@@ -177,6 +177,75 @@ describe('YARA language', () => {
     });
   });
 
+  describe('regular expressions', () => {
+    it('should tokenize a regular expression', () => {
+      expect(tokenize('/md5: [0-9a-fA-F]{32}/')).toEqual([[['/md5: [0-9a-fA-F]{32}/', 'regexp']]]);
+    });
+
+    it.each(['i', 's', 'is'])('should tokenize the `%s` flags', (flags) => {
+      expect(tokenize(`/foo/${flags}`)).toEqual([[[`/foo/${flags}`, 'regexp']]]);
+    });
+
+    it('should accept the flags only in `is` order', () => {
+      expect(tokenize('/foo/si')).toEqual([
+        [
+          ['/foo/s', 'regexp'],
+          ['i', 'identifier'],
+        ],
+      ]);
+    });
+
+    it('should tokenize escape sequences', () => {
+      expect(tokenize(String.raw`/a\/b\d\x41c/`)).toEqual([
+        [
+          ['/a', 'regexp'],
+          ['\\/', 'regexp.escape'],
+          ['b', 'regexp'],
+          ['\\d\\x41', 'regexp.escape'],
+          ['c/', 'regexp'],
+        ],
+      ]);
+    });
+
+    it('should tokenize an escaped slash inside a character class', () => {
+      expect(tokenize(String.raw`/[\/]/`)).toEqual([
+        [
+          ['/[', 'regexp'],
+          ['\\/', 'regexp.escape'],
+          [']/', 'regexp'],
+        ],
+      ]);
+    });
+
+    it('should not tokenize strings and comments inside a regular expression', () => {
+      expect(tokenize('/"a" *b/')).toEqual([[['/"a" *b/', 'regexp']]]);
+    });
+
+    it('should return to normal tokenization after the regular expression', () => {
+      expect(tokenize('/a/ b')).toEqual([
+        [
+          ['/a/', 'regexp'],
+          [' ', 'white'],
+          ['b', 'identifier'],
+        ],
+      ]);
+    });
+
+    it('should mark an unterminated regular expression as invalid until the end of the line', () => {
+      expect(tokenize('/abc\nrule')).toEqual([
+        [['/abc', 'regexp.invalid']],
+        [['rule', 'identifier']],
+      ]);
+    });
+
+    it('should mark an unterminated regular expression ending with a backslash as invalid', () => {
+      expect(tokenize('/abc\\\nrule')).toEqual([
+        [['/abc\\', 'regexp.invalid']],
+        [['rule', 'identifier']],
+      ]);
+    });
+  });
+
   describe('hex strings', () => {
     it('should tokenize a hex string', () => {
       expect(tokenize('a = { E2 34 }')).toEqual([

@@ -40,6 +40,7 @@ export const languageConfiguration: monaco.languages.LanguageConfiguration = {
  */
 export const lexerRules: monaco.languages.IMonarchLanguage = {
   stringEscapes: /\\(?:["\\rtn]|x[0-9a-fA-F]{2})/,
+  regexpEscapes: /\\(?:x[0-9a-fA-F]{2}|.)/,
 
   tokenizer: {
     root: [
@@ -48,6 +49,10 @@ export const lexerRules: monaco.languages.IMonarchLanguage = {
       // Text strings cannot span multiple lines, so an unterminated one is invalid until the end of the line.
       [/"(?:[^"\\]|\\.)*\\?$/, 'string.invalid'],
       [/"/, 'string', '@string'],
+
+      // Same for regular expressions. Comments are matched before, so `//` and `/*` never start one.
+      [/\/(?:[^\\/]|\\.)*\\?$/, 'regexp.invalid'],
+      [/\//, 'regexp', '@regexp'],
 
       // A curly bracket after `=` opens a hex string, otherwise it delimits a rule body.
       [/(=)(\s*)(\{)/, ['operator', 'white', { token: 'delimiter.curly', next: '@hexString' }]],
@@ -74,6 +79,13 @@ export const lexerRules: monaco.languages.IMonarchLanguage = {
       [/@stringEscapes/, 'string.escape'],
       [/\\./, 'string.escape.invalid'],
       [/"/, 'string', '@pop'],
+    ],
+
+    // As in YARA's lexer, an unescaped `/` ends the regular expression even inside a character class.
+    regexp: [
+      [/[^\\/]+/, 'regexp'],
+      [/@regexpEscapes/, 'regexp.escape'],
+      [/\/i?s?/, 'regexp', '@pop'],
     ],
 
     hexString: [
