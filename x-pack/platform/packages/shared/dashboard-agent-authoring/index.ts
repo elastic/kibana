@@ -12,6 +12,8 @@ export type { ArrangeDashboardLayout, LayoutArrangement, LayoutRequest } from '.
 
 export { getErrorMessage, hasValidCreateMetadataOperations } from './src/utils';
 
+export { PANEL_SETTINGS_KEYS } from './src/panel_settings';
+
 export { createPanelFailureResult } from './src/resolve_panel';
 export type {
   InlinePanelOperationType,

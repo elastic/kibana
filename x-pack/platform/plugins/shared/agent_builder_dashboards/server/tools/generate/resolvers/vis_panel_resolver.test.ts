@@ -148,6 +148,40 @@ describe('createVisPanelResolver', () => {
     );
   });
 
+  it('keeps panel settings other than title and description out of the Lens builder input', async () => {
+    mockedBuildLensConfig.mockResolvedValue(createBuildLensConfigResult({ type: 'metric' }));
+
+    const resolveVisPanel = createVisPanelResolver({ logger, modelProvider, events, esClient });
+
+    await resolveVisPanel({
+      operationType: 'edit_panels',
+      identifier: 'panel-1',
+      nlQuery: 'change the title',
+      existingPanel: {
+        id: 'panel-1',
+        type: LENS_EMBEDDABLE_TYPE,
+        config: {
+          type: 'metric',
+          title: 'Requests',
+          description: 'All requests',
+          drilldowns: [{ type: 'url_drilldown', label: 'Open host', url: 'https://example.com' }],
+          hide_title: true,
+          hide_border: true,
+          time_range: { from: 'now-7d', to: 'now' },
+        },
+        grid: { w: 24, h: 12, x: 0, y: 0 },
+      },
+    });
+
+    const chartConfig = { type: 'metric', title: 'Requests', description: 'All requests' };
+    expect(mockedBuildLensConfig).toHaveBeenCalledWith(
+      expect.objectContaining({
+        existingConfig: JSON.stringify(chartConfig),
+        parsedExistingConfig: chartConfig,
+      })
+    );
+  });
+
   it('creates a Vega panel in the attachment API shape (config.spec) when renderer is "vega"', async () => {
     const spec = '{"$schema":"https://vega.github.io/schema/vega-lite/v6.json"}';
     mockedBuildVegaConfig.mockResolvedValue({

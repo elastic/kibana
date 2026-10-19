@@ -14,6 +14,7 @@ import {
 } from '../resolve_panel';
 import { indexPanelsById, updatePanelInDashboard } from '../dashboard_state';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
+import { pickPanelSettings } from '../panel_settings';
 import {
   buildConfigPanelContent,
   CONFIG_PANEL_TYPE_LIST,
@@ -196,7 +197,13 @@ export const editPanelsOperation = defineOperation({
       const updateResult = updatePanelInDashboard({
         dashboardData: nextDashboardData,
         panelId,
-        transformPanel: (panel) => ({ ...panel, ...panelContent }),
+        // Panel content builders only return their type's own config, so keep the
+        // existing panel settings unless the new config sets them.
+        transformPanel: (panel) => ({
+          ...panel,
+          ...panelContent,
+          config: { ...pickPanelSettings(panel.config), ...panelContent.config },
+        }),
       });
 
       if (!updateResult.updated) {

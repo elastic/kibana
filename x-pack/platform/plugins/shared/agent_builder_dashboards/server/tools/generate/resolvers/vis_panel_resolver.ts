@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import {
   buildLensConfig,
   buildVegaConfig,
@@ -19,6 +20,7 @@ import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import {
   createPanelFailureResult,
   getErrorMessage,
+  PANEL_SETTINGS_KEYS,
   type PanelContentAttempt,
   type VisPanelResolutionRequest,
 } from '@kbn/dashboard-agent-authoring';
@@ -102,7 +104,10 @@ export const createVisPanelResolver = ({
         };
       }
 
-      const existingConfig = existingPanel?.config as VisualizationConfig | undefined;
+      // The Lens chart schema can't express panel settings; `edit_panels` carries them over.
+      const existingConfig = existingPanel
+        ? (omit(existingPanel.config, PANEL_SETTINGS_KEYS) as VisualizationConfig)
+        : undefined;
 
       const result = await buildLensConfig({
         nlQuery,
