@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { RenderServiceRetryClass } from '@kbn/reporting-common';
 import {
   classifyResponse,
   FAST_RETRY_INTERVAL_MS,
@@ -25,23 +26,47 @@ describe('classifyResponse', () => {
   });
 
   it.each([
-    ['429 from the service', 429, 'saturated', undefined, 'capacity'],
-    ['429 from a proxy', 429, null, undefined, 'capacity'],
-    ['503 from a draining pod', 503, 'draining', undefined, 'capacity'],
-    ['503 from a proxy', 503, null, undefined, 'unavailable'],
-    ['502 from a proxy', 502, null, undefined, 'unavailable'],
-    ['504 from a proxy', 504, null, undefined, 'unavailable'],
-    ['400 invalid request', 400, null, renderError({ phase: 'navigation' }), 'unrecoverable'],
-    ['401 caller authentication', 401, null, undefined, 'unrecoverable'],
-    ['403 caller authorization', 403, null, undefined, 'unrecoverable'],
-    ['413 body too large', 413, null, undefined, 'unrecoverable'],
-    ['422 unprocessable', 422, null, undefined, 'unrecoverable'],
-    ['500 render failure', 500, null, renderError(), 'render_failure'],
-    ['500 with no service body', 500, null, undefined, 'render_failure'],
-    ['504 phase timeout', 504, null, renderError(), 'render_failure'],
-    ['502 page load failed', 502, null, renderError({ documentStatus: 500 }), 'render_failure'],
-    ['502 Kibana refused 401', 502, null, renderError({ documentStatus: 401 }), 'unrecoverable'],
-    ['502 Kibana refused 403', 502, null, renderError({ documentStatus: 403 }), 'unrecoverable'],
+    ['429 from the service', 429, 'saturated', undefined, RenderServiceRetryClass.CAPACITY],
+    ['429 from a proxy', 429, null, undefined, RenderServiceRetryClass.CAPACITY],
+    ['503 from a draining pod', 503, 'draining', undefined, RenderServiceRetryClass.CAPACITY],
+    ['503 from a proxy', 503, null, undefined, RenderServiceRetryClass.UNAVAILABLE],
+    ['502 from a proxy', 502, null, undefined, RenderServiceRetryClass.UNAVAILABLE],
+    ['504 from a proxy', 504, null, undefined, RenderServiceRetryClass.UNAVAILABLE],
+    [
+      '400 invalid request',
+      400,
+      null,
+      renderError({ phase: 'navigation' }),
+      RenderServiceRetryClass.UNRECOVERABLE,
+    ],
+    ['401 caller authentication', 401, null, undefined, RenderServiceRetryClass.UNRECOVERABLE],
+    ['403 caller authorization', 403, null, undefined, RenderServiceRetryClass.UNRECOVERABLE],
+    ['413 body too large', 413, null, undefined, RenderServiceRetryClass.UNRECOVERABLE],
+    ['422 unprocessable', 422, null, undefined, RenderServiceRetryClass.UNRECOVERABLE],
+    ['500 render failure', 500, null, renderError(), RenderServiceRetryClass.RENDER_FAILURE],
+    ['500 with no service body', 500, null, undefined, RenderServiceRetryClass.RENDER_FAILURE],
+    ['504 phase timeout', 504, null, renderError(), RenderServiceRetryClass.RENDER_FAILURE],
+    [
+      '502 page load failed',
+      502,
+      null,
+      renderError({ documentStatus: 500 }),
+      RenderServiceRetryClass.RENDER_FAILURE,
+    ],
+    [
+      '502 Kibana refused 401',
+      502,
+      null,
+      renderError({ documentStatus: 401 }),
+      RenderServiceRetryClass.UNRECOVERABLE,
+    ],
+    [
+      '502 Kibana refused 403',
+      502,
+      null,
+      renderError({ documentStatus: 403 }),
+      RenderServiceRetryClass.UNRECOVERABLE,
+    ],
   ])('%s → %s', (_name, status, rejection, body, expected) => {
     expect(classifyResponse(status, rejection, body)).toBe(expected);
   });
