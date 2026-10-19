@@ -6,13 +6,15 @@
  */
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { EuiFlexItem, EuiFlexGroup, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 
 import { useGetSimilarCases, initialData } from '../../../containers/use_get_similar_cases';
 import type { CaseUI } from '../../../../common/ui/types';
 
 import { CASES_TABLE_PER_PAGE_VALUES, type EuiBasicTableOnChange } from '../../all_cases/types';
+import { ColumnsPopover } from '../../all_cases/components/columns_popover';
 import { SimilarCasesTable } from '../../similar_cases/table';
+import { useSimilarCasesColumnsSelection } from '../../similar_cases/use_similar_cases_columns_selection';
 import { SidebarToggleButton } from './sidebar/sidebar_toggle_button';
 
 interface CaseViewSimilarCasesProps {
@@ -23,6 +25,8 @@ export const CaseViewSimilarCases = ({ caseData }: CaseViewSimilarCasesProps) =>
   const { euiTheme } = useEuiTheme();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(CASES_TABLE_PER_PAGE_VALUES[0]);
+
+  const { pickerColumns, tableColumns, setPickerColumns } = useSimilarCasesColumnsSelection();
 
   const { data = initialData, isLoading: isLoadingCases } = useGetSimilarCases({
     caseId: caseData.id,
@@ -49,23 +53,34 @@ export const CaseViewSimilarCases = ({ caseData }: CaseViewSimilarCasesProps) =>
   );
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none">
-      <EuiFlexItem grow={false} css={{ paddingTop: euiTheme.size.s }}>
-        <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
-          <EuiFlexItem grow={false}>
-            <SidebarToggleButton />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <SimilarCasesTable
-          isLoading={isLoadingCases}
-          cases={data.cases}
-          pagination={pagination}
-          onChange={tableOnChangeCallback}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    // A plain block wrapper stops the parent column flex item from stretching the toolbar
+    // and the table vertically when the sidebar is taller than the table content.
+    <div>
+      <EuiFlexGroup
+        justifyContent="spaceBetween"
+        gutterSize="s"
+        alignItems="center"
+        css={{ paddingTop: euiTheme.size.s }}
+        data-test-subj="similar-cases-table-toolbar"
+      >
+        <EuiFlexItem grow={false}>
+          <ColumnsPopover
+            selectedColumns={pickerColumns}
+            onSelectedColumnsChange={setPickerColumns}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <SidebarToggleButton />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <SimilarCasesTable
+        isLoading={isLoadingCases}
+        cases={data.cases}
+        pagination={pagination}
+        onChange={tableOnChangeCallback}
+        selectedColumns={tableColumns}
+      />
+    </div>
   );
 };
 

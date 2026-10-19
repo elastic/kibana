@@ -11,15 +11,10 @@ import { EuiText, useGeneratedHtmlId } from '@elastic/eui';
 import {
   ALERT_TRIAGE_DEFAULT_EXTRAS,
   AlertTriageWorkerExtras,
-  BUDGET_PER_HOUR_MAX,
-  LOOKBACK_HOURS_MAX,
-  LOOKBACK_HOURS_MIN,
-  getMinBudgetPerHour,
   type WorkerSettings,
 } from '@kbn/alertzero-common';
 import { MinimumConfidenceScoreField } from '../components/minimum_confidence_score_field';
 import { SettingRow } from '../components/setting_row';
-import { BoundedNumberField } from './bounded_number_field';
 import * as i18n from '../settings_translations';
 import type { WorkerCustomSettingsComponent } from './types';
 
@@ -62,10 +57,7 @@ export const AlertTriageSettings: WorkerCustomSettingsComponent = ({
   onExtrasChange,
 }) => {
   const extras = readAlertTriageExtras(settings);
-  const minBudgetPerHour = getMinBudgetPerHour(settings.scheduleInterval);
   const confidenceDetailId = useGeneratedHtmlId({ prefix: 'alertZeroConfidenceDetail' });
-  const budgetDetailId = useGeneratedHtmlId({ prefix: 'alertZeroBudgetDetail' });
-  const lookbackDetailId = useGeneratedHtmlId({ prefix: 'alertZeroLookbackDetail' });
 
   return (
     <>
@@ -84,42 +76,6 @@ export const AlertTriageSettings: WorkerCustomSettingsComponent = ({
         <SettingDetail id={confidenceDetailId}>
           {i18n.MINIMUM_CONFIDENCE_SCORE_DETAIL_TEXT}
         </SettingDetail>
-      </SettingRow>
-      <SettingRow
-        label={i18n.BUDGET_PER_HOUR_LABEL}
-        labelHelp={i18n.BUDGET_PER_HOUR_HELP_TEXT}
-        data-test-subj="alertZeroBudgetPerHourRow"
-      >
-        <BoundedNumberField
-          value={extras.budgetPerHour}
-          min={minBudgetPerHour}
-          max={BUDGET_PER_HOUR_MAX}
-          ariaLabel={i18n.BUDGET_PER_HOUR_ARIA_LABEL}
-          ariaDescribedBy={budgetDetailId}
-          testSubj="alertZeroBudgetPerHour"
-          isDisabled={isDisabled}
-          onChange={(budgetPerHour) => onExtrasChange({ ...extras, budgetPerHour })}
-        />
-        <SettingDetail id={budgetDetailId}>
-          {i18n.getBudgetPerHourDetailText(minBudgetPerHour)}
-        </SettingDetail>
-      </SettingRow>
-      <SettingRow
-        label={i18n.LOOKBACK_HOURS_LABEL}
-        labelHelp={i18n.LOOKBACK_HOURS_HELP_TEXT}
-        data-test-subj="alertZeroLookbackHoursRow"
-      >
-        <BoundedNumberField
-          value={extras.lookbackHours}
-          min={LOOKBACK_HOURS_MIN}
-          max={LOOKBACK_HOURS_MAX}
-          ariaLabel={i18n.LOOKBACK_HOURS_ARIA_LABEL}
-          ariaDescribedBy={lookbackDetailId}
-          testSubj="alertZeroLookbackHours"
-          isDisabled={isDisabled}
-          onChange={(lookbackHours) => onExtrasChange({ ...extras, lookbackHours })}
-        />
-        <SettingDetail id={lookbackDetailId}>{i18n.LOOKBACK_HOURS_DETAIL_TEXT}</SettingDetail>
       </SettingRow>
     </>
   );
