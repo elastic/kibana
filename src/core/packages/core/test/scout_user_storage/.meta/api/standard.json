@@ -13,7 +13,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/cross_space_read_only.spec.ts",
+        "file": "src/core/packages/core/test/scout_user_storage/api/tests/cross_space_read_only.spec.ts",
         "line": 76,
         "column": 25
       }
@@ -27,7 +27,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/cross_space_read_only.spec.ts",
+        "file": "src/core/packages/core/test/scout_user_storage/api/tests/cross_space_read_only.spec.ts",
         "line": 104,
         "column": 27
       }
@@ -41,7 +41,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/crud.spec.ts",
+        "file": "src/core/packages/core/test/scout_user_storage/api/tests/crud.spec.ts",
         "line": 22,
         "column": 11
       }
@@ -55,7 +55,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/crud.spec.ts",
+        "file": "src/core/packages/core/test/scout_user_storage/api/tests/crud.spec.ts",
         "line": 25,
         "column": 5
       }
@@ -69,7 +69,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/crud.spec.ts",
+        "file": "src/core/packages/core/test/scout_user_storage/api/tests/crud.spec.ts",
         "line": 30,
         "column": 12
       }
@@ -83,7 +83,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/crud.spec.ts",
+        "file": "src/core/packages/core/test/scout_user_storage/api/tests/crud.spec.ts",
         "line": 35,
         "column": 12
       }
@@ -97,7 +97,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/crud.spec.ts",
+        "file": "src/core/packages/core/test/scout_user_storage/api/tests/crud.spec.ts",
         "line": 42,
         "column": 11
       }
@@ -111,7 +111,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/crud.spec.ts",
+        "file": "src/core/packages/core/test/scout_user_storage/api/tests/crud.spec.ts",
         "line": 48,
         "column": 5
       }
@@ -125,7 +125,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/crud.spec.ts",
+        "file": "src/core/packages/core/test/scout_user_storage/api/tests/crud.spec.ts",
         "line": 52,
         "column": 12
       }
@@ -139,7 +139,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/crud.spec.ts",
+        "file": "src/core/packages/core/test/scout_user_storage/api/tests/crud.spec.ts",
         "line": 69,
         "column": 12
       }
@@ -153,7 +153,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/crud.spec.ts",
+        "file": "src/core/packages/core/test/scout_user_storage/api/tests/crud.spec.ts",
         "line": 80,
         "column": 22
       }
@@ -167,7 +167,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/crud.spec.ts",
+        "file": "src/core/packages/core/test/scout_user_storage/api/tests/crud.spec.ts",
         "line": 85,
         "column": 75
       }
@@ -181,7 +181,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/crud.spec.ts",
+        "file": "src/core/packages/core/test/scout_user_storage/api/tests/crud.spec.ts",
         "line": 93,
         "column": 61
       }
@@ -195,7 +195,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/forbidden.spec.ts",
+        "file": "src/core/packages/core/test/scout_user_storage/api/tests/forbidden.spec.ts",
         "line": 21,
         "column": 50
       }
@@ -209,7 +209,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/forbidden.spec.ts",
+        "file": "src/core/packages/core/test/scout_user_storage/api/tests/forbidden.spec.ts",
         "line": 23,
         "column": 7
       }
@@ -223,7 +223,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/forbidden.spec.ts",
+        "file": "src/core/packages/core/test/scout_user_storage/api/tests/forbidden.spec.ts",
         "line": 26,
         "column": 24
       }
@@ -237,7 +237,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/scope_isolation.spec.ts",
+        "file": "src/core/packages/core/test/scout_user_storage/api/tests/scope_isolation.spec.ts",
         "line": 32,
         "column": 5
       }
@@ -251,7 +251,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/scope_isolation.spec.ts",
+        "file": "src/core/packages/core/test/scout_user_storage/api/tests/scope_isolation.spec.ts",
         "line": 36,
         "column": 23
       }
@@ -265,7 +265,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/scope_isolation.spec.ts",
+        "file": "src/core/packages/core/test/scout_user_storage/api/tests/scope_isolation.spec.ts",
         "line": 44,
         "column": 5
       }
@@ -279,7 +279,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/validation.spec.ts",
+        "file": "src/core/packages/core/test/scout_user_storage/api/tests/validation.spec.ts",
         "line": 22,
         "column": 11
       }
@@ -293,7 +293,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/validation.spec.ts",
+        "file": "src/core/packages/core/test/scout_user_storage/api/tests/validation.spec.ts",
         "line": 24,
         "column": 19
       }
@@ -307,7 +307,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/validation.spec.ts",
+        "file": "src/core/packages/core/test/scout_user_storage/api/tests/validation.spec.ts",
         "line": 36,
         "column": 84
       }
@@ -321,7 +321,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/validation.spec.ts",
+        "file": "src/core/packages/core/test/scout_user_storage/api/tests/validation.spec.ts",
         "line": 40,
         "column": 20
       }
@@ -335,7 +335,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/validation.spec.ts",
+        "file": "src/core/packages/core/test/scout_user_storage/api/tests/validation.spec.ts",
         "line": 50,
         "column": 12
       }
@@ -349,7 +349,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/validation.spec.ts",
+        "file": "src/core/packages/core/test/scout_user_storage/api/tests/validation.spec.ts",
         "line": 59,
         "column": 12
       }
@@ -363,7 +363,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/validation.spec.ts",
+        "file": "src/core/packages/core/test/scout_user_storage/api/tests/validation.spec.ts",
         "line": 65,
         "column": 33
       }
@@ -377,7 +377,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/validation.spec.ts",
+        "file": "src/core/packages/core/test/scout_user_storage/api/tests/validation.spec.ts",
         "line": 66,
         "column": 41
       }
@@ -391,7 +391,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/validation.spec.ts",
+        "file": "src/core/packages/core/test/scout_user_storage/api/tests/validation.spec.ts",
         "line": 71,
         "column": 65
       }
@@ -405,7 +405,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/validation.spec.ts",
+        "file": "src/core/packages/core/test/scout_user_storage/api/tests/validation.spec.ts",
         "line": 76,
         "column": 63
       }
@@ -419,7 +419,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/validation.spec.ts",
+        "file": "src/core/packages/core/test/scout_user_storage/api/tests/validation.spec.ts",
         "line": 81,
         "column": 50
       }
@@ -433,7 +433,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "src/core/packages/user-storage/test/scout_user_storage/api/tests/validation.spec.ts",
+        "file": "src/core/packages/core/test/scout_user_storage/api/tests/validation.spec.ts",
         "line": 86,
         "column": 5
       }

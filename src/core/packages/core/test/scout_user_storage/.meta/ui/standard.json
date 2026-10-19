@@ -13,7 +13,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "src/core/packages/user-storage/test/scout_user_storage/ui/tests/render.spec.ts",
+        "file": "src/core/packages/core/test/scout_user_storage/ui/tests/render.spec.ts",
         "line": 20,
         "column": 52
       }
@@ -27,7 +27,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "src/core/packages/user-storage/test/scout_user_storage/ui/tests/render.spec.ts",
+        "file": "src/core/packages/core/test/scout_user_storage/ui/tests/render.spec.ts",
         "line": 23,
         "column": 5
       }

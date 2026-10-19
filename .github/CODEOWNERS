@@ -2369,7 +2369,6 @@ x-pack/platform/test/plugin_api_integration/test_suites/platform/ @elastic/kiban
 /src/core/packages/feature-flags/README.mdx @elastic/kibana-core
 /src/core/packages/saved-objects/docs/ @elastic/kibana-core
 /src/core/packages/user-storage/README.md @elastic/kibana-core
-/src/core/packages/user-storage/test/ @elastic/kibana-core
 /src/core/packages/core/test/scout/api/tests/status.spec.ts @elastic/kibana-core
 /src/platform/test/functional/apps/bundles @elastic/kibana-core # Assigned per https://github.com/elastic/kibana/pull/64367
 /src/platform/test/examples/hello_world @elastic/kibana-core
