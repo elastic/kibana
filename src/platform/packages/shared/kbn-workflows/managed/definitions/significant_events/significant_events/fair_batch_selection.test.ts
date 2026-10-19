@@ -71,18 +71,22 @@ describe('significant events fair batch selection', () => {
     expect(query).toContain('INLINE STATS oldest_unprocessed');
     expect(query).toContain('latest_timestamp = MAX(@timestamp)');
     expect(query).toContain('suppressed_age_minutes');
-    expect(query).toContain('staleness_minutes');
-    expect(query).toContain('recent_detection_count < ?2');
-    expect(query).toContain('suppressed_age_minutes >= ?3');
-    expect(query).toContain('severity_score >= ?4');
+    expect(query).toContain(
+      'EVAL flaky_suppressed = recent_detection_count >= ?2 AND suppressed_age_minutes < ?3 AND severity_score < ?4'
+    );
+    expect(query).toContain('EVAL held_back = ?5 AND flaky_suppressed');
+    expect(query).toContain('SORT held_back ASC, score DESC');
+    expect(query).not.toContain('| WHERE recent_detection_count');
     expect(query).toContain(
       'EVAL flaky_probe = recent_detection_count >= ?2 AND suppressed_age_minutes >= ?3'
     );
-    expect(query).toContain('KEEP rule_uuid, _source, score, recent_detection_count, flaky_probe');
+    expect(query).toContain(
+      'KEEP rule_uuid, _source, score, recent_detection_count, flaky_probe, flaky_suppressed'
+    );
 
     const queryLines = query?.split('\n') ?? [];
     const suppressionLineIdx = queryLines.findIndex((l: string) =>
-      l.includes('recent_detection_count < ?2')
+      l.includes('EVAL flaky_suppressed')
     );
     const limitLineIdx = queryLines.findIndex((l: string) => l.includes('LIMIT ?1'));
     expect(suppressionLineIdx).toBeGreaterThan(-1);
@@ -143,6 +147,7 @@ describe('significant events fair batch selection', () => {
       'classifierShadowMode',
       'classifierReasonCounts',
       'classifierProbeStatusCounts',
+      'classifierGateCounts',
     ]);
     expect(discovery.steps.find(({ name }) => name === 'output_result')?.with).toMatchObject({
       hasWork: true,
@@ -183,14 +188,15 @@ describe('significant events fair batch selection', () => {
     expect(manualTrigger?.inputs?.required).toBeUndefined();
   });
 
-  it('passes the four positional params in the expected order', () => {
+  it('passes the five positional params in the expected order', () => {
     const selection = getStep(DISCOVERY_YAML, 'get_detections');
-    // params is a YAML array of strings: detectionBatchMax, threshold, probe, exempt
+    // params is a YAML array of strings: detectionBatchMax, threshold, probe, exempt, shadow mode
     const params = selection.with?.params as string[] | undefined;
-    expect(params).toHaveLength(4);
+    expect(params).toHaveLength(5);
     expect(params?.[0]).toContain('detectionBatchMax');
     expect(params?.[1]).toContain('flakyRuleDetectionThreshold');
     expect(params?.[2]).toContain('flakyRuleProbeAfterMinutes');
     expect(params?.[3]).toContain('flakyRuleExemptSeverityScore');
+    expect(params?.[4]).toContain('classifierShadowMode');
   });
 });

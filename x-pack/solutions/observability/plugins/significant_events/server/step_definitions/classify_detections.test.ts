@@ -232,6 +232,55 @@ describe('classifyBatch', () => {
     });
   });
 
+  describe('the old flaky-rule gate', () => {
+    const COLUMNS = ['rule_uuid', '_source', 'score', 'recent_detection_count', 'flaky_suppressed'];
+    const gatedRow = (ruleUuid: string, suppressed: boolean) => [
+      ruleUuid,
+      { detection_id: `${ruleUuid}-detection`, rule_uuid: ruleUuid },
+      10,
+      12,
+      suppressed,
+    ];
+    const rows = [gatedRow('rule-A', true), gatedRow('rule-B', false)];
+
+    it('keeps the rows it holds back from the agent while the classifier only records', async () => {
+      const output = await classifyBatch(batchParams({ rows, columns: COLUMNS, shadowMode: true }));
+
+      expect(output.batch.map(({ rule_uuid: id }) => id)).toEqual(['rule-B']);
+      expect(output.rows.map(([id]) => id)).toEqual(['rule-B']);
+      expect(output.row_count).toBe(1);
+      expect(output.decisions.map(({ rule_uuid: id }) => id)).toEqual(['rule-A', 'rule-B']);
+    });
+
+    it('does not hold anything back once the classifier enforces', async () => {
+      const output = await classifyBatch(
+        batchParams({ rows, columns: COLUMNS, shadowMode: false })
+      );
+
+      expect(output.batch.map(({ rule_uuid: id }) => id)).toEqual(['rule-A', 'rule-B']);
+    });
+
+    it('counts what the gate made of each detection against what the classifier decided', async () => {
+      const findLiveMembers = jest.fn(async () =>
+        membersOf({ 'rule-A': [membership('confirms')] })
+      );
+
+      const output = await classifyBatch(
+        batchParams({ rows, columns: COLUMNS, shadowMode: true, findLiveMembers })
+      );
+
+      expect(output.decisions[0]).toMatchObject({ legacy_gate: 'suppressed', decision: 'skip' });
+      expect(output.gate_counts).toEqual({ 'suppressed:skip': 1, 'passed:needs_agent': 1 });
+    });
+
+    it('says nothing about the gate when the rows do not carry it', async () => {
+      const output = await classifyBatch(batchParams({ rows: [detectionRow('rule-A')] }));
+
+      expect(output.decisions[0]).not.toHaveProperty('legacy_gate');
+      expect(output.gate_counts).toEqual({});
+    });
+  });
+
   describe('the escalations that withdraw a skip', () => {
     it('sends a skippable detection to the agent when its series is older than the limit', async () => {
       const old = {
@@ -463,15 +512,32 @@ describe('classifyBatch', () => {
     };
     const confirmsA = () => jest.fn(async () => membersOf({ 'rule-A': [membership('confirms')] }));
 
-    it('records the observation on the decision without changing the decision', async () => {
-      const observe = jest.fn(async () => observation);
+    it('records the observation on the decision', async () => {
+      const observe = jest.fn(async () => ({ ...observation, decision: 'background' as const }));
 
       const output = await classifyBatch(
         batchParams({ rows: [detectionRow('rule-A')], findLiveMembers: confirmsA(), observe })
       );
 
       expect(observe).toHaveBeenCalledWith(STORED_QUERY);
-      expect(output.decisions[0]).toMatchObject({ decision: 'skip', baseline: observation });
+      expect(output.decisions[0]).toMatchObject({
+        decision: 'skip',
+        baseline: { decision: 'background' },
+      });
+    });
+
+    it("withdraws a skip when the match count is above the rule's own normal", async () => {
+      const observe = jest.fn(async () => observation);
+
+      const output = await classifyBatch(
+        batchParams({ rows: [detectionRow('rule-A')], findLiveMembers: confirmsA(), observe })
+      );
+
+      expect(output.decisions[0]).toMatchObject({
+        decision: 'needs_agent',
+        reason: 'above_normal',
+        baseline: observation,
+      });
     });
 
     it('does not observe a rule it does not probe, or when there is no observer', async () => {

@@ -25,6 +25,7 @@ export const DECISION_REASONS = [
   'possible_recovery',
   'possible_rebreach',
   'in_cooldown',
+  'above_normal',
   'series_too_old',
   'member_joining',
   'not_live_member',

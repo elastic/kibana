@@ -356,6 +356,7 @@ describe('discovery workflow detection classifier wiring', () => {
       ['classifierShadowMode', 'boolean'],
       ['classifierReasonCounts', 'string'],
       ['classifierProbeStatusCounts', 'string'],
+      ['classifierGateCounts', 'string'],
     ] as const;
 
     it.each(classifierOutputs)('declares the %s output as %s', (name, type) => {

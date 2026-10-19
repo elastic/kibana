@@ -194,6 +194,7 @@ describe('Significant Events run quota workflow contracts', () => {
           classifierShadowMode: '${{ inputs.classifierShadowMode }}',
           classifierReasonCounts: '{}',
           classifierProbeStatusCounts: '{}',
+          classifierGateCounts: '{}',
         },
       }),
     ]);

@@ -28,7 +28,7 @@ triggers:
         flakyRuleDetectionThreshold:
           type: number
           default: 10
-          description: 'Rules with at least this many change-point detections inside the detectionLookback window are treated as flaky and suppressed from escalation until their oldest unprocessed detection ages past the probe interval.'
+          description: 'Rules with at least this many change-point detections inside the detectionLookback window are treated as flaky and, while classifierShadowMode is true, held back from the agent until their oldest unprocessed detection ages past the probe interval. Once the classifier enforces, it decides instead and this gate is only recorded.'
         flakyRuleProbeAfterMinutes:
           type: number
           default: 360
@@ -108,6 +108,8 @@ outputs:
     type: string
   - name: classifierProbeStatusCounts
     type: string
+  - name: classifierGateCounts
+    type: string
 consts:
   DETECTIONS_INDEX: '.significant_events-detections'
   INVESTIGATABLE_SEVERITIES: ['critical', 'high']
@@ -152,6 +154,7 @@ steps:
           classifierShadowMode: '${{ inputs.classifierShadowMode }}'
           classifierReasonCounts: '{}'
           classifierProbeStatusCounts: '{}'
+          classifierGateCounts: '{}'
 
   # Copy workflow.spaceId into variables so ES body Liquid expressions can reference it.
   - name: set_initial_vars
@@ -160,7 +163,10 @@ steps:
       spaceId: '{{ workflow.spaceId }}'
 
   # Unbounded processed-marker semijoin by detection_id, then reduce to the latest
-  # unprocessed detection per rule (_id tie-break). Score by severity + age.
+  # unprocessed detection per rule (_id tie-break). Ordered by age, not by the rule's own severity
+  # score. `flaky_suppressed` is what the old flaky-rule gate would have held back: while the
+  # classifier only records, those rows sort last and the classifier keeps them from the agent;
+  # once it enforces, they are classified like any other.
   - name: get_detections
     type: elasticsearch.esql.query
     with:
@@ -176,18 +182,19 @@ steps:
         | WHERE _id == latest_id
         | EVAL severity_score = COALESCE(severity_score, 0)
         | EVAL suppressed_age_minutes = DATE_DIFF("minute", oldest_unprocessed, NOW())
-        | WHERE recent_detection_count < ?2 OR suppressed_age_minutes >= ?3 OR severity_score >= ?4
+        | EVAL flaky_suppressed = recent_detection_count >= ?2 AND suppressed_age_minutes < ?3 AND severity_score < ?4
         | EVAL flaky_probe = recent_detection_count >= ?2 AND suppressed_age_minutes >= ?3
-        | EVAL staleness_minutes = DATE_DIFF("minute", @timestamp, NOW())
-        | EVAL score = severity_score + staleness_minutes
-        | SORT score DESC, @timestamp ASC, _id ASC
+        | EVAL score = DATE_DIFF("minute", @timestamp, NOW())
+        | EVAL held_back = ?5 AND flaky_suppressed
+        | SORT held_back ASC, score DESC, @timestamp ASC, _id ASC
         | LIMIT ?1
-        | KEEP rule_uuid, _source, score, recent_detection_count, flaky_probe
+        | KEEP rule_uuid, _source, score, recent_detection_count, flaky_probe, flaky_suppressed
       params:
         - '${{ inputs.detectionBatchMax }}'
         - '${{ inputs.flakyRuleDetectionThreshold }}'
         - '${{ inputs.flakyRuleProbeAfterMinutes }}'
         - '${{ inputs.flakyRuleExemptSeverityScore }}'
+        - '${{ inputs.classifierShadowMode }}'
       filter:
         bool:
           filter:
@@ -349,6 +356,7 @@ steps:
           classifierShadowMode: '${{ inputs.classifierShadowMode }}'
           classifierReasonCounts: "${{ steps.classify_detections.output.reason_counts | json | default: '{}' }}"
           classifierProbeStatusCounts: "${{ steps.classify_detections.output.probe_status_counts | json | default: '{}' }}"
+          classifierGateCounts: "${{ steps.classify_detections.output.gate_counts | json | default: '{}' }}"
 
   # -----------------------------------------------------------------------
   # Correlate detections into discoveries.
@@ -605,3 +613,4 @@ steps:
       classifierShadowMode: '${{ inputs.classifierShadowMode }}'
       classifierReasonCounts: "${{ steps.classify_detections.output.reason_counts | json | default: '{}' }}"
       classifierProbeStatusCounts: "${{ steps.classify_detections.output.probe_status_counts | json | default: '{}' }}"
+      classifierGateCounts: "${{ steps.classify_detections.output.gate_counts | json | default: '{}' }}"

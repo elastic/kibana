@@ -23,6 +23,7 @@ import { BASELINE_DECISIONS, observeMatchSeries, type BaselineObservation } from
 import {
   batchEntrySchema,
   toBatchEntry,
+  DEFAULT_DETECTION_COLUMNS,
   type BatchEntry,
   type BatchPriorSeries,
 } from './detection_batch';
@@ -74,6 +75,8 @@ const decisionSchema = lazySchema(() =>
     reason: z.enum(DECISION_REASONS),
     probe_status: z.enum(PROBE_STATUSES).optional(),
     probe_duration_ms: z.number().int().min(0).optional(),
+    /** What the old flaky-rule gate made of the detection; absent when the row does not say. */
+    legacy_gate: z.enum(['suppressed', 'passed']).optional(),
     baseline: z
       .object({
         decision: z.enum(BASELINE_DECISIONS),
@@ -104,6 +107,8 @@ const outputSchema = lazySchema(() =>
     needs_agent_count: z.number().int().min(0),
     reason_counts: countsSchema,
     probe_status_counts: countsSchema,
+    /** Old gate against the classifier: `<suppressed|passed>:<skip|needs_agent>` to a count. */
+    gate_counts: countsSchema,
     shadow_mode: z.boolean(),
   })
 );
@@ -197,14 +202,19 @@ const withEscalation = ({
   maxSkipAgeMs,
   now,
   joiningEventIds,
+  baseline,
 }: {
   classification: DetectionClassification;
   memberships: readonly LiveRuleMembership[];
   maxSkipAgeMs: number;
   now: number;
   joiningEventIds: ReadonlySet<string>;
+  baseline: BaselineObservation | undefined;
 }): DetectionClassification => {
   if (classification.decision !== 'skip') return classification;
+  // A match count above the rule's own normal is a change the stored verdict has not seen.
+  if (baseline?.decision === 'above_normal')
+    return { decision: 'needs_agent', reason: 'above_normal' };
   const isTooOld = memberships.some(
     ({ createdAt }) => createdAt !== undefined && now - Date.parse(createdAt) > maxSkipAgeMs
   );
@@ -213,6 +223,21 @@ const withEscalation = ({
     ({ eventId }) => eventId !== undefined && joiningEventIds.has(eventId)
   );
   return isJoining ? { decision: 'needs_agent', reason: 'member_joining' } : classification;
+};
+
+const LEGACY_GATE_COLUMN = 'flaky_suppressed';
+
+/** Did the old flaky-rule gate hold this row back? Undefined when the row does not carry it. */
+const readLegacyGate = ({
+  columns = DEFAULT_DETECTION_COLUMNS,
+  row,
+}: {
+  columns?: readonly string[];
+  row: DetectionRow;
+}): 'suppressed' | 'passed' | undefined => {
+  const cell = row[columns.indexOf(LEGACY_GATE_COLUMN)];
+  if (typeof cell !== 'boolean') return undefined;
+  return cell ? 'suppressed' : 'passed';
 };
 
 /** A rule needs a probe only when every one of its live series judged it. */
@@ -330,6 +355,8 @@ export const classifyBatch = async ({
     })
   );
   const skippedIndexes = new Set<number>();
+  // While the classifier only records, the old flaky-rule gate still keeps its rows from the agent.
+  const heldBackIndexes = new Set<number>();
   for (const { index, row, withinCap } of parsed) {
     if (!row) continue;
     const { ruleUuid, detectionId } = row;
@@ -352,9 +379,12 @@ export const classifyBatch = async ({
           maxSkipAgeMs,
           now,
           joiningEventIds,
+          baseline,
         })
       : { decision: 'needs_agent', reason: 'over_cap' };
     if (classification.decision === 'skip') skippedIndexes.add(index);
+    const legacyGate = readLegacyGate({ columns, row: rows[index] });
+    if (shadowMode && legacyGate === 'suppressed') heldBackIndexes.add(index);
     // While the classifier only records, the agent judges unprompted; hints are for enforcement.
     if (!shadowMode) {
       entries[index] = toBatchEntry({
@@ -377,6 +407,7 @@ export const classifyBatch = async ({
       rule_uuid: ruleUuid,
       ...(detectionId !== undefined ? { detection_id: detectionId } : {}),
       ...classification,
+      ...(legacyGate ? { legacy_gate: legacyGate } : {}),
       ...(probed ? { probe_status: probed.status, probe_duration_ms: probed.durationMs } : {}),
       ...(baseline ? { baseline } : {}),
     });
@@ -386,13 +417,13 @@ export const classifyBatch = async ({
     ? []
     : [...new Set(decisions.filter(({ decision }) => decision === 'skip').map((d) => d.rule_uuid))];
 
-  const agentRows = (shadowMode ? rows : rows.filter((_, i) => !skippedIndexes.has(i))).map(
-    (row) => [...row]
-  );
+  const reachesAgent = (index: number): boolean =>
+    !heldBackIndexes.has(index) && (shadowMode || !skippedIndexes.has(index));
+  const agentRows = rows.filter((_, index) => reachesAgent(index)).map((row) => [...row]);
 
   return {
     rows: agentRows,
-    batch: entries.filter((_, index) => shadowMode || !skippedIndexes.has(index)),
+    batch: entries.filter((_, index) => reachesAgent(index)),
     row_count: agentRows.length,
     decisions,
     skipped_rule_uuids: skippedRuleUuids,
@@ -400,6 +431,10 @@ export const classifyBatch = async ({
     needs_agent_count: decisions.length - skippedIndexes.size,
     reason_counts: countBy(decisions, ({ reason }) => reason),
     probe_status_counts: countBy(decisions, ({ probe_status: status }) => status),
+    gate_counts: countBy(
+      decisions.filter(({ legacy_gate: gate }) => gate !== undefined),
+      ({ legacy_gate: gate, decision }) => `${gate}:${decision}`
+    ),
     shadow_mode: shadowMode,
   };
 };
