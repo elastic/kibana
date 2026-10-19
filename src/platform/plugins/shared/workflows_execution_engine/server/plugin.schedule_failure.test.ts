@@ -180,12 +180,16 @@ describe('task scheduling failure', () => {
     ]);
   });
 
-  it('marks every bulkScheduleWorkflow execution FAILED and rethrows', async () => {
-    await expect(bulkScheduleTwoWorkflows()).rejects.toBe(scheduleError);
+  it('marks every bulkScheduleWorkflow execution FAILED and returns per-item errors', async () => {
+    const results = await bulkScheduleTwoWorkflows();
 
     expect(mockBulkUpdateWorkflowExecutions).toHaveBeenCalledWith(
       bulkCreatedIds().map((id) => failedUpdate(id))
     );
+    expect(results).toEqual([
+      { status: 'error', error: { message: scheduleError.message } },
+      { status: 'error', error: { message: scheduleError.message } },
+    ]);
   });
 
   it('marks only the bulk executions whose task was not saved when bulkSchedule throws', async () => {
@@ -194,17 +198,33 @@ describe('task scheduling failure', () => {
       notFound(missingId),
     ]);
 
-    await expect(bulkScheduleTwoWorkflows()).rejects.toBe(scheduleError);
+    const results = await bulkScheduleTwoWorkflows();
 
+    const [savedExecutionId, missingExecutionId] = bulkCreatedIds();
     expect(mockBulkUpdateWorkflowExecutions).toHaveBeenCalledWith([
-      failedUpdate(bulkCreatedIds()[1]),
+      failedUpdate(missingExecutionId),
     ]);
+    expect(results).toEqual([
+      { status: 'scheduled', workflowExecutionId: savedExecutionId },
+      { status: 'error', error: { message: scheduleError.message } },
+    ]);
+  });
+
+  it('uses the message of a plain-object error that Task Manager throws for one bulk item', async () => {
+    taskManager.bulkSchedule.mockRejectedValue({ statusCode: 409, message: 'version conflict' });
+
+    const results = await bulkScheduleTwoWorkflows();
+
+    expect(mockBulkUpdateWorkflowExecutions).toHaveBeenCalledWith(
+      bulkCreatedIds().map((id) => failedUpdate(id, 'version conflict'))
+    );
+    expect(results[0]).toEqual({ status: 'error', error: { message: 'version conflict' } });
   });
 
   it('marks every bulk execution FAILED when the task lookup also fails', async () => {
     taskManager.bulkGet.mockRejectedValue(new Error('es unavailable'));
 
-    await expect(bulkScheduleTwoWorkflows()).rejects.toBe(scheduleError);
+    await bulkScheduleTwoWorkflows();
 
     expect(mockBulkUpdateWorkflowExecutions).toHaveBeenCalledWith(
       bulkCreatedIds().map((id) => failedUpdate(id))
@@ -216,11 +236,13 @@ describe('task scheduling failure', () => {
       scheduledTask as never,
     ]);
 
-    await expect(bulkScheduleTwoWorkflows()).resolves.toHaveLength(2);
+    const results = await bulkScheduleTwoWorkflows();
 
+    const message = 'Task Manager did not schedule the workflow task.';
     expect(mockBulkUpdateWorkflowExecutions).toHaveBeenCalledWith([
-      failedUpdate(bulkCreatedIds()[1], 'Task Manager did not schedule the workflow task.'),
+      failedUpdate(bulkCreatedIds()[1], message),
     ]);
+    expect(results[1]).toEqual({ status: 'error', error: { message } });
   });
 
   it('does not mark an execution when its task is scheduled', async () => {
