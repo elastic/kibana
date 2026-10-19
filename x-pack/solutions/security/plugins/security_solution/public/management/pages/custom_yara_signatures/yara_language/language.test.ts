@@ -115,5 +115,65 @@ describe('YARA language', () => {
     it('should keep `*` and `/` inside a block comment', () => {
       expect(tokenize('/* a * b / c */')).toEqual([[['/* a * b / c */', 'comment']]]);
     });
+
+    it('should not start a string inside a comment', () => {
+      expect(tokenize('// "\nrule')).toEqual([[['// "', 'comment']], [['rule', 'identifier']]]);
+    });
+  });
+
+  describe('text strings', () => {
+    it('should tokenize a text string', () => {
+      expect(tokenize('import "pe"')).toEqual([
+        [
+          ['import', 'identifier'],
+          [' ', 'white'],
+          ['"pe"', 'string'],
+        ],
+      ]);
+    });
+
+    it('should tokenize valid escape sequences', () => {
+      expect(tokenize(String.raw`"a\"b\\c\r\t\n\x4F"`)).toEqual([
+        [
+          ['"a', 'string'],
+          ['\\"', 'string.escape'],
+          ['b', 'string'],
+          ['\\\\', 'string.escape'],
+          ['c', 'string'],
+          ['\\r\\t\\n\\x4F', 'string.escape'],
+          ['"', 'string'],
+        ],
+      ]);
+    });
+
+    it('should tokenize invalid escape sequences', () => {
+      expect(tokenize('"\\q\\x4G"')).toEqual([
+        [
+          ['"', 'string'],
+          ['\\q\\x', 'string.escape.invalid'],
+          ['4G"', 'string'],
+        ],
+      ]);
+    });
+
+    it('should not tokenize comments inside a string', () => {
+      expect(tokenize('"// not /* a comment */"')).toEqual([
+        [['"// not /* a comment */"', 'string']],
+      ]);
+    });
+
+    it('should mark an unterminated string as invalid until the end of the line', () => {
+      expect(tokenize('"abc\nrule')).toEqual([
+        [['"abc', 'string.invalid']],
+        [['rule', 'identifier']],
+      ]);
+    });
+
+    it('should mark an unterminated string ending with a backslash as invalid', () => {
+      expect(tokenize('"abc\\\nrule')).toEqual([
+        [['"abc\\', 'string.invalid']],
+        [['rule', 'identifier']],
+      ]);
+    });
   });
 });

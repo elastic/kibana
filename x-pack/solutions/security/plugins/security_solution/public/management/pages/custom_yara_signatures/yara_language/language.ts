@@ -39,8 +39,18 @@ export const languageConfiguration: monaco.languages.LanguageConfiguration = {
  * and https://microsoft.github.io/monaco-editor/monarch.html
  */
 export const lexerRules: monaco.languages.IMonarchLanguage = {
+  stringEscapes: /\\(?:["\\rtn]|x[0-9a-fA-F]{2})/,
+
   tokenizer: {
-    root: [{ include: '@whitespace' }, [/[a-zA-Z_]\w*/, 'identifier']],
+    root: [
+      { include: '@whitespace' },
+
+      // Text strings cannot span multiple lines, so an unterminated one is invalid until the end of the line.
+      [/"(?:[^"\\]|\\.)*\\?$/, 'string.invalid'],
+      [/"/, 'string', '@string'],
+
+      [/[a-zA-Z_]\w*/, 'identifier'],
+    ],
 
     whitespace: [
       [/\s+/, 'white'],
@@ -53,6 +63,13 @@ export const lexerRules: monaco.languages.IMonarchLanguage = {
       [/[^/*]+/, 'comment'],
       [/\*\//, 'comment', '@pop'],
       [/[/*]/, 'comment'],
+    ],
+
+    string: [
+      [/[^\\"]+/, 'string'],
+      [/@stringEscapes/, 'string.escape'],
+      [/\\./, 'string.escape.invalid'],
+      [/"/, 'string', '@pop'],
     ],
   },
 };
