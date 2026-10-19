@@ -9,7 +9,6 @@ import type { StreamsUnit } from '@kbn/streams-schema';
 import { streamsUnitIdentifierSchema, streamsUnitStatsRequestSchema } from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
-import { UnitStatsClient } from '../../../lib/unit_stats/client';
 import { StreamsUnitService } from '../../../lib/saved_objects/streams_unit_service';
 import { createServerRoute } from '../../create_server_route';
 import { assertStreamsCanvasEnabled } from './assert_streams_canvas_enabled';
@@ -39,7 +38,7 @@ export const getStreamsUnitStatsRoute = createServerRoute({
     getScopedClients,
     logger,
   }): Promise<StreamsUnit.StatsResponse> => {
-    const { soClient, uiSettingsClient, scopedClusterClient } = await getScopedClients({
+    const { soClient, uiSettingsClient, unitStatsClient } = await getScopedClients({
       request,
     });
 
@@ -47,10 +46,7 @@ export const getStreamsUnitStatsRoute = createServerRoute({
 
     const { unit } = await new StreamsUnitService({ soClient, logger }).getUnit(params.path.id);
 
-    return new UnitStatsClient({
-      esClient: scopedClusterClient.asCurrentUser,
-      logger,
-    }).getStats({
+    return unitStatsClient.getStats({
       unitId: params.path.id,
       unit,
       // The route repository drops an empty `{}` body before the handler.

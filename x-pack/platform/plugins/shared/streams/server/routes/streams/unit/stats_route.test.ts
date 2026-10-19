@@ -11,6 +11,7 @@ import { StatusError } from '../../../lib/streams/errors/status_error';
 import { getStreamsUnitStatsRoute } from './stats_route';
 
 const mockGetUnit = jest.fn();
+const mockGetStats = jest.fn();
 
 jest.mock('../../../lib/saved_objects/streams_unit_service', () => ({
   StreamsUnitService: jest.fn().mockImplementation(() => ({ getUnit: mockGetUnit })),
@@ -24,6 +25,11 @@ const unitResponse = {
     pipelines: [],
   },
   ui_metadata: {},
+};
+
+const statsResponse = {
+  components: { destinations: {}, processors: {} },
+  meta: { window: { start: 'a', end: 'b' } },
 };
 
 const route = getStreamsUnitStatsRoute['POST /internal/streams/unit/{id}/_stats'];
@@ -46,13 +52,14 @@ const callHandler = ({
     getScopedClients: async () => ({
       uiSettingsClient: { get: async () => canvasEnabled },
       soClient: {},
-      scopedClusterClient: { asCurrentUser: { search: jest.fn() } },
+      unitStatsClient: { getStats: mockGetStats },
     }),
   } as never);
 
 describe('POST /internal/streams/unit/{id}/_stats handler', () => {
   beforeEach(() => {
     mockGetUnit.mockReset().mockResolvedValue(unitResponse);
+    mockGetStats.mockReset().mockResolvedValue(statsResponse);
   });
 
   it('route repository drops an empty body, so the handler sees no body for {}', () => {
@@ -65,23 +72,23 @@ describe('POST /internal/streams/unit/{id}/_stats handler', () => {
     expect(params).toEqual({ path: { id: 'default' } });
   });
 
-  it('treats a missing body as the empty request and answers for every component', async () => {
+  it('treats a missing body as the empty request', async () => {
     const response = await callHandler();
 
-    // The debug destination emits no stats, so it answers without a search.
-    expect(Object.keys(response.components.destinations)).toEqual(['es-prod']);
-    expect(response.components.destinations['es-prod'].error?.code).toBe('unsupported');
+    expect(mockGetStats).toHaveBeenCalledWith({
+      unitId: 'default',
+      unit: unitResponse.unit,
+      request: {},
+    });
+    expect(response).toBe(statsResponse);
   });
 
-  it('answers a request with components', async () => {
-    const response = await callHandler({
-      params: {
-        path: { id: 'default' },
-        body: { components: [{ kind: 'destination', id: 'es-prod' }] },
-      },
-    });
+  it('passes the request body through', async () => {
+    const body = { components: [{ kind: 'destination', id: 'es-prod' }] };
 
-    expect(Object.keys(response.components.destinations)).toEqual(['es-prod']);
+    await callHandler({ params: { path: { id: 'default' }, body } });
+
+    expect(mockGetStats).toHaveBeenCalledWith(expect.objectContaining({ request: body }));
   });
 
   it('is a 404 when the canvas setting is off', async () => {
@@ -89,11 +96,13 @@ describe('POST /internal/streams/unit/{id}/_stats handler', () => {
       output: { statusCode: 404 },
     });
     expect(mockGetUnit).not.toHaveBeenCalled();
+    expect(mockGetStats).not.toHaveBeenCalled();
   });
 
   it('is a 404 when the unit does not exist', async () => {
     mockGetUnit.mockRejectedValue(new StatusError('Streams unit [default] not found.', 404));
 
     await expect(callHandler()).rejects.toMatchObject({ output: { statusCode: 404 } });
+    expect(mockGetStats).not.toHaveBeenCalled();
   });
 });
