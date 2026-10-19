@@ -19,6 +19,7 @@ gated by the Nightshift feature privileges: reads need `read_nightshift`, writes
 | --- | --- | --- | --- |
 | `GET` | `/internal/nightshift/sources?page&per_page&search&enabled` | read | Paginated catalog, sorted by title. Does not fetch views. |
 | `POST` | `/internal/nightshift/sources` | manage | Validates the query, derives `type`, writes the saved object, creates the view |
+| `POST` | `/internal/nightshift/sources/_validate` | manage | Runs the create checks on `{ esql }` without writing; answers `{ valid: true, type, index_exists }` or `{ valid: false, error }` |
 | `GET` | `/internal/nightshift/sources/{sourceId}` | read | Source plus view health, including a `FROM <view> \| LIMIT 0` probe for `unresolvable` |
 | `PUT` | `/internal/nightshift/sources/{sourceId}` | manage | Full replace of `title`, `description`, `tags`, `esql`; always re-puts the view |
 | `DELETE` | `/internal/nightshift/sources/{sourceId}` | manage | Deletes the view (404 ignored), then the saved object |

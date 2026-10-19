@@ -8,12 +8,14 @@
 import {
   EMBEDDABLE_FLAMEGRAPH,
   EMBEDDABLE_FUNCTIONS,
+  EMBEDDABLE_PROFILING_SCHEMA_SELECTOR,
   EMBEDDABLE_PROFILING_SEARCH_BAR,
   EMBEDDABLE_STACK_TRACES,
 } from '@kbn/observability-shared-plugin/public';
 import { getEmbeddableFlamegraphComponent } from './flamegraph';
 import { getEmbeddableFunctionsComponent } from './functions';
 import type { ProfilingEmbeddablesDependencies } from './profiling_embeddable_provider';
+import { getEmbeddableSchemaSelectorComponent } from './schema_selector';
 import { getEmbeddableStackTracesComponent } from './stack_traces';
 import { getEmbeddableSearchBarComponent } from './search_bar';
 
@@ -36,5 +38,9 @@ export function registerEmbeddables(deps: ProfilingEmbeddablesDependencies) {
   observabilityShared.registerProfilingComponent(
     EMBEDDABLE_STACK_TRACES,
     getEmbeddableStackTracesComponent(deps)
+  );
+  observabilityShared.registerProfilingComponent(
+    EMBEDDABLE_PROFILING_SCHEMA_SELECTOR,
+    getEmbeddableSchemaSelectorComponent(deps)
   );
 }

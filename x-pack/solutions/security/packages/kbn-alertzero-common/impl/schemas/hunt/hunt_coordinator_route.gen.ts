@@ -32,43 +32,10 @@ export type HuntCoordinatorStatus = z.infer<typeof HuntCoordinatorStatus>;
 export type HuntCoordinatorStatusEnum = typeof HuntCoordinatorStatus.enum;
 export const HuntCoordinatorStatusEnum = HuntCoordinatorStatus.enum;
 
-export const HuntCoordinatorRequestBody = lazySchema(() =>
-  z
-    .object({
-      report_id: z.string().min(1).max(512).optional(),
-      /**
-       * Run id supplied by the Worker fan-out so every child of one sweep shares it, which is what the packaging barrier and the conclusion dedupe key off. The route mints one only when the caller has no sweep to tie the run to.
-       */
-      run_id: z
-        .string()
-        .min(1)
-        .max(128)
-        .optional()
-        .describe(
-          'Run id supplied by the Worker fan-out so every child of one sweep shares it, which is what the packaging barrier and the conclusion dedupe key off. The route mints one only when the caller has no sweep to tie the run to.'
-        ),
-      text: z.string().max(200000).optional(),
-      iocs: z.array(HuntIoc).max(100).optional(),
-      techniques: z.array(z.string().min(1).max(32)).max(100).optional(),
-      time_range: z
-        .object({
-          from: z.string().min(1).max(64),
-          to: z.string().min(1).max(64),
-        })
-        .optional(),
-      size: z.number().int().min(1).max(100).optional(),
-      max_assets: z.number().int().min(1).max(200).optional(),
-      llm_confidence_threshold: z.number().min(0).max(1).optional(),
-      tier2_when: z.enum(['on_hits', 'always', 'never']).optional(),
-      max_tier2_sample_events: z.number().int().min(1).max(50).optional(),
-      trigger: z.enum(['manual', 'scheduled']),
-    })
-    .strict()
-);
-export type HuntCoordinatorRequestBody = z.infer<typeof HuntCoordinatorRequestBody>;
-export type HuntCoordinatorRequestBodyInput = z.input<typeof HuntCoordinatorRequestBody>;
-
-export const HuntCoordinatorResponse = lazySchema(() =>
+/**
+ * The full outcome of one two-tier hunt run, as the hunt child reads it from the hidden result attachment once the run has completed.
+ */
+export const HuntCoordinatorResult = lazySchema(() =>
   z.object({
     status: HuntCoordinatorStatus,
     report_id: z.string().optional(),
@@ -351,6 +318,73 @@ export const HuntCoordinatorResponse = lazySchema(() =>
       .optional()
       .describe(
         "Present alongside `sse`: the hosts and users the SSE entries name, deduplicated across entries, ready for the investigations impact route. Ids are `host:<host.name>` or `user:<user.name>`. Capped at 50, half of what one Investigation's impact may hold, because every sweep of a report merges onto the same Investigation."
+      ),
+  })
+);
+export type HuntCoordinatorResult = z.infer<typeof HuntCoordinatorResult>;
+
+export const HuntCoordinatorRequestBody = lazySchema(() =>
+  z
+    .object({
+      /**
+       * Investigation conversation the hidden result attachment is written to.
+       */
+      conversation_id: z
+        .string()
+        .min(1)
+        .max(256)
+        .describe('Investigation conversation the hidden result attachment is written to.'),
+      report_id: z.string().min(1).max(512).optional(),
+      /**
+       * Run id supplied by the Worker fan-out so every child of one sweep shares it, which is what the packaging barrier and the conclusion dedupe key off. The route mints one only when the caller has no sweep to tie the run to.
+       */
+      run_id: z
+        .string()
+        .min(1)
+        .max(128)
+        .optional()
+        .describe(
+          'Run id supplied by the Worker fan-out so every child of one sweep shares it, which is what the packaging barrier and the conclusion dedupe key off. The route mints one only when the caller has no sweep to tie the run to.'
+        ),
+      text: z.string().max(200000).optional(),
+      iocs: z.array(HuntIoc).max(100).optional(),
+      techniques: z.array(z.string().min(1).max(32)).max(100).optional(),
+      time_range: z
+        .object({
+          from: z.string().min(1).max(64),
+          to: z.string().min(1).max(64),
+        })
+        .optional(),
+      size: z.number().int().min(1).max(100).optional(),
+      max_assets: z.number().int().min(1).max(200).optional(),
+      llm_confidence_threshold: z.number().min(0).max(1).optional(),
+      tier2_when: z.enum(['on_hits', 'always', 'never']).optional(),
+      max_tier2_sample_events: z.number().int().min(1).max(50).optional(),
+      trigger: z.enum(['manual', 'scheduled']),
+    })
+    .strict()
+);
+export type HuntCoordinatorRequestBody = z.infer<typeof HuntCoordinatorRequestBody>;
+export type HuntCoordinatorRequestBodyInput = z.input<typeof HuntCoordinatorRequestBody>;
+
+export const HuntCoordinatorResponse = lazySchema(() =>
+  z.object({
+    /**
+     * The caller's run id, or the one the route minted when the caller had no sweep to tie the run to.
+     */
+    run_id: z
+      .string()
+      .describe(
+        "The caller's run id, or the one the route minted when the caller had no sweep to tie the run to."
+      ),
+    state: z.literal('running'),
+    /**
+     * Id of the hidden attachment on the Investigation that the run updates to `{ state: completed, result }` or `{ state: failed, error }` when it finishes. Read it by this id; do not rebuild it.
+     */
+    result_attachment_id: z
+      .string()
+      .describe(
+        'Id of the hidden attachment on the Investigation that the run updates to `{ state: completed, result }` or `{ state: failed, error }` when it finishes. Read it by this id; do not rebuild it.'
       ),
   })
 );
