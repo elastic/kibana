@@ -76,7 +76,16 @@ const exampleCustomMetric = {
 const dataViewMock = dataViewPluginMocks.createStartContract();
 
 describe('Expression', () => {
-  async function setup(currentOptions: AlertContextMeta) {
+  async function setup(
+    currentOptions: AlertContextMeta,
+    options?: {
+      id?: string;
+      initialRuleParams?: Partial<{
+        nodeType: InventoryItemType | undefined;
+        schema: DataSchemaFormat | null;
+      }>;
+    }
+  ) {
     const ruleParams: {
       criteria: unknown[];
       nodeType: InventoryItemType | undefined;
@@ -86,9 +95,11 @@ describe('Expression', () => {
       criteria: [],
       nodeType: undefined,
       filterQueryText: '',
+      ...options?.initialRuleParams,
     };
     const wrapper = mountWithIntl(
       <Expressions
+        id={options?.id}
         ruleInterval="1m"
         ruleThrottle="1m"
         alertNotifyWhen="onThrottleInterval"
@@ -293,6 +304,45 @@ describe('Expression', () => {
       } as AlertContextMeta);
 
       expect(ruleParams.schema).toBe('semconv');
+    });
+
+    it('persists the default schema when creating a new host rule without touching the selector', async () => {
+      const { ruleParams } = await setup({ nodeType: 'host' } as AlertContextMeta);
+
+      expect(ruleParams.schema).toBe(DEFAULT_SCHEMA);
+    });
+
+    it('persists the default schema when creating a new pod rule without touching the selector', async () => {
+      const { ruleParams } = await setup({ nodeType: 'pod' } as AlertContextMeta);
+
+      expect(ruleParams.schema).toBe(DEFAULT_SCHEMA);
+    });
+
+    it('defaults the schema when opening an existing rule that has none', async () => {
+      const { ruleParams } = await setup({} as AlertContextMeta, {
+        id: 'existing-rule-id',
+        initialRuleParams: { nodeType: 'host', schema: undefined },
+      });
+
+      expect(ruleParams.schema).toBe(DEFAULT_SCHEMA);
+    });
+
+    it('keeps the stored schema when opening an existing rule', async () => {
+      const { ruleParams } = await setup({} as AlertContextMeta, {
+        id: 'existing-rule-id',
+        initialRuleParams: { nodeType: 'host', schema: 'ecs' },
+      });
+
+      expect(ruleParams.schema).toBe('ecs');
+    });
+
+    it('does not default the schema when opening an existing container rule that has none', async () => {
+      const { ruleParams } = await setup({} as AlertContextMeta, {
+        id: 'existing-rule-id',
+        initialRuleParams: { nodeType: 'container', schema: undefined },
+      });
+
+      expect(ruleParams.schema).toBeUndefined();
     });
 
     const NON_SCHEMA_AWARE_NODE_TYPES: InventoryItemType[] = [
