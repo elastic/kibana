@@ -15,7 +15,14 @@ import { runExternal } from './external';
 import { targetFromEnv } from './kibana_client';
 import { SCENARIOS } from './scenarios';
 import { computeScorecard, scorecardMarkdown, writeScorecard } from './scorecard';
-import { drillToQuery } from './score';
+import { drillToQuery, scoreRun } from './score';
+import { fetchManifest, fetchRunSamples } from './store';
+
+const computeScorecardParts = async (es: ReturnType<typeof researchEs>, runId: string) => {
+  const manifest = await fetchManifest(es, runId);
+  const samples = await fetchRunSamples(es, runId);
+  return scoreRun(manifest, samples);
+};
 import { ingestRunDir, researchEs, setupStore } from './store';
 
 const DEFAULT_RUNS_DIR = path.join(
@@ -112,6 +119,134 @@ export const main = async (): Promise<void> => {
       }
       // eslint-disable-next-line no-console
       console.log(md);
+      return;
+    }
+    case 'calibrate': {
+      // Slice-proxy calibration: known route doses vs main-side heartbeat gaps (+ worker view).
+      const { pods, cluster } = await computeScorecardParts(es, flags['run-id']);
+      const byDose = new Map<number, Array<Record<string, number | null>>>();
+      for (const c of cluster.filter((r) => r.phase.startsWith('cal-'))) {
+        const off = c.offenders[0];
+        const pod = pods.find((p) => p.phase === c.phase && p.pod === off?.pod);
+        if (!off || !pod) continue;
+        const hb = pod.metrics.hb_gap_max_full_ms ?? pod.metrics.hb_window_max_ms;
+        const list = byDose.get(off.dose_ms) ?? [];
+        list.push({
+          blocked: off.blocked_ms,
+          hb,
+          err: hb === null ? null : hb - off.blocked_ms,
+          worker: pod.metrics.worker_gap_window_max_ms,
+        });
+        byDose.set(off.dose_ms, list);
+      }
+      const st = (xs: number[]) =>
+        xs.length
+          ? {
+              n: xs.length,
+              mean: xs.reduce((a, b) => a + b, 0) / xs.length,
+              min: Math.min(...xs),
+              max: Math.max(...xs),
+            }
+          : null;
+      const samples = (await fetchRunSamples(es, flags['run-id'])) as Array<Record<string, any>>;
+      const manifest = (await fetchManifest(es, flags['run-id'])) as Record<string, any>;
+      const base = manifest.phases.find((p: Record<string, any>) => p.name === 'baseline');
+      const idle = samples
+        .filter(
+          (x) =>
+            x.source === 'main_gap_window' && x.ts >= base.start + 2000 && x.end <= base.end - 1000
+        )
+        .map((x) => x.max_gap_ms as number)
+        .sort((a, b) => a - b);
+      const late = samples
+        .filter(
+          (x) => x.source === 'gap_window' && x.ts >= base.start + 2000 && x.end <= base.end - 1000
+        )
+        .map((x) => (x.sampler_late_max_ms ?? 0) as number)
+        .sort((a, b) => a - b);
+      const q = (xs: number[], p: number) =>
+        xs[Math.min(xs.length - 1, Math.ceil(p * xs.length) - 1)];
+      const out = {
+        run_id: flags['run-id'],
+        doses: Object.fromEntries(
+          [...byDose.entries()].map(([dose, rows]) => [
+            dose,
+            {
+              hb_minus_blocked_ms: st(
+                rows.map((r) => r.err).filter((x): x is number => x !== null)
+              ),
+              worker_view_ms: st(rows.map((r) => r.worker).filter((x): x is number => x !== null)),
+              blocked_ms: st(rows.map((r) => r.blocked).filter((x): x is number => x !== null)),
+            },
+          ])
+        ),
+        idle_1s_window_max_gap_ms: idle.length
+          ? { n: idle.length, p50: q(idle, 0.5), p99: q(idle, 0.99), max: idle.at(-1) }
+          : null,
+        worker_sampler_late_ms: late.length
+          ? { p50: q(late, 0.5), p99: q(late, 0.99), max: late.at(-1) }
+          : null,
+      };
+      if (flags.out) fs.writeFileSync(flags.out, JSON.stringify(out, null, 2));
+      // eslint-disable-next-line no-console
+      console.log(JSON.stringify(out, null, 2));
+      return;
+    }
+    case 'aa': {
+      // A/A analysis: log-ratio noise between matched idle windows (B_i / A_i) per pod+boot.
+      const metricsOf = (m: Record<string, number | null>) => ({
+        probe_p50: m.probe_p50_ms,
+        probe_p99: m.probe_p99_ms,
+        hb_max: Math.max(m.hb_gap_max_overlap_ms ?? 0, m.hb_window_max_ms ?? 0) || null,
+      });
+      const logs: Record<string, number[]> = { probe_p50: [], probe_p99: [], hb_max: [] };
+      const perRun: Record<string, unknown> = {};
+      for (const runId of String(flags['run-ids']).split(',')) {
+        const { pods } = await computeScorecardParts(es, runId);
+        let pairs = 0;
+        for (const a of pods.filter(
+          (p) => p.phase.startsWith('aa-A-') && p.valid && p.metrics.probe_n
+        )) {
+          const b = pods.find(
+            (p) =>
+              p.phase === a.phase.replace('aa-A-', 'aa-B-') &&
+              p.pod === a.pod &&
+              p.boot_id === a.boot_id
+          );
+          if (!b || !b.valid) continue;
+          pairs++;
+          const ma = metricsOf(a.metrics);
+          const mb = metricsOf(b.metrics);
+          for (const k of Object.keys(logs)) {
+            const x = (ma as Record<string, number | null>)[k];
+            const y = (mb as Record<string, number | null>)[k];
+            if (x && y) logs[k].push(Math.log(y / x));
+          }
+        }
+        perRun[runId] = { valid_pairs: pairs };
+      }
+      const summary: Record<string, unknown> = {};
+      for (const [k, xs] of Object.entries(logs)) {
+        if (!xs.length) continue;
+        const m = xs.reduce((a, b) => a + b, 0) / xs.length;
+        const sd = Math.sqrt(xs.reduce((a, b) => a + (b - m) ** 2, 0) / Math.max(1, xs.length - 1));
+        const mde = (n: number) => Math.exp(((1.96 + 0.84) * sd) / Math.sqrt(n));
+        summary[k] = {
+          pairs: xs.length,
+          mean_ratio: Math.exp(m),
+          ci95_mean_ratio: [
+            Math.exp(m - (1.96 * sd) / Math.sqrt(xs.length)),
+            Math.exp(m + (1.96 * sd) / Math.sqrt(xs.length)),
+          ],
+          sd_log_ratio: sd,
+          single_pair_95pct_band: [Math.exp(-1.96 * sd), Math.exp(1.96 * sd)],
+          mde_ratio_80pct_power: { n1: mde(1), n3: mde(3), n5: mde(5), n10: mde(10) },
+        };
+      }
+      const out = { runs: perRun, summary };
+      if (flags.out) fs.writeFileSync(flags.out, JSON.stringify(out, null, 2));
+      // eslint-disable-next-line no-console
+      console.log(JSON.stringify(out, null, 2));
       return;
     }
     case 'verify-drills': {
