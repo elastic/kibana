@@ -120,6 +120,7 @@ const getLatestDateRangePickerProps = () => {
     needsUpdate: boolean;
     isRefreshDisabled: boolean;
     onRefresh: () => void;
+    onManualRefresh: () => void;
     refreshTooltip?: string;
   };
 };
@@ -181,10 +182,30 @@ describe('EpisodesFilterBar', () => {
       getLatestEpisodesKqlInputProps().onChange('severity: high');
     });
     act(() => {
-      getLatestDateRangePickerProps().onRefresh();
+      getLatestDateRangePickerProps().onManualRefresh();
     });
 
     expect(defaultProps.onFilterChange).toHaveBeenCalledTimes(1);
+  });
+
+  it('refreshes the applied query without submitting a valid draft on auto-refresh', () => {
+    const onRefresh = jest.fn();
+    render(
+      <TestProviders>
+        <EpisodesFilterBar {...defaultProps} onRefresh={onRefresh} />
+      </TestProviders>
+    );
+    defaultProps.onFilterChange.mockClear();
+
+    act(() => {
+      getLatestEpisodesKqlInputProps().onChange('severity: high');
+    });
+    act(() => {
+      getLatestDateRangePickerProps().onRefresh();
+    });
+
+    expect(onRefresh).toHaveBeenCalledTimes(1);
+    expect(defaultProps.onFilterChange).not.toHaveBeenCalled();
   });
 
   it('disables update and exposes the validation error for an unsupported draft', () => {

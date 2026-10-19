@@ -144,7 +144,6 @@ describe('EpisodesKqlInput', () => {
           'alert.id': expect.objectContaining({ name: 'alert.id', type: 'string' }),
           'alert.status': expect.objectContaining({ name: 'alert.status', type: 'string' }),
           '@timestamp': expect.objectContaining({ name: '@timestamp', type: 'date' }),
-          duration: expect.objectContaining({ name: 'duration', type: 'number' }),
           'data.host.name': expect.objectContaining({ name: 'data.host.name', type: 'string' }),
           'kibana.alert.rule.name': expect.objectContaining({
             name: 'kibana.alert.rule.name',

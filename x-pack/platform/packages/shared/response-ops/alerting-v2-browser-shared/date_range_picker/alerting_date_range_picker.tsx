@@ -67,6 +67,7 @@ export interface AlertingDateRangePickerProps {
   onChange: (range: { from: string; to: string }) => void;
   services: AlertingDateRangePickerServices;
   onRefresh?: () => void;
+  onManualRefresh?: () => void;
   isLoading?: boolean;
   needsUpdate?: boolean;
   isRefreshDisabled?: boolean;
@@ -86,6 +87,7 @@ export const AlertingDateRangePicker = ({
   onChange,
   services: { data, notifications, http, application, uiSettings, featureFlags },
   onRefresh,
+  onManualRefresh,
   isLoading = false,
   needsUpdate = false,
   isRefreshDisabled = false,
@@ -148,8 +150,8 @@ export const AlertingDateRangePicker = ({
   }, []);
 
   const handleManualRefresh = useCallback(() => {
-    onRefresh?.();
-  }, [onRefresh]);
+    (onManualRefresh ?? onRefresh)?.();
+  }, [onManualRefresh, onRefresh]);
 
   const handleSettingsChange = useCallback(
     (next: DateRangePickerSettings) => {
@@ -167,7 +169,7 @@ export const AlertingDateRangePicker = ({
     [onRefresh]
   );
 
-  const canManuallyRefresh = Boolean(onRefresh);
+  const canManuallyRefresh = Boolean(onManualRefresh ?? onRefresh);
 
   if (!isDateRangePickerEnabled) {
     return (
@@ -177,7 +179,11 @@ export const AlertingDateRangePicker = ({
         onChange={onChange}
         timeHistory={timeHistory}
         onRefresh={onRefresh}
+        onManualRefresh={onManualRefresh}
         isLoading={isLoading}
+        needsUpdate={needsUpdate}
+        isRefreshDisabled={isRefreshDisabled}
+        refreshTooltip={refreshTooltip}
         width={width}
         compressed={compressed}
         dateFormat={dateFormat}
