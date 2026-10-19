@@ -17,6 +17,13 @@ import { PUSH_INDEX } from './lib/recorder';
 import { OFFENDER_TASK_TYPE } from './tasks';
 import type { TickScheduler } from './tasks';
 
+interface IslandHostLike {
+  stats(): Promise<unknown>;
+  resetStats(): Promise<void>;
+  gc(): Promise<unknown>;
+  setFencePhase(phase: string): Promise<unknown>;
+}
+
 export const API_BASE = '/internal/workload_isolation_research';
 
 const security = { authz: { requiredPrivileges: [ReservedPrivilegesSet.superuser] } };
@@ -38,6 +45,35 @@ export const registerRoutes = ({ router, getRecorder, getStart, getInfo }: Route
   router.get(
     { path: `${API_BASE}/info`, security, options, validate: false },
     async (_ctx, _req, res) => res.ok({ body: getInfo() })
+  );
+
+  // Track 2 islands: main + island RPC stats (edges, breakages, memory, fences).
+  router.post(
+    {
+      path: `${API_BASE}/island`,
+      security,
+      options,
+      validate: {
+        body: schema.object({
+          action: schema.oneOf([
+            schema.literal('stats'),
+            schema.literal('reset'),
+            schema.literal('gc'),
+            schema.literal('phase'),
+          ]),
+          phase: schema.maybe(schema.string({ maxLength: 64 })),
+        }),
+      },
+    },
+    async (_ctx, req, res) => {
+      const host = (globalThis as unknown as Record<string, IslandHostLike | undefined>)
+        .__kbnResearchIslandHost;
+      if (!host) return res.ok({ body: { enabled: false } });
+      if (req.body.action === 'reset') await host.resetStats();
+      if (req.body.action === 'gc') await host.gc();
+      if (req.body.action === 'phase') await host.setFencePhase(req.body.phase ?? 'unnamed');
+      return res.ok({ body: (await host.stats()) as Record<string, unknown> });
+    }
   );
 
   router.post(

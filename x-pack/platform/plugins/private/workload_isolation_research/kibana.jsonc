@@ -24,6 +24,7 @@
       "alerting",
       "actions",
       "workflowsManagement",
+      "workflowsExtensions",
       "agentBuilder"
     ]
   }

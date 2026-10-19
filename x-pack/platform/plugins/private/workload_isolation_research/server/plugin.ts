@@ -24,9 +24,12 @@ import { registerResearchTasks, TickScheduler } from './tasks';
 import { registerTierBRoutes, registerTierBTasks } from './tier_b';
 import { registerMockLlmRoute } from './tier_b/canned_llm';
 import { API_BASE } from './routes';
+import { researchSpinStepDefinition } from './tier_b/workflow_step';
 
 interface SetupDeps {
   taskManager: TaskManagerSetupContract;
+  /** Track 2 islands: optional, registers the main-owned `research.spin` workflow step. */
+  workflowsExtensions?: { registerStepDefinition(definition: unknown): void };
 }
 interface StartDeps {
   taskManager: TaskManagerStartContract;
@@ -49,8 +52,9 @@ export class WorkloadIsolationResearchPlugin implements Plugin<void, void, Setup
       .join(',');
   }
 
-  public setup(core: CoreSetup<StartDeps>, { taskManager }: SetupDeps): void {
+  public setup(core: CoreSetup<StartDeps>, { taskManager, workflowsExtensions }: SetupDeps): void {
     const getRecorder = () => this.recorder;
+    workflowsExtensions?.registerStepDefinition(researchSpinStepDefinition);
     registerResearchTasks(taskManager, getRecorder);
     registerTierBTasks(taskManager, getRecorder, async () => {
       const [coreStart] = await core.getStartServices();

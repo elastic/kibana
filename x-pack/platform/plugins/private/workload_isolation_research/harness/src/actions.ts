@@ -100,6 +100,15 @@ export const ACTIONS: Record<string, Action> = {
       { length: Number(params.fields ?? 10) },
       (_, f) => `        f${f}: "\${{ item._source.attr_${f} }}"`
     ).join('\n');
+    const spinMs = Number(params.spinMs ?? 0);
+    const spinStep =
+      spinMs > 0
+        ? `  - name: spin
+    type: research.spin
+    with:
+      doseMs: ${spinMs}
+`
+        : '';
     const yaml = `version: '1'
 name: wir-data-map-${runId.slice(-20)}
 enabled: true
@@ -122,7 +131,7 @@ steps:
         id: "\${{ item._id }}"
         host: "\${{ item._source.host.name }}"
 ${fieldLines}
-`;
+${spinStep}`;
     const wf = must(
       await kbn<{ id: string }>(target, 'POST', '/api/workflows/workflow', { yaml }),
       'create workflow'

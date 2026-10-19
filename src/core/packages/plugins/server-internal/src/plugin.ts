@@ -27,6 +27,8 @@ import type { CorePreboot, CoreSetup, CoreStart } from '@kbn/core-lifecycle-serv
 import type { ServiceToken } from '@kbn/core-di';
 import { Setup, Start } from '@kbn/core-di';
 import { createSetupModule, createStartModule } from '@kbn/core-di-internal';
+import type { IslandHost } from './research_island/host';
+import { getIslandHost } from './research_island/host';
 
 const OSS_PATH_REGEX = /[\/|\\]src[\/|\\]plugins[\/|\\]/; // Matches src/plugins directory on POSIX and Windows
 const XPACK_PATH_REGEX = /[\/|\\]x-pack[\/|\\]plugins[\/|\\]/; // Matches x-pack/plugins directory on POSIX and Windows
@@ -75,6 +77,8 @@ export class PluginWrapper<
     | Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>
     | PrebootPlugin<TSetup, TPluginsSetup>;
   private container?: Container;
+  /** RESEARCH ONLY (Track 2 islands): set when this plugin runs in an island isolate. */
+  private island?: IslandHost;
 
   private readonly startDependencies$ = new Subject<
     [CoreStart, TPluginsStart, TStart | undefined]
@@ -108,6 +112,16 @@ export class PluginWrapper<
   public async init() {
     this.log.debug('Initializing plugin');
 
+    const island = getIslandHost();
+    if (island?.isMember(this.name)) {
+      // RESEARCH ONLY: the plugin module is loaded and instantiated in the island, not here.
+      this.log.info(`Plugin "${this.name}" runs in research island (${island.transportKind})`);
+      await island.init(this.name, join(this.path, 'server'), this.initializerContext);
+      this.island = island;
+      this.definition = {};
+      return;
+    }
+
     this.definition = await this.getPluginDefinition();
     this.instance = await this.createPluginInstance();
 
@@ -131,6 +145,14 @@ export class PluginWrapper<
   ): TSetup | Promise<TSetup> {
     if (!this.definition) {
       throw new Error('The plugin is not initialized. Call the init method first.');
+    }
+
+    if (this.island) {
+      return this.island.setup(
+        this.name,
+        setupContext as object,
+        plugins as unknown as Record<string, unknown>
+      ) as Promise<TSetup>;
     }
 
     if (this.instance && this.isPrebootPluginInstance(this.instance)) {
@@ -165,6 +187,19 @@ export class PluginWrapper<
       throw new Error(`Plugin "${this.name}" is a preboot plugin and cannot be started.`);
     }
 
+    if (this.island) {
+      return (
+        this.island.start(
+          this.name,
+          startContext as object,
+          plugins as unknown as Record<string, unknown>
+        ) as Promise<TStart>
+      ).then((resolvedContract) => {
+        this.startDependencies$.next([startContext, plugins, resolvedContract]);
+        return resolvedContract;
+      });
+    }
+
     this.container?.load(createStartModule(startContext, plugins));
     const contract = [
       this.instance?.start(startContext, plugins),
@@ -191,6 +226,9 @@ export class PluginWrapper<
       throw new Error(`Plugin "${this.name}" can't be stopped since it isn't set up.`);
     }
 
+    if (this.island) {
+      await this.island.stop(this.name);
+    }
     await this.instance?.stop?.();
     await this.container?.unbindAllAsync();
     this.instance = undefined;

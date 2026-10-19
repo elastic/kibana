@@ -323,6 +323,45 @@ export const SCENARIOS: Record<string, Scenario> = {
       },
     ],
   },
+  /**
+   * Track 2 islands: workflow replay (es.search 10k → data.map) and a contributed main-plugin
+   * step (`research.spin`, 1 s CPU) — run with and without the workflows island.
+   */
+  'tier-b-workflow-island': {
+    name: 'tier-b-workflow-island',
+    description:
+      'Track 2: workflow data.map 10k rows, then a research.spin 1 s contributed step (island A/B).',
+    probe,
+    laptopProbe,
+    ticks,
+    phases: [
+      {
+        name: 'seed',
+        durationS: 5,
+        action: 'seed',
+        actionParams: { kind: 'alerting_wide', rows: 10000, fields: 20 },
+      },
+      {
+        name: 'warmup',
+        durationS: 15,
+        action: 'workflow-map',
+        actionParams: { size: 100, fields: 2 },
+      },
+      { name: 'baseline', durationS: 30 },
+      {
+        name: 'wf-map-10000',
+        durationS: 20,
+        action: 'workflow-map',
+        actionParams: { size: 10000, fields: 10 },
+      },
+      {
+        name: 'wf-spin-1000',
+        durationS: 20,
+        action: 'workflow-map',
+        actionParams: { size: 100, fields: 2, spinMs: 1000 },
+      },
+    ],
+  },
   /** Tracer validation (never a perf run): every Tier B replay once, tracer on. */
   'tier-b-tracer-suite': {
     name: 'tier-b-tracer-suite',
