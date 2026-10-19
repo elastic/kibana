@@ -41,6 +41,7 @@ describe('Policy Memory Protections Card', () => {
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
+    mockedContext.setExperimentalFlag({ customYaraSignaturesEnabled: false });
 
     formProps = {
       policy: new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy().inputs[0]

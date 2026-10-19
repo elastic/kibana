@@ -21,6 +21,7 @@ import { useProfilingDependencies } from '../../components/contexts/profiling_de
 import { useEnabledProfilingStatus } from '../../components/contexts/profiling_status/use_enabled_profiling_status';
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
 import { PrimaryProfilingSearchBar } from '../../components/profiling_app_page_template/primary_profiling_search_bar';
+import { UniversalProfilingSetupIncompleteCallout } from '../../components/universal_profiling_setup_incomplete_callout';
 import { AsyncStatus } from '../../hooks/use_async';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
@@ -135,6 +136,7 @@ function StorageExplorerContent() {
       showBetaBadge
     >
       <EuiFlexGroup direction="column">
+        <UniversalProfilingSetupIncompleteCallout />
         <OtelNotSupportedCallout />
         <EuiFlexItem grow={false}>
           <EuiPanel hasShadow={false} color="subdued">
