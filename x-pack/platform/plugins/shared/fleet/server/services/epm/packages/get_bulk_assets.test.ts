@@ -192,7 +192,7 @@ describe('getBulkAssets', () => {
     const mockClient = (states: unknown[] | undefined) =>
       jest
         .spyOn(appContextService, 'getManagedWorkflowsClient')
-        .mockReturnValue(
+        .mockResolvedValue(
           states
             ? ({ listInstalledWorkflowStates: jest.fn().mockResolvedValue(states) } as any)
             : undefined
@@ -275,7 +275,7 @@ describe('getBulkAssets', () => {
       const listInstalledWorkflowStates = jest.fn().mockResolvedValue([]);
       jest
         .spyOn(appContextService, 'getManagedWorkflowsClient')
-        .mockReturnValue({ listInstalledWorkflowStates } as any);
+        .mockResolvedValue({ listInstalledWorkflowStates } as any);
 
       await getBulkAssets(createSoClient(), soTypeRegistry, []);
 

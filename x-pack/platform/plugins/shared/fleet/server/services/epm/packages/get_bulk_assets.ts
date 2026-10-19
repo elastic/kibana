@@ -121,7 +121,7 @@ const parseWorkflowYaml = (yaml: unknown): { name?: unknown; description?: unkno
 
 // Workflows are not saved objects, so they are resolved through the managed workflows client.
 const getWorkflowAssets = async (workflowIds: string[]): Promise<BulkAssetItem[]> => {
-  const client = appContextService.getManagedWorkflowsClient();
+  const client = await appContextService.getManagedWorkflowsClient();
   if (!client || !workflowIds.length) {
     return [];
   }

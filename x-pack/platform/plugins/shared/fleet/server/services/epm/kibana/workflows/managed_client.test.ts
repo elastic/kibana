@@ -44,23 +44,19 @@ describe('managed workflows client', () => {
       jest.clearAllMocks();
     });
 
-    it('hands the client over before it is ready and resolves with it once ready', async () => {
+    it('resolves with the client once it is ready', async () => {
       let markReady: () => void = () => {};
       const ready = jest
         .fn()
         .mockReturnValue(new Promise<void>((resolve) => (markReady = resolve)));
       const client = { ready };
-      const setClient = jest.fn();
 
       const started = startManagedWorkflowsClient({
         workflowsExtensions: createStart(jest.fn().mockResolvedValue(client)),
         workflowsManagement,
-        setClient,
         logger,
       });
 
-      await new Promise((resolve) => setImmediate(resolve));
-      expect(setClient).toHaveBeenCalledWith(client);
       markReady();
       await expect(started).resolves.toBe(client);
     });
@@ -71,82 +67,64 @@ describe('managed workflows client', () => {
       await startManagedWorkflowsClient({
         workflowsExtensions: createStart(init),
         workflowsManagement,
-        setClient: jest.fn(),
         logger,
       });
 
       expect(init).toHaveBeenCalledWith('fleet');
     });
 
-    it('resolves to undefined without setting a client when the plugin is not available', async () => {
-      const setClient = jest.fn();
-
-      await expect(startManagedWorkflowsClient({ setClient, logger })).resolves.toBeUndefined();
-      expect(setClient).not.toHaveBeenCalled();
+    it('resolves to undefined when the plugin is not available', async () => {
+      await expect(startManagedWorkflowsClient({ logger })).resolves.toBeUndefined();
     });
 
     it('does not create a client when the workflows management plugin is not available', async () => {
       const init = jest.fn();
-      const setClient = jest.fn();
 
       await expect(
         startManagedWorkflowsClient({
           workflowsExtensions: createStart(init),
-          setClient,
           logger,
         })
       ).resolves.toBeUndefined();
       expect(init).not.toHaveBeenCalled();
-      expect(setClient).not.toHaveBeenCalled();
     });
 
-    it('resolves to undefined without setting a client when none is returned', async () => {
-      const setClient = jest.fn();
-
+    it('resolves to undefined when none is returned', async () => {
       await expect(
         startManagedWorkflowsClient({
           workflowsExtensions: createStart(jest.fn().mockResolvedValue(undefined)),
           workflowsManagement,
-          setClient,
           logger,
         })
       ).resolves.toBeUndefined();
-      expect(setClient).not.toHaveBeenCalled();
     });
 
     it('logs and resolves to undefined when the initialization fails', async () => {
-      const setClient = jest.fn();
-
       await expect(
         startManagedWorkflowsClient({
           workflowsExtensions: createStart(jest.fn().mockRejectedValue(new Error('boom'))),
           workflowsManagement,
-          setClient,
           logger,
         })
       ).resolves.toBeUndefined();
 
-      expect(setClient).not.toHaveBeenCalled();
-      expect(logger.error).toHaveBeenCalledWith(
+      expect(logger.warn).toHaveBeenCalledWith(
         'Failed to initialize the managed workflows client: boom'
       );
     });
 
     it('logs and resolves to undefined when the client never becomes ready', async () => {
-      const setClient = jest.fn();
       const client = { ready: jest.fn().mockRejectedValue(new Error('not ready')) };
 
       await expect(
         startManagedWorkflowsClient({
           workflowsExtensions: createStart(jest.fn().mockResolvedValue(client)),
           workflowsManagement,
-          setClient,
           logger,
         })
       ).resolves.toBeUndefined();
 
-      expect(setClient).toHaveBeenCalledWith(client);
-      expect(logger.error).toHaveBeenCalledWith(
+      expect(logger.warn).toHaveBeenCalledWith(
         'Failed to initialize the managed workflows client: not ready'
       );
     });

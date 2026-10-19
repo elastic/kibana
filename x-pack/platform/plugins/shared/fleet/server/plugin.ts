@@ -886,7 +886,6 @@ export class FleetPlugin
       startManagedWorkflowsClient({
         workflowsExtensions: plugins.workflowsExtensions,
         workflowsManagement: plugins.workflowsManagement,
-        setClient: (client) => appContextService.setManagedWorkflowsClient(client),
         logger: this.logger,
       })
     );

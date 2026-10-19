@@ -75,7 +75,7 @@ export const stepInstallWorkflows = async (
     );
 
   const client = (await isWorkflowAssetsFlagEnabled())
-    ? await appContextService.waitForManagedWorkflowsClient()
+    ? await appContextService.getManagedWorkflowsClient()
     : undefined;
   if (!client) {
     logger.warn('Workflows are not available, skipping workflow assets installation');

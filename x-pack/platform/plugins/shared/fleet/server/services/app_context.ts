@@ -59,6 +59,8 @@ import type { FleetUsage } from '../collectors/register';
 import type { BulkActionsResolver } from './agents/bulk_actions_resolver';
 import { type UninstallTokenServiceInterface } from './security/uninstall_token_service';
 
+const MANAGED_WORKFLOWS_CLIENT_INIT_TIMEOUT_MS = 30_000;
+
 export type ManagedWorkflowsClient = Awaited<
   ReturnType<WorkflowsExtensionsServerPluginStart['initManagedWorkflowsClient']>
 >;
@@ -93,7 +95,6 @@ class AppContextService {
   private fetchUsage?: (signal: AbortSignal) => Promise<FleetUsage | undefined>;
   private lockManagerService: LockManagerService | undefined;
   private alertingStart: AlertingServerStart | undefined;
-  private managedWorkflowsClient: ManagedWorkflowsClient | undefined;
   private managedWorkflowsClientInit: Promise<ManagedWorkflowsClient | undefined> | undefined;
   private includedHiddenTypes: string[] = [
     UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
@@ -366,21 +367,31 @@ class AppContextService {
     return this.alertingStart;
   }
 
-  public setManagedWorkflowsClient(client: ManagedWorkflowsClient | undefined) {
-    this.managedWorkflowsClient = client;
-  }
-
-  public getManagedWorkflowsClient() {
-    return this.managedWorkflowsClient;
-  }
-
   public setManagedWorkflowsClientInit(init: Promise<ManagedWorkflowsClient | undefined>) {
     this.managedWorkflowsClientInit = init;
   }
 
-  /** Resolves once the client initialization settles; `undefined` if it failed or never started. */
-  public async waitForManagedWorkflowsClient(): Promise<ManagedWorkflowsClient | undefined> {
-    return (await this.managedWorkflowsClientInit) ?? this.managedWorkflowsClient;
+  /**
+   * Resolves once the client initialization settles; `undefined` if it failed, never started
+   * or did not settle within `MANAGED_WORKFLOWS_CLIENT_INIT_TIMEOUT_MS`.
+   */
+  public async getManagedWorkflowsClient(): Promise<ManagedWorkflowsClient | undefined> {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const timeout = new Promise<'timeout'>((resolve) => {
+      timer = setTimeout(() => resolve('timeout'), MANAGED_WORKFLOWS_CLIENT_INIT_TIMEOUT_MS);
+    });
+    try {
+      const result = await Promise.race([this.managedWorkflowsClientInit, timeout]);
+      if (result === 'timeout') {
+        this.logger?.warn(
+          `Managed workflows client did not initialize within ${MANAGED_WORKFLOWS_CLIENT_INIT_TIMEOUT_MS}ms`
+        );
+        return undefined;
+      }
+      return result;
+    } finally {
+      clearTimeout(timer);
+    }
   }
 
   public getReportingStart() {

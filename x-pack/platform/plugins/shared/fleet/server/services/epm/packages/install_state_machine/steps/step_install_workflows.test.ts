@@ -83,7 +83,7 @@ describe('stepInstallWorkflows', () => {
         jest.requireActual('../../../kibana/workflows/install').isWorkflowAssetPath(path)
       );
     mockFeatureFlag(true);
-    mockedAppContext.waitForManagedWorkflowsClient.mockResolvedValue(client);
+    mockedAppContext.getManagedWorkflowsClient.mockResolvedValue(client);
   });
 
   it('is a no-op when the package has no workflows and none were installed before', async () => {
@@ -132,7 +132,7 @@ describe('stepInstallWorkflows', () => {
 
   it('waits for the client to finish initializing instead of skipping workflows', async () => {
     let resolveClient: (value: ManagedWorkflowsClient) => void = () => {};
-    mockedAppContext.waitForManagedWorkflowsClient.mockReturnValue(
+    mockedAppContext.getManagedWorkflowsClient.mockReturnValue(
       new Promise((resolve) => {
         resolveClient = resolve;
       })
@@ -150,7 +150,7 @@ describe('stepInstallWorkflows', () => {
   });
 
   it('leaves the saved workflow refs untouched when the client is not available', async () => {
-    mockedAppContext.waitForManagedWorkflowsClient.mockResolvedValue(undefined);
+    mockedAppContext.getManagedWorkflowsClient.mockResolvedValue(undefined);
     const context = createContext({ paths: [WORKFLOW_PATH], installedKibana: [WORKFLOW_REF] });
 
     await stepInstallWorkflows(context);

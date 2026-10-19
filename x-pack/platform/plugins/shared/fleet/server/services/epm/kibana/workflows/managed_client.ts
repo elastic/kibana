@@ -24,20 +24,18 @@ export const registerWorkflowAssetsOwner = ({
 };
 
 /**
- * Initializes the managed workflows client and hands it over through `setClient` as soon as it is
- * created. Resolves once the client is ready, or to `undefined` if it is unavailable or failed.
+ * Initializes the managed workflows client. Resolves once the client is ready, or to `undefined`
+ * if it is unavailable or failed.
  * Without the workflows management plugin the extensions plugin only provides a noop client whose
  * calls fail, so no client is created.
  */
 export const startManagedWorkflowsClient = async ({
   workflowsExtensions,
   workflowsManagement,
-  setClient,
   logger,
 }: {
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
   workflowsManagement?: WorkflowsServerPluginStart;
-  setClient: (client: ManagedWorkflowsClient) => void;
   logger?: Logger;
 }): Promise<ManagedWorkflowsClient | undefined> => {
   if (!workflowsManagement) return undefined;
@@ -46,11 +44,10 @@ export const startManagedWorkflowsClient = async ({
       FLEET_PACKAGE_WORKFLOW.pluginId
     );
     if (!client) return undefined;
-    setClient(client);
     await client.ready();
     return client;
   } catch (error) {
-    logger?.error(`Failed to initialize the managed workflows client: ${error.message}`);
+    logger?.warn(`Failed to initialize the managed workflows client: ${error.message}`);
     return undefined;
   }
 };

@@ -296,7 +296,7 @@ export const deleteWorkflowAssets = async ({
   const workflowRefs = refs.filter(({ type }) => type === KibanaSavedObjectType.workflow);
   if (!workflowRefs.length) return;
 
-  const client = appContextService.getManagedWorkflowsClient();
+  const client = await appContextService.getManagedWorkflowsClient();
   if (!client) {
     const message = `Workflows are not available, ${workflowRefs.length} workflow asset(s) were not removed`;
     if (strict) throw new FleetError(message);

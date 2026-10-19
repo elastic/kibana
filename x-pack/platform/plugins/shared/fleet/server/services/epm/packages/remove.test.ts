@@ -792,7 +792,9 @@ describe('deleteKibanaSavedObjectsAssets', () => {
 
   beforeEach(() => {
     uninstall.mockReset();
-    (appContextService as any).getManagedWorkflowsClient = jest.fn().mockReturnValue({ uninstall });
+    (appContextService as any).getManagedWorkflowsClient = jest
+      .fn()
+      .mockResolvedValue({ uninstall });
     (appContextService as any).getSavedObjects = jest.fn().mockReturnValue({
       getUnsafeInternalClient: jest.fn().mockReturnValue({ bulkDelete: jest.fn() }),
     });
@@ -826,7 +828,9 @@ describe('workflow assets removal', () => {
     jest.clearAllMocks();
     uninstall.mockReset().mockResolvedValue(undefined);
     bulkDelete.mockReset().mockResolvedValue({ statuses: [] });
-    (appContextService as any).getManagedWorkflowsClient = jest.fn().mockReturnValue({ uninstall });
+    (appContextService as any).getManagedWorkflowsClient = jest
+      .fn()
+      .mockResolvedValue({ uninstall });
     (appContextService as any).getSavedObjects = jest.fn().mockReturnValue({
       getUnsafeInternalClient: jest.fn().mockReturnValue({ bulkDelete }),
     });
@@ -859,7 +863,7 @@ describe('workflow assets removal', () => {
     });
 
     it('warns and keeps going when the managed workflows client is not available', async () => {
-      (appContextService.getManagedWorkflowsClient as jest.Mock).mockReturnValue(undefined);
+      (appContextService.getManagedWorkflowsClient as jest.Mock).mockResolvedValue(undefined);
 
       await deleteWorkflowAssets({ refs: [workflowRef('wf-1')], spaceId: 'default', logger });
 
@@ -955,7 +959,7 @@ describe('workflow assets removal', () => {
       });
 
       it('keeps the package saved object when the client is unavailable', async () => {
-        (appContextService.getManagedWorkflowsClient as jest.Mock).mockReturnValue(undefined);
+        (appContextService.getManagedWorkflowsClient as jest.Mock).mockResolvedValue(undefined);
         const client = soClient();
 
         await expect(remove(client)).rejects.toThrow('Unable to remove workflows');
