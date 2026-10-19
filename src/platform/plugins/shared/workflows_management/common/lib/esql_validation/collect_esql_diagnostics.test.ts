@@ -12,6 +12,7 @@
 
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import { collectEsqlDiagnostics } from './collect_esql_diagnostics';
+import { MAX_VALIDATED_ESQL_QUERY_LENGTH } from './validate_esql_query';
 
 const workflow = (steps: string): string => `name: esql
 triggers:
@@ -269,6 +270,19 @@ ${esqlStep('inner', 'FROM logs-app | WHERE', '      ')}`);
     expect(diagnostics.map(({ path }) => path)).toEqual([
       ['steps', 0, 'steps', 0, 'with', 'query'],
     ]);
+  });
+
+  it('skips a query longer than the size cap and says so in notChecked', async () => {
+    const query = `FROM logs-app | WHERE host.name == "${'a'.repeat(
+      MAX_VALIDATED_ESQL_QUERY_LENGTH
+    )}" |`;
+    const { diagnostics, notChecked } = await collectEsqlDiagnostics(
+      workflow(esqlStep('huge', query)),
+      schemaCallbacks
+    );
+
+    expect(diagnostics).toEqual([]);
+    expect(notChecked).toEqual([expect.stringContaining('step "huge": it is longer than')]);
   });
 
   it('reports the step in notChecked when a callback throws', async () => {

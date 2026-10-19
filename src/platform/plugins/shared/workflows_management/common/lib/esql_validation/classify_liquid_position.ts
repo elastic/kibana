@@ -195,21 +195,28 @@ function maskLiquidOrAdvance(text: string, i: number, state: ScannerState): Scan
 }
 
 /**
- * Replaces every span in `ranges` with a run of spaces of identical length so
+ * Replaces every span in `ranges` with a run of `fill` of identical length so
  * line/column offsets in the surrounding ES|QL stay valid for the parser.
- * Caller is responsible for having computed the ranges (typically via
- * {@link classifyLiquidPosition}).
+ * Caller is responsible for having computed the ranges, in order (typically
+ * via {@link classifyLiquidPosition}).
  */
-export function applyLiquidMask(text: string, ranges: ReadonlyArray<LiquidMaskedRange>): string {
+export function applyLiquidMask(
+  text: string,
+  ranges: ReadonlyArray<LiquidMaskedRange>,
+  fill = ' '
+): string {
   if (ranges.length === 0) {
     return text;
   }
-  let out = text;
-  for (const range of ranges) {
-    const len = range.end - range.start;
-    out = out.slice(0, range.start) + ' '.repeat(len) + out.slice(range.end);
+  // One pass over the text: rebuilding the string per span is O(spans × length).
+  const parts: string[] = [];
+  let cursor = 0;
+  for (const { start, end } of ranges) {
+    parts.push(text.slice(cursor, start), fill.repeat(end - start));
+    cursor = end;
   }
-  return out;
+  parts.push(text.slice(cursor));
+  return parts.join('');
 }
 
 /** True if `offset` lies inside any of `ranges` (end-exclusive). */

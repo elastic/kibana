@@ -19,7 +19,11 @@ import {
   getEsqlToValidate,
   toFileRange,
 } from './extract_esql_region';
-import { type EsqlQueryDiagnostic, validateEsqlQuery } from './validate_esql_query';
+import {
+  type EsqlQueryDiagnostic,
+  MAX_VALIDATED_ESQL_QUERY_LENGTH,
+  validateEsqlQuery,
+} from './validate_esql_query';
 
 interface EsqlStepLocation {
   stepName: string | undefined;
@@ -72,6 +76,12 @@ export async function collectEsqlStepDiagnostics(
   results.forEach((result, index) => {
     const { stepName, path, region } = locations[index];
     const label = stepName ? `step "${stepName}"` : `step at ${path.join('.')}`;
+    if (result.kind === 'skipped-too-large') {
+      notChecked.push(
+        `ES|QL query of ${label}: it is longer than ${MAX_VALIDATED_ESQL_QUERY_LENGTH} characters, so it was not validated.`
+      );
+      return;
+    }
     if (result.kind === 'skipped-structural-liquid') {
       notChecked.push(
         `ES|QL query of ${label}: it has an unclosed Liquid tag, so the query cannot be validated before it runs.`

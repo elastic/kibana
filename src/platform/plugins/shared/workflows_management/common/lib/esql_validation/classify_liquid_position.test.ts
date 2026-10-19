@@ -148,6 +148,28 @@ describe('applyLiquidMask', () => {
     expect(masked.includes('{{')).toBe(false);
     expect(masked.includes('}}')).toBe(false);
   });
+
+  it('uses the fill character', () => {
+    const text = '{{ a }} | {{ b }}';
+    const ranges = [
+      { start: 0, end: 7, kind: 'expression' as const },
+      { start: 10, end: 17, kind: 'expression' as const },
+    ];
+    expect(applyLiquidMask(text, ranges, 'x')).toBe('xxxxxxx | xxxxxxx');
+  });
+
+  it('masks a 1 MB query with many spans in linear time', () => {
+    // Rebuilding the string per span took ~17 s for this input.
+    const text = `"${'{{a}} '.repeat(170_000)}"`;
+    const classification = classifyLiquidPosition(text);
+    const ranges = classification.kind === 'safe' ? classification.maskedRanges : [];
+    expect(ranges).toHaveLength(170_000);
+
+    const started = performance.now();
+    const masked = applyLiquidMask(text, ranges);
+    expect(performance.now() - started).toBeLessThan(1000);
+    expect(masked).toBe(`"${' '.repeat(text.length - 2)}"`);
+  });
 });
 
 describe('findMaskedRangeAtOffset', () => {

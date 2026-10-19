@@ -27,6 +27,12 @@ const PLACEHOLDER_CHAR = 'x';
 /** Column ES|QL returns for a wildcard source that matches no index. */
 const NO_FIELDS_PLACEHOLDER = '<no-fields>';
 
+/**
+ * Longest query that is validated. Parse time grows with length (~0.3 s at
+ * 100 KB) and a 1 MB query exhausts the heap. Same value as the ES|QL view limit.
+ */
+export const MAX_VALIDATED_ESQL_QUERY_LENGTH = 100_000;
+
 export type EsqlQueryDiagnosticSeverity = 'error' | 'warning' | 'info';
 
 /** One ES|QL diagnostic, positioned by offsets relative to the query text. */
@@ -55,6 +61,8 @@ export type EsqlQueryValidationResult =
   | { kind: 'grammar-only'; diagnostics: EsqlQueryDiagnostic[] }
   /** A Liquid span is unclosed, so the query was not validated. */
   | { kind: 'skipped-structural-liquid' }
+  /** The query is longer than {@link MAX_VALIDATED_ESQL_QUERY_LENGTH}, so it was not validated. */
+  | { kind: 'skipped-too-large' }
   /** `validateQuery` threw, e.g. because a callback failed. */
   | { kind: 'failed' };
 
@@ -97,6 +105,9 @@ export async function validateEsqlQuery(
   callbacks: ESQLCallbacks,
   options?: EsqlQueryValidationOptions
 ): Promise<EsqlQueryValidationResult> {
+  if (esql.length > MAX_VALIDATED_ESQL_QUERY_LENGTH) {
+    return { kind: 'skipped-too-large' };
+  }
   const classification = classifyLiquidPosition(esql);
   if (classification.kind === 'has-structural') {
     return classification.spans
@@ -152,10 +163,7 @@ async function validateGrammarWithPlaceholders(
     structural,
   }: { masked: ReadonlyArray<LiquidMaskedRange>; structural: ReadonlyArray<LiquidMaskedRange> }
 ): Promise<EsqlQueryValidationResult> {
-  let query = applyLiquidMask(esql, masked);
-  for (const { start, end } of structural) {
-    query = query.slice(0, start) + PLACEHOLDER_CHAR.repeat(end - start) + query.slice(end);
-  }
+  const query = applyLiquidMask(applyLiquidMask(esql, masked), structural, PLACEHOLDER_CHAR);
 
   let result: Awaited<ReturnType<typeof validateQuery>>;
   try {
