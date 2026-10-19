@@ -550,6 +550,14 @@ export const APPLY_TO_ALL_ALERTS_MODAL_BODY = i18n.translate(
   }
 );
 
+export const APPLY_TO_ALL_ALERTS_SCOPED_MODAL_BODY = i18n.translate(
+  'xpack.maintenanceWindows.applyToAllAlertsModal.scopedBody',
+  {
+    defaultMessage:
+      'One of the selected scopes has no alert filters, so it will apply to all of its alerts.',
+  }
+);
+
 export const APPLY_TO_ALL_ALERTS_MODAL_CONFIRM = i18n.translate(
   'xpack.maintenanceWindows.applyToAllAlertsModal.confirm',
   {

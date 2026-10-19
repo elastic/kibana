@@ -101,7 +101,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
   const [defaultEndDateValue] = useState<string>(moment().add(30, 'minutes').toISOString());
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isSaveWithoutScopeModalVisible, setIsSaveWithoutScopeModalVisible] = useState(false);
-  const [isApplyToAllAlertsModalVisible, setIsApplyToAllAlertsModalVisible] = useState(false);
+  const [applyToAllAlertsModalBody, setApplyToAllAlertsModalBody] = useState<string | null>(null);
   const userConfirmedSaveWithoutScopeRef = useRef(false);
   const userConfirmedApplyToAllAlertsRef = useRef(false);
   const { defaultTimezone } = useDefaultTimezone();
@@ -187,12 +187,18 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
           : null
         : undefined;
 
-      const hasAlertFilters = v1Payload !== null && v2Payload !== null;
-      if (!hasAlertFilters) {
+      const enabledScopes = [alertingV1.enabled, alertingV2.enabled].filter(Boolean);
+      const enabledFilters = [v1Payload, v2Payload].filter(Boolean);
+
+      if (enabledFilters.length < enabledScopes.length) {
         if (userConfirmedApplyToAllAlertsRef.current) {
           userConfirmedApplyToAllAlertsRef.current = false;
         } else {
-          setIsApplyToAllAlertsModalVisible(true);
+          setApplyToAllAlertsModalBody(
+            enabledFilters.length === 0
+              ? i18n.APPLY_TO_ALL_ALERTS_MODAL_BODY
+              : i18n.APPLY_TO_ALL_ALERTS_SCOPED_MODAL_BODY
+          );
           return;
         }
       }
@@ -492,22 +498,22 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
             <p>{i18n.SAVE_WITHOUT_SCOPES_MODAL_SUBTITLE}</p>
           </EuiConfirmModal>
         )}
-        {isApplyToAllAlertsModalVisible && (
+        {applyToAllAlertsModalBody !== null && (
           <EuiConfirmModal
             aria-labelledby={applyToAllAlertsModalTitleId}
             title={i18n.APPLY_TO_ALL_ALERTS_MODAL_TITLE}
             titleProps={{ id: applyToAllAlertsModalTitleId }}
-            onCancel={() => setIsApplyToAllAlertsModalVisible(false)}
+            onCancel={() => setApplyToAllAlertsModalBody(null)}
             onConfirm={() => {
               userConfirmedApplyToAllAlertsRef.current = true;
-              setIsApplyToAllAlertsModalVisible(false);
+              setApplyToAllAlertsModalBody(null);
               form.submit();
             }}
             cancelButtonText={i18n.CANCEL}
             confirmButtonText={i18n.APPLY_TO_ALL_ALERTS_MODAL_CONFIRM}
             data-test-subj="applyToAllAlertsConfirmModal"
           >
-            <p>{i18n.APPLY_TO_ALL_ALERTS_MODAL_BODY}</p>
+            <p>{applyToAllAlertsModalBody}</p>
           </EuiConfirmModal>
         )}
         <EuiFlexItem grow={false}>
