@@ -66,17 +66,18 @@ export const ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW = {
  * uses the internal-workflow management profile: enablement is enforced rather
  * than restorable.
  *
- * The version carries the YAML's switch to a per-batch ES|QL retrieval, which lets
- * each batch persist the replacements its discoveries use. Bumped as a deliberate
- * rollout signal for that switch; the YAML change alone already rolls out through
- * `definitionHash`.
+ * Version 3 carried the YAML's switch to a per-batch ES|QL retrieval, which lets
+ * each batch persist the replacements its discoveries use. Version 4 turns off the
+ * run step's ground-truth gate, so false-positive triage happens only in the
+ * review's FP/TP analysis. Both bumps are deliberate rollout signals; the YAML
+ * change alone already rolls out through `definitionHash`.
  */
 export const ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW = {
   billable: false,
   id: ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW_ID,
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 3,
+  version: 4,
   yaml: ATTACK_DISCOVERY_BATCHED_GENERATION_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
