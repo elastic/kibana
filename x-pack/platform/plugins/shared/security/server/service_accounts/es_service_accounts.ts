@@ -17,7 +17,7 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import type { AuthenticatedPrincipal } from '@kbn/core-security-common';
-import type { CreateServiceAccountParams, ServiceAccount } from '@kbn/core-security-server';
+import type { CreateServiceAccountServerParams, ServiceAccount } from '@kbn/core-security-server';
 import { i18n } from '@kbn/i18n';
 import type {
   AuditLogger,
@@ -204,7 +204,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
 
   async create(
     request: KibanaRequest,
-    params: CreateServiceAccountParams
+    params: CreateServiceAccountServerParams
   ): Promise<ServiceAccount> {
     const auditLogger = this.audit.asScoped(request);
     const cleanup: CreateCleanupReport = {};
@@ -252,7 +252,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
    */
   private async createAccount(
     request: KibanaRequest,
-    params: CreateServiceAccountParams,
+    params: CreateServiceAccountServerParams,
     auditLogger: AuditLogger,
     cleanup: CreateCleanupReport
   ): Promise<ServiceAccount> {
@@ -292,10 +292,17 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     }
 
     const namespace = ES_SERVICE_ACCOUNT_NAMESPACE;
-    const { name, roles, description } = parseCreateServiceAccountParams(
+    const { name, roles, description, platformAssumers } = parseCreateServiceAccountParams(
       params,
       ES_SERVICE_ACCOUNT_ROLE_LIMITS
     );
+    // Elasticsearch service accounts cannot be assumed by anything outside this Kibana. Dropping
+    // the assumers would hand back an account the platform service cannot use.
+    if (platformAssumers?.length) {
+      throw Boom.badRequest(
+        'Cannot create a service account: `platformAssumers` is only supported when service accounts are backed by UIAM'
+      );
+    }
     const serviceAccountId = `${namespace}/${name}`;
 
     const esClient = this.clusterClient.asScoped(request).asCurrentUser;
@@ -386,7 +393,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       request,
       checkPrivilegesWithRequest: this.checkPrivilegesWithRequest,
       logger: this.logger,
-      privilege: 'read_security',
+      privilege: 'manage_security',
       action: 'list service accounts',
     });
 
@@ -448,7 +455,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       request,
       checkPrivilegesWithRequest: this.checkPrivilegesWithRequest,
       logger: this.logger,
-      privilege: 'read_security',
+      privilege: 'manage_security',
       action: 'get a service account',
     });
 
@@ -678,9 +685,9 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
    * Two limits worth knowing. An operator who recreates the account and then mints their own
    * token under Kibana's reserved name passes this check, because the name is all Elasticsearch
    * exposes. And a check that cannot be completed falls through to the stored document rather
-   * than calling the account unassumable: `read_security` is enough to read an account's tokens,
-   * so this is a transient failure rather than an authorization one, and one call that did not
-   * land is weaker evidence than the record Kibana holds.
+   * than calling the account unassumable: the caller's `manage_security` covers reading an
+   * account's tokens, so this is a transient failure rather than an authorization one, and one
+   * call that did not land is weaker evidence than the record Kibana holds.
    */
   private async isAssumable(
     esClient: ElasticsearchClient,

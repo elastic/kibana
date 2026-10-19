@@ -11,6 +11,7 @@ import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { RESOLUTION_RULE_IDS, type ResolutionRuleId } from '@kbn/entity-store/common';
+import { ENTITY_ANALYTICS_MANAGE_KIBANA_FEATURE_PRIVILEGES } from '@kbn/entity-store/server';
 import type { Logger } from '@kbn/logging';
 import type { ExperimentalFeatures } from '../../../../../common';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../plugin_contract';
@@ -91,6 +92,7 @@ This tool only changes which resolution rules are enabled — it does not trigge
           request,
           security,
           action: 'enable or disable entity resolution rules',
+          privileges: ENTITY_ANALYTICS_MANAGE_KIBANA_FEATURE_PRIVILEGES,
         });
         if (!accessResult.allowed) {
           telemetryTracker.recordFailure(accessResult.result.data.message);

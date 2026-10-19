@@ -23,6 +23,7 @@ import {
   isDashboardViewPath,
   isDetectionsPath,
   isRuleChangesHistoryPath,
+  isRulesAddPath,
   isRulesManagementPath,
   isSharedExceptionListsPath,
 } from '../../../helpers';
@@ -65,6 +66,7 @@ export const GlobalHeader = React.memo(() => {
   const dashboardViewPath = isDashboardViewPath(pathname);
   const changesHistoryPath = isRuleChangesHistoryPath(pathname);
   const rulesManagementPath = isRulesManagementPath(pathname);
+  const rulesAddPath = isRulesAddPath(pathname);
   const sharedExceptionListsPath = isSharedExceptionListsPath(pathname);
 
   const { href, onClick } = useAddIntegrationsUrl();
@@ -74,9 +76,9 @@ export const GlobalHeader = React.memo(() => {
       return;
     }
 
-    // The Rules and Shared Exception Lists app headers render their own actions (ML job settings,
-    // Add integrations), so clear the global header action menu there to avoid duplicating them.
-    if (changesHistoryPath || rulesManagementPath || sharedExceptionListsPath) {
+    // The Rules, Add Elastic rules and Shared Exception Lists page app headers render their own actions
+    // (ML job settings, Add integrations), so clear the global header action menu there to avoid duplicating them.
+    if (changesHistoryPath || rulesManagementPath || rulesAddPath || sharedExceptionListsPath) {
       setHeaderActionMenu(undefined);
       return;
     }
@@ -105,6 +107,7 @@ export const GlobalHeader = React.memo(() => {
     dashboardViewPath,
     changesHistoryPath,
     rulesManagementPath,
+    rulesAddPath,
     sharedExceptionListsPath,
   ]);
 
