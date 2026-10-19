@@ -39,6 +39,7 @@ describe('getAgenticInvestigationsCapabilities', () => {
       showEscalations: false,
       manageEscalations: false,
       manageInvestigations: false,
+      canAccessAgentBuilder: false,
     });
   });
 
@@ -78,6 +79,17 @@ describe('getAgenticInvestigationsCapabilities', () => {
       showEscalations: true,
       manageEscalations: true,
       manageInvestigations: true,
+      canAccessAgentBuilder: false,
+    });
+  });
+
+  it('maps canAccessAgentBuilder correctly', () => {
+    const capabilities = {
+      agenticInvestigations: { canAccessAgentBuilder: true },
+    } as unknown as Capabilities;
+
+    expect(getAgenticInvestigationsCapabilities(capabilities)).toMatchObject({
+      canAccessAgentBuilder: true,
     });
   });
 });

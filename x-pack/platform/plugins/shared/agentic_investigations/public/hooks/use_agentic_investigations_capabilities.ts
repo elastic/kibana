@@ -13,12 +13,14 @@ import {
   ESCALATIONS_UI_CAPABILITY_SHOW,
   ESCALATIONS_UI_CAPABILITY_MANAGE,
   INVESTIGATIONS_UI_CAPABILITY_MANAGE,
+  INVESTIGATIONS_UI_CAPABILITY_CAN_ACCESS_AGENT_BUILDER,
 } from '../../common';
 
 export interface AgenticInvestigationsCapabilities {
   showEscalations: boolean;
   manageEscalations: boolean;
   manageInvestigations: boolean;
+  canAccessAgentBuilder: boolean;
 }
 
 /**
@@ -33,6 +35,8 @@ export const getAgenticInvestigationsCapabilities = (
     showEscalations: investigationsCap?.[ESCALATIONS_UI_CAPABILITY_SHOW] === true,
     manageEscalations: investigationsCap?.[ESCALATIONS_UI_CAPABILITY_MANAGE] === true,
     manageInvestigations: investigationsCap?.[INVESTIGATIONS_UI_CAPABILITY_MANAGE] === true,
+    canAccessAgentBuilder:
+      investigationsCap?.[INVESTIGATIONS_UI_CAPABILITY_CAN_ACCESS_AGENT_BUILDER] === true,
   };
 };
 
