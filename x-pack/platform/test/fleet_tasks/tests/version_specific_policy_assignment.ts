@@ -393,6 +393,23 @@ export default function (providerContext: FtrProviderContextWithServices) {
       }
     });
 
+    it('should not move OpAMP collectors', async () => {
+      // collectors get no policy action to acknowledge, so a moved collector would stay updating
+      await createAgentDoc(providerContext, 'agent1', policyId, '8.18.0');
+      await createAgentDoc(providerContext, 'collector', policyId, '8.18.0', true, {
+        type: 'OPAMP',
+      });
+      await waitForTask();
+
+      await retry.tryForTime(30000, async () => {
+        const agent = await getAgent('agent1');
+        expect(agent.policy_id).to.be(`${policyId}${AGENT_POLICY_VERSION_SEPARATOR}8.18`);
+      });
+
+      // the collectors are left on the policy, in the same run of the task
+      expect((await getAgent('collector')).policy_id).to.be(policyId);
+    });
+
     it('should handle agents with unparseable/invalid version gracefully', async () => {
       // Create an agent with an unparseable version (edge case)
       // The task uses semver.coerce() which will return null for invalid versions

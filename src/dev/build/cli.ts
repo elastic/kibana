@@ -60,6 +60,7 @@ if (showHelp) {
         --skip-docker-serverless             {dim Don't build the docker serverless image}
         --skip-docker-ubi                    {dim Don't build the docker ubi image}
         --skip-docker-wolfi                  {dim Don't build the docker wolfi image}
+        --skip-fips-provider                 {dim Skip building and bundling the OpenSSL FIPS provider}
         --skip-initialize                    {dim Skip environment cleanup and verification}
         --skip-generic-folders               {dim Skip building package, plugins, etc from source}
         --skip-platform-folders              {dim Skip platform specific folder creation and operations}
