@@ -113,8 +113,9 @@ describe('Impact', () => {
       />
     );
 
-    expect(pillLabels()).toEqual(['SRVWIN01', 'it.admin']);
-    fireEvent.click(visibleRow().getByRole('button', { name: 'SRVWIN01' }));
+    expect(pillLabels()).toEqual(['SRVWIN01 (host:572750b8)', 'user:it.admin@572750b8@local']);
+    expect(visibleRow().getByText('SRVWIN01')).toBeInTheDocument();
+    fireEvent.click(visibleRow().getByRole('button', { name: 'SRVWIN01 (host:572750b8)' }));
     expect(onEntityFilterChange).toHaveBeenCalledWith('host:572750b8');
   });
 

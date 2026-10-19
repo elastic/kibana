@@ -5,30 +5,27 @@
  * 2.0.
  */
 
-import { entityPillLabel } from './entity_pill_label';
+import { entityPillAriaLabel, entityPillLabel } from './entity_pill_label';
 
 describe('entityPillLabel', () => {
-  it('prefers the stored display name over the entity id', () => {
+  it('shows the display name and leaves an id that has no name unchanged', () => {
     expect(entityPillLabel({ entityId: 'host:572750b8', name: 'SRVWIN01' })).toBe('SRVWIN01');
-    expect(
-      entityPillLabel({
-        entityId: 'user:Administrator@572750b8@local',
-        name: 'Administrator@SRVWIN01',
-      })
-    ).toBe('Administrator@SRVWIN01');
-  });
-
-  it('drops the type prefix when no name was stored', () => {
-    expect(entityPillLabel({ entityId: 'host:web-01' })).toBe('web-01');
-    expect(entityPillLabel({ entityId: 'service:orders-api' })).toBe('orders-api');
-    expect(entityPillLabel({ entityId: 'user:jane@acme.com@okta' })).toBe('jane@acme.com@okta');
-  });
-
-  it('keeps only the user name of a local entity id', () => {
-    expect(entityPillLabel({ entityId: 'user:it.admin@572750b8@local' })).toBe('it.admin');
-  });
-
-  it('leaves an id that is already a name unchanged', () => {
+    expect(entityPillLabel({ entityId: 'user:it.admin@572750b8@local' })).toBe(
+      'user:it.admin@572750b8@local'
+    );
     expect(entityPillLabel({ entityId: 'checkout' })).toBe('checkout');
+  });
+});
+
+describe('entityPillAriaLabel', () => {
+  it('includes the id when the visible label is a display name', () => {
+    expect(entityPillAriaLabel({ entityId: 'host:572750b8', name: 'SRVWIN01' })).toBe(
+      'SRVWIN01 (host:572750b8)'
+    );
+  });
+
+  it('is the id when that is already the label', () => {
+    expect(entityPillAriaLabel({ entityId: 'checkout', name: 'checkout' })).toBe('checkout');
+    expect(entityPillAriaLabel({ entityId: 'checkout' })).toBe('checkout');
   });
 });

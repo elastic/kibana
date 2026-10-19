@@ -5,30 +5,22 @@
  * 2.0.
  */
 
-import { entityStoreIdType } from '../../impact/open_impact_entity';
 import type { ImpactPill } from './impact_pills';
 
-const LOCAL_NAMESPACE = '@local';
-
 /**
- * What an Impact pill shows. Prefer the stored display name. Without one, drop the Entity Store
- * `type:` prefix; a local user id (`user:{name}@{host}@local`) keeps only `{name}`.
+ * Visible pill text. `name` is Entity Store `entity.name` when the store has one, otherwise the
+ * name recorded on the impact. The id is the last resort; it is not parsed.
  */
 export const entityPillLabel = ({
   name,
   entityId,
-}: Pick<ImpactPill, 'name' | 'entityId'>): string => {
-  if (name) {
-    return name;
-  }
-  const type = entityStoreIdType(entityId);
-  if (!type) {
-    return entityId;
-  }
-  const body = entityId.slice(type.length + 1);
-  if (type !== 'user' || !body.endsWith(LOCAL_NAMESPACE)) {
-    return body;
-  }
-  const userName = body.slice(0, body.indexOf('@'));
-  return userName.length > 0 ? userName : body;
+}: Pick<ImpactPill, 'name' | 'entityId'>): string => name ?? entityId;
+
+/**
+ * Accessible name. When the visible label is a display name, the id is included so two entities
+ * that share a name stay distinct, the same way the entity flyout shows the name and the id.
+ */
+export const entityPillAriaLabel = (pill: Pick<ImpactPill, 'name' | 'entityId'>): string => {
+  const label = entityPillLabel(pill);
+  return label === pill.entityId ? label : `${label} (${pill.entityId})`;
 };
