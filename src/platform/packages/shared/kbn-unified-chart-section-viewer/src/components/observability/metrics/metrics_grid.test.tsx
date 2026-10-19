@@ -1345,7 +1345,10 @@ describe('MetricsGrid', () => {
     });
 
     it('keeps the percentile chart when the heatmaps flag is off', () => {
-      renderMetricsGridWithHistDistributions({ metricItems: [histogramItem], histogramBounds: bounds });
+      renderMetricsGridWithHistDistributions({
+        metricItems: [histogramItem],
+        histogramBounds: bounds,
+      });
 
       expect(createESQLQuery).toHaveBeenCalled();
       expect(Chart).toHaveBeenCalledWith(
