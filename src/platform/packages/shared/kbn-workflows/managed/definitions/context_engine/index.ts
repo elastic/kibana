@@ -51,8 +51,8 @@ export const CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW = {
    * the only thing that moves it.
    *
    * 2: gates runs on `can_analyze`, which does not require signals.
-   * 3: the manual trigger takes `message`, `model` and `setup` inputs. `setup` runs the
-   *    Context Engine agent with only the install-template tool and records nothing.
+   * 3: the manual trigger takes `agent_id`, `message` and `model` inputs, each overriding
+   *    the corresponding resolved value for that run only.
    */
   version: 3,
   billable: false,

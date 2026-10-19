@@ -35,6 +35,9 @@ triggers:
     inputs:
       additionalProperties: false
       properties:
+        agent_id:
+          description: Agent to run, overriding the AI index's configured feedback-analysis agent.
+          type: string
         message:
           description: >-
             Overrides the generated briefing sent to the agent. Ignored by the scheduled
@@ -43,65 +46,40 @@ triggers:
         model:
           description: Inference endpoint id to run the agent with, overriding its default.
           type: string
-        setup:
-          default: false
-          description: >-
-            Runs the one-time setup flow instead of analysis: has the agent install the
-            starter automation template and records nothing.
-          type: boolean
 steps:
-  - name: run
+  - name: fetch_context
+    type: context-engine.getFeedbackContext
+    with:
+      ai_index_id: '{{ consts.AI_INDEX_ID }}'
+
+  # Runs whether or not there are signals. Signals are the sharpest evidence an index gives up, but
+  # not the only kind: an indicator contradicted by its source, an automation producing nothing, a
+  # source nothing covers are all visible without a single failed retrieval, and an index nobody has
+  # queried yet is exactly when its setup is worth checking.
+  - name: analyze_and_record
     type: if
-    condition: '${{ inputs.setup == true }}'
+    condition: '${{ steps.fetch_context.output.can_analyze == true }}'
     steps:
-      - name: run_setup_agent
+      - name: run_analysis_agent
         type: ai.agent
-        agent-id: 'platform.context_engine.setup'
+        agent-id: '{{ inputs.agent_id | default: steps.fetch_context.output.agent_id }}'
         inference-id: '{{ inputs.model }}'
         plugin-id: 'context_engine_feedback_analysis'
         aggregate-by: 'context_engine'
         create-conversation: true
-        timeout: '10m'
+        timeout: '30m'
         with:
-          message: '{{ inputs.message | default: "Install the starter automation template for this AI index." }}'
-          configuration_overrides:
-            tools:
-              - tool_ids:
-                  - 'platform.context_engine.install_automation_template'
-    else:
-      - name: fetch_context
-        type: context-engine.getFeedbackContext
+          message: '{{ inputs.message | default: steps.fetch_context.output.briefing }}'
+          schema: '${{ steps.fetch_context.output.output_schema }}'
+
+      - name: record_improvements
+        type: context-engine.recordImprovements
         with:
           ai_index_id: '{{ consts.AI_INDEX_ID }}'
-
-      # Runs whether or not there are signals. Signals are the sharpest evidence an index gives up,
-      # but not the only kind: an indicator contradicted by its source, an automation producing
-      # nothing, a source nothing covers are all visible without a single failed retrieval, and an
-      # index nobody has queried yet is exactly when its setup is worth checking.
-      - name: analyze_and_record
-        type: if
-        condition: '${{ steps.fetch_context.output.can_analyze == true }}'
-        steps:
-          - name: run_analysis_agent
-            type: ai.agent
-            agent-id: '{{ steps.fetch_context.output.agent_id }}'
-            inference-id: '{{ inputs.model }}'
-            plugin-id: 'context_engine_feedback_analysis'
-            aggregate-by: 'context_engine'
-            create-conversation: true
-            timeout: '30m'
-            with:
-              message: '{{ inputs.message | default: steps.fetch_context.output.briefing }}'
-              schema: '${{ steps.fetch_context.output.output_schema }}'
-
-          - name: record_improvements
-            type: context-engine.recordImprovements
-            with:
-              ai_index_id: '{{ consts.AI_INDEX_ID }}'
-              agent_run_id: '{{ execution.id }}'
-              signal_window: '${{ steps.fetch_context.output.signal_window }}'
-              signal_spaces: '${{ steps.fetch_context.output.signal_spaces }}'
-              improvements: '${{ steps.run_analysis_agent.output.structured_output.improvements | default: consts.NO_IMPROVEMENTS }}'
+          agent_run_id: '{{ execution.id }}'
+          signal_window: '${{ steps.fetch_context.output.signal_window }}'
+          signal_spaces: '${{ steps.fetch_context.output.signal_spaces }}'
+          improvements: '${{ steps.run_analysis_agent.output.structured_output.improvements | default: consts.NO_IMPROVEMENTS }}'
 
   - name: output_result
     type: workflow.output
