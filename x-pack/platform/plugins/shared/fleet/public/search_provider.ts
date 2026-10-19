@@ -255,7 +255,12 @@ const getGroupCollections = (
         icon: getEuiIconType(memberPackages[0], basePath),
         url: `${browsePath}?${COLLECTION_QUERYPARAM}=${encodeURIComponent(groupId)}`,
         members: memberPackages.map(({ name, title }) => ({ name, title })),
-        searchTitles: memberPackages.flatMap(({ name, title }) => [name, title]),
+        // The titles the packages' own results had, so a search for a policy template still finds
+        // the collection.
+        searchTitles: memberPackages.flatMap((pkg) => [
+          pkg.name,
+          ...toSearchResult(pkg, application, basePath).map(({ title }) => title),
+        ]),
       };
     });
 };

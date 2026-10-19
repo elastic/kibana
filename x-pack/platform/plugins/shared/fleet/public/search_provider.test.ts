@@ -661,7 +661,13 @@ describe('Package search provider', () => {
           }),
           makePackage('aws_logs', 'AWS Custom Logs'),
           makePackage('aws_ec2_otel', 'AWS EC2 OpenTelemetry'),
-          makePackage('nginx', 'Nginx', { group: 'nginx' }),
+          makePackage('nginx', 'Nginx', {
+            group: 'nginx',
+            policy_templates: [
+              { name: 'metrics', title: 'Stub status metrics' },
+              { name: 'logs', title: 'Access and error logs' },
+            ],
+          }),
           makePackage('nginx_ingress_controller', 'Nginx Ingress Controller', { group: 'nginx' }),
           ...['One', 'Two', 'Three', 'Four', 'Five'].map((n) =>
             makePackage(`kafka_${n.toLowerCase()}`, `Stream ${n}`, { group: 'kafka' })
@@ -760,6 +766,10 @@ describe('Package search provider', () => {
                 description: 'Nginx Ingress Controller is part of the Nginx collection',
               }),
             ]);
+          });
+
+          test('a search for a policy template of a member package finds the collection', async () => {
+            expect(await find({ search: { term: 'stub status' } })).toEqual([nginxResult()]);
           });
 
           test('a search matching many members names the first three and counts the rest', async () => {
