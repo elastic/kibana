@@ -103,6 +103,7 @@ apiTest.describe(
 
         // The acknowledge event is only written when at least one alert was updated,
         // so a real open alert must exist. Ensure the alerts index exists, then seed one.
+        // The create op type is required because the alerts target is a data stream on serverless.
         const indexResponse = await apiClient.post(DETECTION_ENGINE_INDEX_URL, {
           headers: { ...REQUEST_HEADERS, ...admin.apiKeyHeader },
           responseType: 'json',
@@ -112,6 +113,7 @@ apiTest.describe(
         await esClient.index({
           index: ALERTS_INDEX,
           id: alertId,
+          op_type: 'create',
           refresh: 'wait_for',
           document: {
             '@timestamp': new Date().toISOString(),
@@ -155,8 +157,13 @@ apiTest.describe(
             event: { action: 'alert_acknowledge', outcome: 'success' },
           });
         } finally {
-          await esClient.delete(
-            { index: ALERTS_INDEX, id: alertId, refresh: 'wait_for' },
+          await esClient.deleteByQuery(
+            {
+              index: ALERTS_INDEX,
+              query: { ids: { values: [alertId] } },
+              refresh: true,
+              conflicts: 'proceed',
+            },
             { ignore: [404] }
           );
         }
