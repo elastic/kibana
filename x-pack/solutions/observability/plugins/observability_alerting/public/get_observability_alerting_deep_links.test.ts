@@ -17,6 +17,7 @@ import {
 import { getObservabilityAlertingDeepLinks } from './get_observability_alerting_deep_links';
 
 const SEARCHABLE: AppDeepLinkLocations[] = ['globalSearch', 'projectSideNav'];
+const ALERTS: AppDeepLinkLocations[] = [...SEARCHABLE, 'classicSideNav'];
 
 const capabilities = (features: Record<string, Record<string, boolean>>): Capabilities =>
   ({
@@ -57,7 +58,7 @@ describe('getObservabilityAlertingDeepLinks', () => {
   describe('v2-only users', () => {
     it('offers only Alerts to a v2 alerts-read user', () => {
       expect(visibleInById(capabilities({ alerting_v2_alerts: { read: true } }))).toEqual({
-        [OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID]: SEARCHABLE,
+        [OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID]: ALERTS,
         [OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID]: [],
         [OBSERVABILITY_ALERTING_RULES_V2_DEEP_LINK_ID]: [],
         [OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID]: [],
@@ -107,7 +108,7 @@ describe('getObservabilityAlertingDeepLinks', () => {
   describe('v1-only users', () => {
     it('offers Alerts and Rules V1 to a v1 logs user', () => {
       expect(visibleInById(capabilities({ logs: { show: true } }))).toEqual({
-        [OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID]: SEARCHABLE,
+        [OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID]: ALERTS,
         [OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID]: SEARCHABLE,
         [OBSERVABILITY_ALERTING_RULES_V2_DEEP_LINK_ID]: [],
         [OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID]: [],
@@ -118,7 +119,7 @@ describe('getObservabilityAlertingDeepLinks', () => {
 
     it('offers Alerts but not Rules V1 to a v1 observabilityAlerts-only user', () => {
       expect(visibleInById(capabilities({ observabilityAlerts: { show: true } }))).toEqual({
-        [OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID]: SEARCHABLE,
+        [OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID]: ALERTS,
         [OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID]: [],
         [OBSERVABILITY_ALERTING_RULES_V2_DEEP_LINK_ID]: [],
         [OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID]: [],
@@ -129,7 +130,7 @@ describe('getObservabilityAlertingDeepLinks', () => {
 
     it('offers Alerts and Rules V1 to a v1 apm navLink user', () => {
       expect(visibleInById(capabilities({ navLinks: { apm: true } }))).toEqual({
-        [OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID]: SEARCHABLE,
+        [OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID]: ALERTS,
         [OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID]: SEARCHABLE,
         [OBSERVABILITY_ALERTING_RULES_V2_DEEP_LINK_ID]: [],
         [OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID]: [],

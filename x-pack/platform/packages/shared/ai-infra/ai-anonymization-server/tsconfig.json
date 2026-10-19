@@ -24,6 +24,7 @@
     "@kbn/inference-langchain",
     "@kbn/inference-tracing",
     "@kbn/logging",
-    "@kbn/logging-mocks"
+    "@kbn/logging-mocks",
+    "@kbn/repo-info"
   ]
 }

@@ -59,6 +59,7 @@ export const DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS: string[] = [
   'tags',
   'rule_tags',
   'assignees',
+  'maintenance_windows',
 ];
 
 export const DEFAULT_EPISODES_TABLE_SORT: EpisodesTableConfig['sort'] = {
@@ -72,6 +73,7 @@ export const DEFAULT_EPISODES_TABLE_COLUMN_SETTINGS: EpisodesTableColumnSettings
   'episode.status': { width: 110 },
   alerting_source: { width: 140 },
   severity: { width: 100 },
+  maintenance_windows: { width: 180 },
 };
 
 export const DEFAULT_EPISODES_TABLE_CONFIG: EpisodesTableConfig = {
