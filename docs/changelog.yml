@@ -92,6 +92,7 @@ pivot:
       - 'Feature:Data Frame Analytics'
       - 'Feature:Inference UI'
       - 'Feature:ML/AIOps'
+      - 'Team:Search & ML UX'
     'Workflows':
       - 'Team:One Workflow'
     'Maps':
@@ -253,6 +254,19 @@ pivot:
       - 'Team:obs-ux-management'
       - 'Team:actionable-obs'
       - 'Team:obs-ai - DEPRECATED'
+      - 'Team:obs-signals-metrics'
+      - 'Team:obs-signals-logs'
+      - 'Feature:Synthetics'
+      - 'Team:nightshift'
+      - 'Team:nightshift-investigations'
+      - 'Team:nightshift-sre-agent'
+      - 'Team:nightshift-ux'
+      - 'Feature: Nightshift Context Engine'
+      - 'Feature: Nightshift Detection Engine'
+      - 'Feature: Nightshift Interfaces'
+      - 'Feature: Nightshift Investigation Engine'
+      - 'Feature: Nightshift Remediation Engine'
+      - 'Feature: Nightshift UX'
     'security':
       - 'Team:SIEM'
       - 'Team:Security Solution'
@@ -284,6 +298,7 @@ pivot:
       - 'Team:Security Deployment'
       - 'Feature:Endpoint'
       - 'Feature:Security ML Jobs'
+      - 'Team:security-siem-conduit'
 
 # Rules configuration — controls which PRs create changelogs and which entries are published.
 # Global match default for multi-valued fields (labels, areas, products).
