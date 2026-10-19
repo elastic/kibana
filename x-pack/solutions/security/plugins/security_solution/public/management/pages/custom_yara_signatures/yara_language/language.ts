@@ -49,6 +49,10 @@ export const lexerRules: monaco.languages.IMonarchLanguage = {
       [/"(?:[^"\\]|\\.)*\\?$/, 'string.invalid'],
       [/"/, 'string', '@string'],
 
+      // A curly bracket after `=` opens a hex string, otherwise it delimits a rule body.
+      [/(=)(\s*)(\{)/, ['operator', 'white', { token: 'delimiter.curly', next: '@hexString' }]],
+      [/[{}]/, 'delimiter.curly'],
+
       [/[a-zA-Z_]\w*/, 'identifier'],
     ],
 
@@ -70,6 +74,24 @@ export const lexerRules: monaco.languages.IMonarchLanguage = {
       [/@stringEscapes/, 'string.escape'],
       [/\\./, 'string.escape.invalid'],
       [/"/, 'string', '@pop'],
+    ],
+
+    hexString: [
+      { include: '@whitespace' },
+      [/[0-9a-fA-F?]{2}/, 'number.hex'],
+      [/[~|]/, 'operator'],
+      [/[()]/, 'delimiter.parenthesis'],
+      [/\[/, 'delimiter.square', '@hexJump'],
+      [/\}/, 'delimiter.curly', '@pop'],
+      [/./, 'invalid'],
+    ],
+
+    hexJump: [
+      [/\s+/, 'white'],
+      [/\d+/, 'number'],
+      [/-/, 'operator'],
+      [/\]/, 'delimiter.square', '@pop'],
+      [/./, 'invalid'],
     ],
   },
 };

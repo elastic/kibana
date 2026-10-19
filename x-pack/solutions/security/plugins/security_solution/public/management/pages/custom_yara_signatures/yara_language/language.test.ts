@@ -176,4 +176,199 @@ describe('YARA language', () => {
       ]);
     });
   });
+
+  describe('hex strings', () => {
+    it('should tokenize a hex string', () => {
+      expect(tokenize('a = { E2 34 }')).toEqual([
+        [
+          ['a', 'identifier'],
+          [' ', 'white'],
+          ['=', 'operator'],
+          [' ', 'white'],
+          ['{', 'delimiter.curly'],
+          [' ', 'white'],
+          ['E2', 'number.hex'],
+          [' ', 'white'],
+          ['34', 'number.hex'],
+          [' ', 'white'],
+          ['}', 'delimiter.curly'],
+        ],
+      ]);
+    });
+
+    it('should tokenize contiguous bytes without whitespace around the brackets', () => {
+      expect(tokenize('={E234a1}')).toEqual([
+        [
+          ['=', 'operator'],
+          ['{', 'delimiter.curly'],
+          ['E234a1', 'number.hex'],
+          ['}', 'delimiter.curly'],
+        ],
+      ]);
+    });
+
+    it('should tokenize wildcards and not operators', () => {
+      expect(tokenize('= { ?? A? ?0 ~00 ~?F }')).toEqual([
+        [
+          ['=', 'operator'],
+          [' ', 'white'],
+          ['{', 'delimiter.curly'],
+          [' ', 'white'],
+          ['??', 'number.hex'],
+          [' ', 'white'],
+          ['A?', 'number.hex'],
+          [' ', 'white'],
+          ['?0', 'number.hex'],
+          [' ', 'white'],
+          ['~', 'operator'],
+          ['00', 'number.hex'],
+          [' ', 'white'],
+          ['~', 'operator'],
+          ['?F', 'number.hex'],
+          [' ', 'white'],
+          ['}', 'delimiter.curly'],
+        ],
+      ]);
+    });
+
+    it.each([
+      ['[4-6]', ['4', '-', '6']],
+      ['[6]', ['6']],
+      ['[10-]', ['10', '-']],
+      ['[-]', ['-']],
+    ])('should tokenize the %s jump', (jump, jumpContent) => {
+      const contentTokens = jumpContent.map(
+        (text): TokenTuple => [text, text === '-' ? 'operator' : 'number']
+      );
+
+      expect(tokenize(`={${jump}}`)).toEqual([
+        [
+          ['=', 'operator'],
+          ['{', 'delimiter.curly'],
+          ['[', 'delimiter.square'],
+          ...contentTokens,
+          [']', 'delimiter.square'],
+          ['}', 'delimiter.curly'],
+        ],
+      ]);
+    });
+
+    it('should tokenize whitespace inside a jump', () => {
+      expect(tokenize('={[ 1 - 2 ]}')).toEqual([
+        [
+          ['=', 'operator'],
+          ['{', 'delimiter.curly'],
+          ['[', 'delimiter.square'],
+          [' ', 'white'],
+          ['1', 'number'],
+          [' ', 'white'],
+          ['-', 'operator'],
+          [' ', 'white'],
+          ['2', 'number'],
+          [' ', 'white'],
+          [']', 'delimiter.square'],
+          ['}', 'delimiter.curly'],
+        ],
+      ]);
+    });
+
+    it('should tokenize alternatives', () => {
+      expect(tokenize('={F4(62B4|56)}')).toEqual([
+        [
+          ['=', 'operator'],
+          ['{', 'delimiter.curly'],
+          ['F4', 'number.hex'],
+          ['(', 'delimiter.parenthesis'],
+          ['62B4', 'number.hex'],
+          ['|', 'operator'],
+          ['56', 'number.hex'],
+          [')', 'delimiter.parenthesis'],
+          ['}', 'delimiter.curly'],
+        ],
+      ]);
+    });
+
+    it('should tokenize a hex string spanning multiple lines with comments', () => {
+      expect(tokenize('= {\n  E2 // c\n  /* c */ 34\n}')).toEqual([
+        [
+          ['=', 'operator'],
+          [' ', 'white'],
+          ['{', 'delimiter.curly'],
+        ],
+        [
+          ['  ', 'white'],
+          ['E2', 'number.hex'],
+          [' ', 'white'],
+          ['// c', 'comment'],
+        ],
+        [
+          ['  ', 'white'],
+          ['/* c */', 'comment'],
+          [' ', 'white'],
+          ['34', 'number.hex'],
+        ],
+        [['}', 'delimiter.curly']],
+      ]);
+    });
+
+    it('should mark invalid characters', () => {
+      expect(tokenize('={E2 GZ 3 "a"}')).toEqual([
+        [
+          ['=', 'operator'],
+          ['{', 'delimiter.curly'],
+          ['E2', 'number.hex'],
+          [' ', 'white'],
+          ['GZ', 'invalid'],
+          [' ', 'white'],
+          ['3', 'invalid'],
+          [' ', 'white'],
+          ['"a"', 'invalid'],
+          ['}', 'delimiter.curly'],
+        ],
+      ]);
+    });
+
+    it('should mark invalid characters inside a jump', () => {
+      expect(tokenize('={[4x]}')).toEqual([
+        [
+          ['=', 'operator'],
+          ['{', 'delimiter.curly'],
+          ['[', 'delimiter.square'],
+          ['4', 'number'],
+          ['x', 'invalid'],
+          [']', 'delimiter.square'],
+          ['}', 'delimiter.curly'],
+        ],
+      ]);
+    });
+
+    it('should return to normal tokenization after the hex string', () => {
+      expect(tokenize('={E2} a')).toEqual([
+        [
+          ['=', 'operator'],
+          ['{', 'delimiter.curly'],
+          ['E2', 'number.hex'],
+          ['}', 'delimiter.curly'],
+          [' ', 'white'],
+          ['a', 'identifier'],
+        ],
+      ]);
+    });
+
+    it('should not tokenize a rule body as a hex string', () => {
+      expect(tokenize('rule a { E2 }')).toEqual([
+        [
+          ['rule', 'identifier'],
+          [' ', 'white'],
+          ['a', 'identifier'],
+          [' ', 'white'],
+          ['{', 'delimiter.curly'],
+          [' ', 'white'],
+          ['E2', 'identifier'],
+          [' ', 'white'],
+          ['}', 'delimiter.curly'],
+        ],
+      ]);
+    });
+  });
 });
