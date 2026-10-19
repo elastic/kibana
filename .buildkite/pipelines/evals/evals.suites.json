@@ -522,6 +522,20 @@
       "serverConfigSet": "evals_detection_watch_rule_creation"
     },
     {
+      "id": "hunt-watch",
+      "name": "Hunt Watch Worker",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-hunt-watch/playwright.config.ts",
+      "tags": [
+        "security",
+        "hunt-watch"
+      ],
+      "ciLabels": [
+        "evals:hunt-watch"
+      ],
+      "serverConfigSet": "evals_hunt_watch"
+    },
+    {
       "id": "security-attack-discovery-fp-tp",
       "name": "Attack Discovery FP/TP Analysis",
       "slackChannel": "#security-generative-ai-evals",
