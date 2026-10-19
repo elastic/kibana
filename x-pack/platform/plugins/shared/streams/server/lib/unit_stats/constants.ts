@@ -27,6 +27,9 @@ export const TIMESTAMP_FIELD = '@timestamp';
 export const START_TIMESTAMP_FIELD = 'start_timestamp';
 
 export const DIRECTION_FIELD = 'attributes.direction';
+export const OUTCOME_FIELD = 'attributes.outcome';
+export const OUTCOME_SUCCESS = 'success';
+export const OUTCOME_FAILURE = 'failure';
 
 export const DESTINATION_ID_FIELD = 'attributes.streams.destination.id';
 export const DESTINATION_ITEMS_FIELD = 'metrics.streams.destination.items';
