@@ -17,8 +17,6 @@ import {
   updateRuleDataSchema,
   type RuleKind,
 } from '@kbn/alerting-v2-schemas';
-import type { RuleEventOrigin } from '../event_origin/origin_schemas';
-import { resolveRuleEventOrigin } from '../event_origin/rule_event_origin';
 import { PluginStart } from '@kbn/core-di';
 import { Request, PluginInitializer } from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -34,7 +32,8 @@ import { TaskAlreadyRunningError } from '@kbn/task-manager-plugin/server/lib/err
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import { treeifyError, type z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
-import type { RuleEbtOrigin } from '../telemetry/rule_ebt_schema';
+import { resolveRuleEventOrigin } from '../event_origin/rule_event_origin';
+import type { RuleEventOrigin } from '../event_origin/origin_schemas';
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { withApm as withApmDecorator } from '../apm/with_apm_decorator';
 import {

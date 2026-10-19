@@ -50,9 +50,7 @@ describe('resolveRuleEventOrigin', () => {
     });
 
     it('is `api` for a request with no UI headers', () => {
-      expect(
-        resolveRuleEventOrigin(createRequest({ authorization: 'ApiKey abc' }))
-      ).toEqual({
+      expect(resolveRuleEventOrigin(createRequest({ authorization: 'ApiKey abc' }))).toEqual({
         channel: 'api',
       });
     });

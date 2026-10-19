@@ -48,9 +48,9 @@ describe('ruleEventOriginSchema', () => {
   });
 
   it('rejects an app outside the bound', () => {
-    expect(
-      ruleEventOriginSchema.safeParse({ channel: 'ui', app: 'not an app' }).success
-    ).toBe(false);
+    expect(ruleEventOriginSchema.safeParse({ channel: 'ui', app: 'not an app' }).success).toBe(
+      false
+    );
   });
 });
 

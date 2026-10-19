@@ -7,11 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
-import {
-  ruleEventAppSchema,
-  type RuleEventChannel,
-  type RuleEventOrigin,
-} from './origin_schemas';
+import { ruleEventAppSchema, type RuleEventChannel, type RuleEventOrigin } from './origin_schemas';
 
 /**
  * Headers Core's `core.http.fetch` attaches to every request the Kibana browser app makes.

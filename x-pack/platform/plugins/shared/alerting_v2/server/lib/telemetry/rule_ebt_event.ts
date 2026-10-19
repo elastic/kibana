@@ -6,8 +6,8 @@
  */
 
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
-import type { RuleChangedEventOrigin } from '../event_origin/origin_schemas';
 import type { EventTypeOpts } from '@kbn/core/server';
+import type { RuleChangedEventOrigin } from '../event_origin/origin_schemas';
 import {
   RULE_CREATED_EBT_EVENT_TYPE,
   RULE_DELETED_EBT_EVENT_TYPE,
