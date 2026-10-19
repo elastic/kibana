@@ -137,4 +137,30 @@ describe('useEntitiesWithAnomaliesCount', () => {
     (useInstalledSecurityJobsIds as jest.Mock).mockReturnValue({ jobIds: [], loading: false });
     expect(pending()).toBe(false);
   });
+
+  it('stops loading and says the jobs are missing when no security job is installed', () => {
+    // The count query is disabled, which react-query reports as loading with no data.
+    (useInstalledSecurityJobsIds as jest.Mock).mockReturnValue({ jobIds: [], loading: false });
+    const { isLoading, isMissingJobs } = renderHook(() =>
+      useEntitiesWithAnomaliesCount({ spaceId: 'default' })
+    ).result.current;
+    expect(isLoading).toBe(false);
+    expect(isMissingJobs).toBe(true);
+  });
+
+  it('is not missing jobs while they load, or once one is installed', () => {
+    (useInstalledSecurityJobsIds as jest.Mock).mockReturnValue({ jobIds: [], loading: true });
+    expect(
+      renderHook(() => useEntitiesWithAnomaliesCount({ spaceId: 'default' })).result.current
+        .isMissingJobs
+    ).toBe(false);
+    (useInstalledSecurityJobsIds as jest.Mock).mockReturnValue({
+      jobIds: ['job_a'],
+      loading: false,
+    });
+    expect(
+      renderHook(() => useEntitiesWithAnomaliesCount({ spaceId: 'default' })).result.current
+        .isMissingJobs
+    ).toBe(false);
+  });
 });

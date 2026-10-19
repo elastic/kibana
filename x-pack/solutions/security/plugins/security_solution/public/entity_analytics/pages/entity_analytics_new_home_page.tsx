@@ -156,6 +156,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     count: anomaliesCount,
     entityIds: anomaliesEntityIds,
     isLoading: anomaliesLoading,
+    isMissingJobs: anomaliesMissingJobs,
     isCountPending: anomaliesPending,
   } = useEntitiesWithAnomaliesCount({
     spaceId: resolvedSpaceId,
@@ -406,6 +407,12 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         trend: anomaliesTrend,
         isTrendLoading: anomaliesTrendLoading,
         isLoading: anomaliesLoading,
+        noDataMessage: anomaliesMissingJobs
+          ? i18n.translate(
+              'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAnomalies.noJobs',
+              { defaultMessage: 'Requires anomaly detection jobs' }
+            )
+          : undefined,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAnomalies.description',
           {
@@ -586,6 +593,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
       anomaliesDeltaLoading,
       anomaliesHistoryMissing,
       anomaliesLoading,
+      anomaliesMissingJobs,
       riskMoversCount,
       riskMoversDelta,
       riskMoversTrend,

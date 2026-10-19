@@ -117,10 +117,15 @@ export const useEntitiesWithAnomaliesCount = ({
   return {
     count: queryResult?.count ?? 0,
     entityIds: isFetching ? EMPTY_ENTITY_IDS : queryResult?.entityIds ?? EMPTY_ENTITY_IDS,
-    isLoading: isJobsLoading || isIndexLoading || isLoading || isFetching,
+    // A query that can never run (skipped, no index, no job) is not loading: react-query reports a
+    // disabled query with no data as loading for ever.
+    isLoading:
+      isJobsLoading || isIndexLoading || (isEnabled && Boolean(query) && (isLoading || isFetching)),
     // True while the count is on its way, not when its query can never run (skipped, no index, no job).
     isCountPending:
       isJobsLoading || isIndexLoading || (isEnabled && Boolean(query) && (isLoading || isFetching)),
+    /** No security ML job is installed, so the tile has nothing to count. */
+    isMissingJobs: !isJobsLoading && jobIds.length === 0,
     error: filteredError ?? indexError,
   };
 };
