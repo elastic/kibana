@@ -200,6 +200,7 @@ export const AttackDiscoveryInlineContent = ({
           disableActions={true}
           markdown={summaryMarkdown}
           scopeId={ATTACK_DISCOVERY_INLINE_SCOPE_ID}
+          textSize="s"
           wrapFieldValues={true}
         />
       </div>
@@ -214,6 +215,7 @@ export const AttackDiscoveryInlineContent = ({
           disableActions={true}
           markdown={detailsMarkdown}
           scopeId={ATTACK_DISCOVERY_INLINE_SCOPE_ID}
+          textSize="s"
           wrapFieldValues={true}
         />
       </div>

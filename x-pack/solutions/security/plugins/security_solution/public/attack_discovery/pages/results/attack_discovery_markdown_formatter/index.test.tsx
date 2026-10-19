@@ -37,6 +37,26 @@ This appears to be a malware attack delivered via spearphishing, likely exploiti
     );
   });
 
+  it('renders the markdown at the xs text size by default', () => {
+    render(
+      <TestProviders>
+        <AttackDiscoveryMarkdownFormatter markdown={markdown} />
+      </TestProviders>
+    );
+
+    expect(screen.getByTestId('attackDiscoveryMarkdownFormatter').className).toContain('euiText-xs');
+  });
+
+  it('renders the markdown at the given textSize', () => {
+    render(
+      <TestProviders>
+        <AttackDiscoveryMarkdownFormatter markdown={markdown} textSize="s" />
+      </TestProviders>
+    );
+
+    expect(screen.getByTestId('attackDiscoveryMarkdownFormatter').className).toContain('euiText-s');
+  });
+
   it('renders interactive host entities', () => {
     render(
       <TestProviders>
