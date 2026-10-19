@@ -15,4 +15,10 @@ describe('evals_attack_discovery_fp_tp config set', () => {
       '--xpack.security.serviceAccounts.enabled=true'
     );
   });
+
+  it('enables the Attack Discovery workflows uiSetting so generation runs', () => {
+    expect(servers.kbnTestServer.serverArgs).toContain(
+      '--uiSettings.overrides.securitySolution:enableAttackDiscoveryWorkflows=true'
+    );
+  });
 });
