@@ -281,7 +281,7 @@ export class ProposalsService {
    * proposals sharing an action costs one `getWorkflow` rather than one each.
    */
   async list(
-    query: ListProposalsQuery,
+    query: ListProposalsQuery & InProcessProposalFilters,
     spaceId: string,
     request: KibanaRequest,
     /** Replaces the default priority sort; the queues page by recency instead. */
@@ -885,7 +885,6 @@ export class ProposalsService {
               {
                 status: 'pending',
                 excludeSuperseded: true,
-                excludeUndecidedSuperseded: false,
                 // Past its deadline a proposal awaits no decision, even before the gate settles it.
                 excludeExpired: true,
               },
@@ -897,6 +896,27 @@ export class ProposalsService {
       },
       aggs: {
         by_conversation: { terms: { field: 'conversationId', size: ids.length } },
+      },
+    });
+    const buckets = response.aggregations?.by_conversation.buckets ?? [];
+    return new Map(buckets.map(({ key, doc_count: count }) => [String(key), count]));
+  }
+
+  /**
+   * Proposals matching the filters per conversation, in one aggregation. Conversations without
+   * any are absent from the map.
+   */
+  async countByConversation(
+    filters: ProposalFilters & { decidedWithinHours?: number } & InProcessProposalFilters,
+    spaceId: string,
+    size: number
+  ): Promise<Map<string, number>> {
+    const response = await this.deps.storage.search({
+      track_total_hits: false,
+      size: 0,
+      query: { bool: { filter: toFilterClauses(filters, spaceId) } },
+      aggs: {
+        by_conversation: { terms: { field: 'conversationId', size } },
       },
     });
     const buckets = response.aggregations?.by_conversation.buckets ?? [];
@@ -1375,12 +1395,21 @@ export interface ReviseProposalParams extends ReviseProposalRequest {
 
 type QueryFilterList = Array<Record<string, unknown>>;
 
+/** Filters only in-process callers may use; none is part of the HTTP list contract. */
+export interface InProcessProposalFilters {
+  categories?: string[];
+  conversationIds?: string[];
+}
+
 /**
  * Translates the shared filter vocabulary once, so every read applies it
  * identically. The space term is always present: no read crosses a space.
  */
 const toFilterClauses = (
-  filters: ProposalFilters & { category?: string; decidedWithinHours?: number },
+  filters: ProposalFilters & {
+    category?: string;
+    decidedWithinHours?: number;
+  } & InProcessProposalFilters,
   spaceId: string
 ): QueryFilterList => {
   const filter: QueryFilterList = [{ term: { spaceId } }];
@@ -1400,6 +1429,12 @@ const toFilterClauses = (
   if (filters.category) {
     filter.push({ term: { category: filters.category } });
   }
+  if (filters.categories) {
+    filter.push({ terms: { category: filters.categories } });
+  }
+  if (filters.conversationIds) {
+    filter.push({ terms: { conversationId: filters.conversationIds } });
+  }
   if (filters.decidedWithinHours !== undefined) {
     filter.push({ range: { decidedAt: { gte: `now-${filters.decidedWithinHours}h` } } });
   }
@@ -1407,18 +1442,6 @@ const toFilterClauses = (
     // A superseded proposal is represented by its successor, so showing both
     // would put every retry of the same subject in the queue.
     filter.push({ bool: { must_not: { exists: { field: 'supersededBy' } } } });
-  }
-  if (filters.excludeUndecidedSuperseded) {
-    filter.push({
-      bool: {
-        must_not: {
-          bool: {
-            filter: [{ exists: { field: 'supersededBy' } }],
-            must_not: [{ exists: { field: 'decision' } }],
-          },
-        },
-      },
-    });
   }
   if (filters.excludeExpired) {
     // A proposal with no deadline never expires, so it has to survive the
