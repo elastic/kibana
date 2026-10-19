@@ -16,7 +16,7 @@ import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import { getErrorMessage, type RiskScoreDistribution } from '../../common';
 import { TasksConfig } from './config';
 import { EntityStoreTaskType } from './constants';
-import { createAssetManagerClient } from './factories';
+import { createAssetManagerClient, createLogsExtractionClient } from './factories';
 import type { EntityStoreCoreSetup } from '../types';
 import type { EntityType } from '../../common/domain/definitions/entity_schema';
 import { ALL_ENTITY_TYPES } from '../../common/domain/definitions/entity_schema';
@@ -32,6 +32,7 @@ import {
   ENTITY_STORE_RESOLUTION_RULES_STATE_EVENT,
   ENTITY_STORE_SOURCE_STATE_EVENT,
   ENTITY_STORE_ENTITY_METADATA_EVENT,
+  ENTITY_STORE_LOG_COVERAGE_EVENT,
   ENTITY_STORE_RESOLUTION_STATE_EVENT,
   ENTITY_STORE_USAGE_EVENT,
   createReportEvent,
@@ -42,6 +43,7 @@ import { executeEsqlQuery } from '../infra/elasticsearch/esql';
 import { wrapTaskRun } from '../telemetry/traces';
 import { shouldDeleteOrphanedEntityStoreTask } from './should_delete_orphaned_task';
 import { TASK_DEADLINE_MS } from './status_report/collection';
+import { collectLogCoverage, DEFAULT_LOG_COVERAGE_TARGET_DOCS } from './status_report/log_coverage';
 import { collectEntityMetadata, getFleetPackageNames } from './status_report/entity_metadata';
 import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from './execution_context';
 
@@ -511,8 +513,9 @@ async function runTask({
   }
 
   // Report status
+  let statusResult: GetStatusResult | undefined;
   try {
-    const statusResult = await assetManagerClient.getStatus(true);
+    statusResult = await assetManagerClient.getStatus(true);
     telemetryReporter.reportEvent(ENTITY_STORE_HEALTH_REPORT_EVENT, {
       namespace,
       ...toHealthReportPayload(statusResult),
@@ -522,11 +525,47 @@ async function runTask({
     errors.push(getErrorMessage(e));
   }
 
+  // Last step: sampled log probe. It never throws and always reports an outcome.
+  const targetDocs =
+    typeof taskInstance.state.logCoverageTargetDocs === 'number'
+      ? taskInstance.state.logCoverageTargetDocs
+      : DEFAULT_LOG_COVERAGE_TARGET_DOCS;
+  const userExtractionConfig =
+    statusResult && 'logsExtractionConfigByType' in statusResult
+      ? statusResult.logsExtractionConfigByType.user
+      : undefined;
+  const logCoverage = await collectLogCoverage({
+    esClient,
+    logger,
+    getIndexPatterns: async () => {
+      const { logsExtractionClient } = await createLogsExtractionClient({
+        core,
+        fakeRequest,
+        logger,
+        namespace,
+        isServerless: false,
+      });
+      return logsExtractionClient.getLocalIndexPatterns(
+        userExtractionConfig?.additionalIndexPatterns,
+        userExtractionConfig?.excludedIndexPatterns
+      );
+    },
+    excludedUserNames:
+      statusResult && 'excludedUserNames' in statusResult ? statusResult.excludedUserNames : [],
+    targetDocs,
+    signal,
+    deadline: taskDeadline,
+  });
+  telemetryReporter.reportEvent(ENTITY_STORE_LOG_COVERAGE_EVENT, {
+    namespace,
+    ...logCoverage.event,
+  });
+
   if (errors.length > 0) {
     throw new Error(errors.join(', '));
   }
 
-  return { state: { namespace } };
+  return { state: { namespace, logCoverageTargetDocs: logCoverage.nextTargetDocs } };
 }
 
 export function registerStatusReportTask({
@@ -548,9 +587,14 @@ export function registerStatusReportTask({
           1: {
             up: (state: Record<string, unknown>) => ({
               namespace: typeof state.namespace === 'string' ? state.namespace : 'default',
+              logCoverageTargetDocs:
+                typeof state.logCoverageTargetDocs === 'number'
+                  ? state.logCoverageTargetDocs
+                  : undefined,
             }),
             schema: schema.object({
               namespace: schema.string(),
+              logCoverageTargetDocs: schema.maybe(schema.number()),
             }),
           },
         },
