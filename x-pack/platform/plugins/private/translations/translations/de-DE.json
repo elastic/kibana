@@ -37929,7 +37929,6 @@
     "xpack.profiling.storageExplorer.summary.totalData.hint": "Gesamtspeichergröße aller Universal Profiling-Indizes einschließlich Replikate, ohne Berücksichtigung der Filtereinstellungen.",
     "xpack.profiling.storageExplorer.summary.totalDebugSymbolsSize": "Gesamtgröße der Debug-Symbole",
     "xpack.profiling.storageExplorer.summary.totalDebugSymbolsSize.hint": "Die Gesamtsumme der privaten und öffentlichen Debug-Symbole.",
-    "xpack.profiling.storageExplorer.summary.universalProfilingLink": "Gehen Sie zum Universellen Profiling",
     "xpack.profiling.storageExplorer.tabs.dataBreakdown": "Datenaufschlüsselung",
     "xpack.profiling.storageExplorer.tabs.hostBreakdown": "Aufschlüsselung des Host-Agenten",
     "xpack.profiling.storageExplorer.title": "Speicher-Explorer",

@@ -62,7 +62,7 @@ export const useBackNavigation = (): AppHeaderBack | undefined => {
       qs.stringifyUrl({ url: '/app/profiling', query: schema ? { schema } : {} })
     ),
     label: i18n.translate('xpack.profiling.header.backTargetLabel', {
-      defaultMessage: 'Universal Profiling',
+      defaultMessage: 'Profiling',
     }),
   };
 };

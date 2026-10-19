@@ -39,7 +39,7 @@ const dependencies = {
 // The only back target the hook ever returns: the plugin root, labelled with the app name.
 const pluginRootTarget: AppHeaderBack = {
   href: '/base/app/profiling',
-  label: 'Universal Profiling',
+  label: 'Profiling',
 };
 
 const CONTENT_ROUTES = ['/stacktraces/threads', '/flamegraphs/flamegraph', '/functions/topn', '/'];
