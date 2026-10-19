@@ -298,6 +298,15 @@ export class UnifiedTabsPageObject extends FtrService {
     await this.retry.waitFor('the tabs bar menu to open', async () => {
       return await this.testSubjects.exists('unifiedTabs_tabsBarMenuPanel');
     });
+
+    const recentlyClosedBackButton =
+      '[data-test-subj="unifiedTabs_tabsMenu_recentlyClosedContextMenu"] [data-test-subj="contextMenuPanelTitleButton"]';
+    if (await this.find.existsByCssSelector(recentlyClosedBackButton)) {
+      await (await this.find.byCssSelector(recentlyClosedBackButton)).click();
+      await this.retry.waitFor('the recently closed root menu to open', async () => {
+        return !(await this.find.existsByCssSelector(recentlyClosedBackButton));
+      });
+    }
   }
 
   public async closeTabsBarMenu() {
@@ -341,12 +350,11 @@ export class UnifiedTabsPageObject extends FtrService {
   public async restoreRecentlyClosedTab(index: number) {
     const currentNumberOfTabs = await this.getNumberOfTabs();
     await this.openTabsBarMenu();
-    const recentlyClosedItems = await this.getRecentlyClosedTabItems();
-    this.assertRecentlyClosedIndexInBounds(
-      index,
-      recentlyClosedItems.length,
-      'Recently closed tab'
-    );
+    const recentlyClosedItems = await this.retry.try(async () => {
+      const items = await this.getRecentlyClosedTabItems();
+      this.assertRecentlyClosedIndexInBounds(index, items.length, 'Recently closed tab');
+      return items;
+    });
     await recentlyClosedItems[index].click();
     await this.waitForTabCountIncrease(currentNumberOfTabs, 1, 'the tab to be restored');
   }
@@ -449,8 +457,17 @@ export class UnifiedTabsPageObject extends FtrService {
   }
 
   private async openRecentlyClosedGroup(groupIndex: number): Promise<void> {
-    const groupItems = await this.getRecentlyClosedGroupItems();
-    this.assertRecentlyClosedIndexInBounds(groupIndex, groupItems.length, 'Recently closed group');
+    if (
+      groupIndex === 0 &&
+      (await this.testSubjects.exists('unifiedTabs_tabsMenu_restoreAllTabs'))
+    ) {
+      return;
+    }
+    const groupItems = await this.retry.try(async () => {
+      const items = await this.getRecentlyClosedGroupItems();
+      this.assertRecentlyClosedIndexInBounds(groupIndex, items.length, 'Recently closed group');
+      return items;
+    });
 
     await groupItems[groupIndex].click();
     await this.retry.waitFor('group items to be visible', async () => {

@@ -8,6 +8,7 @@
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { ML_NOTIFICATION_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import type { JobMessage } from '../../../common/types/audit_message';
+import type { MLSavedObjectService } from '../../saved_objects';
 
 const SIZE = 50;
 
@@ -24,7 +25,10 @@ interface BoolQuery {
   bool: { [key: string]: any };
 }
 
-export function analyticsAuditMessagesProvider({ asInternalUser }: IScopedClusterClient) {
+export function analyticsAuditMessagesProvider(
+  { asInternalUser }: IScopedClusterClient,
+  mlSavedObjectService: MLSavedObjectService
+) {
   // search for audit messages,
   // analyticsId is optional. without it, all analytics will be listed.
   async function getAnalyticsAuditMessages(analyticsId: string) {
@@ -85,7 +89,11 @@ export function analyticsAuditMessagesProvider({ asInternalUser }: IScopedCluste
       messages = (body.hits.hits as Message[]).map((hit) => hit._source);
       messages.reverse();
     }
-    return messages;
+    return mlSavedObjectService.filterJobsForSpace<JobMessage>(
+      'data-frame-analytics',
+      messages,
+      'job_id'
+    );
   }
 
   return {
