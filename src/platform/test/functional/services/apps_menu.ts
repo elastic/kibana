@@ -57,10 +57,11 @@ export class AppsMenuService extends FtrService {
   }
 
   public async openCollapsibleNav() {
-    if (!(await this.testSubjects.exists('collapsibleNav'))) {
+    // The nav flyout only exists while open, so the toggle's own state is the reliable signal here
+    if ((await this.testSubjects.getAttribute('toggleNavButton', 'aria-expanded')) !== 'true') {
       await this.testSubjects.click('toggleNavButton');
     }
-    await this.testSubjects.exists('collapsibleNav');
+    await this.testSubjects.existOrFail('collapsibleNav', { timeout: this.defaultFindTimeout });
   }
 
   /**

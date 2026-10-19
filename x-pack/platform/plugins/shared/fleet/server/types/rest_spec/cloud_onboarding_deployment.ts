@@ -26,6 +26,19 @@ const EcfStackSchema = schema.object({
     maxLength: 32,
     meta: { description: 'ECF semantic version resolved at launch time, e.g. "1.10.0".' },
   }),
+  stackArn: schema.maybe(
+    schema.string({
+      minLength: 1,
+      maxLength: 2048,
+      meta: { description: 'CloudFormation stack ARN pasted by the user post-launch.' },
+    })
+  ),
+  serviceIds: schema.maybe(
+    schema.arrayOf(schema.string({ minLength: 1, maxLength: 128 }), {
+      maxSize: 1000,
+      meta: { description: 'Service IDs active when the stack was last launched or updated.' },
+    })
+  ),
 });
 
 const CloudOnboardingDeploymentProviderSchema = schema.oneOf(

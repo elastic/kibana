@@ -19,6 +19,7 @@ export const escalationTemplate: ConversationTemplate = {
       default_value: 'open',
       required: true,
       options: ['open', 'closed'],
+      report_changes: true,
     },
     severity: {
       input_type: 'SELECT',
@@ -53,6 +54,7 @@ export const escalationTemplate: ConversationTemplate = {
       description: 'Reason the escalation was closed.',
       required: false,
       options: ['false_positive', 'benign', 'resolved', 'duplicate', 'other'],
+      report_changes: true,
     },
     linked_investigations: {
       input_type: 'TEXT_ARRAY',

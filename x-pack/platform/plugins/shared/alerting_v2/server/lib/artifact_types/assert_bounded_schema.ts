@@ -10,7 +10,7 @@ import {
   MAX_ARTIFACT_DATA_BYTES,
   MAX_ARTIFACT_STRING_LENGTH,
 } from '@kbn/alerting-v2-constants';
-import { z } from '@kbn/zod/v4';
+import { normalizeJsonSchemaTypeArrays, z } from '@kbn/zod/v4';
 
 type JsonSchemaNode = Record<string, unknown>;
 
@@ -26,19 +26,36 @@ type JsonSchemaNode = Record<string, unknown>;
  */
 export function assertBoundedSchema(dataSchema: z.ZodType, typeName: string): void {
   let json: JsonSchemaNode;
+  let usesIntersection = false;
   try {
     // `input` io bounds what a client may send, and is the only mode that tells a
     // stripping `z.object()` (no `additionalProperties`) apart from a closed
     // `.strict()` one (`additionalProperties: false`). Under `output` io both emit
     // `false`, so a stripping object would register while silently accepting — and
     // persisting, since the raw `data` is stored — undeclared fields.
-    json = z.toJSONSchema(dataSchema, { io: 'input' }) as JsonSchemaNode;
+    json = z.toJSONSchema(dataSchema, {
+      io: 'input',
+      // zod >= 4.5 folds intersections into a single object instead of emitting `allOf`.
+      override: ({ zodSchema }) => {
+        if (zodSchema._zod.def.type === 'intersection') {
+          usesIntersection = true;
+        }
+      },
+    }) as JsonSchemaNode;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     throw new Error(
       `Artifact type "${typeName}" dataSchema cannot be converted to JSON Schema: ${message}`
     );
   }
+
+  if (usesIntersection) {
+    throw new Error(
+      `Artifact type "${typeName}" dataSchema uses allOf/not; supported constructs are strict objects, bounded strings/arrays, numbers, booleans, enums/literals, and unions`
+    );
+  }
+
+  json = normalizeJsonSchemaTypeArrays(json) as JsonSchemaNode;
 
   const worstCaseBytes = assertBoundedNode(json, 'data', typeName, new Set());
   if (worstCaseBytes > MAX_ARTIFACT_DATA_BYTES) {

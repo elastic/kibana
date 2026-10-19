@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { ConversationsStart } from '@kbn/agent-builder-server';
+import type { AttachmentsStart, ConversationsStart } from '@kbn/agent-builder-server';
 import type { AlertZeroRouter, AlertZeroSpaceIdResolver } from '../types';
 import type { WatchesService } from '../services/watches/watches_service';
 import type { WorkersService } from '../services/workers/workers_service';
@@ -35,6 +35,7 @@ export interface RouteDependencies {
   getConversationProposalsService: () => ConversationProposalsService;
   getActionsService: () => ActionsService;
   getAgentBuilderConversations: () => ConversationsStart;
+  getAgentBuilderAttachments: () => AttachmentsStart;
   getHuntServices: () => HuntServices;
   getScanFailuresService: () => ScanFailuresService;
   getThreatIntelSupplyService: () => ThreatIntelSupplyService | undefined;

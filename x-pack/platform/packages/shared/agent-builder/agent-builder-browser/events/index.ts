@@ -11,3 +11,5 @@ export type {
   ChatUiEventsContract,
   ActiveConversation,
 } from './contract';
+export { filterApiStateChanges } from './filter_api_state_changes';
+export type { ApiStateChangesOptions } from './filter_api_state_changes';
