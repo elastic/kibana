@@ -8,6 +8,7 @@ toc:
       - file: add-data.md
       - file: running-elasticsearch.md
       - file: wsl-on-windows-development.md
+      - file: jetbrains-ide-setup.md
       - file: local-cross-cluster-search-setup.md
       - file: troubleshooting.md
   - folder: contributing
