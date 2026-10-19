@@ -736,6 +736,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
   apiTest(
     'uses the configured time_field for the lookback range filter',
     async ({ apiServices }) => {
+      apiTest.setTimeout(SLOW_EXECUTIONS_TEST_TIMEOUT_MS);
       // Two docs whose `@timestamp` is fresh but whose `event.created` differs:
       //   - host-time-field-in:  event.created within the 1m lookback
       //   - host-time-field-out: event.created 5m ago, outside the lookback
@@ -780,6 +781,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
       await apiServices.alertingV2.ruleRunner.waitForExecutions({
         ruleId: rule.id,
         runs: 2,
+        timeoutMs: SLOW_EXECUTIONS_TIMEOUT_MS,
       });
 
       const breachEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
@@ -890,6 +892,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
   apiTest(
     'does not emit recovery events for kind: "signal" rules when previously matching groups stop matching',
     async ({ apiServices }) => {
+      apiTest.setTimeout(SLOW_EXECUTIONS_TEST_TIMEOUT_MS);
       await apiServices.alertingV2.sourceIndex.indexDocs({
         index: SOURCE_INDEX,
         docs: [
@@ -927,6 +930,7 @@ apiTest.describe('Rule executor', { tag: testData.API_ENGINE_TAG }, () => {
       await apiServices.alertingV2.ruleRunner.waitForExecutions({
         ruleId: rule.id,
         runs: 2,
+        timeoutMs: SLOW_EXECUTIONS_TIMEOUT_MS,
       });
 
       const recoveredEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {

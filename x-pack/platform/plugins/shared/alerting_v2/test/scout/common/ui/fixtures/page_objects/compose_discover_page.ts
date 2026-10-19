@@ -183,7 +183,9 @@ export class ComposeDiscoverPage {
    * alert condition); the heuristic split runs on Apply.
    */
   async setSandboxQuery(query: string) {
-    await this.codeEditor.setCodeEditorValue(query, 0);
+    // Route through the test-subj variant so it waits for the Monaco model to mount;
+    // the global-index setter throws "No Monaco editor models found" when called too early.
+    await this.codeEditor.setCodeEditorValueByTestSubj('kibanaCodeEditor', query);
   }
 
   /**

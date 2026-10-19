@@ -117,10 +117,13 @@ test.describe('Execution history — smoke', { tag: testData.UI_TAG }, () => {
       await executionHistory.openActionPoliciesTab();
       await executionHistory.search(policyName);
 
-      const row = executionHistory.policyRow(policyName);
-      await expect(row).toBeVisible({ timeout: POLL_TIMEOUT_MS });
-      await expect(row).toContainText('Dispatched');
-      await expect(row).toContainText(ruleName);
+      // The policy can dispatch more than once under load, so assert at least one row shows the
+      // dispatched outcome for this rule rather than pinning to a single row.
+      const dispatchedRows = executionHistory
+        .policyRows(policyName)
+        .filter({ hasText: 'Dispatched' })
+        .filter({ hasText: ruleName });
+      await expect(dispatchedRows).not.toHaveCount(0, { timeout: POLL_TIMEOUT_MS });
     });
 
     await test.step('policy name opens the details flyout', async () => {

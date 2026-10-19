@@ -27,6 +27,14 @@ const { POLL_INTERVAL_MS, POLL_TIMEOUT_MS } = testData;
 const TIMEFRAME_RUN_INTERVAL_MS = 5_000;
 
 /**
+ * A rule driven through the full pending → active → recovering → inactive
+ * lifecycle chains four sequential `waitForEvents`, each polling up to
+ * `POLL_TIMEOUT_MS`, so it needs a test budget well above the 60s default to
+ * stay off the edge under CI load.
+ */
+const LIFECYCLE_TEST_TIMEOUT_MS = 180_000;
+
+/**
  * Integration tests for the alerting_v2 director component.
  *
  * The director runs after the executor has produced a batch of breach/recovery
@@ -135,6 +143,7 @@ apiTest.describe('Director', { tag: testData.API_ENGINE_TAG }, () => {
   apiTest(
     'preserves the same episode id across pending -> active -> recovering -> inactive',
     async ({ apiServices }) => {
+      apiTest.setTimeout(LIFECYCLE_TEST_TIMEOUT_MS);
       await apiServices.alertingV2.sourceIndex.indexDocs({
         index: SOURCE_INDEX,
         docs: [

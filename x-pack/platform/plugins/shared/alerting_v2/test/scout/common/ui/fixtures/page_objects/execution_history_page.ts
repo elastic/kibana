@@ -52,11 +52,18 @@ export class ExecutionHistoryPage {
     await this.searchBar.fill(value);
   }
 
-  policyRow(policyName: string): Locator {
+  /** Every execution-history grid row for the policy. A policy may dispatch more than once. */
+  policyRows(policyName: string): Locator {
     return this.policiesTable.getByRole('row', { name: policyName });
   }
 
   async openPolicyDetails(policyName: string) {
-    await this.policyRow(policyName).getByRole('button', { name: policyName }).click();
+    // A policy can have multiple execution rows; open the details from the top grid row so the
+    // policy-link match stays unambiguous under strict mode. The `[data-test-subj="dataGridRowCell"]`
+    // prefix keeps this raw locator within the Playwright lint allow-list.
+    await this.policiesTable
+      .locator('[data-test-subj="dataGridRowCell"][data-gridcell-visible-row-index="0"]')
+      .getByRole('button', { name: policyName })
+      .click();
   }
 }

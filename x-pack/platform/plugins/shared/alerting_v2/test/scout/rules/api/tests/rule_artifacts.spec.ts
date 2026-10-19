@@ -238,6 +238,10 @@ apiTest.describe('Rule artifacts API', { tag: testData.API_ENGINE_NON_MKI_TAG },
           artifacts: [dashboard('pre-import-id')],
         })
       );
+
+      await apiServices.alertingV2.ruleRunner.waitForExecutions({ ruleId: created.id, runs: 1 });
+      await apiServices.alertingV2.ruleExecutorTask.waitForTaskDrained({ ruleId: created.id });
+
       await apiServices.alertingV2.ruleSavedObject.setReferences(created.id, [
         dashboardReference('post-import-id'),
       ]);
