@@ -76,11 +76,11 @@ pivot:
   # highlight:
   #   - ">highlight"
 
-  # Area definitions with labels. The list follows elastic/kibana-release-notes (src/config/templates/common.ts);
+  # Area definitions with labels. The list follows elastic/kibana-release-notes (src/config/templates/common.ts),
+  # with the changes from the review of elastic/kibana#298799: Logstash and Beats labels sit under
+  # Data ingestion and Fleet, and there is no Maps or QA area.
   # Security and Observability PRs get no area, the solution release notes group them.
   areas:
-    'Logstash':
-      - 'Feature:Logstash Pipelines'
     'Agent Builder':
       - 'Team:agent-builder'
       - 'feature:agent-builder'
@@ -98,12 +98,9 @@ pivot:
     # Not GA yet: rules.bundle drops this area from every bundle until it is.
     'Context Engine':
       - 'Team:context'
-    'Maps':
-      - 'Team:Geo'
-    'QA':
-      - 'Team:QA'
     'Connectivity':
       - 'Feature:Actions/ConnectorTypes'
+      - 'connectors-v2'
     'Dashboards and Visualizations':
       - 'Feature:Dashboard'
       - 'Feature:Drilldowns'
@@ -155,9 +152,6 @@ pivot:
       - 'Feature:Reporting:CSV'
       - 'Feature:Reporting:Framework'
       - 'Feature:Reporting:Screenshot'
-    'Beats Management':
-      - 'Feature:beats-cm'
-      - 'Team:Beats'
     'Alerting':
       - 'Feature:Alerting'
       - 'Feature:Actions'
@@ -169,6 +163,9 @@ pivot:
       - 'Team:Fleet'
       - 'Feature:Fleet'
       - 'Feature:Ingest Node Pipelines'
+      - 'Feature:Logstash Pipelines'
+      - 'Feature:beats-cm'
+      - 'Team:Beats'
     'Data management':
       - 'Feature:Data Views'
       - 'Feature:Index Management'
