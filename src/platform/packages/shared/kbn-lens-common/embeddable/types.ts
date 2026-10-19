@@ -384,7 +384,7 @@ export type LensInternalApi = Simplify<
     PublishesDataViews &
     VisualizationContextHelper & {
       esqlVariables$: PublishingSubject<ESQLControlVariable[]>;
-      loadError?: Error;
+      loadError$: PublishingSubject<Error | undefined>;
       attributes$: PublishingSubject<LensRuntimeState['attributes']>;
       overrides$: PublishingSubject<LensOverrides['overrides']>;
       disableTriggers$: PublishingSubject<boolean>;
@@ -408,6 +408,7 @@ export type LensInternalApi = Simplify<
       updateValidationMessages: (newMessages: UserMessage[]) => void;
       blockingError$: PublishingSubject<Error | undefined>;
       updateBlockingError: (newBlockingError: Error | undefined) => void;
+      updateLoadError: (newLoadError: Error | undefined) => void;
       getDisplayOptions: () => VisualizationDisplayOptions;
       updateEditingState: (inProgress: boolean) => void;
       isEditingInProgress: () => boolean;

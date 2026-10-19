@@ -140,12 +140,9 @@ export function buildUserMessagesHelpers(
     const userMessages: UserMessage[] = [];
 
     // The document could not be loaded, so any other message would be about the empty fallback
-    if (internalApi.loadError) {
-      return filterAndSortUserMessages(
-        [getLoadErrorMessage(internalApi.loadError)],
-        locationId,
-        filters ?? {}
-      );
+    const loadError = internalApi.loadError$.getValue();
+    if (loadError) {
+      return filterAndSortUserMessages([getLoadErrorMessage(loadError)], locationId, filters ?? {});
     }
 
     userMessages.push(
