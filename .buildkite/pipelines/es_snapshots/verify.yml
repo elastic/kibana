@@ -87,6 +87,7 @@ steps:
     depends_on:
       - ftr-configs
       - jest-integration
+      - scout_test_lanes
 
   - wait: ~
     continue_on_failure: true
