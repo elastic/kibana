@@ -6,22 +6,7 @@
  */
 
 import { awsOnboardingProvider } from '../providers/aws/provider_definition';
-
-export interface OnboardingProviderMeta {
-  title: string;
-  description: string;
-  icon: string;
-}
-
-/**
- * Static per-provider configuration the onboarding shell renders from. Not to be confused with
- * `AwsProviderAdapter`, which describes a provider's runtime flow state.
- */
-export interface OnboardingProviderDefinition {
-  /** Matches the `:integrationId` route segment. */
-  id: string;
-  meta: OnboardingProviderMeta;
-}
+import type { OnboardingProviderDefinition } from './provider_types';
 
 const ONBOARDING_PROVIDERS = new Map<string, OnboardingProviderDefinition>(
   [awsOnboardingProvider].map((provider) => [provider.id, provider])

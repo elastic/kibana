@@ -9,7 +9,7 @@ import {
   AWS_ONBOARDING_TITLE,
   AWS_ONBOARDING_DESCRIPTION,
 } from '../../../../common/providers/aws/constants';
-import type { OnboardingProviderDefinition } from '../../core/provider_registry';
+import type { OnboardingProviderDefinition } from '../../core/provider_types';
 
 export const awsOnboardingProvider: OnboardingProviderDefinition = {
   id: 'aws',
