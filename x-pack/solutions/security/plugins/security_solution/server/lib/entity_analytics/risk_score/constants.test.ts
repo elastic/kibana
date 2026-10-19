@@ -9,7 +9,7 @@ import { DEFAULT_ALERT_SAMPLE_SIZE, RIEMANN_ZETA_VALUE } from './constants';
 
 describe('risk scoring constants', () => {
   it('normalizes by the zeta partial sum over the default alert sample size', () => {
-    expect(DEFAULT_ALERT_SAMPLE_SIZE).toBe(100);
-    expect(RIEMANN_ZETA_VALUE).toBeCloseTo(2.412874098703719, 12);
+    expect(DEFAULT_ALERT_SAMPLE_SIZE).toBe(500);
+    expect(RIEMANN_ZETA_VALUE).toBeCloseTo(2.522977328584379, 12);
   });
 });

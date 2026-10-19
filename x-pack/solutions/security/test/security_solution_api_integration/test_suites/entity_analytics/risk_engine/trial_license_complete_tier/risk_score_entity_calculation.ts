@@ -119,8 +119,8 @@ export default ({ getService }: FtrProviderContext): void => {
         const expectedScore = {
           calculated_level: 'Unknown',
           calculated_score: 21,
-          calculated_score_norm: 8.7033136173,
-          category_1_score: 8.7033136173,
+          calculated_score_norm: 8.3234992887,
+          category_1_score: 8.3234992887,
           category_1_count: 1,
           id_field: 'host.name',
           id_value: 'host-1',
@@ -172,8 +172,8 @@ export default ({ getService }: FtrProviderContext): void => {
             criticality_modifier: 1.5,
             calculated_level: 'Unknown',
             calculated_score: 21,
-            calculated_score_norm: 12.5105540488,
-            category_1_score: 8.7033136173,
+            calculated_score_norm: 11.986404775,
+            category_1_score: 8.3234992887,
             category_1_count: 1,
             id_field: 'host.name',
             id_value: 'host-1',
@@ -184,7 +184,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 metadata: {
                   criticality_level: 'high_impact',
                 },
-                contribution: 3.8072404316,
+                contribution: 3.6629054863,
               },
             ],
           };
@@ -226,8 +226,8 @@ export default ({ getService }: FtrProviderContext): void => {
           const expectedScore = {
             calculated_level: 'Unknown',
             calculated_score: 21,
-            calculated_score_norm: 8.7033136173,
-            category_1_score: 8.7033136173,
+            calculated_score_norm: 8.3234992887,
+            category_1_score: 8.3234992887,
             category_1_count: 1,
             id_field: 'host.name',
             id_value: 'host-1',

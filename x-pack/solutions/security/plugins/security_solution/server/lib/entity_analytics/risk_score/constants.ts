@@ -17,11 +17,11 @@ export const RIEMANN_ZETA_S_VALUE = 1.5;
 /**
  * Default number of an entity's highest-scoring alerts that feed its risk score
  * (`alertSampleSizePerShard`). Alerts past this many add almost nothing to the score: with every
- * alert at 100, the 100 highest already reach about 93% of the 10,000-alert total. The scoring
+ * alert at 100, the 500 highest already reach about 97% of the 10,000-alert total. The scoring
  * query reserves memory for this many values per entity up front, whatever the entity's alert
  * count, so a large sample size costs memory on every page.
  */
-export const DEFAULT_ALERT_SAMPLE_SIZE = 100;
+export const DEFAULT_ALERT_SAMPLE_SIZE = 500;
 
 const partialZetaSum = (s: number, terms: number): number => {
   let sum = 0;
@@ -37,13 +37,14 @@ const partialZetaSum = (s: number, terms: number): number => {
  * so normalization maps an entity whose sampled alerts all score 100 to a normalized score of 100.
  *
  * It's derived from RIEMANN_ZETA_S_VALUE and DEFAULT_ALERT_SAMPLE_SIZE so the two can't drift apart. It was 2.5924 while
- * the default sample size was 10,000; moving to 100 raised every normalized score by about 7.4%.
+ * the default sample size was 10,000; moving to 500 raised every normalized score by about 2.8%.
  *
  * The Riemann Zeta value for different number of inputs is:
  * | 𝑍(s,inputs)  |
  * | :---------------------------------------|
  * | 𝑍(1.5,10)≈1.9953364933456017            |
  * | 𝑍(1.5,100)≈2.412874098703719            |
+ * | 𝑍(1.5,500)≈2.522977328584379            |
  * | 𝑍(1.5,1000)≈2.5491456029175756          |
  * | 𝑍(1.5,10_000)≈2.5923758486729866        |
  * | 𝑍(1.5,100_000)≈2.6060508091764736       |
