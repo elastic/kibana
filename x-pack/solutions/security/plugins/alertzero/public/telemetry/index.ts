@@ -8,7 +8,6 @@
 export { ALERTZERO_UI_EVENTS } from './constants';
 export type { QueueFilterType, UiErrorClass, UiErrorSurface } from './constants';
 export { classifyError } from './classify_error';
-export { registerAlertZeroUiEvents } from './register_ui_events';
 export { useAlertZeroTelemetry } from './use_alertzero_telemetry';
 export type { ReportAlertZeroUiEvent } from './use_alertzero_telemetry';
 export { useReportErrorShown } from './use_report_error_shown';

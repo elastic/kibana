@@ -8,7 +8,7 @@
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
 import { ALERTZERO_UI_EVENT_TYPES } from './events';
 
-/** Registers the AlertZero browser event types; called once in `setup()`. */
+/** Registers the AlertZero browser event types; called once, when the app first mounts. */
 export const registerAlertZeroUiEvents = (
   analytics: Pick<AnalyticsServiceSetup, 'registerEventType'>
 ): void => {

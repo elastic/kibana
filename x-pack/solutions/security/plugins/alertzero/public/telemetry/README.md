@@ -2,7 +2,7 @@
 
 Event-Based Telemetry (EBT) events the `alertzero` public plugin reports from the browser. They go through core analytics, so a deployment that has turned telemetry off sends nothing. The server events are in the [server telemetry README](../../server/telemetry/README.md).
 
-The four events are registered in `setup()` inside the `xpack.alertzero.enabled` guard (`registerAlertZeroUiEvents`), and reported through `useAlertZeroTelemetry()`, which reads `analytics` from the Kibana context and never throws. Names follow the RFC's naming Option B, `<plugin>_<object>_<verb>`: the epic's `alertzero.ui.*` events become `alertzero_ui_*`. The epic's fifth browser event, `flyout_interaction`, belongs to the Investigation flyout, which Agentic Investigations owns, so it is built there.
+The four events are registered when the app first mounts (`registerAlertZeroUiEvents`, loaded with the app), so their schemas stay out of the page-load bundle; the app exists only inside the `xpack.alertzero.enabled` guard. Every event is reported from inside the app. They are reported through `useAlertZeroTelemetry()`, which reads `analytics` from the Kibana context and never throws. Names follow the RFC's naming Option B, `<plugin>_<object>_<verb>`: the epic's `alertzero.ui.*` events become `alertzero_ui_*`. The epic's fifth browser event, `flyout_interaction`, belongs to the Investigation flyout, which Agentic Investigations owns, so it is built there.
 
 ## Rules
 
