@@ -171,7 +171,7 @@ export const targetAttributes: {
       if (e instanceof ZodError) {
         throw new Error(
           `Failed to parse the string '${raw}' as a Scout test target attribute` +
-          `; valid attributes: ${SCOUT_TARGET_ATTRIBUTE_VALUES.join(', ')}`
+            `; valid attributes: ${SCOUT_TARGET_ATTRIBUTE_VALUES.join(', ')}`
         );
       }
 
