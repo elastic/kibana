@@ -40,6 +40,7 @@ export const moveWindowBack = ({
   window,
   field,
   prefix = '',
+  lowerBoundOnly = false,
   range,
   k,
 }: {
@@ -47,16 +48,17 @@ export const moveWindowBack = ({
   window: RegExp;
   field: string;
   prefix?: string;
+  /** Moves only the start of the window, for a filter that reads everything since the start. */
+  lowerBoundOnly?: boolean;
   range: TimeRange;
   k: number;
 }): string => {
   const { stepHours, dots } = getSeriesWindow(range);
   expect(base).toMatch(window);
+  const start = `${prefix}${field} >= NOW() - ${(dots + k) * stepHours}h`;
   return base.replace(
     window,
-    `${prefix}${field} >= NOW() - ${(dots + k) * stepHours}h AND ${field} < NOW() - ${
-      k * stepHours
-    }h`
+    lowerBoundOnly ? start : `${start} AND ${field} < NOW() - ${k * stepHours}h`
   );
 };
 
