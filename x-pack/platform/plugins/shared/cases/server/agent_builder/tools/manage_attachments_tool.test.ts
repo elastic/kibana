@@ -29,6 +29,7 @@ const buildToolContext = (attachments = buildMockAttachments()): ToolHandlerCont
     spaceId: 'default',
     logger: loggingSystemMock.createLogger(),
     attachments,
+    events: { sendUiEvent: jest.fn() },
   } as unknown as ToolHandlerContext);
 
 const buildRegistry = (

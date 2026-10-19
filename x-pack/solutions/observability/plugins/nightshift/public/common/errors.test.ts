@@ -6,7 +6,7 @@
  */
 
 import type { SourceWriteConflictReason } from '@kbn/significant-events-schema';
-import { getFormattedError } from './errors';
+import { getFormattedError, getWorkflowFailureMessage } from './errors';
 
 const SERVER_MESSAGE = 'Source knowledge is being updated; retry after the current write finishes';
 
@@ -35,6 +35,20 @@ describe('getFormattedError', () => {
   it('falls back to the server message for an unknown conflict reason', () => {
     expect(getFormattedError(conflictResponse({ reason: 'something_else' })).message).toBe(
       SERVER_MESSAGE
+    );
+  });
+});
+
+describe('getWorkflowFailureMessage', () => {
+  it('unwraps the API message from a failed workflow HTTP step and keeps anything else as is', () => {
+    expect(
+      getWorkflowFailureMessage(
+        'HTTP 400: {"statusCode":400,"error":"Bad Request","message":"No index yet.","attributes":{"data":null}}'
+      )
+    ).toBe('No index yet.');
+    expect(getWorkflowFailureMessage('HTTP 502: Bad Gateway')).toBe('HTTP 502: Bad Gateway');
+    expect(getWorkflowFailureMessage('Workflow onboarding timed out')).toBe(
+      'Workflow onboarding timed out'
     );
   });
 });

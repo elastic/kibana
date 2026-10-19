@@ -56,7 +56,7 @@ import {
 import { EntityPanelHeaderTabs } from '../../../../flyout/entity_details/shared/components/entity_panel_tabs';
 import { EntityStoreTableTab } from '../../../../flyout/entity_details/shared/components/entity_store_table_tab';
 import { EntitySummaryGrid } from '../../../../flyout/entity_details/shared/components/entity_summary_grid';
-import type { EntityViewMode } from '../../../../flyout/entity_details/shared/types';
+import type { EntityViewMode } from '../../../../../common/entity_analytics/entity_store/resolution_group';
 
 export interface HostProps {
   /**
@@ -348,6 +348,7 @@ export const Host: FC<HostProps> = memo(function Host({
             entityType: EntityType.host,
             value: hostName,
             entityId: entityStoreEntityId,
+            mode,
             onOpenEntity: onShowHost,
             title: hostName,
             origin: FLYOUT_ORIGIN.ANOMALIES_SECTION,
@@ -480,6 +481,7 @@ export const Host: FC<HostProps> = memo(function Host({
             noEntityInStore={noEntityInStore}
             entityStoreV2Enabled={entityStoreV2Enabled}
             entityStoreEntityId={entityStoreEntityId}
+            mode={mode}
             onShowEntity={onShowRelatedEntityFromResolution}
             hideHeaderIcons
             riskScoreQueryId={HOST_PANEL_RISK_SCORE_QUERY_ID}
