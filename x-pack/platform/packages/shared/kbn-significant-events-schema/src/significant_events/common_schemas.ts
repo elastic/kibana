@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { lazySchema, z } from '@kbn/zod/v4';
+import { lazySchema, z, isoDateTime } from '@kbn/zod/v4';
 import { alertEventSeveritySchema } from '@kbn/alerting-v2-schemas';
 import type { AlertEventSeverity } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
@@ -194,10 +194,8 @@ export const signalEvidenceSchema = lazySchema(() =>
       ),
     time_range: z
       .object({
-        from: z.iso
-          .datetime({ offset: true })
-          .describe('Inclusive window start bound to ?_tstart.'),
-        to: z.iso.datetime({ offset: true }).describe('Exclusive window end bound to ?_tend.'),
+        from: isoDateTime({ offset: true }).describe('Inclusive window start bound to ?_tstart.'),
+        to: isoDateTime({ offset: true }).describe('Exclusive window end bound to ?_tend.'),
       })
       .optional()
       .describe(
@@ -239,8 +237,7 @@ const signalBaseSchema = lazySchema(() =>
       .describe(
         'Conclusion for the authored rule hypothesis: confirms = a found row directly showing the failure or degradation; refutes = verified healthy, positive, or no-failure result; off_topic = query found an observation unrelated to the rule; inconclusive = the check could not establish a conclusion from the evidence (empty, errored, or found rows that do not directly show the outcome); not_checked = no query was available.'
       ),
-    collected_at: z.iso
-      .datetime({ offset: true })
+    collected_at: isoDateTime({ offset: true })
       .optional()
       .describe('ISO timestamp when this signal was collected.'),
     evidence: signalEvidenceSchema

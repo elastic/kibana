@@ -5,23 +5,22 @@
  * 2.0.
  */
 
-import { getEuidEsqlFilterBasedOnDocument } from '@kbn/entity-store/common/domain/euid';
 import {
-  buildIdentityPrefilter,
   getAlertsIndex,
   getEntityAlias,
   buildLookback,
   buildJoinedPageSteps,
+  SET_UNMAPPED_NULLIFY,
   toList,
 } from './esql';
+import { getEntityIds, getEntityId, SEVERITY_COUNT_FIELDS } from '../common';
 import {
-  getEntityIds,
-  getEntityId,
-  ALLOWED_ENTITY_TYPES,
-  ENTITY_TYPE_FIELD,
-  SEVERITY_COUNT_FIELDS,
-} from '../common';
-import { buildAlertEuidPipeline } from './euid_pipeline';
+  buildAlertEntityFilter,
+  buildAlertEuidPipeline,
+  buildAlertForkSteps,
+  buildStampedAlertBranch,
+  buildUnstampedAlertBranch,
+} from './euid_pipeline';
 import { buildEntitiesInViewConditions, IN_VIEW_FIELD } from './entities_in_view';
 import type { QueryArgs, Row } from '../common';
 import { buildEntityListSortPlan, fetchSplitSortPage } from './split_sort';
@@ -60,43 +59,6 @@ const buildAlertAggregations = (rowCondition?: string): string[] =>
       : `${field} = ${aggregation}`;
   });
 
-const isAllowedEntityType = (type: unknown): type is (typeof ALLOWED_ENTITY_TYPES)[number] =>
-  typeof type === 'string' && (ALLOWED_ENTITY_TYPES as readonly string[]).includes(type);
-
-// ── unstamped alert filters ───────────────────────────────────────────────────
-
-interface UnstampedIdentityFilters {
-  unstampedIdentityClause: string;
-  unstampedIdentityPrefilter?: string;
-}
-
-/**
- * Filters the unstamped branch to alerts of the page rows: an OR of per-row EUID
- * clauses and its pushable prefilter. Rows without a clause are left out, so the
- * filter never widens to all unstamped alerts.
- */
-const buildUnstampedIdentityFilters = (
-  pageRows: readonly Row[]
-): UnstampedIdentityFilters | undefined => {
-  const clauses = new Set<string>();
-  const matchedRows: Row[] = [];
-  for (const row of pageRows) {
-    const entityType = row[ENTITY_TYPE_FIELD];
-    if (isAllowedEntityType(entityType)) {
-      const clause = getEuidEsqlFilterBasedOnDocument(entityType, row);
-      if (clause) {
-        clauses.add(clause);
-        matchedRows.push(row);
-      }
-    }
-  }
-  if (clauses.size === 0) return undefined;
-  return {
-    unstampedIdentityClause: [...clauses].join(' OR '),
-    unstampedIdentityPrefilter: buildIdentityPrefilter(matchedRows),
-  };
-};
-
 // ── sort queries ──────────────────────────────────────────────────────────────
 
 /**
@@ -111,18 +73,20 @@ const buildAlertSortQuery = (args: QueryArgs, sortField: string): string => {
   const isEntityDoc = `_index == "${concreteEntityIndexName}"`;
   const entityConditions = buildEntitiesInViewConditions(args).map((c) => `(${c})`);
   return [
+    SET_UNMAPPED_NULLIFY,
     `FROM ${getAlertsIndex(namespace)}, ${getEntityAlias(namespace)} METADATA _index`,
     `| WHERE (NOT ${isEntityDoc} AND \`@timestamp\` >= ${buildLookback(
       timeRange
     )} AND (${ALERT_OPEN_STATUS_FILTER})) OR (${[isEntityDoc, ...entityConditions].join(' AND ')})`,
-    ...buildAlertEuidPipeline({
-      alertBranchCondition: `NOT ${isEntityDoc}`,
-      extraBranch: [
+    ...buildAlertForkSteps([
+      buildStampedAlertBranch(),
+      buildUnstampedAlertBranch({ guard: `NOT ${isEntityDoc}` }),
+      [
         `WHERE ${isEntityDoc}`,
         `| EVAL _ea_entity_id = \`entity.id\`, ${IN_VIEW_FIELD} = 1`,
         `| KEEP _ea_entity_id, ${IN_VIEW_FIELD}`,
       ],
-    }),
+    ]),
     `| STATS ${[
       ...buildAlertAggregations(`${IN_VIEW_FIELD} IS NULL`),
       `${IN_VIEW_FIELD} = MAX(${IN_VIEW_FIELD})`,
@@ -136,6 +100,7 @@ const buildAlertSortQuery = (args: QueryArgs, sortField: string): string => {
 
 /** Open alerts in the time range, mapped to `entity.id`, without entity docs. */
 const buildOpenAlertEntityRows = ({ namespace, timeRange }: QueryArgs): string[] => [
+  SET_UNMAPPED_NULLIFY,
   `FROM ${getAlertsIndex(namespace)}`,
   `| WHERE \`@timestamp\` >= ${buildLookback(timeRange)} AND (${ALERT_OPEN_STATUS_FILTER})`,
   ...buildAlertEuidPipeline(),
@@ -160,18 +125,16 @@ const getAlertSplitSortPlan = (sortField: string): SplitSortPlan =>
 
 // ── enrichment ────────────────────────────────────────────────────────────────
 
-const buildAlertsEnrichQuery = (
-  args: QueryArgs,
-  entityIds: readonly string[],
-  unstampedIdentity?: UnstampedIdentityFilters
-): string => {
+const buildAlertsEnrichQuery = (args: QueryArgs, pageRows: readonly Row[]): string => {
   const { namespace, timeRange } = args;
+  const filter = buildAlertEntityFilter(pageRows);
   return [
+    SET_UNMAPPED_NULLIFY,
     `FROM ${getAlertsIndex(namespace)}`,
     `| WHERE \`@timestamp\` >= ${buildLookback(timeRange)}`,
     `| WHERE ${ALERT_OPEN_STATUS_FILTER}`,
-    ...buildAlertEuidPipeline({ stampedEntityIds: entityIds, ...unstampedIdentity }),
-    `| WHERE \`entity.id\` IN (${toList(entityIds)})`,
+    ...buildAlertEuidPipeline(filter),
+    `| WHERE \`entity.id\` IN (${toList(filter.entityIds)})`,
     `| STATS ${buildAlertAggregations().join(', ')} BY \`entity.id\``,
   ].join('\n');
 };
@@ -183,8 +146,7 @@ const alertsEnricher: PageEnricher = {
     const entityIds = getEntityIds(pageRows);
     if (!entityIds.length) return new Map();
 
-    const unstampedIdentity = buildUnstampedIdentityFilters(pageRows);
-    const rows = await runQuery(buildAlertsEnrichQuery(args, entityIds, unstampedIdentity));
+    const rows = await runQuery(buildAlertsEnrichQuery(args, pageRows));
 
     const byId = new Map(rows.map((r) => [getEntityId(r), r]));
     return new Map(

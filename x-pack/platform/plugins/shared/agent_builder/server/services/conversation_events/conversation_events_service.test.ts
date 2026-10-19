@@ -44,7 +44,7 @@ describe('createConversationEventsService', () => {
           type: TimelineEventType.userMessage,
           payloadSchema: z.object({}),
         })
-      ).toThrow(/is a built-in timeline event type/);
+      ).toThrow(/is a built-in event type/);
     });
   });
 

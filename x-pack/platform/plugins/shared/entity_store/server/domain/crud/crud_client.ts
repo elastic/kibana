@@ -19,6 +19,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Entity } from '../../../common/domain/definitions/entity.gen';
 import type { EntityType } from '../../../common';
 import { hashEuid, getEuidFromObject } from '../../../common/domain/euid';
+import { getBuiltInEntityDefinition } from '../../../common/domain/definitions/registry';
 import { resolveLatestEntitiesIndexName } from '../asset_manager/resolve_entity_store_indices';
 import {
   BadCRUDRequestError,
@@ -384,7 +385,7 @@ export class CRUDClient {
   // 3. Identity only - no ID and identifying data - ID will be generated
   public async updateEntity(entityType: EntityType, doc: Entity, force: boolean): Promise<void> {
     await this.assertInstalled();
-    const generatedId = getEuidFromObject(entityType, doc);
+    const generatedId = getEuidFromObject(getBuiltInEntityDefinition(entityType), doc);
     const valid = validateAndTransformDoc(
       'update',
       entityType,
@@ -436,7 +437,7 @@ export class CRUDClient {
 
     this.logger.debug(`Preparing ${objects.length} entities for bulk update`);
     for (const { type: entityType, doc } of objects) {
-      const generatedId = getEuidFromObject(entityType, doc);
+      const generatedId = getEuidFromObject(getBuiltInEntityDefinition(entityType), doc);
       const valid = validateAndTransformDoc(
         'update',
         entityType,
@@ -499,7 +500,7 @@ export class CRUDClient {
   // createEntity generates EUID and creates the entity in the LATEST index
   public async createEntity(entityType: EntityType, doc: Entity): Promise<void> {
     await this.assertInstalled();
-    const id = getEuidFromObject(entityType, doc);
+    const id = getEuidFromObject(getBuiltInEntityDefinition(entityType), doc);
     if (!id) {
       throw new BadCRUDRequestError(`Could not derive EUID from document`);
     }
