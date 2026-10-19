@@ -36,6 +36,8 @@ export const NIGHTSHIFT_EBT_ACTIONS = {
   RESET_TUNING_DOCUMENT: 'resetTuningDocument',
   RESUME_DETECTION_ENGINE: 'resumeDetectionEngine',
   RETRY_INVESTIGATIONS: 'retryInvestigations',
+  CANCEL_SANDBOX_ALLOWLIST: 'cancelSandboxAllowlist',
+  SAVE_SANDBOX_ALLOWLIST: 'saveSandboxAllowlist',
   SAVE_AND_ENABLE_AUTOMATION: 'saveAndEnableAutomation',
   SAVE_AUTOMATION: 'saveAutomation',
   SAVE_TUNING_DOCUMENT: 'saveTuningDocument',

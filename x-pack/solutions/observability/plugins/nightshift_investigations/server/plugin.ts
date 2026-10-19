@@ -91,6 +91,7 @@ import {
 import { createOnboardingClient } from './onboarding/onboarding_client';
 import { createSandboxSecretsClient } from './sandbox_secrets';
 import { createCustomContextClient } from './custom_context';
+import { createSandboxAllowlistClient, sandboxAllowlistUiSetting } from './sandbox_allowlist';
 import type {
   InvestigationQuotaCallback,
   NightshiftInvestigationsServerSetup,
@@ -172,6 +173,7 @@ export class NightshiftInvestigationsPlugin
     core.savedObjects.registerType(nightshiftAutomationSavedObjectType);
     core.savedObjects.registerType(nightshiftSecretsSavedObjectType);
     core.savedObjects.registerType(nightshiftCustomContextSavedObjectType);
+    core.uiSettings.register(sandboxAllowlistUiSetting);
     plugins.encryptedSavedObjects?.registerType(nightshiftSecretsEncryptionParams);
 
     const customContextClient = createCustomContextClient({
@@ -182,6 +184,10 @@ export class NightshiftInvestigationsPlugin
         securityPlugin: this.securityStart,
         spaces: this.spaces,
       }),
+    });
+
+    const sandboxAllowlistClient = createSandboxAllowlistClient({
+      getDeps: () => ({ savedObjects: this.savedObjects, uiSettings: this.uiSettings }),
     });
 
     const sandboxSecretsClient = createSandboxSecretsClient({
@@ -286,6 +292,7 @@ export class NightshiftInvestigationsPlugin
             sandboxWorkspaceManager,
             resolveConnectorCredentials,
             sandboxSecretsClient,
+            sandboxAllowlistClient,
             logger: sandboxLogger,
           })
         );
@@ -460,6 +467,7 @@ export class NightshiftInvestigationsPlugin
           isCortexEnabled: () => this.cortexEnabled,
           sandboxSecretsClient,
           customContextClient,
+          sandboxAllowlistClient,
           onboardingClient,
           getCortexPageStore: (request: KibanaRequest) => {
             if (!this.elasticsearch) {

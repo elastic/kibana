@@ -209,6 +209,8 @@ export const OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED =
   'observability:nightshiftContinuousOnboardingEnabled';
 export const OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_INTERVAL_HOURS =
   'observability:nightshiftContinuousOnboardingIntervalHours';
+export const OBSERVABILITY_NIGHTSHIFT_SANDBOX_ALLOWLIST =
+  'observability:nightshiftSandboxAllowlist';
 export const OBSERVABILITY_ENABLE_DIAGNOSTIC_MODE = 'observability:enableDiagnosticMode';
 
 // Reporting settings

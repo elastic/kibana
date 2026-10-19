@@ -10,9 +10,9 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
-import type { SandboxPluginStart, SandboxSession } from '@kbn/sandbox-plugin/server';
+import type { SandboxPluginStart, SandboxSession, SecretEnvKey } from '@kbn/sandbox-plugin/server';
 import type { ResolveConnectorCredentials } from './connector_credentials';
-import { redactSecrets } from './connector_credentials';
+import { getConnectorSecretEnvKeys, redactSecrets } from './connector_credentials';
 import { getConversationId, getSandboxCallContext } from './tool_utils';
 import type { SandboxWorkspaceManager } from './sandbox_workspace_manager';
 import {
@@ -20,8 +20,32 @@ import {
   MAX_SANDBOX_SECRET_KEY_LENGTH,
 } from '../../../common/sandbox_secrets';
 import type { SandboxSecretsClient } from '../../sandbox_secrets';
+import type { SandboxAllowlistClient } from '../../sandbox_allowlist';
 
 export const SANDBOX_BASH_TOOL_ID = 'nightshift_sandbox_bash';
+
+export const SANDBOX_ALLOWLIST_EMPTY_MESSAGE =
+  'Cannot use credentials in this command: the sandbox allowlist is empty, so there is no host the credentials may be sent to. A Nightshift admin can add hostnames under Nightshift settings > Investigations > Sandbox credential allowlist.';
+
+/**
+ * Binds every secret env key to the space's allowlist. Returns `undefined` when the command uses
+ * no secrets, and an error when it does but the allowlist is empty: the proxy reads an empty
+ * list (or "*") as "any host", so an empty allowlist must fail closed rather than be sent.
+ */
+const bindSecretEnvKeysToAllowlist = (
+  keys: readonly string[],
+  allowedHosts: readonly string[]
+): { secretEnvKeys?: SecretEnvKey[] } | { errorMessage: string } => {
+  if (keys.length === 0) {
+    return {};
+  }
+  if (allowedHosts.length === 0) {
+    return { errorMessage: SANDBOX_ALLOWLIST_EMPTY_MESSAGE };
+  }
+  return {
+    secretEnvKeys: keys.map((key) => ({ key, allowed_hosts: [...allowedHosts] })),
+  };
+};
 
 /**
  * Upper bound (and default) for a sandbox command's own timeout. The sandbox client adds a 10s
@@ -68,12 +92,14 @@ export const createSandboxBashTool = ({
   sandboxWorkspaceManager,
   resolveConnectorCredentials,
   sandboxSecretsClient,
+  sandboxAllowlistClient,
   logger,
 }: {
   getSandboxStart: () => SandboxPluginStart | undefined;
   sandboxWorkspaceManager: SandboxWorkspaceManager;
   resolveConnectorCredentials?: ResolveConnectorCredentials;
   sandboxSecretsClient?: Pick<SandboxSecretsClient, 'resolveForCommand'>;
+  sandboxAllowlistClient?: Pick<SandboxAllowlistClient, 'getHostsForCommand'>;
   logger: Logger;
 }): BuiltinToolDefinition<typeof sandboxBashSchema> => ({
   id: SANDBOX_BASH_TOOL_ID,
@@ -133,6 +159,28 @@ export const createSandboxBashTool = ({
       callContext,
     });
 
+    // Credentials only leave Kibana bound to the space's allowlist: check it before resolving
+    // (and decrypting) anything, so an empty allowlist never results in secrets being sent.
+    const usesCredentials = Boolean(connector_id) || (secret_keys?.length ?? 0) > 0;
+    let allowedHosts: string[] = [];
+    if (usesCredentials) {
+      if (!sandboxAllowlistClient) {
+        return {
+          results: [
+            { type: ToolResultType.error, data: { message: SANDBOX_ALLOWLIST_EMPTY_MESSAGE } },
+          ],
+        };
+      }
+      allowedHosts = await sandboxAllowlistClient.getHostsForCommand(context.request);
+      if (allowedHosts.length === 0) {
+        return {
+          results: [
+            { type: ToolResultType.error, data: { message: SANDBOX_ALLOWLIST_EMPTY_MESSAGE } },
+          ],
+        };
+      }
+    }
+
     // Connector credentials are resolved in Kibana and scoped to this one command's environment.
     // The sandbox never holds a credential-retrieval primitive of its own.
     let credentialEnv: Record<string, string> = {};
@@ -180,6 +228,18 @@ export const createSandboxBashTool = ({
       secretValues = [...secretValues, ...resolved.secretValues];
     }
 
+    // Each secret is marked so sandbox-api swaps it for a credential-proxy placeholder that only
+    // resolves to the real value for requests to an allowlisted host.
+    const binding = bindSecretEnvKeysToAllowlist(
+      [...Object.keys(sandboxSecretsEnv), ...getConnectorSecretEnvKeys(credentialEnv)],
+      allowedHosts
+    );
+    if ('errorMessage' in binding) {
+      return {
+        results: [{ type: ToolResultType.error, data: { message: binding.errorMessage } }],
+      };
+    }
+
     logger.debug(`Executing sandbox bash command for session ${rawConversationId}: ${command}`);
 
     try {
@@ -200,6 +260,7 @@ export const createSandboxBashTool = ({
           timeout_seconds && timeout_seconds > 0
             ? Math.min(timeout_seconds, MAX_SANDBOX_COMMAND_TIMEOUT_SECONDS)
             : MAX_SANDBOX_COMMAND_TIMEOUT_SECONDS,
+        ...(binding.secretEnvKeys ? { secret_env_keys: binding.secretEnvKeys } : {}),
       });
 
       const { exit_code, timed_out } = result;

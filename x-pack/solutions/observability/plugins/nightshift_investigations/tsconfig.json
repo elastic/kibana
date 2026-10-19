@@ -20,6 +20,7 @@
     "@kbn/core-http-server",
     "@kbn/core-plugins-server",
     "@kbn/core-spaces-common",
+    "@kbn/management-settings-ids",
     "@kbn/server-route-repository",
     "@kbn/server-route-repository-client",
     "@kbn/spaces-plugin",

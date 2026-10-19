@@ -49,6 +49,7 @@ export type { SandboxPluginSetup, SandboxPluginStart } from './plugin';
 export type {
   RunCommandParams,
   RunCommandResult,
+  SecretEnvKey,
   FileMetadata,
   ReadFileResult,
   WriteFileResult,
