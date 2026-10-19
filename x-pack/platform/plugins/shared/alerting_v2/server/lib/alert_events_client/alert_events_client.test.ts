@@ -11,6 +11,9 @@ import { AlertEventsClient, getGroupHash, getValueByDottedPath } from './alert_e
 import { createMockStorageServiceContract } from '../services/storage_service/storage_service.mock';
 import type { QueryServiceContract } from '../services/query_service/query_service';
 import { createMockResourceManager } from '../services/resource_service/resource_manager.mock';
+import { createLoggerService } from '../services/logger_service/logger_service.mock';
+import { createMockAlertStatusChangedEventPublisher } from '../events/alert_status_changed_event_publisher/alert_status_changed_event_publisher.mock';
+import { ALERTING_LOG_CODES } from '../errors/error_codes';
 import {
   ALERT_EVENTS_RESOURCE_KEY,
   alertEpisodeStatus,
@@ -113,35 +116,38 @@ describe('getGroupHash', () => {
   });
 });
 
-describe('AlertEventsClient.createAlertEvent episode lifecycle', () => {
-  const spaceId = 'default';
+const createClient = (
+  queryRows: Array<{ last_episode_id: string; last_episode_status: string }>,
+  spaceId = 'default'
+) => {
+  const storageService = createMockStorageServiceContract();
+  storageService.bulkIndexDocs.mockImplementation(async ({ docs }) => ({
+    attempted: docs.length,
+    docs: [...docs],
+    errors: [],
+  }));
 
-  const createClient = (
-    queryRows: Array<{ last_episode_id: string; last_episode_status: string }>
-  ) => {
-    const storageService = createMockStorageServiceContract();
-    storageService.bulkIndexDocs.mockImplementation(async ({ docs }) => ({
-      attempted: docs.length,
-      docs: [...docs],
-      errors: [],
-    }));
-
-    const queryService: jest.Mocked<Pick<QueryServiceContract, 'executeQueryRows'>> = {
-      executeQueryRows: jest.fn().mockResolvedValue(queryRows),
-    };
-
-    const resourceManager = createMockResourceManager();
-
-    const client = new AlertEventsClient(
-      storageService,
-      queryService as unknown as QueryServiceContract,
-      spaceId,
-      resourceManager
-    );
-
-    return { client, storageService, queryService, resourceManager };
+  const queryService: jest.Mocked<Pick<QueryServiceContract, 'executeQueryRows'>> = {
+    executeQueryRows: jest.fn().mockResolvedValue(queryRows),
   };
 
+  const resourceManager = createMockResourceManager();
+  const publisher = createMockAlertStatusChangedEventPublisher();
+  const { loggerService, mockLogger } = createLoggerService();
+
+  const client = new AlertEventsClient(
+    storageService,
+    queryService as unknown as QueryServiceContract,
+    spaceId,
+    resourceManager,
+    publisher,
+    loggerService
+  );
+
+  return { client, storageService, queryService, resourceManager, publisher, mockLogger };
+};
+
+describe('AlertEventsClient.createAlertEvent episode lifecycle', () => {
   it('waits for the rule events data stream to be ready before writing', async () => {
     const { client, storageService, resourceManager } = createClient([]);
 
@@ -256,5 +262,131 @@ describe('AlertEventsClient.createAlertEvent episode lifecycle', () => {
 
     const [{ docs }] = storageService.bulkIndexDocs.mock.calls[0];
     expect(docs[0]).toMatchObject({ '@timestamp': timestamp, scheduled_timestamp: timestamp });
+  });
+});
+
+describe('AlertEventsClient.createAlertEvent status changes', () => {
+  const priorEpisodeId = '33333333-3333-3333-3333-333333333333';
+
+  it('publishes the first event of a series with a null previous status and no rule', async () => {
+    const { client, publisher } = createClient([], 'my-space');
+
+    const result = await client.createAlertEvent({
+      source: 'datadog',
+      fingerprint: 'status-fp',
+      alert_status: ALERT_EPISODE_STATUS.ACTIVE,
+    });
+
+    expect(publisher.publishAlertStatusChanges).toHaveBeenCalledTimes(1);
+    expect(publisher.publishAlertStatusChanges).toHaveBeenCalledWith([
+      {
+        spaceId: 'my-space',
+        source: 'datadog',
+        alert: {
+          id: result.alert_id,
+          groupHash: result.group_hash,
+          status: ALERT_EPISODE_STATUS.ACTIVE,
+          previousStatus: null,
+        },
+        rule: null,
+        execution: null,
+      },
+    ]);
+  });
+
+  it('publishes a status change with the previous status of the series', async () => {
+    const { client, publisher } = createClient([
+      { last_episode_id: priorEpisodeId, last_episode_status: alertEpisodeStatus.active },
+    ]);
+
+    await client.createAlertEvent({
+      source: 'datadog',
+      fingerprint: 'status-fp',
+      alert_status: ALERT_EPISODE_STATUS.RECOVERING,
+    });
+
+    expect(publisher.publishAlertStatusChanges).toHaveBeenCalledWith([
+      expect.objectContaining({
+        alert: expect.objectContaining({
+          id: priorEpisodeId,
+          status: ALERT_EPISODE_STATUS.RECOVERING,
+          previousStatus: ALERT_EPISODE_STATUS.ACTIVE,
+        }),
+      }),
+    ]);
+  });
+
+  it('publishes a new episode after an inactive one with the inactive previous status', async () => {
+    const { client, publisher } = createClient([
+      { last_episode_id: priorEpisodeId, last_episode_status: alertEpisodeStatus.inactive },
+    ]);
+
+    const result = await client.createAlertEvent({
+      source: 'datadog',
+      fingerprint: 'status-fp',
+      alert_status: ALERT_EPISODE_STATUS.ACTIVE,
+    });
+
+    expect(result.alert_id).not.toBe(priorEpisodeId);
+    expect(publisher.publishAlertStatusChanges).toHaveBeenCalledWith([
+      expect.objectContaining({
+        alert: expect.objectContaining({
+          id: result.alert_id,
+          status: ALERT_EPISODE_STATUS.ACTIVE,
+          previousStatus: ALERT_EPISODE_STATUS.INACTIVE,
+        }),
+      }),
+    ]);
+  });
+
+  it('does not publish when the write leaves the status unchanged', async () => {
+    const { client, storageService, publisher } = createClient([
+      { last_episode_id: priorEpisodeId, last_episode_status: alertEpisodeStatus.active },
+    ]);
+
+    await client.createAlertEvent({
+      source: 'datadog',
+      fingerprint: 'status-fp',
+      alert_status: ALERT_EPISODE_STATUS.ACTIVE,
+    });
+
+    expect(storageService.bulkIndexDocs).toHaveBeenCalledTimes(1);
+    expect(publisher.publishAlertStatusChanges).not.toHaveBeenCalled();
+  });
+
+  it('does not publish when the write is rejected', async () => {
+    const { client, storageService, publisher } = createClient([]);
+    storageService.bulkIndexDocs.mockImplementation(async ({ docs }) => ({
+      attempted: docs.length,
+      docs: [],
+      errors: docs.map((document) => ({
+        code: 'mapper_parsing_exception',
+        message: 'boom',
+        index: 'rule-events',
+        document,
+      })),
+    }));
+
+    await expect(
+      client.createAlertEvent({ source: 'datadog', fingerprint: 'status-fp' })
+    ).rejects.toThrow('Failed to persist alert event: boom');
+    expect(publisher.publishAlertStatusChanges).not.toHaveBeenCalled();
+  });
+
+  it('logs a publish failure and still returns the stored alert', async () => {
+    const { client, publisher, mockLogger } = createClient([]);
+    publisher.publishAlertStatusChanges.mockRejectedValueOnce(new Error('bus unavailable'));
+
+    const result = await client.createAlertEvent({ source: 'datadog', fingerprint: 'status-fp' });
+
+    expect(result.alert_id).toEqual(expect.any(String));
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      'Failed to publish alert status change',
+      expect.objectContaining({
+        labels: expect.objectContaining({
+          code: ALERTING_LOG_CODES.EVENTS_ALERT_STATUS_CHANGED_PUBLISH_FAILED,
+        }),
+      })
+    );
   });
 });

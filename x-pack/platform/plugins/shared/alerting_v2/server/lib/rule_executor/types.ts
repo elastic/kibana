@@ -14,6 +14,7 @@ import type { ExecutionContext } from '../execution_context';
 import type { LoggerServiceContract } from '../services/logger_service/logger_service';
 import type { RuleExecutionCounter } from './metrics/counters';
 import type { ActiveAlertGroupHash } from './queries';
+import type { AlertStatusTransition } from '../director/director';
 
 export interface RuleExecutorTaskParams {
   ruleId: string;
@@ -23,6 +24,8 @@ export interface RuleExecutorTaskParams {
 export interface RuleExecutionInput {
   readonly ruleId: string;
   readonly spaceId: SpaceId;
+  /** Task Manager's execution UUID for this run. */
+  readonly executionId: string;
   readonly scheduledAt: string;
   readonly executionContext: ExecutionContext;
 }
@@ -36,6 +39,8 @@ export interface RulePipelineState {
   readonly esqlRowBatch?: ReadonlyArray<Record<string, unknown>>;
   readonly alertEventsBatch?: ReadonlyArray<AlertEventDocument>;
   readonly newEpisodeIds?: ReadonlyArray<string>;
+  readonly alertStatusTransitions?: ReadonlyArray<AlertStatusTransition>;
+  readonly storedAlertEvents?: ReadonlyArray<AlertEventDocument>;
   readonly activeGroups?: ReadonlyArray<ActiveAlertGroupHash>;
 }
 

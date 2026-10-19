@@ -56,6 +56,7 @@ export type {
 export type { ArtifactTypeDefinition, ArtifactReferenceDescriptor } from './lib/artifact_types';
 export type { FindRulesArgs } from './lib/rules_client';
 export type { FindActionPoliciesArgs } from './lib/action_policy_client';
+export type { AlertStatusChangedOptIn } from './lib/alert_status_changed';
 
 /**
  * Public catalog of machine-readable error codes emitted by alerting v2 HTTP
