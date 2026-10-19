@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
-import { sourceTypeSchema } from './source_type';
+import { lazySchema, z } from '@kbn/zod/v4';
+import { sourceTypeSchema, type SourceType } from './source_type';
 import { MAX_SOURCE_SLUG_LENGTH, MAX_SOURCE_VIEW_NAME_LENGTH } from './view_name';
 
 export const MAX_SOURCE_TITLE_LENGTH = 256;
@@ -103,6 +103,22 @@ export const updateSourceRequestSchema = z.object({
 });
 
 export type UpdateSourceRequest = z.input<typeof updateSourceRequestSchema>;
+
+export const validateSourceQueryRequestSchema = lazySchema(() =>
+  z.object({
+    esql: sourceEsqlSchema,
+  })
+);
+
+export type ValidateSourceQueryRequest = z.input<typeof validateSourceQueryRequestSchema>;
+
+/**
+ * A query create would accept, with the type it would store, or the reason it would refuse it.
+ * `index_exists` is false for a query accepted before any index behind it exists.
+ */
+export type ValidateSourceQueryResponse =
+  | { valid: true; type: SourceType; index_exists: boolean }
+  | { valid: false; error: string };
 
 export const listSourcesQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),

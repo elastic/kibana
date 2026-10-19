@@ -16,7 +16,7 @@ const investigation: Investigation = {
   template_id: 'investigation',
   title: 'Compromised API key — billing-svc',
   createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
-  updatedAt: new Date().toISOString(),
+  proposalDecidedAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
   worker_execution_ids: ['exec-1'],
   pendingProposalCount: 0,
   assignees: [],
@@ -48,7 +48,8 @@ describe('ConversationCardCompact', () => {
     renderRow();
 
     const row = screen.getByRole('button', { name: investigation.title });
-    expect(row).toHaveTextContent('4 hours ago');
+    expect(row).toHaveTextContent('1 hour ago');
+    expect(row).not.toHaveTextContent('4 hours ago');
     expect(row).toHaveTextContent(investigation.title);
     expect(row).toHaveTextContent('Rotate the Stripe key');
     expect(row).toHaveTextContent('Approved by Maya Chen');
@@ -68,6 +69,14 @@ describe('ConversationCardCompact', () => {
     // Only the read-only Copy link remains.
     expect(screen.getByText('Copy link')).toBeInTheDocument();
     expect(screen.queryByText('Close investigation')).not.toBeInTheDocument();
+  });
+
+  it('shows no age rather than the creation age when there is no decision time', () => {
+    renderRow({ investigation: { ...investigation, proposalDecidedAt: undefined } });
+
+    expect(screen.getByRole('button', { name: investigation.title })).not.toHaveTextContent(
+      '4 hours ago'
+    );
   });
 
   it('still opens the flyout on click', () => {

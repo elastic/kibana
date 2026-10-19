@@ -6,6 +6,7 @@
  */
 
 import { EntityType } from '../../../../../common/entity_analytics/types';
+import { RiskSeverity } from '../../../../../common/search_strategy';
 import type { ESBoolQuery } from '../../../../../common/typed_json';
 import { toDsl, toEsql } from './active_filters';
 import type { ActiveFilters } from './active_filters';
@@ -53,6 +54,20 @@ describe('toEsql', () => {
       entityExpression:
         'entity.EngineMetadata.Type IN ("host") AND MV_CONTAINS(entity.attributes.watchlists, "w1") AND entity.id IN ("host:a", "host:b")',
     });
+  });
+
+  it('tests the risk level of a resolved entity on resolved rows, and the own level on individual rows', () => {
+    const filters = {
+      ...NONE,
+      entityFilters: { ...EMPTY_ENTITY_FILTERS, riskLevels: [RiskSeverity.High] },
+    };
+
+    expect(toEsql(filters).entityExpression).toBe(
+      '(entity.relationships.resolution.risk.calculated_level IN ("High") OR (entity.relationships.resolution.risk.calculated_level IS NULL AND entity.risk.calculated_level IN ("High")))'
+    );
+    expect(toEsql({ ...filters, rowsMode: 'individual' }).entityExpression).toBe(
+      'entity.risk.calculated_level IN ("High")'
+    );
   });
 
   it('keeps the tile entities and their records in individual rows', () => {

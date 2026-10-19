@@ -248,6 +248,7 @@ export interface LensHeatmapConfigBase {
   breakdown?: LensBreakdownConfig;
   xAxis: LensBreakdownConfig;
   legend?: Identity<LensLegendConfig>;
+  axisLabel?: { xAxis?: boolean; yAxis?: boolean };
 }
 
 export type LensHeatmapConfig = Identity<LensBaseConfig & LensBaseLayer & LensHeatmapConfigBase>;
