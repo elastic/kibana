@@ -823,7 +823,11 @@ describe('create', () => {
             ],
             description: 'testing sir',
             owner: 'securitySolution',
-            settings: { syncAlerts: true, extractObservables: true },
+            settings: {
+              syncAlerts: true,
+              extractObservables: true,
+              extractObservablesSource: 'space_default',
+            },
             severity: 'low',
             tags: [],
             title: 'My Case',
@@ -853,7 +857,11 @@ describe('create', () => {
             customFields: caseWithOptionalFields.customFields,
             description: 'testing sir',
             owner: 'securitySolution',
-            settings: { syncAlerts: true, extractObservables: true },
+            settings: {
+              syncAlerts: true,
+              extractObservables: true,
+              extractObservablesSource: 'space_default',
+            },
             severity: 'critical',
             tags: [],
             title: 'My Case',
@@ -1603,6 +1611,58 @@ describe('create', () => {
       const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
       expect(createArgs.attributes.severity).toBe(CaseSeverity.CRITICAL);
       expect(createArgs.attributes.extended_fields).toEqual({ priority_as_keyword: 'urgent' });
+    });
+
+    describe('extractObservablesSource', () => {
+      const templateWithSettingsSO = {
+        ...templateSO,
+        attributes: {
+          ...templateSO.attributes,
+          definition: yamlStringify({
+            name: 'Template default title',
+            fields: [],
+            settings: { extractObservables: false },
+          }),
+        },
+      };
+
+      it('stamps "template" when the template supplies extractObservables', async () => {
+        const clientArgs = createClientArgs();
+        clientArgs.services.templatesService.getTemplate.mockResolvedValue(
+          templateWithSettingsSO as never
+        );
+
+        await create(
+          { ...minimalRequest, template: { id: 'tmpl-exp' } },
+          clientArgs,
+          expansionCasesClientMock
+        );
+
+        const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
+        expect(createArgs.attributes.settings.extractObservables).toBe(false);
+        expect(createArgs.attributes.settings.extractObservablesSource).toBe('template');
+      });
+
+      it('stamps "explicit" when the caller value wins over the template', async () => {
+        const clientArgs = createClientArgs();
+        clientArgs.services.templatesService.getTemplate.mockResolvedValue(
+          templateWithSettingsSO as never
+        );
+
+        await create(
+          {
+            ...minimalRequest,
+            template: { id: 'tmpl-exp' },
+            settings: { syncAlerts: true, extractObservables: true },
+          },
+          clientArgs,
+          expansionCasesClientMock
+        );
+
+        const [[createArgs]] = clientArgs.services.caseService.createCase.mock.calls;
+        expect(createArgs.attributes.settings.extractObservables).toBe(true);
+        expect(createArgs.attributes.settings.extractObservablesSource).toBe('explicit');
+      });
     });
 
     it('records the expanded (not raw) request on the create_case user action', async () => {
