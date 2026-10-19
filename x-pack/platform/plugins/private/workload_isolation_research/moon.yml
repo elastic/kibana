@@ -17,6 +17,8 @@ project:
   owner: '@elastic/kibana-core'
   sourceRoot: x-pack/platform/plugins/private/workload_isolation_research
 dependsOn:
+  - '@kbn/zod'
+  - '@kbn/workflows'
   - '@kbn/core'
   - '@kbn/config-schema'
   - '@kbn/task-manager-plugin'
