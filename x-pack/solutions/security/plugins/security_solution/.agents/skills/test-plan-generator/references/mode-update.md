@@ -48,6 +48,12 @@ If no published comment exists, skip all steps here and run Steps 1–3 from SKI
    ```
    Compare each PR's `updatedAt` against `PLAN_PUBLISHED_AT`. Build two lists: **re-read** (newer than `PLAN_PUBLISHED_AT`) and **skip** (same or older). If the user said "including PRs", mark all PRs as re-read regardless of timestamp.
 
+   **Also mark all PRs as re-read when the new level needs data the published plan does not hold.** The test coverage catalog and the PR artifacts inventory are not kept between sessions, so for a skipped PR the published plan is the only record. A `lean` plan keeps only test counts, not test names or paths, and only a `detailed` plan keeps `**Source:**` citations of PR artifacts. Therefore re-read all PRs when:
+   - `BASELINE_VERBOSITY_LEVEL` is `lean` and `VERBOSITY_LEVEL` is `standard` or `detailed` — the itemised `**Automation coverage**:` lines need the full catalog;
+   - `VERBOSITY_LEVEL` is `detailed` and `BASELINE_VERBOSITY_LEVEL` is not — the `**Source:**` lines need the PR artifacts inventory.
+
+   Moving to a less detailed level needs no extra re-read; the published plan already holds everything the new level renders.
+
 4. **Re-read updated PRs.** For each PR in the re-read list, fetch the full content — description, review comments, and diff — applying the rules defined in the [*Pull requests and test coverage*](gathering-context.md#pull-requests-and-test-coverage) section of `gathering-context.md` (max 20 files per PR, 500-line file diff cap, the always-skip list including `*.gen.ts` / `*.gen.tsx`, image fetching extended to PR bodies and review comments). Update the test coverage catalog and the PR artifacts inventory. If a re-read PR has no test files, apply the filesystem search described in that same section using [`security-test-directories.md`](security-test-directories.md).
 
 5. **Compare all sources against the published comment and identify:**
