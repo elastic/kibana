@@ -222,7 +222,6 @@ export const WorkflowExecuteEventForm = ({
         dataView={dataView}
         getNoCellActions={tableConfig.getNoCellActions}
         visibleTableColumns={tableConfig.visibleTableColumns}
-        columnsMeta={tableConfig.columnsMeta}
         dataTableRows={tableConfig.dataTableRows}
         rowsLength={rows.length}
         unifiedDataTableServices={tableConfig.unifiedDataTableServices}

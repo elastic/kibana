@@ -27,6 +27,7 @@ import type { IngestHubStartDependencies } from '../types';
 import { OnboardingShell } from './onboarding_shell';
 import { OnboardingFlowProvider } from './onboarding_flow_context';
 import { clearOnboardingSession, getOnboardingSessionKey } from './onboarding_session_storage';
+import { ECF_LAUNCH_STEP_SESSION_KEY } from './step_components/ecf_deployment_section';
 import { ONBOARDING_STEPS } from './steps';
 
 const DEFAULT_RETURN_APP = 'integrations';
@@ -140,6 +141,28 @@ export async function hydrateOnboardingSession(
         onboardingDeploymentId: item.id,
       })
     );
+    // Restore ECF launch step from the SO so the deployed state (launched families, stack names,
+    // versions, ARNs, and service ID snapshots for staleness detection) is available on resume.
+    if (item.ecfStacks?.length) {
+      sessionStorage.setItem(
+        getOnboardingSessionKey(integrationId, ECF_LAUNCH_STEP_SESSION_KEY),
+        JSON.stringify({
+          launchedFamilies: item.ecfStacks.map((s) => s.family),
+          stackNames: Object.fromEntries(item.ecfStacks.map((s) => [s.family, s.stackName])),
+          stackVersions: Object.fromEntries(
+            item.ecfStacks.map((s) => [s.family, s.templateVersion])
+          ),
+          stackArns: Object.fromEntries(
+            item.ecfStacks.filter((s) => s.stackArn).map((s) => [s.family, s.stackArn])
+          ),
+          launchedServiceIds: Object.fromEntries(
+            item.ecfStacks
+              .filter((s) => s.serviceIds !== undefined)
+              .map((s) => [s.family, s.serviceIds])
+          ),
+        })
+      );
+    }
     // Mark all steps except the last as complete so the shell defaults to detect-and-review.
     const stepState = Object.fromEntries(
       ONBOARDING_STEPS.map((s, i) => [

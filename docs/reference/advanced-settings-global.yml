@@ -33,25 +33,25 @@ groups:
           self: ga
           serverless: unavailable
 
-  - group: Alerting V2
+  - group: Universal Alerting
     id: kibana-alerting-v2-global-settings
     settings:
 
       - setting: "alerting:v2:enabled"
         id: alerting-v2-enabled
         description: |
-          Makes the experimental {{esql}}-based alerting system available in {{product.kibana}}, including its rules, action policies, and APIs. When this setting is off, {{product.kibana}} hides the **Alerting V2** interface and rejects requests to its APIs, but rules and action policies that already exist keep running.
+          Makes the {{esql}}-based Universal Alerting system available in {{product.kibana}}, including its rules, action policies, and APIs. When this setting is off, {{product.kibana}} hides the **Universal Alerting** interface and rejects requests to its APIs, but rules and action policies that already exist keep running. Disable your rules before you turn this setting off.
 
-          For the steps to turn the system on, confirm that it is available, and stop rules from running, refer to [Set up the experimental alerting system](docs-content://explore-analyze/alerting/experimental-alerting-system/get-started/setup.md).
+          For the steps to turn the system on, confirm that it is available, and stop rules from running, refer to [Set up Universal Alerting](docs-content://explore-analyze/alerting/experimental-alerting-system/get-started/setup.md).
         datatype: bool
-        default: false
+        default: true
         applies_to:
-          stack: preview 9.5+
+          stack: experimental =9.5, ga 9.6+
           ech: ga
           ece: ga
           eck: ga
           self: ga
-          serverless: preview
+          serverless: ga
         note: |
           :applies_to: security: ga
           This setting is unavailable on the [Elastic AI SOC Engine (EASE)](docs-content://solutions/security/ai/ease/ease-intro.md) Security project type.

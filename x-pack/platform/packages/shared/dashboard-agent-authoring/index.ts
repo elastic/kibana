@@ -7,6 +7,9 @@
 
 export { dashboardOperationSchema, executeDashboardOperations } from './src/operations';
 
+export { arrangeDashboardLayout, buildLayoutPrompt, parseLayoutAnswer } from './src/layout';
+export type { ArrangeDashboardLayout, LayoutArrangement, LayoutRequest } from './src/layout';
+
 export { getErrorMessage, hasValidCreateMetadataOperations } from './src/utils';
 
 export { createPanelFailureResult } from './src/resolve_panel';
@@ -16,7 +19,9 @@ export type {
   PanelContentAttempt,
 } from './src/resolve_panel';
 
-export { EMBEDDABLE_TYPE_BY_RENDERER } from './src/operations/panels';
+export type { DashboardValidationIssue, DashboardValidator } from './src/validate_dashboard';
+
+export { getRendererEmbeddableType } from './src/operations/panels';
 export type {
   CustomContentPanelAddRequest,
   CustomContentPanelEditRequest,

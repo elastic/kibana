@@ -53,7 +53,7 @@ export class SyntheticsAppPage {
   }
 
   async navigateToSettingsTab(tabText: string) {
-    await this.page.click(`text=${tabText}`);
+    await this.page.getByRole('tab', { name: tabText, exact: true }).click();
   }
 
   async navigateToFleetIntegrationPolicies() {

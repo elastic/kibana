@@ -110,4 +110,15 @@ export async function handlePostExecutionLoop({
       context: { ...finalExecution.context, serviceAccountFailureCleanupPending: false },
     });
   }
+
+  if (isTerminalStatus(finalExecution.status) && workflowTaskManager) {
+    // Best-effort: the retained wake task removes anything left behind once the execution is terminal.
+    await workflowTaskManager.removeTasksForExecution(workflowRunId).catch((err) => {
+      logger.warn(
+        `Failed to remove Task Manager tasks for terminal execution ${workflowRunId}: ${
+          err instanceof Error ? err.message : String(err)
+        }`
+      );
+    });
+  }
 }

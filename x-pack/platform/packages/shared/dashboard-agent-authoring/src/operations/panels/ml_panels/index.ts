@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { panelGridSchema } from '@kbn/agent-builder-dashboards-common';
 import {
   anomalyChartsEmbeddableStateSchema,
   severityThresholdSchema,
@@ -16,7 +15,7 @@ import {
 } from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
 import { singleMetricViewerEmbeddableStateSchema } from '@kbn/ml-server-schemas/embeddables/single_metric_viewer';
 import { z } from '@kbn/zod/v4';
-import type { ConfigPanelTypeDefinition } from '../config_panel_type';
+import { defineConfigPanelKind } from '../panel_kind';
 
 /**
  * ML anomaly detection panel logic.
@@ -58,27 +57,27 @@ export const anomalyChartsPanelConfigSchema = z.object({
     ),
 });
 
-export const anomalyChartsPanelConfigInputSchema = z.object({
+const anomalyChartsPanelConfigInputSchema = z.object({
   source: z.literal('config'),
   type: z.literal('ml_anomaly_charts'),
-  grid: panelGridSchema,
   config: anomalyChartsPanelConfigSchema.describe(
     'Anomaly charts panel configuration. Provide job_ids obtained from prior ML tool results or conversation context.'
   ),
 });
 
-export const editAnomalyChartsPanelConfigInputSchema = anomalyChartsPanelConfigInputSchema
-  .omit({ grid: true })
-  .extend({
-    panelId: panelIdSchema.describe('Existing anomaly charts panel id to update.'),
-    config: anomalyChartsPanelConfigSchema.describe(
-      'New anomaly charts configuration. Fully replaces the existing config.'
-    ),
-  });
+export const editAnomalyChartsPanelConfigInputSchema = anomalyChartsPanelConfigInputSchema.extend({
+  panelId: panelIdSchema.describe('Existing anomaly charts panel id to update.'),
+  config: anomalyChartsPanelConfigSchema.describe(
+    'New anomaly charts configuration. Fully replaces the existing config.'
+  ),
+});
 
-export const anomalyChartsPanelDefinition: ConfigPanelTypeDefinition = {
+export const anomalyChartsPanelKind = defineConfigPanelKind({
+  type: 'ml_anomaly_charts',
   embeddableType: 'ml_anomaly_charts',
   label: 'anomaly charts',
+  addInputSchema: anomalyChartsPanelConfigInputSchema,
+  editInputSchema: editAnomalyChartsPanelConfigInputSchema,
   toEmbeddableConfig: (config) => {
     const { severity_threshold: severityThreshold, ...rest } = config;
     const normalizedThreshold =
@@ -88,7 +87,7 @@ export const anomalyChartsPanelDefinition: ConfigPanelTypeDefinition = {
       ...(normalizedThreshold != null ? { severity_threshold: normalizedThreshold } : {}),
     };
   },
-};
+});
 
 // ─── Anomaly Swim Lane ────────────────────────────────────────────────────────
 
@@ -100,28 +99,28 @@ export const anomalySwimlaneConfigSchema = z.discriminatedUnion('swimlane_type',
   anomalySwimlaneViewByConfigSchema,
 ]);
 
-export const anomalySwimlaneConfigInputSchema = z.object({
+const anomalySwimlaneConfigInputSchema = z.object({
   source: z.literal('config'),
   type: z.literal('ml_anomaly_swimlane'),
-  grid: panelGridSchema,
   config: anomalySwimlaneConfigSchema.describe(
     'Anomaly swim lane configuration. Use swimlane_type "overall" for a cross-job summary, or "viewBy" with a view_by field to break out by entity.'
   ),
 });
 
-export const editAnomalySwimlaneConfigInputSchema = anomalySwimlaneConfigInputSchema
-  .omit({ grid: true })
-  .extend({
-    panelId: panelIdSchema.describe('Existing anomaly swim lane panel id to update.'),
-    config: anomalySwimlaneConfigSchema.describe(
-      'New anomaly swim lane configuration. Fully replaces the existing config.'
-    ),
-  });
+export const editAnomalySwimlaneConfigInputSchema = anomalySwimlaneConfigInputSchema.extend({
+  panelId: panelIdSchema.describe('Existing anomaly swim lane panel id to update.'),
+  config: anomalySwimlaneConfigSchema.describe(
+    'New anomaly swim lane configuration. Fully replaces the existing config.'
+  ),
+});
 
-export const anomalySwimlaneDefinition: ConfigPanelTypeDefinition = {
+export const anomalySwimlanePanelKind = defineConfigPanelKind({
+  type: 'ml_anomaly_swimlane',
   embeddableType: 'ml_anomaly_swimlane',
   label: 'anomaly swim lane',
-};
+  addInputSchema: anomalySwimlaneConfigInputSchema,
+  editInputSchema: editAnomalySwimlaneConfigInputSchema,
+});
 
 // ─── Single Metric Viewer ─────────────────────────────────────────────────────
 
@@ -135,25 +134,25 @@ export const singleMetricViewerConfigSchema = singleMetricViewerEmbeddableStateS
     ),
 });
 
-export const singleMetricViewerConfigInputSchema = z.object({
+const singleMetricViewerConfigInputSchema = z.object({
   source: z.literal('config'),
   type: z.literal('ml_single_metric_viewer'),
-  grid: panelGridSchema,
   config: singleMetricViewerConfigSchema.describe(
     'Single metric viewer configuration. job_ids must contain exactly one job ID. Set selected_entities only when the job has partition/by/over fields and the user wants a specific entity.'
   ),
 });
 
-export const editSingleMetricViewerConfigInputSchema = singleMetricViewerConfigInputSchema
-  .omit({ grid: true })
-  .extend({
-    panelId: panelIdSchema.describe('Existing single metric viewer panel id to update.'),
-    config: singleMetricViewerConfigSchema.describe(
-      'New single metric viewer configuration. Fully replaces the existing config.'
-    ),
-  });
+export const editSingleMetricViewerConfigInputSchema = singleMetricViewerConfigInputSchema.extend({
+  panelId: panelIdSchema.describe('Existing single metric viewer panel id to update.'),
+  config: singleMetricViewerConfigSchema.describe(
+    'New single metric viewer configuration. Fully replaces the existing config.'
+  ),
+});
 
-export const singleMetricViewerPanelDefinition: ConfigPanelTypeDefinition = {
+export const singleMetricViewerPanelKind = defineConfigPanelKind({
+  type: 'ml_single_metric_viewer',
   embeddableType: 'ml_single_metric_viewer',
   label: 'single metric viewer',
-};
+  addInputSchema: singleMetricViewerConfigInputSchema,
+  editInputSchema: editSingleMetricViewerConfigInputSchema,
+});

@@ -208,6 +208,36 @@ describe('hydrateOnboardingSession', () => {
     );
     expect(detect?.ecfStacks).toBeUndefined();
   });
+
+  it('restores ecfLaunchStep from ecfStacks including serviceIds for staleness detection', async () => {
+    const ecfStacks = [
+      {
+        family: 'unified',
+        stackName: 'my-stack',
+        templateVersion: '1.10.0',
+        stackArn: 'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/uuid',
+        serviceIds: ['cloudtrail', 'elb'],
+      },
+    ];
+    mockSendGet.mockResolvedValue({ item: makeItem({ ecfStacks }) });
+    await hydrateOnboardingSession(INTEGRATION_ID, DEPLOYMENT_ID);
+    const launchStep = JSON.parse(
+      sessionStorage.getItem(`onboarding.${INTEGRATION_ID}.ecfLaunchStep`) ?? 'null'
+    );
+    expect(launchStep?.launchedFamilies).toEqual(['unified']);
+    expect(launchStep?.stackNames).toEqual({ unified: 'my-stack' });
+    expect(launchStep?.stackVersions).toEqual({ unified: '1.10.0' });
+    expect(launchStep?.stackArns).toEqual({
+      unified: 'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/uuid',
+    });
+    expect(launchStep?.launchedServiceIds).toEqual({ unified: ['cloudtrail', 'elb'] });
+  });
+
+  it('does not write ecfLaunchStep when ecfStacks is absent', async () => {
+    mockSendGet.mockResolvedValue({ item: makeItem({ ecfStacks: undefined }) });
+    await hydrateOnboardingSession(INTEGRATION_ID, DEPLOYMENT_ID);
+    expect(sessionStorage.getItem(`onboarding.${INTEGRATION_ID}.ecfLaunchStep`)).toBeNull();
+  });
 });
 
 describe('shouldClearSession', () => {

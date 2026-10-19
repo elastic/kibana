@@ -25,3 +25,13 @@ export type {
   ClaimSubjectsParams,
   ClaimSubjectsResult,
 } from './subjects/services/subject_claims_service';
+
+export { defineInvestigationAttachment } from './investigation_attachments/define_investigation_attachment';
+export type {
+  InvestigationAttachmentDocService,
+  InvestigationAttachmentStorage,
+} from './investigation_attachments/attachment_doc_service';
+export type {
+  StoredInvestigationAttachment,
+  InvestigationAttachmentDocument,
+} from '../common/investigation_attachments';

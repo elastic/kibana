@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { panelGridSchema, type AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
+import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
 import {
+  CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   CUSTOM_CONTENT_MAX_PROMPT_LENGTH,
   CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH,
 } from '@kbn/custom-content-common';
 import { z } from '@kbn/zod/v4';
 import type { PanelResolutionRequestBase } from '../../../resolve_panel';
+import { defineRequestPanelKind } from '../panel_kind';
 
 /**
  * Custom content panel requests.
@@ -47,14 +49,13 @@ export type CustomContentPanelResolutionRequest =
   | CustomContentPanelEditRequest;
 
 /** Adds a new custom content panel. */
-export const customContentPanelRequestSchema = z.object({
+const customContentPanelRequestSchema = z.object({
   source: z.literal('request'),
   renderer: z
     .literal('custom_content')
     .describe(
       'Render an HTML/CSS layout generated server-side. A last resort for content Lens and Vega cannot express.'
     ),
-  grid: panelGridSchema,
   query: z
     .string()
     .min(1)
@@ -72,7 +73,7 @@ export const customContentPanelRequestSchema = z.object({
 });
 
 /** Edits an existing custom content panel by id. */
-export const customContentEditPanelRequestSchema = z
+const customContentEditPanelRequestSchema = z
   .object({
     source: z.literal('request'),
     renderer: z
@@ -99,3 +100,11 @@ export const customContentEditPanelRequestSchema = z
   .refine(({ query, esql }) => query !== undefined || esql !== undefined, {
     message: 'At least one of query or esql must be provided.',
   });
+
+export const customContentPanelKind = defineRequestPanelKind({
+  renderer: 'custom_content',
+  embeddableType: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+  label: 'custom content',
+  addInputSchema: customContentPanelRequestSchema,
+  editInputSchema: customContentEditPanelRequestSchema,
+});
