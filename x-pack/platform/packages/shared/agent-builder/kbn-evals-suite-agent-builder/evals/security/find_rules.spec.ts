@@ -10,6 +10,12 @@ import { tags } from '@kbn/scout';
 import { evaluate as base } from '../../src/evaluate';
 import type { EvaluateDataset } from '../../src/evaluate_dataset';
 import { createEvaluateDataset } from '../../src/evaluate_dataset';
+import {
+  namesMentioned,
+  queriesOnlySeverity,
+  toolCalls,
+  type ToolCallStep,
+} from '../../src/security_rule_checks';
 import { seedFindRulesFixtures } from './find_rules_fixtures';
 
 const evaluate = base.extend<{ evaluateDataset: EvaluateDataset }, {}>({
@@ -312,6 +318,8 @@ evaluate.describe(
                   query_intent: 'MITRE Technique ID Query',
                   expectedSkill: 'find-security-rules',
                   expectedOnlyToolId: 'security.find_rules',
+                  // The find-rules skill mandates calling security.discover_rule_tags first.
+                  allowedPrecedingToolIds: ['security.discover_rule_tags'],
                 },
               },
               {
@@ -330,6 +338,8 @@ evaluate.describe(
                   query_intent: 'MITRE Tactic Name Query',
                   expectedSkill: 'find-security-rules',
                   expectedOnlyToolId: 'security.find_rules',
+                  // The find-rules skill mandates calling security.discover_rule_tags first.
+                  allowedPrecedingToolIds: ['security.discover_rule_tags'],
                 },
               },
               {
@@ -347,6 +357,8 @@ evaluate.describe(
                   query_intent: 'MITRE Tactic Name Query',
                   expectedSkill: 'find-security-rules',
                   expectedOnlyToolId: 'security.find_rules',
+                  // The find-rules skill mandates calling security.discover_rule_tags first.
+                  allowedPrecedingToolIds: ['security.discover_rule_tags'],
                 },
               },
               {
@@ -365,6 +377,8 @@ evaluate.describe(
                   query_intent: 'MITRE Tactic Name Query',
                   expectedSkill: 'find-security-rules',
                   expectedOnlyToolId: 'security.find_rules',
+                  // The find-rules skill mandates calling security.discover_rule_tags first.
+                  allowedPrecedingToolIds: ['security.discover_rule_tags'],
                 },
               },
               {
@@ -382,6 +396,8 @@ evaluate.describe(
                   query_intent: 'MITRE Tactic ID Query',
                   expectedSkill: 'find-security-rules',
                   expectedOnlyToolId: 'security.find_rules',
+                  // The find-rules skill mandates calling security.discover_rule_tags first.
+                  allowedPrecedingToolIds: ['security.discover_rule_tags'],
                 },
               },
             ],
@@ -448,10 +464,14 @@ evaluate.describe(
               },
               {
                 input: {
-                  question: 'Which ML jobs have anomalies in the last 24 hours?',
+                  // Security-entity ML phrasing: generic "ML anomalies" prompts route to
+                  // anomaly-detection instead of the security ML jobs skill.
+                  question:
+                    'Are any users logging in at unusual hours according to our security ML jobs?',
                 },
                 output: {
-                  expected: 'I will check the ML jobs for anomalies detected in the last 24 hours.',
+                  expected:
+                    'I will check the security ML jobs for unusual login hours for our users.',
                 },
                 metadata: {
                   query_intent: 'ML Anomalies',
@@ -467,23 +487,14 @@ evaluate.describe(
                 },
                 metadata: {
                   query_intent: 'Rule Editing',
-                  expectedSkill: 'detection-rule-edit',
+                  // detection-rule-edit excludes enable/disable actions (see its index.ts
+                  // exclusion line), so rule toggles route to find-security-rules instead.
+                  expectedSkill: 'find-security-rules',
                 },
               },
-              {
-                input: {
-                  question:
-                    'Show me my alerting V2 rules with ES|QL queries that monitor system CPU.',
-                },
-                output: {
-                  expected:
-                    'I will look up alerting V2 rules (not Security detection rules) that use ES|QL queries to monitor system CPU.',
-                },
-                metadata: {
-                  query_intent: 'V2 Rule Discovery',
-                  expectedSkill: 'rule-management',
-                },
-              },
+              // Removed the Alerting V2 rule-management row: that skill is gated off by
+              // alerting:v2:experimentalFeatures on evals_agent_builder; coverage lives in
+              // kbn-evals-suite-alerting-v2/evals/rule_management/rule_management.spec.ts.
             ],
           },
         });
@@ -533,26 +544,29 @@ evaluate.describe(
 
         expect(turn2.errors).toEqual([]);
 
-        const turn2ToolCalls = (turn2.steps ?? []).filter(
-          (step: { type?: string; tool_id?: string }) =>
-            step.type === 'tool_call' && step.tool_id === 'security.find_rules'
-        );
-        expect(turn2ToolCalls.length).toBeGreaterThan(0);
+        const findCalls = toolCalls((turn2.steps ?? []) as ToolCallStep[], 'security.find_rules');
+        expect(findCalls.length).toBeGreaterThan(0);
 
-        const turn2CallArgs = turn2ToolCalls.map((step: { params?: unknown }) =>
-          JSON.stringify(step.params ?? {})
-        );
-        const hasMediumFilter = turn2CallArgs.some((args: string) => args.includes('"medium"'));
-        expect(hasMediumFilter).toBe(true);
+        // Turn 2 asked only for medium, so a find_rules call that filters on any
+        // severity other than medium is a stale reuse of turn 1.
+        expect(
+          findCalls.some((step) => queriesOnlySeverity(step, 'medium')),
+          'no turn-2 find_rules call filtered on severity=medium alone'
+        ).toBe(true);
 
         const lastMessage = turn2.messages[turn2.messages.length - 1]?.message ?? '';
         const mediumRuleNames = [
           'Brute Force Detection',
           'Anomalous DNS Activity',
           'PowerShell Network Scan',
+          'Spear Phishing Email Detection',
         ];
-        const mentionedMedium = mediumRuleNames.some((n) => lastMessage.includes(n));
-        expect(mentionedMedium).toBe(true);
+
+        // The answer is an inventory of every medium rule, not a sample of them.
+        const missing = mediumRuleNames.filter(
+          (name) => !namesMentioned(lastMessage, [name]).length
+        );
+        expect(missing, 'medium rules missing from the turn-2 answer').toEqual([]);
       }
     );
   }
