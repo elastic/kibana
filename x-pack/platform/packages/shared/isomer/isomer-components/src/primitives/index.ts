@@ -6,3 +6,4 @@
  */
 
 export { type MarkdownNode, markdown } from './markdown';
+export { type HeaderNode, header } from './header';
