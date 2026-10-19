@@ -188,9 +188,7 @@ export class WorkflowExecutionQueryService {
     spaceId: string
   ): Promise<GetExecutionStepExecutionsResult> {
     return getExecutionStepExecutions({
-      workflowExecutionsDataClient: this.deps.workflowExecutionsDataClient,
-      stepExecutionsDataClient: this.deps.stepExecutionsDataClient,
-      logger: this.deps.logger,
+      workflowsExecutionEngine: this.deps.workflowsExecutionEngine,
       workflowExecutionId: params.executionId,
       spaceId,
       page: params.page,
