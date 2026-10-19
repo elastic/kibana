@@ -228,6 +228,12 @@ export const useESQLOverallStatsData = (
 
   const { runRequest, cancelRequest } = useCancellableSearch(data);
 
+  // An aborted request resolves with `null` rather than throwing, so a superseded run resumes past its awaits and keeps writing state.
+  const cancelOverallStatsRequest = useCallback(() => {
+    fetchGeneration.current++;
+    cancelRequest();
+  }, [cancelRequest]);
+
   const [tableData, setTableData] = useReducer(getReducer<Data>(), getInitialData());
   const [queryHistoryStatus, setQueryHistoryStatus] = useState<boolean | undefined>(false);
   const [overallStatsProgress, setOverallStatsProgress] = useReducer(
@@ -267,9 +273,8 @@ export const useESQLOverallStatsData = (
         }
         previousExecutionTs.current = fieldStatsRequest.lastRefresh;
 
-        cancelRequest();
-        // An aborted request resolves with `null` rather than throwing, so a superseded run resumes past its awaits and keeps writing state.
-        const generation = ++fetchGeneration.current;
+        cancelOverallStatsRequest();
+        const generation = fetchGeneration.current;
         const isStale = () => fetchGeneration.current !== generation;
 
         setOverallStatsProgress({
@@ -522,9 +527,9 @@ export const useESQLOverallStatsData = (
     () => ({
       ...tableData,
       overallStatsProgress,
-      cancelOverallStatsRequest: cancelRequest,
+      cancelOverallStatsRequest,
       queryHistoryStatus,
     }),
-    [tableData, overallStatsProgress, cancelRequest, queryHistoryStatus]
+    [tableData, overallStatsProgress, cancelOverallStatsRequest, queryHistoryStatus]
   );
 };
