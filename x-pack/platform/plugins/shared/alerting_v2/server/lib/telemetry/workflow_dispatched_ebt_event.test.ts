@@ -64,6 +64,16 @@ describe('buildWorkflowDispatchedEventData', () => {
     expect(buildWorkflowDispatchedEventData({ ...input, ruleIds: [] }).rule_count).toBe(0);
   });
 
+  it('reports each rule once and counts distinct rules', () => {
+    const data = buildWorkflowDispatchedEventData({
+      ...input,
+      ruleIds: ['rule-1', 'rule-2', 'rule-1'],
+    });
+
+    expect(data.rule_id).toEqual(['rule-1', 'rule-2']);
+    expect(data.rule_count).toBe(2);
+  });
+
   it('does not share the rule id array with the input', () => {
     const ruleIds = ['rule-1'];
     const data = buildWorkflowDispatchedEventData({ ...input, ruleIds });

@@ -89,12 +89,16 @@ export const buildWorkflowDispatchedEventData = ({
   spaceId,
   ruleIds,
   alertCount,
-}: WorkflowDispatchedEventInput): WorkflowDispatchedEbtData => ({
-  workflow_id: workflowId,
-  action_policy_id: actionPolicyId,
-  workflow_execution_id: workflowExecutionId,
-  space_id: spaceId,
-  rule_id: [...ruleIds],
-  alert_count: alertCount,
-  rule_count: ruleIds.length,
-});
+}: WorkflowDispatchedEventInput): WorkflowDispatchedEbtData => {
+  const distinctRuleIds = [...new Set(ruleIds)];
+
+  return {
+    workflow_id: workflowId,
+    action_policy_id: actionPolicyId,
+    workflow_execution_id: workflowExecutionId,
+    space_id: spaceId,
+    rule_id: distinctRuleIds,
+    alert_count: alertCount,
+    rule_count: distinctRuleIds.length,
+  };
+};
