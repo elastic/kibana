@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { isEqual } from 'lodash';
 import type { CoreStart } from '@kbn/core/public';
 import { isHttpFetchError } from '@kbn/core-http-browser';
@@ -71,6 +71,9 @@ const isWorkerDirty = (worker: Worker, overlay: WorkerDraftOverlay | undefined):
  *
  * A Worker saved as enabled without a service account is bound to its prebuilt account first,
  * which is created if missing. If that fails, the Worker keeps its draft and shows the error.
+ *
+ * `discard()` detaches a save still in flight: its writes go through, but its results, errors and
+ * saving state no longer land on the draft, which by then may belong to another Watch.
  */
 export const useWatchSettingsDraft = (workers: Worker[]) => {
   const {
@@ -79,6 +82,8 @@ export const useWatchSettingsDraft = (workers: Worker[]) => {
   const { mutateAsync } = useUpdateWorker();
   const [overlays, setOverlays] = useState<Record<string, WorkerDraftOverlay>>({});
   const [isSaving, setIsSaving] = useState(false);
+  // Bumped by `discard()`; a save started under an older value no longer owns the draft.
+  const draftGeneration = useRef(0);
 
   // Dropped rather than hidden, so the switch-on can't come back if the block later clears.
   useEffect(() => {
@@ -144,7 +149,9 @@ export const useWatchSettingsDraft = (workers: Worker[]) => {
   }, []);
 
   const discard = useCallback(() => {
+    draftGeneration.current += 1;
     setOverlays({});
+    setIsSaving(false);
   }, []);
 
   /** Resolves with each written Worker as the server returned it; a failed Worker keeps its draft. */
@@ -162,11 +169,17 @@ export const useWatchSettingsDraft = (workers: Worker[]) => {
       throw new Error('invalid');
     }
 
-    const setError = (workerId: string, message: string) =>
+    const generation = draftGeneration.current;
+    const ownsDraft = () => draftGeneration.current === generation;
+    const setError = (workerId: string, message: string) => {
+      if (!ownsDraft()) {
+        return;
+      }
       setOverlays((current) => ({
         ...current,
         [workerId]: { ...current[workerId], error: message },
       }));
+    };
 
     const savedWorkers: Worker[] = [];
     setIsSaving(true);
@@ -206,10 +219,13 @@ export const useWatchSettingsDraft = (workers: Worker[]) => {
         try {
           const { worker: savedWorker } = await mutateAsync({ workerId: worker.id, patch });
           savedWorkers.push(savedWorker);
-          setOverlays((current) => {
-            const { [worker.id]: _removed, ...rest } = current;
-            return rest;
-          });
+          // A Worker can sit on several Watches, so a detached save must not wipe a fresh edit.
+          if (ownsDraft()) {
+            setOverlays((current) => {
+              const { [worker.id]: _removed, ...rest } = current;
+              return rest;
+            });
+          }
         } catch (error) {
           const body = isHttpFetchError(error)
             ? (error.body as { message?: unknown } | undefined)
@@ -224,7 +240,9 @@ export const useWatchSettingsDraft = (workers: Worker[]) => {
         }
       }
     } finally {
-      setIsSaving(false);
+      if (ownsDraft()) {
+        setIsSaving(false);
+      }
     }
     return savedWorkers;
   }, [http, isServerless, mutateAsync, overlays, resolve, serviceAccounts, workers]);

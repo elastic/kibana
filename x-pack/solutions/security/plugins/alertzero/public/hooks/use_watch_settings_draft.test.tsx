@@ -496,4 +496,78 @@ describe('useWatchSettingsDraft', () => {
       expect(mutateAsync).toHaveBeenCalledTimes(2);
     });
   });
+
+  describe('a save that finishes after discard', () => {
+    /** Starts a save whose single write stays pending until the returned settle function runs. */
+    const startPendingSave = (worker: Worker) => {
+      let settle: (outcome: { worker: Worker } | Error) => void = () => {};
+      mutateAsync.mockImplementationOnce(
+        () =>
+          new Promise((resolvePromise, rejectPromise) => {
+            settle = (outcome) =>
+              outcome instanceof Error ? rejectPromise(outcome) : resolvePromise(outcome);
+          })
+      );
+      const rendered = renderHook(() => useWatchSettingsDraft([worker]));
+      act(() => {
+        rendered.result.current.updateEnabled(worker, true);
+      });
+      let saving: Promise<Worker[]> = Promise.resolve([]);
+      act(() => {
+        saving = rendered.result.current.save();
+      });
+      return {
+        ...rendered,
+        saving,
+        settle: (outcome: { worker: Worker } | Error) => settle(outcome),
+      };
+    };
+
+    it('leaves no error and no saving state behind when the write fails', async () => {
+      const { result, saving, settle } = startPendingSave(ruleCoverage);
+      await act(async () => {
+        await Promise.resolve();
+      });
+      expect(result.current.isSaving).toBe(true);
+
+      act(() => {
+        result.current.discard();
+      });
+      expect(result.current.isSaving).toBe(false);
+
+      await act(async () => {
+        settle(new Error('Worker settings are temporarily unavailable; try again'));
+        await saving;
+      });
+
+      expect(result.current.isSaving).toBe(false);
+      expect(result.current.resolve(ruleCoverage)).toMatchObject({
+        enabled: false,
+        dirty: false,
+        error: undefined,
+      });
+    });
+
+    it('keeps an edit made after discard when the earlier write succeeds', async () => {
+      const { result, saving, settle } = startPendingSave(ruleCoverage);
+      await act(async () => {
+        await Promise.resolve();
+      });
+
+      act(() => {
+        result.current.discard();
+        result.current.updateSettings(ruleCoverage, { autonomy: 'assisted' });
+      });
+      await act(async () => {
+        settle({ worker: { ...ruleCoverage, enabled: true } });
+        await saving;
+      });
+
+      expect(result.current.isSaving).toBe(false);
+      expect(result.current.resolve(ruleCoverage)).toMatchObject({
+        settings: { autonomy: 'assisted' },
+        dirty: true,
+      });
+    });
+  });
 });
