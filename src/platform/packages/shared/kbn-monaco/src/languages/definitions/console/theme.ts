@@ -49,39 +49,34 @@ export const buildConsoleTheme: KbnMonacoLanguageThemeResolver = ({ euiTheme }) 
         makeHighContrastColor(euiTheme.colors.textAccent)(consoleColors.background)
       ),
       ...buildRuleGroup(
-        ['comment.default'],
-        makeHighContrastColor(euiTheme.colors.textPrimary)(
-          consoleColors.defaultStatusBackgroundColor
-        )
+        ['method'],
+        makeHighContrastColor(consoleColors.methodTextColor)(consoleColors.background)
       ),
       ...buildRuleGroup(
-        ['comment.success'],
-        makeHighContrastColor(euiTheme.colors.textSuccess)(
-          consoleColors.successStatusBackgroundColor
-        )
+        ['url'],
+        makeHighContrastColor(consoleColors.urlTextColor)(consoleColors.background)
       ),
-      ...buildRuleGroup(
-        ['comment.primary'],
-        makeHighContrastColor(euiTheme.colors.textPrimary)(
-          consoleColors.primaryStatusBackgroundColor
-        )
-      ),
-      ...buildRuleGroup(
-        ['comment.warning'],
-        makeHighContrastColor(euiTheme.colors.textWarning)(
-          consoleColors.warningStatusBackgroundColor
-        )
-      ),
-      ...buildRuleGroup(
-        ['comment.danger'],
-        makeHighContrastColor(euiTheme.colors.textDanger)(consoleColors.dangerStatusBackgroundColor)
-      ),
+    ],
+  };
+};
+
+export const buildConsoleOutputTheme: KbnMonacoLanguageThemeResolver = ({ euiTheme }) => {
+  const consoleColors = getConsoleColorConfig(euiTheme);
+
+  return {
+    rules: [
       ...buildRuleGroup(
         ['status.default'],
         makeHighContrastColor(euiTheme.colors.textPrimary)(
           consoleColors.defaultStatusBackgroundColor
         ),
         true
+      ),
+      ...buildRuleGroup(
+        ['comment.default'],
+        makeHighContrastColor(euiTheme.colors.textPrimary)(
+          consoleColors.defaultStatusBackgroundColor
+        )
       ),
       ...buildRuleGroup(
         ['status.success'],
@@ -91,11 +86,23 @@ export const buildConsoleTheme: KbnMonacoLanguageThemeResolver = ({ euiTheme }) 
         true
       ),
       ...buildRuleGroup(
+        ['comment.success'],
+        makeHighContrastColor(euiTheme.colors.textSuccess)(
+          consoleColors.successStatusBackgroundColor
+        )
+      ),
+      ...buildRuleGroup(
         ['status.primary'],
         makeHighContrastColor(euiTheme.colors.textPrimary)(
           consoleColors.primaryStatusBackgroundColor
         ),
         true
+      ),
+      ...buildRuleGroup(
+        ['comment.primary'],
+        makeHighContrastColor(euiTheme.colors.textPrimary)(
+          consoleColors.primaryStatusBackgroundColor
+        )
       ),
       ...buildRuleGroup(
         ['status.warning'],
@@ -105,6 +112,12 @@ export const buildConsoleTheme: KbnMonacoLanguageThemeResolver = ({ euiTheme }) 
         true
       ),
       ...buildRuleGroup(
+        ['comment.warning'],
+        makeHighContrastColor(euiTheme.colors.textWarning)(
+          consoleColors.warningStatusBackgroundColor
+        )
+      ),
+      ...buildRuleGroup(
         ['status.danger'],
         makeHighContrastColor(euiTheme.colors.textDanger)(
           consoleColors.dangerStatusBackgroundColor
@@ -112,12 +125,8 @@ export const buildConsoleTheme: KbnMonacoLanguageThemeResolver = ({ euiTheme }) 
         true
       ),
       ...buildRuleGroup(
-        ['method'],
-        makeHighContrastColor(consoleColors.methodTextColor)(consoleColors.background)
-      ),
-      ...buildRuleGroup(
-        ['url'],
-        makeHighContrastColor(consoleColors.urlTextColor)(consoleColors.background)
+        ['comment.danger'],
+        makeHighContrastColor(euiTheme.colors.textDanger)(consoleColors.dangerStatusBackgroundColor)
       ),
     ],
   };
