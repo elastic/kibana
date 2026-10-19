@@ -45,6 +45,8 @@ The general skill's Gate 4 has two parts — use the flaky-test-doctor for deepe
 
 ## Triage: where to search for duplicates (Gate 1)
 
+If the Cypress test is tagged `@serverlessQA`, do not delete it because Scout or API/unit already covers the same behavior. Keep Cypress until Scout is in the Kibana QA gate. This overrides the general skill's Gate 1 "Scout covers it → delete Cypress."
+
 Search these locations by domain:
 
 | Domain | API integration test path |

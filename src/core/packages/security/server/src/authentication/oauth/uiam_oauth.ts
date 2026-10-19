@@ -8,6 +8,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { UiamProjectType } from '../../uiam';
 
 export interface UiamOAuthClientLogo {
   media_type: string;
@@ -21,8 +22,6 @@ export interface UiamOAuthConnectionsSummary {
 }
 
 export type UiamOAuthClientType = 'public' | 'confidential';
-
-export type UiamOAuthProjectType = 'elasticsearch' | 'observability' | 'security' | 'vectordb';
 
 export interface UiamOAuthClientResponse {
   id: string;
@@ -59,7 +58,7 @@ export interface UiamOAuthConnectionResponse {
 export interface CreateUiamOAuthClientParams {
   resource: string;
   project_id: string;
-  project_type?: UiamOAuthProjectType;
+  project_type?: UiamProjectType;
   client_name?: string;
   client_type?: UiamOAuthClientType;
   client_metadata?: Record<string, string>;

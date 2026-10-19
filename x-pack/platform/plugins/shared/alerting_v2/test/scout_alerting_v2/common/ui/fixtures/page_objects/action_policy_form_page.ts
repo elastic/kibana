@@ -6,6 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
+import type { AlertingMountConfig } from './alerting_mount_config';
 
 /**
  * Combo box options are fetched from the workflows plugin behind a 300ms
@@ -25,6 +26,10 @@ export class ActionPolicyFormPage {
   public readonly container: Locator;
   public readonly pageTitle: Locator;
   public readonly nameInput: Locator;
+  /** Toggle button for the Advanced Matching accordion. */
+  public readonly advancedMatchingToggle: Locator;
+  /** Routing tags combo box backing `matcher.tags`. */
+  public readonly routingTagsSelector: Locator;
   /** KQL query bar (`QueryStringInput`) backing the `matcher` field. */
   public readonly matcherInput: Locator;
   public readonly submitButton: Locator;
@@ -32,23 +37,29 @@ export class ActionPolicyFormPage {
   /** Shown instead of the workflows combo box when `workflows:ui:enabled` is off. */
   public readonly workflowsDisabledCallout: Locator;
 
-  constructor(private readonly page: ScoutPage) {
+  constructor(private readonly page: ScoutPage, private readonly mountConfig: AlertingMountConfig) {
     this.container = this.page.testSubj.locator('actionPolicyFormPage');
     this.pageTitle = this.container.getByTestId('pageTitle');
     this.nameInput = this.container.getByTestId('nameInput');
+    this.advancedMatchingToggle = this.container.getByTestId('advancedMatchingAccordionToggle');
     this.matcherInput = this.container.getByTestId('matcherInput');
+    this.routingTagsSelector = this.container.getByTestId('routingTagsSelector');
     this.submitButton = this.container.getByTestId('submitButton');
     this.cancelButton = this.container.getByTestId('cancelButton');
     this.workflowsDisabledCallout = this.container.getByTestId('workflowsDisabledCallout');
   }
 
   async gotoCreate() {
-    await this.page.gotoApp('management/alertingV2/action_policies/create');
+    await this.page.gotoApp(
+      `${this.mountConfig.appRoute}${this.mountConfig.subPaths.actionPoliciesCreate}`
+    );
     await this.container.waitFor({ state: 'visible' });
   }
 
   async gotoEdit(policyId: string) {
-    await this.page.gotoApp(`management/alertingV2/action_policies/edit/${policyId}`);
+    await this.page.gotoApp(
+      `${this.mountConfig.appRoute}${this.mountConfig.subPaths.actionPoliciesEdit(policyId)}`
+    );
     await this.container.waitFor({ state: 'visible' });
   }
 
@@ -57,10 +68,24 @@ export class ActionPolicyFormPage {
   }
 
   async setMatcher(matcher: string) {
-    await this.matcherInput.fill(matcher);
+    // Open the accordion only when it is currently collapsed; toggling an
+    // already-open accordion would hide the input and make the fill time out.
+    if ((await this.advancedMatchingToggle.getAttribute('aria-expanded')) !== 'true') {
+      await this.advancedMatchingToggle.click();
+    }
+    // QueryStringInput is React-controlled; fill() races with prop sync.
+    // pressSequentially() drives keydown events that React always wins.
+    await this.matcherInput.pressSequentially(matcher);
     // Typing opens the KQL suggestions popover, which overlays the rest of the
     // form and would swallow the submit click.
     await this.matcherInput.press('Escape');
+  }
+
+  /** Picks a routing tag from the selector's suggestions (the "Recommended" group). */
+  async selectRoutingTag(tag: string) {
+    await this.page.components
+      .comboBox('routingTagsSelector', this.container)
+      .setSelectedOptions([tag], { timeout: WORKFLOW_OPTIONS_TIMEOUT });
   }
 
   async selectWorkflow(workflowName: string) {

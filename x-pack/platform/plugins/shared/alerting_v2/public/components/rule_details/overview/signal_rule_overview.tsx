@@ -11,6 +11,7 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiLoadingChart,
   EuiPanel,
   EuiSpacer,
@@ -28,7 +29,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { useRule } from '../rule_context';
 import { useFetchSignalFirings } from '../../../hooks/use_fetch_signal_firings';
-import { getDiscoverHrefForRuleQuery } from '../../../utils/discover_href_for_episode';
+import { getDiscoverHrefForRuleQuery } from '../../../utils/discover_href_for_alert';
 import { useAlertTimelineUrlState } from './alert_timeline/use_alert_timeline_url_state';
 import { useResolvedActivityWindow } from './use_resolved_activity_window';
 import { StatsRow, type StatItem } from './stats_row';
@@ -178,7 +179,9 @@ export const SignalRuleOverview: React.FC = () => {
       return (
         <EuiEmptyPrompt
           color="danger"
-          iconType="warning"
+          icon={<EuiIcon type="warning" size="l" aria-hidden={true} />}
+          titleSize="xs"
+          paddingSize="m"
           data-test-subj="signalOverviewError"
           title={
             <h4>
@@ -201,7 +204,9 @@ export const SignalRuleOverview: React.FC = () => {
     if (buckets.length === 0) {
       return (
         <EuiEmptyPrompt
-          iconType="chartBarVerticalStack"
+          icon={<EuiIcon type="chartBarVerticalStack" size="l" aria-hidden={true} />}
+          titleSize="xs"
+          paddingSize="m"
           data-test-subj="signalOverviewEmpty"
           title={
             <h4>
@@ -285,7 +290,7 @@ export const SignalRuleOverview: React.FC = () => {
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 size="s"
-                iconType="discoverApp"
+                iconType="productDiscover"
                 href={discoverHref}
                 color="text"
                 data-test-subj="signalOverviewOpenInDiscover"

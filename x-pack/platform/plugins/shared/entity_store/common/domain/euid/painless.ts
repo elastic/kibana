@@ -8,14 +8,19 @@
 import type { Condition } from '@kbn/streamlang';
 import type {
   EntityDefinitionWithoutId,
-  EntityType,
   EuidAttribute,
   FieldEvaluation,
   FieldEvaluationWhenClauseFieldMappingThen,
+  SetFieldsByCondition,
 } from '../definitions/entity_schema';
-import { isSingleFieldIdentity } from '../definitions/entity_schema';
-import { getEntityDefinitionWithoutId } from '../definitions/registry';
-import { isEuidField } from './commons';
+import {
+  getPostAggFilter,
+  getPostStatsFieldOverrides,
+  getPreAggFieldOverrides,
+  isSingleFieldIdentity,
+} from '../definitions/entity_schema';
+import type { EuidGateOptions } from './commons';
+import { assertEmittableEntityType, isEuidField, waiveForAlerts } from './commons';
 
 /**
  * Keyword runtime field scripts must call emit(); they cannot return a value from the script root.
@@ -37,9 +42,7 @@ function wrapEvaluationScriptForKeywordRuntimeField(evaluationScript: string): s
  * Used for pre-agg and `whenConditionTrueSetFieldsAfterStats` (see getEuidFromObject).
  */
 function buildPreAggEvaluatedVarOverridesPreamble(
-  whenRules:
-    | EntityDefinitionWithoutId['whenConditionTrueSetFieldsPreAgg']
-    | EntityDefinitionWithoutId['whenConditionTrueSetFieldsAfterStats'],
+  whenRules: SetFieldsByCondition[] | undefined,
   evaluatedVars: Map<string, string>
 ): string {
   if (!whenRules?.length) {
@@ -64,21 +67,24 @@ function buildPreAggEvaluatedVarOverridesPreamble(
 
 /**
  * Returns an Elasticsearch runtime keyword field mapping whose Painless script
- * computes the typed EUID for the given entity type.
+ * computes the typed EUID for the given entity definition.
  *
  * Example usage:
  * ```ts
- * runtime_mappings: { 'user_id': getEuidPainlessRuntimeMapping('user') }
+ * runtime_mappings: { 'user_id': getEuidPainlessRuntimeMapping(userDefinition) }
  * ```
  *
- * @param entityType - The entity type string (e.g. 'host', 'user', 'generic')
+ * @param entityDefinition - The entity definition whose identity rules compute the EUID
  * @returns A runtime keyword field mapping (type + script) for use in runtime_mappings.
  */
-export function getEuidPainlessRuntimeMapping(entityType: EntityType): {
+export function getEuidPainlessRuntimeMapping(
+  entityDefinition: EntityDefinitionWithoutId,
+  options?: EuidGateOptions
+): {
   type: 'keyword';
   script: { source: string };
 } {
-  const returnScript = getEuidPainlessEvaluation(entityType);
+  const returnScript = getEuidPainlessEvaluation(entityDefinition, options);
   const emitScript = wrapEvaluationScriptForKeywordRuntimeField(returnScript);
   return {
     type: 'keyword',
@@ -87,24 +93,34 @@ export function getEuidPainlessRuntimeMapping(entityType: EntityType): {
 }
 
 /**
- * Constructs a Painless evaluation for the provided entity type to generate the entity id.
+ * Constructs a Painless evaluation for the provided entity definition to generate the entity id.
+ *
+ * Applies the creation gate: a document that may not put an entity in the store yields `null`.
+ * For entities that already exist, use {@link getEuidPainlessEvaluationForSearch}.
  *
  * Example usage:
  * ```ts
  * import { getEuidPainlessEvaluation } from './painless';
  *
- * const evaluation = getEuidPainlessEvaluation('host');
+ * const evaluation = getEuidPainlessEvaluation(hostDefinition);
  * // evaluation may look like:
  * // 'if (doc.containsKey('host.name') && doc['host.name'].size() > 0 && doc['host.name'].value != null && doc['host.name'].value != "") { return "host:" + doc['host.name'].value; } return null;'
  * ```
  *
- * @param entityType - The entity type string (e.g. 'host', 'user', 'generic')
+ * @param entityDefinition - The entity definition whose identity rules compute the entity id
  * @returns A Painless evaluation string that computes the entity id.
  */
-export function getEuidPainlessEvaluation(entityType: EntityType): string {
-  const entityDefinition = getEntityDefinitionWithoutId(entityType);
-  const { identityField } = entityDefinition;
-  const prefixExpr = identityField.skipTypePrepend ? '' : `"${entityType}:" + `;
+export function getEuidPainlessEvaluation(
+  entityDefinition: EntityDefinitionWithoutId,
+  options?: EuidGateOptions
+): string {
+  const { applyPostAggFilter = true } = options ?? {};
+  const { identityField, type: entityType } = entityDefinition;
+  let prefixExpr = '';
+  if (!identityField.skipTypePrepend) {
+    assertEmittableEntityType(entityType);
+    prefixExpr = `"${entityType}:" + `;
+  }
 
   if (isSingleFieldIdentity(identityField)) {
     const field = identityField.singleField;
@@ -127,20 +143,21 @@ export function getEuidPainlessEvaluation(entityType: EntityType): string {
     result.evaluatedVars.forEach((v, k) => evaluatedVars.set(k, v));
   }
   preamble += buildPreAggEvaluatedVarOverridesPreamble(
-    entityDefinition.whenConditionTrueSetFieldsPreAgg,
+    getPreAggFieldOverrides(entityDefinition),
     evaluatedVars
   );
   preamble += buildPreAggEvaluatedVarOverridesPreamble(
-    entityDefinition.whenConditionTrueSetFieldsAfterStats,
+    getPostStatsFieldOverrides(entityDefinition),
     evaluatedVars
   );
 
   /** Same order as getEuidFromObject: field evals (and pre/post stats overrides) run before the pipeline gate. */
   const filterOpts: StreamlangToPainlessDocOptions = { evaluatedVars };
   const filterChecks: string[] = [];
-  for (const filterCond of [identityField.documentsFilter, entityDefinition.postAggFilter].filter(
-    (c): c is Condition => Boolean(c)
-  )) {
+  const gateConditions = applyPostAggFilter
+    ? [identityField.documentsFilter, waiveForAlerts(getPostAggFilter(entityDefinition))]
+    : [identityField.documentsFilter];
+  for (const filterCond of gateConditions.filter((c): c is Condition => Boolean(c))) {
     filterChecks.push(
       `if (!(${streamlangConditionToPainlessDoc(filterCond, filterOpts)})) { return null; }`
     );
@@ -200,6 +217,22 @@ export function getEuidPainlessEvaluation(entityType: EntityType): string {
   const endsWithExhaustiveElse = lastBranchPart.startsWith('else {');
   const trailingReturn = endsWithExhaustiveElse ? '' : ' return null;';
   return preamble + filterPreamble + branchLogic + trailingReturn;
+}
+
+/**
+ * Like {@link getEuidPainlessEvaluation} without the creation gate, so IdP and shared-account
+ * documents still resolve to an entity that already exists.
+ *
+ * For risk scoring and enrichment. The caller checks store membership; this only answers which
+ * entity a document refers to.
+ *
+ * @param entityDefinition - The entity definition whose identity rules compute the entity id
+ * @returns A Painless evaluation string that computes the entity id.
+ */
+export function getEuidPainlessEvaluationForSearch(
+  entityDefinition: EntityDefinitionWithoutId
+): string {
+  return getEuidPainlessEvaluation(entityDefinition, { applyPostAggFilter: false });
 }
 
 function painlessFieldNonEmpty(field: string): string {

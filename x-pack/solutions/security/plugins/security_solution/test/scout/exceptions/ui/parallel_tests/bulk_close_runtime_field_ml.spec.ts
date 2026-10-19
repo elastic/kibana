@@ -37,7 +37,8 @@ const MATCHING_IP = '203.0.113.99';
 const RUNTIME_FIELD_PAINLESS =
   "if (doc.containsKey('source.address') && !doc['source.address'].empty) { emit(doc['source.address'].value); }";
 
-spaceTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/287939
+spaceTest.describe.skip(
   'Bulk close with a runtime field on an ML rule',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {

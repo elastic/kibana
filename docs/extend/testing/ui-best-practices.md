@@ -17,7 +17,9 @@ Default to [parallel UI suites](./parallelism.md) when possible. Parallel worker
 | Mode           | When to use                                                                                                               |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------- |
 | **Parallel**   | UI tests (most suites), suites that share pre-ingested data (often using the [global setup hook](./global-setup-hook.md)) |
-| **Sequential** | API tests, suites that require a “clean” Elasticsearch state                                                              |
+| **Sequential** | API tests, UI suites that need serialized access to state that isn't space-scoped, or whose performance degrades when other workers share the same Kibana and Elasticsearch servers. |
+
+Sequential execution does not reset Elasticsearch or Kibana; earlier suites and pre-existing data can remain. Scope assertions and cleanup to your suite's data. Tests that require an empty cluster need an isolated deployment or a lower test layer that can control the state. See [Parallelism](./parallelism.md#scout-parallelism-differences).
 
 ## Prefer realistic in-app navigation for user flows [prefer-realistic-in-app-navigation]
 
@@ -129,17 +131,42 @@ await page.click('[data-test-subj="myButton"]');
 await page.getByText('Delete').click();
 ```
 
-❌ **Don’t:** select elements by index ([flagged by Playwright’s recommended ESLint rules](https://playwright.dev/docs/best-practices)), as they break on non-clean environments where tests run without server restart and extra data may exist:
-
-```ts
-await page.testSubj.locator('tableRow').nth(0).click();
-```
-
 ✔️ **Do:** use `page.testSubj` or scoped `getByRole`:
 
 ```ts
 await page.testSubj.click('myButton');
 await page.testSubj.locator('confirmDeleteModal').getByRole('button', { name: 'Delete' }).click();
+```
+
+:::::
+
+## Avoid selecting elements by index or position [dont-select-elements-by-index]
+
+Avoid nth methods such as `.first()`, `.last()`, and `.nth()`. Instead:
+
+- Locate elements with `data-test-subj`, or scope the locator to a specific container, rather than silencing a strict-mode "resolved to N elements" error.
+- Expose the loading state in the DOM (e.g. a `data-test-subj` such as `myTable-loading` / `myTable-loaded`) rather than reaching for these methods because the UI isn't actionable yet.
+
+Use them alongside `toHaveCount` when the number of elements is known in advance:
+
+```ts
+// the number of buttons is known in advance
+await expect(stepButtons).toHaveCount(4);
+// eslint-disable-next-line playwright/no-nth-methods -- ordered execution list; the last step is the failed one
+const failedStep = stepButtons.last();
+```
+
+:::::{dropdown} Examples
+❌ **Don’t:** match a prefix and take the first hit — when nothing matches, the failure only says the locator found no elements:
+
+```ts
+await page.locator('[data-test-subj^="monitor-page-link-"]').first().click();
+```
+
+✔️ **Do:** name the element you expect (or identify it with `filter({ hasText })` when the subject isn't unique):
+
+```ts
+await page.testSubj.click('monitor-page-link-0001-up');
 ```
 
 :::::
@@ -350,8 +377,7 @@ If the same custom role appears in many specs, extract it into a `browserAuth` f
 // in your plugin's fixtures/index.ts
 await use({
   ...browserAuth,
-  loginAsPlatformEngineer: () =>
-    browserAuth.loginWithCustomRole('platform_engineer', roleDescriptor),
+  loginAsPlatformEngineer: () => browserAuth.loginWithCustomRole(roleDescriptor),
 });
 
 // in specs

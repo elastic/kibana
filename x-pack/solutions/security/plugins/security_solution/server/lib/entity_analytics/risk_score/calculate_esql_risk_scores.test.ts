@@ -12,13 +12,22 @@ import {
   buildRiskScoreBucket,
   getBaseScoreESQL,
   getESQL,
+  getEuidCompositeQuery,
   getResolutionCompositeQuery,
   getResolutionScoreESQLByIds,
+  getResolutionScoreESQLByRange,
 } from './calculate_esql_risk_scores';
 import type { RiskScoreBucket } from '../types';
 import { RIEMANN_ZETA_S_VALUE, RIEMANN_ZETA_VALUE } from './constants';
 
 describe('Calculate risk scores with ESQL', () => {
+  describe('getEuidCompositeQuery', () => {
+    it('sets ignore_unavailable so a missing per-space alerts index behaves as empty', () => {
+      const query = getEuidCompositeQuery(EntityType.host, [], { index: 'alerts-*', pageSize: 1 });
+      expect(query.ignore_unavailable).toBe(true);
+    });
+  });
+
   describe('ESQL query', () => {
     it('matches snapshot', () => {
       const q = getESQL(EntityType.host, { lower: 'abel', upper: 'zuzanna' }, 10000, 3500);
@@ -27,6 +36,7 @@ describe('Calculate risk scores with ESQL', () => {
 
     it('builds resolution composite query for lookup index pagination', () => {
       const query = getResolutionCompositeQuery(
+        EntityType.user,
         '.entity_analytics.risk_score.lookup-default',
         1000,
         {
@@ -38,8 +48,11 @@ describe('Calculate risk scores with ESQL', () => {
         index: '.entity_analytics.risk_score.lookup-default',
         size: 0,
         query: {
-          term: {
-            relationship_type: 'entity.relationships.resolution.resolved_to',
+          bool: {
+            filter: [
+              { term: { relationship_type: 'entity.relationships.resolution.resolved_to' } },
+              { prefix: { resolution_target_id: 'user:' } },
+            ],
           },
         },
         aggs: {
@@ -56,6 +69,7 @@ describe('Calculate risk scores with ESQL', () => {
 
     it('scopes query to targetEntityIds when they are provided', () => {
       const query = getResolutionCompositeQuery(
+        EntityType.user,
         '.entity_analytics.risk_score.lookup-default',
         1000,
         undefined,
@@ -67,14 +81,33 @@ describe('Calculate risk scores with ESQL', () => {
       });
     });
 
-    it('falls back to relationship_type term query when targetEntityIds is undefined', () => {
-      const query = getResolutionCompositeQuery(
+    it('limits resolution pages to targets of the entity type being scored', () => {
+      const hostQuery = getResolutionCompositeQuery(
+        EntityType.host,
+        '.entity_analytics.risk_score.lookup-default',
+        1000
+      );
+      const userQuery = getResolutionCompositeQuery(
+        EntityType.user,
         '.entity_analytics.risk_score.lookup-default',
         1000
       );
 
-      expect(query.query).toEqual({
-        term: { relationship_type: 'entity.relationships.resolution.resolved_to' },
+      expect(hostQuery.query).toEqual({
+        bool: {
+          filter: [
+            { term: { relationship_type: 'entity.relationships.resolution.resolved_to' } },
+            { prefix: { resolution_target_id: 'host:' } },
+          ],
+        },
+      });
+      expect(userQuery.query).toEqual({
+        bool: {
+          filter: [
+            { term: { relationship_type: 'entity.relationships.resolution.resolved_to' } },
+            { prefix: { resolution_target_id: 'user:' } },
+          ],
+        },
       });
     });
 
@@ -94,6 +127,105 @@ describe('Calculate risk scores with ESQL', () => {
       expect(query).toContain('resolution_target_id IN ("user:target-a", "user:target-z")');
       expect(query).toContain('BY resolution_target_id');
       expect(query).toContain('contributing_entities_raw = VALUES(entity_with_rel)');
+    });
+
+    it('keeps the alert timestamp when joining lookup rows that have their own', () => {
+      const query = getResolutionScoreESQLByIds(
+        EntityType.user,
+        ['user:target-a'],
+        5000,
+        1000,
+        '.alerts-security.alerts-default',
+        '.entity_analytics.risk_score.lookup-default'
+      );
+
+      const renameIndex = query.indexOf('| RENAME @timestamp as time');
+      expect(renameIndex).toBeGreaterThan(-1);
+      expect(renameIndex).toBeLessThan(query.indexOf('| LOOKUP JOIN'));
+    });
+
+    it("selects a page of resolution groups by target range and this run's lookup rows", () => {
+      const query = getResolutionScoreESQLByRange(
+        EntityType.user,
+        { lower: 'user:target-a', upper: 'user:target-m' },
+        'run-1',
+        5000,
+        1000,
+        '.alerts-security.alerts-default',
+        '.entity_analytics.risk_score.lookup-default'
+      );
+
+      expect(query).toContain(
+        '| WHERE calculation_run_id == "run-1" AND resolution_target_id > "user:target-a" AND resolution_target_id <= "user:target-m"'
+      );
+      expect(query).not.toContain('resolution_target_id IN (');
+      expect(query).toContain('BY resolution_target_id');
+      expect(query.indexOf('| RENAME @timestamp as time')).toBeLessThan(
+        query.indexOf('| LOOKUP JOIN')
+      );
+    });
+
+    it('omits the lower bound on the first page of resolution groups', () => {
+      const query = getResolutionScoreESQLByRange(
+        EntityType.user,
+        { upper: 'user:target-m' },
+        'run-1',
+        5000,
+        1000,
+        '.alerts-security.alerts-default',
+        '.entity_analytics.risk_score.lookup-default'
+      );
+
+      expect(query).toContain(
+        '| WHERE calculation_run_id == "run-1" AND resolution_target_id <= "user:target-m"'
+      );
+      expect(query).not.toContain('resolution_target_id >');
+    });
+
+    it("keeps only this run's lookup rows, so a previous run's leftover rows form no groups", () => {
+      // The lookup index is pruned after scoring, so while a run scores, a target whose aliases
+      // have all moved elsewhere still has the row the previous run wrote for it.
+      const query = getResolutionScoreESQLByRange(
+        EntityType.user,
+        { upper: 'user:target-m' },
+        'run-2',
+        5000,
+        1000,
+        '.alerts-security.alerts-default',
+        '.entity_analytics.risk_score.lookup-default'
+      );
+
+      expect(query).toContain('| WHERE calculation_run_id == "run-2" AND');
+      expect(query).not.toContain('resolution_target_id IS NOT NULL');
+    });
+
+    it('escapes quote and backslash characters in resolution target bounds', () => {
+      const query = getResolutionScoreESQLByRange(
+        EntityType.user,
+        { lower: 'user:with"quote', upper: 'user:with\\slash' },
+        'run-1',
+        5000,
+        1000,
+        '.alerts-security.alerts-default',
+        '.entity_analytics.risk_score.lookup-default'
+      );
+
+      expect(query).toContain('resolution_target_id > "user:with\\"quote"');
+      expect(query).toContain('resolution_target_id <= "user:with\\\\slash"');
+    });
+
+    it('throws when resolution target bounds contain a control character', () => {
+      expect(() =>
+        getResolutionScoreESQLByRange(
+          EntityType.user,
+          { lower: 'user:target-a', upper: 'user:bad\u000A' },
+          'run-1',
+          5000,
+          1000,
+          '.alerts-security.alerts-default',
+          '.entity_analytics.risk_score.lookup-default'
+        )
+      ).toThrow('Entity ID contains an unsupported control character');
     });
 
     it('escapes quote and backslash characters in resolution target ID list', () => {
@@ -159,6 +291,31 @@ describe('Calculate risk scores with ESQL', () => {
         )
       ).toThrow('Entity ID contains an unsupported control character');
     });
+
+    it('ranks risk inputs by the numeric risk score in every scoring query', () => {
+      const queries = [
+        getESQL(EntityType.host, { lower: 'abel', upper: 'zuzanna' }, 10000, 3500),
+        getBaseScoreESQL(
+          EntityType.host,
+          { lower: 'host:abel', upper: 'host:zuzanna' },
+          10000,
+          3500,
+          '.alerts-security.alerts-default'
+        ),
+        getResolutionScoreESQLByIds(
+          EntityType.host,
+          ['host:target-a'],
+          10000,
+          3500,
+          '.alerts-security.alerts-default',
+          '.entity_analytics.risk_score.lookup-default'
+        ),
+      ];
+
+      for (const query of queries) {
+        expect(query).toContain('risk_inputs = TOP(risk_score, 10, "desc", input)');
+      }
+    });
   });
 
   describe('stored-EUID fast path', () => {
@@ -181,6 +338,15 @@ describe('Calculate risk scores with ESQL', () => {
 
         expect(script.source).toContain("__id.startsWith('user:')");
         expect(script.source).not.toContain("__id.startsWith('host:')");
+      });
+
+      it('does not gate the fallback derivation on postAggFilter', () => {
+        const { script } = buildEuidRuntimeMappingWithStoredFieldFastPath(EntityType.user);
+
+        // `entity.id exists` is the postAggFilter-only arm, so its absence proves the gate was dropped.
+        expect(script.source).not.toContain(`doc.containsKey('entity.id')`);
+        // documentsFilter still applies.
+        expect(script.source).toContain(`doc.containsKey('user.name')`);
       });
     });
 

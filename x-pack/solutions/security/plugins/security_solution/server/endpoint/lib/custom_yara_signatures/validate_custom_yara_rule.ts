@@ -6,13 +6,15 @@
  */
 
 import type { OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
-import type { YaraCompiledRule, YaraMetaKeyOfInterest, YaraValidateResult } from '../libyara';
+import type { YaraCompiledRule, YaraValidateResult } from '../libyara';
 import { validateYaraRule } from '../libyara';
-import { MAX_YARA_RULE_CONTENT_BYTE_LENGTH, MAXIMUM_RULE_IDENTIFIER_LENGTH } from './constants';
-
-const VALID_META_ARCH_VALUES = Object.freeze(['x86', 'arm64']);
-const VALID_META_SCAN_TYPE_VALUE = 'Memory';
-const VALID_META_OS_VALUES = Object.freeze(['Windows', 'Linux', 'MacOS']);
+import {
+  YaraMetaKeyOfInterest,
+  MetaArchValue,
+  MetaScanTypeValue,
+  MetaOsValue,
+} from '../../../../common/endpoint/types';
+import { MAX_YARA_RULE_CONTENT_BYTE_LENGTH } from './constants';
 
 const hasDuplicateValues = (values: string[]): boolean => new Set(values).size !== values.length;
 
@@ -49,12 +51,13 @@ export const validateCustomYaraRule = async (
   const textLines = ruleText.split('\n');
 
   for (const rule of result.rules) {
-    validateRuleIdentifierLength(rule, textLines, result);
     validateMetaFieldsOfInterestForDuplication(rule, textLines, result);
     validateMetaArchField(rule, textLines, result);
     validateMetaScanTypeField(rule, textLines, result);
     validateMetaOsField(rule, textLines, result, osTypes);
   }
+
+  validateMetaFieldsConsistencyAcrossRules(result.rules, textLines, result);
 
   return result;
 };
@@ -92,23 +95,6 @@ const findFirstOccurrenceLineNumberAfterLineNumber = (
   return lineIndex + 1;
 };
 
-const validateRuleIdentifierLength = (
-  rule: YaraCompiledRule,
-  textLines: string[],
-  result: YaraValidateResult
-) => {
-  if (rule.identifier.length > MAXIMUM_RULE_IDENTIFIER_LENGTH) {
-    const lineNumber = getRuleIdentifierLineNumber(textLines, rule.identifier);
-
-    result.errorCount++;
-    result.errors.push({
-      message: `Too long rule identifier "${rule.identifier}", maximum is ${MAXIMUM_RULE_IDENTIFIER_LENGTH} characters`,
-      line: lineNumber,
-      severity: 'error',
-    });
-  }
-};
-
 const validateMetaFieldsOfInterestForDuplication = (
   rule: YaraCompiledRule,
   textLines: string[],
@@ -142,12 +128,12 @@ const validateMetaArchField = (
     if (
       values.length > 2 ||
       hasDuplicateValues(values) ||
-      values.some((value) => !VALID_META_ARCH_VALUES.includes(value))
+      values.some((value) => !Object.values(MetaArchValue).includes(value as MetaArchValue))
     ) {
       const lineNumberOfRule = getRuleIdentifierLineNumber(textLines, rule.identifier);
       const lineNumber = findFirstOccurrenceLineNumberAfterLineNumber(
         textLines,
-        'arch',
+        YaraMetaKeyOfInterest.ARCH,
         lineNumberOfRule
       );
 
@@ -168,11 +154,11 @@ const validateMetaScanTypeField = (
   textLines: string[],
   result: YaraValidateResult
 ) => {
-  if (rule.meta.scan_type !== undefined && rule.meta.scan_type !== VALID_META_SCAN_TYPE_VALUE) {
+  if (rule.meta.scan_type !== undefined && rule.meta.scan_type !== MetaScanTypeValue.MEMORY) {
     const lineNumberOfRule = getRuleIdentifierLineNumber(textLines, rule.identifier);
     const lineNumber = findFirstOccurrenceLineNumberAfterLineNumber(
       textLines,
-      'scan_type',
+      YaraMetaKeyOfInterest.SCAN_TYPE,
       lineNumberOfRule
     );
 
@@ -200,12 +186,12 @@ const validateMetaOsField = (
     if (
       values.length > 3 ||
       hasDuplicateValues(values) ||
-      values.some((value) => !VALID_META_OS_VALUES.includes(value))
+      values.some((value) => !Object.values(MetaOsValue).includes(value as MetaOsValue))
     ) {
       const lineNumberOfRule = getRuleIdentifierLineNumber(textLines, rule.identifier);
       const lineNumber = findFirstOccurrenceLineNumberAfterLineNumber(
         textLines,
-        'os',
+        YaraMetaKeyOfInterest.OS,
         lineNumberOfRule
       );
 
@@ -229,7 +215,7 @@ const validateMetaOsField = (
         const lineNumberOfRule = getRuleIdentifierLineNumber(textLines, rule.identifier);
         const lineNumber = findFirstOccurrenceLineNumberAfterLineNumber(
           textLines,
-          'os',
+          YaraMetaKeyOfInterest.OS,
           lineNumberOfRule
         );
 
@@ -258,3 +244,60 @@ const shortenMetaValue = (value: string): string =>
   value.length > MAXIMUM_META_VALUE_LENGTH
     ? `${value.slice(0, MAXIMUM_META_VALUE_LENGTH)}...`
     : value;
+
+/**
+ * Within one artifact entry, meta.arch and meta.scan_type must each be either omitted on every
+ * rule or set to the same values on every rule. meta.os is excluded: a declared value is already
+ * required to match os_types, so omitting it is equivalent. A key listed in duplicateMeta is
+ * skipped: its value is omitted from rule.meta, and the duplicate-field error already rejects it.
+ */
+const validateMetaFieldsConsistencyAcrossRules = (
+  rules: YaraCompiledRule[],
+  textLines: string[],
+  result: YaraValidateResult
+) => {
+  if (rules.length < 2) {
+    return;
+  }
+
+  const [referenceRule, ...restOfRules] = rules;
+
+  const duplicatedMetaKeysInAnyRule = new Set(rules.flatMap((rule) => rule.duplicateMeta));
+
+  const metaKeysToCheckForConsistency = [
+    YaraMetaKeyOfInterest.ARCH,
+    YaraMetaKeyOfInterest.SCAN_TYPE,
+  ].filter((metaKey) => !duplicatedMetaKeysInAnyRule.has(metaKey));
+
+  for (const metaKey of metaKeysToCheckForConsistency) {
+    const referenceValue = unifyMetaFieldValues(referenceRule.meta[metaKey]);
+
+    for (const rule of restOfRules) {
+      const value = unifyMetaFieldValues(rule.meta[metaKey]);
+      if (value !== referenceValue) {
+        const lineNumberOfRule = getRuleIdentifierLineNumber(textLines, rule.identifier);
+        const lineNumber =
+          value !== undefined
+            ? findFirstOccurrenceLineNumberAfterLineNumber(textLines, metaKey, lineNumberOfRule)
+            : lineNumberOfRule;
+
+        result.errorCount++;
+        result.errors.push({
+          message: `Inconsistent "meta.${metaKey}" across rules in this entry. All rules must omit "meta.${metaKey}" or use the same value; found ${describeMetaValue(
+            referenceValue
+          )} on rule "${referenceRule.identifier}" and ${describeMetaValue(value)} on rule "${
+            rule.identifier
+          }"`,
+          line: lineNumber,
+          severity: 'error',
+        });
+      }
+    }
+  }
+};
+
+const describeMetaValue = (value: string | undefined): string =>
+  value === undefined ? 'omitted' : `"${shortenMetaValue(value)}"`;
+
+const unifyMetaFieldValues = (values?: string): string | undefined =>
+  values?.split(/, ?/).sort().join(', ') ?? undefined;

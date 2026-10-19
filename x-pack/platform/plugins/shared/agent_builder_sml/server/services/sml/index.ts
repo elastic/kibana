@@ -14,6 +14,9 @@ export type {
   SmlListItem,
   SmlSearchResult,
   SmlDocument,
+  SmlReference,
+  SmlReferenceRelation,
+  SmlWriter,
   SmlCrawlerStateDocument,
   SmlCrawler,
   SmlIndexAction,
@@ -32,4 +35,4 @@ export {
   SML_CRAWLER_TASK_TYPE,
 } from './sml_task_definitions';
 export { resolveSmlAttachItems } from './execute_sml_attach_items';
-export { smlElasticsearchIndexMappings, smlIndexName } from './sml_storage';
+export { smlIndexName } from './sml_storage';

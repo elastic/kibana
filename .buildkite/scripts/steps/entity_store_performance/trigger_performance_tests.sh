@@ -17,11 +17,10 @@ KIBANA_BUILD_ID_ARG="${KIBANA_BUILD_ID:-}"
 # Note: Using [*] instead of [@] because trigger_pipeline.ts expects a single
 # space-separated string argument that it will split. This matches the pattern
 # used in trigger_pr.sh. Values should not contain spaces.
-ts-node .buildkite/scripts/steps/trigger_pipeline.ts \
+node .buildkite/scripts/steps/trigger_pipeline.ts \
   kibana-entity-store-performance-from-pr \
   "$BUILDKITE_BRANCH" \
   "$BUILDKITE_COMMIT" \
   "$KIBANA_BUILD_ID_ARG" \
   "${GITHUB_ENV_VARS[*]}" \
   "true"
-

@@ -18,7 +18,8 @@
       "workflowsExtensions"
     ],
     "optionalPlugins": [
-      "encryptedSavedObjects"
+      "encryptedSavedObjects",
+      "usageCollection"
     ],
     "extraPublicDirs": [
       "common",

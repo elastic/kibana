@@ -53,6 +53,10 @@ dependsOn:
   - '@kbn/test-es-server'
   - '@kbn/scout'
   - '@kbn/core-feature-flags-server'
+  - '@kbn/usage-collection-plugin'
+  - '@kbn/core-saved-objects-api-server-mocks'
+  - '@kbn/core-execution-context-common'
+  - '@kbn/core-spaces-common'
 tags:
   - plugin
   - prod

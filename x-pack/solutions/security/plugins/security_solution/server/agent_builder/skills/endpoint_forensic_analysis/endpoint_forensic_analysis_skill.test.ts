@@ -6,35 +6,20 @@
  */
 
 import type { z } from '@kbn/zod/v4';
-import { z as zod } from '@kbn/zod/v4';
-import { platformCoreTools } from '@kbn/agent-builder-common';
+import { platformCoreTools, ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { isAllowedBuiltinSkill } from '@kbn/agent-builder-server/allow_lists';
-
-// The packaged Kibana server runs with --disallow-code-generation-from-strings,
-// and the jest setup mirrors that by making `new Function` throw — which is what
-// zod v4's fastpass compiler needs for schemas carrying checks. Production
-// therefore takes zod's non-jit path automatically; jitless parsing here
-// exercises the same checks instead of dying in the compiler.
-//
-// zod captures `jitless` when a schema is constructed, and the skill builds its
-// inline-tool schemas at import time — so the config has to be set before the
-// module is evaluated. Hence the dynamic import inside `beforeAll`: a static
-// import would be hoisted above the config call. (Each test file gets its own
-// module registry, so this import is also the first evaluation of the module.)
-zod.config({ jitless: true });
-
-type SkillModule = typeof import('./endpoint_forensic_analysis_skill');
-
-let ENDPOINT_FORENSIC_ANALYSIS_SKILL_ID: SkillModule['ENDPOINT_FORENSIC_ANALYSIS_SKILL_ID'];
-let ENDPOINT_FORENSIC_OSQUERY_TOOL_IDS: SkillModule['ENDPOINT_FORENSIC_OSQUERY_TOOL_IDS'];
-let endpointForensicAnalysisSkill: SkillModule['endpointForensicAnalysisSkill'];
-
-beforeAll(async () => {
-  const skillModule = await import('./endpoint_forensic_analysis_skill');
-  ENDPOINT_FORENSIC_ANALYSIS_SKILL_ID = skillModule.ENDPOINT_FORENSIC_ANALYSIS_SKILL_ID;
-  ENDPOINT_FORENSIC_OSQUERY_TOOL_IDS = skillModule.ENDPOINT_FORENSIC_OSQUERY_TOOL_IDS;
-  endpointForensicAnalysisSkill = skillModule.endpointForensicAnalysisSkill;
-});
+import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills/tools';
+import {
+  isToolHandlerStandardReturn,
+  type ToolHandlerContext,
+} from '@kbn/agent-builder-server/tools';
+import {
+  ENDPOINT_FORENSIC_ANALYSIS_SKILL_ID,
+  ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID,
+  ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID,
+  ENDPOINT_FORENSIC_OSQUERY_TOOL_IDS,
+  endpointForensicAnalysisSkill,
+} from './endpoint_forensic_analysis_skill';
 
 describe('endpointForensicAnalysisSkill', () => {
   it('uses an allow-listed built-in skill id', () => {
@@ -52,85 +37,31 @@ describe('endpointForensicAnalysisSkill', () => {
     expect(registryTools).toContain('osquery.get_live_query_results');
   });
 
-  it('exposes ES|QL and index mapping platform registry tools (read-only scope)', () => {
+  it('exposes ES|QL and index discovery platform registry tools only (read-only scope)', () => {
     const registryTools = endpointForensicAnalysisSkill.getRegistryTools?.() ?? [];
 
+    expect(registryTools).toContain(platformCoreTools.listIndices);
     expect(registryTools).toContain(platformCoreTools.getIndexMapping);
     expect(registryTools).toContain(platformCoreTools.generateEsql);
     expect(registryTools).toContain(platformCoreTools.executeEsql);
   });
 
-  it('defines the discover_telemetry and extract_iocs inline tools', async () => {
+  it('defines the telemetry discovery and IoC extraction inline tools', async () => {
     const inlineTools = (await endpointForensicAnalysisSkill.getInlineTools?.()) ?? [];
-
-    expect(inlineTools.map((tool) => tool.id)).toEqual([
-      'security.endpoint_forensic.discover_telemetry',
-      'security.endpoint_forensic.extract_iocs',
+    expect(inlineTools.map(({ id }) => id)).toEqual([
+      ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID,
+      ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID,
     ]);
   });
 
-  // github-actions review #4958365269: an empty `hosts` array built an
-  // `IN ()` ES|QL clause whose syntax error was swallowed, so a malformed call
-  // reported "no indicators found" instead of failing.
-  it('bounds extract_iocs hosts so an empty array cannot produce a false-negative', async () => {
-    const inlineTools = (await endpointForensicAnalysisSkill.getInlineTools?.()) ?? [];
-    const extractIocs = inlineTools.find(
-      (tool) => tool.id === 'security.endpoint_forensic.extract_iocs'
+  it('presents IoCs as a markdown table to the analyst and as structured categories otherwise', () => {
+    expect(endpointForensicAnalysisSkill.content).toContain(
+      '| Indicator type | Value | First seen | Source event |'
     );
-
-    expect(extractIocs).toBeDefined();
-    expect(extractIocs).toHaveProperty('schema');
-    const schema = (extractIocs as { schema: z.ZodTypeAny }).schema;
-
-    expect(schema.safeParse({ hosts: [] }).success).toBe(false);
-    expect(schema.safeParse({ hosts: Array.from({ length: 51 }, (_, i) => `h${i}`) }).success).toBe(
-      false
+    expect(endpointForensicAnalysisSkill.content).toContain(
+      'Answering with a structured output schema that has an indicators field'
     );
-    expect(schema.safeParse({ hosts: ['WKSTN-RECV01'] }).success).toBe(true);
-    expect(schema.safeParse({ hosts: ['a'.repeat(256)] }).success).toBe(false);
-  });
-
-  it('sorts IoC extraction by @timestamp ASC before LIMIT so first_seen is the earliest event', async () => {
-    const inlineTools = (await endpointForensicAnalysisSkill.getInlineTools?.()) ?? [];
-    const extractIocs = inlineTools.find(
-      (tool) => tool.id === 'security.endpoint_forensic.extract_iocs'
-    ) as { handler: (args: unknown, context: unknown) => Promise<unknown> } | undefined;
-
-    expect(extractIocs?.handler).toBeDefined();
-
-    const esqlQuery = jest.fn().mockResolvedValue({ columns: [], values: [] });
-    await extractIocs!.handler(
-      { hosts: ['WKSTN-RECV01'] },
-      { esClient: { asCurrentUser: { esql: { query: esqlQuery } } } }
-    );
-
-    expect(esqlQuery).toHaveBeenCalledTimes(1);
-    const query = esqlQuery.mock.calls[0][0].query as string;
-    expect(query).toMatch(/\| SORT @timestamp ASC \| LIMIT 500/);
-    expect(query.indexOf('| SORT @timestamp ASC')).toBeLessThan(query.indexOf('| LIMIT 500'));
-  });
-
-  it('extract_iocs filters ordinary host chatter out of network destinations', async () => {
-    const inlineTools = (await endpointForensicAnalysisSkill.getInlineTools?.()) ?? [];
-    const extractIocs = inlineTools.find(
-      (tool) => tool.id === 'security.endpoint_forensic.extract_iocs'
-    ) as { handler: (args: unknown, context: unknown) => Promise<unknown> } | undefined;
-
-    const esqlQuery = jest.fn().mockResolvedValue({
-      columns: [{ name: 'destination.ip' }, { name: 'destination.domain' }, { name: '@timestamp' }],
-      values: [
-        ['10.0.0.5', null, '2026-01-01T00:00:00Z'],
-        ['8.8.8.8', null, '2026-01-01T00:01:00Z'],
-        [null, 'updates.example.com', '2026-01-01T00:02:00Z'],
-      ],
-    });
-    await extractIocs!.handler(
-      { hosts: ['WKSTN-RECV01'] },
-      { esClient: { asCurrentUser: { esql: { query: esqlQuery } } } }
-    );
-
-    const call = esqlQuery.mock.calls[0][0].query as string;
-    expect(call).toContain('file.Ext.original.extension');
+    expect(endpointForensicAnalysisSkill.content).toContain('Do not also render the indicators');
   });
 
   it('routes conflicting antivirus / configuration issues to elastic-defend-configuration-troubleshooting', () => {
@@ -148,16 +79,7 @@ describe('endpointForensicAnalysisSkill', () => {
     );
   });
 
-  it('does not present an unsupported attack sequence as a host chronology', () => {
-    expect(endpointForensicAnalysisSkill.content).toContain(
-      'Only include events supported by query results'
-    );
-    expect(endpointForensicAnalysisSkill.content).toContain(
-      'do **not** present an expected attack sequence as that host'
-    );
-  });
-
-  it('routes the installed-but-unenrolled state to the ES|QL path (review finding 13)', () => {
+  it('routes the installed-but-unenrolled state to the ES|QL path', () => {
     expect(endpointForensicAnalysisSkill.content).toContain(
       '**If Osquery IS installed but NO agents are enrolled**'
     );
@@ -172,7 +94,7 @@ describe('endpointForensicAnalysisSkill', () => {
     expect(endpointForensicAnalysisSkill.content).toContain('NOT the same as "no agents"');
   });
 
-  it('scopes discover_telemetry to the ES|QL path only (review finding 21)', () => {
+  it('scopes discover_telemetry to the ES|QL path only', () => {
     expect(endpointForensicAnalysisSkill.content).toContain(
       '**On the ES|QL / Defend telemetry path only**'
     );
@@ -184,7 +106,7 @@ describe('endpointForensicAnalysisSkill', () => {
     );
   });
 
-  it('requires resolve_agent_ids before dispatching a live query (review finding 16)', () => {
+  it('requires resolve_agent_ids before dispatching a live query', () => {
     expect(endpointForensicAnalysisSkill.content).toContain(
       '**Always** call `osquery.resolve_agent_ids` before `osquery.run_live_query`'
     );
@@ -204,80 +126,6 @@ describe('endpointForensicAnalysisSkill', () => {
       expect(content).toContain('Do not treat rows from a partial response as complete');
     }
   );
-
-  it('excludes Windows system directories using full paths, not basenames', async () => {
-    const inlineTools = (await endpointForensicAnalysisSkill.getInlineTools?.()) ?? [];
-    const extractIocs = inlineTools.find(
-      (tool) => tool.id === 'security.endpoint_forensic.extract_iocs'
-    ) as { handler: (args: unknown, context: unknown) => Promise<unknown> };
-    const esqlQuery = jest.fn().mockResolvedValue({
-      columns: [
-        { name: 'process.executable' },
-        { name: '@timestamp' },
-        { name: 'process.parent.name' },
-      ],
-      values: [
-        ['C:\\Windows\\System32\\notepad.exe', '2026-01-01T00:00:00Z', 'parent.exe'],
-        ['C:/WINDOWS/SysWOW64/custom.exe', '2026-01-01T00:01:00Z', 'parent.exe'],
-        ['C:\\Windows\\System32\\drivers\\driver.exe', '2026-01-01T00:02:00Z', 'parent.exe'],
-        ['C:\\Users\\alice\\Downloads\\notepad.exe', '2026-01-01T00:03:00Z', 'parent.exe'],
-        ['C:/Temp/System32Payload.exe', '2026-01-01T00:04:00Z', 'parent.exe'],
-        ['/tmp/payload', '2026-01-01T00:05:00Z', 'parent.exe'],
-        ['C:/Windows/explorer.exe', '2026-01-01T00:06:00Z', 'parent.exe'],
-      ],
-    });
-
-    const response = (await extractIocs.handler(
-      { hosts: ['host-a'] },
-      { esClient: { asCurrentUser: { esql: { query: esqlQuery } } } }
-    )) as { results: Array<{ data: { iocs: { process_chain: string[] } } }> };
-
-    expect(response.results[0].data.iocs.process_chain).toEqual([
-      'parent.exe → C:\\Users\\alice\\Downloads\\notepad.exe',
-      'parent.exe → C:/Temp/System32Payload.exe',
-      'parent.exe → /tmp/payload',
-    ]);
-  });
-
-  it('keeps unrelated host hashes out of IoCs and labels them as observed evidence', async () => {
-    const inlineTools = (await endpointForensicAnalysisSkill.getInlineTools?.()) ?? [];
-    const extractIocs = inlineTools.find(
-      (tool) => tool.id === 'security.endpoint_forensic.extract_iocs'
-    ) as { handler: (args: unknown, context: unknown) => Promise<unknown> };
-    const esqlQuery = jest.fn().mockResolvedValue({
-      columns: [{ name: 'process.hash.sha256' }, { name: '@timestamp' }],
-      values: [
-        ['ordinary-app-hash', '2026-01-01T00:00:00Z'],
-        ['ordinary-app-hash', '2026-01-01T00:01:00Z'],
-        ['uncorrelated-hash', '2026-01-01T00:02:00Z'],
-        [null, '2026-01-01T00:03:00Z'],
-      ],
-    });
-
-    const response = (await extractIocs.handler(
-      { hosts: ['host-a'] },
-      { esClient: { asCurrentUser: { esql: { query: esqlQuery } } } }
-    )) as {
-      results: Array<{
-        data: {
-          iocs: { file_hashes: string[] };
-          observed_file_hashes: string[];
-          first_seen_by_category: Record<string, string>;
-          guidance: string;
-        };
-      }>;
-    };
-    const data = response.results[0].data;
-
-    expect(data.iocs.file_hashes).toEqual([]);
-    expect(data.first_seen_by_category.file_hashes).toBeUndefined();
-    expect(data.observed_file_hashes).toEqual(['ordinary-app-hash', 'uncorrelated-hash']);
-    expect(data.guidance).toContain('not indicators of compromise');
-    expect(data.guidance).toContain('correlate them with the reconstructed attack');
-    expect(endpointForensicAnalysisSkill.content).toContain(
-      'Do not put uncorrelated observed hashes in the IoC table or offer them for hunting'
-    );
-  });
 
   // github-actions review #4975398846: `osquery.*` tools are registered only
   // when the Osquery plugin's `agentBuilderTools` flag is on (default false), so
@@ -302,5 +150,130 @@ describe('endpointForensicAnalysisSkill', () => {
     expect(endpointForensicAnalysisSkill.content).not.toContain(
       '- **Always** call `osquery.check_integration` before using any other `osquery.*` tool.'
     );
+  });
+
+  describe(`${ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID} handler`, () => {
+    const catIndices = jest.fn();
+    const context = {
+      esClient: { asCurrentUser: { cat: { indices: catIndices } } },
+    } as unknown as ToolHandlerContext;
+
+    const getTool = async (): Promise<BuiltinSkillBoundedTool> => {
+      const inlineTools = (await endpointForensicAnalysisSkill.getInlineTools?.()) ?? [];
+      const tool = inlineTools.find(
+        ({ id }) => id === ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID
+      );
+      if (tool?.type !== ToolType.builtin) {
+        throw new Error(
+          `${ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID} is not a builtin inline tool`
+        );
+      }
+      return tool;
+    };
+
+    const runHandler = async (args: Record<string, unknown> = {}) => {
+      const tool = await getTool();
+      const toolReturn = await tool.handler(args, context);
+      if (!isToolHandlerStandardReturn(toolReturn)) {
+        throw new Error('discover_telemetry did not return a standard tool result');
+      }
+      expect(toolReturn.results).toHaveLength(1);
+      expect(toolReturn.results[0].type).toBe(ToolResultType.other);
+      return toolReturn.results[0].data as Record<string, unknown>;
+    };
+
+    beforeEach(() => {
+      catIndices.mockReset();
+    });
+
+    it('returns the recommended Defend index patterns even when cat.indices fails', async () => {
+      catIndices.mockRejectedValue(new Error('index_not_found_exception'));
+
+      const data = await runHandler({ hosts: ['WKSTN-RECV01'] });
+
+      expect(data.recommended_indices).toEqual([
+        'logs-endpoint.events.process-*',
+        'logs-endpoint.events.network-*',
+        'logs-endpoint.events.file-*',
+        'logs-endpoint.events.registry-*',
+      ]);
+      expect(data.available_indices).toEqual([]);
+      expect(data.scoped_hosts).toEqual(['WKSTN-RECV01']);
+      expect(data.time_window_hours).toBe(72);
+    });
+
+    it('lists available Defend indices from cat.indices', async () => {
+      catIndices.mockResolvedValue([
+        { index: 'logs-endpoint.events.process-default' },
+        { index: undefined },
+        { index: 'logs-endpoint.events.network-default' },
+      ]);
+
+      const data = await runHandler({ hosts: ['SRV-DC01'], time_window_hours: 24 });
+
+      expect(catIndices).toHaveBeenCalledWith({
+        index: 'logs-endpoint.events.*',
+        format: 'json',
+        h: 'index',
+      });
+      expect(data.available_indices).toEqual([
+        'logs-endpoint.events.process-default',
+        'logs-endpoint.events.network-default',
+      ]);
+      expect(data.scoped_hosts).toEqual(['SRV-DC01']);
+      expect(data.time_window_hours).toBe(24);
+    });
+  });
+
+  describe(`${ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID} handler`, () => {
+    const getTool = async (): Promise<BuiltinSkillBoundedTool> => {
+      const inlineTools = (await endpointForensicAnalysisSkill.getInlineTools?.()) ?? [];
+      const tool = inlineTools.find(({ id }) => id === ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID);
+      if (tool?.type !== ToolType.builtin) {
+        throw new Error(`${ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID} is not a builtin inline tool`);
+      }
+      return tool;
+    };
+
+    // github-actions review #4958365269: an empty `hosts` array built an
+    // `IN ()` ES|QL clause whose syntax error was swallowed, so a malformed call
+    // reported "no indicators found" instead of failing.
+    it('bounds hosts so an empty array cannot produce a false-negative', async () => {
+      const tool = await getTool();
+      const schema = (tool as unknown as { schema: z.ZodTypeAny }).schema;
+
+      expect(schema.safeParse({ hosts: [] }).success).toBe(false);
+      expect(
+        schema.safeParse({ hosts: Array.from({ length: 51 }, (_, i) => `h${i}`) }).success
+      ).toBe(false);
+      expect(schema.safeParse({ hosts: ['WKSTN-RECV01'] }).success).toBe(true);
+      expect(schema.safeParse({ hosts: ['a'.repeat(256)] }).success).toBe(false);
+    });
+
+    it('sorts by @timestamp ASC before LIMIT so the kept comment is the earliest occurrence', async () => {
+      const tool = await getTool();
+      const esqlQuery = jest.fn().mockResolvedValue({ columns: [], values: [] });
+
+      await tool.handler({ hosts: ['WKSTN-RECV01'] }, {
+        esClient: { asCurrentUser: { esql: { query: esqlQuery } } },
+      } as unknown as ToolHandlerContext);
+
+      expect(esqlQuery).toHaveBeenCalledTimes(1);
+      const query = esqlQuery.mock.calls[0][0].query as string;
+      expect(query).toMatch(/\| SORT @timestamp ASC \| LIMIT 500/);
+      expect(query.indexOf('| SORT @timestamp ASC')).toBeLessThan(query.indexOf('| LIMIT 500'));
+    });
+
+    it('escapes host names so a quote cannot break out of the ES|QL filter', async () => {
+      const tool = await getTool();
+      const esqlQuery = jest.fn().mockResolvedValue({ columns: [], values: [] });
+
+      await tool.handler({ hosts: ['host"name'] }, {
+        esClient: { asCurrentUser: { esql: { query: esqlQuery } } },
+      } as unknown as ToolHandlerContext);
+
+      const query = esqlQuery.mock.calls[0][0].query as string;
+      expect(query).toContain('"host\\"name"');
+    });
   });
 });

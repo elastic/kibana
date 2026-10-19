@@ -15,6 +15,7 @@ import { useLicenseContext } from '../../../../context/license/use_license_conte
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { getServiceMapUrl } from '../../../../embeddable/service_map/get_service_map_url';
 import { ServiceMapEmbeddable } from '../../../../embeddable/service_map/service_map_embeddable';
+import type { ServiceFlyoutOptions } from '../../../shared/service_flyout/types';
 import { LicensePrompt } from '../../../shared/license_prompt';
 import { APM_EBT_ACTIONS } from '../../ebt_constants';
 import { DisabledPrompt } from '../disabled_prompt';
@@ -47,6 +48,8 @@ export interface ContextualServiceMapSectionProps {
    * full-map href). Use for non-Controls fields such as transaction.name/type.
    */
   filterPills?: Array<{ field: string; value: string }>;
+  /** Initial query scope for the service flyout opened from this map (e.g. the host page's filters). */
+  flyoutOptions?: ServiceFlyoutOptions;
   /** Fixed graph area height when `sectionHeight` is not set. */
   panelHeight?: number;
   /** Fixed outer panel height; map graph fills remaining space below header controls. */
@@ -65,6 +68,7 @@ export function ContextualServiceMapSection({
   environment,
   kuery,
   filterPills,
+  flyoutOptions,
   panelHeight = DEFAULT_CONTEXTUAL_SERVICE_MAP_PANEL_HEIGHT,
   sectionHeight,
   embeddableMinHeight,
@@ -225,6 +229,7 @@ export function ContextualServiceMapSection({
         kuery={kuery}
         serviceName={serviceName}
         filterPills={filterPills}
+        flyoutOptions={flyoutOptions}
         core={core}
         enableContextualMap
         contextualMapBaseMaxHops={baseMaxHops}

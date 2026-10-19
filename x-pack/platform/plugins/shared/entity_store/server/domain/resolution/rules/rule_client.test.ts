@@ -11,6 +11,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { RESOLUTION_RULE_IDS, RESOLUTION_RULE_KINDS } from '../../../../common';
 import { EntityResolutionRuleTypeName } from './saved_object';
 import { ResolutionRulesClient } from './rule_client';
+import { RESOLUTION_RULE_CONFIGS } from './rule_registry';
 
 const NAMESPACE = 'default';
 
@@ -24,20 +25,17 @@ describe('ResolutionRulesClient', () => {
     };
     const client = createClient(soClient);
 
-    await expect(client.getEffectiveRules()).resolves.toEqual([
-      {
-        id: RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH,
-        kind: RESOLUTION_RULE_KINDS.SAME_FIELD,
+    const rules = await client.getEffectiveRules();
+
+    expect(rules).toEqual(
+      RESOLUTION_RULE_CONFIGS.map((config) => ({
+        id: config.id,
+        kind: config.kind,
+        description: config.description,
         managed: true,
-        enabled: true,
-      },
-      {
-        id: RESOLUTION_RULE_IDS.RELATED_USER_ALIAS_RESOLUTION,
-        kind: RESOLUTION_RULE_KINDS.RELATED_USER_ALIAS_RESOLUTION,
-        managed: true,
-        enabled: false,
-      },
-    ]);
+        enabled: config.defaultEnabled,
+      }))
+    );
   });
 
   it('merges saved object overrides over in-code defaults', async () => {
@@ -116,5 +114,27 @@ describe('ResolutionRulesClient', () => {
     const error = await client.setEnabled('unknown' as never, true).catch((err) => err);
 
     expect(SavedObjectsErrorHelpers.isNotFoundError(error)).toBe(true);
+  });
+
+  it('returns undefined for a custom rule that no longer exists', async () => {
+    const client = createClient({
+      get: jest.fn().mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError()),
+    });
+
+    await expect(client.getCustomRule('gone')).resolves.toBeUndefined();
+  });
+
+  // The maintainer prunes a rule's state only on `undefined`, so a forbidden
+  // read must never look like a deleted rule.
+  it('throws when reading a custom rule is forbidden', async () => {
+    const client = createClient({
+      get: jest
+        .fn()
+        .mockRejectedValue(SavedObjectsErrorHelpers.decorateForbiddenError(new Error('denied'))),
+    });
+
+    const error = await client.getCustomRule('rule-1').catch((err) => err);
+
+    expect(SavedObjectsErrorHelpers.isForbiddenError(error)).toBe(true);
   });
 });

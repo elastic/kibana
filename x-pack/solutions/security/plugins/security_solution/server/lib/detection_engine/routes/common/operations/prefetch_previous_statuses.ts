@@ -376,6 +376,13 @@ export const fetchAlertIdIndexWithSource = async (
     size: cappedIds.length * cap,
     ignore_unavailable: true,
   });
+  if (searchResponse.timed_out || (searchResponse._shards.failed ?? 0) > 0) {
+    throw new Error(
+      `Incomplete prefetch response (timed_out=${searchResponse.timed_out}, shards_failed=${
+        searchResponse._shards.failed ?? 0
+      }); suppressing event to avoid reporting an incomplete delta`
+    );
+  }
   const pairs: IdIndexPairWithSource[] = [];
   for (const hit of searchResponse.hits.hits) {
     if (hit._id != null && hit._index != null) {
@@ -412,6 +419,82 @@ export const fetchAllAlertIdIndexWithSource = async (
     }
   }
   return allPairs;
+};
+
+/**
+ * Returns true when applying the requested add/remove to a single document source would
+ * result in at least one actual change: an item to add that isn't already present, or an
+ * item to remove that is present.
+ */
+export const wouldChange = (
+  source: Record<string, unknown>,
+  field: string,
+  toAdd: string[],
+  toRemove: string[]
+): boolean => {
+  const current = new Set<string>(Array.isArray(source[field]) ? (source[field] as string[]) : []);
+  return toAdd.some((item) => !current.has(item)) || toRemove.some((item) => current.has(item));
+};
+
+/**
+ * Given a list of document sources fetched before an update, computes which items from
+ * the requested add/remove lists would actually change at least one document.
+ *
+ * `actualAdded` = items in `requestedToAdd` that are absent from at least one source
+ * `actualRemoved` = items in `requestedToRemove` that are present in at least one source
+ *
+ * Preserves the order of the requested arrays so downstream caps remain stable.
+ */
+export const computeActualDelta = (
+  sources: Array<Record<string, unknown>>,
+  requestedToAdd: string[],
+  requestedToRemove: string[],
+  sourceField: string
+): { actualAdded: string[]; actualRemoved: string[] } => {
+  const wouldBeAdded = new Set<string>();
+  const wouldBeRemoved = new Set<string>();
+  for (const source of sources) {
+    const current = new Set<string>(
+      Array.isArray(source[sourceField]) ? (source[sourceField] as string[]) : []
+    );
+    for (const item of requestedToAdd) {
+      if (!current.has(item)) wouldBeAdded.add(item);
+    }
+    for (const item of requestedToRemove) {
+      if (current.has(item)) wouldBeRemoved.add(item);
+    }
+  }
+  return {
+    actualAdded: [...new Set(requestedToAdd)].filter((item) => wouldBeAdded.has(item)),
+    actualRemoved: [...new Set(requestedToRemove)].filter((item) => wouldBeRemoved.has(item)),
+  };
+};
+
+// Uses raw arrays for the change predicate so over-cap items that genuinely change a document
+// still trigger; the payload uses the capped (valid*) arrays.
+export const prefetchChangedListFieldIds = async (
+  esClient: ElasticsearchClient,
+  index: string | string[],
+  ids: string[],
+  field: string,
+  rawToAdd: string[],
+  rawToRemove: string[],
+  validToAdd: string[],
+  validToRemove: string[]
+): Promise<{ changedIds: string[]; actualAdded: string[]; actualRemoved: string[] }> => {
+  const hits = await fetchAllAlertIdIndexWithSource(esClient, index, ids, [field]);
+  const changedIds = Array.from(
+    new Set(
+      hits.filter((h) => wouldChange(h.source, field, rawToAdd, rawToRemove)).map((h) => h.id)
+    )
+  );
+  const { actualAdded, actualRemoved } = computeActualDelta(
+    hits.map((h) => h.source),
+    validToAdd,
+    validToRemove,
+    field
+  );
+  return { changedIds, actualAdded, actualRemoved };
 };
 
 export const prefetchAllPreviousStatusesByIds = async (

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { basename } from 'node:path';
 import { upsertComment } from '#pipeline-utils';
 
 const COMMENT_MESSAGE = `## 🤖 Prompt Changes Detected
@@ -40,6 +41,6 @@ export async function main() {
   }
 }
 
-if (require.main === module) {
+if (basename(process.argv[1] ?? '') === 'prompt_changes_detector.ts') {
   main();
 }

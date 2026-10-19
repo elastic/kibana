@@ -14,6 +14,15 @@ import { INTERNAL_HEADERS } from '../fixtures';
 
 const isDistributable = (config: ScoutTestConfig) => Boolean(process.env.CI) || config.isCloud;
 
+// Distributable builds serve pre-built translations with immutable caching and no etag.
+// Local dev servers return `must-revalidate` + etag instead. CI covers on-merge runs against
+// a built Kibana; `config.isCloud` covers deployed cloud projects, where CI is not set.
+// TODO: Replace this with a Scout config flag (e.g. isDistributable) when available.
+const expectedCaching = (config: ScoutTestConfig) =>
+  isDistributable(config)
+    ? { cacheControl: 'public, max-age=31536000, immutable', hasEtag: false }
+    : { cacheControl: 'must-revalidate', hasEtag: true };
+
 apiTest.describe('translations', { tag: tags.deploymentAgnostic }, () => {
   let credentials: RoleApiCredentials;
 
@@ -33,16 +42,9 @@ apiTest.describe('translations', { tag: tags.deploymentAgnostic }, () => {
     expect(response.body.locale).toBe('en');
     expect(response).toHaveHeaders({ 'content-type': 'application/json; charset=utf-8' });
 
-    // Distributable builds serve pre-built translations with immutable caching and no etag.
-    // Local dev servers return `must-revalidate` + etag instead. CI covers on-merge runs against
-    // a built Kibana; `config.isCloud` covers deployed cloud projects, where CI is not set.
-    // TODO: Replace this with a Scout config flag (e.g. isDistributable) when available.
-    if (isDistributable(config)) {
-      expect(response).toHaveHeaders({
-        'cache-control': 'public, max-age=31536000, immutable',
-      });
-      expect(response.headers.etag).toBeUndefined();
-    }
+    const { cacheControl, hasEtag } = expectedCaching(config);
+    expect(response).toHaveHeaders({ 'cache-control': cacheControl });
+    expect(response.headers.etag !== undefined).toBe(hasEtag);
   });
 
   apiTest(
@@ -59,15 +61,9 @@ apiTest.describe('translations', { tag: tags.deploymentAgnostic }, () => {
       expect(response.body.locale).toBe('fr-FR');
       expect(response).toHaveHeaders({ 'content-type': 'application/json; charset=utf-8' });
 
-      if (isDistributable(config)) {
-        expect(response).toHaveHeaders({
-          'cache-control': 'public, max-age=31536000, immutable',
-        });
-        expect(response.headers.etag).toBeUndefined();
-      } else {
-        expect(response).toHaveHeaders({ 'cache-control': 'must-revalidate' });
-        expect(response.headers.etag).toBeDefined();
-      }
+      const { cacheControl, hasEtag } = expectedCaching(config);
+      expect(response).toHaveHeaders({ 'cache-control': cacheControl });
+      expect(response.headers.etag !== undefined).toBe(hasEtag);
     }
   );
 

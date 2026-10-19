@@ -2198,6 +2198,16 @@ export const labels = {
     title: i18n.translate('xpack.agentBuilder.connectors.title', {
       defaultMessage: 'Connectors',
     }),
+    techPreviewBadgeLabel: i18n.translate('xpack.agentBuilder.connectors.techPreviewBadgeLabel', {
+      defaultMessage: 'Technical preview',
+    }),
+    techPreviewBadgeDescription: i18n.translate(
+      'xpack.agentBuilder.connectors.techPreviewBadgeDescription',
+      {
+        defaultMessage:
+          'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+      }
+    ),
     pageDescription: i18n.translate('xpack.agentBuilder.connectors.pageDescription', {
       defaultMessage:
         'Manage connectors for your agents. Connectors with workflow definitions will automatically create tools when configured.',
@@ -2764,15 +2774,19 @@ export const labels = {
       defaultMessage: 'Not set',
     }),
     aiIndicesTitle: i18n.translate('xpack.agentBuilder.agentOverview.aiIndicesTitle', {
-      defaultMessage: 'AI indices',
+      defaultMessage: 'AI Indices',
     }),
     aiIndicesTooltip: i18n.translate('xpack.agentBuilder.agentOverview.aiIndicesTooltip', {
       defaultMessage:
-        'The AI indices this agent retrieves from. Default indices apply to every agent and are always included.',
+        'The AI Indices this agent retrieves from. Default indices apply to every agent and are always included.',
     }),
     preExecutionWorkflowTitle: i18n.translate(
       'xpack.agentBuilder.overview.customizations.preExecutionWorkflowTitle',
       { defaultMessage: 'Pre-execution workflows' }
+    ),
+    postExecutionWorkflowTitle: i18n.translate(
+      'xpack.agentBuilder.overview.customizations.postExecutionWorkflowTitle',
+      { defaultMessage: 'Post-execution workflows' }
     ),
     editDetails: {
       successToast: i18n.translate('xpack.agentBuilder.overview.editDetails.successToast', {
@@ -2897,6 +2911,25 @@ export const labels = {
         'xpack.agentBuilder.overview.editDetails.workflowAdminOnlyReason',
         { defaultMessage: 'Only administrators can configure pre-execution workflows.' }
       ),
+      postExecutionWorkflowTitle: i18n.translate(
+        'xpack.agentBuilder.overview.editDetails.postExecutionWorkflowTitle',
+        { defaultMessage: 'Post-execution workflow' }
+      ),
+      postExecutionWorkflowDescription: i18n.translate(
+        'xpack.agentBuilder.overview.editDetails.postExecutionWorkflowDescription',
+        {
+          defaultMessage:
+            'Runs once after the agent finishes responding. Cannot change the response.',
+        }
+      ),
+      postExecutionWorkflowLabel: i18n.translate(
+        'xpack.agentBuilder.overview.editDetails.postExecutionWorkflowLabel',
+        { defaultMessage: 'Workflows' }
+      ),
+      postExecutionWorkflowAdminOnlyReason: i18n.translate(
+        'xpack.agentBuilder.overview.editDetails.postExecutionWorkflowAdminOnlyReason',
+        { defaultMessage: 'Only administrators can configure post-round workflows.' }
+      ),
       instructionsTitle: i18n.translate(
         'xpack.agentBuilder.overview.editDetails.instructionsTitle',
         { defaultMessage: 'Custom Instructions' }
@@ -2932,24 +2965,13 @@ export const labels = {
       }),
     },
   },
-  navigationAbort: {
-    title: i18n.translate('xpack.agentBuilder.navigationAbort.title', {
-      defaultMessage: 'Abort chat request?',
-    }),
-    message: i18n.translate('xpack.agentBuilder.navigationAbort.message', {
-      defaultMessage: 'A chat request is in progress. Do you want to navigate away and abort it?',
-    }),
-    confirmButton: i18n.translate('xpack.agentBuilder.navigationAbort.confirmButton', {
-      defaultMessage: 'Yes, abort',
-    }),
-  },
   aiIndices: {
     sectionTitle: i18n.translate('xpack.agentBuilder.aiIndices.sectionTitle', {
-      defaultMessage: 'AI indices',
+      defaultMessage: 'AI Indices',
     }),
     sectionDescription: i18n.translate('xpack.agentBuilder.aiIndices.sectionDescription', {
       defaultMessage:
-        'Choose which AI indices this agent retrieves from. Default indices are always included and cannot be removed.',
+        'Choose which AI Indices this agent retrieves from. Default indices are always included and cannot be removed.',
     }),
     notAffectedByElasticCapabilities: i18n.translate(
       'xpack.agentBuilder.aiIndices.notAffectedByElasticCapabilities',
@@ -2974,23 +2996,28 @@ export const labels = {
     additionalIndicesPlaceholder: i18n.translate(
       'xpack.agentBuilder.aiIndices.additionalIndicesPlaceholder',
       {
-        defaultMessage: 'Select AI indices',
+        defaultMessage: 'Select AI Indices',
       }
     ),
     optionalLabel: i18n.translate('xpack.agentBuilder.aiIndices.optionalLabel', {
       defaultMessage: 'Optional',
     }),
+    unavailableIndicesHelpText: (ids: string) =>
+      i18n.translate('xpack.agentBuilder.aiIndices.unavailableIndicesHelpText', {
+        defaultMessage: 'Not available to you in this space: {ids}',
+        values: { ids },
+      }),
     loadErrorMessage: i18n.translate('xpack.agentBuilder.aiIndices.loadErrorMessage', {
-      defaultMessage: 'Failed to fetch AI indices',
+      defaultMessage: 'Failed to fetch AI Indices',
     }),
     loadInheritedErrorMessage: i18n.translate(
       'xpack.agentBuilder.aiIndices.loadInheritedErrorMessage',
       {
-        defaultMessage: 'Failed to fetch default AI indices',
+        defaultMessage: 'Failed to fetch default AI Indices',
       }
     ),
     warningsTitle: i18n.translate('xpack.agentBuilder.aiIndices.warningsTitle', {
-      defaultMessage: 'Some AI index details could not be loaded',
+      defaultMessage: 'Some AI Index details could not be loaded',
     }),
     warningMessage: ({ message, agentType }: { message: string; agentType?: string }) =>
       agentType
@@ -3000,7 +3027,66 @@ export const labels = {
           })
         : message,
     columnTitle: i18n.translate('xpack.agentBuilder.aiIndices.columnTitle', {
-      defaultMessage: 'AI indices',
+      defaultMessage: 'AI Indices',
     }),
   },
+  autoApprovedApis: {
+    sectionTitle: i18n.translate('xpack.agentBuilder.autoApprovedApis.sectionTitle', {
+      defaultMessage: 'Auto-approved APIs',
+    }),
+    sectionDescription: i18n.translate('xpack.agentBuilder.autoApprovedApis.sectionDescription', {
+      defaultMessage:
+        'Allow this agent to call APIs that modify or delete data without asking for confirmation, including any subagents it delegates to.',
+    }),
+    elasticsearchLabel: i18n.translate('xpack.agentBuilder.autoApprovedApis.elasticsearchLabel', {
+      defaultMessage: 'Elasticsearch APIs',
+    }),
+    kibanaLabel: i18n.translate('xpack.agentBuilder.autoApprovedApis.kibanaLabel', {
+      defaultMessage: 'Kibana APIs',
+    }),
+    placeholder: i18n.translate('xpack.agentBuilder.autoApprovedApis.placeholder', {
+      defaultMessage: 'Select APIs',
+    }),
+    optionalLabel: i18n.translate('xpack.agentBuilder.autoApprovedApis.optionalLabel', {
+      defaultMessage: 'Optional',
+    }),
+    allElasticsearchApisDescription: (count: number) =>
+      i18n.translate('xpack.agentBuilder.autoApprovedApis.allElasticsearchApisDescription', {
+        defaultMessage:
+          '{count, plural, one {# destructive Elasticsearch API} other {All # destructive Elasticsearch APIs}}',
+        values: { count },
+      }),
+    allKibanaApisDescription: (count: number) =>
+      i18n.translate('xpack.agentBuilder.autoApprovedApis.allKibanaApisDescription', {
+        defaultMessage:
+          '{count, plural, one {# destructive Kibana API} other {All # destructive Kibana APIs}}',
+        values: { count },
+      }),
+    namespaceApisDescription: (namespace: string, count: number) =>
+      i18n.translate('xpack.agentBuilder.autoApprovedApis.namespaceApisDescription', {
+        defaultMessage:
+          '{count, plural, one {# destructive API in {namespace}} other {All # destructive APIs in {namespace}}}',
+        values: { namespace, count },
+      }),
+    restrictedHelpText: i18n.translate('xpack.agentBuilder.autoApprovedApis.restrictedHelpText', {
+      defaultMessage:
+        'Only the owner, managers, or an administrator can change the auto-approved APIs.',
+    }),
+    defaultAgentRestrictedHelpText: i18n.translate(
+      'xpack.agentBuilder.autoApprovedApis.defaultAgentRestrictedHelpText',
+      {
+        defaultMessage:
+          'Only administrators can change the auto-approved APIs of the default agent.',
+      }
+    ),
+  },
+};
+
+// Shared badge config for the Connectors "Technical preview" label, reused across the
+// manage/agent connectors page headers, the connectors capability card, and the agent
+// connectors empty state — kept as one constant so wording/size stay in sync.
+export const connectorsTechPreviewBadgeProps = {
+  label: labels.connectors.techPreviewBadgeLabel,
+  tooltipContent: labels.connectors.techPreviewBadgeDescription,
+  size: 'm' as const,
 };

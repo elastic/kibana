@@ -10,10 +10,15 @@ import type { EuiThemeColorModeStandard, EuiThemeComputed } from '@elastic/eui';
 import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
+import {
+  getLinkBasePath,
+  fetchEsqlData,
+  fillTemplate,
+  sanitizeHtml,
+  applyHtmlTheme,
+  type EsqlDataResult,
+} from '@kbn/custom-content-renderer';
 import { getServices } from '../services';
-import { fetchEsqlData, type EsqlDataResult } from '../utils/fetch_esql_data';
-import { fillTemplate } from '../utils/fill_template';
-import { sanitizeHtml, applyHtmlTheme } from '../utils/prepare_html';
 import { flyoutReducer } from './flyout_reducer';
 
 export interface EditFlyoutState {
@@ -178,7 +183,9 @@ export const useEditFlyoutState = ({
         rawHtml = state.draftTemplate;
       }
       if (!controller.signal.aborted && draftVersionRef.current === snapVersion) {
-        onRunPreview(applyHtmlTheme(sanitizeHtml(rawHtml), colorMode, euiTheme));
+        onRunPreview(
+          applyHtmlTheme(sanitizeHtml(rawHtml, getLinkBasePath(core.http)), colorMode, euiTheme)
+        );
       }
     } catch (err) {
       if (!controller.signal.aborted && !(err instanceof Error && err.name === 'AbortError')) {

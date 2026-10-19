@@ -201,7 +201,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       types: ['string'],
       help: i18n.translate('expressionMetricVis.function.secondaryNameVisibility.help', {
         defaultMessage:
-          'Specifies whether the Secondary Metric name is hidden, or placed before or after the value',
+          'Specifies whether the Secondary Metric name is hidden, shown in a tooltip, or placed before or after the value',
       }),
       required: false,
     },
