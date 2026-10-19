@@ -56,6 +56,10 @@ const setup = () => {
         return document;
       }
     ),
+    delete: jest.fn(async (_type: string, id: string, options: { namespace?: string }) => {
+      documents.delete(key(id, options.namespace));
+      return {};
+    }),
   };
   const source = { enabled: true, esql_updated_at: 'revision-1' };
   const sourcesClient = { get: jest.fn(async () => ({ source })) } as unknown as SourcesClient;
@@ -138,6 +142,23 @@ describe('source knowledge write coordination', () => {
     await expect(client.write({ sourceId: 'source', run: async () => {} })).rejects.toThrow(
       'has changed'
     );
+  });
+
+  it('deletes the state object of a retired source only after its cleanup succeeded', async () => {
+    const { client, documents } = setup();
+
+    await expect(
+      client.retire({
+        sourceId: 'source',
+        run: async () => {
+          throw new Error('cleanup failed');
+        },
+      })
+    ).rejects.toThrow('cleanup failed');
+    expect(documents.has('default:source')).toBe(true);
+
+    await client.retire({ sourceId: 'source', run: async () => {} });
+    expect(documents.has('default:source')).toBe(false);
   });
 
   it('isolates equal source ids in different spaces', async () => {

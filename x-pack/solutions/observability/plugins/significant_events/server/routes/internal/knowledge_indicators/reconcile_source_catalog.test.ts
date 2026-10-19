@@ -138,6 +138,7 @@ describe('reconcileSourceCatalog', () => {
         );
       }),
       write: jest.fn(),
+      retire: jest.fn(),
     };
 
     await expect(
@@ -169,6 +170,7 @@ describe('reconcileSourceCatalog', () => {
         });
       }),
       write: jest.fn(),
+      retire: jest.fn(),
     };
     const scheduleSourceOnboarding = jest.fn(async () => true);
 
@@ -206,6 +208,7 @@ describe('reconcileSourceCatalog', () => {
         return run({ revision: undefined, onboardingScheduled: false, lease: null }, jest.fn());
       }),
       write: jest.fn(),
+      retire: jest.fn(),
     };
 
     const disabled = makeSource({ id: 'disabled-source', enabled: false });
@@ -605,6 +608,7 @@ describe('durable source revision reconciliation', () => {
     const sourceKnowledgeState: SourceKnowledgeStateClient = {
       runExclusive: jest.fn(async ({ run }) => run({ ...state }, checkpoint)),
       write: jest.fn(),
+      retire: jest.fn(),
     };
     const scheduleSourceOnboarding = jest.fn(async () => true);
     const kiClient = makeKiClient();

@@ -65,6 +65,12 @@ export interface SourceKnowledgeStateClient {
       checkpoint: (state: Partial<SourceKnowledgeState>) => Promise<void>
     ) => Promise<T>;
   }): Promise<T>;
+  /**
+   * Runs the cleanup of a source that left the catalog, then deletes its state object. Unlike
+   * `runExclusive`, which creates the object, this leaves nothing behind. When `run` fails the
+   * object is kept, so the next call retries.
+   */
+  retire(args: { sourceId: string; run: () => Promise<void> }): Promise<void>;
   /** Rejects results of an obsolete query, disabled source, or unfinished invalidation. */
   write<T>(args: {
     sourceId: string;
@@ -156,6 +162,10 @@ export const createSourceKnowledgeStateClient = ({
 
   return {
     runExclusive,
+    retire: async ({ sourceId, run }) => {
+      await runExclusive({ sourceId, run });
+      await repository.delete(SOURCE_KNOWLEDGE_STATE_TYPE, sourceId, { namespace: space });
+    },
     write: ({ sourceId, expectedRevision, allowDisabled = false, run }) =>
       runExclusive({
         sourceId,
