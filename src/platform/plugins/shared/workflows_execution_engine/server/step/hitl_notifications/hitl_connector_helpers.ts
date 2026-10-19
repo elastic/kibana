@@ -19,6 +19,42 @@ export function assertConnectorSucceeded(result: {
   throw new Error(result.serviceMessage ?? result.message ?? 'Connector execution failed');
 }
 
+const HITL_WORD_JOINER = '\u2060';
+
+/** Keeps `http://` and `https://` from becoming an autolink. The text still reads as the URL. */
+function breakHitlSchemeUrls(value: string): string {
+  return value.replace(/https?:\/\//gi, (scheme) => `${scheme.slice(0, -2)}${HITL_WORD_JOINER}//`);
+}
+
+/** Escapes generated email text so it cannot add a markdown link. */
+export function escapeHitlEmailMarkdown(value: string): string {
+  return breakHitlSchemeUrls(
+    value.replace(/\\/g, '\\\\').replace(/[\[\]()<>]/g, (char) => `\\${char}`)
+  );
+}
+
+/** Escapes generated Slack mrkdwn so it cannot open an explicit link. */
+export function escapeSlackMrkdwnText(value: string): string {
+  return breakHitlSchemeUrls(
+    value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  );
+}
+
+/** Collapses line breaks so a label stays inside one generated link. */
+export function flattenHitlLinkLabel(value: string): string {
+  return value.replace(/[\r\n\u2028\u2029]+/g, ' ');
+}
+
+/** Escapes a label used inside a Slack `<url|label>` link. */
+export function escapeSlackMrkdwnLabel(value: string): string {
+  return escapeSlackMrkdwnText(flattenHitlLinkLabel(value)).replace(/\|/g, '\uff5c');
+}
+
+/** Escapes `&` in a resume URL placed inside Slack mrkdwn. */
+export function escapeSlackMrkdwnUrl(url: string): string {
+  return url.replace(/&/g, '&amp;');
+}
+
 export type SlackApiChannelTarget = { channelNames: string[] } | { channelIds: string[] };
 
 /** Maps a HITL `channels.slack_api.channels` entry to the Slack API connector param. */

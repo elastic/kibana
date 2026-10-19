@@ -119,6 +119,24 @@ describe('send_wait_for_approval_notifications', () => {
       abortController: new AbortController(),
     };
 
+    it('escapes Slack step text and labels without changing the resume links', async () => {
+      const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+      await sendWaitForApprovalNotifications({
+        ...baseNotifyArgs,
+        message: 'See <https://evil.example|click>',
+        approveLabel: 'Approve|https://evil.example',
+        channels: {
+          slack: { 'connector-id': 'slack-webhook-1' },
+        },
+        connectorExecutor: { execute } as never,
+      });
+
+      expect(execute.mock.calls[0][0].input.message).toBe(
+        'See &lt;https:\u2060//evil.example|click&gt;\n\n<https://kibana.example/approve|Approve\uff5chttps:\u2060//evil.example>  <https://kibana.example/reject|Decline>'
+      );
+    });
+
     it('sends webhook slack notification with mrkdwn-safe resume links', async () => {
       const execute = jest.fn().mockResolvedValue({ status: 'ok' });
       const resumeLinksWithQuery = {

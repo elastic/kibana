@@ -69,6 +69,42 @@ describe('build_hitl_email_notification', () => {
       ).toBe('Please respond\n\n[Open form](https://kibana.example/form)');
     });
 
+    it('keeps step text and labels from adding a link beside the ones we generate', () => {
+      expect(
+        buildDefaultHitlInputEmailMessage({
+          stepMessage: 'See [click](https://evil.example)',
+          formUrl: 'https://kibana.example/form',
+        })
+      ).toBe(
+        'See \\[click\\]\\(https:\u2060//evil.example\\)\n\n[Open form](https://kibana.example/form)'
+      );
+      expect(
+        buildDefaultHitlApprovalEmailMessage({
+          message: 'Approve?',
+          approveLabel: 'Approve](https://evil.example)',
+          rejectLabel: 'Decline',
+          approveUrl: 'https://kibana.example/approve',
+          rejectUrl: 'https://kibana.example/reject',
+        })
+      ).toBe(
+        'Approve?\n\n[Approve\\]\\(https:\u2060//evil.example\\)](https://kibana.example/approve)  [Decline](https://kibana.example/reject)'
+      );
+    });
+
+    it('keeps a newline in an approval label inside the generated link', () => {
+      expect(
+        buildDefaultHitlApprovalEmailMessage({
+          message: 'Line one\nhttps://elastic.co',
+          approveLabel: 'Approve\nhttps://evil.example',
+          rejectLabel: 'Decline\r\nnow',
+          approveUrl: 'https://kibana.example/approve',
+          rejectUrl: 'https://kibana.example/reject',
+        })
+      ).toBe(
+        'Line one\nhttps:\u2060//elastic.co\n\n[Approve https:\u2060//evil.example](https://kibana.example/approve)  [Decline now](https://kibana.example/reject)'
+      );
+    });
+
     it('builds waitForApproval markdown with approve and reject links', () => {
       expect(
         buildDefaultHitlApprovalEmailMessage({

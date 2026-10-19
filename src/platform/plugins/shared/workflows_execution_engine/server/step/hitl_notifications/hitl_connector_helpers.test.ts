@@ -9,7 +9,10 @@
 
 import {
   assertConnectorSucceeded,
+  escapeHitlEmailMarkdown,
   escapeServiceNowCommentText,
+  escapeSlackMrkdwnLabel,
+  escapeSlackMrkdwnText,
   escapeTeamsHtml,
   fitHitlTextPreservingSuffix,
   SERVICENOW_COMMENT_MAX_LENGTH,
@@ -95,6 +98,33 @@ describe('fitHitlTextPreservingSuffix', () => {
   it('throws when the links alone exceed the limit', () => {
     expect(() => fitHitlTextPreservingSuffix('prompt', 'x'.repeat(11), 10)).toThrow(
       'exceed the 10 character connector limit'
+    );
+  });
+});
+
+describe('generated notification text', () => {
+  it('escapes email markdown link syntax and keeps a scheme URL from autolinking', () => {
+    expect(escapeHitlEmailMarkdown('See [click](https://evil.example)')).toBe(
+      'See \\[click\\]\\(https:\u2060//evil.example\\)'
+    );
+    expect(escapeHitlEmailMarkdown('is https://elastic.co a valid indicator')).toBe(
+      'is https:\u2060//elastic.co a valid indicator'
+    );
+    expect(escapeHitlEmailMarkdown('see www.elastic.co')).toBe('see www.elastic.co');
+  });
+
+  it('escapes Slack mrkdwn link syntax and keeps a scheme URL from autolinking', () => {
+    expect(escapeSlackMrkdwnText('See <https://evil.example|click> & more')).toBe(
+      'See &lt;https:\u2060//evil.example|click&gt; &amp; more'
+    );
+  });
+
+  it('keeps a Slack link label from splitting the generated link', () => {
+    expect(escapeSlackMrkdwnLabel('Approve|https://evil.example')).toBe(
+      'Approve\uff5chttps:\u2060//evil.example'
+    );
+    expect(escapeSlackMrkdwnLabel('Approve\nhttps://evil.example')).toBe(
+      'Approve https:\u2060//evil.example'
     );
   });
 });

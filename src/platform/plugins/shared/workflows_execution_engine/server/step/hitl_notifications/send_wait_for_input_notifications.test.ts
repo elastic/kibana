@@ -13,6 +13,26 @@ import { sendWaitForInputNotifications } from './send_wait_for_input_notificatio
 describe('sendWaitForInputNotifications', () => {
   const renderTemplate = (template: string) => template;
 
+  it('escapes a default Slack API section so the step text cannot add a link', async () => {
+    const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+    await sendWaitForInputNotifications({
+      channels: {
+        slack_api: { 'connector-id': 'slack-api-1', channels: ['C0123'] },
+      },
+      stepMessage: 'See <https://evil.example|click>',
+      formUrl: 'https://kibana.example/form',
+      kibanaUrl: 'https://kibana.example',
+      renderTemplate,
+      connectorExecutor: { execute } as never,
+      abortController: new AbortController(),
+    });
+
+    const blocks = JSON.parse(execute.mock.calls[0][0].input.subActionParams.text).blocks;
+    expect(blocks[0].text.text).toBe('See &lt;https:\u2060//evil.example|click&gt;');
+    expect(blocks[1].type).toBe('actions');
+  });
+
   it('sends slack_api #channel values as channelNames and ids as channelIds', async () => {
     const execute = jest.fn().mockResolvedValue({ status: 'ok' });
 
