@@ -8,11 +8,18 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { SourcesClient } from '@kbn/nightshift-sources-plugin/server';
+import type { SourceWriteConflictReason } from '@kbn/significant-events-schema';
 import { createSourceKnowledgeStateClient } from './source_knowledge_state';
 
 type State = Parameters<
   Parameters<ReturnType<typeof createSourceKnowledgeStateClient>['runExclusive']>[0]['run']
 >[0];
+
+/** The 409 a caller sees: the status and the reason the route puts on the wire. */
+const conflict = (reason: SourceWriteConflictReason) => ({
+  statusCode: 409,
+  data: { reason },
+});
 
 const setup = () => {
   const documents = new Map<string, { attributes: State; version: string }>();
@@ -106,7 +113,7 @@ describe('source knowledge write coordination', () => {
     const staleWrite = jest.fn(async () => {});
     await expect(
       client.write({ sourceId: 'source', expectedRevision: 'revision-1', run: staleWrite })
-    ).rejects.toThrow('has changed');
+    ).rejects.toMatchObject(conflict('stale_revision'));
     expect(cleanup).toHaveBeenCalledTimes(1);
     expect(staleWrite).not.toHaveBeenCalled();
     await expect(
@@ -135,8 +142,8 @@ describe('source knowledge write coordination', () => {
       onboardingScheduled: false,
       lease: null,
     });
-    await expect(client.write({ sourceId: 'source', run: async () => {} })).rejects.toThrow(
-      'has changed'
+    await expect(client.write({ sourceId: 'source', run: async () => {} })).rejects.toMatchObject(
+      conflict('reconcile_pending')
     );
   });
 
@@ -154,7 +161,9 @@ describe('source knowledge write coordination', () => {
     const { client, source } = setup();
     source.enabled = false;
     const run = jest.fn(async () => {});
-    await expect(client.write({ sourceId: 'source', run })).rejects.toThrow('has changed');
+    await expect(client.write({ sourceId: 'source', run })).rejects.toMatchObject(
+      conflict('source_disabled')
+    );
     expect(run).not.toHaveBeenCalled();
   });
 
@@ -167,7 +176,7 @@ describe('source knowledge write coordination', () => {
     );
     await expect(
       client.write({ sourceId: 'source', allowDisabled: true, expectedRevision: 'old', run })
-    ).rejects.toThrow('has changed');
+    ).rejects.toMatchObject(conflict('stale_revision'));
     expect(run).toHaveBeenCalledTimes(1);
   });
 
@@ -194,7 +203,7 @@ describe('source knowledge write coordination', () => {
       await jest.advanceTimersByTimeAsync(40 * 60_000);
       await expect(
         client.runExclusive({ sourceId: 'source', run: async () => {} })
-      ).rejects.toThrow('being updated');
+      ).rejects.toMatchObject(conflict('lease_held'));
     } finally {
       releaseWrite();
       await write;
@@ -281,7 +290,7 @@ describe('source knowledge write coordination', () => {
       expect(write.isSettled()).toBe(false);
       await jest.advanceTimersByTimeAsync(1);
 
-      await expect(write.promise).rejects.toThrow('being updated');
+      await expect(write.promise).rejects.toMatchObject(conflict('lease_held'));
       expect(run).not.toHaveBeenCalled();
     });
 
@@ -302,7 +311,7 @@ describe('source knowledge write coordination', () => {
       await jest.advanceTimersByTimeAsync(0);
 
       expect(write.isSettled()).toBe(true);
-      await expect(write.promise).rejects.toThrow('has changed');
+      await expect(write.promise).rejects.toMatchObject(conflict('stale_revision'));
       expect(run).not.toHaveBeenCalled();
     });
 

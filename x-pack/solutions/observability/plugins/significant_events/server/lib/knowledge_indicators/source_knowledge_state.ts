@@ -11,7 +11,10 @@ import type { SavedObjectsClientContract, SavedObjectsType } from '@kbn/core/ser
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import type { SourcesClient } from '@kbn/nightshift-sources-plugin/server';
-import { StatusError } from '../errors/status_error';
+import {
+  getSourceWriteConflictReason,
+  SourceWriteConflictError,
+} from '../errors/source_write_conflict_error';
 
 /** Internal checkpoint and write lease for a source in one space. */
 export const SOURCE_KNOWLEDGE_STATE_TYPE = 'nightshift-source-knowledge-state';
@@ -61,17 +64,16 @@ export const SOURCE_WRITE_LEASE_WAIT_MS = 5_000;
 const LEASE_RETRY_MIN_DELAY_MS = 100;
 const LEASE_RETRY_MAX_DELAY_MS = 1_000;
 
-/** The 409 for a held lease, told apart from the other 409s so only this one is waited out. */
-class WriteLeaseHeldError extends StatusError {
-  constructor() {
-    super('Source knowledge is being updated; retry after the current write finishes', 409);
-  }
-}
+const createLeaseHeldError = () =>
+  new SourceWriteConflictError(
+    'lease_held',
+    'Source knowledge is being updated; retry after the current write finishes'
+  );
 
 /** Losing the race to take the lease means another writer holds it. */
 const rethrowConflictAsLeaseHeld = (error: unknown): never => {
   if (error instanceof Error && SavedObjectsErrorHelpers.isConflictError(error)) {
-    throw new WriteLeaseHeldError();
+    throw createLeaseHeldError();
   }
   throw error;
 };
@@ -90,7 +92,7 @@ const retryWhileLeaseHeld = async <T>(maxWaitMs: number, attempt: () => Promise<
       return await attempt();
     } catch (error) {
       const remainingMs = maxWaitMs - (Date.now() - startedAt);
-      if (!(error instanceof WriteLeaseHeldError) || remainingMs <= 0) {
+      if (getSourceWriteConflictReason(error) !== 'lease_held' || remainingMs <= 0) {
         throw error;
       }
       await sleep(Math.min(delayMs, remainingMs));
@@ -150,7 +152,7 @@ export const createSourceKnowledgeStateClient = ({
       }
     }
     if (stored?.attributes.lease && stored.attributes.lease.expiresAt > Date.now()) {
-      throw new WriteLeaseHeldError();
+      throw createLeaseHeldError();
     }
     const lease = { owner: randomUUID(), expiresAt: Date.now() + WRITE_LEASE_MS };
     let state: SourceKnowledgeState = { ...stored?.attributes, lease };
@@ -211,14 +213,22 @@ export const createSourceKnowledgeStateClient = ({
       sourceId,
       run: async (state, checkpoint) => {
         const { source } = await sourcesClient.get(sourceId);
-        if (
-          (!source.enabled && !allowDisabled) ||
-          (expectedRevision !== undefined && expectedRevision !== source.esql_updated_at) ||
-          (state.revision !== undefined && state.revision !== source.esql_updated_at)
-        ) {
-          throw new StatusError(
-            'Source knowledge has changed; onboard the current source query before writing results',
-            409
+        if (!source.enabled && !allowDisabled) {
+          throw new SourceWriteConflictError(
+            'source_disabled',
+            'The source is disabled; enable it before writing results'
+          );
+        }
+        if (expectedRevision !== undefined && expectedRevision !== source.esql_updated_at) {
+          throw new SourceWriteConflictError(
+            'stale_revision',
+            'The source query changed since this request was prepared; reload and try again'
+          );
+        }
+        if (state.revision !== undefined && state.revision !== source.esql_updated_at) {
+          throw new SourceWriteConflictError(
+            'reconcile_pending',
+            'The source query changed and its knowledge is still being reset; retry shortly'
           );
         }
         if (state.revision === undefined) {
