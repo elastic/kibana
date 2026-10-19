@@ -93,4 +93,58 @@ describe('run quota settings repository', () => {
       },
     });
   });
+
+  it('merges concurrent category activation while normalizing legacy disabled limits', async () => {
+    const repository = makeRepository();
+    const legacy: RunQuotaSettingsAttributes = {
+      enabled: false,
+      limits: {
+        detection: 100,
+        investigation: 30,
+        ki_extraction: 20,
+        future_group: 9,
+      },
+    };
+    const concurrentWinner: RunQuotaSettingsAttributes = {
+      enabled: true,
+      limits: {
+        detection: 15,
+        investigation: 0,
+        ki_extraction: 0,
+        future_group: 9,
+      },
+    };
+    repository.get
+      .mockResolvedValueOnce(makeSavedObject(legacy))
+      .mockResolvedValueOnce(makeSavedObject(concurrentWinner, 'WzIsMV0='));
+    repository.update
+      .mockRejectedValueOnce(SavedObjectsErrorHelpers.createConflictError('settings', 'settings'))
+      .mockImplementation(async (_type, _id, attributes) =>
+        makeSavedObject(attributes as RunQuotaSettingsAttributes, 'WzMsMV0=')
+      );
+
+    await expect(
+      patchRunQuotaSettings(repository, {
+        activateLimits: { investigation: 3 },
+      })
+    ).resolves.toEqual({
+      enabled: true,
+      limits: {
+        detection: 15,
+        investigation: 3,
+        ki_extraction: 0,
+        future_group: 9,
+      },
+    });
+
+    expect(repository.update.mock.calls[0][2]).toEqual({
+      enabled: true,
+      limits: {
+        detection: 0,
+        investigation: 3,
+        ki_extraction: 0,
+        future_group: 9,
+      },
+    });
+  });
 });

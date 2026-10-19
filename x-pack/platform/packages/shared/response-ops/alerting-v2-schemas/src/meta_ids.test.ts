@@ -31,6 +31,7 @@ import {
   bulkSnoozeActionPoliciesBodySchema,
   snoozeActionPolicyBodySchema,
   actionPolicyDestinationSchema,
+  actionPolicyGroupingSchema,
   groupingModeSchema,
 } from './action_policy_data_schema';
 import {
@@ -127,6 +128,7 @@ const EXPECTED_IDS: ReadonlyArray<readonly [z.ZodType, string]> = [
   [snoozeActionPolicyBodySchema, 'alerting_snooze_action_policy_request'],
   [actionPolicyDestinationSchema, 'alerting_action_policy_destination'],
   [groupingModeSchema, 'alerting_action_policy_grouping_mode'],
+  [actionPolicyGroupingSchema, 'alerting_action_policy_grouping'],
   [actionPolicyResponseSchema, 'alerting_action_policy_response'],
   [findActionPoliciesResponseSchema, 'alerting_action_policy_list_response'],
   // alert actions

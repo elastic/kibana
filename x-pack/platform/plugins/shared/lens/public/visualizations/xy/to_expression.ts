@@ -34,7 +34,6 @@ import type {
 } from '@kbn/expression-xy-plugin/common';
 
 import {
-  AreaFillOptions,
   LayerTypes,
   FittingFunctions,
   PointVisibilityOptions,
@@ -52,6 +51,7 @@ import type {
   ValidXYDataLayerConfig,
   XYLayerConfig,
 } from './types';
+import { defaultAreaFill } from './types';
 import { getColumnToLabelMap } from './state_helpers';
 import { getDefaultPalette } from './default_palette';
 import { defaultReferenceLineColor } from './color_assignment';
@@ -347,7 +347,7 @@ export const buildXYExpression = (
     minBarHeight: state.minBarHeight ?? 1,
     fillOpacity: state.fillOpacity ?? 0.3,
     pointVisibility: state.pointVisibility ?? PointVisibilityOptions.AUTO,
-    areaFill: state.areaFill ?? AreaFillOptions.SOLID,
+    areaFill: state.areaFill ?? defaultAreaFill,
     valueLabels: state.valueLabels ?? 'hide',
     hideEndzones: state.hideEndzones ?? false,
     addTimeMarker:

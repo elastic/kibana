@@ -27,6 +27,8 @@ export interface EscalationFlyoutHeaderProps {
    * Falls back to a read-only badge when absent.
    */
   statusNode?: React.ReactNode;
+  /** Optional pre-rendered sync indicator (e.g. a spinner) shown beside the title. */
+  syncNode?: React.ReactNode;
   /** Status string parsed from `conversation.metadata.status`. */
   status?: string;
   /** Assignee uid list parsed from `conversation.metadata.assignees`. */
@@ -45,6 +47,7 @@ export const EscalationFlyoutHeader = ({
   createdAt,
   assigneesNode,
   statusNode,
+  syncNode,
   status,
   assigneeUids = [],
 }: EscalationFlyoutHeaderProps) => {
@@ -52,11 +55,16 @@ export const EscalationFlyoutHeader = ({
     <>
       <EuiFlexGroup direction="column" gutterSize="xs">
         <EuiFlexItem>
-          <EuiTitle size="s">
-            <h2>
-              <EuiTextTruncate text={title} />
-            </h2>
-          </EuiTitle>
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem>
+              <EuiTitle size="s">
+                <h2>
+                  <EuiTextTruncate text={title} />
+                </h2>
+              </EuiTitle>
+            </EuiFlexItem>
+            {syncNode ? <EuiFlexItem grow={false}>{syncNode}</EuiFlexItem> : null}
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText size="xs" color="subdued">

@@ -45,6 +45,9 @@ import {
   type ContextMenuPosition,
 } from './canvas_context_menu';
 import { CanvasEmptyState } from './canvas_empty_state';
+import { applyCanvasSearch, resolveCanvasSearch } from './canvas_search';
+import { CanvasSearchBar } from './canvas_search_bar';
+import { CanvasSearchOverlay } from './canvas_search_overlay';
 import { CanvasShell, getCanvasContainerStyles } from './canvas_shell';
 import { ConnectionTargetsProvider } from './nodes/connection_handle';
 import { CanvasToolbar } from './canvas_toolbar';
@@ -104,6 +107,13 @@ import {
 } from '../../../../services/unit_connections';
 
 const KEYBOARD_INSTRUCTIONS_ID = 'streamsCanvasKbdInstructions';
+const canvasColumnStyles = css`
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  flex-direction: column;
+`;
 const SOURCE_TYPE_ICONS: Record<SourceType, IconType> = {
   async_bulk: 'logoElasticsearch',
   bulk: 'logoElasticsearch',
@@ -162,11 +172,12 @@ function StreamsCanvasInner() {
       },
     },
   } = useKibana();
-  const { flyoutName, flyoutTab } = useCanvasUrlRef();
+  const { flyoutName, flyoutTab, query } = useCanvasUrlRef();
   const {
     openFlyout,
     closeFlyout,
     selectTab,
+    changeSearchQuery,
     updateNodePositions,
     saveUnit,
     changeUnitConnection,
@@ -288,6 +299,12 @@ function StreamsCanvasInner() {
   const [nodes, setNodes, applyNodesChange] = useNodesState(graph.nodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(graph.edges);
   const [contextMenu, setContextMenu] = useState<CanvasContextMenuState | null>(null);
+
+  const searchedFlow = useMemo(() => resolveCanvasSearch(graph, query), [graph, query]);
+  const visible = useMemo(
+    () => applyCanvasSearch(nodes, edges, searchedFlow),
+    [nodes, edges, searchedFlow]
+  );
   const restoreHistory = useCallback(
     (extra: CanvasEditSnapshot) => {
       if (extra.unit !== unitDefinition) {
@@ -727,20 +744,26 @@ function StreamsCanvasInner() {
   // Hold the spinner until classic streams, the unit, the source environment,
   // and the first unit.loaded sync have all settled. Otherwise the graph
   // remounts mid-interaction and undo history is wiped.
-  if (
+  const isCanvasLoading =
     (loading && !value) ||
     isInitializing ||
     isSourceEnvironmentLoading ||
-    ((!hasReceivedUnit || !hasReceivedDestinationsUnit) && !isUnitUnavailable)
-  ) {
+    ((!hasReceivedUnit || !hasReceivedDestinationsUnit) && !isUnitUnavailable);
+
+  const searchBar = <CanvasSearchBar query={query ?? ''} onQueryChange={changeSearchQuery} />;
+
+  if (isCanvasLoading) {
     return (
-      <EuiFlexGroup
-        justifyContent="center"
-        alignItems="center"
-        css={getCanvasContainerStyles(euiTheme)}
-      >
-        <EuiLoadingSpinner size="xl" data-test-subj="streamsCanvasLoading" />
-      </EuiFlexGroup>
+      <div css={canvasColumnStyles}>
+        {searchBar}
+        <EuiFlexGroup
+          justifyContent="center"
+          alignItems="center"
+          css={getCanvasContainerStyles(euiTheme)}
+        >
+          <EuiLoadingSpinner size="xl" data-test-subj="streamsCanvasLoading" />
+        </EuiFlexGroup>
+      </div>
     );
   }
 
@@ -750,15 +773,8 @@ function StreamsCanvasInner() {
   const flyoutStreamName = flyoutDestination?.index ?? flyoutName;
 
   return (
-    <div
-      css={css`
-        display: flex;
-        flex: 1 1 auto;
-        min-height: 0;
-        width: 100%;
-        flex-direction: column;
-      `}
-    >
+    <div css={canvasColumnStyles}>
+      {searchBar}
       {(hasUnsavedChanges || isSaving) && (
         <EuiFlexGroup
           responsive={false}
@@ -786,8 +802,8 @@ function StreamsCanvasInner() {
       )}
       <ConnectionTargetsProvider value={connectionTargetIds}>
         <CanvasShell<ClassicCanvasNode>
-          nodes={nodes}
-          edges={edges}
+          nodes={visible.nodes}
+          edges={visible.edges}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onNodesDelete={onNodesDelete}
@@ -828,6 +844,7 @@ function StreamsCanvasInner() {
             />
           )}
           {nodes.length === 0 && <CanvasEmptyState />}
+          <CanvasSearchOverlay flow={searchedFlow} />
           {flyoutDestination ? (
             <UnitDestinationFlyout
               destinationName={flyoutDestination.name}

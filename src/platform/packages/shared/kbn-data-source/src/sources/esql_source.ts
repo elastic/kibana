@@ -22,6 +22,7 @@ import {
   isComputedColumn,
   getQuerySummary,
   getProjectRoutingFromEsqlQuery,
+  getESQLAdHocDataviewId,
   type ESQLSourceInfoColumn,
 } from '@kbn/esql-utils';
 import type { ESQLControlVariable } from '@kbn/esql-types';
@@ -69,6 +70,21 @@ export interface EsqlSourceArgs {
   esqlVariables?: ESQLControlVariable[];
 }
 
+export interface EsqlDatasetArgs {
+  query: string;
+  timeFieldName?: string;
+  projectRouting?: string;
+  http?: HttpStart;
+}
+
+/** Identity of the FROM target of an ES|QL query, without the query's schema. */
+export interface EsqlDataset {
+  datasetId: string;
+  title: string;
+  timeFieldName: string | undefined;
+  projectRouting: string | undefined;
+}
+
 function columnsFromSourceInfo(columns: ESQLSourceInfoColumn[], query: string): DatatableColumn[] {
   const querySummary = getQuerySummary(query);
   return columns.map(({ name, esType }) => ({
@@ -85,6 +101,7 @@ function columnsFromSourceInfo(columns: ESQLSourceInfoColumn[], query: string): 
 
 interface EsqlSourceConstructorArgs {
   id: string;
+  datasetId: string;
   query: string;
   title: string;
   timeFieldName: string | undefined;
@@ -117,6 +134,13 @@ export class EsqlSource implements DataSourceBase {
 
   public readonly kind = 'esql' as const;
   public readonly id: string;
+  /**
+   * Identity of the FROM target + time field + effective project routing, independent of the
+   * query-instance {@link id}: SORT / WHERE / EVAL keep it, a different FROM, time field or
+   * project does not. Equals the id of the dataset's DataView shim and of the legacy ad-hoc
+   * DataView, so persisted filters (`meta.index`) and Lens layers keep resolving it.
+   */
+  public readonly datasetId: string;
   public readonly query: string;
   public readonly title: string;
   public readonly timeFieldName: string | undefined;
@@ -137,6 +161,7 @@ export class EsqlSource implements DataSourceBase {
 
   private constructor({
     id,
+    datasetId,
     query,
     title,
     timeFieldName,
@@ -144,6 +169,7 @@ export class EsqlSource implements DataSourceBase {
     resultColumns,
   }: EsqlSourceConstructorArgs) {
     this.id = id;
+    this.datasetId = datasetId;
     this.query = query;
     this.title = title;
     this.timeFieldName = timeFieldName;
@@ -237,9 +263,13 @@ export class EsqlSource implements DataSourceBase {
       cleanVariables ?? null,
       timeFieldName ?? null,
     ]);
-    const hash = await sha256(hashInput);
+    const [hash, datasetId] = await Promise.all([
+      sha256(hashInput),
+      getESQLAdHocDataviewId({ indexPattern: title, timeFieldName, projectRouting }),
+    ]);
     const instance = new EsqlSource({
       id: `esql-${hash}`,
+      datasetId,
       query,
       title,
       timeFieldName,
@@ -257,25 +287,28 @@ export class EsqlSource implements DataSourceBase {
     return instance;
   }
 
+  /**
+   * Resolves the dataset identity (FROM target, time field, project routing) of a query without
+   * its schema: no `LIMIT 0` request and nothing is added to the instance cache. For consumers
+   * that only need the {@link EsqlSource.datasetId} and time field, e.g. persisted Lens layers.
+   */
+  public static async resolveDataset(args: EsqlDatasetArgs): Promise<EsqlDataset> {
+    const query = args.query.trim();
+    const title = getIndexPatternFromESQLQuery(query);
+    const projectRouting = getProjectRoutingFromEsqlQuery(query) ?? args.projectRouting;
+    const timeFieldName =
+      args.timeFieldName ??
+      (await getESQLTimeField({ query, http: args.http, projectRouting: args.projectRouting }));
+    const datasetId = await getESQLAdHocDataviewId({
+      indexPattern: title,
+      timeFieldName,
+      projectRouting,
+    });
+    return { datasetId, title, timeFieldName, projectRouting };
+  }
+
   public static clearCache(): void {
     EsqlSource.instanceCache.clear();
-  }
-
-  /**
-   * Dataset identity for the FROM target + time field + effective project routing,
-   * independent of query-instance {@link id}.
-   * SORT / WHERE / EVAL keep the same key; a different FROM, time field, or project does not.
-   */
-  public static getDatasetKey(
-    title: string,
-    timeFieldName?: string,
-    projectRouting?: string
-  ): string {
-    return `esql:${title}:${timeFieldName ?? ''}:${projectRouting ?? ''}`;
-  }
-
-  public get datasetKey(): string {
-    return EsqlSource.getDatasetKey(this.title, this.timeFieldName, this.projectRouting);
   }
 
   public get name(): string {
@@ -297,6 +330,7 @@ export class EsqlSource implements DataSourceBase {
   public withColumns(resultColumns: readonly DatatableColumn[]): EsqlSource {
     return new EsqlSource({
       id: this.id,
+      datasetId: this.datasetId,
       query: this.query,
       title: this.title,
       timeFieldName: this.timeFieldName,

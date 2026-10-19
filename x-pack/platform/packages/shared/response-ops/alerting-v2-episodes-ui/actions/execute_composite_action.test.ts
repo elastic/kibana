@@ -129,9 +129,10 @@ describe('executeCompositeAction', () => {
 
   it('shows warning toast on partial failure from BulkResponse errors', async () => {
     const deps = makeDeps();
-    const nativeExecute = jest
-      .fn()
-      .mockResolvedValue({ affected_count: 1, errors: [{ message: 'err' }] });
+    const nativeExecute = jest.fn().mockResolvedValue({
+      affected_count: 1,
+      errors: [{ id: 'e2', error: { code: 'ALERT_NOT_FOUND', message: 'err' } }],
+    });
 
     await executeCompositeAction({
       episodes: [makeEpisode('e1'), makeEpisode('e2')],
@@ -142,6 +143,48 @@ describe('executeCompositeAction', () => {
     expect(deps.notifications.toasts.add).toHaveBeenCalledWith(
       expect.objectContaining({ color: 'warning' })
     );
+  });
+
+  it('keeps the success toast when an item was already in the requested state', async () => {
+    const deps = makeDeps();
+    const nativeExecute = jest.fn().mockResolvedValue({
+      affected_count: 1,
+      errors: [{ id: 'e2', error: { code: 'ALERT_ACTION_NO_OP', message: 'same tags' } }],
+    });
+
+    await executeCompositeAction({
+      episodes: [makeEpisode('e1'), makeEpisode('e2')],
+      nativeExecute,
+      deps,
+    });
+
+    expect(deps.notifications.toasts.add).toHaveBeenCalledWith(
+      expect.objectContaining({ color: 'success' })
+    );
+  });
+
+  it('reports that nothing needed changing when every item was already in the requested state', async () => {
+    const deps = makeDeps();
+    const nativeExecute = jest.fn().mockResolvedValue({
+      affected_count: 0,
+      errors: [
+        {
+          id: 'e1',
+          error: { code: 'INVALID_ALERT_STATE_TRANSITION', message: 'already acknowledged' },
+        },
+      ],
+    });
+
+    await executeCompositeAction({
+      episodes: [makeEpisode('e1')],
+      nativeExecute,
+      deps,
+    });
+
+    expect(deps.notifications.toasts.add).toHaveBeenCalledWith({
+      title: 'No changes were needed.',
+      color: 'success',
+    });
   });
 
   it('shows no toast when there are no episodes to process', async () => {

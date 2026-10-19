@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
@@ -32,6 +32,7 @@ import { ShareUrlIconButton } from '../../shared/components/share_url_icon_butto
 import { FlyoutHeaderActions } from '../../shared/components/flyout_header_actions';
 import { useGetFlyoutLink } from '../../../flyout/document_details/right/hooks/use_get_flyout_link';
 import { isRulePreviewDocument } from '../../shared/utils/is_rule_preview_document';
+import { DocumentPagination, useShowDocumentPagination } from './components/document_pagination';
 
 const SHARE_ALERT_LABEL = i18n.translate(
   'xpack.securitySolution.flyoutV2.document.header.shareAlertLabel',
@@ -79,6 +80,8 @@ export const Header: FC<HeaderProps> = memo(
       timestamp: String(hit.flattened?.['@timestamp'] ?? ''),
     });
 
+    const showPagination = useShowDocumentPagination();
+
     return (
       <>
         <FlyoutHeaderActions>
@@ -89,14 +92,25 @@ export const Header: FC<HeaderProps> = memo(
             dataTestSubj={DOCUMENT_FLYOUT_HEADER_SHARE_BUTTON_TEST_ID}
           />
         </FlyoutHeaderActions>
-        <DocumentSeverity hit={hit}>
-          <EuiSpacer size="s" />
-        </DocumentSeverity>
-        <EuiText size="s">
-          <Timestamp hit={hit} />
-        </EuiText>
-        <EuiSpacer size="xs" />
-
+        <EuiFlexGroup
+          gutterSize="s"
+          justifyContent="spaceBetween"
+          alignItems="center"
+          responsive={false}
+        >
+          <EuiFlexItem grow={false}>
+            <DocumentSeverity hit={hit} />
+          </EuiFlexItem>
+          {showPagination && (
+            <EuiFlexItem grow={false}>
+              <DocumentPagination />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
+        <Timestamp hit={hit}>
+          <EuiSpacer size="xs" />
+        </Timestamp>
         <Title hit={hit} hideLink={!canReadRules || isRulePreview} />
         {isAlert && (
           <>
