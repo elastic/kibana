@@ -11,6 +11,7 @@ import { css } from '@emotion/react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiPanel,
   EuiTab,
   EuiTabs,
@@ -67,6 +68,51 @@ const NO_DATA_SOURCES: Readonly<Record<BoostProfileType, string>> = {
   data_streams: i18n.translate('xpack.boost.patternMatches.noDataStreams', {
     defaultMessage: 'No data streams detected',
   }),
+};
+
+type MatchKind = 'exact' | 'partial';
+
+// The same icons as the match count beside the pattern's label, so each row shows which it is.
+const MATCH_ICONS: Readonly<
+  Record<MatchKind, { iconType: string; color: 'success' | 'subdued'; label: string }>
+> = {
+  exact: {
+    iconType: 'checkCircleFill',
+    color: 'success',
+    label: i18n.translate('xpack.boost.patternMatches.exactMatchIcon', {
+      defaultMessage: 'Exact match',
+    }),
+  },
+  partial: {
+    iconType: 'partial',
+    color: 'subdued',
+    label: i18n.translate('xpack.boost.patternMatches.partialMatchIcon', {
+      defaultMessage: 'Partial match',
+    }),
+  },
+};
+
+interface MatchIconProps {
+  /** How the name matches the pattern, or nothing when it doesn't. */
+  match?: MatchKind;
+  /** Whether a higher-ranked rule keeps the match, so its icon is subdued like its name. */
+  isSuperseded?: boolean;
+  /** Whether screen readers hear what the icon means, which a list's label may already say. */
+  isLabeled: boolean;
+}
+
+/** An exact or partial match's icon, or a blank space as wide, so names line up. */
+const MatchIcon = ({ match, isSuperseded = false, isLabeled }: MatchIconProps) => {
+  if (!match) {
+    return <EuiIcon type="empty" size="s" aria-hidden={true} />;
+  }
+  const { iconType, label } = MATCH_ICONS[match];
+  const color = isSuperseded ? 'subdued' : MATCH_ICONS[match].color;
+  return isLabeled ? (
+    <EuiIcon type={iconType} color={color} size="s" title={label} />
+  ) : (
+    <EuiIcon type={iconType} color={color} size="s" aria-hidden={true} />
+  );
 };
 
 interface PatternMatchesProps {
@@ -150,6 +196,7 @@ export const PatternMatches = ({
   const highlightedNames = new Set(
     (hasExactMatches ? exactMatches : partialMatches).map(({ name }) => name)
   );
+  const matchKind: MatchKind = hasExactMatches ? 'exact' : 'partial';
 
   const renderEmpty = (message: string) => (
     <EuiText
@@ -186,10 +233,25 @@ export const PatternMatches = ({
     </EuiText>
   );
 
-  // Each target, struck through with the rule that keeps it when a higher-ranked rule does.
+  // A name after its match icon.
+  const renderName = (
+    name: ReactNode,
+    match: MatchKind | undefined,
+    isLabeled: boolean,
+    isSuperseded = false
+  ) => (
+    <span css={{ display: 'inline-flex', alignItems: 'center', gap: euiTheme.size.s }}>
+      <MatchIcon match={match} isSuperseded={isSuperseded} isLabeled={isLabeled} />
+      {name}
+    </span>
+  );
+
+  // Each target, struck through with the rule that keeps it when a higher-ranked rule does. The
+  // list's label says how they match, so their icons don't repeat it to screen readers.
   const renderTargets = (
     targets: readonly TargetPreview[],
     targetPattern: string,
+    match: MatchKind,
     testSubj?: string
   ) =>
     targets.map(({ name, overriddenBy }) => (
@@ -202,7 +264,12 @@ export const PatternMatches = ({
         data-test-subj={testSubj}
       >
         <EuiFlexItem grow={false}>
-          <TargetName name={name} pattern={targetPattern} supersededBy={overriddenBy} />
+          {renderName(
+            <TargetName name={name} pattern={targetPattern} supersededBy={overriddenBy} />,
+            match,
+            false,
+            overriddenBy !== undefined
+          )}
         </EuiFlexItem>
         {overriddenBy && (
           <EuiFlexItem grow={false}>
@@ -229,7 +296,7 @@ export const PatternMatches = ({
         i18n.translate('xpack.boost.patternMatches.exactMatchesLabel', {
           defaultMessage: 'Exact matches',
         }),
-        renderTargets(exactMatches, pattern)
+        renderTargets(exactMatches, pattern, 'exact')
       );
     }
     if (partialMatches.length > 0) {
@@ -238,7 +305,7 @@ export const PatternMatches = ({
         i18n.translate('xpack.boost.patternMatches.partialMatchesLabel', {
           defaultMessage: 'Partial matches',
         }),
-        renderTargets(partialMatches, partialPattern, 'boostRulePartialMatch'),
+        renderTargets(partialMatches, partialPattern, 'partial', 'boostRulePartialMatch'),
         true
       );
     }
@@ -253,14 +320,19 @@ export const PatternMatches = ({
     names.length > 0
       ? renderList(
           TAB_LABELS.all[targetType],
-          names.map((name) => (
-            <div key={name} data-test-subj="boostRuleAvailableTarget">
-              <TargetName
-                name={name}
-                pattern={highlightedNames.has(name) ? highlightPattern : undefined}
-              />
-            </div>
-          ))
+          names.map((name) => {
+            const isHighlighted = highlightedNames.has(name);
+            return (
+              <div key={name} data-test-subj="boostRuleAvailableTarget">
+                {renderName(
+                  <TargetName name={name} pattern={isHighlighted ? highlightPattern : undefined} />,
+                  isHighlighted ? matchKind : undefined,
+                  // Matches are mixed with everything else here, so their icons say which they are.
+                  true
+                )}
+              </div>
+            );
+          })
         )
       : renderEmpty(NO_DATA_SOURCES[targetType]);
 

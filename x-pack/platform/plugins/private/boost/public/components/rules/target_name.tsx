@@ -34,24 +34,31 @@ interface TargetNameProps {
 }
 
 /**
- * A target's name, struck through when a higher-ranked rule applies to it instead, since the rule
- * targets it but doesn't apply.
+ * A target's name, struck through and subdued when a higher-ranked rule applies to it instead, since
+ * the rule targets it but doesn't apply.
  */
-export const TargetName = ({ name, pattern, supersededBy }: TargetNameProps) => (
-  <span
-    css={{ textDecoration: supersededBy ? 'line-through' : undefined }}
-    data-test-subj={supersededBy ? 'boostSupersededTarget' : undefined}
-  >
-    {pattern === undefined
-      ? name
-      : splitByIndexPattern(pattern, name).map(({ text, isLiteral }, index) => (
-          <Fragment key={index}>
-            {/* The name already says what matched, so screen readers skip the highlights. */}
-            {isLiteral ? <EuiMark hasScreenReaderHelpText={false}>{text}</EuiMark> : text}
-          </Fragment>
-        ))}
-  </span>
-);
+export const TargetName = ({ name, pattern, supersededBy }: TargetNameProps) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <span
+      css={
+        supersededBy
+          ? { textDecoration: 'line-through', color: euiTheme.colors.textSubdued }
+          : undefined
+      }
+      data-test-subj={supersededBy ? 'boostSupersededTarget' : undefined}
+    >
+      {pattern === undefined
+        ? name
+        : splitByIndexPattern(pattern, name).map(({ text, isLiteral }, index) => (
+            <Fragment key={index}>
+              {/* The name already says what matched, so screen readers skip the highlights. */}
+              {isLiteral ? <EuiMark hasScreenReaderHelpText={false}>{text}</EuiMark> : text}
+            </Fragment>
+          ))}
+    </span>
+  );
+};
 
 /** Why a higher-ranked rule applies to a target instead, and how to outrank it. */
 export const getSupersedingDescription = (rule: string): string =>

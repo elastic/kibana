@@ -522,6 +522,43 @@ describe('RuleFlyout pattern matches', () => {
     expect(within(partialMatch).getByTestId('boostSupersedingRule')).toHaveTextContent('catalogs');
   });
 
+  it('marks each exact match, or each partial match, with its icon', async () => {
+    renderNewRule();
+    // The match icons, leaving out the icon of a rule that ranks higher.
+    const getIcons = () =>
+      Array.from(
+        screen.getByTestId('boostRulePatternMatches').querySelectorAll('[data-euiicon-type]'),
+        (icon) => icon.getAttribute('data-euiicon-type')
+      ).filter((iconType) => iconType !== 'sortAscending');
+
+    await userEvent.type(screen.getByTestId('boostRulePattern'), 'catalog-*');
+    expect(getIcons()).toEqual(['checkCircleFill']);
+    // The saved catalogs rule ranks higher, so the match is subdued like its struck-through name.
+    expect(
+      screen
+        .getByTestId('boostRulePatternMatches')
+        .querySelector('[data-euiicon-type="checkCircleFill"]')
+    ).toHaveAttribute('color', 'subdued');
+
+    await userEvent.clear(screen.getByTestId('boostRulePattern'));
+    await userEvent.type(screen.getByTestId('boostRulePattern'), 'cat');
+    expect(getIcons()).toEqual(['partial']);
+  });
+
+  it('marks the matches among every data source, keeping the rest aligned', async () => {
+    renderNewRule();
+
+    await userEvent.type(screen.getByTestId('boostRulePattern'), 'catalog-*');
+    await userEvent.click(screen.getByTestId('boostRuleAllTab'));
+
+    const [catalogFall, products] = screen.getAllByTestId('boostRuleAvailableTarget');
+    expect(within(catalogFall).getByTitle('Exact match')).toBeInTheDocument();
+    expect(products.querySelector('[data-euiicon-type]')).toHaveAttribute(
+      'data-euiicon-type',
+      'empty'
+    );
+  });
+
   it('finds partial matches by any part of their name', async () => {
     renderNewRule();
 

@@ -30,6 +30,7 @@ import {
   EuiText,
   EuiTitle,
   EuiToolTip,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -177,6 +178,7 @@ const getInitialDraft = (
 
 /** Creates a custom boost rule, from scratch or a copy, or edits a custom or default one. */
 export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: RuleFlyoutProps) => {
+  const { euiTheme } = useEuiTheme();
   const { notifications } = useBoostServices();
   const { data: state } = useBoostState();
   const titleId = useGeneratedHtmlId();
@@ -810,15 +812,16 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
                     onChange: setPickSearch,
                   }}
                   options={pickOptions}
-                  // A selected name that a higher-ranked rule keeps is struck through, as in the
-                  // rules table.
+                  // A selected name that a higher-ranked rule keeps is struck through and subdued,
+                  // as in the rules table.
                   renderOption={({ label, checked, supersededBy }, searchValue) => (
                     <EuiHighlight
                       search={searchValue}
-                      css={{
-                        textDecoration:
-                          checked === 'on' && supersededBy ? 'line-through' : undefined,
-                      }}
+                      css={
+                        checked === 'on' && supersededBy
+                          ? { textDecoration: 'line-through', color: euiTheme.colors.textSubdued }
+                          : undefined
+                      }
                     >
                       {label}
                     </EuiHighlight>

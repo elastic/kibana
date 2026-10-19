@@ -153,7 +153,7 @@ export const DataStreamTimeline = ({
             padding: `${euiTheme.size.xs} ${euiTheme.size.xxs}`,
             // A shade darker than subdued backgrounds, such as a flyout footer's.
             backgroundColor: euiTheme.colors.lightestShade,
-            borderRadius: euiTheme.border.radius.medium,
+            borderRadius: euiTheme.border.radius.panel,
           }}
         >
           {periods.map((period) => {
@@ -166,7 +166,7 @@ export const DataStreamTimeline = ({
                 tabIndex={cost ? 0 : undefined}
                 css={{
                   padding: `${euiTheme.size.s} var(--boostPeriodPadding)`,
-                  borderRadius: euiTheme.border.radius.small,
+                  borderRadius: euiTheme.border.radius.control,
                   backgroundColor: colors[period].background,
                   color: colors[period].text,
                 }}
