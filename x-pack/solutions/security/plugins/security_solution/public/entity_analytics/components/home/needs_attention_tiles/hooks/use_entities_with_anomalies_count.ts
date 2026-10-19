@@ -14,7 +14,7 @@ import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useInstalledSecurityJobsIds } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
-import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
+import { useTileQueryInputs } from './use_tile_query_inputs';
 import { EMPTY_ENTITY_IDS } from '../data';
 import { buildEntitiesWithAnomaliesCountQuery } from '../queries/entities_with_anomalies_query';
 import {
@@ -22,7 +22,6 @@ import {
   type EntityFilters,
   type TimeRange,
 } from '../../entities_grid/common';
-import { buildEntityFilterClauses } from '../../entities_grid/queries/entity_filters';
 import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
 
 const esqlSearch = async (
@@ -51,8 +50,9 @@ export const useEntitiesWithAnomaliesCount = ({
   const {
     data: resolvedIndex,
     isLoading: isIndexLoading,
+    entityFilterClauses,
     error: indexError,
-  } = useResolvedLatestEntitiesIndexName(spaceId);
+  } = useTileQueryInputs(spaceId, entityFilters);
   const { jobIds, loading: isJobsLoading } = useInstalledSecurityJobsIds();
 
   const isEnabled =
@@ -67,10 +67,10 @@ export const useEntitiesWithAnomaliesCount = ({
     return buildEntitiesWithAnomaliesCountQuery(
       resolvedIndex.indexName,
       timeRange,
-      buildEntityFilterClauses(entityFilters),
+      entityFilterClauses,
       jobIds
     );
-  }, [resolvedIndex?.indexName, timeRange, entityFilters, jobIds]);
+  }, [resolvedIndex?.indexName, timeRange, entityFilterClauses, jobIds]);
 
   const {
     data: queryResult,
