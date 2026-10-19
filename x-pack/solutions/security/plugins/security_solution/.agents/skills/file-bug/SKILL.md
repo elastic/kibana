@@ -56,7 +56,13 @@ Two collect paths; same later steps.
 
 ### 2. Search
 
-Search **open and closed issues** and **open PRs** (include drafts). Empty results are **not** proof the bug is new — run a **second** issue query before proposing create. Run `GH_PAGER=cat gh search issues --repo "$TARGET_REPO" --limit 10 --json number,state,title,body "<title and distinctive error strings>"` (and `gh search prs`), pipe each through `parse-search --input -` into one `matches.json`, then `decide --matches matches.json`. It exits 0 with `create` only when there are **no** matches. **One or more** matches exit 2 — show candidates (`gh issue view` / `gh pr view`), match the *work* not title keywords, and let the human pick create / comment / reopen.
+Search **open and closed issues** and **open PRs** (include drafts); parse every result into one `matches.json`. GitHub's default search returns nothing when a backtick-style identifier (`document_parsing_exception`, `useFoo`) is ANDed with other words and the query has no `in:title` / `in:body` — so an empty unqualified multi-word query is **not** evidence the bug is new, and a second one of the same shape is no better. Run all of these:
+
+1. The distinctive error token alone.
+2. That token plus the other distinctive words, once with `in:title` and once with `in:body`.
+3. Plain-language screen or control words, also split `in:title` / `in:body`.
+
+Never AND an identifier with other words unless the query has `in:title` or `in:body`. Example: `GH_PAGER=cat gh search issues --repo "$TARGET_REPO" --limit 10 --json number,state,title,body "<token> <words> in:title"` (and `gh search prs`), each piped through `parse-search --input -`; then `decide --matches matches.json`. It exits 0 with `create` only when there are **no** matches. **One or more** matches exit 2 — show candidates (`gh issue view` / `gh pr view`), match the *work* not title keywords, and let the human pick create / comment / reopen.
 
 ### 3. Draft and stop
 
