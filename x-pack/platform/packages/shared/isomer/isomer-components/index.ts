@@ -8,6 +8,7 @@
 export { componentsPack, componentsPrimitives } from './src/pack';
 export {
   type ActionsNode,
+  type CodeNode,
   type ContextNode,
   type DividerNode,
   type FieldsNode,
@@ -16,6 +17,7 @@ export {
   type QuoteNode,
   type SectionNode,
   actions,
+  code,
   context,
   divider,
   fields,
