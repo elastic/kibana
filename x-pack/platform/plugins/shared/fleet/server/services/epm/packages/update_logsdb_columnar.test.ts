@@ -661,6 +661,19 @@ describe('setLogsdbColumnarChoice', () => {
     });
   });
 
+  it('puts Elasticsearch back when the choice cannot be stored', async () => {
+    jest.mocked(getInstallationObject).mockResolvedValue(installation());
+    mockInstalledPackage(packageInfo());
+    savedObjectsClient.update.mockRejectedValueOnce(new Error('write blocked'));
+
+    await expect(setChoice(true)).rejects.toThrow('write blocked');
+
+    const lastIndexTemplate = esClient.indices.putIndexTemplate.mock.calls.pop()?.[0] as any;
+    expect(lastIndexTemplate.template.settings.index).toEqual({});
+    // Once for the change, once to put the write indices back.
+    expect(templateModule.updateCurrentWriteIndices).toHaveBeenCalledTimes(2);
+  });
+
   it('is a no-op when the stored choice already matches', async () => {
     jest
       .mocked(getInstallationObject)

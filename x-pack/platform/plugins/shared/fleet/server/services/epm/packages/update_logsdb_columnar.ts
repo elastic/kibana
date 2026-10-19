@@ -177,7 +177,8 @@ export function assertLogsdbColumnarSupported({
  * no-op when the stored choice already matches, a 400 when enabling a package without a ready
  * logs data stream, and nothing written until that check has passed. The choice is only stored
  * once Elasticsearch accepted it: a rejected change leaves the previous choice in place, so it
- * can be retried.
+ * can be retried. If the choice cannot be stored, Elasticsearch is put back as it was, so that
+ * the stored choice keeps describing the index templates.
  */
 export async function setLogsdbColumnarChoice({
   savedObjectsClient,
@@ -211,7 +212,7 @@ export async function setLogsdbColumnarChoice({
     enabled,
   });
 
-  await applyLogsdbColumnarIndexMode({
+  const { restore } = await applyLogsdbColumnarIndexMode({
     esClient,
     savedObjectsClient,
     logger,
@@ -226,9 +227,21 @@ export async function setLogsdbColumnarChoice({
     name: installedPackage.attributes.name,
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
-  await savedObjectsClient.update<Installation>(PACKAGES_SAVED_OBJECT_TYPE, installedPackage.id, {
-    logsdb_columnar_enabled: enabled,
-  });
+  try {
+    await savedObjectsClient.update<Installation>(PACKAGES_SAVED_OBJECT_TYPE, installedPackage.id, {
+      logsdb_columnar_enabled: enabled,
+    });
+  } catch (err) {
+    // Otherwise the templates would no longer match the stored choice, and a retry of the
+    // previous choice would be a no-op.
+    logger.error(
+      `Failed to store the ${LOGSDB_COLUMNAR_INDEX_MODE} choice of ${pkgName}, putting its index templates back: ${err}`
+    );
+    await restore().catch((restoreErr) => {
+      logger.error(`Failed to put the index templates of ${pkgName} back: ${restoreErr}`);
+    });
+    throw err;
+  }
 
   return { changed: true };
 }
@@ -246,7 +259,8 @@ export async function setLogsdbColumnarChoice({
  * If Elasticsearch rejects any data stream, every data stream is put back on its previous mode,
  * the rejected ones included, and nothing is rolled over, so the change is all or nothing.
  * Persisting the choice on the installation saved object is the caller's job
- * (`setLogsdbColumnarChoice`), once this has succeeded.
+ * (`setLogsdbColumnarChoice`), once this has succeeded; `restore` puts Elasticsearch back if
+ * that fails.
  */
 export async function applyLogsdbColumnarIndexMode({
   esClient,
@@ -262,7 +276,7 @@ export async function applyLogsdbColumnarIndexMode({
   pkgName: string;
   enabled: boolean;
   installedPackageWithAssets?: InstalledPackageWithAssets;
-}): Promise<{ updatedDataStreams: string[] }> {
+}): Promise<{ updatedDataStreams: string[]; restore: () => Promise<void> }> {
   const { packageInfo, paths, assetsMap, installation } =
     installedPackageWithAssets ?? (await getInstalledPackageOrThrow(savedObjectsClient, pkgName));
 
@@ -270,7 +284,7 @@ export async function applyLogsdbColumnarIndexMode({
 
   if (readyDataStreams.length === 0) {
     assertLogsdbColumnarSupported({ pkgName, packageInfo, enabled });
-    return { updatedDataStreams: [] };
+    return { updatedDataStreams: [], restore: async () => {} };
   }
 
   const packageInstallContext = {
@@ -346,6 +360,13 @@ export async function applyLogsdbColumnarIndexMode({
       { concurrency: MAX_CONCURRENT_COMPONENT_TEMPLATES }
     );
 
+  // The mode only takes effect at rollover, in both directions: turning it off resets the
+  // template to the cluster default while the write index still carries `logsdb_columnar`.
+  const rollOver = (indexTemplates: IndexTemplateEntry[]) =>
+    updateCurrentWriteIndices(esClient, logger, indexTemplates, {
+      rolloverOnIndexModeReset: true,
+    });
+
   await pMap(
     targetTemplates,
     async ({ componentTemplates, indexTemplate }, index) => {
@@ -378,13 +399,13 @@ export async function applyLogsdbColumnarIndexMode({
     (index) => targetTemplates[index].indexTemplate
   );
 
-  await updateCurrentWriteIndices(esClient, logger, updatedIndexTemplates, {
-    // The mode only takes effect at rollover, in both directions: turning it off resets the
-    // template to the cluster default while the write index still carries `logsdb_columnar`.
-    rolloverOnIndexModeReset: true,
-  });
+  await rollOver(updatedIndexTemplates);
 
   return {
     updatedDataStreams: updatedIndexTemplates.map(({ templateName }) => templateName),
+    restore: async () => {
+      await restoreDataStreams(updated);
+      await rollOver(updated.map((index) => previousTemplates[index].indexTemplate));
+    },
   };
 }
