@@ -65,6 +65,35 @@ export const ACTIONS: Record<string, Action> = {
     return body as Record<string, unknown>;
   },
 
+  /** Capacity negative control: finite worker tasks keep their normal TM admission slots. */
+  'isolated-capacity': async (_params, { target, runId }) => {
+    const ids = await Promise.all(
+      Array.from({ length: 5 }, async () => {
+        const body = must(
+          await kbn<{ task_id: string }>(target, 'POST', `${API}/offender`, {
+            mode: 'task',
+            kind: 'cpu_spin',
+            execution: 'thread',
+            doseMs: 5000,
+            killAfterMs: 120000,
+            runId,
+          }),
+          'capacity offender'
+        );
+        return body.task_id;
+      })
+    );
+    const done = await awaitTasks(target, ids, 180000);
+    return {
+      task_ids: ids,
+      completed_at: done.completedAt,
+      waited_ms: done.waitedMs,
+      expected_tasks: 5,
+      tm_capacity_override: 5,
+      worker_threads_max: 2,
+    };
+  },
+
   /** Repeated large field_caps via the data views fetcher, from a route or a TM task. */
   'field-caps': async (params, { target, runId, log }) => {
     const body = must(

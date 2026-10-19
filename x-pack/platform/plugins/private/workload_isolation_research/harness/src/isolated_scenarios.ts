@@ -35,6 +35,19 @@ export const isolatedTaskCurve = (execution: 'main' | 'thread'): Scenario => ({
 });
 
 export const ISOLATED_SCENARIOS: Record<string, Scenario> = {
+  't1-capacity-starvation': {
+    name: 't1-capacity-starvation',
+    description:
+      'Negative control ONLY with local TM capacity5: five finite normal-cost tasks retain admission while two workers execute.',
+    probe: { rps: 10, path: '/api/spaces/space' },
+    laptopProbe: { rps: 2, path: '/api/spaces/space' },
+    ticks: { intervalMs: 1000 },
+    phases: [
+      { name: 'warmup', durationS: 15 },
+      { name: 'baseline', durationS: 40 },
+      { name: 'five-admitted-two-worker-slots', durationS: 20, action: 'isolated-capacity' },
+    ],
+  },
   't1-task-curve-main': isolatedTaskCurve('main'),
   't1-task-curve-thread': isolatedTaskCurve('thread'),
   't1-worker-supervised': {

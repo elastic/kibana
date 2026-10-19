@@ -53,6 +53,7 @@ const esPort = Number(process.env.WIR_ES_PORT ?? 9221);
 const transportPort = Number(process.env.WIR_ES_TRANSPORT_PORT ?? 9321);
 const headless = process.env.WIR_HEADLESS === '1';
 const scored = process.env.WIR_SCORED === '1';
+const capacityNegative = process.env.WIR_CAPACITY_NEGATIVE === '1';
 const benchLock =
   '/Users/jloleysens/.agentic-work/projects/kibana/workload-isolation-research/bench.lock';
 let ownsLock = false;
@@ -239,6 +240,7 @@ try {
         password: localPassword,
       },
       xpack: {
+        ...(capacityNegative ? { task_manager: { capacity: 5 } } : {}),
         security: { encryptionKey: randomBytes(32).toString('hex') },
         encryptedSavedObjects: { encryptionKey: randomBytes(32).toString('hex') },
         reporting: { encryptionKey: randomBytes(32).toString('hex') },
@@ -286,14 +288,16 @@ try {
       'local Kibana'
     );
   if (scored) {
-    const scenarios = [
-      't1-task-curve-main',
-      't1-task-curve-thread',
-      't1-task-curve-main',
-      't1-task-curve-thread',
-      't1-worker-supervised',
-      't1-field-caps-bytes',
-    ];
+    const scenarios = capacityNegative
+      ? ['t1-capacity-starvation']
+      : [
+          't1-task-curve-main',
+          't1-task-curve-thread',
+          't1-task-curve-main',
+          't1-task-curve-thread',
+          't1-worker-supervised',
+          't1-field-caps-bytes',
+        ];
     for (const [index, scenario] of scenarios.entries()) {
       const child = start(
         `driver-${index}-${scenario}`,
@@ -319,12 +323,20 @@ try {
             p99_inference: false,
             pair_repetitions_per_arm: 2,
             field_caps_main_data_copy_remains: true,
+            ...(capacityNegative
+              ? {
+                  negative_control: true,
+                  expected_tick_drift_ratio_min: 2,
+                  expected_ui_p95_ratio_max: 2,
+                }
+              : {}),
           }),
           '--config-overrides',
           JSON.stringify({
             scored_local_owner: runId,
             bench_lock: benchLock,
             roles: 'combined',
+            ...(capacityNegative ? { task_manager_capacity: 5 } : {}),
             in_pod_probe_both_arms: true,
           }),
         ],
