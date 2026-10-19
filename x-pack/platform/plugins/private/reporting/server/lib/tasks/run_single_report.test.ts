@@ -14,7 +14,12 @@ import type { CancellationToken } from '@kbn/reporting-common';
 import { KibanaShuttingDownError, QueueTimeoutError } from '@kbn/reporting-common';
 import type { ReportDocument, TaskRunResult } from '@kbn/reporting-common/types';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
-import { cryptoFactory, type ExportType, type ReportingConfigType } from '@kbn/reporting-server';
+import {
+  cryptoFactory,
+  ScheduleType,
+  type ExportType,
+  type ReportingConfigType,
+} from '@kbn/reporting-server';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
@@ -647,6 +652,49 @@ describe('Run Single Report Task', () => {
         error: expect.objectContaining({ name: 'Error', message: 'failure generating report' }),
       }
     );
+  });
+
+  it('fails without running the export type when a serverless feature flag has disabled it', async () => {
+    const isExportTypeEnabled = jest
+      .spyOn(mockReporting, 'isExportTypeEnabled')
+      .mockResolvedValue(false);
+    const runTaskFn = jest.fn();
+    mockReporting.getExportTypesRegistry().register({
+      id: 'test1',
+      name: 'Test1',
+      setup: jest.fn(),
+      start: jest.fn(),
+      createJob: () => new Promise(() => {}),
+      runTask: runTaskFn,
+      shouldNotifyUsage: () => true,
+      getFeatureUsageName: () => 'Reporting: test1 single export',
+      notifyUsage: jest.fn(),
+      jobContentEncoding: 'base64',
+      jobType: 'test1',
+      validLicenses: [],
+    } as unknown as ExportType);
+    const store = await mockReporting.getStore();
+    store.setReportError = jest.fn();
+
+    const task = new RunSingleReportTask({ reporting: mockReporting, config: configType, logger });
+    jest
+      // @ts-expect-error TS compilation fails: this overrides a private method of the RunSingleReportTask instance
+      .spyOn(task, 'claimJob')
+      .mockResolvedValueOnce({ _id: 'test', jobtype: 'test1', status: 'pending' } as never);
+    await task.init(taskManagerMock.createStart());
+    const taskRunner = task.getTaskDefinition().createTaskRunner({
+      taskInstance: {
+        id: 'random-task-id',
+        attempts: 1,
+        params: { index: 'cool-reporting-index', id: 'test1', jobtype: 'test1', payload: {} },
+      },
+      fakeRequest: fakeRawRequest,
+    } as unknown as RunContext);
+
+    await expect(() => taskRunner.run()).rejects.toThrow('Export type test1 is disabled');
+
+    expect(isExportTypeEnabled).toHaveBeenCalledWith('test1', ScheduleType.SINGLE);
+    expect(runTaskFn).not.toHaveBeenCalled();
   });
 
   it('catches stream error during performJob and rejects the operation', async () => {
