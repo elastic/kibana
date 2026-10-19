@@ -36,7 +36,7 @@ export const EntityDetailsHighlightsRequestBody = lazySchema(() =>
         'The identifier of the entity (its Entity Store `entity.id` when Entity Store v2 is enabled).'
       ),
     mode: EntityViewMode.optional().default('single'),
-    anonymizationFields: z.array(AnonymizationFieldResponse).max(1000),
+    anonymizationFields: z.array(AnonymizationFieldResponse),
     /**
      * The 'from' date.
      */
