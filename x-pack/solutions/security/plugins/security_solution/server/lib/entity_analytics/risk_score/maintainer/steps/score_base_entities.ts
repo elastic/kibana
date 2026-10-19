@@ -14,11 +14,13 @@ import type { RiskEngineDataWriter } from '../../risk_engine_data_writer';
 import {
   getEuidCompositeQuery,
   getBaseScoreESQL,
+  type EuidCompositeAggregation,
+} from '../../calculate_esql_risk_scores';
+import {
   getStampedEuidCompositeQuery,
   getStampedEuidRangeFilter,
   getUnstampedAlertsCountQuery,
-  type EuidCompositeAggregation,
-} from '../../calculate_esql_risk_scores';
+} from '../../stamping_queries';
 import { RISK_SCORING_REQUEST_TIMEOUT } from '../../constants';
 import type { ParsedRiskScore } from './parse_esql_row';
 import { parseEsqlBaseScoreRow } from './parse_esql_row';
