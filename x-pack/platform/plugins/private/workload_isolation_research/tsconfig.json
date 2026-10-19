@@ -3,18 +3,13 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": [
-    "server/**/*",
-    "common/**/*",
-    "harness/**/*.ts"
-  ],
+  "include": ["server/**/*", "common/**/*", "harness/**/*.ts"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/config-schema",
     "@kbn/task-manager-plugin",
-    "@kbn/data-views-plugin"
+    "@kbn/data-views-plugin",
+    "@kbn/setup-node-env"
   ],
-  "exclude": [
-    "target/**/*"
-  ]
+  "exclude": ["target/**/*"]
 }

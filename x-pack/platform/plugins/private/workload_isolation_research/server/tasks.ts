@@ -11,11 +11,13 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { TaskCost, TaskPriority } from '@kbn/task-manager-plugin/server';
+import { TaskCost, TaskPriority, throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import { epochNow } from './lib/clock';
 import type { OffenderKind } from './lib/offenders';
 import { OFFENDER_KINDS, runOffender } from './lib/offenders';
 import type { Recorder } from './lib/recorder';
+import type { IsolatedTaskExecutor } from './lib/isolated_task_executor';
+import { IsolatedTaskTerminatedError } from './lib/isolated_task_terminated_error';
 
 export const OFFENDER_TASK_TYPE = 'workloadIsolationResearch:offender';
 export const TICK_TASK_TYPE = 'workloadIsolationResearch:tick';
@@ -28,6 +30,8 @@ const offenderParamsSchema = schema.object({
   sizeMb: schema.maybe(schema.number({ min: 0.01, max: 512 })),
   runId: schema.maybe(schema.string({ maxLength: 256 })),
   scheduledAt: schema.number(),
+  execution: schema.maybe(schema.oneOf([schema.literal('main'), schema.literal('thread')])),
+  killAfterMs: schema.maybe(schema.number({ min: 10, max: 600000 })),
 });
 
 const tickParamsSchema = schema.object({
@@ -38,7 +42,8 @@ const tickParamsSchema = schema.object({
 
 export const registerResearchTasks = (
   taskManager: TaskManagerSetupContract,
-  getRecorder: () => Recorder
+  getRecorder: () => Recorder,
+  isolatedExecutor: IsolatedTaskExecutor
 ): void => {
   taskManager.registerTaskDefinitions({
     [OFFENDER_TASK_TYPE]: {
@@ -49,7 +54,7 @@ export const registerResearchTasks = (
       cost: TaskCost.Normal,
       priority: TaskPriority.Standard,
       paramsSchema: offenderParamsSchema,
-      createTaskRunner: ({ taskInstance }) => ({
+      createTaskRunner: ({ taskInstance, signal, executionUuid }) => ({
         run: async () => {
           const params = taskInstance.params as {
             kind: OffenderKind;
@@ -57,6 +62,8 @@ export const registerResearchTasks = (
             sizeMb?: number;
             runId?: string;
             scheduledAt: number;
+            execution?: 'main' | 'thread';
+            killAfterMs?: number;
           };
           const recorder = getRecorder();
           const startTs = epochNow();
@@ -67,22 +74,55 @@ export const registerResearchTasks = (
             task_id: taskInstance.id,
             ...params,
           });
-          const result = await runOffender(params);
-          recorder.push({
-            source: 'offender',
-            ts: startTs,
-            end: epochNow(),
-            mode: 'task',
-            task_id: taskInstance.id,
-            run_id: params.runId,
-            scheduled_at: params.scheduledAt,
-            kind: result.kind,
-            dose_ms: result.doseMs,
-            blocked_ms: result.blockedMs,
-            prep_ms: result.prepMs,
-            detail: result.detail,
-          });
-          return { state: {} };
+          try {
+            const { result, threadId, heapUsed } =
+              params.execution === 'thread'
+                ? await isolatedExecutor.run(
+                    'offender',
+                    { module: 'offender', params },
+                    { signal, executionId: executionUuid, killAfterMs: params.killAfterMs }
+                  )
+                : {
+                    result: await runOffender(params),
+                    threadId: 0,
+                    heapUsed: process.memoryUsage().heapUsed,
+                  };
+            recorder.push({
+              source: 'offender',
+              ts: startTs,
+              end: epochNow(),
+              mode: 'task',
+              task_id: taskInstance.id,
+              run_id: params.runId,
+              scheduled_at: params.scheduledAt,
+              kind: result.kind,
+              dose_ms: result.doseMs,
+              blocked_ms: result.blockedMs,
+              prep_ms: result.prepMs,
+              detail: result.detail,
+              execution: params.execution ?? 'main',
+              worker_thread_id: threadId,
+              executor_heap_used: heapUsed,
+              outcome: 'success',
+            });
+            return { state: {} };
+          } catch (error) {
+            recorder.push({
+              source: 'offender_terminal',
+              ts: startTs,
+              end: epochNow(),
+              mode: 'task',
+              task_id: taskInstance.id,
+              run_id: params.runId,
+              execution: params.execution ?? 'main',
+              outcome: error instanceof IsolatedTaskTerminatedError ? 'terminated' : 'failed',
+              reason: error instanceof Error ? error.message : String(error),
+              discarded_runs:
+                error instanceof IsolatedTaskTerminatedError ? error.discardedRuns.length : 0,
+              collateral: error instanceof IsolatedTaskTerminatedError ? error.collateral : false,
+            });
+            throwUnrecoverableError(error instanceof Error ? error : new Error(String(error)));
+          }
         },
       }),
     },

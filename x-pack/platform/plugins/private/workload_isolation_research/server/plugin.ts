@@ -19,6 +19,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { WorkloadIsolationResearchConfig } from './config';
 import { Recorder } from './lib/recorder';
+import { IsolatedTaskExecutor } from './lib/isolated_task_executor';
 import { registerRoutes } from './routes';
 import { registerResearchTasks, TickScheduler } from './tasks';
 import { registerTierBRoutes, registerTierBTasks } from './tier_b';
@@ -37,6 +38,7 @@ export class WorkloadIsolationResearchPlugin implements Plugin<void, void, Setup
   private readonly logger: Logger;
   private readonly config: WorkloadIsolationResearchConfig;
   private readonly recorder: Recorder;
+  private readonly isolatedExecutor: IsolatedTaskExecutor;
   private ticks?: TickScheduler;
 
   constructor(private readonly context: PluginInitializerContext<WorkloadIsolationResearchConfig>) {
@@ -47,11 +49,12 @@ export class WorkloadIsolationResearchPlugin implements Plugin<void, void, Setup
     this.recorder.roles = [roles.ui ? 'ui' : '', roles.backgroundTasks ? 'background_tasks' : '']
       .filter(Boolean)
       .join(',');
+    this.isolatedExecutor = new IsolatedTaskExecutor(this.config.isolatedMaxThreads, this.logger);
   }
 
   public setup(core: CoreSetup<StartDeps>, { taskManager }: SetupDeps): void {
     const getRecorder = () => this.recorder;
-    registerResearchTasks(taskManager, getRecorder);
+    registerResearchTasks(taskManager, getRecorder, this.isolatedExecutor);
     registerTierBTasks(taskManager, getRecorder, async () => {
       const [coreStart] = await core.getStartServices();
       return coreStart.elasticsearch.client.asInternalUser;
@@ -90,6 +93,7 @@ export class WorkloadIsolationResearchPlugin implements Plugin<void, void, Setup
         node_options: process.env.NODE_OPTIONS ?? null,
         tracer_enabled: process.env.KBN_RESEARCH_CONTRACT_TRACER === 'true',
         push_stats: this.recorder.pushStats,
+        isolated_pools: this.isolatedExecutor.getInfo(),
       }),
     });
   }
@@ -97,10 +101,23 @@ export class WorkloadIsolationResearchPlugin implements Plugin<void, void, Setup
   public start(core: CoreStart): void {
     this.recorder.start();
     this.recorder.startPush(async () => core.elasticsearch.client.asInternalUser);
+    if (process.env.KBN_RESEARCH_HEADLESS_BOOT === '1') {
+      this.logger.info(
+        `research_headless ${JSON.stringify({
+          pid: process.pid,
+          node_roles: this.context.node.roles,
+          registry_types: core.savedObjects.getTypeRegistry().getAllTypes().length,
+          heap_used: process.memoryUsage().heapUsed,
+          rss: process.memoryUsage().rss,
+          snapshot: 'plugin_start_lower_bound_not_peak_or_retained_heap',
+        })}`
+      );
+    }
   }
 
   public async stop(): Promise<void> {
     this.ticks?.stop();
+    await this.isolatedExecutor.stop();
     await this.recorder.stop();
   }
 }

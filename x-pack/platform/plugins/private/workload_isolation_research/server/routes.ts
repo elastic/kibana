@@ -346,24 +346,36 @@ export const registerRoutes = ({ router, getRecorder, getStart, getInfo }: Route
             defaultValue: 'route',
           }),
           runId: schema.maybe(schema.string({ maxLength: 256 })),
+          execution: schema.oneOf([schema.literal('main'), schema.literal('thread')], {
+            defaultValue: 'main',
+          }),
+          killAfterMs: schema.maybe(schema.number({ min: 10, max: 600000 })),
         }),
       },
     },
     async (_ctx, req, res) => {
       const recorder = getRecorder();
-      const { kind, doseMs, sizeMb, mode, runId } = req.body as {
+      const { kind, doseMs, sizeMb, mode, runId, execution, killAfterMs } = req.body as {
         kind: OffenderKind;
         doseMs: number;
         sizeMb?: number;
         mode: 'route' | 'task';
         runId?: string;
+        execution: 'main' | 'thread';
+        killAfterMs?: number;
       };
+      if (
+        (execution === 'thread' && mode !== 'task') ||
+        (killAfterMs !== undefined && execution !== 'thread')
+      ) {
+        return res.badRequest({ body: 'Isolated execution and hard deadlines are task-mode only' });
+      }
       if (mode === 'task') {
         const { taskManager } = await getStart();
         const scheduledAt = epochNow();
         const task = await taskManager.schedule({
           taskType: OFFENDER_TASK_TYPE,
-          params: { kind, doseMs, sizeMb, runId, scheduledAt },
+          params: { kind, doseMs, sizeMb, runId, scheduledAt, execution, killAfterMs },
           state: {},
         });
         return res.ok({

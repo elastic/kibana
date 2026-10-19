@@ -12,6 +12,8 @@ import type { PluginConfigDescriptor } from '@kbn/core/server';
 const configSchema = schema.object({
   // RESEARCH BRANCH ONLY: enabled by default so serverless images carry the harness.
   enabled: schema.boolean({ defaultValue: true }),
+  /** RESEARCH ONLY: per-class execution pool bound; requests remain main unless explicitly opted in. */
+  isolatedMaxThreads: schema.number({ defaultValue: 2, min: 1, max: 10 }),
   /** Main-thread heartbeat cadence written to shared memory and watched by the probe worker. */
   heartbeatIntervalMs: schema.number({ defaultValue: 5, min: 1, max: 1000 }),
   /** Worker-side heartbeat check cadence. */
