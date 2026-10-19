@@ -24,7 +24,11 @@ import { transformDashboardIn } from '../transforms';
 import type { Operation } from '../types';
 import type { DashboardUpdateResponseBody } from './types';
 import { hasContentChanged } from '../../change_history/history_sequence';
-import { addToHistory, getHistorySnapshot, getHistorySequences } from '../../change_history/util';
+import {
+  addToHistory,
+  getHistorySnapshot,
+  getNextHistorySequence,
+} from '../../change_history/util';
 
 export interface UpdateOptions extends Omit<CreateOptions, 'id'> {
   /** Sequence number of the history version this update restores */
@@ -126,21 +130,28 @@ export async function update(
     expectedVersion = existing.version;
   }
 
-  // Unchanged content creates no new version; otherwise continue from the history, which outlives the saved object
+  // Unchanged content creates no new version. The sequence is stored with the update, so the version
+  // check below rejects a concurrent save instead of letting it reuse the sequence.
+  const currentSequence = existing.attributes.historySequence;
   const hasChanged = hasContentChanged(existing, {
     attributes: soAttributes,
     references: soReferences,
   });
   const newSequence = hasChanged
-    ? (await getHistorySequences({ spaceId, dashboardId: id })).next
+    ? await getNextHistorySequence({ spaceId, dashboardId: id, currentSequence })
     : undefined;
+  // attributes are fully replaced, so the stored sequence must be carried over
+  const updatedSequence = newSequence ?? currentSequence;
 
   let savedObject: SavedObjectsUpdateResponse<DashboardSavedObjectAttributes>;
   try {
     savedObject = await core.savedObjects.client.update<DashboardSavedObjectAttributes>(
       DASHBOARD_SAVED_OBJECT_TYPE,
       id,
-      soAttributes,
+      {
+        ...soAttributes,
+        ...(updatedSequence !== undefined && { historySequence: updatedSequence }),
+      },
       {
         references: soReferences,
         /** perform a "full" update instead, where the provided attributes will fully replace the existing ones */

@@ -20,6 +20,13 @@ describe('hasContentChanged', () => {
     expect(hasContentChanged(getObject({}), getObject({}))).toBe(false);
   });
 
+  it('ignores the history sequence', () => {
+    expect(
+      hasContentChanged(getObject({ historySequence: 1 }), getObject({ historySequence: 2 }))
+    ).toBe(false);
+    expect(hasContentChanged(getObject({ historySequence: 1 }), getObject({}))).toBe(false);
+  });
+
   it('is true when attributes change', () => {
     expect(hasContentChanged(getObject({}), getObject({ title: 'Changed' }))).toBe(true);
   });

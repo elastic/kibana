@@ -76,6 +76,24 @@ export const getHistorySequences = async ({
   return { latest, next: latest === undefined ? INITIAL_HISTORY_SEQUENCE : latest + 1 };
 };
 
+/**
+ * The sequence of the next version of a dashboard. A dashboard that stores its history sequence
+ * continues from it, which is atomic with the save. Otherwise (a new dashboard, or one saved before the
+ * sequence was stored) it continues from the history, which outlives the saved object.
+ */
+export const getNextHistorySequence = async ({
+  spaceId,
+  dashboardId,
+  currentSequence,
+}: {
+  spaceId: string | undefined;
+  dashboardId: string;
+  currentSequence: number | undefined;
+}): Promise<number> =>
+  typeof currentSequence === 'number'
+    ? currentSequence + 1
+    : (await getHistorySequences({ spaceId, dashboardId })).next;
+
 export const addToHistory = async ({
   ctx,
   spaceId = 'default',
@@ -136,7 +154,8 @@ export const addToHistory = async ({
           ...(typeof restoredFrom === 'number' && { restoredFrom }),
         },
       },
-      refresh: restoredFrom ? 'wait_for' : undefined, // wait for ES to update so that we fetch the updated list
+      // wait for ES to update so that we fetch the updated list; a delete must also be visible before its ID is recreated
+      refresh: restoredFrom || type === 'delete' ? 'wait_for' : undefined,
     });
   } catch {
     // history is best-effort; a failed write must not fail the save

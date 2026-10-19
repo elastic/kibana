@@ -12,7 +12,12 @@ import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 
 import { getChangeHistoryClient } from './change_history_service';
 import { transformDashboardOut } from '../api/transforms';
-import { addToHistory, getHistorySequences, getHistorySnapshot } from './util';
+import {
+  addToHistory,
+  getHistorySequences,
+  getHistorySnapshot,
+  getNextHistorySequence,
+} from './util';
 
 jest.mock('./change_history_service');
 jest.mock('../api/transforms');
@@ -62,6 +67,35 @@ describe('getHistorySequences', () => {
       throw new Error('not ready');
     });
     expect((await getHistorySequences({ spaceId: 'default', dashboardId: 'dash-1' })).next).toBe(1);
+  });
+});
+
+describe('getNextHistorySequence', () => {
+  beforeEach(() => jest.resetAllMocks());
+
+  it('continues from the stored sequence without reading history', async () => {
+    expect(
+      await getNextHistorySequence({
+        spaceId: 'default',
+        dashboardId: 'dash-1',
+        currentSequence: 4,
+      })
+    ).toBe(5);
+    expect(mockedGetClient).not.toHaveBeenCalled();
+  });
+
+  it('continues from the history when no sequence is stored', async () => {
+    const client = {
+      getHistory: jest.fn().mockResolvedValue({ items: [{ object: { sequence: 7 } }] }),
+    };
+    mockedGetClient.mockReturnValue(client as never);
+    expect(
+      await getNextHistorySequence({
+        spaceId: 'default',
+        dashboardId: 'dash-1',
+        currentSequence: undefined,
+      })
+    ).toBe(8);
   });
 });
 
@@ -142,6 +176,14 @@ describe('addToHistory', () => {
     const options = client.log.mock.calls[0][1];
     expect(options.data.metadata).toEqual({ changeCount: 1, restoredFrom: 2 });
     expect(options.refresh).toBe('wait_for');
+  });
+
+  it('waits for refresh on delete so that a recreated ID continues after it', async () => {
+    const client = getClient();
+    mockedGetClient.mockReturnValue(client as never);
+    await addToHistory({ ...baseArgs, ctx: getContext(), sequence: 4, type: 'delete' });
+
+    expect(client.log.mock.calls[0][1].refresh).toBe('wait_for');
   });
 
   it('swallows history write failures', async () => {

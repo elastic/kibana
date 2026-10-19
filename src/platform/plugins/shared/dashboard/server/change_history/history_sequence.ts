@@ -8,6 +8,7 @@
  */
 
 import equal from 'fast-deep-equal';
+import { omit } from 'lodash';
 
 import type { SavedObject } from '@kbn/core-saved-objects-api-server';
 
@@ -16,10 +17,12 @@ import type { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
 export const INITIAL_HISTORY_SEQUENCE = 1;
 
 /**
- * Whether the stored content (attributes or references) differs between two versions of a dashboard.
+ * Whether the stored content (attributes or references, ignoring the history sequence) differs between two versions of a dashboard.
  */
 export const hasContentChanged = (
   existing: Pick<SavedObject<DashboardSavedObjectAttributes>, 'attributes' | 'references'>,
   next: Pick<SavedObject<DashboardSavedObjectAttributes>, 'attributes' | 'references'>
 ): boolean =>
-  !equal(existing.attributes, next.attributes) || !equal(existing.references, next.references);
+  // the history sequence is bookkeeping, not content
+  !equal(omit(existing.attributes, 'historySequence'), omit(next.attributes, 'historySequence')) ||
+  !equal(existing.references, next.references);

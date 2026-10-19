@@ -15,7 +15,12 @@ import type { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { getDashboardCRUResponseBody } from '../get_cru_response_body';
 import { transformDashboardIn } from '../transforms';
 import type { DashboardCreateResponseBody } from './types';
-import { addToHistory, getHistorySequences, getHistorySnapshot } from '../../change_history/util';
+import { INITIAL_HISTORY_SEQUENCE } from '../../change_history/history_sequence';
+import {
+  addToHistory,
+  getHistorySnapshot,
+  getNextHistorySequence,
+} from '../../change_history/util';
 
 export interface CreateOptions {
   id?: string;
@@ -43,9 +48,14 @@ export async function create(
     DASHBOARD_SAVED_OBJECT_TYPE
   );
 
+  // a recreated ID may still have history from a deleted dashboard, so continue from it
+  const historySequence = id
+    ? await getNextHistorySequence({ spaceId, dashboardId: id, currentSequence: undefined })
+    : INITIAL_HISTORY_SEQUENCE;
+
   const savedObject = await core.savedObjects.client.create(
     DASHBOARD_SAVED_OBJECT_TYPE,
-    soAttributes,
+    { ...soAttributes, historySequence },
     {
       ...(id !== undefined && { id }),
       references: soReferences,
@@ -63,12 +73,6 @@ export async function create(
     strictValidationSchema,
   });
   if (snapshot) {
-    // a recreated ID may still have history from a deleted dashboard
-    const { next: historySequence } = await getHistorySequences({
-      spaceId,
-      dashboardId: savedObject.id,
-    });
-
     await addToHistory({
       ctx: requestCtx,
       dashboardId: savedObject.id,

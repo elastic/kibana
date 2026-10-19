@@ -81,6 +81,15 @@ describe(`create`, () => {
     expect(result.status).toEqual(201);
   });
 
+  it('stores the first history sequence on the new dashboard', async () => {
+    await supertest(server.listener).post('/api/dashboards').send({ title: 'title' });
+    expect(savedObjectsClient.create).toHaveBeenCalledWith(
+      'dashboard',
+      expect.objectContaining({ historySequence: 1 }),
+      expect.anything()
+    );
+  });
+
   it('silences error when thrown in tracking', async () => {
     coreServices.userActivity.trackUserAction = jest.fn().mockImplementationOnce(() => {
       throw new Error('there was a tracking error!');
