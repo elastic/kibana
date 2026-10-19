@@ -90,6 +90,9 @@ export const ENTITY_STORE_ROUTES = {
     ENTITY_MAINTAINERS_RUN: `${INTERNAL_BASE_ROUTE}/entity_maintainers/run/{id}`,
     ENTITY_MAINTAINERS_GET: `${INTERNAL_BASE_ROUTE}/entity_maintainers`,
     ENTITY_MAINTAINERS_INIT: `${INTERNAL_BASE_ROUTE}/entity_maintainers/init`,
+    RESOLUTION_CUSTOM_RULES: `${INTERNAL_BASE_ROUTE}/resolution/custom_rules`,
+    RESOLUTION_CUSTOM_RULE: `${INTERNAL_BASE_ROUTE}/resolution/custom_rules/{id}`,
+    RESOLUTION_CUSTOM_RULES_PREVIEW: `${INTERNAL_BASE_ROUTE}/resolution/custom_rules/_preview`,
   },
 } as const satisfies Record<string, Record<string, string>>;
 

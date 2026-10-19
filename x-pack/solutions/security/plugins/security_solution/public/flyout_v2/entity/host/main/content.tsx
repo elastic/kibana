@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { Entity } from '../../../../../common/api/entity_analytics';
+import type { EntityViewMode } from '../../../../../common/entity_analytics/entity_store/resolution_group';
 import { ObservedDataSection } from '../../shared/components/observed_data_section';
 import { useAnomalyOverview } from '../../../../entity_analytics/api/hooks/use_anomaly_overview';
 import { useAnomalyPrivileges } from '../../../../entity_analytics/api/hooks/use_anomaly_privileges';
@@ -25,6 +26,7 @@ import type { EntityDetailsPath } from '../../../../flyout/entity_details/shared
 import type { IdentityFields } from '../../../../flyout/document_details/shared/utils';
 import type { ObservedEntityData } from '../../shared/components/observed_entity/types';
 import type { EntityRiskScore, HostItem } from '../../../../../common/search_strategy';
+import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import { VisualizationsSection } from '../../../../flyout/entity_details/shared/components/right/visualizations_section';
 import { ResolutionSection } from '../../../../entity_analytics/components/entity_resolution/resolution_section';
 import { useNewEntityAnalyticsPage } from '../../../../entity_analytics/hooks/use_new_entity_analytics_page';
@@ -58,6 +60,11 @@ export interface ContentProps {
   isPreviewMode: boolean;
   /** When using Entity Store v2: entity record for asset criticality upsert. */
   entityRecord?: Entity;
+  /**
+   * Resolution-group aliases of `entityRecord` (empty outside the group view). Insights (alerts,
+   * misconfigurations, vulnerabilities) are then counted across the whole group.
+   */
+  aliasRecords?: readonly EntityStoreRecord[];
   /** Refetch entity store record after AI summary persist (v2). */
   refetchEntityRecord?: () => void;
   /** When true (i.e. entity store v2 enabled but no entity found), hide entity highlights and risk score. */
@@ -66,6 +73,8 @@ export interface ContentProps {
   entityStoreV2Enabled: boolean;
   /** Entity store entity ID for the host. */
   entityStoreEntityId?: string;
+  /** Entity view mode of the panel; `resolved` loads anomalies for the whole resolution group. */
+  mode?: EntityViewMode;
   /** See {@link RiskSummaryProps.prefetchedResolutionRisk}. */
   prefetchedResolutionRisk?: EntityRiskScore<EntityType.host>;
   /**
@@ -113,10 +122,12 @@ export const Content = ({
   onAssetCriticalityChange,
   isPreviewMode,
   entityRecord,
+  aliasRecords,
   refetchEntityRecord,
   noEntityInStore = false,
   entityStoreV2Enabled,
   entityStoreEntityId,
+  mode,
   prefetchedResolutionRisk,
   enableGraphAndResolutionNavigation = true,
   hideHeaderIcons = false,
@@ -133,6 +144,7 @@ export const Content = ({
   const loadAnomalies = isAnomalyDetailsEnabled && hasAnomalyPrivileges && !!entityStoreEntityId;
   const anomalyOverview = useAnomalyOverview({
     entityId: entityStoreEntityId ?? '',
+    mode,
     entityType: EntityType.host,
     enabled: loadAnomalies,
   });
@@ -223,6 +235,7 @@ export const Content = ({
       )}
       <EntityInsight
         entityRecord={entityRecord}
+        aliasRecords={aliasRecords}
         identityFields={identityFields}
         isPreviewMode={isPreviewMode}
         openDetailsPanel={openDetailsPanel}
