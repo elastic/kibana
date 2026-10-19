@@ -77,21 +77,23 @@ describe('custom_content panel schemas', () => {
     ['add_panels', addPanelsItemSchema],
     ['add_section', addSectionPanelItemSchema],
   ])(
-    'keeps esql and drops Lens-only fields on a custom_content request through %s',
+    'keeps esql, hasData and index and drops the Lens-only chartType on a custom_content request through %s',
     (_, schema) => {
       const result = schema.safeParse({
         ...customContentRequest,
         esql: 'FROM logs-* | STATS count = COUNT(*) BY service.name',
         chartType: SupportedChartType.Metric,
+        hasData: true,
         index: 'logs-*',
       });
 
       expect(result.success).toBe(true);
       expect(result.data).toMatchObject({
         esql: 'FROM logs-* | STATS count = COUNT(*) BY service.name',
+        hasData: true,
+        index: 'logs-*',
       });
       expect(result.data).not.toHaveProperty('chartType');
-      expect(result.data).not.toHaveProperty('index');
     }
   );
 

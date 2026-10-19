@@ -28,8 +28,12 @@ export interface CustomContentPanelAddRequest extends PanelResolutionRequestBase
   renderer: 'custom_content';
   /** What to display. */
   nlQuery: string;
-  /** ES|QL query feeding the template. Omit for static content. */
+  /** ES|QL query feeding the template. Wins over `hasData`. */
   esql?: string;
+  /** True: generate the query from `nlQuery`. Omitted or false: static content with no query. */
+  hasData?: boolean;
+  /** Index, alias or data stream to generate the query from. */
+  index?: string;
   existingPanel?: undefined;
 }
 
@@ -41,6 +45,12 @@ export interface CustomContentPanelEditRequest extends PanelResolutionRequestBas
   nlQuery?: string;
   /** New ES|QL query. Omit to keep the existing query; pass `null` to remove it. */
   esql?: string | null;
+  /** True: ensure the panel has data, generating a query only when it has none. False: remove it. */
+  hasData?: boolean;
+  /** Regenerate the query from `nlQuery`, keeping the parts the request does not change. */
+  regenerateEsql?: boolean;
+  /** Index, alias or data stream to generate the query from. */
+  index?: string;
 }
 
 /** Request to generate or refine a custom content panel's template; `existingPanel` tells them apart. */
@@ -68,7 +78,20 @@ const customContentPanelRequestSchema = z.object({
     .max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH)
     .optional()
     .describe(
-      'ES|QL query whose result rows feed the template. Omit for static content — it is not generated for you. Build it with the generate_esql tool rather than writing it yourself; the panel fails if Elasticsearch rejects it.'
+      'An ES|QL query the user supplied verbatim. It wins over hasData. Do not write a query yourself; set hasData to true and let the server generate it.'
+    ),
+  hasData: z
+    .boolean()
+    .optional()
+    .describe(
+      'Set true when the panel shows live Elasticsearch values: the server generates the ES|QL query from "query" (and "index"). Omit for static content such as a banner, a legend or a note — a static panel has no query.'
+    ),
+  index: z
+    .string()
+    .max(256)
+    .optional()
+    .describe(
+      'Exact index, alias, or data stream the data comes from. Pass it whenever known, together with hasData: true.'
     ),
 });
 
@@ -94,12 +117,37 @@ const customContentEditPanelRequestSchema = z
       .nullable()
       .optional()
       .describe(
-        'New ES|QL query. Omit to keep the existing query; pass null to remove it. Build it with the generate_esql tool rather than writing it yourself.'
+        'An ES|QL query the user supplied verbatim; it replaces the current one. Omit to keep the current query; pass null to remove it. Do not write a query yourself; to change the data, set regenerateEsql to true and describe the change in "query".'
+      ),
+    regenerateEsql: z
+      .boolean()
+      .optional()
+      .describe(
+        'Set true when the edit changes what the panel shows: the server regenerates the ES|QL query from "query", keeping the parts the request does not change. Omit for layout, copy and style edits, which keep the current query. Requires "query".'
+      ),
+    hasData: z
+      .boolean()
+      .optional()
+      .describe(
+        'True: ensure the panel has data, generating a query from "query" only when it has none. False: remove the query so the panel is static. Omit to keep the current data state.'
+      ),
+    index: z
+      .string()
+      .max(256)
+      .optional()
+      .describe(
+        'Exact index, alias, or data stream to generate the query from, when regenerating or adding data.'
       ),
   })
-  .refine(({ query, esql }) => query !== undefined || esql !== undefined, {
-    message: 'At least one of query or esql must be provided.',
-  });
+  .refine(
+    ({ query, esql, regenerateEsql, hasData }) =>
+      query !== undefined ||
+      ((esql !== undefined || hasData === false) && !regenerateEsql && hasData !== true),
+    {
+      message:
+        'query is required unless the edit only replaces or removes the ES|QL query (esql, or hasData: false); regenerateEsql and hasData: true need it.',
+    }
+  );
 
 export const customContentPanelKind = defineRequestPanelKind({
   renderer: 'custom_content',
