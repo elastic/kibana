@@ -23,7 +23,7 @@ interface InvestigationIoc {
  */
 type ExtractedIocCategory = Extract<
   InvestigationIocCategory,
-  'shas' | 'ips' | 'file_paths' | 'malicious_commands' | 'affected_hosts'
+  'shas' | 'ips' | 'file_paths' | 'registry_keys' | 'malicious_commands' | 'affected_hosts'
 >;
 
 export const ENDPOINT_FORENSIC_ANALYSIS_SKILL_ID = 'endpoint-forensic-analysis';
@@ -157,16 +157,18 @@ values verbatim — never rewrite, merge, or re-categorize one.
 The categories are:
 - \`shas\` — file hashes
 - \`ips\` — C2 and other network destinations
-- \`file_paths\` — dropped payloads, staging paths, persistence keys
+- \`file_paths\` — dropped payloads and staging paths
+- \`registry_keys\` — registry key paths, including persistence keys
+- \`mutex\` — named mutex created by malware
 - \`malicious_commands\` — the command lines you attributed to the attack
 - \`ransom_note\` — ransom note paths
 - \`encryption_marker\` — markers of encryption such as a renamed file extension
 - \`compromised_identities\` — accounts that were used by the attacker or stolen
 - \`affected_hosts\` — every host the attack touched
 
-The tool is a **floor, not the full set**: it can only fill \`shas\`, \`ips\`, \`file_paths\`, \`malicious_commands\`,
-and \`affected_hosts\` from telemetry fields. You must add \`ransom_note\`, \`encryption_marker\`, and
-\`compromised_identities\` yourself from the reconstruction, and enrich the categories it did return. If the tool
+The tool is a **floor, not the full set**: it can only fill \`shas\`, \`ips\`, \`file_paths\`, \`registry_keys\`,
+\`malicious_commands\`, and \`affected_hosts\` from telemetry fields. You must add \`mutex\`, \`ransom_note\`,
+\`encryption_marker\`, and \`compromised_identities\` yourself from the reconstruction, and enrich the categories it did return. If the tool
 returns an \`error\` field, the missing categories mean the query failed, not that the hosts were clean — fall back
 entirely to your own reconstruction and say so.
 
@@ -261,11 +263,11 @@ Enumerate registry run keys, scheduled tasks, services, and startup items from t
       type: ToolType.builtin,
       description:
         'Extract structured indicators of compromise (IoCs) from Defend telemetry for named host(s). ' +
-        'Returns indicators grouped by category — shas, ips, file_paths, malicious_commands, affected_hosts — ' +
+        'Returns indicators grouped by category — shas, ips, file_paths, registry_keys, malicious_commands, affected_hosts — ' +
         `each a deduplicated list of { value, comment }, capped at ${MAX_IOCS_PER_CATEGORY} per category. ` +
         'Call this after forensic reconstruction to produce the indicators for cross-environment hunts and ' +
-        'response actions. It only returns what telemetry fields can be typed mechanically — add ransom notes, ' +
-        'encryption markers, and compromised identities from your own analysis.',
+        'response actions. It only returns what telemetry fields can be typed mechanically — add mutex, ransom ' +
+        'notes, encryption markers, and compromised identities from your own analysis.',
       schema: extractIocsSchema,
       handler: async (args, context) => {
         const { hosts, time_window_hours: timeWindowHours } = extractIocsSchema.parse(args);
@@ -372,7 +374,7 @@ Enumerate registry run keys, scheduled tasks, services, and startup items from t
               `${action ? `File ${action}` : 'File touched'}${seenOn}${actor ? ` ${actor}` : ''}`
             );
             addIndicator(
-              'file_paths',
+              'registry_keys',
               at(regIdx),
               [
                 `Registry key written${seenOn}`,
@@ -422,7 +424,7 @@ Enumerate registry run keys, scheduled tasks, services, and startup items from t
                   : 'These categories are deduplicated — echo the values verbatim rather than rewriting or ' +
                     'merging them, and enrich each comment with what your reconstruction established. They are ' +
                     'a floor, not the full set: this query can only type telemetry fields mechanically, so add ' +
-                    'the ransom_note, encryption_marker, and compromised_identities categories yourself.',
+                    'the mutex, ransom_note, encryption_marker, and compromised_identities categories yourself.',
               },
             },
           ],

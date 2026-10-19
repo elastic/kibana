@@ -1028,6 +1028,78 @@ describe('createEndpointLookupService', () => {
     });
   });
 
+  describe('resolveByIp', () => {
+    it('queries united endpoint metadata by exact IP and returns one live endpoint', async () => {
+      const getHostMetadataList = jest.fn().mockResolvedValue({
+        data: [
+          { metadata: { elastic: { agent: { id: 'agent-ip' } } }, host_status: HostStatus.HEALTHY },
+        ],
+        total: 1,
+      });
+      const { lookup } = buildService({ getHostMetadataList });
+
+      await expect(lookup.resolveByIp('10.0.0.7')).resolves.toEqual({
+        kind: 'found',
+        endpoint: {
+          agentId: 'agent-ip',
+          agentType: 'endpoint',
+          packages: ['endpoint'],
+          status: HostStatus.HEALTHY,
+        },
+      });
+      expect(getHostMetadataList).toHaveBeenCalledWith(
+        expect.objectContaining({ kuery: 'united.endpoint.host.ip: "10.0.0.7"' }),
+        undefined
+      );
+    });
+
+    it('returns ambiguity rather than guessing when an IP belongs to two live endpoints', async () => {
+      const { lookup } = buildService({
+        getHostMetadataList: jest.fn().mockResolvedValue({
+          data: [
+            {
+              metadata: { elastic: { agent: { id: 'agent-a' } } },
+              host_status: HostStatus.HEALTHY,
+            },
+            {
+              metadata: { elastic: { agent: { id: 'agent-b' } } },
+              host_status: HostStatus.HEALTHY,
+            },
+          ],
+          total: 2,
+        }),
+      });
+
+      expect(await lookup.resolveByIp('10.0.0.8')).toEqual({
+        kind: 'ambiguous',
+        candidates: [
+          { agentId: 'agent-a', status: HostStatus.HEALTHY },
+          { agentId: 'agent-b', status: HostStatus.HEALTHY },
+        ],
+      });
+    });
+
+    it('deduplicates historical metadata documents for the same agent', async () => {
+      const { lookup } = buildService({
+        getHostMetadataList: jest.fn().mockResolvedValue({
+          data: [
+            {
+              metadata: { elastic: { agent: { id: 'agent-a' } } },
+              host_status: HostStatus.OFFLINE,
+            },
+            {
+              metadata: { elastic: { agent: { id: 'agent-a' } } },
+              host_status: HostStatus.HEALTHY,
+            },
+          ],
+          total: 2,
+        }),
+      });
+
+      expect(await lookup.resolveByIp('10.0.0.9')).toHaveProperty('kind', 'found');
+    });
+  });
+
   describe('resolveByAgentId', () => {
     const buildByIdService = (
       agent: Record<string, unknown> | Error,

@@ -115,6 +115,8 @@ describe(`${ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID} handler`, () => {
     ]);
     expect(data.file_paths).toEqual([
       { value: 'C:\\Users\\Public\\update.dll', comment: 'Executable on WKSTN-RECV01' },
+    ]);
+    expect(data.registry_keys).toEqual([
       { value: 'HKLM\\Run\\evil', comment: 'Registry key written on WKSTN-RECV01' },
     ]);
     expect(data.affected_hosts).toEqual([
@@ -156,7 +158,36 @@ describe(`${ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID} handler`, () => {
     expect(data.ransom_note).toBeUndefined();
     expect(data.encryption_marker).toBeUndefined();
     expect(data.compromised_identities).toBeUndefined();
+    expect(data.mutex).toBeUndefined();
     expect(data.guidance).toContain('ransom_note');
+  });
+
+  it('deduplicates registry keys and caps the mechanically extracted category', async () => {
+    mockEsqlQuery.mockResolvedValue({
+      columns: [{ name: 'registry.path' }, { name: 'host.name' }],
+      values: [
+        ['HKLM\\Run\\duplicate', 'WKSTN-RECV01'],
+        ['HKLM\\Run\\duplicate', 'SRV-DC01'],
+        ...Array.from({ length: 60 }, (_, index) => [
+          `HKLM\\Software\\Acme\\Key${index}`,
+          'WKSTN-RECV01',
+        ]),
+      ],
+    });
+
+    const data = await getData();
+
+    expect(data.registry_keys).toHaveLength(50);
+    expect(data.registry_keys).toEqual(
+      expect.arrayContaining([
+        { value: 'HKLM\\Run\\duplicate', comment: 'Registry key written on WKSTN-RECV01' },
+      ])
+    );
+    expect(
+      (data.registry_keys as Array<{ value: string }>).filter(
+        ({ value }) => value === 'HKLM\\Run\\duplicate'
+      )
+    ).toHaveLength(1);
   });
 
   it('sorts ascending before limiting so each comment describes the earliest occurrence', async () => {

@@ -160,6 +160,8 @@ interface ExtraDocument {
 export interface EndpointScenario {
   agentId: string;
   hostName: string;
+  /** IP addresses written to endpoint metadata for exact-IP target resolution. */
+  hostIp?: string[];
   os: {
     name: string;
     version: string;
@@ -354,6 +356,7 @@ export async function seedScenario(clients: SeedClients, scenario: EndpointScena
   const {
     agentId,
     hostName,
+    hostIp,
     os,
     policyName,
     policyStatus,
@@ -382,7 +385,7 @@ export async function seedScenario(clients: SeedClients, scenario: EndpointScena
         namespace: 'default',
       },
       agent: { id: agentId, type: 'endpoint', version: agentVersion },
-      host: { name: hostName, hostname: hostName, os },
+      host: { name: hostName, hostname: hostName, ...(hostIp ? { ip: hostIp } : {}), os },
       Endpoint: {
         status: endpointStatus,
         policy: { applied: { status: policyStatus, name: policyName, id: policyId } },
@@ -406,7 +409,7 @@ export async function seedScenario(clients: SeedClients, scenario: EndpointScena
     document: {
       '@timestamp': now,
       agent: { id: agentId, version: agentVersion },
-      local_metadata: { host: { name: hostName } },
+      local_metadata: { host: { name: hostName, ...(hostIp ? { ip: hostIp } : {}) } },
       active: true,
       enrolled_at: now,
       last_checkin: lastCheckin ?? now,

@@ -65,6 +65,8 @@ export interface ResolvedEndpoint {
    * the read-only status tool resolves.
    */
   status?: string;
+  /** Agent policy assigned to this Fleet agent, used for policy-aware action preflight. */
+  policyId?: string;
 }
 
 /** A Fleet agent record that matched the hostname but could not be selected. */
@@ -99,6 +101,8 @@ export type EndpointLookupResult =
 
 export interface EndpointLookupService {
   resolveByHostName(hostName: string): Promise<EndpointLookupResult>;
+  /** Resolves an exact IP from the space-scoped united Endpoint metadata index. */
+  resolveByIp(ip: string): Promise<EndpointLookupResult>;
   /**
    * Resolves one specific agent by its Fleet agent ID, behind the same space
    * and supported-integration gates as the hostname walk. Never `ambiguous`:
@@ -130,7 +134,7 @@ interface MetadataCandidate {
     /** Fleet agent id — the identity actions and Fleet candidates key on. */
     elastic?: { agent?: { id?: string } };
     /** Names Defend reports for the host; `hostname` is what `list_endpoints` shows. */
-    host?: { hostname?: string; name?: string };
+    host?: { hostname?: string; name?: string; ip?: string | readonly string[] };
   };
   host_status?: string;
   /** HostInfo `last_checkin` — ISO timestamp used for the recency tiebreak. */
@@ -286,6 +290,7 @@ export function createEndpointLookupService(
     isLive: boolean;
     status: string;
     packages?: string[];
+    policyId?: string;
     /**
      * ISO timestamp for the newest-first tiebreak. The source differs by
      * candidate origin: `enrolled_at` for Fleet agents, `last_checkin` for
@@ -300,6 +305,7 @@ export function createEndpointLookupService(
     status?: string;
     packages?: string[];
     enrolled_at?: string;
+    policy_id?: string;
   }
 
   interface CandidateCollection {
@@ -397,6 +403,7 @@ export function createEndpointLookupService(
       // distinction is defined.
       status: candidate.status ? toHostStatus(candidate.status as AgentStatus) : 'unknown',
       packages: candidate.packages,
+      policyId: candidate.policy_id,
       sortKey: candidate.enrolled_at,
     }));
 
@@ -470,7 +477,8 @@ export function createEndpointLookupService(
    * fallback.
    */
   const listMetadataCandidates = async (
-    hostName: string,
+    field: 'hostname' | 'ip',
+    value: string,
     scopedServices?: ScopedEndpointServices
   ): Promise<CandidateCollection> => {
     // The metadata index only holds Elastic Defend hosts.
@@ -488,7 +496,7 @@ export function createEndpointLookupService(
           pageSize: LOOKUP_PAGE_SIZE,
           // `keyword` field (`strings_as_keyword` in metrics-metadata-united.json): the quoted
           // value is an exact match, so `web-01` cannot match `web-01-copy`.
-          kuery: `united.endpoint.host.hostname: "${escapeQuotes(hostName)}"`,
+          kuery: `united.endpoint.host.${field}: "${escapeQuotes(value)}"`,
         },
         scopedServices
       );
@@ -527,7 +535,64 @@ export function createEndpointLookupService(
     return { candidates, truncated, total };
   };
 
+  const resolveMetadataCandidates = async (field: 'hostname' | 'ip', value: string) => {
+    const metadata = await listMetadataCandidates(field, value, scoped);
+    const sorted = [...metadata.candidates].sort((a, b) => {
+      const aLive = a.isLive ? 1 : 0;
+      const bLive = b.isLive ? 1 : 0;
+      if (aLive !== bLive) return bLive - aLive;
+      return (b.sortKey ?? '').localeCompare(a.sortKey ?? '');
+    });
+    // United metadata can retain more than one document for the same agent.
+    // Keep its best (live/newest) document so history is not mistaken for two
+    // distinct machines sharing an address.
+    const distinct = [
+      ...new Map(sorted.map((candidate) => [candidate.agentId, candidate])).values(),
+    ];
+
+    if (!distinct.length) {
+      return { kind: 'not_found' } as const;
+    }
+
+    const live = distinct.filter((candidate) => candidate.isLive);
+    const ambiguous = field === 'ip' ? distinct.length > 1 : live.length > 1;
+    if (metadata.truncated || ambiguous) {
+      const toReport = metadata.truncated || field === 'ip' ? distinct : live;
+      return {
+        kind: 'ambiguous' as const,
+        candidates: toReport
+          .slice(0, MAX_AMBIGUOUS_CANDIDATES)
+          .map((candidate) => ({ agentId: candidate.agentId, status: candidate.status })),
+        ...(metadata.truncated ? { truncated: true as const } : {}),
+        ...(metadata.truncated && metadata.total !== undefined
+          ? { totalCandidates: metadata.total }
+          : {}),
+      };
+    }
+
+    const chosen = distinct[0];
+    return {
+      kind: 'found' as const,
+      endpoint: {
+        agentId: chosen.agentId,
+        agentType: 'endpoint' as const,
+        packages: ['endpoint'],
+        status: chosen.status,
+      },
+    };
+  };
+
   return {
+    async resolveByIp(ip: string): Promise<EndpointLookupResult> {
+      // IP targeting is Defend-only: Fleet has no response-action-safe mapping
+      // from a host IP to third-party EDR agent identity. The metadata service
+      // applies the caller's Space and cross-project scope.
+      if (supportedAgentTypes && !supportedAgentTypes.includes('endpoint')) {
+        return { kind: 'not_found' };
+      }
+      return resolveMetadataCandidates('ip', ip);
+    },
+
     async resolveByAgentId(agentId: string): Promise<EndpointLookupResult> {
       // The same space gate the hostname walk applies per page: an agent
       // outside the caller's space answers `not_found`, so an ID probe cannot
@@ -564,6 +629,7 @@ export function createEndpointLookupService(
           agentType,
           packages,
           ...(agent.status ? { status: toHostStatus(agent.status) } : {}),
+          ...(agent.policy_id ? { policyId: agent.policy_id } : {}),
           ...(typeof fleetHostName === 'string' && fleetHostName
             ? { hostName: fleetHostName }
             : {}),
@@ -575,7 +641,7 @@ export function createEndpointLookupService(
     async resolveByHostName(hostName: string): Promise<EndpointLookupResult> {
       const [fleet, metadata] = await Promise.all([
         listVisibleFleetCandidates(hostName),
-        listMetadataCandidates(hostName, scoped),
+        listMetadataCandidates('hostname', hostName, scoped),
       ]);
 
       // Fleet is the authority when it has the record — prefer it (it carries
@@ -656,6 +722,7 @@ export function createEndpointLookupService(
           agentType: resolveAgentTypeFromPackages(chosen.packages ?? []),
           packages: chosen.packages ?? [],
           status: chosen.status,
+          ...(chosen.policyId ? { policyId: chosen.policyId } : {}),
         },
       };
     },

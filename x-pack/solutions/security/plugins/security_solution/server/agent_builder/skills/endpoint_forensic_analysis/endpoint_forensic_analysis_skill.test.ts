@@ -50,6 +50,8 @@ describe('endpointForensicAnalysisSkill', () => {
       'Answering with a structured output schema that has an indicators field'
     );
     expect(endpointForensicAnalysisSkill.content).toContain('Do not also render the indicators');
+    expect(endpointForensicAnalysisSkill.content).toContain('`registry_keys`');
+    expect(endpointForensicAnalysisSkill.content).toContain('`mutex`');
   });
 
   it('routes conflicting antivirus / configuration issues to elastic-defend-configuration-troubleshooting', () => {
