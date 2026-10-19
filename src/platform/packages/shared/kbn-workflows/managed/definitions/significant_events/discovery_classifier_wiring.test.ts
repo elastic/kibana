@@ -148,7 +148,7 @@ describe('discovery workflow detection classifier wiring', () => {
     const inputs = discovery.triggers[0].inputs;
 
     it.each([
-      ['classifierShadowMode', 'boolean', false, undefined, undefined],
+      ['classifierShadowMode', 'boolean', true, undefined, undefined],
       ['classifierKnownOngoingDays', 'number', 7, 0, 90],
       ['classifierProbeWindowMinutes', 'number', 20, 15, 360],
       ['classifierProbeTimeoutMs', 'number', 8000, 1000, 30000],
@@ -166,8 +166,8 @@ describe('discovery workflow detection classifier wiring', () => {
       expect(inputs?.additionalProperties).toBe(false);
     });
 
-    it('ships enforcing, so the agent only receives the detections the classifier did not skip', () => {
-      expect(inputs?.properties?.classifierShadowMode?.default).toBe(false);
+    it('ships in shadow mode, so the agent still receives every detection', () => {
+      expect(inputs?.properties?.classifierShadowMode?.default).toBe(true);
     });
   });
 
