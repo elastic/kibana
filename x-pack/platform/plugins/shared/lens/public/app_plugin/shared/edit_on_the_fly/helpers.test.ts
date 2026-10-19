@@ -363,7 +363,7 @@ describe('Lens inline editing helpers', () => {
                 [trendlineLayerId]: {
                   index: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
                   query: {
-                    esql: 'FROM index1 | STATS COUNT(*) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)',
+                    esql: 'FROM index1 | STATS COUNT(*) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)',
                   },
                   columns: [
                     {
@@ -373,7 +373,7 @@ describe('Lens inline editing helpers', () => {
                     },
                     {
                       columnId: 'trend-time-1',
-                      fieldName: 'BUCKET(@timestamp, 75, ?_tstart, ?_tend)',
+                      fieldName: 'BUCKET(@timestamp, 100, ?_tstart, ?_tend)',
                       meta: { type: 'date' },
                     },
                   ],
@@ -766,7 +766,7 @@ describe('Lens inline editing helpers', () => {
         const visualization = result?.state.visualization as Partial<MetricVisualizationState>;
 
         expect(trendlineLayer.query?.esql).toBe(
-          'FROM index1 | KEEP bytes, @timestamp | STATS AVG(bytes) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)'
+          'FROM index1 | KEEP bytes, @timestamp | STATS AVG(bytes) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)'
         );
         expect(
           trendlineLayer.columns.some((column) => column.columnId === trendlineBreakdownAccessor)

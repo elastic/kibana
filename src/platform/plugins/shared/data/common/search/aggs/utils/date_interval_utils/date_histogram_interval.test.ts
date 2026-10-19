@@ -19,6 +19,10 @@ describe('dateHistogramInterval', () => {
     expect(dateHistogramInterval('1y')).toEqual({ calendar_interval: '1y' });
   });
 
+  it('should return fixed_interval key for 1h when shouldForceFixed is true', () => {
+    expect(dateHistogramInterval('1h', true)).toEqual({ fixed_interval: '1h' });
+  });
+
   it('should return fixed_interval key for fixed intervals', () => {
     expect(dateHistogramInterval('1ms')).toEqual({ fixed_interval: '1ms' });
     expect(dateHistogramInterval('42ms')).toEqual({ fixed_interval: '42ms' });

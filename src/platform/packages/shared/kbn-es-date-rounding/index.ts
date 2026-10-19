@@ -9,5 +9,7 @@
 
 export type { CalendarDateRounding, DateRounding, FixedDateRounding } from './src/date_rounding';
 export { nextBucketKey, roundToBucketKey, toDateRounding } from './src/date_rounding';
+export type { DateInterval, ZonedDateRange } from './src/pick';
+export { durationAsRange, fitsInBuckets, pickDateRounding } from './src/pick';
 export type { IanaTimeZone } from './src/time_zone';
 export { ianaTimeZone, ianaTimeZoneOrUtc } from './src/time_zone';

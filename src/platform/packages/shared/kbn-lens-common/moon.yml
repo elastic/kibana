@@ -66,7 +66,8 @@ dependsOn:
   - '@kbn/control-group-renderer'
   - '@kbn/palettes'
   - '@kbn/esql-language'
-  - '@kbn/calculate-auto'
+  - '@kbn/data-service'
+  - '@kbn/es-date-rounding'
   - '@kbn/core-lifecycle-browser-mocks'
   - '@kbn/chart-icons'
 tags:

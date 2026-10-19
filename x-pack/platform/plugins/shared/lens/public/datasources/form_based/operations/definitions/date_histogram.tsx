@@ -11,7 +11,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { EuiSwitchEvent } from '@elastic/eui';
 import {
-  EuiBasicTable,
   EuiCode,
   EuiComboBox,
   EuiFormRow,
@@ -495,13 +494,6 @@ export const dateHistogramOperation: OperationDefinition<
     defaultMessage: 'How Date histogram works',
   }),
   helpComponent() {
-    const infiniteBound = i18n.translate('xpack.lens.indexPattern.dateHistogram.moreThanYear', {
-      defaultMessage: 'More than a year',
-    });
-    const upToLabel = i18n.translate('xpack.lens.indexPattern.dateHistogram.upTo', {
-      defaultMessage: 'Up to',
-    });
-
     return (
       <>
         <p>
@@ -513,46 +505,12 @@ export const dateHistogramOperation: OperationDefinition<
         <p>
           <FormattedMessage
             id="xpack.lens.indexPattern.dateHistogram.autoLongerExplanation"
-            defaultMessage="To choose the interval, Lens divides the specified time range by the {targetBarSetting} Advanced Setting and calculates the best interval for your data. For example, when the time range is 4 days, the data is divided into hourly buckets. To configure the maximum number of bars, use the {maxBarSetting} Advanced Setting."
+            defaultMessage="To choose the interval, Lens picks the finest interval that produces at most {targetBarSetting} buckets. For example, when the time range is 4 days, the data is divided into hourly buckets."
             values={{
-              maxBarSetting: <EuiCode>{UI_SETTINGS.HISTOGRAM_MAX_BARS}</EuiCode>,
               targetBarSetting: <EuiCode>{UI_SETTINGS.HISTOGRAM_BAR_TARGET}</EuiCode>,
             }}
           />
         </p>
-
-        <p>
-          {i18n.translate('xpack.lens.indexPattern.dateHistogram.autoAdvancedExplanation', {
-            defaultMessage: 'The interval follows this logic:',
-          })}
-        </p>
-
-        <EuiBasicTable
-          tableCaption={i18n.translate(
-            'xpack.lens.indexPattern.dateHistogram.autoIntervalTableCaption',
-            {
-              defaultMessage: 'Auto date histogram interval thresholds',
-            }
-          )}
-          items={search.aggs.boundsDescendingRaw.map(({ bound, boundLabel, intervalLabel }) => ({
-            bound: typeof bound === 'number' ? infiniteBound : `${upToLabel} ${boundLabel}`,
-            interval: intervalLabel,
-          }))}
-          columns={[
-            {
-              field: 'bound',
-              name: i18n.translate('xpack.lens.indexPattern.dateHistogram.autoBoundHeader', {
-                defaultMessage: 'Target interval measured',
-              }),
-            },
-            {
-              field: 'interval',
-              name: i18n.translate('xpack.lens.indexPattern.dateHistogram.autoIntervalHeader', {
-                defaultMessage: 'Interval used',
-              }),
-            },
-          ]}
-        />
       </>
     );
   },

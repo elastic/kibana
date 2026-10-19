@@ -30,10 +30,9 @@ describe('getBucketSize', () => {
 
   test('returns auto calculated buckets', () => {
     const result = getBucketSize(req, 'auto', capabilities, 100);
-    const expectedValue = 86400; // 24h
 
-    expect(result).toHaveProperty('bucketSize', expectedValue);
-    expect(result).toHaveProperty('intervalString', `${expectedValue}s`);
+    expect(result).toHaveProperty('bucketSize', 604800);
+    expect(result).toHaveProperty('intervalString', '1w');
   });
 
   test('returns overridden buckets (1s)', () => {
@@ -67,14 +66,14 @@ describe('getBucketSize', () => {
   test('returns overridden buckets (>=5d)', () => {
     const result = getBucketSize(req, '>=5d', capabilities, 100);
 
-    expect(result).toHaveProperty('bucketSize', 432000);
-    expect(result).toHaveProperty('intervalString', '5d');
+    expect(result).toHaveProperty('bucketSize', 604800);
+    expect(result).toHaveProperty('intervalString', '1w');
   });
 
   test('returns overridden buckets for 1 bar and >=1d interval', () => {
     const result = getBucketSize(req, '>=1d', capabilities, 1);
 
-    expect(result).toHaveProperty('bucketSize', 2592000);
-    expect(result).toHaveProperty('intervalString', '2592000s');
+    expect(result).toHaveProperty('bucketSize', 29030400);
+    expect(result).toHaveProperty('intervalString', '1y');
   });
 });
