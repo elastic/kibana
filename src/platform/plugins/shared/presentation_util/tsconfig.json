@@ -27,6 +27,7 @@
     "@kbn/field-utils",
     "@kbn/embeddable-plugin",
     "@kbn/presentation-publishing",
+    "@kbn/es-query",
   ],
   "exclude": ["target/**/*"]
 }
