@@ -282,8 +282,12 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       core$: deps.status.core$,
       overall$: deps.status.overall$,
       set: deps.status.plugins.set.bind(null, plugin.name),
-      dependencies$: deps.status.plugins.getDependenciesStatus$(plugin.name),
-      derivedStatus$: deps.status.plugins.getDerivedStatus$(plugin.name),
+      get dependencies$() {
+        return deps.status.plugins.getDependenciesStatus$(plugin.name);
+      },
+      get derivedStatus$() {
+        return deps.status.plugins.getDerivedStatus$(plugin.name);
+      },
       isStatusPageAnonymous: deps.status.isStatusPageAnonymous,
     },
     uiSettings: {
@@ -297,7 +301,9 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       const [coreStart] = await plugin.startDependencies;
       return new CoreRouteHandlerContext(coreStart as unknown as InternalCoreStart, request);
     },
-    deprecations: deps.deprecations.getRegistry(plugin.name),
+    get deprecations() {
+      return deps.deprecations.getRegistry(plugin.name);
+    },
     userActivity: {
       trackUserAction: deps.userActivity.trackUserAction,
     },

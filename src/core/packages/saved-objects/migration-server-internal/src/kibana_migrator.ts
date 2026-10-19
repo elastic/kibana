@@ -31,7 +31,6 @@ import {
   type MigrationResult,
   type SavedObjectsMigrationConfigType,
   SavedObjectsSerializer,
-  type SavedObjectsTypeMappingDefinitions,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { createCummulativeLogger } from './create_cummulative_logger';
 import { buildActiveMappings, buildTypesMappings } from './core';
@@ -64,7 +63,6 @@ export class KibanaMigrator implements IKibanaMigrator {
   private readonly documentMigrator: DocumentMigrator;
   private readonly kibanaIndex: string;
   private readonly log: Logger;
-  private readonly mappingProperties: SavedObjectsTypeMappingDefinitions;
   private readonly typeRegistry: ISavedObjectTypeRegistryInternal;
   private readonly hashToVersionMap: Record<string, string>;
   private readonly serializer: SavedObjectsSerializer;
@@ -80,7 +78,7 @@ export class KibanaMigrator implements IKibanaMigrator {
       unit: 'ms',
       valueType: ValueType.DOUBLE,
     });
-  private readonly activeMappings: IndexMapping;
+  private activeMappings?: IndexMapping;
   private readonly soMigrationsConfig: SavedObjectsMigrationConfigType;
   private readonly docLinks: DocLinksServiceStart;
   private readonly waitForMigrationCompletion: boolean;
@@ -113,8 +111,8 @@ export class KibanaMigrator implements IKibanaMigrator {
     this.typeRegistry = typeRegistry;
     this.hashToVersionMap = hashToVersionMap;
     this.serializer = new SavedObjectsSerializer(this.typeRegistry);
-    // build mappings.properties for all types, all indices
-    this.mappingProperties = buildTypesMappings(this.typeRegistry.getAllTypes());
+    // Validate duplicate type names eagerly without retaining the intermediate map
+    buildTypesMappings(this.typeRegistry.getAllTypes());
     this.log = logger;
     this.kibanaVersion = kibanaVersion;
     this.documentMigrator = new DocumentMigrator({
@@ -125,9 +123,6 @@ export class KibanaMigrator implements IKibanaMigrator {
     });
     this.waitForMigrationCompletion = waitForMigrationCompletion;
     this.nodeRoles = nodeRoles;
-    // we are no longer adding _meta information to the mappings at this level
-    // consumers of the exposed mappings are only accessing the 'properties' field
-    this.activeMappings = buildActiveMappings(this.mappingProperties);
     this.docLinks = docLinks;
     this.esCapabilities = esCapabilities;
     this.kibanaVersionCheck = kibanaVersionCheck;
@@ -210,7 +205,7 @@ export class KibanaMigrator implements IKibanaMigrator {
           docLinks: this.docLinks,
           serializer: this.serializer,
           elasticsearchClient: this.client,
-          mappingProperties: this.mappingProperties,
+          mappingProperties: buildTypesMappings(this.typeRegistry.getAllTypes()),
           waitForMigrationCompletion: this.waitForMigrationCompletion,
           esCapabilities: this.esCapabilities,
           kibanaVersionCheck: skipVersionCheck ? undefined : this.kibanaVersionCheck,
@@ -227,6 +222,9 @@ export class KibanaMigrator implements IKibanaMigrator {
   }
 
   public getActiveMappings(): IndexMapping {
+    this.activeMappings ??= buildActiveMappings(
+      buildTypesMappings(this.typeRegistry.getAllTypes())
+    );
     return this.activeMappings;
   }
 

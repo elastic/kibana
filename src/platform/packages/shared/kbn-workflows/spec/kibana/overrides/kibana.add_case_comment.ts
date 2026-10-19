@@ -14,6 +14,7 @@
  * This override is to support union body with both 'alert' and 'user' comment types.
  */
 
+import { lazySchema } from '@kbn/zod/v4';
 import { buildParamsSchema } from '../../../common/utils/zod';
 
 // import all needed request and response schemas generated from the OpenAPI spec
@@ -47,12 +48,14 @@ You must have \`all\` privileges for the **Cases** feature in the **Management**
     urlParams: [],
     bodyParams: ['alertId', 'index', 'owner', 'rule', 'type', 'comment'],
   },
-  paramsSchema: buildParamsSchema({
-    requestSchema: add_case_comment_default_space_request,
-    additionalSchemas: {
-      fetcher: FetcherConfigSchema,
-      ...KibanaStepMetaSchema,
-    },
-  }),
+  paramsSchema: lazySchema(() =>
+    buildParamsSchema({
+      requestSchema: add_case_comment_default_space_request,
+      additionalSchemas: {
+        fetcher: FetcherConfigSchema,
+        ...KibanaStepMetaSchema,
+      },
+    })
+  ),
   outputSchema: add_case_comment_default_space_response,
 };

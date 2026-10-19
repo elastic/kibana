@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '.';
+import { z, isZod } from '.';
 import { lazySchema, setLazySchemaDisabled } from './lazy_schema';
 
 /**
@@ -99,6 +99,15 @@ describe('lazySchema', () => {
         next: { value: 2, next: { value: 3 } },
       });
       expect(Node.safeParse({ value: 1, next: { value: 'bad' } }).success).toBe(false);
+    });
+
+    // Mirrors the generator's `export const FooEnum = lazySchema(() => Foo.enum)`.
+    it('supports wrapping a schema `.enum` plain object', () => {
+      const Foo = lazySchema(() => z.enum(['A', 'B']));
+      const FooEnum = lazySchema(() => Foo.enum);
+
+      expect(FooEnum.A).toBe('A');
+      expect(FooEnum.B).toBe('B');
     });
 
     // Mirrors the cross-schema reference pattern where one generated schema
@@ -252,6 +261,60 @@ describe('lazySchema', () => {
       // gets the exact Zod instance back — `instanceof` succeeds.
       expect(Schema).toBe(RawSchema);
       expect(Schema).toBeInstanceOf(z.ZodObject);
+    });
+  });
+
+  describe('non-materializing checks and lazy chaining', () => {
+    it('does not materialize when checked with isZod() or `_zod in schema`', () => {
+      const factory = jest.fn(() => z.object({ id: z.string() }));
+      const Schema = lazySchema(factory);
+
+      expect(isZod(Schema)).toBe(true);
+      expect('_zod' in Schema).toBe(true);
+      expect(factory).not.toHaveBeenCalled();
+    });
+
+    it('defers materialization across chained modifiers (.optional, .nullable, .describe, .meta, .extend, .partial, .omit)', () => {
+      const factory = jest.fn(() => z.object({ id: z.string(), extra: z.number() }));
+      const Base = lazySchema(factory);
+
+      const Chained = Base.partial({ extra: true })
+        .omit({ extra: true })
+        .extend({ name: z.string() })
+        .describe('Chained description')
+        .meta({ title: 'Chained Title' })
+        .optional()
+        .nullable();
+
+      expect(factory).not.toHaveBeenCalled();
+      expect(isZod(Chained)).toBe(true);
+      expect(factory).not.toHaveBeenCalled();
+
+      expect(Chained.parse({ id: '1', name: 'alice' })).toEqual({ id: '1', name: 'alice' });
+      expect(Chained.parse(null)).toBeNull();
+      expect(factory).toHaveBeenCalledTimes(1);
+    });
+
+    it('preserves .meta(), recursive toJSONSchema, and defineProperty invariants on lazySchema', () => {
+      const S = lazySchema(() => z.object({ a: z.string() })).meta({
+        id: 'LazyMetaTest',
+        title: 'My Title',
+      });
+      expect(S.meta()).toMatchObject({ id: 'LazyMetaTest', title: 'My Title' });
+
+      const MultiRef = z.object({ x: S, y: S.optional(), zz: S });
+      const multiJson = z.toJSONSchema(MultiRef) as Record<string, any>;
+      expect(multiJson.properties.x).toEqual({ $ref: '#/$defs/LazyMetaTest' });
+      expect(multiJson.properties.zz).toEqual({ $ref: '#/$defs/LazyMetaTest' });
+
+      const Tree: z.ZodType<any> = lazySchema(() =>
+        z.object({ v: z.number(), next: z.lazy(() => Tree.optional()) })
+      );
+      expect(() => z.toJSONSchema(Tree)).not.toThrow();
+
+      Object.defineProperty(S, 'customFlag', { value: 1, configurable: false, enumerable: true });
+      expect(Object.keys(S)).toContain('customFlag');
+      expect('customFlag' in S).toBe(true);
     });
   });
 });

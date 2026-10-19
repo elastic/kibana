@@ -15,7 +15,7 @@
  * To regenerate: node scripts/generate_workflow_es_contracts.js
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { indices_create_request, indices_create_response } from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
@@ -60,10 +60,10 @@ Note that changing this setting will also affect the \`wait_for_active_shards\` 
     urlParams: ['master_timeout', 'timeout', 'wait_for_active_shards'],
     bodyParams: ['aliases', 'mappings', 'settings'],
   },
-  paramsSchema: z.object({
+  paramsSchema: lazySchema(() => z.object({
     ...getShapeAt(indices_create_request, 'body'),
     ...getShapeAt(indices_create_request, 'path'),
     ...getShapeAt(indices_create_request, 'query'),
-  }),
+  })),
   outputSchema: indices_create_response,
 };

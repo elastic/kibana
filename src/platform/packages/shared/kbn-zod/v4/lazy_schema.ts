@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { lazyImmutableGCableObject } from './lazy_immutable_gcable_object';
+import { globalRegistry } from 'zod/v4';
+import {
+  isMaterializingLazyObject,
+  lazyImmutableGCableObject,
+} from './lazy_immutable_gcable_object';
 
 let disabled = false;
 
@@ -26,24 +30,41 @@ export const setLazySchemaDisabled = (value: boolean): void => {
   disabled = value;
 };
 
+export const isLazySchemaDisabled = (): boolean => disabled;
+
+const syncProxyRegistryMetadata = (proxy: object, real: object): void => {
+  // Generated `*Enum` exports wrap `schema.enum`, a plain object with no `_zod`; the registry would throw on it.
+  if (!('_zod' in real)) {
+    return;
+  }
+  const proxyMeta = globalRegistry.get(proxy as any);
+  if (proxyMeta !== undefined && !globalRegistry.has(real as any)) {
+    globalRegistry.add(real as any, proxyMeta);
+  }
+};
+
 /**
- * Zod-typed wrapper for generated schemas (e.g. from `@kbn/openapi-generator`).
+ * Zod-typed wrapper for generated and module-scope schemas.
  *
  * Default behavior: defers construction of the schema until any property
- * (`.parse`, `.safeParse`, `.extend`, `.optional`, ...) is first accessed, and
- * lets the GC reclaim the materialized schema once no consumer is holding a
- * reference (see `lazyImmutableGCableObject`).
+ * (`.parse`, `.safeParse`, `.shape`, ...) is first accessed, preserves laziness
+ * across chainable modifiers (`.optional()`, `.nullable()`, `.describe()`,
+ * `.meta()`, `.extend()`, ...), and lets the GC reclaim the materialized schema
+ * once no consumer is holding a reference (see `lazyImmutableGCableObject`).
  *
  * When disabled via `setLazySchemaDisabled(true)`: calls the factory eagerly
  * at wrap time and returns the real schema object, bypassing the Proxy and
  * GC-eligibility machinery entirely.
- *
- * Caveat (Proxy mode only): chaining e.g. Schema.optional().nullable() will
- * again retain the memory.
  *
  * `instanceof z.ZodObject` / `instanceof z.ZodType` keep working in Proxy mode:
  * Zod resolves `instanceof` via `Symbol.hasInstance` against `_zod.traits`,
  * and the Proxy forwards `_zod` to the materialized schema.
  */
 export const lazySchema = <T extends object>(factory: () => T): T =>
-  disabled ? factory() : lazyImmutableGCableObject(factory);
+  disabled || isMaterializingLazyObject()
+    ? factory()
+    : lazyImmutableGCableObject(factory, {
+        isZodSchema: true,
+        wrapChainable: lazySchema,
+        onMaterialize: syncProxyRegistryMetadata,
+      });

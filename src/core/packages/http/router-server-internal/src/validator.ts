@@ -20,6 +20,10 @@ import type {
 } from '@kbn/core-http-server';
 import { RouteValidationError } from '@kbn/core-http-server';
 
+const BUFFER_PRE_SCHEMA = schema.buffer();
+const STREAM_PRE_SCHEMA = schema.stream();
+const ANY_PRE_SCHEMA = schema.maybe(schema.nullable(schema.any({})));
+
 /**
  * Route validator class to define the validation logic for each new route.
  *
@@ -154,12 +158,12 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
   private preValidateSchema(data: any) {
     if (Buffer.isBuffer(data)) {
       // if options.body.parse !== true
-      return schema.buffer();
+      return BUFFER_PRE_SCHEMA;
     } else if (data instanceof Stream) {
       // if options.body.output === 'stream'
-      return schema.stream();
+      return STREAM_PRE_SCHEMA;
     } else {
-      return schema.maybe(schema.nullable(schema.any({})));
+      return ANY_PRE_SCHEMA;
     }
   }
 }

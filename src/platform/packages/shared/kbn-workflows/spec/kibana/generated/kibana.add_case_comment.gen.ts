@@ -15,7 +15,7 @@
  * To regenerate: node scripts/generate_workflow_kibana_contracts.js
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   add_case_comment_default_space_request,
@@ -50,12 +50,12 @@ You must have \`all\` privileges for the **Cases** feature in the **Management**
     urlParams: [],
     bodyParams: ['alertId', 'index', 'owner', 'rule', 'type', 'comment'],
   },
-  paramsSchema: z.object({
+  paramsSchema: lazySchema(() => z.object({
     ...getShapeAt(add_case_comment_default_space_request, 'body'),
     ...getShapeAt(add_case_comment_default_space_request, 'path'),
     ...getShapeAt(add_case_comment_default_space_request, 'query'),
     fetcher: FetcherConfigSchema,
     ...KibanaStepMetaSchema,
-  }),
+  })),
   outputSchema: add_case_comment_default_space_response,
 };

@@ -129,6 +129,11 @@ export interface SavedObjectsRepositoryOptions {
  *
  * @internal
  */
+const serializerByRegistry = new WeakMap<
+  ISavedObjectTypeRegistryInternal,
+  SavedObjectsSerializer
+>();
+
 export class SavedObjectsRepository implements ISavedObjectsRepository {
   private readonly migrator: IKibanaMigrator;
   private readonly mappings: IndexMapping;
@@ -163,7 +168,11 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
   ): ISavedObjectsRepository {
     const mappings = migrator.getActiveMappings();
     const allTypes = typeRegistry.getAllTypes().map((t) => t.name);
-    const serializer = new SavedObjectsSerializer(typeRegistry);
+    let serializer = serializerByRegistry.get(typeRegistry);
+    if (!serializer) {
+      serializer = new SavedObjectsSerializer(typeRegistry);
+      serializerByRegistry.set(typeRegistry, serializer);
+    }
     const visibleTypes = allTypes.filter((type) => !typeRegistry.isHidden(type));
     // Ensure includedHiddenTypes is an array, even if null or undefined was passed
     const safeIncludedHiddenTypes = Array.isArray(includedHiddenTypes) ? includedHiddenTypes : [];

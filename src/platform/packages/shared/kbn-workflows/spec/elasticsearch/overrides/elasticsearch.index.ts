@@ -16,7 +16,7 @@
  *
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 
 import { getShapeAt } from '../../../common/utils/zod';
 
@@ -178,22 +178,24 @@ Even the simple case of updating the Elasticsearch index using data from a datab
     ],
     bodyParams: [],
   },
-  paramsSchema: z.union([
-    z.strictObject({
-      document: index_request.shape.body.optional(),
-      ...getShapeAt(index_request, 'path'),
-      ...getShapeAt(index_request, 'query'),
-    }),
-    z.strictObject({
-      document: index1_request.shape.body.optional(),
-      ...getShapeAt(index1_request, 'path'),
-      ...getShapeAt(index1_request, 'query'),
-    }),
-    z.strictObject({
-      document: index2_request.shape.body.optional(),
-      ...getShapeAt(index2_request, 'path'),
-      ...getShapeAt(index2_request, 'query'),
-    }),
-  ]),
+  paramsSchema: lazySchema(() =>
+    z.union([
+      z.strictObject({
+        document: index_request.shape.body.optional(),
+        ...getShapeAt(index_request, 'path'),
+        ...getShapeAt(index_request, 'query'),
+      }),
+      z.strictObject({
+        document: index1_request.shape.body.optional(),
+        ...getShapeAt(index1_request, 'path'),
+        ...getShapeAt(index1_request, 'query'),
+      }),
+      z.strictObject({
+        document: index2_request.shape.body.optional(),
+        ...getShapeAt(index2_request, 'path'),
+        ...getShapeAt(index2_request, 'query'),
+      }),
+    ])
+  ),
   outputSchema: types_write_response_base,
 };

@@ -15,7 +15,7 @@
  * To regenerate: node scripts/generate_workflow_es_contracts.js
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   index1_request,
@@ -179,7 +179,7 @@ Even the simple case of updating the Elasticsearch index using data from a datab
     ],
     bodyParams: [],
   },
-  paramsSchema: z.union([
+  paramsSchema: lazySchema(() => z.union([
     z.object({
       ...getShapeAt(index_request, 'body'),
       ...getShapeAt(index_request, 'path'),
@@ -195,6 +195,6 @@ Even the simple case of updating the Elasticsearch index using data from a datab
       ...getShapeAt(index2_request, 'path'),
       ...getShapeAt(index2_request, 'query'),
     }),
-  ]),
-  outputSchema: z.union([index_response, index1_response, index2_response]),
+  ])),
+  outputSchema: lazySchema(() => z.union([index_response, index1_response, index2_response])),
 };

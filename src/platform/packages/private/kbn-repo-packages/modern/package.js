@@ -39,7 +39,7 @@ class Package {
     const manifest = readPackageManifest(repoRoot, path);
     const dir = Path.dirname(path);
 
-    return new Package(repoRoot, dir, manifest, readPackageJson(Path.resolve(dir, 'package.json')));
+    return new Package(repoRoot, dir, manifest);
   }
 
   /**
@@ -74,7 +74,7 @@ class Package {
      * Parsed package.json file from the package
      * @type {import('./types').ParsedPackageJson | undefined}
      */
-    pkg
+    pkg = undefined
   ) {
     /**
      * Absolute path to this package directory
@@ -102,10 +102,10 @@ class Package {
     /**
      * copy of the parsed package.json file in the package
      * @type {import('./types').ParsedPackageJson | undefined}
-     * @readonly
-     * @deprecated rather than accessing this directly the necessary information about the package should be reflected on the Package class.
+     * @private
      */
-    this.pkg = pkg;
+    this._pkg = pkg;
+    this._pkgLoaded = arguments.length >= 4;
 
     /**
      * the name/import id of the package
@@ -136,6 +136,25 @@ class Package {
      * @readonly
      */
     this.visibility = visibility;
+  }
+
+  /**
+   * copy of the parsed package.json file in the package
+   *
+   * @type {import('./types').ParsedPackageJson | undefined}
+   * @deprecated rather than accessing this directly the necessary information about the package should be reflected on the Package class.
+   */
+  get pkg() {
+    if (!this._pkgLoaded) {
+      this._pkg = readPackageJson(Path.resolve(this.directory, 'package.json'));
+      this._pkgLoaded = true;
+    }
+    return this._pkg;
+  }
+
+  set pkg(value) {
+    this._pkg = value;
+    this._pkgLoaded = true;
   }
 
   /**

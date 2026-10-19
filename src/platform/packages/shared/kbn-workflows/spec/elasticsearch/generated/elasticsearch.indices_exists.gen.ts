@@ -15,7 +15,7 @@
  * To regenerate: node scripts/generate_workflow_es_contracts.js
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { indices_exists_request } from './schemas/es_openapi_zod.gen';
 import { getShapeAt } from '../../../common/utils/zod';
@@ -49,10 +49,10 @@ Check if one or more indices, index aliases, or data streams exist.
     ],
     bodyParams: [],
   },
-  paramsSchema: z.object({
+  paramsSchema: lazySchema(() => z.object({
     ...getShapeAt(indices_exists_request, 'body'),
     ...getShapeAt(indices_exists_request, 'path'),
     ...getShapeAt(indices_exists_request, 'query'),
-  }),
-  outputSchema: z.optional(z.looseObject({})),
+  })),
+  outputSchema: lazySchema(() => z.optional(z.looseObject({}))),
 };
