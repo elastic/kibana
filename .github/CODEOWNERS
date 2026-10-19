@@ -3947,8 +3947,6 @@ pnpm-workspace.yaml @elastic/kibana-operations
 /knip.jsonc @elastic/kibana-security
 
 # Auto-generated Scout test metadata has no owner so the automated update PRs are auto-approved.
-# Must stay at the very bottom of this section: it has to come after broader team overrides
-# (e.g. /src/dev/, /.buildkite/) that would otherwise re-claim these files.
 /**/scout/.meta/**
 /**/scout/*/.meta/**
 /**/scout_*/.meta/**
