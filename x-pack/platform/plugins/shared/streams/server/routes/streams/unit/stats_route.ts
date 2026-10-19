@@ -9,7 +9,7 @@ import type { StreamsUnit } from '@kbn/streams-schema';
 import { streamsUnitIdentifierSchema, streamsUnitStatsRequestSchema } from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
-import { getUnitStats } from '../../../lib/unit_stats/get_unit_stats';
+import { UnitStatsClient } from '../../../lib/unit_stats/client';
 import { StreamsUnitService } from '../../../lib/saved_objects/streams_unit_service';
 import { createServerRoute } from '../../create_server_route';
 import { assertStreamsCanvasEnabled } from './assert_streams_canvas_enabled';
@@ -47,13 +47,14 @@ export const getStreamsUnitStatsRoute = createServerRoute({
 
     const { unit } = await new StreamsUnitService({ soClient, logger }).getUnit(params.path.id);
 
-    return getUnitStats({
+    return new UnitStatsClient({
+      esClient: scopedClusterClient.asCurrentUser,
+      logger,
+    }).getStats({
       unitId: params.path.id,
       unit,
       // The route repository drops an empty `{}` body before the handler.
       request: params.body ?? {},
-      esClient: scopedClusterClient.asCurrentUser,
-      logger,
     });
   },
 });

@@ -10,7 +10,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { streamsUnitStatsResponseSchema, type StreamsUnit } from '@kbn/streams-schema';
 import { CONFIG_HASH_FIELD } from './constants';
-import { getUnitStats } from './get_unit_stats';
+import { UnitStatsClient } from './client';
 
 const unit: StreamsUnit.Configuration = {
   sources: [],
@@ -89,14 +89,10 @@ const makeSearch = ({
   });
 
 const run = (search: jest.Mock, request: StreamsUnit.StatsRequest = {}) =>
-  getUnitStats({
-    unitId: 'default',
-    unit,
-    request,
+  new UnitStatsClient({
     esClient: { search } as unknown as ElasticsearchClient,
     logger: loggingSystemMock.createLogger(),
-    now,
-  });
+  }).getStats({ unitId: 'default', unit, request, now });
 
 const responseError = (statusCode: number) =>
   new errors.ResponseError({ statusCode, body: {}, headers: {}, warnings: [], meta: {} as never });
@@ -105,7 +101,7 @@ const nullDestination = expect.objectContaining({
   latency: { average: { value: null, unit: null } },
 });
 
-describe('getUnitStats', () => {
+describe('UnitStatsClient.getStats', () => {
   describe('components', () => {
     it.each([
       ['omitted', {}],
