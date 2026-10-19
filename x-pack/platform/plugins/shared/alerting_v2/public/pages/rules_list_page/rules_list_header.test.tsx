@@ -15,7 +15,6 @@ import { RulesListHeader } from './rules_list_header';
 
 let mockPhase: 'initialLoad' | 'empty' | 'populated' | 'filtering' | 'filtered' = 'populated';
 let mockCanReadV1Rules = true;
-let mockExperimentalFeaturesEnabled = true;
 let mockAreAgentBuilderSkillsAvailable = true;
 let mockAgentBuilderSkillsRequirements = {
   hasAgentBuilderCapability: true,
@@ -66,10 +65,6 @@ jest.mock('@kbn/core-di-browser', () => {
   };
 });
 
-jest.mock('../../hooks/use_alerting_v2_experimental_features', () => ({
-  useAlertingV2ExperimentalFeatures: () => mockExperimentalFeaturesEnabled,
-}));
-
 jest.mock('../../hooks/use_are_agent_builder_skills_available', () => ({
   useAreAgentBuilderSkillsAvailable: () => mockAreAgentBuilderSkillsAvailable,
   useAgentBuilderSkillsRequirements: () => mockAgentBuilderSkillsRequirements,
@@ -78,7 +73,6 @@ jest.mock('../../hooks/use_are_agent_builder_skills_available', () => ({
 const onCreateRule = jest.fn();
 const onCreateEsqlRule = jest.fn();
 const onCreateWithAgent = jest.fn();
-const onBuildSequence = jest.fn();
 
 const renderHeader = (props?: Partial<React.ComponentProps<typeof RulesListHeader>>) =>
   render(
@@ -88,7 +82,6 @@ const renderHeader = (props?: Partial<React.ComponentProps<typeof RulesListHeade
         onCreateRule={onCreateRule}
         onCreateEsqlRule={onCreateEsqlRule}
         onCreateWithAgent={onCreateWithAgent}
-        onBuildSequence={onBuildSequence}
         {...props}
       />
     </ListPageTestProviders>
@@ -99,7 +92,6 @@ describe('RulesListHeader', () => {
     jest.clearAllMocks();
     mockPhase = 'populated';
     mockCanReadV1Rules = true;
-    mockExperimentalFeaturesEnabled = true;
     mockAreAgentBuilderSkillsAvailable = true;
     mockAgentBuilderSkillsRequirements = {
       hasAgentBuilderCapability: true,
@@ -187,7 +179,6 @@ describe('RulesListHeader', () => {
             onCreateRule={onCreateRule}
             onCreateEsqlRule={onCreateEsqlRule}
             onCreateWithAgent={onCreateWithAgent}
-            onBuildSequence={onBuildSequence}
           />
         </TabsProvider>
       </ListPageTestProviders>
