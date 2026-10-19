@@ -7,8 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  VEGA_EMBEDDABLE_TYPE,
-  VEGA_SUPPORTED_TRIGGERS,
-  VEGA_STANDALONE_EMBEDDABLE_FLAG,
-} from './constants';
+export { VEGA_EMBEDDABLE_TYPE, VEGA_SUPPORTED_TRIGGERS } from './constants';

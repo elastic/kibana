@@ -21,17 +21,7 @@ import type {
   EmbeddablePublicDefinition,
   HasDrilldowns,
 } from '@kbn/embeddable-plugin/public';
-import {
-  BehaviorSubject,
-  combineLatest,
-  EMPTY,
-  firstValueFrom,
-  map,
-  merge,
-  skip,
-  switchMap,
-  tap,
-} from 'rxjs';
+import { BehaviorSubject, combineLatest, EMPTY, map, merge, skip, switchMap, tap } from 'rxjs';
 import { isOfQueryType, type AggregateQuery, type Filter, type Query } from '@kbn/es-query';
 import { parse } from 'hjson';
 import { ON_APPLY_FILTER } from '@kbn/ui-actions-plugin/common/trigger_ids';
@@ -64,11 +54,7 @@ import {
   titleComparators,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import {
-  VEGA_EMBEDDABLE_TYPE,
-  VEGA_STANDALONE_EMBEDDABLE_FLAG,
-  VEGA_SUPPORTED_TRIGGERS,
-} from '../../common/constants';
+import { VEGA_EMBEDDABLE_TYPE, VEGA_SUPPORTED_TRIGGERS } from '../../common/constants';
 import { VEGA_EVENT_APPLY_FILTER } from '../constants';
 import type { VegaEvent } from '../types';
 import type { VegaPluginStartDependencies, VegaVisualizationDependencies } from '../plugin';
@@ -110,11 +96,11 @@ interface VegaRenderInput {
  * API of the dedicated Dashboard Vega panel. The panel stores its spec by value, or references a
  * Vega library item.
  *
- * When `vega.standaloneEmbeddable` is enabled, the server registers a schema for this type so it
- * participates in public dashboards-as-code validation and OpenAPI generation.
+ * The server registers a schema for this type so it participates in public dashboards-as-code
+ * validation and OpenAPI generation.
  */
 export type VegaEmbeddableApi = DefaultEmbeddableApi<VegaEmbeddableState> &
-  Partial<HasLibraryTransforms<VegaByReferenceState, VegaByValueState>> &
+  HasLibraryTransforms<VegaByReferenceState, VegaByValueState> &
   CanCancelRequests &
   HasDrilldowns &
   HasEditCapabilities &
@@ -147,8 +133,6 @@ interface VegaEmbeddableDependencies {
     VegaPluginStartDependencies,
     'dataViews' | 'unifiedSearch' | 'savedObjectsTaggingOss'
   >;
-  /** Whether panels can be linked to and unlinked from the library. */
-  isLibraryEnabled: boolean;
 }
 
 export const vegaEmbeddableFactory = (
@@ -323,30 +307,6 @@ export const vegaEmbeddableFactory = (
       }
     };
 
-    const libraryTransforms: HasLibraryTransforms<VegaByReferenceState, VegaByValueState> = {
-      canLinkToLibrary: async () => !isByReference,
-      canUnlinkFromLibrary: async () => isByReference,
-      hasLibraryItemWithTitle: (title) => hasVegaLibraryItemWithTitle(libraryClient, title),
-      saveToLibrary: async (title) => {
-        const { query, filters } = serializePanelSearch();
-        if (hasTooManyFilters(filters)) {
-          // The dashboard only reports that saving failed, so explain why.
-          core.notifications.toasts.addDanger(tooManyFiltersMessage);
-          throw new Error(tooManyFiltersMessage);
-        }
-        const { id } = await libraryClient.create({
-          title,
-          description: titleManager.getLatestState().description,
-          spec: spec$.getValue(),
-          query,
-          filters,
-        });
-        return id;
-      },
-      getSerializedStateByReference: serializeByReference,
-      getSerializedStateByValue: serializeByValue,
-    };
-
     const getEditPanel = async ({
       ariaLabelledBy,
       closeFlyout = () => {},
@@ -405,7 +365,27 @@ export const vegaEmbeddableFactory = (
       isEditingEnabled: () => true,
       defaultTitle$,
       defaultDescription$,
-      ...(deps.isLibraryEnabled && libraryTransforms),
+      canLinkToLibrary: async () => !isByReference,
+      canUnlinkFromLibrary: async () => isByReference,
+      hasLibraryItemWithTitle: (title) => hasVegaLibraryItemWithTitle(libraryClient, title),
+      saveToLibrary: async (title) => {
+        const { query, filters } = serializePanelSearch();
+        if (hasTooManyFilters(filters)) {
+          // The dashboard only reports that saving failed, so explain why.
+          core.notifications.toasts.addDanger(tooManyFiltersMessage);
+          throw new Error(tooManyFiltersMessage);
+        }
+        const { id } = await libraryClient.create({
+          title,
+          description: titleManager.getLatestState().description,
+          spec: spec$.getValue(),
+          query,
+          filters,
+        });
+        return id;
+      },
+      getSerializedStateByReference: serializeByReference,
+      getSerializedStateByValue: serializeByValue,
       getEditPanel,
       onEdit: async ({ isNewPanel = false, returnFocus } = {}) => {
         if (isByReference) {
@@ -431,11 +411,9 @@ export const vegaEmbeddableFactory = (
         });
       },
       getInspectorAdapters: () => inspectorAdapters,
-      // Only when the flag is on: the public dashboards-as-code schema is registered then, so
-      // exported JSON can be round-tripped through the REST API.
-      supportsJsonExport: await firstValueFrom(
-        core.featureFlags.getBooleanValue$(VEGA_STANDALONE_EMBEDDABLE_FLAG, false)
-      ),
+      // The public dashboards-as-code schema is registered, so exported JSON can be round-tripped
+      // through the REST API.
+      supportsJsonExport: true,
     });
 
     // Identities must be stable: `VegaVisComponent` rebuilds its Vega view whenever `fireEvent`
