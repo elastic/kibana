@@ -68,7 +68,9 @@ export async function getServiceTransactionGroupsAlerts({
         terms: {
           field: TRANSACTION_NAME,
           size: MAX_NUMBER_OF_TX_GROUPS,
-          order: { _count: 'desc' as const },
+          // Order by unique-alert cardinality (not doc_count) so top-N cutoff
+          // matches the badge metric when there are more groups than size.
+          order: { alerts_count: 'desc' as const },
         },
         aggs: {
           alerts_count: {

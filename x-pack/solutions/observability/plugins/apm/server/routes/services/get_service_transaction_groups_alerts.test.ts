@@ -106,6 +106,7 @@ describe('getServiceTransactionGroupsAlerts', () => {
 
     const aggs = client.search.mock.calls[0][0].aggs;
     expect(aggs.transaction_groups.terms.field).toBe(TRANSACTION_NAME);
+    expect(aggs.transaction_groups.terms.order).toEqual({ alerts_count: 'desc' });
     expect(aggs.transaction_groups.aggs.alerts_count.cardinality.field).toBe(ALERT_UUID);
     expect(client.search.mock.calls[0][0].query.bool.must).toBeUndefined();
   });

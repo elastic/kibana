@@ -15,7 +15,6 @@ import {
   type FailedTransactionRateResponse,
   type ColdstartRateResponse,
 } from '@kbn/apm-api-shared';
-import { joinByKey } from '../../../common/utils/join_by_key';
 import { getApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
@@ -27,6 +26,7 @@ import { getServiceTransactionGroupDetailedStatisticsPeriods } from '../services
 import { getTransactionBreakdown } from './breakdown';
 import { getFailedTransactionRatePeriods } from './get_failed_transaction_rate_periods';
 import { getLatencyPeriods } from './get_latency_charts';
+import { mergeTransactionGroupsWithAlerts } from './merge_transaction_groups_with_alerts';
 import { getTraceSamples } from './trace_samples';
 
 const transactionGroupsMainStatisticsRoute = createApmServerRoute({
@@ -91,20 +91,17 @@ const transactionGroupsMainStatisticsRoute = createApmServerRoute({
     const { transactionGroups, maxCountExceeded, transactionOverflowCount } =
       serviceTransactionGroups;
 
-    // Alerts ignore page kuery; only decorate rows from the kuery-filtered stats
-    // query so joinByKey does not reintroduce filtered-out transaction groups.
-    const transactionGroupNames = new Set(transactionGroups.map(({ name }): string => name));
-    const matchedAlerts = serviceTransactionGroupsAlerts.filter(({ name }): boolean =>
-      transactionGroupNames.has(name)
-    );
-
-    const transactionGroupsWithAlerts = joinByKey([...transactionGroups, ...matchedAlerts], 'name');
+    const { transactionGroups: transactionGroupsWithAlerts, hasActiveAlerts } =
+      mergeTransactionGroupsWithAlerts({
+        transactionGroups,
+        alerts: serviceTransactionGroupsAlerts,
+      });
 
     return {
       transactionGroups: transactionGroupsWithAlerts,
       maxCountExceeded,
       transactionOverflowCount,
-      hasActiveAlerts: matchedAlerts.length > 0,
+      hasActiveAlerts,
     };
   },
 });

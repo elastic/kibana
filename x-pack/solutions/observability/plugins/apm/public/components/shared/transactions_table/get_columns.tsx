@@ -86,7 +86,7 @@ export function getColumns({
                     'xpack.apm.home.transactionsTableColumnName.tooltip.activeAlertsExplanation',
                     {
                       defaultMessage:
-                        'Active alerts for this transaction. These do not add up to the service alert badge.',
+                        'Active alerts for this transaction, regardless of latency aggregation.',
                     }
                   )}
                 >
