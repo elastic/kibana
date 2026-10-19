@@ -9,6 +9,7 @@ import type { TimeRange } from '../../entities_grid/common';
 import { buildLookback, getRiskScoreIndex } from '../../entities_grid/queries/esql';
 import {
   BOUNDARY_WINDOW_HOURS,
+  RISK_MOVER_MIN_SCORE_CHANGE,
   buildRiskLevelHistoryBranch,
   buildRiskScoreHistoryBranch,
 } from './risk_history';
@@ -37,7 +38,7 @@ export const buildJoinTail = (
   `| STATS value = COUNT(effective_id)`,
 ];
 
-/** Builds the Risk movers query for the previous period: score up by 10 or more over that period. */
+/** Builds the Risk movers query for the previous period: score up by the minimum rise or more over that period. */
 export const buildPreviousRiskMoversQuery = (
   spaceId: string,
   entitiesIndexName: string,
@@ -55,7 +56,7 @@ export const buildPreviousRiskMoversQuery = (
     `| STATS boundary_score = MAX(boundary_score),`,
     `        current_score  = MAX(current_score)`,
     `        BY \`entity.id\``,
-    `| WHERE current_score - boundary_score >= 10`,
+    `| WHERE current_score - boundary_score >= ${RISK_MOVER_MIN_SCORE_CHANGE}`,
     ...buildJoinTail(entitiesIndexName, entityFilterClauses),
   ].join('\n');
 };
