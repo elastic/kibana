@@ -156,29 +156,14 @@ export function inspectStep(
   let stepType: string | undefined;
 
   if (YAML.isMap(node)) {
+    // Pass 1: read the step's own name and type. Values under other keys
+    // (e.g. `with`, `retry`) are data, not steps, so they are not walked.
     node.items.forEach((item) => {
-      if (YAML.isPair(item)) {
-        if (YAML.isScalar(item.key) && YAML.isScalar(item.value)) {
-          if (item.key.value === 'name') {
-            stepId = item.value.value as string;
-          } else if (item.key.value === 'type') {
-            stepType = item.value.value as string;
-          }
-        }
-
-        // Pass 1 (catch-all): descend into non-container keys carrying the
-        // current branchKey through (e.g. `with:` block, `retry:` config).
-        // Use the wider STEP_CHILD_CONTAINER_KEY_SET so branches/cases/default
-        // are excluded from catch-all descent — they are handled in Pass 2.
-        const keyValue = YAML.isScalar(item.key) ? item.key.value : undefined;
-        if (typeof keyValue !== 'string' || !STEP_CHILD_CONTAINER_KEY_SET.has(keyValue)) {
-          const currentParentStepId = stepId ?? parentStepId;
-          path.push(typeof keyValue === 'number' ? keyValue : String(keyValue));
-          Object.assign(
-            result,
-            inspectStep(item.value, lineCounter, currentParentStepId, branchKey, path)
-          );
-          path.pop();
+      if (YAML.isPair(item) && YAML.isScalar(item.key) && YAML.isScalar(item.value)) {
+        if (item.key.value === 'name') {
+          stepId = item.value.value as string;
+        } else if (item.key.value === 'type') {
+          stepType = item.value.value as string;
         }
       }
     });

@@ -9,7 +9,6 @@
 
 import type { Scalar } from 'yaml';
 import { isScalar } from 'yaml';
-import { STEP_CHILD_CONTAINER_KEYS } from '@kbn/workflows';
 import type { StepInfo, WorkflowLookup } from '@kbn/workflows-yaml';
 
 export const ESQL_QUERY_STEP_TYPE = 'elasticsearch.esql.query' as const;
@@ -59,12 +58,9 @@ export interface EsqlStepLocation {
   region: EsqlStepRegion;
 }
 
-const STEP_CONTAINER_KEYS: ReadonlySet<string> = new Set(STEP_CHILD_CONTAINER_KEYS);
-
 /**
  * Returns the `elasticsearch.esql.query` steps with a non-empty query, in
- * document order. Step-shaped data outside step lists (e.g. in a `with` body)
- * is ignored.
+ * document order.
  */
 export function collectEsqlStepsFromLookup(
   { steps }: WorkflowLookup,
@@ -72,7 +68,7 @@ export function collectEsqlStepsFromLookup(
 ): EsqlStepLocation[] {
   const locations: EsqlStepLocation[] = [];
   for (const step of Object.values(steps)) {
-    if (step.stepType === ESQL_QUERY_STEP_TYPE && isInStepList(step)) {
+    if (step.stepType === ESQL_QUERY_STEP_TYPE) {
       const valueNode = step.propInfos['with.query']?.valueNode;
       const region = valueNode ? extractEsqlRegionFromScalar(valueNode, modelText) : null;
       if (region && region.esql.trim().length > 0) {
@@ -82,9 +78,6 @@ export function collectEsqlStepsFromLookup(
   }
   return locations.sort((a, b) => a.region.contentStartInFile - b.region.contentStartInFile);
 }
-
-const isInStepList = ({ path }: StepInfo): boolean =>
-  path.every((segment) => typeof segment === 'number' || STEP_CONTAINER_KEYS.has(segment));
 
 /**
  * Maps a `with.query` YAML scalar to the ES|QL substring and file offsets used

@@ -286,6 +286,18 @@ steps:
     });
   });
 
+  it('checks an ES|QL step when a later body map has the same name', async () => {
+    const yaml = workflow(`${esqlStep('search', 'FROM logs-app | WHERE')}  - name: post
+    type: http
+    with:
+      url: https://example.com
+      body: { name: search, type: example }
+`);
+    const { diagnostics } = await collectEsqlDiagnostics(yaml, schemaCallbacks);
+
+    expect(diagnostics.map(({ path }) => path)).toEqual([['steps', 0, 'with', 'query']]);
+  });
+
   it('finds ES|QL steps nested in flow-control steps', async () => {
     const yaml = workflow(`  - name: loop
     type: foreach

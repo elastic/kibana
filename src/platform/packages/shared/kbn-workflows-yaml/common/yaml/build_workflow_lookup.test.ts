@@ -674,6 +674,32 @@ steps:
     });
   });
 
+  it('does not treat step-shaped data under step properties as steps', () => {
+    const yaml = `
+name: test
+steps:
+  - name: search
+    type: elasticsearch.esql.query
+    with:
+      query: FROM logs-*
+  - name: post
+    type: http
+    with:
+      body:
+        name: search
+        type: example
+    retry:
+      name: retry-config
+      type: fixed
+`;
+    const lineCounter = new LineCounter();
+    const yamlDocument = parseDocument(yaml, { lineCounter, keepSourceTokens: true });
+    const { steps } = buildWorkflowLookup(yamlDocument, lineCounter);
+
+    expect(Object.keys(steps)).toEqual(['search', 'post']);
+    expect(steps.search.stepType).toBe('elasticsearch.esql.query');
+  });
+
   it('should not treat inputs as steps', () => {
     const yaml = `
 name: test
