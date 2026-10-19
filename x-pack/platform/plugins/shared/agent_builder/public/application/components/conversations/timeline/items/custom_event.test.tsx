@@ -10,7 +10,6 @@ import moment from 'moment';
 import { render, screen } from '@testing-library/react';
 import { EventActorType } from '@kbn/agent-builder-common';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { useCurrentUser } from '../../../../hooks/use_current_user';
 import { useUserProfiles } from '../../../../hooks/use_user_profiles';
 import { useConversationId } from '../../../../context/conversation/use_conversation_id';
 import { CUSTOM_EVENT_TYPE, createCustomEvent } from './custom_event.factory';
@@ -19,10 +18,6 @@ import { CustomEvent } from './custom_event';
 
 jest.mock('../../../../context/conversation/use_conversation_id', () => ({
   useConversationId: jest.fn(),
-}));
-
-jest.mock('../../../../hooks/use_current_user', () => ({
-  useCurrentUser: jest.fn(),
 }));
 
 jest.mock('../../../../hooks/use_user_profiles', () => ({
@@ -44,7 +39,6 @@ describe('CustomEvent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.mocked(useConversationId).mockReturnValue('conv-1');
-    jest.mocked(useCurrentUser).mockReturnValue({ currentUser: null, isLoading: false });
     mockUseUserProfiles.mockReturnValue({ data: [] } as unknown as ReturnType<
       typeof useUserProfiles
     >);
