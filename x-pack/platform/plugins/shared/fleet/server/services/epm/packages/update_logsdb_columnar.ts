@@ -234,8 +234,9 @@ export async function setLogsdbColumnarChoice({
  * Every columnar-ready logs data stream of the package, and every custom-dataset copy of one,
  * has its templates re-prepared with the new target mode and written in the mode-aware order (index template first when the mode is
  * being removed, component templates first when it is being added, which
- * `installComponentAndIndexTemplateForDataStream` takes care of), then the write indices are
- * asked to roll over so the change takes effect — in both directions.
+ * `installComponentAndIndexTemplateForDataStream` takes care of, along with the namespace-scoped
+ * copies of the index template), then the write indices are asked to roll over so the change
+ * takes effect — in both directions.
  *
  * If Elasticsearch rejects any data stream, the ones already switched are put back on their
  * previous mode and nothing is rolled over, so the change is all or nothing. Persisting the

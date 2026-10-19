@@ -117,6 +117,52 @@ const packageComponentTemplateMappings = () => {
   return (call?.[0] as any).body.template.mappings;
 };
 
+const NAMESPACE_TEMPLATE = `${DATA_STREAM}@namespace.prod`;
+
+/** Serves these index templates by name, wildcards included, as Elasticsearch would. */
+const mockIndexTemplates = (
+  templates: Record<string, { mode?: string; composed_of?: string[]; priority?: number }>
+) => {
+  esClient.indices.getIndexTemplate.mockImplementation(async (params: any) => {
+    const name: string = params?.name ?? '';
+    return {
+      index_templates: Object.entries(templates)
+        .filter(([templateName]) =>
+          name.endsWith('*') ? templateName.startsWith(name.slice(0, -1)) : templateName === name
+        )
+        .map(([templateName, { mode, composed_of: composedOf = [], priority = 200 }]) => ({
+          name: templateName,
+          index_template: {
+            index_patterns: [templateName],
+            priority,
+            composed_of: composedOf,
+            template: { settings: { index: mode ? { mode } : {} }, mappings: {} },
+            created_date_millis: 1,
+          },
+        })),
+    } as any;
+  });
+};
+
+/** Records the index and component template writes, in order. */
+const trackWrites = () => {
+  const writes: string[] = [];
+  esClient.indices.putIndexTemplate.mockImplementation(async (params: any) => {
+    writes.push(`index:${params.name}`);
+    return { acknowledged: true } as any;
+  });
+  esClient.cluster.putComponentTemplate.mockImplementation(async (params: any) => {
+    writes.push(`component:${params.name}`);
+    return { acknowledged: true } as any;
+  });
+  return writes;
+};
+
+const lastIndexTemplateWrite = (name: string) =>
+  esClient.indices.putIndexTemplate.mock.calls
+    .filter(([params]: any) => params.name === name)
+    .pop()?.[0] as any;
+
 beforeEach(() => {
   jest.clearAllMocks();
   // `clearAllMocks` keeps implementations; drop the per-test rejection rules.
@@ -410,6 +456,78 @@ describe('applyLogsdbColumnarIndexMode', () => {
     expect((customIndexTemplate?.[0] as any).template.settings.index).toEqual({
       mode: 'logsdb_columnar',
     });
+  });
+
+  it('switches the namespace-scoped copies of the index template after it when adding the mode', async () => {
+    mockInstalledPackage(packageInfo());
+    mockIndexTemplates({
+      [DATA_STREAM]: {},
+      [NAMESPACE_TEMPLATE]: { composed_of: ['prod@custom'], priority: 250 },
+    });
+    const writes = trackWrites();
+
+    await applyLogsdbColumnarIndexMode({
+      esClient,
+      savedObjectsClient,
+      logger,
+      pkgName: PKG_NAME,
+      enabled: true,
+    });
+
+    expect(writes.slice(-2)).toEqual([`index:${DATA_STREAM}`, `index:${NAMESPACE_TEMPLATE}`]);
+    const namespaceTemplate = lastIndexTemplateWrite(NAMESPACE_TEMPLATE);
+    // Only the mode changes: the namespace template keeps its own pattern, priority and
+    // `@custom` template.
+    expect(namespaceTemplate).toEqual(
+      expect.objectContaining({
+        index_patterns: [NAMESPACE_TEMPLATE],
+        priority: 250,
+        composed_of: ['prod@custom'],
+      })
+    );
+    expect(namespaceTemplate.template.settings.index).toEqual({ mode: 'logsdb_columnar' });
+    expect(namespaceTemplate).not.toHaveProperty('created_date_millis');
+  });
+
+  it('removes the mode from the namespace-scoped copies before the component templates', async () => {
+    mockInstalledPackage(packageInfo());
+    mockIndexTemplates({
+      [DATA_STREAM]: { mode: 'logsdb_columnar' },
+      [NAMESPACE_TEMPLATE]: { mode: 'logsdb_columnar' },
+    });
+    const writes = trackWrites();
+
+    await applyLogsdbColumnarIndexMode({
+      esClient,
+      savedObjectsClient,
+      logger,
+      pkgName: PKG_NAME,
+      enabled: false,
+    });
+
+    expect(writes.indexOf(`index:${NAMESPACE_TEMPLATE}`)).toBeLessThan(
+      writes.findIndex((write) => write.startsWith('component:'))
+    );
+    expect(lastIndexTemplateWrite(NAMESPACE_TEMPLATE).template.settings.index).toEqual({});
+  });
+
+  it('leaves a namespace-scoped copy alone when it already has the target mode', async () => {
+    mockInstalledPackage(packageInfo());
+    mockIndexTemplates({
+      [DATA_STREAM]: {},
+      [NAMESPACE_TEMPLATE]: { mode: 'logsdb_columnar' },
+    });
+    const writes = trackWrites();
+
+    await applyLogsdbColumnarIndexMode({
+      esClient,
+      savedObjectsClient,
+      logger,
+      pkgName: PKG_NAME,
+      enabled: true,
+    });
+
+    expect(writes).not.toContain(`index:${NAMESPACE_TEMPLATE}`);
   });
 
   it('rejects enabling when no logs data stream is columnar ready', async () => {

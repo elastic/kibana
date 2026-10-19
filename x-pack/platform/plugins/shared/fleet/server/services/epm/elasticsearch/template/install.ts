@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { merge, concat, uniqBy, omit } from 'lodash';
+import { merge, concat, uniqBy, omit, partition } from 'lodash';
 import Boom from '@hapi/boom';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import pMap from 'p-map';
@@ -54,6 +54,7 @@ import { dataStreamUsesOtelInput } from '../../../../../common/services';
 
 import {
   generateMappings,
+  generateNamespaceTemplateName,
   generateTemplateName,
   generateTemplateIndexPattern,
   getTemplate,
@@ -310,12 +311,107 @@ export async function installComponentAndIndexTemplateForDataStream({
   componentTemplates: TemplateMap;
   indexTemplate: IndexTemplateEntry;
 }) {
+  const newMode = indexTemplate.indexTemplate.template.settings.index.mode;
+  // The namespace-scoped copies of the index template follow its mode, in the same order.
+  const [namespaceTemplatesFirst, namespaceTemplatesLast] = partition(
+    await getNamespaceTemplatesWithIndexMode({ esClient, logger, indexTemplate }),
+    ({ previousMode }) => isManagedIndexModeRemoved(previousMode, newMode)
+  );
+
   // update index template first in case a managed index mode (TSDS, logsdb_columnar) was
   // removed, so that it does not become invalid
   await updateIndexTemplateIfIndexModeRemoved({ esClient, logger, indexTemplate });
+  for (const template of namespaceTemplatesFirst) {
+    await installTemplate({ esClient, logger, template });
+  }
 
   await installDataStreamComponentTemplates({ esClient, logger, componentTemplates });
   await installTemplate({ esClient, logger, template: indexTemplate });
+  for (const template of namespaceTemplatesLast) {
+    await installTemplate({ esClient, logger, template });
+  }
+}
+
+/**
+ * Whether going from `existingMode` to `newMode` removes an index mode Fleet manages. The index
+ * template then has to be written before the component templates, so that the composed template
+ * is never validated against the old mode with the new (unstripped / non-TSDB) mappings. The
+ * reverse — adding a mode — must keep the default order: the component templates carry the
+ * mappings the new mode requires.
+ */
+function isManagedIndexModeRemoved(existingMode: string | undefined, newMode: string | undefined) {
+  return (
+    existingMode !== undefined &&
+    MODES_REQUIRING_INDEX_TEMPLATE_FIRST.includes(existingMode) &&
+    existingMode !== newMode &&
+    newMode !== LOGSDB_COLUMNAR_INDEX_MODE
+  );
+}
+
+/**
+ * The namespace-scoped index templates Fleet created from this index template for namespace-level
+ * customization (`<index template>@namespace.<namespace>`) whose index mode differs from it,
+ * rewritten with its mode. They are copies of the index template with a higher priority, so a
+ * mode change has to reach them too: otherwise the data streams of those namespaces keep the
+ * previous mode, and removing a mode fails once the component templates no longer fit the mode a
+ * namespace template still declares.
+ */
+async function getNamespaceTemplatesWithIndexMode({
+  esClient,
+  logger,
+  indexTemplate,
+}: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  indexTemplate: IndexTemplateEntry;
+}): Promise<Array<IndexTemplateEntry & { previousMode?: string }>> {
+  const prefix = generateNamespaceTemplateName(indexTemplate.templateName, '');
+  const newMode: string | undefined = indexTemplate.indexTemplate.template.settings.index.mode;
+  let res;
+  try {
+    res = await retryTransientEsErrors(
+      () => esClient.indices.getIndexTemplate({ name: `${prefix}*` }, { ignore: [404] }),
+      { logger }
+    );
+  } catch (e) {
+    logger.warn(
+      `Error while looking up the namespace templates of ${indexTemplate.templateName}: ${e.message}`
+    );
+    return [];
+  }
+
+  return (res?.index_templates ?? []).flatMap(({ name, index_template: existing }) => {
+    if (!isNamespaceTemplate(name) || !name.startsWith(prefix)) {
+      return [];
+    }
+    const {
+      created_date: _cd,
+      created_date_millis: _cdm,
+      modified_date: _md,
+      modified_date_millis: _mdm,
+      ...namespaceTemplate
+    } = existing as unknown as IndexTemplate & Record<string, unknown>;
+    const { mode: previousMode, ...index } = namespaceTemplate.template?.settings?.index ?? {};
+    if (previousMode === newMode) {
+      return [];
+    }
+    return [
+      {
+        templateName: name,
+        previousMode,
+        indexTemplate: {
+          ...namespaceTemplate,
+          template: {
+            ...namespaceTemplate.template,
+            settings: {
+              ...namespaceTemplate.template?.settings,
+              index: newMode !== undefined ? { ...index, mode: newMode } : index,
+            },
+          },
+        },
+      },
+    ];
+  });
 }
 
 async function updateIndexTemplateIfIndexModeRemoved({
@@ -335,16 +431,7 @@ async function updateIndexTemplateIfIndexModeRemoved({
       existingIndexTemplate.index_templates?.[0]?.index_template.template?.settings?.index?.mode;
     const newMode = indexTemplate.indexTemplate.template.settings.index.mode;
 
-    // The index template has to be written before the component templates whenever a mode Fleet
-    // manages is going away, so that the composed template is never validated against the old
-    // mode with the new (unstripped / non-TSDB) mappings. The reverse — adding a mode — must
-    // keep the default order: the component templates carry the mappings the new mode requires.
-    if (
-      existingMode !== undefined &&
-      MODES_REQUIRING_INDEX_TEMPLATE_FIRST.includes(existingMode as string) &&
-      existingMode !== newMode &&
-      newMode !== LOGSDB_COLUMNAR_INDEX_MODE
-    ) {
+    if (isManagedIndexModeRemoved(existingMode as string | undefined, newMode)) {
       await installTemplate({ esClient, logger, template: indexTemplate });
     }
   } catch (e) {
