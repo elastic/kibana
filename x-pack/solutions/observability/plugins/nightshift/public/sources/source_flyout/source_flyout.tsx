@@ -37,13 +37,13 @@ import {
 } from '@kbn/nightshift-shared';
 import { hasSameEsql } from '@kbn/streams-schema';
 import React, { useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSourcesApi } from '../../data/sources/use_sources_api';
 import { getFormattedError } from '../../common/errors';
 import { ConfirmSourceActionModal } from '../confirm_source_action_modal';
 import { SourcePreview } from './source_preview';
-import { validateSourceEsql } from './validate_source_esql';
+import { useSourceQueryValidation } from './use_source_query_validation';
 
 interface SourceFormValues {
   title: string;
@@ -86,6 +86,16 @@ export function SourceFlyout({ source, readOnly = false, onClose }: SourceFlyout
 
   // Values held back while the user confirms that a new query resets the source's knowledge.
   const [pendingQueryChange, setPendingQueryChange] = useState<SourceFormValues>();
+
+  const watchedEsql = useWatch({ control, name: 'esql' });
+  // The server skips validation for a query that did not change, so a source whose index has
+  // since disappeared can still be renamed.
+  const isQueryUnchanged = source !== undefined && hasSameEsql(watchedEsql, source.esql);
+  const queryValidation = useSourceQueryValidation({
+    esql: watchedEsql,
+    enabled: !readOnly && !isQueryUnchanged,
+  });
+  const canSave = isQueryUnchanged || queryValidation.status === 'valid';
 
   const persist = async ({ title, description, tags, esql }: SourceFormValues) => {
     const body = {
@@ -250,38 +260,61 @@ export function SourceFlyout({ source, readOnly = false, onClose }: SourceFlyout
                   <Controller
                     name="esql"
                     control={control}
-                    rules={{ validate: validateSourceEsql }}
-                    render={({ field, fieldState }) => (
-                      <EuiFormRow
-                        label={QUERY_LABEL}
-                        helpText={QUERY_HELP_TEXT}
-                        isInvalid={fieldState.invalid}
-                        error={fieldState.error?.message}
-                        data-test-subj="significantEventsAppSourceFlyoutQueryRow"
-                      >
-                        <ESQLLangEditor
-                          dataTestSubj="significantEventsAppSourceFlyoutQueryEditor"
-                          query={{ esql: field.value }}
-                          onTextLangQueryChange={({ esql }) => {
-                            // A run error is set by hand, so it would otherwise outlive the edit.
-                            clearErrors('esql');
-                            field.onChange(esql);
-                          }}
-                          onTextLangQuerySubmit={async (query) => {
-                            if (query) {
-                              runPreview(query.esql);
+                    render={({ field, fieldState }) => {
+                      // A run or save error is set by hand and cleared on edit; it wins until then.
+                      const queryError =
+                        fieldState.error?.message ??
+                        (queryValidation.status === 'invalid' ? queryValidation.error : undefined);
+                      return (
+                        <EuiFormRow
+                          label={QUERY_LABEL}
+                          labelAppend={
+                            queryValidation.status === 'validating' && (
+                              <EuiText
+                                size="xs"
+                                color="subdued"
+                                data-test-subj="significantEventsAppSourceFlyoutQueryValidating"
+                              >
+                                {VALIDATING_QUERY_LABEL}
+                              </EuiText>
+                            )
+                          }
+                          helpText={QUERY_HELP_TEXT}
+                          isInvalid={queryError !== undefined}
+                          error={queryError}
+                          data-test-subj="significantEventsAppSourceFlyoutQueryRow"
+                        >
+                          <ESQLLangEditor
+                            dataTestSubj="significantEventsAppSourceFlyoutQueryEditor"
+                            query={{ esql: field.value }}
+                            onTextLangQueryChange={({ esql }) => {
+                              // A run error is set by hand, so it would otherwise outlive the edit.
+                              clearErrors('esql');
+                              field.onChange(esql);
+                            }}
+                            onTextLangQuerySubmit={async (query) => {
+                              if (query) {
+                                runPreview(query.esql);
+                              }
+                            }}
+                            disableAutoFocus
+                            editorIsInline
+                            expandToFitQueryOnMount
+                            hasOutline
+                            // Replaced by the Run query button below, which lines up with the form.
+                            hideRunQueryButton
+                            isDisabled={readOnly}
+                            warning={
+                              queryValidation.status === 'valid' && !queryValidation.indexExists
+                                ? NO_INDEX_WARNING
+                                : undefined
                             }
-                          }}
-                          disableAutoFocus
-                          editorIsInline
-                          expandToFitQueryOnMount
-                          hasOutline
-                          // Replaced by the Run query button below, which lines up with the form.
-                          hideRunQueryButton
-                          isDisabled={readOnly}
-                        />
-                      </EuiFormRow>
-                    )}
+                            // Without it the editor only shows the warning for a submitted query.
+                            mergeExternalMessages
+                          />
+                        </EuiFormRow>
+                      );
+                    }}
                   />
                   <EuiFlexGroup justifyContent="flexEnd">
                     <EuiFlexItem grow={false}>
@@ -319,6 +352,7 @@ export function SourceFlyout({ source, readOnly = false, onClose }: SourceFlyout
                 data-test-subj="significantEventsAppSourceFlyoutSaveButton"
                 fill
                 isLoading={formState.isSubmitting}
+                isDisabled={!canSave}
                 onClick={save}
               >
                 {source ? SAVE_LABEL : CREATE_LABEL}
@@ -388,6 +422,16 @@ const QUERY_LABEL = i18n.translate('xpack.nightshift.sources.flyout.queryLabel',
 const QUERY_HELP_TEXT = i18n.translate('xpack.nightshift.sources.flyout.queryHelpText', {
   defaultMessage:
     'Start with FROM or TS; only WHERE may follow. A TS command is metrics. Every index must be the same kind of data. Index names decide the kind, for example logs-*, metrics-* or traces-*. Run the query to preview it.',
+});
+
+const VALIDATING_QUERY_LABEL = i18n.translate(
+  'xpack.nightshift.sources.flyout.validatingQueryLabel',
+  { defaultMessage: 'Checking query…' }
+);
+
+const NO_INDEX_WARNING = i18n.translate('xpack.nightshift.sources.flyout.noIndexWarning', {
+  defaultMessage:
+    'No index matches this query yet. You can still save the source and onboard it once data arrives.',
 });
 
 const RUN_QUERY_LABEL = i18n.translate('xpack.nightshift.sources.flyout.runQueryLabel', {
