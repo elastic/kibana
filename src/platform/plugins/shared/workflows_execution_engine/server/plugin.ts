@@ -1880,11 +1880,7 @@ export class WorkflowsExecutionEnginePlugin
             results[idx] = { status: 'error', error: { message } };
           }
         }
-        this.logger.debug(
-          `Bulk-scheduled ${
-            toSchedule.length - failedExecutionIds.size
-          } workflow task(s) with user context`
-        );
+        this.logger.debug(`Bulk-scheduled ${toSchedule.length} workflow task(s) with user context`);
       }
 
       return results;
