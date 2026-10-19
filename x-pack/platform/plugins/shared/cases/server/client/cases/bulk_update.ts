@@ -1311,17 +1311,16 @@ const createPatchCasesPayload = async ({
               : updateReq.template?.version ?? originalCase.attributes.template?.version;
           // Validate only what this request touched (written keys + keys pairing derived): the
           // merged map intentionally retains keys from other template versions, which a pinned
-          // definition would otherwise reject as unknown.
+          // definition would otherwise reject as unknown. The full map is still passed so field
+          // conditions (`show_when` / `required_when`) see the stored values of untouched fields.
           const touchedKeys = new Set([
             ...Object.keys(updateCaseAttributes.extended_fields ?? {}),
             ...Object.values(paired.pairedKeyToStorageKey),
           ]);
-          const touchedExtendedFields = Object.fromEntries(
-            Object.entries(finalExtendedFields).filter(([key]) => touchedKeys.has(key))
-          );
           const globalFields = await resolveCachedGlobalFields(originalCase.attributes.owner);
           await validateCaseExtendedFields({
-            extendedFields: touchedExtendedFields,
+            extendedFields: finalExtendedFields,
+            touchedKeys,
             templateId,
             templateVersion,
             globalFields,
