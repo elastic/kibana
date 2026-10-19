@@ -45,10 +45,13 @@ export const useDatasetQualityState = () => {
     );
 
   return {
+    // Whether concrete data stream discovery and statistics are still loading.
     statsLoading,
+    // Whether failure-store data is readable for any concrete stream or requested dataset pattern.
     canUserReadFailureStore,
+    // Whether at least one discovered concrete data stream grants the monitor privilege.
     canUserMonitorAnyDataset,
-    canUserReadAnyDataset,
+    // Whether the user has any concrete stream or broad read/monitor access to the requested data.
     canUserAccessAnyDataset,
   };
 };
