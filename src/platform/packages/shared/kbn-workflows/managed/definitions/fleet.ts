@@ -31,6 +31,7 @@ export const FLEET_PACKAGE_WORKFLOW = {
   pluginId: 'fleet',
   version: 1,
   billable: false,
+  visibility: { lists: ['workflows'] },
   yamlTemplate: ({ yaml }) => forceDisabled(yaml),
   management: {
     lifecycle: 'dynamic',

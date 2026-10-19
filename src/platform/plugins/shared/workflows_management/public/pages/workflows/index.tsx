@@ -20,6 +20,7 @@ import { AppHeader } from '@kbn/app-header';
 import type { AppMenuConfig, AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowsSearchParams } from '@kbn/workflows';
+import { getManagedWorkflowListVisibilityContext } from '@kbn/workflows';
 import { WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID } from '@kbn/workflows/common/constants';
 import {
   useShowManagedWorkflowsSetting,
@@ -90,6 +91,14 @@ const getManagedFilterValue = (
   return undefined;
 };
 
+const LISTED_MANAGED_WORKFLOWS_SEARCH: Pick<
+  WorkflowsSearchParams,
+  'managed' | 'visibilityContext'
+> = {
+  managed: 'all',
+  visibilityContext: [getManagedWorkflowListVisibilityContext('workflows')],
+};
+
 export function WorkflowsPage() {
   const { application, featureFlags } = useKibana().services;
   const isManagedWorkflowsSettingEnabled = useShowManagedWorkflowsSetting();
@@ -106,11 +115,13 @@ export function WorkflowsPage() {
 
     if (!showManagedWorkflowsFilter) {
       const { managed, ...searchWithoutManaged } = nextSearch;
-      return searchWithoutManaged;
+      return canReadManagedWorkflow
+        ? { ...searchWithoutManaged, ...LISTED_MANAGED_WORKFLOWS_SEARCH }
+        : searchWithoutManaged;
     }
 
     return nextSearch;
-  }, [location.search, showManagedWorkflowsFilter]);
+  }, [location.search, showManagedWorkflowsFilter, canReadManagedWorkflow]);
   const { data: filtersData } = useWorkflowFiltersOptions(
     ['enabled', 'createdBy', 'tags'],
     showManagedWorkflowsFilter ? 'all' : undefined
@@ -118,13 +129,16 @@ export function WorkflowsPage() {
 
   const setSearch = useCallback(
     (newSearch: WorkflowsSearchParams) => {
-      const serializedSearch = serializeWorkflowsUrlSearchParams(newSearch);
+      const { managed, visibilityContext, ...urlSearch } = newSearch;
+      const serializedSearch = serializeWorkflowsUrlSearchParams(
+        showManagedWorkflowsFilter ? { ...urlSearch, managed } : urlSearch
+      );
       void application.navigateToApp(PLUGIN_ID, {
         path: serializedSearch ? `?${serializedSearch}` : '',
         replace: true,
       });
     },
-    [application]
+    [application, showManagedWorkflowsFilter]
   );
 
   const [showImportFlyout, setShowImportFlyout] = useState(false);

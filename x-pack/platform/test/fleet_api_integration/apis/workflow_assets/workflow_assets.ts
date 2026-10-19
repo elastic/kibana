@@ -74,6 +74,21 @@ export default function (providerContext: FtrProviderContext) {
       }
     });
 
+    it('lists the package workflows with the workflows list visibility context', async () => {
+      await installPackage('0.1.0');
+
+      const { body } = await supertest
+        .get('/api/workflows')
+        .query({ managed: 'all', visibilityContext: 'list:workflows' })
+        .set('kbn-xsrf', 'xxxx')
+        .set('elastic-api-version', '2023-10-31')
+        .expect(200);
+
+      const listedIds = body.results.map(({ id }: { id: string }) => id);
+      expect(listedIds).to.contain(workflowId('hello'));
+      expect(listedIds).to.contain(workflowId('goodbye'));
+    });
+
     it('updates the workflows on upgrade and removes the ones no longer shipped', async () => {
       await installPackage('0.1.0');
       await installPackage('0.2.0');
