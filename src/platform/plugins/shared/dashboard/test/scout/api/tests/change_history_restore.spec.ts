@@ -261,7 +261,20 @@ apiTest.describe(
 
       const restored = await restore(apiClient, spaceA, versionOne.id, editorBothSpaces, id);
       expect(restored).toHaveStatusCode(200);
-      expect(panelSummary(restored.body.panels)).toStrictEqual(expectedPanels);
+      // the restore response uses the dashboard app panel format, where by-value Lens panels hold
+      // stored attributes and their references, unlike the as-code panels returned when reading
+      const [restoredByValue, restoredByRef] = restored.body.panels;
+      expect(restoredByValue.id).toBe(byValuePanel.id);
+      expect(restoredByValue.config.title).toBe('Request count');
+      expect(restoredByValue.config.attributes.references).toStrictEqual([
+        {
+          type: 'index-pattern',
+          id: 'history-restore-data-view',
+          name: 'indexpattern-datasource-layer-layer_0',
+        },
+      ]);
+      expect(restoredByRef.id).toBe(byRefPanel.id);
+      expect(restoredByRef.config.ref_id).toBe('history-restore-library-lens');
 
       // the panels and their references are persisted, not just echoed back by the route
       const saved = await getDashboard(apiClient, spaceA, id);
@@ -273,7 +286,8 @@ apiTest.describe(
         byRefPanel.grid,
       ]);
       expect(saved.body.data.panels[0].config.title).toBe('Request count');
-      expect(saved.body.data.panels[0].config.metrics).toStrictEqual([
+      // the API fills in defaults for unspecified properties
+      expect(saved.body.data.panels[0].config.metrics).toMatchObject([
         { type: 'primary', operation: 'count' },
       ]);
     });
