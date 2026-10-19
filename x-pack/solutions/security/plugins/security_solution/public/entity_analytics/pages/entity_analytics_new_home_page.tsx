@@ -251,22 +251,20 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
 
   // The sparklines follow the deltas: each starts once its own counts and deltas have settled, and
   // only for a tile whose history reaches back twice the range, so they never delay them.
-  const { alertsTrend, watchlistedTrend, alertsTrendLoading, watchlistedTrendLoading } =
-    useAlertBasedTilesSeries({
-      ...deltaOptions,
-      isReady: !alertBasedPending && !isDeltaLoading,
-      reachesBack: alertBasedReachesBack,
-      severeAlertsCount: alertsCount,
-      watchlistedCount,
-    });
-  const { trend: anomaliesTrend, isTrendLoading: anomaliesTrendLoading } =
-    useEntitiesWithAnomaliesSeries({
-      ...deltaOptions,
-      isReady: !anomaliesPending && !anomaliesDeltaLoading,
-      reachesBack: anomaliesReachesBack,
-      count: anomaliesCount,
-    });
-  const { trend: newEntityTrend, isTrendLoading: newEntityTrendLoading } = useNewEntitySeries({
+  const { alertsTrend, watchlistedTrend } = useAlertBasedTilesSeries({
+    ...deltaOptions,
+    isReady: !alertBasedPending && !isDeltaLoading,
+    reachesBack: alertBasedReachesBack,
+    severeAlertsCount: alertsCount,
+    watchlistedCount,
+  });
+  const { trend: anomaliesTrend } = useEntitiesWithAnomaliesSeries({
+    ...deltaOptions,
+    isReady: !anomaliesPending && !anomaliesDeltaLoading,
+    reachesBack: anomaliesReachesBack,
+    count: anomaliesCount,
+  });
+  const { trend: newEntityTrend } = useNewEntitySeries({
     ...deltaOptions,
     isReady: !newEntityPending && !newEntityDeltaLoading,
     reachesBack: newEntityReachesBack,
@@ -274,12 +272,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   });
   // The two risk tiles read the same risk score history, so one query serves both sparklines: it
   // waits for both risk tiles.
-  const {
-    riskMoversTrend,
-    newlyHighCriticalTrend: newlyHCTrend,
-    riskMoversTrendLoading,
-    newlyHighCriticalTrendLoading: newlyHCTrendLoading,
-  } = useRiskTilesSeries({
+  const { riskMoversTrend, newlyHighCriticalTrend: newlyHCTrend } = useRiskTilesSeries({
     ...deltaOptions,
     isReady:
       !riskMoversPending && !newlyHCPending && !riskMoversDeltaLoading && !newlyHCDeltaLoading,
@@ -374,7 +367,6 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         isDeltaLoading,
         isDeltaUnavailable: alertBasedHistoryMissing,
         trend: alertsTrend,
-        isTrendLoading: alertsTrendLoading,
         isLoading: alertBasedLoading,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAlerts.description',
@@ -405,7 +397,6 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         isDeltaLoading: anomaliesDeltaLoading,
         isDeltaUnavailable: anomaliesHistoryMissing,
         trend: anomaliesTrend,
-        isTrendLoading: anomaliesTrendLoading,
         isLoading: anomaliesLoading,
         noDataMessage: anomaliesMissingJobs
           ? i18n.translate(
@@ -441,7 +432,6 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         isDeltaLoading: riskMoversDeltaLoading,
         isDeltaUnavailable: riskMoversHistoryMissing,
         trend: riskMoversTrend,
-        isTrendLoading: riskMoversTrendLoading,
         isLoading: riskMoversLoading,
         noDataMessage: riskMoversMissingIndex
           ? i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.riskMovers.noData', {
@@ -485,7 +475,6 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         isDeltaLoading: newlyHCDeltaLoading,
         isDeltaUnavailable: newlyHCHistoryMissing,
         trend: newlyHCTrend,
-        isTrendLoading: newlyHCTrendLoading,
         isLoading: newlyHCLoading,
         noDataMessage: newlyHCMissingIndex
           ? i18n.translate(
@@ -532,7 +521,6 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         isDeltaLoading,
         isDeltaUnavailable: alertBasedHistoryMissing,
         trend: watchlistedTrend,
-        isTrendLoading: watchlistedTrendLoading,
         isLoading: alertBasedLoading,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.watchlisted.description',
@@ -559,7 +547,6 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         isDeltaLoading: newEntityDeltaLoading,
         isDeltaUnavailable: newEntityHistoryMissing,
         trend: newEntityTrend,
-        isTrendLoading: newEntityTrendLoading,
         isLoading: newEntityLoading,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.newEntity.description',
@@ -582,14 +569,12 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
       alertsCount,
       alertsDelta,
       alertsTrend,
-      alertsTrendLoading,
       alertBasedLoading,
       isDeltaLoading,
       alertBasedHistoryMissing,
       anomaliesCount,
       anomaliesDelta,
       anomaliesTrend,
-      anomaliesTrendLoading,
       anomaliesDeltaLoading,
       anomaliesHistoryMissing,
       anomaliesLoading,
@@ -597,14 +582,12 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
       riskMoversCount,
       riskMoversDelta,
       riskMoversTrend,
-      riskMoversTrendLoading,
       riskMoversDeltaLoading,
       riskMoversHistoryMissing,
       riskMoversLoading,
       newlyHCCount,
       newlyHCDelta,
       newlyHCTrend,
-      newlyHCTrendLoading,
       newlyHCDeltaLoading,
       newlyHCHistoryMissing,
       newlyHCLoading,
@@ -612,11 +595,9 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
       watchlistedCount,
       watchlistedDelta,
       watchlistedTrend,
-      watchlistedTrendLoading,
       newEntityCount,
       newEntityDelta,
       newEntityTrend,
-      newEntityTrendLoading,
       newEntityDeltaLoading,
       newEntityHistoryMissing,
       newEntityLoading,

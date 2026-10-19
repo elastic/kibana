@@ -38,8 +38,6 @@ export interface SignalCardData {
   isDeltaUnavailable?: boolean;
   filterLabel: string;
   trend?: number[];
-  /** True while the sparkline can still arrive, to show a placeholder where the line goes. */
-  isTrendLoading?: boolean;
 }
 
 export interface ActiveFilter {
