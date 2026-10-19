@@ -127,6 +127,7 @@ describe('bulkScheduleWorkflow', () => {
         enabled: true,
         logEvents: true,
         maxChainDepth: 10,
+        subscriptionCacheEnabled: true,
         subscriptionCacheTtl: moment.duration(60, 's'),
       },
     });

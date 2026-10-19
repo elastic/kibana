@@ -31,7 +31,10 @@ import type { TriggerEventsDataStreamClient } from './event_logs/trigger_events_
 import { findMatchingWorkflowTrigger } from './filter_workflows_by_trigger_condition';
 import { resolveWorkflowEventsModeFromOn } from './lib/resolve_workflow_events_mode_from_on';
 import { groupSubscribedWorkflows, matchSubscriptionGroups } from './subscription_groups';
-import { SubscriptionResolutionCache } from './subscription_resolution_cache';
+import {
+  SubscriptionResolutionCache,
+  type SubscriptionCacheGroup,
+} from './subscription_resolution_cache';
 import {
   createEmptyTriggerScheduleStats,
   type TriggerEventScheduleStats,
@@ -407,29 +410,42 @@ export class TriggerEventHandler {
       this.workflowsExtensions.getTriggerDefinition(triggerId)?.requiresConnectorId === true;
 
     let loadedWorkflows: WorkflowDetailDto[] | undefined;
-    const resolution = await this.subscriptionCache.load(spaceId, triggerId, async () => {
+    let groups: readonly SubscriptionCacheGroup[];
+    let subscriptionCacheOutcome: 'hit' | 'miss' = 'miss';
+
+    if (this.config.subscriptionCacheEnabled) {
+      const resolution = await this.subscriptionCache.load(spaceId, triggerId, async () => {
+        loadedWorkflows = await this.workflowRepository.getWorkflowsSubscribedToTrigger(
+          triggerId,
+          spaceId
+        );
+        return groupSubscribedWorkflows(loadedWorkflows, triggerId, requiresConnectorId);
+      });
+      groups = resolution.entry.groups;
+      subscriptionCacheOutcome = resolution.outcome;
+    } else {
       loadedWorkflows = await this.workflowRepository.getWorkflowsSubscribedToTrigger(
         triggerId,
         spaceId
       );
-      return groupSubscribedWorkflows(loadedWorkflows, triggerId, requiresConnectorId);
-    });
+      groups = groupSubscribedWorkflows(loadedWorkflows, triggerId, requiresConnectorId);
+    }
 
     const { matchedIds, stats } = matchSubscriptionGroups({
-      groups: resolution.entry.groups,
+      groups,
       event: eventContext,
       requiresConnectorId,
       logger: this.logger,
       triggerId,
     });
     const workflows = await this.loadMatchedWorkflows(matchedIds, spaceId, loadedWorkflows);
-    if (resolution.outcome === 'hit' && workflows.length < matchedIds.length) {
+    if (subscriptionCacheOutcome === 'hit' && workflows.length < matchedIds.length) {
       this.logger.debug(
         `Dropping subscriber cache for trigger ${triggerId} in space ${spaceId}: matched ${matchedIds.length} workflows and loaded ${workflows.length}`
       );
       this.subscriptionCache.invalidate({ spaceId, triggerIds: [triggerId] });
     }
-    return { workflows, stats, subscriptionCacheOutcome: resolution.outcome };
+    return { workflows, stats, subscriptionCacheOutcome };
   }
 
   private async loadMatchedWorkflows(

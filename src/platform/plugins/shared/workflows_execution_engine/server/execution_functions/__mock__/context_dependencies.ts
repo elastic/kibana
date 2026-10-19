@@ -28,6 +28,7 @@ export const mockContextDependencies = () => ({
       enabled: true,
       logEvents: true,
       maxChainDepth: 10,
+      subscriptionCacheEnabled: true,
       subscriptionCacheTtl: moment.duration(60, 's'),
     },
     maxWorkflowDepth: 10,

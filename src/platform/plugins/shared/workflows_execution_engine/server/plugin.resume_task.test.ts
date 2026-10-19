@@ -91,6 +91,7 @@ describe('workflow:resume task runner event fields', () => {
         enabled: true,
         logEvents: true,
         maxChainDepth: 10,
+        subscriptionCacheEnabled: true,
         subscriptionCacheTtl: moment.duration(60, 's'),
       },
     });

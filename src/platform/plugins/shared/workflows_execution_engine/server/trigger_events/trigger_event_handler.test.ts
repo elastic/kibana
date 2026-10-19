@@ -128,6 +128,7 @@ function createDeps(overrides: Partial<TriggerEventHandlerDeps> = {}): TriggerEv
       enabled: true,
       logEvents: true,
       maxChainDepth: 10,
+      subscriptionCacheEnabled: true,
       subscriptionCacheTtl: moment.duration(60, 's'),
     },
     scheduleWorkflow: jest.fn().mockResolvedValue({ workflowExecutionId: 'exec-1' }),
@@ -274,6 +275,7 @@ describe('TriggerEventHandler', () => {
         enabled: false,
         logEvents: false,
         maxChainDepth: 10,
+        subscriptionCacheEnabled: true,
         subscriptionCacheTtl: moment.duration(60, 's'),
       },
     });
@@ -451,6 +453,7 @@ describe('TriggerEventHandler', () => {
         enabled: true,
         logEvents: true,
         maxChainDepth: 5,
+        subscriptionCacheEnabled: true,
         subscriptionCacheTtl: moment.duration(60, 's'),
       },
       workflowRepository: createWorkflowRepositoryMock([createMockWorkflow()]),
@@ -771,6 +774,48 @@ describe('TriggerEventHandler', () => {
     );
   });
 
+  it('searches subscribers on every emit when the subscription cache is disabled', async () => {
+    const workflowRepository = createWorkflowRepositoryMock([createMockWorkflow()]);
+    const scheduleWorkflow = jest.fn().mockResolvedValue({ workflowExecutionId: 'exec-1' });
+    const handler = new TriggerEventHandler(
+      createDeps({
+        scheduleWorkflow,
+        workflowRepository,
+        config: {
+          enabled: true,
+          logEvents: true,
+          maxChainDepth: 10,
+          subscriptionCacheEnabled: false,
+          subscriptionCacheTtl: moment.duration(60, 's'),
+        },
+      })
+    );
+
+    await handler.handleEvent({
+      triggerId: 'cases.updated',
+      payload: { n: 1 },
+      request: mockRequest,
+    });
+    await handler.handleEvent({
+      triggerId: 'cases.updated',
+      payload: { n: 2 },
+      request: mockRequest,
+    });
+
+    expect(workflowRepository.getWorkflowsSubscribedToTrigger).toHaveBeenCalledTimes(2);
+    expect(workflowRepository.getWorkflowsByIds).not.toHaveBeenCalled();
+    expect(scheduleWorkflow).toHaveBeenCalledTimes(2);
+    const reportMock = getTelemetryMock();
+    expect(reportMock).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ subscriptionCacheOutcome: 'miss' })
+    );
+    expect(reportMock).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ subscriptionCacheOutcome: 'miss' })
+    );
+  });
+
   it('reloads subscribers when a cache hit cannot load every matched workflow', async () => {
     const workflows = [createMockWorkflow({ id: 'wf-1' }), createMockWorkflow({ id: 'wf-2' })];
     const workflowRepository = {
@@ -850,6 +895,7 @@ describe('TriggerEventHandler', () => {
             enabled: true,
             logEvents: true,
             maxChainDepth: 10,
+            subscriptionCacheEnabled: true,
             subscriptionCacheTtl: moment.duration(1, 's'),
           },
         })
