@@ -12,9 +12,96 @@ import {
   buildEvalRunEnv,
   evalRunFlags,
   readConcurrencyFlag,
+  resolveEvaluationConnectorId,
 } from './run_helpers';
+import { isTTY, promptForConnector } from './prompts';
+import { resolveDefaultJudgeConnectorId } from './profiles';
+
+jest.mock('./prompts', () => ({
+  ...jest.requireActual('./prompts'),
+  isTTY: jest.fn(),
+  promptForConnector: jest.fn(),
+}));
+
+jest.mock('./profiles', () => ({
+  ...jest.requireActual('./profiles'),
+  resolveDefaultJudgeConnectorId: jest.fn(),
+}));
 
 const readFlags = (argv: string[]): FlagsReader => new FlagsReader(getFlags(argv, evalRunFlags));
+
+describe('resolveEvaluationConnectorId', () => {
+  const repoRoot = '/repo';
+  const log = new ToolingLog();
+  const previous = process.env.EVAL_CONNECTOR_ID;
+  const DEFAULT_JUDGE = 'eis-default-judge';
+
+  beforeEach(() => {
+    delete process.env.EVAL_CONNECTOR_ID;
+    jest.mocked(isTTY).mockReturnValue(false);
+    jest.mocked(promptForConnector).mockReset();
+    jest.mocked(resolveDefaultJudgeConnectorId).mockReturnValue(DEFAULT_JUDGE);
+  });
+
+  afterEach(() => {
+    if (previous === undefined) {
+      delete process.env.EVAL_CONNECTOR_ID;
+    } else {
+      process.env.EVAL_CONNECTOR_ID = previous;
+    }
+  });
+
+  it('uses --judge when passed', async () => {
+    process.env.EVAL_CONNECTOR_ID = 'from-env';
+    await expect(
+      resolveEvaluationConnectorId(repoRoot, log, readFlags(['--judge', 'from-flag']))
+    ).resolves.toBe('from-flag');
+  });
+
+  it('uses EVAL_CONNECTOR_ID when no flag is passed', async () => {
+    process.env.EVAL_CONNECTOR_ID = 'from-env';
+    await expect(resolveEvaluationConnectorId(repoRoot, log, readFlags([]))).resolves.toBe(
+      'from-env'
+    );
+  });
+
+  it('prompts with the profile default judge pre-selected on a TTY', async () => {
+    jest.mocked(isTTY).mockReturnValue(true);
+    jest.mocked(promptForConnector).mockResolvedValue('picked');
+
+    await expect(
+      resolveEvaluationConnectorId(repoRoot, log, readFlags([]), 'dev-vault')
+    ).resolves.toBe('picked');
+    expect(resolveDefaultJudgeConnectorId).toHaveBeenCalledWith(repoRoot, 'dev-vault');
+    expect(promptForConnector).toHaveBeenCalledWith(repoRoot, log, undefined, DEFAULT_JUDGE);
+  });
+
+  it('prompts without a pre-selection on a TTY when the profile has no default judge', async () => {
+    jest.mocked(isTTY).mockReturnValue(true);
+    jest.mocked(resolveDefaultJudgeConnectorId).mockReturnValue(undefined);
+    jest.mocked(promptForConnector).mockResolvedValue('picked');
+
+    await expect(resolveEvaluationConnectorId(repoRoot, log, readFlags([]))).resolves.toBe(
+      'picked'
+    );
+    expect(promptForConnector).toHaveBeenCalledWith(repoRoot, log, undefined, undefined);
+  });
+
+  it('uses the profile default judge without prompting when there is no TTY', async () => {
+    await expect(resolveEvaluationConnectorId(repoRoot, log, readFlags([]))).resolves.toBe(
+      DEFAULT_JUDGE
+    );
+    expect(promptForConnector).not.toHaveBeenCalled();
+  });
+
+  it('fails without a TTY when the profile has no default judge', async () => {
+    jest.mocked(resolveDefaultJudgeConnectorId).mockReturnValue(undefined);
+
+    await expect(resolveEvaluationConnectorId(repoRoot, log, readFlags([]))).rejects.toThrow(
+      'EVAL_CONNECTOR_ID is required'
+    );
+  });
+});
 
 describe('readConcurrencyFlag', () => {
   it('is undefined when --concurrency is not passed', () => {

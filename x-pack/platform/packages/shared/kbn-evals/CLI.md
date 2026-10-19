@@ -78,7 +78,7 @@ node scripts/evals start --skip-init --suite agent-builder
 | `--suite <id>`                   |           | Suite to run (interactive prompt if omitted)                                    |
 | `--config <path>`                |           | Playwright config path (alternative to `--suite`)                               |
 | `--project <id>`                 | `--model` | Connector/model to evaluate (comma-separated for multiple)                      |
-| `--evaluation-connector-id <id>` | `--judge` | Connector used for LLM-as-a-judge evaluators                                    |
+| `--evaluation-connector-id <id>` | `--judge` | Connector used for LLM-as-a-judge evaluators (defaults to the shared judge)     |
 | `--profile <name>`               |           | Profile for config resolution (see table above)                                 |
 | `--datasets-profile <name>`      |           | Override dataset settings (sets `EVAL_KBN_URL`/`EVAL_KBN_API_KEY`)              |
 | `--export-profile <name>`        |           | Override export settings (sets `TRACING_ES_URL`, `TRACING_EXPORTERS`)           |
@@ -175,7 +175,7 @@ node scripts/evals run --suite streams --dry-run
 | `--suite <id>`                    |           | Suite to run (interactive prompt if omitted)                                    |
 | `--config <path>`                 |           | Playwright config path (alternative to `--suite`)                               |
 | `--project <id>`                  | `--model` | Connector/model to evaluate                                                     |
-| `--evaluation-connector-id <id>`  | `--judge` | Connector for LLM-as-a-judge evaluators                                         |
+| `--evaluation-connector-id <id>`  | `--judge` | Connector for LLM-as-a-judge evaluators (defaults to the shared judge)          |
 | `--grep <pattern>`                |           | Filter tests by name (passed to Playwright `--grep`)                            |
 | `--repetitions <n>`               |           | Repeat each example N times                                                     |
 | `--concurrency <n>`               |           | Examples each experiment runs at once (default 5; a spec's own value wins)      |
