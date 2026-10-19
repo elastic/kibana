@@ -365,6 +365,24 @@ describe('Expression', () => {
       expect(params.criteria[0].metric).toBeUndefined();
     });
 
+    it('adds a new condition without a metric for non-host node types', () => {
+      const { wrapper, params } = renderShallow({ nodeType: 'pod' });
+
+      wrapper.find('[data-test-subj="infraExpressionsAddConditionButton"]').simulate('click');
+
+      expect(params.criteria).toHaveLength(2);
+      expect(params.criteria[1].metric).toBeUndefined();
+    });
+
+    it('adds a new condition with the default metric for hosts', () => {
+      const { wrapper, params } = renderShallow({ nodeType: 'host' });
+
+      wrapper.find('[data-test-subj="infraExpressionsAddConditionButton"]').simulate('click');
+
+      expect(params.criteria).toHaveLength(2);
+      expect(params.criteria[1].metric).toBe(defaultExpression.metric);
+    });
+
     it('does not render the preview chart without a metric', () => {
       const { wrapper } = renderShallow({
         nodeType: 'pod',

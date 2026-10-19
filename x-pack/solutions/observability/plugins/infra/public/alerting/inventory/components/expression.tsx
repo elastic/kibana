@@ -138,11 +138,12 @@ export const Expressions: React.FC<ExpressionsProps> = (props) => {
     const exp = ruleParams.criteria?.slice() || [];
     exp.push({
       ...defaultExpression,
+      metric: (ruleParams.nodeType ?? 'host') === 'host' ? defaultExpression.metric : undefined,
       timeSize: timeSize ?? defaultExpression.timeSize,
       timeUnit: timeUnit ?? defaultExpression.timeUnit,
     });
     setRuleParams('criteria', exp);
-  }, [setRuleParams, ruleParams.criteria, timeSize, timeUnit]);
+  }, [setRuleParams, ruleParams.criteria, ruleParams.nodeType, timeSize, timeUnit]);
 
   const removeExpression = useCallback(
     (id: number) => {
