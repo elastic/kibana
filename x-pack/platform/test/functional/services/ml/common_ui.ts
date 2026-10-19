@@ -491,11 +491,9 @@ export function MachineLearningCommonUIProvider({
         await testSubjects.setValue('optionsListFilterInput', value);
         await testSubjects.click(`optionsListControlSelection-${value}`);
       });
-      // Close the popover so its panel can't overlay subsequent controls (e.g. the wizard "Next" button).
-      await retry.tryForTime(5000, async () => {
-        await browser.pressKeys(browser.keys.ESCAPE);
-        await testSubjects.missingOrFail('optionsListControlAvailableOptions', { timeout: 1000 });
-      });
+      // Selecting an option closes the popover itself, so wait for that instead of pressing ESCAPE,
+      // which reaches an enclosing modal and dismisses it once the popover has already closed.
+      await testSubjects.missingOrFail('optionsListControlAvailableOptions', { timeout: 5000 });
     },
 
     async assertOptionsListWithFieldStatsValue(
