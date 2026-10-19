@@ -7,14 +7,16 @@
 
 import React from 'react';
 import {
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHealth,
   EuiIcon,
   EuiPanel,
   EuiText,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { AnomalyBand } from './anomaly_bands';
 
 interface SeverityFilterProps {
@@ -22,41 +24,63 @@ interface SeverityFilterProps {
   toggleHiddenBand: (band: AnomalyBand) => void;
 }
 
+const ANOMALY_SCORE_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.recentAnomalies.severityFilter.anomalyScoreLabel',
+  { defaultMessage: 'Anomaly score' }
+);
+
 export const AnomalySeverityFilter: React.FC<SeverityFilterProps> = ({
   anomalyBands,
   toggleHiddenBand,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const labelId = useGeneratedHtmlId({ prefix: 'anomalySeverityFilterLabel' });
 
   return (
     <EuiPanel paddingSize="s" grow={false} hasBorder hasShadow={false}>
-      <EuiFlexGroup alignItems={'center'} responsive={false} wrap>
-        <p css={{ fontWeight: euiTheme.font.weight.bold }}>{'Anomaly score'}</p>
+      <EuiFlexGroup
+        alignItems={'center'}
+        responsive={false}
+        wrap
+        role="group"
+        aria-labelledby={labelId}
+      >
+        <p id={labelId} css={{ fontWeight: euiTheme.font.weight.bold }}>
+          {ANOMALY_SCORE_LABEL}
+        </p>
         {anomalyBands.map((band) => {
-          if (band.hidden) {
-            return (
-              <EuiFlexItem
-                key={`${band.start}-${band.end}`}
-                css={{ cursor: 'pointer' }}
+          const range = `${band.start}-${band.end}`;
+          return (
+            <EuiFlexItem key={range} grow={false}>
+              <EuiButtonEmpty
+                size="xs"
+                color="text"
+                flush="both"
+                aria-pressed={!band.hidden}
                 onClick={() => toggleHiddenBand(band)}
-                grow={false}
+                data-test-subj={`anomaly-severity-filter-${range}`}
               >
-                <EuiFlexGroup alignItems={'center'} gutterSize={'xs'} responsive={false}>
-                  <EuiIcon type={'eyeSlash'} aria-hidden={true} />
-                  <EuiText size={'s'} color={euiTheme.colors.textSubdued}>
-                    <p>{`${band.start}-${band.end}`}</p>
+                <EuiFlexGroup
+                  component="span"
+                  alignItems={'center'}
+                  gutterSize={'xs'}
+                  responsive={false}
+                >
+                  <EuiIcon
+                    type={band.hidden ? 'eyeSlash' : 'dot'}
+                    color={band.hidden ? euiTheme.colors.textSubdued : band.color}
+                    aria-hidden={true}
+                  />
+                  <EuiText
+                    component="span"
+                    size={'s'}
+                    color={band.hidden ? euiTheme.colors.textSubdued : undefined}
+                  >
+                    {range}
                   </EuiText>
                 </EuiFlexGroup>
-              </EuiFlexItem>
-            );
-          }
-          return (
-            <EuiHealth
-              key={`${band.start}-${band.end}`}
-              css={{ cursor: 'pointer' }}
-              onClick={() => toggleHiddenBand(band)}
-              color={band.color}
-            >{`${band.start}-${band.end}`}</EuiHealth>
+              </EuiButtonEmpty>
+            </EuiFlexItem>
           );
         })}
       </EuiFlexGroup>
