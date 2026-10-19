@@ -36,9 +36,12 @@ const mockUseUrlState = useUrlState as jest.MockedFunction<typeof useUrlState>;
 const PAST_TIME = new Date('2018-10-17T19:58:03.000Z').getTime();
 const STORED_VIEW_TIME = new Date('2020-01-02T03:04:05.000Z').getTime();
 
-const buildView = (attributes: Partial<InventoryView['attributes']> = {}): InventoryView =>
+const buildView = (
+  attributes: Partial<InventoryView['attributes']> = {},
+  id = '0'
+): InventoryView =>
   ({
-    id: '0',
+    id,
     attributes: { autoReload: false, ...attributes },
   } as InventoryView);
 
@@ -86,5 +89,24 @@ describe('useWaffleTime', () => {
     rerender();
 
     expect(urlState.currentTime).toBe(STORED_VIEW_TIME);
+  });
+
+  it('still resets the time when switching to a view that stores none', () => {
+    const { result, rerender } = renderHook(() => useWaffleTime());
+
+    // The initial load resolves the default view, then the user picks a past time.
+    mockCurrentView = buildView();
+    rerender();
+    act(() => {
+      result.current.jumpToTime(PAST_TIME);
+    });
+    expect(urlState.currentTime).toBe(PAST_TIME);
+
+    // A genuine switch keeps its existing behavior of resetting the clock to "now".
+    const switchedAt = Date.now();
+    mockCurrentView = buildView({}, '1');
+    rerender();
+
+    expect(urlState.currentTime).toBeGreaterThanOrEqual(switchedAt);
   });
 });

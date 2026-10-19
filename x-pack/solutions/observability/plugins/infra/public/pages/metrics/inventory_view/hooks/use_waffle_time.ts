@@ -51,7 +51,11 @@ export const useWaffleTime = () => {
   const previousViewId = useRef<string | undefined>(currentView?.id);
   useEffect(() => {
     if (currentView && currentView.id !== previousViewId.current) {
-      setUrlState((previous) => mapInventoryViewToState(currentView, previous.currentTime));
+      // The first resolution is the initial load, not a switch: keep the selected time.
+      const isInitialLoad = previousViewId.current === undefined;
+      setUrlState((previous) =>
+        mapInventoryViewToState(currentView, isInitialLoad ? previous.currentTime : undefined)
+      );
       previousViewId.current = currentView.id;
     }
   }, [currentView, setUrlState]);
