@@ -6,7 +6,7 @@
  */
 
 import type { Doc, Drill } from './score';
-import { drillMatches, drillToQuery, recomputeRow, scoreRun } from './score';
+import { computeClusterMetrics, drillMatches, drillToQuery, recomputeRow, scoreRun } from './score';
 import { scorecardMarkdown } from './scorecard';
 import fs from 'fs';
 import path from 'path';
@@ -257,6 +257,43 @@ describe('scoreRun — synthetic coverage and attribution rules', () => {
     const res = scoreRun(manifest, s);
     expect(res.run_valid).toBe(false);
     expect(res.pods.every((r) => !r.valid)).toBe(true);
+  });
+});
+
+describe('computeClusterMetrics — tick denominator uses the scheduled series, not the window', () => {
+  // Track 6 alerting runs: the series started ~2.7 s into a 5.6 s seed phase, so window/interval
+  // expected 5 ticks while only 3 were ever scheduled inside the window.
+  const from = 1792433208334.4;
+  const to = 1792433213913.29;
+  const runAts = [1792433211000, 1792433212000, 1792433213000, 1792433214000, 1792433215000];
+  const audit = (ts: number, i: number) => ({ source: 'tick_audit', ts, id: `t-${i}`, status: 'done' });
+  const tick = (ts: number, i: number) => ({ source: 'tick', ts, task_id: `t-${i}` });
+  const ctx = { from, to, ticks: { interval_ms: 1000 }, laptopRps: null, minCoverage: 0.8 };
+
+  it('a series starting mid-window with complete audits is valid', () => {
+    const inWin = runAts.filter((t) => t >= from && t < to);
+    const { problems } = computeClusterMetrics(
+      { tick_audit: inWin.map(audit), ticks: inWin.map(tick) },
+      { ...ctx, scheduledRunAts: runAts }
+    );
+    expect(problems).toEqual([]);
+  });
+
+  it('missing audits for ticks scheduled inside the window still fail closed', () => {
+    const { problems } = computeClusterMetrics(
+      { tick_audit: [audit(runAts[0], 0)], ticks: [tick(runAts[0], 0)] },
+      { ...ctx, scheduledRunAts: runAts }
+    );
+    expect(problems.join()).toContain('tick audit coverage 1/3');
+  });
+
+  it('without a schedule record it falls back to the window-based denominator', () => {
+    const inWin = runAts.filter((t) => t >= from && t < to);
+    const { problems } = computeClusterMetrics(
+      { tick_audit: inWin.map(audit), ticks: inWin.map(tick) },
+      ctx
+    );
+    expect(problems.join()).toContain('tick audit coverage 3/5');
   });
 });
 
