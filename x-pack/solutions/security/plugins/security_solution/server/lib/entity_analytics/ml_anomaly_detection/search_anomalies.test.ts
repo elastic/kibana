@@ -419,13 +419,17 @@ describe('searchEntityAnomalies', () => {
     expect(result.hits[0]).not.toHaveProperty('typical');
   });
 
-  it('falls back to the first cause for actual/typical on population-analysis records', async () => {
+  it("completes population-analysis records from the entity's cause (values and dimensions)", async () => {
+    // by+over analysis: the parent carries by_field_name but no by_field_value / actual / typical;
+    // each cause does. The cause for the requested entity (user.name = alice) is not the first.
     const hit = makeHit({
       id: 'population',
       entityId: 'user:alice',
+      byFieldName: 'user.name',
+      noByFieldValue: true,
       causes: [
-        { actual: [42], typical: [3] },
-        { actual: [7], typical: [1] },
+        { by_field_value: 'mallory', actual: [99], typical: [1] },
+        { by_field_value: 'alice', actual: [42], typical: [3] },
       ],
     });
     delete (hit._source as Record<string, unknown>).actual;
@@ -434,7 +438,32 @@ describe('searchEntityAnomalies', () => {
 
     const result = await searchEntityAnomalies({ ...defaultOpts, logger, ml: mockMl, soClient });
 
-    expect(result.hits[0]).toMatchObject({ _id: 'population', actual: 42, typical: 3 });
+    expect(result.hits[0]).toMatchObject({
+      _id: 'population',
+      actual: 42,
+      typical: 3,
+      byFieldName: 'user.name',
+      byFieldValue: 'alice',
+    });
+  });
+
+  it('falls back to the first cause when none matches the entity', async () => {
+    const hit = makeHit({
+      entityId: 'user:alice',
+      byFieldName: 'user.name',
+      noByFieldValue: true,
+      causes: [
+        { by_field_value: 'mallory', actual: [99], typical: [1] },
+        { by_field_value: 'trent', actual: [7], typical: [2] },
+      ],
+    });
+    delete (hit._source as Record<string, unknown>).actual;
+    delete (hit._source as Record<string, unknown>).typical;
+    mockMlAnomalySearch.mockResolvedValueOnce(makeResponse([hit]));
+
+    const result = await searchEntityAnomalies({ ...defaultOpts, logger, ml: mockMl, soClient });
+
+    expect(result.hits[0]).toMatchObject({ actual: 99, typical: 1, byFieldValue: 'mallory' });
   });
 
   it('prefers top-level actual/typical over causes when both are present', async () => {

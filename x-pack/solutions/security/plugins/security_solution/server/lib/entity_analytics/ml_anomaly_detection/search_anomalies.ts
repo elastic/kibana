@@ -14,6 +14,7 @@ import { ENTITY_ANOMALY_DEFAULT_LOOKBACK } from '../../../../common/constants';
 import type { AnomalyScoreRange } from '../../../../common/api/entity_analytics';
 import { getSecurityMlJobIds } from './get_security_ml_job_ids';
 import type { AnomalyHit, RawAnomalyRecord } from './types';
+import { getEntityIdentityValues, resolveRecordFields } from './resolve_record_fields';
 
 // A missing/empty selection means "no severity filter", which defaults to the
 // standard threshold of 1 rather than truly unbounded (record_score 0 anomalies are noise).
@@ -41,41 +42,27 @@ interface RequiredHit {
   _source: RawAnomalyRecord;
 }
 
-/**
- * Observed / expected values of a record. Population-analysis records (detector with
- * `over_field_name`) carry them per cause rather than at the top level; use the first cause so
- * the anomaly still renders with a value comparison.
- */
-export const getRecordValues = (
-  src: Pick<RawAnomalyRecord, 'actual' | 'typical' | 'causes'>
-): { actual?: number; typical?: number } => {
-  const cause = src.causes?.[0];
-  return {
-    actual: src.actual?.[0] ?? cause?.actual?.[0],
-    typical: src.typical?.[0] ?? cause?.typical?.[0],
-  };
-};
-
-const mapToAnomalyHit = (hit: RequiredHit, entityId: string): AnomalyHit => {
+const mapToAnomalyHit = (
+  hit: RequiredHit,
+  entityId: string,
+  identityValues?: Set<string>
+): AnomalyHit => {
   const { _id: id, _source: src } = hit;
-  const { actual, typical } = getRecordValues(src);
+  const { actual, typical, detectorFunction, ...dimensions } = resolveRecordFields(
+    src,
+    identityValues
+  );
   return {
     _id: id,
     entityId,
     jobId: src.job_id,
     detectorIndex: src.detector_index,
-    detectorFunction: src.function ?? '',
+    detectorFunction: detectorFunction ?? '',
     timestamp: src.timestamp,
     recordScore: src.record_score,
     ...(actual !== undefined && { actual }),
     ...(typical !== undefined && { typical }),
-    fieldName: src.field_name,
-    byFieldName: src.by_field_name,
-    byFieldValue: src.by_field_value,
-    overFieldName: src.over_field_name,
-    overFieldValue: src.over_field_value,
-    partitionFieldName: src.partition_field_name,
-    partitionFieldValue: src.partition_field_value,
+    ...dimensions,
   };
 };
 
@@ -196,11 +183,17 @@ export const searchEntityAnomalies = async ({
 
     // Every record the query counted in `total` is returned; the guard only narrows the client's
     // optional `_id` / `_source` typing, which search hits always carry.
+    const identityValuesByEntityId = new Map(
+      entityRecords.flatMap((record) =>
+        record.entity?.id ? [[record.entity.id, getEntityIdentityValues([record])] as const] : []
+      )
+    );
     const hits = resp.hits.hits
       .filter((hit): hit is typeof hit & RequiredHit => hit._id != null && hit._source != null)
-      .map((hit) =>
-        mapToAnomalyHit(hit, getMatchedEntityId(hit.matched_queries, entityIds) ?? entityIds[0])
-      );
+      .map((hit) => {
+        const entityId = getMatchedEntityId(hit.matched_queries, entityIds) ?? entityIds[0];
+        return mapToAnomalyHit(hit, entityId, identityValuesByEntityId.get(entityId));
+      });
 
     return { hits, total };
   } catch (error) {

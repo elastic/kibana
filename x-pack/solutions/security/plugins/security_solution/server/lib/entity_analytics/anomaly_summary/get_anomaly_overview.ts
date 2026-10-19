@@ -23,9 +23,10 @@ import type {
 } from '../../../../common/api/entity_analytics';
 import {
   buildScoreRangeFilter,
+  getEntityIdentityValues,
   getJobConfig,
-  getRecordValues,
   getSecurityMlJobIds,
+  resolveRecordFields,
 } from '../ml_anomaly_detection';
 import type { RawAnomalyRecord } from '../ml_anomaly_detection/types';
 
@@ -240,18 +241,20 @@ export const getEntityAnomalyOverview = async ({
 
   const tacticCounts = buildTacticCounts(aggs?.by_time?.buckets ?? [], tacticsByJob);
 
+  const identityValues = getEntityIdentityValues(entityRecords);
   const recentAnomalies: AnomalyOverviewHit[] = rawHits.map((anomaly) => {
     const jobConfig = allJobConfigs.get(anomaly.job_id);
     const detector = jobConfig?.detectors[anomaly.detector_index];
-    const detectorFunction = detector?.function ?? anomaly.function;
-    const { actual } = getRecordValues(anomaly);
+    const record = resolveRecordFields(anomaly, identityValues);
+    const detectorFunction = detector?.function ?? record.detectorFunction;
+    const { actual } = record;
 
     const anomalousValue = detectorFunction
       ? formatAnomalousValue({
           detectorFunction,
-          fieldName: detector?.field_name ?? anomaly.field_name,
+          fieldName: detector?.field_name ?? record.fieldName,
           actual: actual !== undefined ? [actual] : undefined,
-          byFieldValue: anomaly.by_field_value ?? undefined,
+          byFieldValue: record.byFieldValue,
         })
       : actual !== undefined
       ? String(actual)

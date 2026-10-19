@@ -499,6 +499,68 @@ describe('getEntityAnomalyOverview', () => {
         anomalousValue: '1423 events',
       });
     });
+
+    it("uses the entity's cause by_field_value for rare population records lacking it at the top level", async () => {
+      mockGetSecurityMlJobIds.mockResolvedValue([JOB]);
+      mockGetJobConfig.mockResolvedValue(
+        new Map([
+          [
+            JOB,
+            {
+              threatTactics: [],
+              threatTechniques: [],
+              detectors: [
+                { function: 'rare', by_field_name: 'process.name', over_field_name: 'host.name' },
+              ],
+              jobName: 'Rare Process Job',
+            },
+          ],
+        ])
+      );
+      mockMlAnomalySearch.mockResolvedValue(
+        makeSearchResponse(
+          [
+            {
+              key: FROM_MS + 1000,
+              doc_count: 1,
+              max_score: 60,
+              jobBuckets: [{ key: JOB, doc_count: 1 }],
+            },
+          ],
+          [JOB],
+          1,
+          [
+            {
+              _id: 'rec-rare-pop',
+              job_id: JOB,
+              detector_index: 0,
+              timestamp: FROM_MS + 1000,
+              record_score: 60,
+              causes: [
+                {
+                  function: 'rare',
+                  function_description: 'rare',
+                  probability: 0.001,
+                  by_field_name: 'process.name',
+                  by_field_value: 'mimikatz.exe',
+                  over_field_name: 'host.name',
+                  over_field_value: 'entity-1',
+                  actual: [1],
+                  typical: [0.001],
+                },
+              ],
+            },
+          ]
+        )
+      );
+
+      const result = await getEntityAnomalyOverview(baseParams);
+
+      expect(result.recentAnomalies[0]).toMatchObject({
+        recordId: 'rec-rare-pop',
+        anomalousValue: 'mimikatz.exe',
+      });
+    });
   });
 
   describe('tactic filtering', () => {

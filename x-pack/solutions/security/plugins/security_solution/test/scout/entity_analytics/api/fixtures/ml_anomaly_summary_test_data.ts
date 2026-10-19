@@ -1163,8 +1163,9 @@ export const anomalyTestData = () => [
     'host.name': [OR_SEMANTICS_HOST_NAME],
     'host.id': [OR_SEMANTICS_HOST_ID],
   },
-  // Population analysis (`over_field_name`): the record has no top-level `actual` / `typical`;
-  // they live on each cause instead.
+  // Population analysis (by + over fields): as ML writes it, the parent record carries
+  // `by_field_name` but no `by_field_value`, `actual` or `typical`; those live on each cause.
+  // The cause for the requested entity (henry.clark) is deliberately not the first one.
   {
     _id: POPULATION_ANOMALY_RECORD_ID,
     job_id: 'auth_rare_hour_for_a_user_ea',
@@ -1178,12 +1179,22 @@ export const anomalyTestData = () => [
     is_interim: false,
     timestamp: Date.now(),
     by_field_name: 'user.name',
-    by_field_value: 'henry.clark',
     over_field_name: 'source.geo.region_iso_code',
     over_field_value: 'US-CA',
     function: 'time_of_day',
     function_description: 'time_of_day',
     causes: [
+      {
+        probability: 0.0021,
+        by_field_name: 'user.name',
+        by_field_value: 'olivia.perez',
+        over_field_name: 'source.geo.region_iso_code',
+        over_field_value: 'US-CA',
+        function: 'time_of_day',
+        function_description: 'time_of_day',
+        typical: [50400],
+        actual: [7200],
+      },
       {
         probability: 0.0004127113983262128,
         by_field_name: 'user.name',

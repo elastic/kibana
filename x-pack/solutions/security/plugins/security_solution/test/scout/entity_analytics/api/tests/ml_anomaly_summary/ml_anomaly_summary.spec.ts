@@ -434,9 +434,9 @@ apiTest.describe(
       'Anomaly summary API: lists population-analysis records whose actual/typical live only in causes',
       async ({ apiClient }) => {
         // Henry's only anomaly comes from auth_rare_hour_for_a_user_ea, a population job
-        // (`over_field_name`). ML writes `actual` / `typical` on `causes[]` for such records, not at
-        // the top level. The page must contain every record the query counts in `total`, with the
-        // values read from the first cause, rather than reporting total=1 and an empty page.
+        // (`over_field_name`). ML writes `actual` / `typical` / `by_field_value` on `causes[]` for
+        // such records, not at the top level. The page must contain every record the query counts
+        // in `total`, completed from Henry's cause, rather than reporting total=1 and an empty page.
         const response = await apiClient.post(buildUrl(HENRY_EUID, 'user'), {
           headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
@@ -457,6 +457,9 @@ apiTest.describe(
         expect(anomaly.detectorFunction).toBe('time_of_day');
         expect(anomaly.overFieldName).toBe('source.geo.region_iso_code');
         expect(anomaly.overFieldValue).toBe('US-CA');
+        // Dimensions and values come from Henry's cause, not the first cause (olivia.perez).
+        expect(anomaly.byFieldName).toBe('user.name');
+        expect(anomaly.byFieldValue).toBe('henry.clark');
         expect(anomaly.actual).toStrictEqual([POPULATION_ANOMALY_ACTUAL]);
         expect(anomaly.typical).toStrictEqual([POPULATION_ANOMALY_TYPICAL]);
       }

@@ -40,7 +40,9 @@ export const makeHit = (
     byFieldValue?: string;
     actual?: number[];
     typical?: number[];
-    causes?: Array<{ actual: number[]; typical: number[] }>;
+    causes?: Array<{ actual: number[]; typical: number[]; by_field_value?: string }>;
+    /** Omit the top-level by_field_value, as ML does for by+over (population) analyses. */
+    noByFieldValue?: boolean;
     sort?: unknown[];
     noSource?: boolean;
     matchedQueries?: string[];
@@ -59,6 +61,7 @@ export const makeHit = (
     actual = [5],
     typical = [1],
     causes,
+    noByFieldValue = false,
     sort = [timestamp, jobId, detectorIndex],
     noSource = false,
     detectorFunction = 'rare',
@@ -83,7 +86,7 @@ export const makeHit = (
           bucket_span: 900,
           is_interim: false,
           by_field_name: byFieldName,
-          by_field_value: byFieldValue,
+          ...(noByFieldValue ? {} : { by_field_value: byFieldValue }),
           partition_field_name: 'host.name',
           partition_field_value: 'web-01',
           function_description: 'rare',
