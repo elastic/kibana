@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Resolve a recent Kibana distributable to reuse so gen-ai KB artifact pipelines
-# (product-docs + Security Labs) can skip a ~16 minute `node scripts/build`.
+# (product-docs, ES|QL docs sync, + Security Labs) can skip a ~16 minute `node scripts/build`.
 #
 # Must be sourced (so `export KIBANA_BUILD_ID` is visible to the caller):
 #   source .buildkite/scripts/steps/gen_ai/resolve_reusable_kibana_build.sh
@@ -9,6 +9,7 @@
 #
 # Used by:
 #   .buildkite/pipelines/gen_ai_product_docs.yml
+#   .buildkite/pipelines/gen_ai_esql_docs_sync.yml
 #   .buildkite/pipelines/gen_ai_security_labs.yml
 #
 # Lookup is implemented in resolve_reusable_kibana_build.ts via BuildkiteClient
