@@ -47,6 +47,12 @@ not which index answers it. Work from the question, not from the data:
 Never propose a source you have not queried. Field names are the single most common thing to get
 confidently wrong, and every downstream artifact inherits the error.
 
+**Skip what the attachment already did.** When the `ai_index` attachment already carries a source's
+`fields` or `sample_documents`, that is steps 3 and 4 already done — use it instead of calling
+`platform.core.get_index_mapping` or `platform.core.execute_esql` for the same source again. Their
+absence, or an `inspection_error` on the source, means the attempt was made and did not produce a
+result, not that it was skipped.
+
 ## Writing an ES|QL source
 
 The source query is the corpus definition. It should:
