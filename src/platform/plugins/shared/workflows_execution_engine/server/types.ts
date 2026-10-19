@@ -22,6 +22,7 @@ import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
+import type { WorkflowExecutionReadApi } from './public_api/types';
 import type {
   StepExecutionsDataClient,
   WorkflowExecutionsDataClient,
@@ -69,7 +70,7 @@ export interface TriggerEventsContract {
   ) => Promise<SearchTriggerEventLogResult>;
 }
 
-export interface WorkflowsExecutionEnginePluginStart {
+export interface WorkflowsExecutionEnginePluginStart extends WorkflowExecutionReadApi {
   serviceAccountBindings: Pick<
     CoreStart['security']['serviceAccounts'],
     'isEnabled' | 'bindWorkload' | 'unbindWorkload' | 'getWorkloadBinding'
