@@ -1,3 +1,3 @@
 File a bug: the Security Alerts table shows 0 results although 12 alerts exist in the time range. Kibana 9.3.0 on ECH, default space, role superuser, no feature flag, plain UI bug with nothing security-sensitive. Steps: 1) open Security > Alerts, 2) set the date picker to Last 24 hours. Current: "0 results" and an empty table. Expected: 12 rows.
 
-Test override for the search step: `gh search issues` returns the JSON in $FIXTURES/dup-matches.json (an open and a closed issue); `gh search prs` returns [].
+Test harness: run the search command with STUB_MODE=dup.

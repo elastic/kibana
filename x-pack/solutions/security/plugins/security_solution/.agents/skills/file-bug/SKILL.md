@@ -52,17 +52,11 @@ Two collect paths; same later steps.
 
 **Path A — from scratch** — interview and/or watch media (recording / snapshots, pasted text, `.bug-fixer-session/reproduction-report.md`, an existing `#N`); hand-draft `templates/bug-report.md`; then `infer-team` (`--route` is the nav label or path; `--knowledge x-pack/solutions/security/plugins/security_solution/.agents/references/security-domain-knowledge.md`) and `format-title` (see `--help`).
 
-**Path B — exploratory-tester pack** — read `references/path-b.md`. It gives `parse-findings.py`, `from-findings`, `check-pack`, `infer-deployment`, `infer-release`, `scan-sensitive` and `render-body`; then `infer-team` and `format-title` as above.
+**Path B — exploratory-tester pack** — read `references/path-b.md`: one `prepare` command runs the whole collect pipeline; then `infer-team` and `format-title` as above.
 
 ### 2. Search
 
-Search **open and closed issues** and **open PRs** (include drafts); parse every result into one `matches.json`. GitHub's default search returns nothing when a backtick-style identifier (`document_parsing_exception`, `useFoo`) is ANDed with other words and the query has no `in:title` / `in:body` — so an empty unqualified multi-word query is **not** evidence the bug is new, and a second one of the same shape is no better. Run all of these:
-
-1. The distinctive error token alone.
-2. That token plus the other distinctive words, once with `in:title` and once with `in:body`.
-3. Plain-language screen or control words, also split `in:title` / `in:body`.
-
-Never AND an identifier with other words unless the query has `in:title` or `in:body`. Example: `GH_PAGER=cat gh search issues --repo "$TARGET_REPO" --limit 10 --json number,state,title,body "<token> <words> in:title"` (and `gh search prs`), each piped through `parse-search --input -`; then `decide --matches matches.json`. It exits 0 with `create` only when there are **no** matches. **One or more** matches exit 2 — show candidates (`gh issue view` / `gh pr view`), match the *work* not title keywords, and let the human pick create / comment / reopen.
+Run `python3 "$FILE_BUG" search --repo "$TARGET_REPO" --token <distinctive error identifier> --words "<other distinctive words>" [--screen "<screen or control words>"]` (omit `--token` when there is no identifier). It searches open and closed issues and open PRs (drafts included) with the token alone, the token plus words with `in:title` and with `in:body`, and plain-language words split the same way — GitHub returns nothing for an unqualified identifier-plus-words query, so an empty plain query proves nothing. One or more matches exit 2 with candidates; only when every query is empty does it exit 0 with `create`; a `gh` failure exits 1 and is never read as empty. Show candidates (`gh issue view` / `gh pr view`), match the *work* not title keywords, and let the human pick create / comment / reopen. (`parse-search` and `decide --matches` still work on pre-fetched `gh` JSON.)
 
 ### 3. Draft and stop
 

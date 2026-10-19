@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import json
 import os
+import shutil
 import subprocess
 import sys
 import unittest
@@ -37,6 +38,8 @@ from file_bug import (  # noqa: E402
     render_bug_body,
     has_media,
     scan_sensitive,
+    search_queries,
+    run_search,
     scan_wip,
     upload_evidence,
     validate_labels,
@@ -2170,6 +2173,162 @@ class TesterPackIntegrationTest(unittest.TestCase):
         self.assertIn("flow_name", finding)
         self.assertNotIn("flow", finding)
         self.assertIn(f"Flow: {finding['flow_name']}", body)
+
+
+class SearchCommandTest(unittest.TestCase):
+    ISSUE = {
+        "number": 900001,
+        "state": "open",
+        "title": "[Bug] `Raw document_parsing_exception` shown for an invalid IP",
+        "body": "raw document_parsing_exception from Elasticsearch",
+    }
+
+    def _github_like(self, calls):
+        """Mimic GitHub: an identifier ANDed with other words and no in: qualifier returns []."""
+
+        def run_gh(argv):
+            query = argv[-1]
+            calls.append(argv)
+            qualified = "in:title" in query or "in:body" in query
+            bare = query.strip() == "document_parsing_exception"
+            has_token = "document_parsing_exception" in query
+            hit = bare or (has_token and qualified) or (not has_token and qualified)
+            stdout = json.dumps([self.ISSUE] if hit and argv[2] == "issues" else [])
+            return {"returncode": 0, "stdout": stdout, "stderr": ""}
+
+        return run_gh
+
+    def test_query_set_qualifies_every_identifier_plus_words_query(self):
+        queries = search_queries("document_parsing_exception", "value list ip", "Manage value lists")
+        self.assertEqual(queries[0], "document_parsing_exception")
+        for query in queries[1:]:
+            self.assertTrue(query.endswith(("in:title", "in:body")), query)
+        self.assertIn("document_parsing_exception value list ip in:title", queries)
+        self.assertIn("document_parsing_exception value list ip in:body", queries)
+        self.assertIn("Manage value lists in:title", queries)
+
+    def test_without_token_only_split_plain_queries_run(self):
+        self.assertEqual(
+            search_queries(None, "value list invalid ip"),
+            ["value list invalid ip in:title", "value list invalid ip in:body"],
+        )
+
+    def test_bad_token_and_empty_input_rejected(self):
+        for token, words in (("-x", "a"), ("two words", "a"), (None, "")):
+            with self.assertRaises(ValueError):
+                search_queries(token, words)
+
+    def test_search_finds_duplicate_that_unqualified_and_misses(self):
+        calls = []
+        matches, ran = run_search(
+            repo="elastic/kibana",
+            token="document_parsing_exception",
+            words="value list ip",
+            run_gh=self._github_like(calls),
+        )
+        self.assertEqual([m.number for m in matches], [900001])
+        kinds = {(c[2], c[-1]) for c in calls}
+        self.assertIn(("issues", "document_parsing_exception"), kinds)
+        self.assertTrue(any(c[2] == "prs" and "--state" in c and "open" in c for c in calls))
+        self.assertEqual(len(ran), len(calls))
+
+    def test_gh_failure_is_an_error_not_an_empty_result(self):
+        def run_gh(argv):
+            return {"returncode": 1, "stdout": "", "stderr": "rate limited"}
+
+        with self.assertRaises(RuntimeError):
+            run_search(repo="elastic/kibana", token=None, words="value list", run_gh=run_gh)
+
+    def test_cli_search_asks_on_duplicate_via_gh_override(self):
+        with TemporaryDirectory() as tmp:
+            stub = Path(tmp) / "gh_stub.py"
+            stub.write_text(
+                "import json, sys\n"
+                "q = sys.argv[-1]\n"
+                "hit = q == 'document_parsing_exception' or 'in:' in q\n"
+                "print(json.dumps([{'number': 7, 'state': 'open', 'title': 't', 'body': 'b'}] "
+                "if hit and sys.argv[2] == 'issues' else []))\n",
+                encoding="utf-8",
+            )
+            env = {**os.environ, "FILE_BUG_GH": f"{sys.executable} {stub}"}
+            result = subprocess.run(
+                [sys.executable, str(CLI), "search", "--repo", "elastic/kibana",
+                 "--token", "document_parsing_exception", "--words", "value list ip"],
+                capture_output=True, text=True, check=False, env=env,
+            )
+        self.assertEqual(result.returncode, 2, result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["action"], "ask")
+        self.assertEqual(payload["candidates"][0]["number"], 7)
+        self.assertTrue(payload["queries"])
+
+    def test_cli_search_create_when_everything_is_empty(self):
+        with TemporaryDirectory() as tmp:
+            stub = Path(tmp) / "gh_stub.py"
+            stub.write_text("print('[]')\n", encoding="utf-8")
+            env = {**os.environ, "FILE_BUG_GH": f"{sys.executable} {stub}"}
+            result = subprocess.run(
+                [sys.executable, str(CLI), "search", "--repo", "elastic/kibana", "--words", "x y"],
+                capture_output=True, text=True, check=False, env=env,
+            )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(json.loads(result.stdout)["action"], "create")
+
+
+class WriteLocalPathGuardTest(unittest.TestCase):
+    def _write(self, body):
+        def run_gh(argv):
+            return {"returncode": 0, "stdout": "https://github.com/o/r/issues/1", "stderr": ""}
+
+        return write_github(
+            action="create",
+            repo="elastic/kibana",
+            title="[T] [Bug] x",
+            body=body,
+            labels=["bug"],
+            number=None,
+            run_gh=run_gh,
+        )
+
+    def test_refuses_body_with_local_media_path(self):
+        for body in (
+            "Screenshot: /tmp/shot.png",
+            "![s](./shot.jpg)",
+            "Screenshot: $SESSION_DIR/screenshots/a.png",
+            "Recording: ~/flow.mp4",
+        ):
+            with self.assertRaises(ValueError, msg=body):
+                self._write(body)
+
+    def test_allows_embedded_urls_and_plain_text(self):
+        self.assertTrue(self._write("![s](https://github.com/user-attachments/assets/1)"))
+        self.assertTrue(self._write("<video src=\"https://img/flow.mp4\" controls></video>"))
+        self.assertTrue(self._write("The table shows 0 results"))
+
+
+class PrepareCommandTest(unittest.TestCase):
+    def test_prepare_runs_the_path_b_pipeline(self):
+        with TemporaryDirectory() as tmp:
+            session = Path(tmp) / "session"
+            shutil.copytree(TESTER_SESSION, session)
+            out = Path(tmp) / "out"
+            result = run_cli(
+                "prepare", "--session-dir", str(session), "--out-dir", str(out), "--index", "1"
+            )
+            payload = json.loads(result.stdout)
+            self.assertIn(result.returncode, (0, 2), result.stderr)
+            self.assertTrue((out / "finding.json").exists())
+            self.assertTrue((out / "body.md").exists())
+            self.assertEqual(
+                json.loads((out / "finding.json").read_text())["source"], "exploratory-tester"
+            )
+            for key in ("pack_gaps", "deployment", "release", "sensitive"):
+                self.assertIn(key, payload)
+
+    def test_prepare_fails_cleanly_without_findings(self):
+        with TemporaryDirectory() as tmp:
+            result = run_cli("prepare", "--session-dir", tmp, "--out-dir", str(Path(tmp) / "o"))
+            self.assertNotEqual(result.returncode, 0)
 
 
 SKILL = SKILL_ROOT / "SKILL.md"

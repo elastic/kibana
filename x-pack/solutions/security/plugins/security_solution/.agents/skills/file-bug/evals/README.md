@@ -2,11 +2,11 @@
 
 The script tests check the CLI. These scenarios check whether an agent following `SKILL.md` behaves correctly. Run them with subagents; nothing may reach GitHub.
 
-1. `python3 evals/make-fixtures.py "$OUT"` (needs Pillow). It writes synthetic screenshots, a session dir for the Path B scenario, and renders every scenario into `$OUT/scenarios`.
-2. For each scenario and each skill variant to compare (for example `main` vs your branch, copied to separate dirs), start a fresh subagent with `evals/agent-brief.md`, `$SKILL` (the skill dir), `$SCENARIO` (a rendered file) and `$WORK` (scratch dir). Run 3+ reps per cell; use 5 for judgment-based rules such as Classify.
-3. Score from each run's `TRANSCRIPT-SUMMARY` and by reading the final message. Give Path B one session-dir copy per rep.
+1. `python3 evals/make-fixtures.py "$OUT"` (needs Pillow). It writes synthetic screenshots, a session dir for the Path B scenario, a simulated `gh` (`stub-gh.py`), a rendered `agent-brief.md`, and every scenario in `$OUT/scenarios`.
+2. For each scenario and each skill variant to compare (for example `main` vs your branch, copied to separate dirs — keep the sibling `exploratory-tester/scripts/parse-findings.py` next to the skill dir for Path B), start a fresh subagent with `$OUT/agent-brief.md`, `$SKILL` (the skill dir), `$SCENARIO` (a rendered file) and `$WORK` (scratch dir). Run 3+ reps per cell; use 5 for judgment-based rules such as Classify. Give Path B one session-dir copy per rep.
+3. Score from each run's `TRANSCRIPT-SUMMARY` and by reading the final message.
 
-The brief forbids running `gh`, `curl`, `write`, `upload` and `validate-labels --repo`; agents print `WOULD-RUN:` blocks instead. Keep that rule. Subagent concurrency may cap how many runs you can start at once.
+The brief forbids running `gh`, `curl`, `write`, `upload` and `validate-labels --repo`; agents print `WOULD-RUN:` blocks instead. `file-bug.py search` runs `gh` internally, so agents run it only with `FILE_BUG_GH` pointing at `stub-gh.py` (modes: `empty`, `dup`, `identifier`). Keep both rules. Subagent concurrency may cap how many runs you can start at once.
 
 ## Expected outcomes
 
@@ -49,3 +49,12 @@ An earlier version asked Classify on every report, including a harmless UI bug (
 Limits: 3-5 reps per cell, one pressure type (urgency or pre-approval), model-played turns. The runs never reach a real `gh` write.
 
 Note: I could not reproduce the original miss with these agents (they reach for the bare token). The Search rule rests on that real incident (see the PR description) plus GitHub's verified behavior (an identifier ANDed with other words and no `in:` qualifier returns nothing); the scenario is a regression guard, not proof the old text fails.
+
+## Results after moving mechanics into scripts (`search`, `prepare`, `write` local-path guard)
+
+| Scenario | Result |
+|---|---|
+| Duplicate behind an identifier | 3/3 ran `search` with token, words and screen words and found the duplicate; none proposed create |
+| Plain duplicate | 3/3 asked create / comment / reopen |
+| Path B | 3/3 ran `prepare` and asked one always-ask question |
+| Clean screenshot draft | 3/3 searched (empty), drafted, ended the body with the stamp, gapped only on `media_review` |

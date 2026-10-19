@@ -1,24 +1,12 @@
 # Path B — exploratory-tester pack (load only for a named tester finding)
 
-Do **not** hand-map markdown. Parse, pick the finding, then run the checks:
+Do **not** hand-map markdown. One command runs the collect pipeline:
 
 ```bash
-python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/parse-findings.py \
-  --session-dir "$SESSION_DIR"
-python3 "$FILE_BUG" from-findings \
-  --jsonl "$SESSION_DIR/findings.jsonl" --title "$FINDING_TITLE" \
-  --out "$FINDING_JSON"
+python3 "$FILE_BUG" prepare --session-dir "$SESSION_DIR" --out-dir "$OUT" --title "$FINDING_TITLE"
 ```
 
-`from-findings` prints the **bare** finding (`source: exploratory-tester`); pass that file to later `--finding` flags. `--index` is **1-based** (`--index 2` is the second fileable finding) and skips `Observation` blocks; prefer `--title`. `CONFIG_JSON` is `$SESSION_DIR/config.json`.
-
-```bash
-python3 "$FILE_BUG" check-pack --finding "$FINDING_JSON" --config "$CONFIG_JSON"
-python3 "$FILE_BUG" infer-deployment --finding "$FINDING_JSON" --config "$CONFIG_JSON"
-python3 "$FILE_BUG" infer-release --finding "$FINDING_JSON" --config "$CONFIG_JSON"
-python3 "$FILE_BUG" scan-sensitive --finding "$FINDING_JSON"
-python3 "$FILE_BUG" render-body --finding "$FINDING_JSON" --config "$CONFIG_JSON" --out body.md
-```
+`prepare` runs `parse-findings.py`, `from-findings` (pick one finding; `--index` is **1-based** and skips `Observation` blocks — prefer `--title`), `check-pack`, `infer-deployment`, `infer-release`, `scan-sensitive` and `render-body` in order. It writes `$OUT/finding.json` (the bare finding, `source: exploratory-tester`) and `$OUT/body.md`, and prints the pack gaps, deployment, release and sensitive hits. Exit `2` means something needs the human; walk those gaps one at a time. Then `FINDING_JSON=$OUT/finding.json` and `CONFIG_JSON=$SESSION_DIR/config.json`. Each step is also a standalone command (`--help`) for one-off use.
 
 Then `infer-team` and `format-title` as in SKILL.md.
 

@@ -24,7 +24,7 @@ Show the full draft and **end the turn** before any `write` (SKILL.md step 3). `
 
 ## Headings
 
-Use the template headings. **Version** (stack). **Original install method** when known (`from source (dev)` for local/scout). **Steps to reproduce**, **Current behaviour (with screenshots and recordings)**, **Expected behavior**.
+Use the template headings. Each heading stays on its own line with the value on the next line (`**Version:**` then `9.3.0`); `check-draft` reads sections that way, so an inline `**Version:** 9.3.0` counts as a gap. **Version** (stack). **Original install method** when known (`from source (dev)` for local/scout). **Steps to reproduce**, **Current behaviour (with screenshots and recordings)**, **Expected behavior**.
 
 **Title** (new issues): `[<team name>] [Bug] <short symptom>`. Run `format-title` after you have a `Team:*` label (human or `infer-team`). If inference is `ask`, ask the human before create. Do not invent a team. If `format-title` exits 2, the symptom is too long — ask the human to shorten it. Do not file a clipped title.
 

@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import shlex
 import shutil
 import subprocess
 import tempfile
@@ -77,6 +78,11 @@ _SECURITY_RE = re.compile(
 )
 _MEDIA_REF_RE = re.compile(
     r"!\[[^\]]*\]\([^)]+\)|<video\b|\.(?:png|jpe?g|gif|webp|mp4|webm|mov)\b",
+    re.I,
+)
+_LOCAL_MEDIA_RE = re.compile(
+    r"(?<![\w/:.-])(?:\$SESSION_DIR/|~/|\.{1,2}/|/|[A-Za-z]:\\)[^\s()<>\"'`]*"
+    r"\.(?:png|jpe?g|gif|webp|mp4|webm|mov)\b",
     re.I,
 )
 _TITLE_FORMAT_RE = re.compile(r"^\[.+?\] \[Bug\] .+")
@@ -230,6 +236,65 @@ def with_source_labels(
 
 def with_create_labels(labels: list) -> list[str]:
     return _unique_labels(list(CREATE_LABELS), labels)
+
+
+def search_queries(token: str | None, words: str, screen: str | None = None) -> list[str]:
+    """Query set for the duplicate search.
+
+    GitHub's default search returns nothing when an identifier is ANDed with other
+    words and no in:title / in:body qualifier is present, so every identifier-plus-words
+    query is qualified, and the bare identifier is also run on its own.
+    """
+    token = (token or "").strip()
+    words = " ".join((words or "").split())
+    screen = " ".join((screen or "").split())
+    if token.startswith("-") or " " in token:
+        raise ValueError("--token must be a single identifier that does not start with '-'")
+    if not token and not words and not screen:
+        raise ValueError("search needs --token or --words")
+    queries: list[str] = []
+    if token:
+        queries.append(token)
+        if words:
+            queries += [f"{token} {words} in:title", f"{token} {words} in:body"]
+    for plain in dict.fromkeys(text for text in (words, screen) if text):
+        queries += [f"{plain} in:title", f"{plain} in:body"]
+    return list(dict.fromkeys(queries))
+
+
+def run_search(
+    *,
+    repo: str,
+    token: str | None,
+    words: str,
+    screen: str | None = None,
+    run_gh: GhRunner | None = None,
+) -> tuple[list[IssueMatch], list[dict]]:
+    """Run every query on issues (open and closed) and open PRs; a gh failure is an error, never `[]`."""
+    run_gh = run_gh or _default_run_gh
+    queries = search_queries(token, words, screen)
+    found: dict[int, IssueMatch] = {}
+    ran: list[dict] = []
+    for kind in ("issues", "prs"):
+        fields = "number,state,title,body" + (",isDraft" if kind == "prs" else "")
+        for query in queries:
+            argv = ["gh", "search", kind, "--repo", repo, "--limit", "20", "--json", fields]
+            if kind == "prs":
+                argv += ["--state", "open"]
+            argv.append(query)
+            result = run_gh(argv)
+            if result.get("returncode"):
+                detail = str(result.get("stderr") or "").strip() or "no stderr"
+                raise RuntimeError(f"gh search {kind} failed for {query!r}: {detail}")
+            try:
+                payload = json.loads(str(result.get("stdout") or "[]"))
+            except json.JSONDecodeError as error:
+                raise RuntimeError(f"gh search {kind} returned invalid JSON for {query!r}: {error}") from error
+            matches = parse_search_results(payload)
+            ran.append({"kind": kind, "query": query, "matches": len(matches)})
+            for match in matches:
+                found.setdefault(match.number, match)
+    return list(found.values()), ran
 
 
 def decide_write_path(matches: list[IssueMatch]) -> WritePath:
@@ -1500,6 +1565,9 @@ class PartialWrite(Exception):
 
 
 def _default_run_gh(argv: list) -> dict:
+    override = os.environ.get("FILE_BUG_GH")
+    if override and argv and argv[0] == "gh":
+        argv = [*shlex.split(override), *argv[1:]]
     completed = subprocess.run(
         argv,
         check=False,
@@ -1646,6 +1714,13 @@ def write_github(
         raise ValueError(
             f"draft looks security-sensitive: file it in {SECURITY_TEAM_REPO}, "
             "or pass --security-ok if the human confirmed it is not a vulnerability"
+        )
+
+    local_media = _LOCAL_MEDIA_RE.search(body)
+    if local_media:
+        raise ValueError(
+            f"body still references a local file ({local_media.group(0)}): run `upload`, "
+            "then `embed-uploads`, and write the embedded body"
         )
 
     labels = with_source_labels(labels, finding or {}, config)

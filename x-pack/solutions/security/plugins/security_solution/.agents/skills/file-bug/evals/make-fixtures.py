@@ -64,4 +64,7 @@ for scenario in sorted((HERE / "scenarios").glob("*.txt")):
     text = scenario.read_text(encoding="utf-8")
     text = text.replace("$FIXTURES", str(fixtures)).replace("$SESSION_DIR", str(session))
     (rendered / scenario.name).write_text(text, encoding="utf-8")
-print(f"fixtures and {len(list(rendered.glob('*.txt')))} scenarios written to {out}")
+shutil.copy(HERE / "stub-gh.py", out / "stub-gh.py")
+brief = (HERE / "agent-brief.md").read_text(encoding="utf-8")
+(out / "agent-brief.md").write_text(brief.replace("$STUB_GH", str(out / "stub-gh.py")), encoding="utf-8")
+print(f"fixtures, stub, brief and {len(list(rendered.glob('*.txt')))} scenarios written to {out}")

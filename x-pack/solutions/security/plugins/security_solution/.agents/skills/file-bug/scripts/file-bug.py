@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -29,6 +30,7 @@ from file_bug import (  # noqa: E402
     pack_gaps,
     parse_search_results,
     render_bug_body,
+    run_search,
     scan_sensitive,
     scan_wip,
     upload_evidence,
@@ -101,6 +103,28 @@ def _cmd_decide(args: argparse.Namespace) -> int:
             "action": path.action,
             "number": path.number,
             "candidates": [_match_payload(match) for match in path.candidates],
+        },
+        EXIT_ASK if path.action == "ask" else EXIT_OK,
+    )
+
+
+def _cmd_search(args: argparse.Namespace) -> int:
+    try:
+        matches, queries = run_search(
+            repo=args.repo,
+            token=_optional(args.token),
+            words=args.words or "",
+            screen=_optional(args.screen),
+        )
+    except (ValueError, RuntimeError) as error:
+        return _fail(str(error))
+    path = decide_write_path(matches)
+    return _emit(
+        {
+            "action": path.action,
+            "number": path.number,
+            "candidates": [_match_payload(match) for match in path.candidates],
+            "queries": queries,
         },
         EXIT_ASK if path.action == "ask" else EXIT_OK,
     )
@@ -225,6 +249,67 @@ def _cmd_from_findings(args: argparse.Namespace) -> int:
     if args.out:
         Path(args.out).write_text(json.dumps(finding), encoding="utf-8")
     return _emit(finding)
+
+
+_PARSE_FINDINGS = (
+    Path(__file__).resolve().parents[2] / "exploratory-tester" / "scripts" / "parse-findings.py"
+)
+
+
+def _cmd_prepare(args: argparse.Namespace) -> int:
+    session = Path(args.session_dir)
+    parsed = subprocess.run(
+        [sys.executable, str(_PARSE_FINDINGS), "--session-dir", str(session)],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if parsed.returncode:
+        return _fail(f"parse-findings failed: {(parsed.stderr or parsed.stdout).strip()}")
+    records = [
+        json.loads(line)
+        for line in (session / "findings.jsonl").read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    try:
+        finding = finding_from_jsonl(records, index=args.index, title=_optional(args.title))
+    except ValueError as error:
+        return _fail(str(error), EXIT_ASK)
+    config_path = session / "config.json"
+    config = json.loads(config_path.read_text(encoding="utf-8")) if config_path.exists() else {}
+    out = Path(args.out_dir)
+    out.mkdir(parents=True, exist_ok=True)
+    finding_path = out / "finding.json"
+    body_path = out / "body.md"
+    finding_path.write_text(json.dumps(finding), encoding="utf-8")
+    body_path.write_text(render_bug_body(finding, config), encoding="utf-8")
+    gaps = pack_gaps(finding, config)
+    deployment = infer_deployment(finding, config)
+    release = infer_release_label(finding, config)
+    sensitive = scan_sensitive(json.dumps(finding))
+    needs_input = bool(
+        gaps or deployment.status == "ask" or release.status == "ask" or sensitive
+    )
+    return _emit(
+        {
+            "finding": str(finding_path),
+            "body": str(body_path),
+            "config": str(config_path) if config_path.exists() else None,
+            "pack_gaps": gaps,
+            "deployment": {
+                "status": deployment.status,
+                "label": deployment.label,
+                "hint": deployment.hint,
+            },
+            "release": {
+                "status": release.status,
+                "label": release.label,
+                "hint": release.hint,
+            },
+            "sensitive": sensitive,
+        },
+        EXIT_ASK if needs_input else EXIT_OK,
+    )
 
 
 def _cmd_check_pack(args: argparse.Namespace) -> int:
@@ -407,6 +492,35 @@ def _build_parser() -> argparse.ArgumentParser:
         help='JSON file holding {"matches": [...]}, or - to read stdin',
     )
     decide.set_defaults(handler=_cmd_decide)
+
+    search = subparsers.add_parser(
+        "search",
+        help="Run the full duplicate search (issues + open PRs, split in:title/in:body) and decide",
+        description=(
+            "Runs the token alone, token plus words with in:title and in:body, and plain-language "
+            "words split in:title / in:body, on issues and open PRs, then decides. Exit 0 create, "
+            "2 ask (candidates), 1 on any gh failure (never treated as an empty result)."
+        ),
+    )
+    search.add_argument("--repo", required=True)
+    search.add_argument("--token", default=None, help="Distinctive identifier, e.g. an error name")
+    search.add_argument("--words", default="", help="Other distinctive words")
+    search.add_argument("--screen", default=None, help="Plain-language screen or control words")
+    search.set_defaults(handler=_cmd_search)
+
+    prepare = subparsers.add_parser(
+        "prepare",
+        help="Path B: parse-findings, pick one finding, check-pack, infer-*, scan-sensitive, render-body",
+        description=(
+            "Runs the Path B collect pipeline and writes finding.json and body.md to --out-dir. "
+            "Exit 2 when something needs the human (pack gaps, deployment/release ask, sensitive hits)."
+        ),
+    )
+    prepare.add_argument("--session-dir", required=True)
+    prepare.add_argument("--out-dir", required=True)
+    prepare.add_argument("--title", default=None)
+    prepare.add_argument("--index", type=int, default=None, help="1-based index into fileable findings")
+    prepare.set_defaults(handler=_cmd_prepare)
 
     labels = subparsers.add_parser("validate-labels", help="Keep only labels that exist")
     labels.add_argument("--labels", required=True, help="Comma-separated label names")
