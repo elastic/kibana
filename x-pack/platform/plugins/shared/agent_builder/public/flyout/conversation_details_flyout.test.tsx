@@ -161,7 +161,7 @@ describe('ConversationDetailsFlyoutSnapshot', () => {
     return conversationTemplatesService;
   };
 
-  const renderSnapshot = () => {
+  const renderSnapshot = (onNotFound?: () => void) => {
     const get = jest.fn();
     const conversationsService = { get } as unknown as ConversationsService;
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -177,6 +177,7 @@ describe('ConversationDetailsFlyoutSnapshot', () => {
           conversationsService={conversationsService}
           conversationTemplatesService={createTemplatesService()}
           titleId="title"
+          onNotFound={onNotFound}
         />,
         { wrapper: Wrapper }
       );
@@ -269,6 +270,20 @@ describe('ConversationDetailsFlyoutSnapshot', () => {
 
     await waitFor(() => expect(get).toHaveBeenCalledTimes(2));
     expect(screen.getByText('Refetched')).toBeInTheDocument();
+  });
+
+  it('reports a missing conversation once and stops polling', async () => {
+    const onNotFound = jest.fn();
+    const { get, renderResult } = renderSnapshot(onNotFound);
+    get.mockRejectedValue({ response: { status: 404 } });
+
+    renderResult();
+
+    await waitFor(() => expect(onNotFound).toHaveBeenCalledTimes(1));
+    await advance(15_000);
+
+    expect(get).toHaveBeenCalledTimes(1);
+    expect(onNotFound).toHaveBeenCalledTimes(1);
   });
 
   it('omits refetchConversation for the in-chat host', () => {

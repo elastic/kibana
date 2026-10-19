@@ -22,6 +22,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@kbn/react-query';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { Conversation } from '@kbn/agent-builder-common';
 import type { ConversationTemplateTabDefinition } from '@kbn/agent-builder-browser';
 import {
@@ -200,6 +201,7 @@ export interface ConversationDetailsFlyoutSnapshotProps {
   conversationsService: ConversationsService;
   conversationTemplatesService: ConversationTemplatesService;
   titleId: string;
+  onNotFound?: () => void;
 }
 
 /**
@@ -212,16 +214,26 @@ export const ConversationDetailsFlyoutSnapshot = ({
   conversationsService,
   conversationTemplatesService,
   titleId,
+  onNotFound,
 }: ConversationDetailsFlyoutSnapshotProps) => {
   const {
     data: conversation,
+    error,
     isLoading,
     refetch,
-  } = useQuery({
+  } = useQuery<Conversation, IHttpFetchError>({
     queryKey: ['conversation-details-flyout-snapshot', conversationId],
     queryFn: () => conversationsService.get({ conversationId }),
-    refetchInterval: POLL_INTERVAL_MS,
+    retry: (failureCount, httpError) => httpError?.response?.status !== 404 && failureCount < 3,
+    refetchInterval: (data, query) => (query.state.error ? false : POLL_INTERVAL_MS),
   });
+
+  const isNotFound = error?.response?.status === 404;
+  useEffect(() => {
+    if (isNotFound) {
+      onNotFound?.();
+    }
+  }, [isNotFound, onNotFound]);
 
   const refetchConversation = useCallback(async () => {
     await refetch();
