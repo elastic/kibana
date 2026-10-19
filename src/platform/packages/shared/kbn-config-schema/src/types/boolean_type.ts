@@ -14,7 +14,7 @@ import { Type } from './type';
 
 export class BooleanType extends Type<boolean> {
   constructor(options?: TypeOptions<boolean>) {
-    super(internals.boolean(), options);
+    super(() => internals.boolean(), options);
   }
 
   protected handleError(type: string, { value }: Record<string, any>) {
