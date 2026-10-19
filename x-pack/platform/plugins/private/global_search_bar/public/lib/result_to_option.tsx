@@ -6,11 +6,20 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
+import { EuiText } from '@elastic/eui';
 import type { EuiSelectableTemplateSitewideOption } from '@elastic/eui';
 import type { GlobalSearchResult } from '@kbn/global-search-plugin/common/types';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { Tag } from '@kbn/saved-objects-tagging-oss-plugin/common';
 import { ResultTagList } from '../components/result_tag_list';
+
+const truncatedMetaStyles = css`
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
 
 const cleanMeta = (str: string) => (str.charAt(0).toUpperCase() + str.slice(1)).replace(/-/g, ' ');
 
@@ -20,7 +29,17 @@ export const resultToOption = (
   getTagList?: SavedObjectTaggingPluginStart['ui']['getTagList']
 ): EuiSelectableTemplateSitewideOption => {
   const { id, title, url, icon, type, meta = {} } = result;
-  const { tagIds = [], categoryLabel = '' } = meta as { tagIds: string[]; categoryLabel: string };
+  const {
+    tagIds = [],
+    categoryLabel = '',
+    description,
+    trailingLabel,
+  } = meta as {
+    tagIds: string[];
+    categoryLabel: string;
+    description?: string;
+    trailingLabel?: string;
+  };
   // only displaying icons for applications and integrations
   const useIcon =
     type === 'application' ||
@@ -43,6 +62,29 @@ export const resultToOption = (
     type === 'application'
       ? [{ text: categoryLabel }]
       : [{ text: cleanMeta((meta.displayName as string) ?? type) }];
+
+  // Providers can show a subtitle under the title and a label on the right of the row.
+  if (typeof description === 'string' || typeof trailingLabel === 'string') {
+    option.meta =
+      typeof description === 'string'
+        ? [
+            {
+              text: description,
+              highlightSearchString: true,
+              // A long subtitle is truncated with an ellipsis. EUI puts the full text in the
+              // option's `title`, so it stays available as a tooltip.
+              css: truncatedMetaStyles,
+            },
+          ]
+        : [];
+    if (typeof trailingLabel === 'string') {
+      option.append = (
+        <EuiText size="xs" color="subdued">
+          {trailingLabel}
+        </EuiText>
+      );
+    }
+  }
 
   if (tagIds.length && getTagList) {
     const tagList = getTagList();
