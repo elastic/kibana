@@ -37,7 +37,12 @@ import type { AssetCriticalityService } from '../asset_criticality/asset_critica
 
 import type { RiskScoresPreviewResponse } from '../../../../common/api/entity_analytics';
 import type { CalculateScoresParams, RiskScoreBucket, RiskScoreCompositeBuckets } from '../types';
-import { DEFAULT_ALERT_SAMPLE_SIZE, MAX_INPUTS_COUNT, RIEMANN_ZETA_S_VALUE, RIEMANN_ZETA_VALUE } from './constants';
+import {
+  DEFAULT_ALERT_SAMPLE_SIZE,
+  MAX_INPUTS_COUNT,
+  RIEMANN_ZETA_S_VALUE,
+  RIEMANN_ZETA_VALUE,
+} from './constants';
 
 import { filterFromRange } from './helpers';
 import { applyScoreModifiers } from './apply_score_modifiers';
