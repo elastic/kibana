@@ -1020,7 +1020,7 @@ paths:
             type: string
       requestBody:
         content:
-          application/json; application/*+json; application/x-www-form-urlencoded; text/plain; */*:
+          'application/json; application/*+json; application/x-www-form-urlencoded; text/plain; */*':
             schema: {}
             examples:
               ingestEventsRequest:
@@ -1030,7 +1030,7 @@ paths:
       responses:
         '200':
           content:
-            application/json; application/*+json; application/x-www-form-urlencoded; text/plain; */*:
+            'application/json; application/*+json; application/x-www-form-urlencoded; text/plain; */*':
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_ingest_events_ack_response'
               examples:
@@ -1039,7 +1039,7 @@ paths:
           description: Connector HTTP 200 ack. No event is emitted. JSON or a plain-text body.
         '202':
           content:
-            application/json; application/*+json; application/x-www-form-urlencoded; text/plain; */*:
+            'application/json; application/*+json; application/x-www-form-urlencoded; text/plain; */*':
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_ingest_events_response'
               examples:
@@ -51693,7 +51693,7 @@ paths:
               postInstallByUploadRequestExample:
                 description: Upload a .zip or .tar.gz package archive (max 100MB)
                 value: <binary package archive>
-          application/gzip; application/zip:
+          'application/gzip; application/zip':
             examples:
               postInstallByUploadRequestExample:
                 description: Upload a .zip or .tar.gz package archive (max 100MB)
@@ -51704,7 +51704,7 @@ paths:
       responses:
         '200':
           content:
-            application/gzip; application/zip:
+            'application/gzip; application/zip':
               examples:
                 postInstallByUploadExample:
                   description: Package successfully installed from upload
@@ -51729,7 +51729,7 @@ paths:
           description: Successful response
         '400':
           content:
-            application/gzip; application/zip:
+            'application/gzip; application/zip':
               examples:
                 genericErrorResponseExample:
                   description: Example of a generic error response
@@ -51766,7 +51766,7 @@ paths:
           description: Bad Request
         '403':
           content:
-            application/gzip; application/zip:
+            'application/gzip; application/zip':
               examples:
                 insufficientPrivilegesExample:
                   description: Caller lacks a privilege required by a gated asset type in the archive
@@ -189902,7 +189902,7 @@ components:
       type: object
       properties:
         fill:
-          default: solid
+          default: gradient
           description: 'Area fill type: solid or gradient.'
           enum:
             - solid

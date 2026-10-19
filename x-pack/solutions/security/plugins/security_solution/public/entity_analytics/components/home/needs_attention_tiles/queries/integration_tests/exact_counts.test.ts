@@ -70,6 +70,7 @@ const loadFixture = async (client: Client) => {
         'entity.risk.calculated_score_norm': { type: 'double' },
         'entity.risk.calculated_level': KEYWORD,
         'entity.relationships.resolution.resolved_to': KEYWORD,
+        'entity.relationships.resolution.risk.calculated_score': { type: 'double' },
       },
     },
   });
