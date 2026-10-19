@@ -18,6 +18,8 @@ const input = {
   spaceId: 'default',
   ruleIds: ['rule-1', 'rule-2'],
   alertCount: 42,
+  throttleStrategy: 'per_status_interval' as const,
+  groupingMode: 'per_field' as const,
 };
 
 describe('workflowDispatchedTelemetryEvent', () => {
@@ -29,9 +31,11 @@ describe('workflowDispatchedTelemetryEvent', () => {
     expect(Object.keys(workflowDispatchedTelemetryEvent.schema).sort()).toEqual([
       'action_policy_id',
       'alert_count',
+      'grouping_mode',
       'rule_count',
       'rule_id',
       'space_id',
+      'throttle_strategy',
       'workflow_execution_id',
       'workflow_id',
     ]);
@@ -54,6 +58,8 @@ describe('buildWorkflowDispatchedEventData', () => {
       rule_id: ['rule-1', 'rule-2'],
       alert_count: 42,
       rule_count: 2,
+      throttle_strategy: 'per_status_interval',
+      grouping_mode: 'per_field',
     });
   });
 

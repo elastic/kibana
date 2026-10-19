@@ -6,7 +6,12 @@
  */
 
 import { lazySchema, z } from '@kbn/zod/v4';
-import { ID_MAX_LENGTH, ruleIdSchema } from '@kbn/alerting-v2-schemas';
+import {
+  groupingModeSchema,
+  ID_MAX_LENGTH,
+  ruleIdSchema,
+  throttleStrategySchema,
+} from '@kbn/alerting-v2-schemas';
 
 export const WORKFLOW_DISPATCHED_EBT_EVENT_TYPE = 'alerting_v2_workflow_dispatched' as const;
 
@@ -34,6 +39,8 @@ export const workflowDispatchedTelemetryDataSchema = lazySchema(() =>
       .int()
       .nonnegative()
       .describe('Number of distinct rules whose alerts appear in this dispatch.'),
+    throttle_strategy: throttleStrategySchema,
+    grouping_mode: groupingModeSchema,
   })
 );
 

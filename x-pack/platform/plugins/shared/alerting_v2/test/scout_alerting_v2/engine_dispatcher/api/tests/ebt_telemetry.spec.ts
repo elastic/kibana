@@ -84,6 +84,8 @@ apiTest.describe(
               name: 'EBT dispatch policy',
               description: 'Catch-all policy whose destination is a real workflow',
               destinations: [{ type: 'workflow', id: workflowId }],
+              grouping: { mode: 'per_alert' },
+              throttle: { strategy: 'every_time' },
             }),
           }
         );
@@ -114,6 +116,8 @@ apiTest.describe(
           rule_id: [rule.id],
           alert_count: 1,
           rule_count: 1,
+          throttle_strategy: 'every_time',
+          grouping_mode: 'per_alert',
         });
         expect(event.properties.workflow_execution_id.length).toBeGreaterThan(0);
       }

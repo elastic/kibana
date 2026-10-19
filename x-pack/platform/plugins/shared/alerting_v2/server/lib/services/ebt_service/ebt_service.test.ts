@@ -23,6 +23,8 @@ const data: WorkflowDispatchedEbtData = {
   rule_id: ['rule-1'],
   alert_count: 1,
   rule_count: 1,
+  throttle_strategy: 'on_status_change',
+  grouping_mode: 'per_alert',
 };
 
 describe('EbtService', () => {

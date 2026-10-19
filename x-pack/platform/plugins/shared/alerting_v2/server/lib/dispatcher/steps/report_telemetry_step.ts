@@ -11,7 +11,7 @@ import { EbtServiceToken } from '../../services/ebt_service/tokens';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import { WORKFLOW_DISPATCHED_EBT_EVENT_TYPE } from '../../telemetry/workflow_ebt_schema';
 import { buildWorkflowDispatchedEventData } from '../../telemetry/workflow_dispatched_ebt_event';
-import { DispatchOutcome, DispatchPlan } from '../state';
+import { DispatchOutcome, DispatchPlan, PolicyCatalog } from '../state';
 import type {
   ActionGroup,
   ActionGroupId,
@@ -34,7 +34,11 @@ export class ReportTelemetryStep implements DispatcherStep {
     state: Readonly<DispatcherPipelineState>,
     _: LoggerServiceContract
   ): Promise<DispatcherStepOutput> {
-    const { plan = DispatchPlan.empty(), outcome = DispatchOutcome.empty() } = state;
+    const {
+      plan = DispatchPlan.empty(),
+      outcome = DispatchOutcome.empty(),
+      policies = PolicyCatalog.empty(),
+    } = state;
 
     const groupsById = new Map<ActionGroupId, ActionGroup>(
       plan.toDispatch.map((group) => [group.id, group])
@@ -55,6 +59,8 @@ export class ReportTelemetryStep implements DispatcherStep {
           spaceId: group.spaceId,
           ruleIds: Object.keys(group.rules),
           alertCount: group.alerts.length,
+          throttleStrategy: policies.throttleStrategyOf(group.policyId),
+          groupingMode: policies.groupingModeOf(group.policyId),
         })
       );
     }

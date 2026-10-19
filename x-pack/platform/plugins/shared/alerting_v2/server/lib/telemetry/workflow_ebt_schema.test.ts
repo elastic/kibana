@@ -16,6 +16,8 @@ const validData = {
   rule_id: ['rule-1', 'rule-2'],
   alert_count: 42,
   rule_count: 2,
+  throttle_strategy: 'per_status_interval',
+  grouping_mode: 'per_field',
 };
 
 describe('workflowDispatchedTelemetryDataSchema', () => {
@@ -47,6 +49,36 @@ describe('workflowDispatchedTelemetryDataSchema', () => {
       ).toBe(false);
     }
   );
+
+  it.each(['on_status_change', 'per_status_interval', 'time_interval', 'every_time'])(
+    'accepts the %s throttle strategy',
+    (throttleStrategy) => {
+      expect(
+        workflowDispatchedTelemetryDataSchema.safeParse({
+          ...validData,
+          throttle_strategy: throttleStrategy,
+        }).success
+      ).toBe(true);
+    }
+  );
+
+  it.each(['per_alert', 'all', 'per_field'])('accepts the %s grouping mode', (groupingMode) => {
+    expect(
+      workflowDispatchedTelemetryDataSchema.safeParse({ ...validData, grouping_mode: groupingMode })
+        .success
+    ).toBe(true);
+  });
+
+  it('rejects an unknown throttle strategy or grouping mode', () => {
+    expect(
+      workflowDispatchedTelemetryDataSchema.safeParse({ ...validData, throttle_strategy: 'weekly' })
+        .success
+    ).toBe(false);
+    expect(
+      workflowDispatchedTelemetryDataSchema.safeParse({ ...validData, grouping_mode: 'per_host' })
+        .success
+    ).toBe(false);
+  });
 
   it('rejects a rule_id that is not an array', () => {
     expect(

@@ -9,6 +9,7 @@ import { createMockEbtService } from '../../services/ebt_service/ebt_service.moc
 import { WORKFLOW_DISPATCHED_EBT_EVENT_TYPE } from '../../telemetry/workflow_ebt_schema';
 import {
   createActionGroup,
+  createActionPolicy,
   createAlert,
   createDispatcherPipelineState,
   createStepLogger,
@@ -38,6 +39,16 @@ describe('ReportTelemetryStep', () => {
     const result = await step.execute(
       createDispatcherPipelineState({
         dispatch: [group],
+        policies: new Map([
+          [
+            'policy-1',
+            createActionPolicy({
+              id: 'policy-1',
+              grouping: { mode: 'per_field', fields: ['host.name'] },
+              throttle: { strategy: 'time_interval', interval: '1h' },
+            }),
+          ],
+        ]),
         dispatchDeliveries: [
           { actionGroupId: 'g1', workflowId: 'wf-1', workflowExecutionId: 'exec-1' },
         ],
@@ -55,7 +66,29 @@ describe('ReportTelemetryStep', () => {
       rule_id: ['rule-1', 'rule-2'],
       alert_count: 2,
       rule_count: 2,
+      throttle_strategy: 'time_interval',
+      grouping_mode: 'per_field',
     });
+  });
+
+  it('reports the default throttle strategy and grouping mode when the policy sets none', async () => {
+    const group = createActionGroup({ id: 'g1', policyId: 'policy-1' });
+
+    await step.execute(
+      createDispatcherPipelineState({
+        dispatch: [group],
+        policies: new Map([['policy-1', createActionPolicy({ id: 'policy-1' })]]),
+        dispatchDeliveries: [
+          { actionGroupId: 'g1', workflowId: 'wf-1', workflowExecutionId: 'exec-1' },
+        ],
+      }),
+      logger
+    );
+
+    expect(ebtService.reportEvent).toHaveBeenCalledWith(
+      WORKFLOW_DISPATCHED_EBT_EVENT_TYPE,
+      expect.objectContaining({ throttle_strategy: 'on_status_change', grouping_mode: 'per_alert' })
+    );
   });
 
   it('reports one event per destination when a group fans out to several workflows', async () => {

@@ -69,6 +69,22 @@ export const workflowDispatchedTelemetryEvent: EventTypeOpts<WorkflowDispatchedE
         optional: false,
       },
     },
+    throttle_strategy: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'The throttle strategy in effect for the action policy. Reflects the default when the policy sets none.',
+        optional: false,
+      },
+    },
+    grouping_mode: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'How the action policy groups alerts. Reflects the default when the policy sets none.',
+        optional: false,
+      },
+    },
   },
 };
 
@@ -79,6 +95,8 @@ export interface WorkflowDispatchedEventInput {
   spaceId: string;
   ruleIds: readonly string[];
   alertCount: number;
+  throttleStrategy: WorkflowDispatchedEbtData['throttle_strategy'];
+  groupingMode: WorkflowDispatchedEbtData['grouping_mode'];
 }
 
 /** Projects a successful workflow dispatch into its telemetry payload. */
@@ -89,6 +107,8 @@ export const buildWorkflowDispatchedEventData = ({
   spaceId,
   ruleIds,
   alertCount,
+  throttleStrategy,
+  groupingMode,
 }: WorkflowDispatchedEventInput): WorkflowDispatchedEbtData => {
   const distinctRuleIds = [...new Set(ruleIds)];
 
@@ -100,5 +120,7 @@ export const buildWorkflowDispatchedEventData = ({
     rule_id: distinctRuleIds,
     alert_count: alertCount,
     rule_count: distinctRuleIds.length,
+    throttle_strategy: throttleStrategy,
+    grouping_mode: groupingMode,
   };
 };
