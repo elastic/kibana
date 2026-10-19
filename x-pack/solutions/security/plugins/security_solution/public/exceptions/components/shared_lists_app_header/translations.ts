@@ -16,6 +16,13 @@ export {
   IMPORT_EXCEPTION_LIST_BUTTON,
 } from '../../translations/shared_list';
 
+export const CREATE_MORE_OPTIONS = i18n.translate(
+  'xpack.securitySolution.exceptions.appHeader.createMoreOptionsAriaLabel',
+  {
+    defaultMessage: 'More create options',
+  }
+);
+
 export const UPDATING = i18n.translate('xpack.securitySolution.exceptions.appHeader.updating', {
   defaultMessage: 'Updating...',
 });

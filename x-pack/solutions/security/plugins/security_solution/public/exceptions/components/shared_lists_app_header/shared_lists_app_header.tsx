@@ -80,22 +80,27 @@ export const SharedListsAppHeader = React.memo<SharedListsAppHeaderProps>(
         primaryActionItem: {
           id: 'create',
           label: i18n.CREATE_BUTTON,
-          iconType: 'chevronSingleDown',
+          // `iconType` is required by the app menu; an empty value renders the split button without an icon.
+          iconType: '',
+          run: (params) => onCreateSharedList(params?.returnFocus),
           testId: 'manageExceptionListCreateButton',
-          items: [
-            {
-              id: 'createSharedList',
-              label: i18n.CREATE_SHARED_LIST_BUTTON,
-              run: (params) => onCreateSharedList(params?.returnFocus),
-              testId: 'manageExceptionListCreateExceptionListButton',
-            },
-            {
-              id: 'createExceptionItem',
-              label: i18n.CREATE_BUTTON_ITEM_BUTTON,
-              run: onCreateExceptionItem,
-              testId: 'manageExceptionListCreateExceptionButton',
-            },
-          ],
+          splitButtonProps: {
+            secondaryButtonAriaLabel: i18n.CREATE_MORE_OPTIONS,
+            items: [
+              {
+                id: 'createSharedList',
+                label: i18n.CREATE_SHARED_LIST_BUTTON,
+                run: (params) => onCreateSharedList(params?.returnFocus),
+                testId: 'manageExceptionListCreateExceptionListButton',
+              },
+              {
+                id: 'createExceptionItem',
+                label: i18n.CREATE_BUTTON_ITEM_BUTTON,
+                run: onCreateExceptionItem,
+                testId: 'manageExceptionListCreateExceptionButton',
+              },
+            ],
+          },
         },
       };
     }, [canCreate, canImport, onCreateExceptionItem, onCreateSharedList, onImport]);

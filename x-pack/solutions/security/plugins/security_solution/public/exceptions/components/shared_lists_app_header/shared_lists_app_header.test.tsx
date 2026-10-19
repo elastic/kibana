@@ -111,11 +111,23 @@ describe('SharedListsAppHeader', () => {
     expect(screen.queryByTestId('importSharedExceptionList')).not.toBeInTheDocument();
   });
 
-  it('opens the create shared list flyout from the create menu', async () => {
+  it('opens the create shared list flyout from the main create button', async () => {
     const onCreateSharedList = jest.fn();
     renderHeader({ onCreateSharedList });
 
     await user.click(screen.getByTestId('manageExceptionListCreateButton'));
+
+    expect(onCreateSharedList).toHaveBeenCalled();
+    expect(
+      screen.queryByTestId('manageExceptionListCreateExceptionListButton')
+    ).not.toBeInTheDocument();
+  });
+
+  it('opens the create shared list flyout from the create menu', async () => {
+    const onCreateSharedList = jest.fn();
+    renderHeader({ onCreateSharedList });
+
+    await user.click(screen.getByTestId('manageExceptionListCreateButton-secondary-button'));
     await user.click(await screen.findByTestId('manageExceptionListCreateExceptionListButton'));
 
     expect(onCreateSharedList).toHaveBeenCalled();
@@ -125,7 +137,7 @@ describe('SharedListsAppHeader', () => {
     const onCreateExceptionItem = jest.fn();
     renderHeader({ onCreateExceptionItem });
 
-    await user.click(screen.getByTestId('manageExceptionListCreateButton'));
+    await user.click(screen.getByTestId('manageExceptionListCreateButton-secondary-button'));
     await user.click(await screen.findByTestId('manageExceptionListCreateExceptionButton'));
 
     expect(onCreateExceptionItem).toHaveBeenCalled();

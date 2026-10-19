@@ -165,7 +165,7 @@ export const EXCEPTION_COMMENT_TEXT_AREA = '[data-test-subj="newExceptionItemCom
 
 // Shared Exception List Management Page
 export const MANAGE_EXCEPTION_CREATE_BUTTON_MENU =
-  '[data-test-subj="manageExceptionListCreateButton"]';
+  '[data-test-subj="manageExceptionListCreateButton-secondary-button"]';
 
 export const MANAGE_EXCEPTION_CREATE_BUTTON_EXCEPTION =
   '[data-test-subj="manageExceptionListCreateExceptionButton"]';
