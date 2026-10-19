@@ -198,7 +198,9 @@
       "ciLabels": [
         "evals:nightshift-investigations"
       ],
-      "stepTimeoutInMinutes": 60
+      "defaultModelGroups": [
+        "eis/anthropic-claude-5.5-sonnet"
+      ]
     },
     {
       "id": "llm-tasks",

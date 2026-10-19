@@ -11,7 +11,7 @@ import { tags } from '@kbn/evals';
 import type { ConversationRound } from '@kbn/agent-builder-common';
 import { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { evaluate } from '../../src/evaluate';
-import { loadInvestigationDataset } from './datasets';
+import { loadInvestigationDataset, resolveInvestigationDatasetSource } from './datasets';
 import { getDatasetCustomContext, replaceCustomContext } from './custom_context';
 import {
   ANTI_LEAKAGE_EVALUATOR,
@@ -42,7 +42,11 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: suiteTags }, (
       inferenceClient,
       evaluationConnector,
     }) => {
-      const dataset = await loadInvestigationDataset(evalsClient);
+      const datasetSource = resolveInvestigationDatasetSource();
+      const dataset = await loadInvestigationDataset(evalsClient, datasetSource);
+      log.info(
+        `Grading ${datasetSource.kind} dataset "${dataset.name}" (${dataset.examples.length} examples)`
+      );
       // The judges score with the evaluation connector, not the model under test.
       const judges = createInvestigationJudges({
         inferenceClient: inferenceClient.bindTo({ connectorId: evaluationConnector.id }),
@@ -83,12 +87,12 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: suiteTags }, (
           { timeout: 60_000 }
         )
         .toBe(true);
-      await replaceCustomContext(fetch, getDatasetCustomContext(dataset.name));
+      await replaceCustomContext(fetch, getDatasetCustomContext(dataset));
       const [experiment] = await executorClient.runExperiment(
         {
           name: 'Nightshift graded investigation traces',
           datasets: [dataset],
-          trustUpstreamDataset: Boolean(process.env.NIGHTSHIFT_DATASET_NAME),
+          trustUpstreamDataset: datasetSource.kind === 'stored',
           concurrency,
           metadata: { concurrency },
           task: (example) => runInvestigation(fetch, example, connector),
@@ -133,7 +137,7 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: suiteTags }, (
           );
           expect(conversation.rounds.length).toBeGreaterThan(0);
           expect(conversation.rounds).toHaveLength(output.conversation_round_count ?? 0);
-          if (!process.env.NIGHTSHIFT_EXAMPLES_FILE && !process.env.NIGHTSHIFT_DATASET_NAME) {
+          if (datasetSource.kind === 'file' && !datasetSource.path) {
             assertSuccessfulSandboxCommand(conversation.rounds);
           }
           expect(output.traceId).toMatch(/^[a-f0-9]{32}$/);

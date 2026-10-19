@@ -2,7 +2,7 @@
 
 Evaluation suite for [Nightshift investigations](../../plugins/nightshift_investigations).
 
-By default every eval runs, locally and in CI, as long as sandbox credentials are available. Set `NIGHTSHIFT_DATASETS` to run just one. The smoke eval checks seed data loading and score ingestion. The trace-only eval runs the real manual investigation workflow on file-based or stored questions and persists its report, conversation and full agent trace. Its single placeholder score is **ungraded**. It does not measure investigation quality or establish execution success.
+By default every eval runs, locally and in CI, as long as sandbox credentials are available. Set `NIGHTSHIFT_DATASETS` to run just one. The smoke eval checks seed data loading and score ingestion. The trace-only eval runs the real manual investigation workflow on stored or file-based questions, persists its report, conversation and full agent trace, and grades each run with five LLM judges: `goal_pass`, `rca_cause_completeness`, `rca_anti_leakage`, `truthfulness` and `decision_tree_helpfulness`. When Customer-0 telemetry is configured it grades the stored [default dataset](#default-dataset) `ns-investigation-golden-1910`; otherwise it falls back to the bundled synthetic questions.
 
 ## Running the suite
 
@@ -134,11 +134,12 @@ finish and verify concurrent commands can allocate before launching a larger dat
 
 #### What the run does
 
-The native framework still requires an evaluation endpoint in its configuration; the command
-reuses the target endpoint for that metadata. This suite never invokes an LLM evaluator or judge.
-The CODE evaluator `ungraded_placeholder` always returns one, uses neutral direction, and states
-that no quality evaluation was performed. Execution errors, missing reports, incomplete traces, missing
-examples or missing persisted scores fail independent acceptance checks even if that score is one.
+Each run is graded by the five RCA judges in [`judges/`](evals/investigation/judges), which call
+the evaluation endpoint (`--judge`), not the model under test. Judges return a normalized 0–1
+score, or abstain when a dimension doesn't apply (for example `goal_pass` and
+`rca_cause_completeness` without a reference answer). Execution errors, missing reports, incomplete
+traces, missing examples or missing persisted scores fail independent acceptance checks whatever
+the judges scored.
 Recovered tool errors remain visible in the evidence. Trace acceptance checks their complete
 payloads, including model calls rejected by schema validation before tool execution.
 The bundled synthetic cases also require a successful sandbox command (exit code zero), so an
@@ -205,14 +206,12 @@ synthetic fixture. No golden-source derivation or LangSmith identifier is needed
 Tags must satisfy the shared dataset API schema, including its 64-character limit and 20-tag
 total after adding the required `nightshift` and `ungraded` tags.
 
-Acceptance verifies expected example/repetition coverage, one persisted placeholder per run,
-completed investigations, saved report/conversation identifiers, complete linked agent traces,
-and no LLM calls in the evaluator traces. The terminal prints experiment, dataset, case,
+Acceptance verifies expected example/repetition coverage, one persisted score per judge per run,
+completed investigations, saved report/conversation identifiers, linked agent traces, and judge
+inference spans in the evaluator traces. The terminal prints experiment, dataset, case,
 investigation, conversation and trace IDs for sharing. Inspect them in the evaluations UI under
 `/app/management/ai/evals/experiments/<experiment-id>`; per-example links add
 `?dataset_id=<dataset-id>&example_id=<example-index>&trace_id=<agent-trace-id>`.
-Historical full-grader runs are not acceptance evidence for this runner. Graders, native trace
-metrics, automatic provisioning and generalized CI defaults are deferred.
 
 `evals start` restarts Scout automatically when connectors, the server config set,
 `TRACING_EXPORTERS`, `GCS_CREDENTIALS` or any variable the hook exports changes. Switching
@@ -222,6 +221,26 @@ the investigation engine and sandbox, and the smoke eval runs on that server too
 Use `evals run` to repeat a run with unchanged startup settings. Without sandbox credentials (for
 example a profile that has no `sandbox` block), an unset `NIGHTSHIFT_DATASETS` runs only the smoke
 eval and prints a warning.
+
+## Default dataset
+
+With no `NIGHTSHIFT_DATASET_NAME` or `NIGHTSHIFT_EXAMPLES_FILE`, the trace-only eval grades the
+stored dataset `ns-investigation-golden-1910` (`DEFAULT_INVESTIGATION_DATASET_NAME` in
+[`datasets.ts`](evals/investigation/datasets.ts)) whenever remote telemetry is configured, which
+the `nightshift.telemetry` block does in CI and in the dev-vault profile. Without telemetry its
+investigations would have nothing to query, so the run falls back to the bundled synthetic file.
+The log line `Grading stored dataset "…"` at the start of the run shows which one was picked.
+
+It holds 10 resolved Customer-0 incidents harvested from Rootly, each with a causal reference
+answer and the telemetry evidence used to confirm it. The dataset is **actively managed** (tag
+`actively-managed`): its questions query live Customer-0 telemetry, which is retained for roughly
+110–120 days, so its oldest cases age out. Its owners (tags `owner:vermapratyush`,
+`owner:srdjanll`) refresh it before the date in its `refresh-by:` tag by publishing a dated copy
+(`ns-investigation-golden-<date>`) without the expired cases and bumping
+`DEFAULT_INVESTIGATION_DATASET_NAME`. PR comparisons pair examples with the `main` baseline, so a
+bump resets that baseline; land it on its own so the reset is visible.
+
+The dataset carries the `customer0` tag, so it runs with the Customer-0 custom context.
 
 ## Stored investigation datasets and concurrency
 
@@ -246,7 +265,7 @@ The investigation spec sets the existing `runExperiment` concurrency option to *
 Scout config reserves **21 normal-task slots** (42 raw cost units): sixteen for investigation
 workflows and five for background work. The workflow executes its agent inline, without a second
 Task Manager task. The spec uses the same concurrency constant for trace checks and for calculating
-the timeout from example/repetition batches and the 20-minute investigation deadline, with two
+the timeout from example/repetition batches and the 30-minute investigation deadline, with two
 additional minutes per batch for trace ingestion.
 
 To change parallelism, edit the spec's concurrency constant and ensure the Scout config and
@@ -257,7 +276,7 @@ restarting a shared local stack.
 
 ## Remote telemetry investigations
 
-Use the same `trace-only` selection, dataset loader, investigation task, placeholder evaluator and
+Use the same `trace-only` selection, dataset loader, investigation task, RCA judges and
 trace acceptance checks to investigate an operator-configured Elasticsearch cluster. The telemetry
 source is independent of the evaluations profile: the sandbox queries the remote cluster, while
 the profile still selects where experiment results and agent traces are persisted.
@@ -314,8 +333,8 @@ restricted key first. For connectivity acceptance, inspect the persisted agent t
 actual Elasticsearch response: confirm it queried the configured endpoint through the telemetry
 connector and returned data from the intended remote/index and time range without query or remote
 failures. Record the tested commit, experiment and trace links, plus sanitized query evidence. A
-`connector_id`, exit code zero, completed investigation or placeholder score alone does not prove
-connectivity. This workflow remains ungraded and requires no reference answer or quality threshold.
+`connector_id`, exit code zero, completed investigation or judge score alone does not prove
+connectivity.
 
 Leave the remote settings unset for the bundled synthetic examples;
 synthetic execution continues to need no telemetry connector. The former `remote` selection and
@@ -486,6 +505,8 @@ against.
 | Variable              | Effect                                                                                                                                                                                                                                                                                              |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `NIGHTSHIFT_DATASETS` | Comma-separated dataset ids (whitespace trimmed). Smoke dataset ids such as `synthetic-smoke` select seeded evals; `trace-only` selects the file-driven investigations; they can be combined, e.g. `synthetic-smoke,trace-only`. Unset or `all` runs every eval when sandbox credentials are present, except that a stored `NIGHTSHIFT_DATASET_NAME` defaults to trace-only when selection is unset. Without them, unset runs only smoke with a warning, while an explicit `all` or `trace-only` fails before any test runs, even when Scout is reused. Unknown ids fail early. |
+| `NIGHTSHIFT_DATASET_NAME` | A stored dataset to grade instead of the [default dataset](#default-dataset). Selects trace-only when `NIGHTSHIFT_DATASETS` is unset. |
+| `NIGHTSHIFT_EXAMPLES_FILE` | A file of investigation questions to grade instead of the default dataset. Point it at `evals/investigation/synthetic.json` for the bundled synthetic questions. |
 | `SELECTED_EVALUATORS` | Standard `@kbn/evals` filter, by evaluator name (`documents_restored`, `timestamps_replayed`).                                                                                                                                                                                                      |
 | `GCS_CREDENTIALS`     | Service account JSON Elasticsearch uses to reach the seed-data bucket. Read access is enough to run the suite.                                                                                                                                                                                      |
 
@@ -507,11 +528,15 @@ as `nightshift-investigations`.
   `.buildkite/scripts/steps/evals/run_suite.sh` reads it and runs the suite's `scoutHook` on it
   before starting Scout (failing the step if it cannot be read), and Buildkite agents must be able
   to reach the sandbox-api host.
-- **On a PR:** add the `evals:nightshift-investigations` label plus a `models:` label (for example
-  `models:eis/anthropic-claude-5.5-sonnet`) to choose which model investigates. Without a `models:`
-  label the suite is skipped, like other suites that run the real agent.
+- **What it grades:** the [default dataset](#default-dataset), since the secret's
+  `nightshift.telemetry` block configures Customer-0 telemetry.
+- **On a PR:** add the `evals:nightshift-investigations` label. Investigations run on Sonnet 5.5
+  (`defaultModelGroups`) unless a `models:` label picks other models. The PR comment compares the
+  run with the latest `main` run of the suite.
 - **Weekly:** a step in [`llm_evals.yml`](../../../../../.buildkite/pipelines/evals/llm_evals.yml)
-  runs it against the weekly core models (`weekly_eis_core_models`).
+  runs it on Sonnet 5.5 with three repetitions per case. That run is the regression baseline.
+- **Timeout:** the 120-minute default step budget. Two batches of 16 investigations at the
+  30-minute investigation deadline need about 70 minutes plus Scout startup.
 - **Failures** are posted to `#nightshift-alerts`, resolved from `slackChannel` in the suite entry.
 - **Scores** reach the golden cluster automatically, through `EVAL_KBN_URL` in CI.
 

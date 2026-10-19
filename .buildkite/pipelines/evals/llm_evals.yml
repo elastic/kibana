@@ -235,7 +235,10 @@ steps:
           EVAL_SUITE_ID: 'nightshift-investigations'
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
-          EVAL_MODEL_GROUPS: *weekly_eis_core_models
+          # The model investigations ship with. Investigations are long and token-heavy, so the weekly
+          # regression run grades one model with repetitions instead of fanning out across models.
+          EVAL_MODEL_GROUPS: 'eis/anthropic-claude-5.5-sonnet'
+          EVAL_REPETITIONS: '3'
           # Enables the investigation engine and sandbox when the ci-prod config has a sandbox block.
           EVAL_SERVER_CONFIG_SET: 'evals_nightshift_investigations'
         timeout_in_minutes: 60

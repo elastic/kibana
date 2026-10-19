@@ -33,19 +33,46 @@ const assertDistinctCaseIds = (examples: InvestigationExample[]) => {
   }
 };
 
-/** Loads a stored dataset by name or falls back to a file of investigation questions. */
-export const loadInvestigationDataset = async (
-  client: Pick<EvalsClient, 'getDatasetByName'>,
-  {
-    datasetName = process.env.NIGHTSHIFT_DATASET_NAME,
-    examplesFile = process.env.NIGHTSHIFT_EXAMPLES_FILE,
-  }: { datasetName?: string; examplesFile?: string } = {}
-): Promise<EvaluationDataset<InvestigationExample>> => {
+/**
+ * The stored dataset graded when no dataset is selected and Customer-0 telemetry is configured.
+ * Its questions query live Customer-0 telemetry, so it's actively managed: as cases age out of the
+ * retention window it's republished as a dated copy, and this name moves with it. Bumping it resets
+ * the baseline that PR comparisons use.
+ */
+export const DEFAULT_INVESTIGATION_DATASET_NAME = 'ns-investigation-golden-1910';
+
+export type InvestigationDatasetSource =
+  | { kind: 'stored'; name: string }
+  | { kind: 'file'; path?: string };
+
+/**
+ * Picks the dataset a run grades: an explicit stored name or file, else the default stored
+ * dataset when remote telemetry is configured, else the bundled synthetic questions. Without
+ * telemetry the default dataset's investigations would find nothing to query.
+ */
+export const resolveInvestigationDatasetSource = (
+  env: Record<string, string | undefined> = process.env
+): InvestigationDatasetSource => {
+  const datasetName = env.NIGHTSHIFT_DATASET_NAME?.trim();
+  const examplesFile = env.NIGHTSHIFT_EXAMPLES_FILE?.trim();
   if (datasetName && examplesFile) {
     throw new Error('Choose either NIGHTSHIFT_DATASET_NAME or NIGHTSHIFT_EXAMPLES_FILE, not both');
   }
-  if (!datasetName) return readInvestigationDataset(examplesFile);
+  if (datasetName) return { kind: 'stored', name: datasetName };
+  if (examplesFile) return { kind: 'file', path: examplesFile };
+  return env.NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL
+    ? { kind: 'stored', name: DEFAULT_INVESTIGATION_DATASET_NAME }
+    : { kind: 'file' };
+};
 
+/** Loads the stored dataset or file of investigation questions that `source` selects. */
+export const loadInvestigationDataset = async (
+  client: Pick<EvalsClient, 'getDatasetByName'>,
+  source: InvestigationDatasetSource = resolveInvestigationDatasetSource()
+): Promise<EvaluationDataset<InvestigationExample>> => {
+  if (source.kind === 'file') return readInvestigationDataset(source.path);
+
+  const datasetName = source.name;
   const dataset = await client.getDatasetByName(datasetName);
   if (!dataset) throw new Error(`Investigation dataset not found: ${datasetName}`);
   const examples = z

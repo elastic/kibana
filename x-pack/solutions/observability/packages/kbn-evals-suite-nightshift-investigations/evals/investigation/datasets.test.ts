@@ -8,7 +8,12 @@
 import { mkdtempSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
-import { loadInvestigationDataset, readInvestigationDataset } from './datasets';
+import {
+  DEFAULT_INVESTIGATION_DATASET_NAME,
+  loadInvestigationDataset,
+  readInvestigationDataset,
+  resolveInvestigationDatasetSource,
+} from './datasets';
 
 describe('stored investigation dataset', () => {
   const dataset = {
@@ -28,7 +33,9 @@ describe('stored investigation dataset', () => {
 
   it('loads the selected name and preserves example IDs, labels and operator metadata', async () => {
     const client = { getDatasetByName: jest.fn().mockResolvedValue(dataset) };
-    await expect(loadInvestigationDataset(client, { datasetName: dataset.name })).resolves.toEqual({
+    await expect(
+      loadInvestigationDataset(client, { kind: 'stored', name: dataset.name })
+    ).resolves.toEqual({
       ...dataset,
       id: undefined,
     });
@@ -37,27 +44,49 @@ describe('stored investigation dataset', () => {
 
   it('fails before running when the dataset is missing or has duplicate case IDs', async () => {
     const client = { getDatasetByName: jest.fn().mockResolvedValue(null) };
-    await expect(loadInvestigationDataset(client, { datasetName: dataset.name })).rejects.toThrow(
-      'Investigation dataset not found'
-    );
+    await expect(
+      loadInvestigationDataset(client, { kind: 'stored', name: dataset.name })
+    ).rejects.toThrow('Investigation dataset not found');
     client.getDatasetByName.mockResolvedValue({
       ...dataset,
       examples: [...dataset.examples, ...dataset.examples],
     });
-    await expect(loadInvestigationDataset(client, { datasetName: dataset.name })).rejects.toThrow(
-      'Duplicate case_id'
-    );
+    await expect(
+      loadInvestigationDataset(client, { kind: 'stored', name: dataset.name })
+    ).rejects.toThrow('Duplicate case_id');
+  });
+});
+
+describe('investigation dataset selection', () => {
+  const TELEMETRY = { NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL: 'https://telemetry.example:443' };
+
+  it('grades the default stored dataset when remote telemetry is configured', () => {
+    expect(resolveInvestigationDatasetSource(TELEMETRY)).toEqual({
+      kind: 'stored',
+      name: DEFAULT_INVESTIGATION_DATASET_NAME,
+    });
   });
 
-  it('rejects ambiguous file and stored dataset selections before fetching', async () => {
-    const client = { getDatasetByName: jest.fn() };
-    await expect(
-      loadInvestigationDataset(client, {
-        datasetName: dataset.name,
-        examplesFile: '/tmp/examples.json',
+  it('falls back to the bundled synthetic questions without remote telemetry', () => {
+    expect(resolveInvestigationDatasetSource({})).toEqual({ kind: 'file' });
+  });
+
+  it('prefers an explicit stored dataset or file over the default', () => {
+    expect(
+      resolveInvestigationDatasetSource({ ...TELEMETRY, NIGHTSHIFT_DATASET_NAME: ' operator ' })
+    ).toEqual({ kind: 'stored', name: 'operator' });
+    expect(
+      resolveInvestigationDatasetSource({ ...TELEMETRY, NIGHTSHIFT_EXAMPLES_FILE: '/tmp/x.json' })
+    ).toEqual({ kind: 'file', path: '/tmp/x.json' });
+  });
+
+  it('rejects ambiguous file and stored dataset selections', () => {
+    expect(() =>
+      resolveInvestigationDatasetSource({
+        NIGHTSHIFT_DATASET_NAME: 'operator',
+        NIGHTSHIFT_EXAMPLES_FILE: '/tmp/examples.json',
       })
-    ).rejects.toThrow('Choose either NIGHTSHIFT_DATASET_NAME or NIGHTSHIFT_EXAMPLES_FILE');
-    expect(client.getDatasetByName).not.toHaveBeenCalled();
+    ).toThrow('Choose either NIGHTSHIFT_DATASET_NAME or NIGHTSHIFT_EXAMPLES_FILE');
   });
 });
 
