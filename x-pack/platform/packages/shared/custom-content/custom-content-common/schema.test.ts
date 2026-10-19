@@ -93,6 +93,37 @@ describe('customContentPanelUpdateSchema', () => {
     ).toBe(true);
   });
 
+  it('accepts regenerateEsql with a prompt and an index', () => {
+    expect(
+      customContentPanelUpdateSchema.safeParse({
+        embeddable_id: 'p1',
+        prompt: 'Also show the error rate',
+        regenerateEsql: true,
+        index: 'logs-*',
+      }).success
+    ).toBe(true);
+  });
+
+  it('rejects regenerateEsql without a prompt', () => {
+    expect(
+      customContentPanelUpdateSchema.safeParse({
+        embeddable_id: 'p1',
+        esqlQuery: 'FROM logs-*',
+        regenerateEsql: true,
+      }).success
+    ).toBe(false);
+  });
+
+  it('rejects an index longer than the limit', () => {
+    expect(
+      customContentPanelUpdateSchema.safeParse({
+        embeddable_id: 'p1',
+        prompt: 'Show errors',
+        index: 'x'.repeat(257),
+      }).success
+    ).toBe(false);
+  });
+
   it('accepts a null esqlQuery to clear the query', () => {
     expect(
       customContentPanelUpdateSchema.safeParse({ embeddable_id: 'p1', esqlQuery: null }).success

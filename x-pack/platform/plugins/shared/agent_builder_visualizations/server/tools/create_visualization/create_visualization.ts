@@ -92,6 +92,14 @@ const attachmentHasDataField = z
     '(optional, custom content only) Omit to keep the panel\'s current data state. true: ensure the panel has data — keeps the stored query, generating one from "query" only when the panel has none. false: drop the stored query so the panel has no data. A supplied esql always means data: it wins over false. Ignored for Lens and Vega. Never pass false to get past a failed query generation.'
   );
 
+const attachmentRegenerateEsqlField = z
+  .boolean()
+  .nullable()
+  .optional()
+  .describe(
+    '(optional, custom content only) true: the edit changes what the panel shows, so the stored query is regenerated from "query", keeping the parts the request does not change. Omit for layout, copy and style edits, which keep the stored query. A supplied esql wins. Ignored for Lens and Vega.'
+  );
+
 const requiredChartTypeField = z
   .nativeEnum(SupportedChartType)
   .describe(
@@ -150,6 +158,7 @@ const attachmentTargetSchema = z.object({
     ),
   esql: optionalEsqlField,
   has_data: attachmentHasDataField,
+  regenerate_esql: attachmentRegenerateEsqlField,
 });
 
 const targetSchema = z
@@ -241,6 +250,7 @@ const readTarget = (target: CreateVisualizationTarget) => ({
     target.type === 'custom_content' || target.type === 'attachment'
       ? target.has_data ?? undefined
       : undefined,
+  regenerateEsql: target.type === 'attachment' ? target.regenerate_esql ?? undefined : undefined,
 });
 
 const NO_QUERY_HINT =
@@ -260,7 +270,7 @@ You say what to build via "target", discriminated by "target.type":
     )}).
 - "vega" for a custom Vega-Lite specification when no Lens chart type can express the request, e.g. small multiples / faceting, layered or combination charts (bars plus an overlaid line), scatter / bubble plots with an encoded size dimension, or custom tooltips/encodings. "chartType" is optional for Vega and acts only as a styling hint.
 - "custom_content" for an HTML/CSS layout neither chart grammar can express — a KPI scorecard with status badges, a health or status board, a panel mixing narrative text with live values. The HTML is generated server-side from your natural-language "query"; never author markup yourself. Omit "esql" to generate a query; pass "has_data": false only when the panel genuinely has no data (a banner, a legend, a note).
-- "attachment" with "attachment_id" to update an existing visualization; edits keep its renderer. "chartType" is optional on updates. Omit "esql" and "has_data" to keep the current data state; pass "has_data": false to drop a stored query, or "has_data": true to ensure the panel has one (a stored query is kept, one is generated only when the panel has none).
+- "attachment" with "attachment_id" to update an existing visualization; edits keep its renderer. "chartType" is optional on updates. Omit "esql" and "has_data" to keep the current data state; pass "has_data": false to drop a stored query, or "has_data": true to ensure the panel has one (a stored query is kept, one is generated only when the panel has none). For a custom content edit that changes what the panel shows, pass "regenerate_esql": true: the stored query is regenerated from "query", keeping the parts the request does not change; layout, copy and style edits keep the stored query.
 
 Only pass "time_range" when the user explicitly named a time window (e.g. "last 7 days", "May 20–24"). Do not set it otherwise: create applies a data-aware default, and edits keep the existing range.
 
@@ -285,7 +295,8 @@ Ground first: make sure the target index exists and every field you reference is
       { query: nlQuery, index, target, time_range: requestedTimeRange },
       { esClient, modelProvider, logger, events, attachments }
     ) => {
-      const { attachmentId, requestedRenderer, chartType, esql, hasData } = readTarget(target);
+      const { attachmentId, requestedRenderer, chartType, esql, hasData, regenerateEsql } =
+        readTarget(target);
       try {
         // Step 1: Read any existing attachment so edits reuse its renderer + config.
         let existingData: VisualizationAttachmentData | undefined;
@@ -331,6 +342,7 @@ Ground first: make sure the target index exists and every field you reference is
             await resolveCustomContentQuery({
               esql,
               hasData,
+              regenerate: regenerateEsql,
               existingQuery: existingEsql,
               isNewPanel: !existingData,
               generate: async (existingQueries) => {

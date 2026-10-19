@@ -55,7 +55,20 @@ const customContentUpdateFields = {
     .nullable()
     .optional()
     .describe(
-      'ES|QL query. Omit to keep the existing query. Pass null to remove it entirely. Build it with the generate_esql tool rather than writing it yourself — the server runs the query to sample its schema and rejects the whole operation if Elasticsearch refuses it.'
+      'An ES|QL query the user supplied verbatim; it replaces the current one. Omit to keep the existing query. Pass null to remove it entirely. Do not write a query yourself: to change the data, set regenerateEsql to true and describe the change in "prompt". The server runs the query to sample its schema and rejects the whole operation if Elasticsearch refuses it.'
+    ),
+  regenerateEsql: z
+    .boolean()
+    .optional()
+    .describe(
+      'Set true when the edit changes what the panel shows: the server regenerates the ES|QL query from "prompt", keeping the parts the request does not change. Omit for layout, copy and style edits, which keep the current query. Requires "prompt".'
+    ),
+  index: z
+    .string()
+    .max(256)
+    .optional()
+    .describe(
+      'Exact index, alias, or data stream to generate the query from. Pass it with regenerateEsql whenever known.'
     ),
 } as const;
 
@@ -92,6 +105,10 @@ const hasSomethingToChange = ({
 
 const atLeastOneChange = { message: 'At least one of prompt or esqlQuery must be provided.' };
 
+const regenerateNeedsPrompt = {
+  message: 'regenerateEsql requires a prompt describing the change.',
+};
+
 /**
  * Edit input for the chat tool. A conversation can hold one context attachment per panel, so the
  * target has to be explicit — without it the tool would act on whichever panel was attached first.
@@ -107,6 +124,10 @@ export const customContentPanelUpdateSchema = z
       ),
     ...customContentUpdateFields,
   })
-  .refine(hasSomethingToChange, atLeastOneChange);
+  .refine(hasSomethingToChange, atLeastOneChange)
+  .refine(
+    ({ prompt, regenerateEsql }) => !regenerateEsql || prompt !== undefined,
+    regenerateNeedsPrompt
+  );
 
 export type CustomContentPanelUpdate = z.output<typeof customContentPanelUpdateSchema>;

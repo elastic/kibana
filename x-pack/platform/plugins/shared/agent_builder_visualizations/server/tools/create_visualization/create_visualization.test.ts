@@ -73,6 +73,7 @@ const attachmentTarget = (
     chartType?: SupportedChartType;
     esql?: string | null;
     has_data?: boolean | null;
+    regenerate_esql?: boolean | null;
   } = {}
 ) => ({ type: 'attachment' as const, attachment_id: attachmentId, ...rest });
 
@@ -170,6 +171,24 @@ describe('createVisualizationTool schema', () => {
     expect(lens.success).toBe(true);
     if (lens.success) {
       expect(lens.data.target).not.toHaveProperty('has_data');
+    }
+  });
+
+  it('accepts regenerate_esql only on attachment targets', () => {
+    expect(
+      schema.safeParse({
+        query: 'also split by os',
+        target: attachmentTarget('existing', { regenerate_esql: true }),
+      }).success
+    ).toBe(true);
+
+    const customContent = schema.safeParse({
+      query: 'a status board',
+      target: { ...customContentTarget(), regenerate_esql: true },
+    });
+    expect(customContent.success).toBe(true);
+    if (customContent.success) {
+      expect(customContent.data.target).not.toHaveProperty('regenerate_esql');
     }
   });
 
@@ -894,6 +913,52 @@ describe('createVisualizationTool handler', () => {
         expect.objectContaining({ esqlQuery: undefined, hasExistingQuery: true })
       );
       expect(result.results[0].data.esql).toBe('FROM logs | STATS count() BY host');
+    });
+
+    it('regenerates the stored query when an update passes regenerate_esql: true', async () => {
+      mockGenerateEsql.mockResolvedValue({
+        query: 'FROM logs | STATS count() BY host, os',
+      });
+
+      const { result } = await runHandler(
+        {
+          query: 'also split by operating system',
+          index: 'logs',
+          target: attachmentTarget('att-1', { regenerate_esql: true }),
+        },
+        { attachments: dataAttachment() }
+      );
+
+      expect(mockGenerateEsql).toHaveBeenCalledWith(
+        expect.objectContaining({
+          nlQuery: 'also split by operating system',
+          index: 'logs',
+          existingQueries: ['FROM logs | STATS count() BY host'],
+        })
+      );
+      expect(mockResolveTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          esqlQuery: 'FROM logs | STATS count() BY host, os',
+          existingTemplate: '<div>old</div>',
+          hasExistingQuery: false,
+        })
+      );
+      expect(result.results[0].data.esql).toBe('FROM logs | STATS count() BY host, os');
+    });
+
+    it('lets a supplied esql win over regenerate_esql', async () => {
+      await runHandler(
+        {
+          query: 'use my query',
+          target: attachmentTarget('att-1', {
+            esql: 'FROM logs | STATS errors = COUNT() BY host',
+            regenerate_esql: true,
+          }),
+        },
+        { attachments: dataAttachment() }
+      );
+
+      expect(mockGenerateEsql).not.toHaveBeenCalled();
     });
 
     it('re-samples when an update supplies a different esql', async () => {
