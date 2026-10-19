@@ -6,6 +6,7 @@
  */
 
 export { componentsPack, componentsPrimitives } from './src/pack';
+export type { AppLinkTarget, ComponentsRenderContext } from './src/lib';
 export {
   type ActionsNode,
   type CodeNode,
@@ -13,6 +14,7 @@ export {
   type DividerNode,
   type FieldsNode,
   type HeaderNode,
+  type LinkNode,
   type MarkdownNode,
   type QuoteNode,
   type SectionNode,
@@ -23,6 +25,7 @@ export {
   divider,
   fields,
   header,
+  link,
   markdown,
   quote,
   section,

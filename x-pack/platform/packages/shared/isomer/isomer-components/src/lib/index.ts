@@ -6,7 +6,12 @@
  */
 
 export { clampEscapedMrkdwn } from './clamp_escaped_mrkdwn';
-export { definePrimitive, type ComponentsPackTypes } from './define';
+export {
+  definePrimitive,
+  type AppLinkTarget,
+  type ComponentsPackTypes,
+  type ComponentsRenderContext,
+} from './define';
 export { componentIcon, type IconPaint } from './icon';
 export { oneLine, plainText } from './plain_text';
 export {

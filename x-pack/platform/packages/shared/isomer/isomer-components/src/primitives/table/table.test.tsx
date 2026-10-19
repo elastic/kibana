@@ -16,7 +16,7 @@ import type { TableNode } from '.';
 import { MAX_TABLE_CELLS } from './table';
 
 const { surfaces, validate } = createIsomerRuntime({ packs: [componentsPack] });
-const { Code, Composition, Fields, Markdown, Table, toComposition } =
+const { Code, Composition, Fields, Link, Markdown, Table, toComposition } =
   buildJsxShim(componentsPrimitives);
 
 const view = (node: TableNode) => validate({ type: 'view', body: [node] });
@@ -319,9 +319,13 @@ describe('table', () => {
       <>
         <Markdown text="Errors by service." />
         <Code language="esql">FROM logs-* | STATS COUNT(*) BY service.name</Code>
+        <Link app="discover" path="#/">
+          Open in Discover
+        </Link>
       </>
     );
-    expect(blockTypes(esql)).toEqual(['rich_text', 'rich_text']);
+    expect(blockTypes(esql)).toEqual(['rich_text', 'rich_text', 'section']);
+    expect(JSON.stringify(render(esql))).toContain(`<${baseUrl}/app/discover#/|Open in Discover>`);
     expect(
       blockTypes(
         <Table
