@@ -34,6 +34,7 @@ const expectedFor = (
 });
 
 const completed = (docs: Array<Record<string, unknown>>): AutomaticImportRunOutput => ({
+  runId: 'vendor_a_1',
   status: 'completed',
   lines: docs.map((doc) => ({ doc })),
 });
@@ -111,6 +112,7 @@ describe('scoreRun', () => {
 
   it('scores lines that failed to parse as all expected fields missed', () => {
     const output: AutomaticImportRunOutput = {
+      runId: 'vendor_a_1',
       status: 'completed',
       lines: [{ doc: { user: { name: 'jdoe' } } }, { error: 'grok failed' }],
     };
@@ -128,6 +130,7 @@ describe('scoreRun', () => {
 
   it('scores a failed analysis as zero', () => {
     const output: AutomaticImportRunOutput = {
+      runId: 'vendor_a_1',
       status: 'failed',
       error: 'Analysis failed',
       lines: [],

@@ -15,7 +15,6 @@ import type {
   AutomaticImportExampleExpected,
   AutomaticImportExampleInput,
   AutomaticImportRunOutput,
-  SimulatedLine,
 } from './types';
 
 export type CreateCriteriaEvaluator = (criteria: EvaluationCriterion[]) => Evaluator;
@@ -28,6 +27,12 @@ export interface ExtraFieldJudgeParams {
 
 /** Resolves to the keys (see `extraFieldKey`) of the extra fields that are correct. */
 export type JudgeExtraFields = (params: ExtraFieldJudgeParams) => Promise<ReadonlySet<string>>;
+
+export interface ExtraFieldJudge {
+  readonly judgeExtraFields: JudgeExtraFields;
+  /** The judge's model, recorded on the scores that use the judge. */
+  readonly getModel: NonNullable<Evaluator['getModel']>;
+}
 
 const MAX_EXAMPLES_PER_FIELD = 5;
 /** Verdicts on borderline fields flip between calls, even at temperature 0, so the majority decides. */
@@ -186,17 +191,21 @@ const judge = async (
 export const createExtraFieldJudge = (
   ecsFields: EcsFields,
   createCriteriaEvaluator: CreateCriteriaEvaluator
-): JudgeExtraFields => {
-  // Each evaluator gets its own copy of the run output, but the copies share `lines`, so the
-  // judge runs once per run and every score sees the same verdicts.
-  const verdicts = new WeakMap<readonly SimulatedLine[], Promise<ReadonlySet<string>>>();
-  return (params) => {
-    const cached = verdicts.get(params.output.lines);
-    if (cached) {
-      return cached;
-    }
-    const pending = judge(params, ecsFields, createCriteriaEvaluator);
-    verdicts.set(params.output.lines, pending);
-    return pending;
+): ExtraFieldJudge => {
+  // Several scores judge the same run, so the judge runs once per run and they share its verdicts.
+  const verdicts = new Map<string, Promise<ReadonlySet<string>>>();
+  return {
+    judgeExtraFields: (params) => {
+      const { runId } = params.output;
+      const cached = verdicts.get(runId);
+      if (cached) {
+        return cached;
+      }
+      const pending = judge(params, ecsFields, createCriteriaEvaluator);
+      verdicts.set(runId, pending);
+      return pending;
+    },
+    // Building an evaluator doesn't call the model; it only carries the judge's model.
+    getModel: () => createCriteriaEvaluator([]).getModel?.(),
   };
 };

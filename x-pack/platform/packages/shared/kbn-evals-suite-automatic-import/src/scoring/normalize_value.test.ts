@@ -22,6 +22,13 @@ describe('normalizeValue', () => {
     );
   });
 
+  it('reads timestamps without a zone as UTC, whatever the machine time zone', () => {
+    expect(normalizeValue('2024-01-04 06:26:20')).toBe('2024-01-04T06:26:20.000Z');
+    expect(normalizeValue('2024-01-04T06:26')).toBe('2024-01-04T06:26:00.000Z');
+    expect(normalizeValue('2024-01-04 06:26:20 UTC')).toBe('2024-01-04T06:26:20.000Z');
+    expect(normalizeValue('2024-01-04T06:26:20-0500')).toBe('2024-01-04T11:26:20.000Z');
+  });
+
   it('compares IPv6 addresses in canonical form', () => {
     expect(normalizeValue('2001:0db8:0000:0000:0000:0000:0000:0001')).toBe(
       normalizeValue('2001:db8::1')

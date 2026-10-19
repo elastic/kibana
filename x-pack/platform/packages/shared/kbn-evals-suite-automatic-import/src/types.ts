@@ -59,6 +59,8 @@ export type SimulatedLine =
   | { readonly doc?: undefined; readonly error: string };
 
 export interface AutomaticImportRunOutput {
+  /** Unique per run (the run's integration ID), so scores of the same run can share work. */
+  readonly runId: string;
   readonly status: 'completed' | 'failed';
   readonly error?: string;
   /** One entry per input line, in the same order; empty when the analysis failed. */

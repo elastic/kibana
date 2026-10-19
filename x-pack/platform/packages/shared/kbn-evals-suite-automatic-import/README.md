@@ -14,7 +14,7 @@ The suite starts Kibana with the `evals_automatic_import` Scout config set, whic
 
 Each data stream has one description, and like real users' descriptions they're a mix: some terse ("Firewall logs"), some naming the product, and some detailed about the product and format.
 
-Each example is a full analysis that takes minutes (an analysis that hasn't finished after 20 minutes fails), so the suite runs 3 at a time by default; `--concurrency` overrides it. Scores for the same data stream vary from run to run, so each example runs 3 times by default; `EVAL_REPETITIONS=1` gives a quicker, noisier run. Set `AUTOMATIC_IMPORT_DATASETS=vendor_a_signon,vendor_k_app` to run only some data streams.
+Each example is a full analysis that takes minutes, so the suite runs 3 at a time by default; `--concurrency` overrides it. Scores for the same data stream vary from run to run, so each example runs 3 times by default; `EVAL_REPETITIONS=1` gives a quicker, noisier run. Set `AUTOMATIC_IMPORT_DATASETS=vendor_a_signon,vendor_k_app` to run only some data streams.
 
 To run the suite on a pull request, add these labels:
 
@@ -46,7 +46,7 @@ Every score is per data stream; the report averages them, so each data stream co
 - **Latency**: seconds the analysis took, from its trace, so time waiting for a Task Manager slot doesn't count. Lower is better, but a failed analysis can be fast, so read it alongside run success.
 - **Tokens**: input and output tokens across the analysis's model calls. Automatic Import runs the agent in one trace tagged with the integration ID, so the suite can find it.
 
-A failed analysis scores 0 on every accuracy score, and a sample that failed to parse counts as missing all its expected fields.
+A failed analysis scores 0 on every accuracy score, and a sample that failed to parse counts as missing all its expected fields. Each run is one attempt: the suite takes the first failure as final instead of waiting for Task Manager to retry, and an analysis that Task Manager stops after 30 minutes counts as failed.
 
 ## Comparing runs
 
@@ -67,7 +67,7 @@ Any change to the data files or the scoring rules changes the scores too, so re-
 The rules are in [`src/scoring/field_rules.ts`](src/scoring/field_rules.ts).
 
 - Every ECS field in the expected output is scored by value, except pipeline and framework metadata (`ecs.version`, `event.original`, `tags`, `data_stream.*`, and similar), `event.timezone` (which integrations set from a setting, not the log), GeoIP and ASN enrichment, `related.*`, and fields a sample lists in `unscoredFields`. A sample lists a field there when its expected value isn't stable, or when the integration hard-codes it instead of parsing it from the line: `observer.vendor` and `observer.product` are unscored on every line that doesn't contain their expected value. Non-ECS fields, such as the vendor namespace, aren't scored.
-- Values are normalized, so numbers and numeric strings, timestamp precision and offsets, IPv6 notation, and array order don't cause false mismatches.
+- Values are normalized, so numbers and numeric strings, timestamp precision and offsets (a timestamp without one is read as UTC), IPv6 notation, and array order don't cause false mismatches.
 - Arrays of objects, such as the ECS `nested` field `email.attachments`, are scored per sub-field: `email.attachments.file.name` is compared as the list of every attachment's name.
 - ECS allows some field groups for the same entity, so they count as the same field: `client.*` and `source.*`, `server.*` and `destination.*`, and `host.*` and `observer.*`. For example, `source.ip` matches an expected `client.ip`.
 - A generated field that the expected output has with a different value is wrong. A generated field that the expected output doesn't have at all is an extra field. Mapping more of the log is good, so an extra field counts as correct if:

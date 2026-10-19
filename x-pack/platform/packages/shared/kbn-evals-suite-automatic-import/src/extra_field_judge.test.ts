@@ -18,6 +18,8 @@ const ECS_FIELDS: EcsFields = new Map([
   ['event.outcome', { type: 'keyword' }],
 ]);
 
+const JUDGE_MODEL = { id: 'openai-gpt-5.4', family: 'gpt', provider: 'openai' };
+
 const params: ExtraFieldJudgeParams = {
   input: {
     datasetId: 'vendor_a_signon',
@@ -26,6 +28,7 @@ const params: ExtraFieldJudgeParams = {
     lines: ['line one', 'line two'],
   },
   output: {
+    runId: 'vendor_a_1',
     status: 'completed',
     lines: [
       { doc: { user: { name: 'jdoe' }, source: { ip: 'not-an-ip' }, event: { provider: 'UI' } } },
@@ -46,12 +49,10 @@ const createJudge = (verdicts: Record<string, 'PASS' | 'FAIL'>) => {
     kind: 'LLM',
     direction: 'maximize',
     evaluate,
+    getModel: () => JUDGE_MODEL,
   }));
-  return {
-    judge: createExtraFieldJudge(ECS_FIELDS, createCriteriaEvaluator),
-    createCriteriaEvaluator,
-    evaluate,
-  };
+  const { judgeExtraFields, getModel } = createExtraFieldJudge(ECS_FIELDS, createCriteriaEvaluator);
+  return { judge: judgeExtraFields, getModel, createCriteriaEvaluator, evaluate };
 };
 
 describe('createExtraFieldJudge', () => {
@@ -77,7 +78,11 @@ describe('createExtraFieldJudge', () => {
 
     await judge({
       ...params,
-      output: { status: 'completed', lines: [{ doc: { event: { outcome: 'success' } } }] },
+      output: {
+        runId: 'vendor_a_2',
+        status: 'completed',
+        lines: [{ doc: { event: { outcome: 'success' } } }],
+      },
       expected: { samples: [{ expected: {} }] },
     });
 
@@ -92,10 +97,25 @@ describe('createExtraFieldJudge', () => {
   it('votes on a run once, even though each evaluator gets its own copy of the output', async () => {
     const { judge, evaluate } = createJudge({ 'user.name': 'PASS', 'event.provider': 'PASS' });
 
-    await judge({ ...params, output: { ...params.output } });
-    await judge({ ...params, output: { ...params.output } });
+    await judge({ ...params, output: structuredClone(params.output) });
+    await judge({ ...params, output: structuredClone(params.output) });
 
     expect(evaluate).toHaveBeenCalledTimes(3);
+  });
+
+  it('votes again for a different run', async () => {
+    const { judge, evaluate } = createJudge({ 'user.name': 'PASS', 'event.provider': 'PASS' });
+
+    await judge(params);
+    await judge({ ...params, output: { ...params.output, runId: 'vendor_a_2' } });
+
+    expect(evaluate).toHaveBeenCalledTimes(6);
+  });
+
+  it("reports the criteria evaluator's model as the judge model", () => {
+    const { getModel } = createJudge({});
+
+    expect(getModel()).toEqual(JUDGE_MODEL);
   });
 
   it('keeps a field only when most of the votes pass it', async () => {

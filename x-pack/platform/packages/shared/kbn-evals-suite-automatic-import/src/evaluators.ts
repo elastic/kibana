@@ -7,7 +7,7 @@
 
 import type { Evaluator, EvaluationResult } from '@kbn/evals';
 import type { AutomaticImportExample } from './dataset';
-import type { JudgeExtraFields } from './extra_field_judge';
+import type { ExtraFieldJudge } from './extra_field_judge';
 import type { EcsFields } from './scoring/ecs_fields';
 import { CATEGORIZATION_FIELDS } from './scoring/field_rules';
 import type { RunScore } from './scoring/score_run';
@@ -19,25 +19,26 @@ type AutomaticImportEvaluator = Evaluator<AutomaticImportExample, AutomaticImpor
 const MAX_MISPLACED_IN_EXPLANATION = 5;
 
 /**
- * Pass `judgeExtraFields` for scores that count generated fields the reference doesn't set;
- * without it those fields are left out of the result, which recall and run success don't use.
+ * Pass `judge` for scores that count generated fields the reference doesn't set; without it
+ * those fields are left out of the result, which recall and run success don't use.
  */
 const createScoreEvaluator = (
   name: string,
   ecsFields: EcsFields,
   toResult: (score: RunScore, output: AutomaticImportRunOutput) => EvaluationResult,
-  judgeExtraFields?: JudgeExtraFields
+  judge?: ExtraFieldJudge
 ): AutomaticImportEvaluator => ({
   name,
-  kind: judgeExtraFields ? 'LLM' : 'CODE',
+  kind: judge ? 'LLM' : 'CODE',
   direction: 'maximize',
+  ...(judge && { getModel: judge.getModel }),
   evaluate: async ({ input, output, expected }) => {
     if (!expected) {
       return { score: null, explanation: 'Example has no expected output' };
     }
     // The evals framework aborts the whole experiment when an evaluator throws.
-    const judged: { correctExtras: ReadonlySet<string> } | { error: unknown } = judgeExtraFields
-      ? await judgeExtraFields({ input, output, expected }).then(
+    const judged: { correctExtras: ReadonlySet<string> } | { error: unknown } = judge
+      ? await judge.judgeExtraFields({ input, output, expected }).then(
           (correctExtras) => ({ correctExtras }),
           (error: unknown) => ({ error })
         )
@@ -68,19 +69,19 @@ const pickFields = (ecsFields: EcsFields, names: readonly string[]): EcsFields =
 /** ECS F1, recall, and precision, categorization F1, and run success for one data stream. */
 export const createAutomaticImportEvaluators = (
   ecsFields: EcsFields,
-  judgeExtraFields: JudgeExtraFields
+  judge: ExtraFieldJudge
 ): AutomaticImportEvaluator[] => [
   createScoreEvaluator(
     'ECS F1',
     ecsFields,
     (score) => ({ score: f1(score), explanation: describeRecallAndPrecision(score) }),
-    judgeExtraFields
+    judge
   ),
   createScoreEvaluator(
     'Categorization F1',
     pickFields(ecsFields, CATEGORIZATION_FIELDS),
     (score) => ({ score: f1(score), explanation: describeRecallAndPrecision(score) }),
-    judgeExtraFields
+    judge
   ),
   createScoreEvaluator('ECS recall', ecsFields, (score) => ({
     score: recall(score),
@@ -96,7 +97,7 @@ export const createAutomaticImportEvaluators = (
       score: precision(score),
       explanation: `${score.matchedGeneratedFields}/${score.generatedFields} generated ECS fields correct, including ${score.correctExtraFields}/${score.extraFields} that the reference doesn't set`,
     }),
-    judgeExtraFields
+    judge
   ),
   createScoreEvaluator('Run success', ecsFields, (score, { status, error }) => {
     if (status !== 'completed') {

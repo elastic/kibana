@@ -15,8 +15,11 @@ const INTEGRATIONS_PATH = '/api/automatic_import/integrations';
 const VERSION_HEADERS = { 'elastic-api-version': '1' };
 
 const POLL_INTERVAL_MS = 10_000;
-/** Normal analyses take 3 to 7 minutes; a stuck one would otherwise wait out Task Manager's retries. */
-const ANALYSIS_TIMEOUT_MS = 20 * 60_000;
+/**
+ * Task Manager stops the analysis after 30 minutes and marks it cancelled; this only catches a
+ * status that never changes, so it can't cut off an analysis that would still finish.
+ */
+const ANALYSIS_TIMEOUT_MS = 35 * 60_000;
 /** Kibana requests have no timeout of their own, so one stuck request could stall the run. */
 const REQUEST_TIMEOUT_MS = 60_000;
 
@@ -65,13 +68,13 @@ export class AutomaticImportClient {
     const { integrationId } = params;
     try {
       const output = await this.run(params);
-      return { ...output, traceId: await this.findTraceId(integrationId) };
+      return { ...output, runId: integrationId, traceId: await this.findTraceId(integrationId) };
     } finally {
       await this.deleteIntegration(integrationId);
     }
   }
 
-  private async run(params: AnalyzeParams): Promise<AutomaticImportRunOutput> {
+  private async run(params: AnalyzeParams): Promise<Omit<AutomaticImportRunOutput, 'runId'>> {
     const { integrationId, dataStreamId } = params;
     try {
       const pipeline = await this.generatePipeline(params);

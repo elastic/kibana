@@ -15,18 +15,25 @@ const ECS_FIELDS: EcsFields = new Map(
   ['event.category', 'event.outcome', 'user.name', 'source.ip'].map((name) => [name, {}])
 );
 
+const JUDGE_MODEL = { id: 'openai-gpt-5.4', family: 'gpt', provider: 'openai' };
+
+const findEvaluator = (name: string, judgeExtraFields: JudgeExtraFields) => {
+  const evaluator = createAutomaticImportEvaluators(ECS_FIELDS, {
+    judgeExtraFields,
+    getModel: () => JUDGE_MODEL,
+  }).find((candidate) => candidate.name === name);
+  if (!evaluator) {
+    throw new Error(`No evaluator named ${name}`);
+  }
+  return evaluator;
+};
+
 const evaluate = async (
   name: string,
   output: AutomaticImportRunOutput,
   judgeExtraFields: JudgeExtraFields = async () => new Set()
-) => {
-  const evaluator = createAutomaticImportEvaluators(ECS_FIELDS, judgeExtraFields).find(
-    (candidate) => candidate.name === name
-  );
-  if (!evaluator) {
-    throw new Error(`No evaluator named ${name}`);
-  }
-  return evaluator.evaluate({
+) =>
+  findEvaluator(name, judgeExtraFields).evaluate({
     input: { datasetId: 'vendor_a_signon', title: 'Vendor A', description: 'Logs', lines: ['x'] },
     output,
     expected: {
@@ -41,11 +48,21 @@ const evaluate = async (
     },
     metadata: { cohort: 'recent', format: 'json' },
   });
-};
 
 describe('createAutomaticImportEvaluators', () => {
+  it('records the judge model only on the scores that use the judge', () => {
+    const noJudge: JudgeExtraFields = async () => new Set();
+
+    expect(findEvaluator('ECS F1', noJudge).getModel?.()).toEqual(JUDGE_MODEL);
+    expect(findEvaluator('Categorization F1', noJudge).getModel?.()).toEqual(JUDGE_MODEL);
+    expect(findEvaluator('ECS precision', noJudge).getModel?.()).toEqual(JUDGE_MODEL);
+    expect(findEvaluator('ECS recall', noJudge).getModel).toBeUndefined();
+    expect(findEvaluator('Run success', noJudge).getModel).toBeUndefined();
+  });
+
   it('scores categorization on the event categorization fields only', async () => {
     const result = await evaluate('Categorization F1', {
+      runId: 'vendor_a_1',
       status: 'completed',
       lines: [{ doc: { event: { category: ['authentication'], outcome: 'failure' } } }],
     });
@@ -55,6 +72,7 @@ describe('createAutomaticImportEvaluators', () => {
 
   it('counts extra fields the judge marks correct toward precision', async () => {
     const output: AutomaticImportRunOutput = {
+      runId: 'vendor_a_1',
       status: 'completed',
       lines: [
         {
@@ -80,6 +98,7 @@ describe('createAutomaticImportEvaluators', () => {
 
   it('leaves judged scores empty when the judge fails, without failing the others', async () => {
     const output: AutomaticImportRunOutput = {
+      runId: 'vendor_a_1',
       status: 'completed',
       lines: [{ doc: { user: { name: 'jdoe' } } }],
     };
@@ -96,6 +115,7 @@ describe('createAutomaticImportEvaluators', () => {
 
   it('fails a completed run whose pipeline maps no ECS fields', async () => {
     const result = await evaluate('Run success', {
+      runId: 'vendor_a_1',
       status: 'completed',
       lines: [{ doc: { message: 'x', ecs: { version: '9.3.0' } } }],
     });
