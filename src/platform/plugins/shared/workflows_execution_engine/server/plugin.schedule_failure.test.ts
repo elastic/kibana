@@ -78,11 +78,16 @@ const createWorkflow = (id: string): WorkflowExecutionEngineModel => ({
 
 const scheduleError = new Error('api key grant failed');
 
-const failedUpdate = (id: string) => ({
+const failedUpdate = (id: string, message = scheduleError.message) => ({
   id,
   status: ExecutionStatus.FAILED,
-  error: { type: 'TaskScheduleError', message: scheduleError.message },
+  error: { type: 'TaskScheduleError', message },
   finishedAt: expect.any(String),
+});
+
+const notFound = (id: string) => ({
+  tag: 'err' as const,
+  error: { id, type: 'task', error: { statusCode: 404, error: 'Not Found', message: 'Not found' } },
 });
 
 describe('task scheduling failure', () => {
@@ -92,6 +97,27 @@ describe('task scheduling failure', () => {
   const request = {} as KibanaRequest;
 
   const createdExecutionId = (): string => mockCreateWorkflowExecution.mock.calls[0][0].id;
+  const bulkCreatedIds = (): string[] =>
+    mockBulkCreateWorkflowExecutions.mock.calls[0][0].map(({ id }: { id: string }) => id);
+
+  const bulkScheduleTwoWorkflows = () => {
+    mockGetWorkflowExecutionStates.mockResolvedValue(
+      new Map([
+        ['default:wf-a', { enabled: true }],
+        ['default:wf-b', { enabled: true }],
+      ])
+    );
+    mockBulkCreateWorkflowExecutions.mockImplementation(async (executions: Array<{ id: string }>) =>
+      executions.map(({ id }) => ({ id }))
+    );
+    return pluginStart.bulkScheduleWorkflow(
+      [
+        { workflow: createWorkflow('wf-a'), context: { spaceId: 'default' } },
+        { workflow: createWorkflow('wf-b'), context: { spaceId: 'default' } },
+      ],
+      request
+    );
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -114,6 +140,7 @@ describe('task scheduling failure', () => {
     taskManager = taskManagerMock.createStart();
     taskManager.schedule.mockRejectedValue(scheduleError);
     taskManager.bulkSchedule.mockRejectedValue(scheduleError);
+    taskManager.bulkGet.mockImplementation(async (ids) => ids.map(notFound));
     pluginStart = plugin.start(coreMock.createStart(), {
       taskManager,
       actions: {} as any,
@@ -154,30 +181,54 @@ describe('task scheduling failure', () => {
   });
 
   it('marks every bulkScheduleWorkflow execution FAILED and rethrows', async () => {
-    mockGetWorkflowExecutionStates.mockResolvedValue(
-      new Map([
-        ['default:wf-a', { enabled: true }],
-        ['default:wf-b', { enabled: true }],
-      ])
-    );
-    mockBulkCreateWorkflowExecutions.mockImplementation(async (executions: Array<{ id: string }>) =>
-      executions.map(({ id }) => ({ id }))
-    );
+    await expect(bulkScheduleTwoWorkflows()).rejects.toBe(scheduleError);
 
-    await expect(
-      pluginStart.bulkScheduleWorkflow(
-        [
-          { workflow: createWorkflow('wf-a'), context: { spaceId: 'default' } },
-          { workflow: createWorkflow('wf-b'), context: { spaceId: 'default' } },
-        ],
-        request
-      )
-    ).rejects.toBe(scheduleError);
-
-    const createdIds: string[] = mockBulkCreateWorkflowExecutions.mock.calls[0][0].map(
-      ({ id }: { id: string }) => id
+    expect(mockBulkUpdateWorkflowExecutions).toHaveBeenCalledWith(
+      bulkCreatedIds().map((id) => failedUpdate(id))
     );
-    expect(mockBulkUpdateWorkflowExecutions).toHaveBeenCalledWith(createdIds.map(failedUpdate));
+  });
+
+  it('marks only the bulk executions whose task was not saved when bulkSchedule throws', async () => {
+    taskManager.bulkGet.mockImplementation(async ([savedId, missingId]) => [
+      { tag: 'ok', value: { id: savedId } as never },
+      notFound(missingId),
+    ]);
+
+    await expect(bulkScheduleTwoWorkflows()).rejects.toBe(scheduleError);
+
+    expect(mockBulkUpdateWorkflowExecutions).toHaveBeenCalledWith([
+      failedUpdate(bulkCreatedIds()[1]),
+    ]);
+  });
+
+  it('marks every bulk execution FAILED when the task lookup also fails', async () => {
+    taskManager.bulkGet.mockRejectedValue(new Error('es unavailable'));
+
+    await expect(bulkScheduleTwoWorkflows()).rejects.toBe(scheduleError);
+
+    expect(mockBulkUpdateWorkflowExecutions).toHaveBeenCalledWith(
+      bulkCreatedIds().map((id) => failedUpdate(id))
+    );
+  });
+
+  it('marks a bulk execution FAILED when bulkSchedule skips its task without throwing', async () => {
+    taskManager.bulkSchedule.mockImplementation(async ([scheduledTask]) => [
+      scheduledTask as never,
+    ]);
+
+    await expect(bulkScheduleTwoWorkflows()).resolves.toHaveLength(2);
+
+    expect(mockBulkUpdateWorkflowExecutions).toHaveBeenCalledWith([
+      failedUpdate(bulkCreatedIds()[1], 'Task Manager did not schedule the workflow task.'),
+    ]);
+  });
+
+  it('does not mark an execution when its task is scheduled', async () => {
+    taskManager.schedule.mockImplementation(async (task) => task as never);
+
+    await pluginStart.scheduleWorkflow(createWorkflow('wf-alert'), { spaceId: 'default' }, request);
+
+    expect(mockBulkUpdateWorkflowExecutions).not.toHaveBeenCalled();
   });
 
   it('logs and still rethrows the schedule error when marking the execution FAILED also fails', async () => {
