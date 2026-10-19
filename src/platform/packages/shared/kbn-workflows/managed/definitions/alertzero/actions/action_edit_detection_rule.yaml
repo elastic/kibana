@@ -128,6 +128,8 @@ steps:
   - name: fetch_rule
     type: kibana.request
     with:
+      # Call Kibana's own listener, not publicBaseUrl (an auth proxy answers with a sign-in page). See elastic/security-team#20135.
+      use_server_info: true
       method: GET
       path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules?id={{ inputs.actionInput.id | url_encode }}"
       headers:
