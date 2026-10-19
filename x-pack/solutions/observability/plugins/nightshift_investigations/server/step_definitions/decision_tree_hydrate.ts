@@ -11,31 +11,37 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { Logger } from '@kbn/core/server';
 import type { SandboxPluginStart } from '@kbn/sandbox-plugin/server';
 import { hydrateDecisionTreeWorkspace } from '../decision_trees/register_decision_trees';
+import { DECISION_TREE_WORKSPACE_ROOT } from '../decision_trees/materialize';
+import { degradeOnWriterFailure } from '../lib/hydrate_notification';
+import { unscopeConversationId } from '../tools/sandbox_bash/tool_utils';
 import { withTimeout } from './with_timeout';
 
-/** Caps beforeAgent so a stuck sandbox allocate cannot stall the reinforcement round. */
+/** Caps beforeAgent so a stuck sandbox write cannot stall the reinforcement round. */
 const HYDRATE_TIMEOUT_MS = 20_000;
 
 export const decisionTreeHydrateStepDefinition = ({
   getSandboxStart,
   logger,
+  isEnabled,
 }: {
   getSandboxStart: () => SandboxPluginStart | undefined;
   logger: Logger;
+  isEnabled?: () => boolean;
 }) =>
   createServerStepDefinition({
     id: 'nightshift.decisionTreeHydrate',
     label: 'Hydrate Decision Trees into Sandbox',
     category: StepCategory.Ai,
     description:
-      'Writes the stored decision trees into /workspace/decision-trees for the given conversation ' +
-      'so the reinforcement agent can read and edit them with its sandbox file tools.',
+      'Writes the stored decision trees into /workspace/decision-trees for the sandbox obtained ' +
+      'earlier in this workflow. Does not allocate; writes to the sandbox_id it is given so every ' +
+      'writer addresses the same workspace.',
     inputSchema: z.object({
-      conversation_id: z
+      sandbox_id: z
         .string()
         .min(1)
         .max(1024)
-        .describe('Conversation id that namespaces the sandbox.'),
+        .describe('Workspace key from nightshift.obtainSandbox. Already space-scoped.'),
       prompt: z
         .string()
         .max(500_000)
@@ -45,11 +51,40 @@ export const decisionTreeHydrateStepDefinition = ({
         ),
     }),
     outputSchema: z.object({
-      conversation_id: z.string().describe('Conversation id that was hydrated.'),
+      sandbox_id: z.string().describe('Sandbox that was hydrated.'),
+      conversation_id: z
+        .string()
+        .describe('Unscoped conversation id derived from the sandbox key.'),
       tree_count: z.number().describe('Number of decision trees written into the sandbox.'),
+      skipped: z.boolean().optional(),
+      failed: z.boolean().optional().describe('The write failed; its contents may be incomplete.'),
+      notification: z
+        .string()
+        .describe(
+          'Always empty on success. On failure, the incomplete-materialization notice for ' +
+            '/workspace/decision-trees.'
+        ),
     }),
     handler: async (context) => {
-      const { conversation_id: conversationId, prompt } = context.input;
+      const { sandbox_id: sandboxId, prompt } = context.input;
+      const { spaceId } = context.contextManager.getContext().workflow;
+      const conversationId = unscopeConversationId(spaceId, sandboxId);
+
+      // The combined materialize workflow installs with Cortex or Memory, so this step is
+      // registered even when the tree feature is off. Fail closed without touching the sandbox.
+      if (isEnabled && !isEnabled()) {
+        context.logger.info(`Skipped decision tree hydrate for sandbox ${sandboxId} (flag off)`);
+        return {
+          output: {
+            sandbox_id: sandboxId,
+            conversation_id: conversationId,
+            tree_count: 0,
+            skipped: true,
+            notification: '',
+          },
+        };
+      }
+
       const sandboxStart = getSandboxStart();
 
       if (!sandboxStart) {
@@ -59,25 +94,54 @@ export const decisionTreeHydrateStepDefinition = ({
         );
       }
 
-      // The hook runs this workflow in the caller's space, which is the same space the sandbox
-      // tools resolve from the request, so both address the same workspace.
-      const { spaceId } = context.contextManager.getContext().workflow;
+      // getSessionForSpace scopes internally, so the space-scoped sandbox_id must be unscoped first.
+      // This resolves the same session obtain_sandbox already allocated for this conversation.
       const session = sandboxStart.getSessionForSpace(spaceId, conversationId);
 
-      const treeCount = await withTimeout(
-        (signal) =>
-          hydrateDecisionTreeWorkspace({
-            session,
-            esClient: context.contextManager.getScopedEsClient(),
-            logger,
-            spaceId,
-            prompt,
-            signal,
-          }),
-        HYDRATE_TIMEOUT_MS,
-        `Decision tree hydrate timed out after ${HYDRATE_TIMEOUT_MS}ms`
-      );
+      context.logger.info(`Hydrating decision trees into sandbox ${sandboxId} (space ${spaceId})`);
 
-      return { output: { conversation_id: conversationId, tree_count: treeCount } };
+      // A failed write degrades to a system_update line rather than a failed step: this
+      // step is also a before-agent hook for the reinforcement agent, so throwing would
+      // abort that round over one writer.
+      let treeCount: number;
+      try {
+        treeCount = await withTimeout(
+          (signal) =>
+            hydrateDecisionTreeWorkspace({
+              session,
+              esClient: context.contextManager.getScopedEsClient(),
+              logger,
+              spaceId,
+              prompt,
+              signal,
+            }),
+          HYDRATE_TIMEOUT_MS,
+          `Decision tree hydrate timed out after ${HYDRATE_TIMEOUT_MS}ms`
+        );
+      } catch (error) {
+        return {
+          output: {
+            sandbox_id: sandboxId,
+            conversation_id: conversationId,
+            tree_count: 0,
+            ...degradeOnWriterFailure({
+              logger: context.logger,
+              label: 'Decision tree hydrate',
+              sandboxId,
+              directory: DECISION_TREE_WORKSPACE_ROOT,
+              error,
+            }),
+          },
+        };
+      }
+
+      return {
+        output: {
+          sandbox_id: sandboxId,
+          conversation_id: conversationId,
+          tree_count: treeCount,
+          notification: '',
+        },
+      };
     },
   });

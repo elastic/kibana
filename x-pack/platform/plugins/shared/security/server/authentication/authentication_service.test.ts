@@ -1081,6 +1081,18 @@ describe('AuthenticationService', () => {
         } as ConfigType['public'];
         expect(getServerBaseURL()).toBe('https://elastic.co:4321');
       });
+
+      it('brackets IPv6 literal hostnames so the result is a parseable URL', async () => {
+        mockStartAuthenticationParams.http.getServerInfo.mockReturnValue({
+          name: 'some-name',
+          protocol: 'https',
+          hostname: '::1',
+          port: 5620,
+        });
+
+        expect(getServerBaseURL()).toBe('https://[::1]:5620');
+        expect(new URL(getServerBaseURL()).protocol).toBe('https:');
+      });
     });
 
     describe('getCurrentUser()', () => {
@@ -1174,7 +1186,7 @@ describe('AuthenticationService', () => {
                 oauth2: {
                   metadata: {
                     authorization_servers: ['https://localhost:9200'],
-                    resource: 'http://localhost:5620',
+                    resource: 'http://localhost:5620/api/agent_builder/mcp',
                   },
                 },
               },
@@ -1210,6 +1222,94 @@ describe('AuthenticationService', () => {
         });
       });
 
+      it.each(['/api/agent_builder/mcp', '/test_endpoints/self_client/as_scoped_oauth'])(
+        'builds resource_metadata URL from the configured resource for request path %s',
+        async (path) => {
+          const mockOnPreResponseToolkit = httpServiceMock.createOnPreResponseToolkit();
+
+          mockSetupAuthenticationParams.config = createConfig(
+            ConfigSchema.validate(
+              {
+                mcp: {
+                  oauth2: {
+                    metadata: {
+                      authorization_servers: ['https://localhost:9200'],
+                      resource: 'http://localhost:5620/api/agent_builder/mcp',
+                    },
+                  },
+                },
+              },
+              { serverless: true }
+            ),
+            loggingSystemMock.create().get(),
+            { isTLSEnabled: false }
+          );
+
+          const { onPreResponseHandler } = getService();
+
+          await onPreResponseHandler(
+            httpServerMock.createKibanaRequest({
+              path,
+              routeTags: [ROUTE_TAG_ACCEPT_UIAM_OAUTH],
+            }),
+            { statusCode: 401 },
+            mockOnPreResponseToolkit
+          );
+
+          expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith(
+            expect.objectContaining({
+              headers: expect.objectContaining({
+                'WWW-Authenticate':
+                  'Bearer resource_metadata="http://localhost:5620/.well-known/oauth-protected-resource/api/agent_builder/mcp"',
+              }),
+            })
+          );
+        }
+      );
+
+      it.each(['marketing', 'default'])(
+        'includes the literal /s/%s prefix in the resource_metadata URL',
+        async (spaceId) => {
+          const mockOnPreResponseToolkit = httpServiceMock.createOnPreResponseToolkit();
+
+          mockSetupAuthenticationParams.config = createConfig(
+            ConfigSchema.validate(
+              {
+                mcp: {
+                  oauth2: {
+                    metadata: {
+                      authorization_servers: ['https://localhost:9200'],
+                      resource: 'http://localhost:5620/api/agent_builder/mcp',
+                    },
+                  },
+                },
+              },
+              { serverless: true }
+            ),
+            loggingSystemMock.create().get(),
+            { isTLSEnabled: false }
+          );
+
+          const { onPreResponseHandler } = getService();
+          const mockRequest = httpServerMock.createKibanaRequest({
+            path: '/api/agent_builder/mcp',
+            routeTags: [ROUTE_TAG_ACCEPT_UIAM_OAUTH],
+          });
+          const { basePath } = mockSetupAuthenticationParams.http;
+          (basePath.get as jest.Mock).mockReturnValue(`${basePath.serverBasePath}/s/${spaceId}`);
+
+          await onPreResponseHandler(mockRequest, { statusCode: 401 }, mockOnPreResponseToolkit);
+
+          expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith(
+            expect.objectContaining({
+              headers: expect.objectContaining({
+                'WWW-Authenticate': `Bearer resource_metadata="http://localhost:5620/.well-known/oauth-protected-resource/s/${spaceId}/api/agent_builder/mcp"`,
+              }),
+            })
+          );
+        }
+      );
+
       it('does not add WWW-Authenticate header when mcp config is not set', async () => {
         const mockReturnedValue = { type: 'next' as any };
         const mockOnPreResponseToolkit = httpServiceMock.createOnPreResponseToolkit();
@@ -1239,7 +1339,7 @@ describe('AuthenticationService', () => {
                 oauth2: {
                   metadata: {
                     authorization_servers: ['https://localhost:9200'],
-                    resource: 'http://localhost:5620',
+                    resource: 'http://localhost:5620/api/agent_builder/mcp',
                   },
                 },
               },
@@ -1274,7 +1374,7 @@ describe('AuthenticationService', () => {
                 oauth2: {
                   metadata: {
                     authorization_servers: ['https://localhost:9200'],
-                    resource: 'http://localhost:5620',
+                    resource: 'http://localhost:5620/api/agent_builder/mcp',
                   },
                 },
               },

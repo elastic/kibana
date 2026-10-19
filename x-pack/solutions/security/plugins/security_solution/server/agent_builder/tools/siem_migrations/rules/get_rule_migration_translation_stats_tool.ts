@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -21,11 +21,13 @@ import { hasRuleMigrationPrivileges } from '../common/privileges';
 import { createMissingPrivilegeError, createToolErrorResult } from '../common/tool_results';
 import { SIEM_MIGRATION_GET_RULE_MIGRATION_TRANSLATION_STATS_TOOL_ID } from './tool_ids';
 
-const schema = z.object({
-  migration_id: NonEmptyString.describe(
-    'The id of the rule migration whose translation stats to retrieve.'
-  ),
-});
+const schema = lazySchema(() =>
+  z.object({
+    migration_id: NonEmptyString.describe(
+      'The id of the rule migration whose translation stats to retrieve.'
+    ),
+  })
+);
 
 const buildPath = (migrationId: string): string =>
   SIEM_RULE_MIGRATION_TRANSLATION_STATS_PATH.replace(

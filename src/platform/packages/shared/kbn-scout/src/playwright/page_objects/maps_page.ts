@@ -10,6 +10,7 @@
 import type { ScoutPage } from '..';
 import { expect } from '..';
 import { AppMenu } from './app_menu';
+import { DatePicker } from './date_picker';
 import { InspectorPage } from './inspector';
 import { QueryBar } from './query_bar';
 import { SavedObjectSaveModal } from './saved_object_save_modal';
@@ -31,12 +32,13 @@ export class MapsPage {
   public readonly exitFullScreenButton;
   private readonly layerTocTooltip;
   private readonly appMenu: AppMenu;
+  private readonly datePicker: DatePicker;
   private readonly queryBar: QueryBar;
   private readonly mapContainer;
   private readonly setViewForm;
   /** Save modal locators/actions, shared with other apps (e.g. Visualize) via `SavedObjectSaveModal`. */
   public readonly saveModal: SavedObjectSaveModal;
-  public readonly inspector: InspectorPage;
+  private readonly inspector: InspectorPage;
 
   constructor(private readonly page: ScoutPage) {
     // Only present when Maps is the top-level app (standalone). Not available in embeddable contexts (e.g. dashboard panels).
@@ -53,6 +55,7 @@ export class MapsPage {
     this.fullScreenModeButton = this.page.testSubj.locator('mapsFullScreenMode');
     this.exitFullScreenButton = this.page.testSubj.locator('exitFullScreenModeButton');
     this.appMenu = new AppMenu(this.page);
+    this.datePicker = new DatePicker(this.page);
     this.queryBar = new QueryBar(this.page);
     this.layerTocTooltip = this.page.testSubj.locator('layerTocTooltip');
     this.mapContainer = this.page.testSubj.locator('mapContainer');
@@ -92,6 +95,31 @@ export class MapsPage {
     });
   }
 
+  async expectOnMapPage() {
+    await expect
+      .poll(() => this.mapContainer.isVisible(), { timeout: DEFAULT_MAP_LOADING_TIMEOUT })
+      .toBe(true);
+  }
+
+  /**
+   * Verifies Elastic Maps Service (EMS) is reachable by opening the EMS boundaries layer wizard
+   * and checking that the EMS file select is enabled. Throws if EMS is not available.
+   */
+  async expectEmsToBeAvailable() {
+    await this.gotoNewMap();
+    await this.openAddLayerFlyout();
+    await this.page.testSubj.click('emsBoundaries');
+    const emsFileSelect = this.page.testSubj.locator('emsFileSelect');
+    try {
+      await emsFileSelect.waitFor({ state: 'visible', timeout: 120000 }); // large timeout for EMS request
+      await expect(emsFileSelect.locator('input')).toBeEnabled();
+    } catch (e) {
+      throw new Error(
+        `Test requires access to Elastic Maps Service (EMS). EMS is not available: ${e.message}`
+      );
+    }
+  }
+
   async selectLayerWizardByTitle(title: string) {
     const wizardTestSubj = title
       .split(' ')
@@ -118,12 +146,33 @@ export class MapsPage {
     return this.page.testSubj.locator(`layerTocActionsPanelToggleButton${escapedName}`);
   }
 
-  async addDocumentsLayer(documentSelector: string) {
+  async doesLayerExist(layerName: string) {
+    return this.getLayerToggleButton(layerName).isVisible();
+  }
+
+  async selectFileUploadCard() {
+    await this.page.testSubj.click('uploadFile');
+  }
+
+  async getNumberOfLayers() {
+    return this.page.locator('.mapTocEntry').count();
+  }
+
+  async openAddLayerFlyout() {
     await this.addLayerButton.click();
     await this.layerAddForm.waitFor({ state: 'visible' });
+  }
+
+  async selectGeoIndexPatternLayer(indexPattern: string) {
+    await this.page.components
+      .comboBox('mapGeoIndexPatternSelect')
+      .setSelectedOptions([indexPattern]);
+  }
+
+  async addDocumentsLayer(indexPattern: string) {
+    await this.openAddLayerFlyout();
     await this.documentsItem.click();
-    const comboBox = this.page.components.comboBox('mapGeoIndexPatternSelect');
-    await comboBox.setSelectedOptions([documentSelector]);
+    await this.selectGeoIndexPatternLayer(indexPattern);
     await this.importFileButton.click();
     await this.waitForRenderComplete();
     await this.saveAndReturnButton.click();
@@ -131,7 +180,7 @@ export class MapsPage {
 
   /** Waits until map layers are loaded. */
   async waitForLayersToLoad() {
-    await this.mapContainer.waitFor({ state: 'visible', timeout: DEFAULT_MAP_LOADING_TIMEOUT });
+    await this.expectOnMapPage();
 
     // Mapbox GL renders a <canvas> only after mapApi is initialised; mapContainer is
     // visible before that, so gate on this signal before checking loading state.
@@ -263,35 +312,56 @@ export class MapsPage {
    */
   async getResponse(requestName: string): ReturnType<typeof this.inspector.getResponse> {
     await this.inspector.open();
-    await this.inspector.openInspectorRequestsView();
+    try {
+      await this.inspector.openInspectorRequestsView();
 
-    const comboBox = this.page.components.comboBox('inspectorRequestChooser');
-    await comboBox.setSelectedOptions([requestName]);
+      const comboBox = this.page.components.comboBox('inspectorRequestChooser');
+      await comboBox.setSelectedOptions([requestName]);
 
-    const responseBody = await this.inspector.getResponse();
-    await this.inspector.close();
-    return responseBody;
+      return await this.inspector.getResponse();
+    } finally {
+      await this.inspector.close();
+    }
   }
 
   /**
-   * Opens the inspector, reads the "Hits" value from the request statistics table,
-   * closes the inspector, and returns it as a string.
+   * Opens the inspector, switches to the Requests view, optionally selects `requestName`,
+   * switches to the statistics tab, calls `getStat` to read a value, closes the inspector,
+   * and returns the result.
    */
-  async getHits(): Promise<string> {
+  private async getRequestStat(
+    getStat: () => Promise<string>,
+    requestName?: string
+  ): Promise<string> {
     await this.inspector.open();
-    await this.inspector.openInspectorRequestsView();
-    await this.inspector.openRequestsStatisticsTab();
-
-    const rows = await this.inspector.getTableData();
-    const hitsRow = rows.find((row) => row[0] === 'Hits');
-    const hits = hitsRow?.[1];
-
-    if (!hits) {
-      throw new Error(`Unable to find "Hits" in table data: ${JSON.stringify(rows, null, '')}`);
+    try {
+      await this.inspector.openInspectorRequestsView();
+      if (requestName) {
+        await this.page.components
+          .comboBox('inspectorRequestChooser')
+          .setSelectedOptions([requestName]);
+      }
+      await this.inspector.openRequestsStatisticsTab();
+      return await getStat();
+    } finally {
+      await this.inspector.close();
     }
+  }
 
-    await this.inspector.close();
-    return hits;
+  /**
+   * Opens the inspector, reads "Hits" from the statistics tab of the optionally
+   * selected `requestName`, closes the inspector, and returns the value.
+   */
+  async getHits(requestName?: string): Promise<string> {
+    return this.getRequestStat(() => this.inspector.getHits(), requestName);
+  }
+
+  /**
+   * Opens the inspector, reads "Request timestamp" from the statistics tab of the
+   * optionally selected `requestName`, closes the inspector, and returns the value.
+   */
+  async getRequestTimestamp(requestName?: string): Promise<string> {
+    return this.getRequestStat(() => this.inspector.getRequestTimestamp(), requestName);
   }
 
   /** Opens the map settings panel and enables "Auto fit map to data bounds". */
@@ -311,10 +381,159 @@ export class MapsPage {
     await this.page.testSubj.click('mapSettingSubmitButton');
   }
 
+  async setAbsoluteRange(from: string, to: string) {
+    await this.datePicker.setAbsoluteRange({ from, to });
+    await this.waitForLayersToLoad();
+  }
+
+  /** Re-submits the current query, which forces the map to refresh. */
+  async refreshQuery() {
+    await this.queryBar.submitQuery();
+    await this.waitForLayersToLoad();
+  }
+
   /** Sets the KQL query in the search bar, submits it, and waits for layers to load. */
   async setAndSubmitQuery(query: string) {
     await this.queryBar.setQuery(query);
     await this.queryBar.submitQuery();
+    await this.waitForLayersToLoad();
+  }
+
+  /**
+   * Opens the inspector, switches to the "Map details" view, reads the Mapbox GL
+   * style JSON from the mapboxStyleContainer, closes the inspector, and returns the
+   * parsed style object.
+   */
+  async getMapboxStyle(): Promise<Record<string, any>> {
+    await this.inspector.open();
+    try {
+      // openInspectorView skips the view switch when the chooser is not rendered yet,
+      // which leaves the default view open and the mapboxStyleTab missing.
+      await this.inspector.viewChooser.waitFor({ state: 'visible' });
+      await this.inspector.openInspectorView('Map details');
+      await this.page.testSubj.click('mapboxStyleTab');
+      const container = this.page.testSubj.locator('mapboxStyleContainer');
+      await container.waitFor({ state: 'visible' });
+      // EuiCodeBlock renders a visually-hidden screen reader label (wrapped in ✄𐘗
+      // NO_COPY_BOUND markers) inside the <pre> tag before the <code> element.
+      // Calling innerText() on the container includes that hidden text, producing
+      // invalid JSON. Target the <code> element directly to get only the code content.
+      const json = await container.locator('code').innerText();
+      return JSON.parse(json);
+    } finally {
+      await this.inspector.close();
+    }
+  }
+
+  /**
+   * Opens the layer's TOC actions panel by name, clicks "Fit to data bounds",
+   * and waits for the map to pan/zoom to the new extent.
+   */
+  async clickFitToBounds(layerName: string) {
+    const origView = await this.getView();
+    await this.getLayerToggleButton(layerName).click();
+    await this.page.testSubj.click('fitToBoundsButton');
+    await this.waitForMapPanAndZoom(origView);
+  }
+
+  /** Clicks the global "Fit to data" button and waits for the map to pan/zoom to the new extent. */
+  async clickFitToData() {
+    const origView = await this.getView();
+    await this.page.testSubj.click('fitToData');
+    await this.waitForMapPanAndZoom(origView);
+  }
+
+  /** Returns the visible text of the layer's TOC details section (legend content). */
+  async getLayerTOCDetails(layerName: string) {
+    const escapedName = layerName.replace(/\s+/g, '_');
+    return this.page.testSubj.locator(`mapLayerTOCDetails${escapedName}`).innerText();
+  }
+
+  /** Opens the settings panel for the given layer. */
+  async openLayerPanel(layerName: string) {
+    const escapedName = layerName.replace(/\s+/g, '_');
+    await this.getLayerToggleButton(layerName).click();
+    await this.page.testSubj
+      .locator(`layerTocActionsPanel${escapedName}`)
+      .waitFor({ state: 'visible' });
+    await this.page.testSubj.click('layerSettingsButton');
+    await this.waitForLayersToLoad();
+  }
+
+  /** Applies the edits made in the open layer settings panel and closes it. */
+  async keepLayerPanelChanges() {
+    await this.page.getByRole('button', { name: 'Keep changes' }).click();
+    await this.waitForLayersToLoad();
+  }
+
+  /** Closes the currently open layer settings panel. Discards any unsaved edits. */
+  async closeLayerPanel() {
+    await this.page.testSubj.click('layerPanelCancelButton');
+    await this.waitForLayersToLoad();
+  }
+
+  /**
+   * Opens the layer settings panel for `layerName`, sets a join where-clause
+   * to `query`, submits it, and waits for layers to reload.
+   */
+  async setJoinWhereQuery(query: string) {
+    await this.page.testSubj.click('mapJoinWhereExpressionButton');
+    const queryInput = this.page.locator(
+      '[data-test-subj="mapJoinWhereFilterEditor"] [data-test-subj="queryInput"]'
+    );
+    await queryInput.clear();
+    await queryInput.pressSequentially(query);
+    // Dismiss any open autocomplete dropdown before clicking submit.
+    await queryInput.press('Escape');
+    await this.page.testSubj.click('mapWhereFilterEditorSubmitButton');
+    await this.waitForLayersToLoad();
+  }
+
+  /** Expands the layer control (legend) if it is collapsed. */
+  async openLegend() {
+    const toc = this.page.testSubj.locator('mapLayerTOC');
+    if (!(await toc.isVisible())) {
+      await this.page.testSubj.click('mapExpandLayerControlButton');
+      await expect(toc).toBeVisible();
+    }
+  }
+
+  /** Returns the locator for the error icon shown in the TOC entry of `layerName`. */
+  getLayerErrorIcon(layerName: string) {
+    return this.page.testSubj.locator(`layerTocErrorIcon${layerName.replace(/\s+/g, '_')}`);
+  }
+
+  /** Opens the layer panel for `layerName`, clicks Remove, confirms, and waits for the layer to disappear. */
+  async removeLayer(layerName: string) {
+    await this.openLayerPanel(layerName);
+    await this.page.testSubj.click('mapRemoveLayerButton');
+    await this.page.testSubj.locator('confirmModalConfirmButton').click();
+    await expect.poll(() => this.doesLayerExist(layerName), { timeout: 10_000 }).toBe(false);
+  }
+
+  /**
+   * Opens the inspector, switches to Requests view, and returns true when the
+   * "no requests" message is visible (i.e. all layers have been removed).
+   */
+  async doesInspectorHaveRequests() {
+    await this.inspector.open();
+    try {
+      await this.inspector.openInspectorRequestsView();
+      return this.page.testSubj.locator('inspectorNoRequestsMessage').isVisible();
+    } finally {
+      await this.inspector.close();
+    }
+  }
+
+  /**
+   * Starts a 1-second auto-refresh cycle, waits for `refreshInterval` + 50 %
+   * so that at least one refresh fires, then pauses auto-refresh and waits for
+   * layers to finish loading.
+   */
+  async triggerSingleRefresh(refreshInterval: number) {
+    await this.datePicker.startAutoRefresh(1);
+    await this.page.waitForTimeout(refreshInterval + Math.ceil(refreshInterval / 2));
+    await this.datePicker.pauseAutoRefresh();
     await this.waitForLayersToLoad();
   }
 

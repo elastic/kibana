@@ -25,6 +25,8 @@ import type { DataSetWithName, DataSource } from '../../common';
 import { DATASETS_PATH } from '../app_paths';
 import { getFlyoutSaveErrorMessage } from '../get_flyout_save_error_message';
 import type { DataFederationKibanaServices } from '../types';
+import type { DatasetFormat } from '../../common/dataset_types';
+import { getDatasetCreateEvents, UI_COUNTER_EVENTS } from '../ui_counters';
 import { buildDatasetPayload } from './build_dataset_payload';
 import { TIMESTAMP_FIELD_ID, TIMESTAMP_LOGICAL_FIELD_NAME } from './constants';
 import { type CreateDatasetFormValues } from './create_dataset_form_state';
@@ -52,6 +54,16 @@ const OPTIONAL_STEP_IDS: DatasetWizardStepId[] = ['settings'];
 const MAX_WIDTH_NARROW_PX = 600;
 const MAX_WIDTH_WIDE_PX = 1024;
 
+interface SaveError {
+  title: string;
+  text: string;
+}
+
+const toSaveError = (text: string): SaveError => ({
+  title: createDatasetWizardStrings.saveErrorTitle,
+  text,
+});
+
 export function CreateDatasetWizardPage({
   dataSources,
   existingDataSetNames,
@@ -67,11 +79,11 @@ export function CreateDatasetWizardPage({
 }) {
   const history = useHistory();
   const {
-    services: { datasetsClient },
+    services: { datasetsClient, toasts, reportUiCounter },
   } = useKibana<DataFederationKibanaServices>();
   const isEditMode = initialDataSet !== undefined;
   const datasetNameToEdit = initialDataSet?.name;
-  const [saveError, setSaveError] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<SaveError | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const formDefaultValues = useMemo(
     (): CreateDatasetFormValues =>
@@ -128,7 +140,7 @@ export function CreateDatasetWizardPage({
 
     const formatValid = await methods.trigger('settings.format');
     if (!formatValid) {
-      setSaveError(createDatasetWizardStrings.settingsFormatRequired);
+      setSaveError(toSaveError(createDatasetWizardStrings.settingsFormatRequired));
       return;
     }
 
@@ -136,28 +148,65 @@ export function CreateDatasetWizardPage({
       (f) => f.id === TIMESTAMP_FIELD_ID || f.name.trim() === TIMESTAMP_LOGICAL_FIELD_NAME
     );
     if (timestampField && timestampField.path.trim() === '') {
-      setSaveError(createDatasetWizardStrings.timestampFieldPathRequiredSave);
+      setSaveError(toSaveError(createDatasetWizardStrings.timestampFieldPathRequiredSave));
       return;
     }
 
     setIsSaving(true);
+    const previousName = initialDataSet?.name.trim();
+    let savedName: string;
+    const savedFormat = values.settings?.format as DatasetFormat | undefined;
     try {
       const payload = buildDatasetPayload(values);
       await datasetsClient.add(payload);
-
-      const previousId = initialDataSet?.name.trim();
-      if (previousId && previousId !== payload.name) {
-        await datasetsClient.delete(previousId);
-      }
-
-      await loadDataSets();
-      goToDatasets();
+      savedName = payload.name;
     } catch (error) {
-      setSaveError(getFlyoutSaveErrorMessage(error));
+      setSaveError(toSaveError(getFlyoutSaveErrorMessage(error)));
+      setIsSaving(false);
+      return;
+    }
+
+    if (previousName && previousName !== savedName) {
+      try {
+        await datasetsClient.delete(previousName);
+      } catch (error) {
+        setSaveError({
+          title: createDatasetWizardStrings.deletePreviousErrorTitle,
+          text: createDatasetWizardStrings.deletePreviousErrorText(
+            savedName,
+            previousName,
+            getFlyoutSaveErrorMessage(error)
+          ),
+        });
+        setIsSaving(false);
+        return;
+      }
+    }
+
+    reportUiCounter?.(
+      previousName ? UI_COUNTER_EVENTS.datasetUpdate : getDatasetCreateEvents(savedFormat)
+    );
+
+    try {
+      await loadDataSets();
+    } catch (error) {
+      toasts.addDanger({
+        title: createDatasetWizardStrings.refreshAfterSaveErrorTitle(savedName),
+        text: getFlyoutSaveErrorMessage(error),
+      });
     } finally {
       setIsSaving(false);
+      goToDatasets();
     }
-  }, [datasetsClient, goToDatasets, initialDataSet, loadDataSets, methods]);
+  }, [
+    datasetsClient,
+    goToDatasets,
+    initialDataSet,
+    loadDataSets,
+    methods,
+    reportUiCounter,
+    toasts,
+  ]);
 
   const activeStepId = STEPS[activeStepIndex].id;
   const isLastStep = activeStepIndex === LAST_STEP_INDEX;
@@ -170,8 +219,8 @@ export function CreateDatasetWizardPage({
       saveError ? (
         <>
           <KbnDangerCallout
-            title={createDatasetWizardStrings.saveErrorTitle}
-            text={saveError}
+            title={saveError.title}
+            text={saveError.text}
             size="s"
             announceOnMount
             data-test-subj="createDatasetWizardSaveError"
@@ -258,6 +307,7 @@ export function CreateDatasetWizardPage({
                       iconType="chevronSingleLeft"
                       onClick={() => goToStep(activeStepIndex - 1)}
                       data-test-subj="backButton"
+                      data-telemetry-id={`dataFederation-datasetWizard-${activeStepId}-backButton`}
                     >
                       {createDatasetWizardStrings.backButton}
                     </EuiButtonEmpty>
@@ -272,6 +322,11 @@ export function CreateDatasetWizardPage({
                     disabled={stepContent.isValid === false}
                     isLoading={isSaving}
                     data-test-subj="nextButton"
+                    data-telemetry-id={
+                      isLastStep
+                        ? 'dataFederation-datasetWizard-saveButton'
+                        : `dataFederation-datasetWizard-${activeStepId}-nextButton`
+                    }
                   >
                     {isLastStep
                       ? isSaving

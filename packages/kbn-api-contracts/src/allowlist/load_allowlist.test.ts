@@ -100,6 +100,50 @@ describe('loadAllowlist', () => {
     expect(result.entries).toHaveLength(2);
     expect(result.entries.map((e) => e.path)).toEqual(['/api/active', '/api/no-expiry']);
   });
+
+  it('rejects a source on an oasdiff rule, which could never match', () => {
+    const allowlist = {
+      entries: [
+        {
+          path: '/api/fleet/outputs',
+          method: 'post',
+          reason: 'Approved removal',
+          approvedBy: 'test-user',
+          oasdiffId: 'request-property-removed',
+          source: '/components/schemas/Output/properties/name',
+        },
+      ],
+    };
+
+    writeFileSync(testAllowlistPath, JSON.stringify(allowlist));
+
+    expect(() => loadAllowlist(testAllowlistPath)).toThrow(
+      'Remove "source" from: POST /api/fleet/outputs (request-property-removed)'
+    );
+  });
+
+  it('accepts a source on a kbn: rule', () => {
+    const allowlist = {
+      entries: [
+        {
+          path: '/api/data_views/data_view',
+          method: 'post',
+          reason: 'Intentional tightening',
+          approvedBy: 'test-user',
+          oasdiffId: 'kbn:request-additional-properties-tightened',
+          source: '/components/schemas/Data_views_create_data_view_request_object',
+        },
+      ],
+    };
+
+    writeFileSync(testAllowlistPath, JSON.stringify(allowlist));
+
+    expect(loadAllowlist(testAllowlistPath).entries).toHaveLength(1);
+  });
+
+  it('loads the repository allowlist', () => {
+    expect(() => loadAllowlist()).not.toThrow();
+  });
 });
 
 describe('isAllowlisted', () => {

@@ -135,11 +135,18 @@ describe('buildClassicAlertsQuery', () => {
     );
   });
 
-  it('adds a query_string filter for search text', () => {
-    const query = buildClassicAlertsQuery({ queryString: 'host:web-01' });
+  it('translates KQL search text to Elasticsearch DSL', () => {
+    const query = buildClassicAlertsQuery({ queryString: 'kibana.alert.rule.name: test' });
 
     expect(getFilters(query)).toEqual(
-      expect.arrayContaining([{ query_string: { query: 'host:web-01' } }])
+      expect.arrayContaining([
+        {
+          bool: {
+            minimum_should_match: 1,
+            should: [{ match: { 'kibana.alert.rule.name': 'test' } }],
+          },
+        },
+      ])
     );
   });
 

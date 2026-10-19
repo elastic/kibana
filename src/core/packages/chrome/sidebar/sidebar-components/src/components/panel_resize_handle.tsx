@@ -12,6 +12,7 @@ import React, { useCallback, useRef } from 'react';
 import { EuiResizableButton, type UseEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { layoutVar } from '@kbn/ui-chrome-layout';
 import { css } from '@emotion/react';
 import { useSidebarWidth, useSidebar } from '../hooks';
 
@@ -19,7 +20,7 @@ const resizeButtonStyles = {
   button: ({ euiTheme }: UseEuiTheme) => css`
     position: relative;
     inset-inline-start: -${euiTheme.border.width.thin};
-    block-size: calc(100% - ${euiTheme.border.radius.frame} * 2);
+    block-size: calc(100% - ${layoutVar('sidebar.borderRadius', '0px')} * 2);
     flex-shrink: 0;
     align-self: center;
   `,

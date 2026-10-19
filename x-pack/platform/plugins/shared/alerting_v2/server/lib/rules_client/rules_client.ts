@@ -14,7 +14,9 @@ import {
   createRuleDataSchema,
   FIND_DEFAULT_PER_PAGE,
   isStateTransitionAllowed,
+  putRuleDataSchema,
   updateRuleDataSchema,
+  type PutRuleData,
   type RuleKind,
 } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
@@ -52,6 +54,8 @@ import {
   ensureRuleExecutorTaskScheduled,
   getRuleExecutorTaskId,
 } from '../rule_executor/schedule';
+import type { AlertingPublisherContext } from '../events/domain_events';
+import { EventOriginToken, type EventOrigin } from '../event_origin/token';
 import { RuleEventPublisher } from '../events/rule_event_publisher/rule_event_publisher';
 import type { EventRule } from '../events/rule_event_publisher/rule_event_publisher';
 import {
@@ -200,6 +204,7 @@ const mapSortField = (sortField?: FindRulesSortField): string | undefined => {
 export class RulesClient {
   private readonly config: PluginConfig;
   private readonly logger: LoggerServiceContract;
+  private readonly eventContext: AlertingPublisherContext;
 
   constructor(
     @inject(Request) private readonly request: KibanaRequest,
@@ -215,8 +220,10 @@ export class RulesClient {
     private readonly rulesSavedObjectServiceInternal: RulesSavedObjectServiceContract,
     @inject(RuleEventPublisher) private readonly ruleEventPublisher: RuleEventPublisher,
     @inject(LoggerServiceToken) loggerService: LoggerServiceContract,
-    @inject(ArtifactTypeRegistry) private readonly artifactTypeRegistry: ArtifactTypeRegistry
+    @inject(ArtifactTypeRegistry) private readonly artifactTypeRegistry: ArtifactTypeRegistry,
+    @inject(EventOriginToken) origin: EventOrigin
   ) {
+    this.eventContext = { request, origin };
     this.config = pluginConfigAccessor.get<PluginConfig>();
     this.logger = loggerService.forSubsystem('rulesClient');
   }
@@ -395,6 +402,7 @@ export class RulesClient {
     actor,
     nowIso,
     version,
+    template,
   }: {
     data: CreateRuleData;
     id?: string;
@@ -402,6 +410,7 @@ export class RulesClient {
     actor: RuleSavedObjectAttributes['createdBy'];
     nowIso: string;
     version: number;
+    template?: RuleSavedObjectAttributes['metadata']['template'];
   }): PreparedRule {
     this.artifactTypeRegistry.validate(data.artifacts);
     this.assertScheduleIntervalAllowed(data.schedule.every);
@@ -413,6 +422,7 @@ export class RulesClient {
       updatedBy: actor,
       updatedAt: nowIso,
       version,
+      template,
     });
 
     return {
@@ -616,14 +626,15 @@ export class RulesClient {
     const prepared = this.prepareRuleForCreate({
       data: parsed,
       id: params.options?.id,
-      enabled: true,
+      enabled: params.options?.enabled ?? true,
       actor,
       nowIso,
       version: this.getNextVersion(),
+      template: params.options?.template,
     });
 
     await this.validateSchedule([
-      { updatedEvery: prepared.attrs.schedule.every, checkLimit: true },
+      { updatedEvery: prepared.attrs.schedule.every, checkLimit: prepared.enabled },
     ]);
 
     const { created, errors } = await this.persistPreparedRules([prepared]);
@@ -639,7 +650,7 @@ export class RulesClient {
       attrs: persisted.attributes,
       references: persisted.references,
     });
-    this.ruleEventPublisher.emitRuleCreated(this.request, [
+    this.ruleEventPublisher.emitRuleCreated(this.eventContext, [
       { ruleId: rule.id, spaceId: this.spaceId, rule },
     ]);
     return rule;
@@ -702,7 +713,7 @@ export class RulesClient {
       createdRules.push({ ruleId: rule.id, spaceId, rule });
     }
 
-    this.ruleEventPublisher.emitRuleCreated(this.request, createdRules);
+    this.ruleEventPublisher.emitRuleCreated(this.eventContext, createdRules);
 
     return { items, errors };
   }
@@ -784,7 +795,7 @@ export class RulesClient {
       references,
     });
 
-    this.ruleEventPublisher.emitRuleUpdated(this.request, [
+    this.ruleEventPublisher.emitRuleUpdated(this.eventContext, [
       { ruleId: rule.id, spaceId: this.spaceId, rule },
     ]);
 
@@ -854,7 +865,7 @@ export class RulesClient {
       attrs: { ...existingAttrs, version: this.getNextVersion(existingAttrs.version) },
       references,
     });
-    this.ruleEventPublisher.emitRuleDeleted(this.request, [
+    this.ruleEventPublisher.emitRuleDeleted(this.eventContext, [
       { ruleId: id, spaceId: this.spaceId, rule },
     ]);
   }
@@ -960,7 +971,7 @@ export class RulesClient {
       attrs: nextAttrs,
       references,
     });
-    this.ruleEventPublisher.emitRuleEnabled(this.request, [
+    this.ruleEventPublisher.emitRuleEnabled(this.eventContext, [
       { ruleId: rule.id, spaceId: this.spaceId, rule },
     ]);
     return rule;
@@ -1005,7 +1016,7 @@ export class RulesClient {
       attrs: nextAttrs,
       references,
     });
-    this.ruleEventPublisher.emitRuleDisabled(this.request, [
+    this.ruleEventPublisher.emitRuleDisabled(this.eventContext, [
       { ruleId: rule.id, spaceId: this.spaceId, rule },
     ]);
     return rule;
@@ -1020,6 +1031,15 @@ export class RulesClient {
       search: params.search,
       filter: soFilter,
       size: params.size,
+    });
+  }
+
+  @withApm
+  public async getRoutingTags(params: { search?: string; size?: number } = {}): Promise<string[]> {
+    return this.rulesSavedObjectService.findTags({
+      search: params.search,
+      size: params.size,
+      field: 'routing_tags',
     });
   }
 
@@ -1056,8 +1076,9 @@ export class RulesClient {
   }
 
   /**
-   * Finds the alert rules in scope of a policy matcher: those with at least one of its tags, or every
-   * alert rule when it has no tags. Signal rules never create alerts, so no policy applies to them.
+   * Finds the alert rules in scope of a policy matcher: those with at least one of its tags in
+   * `metadata.routing_tags`, or every alert rule when it has no tags. Signal rules never create
+   * alerts, so no policy applies to them.
    * The matcher expression runs against alerts, so it can't narrow rules down.
    */
   @withApm
@@ -1212,7 +1233,7 @@ export class RulesClient {
       errors,
     });
 
-    this.ruleEventPublisher.emitRuleDeleted(this.request, deletedRules);
+    this.ruleEventPublisher.emitRuleDeleted(this.eventContext, deletedRules);
 
     return { affected_count: affectedCount, errors };
   }
@@ -1331,7 +1352,7 @@ export class RulesClient {
         spaceId,
       });
 
-      this.ruleEventPublisher.emitRuleEnabled(this.request, enabledRules);
+      this.ruleEventPublisher.emitRuleEnabled(this.eventContext, enabledRules);
     }
 
     return { affected_count: affectedCount, errors };
@@ -1414,7 +1435,7 @@ export class RulesClient {
       errors,
     });
 
-    this.ruleEventPublisher.emitRuleDisabled(this.request, disabledRules);
+    this.ruleEventPublisher.emitRuleDisabled(this.eventContext, disabledRules);
 
     return { affected_count: affectedCount, errors };
   }
@@ -1531,7 +1552,7 @@ export class RulesClient {
       updatedRules.push({ ruleId: rule.id, spaceId, rule });
     }
 
-    this.ruleEventPublisher.emitRuleUpdated(this.request, updatedRules);
+    this.ruleEventPublisher.emitRuleUpdated(this.eventContext, updatedRules);
 
     return { affected_count: affectedCount, errors };
   }
@@ -1778,15 +1799,16 @@ export class RulesClient {
     data,
   }: {
     id: string;
-    data: CreateRuleData;
+    data: PutRuleData;
   }): Promise<{ rule: RuleResponse; created: boolean }> {
-    const parsed = this.parseRuleData(createRuleDataSchema, data, 'upsert');
+    const parsed = this.parseRuleData(putRuleDataSchema, data, 'upsert');
     this.artifactTypeRegistry.validate(parsed.artifacts);
 
     const exists = await this.ruleExists({ id });
 
     if (!exists) {
-      const rule = await this.createRule({ data, options: { id } });
+      const { enabled, ...createData } = parsed;
+      const rule = await this.createRule({ data: createData, options: { id, enabled } });
       return { rule, created: true };
     }
 
@@ -1802,28 +1824,26 @@ export class RulesClient {
 
     assertImmutableUnchanged(parsed, existingAttrs);
 
+    const prevEnabled = existingAttrs.enabled;
+    const nextEnabled = parsed.enabled ?? prevEnabled;
+
     const nextAttrs = transformCreateRuleBodyToRuleSoAttributes(parsed, {
-      enabled: existingAttrs.enabled,
+      enabled: nextEnabled,
       createdBy: existingAttrs.createdBy,
       createdAt: existingAttrs.createdAt,
       updatedBy: actor,
       updatedAt: nowIso,
       version: this.getNextVersion(existingAttrs.version),
+      template: existingAttrs.metadata.template,
     });
 
     await this.validateSchedule([
       {
         updatedEvery: nextAttrs.schedule.every,
-        prevEvery: existingAttrs.schedule.every,
-        checkLimit: existingAttrs.enabled,
+        prevEvery: prevEnabled ? existingAttrs.schedule.every : undefined,
+        checkLimit: nextEnabled,
       },
     ]);
-
-    await this.scheduleRuleExecutorTask({
-      ruleId: id,
-      spaceId,
-      scheduleEvery: nextAttrs.schedule.every,
-    });
 
     const references = rebuildArtifactReferences({
       artifacts: nextAttrs.artifacts,
@@ -1831,19 +1851,40 @@ export class RulesClient {
       registry: this.artifactTypeRegistry,
     });
 
-    await this.writeRuleAttrs({
-      id,
-      attrs: nextAttrs,
-      version: existingVersion,
-      references,
-    });
+    // Enable schedules before writing; disable writes before removing — each
+    // order keeps a failure from leaving the rule in a worse state than
+    // before. Also self-heals like `enableRule`/`disableRule`: the task state
+    // is always reapplied for `nextEnabled`, not just on a transition, so a
+    // leftover task from a prior bug or failed write also gets cleaned up.
+    if (nextEnabled) {
+      await this.scheduleRuleExecutorTask({
+        ruleId: id,
+        spaceId,
+        scheduleEvery: nextAttrs.schedule.every,
+      });
+      await this.writeRuleAttrs({
+        id,
+        attrs: nextAttrs,
+        version: existingVersion,
+        references,
+      });
+    } else {
+      await this.writeRuleAttrs({
+        id,
+        attrs: nextAttrs,
+        version: existingVersion,
+        references,
+      });
+      const taskId = getRuleExecutorTaskId({ ruleId: id, spaceId });
+      await this.taskManager.removeIfExists(taskId);
+    }
 
     const rule = this.toRuleApiResponse({
       id,
       attrs: nextAttrs,
       references,
     });
-    this.ruleEventPublisher.emitRuleUpdated(this.request, [
+    this.ruleEventPublisher.emitRuleUpdated(this.eventContext, [
       { ruleId: rule.id, spaceId: this.spaceId, rule },
     ]);
     return { rule, created: false };

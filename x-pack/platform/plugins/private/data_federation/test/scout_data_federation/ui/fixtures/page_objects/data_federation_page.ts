@@ -80,8 +80,7 @@ export class DataFederationPage {
   }
 
   async goto(): Promise<void> {
-    await this.page.gotoApp('management');
-    await this.page.testSubj.locator('data_federation').click();
+    await this.page.gotoApp('management/data/data_federation');
     await this.pageTitle.waitFor({ state: 'visible' });
   }
 
@@ -206,9 +205,7 @@ export class DataFederationPage {
     dataSetName: string;
     resource: string;
   }): Promise<void> {
-    await this.openDataSetActionsMenu(dataSetName);
-    await this.clickDataSetActionsMenuItem('Edit');
-    await this.createDatasetWizard.waitFor({ state: 'visible' });
+    await this.openEditDataSetWizard(dataSetName);
 
     await this.createDataSetResource.fill(resource);
     await this.wizardNextButton.click();
@@ -292,6 +289,12 @@ export class DataFederationPage {
       .getByRole('dialog', { name: 'More actions' })
       .getByRole('menuitem', { name, exact: true })
       .click();
+  }
+
+  async openEditDataSetWizard(dataSetName: string): Promise<void> {
+    await this.openDataSetActionsMenu(dataSetName);
+    await this.clickDataSetActionsMenuItem('Edit');
+    await this.createDatasetWizard.waitFor({ state: 'visible' });
   }
 
   async deleteDataSet(dataSetName: string): Promise<void> {

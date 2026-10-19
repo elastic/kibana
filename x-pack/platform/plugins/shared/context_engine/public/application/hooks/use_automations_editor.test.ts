@@ -32,6 +32,7 @@ jest.mock('./use_create_workflow', () => ({
 const aiIndex: GetAiIndexResponse = {
   id: 'my-ai-index',
   managed: false,
+  memory_enabled: false,
   dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
   automations: [{ type: 'workflow', value: 'wf-saved' }],
   sources: [{ type: 'esql', value: 'FROM logs-*' }],

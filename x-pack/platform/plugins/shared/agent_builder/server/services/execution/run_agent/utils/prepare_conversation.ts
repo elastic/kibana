@@ -60,6 +60,11 @@ export interface ProcessedConversation {
   metadata?: Record<string, MetadataFieldValue>;
   /** ID of the template applied to this conversation, used to look up field definitions. */
   template_id?: string;
+  /**
+   * Id of the paused round this run resumes. Only that round is left out of the history; a paused
+   * round the run does not resume is rendered as history.
+   */
+  resumedRoundId?: string;
 }
 
 export const prepareConversation = async ({

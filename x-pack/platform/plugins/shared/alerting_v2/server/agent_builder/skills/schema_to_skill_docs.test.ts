@@ -343,10 +343,10 @@ describe('schema_to_skill_docs', () => {
       expect(doc).toContain('##### `pending`');
       expect(doc).toContain('##### `recovering`');
       expect(doc).toContain(
-        '| `count` | integer | optional | Consecutive matches the alert episode spends in `pending` before it becomes `active` on the next match. For example, `2` opens it on the third consecutive match. Set to `0` to open it on the first match. (min: 0, max: 1000) |'
+        '| `count` | integer | optional | Consecutive matches the alert spends in `pending` before it becomes `active` on the next match. For example, `2` opens it on the third consecutive match. Set to `0` to open it on the first match. (min: 0, max: 1000) |'
       );
       expect(doc).toContain(
-        '| `count` | integer | optional | Consecutive recoveries the alert episode spends in `recovering` before it becomes `inactive` on the next recovery. For example, `2` closes it on the third consecutive recovery. Set to `0` to close it on the first recovery. (min: 0, max: 1000) |'
+        '| `count` | integer | optional | Consecutive recoveries the alert spends in `recovering` before it becomes `inactive` on the next recovery. For example, `2` closes it on the third consecutive recovery. Set to `0` to close it on the first recovery. (min: 0, max: 1000) |'
       );
     });
 
@@ -409,7 +409,7 @@ describe('schema_to_skill_docs', () => {
       expect(doc).toContain('`name`');
       expect(doc).toContain('`destinations`');
       expect(doc).toContain('`matcher`');
-      expect(doc).toContain('`grouping_mode`');
+      expect(doc).toContain('`grouping`');
       expect(doc).toContain('`throttle`');
     });
   });
@@ -486,7 +486,7 @@ describe('schema_to_skill_docs', () => {
 
     it('renders arrays whose items are referenced schemas', () => {
       expect(generateRuleSchemaDoc()).toContain(
-        '| `artifacts` | object[] | optional | Optional objects attached to the rule, such as a runbook or a dashboard. Each item has `id`, `type`, and `data`. The shape of `data` depends on `type`. For example, a `runbook` uses `content` and a `dashboard` uses `dashboard_id`. Known types are validated against that shape. Unknown types are stored when `id`, `type`, and `data` are present. (max items: 100) |'
+        '| `artifacts` | object[] | optional | Optional objects attached to the rule, such as a runbook or a dashboard. Each item has `id`, `type`, and `data`. The shape of `data` depends on `type`. For example, a `runbook` uses `content` and a `dashboard` uses `dashboard_id`. Known types are validated against that shape. Unknown types are stored when `id`, `type`, and `data` are present. An empty array is rejected: omit `artifacts` on create, or send `null` on PATCH to clear. (min items: 1, max items: 100) |'
       );
       expect(generateActionPolicySchemaDoc()).toContain(
         '| `destinations` | { type: "workflow", ... }[] | required | The list of destinations. At least one is required. (min items: 1, max items: 10) |'
@@ -498,16 +498,16 @@ describe('schema_to_skill_docs', () => {
         '| `grouping` | object | optional | Grouping configuration. |'
       );
       expect(generateActionPolicySchemaDoc()).toContain(
-        '| `throttle` | object | optional | The throttle configuration for notifications. |'
+        '| `throttle` | { strategy: "on_status_change", ... } \\| { strategy: "per_status_interval", ... } \\| { strategy: "time_interval", ... } \\| { strategy: "every_time", ... } | optional | The throttle configuration for notifications. Absent when notifications are not throttled; send `null` on PATCH to clear it. The strategy decides the rest of the block, so a PATCH replaces it whole: send the complete strategy variant rather than a single field. |'
       );
     });
 
     it('keeps the referencing field description when the definition also has one', () => {
       const doc = generateActionPolicySchemaDoc();
       expect(doc).toContain(
-        '| `grouping_mode` | "per_alert" \\| "all" \\| "per_field" | optional | The grouping mode for alert notifications. |'
+        '| `destinations` | { type: "workflow", ... }[] | required | The list of destinations. At least one is required. (min items: 1, max items: 10) |'
       );
-      expect(doc).not.toContain('per_alert groups by alert lifecycle');
+      expect(doc).not.toContain('An action policy destination configuration.');
     });
   });
 
@@ -686,7 +686,7 @@ describe('schema_to_skill_docs', () => {
       }
     });
 
-    it('enriches episode_status and severity with schema enum values', () => {
+    it('enriches alert_status and severity with schema enum values', () => {
       const doc = generateMatcherContextDoc();
       expect(doc).toContain('`active`');
       expect(doc).toContain('`critical`');
@@ -850,7 +850,7 @@ describe('schema_to_skill_docs', () => {
       }
     });
 
-    it('documents rule_id as nullable, since external-alert episodes have no rule', () => {
+    it('documents rule_id as nullable, since external alerts have no rule', () => {
       const doc = generateActionPolicyWorkflowPayloadDoc();
       expect(doc).toContain('| `rule_id` | string \\| null | required |');
     });
@@ -873,7 +873,7 @@ describe('schema_to_skill_docs', () => {
     });
   });
 
-  describe('Alerting v2 agent builder start contract', () => {
+  describe('Universal alerting agent builder start contract', () => {
     it.each([
       ['zodToJsonSchema via generateRuleSchemaDoc', generateRuleSchemaDoc],
       ['zodToJsonSchema via generateActionPolicySchemaDoc', generateActionPolicySchemaDoc],

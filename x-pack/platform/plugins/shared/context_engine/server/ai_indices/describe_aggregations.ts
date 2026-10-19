@@ -13,6 +13,7 @@ import {
 } from '../../common/constants';
 import type { AiIndexDest, KiTypeCount } from '../../common/http_api/ai_indices';
 import { buildAiIndexSpaceFilter } from '../../common/space_filter';
+import { EXCLUDE_MEMORY_KI_TYPES_CONDITION } from './example_queries';
 import { kiLifecyclePipeline } from './ki_lifecycle';
 import type { AiIndexField, AiIndexTagCount } from './types';
 
@@ -42,10 +43,16 @@ const isAggregatableKeyword = (fields: AiIndexField[], path: string): boolean =>
   );
 
 /** Counts per value of `field` over the current, active, unexpired KIs; `tags` is multi-valued. */
-const countsQuery = ({ type, value }: AiIndexDest, field: string, size: number): string =>
+const countsQuery = (
+  { type, value }: AiIndexDest,
+  field: string,
+  size: number,
+  excludeMemory: boolean
+): string =>
   [
     `FROM ${value} METADATA _id, _index`,
     ...kiLifecyclePipeline(type),
+    ...(excludeMemory ? [`WHERE ${EXCLUDE_MEMORY_KI_TYPES_CONDITION}`] : []),
     ...(field === KI_TAGS_FIELD ? [`MV_EXPAND ${field}`] : []),
     `WHERE ${field} IS NOT NULL`,
     `STATS count = COUNT(*) BY ${field}`,
@@ -88,14 +95,14 @@ export const describeAiIndexAggregations = async ({
       ? runCounts(
           esClient,
           spaceId,
-          countsQuery(dest, KI_TYPE_FIELD, MAX_AI_INDEX_DESCRIBE_TYPE_COUNTS)
+          countsQuery(dest, KI_TYPE_FIELD, MAX_AI_INDEX_DESCRIBE_TYPE_COUNTS, true)
         )
       : [],
     hasTags
       ? runCounts(
           esClient,
           spaceId,
-          countsQuery(dest, KI_TAGS_FIELD, MAX_AI_INDEX_DESCRIBE_TAG_COUNTS)
+          countsQuery(dest, KI_TAGS_FIELD, MAX_AI_INDEX_DESCRIBE_TAG_COUNTS, hasType)
         )
       : [],
   ]);

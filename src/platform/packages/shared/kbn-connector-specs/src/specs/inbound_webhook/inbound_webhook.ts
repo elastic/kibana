@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { v4 as uuidv4 } from 'uuid';
 import type { ConnectorSpec } from '../../connector_spec';
 import type { ConnectorIngressContext, HandleEventsResult } from '../../connector_spec_events';
@@ -92,7 +92,7 @@ export const InboundWebhook: ConnectorSpec = {
   },
 
   // ingestTokenHash is factory-injected for every spec with events.
-  schema: z.object({}),
+  schema: lazySchema(() => z.object({})),
 
   actions: {},
 

@@ -46,7 +46,6 @@ import { createPortal } from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
 import { QuerySource } from '@kbn/esql-types';
 import { DEFAULT_HISTOGRAM_BAR_TARGET } from '@kbn/data-service';
-import { isMac } from '@kbn/shared-ux-utility';
 import { useLookupIndexCommand } from './lookup_join';
 import { useCommentToEsql, useGhostLineHint, useVisorNlToEsql } from './comment_to_esql';
 import { useSuggestFix } from './suggest_fix/use_suggest_fix';
@@ -54,6 +53,7 @@ import { useEditorAiStyle } from './editor_ai.styles';
 import { useFieldsBrowser } from './resource_browser/use_fields_browser';
 import { EditorFooter } from './editor_footer';
 import { QuickSearchVisor } from './editor_visor';
+import { getEditorPlaceholder } from './get_editor_placeholder';
 import { getTrimmedQuery } from './history_local_storage';
 import { useEsqlEditorActions } from './hooks/use_esql_editor_actions';
 import { useNlToEsqlCheck } from './hooks/use_nl_to_esql_check';
@@ -98,7 +98,7 @@ import {
 } from './custom_editor_commands';
 import { useEsqlCallbacks } from './hooks/use_esql_callbacks';
 import { useMemoizedCaches } from './hooks/use_memoized_caches';
-import { useQueryActions } from './hooks/use_query_actions';
+import { useQueryActions, type PendingReviewActions } from './hooks/use_query_actions';
 import { useQueryValidation } from './hooks/use_query_validation';
 import { useEditorConfig } from './hooks/use_editor_config';
 import { useTimePickerPopover } from './hooks/use_time_picker_popover';
@@ -109,6 +109,7 @@ const BREAKPOINT_WIDTH = 540;
 
 export interface ESQLEditorFocusApi {
   focus: () => void;
+  acceptPendingReview: () => boolean;
 }
 
 export type ESQLEditorApi = RestorableStateProviderApi & ESQLEditorFocusApi;
@@ -142,8 +143,10 @@ const ESQLEditorInternal = function ESQLEditor({
   dataErrorsControl,
   mergeExternalMessages,
   hideQuickSearch,
+  hasExternalVisor,
   queryStats,
   enableResourceBrowser = false,
+  enableCreateView = false,
   onESQLDocsFlyoutVisibilityChanged,
   onVisorNlResultReady,
   editorApiRef,
@@ -151,7 +154,21 @@ const ESQLEditorInternal = function ESQLEditor({
   const popoverRef = useRef<HTMLDivElement>(null);
   const editorModel = useRef<monaco.editor.ITextModel>();
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
-  useImperativeHandle(editorApiRef, () => ({ focus: () => editorRef.current?.focus() }), []);
+
+  // Forward-declared so the query actions can accept or discard whichever AI review
+  // (comment-to-ES|QL, Fix with AI, visor) is pending; populated below by those hooks.
+  const pendingReviewRef = useRef<PendingReviewActions>({
+    accept: () => false,
+    discard: () => {},
+  });
+  useImperativeHandle(
+    editorApiRef,
+    () => ({
+      focus: () => editorRef.current?.focus(),
+      acceptPendingReview: () => pendingReviewRef.current.accept(),
+    }),
+    []
+  );
   const editorModelUriRef = useRef<string | undefined>(undefined);
   const containerRef = useRef<HTMLElement>(null);
   const suppressSuggestionsRef = useRef(false);
@@ -352,6 +369,7 @@ const ESQLEditorInternal = function ESQLEditor({
     onTextLangQuerySubmit,
     onQueryUpdate,
     telemetryService,
+    pendingReviewRef,
   });
 
   // Measure keystroke to React commit by waiting for the code state update.
@@ -399,7 +417,8 @@ const ESQLEditorInternal = function ESQLEditor({
         return;
       }
 
-      if (!editorRef.current) {
+      // Focus may have moved on since (e.g. to the visor input); triggerSuggest would steal it back
+      if (!editorRef.current?.hasTextFocus()) {
         return;
       }
 
@@ -504,6 +523,7 @@ const ESQLEditorInternal = function ESQLEditor({
     memoizedHistoryStarredItems,
     minimalQueryRef,
     getJoinIndicesCallback,
+    effectiveProjectRouting,
   } = useMemoizedCaches({
     code,
     core,
@@ -578,6 +598,7 @@ const ESQLEditorInternal = function ESQLEditor({
     favoritesClient,
     getJoinIndicesCallback,
     enableResourceBrowser,
+    projectRouting: effectiveProjectRouting,
   });
 
   const {
@@ -603,6 +624,7 @@ const ESQLEditorInternal = function ESQLEditor({
   });
 
   const isNlToEsqlEnabled = useNlToEsqlCheck();
+  const placeholder = getEditorPlaceholder({ hasExternalVisor, isNlToEsqlEnabled });
 
   const onUpdateAndSubmitQueryRef = useRef(onUpdateAndSubmitQuery);
   onUpdateAndSubmitQueryRef.current = onUpdateAndSubmitQuery;
@@ -613,16 +635,25 @@ const ESQLEditorInternal = function ESQLEditor({
 
   const editorAiStyle = useEditorAiStyle();
 
+  // Accepting an AI review is the user's own run, so both flows below report it as manual.
+  const runAcceptedQuery = useCallback(
+    (acceptedQuery: string) => onUpdateAndSubmitQuery(acceptedQuery, QuerySource.MANUAL),
+    [onUpdateAndSubmitQuery]
+  );
+
   const {
     generateFromComment: onGenerateFromComment,
     isReviewActiveRef,
     isGeneratingRef,
+    acceptReview: acceptCommentReview,
+    discardReview: discardCommentReview,
   } = useCommentToEsql({
     editorRef,
     editorModel,
     http: core.http,
     notifications: core.notifications,
     isEnabled: isNlToEsqlEnabled,
+    onSubmit: runAcceptedQuery,
     clearGhostHintRef,
     telemetryService,
     onAfterInsert: expandToFitContent,
@@ -680,12 +711,13 @@ const ESQLEditorInternal = function ESQLEditor({
       },
     });
 
-  useSuggestFix({
+  const { acceptReview: acceptFixReview, discardReview: discardFixReview } = useSuggestFix({
     editorRef,
     editorModel,
     http: core.http,
     notifications: core.notifications,
     isEnabled: isNlToEsqlEnabled,
+    onSubmit: runAcceptedQuery,
     telemetryService,
     onAfterInsert: expandToFitContent,
   });
@@ -697,13 +729,27 @@ const ESQLEditorInternal = function ESQLEditor({
     [onUpdateAndSubmitQuery]
   );
 
-  const { showVisorReview } = useVisorNlToEsql({
+  const {
+    showVisorReview,
+    acceptReview: acceptVisorReview,
+    discardReview: discardVisorReview,
+  } = useVisorNlToEsql({
     editorRef,
     editorModel,
     onSubmit: visorNlOnSubmit,
     onAfterInsert: expandToFitContent,
     telemetryService,
   });
+
+  // The first review that reports it was pending wins; accepting submits the query itself.
+  pendingReviewRef.current = {
+    accept: () => acceptCommentReview() || acceptFixReview() || acceptVisorReview(),
+    discard: () => {
+      discardCommentReview();
+      discardFixReview();
+      discardVisorReview();
+    },
+  };
 
   useEffect(() => {
     onVisorNlResultReady?.(showVisorReview);
@@ -809,17 +855,7 @@ const ESQLEditorInternal = function ESQLEditor({
                 languageId={ESQL_LANG_ID}
                 classNameCss={getEditorOverwrites(theme)}
                 value={code}
-                placeholder={
-                  isNlToEsqlEnabled
-                    ? i18n.translate('esqlEditor.placeholder', {
-                        defaultMessage:
-                          "Start typing ES|QL, or describe what you're looking for in a // comment, then press {commandKey}+J to generate the query",
-                        values: { commandKey: isMac ? '⌘' : 'Ctrl' },
-                      })
-                    : i18n.translate('esqlEditor.placeholder.basic', {
-                        defaultMessage: 'Start typing ES|QL',
-                      })
-                }
+                placeholder={placeholder}
                 options={codeEditorOptions}
                 width="100%"
                 suggestionProvider={suggestionProvider}
@@ -995,6 +1031,7 @@ const ESQLEditorInternal = function ESQLEditor({
           isDisabled={Boolean(isDisabled)}
           disableSubmitAction={Boolean(disableSubmitAction)}
           onKqlSubmitted={focusEditor}
+          hasOutline={Boolean(hasOutline)}
         />
       )}
       {(isHistoryOpen || (isLanguageComponentOpen && editorIsInline)) && (
@@ -1040,6 +1077,7 @@ const ESQLEditorInternal = function ESQLEditor({
         starredQueriesService={starredQueriesService}
         queryStats={queryStats}
         hideQueryHistory={hideQueryHistory}
+        enableCreateView={enableCreateView}
         onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged}
         {...editorMessages}
         onErrorClick={onErrorClick}

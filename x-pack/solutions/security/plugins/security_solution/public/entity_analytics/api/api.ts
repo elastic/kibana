@@ -23,9 +23,9 @@ import {
   ENTITY_DETAILS_AI_SUMMARY_INTERNAL_URL,
 } from '../../../common/entity_analytics/entity_analytics/constants';
 import type {
-  AnomalyOverviewRequestBody,
+  GetAnomalyOverviewRequestBodyInput,
   AnomalyOverviewResponse,
-  AnomalySummaryRequestBody,
+  GetAnomalySummaryRequestBodyInput,
   AnomalySummaryResponse,
   AssetCriticalityRecord,
   ConfigureRiskEngineSavedObjectRequestBodyInput,
@@ -755,7 +755,11 @@ export const useEntityAnalyticsRoutes = () => {
         body: JSON.stringify(params),
       });
 
-    const fetchEntityDetailsHighlights = (
+    const fetchEntityDetailsHighlights = ({
+      params,
+      signal,
+      context,
+    }: {
       params: {
         entityType: string;
         entityIdentifier: string;
@@ -763,23 +767,30 @@ export const useEntityAnalyticsRoutes = () => {
         from: number;
         to: number;
         connectorId: string;
-      },
-      signal?: AbortSignal
-    ): Promise<EntityDetailsHighlightsResponse> =>
+      };
+      signal?: AbortSignal;
+      context?: KibanaExecutionContext;
+    }): Promise<EntityDetailsHighlightsResponse> =>
       http.fetch(ENTITY_DETAILS_HIGHLIGHT_INTERNAL_URL, {
         version: API_VERSIONS.internal.v1,
         method: 'POST',
         body: JSON.stringify(params),
         signal,
+        context,
       });
 
-    const saveEntityAiSummary = (
-      params: SaveEntityAiSummaryParams
-    ): Promise<{ created: boolean }> =>
+    const saveEntityAiSummary = ({
+      params,
+      context,
+    }: {
+      params: SaveEntityAiSummaryParams;
+      context?: KibanaExecutionContext;
+    }): Promise<{ created: boolean }> =>
       http.fetch(ENTITY_DETAILS_AI_SUMMARY_INTERNAL_URL, {
         version: API_VERSIONS.internal.v1,
         method: 'POST',
         body: JSON.stringify(params),
+        context,
       });
 
     /**
@@ -787,15 +798,21 @@ export const useEntityAnalyticsRoutes = () => {
      * `canRead: false` in the response means the user lacks metadata read access
      * and the caller should fall back to on-demand generation.
      */
-    const fetchPersistedAiSummary = (
-      params: { entityType: string; entityIdentifier: string },
-      signal?: AbortSignal
-    ): Promise<GetPersistedAiSummaryResponse> =>
+    const fetchPersistedAiSummary = ({
+      params,
+      signal,
+      context,
+    }: {
+      params: { entityType: string; entityIdentifier: string };
+      signal?: AbortSignal;
+      context?: KibanaExecutionContext;
+    }): Promise<GetPersistedAiSummaryResponse> =>
       http.fetch(ENTITY_DETAILS_AI_SUMMARY_INTERNAL_URL, {
         version: API_VERSIONS.internal.v1,
         method: 'GET',
         query: { entityId: params.entityIdentifier, entityType: params.entityType },
         signal,
+        context,
       });
 
     /**
@@ -1045,7 +1062,7 @@ export const useEntityAnalyticsRoutes = () => {
     }: {
       entityType: string;
       entityId: string;
-      body?: AnomalySummaryRequestBody;
+      body?: GetAnomalySummaryRequestBodyInput;
       signal?: AbortSignal;
       context?: KibanaExecutionContext;
     }) =>
@@ -1072,7 +1089,7 @@ export const useEntityAnalyticsRoutes = () => {
     }: {
       entityType: string;
       entityId: string;
-      body?: AnomalyOverviewRequestBody;
+      body?: GetAnomalyOverviewRequestBodyInput;
       signal?: AbortSignal;
       context?: KibanaExecutionContext;
     }) =>
