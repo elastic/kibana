@@ -28,6 +28,7 @@ module.exports = {
     '@kbn/eslint-plugin-i18n',
     '@kbn/eslint-plugin-alerting-v2',
     '@kbn/eslint-plugin-kbn-ui',
+    '@kbn/eslint-plugin-kbn-monaco',
     // `@elastic/eui/*` and `depend/*` rules run in oxlint (.oxlint/eui.mts, .oxlint/depend.mts).
     // The plugins stay registered so `eslint-disable` directives naming their rules resolve.
     '@elastic/eui',

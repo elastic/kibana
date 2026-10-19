@@ -6,7 +6,7 @@ plugins through `@kbn/ui-shared-deps-npm` / `@kbn/ui-shared-deps-src` so they us
 
 Consumers import from the **root of `@kbn/code-editor`**, which provides the React editor,
 accessibility behaviour, and EUI theme lifecycle. Only that package and `@kbn/monaco` itself should
-import `@kbn/monaco` directly. `@kbn/imports/no_direct_monaco_import` warns on violations; if a symbol
+import `@kbn/monaco` directly. `@kbn/kbn-monaco/no_direct_monaco_import` warns on violations; if a symbol
 is missing, export it from `@kbn/code-editor`'s index.
 
 ## How it works

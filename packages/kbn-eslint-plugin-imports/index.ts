@@ -21,7 +21,6 @@ import { NoGroupCrossingImportsRule } from './src/rules/no_group_crossing_import
 import { NoGroupCrossingManifestsRule } from './src/rules/no_group_crossing_manifests';
 import { RequireImportRule } from './src/rules/require_import';
 import { NoDirectHandlebarsImportRule } from './src/rules/no_direct_handlebars_import';
-import { NoDirectMonacoImportRule } from './src/rules/no_direct_monaco_import';
 import { NoUndeclaredPluginTargetRule } from './src/rules/no_undeclared_plugin_target';
 import { NoReduxToolkitV2ImportsRule } from './src/rules/no_redux_toolkit_v2_imports';
 
@@ -37,7 +36,6 @@ const plugin = eslintCompatPlugin({
     no_group_crossing_manifests: NoGroupCrossingManifestsRule,
     require_import: RequireImportRule,
     no_direct_handlebars_import: NoDirectHandlebarsImportRule,
-    no_direct_monaco_import: NoDirectMonacoImportRule,
     no_undeclared_plugin_target: NoUndeclaredPluginTargetRule,
     no_redux_toolkit_v2_imports: NoReduxToolkitV2ImportsRule,
   },
