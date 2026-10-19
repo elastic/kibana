@@ -15,7 +15,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { debounceTime } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
-import { QueryClientProvider } from '@kbn/react-query';
 import type { DashboardApi } from '..';
 import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
 import { DashboardRenderer } from '../dashboard_renderer/dashboard_renderer';
@@ -40,7 +39,6 @@ import type { DashboardRedirect } from './types';
 import { type DashboardEmbedSettings } from './types';
 import { startSyncingExpandedPanelState } from './url';
 import type { DashboardInternalApi } from '../dashboard_api/types';
-import { dashboardQueryClient } from '../services/dashboard_query_client';
 
 export interface DashboardAppProps {
   history: History;
@@ -183,7 +181,7 @@ export function DashboardApp({
   return showNoDataPage ? (
     <DashboardAppNoDataPage onDataViewCreated={() => setShowNoDataPage(false)} />
   ) : (
-    <QueryClientProvider client={dashboardQueryClient}>
+    <>
       {dashboardApi && dashboardInternalApi && (
         <>
           <DashboardTabTitleSetter dashboardApi={dashboardApi} />
@@ -216,6 +214,6 @@ export function DashboardApp({
         showPlainSpinner={showPlainSpinner}
         getCreationOptions={getCreationOptions}
       />
-    </QueryClientProvider>
+    </>
   );
 }

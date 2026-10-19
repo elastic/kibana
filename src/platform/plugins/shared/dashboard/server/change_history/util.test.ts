@@ -31,9 +31,9 @@ const getContext = (user: unknown = { username: 'elastic', profile_uid: 'u_1' })
     core: Promise.resolve({ security: { authc: { getCurrentUser: () => user } } }),
   } as unknown as RequestHandlerContext);
 
-const getClient = (previousSnapshot?: DashboardState) => ({
+const getClient = (latestHistorySnapshot?: DashboardState) => ({
   getHistory: jest.fn().mockResolvedValue({
-    items: previousSnapshot ? [{ object: { snapshot: previousSnapshot } }] : [],
+    items: latestHistorySnapshot ? [{ object: { snapshot: latestHistorySnapshot } }] : [],
   }),
   log: jest.fn().mockResolvedValue(undefined),
 });
@@ -132,6 +132,7 @@ describe('addToHistory', () => {
         objectId: 'dash-1',
         sequence: 1,
         snapshot: baseArgs.snapshot,
+        timestamp: baseArgs.timestamp,
       },
       expect.objectContaining({
         action: 'dashboard_update',
@@ -155,20 +156,41 @@ describe('addToHistory', () => {
   });
 
   it('stores the change count compared with the previous snapshot', async () => {
-    const client = getClient({ title: 'Old' } as DashboardState);
+    const client = getClient();
     mockedGetClient.mockReturnValue(client as never);
-    await addToHistory({ ...baseArgs, ctx: getContext(), sequence: 2 });
+    await addToHistory({
+      ...baseArgs,
+      ctx: getContext(),
+      sequence: 2,
+      previousSnapshot: { title: 'Old' } as DashboardState,
+    });
 
     expect(client.log.mock.calls[0][1].data.metadata).toEqual({ changeCount: 1 });
     expect(client.log.mock.calls[0][1].refresh).toBeUndefined();
   });
 
-  it('records restoredFrom and waits for refresh on restore', async () => {
-    const client = getClient({ title: 'Old' } as DashboardState);
+  it('ignores the latest searchable history event when computing the change count', async () => {
+    // history lags behind (e.g. v1 is still the latest searchable event while saving v3)
+    const client = getClient({ ...baseArgs.snapshot, title: 'v1' } as DashboardState);
     mockedGetClient.mockReturnValue(client as never);
     await addToHistory({
       ...baseArgs,
       ctx: getContext(),
+      sequence: 3,
+      previousSnapshot: baseArgs.snapshot,
+    });
+
+    expect(client.getHistory).not.toHaveBeenCalled();
+    expect(client.log.mock.calls[0][1].data.metadata).toEqual({ changeCount: 0 });
+  });
+
+  it('records restoredFrom and waits for refresh on restore', async () => {
+    const client = getClient();
+    mockedGetClient.mockReturnValue(client as never);
+    await addToHistory({
+      ...baseArgs,
+      ctx: getContext(),
+      previousSnapshot: { title: 'Old' } as DashboardState,
       sequence: 5,
       restoredFrom: 2,
     });

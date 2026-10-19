@@ -135,7 +135,19 @@ describe('getChangeHistoryContext', () => {
     expect(result).toEqual({ error: unavailable });
   });
 
-  it('returns the client, the space of the request and the latest history sequence', async () => {
+  it('uses the saved object history sequence even when history is behind', async () => {
+    getSavedObject.mockResolvedValue({ attributes: { historySequence: 5 } });
+    const client = {
+      getHistory: jest.fn().mockResolvedValue({ items: [{ object: { sequence: 3 } }] }),
+    };
+    mockedGetClient.mockReturnValue(client as never);
+    const res = httpServerMock.createResponseFactory();
+    const result = await getChangeHistoryContext(getContext(true), req, res, 'dash-1');
+
+    expect(result).toEqual({ client, spaceId: 'space-for-req-1', currentSequence: 5 });
+  });
+
+  it('falls back to the latest history sequence when the saved object has none', async () => {
     const client = {
       getHistory: jest.fn().mockResolvedValue({ items: [{ object: { sequence: 3 } }] }),
     };

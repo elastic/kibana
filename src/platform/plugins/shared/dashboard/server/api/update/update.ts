@@ -166,10 +166,16 @@ export async function update(
       strictValidationSchema,
     });
     if (snapshot && newSequence !== undefined) {
+      const previousSnapshot = getHistorySnapshot({
+        attributes: existing.attributes,
+        references: existing.references,
+        strictValidationSchema,
+      });
       await addToHistory({
         ctx: requestCtx,
         dashboardId: id,
         snapshot,
+        previousSnapshot,
         spaceId,
         sequence: newSequence,
         timestamp: savedObject.updated_at ?? new Date(Date.now()).toISOString(),

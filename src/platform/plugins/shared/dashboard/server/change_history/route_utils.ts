@@ -30,7 +30,7 @@ export const CHANGE_HISTORY_ROUTE_SECURITY = {
 
 /**
  * Checks the dashboard "all" privilege and access to the target dashboard saved object, then resolves the change history client and space for a
- * request, along with the saved dashboard's current history sequence. Returns the error response to send when the request cannot be served.
+ * request, along with the saved dashboard's current history sequence (its stored `historySequence`). Returns the error response to send when the request cannot be served.
  */
 export const getChangeHistoryContext = async <P, Q, B, M extends RouteMethod>(
   ctx: RequestHandlerContext,
@@ -57,11 +57,13 @@ export const getChangeHistoryContext = async <P, Q, B, M extends RouteMethod>(
   }
 
   // history is read with an internally privileged client, so access to the dashboard must be verified
+  let storedSequence: number | undefined;
   try {
-    await core.savedObjects.client.get<DashboardSavedObjectAttributes>(
+    const { attributes } = await core.savedObjects.client.get<DashboardSavedObjectAttributes>(
       DASHBOARD_SAVED_OBJECT_TYPE,
       dashboardId
     );
+    storedSequence = attributes.historySequence;
   } catch (e) {
     if (SavedObjectsErrorHelpers.isNotFoundError(e)) return { error: res.notFound() };
     if (SavedObjectsErrorHelpers.isForbiddenError(e)) return { error: res.forbidden() };
@@ -76,7 +78,11 @@ export const getChangeHistoryContext = async <P, Q, B, M extends RouteMethod>(
       error: res.customError({ statusCode: 503, body: 'Change history service is not ready' }),
     };
   }
-  // the dashboard exists, so its latest version is the current one
-  const { latest: currentSequence } = await getHistorySequences({ spaceId, dashboardId });
+  // The saved object is the source of truth for the current version: history is eventually consistent and failed history writes are
+  // swallowed, so the latest searchable event can lag behind it. Only dashboards saved before the sequence was stored fall back to history.
+  const currentSequence =
+    typeof storedSequence === 'number'
+      ? storedSequence
+      : (await getHistorySequences({ spaceId, dashboardId })).latest;
   return { client, spaceId, currentSequence };
 };

@@ -99,6 +99,7 @@ export const addToHistory = async ({
   spaceId = 'default',
   dashboardId,
   snapshot,
+  previousSnapshot,
   timestamp,
   sequence,
   restoredFrom,
@@ -108,6 +109,8 @@ export const addToHistory = async ({
   spaceId: string | undefined;
   dashboardId: string;
   snapshot: DashboardState;
+  /** Pre-change state the change count is computed against; omitted when there is no predecessor (e.g. create). */
+  previousSnapshot?: DashboardState;
   timestamp: string;
   sequence: number;
   restoredFrom?: number;
@@ -132,15 +135,12 @@ export const addToHistory = async ({
   };
 
   try {
-    const {
-      items: [previous],
-    } = await client.getHistory(spaceId, 'dashboard', dashboardId, {
-      size: 1,
-    });
-
-    // stored with the event so that listing history does not need to diff every snapshot
-    const changeCount = previous
-      ? jsonpatchFormatter.format(jsondiffpatch.diff(previous.object.snapshot, snapshot)).length
+    // Diffed against the saved object read before the update rather than the latest history event:
+    // history is searchable only after a refresh, so consecutive saves could otherwise be compared
+    // with an older version or with none. Stored with the event so that listing history does not
+    // need to diff every snapshot.
+    const changeCount = previousSnapshot
+      ? jsonpatchFormatter.format(jsondiffpatch.diff(previousSnapshot, snapshot)).length
       : undefined;
 
     await client.log(change, {
