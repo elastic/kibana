@@ -338,9 +338,7 @@ describe('RulesTabContent', () => {
 
       await userEvent.type(screen.getByTestId('ruleExecutionHistorySearch'), 'nothing');
 
-      await waitFor(() => {
-        expect(screen.getByTestId('executionHistoryFilteredEmptyPrompt')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('executionHistoryFilteredEmptyPrompt')).toBeInTheDocument();
     });
 
     it('warns when the search matched more rules than the server could filter on', async () => {
@@ -357,9 +355,7 @@ describe('RulesTabContent', () => {
 
       await userEvent.type(screen.getByTestId('ruleExecutionHistorySearch'), 'cpu');
 
-      await waitFor(() => {
-        expect(screen.getByText(/matched 600 matching rules/i)).toBeInTheDocument();
-      });
+      expect(await screen.findByText(/matched 600 matching rules/i)).toBeInTheDocument();
     });
 
     it('warns about a truncated search even when the page has no executions', async () => {
@@ -376,9 +372,7 @@ describe('RulesTabContent', () => {
 
       await userEvent.type(screen.getByTestId('ruleExecutionHistorySearch'), 'cpu');
 
-      await waitFor(() => {
-        expect(screen.getByText(/matched 600 matching rules/i)).toBeInTheDocument();
-      });
+      expect(await screen.findByText(/matched 600 matching rules/i)).toBeInTheDocument();
       expect(screen.getByTestId('executionHistoryFilteredEmptyPrompt')).toBeInTheDocument();
     });
 

@@ -242,19 +242,31 @@ apiTest.describe('List rule executions API', { tag: '@local-stateful-classic' },
       );
       await apiServices.alertingV2.ruleExecutions.waitForRuns({ ruleId: rule.id, runs: 1 });
 
-      const response = await apiClient.get(
-        listRuleExecutionsUrl({
-          search: `searchable-filtered-rule-${nameSuffix}`,
-          outcomes: ['success'],
-        }),
+      const searchName = `searchable-filtered-rule-${nameSuffix}`;
+
+      const successResponse = await apiClient.get(
+        listRuleExecutionsUrl({ search: searchName, outcomes: ['success'], per_page: 100 }),
         { headers: searcherHeaders }
       );
 
-      expect(response).toHaveStatusCode(200);
-      expect(response.body.items.length).toBeGreaterThanOrEqual(1);
-      for (const item of response.body.items) {
+      expect(successResponse).toHaveStatusCode(200);
+      expect(successResponse.body.items.length).toBeGreaterThanOrEqual(1);
+      for (const item of successResponse.body.items) {
         expect(item.outcome).toBe('success');
         expect(item.rule.id).toBe(rule.id);
+      }
+
+      // The runs above are known successes, so the failure filter must not return any of them.
+      const successIds = successResponse.body.items.map((item: { id: string }) => item.id);
+      const failureResponse = await apiClient.get(
+        listRuleExecutionsUrl({ search: searchName, outcomes: ['failure'], per_page: 100 }),
+        { headers: searcherHeaders }
+      );
+
+      expect(failureResponse).toHaveStatusCode(200);
+      for (const item of failureResponse.body.items) {
+        expect(item.outcome).toBe('failure');
+        expect(successIds).not.toContain(item.id);
       }
     }
   );

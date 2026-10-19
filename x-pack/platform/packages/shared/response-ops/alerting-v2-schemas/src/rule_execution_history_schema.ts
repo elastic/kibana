@@ -145,7 +145,9 @@ export const ruleSearchMatchCountsSchema = lazySchema(() =>
     rules: z.number().describe(`Rules matching the search. ${ESTIMATED_COUNT_NOTE}`),
     is_truncated: z
       .boolean()
-      .describe('True when the server filter cap was reached and results may be truncated.'),
+      .describe(
+        'True when more than 500 rules matched the search. Only the executions of the first 500 matching rules are returned, so the results are incomplete. Narrow the search to see the rest.'
+      ),
   })
 );
 export type RuleSearchMatchCounts = z.infer<typeof ruleSearchMatchCountsSchema>;
@@ -163,9 +165,7 @@ export const listRuleExecutionsResponseSchema = lazySchema(() =>
       per_page: z.number().int().min(1),
       search_matches: ruleSearchMatchCountsSchema
         .optional()
-        .describe(
-          'Match counts for the active search. Omitted when no search was provided. When is_truncated is true the server ID filter was capped and the result may be truncated.'
-        ),
+        .describe('Match counts for the active search. Omitted when no search was provided.'),
     })
     .meta({ id: 'alerting_rule_executions_response' })
 );
