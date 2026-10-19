@@ -54,17 +54,15 @@ function batchPatterns(patterns: string[]): string[] {
   return batches;
 }
 
-// Instances that cannot use the Fleet agent data API are detected through index patterns.
+// The index patterns of one instance, in its own namespace. Instances that cannot use the Fleet
+// agent data API are detected through these.
 function getInstancePatterns(
   entry: AwsServiceMatrixEntry,
-  patternInstanceIds: string[],
+  instanceId: string,
   serviceSettings: ServiceSettingsPersistedState
 ): string[] {
   const { serviceVars = {} } = serviceSettings;
-  const patterns = patternInstanceIds.flatMap((instanceId) =>
-    getServiceIndexPatterns(entry, serviceVars[instanceId]?.namespace)
-  );
-  return [...new Set(patterns)];
+  return getServiceIndexPatterns(entry, serviceVars[instanceId]?.namespace);
 }
 
 /** The Fleet agent behind a service tile — the worst instance when a service is duplicated. */
@@ -143,13 +141,15 @@ export function useServiceDataDetection(): ServiceDataDetectionResult {
     [policyIdsByInstance, dataSourceByInstanceId]
   );
 
-  const patternsByServiceId = useMemo(() => {
+  // Per instance: duplicates can sit in different namespaces, and one duplicate's data must not
+  // mark another as receiving. Only the request below combines them.
+  const patternsByInstanceId = useMemo(() => {
     const byId = new Map<string, string[]>();
     for (const [serviceId, instanceIds] of instanceIdsByServiceId) {
       const entry = awsServicesMap?.get(serviceId);
-      const patternInstanceIds = instanceIds.filter(isPatternInstance);
-      if (entry && patternInstanceIds.length > 0) {
-        byId.set(serviceId, getInstancePatterns(entry, patternInstanceIds, serviceSettings));
+      if (!entry) continue;
+      for (const instanceId of instanceIds.filter(isPatternInstance)) {
+        byId.set(instanceId, getInstancePatterns(entry, instanceId, serviceSettings));
       }
     }
     return byId;
@@ -157,13 +157,13 @@ export function useServiceDataDetection(): ServiceDataDetectionResult {
 
   const allPatterns = useMemo(() => {
     const patterns = new Set<string>();
-    for (const servicePatterns of patternsByServiceId.values()) {
-      for (const p of servicePatterns) {
+    for (const instancePatterns of patternsByInstanceId.values()) {
+      for (const p of instancePatterns) {
         if (isValidDataStreamIndexPattern(p)) patterns.add(p);
       }
     }
     return [...patterns];
-  }, [patternsByServiceId]);
+  }, [patternsByInstanceId]);
 
   const shouldPoll = allPatterns.length > 0 && shouldPollAgents;
 
@@ -186,16 +186,18 @@ export function useServiceDataDetection(): ServiceDataDetectionResult {
   // Chip state per instance: context state overlaid with the agent and data signals.
   const instanceStates = useMemo((): Record<string, ServiceChipState> => {
     const result: Record<string, ServiceChipState> = {};
-    for (const { instanceId, serviceId } of instances) {
+    for (const { instanceId } of instances) {
       const agentSummary = summaryByInstanceId[instanceId];
-      const patterns = patternsByServiceId.get(serviceId);
-      // A hit in the package's streams is only this integration's if it is running; without a live
-      // unit it can be another integration's data. ECF has no agent, so nothing to wait for.
+      const patterns = patternsByInstanceId.get(instanceId);
+      // A hit in the package's streams is only this integration's if an agent is running it; with
+      // no live agent it can be another integration's data. Only ECF has no agent to wait for.
+      const hasLiveAgent =
+        !policyIdsByInstance[instanceId] || (agentSummary?.liveAgentIds.length ?? 0) > 0;
       const hasData = isPatternInstance(instanceId)
         ? !!queryData &&
           !!patterns &&
           patterns.some((p) => queryData.results[p] === true) &&
-          !agentSummary?.noLiveUnits
+          hasLiveAgent
         : !!hasDataByInstanceId[instanceId];
       result[instanceId] = deriveInstanceChipState({
         contextStatus: serviceStatuses[instanceId] ?? 'instantiating',
@@ -210,8 +212,9 @@ export function useServiceDataDetection(): ServiceDataDetectionResult {
     instances,
     summaryByInstanceId,
     hasDataByInstanceId,
-    patternsByServiceId,
+    patternsByInstanceId,
     isPatternInstance,
+    policyIdsByInstance,
     queryData,
     serviceStatuses,
     deployErrors,

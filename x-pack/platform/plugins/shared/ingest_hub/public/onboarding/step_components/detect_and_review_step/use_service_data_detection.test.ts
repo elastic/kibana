@@ -249,40 +249,121 @@ describe('useServiceDataDetection', () => {
     expect(httpGet.mock.calls[0][1].query.dataStreams).toBe('logs-aws.cloudtrail-*');
   });
 
-  it('marks the service receiving when any instance namespace pattern has data', () => {
-    setup({
-      serviceSettings: {
-        globalRegion: 'us-east-1',
-        instances: [
-          { instanceId: 'cloudtrail', serviceId: 'cloudtrail', name: 'CT', isDuplicate: false },
-          {
-            instanceId: 'cloudtrail__dup-1',
-            serviceId: 'cloudtrail',
-            name: 'CT 2',
-            isDuplicate: true,
-          },
-        ],
-        serviceVars: {
-          cloudtrail: {
-            enabledDataStreams: ['cloudtrail'],
-            varsByDataStream: {},
-            namespace: 'prod',
-          },
-          'cloudtrail__dup-1': {
-            enabledDataStreams: ['cloudtrail'],
-            varsByDataStream: {},
-            namespace: 'staging',
-          },
+  describe('duplicates in different namespaces', () => {
+    const TWO_NAMESPACES: ServiceSettingsPersistedState = {
+      globalRegion: 'us-east-1',
+      instances: [
+        { instanceId: 'cloudtrail', serviceId: 'cloudtrail', name: 'CT', isDuplicate: false },
+        {
+          instanceId: 'cloudtrail__dup-1',
+          serviceId: 'cloudtrail',
+          name: 'CT 2',
+          isDuplicate: true,
+        },
+      ],
+      serviceVars: {
+        cloudtrail: { enabledDataStreams: ['cloudtrail'], varsByDataStream: {}, namespace: 'prod' },
+        'cloudtrail__dup-1': {
+          enabledDataStreams: ['cloudtrail'],
+          varsByDataStream: {},
+          namespace: 'staging',
         },
       },
-      serviceStatuses: { cloudtrail: 'detecting' },
-      queryData: {
-        results: { 'logs-aws.cloudtrail-prod': false, 'logs-aws.cloudtrail-staging': true },
-      },
-    });
-    const { result } = renderHook(() => useServiceDataDetection());
+    };
+    const DETECTING = { cloudtrail: 'detecting', 'cloudtrail__dup-1': 'detecting' };
 
-    expect(result.current.statusByInstanceId.cloudtrail).toBe('receiving');
+    it('matches each instance against its own namespace, so one duplicate cannot mark the other', () => {
+      setup({
+        serviceSettings: TWO_NAMESPACES,
+        serviceStatuses: DETECTING,
+        queryData: {
+          results: { 'logs-aws.cloudtrail-prod': false, 'logs-aws.cloudtrail-staging': true },
+        },
+      });
+      const { result } = renderHook(() => useServiceDataDetection());
+
+      // The staging duplicate has data, the prod original does not, so the tile is not receiving.
+      expect(result.current.statusByInstanceId.cloudtrail).toBe('detecting');
+    });
+
+    it('keeps polling for the instance that is still quiet', () => {
+      setup({
+        serviceSettings: TWO_NAMESPACES,
+        serviceStatuses: DETECTING,
+        queryData: {
+          results: { 'logs-aws.cloudtrail-prod': false, 'logs-aws.cloudtrail-staging': true },
+        },
+      });
+      renderHook(() => useServiceDataDetection());
+
+      const { calls } = mockUseAgentDetection.mock;
+      expect(calls[calls.length - 1][0].shouldPoll).toBe(true);
+    });
+
+    it('persists receiving only for the instance whose namespace has data', () => {
+      const { updateDetectAndReviewStep } = setup({
+        serviceSettings: TWO_NAMESPACES,
+        serviceStatuses: DETECTING,
+        queryData: {
+          results: { 'logs-aws.cloudtrail-prod': false, 'logs-aws.cloudtrail-staging': true },
+        },
+      });
+      renderHook(() => useServiceDataDetection());
+
+      expect(updateDetectAndReviewStep).toHaveBeenCalledWith({
+        serviceStatuses: { 'cloudtrail__dup-1': 'receiving' },
+      });
+    });
+
+    it('is receiving once every instance has data in its own namespace', () => {
+      setup({
+        serviceSettings: TWO_NAMESPACES,
+        serviceStatuses: DETECTING,
+        queryData: {
+          results: { 'logs-aws.cloudtrail-prod': true, 'logs-aws.cloudtrail-staging': true },
+        },
+      });
+      const { result } = renderHook(() => useServiceDataDetection());
+
+      expect(result.current.statusByInstanceId.cloudtrail).toBe('receiving');
+    });
+
+    it('still asks for both namespaces in a single request', async () => {
+      const { httpGet } = setup({ serviceSettings: TWO_NAMESPACES });
+      renderHook(() => useServiceDataDetection());
+
+      await mockUseQuery.mock.calls[0][0].queryFn();
+
+      expect(httpGet).toHaveBeenCalledTimes(1);
+      expect(httpGet.mock.calls[0][1].query.dataStreams).toBe(
+        'logs-aws.cloudtrail-prod,logs-aws.cloudtrail-staging'
+      );
+    });
+
+    it('applies per instance for pattern-sourced Fleet instances too', () => {
+      const instance = (id: string) => ({
+        health: 'healthy',
+        agent: { id },
+        agentIds: [id],
+        liveAgentIds: [id],
+      });
+      setup({
+        serviceSettings: TWO_NAMESPACES,
+        serviceStatuses: DETECTING,
+        policyIdsByInstance: { cloudtrail: 'policy-1', 'cloudtrail__dup-1': 'policy-2' },
+        agentDetection: {
+          ...NO_AGENTS,
+          summaryByInstanceId: { cloudtrail: instance('a1'), 'cloudtrail__dup-1': instance('a2') },
+          dataSourceByInstanceId: { cloudtrail: 'patterns', 'cloudtrail__dup-1': 'patterns' },
+        },
+        queryData: {
+          results: { 'logs-aws.cloudtrail-prod': false, 'logs-aws.cloudtrail-staging': true },
+        },
+      });
+      const { result } = renderHook(() => useServiceDataDetection());
+
+      expect(result.current.statusByInstanceId.cloudtrail).toBe('detecting');
+    });
   });
 
   describe('instances deployed through Fleet', () => {
@@ -311,7 +392,9 @@ describe('useServiceDataDetection', () => {
       instanceId?: string;
     } = {}) => ({
       ...NO_AGENTS,
-      summaryByInstanceId: { [instanceId]: { health, agent: { id: 'a1' }, agentIds: ['a1'] } },
+      summaryByInstanceId: {
+        [instanceId]: { health, agent: { id: 'a1' }, agentIds: ['a1'], liveAgentIds: ['a1'] },
+      },
       hasDataByInstanceId: { [instanceId]: hasData },
     });
 
@@ -406,8 +489,18 @@ describe('useServiceDataDetection', () => {
         agentDetection: {
           ...NO_AGENTS,
           summaryByInstanceId: {
-            cloudtrail: { health: 'healthy', agent: { id: 'a1' }, agentIds: ['a1'] },
-            'cloudtrail__dup-1': { health: 'healthy', agent: { id: 'a2' }, agentIds: ['a2'] },
+            cloudtrail: {
+              health: 'healthy',
+              agent: { id: 'a1' },
+              agentIds: ['a1'],
+              liveAgentIds: ['a1'],
+            },
+            'cloudtrail__dup-1': {
+              health: 'healthy',
+              agent: { id: 'a2' },
+              agentIds: ['a2'],
+              liveAgentIds: ['a2'],
+            },
           },
           hasDataByInstanceId: { cloudtrail: true, 'cloudtrail__dup-1': true },
         },
@@ -427,8 +520,18 @@ describe('useServiceDataDetection', () => {
         agentDetection: {
           ...NO_AGENTS,
           summaryByInstanceId: {
-            cloudtrail: { health: 'healthy', agent: { id: 'a1' }, agentIds: ['a1'] },
-            'cloudtrail__dup-1': { health: 'healthy', agent: { id: 'a2' }, agentIds: ['a2'] },
+            cloudtrail: {
+              health: 'healthy',
+              agent: { id: 'a1' },
+              agentIds: ['a1'],
+              liveAgentIds: ['a1'],
+            },
+            'cloudtrail__dup-1': {
+              health: 'healthy',
+              agent: { id: 'a2' },
+              agentIds: ['a2'],
+              liveAgentIds: ['a2'],
+            },
           },
           hasDataByInstanceId: { cloudtrail: true, 'cloudtrail__dup-1': false },
         },
@@ -446,8 +549,18 @@ describe('useServiceDataDetection', () => {
         agentDetection: {
           ...NO_AGENTS,
           summaryByInstanceId: {
-            cloudtrail: { health: 'healthy', agent: { id: 'a1' }, agentIds: ['a1'] },
-            'cloudtrail__dup-1': { health: 'unhealthy', agent: { id: 'a2' }, agentIds: ['a2'] },
+            cloudtrail: {
+              health: 'healthy',
+              agent: { id: 'a1' },
+              agentIds: ['a1'],
+              liveAgentIds: ['a1'],
+            },
+            'cloudtrail__dup-1': {
+              health: 'unhealthy',
+              agent: { id: 'a2' },
+              agentIds: ['a2'],
+              liveAgentIds: ['a2'],
+            },
           },
           hasDataByInstanceId: { cloudtrail: true, 'cloudtrail__dup-1': false },
         },
@@ -648,6 +761,71 @@ describe('useServiceDataDetection', () => {
       const { result } = renderHook(() => useServiceDataDetection());
 
       expect(result.current.statusByInstanceId.cloudtrail).toBe('detecting');
+    });
+
+    it('ignores a pattern hit before any agent exists, so an older integration cannot mark it', () => {
+      // No agent yet: the summary is pending and no unit is flagged, but nothing is running.
+      setup({
+        serviceSettings: SINGLE,
+        serviceStatuses: { cloudtrail: 'detecting' },
+        policyIdsByInstance: { cloudtrail: 'policy-1' },
+        agentDetection: {
+          ...NO_AGENTS,
+          summaryByInstanceId: {
+            cloudtrail: { health: 'pending', agentIds: [], liveAgentIds: [] },
+          },
+          dataSourceByInstanceId: { cloudtrail: 'patterns' },
+        },
+        queryData: HIT,
+      });
+      const { result } = renderHook(() => useServiceDataDetection());
+
+      expect(result.current.statusByInstanceId.cloudtrail).toBe('detecting');
+    });
+
+    it('does not persist receiving or stop polling before any agent exists', () => {
+      const { updateDetectAndReviewStep } = setup({
+        serviceSettings: SINGLE,
+        serviceStatuses: { cloudtrail: 'detecting' },
+        policyIdsByInstance: { cloudtrail: 'policy-1' },
+        agentDetection: {
+          ...NO_AGENTS,
+          summaryByInstanceId: {
+            cloudtrail: { health: 'pending', agentIds: [], liveAgentIds: [] },
+          },
+          dataSourceByInstanceId: { cloudtrail: 'patterns' },
+        },
+        queryData: HIT,
+      });
+      renderHook(() => useServiceDataDetection());
+
+      expect(updateDetectAndReviewStep).not.toHaveBeenCalled();
+      const { calls } = mockUseAgentDetection.mock;
+      expect(calls[calls.length - 1][0].shouldPoll).toBe(true);
+    });
+
+    it('treats a Fleet-backed instance whose summary is not ready yet as having no agent', () => {
+      setup({
+        serviceSettings: SINGLE,
+        serviceStatuses: { cloudtrail: 'detecting' },
+        policyIdsByInstance: { cloudtrail: 'policy-1' },
+        agentDetection: { ...NO_AGENTS, dataSourceByInstanceId: { cloudtrail: 'patterns' } },
+        queryData: HIT,
+      });
+      const { result } = renderHook(() => useServiceDataDetection());
+
+      expect(result.current.statusByInstanceId.cloudtrail).toBe('detecting');
+    });
+
+    it('still lets ECF, which has no agent, be detected from its patterns alone', () => {
+      setup({
+        serviceSettings: SINGLE,
+        serviceStatuses: { cloudtrail: 'detecting' },
+        queryData: HIT,
+      });
+      const { result } = renderHook(() => useServiceDataDetection());
+
+      expect(result.current.statusByInstanceId.cloudtrail).toBe('receiving');
     });
 
     it('still shows an unhealthy agent as an error', () => {
