@@ -29,6 +29,8 @@ const ALERTING_V2_NOTIFICATION_GROUP_SCHEMA =
 /** Root document carrying `kibana.definitions.*`, used to resolve `#/kibana/definitions/...` refs. */
 const KIBANA_DEFINITIONS_ROOT = mergeKibanaBuiltinWorkflowInputDefinitionsIntoRootSchema({}) ?? {};
 
+const PAYLOAD_INPUT_NAME = 'payload';
+
 /** Known top-level property names on the `alertingV2NotificationGroup` payload schema. */
 const PAYLOAD_TOP_LEVEL_FIELDS = new Set(
   Object.keys(ALERTING_V2_NOTIFICATION_GROUP_SCHEMA?.properties ?? {})
@@ -305,6 +307,81 @@ export class DestinationValidator {
     }
   }
 
+  /**
+   * Validates that the manual trigger declares only the `payload` input.
+   * Action-policy dispatch populates `inputs.payload` and nothing else, so any
+   * other declared input is never filled and any other `required` entry makes
+   * the dispatch fail input validation.
+   */
+  validateManualTriggerInputs(destinationId: string, manualTrigger: ParsedTrigger): void {
+    const { properties, required } = (manualTrigger.inputs ?? {}) as {
+      properties?: unknown;
+      required?: unknown;
+    };
+    const extraProperties =
+      properties && typeof properties === 'object' && !Array.isArray(properties)
+        ? Object.keys(properties).filter((key) => key !== PAYLOAD_INPUT_NAME)
+        : [];
+    const extraRequired = Array.isArray(required)
+      ? required.filter((entry) => entry !== PAYLOAD_INPUT_NAME).map(String)
+      : [];
+    if (extraProperties.length === 0 && extraRequired.length === 0) return;
+
+    const problems: string[] = [];
+    if (extraProperties.length > 0) {
+      problems.push(
+        `  - unexpected input properties: ${formatCodeList(extraProperties)} ` +
+          `(only \`payload\` is allowed; read alert data from \`inputs.payload.alerts\` and ` +
+          `rule data from \`inputs.payload.rules[alert.rule_id]\`)`
+      );
+    }
+    if (extraRequired.length > 0) {
+      problems.push(
+        `  - unexpected \`required\` entries: ${formatCodeList(extraRequired)} ` +
+          `(only \`payload\` may be required)`
+      );
+    }
+
+    this.push(
+      destinationId,
+      this.config.blockOnStructuralErrors ? 'error' : 'warning',
+      'structural',
+      `Workflow "${destinationId}" declares manual-trigger inputs other than \`payload\`. ` +
+        `Action policy dispatch only provides \`inputs.payload\`:\n` +
+        `${problems.join('\n')}\n` +
+        TRIGGER_FIX_SNIPPET
+    );
+  }
+
+  /**
+   * Rejects trigger types other than `manual` (and `alert`, which
+   * {@link validateNoAlertTrigger} reports with its own guidance), as well as
+   * duplicate manual triggers. Those triggers fire without the dispatch
+   * payload, so every `inputs.payload.*` template renders empty.
+   */
+  validateNoExtraTriggers(
+    destinationId: string,
+    triggers: ParsedTrigger[],
+    manualTrigger: ParsedTrigger
+  ): void {
+    const extraTypes = triggers
+      .filter((trigger) => trigger !== manualTrigger && trigger.type !== 'alert')
+      .map((trigger) => String(trigger.type ?? 'unknown'));
+    if (extraTypes.length === 0) return;
+
+    this.push(
+      destinationId,
+      this.config.blockOnStructuralErrors ? 'error' : 'warning',
+      'structural',
+      `Workflow "${destinationId}" declares triggers other than the single manual trigger: ` +
+        `${formatCodeList(extraTypes.map((type) => `type: ${type}`))}. ` +
+        `Action policy destinations are dispatched via the manual trigger only — other ` +
+        `triggers run without \`inputs.payload\`, so payload templates render empty. ` +
+        `Remove them. ` +
+        TRIGGER_FIX_SNIPPET
+    );
+  }
+
   // ---------------------------------------------------------------------------
   // Common template mistakes
   // ---------------------------------------------------------------------------
@@ -400,6 +477,8 @@ export class DestinationValidator {
     if (!manualTrigger) return;
 
     this.validatePayloadRef(destinationId, manualTrigger);
+    this.validateManualTriggerInputs(destinationId, manualTrigger);
+    this.validateNoExtraTriggers(destinationId, triggers!, manualTrigger);
     this.validateNoAlertTrigger(destinationId, triggers!);
     this.validatePayloadLiquidPresence(destinationId, yaml);
     this.validatePayloadFieldPaths(destinationId, yaml);
@@ -438,6 +517,10 @@ export class DestinationValidator {
 // ---------------------------------------------------------------------------
 // Pure helpers
 // ---------------------------------------------------------------------------
+
+function formatCodeList(values: string[]): string {
+  return values.map((value) => `\`${value}\``).join(', ');
+}
 
 function parseWorkflowTriggers(yaml: string): ParsedTrigger[] | undefined {
   const parsed = parseYamlToJSONWithoutValidation(yaml);

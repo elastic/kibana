@@ -175,6 +175,61 @@ steps:
         Rule: {{ ctx.rule.name }}
 `;
 
+const YAML_INVENTED_INPUTS_NO_PAYLOAD = `
+name: notify
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        alerts:
+          type: array
+          items:
+            type: object
+        rule_name:
+          type: string
+      required:
+        - alerts
+        - rule_name
+`;
+
+const YAML_PAYLOAD_REF_WITH_EXTRA_INPUT = `
+name: notify
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        payload:
+          $ref: '#/kibana/definitions/alertingV2NotificationGroup'
+        rule_name:
+          type: string
+`;
+
+const YAML_MANUAL_AND_SCHEDULED_TRIGGERS = `
+name: notify
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        payload:
+          $ref: '#/kibana/definitions/alertingV2NotificationGroup'
+  - type: scheduled
+    with:
+      every: 1h
+`;
+
+const YAML_PAYLOAD_REF_REQUIRED_WITH_DESCRIPTION = `
+name: notify
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        payload:
+          $ref: '#/kibana/definitions/alertingV2NotificationGroup'
+          description: Notification group dispatched by the action policy
+      required:
+        - payload
+`;
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -489,6 +544,141 @@ describe('DestinationValidator', () => {
   });
 
   // -------------------------------------------------------------------------
+  // Structural checks — manual trigger inputs
+  // -------------------------------------------------------------------------
+  describe('validateManualTriggerInputs', () => {
+    const payloadRef = { $ref: '#/kibana/definitions/alertingV2NotificationGroup' };
+
+    it('records no diagnostic when only payload is declared and required', () => {
+      const validator = createValidator();
+      validator.validateManualTriggerInputs('wf-1', {
+        type: 'manual',
+        inputs: { properties: { payload: payloadRef }, required: ['payload'] },
+      });
+      expect(validator.finalize().diagnostics).toEqual([]);
+    });
+
+    it('records no diagnostic when the manual trigger has no inputs', () => {
+      const validator = createValidator();
+      validator.validateManualTriggerInputs('wf-1', { type: 'manual' });
+      expect(validator.finalize().diagnostics).toEqual([]);
+    });
+
+    it('records an error listing extra input properties alongside payload (blocking)', () => {
+      const validator = createValidator({ blockOnStructuralErrors: true });
+      validator.validateManualTriggerInputs('wf-1', {
+        type: 'manual',
+        inputs: { properties: { payload: payloadRef, rule_name: { type: 'string' } } },
+      });
+      expect(() => validator.finalize()).toThrow(
+        /unexpected input properties: `rule_name` \(only `payload` is allowed/
+      );
+    });
+
+    it('records an error listing extra required entries', () => {
+      const validator = createValidator();
+      validator.validateManualTriggerInputs('wf-1', {
+        type: 'manual',
+        inputs: { properties: { payload: payloadRef }, required: ['payload', 'alerts'] },
+      });
+      expect(() => validator.finalize()).toThrow(
+        /unexpected `required` entries: `alerts` \(only `payload` may be required\)/
+      );
+    });
+
+    it('reports extra properties and required entries in a single diagnostic', () => {
+      const validator = createValidator({ blockOnStructuralErrors: false });
+      validator.validateManualTriggerInputs('wf-1', {
+        type: 'manual',
+        inputs: {
+          properties: { alerts: { type: 'array' }, rule_name: { type: 'string' } },
+          required: ['alerts', 'rule_name'],
+        },
+      });
+      const { diagnostics } = validator.finalize();
+      expect(diagnostics).toHaveLength(1);
+      expect(diagnostics[0].message).toContain(
+        'unexpected input properties: `alerts`, `rule_name`'
+      );
+      expect(diagnostics[0].message).toContain(
+        'unexpected `required` entries: `alerts`, `rule_name`'
+      );
+      expect(diagnostics[0].message).toContain(WORKFLOW_DISPATCH_PAYLOAD_SKILL_REF);
+    });
+
+    it('records a warning instead of error when blockOnStructuralErrors is false', () => {
+      const validator = createValidator({ blockOnStructuralErrors: false });
+      validator.validateManualTriggerInputs('wf-1', {
+        type: 'manual',
+        inputs: { properties: { payload: payloadRef, rule_name: { type: 'string' } } },
+      });
+      expect(validator.finalize().diagnostics).toEqual([
+        expect.objectContaining({
+          severity: 'warning',
+          source: 'structural',
+          message: expect.stringContaining('declares manual-trigger inputs other than `payload`'),
+        }),
+      ]);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Structural checks — triggers other than the single manual trigger
+  // -------------------------------------------------------------------------
+  describe('validateNoExtraTriggers', () => {
+    it('records no diagnostic when only the manual trigger is present', () => {
+      const validator = createValidator();
+      const manualTrigger = { type: 'manual' };
+      validator.validateNoExtraTriggers('wf-1', [manualTrigger], manualTrigger);
+      expect(validator.finalize().diagnostics).toEqual([]);
+    });
+
+    it('records an error when a scheduled trigger is present (blocking)', () => {
+      const validator = createValidator({ blockOnStructuralErrors: true });
+      const manualTrigger = { type: 'manual' };
+      validator.validateNoExtraTriggers(
+        'wf-1',
+        [manualTrigger, { type: 'scheduled' }],
+        manualTrigger
+      );
+      expect(() => validator.finalize()).toThrow(
+        /declares triggers other than the single manual trigger: `type: scheduled`/
+      );
+    });
+
+    it('records an error for a duplicate manual trigger', () => {
+      const validator = createValidator();
+      const manualTrigger = { type: 'manual' };
+      validator.validateNoExtraTriggers('wf-1', [manualTrigger, { type: 'manual' }], manualTrigger);
+      expect(() => validator.finalize()).toThrow(/`type: manual`/);
+    });
+
+    it('leaves alert triggers to validateNoAlertTrigger', () => {
+      const validator = createValidator();
+      const manualTrigger = { type: 'manual' };
+      validator.validateNoExtraTriggers('wf-1', [manualTrigger, { type: 'alert' }], manualTrigger);
+      expect(validator.finalize().diagnostics).toEqual([]);
+    });
+
+    it('records a warning when blocking is false', () => {
+      const validator = createValidator({ blockOnStructuralErrors: false });
+      const manualTrigger = { type: 'manual' };
+      validator.validateNoExtraTriggers(
+        'wf-1',
+        [manualTrigger, { type: 'scheduled' }],
+        manualTrigger
+      );
+      expect(validator.finalize().diagnostics).toEqual([
+        expect.objectContaining({
+          severity: 'warning',
+          source: 'structural',
+          message: expect.stringContaining('`type: scheduled`'),
+        }),
+      ]);
+    });
+  });
+
+  // -------------------------------------------------------------------------
   // Common template mistakes — alert trigger alongside manual
   // -------------------------------------------------------------------------
   describe('validateNoAlertTrigger', () => {
@@ -772,6 +962,41 @@ steps:
       const validator = createValidator({ blockOnStructuralErrors: true });
       await validator.validateWorkflow('wf-1', YAML_MANUAL_TRIGGER_NO_PAYLOAD_REF);
       expect(() => validator.finalize()).toThrow(/does not declare `inputs\.payload`/);
+    });
+
+    it('accepts payload required and a description alongside the $ref', async () => {
+      const validator = createValidator();
+      await validator.validateWorkflow('wf-1', YAML_PAYLOAD_REF_REQUIRED_WITH_DESCRIPTION);
+      expect(validator.finalize().diagnostics).toEqual([]);
+    });
+
+    it('reports missing $ref and invented inputs together for a workflow without payload', async () => {
+      const validator = createValidator({ blockOnStructuralErrors: true });
+      await validator.validateWorkflow('wf-1', YAML_INVENTED_INPUTS_NO_PAYLOAD);
+
+      let caught: ActionPolicyOperationValidationError | undefined;
+      try {
+        validator.finalize();
+      } catch (err) {
+        caught = err as ActionPolicyOperationValidationError;
+      }
+      expect(caught).toBeInstanceOf(ActionPolicyOperationValidationError);
+      expect(caught?.message).toMatch(/^Destination validation failed \(2 errors\):/);
+      expect(caught?.message).toContain('does not declare `inputs.payload`');
+      expect(caught?.message).toContain('unexpected input properties: `alerts`, `rule_name`');
+      expect(caught?.message).toContain('unexpected `required` entries: `alerts`, `rule_name`');
+    });
+
+    it('throws in blocking mode for a valid payload $ref with an extra input', async () => {
+      const validator = createValidator({ blockOnStructuralErrors: true });
+      await validator.validateWorkflow('wf-1', YAML_PAYLOAD_REF_WITH_EXTRA_INPUT);
+      expect(() => validator.finalize()).toThrow(/unexpected input properties: `rule_name`/);
+    });
+
+    it('throws in blocking mode for a scheduled trigger alongside the manual trigger', async () => {
+      const validator = createValidator({ blockOnStructuralErrors: true });
+      await validator.validateWorkflow('wf-1', YAML_MANUAL_AND_SCHEDULED_TRIGGERS);
+      expect(() => validator.finalize()).toThrow(/`type: scheduled`/);
     });
 
     it('handles malformed triggers (not a list) gracefully', async () => {
