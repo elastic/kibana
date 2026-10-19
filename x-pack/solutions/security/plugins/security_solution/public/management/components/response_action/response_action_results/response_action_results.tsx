@@ -15,7 +15,7 @@ import { MemoryDumpResponseActionOutputResult } from './components/memory_dump_r
 import { CancelActionResults } from '../../cancel_action_results';
 import { RunscriptActionResult } from './components/runscript_results';
 import { ScanResults } from './components/scan_results';
-import { EndpointUploadActionResult } from '../../endpoint_upload_action_result';
+import { EndpointUploadActionResult } from './components/upload_results/endpoint_upload_action_result';
 import { GetFileResults } from './components/get_file_results';
 import { IsolationResults } from './components/isolation_results';
 import type { ResponseActionResultsProps } from './types';

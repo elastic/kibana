@@ -12,7 +12,7 @@ import type { EuiTextProps } from '@elastic/eui';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
-import { EndpointActionFailureMessage } from '../endpoint_action_failure_message';
+import { EndpointActionFailureMessage } from '../../../../../endpoint_action_failure_message';
 import type {
   ActionDetails,
   ResponseActionUploadOutputContent,
@@ -20,10 +20,10 @@ import type {
   ActionDetailsAgentState,
   ActionResponseOutput,
   MaybeImmutable,
-} from '../../../../common/endpoint/types';
-import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
-import { KeyValueDisplay } from '../key_value_display';
-import { getAgentActionState } from '../response_action/response_action_results/utils';
+} from '../../../../../../../../common/endpoint/types';
+import { useTestIdGenerator } from '../../../../../../hooks/use_test_id_generator';
+import { KeyValueDisplay } from '../../../../../key_value_display';
+import { getAgentActionState } from '../../../utils';
 
 const LABELS = Object.freeze<Record<string, string>>({
   path: i18n.translate('xpack.securitySolution.endpointUploadActionResult.savedTo', {
