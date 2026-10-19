@@ -75,7 +75,9 @@ export const getBucketSize = (
     timeZone: ianaTimeZoneOrUtc(capabilities.timezone),
   });
   const autoBucketData = calculateBucketData(picked.expression, capabilities);
-  autoBucketData.bucketSize = Math.max(1, Math.round(picked.nominalMs / 1000));
+  if (autoBucketData.intervalString === picked.expression) {
+    autoBucketData.bucketSize = Math.max(1, Math.round(picked.nominalMs / 1000));
+  }
 
   const gteAutoMatch = Boolean(interval) && interval.match(GTE_INTERVAL_RE);
 
