@@ -25,7 +25,6 @@ import {
   MAX_TAGS_PER_OPERATION,
 } from '../../../../../common/workflows/triggers';
 import { updateAlertsTags } from '../common/operations/update_alerts_tags';
-import { auditAlertUpdatePreOperationFailure } from '../common/operations/audit_alert_updates';
 import { prefetchChangedListFieldIds } from '../common/operations/prefetch_previous_statuses';
 import { validateAlertTagsArrays } from '../common/validators/validate_alert_arrays';
 import { getAttackAlertsIndex } from '../common/index_patterns/get_attack_alerts_index';
@@ -72,10 +71,6 @@ export const setAttacksTagsRoute = (
 
         const validationErrors = validateAlertTagsArrays(tags, ids);
         if (validationErrors.length) {
-          auditAlertUpdatePreOperationFailure(
-            (await context.securitySolution)?.getAuditLogger(),
-            'Invalid alert update request'
-          );
           reportAttacksApiCallError(
             telemetrySender,
             telemetryFields,

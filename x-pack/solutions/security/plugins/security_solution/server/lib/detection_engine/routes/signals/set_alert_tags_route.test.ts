@@ -81,12 +81,7 @@ describe('setAlertTagsRoute', () => {
         ],
         status_code: 400,
       });
-      expect(context.securitySolution.getAuditLogger()?.log).toHaveBeenCalledWith(
-        expect.objectContaining({
-          event: expect.objectContaining({ action: 'alert_update', outcome: 'failure' }),
-          error: expect.objectContaining({ message: 'Invalid alert update request' }),
-        })
-      );
+      expect(context.securitySolution.getAuditLogger()?.log).not.toHaveBeenCalled();
     });
 
     test('audits a 404 when the alert update target is unavailable', async () => {

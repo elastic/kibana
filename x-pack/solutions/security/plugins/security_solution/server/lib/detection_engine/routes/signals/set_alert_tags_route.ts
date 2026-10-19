@@ -61,10 +61,6 @@ export const setAlertTagsRoute = (
 
         const validationErrors = validateAlertTagsArrays(tags, ids);
         if (validationErrors.length) {
-          auditAlertUpdatePreOperationFailure(
-            (await context.securitySolution)?.getAuditLogger(),
-            'Invalid alert update request'
-          );
           return siemResponse.error({ statusCode: 400, body: validationErrors });
         }
 

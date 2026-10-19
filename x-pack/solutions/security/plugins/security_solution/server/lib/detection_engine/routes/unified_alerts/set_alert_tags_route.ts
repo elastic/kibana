@@ -20,7 +20,6 @@ import { DETECTION_ENGINE_SET_UNIFIED_ALERTS_TAGS_URL } from '../../../../../com
 import { buildSiemResponse } from '../utils';
 import { validateAlertTagsArrays } from '../common/validators/validate_alert_arrays';
 import { updateAlertsTags } from '../common/operations/update_alerts_tags';
-import { auditAlertUpdatePreOperationFailure } from '../common/operations/audit_alert_updates';
 import { getUnifiedAlertsIndex } from '../common/index_patterns/get_unified_alerts_index';
 import { withSiemErrorHandling } from '../with_siem_error_handling';
 import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
@@ -68,10 +67,6 @@ export const setUnifiedAlertsTagsRoute = (
 
         const validationErrors = validateAlertTagsArrays(tags, ids);
         if (validationErrors.length) {
-          auditAlertUpdatePreOperationFailure(
-            (await context.securitySolution)?.getAuditLogger(),
-            'Invalid alert update request'
-          );
           return buildSiemResponse(response).error({ statusCode: 400, body: validationErrors });
         }
 
