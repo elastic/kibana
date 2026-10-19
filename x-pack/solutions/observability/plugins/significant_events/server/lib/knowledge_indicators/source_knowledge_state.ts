@@ -55,6 +55,50 @@ export const sourceKnowledgeStateSavedObjectType: SavedObjectsType = {
 // its in-flight storage requests to finish before cleanup can acquire the lease.
 const WRITE_LEASE_MS = 30 * 60_000;
 
+/** How long a user- or tool-initiated write waits for another write to release the lease. */
+export const SOURCE_WRITE_LEASE_WAIT_MS = 5_000;
+
+const LEASE_RETRY_MIN_DELAY_MS = 100;
+const LEASE_RETRY_MAX_DELAY_MS = 1_000;
+
+/** The 409 for a held lease, told apart from the other 409s so only this one is waited out. */
+class WriteLeaseHeldError extends StatusError {
+  constructor() {
+    super('Source knowledge is being updated; retry after the current write finishes', 409);
+  }
+}
+
+/** Losing the race to take the lease means another writer holds it. */
+const rethrowConflictAsLeaseHeld = (error: unknown): never => {
+  if (error instanceof Error && SavedObjectsErrorHelpers.isConflictError(error)) {
+    throw new WriteLeaseHeldError();
+  }
+  throw error;
+};
+
+const sleep = (ms: number): Promise<void> =>
+  new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+
+/** Runs `attempt` again, with a growing delay, for as long as it fails on a held lease. */
+const retryWhileLeaseHeld = async <T>(maxWaitMs: number, attempt: () => Promise<T>): Promise<T> => {
+  const startedAt = Date.now();
+  let delayMs = LEASE_RETRY_MIN_DELAY_MS;
+  for (;;) {
+    try {
+      return await attempt();
+    } catch (error) {
+      const remainingMs = maxWaitMs - (Date.now() - startedAt);
+      if (!(error instanceof WriteLeaseHeldError) || remainingMs <= 0) {
+        throw error;
+      }
+      await sleep(Math.min(delayMs, remainingMs));
+      delayMs = Math.min(delayMs * 2, LEASE_RETRY_MAX_DELAY_MS);
+    }
+  }
+};
+
 /** Coordinates source knowledge mutations across Kibana nodes without holding a lock during inference. */
 export interface SourceKnowledgeStateClient {
   /** Runs a final write or cleanup exclusively, preserving a checkpoint across failures. */
@@ -75,6 +119,11 @@ export interface SourceKnowledgeStateClient {
      * without re-enabling it. The revision check and the lease still apply.
      */
     allowDisabled?: boolean;
+    /**
+     * How long to keep retrying while another write holds the lease. Omitted means fail
+     * immediately. A stale revision or a disabled source is never retried.
+     */
+    waitForLeaseMs?: number;
     run: () => Promise<T>;
   }): Promise<T>;
 }
@@ -101,25 +150,23 @@ export const createSourceKnowledgeStateClient = ({
       }
     }
     if (stored?.attributes.lease && stored.attributes.lease.expiresAt > Date.now()) {
-      throw new StatusError(
-        'Source knowledge is being updated; retry after the current write finishes',
-        409
-      );
+      throw new WriteLeaseHeldError();
     }
     const lease = { owner: randomUUID(), expiresAt: Date.now() + WRITE_LEASE_MS };
     let state: SourceKnowledgeState = { ...stored?.attributes, lease };
-    const locked = stored
-      ? await repository.update<SourceKnowledgeState>(
+    const locked = await (stored
+      ? repository.update<SourceKnowledgeState>(
           SOURCE_KNOWLEDGE_STATE_TYPE,
           sourceId,
           { lease },
           { namespace: space, version: stored.version }
         )
-      : await repository.create<SourceKnowledgeState>(SOURCE_KNOWLEDGE_STATE_TYPE, state, {
+      : repository.create<SourceKnowledgeState>(SOURCE_KNOWLEDGE_STATE_TYPE, state, {
           id: sourceId,
           namespace: space,
           overwrite: false,
-        });
+        })
+    ).catch(rethrowConflictAsLeaseHeld);
     let version = locked.version;
     const serializeCheckpoint = pLimit(1);
     const checkpoint = (patch: Partial<SourceKnowledgeState>): Promise<void> =>
@@ -154,28 +201,35 @@ export const createSourceKnowledgeStateClient = ({
     }
   };
 
+  const writeOnce: SourceKnowledgeStateClient['write'] = ({
+    sourceId,
+    expectedRevision,
+    allowDisabled = false,
+    run,
+  }) =>
+    runExclusive({
+      sourceId,
+      run: async (state, checkpoint) => {
+        const { source } = await sourcesClient.get(sourceId);
+        if (
+          (!source.enabled && !allowDisabled) ||
+          (expectedRevision !== undefined && expectedRevision !== source.esql_updated_at) ||
+          (state.revision !== undefined && state.revision !== source.esql_updated_at)
+        ) {
+          throw new StatusError(
+            'Source knowledge has changed; onboard the current source query before writing results',
+            409
+          );
+        }
+        if (state.revision === undefined) {
+          await checkpoint({ revision: source.esql_updated_at, onboardingScheduled: false });
+        }
+        return run();
+      },
+    });
+
   return {
     runExclusive,
-    write: ({ sourceId, expectedRevision, allowDisabled = false, run }) =>
-      runExclusive({
-        sourceId,
-        run: async (state, checkpoint) => {
-          const { source } = await sourcesClient.get(sourceId);
-          if (
-            (!source.enabled && !allowDisabled) ||
-            (expectedRevision !== undefined && expectedRevision !== source.esql_updated_at) ||
-            (state.revision !== undefined && state.revision !== source.esql_updated_at)
-          ) {
-            throw new StatusError(
-              'Source knowledge has changed; onboard the current source query before writing results',
-              409
-            );
-          }
-          if (state.revision === undefined) {
-            await checkpoint({ revision: source.esql_updated_at, onboardingScheduled: false });
-          }
-          return run();
-        },
-      }),
+    write: (args) => retryWhileLeaseHeld(args.waitForLeaseMs ?? 0, () => writeOnce(args)),
   };
 };

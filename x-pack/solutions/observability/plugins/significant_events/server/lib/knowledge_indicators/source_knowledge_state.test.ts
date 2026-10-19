@@ -217,4 +217,108 @@ describe('source knowledge write coordination', () => {
     );
     expect(documents.get('default:source')?.attributes.lease).toBeNull();
   });
+
+  describe('waiting for the write lease', () => {
+    const WAIT_MS = 5_000;
+    const FIRST_RETRY_MS = 100;
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    const seedLease = ({
+      documents,
+      lease,
+      version = '1',
+    }: {
+      documents: ReturnType<typeof setup>['documents'];
+      lease: State['lease'];
+      version?: string;
+    }) => {
+      documents.set('default:source', { version, attributes: { revision: 'revision-1', lease } });
+    };
+
+    const heldLease = () => ({ owner: 'other', expiresAt: Date.now() + 60_000 });
+
+    // Attaches its handlers up front so a rejection is never reported as unhandled.
+    const trackSettlement = <T>(promise: Promise<T>) => {
+      let settled = false;
+      const markSettled = () => {
+        settled = true;
+      };
+      promise.then(markSettled, markSettled);
+      return { promise, isSettled: () => settled };
+    };
+
+    it('completes a write once the lease it waited on is released', async () => {
+      const { client, documents } = setup();
+      seedLease({ documents, lease: heldLease() });
+      const write = trackSettlement(
+        client.write({ sourceId: 'source', waitForLeaseMs: WAIT_MS, run: async () => 'written' })
+      );
+      await jest.advanceTimersByTimeAsync(0);
+      expect(write.isSettled()).toBe(false);
+
+      seedLease({ documents, lease: null, version: '2' });
+      await jest.advanceTimersByTimeAsync(FIRST_RETRY_MS);
+
+      await expect(write.promise).resolves.toBe('written');
+    });
+
+    it('rejects when the lease stays held longer than the wait', async () => {
+      const { client, documents } = setup();
+      seedLease({ documents, lease: heldLease() });
+      const run = jest.fn(async () => 'written');
+      const write = trackSettlement(
+        client.write({ sourceId: 'source', waitForLeaseMs: WAIT_MS, run })
+      );
+
+      await jest.advanceTimersByTimeAsync(WAIT_MS - 1);
+      expect(write.isSettled()).toBe(false);
+      await jest.advanceTimersByTimeAsync(1);
+
+      await expect(write.promise).rejects.toThrow('being updated');
+      expect(run).not.toHaveBeenCalled();
+    });
+
+    it('rejects a stale revision without waiting out the lease', async () => {
+      const { client, source } = setup();
+      await client.write({ sourceId: 'source', run: async () => {} });
+      source.esql_updated_at = 'revision-2';
+      const run = jest.fn(async () => {});
+      const write = trackSettlement(
+        client.write({
+          sourceId: 'source',
+          expectedRevision: 'revision-1',
+          waitForLeaseMs: WAIT_MS,
+          run,
+        })
+      );
+
+      await jest.advanceTimersByTimeAsync(0);
+
+      expect(write.isSettled()).toBe(true);
+      await expect(write.promise).rejects.toThrow('has changed');
+      expect(run).not.toHaveBeenCalled();
+    });
+
+    it('completes a write after losing the race to acquire the lease', async () => {
+      const { client, documents, repository } = setup();
+      seedLease({ documents, lease: null });
+      repository.update.mockImplementationOnce(async (type, id) => {
+        throw SavedObjectsErrorHelpers.createConflictError(type, id);
+      });
+      const write = trackSettlement(
+        client.write({ sourceId: 'source', waitForLeaseMs: WAIT_MS, run: async () => 'written' })
+      );
+
+      await jest.advanceTimersByTimeAsync(FIRST_RETRY_MS);
+
+      await expect(write.promise).resolves.toBe('written');
+    });
+  });
 });

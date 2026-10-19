@@ -40,6 +40,7 @@ import {
   createSourceKnowledgeStateClient,
   sourceKnowledgeStateSavedObjectType,
   SOURCE_KNOWLEDGE_STATE_TYPE,
+  SOURCE_WRITE_LEASE_WAIT_MS,
 } from './lib/knowledge_indicators/source_knowledge_state';
 import {
   getRelayAppConnectionSavedObjectType,
@@ -285,6 +286,8 @@ export class SignificantEventsPlugin
             sourceKnowledgeState.write({
               sourceId,
               allowDisabled: options?.allowDisabled,
+              waitForLeaseMs:
+                options?.waitForLease === false ? undefined : SOURCE_WRITE_LEASE_WAIT_MS,
               expectedRevision:
                 typeof request.headers['x-nightshift-source-revision'] === 'string' &&
                 request.headers['x-nightshift-source-revision']

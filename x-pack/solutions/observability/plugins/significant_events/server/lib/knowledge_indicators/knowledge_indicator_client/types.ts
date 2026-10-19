@@ -50,11 +50,12 @@ export interface KnowledgeIndicatorClientDeps {
   space: string;
   /**
    * Serializes final source writes with query invalidation. `allowDisabled` marks writes that only
-   * remove knowledge, which a disabled source still accepts.
+   * remove knowledge, which a disabled source still accepts. `waitForLease: false` fails at once
+   * when another write holds the lease; the default waits.
    */
   withSourceWrite?: <T>(
     sourceId: string,
     run: () => Promise<T>,
-    options?: { allowDisabled?: boolean }
+    options?: { allowDisabled?: boolean; waitForLease?: boolean }
   ) => Promise<T>;
 }
