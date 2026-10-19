@@ -6,6 +6,15 @@
  */
 
 import type { monaco } from '@kbn/code-editor';
+import {
+  BUILT_IN_KEYWORDS,
+  CONSTANT_KEYWORDS,
+  DECLARATION_KEYWORDS,
+  OPERATOR_KEYWORDS,
+  QUANTIFIER_KEYWORDS,
+  SECTION_KEYWORDS,
+  STRING_MODIFIERS,
+} from './keywords';
 
 export const languageConfiguration: monaco.languages.LanguageConfiguration = {
   comments: {
@@ -39,6 +48,16 @@ export const languageConfiguration: monaco.languages.LanguageConfiguration = {
  * and https://microsoft.github.io/monaco-editor/monarch.html
  */
 export const lexerRules: monaco.languages.IMonarchLanguage = {
+  keywords: [
+    ...DECLARATION_KEYWORDS,
+    ...SECTION_KEYWORDS,
+    ...OPERATOR_KEYWORDS,
+    ...QUANTIFIER_KEYWORDS,
+  ],
+  stringModifiers: [...STRING_MODIFIERS],
+  constants: [...CONSTANT_KEYWORDS],
+  builtIns: [...BUILT_IN_KEYWORDS],
+
   stringEscapes: /\\(?:["\\rtn]|x[0-9a-fA-F]{2})/,
   regexpEscapes: /\\(?:x[0-9a-fA-F]{2}|.)/,
 
@@ -58,7 +77,39 @@ export const lexerRules: monaco.languages.IMonarchLanguage = {
       [/(=)(\s*)(\{)/, ['operator', 'white', { token: 'delimiter.curly', next: '@hexString' }]],
       [/[{}]/, 'delimiter.curly'],
 
-      [/[a-zA-Z_]\w*/, 'identifier'],
+      [
+        /[a-zA-Z_]\w*/,
+        {
+          cases: {
+            rule: { token: 'keyword', next: '@ruleName' },
+            // `private` is both a rule and a string modifier, `@keywords` takes precedence.
+            '@keywords': 'keyword',
+            '@stringModifiers': 'keyword.modifier',
+            '@constants': 'constant',
+            '@builtIns': 'variable.predefined',
+            '@default': 'identifier',
+          },
+        },
+      ],
+    ],
+
+    // `rule <name> : <tag> <tag>`, anything else returns to `root`, e.g. the `{` of the rule body.
+    ruleName: [
+      { include: '@whitespace' },
+      [/[a-zA-Z_]\w*/, { token: 'type', switchTo: '@ruleTagsSeparator' }],
+      [/./, { token: '@rematch', next: '@pop' }],
+    ],
+
+    ruleTagsSeparator: [
+      { include: '@whitespace' },
+      [/:/, { token: 'delimiter', switchTo: '@ruleTags' }],
+      [/./, { token: '@rematch', next: '@pop' }],
+    ],
+
+    ruleTags: [
+      { include: '@whitespace' },
+      [/[a-zA-Z_]\w*/, 'tag'],
+      [/./, { token: '@rematch', next: '@pop' }],
     ],
 
     whitespace: [

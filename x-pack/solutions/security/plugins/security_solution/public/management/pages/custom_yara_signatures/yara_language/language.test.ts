@@ -7,6 +7,15 @@
 
 import { monaco } from '@kbn/code-editor';
 import { registerYaraLanguage, YARA_LANG_ID } from '.';
+import {
+  BUILT_IN_KEYWORDS,
+  CONSTANT_KEYWORDS,
+  DECLARATION_KEYWORDS,
+  OPERATOR_KEYWORDS,
+  QUANTIFIER_KEYWORDS,
+  SECTION_KEYWORDS,
+  STRING_MODIFIERS,
+} from './keywords';
 
 type TokenTuple = [text: string, type: string];
 
@@ -41,15 +50,15 @@ describe('YARA language', () => {
   });
 
   it('should tokenize identifiers and whitespace', () => {
-    expect(tokenize('rule dummy\n  condition')).toEqual([
+    expect(tokenize('foo bar\n  baz')).toEqual([
       [
-        ['rule', 'identifier'],
+        ['foo', 'identifier'],
         [' ', 'white'],
-        ['dummy', 'identifier'],
+        ['bar', 'identifier'],
       ],
       [
         ['  ', 'white'],
-        ['condition', 'identifier'],
+        ['baz', 'identifier'],
       ],
     ]);
   });
@@ -60,11 +69,11 @@ describe('YARA language', () => {
     });
 
     it('should tokenize a line comment after code', () => {
-      expect(tokenize('rule a // comment')).toEqual([
+      expect(tokenize('foo bar // comment')).toEqual([
         [
-          ['rule', 'identifier'],
+          ['foo', 'identifier'],
           [' ', 'white'],
-          ['a', 'identifier'],
+          ['bar', 'identifier'],
           [' ', 'white'],
           ['// comment', 'comment'],
         ],
@@ -72,32 +81,32 @@ describe('YARA language', () => {
     });
 
     it('should not start a block comment inside a line comment', () => {
-      expect(tokenize('// a /* b\nrule')).toEqual([
+      expect(tokenize('// a /* b\nfoo')).toEqual([
         [['// a /* b', 'comment']],
-        [['rule', 'identifier']],
+        [['foo', 'identifier']],
       ]);
     });
 
     it('should tokenize an inline block comment', () => {
-      expect(tokenize('rule /* comment */ a')).toEqual([
+      expect(tokenize('foo /* comment */ bar')).toEqual([
         [
-          ['rule', 'identifier'],
+          ['foo', 'identifier'],
           [' ', 'white'],
           ['/* comment */', 'comment'],
           [' ', 'white'],
-          ['a', 'identifier'],
+          ['bar', 'identifier'],
         ],
       ]);
     });
 
     it('should tokenize a block comment spanning multiple lines', () => {
-      expect(tokenize('/*\n  rule a // b\n*/ rule')).toEqual([
+      expect(tokenize('/*\n  rule a // b\n*/ foo')).toEqual([
         [['/*', 'comment']],
         [['  rule a // b', 'comment']],
         [
           ['*/', 'comment'],
           [' ', 'white'],
-          ['rule', 'identifier'],
+          ['foo', 'identifier'],
         ],
       ]);
     });
@@ -117,7 +126,7 @@ describe('YARA language', () => {
     });
 
     it('should not start a string inside a comment', () => {
-      expect(tokenize('// "\nrule')).toEqual([[['// "', 'comment']], [['rule', 'identifier']]]);
+      expect(tokenize('// "\nfoo')).toEqual([[['// "', 'comment']], [['foo', 'identifier']]]);
     });
   });
 
@@ -125,7 +134,7 @@ describe('YARA language', () => {
     it('should tokenize a text string', () => {
       expect(tokenize('import "pe"')).toEqual([
         [
-          ['import', 'identifier'],
+          ['import', 'keyword'],
           [' ', 'white'],
           ['"pe"', 'string'],
         ],
@@ -163,16 +172,16 @@ describe('YARA language', () => {
     });
 
     it('should mark an unterminated string as invalid until the end of the line', () => {
-      expect(tokenize('"abc\nrule')).toEqual([
+      expect(tokenize('"abc\nfoo')).toEqual([
         [['"abc', 'string.invalid']],
-        [['rule', 'identifier']],
+        [['foo', 'identifier']],
       ]);
     });
 
     it('should mark an unterminated string ending with a backslash as invalid', () => {
-      expect(tokenize('"abc\\\nrule')).toEqual([
+      expect(tokenize('"abc\\\nfoo')).toEqual([
         [['"abc\\', 'string.invalid']],
-        [['rule', 'identifier']],
+        [['foo', 'identifier']],
       ]);
     });
   });
@@ -232,16 +241,16 @@ describe('YARA language', () => {
     });
 
     it('should mark an unterminated regular expression as invalid until the end of the line', () => {
-      expect(tokenize('/abc\nrule')).toEqual([
+      expect(tokenize('/abc\nfoo')).toEqual([
         [['/abc', 'regexp.invalid']],
-        [['rule', 'identifier']],
+        [['foo', 'identifier']],
       ]);
     });
 
     it('should mark an unterminated regular expression ending with a backslash as invalid', () => {
-      expect(tokenize('/abc\\\nrule')).toEqual([
+      expect(tokenize('/abc\\\nfoo')).toEqual([
         [['/abc\\', 'regexp.invalid']],
-        [['rule', 'identifier']],
+        [['foo', 'identifier']],
       ]);
     });
   });
@@ -427,13 +436,132 @@ describe('YARA language', () => {
     it('should not tokenize a rule body as a hex string', () => {
       expect(tokenize('rule a { E2 }')).toEqual([
         [
-          ['rule', 'identifier'],
+          ['rule', 'keyword'],
           [' ', 'white'],
-          ['a', 'identifier'],
+          ['a', 'type'],
           [' ', 'white'],
           ['{', 'delimiter.curly'],
           [' ', 'white'],
           ['E2', 'identifier'],
+          [' ', 'white'],
+          ['}', 'delimiter.curly'],
+        ],
+      ]);
+    });
+  });
+
+  describe('keywords', () => {
+    it.each<[string, string]>([
+      ...[
+        ...DECLARATION_KEYWORDS.filter((keyword) => keyword !== 'rule'),
+        ...SECTION_KEYWORDS,
+        ...OPERATOR_KEYWORDS,
+        ...QUANTIFIER_KEYWORDS,
+      ].map((keyword): [string, string] => [keyword, 'keyword']),
+      ...STRING_MODIFIERS.filter((modifier) => modifier !== 'private').map(
+        (modifier): [string, string] => [modifier, 'keyword.modifier']
+      ),
+      ...CONSTANT_KEYWORDS.map((constant): [string, string] => [constant, 'constant']),
+      ...BUILT_IN_KEYWORDS.map((builtIn): [string, string] => [builtIn, 'variable.predefined']),
+    ])('should tokenize `%s` as %s', (keyword, type) => {
+      expect(tokenize(keyword)).toEqual([[[keyword, type]]]);
+    });
+
+    it('should tokenize `private` as a keyword, although it is a string modifier as well', () => {
+      expect(tokenize('private')).toEqual([[['private', 'keyword']]]);
+    });
+
+    it.each(['rules', 'nocase_a', 'true1', 'Rule', 'TRUE'])(
+      'should tokenize `%s` as an identifier',
+      (identifier) => {
+        expect(tokenize(identifier)).toEqual([[[identifier, 'identifier']]]);
+      }
+    );
+  });
+
+  describe('rule headers', () => {
+    it('should tokenize modifiers, rule name and tags', () => {
+      expect(tokenize('private global rule Foo : Bar baz_1 {')).toEqual([
+        [
+          ['private', 'keyword'],
+          [' ', 'white'],
+          ['global', 'keyword'],
+          [' ', 'white'],
+          ['rule', 'keyword'],
+          [' ', 'white'],
+          ['Foo', 'type'],
+          [' ', 'white'],
+          [':', 'delimiter'],
+          [' ', 'white'],
+          ['Bar', 'tag'],
+          [' ', 'white'],
+          ['baz_1', 'tag'],
+          [' ', 'white'],
+          ['{', 'delimiter.curly'],
+        ],
+      ]);
+    });
+
+    it('should tokenize a rule header without whitespace', () => {
+      expect(tokenize('rule a:b{')).toEqual([
+        [
+          ['rule', 'keyword'],
+          [' ', 'white'],
+          ['a', 'type'],
+          [':', 'delimiter'],
+          ['b', 'tag'],
+          ['{', 'delimiter.curly'],
+        ],
+      ]);
+    });
+
+    it('should tokenize a rule header spanning multiple lines with comments', () => {
+      expect(tokenize('rule /* c */\n  Foo // c\n  : Bar\n{')).toEqual([
+        [
+          ['rule', 'keyword'],
+          [' ', 'white'],
+          ['/* c */', 'comment'],
+        ],
+        [
+          ['  ', 'white'],
+          ['Foo', 'type'],
+          [' ', 'white'],
+          ['// c', 'comment'],
+        ],
+        [
+          ['  ', 'white'],
+          [':', 'delimiter'],
+          [' ', 'white'],
+          ['Bar', 'tag'],
+        ],
+        [['{', 'delimiter.curly']],
+      ]);
+    });
+
+    it('should tokenize the rule body normally after the header', () => {
+      expect(tokenize('rule a { true }')).toEqual([
+        [
+          ['rule', 'keyword'],
+          [' ', 'white'],
+          ['a', 'type'],
+          [' ', 'white'],
+          ['{', 'delimiter.curly'],
+          [' ', 'white'],
+          ['true', 'constant'],
+          [' ', 'white'],
+          ['}', 'delimiter.curly'],
+        ],
+      ]);
+    });
+
+    it('should return to normal tokenization when the rule name is missing', () => {
+      expect(tokenize('rule { true }')).toEqual([
+        [
+          ['rule', 'keyword'],
+          [' ', 'white'],
+          ['{', 'delimiter.curly'],
+          [' ', 'white'],
+          ['true', 'constant'],
           [' ', 'white'],
           ['}', 'delimiter.curly'],
         ],
