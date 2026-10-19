@@ -110,6 +110,30 @@ describe.each([
     });
     expect(pending()).toBe(false);
   });
+
+  it('stops the spinner when the query can never run, so the tile settles instead of loading for ever', () => {
+    const loading = () =>
+      renderHook(() => useCount({ spaceId: 'default' })).result.current.isLoading;
+    query({ isLoading: true });
+    // No latest entities index, or its lookup failed: the query is disabled and has no data.
+    (useResolvedLatestEntitiesIndexName as jest.Mock).mockReturnValue({
+      data: { indexName: null },
+      isLoading: false,
+    });
+    expect(loading()).toBe(false);
+    (useResolvedLatestEntitiesIndexName as jest.Mock).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: new Error('boom'),
+    });
+    expect(loading()).toBe(false);
+    // Still loading while the index resolves.
+    (useResolvedLatestEntitiesIndexName as jest.Mock).mockReturnValue({
+      data: undefined,
+      isLoading: true,
+    });
+    expect(loading()).toBe(true);
+  });
 });
 
 describe('useEntitiesWithAnomaliesCount', () => {
