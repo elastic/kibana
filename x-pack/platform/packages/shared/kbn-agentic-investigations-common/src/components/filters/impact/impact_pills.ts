@@ -11,4 +11,6 @@ export interface ImpactPill {
   count: number;
   /** Entity type (`host`, `user`, …) when any row reported one for this id. */
   entityType?: string;
+  /** Display name (`host.name`, `user.name`, `service.name`) when one was stored. */
+  name?: string;
 }

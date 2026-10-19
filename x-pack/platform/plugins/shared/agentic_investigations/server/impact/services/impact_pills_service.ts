@@ -86,11 +86,18 @@ export class ImpactPillsService {
     ]);
     const weights = new Map<string, number>();
     const entities = new Map<string, ImpactPillEntity[]>();
-    for (const { id, entity_ids: ids, entity_types: types } of [...open, ...closed]) {
+    for (const { id, entity_ids: ids, entity_types: types, entity_names: names } of [
+      ...open,
+      ...closed,
+    ]) {
       weights.set(id, 1);
       entities.set(
         id,
-        (ids ?? []).map((entityId) => ({ id: entityId, type: types?.[entityId] }))
+        (ids ?? []).map((entityId) => ({
+          id: entityId,
+          type: types?.[entityId],
+          name: names?.[entityId],
+        }))
       );
     }
     return buildImpactPills(weights, entities);

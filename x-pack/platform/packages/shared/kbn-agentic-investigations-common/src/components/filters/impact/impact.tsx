@@ -20,6 +20,7 @@ import {
   useResizeObserver,
 } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
+import { entityPillLabel } from './entity_pill_label';
 import { entityTypeIcon } from './entity_type_icon';
 import type { ImpactPill } from './impact_pills';
 import { IMPACT_LABELS } from './translations';
@@ -175,11 +176,11 @@ export const Impact: React.FC<ImpactProps> = ({ pills, entityFilter, onEntityFil
       data-test-subj={IMPACT_PILL_TEST_SUBJ}
     >
       <PillBadge
-        label={pill.entityId}
+        label={entityPillLabel(pill)}
         iconType={entityTypeIcon(pill.entityType)}
         count={pill.count}
         selected={entityFilter === pill.entityId}
-        ariaLabel={pill.entityId}
+        ariaLabel={entityPillLabel(pill)}
         onClick={
           interactive
             ? () => onEntityFilterChange(entityFilter === pill.entityId ? null : pill.entityId)

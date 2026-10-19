@@ -58,7 +58,7 @@ describe('ImpactPillsService', () => {
         ]),
         closed: new Map([['c1', 1]]),
         entityIds: new Map([
-          ['c1', [{ id: 'host-1', type: 'host' }]],
+          ['c1', [{ id: 'host-1', type: 'host', name: 'web-01' }]],
           ['c2', [{ id: 'host-1' }, { id: 'user-1' }]],
         ]),
       });
@@ -66,7 +66,7 @@ describe('ImpactPillsService', () => {
       const pills = await service.forProposals(request, query);
 
       expect(pills).toEqual([
-        { entityId: 'host-1', count: 4, entityType: 'host' },
+        { entityId: 'host-1', count: 4, entityType: 'host', name: 'web-01' },
         { entityId: 'user-1', count: 1 },
       ]);
       expect(countByConversation).toHaveBeenNthCalledWith(
@@ -136,6 +136,23 @@ describe('ImpactPillsService', () => {
       ]);
       expect(scanWithEntityIds).toHaveBeenCalledWith(request, { status: 'open' });
       expect(scanWithEntityIds).toHaveBeenCalledWith(request, { status: 'closed' });
+    });
+
+    it('labels a pill with the entity name carried on the escalation', async () => {
+      const { service, scanWithEntityIds } = makeService();
+      scanWithEntityIds.mockResolvedValueOnce([
+        {
+          id: 'e1',
+          entity_ids: ['host:abc'],
+          entity_types: { 'host:abc': 'host' },
+          entity_names: { 'host:abc': 'web-01' },
+        },
+      ]);
+      scanWithEntityIds.mockResolvedValueOnce([]);
+
+      expect(await service.forEscalations(request)).toEqual([
+        { entityId: 'host:abc', count: 1, entityType: 'host', name: 'web-01' },
+      ]);
     });
 
     it('lets a failed scan surface', async () => {

@@ -100,6 +100,24 @@ describe('Impact', () => {
     expect(visibleRow().getByText('1')).toBeInTheDocument();
   });
 
+  it('labels a pill with the entity name and still filters by its id', () => {
+    const onEntityFilterChange = jest.fn();
+    renderWithKibanaRenderContext(
+      <Impact
+        pills={[
+          { entityId: 'host:572750b8', name: 'SRVWIN01', entityType: 'host', count: 2 },
+          { entityId: 'user:it.admin@572750b8@local', count: 1 },
+        ]}
+        entityFilter={null}
+        onEntityFilterChange={onEntityFilterChange}
+      />
+    );
+
+    expect(pillLabels()).toEqual(['SRVWIN01', 'it.admin']);
+    fireEvent.click(visibleRow().getByRole('button', { name: 'SRVWIN01' }));
+    expect(onEntityFilterChange).toHaveBeenCalledWith('host:572750b8');
+  });
+
   it('selects a pill and clears it on the second click', () => {
     const onEntityFilterChange = jest.fn();
     const pills = [{ entityId: 'host-1', count: 1 }];
