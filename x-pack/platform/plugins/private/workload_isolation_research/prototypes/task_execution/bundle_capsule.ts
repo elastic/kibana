@@ -94,12 +94,12 @@ const result = await build({
   plugins: [capsuleModules],
   logLevel: 'warning',
 });
-console.log(
+process.stdout.write(
   JSON.stringify({
     output,
     bytes: statSync(output).size,
     linkage: staticImports ? 'static_named_imports' : 'namespace_requires',
     source_modules: Object.keys(result.metafile?.inputs ?? {}).length,
     note: 'distribution_shaped_standalone_kernel_NOT_Kibana_image_or_Node_source_build',
-  })
+  }) + '\n'
 );

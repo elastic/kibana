@@ -37,7 +37,7 @@ for (const path of process.argv.slice(2)) {
     if (!line.startsWith('{"')) continue;
     const record = JSON.parse(line) as Measurement;
     if (!record.run_id && record.slots === undefined) continue;
-    console.log(
+    process.stdout.write(
       JSON.stringify({
         run_id: record.run_id ?? null,
         source_file: basename(path),
@@ -59,7 +59,7 @@ for (const path of process.argv.slice(2)) {
         child_ready_rss_sum_mib: mib(record.child_ready_rss_sum),
         comparison_valid: false,
         caveat: 'different_graphs_sampled_heap_and_RSS_not_cgroup_PSS_peak_or_real_service_mix',
-      })
+      }) + '\n'
     );
   }
 }

@@ -8,8 +8,11 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { setTimeout as delay } from 'node:timers/promises';
-import { IsolatedRunner, stopWorkloadClass } from './isolated_runner';
 import type { Transport, WorkloadClass } from './protocol';
+
+const { IsolatedRunner, stopWorkloadClass } = (await import(
+  new URL('./isolated_runner.ts', import.meta.url).href
+)) as typeof import('./isolated_runner');
 
 test('main execution: synchronous offender makes heartbeat visibly red', async (context) => {
   let previous = performance.now();

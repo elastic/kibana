@@ -7,8 +7,11 @@
 
 import assert from 'node:assert/strict';
 import { setTimeout as delay } from 'node:timers/promises';
-import { IsolatedRunner } from './isolated_runner';
 import type { Transport, WorkloadClass } from './protocol';
+
+const { IsolatedRunner } = (await import(
+  new URL('./isolated_runner.ts', import.meta.url).href
+)) as typeof import('./isolated_runner');
 
 const transport = process.argv[2];
 assert.ok(transport === 'thread' || transport === 'process');
@@ -47,7 +50,7 @@ try {
   assert.equal(slots.filter((slot) => slot.active).length, count);
   const during = process.memoryUsage();
   const completed = await Promise.all(roundTrips);
-  console.log(
+  process.stdout.write(
     JSON.stringify({
       transport,
       slots: count,
@@ -67,7 +70,7 @@ try {
       sent_bytes: slots.reduce((sum, slot) => sum + slot.sentBytes, 0),
       received_bytes: slots.reduce((sum, slot) => sum + slot.receivedBytes, 0),
       memory_caveat: 'sampled_RSS_not_PSS_or_cgroup_peak; fresh_driver_per_configuration',
-    })
+    }) + '\n'
   );
 } finally {
   await Promise.all(slots.map((slot) => slot.stop()));

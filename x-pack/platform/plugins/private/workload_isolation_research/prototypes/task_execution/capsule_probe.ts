@@ -60,7 +60,7 @@ try {
     return message.result;
   });
   assert.equal(control.result.transportCalls, 2);
-  console.log(
+  process.stdout.write(
     JSON.stringify({
       run_id: process.env.WIR_RUN_ID ?? 'unregistered',
       canonical_equal: true,
@@ -78,7 +78,7 @@ try {
         'process_RSS_not_PSS_or_cgroup; never_sum_worker_RSS',
         'NOT_a_realistic_6_alerting_3_workflow_1_agent_service_mix',
       ],
-    })
+    }) + '\n'
   );
 } finally {
   await Promise.all(workers.map((worker) => worker.terminate()));
