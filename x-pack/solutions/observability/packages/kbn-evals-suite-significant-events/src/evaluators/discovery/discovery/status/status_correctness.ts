@@ -12,8 +12,9 @@ const ruleUuidOf = (detection: { rule_uuid?: string; metadata?: { rule_uuid?: st
 
 /**
  * Status follows from the verdicts the agent stores, so the decision left to grade is whether an
- * event was written at all: one for every expected event, and none for a detection no expected
- * event covers (a false alarm, a benign change). `grouping_correctness` and
+ * event was written at all: one for every active expected event, and none for a detection no
+ * expected event covers (a false alarm). A benign detection that the dataset expects as an
+ * inactive event is the agent's to judge: written or not, it scores the same. `grouping_correctness` and
  * `confirmation_alignment` ignore events outside the expected rules, so this is where those are
  * caught.
  */
@@ -35,16 +36,22 @@ export const statusCorrectnessEvaluator: DiscoveryEvaluator = {
       new Set(
         (event.signals ?? []).map(({ metadata }) => ruleUuidOf(metadata ?? {})).filter(Boolean)
       );
-    // An expected `inactive` event is a benign case the agent must not write, so only the active
-    // ones are owed; the rules of the inactive ones stay outside the universe and are forbidden.
+    // An expected `inactive` event is a benign case discovery judges for itself: it is not owed,
+    // and writing it is no mistake. Only the active ones are owed, and a detection that no expected
+    // event covers at all is forbidden.
     const expectedRuleSets = expectedEvents
       .filter((event) => event.status !== 'inactive')
       .map(ruleSetOf);
+    const optionalRules = new Set(
+      expectedEvents
+        .filter((event) => event.status === 'inactive')
+        .flatMap((event) => [...ruleSetOf(event)])
+    );
     const expectedUniverse = new Set(expectedRuleSets.flatMap((rules) => [...rules]));
     const forbiddenRules = new Set(
       (input?.detections ?? [])
         .map(ruleUuidOf)
-        .filter((rule) => rule && !expectedUniverse.has(rule))
+        .filter((rule) => rule && !expectedUniverse.has(rule) && !optionalRules.has(rule))
     );
 
     const writtenRules = new Set(

@@ -58,7 +58,7 @@ export interface LifecycleState {
 export type LifecycleSkipReason =
   /** The series is already in the state the change asks for. */
   | 'already_in_state'
-  /** Only a breach opens an event: a healthy or unjudged assessment of a closed or new series. */
+  /** A closed series is reopened only by a breach: a healthy or unjudged assessment leaves it closed. */
   | 'not_a_breach';
 
 export type LifecycleDecision =
@@ -78,10 +78,17 @@ const decideAssessment = ({
   const { status } = state;
 
   if (!isLive(status)) {
-    // Only a breach opens or reopens (a new episode on an inactive series).
-    return outcome === 'breached'
-      ? { write: true, status: ALERT_EPISODE_STATUS.ACTIVE }
-      : { write: false, reason: 'not_a_breach' };
+    // A breach opens a new series or reopens a closed one (a new episode).
+    if (outcome === 'breached') return { write: true, status: ALERT_EPISODE_STATUS.ACTIVE };
+    // A closed series stays closed: a healthy or unjudged assessment never reopens it.
+    if (status !== undefined) return { write: false, reason: 'not_a_breach' };
+    // A series with no version yet is one discovery chose to open. Healthy members mean nothing is
+    // failing, so it opens inactive: `recovering` is a transition out of `active`, never a birth.
+    // Evidence that cannot be judged leaves it active until it settles.
+    return {
+      write: true,
+      status: outcome === 'recovered' ? ALERT_EPISODE_STATUS.INACTIVE : ALERT_EPISODE_STATUS.ACTIVE,
+    };
   }
 
   if (outcome === 'breached') {
@@ -177,12 +184,15 @@ export const decideStatusChange = ({
 
   // A blank note counts as omitted, so it cannot overwrite the existing one.
   const note = assessmentNote?.trim();
+  // Only the version an operator wrote carries the marker; later versions must not inherit it.
+  const { status_set_by: _previousSetBy, ...carried } = latest;
   return {
     write: true,
     event: {
-      ...latest,
+      ...carried,
       '@timestamp': timestamp,
       status: decision.status,
+      ...(change.kind === 'operator' ? { status_set_by: 'operator' as const } : {}),
       ...(note ? { assessment_note: note } : {}),
     },
   };

@@ -248,6 +248,138 @@ describe('GET /internal/significant_events/events/{id}/lifecycle', () => {
   });
 });
 
+describe('GET /internal/significant_events/events/{id}/lifecycle, skipped detections', () => {
+  const detectionSignal = (ruleUuid: string, detectionId: string) => ({
+    type: 'detection' as const,
+    source_id: 'logs.test',
+    description: 'description',
+    verdict: 'confirms' as const,
+    metadata: {
+      rule_uuid: ruleUuid,
+      detection_id: detectionId,
+      rule_name: `Rule ${ruleUuid}`,
+      change_point_type: 'spike',
+      p_value: 0.01,
+    },
+  });
+  const event = {
+    '@timestamp': '2026-01-01T00:00:00.000Z',
+    event_uuid: 'version-1',
+    event_id: 'event-1',
+    status: 'open' as const,
+    source_ids: ['logs.test'],
+    title: 'Test event',
+    summary: 'Test summary',
+    severity: '40-medium' as const,
+    confidence: 0.8,
+    signals: [detectionSignal('rule-1', 'detection-1')],
+  };
+  const stored = (detectionId: string, overrides: Record<string, unknown> = {}) => ({
+    detection_id: detectionId,
+    rule_uuid: 'rule-1',
+    rule_name: 'Rule 1',
+    source_id: 'logs.test',
+    change_point_type: 'spike',
+    '@timestamp': '2026-01-01T01:00:00.000Z',
+    processed: true,
+    ...overrides,
+  });
+
+  const run = async ({
+    embedded,
+    history,
+  }: {
+    embedded: Array<Record<string, unknown>>;
+    history: Array<Record<string, unknown>>;
+  }) => {
+    const findHistoryByRuleUuids = jest.fn().mockResolvedValue({ hits: history });
+    const response = await lifecycleRoute.handler({
+      params: { path: { id: event.event_id } },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        licensing: {},
+        getEventSearchClient: () => ({
+          findByEventId: jest.fn().mockResolvedValue({ hits: [event] }),
+        }),
+        getDetectionClient: () => ({
+          findByIds: jest.fn().mockResolvedValue({ hits: embedded }),
+          findHistoryByRuleUuids,
+        }),
+      }),
+      server: {},
+    } as never);
+    return { response, findHistoryByRuleUuids };
+  };
+
+  it("adds the detections of the event's rules that the classifier skipped, with why", async () => {
+    const skip = {
+      reason: 'still_breaching',
+      probe_status: 'ok',
+      checked_at: '2026-01-01T01:00:05.000Z',
+    };
+
+    const { response, findHistoryByRuleUuids } = await run({
+      embedded: [stored('detection-1')],
+      history: [stored('detection-1'), stored('detection-2', { skip })],
+    });
+
+    expect(findHistoryByRuleUuids).toHaveBeenCalledWith({
+      ruleUuids: ['rule-1'],
+      from: event['@timestamp'],
+    });
+    expect(response.detections.map(({ detection_id: id }) => id)).toEqual([
+      'detection-1',
+      'detection-2',
+    ]);
+    expect(response.detections[1]).toMatchObject({ rule_uuid: 'rule-1', skip });
+    expect(response.detections[0]).not.toHaveProperty('skip');
+  });
+
+  it("bounds the history to the event's life once its latest version is inactive", async () => {
+    const findHistoryByRuleUuids = jest.fn().mockResolvedValue({ hits: [] });
+    const closed = { ...event, '@timestamp': '2026-01-02T00:00:00.000Z', status: 'inactive' };
+    await lifecycleRoute.handler({
+      params: { path: { id: event.event_id } },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        licensing: {},
+        getEventSearchClient: () => ({
+          findByEventId: jest.fn().mockResolvedValue({ hits: [closed, event] }),
+        }),
+        getDetectionClient: () => ({
+          findByIds: jest.fn().mockResolvedValue({ hits: [] }),
+          findHistoryByRuleUuids,
+        }),
+      }),
+      server: {},
+    } as never);
+
+    expect(findHistoryByRuleUuids).toHaveBeenCalledWith({
+      ruleUuids: ['rule-1'],
+      from: event['@timestamp'],
+      to: closed['@timestamp'],
+    });
+  });
+
+  it('does not list a detection twice, nor one the classifier did not skip', async () => {
+    const skip = { reason: 'still_breaching' };
+
+    const { response } = await run({
+      embedded: [stored('detection-1')],
+      history: [
+        stored('detection-1', { skip }),
+        stored('detection-3'),
+        stored('detection-4', { skip }),
+      ],
+    });
+
+    expect(response.detections.map(({ detection_id: id }) => id)).toEqual([
+      'detection-1',
+      'detection-4',
+    ]);
+  });
+});
+
 describe('GET /internal/significant_events/events/{id}', () => {
   const baseEvent = {
     '@timestamp': '2026-01-01T00:00:00.000Z',

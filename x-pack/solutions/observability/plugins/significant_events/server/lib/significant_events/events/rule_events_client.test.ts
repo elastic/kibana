@@ -21,6 +21,7 @@ interface MockRow {
   source: Record<string, unknown>;
   dataJson: string;
   createdAt?: string;
+  operatorClosed?: boolean;
 }
 
 const sourceResponse = (rows: MockRow[]): ESQLSearchResponse =>
@@ -29,11 +30,15 @@ const sourceResponse = (rows: MockRow[]): ESQLSearchResponse =>
       { name: '_source', type: 'object' },
       { name: 'data_json', type: 'keyword' },
       ...(rows[0]?.createdAt !== undefined ? [{ name: 'created_at', type: 'date' }] : []),
+      ...(rows[0]?.operatorClosed !== undefined
+        ? [{ name: 'operator_closed', type: 'boolean' }]
+        : []),
     ],
     values: rows.map((row) => [
       row.source,
       row.dataJson,
       ...(row.createdAt !== undefined ? [row.createdAt] : []),
+      ...(row.operatorClosed !== undefined ? [row.operatorClosed] : []),
     ]),
   } as unknown as ESQLSearchResponse);
 
@@ -557,7 +562,6 @@ describe('RuleEventsClient', () => {
       await client.findLatestActive({});
 
       const q = lastQuery(query);
-      expect(q).toContain('`alert.status` IN ("active", "recovering")');
       expect(q).not.toContain('status IN ("open")');
     });
 
@@ -595,6 +599,484 @@ describe('RuleEventsClient', () => {
           severity: 'medium',
         },
       ]);
+    });
+  });
+
+  describe('findRuleSeries › prior', () => {
+    const rowOf = ({
+      eventId,
+      status,
+      timestamp,
+      note,
+      ruleUuid,
+      setBy,
+      operatorClosed,
+    }: {
+      eventId: string;
+      status: string;
+      timestamp: string;
+      note?: string;
+      ruleUuid: string;
+      setBy?: 'operator';
+      operatorClosed?: boolean;
+    }): MockRow => ({
+      ...(operatorClosed !== undefined ? { operatorClosed } : {}),
+      source: ruleEventSource({ alert: { status }, '@timestamp': timestamp }),
+      dataJson: JSON.stringify({
+        ...dataDoc,
+        event_id: eventId,
+        ...(note ? { assessment_note: note } : {}),
+        ...(setBy ? { status_set_by: setBy } : {}),
+        signals: [
+          {
+            type: 'detection',
+            source_id: 'logs.checkout',
+            description: 'Observed rows',
+            verdict: 'confirms',
+            metadata: { rule_uuid: ruleUuid },
+          },
+        ],
+      }),
+    });
+
+    it('returns an empty map without querying when no rules are requested', async () => {
+      const { client, query } = createClient(async () => sourceResponse([]));
+
+      expect(
+        (
+          await client.findRuleSeries({
+            ruleUuids: [],
+            from: '2000-01-01T00:00:00.000Z',
+            priorFrom: '2000-01-01T00:00:00.000Z',
+          })
+        ).prior.size
+      ).toBe(0);
+      expect(query).not.toHaveBeenCalled();
+    });
+
+    it('looks at series in any status since the lookback start', async () => {
+      const { client, query } = createClient(async () => sourceResponse([]));
+
+      await client.findRuleSeries({
+        ruleUuids: ['rule-A'],
+        from: '2026-10-01T00:00:00.000Z',
+        priorFrom: '2026-10-01T00:00:00.000Z',
+      });
+
+      const q = lastQuery(query);
+      expect(q).not.toContain('| WHERE `alert.status` IN');
+      expect(q).toContain('WHERE @timestamp >= TO_DATETIME(?fromIso)');
+      expect(q).toContain(
+        'MV_INTERSECTS(FIELD_EXTRACT(data, "signals.metadata.rule_uuid"), ["rule-A"])'
+      );
+    });
+
+    it('reads the newest series of the rule, and that an operator did not set its status', async () => {
+      const rows = [
+        rowOf({
+          eventId: 'a',
+          status: 'inactive',
+          timestamp: '2026-10-10T10:00:00.000Z',
+          ruleUuid: 'rule-A',
+        }),
+        rowOf({
+          eventId: 'b',
+          status: 'active',
+          timestamp: '2026-10-11T10:00:00.000Z',
+          ruleUuid: 'rule-A',
+        }),
+        rowOf({
+          eventId: 'c',
+          status: 'inactive',
+          timestamp: '2026-10-12T10:00:00.000Z',
+          ruleUuid: 'rule-A',
+        }),
+        rowOf({
+          eventId: 'd',
+          status: 'inactive',
+          timestamp: '2026-10-13T10:00:00.000Z',
+          ruleUuid: 'rule-A',
+        }),
+      ];
+      const { client } = createClient(async () => sourceResponse(rows));
+
+      const prior = (
+        await client.findRuleSeries({
+          ruleUuids: ['rule-A'],
+          from: '2000-01-01T00:00:00.000Z',
+          priorFrom: '2000-01-01T00:00:00.000Z',
+        })
+      ).prior;
+
+      expect(prior.get('rule-A')).toMatchObject({
+        eventId: 'd',
+        statusSetBy: undefined,
+      });
+    });
+
+    it.each([
+      ['carries status_set_by', { setBy: 'operator' as const }],
+      [
+        'predates status_set_by and carries the operator fallback note',
+        { note: operatorFallbackAssessmentNote('inactive') },
+      ],
+    ])("reads a close as the operator's when it %s", async (_n, extra) => {
+      const rows = [
+        rowOf({
+          eventId: 'c',
+          status: 'inactive',
+          timestamp: '2026-10-12T10:00:00.000Z',
+          ruleUuid: 'rule-A',
+        }),
+        rowOf({
+          eventId: 'd',
+          status: 'inactive',
+          timestamp: '2026-10-13T10:00:00.000Z',
+          ruleUuid: 'rule-A',
+          ...extra,
+        }),
+      ];
+      const { client } = createClient(async () => sourceResponse(rows));
+
+      const prior = (
+        await client.findRuleSeries({
+          ruleUuids: ['rule-A'],
+          from: '2000-01-01T00:00:00.000Z',
+          priorFrom: '2000-01-01T00:00:00.000Z',
+        })
+      ).prior;
+
+      expect(prior.get('rule-A')).toMatchObject({
+        eventId: 'd',
+        statusSetBy: 'operator',
+      });
+    });
+
+    it('keeps, per rule, the series written most recently, with its status and note', async () => {
+      const rows = [
+        rowOf({
+          eventId: 'old',
+          status: 'active',
+          timestamp: '2026-10-10T10:00:00.000Z',
+          ruleUuid: 'rule-A',
+        }),
+        rowOf({
+          eventId: 'new',
+          status: 'inactive',
+          timestamp: '2026-10-12T10:00:00.000Z',
+          note: 'Benign deploy.',
+          ruleUuid: 'rule-A',
+        }),
+      ];
+      const { client } = createClient(async () => sourceResponse(rows));
+
+      const prior = (
+        await client.findRuleSeries({
+          ruleUuids: ['rule-A'],
+          from: '2000-01-01T00:00:00.000Z',
+          priorFrom: '2000-01-01T00:00:00.000Z',
+        })
+      ).prior;
+
+      expect(prior.get('rule-A')).toMatchObject({
+        eventId: 'new',
+        status: 'inactive',
+        assessmentNote: 'Benign deploy.',
+        updatedAt: '2026-10-12T10:00:00.000Z',
+      });
+    });
+
+    const readPrior = async (rows: MockRow[]) => {
+      const { client } = createClient(async () => sourceResponse(rows));
+      return (
+        await client.findRuleSeries({
+          ruleUuids: ['rule-A'],
+          from: '2000-01-01T00:00:00.000Z',
+          priorFrom: '2000-01-01T00:00:00.000Z',
+        })
+      ).prior.get('rule-A');
+    };
+
+    it("reads the series' close as the operator's when a later version dropped the marker", async () => {
+      const prior = await readPrior([
+        rowOf({
+          eventId: 'd',
+          status: 'inactive',
+          timestamp: '2026-10-13T10:00:00.000Z',
+          ruleUuid: 'rule-A',
+          note: 'Known, tracked in the deploy channel.',
+          operatorClosed: true,
+        }),
+      ]);
+
+      expect(prior).toMatchObject({
+        statusSetBy: 'operator',
+        closedWithReason: true,
+      });
+    });
+
+    it.each([
+      ['an operator, with a reason', { setBy: 'operator' as const, note: 'Known.' }, true],
+      [
+        'an operator, without a reason',
+        { setBy: 'operator' as const, note: operatorFallbackAssessmentNote('inactive') },
+        false,
+      ],
+      ['the engine, with a note', { note: 'Recovered on its own.' }, false],
+    ])(
+      'says whether a series closed by %s was closed with a reason',
+      async (_n, extra, expected) => {
+        const prior = await readPrior([
+          rowOf({
+            eventId: 'd',
+            status: 'inactive',
+            timestamp: '2026-10-13T10:00:00.000Z',
+            ruleUuid: 'rule-A',
+            ...extra,
+          }),
+        ]);
+
+        expect(prior?.closedWithReason).toBe(expected);
+      }
+    );
+
+    it('decides who closed a series over its whole lineage, before picking the latest version', async () => {
+      const { client, query } = createClient(async () => sourceResponse([]));
+
+      await client.findRuleSeries({
+        ruleUuids: ['rule-A'],
+        from: '2026-10-01T00:00:00.000Z',
+        priorFrom: '2026-10-01T00:00:00.000Z',
+      });
+
+      const q = lastQuery(query);
+      expect(q).toContain('operator_closed_at = MAX(@timestamp) WHERE');
+      expect(q).toContain(
+        'operator_closed_at IS NOT NULL AND (live_at IS NULL OR operator_closed_at > live_at)'
+      );
+      expect(q.indexOf('operator_closed_at = MAX')).toBeLessThan(q.indexOf('latest_ts'));
+    });
+
+    it('keeps a live series older than the prior window as a live membership only', async () => {
+      const { client } = createClient(async () =>
+        sourceResponse([
+          rowOf({
+            eventId: 'old',
+            status: 'active',
+            timestamp: '2026-10-01T10:00:00.000Z',
+            ruleUuid: 'rule-A',
+          }),
+        ])
+      );
+
+      const { prior, live } = await client.findRuleSeries({
+        ruleUuids: ['rule-A'],
+        from: '2026-09-01T00:00:00.000Z',
+        priorFrom: '2026-10-10T00:00:00.000Z',
+      });
+
+      expect(prior.has('rule-A')).toBe(false);
+      expect(live.get('rule-A')?.map(({ eventId }) => eventId)).toEqual(['old']);
+    });
+  });
+
+  describe('findRuleSeries › live', () => {
+    const detectionSignal = ({
+      ruleUuid,
+      verdict,
+      esqlQuery,
+    }: {
+      ruleUuid: string;
+      verdict: string;
+      esqlQuery?: string;
+    }) => ({
+      type: 'detection',
+      source_id: 'logs.checkout',
+      description: 'Observed rows',
+      verdict,
+      metadata: { rule_uuid: ruleUuid },
+      ...(esqlQuery ? { evidence: { esql_query: esqlQuery, result: 'found' } } : {}),
+    });
+
+    const seriesRow = ({
+      eventId,
+      status = 'active',
+      signals,
+    }: {
+      eventId: string;
+      status?: string;
+      signals: unknown[];
+    }): MockRow => ({
+      source: ruleEventSource({ alert: { status } }),
+      dataJson: JSON.stringify({ ...dataDoc, event_id: eventId, signals }),
+    });
+
+    it('returns an empty map without querying when no rules are requested', async () => {
+      const { client, query } = createClient(async () => sourceResponse([]));
+
+      const members = (
+        await client.findRuleSeries({
+          ruleUuids: [],
+          from: '2000-01-01T00:00:00.000Z',
+          priorFrom: '2000-01-01T00:00:00.000Z',
+        })
+      ).live;
+
+      expect(members.size).toBe(0);
+      expect(query).not.toHaveBeenCalled();
+    });
+
+    it('narrows to live series that contain the requested rules', async () => {
+      const { client, query } = createClient(async () => sourceResponse([]));
+
+      await client.findRuleSeries({
+        ruleUuids: ['rule-A'],
+        from: '2026-10-01T00:00:00.000Z',
+        priorFrom: '2026-10-01T00:00:00.000Z',
+      });
+
+      const q = lastQuery(query);
+      // Bounded on the latest version, after created_at is computed over the whole lineage.
+      expect(q.indexOf('INLINE STATS created_at')).toBeLessThan(
+        q.indexOf('@timestamp >= TO_DATETIME(?fromIso)')
+      );
+      expect(q).toContain('SORT @timestamp DESC');
+      expect(q).toContain(
+        'MV_INTERSECTS(FIELD_EXTRACT(data, "signals.metadata.rule_uuid"), ["rule-A"])'
+      );
+    });
+
+    it('pairs each requested rule with its series status, verdict and stored query', async () => {
+      const rows = [
+        seriesRow({
+          eventId: 'event-1',
+          signals: [
+            detectionSignal({ ruleUuid: 'rule-A', verdict: 'confirms', esqlQuery: 'FROM $.a' }),
+            detectionSignal({ ruleUuid: 'rule-other', verdict: 'refutes', esqlQuery: 'FROM $.o' }),
+          ],
+        }),
+      ];
+      const { client } = createClient(async () => sourceResponse(rows));
+
+      const members = (
+        await client.findRuleSeries({
+          ruleUuids: ['rule-A'],
+          from: '2000-01-01T00:00:00.000Z',
+          priorFrom: '2000-01-01T00:00:00.000Z',
+        })
+      ).live;
+
+      expect([...members.keys()]).toEqual(['rule-A']);
+      expect(members.get('rule-A')).toEqual([
+        {
+          eventId: 'event-1',
+          status: 'active',
+          verdict: 'confirms',
+          esqlQuery: 'FROM $.a',
+          evidenceFound: true,
+          createdAt: undefined,
+          sourceIds: ['logs.checkout'],
+          eventTitle: 'Checkout errors',
+        },
+      ]);
+    });
+
+    it("reads when the member's verdict was reached from its signal", async () => {
+      const rows = [
+        seriesRow({
+          eventId: 'event-1',
+          signals: [
+            {
+              ...detectionSignal({ ruleUuid: 'rule-A', verdict: 'confirms' }),
+              collected_at: '2026-10-19T10:00:00.000Z',
+            },
+          ],
+        }),
+      ];
+      const { client } = createClient(async () => sourceResponse(rows));
+
+      const { live } = await client.findRuleSeries({
+        ruleUuids: ['rule-A'],
+        from: '2000-01-01T00:00:00.000Z',
+        priorFrom: '2000-01-01T00:00:00.000Z',
+      });
+
+      expect(live.get('rule-A')?.[0].verifiedAt).toBe('2026-10-19T10:00:00.000Z');
+    });
+
+    it('returns one entry per live series when a rule is a member of several', async () => {
+      const rows = [
+        seriesRow({
+          eventId: 'event-1',
+          signals: [detectionSignal({ ruleUuid: 'rule-A', verdict: 'confirms', esqlQuery: 'q' })],
+        }),
+        seriesRow({
+          eventId: 'event-2',
+          status: 'recovering',
+          signals: [detectionSignal({ ruleUuid: 'rule-A', verdict: 'refutes', esqlQuery: 'q' })],
+        }),
+      ];
+      const { client } = createClient(async () => sourceResponse(rows));
+
+      const members = (
+        await client.findRuleSeries({
+          ruleUuids: ['rule-A'],
+          from: '2000-01-01T00:00:00.000Z',
+          priorFrom: '2000-01-01T00:00:00.000Z',
+        })
+      ).live;
+
+      expect(
+        members.get('rule-A')?.map(({ eventId, status, verdict }) => [eventId, status, verdict])
+      ).toEqual([
+        ['event-1', 'active', 'confirms'],
+        ['event-2', 'recovering', 'refutes'],
+      ]);
+    });
+
+    it('leaves the stored query undefined when the signal ran no query', async () => {
+      const rows = [
+        seriesRow({
+          eventId: 'event-1',
+          signals: [detectionSignal({ ruleUuid: 'rule-A', verdict: 'not_checked' })],
+        }),
+      ];
+      const { client } = createClient(async () => sourceResponse(rows));
+
+      const members = (
+        await client.findRuleSeries({
+          ruleUuids: ['rule-A'],
+          from: '2000-01-01T00:00:00.000Z',
+          priorFrom: '2000-01-01T00:00:00.000Z',
+        })
+      ).live;
+
+      expect(members.get('rule-A')).toEqual([
+        {
+          eventId: 'event-1',
+          status: 'active',
+          verdict: 'not_checked',
+          esqlQuery: undefined,
+          evidenceFound: false,
+          createdAt: undefined,
+          sourceIds: ['logs.checkout'],
+          eventTitle: 'Checkout errors',
+        },
+      ]);
+    });
+
+    it('omits rules that are in no live series', async () => {
+      const { client } = createClient(async () => sourceResponse([]));
+
+      const members = (
+        await client.findRuleSeries({
+          ruleUuids: ['rule-A', 'rule-B'],
+          from: '2000-01-01T00:00:00.000Z',
+          priorFrom: '2000-01-01T00:00:00.000Z',
+        })
+      ).live;
+
+      expect(members.size).toBe(0);
     });
   });
 

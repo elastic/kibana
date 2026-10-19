@@ -46,8 +46,21 @@ describe('decideStatusChange', () => {
 
     expect(decideStatusChange({ latest, change: DEACTIVATE, timestamp: TIMESTAMP })).toEqual({
       write: true,
-      event: { ...latest, '@timestamp': TIMESTAMP, status: 'inactive' },
+      event: { ...latest, '@timestamp': TIMESTAMP, status: 'inactive', status_set_by: 'operator' },
     });
+  });
+
+  it('marks only the version an operator wrote, and does not carry the mark forward', () => {
+    const operatorClosed = createEvent({ status: 'inactive', status_set_by: 'operator' });
+
+    const reopened = decideStatusChange({
+      latest: operatorClosed,
+      change: StatusChange.assessed('breached'),
+      timestamp: TIMESTAMP,
+    });
+
+    expect(reopened).toMatchObject({ write: true, event: { status: 'active' } });
+    expect(reopened.write && reopened.event).not.toHaveProperty('status_set_by');
   });
 
   it('records the given note and keeps the stored one when it is omitted or blank', () => {
@@ -167,8 +180,13 @@ describe('decideLifecycle', () => {
         'no_data',
         RECOVERING,
       ],
-      ['does not open a new series on healthy members', undefined, 'recovered', NOT_A_BREACH],
-      ['does not open a new series on unjudged members', undefined, 'no_data', NOT_A_BREACH],
+      [
+        'opens a new series inactive when every member is healthy: recovering is never a birth',
+        undefined,
+        'recovered',
+        INACTIVE,
+      ],
+      ['opens a new series active when a member cannot be judged', undefined, 'no_data', ACTIVE],
       ['does not reopen a closed series on healthy members', 'inactive', 'recovered', NOT_A_BREACH],
       ['does not reopen a closed series on unjudged members', 'inactive', 'no_data', NOT_A_BREACH],
     ])('%s', (_label, status, outcome, expected) => {
@@ -237,18 +255,18 @@ describe('decideLifecycle', () => {
       });
     });
 
-    it('enters recovering only from an assessment of an active series', () => {
+    it('enters recovering only from an assessment of an active or new series', () => {
       everyCase.forEach(({ status, change, decision }) => {
         if (decision.write && decision.status === 'recovering' && status !== 'recovering') {
           expect(change.kind).toBe('assessment');
-          expect(status).toBe('active');
+          expect(['active', undefined]).toContain(status);
         }
       });
     });
 
-    it('never lets an assessment close a series, and lets it leave recovering only back to active', () => {
+    it('never lets an assessment close a live series, and lets it leave recovering only back to active', () => {
       everyCase.forEach(({ status, change, decision }) => {
-        if (change.kind === 'assessment' && decision.write) {
+        if (change.kind === 'assessment' && decision.write && status !== undefined) {
           expect(decision.status).not.toBe('inactive');
           if (status === 'recovering') {
             expect(['recovering', 'active']).toContain(decision.status);
@@ -257,18 +275,31 @@ describe('decideLifecycle', () => {
       });
     });
 
-    it('never lets an assessment open or reopen a series unless it is breaching', () => {
+    it('never lets a non-breaching assessment reopen a closed series', () => {
       everyCase.forEach(({ status, change, decision }) => {
-        const notLive = status === undefined || status === 'inactive';
-        if (change.kind === 'assessment' && change.outcome !== 'breached' && notLive) {
+        if (
+          change.kind === 'assessment' &&
+          change.outcome !== 'breached' &&
+          status === 'inactive'
+        ) {
           expect(decision.write).toBe(false);
         }
       });
     });
 
-    it('closes a series only through an operator or a deleted rule', () => {
-      everyCase.forEach(({ change, decision }) => {
-        if (decision.write && decision.status === 'inactive') {
+    it('opens a series with no version on any assessment, and never as recovering', () => {
+      everyCase.forEach(({ status, change, decision }) => {
+        if (change.kind === 'assessment' && status === undefined) {
+          expect(decision.write).toBe(true);
+          expect(decision.write && decision.status).not.toBe('recovering');
+        }
+      });
+    });
+
+    it('closes a live series only through an operator or a deleted rule', () => {
+      everyCase.forEach(({ status, change, decision }) => {
+        const wasLive = status === 'active' || status === 'recovering';
+        if (wasLive && decision.write && decision.status === 'inactive') {
           expect(['operator', 'rule_deleted']).toContain(change.kind);
         }
       });
@@ -312,10 +343,10 @@ describe('discovery assessments: the status comes from the members, never from t
     });
   });
 
-  it('does not open an event from healthy members', () => {
+  it('opens an event from healthy members as inactive: recovering is never a birth', () => {
     expect(decideFromMembers({ latest: undefined, signals: allHealthy })).toEqual({
-      write: false,
-      reason: 'not_a_breach',
+      write: true,
+      status: 'inactive',
     });
   });
 

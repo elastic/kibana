@@ -7,8 +7,23 @@
 
 export {
   detectionSchema,
+  detectionSkipSchema,
+  PROBE_STATUSES,
+  type ProbeStatus,
+  BASELINE_DECISIONS,
+  type BaselineDecision,
+  SKIP_REASONS,
+  type SkipReason,
+  NEEDS_AGENT_REASONS,
+  type NeedsAgentReason,
+  DECISION_REASONS,
+  type DecisionReason,
+  baselineObservationSchema,
+  type BaselineObservation,
   CHANGE_POINT_TYPES,
   type Detection,
+  type DetectionSkip,
+  describeSkip,
   type ChangePointType,
 } from './detections';
 export {
@@ -19,6 +34,7 @@ export {
   SIGNAL_VERDICTS,
   SEVERITY_OPTIONS,
   SEVERITY_CONTRACT_RULE,
+  UNCONFIRMED_EVENT_MAX_CONFIDENCE,
   getSeverityLabel,
   type BlastRadiusEntry,
   type CausalFeature,

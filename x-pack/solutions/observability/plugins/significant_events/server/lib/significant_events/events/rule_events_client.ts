@@ -21,6 +21,7 @@ import {
   type SignificantEvent,
   type SignificantEventResponse,
   type Severity,
+  type SignalVerdict,
   type SignificantEventStatus,
 } from '@kbn/significant-events-schema';
 import { i18n } from '@kbn/i18n';
@@ -64,6 +65,15 @@ const isSignificantEventStatus = (status: AlertEpisodeStatus): status is Signifi
 const isSignificantEventSeverity = (severity: AlertEventSeverity): severity is Severity =>
   severity === 'critical' || severity === 'high' || severity === 'medium' || severity === 'low';
 
+/**
+ * Did an operator close this version? Versions written before `status_set_by` existed carry only
+ * the fallback note an operator close records, so that note counts too.
+ */
+const closedByOperator = (event: SignificantEvent): boolean =>
+  event.status === 'inactive' &&
+  (event.status_set_by === 'operator' ||
+    event.assessment_note === operatorFallbackAssessmentNote('inactive'));
+
 type RuleEventsCurrentStateSearchOptions = CommonSearchOptions & EventsFilterOptions;
 
 export type RuleEventsBatchSearchOptions = RuleEventsCurrentStateSearchOptions & {
@@ -84,6 +94,7 @@ interface RuleEventSourceRow {
 }
 
 type RuleEventSourceRowWithCreatedAt = RuleEventSourceRow & { created_at: string };
+type RuleSeriesRow = RuleEventSourceRowWithCreatedAt & { operator_closed?: boolean };
 
 /**
  * `.rule-events` doesn't guarantee `source_ids` is an array — bridge docs write a scalar
@@ -223,6 +234,40 @@ export type UpdateEventStatusResult =
       status: SignificantEventStatus;
       reason: LifecycleSkipReason | 'not_found' | 'superseded';
     };
+
+/** A rule's latest series in any status, as last written: context for judging a new detection of it. */
+export interface PriorSeries {
+  eventId: string | undefined;
+  status: SignificantEventStatus;
+  severity: Severity;
+  /** An operator's reason lives here too: the fallback note is written when none is given. */
+  assessmentNote: string | undefined;
+  /** When the latest version was written; for an `inactive` series, when it went inactive. */
+  updatedAt: string;
+  /** Whether an operator chose the status the series is in. */
+  statusSetBy: 'operator' | undefined;
+  /** An operator closed the series and gave a reason: the note is theirs, not the fallback. */
+  closedWithReason: boolean;
+}
+
+/** A rule's membership in one live series, with that member's latest stored signal. */
+export interface LiveRuleMembership {
+  eventId: string | undefined;
+  status: SignificantEventStatus;
+  verdict: SignalVerdict;
+  /** The stored verification query, absent when the signal ran no query. */
+  esqlQuery: string | undefined;
+  /** Whether the stored query found rows when the verdict was made. */
+  evidenceFound: boolean;
+  /** When this member's signal was last verified: the agent's last verdict for the rule. */
+  verifiedAt: string | undefined;
+  /** When the series was opened: its earliest version. */
+  createdAt: string | undefined;
+  /** The sources the series covers. */
+  sourceIds: string[];
+  /** The series' title, for saying which event a decision rests on. */
+  eventTitle: string | undefined;
+}
 
 /**
  * `.rule-events` client used by agent-side call sites (`event_search`, `event_write`'s dedup scan,
@@ -413,6 +458,122 @@ export class RuleEventsClient {
       fields: ['data_json'],
     });
     return { hits: hits.map(decodeSignificantEvent) };
+  }
+
+  /**
+   * Reads, in one query, the series that the requested rules are members of: each rule's most
+   * recent series in any status written since `priorFrom` (`prior`), and the live series
+   * (`active` or `recovering`) it belongs to with the member's latest stored signal (`live`). A rule
+   * with none is absent from the map.
+   *
+   * `from` bounds the read on a series' latest version, applied after `created_at` is computed over
+   * the whole lineage: bounding earlier would clip `created_at` and make an old series look young.
+   * A live series with no write since `from` is read as "not a live member", which sends its
+   * detections to the agent. Capped at MAX_DEDUP_SCAN_LIMIT series, newest first; a space with more
+   * can omit older ones, which callers must read the same way.
+   */
+  async findRuleSeries({
+    ruleUuids,
+    from,
+    priorFrom,
+  }: {
+    ruleUuids: string[];
+    from: string;
+    priorFrom: string;
+  }): Promise<{
+    prior: Map<string, PriorSeries>;
+    live: Map<string, LiveRuleMembership[]>;
+  }> {
+    const prior = new Map<string, PriorSeries>();
+    const live = new Map<string, LiveRuleMembership[]>();
+    if (ruleUuids.length === 0) return { prior, live };
+
+    const requested = new Set(ruleUuids);
+    const status = esql.col('alert.status');
+    const operatorMarked = esql.exp`FIELD_EXTRACT(${esql.col('data')}, ${esql.str(
+      'status_set_by'
+    )}) == ${esql.str('operator')} OR FIELD_EXTRACT(${esql.col('data')}, ${esql.str(
+      'assessment_note'
+    )}) == ${esql.str(operatorFallbackAssessmentNote('inactive'))}`;
+    // Over the whole lineage, so a later version that drops `status_set_by` (an investigation
+    // attaching) still reads as the operator's close.
+    const lineage = buildBaseQuery(this.clients.space)
+      .pipe`INLINE STATS created_at = MIN(@timestamp),
+      operator_closed_at = MAX(@timestamp) WHERE ${status} == ${esql.str(
+      'inactive'
+    )} AND (${operatorMarked}),
+      live_at = MAX(@timestamp) WHERE ${status} IN (${SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS.map(
+      (option) => esql.str(option)
+    )}) BY ${esql.col(GROUP_HASH_FIELD)}`;
+    const query = applyTimeRange({
+      query: pickLatestPerGroup(lineage, GROUP_HASH_FIELD),
+      from,
+    }).where`${ruleUuidsIntersects(ruleUuids)}`.pipe`EVAL operator_closed = ${status} == ${esql.str(
+      'inactive'
+    )} AND operator_closed_at IS NOT NULL AND (live_at IS NULL OR operator_closed_at > live_at)`;
+    const rows = await executeEsqlQuery<RuleSeriesRow>({
+      esClient: this.clients.esClient,
+      query: withDataJsonProjection(query)
+        .sort(['@timestamp', 'DESC'], ['_id', 'ASC'])
+        .keep('_source', 'data_json', 'created_at', 'operator_closed')
+        .limit(MAX_DEDUP_SCAN_LIMIT),
+      fields: ['data_json', 'created_at', 'operator_closed'],
+    });
+
+    const priorFromMs = Date.parse(priorFrom);
+    const seriesByRule = new Map<string, Array<{ event: SignificantEvent; byOperator: boolean }>>();
+    for (const row of rows) {
+      const event = decodeSignificantEvent(row);
+      const byOperator = row.operator_closed === true || closedByOperator(event);
+      const isLive = (SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS as readonly string[]).includes(
+        event.status
+      );
+      for (const signal of event.signals ?? []) {
+        const ruleUuid = signal.metadata.rule_uuid;
+        if (!ruleUuid || !requested.has(ruleUuid)) continue;
+        if (isLive) {
+          live.set(ruleUuid, [
+            ...(live.get(ruleUuid) ?? []),
+            {
+              eventId: event.event_id,
+              status: event.status,
+              verdict: signal.verdict,
+              esqlQuery: signal.evidence?.esql_query,
+              evidenceFound: signal.evidence?.result === 'found',
+              verifiedAt: signal.collected_at,
+              createdAt: row.created_at,
+              sourceIds: event.source_ids,
+              eventTitle: event.title,
+            },
+          ]);
+        }
+        if (Date.parse(event['@timestamp']) >= priorFromMs) {
+          seriesByRule.set(ruleUuid, [
+            ...(seriesByRule.get(ruleUuid) ?? []),
+            { event, byOperator },
+          ]);
+        }
+      }
+    }
+    for (const [ruleUuid, series] of seriesByRule) {
+      const newestFirst = [...series].sort(
+        (a, b) => Date.parse(b.event['@timestamp']) - Date.parse(a.event['@timestamp'])
+      );
+      const [{ event: latest, byOperator: isOperatorClose }] = newestFirst;
+      prior.set(ruleUuid, {
+        eventId: latest.event_id,
+        status: latest.status,
+        severity: latest.severity,
+        assessmentNote: latest.assessment_note,
+        updatedAt: latest['@timestamp'],
+        statusSetBy: isOperatorClose ? 'operator' : undefined,
+        closedWithReason:
+          isOperatorClose &&
+          latest.assessment_note !== undefined &&
+          latest.assessment_note !== operatorFallbackAssessmentNote('inactive'),
+      });
+    }
+    return { prior, live };
   }
 
   async findByEventId(eventId: string): Promise<{ hits: SignificantEventResponse[] }> {

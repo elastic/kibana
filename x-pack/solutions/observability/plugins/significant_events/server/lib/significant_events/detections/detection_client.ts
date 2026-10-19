@@ -21,7 +21,7 @@ import {
   runPaginatedLatestSourceEsqlQuery,
   runFindByIdEsqlQuery,
   runFindByIdsEsqlQuery,
-  runGetProcessedMarkerIds,
+  runGetProcessedMarkers,
 } from '../latest_source_query';
 import {
   DETECTIONS_DATA_STREAM,
@@ -61,6 +61,7 @@ const ESQL_MAX_ROWS = 10_000;
 // Cap the per-rule detection history (flyout timeline) to the most recent N transitions so a churny
 // rule doesn't produce an unbounded scroll.
 const DETECTION_HISTORY_LIMIT = 20;
+const RULES_HISTORY_LIMIT = 1000;
 
 // Detections carry `change_point_type`; processed markers carry `processed_by` instead.
 // Every detection read filters on this so marker docs never surface as detections.
@@ -94,8 +95,8 @@ export class DetectionClient {
   }
 
   // `processed` is derived: a detection is processed iff a marker references its exact id.
-  private async getProcessedIds(detectionIds: string[]): Promise<Set<string>> {
-    return runGetProcessedMarkerIds({
+  private async getProcessedMarkers(detectionIds: string[]) {
+    return runGetProcessedMarkers({
       esClient: this.clients.esClient,
       space: this.clients.space,
       index: DETECTIONS_DATA_STREAM,
@@ -154,6 +155,35 @@ export class DetectionClient {
       where: detectionFilter(),
       // Most recent N transitions, returned chronologically (oldest→newest of that window).
       limit: DETECTION_HISTORY_LIMIT,
+    });
+    return { hits: await this.withDerivedProcessed(hits) };
+  }
+
+  /** The detections of several rules inside a time range, oldest→newest; the newest when capped. */
+  async findHistoryByRuleUuids({
+    ruleUuids,
+    from,
+    to,
+  }: {
+    ruleUuids: string[];
+    from: string;
+    to?: string;
+  }): Promise<{ hits: Detection[] }> {
+    const range = esql.exp`${esql.col('@timestamp')} >= TO_DATETIME(${esql.str(from)})`;
+    const { hits } = await runFindByIdsEsqlQuery<RawDetection>({
+      esClient: this.clients.esClient,
+      space: this.clients.space,
+      index: DETECTIONS_DATA_STREAM,
+      idField: FIELD_RULE_UUID,
+      idValues: ruleUuids,
+      where: to
+        ? andWhere(
+            andWhere(detectionFilter(), range),
+            esql.exp`${esql.col('@timestamp')} <= TO_DATETIME(${esql.str(to)})`
+          )
+        : andWhere(detectionFilter(), range),
+      limit: RULES_HISTORY_LIMIT,
+      keep: 'newest',
     });
     return { hits: await this.withDerivedProcessed(hits) };
   }
@@ -296,11 +326,16 @@ export class DetectionClient {
   }
 
   private async withDerivedProcessed(rawHits: RawDetection[]): Promise<Detection[]> {
-    const processedIds = await this.getProcessedIds(
+    const markers = await this.getProcessedMarkers(
       rawHits.map((h) => h.detection_id).filter((id): id is string => Boolean(id))
     );
-    return rawHits.map(
-      (raw) => ({ ...raw, processed: processedIds.has(raw.detection_id ?? '') } as Detection)
-    );
+    return rawHits.map((raw) => {
+      const marker = markers.get(raw.detection_id ?? '');
+      return {
+        ...raw,
+        processed: marker !== undefined,
+        ...(marker?.skip ? { skip: { ...marker.skip, checked_at: marker.processedAt } } : {}),
+      } as Detection;
+    });
   }
 }

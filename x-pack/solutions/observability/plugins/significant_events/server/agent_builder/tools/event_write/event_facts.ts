@@ -7,6 +7,7 @@
 
 import {
   SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS,
+  UNCONFIRMED_EVENT_MAX_CONFIDENCE,
   type Severity,
   type SignalEntry,
   type SignificantEvent,
@@ -106,10 +107,13 @@ const changesMemberVerdict = (
   );
 };
 
+const hasConfirmingSignal = (signals: SignificantEvent['signals']): boolean =>
+  (signals ?? []).some(({ verdict }) => verdict === 'confirms');
+
 /**
  * The agent decides the tier under the `severity` field contract; the writer stores it. An inactive
- * event is `low`, and a signal-less write (chat create) keeps its explicit severity, or `low` when
- * it gave none.
+ * event is `low`, so is one where no signal confirms anything, and a signal-less write (chat
+ * create) keeps its explicit severity, or `low` when it gave none.
  */
 const decideSeverity = ({
   proposed,
@@ -125,6 +129,9 @@ const decideSeverity = ({
   }
   if ((signals ?? []).length === 0) {
     return proposed ?? 'low';
+  }
+  if (!hasConfirmingSignal(signals)) {
+    return 'low';
   }
   if (proposed === undefined) {
     throw new Error('events_write: an event with signals needs a proposed severity.');
@@ -212,7 +219,11 @@ export const computeEventFacts = ({
     status,
     severity,
     frozenNarrative,
-    confidence: episodeContext.confidence,
+    // Nothing confirmed, so nothing to be confident about; a signal-less write keeps its own.
+    confidence:
+      signals.length === 0 || hasConfirmingSignal(signals)
+        ? episodeContext.confidence
+        : Math.min(episodeContext.confidence, UNCONFIRMED_EVENT_MAX_CONFIDENCE),
   };
 };
 

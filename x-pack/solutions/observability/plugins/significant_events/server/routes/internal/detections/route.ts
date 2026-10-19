@@ -6,6 +6,8 @@
  */
 
 import {
+  SKIP_REASONS,
+  detectionSkipSchema,
   MAX_ID_LENGTH,
   MAX_RULE_NAME_LENGTH,
   type Detection,
@@ -180,6 +182,11 @@ const markDetectionsProcessedRoute = createServerRoute({
     body: z.object({
       detection_ids: z.array(z.string().max(MAX_ID_LENGTH)).min(1).max(MAX_DETECTIONS_PER_REQUEST),
       processed_by: z.string().max(MAX_ID_LENGTH),
+      /** Set when the classifier, not the agent, closed these detections. */
+      skip: detectionSkipSchema
+        .omit({ checked_at: true })
+        .extend({ reason: z.enum(SKIP_REASONS) })
+        .optional(),
     }),
   }),
   handler: async ({
@@ -194,12 +201,13 @@ const markDetectionsProcessedRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
 
-    const { detection_ids: detectionIds, processed_by: processedBy } = params.body;
+    const { detection_ids: detectionIds, processed_by: processedBy, skip } = params.body;
     return appendDetectionDocuments({
       getDetectionClient,
       documents: detectionIds.map((detectionId) => ({
         detection_id: detectionId,
         processed_by: processedBy,
+        ...(skip ? { skip } : {}),
       })),
     });
   },

@@ -32,6 +32,7 @@ import {
 } from '../../../lib/significant_events/events/cleanup_stale_events';
 import { triggerInvestigationWorkflow } from '../../../lib/significant_events/events/trigger_investigation_workflow';
 import { resolveInvestigationStatuses } from '../../../lib/significant_events/events/resolve_investigation_status';
+import type { DetectionClient } from '../../../lib/significant_events/detections';
 import type { PaginatedResponse } from '../../../lib/significant_events/query_utils';
 import { createServerRoute } from '../../create_server_route';
 import { assertNotPaused } from '../../utils/assert_not_paused';
@@ -76,6 +77,60 @@ const collectEmbeddedDetections = (events: SignificantEvent[]) => {
   }
 
   return result;
+};
+
+const collectRuleUuids = (events: SignificantEvent[]): string[] => [
+  ...new Set(
+    events.flatMap(({ signals }) =>
+      (signals ?? []).flatMap((signal) =>
+        signal.type === 'detection' && signal.metadata.rule_uuid ? [signal.metadata.rule_uuid] : []
+      )
+    )
+  ),
+];
+
+/**
+ * The detections of the event's rules that the classifier closed without the agent. They are in no
+ * signal, so they are read from the rules' detection history; each one's marker says why.
+ */
+const findSkippedDetections = async ({
+  detectionClient,
+  events,
+  known,
+}: {
+  detectionClient: Pick<DetectionClient, 'findHistoryByRuleUuids'>;
+  events: SignificantEvent[];
+  known: ReadonlySet<string>;
+}): Promise<LifecycleDetection[]> => {
+  const ruleUuids = collectRuleUuids(events);
+  const ordered = [...events].sort((x, y) => x['@timestamp'].localeCompare(y['@timestamp']));
+  const first = ordered.at(0);
+  const last = ordered.at(-1);
+  if (ruleUuids.length === 0 || !first || !last) return [];
+  const { hits } = await detectionClient.findHistoryByRuleUuids({
+    ruleUuids,
+    // A rule's detections outside the event's life belong to other events.
+    from: first['@timestamp'],
+    ...(last.status === 'inactive' ? { to: last['@timestamp'] } : {}),
+  });
+  return hits
+    .flatMap((hit) => {
+      const changePointType = parseChangePointType(hit.change_point_type);
+      return hit.skip && changePointType && !known.has(hit.detection_id)
+        ? [
+            {
+              detection_id: hit.detection_id,
+              rule_name: hit.rule_name ?? hit.rule_uuid,
+              rule_uuid: hit.rule_uuid,
+              source_id: hit.source_id,
+              change_point_type: changePointType,
+              '@timestamp': hit['@timestamp'],
+              skip: hit.skip,
+            },
+          ]
+        : [];
+    })
+    .sort((a, b) => a['@timestamp'].localeCompare(b['@timestamp']));
 };
 
 const eventsSearchRoute = createServerRoute({
@@ -221,7 +276,13 @@ const eventsLifecycleRoute = createServerRoute({
       }
     );
 
-    return { detections, events };
+    const skipped = await findSkippedDetections({
+      detectionClient,
+      events,
+      known: new Set(detections.map(({ detection_id: id }) => id)),
+    });
+
+    return { detections: [...detections, ...skipped], events };
   },
 });
 
