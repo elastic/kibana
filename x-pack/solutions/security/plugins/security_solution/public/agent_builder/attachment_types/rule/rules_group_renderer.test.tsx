@@ -61,6 +61,35 @@ describe('createRulesGroupRenderer', () => {
     );
   });
 
+  it('shows a drafted rule as a static row', () => {
+    render(
+      <ul>
+        <Renderer attachments={[rule({ id: 'rule-draft' })]} />
+      </ul>
+    );
+
+    expect(screen.getByText('External mailbox forwarding')).toBeInTheDocument();
+    expect(screen.getByText('Rule')).toBeInTheDocument();
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('groupedAttachmentRowAffordance')).not.toBeInTheDocument();
+    expect(getUrlForApp).not.toHaveBeenCalled();
+  });
+
+  it('does not filter rules management by the draft when several rules are attached', () => {
+    render(
+      <ul>
+        <Renderer attachments={[rule({ id: 'rule-draft' }), rule({ id: 'b', origin: 'r1' })]} />
+      </ul>
+    );
+
+    expect(screen.getByText('2 rules')).toBeInTheDocument();
+    expect(getUrlForApp).toHaveBeenCalledWith(
+      'securitySolutionUI',
+      expect.objectContaining({ deepLinkId: 'rules', path: '/management' })
+    );
+  });
+
   it('collapses several rules into one row linking to rules management', () => {
     render(
       <ul>

@@ -15,7 +15,7 @@ import type { SecurityCanvasEmbeddedBundle } from '../../components/security_red
 import { APP_UI_ID, SecurityPageName } from '../../../../common/constants';
 import { FLYOUT_DESCRIPTOR_KIND } from '../../../flyout_v2/shared/url_state/flyout_v2_url_param';
 import { FlyoutRow, RULE_FALLBACK_TITLE, RULE_SUBTITLE, rulesTitle } from '../grouped_attachments';
-import { getRuleName, getSavedRuleId } from './helpers';
+import { getRuleName, getSavedRuleId, isRuleDraftAttachment } from './helpers';
 import type { RuleAttachment } from './helpers';
 
 export interface RulesGroupRendererDeps {
@@ -70,6 +70,18 @@ export const createRulesGroupRenderer = ({
                 subtitle={RULE_SUBTITLE}
                 descriptor={{ kind: FLYOUT_DESCRIPTOR_KIND.rule, ruleId }}
                 resolveSecurityCanvasContext={resolveSecurityCanvasContext}
+              />
+            );
+          }
+
+          if (isRuleDraftAttachment(ruleAttachment)) {
+            return (
+              <GroupedAttachmentRow
+                key={key}
+                iconType="document"
+                iconColor="subdued"
+                title={title}
+                subtitle={RULE_SUBTITLE}
               />
             );
           }
