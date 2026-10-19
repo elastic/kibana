@@ -36,6 +36,7 @@ import {
   InvestigationUnavailableError,
 } from './errors';
 import { NightshiftInvestigationsClient } from './investigations_client';
+import { findAlertRecoveredInvestigationRoute } from '../routes/find_alert_recovered_investigation';
 
 jest.mock('../lib/install_investigation_agent', () => ({
   installInvestigationAgent: jest.fn().mockResolvedValue(undefined),
@@ -2228,5 +2229,101 @@ describe('NightshiftInvestigationsClient.recordSlackThreadStatusMessage()', () =
     await makeClient().recordSlackThreadStatusMessage(MESSAGE);
 
     expect(subjectsClient.upsertSubjects).not.toHaveBeenCalled();
+  });
+});
+
+describe('NightshiftInvestigationsClient.findAlertRecovered() & route', () => {
+  const RECOVERY = {
+    alertUuid: 'alert-1',
+    alertId: 'service.name:checkout',
+    alertStart: '2026-08-24T12:00:00.000Z',
+    ruleId: 'rule-1',
+    ruleName: 'Latency is too high',
+    ruleTypeId: 'apm.transaction_duration',
+    ruleTags: ['prod'],
+    executionId: 'exec-rec-1',
+  };
+  const { handler, params } =
+    findAlertRecoveredInvestigationRoute['POST /internal/nightshift/investigations/_alert_recovered'];
+
+  it('finds an open investigation, records recovery_execution_id, and ignores missing/closed ones', async () => {
+    await expect(makeClient().findAlertRecovered(RECOVERY)).resolves.toBeUndefined();
+    agenticInvestigationsClient.findOpenBySubjects.mockResolvedValue([{ id: 'inv-closed' }]);
+    withConversations(makeConversation({ id: 'inv-closed', status: 'closed' }));
+    await expect(makeClient().findAlertRecovered(RECOVERY)).resolves.toBeUndefined();
+    expect(conversations.patchMetadata).not.toHaveBeenCalled();
+
+    agenticInvestigationsClient.findOpenBySubjects.mockResolvedValue([{ id: 'inv-1' }]);
+    withConversations(makeConversation({ id: 'inv-1', status: 'open' }));
+    subjectsClient.listByConversationIds.mockResolvedValue([
+      { ...makeStoredSubject(), snapshot: { id: 'alert-1', reason: 'Latency spike' } },
+    ]);
+    const result = await makeClient().findAlertRecovered(RECOVERY);
+    expect(result).toEqual({
+      investigation_id: 'inv-1',
+      message: expect.stringContaining('Reason: Latency spike'),
+    });
+    expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-1', [
+      {
+        type: 'alert',
+        id: 'alert-1',
+        snapshot: { id: 'alert-1', reason: 'Latency spike', recovery_execution_id: 'exec-rec-1' },
+      },
+    ]);
+  });
+
+  it('deduplicates other executions and clears recovery_execution_id on release_event or active re-fire', async () => {
+    agenticInvestigationsClient.findOpenBySubjects.mockResolvedValue([{ id: 'inv-1' }]);
+    withConversations(makeConversation({ id: 'inv-1', status: 'open' }));
+    subjectsClient.listByConversationIds.mockResolvedValue([
+      { ...makeStoredSubject(), snapshot: { id: 'alert-1', recovery_execution_id: 'exec-rec-1' } },
+    ]);
+
+    await expect(
+      makeClient().findAlertRecovered({ ...RECOVERY, executionId: 'exec-rec-2' })
+    ).resolves.toMatchObject({ investigation_id: 'inv-1', duplicate: true });
+    await expect(
+      makeClient().findAlertRecovered({ ...RECOVERY, releaseEvent: true })
+    ).resolves.not.toHaveProperty('duplicate');
+    expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-1', [
+      { type: 'alert', id: 'alert-1', snapshot: { id: 'alert-1' } },
+    ]);
+
+    subjectsClient.upsertSubjects.mockClear();
+    mockManagement.getWorkflow.mockResolvedValue({
+      id: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+      enabled: true,
+      valid: true,
+      definition: { steps: [] },
+    });
+    mockManagement.runWorkflow.mockResolvedValue('exec-active-2');
+    await makeClient().start({
+      subject: { type: 'alert', id: 'alert-1' },
+      trigger_type: 'automatic',
+      context: { alerts: [{ id: 'alert-1', rule_id: 'rule-1', rule_name: 'Latency', rule_type_id: 'apm', rule_category: 'Latency', status: 'active', start: '2026-08-24T13:00:00.000Z' }] },
+    });
+    expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-1', [
+      expect.objectContaining({ id: 'alert-1', snapshot: expect.not.objectContaining({ recovery_execution_id: expect.anything() }) }),
+    ]);
+  });
+
+  it('validates route body and returns empty object when client returns undefined', async () => {
+    const body = {
+      alert_uuid: 'alert-1',
+      alert_id: 'service.name:checkout',
+      alert_start: null,
+      rule_id: 'rule-1',
+      rule_name: 'Latency is too high',
+      rule_type_id: 'apm.transaction_duration',
+      execution_id: 'exec-rec-1',
+      release_event: true,
+    };
+    expect(params?.safeParse({ body }).success).toBe(true);
+    expect(params?.safeParse({ body: { ...body, alert_uuid: '' } }).success).toBe(false);
+    const findAlertRecovered = jest.fn().mockResolvedValue(undefined);
+    await expect(
+      handler({ request: {}, getInvestigationsClient: () => ({ findAlertRecovered }), params: { body } } as never)
+    ).resolves.toEqual({});
+    expect(findAlertRecovered).toHaveBeenCalledWith(expect.objectContaining({ alertUuid: 'alert-1', releaseEvent: true }));
   });
 });

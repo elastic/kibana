@@ -55,7 +55,11 @@ import {
   DEFAULT_INVESTIGATION_TRIGGER_TYPE,
   freeFormContextSchema,
 } from '../../common';
-import { buildInvestigationMessage } from './build_investigation_message';
+import {
+  buildAlertRecoveredFollowUpMessage,
+  buildInvestigationMessage,
+  type AlertRecoveredMessageInput,
+} from './build_investigation_message';
 import {
   InvestigationNotFoundError,
   InvestigationQuotaDeniedError,
@@ -497,6 +501,16 @@ export class NightshiftInvestigationsClient {
     await this.installAgents(agentBuilder, spaceId);
 
     const newSubjects = withoutRecordedSubjects(subjects, recorded);
+    const rearmedSubjects = subjects.filter((s) =>
+      recorded.some(
+        (r) => r.subjectType === s.type && r.subjectId === s.id && r.snapshot?.recovery_execution_id
+      )
+    );
+    if (rearmedSubjects.length > 0) {
+      await agenticInvestigations
+        .getSubjectsClient(this.request)
+        .upsertSubjects(investigationId, rearmedSubjects);
+    }
     const newAlertIds = new Set(newSubjects.map(({ id }) => id));
 
     const inputs = {
@@ -1047,6 +1061,58 @@ export class NightshiftInvestigationsClient {
         slack: { channel, thread_ts: threadTs, status_message_ts: messageTs },
       },
     ]);
+  }
+
+  async findAlertRecovered({
+    executionId,
+    releaseEvent,
+    ...alertInput
+  }: Omit<AlertRecoveredMessageInput, 'snapshot'> & {
+    executionId: string;
+    releaseEvent?: boolean;
+  }): Promise<{ investigation_id: string; message: string; duplicate?: true } | undefined> {
+    const { agentBuilder, agenticInvestigations } = this.requireWriteDeps();
+    const { alertUuid } = alertInput;
+    const open = await agenticInvestigations
+      .getInvestigationsClient(this.request)
+      .findOpenBySubjects([{ type: 'alert', id: alertUuid }]);
+    if (open.length === 0) return undefined;
+    const conversations = await agentBuilder.conversations.getScopedClient({
+      request: this.request,
+    });
+    const candidates = await findInvestigationConversations(
+      conversations,
+      open.map(({ id }) => id)
+    );
+    const existing = candidates.find(({ status }) => status === 'open');
+    if (!existing) return undefined;
+
+    const subjectsClient = agenticInvestigations.getSubjectsClient(this.request);
+    const alertSubject = (await subjectsClient.listByConversationIds([existing.id])).find(
+      ({ subjectType, subjectId }) => subjectType === 'alert' && subjectId === alertUuid
+    );
+    const snapshot = alertSubject?.snapshot;
+    const recordedExecutionId = asString(snapshot?.recovery_execution_id);
+    const message = buildAlertRecoveredFollowUpMessage({ ...alertInput, snapshot });
+
+    if (releaseEvent) {
+      if (recordedExecutionId === executionId) {
+        const { recovery_execution_id: _cleared, ...restSnapshot } = snapshot ?? {};
+        await subjectsClient.upsertSubjects(existing.id, [
+          { type: 'alert', id: alertUuid, snapshot: restSnapshot },
+        ]);
+      }
+      return { investigation_id: existing.id, message };
+    }
+    if (recordedExecutionId && recordedExecutionId !== executionId) {
+      return { investigation_id: existing.id, message, duplicate: true };
+    }
+    if (!recordedExecutionId) {
+      await subjectsClient.upsertSubjects(existing.id, [
+        { type: 'alert', id: alertUuid, snapshot: { ...snapshot, recovery_execution_id: executionId } },
+      ]);
+    }
+    return { investigation_id: existing.id, message };
   }
 
   /**

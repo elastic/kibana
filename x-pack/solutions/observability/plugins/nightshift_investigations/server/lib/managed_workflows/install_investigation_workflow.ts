@@ -6,6 +6,7 @@
  */
 
 import {
+  NIGHTSHIFT_ALERT_RECOVERY_WORKFLOW_ID,
   NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
   NIGHTSHIFT_SLACK_THREAD_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
@@ -21,6 +22,9 @@ export const installInvestigationWorkflow = async ({
     spaceId: GLOBAL_WORKFLOW_SPACE_ID,
   });
   await client.install(NIGHTSHIFT_SLACK_THREAD_WORKFLOW_ID, {
+    spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+  });
+  await client.install(NIGHTSHIFT_ALERT_RECOVERY_WORKFLOW_ID, {
     spaceId: GLOBAL_WORKFLOW_SPACE_ID,
   });
 };
