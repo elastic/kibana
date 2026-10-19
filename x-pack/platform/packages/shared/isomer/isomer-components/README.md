@@ -27,6 +27,10 @@ Kibana's [Isomer](https://github.com/elastic/isomer) pack of content and layout 
   - `{ type: 'fields', items: [{ label, value }] }`. `value` is plain text, or `{ raw, format?, precision?, currency? }` formatted by the SDK's `formatDisplayValue` the same on every surface. Slack gets one `section` with a `mrkdwn` field per item, the value clamped after escaping to 2,000 characters.
 - `code`: code or source shown as written, such as an ES|QL query.
   - `{ type: 'code', text, language? }`, up to 12,000 characters. Slack gets a `rich_text_preformatted` block, which needs no escaping and splits past 3,000 characters; Markdown gets a fence longer than any backtick run.
+- `table`: rows of values under column headings.
+  - `{ type: 'table', columns: [{ label, format?, precision?, currency?, align? }], rows, sort?, maxRows?, totalRows? }`, 1 to 20 columns and up to 1,000 rows of text, numbers or `null`. Numbers align right by default. Rows are sorted, then cut to `maxRows`, with a "Showing N of M rows" note; `totalRows` counts rows the caller already left out.
+  - JSX: `<Table.Column format="number">Errors</Table.Column>` per column, and a `<Table.Row>` per row with one expression per cell, `{'checkout'}{1284}{null}`, or `cells={['checkout', 1284, null]}`. Expressions keep a number a number; text children would make it a string. `columns` and `rows` props work too.
+  - Slack gets a native `table` block of up to 99 rows under the header, cut by row before its cells pass Slack's 10,000-character budget, so it stays a table.
 
 There's no list primitive. For a list built from data, such as a graph's nodes, build Markdown with the SDK's `md.list` and `serializeMarkdown` (`@elastic/isomer-sdk/markdown`), which escape each item, and put it in a `markdown` node.
 

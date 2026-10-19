@@ -16,6 +16,7 @@ export {
   type MarkdownNode,
   type QuoteNode,
   type SectionNode,
+  type TableNode,
   actions,
   code,
   context,
@@ -25,4 +26,5 @@ export {
   markdown,
   quote,
   section,
+  table,
 } from './src/primitives';
