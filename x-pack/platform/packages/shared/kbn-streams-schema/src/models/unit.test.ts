@@ -175,6 +175,7 @@ describe('streams unit stats response schema', () => {
         total: { value: null, unit: '{item}' },
         rate: { value: null, unit: '{item}', time_unit: 's' },
         series: { bucket_ms: 10000, points: [] },
+        failures: { rate: { value: null, unit: '{item}', time_unit: 's' } },
       },
     },
   };

@@ -234,6 +234,8 @@ export const streamsUnitStatsDestinationResultSchema = z.object({
       total: statsValueSchema,
       rate: statsRateSchema,
       series: streamsUnitStatsSeriesSchema,
+      /** Items with a non-success outcome, per second. */
+      failures: z.object({ rate: statsRateSchema }),
     }),
   }),
 });
@@ -241,7 +243,13 @@ export const streamsUnitStatsDestinationResultSchema = z.object({
 export const streamsUnitStatsProcessorResultSchema = z.object({
   error: streamsUnitStatsErrorSchema.optional(),
   processing_duration: z.object({ average: statsValueSchema }),
-  events: z.object({ incoming: z.object({ rate: statsRateSchema }) }),
+  events: z.object({
+    incoming: z.object({
+      rate: statsRateSchema,
+      /** Items this processor failed on, per second. Downstream refusals are not counted. */
+      failures: z.object({ rate: statsRateSchema }),
+    }),
+  }),
 });
 
 export const streamsUnitStatsMetaSchema = z.object({
