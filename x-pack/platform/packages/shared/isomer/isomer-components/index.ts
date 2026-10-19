@@ -6,4 +6,4 @@
  */
 
 export { componentsPack, componentsPrimitives } from './src/pack';
-export { type MarkdownNode, markdown } from './src/primitives';
+export { type HeaderNode, type MarkdownNode, header, markdown } from './src/primitives';
