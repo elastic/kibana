@@ -264,7 +264,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
           mode: getEntityViewMode(rowMode),
         });
       },
-      onAnomalyCountClick: (row) => {
+      onAnomalyCountClick: (row, rowMode) => {
         const entity = getRowEntity(row);
         const entityType = toSecurityEntityType(entity?.entityType);
         if (!entity || entityType === SecurityEntityType.generic) return;
@@ -272,6 +272,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
           entityType,
           value: entity.entityName ?? '',
           entityId: entity.entityId,
+          mode: getEntityViewMode(rowMode),
         });
       },
     }),
