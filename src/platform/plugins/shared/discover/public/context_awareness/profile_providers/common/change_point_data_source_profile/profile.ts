@@ -189,6 +189,8 @@ export const createChangePointDataSourceProfileProvider = (
       undefined
     );
 
+    void services.aiops?.aiopsUsage.trackRenderEsqlChangePointResults('discover');
+
     return {
       isMatch: true,
       context: {
