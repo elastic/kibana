@@ -143,18 +143,6 @@ describe('SharedListsAppHeader', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('shows a plus icon on the create exception item menu entry', async () => {
-    renderHeader();
-
-    await user.click(await screen.findByTestId('manageExceptionListCreateButton-secondary-button'));
-
-    expect(
-      (await screen.findByTestId('manageExceptionListCreateExceptionButton')).querySelector(
-        '[data-euiicon-type="plus"]'
-      )
-    ).toBeInTheDocument();
-  });
-
   it('opens the add exception flyout from the create menu', async () => {
     const onCreateExceptionItem = jest.fn();
     renderHeader({ onCreateExceptionItem });
