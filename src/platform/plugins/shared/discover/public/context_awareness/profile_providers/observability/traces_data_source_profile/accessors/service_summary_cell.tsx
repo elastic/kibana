@@ -19,6 +19,7 @@ import {
   getFieldValue,
   OTEL_RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE,
   SERVICE_ENVIRONMENT_FIELD,
+  type DataTableRecord,
 } from '@kbn/discover-utils';
 import {
   ServiceSummary,
@@ -29,6 +30,7 @@ import type {
   ObservabilityTracesServiceSummaryData,
   ObservabilityTracesServiceSummarySlo,
 } from '@kbn/discover-shared-plugin/public';
+import type { ContextAwarenessToolkit } from '../../../../toolkit';
 import { AGENT_NAME_FIELD } from '../../../../../../common/data_types/logs/constants';
 import { useFetchServiceSummary } from './use_fetch_service_summary';
 
@@ -41,6 +43,12 @@ const badgeStyle = css`
   max-width: 100%;
 `;
 
+interface ServiceSummaryBadgeProps {
+  row: DataTableRecord;
+  serviceNameField: string;
+  toolkit: ContextAwarenessToolkit;
+}
+
 /**
  * Traces-profile service badge: clicking it opens the service summary popover.
  *
@@ -48,106 +56,128 @@ const badgeStyle = css`
  * provided through the `discover_shared` features registry, which APM fulfils — Discover never
  * calls the APM internal routes or builds APM URLs directly. The service name in the header links
  * to APM; the alert and SLO rows open their respective APM pages in a new tab. The metric charts
- * are stacked vertically, and the filter/copy actions row is omitted in this variant.
+ * are stacked vertically, and filter-for/filter-out/copy actions live inside the popover.
+ *
+ * Rendered both as the dedicated Service name column cell and (via `renderResourceBadge`) as the
+ * service chip inside the traces summary column.
  */
-export const getServiceSummaryCell =
-  (serviceNameField: string) => (props: DataGridCellValueElementProps) => {
-    const serviceNameValue = getFieldValue(props.row, serviceNameField);
-    const agentName = getFieldValue(props.row, AGENT_NAME_FIELD) as AgentName;
-    const otelSdkLanguage = getFieldValue(
-      props.row,
-      OTEL_RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE
-    ) as AgentName | undefined;
-    const environmentValue = getFieldValue(props.row, SERVICE_ENVIRONMENT_FIELD);
+export const ServiceSummaryBadge = ({
+  row,
+  serviceNameField,
+  toolkit,
+}: ServiceSummaryBadgeProps) => {
+  const serviceNameValue = getFieldValue(row, serviceNameField);
+  const agentName = getFieldValue(row, AGENT_NAME_FIELD) as AgentName;
+  const otelSdkLanguage = getFieldValue(row, OTEL_RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE) as
+    | AgentName
+    | undefined;
+  const environmentValue = getFieldValue(row, SERVICE_ENVIRONMENT_FIELD);
 
-    const [isPopoverOpen, { toggle: togglePopover, off: closePopover }] = useBoolean(false);
+  const [isPopoverOpen, { toggle: togglePopover, off: closePopover }] = useBoolean(false);
 
-    const serviceName = typeof serviceNameValue === 'string' ? serviceNameValue : '';
-    const environment = typeof environmentValue === 'string' ? environmentValue : undefined;
-    const agentNameIcon = otelSdkLanguage || agentName;
+  const serviceName = typeof serviceNameValue === 'string' ? serviceNameValue : '';
+  const environment = typeof environmentValue === 'string' ? environmentValue : undefined;
+  const agentNameIcon = otelSdkLanguage || agentName;
 
-    const { loading, data } = useFetchServiceSummary({
-      serviceName,
-      environment,
-      enabled: isPopoverOpen,
-    });
+  const { loading, data } = useFetchServiceSummary({
+    serviceName,
+    environment,
+    enabled: isPopoverOpen,
+  });
 
-    const metrics = useMemo(() => getMetrics(data), [data]);
-    const activeAlertCount = data?.activeAlertCount ?? 0;
-    const slo = data?.slo;
-    const linkTargets = data?.links;
-    const links = useMemo<ServiceSummaryLink[]>(
-      () => [
-        {
-          label: activeAlertsLabel,
-          iconType: 'bell',
-          external: true,
-          badgeLabel: activeAlertCount,
-          badgeColor: activeAlertCount > 0 ? 'danger' : 'hollow',
-          href: linkTargets?.alerts,
-          onClick: closePopover,
-        },
-        {
-          label: slosLabel,
-          iconType: 'chartGauge',
-          external: true,
-          // Surface a count badge only when SLOs are actually having problems.
-          ...getSloBadge(slo),
-          href: linkTargets?.slos,
-          onClick: closePopover,
-        },
-      ],
-      [closePopover, linkTargets, activeAlertCount, slo]
-    );
+  const metrics = useMemo(() => getMetrics(data), [data]);
+  const activeAlertCount = data?.activeAlertCount ?? 0;
+  const slo = data?.slo;
+  const linkTargets = data?.links;
+  const links = useMemo<ServiceSummaryLink[]>(
+    () => [
+      {
+        label: activeAlertsLabel,
+        iconType: 'bell',
+        external: true,
+        badgeLabel: activeAlertCount,
+        badgeColor: activeAlertCount > 0 ? 'danger' : 'hollow',
+        href: linkTargets?.alerts,
+        onClick: closePopover,
+      },
+      {
+        label: slosLabel,
+        iconType: 'chartGauge',
+        external: true,
+        // Surface a count badge only when SLOs are actually having problems.
+        ...getSloBadge(slo),
+        href: linkTargets?.slos,
+        onClick: closePopover,
+      },
+    ],
+    [closePopover, linkTargets, activeAlertCount, slo]
+  );
 
-    if (!serviceName) {
-      return <span data-test-subj={`${dataTestSubj}-empty`}>-</span>;
-    }
+  if (!serviceName) {
+    return <span data-test-subj={`${dataTestSubj}-empty`}>-</span>;
+  }
 
-    const trigger = (
-      <EuiBadge
-        color="hollow"
-        css={badgeStyle}
-        onClick={togglePopover}
-        onClickAriaLabel={i18n.translate('discover.tracesServiceSummary.openAriaLabel', {
-          defaultMessage: 'Open summary for service {serviceName}',
-          values: { serviceName },
-        })}
-        data-test-subj={`${dataTestSubj}-badge`}
-      >
-        <AgentIcon agentName={agentNameIcon} size="s" /> {serviceName}
-      </EuiBadge>
-    );
-
-    return (
-      // The span receives the hover/focus events; `panelProps` keeps the popover open while the
-      <EuiPopover
-        button={trigger}
-        isOpen={isPopoverOpen}
-        closePopover={closePopover}
-        anchorPosition="downLeft"
-        panelPaddingSize="none"
-        aria-label={i18n.translate('discover.tracesServiceSummary.popoverAriaLabel', {
-          defaultMessage: 'Summary for service {serviceName}',
-          values: { serviceName },
-        })}
-        data-test-subj={dataTestSubj}
-      >
-        <ServiceSummary
-          serviceName={serviceName}
-          environment={environment}
-          agentName={agentNameIcon}
-          serviceHref={linkTargets?.serviceOverview}
-          icon={<AgentIcon agentName={agentNameIcon} size="l" />}
-          metrics={metrics}
-          metricsDirection="column"
-          links={links}
-          isLoading={loading}
-          onClose={closePopover}
-        />
-      </EuiPopover>
-    );
+  const onFilter = (operator: '+' | '-') => () => {
+    toolkit.actions.addFilter?.(serviceNameField, serviceNameValue, operator);
+    closePopover();
   };
+
+  const onCopyValue = () => {
+    void navigator.clipboard?.writeText(serviceName);
+    closePopover();
+  };
+
+  const trigger = (
+    <EuiBadge
+      color="hollow"
+      css={badgeStyle}
+      onClick={togglePopover}
+      onClickAriaLabel={i18n.translate('discover.tracesServiceSummary.openAriaLabel', {
+        defaultMessage: 'Open summary for service {serviceName}',
+        values: { serviceName },
+      })}
+      data-test-subj={`${dataTestSubj}-badge`}
+    >
+      <AgentIcon agentName={agentNameIcon} size="s" /> {serviceName}
+    </EuiBadge>
+  );
+
+  return (
+    <EuiPopover
+      button={trigger}
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+      anchorPosition="downLeft"
+      panelPaddingSize="none"
+      aria-label={i18n.translate('discover.tracesServiceSummary.popoverAriaLabel', {
+        defaultMessage: 'Summary for service {serviceName}',
+        values: { serviceName },
+      })}
+      data-test-subj={dataTestSubj}
+    >
+      <ServiceSummary
+        serviceName={serviceName}
+        environment={environment}
+        agentName={agentNameIcon}
+        serviceHref={linkTargets?.serviceOverview}
+        icon={<AgentIcon agentName={agentNameIcon} size="l" />}
+        metrics={metrics}
+        metricsDirection="column"
+        links={links}
+        isLoading={loading}
+        onClose={closePopover}
+        onFilterFor={onFilter('+')}
+        onFilterOut={onFilter('-')}
+        onCopyValue={onCopyValue}
+      />
+    </EuiPopover>
+  );
+};
+
+export const getServiceSummaryCell =
+  (serviceNameField: string, toolkit: ContextAwarenessToolkit) =>
+  (props: DataGridCellValueElementProps) =>
+    <ServiceSummaryBadge row={props.row} serviceNameField={serviceNameField} toolkit={toolkit} />;
 
 const activeAlertsLabel = i18n.translate('discover.tracesServiceSummary.activeAlerts', {
   defaultMessage: 'Active alerts',
