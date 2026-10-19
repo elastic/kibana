@@ -89,8 +89,9 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
   queryClient,
   filesClient,
 }) => {
+  const baseServices = useMemo(() => createStartServicesMock({ license }), [license]);
+
   const finalCoreStart = useMemo(() => {
-    const baseServices = createStartServicesMock({ license });
     const nextCoreStart = coreStart ?? (baseServices as unknown as CoreStart);
     if (
       jest.isMockFunction(nextCoreStart.uiSettings.get) &&
@@ -101,9 +102,8 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
       );
     }
     return nextCoreStart;
-  }, [coreStart, license]);
+  }, [baseServices, coreStart]);
   const finalServices = useMemo(() => {
-    const baseServices = createStartServicesMock({ license });
     const mergedServices = { ...baseServices, ...finalCoreStart, ...services };
 
     const baseCapabilities = baseServices.application.capabilities ?? {};
@@ -123,7 +123,7 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
     };
 
     return mergedServices;
-  }, [finalCoreStart, license, services]);
+  }, [baseServices, finalCoreStart, services]);
 
   const defaultQueryClient = useMemo(() => createTestQueryClient(), []);
 
