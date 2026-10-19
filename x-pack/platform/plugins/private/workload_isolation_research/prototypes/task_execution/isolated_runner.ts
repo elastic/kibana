@@ -16,7 +16,7 @@ import type {
   RunCommand,
   Transport,
   WorkloadClass,
-} from './protocol.ts';
+} from './protocol';
 
 interface PendingRun {
   readonly generation: number;

@@ -7,8 +7,8 @@
 
 import assert from 'node:assert/strict';
 import { setTimeout as delay } from 'node:timers/promises';
-import { IsolatedRunner } from './isolated_runner.ts';
-import type { Transport, WorkloadClass } from './protocol.ts';
+import { IsolatedRunner } from './isolated_runner';
+import type { Transport, WorkloadClass } from './protocol';
 
 const transport = process.argv[2];
 assert.ok(transport === 'thread' || transport === 'process');

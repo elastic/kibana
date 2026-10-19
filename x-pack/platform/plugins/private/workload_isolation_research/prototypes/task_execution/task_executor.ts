@@ -7,7 +7,7 @@
 
 import { parentPort } from 'node:worker_threads';
 import { setTimeout as delay } from 'node:timers/promises';
-import type { ExecutorMessage, RunCommand } from './protocol.ts';
+import type { ExecutorMessage, RunCommand } from './protocol';
 
 const send = (message: ExecutorMessage): void => {
   if (parentPort) parentPort.postMessage(message);

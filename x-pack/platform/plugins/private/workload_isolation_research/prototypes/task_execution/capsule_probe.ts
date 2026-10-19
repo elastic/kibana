@@ -9,7 +9,7 @@ import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { Worker } from 'node:worker_threads';
-import type { CapsuleProbeResult } from '../task_capsule/capsule_kernel.ts';
+import type { CapsuleProbeResult } from '../task_capsule/capsule_kernel';
 
 type ProbeEnvelope =
   | { readonly ok: true; readonly result: CapsuleProbeResult }
