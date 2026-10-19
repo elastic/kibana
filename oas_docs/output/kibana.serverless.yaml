@@ -114,6 +114,10 @@ tags:
   - description: Data view APIs enable you to manage data views, formerly known as Kibana index patterns.
     name: data views
     x-displayName: Data views
+  - name: data-views-v2
+    description: |
+      Data view APIs enable you to manage data views, formerly known as Kibana index patterns. Use these endpoints to list, retrieve, create, replace, and delete data views with the as-code data view definition.
+    x-displayName: Data views v2
   - name: Discover sessions
     description: |
       A [Discover session](https://www.elastic.co/docs/explore-analyze/discover) is a saved exploration of your data in Discover. Each session contains one or more tabs, and each tab stores its own data source, query, filters, columns, sorting, and chart settings. Use this API to create and manage Discover sessions programmatically.
@@ -600,7 +604,7 @@ paths:
       responses:
         '200':
           description: Returns the OAuth callback script
-      summary: ''
+      summary: Get OAuth callback script
       tags:
         - connectors
       x-state: ''
@@ -3559,7 +3563,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Update the origin reference for an attachment. Use this after saving a by-value attachment to link it to its persistent store.<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
+        Update the origin reference for an attachment. Use this after saving a by-value attachment to link it to its persistent store.<br/><br/>[Required authorization] Route required privileges: agentBuilder:read. Extended privileges (optional, expand functionality when granted): agentBuilder:manageAgents.
       operationId: put-agent-builder-conversations-conversation-id-attachments-attachment-id-origin
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -8781,7 +8785,7 @@ paths:
       summary: List action policies
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -8941,7 +8945,7 @@ paths:
       summary: Create an action policy
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -9064,7 +9068,7 @@ paths:
       summary: Delete action policies in bulk by ID
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -9187,7 +9191,7 @@ paths:
       summary: Disable action policies in bulk by ID
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -9320,7 +9324,7 @@ paths:
       summary: Enable action policies in bulk by ID
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -9444,7 +9448,7 @@ paths:
       summary: Snooze action policies in bulk by ID
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -9567,7 +9571,7 @@ paths:
       summary: Cancel snooze for action policies in bulk by ID
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -9690,7 +9694,7 @@ paths:
       summary: Rotate API keys for action policies in bulk by ID
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -9815,7 +9819,7 @@ paths:
       summary: Delete an action policy
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -9960,7 +9964,7 @@ paths:
       summary: Get an action policy
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -10153,7 +10157,7 @@ paths:
       summary: Partially update an action policy.
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -10367,7 +10371,7 @@ paths:
       summary: Create or replace an action policy
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -10535,7 +10539,7 @@ paths:
       summary: Disable an action policy
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -10713,7 +10717,7 @@ paths:
       summary: Enable an action policy
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -10892,7 +10896,7 @@ paths:
       summary: Snooze an action policy
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -11060,7 +11064,7 @@ paths:
       summary: Unsnooze an action policy
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -11228,7 +11232,7 @@ paths:
       summary: Update an action policy API key
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -11352,7 +11356,7 @@ paths:
       summary: Bulk acknowledge alerts
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -11472,7 +11476,7 @@ paths:
       summary: Bulk activate alerts
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -11594,7 +11598,7 @@ paths:
       summary: Bulk assign alerts
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -11714,7 +11718,7 @@ paths:
       summary: Bulk deactivate alerts
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -11838,7 +11842,7 @@ paths:
       summary: Bulk tag alerts
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -11958,7 +11962,7 @@ paths:
       summary: Bulk unacknowledge alerts
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -12105,7 +12109,7 @@ paths:
       summary: Acknowledge an alert
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -12252,7 +12256,7 @@ paths:
       summary: Activate an alert
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -12400,7 +12404,7 @@ paths:
       summary: Assign an alert to a user
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -12547,7 +12551,7 @@ paths:
       summary: Deactivate an alert
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -12697,7 +12701,7 @@ paths:
       summary: Tag an alert
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -12844,7 +12848,7 @@ paths:
       summary: Unacknowledge an alert
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -13060,7 +13064,7 @@ paths:
       summary: List action policy executions
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -13251,7 +13255,7 @@ paths:
       summary: List rule executions
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -13445,7 +13449,7 @@ paths:
       summary: List rules
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -13626,7 +13630,7 @@ paths:
       summary: Create a rule
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -13880,7 +13884,7 @@ paths:
       summary: Create rules in bulk
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -14000,7 +14004,7 @@ paths:
       summary: Delete rules in bulk by ID
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -14120,7 +14124,7 @@ paths:
       summary: Disable rules in bulk by ID
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -14240,7 +14244,7 @@ paths:
       summary: Enable rules in bulk by ID
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -14410,7 +14414,7 @@ paths:
       summary: Get rules in bulk
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -14530,7 +14534,7 @@ paths:
       summary: Update the API key of rules in bulk by ID
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -14652,7 +14656,7 @@ paths:
       summary: Delete rules matching a query (dry-run by default)
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -14774,7 +14778,7 @@ paths:
       summary: Disable rules matching a query (dry-run by default)
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -14896,7 +14900,7 @@ paths:
       summary: Enable rules matching a query (dry-run by default)
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -15018,7 +15022,7 @@ paths:
       summary: Update the API key of rules matching a query (dry-run by default)
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -15143,7 +15147,7 @@ paths:
       summary: Delete a rule
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -15308,7 +15312,7 @@ paths:
       summary: Get a rule
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -15503,7 +15507,7 @@ paths:
       summary: Update a rule
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -15756,7 +15760,7 @@ paths:
       summary: Create or replace a rule
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -15942,7 +15946,7 @@ paths:
       summary: Disable a rule
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -16124,7 +16128,7 @@ paths:
       summary: Enable a rule
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -16259,7 +16263,7 @@ paths:
       summary: Run a rule now
       tags:
         - alerting-v2
-      x-state: Experimental
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -25762,6 +25766,660 @@ paths:
           source: |
             POST kbn://api/data_views/swap_references/_preview
             {"fromId":"abcd-efg","toId":"xyz-123"}
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/data_views/v2:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/data_views/v2</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns a paginated list of the data views in the current space. Each item includes only the name, index pattern, and time field. To get the full definition, use `GET /api/data_views/v2/{id}`.
+      operationId: get-data-views-v2
+      parameters:
+        - description: The page of results to return.
+          in: query
+          name: page
+          required: false
+          schema:
+            default: 1
+            minimum: 1
+            type: number
+        - description: The number of results to return per page.
+          in: query
+          name: per_page
+          required: false
+          schema:
+            default: 20
+            maximum: 1000
+            minimum: 1
+            type: number
+        - description: Filters results by `name` and `index_pattern` using Elasticsearch [`simple_query_string`](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-simple-query-string-query) syntax.
+          in: query
+          name: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getDataViewsResponse:
+                  summary: Paginated data views response
+                  value:
+                    data:
+                      - data:
+                          index_pattern: logs-*
+                          name: Web logs
+                          time_field: '@timestamp'
+                        id: c0ffee00-d57a-11ef-9a52-4f3c2a8d0e1b
+                        meta:
+                          created_at: '2026-01-15T10:00:00.000Z'
+                          created_by: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+                          managed: false
+                          spaces:
+                            - default
+                          updated_at: '2026-01-16T08:30:00.000Z'
+                          updated_by: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+                          version: WzIsMV0=
+                      - data:
+                          index_pattern: metrics-*
+                          name: Metrics
+                        id: a1b2c3d4-d57a-11ef-9a52-4f3c2a8d0e1b
+                        meta:
+                          created_at: '2026-01-15T11:00:00.000Z'
+                          managed: false
+                          spaces:
+                            - default
+                          updated_at: '2026-01-15T11:00:00.000Z'
+                          version: WzMsMV0=
+                    meta:
+                      page: 1
+                      per_page: 20
+                      total: 2
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    items:
+                      type: object
+                      properties:
+                        data:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            index_pattern:
+                              $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-index-pattern-schema'
+                            name:
+                              description: 'The name of the data view. Example: "Sample data view".'
+                              maxLength: 256
+                              minLength: 1
+                              title: Data view name
+                              type: string
+                            time_field:
+                              $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-time-field-schema'
+                          required:
+                            - index_pattern
+                        id:
+                          description: The ID of the data view.
+                          maxLength: 1000
+                          type: string
+                        meta:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            created_at:
+                              description: Timestamp when the object was created (ISO 8601).
+                              type: string
+                            created_by:
+                              description: User profile ID of the user who created the object.
+                              type: string
+                            managed:
+                              description: When `true`, the object is managed by Kibana and cannot be edited by users.
+                              type: boolean
+                            owner:
+                              description: Identifier of the plugin or team that owns this object.
+                              type: string
+                            spaces:
+                              description: The IDs of the spaces where the data view is available.
+                              items:
+                                maxLength: 1000
+                                type: string
+                              maxItems: 100
+                              type: array
+                            updated_at:
+                              description: Timestamp when the object was last updated (ISO 8601).
+                              type: string
+                            updated_by:
+                              description: User profile ID of the user who last updated the object.
+                              type: string
+                            version:
+                              description: Internal version identifier for optimistic concurrency control.
+                              type: string
+                      required:
+                        - id
+                        - data
+                        - meta
+                    maxItems: 1000
+                    type: array
+                  meta:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      page:
+                        default: 1
+                        description: The returned page of results.
+                        minimum: 1
+                        type: number
+                      per_page:
+                        default: 20
+                        description: The number of results returned per page.
+                        maximum: 1000
+                        minimum: 1
+                        type: number
+                      total:
+                        description: The total number of results matching the query.
+                        type: number
+                    required:
+                      - total
+                required:
+                  - data
+                  - meta
+          description: OK
+        '400':
+          description: bad request
+      summary: Search data views
+      tags:
+        - data-views-v2
+      x-state: Generally available
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/data_views/v2</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Creates a data view and returns it. Kibana generates the data view ID. If a data view with the same name already exists, the request fails with a conflict.<br/><br/>[Required authorization] Route required privileges: indexPatterns:manage.
+      operationId: post-data-views-v2
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              createDataViewRequest:
+                summary: Create a data view
+                value:
+                  index_pattern: logs-*
+                  name: Web logs
+                  time_field: '@timestamp'
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                allow_hidden_indices:
+                  description: When `true`, allows the data view to match hidden indices.
+                  title: Allow hidden and system indices
+                  type: boolean
+                field_filters:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-filters-schema'
+                field_settings:
+                  additionalProperties:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-field-settings-entry'
+                  description: Settings for individual fields, keyed by field name. To change how Kibana displays a field from the backing indices, set its label, description, format, or popularity. To define a runtime field, use the runtime field name and set `type`.
+                  title: Field settings
+                  type: object
+                index_pattern:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-index-pattern-schema'
+                name:
+                  description: 'The name of the data view. Example: "Sample data view".'
+                  maxLength: 256
+                  minLength: 1
+                  title: Data view name
+                  type: string
+                time_field:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-time-field-schema'
+              required:
+                - index_pattern
+      responses:
+        '201':
+          content:
+            application/json:
+              examples:
+                dataViewResponse:
+                  summary: Data view response
+                  value:
+                    data:
+                      index_pattern: logs-*
+                      name: Web logs
+                      time_field: '@timestamp'
+                    id: c0ffee00-d57a-11ef-9a52-4f3c2a8d0e1b
+                    meta:
+                      managed: false
+                      spaces:
+                        - default
+                      version: WzEsMV0=
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-data-view-spec-schema'
+                    description: The data view definition.
+                  id:
+                    description: The ID of the data view.
+                    maxLength: 1000
+                    type: string
+                  meta:
+                    additionalProperties: false
+                    description: Metadata about the data view.
+                    type: object
+                    properties:
+                      created_at:
+                        description: Timestamp when the object was created (ISO 8601).
+                        type: string
+                      created_by:
+                        description: User profile ID of the user who created the object.
+                        type: string
+                      managed:
+                        description: When `true`, the object is managed by Kibana and cannot be edited by users.
+                        type: boolean
+                      owner:
+                        description: Identifier of the plugin or team that owns this object.
+                        type: string
+                      spaces:
+                        description: The IDs of the spaces where the data view is available.
+                        items:
+                          maxLength: 1000
+                          type: string
+                        maxItems: 100
+                        type: array
+                      updated_at:
+                        description: Timestamp when the object was last updated (ISO 8601).
+                        type: string
+                      updated_by:
+                        description: User profile ID of the user who last updated the object.
+                        type: string
+                      version:
+                        description: Internal version identifier for optimistic concurrency control.
+                        type: string
+                required:
+                  - id
+                  - data
+                  - meta
+          description: The data view was created.
+        '400':
+          description: The request is invalid, for example when a field format type does not exist.
+        '403':
+          description: forbidden
+        '409':
+          description: A data view with the same name already exists.
+      summary: Create a data view
+      tags:
+        - data-views-v2
+      x-state: Generally available
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/data_views/v2/{id}:
+    delete:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/data_views/v2/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Permanently deletes a data view by ID. You can't recover a deleted data view.<br/><br/>[Required authorization] Route required privileges: indexPatterns:manage.
+      operationId: delete-data-views-v2-id
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The ID of the data view to delete.
+          in: path
+          name: id
+          required: true
+          schema:
+            maxLength: 1000
+            minLength: 1
+            type: string
+      responses:
+        '204':
+          description: deleted
+        '403':
+          description: forbidden
+        '404':
+          description: not found
+      summary: Delete a data view
+      tags:
+        - data-views-v2
+      x-state: Generally available
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/data_views/v2/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns a data view by ID, including its field settings and runtime fields.
+      operationId: get-data-views-v2-id
+      parameters:
+        - description: The ID of the data view to return.
+          in: path
+          name: id
+          required: true
+          schema:
+            maxLength: 1000
+            minLength: 1
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                dataViewResponse:
+                  summary: Data view response
+                  value:
+                    data:
+                      index_pattern: logs-*
+                      name: Web logs
+                      time_field: '@timestamp'
+                    id: c0ffee00-d57a-11ef-9a52-4f3c2a8d0e1b
+                    meta:
+                      managed: false
+                      spaces:
+                        - default
+                      version: WzEsMV0=
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-data-view-spec-schema'
+                    description: The data view definition.
+                  id:
+                    description: The ID of the data view.
+                    maxLength: 1000
+                    type: string
+                  meta:
+                    additionalProperties: false
+                    description: Metadata about the data view.
+                    type: object
+                    properties:
+                      created_at:
+                        description: Timestamp when the object was created (ISO 8601).
+                        type: string
+                      created_by:
+                        description: User profile ID of the user who created the object.
+                        type: string
+                      managed:
+                        description: When `true`, the object is managed by Kibana and cannot be edited by users.
+                        type: boolean
+                      owner:
+                        description: Identifier of the plugin or team that owns this object.
+                        type: string
+                      spaces:
+                        description: The IDs of the spaces where the data view is available.
+                        items:
+                          maxLength: 1000
+                          type: string
+                        maxItems: 100
+                        type: array
+                      updated_at:
+                        description: Timestamp when the object was last updated (ISO 8601).
+                        type: string
+                      updated_by:
+                        description: User profile ID of the user who last updated the object.
+                        type: string
+                      version:
+                        description: Internal version identifier for optimistic concurrency control.
+                        type: string
+                required:
+                  - id
+                  - data
+                  - meta
+          description: OK
+        '404':
+          description: not found
+      summary: Get a data view
+      tags:
+        - data-views-v2
+      x-state: Generally available
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/data_views/v2/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Creates the data view with the ID in the path, or replaces its definition if it already exists. Returns `201` when the request creates a data view and `200` when it replaces one. A replacement removes any optional property you omit, such as `time_field`.<br/><br/>[Required authorization] Route required privileges: indexPatterns:manage.
+      operationId: put-data-views-v2-id
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The ID of the data view to create or update.
+          in: path
+          name: id
+          required: true
+          schema:
+            maxLength: 1000
+            minLength: 1
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              updateDataViewRequest:
+                summary: Create or update a data view
+                value:
+                  index_pattern: logs-*
+                  name: Web logs
+                  time_field: '@timestamp'
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                allow_hidden_indices:
+                  description: When `true`, allows the data view to match hidden indices.
+                  title: Allow hidden and system indices
+                  type: boolean
+                field_filters:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-filters-schema'
+                field_settings:
+                  additionalProperties:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-field-settings-entry'
+                  description: Settings for individual fields, keyed by field name. To change how Kibana displays a field from the backing indices, set its label, description, format, or popularity. To define a runtime field, use the runtime field name and set `type`.
+                  title: Field settings
+                  type: object
+                index_pattern:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-index-pattern-schema'
+                name:
+                  description: 'The name of the data view. Example: "Sample data view".'
+                  maxLength: 256
+                  minLength: 1
+                  title: Data view name
+                  type: string
+                time_field:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-time-field-schema'
+              required:
+                - index_pattern
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                dataViewResponse:
+                  summary: Data view response
+                  value:
+                    data:
+                      index_pattern: logs-*
+                      name: Web logs
+                      time_field: '@timestamp'
+                    id: c0ffee00-d57a-11ef-9a52-4f3c2a8d0e1b
+                    meta:
+                      managed: false
+                      spaces:
+                        - default
+                      version: WzEsMV0=
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-data-view-spec-schema'
+                    description: The data view definition.
+                  id:
+                    description: The ID of the data view.
+                    maxLength: 1000
+                    type: string
+                  meta:
+                    additionalProperties: false
+                    description: Metadata about the data view.
+                    type: object
+                    properties:
+                      created_at:
+                        description: Timestamp when the object was created (ISO 8601).
+                        type: string
+                      created_by:
+                        description: User profile ID of the user who created the object.
+                        type: string
+                      managed:
+                        description: When `true`, the object is managed by Kibana and cannot be edited by users.
+                        type: boolean
+                      owner:
+                        description: Identifier of the plugin or team that owns this object.
+                        type: string
+                      spaces:
+                        description: The IDs of the spaces where the data view is available.
+                        items:
+                          maxLength: 1000
+                          type: string
+                        maxItems: 100
+                        type: array
+                      updated_at:
+                        description: Timestamp when the object was last updated (ISO 8601).
+                        type: string
+                      updated_by:
+                        description: User profile ID of the user who last updated the object.
+                        type: string
+                      version:
+                        description: Internal version identifier for optimistic concurrency control.
+                        type: string
+                required:
+                  - id
+                  - data
+                  - meta
+          description: updated
+        '201':
+          content:
+            application/json:
+              examples:
+                dataViewResponse:
+                  summary: Data view response
+                  value:
+                    data:
+                      index_pattern: logs-*
+                      name: Web logs
+                      time_field: '@timestamp'
+                    id: c0ffee00-d57a-11ef-9a52-4f3c2a8d0e1b
+                    meta:
+                      managed: false
+                      spaces:
+                        - default
+                      version: WzEsMV0=
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-data-view-spec-schema'
+                    description: The data view definition.
+                  id:
+                    description: The ID of the data view.
+                    maxLength: 1000
+                    type: string
+                  meta:
+                    additionalProperties: false
+                    description: Metadata about the data view.
+                    type: object
+                    properties:
+                      created_at:
+                        description: Timestamp when the object was created (ISO 8601).
+                        type: string
+                      created_by:
+                        description: User profile ID of the user who created the object.
+                        type: string
+                      managed:
+                        description: When `true`, the object is managed by Kibana and cannot be edited by users.
+                        type: boolean
+                      owner:
+                        description: Identifier of the plugin or team that owns this object.
+                        type: string
+                      spaces:
+                        description: The IDs of the spaces where the data view is available.
+                        items:
+                          maxLength: 1000
+                          type: string
+                        maxItems: 100
+                        type: array
+                      updated_at:
+                        description: Timestamp when the object was last updated (ISO 8601).
+                        type: string
+                      updated_by:
+                        description: User profile ID of the user who last updated the object.
+                        type: string
+                      version:
+                        description: Internal version identifier for optimistic concurrency control.
+                        type: string
+                required:
+                  - id
+                  - data
+                  - meta
+          description: created
+        '400':
+          description: invalid request
+        '403':
+          description: forbidden
+        '409':
+          description: conflict
+      summary: Upsert a data view
+      tags:
+        - data-views-v2
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -130099,7 +130757,7 @@ paths:
                   maxLength: 1000
                   type: string
                 include:
-                  $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_56___schema0'
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_63___schema0'
                 name:
                   maxLength: 256
                   type: string
@@ -146973,7 +147631,7 @@ components:
           type: boolean
       required:
         - data_view
-    Kibana_HTTP_APIs__zod_v4_56___schema0:
+    Kibana_HTTP_APIs__zod_v4_63___schema0:
       anyOf:
         - additionalProperties: false
           type: object
@@ -147002,7 +147660,7 @@ components:
                 routing:
                   items:
                     allOf:
-                      - $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_56___schema0'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_63___schema0'
                       - type: object
                         properties:
                           destination:
@@ -160864,6 +161522,8 @@ components:
         field_settings:
           additionalProperties:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-settings-entry'
+          description: Settings for individual fields, keyed by field name. To change how Kibana displays a field from the backing indices, set its label, description, or format. To define a runtime field, use the runtime field name and set `type`.
+          title: Field settings
           type: object
         index_pattern:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-index-pattern-schema'
@@ -162335,6 +162995,20 @@ components:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-field-setting'
       description: Display overrides for an indexed field, or a runtime field definition when `type` is set to a runtime field kind.
       title: Field settings or runtime field
+    Kibana_HTTP_APIs_kbn-field-settings-with-popularity:
+      additionalProperties: false
+      description: Display overrides for a field. These settings can define a custom label, description, format and popularity.
+      properties:
+        custom_description:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-custom-description'
+        custom_label:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-custom-label'
+        format:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-format'
+        popularity:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-runtime-field-popularity'
+      title: Field settings
+      type: object
     Kibana_HTTP_APIs_kbn-index-pattern-schema:
       description: 'The index pattern (Elasticsearch index expression) to use as the data source. Example: "my-index-*".'
       minLength: 1
@@ -162426,6 +163100,11 @@ components:
         - type
       title: Runtime field base
       type: object
+    Kibana_HTTP_APIs_kbn-runtime-field-popularity:
+      description: Adjust the popularity to make the field appear higher or lower in the fields list. By default, Discover orders fields from most selected to least selected.
+      minimum: 0
+      title: Popularity
+      type: number
     Kibana_HTTP_APIs_kbn-runtime-field-schema:
       additionalProperties: false
       properties:
@@ -162460,6 +163139,103 @@ components:
         - geo_point
       title: Type
       type: string
+    Kibana_HTTP_APIs_kbn-saved-composite-runtime-field-schema:
+      additionalProperties: false
+      properties:
+        fields:
+          additionalProperties:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-runtime-field-base-schema'
+          type: object
+        script:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-runtime-field-script'
+        type:
+          enum:
+            - composite
+          type: string
+      required:
+        - type
+        - fields
+      title: Saved composite runtime field
+      type: object
+    Kibana_HTTP_APIs_kbn-saved-data-view-spec-schema:
+      additionalProperties: false
+      description: Defines an stored data source with a mandatory index pattern and optional settings like id, name, show hidden indices and field settings.
+      properties:
+        allow_hidden_indices:
+          description: When `true`, allows the data view to match hidden indices.
+          title: Allow hidden and system indices
+          type: boolean
+        field_filters:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-filters-schema'
+        field_settings:
+          additionalProperties:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-field-settings-entry'
+          description: Settings for individual fields, keyed by field name. To change how Kibana displays a field from the backing indices, set its label, description, format, or popularity. To define a runtime field, use the runtime field name and set `type`.
+          title: Field settings
+          type: object
+        id:
+          description: Kibana provides a unique identifier for each data view, or you can create your own.
+          maxLength: 256
+          minLength: 1
+          title: Data view ID
+          type: string
+        index_pattern:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-index-pattern-schema'
+        name:
+          description: 'The name of the data view. Example: "Sample data view".'
+          maxLength: 256
+          minLength: 1
+          title: Data view name
+          type: string
+        time_field:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-time-field-schema'
+      required:
+        - index_pattern
+      title: Saved data view spec
+      type: object
+    Kibana_HTTP_APIs_kbn-saved-field-settings-entry:
+      anyOf:
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-composite-runtime-field-schema'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-runtime-field-schema'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-settings-with-popularity'
+      description: Display overrides for an indexed field, or a runtime field definition when `type` is set to a runtime field kind.
+      title: Field settings or runtime field
+    Kibana_HTTP_APIs_kbn-saved-runtime-field-base-schema:
+      additionalProperties: false
+      properties:
+        custom_description:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-custom-description'
+        custom_label:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-custom-label'
+        format:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-format'
+        popularity:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-runtime-field-popularity'
+        type:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-runtime-field-type'
+      required:
+        - type
+      title: Saved runtime field base
+      type: object
+    Kibana_HTTP_APIs_kbn-saved-runtime-field-schema:
+      additionalProperties: false
+      properties:
+        custom_description:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-custom-description'
+        custom_label:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-custom-label'
+        format:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-format'
+        popularity:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-runtime-field-popularity'
+        script:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-runtime-field-script'
+        type:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-runtime-field-type'
+      required:
+        - type
+      title: Saved runtime field
+      type: object
     Kibana_HTTP_APIs_kbn-tags-attributes:
       additionalProperties: false
       type: object
@@ -197636,17 +198412,14 @@ components:
         - name
         - riskModifier
         - managed
-    Security_Exceptions_API_BlocklistHashOrPathEntry:
-      type: object
+    Security_Exceptions_API_BlocklistHashEntry:
       properties:
         field:
-          description: File hash or path field
+          description: File hash field
           enum:
             - file.hash.md5
             - file.hash.sha1
             - file.hash.sha256
-            - file.path
-            - file.path.caseless
           type: string
         operator:
           description: Must be the value "included"
@@ -197654,14 +198427,17 @@ components:
             - included
           type: string
         type:
-          description: Must be match_any for blocklists
+          description: Must be match_any for blocklist hash entries
           enum:
             - match_any
           type: string
         value:
-          description: Array of hash values or file paths
+          description: Array of hash values
           items:
+            maxLength: 4096
+            minLength: 1
             type: string
+          maxItems: 2000
           minItems: 1
           type: array
       required:
@@ -197669,6 +198445,8 @@ components:
         - type
         - value
         - operator
+      title: Blocklist hash entry
+      type: object
     Security_Exceptions_API_BlocklistLinuxProperties:
       description: Blocklist list item properties (Linux, code signature not supported).
       type: object
@@ -197677,9 +198455,12 @@ components:
           description: |
             **Validation rules:**
             * Hash entries: up to 3 (one for each hash type: md5, sha1, sha256)
-            * Path entry: only 1 allowed
+            * Path or File Name entry: only 1 allowed
           items:
-            $ref: '#/components/schemas/Security_Exceptions_API_BlocklistHashOrPathEntry'
+            oneOf:
+              - $ref: '#/components/schemas/Security_Exceptions_API_BlocklistHashEntry'
+              - $ref: '#/components/schemas/Security_Exceptions_API_BlocklistPathOrFileNameMatchAnyEntry'
+              - $ref: '#/components/schemas/Security_Exceptions_API_BlocklistPathOrFileNameWildcardEntry'
           minItems: 1
           type: array
         list_id:
@@ -197708,9 +198489,12 @@ components:
           description: |
             **Validation rules:**
             * Hash entries: up to 3 (one for each hash type: md5, sha1, sha256)
-            * Path entry: only 1 allowed
+            * Path or File Name entry: only 1 allowed
           items:
-            $ref: '#/components/schemas/Security_Exceptions_API_BlocklistHashOrPathEntry'
+            oneOf:
+              - $ref: '#/components/schemas/Security_Exceptions_API_BlocklistHashEntry'
+              - $ref: '#/components/schemas/Security_Exceptions_API_BlocklistPathOrFileNameMatchAnyEntry'
+              - $ref: '#/components/schemas/Security_Exceptions_API_BlocklistPathOrFileNameWildcardEntry'
           minItems: 1
           type: array
         list_id:
@@ -197731,8 +198515,77 @@ components:
           $ref: '#/components/schemas/Security_Exceptions_API_EndpointArtifactTags'
       required:
         - list_id
-    Security_Exceptions_API_BlocklistWindowsCodeSignatureEntry:
+    Security_Exceptions_API_BlocklistPathOrFileNameMatchAnyEntry:
+      properties:
+        field:
+          description: File path or file name field (available on all OS)
+          enum:
+            - file.path
+            - file.path.caseless
+            - file.name
+            - file.name.caseless
+          type: string
+        operator:
+          description: Must be the value "included"
+          enum:
+            - included
+          type: string
+        type:
+          description: Must be `match_any` ("is one of")
+          enum:
+            - match_any
+          type: string
+        value:
+          description: Array of values
+          items:
+            maxLength: 4096
+            minLength: 1
+            type: string
+          maxItems: 2000
+          minItems: 1
+          type: array
+      required:
+        - field
+        - type
+        - value
+        - operator
+      title: Blocklist path or file name "is one of" entry
       type: object
+    Security_Exceptions_API_BlocklistPathOrFileNameWildcardEntry:
+      properties:
+        field:
+          description: |
+            File path or file name field (available on all OS). `file.name.caseless` is used for
+            `wildcard` (Match) entries on Windows and macOS, since both have case-insensitive filesystems.
+          enum:
+            - file.path
+            - file.path.caseless
+            - file.name
+            - file.name.caseless
+          type: string
+        operator:
+          description: Must be the value "included"
+          enum:
+            - included
+          type: string
+        type:
+          description: Must be `wildcard` ("Matches", supports `*` and `?` wildcards)
+          enum:
+            - wildcard
+          type: string
+        value:
+          description: Single value
+          maxLength: 4096
+          minLength: 1
+          type: string
+      required:
+        - field
+        - type
+        - value
+        - operator
+      title: Blocklist path or file name "Match" entry
+      type: object
+    Security_Exceptions_API_BlocklistWindowsCodeSignatureEntry:
       properties:
         entries:
           description: Nested subject_name entries
@@ -197785,6 +198638,8 @@ components:
         - field
         - type
         - entries
+      title: Blocklist Windows code signature entry
+      type: object
     Security_Exceptions_API_BlocklistWindowsProperties:
       description: Blocklist list item properties (Windows, supports code signature).
       type: object
@@ -197793,11 +198648,13 @@ components:
           description: |
             **Validation rules:**
             * Hash entries: up to 3 (one for each hash type: md5, sha1, sha256)
-            * Path entry: only 1 allowed
+            * Path or File Name entry: only 1 allowed
             * Code signature entry: only 1 allowed
           items:
             oneOf:
-              - $ref: '#/components/schemas/Security_Exceptions_API_BlocklistHashOrPathEntry'
+              - $ref: '#/components/schemas/Security_Exceptions_API_BlocklistHashEntry'
+              - $ref: '#/components/schemas/Security_Exceptions_API_BlocklistPathOrFileNameMatchAnyEntry'
+              - $ref: '#/components/schemas/Security_Exceptions_API_BlocklistPathOrFileNameWildcardEntry'
               - $ref: '#/components/schemas/Security_Exceptions_API_BlocklistWindowsCodeSignatureEntry'
           minItems: 1
           type: array
