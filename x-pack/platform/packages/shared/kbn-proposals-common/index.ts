@@ -41,6 +41,7 @@ export {
   isAwaitingDecision,
   isExpired,
   isProposalSettling,
+  isTerminal,
   listProposalsQuerySchema,
   MAX_PROPOSALS_PAGE_OFFSET,
   MAX_PROPOSALS_PAGE_SIZE,

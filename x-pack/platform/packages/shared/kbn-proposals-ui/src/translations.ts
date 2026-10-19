@@ -92,6 +92,9 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
     'xpack.proposals.approvalModal.previousFailureCallout',
     { defaultMessage: 'A previous attempt at this action failed' }
   ),
+  failedAttemptCalloutTitle: i18n.translate('xpack.proposals.approvalModal.failedAttemptCallout', {
+    defaultMessage: 'This attempt failed to execute the action',
+  }),
   // Deliberately silent on *why* it expired: `isProposalExpired` is true both once the deadline
   // passes and when the workflow settles a proposal as `status: 'expired'` beforehand (e.g. after
   // exhausting its retry attempts), and this wording has to be true for either cause.
