@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { of } from 'rxjs';
+
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 
@@ -57,6 +59,12 @@ const createContext = ({
   } as unknown as Parameters<typeof stepInstallWorkflows>[0]['installedPkg'],
 });
 
+const mockFeatureFlag = (enabled: boolean) => {
+  mockedAppContext.getFeatureFlags.mockReturnValue({
+    getBooleanValue$: jest.fn().mockReturnValue(of(enabled)),
+  } as unknown as ReturnType<typeof appContextService.getFeatureFlags>);
+};
+
 describe('stepInstallWorkflows', () => {
   const client = {} as ManagedWorkflowsClient;
 
@@ -68,9 +76,7 @@ describe('stepInstallWorkflows', () => {
       .mockImplementation((path) =>
         jest.requireActual('../../../kibana/workflows/install').isWorkflowAssetPath(path)
       );
-    mockedAppContext.getExperimentalFeatures.mockReturnValue({
-      enableWorkflowAssets: true,
-    } as ReturnType<typeof appContextService.getExperimentalFeatures>);
+    mockFeatureFlag(true);
     mockedAppContext.waitForManagedWorkflowsClient.mockResolvedValue(client);
   });
 
@@ -157,9 +163,25 @@ describe('stepInstallWorkflows', () => {
   });
 
   it('keeps the previous workflow refs when the feature flag is off', async () => {
-    mockedAppContext.getExperimentalFeatures.mockReturnValue({
-      enableWorkflowAssets: false,
-    } as ReturnType<typeof appContextService.getExperimentalFeatures>);
+    mockFeatureFlag(false);
+    const context = createContext({ paths: [WORKFLOW_PATH], installedKibana: [WORKFLOW_REF] });
+
+    await stepInstallWorkflows(context);
+
+    expect(installWorkflows).not.toHaveBeenCalled();
+    expect(saveKibanaAssetsRefs).toHaveBeenCalledWith(
+      context.savedObjectsClient,
+      'my_pkg',
+      [WORKFLOW_REF],
+      'default',
+      false,
+      true,
+      [KibanaSavedObjectType.workflow]
+    );
+  });
+
+  it('keeps the previous workflow refs when the feature flag service is unavailable', async () => {
+    mockedAppContext.getFeatureFlags.mockReturnValue(undefined);
     const context = createContext({ paths: [WORKFLOW_PATH], installedKibana: [WORKFLOW_REF] });
 
     await stepInstallWorkflows(context);

@@ -15,13 +15,10 @@ import type {
 import type { ManagedWorkflowsClient } from '../../../app_context';
 
 export const registerWorkflowAssetsOwner = ({
-  enabled,
   workflowsExtensions,
 }: {
-  enabled: boolean;
   workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
 }) => {
-  if (!enabled) return;
   workflowsExtensions?.registerManagedWorkflowOwner(FLEET_PACKAGE_WORKFLOW.pluginId);
 };
 

@@ -20,24 +20,16 @@ describe('managed workflows client', () => {
         registerManagedWorkflowOwner: jest.fn(),
       } as unknown as jest.Mocked<WorkflowsExtensionsServerPluginSetup>);
 
-    it('registers fleet as a managed workflow owner when the feature is enabled', () => {
+    it('registers fleet as a managed workflow owner', () => {
       const workflowsExtensions = createSetup();
 
-      registerWorkflowAssetsOwner({ enabled: true, workflowsExtensions });
+      registerWorkflowAssetsOwner({ workflowsExtensions });
 
       expect(workflowsExtensions.registerManagedWorkflowOwner).toHaveBeenCalledWith('fleet');
     });
 
-    it('does not register anything when the feature is disabled', () => {
-      const workflowsExtensions = createSetup();
-
-      registerWorkflowAssetsOwner({ enabled: false, workflowsExtensions });
-
-      expect(workflowsExtensions.registerManagedWorkflowOwner).not.toHaveBeenCalled();
-    });
-
     it('does nothing when the workflows extensions plugin is not available', () => {
-      expect(() => registerWorkflowAssetsOwner({ enabled: true })).not.toThrow();
+      expect(() => registerWorkflowAssetsOwner({})).not.toThrow();
     });
   });
 

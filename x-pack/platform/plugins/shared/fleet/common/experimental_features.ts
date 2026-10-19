@@ -25,7 +25,6 @@ const _allowedExperimentalValues = {
   disableAgentlessLegacyAPI: true, // When enabled, the legacy agent/package policy APIs reject agentless create, update, upgrade, and copy. Forces enableAgentlessPoliciesUI on (see below).
   enableAgentlessPoliciesUI: true, // When enabled, the UI reads/writes agentless integration policies through the managed integrations API. Disable as a kill switch to fall back to the legacy APIs — but disableAgentlessLegacyAPI overrides it (the fallback would 400).
   enableEsqlViewInstall: false,
-  enableWorkflowAssets: false, // When enabled, kibana/workflow/*.yml package assets are installed as managed workflows (always disabled on install).
   enableSloTemplates: true,
   newBrowseIntegrationUx: true, // When enabled integrations, browse integrations page will use the new UX.
   enableVersionSpecificPolicies: true, // When enabled, version specific policies will be created when packages use agent version conditions

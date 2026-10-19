@@ -412,10 +412,7 @@ export class FleetPlugin
       config.enableExperimental ?? [],
       config.experimentalFeatures || {}
     );
-    registerWorkflowAssetsOwner({
-      enabled: experimentalFeatures.enableWorkflowAssets === true,
-      workflowsExtensions: deps.workflowsExtensions,
-    });
+    registerWorkflowAssetsOwner({ workflowsExtensions: deps.workflowsExtensions });
     const requireAllSpaces = experimentalFeatures.useSpaceAwareness ? false : true;
 
     registerSavedObjects(core.savedObjects, {
@@ -883,15 +880,13 @@ export class FleetPlugin
       reportingStart: plugins.reporting,
       featureFlags: core.featureFlags,
     });
-    if (appContextService.getExperimentalFeatures().enableWorkflowAssets) {
-      appContextService.setManagedWorkflowsClientInit(
-        startManagedWorkflowsClient({
-          workflowsExtensions: plugins.workflowsExtensions,
-          setClient: (client) => appContextService.setManagedWorkflowsClient(client),
-          logger: this.logger,
-        })
-      );
-    }
+    appContextService.setManagedWorkflowsClientInit(
+      startManagedWorkflowsClient({
+        workflowsExtensions: plugins.workflowsExtensions,
+        setClient: (client) => appContextService.setManagedWorkflowsClient(client),
+        logger: this.logger,
+      })
+    );
     licenseService.start(plugins.licensing.license$);
     this.telemetryEventsSender.start(plugins.telemetry, core).catch(() => {});
     this.bulkActionsResolver?.start(plugins.taskManager).catch(() => {});

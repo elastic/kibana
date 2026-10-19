@@ -129,7 +129,6 @@ describe('allowedExperimentalValues', () => {
     'disableAgentlessLegacyAPI',
     'enableAgentlessPoliciesUI',
     'enableEsqlViewInstall',
-    'enableWorkflowAssets',
     'enableSloTemplates',
     'newBrowseIntegrationUx',
     'enableVersionSpecificPolicies',

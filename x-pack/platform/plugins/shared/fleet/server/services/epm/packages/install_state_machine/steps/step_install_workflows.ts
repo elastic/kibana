@@ -5,7 +5,11 @@
  * 2.0.
  */
 
+import { firstValueFrom } from 'rxjs';
+
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+
+import { ENABLE_WORKFLOW_ASSETS_FLAG } from '../../../../../../common/constants';
 
 import { KibanaSavedObjectType } from '../../../../../../common/types';
 import { appContextService } from '../../../../app_context';
@@ -13,6 +17,12 @@ import { withPackageSpan } from '../../utils';
 import type { InstallContext } from '../_state_machine_package_install';
 import { saveKibanaAssetsRefs } from '../../install';
 import { installWorkflows, isWorkflowAssetPath } from '../../../kibana/workflows/install';
+
+const isWorkflowAssetsFlagEnabled = async (): Promise<boolean> => {
+  const featureFlags = appContextService.getFeatureFlags();
+  if (!featureFlags) return false;
+  return await firstValueFrom(featureFlags.getBooleanValue$(ENABLE_WORKFLOW_ASSETS_FLAG, false));
+};
 
 export const stepInstallWorkflows = async (
   context: Pick<
@@ -60,8 +70,10 @@ export const stepInstallWorkflows = async (
       [KibanaSavedObjectType.workflow]
     );
 
-  const client = await appContextService.waitForManagedWorkflowsClient();
-  if (appContextService.getExperimentalFeatures().enableWorkflowAssets !== true || !client) {
+  const client = (await isWorkflowAssetsFlagEnabled())
+    ? await appContextService.waitForManagedWorkflowsClient()
+    : undefined;
+  if (!client) {
     logger.warn('Workflows are not available, skipping workflow assets installation');
     // The kibana assets step replaced the saved refs, put back the workflows that are still installed
     await saveRefs(previousWorkflowRefs);
