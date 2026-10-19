@@ -62,8 +62,11 @@ export function Sparkline({
   const hasComparisonSeries = !!comparisonSeries?.length;
 
   const lineStyle = fill ? { strokeWidth: FILLED_LINE_WIDTH } : {};
+  // A flat series sits on the plot edge; reserve half the stroke so it isn't clipped (and so a
+  // constant line doesn't look thinner than a varying one). Only needed for the thicker filled line.
+  const edgeInset = fill ? FILLED_LINE_WIDTH / 2 : 0;
   const sparklineTheme = {
-    chartMargins: { left: 0, right: 0, top: 0, bottom: 0 },
+    chartMargins: { left: 0, right: 0, top: edgeInset, bottom: edgeInset },
     lineSeriesStyle: { point: { opacity: 0 }, line: lineStyle },
     areaSeriesStyle: {
       point: { opacity: 0 },

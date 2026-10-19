@@ -257,7 +257,8 @@ function getMetrics(data: ObservabilityTracesServiceSummaryData | null): Service
         defaultMessage: 'Error rate',
       }),
       valueLabel: data?.failedTransactionRate.valueLabel ?? loadingLabel,
-      color: palette[3],
+      // Red to signal errors (palette[6] = #f6726a), rather than the next sequential vis color.
+      color: palette[6],
       series: data?.failedTransactionRate.series ?? null,
     },
   ];
