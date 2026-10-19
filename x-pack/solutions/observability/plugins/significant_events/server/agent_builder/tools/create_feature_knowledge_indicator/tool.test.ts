@@ -255,7 +255,7 @@ describe('ki_feature_create tool', () => {
   });
 
   it('tells the agent whether a refused write is worth retrying', async () => {
-    (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
+    jest.mocked(assertSignificantEventsAccess).mockResolvedValue(undefined);
     const bulk = jest
       .fn()
       .mockRejectedValueOnce(new SourceWriteConflictError('lease_held', 'being updated'))
@@ -267,8 +267,12 @@ describe('ki_feature_create tool', () => {
       telemetry,
     });
 
-    const retryable = await invokeHandler(tool as never, featureParams, createMockToolContext());
-    const final = await invokeHandler(tool as never, featureParams, createMockToolContext());
+    if (!('handler' in tool)) {
+      throw new Error('ki_feature_create must be a builtin tool');
+    }
+
+    const retryable = await invokeHandler(tool, featureParams, createMockToolContext());
+    const final = await invokeHandler(tool, featureParams, createMockToolContext());
 
     expect(retryable).toMatchObject({
       results: [{ data: { metadata: { reason: 'lease_held', retryable: true } } }],

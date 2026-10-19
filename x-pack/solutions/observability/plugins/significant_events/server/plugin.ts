@@ -129,6 +129,7 @@ import {
 import { createSignificantEventsAvailability } from './agent_builder/tools/significant_events_availability';
 import { SIGNIFICANT_EVENT_TIERED_FEATURES } from '../common/constants';
 import { isSignificantEventsAvailable } from './routes/utils/assert_significant_events_access';
+import { getRequestAbortSignal } from './routes/utils/get_request_abort_signal';
 import type { SignificantEventsKIsOnboardingClient } from './lib/workflows/onboarding_workflow_client';
 import { WorkflowExecutionService } from './lib/workflows/workflow_execution_service';
 import { createSourceChangeListener } from './routes/internal/knowledge_indicators/reconcile_source_catalog';
@@ -288,6 +289,7 @@ export class SignificantEventsPlugin
               allowDisabled: options?.allowDisabled,
               waitForLeaseMs:
                 options?.waitForLease === false ? undefined : SOURCE_WRITE_LEASE_WAIT_MS,
+              signal: getRequestAbortSignal(request),
               expectedRevision:
                 typeof request.headers['x-nightshift-source-revision'] === 'string' &&
                 request.headers['x-nightshift-source-revision']

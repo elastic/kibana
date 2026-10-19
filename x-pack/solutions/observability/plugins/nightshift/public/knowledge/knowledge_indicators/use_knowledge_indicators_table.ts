@@ -170,12 +170,13 @@ export function useKnowledgeIndicatorsTable() {
       setIsBulkOperationInProgress(true);
       try {
         const { failedCount, conflictCount } = await operation(features);
-        if (conflictCount > 0) {
-          toasts.addWarning({ title: BULK_WRITE_CONFLICT_MESSAGE });
-        } else if (failedCount === 0) {
+        if (failedCount === 0 && conflictCount === 0) {
           toasts.addSuccess({ title: successTitle });
         } else {
-          toasts.addWarning({ title: partialTitle });
+          toasts.addWarning({
+            title: partialTitle,
+            text: conflictCount > 0 ? BULK_WRITE_CONFLICT_MESSAGE : undefined,
+          });
         }
         setSelectedKnowledgeIndicators([]);
         closeFlyout();

@@ -11,6 +11,7 @@ import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
 import type { Feature } from '@kbn/significant-events-schema';
 import { BULK_WRITE_CONFLICT_MESSAGE } from '../../common/errors';
 import type { PromoteResult } from '../../data/rules/use_queries_api';
+import { BULK_EXCLUDE_PARTIAL_TOAST_TITLE } from './translations';
 import type { KnowledgeIndicatorsQuery } from './use_knowledge_indicators_query_params';
 import {
   useKnowledgeIndicatorsTable,
@@ -270,7 +271,11 @@ describe('useKnowledgeIndicatorsTable', () => {
       const feature = makeFeature({ id: 'f1', source_id: 's1' });
       const ki = { kind: 'feature' as const, feature };
       mockKnowledgeIndicators = [ki];
-      mockExcludeFeaturesInBulk.mockResolvedValue({ failedCount: 0 });
+      mockExcludeFeaturesInBulk.mockResolvedValue({
+        succeededCount: 1,
+        failedCount: 0,
+        conflictCount: 0,
+      });
 
       const { result } = renderHook(() => useKnowledgeIndicatorsTable());
       act(() => {
@@ -290,7 +295,11 @@ describe('useKnowledgeIndicatorsTable', () => {
     it('shows warning when some features fail', async () => {
       const ki = makeFeatureKI({ id: 'f1', source_id: 's1' });
       mockKnowledgeIndicators = [ki];
-      mockExcludeFeaturesInBulk.mockResolvedValue({ failedCount: 1 });
+      mockExcludeFeaturesInBulk.mockResolvedValue({
+        succeededCount: 0,
+        failedCount: 1,
+        conflictCount: 0,
+      });
 
       const { result } = renderHook(() => useKnowledgeIndicatorsTable());
       act(() => {
@@ -301,13 +310,20 @@ describe('useKnowledgeIndicatorsTable', () => {
         await result.current.handleBulkExclude();
       });
 
-      expect(mockToasts.addWarning).toHaveBeenCalled();
+      expect(mockToasts.addWarning).toHaveBeenCalledWith({
+        title: BULK_EXCLUDE_PARTIAL_TOAST_TITLE,
+        text: undefined,
+      });
     });
 
-    it('tells the user the source was busy when changes hit a conflict', async () => {
+    it('adds that the source was busy to the partial warning when changes hit a conflict', async () => {
       const ki = makeFeatureKI({ id: 'f1', source_id: 's1' });
       mockKnowledgeIndicators = [ki];
-      mockExcludeFeaturesInBulk.mockResolvedValue({ failedCount: 1, conflictCount: 1 });
+      mockExcludeFeaturesInBulk.mockResolvedValue({
+        succeededCount: 1,
+        failedCount: 1,
+        conflictCount: 1,
+      });
 
       const { result } = renderHook(() => useKnowledgeIndicatorsTable());
       act(() => {
@@ -318,7 +334,11 @@ describe('useKnowledgeIndicatorsTable', () => {
         await result.current.handleBulkExclude();
       });
 
-      expect(mockToasts.addWarning).toHaveBeenCalledWith({ title: BULK_WRITE_CONFLICT_MESSAGE });
+      expect(mockToasts.addWarning).toHaveBeenCalledWith({
+        title: BULK_EXCLUDE_PARTIAL_TOAST_TITLE,
+        text: BULK_WRITE_CONFLICT_MESSAGE,
+      });
+      expect(mockToasts.addSuccess).not.toHaveBeenCalled();
     });
 
     it('shows error toast when operation throws', async () => {
@@ -384,7 +404,11 @@ describe('useKnowledgeIndicatorsTable', () => {
         excluded: true,
       });
       mockKnowledgeIndicators = [ki];
-      mockRestoreFeaturesInBulk.mockResolvedValue({ failedCount: 0 });
+      mockRestoreFeaturesInBulk.mockResolvedValue({
+        succeededCount: 1,
+        failedCount: 0,
+        conflictCount: 0,
+      });
 
       const { result } = renderHook(() => useKnowledgeIndicatorsTable());
       act(() => {

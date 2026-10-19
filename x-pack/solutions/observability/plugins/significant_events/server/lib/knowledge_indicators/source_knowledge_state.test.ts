@@ -294,7 +294,31 @@ describe('source knowledge write coordination', () => {
       expect(run).not.toHaveBeenCalled();
     });
 
-    it('rejects a stale revision without waiting out the lease', async () => {
+    it('stops waiting for the lease once the request is aborted', async () => {
+      const { client, documents } = setup();
+      seedLease({ documents, lease: heldLease() });
+      const controller = new AbortController();
+      const run = jest.fn(async () => 'written');
+      const write = trackSettlement(
+        client.write({
+          sourceId: 'source',
+          waitForLeaseMs: WAIT_MS,
+          signal: controller.signal,
+          run,
+        })
+      );
+      await jest.advanceTimersByTimeAsync(0);
+      expect(write.isSettled()).toBe(false);
+
+      controller.abort();
+      seedLease({ documents, lease: null, version: '2' });
+      await jest.advanceTimersByTimeAsync(FIRST_RETRY_MS);
+
+      await expect(write.promise).rejects.toMatchObject(conflict('lease_held'));
+      expect(run).not.toHaveBeenCalled();
+    });
+
+    it('does not retry a stale revision', async () => {
       const { client, source } = setup();
       await client.write({ sourceId: 'source', run: async () => {} });
       source.esql_updated_at = 'revision-2';

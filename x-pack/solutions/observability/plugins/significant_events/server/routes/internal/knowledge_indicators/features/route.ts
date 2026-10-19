@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import pLimit from 'p-limit';
 import { lazySchema, z, isoDateTime } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import {
@@ -28,6 +29,8 @@ import {
 import type { KIBulkOperation } from '../../../../lib/knowledge_indicators';
 
 const MAX_INPUT_STRING_LENGTH = 255;
+// Each source write can wait for its lease, so sources run in parallel to keep the request short.
+const BULK_SOURCE_CONCURRENCY = 3;
 
 const upsertFeatureRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{sourceId}/features',
@@ -417,28 +420,33 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
 
     const sourcesWithShrinkingOps = new Set<string>();
 
-    for (const [sourceId, ops] of Object.entries(bySource)) {
-      try {
-        const { applied, skipped: sourceSkipped } = await kiClient.bulk(sourceId, ops);
-        succeeded += applied;
-        skipped += sourceSkipped;
-        if (ops.some((op) => 'delete' in op || 'exclude' in op)) {
-          sourcesWithShrinkingOps.add(sourceId);
-        }
-      } catch (error) {
-        logger.error(
-          `Bulk feature operation failed for source ${sourceId}: ${
-            error instanceof Error ? error.message : String(error)
-          }`
-        );
-        const reason = getSourceWriteConflictReason(error);
-        if (reason && isRetryableSourceWriteConflict(reason)) {
-          conflicts += ops.length;
-        } else {
-          failed += ops.length;
-        }
-      }
-    }
+    const limiter = pLimit(BULK_SOURCE_CONCURRENCY);
+    await Promise.all(
+      Object.entries(bySource).map(([sourceId, ops]) =>
+        limiter(async () => {
+          try {
+            const { applied, skipped: sourceSkipped } = await kiClient.bulk(sourceId, ops);
+            succeeded += applied;
+            skipped += sourceSkipped;
+            if (ops.some((op) => 'delete' in op || 'exclude' in op)) {
+              sourcesWithShrinkingOps.add(sourceId);
+            }
+          } catch (error) {
+            logger.error(
+              `Bulk feature operation failed for source ${sourceId}: ${
+                error instanceof Error ? error.message : String(error)
+              }`
+            );
+            const reason = getSourceWriteConflictReason(error);
+            if (reason && isRetryableSourceWriteConflict(reason)) {
+              conflicts += ops.length;
+            } else {
+              failed += ops.length;
+            }
+          }
+        })
+      )
+    );
 
     for (const sourceId of sourcesWithShrinkingOps) {
       try {

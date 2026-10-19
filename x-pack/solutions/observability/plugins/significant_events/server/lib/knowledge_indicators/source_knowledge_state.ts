@@ -83,8 +83,12 @@ const sleep = (ms: number): Promise<void> =>
     setTimeout(resolve, ms);
   });
 
-/** Runs `attempt` again, with a growing delay, for as long as it fails on a held lease. */
-const retryWhileLeaseHeld = async <T>(maxWaitMs: number, attempt: () => Promise<T>): Promise<T> => {
+/** Runs `attempt` again, with a growing delay, for as long as it fails on a held lease and `signal` is not aborted. */
+const retryWhileLeaseHeld = async <T>(
+  maxWaitMs: number,
+  attempt: () => Promise<T>,
+  signal?: AbortSignal
+): Promise<T> => {
   const startedAt = Date.now();
   let delayMs = LEASE_RETRY_MIN_DELAY_MS;
   for (;;) {
@@ -92,10 +96,17 @@ const retryWhileLeaseHeld = async <T>(maxWaitMs: number, attempt: () => Promise<
       return await attempt();
     } catch (error) {
       const remainingMs = maxWaitMs - (Date.now() - startedAt);
-      if (getSourceWriteConflictReason(error) !== 'lease_held' || remainingMs <= 0) {
+      if (
+        getSourceWriteConflictReason(error) !== 'lease_held' ||
+        remainingMs <= 0 ||
+        signal?.aborted
+      ) {
         throw error;
       }
       await sleep(Math.min(delayMs, remainingMs));
+      if (signal?.aborted) {
+        throw error;
+      }
       delayMs = Math.min(delayMs * 2, LEASE_RETRY_MAX_DELAY_MS);
     }
   }
@@ -126,6 +137,8 @@ export interface SourceKnowledgeStateClient {
      * immediately. A stale revision or a disabled source is never retried.
      */
     waitForLeaseMs?: number;
+    /** Stops the wait for the lease, e.g. when the HTTP request is aborted. A write that holds the lease still completes. */
+    signal?: AbortSignal;
     run: () => Promise<T>;
   }): Promise<T>;
 }
@@ -240,6 +253,7 @@ export const createSourceKnowledgeStateClient = ({
 
   return {
     runExclusive,
-    write: (args) => retryWhileLeaseHeld(args.waitForLeaseMs ?? 0, () => writeOnce(args)),
+    write: (args) =>
+      retryWhileLeaseHeld(args.waitForLeaseMs ?? 0, () => writeOnce(args), args.signal),
   };
 };
