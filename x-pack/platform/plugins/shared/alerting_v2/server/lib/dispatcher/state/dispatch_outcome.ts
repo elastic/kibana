@@ -9,6 +9,7 @@ import type {
   ActionGroup,
   ActionGroupId,
   ActionPolicyDestination,
+  DispatchDelivery,
   DispatchFailure,
 } from '../types';
 
@@ -16,16 +17,18 @@ const NO_EXECUTIONS: readonly string[] = [];
 
 /**
  * What actually happened during dispatch (DispatchStep): workflow execution ids
- * per successfully scheduled group, plus every failed (group, destination) attempt.
+ * per successfully scheduled group, every successful (group, destination)
+ * delivery, plus every failed (group, destination) attempt.
  */
 export class DispatchOutcome {
-  private static readonly EMPTY = new DispatchOutcome([], new Map());
+  private static readonly EMPTY = new DispatchOutcome([], new Map(), []);
 
   private readonly failedWorkflowsByGroup: ReadonlyMap<ActionGroupId, ReadonlySet<string>>;
 
   private constructor(
     public readonly failures: readonly DispatchFailure[],
-    private readonly executionsByGroup: ReadonlyMap<ActionGroupId, readonly string[]>
+    private readonly executionsByGroup: ReadonlyMap<ActionGroupId, readonly string[]>,
+    public readonly deliveries: readonly DispatchDelivery[]
   ) {
     this.failedWorkflowsByGroup = indexFailedWorkflows(failures);
   }
@@ -33,11 +36,13 @@ export class DispatchOutcome {
   public static of({
     executionsByGroup,
     failures,
+    deliveries = [],
   }: {
     executionsByGroup: ReadonlyMap<ActionGroupId, readonly string[]>;
     failures: readonly DispatchFailure[];
+    deliveries?: readonly DispatchDelivery[];
   }): DispatchOutcome {
-    return new DispatchOutcome(failures, executionsByGroup);
+    return new DispatchOutcome(failures, executionsByGroup, deliveries);
   }
 
   public static empty(): DispatchOutcome {
