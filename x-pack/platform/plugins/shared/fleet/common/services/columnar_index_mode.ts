@@ -51,3 +51,18 @@ export function getLogsdbColumnarReadiness(
 export function isLogsdbColumnarReady(readiness?: LogsdbColumnarReadiness): boolean {
   return readiness === 'opt_in' || readiness === 'default';
 }
+
+/**
+ * The logs data streams of a package that are not columnar-ready (`unsupported`, or no readiness
+ * declared at either level). The integration can only be switched to the `logsdb_columnar` index
+ * mode when this is empty: every logs data stream has to be ready.
+ */
+export function getLogsdbColumnarNotReadyDataStreams<
+  T extends Pick<RegistryDataStream, 'type' | 'elasticsearch'>
+>(packageInfo: ColumnarPackageInfo | undefined, dataStreams: T[] = []): T[] {
+  return dataStreams.filter(
+    (dataStream) =>
+      dataStream.type === 'logs' &&
+      !isLogsdbColumnarReady(getLogsdbColumnarReadiness(packageInfo, dataStream))
+  );
+}

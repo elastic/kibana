@@ -15,6 +15,7 @@ import pMap from 'p-map';
 
 import {
   LOGSDB_COLUMNAR_INDEX_MODE,
+  getLogsdbColumnarNotReadyDataStreams,
   getLogsdbColumnarReadiness,
   getRegistryDataStreamAssetBaseName,
   isLogsdbColumnarReady,
@@ -147,8 +148,9 @@ export async function getInstalledPackageOrThrow(
 }
 
 /**
- * Throws a 400 when the user asks to enable the columnar index mode for a package that has no
- * logs data stream ready for it. Runs before anything is persisted or written to Elasticsearch.
+ * Throws a 400 when the user asks to enable the columnar index mode for a package whose logs data
+ * streams are not all ready for it: the integration can only be switched as a whole. Turning the
+ * mode off is always allowed. Runs before anything is persisted or written to Elasticsearch.
  */
 export function assertLogsdbColumnarSupported({
   pkgName,
@@ -168,14 +170,26 @@ export function assertLogsdbColumnarSupported({
       400
     );
   }
+  const notReadyDataStreams = getLogsdbColumnarNotReadyDataStreams(
+    packageInfo,
+    packageInfo.data_streams
+  );
+  if (notReadyDataStreams.length > 0) {
+    throw new FleetErrorWithStatusCode(
+      `${pkgName} can only use the ${LOGSDB_COLUMNAR_INDEX_MODE} index mode when all its logs data streams are ready for it; not ready: ${notReadyDataStreams
+        .map(({ dataset }) => dataset)
+        .join(', ')}`,
+      400
+    );
+  }
 }
 
 /**
  * Applies the user's installation-level `logsdb_columnar` choice to Elasticsearch and stores it.
  *
  * Shared by the update package API and the package policy editor so both behave the same: a
- * no-op when the stored choice already matches, a 400 when enabling a package without a ready
- * logs data stream, and nothing written until that check has passed. The choice is only stored
+ * no-op when the stored choice already matches, a 400 when enabling a package whose logs data
+ * streams are not all ready, and nothing written until that check has passed. The choice is only stored
  * once Elasticsearch accepted it: a rejected change leaves the previous choice in place, so it
  * can be retried. If the choice cannot be stored, Elasticsearch is put back as it was, so that
  * the stored choice keeps describing the index templates.

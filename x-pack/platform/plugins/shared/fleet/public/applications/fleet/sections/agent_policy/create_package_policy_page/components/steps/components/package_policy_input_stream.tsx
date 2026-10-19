@@ -309,8 +309,8 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
           }
         );
 
-    // The integration's columnar toggle doesn't apply to a data stream the package marks
-    // `unsupported`: say so in the stream's own section.
+    // A data stream the package marks `unsupported` stays on LogsDB and keeps the integration's
+    // columnar toggle from being turned on: say so in the stream's own section.
     const isColumnarUnsupported =
       packageInfo.type !== 'input' &&
       getLogsdbColumnarReadiness(packageInfo, packageInputStream.data_stream) === 'unsupported';
@@ -408,7 +408,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                       <EuiIcon type="info" aria-hidden={true} />{' '}
                       <FormattedMessage
                         id="xpack.fleet.createPackagePolicy.stepConfigure.streamColumnarUnsupported"
-                        defaultMessage="This data stream doesn't support columnar storage. It stays on LogsDB, even when the integration's columnar index mode is on."
+                        defaultMessage="This data stream doesn't support columnar storage and stays on LogsDB. The integration can only use the columnar index mode when all its log data streams support it."
                       />
                     </EuiText>
                   </>

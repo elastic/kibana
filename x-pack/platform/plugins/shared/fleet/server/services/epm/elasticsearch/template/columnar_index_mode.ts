@@ -10,6 +10,7 @@ import pMap from 'p-map';
 
 import {
   LOGSDB_COLUMNAR_INDEX_MODE,
+  getLogsdbColumnarNotReadyDataStreams,
   getLogsdbColumnarReadiness,
   getRegistryDataStreamAssetBaseName,
   isLogsdbColumnarReady,
@@ -101,10 +102,12 @@ export function stripColumnarIncompatibleMappings(componentTemplates: TemplateMa
  *
  * - A data stream that is not columnar-ready (`unsupported` or nothing declared) never gets it.
  * - An explicit user choice, stored once per installation, always wins.
- * - Without a user choice, `default` readiness applies to new installations. A data stream that a
- *   later package version adds to an existing installation follows what the installation already
- *   uses: it only gets columnar when it is `default` and the installation is on columnar, so an
- *   integration that already has data on LogsDB never gains a columnar data stream.
+ * - Without a user choice, `default` readiness applies to new installations of an integration
+ *   whose logs data streams are all ready: the switch can only be turned on for those, so a
+ *   partly ready integration never starts on columnar. A data stream that a later package version
+ *   adds to an existing installation follows what the installation already uses: it only gets
+ *   columnar when it is `default` and the installation is on columnar, so an integration that
+ *   already has data on LogsDB never gains a columnar data stream.
  * - Existing data streams keep whatever mode their index template already has, so an `opt_in` ->
  *   `default` package upgrade never flips them.
  */
@@ -112,6 +115,7 @@ export function resolveLogsdbColumnarIndexMode({
   readiness,
   userChoice,
   isNewInstall,
+  isIntegrationReady = true,
   isNewDataStream = false,
   installationUsesColumnar = false,
   currentIndexMode,
@@ -119,6 +123,8 @@ export function resolveLogsdbColumnarIndexMode({
   readiness?: ReturnType<typeof getLogsdbColumnarReadiness>;
   userChoice?: boolean;
   isNewInstall: boolean;
+  /** Every logs data stream of the package is columnar-ready. */
+  isIntegrationReady?: boolean;
   /** The data stream has no index template yet in an existing installation. */
   isNewDataStream?: boolean;
   /** A logs data stream of the existing installation is on `logsdb_columnar`. */
@@ -132,7 +138,7 @@ export function resolveLogsdbColumnarIndexMode({
     return userChoice ? LOGSDB_COLUMNAR_INDEX_MODE : undefined;
   }
   if (isNewInstall) {
-    return readiness === 'default' ? LOGSDB_COLUMNAR_INDEX_MODE : undefined;
+    return readiness === 'default' && isIntegrationReady ? LOGSDB_COLUMNAR_INDEX_MODE : undefined;
   }
   if (isNewDataStream) {
     return readiness === 'default' && installationUsesColumnar
@@ -253,7 +259,11 @@ export async function resolveColumnarIndexModes({
 }: {
   esClient?: ElasticsearchClient;
   logger?: Logger;
-  packageInfo: ColumnarPackageInfo & { name: string; version: string };
+  packageInfo: ColumnarPackageInfo & {
+    name: string;
+    version: string;
+    data_streams?: RegistryDataStream[];
+  };
   dataStreams: RegistryDataStream[];
   installedPkg?: Installation;
 }): Promise<Map<string, string | undefined>> {
@@ -264,6 +274,10 @@ export async function resolveColumnarIndexModes({
   if (logsDataStreams.length === 0) {
     return new Map();
   }
+  // Judged on every data stream of the package, not only the ones being installed.
+  const isIntegrationReady =
+    getLogsdbColumnarNotReadyDataStreams(packageInfo, packageInfo.data_streams ?? dataStreams)
+      .length === 0;
 
   // The current mode only matters for an existing installation: a fresh install has no index
   // templates to preserve a mode from, and nothing to move back to LogsDB either.
@@ -344,6 +358,7 @@ export async function resolveColumnarIndexModes({
         readiness,
         userChoice,
         isNewInstall,
+        isIntegrationReady,
         isNewDataStream,
         installationUsesColumnar,
         currentIndexMode,

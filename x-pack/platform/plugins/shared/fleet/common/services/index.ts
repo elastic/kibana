@@ -107,6 +107,7 @@ export {
 } from './datastream_es_name';
 export {
   LOGSDB_COLUMNAR_INDEX_MODE,
+  getLogsdbColumnarNotReadyDataStreams,
   getLogsdbColumnarReadiness,
   isLogsdbColumnarReady,
 } from './columnar_index_mode';

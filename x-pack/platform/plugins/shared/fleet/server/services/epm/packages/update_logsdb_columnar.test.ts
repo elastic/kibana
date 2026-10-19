@@ -674,6 +674,38 @@ describe('setLogsdbColumnarChoice', () => {
     expect(templateModule.updateCurrentWriteIndices).toHaveBeenCalledTimes(2);
   });
 
+  it('rejects enabling unless every logs data stream is ready, and still lets the user turn it off', async () => {
+    const info = packageInfo();
+    const partlyReady = {
+      ...info,
+      data_streams: [
+        ...info.data_streams,
+        {
+          ...info.data_streams[0],
+          dataset: 'test.other',
+          path: 'other',
+          elasticsearch: { logsdb_columnar: 'unsupported' },
+        },
+      ],
+    };
+    jest.mocked(getInstallationObject).mockResolvedValue(installation());
+    mockInstalledPackage(partlyReady);
+
+    await expect(setChoice(true)).rejects.toThrow(
+      'test can only use the logsdb_columnar index mode when all its logs data streams are ready for it; not ready: test.other'
+    );
+    expect(esClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+    expect(savedObjectsClient.update).not.toHaveBeenCalled();
+
+    jest
+      .mocked(getInstallationObject)
+      .mockResolvedValue(installation({ logsdb_columnar_enabled: true }));
+    await expect(setChoice(false)).resolves.toEqual({ changed: true });
+    expect(savedObjectsClient.update).toHaveBeenCalledWith(PACKAGES_SAVED_OBJECT_TYPE, PKG_NAME, {
+      logsdb_columnar_enabled: false,
+    });
+  });
+
   it('is a no-op when the stored choice already matches', async () => {
     jest
       .mocked(getInstallationObject)

@@ -145,6 +145,16 @@ describe('resolveLogsdbColumnarIndexMode', () => {
     ).toBeUndefined();
   });
 
+  it('does not apply `default` readiness to a new installation of a partly ready integration', () => {
+    expect(
+      resolveLogsdbColumnarIndexMode({
+        readiness: 'default',
+        isNewInstall: true,
+        isIntegrationReady: false,
+      })
+    ).toBeUndefined();
+  });
+
   it('puts a data stream added by an upgrade on what the installation already uses', () => {
     const added = { isNewInstall: false, isNewDataStream: true };
     expect(
@@ -229,6 +239,28 @@ describe('resolveColumnarIndexModes', () => {
 
     expect(modes.get('logs-pkg.ds')).toEqual('logsdb_columnar');
     expect(esClient.indices.getIndexTemplate).not.toHaveBeenCalled();
+  });
+
+  it('keeps a partly ready `default` package on LogsDB on a fresh install', async () => {
+    const ready = dataStream({});
+    const unsupported = dataStream({
+      dataset: 'pkg.other',
+      path: 'other',
+      elasticsearch: { logsdb_columnar: 'unsupported' },
+    });
+
+    const modes = await resolveColumnarIndexModes({
+      packageInfo: {
+        name: 'pkg',
+        version: '1.0.0',
+        elasticsearch: { logsdb_columnar: 'default' },
+        data_streams: [ready, unsupported],
+      },
+      // Judged on every data stream of the package, even when only some are installed.
+      dataStreams: [ready],
+    });
+
+    expect(modes.get('logs-pkg.ds')).toBeUndefined();
   });
 
   it('ignores data streams that are not logs', async () => {

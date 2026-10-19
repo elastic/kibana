@@ -61,6 +61,18 @@ describe('ColumnarIndexModeSwitch', () => {
     expect(result.queryByTestId('columnarIndexModeUnsupportedDataStreams')).not.toBeInTheDocument();
   });
 
+  it('names the data streams that keep a partly ready integration from being columnar-ready', () => {
+    const result = render({
+      disabled: true,
+      notReady: true,
+      notReadyDataStreams: ['Nginx error logs', 'Nginx debug logs'],
+    });
+
+    expect(result.getByTestId('columnarIndexModeNotReady')).toHaveTextContent(
+      "This integration isn't columnar-ready: Nginx error logs, Nginx debug logs don't support columnar storage yet, and every log data stream has to."
+    );
+  });
+
   it('replaces the description with the withdrawn notice', () => {
     const result = render({ withdrawn: true, disabled: true });
 

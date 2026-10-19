@@ -25,6 +25,7 @@ import {
   getRegistryStreamWithDataStreamForInputType,
   getInputEffectiveName,
   buildInputKey,
+  getLogsdbColumnarNotReadyDataStreams,
   getLogsdbColumnarReadiness,
   isLogsdbColumnarReady,
 } from '../../../../../../../../common/services';
@@ -89,10 +90,11 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
   const isSinglePolicyTemplate = packagePolicyTemplates.length === 1;
 
   // Columnar index mode: one choice per installed integration, stored on the installation rather
-  // than on the policy. Every integration with a logs data stream shows the toggle; it can be
-  // turned on when at least one logs data stream declares readiness, and is greyed out with an
-  // explanation otherwise. Data streams marked `unsupported` stay on LogsDB: they are listed
-  // under the toggle and noted in their own section.
+  // than on the policy. Every integration with a logs data stream shows the toggle. It can only be
+  // turned on when all its logs data streams declare readiness, and is greyed out with an
+  // explanation otherwise; turning it off is always possible. Data streams that aren't ready stay
+  // on LogsDB: they are listed under the toggle, and the ones marked `unsupported` are noted in
+  // their own section.
   const columnarReadyDataStreams = useMemo(
     () =>
       packageInfo.type === 'input'
@@ -102,37 +104,45 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
           ),
     [packageInfo]
   );
-  const columnarUnsupportedDataStreams = useMemo(
+  const columnarNotReadyDataStreams = useMemo(
     () =>
-      (packageInfo.data_streams ?? [])
-        .filter(
-          (dataStream) => getLogsdbColumnarReadiness(packageInfo, dataStream) === 'unsupported'
-        )
-        .map((dataStream) => dataStream.title || dataStream.dataset),
+      packageInfo.type === 'input'
+        ? []
+        : getLogsdbColumnarNotReadyDataStreams(packageInfo, packageInfo.data_streams).map(
+            (dataStream) => dataStream.title || dataStream.dataset
+          ),
     [packageInfo]
   );
+  const hasLogsDataStreams =
+    packageInfo.type !== 'input' &&
+    (packageInfo.data_streams ?? []).some((dataStream) => dataStream.type === 'logs');
+  const isColumnarIndexModeReady = hasLogsDataStreams && columnarNotReadyDataStreams.length === 0;
   // The pending choice wins, then the one stored on the installation, then the mode the
-  // installation uses today, and for a new installation the package default.
+  // installation uses today, and for a new installation the package default, which only applies
+  // when every logs data stream is ready.
   const installationInfo =
     'installationInfo' in packageInfo ? packageInfo.installationInfo : undefined;
   const isColumnarIndexModeEnabled =
     packagePolicy.package?.logsdb_columnar ??
     installationInfo?.logsdb_columnar_enabled ??
     installationInfo?.logsdb_columnar_active ??
-    columnarReadyDataStreams.some(
-      (dataStream) => getLogsdbColumnarReadiness(packageInfo, dataStream) === 'default'
-    );
+    (isColumnarIndexModeReady &&
+      columnarReadyDataStreams.some(
+        (dataStream) => getLogsdbColumnarReadiness(packageInfo, dataStream) === 'default'
+      ));
   // The user opted in, but this version has no columnar-ready logs data stream left: show the
   // switch off and disabled so the user learns why the data streams go back to LogsDB.
   const isColumnarIndexModeWithdrawn =
     packageInfo.type !== 'input' &&
     columnarReadyDataStreams.length === 0 &&
     installationInfo?.logsdb_columnar_enabled === true;
-  const hasLogsDataStreams =
-    packageInfo.type !== 'input' &&
-    (packageInfo.data_streams ?? []).some((dataStream) => dataStream.type === 'logs');
+  // Off while not every logs data stream is ready: it can't be turned on. When it is on (an
+  // upgrade made a data stream unready), it stays usable so that it can be turned off.
   const isColumnarIndexModeNotReady =
-    hasLogsDataStreams && columnarReadyDataStreams.length === 0 && !isColumnarIndexModeWithdrawn;
+    hasLogsDataStreams &&
+    !isColumnarIndexModeReady &&
+    !isColumnarIndexModeWithdrawn &&
+    !isColumnarIndexModeEnabled;
   const toggleColumnarIndexMode = () =>
     updatePackagePolicy({
       package: {
@@ -159,9 +169,12 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
               }
               disabled={isColumnarIndexModeWithdrawn || isColumnarIndexModeNotReady}
               notReady={isColumnarIndexModeNotReady}
+              notReadyDataStreams={
+                columnarReadyDataStreams.length > 0 ? columnarNotReadyDataStreams : []
+              }
               withdrawn={isColumnarIndexModeWithdrawn}
               onChange={toggleColumnarIndexMode}
-              unsupportedDataStreams={columnarUnsupportedDataStreams}
+              unsupportedDataStreams={columnarNotReadyDataStreams}
             />
             <EuiHorizontalRule margin="m" />
           </>

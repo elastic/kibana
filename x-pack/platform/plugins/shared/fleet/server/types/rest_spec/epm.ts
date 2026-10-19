@@ -901,7 +901,7 @@ export const UpdatePackageRequestSchema = {
         schema.boolean({
           meta: {
             description:
-              'Store the logs data streams of this integration in the logsdb_columnar index mode. Only accepted when at least one logs data stream of the installed package declares columnar readiness. Takes effect on the next rollover.',
+              'Store the logs data streams of this integration in the logsdb_columnar index mode. Turning it on is only accepted when every logs data stream of the installed package declares columnar readiness; turning it off is always accepted. Takes effect on the next rollover.',
           },
         })
       ),

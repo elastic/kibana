@@ -423,8 +423,11 @@ describe('StepConfigurePackage', () => {
   describe('columnar index mode switch', () => {
     const SWITCH = 'columnarIndexModeSwitch';
 
-    // Package-level readiness plus one logs data stream that opts out of it.
-    const declareReadiness = (readiness: 'opt_in' | 'default' = 'opt_in') => {
+    // Package-level readiness plus a second logs data stream, which can opt out of it.
+    const declareReadiness = (
+      readiness: 'opt_in' | 'default' = 'opt_in',
+      { withUnsupported = false }: { withUnsupported?: boolean } = {}
+    ) => {
       packageInfo.elasticsearch = { logsdb_columnar: readiness };
       packageInfo.data_streams = [
         ...(packageInfo.data_streams ?? []),
@@ -437,7 +440,7 @@ describe('StepConfigurePackage', () => {
             ...stream,
             title: 'Nginx error logs',
           })),
-          elasticsearch: { logsdb_columnar: 'unsupported' },
+          elasticsearch: withUnsupported ? { logsdb_columnar: 'unsupported' } : {},
         },
       ];
     };
@@ -469,24 +472,36 @@ describe('StepConfigurePackage', () => {
       expect(renderResult.queryByTestId(SWITCH)).not.toBeInTheDocument();
     });
 
-    it('is shown above the inputs, off by default, with the unsupported data streams listed', async () => {
+    it('is shown above the inputs, and off by default, when every logs data stream is ready', async () => {
       declareReadiness();
       render();
 
       const switchEl = renderResult.getByTestId(SWITCH);
       expect(switchEl).not.toBeChecked();
       expect(switchEl).not.toBeDisabled();
-      expect(renderResult.getByTestId('columnarIndexModeUnsupportedDataStreams')).toHaveTextContent(
-        'Nginx error logs'
-      );
+      expect(
+        renderResult.queryByTestId('columnarIndexModeUnsupportedDataStreams')
+      ).not.toBeInTheDocument();
 
       await renderResult.findByText('Collect logs from Nginx instances');
       const html = renderResult.container.innerHTML;
       expect(html.indexOf(SWITCH)).toBeLessThan(html.indexOf('Collect logs from Nginx instances'));
     });
 
+    it('is greyed out, naming the data streams that are not ready, unless every logs data stream is', () => {
+      declareReadiness('opt_in', { withUnsupported: true });
+      render();
+
+      const switchEl = renderResult.getByTestId(SWITCH);
+      expect(switchEl).not.toBeChecked();
+      expect(switchEl).toBeDisabled();
+      expect(renderResult.getByTestId('columnarIndexModeNotReady')).toHaveTextContent(
+        'Nginx error logs'
+      );
+    });
+
     it('notes in its own section that an unsupported data stream stays on LogsDB', async () => {
-      declareReadiness();
+      declareReadiness('opt_in', { withUnsupported: true });
       packagePolicy.inputs[0].streams.push({
         ...packagePolicy.inputs[0].streams[0],
         data_stream: { type: 'logs', dataset: 'nginx.error' },
@@ -518,6 +533,34 @@ describe('StepConfigurePackage', () => {
       render();
 
       expect(renderResult.getByTestId(SWITCH)).toBeChecked();
+    });
+
+    it('does not start enabled from the package default unless every logs data stream is ready', () => {
+      declareReadiness('default', { withUnsupported: true });
+      render();
+
+      const switchEl = renderResult.getByTestId(SWITCH);
+      expect(switchEl).not.toBeChecked();
+      expect(switchEl).toBeDisabled();
+    });
+
+    it('stays on, and can be turned off, when a data stream is no longer ready after an upgrade', () => {
+      declareReadiness('opt_in', { withUnsupported: true });
+      (packageInfo as any).installationInfo = { logsdb_columnar_enabled: true };
+      render();
+
+      const switchEl = renderResult.getByTestId(SWITCH);
+      expect(switchEl).toBeChecked();
+      expect(switchEl).not.toBeDisabled();
+      expect(renderResult.getByTestId('columnarIndexModeUnsupportedDataStreams')).toHaveTextContent(
+        'Nginx error logs'
+      );
+
+      fireEvent.click(switchEl);
+
+      expect(mockUpdatePackagePolicy).toHaveBeenCalledWith({
+        package: { name: 'nginx', title: 'Nginx', version: '1.3.0', logsdb_columnar: false },
+      });
     });
 
     it('starts from the choice stored on the installation over the package default', () => {

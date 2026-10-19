@@ -25,15 +25,21 @@ interface Props {
   disabled?: boolean;
   onChange: () => void;
   /**
-   * Titles of the logs data streams the package explicitly marks as `unsupported`; they stay on
-   * LogsDB no matter what the toggle says. Each one also carries a note in its own section.
+   * Titles of the logs data streams that aren't columnar-ready, listed while the switch is on:
+   * they stay on LogsDB no matter what the toggle says. The ones marked `unsupported` also carry
+   * a note in their own section.
    */
   unsupportedDataStreams?: string[];
   /**
-   * The integration has logs data streams but none declares columnar readiness: the switch is
+   * Not every logs data stream of the integration declares columnar readiness: the switch is
    * shown off and disabled, with an explanation.
    */
   notReady?: boolean;
+  /**
+   * Titles of the logs data streams that keep a partly ready integration from being
+   * columnar-ready, named in the `notReady` explanation. Empty when none is ready.
+   */
+  notReadyDataStreams?: string[];
   /**
    * The user opted in, but this package version has no columnar-ready logs data stream left:
    * the switch stays visible to tell the user the data streams go back to LogsDB.
@@ -47,6 +53,7 @@ export const ColumnarIndexModeSwitch: React.FunctionComponent<Props> = ({
   onChange,
   unsupportedDataStreams = [],
   notReady = false,
+  notReadyDataStreams = [],
   withdrawn = false,
 }) => (
   <>
@@ -98,10 +105,21 @@ export const ColumnarIndexModeSwitch: React.FunctionComponent<Props> = ({
             </span>
           ) : notReady ? (
             <span data-test-subj="columnarIndexModeNotReady">
-              <FormattedMessage
-                id="xpack.fleet.createPackagePolicy.stepConfigure.columnarIndexModeNotReady"
-                defaultMessage="This integration isn't columnar-ready yet. Its log data streams use LogsDB."
-              />
+              {notReadyDataStreams.length > 0 ? (
+                <FormattedMessage
+                  id="xpack.fleet.createPackagePolicy.stepConfigure.columnarIndexModeNotAllReady"
+                  defaultMessage="This integration isn't columnar-ready: {dataStreams} {count, plural, one {doesn't} other {don't}} support columnar storage yet, and every log data stream has to. Its log data streams use LogsDB."
+                  values={{
+                    dataStreams: notReadyDataStreams.join(', '),
+                    count: notReadyDataStreams.length,
+                  }}
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.fleet.createPackagePolicy.stepConfigure.columnarIndexModeNotReady"
+                  defaultMessage="This integration isn't columnar-ready yet. Its log data streams use LogsDB."
+                />
+              )}
             </span>
           ) : (
             <>

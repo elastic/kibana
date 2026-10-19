@@ -7,7 +7,11 @@
 
 import type { RegistryDataStream } from '../types';
 
-import { getLogsdbColumnarReadiness, isLogsdbColumnarReady } from './columnar_index_mode';
+import {
+  getLogsdbColumnarNotReadyDataStreams,
+  getLogsdbColumnarReadiness,
+  isLogsdbColumnarReady,
+} from './columnar_index_mode';
 
 const dataStream = (props: Partial<RegistryDataStream> = {}): RegistryDataStream =>
   ({
@@ -74,5 +78,38 @@ describe('isLogsdbColumnarReady', () => {
     [undefined, false],
   ] as const)('%s -> %s', (readiness, expected) => {
     expect(isLogsdbColumnarReady(readiness)).toBe(expected);
+  });
+});
+
+describe('getLogsdbColumnarNotReadyDataStreams', () => {
+  const logs = (dataset: string, readiness?: 'opt_in' | 'default' | 'unsupported') =>
+    dataStream({ dataset, elasticsearch: readiness ? { logsdb_columnar: readiness } : {} });
+
+  it('is empty when every logs data stream is ready', () => {
+    expect(
+      getLogsdbColumnarNotReadyDataStreams({ elasticsearch: { logsdb_columnar: 'opt_in' } }, [
+        logs('a'),
+        logs('b', 'default'),
+      ])
+    ).toEqual([]);
+  });
+
+  it('lists the logs data streams that are unsupported or declare nothing', () => {
+    expect(
+      getLogsdbColumnarNotReadyDataStreams(undefined, [
+        logs('ready', 'opt_in'),
+        logs('unsupported', 'unsupported'),
+        logs('undeclared'),
+      ]).map(({ dataset }) => dataset)
+    ).toEqual(['unsupported', 'undeclared']);
+  });
+
+  it('ignores data streams that are not logs', () => {
+    expect(
+      getLogsdbColumnarNotReadyDataStreams({ elasticsearch: { logsdb_columnar: 'opt_in' } }, [
+        logs('a'),
+        dataStream({ type: 'metrics', dataset: 'm' }),
+      ])
+    ).toEqual([]);
   });
 });
