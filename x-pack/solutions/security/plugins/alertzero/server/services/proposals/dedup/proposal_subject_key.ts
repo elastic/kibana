@@ -46,13 +46,18 @@ const asNumber = (value: unknown): number | undefined =>
   typeof value === 'number' && Number.isFinite(value) ? value : undefined;
 
 /**
- * The subject key for an action read off its own input, so a worker that has the action input
- * but no notion of "subject" lands on the same key Hunt builds from its run state:
+ * The subject key for an action read off its own input. Hunt builds the key from its run state
+ * (`subjectId` and the call to `buildProposalSubjectKey` in `decide_package_report.ts`,
+ * `processKey` in `rehydrate_process_selectors.ts`) and then writes those same values into the
+ * action input (`buildActionInput`). This reads them back out, so a worker that only has the
+ * action input lands on the same key:
  *
- * - host and process actions: `endpoint_ids[0]`, plus `parameters.entity_id` or `parameters.pid`
- *   as the process key, spelled the way Hunt's process selectors spell it;
- * - identity actions: `id_field` + `id_value`, as `<kind>:<value>` where kind is the field's
- *   first segment (`user.name` -> `user`).
+ * - `endpoint_ids[0]` is the agent id Hunt uses for host and process subjects;
+ * - `parameters.entity_id` becomes `entity_id:<id>`, Hunt's process key. `parameters.pid`
+ *   becomes `pid:<pid>`; Hunt never proposes on a bare pid, so this only keeps a pid kill
+ *   apart from an entity kill;
+ * - `id_field` + `id_value` become `<kind>:<value>`, with kind the field's first segment
+ *   (`user.name` -> `user`), which is how Hunt keys users and services.
  *
  * `undefined` when the input names no target; the caller decides what to key such a proposal on.
  */

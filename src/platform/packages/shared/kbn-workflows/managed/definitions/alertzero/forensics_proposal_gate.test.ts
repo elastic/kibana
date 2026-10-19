@@ -89,6 +89,7 @@ describe('Forensics proposal gate', () => {
       const inputs = wrap?.with?.inputs as Record<string, string>;
       const forwarded = [
         'conversationId',
+        'proposalId',
         'title',
         'comment',
         'actionWorkflowId',
@@ -122,6 +123,13 @@ describe('Forensics proposal gate', () => {
     it('types autoApprove as a boolean and expectedProposalCount as a number', () => {
       expect(inputs?.properties?.autoApprove).toMatchObject({ type: 'boolean' });
       expect(inputs?.properties?.expectedProposalCount).toMatchObject({ type: 'number' });
+    });
+
+    // The run resolves each Proposal's id before dispatching, so two runs racing over one
+    // subject create one Proposal. Optional: a caller may still raise an always-new one.
+    it('accepts the deterministic proposalId the run resolved, without requiring it', () => {
+      expect(inputs?.properties?.proposalId).toMatchObject({ type: 'string' });
+      expect(inputs?.required).not.toContain('proposalId');
     });
   });
 

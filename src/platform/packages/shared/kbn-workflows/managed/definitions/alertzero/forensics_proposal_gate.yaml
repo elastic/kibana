@@ -38,6 +38,12 @@ triggers:
         conversationId:
           type: string
           description: Conversation this Proposal belongs to (create_proposal.yaml's own required field).
+        proposalId:
+          type: string
+          description: >
+            The id to create the Proposal under, derived by the caller from what is proposed
+            so two runs that race over one subject create one Proposal. Must be a UUID.
+            Omit for a Proposal that is always new.
         title:
           type: string
           description: Short plain-text label naming what is proposed; absent falls back to the action's own name.
@@ -102,6 +108,7 @@ steps:
       run-as-mode: inherit
       inputs:
         conversationId: "${{ inputs.conversationId }}"
+        proposalId: "${{ inputs.proposalId }}"
         title: "${{ inputs.title }}"
         comment: "${{ inputs.comment }}"
         actionWorkflowId: "${{ inputs.actionWorkflowId }}"
