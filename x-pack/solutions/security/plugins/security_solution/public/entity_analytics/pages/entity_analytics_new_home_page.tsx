@@ -523,7 +523,6 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
   const skipAlertTiles = skipTileQueries || !readAccess.alerts;
   const skipAnomaliesTile = skipTileQueries || !readAccess.anomalies;
   const skipRiskTiles = skipTileQueries || !readAccess.risk;
-  // Skipped queries read as loading, so the tiles of a source the user can't read stop loading here.
   const canReadAlerts = readAccess.alerts !== false;
   const canReadAnomalies = readAccess.anomalies !== false;
   const canReadRisk = readAccess.risk !== false;
@@ -814,7 +813,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         isDeltaLoading,
         isDeltaUnavailable: alertBasedHistoryMissing,
         trend: alertsTrend,
-        isLoading: canReadAlerts && alertBasedLoading,
+        isLoading: alertBasedLoading,
         noDataMessage: canReadAlerts ? undefined : NO_ALERTS_ACCESS_MESSAGE,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAlerts.description',
@@ -845,7 +844,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         isDeltaLoading: anomaliesDeltaLoading,
         isDeltaUnavailable: anomaliesHistoryMissing,
         trend: anomaliesTrend,
-        isLoading: canReadAnomalies && anomaliesLoading,
+        isLoading: anomaliesLoading,
         noDataMessage: canReadAnomalies ? undefined : NO_ANOMALIES_ACCESS_MESSAGE,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAnomalies.description',
@@ -875,7 +874,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         isDeltaLoading: riskMoversDeltaLoading,
         isDeltaUnavailable: riskMoversHistoryMissing,
         trend: riskMoversTrend,
-        isLoading: canReadRisk && riskMoversLoading,
+        isLoading: riskMoversLoading,
         noDataMessage: !canReadRisk
           ? NO_RISK_ACCESS_MESSAGE
           : riskMoversMissingIndex
@@ -920,7 +919,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         isDeltaLoading: newlyHCDeltaLoading,
         isDeltaUnavailable: newlyHCHistoryMissing,
         trend: newlyHCTrend,
-        isLoading: canReadRisk && newlyHCLoading,
+        isLoading: newlyHCLoading,
         noDataMessage: !canReadRisk
           ? NO_RISK_ACCESS_MESSAGE
           : newlyHCMissingIndex
@@ -968,7 +967,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         isDeltaLoading,
         isDeltaUnavailable: alertBasedHistoryMissing,
         trend: watchlistedTrend,
-        isLoading: canReadAlerts && alertBasedLoading,
+        isLoading: alertBasedLoading,
         noDataMessage: canReadAlerts ? undefined : NO_ALERTS_ACCESS_MESSAGE,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.watchlisted.description',

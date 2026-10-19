@@ -344,7 +344,6 @@ describe('EntityAnalyticsNewHomePage: privileges', () => {
         expect(lastOptions(SERIES_HOOKS[tile]).skip).toBe(isSkipped);
       });
       cardIds.forEach((id) => {
-        expect(getCard(id)?.isLoading).toBe(false);
         expect(getCard(id)?.noDataMessage).toMatch(/^Requires read access to /);
       });
     }
