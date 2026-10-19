@@ -16,10 +16,8 @@ interface BuiltInCapabilitySkillRule {
 }
 
 /**
- * Skills Agent Builder grants to an agent as a built-in capability, outside its configuration.
- * The user never picks or removes them, so the skills listed here should be `hidden`. A rule only
- * says when the capability is relevant; whether the skill exists in this space is the skill's own
- * `availability`, which the registry applies when the skill is fetched.
+ * Skills granted at runtime, outside the agent's configuration. They should be `hidden`;
+ * each skill's own `availability` still applies when it is fetched.
  */
 const builtInCapabilitySkillRules: BuiltInCapabilitySkillRule[] = [
   {
