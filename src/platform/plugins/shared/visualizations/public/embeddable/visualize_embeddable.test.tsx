@@ -14,8 +14,10 @@ import type { VisualizeApi } from './types';
 import { visualizeEmbeddableFactory } from './visualize_embeddable';
 import { getExpressionRendererProps } from './get_expression_renderer_props';
 import { BehaviorSubject } from 'rxjs';
+import { coreMock } from '@kbn/core/public/mocks';
 import { initializeDrilldownsManager } from '@kbn/embeddable-plugin/public/drilldowns/drilldowns_manager';
 import type { SerializedVis } from '../vis';
+import { setTheme } from '../services';
 
 jest.mock('./get_expression_renderer_props', () => ({
   getExpressionRendererProps: jest.fn(async () => ({
@@ -58,6 +60,8 @@ jest.mock('./create_vis_instance', () => {
     }),
   };
 });
+
+setTheme(coreMock.createStart().theme);
 
 describe('visualizeEmbeddable', () => {
   let embeddableApi: VisualizeApi;
