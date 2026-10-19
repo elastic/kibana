@@ -15,6 +15,7 @@ import {
   removeCustomYaraSignatures,
   removeDeviceControl,
   removeLinuxRansomware,
+  removeRegistryCredentialHardening,
 } from '../../../../../../common/endpoint/models/policy_config_helpers';
 import type { PolicyConfig } from '../../../../../../common/endpoint/types';
 import { unsetPolicyFeaturesAccordingToLicenseLevel } from '../../../../../../common/license/policy_config';
@@ -29,6 +30,8 @@ export interface BuildEligibilityContextInput {
   readonly endpointCustomYaraSignatures: boolean;
   readonly customYaraSignaturesExperimental: boolean;
   readonly linuxRansomwareProtection: boolean;
+  readonly endpointRegistryCredentialHardening: boolean;
+  readonly registryCredentialHardeningExperimental: boolean;
   readonly endpointProtectionUpdates: boolean;
   readonly serverless: boolean;
 }
@@ -42,6 +45,8 @@ export const buildEligibilityContext = ({
   endpointCustomYaraSignatures,
   customYaraSignaturesExperimental,
   linuxRansomwareProtection,
+  endpointRegistryCredentialHardening,
+  registryCredentialHardeningExperimental,
   endpointProtectionUpdates,
   serverless,
 }: BuildEligibilityContextInput): EligibilityContext => {
@@ -72,6 +77,13 @@ export const buildEligibilityContext = ({
     linuxRansomwareStripped: linuxRansomwareProtection
       ? proposedConfig
       : removeLinuxRansomware(proposedConfig),
+    registryCredentialHardeningStripped:
+      endpointRegistryCredentialHardening && registryCredentialHardeningExperimental
+        ? proposedConfig
+        : removeRegistryCredentialHardening(proposedConfig),
+    registryCredentialHardeningReason: endpointRegistryCredentialHardening
+      ? 'registry_credential_hardening_experimental_disabled'
+      : 'endpoint_registry_credential_hardening_disabled',
     endpointProtectionUpdates,
     serverless,
   };

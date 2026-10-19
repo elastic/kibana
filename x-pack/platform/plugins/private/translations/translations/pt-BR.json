@@ -38026,7 +38026,6 @@
     "xpack.profiling.storageExplorer.summary.totalData.hint": "Tamanho total de armazenamento de todos os índices do Universal Profiling, incluindo réplicas, sem considerar as configurações de filtro.",
     "xpack.profiling.storageExplorer.summary.totalDebugSymbolsSize": "Tamanho total dos símbolos de depuração",
     "xpack.profiling.storageExplorer.summary.totalDebugSymbolsSize.hint": "Soma total dos símbolos de depuração privados e públicos.",
-    "xpack.profiling.storageExplorer.summary.universalProfilingLink": "Ir para o Universal Profiling",
     "xpack.profiling.storageExplorer.tabs.dataBreakdown": "Detalhamento de dados",
     "xpack.profiling.storageExplorer.tabs.hostBreakdown": "Detalhamento de agentes do host",
     "xpack.profiling.storageExplorer.title": "Explorador de armazenamento",

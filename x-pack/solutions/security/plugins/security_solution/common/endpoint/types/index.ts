@@ -1054,6 +1054,10 @@ export interface PolicyConfig {
       credential_hardening: {
         enabled: boolean;
       };
+      /** Absent means never configured and is treated as disabled. */
+      registry_credential_hardening?: {
+        enabled: boolean;
+      };
     };
   };
   mac: {
