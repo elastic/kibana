@@ -24,6 +24,8 @@ import type {
 import { ElasticsearchAssetType } from '../../../../types';
 import { MAX_CONCURRENT_COMPONENT_TEMPLATES } from '../../../../constants';
 
+import { generateTemplateIndexPattern } from './template';
+
 /**
  * Mapping parameters Elasticsearch rejects in the columnar index modes: the columnar format
  * stores every field once as doc values and reconstructs `_source` from them, so a field that
@@ -176,6 +178,41 @@ export async function getCurrentIndexModes(
 }
 
 /**
+ * Reads the index mode of the write indices of the data streams matching each index pattern,
+ * keyed by index template name. Used when an index template is missing while its data streams
+ * exist, for example after a failed install removed the templates before retrying. When the data
+ * streams of a template (one per namespace) disagree, `logsdb_columnar` wins. Patterns without
+ * any data stream are left out of the map.
+ */
+export async function getDataStreamIndexModes(
+  esClient: ElasticsearchClient,
+  indexPatterns: Map<string, string>
+): Promise<Map<string, string | undefined>> {
+  const entries = await pMap(
+    [...indexPatterns],
+    async ([templateName, indexPattern]) => {
+      const res = await esClient.indices.getDataStream(
+        { name: indexPattern, expand_wildcards: ['open', 'hidden'] },
+        { ignore: [404] }
+      );
+      const modes: Array<string | undefined> = (res?.data_streams ?? []).map(
+        (dataStream) => dataStream.indices?.at(-1)?.index_mode ?? dataStream.index_mode
+      );
+      if (modes.length === 0) {
+        return undefined;
+      }
+      return [
+        templateName,
+        modes.includes(LOGSDB_COLUMNAR_INDEX_MODE) ? LOGSDB_COLUMNAR_INDEX_MODE : modes[0],
+      ] as const;
+    },
+    { concurrency: MAX_CONCURRENT_COMPONENT_TEMPLATES }
+  );
+
+  return new Map(entries.filter((entry) => entry !== undefined));
+}
+
+/**
  * Whether a logs index template of the installation currently carries the `logsdb_columnar`
  * index mode. Without a stored user choice, this is the only way to tell whether the package
  * defaults put the installation on columnar.
@@ -238,6 +275,30 @@ export async function resolveColumnarIndexModes({
         )
       : new Map<string, string | undefined>();
 
+  // A data stream can exist without its index template, for example when a failed install
+  // removed the templates before retrying: its write index tells which mode it is on, so that the
+  // retry does not take it for a new data stream and move it back to LogsDB.
+  if (!isNewInstall && esClient) {
+    const missingTemplates = new Map(
+      logsDataStreams
+        .filter(
+          (dataStream) => !currentIndexModes.has(getRegistryDataStreamAssetBaseName(dataStream))
+        )
+        .map((dataStream) => [
+          getRegistryDataStreamAssetBaseName(dataStream),
+          generateTemplateIndexPattern(dataStream),
+        ])
+    );
+    if (missingTemplates.size > 0) {
+      for (const [templateName, mode] of await getDataStreamIndexModes(
+        esClient,
+        missingTemplates
+      )) {
+        currentIndexModes.set(templateName, mode);
+      }
+    }
+  }
+
   const resolved = new Map<string, string | undefined>();
   // Only looked up when a `default` data stream is new to an existing installation without a
   // user choice: it then follows what the installation already uses.
@@ -272,7 +333,9 @@ export async function resolveColumnarIndexModes({
       readiness === 'default' &&
       installationUsesColumnar === undefined
     ) {
-      installationUsesColumnar = await isLogsdbColumnarActive(esClient, installedPkg?.installed_es);
+      installationUsesColumnar =
+        [...currentIndexModes.values()].includes(LOGSDB_COLUMNAR_INDEX_MODE) ||
+        (await isLogsdbColumnarActive(esClient, installedPkg?.installed_es));
     }
 
     resolved.set(

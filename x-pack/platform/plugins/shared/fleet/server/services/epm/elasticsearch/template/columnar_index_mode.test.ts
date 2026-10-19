@@ -296,6 +296,102 @@ describe('resolveColumnarIndexModes', () => {
     expect(modes.get('logs-pkg.ds')).toEqual('logsdb_columnar');
   });
 
+  // A failed install removes the index templates before it retries; the data streams stay.
+  const setupMissingTemplatesEsClient = (
+    writeIndexModes: Record<string, string>,
+    templates: Record<string, string | undefined> = {}
+  ) => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.indices.getIndexTemplate.mockImplementation(
+      async ({ name }: any) =>
+        ({
+          index_templates:
+            name in templates
+              ? [
+                  {
+                    name,
+                    index_template: {
+                      index_patterns: [],
+                      template: {
+                        settings: { index: templates[name] ? { mode: templates[name] } : {} },
+                      },
+                    },
+                  },
+                ]
+              : [],
+        } as any)
+    );
+    esClient.indices.getDataStream.mockImplementation(
+      async ({ name }: any) =>
+        ({
+          data_streams: Object.entries(writeIndexModes)
+            .filter(([templateName]) => name === `${templateName}-*`)
+            .map(([templateName, mode]) => ({
+              name: `${templateName}-default`,
+              indices: [
+                { index_name: '.ds-old', index_mode: 'logsdb' },
+                { index_name: '.ds-write', index_mode: mode },
+              ],
+            })),
+        } as any)
+    );
+    return esClient;
+  };
+
+  it('keeps a data stream whose index template is missing on the mode of its write index', async () => {
+    const esClient = setupMissingTemplatesEsClient({ 'logs-pkg.ds': 'logsdb_columnar' });
+
+    const modes = await resolveColumnarIndexModes({
+      esClient,
+      logger: loggerMock.create(),
+      packageInfo: { name: 'pkg', version: '1.0.0', elasticsearch: { logsdb_columnar: 'default' } },
+      dataStreams: [dataStream({})],
+      installedPkg: {
+        name: 'pkg',
+        version: '1.0.0',
+        installed_es: [{ id: 'logs-pkg.ds', type: 'index_template' }],
+      } as Installation,
+    });
+
+    expect(modes.get('logs-pkg.ds')).toEqual('logsdb_columnar');
+    expect(esClient.indices.getDataStream).toHaveBeenCalledWith(
+      { name: 'logs-pkg.ds-*', expand_wildcards: ['open', 'hidden'] },
+      { ignore: [404] }
+    );
+  });
+
+  it('keeps a data stream whose index template is missing on LogsDB when its write index is', async () => {
+    const esClient = setupMissingTemplatesEsClient(
+      { 'logs-pkg.ds': 'logsdb' },
+      { 'logs-pkg.existing': 'logsdb_columnar' }
+    );
+
+    const modes = await resolveColumnarIndexModes({
+      esClient,
+      logger: loggerMock.create(),
+      packageInfo: { name: 'pkg', version: '2.0.0', elasticsearch: { logsdb_columnar: 'default' } },
+      dataStreams: [dataStream({})],
+      installedPkg: installedWithExisting,
+    });
+
+    expect(modes.get('logs-pkg.ds')).toBeUndefined();
+  });
+
+  it('puts a new `default` data stream on columnar when the data streams of the installation are, even without their templates', async () => {
+    const esClient = setupMissingTemplatesEsClient({ 'logs-pkg.other': 'logsdb_columnar' });
+
+    const modes = await resolveColumnarIndexModes({
+      esClient,
+      logger: loggerMock.create(),
+      packageInfo: { name: 'pkg', version: '1.0.0', elasticsearch: { logsdb_columnar: 'default' } },
+      dataStreams: [dataStream({}), dataStream({ dataset: 'pkg.other', path: 'other' })],
+      installedPkg: { name: 'pkg', version: '1.0.0' } as Installation,
+    });
+
+    expect(modes.get('logs-pkg.ds')).toEqual('logsdb_columnar');
+    expect(modes.get('logs-pkg.other')).toEqual('logsdb_columnar');
+  });
+
   it('keeps a `default` data stream added by an upgrade on LogsDB when the installation is', async () => {
     const modes = await resolveColumnarIndexModes({
       esClient: setupUpgradeEsClient(),
