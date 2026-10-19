@@ -51,6 +51,17 @@ export const RunStepInputSchema = lazySchema(() =>
     feature_id: z.string().max(256).optional(),
     filter: z.record(z.string(), z.unknown()).optional(),
     /**
+     * Whether the generation-phase ground-truth gate runs. Defaults to `true`.
+     *
+     * The gate runs the Attack Discovery skill to corroborate the candidate
+     * alerts against raw telemetry and entity context, and hands its findings,
+     * including false-positive triage, to the generation prompt. Set `false`
+     * when a later step in the workflow owns the false-positive decision, so
+     * generation does not drop a chain on the gate's triage first. `false` also
+     * disables the skill's own additional alert retrieval.
+     */
+    ground_truth_gate_enabled: z.boolean().optional().default(true),
+    /**
      * Whether the generated discoveries are returned inline. Defaults to `true`.
      *
      * Set `false` when the caller will read the persisted discoveries back from

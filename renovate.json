@@ -2289,6 +2289,7 @@
       "groupName": "esql-js",
       "matchDepNames": [
         "@elastic/esql",
+        "@elastic/esql-definitions",
         "@elastic/esql-grammar",
         "@elastic/esql-promql-grammar",
         "@elastic/esql-types",
@@ -2472,15 +2473,6 @@
       "addLabels": ["team:obs-entities"],
       "enabled": true,
       "minimumReleaseAge": "14 days"
-    },
-    {
-      "groupName": "dotenv",
-      "matchDepNames": ["dotenv"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Operations"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
     },
     {
       "groupName": "oxlint",

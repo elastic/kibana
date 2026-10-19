@@ -14,6 +14,7 @@ import type { EntityRiskScoreRecord } from '../../../../../../common/api/entity_
 import {
   getResolutionCompositeQuery,
   getResolutionScoreESQLByIds,
+  getResolutionScoreESQLByRange,
 } from '../../calculate_esql_risk_scores';
 import { MAX_RESOLUTION_TARGETS_PER_PAGE, RISK_SCORING_REQUEST_TIMEOUT } from '../../constants';
 import { RESOLUTION_RELATIONSHIP_TYPE } from '../lookup/lookup_types';
@@ -68,6 +69,7 @@ export const calculateResolutionEntityScores = async function* ({
   alertFilters,
 }: ScoreResolutionEntitiesParams): AsyncGenerator<EntityRiskScoreRecord[], number> {
   let afterKey: Record<string, string> | undefined;
+  let previousPageUpperBound: string | undefined;
   let pagesProcessed = 0;
 
   do {
@@ -95,16 +97,25 @@ export const calculateResolutionEntityScores = async function* ({
       `[resolution][page:${pagesProcessed}] lookup buckets=${pageResult.bucketCount}, targets=${pageResult.resolutionTargetIds.length}`
     );
 
+    const pageUpperBound =
+      pageResult.resolutionTargetIds[pageResult.resolutionTargetIds.length - 1];
     const { parsedScores, esqlRows } = await scoreResolutionPage({
       esClient,
       entityType,
       resolutionTargetIds: pageResult.resolutionTargetIds,
+      // Full runs page through every target in sort order, so each page is exactly the
+      // targets in (previous upper bound, this upper bound]. Explicit target lists from
+      // single-entity recalculation can be sparse and keep the ID list.
+      bounds: targetEntityIds
+        ? undefined
+        : { lower: previousPageUpperBound, upper: pageUpperBound },
       sampleSize,
       pageSize,
       alertsIndex,
       lookupIndex,
       alertFilters,
     });
+    previousPageUpperBound = pageUpperBound;
     logger.debug(
       `[resolution][page:${pagesProcessed}] parsed_scores=${parsedScores.length}, esql_rows=${esqlRows}`
     );
@@ -267,6 +278,7 @@ const scoreResolutionPage = async ({
   esClient,
   entityType,
   resolutionTargetIds,
+  bounds,
   sampleSize,
   pageSize,
   alertsIndex,
@@ -276,20 +288,30 @@ const scoreResolutionPage = async ({
   esClient: ElasticsearchClient;
   entityType: EntityType;
   resolutionTargetIds: string[];
+  bounds: { lower?: string; upper: string } | undefined;
   sampleSize: number;
   pageSize: number;
   alertsIndex: string;
   lookupIndex: string;
   alertFilters: QueryDslQueryContainer[];
 }): Promise<{ parsedScores: ParsedResolutionScore[]; esqlRows: number }> => {
-  const query = getResolutionScoreESQLByIds(
-    entityType,
-    resolutionTargetIds,
-    sampleSize,
-    pageSize,
-    alertsIndex,
-    lookupIndex
-  );
+  const query = bounds
+    ? getResolutionScoreESQLByRange(
+        entityType,
+        bounds,
+        sampleSize,
+        pageSize,
+        alertsIndex,
+        lookupIndex
+      )
+    : getResolutionScoreESQLByIds(
+        entityType,
+        resolutionTargetIds,
+        sampleSize,
+        pageSize,
+        alertsIndex,
+        lookupIndex
+      );
   const esqlResponse = await esClient.esql.query(
     { query, filter: { bool: { filter: alertFilters } } },
     { requestTimeout: RISK_SCORING_REQUEST_TIMEOUT }

@@ -10,6 +10,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux-v7';
 import { v4 } from 'uuid';
+import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
 import type { monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import {
@@ -54,6 +55,15 @@ interface UseAgentBuilderIntegrationParams {
    * until the editor shows it.
    */
   workflowTabYaml?: string;
+  /** Prompt from the agentic-first landing, sent when the chat auto-opens. */
+  initialAgentMessage?: string;
+  /** Attachments of that prompt (e.g. pasted images), added when the chat auto-opens. */
+  initialAgentAttachments?: ConversationAttachment[];
+  /**
+   * Opens the sidebar on mount for an unsaved workflow. Set when the user
+   * chose AI on the landing or remixed a library template.
+   */
+  autoOpenAgentChat?: boolean;
 }
 
 export interface OpenAgentChatOptions {
@@ -68,6 +78,8 @@ export interface OpenAgentChatOptions {
   // session-completed events with `autoOpened: true` so analysts can filter
   // out non-deliberate opens when measuring engagement.
   isAutoOpen?: boolean;
+  /** Added to the chat next to the workflow attachment. */
+  attachments?: ConversationAttachment[];
 }
 
 interface UseAgentBuilderIntegrationReturn {
@@ -93,6 +105,9 @@ export const useAgentBuilderIntegration = ({
   canApplyProposals = true,
   onProposalDeferred,
   workflowTabYaml,
+  initialAgentMessage,
+  initialAgentAttachments,
+  autoOpenAgentChat = false,
 }: UseAgentBuilderIntegrationParams): UseAgentBuilderIntegrationReturn => {
   const { workflowsManagement, application } = useKibana().services;
   const agentBuilder = workflowsManagement?.agentBuilder;
@@ -497,21 +512,24 @@ export const useAgentBuilderIntegration = ({
         initialMessage: options?.initialMessage,
         autoSendInitialMessage: options?.autoSendInitialMessage,
         newConversation: options?.newConversation,
-        attachments: shouldAttachNow
-          ? [
-              buildWorkflowAttachment({
-                yaml: currentYaml,
-                attachmentId: syncAttachmentIdRef.current ?? attachmentId,
-                workflowId,
-                workflowName,
-                diagnostics:
-                  executionsTabYaml === undefined
-                    ? serializeClientDiagnostics(validationErrors)
-                    : undefined,
-                readOnlyReason,
-              }),
-            ]
-          : [],
+        attachments: [
+          ...(options?.attachments ?? []),
+          ...(shouldAttachNow
+            ? [
+                buildWorkflowAttachment({
+                  yaml: currentYaml,
+                  attachmentId: syncAttachmentIdRef.current ?? attachmentId,
+                  workflowId,
+                  workflowName,
+                  diagnostics:
+                    executionsTabYaml === undefined
+                      ? serializeClientDiagnostics(validationErrors)
+                      : undefined,
+                  readOnlyReason,
+                }),
+              ]
+            : []),
+        ],
         onClose: () => setSidebarOpen(false),
       });
       chatRefHandle.current = chatRef;
@@ -555,9 +573,10 @@ export const useAgentBuilderIntegration = ({
     if (yaml !== undefined) syncAttachmentRef.current?.(yaml);
   }, [readOnlyReason, executionsTabYaml, editorRef]);
 
-  // Auto-open only on /workflows/create, or on a saved workflow whose sidebar
-  // the save thunk requested we restore. Never on an existing workflow the
-  // user navigated to directly. Guarded per-mount so a manual close stays.
+  // Auto-open only on an unsaved workflow that asked for it, or on a saved
+  // workflow whose sidebar the save thunk requested we restore. Never on an
+  // existing workflow the user navigated to directly. Guarded per-mount so a
+  // manual close stays.
   useEffect(() => {
     if (!isEditorMounted || !agentBuilder || !isChatAccessible) return;
     if (hasAutoOpenedRef.current) return;
@@ -565,11 +584,27 @@ export const useAgentBuilderIntegration = ({
     const shouldRestoreForSavedWorkflow =
       workflowId != null && consumeSidebarRestoreFor(workflowId);
 
-    if (workflowId != null && !shouldRestoreForSavedWorkflow) return;
+    const shouldOpenForNewWorkflow = workflowId == null && autoOpenAgentChat;
+
+    if (!shouldOpenForNewWorkflow && !shouldRestoreForSavedWorkflow) return;
 
     hasAutoOpenedRef.current = true;
-    openAgentChat({ isAutoOpen: true });
-  }, [isEditorMounted, agentBuilder, isChatAccessible, workflowId, openAgentChat]);
+    openAgentChat({
+      isAutoOpen: true,
+      initialMessage: initialAgentMessage,
+      autoSendInitialMessage: Boolean(initialAgentMessage),
+      attachments: initialAgentAttachments,
+    });
+  }, [
+    isEditorMounted,
+    agentBuilder,
+    isChatAccessible,
+    workflowId,
+    openAgentChat,
+    initialAgentMessage,
+    initialAgentAttachments,
+    autoOpenAgentChat,
+  ]);
 
   // Close the sidebar on unmount (leaving the workflow scope). Empty deps so
   // it does not fire on prop changes. `application.navigateToApp` remounts

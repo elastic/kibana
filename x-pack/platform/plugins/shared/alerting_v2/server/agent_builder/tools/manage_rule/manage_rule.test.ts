@@ -183,6 +183,36 @@ describe('manageRuleTool', () => {
       expect(addCall.data.time_field).toBe('event.ingested');
     });
 
+    it('returns a backing-index warning in the tool result without blocking the rule', async () => {
+      const ctx = createContext();
+      getEsqlQueryMock(ctx).mockResolvedValueOnce({
+        columns: [{ name: 'count', type: 'long' }],
+        values: [],
+      });
+      mockResolvableTimeField(ctx);
+
+      const result = await tool.handler(
+        {
+          operations: [
+            { operation: 'set_metadata', name: 'Test' },
+            {
+              operation: 'set_query',
+              query: {
+                base: 'FROM .ds-logs-nginx.access-default-2026.06.11-000001 | STATS COUNT(*)',
+              },
+            },
+          ],
+        },
+        ctx
+      );
+
+      const { results } = result as { results: Array<{ data?: { warnings?: string[] } }> };
+      expect(results[0].data?.warnings).toEqual([
+        expect.stringContaining('base name `logs-nginx.access-default`'),
+      ]);
+      expect(ctx.attachments.add).toHaveBeenCalledTimes(1);
+    });
+
     it('omits warnings from the tool result when there are none', async () => {
       const ctx = createContext();
       getEsqlQueryMock(ctx).mockResolvedValueOnce({

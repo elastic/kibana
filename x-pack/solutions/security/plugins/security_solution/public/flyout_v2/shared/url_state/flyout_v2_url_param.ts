@@ -270,6 +270,9 @@ export interface EntityAlertsInsightsDescriptor {
   entityType: string;
   value: string;
   entityId?: string;
+  scopeId?: string;
+  /** Entity-store lookup mode of the originating entity flyout; `resolved` queries the whole resolution group. */
+  mode?: EntityDescriptorMode;
 }
 
 export interface EntityMisconfigurationInsightsDescriptor {
@@ -278,6 +281,8 @@ export interface EntityMisconfigurationInsightsDescriptor {
   entityType: string;
   value: string;
   entityId?: string;
+  /** Entity-store lookup mode of the originating entity flyout; `resolved` queries the whole resolution group. */
+  mode?: EntityDescriptorMode;
 }
 
 export interface EntityVulnerabilityInsightsDescriptor {
@@ -286,6 +291,8 @@ export interface EntityVulnerabilityInsightsDescriptor {
   entityId?: string;
   /** EntityType stored as plain string. Cast back to EntityType on restore. */
   entityType?: string;
+  /** Entity-store lookup mode of the originating entity flyout; `resolved` queries the whole resolution group. */
+  mode?: EntityDescriptorMode;
 }
 
 export interface EntityGraphViewDescriptor {
