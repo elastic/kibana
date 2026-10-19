@@ -50,6 +50,78 @@ export const ACTIONS: Record<string, Action> = {
     return body;
   },
 
+  /** Workflow: elasticsearch.search (size N) then data.map over every row (Tier B workflow replay). */
+  'workflow-map': async (params, { target, runId, log }) => {
+    const size = Number(params.size ?? 10000);
+    await kbn(target, 'POST', '/internal/kibana/settings', {
+      changes: { 'workflows:ui:enabled': true },
+    });
+    const fieldLines = Array.from(
+      { length: Number(params.fields ?? 10) },
+      (_, f) => `        f${f}: "\${{ item._source.attr_${f} }}"`
+    ).join('\n');
+    const yaml = `version: '1'
+name: wir-data-map-${runId.slice(-20)}
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: fetch
+    type: elasticsearch.search
+    with:
+      index: wir-alerting-wide
+      size: ${size}
+      _source: ['host.name', 'attr_0', 'attr_1', 'attr_2', 'attr_3', 'attr_4', 'attr_5', 'attr_6', 'attr_7', 'attr_8', 'attr_9']
+      query:
+        match_all: {}
+  - name: shape
+    type: data.map
+    items: "\${{ steps.fetch.output.hits.hits }}"
+    with:
+      fields:
+        id: "\${{ item._id }}"
+        host: "\${{ item._source.host.name }}"
+${fieldLines}
+`;
+    const wf = must(
+      await kbn<{ id: string }>(target, 'POST', '/api/workflows/workflow', { yaml }),
+      'create workflow'
+    );
+    const t0 = Date.now();
+    const run = must(
+      await kbn<{ workflowExecutionId?: string; executionId?: string }>(
+        target,
+        'POST',
+        `/api/workflows/workflow/${wf.id}/run`,
+        { inputs: {} }
+      ),
+      'run workflow'
+    );
+    const execId = run.workflowExecutionId ?? run.executionId;
+    let status: Record<string, any> = {};
+    const deadline = Date.now() + Number(params.timeoutS ?? 600) * 1000;
+    while (execId && Date.now() < deadline) {
+      await sleep(1000);
+      const r = await kbn<Record<string, any>>(
+        target,
+        'GET',
+        `/api/workflows/executions/${execId}`
+      ).catch(() => undefined);
+      status = r?.body ?? {};
+      if (['completed', 'failed', 'cancelled', 'timed_out'].includes(String(status.status))) break;
+    }
+    const result = {
+      workflow_id: wf.id,
+      execution_id: execId,
+      status: status.status,
+      ms: Date.now() - t0,
+      error: status.error,
+    };
+    log(`workflow-map ${JSON.stringify(params)} -> ${JSON.stringify(result).slice(0, 400)}`);
+    await kbn(target, 'DELETE', `/api/workflows/workflow/${wf.id}`).catch(() => undefined);
+    return result;
+  },
+
   /**
    * Agent Builder converse with a mocked LLM (served by the research plugin): N parallel
    * execute_esql tool calls over wide rows, then a final answer. mode local = HTTP route,

@@ -236,6 +236,30 @@ export const SCENARIOS: Record<string, Scenario> = {
       },
     ],
   },
+  /** Tier B: workflow data.map over 10k rows (runs as a TM task). */
+  'tier-b-workflow': {
+    name: 'tier-b-workflow',
+    description: 'elasticsearch.search size 10000 then data.map with 12 templated fields per row.',
+    probe,
+    laptopProbe,
+    ticks,
+    phases: [
+      {
+        name: 'seed',
+        durationS: 5,
+        action: 'seed',
+        actionParams: { kind: 'alerting_wide', rows: 10000, fields: 20 },
+      },
+      { name: 'warmup', durationS: 10 },
+      { name: 'baseline', durationS: 40 },
+      {
+        name: 'workflow-map-10000',
+        durationS: 15,
+        action: 'workflow-map',
+        actionParams: { size: 10000, fields: 10 },
+      },
+    ],
+  },
   /** Non-terminating offender with emulated external supervision (SIGKILL after 30s stall). */
   'infinite-loop-supervised': {
     name: 'infinite-loop-supervised',
