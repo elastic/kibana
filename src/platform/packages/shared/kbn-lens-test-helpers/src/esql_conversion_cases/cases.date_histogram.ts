@@ -42,6 +42,26 @@ export const buildDateHistogramCases = (): EsqlConversionCase[] => {
     {
       group: 'date_histogram',
       dataset: ecommerce,
+      description: 'date histogram (auto interval) honors a non-default histogram:barTarget',
+      histogramBarTarget: 50,
+      columns: {
+        col1: dateHistogram('order_date', { interval: 'auto' }),
+        col2: count(),
+      },
+      columnOrder: ['col1', 'col2'],
+      expected: {
+        success: true,
+        esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS COUNT(*) BY order_date = BUCKET(order_date, 50, ?_tstart, ?_tend)`,
+        columnNames: ['COUNT(*)', 'order_date'],
+        expectedSourceIds: {
+          'COUNT(*)': ['col2'],
+          order_date: ['col1'],
+        },
+      },
+    },
+    {
+      group: 'date_histogram',
+      dataset: ecommerce,
       description: 'date histogram (fixed interval) with average',
       columns: {
         col1: dateHistogram('order_date', { interval: '1h' }),

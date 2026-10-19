@@ -46,13 +46,13 @@ export const ESQL_CONVERSION_DATE_RANGE = {
 
 export const ESQL_CONVERSION_NOW = new Date('2023-06-16T00:00:00.000Z');
 
-export const createEsqlConversionUiSettings = () => ({
+export const createEsqlConversionUiSettings = (histogramBarTarget = 100) => ({
   get: <T = unknown>(key: string): T => {
     const settings: Record<string, unknown> = {
       dateFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',
       'dateFormat:scaled': [[]],
       'dateFormat:tz': 'UTC',
-      'histogram:barTarget': 100,
+      'histogram:barTarget': histogramBarTarget,
       'histogram:maxBars': 100,
     };
     return settings[key] as T;
@@ -84,7 +84,7 @@ export const createEsqlConversionInput = (conversionCase: EsqlConversionCase) =>
       columnOrder: [...conversionCase.columnOrder],
     },
     indexPattern: createEsqlConversionIndexPattern(conversionCase.dataset),
-    uiSettings: createEsqlConversionUiSettings(),
+    uiSettings: createEsqlConversionUiSettings(conversionCase.histogramBarTarget),
     dateRange: conversionCase.omitDateRange
       ? { fromDate: undefined, toDate: undefined }
       : ESQL_CONVERSION_DATE_RANGE,
