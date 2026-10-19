@@ -19,6 +19,7 @@ import {
   getFieldValue,
   OTEL_RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE,
   SERVICE_ENVIRONMENT_FIELD,
+  type DataTableRecord,
 } from '@kbn/discover-utils';
 import {
   ServiceSummary,
@@ -46,6 +47,12 @@ const badgeStyle = css`
   max-width: 100%;
 `;
 
+interface ServiceSummaryBadgeProps {
+  row: DataTableRecord;
+  serviceNameField: string;
+  toolkit: ContextAwarenessToolkit;
+}
+
 /**
  * Traces-profile service badge: hovering or focusing it opens the service summary popover
  * (clicking/tapping also opens it, for touch users); it closes on mouse-leave, blur, Escape, or
@@ -55,162 +62,171 @@ const badgeStyle = css`
  * provided through the `discover_shared` features registry, which APM fulfils — Discover never
  * calls the APM internal routes or builds APM URLs directly. The service name in the header links
  * to APM; the alert and SLO rows open their respective APM pages in a new tab.
+ *
+ * Rendered both as the dedicated Service name column cell and (via `renderResourceBadge`) as the
+ * service chip inside the traces summary column.
  */
-export const getServiceSummaryCell =
-  (serviceNameField: string, toolkit: ContextAwarenessToolkit) =>
-  (props: DataGridCellValueElementProps) => {
-    const serviceNameValue = getFieldValue(props.row, serviceNameField);
-    const agentName = getFieldValue(props.row, AGENT_NAME_FIELD) as AgentName;
-    const otelSdkLanguage = getFieldValue(
-      props.row,
-      OTEL_RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE
-    ) as AgentName | undefined;
-    const environmentValue = getFieldValue(props.row, SERVICE_ENVIRONMENT_FIELD);
+export const ServiceSummaryBadge = ({
+  row,
+  serviceNameField,
+  toolkit,
+}: ServiceSummaryBadgeProps) => {
+  const serviceNameValue = getFieldValue(row, serviceNameField);
+  const agentName = getFieldValue(row, AGENT_NAME_FIELD) as AgentName;
+  const otelSdkLanguage = getFieldValue(row, OTEL_RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE) as
+    | AgentName
+    | undefined;
+  const environmentValue = getFieldValue(row, SERVICE_ENVIRONMENT_FIELD);
 
-    const [isPopoverOpen, { on: openPopover, off: closePopover }] = useBoolean(false);
+  const [isPopoverOpen, { on: openPopover, off: closePopover }] = useBoolean(false);
 
-    // Open/close the popover on hover with a short intent delay (see the delay constants above).
-    const openTimer = useRef<ReturnType<typeof setTimeout>>();
-    const closeTimer = useRef<ReturnType<typeof setTimeout>>();
+  // Open/close the popover on hover with a short intent delay (see the delay constants above).
+  const openTimer = useRef<ReturnType<typeof setTimeout>>();
+  const closeTimer = useRef<ReturnType<typeof setTimeout>>();
 
-    const handleMouseEnter = useCallback(() => {
-      clearTimeout(closeTimer.current);
-      openTimer.current = setTimeout(openPopover, HOVER_OPEN_DELAY);
-    }, [openPopover]);
+  const handleMouseEnter = useCallback(() => {
+    clearTimeout(closeTimer.current);
+    openTimer.current = setTimeout(openPopover, HOVER_OPEN_DELAY);
+  }, [openPopover]);
 
-    const handleMouseLeave = useCallback(() => {
+  const handleMouseLeave = useCallback(() => {
+    clearTimeout(openTimer.current);
+    closeTimer.current = setTimeout(closePopover, HOVER_CLOSE_DELAY);
+  }, [closePopover]);
+
+  // Keyboard parity: focusing the badge opens immediately (no hover-intent delay), blurring away
+  // closes it. `onFocus`/`onBlur` bubble, so this also covers focus moving within the panel.
+  const handleFocus = useCallback(() => {
+    clearTimeout(openTimer.current);
+    clearTimeout(closeTimer.current);
+    openPopover();
+  }, [openPopover]);
+
+  const handleBlur = useCallback(() => {
+    closeTimer.current = setTimeout(closePopover, HOVER_CLOSE_DELAY);
+  }, [closePopover]);
+
+  useEffect(
+    () => () => {
       clearTimeout(openTimer.current);
-      closeTimer.current = setTimeout(closePopover, HOVER_CLOSE_DELAY);
-    }, [closePopover]);
-
-    // Keyboard parity: focusing the badge opens immediately (no hover-intent delay), blurring away
-    // closes it. `onFocus`/`onBlur` bubble, so this also covers focus moving within the panel.
-    const handleFocus = useCallback(() => {
-      clearTimeout(openTimer.current);
       clearTimeout(closeTimer.current);
-      openPopover();
-    }, [openPopover]);
+    },
+    []
+  );
 
-    const handleBlur = useCallback(() => {
-      closeTimer.current = setTimeout(closePopover, HOVER_CLOSE_DELAY);
-    }, [closePopover]);
+  const serviceName = typeof serviceNameValue === 'string' ? serviceNameValue : '';
+  const environment = typeof environmentValue === 'string' ? environmentValue : undefined;
+  const agentNameIcon = otelSdkLanguage || agentName;
 
-    useEffect(
-      () => () => {
-        clearTimeout(openTimer.current);
-        clearTimeout(closeTimer.current);
+  const { loading, data } = useFetchServiceSummary({
+    serviceName,
+    environment,
+    enabled: isPopoverOpen,
+  });
+
+  const metrics = useMemo(() => getMetrics(data), [data]);
+  const activeAlertCount = data?.activeAlertCount ?? 0;
+  const slo = data?.slo;
+  const linkTargets = data?.links;
+  const links = useMemo<ServiceSummaryLink[]>(
+    () => [
+      {
+        label: activeAlertsLabel,
+        iconType: 'bell',
+        external: true,
+        badgeLabel: activeAlertCount,
+        badgeColor: activeAlertCount > 0 ? 'danger' : 'hollow',
+        href: linkTargets?.alerts,
+        onClick: closePopover,
       },
-      []
-    );
+      {
+        label: slosLabel,
+        iconType: 'chartGauge',
+        external: true,
+        // Surface a count badge only when SLOs are actually having problems.
+        ...getSloBadge(slo),
+        href: linkTargets?.slos,
+        onClick: closePopover,
+      },
+    ],
+    [closePopover, linkTargets, activeAlertCount, slo]
+  );
 
-    const serviceName = typeof serviceNameValue === 'string' ? serviceNameValue : '';
-    const environment = typeof environmentValue === 'string' ? environmentValue : undefined;
-    const agentNameIcon = otelSdkLanguage || agentName;
+  if (!serviceName) {
+    return <span data-test-subj={`${dataTestSubj}-empty`}>-</span>;
+  }
 
-    const { loading, data } = useFetchServiceSummary({
-      serviceName,
-      environment,
-      enabled: isPopoverOpen,
-    });
+  const onFilter = (operator: '+' | '-') => () => {
+    toolkit.actions.addFilter?.(serviceNameField, serviceNameValue, operator);
+    closePopover();
+  };
 
-    const metrics = useMemo(() => getMetrics(data), [data]);
-    const activeAlertCount = data?.activeAlertCount ?? 0;
-    const slo = data?.slo;
-    const linkTargets = data?.links;
-    const links = useMemo<ServiceSummaryLink[]>(
-      () => [
-        {
-          label: activeAlertsLabel,
-          iconType: 'bell',
-          external: true,
-          badgeLabel: activeAlertCount,
-          badgeColor: activeAlertCount > 0 ? 'danger' : 'hollow',
-          href: linkTargets?.alerts,
-          onClick: closePopover,
-        },
-        {
-          label: slosLabel,
-          iconType: 'chartGauge',
-          external: true,
-          // Surface a count badge only when SLOs are actually having problems.
-          ...getSloBadge(slo),
-          href: linkTargets?.slos,
-          onClick: closePopover,
-        },
-      ],
-      [closePopover, linkTargets, activeAlertCount, slo]
-    );
+  const onCopyValue = () => {
+    void navigator.clipboard?.writeText(serviceName);
+    closePopover();
+  };
 
-    if (!serviceName) {
-      return <span data-test-subj={`${dataTestSubj}-empty`}>-</span>;
-    }
+  const trigger = (
+    <EuiBadge
+      color="hollow"
+      css={badgeStyle}
+      onClick={openPopover}
+      onClickAriaLabel={i18n.translate('discover.tracesServiceSummary.openAriaLabel', {
+        defaultMessage: 'Open summary for service {serviceName}',
+        values: { serviceName },
+      })}
+      data-test-subj={`${dataTestSubj}-badge`}
+    >
+      <AgentIcon agentName={agentNameIcon} size="s" /> {serviceName}
+    </EuiBadge>
+  );
 
-    const onFilter = (operator: '+' | '-') => () => {
-      toolkit.actions.addFilter?.(serviceNameField, serviceNameValue, operator);
-      closePopover();
-    };
-
-    const onCopyValue = () => {
-      void navigator.clipboard?.writeText(serviceName);
-      closePopover();
-    };
-
-    const trigger = (
-      <EuiBadge
-        color="hollow"
-        css={badgeStyle}
-        onClick={openPopover}
-        onClickAriaLabel={i18n.translate('discover.tracesServiceSummary.openAriaLabel', {
-          defaultMessage: 'Open summary for service {serviceName}',
+  return (
+    // The span receives the hover/focus events; `panelProps` keeps the popover open while the
+    // pointer is inside the panel so its filter/link actions stay reachable.
+    <span
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
+    >
+      <EuiPopover
+        button={trigger}
+        isOpen={isPopoverOpen}
+        closePopover={closePopover}
+        ownFocus={false}
+        anchorPosition="downLeft"
+        panelPaddingSize="none"
+        panelProps={{ onMouseEnter: handleMouseEnter, onMouseLeave: handleMouseLeave }}
+        aria-label={i18n.translate('discover.tracesServiceSummary.popoverAriaLabel', {
+          defaultMessage: 'Summary for service {serviceName}',
           values: { serviceName },
         })}
-        data-test-subj={`${dataTestSubj}-badge`}
+        data-test-subj={dataTestSubj}
       >
-        <AgentIcon agentName={agentNameIcon} size="s" /> {serviceName}
-      </EuiBadge>
-    );
+        <ServiceSummary
+          serviceName={serviceName}
+          environment={environment}
+          agentName={agentNameIcon}
+          serviceHref={linkTargets?.serviceOverview}
+          icon={<AgentIcon agentName={agentNameIcon} size="l" />}
+          metrics={metrics}
+          links={links}
+          isLoading={loading}
+          onClose={closePopover}
+          onFilterFor={onFilter('+')}
+          onFilterOut={onFilter('-')}
+          onCopyValue={onCopyValue}
+        />
+      </EuiPopover>
+    </span>
+  );
+};
 
-    return (
-      // The span receives the hover/focus events; `panelProps` keeps the popover open while the
-      // pointer is inside the panel so its filter/link actions stay reachable.
-      <span
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-      >
-        <EuiPopover
-          button={trigger}
-          isOpen={isPopoverOpen}
-          closePopover={closePopover}
-          ownFocus={false}
-          anchorPosition="downLeft"
-          panelPaddingSize="none"
-          panelProps={{ onMouseEnter: handleMouseEnter, onMouseLeave: handleMouseLeave }}
-          aria-label={i18n.translate('discover.tracesServiceSummary.popoverAriaLabel', {
-            defaultMessage: 'Summary for service {serviceName}',
-            values: { serviceName },
-          })}
-          data-test-subj={dataTestSubj}
-        >
-          <ServiceSummary
-            serviceName={serviceName}
-            environment={environment}
-            agentName={agentNameIcon}
-            serviceHref={linkTargets?.serviceOverview}
-            icon={<AgentIcon agentName={agentNameIcon} size="l" />}
-            metrics={metrics}
-            links={links}
-            isLoading={loading}
-            onClose={closePopover}
-            onFilterFor={onFilter('+')}
-            onFilterOut={onFilter('-')}
-            onCopyValue={onCopyValue}
-          />
-        </EuiPopover>
-      </span>
-    );
-  };
+export const getServiceSummaryCell =
+  (serviceNameField: string, toolkit: ContextAwarenessToolkit) =>
+  (props: DataGridCellValueElementProps) =>
+    <ServiceSummaryBadge row={props.row} serviceNameField={serviceNameField} toolkit={toolkit} />;
 
 const activeAlertsLabel = i18n.translate('discover.tracesServiceSummary.activeAlerts', {
   defaultMessage: 'Active alerts',
