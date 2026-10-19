@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { ModelCard } from './model_card';
 import type { GroupedModel } from '../../utils/eis_utils';
 import { EisModelStatus } from '../../types';
@@ -134,7 +135,9 @@ describe('ModelCard', () => {
         },
       };
       const { getByTestId, queryByTestId } = render(
-        <ModelCard model={model} onClick={jest.fn()} />
+        <I18nProvider>
+          <ModelCard model={model} onClick={jest.fn()} />
+        </I18nProvider>
       );
       const row = getByTestId('eisModelCardMeta-my-model');
       expect(row).toHaveTextContent('2026-08-01');
@@ -163,7 +166,9 @@ describe('ModelCard', () => {
         },
       };
       const { getByTestId, queryByTestId } = render(
-        <ModelCard model={model} onClick={jest.fn()} />
+        <I18nProvider>
+          <ModelCard model={model} onClick={jest.fn()} />
+        </I18nProvider>
       );
       const row = getByTestId('eisModelCardMeta-my-model');
       expect(row).toHaveTextContent('2026-02-01');
