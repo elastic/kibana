@@ -12,20 +12,20 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiSpacer,
-  EuiText,
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
 import React from 'react';
 import type { Threat } from '@kbn/securitysolution-io-ts-alerting-types';
-import { getMitreEntityDisplayName } from '@kbn/security-mitre-attack-common';
-import * as Rulei18n from '../../../common/translations';
 import { UNKNOWN_FRAMEWORK_LABEL } from '../description_step/translations';
 import * as i18n from './translations';
+import { ReadOnlyThreatEntry } from './read_only_threat_entry';
 
 interface UnknownFrameworkThreatSectionProps {
   label: string;
   threats: Threat[];
+  message?: string;
+  dataTestSubj?: string;
   isDisabled: boolean;
   onRemoveThreats: (threats: Threat[]) => void;
 }
@@ -37,10 +37,12 @@ interface UnknownFrameworkThreatSectionProps {
 export const UnknownFrameworkThreatSection: React.FC<UnknownFrameworkThreatSectionProps> = ({
   label,
   threats,
+  message = i18n.UNKNOWN_FRAMEWORK_WARNING,
+  dataTestSubj = 'mitreUnknownFrameworkSection',
   isDisabled,
   onRemoveThreats,
 }) => (
-  <EuiPanel hasBorder paddingSize="m" data-test-subj="mitreUnknownFrameworkSection">
+  <EuiPanel hasBorder paddingSize="m" data-test-subj={dataTestSubj}>
     <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
       <EuiFlexItem grow>
         <EuiTitle size="xxs">
@@ -61,55 +63,14 @@ export const UnknownFrameworkThreatSection: React.FC<UnknownFrameworkThreatSecti
       </EuiFlexItem>
     </EuiFlexGroup>
     <EuiSpacer size="s" />
-    <EuiCallOut
-      color="warning"
-      size="s"
-      iconType="warning"
-      title={i18n.UNKNOWN_FRAMEWORK_WARNING}
-    />
+    <EuiCallOut color="warning" size="s" iconType="warning" title={message} />
     {threats.map((threat, index) => (
-      <div key={`${threat.tactic?.id ?? 'none'}-${index}`}>
-        <EuiSpacer size="s" />
-        <EuiFlexGroup gutterSize="s" alignItems="flexStart" justifyContent="spaceBetween">
-          <EuiFlexItem grow>
-            <EuiText size="s">
-              <strong>{threat.tactic ? getMitreEntityDisplayName(threat.tactic) : ''}</strong>
-              <ul>
-                {(threat.technique ?? [])
-                  .filter((technique) => technique != null)
-                  .map((technique, techniqueIndex) => (
-                    <li key={`${technique.id}-${techniqueIndex}`}>
-                      {getMitreEntityDisplayName(technique)}
-                      {(technique.subtechnique ?? []).length > 0 && (
-                        <ul>
-                          {(technique.subtechnique ?? [])
-                            .filter((subtechnique) => subtechnique != null)
-                            .map((subtechnique, subtechniqueIndex) => (
-                              <li key={`${subtechnique.id}-${subtechniqueIndex}`}>
-                                {getMitreEntityDisplayName(subtechnique)}
-                              </li>
-                            ))}
-                        </ul>
-                      )}
-                    </li>
-                  ))}
-              </ul>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip content={Rulei18n.DELETE} disableScreenReaderOutput>
-              <EuiButtonIcon
-                color="danger"
-                iconType="trash"
-                aria-label={Rulei18n.DELETE}
-                data-test-subj="removeMitreThreatEntry"
-                isDisabled={isDisabled}
-                onClick={() => onRemoveThreats([threat])}
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </div>
+      <ReadOnlyThreatEntry
+        key={`${threat.tactic?.id ?? 'none'}-${index}`}
+        threat={threat}
+        isDisabled={isDisabled}
+        onRemove={(entry) => onRemoveThreats([entry])}
+      />
     ))}
   </EuiPanel>
 );

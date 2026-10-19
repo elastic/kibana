@@ -153,7 +153,9 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
 
   const getSubtechniqueRenamedFromName = useCallback(
     (subtechnique: ThreatSubtechnique) => {
-      if (!isMitreAttackUpdatesUIEnabled) return undefined;
+      if (!isMitreAttackUpdatesUIEnabled) {
+        return undefined;
+      }
       const matchedOption = findCurrentSubtechniqueOption(subtechnique);
       return matchedOption && matchedOption.name !== subtechnique.name
         ? subtechnique.name
@@ -162,11 +164,23 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
     [findCurrentSubtechniqueOption, isMitreAttackUpdatesUIEnabled]
   );
 
+  const parentTechniqueId = technique[techniqueIndex]?.id;
+  // Filter subtechniques belonging to the parent technique. The managed source returns
+  // entities name-ordered, so the filtered subset is already in the correct display order.
+  const baseSubtechniqueOptions = useMemo(
+    () =>
+      subtechniques
+        .filter((t) => t.technique_id === parentTechniqueId)
+        .map((option) => ({
+          inputDisplay: <>{getMitreEntityDisplayName(option)}</>,
+          value: option.id,
+          disabled: isDisabled,
+        })),
+    [subtechniques, parentTechniqueId, isDisabled]
+  );
+
   const getSelectSubtechnique = useCallback(
     (index: number, disabled: boolean, subtechnique: ThreatSubtechnique) => {
-      // Filter subtechniques belonging to the parent technique. The managed source returns
-      // entities name-ordered, so the filtered subset is already in the correct display order.
-      const options = subtechniques.filter((t) => t.technique_id === technique[techniqueIndex]?.id);
       const isUnsupported = isUnsupportedSubtechnique(subtechnique);
 
       return (
@@ -191,11 +205,7 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
                     }),
                   ]
                 : []),
-              ...options.map((option) => ({
-                inputDisplay: <>{getMitreEntityDisplayName(option)}</>,
-                value: option.id,
-                disabled,
-              })),
+              ...baseSubtechniqueOptions,
             ]}
             prepend={`${labelPrefix} ${i18n.SUBTECHNIQUE}`}
             aria-label=""
@@ -211,11 +221,10 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
       );
     },
     [
-      subtechniques,
+      baseSubtechniqueOptions,
       isUnsupportedSubtechnique,
       labelPrefix,
       updateSubtechnique,
-      technique,
       techniqueIndex,
       threatIndex,
     ]

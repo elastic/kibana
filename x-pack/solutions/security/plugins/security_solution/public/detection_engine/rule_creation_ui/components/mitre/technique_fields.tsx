@@ -14,7 +14,7 @@ import {
   EuiSuperSelect,
   EuiToolTip,
 } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import styled, { css } from 'styled-components';
 
 import type { Threat, Threats, ThreatTechnique } from '@kbn/securitysolution-io-ts-alerting-types';
@@ -167,11 +167,29 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
 
   const getTechniqueRenamedFromName = useCallback(
     (technique: ThreatTechnique) => {
-      if (!isMitreAttackUpdatesUIEnabled) return undefined;
+      if (!isMitreAttackUpdatesUIEnabled) {
+        return undefined;
+      }
       const matchedOption = findCurrentTechniqueOption(technique);
       return matchedOption && matchedOption.name !== technique.name ? technique.name : undefined;
     },
     [findCurrentTechniqueOption, isMitreAttackUpdatesUIEnabled]
+  );
+
+  const parentTacticId = values[threatIndex]?.tactic?.id ?? '';
+  // Filter techniques belonging to the parent tactic using MITRE tactic ids so renames
+  // in MITRE upgrades don't blank the list. The managed source returns entities
+  // name-ordered, so the filtered subset is already in the correct display order.
+  const baseTechniqueOptions = useMemo(
+    () =>
+      techniques
+        .filter((t) => t.tactic_ids.includes(parentTacticId))
+        .map((option) => ({
+          inputDisplay: <>{getMitreEntityDisplayName(option)}</>,
+          value: option.id,
+          disabled: isDisabled,
+        })),
+    [techniques, parentTacticId, isDisabled]
   );
 
   const getSelectTechnique = useCallback(
@@ -181,10 +199,6 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
       disabled: boolean,
       technique: ThreatTechnique
     ) => {
-      // Filter techniques belonging to the parent tactic using MITRE tactic ids so renames
-      // in MITRE upgrades don't blank the list. The managed source returns entities
-      // name-ordered, so the filtered subset is already in the correct display order.
-      const options = techniques.filter((t) => t.tactic_ids.includes(parentTactic.id));
       const isUnsupported = isUnsupportedTechnique(technique);
       const isReassigned = isTechniqueReassignedFromTactic(parentTactic, technique);
       const reassignedOption = isReassigned ? findCurrentTechniqueOption(technique) : undefined;
@@ -215,11 +229,7 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
                     }),
                   ]
                 : []),
-              ...options.map((option) => ({
-                inputDisplay: <>{getMitreEntityDisplayName(option)}</>,
-                value: option.id,
-                disabled,
-              })),
+              ...baseTechniqueOptions,
             ]}
             prepend={`${labelPrefix} ${i18n.TECHNIQUE}`}
             aria-label=""
@@ -239,7 +249,7 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
       findCurrentTechniqueOption,
       isTechniqueReassignedFromTactic,
       isUnsupportedTechnique,
-      techniques,
+      baseTechniqueOptions,
       updateTechnique,
       threatIndex,
     ]

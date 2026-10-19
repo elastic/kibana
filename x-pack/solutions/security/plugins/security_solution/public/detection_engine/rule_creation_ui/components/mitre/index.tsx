@@ -114,7 +114,7 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
         <div>
           {groups.map((group) => (
             <React.Fragment key={group.framework ?? `unknown-${group.label}`}>
-              {group.framework ? (
+              {group.framework && availableFrameworks.includes(group.framework) ? (
                 <MitreFrameworkThreatSection
                   framework={group.framework}
                   field={field}
@@ -128,6 +128,12 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
                 <UnknownFrameworkThreatSection
                   label={group.label}
                   threats={group.threats}
+                  {...(group.framework
+                    ? {
+                        message: i18n.FRAMEWORK_UNAVAILABLE_WARNING,
+                        dataTestSubj: `mitreUnavailableFrameworkSection-${group.framework}`,
+                      }
+                    : {})}
                   isDisabled={isDisabled}
                   onRemoveThreats={removeThreats}
                 />

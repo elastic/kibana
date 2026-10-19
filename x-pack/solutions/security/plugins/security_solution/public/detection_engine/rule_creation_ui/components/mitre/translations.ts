@@ -139,3 +139,11 @@ export const UNKNOWN_FRAMEWORK_WARNING = i18n.translate(
       'This threat framework is not recognized. Its mappings are kept on the rule but cannot be edited here.',
   }
 );
+
+export const FRAMEWORK_UNAVAILABLE_WARNING = i18n.translate(
+  'xpack.securitySolution.detectionEngine.mitreAttack.frameworkUnavailableWarning',
+  {
+    defaultMessage:
+      'This framework is not available from the current MITRE data source. Its mappings are kept on the rule but cannot be edited here.',
+  }
+);

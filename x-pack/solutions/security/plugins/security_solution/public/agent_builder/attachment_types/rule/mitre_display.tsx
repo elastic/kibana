@@ -59,6 +59,47 @@ const MitreNodeLink: React.FC<{ node: MitreNode | null | undefined; 'data-test-s
   );
 };
 
+const MitreThreatEntry: React.FC<{ threat: Threat | null | undefined }> = ({ threat }) => {
+  const { euiTheme } = useEuiTheme();
+  const tactic: MitreNode | undefined = threat?.tactic;
+  const techniques = threat?.technique ?? [];
+  if (!tactic && techniques.length === 0) {
+    return null;
+  }
+  return (
+    <EuiFlexItem grow={false}>
+      {tactic && <MitreNodeLink node={tactic} data-test-subj="mitreTacticLink" />}
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="none"
+        alignItems="flexStart"
+        css={{ marginLeft: euiTheme.size.m }}
+      >
+        {techniques.map((technique, techniqueIndex) => (
+          <EuiFlexItem key={`${technique?.id ?? 'none'}-${techniqueIndex}`} grow={false}>
+            <MitreNodeLink node={technique} data-test-subj="mitreTechniqueLink" />
+            <EuiFlexGroup
+              direction="column"
+              gutterSize="none"
+              alignItems="flexStart"
+              css={{ marginLeft: euiTheme.size.m }}
+            >
+              {(technique?.subtechnique ?? []).map((subtechnique, subtechniqueIndex) => (
+                <EuiFlexItem
+                  key={`${subtechnique?.id ?? 'none'}-${subtechniqueIndex}`}
+                  grow={false}
+                >
+                  <MitreNodeLink node={subtechnique} data-test-subj="mitreSubtechniqueLink" />
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    </EuiFlexItem>
+  );
+};
+
 export const MitreAttackDisplay: React.FC<{ threat: Threat[] }> = ({ threat }) => {
   const { euiTheme } = useEuiTheme();
   const groups = groupThreatsByFramework(threat);
@@ -77,53 +118,12 @@ export const MitreAttackDisplay: React.FC<{ threat: Threat[] }> = ({ threat }) =
             </strong>
           </EuiText>
           <EuiFlexGroup direction="column" gutterSize="s" css={{ marginLeft: euiTheme.size.m }}>
-            {group.threats.map((singleThreat, threatIndex) => {
-              const tactic: MitreNode | undefined = singleThreat?.tactic;
-              const techniques = singleThreat?.technique ?? [];
-              if (!tactic && techniques.length === 0) {
-                return null;
-              }
-              return (
-                <EuiFlexItem key={`${tactic?.id ?? 'none'}-${threatIndex}`} grow={false}>
-                  {tactic && <MitreNodeLink node={tactic} data-test-subj="mitreTacticLink" />}
-                  <EuiFlexGroup
-                    direction="column"
-                    gutterSize="none"
-                    alignItems="flexStart"
-                    css={{ marginLeft: euiTheme.size.m }}
-                  >
-                    {techniques.map((technique, techniqueIndex) => (
-                      <EuiFlexItem
-                        key={`${technique?.id ?? 'none'}-${techniqueIndex}`}
-                        grow={false}
-                      >
-                        <MitreNodeLink node={technique} data-test-subj="mitreTechniqueLink" />
-                        <EuiFlexGroup
-                          direction="column"
-                          gutterSize="none"
-                          alignItems="flexStart"
-                          css={{ marginLeft: euiTheme.size.m }}
-                        >
-                          {(technique?.subtechnique ?? []).map(
-                            (subtechnique, subtechniqueIndex) => (
-                              <EuiFlexItem
-                                key={`${subtechnique?.id ?? 'none'}-${subtechniqueIndex}`}
-                                grow={false}
-                              >
-                                <MitreNodeLink
-                                  node={subtechnique}
-                                  data-test-subj="mitreSubtechniqueLink"
-                                />
-                              </EuiFlexItem>
-                            )
-                          )}
-                        </EuiFlexGroup>
-                      </EuiFlexItem>
-                    ))}
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              );
-            })}
+            {group.threats.map((singleThreat, threatIndex) => (
+              <MitreThreatEntry
+                key={`${singleThreat?.tactic?.id ?? 'none'}-${threatIndex}`}
+                threat={singleThreat}
+              />
+            ))}
           </EuiFlexGroup>
         </EuiFlexItem>
       ))}

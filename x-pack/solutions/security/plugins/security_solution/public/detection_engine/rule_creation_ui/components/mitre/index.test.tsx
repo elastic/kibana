@@ -113,10 +113,10 @@ describe('AddMitreThreat', () => {
       expect(screen.queryByTestId('addMitreFramework-atlas')).not.toBeInTheDocument();
     });
 
-    it('still renders an existing ATLAS section', () => {
+    it('renders an existing ATLAS section as read-only', () => {
       renderWithValue([ENTERPRISE_ROW, ATLAS_ROW]);
 
-      expect(screen.getByTestId('mitreFrameworkSection-atlas')).toBeInTheDocument();
+      expect(screen.getByTestId('mitreUnavailableFrameworkSection-atlas')).toBeInTheDocument();
     });
   });
 
@@ -354,6 +354,23 @@ describe('AddMitreThreat', () => {
       await userEvent.click(screen.getAllByTestId('removeMitreThreatEntry')[0]);
 
       expect(field.setValue).toHaveBeenCalledWith([ENTERPRISE_ROW, second]);
+    });
+  });
+
+  describe('framework unavailable from the data source', () => {
+    it('renders a read-only section for ATLAS rows when only enterprise is available', async () => {
+      mockUseAvailableMitreFrameworks.mockReturnValue(['enterprise']);
+      const field = renderWithValue([ENTERPRISE_ROW, ATLAS_ROW]);
+
+      const section = screen.getByTestId('mitreUnavailableFrameworkSection-atlas');
+      expect(within(section).getByText(/not available from the current MITRE/)).toBeInTheDocument();
+      expect(within(section).getByText(/Atlas Tactic/)).toBeInTheDocument();
+      expect(within(section).queryByTestId('mitreAttackTactic')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('mitreFrameworkSection-atlas')).not.toBeInTheDocument();
+
+      await userEvent.click(within(section).getByTestId('removeMitreThreatEntry'));
+
+      expect(field.setValue).toHaveBeenCalledWith([ENTERPRISE_ROW]);
     });
   });
 });
