@@ -244,7 +244,7 @@ Every command accepts an optional verbosity keyword — `lean`, `standard`, or `
 /test-plan-generator generate a detailed test plan for issue #1234
 ```
 
-If you omit the keyword, the agent uses `standard` (the current default). The chosen level is persisted as a hidden `<!-- verbosity: … -->` marker in the published comment, so `update` runs preserve it automatically. To flip the level later, just include the keyword in the update invocation — the agent re-renders the whole plan at the new level and announces the change in its post-save message.
+If you omit the keyword, the agent uses `standard` (the current default). The chosen level is persisted as a hidden `<!-- verbosity: … -->` marker in the published comment, so `update` runs preserve it automatically. To flip the level later, just include the keyword in the update invocation — the agent re-renders `Overview`, `Feature Background`, `Assumptions`, and the per-scenario metadata lines at the new level (scenario titles and Gherkin stay as they are) and announces the change in its post-save message. Plans published before this marker existed are treated as `standard`: the first `update` only adds the marker, unless you pass a different level keyword.
 
 **When to reach for `lean`** — small, well-understood changes; issues where the reviewer already knows the domain; drafts you plan to skim.
 
