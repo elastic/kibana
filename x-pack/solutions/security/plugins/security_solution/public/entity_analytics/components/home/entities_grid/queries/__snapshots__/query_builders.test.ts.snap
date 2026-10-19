@@ -236,7 +236,7 @@ exports[`entities grid query builders sort by alert_count builds the sort query 
 FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
 | WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND (entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")) AND (entity.relationships.resolution.resolved_to IS NULL))
 | FORK (
-    WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NOT NULL
+    WHERE \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
     | KEEP \`@timestamp\`, \`kibana.alert.severity\`, _ea_entity_id
   )
@@ -322,7 +322,7 @@ exports[`entities grid query builders sort by alert_count builds the sort query 
 FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
 | WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND (entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")) AND (entity.relationships.resolution.resolved_to IS NULL))
 | FORK (
-    WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NOT NULL
+    WHERE \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
     | KEEP \`@timestamp\`, \`kibana.alert.severity\`, _ea_entity_id
   )
@@ -409,7 +409,7 @@ exports[`entities grid query builders sort by alert_count builds the sort query 
 FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
 | WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND (entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")) AND (entity.relationships.resolution.resolved_to IS NULL) AND (asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")))
 | FORK (
-    WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NOT NULL
+    WHERE \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
     | KEEP \`@timestamp\`, \`kibana.alert.severity\`, _ea_entity_id
   )
@@ -495,7 +495,7 @@ exports[`entities grid query builders sort by alert_count builds the sort query 
 FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
 | WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND (entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")) AND (KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\")) AND (asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")))
 | FORK (
-    WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NOT NULL
+    WHERE \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
     | KEEP \`@timestamp\`, \`kibana.alert.severity\`, _ea_entity_id
   )
@@ -1159,7 +1159,7 @@ exports[`entities grid query builders sort by last_seen_alert builds the sort qu
 FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
 | WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND (entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")) AND (entity.relationships.resolution.resolved_to IS NULL))
 | FORK (
-    WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NOT NULL
+    WHERE \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
     | KEEP \`@timestamp\`, \`kibana.alert.severity\`, _ea_entity_id
   )
@@ -1245,7 +1245,7 @@ exports[`entities grid query builders sort by last_seen_alert builds the sort qu
 FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
 | WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND (entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")) AND (entity.relationships.resolution.resolved_to IS NULL))
 | FORK (
-    WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NOT NULL
+    WHERE \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
     | KEEP \`@timestamp\`, \`kibana.alert.severity\`, _ea_entity_id
   )
@@ -1332,7 +1332,7 @@ exports[`entities grid query builders sort by last_seen_alert builds the sort qu
 FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
 | WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND (entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")) AND (entity.relationships.resolution.resolved_to IS NULL) AND (asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")))
 | FORK (
-    WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NOT NULL
+    WHERE \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
     | KEEP \`@timestamp\`, \`kibana.alert.severity\`, _ea_entity_id
   )
@@ -1418,7 +1418,7 @@ exports[`entities grid query builders sort by last_seen_alert builds the sort qu
 FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
 | WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND (entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")) AND (KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\")) AND (asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")))
 | FORK (
-    WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NOT NULL
+    WHERE \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
     | KEEP \`@timestamp\`, \`kibana.alert.severity\`, _ea_entity_id
   )
@@ -2202,7 +2202,7 @@ Array [
 FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
 | WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND (entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")) AND (entity.relationships.resolution.resolved_to IS NULL) AND (KQL(\\"\\"\\"entity.name: host-001-payments-db\\"\\"\\")))
 | FORK (
-    WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NOT NULL
+    WHERE \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
     | KEEP \`@timestamp\`, \`kibana.alert.severity\`, _ea_entity_id
   )
@@ -3572,7 +3572,7 @@ Array [
 FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
 | WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND (entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")) AND (entity.relationships.resolution.resolved_to IS NULL) AND (KQL(\\"\\"\\"entity.name: host-001-payments-db\\"\\"\\")))
 | FORK (
-    WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NOT NULL
+    WHERE \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
     | KEEP \`@timestamp\`, \`kibana.alert.severity\`, _ea_entity_id
   )

@@ -38,9 +38,10 @@ interface ExecuteDashboardOperationsParams {
  * persistence, and result shape belong to the calling tool. Inline panel content
  * is resolved via the injected `resolvePanelContent` callback, so the core never
  * reads any store. Control fields are validated against index mappings when
- * the host provides `resolveControlFieldCapabilities`. When the host provides a
- * `validator`, changes that make the dashboard invalid are discarded and
- * reported as failures.
+ * the host provides `resolveControlFieldCapabilities`. New panels (full width),
+ * new sections, and panels moved between sections are placed below the existing
+ * ones until the host arranges the layout. When the host provides a `validator`,
+ * changes that make the dashboard invalid are discarded and reported as failures.
  */
 export const executeDashboardOperations = async ({
   dashboardData,

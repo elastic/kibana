@@ -20,6 +20,7 @@ import { useIsAlertsAndAttacksAlignmentEnabled } from '../common/hooks/use_is_al
 import { useSpaceId } from '../common/hooks/use_space_id';
 import { useIdsFromUrl } from './pages/results/history/use_ids_from_url';
 import { buildAttackDetailPath } from '../../common/utils/attack_detail_path';
+import { ATTACKS_PATH } from '../../common/constants';
 
 jest.mock('react-router-dom', () => ({
   Redirect: jest.fn(() => <div data-test-subj="mock-redirect" />),
@@ -47,10 +48,6 @@ jest.mock('../../common/utils/attack_detail_path', () => ({
 
 jest.mock('./pages', () => ({
   AttackDiscoveryPage: () => <div data-test-subj="mock-attack-discovery-page" />,
-}));
-
-jest.mock('./pages/attack_discovery_moved', () => ({
-  AttackDiscoveryMovedPage: () => <div data-test-subj="mock-attack-discovery-moved-page" />,
 }));
 
 jest.mock('../common/components/plugin_template_wrapper', () => ({
@@ -82,18 +79,18 @@ describe('AttackDiscoveryRoutes', () => {
     render(<AttackDiscoveryRoutes {...mockRouteProps} />);
 
     expect(screen.getByTestId('mock-attack-discovery-page')).toBeInTheDocument();
-    expect(screen.queryByTestId('mock-attack-discovery-moved-page')).not.toBeInTheDocument();
     expect(Redirect).not.toHaveBeenCalled();
   });
 
-  it('renders the AttackDiscoveryMovedPage when alignment is enabled', () => {
+  it('redirects to the Attacks page when alignment is enabled and the URL has no attack id', () => {
     (useIsAlertsAndAttacksAlignmentEnabled as jest.Mock).mockReturnValue(true);
 
     render(<AttackDiscoveryRoutes {...mockRouteProps} />);
 
-    expect(screen.getByTestId('mock-attack-discovery-moved-page')).toBeInTheDocument();
+    expect(Redirect).toHaveBeenCalledTimes(1);
+    expect((Redirect as jest.Mock).mock.calls[0][0]).toEqual({ to: ATTACKS_PATH });
+    expect(buildAttackDetailPath).not.toHaveBeenCalled();
     expect(screen.queryByTestId('mock-attack-discovery-page')).not.toBeInTheDocument();
-    expect(Redirect).not.toHaveBeenCalled();
   });
 
   // Legacy `/attack_discovery?id=<id>` deep links (e.g. the generated `kibana.alert.url`) must
@@ -102,6 +99,7 @@ describe('AttackDiscoveryRoutes', () => {
     (useIsAlertsAndAttacksAlignmentEnabled as jest.Mock).mockReturnValue(true);
     (useSpaceId as jest.Mock).mockReturnValue('default');
     (useIdsFromUrl as jest.Mock).mockReturnValue({ ids: ['attack-id-1', 'attack-id-2'] });
+    (buildAttackDetailPath as jest.Mock).mockReturnValue('/attacks/attack-id-1');
 
     render(<AttackDiscoveryRoutes {...mockRouteProps} />);
 
@@ -110,8 +108,9 @@ describe('AttackDiscoveryRoutes', () => {
       index: `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-default,${ATTACK_DISCOVERY_ADHOC_ALERTS_COMMON_INDEX_PREFIX}-default`,
       timestamp: null,
     });
-    expect(Redirect).toHaveBeenCalled();
-    expect(screen.queryByTestId('mock-attack-discovery-moved-page')).not.toBeInTheDocument();
+    expect(Redirect).toHaveBeenCalledTimes(1);
+    expect((Redirect as jest.Mock).mock.calls[0][0]).toEqual({ to: '/attacks/attack-id-1' });
+    expect(screen.queryByTestId('mock-attack-discovery-page')).not.toBeInTheDocument();
   });
 
   it('waits for the space id to resolve before redirecting', () => {
