@@ -9,11 +9,13 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
+import { EuiEmptyPrompt } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { toStoredFilters } from '@kbn/as-code-filters-transforms';
 import { toStoredQuery } from '@kbn/as-code-shared-transforms';
 import type { ChangeHistoryPreviewRenderFn } from '@kbn/change-history-ui';
+import { i18n } from '@kbn/i18n';
 
 import type { DashboardApi, DashboardInitializationState } from '..';
 import { DASHBOARD_APP_ID, DashboardRenderer } from '..';
@@ -31,6 +33,8 @@ export const DashboardPreview: ChangeHistoryPreviewRenderFn<{
   const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>();
 
   const applyQueue = useRef<Promise<void>>(Promise.resolve());
+  /** the selection whose snapshot could not be applied; the preview would not match this version */
+  const [failedChange, setFailedChange] = useState<typeof change | undefined>();
 
   useEffect(() => {
     if (!dashboardApi) return;
@@ -39,9 +43,17 @@ export const DashboardPreview: ChangeHistoryPreviewRenderFn<{
     /** `setState` leaves the previous time range in place when the snapshot has none, so re-apply the inherited one */
     const state = snapshot.time_range ? snapshot : { ...snapshot, time_range: inheritedTimeRange };
     /** `setState` awaits async child state application, so wait for the previous call to avoid overlapping */
+    let isStale = false;
+    setFailedChange(undefined);
     applyQueue.current = applyQueue.current
       .then(() => dashboardApi.setState(state))
-      .catch(() => {}); // a failed application must not block later snapshots
+      .catch(() => {
+        // recover the queue so later snapshots still apply, but surface the failure for this selection
+        if (!isStale) setFailedChange(change);
+      });
+    return () => {
+      isStale = true;
+    };
   }, [change, dashboardApi, inheritedTimeRange, setPreviewTitle]);
 
   const memoized = useMemo(() => {
@@ -67,7 +79,30 @@ export const DashboardPreview: ChangeHistoryPreviewRenderFn<{
     };
   }, [change.snapshot]);
 
-  return (
+  const hasApplyError = failedChange === change;
+
+  return hasApplyError ? (
+    <EuiEmptyPrompt
+      color="danger"
+      iconType="warning"
+      data-test-subj="dashboardPreviewApplyError"
+      title={
+        <h2>
+          {i18n.translate('dashboard.changeHistory.previewApplyErrorTitle', {
+            defaultMessage: 'Unable to load this version',
+          })}
+        </h2>
+      }
+      body={
+        <p>
+          {i18n.translate('dashboard.changeHistory.previewApplyErrorBody', {
+            defaultMessage:
+              'This version of the dashboard could not be displayed. Select a different version, or go back to the dashboard.',
+          })}
+        </p>
+      }
+    />
+  ) : (
     <div
       css={css`
         overflow: scroll;

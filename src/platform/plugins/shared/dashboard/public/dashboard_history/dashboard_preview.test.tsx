@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
+import React from 'react';
 
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import type { ChangeHistoryDetail } from '@kbn/change-history-ui';
@@ -289,6 +289,32 @@ describe('DashboardPreview', () => {
         mockSetStateControl.calls[1].resolve();
 
         await waitFor(() => expect(renderedPanels()).toEqual(['panel-a', 'panel-b']));
+      });
+
+      it('shows an error for the selection whose application failed', async () => {
+        renderPreview(bareSnapshot);
+        await waitFor(() => expect(mockSetStateControl.calls).toHaveLength(1));
+        expect(screen.queryByTestId('dashboardPreviewApplyError')).not.toBeInTheDocument();
+
+        mockSetStateControl.calls[0].reject(new Error('failed to apply'));
+
+        expect(await screen.findByTestId('dashboardPreviewApplyError')).toBeInTheDocument();
+        expect(screen.queryByTestId('searchBar')).not.toBeInTheDocument();
+      });
+
+      it('clears the error when a later selection applies successfully', async () => {
+        const { rerender, setPreviewTitle } = renderPreview(bareSnapshot);
+        await waitFor(() => expect(mockSetStateControl.calls).toHaveLength(1));
+        mockSetStateControl.calls[0].reject(new Error('failed to apply'));
+        await screen.findByTestId('dashboardPreviewApplyError');
+
+        rerender(<Wrapper change={fullSnapshot} setPreviewTitle={setPreviewTitle} />);
+        /** the error state unmounts the renderer, so recovering remounts it and applies the snapshot on the new API */
+        await waitFor(() => {
+          mockSetStateControl.calls.slice(1).forEach(({ resolve }) => resolve());
+          expect(renderedPanels()).toEqual(['panel-a', 'panel-b']);
+        });
+        expect(screen.queryByTestId('dashboardPreviewApplyError')).not.toBeInTheDocument();
       });
     });
   });
