@@ -28,8 +28,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
       try {
         const enabledAppIds = Object.keys(applicationUsageSchema).filter(
-          // Profiling is disabled by default; Playground is retained only for historical usage.
-          (appId) => appId !== 'profiling' && appId !== 'searchPlayground'
+          // Profiling and Digital Experience are disabled by default; Playground is retained only for historical usage.
+          (appId) =>
+            appId !== 'profiling' && appId !== 'digital_experience' && appId !== 'searchPlayground'
         );
         expect(enabledAppIds.sort()).to.eql(appIds.sort());
       } catch (err) {
