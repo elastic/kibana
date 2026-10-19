@@ -44,6 +44,8 @@ export interface CascadeVirtualizerProps<G extends GroupNode>
     | 'initialOffset'
     | 'initialRect'
     | 'scrollMargin'
+    | 'scrollPaddingStart'
+    | 'scrollPaddingEnd'
     | 'observeElementOffset'
     | 'observeElementRect'
   > {
@@ -161,6 +163,7 @@ export interface CascadeVirtualizerReturnValue
     | 'measurementsCache'
     | 'calculateRange'
     | 'scrollToIndex'
+    | 'measure'
   > {
   virtualizedRowComputedTranslateValue: Map<number, number>;
   virtualizedRowsSizeCache: Map<string, number>;
@@ -419,6 +422,8 @@ export const useCascadeVirtualizer = (<G extends GroupNode>({
   initialOffset,
   initialRect,
   scrollMargin,
+  scrollPaddingStart,
+  scrollPaddingEnd,
   initialAnchorItemIndex,
   isRoot = true,
   observeElementOffset,
@@ -496,6 +501,8 @@ export const useCascadeVirtualizer = (<G extends GroupNode>({
       rangeExtractor,
       initialOffset,
       scrollMargin,
+      ...(scrollPaddingStart !== undefined ? { scrollPaddingStart } : {}),
+      ...(scrollPaddingEnd !== undefined ? { scrollPaddingEnd } : {}),
       initialRect,
       ...(observeElementOffset ? { observeElementOffset } : {}),
       ...(observeElementRect ? { observeElementRect } : {}),
@@ -520,6 +527,8 @@ export const useCascadeVirtualizer = (<G extends GroupNode>({
       rangeExtractor,
       initialOffset,
       scrollMargin,
+      scrollPaddingStart,
+      scrollPaddingEnd,
       initialRect,
       observeElementOffset,
       observeElementRect,
@@ -643,6 +652,9 @@ export const useCascadeVirtualizer = (<G extends GroupNode>({
       // item-index based scrolling; accounts for the configured scrollMargin, so for a child
       // virtualizer this scrolls the shared root scroll element to the child's row
       scrollToIndex: virtualizerImpl.scrollToIndex.bind(virtualizerImpl),
+      // drops the cached item sizes so positions are recomputed from the current `estimateSize`; tanstack
+      // does not do this on its own when the estimate changes
+      measure: virtualizerImpl.measure.bind(virtualizerImpl),
       get measurementsCache() {
         return virtualizerImpl.measurementsCache;
       },
