@@ -9,6 +9,7 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { ExecutionStatus } from '@kbn/workflows';
+import { getStepExecutionsByIds } from './get_step_executions_by_ids';
 import { getStepFacets } from './get_step_facets';
 import { searchExecutionView } from './search_execution_view';
 import { searchExecutions } from './search_executions';
@@ -86,6 +87,31 @@ describe('execution read API', () => {
       searchExecutionView(deps, { spaceId: 'default', kql: 'status:' })
     ).rejects.toMatchObject({ statusCode: 400 });
     expect(workflowExecutionsDataClient.search).not.toHaveBeenCalled();
+  });
+
+  it('returns step executions in the requested space and leaves the rest out', async () => {
+    stepExecutionsDataClient.getByIds.mockResolvedValue({
+      items: [
+        { document: { id: 'a', spaceId: 'default' }, index: 'steps' },
+        { document: { id: 'b', spaceId: 'other' }, index: 'steps' },
+      ],
+      missing: ['c'],
+    } as never);
+
+    const steps = await getStepExecutionsByIds(deps, { ids: ['a', 'b', 'c'], spaceId: 'default' });
+
+    expect(steps).toEqual([{ id: 'a', spaceId: 'default' }]);
+    expect(stepExecutionsDataClient.getByIds).toHaveBeenCalledWith(['a', 'b', 'c'], {
+      sourceIncludes: undefined,
+      sourceExcludes: undefined,
+    });
+  });
+
+  it('does not query when no step ids are requested', async () => {
+    const steps = await getStepExecutionsByIds(deps, { ids: [], spaceId: 'default' });
+
+    expect(steps).toEqual([]);
+    expect(stepExecutionsDataClient.getByIds).not.toHaveBeenCalled();
   });
 
   it('aggregates only the requested facet fields', async () => {

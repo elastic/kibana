@@ -192,6 +192,13 @@ export interface GetStepParams {
   spaceId: string;
 }
 
+export interface GetStepExecutionsByIdsParams {
+  ids: readonly string[];
+  spaceId: string;
+  sourceIncludes?: ReadonlyArray<Extract<keyof EsWorkflowStepExecution, string>>;
+  sourceExcludes?: ReadonlyArray<Extract<keyof EsWorkflowStepExecution, string>>;
+}
+
 export interface GetWaitingStepIdParams {
   executionId: string;
   spaceId: string;
@@ -219,6 +226,9 @@ export interface WorkflowExecutionReadApi {
   searchSteps: (params: SearchStepsParams) => Promise<WorkflowStepExecutionListDto>;
   getStepFacets: (params: GetStepFacetsParams) => Promise<StepFacetCounts>;
   getStep: (params: GetStepParams) => Promise<EsWorkflowStepExecution | null>;
+  getStepExecutionsByIds: (
+    params: GetStepExecutionsByIdsParams
+  ) => Promise<EsWorkflowStepExecution[]>;
   getWaitingStepId: (params: GetWaitingStepIdParams) => Promise<string | null>;
   getDailyExecutionCounts: (
     params: GetDailyExecutionCountsParams

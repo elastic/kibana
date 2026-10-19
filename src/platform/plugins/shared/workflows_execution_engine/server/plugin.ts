@@ -80,6 +80,7 @@ import { getDailyExecutionCounts } from './public_api/get_daily_execution_counts
 import { getExecution } from './public_api/get_execution';
 import { getExecutionSteps } from './public_api/get_execution_steps';
 import { getStep } from './public_api/get_step';
+import { getStepExecutionsByIds } from './public_api/get_step_executions_by_ids';
 import { getStepFacets } from './public_api/get_step_facets';
 import { getWaitingStepId } from './public_api/get_waiting_step_id';
 import { hasNonTerminalExecution } from './public_api/has_non_terminal_execution';
@@ -2102,6 +2103,7 @@ export class WorkflowsExecutionEnginePlugin
       searchSteps: (params) => searchSteps(executionReadDeps, params),
       getStepFacets: (params) => getStepFacets(executionReadDeps, params),
       getStep: (params) => getStep(executionReadDeps, params),
+      getStepExecutionsByIds: (params) => getStepExecutionsByIds(executionReadDeps, params),
       getWaitingStepId: (params) => getWaitingStepId(executionReadDeps, params),
       getDailyExecutionCounts: (params) => getDailyExecutionCounts(executionReadDeps, params),
       hasNonTerminalExecution: (params) => hasNonTerminalExecution(executionReadDeps, params),
