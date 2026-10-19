@@ -170,6 +170,20 @@ describe('useAllRelayAppBindings', () => {
       { channel: 'C1', displayName: 'alerts', status: 'bound_to_self' },
       { channel: 'C2', displayName: 'oncall', status: 'bound_to_self' },
     ]);
+    expect(result.current.isComplete).toBe(true);
+  });
+
+  it('stops at the page bound and reports the list as incomplete', async () => {
+    httpGet.mockResolvedValue({
+      bindings: [{ channel: 'C1', status: 'bound_to_self' }],
+      nextCursor: 'more',
+    });
+    const { wrapper } = createSetup();
+    const { result } = renderHook(() => useAllRelayAppBindings(), { wrapper });
+
+    await flush();
+    expect(httpGet).toHaveBeenCalledTimes(10);
+    expect(result.current.isComplete).toBe(false);
   });
 
   it('reports a load error without a toast', async () => {

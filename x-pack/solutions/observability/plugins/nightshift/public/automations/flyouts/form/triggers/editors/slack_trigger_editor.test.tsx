@@ -22,6 +22,7 @@ const connected = {
   ],
   isLoading: false,
   isError: false,
+  isComplete: true,
 };
 const mockUseAllRelayAppBindings = jest.fn();
 jest.mock('../../../../../settings/components/apps_section/use_relay_app_bindings', () => ({
@@ -122,6 +123,19 @@ describe('SlackTriggerEditor', () => {
 
     expect(await screen.findByTestId('automationSlackTriggerChannelsInputHelp')).toHaveTextContent(
       'Not connected: #legacy.'
+    );
+  });
+
+  it('does not flag saved channels when the connected list is truncated', async () => {
+    mockUseAllRelayAppBindings.mockReturnValue({ ...connected, isComplete: false });
+    render(<Editor kind="slack_message" initialChannels={['C3000']} />);
+
+    const pill = screen.getByTestId('automationSlackTriggerChannels');
+    expect(pill).toHaveAttribute('aria-invalid', 'false');
+    fireEvent.click(pill);
+
+    expect(await screen.findByTestId('automationSlackTriggerChannelsInputHelp')).toHaveTextContent(
+      'Showing the first 2 connected channels.'
     );
   });
 

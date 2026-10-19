@@ -19,6 +19,7 @@ jest.mock('../../../settings/components/apps_section/use_relay_app_bindings', ()
     bindings: [{ channel: 'C2', displayName: 'oncall', status: 'bound_to_self' }],
     isLoading: false,
     isError: false,
+    isComplete: true,
   }),
 }));
 

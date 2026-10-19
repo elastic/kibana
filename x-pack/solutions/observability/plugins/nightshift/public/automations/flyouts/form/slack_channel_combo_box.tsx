@@ -21,12 +21,12 @@ import {
   type UseAllRelayAppBindings,
 } from '../../../settings/components/apps_section/use_relay_app_bindings';
 
-/** Selected values that are not connected channels; none while loading, on error, or when nothing is connected. */
+/** Selected values that are not connected channels; none unless the full connected list loaded. */
 export const findUnconnectedChannels = (
   values: string[],
-  { bindings, isLoading, isError }: UseAllRelayAppBindings
+  { bindings, isLoading, isError, isComplete }: UseAllRelayAppBindings
 ): string[] =>
-  isLoading || isError || bindings.length === 0
+  isLoading || isError || !isComplete || bindings.length === 0
     ? []
     : values.filter((value) => !bindings.some(({ channel }) => channel === value));
 
@@ -38,6 +38,11 @@ const labels = {
     i18n.translate('xpack.nightshift.automations.flyout.slackChannelsNotConnected', {
       defaultMessage: 'Not connected: {channels}. Messages there will not start this automation.',
       values: { channels },
+    }),
+  truncated: (count: number) =>
+    i18n.translate('xpack.nightshift.automations.flyout.slackChannelsTruncated', {
+      defaultMessage: 'Showing the first {count} connected channels.',
+      values: { count },
     }),
 };
 
@@ -84,7 +89,8 @@ export const SlackChannelComboBox = ({
   warnUnconnected?: boolean;
   autoFocus?: boolean;
 }) => {
-  const { bindings, isLoading, isError } = useAllRelayAppBindings();
+  const connected = useAllRelayAppBindings();
+  const { bindings, isLoading, isError, isComplete } = connected;
 
   const options: Array<EuiComboBoxOptionOption<string>> = bindings.map((binding) => ({
     label: formatChannelLabel(binding),
@@ -95,9 +101,8 @@ export const SlackChannelComboBox = ({
     value,
   }));
   const isEmpty = !isLoading && !isError && bindings.length === 0;
-  const unconnected = warnUnconnected
-    ? findUnconnectedChannels(values, { bindings, isLoading, isError })
-    : [];
+  const unconnected = warnUnconnected ? findUnconnectedChannels(values, connected) : [];
+  const isTruncated = !isLoading && !isError && !isComplete;
 
   return (
     <>
@@ -115,7 +120,7 @@ export const SlackChannelComboBox = ({
         onChange={(selected) => onChange(selected.map(({ label, value }) => value ?? label))}
         data-test-subj={testSubject}
       />
-      {(isError || isEmpty || unconnected.length > 0) && (
+      {(isError || isEmpty || isTruncated || unconnected.length > 0) && (
         <>
           <EuiSpacer size="xs" />
           <EuiText
@@ -124,6 +129,7 @@ export const SlackChannelComboBox = ({
             data-test-subj={`${testSubject}Help`}
           >
             {isError && labels.loadError}
+            {isTruncated && labels.truncated(bindings.length)}
             {isEmpty && (
               <FormattedMessage
                 id="xpack.nightshift.automations.flyout.slackChannelsEmpty"

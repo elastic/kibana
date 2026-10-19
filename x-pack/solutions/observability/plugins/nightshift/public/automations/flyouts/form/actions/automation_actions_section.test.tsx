@@ -20,6 +20,7 @@ jest.mock('../../../../settings/components/apps_section/use_relay_app_bindings',
     ],
     isLoading: false,
     isError: false,
+    isComplete: true,
   }),
 }));
 
