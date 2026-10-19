@@ -67,7 +67,11 @@ interface YamlStep {
   else?: YamlStep[];
   cases?: Array<{ match: string; steps: YamlStep[] }>;
   default?: YamlStep[];
-  'on-failure'?: { continue?: boolean; fallback?: YamlStep[] };
+  'on-failure'?: {
+    continue?: boolean;
+    fallback?: YamlStep[];
+    retry?: { 'max-attempts'?: number; delay?: string };
+  };
 }
 
 interface YamlWorkflow {
@@ -2030,6 +2034,182 @@ describe('Attack Discovery worker chain', () => {
     });
   });
 
+  // The alerts behind an escalated attack leave the Worker's queue: acknowledged, and
+  // tagged with the tag batched generation excludes. Without it, every Worker run
+  // while the gate is parked correlates the same alerts into a near-duplicate attack.
+  describe('retiring the correlated alerts', () => {
+    const retireSteps = [
+      'tag_correlated_alerts',
+      'acknowledge_correlated_alerts',
+      'journal_alerts_retired',
+    ] as const;
+    const writes = ['tag_correlated_alerts', 'acknowledge_correlated_alerts'] as const;
+    const topLevelNames = review.steps.map((step) => step.name);
+    const generation = parse(
+      ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW.yaml
+    ) as YamlWorkflow;
+
+    const evaluateGuard = (name: string, escalate: boolean, alertIds?: string[]): unknown =>
+      createWorkflowLiquidEngine().evalValueSync(
+        String(stepIn(reviewSteps, name)?.if)
+          .replace(/^\$\{\{/, '')
+          .replace(/\}\}$/, '')
+          .trim(),
+        {
+          steps: { resolve_escalation: { output: { escalate } } },
+          inputs: alertIds === undefined ? {} : { alert_ids: alertIds },
+        }
+      );
+
+    const renderJournal = (errors: { tag?: unknown; ack?: unknown }): Promise<string> =>
+      createWorkflowLiquidEngine().parseAndRender(
+        asInputs(stepIn(reviewSteps, 'journal_alerts_retired')).message,
+        {
+          consts: review.consts,
+          execution: { id: 'review-exec-1' },
+          inputs: { alert_ids: ['alert-1', 'alert-2'] },
+          steps: {
+            tag_correlated_alerts: errors.tag ? { error: errors.tag } : { output: {} },
+            acknowledge_correlated_alerts: errors.ack ? { error: errors.ack } : { output: {} },
+          },
+        }
+      );
+
+    it('uses the az:ad_correlated tag', () => {
+      expect(review.consts?.ad_correlated_tag).toBe('az:ad_correlated');
+    });
+
+    it('tags with the tag batched generation excludes', () => {
+      const retrieve = stepIn(flatten(generation.steps), 'retrieve_alert_ids');
+      const mustNot = (retrieve?.with?.filter as { bool?: { must_not?: unknown[] } })?.bool
+        ?.must_not;
+
+      expect(mustNot).toContainEqual({
+        terms: { 'kibana.alert.workflow_tags': [review.consts?.ad_correlated_tag] },
+      });
+    });
+
+    it.each([
+      ['tag_correlated_alerts', 'security.setAlertTags'],
+      ['acknowledge_correlated_alerts', 'security.setAlertStatus'],
+      ['journal_alerts_retired', 'workflow.execute'],
+    ] as const)('implements %s as a real %s step', (name, type) => {
+      expect(stepIn(reviewSteps, name)?.type).toBe(type);
+    });
+
+    // The gate can park the run for up to 168h, so retiring the alerts after the
+    // decision would leave them in the queue for every Worker run in that window.
+    it('retires the alerts after the escalation is resolved and before the gate', () => {
+      const order = ['resolve_escalation', ...retireSteps, 'escalation_gate'].map((name) =>
+        topLevelNames.indexOf(name)
+      );
+
+      expect(order).not.toContain(-1);
+      expect([...order].sort((a, b) => a - b)).toEqual(order);
+    });
+
+    // The tag is what keeps the alerts out of the next run, so it must not depend on
+    // the status write succeeding.
+    it('tags before it acknowledges', () => {
+      expect(topLevelNames.indexOf('tag_correlated_alerts')).toBeLessThan(
+        topLevelNames.indexOf('acknowledge_correlated_alerts')
+      );
+    });
+
+    // False positives are handled separately, and a failed analysis is not a verdict
+    // about the attack, so neither touches the alerts.
+    it('writes to the alerts nowhere else', () => {
+      expect(
+        reviewSteps
+          .filter((step) =>
+            ['security.setAlertTags', 'security.setAlertStatus'].includes(step.type)
+          )
+          .map((step) => step.name)
+      ).toEqual([...writes]);
+    });
+
+    it.each(retireSteps)('runs %s for an escalated attack with alerts', (name) => {
+      expect(evaluateGuard(name, true, ['alert-1'])).toBe(true);
+    });
+
+    it.each(retireSteps)('skips %s when the verdict does not escalate', (name) => {
+      expect(evaluateGuard(name, false, ['alert-1'])).toBe(false);
+    });
+
+    // Both steps reject an empty id list.
+    it.each(retireSteps)('skips %s when the review was given no alerts', (name) => {
+      expect(evaluateGuard(name, true, [])).toBe(false);
+      expect(evaluateGuard(name, true)).toBe(false);
+    });
+
+    it('adds the tag without removing any', () => {
+      const tagStep = asWith(stepIn(reviewSteps, 'tag_correlated_alerts')) as Record<
+        string,
+        unknown
+      >;
+
+      expect(tagStep.tags_to_add).toEqual(['{{ consts.ad_correlated_tag }}']);
+      expect(tagStep.tags_to_remove).toBeUndefined();
+    });
+
+    it('acknowledges rather than closes the alerts', () => {
+      expect(asWith(stepIn(reviewSteps, 'acknowledge_correlated_alerts')).status).toBe(
+        'acknowledged'
+      );
+    });
+
+    it.each(writes)('writes %s to the correlated detection alerts', (name) => {
+      expect(asWith(stepIn(reviewSteps, name)).alert_ids).toBe('${{ inputs.alert_ids }}');
+    });
+
+    // Bookkeeping, not the lifecycle: neither write may cancel the escalation.
+    it.each(writes)('retries %s and then continues', (name) => {
+      const onFailure = stepIn(reviewSteps, name)?.['on-failure'];
+
+      expect(onFailure?.retry?.['max-attempts']).toBe(3);
+      expect(onFailure?.continue).toBe(true);
+    });
+
+    it('continues past a failed journal note', () => {
+      expect(stepIn(reviewSteps, 'journal_alerts_retired')?.['on-failure']?.continue).toBe(true);
+    });
+
+    describe('the journal note', () => {
+      const failure = { type: 'PermissionError', message: 'internal detail' };
+
+      it('reports both writes when they landed', async () => {
+        const rendered = await renderJournal({});
+
+        expect(rendered).toContain('Acknowledged the 2 correlated detection alert(s)');
+        expect(rendered).toContain('tagged them az:ad_correlated');
+      });
+
+      it('says later runs may correlate the alerts again when the tag failed', async () => {
+        const rendered = await renderJournal({ tag: failure });
+
+        expect(rendered).toContain('Could not tag');
+        expect(rendered).toContain('Acknowledged them.');
+        expect(rendered).toContain('review-exec-1');
+      });
+
+      it('says the alerts are tagged but not acknowledged when the status write failed', async () => {
+        const rendered = await renderJournal({ ack: failure });
+
+        expect(rendered).toContain('Tagged the 2 correlated detection alert(s) az:ad_correlated.');
+        expect(rendered).toContain('Could not acknowledge them.');
+        expect(rendered).toContain('review-exec-1');
+      });
+
+      // An internal failure's message would land in the Investigation, where every
+      // later agent round reads it as user input.
+      it('never relays an error message', async () => {
+        const rendered = await renderJournal({ tag: failure, ack: failure });
+
+        expect(rendered).not.toContain('internal detail');
+      });
+    });
+  });
+
   describe('handoff contracts', () => {
     // `workflow.execute` resolves to the child's `context.output`, so a child without an
     // explicit `workflow.output` step hands its parent nothing.
@@ -2182,6 +2362,7 @@ describe('Attack Discovery worker chain', () => {
       'journal_fp_closed',
       'journal_attack_status_false_positive',
       'journal_analysis_failed',
+      'journal_alerts_retired',
       'journal_decision_recorded',
       'journal_attack_status_declined',
     ] as const;

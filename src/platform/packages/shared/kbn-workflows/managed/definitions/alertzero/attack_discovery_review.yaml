@@ -77,7 +77,9 @@ triggers:
             Document ids of the DETECTION alerts the Attack Discovery correlated.
             Not the Attack Discovery's own id — that is `attack_discovery_id`.
             Nothing below ever closes these: an attack being closed says nothing
-            about the alerts underneath it.
+            about the alerts underneath it. A true-positive or inconclusive verdict
+            acknowledges them and tags them `az:ad_correlated`, which keeps them out
+            of the Worker's next runs.
         summary_markdown:
           type: string
           maxLength: 8000
@@ -157,6 +159,10 @@ consts:
   # hold, so another writer can still add to it, and few enough pills for the
   # landing page to stay readable.
   impact_entity_cap: 50
+  # Marks the detection alerts behind an escalated attack as correlated by this
+  # Worker, following the `az:` convention of the Alert Triage Worker. The batched
+  # generation query excludes alerts carrying it; keep the literal there in sync.
+  ad_correlated_tag: az:ad_correlated
 steps:
   # kibana-q0t5: the Investigation id is a pure function of the attack, so every
   # execution that reviews this attack addresses the SAME Investigation — a hand
@@ -858,6 +864,78 @@ steps:
         investigation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
         classification: "{{ steps.resolve_analysis.output.verdict }}"
         workflow_execution_id: "{{ execution.id }}"
+
+  # The correlated detection alerts, retired from the Worker's queue. Written BEFORE
+  # the gate, not after the decision: the gate can park this run for up to 168h, and
+  # every Worker run in that window would otherwise correlate the same alerts again
+  # and persist a near-duplicate attack with an Investigation of its own.
+  #
+  # Tagged first, because the tag is what the generation query excludes on, so a
+  # failed status write after it still keeps the alerts out of the next run.
+  #
+  # Bookkeeping, not the lifecycle: neither write is a reason to cancel the
+  # escalation the verdict calls for, so both retry and then continue, and
+  # `journal_alerts_retired` says what landed. One call each, because `alert_ids`
+  # holds at most 1000 ids. The `alert_ids` guard is required: both steps reject an
+  # empty id list.
+  - name: tag_correlated_alerts
+    type: security.setAlertTags
+    if: >-
+      ${{ steps.resolve_escalation.output.escalate == true
+        and inputs.alert_ids != blank }}
+    with:
+      alert_ids: "${{ inputs.alert_ids }}"
+      # Listed item by item because security.setAlertTags takes an array here and its
+      # input schema is a union, so a whole-array template fails workflow validation.
+      tags_to_add:
+        - "{{ consts.ad_correlated_tag }}"
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
+      continue: true
+
+  - name: acknowledge_correlated_alerts
+    type: security.setAlertStatus
+    if: >-
+      ${{ steps.resolve_escalation.output.escalate == true
+        and inputs.alert_ids != blank }}
+    with:
+      alert_ids: "${{ inputs.alert_ids }}"
+      status: acknowledged
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
+      continue: true
+
+  # Names which write failed, never its error message: an internal failure's message
+  # would land in the Investigation, where every later agent round reads it as user
+  # input. The execution history keeps the message.
+  - name: journal_alerts_retired
+    type: workflow.execute
+    if: >-
+      ${{ steps.resolve_escalation.output.escalate == true
+        and inputs.alert_ids != blank }}
+    with:
+      workflow-id: system-alertzero-journal-note
+      run-as-mode: inherit
+      inputs:
+        conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
+        message: >-
+          {% if steps.tag_correlated_alerts.error == blank and
+          steps.acknowledge_correlated_alerts.error == blank %}Acknowledged the
+          {{ inputs.alert_ids | size }} correlated detection alert(s) and tagged them
+          {{ consts.ad_correlated_tag }}, so later Worker runs skip them.{% else %}{% if
+          steps.tag_correlated_alerts.error != blank %}Could not tag the correlated
+          detection alerts {{ consts.ad_correlated_tag }}, so later Worker runs may
+          correlate them again.{% else %}Tagged the {{ inputs.alert_ids | size }}
+          correlated detection alert(s) {{ consts.ad_correlated_tag }}.{% endif %}{% if
+          steps.acknowledge_correlated_alerts.error != blank %} Could not acknowledge
+          them.{% else %} Acknowledged them.{% endif %} See review execution
+          {{ execution.id }}.{% endif %}
+    on-failure:
+      continue: true
 
   # One gate for both escalating verdicts. The shared workflow creates the proposal,
   # parks on the analyst decision unless `autoApprove` lets it through, and runs the
