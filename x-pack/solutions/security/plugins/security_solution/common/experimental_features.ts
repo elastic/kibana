@@ -297,15 +297,13 @@ export const allowedExperimentalValues = Object.freeze({
 
   /**
    * Enables the Endpoint Forensic Analysis Agent Builder skill (DFIR / patient zero / timeline).
-   * Shipped dark by default; enable per environment via config.
    */
-  endpointForensicAnalysisSkill: false,
+  endpointForensicAnalysisSkill: true,
 
   /**
-   * Enables the Elastic Defend Policy Management Agent Builder skill (read-only prose workflows).
-   * Shipped dark by default; enable per environment via config.
+   * Enables the Elastic Defend Policy Management Agent Builder skill
    */
-  elasticDefendPolicyManagementSkill: false,
+  elasticDefendPolicyManagementSkill: true,
 
   /**
    * Enables the investigate-rule Agent Builder skill.
@@ -375,7 +373,7 @@ export const allowedExperimentalValues = Object.freeze({
    * per-operating-system protection configuration.
    * Release: 9.6
    */
-  perOsPolicySettings: false,
+  perOsPolicySettings: true,
 
   /**
    * Enables ransomware protection for Linux in Elastic Defend policies.

@@ -17,7 +17,7 @@ const ALERT_STATUS_TO_KQL: Record<string, string> = {
 
 // Defaults to the Elastic Slack app when no connector is selected; the channel remains user-selected.
 // Mirrors significant_events/server/lib/slack_app/service.ts, which depends on this plugin.
-const ELASTIC_APPS_SLACK_CONNECTOR_ID = 'elastic-apps-slack';
+export const ELASTIC_APPS_SLACK_CONNECTOR_ID = 'elastic-apps-slack';
 
 const ALERT_TRIGGER_TYPE = 'alerting.alertStatusChanged';
 const SLACK_MESSAGE_TRIGGER_TYPE = 'slack2.message';
@@ -33,6 +33,16 @@ const SLACK_MESSAGE_EXCLUSIONS = [
 
 // One investigation per message, so concurrent messages in a channel do not share a subject.
 const SLACK_SUBJECT_ID = '{{ event.connectorId }}:{{ event.channel }}:{{ event.messageId }}';
+
+// The message's thread, which the managed Slack thread workflow looks the investigation up by when
+// someone replies. Only recorded for an automation that already reports in that thread: it makes
+// a reply there report the investigation, which a silent or channel-mode automation does not do.
+// The trigger condition guarantees a workspace.
+const SLACK_THREAD = {
+  workspace: '{{ event.workspace }}',
+  channel: '{{ event.channel }}',
+  thread_ts: '{{ event.messageId }}',
+};
 
 // See MAX_PROMPT_TEMPLATE_LENGTH: the template and this text share the step's message limit.
 export const SLACK_MESSAGE_TEXT_LIMIT = 4000;
@@ -173,19 +183,28 @@ function buildInvestigationStep(
   hasAlertRows: boolean
 ): Record<string, unknown> {
   const notificationDestinations = buildNotificationDestinations(automationId, automation, kind);
-  // The alert shape also covers an automation with no alert or Slack rows, which runs from the
-  // manual trigger and has no payload to read.
+  const repliesInMessageThread = notificationDestinations?.some(({ params }) => params.thread_ts);
   return {
     name,
     type: 'nightshift.triggerInvestigation',
     with: {
       ...(kind === 'slack'
-        ? { subject_type: 'manual', subject_id: SLACK_SUBJECT_ID, title: automation.name }
-        : {
+        ? {
+            subject_type: 'manual',
+            subject_id: SLACK_SUBJECT_ID,
+            title: automation.name,
+            ...(repliesInMessageThread ? { slack_thread: SLACK_THREAD } : {}),
+          }
+        : hasAlertRows
+        ? {
             subject_type: 'alert',
-            subject_id: hasAlertRows ? '{{ trigger.alert.uuid }}' : automationId,
-            title: hasAlertRows ? '{{ trigger.rule.name }}' : automation.name,
-          }),
+            subject_id: '{{ trigger.alert.uuid }}',
+            title: '{{ trigger.rule.name }}',
+          }
+        : // An automation with no alert or Slack rows runs from the manual trigger and has no
+          // alert payload, and an alert investigation requires `context.alerts`, so the prompt
+          // is the whole subject.
+          { subject_type: 'manual', subject_id: automationId, title: automation.name }),
       summary: automation.name,
       trigger_type: 'automatic',
       ...buildMessage(automation.execution.promptTemplate, kind === 'slack'),

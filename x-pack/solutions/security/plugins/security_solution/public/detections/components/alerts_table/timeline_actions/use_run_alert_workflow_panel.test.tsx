@@ -406,6 +406,23 @@ describe('useRunAlertWorkflowPanel', () => {
         });
       });
     });
+    it('forwards an explicit attachment type to the attachment hook', async () => {
+      render(
+        <AlertWorkflowsPanel
+          alertIds={[{ _id: 'attack-1', _index: '.internal.alerts' }]}
+          attachmentType="security.attack"
+          onClose={jest.fn()}
+        />,
+        { wrapper: TestProviders }
+      );
+
+      await waitFor(() => {
+        expect(mockUseCaseAttachmentWorkflowRun).toHaveBeenCalledWith({
+          attachmentType: 'security.attack',
+          target: { attachmentIds: ['attack-1'] },
+        });
+      });
+    });
   });
 });
 // Full RunWorkflowPanel behavior (mutate, toasts, manual inputs) is covered by:
