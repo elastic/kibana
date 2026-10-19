@@ -1,13 +1,12 @@
 {
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
     "strict": true,
     "noEmit": true,
     "esModuleInterop": true,
     "allowImportingTsExtensions": true,
     "types": ["node"],
+    "typeRoots": ["../../../../../../node_modules/@types"],
     "typeRoots": ["/Users/jloleysens/repos/work/kibana/node_modules/@types"],
     "outDir": "target/types",
   },
