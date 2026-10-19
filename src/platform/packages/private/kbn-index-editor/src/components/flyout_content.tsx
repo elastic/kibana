@@ -49,6 +49,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
 
   const dataView = useObservable(deps.indexUpdateService.dataView$);
   const dataViewColumns = useObservable(deps.indexUpdateService.dataTableColumns$);
+  const dataSource = useObservable(deps.indexUpdateService.dataSource$);
 
   const totalHits = useObservable(deps.indexUpdateService.totalHits$);
   const searchQuery = useObservable(deps.indexUpdateService.filterQuery$, {
@@ -182,11 +183,12 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
             }}
           >
             <FileDropzone noResults={noResults}>
-              {dataView && dataViewColumns ? (
+              {dataView && dataViewColumns && dataSource ? (
                 <DataGridLazy
                   {...props}
                   dataView={dataView}
                   columns={dataViewColumns}
+                  dataSource={dataSource}
                   rows={rows}
                   totalHits={totalHits}
                   onOpenIndexInDiscover={props.onOpenIndexInDiscover}

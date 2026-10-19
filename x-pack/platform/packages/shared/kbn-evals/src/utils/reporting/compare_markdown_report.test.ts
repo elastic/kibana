@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { PairedTTestResult } from '@kbn/evals-common';
+import type { ComparisonResult } from '@kbn/evals-common';
+import { PARAMETRIC_UPGRADE_MIN_PAIRS } from '@kbn/evals-common';
 import { formatMarkdownCompareReport } from './compare_markdown_report';
 
-const makeResult = (overrides: Partial<PairedTTestResult> = {}): PairedTTestResult => ({
+const makeResult = (overrides: Partial<ComparisonResult> = {}): ComparisonResult => ({
   datasetId: 'ds-1',
   datasetName: 'Dataset One',
   evaluatorName: 'Criteria',
@@ -17,6 +18,8 @@ const makeResult = (overrides: Partial<PairedTTestResult> = {}): PairedTTestResu
   meanBaseline: 0.7,
   pValue: 0.03,
   direction: 'maximize',
+  metricType: 'continuous_bounded',
+  hypothesisTest: { id: 'wilcoxon_signed_rank', method: 'exact', statistic: 5 },
   ...overrides,
 });
 
@@ -38,6 +41,36 @@ describe('formatMarkdownCompareReport', () => {
     expect(output).toContain('+0.10');
     expect(output).toContain('0.03');
     expect(output).toContain('Yes');
+  });
+
+  it('renders the test column and explains how tests are chosen', () => {
+    const output = formatMarkdownCompareReport({
+      targetExperimentId: 'exp-a',
+      baselineExperimentId: 'exp-b',
+      results: [
+        makeResult({ evaluatorName: 'Criteria' }),
+        makeResult({
+          evaluatorName: 'Pass',
+          metricType: 'binary',
+          hypothesisTest: {
+            id: 'mcnemar',
+            method: 'mid-p',
+            statistic: 0,
+            discordantPairs: { targetOnly: 3, baselineOnly: 0 },
+          },
+        }),
+      ],
+    });
+
+    expect(output).toContain('| Diff | Test | p-value |');
+    expect(output).toContain(
+      `otherwise Wilcoxon signed-rank (paired t-test for continuous scores when n ≥ ${PARAMETRIC_UPGRADE_MIN_PAIRS}`
+    );
+    const lines = output.split('\n');
+    expect(lines.find((line) => line.includes('| Criteria |'))).toContain('| Wilcoxon |');
+    expect(lines.find((line) => line.includes('| Pass |'))).toContain(
+      '| +0.10 (3 target only, 0 baseline only) | McNemar |'
+    );
   });
 
   it('reports no significant regressions when all p-values are above threshold', () => {

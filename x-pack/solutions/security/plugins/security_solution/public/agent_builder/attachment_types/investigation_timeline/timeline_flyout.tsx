@@ -20,6 +20,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { TIMELINE_TITLE } from '../grouped_attachments';
+import { TimelineTimestamp } from './timeline_timestamp';
 import type { InvestigationTimelineEvent } from './types';
 
 export const INVESTIGATION_TIMELINE_FLYOUT_TEST_ID = 'investigationTimelineFlyout';
@@ -34,14 +36,6 @@ const EVENT_ICON_ARIA_LABEL = i18n.translate(
   { defaultMessage: 'Event' }
 );
 
-export const INVESTIGATION_TIMELINE_FLYOUT_TITLE = i18n.translate(
-  'xpack.securitySolution.agentBuilder.investigationTimeline.flyoutTitle',
-  { defaultMessage: 'Investigation timeline' }
-);
-
-/** ISO-8601 timestamps render with a space before the time, matching the flyout design. */
-const formatTimestamp = (timestamp: string): string => timestamp.replace('T', ' ');
-
 export interface InvestigationTimelineFlyoutProps {
   events: InvestigationTimelineEvent[];
 }
@@ -53,7 +47,7 @@ export const InvestigationTimelineFlyout = ({ events }: InvestigationTimelineFly
   return (
     <EuiFlyoutBody data-test-subj={INVESTIGATION_TIMELINE_FLYOUT_TEST_ID}>
       <EuiTitle size="s" css={css({ marginBottom: euiTheme.size.l })}>
-        <h2>{INVESTIGATION_TIMELINE_FLYOUT_TITLE}</h2>
+        <h2>{TIMELINE_TITLE}</h2>
       </EuiTitle>
 
       {events.length === 0 ? (
@@ -88,9 +82,10 @@ export const InvestigationTimelineFlyout = ({ events }: InvestigationTimelineFly
                       color="subdued"
                       css={css({ fontFamily: euiTheme.font.familyCode })}
                     >
-                      <span data-test-subj="investigationTimelineEventTimestamp">
-                        {formatTimestamp(event.timestamp)}
-                      </span>
+                      <TimelineTimestamp
+                        value={event.timestamp}
+                        data-test-subj="investigationTimelineEventTimestamp"
+                      />
                     </EuiText>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>

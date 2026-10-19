@@ -27,7 +27,6 @@ export type {
   DeleteServiceAccountResponse,
   ListServiceAccountWorkloadsResponse,
   ListServiceAccountsResponse,
-  ServiceAccountBoundWorkload,
   ServiceAccountDirectoryCreator,
   ServiceAccountDirectoryEntry,
 } from './types';

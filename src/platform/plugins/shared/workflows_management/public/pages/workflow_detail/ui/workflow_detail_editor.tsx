@@ -22,6 +22,7 @@ import { css } from '@emotion/react';
 import type { Viewport } from '@xyflow/react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
+import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import type { monaco } from '@kbn/monaco';
@@ -84,10 +85,22 @@ const WorkflowVisualEditor = React.lazy(() =>
 interface WorkflowDetailEditorProps {
   highlightDiff?: boolean;
   onAgentProposalHeld?: () => void;
+  /** Prompt from the agentic-first landing, sent when the chat auto-opens. */
+  initialAgentMessage?: string;
+  /** Attachments of that prompt (e.g. pasted images). */
+  initialAgentAttachments?: ConversationAttachment[];
+  /** Opens the Agent Builder sidebar on mount for an unsaved workflow. */
+  autoOpenAgentChat?: boolean;
 }
 
 export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>((props) => {
-  const { highlightDiff, onAgentProposalHeld } = props;
+  const {
+    highlightDiff,
+    onAgentProposalHeld,
+    initialAgentMessage,
+    initialAgentAttachments,
+    autoOpenAgentChat,
+  } = props;
   const styles = useMemoCss(componentStyles);
   const readOnlyBadgeShadow = useEuiShadow('xl');
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
@@ -389,6 +402,9 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>((props
                 openActionsRef={openActionsRef}
                 onToggleEditorMode={() => handleEditorViewChange(showGraph ? 'yaml' : 'graph')}
                 onAgentProposalHeld={onAgentProposalHeld}
+                initialAgentMessage={initialAgentMessage}
+                initialAgentAttachments={initialAgentAttachments}
+                autoOpenAgentChat={autoOpenAgentChat}
               />
             </React.Suspense>
           </div>

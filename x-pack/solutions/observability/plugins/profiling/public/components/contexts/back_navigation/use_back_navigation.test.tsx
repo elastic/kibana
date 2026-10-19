@@ -305,13 +305,13 @@ describe('useBackNavigation', () => {
       expect(result.current.back).toEqual(pluginRootTarget);
     });
 
-    it('returns undefined when the Universal Profiling data is not set up', () => {
-      // Going back would only be redirected to this page again until the setup is done.
+    it('returns the plugin root when there is Universal Profiling data and its setup is incomplete', () => {
+      // The app can be used with that data, so users can leave the setup prompt.
       const { result } = renderBackNavigation({
         initialEntry: '/add-data-instructions',
         initialStatus: makeStatus({ universalProfilingData: true, universalProfilingSetup: false }),
       });
-      expect(result.current.back).toBeUndefined();
+      expect(result.current.back).toEqual(pluginRootTarget);
     });
 
     it('returns undefined when profiling is disabled in Elasticsearch', () => {

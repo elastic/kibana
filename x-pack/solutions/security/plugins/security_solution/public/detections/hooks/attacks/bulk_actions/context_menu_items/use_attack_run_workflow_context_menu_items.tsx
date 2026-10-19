@@ -25,11 +25,17 @@ export const useAttackRunWorkflowContextMenuItems = ({
   closePopover,
   telemetrySource,
 }: UseAttackRunWorkflowContextMenuItemsProps): BulkAttackContextMenuItems => {
-  const bulkActionItems = useBulkAttackRunWorkflowItems({ telemetrySource });
   const attacksWithIndex = useMemo(
     () => attacksForWorkflowRun.filter((attack) => Boolean(attack.attackIndex)),
     [attacksForWorkflowRun]
   );
+
+  // This menu is the single-attack surface (a table row or the attack flyout), so a run against
+  // exactly one attack is recorded with a singular origin. That is what lets the case activity
+  // entry name the attack and render the button that reopens its flyout.
+  const originAttackId = attacksWithIndex.length === 1 ? attacksWithIndex[0].attackId : undefined;
+
+  const bulkActionItems = useBulkAttackRunWorkflowItems({ telemetrySource, originAttackId });
 
   const attackItems = useMemo(
     () =>

@@ -41,6 +41,8 @@ Pass the Saved Object's `updated_at` field (assigned by Elasticsearch at write t
 
 - Returns change documents for the given object `type` and `id` in the specified Kibana space, sorted by `sequence` (if available), then `@timestamp`, then `event.id` as a tie-breaker. Supports pagination and custom sort/filters via `opts`. Results can be incomplete if an admin has applied retention — see [Retention](#retention).
 
+**Get a single event** with `getEvent(spaceId, eventId, opts?)` — looks up one document by its unique `event.id`, without needing the object type or ID.
+
 **Facet distinct field values** with `getHistoryByFields(spaceId, objectType, objectId, fields, opts?)` — terms buckets on mapped keyword fields (`user.name`, `event.action`, etc.).
 
 All persisted documents follow the same schema (see below).
@@ -98,8 +100,9 @@ UUID v7 values are monotonically increasing within the same millisecond. That ma
 
 - **`isInitialized()`** — Returns `true` if the client has been initialized (e.g. after `initialize()` has been called).
 
-- **`initialize(elasticsearchClient)`**
+- **`initialize(elasticsearchClient, opts?)`**
   Creates/ensures the data stream and stores the internal client. Called once during plugin `start()` phase and before `log` / `logBulk` / `getHistory` / `getHistoryByFields`.
+  - Optional `opts.userProfileService` (`core.userProfile`). When provided, `getHistory` and `getEvent` resolve `user.full_name` and `user.email` from the matching user profile at read time. These fields are never persisted, and are absent when no profile is found or the lookup fails. Render the author as `user.full_name || user.email || user.name`.
 
 - **`log(change, opts)`**
   Writes one `change` document with given `opts` context (`action`, `username`, etc) in `LogChangeHistoryOptions`.
@@ -123,6 +126,11 @@ UUID v7 values are monotonically increasing within the same millisecond. That ma
   - Results are scoped by `spaceId`, the client’s `module` and `dataset`, and filtered by `object.type` and `object.id`.
   - Optional `opts: GetChangeHistoryOptions` with `additionalFilters` (array of ES query clauses), pagination options `sort`, `from`, `size` (default 100).
   - Results are sorted by `object.sequence` (if available), then `@timestamp`, and `event.id` as the tie-breaker.
+
+- **`getEvent(spaceId, eventId, opts?)`**
+  - Returns a promise with the change document whose `event.id` matches `eventId`, or `undefined` when none exists.
+  - `event.id` is a UUID v7 minted per document (also the Elasticsearch `_id`), so no `objectType` / `objectId` is needed to identify the event.
+  - Results are scoped by `spaceId` and the client's `module` and `dataset`. Check `object.type` / `object.id` on the returned document if the caller needs the event to belong to a specific object.
 
 - **`getHistoryByFields(spaceId, objectType, objectId, fields, opts?)`**
   - Returns `{ results }` — one `{ field, buckets, sumOtherDocCount }` entry per requested field (duplicates removed, first-seen order preserved).
@@ -212,7 +220,7 @@ const client = new ChangeHistoryClient({
 });
 
 // During plugin `start()` phase
-await client.initialize(elasticsearchClient);
+await client.initialize(elasticsearchClient, { userProfileService: core.userProfile });
 const spaceId = 'default';
 
 // When user makes a change

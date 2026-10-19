@@ -15,11 +15,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { usePerformanceContext } from '@kbn/ebt-tools';
+import { ProfilingSchema } from '@kbn/profiling-utils';
 import React, { useState, useEffect } from 'react';
 import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { useEnabledProfilingStatus } from '../../components/contexts/profiling_status/use_enabled_profiling_status';
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
 import { PrimaryProfilingSearchBar } from '../../components/profiling_app_page_template/primary_profiling_search_bar';
+import { UniversalProfilingSetupIncompleteCallout } from '../../components/universal_profiling_setup_incomplete_callout';
 import { AsyncStatus } from '../../hooks/use_async';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
@@ -29,12 +31,12 @@ import { DataBreakdown } from './data_breakdown';
 import { DistinctProbabilisticValuesWarning } from './distinct_probabilistic_values_warning';
 import { HostBreakdown } from './host_breakdown';
 import { IndexLifecyclePhaseSelect } from './index_lifecycle_phase_select';
+import { OtelNotSupportedCallout } from './otel_not_supported_callout';
 import { Summary } from './summary';
 import {
   getStorageExplorerAvailability,
   StorageExplorerAvailability,
 } from '../../utils/get_storage_explorer_availability';
-import { AddDataTabs } from '../add_data_view/types';
 
 export function StorageExplorerView() {
   const {
@@ -52,7 +54,7 @@ export function StorageExplorerView() {
     if (availability === StorageExplorerAvailability.NotSetUp) {
       profilingRouter.replace('/add-data-instructions', {
         path: {},
-        query: { selectedTab: AddDataTabs.Kubernetes },
+        query: { schema: ProfilingSchema.ECS },
       });
     } else if (availability === StorageExplorerAvailability.NotAvailable) {
       profilingRouter.replace('/', { path: {}, query: { rangeFrom, rangeTo, kuery } });
@@ -134,6 +136,8 @@ function StorageExplorerContent() {
       showBetaBadge
     >
       <EuiFlexGroup direction="column">
+        <UniversalProfilingSetupIncompleteCallout />
+        <OtelNotSupportedCallout />
         <EuiFlexItem grow={false}>
           <EuiPanel hasShadow={false} color="subdued">
             <PrimaryProfilingSearchBar />

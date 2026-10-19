@@ -8,6 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { EnabledProfilingStatus } from '@kbn/profiling-utils';
+import { ProfilingSchema } from '@kbn/profiling-utils';
 import { IndexLifecyclePhaseSelectOption } from '../../../common/storage_explorer';
 import { useEnabledProfilingStatus } from '../../components/contexts/profiling_status/use_enabled_profiling_status';
 import { TimeRangeContextProvider } from '../../components/contexts/time_range_context';
@@ -15,7 +16,6 @@ import { AsyncStatus } from '../../hooks/use_async';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { useTimeRangeAsync } from '../../hooks/use_time_range_async';
-import { AddDataTabs } from '../add_data_view/types';
 import { StorageExplorerView } from '.';
 
 jest.mock('@kbn/ebt-tools', () => ({
@@ -32,6 +32,11 @@ jest.mock('../../components/profiling_app_page_template', () => ({
 }));
 jest.mock('../../components/profiling_app_page_template/primary_profiling_search_bar', () => ({
   PrimaryProfilingSearchBar: () => null,
+}));
+jest.mock('../../components/universal_profiling_setup_incomplete_callout', () => ({
+  UniversalProfilingSetupIncompleteCallout: () => (
+    <div data-test-subj="profilingSetupIncompleteCallout" />
+  ),
 }));
 jest.mock('../../hooks/use_profiling_params');
 jest.mock('../../hooks/use_profiling_router');
@@ -98,14 +103,32 @@ describe('StorageExplorerView', () => {
     expect(replace).not.toHaveBeenCalled();
   });
 
-  it('redirects to the setup when Universal Profiling is not set up', () => {
+  it('renders Storage explorer when Universal Profiling has data but its setup is incomplete', () => {
+    mockUniversalProfilingStatus({ hasSetup: false, hasData: true });
+
+    const { getByTestId } = renderView();
+
+    expect(getByTestId('storageExplorerPage')).toBeInTheDocument();
+    expect(replace).not.toHaveBeenCalled();
+  });
+
+  it('renders the Universal Profiling setup incomplete callout', () => {
+    mockUniversalProfilingStatus({});
+
+    const { getByTestId } = renderView();
+
+    // The callout itself decides whether the setup is incomplete
+    expect(getByTestId('profilingSetupIncompleteCallout')).toBeInTheDocument();
+  });
+
+  it('redirects to the setup when Universal Profiling is not set up and has no data', () => {
     mockUniversalProfilingStatus({ hasSetup: false, hasData: false });
 
     const { queryByTestId } = renderView();
 
     expect(replace).toHaveBeenCalledWith('/add-data-instructions', {
       path: {},
-      query: { selectedTab: AddDataTabs.Kubernetes },
+      query: { schema: ProfilingSchema.ECS },
     });
     expect(queryByTestId('storageExplorerPage')).not.toBeInTheDocument();
     expect(useTimeRangeAsync).not.toHaveBeenCalled();
