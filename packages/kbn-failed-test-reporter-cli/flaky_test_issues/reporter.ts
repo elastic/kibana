@@ -20,6 +20,7 @@ import {
   flakySuiteIssueTitle,
   lastNotifiedAt,
   readFlakySuiteIssueMetadata,
+  refreshFlakySuiteIssueMetadata,
   renderFlakySuiteIssueBody,
   renderFlakySuiteIssueComment,
   type RecordedFlakySuiteIssueMetadata,
@@ -74,9 +75,10 @@ export interface ReportFlakySuiteIssuesOptions {
   /** Leave out flaky tests that were skipped since (`isSkippedTest`). */
   omitSkippedTests: boolean;
   /**
-   * Refresh the suite issues of `githubRepo` that the report finds flaky again: the body is
-   * rewritten with this report's numbers, a comment posted when the suite failed since the last
-   * report, and an issue closed before such a failure reopened. Off, they are skipped as tracked.
+   * Refresh the suite issues of `githubRepo` that the report finds flaky again: the body's
+   * metadata is brought up to this report, a comment with its numbers posted when the suite
+   * failed since the last notification, and an issue closed before such a failure reopened. The
+   * body's text stays as filed. Off, they are skipped as tracked.
    */
   updateIssues: boolean;
   /**
@@ -125,7 +127,7 @@ export type FlakySuiteAction = SuiteRef &
         /** Closed issues about its tests that no longer counted (`isSuperseded`). */
         supersedes?: IssueRef[];
       }
-    /** The suite's own issue got this report's numbers; `commented` on new failures. */
+    /** The suite's own issue recorded this report; `commented` with its numbers on new failures. */
     | { action: 'updated'; issue: IssueRef; commented: boolean; reopened: boolean }
     | { action: 'skipped'; reason: SkipReason; issue?: IssueRef; match?: IssueMatch }
     | { action: 'failed'; attempted: 'create' | 'update'; error: string; issue?: IssueRef }
@@ -474,19 +476,18 @@ export const reportFlakySuiteIssues = async (
     }
   };
 
-  /** Body first: the Slack notification the comment triggers reads the updated metadata. */
+  /**
+   * Metadata first: the Slack notification the comment triggers reads the report count from it.
+   * The body's text stays as filed, this report's numbers go in the comment.
+   */
   const update = async (
     suite: FlakySuite,
     issue: GithubIssue,
-    related: MatchedIssue[],
     { previous, comment, reopen }: Refresh
   ) => {
     const ref = suiteRef(suite);
-    const body = renderFlakySuiteIssueBody(suite, {
+    const body = refreshFlakySuiteIssueMetadata(issue.body, suite, {
       report,
-      relatedIssues: related
-        .filter((matched) => matched.issue.number !== issue.number)
-        .map((matched) => matched.issue.number),
       previous,
       notifies: comment,
     });
@@ -495,7 +496,7 @@ export const reportFlakySuiteIssues = async (
       if (comment) {
         await github.addIssueComment(
           issue.number,
-          renderFlakySuiteIssueComment({ reopened: reopen })
+          renderFlakySuiteIssueComment(suite, { report, reopened: reopen })
         );
       }
       log.info(
@@ -532,7 +533,7 @@ export const reportFlakySuiteIssues = async (
         ? planRefresh(suite, tracked.issue, report, commentIntervalDays)
         : undefined;
     if (tracked && refresh) {
-      await update(suite, tracked.issue, matches, refresh);
+      await update(suite, tracked.issue, refresh);
       continue;
     }
     if (tracked) {

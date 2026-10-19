@@ -44,16 +44,19 @@ exception, it is reopened instead (below).
 A suite whose issue is its own, one this command filed for that `describe` block rather than for
 the whole file, has it refreshed instead (`--no-update-issues` turns this off):
 
-- the body is rewritten with the report's numbers, and its metadata keeps the test ids and branches
-  recorded before, so `/skip` still covers a branch the suite stopped failing on this week;
-- a comment is posted when the suite failed since the owners were last notified, saying it still
-  appears to be flaky and how to skip it, at most every `--comment-interval-days` (default 3, the
-  daily pipeline starts at 7 as every comment is a Slack message to the owning team). The
+- the body's text stays as filed, a record of what the suite did then; only its hidden metadata
+  is brought up to the report (`report.count`, `report.history`, `report.generatedAt`), and it
+  keeps the test ids and branches recorded before, so `/skip` still covers a branch the suite
+  stopped failing on this week;
+- a comment is posted when the suite failed since the owners were last notified, with the
+  report's numbers for the suite (the flaky tests, then the failures by error message, branch,
+  target and pipeline) and how to skip it, at most every `--comment-interval-days` (default 3,
+  the daily pipeline starts at 7 as every comment is a Slack message to the owning team). The
   last notification is recorded as `report.notifiedAt`: the report that filed the issue, whose team
   label gets the owners pinged, or the latest one that commented, so failures in between are
   covered by the next comment. Comments by `kibanamachine` are what the Slack notifications of
-  `triage/` react to, so the body is written first: the notification reads `report.count` from
-  it to tell a new failure from an existing one;
+  `triage/` react to, so the metadata is written first: the notification reads `report.count`
+  from it to tell a new failure from an existing one;
 - a closed issue is reopened, with a comment, when the suite failed after it was closed. It stays
   closed when the suite has not failed since, as the report window can still hold the failures
   from before a fix, and when it was closed as a duplicate;

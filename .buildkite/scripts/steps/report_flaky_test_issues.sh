@@ -15,9 +15,10 @@ set -euo pipefail
 # the test it is about fails again, the new suite issue then links it. At most
 # FLAKY_TESTS_MAX_NEW_ISSUES issues are created per run. FLAKY_TESTS_OMIT_SKIPPED_TESTS leaves
 # out flaky tests that were skipped since. Unless FLAKY_TESTS_UPDATE_ISSUES is 'false', a suite
-# that has an issue of its own gets it refreshed with the report's numbers, a comment when it
-# failed since the owners were last notified (at most every FLAKY_TESTS_COMMENT_INTERVAL_DAYS
-# days), and a reopen when it failed after the close.
+# that has an issue of its own gets it refreshed: its metadata records the report, a comment
+# with the report's numbers is posted when it failed since the owners were last notified (at
+# most every FLAKY_TESTS_COMMENT_INTERVAL_DAYS days), and it is reopened when it failed after
+# the close. The body's text stays as filed.
 # GITHUB_TOKEN (kibanamachine) comes from Vault via .buildkite/scripts/common/setup_job_env.sh.
 
 source .buildkite/scripts/common/util.sh

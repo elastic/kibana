@@ -53,10 +53,20 @@ export interface FlakySuiteIssueContext {
    * which this issue takes over from.
    */
   supersededIssues?: number[];
-  /** Metadata of the issue being refreshed, merged into the new one; absent for a new issue. */
-  previous?: RecordedFlakySuiteIssueMetadata;
+}
+
+export interface FlakySuiteIssueRefreshContext {
+  report: FlakyTestReport;
+  /** Metadata of the issue being refreshed, merged into the new one. */
+  previous: RecordedFlakySuiteIssueMetadata;
   /** The refresh comes with a comment, so this report notified the owners. */
-  notifies?: boolean;
+  notifies: boolean;
+}
+
+export interface FlakySuiteIssueCommentContext {
+  report: FlakyTestReport;
+  /** The issue is being reopened: the suite failed again after it was closed. */
+  reopened: boolean;
 }
 
 /** One report's numbers for the suite's worst test, kept in the body so the history survives. */
@@ -694,48 +704,83 @@ const relatedIssues = (ctx: FlakySuiteIssueContext): string | undefined =>
     ? `Possibly related: ${issueList(ctx.relatedIssues)}.`
     : undefined;
 
-/** Full issue body for a suite, including the hidden metadata. */
-export const renderFlakySuiteIssueBody = (
-  suite: FlakySuite,
-  ctx: FlakySuiteIssueContext
-): string => {
-  const sections = [
-    opening(suite),
-    testsTable(suite.tests, {
-      withDashboardLinks: true,
-      maxRows: MAX_TEST_ROWS,
-      thresholds: ctx.report.thresholds,
-    }),
-    skippedNote(suite),
-    '### Suite',
-    suiteDetails(suite),
-    '### Failures',
-    failuresByErrorMessage(suite),
-    failuresByBranch(suite),
-    failuresByTarget(suite),
-    failuresByPipeline(suite, ctx.report),
-    supersededIssues(ctx),
-    relatedIssues(ctx),
-  ];
-  return updateIssueMetadata(
-    sections.filter((section) => section !== undefined).join('\n\n'),
-    flakySuiteIssueMetadata(suite, ctx.report, ctx.previous, ctx.notifies),
+/** What a report found about the suite: its flaky tests, then the failures from every angle. */
+const reportSections = (suite: FlakySuite, report: FlakyTestReport): Array<string | undefined> => [
+  testsTable(suite.tests, {
+    withDashboardLinks: true,
+    maxRows: MAX_TEST_ROWS,
+    thresholds: report.thresholds,
+  }),
+  skippedNote(suite),
+];
+
+const failureSections = (suite: FlakySuite, report: FlakyTestReport): Array<string | undefined> => [
+  failuresByErrorMessage(suite),
+  failuresByBranch(suite),
+  failuresByTarget(suite),
+  failuresByPipeline(suite, report),
+];
+
+const joinSections = (sections: ReadonlyArray<string | undefined>): string =>
+  sections.filter((section) => section !== undefined).join('\n\n');
+
+/** Full issue body for a new suite issue, including the hidden metadata. */
+export const renderFlakySuiteIssueBody = (suite: FlakySuite, ctx: FlakySuiteIssueContext): string =>
+  updateIssueMetadata(
+    joinSections([
+      opening(suite),
+      ...reportSections(suite, ctx.report),
+      '### Suite',
+      suiteDetails(suite),
+      '### Failures',
+      ...failureSections(suite, ctx.report),
+      supersededIssues(ctx),
+      relatedIssues(ctx),
+    ]),
+    flakySuiteIssueMetadata(suite, ctx.report),
     FLAKY_TEST_SUITE_METADATA_PREFIX
   );
-};
 
 /**
- * The comment of a refresh that found new failures, saying how to skip the suite; the numbers are
- * in the body. A `kibanamachine` comment is what turns into a Slack notification
- * (elastic/kibana-operations `triage/`), so the body has to be updated first: the notification
- * reads its metadata.
+ * The body of a refreshed issue: the text stays as filed, a record of what the suite did then,
+ * and only the hidden metadata is brought up to this report, as `/skip` and the Slack
+ * notifications of elastic/kibana-operations `triage/` read the suite's tests, branches,
+ * pipelines and report count from it. This report's numbers go in the comment.
  */
-export const renderFlakySuiteIssueComment = ({ reopened }: { reopened: boolean }): string =>
-  [
-    reopened
-      ? 'This test suite appears to be flaky again after this issue was closed.'
-      : 'This test suite still appears to be flaky.',
-    '> [!TIP]\n' +
-      "> Review the failures. If you'd like to skip the test, ask the #kibana-operations team " +
-      'to `/skip` it, or skip the test case manually.',
-  ].join('\n\n');
+export const refreshFlakySuiteIssueMetadata = (
+  body: string,
+  suite: FlakySuite,
+  { report, previous, notifies }: FlakySuiteIssueRefreshContext
+): string =>
+  updateIssueMetadata(
+    body,
+    flakySuiteIssueMetadata(suite, report, previous, notifies),
+    FLAKY_TEST_SUITE_METADATA_PREFIX
+  );
+
+const SKIP_TIP =
+  '> [!TIP]\n' +
+  "> Review the failures. If you'd like to skip the test, ask the #kibana-operations team " +
+  'to `/skip` it, or skip the test case manually.';
+
+/**
+ * The comment of a refresh that found new failures: this report's numbers for the suite, as the
+ * body keeps the ones it was filed with, then how to skip it. A `kibanamachine` comment is what
+ * turns into a Slack notification (elastic/kibana-operations `triage/`), so the body's metadata
+ * has to be updated first: the notification reads it.
+ */
+export const renderFlakySuiteIssueComment = (
+  suite: FlakySuite,
+  { report, reopened }: FlakySuiteIssueCommentContext
+): string => {
+  const lead = reopened
+    ? 'This test suite appears to be flaky again after this issue was closed'
+    : 'This test suite still appears to be flaky';
+  return joinSections([
+    `${lead}, with ${plural(suite.tests.length, 'flaky test')} over ` +
+      `${formatDateRange(report.window.from, report.window.to)}:`,
+    ...reportSections(suite, report),
+    ...failureSections(suite, report),
+    SKIP_TIP,
+  ]);
+};

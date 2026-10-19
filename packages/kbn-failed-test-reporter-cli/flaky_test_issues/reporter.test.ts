@@ -556,7 +556,7 @@ describe('reportFlakySuiteIssues', () => {
   describe('suites with an issue of their own in the target repository', () => {
     const report = () => flakyReport([flakyTest()]);
 
-    it('refreshes the issue with the report, then comments on the failures since the last one', async () => {
+    it("brings the issue's metadata up to the report, then comments with its numbers, the text left as filed", async () => {
       const issue = suiteIssue(42);
       const github = createGithubApi([issue]);
 
@@ -573,12 +573,16 @@ describe('reportFlakySuiteIssues', () => {
           { generatedAt: GENERATED_AT.toISOString(), builds: 509, failedBuilds: 49 },
         ],
       });
-      expect(body).toContain('49 / 509');
-      // The comment's Slack notification reads the metadata, so the body goes first
+      // The body keeps what the suite did when the issue was filed; this report is in the comment
+      const textOf = (markdown: string) => markdown.split('\n\n<!-- kibanaCiData')[0];
+      expect(textOf(body)).toBe(textOf(issue.body));
       expect(github.addIssueComment).toHaveBeenCalledWith(
         42,
-        expect.stringContaining('This test suite still appears to be flaky.')
+        expect.stringMatching(
+          /^This test suite still appears to be flaky, with 1 flaky test over 2–9 Sep 2026:\n\n\| Test \|[\s\S]*49 \/ 509[\s\S]*> \[!TIP\]/
+        )
       );
+      // The comment's Slack notification reads the metadata, so the body goes first
       expect(github.editIssue.mock.invocationCallOrder[0]).toBeLessThan(
         github.addIssueComment.mock.invocationCallOrder[0]
       );

@@ -138,10 +138,10 @@ export function runReportFlakyTestIssuesCli() {
         or an issue about the suite or its file, open or closed after the test last failed; a
         single test without one is enough for the suite issue to be filed, which links the closed
         issues it takes over from. Flaky tests skipped since are left out. A suite
-        with an issue of its own in --github-repo has it refreshed: the body gets this report's
-        numbers, a comment is posted when the suite failed since the owners were last notified,
-        at most every --comment-interval-days, and an issue closed before such a failure is
-        reopened.
+        with an issue of its own in --github-repo has it refreshed: the body's metadata records
+        this report, a comment with its numbers is posted when the suite failed since the owners
+        were last notified, at most every --comment-interval-days, and an issue closed before
+        such a failure is reopened. The body's text stays as filed.
 
         Examples:
           GITHUB_TOKEN=... node scripts/report_flaky_test_issues --input .scout/flaky_tests.json --dry-run

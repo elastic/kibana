@@ -8,9 +8,12 @@
  */
 
 import type { FlakyTestBranchStats } from '@kbn/scout-reporting';
+import { updateIssueMetadata } from '../failed_tests_reporter/issue_metadata';
 import {
+  FLAKY_TEST_SUITE_METADATA_PREFIX,
   flakySuiteIssueTitle,
   readFlakySuiteIssueMetadata,
+  refreshFlakySuiteIssueMetadata,
   renderFlakySuiteIssueBody,
   renderFlakySuiteIssueComment,
   type RecordedFlakySuiteIssueMetadata,
@@ -612,11 +615,36 @@ describe('refreshing a suite issue', () => {
     ],
   };
 
+  /** The body as filed from an older report, with `previous` as its metadata. */
+  const filedBody = (metadata: RecordedFlakySuiteIssueMetadata = previous) =>
+    updateIssueMetadata(
+      '1 test in the suite appears to be flaky:\n\n| Test | Flaky branches |\n|---|---|\n| creates default alert | **`main` 5% (20 / 400)** |',
+      metadata,
+      FLAKY_TEST_SUITE_METADATA_PREFIX
+    );
+  const textOf = (body: string) => body.replace(/\n\n<!-- kibanaCiData = .* -->$/, '');
+
+  it('leaves the text as filed and only brings the metadata up to the report', () => {
+    const { suite, report } = singleTestReport();
+
+    const refreshed = refreshFlakySuiteIssueMetadata(filedBody(), suite, {
+      report,
+      previous,
+      notifies: false,
+    });
+
+    expect(textOf(refreshed)).toBe(textOf(filedBody()));
+    expect(refreshed).not.toContain('49 / 509');
+    expect(readFlakySuiteIssueMetadata(refreshed)?.['report.generatedAt']).toBe(
+      '2026-09-09T09:04:41.000Z'
+    );
+  });
+
   it('keeps the test ids and branches it recorded and moves pipelines it no longer fails on first', () => {
     const { suite, report } = singleTestReport();
 
     const metadata = readFlakySuiteIssueMetadata(
-      renderFlakySuiteIssueBody(suite, { report, previous })
+      refreshFlakySuiteIssueMetadata(filedBody(), suite, { report, previous, notifies: false })
     );
 
     expect(metadata).toEqual({
@@ -635,6 +663,16 @@ describe('refreshing a suite issue', () => {
     });
   });
 
+  it('records this report as the notification when the refresh comments', () => {
+    const { suite, report } = singleTestReport();
+
+    const metadata = readFlakySuiteIssueMetadata(
+      refreshFlakySuiteIssueMetadata(filedBody(), suite, { report, previous, notifies: true })
+    );
+
+    expect(metadata?.['report.notifiedAt']).toBe('2026-09-09T09:04:41.000Z');
+  });
+
   it('counts the reports of an issue filed before the count was recorded and caps the history', () => {
     const { suite, report } = singleTestReport();
     const history = Array.from({ length: 30 }, (_, day) => ({
@@ -642,11 +680,13 @@ describe('refreshing a suite issue', () => {
       builds: 100,
       failedBuilds: day,
     }));
+    const uncounted = { ...previous, 'report.count': undefined, 'report.history': history };
 
     const metadata = readFlakySuiteIssueMetadata(
-      renderFlakySuiteIssueBody(suite, {
+      refreshFlakySuiteIssueMetadata(filedBody(uncounted), suite, {
         report,
-        previous: { ...previous, 'report.count': undefined, 'report.history': history },
+        previous: uncounted,
+        notifies: false,
       })
     );
 
@@ -656,18 +696,36 @@ describe('refreshing a suite issue', () => {
     expect(metadata?.['report.history'][29].generatedAt).toBe('2026-09-09T09:04:41.000Z');
   });
 
-  it('comments that the suite still appears to be flaky and how to skip it', () => {
-    expect(renderFlakySuiteIssueComment({ reopened: false })).toMatchInlineSnapshot(`
-      "This test suite still appears to be flaky.
+  it("comments with the report's numbers for the suite, then how to skip it", () => {
+    const { suite, report } = singleTestReport();
 
-      > [!TIP]
-      > Review the failures. If you'd like to skip the test, ask the #kibana-operations team to \`/skip\` it, or skip the test case manually."
-    `);
+    const comment = renderFlakySuiteIssueComment(suite, { report, reopened: false });
+
+    expect(comment).toMatch(
+      /^This test suite still appears to be flaky, with 1 flaky test over 2–9 Sep 2026:\n\n\| Test \| Flaky branches \| Dashboard \|\n/
+    );
+    for (const section of [
+      '#### Failures by Error Message',
+      '#### Failures by Branch',
+      '#### Failures by Target',
+      '#### Failures by Pipeline',
+    ]) {
+      expect(comment).toContain(section);
+    }
+    // the suite's details and the metadata are the body's, which is left as filed
+    expect(comment).not.toContain('### Suite');
+    expect(comment).not.toContain('kibanaCiData');
+    expect(comment).toMatch(
+      /\n\n> \[!TIP\]\n> Review the failures\. .*`\/skip` it, or skip the test case manually\.$/
+    );
+    expect(comment).toMatchSnapshot();
   });
 
-  it('says why the issue is reopened', () => {
-    expect(renderFlakySuiteIssueComment({ reopened: true })).toMatch(
-      /^This test suite appears to be flaky again after this issue was closed\.\n\n> \[!TIP\]/
+  it('says why the issue is reopened and counts the tests', () => {
+    const { suite, report } = multiTestReport();
+
+    expect(renderFlakySuiteIssueComment(suite, { report, reopened: true })).toMatch(
+      /^This test suite appears to be flaky again after this issue was closed, with 3 flaky tests over 2–9 Sep 2026:\n\n\| Test \|/
     );
   });
 });
