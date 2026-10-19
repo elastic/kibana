@@ -217,6 +217,13 @@ describe('Content — group view', () => {
     );
   });
 
+  it('tells the entity summary to wait while the entity store record is loading', () => {
+    render(<Content {...defaultProps} isEntityRecordLoading />, { wrapper: TestProviders });
+    expect(mockEntityHighlightsAccordion).toHaveBeenLastCalledWith(
+      expect.objectContaining({ isEntityRecordLoading: true })
+    );
+  });
+
   it('leaves the entity summary in single mode when no mode is given', () => {
     render(<Content {...defaultProps} />, { wrapper: TestProviders });
     expect(mockEntityHighlightsAccordion).toHaveBeenLastCalledWith(

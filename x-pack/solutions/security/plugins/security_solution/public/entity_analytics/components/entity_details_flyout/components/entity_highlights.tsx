@@ -59,7 +59,20 @@ export const EntityHighlightsAccordion: React.FC<{
   entityRecord?: Entity | null;
   refetchEntityRecord?: () => void;
   mode?: EntityViewMode;
-}> = ({ entityType, entityIdentifier, entityRecord, refetchEntityRecord, mode = 'single' }) => {
+  /**
+   * True while the entity store record is still being resolved. The persisted summary is keyed
+   * by the record's EUID and the staleness check needs its risk score, so wait for it instead of
+   * fetching with a placeholder identifier and re-laying out once the record arrives.
+   */
+  isEntityRecordLoading?: boolean;
+}> = ({
+  entityType,
+  entityIdentifier,
+  entityRecord,
+  refetchEntityRecord,
+  mode = 'single',
+  isEntityRecordLoading = false,
+}) => {
   // Degrade gracefully on surfaces that render outside `AssistantProvider` (e.g. the Agent
   // Builder attachment Canvas). The Elastic Assistant–backed summary cannot work without it.
   const assistantContext = useMaybeAssistantContext();
@@ -133,6 +146,7 @@ export const EntityHighlightsAccordion: React.FC<{
     entityType,
     entityIdentifier,
     mode,
+    skip: isEntityRecordLoading,
   });
 
   // Snapshot of current entity signals — passed to the hook so they are persisted
@@ -142,7 +156,7 @@ export const EntityHighlightsAccordion: React.FC<{
     () =>
       buildEntitySummaryStalenessEntitySnapshot(
         entityRecord ? (entityRecord as EntityStoreRecord) : null,
-        { preferResolutionRisk: mode === 'resolved' }
+        { useResolutionRisk: mode === 'resolved' }
       ),
     [entityRecord, mode]
   );
@@ -280,6 +294,7 @@ export const EntityHighlightsAccordion: React.FC<{
     () =>
       isGeneratingSummary ||
       isPersistedSummaryLoading ||
+      isEntityRecordLoading ||
       // Connector / anonymization loading only matters for generation, not for
       // displaying an already-persisted summary to a read-only user.
       (canGenerate &&
@@ -290,6 +305,7 @@ export const EntityHighlightsAccordion: React.FC<{
       isGeneratingSummary,
       isLoadingConnectors,
       isPersistedSummaryLoading,
+      isEntityRecordLoading,
       isCheckingInferencePrivileges,
     ]
   );
@@ -302,7 +318,8 @@ export const EntityHighlightsAccordion: React.FC<{
 
   const hasAssistantResult = assistantResult != null;
   // First paint with nothing to show yet — replace the body with a skeleton.
-  const isLoadingInitialSummary = !hasAssistantResult && isPersistedSummaryLoading;
+  const isLoadingInitialSummary =
+    !hasAssistantResult && (isPersistedSummaryLoading || isEntityRecordLoading);
   // Content is already on screen; keep it mounted and show a thin progress bar
   // while the persisted summary refetches in the background
   const isSummaryRefreshing =
@@ -326,7 +343,7 @@ export const EntityHighlightsAccordion: React.FC<{
   }
 
   // hide section if user cannot generate a summary and there is no stored summary
-  if (!canGenerate && (isPersistedSummaryLoading || !hasReadablePersistedSummary)) {
+  if (!canGenerate && (isLoadingInitialSummary || !hasReadablePersistedSummary)) {
     return null;
   }
 

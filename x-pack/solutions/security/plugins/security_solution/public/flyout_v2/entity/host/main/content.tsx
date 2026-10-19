@@ -69,6 +69,8 @@ export interface ContentProps {
   refetchEntityRecord?: () => void;
   /** When true (i.e. entity store v2 enabled but no entity found), hide entity highlights and risk score. */
   noEntityInStore?: boolean;
+  /** True while the entity store record is being resolved (v2); the AI summary waits for it. */
+  isEntityRecordLoading?: boolean;
   /** When `true`, hide the legacy asset criticality accordion. Required so every call site wires it explicitly. */
   entityStoreV2Enabled: boolean;
   /** Entity store entity ID for the host. */
@@ -125,6 +127,7 @@ export const Content = ({
   aliasRecords,
   refetchEntityRecord,
   noEntityInStore = false,
+  isEntityRecordLoading = false,
   entityStoreV2Enabled,
   entityStoreEntityId,
   mode,
@@ -178,6 +181,7 @@ export const Content = ({
           entityRecord={entityRecord}
           refetchEntityRecord={refetchEntityRecord}
           mode={mode}
+          isEntityRecordLoading={isEntityRecordLoading}
         />
       )}
       {!noEntityInStore &&

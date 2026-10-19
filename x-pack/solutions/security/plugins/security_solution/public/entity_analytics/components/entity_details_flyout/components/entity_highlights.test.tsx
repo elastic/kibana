@@ -486,6 +486,49 @@ describe('EntityHighlights', () => {
     expect(screen.queryByRole('button', { name: 'Generate' })).not.toBeInTheDocument();
   });
 
+  describe('while the entity store record is loading', () => {
+    it('skips the persisted-summary fetch and shows the loading skeleton instead of the empty state', () => {
+      render(<EntityHighlightsAccordion {...defaultProps} isEntityRecordLoading />, {
+        wrapper: TestProviders,
+      });
+
+      expect(mockUseFetchPersistedAiSummary).toHaveBeenCalledWith(
+        expect.objectContaining({ skip: true })
+      );
+      expect(
+        screen.getByRole('progressbar', { name: /loading entity summary/i })
+      ).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Generate' })).not.toBeInTheDocument();
+      expect(screen.queryByTestId('entity-highlights-staleness-callout')).not.toBeInTheDocument();
+    });
+
+    it('does not fetch the persisted summary once the record has resolved', () => {
+      render(<EntityHighlightsAccordion {...defaultProps} />, { wrapper: TestProviders });
+
+      expect(mockUseFetchPersistedAiSummary).toHaveBeenCalledWith(
+        expect.objectContaining({ skip: false })
+      );
+    });
+
+    it('hides the section for a user who cannot generate until the record has resolved', () => {
+      mockUseAssistantAvailability.mockReturnValue({
+        ...defaultAssistantAvailability,
+        hasAssistantPrivilege: false,
+        hasConnectorsReadPrivilege: false,
+      });
+      mockUseAgentBuilderAvailability.mockReturnValue({
+        ...defaultAgentBuilderAvailability,
+        hasAgentBuilderPrivilege: false,
+      });
+
+      render(<EntityHighlightsAccordion {...defaultProps} isEntityRecordLoading />, {
+        wrapper: TestProviders,
+      });
+
+      expect(screen.queryByTestId('entity-highlights-accordion')).not.toBeInTheDocument();
+    });
+  });
+
   it('keeps content mounted and shows a progress bar while the persisted summary refetches', () => {
     const mockAssistantResult = createAssistantResult({
       text: 'Summary stays visible during background refetch',

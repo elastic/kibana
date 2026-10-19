@@ -54,22 +54,22 @@ describe('buildEntitySummaryStalenessEntitySnapshot', () => {
     });
   });
 
-  it('snapshots the resolution-group risk score when preferResolutionRisk is set', () => {
+  it('snapshots the resolution-group risk score when useResolutionRisk is set', () => {
     expect(
       buildEntitySummaryStalenessEntitySnapshot(recordWithBothScores, {
-        preferResolutionRisk: true,
+        useResolutionRisk: true,
       })
     ).toEqual({ riskScoreNorm: 91 });
   });
 
-  it('snapshots null when preferResolutionRisk is set but the record has no resolution score', () => {
+  it('snapshots null when useResolutionRisk is set but the record has no resolution score', () => {
     const record = {
       entity: { risk: { calculated_level: RiskSeverity.High, calculated_score_norm: 70 } },
     } as EntityStoreRecord;
 
-    expect(
-      buildEntitySummaryStalenessEntitySnapshot(record, { preferResolutionRisk: true })
-    ).toEqual({ riskScoreNorm: null });
+    expect(buildEntitySummaryStalenessEntitySnapshot(record, { useResolutionRisk: true })).toEqual({
+      riskScoreNorm: null,
+    });
   });
 
   it('snapshots null when there is no entity record', () => {

@@ -58,11 +58,9 @@ export function getHeaderRiskLevel(
  */
 export function buildEntitySummaryStalenessEntitySnapshot(
   record?: EntityStoreRecord | null,
-  { preferResolutionRisk = false }: { preferResolutionRisk?: boolean } = {}
+  { useResolutionRisk = false }: { useResolutionRisk?: boolean } = {}
 ): EntitySummaryStalenessEntitySnapshot {
-  const getRisk = preferResolutionRisk
-    ? getResolutionRiskFromEntityRecord
-    : getRiskFromEntityRecord;
+  const getRisk = useResolutionRisk ? getResolutionRiskFromEntityRecord : getRiskFromEntityRecord;
   const risk = record ? getRisk(record) : null;
   return {
     // Matches flyout risk summary (`entity.risk.calculated_score_norm`), not raw calculated_score.

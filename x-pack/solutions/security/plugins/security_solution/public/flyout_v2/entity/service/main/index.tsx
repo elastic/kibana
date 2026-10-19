@@ -344,6 +344,7 @@ export const Service: FC<ServiceProps> = memo(function Service({
         ) : (
           <ServicePanelContent
             entityRecord={entityFromStoreResult.entityRecord ?? undefined}
+            isEntityRecordLoading={entityFromStoreResult.isLoading}
             serviceName={serviceName}
             observedService={observedService}
             riskScoreState={riskScoreState}

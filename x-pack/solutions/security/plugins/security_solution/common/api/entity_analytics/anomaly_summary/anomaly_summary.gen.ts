@@ -37,14 +37,6 @@ export const AnomalyScoreRange = lazySchema(() =>
 );
 export type AnomalyScoreRange = z.infer<typeof AnomalyScoreRange>;
 
-/**
- * Which Entity Store records the request covers. `single` queries the target entity only; `resolved` also includes every entity resolved to the target (its resolution group).
- */
-export const AnomalyEntityMode = lazySchema(() => z.enum(['single', 'resolved']));
-export type AnomalyEntityMode = z.infer<typeof AnomalyEntityMode>;
-export type AnomalyEntityModeEnum = typeof AnomalyEntityMode.enum;
-export const AnomalyEntityModeEnum = AnomalyEntityMode.enum;
-
 export const AnomalySummaryRequestBody = lazySchema(() =>
   z.object({
     mode: EntityViewMode.optional().default('single'),

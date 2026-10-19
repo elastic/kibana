@@ -40,6 +40,7 @@ interface ServicePanelContentProps {
   openDetailsPanel: (path: EntityDetailsPath) => void;
   entityRecord?: Entity;
   refetchEntityRecord?: () => void;
+  isEntityRecordLoading?: boolean;
   /** When `true`, hide the legacy asset criticality accordion. Required so every call site wires it explicitly. */
   entityStoreV2Enabled: boolean;
   entityStoreEntityId?: string;
@@ -80,6 +81,7 @@ export const ServicePanelContent = ({
   serviceName,
   entityRecord,
   refetchEntityRecord,
+  isEntityRecordLoading = false,
   observedService,
   riskScoreState,
   entityRiskScores,
@@ -125,6 +127,7 @@ export const ServicePanelContent = ({
         entityRecord={entityRecord}
         refetchEntityRecord={refetchEntityRecord}
         mode={mode}
+        isEntityRecordLoading={isEntityRecordLoading}
       />
       {riskScoreState.hasEngineBeenInstalled && riskScoreState.data?.length !== 0 && (
         <>
