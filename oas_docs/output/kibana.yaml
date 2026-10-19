@@ -9216,7 +9216,7 @@ paths:
       summary: List action policies
       tags:
         - alerting-v2
-      x-state: Experimental; added in 9.5.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -9376,7 +9376,7 @@ paths:
       summary: Create an action policy
       tags:
         - alerting-v2
-      x-state: Experimental; added in 9.5.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -9499,7 +9499,7 @@ paths:
       summary: Delete action policies in bulk by ID
       tags:
         - alerting-v2
-      x-state: Experimental; added in 9.5.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -9622,7 +9622,7 @@ paths:
       summary: Disable action policies in bulk by ID
       tags:
         - alerting-v2
-      x-state: Experimental; added in 9.5.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -9755,7 +9755,7 @@ paths:
       summary: Enable action policies in bulk by ID
       tags:
         - alerting-v2
-      x-state: Experimental; added in 9.5.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -9879,7 +9879,7 @@ paths:
       summary: Snooze action policies in bulk by ID
       tags:
         - alerting-v2
-      x-state: Experimental; added in 9.5.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -10002,7 +10002,7 @@ paths:
       summary: Cancel snooze for action policies in bulk by ID
       tags:
         - alerting-v2
-      x-state: Experimental; added in 9.5.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -10125,7 +10125,7 @@ paths:
       summary: Rotate API keys for action policies in bulk by ID
       tags:
         - alerting-v2
-      x-state: Experimental; added in 9.5.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -10250,7 +10250,7 @@ paths:
       summary: Delete an action policy
       tags:
         - alerting-v2
-      x-state: Experimental; added in 9.5.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -10395,7 +10395,7 @@ paths:
       summary: Get an action policy
       tags:
         - alerting-v2
-      x-state: Experimental; added in 9.5.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -10588,7 +10588,7 @@ paths:
       summary: Partially update an action policy.
       tags:
         - alerting-v2
-      x-state: Experimental; added in 9.5.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -10802,7 +10802,7 @@ paths:
       summary: Create or replace an action policy
       tags:
         - alerting-v2
-      x-state: Experimental; added in 9.5.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -10970,7 +10970,7 @@ paths:
       summary: Disable an action policy
       tags:
         - alerting-v2
-      x-state: Experimental; added in 9.5.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -11148,7 +11148,7 @@ paths:
       summary: Enable an action policy
       tags:
         - alerting-v2
-      x-state: Experimental; added in 9.5.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -11327,7 +11327,7 @@ paths:
       summary: Snooze an action policy
       tags:
         - alerting-v2
-      x-state: Experimental; added in 9.5.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -11495,7 +11495,7 @@ paths:
       summary: Unsnooze an action policy
       tags:
         - alerting-v2
-      x-state: Experimental; added in 9.5.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -11663,7 +11663,7 @@ paths:
       summary: Update an action policy API key
       tags:
         - alerting-v2
-      x-state: Experimental; added in 9.5.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -11787,7 +11787,7 @@ paths:
       summary: Bulk acknowledge alerts
       tags:
         - alerting-v2
-      x-state: Experimental; added in 9.5.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -11907,7 +11907,7 @@ paths:
       summary: Bulk activate alerts
       tags:
         - alerting-v2
-      x-state: Experimental; added in 9.5.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -12029,7 +12029,7 @@ paths:
       summary: Bulk assign alerts
       tags:
         - alerting-v2
-      x-state: Experimental; added in 9.5.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -12149,7 +12149,7 @@ paths:
       summary: Bulk deactivate alerts
       tags:
         - alerting-v2
-      x-state: Experimental; added in 9.5.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -12273,7 +12273,7 @@ paths:
       summary: Bulk tag alerts
       tags:
         - alerting-v2
-      x-state: Experimental; added in 9.5.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -12393,7 +12393,7 @@ paths:
       summary: Bulk unacknowledge alerts
       tags:
         - alerting-v2
-      x-state: Experimental; added in 9.5.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -12540,7 +12540,7 @@ paths:
       summary: Acknowledge an alert
       tags:
         - alerting-v2
-      x-state: Experimental; added in 9.5.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -12687,7 +12687,7 @@ paths:
       summary: Activate an alert
       tags:
         - alerting-v2
-      x-state: Experimental; added in 9.5.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -12835,7 +12835,7 @@ paths:
       summary: Assign an alert to a user
       tags:
         - alerting-v2
-      x-state: Experimental; added in 9.5.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -12982,7 +12982,7 @@ paths:
       summary: Deactivate an alert
       tags:
         - alerting-v2
-      x-state: Experimental; added in 9.5.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -13132,7 +13132,7 @@ paths:
       summary: Tag an alert
       tags:
         - alerting-v2
-      x-state: Experimental; added in 9.5.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -13279,7 +13279,7 @@ paths:
       summary: Unacknowledge an alert
       tags:
         - alerting-v2
-      x-state: Experimental; added in 9.5.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -13495,7 +13495,7 @@ paths:
       summary: List action policy executions
       tags:
         - alerting-v2
-      x-state: Experimental; added in 9.5.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -13686,7 +13686,7 @@ paths:
       summary: List rule executions
       tags:
         - alerting-v2
-      x-state: Experimental; added in 9.5.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -13880,7 +13880,7 @@ paths:
       summary: List rules
       tags:
         - alerting-v2
-      x-state: Experimental; added in 9.5.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -14061,7 +14061,7 @@ paths:
       summary: Create a rule
       tags:
         - alerting-v2
-      x-state: Experimental; added in 9.5.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -14315,7 +14315,7 @@ paths:
       summary: Create rules in bulk
       tags:
         - alerting-v2
-      x-state: Experimental; added in 9.5.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -14435,7 +14435,7 @@ paths:
       summary: Delete rules in bulk by ID
       tags:
         - alerting-v2
-      x-state: Experimental; added in 9.5.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -14555,7 +14555,7 @@ paths:
       summary: Disable rules in bulk by ID
       tags:
         - alerting-v2
-      x-state: Experimental; added in 9.5.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -14675,7 +14675,7 @@ paths:
       summary: Enable rules in bulk by ID
       tags:
         - alerting-v2
-      x-state: Experimental; added in 9.5.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -14845,7 +14845,7 @@ paths:
       summary: Get rules in bulk
       tags:
         - alerting-v2
-      x-state: Experimental; added in 9.5.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -14965,7 +14965,7 @@ paths:
       summary: Update the API key of rules in bulk by ID
       tags:
         - alerting-v2
-      x-state: Experimental; added in 9.5.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -15087,7 +15087,7 @@ paths:
       summary: Delete rules matching a query (dry-run by default)
       tags:
         - alerting-v2
-      x-state: Experimental; added in 9.5.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -15209,7 +15209,7 @@ paths:
       summary: Disable rules matching a query (dry-run by default)
       tags:
         - alerting-v2
-      x-state: Experimental; added in 9.5.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -15331,7 +15331,7 @@ paths:
       summary: Enable rules matching a query (dry-run by default)
       tags:
         - alerting-v2
-      x-state: Experimental; added in 9.5.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -15453,7 +15453,7 @@ paths:
       summary: Update the API key of rules matching a query (dry-run by default)
       tags:
         - alerting-v2
-      x-state: Experimental; added in 9.5.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -15578,7 +15578,7 @@ paths:
       summary: Delete a rule
       tags:
         - alerting-v2
-      x-state: Experimental; added in 9.5.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -15743,7 +15743,7 @@ paths:
       summary: Get a rule
       tags:
         - alerting-v2
-      x-state: Experimental; added in 9.5.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -15938,7 +15938,7 @@ paths:
       summary: Update a rule
       tags:
         - alerting-v2
-      x-state: Experimental; added in 9.5.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -16191,7 +16191,7 @@ paths:
       summary: Create or replace a rule
       tags:
         - alerting-v2
-      x-state: Experimental; added in 9.5.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -16377,7 +16377,7 @@ paths:
       summary: Disable a rule
       tags:
         - alerting-v2
-      x-state: Experimental; added in 9.5.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -16559,7 +16559,7 @@ paths:
       summary: Enable a rule
       tags:
         - alerting-v2
-      x-state: Experimental; added in 9.5.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -16694,7 +16694,7 @@ paths:
       summary: Run a rule now
       tags:
         - alerting-v2
-      x-state: Experimental; added in 9.5.0
+      x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
           name: product_name
