@@ -161,22 +161,14 @@ export class WorkflowExecutionQueryService {
     if (ids.length === 0) {
       return [];
     }
-    // const { items } = await this.deps.workflowExecutionsDataClient.getByIds(ids, {
-    //   sourceIncludes: ['spaceId', 'workflowId', 'status'],
-    // });
-    const x = await this.deps.workflowsExecutionEngine.getStepExecutionsByIds({
+
+    const items = await this.deps.workflowsExecutionEngine.getStepExecutionsByIds({
       ids,
       spaceId,
       sourceIncludes: ['spaceId', 'workflowId', 'status'],
     });
 
-    const { items } = await this.deps.workflowExecutionsDataClient.getByIds(ids, {
-      sourceIncludes: ['spaceId', 'workflowId', 'status'],
-    });
-    return items
-      .map(({ document }) => document)
-      .filter((execution) => execution.spaceId === spaceId)
-      .map(({ id, workflowId, status }) => ({ id, workflowId, status }));
+    return items.map(({ id, workflowId, status }) => ({ id, workflowId, status }));
   }
 
   async getChildWorkflowExecutions(
