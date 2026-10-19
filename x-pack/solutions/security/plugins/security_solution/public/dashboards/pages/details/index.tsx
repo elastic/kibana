@@ -30,35 +30,19 @@ import { DashboardToolBar } from '../../components/dashboard_tool_bar';
 import { useDashboardRenderer } from '../../hooks/use_dashboard_renderer';
 import { DashboardTitle } from '../../components/dashboard_title';
 
+const dashboardExpandedStyles = {
+  '&:has(.dshDashboardViewport--panelExpanded)': {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    flex: '1 1 auto',
+    height: '100%',
+    minHeight: 0,
+  },
+};
+
 const dashboardViewFlexGroupStyle = {
   minHeight: 'calc(100vh - 140px)',
-  '&:has(.dshDashboardViewport--panelExpanded)': {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    flex: '1 1 auto',
-    height: '100%',
-    minHeight: 0,
-  },
-};
-
-const dashboardPageStyle = {
-  '&:has(.dshDashboardViewport--panelExpanded)': {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    flex: '1 1 auto',
-    height: '100%',
-    minHeight: 0,
-  },
-};
-
-const dashboardPanelSlotStyle = {
-  '&:has(.dshDashboardViewport--panelExpanded)': {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    flex: '1 1 auto',
-    height: '100%',
-    minHeight: 0,
-  },
+  ...dashboardExpandedStyles,
 };
 
 interface DashboardViewProps {
@@ -101,7 +85,7 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
       <FiltersGlobal>
         <SiemSearchBar dataView={dataView} id={InputsModelId.global} />
       </FiltersGlobal>
-      <SecuritySolutionPageWrapper css={dashboardPageStyle}>
+      <SecuritySolutionPageWrapper css={dashboardExpandedStyles}>
         <EuiFlexGroup
           direction="column"
           css={dashboardViewFlexGroupStyle}
@@ -129,7 +113,7 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
             )}
           </EuiFlexItem>
           {!errorState && (
-            <EuiFlexItem css={dashboardPanelSlotStyle} grow>
+            <EuiFlexItem css={dashboardExpandedStyles} grow>
               <DashboardRenderer
                 query={query}
                 filters={filters}
