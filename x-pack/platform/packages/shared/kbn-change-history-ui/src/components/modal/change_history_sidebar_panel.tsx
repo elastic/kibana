@@ -66,6 +66,7 @@ export function ChangeHistorySidebarPanel({
     }),
     [euiTheme]
   );
+
   return (
     <div css={styles.panel} data-test-subj="changeHistorySidebarPanel">
       <div css={styles.header}>

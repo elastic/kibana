@@ -66,6 +66,7 @@ export function ChangeHistoryModal(): JSX.Element | null {
     objectId,
     enabled: isOpen,
   });
+
   const reportChangeSelected = useCallback(
     (item: ChangeHistoryListItem, selectionSource: ChangeHistorySelectionSource) => {
       if (lastReportedChangeIdBySourceRef.current[selectionSource] === item.id) {
@@ -87,7 +88,6 @@ export function ChangeHistoryModal(): JSX.Element | null {
     items,
     isFetchingFirstPage,
     enabled: isOpen,
-    selectedChangeId,
     setSelectedChangeId,
     onAutoSelect: (item) => reportChangeSelected(item, 'auto_latest'),
   });

@@ -118,7 +118,7 @@ export function ChangeHistoryTimeline({
         aria-label={i18n.TIMELINE_ARIA_LABEL}
         data-test-subj="changeHistoryTimelineList"
       >
-        {items.map((item, index) => (
+        {items.map((item) => (
           <ChangeHistoryItem
             key={item.id}
             item={item}
