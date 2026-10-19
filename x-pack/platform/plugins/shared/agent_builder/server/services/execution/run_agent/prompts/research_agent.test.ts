@@ -210,14 +210,17 @@ describe('getResearchAgentPrompt', () => {
     expect(messages.map(asText).some((t) => t.includes(NOTICE_MARKER))).toBe(false);
   });
 
-  it('omits the AI Indices section when the agent declares no AI Indices', async () => {
+  it('renders the AI Indices section when the agent has none assigned', async () => {
     const messages = await getResearchAgentPrompt(
       makeParams({
         experimentalFeatures: { aiIndices: true, bash: false, skills: false },
       })
     );
+    const system = asText(messages[0]);
 
-    expect(asText(messages[0])).not.toContain('## AI INDICES');
+    expect(system).toContain('## AI INDICES');
+    expect(system).toContain('No AI Indices are assigned to this agent');
+    expect(system).not.toContain('Available to this agent:');
   });
 
   it('omits the AI Indices section when AI Index instructions are disabled', async () => {
