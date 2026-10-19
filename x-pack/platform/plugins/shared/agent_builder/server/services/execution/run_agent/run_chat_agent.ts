@@ -189,6 +189,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     modelProvider.getDefaultModel(),
     resolveConfiguration(agentConfiguration, {
       aiIndicesEnabled: experimentalFeatures.aiIndices,
+      defaultAiIndexEnabled: experimentalFeatures.defaultAiIndex,
       request,
       resolver: context.aiIndexResolver,
       logger,
