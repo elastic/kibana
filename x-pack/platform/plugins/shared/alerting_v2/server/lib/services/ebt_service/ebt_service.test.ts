@@ -10,6 +10,7 @@ import {
   type RuleChangedEbtData,
 } from '../../telemetry/rule_ebt_schema';
 import type { AnalyticsServiceStart, Logger } from '@kbn/core/server';
+import { analyticsServiceMock } from '@kbn/core/server/mocks';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import { createLoggerService } from '../logger_service/logger_service.mock';
 import { EbtService } from './ebt_service';
@@ -23,12 +24,12 @@ const data: RuleChangedEbtData = {
 };
 
 describe('EbtService', () => {
-  let analytics: jest.Mocked<Pick<AnalyticsServiceStart, 'reportEvent'>>;
+  let analytics: jest.Mocked<AnalyticsServiceStart>;
   let mockLogger: jest.Mocked<Logger>;
   let service: EbtService;
 
   beforeEach(() => {
-    analytics = { reportEvent: jest.fn() };
+    analytics = analyticsServiceMock.createAnalyticsServiceStart();
     const { loggerService, mockLogger: logger } = createLoggerService();
     mockLogger = logger;
     service = new EbtService(analytics, loggerService);

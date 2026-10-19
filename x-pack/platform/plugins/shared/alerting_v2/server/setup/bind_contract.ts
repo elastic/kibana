@@ -49,10 +49,8 @@ export function bindContract({ bind }: ContainerModuleLoadOptions) {
       const scope = injection.fork();
       scope.bind(Request).toConstantValue(request);
       scope.bind(Global).toConstantValue(Request);
-      if (rulesClientOptions) {
-        scope.bind(RulesClientOptionsToken).toConstantValue(rulesClientOptions);
-        scope.bind(Global).toConstantValue(RulesClientOptionsToken);
-      }
+      scope.bind(RulesClientOptionsToken).toConstantValue(rulesClientOptions ?? {});
+      scope.bind(Global).toConstantValue(RulesClientOptionsToken);
       if (spaceId) {
         scope.bind(RequestSpaceIdToken).toConstantValue(spaceId);
         scope.bind(Global).toConstantValue(RequestSpaceIdToken);
