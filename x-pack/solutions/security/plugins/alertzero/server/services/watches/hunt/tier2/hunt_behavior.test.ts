@@ -1158,6 +1158,35 @@ describe('huntBehavior', () => {
       // the budget with no slot wasted on a duplicate.
       expect(generateEsqlMock).toHaveBeenCalledTimes(20);
     });
+
+    it('does not mark siblings collapsed when their survivor is cut by the generation budget', async () => {
+      // 20 high-confidence unique behaviors fill the budget. Three lower-confidence behaviors
+      // (still above the 0.5 extraction floor) share one artifact; collapse keeps one survivor,
+      // then that survivor misses the cut. The two siblings must not claim `collapsed` (nothing
+      // hunted those artifacts).
+      const ids = [...enterpriseCatalog.techniqueById.keys()].slice(0, 23);
+      const sharedQuote = 'evidence mentioning evil.example.com directly';
+      generateEsqlMock.mockResolvedValue({ query: GROUNDED_ESQL });
+
+      const candidates = ids.map((technique_id, index) => ({
+        technique_id,
+        evidence_quote: index < 3 ? sharedQuote : 'evidence',
+        // Shared group clears the extraction threshold but stays below every unique behavior.
+        llm_confidence: index < 3 ? 0.5 + index * 0.01 : 0.7 + index * 0.01,
+      }));
+
+      const result = await huntBehavior(
+        buildMockModel(candidates),
+        logger,
+        { ...executeParams, text: `${REPORT_TEXT} ${sharedQuote}`, iocs: [sharedIoc] },
+        esClient
+      );
+
+      expect(result.behaviors).toHaveLength(23);
+      expect(result.incomplete?.some((i) => i.reason === 'collapsed')).not.toBe(true);
+      expect(result.incomplete?.filter((i) => i.reason === 'generation_budget')).toHaveLength(3);
+      expect(generateEsqlMock).toHaveBeenCalledTimes(20);
+    });
   });
 
   describe('the generation budget', () => {
