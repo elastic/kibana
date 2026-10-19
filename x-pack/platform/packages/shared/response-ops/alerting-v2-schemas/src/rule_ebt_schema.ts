@@ -60,13 +60,14 @@ export const ruleEventAppTelemetrySchema = lazySchema(() =>
 export type RuleEbtApp = z.infer<typeof ruleEventAppTelemetrySchema>;
 
 /**
- * Channel and app derived from the request. Actor is not included: the rules
- * client does not know who made the change.
+ * Channel, app, and optional actor derived from the request. Actor is optional
+ * because the rules client may not yet know who made the change at resolve time.
  */
 export const ruleEventOriginTelemetrySchema = lazySchema(() =>
   z.object({
     channel: ruleEventChannelTelemetrySchema,
     app: ruleEventAppTelemetrySchema.optional(),
+    actor: ruleEventActorTelemetrySchema.optional(),
   })
 );
 
