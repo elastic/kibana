@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
-import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
-import type { AppContextTestRender } from '../../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import { EndpointActionGenerator } from '../../../../../../../../common/endpoint/data_generators/endpoint_action_generator';
+import type { AppContextTestRender } from '../../../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../../../common/mock/endpoint';
 import type {
   ActionDetails,
   ResponseActionRunScriptOutputContent,
-} from '../../../../common/endpoint/types';
+} from '../../../../../../../../common/endpoint/types';
 import { CrowdstrikeRunscriptOutput } from './crowdstrike_runscript_output';
 
 describe('CrowdstrikeRunscriptOutput component', () => {

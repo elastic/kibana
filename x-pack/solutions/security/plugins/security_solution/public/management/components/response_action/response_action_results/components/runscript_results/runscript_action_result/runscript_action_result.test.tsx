@@ -13,20 +13,20 @@
  */
 
 import React from 'react';
-import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
-import type { AppContextTestRender } from '../../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import { EndpointActionGenerator } from '../../../../../../../../common/endpoint/data_generators/endpoint_action_generator';
+import type { AppContextTestRender } from '../../../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../../../common/mock/endpoint';
 import type {
   ActionDetails,
   ResponseActionRunScriptOutputContent,
-} from '../../../../common/endpoint/types';
+} from '../../../../../../../../common/endpoint/types';
 import { RunscriptActionResult } from './runscript_action_result';
 
-import { useUserPrivileges as _useUserPrivileges } from '../../../common/components/user_privileges';
-import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mocks';
+import { useUserPrivileges as _useUserPrivileges } from '../../../../../../../common/components/user_privileges';
+import { responseActionsHttpMocks } from '../../../../../../mocks/response_actions_http_mocks';
 import { waitFor } from '@testing-library/react';
 
-jest.mock('../../../common/components/user_privileges');
+jest.mock('../../../../../../../common/components/user_privileges');
 
 const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
 

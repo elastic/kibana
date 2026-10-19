@@ -17,12 +17,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 
-import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../../../../../../hooks/use_test_id_generator';
 import type {
   ActionDetails,
   MaybeImmutable,
   ResponseActionRunScriptOutputContent,
-} from '../../../../common/endpoint/types';
+} from '../../../../../../../../common/endpoint/types';
 
 const ACCORDION_BUTTON_TEXT = Object.freeze({
   output: i18n.translate('xpack.securitySolution.crowdstrikeRunscriptAccordion.outputButtonText', {
