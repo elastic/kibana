@@ -59,6 +59,21 @@ const mockRulesWithLongTags = [
   },
 ];
 
+const mockRulesWithRoutingTags = [
+  {
+    id: 'rule-routing-tags',
+    kind: 'alert',
+    enabled: true,
+    metadata: {
+      name: 'Rule With Routing Tags',
+      tags: [],
+      routing_tags: ['team-a', 'team-b', 'team-c'],
+    },
+    schedule: { every: '1m' },
+    query: { base: 'FROM logs-* | LIMIT 1' },
+  },
+];
+
 const defaultProps: RulesListTableProps = {
   items: mockRules as any,
   totalItemCount: 2,
@@ -229,6 +244,50 @@ describe('RulesListTable', () => {
       expect(
         screen.getByText('this-is-a-very-long-tag-name-that-should-be-truncated')
       ).toBeInTheDocument();
+    });
+  });
+
+  describe('routing tags column', () => {
+    it('renders the routing tags header with an info icon explaining them', async () => {
+      renderTable();
+
+      expect(screen.getByText('Routing tags')).toBeInTheDocument();
+
+      fireEvent.mouseOver(screen.getByTestId('routingTagsColumnInfoIcon'));
+
+      expect(
+        await screen.findByText(
+          'Action policies apply to a rule when they share at least one of its routing tags.'
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('truncates routing tags to the first one and a +N badge, like regular tags', () => {
+      renderTable({
+        items: mockRulesWithRoutingTags as any,
+        totalItemCount: 1,
+      });
+
+      expect(screen.getByTestId('routingTagsContainer')).toHaveTextContent('team-a');
+      expect(screen.getByTestId('overflowRoutingTagsBadge')).toHaveTextContent('+2');
+      expect(screen.queryByText('team-b')).not.toBeInTheDocument();
+    });
+
+    it('shows the overflowing routing tags in a tooltip', async () => {
+      renderTable({
+        items: mockRulesWithRoutingTags as any,
+        totalItemCount: 1,
+      });
+
+      fireEvent.mouseOver(screen.getByTestId('overflowRoutingTagsBadge'));
+
+      expect(await screen.findByText('team-b, team-c')).toBeInTheDocument();
+    });
+
+    it('renders an empty value for rules without routing tags', () => {
+      renderTable();
+
+      expect(screen.queryByTestId('routingTagsContainer')).not.toBeInTheDocument();
     });
   });
 

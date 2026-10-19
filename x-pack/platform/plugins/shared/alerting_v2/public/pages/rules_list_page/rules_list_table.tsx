@@ -15,6 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiIconTip,
   EuiLink,
   EuiLoadingSpinner,
   EuiSpacer,
@@ -60,6 +61,48 @@ const descriptionTextStyle = css`
   overflow: hidden;
   word-break: break-word;
 `;
+
+interface RuleTagsCellProps {
+  tags?: string[];
+  containerTestSubj: string;
+  overflowTestSubj: string;
+}
+
+const RuleTagsCell: React.FC<RuleTagsCellProps> = ({
+  tags,
+  containerTestSubj,
+  overflowTestSubj,
+}) => {
+  if (!tags || tags.length === 0) {
+    return <FormattedMessage id="xpack.alertingV2.rulesList.emptyValue" defaultMessage="-" />;
+  }
+  const overflowCount = tags.length - 1;
+  return (
+    <EuiBadgeGroup gutterSize="xs" css={labelsContainerStyle} data-test-subj={containerTestSubj}>
+      <EuiBadge color="hollow" css={overflowCount > 0 ? labelBadgeStyle : undefined}>
+        {tags[0]}
+      </EuiBadge>
+      {overflowCount > 0 && (
+        <span css={overflowTooltipStyle}>
+          <EuiToolTip content={tags.slice(1).join(', ')}>
+            <EuiBadge
+              tabIndex={0}
+              color="hollow"
+              data-test-subj={overflowTestSubj}
+              iconType="tag"
+              title=""
+            >
+              {i18n.translate('xpack.alertingV2.rulesList.tags.overflow', {
+                defaultMessage: '+{count}',
+                values: { count: overflowCount },
+              })}
+            </EuiBadge>
+          </EuiToolTip>
+        </span>
+      )}
+    </EuiBadgeGroup>
+  );
+};
 
 export type RulesListTableSortField = 'kind' | 'enabled' | 'metadata';
 
@@ -250,45 +293,50 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
         name: (
           <FormattedMessage id="xpack.alertingV2.rulesList.column.tags" defaultMessage="Tags" />
         ),
-        width: '20%',
-        render: (_metadata: RuleApiResponse['metadata']) => {
-          const tags = _metadata?.tags;
-          if (!tags || tags.length === 0) {
-            return (
-              <FormattedMessage id="xpack.alertingV2.rulesList.emptyValue" defaultMessage="-" />
-            );
-          }
-          const overflowCount = tags.length - 1;
-          return (
-            <EuiBadgeGroup
-              gutterSize="xs"
-              css={labelsContainerStyle}
-              data-test-subj="tagsContainer"
-            >
-              <EuiBadge color="hollow" css={overflowCount > 0 ? labelBadgeStyle : undefined}>
-                {tags[0]}
-              </EuiBadge>
-              {overflowCount > 0 && (
-                <span css={overflowTooltipStyle}>
-                  <EuiToolTip content={tags.slice(1).join(', ')}>
-                    <EuiBadge
-                      tabIndex={0}
-                      color="hollow"
-                      data-test-subj="overflowTagsBadge"
-                      iconType="tag"
-                      title=""
-                    >
-                      {i18n.translate('xpack.alertingV2.rulesList.tags.overflow', {
-                        defaultMessage: '+{count}',
-                        values: { count: overflowCount },
-                      })}
-                    </EuiBadge>
-                  </EuiToolTip>
-                </span>
-              )}
-            </EuiBadgeGroup>
-          );
-        },
+        width: '15%',
+        render: (metadata: RuleApiResponse['metadata']) => (
+          <RuleTagsCell
+            tags={metadata?.tags}
+            containerTestSubj="tagsContainer"
+            overflowTestSubj="overflowTagsBadge"
+          />
+        ),
+      },
+      {
+        field: 'metadata',
+        name: (
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <FormattedMessage
+                id="xpack.alertingV2.rulesList.column.routingTags"
+                defaultMessage="Routing tags"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiIconTip
+                type="info"
+                color="subdued"
+                anchorProps={{ 'data-test-subj': 'routingTagsColumnInfoIcon' }}
+                aria-label={i18n.translate(
+                  'xpack.alertingV2.rulesList.column.routingTags.ariaLabel',
+                  { defaultMessage: 'What are routing tags?' }
+                )}
+                content={i18n.translate('xpack.alertingV2.rulesList.column.routingTags.tooltip', {
+                  defaultMessage:
+                    'Action policies apply to a rule when they share at least one of its routing tags.',
+                })}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ),
+        width: '15%',
+        render: (metadata: RuleApiResponse['metadata']) => (
+          <RuleTagsCell
+            tags={metadata?.routing_tags}
+            containerTestSubj="routingTagsContainer"
+            overflowTestSubj="overflowRoutingTagsBadge"
+          />
+        ),
       },
       {
         field: 'kind',
