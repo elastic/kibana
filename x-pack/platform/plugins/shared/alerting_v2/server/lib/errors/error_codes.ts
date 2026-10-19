@@ -130,6 +130,12 @@ export const ALERTING_ERROR_CODES = {
    * snoozing and deleting existing policies stay available.
    */
   ACTION_POLICY_LICENSE_NOT_SUPPORTED: 'ACTION_POLICY_LICENSE_NOT_SUPPORTED',
+  /**
+   * An action policy was written with a user-created Cloud API key (a raw `essu_`
+   * credential). Such a key has no key id and cannot be stored or used by the
+   * dispatcher, so create / update / upsert / API key rotation are rejected.
+   */
+  ACTION_POLICY_CLOUD_API_KEY_NOT_SUPPORTED: 'ACTION_POLICY_CLOUD_API_KEY_NOT_SUPPORTED',
 
   // ──────────────────────── Alert actions ────────────────────
   /** No alert event matched the supplied `group_hash` (and `alert_id`). */
@@ -383,12 +389,6 @@ export const ALERTING_LOG_CODES = {
    * remaining policies still dispatch.
    */
   DISPATCH_POLICY_LOOKUP_FAILED: 'DISPATCH_POLICY_LOOKUP_FAILED',
-  /**
-   * The dispatcher has no persisted event watermark (cold start or wiped task
-   * state). The first scan starts from `startedAt − OVERLAP_WINDOW_MINUTES`.
-   * Rule events older than that will not be dispatched.
-   */
-  DISPATCHER_COLD_START: 'DISPATCHER_COLD_START',
   /**
    * The self-imposed tick deadline (TICK_DEADLINE_MS) fired before the pipeline
    * completed. The pipeline was aborted cooperatively; the returned watermark is

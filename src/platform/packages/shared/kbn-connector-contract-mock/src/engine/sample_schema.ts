@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getAtPointer, refToPointer } from '../openapi/json_pointer';
+import { appendPointer, getAtPointer, refToPointer } from '../openapi/json_pointer';
 import type { SchemaNode } from '../openapi/schema_walk';
 import { isRecord } from '../openapi/schema_walk';
-import type { OpenApiDocument } from '../openapi/types';
+import type { OpenApiDocument, SpecSchema } from '../openapi/types';
+import { samplePattern } from './sample_pattern';
 
 // Beyond SHALLOW_DEPTH only required properties and `minItems` items are generated, which
 // keeps samples of large recursive schemas small; MAX_DEPTH stops cycles of required refs.
@@ -31,30 +32,82 @@ const FORMAT_PLACEHOLDERS: Readonly<Record<string, string>> = {
   byte: 'AA==',
 };
 
+// Boundary samples of unbounded strings and arrays; bounded arrays are capped at
+// BOUNDARY_MAX_ITEMS so that nested `maxItems` don't multiply into huge responses, and bounded
+// strings at BOUNDARY_MAX_STRING_LENGTH, since patterns such as base64's overflow the regex
+// stack on megabytes of input.
+const BOUNDARY_STRING_LENGTH = 1024;
+const BOUNDARY_MAX_STRING_LENGTH = 65_536;
+const BOUNDARY_ITEMS = 3;
+const BOUNDARY_MAX_ITEMS = 100;
+
+const FORMAT_MAXIMUMS: Readonly<Record<string, number>> = {
+  int32: 2147483647,
+  int64: Number.MAX_SAFE_INTEGER,
+  float: 3.4028234663852886e38,
+};
+
 const numberOrUndefined = (value: unknown): number | undefined =>
   typeof value === 'number' ? value : undefined;
 
-const placeholderString = ({ format, minLength, maxLength }: SchemaNode): string => {
+const fitLength = (
+  value: string,
+  { minLength, maxLength }: SchemaNode,
+  padding: string,
+  boundary: boolean
+): string => {
+  const max = numberOrUndefined(maxLength);
+  const min = numberOrUndefined(minLength) ?? 0;
+  const target = boundary
+    ? Math.max(Math.min(max ?? BOUNDARY_STRING_LENGTH, BOUNDARY_MAX_STRING_LENGTH), min)
+    : min;
+  const padded = value.padEnd(target, padding);
+  return padded.slice(0, max ?? padded.length);
+};
+
+const placeholderString = (schema: SchemaNode, boundary: boolean): string => {
+  const { format, pattern } = schema;
   const formatted = typeof format === 'string' ? FORMAT_PLACEHOLDERS[format] : undefined;
   if (formatted) {
     return formatted;
   }
-  const value = 'string'.padEnd(numberOrUndefined(minLength) ?? 0, 'x');
-  return value.slice(0, numberOrUndefined(maxLength) ?? value.length);
+  const sampled = typeof pattern === 'string' ? samplePattern(pattern) : undefined;
+  if (typeof pattern !== 'string' || sampled === undefined) {
+    return fitLength('string', schema, 'x', boundary);
+  }
+  // Repeating the last character extends a trailing `+` or `*`, as in `^[A-Z]{2}-\d+$`.
+  const matcher = new RegExp(pattern, 'u');
+  const fitted = [sampled.slice(-1) || 'x', 'x']
+    .map((padding) => fitLength(sampled, schema, padding, boundary))
+    .find((value) => matcher.test(value));
+  return fitted ?? sampled;
 };
 
-const placeholderNumber = (schema: SchemaNode, integer: boolean): number => {
+const placeholderNumber = (schema: SchemaNode, integer: boolean, boundary: boolean): number => {
   const step = integer ? 1 : 0.5;
   const exclusiveMinimum = numberOrUndefined(schema.exclusiveMinimum);
   const exclusiveMaximum = numberOrUndefined(schema.exclusiveMaximum);
+  const multipleOf = numberOrUndefined(schema.multipleOf);
   const lower =
     numberOrUndefined(schema.minimum) ??
     (exclusiveMinimum === undefined ? undefined : exclusiveMinimum + step);
   const upper =
     numberOrUndefined(schema.maximum) ??
     (exclusiveMaximum === undefined ? undefined : exclusiveMaximum - step);
+  const steps = multipleOf && multipleOf > 0 ? multipleOf : undefined;
+  if (boundary) {
+    const formatMaximum =
+      typeof schema.format === 'string' ? FORMAT_MAXIMUMS[schema.format] : undefined;
+    const max = upper ?? formatMaximum ?? (integer ? Number.MAX_SAFE_INTEGER : Number.MAX_VALUE);
+    const rounded = integer ? Math.floor(max) : max;
+    const value = steps ? Math.floor(rounded / steps) * steps : rounded;
+    if (Number.isFinite(value) && (lower === undefined || value >= lower)) {
+      return value;
+    }
+  }
   const value = lower ?? (upper !== undefined && upper < 0 ? upper : 0);
-  return integer ? Math.ceil(value) : value;
+  const rounded = integer ? Math.ceil(value) : value;
+  return steps ? Math.ceil(rounded / steps) * steps : rounded;
 };
 
 const firstType = ({ type, properties, items }: SchemaNode): unknown => {
@@ -106,72 +159,157 @@ const mergeAllOf = (parts: readonly unknown[], document: OpenApiDocument): Schem
     return result;
   }, {});
 
+export interface SampleOptions {
+  /** The schema's JSON pointer in the document, which lets `conforms` check its examples. */
+  readonly pointer?: string;
+  /**
+   * Whether a value conforms to a schema of the document. Examples and defaults that don't are
+   * skipped, since vendors' examples sometimes contradict their own schemas.
+   */
+  readonly conforms?: (schema: SpecSchema, value: unknown) => boolean;
+  /**
+   * Samples at the schema's upper bounds instead: longest strings, largest numbers, fullest
+   * arrays and the last `enum` value, ignoring examples and defaults.
+   */
+  readonly boundary?: boolean;
+}
+
 /**
- * Builds a deterministic value for a schema: the first of `examples`, `default`, `const` and
- * `enum` that it declares, otherwise a placeholder for its type and format.
+ * Builds a deterministic value for a schema: the first of `examples`, `example` and `default`
+ * that conforms to it, then its `const` or first `enum` value, otherwise a placeholder for its
+ * type, format and bounds.
  */
-export const sampleSchema = (schema: unknown, document: OpenApiDocument, depth = 0): unknown => {
-  if (!isRecord(schema) || depth > MAX_DEPTH) {
-    return null;
-  }
-  if (typeof schema.$ref === 'string') {
-    return sampleSchema(resolve(schema, document), document, depth + 1);
-  }
-  if (Array.isArray(schema.examples) && schema.examples.length > 0) {
-    return schema.examples[0];
-  }
-  for (const keyword of ['example', 'default', 'const'] as const) {
-    if (schema[keyword] !== undefined) {
-      return schema[keyword];
-    }
-  }
-  if (Array.isArray(schema.enum) && schema.enum.length > 0) {
-    return schema.enum[0];
-  }
-  const sampleNext = (child: unknown) => sampleSchema(child, document, depth + 1);
-
-  const variants = Array.isArray(schema.oneOf) ? schema.oneOf : schema.anyOf;
-  if (Array.isArray(variants) && variants.length > 0) {
-    const nonNull = variants.find((variant) => !isRecord(variant) || variant.type !== 'null');
-    return sampleNext(nonNull ?? variants[0]);
-  }
-  if (Array.isArray(schema.allOf) && schema.allOf.length > 0) {
-    const { allOf, ...rest } = schema;
-    return sampleSchema(mergeAllOf([rest, ...allOf], document), document, depth + 1);
-  }
-
-  switch (firstType(schema)) {
-    case 'object': {
-      const required = new Set(Array.isArray(schema.required) ? schema.required : []);
-      const properties = isRecord(schema.properties) ? schema.properties : {};
-      const sampled = Object.entries(properties).flatMap(([name, property]) => {
-        if (depth >= SHALLOW_DEPTH && !required.has(name)) {
-          return [];
-        }
-        const value = sampleNext(property);
-        return value === null && isRecord(property) && !allowsNull(property) ? [] : [[name, value]];
-      });
-      return Object.fromEntries(sampled);
-    }
-    case 'array': {
-      const minItems = numberOrUndefined(schema.minItems) ?? 0;
-      const count = depth >= SHALLOW_DEPTH ? minItems : Math.max(minItems, 1);
-      if (Array.isArray(schema.items)) {
-        return schema.items.map(sampleNext);
-      }
-      return Array.from({ length: count }, () => sampleNext(schema.items));
-    }
-    case 'string':
-      return placeholderString(schema);
-    case 'integer':
-      return placeholderNumber(schema, true);
-    case 'number':
-      return placeholderNumber(schema, false);
-    case 'boolean':
-      return true;
-    case 'null':
+export const sampleSchema = (
+  schema: unknown,
+  document: OpenApiDocument,
+  { pointer, conforms, boundary = false }: SampleOptions = {}
+): unknown => {
+  // `at` is the node's pointer; nodes merged from allOf parts have none, and their examples
+  // are used unchecked.
+  const sample = (node: unknown, at: string | undefined, depth: number): unknown => {
+    if (!isRecord(node) || depth > MAX_DEPTH) {
       return null;
-    default:
-      return {};
-  }
+    }
+    if (typeof node.$ref === 'string') {
+      return sample(resolve(node, document), refToPointer(node.$ref), depth + 1);
+    }
+    const candidates = boundary
+      ? []
+      : [...(Array.isArray(node.examples) ? node.examples : []), node.example, node.default].filter(
+          (value) => value !== undefined
+        );
+    const example = candidates.find(
+      (value) => at === undefined || !conforms || conforms({ pointer: at, schema: node }, value)
+    );
+    if (example !== undefined) {
+      return example;
+    }
+    if (node.const !== undefined) {
+      return node.const;
+    }
+    if (Array.isArray(node.enum) && node.enum.length > 0) {
+      // The last value, unless it is the `null` that nullable enums end with.
+      return boundary
+        ? [...node.enum].reverse().find((value) => value !== null) ?? null
+        : node.enum[0];
+    }
+    const pointerTo = (...tokens: Array<string | number>) =>
+      at === undefined ? undefined : appendPointer(at, ...tokens);
+    const child = (value: unknown, ...tokens: Array<string | number>) =>
+      sample(value, pointerTo(...tokens), depth + 1);
+    const expands = depth < SHALLOW_DEPTH;
+
+    const keyword = Array.isArray(node.oneOf) ? 'oneOf' : 'anyOf';
+    const variants = node[keyword];
+    if (Array.isArray(variants) && variants.length > 0) {
+      // Non-null variants first. A sample of one oneOf variant can match another one too, so
+      // with a pointer the first sample the whole node accepts wins. Picking a variant isn't a
+      // level of nesting: variants are often told apart by optional properties.
+      const order = variants
+        .map((variant, index) => ({ index, isNull: isRecord(variant) && variant.type === 'null' }))
+        .sort((a, b) => Number(a.isNull) - Number(b.isNull));
+      // Properties next to the variants, as in an `allOf` of common fields and an `anyOf`,
+      // apply to every variant.
+      const { [keyword]: _variants, ...rest } = node;
+      const shared = rest.properties !== undefined || rest.required !== undefined;
+      let first: unknown;
+      for (const [position, { index }] of order.entries()) {
+        const value = shared
+          ? sample(mergeAllOf([rest, variants[index]], document), undefined, depth)
+          : sample(variants[index], pointerTo(keyword, index), depth);
+        if (at === undefined || !conforms || conforms({ pointer: at, schema: node }, value)) {
+          return value;
+        }
+        first = position === 0 ? value : first;
+      }
+      return first;
+    }
+    if (Array.isArray(node.allOf) && node.allOf.length > 0) {
+      const { allOf, ...rest } = node;
+      return sample(mergeAllOf([rest, ...allOf], document), undefined, depth + 1);
+    }
+
+    switch (firstType(node)) {
+      case 'object': {
+        const required = new Set(Array.isArray(node.required) ? node.required : []);
+        const properties = isRecord(node.properties) ? node.properties : {};
+        const sampled = Object.entries(properties).flatMap(([name, property]) => {
+          if (!expands && !required.has(name)) {
+            return [];
+          }
+          const value = child(property, 'properties', name);
+          return value === null && isRecord(property) && !allowsNull(property)
+            ? []
+            : [[name, value]];
+        });
+        // Vendors sometimes require a property they never declare; any value satisfies it.
+        const { additionalProperties } = node;
+        const undeclared = [...required].filter(
+          (name): name is string => typeof name === 'string' && !(name in properties)
+        );
+        if (additionalProperties !== false) {
+          for (const name of undeclared) {
+            sampled.push([
+              name,
+              isRecord(additionalProperties)
+                ? child(additionalProperties, 'additionalProperties')
+                : null,
+            ]);
+          }
+        }
+        return Object.fromEntries(sampled);
+      }
+      case 'array': {
+        const minItems = numberOrUndefined(node.minItems) ?? 0;
+        const maxItems = numberOrUndefined(node.maxItems) ?? Infinity;
+        const typical = expands ? Math.max(minItems, 1) : minItems;
+        // Items are copies of one sample, so only `uniqueItems` arrays of one item stay valid.
+        const fullest =
+          boundary && expands && node.uniqueItems !== true
+            ? Math.max(
+                Number.isFinite(maxItems) ? Math.min(maxItems, BOUNDARY_MAX_ITEMS) : BOUNDARY_ITEMS,
+                typical
+              )
+            : typical;
+        const count = Math.min(fullest, maxItems);
+        if (Array.isArray(node.items)) {
+          return node.items.map((item, index) => child(item, 'items', index));
+        }
+        return Array.from({ length: count }, () => child(node.items, 'items'));
+      }
+      case 'string':
+        return placeholderString(node, boundary);
+      case 'integer':
+        return placeholderNumber(node, true, boundary);
+      case 'number':
+        return placeholderNumber(node, false, boundary);
+      case 'boolean':
+        return true;
+      case 'null':
+        return null;
+      default:
+        return {};
+    }
+  };
+  return sample(schema, pointer, 0);
 };

@@ -1,9 +1,629 @@
 {
-  "sha1": "5d4f5138f6e3341d0d97a335049aa714c9334349",
+  "sha1": "8ac52c8ef064d6b0624497ed47f61cd60f9c3022",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "641219711c48a84-f1cec04c368de2f",
+      "title": "KQL telemetry API should increment the opt *in* counter in the kql-telemetry document and report success",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/kql_telemetry.spec.ts",
+        "line": 53,
+        "column": 43
+      }
+    },
+    {
+      "id": "641219711c48a84-eac3abebfbe837a",
+      "title": "KQL telemetry API should increment the opt *out* counter in the kql-telemetry document and report success",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/kql_telemetry.spec.ts",
+        "line": 53,
+        "column": 43
+      }
+    },
+    {
+      "id": "641219711c48a84-f3e62fbee462332",
+      "title": "KQL telemetry API should reject a non-boolean opt_in value (string)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/kql_telemetry.spec.ts",
+        "line": 80,
+        "column": 5
+      }
+    },
+    {
+      "id": "641219711c48a84-161097d19a58b78",
+      "title": "KQL telemetry API should reject a non-boolean opt_in value (number)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/kql_telemetry.spec.ts",
+        "line": 80,
+        "column": 5
+      }
+    },
+    {
+      "id": "641219711c48a84-0fdb03c3372114d",
+      "title": "KQL telemetry API should reject a non-boolean opt_in value (null)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/kql_telemetry.spec.ts",
+        "line": 80,
+        "column": 5
+      }
+    },
+    {
+      "id": "641219711c48a84-30852c4dcd752f4",
+      "title": "KQL telemetry API should reject a non-boolean opt_in value (undefined)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/kql_telemetry.spec.ts",
+        "line": 80,
+        "column": 5
+      }
+    },
+    {
+      "id": "641219711c48a84-85a2252d35effef",
+      "title": "KQL telemetry API should reject a non-boolean opt_in value (missing)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/kql_telemetry.spec.ts",
+        "line": 80,
+        "column": 5
+      }
+    },
+    {
+      "id": "395668710c0e10d-9f3f343ae831076",
+      "title": "Saved queries API create: should return 200 for create saved query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/saved_queries.spec.ts",
+        "line": 67,
+        "column": 49
+      }
+    },
+    {
+      "id": "395668710c0e10d-08bc541d4a2d562",
+      "title": "Saved queries API create: should return 400 for create invalid saved query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/saved_queries.spec.ts",
+        "line": 72,
+        "column": 25
+      }
+    },
+    {
+      "id": "395668710c0e10d-cb6c2a8416ad38e",
+      "title": "Saved queries API create: should return 400 for create saved query with duplicate title",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/saved_queries.spec.ts",
+        "line": 78,
+        "column": 11
+      }
+    },
+    {
+      "id": "395668710c0e10d-89b890be4ed0978",
+      "title": "Saved queries API create: should leave filters and timefilter undefined if not provided",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/saved_queries.spec.ts",
+        "line": 82,
+        "column": 12
+      }
+    },
+    {
+      "id": "395668710c0e10d-17f192ae8e2b2d6",
+      "title": "Saved queries API update: should return 200 for update saved query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/saved_queries.spec.ts",
+        "line": 96,
+        "column": 30
+      }
+    },
+    {
+      "id": "395668710c0e10d-0ee808df40ea0a6",
+      "title": "Saved queries API update: should return 404 for update non-existent saved query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/saved_queries.spec.ts",
+        "line": 109,
+        "column": 27
+      }
+    },
+    {
+      "id": "395668710c0e10d-4118696a83e2744",
+      "title": "Saved queries API update: should return 400 for update saved query with duplicate title",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/saved_queries.spec.ts",
+        "line": 113,
+        "column": 29
+      }
+    },
+    {
+      "id": "395668710c0e10d-b5a92f1b8872c9d",
+      "title": "Saved queries API update: should remove filters and timefilter if not provided",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/saved_queries.spec.ts",
+        "line": 127,
+        "column": 14
+      }
+    },
+    {
+      "id": "395668710c0e10d-a4c54a87a22b328",
+      "title": "Saved queries API delete: should return 200 for delete saved query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/saved_queries.spec.ts",
+        "line": 162,
+        "column": 27
+      }
+    },
+    {
+      "id": "395668710c0e10d-e0da4a34b50067f",
+      "title": "Saved queries API delete: should return 404 for delete non-existent saved query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/saved_queries.spec.ts",
+        "line": 165,
+        "column": 18
+      }
+    },
+    {
+      "id": "395668710c0e10d-1705ba24d720b0e",
+      "title": "Saved queries API get: should return 200 for get saved query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/saved_queries.spec.ts",
+        "line": 166,
+        "column": 49
+      }
+    },
+    {
+      "id": "395668710c0e10d-6087a7eced36948",
+      "title": "Saved queries API get: should return 404 for get non-existent saved query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/saved_queries.spec.ts",
+        "line": 174,
+        "column": 24
+      }
+    },
+    {
+      "id": "395668710c0e10d-10d08479611ac6e",
+      "title": "Saved queries API find: should return 200 for find saved queries",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/saved_queries.spec.ts",
+        "line": 177,
+        "column": 7
+      }
+    },
+    {
+      "id": "395668710c0e10d-f8a59e2b799d922",
+      "title": "Saved queries API find: should return 400 for bad find saved queries request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/saved_queries.spec.ts",
+        "line": 180,
+        "column": 12
+      }
+    },
+    {
+      "id": "395668710c0e10d-5d37d5747d3a7a2",
+      "title": "Saved queries API find: should return expected queries for find saved queries",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/saved_queries.spec.ts",
+        "line": 188,
+        "column": 72
+      }
+    },
+    {
+      "id": "395668710c0e10d-6e38b050a002c54",
+      "title": "Saved queries API find: should return expected queries for find saved queries with a search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/saved_queries.spec.ts",
+        "line": 210,
+        "column": 79
+      }
+    },
+    {
+      "id": "395668710c0e10d-d7671fb94a089f1",
+      "title": "Saved queries API find: should support pagination for find saved queries",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/saved_queries.spec.ts",
+        "line": 234,
+        "column": 12
+      }
+    },
+    {
+      "id": "395668710c0e10d-5c9825161bec482",
+      "title": "Saved queries API find: should support pagination for find saved queries with a search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/saved_queries.spec.ts",
+        "line": 264,
+        "column": 71
+      }
+    },
+    {
+      "id": "395668710c0e10d-43685e19b25bfc0",
+      "title": "Saved queries API find: should support searching for queries containing special characters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/saved_queries.spec.ts",
+        "line": 293,
+        "column": 30
+      }
+    },
+    {
+      "id": "395668710c0e10d-20fd96aa39e0085",
+      "title": "Saved queries API count: should return 200 for saved query count",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/saved_queries.spec.ts",
+        "line": 302,
+        "column": 14
+      }
+    },
+    {
+      "id": "395668710c0e10d-0a415b8b78d26e6",
+      "title": "Saved queries API count: should return expected counts for saved query count",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/saved_queries.spec.ts",
+        "line": 304,
+        "column": 71
+      }
+    },
+    {
+      "id": "395668710c0e10d-78063e9af876b23",
+      "title": "Saved queries API isDuplicateTitle: should return isDuplicate = true for _is_duplicate_title check with a duplicate title",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/saved_queries.spec.ts",
+        "line": 318,
+        "column": 24
+      }
+    },
+    {
+      "id": "395668710c0e10d-3d865b24cbefce5",
+      "title": "Saved queries API isDuplicateTitle: should return isDuplicate = false for _is_duplicate_title check with a duplicate title and matching ID",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/saved_queries.spec.ts",
+        "line": 325,
+        "column": 11
+      }
+    },
+    {
+      "id": "395668710c0e10d-4a027bd52b26c74",
+      "title": "Saved queries API isDuplicateTitle: should return isDuplicate = false for _is_duplicate_title check with a unique title",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/saved_queries.spec.ts",
+        "line": 329,
+        "column": 98
+      }
+    },
     {
       "id": "ea5fd1e61e8e168-d8c130fa37fd60e",
       "title": "Saved query deletion across spaces deletes a shared query from both spaces",
@@ -22,6 +642,146 @@
         "file": "src/platform/plugins/shared/data/test/scout/api/tests/saved_query_shared_delete.spec.ts",
         "line": 38,
         "column": 23
+      }
+    },
+    {
+      "id": "349fe9ef5d1e262-49614f01c7b7b82",
+      "title": "es search strategy - post, delete and error handling should return 200 when correctly formatted searches are provided",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/es_post_sync.spec.ts",
+        "line": 37,
+        "column": 72
+      }
+    },
+    {
+      "id": "349fe9ef5d1e262-79158777eb0c0ee",
+      "title": "es search strategy - post, delete and error handling should return 200 if terminated early",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/es_post_sync.spec.ts",
+        "line": 49,
+        "column": 16
+      }
+    },
+    {
+      "id": "349fe9ef5d1e262-6e9f894285295a6",
+      "title": "es search strategy - post, delete and error handling should return 404 when if unknown strategy is provided",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/es_post_sync.spec.ts",
+        "line": 67,
+        "column": 9
+      }
+    },
+    {
+      "id": "349fe9ef5d1e262-1a70b8d03754113",
+      "title": "es search strategy - post, delete and error handling should return 400 with illegal ES argument",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/es_post_sync.spec.ts",
+        "line": 79,
+        "column": 38
+      }
+    },
+    {
+      "id": "349fe9ef5d1e262-563be97ee6209d2",
+      "title": "es search strategy - post, delete and error handling should return 400 with a bad body",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/es_post_sync.spec.ts",
+        "line": 94,
+        "column": 28
+      }
+    },
+    {
+      "id": "349fe9ef5d1e262-6daa68ea927c83c",
+      "title": "es search strategy - post, delete and error handling should return 400 for a painless error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/es_post_sync.spec.ts",
+        "line": 107,
+        "column": 16
+      }
+    },
+    {
+      "id": "349fe9ef5d1e262-c1922203af798ce",
+      "title": "es search strategy - post, delete and error handling should return 400 when trying a delete on a non supporting strategy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/es_post_sync.spec.ts",
+        "line": 127,
+        "column": 56
       }
     },
     {
@@ -85,7 +845,7 @@
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_delete.spec.ts",
         "line": 26,
-        "column": 23
+        "column": 42
       }
     },
     {
@@ -284,6 +1044,48 @@
         "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_rollup.spec.ts",
         "line": 53,
         "column": 28
+      }
+    },
+    {
+      "id": "c9f4b9e5aab51b1-b283a334d9aaecd",
+      "title": "sql search strategy should return 200 when correctly formatted searches are provided",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/sql_search.spec.ts",
+        "line": 34,
+        "column": 5
+      }
+    },
+    {
+      "id": "c9f4b9e5aab51b1-43bbfe9907c9d2e",
+      "title": "sql search strategy should fetch search results by id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/sql_search.spec.ts",
+        "line": 45,
+        "column": 43
+      }
+    },
+    {
+      "id": "c9f4b9e5aab51b1-11d41ec97e3dc07",
+      "title": "sql search strategy should delete search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/sql_search.spec.ts",
+        "line": 68,
+        "column": 11
       }
     }
   ]

@@ -23,6 +23,7 @@ import {
   type Severity,
   type SignificantEventStatus,
 } from '@kbn/significant-events-schema';
+import { i18n } from '@kbn/i18n';
 import {
   MAX_DEDUP_SCAN_LIMIT,
   type CommonSearchOptions,
@@ -49,6 +50,13 @@ import { toRuleEvent } from './to_rule_event';
 
 /** `.rule-events` groups a series of writes by `group_hash`, not `event_id` (unavailable as a column). */
 const GROUP_HASH_FIELD = 'group_hash';
+
+/** Note recorded when an operator changes status without giving a reason. */
+export const operatorFallbackAssessmentNote = (status: 'active' | 'inactive'): string =>
+  i18n.translate('xpack.significantEvents.events.operatorFallbackAssessmentNote', {
+    defaultMessage: 'Manually set to {status} by an operator. No reason was given.',
+    values: { status },
+  });
 
 const isSignificantEventStatus = (status: AlertEpisodeStatus): status is SignificantEventStatus =>
   (SIGNIFICANT_EVENT_STATUS_OPTIONS as readonly string[]).includes(status);
@@ -500,7 +508,11 @@ export class RuleEventsClient {
     const decision = decideStatusChange({
       latest,
       change,
-      assessmentNote,
+      assessmentNote: assessmentNote?.trim()
+        ? assessmentNote
+        : change.kind === 'operator'
+        ? operatorFallbackAssessmentNote(change.status)
+        : undefined,
       timestamp: new Date().toISOString(),
     });
     if (!decision.write) {

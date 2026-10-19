@@ -33,6 +33,11 @@ jest.mock('../../components/profiling_app_page_template', () => ({
 jest.mock('../../components/profiling_app_page_template/primary_profiling_search_bar', () => ({
   PrimaryProfilingSearchBar: () => null,
 }));
+jest.mock('../../components/universal_profiling_setup_incomplete_callout', () => ({
+  UniversalProfilingSetupIncompleteCallout: () => (
+    <div data-test-subj="profilingSetupIncompleteCallout" />
+  ),
+}));
 jest.mock('../../hooks/use_profiling_params');
 jest.mock('../../hooks/use_profiling_router');
 jest.mock('../../hooks/use_time_range_async');
@@ -98,7 +103,25 @@ describe('StorageExplorerView', () => {
     expect(replace).not.toHaveBeenCalled();
   });
 
-  it('redirects to the setup when Universal Profiling is not set up', () => {
+  it('renders Storage explorer when Universal Profiling has data but its setup is incomplete', () => {
+    mockUniversalProfilingStatus({ hasSetup: false, hasData: true });
+
+    const { getByTestId } = renderView();
+
+    expect(getByTestId('storageExplorerPage')).toBeInTheDocument();
+    expect(replace).not.toHaveBeenCalled();
+  });
+
+  it('renders the Universal Profiling setup incomplete callout', () => {
+    mockUniversalProfilingStatus({});
+
+    const { getByTestId } = renderView();
+
+    // The callout itself decides whether the setup is incomplete
+    expect(getByTestId('profilingSetupIncompleteCallout')).toBeInTheDocument();
+  });
+
+  it('redirects to the setup when Universal Profiling is not set up and has no data', () => {
     mockUniversalProfilingStatus({ hasSetup: false, hasData: false });
 
     const { queryByTestId } = renderView();

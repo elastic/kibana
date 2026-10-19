@@ -69,8 +69,8 @@ const loadIndex = async (
 /** Runs ES|QL on the test cluster and returns rows keyed by column name. */
 const createRunQuery =
   (client: Client): EsqlRunner =>
-  async (query) => {
-    const { columns, values } = await client.esql.query({ query });
+  async (steps) => {
+    const { columns, values } = await client.esql.query({ query: steps.join('\n') });
     return values.map((value) =>
       Object.fromEntries(columns.map(({ name }, i) => [name, value[i]]))
     );
@@ -100,7 +100,6 @@ export const BASE_ARGS: QueryArgs = {
   namespace: NAMESPACE,
   timeRange: '30d',
   sort: { field: 'entity.risk.calculated_score_norm', direction: 'desc' },
-  cursor: null,
   pageSize: 25,
   rowsMode: 'resolved',
   concreteEntityIndexName: ENTITY_INDEX,
