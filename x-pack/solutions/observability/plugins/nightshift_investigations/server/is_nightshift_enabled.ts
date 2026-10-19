@@ -10,7 +10,7 @@ import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 
 export const createIsNightshiftEnabled = (getStartServices: CoreSetup['getStartServices']) => {
   let isEnabled = false;
-  getStartServices().then(([{ featureFlags }]) => {
+  void getStartServices().then(([{ featureFlags }]) => {
     featureFlags.getBooleanValue$(NIGHTSHIFT_ENABLED_FLAG, false).subscribe((value) => {
       isEnabled = value;
     });
