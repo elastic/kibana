@@ -79,7 +79,7 @@ A pack is **thin** when `check-pack` exits 2. `Unknown` counts as answered, incl
 
 ## Sanitize
 
-Before draft-and-stop, run `scan-sensitive` on the finding and draft. Flag emails, `SDH…` / case IDs, NDA, “customer name/id”. Strip or ask to strip anything not needed to repro. Cases product language (`Opening case 12345`, `Cases table`) will flag — confirm and keep when it is UI text, not a customer ID, then `check-draft --sensitive-ok`. Default repo stays `elastic/kibana`. If they say the content is sensitive / NDA, **stop** and ask whether to file in `elastic/security-team` instead — do not switch silently.
+Before draft-and-stop, run `scan-sensitive` on the finding and draft. Flag emails, `SDH…` / case IDs, NDA, “customer name/id”. Strip or ask to strip anything not needed to repro. Cases product language (`Opening case 12345`, `Cases table`) will flag — confirm and keep when it is UI text, not a customer ID, then `check-draft --sensitive-ok`. Default repo is `elastic/kibana`. A security-sensitive bug (vulnerability, credentials/secrets, customer data, exploit path; `scan-sensitive` reports `security_issue`) goes to `elastic/security-team` — never to `elastic/kibana`. Ask, have the human confirm the repo in the draft, and use that repo for search, labels, upload and write. `--sensitive-ok` does not unlock `security_issue`; `--security-ok` is only for a human-confirmed false positive.
 
 ## Environment setup questions
 
@@ -100,7 +100,8 @@ Given a recording and stills:
 2. Put screenshot and recording/video paths (`Screenshot:`, `Recording:`, `Video:`) under **Current behaviour**. Resolve `` `$SESSION_DIR/...` `` to the real session directory. Upload those files; `embed-uploads` writes images as `![name](url)` and videos as `<video src="url" controls></video>` on their own paragraph (GitHub inlines both).
 3. Use a visible route or UI area for `Team:*` inference.
 4. Ask for what media cannot provide: version, the always-ask items, console/network, server OS, endpoint version, expected if unclear.
-5. If the video is unreadable or too long to trust, say so and ask for a still of the failure.
+5. Screenshots and recordings must not show real customer or host data (hostnames, IPs, emails, usernames, org/customer names, cluster URLs, keys, tokens — also in the URL bar and network/console panels). Review each file before upload, list it under **Media reviewed**, and ask for a redacted or synthetic-data replacement when it is not clean. Prefer demo data and crop or blur before capture. Then `check-draft --media-ok`.
+6. If the video is unreadable or too long to trust, say so and ask for a still of the failure.
 
 ## Path B pack (collect steps live in SKILL.md)
 

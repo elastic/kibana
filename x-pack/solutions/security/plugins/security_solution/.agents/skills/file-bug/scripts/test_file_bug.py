@@ -13,7 +13,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from file_bug import (  # noqa: E402
     CreateFailed,
+    FILED_MARKER,
     FILED_VIA,
+    KIBANA_REPO,
+    SECURITY_TEAM_REPO,
     IssueMatch,
     PartialWrite,
     TESTER_SOURCE_LABEL,
@@ -32,6 +35,7 @@ from file_bug import (  # noqa: E402
     pack_gaps,
     parse_search_results,
     render_bug_body,
+    has_media,
     scan_sensitive,
     scan_wip,
     upload_evidence,
@@ -683,6 +687,125 @@ class ScanSensitiveTest(unittest.TestCase):
         self.assertEqual(scan_sensitive("Table shows 0 entities"), [])
 
 
+class SecurityRoutingTest(unittest.TestCase):
+    def test_flags_security_signals(self):
+        for text in (
+            "This is an authentication bypass",
+            "see CVE-2024-12345",
+            "Authorization: Bearer abcdefghijklmnopqrstuvwxyz0123",
+            "api_key=sk_live_abcdef123456",
+            "-----BEGIN RSA PRIVATE KEY-----",
+        ):
+            self.assertIn("security_issue", scan_sensitive(text), text)
+
+    def test_plain_ui_bug_is_not_security(self):
+        self.assertNotIn("security_issue", scan_sensitive("Table shows 0 entities"))
+
+    def _finding(self):
+        return {
+            "title": "Risk table empty",
+            "current_behavior": 'Toast: "TypeError: cannot read map"',
+            "expected_behavior": "Table lists entities",
+            "steps_followed": ["click"],
+            "feature_flags": "Unknown",
+            "deployment": "Unknown",
+            "role": "Unknown",
+            "spaces": "Unknown",
+        }
+
+    def _body(self, extra):
+        return render_bug_body(self._finding(), {"kibana_version": "9.3.0"}) + extra
+
+    def _gaps(self, **kwargs):
+        return check_draft(
+            body=self._body("\nThis is an authentication bypass.\n"),
+            title="[Entity Analytics] [Bug] Risk table empty",
+            finding=self._finding(),
+            config={"kibana_version": "9.3.0"},
+            labels=["bug", "triage_needed"],
+            **kwargs,
+        )
+
+    def test_check_draft_blocks_kibana_repo(self):
+        self.assertIn("security_issue:file_in_security_team", self._gaps())
+
+    def test_check_draft_allows_security_team_repo(self):
+        self.assertNotIn(
+            "security_issue:file_in_security_team",
+            self._gaps(repo=SECURITY_TEAM_REPO),
+        )
+
+    def test_sensitive_ok_does_not_unlock_kibana_repo(self):
+        self.assertIn(
+            "security_issue:file_in_security_team", self._gaps(sensitive_ok=True)
+        )
+
+    def test_security_ok_unlocks_kibana_repo(self):
+        self.assertNotIn(
+            "security_issue:file_in_security_team", self._gaps(security_ok=True)
+        )
+
+    def _write(self, repo, **kwargs):
+        calls = []
+
+        def run_gh(argv):
+            calls.append(argv)
+            return {
+                "returncode": 0,
+                "stdout": f"https://github.com/{repo}/issues/1",
+                "stderr": "",
+            }
+
+        write_github(
+            action="create",
+            repo=repo,
+            title="Bug",
+            body="This is an authentication bypass",
+            labels=["bug"],
+            number=None,
+            run_gh=run_gh,
+            **kwargs,
+        )
+        return calls
+
+    def test_write_refuses_kibana_repo(self):
+        with self.assertRaises(ValueError):
+            self._write(KIBANA_REPO)
+
+    def test_write_allows_security_team_and_security_ok(self):
+        self.assertTrue(self._write(SECURITY_TEAM_REPO))
+        self.assertTrue(self._write(KIBANA_REPO, security_ok=True))
+
+
+class MediaGateTest(unittest.TestCase):
+    def test_has_media(self):
+        self.assertTrue(has_media("![shot](https://x/y.png)"))
+        self.assertTrue(has_media("Recording: /tmp/flow.mp4"))
+        self.assertFalse(has_media("Table shows 0 entities"))
+
+    def test_check_draft_requires_media_review(self):
+        finding = {
+            "title": "Risk table empty",
+            "current_behavior": 'Toast: "TypeError: cannot read map"',
+            "expected_behavior": "Table lists entities",
+            "steps_followed": ["click"],
+            "feature_flags": "Unknown",
+            "deployment": "Unknown",
+            "role": "Unknown",
+            "spaces": "Unknown",
+        }
+        body = render_bug_body(finding, {"kibana_version": "9.3.0"}) + "\n![s](a.png)\n"
+        kwargs = dict(
+            body=body,
+            title="[Entity Analytics] [Bug] Risk table empty",
+            finding=finding,
+            config={"kibana_version": "9.3.0"},
+            labels=["bug", "triage_needed"],
+        )
+        self.assertIn("media_review", check_draft(**kwargs))
+        self.assertNotIn("media_review", check_draft(**kwargs, media_ok=True))
+
+
 class ScanWipTest(unittest.TestCase):
     def test_flags_draft_pr_note(self):
         hits = scan_wip(
@@ -1027,9 +1150,15 @@ class CheckDraftTest(unittest.TestCase):
     def test_with_filed_stamp_appends_when_only_in_comment(self):
         body = f"<!-- {FILED_VIA} -->\n**Describe the bug:**\nRisk table empty\n"
         updated = with_filed_stamp(body)
-        self.assertTrue(updated.rstrip().endswith(FILED_VIA))
+        self.assertTrue(updated.rstrip().endswith(FILED_MARKER))
         visible = updated.split("-->", 1)[-1]
         self.assertIn(FILED_VIA, visible)
+
+    def test_with_filed_stamp_adds_hidden_marker_once(self):
+        updated = with_filed_stamp("**Describe the bug:**\nRisk table empty\n")
+        self.assertEqual(updated.count(FILED_MARKER), 1)
+        self.assertEqual(updated.count(FILED_VIA), 1)
+        self.assertEqual(with_filed_stamp(updated), updated)
 
 
 class PathADraftTest(unittest.TestCase):

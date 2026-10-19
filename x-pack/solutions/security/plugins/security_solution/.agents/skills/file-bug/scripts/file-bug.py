@@ -255,6 +255,9 @@ def _cmd_check_draft(args: argparse.Namespace) -> int:
         labels=labels or None,
         wip_ok=bool(args.wip_ok),
         sensitive_ok=bool(args.sensitive_ok),
+        repo=args.repo,
+        security_ok=bool(args.security_ok),
+        media_ok=bool(args.media_ok),
     )
     return _emit(
         {"fileable": not gaps, "gaps": gaps},
@@ -322,6 +325,7 @@ def _cmd_write(args: argparse.Namespace) -> int:
             number=args.number,
             finding=finding if isinstance(finding, dict) else {},
             config=config if isinstance(config, dict) else {},
+            security_ok=bool(args.security_ok),
         )
     except CreateFailed as error:
         return _fail(str(error))
@@ -503,6 +507,21 @@ def _build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Human confirmed flagged Cases UI text / similar is not a customer ID",
     )
+    draft.add_argument(
+        "--repo",
+        default="elastic/kibana",
+        help="Target repo; a security_issue hit is a gap unless this is elastic/security-team",
+    )
+    draft.add_argument(
+        "--security-ok",
+        action="store_true",
+        help="Human confirmed a security_issue hit is not a vulnerability or secret",
+    )
+    draft.add_argument(
+        "--media-ok",
+        action="store_true",
+        help="Human confirmed every screenshot/recording has no real customer or host data",
+    )
     draft.set_defaults(handler=_cmd_check_draft)
 
     wip = subparsers.add_parser(
@@ -514,7 +533,7 @@ def _build_parser() -> argparse.ArgumentParser:
     wip.set_defaults(handler=_cmd_scan_wip)
 
     sensitive = subparsers.add_parser(
-        "scan-sensitive", help="Flag emails, case IDs, NDA/customer wording"
+        "scan-sensitive", help="Flag emails, case IDs, NDA/customer wording, security_issue"
     )
     sensitive.add_argument("--finding", default=None)
     sensitive.add_argument("--body", default=None)
@@ -542,6 +561,11 @@ def _build_parser() -> argparse.ArgumentParser:
     write.add_argument("--number", type=int, default=None, help="Issue number to comment on")
     write.add_argument("--finding", default=None, help="Finding JSON; Path B stamps the tester label")
     write.add_argument("--config", default=None)
+    write.add_argument(
+        "--security-ok",
+        action="store_true",
+        help="Human confirmed a security_issue hit is not a vulnerability; allows elastic/kibana",
+    )
     write.set_defaults(handler=_cmd_write)
 
     upload = subparsers.add_parser("upload", help="Upload evidence to user-attachments")

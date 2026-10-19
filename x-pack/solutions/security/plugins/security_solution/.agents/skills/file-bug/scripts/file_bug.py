@@ -14,6 +14,9 @@ from urllib.parse import quote
 WriteAction = Literal["create", "comment", "reopen_comment", "ask"]
 UNKNOWN_ANSWER = "Unknown"
 FILED_VIA = "Filed via file-bug"
+FILED_MARKER = "<!-- filed-via: file-bug v1 -->"
+KIBANA_REPO = "elastic/kibana"
+SECURITY_TEAM_REPO = "elastic/security-team"
 MAX_TITLE_LEN = 140
 SOURCE_EXPLORATORY_TESTER = "exploratory-tester"
 TESTER_SOURCE_LABEL = "sec-eng-prod:exploratory-tester"
@@ -59,6 +62,21 @@ _SDH_RE = re.compile(r"\bSDH[A-Z0-9-]{3,}\b", re.I)
 _CASE_RE = re.compile(r"\b(?:case|ticket)\s*#?\s*\d{4,}\b", re.I)
 _SENSITIVE_WORD_RE = re.compile(
     r"\bnda\b|\bcustomer\s+(?:name|id|org|organization)\b|\bour customer\b",
+    re.I,
+)
+_SECURITY_RE = re.compile(
+    r"\bCVE-\d{4}-\d{4,}\b"
+    r"|\b(?:auth(?:entication|orization)?\s+bypass|privilege\s+escalation|"
+    r"remote\s+code\s+execution|sql\s+injection|cross[\s-]site\s+scripting|"
+    r"xss|rce|csrf|ssrf|exploit(?:able)?|vulnerab(?:le|ility|ilities))\b"
+    r"|-----BEGIN [A-Z ]*PRIVATE KEY-----"
+    r"|\b(?:Bearer|ApiKey|Basic)\s+[A-Za-z0-9+/=_.-]{20,}"
+    r"|\bAKIA[0-9A-Z]{16}\b"
+    r"|\b(?:password|passwd|secret|api[_-]?key|token)\s*[:=]\s*\S{6,}",
+    re.I,
+)
+_MEDIA_REF_RE = re.compile(
+    r"!\[[^\]]*\]\([^)]+\)|<video\b|\.(?:png|jpe?g|gif|webp|mp4|webm|mov)\b",
     re.I,
 )
 _TITLE_FORMAT_RE = re.compile(r"^\[.+?\] \[Bug\] .+")
@@ -968,10 +986,13 @@ def _finding_with_body_answers(finding: dict, body: str) -> dict:
 
 
 def with_filed_stamp(body: str) -> str:
+    """Append the visible stamp and the hidden marker, each only once."""
     text = body.rstrip()
-    if FILED_VIA in _visible_text(text):
-        return f"{text}\n"
-    return f"{text}\n\n{FILED_VIA}\n"
+    if FILED_VIA not in _visible_text(text):
+        text = f"{text}\n\n{FILED_VIA}"
+    if FILED_MARKER not in text:
+        text = f"{text}\n{FILED_MARKER}"
+    return f"{text}\n"
 
 
 def scan_wip(*texts: object) -> list[str]:
@@ -993,7 +1014,14 @@ def scan_sensitive(*texts: object) -> list[str]:
         hits.append("case_id")
     if _SENSITIVE_WORD_RE.search(blob):
         hits.append("customer_or_nda")
+    if _SECURITY_RE.search(blob):
+        hits.append("security_issue")
     return hits
+
+
+def has_media(*texts: object) -> bool:
+    """True when a draft embeds or references a screenshot or recording."""
+    return bool(_MEDIA_REF_RE.search("\n".join(str(text) for text in texts if text)))
 
 
 def check_draft(
@@ -1005,6 +1033,9 @@ def check_draft(
     labels: list | None = None,
     wip_ok: bool = False,
     sensitive_ok: bool = False,
+    repo: str = KIBANA_REPO,
+    security_ok: bool = False,
+    media_ok: bool = False,
 ) -> list[str]:
     merged = _finding_with_body_answers(finding, body)
     gaps = list(pack_gaps(merged, config))
@@ -1022,8 +1053,13 @@ def check_draft(
     if is_tester_finding(finding, config) and title is not None:
         if TESTER_SOURCE_LABEL not in [str(label) for label in (labels or [])]:
             gaps.append("tester_label")
+    hits = scan_sensitive(body, json.dumps(merged))
     if not sensitive_ok:
-        gaps.extend(f"sensitive:{hit}" for hit in scan_sensitive(body, json.dumps(merged)))
+        gaps.extend(f"sensitive:{hit}" for hit in hits if hit != "security_issue")
+    if "security_issue" in hits and not security_ok and repo.lower() != SECURITY_TEAM_REPO:
+        gaps.append("security_issue:file_in_security_team")
+    if not media_ok and has_media(body):
+        gaps.append("media_review")
     if not wip_ok and not merged.get("file_despite_wip"):
         gaps.extend(scan_wip(body, json.dumps(merged)))
     return gaps
@@ -1586,6 +1622,7 @@ def write_github(
     number: int | None,
     finding: dict | None = None,
     config: dict | None = None,
+    security_ok: bool = False,
     run_gh: GhRunner = _default_run_gh,
 ) -> dict:
     """Run the `gh` write for `action`, never retrying a create that already failed."""
@@ -1596,6 +1633,15 @@ def write_github(
             raise ValueError("action 'create' needs a title")
     elif number is None:
         raise ValueError(f"action {action!r} needs an issue number")
+    if (
+        repo.lower() == KIBANA_REPO
+        and not security_ok
+        and "security_issue" in scan_sensitive(body)
+    ):
+        raise ValueError(
+            f"draft looks security-sensitive: file it in {SECURITY_TEAM_REPO}, "
+            "or pass --security-ok if the human confirmed it is not a vulnerability"
+        )
 
     labels = with_source_labels(labels, finding or {}, config)
     if action == "create":
