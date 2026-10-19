@@ -7,6 +7,7 @@ The Worker reports its sweep, packaging reports each threat report, and packagin
 | `hunt_continuous_threat_hunt.yaml` | `report_worker_run_completed` | `worker_run_completed` | The last step, after `report_fan_out` |
 | `hunt_package_report.yaml` | `report_investigation_closed_benign` | `worker_investigation_closed` | Right after `dismiss_investigation_if_clean` |
 | `hunt_package_report.yaml` | `report_report_completed` | `hunt_report_completed` | Right before `emit_result` |
+| `hunt_package_report.yaml` | `report_report_completed_package_failed` | `hunt_report_completed` | In `decide_and_package`'s fallback, right before `emit_package_failed` |
 | `hunt_proposal_gate.yaml` | `report_investigation_closed_settled` | `worker_investigation_closed` | Right after `close_if_settled` |
 
 ## Runs
@@ -24,7 +25,11 @@ The items are the selected threat reports: `candidates_found` is the reports sel
 
 ## Tier 2
 
-`hunt.yaml` outputs `tier2_invoked`, true when the coordinator's result has status `tier1_and_tier2`. The Worker passes it to packaging under the same name, and packaging sends it on. Packaging leaves it out when the calling Worker hasn't picked up the version that passes it.
+`hunt.yaml` outputs `tier2_invoked`, true when the coordinator's result has status `tier1_and_tier2`, or `tier2_skipped_reason: tier2_failed` (Tier 2 was called and threw). The Worker passes it to packaging under the same name, and packaging sends it on. It is `false`, not absent, when unknown, such as a hunt that never reached the coordinator. Packaging leaves it out only when the calling Worker hasn't picked up the version that passes it.
+
+## Packaging
+
+`hunt_report_completed` comes from either of two steps. A packaging step that throws ends the run in its fallback (`emit_package_failed`), so the fallback reports first, as `package_status: run_incomplete` with nothing packaged. `mint_suppression: existing_proposals` is derived the same way as the summary: no proposal minted, and at least one converged on another Investigation or already open on this one.
 
 ## Closes
 

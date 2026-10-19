@@ -272,21 +272,31 @@ describe('Continuous Threat Hunt outcome reports', () => {
   describe('the hunt (hunt.yaml)', () => {
     const steps = topLevelSteps(ALERTZERO_HUNT_WORKFLOW.yaml);
 
-    it('outputs whether the coordinator result says Tier 2 ran', () => {
+    it.each([
+      ['Tier 2 ran', { status: 'tier1_and_tier2' }, true],
+      [
+        'Tier 2 was called and threw',
+        { status: 'tier1_only', tier2_skipped_reason: 'tier2_failed' },
+        true,
+      ],
+      [
+        'Tier 2 was skipped',
+        { status: 'tier1_only', tier2_skipped_reason: 'no_searchable_input' },
+        false,
+      ],
+      ['only Tier 2 was skipped', { status: 'tier2_only_skipped' }, false],
+      ['the hunt was blocked', { status: 'blocked' }, false],
+      ['there is no coordinator result', undefined, false],
+    ])('outputs tier2_invoked when %s', (_scenario, result, expected) => {
       const tier2 = stepNamed(steps, 'resolve_result_status').with?.result_tier2_invoked;
 
       expect(
-        ['tier1_and_tier2', 'tier1_only', 'tier2_only_skipped', 'blocked', undefined].map(
-          (status) =>
-            renderValue(tier2, {
-              steps: {
-                read_hunt_result: status
-                  ? { output: { data: { result: { status }, state: 'completed' } } }
-                  : {},
-              },
-            })
-        )
-      ).toEqual([true, false, false, false, false]);
+        renderValue(tier2, {
+          steps: {
+            read_hunt_result: result ? { output: { data: { result, state: 'completed' } } } : {},
+          },
+        })
+      ).toBe(expected);
     });
 
     it('declares and emits the tier2_invoked output', () => {
@@ -309,6 +319,43 @@ describe('Continuous Threat Hunt outcome reports', () => {
     const report = stepNamed(steps, 'report_report_completed');
 
     describeReportStep(steps, 'report_report_completed', 'hunt_report_completed', 'emit_result');
+
+    // `emit_package_failed` ends the run, so the step-failed path reports from the fallback.
+    const fallbackSteps = stepNamed(steps, 'decide_and_package')['on-failure']
+      ?.fallback as typeof steps;
+    describeReportStep(
+      fallbackSteps,
+      'report_report_completed_package_failed',
+      'hunt_report_completed',
+      'emit_package_failed'
+    );
+
+    it('reports a packaging step that threw as run_incomplete, with nothing packaged', () => {
+      expect(
+        renderReport(stepNamed(fallbackSteps, 'report_report_completed_package_failed'), {
+          inputs: {
+            hasConfirmedHit: true,
+            huntStatus: 'success',
+            investigationConversationId: INVESTIGATION_ID,
+            tier2_invoked: true,
+          },
+          steps: { decide_and_package: { error: { message: 'packaging blew up' } } },
+          variables: {},
+        })
+      ).toEqual({
+        closed_clean: false,
+        coverage_kis_skipped: 0,
+        coverage_kis_written: 0,
+        has_confirmed_hit: true,
+        hunt_status: 'success',
+        investigation_id: INVESTIGATION_ID,
+        mint_suppression: 'none',
+        package_status: 'run_incomplete',
+        proposals_dispatch_failed: 0,
+        proposals_prepared: 0,
+        tier2_invoked: true,
+      });
+    });
 
     it('accepts tier2_invoked as an optional boolean input', () => {
       const workflow = parse(ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW.yaml) as {
@@ -441,17 +488,17 @@ describe('Continuous Threat Hunt outcome reports', () => {
         },
       ],
       [
-        'proposals held back by an existing one, with a gate that failed to launch',
+        'every proposal it would raise already exists, here or on another Investigation',
         {
-          dispatchFailed: 1,
           packaged: {
+            alreadyOpenCount: 1,
+            converged: [{ investigationConversationId: 'other-investigation' }],
             coverage: { skipped: [], written: [] },
             dismiss: false,
-            mintSuppression: 'existing_proposals',
+            mintSuppression: 'none',
             proposals: [],
             status: 'packaged',
           },
-          status: 'run_incomplete',
         },
         {
           closed_clean: false,
@@ -461,8 +508,34 @@ describe('Continuous Threat Hunt outcome reports', () => {
           hunt_status: 'success',
           investigation_id: INVESTIGATION_ID,
           mint_suppression: 'existing_proposals',
-          package_status: 'run_incomplete',
-          proposals_dispatch_failed: 1,
+          package_status: 'success',
+          proposals_dispatch_failed: 0,
+          proposals_prepared: 0,
+          tier2_invoked: undefined,
+        },
+      ],
+      [
+        'a proposal held back only by one already open on this Investigation',
+        {
+          packaged: {
+            alreadyOpenCount: 1,
+            coverage: { skipped: [], written: [] },
+            dismiss: false,
+            mintSuppression: 'none',
+            proposals: [],
+            status: 'packaged',
+          },
+        },
+        {
+          closed_clean: false,
+          coverage_kis_skipped: 0,
+          coverage_kis_written: 0,
+          has_confirmed_hit: true,
+          hunt_status: 'success',
+          investigation_id: INVESTIGATION_ID,
+          mint_suppression: 'existing_proposals',
+          package_status: 'success',
+          proposals_dispatch_failed: 0,
           proposals_prepared: 0,
           tier2_invoked: undefined,
         },

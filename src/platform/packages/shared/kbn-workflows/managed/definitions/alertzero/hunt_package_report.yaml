@@ -99,7 +99,7 @@ triggers:
           description: The coordinator's `tier2.behaviors` (the hunt child's `behaviors` output).
         tier2_invoked:
           type: boolean
-          description: Whether the hunt ran Tier 2. Read only for product telemetry; omit when unknown.
+          description: Whether the hunt ran Tier 2, including a Tier 2 that failed. Read only for product telemetry. The Worker sends false when unknown, such as a hunt that never reached the coordinator.
       required:
         - reportId
         - investigationConversationId
@@ -141,6 +141,29 @@ steps:
       behaviors: "${{ inputs.behaviors }}"
     on-failure:
       fallback:
+        # `emit_package_failed` ends the run, so this report goes first.
+        - name: report_report_completed_package_failed
+          type: alertzero.reportWorkerOutcome
+          on-failure:
+            continue: true
+          with:
+            event: hunt_report_completed
+            hunt_status: |-
+              {%- if inputs.huntStatus == 'success' or inputs.huntStatus == 'partial' or inputs.huntStatus == 'failed' -%}
+              {{ inputs.huntStatus }}
+              {%- else -%}
+              unknown
+              {%- endif -%}
+            has_confirmed_hit: "${{ inputs.hasConfirmedHit == true }}"
+            tier2_invoked: "${{ inputs.tier2_invoked }}"
+            package_status: run_incomplete
+            closed_clean: false
+            proposals_prepared: 0
+            proposals_dispatch_failed: 0
+            mint_suppression: none
+            coverage_kis_written: 0
+            coverage_kis_skipped: 0
+            investigation_id: "{{ inputs.investigationConversationId }}"
         - name: emit_package_failed
           type: workflow.output
           status: completed
@@ -366,9 +389,16 @@ steps:
       closed_clean: "${{ steps.decide_and_package.output.dismiss == true and variables.dismiss_close_failed != true }}"
       proposals_prepared: "${{ steps.decide_and_package.output.proposals | size }}"
       proposals_dispatch_failed: "${{ variables.dispatch_failed_count | default: 0 }}"
+      # The step only says `check_failed`; "every proposal already exists" is derived the same way
+      # as `resolve_package_summary`.
       mint_suppression: |-
-        {%- if steps.decide_and_package.output.mintSuppression == 'existing_proposals' or steps.decide_and_package.output.mintSuppression == 'check_failed' -%}
-        {{ steps.decide_and_package.output.mintSuppression }}
+        {%- assign packaged = steps.decide_and_package.output -%}
+        {%- assign already_open = packaged.alreadyOpenCount | default: 0 -%}
+        {%- assign covered = packaged.converged | size | plus: already_open -%}
+        {%- if packaged.mintSuppression == 'check_failed' -%}
+        check_failed
+        {%- elsif packaged.proposals == empty and covered > 0 -%}
+        existing_proposals
         {%- else -%}
         none
         {%- endif -%}

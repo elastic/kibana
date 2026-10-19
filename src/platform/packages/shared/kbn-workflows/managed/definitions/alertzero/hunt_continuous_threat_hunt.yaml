@@ -197,8 +197,9 @@ steps:
             packaging
             {%- endif -%}
 
-      # Always-runs terminal step, unconditional: an `if` is impossible here
-      # because the engine rejects a flow-control key on a branch-body step.
+      # Always-runs step, unconditional (only the outcome record follows it):
+      # an `if` is impossible here because the engine rejects a flow-control
+      # key on a branch-body step.
       # journal_note.yaml's own `on-failure: continue: true` makes an empty
       # conversation_id (find_or_create never minted one) a silent no-op, which
       # gives "a run that never obtained an Investigation writes no conclusion"

@@ -25,7 +25,8 @@ const buildClient = (
 ): FindOrCreateConversationClient => ({
   create: jest.fn().mockResolvedValue(undefined),
   get: jest.fn().mockResolvedValue({ id: conversationId }),
-  patchMetadata: jest.fn().mockResolvedValue(undefined),
+  // Agent Builder reports the fields the write changed; a reopen changes `status`.
+  patchMetadata: jest.fn().mockResolvedValue({ changedFields: ['status'] }),
   ...overrides,
 });
 
@@ -166,6 +167,19 @@ describe('runFindOrCreateInvestigation', () => {
       ['a new Investigation', buildClient()],
     ])('does not tell the caller about a reopen for %s', async (_label, conversationClient) => {
       const onReopened = jest.fn();
+
+      await runFindOrCreateInvestigation({ spaceId, reportId }, { conversationClient, onReopened });
+
+      expect(onReopened).not.toHaveBeenCalled();
+    });
+
+    // Two reruns that both read `closed`: the loser's write re-reads `open` and changes nothing.
+    it('does not tell the caller about a reopen another writer already made', async () => {
+      const onReopened = jest.fn();
+      const conversationClient = buildRerunClient(
+        { status: 'closed' },
+        { patchMetadata: jest.fn().mockResolvedValue({ changedFields: [] }) }
+      );
 
       await runFindOrCreateInvestigation({ spaceId, reportId }, { conversationClient, onReopened });
 

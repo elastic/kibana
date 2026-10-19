@@ -44,7 +44,7 @@ export interface FindOrCreateConversationClient {
     conversationId: string,
     updates: Record<string, MetadataFieldValue>,
     options?: { access?: 'owner' | 'converse' }
-  ) => Promise<unknown>;
+  ) => Promise<{ changedFields: readonly string[] }>;
 }
 
 export interface RunFindOrCreateInvestigationDeps {
@@ -94,12 +94,13 @@ const reopenIfClosed = async (
   if (metadata?.status !== 'closed') {
     return false;
   }
-  await conversationClient.patchMetadata(
+  const { changedFields } = await conversationClient.patchMetadata(
     investigationConversationId,
     { status: 'open' },
     { access: 'converse' }
   );
-  return true;
+  // A concurrent reopen that won the race leaves this write nothing to change.
+  return changedFields.includes('status');
 };
 
 export const summarizeReportForTrigger = (
