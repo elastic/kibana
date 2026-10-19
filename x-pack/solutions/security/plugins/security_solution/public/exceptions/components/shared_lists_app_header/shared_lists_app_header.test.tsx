@@ -133,19 +133,33 @@ describe('SharedListsAppHeader', () => {
   it('does not repeat the create shared list action in the create menu', async () => {
     renderHeader();
 
-    await user.click(screen.getByTestId('manageExceptionListCreateButton-secondary-button'));
+    await user.click(await screen.findByTestId('manageExceptionListCreateButton-secondary-button'));
 
-    expect(await screen.findByTestId('manageExceptionListCreateExceptionButton')).toBeVisible();
+    expect(
+      await screen.findByTestId('manageExceptionListCreateExceptionButton')
+    ).toBeInTheDocument();
     expect(
       screen.queryByTestId('manageExceptionListCreateExceptionListButton')
     ).not.toBeInTheDocument();
+  });
+
+  it('shows a plus icon on the create exception item menu entry', async () => {
+    renderHeader();
+
+    await user.click(await screen.findByTestId('manageExceptionListCreateButton-secondary-button'));
+
+    expect(
+      (await screen.findByTestId('manageExceptionListCreateExceptionButton')).querySelector(
+        '[data-euiicon-type="plus"]'
+      )
+    ).toBeInTheDocument();
   });
 
   it('opens the add exception flyout from the create menu', async () => {
     const onCreateExceptionItem = jest.fn();
     renderHeader({ onCreateExceptionItem });
 
-    await user.click(screen.getByTestId('manageExceptionListCreateButton-secondary-button'));
+    await user.click(await screen.findByTestId('manageExceptionListCreateButton-secondary-button'));
     await user.click(await screen.findByTestId('manageExceptionListCreateExceptionButton'));
 
     expect(onCreateExceptionItem).toHaveBeenCalled();
