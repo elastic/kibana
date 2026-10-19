@@ -82,9 +82,13 @@ const makeAgentBuilder = (
   } as unknown as AgentBuilderPluginStart);
 
 const makeImpactClient = (
-  entityIdsByConversationId: Record<string, string[]> = {}
+  entityIdsByConversationId: Record<string, string[]> = {},
+  conversationIdsByEntity: Record<string, string[]> = {}
 ): AgenticInvestigationsPluginStart['getImpactClient'] =>
   jest.fn().mockReturnValue({
+    searchConversationIdsByEntityId: jest
+      .fn()
+      .mockImplementation(async (entityId: string) => conversationIdsByEntity[entityId] ?? []),
     getEntitiesByConversationId: jest.fn().mockImplementation(
       async (ids: string[]) =>
         new Map(
@@ -447,6 +451,51 @@ describe('ConversationProposalsService', () => {
       expect(result.proposals).toHaveLength(1);
       expect(result.proposals[0].conversationTitle).toBe('Title for conv-1');
       expect(result.proposals[0]).not.toHaveProperty('entityIds');
+    });
+  });
+
+  describe.each([
+    [
+      'listByCategory',
+      (service: ConversationProposalsService, entity: string) =>
+        service.listByCategory('respond', request, spaceId, { size: 10, from: 0, entity }),
+    ],
+    [
+      'listClosed',
+      (service: ConversationProposalsService, entity: string) =>
+        service.listClosed(request, spaceId, { size: 10, from: 0, entity }),
+    ],
+  ])('%s with an entity filter', (_name, run) => {
+    it('restricts the proposals to the conversations impacting the entity', async () => {
+      const proposalsService = makeProposalsService();
+      const service = new ConversationProposalsService(
+        proposalsService,
+        makeAgentBuilder(),
+        logger,
+        makeImpactClient({}, { 'host-1': ['conv-1', 'conv-2'] })
+      );
+
+      await run(service, 'host-1');
+
+      expect(proposalsService.list).toHaveBeenCalledWith(
+        expect.objectContaining({ conversationIds: ['conv-1', 'conv-2'] }),
+        spaceId,
+        request,
+        expect.anything()
+      );
+    });
+
+    it('returns an empty page without querying proposals when no conversation has the entity', async () => {
+      const proposalsService = makeProposalsService();
+      const service = new ConversationProposalsService(
+        proposalsService,
+        makeAgentBuilder(),
+        logger,
+        makeImpactClient()
+      );
+
+      expect(await run(service, 'unknown')).toEqual({ proposals: [], total: 0 });
+      expect(proposalsService.list).not.toHaveBeenCalled();
     });
   });
 

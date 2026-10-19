@@ -29,6 +29,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID,
   ATTACK_DISCOVERY_DATA_GENERATOR_RULE_TYPE_ID,
+  isAttackDiscoveryIndex,
   toReadableAttackIndexPattern,
 } from '@kbn/elastic-assistant-common';
 import { CaseStatuses } from '../../../common/types/domain';
@@ -487,17 +488,22 @@ export class AlertService {
   }
 
   /**
-   * Authorizes attack attachments, which reference an attack discovery AAD alert.
-   *
-   * `ensureAlertsAuthorized` alone is not enough: it authorizes the (rule type, consumer) pair of
-   * every document that carries those fields, and silently accepts a document that is missing, is
-   * not an alert, or belongs to another space. The status sync later writes to the reference by id
-   * alone, so all three are rejected here, before the attachment is persisted.
-   *
-   * Scheduled, ad-hoc and dev-only generator discoveries are all accepted, but only scheduled ones
-   * reach alerting RBAC — see `ensureScheduledAttacksAuthorized`. The read itself runs as the
-   * caller against an index pattern rather than the index on the attachment — see
-   * `fetchAttackAuthorizationSources`.
+   * Rejects indices outside the two attack discovery families, so a document elsewhere that merely
+   * carries an attack discovery rule type and space id cannot pass the checks that follow.
+   */
+  private rejectNonAttackIndices(attacks: AlertInfo[]): void {
+    const foreignAttack = attacks.find((attack) => !isAttackDiscoveryIndex(attack.index));
+
+    if (foreignAttack != null) {
+      throw Boom.badRequest(
+        `Cannot attach an attack from an index that is not an attack discovery index: ${foreignAttack.index}`
+      );
+    }
+  }
+
+  /**
+   * Authorizes attack attachments, rejecting references that are missing, not attack discoveries,
+   * or in another space, all of which `ensureAlertsAuthorized` silently accepts.
    */
   public async ensureAttacksAuthorized({
     attacks,
@@ -514,6 +520,7 @@ export class AlertService {
       }
 
       this.rejectNonLocalIndices(nonEmptyAttacks, 'an attack');
+      this.rejectNonAttackIndices(nonEmptyAttacks);
 
       const sourcesById = await this.fetchAttackAuthorizationSources(nonEmptyAttacks);
 
@@ -526,7 +533,9 @@ export class AlertService {
       }
 
       const invalidIds = nonEmptyAttacks
-        .filter((attack) => !AlertService.isAttackInSpace(sourcesById.get(attack.id), spaceId))
+        .filter(
+          (attack) => !AlertService.isAttackInSpace(sourcesById.get(attack.id)?.fields, spaceId)
+        )
         .map((attack) => attack.id);
 
       if (invalidIds.length > 0) {
@@ -548,52 +557,80 @@ export class AlertService {
   }
 
   /**
-   * Reads the authorization fields of each referenced attack, as the caller.
+   * Whether Elasticsearch refused a read because the caller holds no privilege on the pattern.
    *
-   * Deliberately a search over an index *pattern* rather than an `mget` against the index the
-   * attachment carries. `metadata.index` snapshots the attack document's `_index`, which is the
-   * concrete backing index (`.internal.alerts-security.attack.discovery.alerts-default-000001`),
-   * and alert index privileges are only ever granted on the alias family
-   * (`.alerts-security.attack.discovery.alerts*`). Addressing the backing index therefore fails
-   * with a security exception for every non-superuser, which this method would read as "not
-   * found" and reject the attach.
+   * A caller with read somewhere else gets an empty result for a pattern it cannot see, because
+   * the wildcard resolves to no authorized index. A caller with no index privileges at all is
+   * refused the search action outright, before resolution, so the same absence arrives as an
+   * error instead. Both mean the attack is not readable, so they must be treated alike.
+   */
+  private static isUnauthorizedRead(error: unknown): boolean {
+    const candidate = error as {
+      statusCode?: number;
+      body?: { error?: { type?: string } };
+    };
+
+    return candidate?.statusCode === 403 || candidate?.body?.error?.type === 'security_exception';
+  }
+
+  /**
+   * Reads each referenced attack's authorization fields as the caller, keyed by `_id`.
    *
-   * The alias on its own would not do either: single-document operations against an alias fail
-   * once it spans more than one index, which is exactly what happens on the first rollover.
-   *
-   * Results are keyed by `_id` because a search returns only the documents it found, in relevance
-   * order. Attack discovery alert ids are unique across both index families, so this cannot
-   * conflate two documents, and it never compares the caller-supplied index against the one
-   * Elasticsearch resolved — see `ensureScheduledAttacksAuthorized` for why that matters.
+   * Searches an index pattern rather than `mget`-ing the attachment's index: privileges are granted
+   * on the alias family, not the concrete backing index `metadata.index` holds, and single-document
+   * operations against the alias fail once it spans more than one index, i.e. after the first
+   * rollover. Callers must call `rejectNonAttackIndices` first.
    */
   private async fetchAttackAuthorizationSources(
     attacks: AlertInfo[]
-  ): Promise<Map<string, AttackAuthorizationFields | undefined>> {
+  ): Promise<Map<string, AttackAuthorizationSource>> {
     const idsByPattern = new Map<string, string[]>();
 
     for (const attack of attacks) {
       const pattern = toReadableAttackIndexPattern(attack.index);
-      idsByPattern.set(pattern, [...(idsByPattern.get(pattern) ?? []), attack.id]);
+      const ids = idsByPattern.get(pattern);
+      if (ids) {
+        ids.push(attack.id);
+      } else {
+        idsByPattern.set(pattern, [attack.id]);
+      }
     }
 
-    const sourcesById = new Map<string, AttackAuthorizationFields | undefined>();
+    const sourcesById = new Map<string, AttackAuthorizationSource>();
 
     await pMap(
       Array.from(idsByPattern.entries()),
       async ([index, ids]) => {
-        const { hits } = await this.scopedClusterClient.search<AttackAuthorizationFields>({
-          index,
-          size: ids.length,
-          query: { ids: { values: ids } },
-          _source: [ALERT_RULE_TYPE_ID, SPACE_IDS],
-          // A pattern that currently resolves to nothing is a missing attack, not a failure.
-          ignore_unavailable: true,
-          allow_no_indices: true,
-        });
+        let hits;
+
+        try {
+          ({ hits } = await this.scopedClusterClient.search<AttackAuthorizationFields>({
+            index,
+            size: ids.length,
+            query: { ids: { values: ids } },
+            _source: [ALERT_RULE_TYPE_ID, SPACE_IDS],
+            // A pattern that currently resolves to nothing is a missing attack, not a failure.
+            ignore_unavailable: true,
+            allow_no_indices: true,
+          }));
+        } catch (error) {
+          if (!AlertService.isUnauthorizedRead(error)) {
+            throw error;
+          }
+
+          // Leaving the ids unresolved reports them as not found, the same as an empty result.
+          this.logger.debug(
+            `Caller cannot read ${index}, treating its referenced attacks as not found: ${ids.join(
+              ', '
+            )}`
+          );
+
+          return;
+        }
 
         for (const hit of hits.hits) {
           if (hit._id != null) {
-            sourcesById.set(hit._id, hit._source);
+            sourcesById.set(hit._id, { index: hit._index, fields: hit._source });
           }
         }
       },
@@ -606,27 +643,22 @@ export class AlertService {
   /**
    * Runs alerting RBAC over the scheduled attacks of an already space-checked batch.
    *
-   * Ad-hoc discoveries are deliberately left out. `ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID` is a
-   * sentinel the alerting framework never registers and no feature privilege grants, so
-   * `ensureAllAlertsAuthorizedRead` would reject every ad-hoc attack for any caller that is not a
-   * superuser. They carry no privacy of their own — the generating user is recorded on the
-   * document so it can be filtered on, not hidden — so the caller-scoped search that produced
-   * `sourcesById` is the authorization: it is the same Elasticsearch index privilege gate the
-   * attack discovery APIs read ad-hoc discoveries with, and the one the status sync writes
-   * through.
-   *
-   * Pairing is by `_id` and never by index name. That is load-bearing: the index on the
-   * attachment is caller-controlled and is not the one Elasticsearch resolves the document from,
-   * so matching the two would find nothing, leave `scheduledAttacks` empty, and skip alerting
-   * RBAC entirely for a caller that named the alias.
+   * Ad-hoc attacks are skipped because their rule type is never registered, so RBAC would reject
+   * them for every non-superuser; the caller-scoped search is their authorization instead.
+   * Attacks are paired with their sources by `_id`, and RBAC is given the resolved `_index`, never
+   * the caller-supplied one, so it checks the same document whose rule type was read.
    */
   private async ensureScheduledAttacksAuthorized(
     attacks: AlertInfo[],
-    sourcesById: Map<string, AttackAuthorizationFields | undefined>
+    sourcesById: Map<string, AttackAuthorizationSource>
   ): Promise<void> {
-    const scheduledAttacks = attacks.filter((attack) =>
-      AlertService.isScheduledAttack(sourcesById.get(attack.id))
-    );
+    const scheduledAttacks = attacks.flatMap((attack) => {
+      const source = sourcesById.get(attack.id);
+
+      return AlertService.isScheduledAttack(source?.fields)
+        ? [{ ...attack, index: source?.index ?? attack.index }]
+        : [];
+    });
 
     if (scheduledAttacks.length <= 0) {
       return;
@@ -636,13 +668,8 @@ export class AlertService {
   }
 
   /**
-   * The rule types that write attack discovery alerts.
-   *
-   * Scheduled and ad hoc are the two production producers. The data generator is a dev-only rule
-   * type that writes through the same AAD config into the same index, so its documents are attack
-   * discoveries too; it is registered only in dev mode or on Elastic-staff-owned cloud
-   * deployments, so recognising it here does not widen production exposure. Rejecting it made the
-   * feature untestable with the generator everyone desk tests with.
+   * The rule types that write attack discovery alerts. The data generator is only registered in
+   * dev mode or on Elastic-staff cloud deployments, so accepting it does not widen production.
    */
   private static isAttackDiscoveryRuleType(ruleTypeId: string | undefined): boolean {
     return (
@@ -800,6 +827,12 @@ export interface Alert {
 interface AttackAuthorizationFields {
   [ALERT_RULE_TYPE_ID]?: string;
   [SPACE_IDS]?: string[];
+}
+
+/** A referenced attack as resolved; `index` is the hit's `_index`, not the attachment's. */
+interface AttackAuthorizationSource {
+  index: string;
+  fields: AttackAuthorizationFields | undefined;
 }
 
 interface AlertIdIndex {
