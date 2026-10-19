@@ -147,7 +147,7 @@ describe('registerAlertZeroInferenceFeatures', () => {
       featureId: ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID,
       featureName: 'Cyber domain models',
       featureDescription:
-        'OpenAI Daybreak models for Attack Discovery, alert triage, and the false-positive judge. A Daybreak endpoint requires a prompt template, so it is listed only here. A model saved here replaces the tier those calls use. Leave this empty to keep Attack Discovery and the judge on Frontier models and alert triage on Efficient models.',
+        'Cyber domain models for Attack Discovery, alert triage, and the false-positive judge. These endpoints require a prompt template, so they are listed only here. A model saved here replaces the tier those calls use. Leave this empty to keep Attack Discovery and the judge on Frontier models and alert triage on Efficient models.',
       recommendedEndpoints: [],
     });
   });
