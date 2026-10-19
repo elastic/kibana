@@ -129,10 +129,14 @@ export const main = async (): Promise<void> => {
       const groups = new Map<string, Array<Record<string, any>>>();
       for (const h of res.hits.hits) {
         const r = h._source as Record<string, any>;
-        const key = `${project.get(r.run_id)}|${r.pod}`;
+        // Group by target and pod role (pods are replaced by image updates; roles are stable).
+        const role = String(r.pod).startsWith('kb-background') ? 'background' : String(r.pod).startsWith('kb-ui') ? 'ui' : r.pod;
+        const key = `${project.get(r.run_id)}|${role}`;
         groups.set(key, [...(groups.get(key) ?? []), r]);
       }
-      const stats = (xs: number[]) => {
+      const stats = (raw: Array<number | null>) => {
+        const xs = raw.filter((x): x is number => typeof x === 'number');
+        if (!xs.length) return null;
         const m = xs.reduce((a, b) => a + b, 0) / xs.length;
         const sd = Math.sqrt(xs.reduce((a, b) => a + (b - m) ** 2, 0) / Math.max(1, xs.length - 1));
         return {
@@ -153,8 +157,10 @@ export const main = async (): Promise<void> => {
           longest_slice_ms: stats(rows.map((r) => r.longest_slice_ms)),
         };
       }
-      const all = res.hits.hits.map((h) => h._source as Record<string, any>);
-      out.pooled = {
+      const all = res.hits.hits
+        .map((h) => h._source as Record<string, any>)
+        .filter((r) => project.get(r.run_id) !== 'local' && String(r.pod).startsWith('kb-ui'));
+      out.pooled_qaf_ui = {
         probe_p99_ms: stats(all.map((r) => r.probe_p99_ms)),
         probe_p50_ms: stats(all.map((r) => r.probe_p50_ms)),
       };
