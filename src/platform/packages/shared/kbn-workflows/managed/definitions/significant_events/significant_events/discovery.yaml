@@ -39,14 +39,14 @@ triggers:
           description: 'Rules with severity_score at or above this value are never suppressed, however frequently they fire. Default matches the 80-critical investigation boundary; set above 100 to disable the exemption.'
         classifierShadowMode:
           type: boolean
-          default: true
+          default: false
           description: 'When true, the detection classifier only records which detections it would skip and every detection still goes to the agent. Set to false to enforce the skips.'
         classifierProbeWindowMinutes:
           type: number
           default: 20
           minimum: 15
           maximum: 360
-          description: 'Window, ending now, over which the classifier re-runs a rule''s stored query. Keep it short: on c0, windows over about 30 minutes let earlier matches hide recoveries from the agent.'
+          description: "Window, ending now, over which the classifier re-runs a rule's stored query. Keep it short: on c0, windows over about 30 minutes let earlier matches hide recoveries from the agent."
         classifierProbeTimeoutMs:
           type: number
           default: 8000
@@ -64,7 +64,7 @@ triggers:
           default: 24
           minimum: 1
           maximum: 720
-          description: 'A detection is never skipped on the strength of a verdict older than this many hours (the rule''s last verification in its live series): it goes to the agent, so a long-running event is re-judged at least this often.'
+          description: "A detection is never skipped on the strength of a verdict older than this many hours (the rule's last verification in its live series): it goes to the agent, so a long-running event is re-judged at least this often."
         classifierKnownOngoingDays:
           type: number
           default: 7
@@ -76,7 +76,7 @@ triggers:
           default: 336
           minimum: 1
           maximum: 2160
-          description: 'How far back a rule''s latest series is looked for. It is handed to the agent as prior_series context.'
+          description: "How far back a rule's latest series is looked for. It is handed to the agent as prior_series context."
         classifierBudgetMs:
           type: number
           default: 20000
@@ -268,7 +268,7 @@ steps:
             | WHERE classified_at IS NOT NULL AND @timestamp <= classified_at
             | STATS detection_ids = VALUES(detection_id) BY rule_uuid
           params:
-            - ',{{ steps.classify_detections.output.skipped_detection_ids | join: '','' }},'
+            - ",{{ steps.classify_detections.output.skipped_detection_ids | join: ',' }},"
           filter:
             bool:
               filter:
@@ -305,7 +305,7 @@ steps:
                 detection_ids: "${{ foreach.item[0] | join: ',' | split: ',' }}"
                 processed_by: '{{ execution.id }}'
                 # The classifier's decision for this rule, so the marker says why.
-                skip: '${{ steps.classify_detections.output.skips | where: ''rule_uuid'', foreach.item[1] | map: ''skip'' | first }}'
+                skip: "${{ steps.classify_detections.output.skips | where: 'rule_uuid', foreach.item[1] | map: 'skip' | first }}"
             on-failure:
               continue: true
 
@@ -442,7 +442,14 @@ steps:
                   description: 'true when events_write appended the event version.'
                 reason:
                   type: string
-                  enum: [bulk_error, duplicate_in_batch, existing_active_event, unchanged_outcome, unknown_event_id]
+                  enum:
+                    [
+                      bulk_error,
+                      duplicate_in_batch,
+                      existing_active_event,
+                      unchanged_outcome,
+                      unknown_event_id,
+                    ]
                   description: 'Failure or skip reason when written is false.'
               required: [event_id, severity, status, written]
         required: [written_rule_uuids, significant_events]
