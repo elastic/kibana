@@ -35,6 +35,7 @@ import type {
   ResponseActionMemoryDumpParameters,
 } from '../../../../common/endpoint/types';
 import { EndpointActionFailureMessage } from '../endpoint_action_failure_message';
+import { getAgentActionState } from '../response_action/response_action_results/utils';
 
 export interface MemoryDumpResponseActionOutputResultProps {
   action: MaybeImmutable<
@@ -49,15 +50,22 @@ export interface MemoryDumpResponseActionOutputResultProps {
   'data-test-subj'?: string;
 }
 
+/**
+ * DO NOT USE as it is undergoing refactoring. Use `<ResponseActionResults>` component instead
+ * @deprecated
+ */
 export const MemoryDumpResponseActionOutputResult = memo<MemoryDumpResponseActionOutputResultProps>(
   ({ action, agentId: _agentId, 'data-test-subj': dataTestSubj, textSize = 's' }) => {
     const agentId = _agentId || action.agents[0];
     const testId = useTestIdGenerator(dataTestSubj);
-    const agentActionState = action.agentState[agentId];
+    const agentActionState = useMemo(
+      () => (action.agents.includes(agentId) ? getAgentActionState(action, agentId) : undefined),
+      [action, agentId]
+    );
     const agentActionResult = action.outputs?.[agentId];
 
     return useMemo(() => {
-      if (!action.agents.includes(agentId)) {
+      if (!agentActionState) {
         window.console.error(
           `MemoryDumpResponseActionOutputResult called with agentId [${agentId}] not in action.agents`
         );
@@ -72,7 +80,11 @@ export const MemoryDumpResponseActionOutputResult = memo<MemoryDumpResponseActio
         );
       } else if (!agentActionState.wasSuccessful) {
         result = (
-          <EndpointActionFailureMessage action={action} data-test-subj={testId('failure')} />
+          <EndpointActionFailureMessage
+            action={action}
+            agentId={agentId}
+            data-test-subj={testId('failure')}
+          />
         );
       } else {
         result = (
@@ -198,15 +210,7 @@ export const MemoryDumpResponseActionOutputResult = memo<MemoryDumpResponseActio
           {result}
         </EuiText>
       );
-    }, [
-      action,
-      agentActionResult?.content,
-      agentActionState?.isCompleted,
-      agentActionState?.wasSuccessful,
-      agentId,
-      testId,
-      textSize,
-    ]);
+    }, [action, agentActionResult?.content, agentActionState, agentId, testId, textSize]);
   }
 );
 MemoryDumpResponseActionOutputResult.displayName = 'MemoryDumpResponseActionOutputResult';

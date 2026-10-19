@@ -29,6 +29,8 @@ import { maintenanceWindowsMock } from '@kbn/maintenance-windows-plugin/server/m
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import { schema } from '@kbn/config-schema';
 import { serverlessPluginMock } from '@kbn/serverless/server/mocks';
+import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
+import { AlertStatusChangedTriggerId } from '../common/workflows/triggers';
 import { AlertsService } from './alerts_service/alerts_service';
 import { alertsServiceMock } from './alerts_service/alerts_service.mock';
 
@@ -116,6 +118,30 @@ describe('Alerting Plugin', () => {
 
           expect(usageCollectionSetup.createUsageCounter).toHaveBeenCalled();
           expect(usageCollectionSetup.registerCollector).toHaveBeenCalled();
+        });
+
+        it('registers the alert status changed trigger definition when workflowsExtensions is present, whether or not anyone has opted in', async () => {
+          const workflowsExtensions = workflowsExtensionsMock.createSetup();
+          plugin = new AlertingPlugin(
+            coreMock.createPluginInitializerContext<AlertingConfig>(generateAlertingConfig())
+          );
+          plugin.setup(setupMocks, { ...mockPlugins, workflowsExtensions });
+          await waitForSetupComplete(setupMocks);
+          expect(workflowsExtensions.registerTriggerDefinition).toHaveBeenCalledWith(
+            expect.objectContaining({ id: AlertStatusChangedTriggerId })
+          );
+        });
+
+        it('lets another plugin opt in to the alert status changed trigger', async () => {
+          plugin = new AlertingPlugin(
+            coreMock.createPluginInitializerContext<AlertingConfig>(generateAlertingConfig())
+          );
+          const setupContract = plugin.setup(setupMocks, mockPlugins);
+          await waitForSetupComplete(setupMocks);
+
+          expect(() =>
+            setupContract.enableAlertStatusChanged({ isEnabled: async () => true })
+          ).not.toThrow();
         });
 
         it('should initialize AlertsService if enableFrameworkAlerts config is true', async () => {

@@ -6,26 +6,28 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiCallOut } from '@elastic/eui';
+import { EuiCallOut } from '@elastic/eui';
 import { getRateLimitTitle, listLabels } from './translations';
 
-export const RateLimitCallout = ({ count, onShow }: { count: number; onShow: () => void }) => (
+export const RateLimitCallout = ({ count, onShow }: { count: number; onShow?: () => void }) => (
   <EuiCallOut
     announceOnMount
     size="s"
     color="warning"
     iconType="hourglass"
     title={getRateLimitTitle(count)}
+    text={listLabels.rateLimitBody}
+    actionProps={
+      onShow
+        ? {
+            primary: {
+              children: listLabels.showRateLimited,
+              onClick: onShow,
+              'data-test-subj': 'automationsShowRateLimited',
+            },
+          }
+        : undefined
+    }
     data-test-subj="automationsRateLimitBanner"
-  >
-    <p>{listLabels.rateLimitBody}</p>
-    <EuiButton
-      data-test-subj="automationsShowRateLimited"
-      color="warning"
-      size="s"
-      onClick={onShow}
-    >
-      {listLabels.showThem}
-    </EuiButton>
-  </EuiCallOut>
+  />
 );

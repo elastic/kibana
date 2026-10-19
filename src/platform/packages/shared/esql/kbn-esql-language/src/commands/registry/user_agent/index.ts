@@ -26,6 +26,7 @@ export const userAgentCommand = {
   name: Commands.USER_AGENT,
   methods: userAgentCommandMethods,
   metadata: {
+    docPreserving: true,
     preview: true,
     description: i18n.translate('kbn-esql-language.esql.definitions.userAgentDoc', {
       defaultMessage:

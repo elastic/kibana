@@ -18,6 +18,10 @@ import { withProfilingSpan } from './with_profiling_span';
 
 const PROFILING_STATUS_TIMEOUT_SECONDS = 60;
 
+interface SampledStacktraceIdsResponse {
+  aggregations?: { sample: { stacktraceIds: { buckets: Array<{ key: string }> } } };
+}
+
 /** Creates a profiling ES client; when `abortSignal` is given, ES requests are cancelled once it aborts. */
 export const createProfilingEsClient: CreateProfilingEsClient = ({ esClient, abortSignal }) => {
   const requestOptions = { signal: abortSignal, meta: true } as const;
@@ -50,6 +54,7 @@ export const createProfilingEsClient: CreateProfilingEsClient = ({ esClient, abo
       azureCostDiscountRate,
       indices,
       stacktraceIdsField,
+      schema,
     }) {
       const promise = withProfilingSpan('_profiling/stacktraces', () =>
         esClient.transport.request(
@@ -69,6 +74,7 @@ export const createProfilingEsClient: CreateProfilingEsClient = ({ esClient, abo
               azure_cost_factor: azureCostDiscountRate,
               indices,
               stacktrace_ids_field: stacktraceIdsField,
+              schema,
             },
           },
           requestOptions
@@ -76,6 +82,44 @@ export const createProfilingEsClient: CreateProfilingEsClient = ({ esClient, abo
       );
 
       return unwrapEsResponse(promise) as Promise<StackTraceResponse>;
+    },
+    async sampleStacktraceIds({
+      query,
+      indices,
+      stacktraceIdsField,
+      probability,
+      seed,
+      preference,
+      size,
+    }) {
+      // A raw request because the ES client types don't include the `counted_terms` aggregation,
+      // which counts the repeated values of the `counted_keyword` stacktrace IDs fields
+      const promise = withProfilingSpan('sample_stacktrace_ids', () =>
+        esClient.transport.request<SampledStacktraceIdsResponse>(
+          {
+            method: 'POST',
+            path: `/${indices.map(encodeURIComponent).join(',')}/_search`,
+            querystring: { preference, request_cache: true },
+            body: {
+              size: 0,
+              track_total_hits: false,
+              query,
+              aggs: {
+                sample: {
+                  random_sampler: { probability, seed },
+                  aggs: {
+                    stacktraceIds: { counted_terms: { field: stacktraceIdsField, size } },
+                  },
+                },
+              },
+            },
+          },
+          requestOptions
+        )
+      );
+
+      const response = await unwrapEsResponse(promise);
+      return response.aggregations?.sample.stacktraceIds.buckets.map(({ key }) => key) ?? [];
     },
     getEsClient() {
       return esClient;
@@ -93,6 +137,7 @@ export const createProfilingEsClient: CreateProfilingEsClient = ({ esClient, abo
       azureCostDiscountRate,
       indices,
       stacktraceIdsField,
+      schema,
     }) {
       const promise = withProfilingSpan('_profiling/flamegraph', () =>
         esClient.transport.request(
@@ -112,6 +157,7 @@ export const createProfilingEsClient: CreateProfilingEsClient = ({ esClient, abo
               azure_cost_factor: azureCostDiscountRate,
               indices,
               stacktrace_ids_field: stacktraceIdsField,
+              schema,
             },
           },
           requestOptions
@@ -135,6 +181,7 @@ export const createProfilingEsClient: CreateProfilingEsClient = ({ esClient, abo
       sampleSize,
       limit,
       durationSeconds,
+      schema,
     }) {
       const promise = withProfilingSpan('_profiling/topn/functions', () =>
         esClient.transport.request(
@@ -156,6 +203,7 @@ export const createProfilingEsClient: CreateProfilingEsClient = ({ esClient, abo
               cost_per_core_hour: costPervCPUPerHour,
               azure_cost_factor: azureCostDiscountRate,
               requested_duration: durationSeconds,
+              schema,
             },
           },
           requestOptions

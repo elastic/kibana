@@ -1,5 +1,5 @@
 {
-  "sha1": "4953513a31b138aa21abf89d18a5beb815029c8c",
+  "sha1": "cf6467a8e411fa137e66140d952d70a36c2b1edf",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -89,19 +89,18 @@
       "title": "No data views: try ES|QL from dashboard creates a new ES|QL dashboard from the no-data prompt",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@cloud-serverless-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_esql_no_data.spec.ts",
-        "line": 24,
-        "column": 35
+        "line": 36,
+        "column": 33
       }
     },
     {

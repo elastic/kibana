@@ -22,9 +22,10 @@ export interface Props {
   loading: boolean;
   error: boolean;
   view: ViewType;
+  isInteractive?: boolean;
 }
 
-export function SlosView({ sloList, loading, error, view }: Props) {
+export function SlosView({ sloList, loading, error, view, isInteractive = true }: Props) {
   if (!loading && !error && sloList.length === 0) {
     return <SloListEmpty />;
   }
@@ -35,32 +36,46 @@ export function SlosView({ sloList, loading, error, view }: Props) {
 
   if (view === 'cardView') {
     return (
-      <Wrapper sloList={sloList}>
-        <SloListCardView sloList={sloList} loading={loading} error={error} />
+      <Wrapper sloList={sloList} isInteractive={isInteractive}>
+        <SloListCardView
+          sloList={sloList}
+          loading={loading}
+          error={error}
+          isInteractive={isInteractive}
+        />
       </Wrapper>
     );
   }
 
   if (view === 'compactView') {
     return (
-      <Wrapper sloList={sloList}>
-        <SloListCompactView sloList={sloList} loading={loading} error={error} />
+      <Wrapper sloList={sloList} isInteractive={isInteractive}>
+        <SloListCompactView
+          sloList={sloList}
+          loading={loading}
+          error={error}
+          isInteractive={isInteractive}
+        />
       </Wrapper>
     );
   }
 
   return (
-    <Wrapper sloList={sloList}>
+    <Wrapper sloList={sloList} isInteractive={isInteractive}>
       <SloListView sloList={sloList} loading={loading} error={error} />
     </Wrapper>
   );
 }
 
-function Wrapper({ children, sloList }: { children: React.ReactNode } & Pick<Props, 'sloList'>) {
+function Wrapper({
+  children,
+  sloList,
+  isInteractive = true,
+}: { children: React.ReactNode; isInteractive?: boolean } & Pick<Props, 'sloList'>) {
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
-        <HealthCallout sloList={sloList} />
+        <HealthCallout sloList={sloList} isInteractive={isInteractive} />
       </EuiFlexItem>
       <EuiFlexItem>
         <ActionModalProvider>{children}</ActionModalProvider>

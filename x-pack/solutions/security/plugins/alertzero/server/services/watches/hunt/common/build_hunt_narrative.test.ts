@@ -74,6 +74,7 @@ const result = (overrides: Partial<HuntCoordinatorCoreResult> = {}): HuntCoordin
   index_patterns: ['logs-*', '-logs-elastic_agent*'],
   tier2_targets: ['logs-aws.cloudtrail-*', 'logs-endpoint.events.process-*'],
   tier2_target_sources: ['report_match', 'tier1_hits', 'actionable'],
+  report_intent_targets: [],
   actionable_indices: ['logs-endpoint.events.process-*'],
   tier1: tier1(),
   message: 'Tier 1: no_environment_hits.',
@@ -200,6 +201,7 @@ describe('buildHuntNarrative', () => {
         tier2: tier2([]),
         tier2_targets: ['logs-aws.cloudtrail-*'],
         tier2_target_sources: ['model'],
+        report_intent_targets: [],
         has_confirmed_hit: true,
       }),
       ctx
@@ -246,6 +248,23 @@ describe('buildHuntNarrative', () => {
     expect(narrative).not.toMatch(TECHNOLOGY_WORD);
   });
 
+  it('names the model tiers that were unavailable when Tier 2 could not run for want of a model', () => {
+    const narrative = buildHuntNarrative(
+      result({
+        status: 'tier1_only',
+        tier2_skipped_reason: 'no_inference',
+        unavailable_model_tiers: ['efficient', 'balanced', 'frontier'],
+      }),
+      ctx
+    );
+
+    // Efficient and Balanced are unavailable too, but Tier 2 has no consumer for either, so
+    // neither is blamed.
+    expect(narrative).toContain('no model was available for the Frontier tier');
+    expect(narrative).not.toContain('Efficient');
+    expect(narrative).not.toContain('Balanced');
+  });
+
   it('explains every Tier 2 skip reason in plain words under the Tier 2 heading', () => {
     const skipped = (reason: HuntCoordinatorCoreResult['tier2_skipped_reason']) =>
       buildHuntNarrative(result({ status: 'tier1_only', tier2_skipped_reason: reason }), ctx);
@@ -287,6 +306,7 @@ describe('buildHuntNarrative', () => {
         index_patterns: [],
         tier2_targets: [],
         tier2_target_sources: [],
+        report_intent_targets: [],
         actionable_indices: [],
         tier1: tier1({ status: 'scope_blocked' }),
         tier2_skipped_reason: 'scope_blocked',
@@ -312,6 +332,7 @@ describe('buildHuntNarrative', () => {
         index_patterns: [],
         tier2_targets: [],
         tier2_target_sources: [],
+        report_intent_targets: [],
         actionable_indices: [],
         tier1: tier1({ status: 'no_searchable_terms' }),
         tier2_skipped_reason: 'report_not_found',
@@ -409,6 +430,7 @@ describe('buildHuntHeadline', () => {
           index_patterns: [],
           tier2_targets: [],
           tier2_target_sources: [],
+          report_intent_targets: [],
           actionable_indices: [],
           tier2_skipped_reason: 'scope_blocked',
         })

@@ -19,6 +19,7 @@ import { CONTENT_LIST_ACTIONS } from '../../state';
 import type { ContentListFeatures } from '../types';
 import type { FindItemsParams, FindItemsResult } from '../../datasource';
 import { parseSearch } from './url_codec';
+import { useContentListSort } from '../sorting';
 
 describe('ContentListUrlSync', () => {
   const mockFindItems = jest.fn(
@@ -66,6 +67,7 @@ describe('ContentListUrlSync', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    localStorage.clear();
   });
 
   afterEach(async () => {
@@ -602,6 +604,99 @@ describe('ContentListUrlSync', () => {
 
       primary.unmount();
       secondary.unmount();
+    });
+  });
+
+  describe('with a persisted sort', () => {
+    const STORAGE_KEY = 'contentList:sort:test-list-listing';
+
+    const persistOpeningSort = () => localStorage.setItem(STORAGE_KEY, 'updatedAt:asc');
+
+    const renderList = (history: MemoryHistory) =>
+      renderHook(() => ({ list: useContentListState(), sort: useContentListSort() }), {
+        wrapper: createWrapper({ history }),
+      });
+
+    it('opens with the persisted sort without writing `sort` to the URL', async () => {
+      persistOpeningSort();
+      const history = createMemoryHistory({ initialEntries: ['/app'] });
+      const replaceSpy = jest.spyOn(history, 'replace');
+
+      const { result } = renderList(history);
+
+      await waitFor(() => {
+        expect(result.current.list.state.sort).toEqual({ field: 'updatedAt', direction: 'asc' });
+      });
+      expect(history.location.search).toBe('');
+      expect(replaceSpy).not.toHaveBeenCalled();
+    });
+
+    it('lets a URL sort win over the persisted sort and does not persist it', async () => {
+      persistOpeningSort();
+      const history = createMemoryHistory({ initialEntries: ['/app?sort=title%3Adesc'] });
+
+      const { result } = renderList(history);
+
+      await waitFor(() => {
+        expect(result.current.list.state.sort).toEqual({ field: 'title', direction: 'desc' });
+      });
+      expect(history.location.search).toBe('?sort=title:desc');
+      expect(localStorage.getItem(STORAGE_KEY)).toBe('updatedAt:asc');
+    });
+
+    it('writes `sort` only while the user sort differs from the opening sort', async () => {
+      persistOpeningSort();
+      const history = createMemoryHistory({ initialEntries: ['/app'] });
+
+      const { result } = renderList(history);
+
+      await waitFor(() => {
+        expect(result.current.list.state.sort).toEqual({ field: 'updatedAt', direction: 'asc' });
+      });
+
+      // `title asc` is the configured default, but not this list's opening sort.
+      act(() => {
+        result.current.sort.setSort('title', 'asc');
+      });
+      await waitFor(() => {
+        expect(history.location.search).toBe('?sort=title:asc');
+      });
+      expect(localStorage.getItem(STORAGE_KEY)).toBe('title:asc');
+
+      // Picking the opening sort again drops the param.
+      act(() => {
+        result.current.sort.setSort('updatedAt', 'asc');
+      });
+      await waitFor(() => {
+        expect(history.location.search).toBe('');
+      });
+    });
+
+    it('returns to the opening sort when navigating back to a URL without `sort`', async () => {
+      persistOpeningSort();
+      const history = createMemoryHistory({ initialEntries: ['/app'] });
+
+      const { result } = renderList(history);
+
+      await waitFor(() => {
+        expect(result.current.list.state.sort).toEqual({ field: 'updatedAt', direction: 'asc' });
+      });
+
+      act(() => {
+        history.push({ search: '?sort=title:desc' });
+      });
+      await waitFor(() => {
+        expect(result.current.list.state.sort).toEqual({ field: 'title', direction: 'desc' });
+      });
+
+      act(() => {
+        history.goBack();
+      });
+
+      // The opening sort (persisted), not the configured `title asc` default.
+      await waitFor(() => {
+        expect(result.current.list.state.sort).toEqual({ field: 'updatedAt', direction: 'asc' });
+      });
     });
   });
 });
