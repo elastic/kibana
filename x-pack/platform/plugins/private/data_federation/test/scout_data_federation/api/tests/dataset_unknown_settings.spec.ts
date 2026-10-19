@@ -24,10 +24,11 @@ interface GetDataSetResponse {
 
 apiTest.describe(
   'ES|QL Data Federation — dataset settings not defined in the Kibana schema',
-  { tag: tags.stateful.classic },
+  { tag: tags.deploymentAgnostic },
   () => {
     const dataSourceName = `scout-data-source-${randomUUID().slice(0, 8)}`;
     const dataSetName = `scout-dataset-multiline-${randomUUID().slice(0, 8)}`;
+    const invalidDataSetName = `scout-dataset-invalid-format-${randomUUID().slice(0, 8)}`;
     let credentials: RoleSessionCredentials;
 
     apiTest.beforeAll(async ({ samlAuth, kbnClient }) => {
@@ -60,7 +61,7 @@ apiTest.describe(
     });
 
     apiTest(
-      'creates a dataset with multiline_fields and returns it on get',
+      'creates a dataset with an unknown setting and returns it on get',
       async ({ apiClient }) => {
         const headers = { ...COMMON_HEADERS, ...credentials.cookieHeader };
 
@@ -87,5 +88,20 @@ apiTest.describe(
         expect(savedDataSet.settings).toMatchObject({ format: 'csv', multiline_fields: true });
       }
     );
+
+    apiTest('rejects invalid values for settings Kibana defines', async ({ apiClient }) => {
+      const response = await apiClient.put(getDataSetByIdApiPath(invalidDataSetName), {
+        headers: { ...COMMON_HEADERS, ...credentials.cookieHeader },
+        body: {
+          data_source: dataSourceName,
+          resource: 's3://scout-bucket/path/**/*.csv',
+          settings: { format: 'not-a-format', multiline_fields: true },
+        },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.message).toContain('[request body.settings.format]');
+    });
   }
 );
