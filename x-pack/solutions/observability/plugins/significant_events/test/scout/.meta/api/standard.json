@@ -1,5 +1,5 @@
 {
-  "sha1": "382604f9f49d928b8f204a67c4582b198bd5d0f1",
+  "sha1": "c4ba085494f967166ec75ea2a4e97a449f8460f1",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -338,6 +338,54 @@
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/maintenance/pause_on_flag_off.spec.ts",
         "line": 254,
         "column": 46
+      }
+    },
+    {
+      "id": "2c1ca3cbc179593-6dfa4e500e89b4f",
+      "title": "Reset current-space authorization and isolation rejects missing configure privilege before changing any data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/maintenance/reset_current_space.spec.ts",
+        "line": 120,
+        "column": 52
+      }
+    },
+    {
+      "id": "2c1ca3cbc179593-a9df050ef5d7cf9",
+      "title": "Reset current-space authorization and isolation reports missing ES delete privilege without falling back to internal deletion",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/maintenance/reset_current_space.spec.ts",
+        "line": 137,
+        "column": 10
+      }
+    },
+    {
+      "id": "2c1ca3cbc179593-d16b66666aceb3b",
+      "title": "Reset current-space authorization and isolation allows a current-space-only caller and leaves the other space paused and intact",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/maintenance/reset_current_space.spec.ts",
+        "line": 153,
+        "column": 43
       }
     },
     {

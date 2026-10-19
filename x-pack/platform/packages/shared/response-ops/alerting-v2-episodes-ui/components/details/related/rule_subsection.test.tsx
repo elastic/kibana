@@ -48,6 +48,7 @@ const loadedRuleState: LoadedRuleState = {
 
 const mockRuleProps = {
   ruleState: loadedRuleState,
+  scope: { type: 'rule' as const, ruleId: 'rule-1' },
 };
 const mockGetEpisodeDetailsHref = (id: string) => `/base/${id}`;
 
@@ -141,5 +142,26 @@ describe('RelatedEpisodesRuleSubsection', () => {
     );
 
     expect(screen.getByText('Other groups for this rule').tagName).toBe(tagName);
+  });
+
+  it('lists other groups from the source when the episode has no rule', () => {
+    mockUseFetch.mockReturnValue({ data: [], isLoading: false } as any);
+
+    render(
+      <I18nProvider>
+        <RelatedEpisodesRuleSubsection
+          currentEpisodeId="ep-1"
+          currentGroupHash="gh-1"
+          ruleState={{ status: RuleStateStatus.idle }}
+          scope={{ type: 'source', source: 'zabbix' }}
+          getEpisodeDetailsHref={mockGetEpisodeDetailsHref}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByText('Other groups from this source')).toBeInTheDocument();
+    expect(mockUseFetch).toHaveBeenCalledWith(
+      expect.objectContaining({ scope: { type: 'source', source: 'zabbix' } })
+    );
   });
 });

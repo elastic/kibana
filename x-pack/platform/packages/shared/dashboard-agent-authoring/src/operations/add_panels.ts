@@ -13,7 +13,7 @@ import {
   getPlaceholderGrid,
 } from '../dashboard_state';
 import { defineOperation } from './types';
-import { addPanelsItemSchema } from './panels';
+import { addPanelsItemSchema } from '../panels';
 import { createPanelInputMaterializer } from './panel_creation';
 
 export const addPanelsOperation = defineOperation({
