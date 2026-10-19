@@ -25623,7 +25623,7 @@ paths:
                           created_at: '2026-01-15T10:00:00.000Z'
                           created_by: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
                           managed: false
-                          namespaces:
+                          spaces:
                             - default
                           updated_at: '2026-01-16T08:30:00.000Z'
                           updated_by: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
@@ -25635,7 +25635,7 @@ paths:
                         meta:
                           created_at: '2026-01-15T11:00:00.000Z'
                           managed: false
-                          namespaces:
+                          spaces:
                             - default
                           updated_at: '2026-01-15T11:00:00.000Z'
                           version: WzMsMV0=
@@ -25683,15 +25683,15 @@ paths:
                             managed:
                               description: When `true`, the object is managed by Kibana and cannot be edited by users.
                               type: boolean
-                            namespaces:
+                            owner:
+                              description: Identifier of the plugin or team that owns this object.
+                              type: string
+                            spaces:
                               items:
                                 maxLength: 1000
                                 type: string
                               maxItems: 100
                               type: array
-                            owner:
-                              description: Identifier of the plugin or team that owns this object.
-                              type: string
                             updated_at:
                               description: Timestamp when the object was last updated (ISO 8601).
                               type: string
@@ -25809,7 +25809,7 @@ paths:
                     id: c0ffee00-d57a-11ef-9a52-4f3c2a8d0e1b
                     meta:
                       managed: false
-                      namespaces:
+                      spaces:
                         - default
                       version: WzEsMV0=
               schema:
@@ -25834,15 +25834,15 @@ paths:
                       managed:
                         description: When `true`, the object is managed by Kibana and cannot be edited by users.
                         type: boolean
-                      namespaces:
+                      owner:
+                        description: Identifier of the plugin or team that owns this object.
+                        type: string
+                      spaces:
                         items:
                           maxLength: 1000
                           type: string
                         maxItems: 100
                         type: array
-                      owner:
-                        description: Identifier of the plugin or team that owns this object.
-                        type: string
                       updated_at:
                         description: Timestamp when the object was last updated (ISO 8601).
                         type: string
@@ -25947,7 +25947,7 @@ paths:
                     id: c0ffee00-d57a-11ef-9a52-4f3c2a8d0e1b
                     meta:
                       managed: false
-                      namespaces:
+                      spaces:
                         - default
                       version: WzEsMV0=
               schema:
@@ -25972,15 +25972,15 @@ paths:
                       managed:
                         description: When `true`, the object is managed by Kibana and cannot be edited by users.
                         type: boolean
-                      namespaces:
+                      owner:
+                        description: Identifier of the plugin or team that owns this object.
+                        type: string
+                      spaces:
                         items:
                           maxLength: 1000
                           type: string
                         maxItems: 100
                         type: array
-                      owner:
-                        description: Identifier of the plugin or team that owns this object.
-                        type: string
                       updated_at:
                         description: Timestamp when the object was last updated (ISO 8601).
                         type: string
@@ -26081,7 +26081,7 @@ paths:
                     id: c0ffee00-d57a-11ef-9a52-4f3c2a8d0e1b
                     meta:
                       managed: false
-                      namespaces:
+                      spaces:
                         - default
                       version: WzEsMV0=
               schema:
@@ -26106,15 +26106,15 @@ paths:
                       managed:
                         description: When `true`, the object is managed by Kibana and cannot be edited by users.
                         type: boolean
-                      namespaces:
+                      owner:
+                        description: Identifier of the plugin or team that owns this object.
+                        type: string
+                      spaces:
                         items:
                           maxLength: 1000
                           type: string
                         maxItems: 100
                         type: array
-                      owner:
-                        description: Identifier of the plugin or team that owns this object.
-                        type: string
                       updated_at:
                         description: Timestamp when the object was last updated (ISO 8601).
                         type: string
@@ -26143,7 +26143,7 @@ paths:
                     id: c0ffee00-d57a-11ef-9a52-4f3c2a8d0e1b
                     meta:
                       managed: false
-                      namespaces:
+                      spaces:
                         - default
                       version: WzEsMV0=
               schema:
@@ -26168,15 +26168,15 @@ paths:
                       managed:
                         description: When `true`, the object is managed by Kibana and cannot be edited by users.
                         type: boolean
-                      namespaces:
+                      owner:
+                        description: Identifier of the plugin or team that owns this object.
+                        type: string
+                      spaces:
                         items:
                           maxLength: 1000
                           type: string
                         maxItems: 100
                         type: array
-                      owner:
-                        description: Identifier of the plugin or team that owns this object.
-                        type: string
                       updated_at:
                         description: Timestamp when the object was last updated (ISO 8601).
                         type: string
