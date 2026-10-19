@@ -44,8 +44,10 @@ export type {
 // them so consumers have a single entry point per the plugin's public surface.
 export {
   IMPACT_ATTACHMENT_TYPE,
+  IMPACT_ESCALATION_SUMMARY_URL,
   IMPACT_INDEX_NAME,
   IMPACT_INTERNAL_URL,
+  IMPACT_PROPOSAL_SUMMARY_URL,
   MAX_ENTITY_ID_LENGTH,
   MAX_ENTITY_IDS,
   MAX_ENTITY_NAME_LENGTH,
@@ -61,7 +63,13 @@ export {
   storedImpactEntitiesSchema,
 } from './impact';
 
-export type { AttachImpactRequest, GetImpactQuery, Impact, ImpactEntity } from './impact';
+export type {
+  AttachImpactRequest,
+  GetImpactQuery,
+  Impact,
+  ImpactEntity,
+  ImpactPillsResponse,
+} from './impact';
 
 // Subjects and hypotheses export constants and types only: this directory is an extra public
 // dir, so every value exported here lands in the page load bundle. Their schemas stay in the

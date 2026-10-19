@@ -6,13 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { z } from '@kbn/zod/v4';
+import { lazySchema, type z } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 import { alertActionEnvelopeSchema } from './alert_action_envelope';
 
 export const ALERT_UNACKED_TRIGGER_ID = 'alerting.actions.alertUnacked' as const;
 
-export const alertUnackedPayloadSchema = alertActionEnvelopeSchema.extend({});
+export const alertUnackedPayloadSchema = lazySchema(() => alertActionEnvelopeSchema.extend({}));
 
 export type AlertUnackedPayload = z.infer<typeof alertUnackedPayloadSchema>;
 

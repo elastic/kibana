@@ -15,6 +15,7 @@ import {
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import {
+  INVESTIGATION_SUBJECT_TYPES,
   INVESTIGATION_TRIGGER_TYPES,
   investigationNotificationDestinationsSchema,
 } from '../../common';
@@ -22,8 +23,10 @@ import type { GetInvestigationsClient } from '../routes/types';
 
 const inputSchema = z.object({
   subject_type: z
-    .enum(['significant_event', 'alert'])
-    .describe('The type of entity being investigated'),
+    .enum(INVESTIGATION_SUBJECT_TYPES)
+    .describe(
+      'The type of entity being investigated. Use "manual" when the prompt is the whole subject, for example a Slack message.'
+    ),
   subject_id: z.string().min(1).describe('The ID of the entity being investigated'),
   title: z
     .string()
@@ -64,6 +67,17 @@ const inputSchema = z.object({
     .describe(
       'Destinations that receive the concluded investigation. Delivery results are recorded on the investigation.'
     ),
+  // Bounded like the Slack thread route, so the thread's subject id stays within a subject id.
+  slack_thread: z
+    .object({
+      workspace: z.string().min(1).max(128),
+      channel: z.string().min(1).max(256),
+      thread_ts: z.string().min(1).max(64),
+    })
+    .optional()
+    .describe(
+      'The Slack thread the investigation is about. A reply in that thread continues the investigation.'
+    ),
 });
 
 export const triggerInvestigationStepDefinition = (
@@ -100,6 +114,7 @@ export const triggerInvestigationStepDefinition = (
         source_ids: input.source_ids,
         context: input.context,
         notificationDestinations: input.notificationDestinations,
+        slack_thread: input.slack_thread,
       });
       return { output: result };
     },

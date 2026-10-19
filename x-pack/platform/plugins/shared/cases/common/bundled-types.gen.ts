@@ -2404,6 +2404,27 @@ export const PayloadAssignees = lazySchema(() =>
 );
 export type PayloadAssignees = z.infer<typeof PayloadAssignees>;
 
+/**
+ * The payload for a bulk attachments user action, recorded when a user removes one or more attachments of the same type from a case in a single action.
+ */
+export const PayloadBulkAttachments = lazySchema(() =>
+  z.object({
+    bulkAttachments: z.object({
+      /**
+       * The attachment type, such as `security.alert` or `file`.
+       */
+      attachmentType: z
+        .string()
+        .describe('The attachment type, such as `security.alert` or `file`.'),
+      /**
+       * The number of attachments of this type.
+       */
+      count: z.number().int().describe('The number of attachments of this type.'),
+    }),
+  })
+);
+export type PayloadBulkAttachments = z.infer<typeof PayloadBulkAttachments>;
+
 export const PayloadConnector = lazySchema(() =>
   z.object({
     connector: z
@@ -2908,6 +2929,7 @@ export const UserActionsFindResponseProperties = lazySchema(() =>
     payload: z.union([
       PayloadAlertComment,
       PayloadAssignees,
+      PayloadBulkAttachments,
       PayloadConnector,
       PayloadCreateCase,
       PayloadDelete,
@@ -2928,6 +2950,7 @@ export const UserActionsFindResponseProperties = lazySchema(() =>
     type: z
       .enum([
         'assignees',
+        'bulkAttachments',
         'category',
         'comment',
         'connector',
