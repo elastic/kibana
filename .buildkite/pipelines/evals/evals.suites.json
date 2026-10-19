@@ -493,6 +493,20 @@
       ]
     },
     {
+      "id": "security-alert-analysis-workflow-batch",
+      "name": "Alert Analysis Workflow (batch reliability)",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-alert-analysis-workflow/batch.playwright.config.ts",
+      "tags": [
+        "security",
+        "alert-analysis"
+      ],
+      "ciLabels": [
+        "evals:security-alert-analysis-workflow-batch"
+      ],
+      "stepTimeoutInMinutes": 120
+    },
+    {
       "id": "detection-watch-rule-creation",
       "name": "Detection Watch Rule Creation",
       "slackChannel": "#security-generative-ai-evals",
