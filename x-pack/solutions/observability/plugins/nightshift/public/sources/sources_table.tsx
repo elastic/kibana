@@ -126,7 +126,7 @@ export function SourcesTable({
           data-test-subj={`significantEventsAppSourcesTableTitleLink-${source.id}`}
           onClick={() => onOpenSource(source)}
         >
-          <EuiHighlight search={searchText}>{title}</EuiHighlight>
+          <EuiHighlight search={searchText.trim()}>{title}</EuiHighlight>
         </EuiLink>
       ),
     },

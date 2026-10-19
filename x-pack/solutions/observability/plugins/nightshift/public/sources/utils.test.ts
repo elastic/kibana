@@ -57,10 +57,11 @@ describe('filterSourcesByQuery', () => {
 
   it('returns the same list when the query is empty', () => {
     expect(filterSourcesByQuery(sources, '')).toBe(sources);
+    expect(filterSourcesByQuery(sources, '   ')).toBe(sources);
   });
 
   it('matches title, query text, or a tag, ignoring case', () => {
-    expect(filterSourcesByQuery(sources, 'NGINX').map(({ id }) => id)).toEqual(['source-1']);
+    expect(filterSourcesByQuery(sources, '  NGINX  ').map(({ id }) => id)).toEqual(['source-1']);
     expect(filterSourcesByQuery(sources, 'logs-apache').map(({ id }) => id)).toEqual(['source-2']);
     expect(filterSourcesByQuery(sources, 'WEB').map(({ id }) => id)).toEqual(['source-1']);
   });
