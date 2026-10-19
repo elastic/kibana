@@ -7,7 +7,8 @@ pageLoadAssetSize:
   agentBuilderSml: 597
   agentBuilderVisualizations: 1551
   agentBuilderWorkflows: 1152
-  agenticInvestigations: 48669
+  agenticInvestigations: 54247
+  aiAnonymizationSettings: 1775
   aiAssistantManagementSelection: 355
   aiops: 586
   alerting: 8789
@@ -61,6 +62,7 @@ pageLoadAssetSize:
   elasticAssistant: 136070
   elasticAssistantSharedState: 3369
   elasticConsole: 1119
+  elasticsearchHome: 2777
   embeddable: 990
   embeddableAlertsTable: 1536
   enterpriseSearch: 28188
@@ -133,7 +135,7 @@ pageLoadAssetSize:
   monitoring: 22416
   navigation: 332
   newsfeed: 10708
-  nightshift: 2762
+  nightshift: 3160
   nightshiftInvestigations: 9405
   nightshiftSources: 3928
   noDataPage: 630
@@ -146,13 +148,13 @@ pageLoadAssetSize:
   observabilityAlerting: 3883
   observabilityLogsExplorer: 1351
   observabilityOnboarding: 8873
-  observabilityShared: 7496
+  observabilityShared: 8355
   osquery: 13046
   painlessLab: 2550
   presentationUtil: 350
   productDocBase: 4218
   productIntercept: 4738
-  profiling: 12944
+  profiling: 14267
   proposals: 13459
   queryActivity: 1149
   reindexService: 1964
@@ -185,14 +187,14 @@ pageLoadAssetSize:
   serverless: 1571
   serverlessObservability: 14136
   serverlessSearch: 18103
-  serverlessVectordb: 9436
+  serverlessVectordb: 8809
   sessionView: 647
   share: 379
   shared-core: 311749
   shared-misc: 155260
   shared-packages: 5513030
   shared-plugins: 13536562
-  shared-solution-packages: 392658
+  shared-solution-packages: 386709
   significantEvents: 4439
   significantEventsApp: 5759
   slo: 19531
@@ -202,6 +204,7 @@ pageLoadAssetSize:
   stackConnectors: 63548
   streams: 6955
   streamsApp: 55882
+  subscriptionStatus: 5000
   synthetics: 20839
   telemetry: 20586
   telemetryManagementSection: 1738

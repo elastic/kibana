@@ -6,9 +6,12 @@
  */
 import { i18n } from '@kbn/i18n';
 
-export const MAINTENANCE_WINDOWS = i18n.translate('xpack.maintenanceWindows', {
-  defaultMessage: 'Maintenance Windows',
-});
+export const MAINTENANCE_WINDOWS = i18n.translate(
+  'xpack.maintenanceWindows.maintenanceWindowsTitle',
+  {
+    defaultMessage: 'Maintenance Windows',
+  }
+);
 
 export const MAINTENANCE_WINDOWS_DESCRIPTION = i18n.translate(
   'xpack.maintenanceWindows.description',
@@ -189,25 +192,10 @@ export const CREATE_FORM_ALERTING_V2_QUERY_INVALID_ERROR_MESSAGE = i18n.translat
   }
 );
 
-export const TECHNICAL_PREVIEW_LABEL = i18n.translate(
-  'xpack.maintenanceWindows.technicalPreviewLabel',
-  {
-    defaultMessage: 'Technical preview',
-  }
-);
-
 export const CREATE_FORM_ALERTINGV2_FILTERS_PLACEHOLDER = i18n.translate(
   'xpack.maintenanceWindows.createForm.alertingV2FiltersPlaceholder',
   {
     defaultMessage: 'Search alerts (e.g. data.host.name:"my-host" or data.severity:"low")',
-  }
-);
-
-export const CREATE_FORM_ALERTINGV2_FILTERS_TECHNICAL_PREVIEW_TOOLTIP = i18n.translate(
-  'xpack.maintenanceWindows.createForm.alertingV2FiltersTechnicalPreviewTooltip',
-  {
-    defaultMessage:
-      'This feature is in technical preview and may change or be removed in future releases.',
   }
 );
 
@@ -566,12 +554,12 @@ export const TABLE_SCOPE = i18n.translate('xpack.maintenanceWindows.table.scope'
   defaultMessage: 'Scope',
 });
 
-export const TABLE_SCOPE_BADGE_ALERTS = i18n.translate(
-  'xpack.maintenanceWindows.table.scopeBadgeAlerts',
-  { defaultMessage: 'Alerts' }
+export const TABLE_SCOPE_BADGE_CLASSIC_ALERTING = i18n.translate(
+  'xpack.maintenanceWindows.table.scopeBadgeClassicAlerting',
+  { defaultMessage: 'Classic Alerting' }
 );
 
-export const TABLE_SCOPE_BADGE_EPISODES = i18n.translate(
-  'xpack.maintenanceWindows.table.scopeBadgeEpisodes',
-  { defaultMessage: 'Episodes' }
+export const TABLE_SCOPE_BADGE_UNIVERSAL_ALERTING = i18n.translate(
+  'xpack.maintenanceWindows.table.scopeBadgeUniversalAlerting',
+  { defaultMessage: 'Universal Alerting' }
 );

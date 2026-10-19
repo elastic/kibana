@@ -31,8 +31,7 @@ describe('createHistogramBoundsQuery', () => {
     ).toEqual({
       metricKey: 'metrics-a::latency.exp',
       source: 'metrics-a',
-      esqlQuery: `SET unmapped_fields = "NULLIFY";
-TS metrics-a
+      esqlQuery: `TS metrics-a
   | STATS min_value = MIN(latency.exp), max_value = MAX(latency.exp)`,
     });
   });
@@ -109,6 +108,18 @@ TS metrics-a
     ['a numeric histogram instrument', createMetric({ fieldTypes: [ES_FIELD_TYPES.DOUBLE] })],
   ])('returns undefined for %s', (_label, metricItem) => {
     expect(createHistogramBoundsQuery({ metricItem, originalSource: 'metrics-*' })).toBeUndefined();
+  });
+
+  it('omits NULLIFY when WHERE cannot name an extra column', () => {
+    const boundsQuery = createHistogramBoundsQuery({
+      metricItem: createMetric({}),
+      whereStatements: ['@timestamp IS NOT NULL', '1 == 1'],
+      originalSource: 'metrics-*',
+    });
+
+    expect(boundsQuery?.esqlQuery.startsWith('SET unmapped_fields = "NULLIFY";\n')).toBe(false);
+    expect(boundsQuery?.esqlQuery).toContain('| WHERE @timestamp IS NOT NULL');
+    expect(boundsQuery?.esqlQuery).toContain('| WHERE 1 == 1');
   });
 
   it('applies the user WHERE clauses before STATS', () => {

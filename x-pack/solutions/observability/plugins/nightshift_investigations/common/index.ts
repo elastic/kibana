@@ -5,17 +5,14 @@
  * 2.0.
  */
 
-import type {
-  InvestigationHypothesis,
-  InvestigationImpact,
-  InvestigationRecommendation,
-  Severity,
-} from '@kbn/significant-events-schema';
-import type { InvestigationSubjectType, InvestigationTriggerType } from './workflows/triggers';
+import type { Severity } from '@kbn/significant-events-schema';
+import type { InvestigationTriggerType } from './workflows/triggers';
 
 export type { Severity } from '@kbn/significant-events-schema';
 
-export { MAX_RULE_NAMES } from './automation_limits';
+export { MAX_RULE_NAMES, MAX_AUTOMATION_INSTRUCTIONS_LENGTH } from './automation_limits';
+export { parsePresetSchedule, presetScheduleSchema } from './automation_schedule';
+export type { PresetSchedule } from './automation_schedule';
 
 export {
   INVESTIGATION_SUBJECT_TYPES,
@@ -55,9 +52,18 @@ import type {
 
 export interface StartInvestigationRequest {
   subject: InvestigationSubject;
-  title: string;
+  /**
+   * Optional headline from the caller (significant event title, alert rule name). Accepted for
+   * compatibility and passed to the investigation workflow as its `title` input, but not stored
+   * as the investigation's title: Agent Builder generates that from the investigation's first
+   * round, and UIs name the investigation after its first subject until then.
+   */
+  title?: string;
+  /** What initiated the investigation. */
   trigger_type: InvestigationTriggerType;
   message?: string;
+  /** Optional upper bound for this investigation workflow run, in seconds. */
+  timeout_seconds?: number;
   /**
    * Nightshift source ids the investigation should scope its queries to. The
    * investigation workflow resolves them to slug and ES|QL view.
@@ -65,17 +71,42 @@ export interface StartInvestigationRequest {
   source_ids?: string[];
   /** Optional chat model connector or inference endpoint id for this run. */
   connector_id?: string;
-  /**
-   * Passed to the workflow engine as `concurrency_key`. Two starts with the same key
-   * cancel-and-replace the in-flight run, so use a stable, unique caller-side id.
-   */
-  concurrency_key?: string;
   context?: InvestigationContext | AlertInvestigationContext;
   /** Destinations receiving investigation lifecycle messages. */
   notificationDestinations?: InvestigationNotificationDestination[];
+  /** The Slack thread the investigation is about, so a reply in it continues the investigation. */
+  slack_thread?: SlackThreadReference;
 }
 
+/** A Slack thread, by the workspace and channel ids and the thread's root message ts. */
+export interface SlackThreadReference {
+  workspace: string;
+  channel: string;
+  thread_ts: string;
+}
+
+/**
+ * The key the Relay and Agent Builder identify a Slack thread's conversation by
+ * (`origin.external_conversation_id`), which is also the thread's subject id.
+ * Channel ids are only unique within a workspace.
+ */
+export const toSlackThreadKey = ({
+  workspace,
+  channel,
+  threadTs,
+}: {
+  workspace: string;
+  channel: string;
+  threadTs: string;
+}): string => ['slack', workspace, channel, threadTs].map(encodeURIComponent).join(':');
+
 export interface StartInvestigationResponse {
+  /**
+   * The investigation, which is an Agent Builder conversation with this id. A start whose
+   * subjects overlap an open investigation continues that one, so the id can be an existing
+   * investigation's. The investigation workflow creates the conversation, so for a few seconds
+   * after a first start the id may not resolve yet.
+   */
   investigation_id: string;
 }
 
@@ -86,108 +117,7 @@ export const MAX_KEYWORD_LENGTH = 500;
 
 export const DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID = 'manual';
 
-export const INVESTIGATION_STATUSES = [
-  'pending',
-  'running',
-  'completed',
-  'failed',
-  'cancelled',
-] as const;
-export type InvestigationStatus = (typeof INVESTIGATION_STATUSES)[number];
-
-/** Whether an investigation has settled and can no longer transition to another status. */
-export const isTerminalStatus = (status: InvestigationStatus): boolean =>
-  status === 'completed' || status === 'failed' || status === 'cancelled';
-
-export const UPDATABLE_INVESTIGATION_STATUSES = [
-  'running',
-  'completed',
-  'failed',
-  'cancelled',
-] as const;
-export type UpdatableInvestigationStatus = (typeof UPDATABLE_INVESTIGATION_STATUSES)[number];
-
-export interface InvestigationStructuredOutput {
-  summary?: string;
-  conclusion?: string;
-  severity?: Severity;
-  hypotheses?: InvestigationHypothesis[];
-  recommendations?: InvestigationRecommendation[];
-  impact?: InvestigationImpact;
-}
-
-/** Body of PATCH /internal/nightshift/investigations/{id}. */
-export interface UpdateInvestigationRequest extends InvestigationStructuredOutput {
-  status: UpdatableInvestigationStatus;
-  title?: string;
-  error?: string;
-  conversation_id?: string;
-}
-
-export interface GetInvestigationResponse extends InvestigationStructuredOutput {
-  investigation_id: string;
-  title: string;
-  subject: InvestigationSubject;
-  trigger_type?: InvestigationTriggerType;
-  status: InvestigationStatus;
-  created_at: string;
-  started_at?: string;
-  completed_at?: string;
-  concurrency_key?: string;
-  executed_by?: string;
-  error?: string;
-  conversation_id?: string;
-}
-
-export interface InvestigationStatusEvent {
-  type: 'investigation_status';
-  investigation_id: string;
-  status: InvestigationStatus;
-}
-
-export interface ListInvestigationsRequest {
-  statuses?: InvestigationStatus[];
-  severities?: Severity[];
-  subject_types?: InvestigationSubjectType[];
-  query?: string;
-  concurrency_key?: string;
-  created_after?: string;
-  created_before?: string;
-  started_after?: string;
-  started_before?: string;
-  completed_after?: string;
-  completed_before?: string;
-  sort_field?: 'created_at' | 'completed_at' | 'severity';
-  sort_order?: 'asc' | 'desc';
-  page?: number;
-  size?: number;
-}
-
-export type ListInvestigationItem = Pick<
-  GetInvestigationResponse,
-  | 'investigation_id'
-  | 'title'
-  | 'status'
-  | 'created_at'
-  | 'started_at'
-  | 'completed_at'
-  | 'severity'
-  | 'concurrency_key'
-  | 'executed_by'
-  | 'subject'
-  | 'summary'
-  | 'impact'
->;
-
-export interface PaginatedResponse<T> {
-  results: T[];
-  page: number;
-  size: number;
-  total: number;
-}
-
-export type ListInvestigationsResponse = PaginatedResponse<ListInvestigationItem>;
-
+/** Counts of investigations at each severity tier, zero-filled for all four tiers. */
 export type SeverityCounts = Record<Severity, number>;
 
 export {
@@ -247,6 +177,20 @@ export {
   type PutCustomContextRequest,
   type PutCustomContextResponse,
 } from './custom_context';
+
+export {
+  ONBOARDING_SUGGESTION_SOURCES,
+  MAX_ONBOARDING_SUGGESTIONS,
+  MAX_ONBOARDING_SUGGESTION_TITLE_LENGTH,
+  MAX_ONBOARDING_SUGGESTION_PROMPT_LENGTH,
+  MAX_ONBOARDING_SUGGESTION_RATIONALE_LENGTH,
+  type OnboardingSuggestion,
+  type OnboardingSuggestionSource,
+  type OnboardingSuggestionsStatus,
+  type OnboardingSuggestionsExecution,
+  type GetOnboardingResponse,
+  type StartOnboardingSuggestionsResponse,
+} from './onboarding';
 
 export {
   DECISION_TREE_AI_INDEX_ID,

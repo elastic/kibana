@@ -5,30 +5,42 @@
  * 2.0.
  */
 
-import {
-  buildIdentityPrefilter,
-  ML_ANOMALY_INDICES,
-  ANOMALY_RECORD_FILTER,
-  buildAnomalyJobFilter,
-  buildLookback,
-  toList,
-} from './esql';
-import { getEntityIds, getEntityId, getNumber, ANOMALY_COUNT_FIELD } from '../common';
-import { buildEuidStages } from './euid_pipeline';
-import { buildMergedForeignSortQuery } from './foreign_sort';
+import { ANOMALY_COUNT_FIELD, getEntityId, getEntityIds, getNumber } from '../common';
 import type { QueryArgs, Row } from '../common';
-import { buildEntityListSortPlan, fetchSplitSortPage } from './split_sort';
-import type { SplitSortPlan } from './split_sort';
-import type { ColumnQuerySpec, PageEnricher } from './types';
+import { IN_VIEW_AGGREGATION, IN_VIEW_FIELD, buildEntitiesInViewBranch } from './entities_in_view';
+import {
+  ANOMALY_RECORD_FILTER,
+  ID_LIST_CHUNK_SIZE,
+  ML_ANOMALY_INDICES,
+  buildAnomalyJobFilter,
+  buildEntityAggregations,
+  buildFilterClause,
+  buildIdentityPrefilter,
+  buildJoinedPageSteps,
+  buildLookback,
+  buildStatsByEntityClause,
+  SET_UNMAPPED_NULLIFY,
+  toList,
+  fetchInChunks,
+} from './esql';
+import type { EntityAggregation } from './esql';
+import { buildEuidStages } from './euid_pipeline';
+import {
+  buildRollUpOverAliasesSteps,
+  getMergedRowsByEntity,
+  withEntityAliases,
+} from './resolved_entities';
+import type { EnrichedFields, SortPageContext } from './types';
+import { buildSortWithValueSteps, getComputedColumnQuerySpec } from './computed_column';
+import type { ComputedColumn } from './computed_column';
 
-/** ML anomaly indices have different mappings; unmapped fields read as null, not as errors. */
-const SET_UNMAPPED_NULLIFY = 'SET unmapped_fields="nullify";';
+const ANOMALY_AGGREGATIONS: readonly EntityAggregation[] = [
+  { field: ANOMALY_COUNT_FIELD, aggregation: 'COUNT(*)', resolvedEntity: 'SUM' },
+];
 
-/**
- * Final anomaly records of the security jobs in the time range, one row per record with its
- * derived `entity.id`. `identityPrefilter` narrows the records before the EUID evaluation,
- * which can't push down.
- */
+const ANOMALY_COUNT_STATS = buildStatsByEntityClause(buildEntityAggregations(ANOMALY_AGGREGATIONS));
+
+/** ML records lack entity.id, so it's derived; `identityPrefilter` narrows them first, as that can't push down. */
 const buildAnomalyEntityRows = (
   { timeRange, anomalyJobIds }: QueryArgs,
   identityPrefilter?: string
@@ -37,63 +49,71 @@ const buildAnomalyEntityRows = (
   `| WHERE ${ANOMALY_RECORD_FILTER} AND \`@timestamp\` >= ${buildLookback(
     timeRange
   )} AND ${buildAnomalyJobFilter(anomalyJobIds)}`,
-  ...(identityPrefilter ? [`| WHERE ${identityPrefilter}`] : []),
+  ...buildFilterClause(identityPrefilter),
   ...buildEuidStages(),
 ];
 
-// ── sort queries ──────────────────────────────────────────────────────────────
+const buildAnomalySortWithValueQuery = (args: QueryArgs, limit: number): string[] => [
+  SET_UNMAPPED_NULLIFY,
+  ...buildAnomalyEntityRows(args),
+  ANOMALY_COUNT_STATS,
+  ...buildRollUpOverAliasesSteps(args, ANOMALY_AGGREGATIONS),
+  ...buildSortWithValueSteps(args, ANOMALY_COUNT_FIELD, limit),
+];
 
-/** Entities without anomalies have no count and sort last. */
-const buildAnomalyCountSortQuery = (args: QueryArgs): string =>
-  buildMergedForeignSortQuery(args, {
-    settings: [SET_UNMAPPED_NULLIFY],
-    foreignRows: [
-      ...buildAnomalyEntityRows(args),
-      `| STATS ${ANOMALY_COUNT_FIELD} = COUNT(*) BY \`entity.id\``,
-    ],
-    mergeAggregations: [`${ANOMALY_COUNT_FIELD} = MAX(${ANOMALY_COUNT_FIELD})`],
-    sortField: ANOMALY_COUNT_FIELD,
-  });
+const buildAnomalySortAllQuery = (args: QueryArgs): string[] => [
+  SET_UNMAPPED_NULLIFY,
+  'FROM (',
+  ...buildAnomalyEntityRows(args),
+  ANOMALY_COUNT_STATS,
+  '), (',
+  ...buildEntitiesInViewBranch(args),
+  ')',
+  buildStatsByEntityClause([
+    `${ANOMALY_COUNT_FIELD} = MAX(${ANOMALY_COUNT_FIELD})`,
+    ...buildEntityAggregations([IN_VIEW_AGGREGATION]),
+  ]),
+  ...buildRollUpOverAliasesSteps(args, [...ANOMALY_AGGREGATIONS, IN_VIEW_AGGREGATION]),
+  `| WHERE ${IN_VIEW_FIELD} == 1`,
+  ...buildJoinedPageSteps(args, ANOMALY_COUNT_FIELD),
+];
 
-// ── split sort (see split_sort.ts) ───────────────────────────────────────────
-
-const anomalySplitSortPlan: SplitSortPlan = buildEntityListSortPlan({
-  sortField: ANOMALY_COUNT_FIELD,
-  emptyValue: null,
-  buildForeignRows: (args) => [SET_UNMAPPED_NULLIFY, ...buildAnomalyEntityRows(args)],
-  buildSortQuery: buildAnomalyCountSortQuery,
-  aggregations: [`${ANOMALY_COUNT_FIELD} = COUNT(*)`],
-  columns: [ANOMALY_COUNT_FIELD],
-  emptyColumns: `${ANOMALY_COUNT_FIELD} = TO_LONG(null)`,
-});
-
-// ── enrichment ────────────────────────────────────────────────────────────────
-
-const buildAnomalyCountEnrichQuery = (args: QueryArgs, pageRows: readonly Row[]): string =>
-  [
-    SET_UNMAPPED_NULLIFY,
-    ...buildAnomalyEntityRows(args, buildIdentityPrefilter(pageRows)),
-    `| WHERE \`entity.id\` IN (${toList(getEntityIds(pageRows))})`,
-    `| STATS ${ANOMALY_COUNT_FIELD} = COUNT(*) BY \`entity.id\``,
-  ].join('\n');
-
-const anomalyCountEnricher: PageEnricher = {
-  fields: [ANOMALY_COUNT_FIELD],
-  fetch: async (pageRows, args, { runQuery }) => {
-    const entityIds = getEntityIds(pageRows);
-    if (!entityIds.length) return new Map();
-
-    const rows = await runQuery(buildAnomalyCountEnrichQuery(args, pageRows));
-
-    const byId = new Map(rows.map((r) => [getEntityId(r), getNumber(r, ANOMALY_COUNT_FIELD)]));
-    // No anomalies reads as null, as in the sort queries.
-    return new Map(entityIds.map((id) => [id, { [ANOMALY_COUNT_FIELD]: byId.get(id) ?? null }]));
-  },
+const fetchAnomalyCounts = async (
+  rows: readonly Row[],
+  args: QueryArgs,
+  { runQuery }: SortPageContext
+): Promise<EnrichedFields> => {
+  // Without security jobs there is no anomaly index to read, and no anomaly.
+  if (!getEntityIds(rows).length || !args.anomalyJobIds.length) return toAnomalyCounts(rows, []);
+  const entities =
+    args.rowsMode === 'resolved' ? await withEntityAliases(rows, args, runQuery) : rows;
+  // Each part lists its entities in the query, so a large group is read in several.
+  const counts = await fetchInChunks(entities, ID_LIST_CHUNK_SIZE, (part) =>
+    runQuery([
+      SET_UNMAPPED_NULLIFY,
+      ...buildAnomalyEntityRows(args, buildIdentityPrefilter(part)),
+      `| WHERE \`entity.id\` IN (${toList(getEntityIds(part))})`,
+      ANOMALY_COUNT_STATS,
+      ...buildRollUpOverAliasesSteps(args, ANOMALY_AGGREGATIONS),
+    ])
+  );
+  return toAnomalyCounts(rows, getMergedRowsByEntity(counts.flat(), ANOMALY_AGGREGATIONS));
 };
 
-// ── query spec ────────────────────────────────────────────────────────────────
+const toAnomalyCounts = (rows: readonly Row[], counts: Row[]): EnrichedFields => {
+  const byId = new Map(
+    counts.map((row) => [getEntityId(row), getNumber(row, ANOMALY_COUNT_FIELD)])
+  );
+  return new Map(
+    getEntityIds(rows).map((id) => [id, { [ANOMALY_COUNT_FIELD]: byId.get(id) ?? null }])
+  );
+};
 
-export const anomalyCountQuerySpec = {
-  fetchSortPage: (args, ctx) => fetchSplitSortPage(anomalySplitSortPlan, args, ctx),
-  enricher: anomalyCountEnricher,
-} satisfies ColumnQuerySpec;
+const anomalyCountColumn: ComputedColumn = {
+  emptyValues: { [ANOMALY_COUNT_FIELD]: null },
+  buildSortAllQuery: buildAnomalySortAllQuery,
+  buildSortWithValueQuery: buildAnomalySortWithValueQuery,
+  fetchValues: fetchAnomalyCounts,
+};
+
+export const anomalyCountQuerySpec = getComputedColumnQuerySpec(anomalyCountColumn);

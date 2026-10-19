@@ -480,6 +480,48 @@ describe('createWorkerSettingsRegistration', () => {
       });
     });
 
+    describe('budget against the schedule', () => {
+      const stored = (scheduleInterval: string, budgetPerHour: number) => ({
+        settingsVersion: 1,
+        autonomyLevel: 'manual',
+        scheduleInterval,
+        extras: { ...TRIAGE_DEFAULT_EXTRAS, budgetPerHour },
+      });
+
+      it('rejects a budget no run could fund on the saved schedule, naming the field', () => {
+        const message = expectInvalid(
+          registration.applyPatch(stored('15m', 1300), {
+            extras: { ...TRIAGE_DEFAULT_EXTRAS, budgetPerHour: 23 },
+          })
+        );
+
+        expect(message).toMatch(/^extras\.budgetPerHour: must be at least 24 for a 15m schedule/);
+      });
+
+      it('rejects shortening the schedule below what the saved budget can fund', () => {
+        const message = expectInvalid(
+          registration.applyPatch(stored('15m', 50), { scheduleInterval: '5m' })
+        );
+
+        expect(message).toContain('extras.budgetPerHour: must be at least 72 for a 5m schedule');
+      });
+
+      it('accepts the schedule and budget together when the budget funds a run', () => {
+        expect(
+          registration.applyPatch(stored('15m', 50), {
+            scheduleInterval: '5m',
+            extras: { ...TRIAGE_DEFAULT_EXTRAS, budgetPerHour: 72 },
+          })
+        ).toEqual({ values: stored('5m', 72) });
+      });
+
+      it('still reads a stored combination the rule would refuse, so an upgrade cannot lock it out', () => {
+        expect(registration.toSettings(stored('15m', 10))).toEqual(
+          expect.objectContaining({ scheduleInterval: '15m' })
+        );
+      });
+    });
+
     it('persists the backfilled extras and projected autonomy on the next save', () => {
       const stored = { settingsVersion: 1, autonomyLevel: 'assisted' };
 
