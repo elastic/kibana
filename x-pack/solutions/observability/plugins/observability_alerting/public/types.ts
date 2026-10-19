@@ -6,6 +6,7 @@
  */
 
 import type { AlertingV2PublicStart } from '@kbn/alerting-v2-plugin/public';
+import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 
 export interface ObservabilityAlertingSetupDependencies {
@@ -15,6 +16,7 @@ export interface ObservabilityAlertingSetupDependencies {
 export interface ObservabilityAlertingStartDependencies {
   alertingVTwo: AlertingV2PublicStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  observabilityShared: ObservabilitySharedPluginStart;
 }
 
 /* eslint-disable-next-line @typescript-eslint/no-empty-interface */

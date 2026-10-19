@@ -26,6 +26,7 @@ import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
 import { AiIndexDescriptionField } from '../components/ai_index_description_field';
 import { MemorySettingsPanel } from '../components/memory_settings_panel';
 import { TraceSelector, type EditableAiIndexTrace } from '../components/trace_selector';
+import { useContextEngineBreadcrumbs } from '../hooks/use_context_engine_breadcrumbs';
 import { useCreateAiIndex } from '../hooks/use_create_ai_index';
 import { useMemoryEnabled } from '../hooks/use_memory_enabled';
 import { useNavigation } from '../hooks/use_navigation';
@@ -60,6 +61,8 @@ export const CreateAiIndexPage = () => {
   const [trace, setTrace] = useState<EditableAiIndexTrace | undefined>();
   const backHref = createContextEngineUrl(CONTEXT_ENGINE_PATHS.landing);
 
+  useContextEngineBreadcrumbs([{ text: createPageTitle }]);
+
   const { dest, error: nameError } = validateAiIndexId(DEFAULT_AI_INDEX_TYPE, id);
   const destValue = dest?.value;
   const descriptionValidation = validateTextInput({
@@ -85,10 +88,7 @@ export const CreateAiIndexPage = () => {
   };
 
   return (
-    <ContextEnginePageTemplate
-      data-test-subj="contextCreateAiIndexPage"
-      breadcrumbPageName={createPageTitle}
-    >
+    <ContextEnginePageTemplate data-test-subj="contextCreateAiIndexPage">
       <ContextEngineSubPageHeader
         backDestinationLabel={contextEngineBackDestinationLabel}
         backHref={backHref}
