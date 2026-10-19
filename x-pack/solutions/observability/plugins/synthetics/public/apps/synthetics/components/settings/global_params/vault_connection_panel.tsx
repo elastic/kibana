@@ -99,7 +99,8 @@ const toForm = (c: VaultConnectionStatus): FormState => ({
 
 export const VaultConnectionPanel = () => {
   const { http, notifications, application } = useKibana<ClientPluginsStart>().services;
-  const canSave = (application?.capabilities.uptime.save ?? false) as boolean;
+  const canManage = (application?.capabilities.uptime.canManageVaultConnections ??
+    false) as boolean;
 
   const [connections, setConnections] = useState<VaultConnectionStatus[]>([]);
   const [editing, setEditing] = useState<FormState | null>(null);
@@ -268,7 +269,7 @@ export const VaultConnectionPanel = () => {
             setTestResult(null);
             setEditing(toForm(c));
           },
-          enabled: () => canSave,
+          enabled: () => canManage,
         },
         {
           name: DELETE_LABEL,
@@ -280,7 +281,7 @@ export const VaultConnectionPanel = () => {
           onClick: (c: VaultConnectionStatus) => {
             if (c.name) setDeleteTarget(c.name);
           },
-          enabled: () => canSave,
+          enabled: () => canManage,
         },
       ],
     },
@@ -333,7 +334,7 @@ export const VaultConnectionPanel = () => {
               size="s"
               iconType="plusCircle"
               data-test-subj="syntheticsVaultAddConnection"
-              isDisabled={!canSave || !!editing}
+              isDisabled={!canManage || !!editing}
               onClick={() => {
                 setTestResult(null);
                 setEditing(blankForm());
@@ -349,7 +350,7 @@ export const VaultConnectionPanel = () => {
                 iconType="refresh"
                 data-test-subj="syntheticsVaultRefreshSecrets"
                 isLoading={refreshing}
-                isDisabled={!canSave}
+                isDisabled={!canManage}
                 onClick={onRefreshAll}
               >
                 {REFRESH_BUTTON}

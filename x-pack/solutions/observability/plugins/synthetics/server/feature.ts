@@ -31,6 +31,7 @@ import {
 import { syntheticsApiKeyObjectType } from './saved_objects/service_api_key';
 
 export const PRIVATE_LOCATION_WRITE_API = 'private-location-write';
+export const VAULT_CONNECTION_WRITE_API = 'vault-connection-write';
 export const MONITOR_RUN_MANUALLY_API = 'monitor-run-manually';
 export const WRITE_SYNTHETICS_DEFAULT_RULES_API = 'write_synthetics_default_rules';
 
@@ -92,6 +93,25 @@ const canManagePrivateLocationsPrivilege: SubFeaturePrivilegeGroupConfig = {
         read: [],
       },
       ui: ['canManagePrivateLocations'],
+    },
+  ],
+};
+
+const canManageVaultConnectionsPrivilege: SubFeaturePrivilegeGroupConfig = {
+  groupType: 'independent' as SubFeaturePrivilegeGroupType,
+  privileges: [
+    {
+      id: 'can_manage_vault_connections',
+      name: i18n.translate('xpack.synthetics.features.canManageVaultConnections', {
+        defaultMessage: 'Can manage',
+      }),
+      includeIn: 'all',
+      api: [VAULT_CONNECTION_WRITE_API],
+      savedObject: {
+        all: [syntheticsVaultConnectionType],
+        read: [],
+      },
+      ui: ['canManageVaultConnections'],
     },
   ],
 };
@@ -173,12 +193,15 @@ export const syntheticsFeature = {
           syntheticsMonitorSavedObjectType,
           syntheticsApiKeyObjectType,
           syntheticsParamType,
-          syntheticsVaultConnectionType,
 
           // uptime settings object is also registered here since feature is shared between synthetics and uptime
           uptimeSettingsObjectType,
         ],
-        read: [privateLocationSavedObjectName, legacyPrivateLocationsSavedObjectName],
+        read: [
+          privateLocationSavedObjectName,
+          legacyPrivateLocationsSavedObjectName,
+          syntheticsVaultConnectionType,
+        ],
       },
       alerting: {
         rule: {
@@ -259,6 +282,16 @@ export const syntheticsFeature = {
           'This feature allows you to manage your private locations, for example adding, or deleting them.',
       }),
       privilegeGroups: [canManagePrivateLocationsPrivilege],
+    },
+    {
+      name: i18n.translate('xpack.synthetics.features.app.vaultConnections', {
+        defaultMessage: 'Vault connections',
+      }),
+      description: i18n.translate('xpack.synthetics.features.app.vaultConnections.description', {
+        defaultMessage:
+          'This feature allows you to manage the HashiCorp Vault connections used to resolve secret references in monitors and global parameters.',
+      }),
+      privilegeGroups: [canManageVaultConnectionsPrivilege],
     },
     {
       name: i18n.translate('xpack.synthetics.features.app.params', {

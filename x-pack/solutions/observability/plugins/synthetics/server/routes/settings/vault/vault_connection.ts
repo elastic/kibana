@@ -22,6 +22,7 @@ import type {
 import { SECRET_PROVIDER_HASHICORP_VAULT } from '../../../../common/runtime_types';
 import { syntheticsVaultConnectionType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
+import { VAULT_CONNECTION_WRITE_API } from '../../../feature';
 import { vaultConnectionId } from '../../../saved_objects/synthetics_vault_connection';
 import { VAULT_CONNECTION_NAME_REGEX } from '../../../synthetics_service/formatters/vault_param_formatter';
 import { asyncGlobalParamsPropagation } from '../../../tasks/sync_global_params_task';
@@ -132,6 +133,7 @@ export const saveVaultConnectionRoute: SyntheticsRestApiRouteFactory<
   path: SYNTHETICS_API_URLS.VAULT_CONNECTION,
   validate: { body: SaveBodySchema },
   writeAccess: true,
+  requiredPrivileges: [VAULT_CONNECTION_WRITE_API],
   handler: async ({ request, response, savedObjectsClient, server, spaceId }) => {
     const body = request.body as SaveBody;
     const type: SecretProviderType = body.type ?? SECRET_PROVIDER_HASHICORP_VAULT;
@@ -236,6 +238,7 @@ export const deleteVaultConnectionRoute: SyntheticsRestApiRouteFactory<
   path: SYNTHETICS_API_URLS.VAULT_CONNECTION + '/{name}',
   validate: { params: schema.object({ name: schema.string({ minLength: 1, maxLength: 1024 }) }) },
   writeAccess: true,
+  requiredPrivileges: [VAULT_CONNECTION_WRITE_API],
   handler: async ({ request, savedObjectsClient, server, spaceId }) => {
     const { name } = request.params as { name: string };
     await savedObjectsClient.delete(
@@ -258,6 +261,7 @@ export const refreshVaultConnectionsRoute: SyntheticsRestApiRouteFactory<
   path: SYNTHETICS_API_URLS.VAULT_CONNECTION + '/_refresh',
   validate: {},
   writeAccess: true,
+  requiredPrivileges: [VAULT_CONNECTION_WRITE_API],
   handler: async (routeContext) => {
     const { savedObjectsClient, server, spaceId } = routeContext;
     const encryptedClient = server.encryptedSavedObjects.getClient();
@@ -445,6 +449,7 @@ export const testVaultConnectionRoute: SyntheticsRestApiRouteFactory<TestResult>
   path: SYNTHETICS_API_URLS.VAULT_CONNECTION + '/_test',
   validate: { body: TestBodySchema },
   writeAccess: true,
+  requiredPrivileges: [VAULT_CONNECTION_WRITE_API],
   handler: async ({ request, server, spaceId }) => {
     const body = request.body as TestBody;
     const { address, authMethod, namespace, tlsSkipVerify, roleId } = body.config;
