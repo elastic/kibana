@@ -262,27 +262,20 @@ export default ({ getService }: FtrProviderContext): void => {
         metadata: { ...attackMetadata, alertCount: alertIds.length, index },
       });
 
-      const buildAlertAttachment = (alertId: string, sourceAttackId: string) => ({
+      /**
+       * The alert attachment `buildAttacksAttachments` posts right after each attack: one per
+       * attack, holding every alert of that attack and naming it as the source.
+       */
+      const buildAlertAttachment = (alertIds: string[], sourceAttackId: string) => ({
         type: SECURITY_ALERT_ATTACHMENT_TYPE,
         owner: OWNER,
-        attachmentId: alertId,
+        attachmentId: alertIds,
         metadata: {
           index: ALERT_INDEX,
           rule: { id: 'attack-rule-id', name: 'attack rule' },
           sourceAttachmentIds: [sourceAttackId],
         },
       });
-
-      /**
-       * Which attack put each alert on the case. The shared alert is credited to A because A is
-       * posted first and the dedupe drops it from B's attachment, which is what the client
-       * builder produces in the UI.
-       */
-      const alertSourceAttackId = {
-        [SHARED_ALERT_ID]: ATTACK_A_ID,
-        [ATTACK_A_ONLY_ALERT_ID]: ATTACK_A_ID,
-        [ATTACK_B_ONLY_ALERT_ID]: ATTACK_B_ID,
-      };
 
       interface Attachment {
         id: string;
@@ -300,59 +293,21 @@ export default ({ getService }: FtrProviderContext): void => {
         type === SECURITY_ALERT_ATTACHMENT_TYPE || type === AttachmentType.alert;
 
       /**
-       * The rule the removal prompt applies, restated here so the assertions below are driven by
-       * it rather than by hand-picked ids: an alert attachment goes with the attack only when the
-       * attack is recorded as having put it on the case *and* every alert it references is
-       * currently in that attack *and* is not claimed by another attack attached to the same
-       * case. The rule itself is unit tested in `resolve_removable_alerts.test.ts`; this
-       * exercises the endpoint that carries it out.
+       * Attaches A and then B the way the UI does. Cases drops the alert ids already on the case or
+       * earlier in the request, so the shared alert stays in A's attachment and B's holds only its
+       * own: `[shared, a-only]` and `[b-only]`.
        */
-      const resolveRemovableAlertAttachmentIds = (
-        attachments: Attachment[],
-        attackId: keyof typeof attackAlertIds
-      ): string[] => {
-        const attackSet = new Set(attackAlertIds[attackId]);
-        const claimedByOthers = new Set(
-          Object.entries(attackAlertIds)
-            .filter(([id]) => id !== attackId)
-            .flatMap(([, ids]) => ids)
-        );
-
-        return attachments
-          .filter(isAlertAttachment)
-          .filter(({ attachmentId, alertId }) => {
-            const ids = toArray(alertId ?? attachmentId);
-            return (
-              ids.length > 0 &&
-              ids.every(
-                (id) =>
-                  alertSourceAttackId[id as keyof typeof alertSourceAttackId] === attackId &&
-                  attackSet.has(id) &&
-                  !claimedByOthers.has(id)
-              )
-            );
-          })
-          .map(({ id }) => id);
-      };
-
-      const seedCaseWithTwoAttacks = async (attackIndex = ATTACK_INDEX) => {
+      const seedCaseWithTwoAttacks = async () => {
         const postedCase = await createCase(supertest, getPostCaseRequest({ owner: OWNER }));
 
         const updatedCase = await bulkCreateAttachments({
           supertest,
           caseId: postedCase.id,
           params: [
-            buildAttackAttachment(ATTACK_A_ID, attackAlertIds[ATTACK_A_ID], attackIndex),
-            buildAttackAttachment(ATTACK_B_ID, attackAlertIds[ATTACK_B_ID], attackIndex),
-            buildAlertAttachment(SHARED_ALERT_ID, alertSourceAttackId[SHARED_ALERT_ID]),
-            buildAlertAttachment(
-              ATTACK_A_ONLY_ALERT_ID,
-              alertSourceAttackId[ATTACK_A_ONLY_ALERT_ID]
-            ),
-            buildAlertAttachment(
-              ATTACK_B_ONLY_ALERT_ID,
-              alertSourceAttackId[ATTACK_B_ONLY_ALERT_ID]
-            ),
+            buildAttackAttachment(ATTACK_A_ID, attackAlertIds[ATTACK_A_ID], ATTACK_INDEX),
+            buildAlertAttachment(attackAlertIds[ATTACK_A_ID], ATTACK_A_ID),
+            buildAttackAttachment(ATTACK_B_ID, attackAlertIds[ATTACK_B_ID], ATTACK_INDEX),
+            buildAlertAttachment(attackAlertIds[ATTACK_B_ID], ATTACK_B_ID),
           ] as unknown as BulkCreateUnifiedAttachmentsRequest,
         });
 
@@ -376,7 +331,96 @@ export default ({ getService }: FtrProviderContext): void => {
           .flatMap(({ alertId, attachmentId }) => toArray(alertId ?? attachmentId))
           .sort();
 
-      it('removes only the attack attachment when no alerts were opted in', async () => {
+      const attackIdsOf = (attachments: Attachment[]): Array<string | string[] | undefined> =>
+        attachments
+          .filter(({ type }) => type === SECURITY_ATTACK_ATTACHMENT_TYPE)
+          .map(({ attachmentId }) => attachmentId);
+
+      // The removal reads each attack's own alert ids, which the suite-wide fixture omits. Seeding
+      // them on the real fixture index matters: an attack outside the attack discovery families is
+      // refused at attach time, so a bespoke index would never reach the removal at all.
+      beforeEach(async () => {
+        await indexAttackDocuments({
+          es,
+          attackIds: [ATTACK_A_ID, ATTACK_B_ID],
+          alertIdsByAttackId: attackAlertIds,
+        });
+      });
+
+      it('keeps the shared alert in the attachment of the attack attached first', async () => {
+        // Every test below depends on this shape; without it removing A would be trivially right.
+        const { attachments } = await seedCaseWithTwoAttacks();
+
+        const alertSets = attachments
+          .filter(isAlertAttachment)
+          .map(({ alertId, attachmentId }) => toArray(alertId ?? attachmentId).sort());
+
+        expect(alertSets).to.have.length(2);
+        expect(alertSets).to.containEql([ATTACK_A_ONLY_ALERT_ID, SHARED_ALERT_ID].sort());
+        expect(alertSets).to.containEql([ATTACK_B_ONLY_ALERT_ID]);
+      });
+
+      it('takes the alerts only the first-attached attack claims, keeping the one it shares', async () => {
+        const { caseId, attackAttachmentId } = await seedCaseWithTwoAttacks();
+
+        await bulkDeleteAttachments({
+          supertest,
+          caseId,
+          savedObjectIds: [attackAttachmentId(ATTACK_A_ID)],
+        });
+
+        const remaining = await readAttachments(caseId);
+        expect(attackIdsOf(remaining)).to.eql([ATTACK_B_ID]);
+        expect(alertIdsOf(remaining)).to.eql([SHARED_ALERT_ID, ATTACK_B_ONLY_ALERT_ID].sort());
+      });
+
+      it('takes the alerts only the second-attached attack claims', async () => {
+        const { caseId, attackAttachmentId } = await seedCaseWithTwoAttacks();
+
+        await bulkDeleteAttachments({
+          supertest,
+          caseId,
+          savedObjectIds: [attackAttachmentId(ATTACK_B_ID)],
+        });
+
+        const remaining = await readAttachments(caseId);
+        expect(attackIdsOf(remaining)).to.eql([ATTACK_A_ID]);
+        expect(alertIdsOf(remaining)).to.eql([SHARED_ALERT_ID, ATTACK_A_ONLY_ALERT_ID].sort());
+      });
+
+      for (const [first, second] of [
+        [ATTACK_A_ID, ATTACK_B_ID],
+        [ATTACK_B_ID, ATTACK_A_ID],
+      ]) {
+        it(`takes every alert once ${first} and then ${second} are removed`, async () => {
+          const { caseId, attackAttachmentId } = await seedCaseWithTwoAttacks();
+
+          await bulkDeleteAttachments({
+            supertest,
+            caseId,
+            savedObjectIds: [attackAttachmentId(first)],
+          });
+          await bulkDeleteAttachments({
+            supertest,
+            caseId,
+            savedObjectIds: [attackAttachmentId(second)],
+          });
+
+          expect(await readAttachments(caseId)).to.eql([]);
+        });
+      }
+
+      it('takes the alerts with the attack when it is deleted through the public delete API', async () => {
+        const { caseId, attackAttachmentId } = await seedCaseWithTwoAttacks();
+
+        await deleteComment({ supertest, caseId, commentId: attackAttachmentId(ATTACK_A_ID) });
+
+        const remaining = await readAttachments(caseId);
+        expect(attackIdsOf(remaining)).to.eql([ATTACK_B_ID]);
+        expect(alertIdsOf(remaining)).to.eql([SHARED_ALERT_ID, ATTACK_B_ONLY_ALERT_ID].sort());
+      });
+
+      it('keeps every alert when related attachments are excluded', async () => {
         const { caseId, attackAttachmentId } = await seedCaseWithTwoAttacks();
 
         await bulkDeleteAttachments({
@@ -387,67 +431,10 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         const remaining = await readAttachments(caseId);
-        expect(
-          remaining
-            .filter(({ type }) => type === SECURITY_ATTACK_ATTACHMENT_TYPE)
-            .map(({ attachmentId }) => attachmentId)
-        ).to.eql([ATTACK_B_ID]);
-        // Every alert stays: the attack was removed on its own.
+        expect(attackIdsOf(remaining)).to.eql([ATTACK_B_ID]);
         expect(alertIdsOf(remaining)).to.eql(
           [SHARED_ALERT_ID, ATTACK_A_ONLY_ALERT_ID, ATTACK_B_ONLY_ALERT_ID].sort()
         );
-      });
-
-      it('leaves an alert shared with another attached attack when removing one attack with its alerts', async () => {
-        const { caseId, attachments, attackAttachmentId } = await seedCaseWithTwoAttacks();
-
-        const removableAlertAttachmentIds = resolveRemovableAlertAttachmentIds(
-          attachments,
-          ATTACK_A_ID
-        );
-        // Only attack A's exclusive alert is removable — the shared one is still claimed by B.
-        expect(removableAlertAttachmentIds.length).to.be(1);
-
-        await bulkDeleteAttachments({
-          supertest,
-          caseId,
-          savedObjectIds: [attackAttachmentId(ATTACK_A_ID), ...removableAlertAttachmentIds],
-        });
-
-        const remaining = await readAttachments(caseId);
-        expect(
-          remaining
-            .filter(({ type }) => type === SECURITY_ATTACK_ATTACHMENT_TYPE)
-            .map(({ attachmentId }) => attachmentId)
-        ).to.eql([ATTACK_B_ID]);
-        expect(alertIdsOf(remaining)).to.eql([SHARED_ALERT_ID, ATTACK_B_ONLY_ALERT_ID].sort());
-      });
-
-      it('removes both attacks and every alert when the second attack is removed too', async () => {
-        const { caseId, attachments, attackAttachmentId } = await seedCaseWithTwoAttacks();
-
-        await bulkDeleteAttachments({
-          supertest,
-          caseId,
-          savedObjectIds: [
-            attackAttachmentId(ATTACK_A_ID),
-            ...resolveRemovableAlertAttachmentIds(attachments, ATTACK_A_ID),
-          ],
-        });
-
-        // Attack A is gone, so the shared alert is no longer claimed by anyone but B.
-        const afterFirstRemoval = await readAttachments(caseId);
-        const remainingAlertAttachmentIds = afterFirstRemoval
-          .filter(isAlertAttachment)
-          .map(({ id }) => id);
-
-        await bulkDeleteAttachments({
-          supertest,
-          caseId,
-          savedObjectIds: [attackAttachmentId(ATTACK_B_ID), ...remainingAlertAttachmentIds],
-        });
-
-        expect(await readAttachments(caseId)).to.eql([]);
       });
 
       it('deletes nothing when one of the ids is not an attachment of the case', async () => {
@@ -463,95 +450,45 @@ export default ({ getService }: FtrProviderContext): void => {
         expect((await readAttachments(caseId)).length).to.be(attachments.length);
       });
 
-      describe('onDelete', () => {
-        // The removal reads each attack's own alert ids, which the shared fixture omits. Seeding
-        // them on the real fixture index matters: an attack outside the attack discovery families
-        // is refused at attach time, so a bespoke index would never reach the removal at all.
-        beforeEach(async () => {
-          await indexAttackDocuments({
-            es,
-            attackIds: [ATTACK_A_ID, ATTACK_B_ID],
-            alertIdsByAttackId: attackAlertIds,
-          });
+      it('keeps an alert the analyst attached before the attack, taking only what the attack added', async () => {
+        // The public delete API has no prompt, so `metadata.sourceAttachmentIds` is the only thing
+        // separating an alert the attack contributed from an identical one the analyst attached
+        // themselves. The analyst's attachment carries none, so it is not the attack's to take.
+        const postedCase = await createCase(supertest, getPostCaseRequest({ owner: OWNER }));
+
+        await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: {
+            type: SECURITY_ALERT_ATTACHMENT_TYPE,
+            owner: OWNER,
+            attachmentId: SHARED_ALERT_ID,
+            metadata: {
+              index: ALERT_INDEX,
+              rule: { id: 'attack-rule-id', name: 'attack rule' },
+            },
+          } as unknown as AttachmentRequestV2,
         });
 
-        const attackIdsOf = (attachments: Attachment[]): Array<string | string[] | undefined> =>
-          attachments
-            .filter(({ type }) => type === SECURITY_ATTACK_ATTACHMENT_TYPE)
-            .map(({ attachmentId }) => attachmentId);
-
-        it('takes the alerts only the removed attack claims when it is bulk deleted', async () => {
-          const { caseId, attackAttachmentId } = await seedCaseWithTwoAttacks();
-
-          await bulkDeleteAttachments({
-            supertest,
-            caseId,
-            savedObjectIds: [attackAttachmentId(ATTACK_A_ID)],
-          });
-
-          const remaining = await readAttachments(caseId);
-          expect(attackIdsOf(remaining)).to.eql([ATTACK_B_ID]);
-          expect(alertIdsOf(remaining)).to.eql([SHARED_ALERT_ID, ATTACK_B_ONLY_ALERT_ID].sort());
+        // The shared alert is already on the case, so the attack's own attachment holds only A1.
+        const updatedCase = await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [
+            buildAttackAttachment(ATTACK_A_ID, attackAlertIds[ATTACK_A_ID], ATTACK_INDEX),
+            buildAlertAttachment(attackAlertIds[ATTACK_A_ID], ATTACK_A_ID),
+          ] as unknown as BulkCreateUnifiedAttachmentsRequest,
         });
 
-        it('takes the alerts with the attack when it is deleted through the public delete API', async () => {
-          const { caseId, attackAttachmentId } = await seedCaseWithTwoAttacks();
+        const seededAttack = (updatedCase.comments as unknown as Attachment[]).find(
+          ({ type }) => type === SECURITY_ATTACK_ATTACHMENT_TYPE
+        )!;
 
-          await deleteComment({ supertest, caseId, commentId: attackAttachmentId(ATTACK_A_ID) });
+        await deleteComment({ supertest, caseId: postedCase.id, commentId: seededAttack.id });
 
-          const remaining = await readAttachments(caseId);
-          expect(attackIdsOf(remaining)).to.eql([ATTACK_B_ID]);
-          expect(alertIdsOf(remaining)).to.eql([SHARED_ALERT_ID, ATTACK_B_ONLY_ALERT_ID].sort());
-        });
-
-        it('keeps every alert when related attachments are excluded', async () => {
-          const { caseId, attackAttachmentId } = await seedCaseWithTwoAttacks();
-
-          await bulkDeleteAttachments({
-            supertest,
-            caseId,
-            savedObjectIds: [attackAttachmentId(ATTACK_A_ID)],
-            includeRelated: false,
-          });
-
-          expect(alertIdsOf(await readAttachments(caseId))).to.eql(
-            [SHARED_ALERT_ID, ATTACK_A_ONLY_ALERT_ID, ATTACK_B_ONLY_ALERT_ID].sort()
-          );
-        });
-
-        it('keeps an alert the analyst attached, even though the removed attack lists it', async () => {
-          // The public delete API has no prompt, so `metadata.sourceAttachmentIds` is the only
-          // thing separating an alert the attack contributed from an identical one the analyst
-          // attached themselves. This attachment carries none, so it is not the attack's to take.
-          const postedCase = await createCase(supertest, getPostCaseRequest({ owner: OWNER }));
-
-          const updatedCase = await bulkCreateAttachments({
-            supertest,
-            caseId: postedCase.id,
-            params: [
-              buildAttackAttachment(ATTACK_A_ID, attackAlertIds[ATTACK_A_ID], ATTACK_INDEX),
-              {
-                type: SECURITY_ALERT_ATTACHMENT_TYPE,
-                owner: OWNER,
-                attachmentId: ATTACK_A_ONLY_ALERT_ID,
-                metadata: {
-                  index: ALERT_INDEX,
-                  rule: { id: 'attack-rule-id', name: 'attack rule' },
-                },
-              },
-            ] as unknown as BulkCreateUnifiedAttachmentsRequest,
-          });
-
-          const seededAttack = (updatedCase.comments as unknown as Attachment[]).find(
-            ({ type }) => type === SECURITY_ATTACK_ATTACHMENT_TYPE
-          )!;
-
-          await deleteComment({ supertest, caseId: postedCase.id, commentId: seededAttack.id });
-
-          const remaining = await readAttachments(postedCase.id);
-          expect(attackIdsOf(remaining)).to.eql([]);
-          expect(alertIdsOf(remaining)).to.eql([ATTACK_A_ONLY_ALERT_ID]);
-        });
+        const remaining = await readAttachments(postedCase.id);
+        expect(attackIdsOf(remaining)).to.eql([]);
+        expect(alertIdsOf(remaining)).to.eql([SHARED_ALERT_ID]);
       });
     });
 

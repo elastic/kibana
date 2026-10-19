@@ -395,7 +395,7 @@ spaceTest.describe(
         const { detectionsAttackDiscoveryPage, attackCases } = pageObjects;
         const caseName = 'Scout attack attachment case – removal';
         let caseId = '';
-        let manualAttachmentId = '';
+        let scheduledAttachmentId = '';
 
         await spaceTest.step('make the two seeded attacks share an alert', async () => {
           // The seed leaves the two attacks' alert sets disjoint, which cannot exercise the rule
@@ -418,12 +418,11 @@ spaceTest.describe(
         });
 
         await spaceTest.step('attach both attacks to one case', async () => {
-          // Attach order decides the outcome, so neither attach may go through a table row index.
-          // Cases drops the ids already on the case, so the shared alert lands in whichever
-          // attack is attached first and the second attack's attachment holds only its own. This
-          // test removes the manual attack and expects its exclusive alert to go with it, which
-          // only holds while the manual attack is attached second. Filtering by type pins each
-          // attach to a known attack instead of to whatever the table happens to sort first.
+          // Cases drops the ids already on the case, so the shared alert lands in whichever attack
+          // is attached first and the second attack's attachment holds only its own. This test
+          // removes the first-attached attack, whose attachment has to be shrunk rather than
+          // deleted, so the attach order is pinned. Filtering by type ties each attach to a known
+          // attack instead of to whatever the table happens to sort first.
           const showOnlyAttacksOfType = async (select: Locator, unselect?: Locator) => {
             await detectionsAttackDiscoveryPage.navigateToAttacksPage();
             await detectionsAttackDiscoveryPage.collapseKpisSection();
@@ -475,15 +474,15 @@ spaceTest.describe(
               [SCHEDULED_ONLY_ALERT_ID, SHARED_ALERT_ID, MANUAL_ONLY_ALERT_ID].sort()
             );
 
-            const manualAttachment = attackAttachments.find(({ metadata }) =>
-              metadata?.title?.endsWith(MANUAL_TITLE_SUFFIX)
+            const scheduledAttachment = attackAttachments.find(
+              ({ metadata }) => !metadata?.title?.endsWith(MANUAL_TITLE_SUFFIX)
             );
 
-            if (manualAttachment == null) {
-              throw new Error('The manual attack was not attached to the case');
+            if (scheduledAttachment == null) {
+              throw new Error('The scheduled attack was not attached to the case');
             }
 
-            manualAttachmentId = manualAttachment.id;
+            scheduledAttachmentId = scheduledAttachment.id;
 
             await attackCases.navigateToCase(caseId);
             await attackCases.openAttachmentsTab();
@@ -536,7 +535,7 @@ spaceTest.describe(
             await expect(attackCases.activityAttackDeleteButtons).toHaveCount(2);
 
             await attackCases.removeAttackFromActivityCard({
-              savedObjectId: manualAttachmentId,
+              savedObjectId: scheduledAttachmentId,
               withRelatedAlerts: true,
             });
 
@@ -547,10 +546,11 @@ spaceTest.describe(
             const attachments = await findCaseAttachments(kbnClient, scoutSpace.id, caseId);
 
             expect(getAttackAttachments(attachments)).toHaveLength(1);
-            // The manual attack's own alert goes with it; the alert the scheduled attack also
-            // claims stays, as does the scheduled attack's own.
+            // The scheduled attack's own alert goes with it. The shared alert sat in the same
+            // attachment, but the manual attack still claims it, so it stays alongside the manual
+            // attack's own.
             expect(getAttachedAlertIds(attachments)).toStrictEqual(
-              [SCHEDULED_ONLY_ALERT_ID, SHARED_ALERT_ID].sort()
+              [SHARED_ALERT_ID, MANUAL_ONLY_ALERT_ID].sort()
             );
           }
         );
