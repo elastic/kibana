@@ -600,7 +600,7 @@ paths:
       responses:
         '200':
           description: Returns the OAuth callback script
-      summary: ''
+      summary: Get OAuth callback script
       tags:
         - connectors
       x-state: ''
