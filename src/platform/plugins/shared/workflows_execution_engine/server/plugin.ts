@@ -1425,6 +1425,39 @@ export class WorkflowsExecutionEnginePlugin
       };
     };
 
+    // A persisted execution with no task would otherwise stay pending forever.
+    const scheduleOrMarkFailed = async (
+      executionIds: string[],
+      schedule: () => Promise<unknown>
+    ): Promise<void> => {
+      try {
+        await schedule();
+      } catch (scheduleError) {
+        const message =
+          scheduleError instanceof Error ? scheduleError.message : String(scheduleError);
+        const finishedAt = new Date().toISOString();
+        await workflowExecutionRepository
+          .bulkUpdateWorkflowExecutions(
+            executionIds.map((id) => ({
+              id,
+              status: ExecutionStatus.FAILED,
+              error: { type: 'TaskScheduleError', message },
+              finishedAt,
+            }))
+          )
+          .catch((updateError) => {
+            this.logger.error(
+              `Failed to mark workflow executions [${executionIds.join(
+                ', '
+              )}] as FAILED after task schedule error "${message}": ${
+                updateError instanceof Error ? updateError.message : String(updateError)
+              }`
+            );
+          });
+        throw scheduleError;
+      }
+    };
+
     const executeWorkflow: ExecuteWorkflow = async (workflow, context, originalRequest) => {
       const request = getWorkflowOriginalRequest(originalRequest);
       await checkLicense(plugins.licensing);
@@ -1530,10 +1563,12 @@ export class WorkflowsExecutionEnginePlugin
       } else {
         // Schedule a task: either we're not in a task, or this is a child execution (must not run inline)
         const taskInstance = createTaskInstance(workflowExecution, ['workflows']);
-        await plugins.taskManager.schedule(taskInstance, {
-          request: request as KibanaRequest,
-          cloneApiKey: true,
-        });
+        await scheduleOrMarkFailed([workflowExecution.id], () =>
+          plugins.taskManager.schedule(taskInstance, {
+            request: request as KibanaRequest,
+            cloneApiKey: true,
+          })
+        );
         this.logger.debug(
           `Scheduling workflow task for workflow ${workflow.id}, execution ${workflowExecution.id}${
             isChildExecution ? ' (child execution)' : ''
@@ -1590,7 +1625,9 @@ export class WorkflowsExecutionEnginePlugin
         generateExecutionTaskScope(workflowExecution as EsWorkflowExecution)
       );
 
-      await plugins.taskManager.schedule(taskInstance, { request, cloneApiKey: true });
+      await scheduleOrMarkFailed([workflowExecution.id as string], () =>
+        plugins.taskManager.schedule(taskInstance, { request, cloneApiKey: true })
+      );
       this.logger.debug(
         `Scheduling workflow task with user context for workflow ${workflow.id}, execution ${workflowExecution.id}`
       );
@@ -1805,7 +1842,10 @@ export class WorkflowsExecutionEnginePlugin
             generateExecutionTaskScope(p.workflowExecution as EsWorkflowExecution)
           )
         );
-        await plugins.taskManager.bulkSchedule(tasks, { request, cloneApiKey: true });
+        await scheduleOrMarkFailed(
+          toSchedule.map((p) => p.workflowExecution.id as string),
+          () => plugins.taskManager.bulkSchedule(tasks, { request, cloneApiKey: true })
+        );
         this.logger.debug(`Bulk-scheduled ${toSchedule.length} workflow task(s) with user context`);
       }
 
@@ -1868,7 +1908,9 @@ export class WorkflowsExecutionEnginePlugin
       this.logger.debug(
         `Scheduling workflow step task with user context for workflow ${workflow.id}, step ${stepId}`
       );
-      await plugins.taskManager.schedule(taskInstance, { request, cloneApiKey: true });
+      await scheduleOrMarkFailed([workflowExecution.id as string], () =>
+        plugins.taskManager.schedule(taskInstance, { request, cloneApiKey: true })
+      );
 
       return {
         workflowExecutionId: workflowExecution.id as string,
