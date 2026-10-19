@@ -58,7 +58,7 @@ Where it is sent:
 | Site | `surface` | `error_class` |
 |---|---|---|
 | Queue header count failed to load (`conversations_page.tsx`) | `queue` | From the error |
-| A queue section failed to load (`queue_section.tsx`) | `queue` | From the error |
+| A queue section failed to load (`queue_section.tsx`); picking or clearing an Impact filter starts a new occurrence | `queue` | From the error |
 | A queue section's Show more failed, below rows already on screen (`queue_section.tsx`); each failed click reports once | `queue` | From the error |
 | Approve or dismiss failed (`conversations_page.tsx` decision toast) | `queue` | From the error |
 | Copy link failed, from a card menu or the flyout (`copy_link.ts`) | `queue` or `flyout` | `clipboard` |

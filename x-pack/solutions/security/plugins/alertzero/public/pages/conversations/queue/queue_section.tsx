@@ -84,6 +84,7 @@ export const QueueSection = ({
     errorClass: classifyError(loadError),
     isShown: hasLoadError,
     isRefetching: isRefetchingRows,
+    resetKey: entityFilter ?? undefined,
     surface: 'queue',
   });
   // Each Show more click clears the failure first, so a retry that fails again is a new report.

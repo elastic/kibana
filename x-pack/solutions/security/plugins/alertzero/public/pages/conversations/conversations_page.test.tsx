@@ -1420,6 +1420,33 @@ describe('ConversationsPage telemetry', () => {
       expect(reportedEvents(core, 'alertzero_ui_error_shown')).toHaveLength(1);
     });
 
+    it('reports a filtered queue that fails after the unfiltered one failed', () => {
+      const failedPage =
+        (loadingEntity?: string) =>
+        (category: string, { entity }: { entity?: string | null }) => {
+          const isLoading = category === 'investigate' && entity === loadingEntity;
+          return {
+            data: undefined,
+            fetchNextPage: jest.fn(),
+            hasNextPage: undefined,
+            isFetchingNextPage: false,
+            isFetching: isLoading,
+            isInitialLoading: isLoading,
+            error: category === 'investigate' && !isLoading ? new Error('boom') : undefined,
+          };
+        };
+      mockOpenCount(3);
+      mockUseProposalsByCategory.mockImplementation(failedPage());
+      const { core, rerender } = renderPage('/');
+      // The filtered query is on its first load when the pill is picked, then fails too.
+      mockUseProposalsByCategory.mockImplementation(failedPage('host-1'));
+      fireEvent.click(screen.getByRole('button', { name: 'host-1' }));
+      mockUseProposalsByCategory.mockImplementation(failedPage());
+      rerender();
+
+      expect(reportedEvents(core, 'alertzero_ui_error_shown')).toHaveLength(2);
+    });
+
     // More rows than the first page, so the respond section offers Show more.
     const respondPageAndMore = () =>
       Array.from({ length: CATEGORY_PAGE_SIZE + 5 }, (_, i) => ({
