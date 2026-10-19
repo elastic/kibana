@@ -110,6 +110,20 @@ export const discoverSessionSearchRequestParamsSchema = getAsCodeSearchRequestSc
     arrayDescription: 'Tag IDs to exclude.',
   },
 }).extend({
+  tag_names: z
+    .union([z.string(), z.array(z.string()).max(100)])
+    .optional()
+    .meta({
+      description:
+        'A tag name to include. Accepts a single tag name or multiple tag names. When multiple are specified, Discover sessions matching any of the tag names are included. If the same name is shared by multiple tags, sessions matching any of those tags are included.',
+    }),
+  excluded_tag_names: z
+    .union([z.string(), z.array(z.string()).max(100)])
+    .optional()
+    .meta({
+      description:
+        'A tag name to exclude. Accepts a single tag name or multiple tag names. When multiple are specified, Discover sessions matching any of the tag names are excluded. If the same name is shared by multiple tags, sessions matching any of those tags are excluded.',
+    }),
   query: z
     .string()
     .max(MAX_SEARCH_QUERY_LENGTH)
