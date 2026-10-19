@@ -26,11 +26,8 @@ import type { RequestStatus } from '@kbn/inspector-plugin/public';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { estypes } from '@elastic/elasticsearch';
 import { useStableCallback } from '@kbn/react-hooks';
-import {
-  TEXT_BASED_HISTOGRAM_OVERLAY_APPLIED_META,
-  TEXT_BASED_HISTOGRAM_OVERLAY_APPROXIMATE_META,
-} from '@kbn/lens-common';
 import type { DataSource } from '@kbn/data-source';
+import type { LensAttributes } from '@kbn/lens-embeddable-utils';
 import { Histogram } from './histogram';
 import type {
   UnifiedHistogramBucketInterval,
@@ -56,10 +53,14 @@ import { useLensProps } from './hooks/use_lens_props';
 import { buildBucketInterval } from './utils/build_bucket_interval';
 import { ChartSectionTemplate } from './chart_section_template';
 import {
-  useHistogramOverlayAttributes,
-  type UnifiedHistogramOverlaySeries,
-  type UnifiedHistogramOverlaySeriesResult,
-} from './histogram_overlay';
+  applyHistogramComparisonAttributes,
+  canApplyHistogramComparison,
+} from './histogram_comparison';
+import {
+  getHistogramBucket,
+  splitHistogramTable,
+  type HistogramComparisonCount,
+} from './split_histogram_table';
 
 export interface UnifiedHistogramChartProps {
   isChartAvailable: boolean;
@@ -88,14 +89,38 @@ export interface UnifiedHistogramChartProps {
   withLensActions?: boolean;
   onApiAvailable?: EmbeddableComponentProps['onApiAvailable'];
   /**
-   * Optional time-aligned subset drawn as a stacked series on the live histogram.
-   * Omitted, the chart is unchanged.
+   * Selected subset counted on the histogram's own buckets and drawn as a stacked bar.
    */
-  overlaySeries?: UnifiedHistogramOverlaySeries;
-  onOverlaySeriesResult?: (result: UnifiedHistogramOverlaySeriesResult) => void;
+  comparison?: {
+    key: string;
+    label: string;
+    /**
+     * Counts the subset with the request params that produced the loaded histogram.
+     * Buckets `timeField` by `interval` and returns each bucket keyed by `timeColumn`.
+     */
+    loadCounts: (params: {
+      fetchParams: UnifiedHistogramFetchParams;
+      timeField: string;
+      timeColumn: string;
+      interval: string;
+      signal: AbortSignal;
+    }) => Promise<HistogramComparisonCount[]>;
+    onResult: (result: {
+      key: string;
+      status: 'loading' | 'applied' | 'approximate' | 'unavailable';
+    }) => void;
+  };
+}
+
+interface LoadedHistogram {
+  table: Datatable;
+  fetchParams: UnifiedHistogramFetchParams;
 }
 
 const RequestStatusError: typeof RequestStatus.ERROR = 2;
+const otherDocumentsLabel = i18n.translate('unifiedHistogram.comparison.otherDocuments', {
+  defaultMessage: 'Other documents',
+});
 const HistogramMemoized = memo(Histogram);
 
 export function UnifiedHistogramChart({
@@ -117,8 +142,7 @@ export function UnifiedHistogramChart({
   onTotalHitsChange,
   onChartLoad,
   onApiAvailable: consumerOnApiAvailable,
-  overlaySeries,
-  onOverlaySeriesResult,
+  comparison,
   withLensActions = true,
   ...histogramProps
 }: UnifiedHistogramChartProps) {
@@ -180,19 +204,6 @@ export function UnifiedHistogramChart({
     isEsql &&
       lensVisServiceCurrentSuggestionContext?.type === UnifiedHistogramSuggestionType.lensSuggestion
   );
-  const overlayAttributes = useHistogramOverlayAttributes({
-    attributes: visContext?.attributes,
-    suggestionType: visContext?.suggestionType,
-    fetchParams,
-    overlaySeries,
-    remainderColor: euiTheme.colors.vis.euiColorVis0,
-    overlayColor: euiTheme.colors.vis.euiColorVis8,
-    remainderLabel: i18n.translate('unifiedHistogram.overlaySeries.remainderLabel', {
-      defaultMessage: 'Other documents',
-    }),
-  });
-  const overlayApplied = overlayAttributes !== undefined;
-
   useTotalHits({
     services,
     hits,
@@ -203,12 +214,28 @@ export function UnifiedHistogramChart({
   });
 
   const [bucketInterval, setBucketInterval] = useState<UnifiedHistogramBucketInterval>();
+  const [loadedHistogram, setLoadedHistogram] = useState<LoadedHistogram>();
+  const [comparisonAttributes, setComparisonAttributes] = useState<{
+    key: string;
+    histogram: LoadedHistogram;
+    attributes: LensAttributes;
+  }>();
+  // Lens keeps the `onLoad` it was mounted with, so each load is attributed to what was last rendered.
+  const renderedLensRef = useRef<{
+    fetchParams: UnifiedHistogramFetchParams | undefined;
+    isComparison: boolean;
+  }>({ fetchParams: undefined, isComparison: false });
   const onLoad = useStableCallback(
     (
       isLoading: boolean,
       adapters: Partial<DefaultInspectorAdapters> | undefined,
       dataLoadingSubject$?: PublishingSubject<boolean | undefined>
     ) => {
+      const { fetchParams: loadFetchParams, isComparison } = renderedLensRef.current;
+      if (isComparison) {
+        return;
+      }
+
       const lensRequest = adapters?.requests?.getRequests()[0];
       const requestFailed = lensRequest?.status === RequestStatusError;
       const json = lensRequest?.response?.json as
@@ -217,13 +244,6 @@ export function UnifiedHistogramChart({
       const response = json?.rawResponse;
 
       if (requestFailed) {
-        if (overlaySeries) {
-          onOverlaySeriesResult?.({
-            key: overlaySeries.key,
-            applied: false,
-            approximate: false,
-          });
-        }
         onTotalHitsChange?.(UnifiedHistogramFetchStatus.error, undefined);
         onChartLoad?.({ adapters: adapters ?? {} });
         return;
@@ -231,21 +251,6 @@ export function UnifiedHistogramChart({
 
       const adapterTables = adapters?.tables?.tables;
       const totalHits = computeTotalHits(hasLensSuggestions, adapterTables, dataSource);
-
-      if (overlaySeries && !isLoading) {
-        const tables = Object.values(adapterTables ?? {});
-        const applied =
-          overlayApplied &&
-          tables.some((table) => table.meta?.[TEXT_BASED_HISTOGRAM_OVERLAY_APPLIED_META] === true);
-        const approximate = tables.some(
-          (table) => table.meta?.[TEXT_BASED_HISTOGRAM_OVERLAY_APPROXIMATE_META] === true
-        );
-        onOverlaySeriesResult?.({
-          key: overlaySeries.key,
-          applied,
-          approximate: applied && approximate,
-        });
-      }
 
       if (response?._shards?.failed || response?.timed_out) {
         onTotalHitsChange?.(UnifiedHistogramFetchStatus.error, totalHits);
@@ -269,6 +274,11 @@ export function UnifiedHistogramChart({
       }
 
       onChartLoad?.({ adapters: adapters ?? {}, dataLoading$: dataLoadingSubject$ });
+
+      if (!isLoading && loadFetchParams === fetchParams) {
+        const table = Object.values(adapterTables ?? {})[0];
+        setLoadedHistogram(table ? { table, fetchParams: loadFetchParams } : undefined);
+      }
     }
   );
 
@@ -276,13 +286,94 @@ export function UnifiedHistogramChart({
     fetch$,
     onLoad,
   });
-  const overlayLensProps = useMemo(
-    () =>
-      lensPropsContext && overlayAttributes
-        ? { ...lensPropsContext.lensProps, attributes: overlayAttributes }
-        : undefined,
-    [lensPropsContext, overlayAttributes]
-  );
+  // `fetchParams` is replaced on every fetch, so identity ties the table to the current request.
+  const currentHistogram =
+    loadedHistogram?.fetchParams === fetchParams ? loadedHistogram : undefined;
+  const comparisonLensProps = useMemo(() => {
+    if (
+      !lensPropsContext ||
+      !comparison ||
+      comparisonAttributes?.key !== comparison.key ||
+      comparisonAttributes.histogram !== currentHistogram
+    ) {
+      return;
+    }
+    return { ...lensPropsContext.lensProps, attributes: comparisonAttributes.attributes };
+  }, [comparison, comparisonAttributes, currentHistogram, lensPropsContext]);
+  renderedLensRef.current = {
+    fetchParams: lensPropsContext?.fetchParams,
+    isComparison: Boolean(comparisonLensProps),
+  };
+
+  const baseAttributes = lensPropsContext?.lensProps.attributes;
+  const overlayColor = euiTheme.colors.vis.euiColorVis8;
+  const remainderColor = euiTheme.colors.vis.euiColorVis0;
+  useEffect(() => {
+    if (!comparison) {
+      return;
+    }
+
+    const { key, label, loadCounts, onResult } = comparison;
+    if (!currentHistogram || !baseAttributes) {
+      onResult({ key, status: 'loading' });
+      return;
+    }
+
+    const bucket = getHistogramBucket(currentHistogram.table);
+    const { timeFieldName } = currentHistogram.fetchParams.dataSource;
+    if (
+      !bucket ||
+      !timeFieldName ||
+      currentHistogram.fetchParams.breakdown?.field ||
+      !canApplyHistogramComparison(baseAttributes)
+    ) {
+      onResult({ key, status: 'unavailable' });
+      return;
+    }
+
+    const controller = new AbortController();
+    loadCounts({
+      fetchParams: currentHistogram.fetchParams,
+      timeField: timeFieldName,
+      ...bucket,
+      signal: controller.signal,
+    })
+      .then((counts) => {
+        if (controller.signal.aborted) {
+          return;
+        }
+        const split = splitHistogramTable({
+          table: currentHistogram.table,
+          timeColumn: bucket.timeColumn,
+          counts,
+          label,
+          remainderLabel: otherDocumentsLabel,
+        });
+        const attributes =
+          split &&
+          applyHistogramComparisonAttributes({
+            attributes: baseAttributes,
+            table: split.table,
+            colors: { overlay: overlayColor, remainder: remainderColor },
+          });
+        if (!split || !attributes) {
+          onResult({ key, status: 'unavailable' });
+          return;
+        }
+        setComparisonAttributes({ key, histogram: currentHistogram, attributes });
+        onResult({ key, status: split.approximate ? 'approximate' : 'applied' });
+      })
+      .catch((error: { name?: string }) => {
+        if (!controller.signal.aborted && error?.name !== 'AbortError') {
+          onResult({ key, status: 'unavailable' });
+        }
+      });
+
+    return () => {
+      controller.abort();
+      setComparisonAttributes(undefined);
+    };
+  }, [baseAttributes, comparison, currentHistogram, overlayColor, remainderColor]);
 
   const { chartToolbarCss, histogramCss } = useChartStyles(chartVisible);
 
@@ -452,7 +543,7 @@ export function UnifiedHistogramChart({
                   abortController={abortController}
                   {...histogramProps}
                   {...lensPropsContext}
-                  {...(overlayLensProps ? { lensProps: overlayLensProps } : undefined)}
+                  {...(comparisonLensProps ? { lensProps: comparisonLensProps } : undefined)}
                   onApiAvailable={onApiAvailable}
                 />
               )}

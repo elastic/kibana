@@ -94,6 +94,25 @@ columns: [
 
 ---
 
+### Histogram comparison — `getHistogramComparison` / `publishHistogramComparison`
+
+**Changes:** Lets a table selection add one count series to the default document-count histogram.
+
+**Use when:** A row should be compared with the histogram total. Profiles that replace the chart do not implement this.
+
+**Returns:** A controller with the current selection observable, its result, and `onResult`. Publishing accepts a generic group value or `undefined` to clear it.
+
+**Table-to-main-view pattern:** The table calls the named `publish…` extension point, the
+owning profile writes registered `Ui` state, and the main view subscribes through the matching
+`get…` controller. The state is observable, scoped to one tab, and never persisted to the URL or
+saved session. Query or variable changes invalidate a selection. Time and filter changes preserve
+the user's selection, but the main view waits for matching request context before applying it.
+Discover owns requests, cancellation, and Inspector integration; Unified Histogram applies
+render-only attributes. New effects should add a specifically named pair rather than a generic
+event bus.
+
+---
+
 ### Chart section configuration — `getChartSectionConfiguration`
 
 **Changes:** Chart area UI and behavior (custom component/actions).

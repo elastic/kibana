@@ -368,9 +368,7 @@ describe('Discover documents layout', () => {
 
       await waitFor(() => {
         const discoverGridProps = discoverGridMock.mock.lastCall?.[0];
-        expect(discoverGridProps?.rowAdditionalLeadingControls?.[0]?.id).toBe(
-          'comparePatternHistogram'
-        );
+        expect(discoverGridProps?.histogramComparisonEnabled).toBe(true);
         expect(discoverGridProps?.visibleRowLeadingControls).toBeUndefined();
       });
     });
@@ -385,7 +383,6 @@ describe('Discover documents layout', () => {
           cascadedDocumentsState: {
             availableCascadeGroups: ['Pattern'],
             selectedCascadeGroups: ['Pattern'],
-            columnsMeta: {},
             cascadedDocumentsMap: {},
           },
         })
@@ -398,7 +395,7 @@ describe('Discover documents layout', () => {
         dataView: dataViewMockWithTimeField,
       });
 
-      expect(discoverGridMock.mock.lastCall?.[0]?.rowAdditionalLeadingControls).toBeUndefined();
+      expect(discoverGridMock.mock.lastCall?.[0]?.histogramComparisonEnabled).toBe(false);
     });
   });
 

@@ -99,7 +99,6 @@ export type {
   PersistedIndexPatternLayer,
   FormBasedPrivateState,
   TextBasedLayer,
-  TextBasedHistogramOverlay,
   TextBasedLayerColumn,
   TextBasedPrivateState,
   GenericIndexPatternColumn,
@@ -324,8 +323,6 @@ export {
   INDEX_PATTERN_TYPE,
   LENS_DOCUMENT_FIELD_NAME,
   LENS_RANGE_MODES,
-  TEXT_BASED_HISTOGRAM_OVERLAY_APPLIED_META,
-  TEXT_BASED_HISTOGRAM_OVERLAY_APPROXIMATE_META,
 } from './datasources/constants';
 export {
   LENS_UNKNOWN_VIS,

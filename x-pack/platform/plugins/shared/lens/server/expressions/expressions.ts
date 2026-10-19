@@ -12,7 +12,6 @@ import {
   formatColumn,
   mapToColumns,
   getDateHistogramTextBased,
-  getStackHistogramSeries,
   getTimeScale,
   getDatatable,
   formulaIntervalFn,
@@ -37,6 +36,5 @@ export const setupExpressions = (
     getDatatable(getFormatFactory(core)),
     getTimeScale(getDatatableUtilitiesFactory(core), getTimeZoneFactory(core)),
     getDateHistogramTextBased(getDatatableUtilitiesFactory(core), getTimeZoneFactory(core)),
-    getStackHistogramSeries(getDatatableUtilitiesFactory(core), getTimeZoneFactory(core)),
   ].forEach((expressionFn) => expressions.registerFunction(expressionFn));
 };

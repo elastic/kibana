@@ -91,9 +91,12 @@ import {
 } from '../../state_management/redux';
 import type { CascadedDocumentsContext } from './cascaded_documents';
 import { isCascadedDocumentsVisible } from './cascaded_documents';
-import { useRegularGridPatternComparison } from './histogram_overlay';
 import { SaveDiscoverTableButton } from './save_discover_table_button';
 import type { RenderViewModeToggle } from '../../../../components/view_mode_toggle';
+import {
+  PatternComparisonMessage,
+  usePatternComparisonMessageState,
+} from './histogram_comparison/pattern_comparison_message';
 
 // export needs for testing
 export const onResize = (
@@ -129,6 +132,7 @@ function DiscoverDocumentsComponent({
     dataSource,
     query,
     hideChart,
+    breakdownField,
     sort,
     rowHeight,
     headerRowHeight,
@@ -144,6 +148,7 @@ function DiscoverDocumentsComponent({
       state.dataSource,
       state.query,
       state.hideChart,
+      state.breakdownField,
       state.sort,
       state.rowHeight,
       state.headerRowHeight,
@@ -587,29 +592,21 @@ function DiscoverDocumentsComponent({
   const cascadeLayoutActive = Boolean(
     cascadedDocumentsContext && cascadedDocumentsContext.selectedCascadeGroups.length > 0
   );
-  const documentsQuery = isOfAggregateQueryType(documentState.query)
-    ? documentState.query.esql
-    : undefined;
-  const { message, publisher, rowAdditionalLeadingControls } = useRegularGridPatternComparison({
-    active: !cascadeLayoutActive,
-    rows,
+  const histogramComparisonAvailable = defaultHistogramAvailable && !breakdownField;
+  const patternComparison = usePatternComparisonMessageState({
     query,
-    rowsQuery: documentsQuery,
-    fetchStatus: documentState.fetchStatus,
-    timeRange: requestParams.timeRangeAbsolute,
-    rowsTimeRange: documentState.requestContext?.timeRange,
-    currentEsqlVariables: esqlVariables,
-    rowsEsqlVariables: documentState.requestContext?.esqlVariables,
-    timeFieldName: dataView.timeFieldName,
-    chartHidden: Boolean(hideChart),
-    defaultHistogramAvailable,
+    esqlVariables,
+    defaultHistogramAvailable: histogramComparisonAvailable,
+    chartHidden: Boolean(hideChart) || cascadeLayoutActive,
   });
   const renderCustomToolbarWithElements = useMemo(
     () =>
       getRenderCustomToolbarWithElements({
         saveToDashboardButton,
         leftSide: isDataGridFullScreen ? undefined : renderViewModeToggle(),
-        centerContent: message,
+        centerContent: patternComparison ? (
+          <PatternComparisonMessage patternComparison={patternComparison} />
+        ) : undefined,
         bottomSection: (
           <>
             {callouts}
@@ -619,9 +616,9 @@ function DiscoverDocumentsComponent({
       }),
     [
       callouts,
-      message,
       isDataGridFullScreen,
       loadingIndicator,
+      patternComparison,
       renderViewModeToggle,
       saveToDashboardButton,
     ]
@@ -664,7 +661,6 @@ function DiscoverDocumentsComponent({
       </EuiScreenReaderOnly>
       <div className="unifiedDataTable" css={styles.dataTable}>
         <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
-          {publisher}
           <DiscoverGrid
             ariaLabelledBy="documentsAriaLabel"
             cascadedDocumentsContext={cascadedDocumentsContext}
@@ -708,7 +704,9 @@ function DiscoverDocumentsComponent({
             showMultiFields={uiSettings.get(SHOW_MULTIFIELDS)}
             maxDocFieldsDisplayed={uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
             externalAdditionalControls={externalAdditionalControls}
-            rowAdditionalLeadingControls={rowAdditionalLeadingControls}
+            histogramComparisonEnabled={
+              !cascadeLayoutActive && !hideChart && histogramComparisonAvailable
+            }
             renderDocumentView="external"
             setRenderDocumentViewMeta={setRenderDocumentViewMetaForDefaultOwner}
             renderCustomToolbar={renderCustomToolbarWithElements}
@@ -720,6 +718,7 @@ function DiscoverDocumentsComponent({
             onUpdateDataGridDensity={onUpdateDensity}
             query={query}
             filters={filters}
+            esqlVariables={esqlVariables}
             cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER_ID}
             cellActionsMetadata={cellActionsMetadata}
             cellActionsHandling="append"

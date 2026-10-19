@@ -11,58 +11,68 @@ import React from 'react';
 import { EuiText, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { UnifiedHistogramOverlaySeriesResult } from '@kbn/unified-histogram';
-import type { DiscoverHistogramOverlaySelection } from '../../../state_management/redux/runtime_state';
+import type {
+  HistogramComparisonContext,
+  HistogramComparisonResult,
+  HistogramComparisonSelection,
+} from '../../../../../context_awareness/types';
+import { useHistogramComparisonState } from './use_histogram_comparison_state';
 
 export type PatternComparisonMessageState = 'hint' | 'approximate' | 'unavailable';
 
 export const getPatternComparisonMessageState = ({
-  canCompare,
+  defaultHistogramAvailable,
   chartHidden,
   selection,
   result,
 }: {
-  canCompare: boolean;
+  defaultHistogramAvailable: boolean;
   chartHidden: boolean;
-  selection: DiscoverHistogramOverlaySelection | undefined;
-  result: UnifiedHistogramOverlaySeriesResult | undefined;
+  selection: HistogramComparisonSelection | undefined;
+  result: HistogramComparisonResult | undefined;
 }): PatternComparisonMessageState | undefined => {
-  if (!canCompare || chartHidden) {
+  if (!defaultHistogramAvailable || chartHidden) {
     return undefined;
   }
-
   if (!selection) {
     return 'hint';
   }
-
   if (result?.key !== selection.key) {
     return undefined;
   }
+  return result.status === 'approximate' || result.status === 'unavailable'
+    ? result.status
+    : undefined;
+};
 
-  if (result.applied && result.approximate) {
-    return 'approximate';
-  }
-
-  if (!result.applied) {
-    return 'unavailable';
-  }
-
-  return undefined;
+export const usePatternComparisonMessageState = ({
+  chartHidden,
+  ...context
+}: HistogramComparisonContext & {
+  chartHidden: boolean;
+}): PatternComparisonMessageState | undefined => {
+  const { selection, result } = useHistogramComparisonState(context);
+  return getPatternComparisonMessageState({
+    defaultHistogramAvailable: context.defaultHistogramAvailable,
+    chartHidden,
+    selection,
+    result,
+  });
 };
 
 const comparisonMessages = {
   approximate: {
-    id: 'discover.histogramOverlay.patternComparisonApproximateDescription',
+    id: 'discover.histogramComparison.approximateDescription',
     defaultMessage: 'Pattern comparison is approximate.',
     dataTestSubj: 'patternHistogramApproximate',
   },
   unavailable: {
-    id: 'discover.histogramOverlay.patternComparisonUnavailableDescription',
+    id: 'discover.histogramComparison.unavailableDescription',
     defaultMessage: 'Pattern comparison is unavailable.',
     dataTestSubj: 'patternHistogramComparisonUnavailable',
   },
   hint: {
-    id: 'discover.histogramOverlay.patternComparisonHintDescription',
+    id: 'discover.histogramComparison.hintDescription',
     defaultMessage: 'Select a pattern to compare its volume with total document volume.',
     dataTestSubj: 'patternHistogramComparisonHint',
   },

@@ -30,7 +30,7 @@ import type { ESQLDataGroupNode } from './types';
 import {
   PatternComparisonMessage,
   type PatternComparisonMessageState,
-} from '../../histogram_overlay/pattern_comparison_message';
+} from '../../histogram_comparison/pattern_comparison_message';
 
 interface UseTableHeaderProps {
   renderViewModeToggle: CascadedDocumentsContext['renderViewModeToggle'];

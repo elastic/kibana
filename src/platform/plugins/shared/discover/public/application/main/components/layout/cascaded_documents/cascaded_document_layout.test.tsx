@@ -275,7 +275,7 @@ describe('CascadedDocumentsLayout', () => {
     });
   });
 
-  it('reuses the parsed sparkline across snapshot notifications', async () => {
+  it('does not parse row sparklines for histogram comparison', async () => {
     const listeners = new Set<() => void>();
     mockGetUISnapshotStore.mockReturnValue({
       getSnapshot: () => ({
@@ -305,11 +305,10 @@ describe('CascadedDocumentsLayout', () => {
       </Wrapper>
     );
 
-    const parsesAfterRender = mockGetCountSparkline.mock.calls.length;
-    expect(parsesAfterRender).toBeGreaterThan(0);
+    expect(mockGetCountSparkline).not.toHaveBeenCalled();
     listeners.forEach((listener) => listener());
     listeners.forEach((listener) => listener());
 
-    expect(mockGetCountSparkline).toHaveBeenCalledTimes(parsesAfterRender);
+    expect(mockGetCountSparkline).not.toHaveBeenCalled();
   });
 });

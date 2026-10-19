@@ -86,7 +86,6 @@ export {
 } from './selectors';
 
 export {
-  type DiscoverHistogramOverlaySelection,
   type RuntimeStateManager,
   type ReactiveTabRuntimeState,
   type CombinedRuntimeState,
@@ -104,8 +103,6 @@ export {
   selectIsDataViewUsedInMultipleRuntimeTabStates,
   selectInitialUnifiedHistogramLayoutPropsMap,
   useCurrentTabRuntimeState,
-  publishHistogramOverlaySelection,
-  publishHistogramOverlayResult,
   useCurrentTabDataStateContainer,
   RuntimeStateProvider,
   RuntimeStateManagerProvider,

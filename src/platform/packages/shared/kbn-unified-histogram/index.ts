@@ -26,10 +26,6 @@ export {
   ChartSectionTemplate,
   type ChartSectionTemplateProps,
 } from './components/chart';
-export type {
-  UnifiedHistogramOverlaySeries,
-  UnifiedHistogramOverlaySeriesResult,
-} from './components/chart/histogram_overlay';
 export { UnifiedHistogramLayout, type UnifiedHistogramLayoutProps } from './components/layout';
 
 export {
