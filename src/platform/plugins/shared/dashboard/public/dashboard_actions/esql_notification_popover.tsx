@@ -16,6 +16,7 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiToolTip,
+  UseEuiTheme,
 } from '@elastic/eui';
 
 import { css } from '@emotion/react';
@@ -24,6 +25,7 @@ import {
   apiCanLockHoverActions,
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 import type { EsqlNotificationActionApi } from './esql_notification_action';
 
@@ -69,16 +71,7 @@ export function EsqlNotificationPopover({ api }: { api: EsqlNotificationActionAp
       <EuiPopoverTitle>
         {i18n.translate('dashboard.panel.esqlTitle', { defaultMessage: 'ES|QL query' })}
       </EuiPopoverTitle>
-      <EuiFlexGroup
-        direction="column"
-        gutterSize="s"
-        css={({ euiTheme }) => css`
-          min-width: calc(${euiTheme.size.xxxxl} * 5); // 320px
-          max-width: calc(${euiTheme.size.xxxxl} * 12); // 768px
-          max-height: calc(${euiTheme.size.xxxxl} * 6); // 384px
-          overflow-y: auto;
-        `}
-      >
+      <EuiFlexGroup direction="column" gutterSize="s" css={popoverCss}>
         {esqlQueries.map((query, index) => (
           <EuiCodeBlock
             key={index}
@@ -94,3 +87,11 @@ export function EsqlNotificationPopover({ api }: { api: EsqlNotificationActionAp
     </EuiPopover>
   );
 }
+
+const popoverCss = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    minWidth: `calc(${euiTheme.size.xxxxl} * 5)`, // 320px
+    maxWidth: `calc(${euiTheme.size.xxxxl} * 12)`, // 768px
+    maxHeight: `calc(${euiTheme.size.xxxxl} * 6)`, // 384px
+    overflowY: 'auto',
+  });
