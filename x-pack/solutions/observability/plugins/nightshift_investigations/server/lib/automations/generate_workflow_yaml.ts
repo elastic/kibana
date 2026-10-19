@@ -19,7 +19,7 @@ const ALERT_STATUS_TO_KQL: Record<string, string> = {
 
 // Defaults to the Elastic Slack app when no connector is selected; the channel remains user-selected.
 // Mirrors significant_events/server/lib/slack_app/service.ts, which depends on this plugin.
-const ELASTIC_APPS_SLACK_CONNECTOR_ID = 'elastic-apps-slack';
+export const ELASTIC_APPS_SLACK_CONNECTOR_ID = 'elastic-apps-slack';
 
 const ALERT_TRIGGER_TYPE = 'alerting.v1.alertStatusChanged';
 const SLACK_MESSAGE_TRIGGER_TYPE = 'slack2.message';
@@ -35,6 +35,16 @@ const SLACK_MESSAGE_EXCLUSIONS = [
 
 // One investigation per message, so concurrent messages in a channel do not share a subject.
 const SLACK_SUBJECT_ID = '{{ event.connectorId }}:{{ event.channel }}:{{ event.messageId }}';
+
+// The message's thread, which the managed Slack thread workflow looks the investigation up by when
+// someone replies. Only recorded for an automation that already reports in that thread: it makes
+// a reply there report the investigation, which a silent or channel-mode automation does not do.
+// The trigger condition guarantees a workspace.
+const SLACK_THREAD = {
+  workspace: '{{ event.workspace }}',
+  channel: '{{ event.channel }}',
+  thread_ts: '{{ event.messageId }}',
+};
 
 // See MAX_PROMPT_TEMPLATE_LENGTH: the template and this text share the step's message limit.
 export const SLACK_MESSAGE_TEXT_LIMIT = 4000;
@@ -240,6 +250,7 @@ function generateSlackWorkflow(
   hasMultipleTriggers: boolean
 ) {
   const notificationDestinations = buildNotificationDestinations(automationId, automation, 'slack');
+  const repliesInMessageThread = notificationDestinations?.some(({ params }) => params.thread_ts);
   const condition = buildSlackCondition(slackRows);
   // One trigger combines all Slack rows so a message matching several rows starts only one run.
   return {
@@ -258,6 +269,7 @@ function generateSlackWorkflow(
         with: {
           subject_type: 'manual',
           subject_id: SLACK_SUBJECT_ID,
+          ...(repliesInMessageThread ? { slack_thread: SLACK_THREAD } : {}),
           title: automation.name,
           summary: automation.name,
           trigger_type: 'automatic',

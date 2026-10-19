@@ -127,10 +127,28 @@ The automation UI's Channel action uses the Elastic Slack app by default. A save
 }
 ```
 
-Destinations and delivery history live in a hidden, readonly `nightshift.notification_routing` attachment backed by its own index. Endpoints are deduplicated by type, connector ID, and canonical parameters while retaining automation attribution. The 5-association limit applies to retained endpoints and automation identities, not execution or attempt history. The started phase adds destinations and freezes each execution's participants; explicit follow-up executions notify all retained destinations.
+Destinations and delivery history live in a hidden, readonly `nightshift.notification_routing` attachment backed by its own index. Endpoints are deduplicated by type, connector ID, and canonical parameters while retaining automation attribution. The 5-association limit applies to retained endpoints and automation identities, not execution or attempt history. The started phase, or an early failed phase, adds destinations and freezes each execution's participants; explicit follow-up executions notify all retained destinations.
 
-The investigation workflow sends a started message, stores its confirmed Slack thread reference, and replies with completion or failure. Later executions reuse that thread. An explicitly supplied parent timestamp is also supported. Terminal delivery requires an initialized execution and persists one terminal phase, preventing contradictory completion and failure messages.
+The investigation workflow sends a started message, stores its confirmed Slack thread reference, and replies with completion or failure. Later executions reuse that thread. An explicitly supplied parent timestamp is also supported. Failure delivery initializes routing even before the started step runs. A failure without an existing or explicit thread posts directly to the configured channel and stores its confirmed thread reference. Terminal delivery selects one persisted outcome, preventing contradictory completion and failure messages.
 
 Each execution, destination, and phase is claimed as `unconfirmed` before connector execution. The shared attachment factory handles versioned writes, and the connector executes once using workflow authentication, the investigation's space, and the abort signal. A confirmed message timestamp produces `sent`; connector error responses produce `failed`; exceptions, cancellation after claiming, and missing timestamps remain `unconfirmed`. Replay skips all existing attempts. An uncertain root blocks automatic root recreation across later executions; a definitely failed root may be attempted again by a later execution.
 
 The `nightshift.sendNotifications` step validates the persisted workflow execution and its investigation binding, and reads the investigation (title, severity, summary, impact, first pending proposed action) through the shared query API. Until Agent Builder titles the investigation, messages use the run's `title` input. Investigation and execution IDs may differ for explicit continuation. It returns persisted `sent`, `failed`, and `unconfirmed` counts for the requested execution and phase; full diagnostics are available through authorized attachment reads. Notification-step failures continue the investigation workflow, while persistence failures stop further posts within that step. There is no automatic claim expiry, resend, or routing-document cleanup on investigation or space deletion. Outbound thread references do not register incoming Slack-thread continuation.
+
+### Workflow failures
+
+The managed investigation workflow uses `settings.on-failure.fallback` to invoke
+`nightshift.handleInvestigationFailure` for model resolution, agent setup, agent pre-execution,
+agent execution, and step timeout errors. Persistence has the same fallback after its explicit
+retries are exhausted because step-level error handling overrides workflow-level handling.
+The handler records the validated execution and subjects, creates a missing investigation conversation,
+and preserves an existing conversation's open/closed state. It emits the existing failed lifecycle
+trigger and uses the same notification routing and delivery claims as `nightshift.sendNotifications`.
+Notification errors do not replace the original workflow error. Lifecycle trigger emission remains
+best effort; Slack delivery claims suppress replayed sends.
+
+Workflow-level timeout, cancellation, Task Manager interruption, and resume-scheduling failure bypass
+these fallbacks. Reporting those outcomes needs a durable Workflows terminal-outcome mechanism,
+coordinated with recovery (#1677), before #1820 can be closed. Future intentional-cancellation messages
+should say "Investigation stopped". The separate Slack follow-up workflow's status-message editor is
+unchanged; consolidating it with investigation-owned notifications remains follow-up work.

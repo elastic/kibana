@@ -38,6 +38,11 @@ describe('getLatestAlertEventStateQuery', () => {
     expect(printed).toMatch(
       new RegExp(`last_episode_timestamp = MAX\\(@timestamp\\)${alertScope}`)
     );
+    expect(printed).toMatch(
+      new RegExp(
+        `last_episode_phase_started_at = MAX\\(@timestamp\\)${alertScope}\\s+AND alert\\.status_count == 1`
+      )
+    );
 
     expect(printed).toMatch(
       /last_action_episode_id = LAST\(alert_id, @timestamp\)\s+WHERE\s+action_type IN\s*\(\s*"activate", "deactivate"\s*\)/
@@ -120,6 +125,7 @@ describe('getLatestAlertEventStateQuery', () => {
     expect(keepClause).toContain('last_episode_status');
     expect(keepClause).toContain('last_episode_status_count');
     expect(keepClause).toContain('last_episode_timestamp');
+    expect(keepClause).toContain('last_episode_phase_started_at');
     expect(keepClause).toContain('last_lifecycle_action_type');
     expect(keepClause).toContain('group_hash');
   });

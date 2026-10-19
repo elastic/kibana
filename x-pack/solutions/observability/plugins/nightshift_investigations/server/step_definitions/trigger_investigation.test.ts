@@ -132,6 +132,40 @@ describe('triggerInvestigationStepDefinition', () => {
     expect(start).toHaveBeenCalledWith(expect.objectContaining({ notificationDestinations }));
   });
 
+  it('forwards the Slack thread to the client', async () => {
+    const start = jest.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
+    const { definition } = createDefinition(start);
+    const slackThread = { workspace: 'T1', channel: 'C1', thread_ts: '1.1' };
+
+    await definition.handler(
+      createContext({
+        subject_type: 'manual',
+        subject_id: 'slack:C1:1.1',
+        message: 'Investigate the service errors reported in this Slack thread.',
+        slack_thread: slackThread,
+      })
+    );
+
+    expect(start).toHaveBeenCalledWith(expect.objectContaining({ slack_thread: slackThread }));
+  });
+
+  it('rejects a Slack thread without a workspace', async () => {
+    const start = jest.fn();
+    const { definition } = createDefinition(start);
+
+    await expect(
+      definition.handler(
+        createContext({
+          subject_type: 'manual',
+          subject_id: 'slack:C1:1.1',
+          message: 'Investigate the service errors reported in this Slack thread.',
+          slack_thread: { workspace: '', channel: 'C1', thread_ts: '1.1' },
+        })
+      )
+    ).rejects.toThrow();
+    expect(start).not.toHaveBeenCalled();
+  });
+
   it('rejects a destination without a connector or channel', async () => {
     const start = jest.fn();
     const { definition } = createDefinition(start);

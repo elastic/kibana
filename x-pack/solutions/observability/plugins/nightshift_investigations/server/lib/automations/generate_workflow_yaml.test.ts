@@ -307,6 +307,13 @@ describe('generateWorkflowYaml', () => {
       expect(scheduled.with.message).not.toContain('event.text');
       expect(alert.with.message).not.toContain('event.text');
       expect(slack.with.message).toContain('{{ event.text | truncate: 4000 }}');
+      expect(scheduled.with.slack_thread).toBeUndefined();
+      expect(alert.with.slack_thread).toBeUndefined();
+      expect(slack.with.slack_thread).toEqual({
+        workspace: '{{ event.workspace }}',
+        channel: '{{ event.channel }}',
+        thread_ts: '{{ event.messageId }}',
+      });
       expect(scheduled.with.notificationDestinations).toBeUndefined();
       expect(alert.with.notificationDestinations).toBeUndefined();
       expect(slack.with.notificationDestinations).toEqual([
@@ -537,6 +544,30 @@ describe('generateWorkflowYaml', () => {
           subject_id: '{{ event.connectorId }}:{{ event.channel }}:{{ event.messageId }}',
           title: 'Test automation',
         });
+      });
+
+      it("names the message's thread, so a reply in it continues the investigation", () => {
+        const automation = slackAutomation(slackRow());
+        automation.completions = [{ action: 'post_to_slack', targetMode: 'thread' }];
+        const yaml = parse(generateWorkflowYaml('auto-123', automation));
+        expect(yaml.steps[0].with.slack_thread).toEqual({
+          workspace: '{{ event.workspace }}',
+          channel: '{{ event.channel }}',
+          thread_ts: '{{ event.messageId }}',
+        });
+      });
+
+      it.each<[string, NightshiftAutomationAttributes['completions']]>([
+        ['reports nowhere', []],
+        [
+          'reports in another channel',
+          [{ action: 'post_to_slack', targetMode: 'channel', destination: '#prod-alerts' }],
+        ],
+      ])('leaves the thread unnamed when the automation %s', (_, completions) => {
+        const automation = slackAutomation(slackRow());
+        automation.completions = completions;
+        const yaml = parse(generateWorkflowYaml('auto-123', automation));
+        expect(yaml.steps[0].with.slack_thread).toBeUndefined();
       });
 
       it('puts the slack message in the prompt after the prompt template', () => {

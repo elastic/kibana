@@ -169,7 +169,7 @@ describe('global header', () => {
     expect(queryByTestId(DATA_VIEW_PICKER_TEST_ID)).not.toBeInTheDocument();
   });
 
-  it.each(['/rules/management', '/rules/monitoring', '/rules/updates'])(
+  it.each(['/rules/management', '/rules/monitoring', '/rules/updates', '/rules/add_rules'])(
     'does not mount the header action menu on %s, where the page app header owns the actions',
     (pathname) => {
       (useLocation as jest.Mock).mockReturnValue({ pathname });

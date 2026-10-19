@@ -85,6 +85,17 @@ const inputSchema = lazySchema(() =>
       .describe(
         'Destinations that receive the concluded investigation. Delivery results are recorded on the investigation.'
       ),
+    // Bounded like the Slack thread route, so the thread's subject id stays within a subject id.
+    slack_thread: z
+      .object({
+        workspace: z.string().min(1).max(128),
+        channel: z.string().min(1).max(256),
+        thread_ts: z.string().min(1).max(64),
+      })
+      .optional()
+      .describe(
+        'The Slack thread the investigation is about. A reply in that thread continues the investigation.'
+      ),
   })
 );
 
@@ -131,6 +142,7 @@ export const triggerInvestigationStepDefinition = (
             : input.context,
         timeout_seconds: input.timeout_seconds,
         notificationDestinations: input.notificationDestinations,
+        slack_thread: input.slack_thread,
       });
       return { output: result };
     },

@@ -626,9 +626,11 @@
     "nightshift.decisionTreePrepare",
     "nightshift.decisionTreeReinforce",
     "nightshift.ensureInvestigationAgent",
+    "nightshift.handleInvestigationFailure",
     "nightshift.memoryMaterializeToSandbox",
     "nightshift.memoryOptimize",
     "nightshift.obtainSandbox",
+    "nightshift.renderSlackMessage",
     "nightshift.resolveModel",
     "nightshift.sendNotifications",
     "nightshift.triggerInvestigation",
@@ -1029,11 +1031,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "5df1b106ba18d37213804560feb849bf2bb6b670ee5b8de4b5b8dc433f44637f"
+      "sha256": "b3b941caa3ebe72df41cbadab9575d073407d8c033c150fe3e26519c8d67e7b1"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "b9aa882c3fdfb1c7abc194372265d47fe61473006bbbef5bff8b9178dc6f1e79"
+      "sha256": "95c112cefd532c2fb854b1eefc91a7bb16c05563c6b5b2ba91f12cd6f2f86712"
     }
   }
 }

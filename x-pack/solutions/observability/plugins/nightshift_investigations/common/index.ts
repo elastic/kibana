@@ -74,7 +74,31 @@ export interface StartInvestigationRequest {
   context?: InvestigationContext | AlertInvestigationContext;
   /** Destinations receiving investigation lifecycle messages. */
   notificationDestinations?: InvestigationNotificationDestination[];
+  /** The Slack thread the investigation is about, so a reply in it continues the investigation. */
+  slack_thread?: SlackThreadReference;
 }
+
+/** A Slack thread, by the workspace and channel ids and the thread's root message ts. */
+export interface SlackThreadReference {
+  workspace: string;
+  channel: string;
+  thread_ts: string;
+}
+
+/**
+ * The key the Relay and Agent Builder identify a Slack thread's conversation by
+ * (`origin.external_conversation_id`), which is also the thread's subject id.
+ * Channel ids are only unique within a workspace.
+ */
+export const toSlackThreadKey = ({
+  workspace,
+  channel,
+  threadTs,
+}: {
+  workspace: string;
+  channel: string;
+  threadTs: string;
+}): string => ['slack', workspace, channel, threadTs].map(encodeURIComponent).join(':');
 
 export interface StartInvestigationResponse {
   /**

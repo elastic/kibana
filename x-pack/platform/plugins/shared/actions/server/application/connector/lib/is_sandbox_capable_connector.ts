@@ -8,8 +8,8 @@
 import type { ActionTypeRegistry } from '../../../action_type_registry';
 
 /**
- * True when the connector can use sandbox credential injection: its auth type is in
- * sandboxSupportedAuthTypes (spec auth opt-in).
+ * True when the connector can use sandbox credential injection: either the action type opts in
+ * via isSandboxCapable, or config.authType is in sandboxSupportedAuthTypes (spec auth opt-in).
  */
 export const isSandboxCapableConnector = ({
   actionTypeId,
@@ -19,7 +19,7 @@ export const isSandboxCapableConnector = ({
 }: {
   actionTypeId: string;
   config?: Record<string, unknown>;
-  /** Only pass secrets that are already in memory (in-memory connectors); list paths omit it. */
+  /** Persisted connector lists omit secrets; credential resolution supplies validated secrets. */
   secrets?: Record<string, unknown>;
   actionTypeRegistry: Pick<ActionTypeRegistry, 'has' | 'get'>;
 }): boolean => {
@@ -32,8 +32,14 @@ export const isSandboxCapableConnector = ({
     return false;
   }
 
+  // Stored secrets are not decrypted at list time, so the predicate works from config alone
+  // unless the caller already holds the secrets in memory.
+  if (actionType.isSandboxCapable?.({ config: config ?? {}, secrets: secrets ?? {} })) {
+    return true;
+  }
+
   const sandboxSupportedAuthTypes = actionType.sandboxSupportedAuthTypes ?? [];
-  const authType = config?.authType ?? secrets?.authType;
+  const authType = secrets?.authType ?? config?.authType;
   return (
     typeof authType === 'string' &&
     authType.length > 0 &&
