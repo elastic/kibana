@@ -13,3 +13,7 @@ export {
   type KibanaContentListPageHeaderProps,
   type KibanaContentListPageSectionProps,
 } from './src/kibana_content_list_page';
+export type {
+  KibanaContentListPageTab,
+  KibanaContentListPageActiveTabProps,
+} from './src/active_tab';
