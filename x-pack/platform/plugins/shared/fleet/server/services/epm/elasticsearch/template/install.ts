@@ -14,6 +14,7 @@ import type { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/
 
 import { ElasticsearchAssetType } from '../../../../types';
 import {
+  LOGSDB_COLUMNAR_INDEX_MODE,
   getPipelineNameForDatastream,
   getRegistryDataStreamAssetBaseName,
 } from '../../../../../common/services';
@@ -60,6 +61,7 @@ import {
   isNamespaceTemplate,
 } from './template';
 import { buildDefaultSettings, getILMMigrationStatus } from './default_settings';
+import { stripColumnarIncompatibleMappings } from './columnar_index_mode';
 import { isUserSettingsTemplate } from './utils';
 
 const FLEET_COMPONENT_TEMPLATE_NAMES = FLEET_COMPONENT_TEMPLATES.map((tmpl) => tmpl.name);
@@ -638,7 +640,10 @@ export function prepareTemplate({
   dataStream: RegistryDataStream;
   experimentalDataStreamFeature?: ExperimentalDataStreamFeature;
   ilmMigrationStatusMap: Map<string, 'success' | undefined | null>;
-  /** `logsdb_columnar` when the installation is on it. Ignored for a `time_series` data stream. */
+  /**
+   * `logsdb_columnar` when the installation is on it, which also strips the mappings Elasticsearch
+   * rejects in that mode. Ignored for a `time_series` data stream.
+   */
   indexMode?: string;
 }): {
   componentTemplates: TemplateMap;
@@ -695,6 +700,10 @@ export function prepareTemplate({
     type: dataStream.type,
     isOtelInputType,
   });
+  const packageTemplate = componentTemplates[`${templateName}${PACKAGE_TEMPLATE_SUFFIX}`].template;
+  if (resolvedIndexMode === LOGSDB_COLUMNAR_INDEX_MODE && 'mappings' in packageTemplate) {
+    packageTemplate.mappings = stripColumnarIncompatibleMappings(packageTemplate.mappings);
+  }
 
   const template = getTemplate({
     templateIndexPattern,

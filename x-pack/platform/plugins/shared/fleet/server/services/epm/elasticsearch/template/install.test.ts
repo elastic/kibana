@@ -342,11 +342,11 @@ describe('EPM index template install', () => {
         };
       };
 
-      it('writes the mode and leaves the mappings as the package declares them', () => {
+      it('writes the mode and strips the mappings Elasticsearch rejects in it', () => {
         const { settings, properties } = prepare(logsDataStream(), 'logsdb_columnar');
 
         expect(settings).toEqual({ index: { mode: 'logsdb_columnar' } });
-        expect(properties).toEqual({ type: 'keyword', doc_values: false, store: true });
+        expect(properties).toEqual({ type: 'keyword' });
       });
 
       it('writes no mode when none is requested', () => {

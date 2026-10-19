@@ -7,7 +7,10 @@
 
 import type { Installation, RegistryDataStream } from '../../../../types';
 
-import { resolveColumnarIndexModes } from './columnar_index_mode';
+import {
+  resolveColumnarIndexModes,
+  stripColumnarIncompatibleMappings,
+} from './columnar_index_mode';
 
 const dataStream = (props: Partial<RegistryDataStream>): RegistryDataStream =>
   ({
@@ -92,5 +95,51 @@ describe('resolveColumnarIndexModes', () => {
         installedPkg: installed(true),
       }).get('logs-pkg.ds')
     ).toBeUndefined();
+  });
+});
+
+describe('stripColumnarIncompatibleMappings', () => {
+  it('removes `doc_values: false` and `store: true` from fields, multi-fields and dynamic templates', () => {
+    expect(
+      stripColumnarIncompatibleMappings({
+        properties: {
+          event: {
+            properties: {
+              original: { type: 'keyword', index: false, doc_values: false },
+              code: { type: 'keyword', doc_values: true, store: false },
+            },
+          },
+          message: {
+            type: 'text',
+            store: true,
+            fields: { raw: { type: 'keyword', doc_values: false } },
+          },
+          // Field names are kept, whatever they are.
+          store: { type: 'boolean' },
+        },
+        dynamic_templates: [
+          {
+            strings: {
+              match_mapping_type: 'string',
+              mapping: { type: 'keyword', doc_values: false },
+            },
+          },
+        ],
+      })
+    ).toEqual({
+      properties: {
+        event: {
+          properties: {
+            original: { type: 'keyword', index: false },
+            code: { type: 'keyword', doc_values: true, store: false },
+          },
+        },
+        message: { type: 'text', fields: { raw: { type: 'keyword' } } },
+        store: { type: 'boolean' },
+      },
+      dynamic_templates: [
+        { strings: { match_mapping_type: 'string', mapping: { type: 'keyword' } } },
+      ],
+    });
   });
 });
