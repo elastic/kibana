@@ -44,7 +44,7 @@ export const toEsql = ({
 }: ActiveFilters): ActiveFiltersEsql => ({
   searchExpression: search.esql,
   entityExpression: joinAnd(
-    buildEntityFiltersExpression(entityFilters),
+    buildEntityFiltersExpression(entityFilters, rowsMode),
     tileEntityIds == null ? undefined : buildTileWhereExpression(tileEntityIds, rowsMode)
   ),
 });
