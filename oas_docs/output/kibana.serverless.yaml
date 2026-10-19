@@ -25854,7 +25854,7 @@ paths:
           description: OK
         '400':
           description: bad request
-      summary: Get data views
+      summary: Search data views
       tags:
         - data-views-v2
       x-state: Generally available
