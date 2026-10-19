@@ -7,12 +7,17 @@
 
 import { globalSetupHook } from '@kbn/scout-oblt';
 import { testData } from '../fixtures';
-import { DIGITAL_EXPERIENCE_WITH_UX_TAGS } from '../../tags';
+import { DIGITAL_EXPERIENCE_TAGS } from '../../tags';
 
 globalSetupHook(
   'Ingest RUM test data',
-  { tag: DIGITAL_EXPERIENCE_WITH_UX_TAGS },
-  async ({ esArchiver }) => {
+  { tag: DIGITAL_EXPERIENCE_TAGS },
+  async ({ esArchiver, config }) => {
+    // CI runs the setup in every lane of this config; only stateful specs read RUM data, and the
+    // archive's ILM settings do not exist on serverless.
+    if (config.serverless) {
+      return;
+    }
     await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.RUM_TEST_DATA);
   }
 );
