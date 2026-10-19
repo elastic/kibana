@@ -155,7 +155,7 @@ describe('source knowledge write coordination', () => {
   });
 
   it('deletes the state object of a retired source only after its cleanup succeeded', async () => {
-    const { client, documents } = setup();
+    const { client, documents, repository } = setup();
 
     await expect(
       client.retire({
@@ -166,6 +166,12 @@ describe('source knowledge write coordination', () => {
       })
     ).rejects.toThrow('cleanup failed');
     expect(documents.has('default:source')).toBe(true);
+
+    repository.delete.mockRejectedValueOnce(new Error('delete failed'));
+    await expect(client.retire({ sourceId: 'source', run: async () => {} })).rejects.toThrow(
+      'delete failed'
+    );
+    expect(documents.get('default:source')?.attributes.lease).toBeNull();
 
     await client.retire({ sourceId: 'source', run: async () => {} });
     expect(documents.has('default:source')).toBe(false);

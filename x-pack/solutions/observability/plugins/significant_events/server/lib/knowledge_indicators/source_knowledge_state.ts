@@ -174,7 +174,12 @@ export const createSourceKnowledgeStateClient = ({
         // Deleted while the lease is still held, so no other write can own the object by then.
         await serializeCheckpoint(() =>
           repository.delete(SOURCE_KNOWLEDGE_STATE_TYPE, sourceId, { namespace: space })
-        );
+        ).catch(async (error) => {
+          // A lease left behind would turn every retry into a 409 until it expires. If releasing
+          // it fails too, the delete error is the one worth reporting.
+          await checkpoint({ lease: null }).catch(() => {});
+          throw error;
+        });
       } else {
         await checkpoint({ lease: null });
       }
