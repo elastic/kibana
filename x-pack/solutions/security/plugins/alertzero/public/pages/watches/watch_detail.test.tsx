@@ -651,6 +651,46 @@ describe('WatchDetailPage', () => {
     expect(mockReportEvent).toHaveBeenCalledTimes(1);
   });
 
+  it('reports a second Watch that fails after switching from one that failed', () => {
+    const notFound = {
+      data: undefined,
+      isLoading: false,
+      isFetching: false,
+      error: Object.assign(new Error('Not Found'), { request: {}, response: { status: 404 } }),
+      refetch: jest.fn(),
+    };
+    mockUseWatch.mockReturnValue(notFound as never);
+    mockUseWorkers.mockReturnValue({
+      data: { workers: [] },
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    } as never);
+    mockUseUpdateWorker.mockReturnValue({ mutate: jest.fn(), mutateAsync: jest.fn() } as never);
+    const history = createMemoryHistory({ initialEntries: ['/watches/missing-watch-a'] });
+    render(
+      <Router history={history}>
+        <Route path="/watches/:watchId">
+          <WatchDetailPage />
+        </Route>
+      </Router>
+    );
+
+    // The page stays mounted, and the next Watch's first load is a fetch in flight.
+    mockUseWatch.mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      isFetching: true,
+      error: null,
+      refetch: jest.fn(),
+    } as never);
+    act(() => history.push('/watches/missing-watch-b'));
+    mockUseWatch.mockReturnValue(notFound as never);
+    act(() => history.replace('/watches/missing-watch-b'));
+
+    expect(mockReportEvent).toHaveBeenCalledTimes(2);
+  });
+
   it('reports a Worker-load error once while its refetches fail again', () => {
     mockUseWatch.mockReturnValue({
       data: { watch: createCatalogWatchPlaceholder(SYSTEM_SECURITY_WATCH_FLOOR_ID) },

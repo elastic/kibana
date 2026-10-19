@@ -306,12 +306,14 @@ export const WatchDetailPage: React.FC = () => {
     errorClass: isNotFound ? 'not_found' : classifyError(error),
     isShown: !isWatchLoading && (!watch || !hasCurrentWatch),
     isRefetching: isFetching,
+    resetKey: watchId,
     surface: 'watch_detail',
   });
   useReportErrorShown({
     errorClass: classifyError(workersError),
     isShown: Boolean(workersError) && Boolean(watch) && hasCurrentWatch,
     isRefetching: workersFetching,
+    resetKey: watchId,
     surface: 'watch_detail',
   });
 

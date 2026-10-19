@@ -1420,6 +1420,42 @@ describe('ConversationsPage telemetry', () => {
       expect(reportedEvents(core, 'alertzero_ui_error_shown')).toHaveLength(1);
     });
 
+    // More rows than the first page, so the respond section offers Show more.
+    const respondPageAndMore = () =>
+      Array.from({ length: CATEGORY_PAGE_SIZE + 5 }, (_, i) => ({
+        ...proposal,
+        id: `prop-${i}`,
+        category: 'respond' as const,
+      }));
+
+    it('reports a failed Show more, below rows already on screen', async () => {
+      mockProposals({ respond: respondPageAndMore() });
+      const { core } = renderPage('/');
+      fetchNextPage.respond.mockRejectedValueOnce(new Error('boom'));
+
+      fireEvent.click(screen.getByTestId('conversationQueueShowMore-respond'));
+
+      await waitFor(() =>
+        expect(reportedEvents(core, 'alertzero_ui_error_shown')).toEqual([
+          ['alertzero_ui_error_shown', { error_class: 'unknown', surface: 'queue' }],
+        ])
+      );
+    });
+
+    it('reports each Show more the analyst retries that fails again', async () => {
+      mockProposals({ respond: respondPageAndMore() });
+      const { core } = renderPage('/');
+      fetchNextPage.respond
+        .mockRejectedValueOnce(new Error('boom'))
+        .mockRejectedValueOnce(new Error('boom'));
+      fireEvent.click(screen.getByTestId('conversationQueueShowMore-respond'));
+      await waitFor(() => expect(reportedEvents(core, 'alertzero_ui_error_shown')).toHaveLength(1));
+
+      fireEvent.click(screen.getByTestId('conversationQueueShowMore-respond'));
+
+      await waitFor(() => expect(reportedEvents(core, 'alertzero_ui_error_shown')).toHaveLength(2));
+    });
+
     it('never sends the error message', () => {
       mockUseProposalChartsSummary.mockReturnValue({
         data: undefined,

@@ -59,6 +59,7 @@ export const QueueSection = ({
     loadError,
     isRefetchingRows,
     hasLoadMoreError,
+    loadMoreError,
     hasCountError,
     retry,
     remaining,
@@ -83,6 +84,12 @@ export const QueueSection = ({
     errorClass: classifyError(loadError),
     isShown: hasLoadError,
     isRefetching: isRefetchingRows,
+    surface: 'queue',
+  });
+  // Each Show more click clears the failure first, so a retry that fails again is a new report.
+  useReportErrorShown({
+    errorClass: classifyError(loadMoreError),
+    isShown: hasLoadMoreError,
     surface: 'queue',
   });
 

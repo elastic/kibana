@@ -59,12 +59,13 @@ Where it is sent:
 |---|---|---|
 | Queue header count failed to load (`conversations_page.tsx`) | `queue` | From the error |
 | A queue section failed to load (`queue_section.tsx`) | `queue` | From the error |
+| A queue section's Show more failed, below rows already on screen (`queue_section.tsx`); each failed click reports once | `queue` | From the error |
 | Approve or dismiss failed (`conversations_page.tsx` decision toast) | `queue` | From the error |
 | Copy link failed, from a card menu or the flyout (`copy_link.ts`) | `queue` or `flyout` | `clipboard` |
 | Scan failure callout (`scan_failure_callout.tsx`), on the queue or onboarding | `queue` or `onboarding` | `worker_scan_failed` |
 | Enabling Workers failed, or partly failed, during onboarding (`use_enable_workers.ts`) | `onboarding` | From the error, and `partial_failure` for the partial-success warning |
 | Saving a Worker failed (`use_workers_api.ts` toasts) | `watch_settings` | From the error (`conflict` and `forbidden` have their own toasts) |
-| The Watch failed to load or was not found (`watch_detail.tsx`) | `watch_detail` | From the error, or `not_found` |
+| The Watch failed to load or was not found (`watch_detail.tsx`); switching to another Watch starts a new occurrence | `watch_detail` | From the error, or `not_found` |
 | The Workers failed to load on a Watch (`watch_detail.tsx`) | `watch_detail` | From the error |
 
 Not sent: form validation messages (an invalid trigger amount), and the read-only and permission notices, which describe access rather than an error. Nor is a failure to set up a Worker's service account (the onboarding toast, and the inline error on the Watch settings page): AlertZero gets it as a message, with no HTTP status to classify. Any other per-Worker save error shown inline on the Watch settings page is the same failure as the save toast, so only the toast reports. Waiting on UI: `escalations`, whose page shows no AlertZero error of its own yet.

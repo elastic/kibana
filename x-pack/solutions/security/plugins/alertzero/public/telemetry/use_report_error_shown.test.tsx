@@ -88,6 +88,27 @@ describe('useReportErrorShown', () => {
     expect(reportEvent).toHaveBeenCalledTimes(2);
   });
 
+  it('reports a new failure after the reset key changes, though the next request is still loading', () => {
+    const { reportEvent, rerender } = setup({ ...shown, resetKey: 'watch-a' });
+
+    rerender({ ...shown, isRefetching: true, isShown: false, resetKey: 'watch-b' });
+    rerender({ ...shown, errorClass: 'network', resetKey: 'watch-b' });
+
+    expect(reportEvent.mock.calls).toEqual([
+      ['alertzero_ui_error_shown', { error_class: 'server', surface: 'watch_detail' }],
+      ['alertzero_ui_error_shown', { error_class: 'network', surface: 'watch_detail' }],
+    ]);
+  });
+
+  it('keeps one occurrence while the reset key stays the same', () => {
+    const { reportEvent, rerender } = setup({ ...shown, resetKey: 'watch-a' });
+
+    rerender({ ...shown, isRefetching: true, isShown: false, resetKey: 'watch-a' });
+    rerender({ ...shown, resetKey: 'watch-a' });
+
+    expect(reportEvent).toHaveBeenCalledTimes(1);
+  });
+
   it('reports once under StrictMode, which runs effects twice', () => {
     const { reportEvent } = setup(shown, { strict: true });
 
