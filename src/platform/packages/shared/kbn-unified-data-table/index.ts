@@ -49,3 +49,34 @@ export type { UnifiedDataTableRestorableState } from './src/restorable_state';
 export { UnifiedDataTableSourceColumnHeader } from './src/components/data_table_source_column_header';
 
 export { type EuiDataGridRefProps } from '@elastic/eui';
+
+export {
+  CellActionsBubble,
+  type CellActionsBubbleAction,
+  type CellActionsBubbleProps,
+} from './src/components/cell_actions_bubble/cell_actions_bubble';
+export type { CellActionTarget } from './src/components/cell_actions_bubble/cell_actions';
+export {
+  CellActionIconButton,
+  CellActionPopoverButton,
+  CellActionsPopoverFooter,
+  EXPAND_CELL_TEST_SUBJ,
+  getCellActionBubbleActions,
+} from './src/components/cell_actions_bubble/cell_actions';
+export { cellActionsHostStyles } from './src/components/cell_actions_bubble/cell_actions_bubble_styles';
+export type { GridBounds, GridPosition } from './src/components/grid_keyboard_navigation';
+export type {
+  GridNavigationLayout,
+  UseGridKeyboardNavigationParams,
+} from './src/components/use_grid_keyboard_navigation';
+export { useGridKeyboardNavigation } from './src/components/use_grid_keyboard_navigation';
+export {
+  GRID_CELL_SELECTOR,
+  GRID_KEYS,
+  getGridPosition,
+  getNextGridPosition,
+} from './src/components/grid_keyboard_navigation';
+export type { CellExpansion } from './src/components/cell_expansion/use_cell_expansion';
+export { useCellExpansion } from './src/components/cell_expansion/use_cell_expansion';
+export type { CellExpansionPopoverProps } from './src/components/cell_expansion/cell_expansion_popover';
+export { CellExpansionPopover } from './src/components/cell_expansion/cell_expansion_popover';

@@ -57,10 +57,15 @@ import type {
   LensPagesizeAction,
 } from '@kbn/lens-common';
 import type { LensGridDirection } from '../../../../common/expressions';
+import { getLensFeatureFlags } from '../../../get_feature_flags';
 import { findMinMaxByColumnId, shouldColorByTerms } from '../../../shared_components';
 import type { DataContextType, DatatableRenderProps } from './types';
 import { createGridColumns } from './columns';
-import { createRenderDatatableCellPopover } from './datatable_cell_popover';
+import {
+  createRenderDatatableCellPopover,
+  createRenderTanStackDatatableCellPopover,
+} from './datatable_cell_popover';
+import { TanStackDatatableGrid } from './tanstack_grid';
 import { createGridCell } from './cell_value';
 import {
   buildSchemaDetectors,
@@ -98,7 +103,6 @@ const PAGE_SIZE_OPTIONS = [DEFAULT_PAGE_SIZE, 20, 30, 50, 100];
 
 export const DatatableComponent = (props: DatatableRenderProps) => {
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
-
   const isInteractive = props.interactive && props.viewMode !== 'non-interactive';
   const isDarkMode = useKibanaIsDarkMode();
   const palettes = useKbnPalettes();
@@ -116,12 +120,21 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     undefined
   );
 
+  const isTanStackGridEnabled = getLensFeatureFlags().enableTanstackDatatable;
+
+  const hasNoRows = firstLocalTable.rows.length === 0;
+
   useLayoutEffect(() => {
-    // Temporary solution: DataGrid should provide onRender callback
+    // The TanStack grid signals when it is done rendering through `onRender`, there is no grid to
+    // do that when the table is empty.
+    if (isTanStackGridEnabled && !hasNoRows) {
+      return;
+    }
+    // Temporary solution: EuiDataGrid does not provide an onRender callback
     setTimeout(() => {
       props.renderComplete();
     }, 300);
-  }, [props]);
+  }, [props, isTanStackGridEnabled, hasNoRows]);
 
   useEffect(() => {
     setPagination(
@@ -388,6 +401,12 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     return [
       {
         headerCellRender: () => null,
+        // The header is empty, so it needs a name for assistive technology.
+        headerCellProps: {
+          'aria-label': i18n.translate('xpack.lens.table.rowActionsColumnLabel', {
+            defaultMessage: 'Row actions',
+          }),
+        },
         width: 40,
         id: 'trailingControlColumn',
         rowCellRender: function RowCellRender({ rowIndex }) {
@@ -543,6 +562,22 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     [sortedTable, props.columnFilterable]
   );
 
+  const tanStackRowHeightsOptions = useMemo(
+    () => ({
+      defaultHeight: props.args.fitRowToContent
+        ? ('auto' as const)
+        : props.args.rowHeightLines && props.args.rowHeightLines !== 1
+        ? { lineCount: props.args.rowHeightLines }
+        : undefined,
+    }),
+    [props.args.fitRowToContent, props.args.rowHeightLines]
+  );
+
+  const renderTanStackCellPopover = useMemo(
+    () => createRenderTanStackDatatableCellPopover(sortedTable, props.columnFilterable),
+    [sortedTable, props.columnFilterable]
+  );
+
   const columnVisibility = useMemo(
     () => ({
       visibleColumns,
@@ -613,6 +648,12 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       {
         id: 'rowNumber',
         headerCellRender: () => null,
+        // The header is empty, so it needs a name for assistive technology.
+        headerCellProps: {
+          'aria-label': i18n.translate('xpack.lens.table.rowNumberColumnLabel', {
+            defaultMessage: 'Row number',
+          }),
+        },
         rowCellRender: function RowCellRender({ visibleRowIndex }) {
           return (
             <div
@@ -651,6 +692,27 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       defaultMessage: 'Data table visualization',
     });
 
+  // The props both grids take, the TanStack grid accepts the subset of the EuiDataGrid props used here.
+  const sharedGridProps = {
+    'aria-label': dataGridAriaLabel,
+    'data-test-subj': 'lnsDataTable',
+    columns,
+    leadingControlColumns,
+    trailingControlColumns,
+    rowCount: sortedTable.rows.length,
+    renderCellValue,
+    gridStyle,
+    sorting: props.viewMode === 'non-interactive' ? undefined : sorting,
+    pagination: pagination && {
+      ...pagination,
+      pageSizeOptions: PAGE_SIZE_OPTIONS,
+      onChangeItemsPerPage,
+      onChangePage,
+    },
+    onColumnResize,
+    renderFooterCellValue: renderSummaryRow,
+  };
+
   return (
     <div
       css={datatableContainerStyles}
@@ -666,41 +728,32 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           handleFilterClick,
         }}
       >
-        <EuiDataGrid
-          aria-label={dataGridAriaLabel}
-          data-test-subj="lnsDataTable"
-          rowHeightsOptions={{
-            defaultHeight: props.args.fitRowToContent
-              ? RowHeightMode.auto
-              : props.args.rowHeightLines && props.args.rowHeightLines !== 1
-              ? {
-                  lineCount: props.args.rowHeightLines,
-                }
-              : undefined,
-          }}
-          columns={columns}
-          columnVisibility={columnVisibility}
-          leadingControlColumns={leadingControlColumns}
-          trailingControlColumns={trailingControlColumns}
-          rowCount={sortedTable.rows.length}
-          renderCellValue={renderCellValue}
-          renderCellPopover={renderCellPopover}
-          gridStyle={gridStyle}
-          schemaDetectors={schemaDetectors}
-          sorting={props.viewMode === 'non-interactive' ? undefined : sorting}
-          pagination={
-            pagination && {
-              ...pagination,
-              pageSizeOptions: PAGE_SIZE_OPTIONS,
-              onChangeItemsPerPage,
-              onChangePage,
-            }
-          }
-          onColumnResize={onColumnResize}
-          toolbarVisibility={false}
-          renderFooterCellValue={renderSummaryRow}
-          ref={dataGridRef}
-        />
+        {isTanStackGridEnabled ? (
+          <TanStackDatatableGrid
+            {...sharedGridProps}
+            rowHeightsOptions={tanStackRowHeightsOptions}
+            renderCellPopover={renderTanStackCellPopover}
+            onRender={props.renderComplete}
+          />
+        ) : (
+          <EuiDataGrid
+            {...sharedGridProps}
+            rowHeightsOptions={{
+              defaultHeight: props.args.fitRowToContent
+                ? RowHeightMode.auto
+                : props.args.rowHeightLines && props.args.rowHeightLines !== 1
+                ? {
+                    lineCount: props.args.rowHeightLines,
+                  }
+                : undefined,
+            }}
+            columnVisibility={columnVisibility}
+            renderCellPopover={renderCellPopover}
+            schemaDetectors={schemaDetectors}
+            toolbarVisibility={false}
+            ref={dataGridRef}
+          />
+        )}
       </DataContext.Provider>
     </div>
   );
