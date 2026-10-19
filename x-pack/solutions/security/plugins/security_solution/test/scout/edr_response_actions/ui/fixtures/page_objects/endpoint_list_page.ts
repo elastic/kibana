@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { APP_LOAD_TIMEOUT_MS } from '@kbn/scout-security';
 import type { Locator, ScoutPage } from '@kbn/scout-security';
 
 const ENDPOINTS_APP_PATH = 'security/administration/endpoints';
@@ -23,8 +24,10 @@ export class EndpointListPage {
 
   async goto(): Promise<void> {
     await this.page.gotoApp(ENDPOINTS_APP_PATH);
-    // The table renders only after the first metadata list request returns.
-    await this.table.waitFor({ state: 'visible' });
+    // Until the user privileges and the list init (metadata list, then the search-bar
+    // fields) finish, the page shows "Loading Endpoint Management" and no table. On a
+    // cold first load that took over the default 10s action timeout in CI.
+    await this.table.waitFor({ state: 'visible', timeout: APP_LOAD_TIMEOUT_MS });
   }
 
   /** The table row whose hostname cell links to `hostname`. */
