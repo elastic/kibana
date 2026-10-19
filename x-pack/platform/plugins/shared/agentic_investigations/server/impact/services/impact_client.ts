@@ -29,12 +29,12 @@ export interface ImpactReadClient {
    */
   getEntityIdsByConversationId: (conversationIds: string[]) => Promise<Map<string, string[]>>;
   /**
-   * Same read as `getEntityIdsByConversationId`, keeping each entity's `id` and `type` so the
-   * landing page can show what kind of entity a pill stands for.
+   * Same read as `getEntityIdsByConversationId`, keeping each entity's `id`, `type`, and `name`
+   * so the landing page can label a pill with the entity and show what kind it is.
    */
   getEntitiesByConversationId: (
     conversationIds: string[]
-  ) => Promise<Map<string, Array<Pick<ImpactEntity, 'id' | 'type'>>>>;
+  ) => Promise<Map<string, Array<Pick<ImpactEntity, 'id' | 'type' | 'name'>>>>;
   /**
    * Conversations whose impact lists the entity, for filtering a list by an Impact pill. Bounded
    * by {@link MAX_INVESTIGATION_CANDIDATE_CONVERSATION_IDS}; conversations the caller cannot read
@@ -96,7 +96,11 @@ export const createImpactClient =
       return new Map(
         impacts.map((impact) => [
           impact.conversationId,
-          (impact.entities ?? []).map(({ id, type }) => ({ id, type })),
+          (impact.entities ?? []).map(({ id, type, name }) => ({
+            id,
+            type,
+            ...(name !== undefined ? { name } : {}),
+          })),
         ])
       );
     };

@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { distinctUntilChanged, type Subscription } from 'rxjs';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import { resolveServerlessStatus } from './status/resolve_serverless';
@@ -16,6 +17,9 @@ import {
   BADGE_SHOWN_EVENT,
   registerSubscriptionStatusEvents,
 } from './telemetry';
+
+// Off by default: billing admins get the no-access tooltip in real Serverless environments.
+const ENABLED_FLAG = 'subscriptionStatus.enabled';
 
 interface SubscriptionStatusSetupDeps {
   cloud?: CloudSetup;
@@ -30,6 +34,7 @@ export class SubscriptionStatusPlugin
 {
   private csp?: string;
   private region?: string;
+  private flagSubscription?: Subscription;
 
   public setup(core: CoreSetup, { cloud }: SubscriptionStatusSetupDeps) {
     registerSubscriptionStatusEvents(core.analytics);
@@ -39,10 +44,21 @@ export class SubscriptionStatusPlugin
 
   public start(core: CoreStart, { cloud }: SubscriptionStatusStartDeps) {
     if (!cloud) return;
-    void this.showBadge(core, cloud);
+    this.flagSubscription = core.featureFlags
+      .getBooleanValue$(ENABLED_FLAG, false)
+      .pipe(distinctUntilChanged())
+      .subscribe((enabled) => {
+        if (enabled) {
+          void this.showBadge(core, cloud);
+        } else {
+          core.chrome.controls.subscriptionBadge.set(undefined);
+        }
+      });
   }
 
-  public stop() {}
+  public stop() {
+    this.flagSubscription?.unsubscribe();
+  }
 
   private async showBadge({ analytics, chrome }: CoreStart, cloud: CloudStart) {
     const status = await resolveServerlessStatus({ cloud, csp: this.csp, region: this.region });
