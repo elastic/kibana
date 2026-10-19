@@ -8,7 +8,7 @@
 import type { SignalCardId } from '../../../../../common/entity_analytics/home/constants';
 import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
 import type { BriefCandidate } from './types';
-import { rankCandidates, selectCandidateTiles } from './read_entities';
+import { rankCandidates, selectCandidateTiles, withGroupValues } from './read_entities';
 
 const scopeWith = (
   tiles: EntityAnalyticsScope['tiles'],
@@ -104,5 +104,34 @@ describe('rankCandidates', () => {
     ],
   ])('%s', (_name, candidates, focusTileId, expected) => {
     expect(rankCandidates(candidates, focusTileId).map(({ id }) => id)).toEqual(expected);
+  });
+});
+
+describe('withGroupValues', () => {
+  it('gives the golden entity its group values, as the page does', () => {
+    const golden = candidate('user:gold', ['watchlisted']);
+    const { record } = withGroupValues(
+      {
+        ...golden,
+        record: {
+          ...golden.record,
+          asset: { criticality: 'low_impact' },
+          entity: {
+            ...golden.record.entity,
+            lifecycle: { first_seen: '2026-10-10T00:00:00.000Z' },
+          },
+        },
+      },
+      [
+        {
+          entity: { id: 'user:a1', attributes: { watchlists: ['privileged'] } },
+          asset: { criticality: 'high_impact' },
+        },
+        { entity: { id: 'user:a2', lifecycle: { first_seen: '2026-10-01T00:00:00.000Z' } } },
+      ]
+    );
+    expect(record.asset?.criticality).toBe('high_impact');
+    expect(record.entity?.attributes?.watchlists).toEqual(['privileged']);
+    expect(record.entity?.lifecycle?.first_seen).toBe('2026-10-01T00:00:00.000Z');
   });
 });

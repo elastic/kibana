@@ -6,9 +6,9 @@
  */
 
 import type { QueryDslQueryContainer, SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
-import { orderBy, truncate, uniq } from 'lodash';
+import { min, orderBy, truncate, uniq } from 'lodash';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { Entity, EntityRiskLevels } from '@kbn/entity-store/common';
+import type { AssetCriticalityLevel, Entity, EntityRiskLevels } from '@kbn/entity-store/common';
 import { ENTITY_LATEST, getEntitiesAlias } from '@kbn/entity-store/common';
 import type { EsQueryConfig } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
@@ -18,7 +18,9 @@ import type { EntityAnalyticsScope } from '../../../../../common/entity_analytic
 import { getEntityType } from '../../../../../common/entity_analytics/entity_store/sanitize_entity_record_for_upsert';
 import { getRiskLevel } from '../../../../../common/entity_analytics/risk_engine/risk_levels';
 import { getRiskScoreTimeSeriesIndex } from '../../../../../common/entity_analytics/risk_engine/indices';
+import { fetchGroupMembers } from '../../../../lib/entity_analytics/entity_case_counts/fetch_group_member_ids';
 import { resolveDisplayName } from '../../../../lib/entity_analytics/lead_generation/entity_conversion';
+import { getHigherCriticality } from '../../../../lib/entity_analytics/risk_score/maintainer/steps/resolution_modifiers';
 import { ENTITY_IDENTIFIER_TYPES } from '../entity_resolution';
 import type { BriefCandidate, BriefEntityType } from './types';
 import { MAX_BRIEF_CANDIDATES } from './types';
@@ -78,8 +80,15 @@ export const readEntities = async ({
     return [{ id, name, type, tileIds, record }];
   });
 
+  const ranked = rankCandidates(candidates, scope.focusTileId);
+  const membersById = await fetchGroupMembers(
+    esClient,
+    spaceId,
+    ranked.map(({ id }) => id),
+    GROUP_VALUE_FIELDS
+  );
   return {
-    candidates: rankCandidates(candidates, scope.focusTileId),
+    candidates: ranked.map((candidate) => withGroupValues(candidate, membersById[candidate.id])),
     capturedCount: entityIds.length,
     isTruncated: candidates.length > MAX_BRIEF_CANDIDATES,
     notFoundCount: entityIds.length - (response.aggregations?.found.value ?? 0),
@@ -101,6 +110,48 @@ export const selectCandidateTiles = ({
     }
   }
   return tileIdsByEntityId;
+};
+
+const GROUP_VALUE_FIELDS = [
+  'asset.criticality',
+  'entity.attributes.watchlists',
+  'entity.lifecycle.first_seen',
+];
+
+/** A group's values, as the page shows them: the highest criticality, every watchlist, the earliest first seen. */
+export const withGroupValues = (
+  candidate: BriefCandidate,
+  members: Entity[] = []
+): BriefCandidate => {
+  if (members.length === 0) {
+    return candidate;
+  }
+  const { record } = candidate;
+  const records = [record, ...members];
+  return {
+    ...candidate,
+    record: {
+      ...record,
+      asset: {
+        ...record.asset,
+        criticality: records.reduce<AssetCriticalityLevel | null | undefined>(
+          (highest, { asset }) => getHigherCriticality(highest, asset?.criticality),
+          undefined
+        ),
+      },
+      entity: {
+        ...record.entity,
+        attributes: {
+          ...record.entity?.attributes,
+          watchlists: uniq(records.flatMap(({ entity }) => entity?.attributes?.watchlists ?? [])),
+        },
+        lifecycle: {
+          ...record.entity?.lifecycle,
+          first_seen: min(records.flatMap(({ entity }) => entity?.lifecycle?.first_seen ?? [])),
+        },
+      },
+    },
+  };
 };
 
 /** Ranks by the selected tile, then how many tiles flag the entity, then risk, and keeps the first few. */
