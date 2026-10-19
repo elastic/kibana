@@ -57,4 +57,6 @@ export interface FeedbackAnalysisContext {
   output_schema: Record<string, unknown>;
   /** False when the window held nothing to analyze. */
   has_signals: boolean;
+  /** Whether the index offers anything to reason from: signals, indicators, sources or automations. */
+  can_analyze: boolean;
 }
