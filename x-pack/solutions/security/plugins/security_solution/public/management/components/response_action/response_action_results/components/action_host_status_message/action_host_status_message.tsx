@@ -7,12 +7,12 @@
 import React, { memo, useMemo } from 'react';
 import type { EuiTextColorProps } from '@elastic/eui';
 import { EuiTextColor } from '@elastic/eui';
-import { isRunScriptAction } from '../../../../../../common/endpoint/service/response_actions/type_guards';
-import { getAgentActionState } from '../utils';
-import { OUTPUT_MESSAGES } from '../../../endpoint_response_actions_list/translations';
-import { RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP } from '../../../../../../common/endpoint/service/response_actions/constants';
-import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
-import type { ResponseActionResultsProps } from '../types';
+import { isRunScriptAction } from '../../../../../../../common/endpoint/service/response_actions/type_guards';
+import { getAgentActionState } from '../../utils';
+import { OUTPUT_MESSAGES } from '../../../../endpoint_response_actions_list/translations';
+import { RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP } from '../../../../../../../common/endpoint/service/response_actions/constants';
+import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
+import type { ResponseActionResultsProps } from '../../types';
 
 export type ActionHostStatusMessageProps = Omit<ResponseActionResultsProps, 'textSize'>;
 

@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import type { ActionDetails, MaybeImmutable } from '../../../../../../common/endpoint/types';
-import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
-import { EndpointActionGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_action_generator';
-import { RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP } from '../../../../../../common/endpoint/service/response_actions/constants';
-import { OUTPUT_MESSAGES } from '../../../endpoint_response_actions_list/translations';
+import type { ActionDetails, MaybeImmutable } from '../../../../../../../common/endpoint/types';
+import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
+import { EndpointActionGenerator } from '../../../../../../../common/endpoint/data_generators/endpoint_action_generator';
+import { RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP } from '../../../../../../../common/endpoint/service/response_actions/constants';
+import { OUTPUT_MESSAGES } from '../../../../endpoint_response_actions_list/translations';
 import type { ActionHostStatusMessageProps } from './action_host_status_message';
 import { ActionHostStatusMessage } from './action_host_status_message';
 
