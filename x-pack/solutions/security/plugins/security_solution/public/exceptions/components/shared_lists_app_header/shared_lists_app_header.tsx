@@ -89,7 +89,6 @@ export const SharedListsAppHeader = React.memo<SharedListsAppHeaderProps>(
               {
                 id: 'createExceptionItem',
                 label: i18n.CREATE_BUTTON_ITEM_BUTTON,
-                iconType: 'plus',
                 run: onCreateExceptionItem,
                 testId: 'manageExceptionListCreateExceptionButton',
               },
