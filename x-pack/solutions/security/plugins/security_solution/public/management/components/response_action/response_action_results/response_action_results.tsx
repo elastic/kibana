@@ -11,7 +11,7 @@ import { EuiText, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { ActionHostStatusMessage } from './components/action_host_status_message';
 import { getAgentActionState } from './utils';
 import { FormattedDate } from '../../../../common/components/formatted_date';
-import { MemoryDumpResponseActionOutputResult } from '../../memory_dump_response_action_output_result';
+import { MemoryDumpResponseActionOutputResult } from './components/memory_dump_results/memory_dump_response_action_output_result';
 import { CancelActionResults } from '../../cancel_action_results';
 import { RunscriptActionResult } from './components/runscript_results';
 import { ScanResults } from './components/scan_results';

@@ -20,22 +20,22 @@ import {
 import numeral from '@elastic/numeral';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { KeyValueDisplay } from '../key_value_display';
+import { KeyValueDisplay } from '../../../../../key_value_display';
 import {
   CONSOLE_COMMANDS,
   RESPONSE_ACTION_STATUS,
   YES_LABEL,
   NO_LABEL,
-} from '../../common/translations';
-import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
+} from '../../../../../../common/translations';
+import { useTestIdGenerator } from '../../../../../../hooks/use_test_id_generator';
 import type {
   ActionDetails,
   MaybeImmutable,
   ResponseActionMemoryDumpOutputContent,
   ResponseActionMemoryDumpParameters,
-} from '../../../../common/endpoint/types';
-import { EndpointActionFailureMessage } from '../endpoint_action_failure_message';
-import { getAgentActionState } from '../response_action/response_action_results/utils';
+} from '../../../../../../../../common/endpoint/types';
+import { EndpointActionFailureMessage } from '../../../../../endpoint_action_failure_message';
+import { getAgentActionState } from '../../../utils';
 
 export interface MemoryDumpResponseActionOutputResultProps {
   action: MaybeImmutable<

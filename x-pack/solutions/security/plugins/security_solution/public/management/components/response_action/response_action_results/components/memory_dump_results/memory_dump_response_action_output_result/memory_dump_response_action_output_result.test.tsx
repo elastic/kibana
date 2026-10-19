@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type { AppContextTestRender } from '../../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../../../common/mock/endpoint';
 import type {
   ActionDetails,
   ResponseActionMemoryDumpOutputContent,
   ResponseActionMemoryDumpParameters,
-} from '../../../../common/endpoint/types';
-import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
+} from '../../../../../../../../common/endpoint/types';
+import { EndpointActionGenerator } from '../../../../../../../../common/endpoint/data_generators/endpoint_action_generator';
 import React from 'react';
 import { MemoryDumpResponseActionOutputResult } from './memory_dump_response_action_output_result';
-import { RESPONSE_ACTION_STATUS, YES_LABEL, NO_LABEL } from '../../common/translations';
+import { RESPONSE_ACTION_STATUS, YES_LABEL, NO_LABEL } from '../../../../../../common/translations';
 
 describe('MemoryDumpResponseActionOutputResult component', () => {
   let appTestContext: AppContextTestRender;
