@@ -28,11 +28,10 @@ import { i18n } from '@kbn/i18n';
 import { MAX_BOOST, MIN_BOOST } from '../../../common/constants';
 import type { BoostProfile, BoostProfileInput, BoostProfileType } from '../../../common/types';
 import type { CostImpact } from '../../../common/vcu_estimate';
-import { estimateProfileImpact } from '../../../common/vcu_estimate';
 import { BOOST_DOCS_URL } from '../../doc_links';
 import { useBoostServices } from '../../hooks/use_boost_services';
 import { LEARN_MORE_LABEL, PROVISIONING_NOTE } from '../../translations';
-import { useBoostState, useCreateProfile, useUpdateProfile } from '../../hooks/use_boost_state';
+import { useCreateProfile, useUpdateProfile } from '../../hooks/use_boost_state';
 import { CardLabel } from '../card_label';
 import { PROFILE_TYPE_LABELS } from '../format';
 import { PresetCards } from '../preset_cards';
@@ -177,7 +176,6 @@ export const ProfileFlyoutContent = ({
   const [showErrors, setShowErrors] = useState(false);
   // While focus is in the boost values, an estimate they made unavailable stays, faded.
   const [isBoostFocused, setIsBoostFocused] = useState(false);
-  const { data: state } = useBoostState();
 
   const { mutate: createProfile, isLoading: isCreating } = useCreateProfile();
   const { mutate: updateProfile, isLoading: isUpdating } = useUpdateProfile();
@@ -223,25 +221,11 @@ export const ProfileFlyoutContent = ({
 
   const nameError = visibleErrors.name && PROFILE_NAME_ERROR_MESSAGES[visibleErrors.name];
 
-  // Estimates use real data, so only a profile that rules use, or one for a rule with targets, has
-  // one.
+  // Only a profile created for a rule has an estimate, for the rule's targets. A saved profile can
+  // apply through any number of rules, so an estimate of it would be hard to read.
   const getImpact = (): CostImpact | undefined => {
     const draftProfile = getDraftProfile(draft);
-    if (!draftProfile) {
-      return undefined;
-    }
-    if (forRule) {
-      return forRule.estimate(draftProfile);
-    }
-    if (!isEditing || !state) {
-      return undefined;
-    }
-    return estimateProfileImpact({
-      dataSources: state.data_sources,
-      rules: state.rules,
-      profiles: state.profiles,
-      nextProfile: draftProfile,
-    });
+    return forRule && draftProfile ? forRule.estimate(draftProfile) : undefined;
   };
 
   return (
@@ -463,12 +447,14 @@ export const ProfileFlyoutContent = ({
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
-        <CostEstimate
-          impact={getImpact()}
-          type={draft.type}
-          isEditing={isBoostFocused}
-          showChange={isEditing || duplicateOf !== undefined}
-        />
+        {forRule && (
+          <CostEstimate
+            impact={getImpact()}
+            type={draft.type}
+            isEditing={isBoostFocused}
+            showChange={false}
+          />
+        )}
         <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty

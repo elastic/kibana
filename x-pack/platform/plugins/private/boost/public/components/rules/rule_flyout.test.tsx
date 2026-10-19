@@ -18,7 +18,7 @@ import {
   createDefaultRules,
   translateSimpleDefaults,
 } from '../../../common/presets';
-import type { BoostProfile, BoostRule, BoostState } from '../../../common/types';
+import type { BoostDataSource, BoostProfile, BoostRule, BoostState } from '../../../common/types';
 import { RuleFlyout } from './rule_flyout';
 
 const customProfile = (name: string): BoostProfile => ({
@@ -52,6 +52,16 @@ const state: BoostState = {
   data_sources: [
     { name: 'catalog-fall', type: 'index', size_in_bytes: 4e9 },
     { name: 'products', type: 'index', size_in_bytes: 1e9 },
+  ],
+};
+
+const logsApp: BoostDataSource = {
+  name: 'logs-app',
+  type: 'data_stream',
+  size_in_bytes: 3e9,
+  data_ages: [
+    { age_hours: 2, size_in_bytes: 1e9 },
+    { age_hours: 24 * 30, size_in_bytes: 2e9 },
   ],
 };
 
@@ -253,6 +263,37 @@ describe('RuleFlyout estimate', () => {
     expect(getEstimate()).toHaveTextContent('1 index · 4 GB');
     expect(getEstimate()).toHaveAttribute('data-shown', 'true');
     expect(getEstimate()).toHaveAttribute('data-stale', 'false');
+    expect(screen.getByTestId('boostCostEstimate-atRest')).toBeInTheDocument();
+    expect(screen.queryByTestId('boostCostEstimateTimeline')).not.toBeInTheDocument();
+  });
+
+  describe('with a data stream', () => {
+    const indices = state.data_sources;
+    beforeEach(() => {
+      state.data_sources = [...indices, logsApp];
+    });
+    afterEach(() => {
+      state.data_sources = indices;
+    });
+
+    it("splits a data streams rule's estimate between its profile's periods", () => {
+      const [defaultDataStreamsRule] = state.rules.filter(
+        ({ name }) => name === DEFAULT_DATA_STREAMS_RULE_NAME
+      );
+      renderFlyout(defaultDataStreamsRule);
+
+      expect(getEstimate()).toHaveTextContent('1 data stream · 3 GB');
+      expect(screen.getByTestId('boostCostEstimate-range')).toBeInTheDocument();
+      expect(screen.queryByTestId('boostCostEstimate-atRest')).not.toBeInTheDocument();
+      expect(screen.getByTestId('boostCostEstimateTimeline-recent')).toHaveTextContent(
+        'Recent1 GB'
+      );
+      expect(screen.getByTestId('boostCostEstimateTimeline-background')).toHaveTextContent(
+        'Background2 GB'
+      );
+      // The default profile's standard period ends where its recent period does, so it's left out.
+      expect(screen.queryByTestId('boostCostEstimateTimeline-standard')).not.toBeInTheDocument();
+    });
   });
 
   it('fades the last estimate while the pattern is cleared, and hides it once the field is left', async () => {

@@ -14,6 +14,7 @@ import {
   BUILTIN_DATA_STREAMS_PROFILE_NAMES,
   BUILTIN_INDICES_PROFILE_NAMES,
   BUILTIN_PROFILES,
+  DEFAULT_DATA_STREAMS_RULE_NAME,
   DEFAULT_INDICES_RULE_NAME,
   DEFAULT_SIMPLE_MODE_DEFAULTS,
   NO_CUSTOM_DEFAULTS,
@@ -187,13 +188,13 @@ describe('ProfileDetailsPage', () => {
     expect(screen.getByTestId('boostProfileSettings')).not.toHaveTextContent('Prewarm');
     expect(screen.getByTestId('boostProfileSettings')).not.toHaveTextContent('One extra copy');
     // The default rule applies it to logs-app, all of whose data counts as recent.
-    expect(screen.getByTestId('boostAgeTimeline-recent')).toHaveTextContent('3 GB');
+    expect(screen.getByTestId('boostAgeTimelinePeriods-recent')).toHaveTextContent('3 GB');
   });
 
   it('leaves the timeline without sizes until the profile applies to a data stream', () => {
     renderAt('/profiles/clicks');
 
-    expect(screen.getByTestId('boostAgeTimeline-recent')).toHaveTextContent('—');
+    expect(screen.getByTestId('boostAgeTimelinePeriods-recent')).toHaveTextContent('—');
     expect(screen.getByTestId('boostAgeTimeline')).toHaveTextContent(
       'appears once a boost rule applies this profile to a data stream'
     );
@@ -230,6 +231,21 @@ describe('RuleDetailsPage', () => {
     expect(within(matched).getByText('catalog-fall').closest('tr')).toHaveTextContent(
       'catalog-first'
     );
+  });
+
+  it("shows a data streams rule's data in each period of its profile", () => {
+    renderAt(`/rules/${DEFAULT_DATA_STREAMS_RULE_NAME}`);
+
+    expect(screen.getByTestId('boostAgeTimelinePeriods-recent')).toHaveTextContent('3 GB');
+    expect(screen.getByTestId('boostAgeTimeline')).toHaveTextContent(
+      'Data in each period across the 1 data stream this rule applies to, 3 GB in total.'
+    );
+  });
+
+  it('has no age timeline for an indices rule', () => {
+    renderAt('/rules/catalogs');
+
+    expect(screen.queryByTestId('boostAgeTimeline')).not.toBeInTheDocument();
   });
 
   it('only offers to edit a default rule', () => {

@@ -38,7 +38,8 @@ import type {
 import { estimateDataSourcesVcuRange } from '../../../common/vcu_estimate';
 import { useBoostServices } from '../../hooks/use_boost_services';
 import { useBoostState } from '../../hooks/use_boost_state';
-import { COST_DISCLAIMER, formatSize, getCostText } from '../cost_estimate';
+import { AgeTimeline } from '../age_timeline';
+import { COST_DISCLAIMER, formatSize, getCostText } from '../cost_format';
 import { DetailsPage, DetailsPanel, SimpleModeNotice } from '../details/details_page';
 import { DetailsList } from '../details/details_list';
 import { DetailsLink } from '../details_link';
@@ -47,7 +48,6 @@ import { LoadError } from '../load_error';
 import { RuleFlyout } from '../rules/rule_flyout';
 import { RuleMatches } from '../rules/rule_matches';
 import { DEFAULT_BADGE_LABEL, getProfileRulesLocation } from '../rules/rules_tab';
-import { AgeTimeline } from './age_timeline';
 import { DeleteProfileModal } from './delete_profile_modal';
 import { PERIOD_LABELS } from './period_labels';
 import { INDEX_OPTIONS, ProfileFlyout } from './profile_flyout';
@@ -419,7 +419,7 @@ export const ProfileDetailsPage = () => {
               defaultMessage: 'Age timeline',
             })}
           >
-            <AgeTimeline profile={profile} dataStreams={usedBy} />
+            <AgeTimeline profile={profile} dataStreams={usedBy} appliesThrough="profile" />
           </DetailsPanel>
         </>
       )}

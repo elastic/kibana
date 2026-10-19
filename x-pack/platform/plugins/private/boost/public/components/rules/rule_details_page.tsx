@@ -26,7 +26,8 @@ import type { BoostDataSource } from '../../../common/types';
 import { estimateDataSourcesVcuRange } from '../../../common/vcu_estimate';
 import { useBoostServices } from '../../hooks/use_boost_services';
 import { useBoostState } from '../../hooks/use_boost_state';
-import { COST_DISCLAIMER, formatSize, getCostText } from '../cost_estimate';
+import { AgeTimeline } from '../age_timeline';
+import { COST_DISCLAIMER, formatSize, getCostText } from '../cost_format';
 import { DetailsPage, DetailsPanel, SimpleModeNotice } from '../details/details_page';
 import { DetailsList } from '../details/details_list';
 import { DetailsLink } from '../details_link';
@@ -300,6 +301,19 @@ export const RuleDetailsPage = () => {
           </DetailsPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      {profile?.type === 'data_streams' && (
+        <>
+          <EuiSpacer size="l" />
+          <DetailsPanel
+            title={i18n.translate('xpack.boost.ruleDetails.ageTimelineTitle', {
+              defaultMessage: 'Age timeline',
+            })}
+          >
+            <AgeTimeline profile={profile} dataStreams={applied} appliesThrough="rule" />
+          </DetailsPanel>
+        </>
+      )}
 
       <EuiSpacer size="l" />
       <DetailsPanel

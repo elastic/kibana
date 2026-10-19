@@ -96,49 +96,78 @@ export const getDataStreamPeriod = (
     ? 'standard'
     : 'background';
 
-/** How much of these data streams' data is in each of the profile's periods, in bytes. */
-export const getDataStreamPeriodSizes = (
+/** One period's share of data streams' data, and the search VCUs it uses. */
+export interface DataStreamPeriodEstimate {
+  sizeInBytes: number;
+  vcus: VcuRange;
+}
+
+export type DataStreamPeriodEstimates = Record<DataStreamPeriod, DataStreamPeriodEstimate>;
+
+const NO_PERIOD_ESTIMATE: DataStreamPeriodEstimate = { sizeInBytes: 0, vcus: NO_VCUS };
+
+// Without a breakdown, all of a data stream's data counts as new, which overestimates rather than
+// under.
+const getDataAges = ({
+  size_in_bytes: sizeInBytes,
+  data_ages: dataAges,
+}: BoostDataSource): readonly BoostDataAge[] =>
+  dataAges ?? [{ age_hours: 0, size_in_bytes: sizeInBytes }];
+
+/** Search VCUs for this much data in one of the profile's periods. */
+const estimatePeriodVcuRange = (
+  profile: DataStreamsProfile,
+  periodName: DataStreamPeriod,
+  bytes: number
+): VcuRange => {
+  const period = profile[periodName];
+  const ratio = PERIOD_CACHE_RATIOS[periodName];
+  const dataGb = bytes / BYTES_PER_GB;
+  const atRest = vcusForCachedData(dataGb, ratio, period.min_boost);
+  return { atRest, atPeak: Math.max(atRest, vcusForCachedData(dataGb, ratio, period.max_boost)) };
+};
+
+/** How much of these data streams' data is in each of the profile's periods, and its search VCUs. */
+export const estimateDataStreamPeriods = (
   profile: DataStreamsProfile,
   dataSources: readonly BoostDataSource[]
-): Record<DataStreamPeriod, number> =>
-  dataSources
-    .flatMap(
-      ({ size_in_bytes: sizeInBytes, data_ages: dataAges }) =>
-        // Without a breakdown, all of the data counts as new, as in the estimates.
-        dataAges ?? [{ age_hours: 0, size_in_bytes: sizeInBytes }]
-    )
-    .reduce(
-      (sizes, { age_hours: ageHours, size_in_bytes: bytes }) => {
-        const period = getDataStreamPeriod(profile, ageHours);
-        return { ...sizes, [period]: sizes[period] + bytes };
-      },
-      { recent: 0, standard: 0, background: 0 }
-    );
+): DataStreamPeriodEstimates =>
+  dataSources.flatMap(getDataAges).reduce<DataStreamPeriodEstimates>(
+    (periods, { age_hours: ageHours, size_in_bytes: bytes }) => {
+      const periodName = getDataStreamPeriod(profile, ageHours);
+      const { sizeInBytes, vcus } = periods[periodName];
+      return {
+        ...periods,
+        [periodName]: {
+          sizeInBytes: sizeInBytes + bytes,
+          vcus: addRanges(vcus, estimatePeriodVcuRange(profile, periodName, bytes)),
+        },
+      };
+    },
+    { recent: NO_PERIOD_ESTIMATE, standard: NO_PERIOD_ESTIMATE, background: NO_PERIOD_ESTIMATE }
+  );
 
 /** Search VCUs for a data stream's data, with each part in the period its age falls in. */
 export const estimateDataStreamVcuRange = (
   profile: DataStreamsProfile,
   dataAges: readonly BoostDataAge[]
 ): VcuRange =>
-  dataAges.reduce<VcuRange>((total, { age_hours: ageHours, size_in_bytes: bytes }) => {
-    const periodName = getDataStreamPeriod(profile, ageHours);
-    const period = profile[periodName];
-    const ratio = PERIOD_CACHE_RATIOS[periodName];
-    const dataGb = bytes / BYTES_PER_GB;
-    const atRest = vcusForCachedData(dataGb, ratio, period.min_boost);
-    return addRanges(total, {
-      atRest,
-      atPeak: Math.max(atRest, vcusForCachedData(dataGb, ratio, period.max_boost)),
-    });
-  }, NO_VCUS);
+  dataAges.reduce<VcuRange>(
+    (total, { age_hours: ageHours, size_in_bytes: bytes }) =>
+      addRanges(
+        total,
+        estimatePeriodVcuRange(profile, getDataStreamPeriod(profile, ageHours), bytes)
+      ),
+    NO_VCUS
+  );
 
 /** Search VCUs a profile would use for one index's or data stream's actual data. */
 export const estimateDataSourceVcuRange = (
-  { size_in_bytes: sizeInBytes, data_ages: dataAges }: BoostDataSource,
+  dataSource: BoostDataSource,
   profile: BoostProfile | BoostProfileInput
 ): VcuRange => {
   if (profile.type === 'indices') {
-    return estimateIndicesVcuRange(sizeInBytes / BYTES_PER_GB, {
+    return estimateIndicesVcuRange(dataSource.size_in_bytes / BYTES_PER_GB, {
       minBoost: profile.min_boost,
       maxBoost: profile.max_boost,
       extraCopy: profile.high_availability === 'one_extra_copy',
@@ -146,11 +175,7 @@ export const estimateDataSourceVcuRange = (
       pinned: profile.pinned,
     });
   }
-  // Without a breakdown, all of the data counts as new, which overestimates rather than under.
-  return estimateDataStreamVcuRange(
-    profile,
-    dataAges ?? [{ age_hours: 0, size_in_bytes: sizeInBytes }]
-  );
+  return estimateDataStreamVcuRange(profile, getDataAges(dataSource));
 };
 
 /** Search VCUs a profile uses today for these indices or data streams together. */
@@ -173,15 +198,16 @@ export interface CostImpact {
   next: VcuRange;
   /** Whether today's cost covers any data, so a change that leaves none still compares with it. */
   hasCurrentData: boolean;
+  /** With a data streams profile, how its periods split the data and its search VCUs. */
+  periods?: DataStreamPeriodsImpact;
 }
 
-const NO_IMPACT: CostImpact = {
-  dataSourceCount: 0,
-  sizeInBytes: 0,
-  current: NO_VCUS,
-  next: NO_VCUS,
-  hasCurrentData: false,
-};
+/** A data streams profile's periods, and each one's data and search VCUs with the change. */
+export interface DataStreamPeriodsImpact {
+  /** The max ages that end the recent and standard periods. */
+  maxAges: { recent?: string; standard?: string };
+  estimates: DataStreamPeriodEstimates;
+}
 
 interface RuleCostInput {
   dataSources: readonly BoostDataSource[];
@@ -212,62 +238,33 @@ export const estimateRuleCost = ({
   const nextProfile = profilesByName.get(nextRule.boost_profile);
   const comparedProfile = comparedRule && profilesByName.get(comparedRule.boost_profile);
 
-  return dataSources.reduce<CostImpact>((cost, dataSource) => {
-    const appliesNext =
-      nextProfile !== undefined && resolveRule(dataSource, nextRules, profilesByName) === nextRule;
-    // Matched by name, since callers may pass a copy of the saved rule.
-    const appliesNow =
-      comparedProfile !== undefined &&
-      resolveRule(dataSource, rules, profilesByName)?.name === comparedRule?.name;
-    return {
-      dataSourceCount: cost.dataSourceCount + (appliesNext ? 1 : 0),
-      sizeInBytes: cost.sizeInBytes + (appliesNext ? dataSource.size_in_bytes : 0),
-      next:
-        appliesNext && nextProfile
-          ? addRanges(cost.next, estimateDataSourceVcuRange(dataSource, nextProfile))
-          : cost.next,
-      current:
-        appliesNow && comparedProfile
-          ? addRanges(cost.current, estimateDataSourceVcuRange(dataSource, comparedProfile))
-          : cost.current,
-      hasCurrentData: cost.hasCurrentData || appliesNow,
-    };
-  }, NO_IMPACT);
-};
+  const appliesNext = nextProfile
+    ? dataSources.filter(
+        (dataSource) => resolveRule(dataSource, nextRules, profilesByName) === nextRule
+      )
+    : [];
+  // Matched by name, since callers may pass a copy of the saved rule.
+  const appliesNow = comparedProfile
+    ? dataSources.filter(
+        (dataSource) => resolveRule(dataSource, rules, profilesByName)?.name === comparedRule?.name
+      )
+    : [];
 
-interface ProfileImpactInput {
-  dataSources: readonly BoostDataSource[];
-  rules: readonly BoostRule[];
-  profiles: readonly BoostProfile[];
-  /** The profile as it would be saved, with the saved profile's name and type. */
-  nextProfile: BoostProfileInput;
-}
-
-/** The cost change of editing a profile, across the data sources whose applied rule uses it. */
-export const estimateProfileImpact = ({
-  dataSources,
-  rules,
-  profiles,
-  nextProfile,
-}: ProfileImpactInput): CostImpact => {
-  const profilesByName = new Map(profiles.map((profile) => [profile.name, profile]));
-  const currentProfile = profilesByName.get(nextProfile.name);
-  if (!currentProfile) {
-    return NO_IMPACT;
-  }
-  return dataSources
-    .filter(
-      (dataSource) =>
-        resolveRule(dataSource, rules, profilesByName)?.boost_profile === nextProfile.name
-    )
-    .reduce<CostImpact>(
-      (impact, dataSource) => ({
-        dataSourceCount: impact.dataSourceCount + 1,
-        sizeInBytes: impact.sizeInBytes + dataSource.size_in_bytes,
-        current: addRanges(impact.current, estimateDataSourceVcuRange(dataSource, currentProfile)),
-        next: addRanges(impact.next, estimateDataSourceVcuRange(dataSource, nextProfile)),
-        hasCurrentData: true,
-      }),
-      NO_IMPACT
-    );
+  return {
+    dataSourceCount: appliesNext.length,
+    sizeInBytes: appliesNext.reduce((total, { size_in_bytes: bytes }) => total + bytes, 0),
+    next: nextProfile ? estimateDataSourcesVcuRange(appliesNext, nextProfile) : NO_VCUS,
+    current: comparedProfile ? estimateDataSourcesVcuRange(appliesNow, comparedProfile) : NO_VCUS,
+    hasCurrentData: appliesNow.length > 0,
+    periods:
+      nextProfile?.type === 'data_streams'
+        ? {
+            maxAges: {
+              recent: nextProfile.recent.max_age,
+              standard: nextProfile.standard.max_age,
+            },
+            estimates: estimateDataStreamPeriods(nextProfile, appliesNext),
+          }
+        : undefined,
+  };
 };

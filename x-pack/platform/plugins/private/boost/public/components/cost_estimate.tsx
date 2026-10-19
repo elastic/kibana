@@ -12,6 +12,7 @@ import {
   EuiFlexItem,
   EuiIconTip,
   EuiScreenReaderOnly,
+  EuiSpacer,
   EuiText,
   euiCanAnimate,
   useEuiTheme,
@@ -19,7 +20,19 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { BoostProfileType } from '../../common/types';
 import type { CostImpact, VcuRange } from '../../common/vcu_estimate';
-import { ILLUSTRATIVE_USD_PER_VCU_HOUR } from '../../common/vcu_estimate';
+import {
+  COST_DISCLAIMER,
+  formatCost,
+  formatCostRange,
+  formatSize,
+  formatVcus,
+  getCostRangeLabel,
+  getCostText,
+  getVcuRangeText,
+  getVcusText,
+  roundVcus,
+} from './cost_format';
+import { DataStreamTimeline } from './data_stream_timeline';
 import { formatDataSourceCount } from './format';
 
 interface CostEstimateProps {
@@ -46,71 +59,6 @@ interface ShownEstimate {
   impact: CostImpact;
   type: BoostProfileType;
 }
-
-/** A data size, such as "12 GB". */
-export const formatSize = (bytes: number): string =>
-  i18n.translate('xpack.boost.costEstimate.sizeInGb', {
-    defaultMessage: '{size} GB',
-    values: {
-      size: new Intl.NumberFormat(i18n.getLocale(), {
-        maximumFractionDigits: bytes < 1e9 ? 2 : 1,
-      }).format(bytes / 1e9),
-    },
-  });
-
-// Rounds to the displayed precision, so comparisons and deltas match what users see. Small data
-// often costs below 1 VCU, so small values keep two decimals.
-const roundVcus = (vcus: number): number => {
-  const decimals = vcus < 1 ? 2 : vcus < 10 ? 1 : 0;
-  return Math.round(vcus * 10 ** decimals) / 10 ** decimals;
-};
-
-const formatVcus = (vcus: number): string =>
-  new Intl.NumberFormat(i18n.getLocale(), { maximumFractionDigits: 2 }).format(vcus);
-
-const formatUsd = (usd: number): string =>
-  new Intl.NumberFormat(i18n.getLocale(), {
-    style: 'currency',
-    currency: 'USD',
-    maximumFractionDigits: usd >= 100 ? 0 : 2,
-  }).format(usd);
-
-/** The hourly cost of this many VCUs. */
-export const formatCost = (vcus: number): string => {
-  const usd = vcus * ILLUSTRATIVE_USD_PER_VCU_HOUR;
-  if (usd > 0 && usd < 0.01) {
-    return i18n.translate('xpack.boost.costEstimate.costBelowOneCent', {
-      defaultMessage: '<{amount}',
-      values: { amount: formatUsd(0.01) },
-    });
-  }
-  return formatUsd(usd);
-};
-
-/** How an estimate is made, and that it isn't pricing. */
-export const COST_DISCLAIMER = i18n.translate('xpack.boost.costEstimate.disclaimer', {
-  defaultMessage:
-    'Actual usage varies with query load and your data. Costs use an illustrative rate of {rate} per VCU-hour. This is an estimate and may not represent actual pricing.',
-  values: { rate: formatUsd(ILLUSTRATIVE_USD_PER_VCU_HOUR) },
-});
-
-/** The cost for one end of the range, such as "$0.03 at rest". */
-export const getCostText = (end: keyof VcuRange, vcus: number): string =>
-  end === 'atRest'
-    ? i18n.translate('xpack.boost.costEstimate.atRestCost', {
-        defaultMessage: '{cost} at rest',
-        values: { cost: formatCost(vcus) },
-      })
-    : i18n.translate('xpack.boost.costEstimate.atPeakCost', {
-        defaultMessage: '{cost} at peak',
-        values: { cost: formatCost(vcus) },
-      });
-
-const getVcusText = (vcus: number): string =>
-  i18n.translate('xpack.boost.costEstimate.vcus', {
-    defaultMessage: '{value} {count, plural, one {VCU} other {VCUs}}',
-    values: { value: formatVcus(vcus), count: vcus },
-  });
 
 interface ChangeIndicatorProps {
   vcus: number;
@@ -187,13 +135,93 @@ const EstimateValue = ({ end, estimate, comparison }: EstimateValueProps) => {
   );
 };
 
+interface RangeChangeIndicatorProps {
+  range: VcuRange;
+  savedRange: VcuRange;
+}
+
+/** Whether a range moved up (costs more) or down (costs less) from today's, led by its peak. */
+const RangeChangeIndicator = ({ range, savedRange }: RangeChangeIndicatorProps) => {
+  const isHigher =
+    range.atPeak !== savedRange.atPeak
+      ? range.atPeak > savedRange.atPeak
+      : range.atRest > savedRange.atRest;
+  const savedCost = formatCostRange(savedRange);
+
+  return (
+    <EuiIconTip
+      type={isHigher ? 'sortUp' : 'sortDown'}
+      color={isHigher ? 'danger' : 'success'}
+      display="flex"
+      content={i18n.translate('xpack.boost.costEstimate.previousRange', {
+        defaultMessage: 'Previously {cost}',
+        values: { cost: savedCost },
+      })}
+      aria-label={
+        isHigher
+          ? i18n.translate('xpack.boost.costEstimate.rangeHigherThanSaved', {
+              defaultMessage: 'Up from {cost}',
+              values: { cost: savedCost },
+            })
+          : i18n.translate('xpack.boost.costEstimate.rangeLowerThanSaved', {
+              defaultMessage: 'Down from {cost}',
+              values: { cost: savedCost },
+            })
+      }
+    />
+  );
+};
+
+interface RangeValueProps {
+  estimate: VcuRange;
+  comparison?: VcuRange;
+}
+
+/** The whole range, from at rest to at peak, with any change indicator and the VCUs below. */
+const RangeValue = ({ estimate, comparison }: RangeValueProps) => {
+  const range = { atRest: roundVcus(estimate.atRest), atPeak: roundVcus(estimate.atPeak) };
+  const savedRange = comparison && {
+    atRest: roundVcus(comparison.atRest),
+    atPeak: roundVcus(comparison.atPeak),
+  };
+  const hasChanged =
+    savedRange !== undefined &&
+    (savedRange.atRest !== range.atRest || savedRange.atPeak !== range.atPeak);
+
+  return (
+    <div data-test-subj="boostCostEstimate-range">
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiText size="s">
+            <span aria-hidden={true}>{formatCostRange(range)}</span>
+            <EuiScreenReaderOnly>
+              <span>{getCostRangeLabel(range)}</span>
+            </EuiScreenReaderOnly>
+          </EuiText>
+        </EuiFlexItem>
+        {hasChanged && savedRange && (
+          <EuiFlexItem grow={false}>
+            <RangeChangeIndicator range={range} savedRange={savedRange} />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+      <EuiText size="xs" color="subdued">
+        {getVcuRangeText(range)}
+      </EuiText>
+    </div>
+  );
+};
+
 interface EstimateContentProps {
   estimate: ShownEstimate;
   isStale: boolean;
   showChange: boolean;
 }
 
-/** The estimate's title, what it covers, and its values. */
+/**
+ * The estimate's title, what it covers, and its values. For data streams, the whole range sits beside
+ * the title, and a timeline below splits it between the profile's periods.
+ */
 const EstimateContent = ({
   estimate: { impact, type },
   isStale,
@@ -202,94 +230,115 @@ const EstimateContent = ({
   const { euiTheme } = useEuiTheme();
   const { next: estimate, dataSourceCount, sizeInBytes } = impact;
   const comparison = showChange ? impact.current : undefined;
+  const periods = type === 'data_streams' ? impact.periods : undefined;
 
   return (
-    <EuiFlexGroup
-      gutterSize="s"
-      alignItems="flexStart"
-      justifyContent="spaceBetween"
-      responsive={false}
-      wrap
+    <div
       css={{
-        // Matches the height of the small buttons below the divider, so both halves of the
-        // footer are the same height.
-        minBlockSize: euiTheme.size.xl,
         // A stale estimate is faded; EUI has no opacity token.
         opacity: isStale ? 0.5 : 1,
         transition: `opacity ${euiTheme.animation.fast}`,
       }}
     >
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">
-              <strong>
-                {i18n.translate('xpack.boost.costEstimate.title', {
-                  defaultMessage: 'Search cost per hour',
-                })}
-              </strong>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiIconTip
-              type="info"
-              color="subdued"
-              // A flex anchor sizes to the icon, so the row's flex alignment centers it. The
-              // default inline-block anchor gets a line box from the inherited font, which
-              // offsets the icon.
-              display="flex"
-              content={COST_DISCLAIMER}
-              aria-label={i18n.translate('xpack.boost.costEstimate.disclaimerLabel', {
-                defaultMessage: 'About this estimate',
-              })}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiText size="xs" color="subdued">
-          {i18n.translate('xpack.boost.costEstimate.subtitle', {
-            defaultMessage: '{targets} · {size}',
-            values: {
-              targets: formatDataSourceCount(type, dataSourceCount),
-              size: formatSize(sizeInBytes),
-            },
-          })}
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <div aria-live="polite">
-          {isStale && (
-            <EuiScreenReaderOnly>
-              <span>
-                {i18n.translate('xpack.boost.costEstimate.staleLabel', {
-                  defaultMessage: 'Last available estimate:',
-                })}
-              </span>
-            </EuiScreenReaderOnly>
-          )}
-          <EuiFlexGroup
-            // 16px around the divider, between EUI's 12px and 24px gutters.
-            gutterSize="none"
-            alignItems="flexStart"
-            responsive={false}
-            wrap
-            css={{ gap: euiTheme.size.base }}
-          >
+      <EuiFlexGroup
+        gutterSize="s"
+        alignItems="flexStart"
+        justifyContent="spaceBetween"
+        responsive={false}
+        wrap
+        css={{
+          // Matches the height of the small buttons below the divider, so both halves of the
+          // footer are the same height.
+          minBlockSize: euiTheme.size.xl,
+        }}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EstimateValue end="atRest" estimate={estimate} comparison={comparison} />
+              <EuiText size="s">
+                <strong>
+                  {i18n.translate('xpack.boost.costEstimate.title', {
+                    defaultMessage: 'Search cost per hour',
+                  })}
+                </strong>
+              </EuiText>
             </EuiFlexItem>
-            {/* Decorative divider, as tall as the values beside it; EUI has no vertical rule. */}
-            <EuiFlexItem
-              grow={false}
-              aria-hidden={true}
-              css={{ alignSelf: 'stretch', borderInlineStart: euiTheme.border.thin }}
-            />
             <EuiFlexItem grow={false}>
-              <EstimateValue end="atPeak" estimate={estimate} comparison={comparison} />
+              <EuiIconTip
+                type="info"
+                color="subdued"
+                // A flex anchor sizes to the icon, so the row's flex alignment centers it. The
+                // default inline-block anchor gets a line box from the inherited font, which
+                // offsets the icon.
+                display="flex"
+                content={COST_DISCLAIMER}
+                aria-label={i18n.translate('xpack.boost.costEstimate.disclaimerLabel', {
+                  defaultMessage: 'About this estimate',
+                })}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
-        </div>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+          <EuiText size="xs" color="subdued">
+            {i18n.translate('xpack.boost.costEstimate.subtitle', {
+              defaultMessage: '{targets} · {size}',
+              values: {
+                targets: formatDataSourceCount(type, dataSourceCount),
+                size: formatSize(sizeInBytes),
+              },
+            })}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <div aria-live="polite">
+            {isStale && (
+              <EuiScreenReaderOnly>
+                <span>
+                  {i18n.translate('xpack.boost.costEstimate.staleLabel', {
+                    defaultMessage: 'Last available estimate:',
+                  })}
+                </span>
+              </EuiScreenReaderOnly>
+            )}
+            {periods ? (
+              <RangeValue estimate={estimate} comparison={comparison} />
+            ) : (
+              <EuiFlexGroup
+                // 16px around the divider, between EUI's 12px and 24px gutters.
+                gutterSize="none"
+                alignItems="flexStart"
+                responsive={false}
+                wrap
+                css={{ gap: euiTheme.size.base }}
+              >
+                <EuiFlexItem grow={false}>
+                  <EstimateValue end="atRest" estimate={estimate} comparison={comparison} />
+                </EuiFlexItem>
+                {/* Decorative divider, as tall as the values beside it; EUI has no vertical rule. */}
+                <EuiFlexItem
+                  grow={false}
+                  aria-hidden={true}
+                  css={{ alignSelf: 'stretch', borderInlineStart: euiTheme.border.thin }}
+                />
+                <EuiFlexItem grow={false}>
+                  <EstimateValue end="atPeak" estimate={estimate} comparison={comparison} />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            )}
+          </div>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {periods && (
+        <>
+          <EuiSpacer size="s" />
+          <DataStreamTimeline
+            maxAges={periods.maxAges}
+            estimates={periods.estimates}
+            showsCost
+            testSubj="boostCostEstimateTimeline"
+          />
+        </>
+      )}
+    </div>
   );
 };
 

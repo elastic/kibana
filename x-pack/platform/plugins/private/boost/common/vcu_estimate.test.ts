@@ -22,9 +22,8 @@ import {
   estimateDataSourceVcuRange,
   estimateDataSourcesVcuRange,
   estimateDataStreamVcuRange,
-  getDataStreamPeriodSizes,
+  estimateDataStreamPeriods,
   estimateIndicesVcuRange,
-  estimateProfileImpact,
   estimateRuleCost,
 } from './vcu_estimate';
 
@@ -124,8 +123,8 @@ describe('estimateDataStreamVcuRange', () => {
   });
 });
 
-describe('getDataStreamPeriodSizes', () => {
-  it("sorts data streams' data into the profile's periods by age", () => {
+describe('estimateDataStreamPeriods', () => {
+  it("sorts data streams' data into the profile's periods by age, with each one's VCUs", () => {
     const logs: BoostDataSource = {
       name: 'logs-app',
       type: 'data_stream',
@@ -139,11 +138,19 @@ describe('getDataStreamPeriodSizes', () => {
     // Without a breakdown, all of a data stream's data counts as new.
     const metrics: BoostDataSource = { name: 'metrics', type: 'data_stream', size_in_bytes: GB };
 
-    expect(getDataStreamPeriodSizes(streams, [logs, metrics])).toEqual({
-      recent: 2 * GB,
-      standard: 2 * GB,
-      background: 3 * GB,
-    });
+    const periods = estimateDataStreamPeriods(streams, [logs, metrics]);
+
+    expect(periods.recent.sizeInBytes).toBe(2 * GB);
+    expect(periods.standard.sizeInBytes).toBe(2 * GB);
+    expect(periods.background.sizeInBytes).toBe(3 * GB);
+    // The periods split the data stream's estimate between them.
+    const total = estimateDataStreamVcuRange(streams, [
+      ...(logs.data_ages ?? []),
+      { age_hours: 0, size_in_bytes: GB },
+    ]);
+    expect(
+      periods.recent.vcus.atPeak + periods.standard.vcus.atPeak + periods.background.vcus.atPeak
+    ).toBeCloseTo(total.atPeak);
   });
 });
 
@@ -289,28 +296,36 @@ describe('cost impacts', () => {
     expect(cost.current.atRest).toBeCloseTo(atRest(products, fast));
   });
 
-  it('compares an edited profile across the data its rules apply to', () => {
-    const faster = { ...fast, min_boost: 8 };
-    const impact = estimateProfileImpact({
-      dataSources,
-      rules: [...defaultRules, rule(['products'])],
-      profiles,
-      nextProfile: faster,
+  it("splits a data streams rule's estimate by its profile's periods", () => {
+    const clicks: BoostDataSource = {
+      name: 'clicks',
+      type: 'data_stream',
+      size_in_bytes: 3 * GB,
+      data_ages: [
+        { age_hours: 2, size_in_bytes: 1 * GB },
+        { age_hours: 24 * 30, size_in_bytes: 2 * GB },
+      ],
+    };
+    const cost = estimateRuleCost({
+      dataSources: [...dataSources, clicks],
+      rules: defaultRules,
+      profiles: [...profiles, { ...streams, is_builtin: false }],
+      nextRule: { ...rule(['clicks']), boost_profile: 'streams' },
     });
 
-    expect(impact.dataSourceCount).toBe(1);
-    expect(impact.current.atRest).toBeCloseTo(atRest(products, fast));
-    expect(impact.next.atRest).toBeCloseTo(atRest(products, faster));
+    expect(cost.periods?.maxAges).toEqual({ recent: '1d', standard: '7d' });
+    expect(cost.periods?.estimates.recent.sizeInBytes).toBe(1 * GB);
+    expect(cost.periods?.estimates.background.sizeInBytes).toBe(2 * GB);
   });
 
-  it('has no impact for a profile that no rule applies', () => {
-    const impact = estimateProfileImpact({
+  it('has no periods for an indices rule', () => {
+    const cost = estimateRuleCost({
       dataSources,
       rules: defaultRules,
       profiles,
-      nextProfile: fast,
+      nextRule: rule(['products']),
     });
 
-    expect(impact.dataSourceCount).toBe(0);
+    expect(cost.periods).toBeUndefined();
   });
 });
