@@ -170,6 +170,38 @@ describe('resolveAgentIdsTool', () => {
     expect(data.guidance).toBeUndefined();
   });
 
+  it('resolves a degraded agent and prefers it over a newer offline enrollment', async () => {
+    // Fleet's Osquery dispatch path (parse_agent_groups) accepts online and
+    // degraded agents; a degraded agent is checking in and can run a query.
+    const { context } = buildContext([
+      buildAgent({
+        id: 'degraded-live',
+        status: 'degraded',
+        enrolled_at: '2026-07-17T10:00:00.000Z',
+      }),
+      buildAgent({
+        id: 'offline-newer',
+        status: 'offline',
+        enrolled_at: '2026-07-17T13:00:00.000Z',
+      }),
+    ]);
+
+    const tool = resolveAgentIdsTool(context, loggerMock.create());
+    const result = await tool.handler({ hostnames: ['SRV-DC01'] }, {
+      request: {},
+      spaceId: 'default',
+    } as any);
+
+    expect(getResultData(result).resolved).toEqual([
+      {
+        hostname: 'SRV-DC01',
+        agent_id: 'degraded-live',
+        status: 'degraded',
+        osquery_capable: true,
+      },
+    ]);
+  });
+
   it('falls back to the most recently enrolled agent when none are online', async () => {
     const { context } = buildContext([
       buildAgent({ id: 'older', status: 'offline', enrolled_at: '2026-07-17T10:00:00.000Z' }),

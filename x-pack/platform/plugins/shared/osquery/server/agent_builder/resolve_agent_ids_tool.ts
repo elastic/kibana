@@ -211,8 +211,8 @@ export const resolveAgentIdsTool = (
         );
 
         const best = [...matches].sort((a, b) => {
-          const aOnline = a.status === 'online' ? 1 : 0;
-          const bOnline = b.status === 'online' ? 1 : 0;
+          const aOnline = a.status === 'online' || a.status === 'degraded' ? 1 : 0;
+          const bOnline = b.status === 'online' || b.status === 'degraded' ? 1 : 0;
           if (aOnline !== bOnline) return bOnline - aOnline;
 
           return (b.enrolled_at ?? '').localeCompare(a.enrolled_at ?? '');

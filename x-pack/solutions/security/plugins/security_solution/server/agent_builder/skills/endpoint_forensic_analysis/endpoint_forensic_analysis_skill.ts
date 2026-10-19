@@ -237,10 +237,16 @@ Where the indicators go depends on how you were asked to answer:
   Echo each \`value\` verbatim. Source event is the indicator's \`comment\`, enriched from the reconstruction.
   First seen is the earliest timestamp you have for that indicator; use "—" when you do not have one.
   Surface every category listed above; if a category has no hits, show one row with Value "—".
+  If the tool result contains an \`error\` field, do NOT report "no indicators found" — say the extraction failed,
+  report the error, and answer from the telemetry you already have.
 - Answering with a structured output schema that has an indicators field: that field is the categories
   themselves, each a list of \`{ value, comment }\`. \`comment\` carries the same detail you would have written
   for an analyst — do not shorten it to a label because it is going into a structured field. Omit a category
   entirely when the reconstruction found nothing in it. Do not also render the indicators in a free-text field.
+
+Do not automatically put observed network destinations in \`ips\`. The tool returns them separately in
+\`observed_network_destinations\`; host/time scope alone does not establish compromise. Add only destinations
+corroborated by the reconstructed attack to the \`ips\` category.
 
 ### 6. Lateral movement
 
@@ -318,8 +324,9 @@ When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`s
       type: ToolType.builtin,
       description:
         'Extract structured indicators of compromise (IoCs) from Defend telemetry for named host(s). ' +
-        'Returns indicators grouped by category — shas, ips, file_paths, malicious_commands, affected_hosts — ' +
-        `each a deduplicated list of { value, comment }, capped at ${MAX_IOCS_PER_CATEGORY} per category. ` +
+        'Returns indicators grouped by category — shas, file_paths, malicious_commands, affected_hosts — ' +
+        `each a deduplicated list of { value, comment }, capped at ${MAX_IOCS_PER_CATEGORY} per category, ` +
+        'plus observed network destinations that require attack correlation before adding them to ips. ' +
         'Call this after forensic reconstruction to produce the indicators for cross-environment hunts and ' +
         'response actions. It only returns what telemetry fields can be typed mechanically — add ransom notes, ' +
         'encryption markers, and compromised identities from your own analysis.',
@@ -332,7 +339,7 @@ When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`s
         const esqlQuery = [
           `FROM logs-endpoint.events.process-*, logs-endpoint.events.network-*, logs-endpoint.events.file-*, logs-endpoint.events.registry-*`,
           `| WHERE host.name IN (${hostFilter}) AND @timestamp >= NOW() - ${timeWindowHours} HOURS`,
-          `| KEEP process.hash.sha256, process.executable, process.name, process.command_line, process.parent.name, process.parent.command_line, destination.ip, destination.domain, registry.path, registry.value, file.path, user.name, event.action, host.name, @timestamp`,
+          `| KEEP process.hash.sha256, file.hash.sha256, process.executable, process.name, process.command_line, process.parent.name, process.parent.command_line, destination.ip, destination.domain, registry.path, registry.value, file.path, user.name, event.action, host.name, @timestamp`,
           `| SORT @timestamp ASC`,
           `| LIMIT 500`,
         ].join(' ');
@@ -340,6 +347,7 @@ When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`s
         // One map per category, keyed by value so a repeated indicator keeps the first comment it
         // was given — which, because the query sorts ascending, is its earliest occurrence.
         const byCategory = new Map<ExtractedIocCategory, Map<string, InvestigationIoc>>();
+        const observedNetworkDestinations: string[] = [];
 
         const addIndicator = (category: ExtractedIocCategory, value: unknown, comment?: string) => {
           if (typeof value !== 'string' || value === '') {
@@ -365,6 +373,7 @@ When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`s
           const colIndex = (name: string) => columns.findIndex((c) => c.name === name);
 
           const hashIdx = colIndex('process.hash.sha256');
+          const fileHashIdx = colIndex('file.hash.sha256');
           const exeIdx = colIndex('process.executable');
           const processNameIdx = colIndex('process.name');
           const cmdIdx = colIndex('process.command_line');
@@ -389,6 +398,7 @@ When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`s
 
             const host = asText(hostIdx);
             const exe = asText(exeIdx);
+            const filePath = asText(filePathIdx);
             const processName = asText(processNameIdx) ?? exe;
             const parentName = asText(parentNameIdx);
             const user = asText(userIdx);
@@ -409,15 +419,34 @@ When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`s
               exe ? `SHA256 of ${exe}${seenOn}` : `Observed${seenOn}`.trim()
             );
             addIndicator(
-              'ips',
-              at(ipIdx),
-              `Outbound destination contacted${seenOn}${actor ? ` ${actor}` : ''}`
+              'shas',
+              at(fileHashIdx),
+              filePath
+                ? `SHA256 of ${filePath}${seenOn}`
+                : `Observed in file telemetry${seenOn}`.trim()
             );
-            addIndicator(
-              'ips',
-              at(domainIdx),
-              `Domain resolved and contacted${seenOn}${actor ? ` ${actor}` : ''}`
-            );
+
+            const addObservedNetworkDestination = (value: unknown) => {
+              if (
+                typeof value !== 'string' ||
+                value === '' ||
+                observedNetworkDestinations.includes(value) ||
+                observedNetworkDestinations.length >= MAX_IOCS_PER_CATEGORY
+              ) {
+                return;
+              }
+              observedNetworkDestinations.push(value);
+            };
+            const destinationIp = asText(ipIdx);
+            if (
+              destinationIp &&
+              !/^(10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[01])\.|127\.|0\.|169\.254\.|::1|fe80:|224\.|239\.)/i.test(
+                destinationIp
+              )
+            ) {
+              addObservedNetworkDestination(destinationIp);
+            }
+            addObservedNetworkDestination(at(domainIdx));
             addIndicator(
               'file_paths',
               exe,
@@ -425,7 +454,7 @@ When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`s
             );
             addIndicator(
               'file_paths',
-              at(filePathIdx),
+              filePath,
               `${action ? `File ${action}` : 'File touched'}${seenOn}${actor ? ` ${actor}` : ''}`
             );
             addIndicator(
@@ -472,14 +501,16 @@ When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`s
                 ...iocs,
                 scoped_hosts: hosts,
                 time_window_hours: timeWindowHours,
+                observed_network_destinations: observedNetworkDestinations,
                 ...(queryError ? { error: queryError } : {}),
                 guidance: queryError
                   ? 'The extraction query failed, so no categories were returned for that reason and not ' +
                     'because the hosts were clean. Fall back to the indicators you identified during reconstruction.'
                   : 'These categories are deduplicated — echo the values verbatim rather than rewriting or ' +
-                    'merging them, and enrich each comment with what your reconstruction established. They are ' +
-                    'a floor, not the full set: this query can only type telemetry fields mechanically, so add ' +
-                    'the ransom_note, encryption_marker, and compromised_identities categories yourself.',
+                    'merging them, and enrich each comment with what your reconstruction established. Observed ' +
+                    'network destinations require attack correlation before adding them to ips. The categories ' +
+                    'are a floor, not the full set: add ransom notes, encryption markers, and compromised identities ' +
+                    'from the reconstruction.',
               },
             },
           ],

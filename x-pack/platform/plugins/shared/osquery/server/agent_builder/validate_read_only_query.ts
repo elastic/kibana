@@ -79,54 +79,113 @@ const NON_READ_ONLY_TABLES = new Set([
   'wifi_survey',
 ]);
 
-/**
- * Table references in a FROM/JOIN clause, including comma-separated lists and
- * parenthesized subqueries.
- *
- * `FROM processes, shell` is two table references. Matching only the first
- * identifier after FROM validates `processes` and lets `shell` through
- * unchecked. A table nested in a subquery — `WHERE pid IN (SELECT 1 FROM curl
- * WHERE ...)` — must also be extracted, or it escapes both the catalog
- * allowlist and NON_READ_ONLY_TABLES.
- *
- * Set operators (UNION / EXCEPT / INTERSECT) terminate a clause like WHERE
- * does, so each branch's tables are extracted.
- */
-const extractTableRefs = (sql: string): string[] => {
-  const refs: string[] = [];
-  // The capture stops at the next clause keyword OR at a paren boundary, but
-  // the lookahead consumes nothing — so the global match resumes inside the
-  // parenthesized group and finds FROM/JOIN at every nesting level. Without
-  // the `[()]` boundary a table immediately before `)` is dropped entirely.
-  const clauseRe =
-    /\b(?:FROM|JOIN)(?:\s+|(?=[`"[]))([^()]*?)(?=\b(?:WHERE|GROUP|ORDER|LIMIT|HAVING|UNION|EXCEPT|INTERSECT|JOIN|ON|USING)\b|[()]|$)/gi;
+const TOKEN_RE =
+  /\s+|"(?:[^"]|"")*"|`(?:[^`]|``)*`|\[[^\]]*\]|[A-Za-z_][A-Za-z0-9_$]*|\d[\w.]*|[\s\S]/g;
+const IDENTIFIER_RE = /^(?:[A-Za-z_]|["`[])/;
+/** Keywords that end the table list of the SELECT they appear in. */
+const FROM_LIST_TERMINATORS = new Set([
+  'WHERE',
+  'GROUP',
+  'ORDER',
+  'LIMIT',
+  'HAVING',
+  'WINDOW',
+  'UNION',
+  'EXCEPT',
+  'INTERSECT',
+  'SELECT',
+]);
+const SUBQUERY_STARTS = new Set(['SELECT', 'WITH', 'VALUES']);
 
-  for (const clause of sql.matchAll(clauseRe)) {
-    for (const item of clause[1].split(',')) {
-      // First reference of each item; drops any alias (`processes p`,
-      // `processes AS p`). A reference is a chain of dot-separated segments
-      // where each segment may be quoted independently (`main`.`curl`,
-      // [main].[curl], "main".curl) — one optional quote wrapper per segment,
-      // not per reference. `physicalTableName` resolves the last segment.
-      const quotedSegment =
-        '((?:[`"\\[])[a-zA-Z_][a-zA-Z0-9_]*(?:[`"\\]])?|[a-zA-Z_][a-zA-Z0-9_]*)';
-      const match = item
-        .trim()
-        .match(new RegExp(`^(${quotedSegment}(?:\\s*\\.\\s*${quotedSegment})*)`));
-      if (match) {
-        refs.push(
-          match[1]
-            .split('.')
-            .map((segment) => segment.trim().replace(/^[\s`"[]+|[\s`"\]]+$/g, ''))
-            .filter(Boolean)
-            .join('.')
-            .toLowerCase()
-        );
+interface Scope {
+  /** Between FROM/JOIN and the clause that ends the table list. */
+  inFromList: boolean;
+  /** The next token begins a table-or-subquery. */
+  expectTable: boolean;
+}
+
+interface TableRefExtraction {
+  refs: string[];
+  /** Set when the FROM clause has a shape this scanner cannot inspect. */
+  unsupported?: string;
+}
+
+const unquoteIdentifier = (token: string): string =>
+  token.replace(/^[`"[]/, '').replace(/[`"\]]$/, '');
+
+/**
+ * Table references in every FROM/JOIN clause, at every parenthesis depth.
+ *
+ * The scan is a token walk with one scope per parenthesis level, because the
+ * table list of a SELECT is not contiguous text: `FROM a JOIN b ON x, c`,
+ * `FROM (SELECT 1 FROM a), c` and `FROM a JOIN b USING (id), c` all name `c`
+ * after the point where a flat clause regex has stopped looking. A reference
+ * the scan never sees escapes both the catalog allowlist and
+ * NON_READ_ONLY_TABLES.
+ *
+ * A parenthesized table factor that is not a subquery — `JOIN (curl AS c)`,
+ * `FROM ((curl))` — is valid SQLite and names a table through the parentheses,
+ * so it is reported as `unsupported` and rejected rather than guessed at.
+ */
+const extractTableRefs = (sql: string): TableRefExtraction => {
+  const tokens = (sql.match(TOKEN_RE) ?? []).filter((token) => token.trim() !== '');
+  const refs: string[] = [];
+  const scopes: Scope[] = [{ inFromList: false, expectTable: false }];
+
+  for (let i = 0; i < tokens.length; i++) {
+    const token = tokens[i];
+    const word = token.toUpperCase();
+    const scope = scopes[scopes.length - 1];
+
+    if (token === '(') {
+      if (scope.expectTable) {
+        let next = i;
+        while (tokens[next] === '(') next++;
+        if (!SUBQUERY_STARTS.has((tokens[next] ?? '').toUpperCase())) {
+          return {
+            refs,
+            unsupported:
+              'Parenthesized table references other than subqueries are not supported. Name each table directly after FROM / JOIN.',
+          };
+        }
       }
+
+      scope.expectTable = false;
+      scopes.push({ inFromList: false, expectTable: false });
+    } else if (token === ')') {
+      if (scopes.length === 1) {
+        return { refs, unsupported: 'Query has unbalanced parentheses.' };
+      }
+
+      scopes.pop();
+    } else if (token === ',') {
+      if (scope.inFromList) scope.expectTable = true;
+    } else if (word === 'FROM' && (tokens[i - 1] ?? '').toUpperCase() === 'DISTINCT') {
+      // `a IS DISTINCT FROM b` is a comparison, not a table list.
+    } else if (word === 'FROM' || word === 'JOIN') {
+      scope.inFromList = true;
+      scope.expectTable = true;
+    } else if (FROM_LIST_TERMINATORS.has(word)) {
+      scope.inFromList = false;
+      scope.expectTable = false;
+    } else if (word === 'ON' || word === 'USING') {
+      scope.expectTable = false;
+    } else if (scope.expectTable && IDENTIFIER_RE.test(token)) {
+      // Dot-separated chain, each segment independently quoted
+      // (`main`.`curl`, [main].[curl], "main".curl). `physicalTableName`
+      // resolves the last segment.
+      const segments = [unquoteIdentifier(token)];
+      while (tokens[i + 1] === '.' && IDENTIFIER_RE.test(tokens[i + 2] ?? '')) {
+        segments.push(unquoteIdentifier(tokens[i + 2]));
+        i += 2;
+      }
+
+      refs.push(segments.join('.').toLowerCase());
+      scope.expectTable = false;
     }
   }
 
-  return refs;
+  return scopes.length > 1 ? { refs, unsupported: 'Query has unbalanced parentheses.' } : { refs };
 };
 
 /**
@@ -198,7 +257,10 @@ export const validateReadOnlyQuery = (
     ].map((m) => m[1].toLowerCase())
   );
 
-  const tableRefs = extractTableRefs(scannable);
+  const { refs: tableRefs, unsupported } = extractTableRefs(scannable);
+  if (unsupported) {
+    return unsupported;
+  }
 
   if (tableRefs.length === 0) {
     return 'Query must reference at least one Osquery table via FROM / JOIN';

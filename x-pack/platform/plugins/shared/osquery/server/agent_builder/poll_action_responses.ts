@@ -107,16 +107,12 @@ const extractRowFromHit = (source: Record<string, unknown>): Record<string, unkn
   const row = nested ?? source;
   const provenance = extractRowProvenance(source);
 
-  // Only fill keys the SQL row does not already define: provenance must never
-  // overwrite a column the query itself selected.
-  const missingProvenance = Object.fromEntries(
-    Object.entries(provenance).filter(([key]) => !(key in row))
-  );
-
+  // Provenance rows carry the SQL columns exactly once, under `osquery`; the
+  // trusted host identity sits beside them in `_agent` so a SQL alias can never
+  // replace it. Spreading the columns at the top level as well would serialize
+  // every row twice into the tool result and the conversation context.
   return Object.keys(provenance).length > 0
     ? {
-        ...row,
-        ...missingProvenance,
         _agent: { id: provenance.agent_id, name: provenance.agent_name },
         osquery: row,
       }

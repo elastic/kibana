@@ -31,7 +31,6 @@ const OSQUERY_LIST_PACKS = 'osquery.list_packs' as const;
 const OSQUERY_GET_TABLE_SCHEMA = 'osquery.get_table_schema' as const;
 const OSQUERY_RESOLVE_AGENT_IDS = 'osquery.resolve_agent_ids' as const;
 const OSQUERY_RUN_LIVE_QUERY = 'osquery.run_live_query' as const;
-const OSQUERY_GET_LIVE_QUERY_RESULTS = 'osquery.get_live_query_results' as const;
 
 evaluate.describe(
   'Endpoint Forensic Analysis — Osquery live state',
@@ -94,7 +93,6 @@ evaluate.describe(
                     OSQUERY_GET_TABLE_SCHEMA,
                     OSQUERY_RESOLVE_AGENT_IDS,
                     OSQUERY_RUN_LIVE_QUERY,
-                    OSQUERY_GET_LIVE_QUERY_RESULTS,
                   ],
                 },
                 metadata: {
@@ -134,7 +132,6 @@ evaluate.describe(
                     OSQUERY_LIST_PACKS,
                     OSQUERY_RESOLVE_AGENT_IDS,
                     OSQUERY_RUN_LIVE_QUERY,
-                    OSQUERY_GET_LIVE_QUERY_RESULTS,
                   ],
                 },
                 metadata: {
@@ -173,7 +170,6 @@ evaluate.describe(
                     OSQUERY_LIST_SAVED_QUERIES,
                     OSQUERY_RESOLVE_AGENT_IDS,
                     OSQUERY_RUN_LIVE_QUERY,
-                    OSQUERY_GET_LIVE_QUERY_RESULTS,
                   ],
                 },
                 metadata: {
@@ -211,7 +207,6 @@ evaluate.describe(
                   OSQUERY_GET_TABLE_SCHEMA,
                   OSQUERY_RESOLVE_AGENT_IDS,
                   OSQUERY_RUN_LIVE_QUERY,
-                  OSQUERY_GET_LIVE_QUERY_RESULTS,
                 ],
               },
               metadata: {

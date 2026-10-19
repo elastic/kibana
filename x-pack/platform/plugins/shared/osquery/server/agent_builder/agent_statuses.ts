@@ -11,4 +11,10 @@
  * enrolments survive it while being unable to run anything. Kept in its own
  * module so tools and availability gates can share it without import cycles.
  */
-export const EXECUTABLE_AGENT_STATUSES = new Set(['online', 'offline', 'enrolling', 'updating']);
+export const EXECUTABLE_AGENT_STATUSES = new Set([
+  'online',
+  'degraded',
+  'offline',
+  'enrolling',
+  'updating',
+]);

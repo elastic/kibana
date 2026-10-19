@@ -5,18 +5,23 @@
  * 2.0.
  */
 
+import Os from 'os';
 import Path from 'path';
 import { v4 as uuid } from 'uuid';
 import { createPlaywrightEvalsConfig } from '@kbn/evals';
 
-// Use a unique absolute state path outside the checkout for each isolated stack invocation.
-if (!process.env.OSQUERY_TRAP_STATE_PATH || !Path.isAbsolute(process.env.OSQUERY_TRAP_STATE_PATH)) {
-  throw new Error(
-    'OSQUERY_TRAP_STATE_PATH must be an absolute, unused file path outside the checkout'
-  );
+process.env.OSQUERY_TRAP_RUN_ID ??= uuid();
+// The registered Buildkite suite does not set a state path, so default to a
+// unique file in the OS temp dir (outside the checkout). Playwright workers
+// inherit the env set here, so every process agrees on one path per invocation.
+process.env.OSQUERY_TRAP_STATE_PATH ??= Path.join(
+  Os.tmpdir(),
+  `osquery-trap-state-${process.env.OSQUERY_TRAP_RUN_ID}.json`
+);
+if (!Path.isAbsolute(process.env.OSQUERY_TRAP_STATE_PATH)) {
+  throw new Error('OSQUERY_TRAP_STATE_PATH must be an absolute file path outside the checkout');
 }
 
-process.env.OSQUERY_TRAP_RUN_ID ??= uuid();
 const relativeStatePath = Path.relative(
   Path.resolve(__dirname, '../../../../../..'),
   process.env.OSQUERY_TRAP_STATE_PATH

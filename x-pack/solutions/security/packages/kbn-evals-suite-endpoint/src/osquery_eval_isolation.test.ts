@@ -97,6 +97,48 @@ describe('Endpoint Osquery eval isolation', () => {
     ).toBe(true);
   });
 
+  it('checks the trap precondition against the registered osquery tool id', () => {
+    const trapSpec = read(
+      'x-pack/solutions/security/packages/kbn-evals-suite-endpoint/evals_trap/endpoint_forensic_analysis/endpoint_forensic_analysis_osquery_trap.spec.ts'
+    );
+
+    // The Osquery tools register under the top-level `osquery` namespace; a
+    // `security.`-prefixed id never matches, so beforeAll would always throw.
+    expect(trapSpec).toContain("tool.id === 'osquery.check_integration'");
+    expect(trapSpec).not.toContain('security.osquery.');
+  });
+
+  it('loads the trap Playwright config without a pre-provisioned state path', () => {
+    const saved = {
+      state: process.env.OSQUERY_TRAP_STATE_PATH,
+      runId: process.env.OSQUERY_TRAP_RUN_ID,
+    };
+    delete process.env.OSQUERY_TRAP_STATE_PATH;
+    delete process.env.OSQUERY_TRAP_RUN_ID;
+    try {
+      jest.isolateModules(() => {
+        // Only the state-path handling is under test, not connector discovery.
+        jest.doMock('@kbn/evals', () => ({
+          createPlaywrightEvalsConfig: () => ({ projects: [{ name: 'model', use: {} }] }),
+        }));
+        expect(() => require('../playwright.osquery_trap.config')).not.toThrow();
+      });
+      // `delete` above narrows the property to `undefined`; read through a map.
+      const env: Record<string, string | undefined> = process.env;
+      const statePath = env.OSQUERY_TRAP_STATE_PATH ?? '';
+      expect(Path.isAbsolute(statePath)).toBe(true);
+      expect(statePath).toContain(env.OSQUERY_TRAP_RUN_ID ?? 'missing-run-id');
+    } finally {
+      for (const [key, value] of [
+        ['OSQUERY_TRAP_STATE_PATH', saved.state],
+        ['OSQUERY_TRAP_RUN_ID', saved.runId],
+      ] as const) {
+        if (value === undefined) delete process.env[key];
+        else process.env[key] = value;
+      }
+    }
+  });
+
   it('keeps the no-Osquery fallback golden in the base endpoint suite', () => {
     const baseSmoke = read(
       'x-pack/solutions/security/packages/kbn-evals-suite-endpoint/evals/endpoint_forensic_analysis/endpoint_forensic_analysis_smoke.spec.ts'
@@ -124,10 +166,10 @@ describe('Endpoint Osquery eval isolation', () => {
       expect(sequence.indexOf('OSQUERY_RESOLVE_AGENT_IDS')).toBeLessThan(
         sequence.indexOf('OSQUERY_RUN_LIVE_QUERY')
       );
-      expect(sequence).toContain('OSQUERY_GET_LIVE_QUERY_RESULTS');
-      expect(sequence.indexOf('OSQUERY_RUN_LIVE_QUERY')).toBeLessThan(
-        sequence.indexOf('OSQUERY_GET_LIVE_QUERY_RESULTS')
-      );
+      // `run_live_query` polls inline and returns rows when agents answer in
+      // time, so `get_live_query_results` is a conditional follow-up. Requiring
+      // it in the golden path would cap the score of a valid completed result.
+      expect(sequence).not.toContain('OSQUERY_GET_LIVE_QUERY_RESULTS');
     }
   });
 });

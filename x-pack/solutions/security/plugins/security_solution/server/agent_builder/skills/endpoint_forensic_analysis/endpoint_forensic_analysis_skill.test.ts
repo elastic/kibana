@@ -64,6 +64,61 @@ describe('endpointForensicAnalysisSkill', () => {
     expect(endpointForensicAnalysisSkill.content).toContain('Do not also render the indicators');
   });
 
+  it('extract_iocs reads file.hash.sha256 from file events into structured hash indicators', async () => {
+    const inlineTools = (await endpointForensicAnalysisSkill.getInlineTools?.()) ?? [];
+    const extractIocs = inlineTools.find(
+      (tool) => tool.id === 'security.endpoint_forensic.extract_iocs'
+    ) as { handler: (args: unknown, context: unknown) => Promise<unknown> };
+    // A dropped payload: the file event has a hash but no process of its own.
+    const esqlQuery = jest.fn().mockResolvedValue({
+      columns: [{ name: 'file.hash.sha256' }, { name: '@timestamp' }],
+      values: [['dropped-payload-hash', '2026-01-01T00:00:00Z']],
+    });
+
+    const response = (await extractIocs.handler(
+      { hosts: ['host-a'] },
+      { esClient: { asCurrentUser: { esql: { query: esqlQuery } } } }
+    )) as { results: Array<{ data: { shas: Array<{ value: string }> } }> };
+
+    expect(esqlQuery.mock.calls[0][0].query).toContain('file.hash.sha256');
+    expect(response.results[0].data.shas).toEqual([
+      { value: 'dropped-payload-hash', comment: 'Observed in file telemetry' },
+    ]);
+  });
+
+  it('extract_iocs keeps uncorrelated network destinations out of IoCs', async () => {
+    const inlineTools = (await endpointForensicAnalysisSkill.getInlineTools?.()) ?? [];
+    const extractIocs = inlineTools.find(
+      (tool) => tool.id === 'security.endpoint_forensic.extract_iocs'
+    ) as { handler: (args: unknown, context: unknown) => Promise<unknown> };
+    const esqlQuery = jest.fn().mockResolvedValue({
+      columns: [{ name: 'destination.ip' }, { name: 'destination.domain' }, { name: '@timestamp' }],
+      values: [
+        ['10.0.0.5', null, '2026-01-01T00:00:00Z'],
+        ['8.8.8.8', null, '2026-01-01T00:01:00Z'],
+        [null, 'SRV-DC01', '2026-01-01T00:02:00Z'],
+      ],
+    });
+
+    const response = (await extractIocs.handler(
+      { hosts: ['host-a'] },
+      { esClient: { asCurrentUser: { esql: { query: esqlQuery } } } }
+    )) as {
+      results: Array<{
+        data: {
+          ips?: Array<{ value: string }>;
+          observed_network_destinations: string[];
+          guidance: string;
+        };
+      }>;
+    };
+    const data = response.results[0].data;
+
+    expect(data.ips).toBeUndefined();
+    expect(data.observed_network_destinations).toEqual(['8.8.8.8', 'SRV-DC01']);
+    expect(data.guidance).toContain('require attack correlation before adding them to ips');
+  });
+
   it('routes conflicting antivirus / configuration issues to elastic-defend-configuration-troubleshooting', () => {
     expect(endpointForensicAnalysisSkill.description).toContain('antivirus');
     expect(endpointForensicAnalysisSkill.description).toContain(

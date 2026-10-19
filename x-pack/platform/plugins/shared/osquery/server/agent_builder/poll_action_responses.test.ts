@@ -43,8 +43,6 @@ describe('pollActionResponses', () => {
       expectedAgentCount: 1,
     });
     expect(result.rows[0]).toEqual({
-      agent_id: 'sql-id',
-      agent_name: 'sql-name',
       _agent: { id: 'real-agent', name: 'real-host' },
       osquery: { agent_id: 'sql-id', agent_name: 'sql-name', _agent: 'sql-alias' },
     });
@@ -336,6 +334,34 @@ describe('pollActionResponses', () => {
   // dispatched to several agents used to emit rows with nothing to tell them
   // apart — forensic output from one host could be attributed to another.
   describe('row provenance', () => {
+    it('serializes each SQL column once, not at the top level and again under osquery', async () => {
+      const search = jest
+        .fn()
+        .mockResolvedValueOnce(responsesSearchResult(1))
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _source: {
+                  agent: { id: 'agent-a', name: 'host-a' },
+                  osquery: { cmdline: 'UNIQUE-COLUMN-VALUE', pid: 1 },
+                },
+              },
+            ],
+          },
+        });
+
+      const result = await pollActionResponses({ search } as any, 'query-action-1', {
+        budgetMs: 10,
+        intervalMs: 1,
+        spaceId: 'default',
+        expectedAgentCount: 1,
+      });
+
+      expect(Object.keys(result.rows[0]).sort()).toEqual(['_agent', 'osquery']);
+      expect(JSON.stringify(result.rows[0]).split('UNIQUE-COLUMN-VALUE')).toHaveLength(2);
+    });
+
     const twoAgentResults = {
       hits: {
         hits: [
@@ -370,18 +396,10 @@ describe('pollActionResponses', () => {
 
       expect(result.rows).toEqual([
         {
-          pid: 1,
-          name: 'launchd',
-          agent_id: 'agent-a',
-          agent_name: 'host-a',
           _agent: { id: 'agent-a', name: 'host-a' },
           osquery: { pid: 1, name: 'launchd' },
         },
         {
-          pid: 2,
-          name: 'svchost',
-          agent_id: 'agent-b',
-          agent_name: 'host-b',
           _agent: { id: 'agent-b', name: 'host-b' },
           osquery: { pid: 2, name: 'svchost' },
         },
@@ -409,9 +427,6 @@ describe('pollActionResponses', () => {
 
       expect(result.rows).toEqual([
         {
-          pid: 1,
-          agent_id: 'a1',
-          agent_name: 'host-a',
           _agent: { id: 'a1', name: 'host-a' },
           osquery: { pid: 1 },
         },
@@ -452,14 +467,10 @@ describe('pollActionResponses', () => {
 
       expect(result.rows).toEqual([
         {
-          pid: 1,
-          agent_id: 'value-selected-by-the-query',
           _agent: { id: 'agent-from-elastic-agent', name: undefined },
           osquery: { pid: 1, agent_id: 'value-selected-by-the-query' },
         },
         {
-          pid: 2,
-          agent_id: 'agent-from-elastic-agent',
           _agent: { id: 'agent-from-elastic-agent', name: undefined },
           osquery: { pid: 2 },
         },
@@ -492,9 +503,6 @@ describe('pollActionResponses', () => {
 
       expect(result.rows).toEqual([
         {
-          pid: 1,
-          agent_id: 'agent-a',
-          agent_name: 'host-a',
           _agent: { id: 'agent-a', name: 'host-a' },
           osquery: { pid: 1 },
         },

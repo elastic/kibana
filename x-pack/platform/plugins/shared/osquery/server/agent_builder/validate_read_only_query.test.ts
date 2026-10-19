@@ -452,4 +452,50 @@ describe('validateReadOnlyQuery', () => {
       ).toBeNull();
     });
   });
+
+  describe('parenthesized table factors and non-contiguous FROM lists', () => {
+    // Each of these is valid SQLite that resolves `curl` (verified against
+    // sqlite3) and previously validated clean because the clause scan stopped
+    // at the first `(` or at ON / USING.
+    it.each([
+      'SELECT * FROM processes JOIN (curl AS c)',
+      'SELECT * FROM processes, (curl)',
+      'SELECT * FROM (curl)',
+      'SELECT * FROM((curl))',
+      'SELECT * FROM processes JOIN(curl)',
+      'SELECT * FROM (processes JOIN curl)',
+    ])('rejects a parenthesized table factor: %s', (query) => {
+      expect(validateReadOnlyQuery(query, ALLOWED)).toMatch(/Parenthesized table references/);
+    });
+
+    it.each([
+      'SELECT * FROM processes JOIN users ON processes.uid = users.uid, curl',
+      'SELECT * FROM processes JOIN users USING (uid), curl',
+      'SELECT * FROM (SELECT 1 FROM processes), curl',
+      'SELECT * FROM (SELECT 1 FROM processes) p, curl',
+    ])('still extracts a table listed after ON / USING / a subquery: %s', (query) => {
+      expect(validateReadOnlyQuery(query, ALLOWED)).toMatch(/not read-only/);
+    });
+
+    it('rejects an unbalanced query rather than guessing', () => {
+      expect(validateReadOnlyQuery('SELECT * FROM processes WHERE (pid = 1', ALLOWED)).toMatch(
+        /unbalanced parentheses/
+      );
+    });
+
+    it('still accepts subqueries, joins and IS DISTINCT FROM comparisons', () => {
+      expect(
+        validateReadOnlyQuery(
+          'SELECT * FROM (SELECT pid FROM processes) p JOIN users u ON u.uid IS DISTINCT FROM p.pid',
+          ALLOWED
+        )
+      ).toBeNull();
+      expect(
+        validateReadOnlyQuery(
+          'SELECT * FROM processes WHERE pid IN (SELECT pid FROM process_open_sockets)',
+          ALLOWED
+        )
+      ).toBeNull();
+    });
+  });
 });

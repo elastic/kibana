@@ -25,8 +25,8 @@ evaluate.describe(
         method: 'GET',
         path: '/api/agent_builder/tools',
       });
-      if (!data.results.some((tool) => tool.id === 'security.osquery.check_integration')) {
-        throw new Error('Trap suite requires security.osquery.check_integration in this space');
+      if (!data.results.some((tool) => tool.id === 'osquery.check_integration')) {
+        throw new Error('Trap suite requires osquery.check_integration in this space');
       }
     });
 
