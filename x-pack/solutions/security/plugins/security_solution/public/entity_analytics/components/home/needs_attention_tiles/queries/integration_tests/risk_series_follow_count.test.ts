@@ -44,6 +44,7 @@ import { describeSeriesFollowsCount, readCounts, RANGES } from './series_follow_
  * | host:r8   | 1500         | 20 Low, at 1300: 55 Moderate, at 40: 95 Critical                    |
  * | host:g1   | 1500         | own 30 Low throughout; group 40 Low, at 100: 70 High (the group counts) |
  * | host:g1a  | 1500         | alias of host:g1: own 20 Low, at 140: 80 Critical (must not count, even where the group does not rise) |
+ * | host:g4   | 1500         | like host:g1, but each group doc is older than the own doc of its hour (the group still counts) |
  */
 
 const NAMESPACE = 'default';
@@ -68,7 +69,7 @@ interface EntitySeed {
   resolvedTo?: string;
   noEntityDoc?: boolean;
   /** The group's own (resolution) value, on a main entity: its history, hour by hour. */
-  group?: { initial: Value; changes: Change[] };
+  group?: { initial: Value; changes: Change[]; hoursOlder?: number };
 }
 
 const R1_CHANGES: Change[] = [
@@ -136,6 +137,13 @@ const ENTITIES: readonly EntitySeed[] = [
     initial: [20, 'Low'],
     changes: [[140, [80, 'Critical']]],
     resolvedTo: 'host:g1',
+  },
+  {
+    id: 'host:g4',
+    from: HISTORY_HOURS,
+    initial: [30, 'Low'],
+    changes: [],
+    group: { initial: [40, 'Low'], changes: [[100, [70, 'High']]], hoursOlder: 0.3 },
   },
 ];
 
@@ -208,11 +216,10 @@ const loadFixture = async (client: Client) => {
         ];
     const history = Array.from({ length: seed.from + 1 }, (_, h) => {
       const [docScore, docLevel] = valueAt(seed, h);
-      const timestamp = new Date(now - (h + 0.5) * HOUR_MS).toISOString();
-      const doc = (value: Value, scoreType?: 'base' | 'resolution') => [
+      const doc = (value: Value, scoreType?: 'base' | 'resolution', hoursOlder = 0) => [
         { index: { _index: getRiskScoreIndex(NAMESPACE) } },
         {
-          '@timestamp': timestamp,
+          '@timestamp': new Date(now - (h + 0.5 + hoursOlder) * HOUR_MS).toISOString(),
           [`${type}.risk.id_value`]: seed.id,
           [`${type}.risk.calculated_score_norm`]: value[0],
           [`${type}.risk.calculated_level`]: value[1],
@@ -223,7 +230,7 @@ const loadFixture = async (client: Client) => {
       return seed.group
         ? [
             ...doc([docScore, docLevel], 'base'),
-            ...doc(valueAt({ ...seed, ...seed.group }, h), 'resolution'),
+            ...doc(valueAt({ ...seed, ...seed.group }, h), 'resolution', seed.group.hoursOlder),
           ]
         : doc([docScore, docLevel]);
     }).flat();
@@ -279,12 +286,12 @@ describeSeriesFollowsCount({
     {
       name: 'Risk movers',
       column: riskMoversSeriesColumn,
-      byHand: { '24h': 2, '30d': 4 },
+      byHand: { '24h': 2, '30d': 5 },
     },
     {
       name: 'Newly high/critical',
       column: newlyHighCriticalSeriesColumn,
-      byHand: { '24h': 2, '30d': 5 },
+      byHand: { '24h': 2, '30d': 6 },
     },
   ],
   // The one query for both tiles.

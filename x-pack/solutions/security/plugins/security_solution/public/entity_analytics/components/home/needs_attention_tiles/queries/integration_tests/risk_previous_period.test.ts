@@ -129,6 +129,15 @@ const MOVERS: readonly MoverSeed[] = [
     group: { now: 55, start: [[50, LAST]], end: [[52, LAST]] },
   },
   { id: 'host:g2a', now: 70, start: [[10, LAST]], end: [[50, LAST]], resolvedTo: 'host:g2' },
+  // g4: like g1, but its group docs are older than its own docs in each window. The group's value
+  // still counts: it rose by 20 in the previous period, and by 2 (not its own 32) in the current one.
+  {
+    id: 'host:g4',
+    now: 30,
+    start: [[30, LAST]],
+    end: [[30, LAST]],
+    group: { now: 62, start: [[40, OLD]], end: [[60, OLD]] },
+  },
 ];
 
 const NEWLY: readonly NewlySeed[] = [
@@ -170,6 +179,15 @@ const NEWLY: readonly NewlySeed[] = [
     start: [['Low', LAST]],
     end: [['Low', LAST]],
     resolvedTo: 'user:g3',
+  },
+  // g4: like g3, but its group docs are older than its own docs in each window. The group's level
+  // still counts: Moderate to High in the previous period, and High to High (not Low to High) now.
+  {
+    id: 'user:g4',
+    now: 'Low',
+    start: [['Low', LAST]],
+    end: [['Low', LAST]],
+    group: { now: 'High', start: [['Moderate', OLD]], end: [['High', OLD]] },
   },
 ];
 
@@ -351,10 +369,10 @@ describe('risk tiles for both periods on Elasticsearch', () => {
 
   describe('risk movers', () => {
     it('counts the previous period from the history at its start and its end', async () => {
-      // host:g1 counts through its group's rise; host:g2 does not, only its alias rose.
+      // host:g1 and host:g4 count through their group's rise; host:g2 does not, only its alias rose.
       expect(await movers('previous')).toEqual({
-        count: 4,
-        ids: ['host:g1', 'host:m1', 'host:m3', 'host:m7'],
+        count: 5,
+        ids: ['host:g1', 'host:g4', 'host:m1', 'host:m3', 'host:m7'],
       });
     });
 
@@ -363,7 +381,7 @@ describe('risk tiles for both periods on Elasticsearch', () => {
     });
 
     it('gives the delta as the current count minus the previous count', async () => {
-      expect((await movers('current')).count - (await movers('previous')).count).toBe(-2);
+      expect((await movers('current')).count - (await movers('previous')).count).toBe(-3);
     });
 
     it('keeps only the entities the filters keep in the previous period', async () => {
@@ -376,10 +394,10 @@ describe('risk tiles for both periods on Elasticsearch', () => {
 
   describe('newly high/critical', () => {
     it('counts the previous period from the history at its start and its end', async () => {
-      // user:g3 counts through its group's level, which its own Low level hides.
+      // user:g3 and user:g4 count through their group's level, which their own Low level hides.
       expect(await newly('previous')).toEqual({
-        count: 5,
-        ids: ['user:g3', 'user:n1', 'user:n2', 'user:n4', 'user:n7'],
+        count: 6,
+        ids: ['user:g3', 'user:g4', 'user:n1', 'user:n2', 'user:n4', 'user:n7'],
       });
     });
 
@@ -388,7 +406,7 @@ describe('risk tiles for both periods on Elasticsearch', () => {
     });
 
     it('gives the delta as the current count minus the previous count', async () => {
-      expect((await newly('current')).count - (await newly('previous')).count).toBe(-3);
+      expect((await newly('current')).count - (await newly('previous')).count).toBe(-4);
     });
 
     it('keeps only the entities the filters keep in the previous period', async () => {
