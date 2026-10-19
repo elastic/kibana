@@ -52,6 +52,8 @@ If no published comment exists, skip all steps here and run Steps 1–3 from SKI
    - `BASELINE_VERBOSITY_LEVEL` is `lean` and `VERBOSITY_LEVEL` is `standard` or `detailed` — the itemised `**Automation coverage**:` lines need the full catalog;
    - `VERBOSITY_LEVEL` is `detailed` and `BASELINE_VERBOSITY_LEVEL` is not — the `**Source:**` lines need the PR artifacts inventory.
 
+   If the first case applies and the plan has **no linked PR** (the backend / parser case in [`example-test-plan-backend.md`](example-test-plan-backend.md)), there is nothing to re-read, but the catalog still has to be rebuilt: run the filesystem test search from the *If a PR has no test files* list in [`gathering-context.md`](gathering-context.md#pull-requests-and-test-coverage) against the feature area and the source files the published plan cites, and use its results as the test coverage catalog for Step 6.
+
    Moving to a less detailed level needs no extra re-read; the published plan already holds everything the new level renders.
 
 4. **Re-read updated PRs.** For each PR in the re-read list, fetch the full content — description, review comments, and diff — applying the rules defined in the [*Pull requests and test coverage*](gathering-context.md#pull-requests-and-test-coverage) section of `gathering-context.md` (max 20 files per PR, 500-line file diff cap, the always-skip list including `*.gen.ts` / `*.gen.tsx`, image fetching extended to PR bodies and review comments). Update the test coverage catalog and the PR artifacts inventory. If a re-read PR has no test files, apply the filesystem search described in that same section using [`security-test-directories.md`](security-test-directories.md).
