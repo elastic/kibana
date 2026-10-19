@@ -981,6 +981,85 @@ paths:
         <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/actions/connectors</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+  /api/actions/events/{connector_type_id}/{connector_id}:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/actions/events/{connector_type_id}/{connector_id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Public ingress for Kibana connector-scoped inbound events. Authenticate with an ingest token (`Authorization: Bearer`, or `token` query parameter as fallback). A successful emit returns 202. A connector HTTP ack returns 200 (JSON or a plain-text body) and does not emit.
+      operationId: post-actions-events-connector-type-id-connector-id
+      parameters:
+        - description: The Kibana connector type identifier.
+          in: path
+          name: connector_type_id
+          required: true
+          schema:
+            maxLength: 64
+            minLength: 1
+            type: string
+        - description: The identifier of the Kibana connector instance that should receive the event.
+          in: path
+          name: connector_id
+          required: true
+          schema:
+            maxLength: 36
+            minLength: 1
+            type: string
+        - description: 'Connector ingest token. Prefer `Authorization: Bearer <token>`. Query `token` is only used when the Authorization header is absent.'
+          in: query
+          name: token
+          required: false
+          schema:
+            maxLength: 128
+            minLength: 1
+            type: string
+      requestBody:
+        content:
+          application/json; application/*+json; application/x-www-form-urlencoded; text/plain; */*:
+            schema: {}
+            examples:
+              ingestEventsRequest:
+                $ref: '#/components/examples/ingest_events_request'
+              ingestEventsChallengeRequest:
+                $ref: '#/components/examples/ingest_events_challenge_request'
+      responses:
+        '200':
+          content:
+            application/json; application/*+json; application/x-www-form-urlencoded; text/plain; */*:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_ingest_events_ack_response'
+              examples:
+                ingestEventsAckResponse:
+                  $ref: '#/components/examples/ingest_events_ack_response'
+          description: Connector HTTP 200 ack. No event is emitted. JSON or a plain-text body.
+        '202':
+          content:
+            application/json; application/*+json; application/x-www-form-urlencoded; text/plain; */*:
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_ingest_events_response'
+              examples:
+                ingestEventsResponse:
+                  $ref: '#/components/examples/ingest_events_response'
+          description: The ingress request was accepted. Downstream emit failures may still be partial; see server logs.
+        '403':
+          description: Inbound connector events are disabled.
+        '404':
+          description: Connector, connector type, or ingest token was not found or failed verification.
+        '429':
+          description: Inbound rate limit exceeded. Retry-After is the seconds until a request is allowed again.
+        '500':
+          description: The connector failed to handle or validate the event.
+      summary: Ingest an external event for a Kibana connector
+      tags:
+        - connectors
+      x-state: Experimental; added in 9.6.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/agent_builder/a2a/{agentId}:
     post:
       description: |-
@@ -148701,6 +148780,24 @@ components:
           referenced_by_count: 2
           is_missing_secrets: false
           is_system_action: false
+    ingest_events_request:
+      summary: Ingest a connector event.
+      value:
+        eventType: order.created
+        orderId: '1'
+    ingest_events_challenge_request:
+      summary: Inbound webhook handshake. A top-level string challenge is echoed and no event is emitted.
+      value:
+        type: ping
+        challenge: abc
+    ingest_events_ack_response:
+      summary: Connector HTTP 200 ack. No event is emitted.
+      value:
+        challenge: abc
+    ingest_events_response:
+      summary: The ingress request was accepted.
+      value:
+        ok: true
     get_roles_response1:
       summary: Get all role details
       value:
@@ -157819,6 +157916,9 @@ components:
         is_deprecated:
           description: Indicates whether the connector is deprecated.
           type: boolean
+        is_inbound_events_enabled:
+          description: Indicates whether this connector can receive inbound events. Always true for inbound-only connectors. For connectors that also send actions, true after inbound events have been turned on.
+          type: boolean
         is_missing_secrets:
           description: Indicates whether the connector is missing secrets.
           type: boolean
@@ -157865,6 +157965,9 @@ components:
           type: boolean
         is_deprecated:
           description: Indicates whether the connector is deprecated.
+          type: boolean
+        is_inbound_events_enabled:
+          description: Indicates whether this connector can receive inbound events. Always true for inbound-only connectors. For connectors that also send actions, true after inbound events have been turned on.
           type: boolean
         is_missing_secrets:
           description: Indicates whether the connector is missing secrets.
@@ -163541,6 +163644,33 @@ components:
         - rule_type_id
         - params
       title: Index threshold
+      type: object
+    Kibana_HTTP_APIs_ingest_events_ack_response:
+      anyOf:
+        - description: Plain-text HTTP ack body.
+          maxLength: 8192
+          minLength: 1
+          type: string
+        - additionalProperties: true
+          description: Connector HTTP 200 JSON ack. `.inboundWebhook` and Slack handshake is `{ challenge }`.
+          type: object
+          properties:
+            challenge:
+              description: When present, echo of a top-level request `challenge` (inbound webhook handshake). No event is emitted.
+              maxLength: 1024
+              minLength: 1
+              type: string
+      description: Connector HTTP 200 ack. JSON or a plain-text body. No event is emitted.
+      title: ingest_events_ack_response
+    Kibana_HTTP_APIs_ingest_events_response:
+      additionalProperties: false
+      properties:
+        ok:
+          description: Indicates the ingress request was accepted for processing.
+          type: boolean
+      required:
+        - ok
+      title: ingest_events_response
       type: object
     Kibana_HTTP_APIs_IngestStreamLifecycle:
       anyOf:
@@ -172730,6 +172860,9 @@ components:
           description: The type of connector.
           maxLength: 64
           type: string
+        is_inbound_events_enabled:
+          description: When true, this connector can receive inbound events. Only valid for connectors that both send and receive. Defaults to false. Generate the webhook token after create.
+          type: boolean
         name:
           description: The display name for the connector.
           maxLength: 1024
@@ -181401,6 +181534,9 @@ components:
     Kibana_HTTP_APIs_update_connector:
       additionalProperties: false
       properties:
+        is_inbound_events_enabled:
+          description: Turn receiving inbound events on or off. Omit to keep the current setting. Only valid for connectors that both send and receive.
+          type: boolean
         name:
           description: The display name for the connector.
           maxLength: 1024
