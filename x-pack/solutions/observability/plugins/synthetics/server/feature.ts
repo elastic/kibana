@@ -20,6 +20,7 @@ import {
   legacySyntheticsMonitorTypeSingle,
   syntheticsMonitorSavedObjectType,
   syntheticsParamType,
+  syntheticsVaultConnectionType,
 } from '../common/types/saved_objects';
 
 import { PLUGIN } from '../common/constants/plugin';
@@ -172,6 +173,7 @@ export const syntheticsFeature = {
           syntheticsMonitorSavedObjectType,
           syntheticsApiKeyObjectType,
           syntheticsParamType,
+          syntheticsVaultConnectionType,
 
           // uptime settings object is also registered here since feature is shared between synthetics and uptime
           uptimeSettingsObjectType,
@@ -202,6 +204,7 @@ export const syntheticsFeature = {
         all: [],
         read: [
           syntheticsParamType,
+          syntheticsVaultConnectionType,
           syntheticsSettingsObjectType,
           syntheticsMonitorSavedObjectType,
           legacySyntheticsMonitorTypeSingle,
