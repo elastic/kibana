@@ -922,5 +922,61 @@ describe('workflow assets removal', () => {
         workflowId: 'wf-other',
       });
     });
+
+    describe('when the workflows cannot be removed', () => {
+      const installation = {
+        name: 'test-package',
+        version: '1.0.0',
+        install_source: 'registry',
+        installed_kibana_space_id: 'default',
+        installed_kibana: [workflowRef('wf-default')],
+        installed_es: [],
+        package_assets: [],
+      } as any;
+      const soClient = () =>
+        ({
+          get: jest.fn().mockResolvedValue({ attributes: installation }),
+          update: jest.fn(),
+          delete: jest.fn(),
+          find: jest.fn().mockResolvedValue({ saved_objects: [] }),
+          bulkResolve: jest.fn().mockResolvedValue({ resolved_objects: [] }),
+        } as any);
+      const remove = (client: any, force?: boolean) =>
+        removeInstallation({
+          savedObjectsClient: client,
+          pkgName: 'test-package',
+          pkgVersion: '1.0.0',
+          esClient: {} as any,
+          force,
+        });
+
+      beforeEach(() => {
+        mockGetInstallation.mockResolvedValue(installation);
+      });
+
+      it('keeps the package saved object when the client is unavailable', async () => {
+        (appContextService.getManagedWorkflowsClient as jest.Mock).mockReturnValue(undefined);
+        const client = soClient();
+
+        await expect(remove(client)).rejects.toThrow('Unable to remove workflows');
+        expect(client.delete).not.toHaveBeenCalled();
+      });
+
+      it('keeps the package saved object when a workflow fails to uninstall', async () => {
+        uninstall.mockRejectedValue(new Error('boom'));
+        const client = soClient();
+
+        await expect(remove(client)).rejects.toThrow('boom');
+        expect(client.delete).not.toHaveBeenCalled();
+      });
+
+      it('continues the uninstall when forced', async () => {
+        uninstall.mockRejectedValue(new Error('boom'));
+        const client = soClient();
+
+        await remove(client, true);
+        expect(client.delete).toHaveBeenCalledWith(PACKAGES_SAVED_OBJECT_TYPE, 'test-package');
+      });
+    });
   });
 });

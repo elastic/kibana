@@ -81,17 +81,19 @@ export const getPackageWorkflowId = ({
   return isValidId(workflowId) ? workflowId : undefined;
 };
 
-/** Removes the given workflow refs, logging failures instead of throwing. */
+/** Removes the given workflow refs; failures are logged, or thrown when `strict` is set. */
 export const uninstallWorkflows = async ({
   client,
   refs,
   spaceId,
   logger,
+  strict = false,
 }: {
   client: ManagedWorkflowsClient;
   refs: KibanaAssetReference[];
   spaceId: string;
   logger: Logger;
+  strict?: boolean;
 }) => {
   await pMap(
     refs.filter(({ type }) => type === KibanaSavedObjectType.workflow),
@@ -99,6 +101,7 @@ export const uninstallWorkflows = async ({
       try {
         await client.uninstall(FLEET_PACKAGE_WORKFLOW_ID, { spaceId, workflowId: id });
       } catch (error) {
+        if (strict) throw error;
         logger.warn(`Failed to uninstall workflow ${id}: ${error.message}`);
       }
     },
