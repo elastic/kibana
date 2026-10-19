@@ -55,7 +55,7 @@ export interface WorkflowLookup {
   triggersLineStart?: number;
   /** Line where the last item in the triggers block ends; undefined when there are no triggers. */
   triggersLineEnd?: number;
-  /** Line where the first recognised step starts; undefined when there are no steps. */
+  /** Line where the first step under `steps` starts; undefined when there are none. */
   stepsLineStart?: number;
 }
 
@@ -75,6 +75,23 @@ export function buildWorkflowLookup(
   if (stepsNode) {
     Object.assign(steps, inspectStep(stepsNode, lineCounter, undefined, undefined, ['steps']));
   }
+  const stepLineStarts = Object.values(steps).map((s) => s.lineStart);
+  const stepsLineStart = stepLineStarts.length > 0 ? Math.min(...stepLineStarts) : undefined;
+
+  const settingsFallbackPath = ['settings', 'on-failure', 'fallback'];
+  const settingsFallbackNode = yamlDocument.getIn(settingsFallbackPath, true);
+  if (settingsFallbackNode) {
+    Object.assign(
+      steps,
+      inspectStep(
+        settingsFallbackNode,
+        lineCounter,
+        undefined,
+        'on-failure.fallback',
+        settingsFallbackPath
+      )
+    );
+  }
 
   let triggersLineStart: number | undefined;
   let triggersLineEnd: number | undefined;
@@ -83,9 +100,6 @@ export function buildWorkflowLookup(
     triggersLineStart = lineCounter.linePos(triggersNode.range[0]).line;
     triggersLineEnd = lineCounter.linePos(triggersNode.range[2] - 1).line;
   }
-
-  const stepLineStarts = Object.values(steps).map((s) => s.lineStart);
-  const stepsLineStart = stepLineStarts.length > 0 ? Math.min(...stepLineStarts) : undefined;
 
   return {
     steps,

@@ -9,6 +9,7 @@
 
 import { of } from 'rxjs';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import type { CustomTriggerSchemaConfig } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import type { WorkflowValidationDeps } from './types';
@@ -61,6 +62,7 @@ const makeDeps = (
             client: { asScoped: jest.fn().mockReturnValue({ asCurrentUser: {} }) },
           },
         } as any),
+      licensing: licensingMock.createStart(),
       logger: loggingSystemMock.createLogger(),
     },
     actionsClient,
@@ -445,6 +447,28 @@ describe('WorkflowValidationService', () => {
 
       expect(result.valid).toBe(true);
       expect(result.diagnostics).toEqual([]);
+    });
+
+    it('reports a command the cluster license does not allow', async () => {
+      const { deps } = makeDeps();
+      deps.licensing.getLicense = jest
+        .fn()
+        .mockResolvedValue(licensingMock.createLicense({ license: { type: 'basic' } }));
+      const service = new WorkflowValidationService(deps);
+
+      const result = await service.validateWorkflow(
+        esqlWorkflowYaml('FROM logs-app | CHANGE_POINT host.name'),
+        'default',
+        {} as any,
+        { includeVariableRules: true, includeEsqlRules: true }
+      );
+
+      expect(result.diagnostics).toContainEqual(
+        expect.objectContaining({
+          source: 'esql',
+          message: expect.stringContaining('CHANGE_POINT requires a PLATINUM license'),
+        })
+      );
     });
 
     it('does not run ES|QL rules for callers that gate on the result', async () => {

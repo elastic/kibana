@@ -674,6 +674,30 @@ steps:
     });
   });
 
+  it('includes the workflow-level fallback steps from settings', () => {
+    const yaml = `
+name: test
+settings:
+  on-failure:
+    fallback:
+      - name: notify
+        type: console
+steps:
+  - name: first
+    type: http
+`;
+    const lineCounter = new LineCounter();
+    const yamlDocument = parseDocument(yaml, { lineCounter, keepSourceTokens: true });
+    const { steps, stepsLineStart } = buildWorkflowLookup(yamlDocument, lineCounter);
+
+    expect(steps.notify).toMatchObject({
+      path: ['settings', 'on-failure', 'fallback', 0],
+      branchKey: 'on-failure.fallback',
+      parentStepId: undefined,
+    });
+    expect(stepsLineStart).toBe(steps.first.lineStart);
+  });
+
   it('does not treat step-shaped data under step properties as steps', () => {
     const yaml = `
 name: test

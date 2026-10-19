@@ -145,6 +145,7 @@ export class WorkflowValidationService {
       getSources: getSources && once(getSources),
       getColumnsFor,
       getPolicies: getPolicies && once(getPolicies),
+      getLicense: once(() => this.deps.licensing.getLicense()),
     };
   }
 

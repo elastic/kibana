@@ -34,7 +34,7 @@ export const validateGeneratedYaml = async (
     };
   }
 
-  return { valid: false, errors: errorDiagnostics.map(formatDiagnostic), unknownSources: [] };
+  return { valid: false, errors: blocking.map(formatDiagnostic), unknownSources: [] };
 };
 
 const formatDiagnostic = (d: WorkflowDiagnostic): string =>

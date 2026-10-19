@@ -79,7 +79,7 @@ describe('validateGeneratedYaml', () => {
       });
     });
 
-    it('stays invalid when another error remains', async () => {
+    it('stays invalid when another error remains, and reports only that error', async () => {
       const api = {
         validateWorkflow: jest.fn().mockResolvedValue({
           valid: false,
@@ -97,7 +97,7 @@ describe('validateGeneratedYaml', () => {
         request: {} as any,
       });
       expect(result.valid).toBe(false);
-      expect(result.errors).toHaveLength(2);
+      expect(result.errors).toEqual(['[esql] ES|QL: x']);
       expect(result.unknownSources).toEqual([]);
     });
   });

@@ -266,6 +266,28 @@ describe('collectEsqlDiagnostics', () => {
     });
   });
 
+  it('checks an ES|QL step in the workflow-level fallback', async () => {
+    const yaml = `name: esql
+triggers:
+  - type: manual
+settings:
+  on-failure:
+    fallback:
+${esqlStep('recover', 'FROM logs-app | KEEP hostname', '      ')}steps:
+  - name: log
+    type: console
+    with:
+      message: hi
+`;
+    const { diagnostics } = await collectEsqlDiagnostics(yaml, schemaCallbacks);
+    expect(diagnostics).toEqual([
+      expect.objectContaining({
+        path: ['settings', 'on-failure', 'fallback', 0, 'with', 'query'],
+        message: expect.stringContaining('hostname'),
+      }),
+    ]);
+  });
+
   it('ignores step-shaped data outside step lists', async () => {
     const decoy = `{ name: decoy, type: elasticsearch.esql.query, with: { query: 'FROM logs-app | WHERE' } }`;
     const yaml = `name: esql
