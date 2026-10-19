@@ -10,6 +10,7 @@ import type { StreamsUnit } from '@kbn/streams-schema';
 import { UNIT_STATS_DEFAULT_WINDOW_MS } from './constants';
 import { getDestinationStats } from './get_destination_stats';
 import { getEarliestStartMs } from './get_earliest_start';
+import { getProcessorStats } from './get_processor_stats';
 import { errorForSearchFailure, isMissingStreamError } from './search_errors';
 import { getSeriesBucketMs } from './series_bucket';
 import type { UnitStatsQueryContext } from './types';
@@ -66,6 +67,7 @@ export const getUnitStats = async ({
   const destinations: Record<string, StreamsUnit.StatsDestinationResult> = {};
   const processors: Record<string, StreamsUnit.StatsProcessorResult> = {};
   const destinationIds: string[] = [];
+  const processorIds: string[] = [];
 
   for (const { kind, id } of refs) {
     if (kind === 'destination') {
@@ -76,7 +78,9 @@ export const getUnitStats = async ({
       destinations[id] = result;
       if (queryable) destinationIds.push(id);
     } else {
-      processors[id] = validateProcessor({ config: processorConfigs.get(id) }).result;
+      const { result, queryable } = validateProcessor({ config: processorConfigs.get(id) });
+      processors[id] = result;
+      if (queryable) processorIds.push(id);
     }
   }
 
@@ -86,7 +90,7 @@ export const getUnitStats = async ({
     meta: { window, ...(configHash ? { config_hash: configHash } : {}) },
   });
 
-  if (destinationIds.length === 0) {
+  if (destinationIds.length === 0 && processorIds.length === 0) {
     return finish();
   }
 
@@ -110,10 +114,15 @@ export const getUnitStats = async ({
   // read as busy.
   const seconds = (windowEndMs - Math.max(windowStartMs, earliestStartMs)) / 1000;
 
-  Object.assign(
-    destinations,
-    await getDestinationStats({ context, ids: destinationIds, seconds, bucketMs })
-  );
+  // One search per kind, in parallel. A kind with no queryable ids makes no search.
+  const [destinationResults, processorResults] = await Promise.all([
+    destinationIds.length > 0
+      ? getDestinationStats({ context, ids: destinationIds, seconds, bucketMs })
+      : {},
+    processorIds.length > 0 ? getProcessorStats({ context, ids: processorIds, seconds }) : {},
+  ]);
+  Object.assign(destinations, destinationResults);
+  Object.assign(processors, processorResults);
 
   return finish();
 };

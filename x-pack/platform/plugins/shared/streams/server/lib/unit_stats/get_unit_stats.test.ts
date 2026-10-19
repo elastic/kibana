@@ -48,23 +48,44 @@ const destinationAggregations = {
   },
 };
 
+const processorAggregations = {
+  by_id: {
+    buckets: [
+      {
+        key: 'uppercase-message',
+        items_in: {
+          doc_count: 4,
+          sum: { value: 35 },
+          failures: { doc_count: 0, sum: { value: 0 } },
+        },
+        duration: { doc_count: 4, sum: { value: 0.001895 } },
+      },
+    ],
+  },
+};
+
 const earliestResponse = (ms: number | null) => ({ aggregations: { earliest: { value: ms } } });
 
-/** Answers each search by its shape: the earliest start, or the destination search. */
+/** Answers each search by its shape: the earliest start, a destination or a processor search. */
 const makeSearch = ({
   earliestMs = now.getTime() - 5 * MINUTE,
   earliest,
   destination,
+  processor,
 }: {
   earliestMs?: number | null;
   earliest?: () => unknown;
   destination?: () => unknown;
+  processor?: () => unknown;
 } = {}) =>
   jest.fn(async (body: { aggs?: Record<string, unknown> }) => {
     if (body.aggs && 'earliest' in body.aggs) {
       return (earliest ?? (() => earliestResponse(earliestMs)))();
     }
-    return (destination ?? (() => ({ aggregations: destinationAggregations })))();
+    const { field } = (body.aggs?.by_id as { terms: { field: string } }).terms;
+    return field.includes('destination')
+      ? (destination ?? (() => ({ aggregations: destinationAggregations })))()
+      : (processor ?? (() => ({ aggregations: processorAggregations })))();
   });
 
 const run = (search: jest.Mock, request: StreamsUnit.StatsRequest = {}) =>
@@ -108,6 +129,7 @@ describe('getUnitStats', () => {
 
       expect(Object.keys(response.components.destinations)).toEqual(['es-prod']);
       const destinationSearch = search.mock.calls[1][0] as unknown as { query: unknown };
+      expect(search).toHaveBeenCalledTimes(2);
       expect(JSON.stringify(destinationSearch.query)).toContain(
         '"terms":{"attributes.streams.destination.id":["es-prod"]}'
       );
@@ -143,6 +165,20 @@ describe('getUnitStats', () => {
       expect(response.components.destinations['es-dev']).toEqual(nullDestination);
       expect(response.components.destinations['es-dev'].error).toBeUndefined();
       expect(response.error).toBeUndefined();
+    });
+
+    it('maps a processor with data, with a per event average', async () => {
+      const response = await run(makeSearch());
+
+      expect(response.components.processors['uppercase-message']).toEqual({
+        processing_duration: { average: { value: 0.001895 / 35, unit: 's' } },
+        events: {
+          incoming: {
+            rate: { value: 35 / 300, unit: '{item}', time_unit: 's' },
+            failures: { rate: { value: 0, unit: '{item}', time_unit: 's' } },
+          },
+        },
+      });
     });
 
     it('reports the window, and a config hash only when the request pins one', async () => {
@@ -277,6 +313,24 @@ describe('getUnitStats', () => {
       // Not queryable, so these keep their own error.
       expect(response.components.destinations.dbg.error?.code).toBe('unsupported');
       expect(response.components.processors['uppercase-message'].error).toBeUndefined();
+      expect(response.components.processors['uppercase-message'].events.incoming.rate.value).toBe(
+        35 / 300
+      );
+    });
+
+    it('sets the same component error on every processor when the processor search fails', async () => {
+      const response = await run(
+        makeSearch({
+          processor: () => {
+            throw responseError(403);
+          },
+        })
+      );
+
+      expect(response.error).toBeUndefined();
+      expect(response.components.processors['uppercase-message'].error?.code).toBe('forbidden');
+      expect(response.components.destinations['es-prod'].error).toBeUndefined();
+      expect(response.components.destinations['es-prod'].events.incoming.total.value).toBe(30);
     });
   });
 });
