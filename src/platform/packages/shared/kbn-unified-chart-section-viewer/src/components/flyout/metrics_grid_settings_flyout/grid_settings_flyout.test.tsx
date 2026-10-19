@@ -273,9 +273,21 @@ describe('GridSettingsFlyout', () => {
     expect(histogramSelect.getSelected()).toContain('90th percentile');
 
     await userEvent.click(screen.getByTestId('metricsExperienceGridSettingsHistogramSelect'));
+    const distributionOption = await screen.findByTestId(
+      'metricsExperienceGridSettingsHistogramOption-distribution'
+    );
+    expect(distributionOption).toHaveAttribute('aria-disabled', 'true');
+
+    const tooltipAnchor = distributionOption.parentElement;
+    if (!tooltipAnchor) {
+      throw new Error('Expected the distribution option to be wrapped for its tooltip');
+    }
+    await userEvent.hover(tooltipAnchor);
     expect(
-      await screen.findByTestId('metricsExperienceGridSettingsHistogramOption-distribution')
-    ).toHaveAttribute('aria-disabled', 'true');
+      await screen.findByText(
+        'Distribution is unavailable while dimensions are selected. Histograms use the 90th percentile instead.'
+      )
+    ).toBeInTheDocument();
   });
 
   it('discards the draft and does not call onGridSettingsChange when the flyout close button is clicked', async () => {

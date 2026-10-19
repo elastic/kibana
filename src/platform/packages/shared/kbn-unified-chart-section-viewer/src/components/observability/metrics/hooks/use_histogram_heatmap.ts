@@ -20,6 +20,7 @@ import { isHistogramMetric } from '../../../../common/utils/histogram_metric';
 import { useFeatureFlag } from '../../../../hooks/use_feature_flag';
 import type { Dimension, ParsedMetricItem } from '../../../../types';
 import { buildHistogramHeatmapConfig } from '../../../chart/build_histogram_heatmap_config';
+import { isDistributionVisualization } from '../../../flyout/metrics_grid_settings_flyout/constants';
 import type { HistogramBoundsByMetricKey } from './use_fetch_histogram_bounds';
 
 export interface UseHistogramHeatmapParams {
@@ -58,7 +59,7 @@ export const useHistogramHeatmap = ({
   // Percentile settings always draw the series chart. Only distribution can draw a heatmap.
   const isHistogramDistribution =
     isHeatmapsEnabled &&
-    histogramPercentile === 'distribution' &&
+    isDistributionVisualization(histogramPercentile) &&
     isHistogramMetric(
       firstNonNullable(metricItem.fieldTypes),
       firstNonNullable(metricItem.metricTypes)

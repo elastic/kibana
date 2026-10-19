@@ -13,9 +13,11 @@ import {
   METRICS_GRID_SIMPLE_AGGREGATIONS,
 } from '@kbn/discover-utils';
 import {
-  HISTOGRAM_VISUALIZATION_OPTIONS,
   HISTOGRAM_PERCENTILE_VALUES,
+  HISTOGRAM_VISUALIZATION_OPTIONS,
+  isDistributionVisualization,
   SIMPLE_AGGREGATION_OPTIONS,
+  toSeriesPercentile,
 } from './constants';
 
 describe('grid_settings constants', () => {
@@ -45,5 +47,12 @@ describe('grid_settings constants', () => {
       p95: 95,
       p99: 99,
     });
+  });
+
+  it('maps distribution to the series fallback and leaves numeric percentiles unchanged', () => {
+    expect(toSeriesPercentile('distribution')).toBe('p95');
+    expect(toSeriesPercentile('p99')).toBe('p99');
+    expect(isDistributionVisualization('distribution')).toBe(true);
+    expect(isDistributionVisualization('p95')).toBe(false);
   });
 });

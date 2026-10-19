@@ -10,7 +10,12 @@
 import type { EuiSuperSelectOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { HistogramVisualization, SimpleAggregation } from '@kbn/discover-utils';
-import { SIMPLE_AGGREGATION_OPTIONS, HISTOGRAM_VISUALIZATION_OPTIONS } from './constants';
+import {
+  HISTOGRAM_SERIES_FALLBACK,
+  HISTOGRAM_VISUALIZATION_OPTIONS,
+  SIMPLE_AGGREGATION_OPTIONS,
+  toSeriesPercentile,
+} from './constants';
 
 /**
  * Display labels for `SimpleAggregation` values. Spelled out in full (e.g.
@@ -77,21 +82,25 @@ type HistogramVisualizationOption = EuiSuperSelectOption<HistogramVisualization>
   tooltipProps?: { content: string };
 };
 
-const DISTRIBUTION_UNAVAILABLE_WITH_DIMENSIONS_TOOLTIP = i18n.translate(
-  'metricsExperience.gridSettingsFlyout.distributionUnavailableTooltip',
-  {
+const distributionUnavailableTooltip = (histogramPercentile: HistogramVisualization): string =>
+  i18n.translate('metricsExperience.gridSettingsFlyout.distributionUnavailableTooltip', {
     defaultMessage:
-      'Distribution is unavailable while dimensions are selected. Histograms use the 95th percentile instead.',
-  }
-);
+      'Distribution is unavailable while dimensions are selected. Histograms use the {percentile} instead.',
+    values: {
+      percentile: HISTOGRAM_VISUALIZATION_LABELS[toSeriesPercentile(histogramPercentile)],
+    },
+  });
 
 export const buildHistogramVisualizationOptions = ({
   hasDimensions = false,
   isHeatmapsEnabled = true,
+  histogramPercentile = 'distribution',
 }: {
   hasDimensions?: boolean;
-  /** When false, Distribution is omitted. The chart draws the 95th percentile. */
+  /** When false, Distribution is omitted. The chart draws the fallback percentile. */
   isHeatmapsEnabled?: boolean;
+  /** Stored visualization. The disabled Distribution tooltip names the series the chart draws. */
+  histogramPercentile?: HistogramVisualization;
 } = {}): HistogramVisualizationOption[] =>
   HISTOGRAM_VISUALIZATION_OPTIONS.filter(
     (option) => isHeatmapsEnabled || option !== 'distribution'
@@ -103,13 +112,15 @@ export const buildHistogramVisualizationOptions = ({
       value: option,
       // The closed control shows the series the chart actually draws. The menu
       // row stays "Distribution" so the stored value is unchanged.
-      inputDisplay: isDistributionUnavailable ? HISTOGRAM_VISUALIZATION_LABELS.p95 : label,
+      inputDisplay: isDistributionUnavailable
+        ? HISTOGRAM_VISUALIZATION_LABELS[HISTOGRAM_SERIES_FALLBACK]
+        : label,
       dropdownDisplay: label,
       disabled: isDistributionUnavailable,
       ...(isDistributionUnavailable
         ? {
             hasAriaDisabled: true,
-            tooltipProps: { content: DISTRIBUTION_UNAVAILABLE_WITH_DIMENSIONS_TOOLTIP },
+            tooltipProps: { content: distributionUnavailableTooltip(histogramPercentile) },
           }
         : {}),
       'data-test-subj': `metricsExperienceGridSettingsHistogramOption-${option}`,
@@ -123,5 +134,3 @@ export const COUNTER_OPTIONS = buildSimpleAggregationOptions(
 export const GAUGE_OPTIONS = buildSimpleAggregationOptions(
   'metricsExperienceGridSettingsGaugeOption'
 );
-
-export const HISTOGRAM_OPTIONS = buildHistogramVisualizationOptions();

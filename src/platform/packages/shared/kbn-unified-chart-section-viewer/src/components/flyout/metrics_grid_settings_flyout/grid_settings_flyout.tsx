@@ -30,6 +30,7 @@ import { type MetricsGridSettings } from '@kbn/discover-utils';
 import { FEATURE_FLAG_DEFAULTS, FEATURE_FLAGS } from '../../../common/constants';
 import { useTelemetry } from '../../../context/ebt_telemetry_context';
 import { useFeatureFlag } from '../../../hooks/use_feature_flag';
+import { toSeriesPercentile } from './constants';
 import { COUNTER_OPTIONS, GAUGE_OPTIONS, buildHistogramVisualizationOptions } from './options';
 import { getAggregationConfigChanges } from './get_aggregation_config_changes';
 import { getChangedSettings } from './get_changed_settings';
@@ -69,15 +70,15 @@ export const GridSettingsFlyout = ({
       buildHistogramVisualizationOptions({
         hasDimensions: gridSettings.dimensions.length > 0,
         isHeatmapsEnabled,
+        histogramPercentile: draftSettings.histogramPercentile,
       }),
-    [gridSettings.dimensions.length, isHeatmapsEnabled]
+    [draftSettings.histogramPercentile, gridSettings.dimensions.length, isHeatmapsEnabled]
   );
   // Distribution is omitted while heatmaps are off. The series chart already
-  // draws the 95th percentile for that stored value.
-  const histogramValueOfSelected =
-    !isHeatmapsEnabled && draftSettings.histogramPercentile === 'distribution'
-      ? 'p95'
-      : draftSettings.histogramPercentile;
+  // draws the fallback percentile for that stored value.
+  const histogramValueOfSelected = !isHeatmapsEnabled
+    ? toSeriesPercentile(draftSettings.histogramPercentile)
+    : draftSettings.histogramPercentile;
 
   const pendingUpdate = useMemo(
     () => getChangedSettings(draftSettings, gridSettings),

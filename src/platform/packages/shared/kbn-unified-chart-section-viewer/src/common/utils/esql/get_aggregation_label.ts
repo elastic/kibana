@@ -14,6 +14,7 @@ import type {
   MetricsGridSettings,
   SimpleAggregation,
 } from '@kbn/discover-utils';
+import { toSeriesPercentile } from '../../../components/flyout/metrics_grid_settings_flyout/constants';
 
 /**
  * Short display labels for `SimpleAggregation` values, used where space is
@@ -61,12 +62,7 @@ export const getAggregationLabel = ({
   if (customFunction) return customFunction;
 
   if (instrument === 'histogram') {
-    // Distribution's series fallback is the 95th percentile, so the axis uses that label.
-    const percentile =
-      gridSettings.histogramPercentile === 'distribution'
-        ? 'p95'
-        : gridSettings.histogramPercentile;
-    return PERCENTILE_LABELS[percentile];
+    return PERCENTILE_LABELS[toSeriesPercentile(gridSettings.histogramPercentile)];
   }
 
   return AGGREGATION_LABELS[
