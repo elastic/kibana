@@ -12,7 +12,7 @@ import { ActionHostStatusMessage } from './components/action_host_status_message
 import { getAgentActionState } from './utils';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { MemoryDumpResponseActionOutputResult } from './components/memory_dump_results/memory_dump_response_action_output_result';
-import { CancelActionResults } from '../../cancel_action_results';
+import { CancelActionResults } from './components/cancel_results/cancel_action_results';
 import { RunscriptActionResult } from './components/runscript_results';
 import { ScanResults } from './components/scan_results';
 import { EndpointUploadActionResult } from './components/upload_results/endpoint_upload_action_result';

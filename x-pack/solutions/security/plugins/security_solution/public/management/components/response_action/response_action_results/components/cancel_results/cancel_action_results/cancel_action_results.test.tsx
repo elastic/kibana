@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
-import type { ActionDetails, MaybeImmutable } from '../../../../common/endpoint/types';
-import type { AppContextTestRender } from '../../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
-import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
+import type { ActionDetails, MaybeImmutable } from '../../../../../../../../common/endpoint/types';
+import type { AppContextTestRender } from '../../../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../../../common/mock/endpoint';
+import { EndpointActionGenerator } from '../../../../../../../../common/endpoint/data_generators/endpoint_action_generator';
 import { CancelActionResults } from './cancel_action_results';
-import { endpointActionResponseCodes } from '../endpoint_responder/lib/endpoint_action_response_codes';
-import { RESPONSE_ACTION_STATUS } from '../../common/translations';
+import { endpointActionResponseCodes } from '../../../../../endpoint_responder/lib/endpoint_action_response_codes';
+import { RESPONSE_ACTION_STATUS } from '../../../../../../common/translations';
 
 describe('CancelActionResults', () => {
   const testPrefix = 'test';

@@ -13,12 +13,12 @@ import type {
   ActionResponseOutput,
   MaybeImmutable,
   ResponseActionCancelOutputContent,
-} from '../../../../common/endpoint/types';
-import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
-import { RESPONSE_ACTION_STATUS } from '../../common/translations';
-import { EndpointActionFailureMessage } from '../endpoint_action_failure_message';
-import { endpointActionResponseCodes } from '../endpoint_responder/lib/endpoint_action_response_codes';
-import { getAgentActionState } from '../response_action/response_action_results/utils';
+} from '../../../../../../../../common/endpoint/types';
+import { useTestIdGenerator } from '../../../../../../hooks/use_test_id_generator';
+import { RESPONSE_ACTION_STATUS } from '../../../../../../common/translations';
+import { EndpointActionFailureMessage } from '../../../../../endpoint_action_failure_message';
+import { endpointActionResponseCodes } from '../../../../../endpoint_responder/lib/endpoint_action_response_codes';
+import { getAgentActionState } from '../../../utils';
 
 export interface CancelActionResultsProps {
   action: MaybeImmutable<ActionDetails>;
