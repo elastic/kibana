@@ -406,4 +406,25 @@ describe('transformRequestToMetricsAPIRequest', () => {
       },
     });
   });
+
+  test('throws a descriptive 400 error when a metric is not available for the node type and schema', async () => {
+    const compositeSize = 3000;
+    // Reproduces the Inventory Threshold flyout "switch entity" leftover-metric case:
+    // a SemConv Host request still carrying the legacy `cpu` metric (valid for Pods, not Hosts/SemConv).
+    const mismatchedRequest: SnapshotRequest = {
+      ...snapshotRequest,
+      nodeType: 'host',
+      schema: 'semconv',
+      metrics: [{ type: 'cpu' }],
+    };
+
+    await expect(
+      transformRequestToMetricsAPIRequest({
+        client: {} as ESSearchClient,
+        source,
+        snapshotRequest: mismatchedRequest,
+        compositeSize,
+      })
+    ).rejects.toThrow('The aggregation for cpu for host is not available.');
+  });
 });

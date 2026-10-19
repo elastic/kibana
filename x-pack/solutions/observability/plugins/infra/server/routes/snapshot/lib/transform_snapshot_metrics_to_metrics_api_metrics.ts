@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { identity } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { networkTraffic, findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import type { MetricsAPIMetric } from '@kbn/metrics-data-access-plugin/common/http_api/metrics_api';
 import { type SnapshotRequest, SnapshotCustomMetricInputRT } from '../../../../common/http_api';
@@ -63,6 +65,18 @@ export const transformSnapshotMetricsToMetricsAPIMetrics = async (
           };
         }
       }
+      if (!aggregation) {
+        throw Boom.badRequest(
+          i18n.translate('xpack.infra.snapshot.missingSnapshotMetricAggregationError', {
+            defaultMessage: 'The aggregation for {metric} for {nodeType} is not available.',
+            values: {
+              nodeType: snapshotRequest.nodeType,
+              metric: metric.type,
+            },
+          })
+        );
+      }
+
       return { id: metric.type, aggregations: aggregation };
     })
     .filter(identity) as MetricsAPIMetric[];
