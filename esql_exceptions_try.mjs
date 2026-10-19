@@ -595,7 +595,7 @@ const alerted = alerts.body.hits.hits
   .sort();
 console.log(
   `\nResult: rule status "${last?.status}"${
-    last?.message && last.status !== 'succeeded' ? ': ' + last.message.slice(0, 300) : ''
+    last?.message && last.status !== 'succeeded' ? ': ' + last.message.slice(0, 1500) : ''
   }`
 );
 console.log(`Alerts created for: ${alerted.join(', ') || '(none)'}`);

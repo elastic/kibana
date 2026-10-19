@@ -1,6 +1,5 @@
 # Exceptions for computed fields in ES|QL rules 
 
-Status: proposal with a working implementation behind an advanced setting that is off by default. Scope: the ES|QL rule type (`siem.esqlRule`) in the current detection engine. Value lists stay as they are today (see [Out of scope](#out-of-scope)).
 
 ## Summary
 
@@ -569,18 +568,56 @@ Each problem below gives the exception, what the DSL filter does today and what 
 
 ## Verification
 
-- Unit tests cover the clause compiler (every entry type, operator, column type, value rule and rejection), the split of items between DSL, end of query and skipped, the orchestration (the log entry, failure handling, DSL filter rebuilt from DSL items only) and the executor wiring (setting disabled makes no request, the stage is appended before the final limit, the DSL filter is built from the source items only).
-- The production code was run against a live Elasticsearch for 27 cases. They cover every operator on `keyword`, `long`, `integer`, `unsigned_long`, `boolean`, `ip`, `version`, `date` and `date_nanos`, plus `exists` on `text`, with single-valued, multi-valued and missing values. Each case excluded exactly the expected rows. The same run on `double` and `scaled_float` columns was later shown to miss values after a `STATS` (see [Types not supported](#types-not-supported-at-the-end-of-the-query)), and equality on `double` columns is not supported.
-- Real rules run through Kibana with the setting enabled, with exceptions on a computed `text` column (`FROM index METADATA _id | EVAL m = message`, six documents that differ in case and in position of the phrase): `is good.com` excluded `good.com`, `is GOOD.COM` excluded `GOOD.COM`, `matches good*` excluded `good.com`, and `matches GOOD*` excluded `GOOD morning` and `GOOD.COM`, the same documents that the exceptions exclude on a `keyword` field. The results were the same with a `LIMIT 100` after the `EVAL`, and every run ended `succeeded`.
-- The same rules with the exceptions on the `text` source field, which stays in the DSL filter, excluded `Connection to good.com failed`, `Good.com`, `GOOD.COM` and `good.com` for both `is good.com` and `is GOOD.COM`, and nothing for `matches GOOD*`. This is the difference described in [Text columns](#text-columns).
-- Real rules run through Kibana with the setting enabled, for a source field that the query outputs (`FROM index METADATA _id | EVAL name = TO_UPPER(name)`, documents with `web01`, `DB02` and `app03`): "name is web01" excluded the first document and "name is DB02" the second, both by their source value, "name is APP03" excluded none because the source holds `app03`, and "name is nothing" excluded none. A rule that only passes the field through (`KEEP _id, name`) with "name is web01" excluded the first document, and a rule that converts it with `EVAL name = TO_IP(name)` with "name is bogus" did not fail and excluded none. The item stays in the DSL filter only in every case. Every run ended `succeeded`.
-- A worked example with a shared list ran end to end: the source field item stayed in the DSL filter, a flattened sub-key stayed in the DSL filter, and a source field the query does not output was recorded in the rule execution log. That run came before items on fields that exist nowhere were left to the DSL filter, which the unit tests cover.
-- Invalid values: the values each field type accepts and rejects in the DSL filter were compared one by one with the validation of the executor, and the unit tests keep that table. A rule with an invalid `ip` value on a source field ended `failed` with `'bogus' is not an IP string literal`. The same value on a computed `ip` column ended `failed` with the message above, before the query ran and with no alerts, and a valid value on the same column applied normally.
-- Rules run through Kibana with the setting enabled applied the items at the end of the query, excluded the expected documents and wrote the final query to the rule execution log.
-- Not yet verified: the performance of the extra requests on wide mappings or cross-cluster searches.
+These steps run the branch of [the pull request](https://github.com/elastic/kibana/pull/295143) on a local stack and check the behavior with a script that creates its own data.
 
-## Related documents
+1. **Check out the latest changes of the pull request.**
 
-- `esql_exceptions_v1_inventory.md`: behavior of every entry type, operator and field type today.
-- `esql_exceptions_inline_parity.md`: the exhaustive comparison between the DSL filter and a `WHERE` stage right after `FROM`, for every field type and operator (the harness is `esql_exceptions_inline_parity.harness.ts`). It replaces `esql_exceptions_operator_parity.md`.
-- `esql_exceptions_language_gaps.md`: ES|QL language limitations behind the unsupported combinations.
+   ```bash
+   gh pr checkout 295143
+   node scripts/kbn bootstrap
+   ```
+
+2. **Run Elasticsearch.**
+
+   ```bash
+   node scripts/es snapshot --license trial
+   ```
+
+3. **Run Kibana** from the same checkout, in another terminal.
+
+   ```bash
+   node scripts/kibana --dev --no-base-path
+   ```
+
+   To let the script read the `esql_exceptions` log message, add `xpack.securitySolution.enableExperimental: ['extendedRuleExecutionLoggingEnabled']` to `config/kibana.dev.yml` before you start Kibana. The Advanced setting "Extended rule execution logging: min level" must be Info or lower. The script tells you when the message is missing.
+
+4. **Enable the advanced setting.** Open Stack Management, Advanced Settings, Security Solution, and turn on "Enable exceptions on computed fields in ES|QL rules" (`securitySolution:enableEsqlRuleComputedFieldExceptions`). The script also sets it at the start of each run, to enabled by default or to disabled with `--setting=off`.
+
+5. **Run the try script** from the root of the checkout.
+
+   ```bash
+   KBN_URL=http://localhost:5601 node esql_exceptions_try.mjs
+   ```
+
+   The script signs in as `elastic` with the password `changeme` and reads Elasticsearch at `http://localhost:9200`. The variables `ES_USER`, `ES_PASS` and `ES_URL` change these.
+
+The script asks which exceptions you want to try. For each one it asks where the field lives (`source`, `computed`, `redefined` or `missing`), the type of the field, the operator, and whether to use a value that is not valid for the type. Then it creates everything the scenario needs: an index with one document for each exception (a document that only that exception excludes) and one that no exception excludes, the exception list with its items, and an ES|QL rule that returns the documents. It runs the rule and tells you what to look for:
+
+- the query of the rule and where each exception goes: the DSL filter, the end of the query, or not applied with the reason,
+- the documents that should create an alert, and what happens with the setting in the other state,
+- after the run, the alerts that were created, with "This matches what to expect" or "This DIFFERS from what to expect",
+- the final query and the items not applied, from the rule execution log, when the log message is available.
+
+A new run deletes what the previous run created. The rule stays enabled after the run. Delete it when you finish. The script accepts the first letters of an answer, and the answers below use the names that it prints. When it asks about a value that is not valid for the type, answer `no` unless the scenario says otherwise.
+
+The five scenarios go from the simplest to the most complex.
+
+1. **One exception on a computed column.** Answers: `computed`, `keyword`, `is`, then no more items and no more exceptions. Look for the final query ending in `| WHERE NOT (MV_CONTAINS(c1, "good.com"))` and the rule alerts for `survivor` only.
+
+2. **The same exception with the advanced setting disabled.** Run `node esql_exceptions_try.mjs --setting=off` with the same answers. Look for alerts for `survivor` and `target-1`. The setting is off, which means the exception excludes nothing, and no `esql_exceptions` message is written.
+
+3. **One exception with two entries, on a source field and on a computed column.** Answers: `source`, `keyword`, `is`, another item, `computed`, `integer`, `is`, then no more items and no more exceptions. Look for both entries in one `NOT ((…) AND (…))` expression at the end of the query. The alert is created for `survivor` only, and `target-1` is excluded because both entries match it.
+
+4. **A list of three exceptions that go to three places.** Answers: exception 1 is `source`, `keyword`, `is`. Exception 2 is `computed`, `ip`, `is_one_of`. Exception 3 is `computed`, `double`, `is`. Add another exception after the first two. Look for exception 1 staying in the DSL filter, exception 2 applied at the end of the query, and exception 3 not applied with the code `operator_not_supported_on_type` (a `double` column does not support `is`). The alerts are for `survivor` and `target-3`.
+
+5. **Values that cannot be written for the type of the column.** Answers: one exception with two items, `computed`, `ip`, `is` with the invalid value (`yes`), then `computed`, `integer`, `is` with the invalid value (`yes`). Look for the rule ending as failed, no alerts, and a status message that names both values (`"bogus"` and `"many"`), each with its item and field. No `esql_exceptions` message is written for that run.
