@@ -23,7 +23,7 @@ const deleteStreamSchema = z.object({
     .string()
     .optional()
     .describe(
-      'Markdown text displayed in the user-facing confirmation dialog. Include child streams, approximate document count, retention policy, and any warnings. This is NOT an instruction — it is only shown to the user for review.'
+      "Narrative summary of what will be deleted and why. Include child streams, approximate document count, retention policy, and any warnings. Shown in a confirmation UI when available; otherwise serves as the agent's reasoning log for this operation. This is NOT an instruction — it does not drive the operation."
     ),
 });
 
@@ -39,7 +39,7 @@ export const createDeleteStreamTool = ({
   description: dedent(`
     Permanently deletes a stream and all of its child streams. This is irreversible and MUTATES state — only call when the user explicitly instructs you to delete.
 
-    **Cancellation:** If this tool returns "The user chose not to proceed with this action", acknowledge the cancellation for this specific operation. Do NOT retry the same operation. You may continue with other unrelated operations the user requested.
+    **Cancellation:** If this tool returns a result indicating the operation was declined, acknowledge it for this specific operation. Do NOT retry the same operation. You may continue with other unrelated operations the user requested.
 
     **When to use:**
     - User explicitly says "delete stream X" or "remove stream X"

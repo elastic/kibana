@@ -120,6 +120,34 @@ test.describe(
       await expect(streams.canvasUndo).toBeEnabled();
     });
 
+    test('keeps the viewport where the user left it when tidying up', async ({
+      pageObjects: { streams },
+    }) => {
+      await streams.zoomInCanvas();
+      const transform = await streams.getCanvasViewportTransform();
+
+      // Tidy up relayouts the nodes and must leave the camera alone.
+      await streams.tidyUpCanvasFromPane();
+      await expect(streams.canvasUndo).toBeEnabled();
+
+      expect(await streams.getCanvasViewportTransform()).toBe(transform);
+    });
+
+    test('keeps the viewport where the user left it when opening a node flyout', async ({
+      page,
+      pageObjects: { streams },
+    }) => {
+      await streams.zoomInCanvas();
+      const transform = await streams.getCanvasViewportTransform();
+
+      await streams.clickCanvasNode(streams.getCanvasDestinationNode(PLAIN_STREAM));
+      await expect(page.testSubj.locator('streamsCanvasFlyout')).toBeVisible();
+
+      // The flyout is an overlay, so the canvas is neither resized nor
+      // remounted and the viewport should be untouched.
+      expect(await streams.getCanvasViewportTransform()).toBe(transform);
+    });
+
     test('renders the canvas toolbar with undo/redo and add-node placeholders', async ({
       pageObjects: { streams },
     }) => {
@@ -245,6 +273,27 @@ test.describe(
       await expect(page).toHaveURL(/flyoutTab:attachments/);
       await expect(flyout).toBeVisible();
       await expect(attachmentsTab).toHaveAttribute('aria-selected', 'true');
+    });
+
+    test('shows a menu for editing an edge between nodes', async ({ page }) => {
+      // Doesn't matter which one, just get an edge so defaulting to the first
+      // eslint-disable-next-line playwright/no-nth-methods
+      const edge = page.getByTestId('streamsCanvasBasicEdge').first();
+
+      await expect(edge).toBeVisible();
+      // Hovering over the edge path won't work unless forced?
+      // eslint-disable-next-line playwright/no-force-option
+      await edge.hover({ force: true });
+      await page.getByTestId('streamsCanvasEdgeMenuButton').click();
+
+      await expect(page.getByTestId('streamsCanvasEdgeMenu')).toBeVisible();
+      await expect(page.getByText('Add processing')).toBeVisible();
+      await expect(page.getByText('Add routing')).toBeVisible();
+
+      await page.getByText('Add processing').click();
+      await expect(
+        page.getByTestId('streamsProcessingFlyout').getByText('Add Processing')
+      ).toBeVisible();
     });
   }
 );

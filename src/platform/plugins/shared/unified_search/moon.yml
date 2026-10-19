@@ -17,6 +17,7 @@ project:
   owner: '@elastic/kibana-dashboards'
   sourceRoot: src/platform/plugins/shared/unified_search
 dependsOn:
+  - '@kbn/search-sessions-management-plugin'
   - '@kbn/core'
   - '@kbn/data-plugin'
   - '@kbn/data-views-plugin'
@@ -61,6 +62,7 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/esql-utils'
   - '@kbn/licensing-plugin'
+  - '@kbn/field-formats-common'
 tags:
   - plugin
   - prod

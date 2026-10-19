@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/public';
 import {
   EuiFlyout,
@@ -25,7 +25,10 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import { isEmpty } from 'lodash';
-import { NoPermissionsTooltip } from '../../common/components/permissions';
+import {
+  CANNOT_PERFORM_ACTION_SYNTHETICS,
+  NoPermissionsTooltip,
+} from '../../common/components/permissions';
 import {
   ADD_PARAM_SUCCESS_MESSAGE,
   EDIT_PARAM_SUCCESS_MESSAGE,
@@ -39,6 +42,10 @@ import type { ListParamItem } from './params_list';
 import type { SyntheticsParams } from '../../../../../../common/runtime_types';
 import { useFormWrapped } from '../../../../../hooks/use_form_wrapped';
 import { AddParamForm } from './add_param_form';
+import {
+  useHasSettingsHeaderAction,
+  useRegisterSettingsHeaderAction,
+} from '../settings_header_action';
 
 export const AddParamFlyout = ({
   items,
@@ -80,6 +87,21 @@ export const AddParamFlyout = ({
   const { application } = useKibana<ClientPluginsStart>().services;
 
   const canSave = (application?.capabilities.uptime.save ?? false) as boolean;
+  const isHeaderAction = useHasSettingsHeaderAction();
+  const openFlyout = useCallback(() => setIsFlyoutVisible(true), []);
+  const createParamAction = useMemo(
+    () => ({
+      id: 'createParameter',
+      label: CREATE_PARAM,
+      iconType: 'plusCircle',
+      testId: 'syntheticsAddParamFlyoutButton',
+      disableButton: !canSave,
+      tooltipContent: !canSave ? CANNOT_PERFORM_ACTION_SYNTHETICS : undefined,
+      run: openFlyout,
+    }),
+    [canSave, openFlyout]
+  );
+  useRegisterSettingsHeaderAction(createParamAction);
 
   const dispatch = useDispatch();
 
@@ -209,18 +231,20 @@ export const AddParamFlyout = ({
 
   return (
     <div>
-      <NoPermissionsTooltip canEditSynthetics={canSave}>
-        <EuiButton
-          data-test-subj="syntheticsAddParamFlyoutButton"
-          fill
-          iconType="plusCircle"
-          iconSide="left"
-          onClick={() => setIsFlyoutVisible(true)}
-          isDisabled={!canSave}
-        >
-          {CREATE_PARAM}
-        </EuiButton>
-      </NoPermissionsTooltip>
+      {!isHeaderAction ? (
+        <NoPermissionsTooltip canEditSynthetics={canSave}>
+          <EuiButton
+            data-test-subj="syntheticsAddParamFlyoutButton"
+            fill
+            iconType="plusCircle"
+            iconSide="left"
+            onClick={openFlyout}
+            isDisabled={!canSave}
+          >
+            {CREATE_PARAM}
+          </EuiButton>
+        </NoPermissionsTooltip>
+      ) : null}
       {flyout}
       <EuiScreenReaderLive>{announcement}</EuiScreenReaderLive>
     </div>

@@ -11,7 +11,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 
 const MAX_STRING_LENGTH = 2048;
 
-export const HttpMethodSchema = z.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']);
+export const HttpMethodSchema = lazySchema(() => z.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']));
 export type HttpMethod = z.infer<typeof HttpMethodSchema>;
 
 export const RequestInputSchema = lazySchema(() =>
@@ -39,6 +39,7 @@ export const ListApplicationsInputSchema = lazySchema(() =>
   z.object({
     projects: z
       .array(z.string().max(MAX_STRING_LENGTH))
+      .max(100)
       .optional()
       .describe('Filter by one or more AppProject names (query: projects).'),
     project: z
@@ -195,23 +196,54 @@ export const SyncApplicationInputSchema = lazySchema(() =>
       .describe('The Application CR namespace when using app-of-apps namespaces.'),
     syncOptions: z
       .array(z.string().max(MAX_STRING_LENGTH))
+      .max(50)
       .optional()
       .describe('Optional sync options, e.g. ["CreateNamespace=true", "PruneLast=true"].'),
     resources: z
       .array(
         z.object({
-          group: z.string().max(MAX_STRING_LENGTH).optional(),
-          kind: z.string().max(MAX_STRING_LENGTH),
-          name: z.string().max(MAX_STRING_LENGTH),
-          namespace: z.string().max(MAX_STRING_LENGTH).optional(),
+          group: z
+            .string()
+            .max(MAX_STRING_LENGTH)
+            .optional()
+            .describe(
+              'Kubernetes API group of the resource, e.g. "apps". Omit for core resources.'
+            ),
+          kind: z
+            .string()
+            .max(MAX_STRING_LENGTH)
+            .describe('Kubernetes resource kind, e.g. "Deployment".'),
+          name: z.string().max(MAX_STRING_LENGTH).describe('Kubernetes resource name.'),
+          namespace: z
+            .string()
+            .max(MAX_STRING_LENGTH)
+            .optional()
+            .describe('Kubernetes namespace of the resource. Omit for cluster-scoped resources.'),
         })
       )
+      .max(100)
       .optional()
       .describe('Optional list of specific resources to sync instead of the whole application.'),
     strategy: z
       .object({
-        apply: z.object({ force: z.boolean().optional() }).optional(),
-        hook: z.object({ force: z.boolean().optional() }).optional(),
+        apply: z
+          .object({
+            force: z
+              .boolean()
+              .optional()
+              .describe('When true, use kubectl apply --force (delete and re-create on conflict).'),
+          })
+          .optional()
+          .describe('Sync using kubectl apply only, without running resource hooks.'),
+        hook: z
+          .object({
+            force: z
+              .boolean()
+              .optional()
+              .describe('When true, use kubectl apply --force (delete and re-create on conflict).'),
+          })
+          .optional()
+          .describe('Sync using resource hooks (PreSync, Sync, PostSync); this is the default.'),
       })
       .optional()
       .describe('Optional sync strategy (apply or hook).'),

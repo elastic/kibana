@@ -6,25 +6,16 @@
  */
 
 import React, { useMemo } from 'react';
-import {
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiSkeletonLoading,
-  EuiSkeletonRectangle,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiSkeletonLoading, EuiSkeletonRectangle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { AppHeaderLoading } from '@kbn/app-header';
 import { PageScope } from '../../../data_view_manager/constants';
-import { HeaderPage } from '../../../common/components/header_page';
 import { useIsCpsLinkedSearchSpace } from '../../../common/hooks/use_is_cps_linked_search_space';
 import { DataViewDegradedCallout } from '../../../data_view_manager/components/data_view_degraded_callout';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { AttacksPageContent } from './content';
 import { UninitializedDataViewEmptyState } from './uninitialized_empty_state/uninitialized_data_view_empty_state';
-import { PAGE_TITLE } from '../../pages/attacks/translations';
 
 export const DATA_VIEW_LOADING_PROMPT_TEST_ID = 'attacks-page-data-view-loading-prompt';
 export const DATA_VIEW_ERROR_TEST_ID = 'attacks-page-data-view-error';
@@ -108,22 +99,12 @@ export const Wrapper = React.memo(() => {
       isLoading={isLoading}
       loadingContent={
         <div data-test-subj={SKELETON_TEST_ID}>
-          <EuiSkeletonRectangle height={40} width="100%" />
-          <EuiSpacer />
-          <HeaderPage title={PAGE_TITLE}>
-            <EuiFlexGroup gutterSize="m">
-              <EuiFlexItem>
-                <EuiSkeletonRectangle height={40} width={110} />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiSkeletonRectangle height={40} width={110} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </HeaderPage>
-          <EuiHorizontalRule margin="none" />
-          <EuiSpacer size="l" />
+          <AppHeaderLoading spacing="largeBleed" />
+          <EuiSpacer size="s" />
           <EuiSkeletonRectangle height={32} width="100%" />
-          <EuiSpacer />
+          <EuiSpacer size="s" />
+          <EuiSkeletonRectangle height={32} width="100%" />
+          <EuiSpacer size="l" />
           <EuiSkeletonRectangle height={375} width="100%" />
           <EuiSpacer />
           <EuiSkeletonRectangle height={600} width="100%" />

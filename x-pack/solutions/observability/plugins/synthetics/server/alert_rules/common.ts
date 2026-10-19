@@ -42,7 +42,7 @@ import type {
   SyntheticsCommonState,
   SyntheticsMonitorStatusAlertState,
 } from '../../common/runtime_types/alert_rules/common';
-import { SyntheticsCommonStateCodec } from '../../common/runtime_types/zod/alert_rules_common';
+import { SyntheticsCommonStateCodec } from '../../common/runtime_types/schemas/alert_rules_common';
 import {
   getSyntheticsErrorRouteFromMonitorId,
   getSyntheticsCertificatesRoute,
@@ -66,7 +66,9 @@ export const updateState = (
       lastTriggeredAt: triggerVal,
       lastCheckedAt: now,
       lastResolvedAt: undefined,
-      meta: {},
+      // Keep caller meta on the first run; `pendingCount` lives here and must
+      // survive so consecutive pending evaluations can cross pendingThreshold.
+      meta: meta ?? {},
     };
   }
   const {

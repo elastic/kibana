@@ -14,13 +14,31 @@ export type {
   MitreEntity,
 } from './src/schema';
 
-export { mitreEntitySchema, mitreEntitiesSchema } from './src/schema';
+export {
+  MITRE_FRAMEWORKS,
+  mitreFrameworkSchema,
+  mitreEntitySchema,
+  mitreEntitiesSchema,
+} from './src/schema';
+
+export {
+  THREAT_FRAMEWORK_NAME,
+  getMitreFrameworkByThreatName,
+  getMitreFrameworkById,
+  buildMitreReferenceUrl,
+} from './src/threat_framework';
 
 export type {
   MitreEntityStatus,
   MitreEntityBuckets,
   MitreEntityCollection,
   MitreListParams,
+  MitreTacticSummary,
+  MitreTechniqueSummary,
+  MitreSubtechniqueSummary,
+  MitreEntitySummary,
+  MitreEntitySummaryBuckets,
+  MitreEntitySummaryCollection,
 } from './src/types';
 
 export {
@@ -31,17 +49,13 @@ export {
   MITRE_ATTACK_ENTITY_SO_TYPE,
 } from './src/constants';
 
-export { buildSoId } from './src/utils';
+export { buildSoId, getMitreEntityDisplayName } from './src/utils';
 
 export { GetMitreEntitiesRequestQuery } from './src/api';
 
 export type {
-  MitreTacticSummary,
-  MitreTechniqueSummary,
-  MitreSubtechniqueSummary,
-  MitreEntitySummary,
-  MitreEntitySummaryBuckets,
   GetMitreEntitiesRequestQueryInput,
   GetMitreEntitiesRequestQueryOutput,
+  GetMitreEntitiesRequestParams,
   GetMitreEntitiesResponse,
 } from './src/api';

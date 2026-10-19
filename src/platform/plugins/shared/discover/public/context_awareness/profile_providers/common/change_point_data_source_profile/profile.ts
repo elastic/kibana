@@ -18,7 +18,7 @@ import type {
   CustomGridColumnProps,
   CustomCellRenderer,
 } from '@kbn/unified-data-table';
-import { SOURCE_COLUMN } from '@kbn/unified-data-table';
+import { ROWS_HEIGHT_OPTIONS, SOURCE_COLUMN } from '@kbn/unified-data-table';
 import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
 import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory } from '../../../profiles';
@@ -29,11 +29,13 @@ import {
   CHANGE_POINT_DATA_SOURCE_PROFILE_ID,
   type ChangePointChartSectionProps$,
   type ChangePointChartSectionSnapshot,
+  type ChangePointSummaryContext,
 } from './change_point_context';
 import type { ChangePointPvalueCellContext } from './change_point_pvalue_cell';
 import { ChangePointChartSectionSync } from './change_point_chart_section_sync';
 import { ChangePointDocViewerPanel } from './change_point_doc_viewer_panel';
 import type { ProfileProviderServices } from '../../profile_provider_services';
+import { createChangePointSummarySeriesCache } from './change_point_summary_series';
 
 const CHANGE_POINT_CHART_LOCAL_STORAGE_KEY = 'discover:changePointExperience';
 
@@ -45,7 +47,9 @@ const CHANGE_POINT_CHART_LOCAL_STORAGE_KEY = 'discover:changePointExperience';
  * `DataSourceContext` (which already contributes `category`), so `category`
  * must NOT be included here.
  */
-interface ChangePointDataSourceProfileContext extends ChangePointPvalueCellContext {
+interface ChangePointDataSourceProfileContext
+  extends ChangePointPvalueCellContext,
+    ChangePointSummaryContext {
   typeColumnId: string;
   chartSectionProps$: ChangePointChartSectionProps$;
 }
@@ -64,6 +68,7 @@ export const createChangePointDataSourceProfileProvider = (
           { name: SOURCE_COLUMN },
           { name: context.pvalueColumnId },
         ],
+        rowHeight: ROWS_HEIGHT_OPTIONS.default,
       }),
     getChartSectionConfiguration:
       (prev, { context, toolkit }) =>
@@ -116,8 +121,15 @@ export const createChangePointDataSourceProfileProvider = (
           [SOURCE_COLUMN]: (props: DataGridCellValueElementProps) =>
             React.createElement(ChangePointSummaryCell, {
               ...props,
-              context,
+              context: {
+                typeColumnId: context.typeColumnId,
+                pvalueColumnId: context.pvalueColumnId,
+                summarySeriesCache: context.summarySeriesCache,
+              },
               charts: services.charts,
+              data: services.data,
+              searchContext: params.searchContext,
+              isDataLoading: params.isDataLoading,
             }),
         };
 
@@ -184,6 +196,7 @@ export const createChangePointDataSourceProfileProvider = (
         typeColumnId,
         pvalueColumnId,
         chartSectionProps$,
+        summarySeriesCache: createChangePointSummarySeriesCache(),
       },
     };
   },

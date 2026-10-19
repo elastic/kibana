@@ -50,6 +50,7 @@ dependsOn:
   - '@kbn/ui-callout'
   - '@kbn/config-schema'
   - '@kbn/zod'
+  - '@kbn/esql-browser'
 tags:
   - plugin
   - prod

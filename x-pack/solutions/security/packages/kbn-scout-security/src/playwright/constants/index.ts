@@ -7,6 +7,7 @@
 
 export * as archives from './archives';
 export * as detection_rules from './detection_rules';
+export { APP_LOAD_TIMEOUT_MS, DATA_LOAD_TIMEOUT_MS } from './timeouts';
 export type * from './entity_analytics';
 export * from './alert_workflows';
 export * from './take_action';

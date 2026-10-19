@@ -80,6 +80,7 @@ describe('rssAdapter', () => {
         title: 'Item one',
         body_text: 'Body one',
         language: 'en',
+        article_url: 'https://acme.example/1',
       },
       severity: { level: 'medium', score: 40 },
       lineage: {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { StreamDocsStat } from '@kbn/streams-plugin/common';
 import type { UnparsedEsqlResponse } from '@kbn/traced-es-client';
@@ -44,6 +44,15 @@ export interface StreamDocCountsFetch {
   ingestionDocCount: Promise<StreamDocsStat[]>;
 }
 
+interface HistogramEntry {
+  key: string;
+  promise: Promise<UnparsedEsqlResponse>;
+  abortController: AbortController;
+  retainers: number;
+  settled: boolean;
+  releaseTimer?: ReturnType<typeof setTimeout>;
+}
+
 interface UseDocCountFetchProps {
   groupTotalCountByTimestamp: boolean;
   /** When `streamName` is omitted (streams listing), this decides whether to fetch failed-doc counts for all streams. */
@@ -60,6 +69,8 @@ export function useStreamDocCountsFetch({
 }: UseDocCountFetchProps): {
   getStreamDocCounts(streamName?: string): StreamDocCountsFetch;
   getStreamHistogram(streamName: string): Promise<UnparsedEsqlResponse>;
+  /** Marks a histogram as in use by a mounted row. The returned function releases it. */
+  retainStreamHistogram(histogramFetch: Promise<UnparsedEsqlResponse>): () => void;
 } {
   const { timeState, timeState$ } = useTimefilter();
   const {
@@ -73,7 +84,10 @@ export function useStreamDocCountsFetch({
   } = useKibana();
 
   const docCountsPromiseCache = useRef<StreamDocCountsFetch | null>(null);
-  const histogramPromiseCache = useRef<Partial<Record<string, Promise<UnparsedEsqlResponse>>>>({});
+  const histogramCache = useRef(new Map<string, HistogramEntry>());
+  const histogramEntriesByPromise = useRef(
+    new WeakMap<Promise<UnparsedEsqlResponse>, HistogramEntry>()
+  );
   const abortControllerRef = useRef<AbortController>();
 
   if (!abortControllerRef.current) {
@@ -96,7 +110,7 @@ export function useStreamDocCountsFetch({
 
         if (shouldRefresh) {
           docCountsPromiseCache.current = null;
-          histogramPromiseCache.current = {};
+          histogramCache.current = new Map();
           abortControllerRef.current?.abort();
           abortControllerRef.current = new AbortController();
         }
@@ -107,7 +121,40 @@ export function useStreamDocCountsFetch({
     };
   }, [timeState$]);
 
+  const retainStreamHistogram = useCallback((histogramFetch: Promise<UnparsedEsqlResponse>) => {
+    const entry = histogramEntriesByPromise.current.get(histogramFetch);
+    if (!entry) {
+      return () => {};
+    }
+
+    clearTimeout(entry.releaseTimer);
+    entry.retainers++;
+
+    let released = false;
+    return () => {
+      if (released) {
+        return;
+      }
+      released = true;
+      entry.retainers--;
+      if (entry.retainers > 0) {
+        return;
+      }
+      // Deferred so a row that unmounts and mounts again in the same commit keeps its request.
+      entry.releaseTimer = setTimeout(() => {
+        if (entry.retainers > 0 || entry.settled) {
+          return;
+        }
+        if (histogramCache.current.get(entry.key) === entry) {
+          histogramCache.current.delete(entry.key);
+        }
+        entry.abortController.abort();
+      }, 0);
+    };
+  }, []);
+
   return {
+    retainStreamHistogram,
     getStreamDocCounts(streamName?: string) {
       if (docCountsPromiseCache.current) {
         return docCountsPromiseCache.current;
@@ -191,14 +238,27 @@ export function useStreamDocCountsFetch({
     },
     getStreamHistogram(streamName: string): Promise<UnparsedEsqlResponse> {
       const cacheKey = `${streamName}::${timeState.start}::${timeState.end}`;
-      const cachedPromise = histogramPromiseCache.current[cacheKey];
-      if (cachedPromise) {
-        return cachedPromise;
+      const cachedEntry = histogramCache.current.get(cacheKey);
+      if (cachedEntry) {
+        // A render that hands the request out again keeps it alive until its row mounts.
+        clearTimeout(cachedEntry.releaseTimer);
+        return cachedEntry.promise;
       }
 
-      const abortController = abortControllerRef.current;
-      if (!abortController) {
+      const parentAbortController = abortControllerRef.current;
+      if (!parentAbortController) {
         throw new Error('Abort controller not set');
+      }
+
+      // Each row gets its own controller so filtering can cancel rows that are no longer shown.
+      // Time range changes and unmount still cancel everything through the parent controller.
+      const abortController = new AbortController();
+      const parentSignal = parentAbortController.signal;
+      const abortWithParent = () => abortController.abort();
+      if (parentSignal.aborted) {
+        abortController.abort();
+      } else {
+        parentSignal.addEventListener('abort', abortWithParent, { once: true });
       }
 
       const minInterval = getMeaningfulBucketMs(timeState.end - timeState.start, numDataPoints);
@@ -224,7 +284,22 @@ export function useStreamDocCountsFetch({
         throw error;
       }) as Promise<UnparsedEsqlResponse>;
 
-      histogramPromiseCache.current[cacheKey] = histogramPromise;
+      const entry: HistogramEntry = {
+        key: cacheKey,
+        promise: histogramPromise,
+        abortController,
+        retainers: 0,
+        settled: false,
+      };
+      const markSettled = () => {
+        entry.settled = true;
+        parentSignal.removeEventListener('abort', abortWithParent);
+      };
+      // Keep both handlers on `.then` rather than `.finally`, which returns a new promise that rejects
+      // on every abort with nothing to catch it. Callers still get the rejection from `histogramPromise`.
+      histogramPromise.then(markSettled, markSettled);
+      histogramCache.current.set(cacheKey, entry);
+      histogramEntriesByPromise.current.set(histogramPromise, entry);
 
       return histogramPromise;
     },

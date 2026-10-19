@@ -25,11 +25,7 @@ import type {
 import type { RuleExecutorOptions, RuleTypeState } from '@kbn/alerting-plugin/server';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import { convertToBuiltInComparators, getAlertDetailsUrl } from '@kbn/observability-plugin/common';
-import {
-  getFieldByType,
-  type InventoryItemType,
-  type SnapshotMetricType,
-} from '@kbn/metrics-data-access-plugin/common';
+import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import type { ObservabilityMetricsAlert } from '@kbn/alerts-as-data-utils';
 import type { LogQueryFields } from '@kbn/metrics-data-access-plugin/server';
 import { getOriginalActionGroup } from '../../../utils/get_original_action_group';
@@ -38,6 +34,7 @@ import type {
   InventoryMetricThresholdParams,
 } from '../../../../common/alerting/metrics';
 import { AlertStates } from '../../../../common/alerting/metrics';
+import { getInventoryAlertGroupingField } from '../../../../common/inventory/get_inventory_rule_schema';
 import { createFormatter } from '../../../../common/formatters';
 import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
 import { METRIC_FORMATTERS } from '../../../../common/formatters/snapshot_metric_formats';
@@ -281,7 +278,7 @@ export const createInventoryMetricThresholdExecutor =
 
         const evaluationValues = getEvaluationValues<ConditionResult>(results, group);
         const thresholds = getThresholds<InventoryMetricConditions>(criteria);
-        const field = getFieldByType(nodeType);
+        const field = getInventoryAlertGroupingField(nodeType, schema);
         const grouping = field ? unflattenGrouping({ [field]: group }) : undefined;
 
         const { uuid, start } = alertsClient.report({
