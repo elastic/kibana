@@ -1473,28 +1473,28 @@ export class WorkflowsExecutionEnginePlugin
     };
 
     // bulkSchedule can save some tasks and then throw, or skip a task without throwing.
-    const bulkScheduleTasks = async (
+    const bulkScheduleTasksOrMarkFailed = async (
       tasks: Array<ReturnType<typeof createTaskInstance>>,
       request: KibanaRequest
-    ): Promise<{ unscheduledTaskIds: Set<string>; message: string }> => {
-      const taskIds = tasks.map(({ id }) => id);
+    ): Promise<{ failedExecutionIds: Set<string>; message: string }> => {
+      let unscheduled: typeof tasks;
+      let message: string;
       try {
         const scheduled = await plugins.taskManager.bulkSchedule(tasks, {
           request,
           cloneApiKey: true,
         });
         const scheduledIds = new Set(scheduled.map(({ id }) => id));
-        return {
-          unscheduledTaskIds: new Set(taskIds.filter((id) => !scheduledIds.has(id))),
-          message: 'Task Manager did not schedule the workflow task.',
-        };
+        unscheduled = tasks.filter(({ id }) => !scheduledIds.has(id));
+        message = 'Task Manager did not schedule the workflow task.';
       } catch (error) {
-        const found = await plugins.taskManager.bulkGet(taskIds).catch(() => []);
-        return {
-          unscheduledTaskIds: new Set(taskIds.filter((_id, index) => found[index]?.tag !== 'ok')),
-          message: getErrorMessage(error),
-        };
+        const found = await plugins.taskManager.bulkGet(tasks.map(({ id }) => id)).catch(() => []);
+        unscheduled = tasks.filter((_task, index) => found[index]?.tag !== 'ok');
+        message = getErrorMessage(error);
       }
+      const failedExecutionIds = unscheduled.map(({ params }) => params.workflowRunId);
+      await markExecutionsFailed(failedExecutionIds, message);
+      return { failedExecutionIds: new Set(failedExecutionIds), message };
     };
 
     const executeWorkflow: ExecuteWorkflow = async (workflow, context, originalRequest) => {
@@ -1874,20 +1874,15 @@ export class WorkflowsExecutionEnginePlugin
             generateExecutionTaskScope(p.workflowExecution as EsWorkflowExecution)
           )
         );
-        const { unscheduledTaskIds, message } = await bulkScheduleTasks(tasks, request);
-        const unscheduled = toSchedule.filter((_p, index) =>
-          unscheduledTaskIds.has(tasks[index].id)
-        );
-        await markExecutionsFailed(
-          unscheduled.map((p) => p.workflowExecution.id as string),
-          message
-        );
-        for (const { idx } of unscheduled) {
-          results[idx] = { status: 'error', error: { message } };
+        const { failedExecutionIds, message } = await bulkScheduleTasksOrMarkFailed(tasks, request);
+        for (const { idx, workflowExecution } of toSchedule) {
+          if (failedExecutionIds.has(workflowExecution.id as string)) {
+            results[idx] = { status: 'error', error: { message } };
+          }
         }
         this.logger.debug(
           `Bulk-scheduled ${
-            toSchedule.length - unscheduled.length
+            toSchedule.length - failedExecutionIds.size
           } workflow task(s) with user context`
         );
       }
