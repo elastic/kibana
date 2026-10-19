@@ -45,7 +45,7 @@ describe('getAggregationLabel', () => {
     ).toBe('min');
   });
 
-  it('uses the p95 axis label for the distribution default', () => {
+  it('uses the p95 axis label for the default histogram percentile', () => {
     expect(
       getAggregationLabel({ instrument: 'histogram', gridSettings: METRICS_GRID_SETTINGS_DEFAULTS })
     ).toBe('p95');

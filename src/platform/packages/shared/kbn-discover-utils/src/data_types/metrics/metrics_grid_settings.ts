@@ -63,7 +63,8 @@ export interface MetricsGridSettings extends SerializableRecord {
 export const METRICS_GRID_SETTINGS_DEFAULTS: MetricsGridSettings = {
   counterAggregation: FunctionNames.SUM,
   gaugeAggregation: FunctionNames.AVG,
-  histogramPercentile: 'distribution',
+  // Heatmaps stay opt-in until observability.metricsHeatmapsEnabled is on by default.
+  histogramPercentile: 'p95',
   dimensions: [],
   searchTerm: '',
 };

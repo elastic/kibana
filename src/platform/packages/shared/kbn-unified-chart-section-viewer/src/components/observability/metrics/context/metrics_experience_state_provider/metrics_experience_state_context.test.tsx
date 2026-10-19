@@ -267,7 +267,7 @@ describe('MetricsExperienceStateProvider', () => {
       expect(result.current.gridSettings).toEqual({
         counterAggregation: 'sum',
         gaugeAggregation: 'avg',
-        histogramPercentile: 'distribution',
+        histogramPercentile: 'p95',
         dimensions: [],
         searchTerm: '',
       });
