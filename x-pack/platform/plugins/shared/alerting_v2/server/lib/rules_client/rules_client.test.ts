@@ -4011,12 +4011,12 @@ describe('RulesClient', () => {
             expect.objectContaining({
               ruleId: 'rule-id-wf-1',
               spaceId: 'space-1',
-              channel: 'api',
+              origin: expect.objectContaining({ channel: 'api' }),
             }),
           ]
         );
         const [, [emitted]] = (ruleEventPublisher.emitRuleCreated as jest.Mock).mock.calls[0];
-        expect(emitted).not.toHaveProperty('app');
+        expect(emitted.origin).not.toHaveProperty('app');
       });
 
       it('emits ruleCreated with the channel derived from the request', async () => {
@@ -4032,7 +4032,7 @@ describe('RulesClient', () => {
 
         expect(ruleEventPublisher.emitRuleCreated).toHaveBeenCalledWith(
           { request: uiRequest, origin: 'user' },
-          [expect.objectContaining({ ruleId: 'rule-id-wf-ui', channel: 'ui', app: 'discover' })]
+          [expect.objectContaining({ ruleId: 'rule-id-wf-ui', origin: expect.objectContaining({ channel: 'ui', app: 'discover' }) })]
         );
       });
 
@@ -4043,7 +4043,7 @@ describe('RulesClient', () => {
 
         expect(ruleEventPublisher.emitRuleCreated).toHaveBeenCalledWith(
           { request, origin: 'user' },
-          [expect.objectContaining({ ruleId: 'rule-id-wf-app', channel: 'api', app: 'nightshift' })]
+          [expect.objectContaining({ ruleId: 'rule-id-wf-app', origin: expect.objectContaining({ channel: 'api', app: 'nightshift' }) })]
         );
       });
 
@@ -4055,7 +4055,7 @@ describe('RulesClient', () => {
 
         expect(ruleEventPublisher.emitRuleCreated).toHaveBeenCalledWith(
           { request: fakeRequest, origin: 'user' },
-          [expect.objectContaining({ ruleId: 'rule-id-wf-sys', channel: 'system' })]
+          [expect.objectContaining({ ruleId: 'rule-id-wf-sys', origin: expect.objectContaining({ channel: 'system' }) })]
         );
       });
     });
@@ -4089,8 +4089,8 @@ describe('RulesClient', () => {
         expect(ruleEventPublisher.emitRuleCreated).toHaveBeenCalledWith(
           { request, origin: 'user' },
           [
-            expect.objectContaining({ ruleId: 'rule-bulk-1', channel: 'api', app: 'nightshift' }),
-            expect.objectContaining({ ruleId: 'rule-bulk-2', channel: 'api', app: 'nightshift' }),
+            expect.objectContaining({ ruleId: 'rule-bulk-1', origin: expect.objectContaining({ channel: 'api', app: 'nightshift' }) }),
+            expect.objectContaining({ ruleId: 'rule-bulk-2', origin: expect.objectContaining({ channel: 'api', app: 'nightshift' }) }),
           ]
         );
       });
@@ -4102,8 +4102,8 @@ describe('RulesClient', () => {
         await client.bulkCreateRules({ items: [{ ...workflowCreateData, id: 'rule-bulk-3' }] });
 
         const [, [emitted]] = (ruleEventPublisher.emitRuleCreated as jest.Mock).mock.calls[0];
-        expect(emitted).toEqual(expect.objectContaining({ channel: 'api' }));
-        expect(emitted).not.toHaveProperty('app');
+        expect(emitted).toEqual(expect.objectContaining({ origin: expect.objectContaining({ channel: 'api' }) }));
+        expect(emitted.origin).not.toHaveProperty('app');
       });
     });
 
@@ -4237,7 +4237,7 @@ describe('RulesClient', () => {
 
         expect(ruleEventPublisher.emitRuleDeleted).toHaveBeenCalledWith(
           { request: uiRequest, origin: 'user' },
-          [expect.objectContaining({ ruleId: 'rule-id-wf-origin', channel: 'ui', app: 'discover' })]
+          [expect.objectContaining({ ruleId: 'rule-id-wf-origin', origin: expect.objectContaining({ channel: 'ui', app: 'discover' }) })]
         );
       });
     });
@@ -4397,8 +4397,8 @@ describe('RulesClient', () => {
         expect(ruleEventPublisher.emitRuleDeleted).toHaveBeenCalledWith(
           { request, origin: 'user' },
           [
-            { ruleId: 'rule-1', spaceId: 'space-1', channel: 'api' },
-            { ruleId: 'rule-2', spaceId: 'space-1', channel: 'api' },
+            expect.objectContaining({ ruleId: 'rule-1', spaceId: 'space-1', origin: expect.objectContaining({ channel: 'api' }) }),
+            expect.objectContaining({ ruleId: 'rule-2', spaceId: 'space-1', origin: expect.objectContaining({ channel: 'api' }) }),
           ]
         );
       });
@@ -4418,7 +4418,7 @@ describe('RulesClient', () => {
 
         expect(ruleEventPublisher.emitRuleDeleted).toHaveBeenCalledWith(
           { request, origin: 'user' },
-          [{ ruleId: 'rule-1', spaceId: 'space-1', channel: 'api' }]
+          [expect.objectContaining({ ruleId: 'rule-1', spaceId: 'space-1', origin: expect.objectContaining({ channel: 'api' }) })]
         );
       });
     });
