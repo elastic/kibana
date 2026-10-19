@@ -286,6 +286,20 @@ describe('ConversationDetailsFlyoutSnapshot', () => {
     expect(onNotFound).toHaveBeenCalledTimes(1);
   });
 
+  it('keeps polling after a transient error and recovers once the backend does', async () => {
+    const onNotFound = jest.fn();
+    const { get, renderResult } = renderSnapshot(onNotFound);
+    get
+      .mockRejectedValueOnce({ response: { status: 500 } })
+      .mockResolvedValue(createConversation({ title: 'Recovered' }));
+
+    renderResult();
+    await advance(5_000);
+
+    expect(await screen.findByText('Recovered')).toBeInTheDocument();
+    expect(onNotFound).not.toHaveBeenCalled();
+  });
+
   it('omits refetchConversation for the in-chat host', () => {
     render(
       <ConversationDetailsFlyoutContent

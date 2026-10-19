@@ -45,6 +45,8 @@ const ERROR_BODY = i18n.translate('xpack.agentBuilder.conversationDetailsFlyout.
 
 const POLL_INTERVAL_MS = 5_000;
 
+const isNotFoundError = (error: IHttpFetchError | null): boolean => error?.response?.status === 404;
+
 type ResolvedTab = ConversationTemplateTabDefinition & { id: string };
 
 const buildTabs = (
@@ -224,11 +226,12 @@ export const ConversationDetailsFlyoutSnapshot = ({
   } = useQuery<Conversation, IHttpFetchError>({
     queryKey: ['conversation-details-flyout-snapshot', conversationId],
     queryFn: () => conversationsService.get({ conversationId }),
-    retry: (failureCount, httpError) => httpError?.response?.status !== 404 && failureCount < 3,
-    refetchInterval: (data, query) => (query.state.error ? false : POLL_INTERVAL_MS),
+    retry: (failureCount, httpError) => !isNotFoundError(httpError) && failureCount < 3,
+    refetchInterval: (data, query) =>
+      isNotFoundError(query.state.error) ? false : POLL_INTERVAL_MS,
   });
 
-  const isNotFound = error?.response?.status === 404;
+  const isNotFound = isNotFoundError(error);
   useEffect(() => {
     if (isNotFound) {
       onNotFound?.();
