@@ -5,15 +5,7 @@
  * 2.0.
  */
 
-import React, {
-  memo,
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { memo, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { ComponentProps, ComponentType } from 'react';
 import {
   EuiButton,
@@ -24,11 +16,9 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { SerializedStyles } from '@emotion/react';
-import { defaultRangeExtractor, useVirtualizer } from '@tanstack/react-virtual';
-import type { Range } from '@tanstack/react-virtual';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { i18n } from '@kbn/i18n';
 import { getEntityId } from '../common';
-import type { Row } from '../common';
 import { useResetEntityGridFilters } from '../hooks/use_reset_entity_grid_filters';
 import { RenderEntityGridCell } from './entities_cell_renderer';
 import type { EntityGridCellContext, RowCellHandlers } from './entities_cell_renderer';
@@ -57,12 +47,6 @@ const ESTIMATED_ROW_HEIGHT = 41;
 
 /** Rows rendered above and below the visible ones, so fast scrolling doesn't show gaps. */
 const OVERSCAN_ROWS = 5;
-
-/** Rendering many rows at once overruns a frame, so rows seen recently stay rendered. */
-const MAX_KEPT_ROWS = 40;
-
-/** Rows always rendered at the top, so going back to the top renders none. */
-const TOP_ROWS = 15;
 
 const scrollContainerCss = css`
   max-block-size: 70vh;
@@ -153,37 +137,6 @@ const EntityGridRow = memo(
 );
 EntityGridRow.displayName = 'EntityGridRow';
 
-/** Keeps the rows in view, the top rows and recent ones by entity id, so a new sort keeps none it hides. */
-const useKeptRowsRangeExtractor = (rows: readonly Row[]) => {
-  const keptIds = useRef(new Set<string>());
-  const indexById = useMemo(
-    () => new Map(rows.map((row, index) => [getEntityId(row), index])),
-    [rows]
-  );
-  return useCallback(
-    (range: Range): number[] => {
-      const inView = defaultRangeExtractor(range);
-      const kept = keptIds.current;
-      for (const index of inView) {
-        const id = getEntityId(rows[index]);
-        if (id != null) {
-          // Most recently seen last, so the oldest go first.
-          kept.delete(id);
-          kept.add(id);
-        }
-      }
-      for (const id of kept) {
-        if (kept.size <= MAX_KEPT_ROWS) break;
-        kept.delete(id);
-      }
-      const topIndexes = Array.from({ length: Math.min(TOP_ROWS, range.count) }, (_, i) => i);
-      const keptIndexes = [...kept].flatMap((id) => indexById.get(id) ?? []);
-      return [...new Set([...topIndexes, ...inView, ...keptIndexes])].sort((a, b) => a - b);
-    },
-    [rows, indexById]
-  );
-};
-
 export const EntityGridCustomBody = memo(
   ({
     visibleColumns: visCols,
@@ -261,7 +214,6 @@ export const EntityGridCustomBody = memo(
       setListOffset(listRef.current?.offsetTop ?? 0);
     }, [scrollElement]);
 
-    const rangeExtractor = useKeptRowsRangeExtractor(rows);
     const virtualizer = useVirtualizer({
       count: rows.length,
       getScrollElement: () => scrollElement,
@@ -269,10 +221,9 @@ export const EntityGridCustomBody = memo(
       overscan: OVERSCAN_ROWS,
       scrollMargin: listOffset,
       getItemKey: (index) => getEntityId(rows[index]) ?? index,
-      rangeExtractor,
     });
     const virtualRows = virtualizer.getVirtualItems();
-    // Only the rows in view are enriched, not the kept ones.
+    // Only the rows in view are enriched, not the overscan ones.
     const firstRow = virtualizer.range?.startIndex;
     const lastRow = virtualizer.range?.endIndex;
     useEffect(() => {
@@ -308,7 +259,6 @@ export const EntityGridCustomBody = memo(
                   data-index={index}
                   ref={virtualizer.measureElement}
                   css={rowContainerCss}
-                  // Runtime position: the kept rows aren't next to the rows in view.
                   style={{ transform: `translateY(${start - listOffset}px)` }}
                 >
                   <EntityGridRow
