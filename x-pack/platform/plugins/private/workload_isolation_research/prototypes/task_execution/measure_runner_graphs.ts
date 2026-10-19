@@ -20,7 +20,7 @@ assert.ok(global.gc, 'Use node --expose-gc');
 const evidence = process.env.WIR_EVIDENCE_DIR;
 assert.ok(evidence);
 const shape = process.env.WIR_GRAPH_SHAPE;
-assert.ok(shape === 'pool' || shape === 'capsule');
+assert.ok(shape === 'pool' || shape === 'pool_default' || shape === 'capsule');
 const runId = `t1-runner-code-floor-${shape}-001`;
 const contended = process.env.WIR_GRAPH_ALLOW_CONTENDED === '1';
 const lock =
@@ -35,6 +35,8 @@ const write = (suffix: string, data: object): void =>
 const families =
   shape === 'pool'
     ? ['alerting', 'workflow', 'agent']
+    : shape === 'pool_default'
+    ? ['alerting', 'alerting', 'workflow', 'workflow', 'agent']
     : [
         ...Array.from({ length: 6 }, () => 'alerting'),
         ...Array.from({ length: 3 }, () => 'workflow'),
@@ -42,6 +44,7 @@ const families =
       ];
 write('manifest', {
   run_id: runId,
+  owner_pid: process.pid,
   source_commit: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
   host_loadavg: loadavg(),
   load_time_comparable: !contended,
@@ -52,12 +55,15 @@ write('manifest', {
   expected: {
     per_isolate_heap_mb: [80, 350],
     cold_load_ms: [200, 5000],
-    capsule_10_process_rss_mb: [1500, 5000],
+    process_rss_mb:
+      shape === 'pool' ? [800, 1500] : shape === 'pool_default' ? [1200, 2200] : [1500, 5000],
   },
   families,
   capacity:
     shape === 'pool'
       ? 'three resident slots, queues actual6/3/1 concurrency; NOT ten concurrently executing runners'
+      : shape === 'pool_default'
+      ? 'five slots2/2/1 (default max2 per class at admitted6/3/1); queues five admitted runs; NO actual runner execution'
       : 'ten resident code graphs at6/3/1; NO actual runner execution',
   scope: 'code-graph floor only, no service initialization, no adoption, source-dev imports',
   status: 'preregistered',
@@ -126,7 +132,7 @@ try {
     status: 'complete',
     rss_scope: 'whole fresh parent+all held workers, never sum per-worker process RSS',
     limitation:
-      'real code graphs only; initialized service graphs/data/execution excluded; source-dev loader costs retained; A3 is capacity3 floor not10 concurrent tasks',
+      'real code graphs only; initialized service graphs/data/execution excluded; source-dev loader costs retained; pooled resident capacity differs from ten admitted/executing tasks',
   });
 } finally {
   await Promise.all(workers.map((worker) => worker.terminate()));

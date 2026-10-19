@@ -6,7 +6,7 @@
  */
 
 import assert from 'node:assert/strict';
-import { readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 interface FloorResult {
@@ -26,8 +26,9 @@ interface FloorResult {
 }
 const evidence = process.argv[2];
 assert.ok(evidence);
-const derived = (['pool', 'capsule'] as const).flatMap((shape) => {
+const derived = (['pool', 'pool_default', 'capsule'] as const).flatMap((shape) => {
   const resultPath = join(evidence, `t1-runner-code-floor-${shape}-001_result.json`);
+  if (shape === 'pool_default' && !existsSync(resultPath)) return [];
   const result = JSON.parse(readFileSync(resultPath, 'utf8')) as FloorResult;
   assert.equal(result.status, 'complete');
   const common = {
@@ -40,6 +41,8 @@ const derived = (['pool', 'capsule'] as const).flatMap((shape) => {
     mix:
       shape === 'pool'
         ? '1/1/1 class slots (capacity3, queues6/3/1)'
+        : shape === 'pool_default'
+        ? '2/2/1 class slots (capacity5, default max2 per class; queues five of admitted6/3/1)'
         : '6/3/1 capsule slots (capacity10)',
     load_time_comparable: result.load_time_comparable,
     actual_runners_executed: 0,

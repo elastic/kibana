@@ -19,6 +19,7 @@ interface Project {
   environment: string;
   credentials: { api_key: string };
   kibana: { url: string };
+  elasticsearch: { url: string };
 }
 const root = process.cwd();
 assert.equal(root, '/Users/jloleysens/repos/work/kibana-t1-isolated-tasks');
@@ -76,13 +77,18 @@ const scenarios = baseline
   ? ['t1-task-curve-main']
   : ['t1-task-curve-thread', 't1-worker-supervised', 't1-field-caps-bytes'];
 const resources: Array<{ pid: number; scenario: string; stopped: boolean }> = [];
+const remoteCleanup: Array<{ endpoint: string; status: number }> = [];
 const controller = new AbortController();
 process.once('SIGTERM', () => controller.abort());
 process.once('SIGINT', () => controller.abort());
 const checkpoint = (): void =>
   writeFileSync(
     join(evidence, `${projectName}_driver_resources.json`),
-    JSON.stringify({ owner_pid: process.pid, project_id: project.id, resources }, null, 2)
+    JSON.stringify(
+      { owner_pid: process.pid, project_id: project.id, resources, remote_cleanup: remoteCleanup },
+      null,
+      2
+    )
   );
 try {
   for (const scenario of scenarios) {
@@ -128,6 +134,8 @@ try {
           ...process.env,
           WIR_KIBANA_URL: project.kibana.url,
           WIR_KIBANA_API_KEY: project.credentials.api_key,
+          WIR_ES_URL: project.elasticsearch.url,
+          WIR_ES_API_KEY: project.credentials.api_key,
         },
       }
     );
@@ -159,6 +167,30 @@ try {
       if (alive()) process.kill(-resource.pid, 'SIGKILL');
       for (let attempt = 0; attempt < 30 && alive(); attempt++) await delay(100);
       resource.stopped = !alive();
+    }
+  }
+  if (controller.signal.aborted) {
+    for (const endpoint of [
+      'ticks/_stop',
+      'probe/_stop',
+      'probe/_stop',
+      'probe/_stop',
+      'probe/_stop',
+    ]) {
+      const response = await fetch(
+        `${project.kibana.url}/internal/workload_isolation_research/${endpoint}`,
+        {
+          method: 'POST',
+          headers: {
+            authorization: `ApiKey ${project.credentials.api_key}`,
+            'kbn-xsrf': 'research',
+            'x-elastic-internal-origin': 'kibana',
+            'elastic-api-version': '1',
+          },
+          signal: AbortSignal.timeout(30000),
+        }
+      ).catch(() => undefined);
+      remoteCleanup.push({ endpoint, status: response?.status ?? 0 });
     }
   }
   checkpoint();

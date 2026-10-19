@@ -31,6 +31,30 @@ export const summarizeIsolationRuns = (dirs: readonly string[]): object[] =>
       utc_end: manifest.utc_end,
       run_valid: result.run_valid,
       invalid_reasons: result.run_invalid_reasons,
+      discovery_heartbeat_acknowledgements: [
+        ...new Set(
+          samples
+            .filter((doc) => doc.source === 'tm' && doc.tm_event === 'DISCOVERY_HEARTBEAT')
+            .map((doc) => String(doc.boot_id))
+        ),
+      ].map((bootId) => {
+        const beats = samples
+          .filter(
+            (doc) =>
+              doc.boot_id === bootId &&
+              doc.source === 'tm' &&
+              doc.tm_event === 'DISCOVERY_HEARTBEAT'
+          )
+          .sort((left, right) => left.ts - right.ts);
+        const gaps = beats.slice(1).map((beat, index) => beat.ts - beats[index].ts);
+        return {
+          boot_id: bootId,
+          observed: beats.length,
+          failed: beats.filter((beat) => !beat.ok).length,
+          max_ack_gap_ms: gaps.length ? Math.max(...gaps) : null,
+          scope: 'discovery acknowledgements only; not task lease-renewal telemetry',
+        };
+      }),
       rows: result.run_valid
         ? result.pods.map((row) => ({
             phase: row.phase,
