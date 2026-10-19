@@ -1,5 +1,5 @@
 {
-  "sha1": "9c9f95975aba8599b63731d609aa95261af0996e",
+  "sha1": "c03a5536054376c10b7842d7d4eb380a0816bd71",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -4774,8 +4774,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/rule_artifacts.spec.ts",
-        "line": 247,
-        "column": 33
+        "line": 243,
+        "column": 25
       }
     },
     {
@@ -4789,7 +4789,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/rule_artifacts.spec.ts",
-        "line": 285,
+        "line": 289,
         "column": 18
       }
     },
@@ -4804,7 +4804,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/rule_artifacts.spec.ts",
-        "line": 299,
+        "line": 303,
         "column": 84
       }
     },
@@ -4819,7 +4819,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/rule_artifacts.spec.ts",
-        "line": 320,
+        "line": 324,
         "column": 43
       }
     },
@@ -4834,7 +4834,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/rule_artifacts.spec.ts",
-        "line": 332,
+        "line": 336,
         "column": 16
       }
     },
@@ -4849,7 +4849,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/rule_artifacts.spec.ts",
-        "line": 348,
+        "line": 352,
         "column": 12
       }
     },
@@ -4864,7 +4864,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/rule_artifacts.spec.ts",
-        "line": 361,
+        "line": 365,
         "column": 7
       }
     },
@@ -4879,7 +4879,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/rule_artifacts.spec.ts",
-        "line": 368,
+        "line": 372,
         "column": 84
       }
     },
@@ -4894,98 +4894,104 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/rule_artifacts.spec.ts",
-        "line": 388,
+        "line": 395,
         "column": 27
       }
     },
     {
-      "id": "91169d10f4b3bcc-38bb6395e80f680",
+      "id": "877dd578d5d0c3f-38bb6395e80f680",
       "title": "Rule metadata.template create: rejects metadata.template in the body",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete"
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/rule_metadata_template.spec.ts",
-        "line": 41,
-        "column": 4
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/rule_templates_integration.spec.ts",
+        "line": 63,
+        "column": 30
       }
     },
     {
-      "id": "91169d10f4b3bcc-7389c37d23459c7",
+      "id": "877dd578d5d0c3f-7389c37d23459c7",
       "title": "Rule metadata.template update: rejects metadata.template in the body",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete"
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/rule_metadata_template.spec.ts",
-        "line": 52,
-        "column": 34
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/rule_templates_integration.spec.ts",
+        "line": 75,
+        "column": 16
       }
     },
     {
-      "id": "91169d10f4b3bcc-538e5ffc050d029",
+      "id": "877dd578d5d0c3f-538e5ffc050d029",
       "title": "Rule metadata.template upsert: rejects metadata.template in the body",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete"
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/rule_metadata_template.spec.ts",
-        "line": 61,
-        "column": 16
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/rule_templates_integration.spec.ts",
+        "line": 82,
+        "column": 98
       }
     },
     {
-      "id": "91169d10f4b3bcc-395752ff52a54cd",
+      "id": "877dd578d5d0c3f-395752ff52a54cd",
       "title": "Rule metadata.template get and find: return metadata.template when present",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete"
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/rule_metadata_template.spec.ts",
-        "line": 72,
-        "column": 88
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/rule_templates_integration.spec.ts",
+        "line": 96,
+        "column": 50
       }
     },
     {
-      "id": "91169d10f4b3bcc-1e1bca9bb6e7ce6",
+      "id": "877dd578d5d0c3f-1e1bca9bb6e7ce6",
       "title": "Rule metadata.template update: keeps metadata.template",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete"
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/rule_metadata_template.spec.ts",
-        "line": 83,
-        "column": 23
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/rule_templates_integration.spec.ts",
+        "line": 101,
+        "column": 12
       }
     },
     {
-      "id": "91169d10f4b3bcc-9342707c04c28a4",
+      "id": "877dd578d5d0c3f-9342707c04c28a4",
       "title": "Rule metadata.template upsert: keeps metadata.template on an existing rule",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-observability_complete"
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/rule_metadata_template.spec.ts",
-        "line": 99,
-        "column": 4
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/rule_templates_integration.spec.ts",
+        "line": 117,
+        "column": 8
       }
     },
     {
