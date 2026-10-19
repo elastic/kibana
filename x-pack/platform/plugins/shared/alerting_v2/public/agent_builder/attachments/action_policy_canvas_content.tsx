@@ -21,7 +21,6 @@ import { attachmentDataToActionPolicyPayload } from '@kbn/alerting-v2-utils';
 import { getAlertingV2Locators } from '../../application/bind_locators_to_host';
 import { ActionPolicyDefinitionList } from '../../components/action_policy/details_flyout/action_policy_definition_list';
 import { ActionPoliciesApi } from '../../services/action_policies_api';
-import { useAlertingV2ExperimentalFeatures } from '../../hooks/use_alerting_v2_experimental_features';
 import { OBSERVABILITY_ALERTING_HOST } from '../../observability_alerting_host';
 import type { ActionPolicyAttachment } from './action_policy_attachment_definition';
 
@@ -42,7 +41,6 @@ export const ActionPolicyCanvasContent = ({
   const workflowApi = useService(WorkflowApi);
   const share = useService(PluginStart('share')) as SharePluginStart;
   const notifications = useService(CoreStart('notifications'));
-  const showExperimentalFeatures = useAlertingV2ExperimentalFeatures();
 
   const { data: rawData, origin } = attachment;
   const data = rawData as ActionPolicyCanvasData;
@@ -91,7 +89,7 @@ export const ActionPolicyCanvasContent = ({
   }, []);
 
   useEffect(() => {
-    if (!mounted || !showExperimentalFeatures) {
+    if (!mounted) {
       registerActionButtons([]);
       return;
     }
@@ -197,7 +195,6 @@ export const ActionPolicyCanvasContent = ({
     notifications,
     data,
     hasDraftDependencies,
-    showExperimentalFeatures,
   ]);
 
   return (
