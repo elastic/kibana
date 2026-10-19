@@ -150,13 +150,13 @@ export const getInstallErrorTitle = (name: string) =>
   });
 
 export const getUpdateSuccessTitle = (name: string) =>
-  i18n.translate('genAiSettings.documentation.update.successWithName', {
+  i18n.translate('xpack.genAiSettings.documentation.update.successWithName', {
     defaultMessage: '{name} updated successfully',
     values: { name },
   });
 
 export const getUpdateErrorTitle = (name: string) =>
-  i18n.translate('genAiSettings.documentation.update.errorWithName', {
+  i18n.translate('xpack.genAiSettings.documentation.update.errorWithName', {
     defaultMessage: 'Failed to update {name}',
     values: { name },
   });
