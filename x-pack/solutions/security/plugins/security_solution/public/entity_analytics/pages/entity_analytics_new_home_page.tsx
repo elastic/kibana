@@ -913,13 +913,16 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     [setRowsMode]
   );
 
-  const groupByOptions = useMemo(
-    () =>
-      GROUP_BY_OPTIONS.filter(
-        (o) => !(rowsMode === 'resolved' && o.key === ENTITY_GROUPING_OPTIONS.RESOLUTION)
-      ),
-    [rowsMode]
-  );
+  const groupByOptions = useMemo(() => {
+    const options: Array<{ key: string; label: string }> = GROUP_BY_OPTIONS.filter(
+      (o) => !(rowsMode === 'resolved' && o.key === ENTITY_GROUPING_OPTIONS.RESOLUTION)
+    );
+    // The selector names a selection only from its options, so a custom field joins them, as in kbn-grouping.
+    const customFields = groupsSelected
+      .filter((key) => key !== 'none' && !options.some((o) => o.key === key))
+      .map((key) => ({ key, label: key }));
+    return [...options, ...customFields];
+  }, [rowsMode, groupsSelected]);
   const groupByFields = useMemo(
     () => (isDataViewLoading ? [] : dataView.fields.getAll()),
     [isDataViewLoading, dataView]
