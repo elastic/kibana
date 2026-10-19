@@ -1,33 +1,20 @@
 {
-  "sha1": "a60f21d8ecfb243cbcfc5c83d0e0147673ec80fe",
+  "sha1": "36b575481629589646a411906c5f3c8dbc3bec6f",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "6cb21ca8e3593d9-dae09b093b80946",
-      "title": "Subscription status badge for billing admins shows the trial popover with subscribe and pricing links",
+      "id": "258baac59aa8826-47da8101732e5ec",
+      "title": "Subscription status badge shows the trial popover with subscribe and pricing links",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-search"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/private/subscription_status/test/scout_cloud_trial/ui/tests/billing_admin.spec.ts",
-        "line": 34,
-        "column": 18
-      }
-    },
-    {
-      "id": "f5b0c8dfcdebe68-df0fa6fc38738a8",
-      "title": "Subscription status badge for users without the billing admin role shows the trial popover with the subscribe link",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-serverless-search"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/private/subscription_status/test/scout_cloud_trial/ui/tests/no_billing_access.spec.ts",
-        "line": 17,
-        "column": 54
+        "file": "x-pack/platform/plugins/private/subscription_status/test/scout_cloud_trial/ui/tests/trial_popover.spec.ts",
+        "line": 14,
+        "column": 52
       }
     }
   ]
