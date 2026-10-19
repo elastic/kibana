@@ -6,11 +6,13 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { TestProviders } from '../../common/mock';
 import { EntityAnalyticsNewHomePage } from './entity_analytics_new_home_page';
 import * as tileHooks from '../components/home/needs_attention_tiles/hooks';
 import { useEntityStoreStatus } from '../components/entity_store/hooks/use_entity_store';
+import { useMissingRiskEnginePrivileges } from '../hooks/use_missing_risk_engine_privileges';
+import { useEntityEnginePrivileges } from '../components/entity_store/hooks/use_entity_engine_privileges';
 
 jest.mock('../components/home/needs_attention_tiles/hooks', () => ({
   useAlertBasedTiles: jest.fn(),
@@ -106,8 +108,38 @@ jest.mock('../../common/components/page_wrapper', () => ({
   SecuritySolutionPageWrapper: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 jest.mock('../../common/utils/route/spy_routes', () => ({ SpyRoute: () => null }));
+jest.mock('../hooks/use_missing_risk_engine_privileges', () => ({
+  useMissingRiskEnginePrivileges: jest.fn(),
+}));
+jest.mock('../components/entity_store/hooks/use_entity_engine_privileges', () => ({
+  useEntityEnginePrivileges: jest.fn(),
+}));
+jest.mock('../api/hooks/use_anomaly_privileges', () => ({
+  useAnomalyPrivileges: () => ({ isLoading: false, data: undefined }),
+}));
 
 const hooks = tileHooks as unknown as Record<string, jest.Mock>;
+
+const mockPrivileges = ({
+  isLoading = false,
+  isError = false,
+  hasReadPermissions = true,
+}: { isLoading?: boolean; isError?: boolean; hasReadPermissions?: boolean } = {}) => {
+  (useMissingRiskEnginePrivileges as jest.Mock).mockReturnValue({
+    isLoading: false,
+    hasAllRequiredPrivileges: true,
+  });
+  (useEntityEnginePrivileges as jest.Mock).mockReturnValue({
+    isLoading,
+    isError,
+    data: isError
+      ? undefined
+      : {
+          has_read_permissions: hasReadPermissions,
+          privileges: { elasticsearch: { index: {} }, kibana: [] },
+        },
+  });
+};
 
 const COUNT_HOOKS = {
   alerts: 'useAlertBasedTiles',
@@ -213,9 +245,58 @@ const seriesReachesBack = (tile: Tile): boolean | undefined => {
   return options.reachesBack;
 };
 
+describe('EntityAnalyticsNewHomePage: privileges', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useEntityStoreStatus as jest.Mock).mockReturnValue({
+      data: { status: 'running' },
+      isLoading: false,
+    });
+    mockTiles();
+  });
+
+  it('shows a loader and runs no query while the privileges load', () => {
+    mockPrivileges({ isLoading: true });
+    render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+    expect(screen.getByRole('progressbar', { name: 'Loading' })).toBeInTheDocument();
+    expect(hooks.useNewEntityCount).not.toHaveBeenCalled();
+  });
+
+  it('shows the no-access screen and runs no query without read access to the entity store', () => {
+    mockPrivileges({ hasReadPermissions: false });
+    render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+    expect(screen.getByTestId('noPrivilegesPage')).toBeInTheDocument();
+    expect(hooks.useNewEntityCount).not.toHaveBeenCalled();
+  });
+
+  it('shows the page when the privileges check fails', () => {
+    mockPrivileges({ isError: true });
+    render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+    expect(screen.queryByTestId('noPrivilegesPage')).not.toBeInTheDocument();
+    expect(hooks.useNewEntityCount).toHaveBeenCalled();
+  });
+
+  it('shows the page when the risk engine privileges check fails', () => {
+    mockPrivileges();
+    (useMissingRiskEnginePrivileges as jest.Mock).mockReturnValue({
+      isLoading: true,
+      isError: true,
+    });
+    render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+    expect(screen.queryByRole('progressbar', { name: 'Loading' })).not.toBeInTheDocument();
+    expect(hooks.useNewEntityCount).toHaveBeenCalled();
+  });
+
+});
+
 describe('EntityAnalyticsNewHomePage: the tiles wait for every count', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockPrivileges();
     (useEntityStoreStatus as jest.Mock).mockReturnValue({
       data: { status: 'running' },
       isLoading: false,

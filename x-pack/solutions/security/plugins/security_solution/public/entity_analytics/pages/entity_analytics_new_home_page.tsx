@@ -34,6 +34,11 @@ import { useEntityStoreDataView } from '../components/home/use_entity_store_data
 import { DataViewErrorComponent } from '../../common/components/data_view_error';
 import { useEntityStoreStatus } from '../components/entity_store/hooks/use_entity_store';
 import { EntityStoreDisabledEmptyPrompt } from './entity_store_disabled_empty_prompt';
+import { useMissingRiskEnginePrivileges } from '../hooks/use_missing_risk_engine_privileges';
+import { useEntityEnginePrivileges } from '../components/entity_store/hooks/use_entity_engine_privileges';
+import { useAnomalyPrivileges } from '../api/hooks/use_anomaly_privileges';
+import { EntityAnalyticsReadPrivilegesCallout } from '../components/entity_analytics_read_privileges_callout';
+import { NoPrivileges } from '../../common/components/no_privileges';
 import { useGetWatchlists } from '../api/hooks/use_get_watchlists';
 import { useErrorToast } from '../../common/hooks/use_error_toast';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
@@ -187,7 +192,53 @@ const ROWS_SELECTOR_TITLE = i18n.translate(
   { defaultMessage: 'Rows' }
 );
 
+const PAGE_TITLE = i18n.translate('xpack.securitySolution.entityAnalytics.homePage.pageTitle', {
+  defaultMessage: 'Entity analytics',
+});
+
 export const EntityAnalyticsNewHomePage: React.FC = () => {
+  const riskEngineReadPrivileges = useMissingRiskEnginePrivileges({ readonly: true });
+  const entityEnginePrivilegesQuery = useEntityEnginePrivileges();
+  const anomalyPrivilegesQuery = useAnomalyPrivileges();
+
+  const isRiskEngineReadPrivilegesLoading =
+    riskEngineReadPrivileges.isLoading && !riskEngineReadPrivileges.isError;
+
+  if (entityEnginePrivilegesQuery.isLoading || isRiskEngineReadPrivilegesLoading) {
+    return <PageLoader />;
+  }
+
+  const noPrivileges =
+    !entityEnginePrivilegesQuery.isError && !entityEnginePrivilegesQuery.data?.has_read_permissions;
+
+  return (
+    <>
+      <EntityAnalyticsReadPrivilegesCallout
+        riskEngineReadPrivileges={riskEngineReadPrivileges}
+        entityEnginePrivileges={entityEnginePrivilegesQuery.data}
+        anomalyPrivileges={anomalyPrivilegesQuery.data}
+        id="entity-analytics-home"
+      />
+      {noPrivileges ? (
+        <>
+          <SecuritySolutionPageWrapper data-test-subj="entityAnalyticsNewHomePage">
+            <NoPrivileges
+              pageName={PAGE_TITLE.toLowerCase()}
+              docLinkSelector={(docLinks) =>
+                docLinks.securitySolution.entityAnalytics.riskScorePrerequisites
+              }
+            />
+          </SecuritySolutionPageWrapper>
+          <SpyRoute pageName={SecurityPageName.entityAnalyticsHomePage} />
+        </>
+      ) : (
+        <EntityAnalyticsNewHomePageContent />
+      )}
+    </>
+  );
+};
+
+const EntityAnalyticsNewHomePageContent: React.FC = () => {
   const spaceId = useSpaceId();
   const {
     dataView,
