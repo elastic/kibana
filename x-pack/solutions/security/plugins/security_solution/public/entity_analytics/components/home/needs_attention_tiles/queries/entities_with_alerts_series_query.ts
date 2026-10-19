@@ -6,11 +6,8 @@
  */
 
 import type { TimeRange } from '../../entities_grid/common';
-import {
-  GROUP_ON_WATCHLIST,
-  buildAlertTilesHead,
-  buildGroupFilterSteps,
-} from './entities_with_alerts_query';
+import { GROUP_ON_WATCHLIST, buildAlertTilesHead } from './entities_with_alerts_query';
+import { buildGroupFilterSteps } from './group_filter_steps';
 import {
   SERIES_BUCKET_COLUMN,
   buildSeriesBucketExpression,

@@ -9,6 +9,7 @@ import type { TimeRange } from '../../entities_grid/common';
 import { ALERT_OPEN_STATUS_FILTER } from '../../entities_grid/queries/alerts';
 import { getAlertsIndex } from '../../entities_grid/queries/esql';
 import { buildAlertEuidPipeline } from './alert_euid_pipeline';
+import { buildGroupFilterSteps } from './group_filter_steps';
 import { buildPeriodCondition } from './tile_period';
 import type { TilePeriod } from './tile_period';
 
@@ -104,23 +105,6 @@ export const buildAlertTilesHead = ({
     `| EVAL effective_id = COALESCE(${RESOLVED_TO}, entity.id), group_on_watchlist = COALESCE(alias_watchlisted, false) OR entity.attributes.watchlists IS NOT NULL`,
   ];
 };
-
-/**
- * Returns the stages that keep only the groups whose main entity passes the entity filters, for
- * rows already grouped by `effective_id`. Filtering each member before grouping would drop an
- * alias's alert when only the main entity passes. Without filters there is nothing to join.
- */
-export const buildGroupFilterSteps = (
-  entitiesIndexName: string,
-  entityFilterClauses: string[]
-): string[] =>
-  entityFilterClauses.length === 0
-    ? []
-    : [
-        '| EVAL entity.id = effective_id',
-        `| LOOKUP JOIN ${entitiesIndexName} ON entity.id`,
-        ...entityFilterClauses,
-      ];
 
 export const buildAlertBasedTilesQuery = (
   entitiesIndexName: string,

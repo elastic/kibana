@@ -73,26 +73,25 @@ describe('series queries count exactly, with one column per dot', () => {
 });
 
 describe('series queries apply the entity filters where the count does', () => {
-  const lookupJoinTo = (end: string) => (query: string) =>
-    query.slice(query.indexOf('| LOOKUP JOIN'), query.indexOf(end));
+  // After the rows are grouped: the join to the main entity, then the filters.
+  const groupFilterSteps = (query: string) =>
+    query.slice(
+      query.indexOf('| EVAL entity.id = effective_id'),
+      query.indexOf(FILTERS[0]) + FILTERS[0].length
+    );
 
   it.each([
     {
       tile: 'alert based',
       series: buildAlertBasedTilesSeriesQuery(INDEX, NAMESPACE, '7d', FILTERS),
       count: buildAlertBasedTilesQuery(INDEX, NAMESPACE, '7d', FILTERS),
-      // After the rows are grouped: the join to the main entity, then the filters.
-      shared: (query: string) =>
-        query.slice(
-          query.indexOf('| EVAL entity.id = effective_id'),
-          query.indexOf(FILTERS[0]) + FILTERS[0].length
-        ),
+      shared: groupFilterSteps,
     },
     {
       tile: 'anomalies',
       series: buildEntitiesWithAnomaliesSeriesQuery(INDEX, '7d', FILTERS, JOBS),
       count: buildEntitiesWithAnomaliesCountQuery(INDEX, '7d', FILTERS, JOBS),
-      shared: lookupJoinTo('| EVAL effective_id'),
+      shared: groupFilterSteps,
     },
     {
       tile: 'new entity',

@@ -393,9 +393,11 @@ TRUE, _euid_branch_2_formula, NULL))
 | RENAME derived_euids AS \`entity.id\`
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON entity.id
 | WHERE entity.name IS NOT NULL
-| WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
 | EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)
 | STATS BY effective_id
+| EVAL entity.id = effective_id
+| LOOKUP JOIN .entities.v2.latest.default-00001 ON entity.id
+| WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
 | STATS value = COUNT(effective_id), entity_ids = VALUES(effective_id)"
 `;
 
