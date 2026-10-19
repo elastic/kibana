@@ -168,6 +168,7 @@ export async function buildOverview(scope: IEngineScope): Promise<EngineOverview
       ledger: currentLedger,
       today_usd: currentLedger.by_day[today]?.usd ?? 0,
       today_calls: currentLedger.by_day[today]?.calls ?? 0,
+      today_tokens: currentLedger.by_day[today]?.tokens ?? 0,
       current_price: model && modelPrice ? toPricePerMillion(model, modelPrice) : undefined,
       prices_available: prices !== null,
       prices_fetched_at: prices?.fetchedAt,

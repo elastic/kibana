@@ -35,9 +35,10 @@ export function EngineKpis({ overview, events }: IEngineKpisProps) {
     'xpack.significantEventsApp.detectionEngine.kpi.costBreakdown',
     {
       defaultMessage:
-        'Model calls only, at Elastic Inference Service list price. Today {today}. Since {since}: {calls} calls, {tokens} tokens ({prompt} in, {completion} out){unpriced}.',
+        'Model calls only, at Elastic Inference Service list price, per UTC day. Today: {todayCalls} calls. Since {since}: {total}, {calls} calls, {tokens} tokens ({prompt} in, {completion} out){unpriced}.',
       values: {
-        today: formatUsd(cost.today_usd),
+        todayCalls: cost.today_calls,
+        total: formatUsd(ledger.total_usd),
         since: new Date(ledger.since).toLocaleString(),
         calls: ledger.calls,
         tokens: formatTokens(tokens),
@@ -149,7 +150,9 @@ export function EngineKpis({ overview, events }: IEngineKpisProps) {
       <EuiFlexItem style={{ minWidth: 220 }}>
         <EuiPanel hasBorder paddingSize="s">
           <EuiStat
-            title={formatUsd(ledger.total_usd)}
+            // Today, not the running total: a cheap model's calls barely move a total that
+            // includes past runs on a pricier one, and the cost looked frozen.
+            title={formatUsd(cost.today_usd)}
             titleSize="s"
             reverse
             descriptionElement="div"
@@ -158,7 +161,7 @@ export function EngineKpis({ overview, events }: IEngineKpisProps) {
               <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
                   {i18n.translate('xpack.significantEventsApp.detectionEngine.kpi.cost', {
-                    defaultMessage: 'Model cost so far',
+                    defaultMessage: 'Model cost today',
                   })}
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -170,12 +173,15 @@ export function EngineKpis({ overview, events }: IEngineKpisProps) {
             <EuiText size="xs" color="subdued">
               {cost.current_price
                 ? i18n.translate('xpack.significantEventsApp.detectionEngine.kpi.costModel', {
-                    defaultMessage: '{tokens} tokens · {model}',
-                    values: { tokens: formatTokens(tokens), model: cost.current_price.model },
+                    defaultMessage: '{tokens} tokens today · {model}',
+                    values: {
+                      tokens: formatTokens(cost.today_tokens),
+                      model: cost.current_price.model,
+                    },
                   })
                 : i18n.translate('xpack.significantEventsApp.detectionEngine.kpi.costHeuristic', {
-                    defaultMessage: '{tokens} tokens · heuristic agent is free',
-                    values: { tokens: formatTokens(tokens) },
+                    defaultMessage: '{tokens} tokens today · heuristic agent is free',
+                    values: { tokens: formatTokens(cost.today_tokens) },
                   })}
             </EuiText>
           </EuiStat>

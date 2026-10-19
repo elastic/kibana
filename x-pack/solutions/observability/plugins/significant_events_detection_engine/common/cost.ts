@@ -40,6 +40,7 @@ export interface EngineCostSummary {
   ledger: EngineCostLedger;
   today_usd: number;
   today_calls: number;
+  today_tokens: number;
   /** Price of the model the agent uses now; absent for the heuristic agent. */
   current_price?: ModelPricePerMillion;
   /** False when the price catalog could not be read; costs then stay unpriced. */
