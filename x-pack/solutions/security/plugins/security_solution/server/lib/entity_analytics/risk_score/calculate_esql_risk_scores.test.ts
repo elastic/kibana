@@ -18,7 +18,9 @@ import {
   getResolutionScoreESQLByRange,
 } from './calculate_esql_risk_scores';
 import type { RiskScoreBucket } from '../types';
-import { RIEMANN_ZETA_S_VALUE, RIEMANN_ZETA_VALUE } from './constants';
+import { DEFAULT_ALERT_SAMPLE_SIZE, RIEMANN_ZETA_S_VALUE, getRiemannZetaValue } from './constants';
+
+const RIEMANN_ZETA_VALUE = getRiemannZetaValue(DEFAULT_ALERT_SAMPLE_SIZE);
 
 describe('Calculate risk scores with ESQL', () => {
   describe('getEuidCompositeQuery', () => {
@@ -405,7 +407,8 @@ describe('Calculate risk scores with ESQL', () => {
 
       const bucket = buildRiskScoreBucket(
         EntityType.host,
-        '.alerts-security.alerts-default'
+        '.alerts-security.alerts-default',
+        DEFAULT_ALERT_SAMPLE_SIZE
       )(esqlResultRow as FieldValue[]);
 
       const expected: RiskScoreBucket = {
@@ -491,7 +494,8 @@ describe('Calculate risk scores with ESQL', () => {
 
         const bucket = buildRiskScoreBucket(
           EntityType.host,
-          '.alerts-security.alerts-default'
+          '.alerts-security.alerts-default',
+          DEFAULT_ALERT_SAMPLE_SIZE
         )(esqlResultRow as FieldValue[]);
 
         expect(bucket.top_inputs.risk_details.value.risk_inputs[0].rule_name).toBe(
@@ -513,7 +517,8 @@ describe('Calculate risk scores with ESQL', () => {
         const esqlResultRow = [1, 80, inputs, 'hostname'];
         const bucket = buildRiskScoreBucket(
           EntityType.host,
-          '.alerts-security.alerts-default'
+          '.alerts-security.alerts-default',
+          DEFAULT_ALERT_SAMPLE_SIZE
         )(esqlResultRow as FieldValue[]);
 
         expect(bucket.top_inputs.risk_details.value.risk_inputs[0].rule_name).toBe(ruleName);
@@ -530,7 +535,8 @@ describe('Calculate risk scores with ESQL', () => {
         const esqlResultRow = [1, 90, inputs, 'hostname'];
         const bucket = buildRiskScoreBucket(
           EntityType.host,
-          '.alerts-security.alerts-default'
+          '.alerts-security.alerts-default',
+          DEFAULT_ALERT_SAMPLE_SIZE
         )(esqlResultRow as FieldValue[]);
 
         expect(bucket.top_inputs.risk_details.value.risk_inputs[0].rule_name).toBe(ruleName);
@@ -547,7 +553,8 @@ describe('Calculate risk scores with ESQL', () => {
         const esqlResultRow = [1, 85, inputs, 'hostname'];
         const bucket = buildRiskScoreBucket(
           EntityType.host,
-          '.alerts-security.alerts-default'
+          '.alerts-security.alerts-default',
+          DEFAULT_ALERT_SAMPLE_SIZE
         )(esqlResultRow as FieldValue[]);
 
         expect(bucket.top_inputs.risk_details.value.risk_inputs[0].rule_name).toBe(ruleName);
@@ -566,7 +573,8 @@ describe('Calculate risk scores with ESQL', () => {
         const esqlResultRow = [1, 95, inputs, 'hostname'];
         const bucket = buildRiskScoreBucket(
           EntityType.host,
-          '.alerts-security.alerts-default'
+          '.alerts-security.alerts-default',
+          DEFAULT_ALERT_SAMPLE_SIZE
         )(esqlResultRow as FieldValue[]);
 
         expect(bucket.top_inputs.risk_details.value.risk_inputs[0].rule_name).toBe(ruleName);
@@ -584,7 +592,8 @@ describe('Calculate risk scores with ESQL', () => {
         const esqlResultRow = [1, 70, inputs, 'hostname'];
         const bucket = buildRiskScoreBucket(
           EntityType.host,
-          '.alerts-security.alerts-default'
+          '.alerts-security.alerts-default',
+          DEFAULT_ALERT_SAMPLE_SIZE
         )(esqlResultRow as FieldValue[]);
 
         expect(bucket.top_inputs.risk_details.value.risk_inputs[0].rule_name).toBe(ruleName);
@@ -604,7 +613,8 @@ describe('Calculate risk scores with ESQL', () => {
 
         const bucket = buildRiskScoreBucket(
           EntityType.host,
-          '.alerts-security.alerts-default'
+          '.alerts-security.alerts-default',
+          DEFAULT_ALERT_SAMPLE_SIZE
         )(esqlResultRow as FieldValue[]);
 
         expect(bucket.top_inputs.risk_details.value.risk_inputs[0].rule_name).toBe(
@@ -624,7 +634,8 @@ describe('Calculate risk scores with ESQL', () => {
         const esqlResultRow = [1, 60, inputs, 'hostname'];
         const bucket = buildRiskScoreBucket(
           EntityType.host,
-          '.alerts-security.alerts-default'
+          '.alerts-security.alerts-default',
+          DEFAULT_ALERT_SAMPLE_SIZE
         )(esqlResultRow as FieldValue[]);
 
         expect(bucket.top_inputs.risk_details.value.risk_inputs[0].rule_name).toBe(correctRuleName);
@@ -643,7 +654,8 @@ describe('Calculate risk scores with ESQL', () => {
         const esqlResultRow = [2, 125, inputs, 'hostname'];
         const bucket = buildRiskScoreBucket(
           EntityType.host,
-          '.alerts-security.alerts-default'
+          '.alerts-security.alerts-default',
+          DEFAULT_ALERT_SAMPLE_SIZE
         )(esqlResultRow as FieldValue[]);
 
         expect(bucket.top_inputs.risk_details.value.risk_inputs).toHaveLength(2);
