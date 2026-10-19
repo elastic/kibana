@@ -176,6 +176,19 @@ describe('GridSettingsFlyout', () => {
     expect(onClose).toHaveBeenCalled();
   });
 
+  it('shows Distribution when heatmaps are enabled', () => {
+    renderFlyout(
+      <GridSettingsFlyout
+        gridSettings={defaultSettings}
+        onGridSettingsChange={jest.fn()}
+        onClose={jest.fn()}
+      />,
+      { isHeatmapsEnabled: true }
+    );
+
+    expect(histogramSelect.getSelected()).toContain('Distribution');
+  });
+
   it('hides Distribution and shows the 95th percentile when heatmaps are disabled', async () => {
     renderFlyout(
       <GridSettingsFlyout

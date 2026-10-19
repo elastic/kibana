@@ -30,7 +30,7 @@ export interface UseHistogramHeatmapParams {
   histogramBoundsLoading: boolean;
   whereStatements?: readonly string[];
   originalSource?: string;
-  histogramPercentile: HistogramVisualization;
+  histogramVisualization: HistogramVisualization;
   description?: string;
 }
 
@@ -49,7 +49,7 @@ export const useHistogramHeatmap = ({
   histogramBoundsLoading,
   whereStatements,
   originalSource,
-  histogramPercentile,
+  histogramVisualization,
   description,
 }: UseHistogramHeatmapParams): HistogramHeatmapState => {
   const isHeatmapsEnabled = useFeatureFlag(
@@ -59,7 +59,7 @@ export const useHistogramHeatmap = ({
   // Percentile settings always draw the series chart. Only distribution can draw a heatmap.
   const isHistogramDistribution =
     isHeatmapsEnabled &&
-    isDistributionVisualization(histogramPercentile) &&
+    isDistributionVisualization(histogramVisualization) &&
     isHistogramMetric(
       firstNonNullable(metricItem.fieldTypes),
       firstNonNullable(metricItem.metricTypes)

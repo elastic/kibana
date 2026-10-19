@@ -1288,7 +1288,7 @@ describe('MetricsGrid', () => {
       histogramPercentile: 'distribution' as const,
     };
 
-    const renderDistributionGrid = (props: Partial<MetricsGridProps> = {}) =>
+    const renderMetricsGridWithHistDistributions = (props: Partial<MetricsGridProps> = {}) =>
       render(
         <MetricsExperienceStateProvider
           profileId="test-profile"
@@ -1345,7 +1345,7 @@ describe('MetricsGrid', () => {
     });
 
     it('keeps the percentile chart when the heatmaps flag is off', () => {
-      renderDistributionGrid({ metricItems: [histogramItem], histogramBounds: bounds });
+      renderMetricsGridWithHistDistributions({ metricItems: [histogramItem], histogramBounds: bounds });
 
       expect(createESQLQuery).toHaveBeenCalled();
       expect(Chart).toHaveBeenCalledWith(
@@ -1361,7 +1361,7 @@ describe('MetricsGrid', () => {
     it('keeps the data stream description on the heatmap', () => {
       enableHeatmaps();
       const description = 'Data stream: metrics-a';
-      renderDistributionGrid({
+      renderMetricsGridWithHistDistributions({
         metricItems: [histogramItem],
         histogramBounds: bounds,
         getDescription: () => description,
@@ -1380,7 +1380,7 @@ describe('MetricsGrid', () => {
 
     it('draws a heatmap from the distribution query when bounds exist', () => {
       enableHeatmaps();
-      renderDistributionGrid({
+      renderMetricsGridWithHistDistributions({
         metricItems: [histogramItem],
         histogramBounds: bounds,
       });
@@ -1405,7 +1405,7 @@ describe('MetricsGrid', () => {
 
     it('draws a heatmap when the upper and lower bounds are the same', () => {
       enableHeatmaps();
-      renderDistributionGrid({
+      renderMetricsGridWithHistDistributions({
         metricItems: [histogramItem],
         histogramBounds: new Map([
           [getMetricUniqueKey(histogramItem), { bounds: { min: 5, max: 5 } }],
@@ -1429,7 +1429,7 @@ describe('MetricsGrid', () => {
 
     it('uses the series chart when a breakdown applies to the histogram', () => {
       enableHeatmaps();
-      renderDistributionGrid({
+      renderMetricsGridWithHistDistributions({
         metricItems: [histogramItem],
         dimensions: [{ name: 'host.name' }],
         histogramBounds: bounds,
@@ -1454,7 +1454,7 @@ describe('MetricsGrid', () => {
 
     it('keeps gauge and counter charts on the percentile path while the flag is on', () => {
       enableHeatmaps();
-      renderDistributionGrid({
+      renderMetricsGridWithHistDistributions({
         metricItems: [metricItems[0], histogramItem],
         histogramBounds: bounds,
       });
@@ -1472,7 +1472,7 @@ describe('MetricsGrid', () => {
 
     it('waits for bounds before drawing a histogram', () => {
       enableHeatmaps();
-      renderDistributionGrid({
+      renderMetricsGridWithHistDistributions({
         metricItems: [histogramItem],
         histogramBoundsLoading: true,
       });
@@ -1494,7 +1494,7 @@ describe('MetricsGrid', () => {
 
     it('uses the series chart when bounds are missing', () => {
       enableHeatmaps();
-      renderDistributionGrid({
+      renderMetricsGridWithHistDistributions({
         metricItems: [histogramItem],
         histogramBounds: new Map(),
         histogramBoundsLoading: false,
@@ -1515,7 +1515,7 @@ describe('MetricsGrid', () => {
     it('passes a bounds error to the chart', () => {
       enableHeatmaps();
       const error = new Error('bounds failed');
-      renderDistributionGrid({
+      renderMetricsGridWithHistDistributions({
         metricItems: [histogramItem],
         histogramBounds: new Map([[getMetricUniqueKey(histogramItem), { error }]]),
       });

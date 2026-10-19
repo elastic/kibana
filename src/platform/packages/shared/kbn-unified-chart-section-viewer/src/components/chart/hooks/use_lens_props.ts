@@ -39,6 +39,7 @@ import { useEuiTheme } from '@elastic/eui';
 import type { UnifiedMetricsGridProps } from '../../../types';
 import { useReportChartSectionError } from './use_report_chart_section_error';
 
+/** XY series and heatmap only. Other Lens chart types are not built here. */
 export type ChartLensConfig = LensXYConfig | LensHeatmapConfig;
 
 const getLensConfigEsql = (config: ChartLensConfig): string => {
@@ -65,6 +66,7 @@ export type LensProps = Pick<
   | 'description'
 >;
 
+/** Builds Lens props for an XY series or heatmap config. Other chart types are not supported. */
 export const useLensProps = ({
   chartId,
   lensConfig,

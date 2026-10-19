@@ -27,11 +27,9 @@ export type ChartProps = Pick<UnifiedMetricsGridProps, 'fetchParams'> &
   Omit<LensWrapperProps, 'lensProps' | 'abortController'> & {
     size?: ChartSize;
     discoverFetch$: UnifiedMetricsGridProps['fetch$'];
-    /** XY series or heatmap. Each chart type is a finished Lens config. */
     lensConfig: ChartLensConfig;
     /**
      * When true, a click does not create a filter. Brushing still uses onBrushEnd.
-     * Histogram heatmaps set this because ES|QL cannot compare a histogram to a number.
      */
     disableClickFilter?: boolean;
     isLoading?: boolean;

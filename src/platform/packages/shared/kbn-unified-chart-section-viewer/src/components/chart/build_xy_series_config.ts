@@ -14,7 +14,7 @@ import type {
   LensYBoundsConfig,
 } from '@kbn/lens-embeddable-utils';
 
-/** Builds an XY series chart with the same Lens config builder the heatmap uses. */
+/** Builds an XY series Lens config. */
 export const buildXySeriesConfig = ({
   query,
   title,

@@ -87,6 +87,34 @@ const EMPTY_HISTOGRAM_BOUNDS: HistogramBoundsByMetricKey = new Map();
 const getItemKey = (metricItem: ParsedMetricItem, index: number) => {
   return `${metricItem.metricName}-${index}`;
 };
+
+const EMPTY_APPLICABLE_DIMENSIONS: Dimension[] = [];
+
+const useStableApplicableDimensions = (
+  dimensions: Dimension[],
+  dimensionFields: readonly Dimension[]
+): Dimension[] => {
+  const stabilizedRef = useRef<{ key: string | null; value: Dimension[] }>({
+    key: null,
+    value: EMPTY_APPLICABLE_DIMENSIONS,
+  });
+
+  return useMemo(() => {
+    const applicable = dimensions.filter((dimension) =>
+      dimensionFields.some((field) => field.name === dimension.name)
+    );
+    const key = applicable.length === 0 ? null : stableStringify(applicable);
+
+    if (stabilizedRef.current.key === key) {
+      return stabilizedRef.current.value;
+    }
+
+    const value = applicable.length === 0 ? EMPTY_APPLICABLE_DIMENSIONS : applicable;
+    stabilizedRef.current = { key, value };
+    return value;
+  }, [dimensions, dimensionFields]);
+};
+
 export const MetricsGrid = ({
   metricItems,
   onBrushEnd,
@@ -274,33 +302,6 @@ export const MetricsGrid = ({
   );
 };
 
-const EMPTY_APPLICABLE_DIMENSIONS: Dimension[] = [];
-
-const useStableApplicableDimensions = (
-  dimensions: Dimension[],
-  dimensionFields: readonly Dimension[]
-): Dimension[] => {
-  const stabilizedRef = useRef<{ key: string | null; value: Dimension[] }>({
-    key: null,
-    value: EMPTY_APPLICABLE_DIMENSIONS,
-  });
-
-  return useMemo(() => {
-    const applicable = dimensions.filter((dimension) =>
-      dimensionFields.some((field) => field.name === dimension.name)
-    );
-    const key = applicable.length === 0 ? null : stableStringify(applicable);
-
-    if (stabilizedRef.current.key === key) {
-      return stabilizedRef.current.value;
-    }
-
-    const value = applicable.length === 0 ? EMPTY_APPLICABLE_DIMENSIONS : applicable;
-    stabilizedRef.current = { key, value };
-    return value;
-  }, [dimensions, dimensionFields]);
-};
-
 const METRICS_QUICK_ACTION_IDS: QuickActionIds = [
   ACTION_EXPLORE_IN_DISCOVER_TAB,
   ACTION_INSPECT_PANEL,
@@ -415,7 +416,7 @@ const ChartItem = React.memo(
         histogramBoundsLoading,
         whereStatements,
         originalSource: userSource,
-        histogramPercentile: gridSettings.histogramPercentile,
+        histogramVisualization: gridSettings.histogramPercentile,
         description,
       });
 
@@ -444,13 +445,12 @@ const ChartItem = React.memo(
       gridSettings,
     ]);
 
-    const color = useMemo(() => colorPalette[index % colorPalette.length], [index, colorPalette]);
-
     const yAxisTitle = useMemo(() => {
       const instrument = firstNonNullable(metricItem.metricTypes);
       return instrument ? getAggregationLabel({ instrument, gridSettings }) : undefined;
     }, [metricItem.metricTypes, gridSettings]);
 
+    const color = useMemo(() => colorPalette[index % colorPalette.length], [index, colorPalette]);
     const chartLayers = useChartLayers({
       dimensions: applicableDimensions,
       metricItem,
@@ -518,6 +518,8 @@ const ChartItem = React.memo(
           id={metricItem.metricName}
           isSelected={isSelected}
           lensConfig={lensConfig}
+          // Chart does not know which configs are heatmaps. Click-to-filter is
+          // disabled here because ES|QL cannot compare a histogram value to a number.
           disableClickFilter={lensConfig.chartType === 'heatmap'}
           size={size}
           discoverFetch$={discoverFetch$}
