@@ -57,6 +57,7 @@ export const AutomationRow = ({
   const displayName = workflowSummary?.name ?? automation.value;
   const enabled = workflowSummary?.enabled;
   const definition = workflowSummary?.definition;
+  const hasWorkflowDefinition = definition != null;
   const actionsAriaLabel = i18n.translate(
     'xpack.contextEngine.aiIndexDetail.automations.actionsAriaLabel',
     { defaultMessage: 'Actions for {name}', values: { name: displayName } }
@@ -73,19 +74,22 @@ export const AutomationRow = ({
   const openDeleteModal = useCallback(() => setIsDeleteModalOpen(true), []);
 
   const handleRun = useCallback(() => {
+    if (!hasWorkflowDefinition) {
+      return;
+    }
     if (needsManualInputs) {
       setIsInputsModalOpen(true);
     } else {
       runAutomation(automation.value);
     }
-  }, [automation.value, needsManualInputs, runAutomation]);
+  }, [automation.value, hasWorkflowDefinition, needsManualInputs, runAutomation]);
 
   const menuItems = useAutomationRowMenuItems({
     editHref,
     isReadOnly,
     isBusy,
     canRun,
-    isRunDisabled: isBusy || isLoading || enabled === false,
+    isRunDisabled: isBusy || isLoading || enabled === false || !hasWorkflowDefinition,
     onCloseMenu: closeMenu,
     onRun: handleRun,
     onPreview: openPreview,

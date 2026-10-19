@@ -93,7 +93,6 @@ describe('useRunAutomation', () => {
           primary: expect.objectContaining({
             children: 'View execution',
             href: '/app/workflows/wf-1',
-            target: '_blank',
           }),
         }),
       })

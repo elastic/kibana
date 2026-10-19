@@ -282,6 +282,29 @@ describe('AutomationRow', () => {
     expect(screen.queryByTestId('contextAutomationDeleteConfirmModalStub')).not.toBeInTheDocument();
   });
 
+  it('disables Run when the workflow definition is unavailable', () => {
+    renderAutomationRow({
+      canRun: true,
+      workflowSummary: undefined,
+    });
+
+    openActionsMenu();
+
+    expect(screen.getByTestId('contextRunAutomationButton')).toBeDisabled();
+    expect(mockRunAutomation).not.toHaveBeenCalled();
+  });
+
+  it('disables Run when workflow summary omits definition', () => {
+    renderAutomationRow({
+      canRun: true,
+      workflowSummary: createWorkflowSummary(),
+    });
+
+    openActionsMenu();
+
+    expect(screen.getByTestId('contextRunAutomationButton')).toBeDisabled();
+  });
+
   it('runs the workflow directly when Run is chosen and no manual inputs are required', () => {
     renderAutomationRow({
       canRun: true,
