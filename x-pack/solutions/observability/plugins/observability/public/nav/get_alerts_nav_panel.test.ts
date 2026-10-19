@@ -7,11 +7,7 @@
 
 import type { Capabilities, CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import {
-  getAlertsNavPanel,
-  getObservabilityAlertsLinkTitle,
-  shouldIncludeStackManagementRules,
-} from './get_alerts_nav_panel';
+import { getAlertsNavPanel, getObservabilityAlertsLinkTitle } from './get_alerts_nav_panel';
 
 const FULL_V2_CAPABILITIES = {
   alerting_v2_alerts: { read: true },
@@ -82,25 +78,99 @@ describe('getAlertsNavPanel', () => {
     core.settings.client.get = <T>(_key: string) => false as T;
   });
 
-  it('returns the classic Alerts link when alerting v2 is disabled', () => {
-    const result = getAlertsNavPanel(core);
+  describe('when alerting v2 is disabled', () => {
+    it('returns an Alerting panel linking only to v1 pages for a user with full capabilities', () => {
+      setCapabilities(core, FULL_V2_CAPABILITIES);
 
-    expect(result).toHaveLength(1);
-    expect(result[0]).toEqual(
-      expect.objectContaining({
-        link: 'observability-overview:alerts',
-        icon: 'warning',
-        title: 'Alerts',
-      })
-    );
-    expect(result[0]).not.toHaveProperty('renderAs');
-  });
+      const result = getAlertsNavPanel(core);
 
-  it('includes Stack Management Rules only while alerting v2 is disabled', () => {
-    expect(shouldIncludeStackManagementRules(core)).toBe(true);
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual(
+        expect.objectContaining({
+          id: 'alerting',
+          title: 'Alerting',
+          icon: 'warning',
+          renderAs: 'panelOpener',
+        })
+      );
+      expect(result[0]).not.toHaveProperty('link');
+      expect(result[0].children).toEqual([
+        expect.objectContaining({
+          breadcrumbStatus: 'hidden',
+          children: [{ link: 'observability-overview:alerts', title: 'Alerts' }],
+        }),
+        expect.objectContaining({
+          title: 'Rule Management',
+          children: [{ link: 'management:triggersActions', title: 'Rules' }],
+        }),
+        expect.objectContaining({
+          title: 'Notifications and Suppressions',
+          children: [{ link: 'management:maintenanceWindows' }],
+        }),
+      ]);
+    });
 
-    enableV2(core);
-    expect(shouldIncludeStackManagementRules(core)).toBe(false);
+    it('returns an empty array when the user has no capabilities', () => {
+      expect(getAlertsNavPanel(core)).toEqual([]);
+    });
+
+    it('returns an empty array when the user only has v2 capabilities', () => {
+      setCapabilities(core, {
+        alerting_v2_alerts: { read: true },
+        alerting_v2_rules: { read: true },
+        alerting_v2_action_policies: { read: true },
+        alerting_v2_execution_history: { read: true },
+      });
+
+      expect(getAlertsNavPanel(core)).toEqual([]);
+    });
+
+    it('shows only Alerts when the user has v1 alerts read', () => {
+      setCapabilities(core, { observabilityAlerts: { show: true } });
+
+      expect(getPanelChildren(core)).toEqual([
+        expect.objectContaining({
+          children: [{ link: 'observability-overview:alerts', title: 'Alerts' }],
+        }),
+      ]);
+    });
+
+    it('ignores the V1 alerts table setting', () => {
+      core.settings.client.get = <T>(_key: string) => true as T;
+      setCapabilities(core, { observabilityAlerts: { show: true } });
+
+      expect(getPanelChildren(core)).toEqual([
+        expect.objectContaining({
+          children: [{ link: 'observability-overview:alerts', title: 'Alerts' }],
+        }),
+      ]);
+    });
+
+    it('shows only Stack Management Rules when the user has v1 rules read', () => {
+      setCapabilities(core, {
+        management: { insightsAndAlerting: { triggersActionsRules: true } },
+      });
+
+      expect(getPanelChildren(core)).toEqual([
+        expect.objectContaining({
+          title: 'Rule Management',
+          children: [{ link: 'management:triggersActions', title: 'Rules' }],
+        }),
+      ]);
+    });
+
+    it('shows only Maintenance Windows when the user has that management capability', () => {
+      setCapabilities(core, {
+        management: { insightsAndAlerting: { maintenanceWindows: true } },
+      });
+
+      expect(getPanelChildren(core)).toEqual([
+        expect.objectContaining({
+          title: 'Notifications and Suppressions',
+          children: [{ link: 'management:maintenanceWindows' }],
+        }),
+      ]);
+    });
   });
 
   it('returns a full Alerting panel when the user has v1 and v2 read capabilities', () => {
