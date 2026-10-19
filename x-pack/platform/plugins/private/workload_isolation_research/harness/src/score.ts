@@ -299,6 +299,10 @@ export const scoreRun = (
           probes.map((x) => x.latency_ms),
           50
         ),
+        probe_p95_ms: pct(
+          probes.map((x) => x.latency_ms),
+          95
+        ),
         probe_p99_ms: pct(
           probes.map((x) => x.latency_ms),
           99
@@ -428,6 +432,7 @@ export const scoreRun = (
     if (!b) continue;
     r.vs_baseline = {
       probe_p50: ratio(r.metrics.probe_p50_ms, b.metrics.probe_p50_ms),
+      probe_p95: ratio(r.metrics.probe_p95_ms, b.metrics.probe_p95_ms),
       probe_p99: ratio(r.metrics.probe_p99_ms, b.metrics.probe_p99_ms),
       hb_gap_max: ratio(
         Math.max(r.metrics.hb_gap_max_overlap_ms ?? 0, r.metrics.hb_window_max_ms ?? 0) || null,

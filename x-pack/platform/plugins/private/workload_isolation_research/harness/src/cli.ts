@@ -196,10 +196,16 @@ export const main = async (): Promise<void> => {
       // A/A analysis: log-ratio noise between matched idle windows (B_i / A_i) per pod+boot.
       const metricsOf = (m: Record<string, number | null>) => ({
         probe_p50: m.probe_p50_ms,
+        probe_p95: m.probe_p95_ms,
         probe_p99: m.probe_p99_ms,
         hb_max: Math.max(m.hb_gap_max_overlap_ms ?? 0, m.hb_window_max_ms ?? 0) || null,
       });
-      const logs: Record<string, number[]> = { probe_p50: [], probe_p99: [], hb_max: [] };
+      const logs: Record<string, number[]> = {
+        probe_p50: [],
+        probe_p95: [],
+        probe_p99: [],
+        hb_max: [],
+      };
       const perRun: Record<string, unknown> = {};
       for (const runId of String(flags['run-ids']).split(',')) {
         const { pods } = await computeScorecardParts(es, runId);

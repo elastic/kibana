@@ -85,11 +85,24 @@ Limits on QAF: `supervise` and `probe/_start` reach only the UI pod (background 
 - Phases with background work wait for completion **by task id** (`POST tasks/_status`; alerting waits for the `actions:.index` queue to drain); timeout → run failed. Only the non-terminating offender waits a fixed safety cap.
 - Heap/RSS are **sampled lower bounds** (1 s point samples timestamped at acquisition).
 
-## Comparing variants (rule)
+## Comparing variants (rule, calibrated in the Track 0 fix pass)
 
-- Local: paired ABAB, same machine, back to back; note `manifest.host.loadavg_*`.
-- QAF: p99 is noisy **per pod** (CV 0.24–0.55 on identical idle projects, even in the same minute). Never compare raw p99 against a separately measured baseline; compare each run's in-pod `vs_baseline` ratios across images over ≥ 3 runs. Only p50 (CV ≈ 0.09) and TM poll cadence are stable enough to compare with the shared baseline project directly; idle longest slices on QAF range 20–570 ms, so use dose-attributable slices (offender window minus idle max) and ABAB windows.
-- Derived dispersion: `node $H variance --variant-prefix <prefix> --out <file>`.
+Noise of the in-pod ratio method was measured with A/A trials (matched 30 s idle windows, B_i/A_i, 10 rps in-pod probe): QAF 30 pairs over 3 runs on two clean image-4 projects, local 10 pairs (`evidence/aa-qaf.json`, `aa-local.json` in the Track 0 folder; `node $H aa --run-ids …`).
+
+| metric | QAF sd(log ratio) | QAF single-pair 95 % band | QAF MDE (80 % power) n=1/3/5/10 | local sd | local MDE n=1/5 |
+|---|---|---|---|---|---|
+| probe p50 | 0.024 | 0.95–1.05 | 1.07/1.04/1.03/1.02 | 0.045 | 1.14/1.06 |
+| probe p95 | 0.052 | 0.90–1.11 | 1.16/1.09/1.07/1.05 | 0.053 | 1.16/1.07 |
+| probe p99 | **0.665** | **0.27–3.68** | **6.44/2.93/2.30/1.80** | 0.152 | 1.53/1.21 |
+| heartbeat-gap max (slice proxy) | 0.305 | 0.55–1.82 | 2.35/1.64/1.46/1.31 | 0.219 | 1.85/1.32 |
+
+Rules:
+- Use **p95** (and p50) of the in-pod probe for neighbour-latency comparisons on QAF; a single matched pair detects ≥ 1.16× at 80 % power. Report p99, but claims about p99 on QAF need ≥ 10 matched pairs (MDE 1.8×) or effects far above the band (10 s doses give ×60–×380).
+- Pair within pod+boot (scorecard `vs_baseline`) and interleave A/B windows of equal duration; compare ratios across images, never raw percentiles across projects.
+- Slice proxy resolution floor (idle 1 s-window max heartbeat gap, p99): **≈ 20 ms local, ≈ 110 ms QAF UI pod**; idle 30 s-window max: local p99 30 ms, QAF UI p99 214 ms, QAF background p99 346 ms. "Longest slice ≤ 50 ms" is only testable locally; on QAF compare the treatment window against the same pod's idle distribution.
+- Calibration: for known route doses the main-side gap equals the measured block + 0.8–10.8 ms locally (10–200 ms), + 2.4–7 ms on QAF when no unrelated stall shares the window (unrelated stalls up to ~110 ms otherwise). The worker-observed view over-reports short blocks up to 2× and is only a live detector.
+- Perturbation: idle instrumentation (heartbeat, worker, push, TM subscription) showed no detectable latency, CPU or RSS cost vs the plugin disabled (local ABAB, n = 2 per condition, external probe + `ps`); the 10 rps in-pod probe costs ≈ 7 pp of one core. Always run the probe in both arms.
+- After `update-images`, previous-image pods keep running and claiming tasks; recreate the project (≈ 2 min) before comparative runs.
 
 ## QA overview export
 
