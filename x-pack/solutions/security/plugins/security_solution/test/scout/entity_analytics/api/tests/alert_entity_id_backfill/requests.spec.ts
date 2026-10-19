@@ -97,14 +97,24 @@ apiTest.describe('alert entity.id backfill requests', { tag: BACKFILL_TAGS }, ()
       expect(progress.updated).toBe(NUM_DOCS);
       expect(progress.failures).toStrictEqual([]);
       expect(progress.versionConflicts).toBe(0);
-
-      const { task } = await esClient.tasks.get({ task_id: esTaskId, wait_for_completion: false });
-      const statusKeys = Object.keys(task.status as Record<string, unknown>);
-      expect(statusKeys).toContain('total');
-      expect(statusKeys).toContain('updated');
-      expect(statusKeys).toContain('version_conflicts');
     }
   );
+
+  apiTest('reports the task status fields the backfill reads', async ({ esClient, log }) => {
+    const logger = asKibanaLogger(log);
+    await seedHosts(esClient, MAPPED_INDEX, 10);
+
+    const esTaskId = await start(esClient, logger, 1_000);
+    const { task } = await esClient.tasks.get({ task_id: esTaskId, wait_for_completion: false });
+    const statusKeys = Object.keys(task.status as Record<string, unknown>);
+
+    expect(statusKeys).toContain('total');
+    expect(statusKeys).toContain('updated');
+    expect(statusKeys).toContain('version_conflicts');
+
+    // Nothing polled this request, so its result is left behind on completion.
+    await esClient.delete({ index: '.tasks', id: esTaskId }, { ignore: [401, 403, 404] });
+  });
 
   apiTest('reports total equal to the cap when the cap is reached', async ({ esClient, log }) => {
     const CAP = 5;

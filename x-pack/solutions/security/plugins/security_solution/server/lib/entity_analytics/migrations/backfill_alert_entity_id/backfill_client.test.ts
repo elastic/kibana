@@ -367,7 +367,7 @@ describe('pollBackfill', () => {
     esClient.tasks.get.mockResolvedValue({
       completed: true,
       task: { status: { updated: 10 } },
-      response: { failures: [] },
+      response: { updated: 10, failures: [] },
     } as never);
     esClient.delete.mockRejectedValue(new errors.ResponseError({ statusCode: 403 } as never));
 
