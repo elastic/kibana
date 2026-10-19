@@ -147,7 +147,7 @@ It supports:
 - timeframe only
 - count + timeframe with `AND` / `OR`
 
-For timeframe evaluation, it compares the director run time (`evaluatedAt`) with the last stored episode timestamp; the current event has no `@timestamp` yet, since ES sets it at ingest.
+For timeframe evaluation, it compares the director run time (`evaluatedAt`) with the timestamp the phase was entered; the current event has no `@timestamp` yet, since ES sets it at ingest.
 
 #### Count semantics
 
@@ -164,7 +164,13 @@ A count of `N` is the number of evaluations the episode spends in the phase. The
 
 A count of `0` skips the phase, unless a `timeframe` is combined with it using `and`: then the timeframe still has to elapse, so `{ count: 0, timeframe: '5m', operator: 'and' }` holds the phase until the timeframe is met. With `or`, the count alone is enough and the phase is skipped.
 
-**Caveat:** elapsed time for an `and`-combined `timeframe` is measured against the previous evaluation's stored timestamp, not against when the phase was entered (see above), so it never accumulates past roughly one schedule interval. An `and`-combined `timeframe` therefore only resolves reliably when the rule's schedule interval is >= the timeframe; on a shorter schedule it holds the phase indefinitely. This applies to any count, not just `0`.
+#### Timeframe semantics
+
+Elapsed time for a `timeframe` is measured against the timestamp the phase was entered. That timestamp is not persisted as its own field; it is **derived** by `getLatestAlertEventStateQuery` as `MAX(@timestamp)` over the episode's `status_count == 1` events. `status_count` resets to `1` on every phase entry and increments while the phase is held, so the latest `status_count == 1` event marks the start of the current run (`last_episode_phase_started_at`).
+
+Elapsed time therefore accumulates across evaluations, so an `and`-combined `timeframe` resolves once cumulative elapsed time exceeds it regardless of how the rule's schedule interval compares to the timeframe (a 5m timeframe on a 1m schedule resolves after ~5 evaluations). This holds for any count.
+
+> **Note:** the derivation reads the phase-entry event back from the `.rule-events` data stream, so the entry event can be missing when a `timeframe` outlives the stream's retention, or when `state_transition` is configured while an episode is already mid-phase. In that case `last_episode_phase_started_at` is `null` and elapsed time falls back to `last_episode_timestamp` (the previous evaluation), so the phase keeps advancing instead of stalling at 0 until the signal flaps. Phase durations are expected to be well within retention, where the exact phase-entry timestamp is used.
 
 ## When to add a new strategy
 

@@ -6,11 +6,12 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { kqlQuery, termQuery, rangeQuery, wildcardQuery } from '@kbn/observability-plugin/server';
+import { termQuery, rangeQuery, wildcardQuery } from '@kbn/observability-plugin/server';
 import {
   ALERT_RULE_TYPE_ID,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
+  ALERT_TIME_RANGE,
   ALERT_UUID,
   SLO_BURN_RATE_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
@@ -27,7 +28,6 @@ import { serviceGroupWithOverflowQuery } from '../../../lib/service_group_query_
 
 export async function getServicesAlerts({
   apmAlertsClient,
-  kuery,
   maxNumServices = MAX_NUMBER_OF_SERVICES,
   serviceGroup,
   serviceName,
@@ -38,7 +38,6 @@ export async function getServicesAlerts({
   searchQuery,
 }: {
   apmAlertsClient: ApmAlertsClient;
-  kuery?: string;
   maxNumServices?: number;
   serviceGroup?: ServiceGroup | null;
   serviceName?: string;
@@ -60,6 +59,8 @@ export async function getServicesAlerts({
 
   // Badge counts mean currently active alerts: extend a past picker end to now so
   // inventory, alerts_count, and service-map badges share the same window.
+  // Use alert lifetime (kibana.alert.time_range), not @timestamp write time.
+  // Kuery is intentionally omitted — badges are entity health (service/env), not search-bar scoped.
   const badgesEnd = getAlertsBadgeEndMs(end);
 
   const params = {
@@ -69,8 +70,7 @@ export async function getServicesAlerts({
       bool: {
         filter: [
           ...termQuery(ALERT_STATUS, ALERT_STATUS_ACTIVE),
-          ...rangeQuery(start, badgesEnd),
-          ...kqlQuery(kuery),
+          ...rangeQuery(start, badgesEnd, ALERT_TIME_RANGE),
           ...serviceGroupWithOverflowQuery(serviceGroup),
           // Either a bounded list (e.g. service map) or a single service — not both. When
           // neither is set, we aggregate across services (up to maxNumServices). `termQuery`

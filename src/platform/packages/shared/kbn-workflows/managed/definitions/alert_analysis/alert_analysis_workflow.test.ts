@@ -319,7 +319,6 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
       properties: {
         verdicts: {
           type: string;
-          maxItems: number;
           items: {
             required: string[];
             properties: {
@@ -345,8 +344,10 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
 
     const verdicts = schema.properties.verdicts;
     expect(verdicts.type).toBe('array');
-    // Cap at consts.batch_size — more than 50 verdicts cannot pair to real alerts in a batch.
-    expect(verdicts.maxItems).toBe(50);
+    // No maxItems on the array: Gemini answers 400 "Provider returned error" to this schema when
+    // the array cap sits next to the per-verdict bounds. The cap is applied after parsing instead
+    // (see 'caps the verdicts taken from one batch at consts.batch_size').
+    expect(verdicts).not.toHaveProperty('maxItems');
     // The echoed id is what pairs a verdict with its alert, so it is required.
     expect(verdicts.items.required).toEqual(
       expect.arrayContaining(['id', 'classification', 'confidence_score', 'rationale'])
@@ -2031,6 +2032,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
       foreach: { item: [{ _id: 'a1' }, { _id: 'a2' }] },
     });
     const batchVerdicts = evaluateExpression(engine, filterStep.with.batch_verdicts, {
+      consts: { batch_size: workflow.consts.batch_size },
       variables: {
         batch_alert_ids: batchAlertIds,
         batch_result_verdicts: [{ id: 'a1' }, { id: 'other-batch-alert' }, { id: 'a2' }],
@@ -2038,6 +2040,74 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
     });
 
     expect(batchVerdicts).toEqual([{ id: 'a1' }, { id: 'a2' }]);
+  });
+
+  it('caps the verdicts taken from one batch at consts.batch_size', () => {
+    const filterStep = findStepByName(workflow.steps, 'filter_verdicts_to_batch') as {
+      with: { batch_verdicts: string };
+    };
+    const batchSize = workflow.consts.batch_size as number;
+    const ids = Array.from({ length: batchSize + 10 }, (_, i) => `a${i}`);
+
+    // A response with more verdicts than the batch has alerts, all echoing real ids.
+    const batchVerdicts = evaluateExpression(engine, filterStep.with.batch_verdicts, {
+      consts: { batch_size: batchSize },
+      variables: {
+        batch_alert_ids: ids,
+        batch_result_verdicts: ids.map((id) => ({ id })),
+      },
+    });
+
+    expect(batchVerdicts).toEqual(ids.slice(0, batchSize).map((id) => ({ id })));
+  });
+
+  it('applies the batch_size cap after dropping foreign ids, not before', () => {
+    const filterStep = findStepByName(workflow.steps, 'filter_verdicts_to_batch') as {
+      with: { batch_verdicts: string };
+    };
+    const batchSize = workflow.consts.batch_size as number;
+    const realIds = Array.from({ length: batchSize }, (_, i) => `a${i}`);
+    const foreign = Array.from({ length: 10 }, (_, i) => ({ id: `foreign${i}` }));
+
+    // Foreign ids come first: slicing before the where_exp would evict real verdicts.
+    const batchVerdicts = evaluateExpression(engine, filterStep.with.batch_verdicts, {
+      consts: { batch_size: batchSize },
+      variables: {
+        batch_alert_ids: realIds,
+        batch_result_verdicts: [...foreign, ...realIds.map((id) => ({ id }))],
+      },
+    });
+
+    expect(batchVerdicts).toEqual(realIds.map((id) => ({ id })));
+  });
+
+  it('keeps only the first verdict per id so duplicates cannot evict real verdicts', () => {
+    const filterStep = findStepByName(workflow.steps, 'filter_verdicts_to_batch') as {
+      with: { batch_verdicts: string };
+    };
+    const batchSize = workflow.consts.batch_size as number;
+    const realIds = Array.from({ length: batchSize }, (_, i) => `a${i}`);
+    const duplicates = Array.from({ length: batchSize }, (_, i) => ({
+      id: 'a0',
+      rationale: `dup${i}`,
+    }));
+
+    const batchVerdicts = evaluateExpression(engine, filterStep.with.batch_verdicts, {
+      consts: { batch_size: batchSize },
+      variables: {
+        batch_alert_ids: realIds,
+        batch_result_verdicts: [
+          { id: 'a0', rationale: 'first' },
+          ...duplicates,
+          ...realIds.slice(1).map((id) => ({ id })),
+        ],
+      },
+    });
+
+    expect(batchVerdicts).toEqual([
+      { id: 'a0', rationale: 'first' },
+      ...realIds.slice(1).map((id) => ({ id })),
+    ]);
   });
 
   it('reports every pending alert as missing when analysis is skipped', () => {

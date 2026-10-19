@@ -7,6 +7,7 @@
 
 import { expect } from '@kbn/scout/ui';
 import { RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
+import { trackCreateRuleRequests } from '../../../common/track_create_rule_requests';
 import { buildCreateRuleData, test } from '../fixtures';
 
 // Importing @kbn/alerting-v2-rule-form transitively pulls in monaco-editor CSS,
@@ -138,6 +139,8 @@ test.describe(
       pageObjects,
       apiServices,
     }) => {
+      const { createRequestUrls, installRequestUrls } = trackCreateRuleRequests(page);
+
       await test.step('open ComposeDiscoverFlyout via empty-state card', async () => {
         await pageObjects.composeDiscover.openCreateFlyout();
         await expect(pageObjects.composeDiscover.flyout).toBeVisible();
@@ -227,6 +230,13 @@ test.describe(
               artifact.type === RUNBOOK_ARTIFACT_TYPE && artifact.data?.content === RUNBOOK_TEXT
           )
         ).toBe(true);
+      });
+
+      await test.step('the rule was created through the create API, not the rule template API', async () => {
+        const { items } = await apiServices.alertingV2.rules.find({ search: RULE_NAME });
+        expect(items[0]?.metadata.template).toBeUndefined();
+        expect(createRequestUrls).toHaveLength(1);
+        expect(installRequestUrls).toHaveLength(0);
       });
     });
 
@@ -548,6 +558,13 @@ test.describe(
           )
           .toBe('event.ingested');
       });
+
+      await test.step('the created rule does not record a rule template', async () => {
+        const { items } = await apiServices.alertingV2.rules.find({
+          search: TWO_DATE_FIELDS_RULE_NAME,
+        });
+        expect(items[0]?.metadata.template).toBeUndefined();
+      });
     });
 
     test('create flow: signal (standalone) kind can select timestamp and create', async ({
@@ -594,6 +611,13 @@ test.describe(
             { timeout: 30_000 }
           )
           .toBe('timestamp');
+      });
+
+      await test.step('the created rule does not record a rule template', async () => {
+        const { items } = await apiServices.alertingV2.rules.find({
+          search: CREATE_SIGNAL_TIMESTAMP_RULE_NAME,
+        });
+        expect(items[0]?.metadata.template).toBeUndefined();
       });
     });
 

@@ -206,6 +206,7 @@ export const User: FC<UserProps> = memo(function User({
       entityStoreV2Enabled,
       entityFromStoreResult,
       riskScoreState,
+      isGroupView,
     });
 
   const onAssetCriticalityChanged = useCallback(() => {
@@ -360,6 +361,8 @@ export const User: FC<UserProps> = memo(function User({
                 entityType: EntityType.user,
                 value: userName,
                 entityId: panelDisplayEntityId,
+                mode,
+                scopeId,
                 onShowEntity: onOpenUser,
                 title: userName,
                 origin: FLYOUT_ORIGIN.INSIGHTS_ALERTS,
@@ -369,6 +372,7 @@ export const User: FC<UserProps> = memo(function User({
                 entityType: EntityType.user,
                 value: userName,
                 entityId: panelDisplayEntityId,
+                mode,
                 onShowEntity: onOpenUser,
                 title: userName,
                 origin: FLYOUT_ORIGIN.INSIGHTS_MISCONFIGURATION,
@@ -437,6 +441,7 @@ export const User: FC<UserProps> = memo(function User({
       scopeId,
       panelDisplayEntityId,
       entityStoreEntityId,
+      mode,
       managedUser,
       onOpenUser,
       onShowRelatedEntityFromGraph,
@@ -490,12 +495,14 @@ export const User: FC<UserProps> = memo(function User({
             onAssetCriticalityChange={onAssetCriticalityChanged}
             isPreviewMode={false}
             entityRecord={entityStoreV2Enabled ? observedUser.entityRecord ?? undefined : undefined}
+            aliasRecords={aliasRecords}
             noEntityInStore={noEntityInStore}
             entityStoreV2Enabled={entityStoreV2Enabled}
             entityStoreEntityId={entityStoreEntityId}
             onShowEntity={onShowRelatedEntityFromResolution}
             hideHeaderIcons
             riskScoreQueryId={USER_PANEL_RISK_SCORE_QUERY_ID}
+            isGroupView={isGroupView}
           />
         )}
       </EuiFlyoutBody>
