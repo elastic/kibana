@@ -179,4 +179,22 @@ describe('useMinimumConfidenceScoreDraft', () => {
     // No second persist triggered by the echo.
     expect(onChange).toHaveBeenCalledTimes(1);
   });
+
+  it('restores a value updated from outside while focused, not the value at focus', () => {
+    const onChange = jest.fn();
+    const { result, rerender } = renderHook(
+      (props: { current: number }) =>
+        useMinimumConfidenceScoreDraft({ current: props.current, onChange }),
+      { initialProps: { current: 0.85 } }
+    );
+
+    act(() => result.current.onFocus());
+    // A reload brings in a newer saved value while the field keeps focus.
+    rerender({ current: 0.7 });
+    act(() => result.current.onValueChange(changeEvent('')));
+    act(() => result.current.onBlur());
+
+    expect(result.current.draft).toBe(70);
+    expect(onChange).not.toHaveBeenCalled();
+  });
 });

@@ -49,7 +49,12 @@ export const useMinimumConfidenceScoreDraft = ({
   onChangeRef.current = onChange;
 
   useEffect(() => {
-    lastEmittedRef.current = toDecimal(toDisplay(current));
+    const decimal = toDecimal(toDisplay(current));
+    // A reload or Discard becomes the value to restore; an echo of our own emitted value does not.
+    if (decimal !== lastEmittedRef.current) {
+      editStartRef.current = decimal;
+    }
+    lastEmittedRef.current = decimal;
     const next = toDisplay(current);
     draftRef.current = next;
     setDraft(next);

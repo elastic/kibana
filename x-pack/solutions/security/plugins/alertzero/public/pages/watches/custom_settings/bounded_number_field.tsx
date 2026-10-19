@@ -46,7 +46,9 @@ const parseBoundedNumber = (text: string, min: number, max: number): number | un
  * Each valid keystroke is published right away, so the page knows about unsaved changes while the
  * user types. An entry left invalid on blur or Enter falls back to the value from before the edit
  * and publishes it again: typing "31" over a saved 21 publishes 3 on the way, then restores 21.
- * A change to `value` re-syncs the input, which is how Discard restores it.
+ * A change to `value` re-syncs the input, which is how Discard restores it. A change that is not
+ * this field's own value coming back, such as a reload or Discard, also becomes the new value to
+ * fall back to.
  */
 export const BoundedNumberField: React.FC<BoundedNumberFieldProps> = ({
   value,
@@ -64,8 +66,17 @@ export const BoundedNumberField: React.FC<BoundedNumberFieldProps> = ({
   // Valid keystrokes are published as they are typed, so an abandoned out-of-range entry must
   // fall back to the value from before the edit, not to a valid prefix such as 15 of 150.
   const editStartRef = useRef(value);
+  const lastPublishedRef = useRef<number | undefined>(undefined);
+
+  const publish = (next: number) => {
+    lastPublishedRef.current = next;
+    onChange(next);
+  };
 
   useEffect(() => {
+    if (value !== lastPublishedRef.current) {
+      editStartRef.current = value;
+    }
     setDraft(String(value));
   }, [value]);
 
@@ -73,14 +84,14 @@ export const BoundedNumberField: React.FC<BoundedNumberFieldProps> = ({
     const parsed = parseBoundedNumber(draft, min, max);
     if (parsed === undefined) {
       if (value !== editStartRef.current) {
-        onChange(editStartRef.current);
+        publish(editStartRef.current);
       }
       setDraft(String(editStartRef.current));
       return;
     }
     editStartRef.current = parsed;
     if (parsed !== value) {
-      onChange(parsed);
+      publish(parsed);
     }
   };
 
@@ -106,7 +117,7 @@ export const BoundedNumberField: React.FC<BoundedNumberFieldProps> = ({
           setDraft(text);
           const parsed = parseBoundedNumber(text, min, max);
           if (parsed !== undefined && parsed !== value) {
-            onChange(parsed);
+            publish(parsed);
           }
         }}
         onFocus={() => {

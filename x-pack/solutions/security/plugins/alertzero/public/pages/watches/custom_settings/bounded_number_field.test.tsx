@@ -161,4 +161,29 @@ describe('BoundedNumberField', () => {
 
     expect(screen.getByTestId('field')).toHaveValue(7);
   });
+
+  it('falls back to a value updated from outside while focused, not to the value at focus', () => {
+    const onChange = jest.fn();
+    const field = (value: number) => (
+      <BoundedNumberField
+        value={value}
+        min={1}
+        max={30}
+        ariaLabel="Analysis window in days"
+        testSubj="field"
+        onChange={onChange}
+      />
+    );
+    const { rerender } = render(field(21));
+    const input = screen.getByTestId('field');
+
+    fireEvent.focus(input);
+    // A reload brings in a newer saved value while the field keeps focus.
+    rerender(field(14));
+    fireEvent.change(input, { target: { value: '' } });
+    fireEvent.blur(input);
+
+    expect(input).toHaveValue(14);
+    expect(onChange).not.toHaveBeenCalled();
+  });
 });
