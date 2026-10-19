@@ -1,0 +1,56 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { monaco } from '@kbn/code-editor';
+import { registerYaraLanguage, YARA_LANG_ID } from '.';
+
+type TokenTuple = [text: string, type: string];
+
+/** Tokenizes `text` into `[text, type]` tuples per line, with the `.yara` postfix removed. */
+const tokenize = (text: string): TokenTuple[][] => {
+  const lines = text.split('\n');
+
+  return monaco.editor
+    .tokenize(text, YARA_LANG_ID)
+    .map((lineTokens, lineIndex) =>
+      lineTokens.map(
+        ({ offset, type }, tokenIndex): TokenTuple => [
+          lines[lineIndex].slice(offset, lineTokens[tokenIndex + 1]?.offset),
+          type.replace(/\.yara$/, ''),
+        ]
+      )
+    );
+};
+
+describe('YARA language', () => {
+  beforeAll(() => {
+    registerYaraLanguage();
+
+    // Instantiating a model triggers the `onLanguage` callback that sets up the tokenizer.
+    monaco.editor.createModel('', YARA_LANG_ID).dispose();
+  });
+
+  it('should register the language only once', () => {
+    registerYaraLanguage();
+
+    expect(monaco.languages.getLanguages().filter(({ id }) => id === YARA_LANG_ID)).toHaveLength(1);
+  });
+
+  it('should tokenize identifiers and whitespace', () => {
+    expect(tokenize('rule dummy\n  condition')).toEqual([
+      [
+        ['rule', 'identifier'],
+        [' ', 'white'],
+        ['dummy', 'identifier'],
+      ],
+      [
+        ['  ', 'white'],
+        ['condition', 'identifier'],
+      ],
+    ]);
+  });
+});

@@ -25,6 +25,7 @@ import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { CUSTOM_YARA_SIGNATURE_FIELD_TYPE } from '../../../../../../common/endpoint/service/artifacts/constants';
 import { useCustomYaraSignatureEditorMarkers } from '../../hooks/use_custom_yara_signature_editor_markers';
 import { useValidateCustomYaraSignature } from '../../hooks/use_validate_custom_yara_signature';
+import { registerYaraLanguage, YARA_LANG_ID } from '../../yara_language';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import type { EffectedPolicySelectProps } from '../../../../components/effected_policy_select';
 import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
@@ -46,6 +47,8 @@ import {
   SIGNATURE_EDITOR_ARIA_LABEL,
 } from './translations';
 import { CustomYaraSignatureValidationMessages } from './custom_yara_signature_validation_messages';
+
+registerYaraLanguage();
 
 interface CustomYaraSignatureEntry {
   field: typeof CUSTOM_YARA_SIGNATURE_FIELD_TYPE;
@@ -369,7 +372,7 @@ export const CustomYaraSignaturesForm = memo<ArtifactFormComponentProps>(
                 data-test-subj={getTestId('signature-input-container')}
               >
                 <CodeEditor
-                  languageId="plaintext"
+                  languageId={YARA_LANG_ID}
                   value={yaraEntry.value}
                   onChange={handleOnSignatureChange}
                   editorDidMount={handleSignatureEditorDidMount}
