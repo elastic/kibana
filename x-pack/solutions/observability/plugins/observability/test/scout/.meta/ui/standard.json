@@ -1,5 +1,5 @@
 {
-  "sha1": "6a8f5145c34975c22be198a0763f5d3be3e4877b",
+  "sha1": "a725b2595614f6e76c3c45a3d4d603e89d382961",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -840,6 +840,216 @@
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/landing.spec.ts",
         "line": 101,
         "column": 7
+      }
+    },
+    {
+      "id": "6ebd6ce189b23b9-33f7da6f3e095bc",
+      "title": "Classic Observability nav — Alerting section lists the Alerting section without Alerts (Classic) while the V1 table is off",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2_classic.spec.ts",
+        "line": 141,
+        "column": 7
+      }
+    },
+    {
+      "id": "6ebd6ce189b23b9-ff4ab020c73e9b4",
+      "title": "Classic Observability nav — Alerting section lists the Alerting section directly below Overview",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2_classic.spec.ts",
+        "line": 155,
+        "column": 20
+      }
+    },
+    {
+      "id": "6ebd6ce189b23b9-dd68a3b63d21c1d",
+      "title": "Classic Observability nav — Alerting section opens Alerts under /app/observability/alerting and keeps the sub-nav",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2_classic.spec.ts",
+        "line": 168,
+        "column": 98
+      }
+    },
+    {
+      "id": "6ebd6ce189b23b9-8d05298d36916f4",
+      "title": "Classic Observability nav — Alerting section opens Action Policies under /app/observability/alerting and keeps the sub-nav",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2_classic.spec.ts",
+        "line": 168,
+        "column": 98
+      }
+    },
+    {
+      "id": "6ebd6ce189b23b9-91ea280747e6bf9",
+      "title": "Classic Observability nav — Alerting section opens Execution History under /app/observability/alerting and keeps the sub-nav",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2_classic.spec.ts",
+        "line": 168,
+        "column": 98
+      }
+    },
+    {
+      "id": "6ebd6ce189b23b9-18e5cb048dcd5f9",
+      "title": "Classic Observability nav — Alerting section shows Alerts (Classic) and opens the classic table when the V1 table is on",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2_classic.spec.ts",
+        "line": 183,
+        "column": 9
+      }
+    },
+    {
+      "id": "6ebd6ce189b23b9-a9dba161f3e747a",
+      "title": "Classic Observability nav — Alerting section keeps the classic alerts URL reachable while Alerts (Classic) is hidden",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2_classic.spec.ts",
+        "line": 196,
+        "column": 18
+      }
+    },
+    {
+      "id": "6ebd6ce189b23b9-898e7f86b4edd9e",
+      "title": "Classic Observability nav — Alerting section hides the Alerting section when the user has no alerting privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2_classic.spec.ts",
+        "line": 206,
+        "column": 32
+      }
+    },
+    {
+      "id": "6ebd6ce189b23b9-5cb8affa0d1ffdc",
+      "title": "Classic Observability nav — Alerting section shows Alerts when the user has only v2 alerts read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2_classic.spec.ts",
+        "line": 217,
+        "column": 18
+      }
+    },
+    {
+      "id": "6ebd6ce189b23b9-2c80f551c54e632",
+      "title": "Classic Observability nav — Alerting section shows Alerts when the user has only v1 observability alerts read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2_classic.spec.ts",
+        "line": 233,
+        "column": 10
+      }
+    },
+    {
+      "id": "6ebd6ce189b23b9-9c7c438d601a36a",
+      "title": "Classic Observability nav — Alerting section shows Alerts and Alerts (Classic) to a v1-only user when the V1 table is on",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2_classic.spec.ts",
+        "line": 247,
+        "column": 18
+      }
+    },
+    {
+      "id": "6ebd6ce189b23b9-84369042ccb314a",
+      "title": "Classic Observability nav — Alerting section hides Alerts (Classic) from a v2-only user when the V1 table is on",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2_classic.spec.ts",
+        "line": 262,
+        "column": 16
+      }
+    },
+    {
+      "id": "6ebd6ce189b23b9-e43e32902416216",
+      "title": "Classic Observability nav — Alerting section shows only Action Policies when the user has only v2 action policies read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2_classic.spec.ts",
+        "line": 276,
+        "column": 7
+      }
+    },
+    {
+      "id": "6ebd6ce189b23b9-5395c322def5b26",
+      "title": "Classic Observability nav — Alerting section shows only Execution History when the user has only v2 execution history read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2_classic.spec.ts",
+        "line": 287,
+        "column": 18
+      }
+    },
+    {
+      "id": "6ebd6ce189b23b9-1d00b172536680d",
+      "title": "Classic Observability nav — Alerting section shows the flat Alerts entry and no Alerting section when v2 is off",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/navigation_alerts_v2_classic.spec.ts",
+        "line": 297,
+        "column": 8
       }
     },
     {

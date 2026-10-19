@@ -225,6 +225,34 @@ describe('useWatchSettingsDraft', () => {
     });
   });
 
+  it('lists only the Workers with unsaved changes, in the order they were given', () => {
+    const { result } = renderHook(() => useWatchSettingsDraft([ruleTuning, ruleCoverage]));
+
+    expect(result.current.dirtyWorkers).toEqual([]);
+
+    act(() => {
+      result.current.updateEnabled(ruleCoverage, true);
+    });
+    expect(result.current.dirtyWorkers).toEqual([ruleCoverage]);
+
+    act(() => {
+      result.current.updateSettings(ruleTuning, {
+        extras: { ...RULE_TUNING_EXTRAS, analysisWindowDays: 7 },
+      });
+    });
+    expect(result.current.dirtyWorkers).toEqual([ruleTuning, ruleCoverage]);
+
+    act(() => {
+      result.current.updateEnabled(ruleCoverage, false);
+    });
+    expect(result.current.dirtyWorkers).toEqual([ruleTuning]);
+
+    act(() => {
+      result.current.discard();
+    });
+    expect(result.current.dirtyWorkers).toEqual([]);
+  });
+
   it('diffs and revision-checks against the settings the edit started from, not a later refetch', async () => {
     mutateAsync.mockResolvedValue({ worker: ruleTuning });
     const { result, rerender } = renderHook(

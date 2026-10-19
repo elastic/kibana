@@ -1,5 +1,5 @@
 {
-  "sha1": "e80c399d88733b7768cd286becddc723c0b85285",
+  "sha1": "06ce9118e82c0a93158429ff4702ce0d7bbabf1c",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -288,7 +288,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_message_api.spec.ts",
-        "line": 113,
+        "line": 114,
         "column": 7
       }
     },
@@ -304,8 +304,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_message_api.spec.ts",
-        "line": 182,
-        "column": 22
+        "line": 187,
+        "column": 13
       }
     },
     {
@@ -320,8 +320,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_message_api.spec.ts",
-        "line": 239,
-        "column": 16
+        "line": 243,
+        "column": 17
       }
     },
     {
@@ -336,8 +336,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_message_api.spec.ts",
-        "line": 253,
-        "column": 11
+        "line": 260,
+        "column": 13
       }
     },
     {
@@ -352,8 +352,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_message_api.spec.ts",
-        "line": 273,
-        "column": 7
+        "line": 278,
+        "column": 23
       }
     },
     {
@@ -1120,6 +1120,20 @@
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_tracing_snapshot_api.spec.ts",
         "line": 207,
         "column": 9
+      }
+    },
+    {
+      "id": "f377d03cd6f648c-f765672e4a9c9fd",
+      "title": "Agent Builder — ai.agent workflow step on the owner private conversation a workflow run by the owner continues their private conversation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_workflow_agent_step_ownership_api.spec.ts",
+        "line": 151,
+        "column": 28
       }
     },
     {

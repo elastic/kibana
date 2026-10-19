@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { Entity } from '../../../../../common/api/entity_analytics';
+import type { EntityViewMode } from '../../../../../common/entity_analytics/entity_store/resolution_group';
 import { useAnomalyOverview } from '../../../../entity_analytics/api/hooks/use_anomaly_overview';
 import { useAnomalyPrivileges } from '../../../../entity_analytics/api/hooks/use_anomaly_privileges';
 import { ObservedDataSection } from '../../shared/components/observed_data_section';
@@ -74,6 +75,8 @@ export interface ContentProps {
   entityStoreV2Enabled: boolean;
   /** Entity store entity ID for the user. */
   entityStoreEntityId?: string;
+  /** Entity view mode of the panel; `resolved` loads anomalies for the whole resolution group. */
+  mode?: EntityViewMode;
   /** See {@link RiskSummaryProps.prefetchedResolutionRisk}. */
   prefetchedResolutionRisk?: EntityRiskScore<EntityType.user>;
   /**
@@ -126,6 +129,7 @@ export const Content = ({
   noEntityInStore = false,
   entityStoreV2Enabled,
   entityStoreEntityId,
+  mode,
   prefetchedResolutionRisk,
   enableGraphAndResolutionNavigation = true,
   hideHeaderIcons = false,
@@ -143,6 +147,7 @@ export const Content = ({
 
   const anomalyOverview = useAnomalyOverview({
     entityId: entityStoreEntityId ?? '',
+    mode,
     entityType: EntityType.user,
     enabled: loadAnomalies,
   });
