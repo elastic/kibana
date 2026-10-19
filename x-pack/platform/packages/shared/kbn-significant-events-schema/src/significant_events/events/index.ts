@@ -102,7 +102,7 @@ export const significantEventSchema = lazySchema(() =>
         dedent`
         Rationale for this assessment: why this severity, what was ruled out, and why this confidence.
         ${ASSESSMENT_NOTE_ROLE_RULE}
-        Good: "High: checkout fails 18.5% of attempts and the ledger write path is blocked, meeting the high condition. Payment retries were ruled out; breadth across regions is unmeasured. Confidence is 0.7 because the mechanism is corroborated by one source." Bad: "Draft: the error shows connection refused... let me revise: summarizing the logs again."
+        Good: "High: checkout fails 18.5% of attempts and the ledger write path is blocked, meeting the high condition. Payment retries were ruled out; breadth across regions is unmeasured. Confidence is 70.0% because the mechanism is corroborated by one source." Bad: "Draft: the error shows connection refused... let me revise: summarizing the logs again."
 
         ${NO_RAW_SENSITIVE_VALUES_RULE}
         `
