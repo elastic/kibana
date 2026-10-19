@@ -38,7 +38,4 @@ export function registerCasesTriggerDefinitions(
   workflowsExtensions.registerTriggerDefinition(() =>
     import('./observables_added').then((m) => m.observablesAddedTriggerPublicDefinition)
   );
-  workflowsExtensions.registerTriggerDefinition(() =>
-    import('./incremental_id_assigned').then((m) => m.incrementalIdAssignedTriggerPublicDefinition)
-  );
 }

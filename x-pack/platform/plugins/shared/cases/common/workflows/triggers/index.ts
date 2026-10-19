@@ -34,7 +34,6 @@ import {
   EXTENDED_FIELDS_UPDATED_TRIGGER_EVENT_SCHEMA_CHANGED_FIELDS_DESCRIPTION,
   OBSERVABLES_ADDED_TRIGGER_EVENT_SCHEMA_OBSERVABLE_IDS_DESCRIPTION,
   OBSERVABLES_ADDED_TRIGGER_EVENT_SCHEMA_OBSERVABLE_TYPE_KEYS_DESCRIPTION,
-  INCREMENTAL_ID_ASSIGNED_TRIGGER_EVENT_SCHEMA_INCREMENTAL_ID_DESCRIPTION,
 } from '../translations';
 
 export const CaseCreatedTriggerId = 'cases.caseCreated' as const;
@@ -541,74 +540,4 @@ steps:
     ],
   },
   snippets: { condition: `event.observableTypeKeys: "${OBSERVABLE_TYPE_IPV4.key}"` },
-};
-
-export const IncrementalIdAssignedTriggerId = 'cases.incrementalIdAssigned' as const;
-
-// .strict() because trigger_event_handler validates the raw payload and stores it as given,
-// so an unexpected key would otherwise reach the trigger-events data stream.
-const incrementalIdAssignedEventSchema = baseCaseEventSchema
-  .extend({
-    incrementalId: z.number().int().positive().meta({
-      description: INCREMENTAL_ID_ASSIGNED_TRIGGER_EVENT_SCHEMA_INCREMENTAL_ID_DESCRIPTION,
-    }),
-  })
-  .strict();
-
-export const incrementalIdAssignedTriggerCommonDefinition: CommonTriggerDefinition = {
-  id: IncrementalIdAssignedTriggerId,
-  stability: 'tech_preview',
-  eventSchema: incrementalIdAssignedEventSchema,
-  title: i18n.translate('xpack.cases.workflowTriggers.incrementalIdAssigned.title', {
-    defaultMessage: 'Cases - Incremental ID assigned',
-  }),
-  description: i18n.translate('xpack.cases.workflowTriggers.incrementalIdAssigned.description', {
-    defaultMessage: 'Emitted when an incremental ID is assigned to a case.',
-  }),
-  documentation: {
-    details: i18n.translate(
-      'xpack.cases.workflowTriggers.incrementalIdAssigned.documentation.details',
-      {
-        defaultMessage:
-          'Emitted after the incremental ID of a case has been assigned. The ID is assigned asynchronously by a background job, typically a few minutes after the case is created, so it is not available in cases.caseCreated. The payload includes event.caseId, event.owner and event.incrementalId. Use KQL on event.* for trigger conditions. Assigning the ID does not emit cases.caseUpdated. The workflow runs with the credentials of the user who created the case. This trigger only fires for cases created while it is available, and stops waiting for the ID one day after the case was created.',
-      }
-    ),
-    examples: [
-      i18n.translate(
-        'xpack.cases.workflowTriggers.incrementalIdAssigned.documentation.exampleOwnerFilter',
-        {
-          defaultMessage: `## Run only for Security cases
-\`\`\`yaml
-triggers:
-  - type: {triggerId}
-    on:
-      condition: 'event.owner: "securitySolution"'
-\`\`\``,
-          values: {
-            triggerId: IncrementalIdAssignedTriggerId,
-          },
-        }
-      ),
-      i18n.translate(
-        'xpack.cases.workflowTriggers.incrementalIdAssigned.documentation.exampleUseId',
-        {
-          defaultMessage: `## Use the incremental ID in a step
-\`\`\`yaml
-triggers:
-  - type: {triggerId}
-steps:
-  - name: log-id
-    type: console
-    with:
-      message: 'Case {liqCaseId} is now #{liqIncrementalId}'
-\`\`\``,
-          values: {
-            triggerId: IncrementalIdAssignedTriggerId,
-            liqCaseId: '{{ event.caseId }}',
-            liqIncrementalId: '{{ event.incrementalId }}',
-          },
-        }
-      ),
-    ],
-  },
 };

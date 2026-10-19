@@ -666,12 +666,6 @@ export const OBSERVABLES_ADDED_TRIGGER_EVENT_SCHEMA_OBSERVABLE_TYPE_KEYS_DESCRIP
       'Type keys for the newly-persisted observables, one entry per observable, index-aligned with event.observableIds (e.g. "observable-type-ipv4"). A key may repeat when several observables of the same type are added in one request. Use in trigger conditions: event.observableTypeKeys: "observable-type-ipv4".',
   });
 
-export const INCREMENTAL_ID_ASSIGNED_TRIGGER_EVENT_SCHEMA_INCREMENTAL_ID_DESCRIPTION =
-  i18n.translate('xpack.cases.workflowTriggers.incrementalIdAssigned.eventSchema.incrementalId', {
-    defaultMessage:
-      'The incremental ID that was assigned to the case (the short, human-readable number shown on a case, e.g. 44994).',
-  });
-
 export const CUSTOM_FIELD_CAN_BE_USED_MESSAGE = (fieldName: string) =>
   i18n.translate('xpack.cases.workflowSteps.shared.customFieldCanBeUsedMessage', {
     defaultMessage: 'Custom field "{fieldName}" can be updated by this step.',

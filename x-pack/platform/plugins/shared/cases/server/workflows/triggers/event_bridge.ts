@@ -48,7 +48,7 @@ export function registerCasesWorkflowEventBridge(
     void forward(CaseCreatedTriggerId, event.payload, event.request);
 
     // The incremental ID is assigned later by a background job that has no user request, so the
-    // credentials for `cases.incrementalIdAssigned` have to be captured here, at creation.
+    // credentials for `cases.caseUpdated` for the assigned ID have to be captured here, at creation.
     // The task id is derived from the case id inside `schedule`, so callers never handle it.
     const { caseId, owner } = event.payload;
     void incrementalIdAssignedTriggerTask?.schedule(event.request, { caseId, owner });

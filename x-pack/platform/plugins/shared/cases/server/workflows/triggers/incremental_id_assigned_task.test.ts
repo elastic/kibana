@@ -19,7 +19,7 @@ import {
   createWorkflowsClientMock,
   workflowsExtensionsMock,
 } from '@kbn/workflows-extensions/server/mocks';
-import { IncrementalIdAssignedTriggerId } from '../../../common/workflows/triggers';
+import { CaseUpdatedTriggerId } from '../../../common/workflows/triggers';
 import { INCREMENTAL_ID_ASSIGNED_TRIGGER_TTL_MS } from '../../../common/constants/incremental_id';
 import {
   getIncrementalIdAssignedTriggerTaskId,
@@ -194,10 +194,10 @@ describe('IncrementalIdAssignedTriggerTask', () => {
 
       expect(internalRepo.get).toHaveBeenCalledWith('cases', 'case-1', { namespace: 'my-space' });
       expect(workflowsExtensions.getClient).toHaveBeenCalledWith(fakeRequest);
-      expect(workflowsClient.emitEvent).toHaveBeenCalledWith(IncrementalIdAssignedTriggerId, {
+      expect(workflowsClient.emitEvent).toHaveBeenCalledWith(CaseUpdatedTriggerId, {
         caseId: 'case-1',
         owner: 'securitySolution',
-        incrementalId: 44994,
+        updatedFields: ['incremental_id'],
       });
       expect(result).toEqual({ state: {}, shouldDeleteTask: true });
     });

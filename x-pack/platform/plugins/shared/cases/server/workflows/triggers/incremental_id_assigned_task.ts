@@ -20,7 +20,7 @@ import {
 } from '@kbn/workflows-extensions/server';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { INCREMENTAL_ID_ASSIGNED_TRIGGER_TTL_MS } from '../../../common/constants/incremental_id';
-import { IncrementalIdAssignedTriggerId } from '../../../common/workflows/triggers';
+import { CaseUpdatedTriggerId } from '../../../common/workflows/triggers';
 import type { CasePersistedAttributes } from '../../common/types/case';
 import type { IncrementalIdsAssignedEventPayload } from '../../events/types';
 
@@ -56,7 +56,7 @@ export const getIncrementalIdAssignedTriggerTaskId = (caseId: string) =>
   `cases:${INCREMENTAL_ID_ASSIGNED_TRIGGER_TASK_TYPE}:${caseId}`;
 
 /**
- * Makes the `cases.incrementalIdAssigned` workflow trigger possible without a user request.
+ * Makes `cases.caseUpdated` (with `incremental_id` in `updatedFields`) possible without a user request.
  *
  * Emitting a workflow trigger needs a request carrying credentials, which the incremental ID
  * background task doesn't have. So when a case is created, a one-off task is scheduled with the
@@ -81,7 +81,8 @@ export class IncrementalIdAssignedTriggerTask {
     taskManagerSetup.registerTaskDefinitions({
       [INCREMENTAL_ID_ASSIGNED_TRIGGER_TASK_TYPE]: {
         title: 'Cases incremental ID assigned workflow trigger',
-        description: 'Emits the cases.incrementalIdAssigned workflow trigger for a case',
+        description:
+          'Emits the cases.caseUpdated workflow trigger once a case has an incremental ID',
         timeout: '1m',
         createTaskRunner: ({ taskInstance, fakeRequest }: RunContext) => ({
           run: () => this.run(taskInstance, fakeRequest),
@@ -221,8 +222,8 @@ export class IncrementalIdAssignedTriggerTask {
       const incrementalId = caseSo.attributes.incremental_id;
       if (typeof incrementalId === 'number') {
         await this.forward(
-          IncrementalIdAssignedTriggerId,
-          { caseId, owner, incrementalId },
+          CaseUpdatedTriggerId,
+          { caseId, owner, updatedFields: ['incremental_id'] },
           fakeRequest
         );
         return done;
