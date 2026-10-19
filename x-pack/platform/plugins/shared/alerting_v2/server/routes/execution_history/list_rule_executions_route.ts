@@ -110,6 +110,7 @@ export class ListRuleExecutionsRoute extends BaseAlertingRoute {
   };
   static routeOptions = {
     access: 'public' as const,
+    availability: { stability: 'stable', since: '9.6.0' },
     summary: 'List rule executions',
     description: 'Get a paginated list of rule execution events.',
     oasOperationObject: listRuleExecutionsOasExamples,

@@ -25,6 +25,11 @@ export { createResolveAction } from './resolve';
 export { createUnresolveAction } from './unresolve';
 export { createEditTagsAction } from './edit_tags';
 export { createEditAssigneeAction, EDIT_EPISODE_ASSIGNEE_ACTION_ID } from './edit_assignee';
+export { createAddToCaseAction } from './add_to_case';
+export { ADD_TO_CASE_EPISODE_ACTION_ID } from './add_to_case_action_id';
+export type { AddToCaseActionDeps } from './add_to_case';
+export type { AddToCaseCasesService } from '../components/add_to_case_modal';
+export { closeAddToCaseModal } from '../components/add_to_case_modal';
 export { createOpenInDiscoverAction, OPEN_IN_DISCOVER_EPISODE_ACTION_ID } from './open_in_discover';
 export {
   createCompositeEpisodeAction,
