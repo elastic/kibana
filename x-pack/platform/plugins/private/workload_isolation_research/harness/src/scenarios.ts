@@ -260,6 +260,71 @@ export const SCENARIOS: Record<string, Scenario> = {
       },
     ],
   },
+  /** Tracer validation (never a perf run): every Tier B replay once, tracer on. */
+  'tier-b-tracer-suite': {
+    name: 'tier-b-tracer-suite',
+    description: 'All Tier B replays at modest doses with KBN_RESEARCH_CONTRACT_TRACER=true.',
+    probe,
+    laptopProbe,
+    ticks,
+    phases: [
+      {
+        name: 'seed-rows',
+        durationS: 2,
+        action: 'seed',
+        actionParams: { kind: 'alerting_wide', rows: 1000, fields: 100 },
+      },
+      { name: 'baseline', durationS: 20 },
+      {
+        name: 'alerting-esql-1000x2',
+        durationS: 5,
+        action: 'alerting-esql',
+        actionParams: { rows: 1000, actionsPerAlert: 2, drainS: 30 },
+      },
+      {
+        name: 'workflow-map-1000',
+        durationS: 5,
+        action: 'workflow-map',
+        actionParams: { size: 1000, fields: 10 },
+      },
+      {
+        name: 'ab-local-5x1000',
+        durationS: 5,
+        action: 'agent-builder',
+        actionParams: { calls: 5, limit: 1000, mode: 'local' },
+      },
+      {
+        name: 'ab-task-5x1000',
+        durationS: 5,
+        action: 'agent-builder',
+        actionParams: { calls: 5, limit: 1000, mode: 'task_manager' },
+      },
+      {
+        name: 'fc-m-seed',
+        durationS: 2,
+        action: 'seed',
+        actionParams: {
+          kind: 'field_caps',
+          indices: 100,
+          fieldsPerIndex: 2000,
+          uniqueRatio: 0.5,
+          conflictRatio: 0.2,
+        },
+      },
+      {
+        name: 'fc-m-route-e2e',
+        durationS: 5,
+        action: 'field-caps',
+        actionParams: { repeat: 2, decompose: false, mode: 'route' },
+      },
+      {
+        name: 'fc-m-task',
+        durationS: 5,
+        action: 'field-caps',
+        actionParams: { repeat: 2, decompose: true, mode: 'task', waitS: 20 },
+      },
+    ],
+  },
   /** Non-terminating offender with emulated external supervision (SIGKILL after 30s stall). */
   'infinite-loop-supervised': {
     name: 'infinite-loop-supervised',

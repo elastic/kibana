@@ -225,9 +225,13 @@ export const computeScorecard = async (
   }
 
   // Ratios against the baseline phase of the same run (paired within run).
-  const base = rows.find((r) => r.phase === 'baseline');
-  if (base) {
+  if (rows.some((r) => r.phase === 'baseline')) {
     for (const r of rows) {
+      // Paired within run and within pod (serverless UI and background pods differ).
+      const base =
+        rows.find((b) => b.phase === 'baseline' && b.pod === r.pod) ??
+        rows.find((b) => b.phase === 'baseline');
+      if (!base) continue;
       const ratio = (a: number | null, b: number | null) =>
         a === null || b === null || b === 0 ? null : round(a / b, 2);
       r.vs_baseline = {

@@ -82,6 +82,7 @@ export class WorkloadIsolationResearchPlugin implements Plugin<void, void, Setup
         exec_argv: process.execArgv,
         node_options: process.env.NODE_OPTIONS ?? null,
         tracer_enabled: process.env.KBN_RESEARCH_CONTRACT_TRACER === 'true',
+        push_dropped: this.recorder.pushDropped,
       }),
     });
   }

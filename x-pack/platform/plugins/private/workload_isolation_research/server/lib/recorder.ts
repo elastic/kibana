@@ -22,7 +22,8 @@ export const TM_RESEARCH_CHANNEL = 'kbn:research:task_manager';
 
 export type Sample = Record<string, unknown> & { source: string; ts: number };
 
-export const PUSH_INDEX = '.kibana-research-samples';
+/** Versioned: v1 on QAF got `kind` dynamically mapped as long (GC kind) and poisoned pushes. */
+export const PUSH_INDEX = '.kibana-research-samples-v2';
 
 interface WorkerSamplesReply {
   entries: Array<{ seq: number; item: Sample }>;
@@ -105,8 +106,8 @@ export class Recorder {
           source: 'gc',
           ts: performance.timeOrigin + entry.startTime,
           duration_ms: entry.duration,
-          kind: detail?.kind,
-          flags: detail?.flags,
+          gc_kind: detail?.kind,
+          gc_flags: detail?.flags,
         });
       }
     });
@@ -211,6 +212,7 @@ export class Recorder {
   private pushed = { main: 0, worker: 0 };
   private pushing = false;
   private indexReady = false;
+  public pushDropped = 0;
   private lastPushError = 0;
 
   /** Periodically bulk-indexes new samples into the project's ES (internal user). */
@@ -236,6 +238,13 @@ export class Recorder {
                   boot_id: { type: 'keyword' },
                   thread: { type: 'keyword' },
                   source: { type: 'keyword' },
+                  kind: { type: 'keyword' },
+                  mode: { type: 'keyword' },
+                  tm_event: { type: 'keyword' },
+                  task_type: { type: 'keyword' },
+                  task_id: { type: 'keyword' },
+                  error: { type: 'keyword' },
+                  error_code: { type: 'keyword' },
                   detail: { type: 'flattened' },
                   stats: { type: 'flattened' },
                 },

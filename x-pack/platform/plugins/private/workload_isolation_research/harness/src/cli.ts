@@ -108,6 +108,61 @@ export const main = async (): Promise<void> => {
       console.log(md);
       return;
     }
+    case 'variance': {
+      // Baseline-phase dispersion per target (project/local) across runs whose variant matches.
+      const prefix = flags['variant-prefix'] ?? 'variance';
+      const res = await es.search<Record<string, any>>({
+        index: 'research-scorecards',
+        size: 1000,
+        query: {
+          bool: { filter: [{ term: { phase: 'baseline' } }, { prefix: { variant: prefix } }] },
+        },
+      });
+      const runs = await es.search<Record<string, any>>({
+        index: 'research-runs',
+        size: 1000,
+        query: { prefix: { variant: prefix } },
+      });
+      const project = new Map(
+        runs.hits.hits.map((h) => [h._source?.run_id, h._source?.qaf_project_id ?? 'local'])
+      );
+      const groups = new Map<string, Array<Record<string, any>>>();
+      for (const h of res.hits.hits) {
+        const r = h._source as Record<string, any>;
+        const key = `${project.get(r.run_id)}|${r.pod}`;
+        groups.set(key, [...(groups.get(key) ?? []), r]);
+      }
+      const stats = (xs: number[]) => {
+        const m = xs.reduce((a, b) => a + b, 0) / xs.length;
+        const sd = Math.sqrt(xs.reduce((a, b) => a + (b - m) ** 2, 0) / Math.max(1, xs.length - 1));
+        return {
+          n: xs.length,
+          mean: Math.round(m * 10) / 10,
+          sd: Math.round(sd * 10) / 10,
+          cv: Math.round((sd / m) * 100) / 100,
+          min: Math.min(...xs),
+          max: Math.max(...xs),
+        };
+      };
+      const out: Record<string, unknown> = {};
+      for (const [key, rows] of groups) {
+        out[key] = {
+          runs: rows.map((r) => r.run_id),
+          probe_p50_ms: stats(rows.map((r) => r.probe_p50_ms)),
+          probe_p99_ms: stats(rows.map((r) => r.probe_p99_ms)),
+          longest_slice_ms: stats(rows.map((r) => r.longest_slice_ms)),
+        };
+      }
+      const all = res.hits.hits.map((h) => h._source as Record<string, any>);
+      out.pooled = {
+        probe_p99_ms: stats(all.map((r) => r.probe_p99_ms)),
+        probe_p50_ms: stats(all.map((r) => r.probe_p50_ms)),
+      };
+      if (flags.out) fs.writeFileSync(flags.out, JSON.stringify(out, null, 2));
+      // eslint-disable-next-line no-console
+      console.log(JSON.stringify(out, null, 2));
+      return;
+    }
     case 'overview': {
       // Export QA overview slices for a QAF project window (read-only).
       const checks = flags.query
