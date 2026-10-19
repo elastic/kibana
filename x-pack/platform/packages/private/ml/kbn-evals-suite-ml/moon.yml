@@ -15,7 +15,7 @@ project:
   description: Moon project for @kbn/evals-suite-ml
   channel: ''
   owner: '@elastic/search-ml-ux'
-  sourceRoot: x-pack/platform/plugins/shared/ml/evals
+  sourceRoot: x-pack/platform/packages/private/ml/kbn-evals-suite-ml
 dependsOn:
   - '@kbn/evals'
   - '@kbn/evals-suite-agent-builder'
