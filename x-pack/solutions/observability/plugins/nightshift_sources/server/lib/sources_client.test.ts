@@ -336,6 +336,36 @@ describe('SourcesClient', () => {
     });
   });
 
+  describe('validateQuery', () => {
+    it('reports whether any index exists yet behind an accepted query', async () => {
+      const { client, dataEsClient } = setup();
+
+      await expect(client.validateQuery({ esql: 'FROM logs-nginx-*' })).resolves.toEqual({
+        type: 'logs',
+        indexExists: true,
+      });
+
+      dataEsClient.esql.query.mockResponseOnce(withoutColumns);
+      await expect(client.validateQuery({ esql: 'FROM logs-none-*' })).resolves.toEqual({
+        type: 'logs',
+        indexExists: false,
+      });
+
+      dataEsClient.esql.query.mockRejectedValueOnce(unknownIndexError());
+      await expect(client.validateQuery({ esql: 'FROM logs-none' })).resolves.toEqual({
+        type: 'logs',
+        indexExists: false,
+      });
+
+      dataEsClient.esql.query
+        .mockRejectedValueOnce(unknownColumnError())
+        .mockResponseOnce(withoutColumns);
+      await expect(
+        client.validateQuery({ esql: 'FROM logs-none-* | WHERE status >= 500' })
+      ).resolves.toEqual({ type: 'logs', indexExists: false });
+    });
+  });
+
   describe('create', () => {
     it('validates, writes the saved object with a generated view name, then puts the view', async () => {
       const { client, soClient, viewsClient, dataEsClient } = setup();
@@ -1053,6 +1083,20 @@ describe('SourcesClient', () => {
       expect(soClient.delete).toHaveBeenCalledWith(NIGHTSHIFT_SOURCE_SO_TYPE, 'source-1');
       expect(viewsClient.deleteView).toHaveBeenCalledWith(NGINX_VIEW_NAME);
       expect(callOrder).toEqual(['view', 'so']);
+    });
+
+    it('does not delete the view when the caller cannot write the saved object', async () => {
+      const { client, soClient, viewsClient } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+      soClient.update.mockRejectedValue(
+        SavedObjectsErrorHelpers.decorateForbiddenError(new Error('read only'))
+      );
+
+      await expect(client.delete('source-1')).rejects.toMatchObject({
+        output: { statusCode: 403 },
+      });
+      expect(viewsClient.deleteView).not.toHaveBeenCalled();
+      expect(soClient.delete).not.toHaveBeenCalled();
     });
 
     it('leaves the saved object in place when the view cannot be deleted', async () => {

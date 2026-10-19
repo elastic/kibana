@@ -11,6 +11,7 @@ import {
   kafkaAuthType,
   kafkaCompressionType,
   kafkaConnectionType,
+  kafkaKerberosAuthType,
   kafkaOAuth2GrantType,
   kafkaOAuth2SignatureAlgorithm,
   kafkaPartitionType,
@@ -322,6 +323,59 @@ const KafkaOAuth2Schema = schema.object({
   claims: schema.maybe(schema.recordOf(schema.string(), schema.any())),
 });
 
+/**
+ * Settings of the Kerberos authentication method, they follow the `kerberos` settings of the Kafka
+ * output of Beats. The password is in `secrets`. The paths are paths on the host of the agent.
+ */
+const KafkaKerberosSchema = schema.object({
+  auth_type: schema.oneOf(
+    [schema.literal(kafkaKerberosAuthType.Keytab), schema.literal(kafkaKerberosAuthType.Password)],
+    {
+      meta: {
+        description:
+          'How the agent authenticates with Kerberos: a keytab file, or a username and password.',
+      },
+    }
+  ),
+  config_path: schema.string({
+    minLength: 1,
+    meta: {
+      description: 'Path to the Kerberos configuration file (`krb5.conf`) on the agent host.',
+    },
+  }),
+  keytab: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          'Path to the keytab file on the agent host. Required when `auth_type` is `keytab`.',
+      },
+    })
+  ),
+  username: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          'Kerberos username. Required when `auth_type` is `password`; the password is set in `secrets.kerberos.password`.',
+      },
+    })
+  ),
+  service_name: schema.maybe(
+    schema.string({ meta: { description: 'Kerberos service name of the Kafka brokers.' } })
+  ),
+  realm: schema.string({
+    minLength: 1,
+    meta: { description: 'Kerberos realm. This is usually the domain name in uppercase.' },
+  }),
+  enable_krb5_fast: schema.maybe(
+    schema.boolean({
+      meta: {
+        description:
+          'Whether to use Kerberos FAST authentication. This can conflict with some Active Directory installations. It defaults to `false` when not set.',
+      },
+    })
+  ),
+});
+
 export const KafkaSchema = {
   ...BeatsBaseSchema,
   // Kafka does not support proxies. proxy_id is accepted to avoid breaking existing preconfigured
@@ -383,6 +437,7 @@ export const KafkaSchema = {
     ])
   ),
   oauth2: schema.maybe(schema.oneOf([schema.literal(null), KafkaOAuth2Schema])),
+  kerberos: schema.maybe(schema.oneOf([schema.literal(null), KafkaKerberosSchema])),
   partition: schema.maybe(
     schema.oneOf([
       schema.literal(kafkaPartitionType.Random),
@@ -416,6 +471,7 @@ export const KafkaSchema = {
           client_certificate_key: schema.maybe(secretRefSchema),
         })
       ),
+      kerberos: schema.maybe(schema.object({ password: schema.maybe(secretRefSchema) })),
     })
   ),
 };

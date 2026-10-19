@@ -60,6 +60,13 @@ export const EPISODES_LIST_COLUMN_SOURCE = i18n.translate(
   }
 );
 
+export const EPISODES_LIST_COLUMN_MAINTENANCE_WINDOWS = i18n.translate(
+  'xpack.alertingV2.episodes.columns.maintenanceWindows',
+  {
+    defaultMessage: 'Maintenance windows',
+  }
+);
+
 export const EPISODES_LIST_ITEM_COUNT = (count: number) =>
   i18n.translate('xpack.alertingV2.episodes.itemCount', {
     defaultMessage: 'Showing {count, plural, one {# alert} other {# alerts}}',
