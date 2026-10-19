@@ -10,3 +10,4 @@ export { type HeaderNode, header } from './header';
 export { type ContextNode, context } from './context';
 export { type DividerNode, divider } from './divider';
 export { type QuoteNode, quote } from './quote';
+export { type ActionsNode, actions } from './actions';
