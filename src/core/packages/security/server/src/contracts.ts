@@ -35,8 +35,10 @@ export interface SecurityServiceSetup {
    * {@link AuthenticatedUser} exposing only those fields. Reading any other
    * identity field on the returned user yields `undefined`.
    *
-   * One-shot: calling it more than once throws. Reserved for Task Manager,
-   * the sole legitimate consumer. The returned enricher throws on non-fake
+   * One-shot per plugin: calling it more than once throws. Reserved for Task
+   * Manager, Alerting and Actions, which run work from credentials they
+   * persist together with the identity of the user the credential was minted
+   * for; any other plugin gets an error. The returned enricher throws on non-fake
    * requests; calling it twice on the same fake request is a no-op
    * (first-wins) and emits a warning.
    *

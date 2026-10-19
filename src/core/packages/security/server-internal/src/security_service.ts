@@ -27,12 +27,22 @@ import { createCoreUiamService } from './uiam';
 import { WorkloadTypeRegistry } from './workload_type_registry';
 import { createBoundWorkloadResolver } from './resolve_bound_workloads';
 
+/**
+ * Plugins that run work on behalf of a user from a credential they persisted, and record that
+ * user's identity alongside it when the credential is minted.
+ */
+const FAKE_REQUEST_ENRICHER_CONSUMERS: ReadonlySet<string> = new Set([
+  'taskManager',
+  'alerting',
+  'actions',
+]);
+
 export class SecurityService
   implements CoreService<InternalSecurityServiceSetup, InternalSecurityServiceStart>
 {
   private readonly log: Logger;
   private securityApi?: CoreSecurityDelegateContract;
-  private fakeRequestEnricherAcquired = false;
+  private readonly fakeRequestEnricherAcquiredBy = new Set<string>();
   private readonly workloadTypes = new WorkloadTypeRegistry();
   private config$: Observable<Config>;
   private configSubscription?: Subscription;
@@ -84,13 +94,20 @@ export class SecurityService
           },
         };
       },
-      acquireFakeRequestEnricher: (): FakeRequestEnricher => {
-        if (this.fakeRequestEnricherAcquired) {
+      acquireFakeRequestEnricher: (pluginId: string): FakeRequestEnricher => {
+        if (!FAKE_REQUEST_ENRICHER_CONSUMERS.has(pluginId)) {
           throw new Error(
-            'acquireFakeRequestEnricher() can only be called once and is reserved for Task Manager.'
+            `acquireFakeRequestEnricher() is reserved for ${[
+              ...FAKE_REQUEST_ENRICHER_CONSUMERS,
+            ].join(', ')}; "${pluginId}" is not allowed.`
           );
         }
-        this.fakeRequestEnricherAcquired = true;
+        if (this.fakeRequestEnricherAcquiredBy.has(pluginId)) {
+          throw new Error(
+            `acquireFakeRequestEnricher() can only be called once per plugin; "${pluginId}" already acquired it.`
+          );
+        }
+        this.fakeRequestEnricherAcquiredBy.add(pluginId);
 
         // Returned eagerly at setup but invoked at task-run time, by which point
         // the security delegate has been registered.

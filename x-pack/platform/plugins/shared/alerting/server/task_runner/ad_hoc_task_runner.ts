@@ -6,7 +6,7 @@
  */
 
 import apm from 'elastic-apm-node';
-import { isExternalUiamCredential } from '@kbn/core-security-server';
+import { isExternalUiamCredential, type FakeRequestUserFields } from '@kbn/core-security-server';
 import type { ISavedObjectsRepository, KibanaRequest, Logger, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
@@ -72,6 +72,7 @@ interface RunParams {
   effectiveApiKey: string | null;
   credentialType: CredentialType;
   fakeRequest: KibanaRequest;
+  apiKeyOwnerIdentity?: FakeRequestUserFields;
   scheduleToRun: AdHocRunSchedule | null;
   validatedParams: RuleTypeParams;
 }
@@ -192,6 +193,7 @@ export class AdHocTaskRunner implements CancellableTask {
     effectiveApiKey,
     credentialType,
     fakeRequest,
+    apiKeyOwnerIdentity,
     scheduleToRun,
     validatedParams: params,
   }: RunParams): Promise<RuleRunMetrics> {
@@ -329,6 +331,7 @@ export class AdHocTaskRunner implements CancellableTask {
       // Mirror the backfill run's own credential treatment onto the connector tasks: the request
       // is marked by getFakeKibanaRequest from the ad hoc run's snapshotted `uiamApiKeyExternal`.
       uiamApiKeyExternal: isExternalUiamCredential(fakeRequest),
+      apiKeyOwnerIdentity,
       ruleConsumer: rule.consumer,
       executionId: this.executionId,
       ruleLabel,
@@ -543,18 +546,14 @@ export class AdHocTaskRunner implements CancellableTask {
       // Generate fake request with API key. Threading the UIAM key (and owner
       // metadata) mirrors the regular rule runner so backfills authenticate with
       // the UIAM key in UIAM deployments instead of falling back to the ES key.
-      const { fakeRequest, effectiveApiKey, credentialType } = getFakeKibanaRequest(
-        this.context,
-        spaceId,
-        apiKeyToUse,
-        {
+      const { fakeRequest, effectiveApiKey, credentialType, apiKeyOwnerIdentity } =
+        getFakeKibanaRequest(this.context, spaceId, apiKeyToUse, {
           uiamApiKey,
           uiamApiKeyExternal,
           apiKeyCreatedByUser: rule.apiKeyCreatedByUser,
           apiKeyOwner: rule.apiKeyOwner,
           ruleId: rule.id,
-        }
-      );
+        });
       // Stash the built request so the cleanup path (updateGapsAfterBackfillComplete)
       // reuses the exact same credentials instead of rebuilding it from scratch.
       this.fakeRequest = fakeRequest;
@@ -564,6 +563,7 @@ export class AdHocTaskRunner implements CancellableTask {
         effectiveApiKey,
         credentialType,
         fakeRequest,
+        apiKeyOwnerIdentity,
         scheduleToRun:
           this.scheduleToRunIndex > -1 ? this.adHocRunSchedule[this.scheduleToRunIndex] : null,
         validatedParams,

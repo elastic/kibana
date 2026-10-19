@@ -17,7 +17,11 @@ import {
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { createRetryableError, getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { type Headers, type FakeRawRequest } from '@kbn/core-http-server';
-import { markExternalUiamCredential } from '@kbn/core-security-server';
+import {
+  markExternalUiamCredential,
+  type FakeRequestEnricher,
+  type FakeRequestUserFields,
+} from '@kbn/core-security-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { Logger } from '@kbn/logging';
 import type {
@@ -50,6 +54,7 @@ export interface TaskRunnerContext {
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;
   savedObjectsRepository: ISavedObjectsRepository;
+  enrichFakeRequest?: FakeRequestEnricher;
 }
 
 type TaskParams = Omit<SavedObject<ActionTaskParams>, 'id' | 'type'>;
@@ -79,8 +84,13 @@ export class TaskRunnerFactory {
     }
 
     const { actionExecutor, inMemoryMetrics } = this;
-    const { logger, encryptedSavedObjectsClient, spaceIdToNamespace, savedObjectsRepository } =
-      this.taskRunnerContext!;
+    const {
+      logger,
+      encryptedSavedObjectsClient,
+      spaceIdToNamespace,
+      savedObjectsRepository,
+      enrichFakeRequest,
+    } = this.taskRunnerContext!;
 
     const taskInfo = {
       scheduled: taskInstance.runAt,
@@ -97,6 +107,8 @@ export class TaskRunnerFactory {
             params,
             apiKey,
             uiamApiKeyExternal,
+            userProfileId,
+            userName,
             executionId,
             consumer,
             source,
@@ -111,7 +123,13 @@ export class TaskRunnerFactory {
         );
 
         const { spaceId } = actionTaskExecutorParams;
-        const request = getFakeRequest(apiKey, spaceId, uiamApiKeyExternal);
+        const request = getFakeRequest({
+          apiKey,
+          spaceId,
+          uiamApiKeyExternal,
+          user: { profileId: userProfileId, username: userName },
+          enrichFakeRequest,
+        });
 
         let executorResult: ActionTypeExecutorResult<unknown> | undefined;
         try {
@@ -183,6 +201,8 @@ export class TaskRunnerFactory {
             actionId,
             apiKey,
             uiamApiKeyExternal,
+            userProfileId,
+            userName,
             executionId,
             consumer,
             source,
@@ -196,7 +216,13 @@ export class TaskRunnerFactory {
           logger
         );
 
-        const request = getFakeRequest(apiKey, spaceId, uiamApiKeyExternal);
+        const request = getFakeRequest({
+          apiKey,
+          spaceId,
+          uiamApiKeyExternal,
+          user: { profileId: userProfileId, username: userName },
+          enrichFakeRequest,
+        });
 
         await actionExecutor.logCancellation({
           actionId,
@@ -247,7 +273,21 @@ export class TaskRunnerFactory {
   }
 }
 
-function getFakeRequest(apiKey: string | undefined, spaceId: string, uiamApiKeyExternal?: boolean) {
+interface GetFakeRequestOpts {
+  apiKey: string | undefined;
+  spaceId: string;
+  uiamApiKeyExternal?: boolean;
+  user: FakeRequestUserFields;
+  enrichFakeRequest?: FakeRequestEnricher;
+}
+
+function getFakeRequest({
+  apiKey,
+  spaceId,
+  uiamApiKeyExternal,
+  user,
+  enrichFakeRequest,
+}: GetFakeRequestOpts) {
   const requestHeaders: Headers = {};
   if (apiKey) {
     requestHeaders.authorization = `ApiKey ${apiKey}`;
@@ -266,6 +306,12 @@ function getFakeRequest(apiKey: string | undefined, spaceId: string, uiamApiKeyE
   // Framework-minted UIAM keys (flag absent) keep receiving the shared secret.
   if (apiKey && uiamApiKeyExternal === true) {
     markExternalUiamCredential(fakeRequest);
+  }
+
+  // A UIAM API key authenticates as the key itself, so without the enqueuer's record of who the
+  // key was minted for, the connector run would be attributed to an anonymous key id.
+  if (apiKey && enrichFakeRequest && (user.profileId || user.username)) {
+    enrichFakeRequest(fakeRequest, user);
   }
 
   return fakeRequest;

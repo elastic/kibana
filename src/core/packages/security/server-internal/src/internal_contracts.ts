@@ -9,6 +9,7 @@
 
 import type {
   CoreServiceAccountsService,
+  FakeRequestEnricher,
   SecurityServiceSetup,
   SecurityServiceStart,
   ServiceAccountWorkloadTypeRegistration,
@@ -27,8 +28,13 @@ export interface InternalCoreServiceAccountsSetup {
 }
 
 export interface InternalSecurityServiceSetup
-  extends Omit<SecurityServiceSetup, 'serviceAccounts'> {
+  extends Omit<SecurityServiceSetup, 'serviceAccounts' | 'acquireFakeRequestEnricher'> {
   serviceAccounts: InternalCoreServiceAccountsSetup;
+  /**
+   * Plugin-keyed counterpart of the public `acquireFakeRequestEnricher`. The plugin context closes
+   * over the calling plugin's id, so plugins never supply it themselves.
+   */
+  acquireFakeRequestEnricher(pluginId: string): FakeRequestEnricher;
   /**
    * The {@link CoreUiamService | UIAM service}
    */

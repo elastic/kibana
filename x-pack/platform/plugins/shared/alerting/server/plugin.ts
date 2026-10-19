@@ -36,6 +36,7 @@ import type {
   CoreStatus,
 } from '@kbn/core/server';
 import { ServiceStatusLevels } from '@kbn/core/server';
+import type { FakeRequestEnricher } from '@kbn/core-security-server';
 import { LockManagerService } from '@kbn/lock-manager';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { LICENSE_TYPE } from '@kbn/licensing-types';
@@ -256,6 +257,7 @@ export class AlertingPlugin {
   private licenseState: ILicenseState | null = null;
   private isESOCanEncrypt?: boolean;
   private security?: SecurityPluginSetup;
+  private enrichFakeRequest?: FakeRequestEnricher;
   private readonly rulesClientFactory: RulesClientFactory;
   private readonly alertingAuthorizationClientFactory: AlertingAuthorizationClientFactory;
   private readonly rulesSettingsClientFactory: RulesSettingsClientFactory;
@@ -313,6 +315,7 @@ export class AlertingPlugin {
     this.kibanaBaseUrl = core.http.basePath.publicBaseUrl;
     this.licenseState = new LicenseState(plugins.licensing.license$);
     this.security = plugins.security;
+    this.enrichFakeRequest = core.security.acquireFakeRequestEnricher();
 
     const elasticsearchAndSOAvailability$ = getElasticsearchAndSOAvailability(core.status.core$);
 
@@ -808,6 +811,7 @@ export class AlertingPlugin {
       actionsPlugin: plugins.actions,
       alertsService: this.alertsService,
       auditService: core.security.audit,
+      enrichFakeRequest: this.enrichFakeRequest,
       backfillClient: this.backfillClient!,
       cancelAlertsOnRuleTimeout: this.config.cancelAlertsOnRuleTimeout,
       connectorAdapterRegistry: this.connectorAdapterRegistry,

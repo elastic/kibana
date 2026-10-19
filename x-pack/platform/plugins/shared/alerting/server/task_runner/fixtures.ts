@@ -452,6 +452,7 @@ export const generateEnqueueFunctionInput = ({
       type: 'SAVED_OBJECT',
     },
     spaceId: 'default',
+    userName: 'elastic',
     ...(priority && { priority }),
     ...(apiKeyId && { apiKeyId }),
   };

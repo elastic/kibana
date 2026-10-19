@@ -16,6 +16,7 @@ import type {
 import type { ConcreteTaskInstance, DecoratedError } from '@kbn/task-manager-plugin/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
+import type { FakeRequestEnricher, FakeRequestUserFields } from '@kbn/core-security-server';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
@@ -128,6 +129,11 @@ export interface RunRuleParams<Params extends RuleTypeParams> {
    */
   uiamApiKeyId?: string;
   fakeRequest: KibanaRequest;
+  /**
+   * The user the rule's API key was minted for, bound to `fakeRequest` and handed to the
+   * connector tasks the run enqueues so they act as the same user.
+   */
+  apiKeyOwnerIdentity?: FakeRequestUserFields;
   rule: SanitizedRule<Params> & { snoozedInstances: RawRuleSnoozedInstance[] };
   validatedParams: Params;
   version: string | undefined;
@@ -261,6 +267,11 @@ export interface TaskRunnerContext {
   getEventLogClient: (request: KibanaRequest) => IEventLogClient;
   isServerless: boolean;
   shouldGrantUiam?: boolean;
+  /**
+   * Binds the rule's API key owner to the rule run's fake request, so code that reads
+   * `getCurrentUser` attributes the run to that user rather than to the API key.
+   */
+  enrichFakeRequest?: FakeRequestEnricher;
   /**
    * Optional — present only when `workflowsExtensions` is loaded.
    * Rule executions publish `alert.status.changed` events on this bus;
