@@ -65,6 +65,7 @@ export const getRunStepDefinition = ({
           connector_id: connectorId,
           end,
           esql_query: esqlQuery,
+          explicit_feature_id: explicitFeatureId,
           feature_id: featureId,
           filter,
           // The engine does not apply the schema's zod defaults to
@@ -107,6 +108,7 @@ export const getRunStepDefinition = ({
         const effectiveConnectorId = connectorId
           ? connectorId
           : await resolveDefaultConnectorId({
+              explicitFeatureId,
               featureId,
               inference: pluginsStart.inference,
               logger,

@@ -1584,6 +1584,10 @@ steps:
             # Standalone path: connector_id_by_feature="", connector_id=<real id>.
             # Worker path: connector_id="", connector_id_by_feature=<feature id>.
             connector-id-by-feature: "{{ variables.connector_id_by_feature }}"
+            # A model saved on alertzero_template_models replaces both connector fields.
+            # An empty row leaves them in charge. Keep in sync with
+            # ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
+            explicit-connector-feature-id: alertzero_template_models
             create-conversation: "${{ variables.create_conversation }}"
             # The default maxResponseContentLength (1 MB) is too small for a 50-alert batch.
             # Azure OpenAI's buffered response for all verdicts can exceed 1 MB; Bedrock bypasses
@@ -1632,6 +1636,8 @@ steps:
             # Same as runAgent_step: exactly one of the two is non-empty at execution time, and
             # ai.prompt treats a blank value as unset.
             connector-id-by-feature: "{{ variables.connector_id_by_feature }}"
+            # Same override as runAgent_step: a saved template-row model wins, an empty row does not.
+            explicit-connector-feature-id: alertzero_template_models
             # The default maxResponseContentLength (1 MB) is too small for a 50-alert batch (see
             # runAgent_step).
             max-step-size: '10mb'
@@ -1653,6 +1659,12 @@ steps:
               continue: true
             with:
               prompt: "{{ steps.build_agent_message.output.message }}"
+              # Used only when the connector requires an EIS prompt template.
+              # Other connectors ignore these fields and send `prompt`.
+              template_id: ".alert-triage"
+              template_version: 1
+              template_variables:
+                alerts_text: "{{ steps.build_agent_message.output.message }}"
 
               # The same reply as runAgent_step (see consts.batch_reply_schema).
               schema: "${{ consts.batch_reply_schema }}"

@@ -739,6 +739,67 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       expect(parsed.success).toBe(true);
     });
 
+    it('ConfigSchema accepts an explicit feature next to connector-id-by-feature', () => {
+      const parsed = ConfigSchema.safeParse({
+        'connector-id-by-feature': 'my_feature',
+        'explicit-connector-feature-id': 'alertzero_template_models',
+      });
+      expect(parsed.success).toBe(true);
+    });
+
+    it('uses a saved explicit feature instead of connector-id-by-feature', async () => {
+      const events$ = of({
+        type: ChatEventType.roundComplete,
+        data: { round: { id: 'r-1', response: { message: 'ok' } } },
+      });
+      const execution = createExecutionMock(events$);
+      const getForFeature = jest.fn().mockImplementation(async (featureId: string) => {
+        if (featureId === 'alertzero_template_models') {
+          return {
+            endpoints: [{ connectorId: 'template-connector' }],
+            warnings: [],
+            soEntryFound: true,
+          };
+        }
+        return {
+          endpoints: [{ connectorId: 'tier-connector' }],
+          warnings: [],
+          soEntryFound: false,
+        };
+      });
+      const serviceManager = {
+        internalStart: {
+          execution,
+          searchInferenceEndpoints: {
+            features: { get: jest.fn().mockReturnValue({ taskType: 'chat_completion' }) },
+            endpoints: { getForFeature },
+          },
+        },
+      } as any;
+
+      const step = getRunAgentStepDefinition(serviceManager);
+      await step.handler(
+        createContext({
+          input: { message: 'hello' },
+          config: {
+            'connector-id-by-feature': 'alertzero_frontier',
+            'explicit-connector-feature-id': 'alertzero_template_models',
+          },
+        })
+      );
+
+      expect(execution.executeAgent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({ connectorId: 'template-connector' }),
+        })
+      );
+      expect(getForFeature).not.toHaveBeenCalledWith(
+        'alertzero_frontier',
+        expect.anything(),
+        expect.anything()
+      );
+    });
+
     it('resolves the connector from the feature and passes it to executeAgent', async () => {
       const events$ = of({
         type: ChatEventType.roundComplete,

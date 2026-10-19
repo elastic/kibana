@@ -19,6 +19,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { isTemplateRequiredConnector, MessageRole } from '@kbn/inference-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import { resolveExplicitFeatureConnectorId } from '@kbn/search-inference-endpoints/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { firstValueFrom, tap, toArray } from 'rxjs';
 import type { ServiceManager } from '../services';
@@ -190,6 +191,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           'connector-id': connectorIdRaw,
           'inference-id': inferenceIdRaw,
           'connector-id-by-feature': connectorIdByFeatureRaw,
+          'explicit-connector-feature-id': explicitConnectorFeatureIdRaw,
           'create-conversation': createConversation,
           'public-conversation': publicConversation,
           ephemeral,
@@ -219,8 +221,27 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW
         );
 
+        const explicitConnectorFeatureId = normalizeOptionalStringParam(
+          explicitConnectorFeatureIdRaw
+        );
+        let explicitOverride = false;
+        if (explicitConnectorFeatureId !== undefined) {
+          const { searchInferenceEndpoints } = serviceManager.internalStart ?? {};
+          if (searchInferenceEndpoints) {
+            const explicitConnectorId = await resolveExplicitFeatureConnectorId({
+              featureId: explicitConnectorFeatureId,
+              request,
+              searchInferenceEndpoints,
+            });
+            if (explicitConnectorId) {
+              effectiveConnectorId = explicitConnectorId;
+              explicitOverride = true;
+            }
+          }
+        }
+
         const connectorIdByFeature = normalizeOptionalStringParam(connectorIdByFeatureRaw);
-        if (connectorIdByFeature !== undefined) {
+        if (!explicitOverride && connectorIdByFeature !== undefined) {
           if (effectiveConnectorId !== undefined) {
             throw new ConnectorOrInferenceIdConflictError(
               CONNECTOR_ID_BY_FEATURE_CONFLICT_MESSAGE_WORKFLOW

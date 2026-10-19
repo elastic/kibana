@@ -81,9 +81,7 @@ export const InputSchema = z.object({
   template_variables: z
     .record(z.string(), z.unknown())
     .optional()
-    .describe(
-      'Variables for template_id. Ignored when the connector does not require a template.'
-    ),
+    .describe('Variables for template_id. Ignored when the connector does not require a template.'),
   /**
    * Optional attachments to provide to the agent.
    */
@@ -291,6 +289,17 @@ export const ConfigSchema = z
       .optional()
       .describe(
         'The Model Management feature id whose configured connector should be used. Mutually exclusive with `connector-id` and `inference-id`.'
+      ),
+    /**
+     * Optional feature checked before connector-id and connector-id-by-feature.
+     * Used only when an operator has saved a model for it.
+     */
+    'explicit-connector-feature-id': z
+      .string()
+      .max(255)
+      .optional()
+      .describe(
+        'Model Management feature id. When an operator has saved a model for it, that connector is used. Otherwise connector-id and connector-id-by-feature resolve as usual. Recommended endpoints on this feature do not count.'
       ),
     /**
      * When true, create/persist a conversation and associate it with the executing user.

@@ -474,6 +474,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                         onAdd={handleAdd}
                         taskType={feature.taskType}
                         panelWidth={listWidth}
+                        allowTemplateRequiredModels={feature.allowTemplateRequiredModels}
                       />
                     </EuiFlexItem>
                   )}

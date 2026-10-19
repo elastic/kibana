@@ -740,6 +740,87 @@ describe('aiPromptStepDefinition', () => {
       });
     });
 
+    describe('prompt templates', () => {
+      it('sends the pinned template and skips the messages path when the connector requires one', async () => {
+        const chatComplete = jest.fn().mockResolvedValue({
+          content: '{"verdicts":[]}',
+          tokens: { prompt: 3, completion: 4, total: 7 },
+        });
+        (mockInference as any).getClient = jest.fn().mockReturnValue({
+          getConnectorById: jest.fn().mockResolvedValue({
+            metadata: { capabilities: { templates: { policy: 'required' } } },
+          }),
+          chatComplete,
+        });
+        mockContext.input = {
+          prompt: 'classify these alerts',
+          schema: { type: 'object' },
+          template_id: '.alert-triage',
+          template_version: 1,
+          template_variables: { alerts_text: 'classify these alerts' },
+        };
+
+        const result = await handler(mockContext);
+
+        expect(chatComplete).toHaveBeenCalledWith(
+          expect.objectContaining({
+            connectorId: 'resolved-connector-id',
+            template: {
+              id: '.alert-triage',
+              version: 1,
+              variables: { alerts_text: 'classify these alerts' },
+            },
+          })
+        );
+        expect(mockInference.getChatModel).not.toHaveBeenCalled();
+        expect(result.output.content).toEqual({ verdicts: [] });
+      });
+
+      it('keeps the messages path when the connector does not require a template', async () => {
+        (mockInference as any).getClient = jest.fn().mockReturnValue({
+          getConnectorById: jest.fn().mockResolvedValue({ metadata: {} }),
+        });
+        mockChatModel.invoke.mockResolvedValue({ content: 'ok', response_metadata: {} });
+
+        await handler(mockContext);
+
+        expect(mockInference.getChatModel).toHaveBeenCalled();
+      });
+
+      it('uses a saved explicit feature ahead of connector-id-by-feature', async () => {
+        mockSearchInferenceEndpoints.features.get.mockReturnValue({ taskType: 'chat_completion' });
+        mockSearchInferenceEndpoints.endpoints.getForFeature.mockImplementation(
+          async (featureId: string) => {
+            if (featureId === 'alertzero_template_models') {
+              return {
+                endpoints: [{ connectorId: 'template-connector' }],
+                soEntryFound: true,
+              };
+            }
+            return { endpoints: [{ connectorId: 'tier-connector' }], soEntryFound: false };
+          }
+        );
+        mockChatModel.invoke.mockResolvedValue({ content: 'ok', response_metadata: {} });
+        const contextWithFeature = {
+          ...mockContext,
+          config: {
+            'connector-id-by-feature': 'alertzero_efficient',
+            'explicit-connector-feature-id': 'alertzero_template_models',
+          },
+        };
+
+        await handler(contextWithFeature);
+
+        expect(mockInference.getChatModel).toHaveBeenCalledWith(
+          expect.objectContaining({ connectorId: 'template-connector' })
+        );
+        expect(mockSearchInferenceEndpoints.endpoints.getForFeature).not.toHaveBeenCalledWith(
+          'alertzero_efficient',
+          expect.anything()
+        );
+      });
+    });
+
     describe('connector-id-by-feature routing', () => {
       it('resolves the connector via the feature endpoint when connector-id-by-feature is set', async () => {
         const contextWithFeature = {

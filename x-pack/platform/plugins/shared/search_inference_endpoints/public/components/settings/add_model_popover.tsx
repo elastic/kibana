@@ -41,6 +41,11 @@ interface AddModelPopoverProps {
   /** When set, only connectors compatible with this inference task type are listed. */
   taskType?: string;
   panelWidth?: number;
+  /**
+   * Endpoints with `capabilities.templates.policy: required` stay out of the list
+   * unless the feature opts in. Ordinary models stay listed either way.
+   */
+  allowTemplateRequiredModels?: boolean;
 }
 
 export const AddModelPopover: React.FC<AddModelPopoverProps> = ({
@@ -48,6 +53,7 @@ export const AddModelPopover: React.FC<AddModelPopoverProps> = ({
   onAdd,
   taskType,
   panelWidth,
+  allowTemplateRequiredModels = false,
 }) => {
   const { data: connectors = [] } = useConnectors();
   const [isOpen, setIsOpen] = useState(false);
@@ -58,7 +64,7 @@ export const AddModelPopover: React.FC<AddModelPopoverProps> = ({
       if (existingSet.has(connector.connectorId)) {
         return false;
       }
-      if (isTemplateRequiredConnector(connector)) {
+      if (!allowTemplateRequiredModels && isTemplateRequiredConnector(connector)) {
         return false;
       }
       if (!taskType) {
@@ -93,7 +99,7 @@ export const AddModelPopover: React.FC<AddModelPopoverProps> = ({
         ) : undefined,
       };
     });
-  }, [connectors, existingEndpointIds, taskType]);
+  }, [allowTemplateRequiredModels, connectors, existingEndpointIds, taskType]);
 
   const handleChange = useCallback(
     (newOptions: EuiSelectableOption[]) => {

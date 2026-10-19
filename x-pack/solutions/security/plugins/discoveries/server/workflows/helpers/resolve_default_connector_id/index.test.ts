@@ -80,6 +80,59 @@ describe('resolveDefaultConnectorId', () => {
 
     // The tier is deliberately above the cluster-wide default in the resolution
     // order, so a configured default must not win over an operator's tier choice.
+    it('uses a model saved on explicitFeatureId ahead of the tier', async () => {
+      mockGetForFeature.mockImplementation(async (featureId: string) => {
+        if (featureId === 'alertzero_template_models') {
+          return {
+            endpoints: [{ connectorId: 'template-connector' }],
+            soEntryFound: true,
+          };
+        }
+        return { endpoints: [{ connectorId: 'tier-connector' }], soEntryFound: false };
+      });
+
+      const result = await resolveDefaultConnectorId({
+        explicitFeatureId: 'alertzero_template_models',
+        featureId: 'alertzero_frontier',
+        inference: mockInference,
+        logger: mockLogger,
+        request: mockRequest,
+        searchInferenceEndpoints: mockSearchInferenceEndpoints,
+        uiSettingsClient: mockUiSettingsClient,
+      });
+
+      expect(result).toBe('template-connector');
+      expect(mockGetForFeature).toHaveBeenCalledWith('alertzero_template_models', mockRequest, {
+        onlyReturnConfigured: true,
+      });
+      expect(mockGetForFeature).not.toHaveBeenCalledWith(
+        'alertzero_frontier',
+        expect.anything(),
+        expect.anything()
+      );
+    });
+
+    it('keeps the tier when the explicit feature has no saved model', async () => {
+      mockGetForFeature.mockImplementation(async (featureId: string) => {
+        if (featureId === 'alertzero_template_models') {
+          return { endpoints: [], soEntryFound: false };
+        }
+        return { endpoints: [{ connectorId: 'tier-connector' }], soEntryFound: false };
+      });
+
+      const result = await resolveDefaultConnectorId({
+        explicitFeatureId: 'alertzero_template_models',
+        featureId: 'alertzero_frontier',
+        inference: mockInference,
+        logger: mockLogger,
+        request: mockRequest,
+        searchInferenceEndpoints: mockSearchInferenceEndpoints,
+        uiSettingsClient: mockUiSettingsClient,
+      });
+
+      expect(result).toBe('tier-connector');
+    });
+
     it('takes precedence over genAiSettings:defaultAIConnector', async () => {
       await resolveDefaultConnectorId({
         featureId: 'alertzero_frontier',

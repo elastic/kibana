@@ -83,6 +83,13 @@ export const ConfigSchema = z
       .describe(
         'Resolve the connector from a named inference feature (as configured in Management → Model Settings) rather than using a literal connector id. Mutually exclusive with connector-id. Example: "context_engine_prompt".'
       ),
+    'explicit-connector-feature-id': z
+      .string()
+      .max(255)
+      .optional()
+      .describe(
+        'Model Management feature id. When an operator has saved a model for it, that connector is used. Otherwise connector-id and connector-id-by-feature resolve as usual. Recommended endpoints on this feature do not count.'
+      ),
   })
   .superRefine((cfg, ctx) => {
     if (
@@ -121,6 +128,31 @@ export const InputSchema = z.object({
   systemPrompt: z.string().optional(),
   schema: JsonModelShapeSchema.optional().describe('The schema for the output of the step.'),
   temperature: z.number().min(0).max(1).optional(),
+  /**
+   * EIS prompt template id. Used only when the resolved connector's
+   * `capabilities.templates.policy` is `required`. Otherwise the step ignores
+   * these fields and sends `prompt`. The id starts with a dot.
+   */
+  template_id: z
+    .string()
+    .max(128)
+    .optional()
+    .describe(
+      'Pinned EIS prompt template id, including the leading dot. Sent instead of the prompt when the connector requires templates.'
+    ),
+  template_version: z
+    .number()
+    .int()
+    .positive()
+    .max(1_000_000)
+    .optional()
+    .describe(
+      'Pinned EIS prompt template version. Required with template_id when the connector requires templates.'
+    ),
+  template_variables: z
+    .record(z.string(), z.unknown())
+    .optional()
+    .describe('Variables for template_id. Ignored when the connector does not require a template.'),
 });
 
 export function getStructuredOutputSchema(contentSchema: z.ZodType) {

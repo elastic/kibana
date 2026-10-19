@@ -49,6 +49,12 @@ export const RunStepInputSchema = lazySchema(() =>
      * feature is disabled.
      */
     feature_id: z.string().max(256).optional(),
+    /**
+     * Feature id checked before `feature_id`. Used only when an operator has
+     * saved a model for it. Recommended endpoints on that feature are ignored,
+     * so an empty row leaves `feature_id` in charge.
+     */
+    explicit_feature_id: z.string().max(256).optional(),
     filter: z.record(z.string(), z.unknown()).optional(),
     /**
      * Whether the generated discoveries are returned inline. Defaults to `true`.

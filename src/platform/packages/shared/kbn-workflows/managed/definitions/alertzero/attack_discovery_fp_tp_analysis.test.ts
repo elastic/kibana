@@ -550,6 +550,10 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       expect(analyze?.['connector-id-by-feature']).toBe('alertzero_frontier');
     });
 
+    it('prefers a model saved on the prompt-template row', () => {
+      expect(analyze?.['explicit-connector-feature-id']).toBe('alertzero_template_models');
+    });
+
     it('uses the thin agent', () => {
       expect(analyze?.['agent-id']).toBe('alertzero-thin-agent');
     });

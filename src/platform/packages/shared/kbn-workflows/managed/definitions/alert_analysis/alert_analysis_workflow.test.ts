@@ -391,6 +391,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     const agentStep = findStepByName(workflow.steps, 'runAgent_step') as {
       'connector-id': string;
       'connector-id-by-feature': string;
+      'explicit-connector-feature-id': string;
       'create-conversation': string;
     };
 
@@ -399,6 +400,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     // Dual connector params coexist: superRefine only fires when BOTH are non-empty; Liquid renders
     // "" for the unused variable so exactly one is non-empty at execution time.
     expect(agentStep['connector-id-by-feature']).toBe('{{ variables.connector_id_by_feature }}');
+    expect(agentStep['explicit-connector-feature-id']).toBe('alertzero_template_models');
     // `${{ }}` preserves the boolean; a plain `{{ }}` would render the string "false" (truthy).
     expect(agentStep['create-conversation']).toBe('${{ variables.create_conversation }}');
   });
@@ -2679,6 +2681,13 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
 
       expect(promptStep['connector-id']).toBe('{{ variables.connector_id }}');
       expect(promptStep['connector-id-by-feature']).toBe('{{ variables.connector_id_by_feature }}');
+      expect(promptStep['explicit-connector-feature-id']).toBe('alertzero_template_models');
+      expect(promptStep.with).toEqual(
+        expect.objectContaining({
+          template_id: '.alert-triage',
+          template_version: 1,
+        })
+      );
     });
 
     describe('token usage attribution', () => {

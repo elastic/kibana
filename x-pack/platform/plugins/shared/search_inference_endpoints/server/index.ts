@@ -8,6 +8,7 @@
 import type { PluginInitializerContext } from '@kbn/core/server';
 
 export { config } from './config';
+export { resolveExplicitFeatureConnectorId } from './lib/resolve_explicit_feature_connector';
 
 export async function plugin(initializerContext: PluginInitializerContext) {
   const { SearchInferenceEndpointsPlugin } = await import('./plugin');

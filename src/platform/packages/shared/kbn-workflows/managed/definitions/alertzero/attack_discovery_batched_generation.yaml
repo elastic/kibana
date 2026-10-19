@@ -149,6 +149,10 @@ steps:
           # tier is therefore unregistered. Keep in sync with
           # ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
           feature_id: alertzero_frontier
+          # Used only when an operator has saved a model on this row. Otherwise
+          # feature_id above stays in charge. Keep in sync with
+          # ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
+          explicit_feature_id: alertzero_template_models
           # The discoveries are read back from the index below instead. They
           # dominate this step's output, and an output above the engine's
           # eviction threshold is dropped from in-memory state before the

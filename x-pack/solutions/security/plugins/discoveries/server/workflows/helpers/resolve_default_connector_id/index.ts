@@ -8,7 +8,10 @@
 import type { IUiSettingsClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
-import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
+import {
+  resolveExplicitFeatureConnectorId,
+  type SearchInferenceEndpointsPluginStart,
+} from '@kbn/search-inference-endpoints/server';
 
 // Sentinel stored in `genAiSettings:defaultAIConnector` when no default is configured.
 const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
@@ -85,16 +88,19 @@ const resolveFeatureConnectorId = async ({
  * do not carry an explicit `connector_id`.
  *
  * Resolution order:
- * 1. `featureId`, when it names a registered `chat_completion` feature in Model
+ * 1. `explicitFeatureId`, only when an operator has saved a model for it.
+ *    Recommended endpoints on that feature do not count.
+ * 2. `featureId`, when it names a registered `chat_completion` feature in Model
  *    Management > Feature settings. Lets a step pick a tier without naming an
  *    endpoint.
- * 2. `genAiSettings:defaultAIConnector` (request-scoped uiSettings). The
+ * 3. `genAiSettings:defaultAIConnector` (request-scoped uiSettings). The
  *    `NO_DEFAULT_CONNECTOR` sentinel and empty values are treated as unset.
- * 3. `inference.getDefaultConnector(request)` fallback.
+ * 4. `inference.getDefaultConnector(request)` fallback.
  *
  * Throws a clean error when no source yields a connector.
  */
 export const resolveDefaultConnectorId = async ({
+  explicitFeatureId,
   featureId,
   inference,
   logger,
@@ -102,6 +108,7 @@ export const resolveDefaultConnectorId = async ({
   searchInferenceEndpoints,
   uiSettingsClient,
 }: {
+  explicitFeatureId?: string;
   featureId?: string;
   inference?: InferenceServerStart;
   logger: Logger;
@@ -109,6 +116,22 @@ export const resolveDefaultConnectorId = async ({
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   uiSettingsClient: IUiSettingsClient;
 }): Promise<string> => {
+  if (explicitFeatureId && searchInferenceEndpoints) {
+    const explicitConnectorId = await resolveExplicitFeatureConnectorId({
+      featureId: explicitFeatureId,
+      request,
+      searchInferenceEndpoints,
+    });
+
+    if (explicitConnectorId != null) {
+      logger.debug(
+        () => `Resolved connector ${explicitConnectorId} from saved feature ${explicitFeatureId}`
+      );
+
+      return explicitConnectorId;
+    }
+  }
+
   if (featureId) {
     const featureConnectorId = await resolveFeatureConnectorId({
       featureId,
