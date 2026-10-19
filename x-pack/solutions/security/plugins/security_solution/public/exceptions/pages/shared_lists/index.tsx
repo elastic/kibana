@@ -55,8 +55,6 @@ import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { EndpointExceptionsMovedCallout } from '../../components/endpoint_exceptions_moved_callout';
 import { SharedListsAppHeader } from '../../components/shared_lists_app_header/shared_lists_app_header';
 
-export type Func = () => Promise<void>;
-
 interface ReferenceModalState {
   contentText: string;
   rulesReferences: string[];
