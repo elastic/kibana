@@ -539,9 +539,9 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     newlyHighCriticalCount: newlyHCCount,
   });
 
-  const handleFilterForTile = useCallback(
-    (tileId: SignalCardId) => {
-      setActiveTile(activeTile === tileId ? null : tileId);
+  const handleFilterForCard = useCallback(
+    (cardId: SignalCardId) => {
+      setActiveTile(activeTile === cardId ? null : cardId);
     },
     [activeTile, setActiveTile]
   );
@@ -624,14 +624,14 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     }
     addWarning({
       title: i18n.translate(
-        'xpack.securitySolution.entityAnalytics.home.tiles.tileFilterLimitTitle',
+        'xpack.securitySolution.entityAnalytics.home.tiles.cardFilterLimitTitle',
         {
           defaultMessage: 'Table shows {limit} of {count} entities',
           values: { limit: MAX_TILE_FILTER_ENTITY_IDS, count: selectedEntityIds.length },
         }
       ),
       text: i18n.translate(
-        'xpack.securitySolution.entityAnalytics.home.tiles.tileFilterLimitDescription',
+        'xpack.securitySolution.entityAnalytics.home.tiles.cardFilterLimitDescription',
         {
           defaultMessage:
             'The table is limited to {limit} entities from this tile. Narrow the time range or filters to see a smaller set.',
@@ -657,7 +657,6 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         isDeltaUnavailable: alertBasedHistoryMissing,
         trend: alertsTrend,
         isLoading: alertBasedLoading,
-        // TODO: counts high/critical alerts only; suggested description: "Entities with at least one high- or critical-severity alert in the last {timeRange}"
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAlerts.description',
           {
@@ -1017,7 +1016,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
             <SignalCards
               activeTile={activeTile}
               cards={signalCards}
-              onFilterForTile={handleFilterForTile}
+              onFilterForCard={handleFilterForCard}
             />
           </div>
         </div>
