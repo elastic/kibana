@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import type { Entity } from '@kbn/entity-store/common';
+import type { Entity, EntityType } from '@kbn/entity-store/common';
 import type { RawAnomalyRecord } from './types';
 
 type AnomalyRecordCause = NonNullable<RawAnomalyRecord['causes']>[number];
+
+/** Identity field path (e.g. `user.name`) → values of the entity for that field. */
+export type EntityIdentityFields = Map<string, Set<string>>;
 
 export interface ResolvedRecordFields {
   actual?: number;
@@ -23,57 +26,100 @@ export interface ResolvedRecordFields {
   partitionFieldValue?: string;
 }
 
-const IDENTITY_NAMESPACES = ['user', 'host', 'service'] as const;
+// The namespace whose fields identify an entity of each type in source documents (and therefore
+// in anomaly record dimensions). Other namespaces on the record (e.g. `host.*` on a user) are
+// context shared with other entities and must not select a cause.
+const IDENTITY_NAMESPACE: Record<EntityType, string> = {
+  user: 'user',
+  host: 'host',
+  service: 'service',
+  generic: 'entity',
+};
 
-const collectStrings = (value: unknown, into: Set<string>): void => {
+const collectIdentityFields = (path: string, value: unknown, into: EntityIdentityFields): void => {
   if (typeof value === 'string') {
-    into.add(value);
+    into.set(path, (into.get(path) ?? new Set()).add(value));
   } else if (Array.isArray(value)) {
-    value.forEach((item) => collectStrings(item, into));
+    value.forEach((item) => collectIdentityFields(path, item, into));
+  } else if (value && typeof value === 'object') {
+    Object.entries(value).forEach(([key, nested]) =>
+      collectIdentityFields(`${path}.${key}`, nested, into)
+    );
   }
 };
 
 /**
- * String values an anomaly record's by/over/partition fields may take for these entities
- * (e.g. `user.name`, `host.id`), used to pick the cause that belongs to the entity.
+ * Identity field → values of these entities (e.g. `user.name` → {alice}), restricted to the
+ * entity type's own namespace, used to pick the cause that belongs to the entity.
  */
-export const getEntityIdentityValues = (entityRecords: Entity[]): Set<string> => {
-  const values = new Set<string>();
+export const getEntityIdentityFields = (
+  entityType: EntityType,
+  entityRecords: Entity[]
+): EntityIdentityFields => {
+  const namespace = IDENTITY_NAMESPACE[entityType];
+  const fields: EntityIdentityFields = new Map();
   for (const record of entityRecords) {
-    collectStrings(record.entity?.name, values);
-    for (const namespace of IDENTITY_NAMESPACES) {
-      const fields = (record as Partial<Record<typeof namespace, Record<string, unknown>>>)[
-        namespace
-      ];
-      if (fields) {
-        Object.values(fields).forEach((value) => collectStrings(value, values));
-      }
-    }
+    collectIdentityFields(
+      namespace,
+      (record as Partial<Record<string, unknown>>)[namespace],
+      fields
+    );
   }
-  return values;
+  return fields;
 };
 
-const causeDimensionValues = (cause: AnomalyRecordCause): string[] =>
-  [cause.by_field_value, cause.over_field_value, cause.partition_field_value]
-    .filter((value): value is string | number => value != null)
-    .map(String);
+/** Identity fields of each entity record, keyed by `entity.id`, for per-hit cause selection. */
+export const getIdentityFieldsByEntityId = (
+  entityType: EntityType,
+  entityRecords: Entity[]
+): Map<string, EntityIdentityFields> =>
+  new Map(
+    entityRecords.flatMap((record) =>
+      record.entity?.id
+        ? [[record.entity.id, getEntityIdentityFields(entityType, [record])] as const]
+        : []
+    )
+  );
+
+const causeDimensions = (cause: AnomalyRecordCause): Array<[string, string]> =>
+  (
+    [
+      [cause.by_field_name, cause.by_field_value],
+      [cause.over_field_name, cause.over_field_value],
+      [cause.partition_field_name, cause.partition_field_value],
+    ] as Array<[string | undefined, string | number | undefined]>
+  )
+    .filter(([name, value]) => name != null && value != null)
+    .map(([name, value]) => [String(name), String(value)]);
+
+const countMatchingDimensions = (
+  cause: AnomalyRecordCause,
+  identityFields: EntityIdentityFields
+): number =>
+  causeDimensions(cause).filter(([name, value]) => identityFields.get(name)?.has(value) ?? false)
+    .length;
 
 /**
- * The cause relevant to the entity: the one whose by/over/partition value is one of the entity's
- * identity values, else the first (most anomalous) cause.
+ * The cause relevant to the entity: the one with the most by/over/partition dimensions equal to
+ * one of the entity's identity fields (earliest wins ties), else the first (most anomalous) cause.
  */
 export const selectCause = (
   causes: RawAnomalyRecord['causes'],
-  identityValues?: Set<string>
+  identityFields?: EntityIdentityFields
 ): AnomalyRecordCause | undefined => {
   if (!causes?.length) return undefined;
-  if (identityValues?.size) {
-    const match = causes.find((cause) =>
-      causeDimensionValues(cause).some((value) => identityValues.has(value))
-    );
-    if (match) return match;
+  if (!identityFields?.size) return causes[0];
+
+  let best: AnomalyRecordCause | undefined;
+  let bestScore = 0;
+  for (const cause of causes) {
+    const score = countMatchingDimensions(cause, identityFields);
+    if (score > bestScore) {
+      best = cause;
+      bestScore = score;
+    }
   }
-  return causes[0];
+  return best ?? causes[0];
 };
 
 /**
@@ -83,9 +129,9 @@ export const selectCause = (
  */
 export const resolveRecordFields = (
   src: RawAnomalyRecord,
-  identityValues?: Set<string>
+  identityFields?: EntityIdentityFields
 ): ResolvedRecordFields => {
-  const cause = selectCause(src.causes, identityValues);
+  const cause = selectCause(src.causes, identityFields);
   const partitionFieldValue = src.partition_field_value ?? cause?.partition_field_value;
   return {
     actual: src.actual?.[0] ?? cause?.actual?.[0],

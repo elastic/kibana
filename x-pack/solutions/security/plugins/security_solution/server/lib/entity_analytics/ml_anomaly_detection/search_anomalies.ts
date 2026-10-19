@@ -14,7 +14,8 @@ import { ENTITY_ANOMALY_DEFAULT_LOOKBACK } from '../../../../common/constants';
 import type { AnomalyScoreRange } from '../../../../common/api/entity_analytics';
 import { getSecurityMlJobIds } from './get_security_ml_job_ids';
 import type { AnomalyHit, RawAnomalyRecord } from './types';
-import { getEntityIdentityValues, resolveRecordFields } from './resolve_record_fields';
+import { getIdentityFieldsByEntityId, resolveRecordFields } from './resolve_record_fields';
+import type { EntityIdentityFields } from './resolve_record_fields';
 
 // A missing/empty selection means "no severity filter", which defaults to the
 // standard threshold of 1 rather than truly unbounded (record_score 0 anomalies are noise).
@@ -45,12 +46,12 @@ interface RequiredHit {
 const mapToAnomalyHit = (
   hit: RequiredHit,
   entityId: string,
-  identityValues?: Set<string>
+  identityFields?: EntityIdentityFields
 ): AnomalyHit => {
   const { _id: id, _source: src } = hit;
   const { actual, typical, detectorFunction, ...dimensions } = resolveRecordFields(
     src,
-    identityValues
+    identityFields
   );
   return {
     _id: id,
@@ -183,16 +184,12 @@ export const searchEntityAnomalies = async ({
 
     // Every record the query counted in `total` is returned; the guard only narrows the client's
     // optional `_id` / `_source` typing, which search hits always carry.
-    const identityValuesByEntityId = new Map(
-      entityRecords.flatMap((record) =>
-        record.entity?.id ? [[record.entity.id, getEntityIdentityValues([record])] as const] : []
-      )
-    );
+    const identityFieldsByEntityId = getIdentityFieldsByEntityId(entityType, entityRecords);
     const hits = resp.hits.hits
       .filter((hit): hit is typeof hit & RequiredHit => hit._id != null && hit._source != null)
       .map((hit) => {
         const entityId = getMatchedEntityId(hit.matched_queries, entityIds) ?? entityIds[0];
-        return mapToAnomalyHit(hit, entityId, identityValuesByEntityId.get(entityId));
+        return mapToAnomalyHit(hit, entityId, identityFieldsByEntityId.get(entityId));
       });
 
     return { hits, total };

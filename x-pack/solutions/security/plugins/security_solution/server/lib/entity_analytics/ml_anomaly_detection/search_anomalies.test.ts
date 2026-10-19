@@ -447,6 +447,47 @@ describe('searchEntityAnomalies', () => {
     });
   });
 
+  it("does not pick another user's cause because it shares the entity's host partition", async () => {
+    // mockEntityRecord: user.name=alice. Both causes are partitioned on WIN-1 (makeHit default
+    // partition_field_value = 'web-01' is overridden per cause); only the second is Alice's.
+    const hit = makeHit({
+      entityId: 'user:alice',
+      byFieldName: 'user.name',
+      noByFieldValue: true,
+      causes: [
+        { by_field_value: 'mallory', actual: [99], typical: [1] },
+        { by_field_value: 'alice', actual: [42], typical: [3] },
+      ],
+    });
+    delete (hit._source as Record<string, unknown>).actual;
+    delete (hit._source as Record<string, unknown>).typical;
+    mockMlAnomalySearch.mockResolvedValueOnce(
+      makeResponse([
+        {
+          ...hit,
+          _source: {
+            ...hit._source,
+            causes: hit._source?.causes?.map((cause) => ({
+              ...cause,
+              partition_field_name: 'host.name',
+              partition_field_value: 'WIN-1',
+            })),
+          },
+        },
+      ])
+    );
+
+    const result = await searchEntityAnomalies({
+      ...defaultOpts,
+      entityRecords: [{ ...mockEntityRecord, host: { name: 'WIN-1' } }],
+      logger,
+      ml: mockMl,
+      soClient,
+    });
+
+    expect(result.hits[0]).toMatchObject({ actual: 42, typical: 3, byFieldValue: 'alice' });
+  });
+
   it('falls back to the first cause when none matches the entity', async () => {
     const hit = makeHit({
       entityId: 'user:alice',

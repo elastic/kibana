@@ -10,7 +10,10 @@ import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
 import type { Entity, EntityType } from '@kbn/entity-store/common';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { compact } from 'lodash';
-import { buildEntitiesFilter } from '../ml_anomaly_detection/build_entities_filter';
+import {
+  buildEntitiesFilter,
+  getMatchedEntityId,
+} from '../ml_anomaly_detection/build_entities_filter';
 import { ENTITY_ANOMALY_DEFAULT_LOOKBACK_DAYS } from '../../../../common/constants';
 import {
   deriveBucketInterval,
@@ -23,7 +26,7 @@ import type {
 } from '../../../../common/api/entity_analytics';
 import {
   buildScoreRangeFilter,
-  getEntityIdentityValues,
+  getIdentityFieldsByEntityId,
   getJobConfig,
   getSecurityMlJobIds,
   resolveRecordFields,
@@ -155,7 +158,8 @@ export const getEntityAnomalyOverview = async ({
   }
 
   let aggs: OverviewAggs | undefined;
-  let rawHits: RawAnomalyRecord[] = [];
+  let rawHits: Array<RawAnomalyRecord & { matched_queries?: string[] | Record<string, number> }> =
+    [];
   let totalAnomaliesCount = 0;
 
   try {
@@ -198,7 +202,9 @@ export const getEntityAnomalyOverview = async ({
 
     aggs = resp.aggregations as unknown as OverviewAggs | undefined;
     rawHits = compact(
-      resp.hits.hits.map((h) => (h._source ? { ...h._source, _id: h._id } : undefined))
+      resp.hits.hits.map((h) =>
+        h._source ? { ...h._source, _id: h._id, matched_queries: h.matched_queries } : undefined
+      )
     );
     const total = resp.hits.total;
     totalAnomaliesCount = total == null ? 0 : typeof total === 'number' ? total : total.value;
@@ -241,11 +247,13 @@ export const getEntityAnomalyOverview = async ({
 
   const tacticCounts = buildTacticCounts(aggs?.by_time?.buckets ?? [], tacticsByJob);
 
-  const identityValues = getEntityIdentityValues(entityRecords);
+  // Resolve causes against the group member each hit matched (same attribution as the summary).
+  const identityFieldsByEntityId = getIdentityFieldsByEntityId(entityType, entityRecords);
   const recentAnomalies: AnomalyOverviewHit[] = rawHits.map((anomaly) => {
     const jobConfig = allJobConfigs.get(anomaly.job_id);
     const detector = jobConfig?.detectors[anomaly.detector_index];
-    const record = resolveRecordFields(anomaly, identityValues);
+    const matchedEntityId = getMatchedEntityId(anomaly.matched_queries, entityIds) ?? entityIds[0];
+    const record = resolveRecordFields(anomaly, identityFieldsByEntityId.get(matchedEntityId));
     const detectorFunction = detector?.function ?? record.detectorFunction;
     const { actual } = record;
 
