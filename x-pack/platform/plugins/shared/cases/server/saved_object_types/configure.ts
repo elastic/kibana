@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import type { SavedObjectsType } from '@kbn/core/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { CASE_CONFIGURE_SAVED_OBJECT } from '../../common/constants';
+import { CASE_CONFIGURE_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import { configureMigrations } from './migrations';
 
 /**
@@ -141,8 +141,10 @@ export const caseConfigureSavedObjectType: SavedObjectsType = {
             if (doc.attributes.extractObservables !== undefined) {
               return { attributes: {} };
             }
-            // Match the Settings UI default-on for documents that lack the field.
-            return { attributes: { extractObservables: true } };
+            // Follow the owner default (on only for securitySolution), as the read path does.
+            return {
+              attributes: { extractObservables: doc.attributes.owner === SECURITY_SOLUTION_OWNER },
+            };
           },
         },
       ],
