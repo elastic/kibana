@@ -195,6 +195,7 @@ export const editExceptionLisDetails = ({
   description?: { original: string; updated: string | null };
 }) => {
   cy.get(EXCEPTIONS_LIST_MANAGEMENT_NAME).should('exist');
+  cy.get('[data-test-subj="app-menu-overflow-button"]').click();
   cy.get(EXCEPTIONS_LIST_MANAGEMENT_EDIT_NAME_BTN).click();
 
   if (name != null) {

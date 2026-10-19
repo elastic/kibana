@@ -116,6 +116,7 @@ export const ListDetailsAppHeader = React.memo<ListDetailsAppHeaderProps>(
                 id: 'editDetails',
                 label: i18n.EDIT_DETAILS,
                 iconType: 'pencil',
+                overflow: true,
                 run: openEditModal,
                 testId: `${TEST_SUBJ_PREFIX}EditDetailsAction`,
               },
