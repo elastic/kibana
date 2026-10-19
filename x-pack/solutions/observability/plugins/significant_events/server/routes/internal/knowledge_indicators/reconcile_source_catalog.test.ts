@@ -139,6 +139,7 @@ describe('reconcileSourceCatalog', () => {
       }),
       write: jest.fn(),
       retire: jest.fn(),
+      listSourceIds: jest.fn(),
     };
 
     await expect(
@@ -171,6 +172,7 @@ describe('reconcileSourceCatalog', () => {
       }),
       write: jest.fn(),
       retire: jest.fn(),
+      listSourceIds: jest.fn(),
     };
     const scheduleSourceOnboarding = jest.fn(async () => true);
 
@@ -209,6 +211,7 @@ describe('reconcileSourceCatalog', () => {
       }),
       write: jest.fn(),
       retire: jest.fn(),
+      listSourceIds: jest.fn(),
     };
 
     const disabled = makeSource({ id: 'disabled-source', enabled: false });
@@ -363,6 +366,27 @@ describe('reconcileSourceCatalog', () => {
     expect(kiClient.deleteAllQueries).toHaveBeenCalledWith('gone-source');
     expect(kiClient.deleteIndicators).toHaveBeenCalledWith('gone-source');
     expect(kiClient.deleteOwnedRules).not.toHaveBeenCalledWith('enabled-source');
+  });
+
+  it('retires the state object of a deleted source that has no indicators or rules left', async () => {
+    const retire = jest.fn(async ({ run }: { run: () => Promise<void> }) => run());
+    const sourceKnowledgeState: SourceKnowledgeStateClient = {
+      runExclusive: jest.fn(),
+      write: jest.fn(),
+      retire,
+      listSourceIds: jest.fn().mockResolvedValue(['live-source', 'gone-source']),
+    };
+
+    await reconcileSourceCatalog({
+      sourcesClient: makeSourcesClient([makeSource({ id: 'live-source' })]),
+      kiClient: makeKiClient([]),
+      sourceKnowledgeState,
+      maintenanceService: { getState: jest.fn().mockResolvedValue('enabled') },
+      request,
+    });
+
+    expect(retire).toHaveBeenCalledTimes(1);
+    expect(retire).toHaveBeenCalledWith(expect.objectContaining({ sourceId: 'gone-source' }));
   });
 
   it('marks the detections of an id that is no longer in the catalog as processed', async () => {
@@ -609,6 +633,7 @@ describe('durable source revision reconciliation', () => {
       runExclusive: jest.fn(async ({ run }) => run({ ...state }, checkpoint)),
       write: jest.fn(),
       retire: jest.fn(),
+      listSourceIds: jest.fn(),
     };
     const scheduleSourceOnboarding = jest.fn(async () => true);
     const kiClient = makeKiClient();

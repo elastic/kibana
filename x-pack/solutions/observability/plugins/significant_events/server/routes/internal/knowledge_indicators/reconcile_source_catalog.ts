@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { union } from 'lodash';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import type { SourceChangeListener, SourcesClient } from '@kbn/nightshift-sources-plugin/server';
@@ -325,8 +326,8 @@ export const createSourceChangeListener =
  * A running execution whose slug has no catalog row is cancelled. Executions are
  * keyed by slug and live in the request space, so they are matched against this
  * space's catalog only.
- * Ids that still have knowledge indicators or owned rules but no catalog row are
- * then retired.
+ * Ids that still have knowledge indicators, owned rules or a knowledge state object but
+ * no catalog row are then retired.
  */
 export async function reconcileSourceCatalog({
   sourcesClient,
@@ -354,12 +355,14 @@ export async function reconcileSourceCatalog({
   maintenanceService: Pick<SignificantEventsMaintenanceService, 'getState'>;
   request: KibanaRequest;
 }): Promise<{ sources: NightshiftSource[]; reconcileIds: string[] }> {
-  const [sources, ownedRuleIds, maintenanceState, runningSources] = await Promise.all([
-    listAllSources(sourcesClient),
-    kiClient.findSourceIdsWithOwnedRules(),
-    maintenanceService.getState({ request }),
-    loadRunningSources(onboardingClient, request),
-  ]);
+  const [sources, ownedRuleIds, maintenanceState, runningSources, stateSourceIds] =
+    await Promise.all([
+      listAllSources(sourcesClient),
+      kiClient.findSourceIdsWithOwnedRules(),
+      maintenanceService.getState({ request }),
+      loadRunningSources(onboardingClient, request),
+      sourceKnowledgeState?.listSourceIds(),
+    ]);
   let remainingSlots =
     maxScheduled === undefined ? Infinity : Math.max(0, maxScheduled - runningSources.size);
   // Once the budget is spent the scheduler declines, which leaves the source unscheduled so the
@@ -431,10 +434,11 @@ export async function reconcileSourceCatalog({
   }
 
   const reconcileIds = await kiClient.getSourceIdsToReconcile();
-  const survivingReconcileIds: string[] = [];
-  for (const sourceId of reconcileIds) {
+  const survivingReconcileIds = reconcileIds.filter((sourceId) => catalogIds.has(sourceId));
+  // A state object outlives its source when the cleanup of the deleted source failed or when it
+  // was created before deletion cleaned it up, and no indicator or rule leads the sweep to it.
+  for (const sourceId of union(reconcileIds, stateSourceIds)) {
     if (catalogIds.has(sourceId)) {
-      survivingReconcileIds.push(sourceId);
       continue;
     }
     try {

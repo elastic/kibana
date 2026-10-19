@@ -71,6 +71,8 @@ export interface SourceKnowledgeStateClient {
    * object is kept, so the next call retries.
    */
   retire(args: { sourceId: string; run: () => Promise<void> }): Promise<void>;
+  /** Lists the ids of the sources that have a state object, so ones left by a deleted source can be retired. */
+  listSourceIds(): Promise<string[]>;
   /** Rejects results of an obsolete query, disabled source, or unfinished invalidation. */
   write<T>(args: {
     sourceId: string;
@@ -165,6 +167,19 @@ export const createSourceKnowledgeStateClient = ({
     retire: async ({ sourceId, run }) => {
       await runExclusive({ sourceId, run });
       await repository.delete(SOURCE_KNOWLEDGE_STATE_TYPE, sourceId, { namespace: space });
+    },
+    listSourceIds: async () => {
+      const finder = repository.createPointInTimeFinder({
+        type: SOURCE_KNOWLEDGE_STATE_TYPE,
+        namespaces: [space],
+        fields: [],
+      });
+      const sourceIds: string[] = [];
+      for await (const { saved_objects: objects } of finder.find()) {
+        sourceIds.push(...objects.map(({ id }) => id));
+      }
+      await finder.close();
+      return sourceIds;
     },
     write: ({ sourceId, expectedRevision, allowDisabled = false, run }) =>
       runExclusive({

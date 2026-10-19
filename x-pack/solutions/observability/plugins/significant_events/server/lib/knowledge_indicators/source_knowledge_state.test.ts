@@ -60,6 +60,16 @@ const setup = () => {
       documents.delete(key(id, options.namespace));
       return {};
     }),
+    createPointInTimeFinder: jest.fn(({ namespaces: [namespace] }: { namespaces: string[] }) => ({
+      async *find() {
+        yield {
+          saved_objects: [...documents.keys()]
+            .filter((documentKey) => documentKey.startsWith(`${namespace}:`))
+            .map((documentKey) => ({ id: documentKey.slice(namespace.length + 1) })),
+        };
+      },
+      close: jest.fn(),
+    })),
   };
   const source = { enabled: true, esql_updated_at: 'revision-1' };
   const sourcesClient = { get: jest.fn(async () => ({ source })) } as unknown as SourcesClient;
@@ -169,6 +179,9 @@ describe('source knowledge write coordination', () => {
       )
     );
     expect([...documents.keys()]).toEqual(['a:same-id', 'b:same-id']);
+    await clientForSpace('a').write({ sourceId: 'only-in-a', run: async () => {} });
+    await expect(clientForSpace('a').listSourceIds()).resolves.toEqual(['same-id', 'only-in-a']);
+    await expect(clientForSpace('b').listSourceIds()).resolves.toEqual(['same-id']);
   });
 
   it('rejects disabled sources before writing', async () => {
