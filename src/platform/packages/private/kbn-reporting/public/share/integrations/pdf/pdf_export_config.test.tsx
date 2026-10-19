@@ -8,19 +8,22 @@
  */
 
 import { NEVER } from 'rxjs';
-import type { ReportingAPIClient } from '../../../reporting_api_client';
-import { reportingPDFExportShareIntegration } from '.';
+import { getShareMenuItems } from './pdf_export_config';
 
-describe('reportingPDFExportShareIntegration', () => {
-  const getIntegration = (isServerless: boolean) =>
-    reportingPDFExportShareIntegration({
-      apiClient: {} as ReportingAPIClient,
+describe('PDF export config', () => {
+  const getConfig = (isServerless: boolean) =>
+    getShareMenuItems({
+      apiClient: {},
       startServices$: NEVER,
       isServerless,
-    });
+    } as unknown as Parameters<typeof getShareMenuItems>[0])({
+      objectType: 'dashboard',
+      isDirty: false,
+      sharingData: { title: 'test', locatorParams: { id: 'test', params: {} } },
+    } as unknown as Parameters<ReturnType<typeof getShareMenuItems>>[0]);
 
   it('marks the export as experimental on serverless', () => {
-    expect(getIntegration(true).badge).toEqual({
+    expect(getConfig(true).badge).toEqual({
       label: 'Experimental',
       tooltipContent:
         'This functionality is experimental and may be changed or removed in a future release.',
@@ -28,6 +31,6 @@ describe('reportingPDFExportShareIntegration', () => {
   });
 
   it('does not badge the export on stateful', () => {
-    expect(getIntegration(false).badge).toBeUndefined();
+    expect(getConfig(false).badge).toBeUndefined();
   });
 });

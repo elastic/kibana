@@ -137,7 +137,6 @@ export class ShareRegistry implements ShareRegistryPublicApi {
       groupId: shareActionIntent.groupId,
       config: shareActionIntent.getShareIntegrationConfig,
       prerequisiteCheck: shareActionIntent.prerequisiteCheck,
-      badge: shareActionIntent.badge,
     });
   }
 

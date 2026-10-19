@@ -11,22 +11,20 @@ import type { ExportShare, RegisterShareIntegrationArgs } from '@kbn/share-plugi
 import { checkLicense } from '../../../license_check';
 import type { ExportModalShareOpts } from '../../share_context_menu';
 import { hasCapabilityByKey } from '../../shared';
-import { getServerlessExperimentalBadge } from '../../shared/experimental_badge';
 
 export const reportingPNGExportShareIntegration = ({
   apiClient,
   startServices$,
-  isServerless = false,
+  isServerless,
 }: ExportModalShareOpts): RegisterShareIntegrationArgs<ExportShare> => {
   const supportedObjectTypes = ['dashboard', 'visualization', 'lens'];
 
   return {
     id: 'imageReports',
     groupId: 'export',
-    badge: getServerlessExperimentalBadge(isServerless),
     getShareIntegrationConfig: async (...args) => {
       const { getShareMenuItems } = await import('./png_export_config');
-      return getShareMenuItems({ apiClient, startServices$ })(...args);
+      return getShareMenuItems({ apiClient, startServices$, isServerless })(...args);
     },
     prerequisiteCheck({ license, capabilities, objectType }) {
       if (!license) {

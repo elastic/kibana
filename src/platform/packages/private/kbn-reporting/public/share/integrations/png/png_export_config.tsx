@@ -20,12 +20,13 @@ import type {
   ExportModalShareOpts,
 } from '../../share_context_menu';
 import { getJobParams } from '../../shared/get_png_pdf_job_params';
+import { getServerlessExperimentalBadge } from '../../shared/experimental_badge';
 
 /**
  * @description Returns config for the PNG export integration
  */
 export const getShareMenuItems =
-  ({ apiClient, startServices$ }: ExportModalShareOpts) =>
+  ({ apiClient, startServices$, isServerless = false }: ExportModalShareOpts) =>
   ({
     objectType,
     objectId,
@@ -115,6 +116,7 @@ export const getShareMenuItems =
       icon: 'image',
       disabled: sharingData.reportingDisabled,
       label: 'PNG' as const,
+      badge: getServerlessExperimentalBadge(isServerless),
       generateAssetExport: generateReportPNG,
       exportType: 'pngV2',
       requiresSavedState,

@@ -74,8 +74,6 @@ export const useDashboardExportItems = (
         return {
           ...getExportItemMeta(item.id),
           id: item.id,
-          labelBadgeText: item.badge?.label,
-          tooltipContent: item.badge?.tooltipContent,
           run: async () => {
             const handler = await shareService?.getExportHandler(exportShareOptions, item.id, intl);
             await handler?.();
@@ -92,8 +90,6 @@ export const useDashboardExportItems = (
       .map((item) => ({
         ...getExportItemMeta(item.id),
         id: item.id,
-        labelBadgeText: item.badge?.label,
-        tooltipContent: item.badge?.tooltipContent,
         run: async () => {
           const handler = await shareService?.getExportDerivativeHandler(
             exportShareOptions,

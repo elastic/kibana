@@ -8,14 +8,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ShareIntegrationBadge } from '@kbn/share-plugin/public';
+import type { ExportShareConfig } from '@kbn/share-plugin/public';
 
 /**
  * Badge marking PDF/PNG exports as experimental on serverless; delete it when they reach GA.
  */
 export const getServerlessExperimentalBadge = (
   isServerless: boolean
-): ShareIntegrationBadge | undefined =>
+): ExportShareConfig['config']['badge'] =>
   isServerless
     ? {
         label: i18n.translate('reporting.share.experimentalBadge.label', {

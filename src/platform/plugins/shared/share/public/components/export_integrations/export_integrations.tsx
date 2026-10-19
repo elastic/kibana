@@ -40,12 +40,7 @@ import {
   useShareTypeContext,
   useShareContext,
 } from '../context';
-import type {
-  ExportShareConfig,
-  ExportShareDerivativesConfig,
-  ShareContext,
-  ShareIntegrationBadge,
-} from '../../types';
+import type { ExportShareConfig, ExportShareDerivativesConfig, ShareContext } from '../../types';
 import { DraftModeCallout } from '../common/draft_mode_callout';
 
 export const ExportMenu: FC<{ shareContext: IShareContext }> = ({ shareContext }) => {
@@ -176,7 +171,7 @@ export function ManagedExportFlyout({
   const draftModeCallout = shareObjectTypeMeta.config?.[exportIntegration.id]?.draftModeCallOut;
   const draftModeCalloutContent = typeof draftModeCallout === 'object' ? draftModeCallout : {};
 
-  const { badge } = exportIntegration;
+  const { badge } = exportIntegration.config;
   const flyoutTitle = (
     <EuiTitle>
       <h2>
@@ -311,26 +306,6 @@ export function ManagedExportFlyout({
   );
 }
 
-// The badge sits inside the menu item's button, so it stays display-only; its tooltip content
-// is shown by the tooltip that wraps the whole menu item instead.
-function ExportMenuItemLabel({ label, badge }: { label: string; badge: ShareIntegrationBadge }) {
-  return (
-    <EuiFlexGroup component="span" gutterSize="s" alignItems="center" responsive={false}>
-      <EuiFlexItem component="span" grow={false}>
-        {label}
-      </EuiFlexItem>
-      <EuiFlexItem component="span" grow={false}>
-        <EuiBetaBadge
-          size="s"
-          alignment="middle"
-          label={badge.label}
-          data-test-subj={`exportMenuItemBadge-${label}`}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-}
-
 function ExportMenuPopover({ intl }: ExportMenuProps) {
   const { onSave, isSaving } = useShareContext();
   const {
@@ -451,19 +426,13 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
           {exportIntegrations.map((menuItem) => (
             <EuiToolTip
               position="left"
-              content={menuItem.badge?.tooltipContent ?? selectedMenuItem?.config.toolTipContent}
+              content={selectedMenuItem?.config.toolTipContent}
               key={menuItem.id}
             >
               <EuiListGroupItem
                 iconType={menuItem.config.icon}
                 key={menuItem.id}
-                label={
-                  menuItem.badge ? (
-                    <ExportMenuItemLabel label={menuItem.config.label} badge={menuItem.badge} />
-                  ) : (
-                    menuItem.config.label
-                  )
-                }
+                label={menuItem.config.label}
                 data-test-subj={`exportMenuItem-${menuItem.config.label}`}
                 isDisabled={menuItem.config.disabled}
                 onClick={exportIntegrationInteractionHandler.bind(null, menuItem)}

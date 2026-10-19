@@ -246,51 +246,6 @@ describe('useDashboardMenuItems', () => {
       );
     });
 
-    test.each([
-      ['widens', { label: 'Experimental' }, 260],
-      ['keeps', undefined, 160],
-    ])(
-      '%s the Export popover when an export integration has a badge',
-      (_description, badge, popoverWidth) => {
-        jest
-          .mocked(shareService!.availableIntegrations)
-          .mockImplementation((_objectType: string, groupId?: string): ShareActionIntents[] =>
-            groupId === 'export'
-              ? [
-                  {
-                    id: 'exportJson',
-                    shareType: 'integration',
-                    groupId: 'export',
-                    config: async () => ({}),
-                  },
-                  {
-                    id: 'pdfReports',
-                    shareType: 'integration',
-                    groupId: 'export',
-                    badge,
-                    config: async () => ({}),
-                  },
-                ]
-              : []
-          );
-
-        const { result } = renderHook(
-          () =>
-            useDashboardMenuItems({
-              redirectTo: jest.fn(),
-            }),
-          {
-            wrapper: dashboardContextWrapper({ savedObjectId: 'test-id' }),
-          }
-        );
-
-        const exportMenuItem = result.current.viewModeTopNavConfig.items!.find(
-          ({ id }) => id === 'export'
-        );
-        expect(exportMenuItem).toEqual(expect.objectContaining({ popoverWidth }));
-      }
-    );
-
     test('includes Export top-nav item with JSON and Reporting items when export and exportDerivatives integrations are available', () => {
       jest
         .mocked(shareService!.availableIntegrations)

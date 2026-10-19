@@ -828,8 +828,6 @@ export const LensTopNavMenu = ({
           exportMenuItems.push({
             ...getLensExportItemMeta(integration.id),
             id: integration.id,
-            labelBadgeText: integration.badge?.label,
-            tooltipContent: integration.badge?.tooltipContent,
             // Mirror sharingData.reportingDisabled / csvEnabled for nested AppMenu items.
             disableButton: !csvEnabled,
             run: async () => {
@@ -854,8 +852,6 @@ export const LensTopNavMenu = ({
           exportMenuItems.push({
             ...getLensExportItemMeta(integration.id),
             id: integration.id,
-            labelBadgeText: integration.badge?.label,
-            tooltipContent: integration.badge?.tooltipContent,
             disableButton: !csvEnabled,
             run: async () => {
               const shareOptions = buildShareContextMenuOptions();

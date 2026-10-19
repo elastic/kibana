@@ -11,22 +11,20 @@ import type { ExportShare, RegisterShareIntegrationArgs } from '@kbn/share-plugi
 import type { ExportModalShareOpts } from '../../share_context_menu';
 import { checkLicense } from '../../..';
 import { hasCapabilityByKey } from '../../shared';
-import { getServerlessExperimentalBadge } from '../../shared/experimental_badge';
 
 export const reportingPDFExportShareIntegration = ({
   apiClient,
   startServices$,
-  isServerless = false,
+  isServerless,
 }: ExportModalShareOpts): RegisterShareIntegrationArgs<ExportShare> => {
   const supportedObjectTypes = ['dashboard', 'visualization', 'lens', 'ai_value_report'];
 
   return {
     id: 'pdfReports',
     groupId: 'export',
-    badge: getServerlessExperimentalBadge(isServerless),
     getShareIntegrationConfig: async (...args) => {
       const { getShareMenuItems } = await import('./pdf_export_config');
-      return getShareMenuItems({ apiClient, startServices$ })(...args);
+      return getShareMenuItems({ apiClient, startServices$, isServerless })(...args);
     },
     prerequisiteCheck({ license, capabilities, objectType }) {
       if (!license) {

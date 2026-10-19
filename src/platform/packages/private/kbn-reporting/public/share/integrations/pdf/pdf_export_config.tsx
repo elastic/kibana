@@ -20,12 +20,13 @@ import type {
   ExportModalShareOpts,
 } from '../../share_context_menu';
 import { getJobParams } from '../../shared/get_png_pdf_job_params';
+import { getServerlessExperimentalBadge } from '../../shared/experimental_badge';
 
 /**
  * @description Returns config for the PDF export integration
  */
 export const getShareMenuItems =
-  ({ apiClient, startServices$ }: ExportModalShareOpts) =>
+  ({ apiClient, startServices$, isServerless = false }: ExportModalShareOpts) =>
   ({
     objectType,
     objectId,
@@ -114,6 +115,7 @@ export const getShareMenuItems =
       icon: 'document',
       disabled: sharingData.reportingDisabled,
       label: 'PDF' as const,
+      badge: getServerlessExperimentalBadge(isServerless),
       generateAssetExport: generateReportPDF,
       exportType: 'printablePdfV2',
       requiresSavedState,

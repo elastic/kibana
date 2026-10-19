@@ -90,55 +90,6 @@ describe('Export Integrations', () => {
     });
   });
 
-  describe('Badge', () => {
-    const badge = { label: 'Experimental', tooltipContent: 'This is experimental.' };
-    const badgedShareContext: IShareContext = {
-      ...mockShareContext,
-      shareMenuItems: [
-        mockShareContext.shareMenuItems[0],
-        {
-          shareType: 'integration',
-          groupId: 'export',
-          id: 'png',
-          badge,
-          config: {
-            icon: 'empty',
-            label: 'PNG',
-          },
-        },
-      ],
-    };
-
-    it('renders the badge next to the label of the export type that defines it', async () => {
-      const user = userEvent.setup();
-
-      render(<ExportPopoverRender shareContext={badgedShareContext} />);
-
-      await user.click(screen.getByText('click me'));
-
-      await waitForEuiPopoverOpen();
-
-      expect(screen.getByTestId('exportMenuItem-PNG')).toHaveTextContent('PNGExperimental');
-      expect(screen.getByTestId('exportMenuItemBadge-PNG')).toBeInTheDocument();
-      expect(screen.getByTestId('exportMenuItem-CSV')).toHaveTextContent(/^CSV$/);
-      expect(screen.queryByTestId('exportMenuItemBadge-CSV')).not.toBeInTheDocument();
-    });
-
-    it('shows the badge tooltip content when hovering the export type', async () => {
-      const user = userEvent.setup();
-
-      render(<ExportPopoverRender shareContext={badgedShareContext} />);
-
-      await user.click(screen.getByText('click me'));
-
-      await waitForEuiPopoverOpen();
-
-      await user.hover(screen.getByTestId('exportMenuItem-PNG'));
-
-      expect(await screen.findByRole('tooltip')).toHaveTextContent('This is experimental.');
-    });
-  });
-
   describe('Export Derivatives', () => {
     const exportDerivativeLabel = 'Export derivative';
     const getMockExportDerivativeConfig = (shouldRender: boolean): ShareConfigs => ({
@@ -295,7 +246,10 @@ describe('Export Integrations', () => {
         <CsvExportFlyoutRender
           exportIntegration={{
             ...mockCsvConfigForFlyout,
-            badge: { label: 'Experimental', tooltipContent: 'This is experimental.' },
+            config: {
+              ...mockCsvConfigForFlyout.config,
+              badge: { label: 'Experimental', tooltipContent: 'This is experimental.' },
+            },
           }}
         />
       );

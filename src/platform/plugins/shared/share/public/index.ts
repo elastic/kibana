@@ -27,7 +27,6 @@ export type {
   ShareContextMenuPanelItem,
   BrowserUrlService,
   ExportShare,
-  ShareIntegrationBadge,
   ExportShareConfig,
   ExportShareDerivatives,
   ExportShareParameters,
