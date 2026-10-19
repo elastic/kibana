@@ -273,6 +273,7 @@ export class WorkflowsService {
     this.executionQueryService = new WorkflowExecutionQueryService({
       logger: this.logger,
       esClient: this.esClient,
+      workflowsExecutionEngine: this.workflowsExecutionEngine,
       workflowExecutionsDataClient: this.workflowExecutionsDataClient,
       stepExecutionsDataClient,
       workflowEventLoggerService: this.workflowsExecutionEngine.workflowEventLoggerService,

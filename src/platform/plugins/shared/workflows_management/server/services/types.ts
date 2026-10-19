@@ -63,6 +63,7 @@ export interface WorkflowSearchDeps extends WorkflowStorageDeps {
 export interface WorkflowExecutionQueryDeps {
   logger: Logger;
   esClient: ElasticsearchClient;
+  workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart;
   workflowExecutionsDataClient: WorkflowExecutionsDataClient;
   stepExecutionsDataClient: StepExecutionsDataClient;
   workflowEventLoggerService: IWorkflowLogsQueryService;
