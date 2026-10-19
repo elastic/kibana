@@ -63,14 +63,10 @@ export function getSyntheticsFilterDisplayValues(
         count,
       }));
     case 'schedules':
-      return [...values]
-        .sort(
-          (left, right) => scheduleFilterDuration(left.label) - scheduleFilterDuration(right.label)
-        )
-        .map(({ label, count }: { label: string; count: number }) => ({
-          label: scheduleFrequencyDisplayLabel(label),
-          count,
-        }));
+      return values.map(({ label, count }: { label: string; count: number }) => ({
+        label: scheduleFrequencyDisplayLabel(label),
+        count,
+      }));
     case 'locations':
       return values.map(({ label, count }) => {
         const foundLocation = locations.find(
@@ -141,6 +137,12 @@ const scheduleFilterDuration = (value: string): number => {
   const parsed = parseScheduleFilterKey(value);
   return parsed ? scheduleToSeconds(parsed) : Number.POSITIVE_INFINITY;
 };
+
+/** Dropdown-only. Selected pills pair each display label with the URL value at the same index. */
+export const sortScheduleFilterValues = (values: LabelWithCountValue[]): LabelWithCountValue[] =>
+  [...values].sort(
+    (left, right) => scheduleFilterDuration(left.label) - scheduleFilterDuration(right.label)
+  );
 
 const scheduleKeyForLabel = (value: string): string => {
   const parsed = parseScheduleFilterKey(value ?? '');

@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { getSyntheticsFilterDisplayValues, getSyntheticsFilterKeyForLabel } from './filter_fields';
+import {
+  getSyntheticsFilterDisplayValues,
+  getSyntheticsFilterKeyForLabel,
+  sortScheduleFilterValues,
+} from './filter_fields';
 
 describe('schedule filter labels', () => {
   it('labels seconds and minutes separately', () => {
@@ -21,24 +25,28 @@ describe('schedule filter labels', () => {
       )
     ).toEqual([
       { label: 'Every 10 seconds', count: 1 },
-      { label: 'Every 5 minutes', count: 3 },
       { label: 'Every 10 minutes', count: 2 },
+      { label: 'Every 5 minutes', count: 3 },
     ]);
   });
 
-  it('orders frequency options by duration', () => {
+  it('orders frequency options by duration without changing the shared label order', () => {
+    const values = [
+      { label: '3m', count: 1 },
+      { label: '5m', count: 1 },
+      { label: '10m', count: 1 },
+      { label: '10s', count: 1 },
+    ];
+
+    expect(sortScheduleFilterValues(values).map(({ label }) => label)).toEqual([
+      '10s',
+      '3m',
+      '5m',
+      '10m',
+    ]);
     expect(
-      getSyntheticsFilterDisplayValues(
-        [
-          { label: '3m', count: 1 },
-          { label: '5m', count: 1 },
-          { label: '10m', count: 1 },
-          { label: '10s', count: 1 },
-        ],
-        'schedules',
-        []
-      ).map(({ label }) => label)
-    ).toEqual(['Every 10 seconds', 'Every 3 minutes', 'Every 5 minutes', 'Every 10 minutes']);
+      getSyntheticsFilterDisplayValues(values, 'schedules', []).map(({ label }) => label)
+    ).toEqual(['Every 3 minutes', 'Every 5 minutes', 'Every 10 minutes', 'Every 10 seconds']);
   });
 
   it('keeps the unit when a frequency label is selected', () => {
