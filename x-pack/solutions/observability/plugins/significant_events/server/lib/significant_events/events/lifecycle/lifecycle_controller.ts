@@ -82,13 +82,12 @@ const decideAssessment = ({
     if (outcome === 'breached') return { write: true, status: ALERT_EPISODE_STATUS.ACTIVE };
     // A closed series stays closed: a healthy or unjudged assessment never reopens it.
     if (status !== undefined) return { write: false, reason: 'not_a_breach' };
-    // A series with no version yet is one discovery chose to open. Healthy members start it
-    // recovering (visible, not alarming); evidence that cannot be judged leaves it active until it
-    // settles.
+    // A series with no version yet is one discovery chose to open. Healthy members mean nothing is
+    // failing, so it opens inactive: `recovering` is a transition out of `active`, never a birth.
+    // Evidence that cannot be judged leaves it active until it settles.
     return {
       write: true,
-      status:
-        outcome === 'recovered' ? ALERT_EPISODE_STATUS.RECOVERING : ALERT_EPISODE_STATUS.ACTIVE,
+      status: outcome === 'recovered' ? ALERT_EPISODE_STATUS.INACTIVE : ALERT_EPISODE_STATUS.ACTIVE,
     };
   }
 

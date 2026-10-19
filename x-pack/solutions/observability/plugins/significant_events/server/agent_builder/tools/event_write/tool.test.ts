@@ -180,10 +180,29 @@ describe('events_write tool', () => {
       ['refuting evidence', [signalWith('refutes')]],
       ['a quiet not_checked rule', [quiet]],
     ])('accepts a new event backed only by %s: discovery decides', (_label, signals) => {
-      expect(eventsWriteSchema.safeParse({ items: [{ ...newEventInput, signals }] }).success).toBe(
-        true
-      );
+      expect(
+        eventsWriteSchema.safeParse({
+          items: [{ ...newEventInput, signals, severity: 'low', confidence: 0.2 }],
+        }).success
+      ).toBe(true);
     });
+
+    it.each([
+      ['severity', { severity: 'medium', confidence: 0.2 }, 'severity must be low'],
+      ['confidence', { severity: 'low', confidence: 0.6 }, 'confidence is at most 0.3'],
+    ])(
+      'rejects a new event with nothing confirmed that rates its %s too high',
+      (_label, fields, message) => {
+        const result = eventsWriteSchema.safeParse({
+          items: [{ ...newEventInput, signals: [signalWith('inconclusive')], ...fields }],
+        });
+
+        expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.error.issues.map(({ message: m }) => m).join(' ')).toContain(message);
+        }
+      }
+    );
 
     it('rejects a new event with no signals at all', () => {
       const result = eventsWriteSchema.safeParse({

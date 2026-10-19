@@ -330,6 +330,9 @@ export const SEVERITY_OPTIONS = [
  * and eval judges. It is the ladder the investigation agent applies. Order of `SEVERITY_OPTIONS`
  * is part of this contract (most-severe first).
  */
+/** The most confidence an event can carry while no signal on it confirms anything. */
+export const UNCONFIRMED_EVENT_MAX_CONFIDENCE = 0.3;
+
 export const SEVERITY_CONTRACT_RULE = dedent`
     Severity rates the situation the grounding evidence confirms, whatever triggered the detection. It is the assessing agent's own verdict, decided from the confirming signals and the queries run — never from p_value, change_point_type, alert volume, the rule's severity_score or how alarming the rule looks. A concrete non-benign error in a found off-topic row evidences its own observed-error event; assess it from that row's error signature and impact.
 
@@ -342,7 +345,10 @@ export const SEVERITY_CONTRACT_RULE = dedent`
     Rate what the evidence shows, with the numbers measured: how much of the operation fails, how many parties are affected, and whether it is still happening. Evidence that could not be collected (a query that timed out or returned nothing) leaves the question unsettled, and the ladder rates unsettled evidence "medium"; it is never grounds for "low". Weigh scope by what the operations do, not by how many detections fired. Signals on the same operation overlap: rate that operation from its most direct failure measure (the share of attempts that fail, otherwise the share of log lines), never by adding shares across signals or taking the highest of differently scoped ones.
     A mandatory component is one that the event's blast_radius shows other services depending on; when it shows none, that clause does not apply.
 
-  Tie-break: when two adjacent tiers both match the same evidence, choose the lower only when the evidence leaves genuinely unresolved whether the operation still completes, and never below "medium" on that ground.`;
+    Tie-break: when two adjacent tiers both match the same evidence, choose the lower only when the evidence leaves genuinely unresolved whether the operation still completes, and never below "medium" on that ground.
+
+    Nothing established: when the evidence establishes no failure, degradation, or exposure, the event is "low" and the tie-break does not apply.
+  `;
 
 /** Canonical severity used by storage, APIs, and tools. */
 export const severitySchema = lazySchema(() =>
@@ -426,7 +432,8 @@ export const significantEventBaseSchema = lazySchema(() =>
       .max(1)
       .describe(
         'symptom_hypothesis correctness 0.0–1.0 float. Higher values reflect stronger evidence grounding and more corroboration. ' +
-          'causal_features ceiling: cap at 0.65 when causal_features is empty (applies to open status only).'
+          'causal_features ceiling: cap at 0.65 when causal_features is empty (applies to open status only). ' +
+          `When the evidence establishes nothing, at most ${UNCONFIRMED_EVENT_MAX_CONFIDENCE}.`
       ),
     source_ids: z
       .array(z.string().max(MAX_ID_LENGTH))

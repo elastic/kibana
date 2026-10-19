@@ -419,6 +419,76 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
     signals: [makeDetectionSignal({ ruleUuid: 'rule-abc', description: 'High Latency' })],
   };
 
+  it('rejects a new event that shares a rule with live events that do not cover it, and names them', async () => {
+    const eventClient = makeEventSearchClient({
+      findLatestActive: jest.fn().mockResolvedValue({
+        hits: [
+          makeStoredEvent('live-a', {
+            '@timestamp': new Date().toISOString(),
+            signals: [
+              makeDetectionSignal({
+                ruleUuid: 'rule-1',
+                verdict: 'inconclusive',
+                description: 'a',
+              }),
+            ],
+          }),
+          makeStoredEvent('live-b', {
+            '@timestamp': new Date().toISOString(),
+            signals: [
+              makeDetectionSignal({
+                ruleUuid: 'rule-2',
+                verdict: 'inconclusive',
+                description: 'b',
+              }),
+            ],
+          }),
+        ],
+      }),
+    });
+
+    const results = await eventsWriteBulkHandler({
+      eventSearchClient: eventClient,
+      inputs: [
+        {
+          ...baseInput,
+          signals: [
+            makeDetectionSignal({ ruleUuid: 'rule-1', description: 'x' }),
+            makeDetectionSignal({ ruleUuid: 'rule-2', description: 'y' }),
+            makeDetectionSignal({ ruleUuid: 'rule-3', description: 'z' }),
+          ],
+        },
+      ],
+    });
+
+    expect(results[0]).toMatchObject({
+      written: false,
+      reason: 'rule_already_in_live_event',
+      existing_event_ids: ['live-a', 'live-b'],
+    });
+    expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
+  });
+
+  it('lets a new event through when none of its rules is in a live event', async () => {
+    const eventClient = makeEventSearchClient({
+      findLatestActive: jest.fn().mockResolvedValue({
+        hits: [
+          makeStoredEvent('live-a', {
+            '@timestamp': new Date().toISOString(),
+            signals: [makeDetectionSignal({ ruleUuid: 'other-rule', description: 'a' })],
+          }),
+        ],
+      }),
+    });
+
+    const results = await eventsWriteBulkHandler({
+      eventSearchClient: eventClient,
+      inputs: [dedupInput],
+    });
+
+    expect(results[0]).toMatchObject({ written: true });
+  });
+
   it('skips the write and returns the existing event_id when an active duplicate is found', async () => {
     const eventClient = makeEventSearchClient({
       findLatestActive: jest.fn().mockResolvedValue({
@@ -756,7 +826,7 @@ describe('eventsWriteBulkHandler — lifecycle resolution', () => {
   });
 
   it.each([
-    ['healthy members', 'refutes', 'recovering'],
+    ['healthy members', 'refutes', 'inactive'],
     ['members that cannot be judged', 'inconclusive', 'active'],
   ] as const)(
     'opens a new event from %s, with the status the verdicts give',
@@ -784,6 +854,54 @@ describe('eventsWriteBulkHandler — lifecycle resolution', () => {
       expect(writtenDocs()[0].status).toBe(status);
     }
   );
+
+  it('rates an event with no confirming signal low, and caps its confidence', async () => {
+    await eventsWriteBulkHandler({
+      eventSearchClient: makeEventSearchClient(),
+      inputs: [
+        {
+          ...baseInput,
+          status: undefined,
+          severity: 'high',
+          confidence: 0.8,
+          signals: [
+            makeDetectionSignal({
+              ruleUuid: 'rule-1',
+              verdict: 'inconclusive',
+              description: 'Query returned nothing',
+              changePointType: 'dip',
+            }),
+          ],
+        },
+      ],
+    });
+
+    expect(writtenDocs()[0]).toMatchObject({ severity: 'low', confidence: 0.3 });
+  });
+
+  it('keeps the severity and confidence of an event with a confirming signal', async () => {
+    await eventsWriteBulkHandler({
+      eventSearchClient: makeEventSearchClient(),
+      inputs: [
+        {
+          ...baseInput,
+          status: undefined,
+          severity: 'high',
+          confidence: 0.8,
+          signals: [
+            makeDetectionSignal({
+              ruleUuid: 'rule-1',
+              verdict: 'confirms',
+              description: 'Failures found',
+              changePointType: 'spike',
+            }),
+          ],
+        },
+      ],
+    });
+
+    expect(writtenDocs()[0]).toMatchObject({ severity: 'high', confidence: 0.8 });
+  });
 
   it('sets aside a refuting continuation of an unknown event without failing the batch', async () => {
     const results = await eventsWriteBulkHandler({

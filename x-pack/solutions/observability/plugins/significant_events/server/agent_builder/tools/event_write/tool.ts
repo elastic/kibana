@@ -14,7 +14,10 @@ import {
 } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { significantEventSchema } from '@kbn/significant-events-schema';
+import {
+  significantEventSchema,
+  UNCONFIRMED_EVENT_MAX_CONFIDENCE,
+} from '@kbn/significant-events-schema';
 import { nightshiftSourceSlugsField } from '@kbn/nightshift-shared';
 import { z, lazySchema } from '@kbn/zod/v4';
 import dedent from 'dedent';
@@ -62,7 +65,7 @@ export const eventsWriteItemSchema = lazySchema(() =>
       status: z
         .never({
           error:
-            'status is not an input: it follows from the per-rule verdicts you write. A breach opens or keeps an event active, healthy verdicts for every member start recovering, and only an operator or a close workflow closes it.',
+            'status is not an input: it follows from the per-rule verdicts you write. A breach opens or keeps an event active, healthy verdicts for every member open it inactive (nothing is failing) or, on an active event, move it to recovering, and only an operator or a close workflow closes a live event.',
         })
         .optional(),
       event_id: z
@@ -90,6 +93,7 @@ export const eventsWriteItemSchema = lazySchema(() =>
     .superRefine((item, ctx) => {
       const signals = item.signals ?? [];
       const hasConfirms = signals.some((s) => s.evidence != null && s.verdict === 'confirms');
+      const hasConfirmingSignal = signals.some((s) => s.verdict === 'confirms');
 
       // One issue per offending signal, so a retry knows exactly which entries to remove.
       if (hasConfirms) {
@@ -103,9 +107,27 @@ export const eventsWriteItemSchema = lazySchema(() =>
           });
         });
       }
-      // Discovery decides which detections open an event, whatever their verdict: a healthy or
-      // unjudged one opens it recovering or active, and the lifecycle derives that status from the
+      // Discovery decides which detections open an event, whatever their verdict: a healthy one opens
+      // it inactive and an unjudged one active, and the lifecycle derives that status from the
       // verdicts. An event with no signal says nothing, so it is the only thing refused.
+      // Nothing confirmed means low severity and little confidence; the writer enforces it too, but
+      // refusing it here lets the note state the confidence that is stored.
+      if (item.event_id === undefined && signals.length > 0 && !hasConfirmingSignal) {
+        if (item.severity !== undefined && item.severity !== 'low') {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['severity'],
+            message: 'No signal in this new event confirms anything, so its severity must be low.',
+          });
+        }
+        if (item.confidence !== undefined && item.confidence > UNCONFIRMED_EVENT_MAX_CONFIDENCE) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['confidence'],
+            message: `No signal in this new event confirms anything, so its confidence is at most ${UNCONFIRMED_EVENT_MAX_CONFIDENCE}.`,
+          });
+        }
+      }
       if (item.event_id === undefined && signals.length === 0) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
@@ -298,7 +320,8 @@ export function createEventsWriteTool({
 
       **With event_id**: append a version to an existing event. Its status follows the merged
       members' verdicts: a breaching member returns a recovering event to active, while healthy or
-      unjudgeable verdicts keep it recovering. Submit healthy evidence for a member too.
+      unjudgeable verdicts keep it recovering. Submit healthy evidence for a member too. A new event
+      is never opened recovering: every member healthy opens it inactive.
       Signals and topology are merged with prior versions. \`severity\` is your verdict under
       its field contract, decided from the merged confirming signals; the writer stores it as given
       (an inactive event is low) and returns the stored tier. No-op if the stored severity and
@@ -312,8 +335,10 @@ export function createEventsWriteTool({
       currently-active events for one that confirms every submitted confirmed rule and shares at
       least one source; non-confirming co-signals do not affect the identity. When the item
       has no confirmed rules, every submitted rule is used instead. If found, returns it without
-      writing (written: false, reason: existing_active_event). Otherwise creates a new event with
-      a generated event_id.
+      writing (written: false, reason: existing_active_event). If a submitted rule, whatever its
+      verdict, is already in a live event that does not cover them all, the item is rejected
+      (written: false, reason: rule_already_in_live_event, existing_event_ids): continue one of
+      those events by sending its event_id. Otherwise creates a new event with a generated event_id.
     `,
     annotations: {
       title: 'Write significant events',

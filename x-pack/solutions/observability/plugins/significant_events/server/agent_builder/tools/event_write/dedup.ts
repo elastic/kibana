@@ -36,6 +36,7 @@ export const buildWriteCandidates = (inputs: EventsWriteInput[]): WriteCandidate
         input: normalizedInput,
         eventId: uuidv4(),
         ruleUuids,
+        allRuleUuids: extractRuleUuids(input.signals),
         confirmedOnly,
       };
     }
@@ -109,13 +110,13 @@ export const fetchActiveEventsForDedup = async (
   // Narrow by source/rule only when every candidate carries one, otherwise an AND'd filter
   // could exclude a candidate's genuine duplicate that has no value for that field.
   const allCandidatesHaveSourceIds = dedupCandidates.every((c) => c.input.source_ids.length > 0);
-  const allCandidatesHaveRuleUuids = dedupCandidates.every((c) => c.ruleUuids.length > 0);
+  const allCandidatesHaveRuleUuids = dedupCandidates.every((c) => c.allRuleUuids.length > 0);
   const { hits } = await eventSearchClient.findLatestActive({
     sourceIds: allCandidatesHaveSourceIds
       ? [...new Set(dedupCandidates.flatMap((c) => c.input.source_ids))]
       : undefined,
     ruleUuids: allCandidatesHaveRuleUuids
-      ? [...new Set(dedupCandidates.flatMap((c) => c.ruleUuids))]
+      ? [...new Set(dedupCandidates.flatMap((c) => c.allRuleUuids))]
       : undefined,
   });
   return hits;
@@ -198,4 +199,47 @@ export const resolveDedupSkips = (
   }
 
   return toWrite;
+};
+
+/**
+ * Sets aside a new event that submits a rule a live event already holds, and names those events.
+ * Runs after `resolveDedupSkips`, so a candidate that one live event fully covers was already
+ * deduplicated; what is left spans several live events or only partly overlaps one. Choosing one to
+ * continue would silently drop the rules the others hold, so the caller picks: it retries with the
+ * `event_id` of one of them. Returns the candidates that still need to be written.
+ */
+export const rejectRulesInLiveEvents = (
+  candidates: WriteCandidate[],
+  activeEvents: SignificantEvent[],
+  results: BulkResults
+): WriteCandidate[] => {
+  const live = activeEvents.filter(({ status }) =>
+    (SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS as readonly string[]).includes(status)
+  );
+
+  return candidates.filter((candidate) => {
+    if (candidate.mode !== 'dedup') return true;
+    const submitted = new Set(candidate.allRuleUuids);
+    const holders = live.filter((event) =>
+      extractRuleUuids(event.signals).some((ruleUuid) => submitted.has(ruleUuid))
+    );
+    if (holders.length === 0) return true;
+
+    const existingEventIds = holders.flatMap(({ event_id: eventId }) => (eventId ? [eventId] : []));
+    results[candidate.index] = {
+      index: candidate.index,
+      event_id: candidate.eventId,
+      written: false,
+      reason: 'rule_already_in_live_event',
+      existing_event_ids: existingEventIds,
+      error: {
+        type: 'validation_error',
+        reason: `A rule in this item is already in the live event(s) ${existingEventIds.join(
+          ', '
+        )}. Continue one of them: send its event_id with the item's signals.`,
+        status: 409,
+      },
+    };
+    return false;
+  });
 };

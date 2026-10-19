@@ -33,6 +33,7 @@ export {
   SIGNAL_VERDICTS,
   SEVERITY_OPTIONS,
   SEVERITY_CONTRACT_RULE,
+  UNCONFIRMED_EVENT_MAX_CONFIDENCE,
   getSeverityLabel,
   type BlastRadiusEntry,
   type CausalFeature,

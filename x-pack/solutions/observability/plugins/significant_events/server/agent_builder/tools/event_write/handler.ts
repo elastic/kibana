@@ -27,6 +27,7 @@ import {
   buildWriteCandidates,
   fetchActiveEventsForDedup,
   markDuplicateKeys,
+  rejectRulesInLiveEvents,
   resolveDedupSkips,
 } from './dedup';
 import {
@@ -96,7 +97,11 @@ export async function eventsWriteBulkHandler({
   const dedupCandidates = candidates.filter((c): c is DedupCandidate => c.mode === 'dedup');
 
   const activeEvents = await fetchActiveEventsForDedup(eventSearchClient, dedupCandidates);
-  const toWrite = resolveDedupSkips(candidates, activeEvents, results);
+  const toWrite = rejectRulesInLiveEvents(
+    resolveDedupSkips(candidates, activeEvents, results),
+    activeEvents,
+    results
+  );
 
   const eventHistory = await loadHistory({ eventSearchClient, candidates: toWrite });
   const known = keepKnownEvents({ candidates: eventHistory, enabled: rejectUnknownEventIds });

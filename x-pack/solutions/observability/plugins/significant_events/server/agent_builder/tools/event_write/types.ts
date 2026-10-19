@@ -72,8 +72,15 @@ export interface EventsWriteFailureResult {
   /** Absent: a rejected item never reached the lifecycle. */
   status?: SignificantEvent['status'];
   written: false;
-  reason: 'bulk_error' | 'duplicate_in_batch' | 'superseded' | 'unknown_event_id';
+  reason:
+    | 'bulk_error'
+    | 'duplicate_in_batch'
+    | 'superseded'
+    | 'unknown_event_id'
+    | 'rule_already_in_live_event';
   error: CompactBulkError;
+  /** For `rule_already_in_live_event`: the live events that already hold a submitted rule. */
+  existing_event_ids?: string[];
 }
 
 export interface DedupCandidate {
@@ -82,6 +89,8 @@ export interface DedupCandidate {
   input: EventsWriteInput;
   eventId: string;
   ruleUuids: string[];
+  /** Every rule the item submits, whatever its verdict. */
+  allRuleUuids: string[];
   confirmedOnly: boolean;
 }
 
