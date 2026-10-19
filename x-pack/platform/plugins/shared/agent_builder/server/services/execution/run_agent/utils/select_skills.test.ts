@@ -9,7 +9,7 @@ import type { AgentConfiguration } from '@kbn/agent-builder-common';
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import { createSkillsServiceMock, createSkillsStoreMock } from '../../../../test_utils/runner';
 import { kiRetrievalSkillId } from '@kbn/agent-builder-common';
-import { getBuiltInCapabilitySkillIds, selectSkills } from './select_skills';
+import { selectSkills } from './select_skills';
 
 const createSkill = (id: string, readonly = false): InternalSkillDefinition => ({
   id,
@@ -377,25 +377,5 @@ describe('selectSkills', () => {
       expect(result).toEqual([]);
       expect(skillsStore.add).not.toHaveBeenCalled();
     });
-  });
-});
-
-describe('getBuiltInCapabilitySkillIds', () => {
-  it('returns ki-retrieval only when AI Indices are enabled and assigned', () => {
-    expect(
-      getBuiltInCapabilitySkillIds({
-        aiIndicesEnabled: true,
-        agentConfiguration: createConfig({ ai_indices: ['elastic'] }),
-      })
-    ).toEqual([kiRetrievalSkillId]);
-    expect(
-      getBuiltInCapabilitySkillIds({
-        aiIndicesEnabled: false,
-        agentConfiguration: createConfig({ ai_indices: ['elastic'] }),
-      })
-    ).toEqual([]);
-    expect(
-      getBuiltInCapabilitySkillIds({ aiIndicesEnabled: true, agentConfiguration: createConfig() })
-    ).toEqual([]);
   });
 });

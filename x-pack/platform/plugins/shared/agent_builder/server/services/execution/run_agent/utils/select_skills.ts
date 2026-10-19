@@ -18,7 +18,6 @@ interface BuiltInCapabilityContext {
 
 interface BuiltInCapabilitySkillRule {
   skillId: string;
-  /** Whether the agent gets the skill in this run. */
   applies: (context: BuiltInCapabilityContext) => boolean;
 }
 
@@ -37,10 +36,7 @@ const builtInCapabilitySkillRules: BuiltInCapabilitySkillRule[] = [
   },
 ];
 
-/**
- * Returns the ids of the built-in capability skills that apply to this run.
- */
-export const getBuiltInCapabilitySkillIds = (context: BuiltInCapabilityContext): string[] =>
+const getBuiltInCapabilitySkillIds = (context: BuiltInCapabilityContext): string[] =>
   builtInCapabilitySkillRules.filter((rule) => rule.applies(context)).map(({ skillId }) => skillId);
 
 /**

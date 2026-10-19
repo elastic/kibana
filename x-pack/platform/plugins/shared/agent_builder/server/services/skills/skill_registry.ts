@@ -179,7 +179,6 @@ export const createSkillRegistry = ({
       if (!includePlugins) {
         results = results.filter((skill) => !skill.plugin_id);
       }
-      // Hidden skills are granted at runtime as built-in capabilities: resolvable by id, never listed.
       results = results.filter((skill) => !skill.hidden);
       return filterAvailable(results);
     },

@@ -15,8 +15,7 @@ export const kiRetrievalSkill = defineSkillType({
   name: 'ki-retrieval',
   basePath: 'skills/platform/context-engine',
   availability: contextEngineSkillAvailability,
-  // Granted at runtime to any agent that can reach an AI Index (see `select_skills.ts` in the
-  // Agent Builder plugin), so it is never offered in the skill library or agent pickers.
+  // Granted at runtime by Agent Builder (`select_skills.ts`), never offered in the skill library.
   hidden: true,
   description:
     'Retrieve context from a Context Engine AI Index at query time using keyword, semantic, or hybrid (FORK+FUSE) ES|QL search.',
