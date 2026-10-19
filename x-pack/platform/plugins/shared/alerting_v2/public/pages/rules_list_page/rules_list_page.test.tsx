@@ -72,6 +72,13 @@ jest.mock('@kbn/core-di-browser', () => {
           toasts: { addSuccess: jest.fn(), addError: jest.fn() },
           tours: { isEnabled: () => false },
         },
+        docLinks: {
+          links: {
+            alerting: {
+              viewManageRules: 'https://docs.test/view-manage-rules',
+            },
+          },
+        },
       };
 
       return services[token as string] ?? {};
@@ -713,9 +720,7 @@ describe('RulesListPage', () => {
     expect(
       screen.getByTestId('createWithAgentButton').querySelector('[data-euiicon-type="sparkles"]')
     ).toBeInTheDocument();
-    expect(screen.getByTestId('createWithAgentButton')).toHaveTextContent(
-      'Create with agent (Experimental)'
-    );
+    expect(screen.getByTestId('createWithAgentButton')).toHaveTextContent('Create with agent');
 
     fireEvent.click(screen.getByTestId('createWithAgentButton'));
 
@@ -725,18 +730,20 @@ describe('RulesListPage', () => {
     });
   });
 
-  it('hides all Create with AI Agent entry points when Alerting V2 experimental features are disabled', async () => {
+  it('still shows Create with AI Agent entry points when experimental features are disabled', async () => {
+    mockExperimentalFeaturesEnabled = false;
     mockAlertingV2ExperimentalFeaturesEnabled = false;
     resolveRules([], 0);
 
     renderPage();
 
     await waitFor(() => expect(screen.getByTestId('createEsqlRuleCard')).toBeInTheDocument());
-    expect(screen.queryByTestId('createWithAgentCard')).not.toBeInTheDocument();
+    expect(screen.getByTestId('createWithAgentCard')).toBeInTheDocument();
     expect(screen.queryByTestId('createWithAgentExperimentalBadge')).not.toBeInTheDocument();
   });
 
-  it('hides the populated-list Create with AI Agent menu option when Alerting V2 experimental features are disabled', async () => {
+  it('still shows the populated-list Create with AI Agent menu option when experimental features are disabled', async () => {
+    mockExperimentalFeaturesEnabled = false;
     mockAlertingV2ExperimentalFeaturesEnabled = false;
     renderPage();
 
@@ -746,12 +753,11 @@ describe('RulesListPage', () => {
     fireEvent.click(screen.getByTestId('createRuleButton-secondary-button'));
 
     await waitFor(() => expect(screen.getByTestId('createEsqlRuleButton')).toBeInTheDocument());
-    expect(screen.queryByTestId('createWithAgentButton')).not.toBeInTheDocument();
+    expect(screen.getByTestId('createWithAgentButton')).toBeEnabled();
   });
 
   it('disables the split button agent option (does not hide it) when agent builder is not available', async () => {
     mockAgentBuilderShow = false;
-    mockExperimentalFeaturesEnabled = false;
 
     renderPage();
     await waitFor(() =>
@@ -774,7 +780,6 @@ describe('RulesListPage', () => {
 
   it('disables the empty state agent card (does not hide it) when agent builder is not available', async () => {
     mockAgentBuilderShow = false;
-    mockExperimentalFeaturesEnabled = false;
     resolveRules([], 0);
 
     renderPage();
