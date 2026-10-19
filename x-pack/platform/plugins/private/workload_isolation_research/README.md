@@ -73,7 +73,7 @@ Limits on QAF: `supervise` and `probe/_start` reach only the UI pod (background 
 ## Comparing variants (rule)
 
 - Local: paired ABAB, same machine, back to back; note `manifest.host.loadavg_*`.
-- QAF: p99 is noisy **per pod** (CV 0.24–0.55 on identical idle projects, even in the same minute). Never compare raw p99 against a separately measured baseline; compare each run's in-pod `vs_baseline` ratios across images over ≥ 3 runs. p50, `longest_slice_ms`, tick-drift floor and TM poll cadence are stable enough to compare with the shared baseline project directly.
+- QAF: p99 is noisy **per pod** (CV 0.24–0.55 on identical idle projects, even in the same minute). Never compare raw p99 against a separately measured baseline; compare each run's in-pod `vs_baseline` ratios across images over ≥ 3 runs. Only p50 (CV ≈ 0.09) and TM poll cadence are stable enough to compare with the shared baseline project directly; idle longest slices on QAF range 20–570 ms, so use dose-attributable slices (offender window minus idle max) and ABAB windows.
 - Derived dispersion: `node $H variance --variant-prefix <prefix> --out <file>`.
 
 ## QA overview export
