@@ -38,6 +38,8 @@ interface GroupViewProps {
   entityExpression?: string;
   cellHandlers?: CellHandlers;
   rowActions?: RowActions;
+  /** False while the page still reads what its grouping query needs. */
+  isQueryReady?: boolean;
 }
 
 interface GroupLevelProps extends GroupViewProps {
@@ -71,13 +73,14 @@ const GroupWithPagination: React.FC<GroupWithPaginationProps> = ({
   groupSelectorComponent,
   ...level
 }) => {
-  const { state, selectedGroup } = level;
+  const { state, selectedGroup, isQueryReady } = level;
   const { groupData, grouping, isFetching } = useEntityGrouping({
     state,
     selectedGroup,
     groupFilters: [],
     tableId: GROUPED_VIEW_TABLE_ID,
     groupingId: GROUPED_VIEW_GROUPING_ID,
+    isQueryReady,
   });
 
   return (
@@ -154,7 +157,7 @@ const GroupWithLocalPagination: React.FC<GroupWithLocalPaginationProps> = ({
   parentGroupFilters,
   ...level
 }) => {
-  const { state, selectedGroup } = level;
+  const { state, selectedGroup, isQueryReady } = level;
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 
@@ -169,6 +172,7 @@ const GroupWithLocalPagination: React.FC<GroupWithLocalPaginationProps> = ({
     groupFilters,
     tableId: GROUPED_VIEW_TABLE_ID,
     groupingId: GROUPED_VIEW_GROUPING_ID,
+    isQueryReady,
   });
 
   return (

@@ -51,6 +51,8 @@ import {
 } from '../components/home/entities_grid';
 import { toDsl, toEsql } from '../components/home/entities_grid/active_filters';
 import type { ActiveFilters } from '../components/home/entities_grid/active_filters';
+import { useEntityFilterOverrides } from '../components/home/entities_grid/hooks/use_entity_grid_data';
+import { isFilteringByGroupValue } from '../components/home/entities_grid/queries/resolved_entities';
 import type { RowActions, CellHandlers, Row, RowsMode } from '../components/home/entities_grid';
 import { ENTITY_GROUPING_OPTIONS } from '../components/home/entities_table/constants';
 import type { EntityURLStateResult } from '../components/home/entities_table/hooks/use_entity_url_state';
@@ -594,7 +596,18 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   // Strings, so a tile refetch with the same entities doesn't reset the pages below.
   const { searchExpression: gridSearchExpression, entityExpression: gridEntityExpression } =
     useMemo(() => toEsql(activeFilters), [activeFilters]);
-  const groupingQuery = useMemo(() => toDsl(activeFilters), [activeFilters]);
+  // Group by reads the grid's rows with DSL, so it takes the overrides the grid's filters read.
+  const { data: entityFilterOverrides } = useEntityFilterOverrides({
+    rowsMode,
+    entityExpression: gridEntityExpression,
+  });
+  const isGroupingQueryReady =
+    !isFilteringByGroupValue({ rowsMode, entityExpression: gridEntityExpression }) ||
+    entityFilterOverrides != null;
+  const groupingQuery = useMemo(
+    () => toDsl(activeFilters, entityFilterOverrides),
+    [activeFilters, entityFilterOverrides]
+  );
 
   const groupingState = useMemo<EntityURLStateResult>(
     () => ({
@@ -1043,6 +1056,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
                 rowsMode={rowsMode}
                 searchExpression={gridSearchExpression}
                 entityExpression={gridEntityExpression}
+                isQueryReady={isGroupingQueryReady}
                 groupSelectorComponent={tableControls}
                 cellHandlers={cellHandlers}
                 rowActions={rowActions}

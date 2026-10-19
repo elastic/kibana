@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { escapeStringValue } from '@kbn/esql-utils';
 import { CriticalityLevels } from '../../../../../../common/entity_analytics/asset_criticality/constants';
 import {
@@ -225,6 +226,30 @@ export const applyResolvedEntityFilterOverrides = (
     ? `(${expression}) AND NOT ${ENTITY_ID_FIELD} IN (${toList(exclude)})`
     : expression;
   return include.length ? `(${passing}) OR ${ENTITY_ID_FIELD} IN (${toList(include)})` : passing;
+};
+
+/** The DSL form of `applyResolvedEntityFilterOverrides`, for the reads that run on DSL. */
+export const applyResolvedEntityFilterOverridesToQuery = (
+  filters: QueryDslQueryContainer[],
+  { include = [], exclude = [] }: Partial<ResolvedEntityFilterOverrides> = {}
+): QueryDslQueryContainer[] => {
+  if (!include.length && !exclude.length) return filters;
+  const passing: QueryDslQueryContainer = {
+    bool: {
+      filter: filters,
+      ...(exclude.length ? { must_not: [{ terms: { [ENTITY_ID_FIELD]: [...exclude] } }] } : {}),
+    },
+  };
+  return include.length
+    ? [
+        {
+          bool: {
+            should: [passing, { terms: { [ENTITY_ID_FIELD]: [...include] } }],
+            minimum_should_match: 1,
+          },
+        },
+      ]
+    : [passing];
 };
 
 /** How many resolved entities a value of a group-valued field gains (positive) or loses (negative). */

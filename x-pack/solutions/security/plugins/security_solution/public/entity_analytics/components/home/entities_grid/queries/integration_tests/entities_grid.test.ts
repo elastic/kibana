@@ -11,7 +11,7 @@ import { RiskSeverity } from '../../../../../../../common/search_strategy';
 import { EMPTY_ENTITY_FILTERS } from '../../common';
 import type { QueryArgs, Row, SortDir } from '../../common';
 import { QUERY_SPECS, findSortPageFetcher } from '../../grid_columns';
-import { toEsql } from '../../active_filters';
+import { toDsl, toEsql } from '../../active_filters';
 import type { ActiveFilters } from '../../active_filters';
 import {
   applyResolvedEntityFilterOverrides,
@@ -363,6 +363,29 @@ describe('entities grid on Elasticsearch', () => {
 
         expect(total).toBe(filterCase[4].length);
       });
+    });
+  });
+
+  describe('Group by', () => {
+    it('reads the same entities as the grid, for a watchlist only an alias is on', async () => {
+      // host:h1 isn't on wl-2 itself; its alias host:h4 is.
+      const activeFilters: ActiveFilters = {
+        ...NO_FILTERS,
+        entityFilters: { ...EMPTY_ENTITY_FILTERS, watchlists: ['wl-2'] },
+      };
+      const args = { ...BASE_ARGS, ...toEsql(activeFilters) };
+      const overrides = await fetchResolvedEntityFilterOverrides(args, cluster.runQuery);
+      const gridIds = getIds(
+        await fetchPage(cluster.runQuery, {
+          ...args,
+          entityExpression:
+            args.entityExpression &&
+            applyResolvedEntityFilterOverrides(args.entityExpression, overrides),
+        })
+      );
+
+      expect(gridIds).toEqual(['host:h1']);
+      expect(await cluster.searchEntityIds(toDsl(activeFilters, overrides) ?? {})).toEqual(gridIds);
     });
   });
 
