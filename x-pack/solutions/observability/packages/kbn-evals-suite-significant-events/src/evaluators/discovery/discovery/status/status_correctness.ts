@@ -12,8 +12,10 @@ const ruleUuidOf = (detection: { rule_uuid?: string; metadata?: { rule_uuid?: st
 
 /**
  * Status follows from the verdicts the agent stores, so the decision left to grade is whether an
- * event was written at all: one for every active expected event, and none for a detection no
- * expected event covers (a false alarm). A benign detection that the dataset expects as an
+ * event was written at all: one for every active expected event, and no *confirmed* event for a
+ * detection no expected event covers (a false alarm). Discovery writes an event for any verdict, so
+ * an uncovered detection written with no confirming verdict is the agent recording that it could
+ * not establish anything, not a false alarm. A benign detection that the dataset expects as an
  * inactive event is the agent's to judge: written or not, it scores the same. `grouping_correctness` and
  * `confirmation_alignment` ignore events outside the expected rules, so this is where those are
  * caught.
@@ -54,16 +56,23 @@ export const statusCorrectnessEvaluator: DiscoveryEvaluator = {
         .filter((rule) => rule && !expectedUniverse.has(rule) && !optionalRules.has(rule))
     );
 
+    const writtenSignals = (output?.significantEvents ?? []).flatMap(
+      (event) => event.signals ?? []
+    );
     const writtenRules = new Set(
-      (output?.significantEvents ?? []).flatMap((event) =>
-        (event.signals ?? []).map(({ metadata }) => ruleUuidOf(metadata ?? {})).filter(Boolean)
-      )
+      writtenSignals.map(({ metadata }) => ruleUuidOf(metadata ?? {})).filter(Boolean)
+    );
+    const confirmedRules = new Set(
+      writtenSignals
+        .filter(({ verdict }) => verdict === 'confirms')
+        .map(({ metadata }) => ruleUuidOf(metadata ?? {}))
+        .filter(Boolean)
     );
 
     const missingEvents = expectedRuleSets.filter(
       (rules) => ![...rules].some((rule) => writtenRules.has(rule))
     );
-    const wronglyWritten = [...forbiddenRules].filter((rule) => writtenRules.has(rule)).sort();
+    const wronglyWritten = [...forbiddenRules].filter((rule) => confirmedRules.has(rule)).sort();
 
     const checks = expectedRuleSets.length + forbiddenRules.size;
     const failures = missingEvents.length + wronglyWritten.length;
@@ -72,7 +81,11 @@ export const statusCorrectnessEvaluator: DiscoveryEvaluator = {
         (rules) => `no event written for expected rules [${[...rules].sort().join(', ')}]`
       ),
       ...(wronglyWritten.length > 0
-        ? [`event written for rules no expected event covers [${wronglyWritten.join(', ')}]`]
+        ? [
+            `confirmed event written for rules no expected event covers [${wronglyWritten.join(
+              ', '
+            )}]`,
+          ]
         : []),
     ];
 
@@ -80,7 +93,7 @@ export const statusCorrectnessEvaluator: DiscoveryEvaluator = {
       score: (checks - failures) / checks,
       explanation:
         issues.length === 0
-          ? 'An event was written for every expected event and for no uncovered detection'
+          ? 'An event was written for every expected event and none confirmed an uncovered detection'
           : issues.join('; '),
     });
   },
