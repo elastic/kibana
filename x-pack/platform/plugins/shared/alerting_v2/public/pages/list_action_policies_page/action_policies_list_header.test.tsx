@@ -40,10 +40,25 @@ jest.mock('../../hooks/use_is_action_policies_license_valid', () => ({
   useIsActionPoliciesLicenseValid: () => mockIsLicenseValid,
 }));
 
-jest.mock('@kbn/core-di-browser', () => ({
-  ...jest.requireActual('@kbn/core-di-browser'),
-  useService: () => ({ capabilities: {}, getUrlForApp: jest.fn() }),
-}));
+jest.mock('@kbn/core-di-browser', () => {
+  const actual = jest.requireActual('@kbn/core-di-browser');
+  return {
+    ...actual,
+    useService: (token: symbol) => {
+      if (token === actual.CoreStart('docLinks')) {
+        return {
+          links: {
+            alerting: {
+              manageActionPolicies: 'https://docs.test/manage-action-policies',
+            },
+          },
+        };
+      }
+
+      return { capabilities: {}, getUrlForApp: jest.fn() };
+    },
+  };
+});
 
 const onCreatePolicy = jest.fn();
 const onCreateWithAgent = jest.fn();

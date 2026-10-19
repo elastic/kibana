@@ -9,7 +9,7 @@ import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result'
 import { VEGA_VIS_TYPE } from '@kbn/agent-builder-visualizations-common';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { z } from '@kbn/zod/v4';
-import type { PanelResolutionRequestBase } from '../../../resolve_panel';
+import type { PanelResolutionRequestBase } from '../../resolve_panel';
 import { defineRequestPanelKind } from '../panel_kind';
 
 /**
