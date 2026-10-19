@@ -40,11 +40,11 @@ export const createClassicRumDashboard = ({
     isDev,
   };
 
-  const ClassicRumDashboard = ({
+  function ClassicRumDashboard({
     serviceName,
     timeRange,
     onTimeRangeChange,
-  }: ClassicRumDashboardProps) => {
+  }: ClassicRumDashboardProps) {
     // An in-memory URL keeps the dashboard state out of the host app's URL.
     const history = useEmbeddedHistory({ serviceName, timeRange, onTimeRangeChange });
 
@@ -64,7 +64,7 @@ export const createClassicRumDashboard = ({
         </EuiPageSection>
       </UxProviders>
     );
-  };
+  }
 
   return ClassicRumDashboard;
 };
