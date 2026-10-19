@@ -6,6 +6,7 @@
  */
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
+import type { AvailabilityConfig } from '@kbn/agent-builder-server/availability';
 import {
   ACTION_POLICY_MANAGEMENT_SKILL_ID,
   ALERTING_TOOL_IDS,
@@ -13,7 +14,6 @@ import {
 } from '@kbn/alerting-v2-constants';
 import { manageActionPolicyTool } from '../tools/manage_action_policy';
 import type { ManageActionPolicyToolDeps } from '../tools/manage_action_policy';
-import { alertingV2ExperimentalAvailability } from './alerting_v2_experimental_availability';
 import {
   generateActionPolicyOperationsDoc,
   generateActionPolicyWorkflowPayloadDoc,
@@ -27,7 +27,11 @@ import {
   generateMultiRuleActionPolicyDoc,
 } from './schema_to_skill_docs';
 
-export const createActionPolicyManagementSkill = (deps: ManageActionPolicyToolDeps) =>
+type ActionPolicyManagementSkillDeps = ManageActionPolicyToolDeps & {
+  availability: AvailabilityConfig;
+};
+
+export const createActionPolicyManagementSkill = (deps: ActionPolicyManagementSkillDeps) =>
   defineSkillType({
     id: ACTION_POLICY_MANAGEMENT_SKILL_ID,
     name: ACTION_POLICY_MANAGEMENT_SKILL_ID,
@@ -36,7 +40,7 @@ export const createActionPolicyManagementSkill = (deps: ManageActionPolicyToolDe
       'Compose, discover, and modify Alerting V2 action policies within a conversation. Use when the user wants to set up, change, or inspect how alert notifications are matched, grouped, throttled, and dispatched to workflows ("notify me when this rule fires", "set up email notifications for my alert", "create a notification policy", "change my alert to page via PagerDuty", "list my action policies"). Covers workflow destinations, KQL matchers, grouping, and throttling. For composing or editing the underlying alert rules themselves, load the rule-management skill.',
     experimental: true,
     uiSettingRequired: ALERTING_V2_ENABLED_SETTING_ID,
-    availability: alertingV2ExperimentalAvailability,
+    availability: deps.availability,
     referencedContent: [
       {
         name: 'action-policy-matchers',
@@ -126,7 +130,7 @@ For a new policy, start with \`set_metadata\` (name required), then \`set_destin
 
 For an existing policy, pass the \`actionPolicyAttachmentId\` and only include the operations for the requested changes.
 
-See the [action-policy-matchers reference](./references/action-policy-matchers.md) when choosing matcher fields. To scope a policy to one rule, use a shared link tag on both the rule and \`matcher.tags\` — the \`matcher\` field in the operations table below shows the shape but does not expand its \`tags\`/\`expression\` sub-fields; consult the matchers reference for the full API. For whether to scope to one rule or many, consult [single-rule action policies](./references/action-policy-single-rule.md) or [multi-rule action policies](./references/action-policy-multi-rule.md).
+See the [action-policy-matchers reference](./references/action-policy-matchers.md) when choosing matcher fields. To scope a policy to one rule, use a shared routing tag on both the rule's \`routing_tags\` and \`matcher.tags\` — the \`matcher\` field in the operations table below shows the shape but does not expand its \`tags\`/\`expression\` sub-fields; consult the matchers reference for the full API. For whether to scope to one rule or many, consult [single-rule action policies](./references/action-policy-single-rule.md) or [multi-rule action policies](./references/action-policy-multi-rule.md).
 
 ${generateActionPolicyOperationsDoc()}
 
@@ -194,9 +198,13 @@ where \`attachmentId\` is \`actionPolicyAttachment.id\` and \`version\` is \`ver
 
 ## Save Order Reminder
 
-After rendering all three attachments (rule, workflow, action policy), remind the user of the required save order:
+An action policy only requires its destination **workflows** to be saved first. It never requires a rule to be saved, and an unsaved rule attachment must not block creating or rendering a policy.
 
-> "To activate this alerting setup, please save in order: **Rule → Workflow → Action Policy**. The action policy depends on both the rule and the workflow being saved first."
+After rendering the attachments, remind the user to save the workflow before the action policy.
+
+Policies are linked to rules only by \`matcher.tags\`, matched against the rule's \`metadata.routing_tags\`. If a tag in the policy's \`matcher.tags\` is carried by a rule attachment in the conversation that is still unsaved, remind the user that the rule has not been saved yet. Explain that unless another saved rule already carries that routing tag, the policy will not match any alerts until the rule is saved. Do not search for or fetch other rules to check this.
+
+Do not add this reminder for catch-all policies, for policies that route only by \`matcher.expression\`, or when the policy's tags are not on the unsaved rule.
 
 ## Customization Hints
 
@@ -210,7 +218,7 @@ After creating the defaults, briefly mention:
 ## When to Load References
 
 ### Single-rule Action Policies
-When notifying on one specific rule (link via a shared tag on both the rule and \`matcher.tags\`), consult the [action-policy-single-rule reference](./references/action-policy-single-rule.md).
+When notifying on one specific rule (link via a shared routing tag on both the rule's \`routing_tags\` and \`matcher.tags\`), consult the [action-policy-single-rule reference](./references/action-policy-single-rule.md).
 
 ### Multi-rule Action Policies
 When the user wants one policy across several rules, a catch-all, or routing by tag/severity, consult the [action-policy-multi-rule reference](./references/action-policy-multi-rule.md).

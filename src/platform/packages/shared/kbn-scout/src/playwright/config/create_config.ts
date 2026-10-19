@@ -64,7 +64,9 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
     },
     {
       name: 'ech',
-
+      // Cloud SAML auth hits a real service and is slower than the local mock; 90 s gives
+      // enough headroom for auth + test body within a single Playwright test timeout.
+      timeout: 90_000,
       testIgnore: [
         // TODO: remove when AI suggestions are supported on ECH or when the new tagging system is in place
         '**/ai_suggestions_*.spec.ts',
@@ -75,6 +77,9 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
     },
     {
       name: 'mki',
+      // Cloud SAML auth hits a real service and is slower than the local mock; 90 s gives
+      // enough headroom for auth + test body within a single Playwright test timeout.
+      timeout: 90_000,
       testIgnore: [
         // TODO: remove when we find a way to run "no data" tests without being affected by others
         '**/no_data_*.spec.ts',
