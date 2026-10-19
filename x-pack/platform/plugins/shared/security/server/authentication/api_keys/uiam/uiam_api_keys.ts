@@ -90,11 +90,7 @@ export class UiamAPIKeys implements UiamAPIKeysType {
     try {
       // External API keys must not carry client authentication (`null`). For other credentials,
       // preserve the request's secret and only default to Kibana's for internally created requests.
-      // A fake request has no authenticated user to inspect, so its builder's external marker is
-      // the only signal that it carries an external key.
-      const isExternalCredential =
-        isExternalUiamCredential(request) || userHasExternalApiKey(this.getCurrentUser(request));
-      const clientAuthentication = isExternalCredential
+      const clientAuthentication = this.isExternalApiKey(request)
         ? null
         : getUiamClientAuthentication(request);
       const { id, key, description } = await this.uiam?.grantApiKey(
@@ -218,8 +214,12 @@ export class UiamAPIKeys implements UiamAPIKeysType {
     return presented.length === expected.length && timingSafeEqual(presented, expected);
   }
 
+  /**
+   * A fake request has no authenticated user to inspect, so the external marker set by its builder
+   * is the only signal that it carries an external key.
+   */
   isExternalApiKey(request: KibanaRequest): boolean {
-    return userHasExternalApiKey(this.getCurrentUser(request));
+    return isExternalUiamCredential(request) || userHasExternalApiKey(this.getCurrentUser(request));
   }
 
   /**
