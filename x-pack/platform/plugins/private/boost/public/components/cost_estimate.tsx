@@ -22,14 +22,10 @@ import type { BoostProfileType } from '../../common/types';
 import type { CostImpact, VcuRange } from '../../common/vcu_estimate';
 import {
   COST_DISCLAIMER,
-  formatCost,
   formatCostRange,
   formatSize,
-  formatVcus,
   getCostRangeLabel,
-  getCostText,
   getVcuRangeText,
-  getVcusText,
   roundVcus,
 } from './cost_format';
 import { DataStreamTimeline } from './data_stream_timeline';
@@ -59,81 +55,6 @@ interface ShownEstimate {
   impact: CostImpact;
   type: BoostProfileType;
 }
-
-interface ChangeIndicatorProps {
-  vcus: number;
-  savedVcus: number;
-}
-
-/** Whether a value moved up (costs more) or down (costs less) from today's. */
-const ChangeIndicator = ({ vcus, savedVcus }: ChangeIndicatorProps) => {
-  const isHigher = vcus > savedVcus;
-  const deltaVcus = roundVcus(Math.abs(vcus - savedVcus));
-  const cost = formatCost(deltaVcus);
-  const delta = formatVcus(deltaVcus);
-  const savedCost = formatCost(savedVcus);
-  const difference = isHigher
-    ? i18n.translate('xpack.boost.costEstimate.increase', {
-        defaultMessage: '+{cost} (+{delta} {count, plural, one {VCU} other {VCUs}})',
-        values: { cost, delta, count: deltaVcus },
-      })
-    : i18n.translate('xpack.boost.costEstimate.decrease', {
-        defaultMessage: '−{cost} (−{delta} {count, plural, one {VCU} other {VCUs}})',
-        values: { cost, delta, count: deltaVcus },
-      });
-  const description = isHigher
-    ? i18n.translate('xpack.boost.costEstimate.higherThanSaved', {
-        defaultMessage: 'Up {cost} from {savedCost}',
-        values: { cost, savedCost },
-      })
-    : i18n.translate('xpack.boost.costEstimate.lowerThanSaved', {
-        defaultMessage: 'Down {cost} from {savedCost}',
-        values: { cost, savedCost },
-      });
-
-  // The tooltip shows the difference at a glance, and the accessible name adds the saved value
-  // for context.
-  return (
-    <EuiIconTip
-      type={isHigher ? 'sortUp' : 'sortDown'}
-      color={isHigher ? 'danger' : 'success'}
-      // A flex anchor sizes to the icon, so the row's flex alignment centers it.
-      display="flex"
-      content={difference}
-      aria-label={description}
-    />
-  );
-};
-
-interface EstimateValueProps {
-  end: keyof VcuRange;
-  estimate: VcuRange;
-  comparison?: VcuRange;
-}
-
-/** One end of the range: the cost and its label, any change indicator, and the VCUs below. */
-const EstimateValue = ({ end, estimate, comparison }: EstimateValueProps) => {
-  const vcus = roundVcus(estimate[end]);
-  const savedVcus = comparison && roundVcus(comparison[end]);
-
-  return (
-    <div data-test-subj={`boostCostEstimate-${end}`}>
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiText size="s">{getCostText(end, vcus)}</EuiText>
-        </EuiFlexItem>
-        {savedVcus !== undefined && savedVcus !== vcus && (
-          <EuiFlexItem grow={false}>
-            <ChangeIndicator vcus={vcus} savedVcus={savedVcus} />
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-      <EuiText size="xs" color="subdued">
-        {getVcusText(vcus)}
-      </EuiText>
-    </div>
-  );
-};
 
 interface RangeChangeIndicatorProps {
   range: VcuRange;
@@ -219,8 +140,8 @@ interface EstimateContentProps {
 }
 
 /**
- * The estimate's title, what it covers, and its values. For data streams, the whole range sits beside
- * the title, and a timeline below splits it between the profile's periods.
+ * The estimate's title, what it covers, and its range. For data streams, a timeline below splits it
+ * between the profile's periods.
  */
 const EstimateContent = ({
   estimate: { impact, type },
@@ -299,31 +220,7 @@ const EstimateContent = ({
                 </span>
               </EuiScreenReaderOnly>
             )}
-            {periods ? (
-              <RangeValue estimate={estimate} comparison={comparison} />
-            ) : (
-              <EuiFlexGroup
-                // 16px around the divider, between EUI's 12px and 24px gutters.
-                gutterSize="none"
-                alignItems="flexStart"
-                responsive={false}
-                wrap
-                css={{ gap: euiTheme.size.base }}
-              >
-                <EuiFlexItem grow={false}>
-                  <EstimateValue end="atRest" estimate={estimate} comparison={comparison} />
-                </EuiFlexItem>
-                {/* Decorative divider, as tall as the values beside it; EUI has no vertical rule. */}
-                <EuiFlexItem
-                  grow={false}
-                  aria-hidden={true}
-                  css={{ alignSelf: 'stretch', borderInlineStart: euiTheme.border.thin }}
-                />
-                <EuiFlexItem grow={false}>
-                  <EstimateValue end="atPeak" estimate={estimate} comparison={comparison} />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            )}
+            <RangeValue estimate={estimate} comparison={comparison} />
           </div>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -357,7 +254,11 @@ export const CostEstimate = ({ impact, type, isEditing, showChange }: CostEstima
   const hasData =
     impact !== undefined && (impact.dataSourceCount > 0 || (showChange && impact.hasCurrentData));
   const current = impact && hasData && type ? { impact, type } : undefined;
-  const shown = current ?? (isEditing ? lastShownRef.current : undefined);
+  // A faded estimate stays while the profile is cleared, but not once one of another type is chosen:
+  // an indices estimate has no periods, and a data streams one has periods indices don't.
+  const lastShown = lastShownRef.current;
+  const isSameType = type === undefined || lastShown?.type === type;
+  const shown = current ?? (isEditing && isSameType ? lastShown : undefined);
   useEffect(() => {
     lastShownRef.current = shown;
     if (shown) {
@@ -401,12 +302,15 @@ export const CostEstimate = ({ impact, type, isEditing, showChange }: CostEstima
       data-stale={isStale}
     >
       {/* Clipped at the divider, which doesn't move, so the estimate slides out from behind it and
-          back in. */}
+          back in. The clip reaches a little past the sides, so the timeline's first age, centered
+          on its tick at the edge, shows in full. */}
       <div
         css={[
           fade,
           css`
             min-block-size: 0;
+            margin-inline: -${euiTheme.size.s};
+            padding-inline: ${euiTheme.size.s};
             clip-path: inset(0 0 calc(${dividerGap} + ${euiTheme.border.width.thin}) 0);
           `,
         ]}

@@ -263,7 +263,7 @@ describe('RuleFlyout estimate', () => {
     expect(getEstimate()).toHaveTextContent('1 index · 4 GB');
     expect(getEstimate()).toHaveAttribute('data-shown', 'true');
     expect(getEstimate()).toHaveAttribute('data-stale', 'false');
-    expect(screen.getByTestId('boostCostEstimate-atRest')).toBeInTheDocument();
+    expect(screen.getByTestId('boostCostEstimate-range')).toBeInTheDocument();
     expect(screen.queryByTestId('boostCostEstimateTimeline')).not.toBeInTheDocument();
   });
 
@@ -284,7 +284,6 @@ describe('RuleFlyout estimate', () => {
 
       expect(getEstimate()).toHaveTextContent('1 data stream · 3 GB');
       expect(screen.getByTestId('boostCostEstimate-range')).toBeInTheDocument();
-      expect(screen.queryByTestId('boostCostEstimate-atRest')).not.toBeInTheDocument();
       expect(screen.getByTestId('boostCostEstimateTimeline-recent')).toHaveTextContent(
         'Recent1 GB'
       );
@@ -293,6 +292,48 @@ describe('RuleFlyout estimate', () => {
       );
       // The default profile's standard period ends where its recent period does, so it's left out.
       expect(screen.queryByTestId('boostCostEstimateTimeline-standard')).not.toBeInTheDocument();
+    });
+
+    it("shows a period's cost in a tooltip", async () => {
+      const [defaultDataStreamsRule] = state.rules.filter(
+        ({ name }) => name === DEFAULT_DATA_STREAMS_RULE_NAME
+      );
+      renderFlyout(defaultDataStreamsRule);
+
+      expect(screen.getByTestId('boostCostEstimateTimeline-recent')).not.toHaveTextContent('$');
+      await userEvent.hover(
+        within(screen.getByTestId('boostCostEstimateTimeline-recent')).getByText('Recent')
+      );
+
+      const tooltip = await screen.findByRole('tooltip');
+      expect(tooltip).toHaveTextContent(/per hour/);
+      expect(tooltip).toHaveTextContent(/VCUs/);
+    });
+
+    it('hides a data streams estimate once the rule switches to an indices profile', async () => {
+      render(
+        <IntlProvider locale="en">
+          <RuleFlyout
+            initialProfileName={BUILTIN_DATA_STREAMS_PROFILE_NAMES.last_7_days}
+            onClose={jest.fn()}
+          />
+        </IntlProvider>
+      );
+      await userEvent.type(getPattern(), 'logs-*');
+      expect(getEstimate()).toHaveAttribute('data-shown', 'true');
+
+      const profileInput = within(screen.getByTestId('boostRuleProfile')).getByTestId(
+        'comboBoxSearchInput'
+      );
+      await userEvent.click(profileInput);
+      await userEvent.keyboard('{Control>}a{/Control}{Delete}');
+      // While the profile is cleared, the last estimate stays, faded.
+      expect(getEstimate()).toHaveAttribute('data-stale', 'true');
+
+      await userEvent.keyboard('alpha');
+      await userEvent.click(screen.getByRole('option', { name: /alpha-search/ }));
+
+      expect(getEstimate()).toHaveAttribute('data-shown', 'false');
     });
   });
 

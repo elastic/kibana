@@ -27,7 +27,7 @@ export const roundVcus = (vcus: number): number => {
   return Math.round(vcus * 10 ** decimals) / 10 ** decimals;
 };
 
-export const formatVcus = (vcus: number): string =>
+const formatVcus = (vcus: number): string =>
   new Intl.NumberFormat(i18n.getLocale(), { maximumFractionDigits: 2 }).format(vcus);
 
 const formatUsd = (usd: number): string =>
@@ -69,7 +69,7 @@ export const getCostText = (end: keyof VcuRange, vcus: number): string =>
       });
 
 /** A number of search VCUs, such as "1.2 VCUs". */
-export const getVcusText = (vcus: number): string =>
+const getVcusText = (vcus: number): string =>
   i18n.translate('xpack.boost.costEstimate.vcus', {
     defaultMessage: '{value} {count, plural, one {VCU} other {VCUs}}',
     values: { value: formatVcus(vcus), count: vcus },

@@ -7,8 +7,8 @@
 
 import React, { useMemo } from 'react';
 import {
-  EuiScreenReaderOnly,
   EuiText,
+  EuiToolTip,
   colorPalette,
   hexToRgb,
   isColorDark,
@@ -16,9 +16,13 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { DataStreamPeriod, DataStreamPeriodEstimates } from '../../common/vcu_estimate';
+import type {
+  DataStreamPeriod,
+  DataStreamPeriodEstimates,
+  VcuRange,
+} from '../../common/vcu_estimate';
 import { parseMaxAge, toMaxAgeHours } from '../../common/validation';
-import { formatCostRange, formatSize, getCostRangeLabel } from './cost_format';
+import { formatCostRange, formatSize, getVcuRangeText } from './cost_format';
 import { PERIOD_LABELS } from './profiles/period_labels';
 
 interface DataStreamTimelineProps {
@@ -26,13 +30,26 @@ interface DataStreamTimelineProps {
   maxAges: { recent?: string; standard?: string };
   /** Each period's data and search VCUs; omitted while no data streams use the periods. */
   estimates?: DataStreamPeriodEstimates;
-  /** Whether each period also shows its search cost per hour, below its data. */
+  /** Whether hovering or focusing a period shows its search cost per hour and VCUs. */
   showsCost?: boolean;
   /** Prefixes the test subjects of the timeline and each period. */
   testSubj: string;
 }
 
 const PERIODS: readonly DataStreamPeriod[] = ['recent', 'standard', 'background'];
+
+/** A period's search cost per hour and VCUs, for its tooltip. */
+const PeriodCost = ({ vcus }: { vcus: VcuRange }) => (
+  <>
+    <div>
+      {i18n.translate('xpack.boost.dataStreamTimeline.periodCost', {
+        defaultMessage: '{cost} per hour',
+        values: { cost: formatCostRange(vcus) },
+      })}
+    </div>
+    <div>{getVcuRangeText(vcus)}</div>
+  </>
+);
 
 const toHours = (maxAge: string | undefined) => {
   const parsed = parseMaxAge(maxAge);
@@ -67,7 +84,8 @@ const usePeriodColors = (): Record<DataStreamPeriod, { background: string; text:
 
 /**
  * A data streams profile's periods along the age of data, like the Streams lifecycle timeline: each
- * period's name, data, and optionally search cost in its bar, and the ages between them below.
+ * period's name and data in its bar, optionally with its search cost in a tooltip, and the ages
+ * between them below.
  * Recent and Standard are as long as their max ages allow, and a Standard period that ends where
  * Recent does is left out. Background has no end, so it gets the length of the period before it.
  * Each keeps a minimum width, so its text doesn't truncate too soon.
@@ -121,8 +139,11 @@ export const DataStreamTimeline = ({
             }px, 1fr))`,
             '--boostPeriodPadding': euiTheme.size.xs,
           },
-          // Narrower still, the timeline scrolls rather than squeezing them further.
+          // Narrower still, the timeline scrolls rather than squeezing them further. The scroll area
+          // reaches past the timeline's ends, so the first and last ages can center on their ticks.
           overflowX: 'auto',
+          paddingInline: euiTheme.size.s,
+          marginInline: `-${euiTheme.size.s}`,
         }}
       >
         <div
@@ -134,14 +155,39 @@ export const DataStreamTimeline = ({
             display: 'grid',
             gridTemplateColumns: 'var(--boostPeriodColumns)',
             padding: `${euiTheme.size.xs} ${euiTheme.size.xxs}`,
-            backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+            // A shade darker than subdued backgrounds, such as a flyout footer's.
+            backgroundColor: euiTheme.colors.lightestShade,
             borderRadius: euiTheme.border.radius.medium,
           }}
         >
           {periods.map((period) => {
             const estimate = estimates?.[period];
             const size = estimate ? formatSize(estimate.sizeInBytes) : '—';
-            const cost = estimate && formatCostRange(estimate.vcus);
+            const cost = showsCost ? estimate?.vcus : undefined;
+            const bar = (
+              <div
+                // Focusable when it has a tooltip, so keyboard users can reach its cost too.
+                tabIndex={cost ? 0 : undefined}
+                css={{
+                  padding: `${euiTheme.size.xs} var(--boostPeriodPadding)`,
+                  borderRadius: euiTheme.border.radius.small,
+                  backgroundColor: colors[period].background,
+                  color: colors[period].text,
+                }}
+              >
+                <EuiText size="xs" color="inherit">
+                  <div
+                    css={[lineCss, { fontWeight: euiTheme.font.weight.semiBold }]}
+                    title={PERIOD_LABELS[period].title}
+                  >
+                    {PERIOD_LABELS[period].title}
+                  </div>
+                  <div css={lineCss} title={size}>
+                    {size}
+                  </div>
+                </EuiText>
+              </div>
+            );
             return (
               <div
                 key={period}
@@ -149,35 +195,17 @@ export const DataStreamTimeline = ({
                 css={{ paddingInline: euiTheme.size.xxs, minInlineSize: 0 }}
                 data-test-subj={`${testSubj}-${period}`}
               >
-                <div
-                  css={{
-                    blockSize: '100%',
-                    padding: `${euiTheme.size.xs} var(--boostPeriodPadding)`,
-                    borderRadius: euiTheme.border.radius.small,
-                    backgroundColor: colors[period].background,
-                    color: colors[period].text,
-                  }}
-                >
-                  <EuiText size="xs" color="inherit">
-                    <div
-                      css={[lineCss, { fontWeight: euiTheme.font.weight.semiBold }]}
-                      title={PERIOD_LABELS[period].title}
-                    >
-                      {PERIOD_LABELS[period].title}
-                    </div>
-                    <div css={lineCss} title={size}>
-                      {size}
-                    </div>
-                    {showsCost && cost && estimate && (
-                      <div css={lineCss} title={getCostRangeLabel(estimate.vcus)}>
-                        <span aria-hidden={true}>{cost}</span>
-                        <EuiScreenReaderOnly>
-                          <span>{getCostRangeLabel(estimate.vcus)}</span>
-                        </EuiScreenReaderOnly>
-                      </div>
-                    )}
-                  </EuiText>
-                </div>
+                {cost ? (
+                  <EuiToolTip
+                    title={PERIOD_LABELS[period].title}
+                    content={<PeriodCost vcus={cost} />}
+                    display="block"
+                  >
+                    {bar}
+                  </EuiToolTip>
+                ) : (
+                  bar
+                )}
               </div>
             );
           })}
@@ -192,7 +220,7 @@ export const DataStreamTimeline = ({
             paddingInline: euiTheme.size.xxs,
           }}
         >
-          {periods.map((period, index) => (
+          {periods.map((period) => (
             <div key={period}>
               <div
                 css={{
@@ -203,11 +231,8 @@ export const DataStreamTimeline = ({
               <EuiText
                 size="xs"
                 color="subdued"
-                css={{
-                  display: 'inline-block',
-                  // Each age sits centered under its tick, except the first, at the timeline's start.
-                  transform: index === 0 ? undefined : 'translateX(-50%)',
-                }}
+                // Each age sits centered under its tick.
+                css={{ display: 'inline-block', transform: 'translateX(-50%)' }}
               >
                 {tickLabels[period]}
               </EuiText>
