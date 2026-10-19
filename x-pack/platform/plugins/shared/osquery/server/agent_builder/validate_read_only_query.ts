@@ -204,6 +204,45 @@ const physicalTableName = (ref: string): string => {
  */
 const isUnqualifiedRef = (ref: string): boolean => !ref.includes('.');
 
+/** Collect every alias in a leading WITH clause without confusing nested commas for separators. */
+const extractCteAliases = (sql: string): Set<string> => {
+  const tokens = (sql.match(TOKEN_RE) ?? []).filter((token) => token.trim() !== '');
+  const aliases = new Set<string>();
+  let index = 0;
+
+  if ((tokens[index] ?? '').toUpperCase() !== 'WITH') return aliases;
+  index++;
+  if ((tokens[index] ?? '').toUpperCase() === 'RECURSIVE') index++;
+
+  while (index < tokens.length && IDENTIFIER_RE.test(tokens[index])) {
+    const alias = unquoteIdentifier(tokens[index]).toLowerCase();
+    index++;
+
+    if (tokens[index] === '(') {
+      let depth = 1;
+      while (++index < tokens.length && depth > 0) {
+        if (tokens[index] === '(') depth++;
+        else if (tokens[index] === ')') depth--;
+      }
+    }
+
+    if ((tokens[index] ?? '').toUpperCase() !== 'AS' || tokens[index + 1] !== '(') break;
+    aliases.add(alias);
+    index += 2;
+    let depth = 1;
+    while (index < tokens.length && depth > 0) {
+      if (tokens[index] === '(') depth++;
+      else if (tokens[index] === ')') depth--;
+      index++;
+    }
+
+    if (depth !== 0 || tokens[index] !== ',') break;
+    index++;
+  }
+
+  return aliases;
+};
+
 /**
  * Validates that an Osquery SQL query is read-only and only references tables
  * present in the SchemaService catalog (the extensible allowlist).
@@ -248,14 +287,10 @@ export const validateReadOnlyQuery = (
     return 'Query contains a forbidden keyword. Only read-only SELECT queries against schema-catalog tables are allowed.';
   }
 
-  // CTE aliases (WITH [RECURSIVE] name[(cols)] AS (...)) are not physical tables — allow them
-  const cteAliases = new Set(
-    [
-      ...scannable.matchAll(
-        /\b(?:WITH|,)\s+(?:RECURSIVE\s+)?([a-zA-Z_][a-zA-Z0-9_]*)\s*(?:\([^()]*\))?\s+AS\s*\(/gi
-      ),
-    ].map((m) => m[1].toLowerCase())
-  );
+  // CTE aliases are not physical tables. Parse the complete leading WITH list:
+  // a comma can also occur inside a CTE body, so a flat comma-based regex cannot
+  // reliably distinguish the second alias from nested SELECT syntax.
+  const cteAliases = extractCteAliases(scannable);
 
   const { refs: tableRefs, unsupported } = extractTableRefs(scannable);
   if (unsupported) {

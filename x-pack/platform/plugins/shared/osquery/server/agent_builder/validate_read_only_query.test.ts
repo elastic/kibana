@@ -442,14 +442,23 @@ describe('validateReadOnlyQuery', () => {
     });
   });
 
-  describe('WITH RECURSIVE CTEs (review round 3)', () => {
-    it('collects the CTE name after WITH RECURSIVE', () => {
+  describe('CTE alias extraction', () => {
+    it.each([
+      'WITH first AS (SELECT pid FROM processes), second AS (SELECT pid FROM first) SELECT * FROM second',
+      'WITH first(pid) AS (SELECT pid FROM processes), second (pid) AS (SELECT pid FROM first) SELECT * FROM second',
+      'WITH first AS (SELECT pid, name FROM processes),second AS(SELECT pid FROM first) SELECT * FROM second',
+      'WITH RECURSIVE first(x) AS (SELECT 1), second(y) AS (SELECT x FROM first) SELECT * FROM second JOIN processes ON 1=1',
+    ])('collects every alias in a multi-CTE WITH list: %s', (query) => {
+      expect(validateReadOnlyQuery(query, ALLOWED)).toBeNull();
+    });
+
+    it('does not exempt an unknown physical table after a multi-CTE list', () => {
       expect(
         validateReadOnlyQuery(
-          'WITH RECURSIVE walk(x) AS (SELECT 1) SELECT * FROM walk JOIN processes ON 1=1',
+          'WITH first AS (SELECT pid FROM processes), second AS (SELECT pid FROM first) SELECT * FROM second, secret_table',
           ALLOWED
         )
-      ).toBeNull();
+      ).toMatch(/not in the Osquery schema catalog.*secret_table/i);
     });
   });
 
@@ -459,6 +468,9 @@ describe('validateReadOnlyQuery', () => {
     // at the first `(` or at ON / USING.
     it.each([
       'SELECT * FROM processes JOIN (curl AS c)',
+      'SELECT * FROM processes, (curl AS c)',
+      'SELECT * FROM processes, (curl) c',
+      'SELECT * FROM processes, (secret_table) s',
       'SELECT * FROM processes, (curl)',
       'SELECT * FROM (curl)',
       'SELECT * FROM((curl))',

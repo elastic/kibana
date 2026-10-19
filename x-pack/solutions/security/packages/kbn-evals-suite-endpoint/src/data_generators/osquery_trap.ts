@@ -52,7 +52,7 @@ export async function assertOsqueryTrapHasNoAgents(kbnClient: KbnClient): Promis
       showInactive: false,
       kuery: `(${buildPolicyIdKuery(
         policyIds
-      )}) and status:(online or offline or enrolling or updating)`,
+      )}) and status:(online or degraded or offline or enrolling or updating)`,
     },
   });
   if (data.total !== 0) {

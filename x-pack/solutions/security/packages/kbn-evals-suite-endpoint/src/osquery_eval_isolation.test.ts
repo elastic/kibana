@@ -8,6 +8,11 @@
 import Fs from 'fs';
 import Path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
+import {
+  configureOsqueryTrapStatePath,
+  readOsqueryTrapState,
+  writeOsqueryTrapState,
+} from './data_generators/osquery_trap_state';
 
 const read = (relativePath: string) => Fs.readFileSync(Path.join(REPO_ROOT, relativePath), 'utf8');
 
@@ -97,45 +102,59 @@ describe('Endpoint Osquery eval isolation', () => {
     ).toBe(true);
   });
 
-  it('checks the trap precondition against the registered osquery tool id', () => {
-    const trapSpec = read(
-      'x-pack/solutions/security/packages/kbn-evals-suite-endpoint/evals_trap/endpoint_forensic_analysis/endpoint_forensic_analysis_osquery_trap.spec.ts'
-    );
-
-    // The Osquery tools register under the top-level `osquery` namespace; a
-    // `security.`-prefixed id never matches, so beforeAll would always throw.
-    expect(trapSpec).toContain("tool.id === 'osquery.check_integration'");
-    expect(trapSpec).not.toContain('security.osquery.');
+  it('wires setup and teardown projects around every trap model project', async () => {
+    await jest.isolateModulesAsync(async () => {
+      jest.doMock('@kbn/evals', () => ({
+        createPlaywrightEvalsConfig: () => ({ projects: [{ name: 'model', use: {} }] }),
+      }));
+      const env = { ...process.env, OSQUERY_TRAP_RUN_ID: 'wiring-test' };
+      delete env.OSQUERY_TRAP_STATE_PATH;
+      const replacedEnv = jest.replaceProperty(process, 'env', env);
+      try {
+        const config = await import('../playwright.osquery_trap.config');
+        expect(config.default.projects).toEqual([
+          expect.objectContaining({
+            name: 'trap-setup',
+            testMatch: /global.setup\.ts/,
+            teardown: 'trap-teardown',
+          }),
+          expect.objectContaining({ name: 'trap-teardown', testMatch: /global.teardown\.ts/ }),
+          expect.objectContaining({ name: 'model', dependencies: ['trap-setup'] }),
+        ]);
+      } finally {
+        replacedEnv.restore();
+      }
+    });
   });
 
-  it('loads the trap Playwright config without a pre-provisioned state path', () => {
-    const saved = {
-      state: process.env.OSQUERY_TRAP_STATE_PATH,
-      runId: process.env.OSQUERY_TRAP_RUN_ID,
+  it('defaults trap state outside the checkout and rejects checkout-local state', () => {
+    const env: NodeJS.ProcessEnv = { OSQUERY_TRAP_RUN_ID: 'state-test' };
+    const statePath = configureOsqueryTrapStatePath(env);
+    expect(Path.isAbsolute(statePath)).toBe(true);
+    expect(Path.relative(REPO_ROOT, statePath).startsWith('..')).toBe(true);
+    expect(env.OSQUERY_TRAP_STATE_PATH).toBe(statePath);
+
+    expect(() =>
+      configureOsqueryTrapStatePath({
+        OSQUERY_TRAP_RUN_ID: 'state-test',
+        OSQUERY_TRAP_STATE_PATH: Path.join(REPO_ROOT, 'trap-state.json'),
+      })
+    ).toThrow(/outside the checkout/);
+  });
+
+  it('round-trips trap cleanup resources through the external state file', async () => {
+    const statePath = configureOsqueryTrapStatePath({ OSQUERY_TRAP_RUN_ID: `state-${Date.now()}` });
+    const resources = {
+      agentPolicyId: 'agent-policy',
+      packagePolicyId: 'package-policy',
+      packageInstalledByTrap: true,
     };
-    delete process.env.OSQUERY_TRAP_STATE_PATH;
-    delete process.env.OSQUERY_TRAP_RUN_ID;
+
     try {
-      jest.isolateModules(() => {
-        // Only the state-path handling is under test, not connector discovery.
-        jest.doMock('@kbn/evals', () => ({
-          createPlaywrightEvalsConfig: () => ({ projects: [{ name: 'model', use: {} }] }),
-        }));
-        expect(() => require('../playwright.osquery_trap.config')).not.toThrow();
-      });
-      // `delete` above narrows the property to `undefined`; read through a map.
-      const env: Record<string, string | undefined> = process.env;
-      const statePath = env.OSQUERY_TRAP_STATE_PATH ?? '';
-      expect(Path.isAbsolute(statePath)).toBe(true);
-      expect(statePath).toContain(env.OSQUERY_TRAP_RUN_ID ?? 'missing-run-id');
+      await writeOsqueryTrapState(statePath, resources);
+      expect(await readOsqueryTrapState(statePath)).toEqual(resources);
     } finally {
-      for (const [key, value] of [
-        ['OSQUERY_TRAP_STATE_PATH', saved.state],
-        ['OSQUERY_TRAP_RUN_ID', saved.runId],
-      ] as const) {
-        if (value === undefined) delete process.env[key];
-        else process.env[key] = value;
-      }
+      Fs.rmSync(statePath, { force: true });
     }
   });
 

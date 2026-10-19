@@ -5,30 +5,15 @@
  * 2.0.
  */
 
-import Os from 'os';
 import Path from 'path';
 import { v4 as uuid } from 'uuid';
 import { createPlaywrightEvalsConfig } from '@kbn/evals';
+import { configureOsqueryTrapStatePath } from './src/data_generators/osquery_trap_state';
 
 process.env.OSQUERY_TRAP_RUN_ID ??= uuid();
-// The registered Buildkite suite does not set a state path, so default to a
-// unique file in the OS temp dir (outside the checkout). Playwright workers
-// inherit the env set here, so every process agrees on one path per invocation.
-process.env.OSQUERY_TRAP_STATE_PATH ??= Path.join(
-  Os.tmpdir(),
-  `osquery-trap-state-${process.env.OSQUERY_TRAP_RUN_ID}.json`
-);
-if (!Path.isAbsolute(process.env.OSQUERY_TRAP_STATE_PATH)) {
-  throw new Error('OSQUERY_TRAP_STATE_PATH must be an absolute file path outside the checkout');
-}
-
-const relativeStatePath = Path.relative(
-  Path.resolve(__dirname, '../../../../../..'),
-  process.env.OSQUERY_TRAP_STATE_PATH
-);
-if (!relativeStatePath.startsWith('..') && !Path.isAbsolute(relativeStatePath)) {
-  throw new Error('OSQUERY_TRAP_STATE_PATH must be outside the checkout');
-}
+// Playwright workers inherit this environment, so setup, model projects and
+// teardown share one state file while separate suite invocations remain isolated.
+configureOsqueryTrapStatePath();
 
 const config = createPlaywrightEvalsConfig({
   testDir: Path.resolve(__dirname, './evals_trap'),
