@@ -15,7 +15,7 @@ import { css } from '@emotion/css';
 import { EndpointActionFailureMessage } from '../endpoint_action_failure_message';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
-import { ResponseActionFileDownloadLink } from '../response_action_file_download_link';
+import { ResponseActionFileDownloadLink } from '../response_action/response_action_results/components/response_action_file_download_link';
 import { getAgentActionState } from '../response_action/response_action_results/utils';
 import type {
   ActionDetails,

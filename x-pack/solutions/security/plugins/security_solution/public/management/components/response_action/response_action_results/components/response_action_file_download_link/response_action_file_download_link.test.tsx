@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { AppContextTestRender } from '../../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
 import type {
   ActionDetails,
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
-} from '../../../../common/endpoint/types';
+} from '../../../../../../../common/endpoint/types';
 import React from 'react';
-import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
+import { EndpointActionGenerator } from '../../../../../../../common/endpoint/data_generators/endpoint_action_generator';
 import {
   FILE_NO_LONGER_AVAILABLE_MESSAGE,
   FILE_TRUNCATED_MESSAGE,
@@ -22,11 +22,11 @@ import {
   ResponseActionFileDownloadLink,
   type ResponseActionFileDownloadLinkProps,
 } from './response_action_file_download_link';
-import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mocks';
-import { getDeferred } from '../../mocks/utils';
+import { responseActionsHttpMocks } from '../../../../../mocks/response_actions_http_mocks';
+import { getDeferred } from '../../../../../mocks/utils';
 import { waitFor } from '@testing-library/react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import { RESPONSE_ACTIONS_ZIP_PASSCODE } from '../../../../common/endpoint/service/response_actions/constants';
+import { RESPONSE_ACTIONS_ZIP_PASSCODE } from '../../../../../../../common/endpoint/service/response_actions/constants';
 
 describe('When using the `ResponseActionFileDownloadLink` component', () => {
   let appTestContext: AppContextTestRender;
