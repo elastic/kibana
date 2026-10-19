@@ -119,7 +119,8 @@ async function cancelOnboardingThen({
 /**
  * Cancels the source's onboarding run, then drops its owned rules, queries and knowledge
  * indicators, even when the cancel fails. Runs when a source is deleted and when its knowledge is
- * reset; the view and the saved object are left to the caller.
+ * reset; the view and the saved object are left to the caller. With `sourceKnowledgeState` the
+ * state object of the source is deleted too, so pass it only for a source that left the catalog.
  */
 export async function resetSourceKnowledge({
   source,
@@ -140,7 +141,7 @@ export async function resetSourceKnowledge({
     request,
     cleanup: () =>
       sourceKnowledgeState
-        ? sourceKnowledgeState.runExclusive({
+        ? sourceKnowledgeState.retire({
             sourceId: source.id,
             run: () => retireSourceKnowledge({ sourceId: source.id, kiClient }),
           })
@@ -441,7 +442,7 @@ export async function reconcileSourceCatalog({
       // id, so a failed marker write must leave them in place for the retry.
       await retireSourceDetections({ sourceId, getDetectionClient });
       if (sourceKnowledgeState) {
-        await sourceKnowledgeState.runExclusive({
+        await sourceKnowledgeState.retire({
           sourceId,
           run: () => retireSourceKnowledge({ sourceId, kiClient }),
         });

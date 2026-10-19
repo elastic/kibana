@@ -96,6 +96,7 @@ const reconcileSourceRoute = createServerRoute({
     workflowClients,
     maintenanceService,
     server,
+    logger,
   }): Promise<{ reconciled: boolean }> => {
     const {
       licensing,
@@ -117,14 +118,22 @@ const reconcileSourceRoute = createServerRoute({
     if (!source) {
       // Detections first: the rules and indicators removed below are how a later sweep finds this
       // id, so a failed marker write must leave them in place for the retry.
-      await retireSourceDetections({ sourceId: params.path.sourceId, getDetectionClient });
-      await resetSourceKnowledge({
-        source: { id: params.path.sourceId, slug: params.body.sourceSlug },
-        kiClient,
-        onboardingClient,
-        sourceKnowledgeState,
-        request,
-      });
+      try {
+        await retireSourceDetections({ sourceId: params.path.sourceId, getDetectionClient });
+        await resetSourceKnowledge({
+          source: { id: params.path.sourceId, slug: params.body.sourceSlug },
+          kiClient,
+          onboardingClient,
+          sourceKnowledgeState,
+          request,
+        });
+      } catch (error) {
+        // The source is already deleted: the next sync sweep retries this cleanup.
+        logger.error(
+          `Failed to clean up the knowledge of deleted source ${params.path.sourceId}: ${error}`
+        );
+        throw error;
+      }
       return { reconciled: true };
     }
     await reconcileSourceRevision({
