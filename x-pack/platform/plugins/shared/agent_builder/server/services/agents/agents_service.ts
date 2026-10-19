@@ -13,6 +13,7 @@ import type {
   UiSettingsServiceStart,
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { isAllowedBuiltinAgent } from '@kbn/agent-builder-server/allow_lists';
 import type {
   AgentAvailabilityConfig,
@@ -64,6 +65,7 @@ export class AgentsService {
   private aiIndexResolver?: AiIndexResolver;
 
   private setupDeps?: AgentsServiceSetupDeps;
+  private settingsDeps?: Pick<AgentsServiceStartDeps, 'uiSettings' | 'savedObjects'>;
 
   constructor() {
     this.builtinRegistry = createBuiltinAgentRegistry();
@@ -76,10 +78,13 @@ export class AgentsService {
     this.typeRegistry.register({
       id: chatAgentTypeId,
       // The skill hides itself in spaces where the Context Engine is off.
-      baseConfiguration: {
-        ai_indices: Object.keys(defaultAiIndices),
+      // The default `elastic` AI index is the SML index, so it follows the experimental flag.
+      baseConfiguration: async ({ request }) => ({
+        ai_indices: (await this.isExperimentalEnabled(request))
+          ? Object.keys(defaultAiIndices)
+          : [],
         skill_ids: [kiRetrievalSkillId],
-      },
+      }),
     });
 
     return {
@@ -102,6 +107,17 @@ export class AgentsService {
     };
   }
 
+  private async isExperimentalEnabled(request: KibanaRequest): Promise<boolean> {
+    if (!this.settingsDeps) {
+      throw new Error('Agent type base configuration resolved before #start');
+    }
+    const { uiSettings, savedObjects } = this.settingsDeps;
+    return uiSettings
+      .asScopedToClient(savedObjects.getScopedClient(request))
+      .get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)
+      .catch(() => false);
+  }
+
   private validateAgentTypes() {
     for (const agent of this.builtinRegistry.list()) {
       if (agent.type !== undefined && !this.typeRegistry.has(agent.type)) {
@@ -119,6 +135,7 @@ export class AgentsService {
 
     const { logger } = this.setupDeps;
     const { security, elasticsearch, spaces, toolsService, uiSettings, savedObjects } = startDeps;
+    this.settingsDeps = { uiSettings, savedObjects };
 
     this.validateAgentTypes();
 
