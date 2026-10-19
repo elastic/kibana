@@ -25,6 +25,7 @@ const createCallContext = (
 ): SandboxCallContext => ({
   request: httpServerMock.createKibanaRequest(),
   allowedConnectorIds,
+  resolvedCredentials: new Map(),
 });
 
 const setup = ({
@@ -217,16 +218,48 @@ describe('createConnectorCredentialResolver', () => {
     expect(actionsClient.getSandboxCredentials).not.toHaveBeenCalled();
   });
 
-  it('rejects an allow-listed connector that is not preconfigured', async () => {
-    const { resolve, actionsClient } = setup();
+  it('injects credentials for a saved connector that is not held in memory', async () => {
+    const { resolve, actions, actionsClient } = setup({
+      credentials: {
+        connectorId: 'saved-object-1',
+        actionTypeId: '.http',
+        config: { url: 'https://api.example.com' },
+        headers: { Authorization: BEARER_AUTHORIZATION },
+      },
+    });
+    actions.inMemoryConnectors = [];
 
     const result = await resolve('saved-object-1', createCallContext(['saved-object-1']));
 
     expect(result).toEqual({
-      errorMessage:
-        "Connector 'saved-object-1' is not a preconfigured connector. Only connectors defined in kibana.yml (xpack.actions.preconfigured) can be used from the sandbox.",
+      env: {
+        CONNECTOR_ID: 'saved-object-1',
+        CONNECTOR_TYPE: '.http',
+        CONNECTOR_CONFIG_URL: 'https://api.example.com',
+        CONNECTOR_HEADER_AUTHORIZATION: BEARER_AUTHORIZATION,
+      },
+      secretValues: [BEARER_AUTHORIZATION, 'ghp_topsecrettokenvalue'],
     });
-    expect(actionsClient.getSandboxCredentials).not.toHaveBeenCalled();
+    expect(actionsClient.getSandboxCredentials).toHaveBeenCalledWith({ id: 'saved-object-1' });
+    // The same call redacts the full header and the bare token from the command output.
+    expect(
+      redactSecrets(
+        `header=${BEARER_AUTHORIZATION} token=ghp_topsecrettokenvalue`,
+        (result as { secretValues: string[] }).secretValues
+      )
+    ).toBe('header=[REDACTED] token=[REDACTED]');
+  });
+
+  it('resolves a connector once per call context', async () => {
+    const { resolve, actionsClient } = setup();
+    const callContext = createCallContext();
+
+    await resolve(CONNECTOR_ID, callContext);
+    await resolve(CONNECTOR_ID, { ...callContext });
+    expect(actionsClient.getSandboxCredentials).toHaveBeenCalledTimes(1);
+
+    await resolve(CONNECTOR_ID, createCallContext());
+    expect(actionsClient.getSandboxCredentials).toHaveBeenCalledTimes(2);
   });
 
   it('denies by default when the agent has no connectors', async () => {

@@ -7,8 +7,13 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { ActionsClient } from './agent_connectors';
 import type { SandboxCallContext } from './tool_utils';
 import { createOutputRedactor, MIN_REDACTABLE_SECRET_LENGTH } from './output_redactor';
+
+export type ResolvedSandboxCredentials = Awaited<
+  ReturnType<ActionsClient['getSandboxCredentials']>
+>;
 
 /** Env var prefix under which connector material is exposed to a single sandbox command. */
 export const CONNECTOR_ENV_PREFIX = 'CONNECTOR_';
@@ -157,6 +162,32 @@ export const buildConnectorEnv = ({
   return { env, secretValues: [...new Set(secretValues)] };
 };
 
+/**
+ * Resolves a connector's sandbox credentials through Actions at most once per call context
+ * (`callContext.resolvedCredentials`): the output redactor and the command that injects them
+ * share the lookup, so both see the same values. Failures are memoized too, so a connector that
+ * cannot be resolved fails the same way.
+ */
+export const resolveSandboxCredentials = ({
+  actions,
+  callContext,
+  connectorId,
+}: {
+  actions: Pick<ActionsPluginStart, 'getActionsClientWithRequest'>;
+  callContext: SandboxCallContext;
+  connectorId: string;
+}): Promise<ResolvedSandboxCredentials> => {
+  const { resolvedCredentials } = callContext;
+  let credentials = resolvedCredentials.get(connectorId);
+  if (!credentials) {
+    credentials = actions
+      .getActionsClientWithRequest(callContext.request)
+      .then((actionsClient) => actionsClient.getSandboxCredentials({ id: connectorId }));
+    resolvedCredentials.set(connectorId, credentials);
+  }
+  return credentials;
+};
+
 /** Redacts injected secret values (and their common encodings) from command output. */
 export const redactSecrets = (text: string, secretValues: readonly string[]): string =>
   createOutputRedactor(secretValues).redact(text);
@@ -190,20 +221,8 @@ export const createConnectorCredentialResolver =
       };
     }
 
-    // Tech preview is limited to preconfigured connectors so the shared output redactor, built
-    // from in-memory connector secrets, covers every injected value.
-    const inMemoryConnector = actions.inMemoryConnectors.find(({ id }) => id === connectorId);
-    if (!inMemoryConnector?.isPreconfigured) {
-      return {
-        errorMessage:
-          `Connector '${connectorId}' is not a preconfigured connector. Only connectors defined ` +
-          `in kibana.yml (xpack.actions.preconfigured) can be used from the sandbox.`,
-      };
-    }
-
     try {
-      const actionsClient = await actions.getActionsClientWithRequest(callContext.request);
-      const credentials = await actionsClient.getSandboxCredentials({ id: connectorId });
+      const credentials = await resolveSandboxCredentials({ actions, callContext, connectorId });
 
       logger.debug(
         `Injecting credentials for connector ${connectorId} into a single sandbox command`

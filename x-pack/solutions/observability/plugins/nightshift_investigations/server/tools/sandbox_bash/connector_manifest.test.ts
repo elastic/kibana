@@ -51,6 +51,7 @@ const createSessionMock = (): jest.Mocked<Pick<SandboxSession, 'writeFiles' | 'i
 const createCallContext = (allowedConnectorIds: readonly string[]): SandboxCallContext => ({
   request: httpServerMock.createKibanaRequest(),
   allowedConnectorIds,
+  resolvedCredentials: new Map(),
 });
 
 const createGetActionsClient = (connectors: Array<Record<string, unknown>>) => {

@@ -15,6 +15,7 @@ const SECRET_WEBHOOK_URL = 'https://hooks.slack.example/T000/B000/super-secret-t
 const createCallContext = (allowedConnectorIds: readonly string[]): SandboxCallContext => ({
   request: {} as KibanaRequest,
   allowedConnectorIds,
+  resolvedCredentials: new Map(),
 });
 
 const createConnector = ({
