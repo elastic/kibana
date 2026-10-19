@@ -40,7 +40,7 @@ spec:
         # hidden metadata records the report
         FLAKY_TESTS_UPDATE_ISSUES: 'true'
         # Days to wait after a comment before the issue can get another; reopens always comment.
-        FLAKY_TESTS_COMMENT_COOLDOWN_DAYS: '7'
+        FLAKY_TESTS_COMMENT_COOLDOWN_DAYS: '3'
       allow_rebuilds: true
       branch_configuration: main
       cancel_intermediate_builds: true

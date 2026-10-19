@@ -51,13 +51,12 @@ the whole file, has it refreshed instead (`--no-update-issues` turns this off):
 - a comment is posted when the suite failed since the newest report posted on the issue, with the
   report's numbers for the suite (the flaky tests, then the failures by error message, branch,
   target and pipeline) and how to skip it, once that report is `--comment-cooldown-days` old
-  (default 3, the daily pipeline starts at 7). The newest report posted is the latest comment,
-  recorded as `report.commentedAt`, or until the first comment the report that filed the issue,
-  so failures in between are covered by the next comment. In `elastic/kibana`, a `kibanamachine`
-  comment on a `failed-test` issue also runs the failed-test alert of `triage/`, a Slack message
-  to the teams that opted in to existing-failure alerts (none at the time of writing); the alert
-  reads `report.count` from the metadata to tell a new failure from an existing one, so the
-  metadata is written first;
+  (default 3). The newest report posted is the latest comment, recorded as `report.commentedAt`,
+  or until the first comment the report that filed the issue, so failures in between are covered
+  by the next comment. In `elastic/kibana`, a `kibanamachine` comment on a `failed-test` issue
+  also runs the failed-test alert of `triage/`, a Slack message to the teams that opted in to
+  existing-failure alerts (none at the time of writing); the alert reads `report.count` from the
+  metadata to tell a new failure from an existing one, so the metadata is written first;
 - a closed issue is reopened, with a comment, when the suite failed after it was closed. It stays
   closed when the suite has not failed since, as the report window can still hold the failures
   from before a fix, and when it was closed as a duplicate;
