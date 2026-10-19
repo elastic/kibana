@@ -13,9 +13,9 @@ module.exports = {
   // to do so, we must fix all integration tests first
   // see https://github.com/elastic/kibana/pull/130255/
   preset: '@kbn/test/jest_integration',
-  rootDir: '../../../../..',
-  roots: ['<rootDir>/src/core/server/integration_tests/logging'],
+  rootDir: '../../../../../../..',
+  roots: ['<rootDir>/src/core/packages/core/server/integration_tests/logging'],
   // must override to match all test given there is no `integration_tests` subfolder.
   // Only direct children: the `otel` subfolder has its own config (node environment).
-  testMatch: ['<rootDir>/src/core/server/integration_tests/logging/*.test.{js,mjs,ts,tsx}'],
+  testMatch: ['<rootDir>/src/core/packages/core/server/integration_tests/logging/*.test.{js,mjs,ts,tsx}'],
 };

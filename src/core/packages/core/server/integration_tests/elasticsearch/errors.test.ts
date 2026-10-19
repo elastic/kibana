@@ -48,7 +48,7 @@ describe('elasticsearch clients errors', () => {
         `{"name":"ResponseError","message":"parsing_exception\\n\\tCaused by:\\n\\t\\tnamed_object_not_found_exception: [1:30] unknown field [someInvalidQuery]\\n\\tRoot causes:\\n\\t\\tparsing_exception: unknown query [someInvalidQuery]","stack":"ResponseError: parsing_exception`
       );
       // it contains the offending line for troubleshooting.
-      expect(str).toContain('src/core/server/integration_tests/elasticsearch/errors.test.ts:39:7');
+      expect(str).toContain('src/core/packages/core/server/integration_tests/elasticsearch/errors.test.ts:39:7');
     }
   });
 
@@ -98,7 +98,7 @@ describe('elasticsearch clients errors', () => {
     '\\tRoot causes:\\n' +
     '\\t\\tparsing_exception: unknown query [someInvalidQuery]\\n'`);
       // it contains the offending line for troubleshooting.
-      expect(str).toContain('src/core/server/integration_tests/elasticsearch/errors.test.ts:80:7');
+      expect(str).toContain('src/core/packages/core/server/integration_tests/elasticsearch/errors.test.ts:80:7');
     }
   });
 });

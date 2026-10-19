@@ -9,7 +9,7 @@
 
 module.exports = {
   preset: '@kbn/test/jest_integration',
-  rootDir: '../../../../..',
-  roots: ['<rootDir>/src/core/server/integration_tests/user_storage'],
+  rootDir: '../../../../../../..',
+  roots: ['<rootDir>/src/core/packages/core/server/integration_tests/user_storage'],
   testMatch: ['**/*.test.{js,mjs,ts,tsx}'],
 };

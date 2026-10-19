@@ -60,18 +60,18 @@ update_initial_app_data() {
 
 update_kibana_migrator_utils() {
   echo --- Bump BASELINE_ELASTICSEARCH_VERSION
-  local target="src/core/server/integration_tests/saved_objects/migrations/kibana_migrator_archive_utils.ts"
+  local target="src/core/packages/core/server/integration_tests/saved_objects/migrations/kibana_migrator_archive_utils.ts"
   sed -i "s/BASELINE_ELASTICSEARCH_VERSION = '[0-9]\+\.[0-9]\+\.[0-9]\+'/BASELINE_ELASTICSEARCH_VERSION = '${TARGET_VERSION}'/" "$target"
 }
 
 delete_baseline_archives() {
   echo --- Deleting baseline archives
-  local archive_dir="src/core/server/integration_tests/saved_objects/migrations/archives"
+  local archive_dir="src/core/packages/core/server/integration_tests/saved_objects/migrations/archives"
   find "$archive_dir" -type f -name "${old_version}_baseline_*.zip" -delete
 }
 
 run_tests() {
-  local test_file="src/core/server/integration_tests/saved_objects/migrations/group1/create_test_archives.test.ts"
+  local test_file="src/core/packages/core/server/integration_tests/saved_objects/migrations/group1/create_test_archives.test.ts"
   echo --- Temporarily unskipping and running "$test_file"
   sed -i "s/describe\.skip(/describe(/" "$test_file"
   local exit_code=0
@@ -83,7 +83,7 @@ run_tests() {
 
   # This test MUST run after the create_test_archives.test.ts test, as it relies on the snapshots created by that test to update the snapshots for the v2 migration tests
   echo --- Running integration tests to update snapshots
-  node scripts/jest_integration.js -u src/core/server/integration_tests/saved_objects/migrations/group1/v2_migration.test.ts
+  node scripts/jest_integration.js -u src/core/packages/core/server/integration_tests/saved_objects/migrations/group1/v2_migration.test.ts
 
   return "$exit_code"
 }
@@ -109,7 +109,7 @@ git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
 
 head_branch="bump-versions-$(date +%F_%H-%M-%S)"
 git checkout -b "$head_branch"
-git add package.json x-pack/package.json x-pack/solutions/search/plugins/enterprise_search/common/__mocks__/initial_app_data.ts src/core/server/integration_tests/saved_objects/migrations/kibana_migrator_archive_utils.ts src/core/server/integration_tests/saved_objects/migrations/archives src/core/server/integration_tests/saved_objects/migrations/group1/__snapshots__/v2_migration.test.ts.snap
+git add package.json x-pack/package.json x-pack/solutions/search/plugins/enterprise_search/common/__mocks__/initial_app_data.ts src/core/packages/core/server/integration_tests/saved_objects/migrations/kibana_migrator_archive_utils.ts src/core/packages/core/server/integration_tests/saved_objects/migrations/archives src/core/packages/core/server/integration_tests/saved_objects/migrations/group1/__snapshots__/v2_migration.test.ts.snap
 
 if git diff --cached --quiet; then
   echo "No changes to commit — skipping PR creation"

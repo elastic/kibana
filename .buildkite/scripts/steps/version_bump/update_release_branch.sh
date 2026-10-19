@@ -22,7 +22,7 @@ if ! grep -qF '* @kibanamachine' .github/CODEOWNERS; then
 fi
 
 echo "Disabling serverless jest integration config on release branch"
-jq '. + ["src/core/server/integration_tests/saved_objects/serverless/migrations/jest.integration.config.js"] | unique' \
+jq '. + ["src/core/packages/core/server/integration_tests/saved_objects/serverless/migrations/jest.integration.config.js"] | unique' \
   .buildkite/disabled_jest_configs.json > .buildkite/disabled_jest_configs.json.tmp \
   && mv .buildkite/disabled_jest_configs.json.tmp .buildkite/disabled_jest_configs.json
 
@@ -41,9 +41,9 @@ done
 
 echo "Skipping serverless core integration tests on release branch"
 SERVERLESS_TESTS=(
-  "src/core/server/integration_tests/elasticsearch/capabilities_serverless.test.ts"
-  "src/core/server/integration_tests/elasticsearch/project_routing_serverless_cps.test.ts"
-  "src/core/server/integration_tests/elasticsearch/project_routing_serverless_non_cps.test.ts"
+  "src/core/packages/core/server/integration_tests/elasticsearch/capabilities_serverless.test.ts"
+  "src/core/packages/core/server/integration_tests/elasticsearch/project_routing_serverless_cps.test.ts"
+  "src/core/packages/core/server/integration_tests/elasticsearch/project_routing_serverless_non_cps.test.ts"
 )
 for test_file in "${SERVERLESS_TESTS[@]}"; do
   if grep -q "^describe\.skip(" "$test_file"; then

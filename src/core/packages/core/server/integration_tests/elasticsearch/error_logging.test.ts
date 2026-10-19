@@ -95,7 +95,7 @@ describe('Error logging', () => {
         });
         // it contains the offending line for troubleshooting.
         expect(parsedLine.stack).toContain(
-          'src/core/server/integration_tests/elasticsearch/error_logging.test.ts:64:9'
+          'src/core/packages/core/server/integration_tests/elasticsearch/error_logging.test.ts:64:9'
         );
       }
     });

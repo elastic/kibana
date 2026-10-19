@@ -287,7 +287,7 @@ export function getSassOptions(repoRoot: string, dist: boolean): LegacySharedOpt
     includePaths: [
       repoRoot,
       Path.resolve(repoRoot, 'node_modules'),
-      Path.resolve(repoRoot, 'src/core/public/styles'),
+      Path.resolve(repoRoot, 'src/core/packages/core/public/styles'),
       Path.resolve(repoRoot, 'packages'),
     ],
     quietDeps: true,
@@ -306,7 +306,7 @@ function getSassLoaderChain(
 ): NonNullable<RuleSetRule['use']> {
   const globalsPath = Path.resolve(
     repoRoot,
-    `src/core/public/styles/core_app/_globals_${theme}.scss`
+    `src/core/packages/core/public/styles/core_app/_globals_${theme}.scss`
   ).replace(/\\/g, '/');
 
   return [
@@ -387,7 +387,7 @@ export function getNodeModulesScssLoaderRule(repoRoot: string, dist: boolean): R
         options: {
           additionalData: `@import "${Path.resolve(
             repoRoot,
-            'src/core/public/styles/core_app/_globals_borealislight.scss'
+            'src/core/packages/core/public/styles/core_app/_globals_borealislight.scss'
           ).replace(/\\/g, '/')}";\n`,
           implementation: require('sass-embedded'),
           sassOptions: getSassOptions(repoRoot, dist),

@@ -19,7 +19,7 @@
         "@cloud-serverless-vectordb"
       ],
       "location": {
-        "file": "src/core/test/scout/api/tests/blocked_saved_objects_api.spec.ts",
+        "file": "src/core/packages/core/test/scout/api/tests/blocked_saved_objects_api.spec.ts",
         "line": 49,
         "column": 9
       }
@@ -39,7 +39,7 @@
         "@cloud-serverless-vectordb"
       ],
       "location": {
-        "file": "src/core/test/scout/api/tests/blocked_saved_objects_api.spec.ts",
+        "file": "src/core/packages/core/test/scout/api/tests/blocked_saved_objects_api.spec.ts",
         "line": 49,
         "column": 9
       }
@@ -59,7 +59,7 @@
         "@cloud-serverless-vectordb"
       ],
       "location": {
-        "file": "src/core/test/scout/api/tests/blocked_saved_objects_api.spec.ts",
+        "file": "src/core/packages/core/test/scout/api/tests/blocked_saved_objects_api.spec.ts",
         "line": 49,
         "column": 9
       }
@@ -79,7 +79,7 @@
         "@cloud-serverless-vectordb"
       ],
       "location": {
-        "file": "src/core/test/scout/api/tests/blocked_saved_objects_api.spec.ts",
+        "file": "src/core/packages/core/test/scout/api/tests/blocked_saved_objects_api.spec.ts",
         "line": 49,
         "column": 9
       }
@@ -99,7 +99,7 @@
         "@cloud-serverless-vectordb"
       ],
       "location": {
-        "file": "src/core/test/scout/api/tests/blocked_saved_objects_api.spec.ts",
+        "file": "src/core/packages/core/test/scout/api/tests/blocked_saved_objects_api.spec.ts",
         "line": 49,
         "column": 9
       }
@@ -119,7 +119,7 @@
         "@cloud-serverless-vectordb"
       ],
       "location": {
-        "file": "src/core/test/scout/api/tests/blocked_saved_objects_api.spec.ts",
+        "file": "src/core/packages/core/test/scout/api/tests/blocked_saved_objects_api.spec.ts",
         "line": 49,
         "column": 9
       }
@@ -139,7 +139,7 @@
         "@cloud-serverless-vectordb"
       ],
       "location": {
-        "file": "src/core/test/scout/api/tests/blocked_saved_objects_api.spec.ts",
+        "file": "src/core/packages/core/test/scout/api/tests/blocked_saved_objects_api.spec.ts",
         "line": 49,
         "column": 9
       }
@@ -159,7 +159,7 @@
         "@cloud-serverless-vectordb"
       ],
       "location": {
-        "file": "src/core/test/scout/api/tests/blocked_saved_objects_api.spec.ts",
+        "file": "src/core/packages/core/test/scout/api/tests/blocked_saved_objects_api.spec.ts",
         "line": 49,
         "column": 9
       }
@@ -179,7 +179,7 @@
         "@cloud-serverless-vectordb"
       ],
       "location": {
-        "file": "src/core/test/scout/api/tests/blocked_saved_objects_api.spec.ts",
+        "file": "src/core/packages/core/test/scout/api/tests/blocked_saved_objects_api.spec.ts",
         "line": 49,
         "column": 9
       }
@@ -199,7 +199,7 @@
         "@cloud-serverless-vectordb"
       ],
       "location": {
-        "file": "src/core/test/scout/api/tests/blocked_saved_objects_api.spec.ts",
+        "file": "src/core/packages/core/test/scout/api/tests/blocked_saved_objects_api.spec.ts",
         "line": 49,
         "column": 9
       }
@@ -219,7 +219,7 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/core/test/scout/api/tests/capabilities.spec.ts",
+        "file": "src/core/packages/core/test/scout/api/tests/capabilities.spec.ts",
         "line": 18,
         "column": 11
       }
@@ -239,7 +239,7 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/core/test/scout/api/tests/compression.spec.ts",
+        "file": "src/core/packages/core/test/scout/api/tests/compression.spec.ts",
         "line": 17,
         "column": 11
       }
@@ -259,7 +259,7 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/core/test/scout/api/tests/compression.spec.ts",
+        "file": "src/core/packages/core/test/scout/api/tests/compression.spec.ts",
         "line": 25,
         "column": 24
       }
@@ -279,7 +279,7 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/core/test/scout/api/tests/status.spec.ts",
+        "file": "src/core/packages/core/test/scout/api/tests/status.spec.ts",
         "line": 21,
         "column": 5
       }
@@ -299,7 +299,7 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/core/test/scout/api/tests/status.spec.ts",
+        "file": "src/core/packages/core/test/scout/api/tests/status.spec.ts",
         "line": 58,
         "column": 12
       }
@@ -319,7 +319,7 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/core/test/scout/api/tests/translations.spec.ts",
+        "file": "src/core/packages/core/test/scout/api/tests/translations.spec.ts",
         "line": 27,
         "column": 38
       }
@@ -339,7 +339,7 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/core/test/scout/api/tests/translations.spec.ts",
+        "file": "src/core/packages/core/test/scout/api/tests/translations.spec.ts",
         "line": 43,
         "column": 12
       }
@@ -359,7 +359,7 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/core/test/scout/api/tests/translations.spec.ts",
+        "file": "src/core/packages/core/test/scout/api/tests/translations.spec.ts",
         "line": 55,
         "column": 14
       }
@@ -379,7 +379,7 @@
         "@cloud-serverless-vectordb"
       ],
       "location": {
-        "file": "src/core/test/scout/api/tests/ui_settings_crud.spec.ts",
+        "file": "src/core/packages/core/test/scout/api/tests/ui_settings_crud.spec.ts",
         "line": 33,
         "column": 45
       }
@@ -399,7 +399,7 @@
         "@cloud-serverless-vectordb"
       ],
       "location": {
-        "file": "src/core/test/scout/api/tests/ui_settings_crud.spec.ts",
+        "file": "src/core/packages/core/test/scout/api/tests/ui_settings_crud.spec.ts",
         "line": 43,
         "column": 7
       }
@@ -419,7 +419,7 @@
         "@cloud-serverless-vectordb"
       ],
       "location": {
-        "file": "src/core/test/scout/api/tests/ui_settings_crud.spec.ts",
+        "file": "src/core/packages/core/test/scout/api/tests/ui_settings_crud.spec.ts",
         "line": 59,
         "column": 12
       }
@@ -439,7 +439,7 @@
         "@cloud-serverless-vectordb"
       ],
       "location": {
-        "file": "src/core/test/scout/api/tests/ui_settings_crud.spec.ts",
+        "file": "src/core/packages/core/test/scout/api/tests/ui_settings_crud.spec.ts",
         "line": 71,
         "column": 12
       }
@@ -459,7 +459,7 @@
         "@cloud-serverless-vectordb"
       ],
       "location": {
-        "file": "src/core/test/scout/api/tests/ui_settings_crud.spec.ts",
+        "file": "src/core/packages/core/test/scout/api/tests/ui_settings_crud.spec.ts",
         "line": 86,
         "column": 48
       }
@@ -479,7 +479,7 @@
         "@cloud-serverless-vectordb"
       ],
       "location": {
-        "file": "src/core/test/scout/api/tests/ui_settings_crud.spec.ts",
+        "file": "src/core/packages/core/test/scout/api/tests/ui_settings_crud.spec.ts",
         "line": 99,
         "column": 16
       }
@@ -499,7 +499,7 @@
         "@cloud-serverless-vectordb"
       ],
       "location": {
-        "file": "src/core/test/scout/api/tests/ui_settings_validate.spec.ts",
+        "file": "src/core/packages/core/test/scout/api/tests/ui_settings_validate.spec.ts",
         "line": 31,
         "column": 11
       }
@@ -519,7 +519,7 @@
         "@cloud-serverless-vectordb"
       ],
       "location": {
-        "file": "src/core/test/scout/api/tests/ui_settings_validate.spec.ts",
+        "file": "src/core/packages/core/test/scout/api/tests/ui_settings_validate.spec.ts",
         "line": 47,
         "column": 7
       }
@@ -539,7 +539,7 @@
         "@cloud-serverless-vectordb"
       ],
       "location": {
-        "file": "src/core/test/scout/api/tests/ui_settings_validate.spec.ts",
+        "file": "src/core/packages/core/test/scout/api/tests/ui_settings_validate.spec.ts",
         "line": 65,
         "column": 7
       }
@@ -559,7 +559,7 @@
         "@cloud-serverless-vectordb"
       ],
       "location": {
-        "file": "src/core/test/scout/api/tests/ui_settings_validate.spec.ts",
+        "file": "src/core/packages/core/test/scout/api/tests/ui_settings_validate.spec.ts",
         "line": 82,
         "column": 7
       }

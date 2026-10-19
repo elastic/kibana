@@ -9,8 +9,8 @@
 
 module.exports = {
   preset: '@kbn/test/jest_integration_node',
-  rootDir: '../../../../..',
-  roots: ['<rootDir>/src/core/server/integration_tests/elasticsearch'],
+  rootDir: '../../../../../../..',
+  roots: ['<rootDir>/src/core/packages/core/server/integration_tests/elasticsearch'],
   // must override to match all test given there is no `integration_tests` subfolder
   testMatch: ['**/*.test.{js,mjs,ts,tsx}'],
   // Force exit after tests complete - necessary for Docker-based integration tests

@@ -15,7 +15,7 @@ project:
   description: Moon project for @kbn/core
   channel: ''
   owner: '@elastic/kibana-core'
-  sourceRoot: src/core
+  sourceRoot: src/core/packages/core
 dependsOn:
   - '@kbn/core-base-common'
   - '@kbn/config'
