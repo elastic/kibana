@@ -183,6 +183,18 @@ describe('generateWorkflowYaml', () => {
       const yaml = parse(generateWorkflowYaml('auto-123', automation));
       expect(yaml.triggers).toEqual([{ type: 'manual' }]);
     });
+
+    // An alert investigation requires `context.alerts`, which a manual run has none of.
+    it('investigates the prompt rather than an alert', () => {
+      const automation = baseAutomation();
+      automation.trigger.rows = [{ kind: 'schedule' }];
+      const yaml = parse(generateWorkflowYaml('auto-123', automation));
+      expect(yaml.steps[0].with).toMatchObject({
+        subject_type: 'manual',
+        subject_id: 'auto-123',
+        title: 'Test automation',
+      });
+    });
   });
 
   describe('slack trigger', () => {
@@ -392,6 +404,30 @@ describe('generateWorkflowYaml', () => {
           subject_id: '{{ event.connectorId }}:{{ event.channel }}:{{ event.messageId }}',
           title: 'Test automation',
         });
+      });
+
+      it("names the message's thread, so a reply in it continues the investigation", () => {
+        const automation = slackAutomation(slackRow());
+        automation.completions = [{ action: 'post_to_slack', targetMode: 'thread' }];
+        const yaml = parse(generateWorkflowYaml('auto-123', automation));
+        expect(yaml.steps[0].with.slack_thread).toEqual({
+          workspace: '{{ event.workspace }}',
+          channel: '{{ event.channel }}',
+          thread_ts: '{{ event.messageId }}',
+        });
+      });
+
+      it.each<[string, NightshiftAutomationAttributes['completions']]>([
+        ['reports nowhere', []],
+        [
+          'reports in another channel',
+          [{ action: 'post_to_slack', targetMode: 'channel', destination: '#prod-alerts' }],
+        ],
+      ])('leaves the thread unnamed when the automation %s', (_, completions) => {
+        const automation = slackAutomation(slackRow());
+        automation.completions = completions;
+        const yaml = parse(generateWorkflowYaml('auto-123', automation));
+        expect(yaml.steps[0].with.slack_thread).toBeUndefined();
       });
 
       it('puts the slack message in the prompt after the prompt template', () => {
