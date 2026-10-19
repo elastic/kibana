@@ -138,7 +138,9 @@ describe('isEmptyModelResponseErrorEntry', () => {
   });
 
   it('returns false for other persisted errors', () => {
-    expect(isEmptyModelResponseErrorEntry('generate node is unable to parse (inference)')).toBe(false);
+    expect(isEmptyModelResponseErrorEntry('generate node is unable to parse (inference)')).toBe(
+      false
+    );
   });
 });
 
@@ -163,9 +165,7 @@ describe('isEmptyModelResponseError', () => {
   });
 
   it('returns false for parse errors, and for non-errors', () => {
-    expect(isEmptyModelResponseError(new SyntaxError('Unexpected end of JSON input'))).toBe(
-      false
-    );
+    expect(isEmptyModelResponseError(new SyntaxError('Unexpected end of JSON input'))).toBe(false);
     expect(isEmptyModelResponseError(undefined)).toBe(false);
     expect(isEmptyModelResponseError('boom')).toBe(false);
   });
