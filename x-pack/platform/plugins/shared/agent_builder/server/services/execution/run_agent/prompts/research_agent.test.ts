@@ -319,8 +319,8 @@ describe('getResearchAgentPrompt', () => {
     const system = asText(messages[0]);
     const discovery = system.slice(system.indexOf('## CONNECTOR DISCOVERY'));
 
-    expect(discovery).toContain('load the `ki-retrieval` skill');
     expect(discovery).toContain('query the `elastic` AI Index for connector records');
+    expect(discovery).toContain('with `query_ai_indices`');
     expect(discovery).toContain('call `sml_attach` with its `id`');
     expect(discovery).not.toContain('sml_search');
   });
