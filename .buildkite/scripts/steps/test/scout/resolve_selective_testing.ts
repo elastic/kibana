@@ -42,7 +42,7 @@ import type { ScoutLog } from './scout_log.ts';
 import { shouldSkipScoutTests } from './scout_ftr_modules.ts';
 import { SCOUT_MODULE_GRAPH_IGNORE } from './scout_module_graph_ignore.ts';
 import { computeMoonShadow } from './moon_shadow.ts';
-import { getAffectedPackages, listChangedFiles } from '#pipeline-utils';
+import { filterIgnoredFiles, getAffectedPackages, listChangedFiles } from '#pipeline-utils';
 
 const writeLog = (message: string) => process.stderr.write(`${message}\n`);
 const log: ScoutLog = {
@@ -95,7 +95,8 @@ if (!mergeBase || !outPath) {
       ignorePatterns: SCOUT_MODULE_GRAPH_IGNORE,
       ignoreUncategorizedChanges: true,
     }),
-    changedFiles,
+    // Same exclusions as the module graph, so docs / Jest-only files don't add implicit consumers.
+    filterIgnoredFiles(changedFiles, SCOUT_MODULE_GRAPH_IGNORE),
     log
   );
 
