@@ -215,6 +215,28 @@ describe('useBackNavigation', () => {
       expect(result.current.back).toEqual(pluginRootTarget);
     });
 
+    it('keeps the kuery of the current URL, but not its time range', () => {
+      const { result } = renderBackNavigation({
+        initialEntry: '/storage-explorer?rangeFrom=now-15m&rangeTo=now&kuery=foo',
+        initialStatus: withData,
+      });
+      expect(result.current.back).toEqual({
+        ...pluginRootTarget,
+        href: '/base/app/profiling?kuery=foo',
+      });
+    });
+
+    it('keeps both the kuery and the schema of the current URL', () => {
+      const { result } = renderBackNavigation({
+        initialEntry: `/settings?kuery=foo&schema=${ProfilingSchema.OTEL}`,
+        initialStatus: withData,
+      });
+      expect(result.current.back).toEqual({
+        ...pluginRootTarget,
+        href: `/base/app/profiling?kuery=foo&schema=${ProfilingSchema.OTEL}`,
+      });
+    });
+
     it('drops the back button again when navigating to a content route', () => {
       const { result } = renderBackNavigation({
         initialEntry: '/storage-explorer',
