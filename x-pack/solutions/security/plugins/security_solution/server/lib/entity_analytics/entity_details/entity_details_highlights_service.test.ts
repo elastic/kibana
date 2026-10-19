@@ -32,6 +32,7 @@ const makeEnrichedEntity = ({
   riskScoreNorm,
   criticality,
   anomalyIds = [],
+  anomalyShape = 'legacy',
   vulnerabilitiesTotal,
 }: {
   id: string;
@@ -39,6 +40,8 @@ const makeEnrichedEntity = ({
   riskScoreNorm?: number;
   criticality?: string;
   anomalyIds?: string[];
+  /** `details` mirrors the `AnomalySummaryEntry` produced when entityAnalyticsAnomalyDetails is on. */
+  anomalyShape?: 'legacy' | 'details';
   vulnerabilitiesTotal?: Record<string, number>;
 }): EnrichedEntity =>
   ({
@@ -58,7 +61,10 @@ const makeEnrichedEntity = ({
           }
         : undefined,
     anomalies: anomalyIds.map((anomalyId) => ({
-      source: { _id: anomalyId, job_id: `job-${anomalyId}`, record_score: 50 },
+      source:
+        anomalyShape === 'details'
+          ? { recordId: anomalyId, entityId: id, jobId: `job-${anomalyId}`, recordScore: 50 }
+          : { _id: anomalyId, job_id: `job-${anomalyId}`, record_score: 50 },
       job: { name: `Job ${anomalyId}` },
     })),
     vulnerabilities: [],
@@ -175,6 +181,29 @@ describe('entityDetailsHighlightsServiceFactory.getV2Data', () => {
       });
       // Users have no vulnerabilities section.
       expect(result).not.toHaveProperty('vulnerabilities');
+    });
+
+    it('merges an anomaly-details record that several members matched', async () => {
+      const detailsTarget = makeEnrichedEntity({
+        id: 'user:carol',
+        name: 'carol',
+        riskScoreNorm: 71.25,
+        anomalyIds: ['a-1'],
+        anomalyShape: 'details',
+      });
+      const detailsAlias = makeEnrichedEntity({
+        id: 'user:carol-alias',
+        name: 'carol.alias',
+        anomalyIds: ['a-1', 'a-2'],
+        anomalyShape: 'details',
+      });
+      mockGetEnrichedEntities
+        .mockResolvedValueOnce({ entities: [detailsTarget] })
+        .mockResolvedValueOnce({ entities: [detailsAlias] });
+
+      const result = await buildService().getV2Data({ ...getDataOpts, mode: 'resolved' });
+
+      expect(result.anomalies?.map((anomaly) => anomaly.id)).toEqual(['job-a-1', 'job-a-2']);
     });
 
     it('anonymizes member identifiers with the shared replacements', async () => {

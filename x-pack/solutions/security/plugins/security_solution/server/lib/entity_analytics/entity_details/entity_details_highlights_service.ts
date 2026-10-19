@@ -175,12 +175,15 @@ const sumVulnerabilitiesTotals = (enrichedEntities: EnrichedEntity[]): Record<st
     return totals;
   }, getEmptyVulnerabilitiesTotal());
 
-/** Anomalies of every member, dropping repeats of the same ML record. */
+/**
+ * Anomalies of every member, dropping repeats of the same ML record. The record is identified
+ * by `recordId` (anomaly-details representation) or `_id` (legacy representation).
+ */
 const collectAnomalies = (enrichedEntities: EnrichedEntity[]): AnomalyRecord[] => {
   const seenIds = new Set<string>();
   return enrichedEntities.flatMap(({ anomalies }) =>
     (anomalies ?? []).filter(({ source }) => {
-      const id = source._id;
+      const id = source.recordId ?? source._id;
       if (typeof id !== 'string') {
         return true;
       }
