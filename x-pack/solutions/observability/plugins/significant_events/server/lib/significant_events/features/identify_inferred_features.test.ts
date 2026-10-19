@@ -165,7 +165,6 @@ describe('identifyInferredFeatures', () => {
     mockExecuteFeatureIdentificationAgent.mockResolvedValue({
       features: [],
       ignoredFeatures: [],
-      suggestedSlugs: [],
       tokensUsed: { prompt: 0, completion: 0, total: 0 },
     });
 
