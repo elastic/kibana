@@ -141,6 +141,7 @@ describe('RulesClient', () => {
     const config: PluginConfig = {
       enabled: true,
       invalidateApiKeysTask: { interval: '5m', removalDelay: '1h' },
+      retention: { ruleEvents: { enabled: false, dataRetention: '90d' } },
       rules: {
         minimumScheduleInterval: '1m',
         maxScheduledPerMinute: 400,
@@ -213,6 +214,37 @@ describe('RulesClient', () => {
           updated_at: '2025-01-01T00:00:00.000Z',
         })
       );
+    });
+
+    it('stores the server-provided template and returns it', async () => {
+      const client = createClient();
+
+      const res = await client.createRule({
+        data: baseCreateData,
+        options: { id: 'rule-id-template', template: { id: 'template-1' } },
+      });
+
+      expect(rulesSavedObjectService.bulkCreate).toHaveBeenCalledWith([
+        expect.objectContaining({
+          attrs: expect.objectContaining({
+            metadata: expect.objectContaining({ template: { id: 'template-1' } }),
+          }),
+        }),
+      ]);
+      expect(res.metadata.template).toEqual({ id: 'template-1' });
+    });
+
+    it('rejects metadata.template in the request body', async () => {
+      const client = createClient();
+
+      await expect(
+        client.createRule({
+          data: {
+            ...baseCreateData,
+            metadata: { name: 'rule-1', template: { id: 'template-1' } },
+          } as unknown as typeof baseCreateData,
+        })
+      ).rejects.toMatchObject({ output: { statusCode: 400 } });
     });
 
     it('writes dashboard artifact references and rejects invalid registered artifact data', async () => {
@@ -1581,6 +1613,35 @@ describe('RulesClient', () => {
           references: [],
         });
         expect(res.created).toBe(false);
+      });
+
+      it('keeps the existing template', async () => {
+        const client = createClient();
+        const existingDoc = {
+          id: 'rule-id-1',
+          attributes: {
+            ...baseSoAttrs,
+            metadata: { name: 'before', template: { id: 'template-1' } },
+          },
+          version: 'WzEsMV0=',
+        };
+        rulesSavedObjectService.get
+          .mockResolvedValueOnce(existingDoc)
+          .mockResolvedValueOnce(existingDoc);
+        rulesSavedObjectService.update.mockResolvedValueOnce({ id: 'rule-id-1' });
+
+        await client.upsertRule({
+          id: 'rule-id-1',
+          data: { ...baseCreateData, metadata: { name: 'after' } },
+        });
+
+        expect(rulesSavedObjectService.update).toHaveBeenCalledWith(
+          expect.objectContaining({
+            attrs: expect.objectContaining({
+              metadata: expect.objectContaining({ name: 'after', template: { id: 'template-1' } }),
+            }),
+          })
+        );
       });
 
       it('reschedules the task with the new interval', async () => {

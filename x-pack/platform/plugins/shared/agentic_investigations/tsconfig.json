@@ -8,9 +8,12 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "scripts/**/*",
     "../../../../../typings/**/*"
   ],
   "kbn_references": [
+    "@kbn/dev-cli-runner",
+    "@kbn/tooling-log",
     "@kbn/core",
     "@kbn/config-schema",
     "@kbn/core-security-server",
@@ -23,6 +26,7 @@
     "@kbn/storage-adapter",
     "@kbn/workflows",
     "@kbn/workflows-extensions",
+    "@kbn/workflows-management-plugin",
     "@kbn/zod",
     "@kbn/core-http-server-mocks",
     "@kbn/zod-helpers",

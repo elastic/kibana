@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { IRouter, KibanaRequest } from '@kbn/core/server';
+import type { IRouter, KibanaRequest, Logger } from '@kbn/core/server';
 
+import { ACTIONS_INBOUND_EVENTS_ENABLED_FLAG } from '../../../common';
 import type {
   IngestEventsRequestBodyV1,
   IngestEventsRequestParamsV1,
@@ -25,9 +26,11 @@ import type { ActionsRequestHandlerContext } from '../../types';
 import {
   INBOUND_EVENTS_API_PATH,
   INBOUND_EVENTS_API_VERSION,
+  INBOUND_EVENTS_DISABLED_MESSAGE,
   INBOUND_EVENTS_SECURITY,
 } from '../../inbound/constants';
 import type { InboundEventsClient } from '../../inbound/client';
+import { logInboundIngressOutcome } from '../../inbound/log_inbound_ingress_outcome';
 import { mapIngestResultToResponse } from '../../inbound/map_ingest_result_to_response';
 
 export interface InboundEventsRouteParams {
@@ -35,6 +38,7 @@ export interface InboundEventsRouteParams {
   maxBodyBytes: number;
   inboundEventsClient: InboundEventsClient;
   getSpaceId: (request: KibanaRequest) => string;
+  logger: Logger;
 }
 
 type InboundEventsHttpRequest = KibanaRequest<
@@ -48,6 +52,7 @@ export function inboundEventsRoute({
   maxBodyBytes,
   inboundEventsClient,
   getSpaceId,
+  logger,
 }: InboundEventsRouteParams): void {
   router.versioned
     .post({
@@ -56,7 +61,7 @@ export function inboundEventsRoute({
       security: INBOUND_EVENTS_SECURITY,
       summary: 'Ingest an external event for a Kibana connector',
       description:
-        'Public ingress for Kibana connector-scoped inbound events. Authenticate with an ingest token (`Authorization: Bearer`, or `token` query parameter as fallback). A successful emit returns 202. A connector HTTP ack returns 200 (`.inboundWebhook` handshake is `{ challenge }`) and does not emit.',
+        'Public ingress for Kibana connector-scoped inbound events. Authenticate with an ingest token (`Authorization: Bearer`, or `token` query parameter as fallback). A successful emit returns 202. A connector HTTP ack returns 200 (JSON or a plain-text body) and does not emit.',
       options: {
         // External vendors cannot send Kibana session XSRF headers (`kbn-xsrf`).
         // Auth is the ingest token (Bearer, or `token` query if Authorization is
@@ -68,7 +73,13 @@ export function inboundEventsRoute({
           stability: 'experimental',
         },
         body: {
-          accepts: ['application/json', 'application/*+json', '*/*'],
+          accepts: [
+            'application/json',
+            'application/*+json',
+            'application/x-www-form-urlencoded',
+            'text/plain',
+            '*/*',
+          ],
           maxBytes: maxBodyBytes,
         },
       },
@@ -85,13 +96,16 @@ export function inboundEventsRoute({
           response: {
             200: {
               description:
-                'Connector HTTP 200 ack. No event is emitted. `.inboundWebhook` handshake is `{ challenge }`.',
+                'Connector HTTP 200 ack. No event is emitted. JSON or a plain-text body.',
               body: () => ingestEventsAckResponseSchemaV1,
             },
             202: {
               description:
                 'The ingress request was accepted. Downstream emit failures may still be partial; see server logs.',
               body: () => ingestEventsResponseSchemaV1,
+            },
+            403: {
+              description: 'Inbound connector events are disabled.',
             },
             404: {
               description:
@@ -107,8 +121,26 @@ export function inboundEventsRoute({
           },
         },
       },
-      async (_context, request: InboundEventsHttpRequest, response) => {
+      async (context, request: InboundEventsHttpRequest, response) => {
         const { connector_type_id: connectorTypeId, connector_id: connectorId } = request.params;
+        const { featureFlags } = await context.core;
+        const inboundEventsFlagEnabled = await featureFlags.getBooleanValue(
+          ACTIONS_INBOUND_EVENTS_ENABLED_FLAG,
+          true
+        );
+        if (!inboundEventsFlagEnabled) {
+          const spaceId = getSpaceId(request);
+          logInboundIngressOutcome(logger, {
+            outcome: 'disabled',
+            spaceId,
+            connectorId,
+            connectorTypeId,
+            requestId: request.id,
+            detail: 'feature_flag',
+          });
+          return response.forbidden({ body: INBOUND_EVENTS_DISABLED_MESSAGE });
+        }
+
         const result = await inboundEventsClient.ingest({
           connectorTypeId,
           connectorId,

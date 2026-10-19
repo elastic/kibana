@@ -8,7 +8,6 @@
 import React from 'react';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import { QueryClient } from '@kbn/react-query';
-import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { createMockLocators, ListPageTestProviders } from '../../test_utils/test_providers';
 import { ManageRulesHrefProvider } from '../../application/manage_rules_href_context';
 import { AlertsListPage } from './alerts_list_page';
@@ -42,6 +41,9 @@ jest.mock('@kbn/core-di-browser', () => {
     useService: (token: unknown) => {
       if (token === ActualUserCapabilities) {
         return new ActualUserCapabilities({ capabilities: mockCapabilities });
+      }
+      if (token === 'notifications') {
+        return { tours: { isEnabled: () => true } };
       }
       return {};
     },
@@ -257,11 +259,6 @@ describe('AlertsListPage', () => {
     });
   });
 
-  it('renders the experimental badge in the page header', () => {
-    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Alerts');
-    expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
-  });
-
   it('renders the manage rules link in the app header menu', async () => {
     const { rulesLocators } = mockLocators;
     const manageRulesLink = await screen.findByTestId('alertingV2EpisodesListManageRules');
@@ -297,6 +294,7 @@ describe('AlertsListPage', () => {
     const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
     expect(lastCall?.columns).toEqual([
       'episode.status',
+      'alerting_source',
       'severity',
       '@timestamp',
       'rule.id',
@@ -322,6 +320,38 @@ describe('AlertsListPage', () => {
       displayAsText: label,
       isSortable: false,
     });
+  });
+
+  it.each([
+    'episode.status',
+    'alerting_source',
+    'severity',
+    '@timestamp',
+    'rule.id',
+    'duration',
+    'tags',
+    'rule_tags',
+    'assignees',
+  ])('takes the remove column action away from the %s column', (columnId) => {
+    const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+    const customize = lastCall?.customGridColumnsConfiguration?.[columnId];
+
+    expect(customize).toBeDefined();
+    const column = customize!({
+      column: {
+        id: columnId,
+        actions: { showHide: { label: 'Remove column' }, showMoveLeft: true },
+      },
+      headerRowHeight: 1,
+    });
+    expect(column.actions).toEqual({ showHide: false, showMoveLeft: true });
+  });
+
+  it('keeps disabled column actions disabled', () => {
+    const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+    const customize = lastCall?.customGridColumnsConfiguration?.['rule.id'];
+
+    expect(customize!({ column: { id: 'rule.id', actions: false } }).actions).toBe(false);
   });
 
   it('does not pass key prop derived from tableKey (no tableKey state)', () => {
@@ -754,12 +784,16 @@ describe('AlertsListPage fetch errors', () => {
     await waitFor(() => {
       expect(mockServices.notifications.toasts.addError).toHaveBeenCalledWith(
         expect.objectContaining({ message: 'classic alerts failed' }),
-        expect.objectContaining({ title: 'Failed to fetch alerts for v1 alerts' })
+        expect.objectContaining({
+          title: 'Failed to fetch alerts for Classic Alerting',
+        })
       );
     });
     expect(screen.queryByText('Unable to load some alerts')).not.toBeInTheDocument();
     expect(screen.queryByTestId('alertingV2EpisodesListFetchError')).not.toBeInTheDocument();
-    expect(screen.queryByText('Failed to fetch alerts for v1 alerts')).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('Failed to fetch alerts for Classic Alerting')
+    ).not.toBeInTheDocument();
   });
 
   it.each([403, 503])('does not toast when classic alerts return %s', async (status) => {
@@ -789,7 +823,9 @@ describe('AlertsListPage fetch errors', () => {
     await waitFor(() => {
       expect(mockServices.notifications.toasts.addError).toHaveBeenCalledWith(
         expect.objectContaining({ message: 'v2 episodes failed' }),
-        expect.objectContaining({ title: 'Failed to fetch alerts for v2 alerts' })
+        expect.objectContaining({
+          title: 'Failed to fetch alerts for Universal Alerting',
+        })
       );
     });
     expect(screen.queryByText('Unable to load some alerts')).not.toBeInTheDocument();
