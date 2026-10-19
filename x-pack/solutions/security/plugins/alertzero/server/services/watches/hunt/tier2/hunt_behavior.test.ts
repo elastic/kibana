@@ -1048,23 +1048,29 @@ describe('huntBehavior', () => {
   describe('collapsing same-artifact behaviors', () => {
     const sharedIoc = { type: 'domain', value: 'evil.example.com' };
     const COLLAPSE_TEXT = `${REPORT_TEXT} Attackers used evil.example.com for both lateral movement and persistence.`;
+    // A survivor query that filters on the shared artifact, so its siblings really are covered.
+    // GROUNDED_ESQL grounds on `AssumeRole` instead, which clears the gate without hunting the
+    // domain at all — the case a sibling must not be collapsed against.
+    const COVERING_ESQL =
+      'FROM logs-aws.cloudtrail-*\n| WHERE destination.domain == "evil.example.com"\n| LIMIT 10';
+    const sharedCandidates = [
+      {
+        technique_id: 'T1078.004',
+        evidence_quote: 'evil.example.com for both lateral movement',
+        llm_confidence: 0.9,
+      },
+      {
+        technique_id: 'T1566',
+        evidence_quote: 'evil.example.com for both lateral movement and persistence',
+        llm_confidence: 0.5,
+      },
+    ];
 
     it('generates once for two behaviors whose evidence names the same artifact, and marks the loser collapsed', async () => {
-      generateByTechnique({ 'T1078.004': GROUNDED_ESQL });
+      generateByTechnique({ 'T1078.004': COVERING_ESQL });
 
       const result = await huntBehavior(
-        buildMockModel([
-          {
-            technique_id: 'T1078.004',
-            evidence_quote: 'evil.example.com for both lateral movement',
-            llm_confidence: 0.9,
-          },
-          {
-            technique_id: 'T1566',
-            evidence_quote: 'evil.example.com for both lateral movement and persistence',
-            llm_confidence: 0.5,
-          },
-        ]),
+        buildMockModel(sharedCandidates),
         logger,
         { ...executeParams, text: COLLAPSE_TEXT, iocs: [sharedIoc] },
         esClient
@@ -1074,7 +1080,7 @@ describe('huntBehavior', () => {
 
       const winner = result.behaviors.find((b) => b.technique_id === 'T1078.004');
       const loser = result.behaviors.find((b) => b.technique_id === 'T1566');
-      expect(winner?.validated_esql).toContain(GROUNDED_ESQL);
+      expect(winner?.validated_esql).toContain(COVERING_ESQL);
       expect(loser?.execution).toEqual({
         executed: false,
         row_count: 0,
@@ -1095,6 +1101,72 @@ describe('huntBehavior', () => {
           detail: expect.stringContaining('T1078.004'),
         })
       );
+    });
+
+    it('generates the sibling in a second wave when the survivor grounds on a different report literal', async () => {
+      // The survivor's query clears the grounding gate on `AssumeRole`, never mentioning the
+      // domain its sibling was deferred for. Nothing hunted that domain, so the sibling is not
+      // `collapsed`; it gets its own generation instead.
+      generateByTechnique({ 'T1078.004': GROUNDED_ESQL, T1566: COVERING_ESQL });
+
+      const result = await huntBehavior(
+        buildMockModel(sharedCandidates),
+        logger,
+        { ...executeParams, text: COLLAPSE_TEXT, iocs: [sharedIoc] },
+        esClient
+      );
+
+      expect(generateEsqlMock).toHaveBeenCalledTimes(2);
+      const sibling = result.behaviors.find((b) => b.technique_id === 'T1566');
+      expect(sibling?.validated_esql).toContain(COVERING_ESQL);
+      expect(sibling?.execution?.inconclusive_reason).toBeUndefined();
+      expect(result.incomplete?.some((i) => i.reason === 'collapsed')).not.toBe(true);
+    });
+
+    it('generates the sibling in a second wave when the survivor produced no usable query', async () => {
+      // Only the sibling has a fixture; the survivor's generation errors out. A sibling
+      // collapsed onto a survivor with no query would be retired on a claim nothing ran.
+      generateByTechnique({ T1566: COVERING_ESQL });
+
+      const result = await huntBehavior(
+        buildMockModel(sharedCandidates),
+        logger,
+        { ...executeParams, text: COLLAPSE_TEXT, iocs: [sharedIoc] },
+        esClient
+      );
+
+      expect(generateEsqlMock).toHaveBeenCalledTimes(2);
+      const survivor = result.behaviors.find((b) => b.technique_id === 'T1078.004');
+      const sibling = result.behaviors.find((b) => b.technique_id === 'T1566');
+      expect(survivor?.execution?.inconclusive_reason).toBe('generation_failed');
+      expect(sibling?.validated_esql).toContain(COVERING_ESQL);
+      expect(result.incomplete?.some((i) => i.reason === 'collapsed')).not.toBe(true);
+    });
+
+    it('charges uncovered siblings to the generation budget when the first wave used it all', async () => {
+      // 20 survivors fill the budget. Their queries ground on `AssumeRole`, so the two deferred
+      // siblings are not covered, but no budget remains to generate them: they report
+      // `generation_budget`, never `collapsed`, and no 21st generation call is made.
+      const ids = [...enterpriseCatalog.techniqueById.keys()].slice(0, 22);
+      const sharedQuote = 'evidence mentioning evil.example.com directly';
+      generateEsqlMock.mockResolvedValue({ query: GROUNDED_ESQL });
+
+      const candidates = ids.map((technique_id, index) => ({
+        technique_id,
+        evidence_quote: index < 3 ? sharedQuote : 'evidence',
+        llm_confidence: 0.5 + index * 0.01,
+      }));
+
+      const result = await huntBehavior(
+        buildMockModel(candidates),
+        logger,
+        { ...executeParams, text: `${REPORT_TEXT} ${sharedQuote}`, iocs: [sharedIoc] },
+        esClient
+      );
+
+      expect(generateEsqlMock).toHaveBeenCalledTimes(20);
+      expect(result.incomplete?.some((i) => i.reason === 'collapsed')).not.toBe(true);
+      expect(result.incomplete?.filter((i) => i.reason === 'generation_budget')).toHaveLength(2);
     });
 
     it('does not collapse behaviors whose quotes name no shared artifact', async () => {
@@ -1134,7 +1206,7 @@ describe('huntBehavior', () => {
     it('collapses before the budget, so 22 behaviors sharing one artifact across 3 of them fit inside it', async () => {
       const ids = [...enterpriseCatalog.techniqueById.keys()].slice(0, 22);
       const sharedQuote = 'evidence mentioning evil.example.com directly';
-      generateEsqlMock.mockResolvedValue({ query: GROUNDED_ESQL });
+      generateEsqlMock.mockResolvedValue({ query: COVERING_ESQL });
 
       const candidates = ids.map((technique_id, index) => ({
         technique_id,

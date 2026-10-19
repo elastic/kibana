@@ -7,7 +7,11 @@
 
 import type { HuntBehaviorIoc } from '@kbn/alertzero-common';
 import type { ValidatedBehavior } from './types';
-import { artifactSetKey, collapseByArtifactSet } from './behavior_artifact_set';
+import {
+  artifactSetKey,
+  collapseByArtifactSet,
+  queryCarriesArtifacts,
+} from './behavior_artifact_set';
 
 const ioc = (value: string, type = 'domain'): HuntBehaviorIoc => ({ type, value });
 
@@ -156,5 +160,45 @@ describe('collapseByArtifactSet', () => {
 
     expect(survivors).toEqual([first, second]);
     expect(collapsed).toEqual([]);
+  });
+});
+
+describe('queryCarriesArtifacts', () => {
+  it('is true when the query names every artifact in the key as a literal', () => {
+    const key = artifactSetKey('seen at evil.example.com and 10.0.0.1', [
+      { type: 'domain', value: 'evil.example.com' },
+      { type: 'ip', value: '10.0.0.1' },
+    ])!;
+    const esql =
+      'FROM logs-* | WHERE destination.domain == "evil.example.com" AND source.ip == "10.0.0.1"';
+    expect(queryCarriesArtifacts(esql, key)).toBe(true);
+  });
+
+  it('is false when the query grounds on a different report literal than the key', () => {
+    const key = artifactSetKey('seen at evil.example.com', [
+      { type: 'domain', value: 'evil.example.com' },
+    ])!;
+    expect(queryCarriesArtifacts('FROM logs-* | WHERE event.action == "AssumeRole"', key)).toBe(
+      false
+    );
+  });
+
+  it('is false when the query carries only some of the artifacts in the key', () => {
+    const key = artifactSetKey('seen at evil.example.com and 10.0.0.1', [
+      { type: 'domain', value: 'evil.example.com' },
+      { type: 'ip', value: '10.0.0.1' },
+    ])!;
+    expect(
+      queryCarriesArtifacts('FROM logs-* | WHERE destination.domain == "evil.example.com"', key)
+    ).toBe(false);
+  });
+
+  it('matches regardless of case in the query', () => {
+    const key = artifactSetKey('seen at evil.example.com', [
+      { type: 'domain', value: 'evil.example.com' },
+    ])!;
+    expect(
+      queryCarriesArtifacts('FROM logs-* | WHERE destination.domain == "EVIL.Example.COM"', key)
+    ).toBe(true);
   });
 });

@@ -26,7 +26,7 @@ import {
   CONTEXT_PREAMBLE,
   ESQL_GENERATION_INSTRUCTIONS,
 } from './extraction_contract';
-import { collapseByArtifactSet } from './behavior_artifact_set';
+import { collapseByArtifactSet, queryCarriesArtifacts } from './behavior_artifact_set';
 import { toIndexedBehaviors } from './indexed_behaviors';
 import { getMitreCatalog } from './mitre_catalog';
 import { assertEsqlSourcesAllowed } from './assert_esql_sources_allowed';
@@ -860,10 +860,11 @@ export const huntBehavior = async (
     // Behaviors whose evidence names the same report artifacts are hunting the same thing
     // under different technique ids, so pay for one query per shared artifact set rather than
     // one per technique — and do it before the budget slice below, so a duplicate never spends
-    // a slot a distinct behavior could have used. Collapsed siblings are marked only after the
-    // budget cut: `collapsed` means another behavior's query covers the same artifacts, which is
-    // only true when that survivor is actually generated. A sibling of a budget-skipped survivor
-    // gets `generation_budget` instead, so the record does not claim coverage that never ran.
+    // a slot a distinct behavior could have used. Siblings are not written off here, though:
+    // `collapsed` claims that the survivor's query hunts the shared artifacts, and that is only
+    // known once the survivor's query has been generated, gated and seen to carry them. Until
+    // then a sibling is merely deferred, and one whose survivor never covered it is generated
+    // in a second wave with whatever budget remains rather than retired on a claim nothing ran.
     const { survivors, collapsed: collapsedSiblings } = collapseByArtifactSet(validated, iocs);
 
     // Highest confidence first, so a report that overruns the budget spends it on
@@ -891,26 +892,11 @@ export const huntBehavior = async (
       );
     }
 
-    const trulyCollapsed = collapsedSiblings.filter((c) => targeted.has(c.survivor.technique_id));
-    const collapsedOntoBudget = collapsedSiblings.filter(
-      (c) => !targeted.has(c.survivor.technique_id)
-    );
-    if (trulyCollapsed.length > 0) {
-      const survivorCount = new Set(trulyCollapsed.map((c) => c.survivor.technique_id)).size;
-      logger.info(
-        `[hunt:esql] collapsed ${trulyCollapsed.length} behavior(s) into ${survivorCount} ` +
-          `survivor(s) that already hunt the same report artifacts.`
-      );
-      for (const { behavior, survivor, key } of trulyCollapsed) {
-        behavior.execution = notExecuted('collapsed');
-        const sharedValues = key.split('\u0000').join(', ');
-        const detail =
-          `${behavior.technique_id} shares the same report artifacts (${sharedValues}) as ` +
-          `${survivor.technique_id}, whose query already hunts them, so it was never generated.`;
-        gap(behavior.technique_id, 'collapsed', detail.slice(0, 500));
-      }
-    }
-    for (const { behavior, survivor } of collapsedOntoBudget) {
+    // A sibling whose survivor missed the budget cut was never going to be covered: nothing
+    // hunted those artifacts, so it gets `generation_budget` rather than a coverage claim.
+    const deferredSiblings = collapsedSiblings.filter((c) => targeted.has(c.survivor.technique_id));
+    for (const { behavior, survivor } of collapsedSiblings) {
+      if (targeted.has(survivor.technique_id)) continue;
       behavior.execution = notExecuted('generation_budget');
       gap(
         behavior.technique_id,
@@ -920,21 +906,16 @@ export const huntBehavior = async (
           `so neither was generated and ${behavior.technique_id} was never searched.`
       );
     }
-    const groundedEsql = await generateGroundedEsql({
-      esqlModel: models.esql,
-      esClient,
-      logger,
-      behaviors: generationTargets,
-      text,
-      iocs,
-      articleContext,
-      allowedIndices,
-      rowLimit: rowLimit ?? DEFAULT_HUNT_QUERY_LIMIT,
-    });
-    for (const behavior of validated) {
-      // Budget-skipped behaviors are already recorded above; re-reporting them here
-      // as generation failures would name the same technique twice for two causes.
-      if (!targeted.has(behavior.technique_id)) continue;
+
+    /**
+     * Carries one generated query through the publish gates and, when the run has a window,
+     * execution. Returns the published query so a caller can see what the behavior now hunts,
+     * or `undefined` when the behavior kept its placeholder.
+     */
+    const publishBehavior = async (
+      behavior: ValidatedBehavior,
+      groundedEsql: Awaited<ReturnType<typeof generateGroundedEsql>>
+    ): Promise<string | undefined> => {
       const esql = groundedEsql.generated.get(behavior.technique_id);
       if (!esql) {
         const firstReason = groundedEsql.ungrounded.get(behavior.technique_id);
@@ -955,7 +936,7 @@ export const huntBehavior = async (
               `A later run may succeed.`
           );
         }
-        continue;
+        return undefined;
       }
       // Publication clears a source gate of its own. A staged rule reads as
       // grounded and authoritative to whoever picks it up in Investigation, so a
@@ -976,7 +957,7 @@ export const huntBehavior = async (
           `The query generated for ${behavior.technique_id} was discarded (${sourcesAllowed.reason}), ` +
             `so the technique was never searched.`
         );
-        continue;
+        return undefined;
       }
       // The source gate proves the query stays in scope; it does not prove the query
       // filters on anything from the report. An unfiltered query (`FROM <required> |
@@ -999,10 +980,10 @@ export const huntBehavior = async (
           `The query generated for ${behavior.technique_id} was discarded ` +
             `(${groundedInReport.reason}), so the technique was never searched.`
         );
-        continue;
+        return undefined;
       }
       behavior.validated_esql = `${buildGroundedEsqlHeader(behavior)}\n${esql}`;
-      if (!canExecute) continue;
+      if (!canExecute) return esql;
       const executed = await executeValidatedEsql({
         esClient,
         logger,
@@ -1030,6 +1011,96 @@ export const huntBehavior = async (
       if (executed.affected_hosts_truncated) behavior.affected_hosts_truncated = true;
       if (executed.affected_users_truncated) behavior.affected_users_truncated = true;
       if (executed.hits) behavior.hits = executed.hits;
+      return esql;
+    };
+
+    const firstWave = await generateGroundedEsql({
+      esqlModel: models.esql,
+      esClient,
+      logger,
+      behaviors: generationTargets,
+      text,
+      iocs,
+      articleContext,
+      allowedIndices,
+      rowLimit: rowLimit ?? DEFAULT_HUNT_QUERY_LIMIT,
+    });
+    const published = new Map<string, string>();
+    for (const behavior of validated) {
+      // Budget-skipped and deferred behaviors are recorded elsewhere; re-reporting them
+      // here as generation failures would name the same technique twice for two causes.
+      if (!targeted.has(behavior.technique_id)) continue;
+      const esql = await publishBehavior(behavior, firstWave);
+      if (esql) published.set(behavior.technique_id, esql);
+    }
+
+    // Now the survivors' queries are known, settle their siblings. One whose survivor published
+    // a query that carries every shared artifact is `collapsed`: the claim is true. One whose
+    // survivor kept its placeholder, or published a query grounded on some other report literal,
+    // was not covered by anything and goes into a second generation wave instead.
+    const retained: ValidatedBehavior[] = [];
+    let collapsedCount = 0;
+    for (const { behavior, survivor, key } of deferredSiblings) {
+      const survivorEsql = published.get(survivor.technique_id);
+      if (survivorEsql && queryCarriesArtifacts(survivorEsql, key)) {
+        collapsedCount += 1;
+        behavior.execution = notExecuted('collapsed');
+        const sharedValues = key.split('\u0000').join(', ');
+        const detail =
+          `${behavior.technique_id} shares the same report artifacts (${sharedValues}) as ` +
+          `${survivor.technique_id}, whose query already hunts them, so it was never generated.`;
+        gap(behavior.technique_id, 'collapsed', detail.slice(0, 500));
+      } else {
+        retained.push(behavior);
+      }
+    }
+    if (collapsedCount > 0) {
+      logger.info(
+        `[hunt:esql] collapsed ${collapsedCount} behavior(s) onto survivors whose published ` +
+          `queries hunt the same report artifacts.`
+      );
+    }
+    if (retained.length > 0) {
+      const remainingBudget = Math.max(0, MAX_GENERATED_BEHAVIORS - generationTargets.length);
+      const secondWave = [...retained]
+        .sort((a, b) => b.confidence - a.confidence)
+        .slice(0, remainingBudget);
+      const secondWaveIds = new Set(secondWave.map((b) => b.technique_id));
+      for (const behavior of retained) {
+        if (secondWaveIds.has(behavior.technique_id)) continue;
+        behavior.execution = notExecuted('generation_budget');
+        gap(
+          behavior.technique_id,
+          'generation_budget',
+          `The run reached its budget of ${MAX_GENERATED_BEHAVIORS} generated queries before ` +
+            `${behavior.technique_id}, whose artifacts no other query ended up hunting, so no ` +
+            `query was written for it and it was never searched.`
+        );
+      }
+      logger.info(
+        `[hunt:esql] ${retained.length} deferred behavior(s) were not covered by their ` +
+          `survivor's query; generating ${secondWave.length} with the remaining budget` +
+          (secondWave.length < retained.length
+            ? ` and leaving ${retained.length - secondWave.length} to the budget gap.`
+            : '.')
+      );
+      if (secondWave.length > 0) {
+        const secondWaveEsql = await generateGroundedEsql({
+          esqlModel: models.esql,
+          esClient,
+          logger,
+          behaviors: secondWave,
+          text,
+          iocs,
+          articleContext,
+          allowedIndices,
+          rowLimit: rowLimit ?? DEFAULT_HUNT_QUERY_LIMIT,
+        });
+        for (const behavior of validated) {
+          if (!secondWaveIds.has(behavior.technique_id)) continue;
+          await publishBehavior(behavior, secondWaveEsql);
+        }
+      }
     }
   }
 

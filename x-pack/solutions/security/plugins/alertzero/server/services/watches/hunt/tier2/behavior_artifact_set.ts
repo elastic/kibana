@@ -56,6 +56,19 @@ export const artifactSetKey = (
   return [...matched].sort().join('\u0000');
 };
 
+/**
+ * Whether a query carries every artifact in a collapse key as a literal, which is what the
+ * `collapsed` reason claims about the survivor's query. Grounding is report-wide, so a survivor
+ * can clear the grounding gate on an unrelated report literal and never mention the artifacts
+ * its siblings were collapsed for; a sibling marked `collapsed` against such a query would be
+ * retired with a coverage claim nothing ever ran. A plain substring test on the normalized query
+ * text, mirroring the way the key was built from the quote.
+ */
+export const queryCarriesArtifacts = (esql: string, key: string): boolean => {
+  const query = normalize(esql);
+  return key.split('\u0000').every((value) => query.includes(value));
+};
+
 /** One behavior dropped because another behavior already covers the same artifact set. */
 export interface CollapsedBehavior {
   behavior: ValidatedBehavior;
