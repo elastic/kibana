@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, waitFor } from '@testing-library/react';
+import { act, fireEvent, waitFor } from '@testing-library/react';
 
 import type { TestRenderer } from '../../../../../mock';
 import { createFleetTestRendererMock } from '../../../../../mock';
@@ -17,6 +17,7 @@ import {
   sendGetOnePackagePolicy,
   sendUpgradePackagePolicyDryRun,
   sendUpdatePackagePolicy,
+  sendUpdatePackage,
   useStartServices,
   sendGetPackageInfoByKey,
   sendCreateAgentPolicy,
@@ -56,6 +57,7 @@ jest.mock('../../../hooks', () => {
     sendGetAgentStatus: jest.fn(),
     sendBulkGetAgentPoliciesForRq: jest.fn(),
     sendUpdatePackagePolicy: jest.fn(),
+    sendUpdatePackage: jest.fn(),
     sendGetOnePackagePolicy: jest.fn(),
     sendGetOneAgentPolicy: jest.fn(),
     sendUpgradePackagePolicyDryRun: jest.fn(),
@@ -424,6 +426,27 @@ describe('edit package policy page', () => {
       );
       expect(useStartServices().application.navigateToUrl).toHaveBeenCalledWith('/navigate/path');
     });
+  });
+
+  it('saves a change of the columnar switch alone, through the update package API', async () => {
+    (sendUpdatePackage as MockFn).mockResolvedValue({});
+    render();
+
+    await waitFor(() => {
+      expect(renderResult.getByText('Collect logs from Nginx instances')).toBeInTheDocument();
+    });
+    act(() => lastStepConfigureProps.onLogsdbColumnarChange(true));
+
+    fireEvent.click(renderResult.getByText('Save integration').closest('button')!);
+
+    await waitFor(() => {
+      expect(sendUpdatePackage).toHaveBeenCalledWith('nginx', expect.any(String), {
+        logsdb_columnar: true,
+      });
+    });
+    expect((sendUpdatePackagePolicy as MockFn).mock.calls[0][1].package).not.toHaveProperty(
+      'logsdb_columnar'
+    );
   });
 
   it('should show out of date error on 409 statusCode on submit', async () => {

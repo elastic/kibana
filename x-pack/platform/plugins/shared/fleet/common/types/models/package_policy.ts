@@ -19,11 +19,6 @@ export interface PackagePolicyPackage {
   requires_root?: boolean;
   type?: string;
   fips_compatible?: boolean;
-  /**
-   * The user's `logsdb_columnar` choice from the policy editor. It belongs to the installation:
-   * Fleet applies it to the package and strips it before the policy is saved.
-   */
-  logsdb_columnar?: boolean;
 }
 
 export interface PackagePolicyConfigRecordEntry {

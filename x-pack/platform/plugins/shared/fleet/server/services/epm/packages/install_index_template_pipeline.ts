@@ -56,12 +56,7 @@ export async function installIndexTemplatesAndPipelines({
    */
   const experimentalDataStreamFeatures = installedPkg?.experimental_data_stream_features ?? [];
 
-  // Resolve the logsdb_columnar index mode per data stream before any template is built: it
-  // depends on the installation-level user choice, on whether the data stream is new to the
-  // installation, and otherwise on the mode its existing index template already carries.
-  const columnarIndexModes = await resolveColumnarIndexModes({
-    esClient,
-    logger,
+  const columnarIndexModes = resolveColumnarIndexModes({
     packageInfo: packageInstallContext.packageInfo,
     dataStreams: onlyForDataStreams ?? packageInstallContext.packageInfo.data_streams ?? [],
     installedPkg,

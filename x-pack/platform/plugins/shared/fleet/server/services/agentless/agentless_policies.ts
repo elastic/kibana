@@ -287,8 +287,6 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
 
       let newPackagePolicy = simplifiedPackagePolicytoNewPackagePolicy(newPolicy, pkgInfo, {
         policyTemplate,
-        // Applied to the installation by the package policy service, as for any other policy.
-        logsdb_columnar: pkg.logsdb_columnar,
       });
 
       const { outputId, fleetServerId } = agentlessAgentService.getDefaultSettings({
@@ -577,8 +575,6 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
 
       let newPackagePolicy = simplifiedPackagePolicytoNewPackagePolicy(newPolicy, pkgInfo, {
         policyTemplate,
-        // Applied to the installation by the package policy service, as for any other policy.
-        logsdb_columnar: pkg.logsdb_columnar,
       });
 
       // Handle cloud-connector add / reuse / swap. Detaching or swapping only updates the reference;

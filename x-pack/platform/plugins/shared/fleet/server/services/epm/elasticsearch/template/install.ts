@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { merge, concat, uniqBy, omit, partition } from 'lodash';
+import { merge, concat, uniqBy, omit } from 'lodash';
 import Boom from '@hapi/boom';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import pMap from 'p-map';
@@ -14,7 +14,6 @@ import type { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/
 
 import { ElasticsearchAssetType } from '../../../../types';
 import {
-  LOGSDB_COLUMNAR_INDEX_MODE,
   getPipelineNameForDatastream,
   getRegistryDataStreamAssetBaseName,
 } from '../../../../../common/services';
@@ -54,7 +53,6 @@ import { dataStreamUsesOtelInput } from '../../../../../common/services';
 
 import {
   generateMappings,
-  generateNamespaceTemplateName,
   generateTemplateName,
   generateTemplateIndexPattern,
   getTemplate,
@@ -63,24 +61,16 @@ import {
 } from './template';
 import { buildDefaultSettings, getILMMigrationStatus } from './default_settings';
 import { isUserSettingsTemplate } from './utils';
-import { stripColumnarIncompatibleMappings } from './columnar_index_mode';
 
 const FLEET_COMPONENT_TEMPLATE_NAMES = FLEET_COMPONENT_TEMPLATES.map((tmpl) => tmpl.name);
-
-/**
- * Index modes Fleet writes explicitly to `settings.index.mode`. When one of them disappears from
- * a data stream's index template, the index template must be PUT before the component templates.
- */
-const MODES_REQUIRING_INDEX_TEMPLATE_FIRST: string[] = ['time_series', LOGSDB_COLUMNAR_INDEX_MODE];
 
 export const prepareToInstallTemplates = async (
   packageInstallContext: PackageInstallContext,
   esReferences: EsAssetReference[],
   experimentalDataStreamFeatures: ExperimentalDataStreamFeature[] = [],
   onlyForDataStreams?: RegistryDataStream[],
-  // Target `settings.index.mode` per data stream asset base name, resolved from the package's
-  // logsdb_columnar readiness and the installation-level user choice. `undefined` entries (and
-  // data streams absent from the map) keep the mode the package manifest implies.
+  // `settings.index.mode` per data stream asset base name: `logsdb_columnar` for the data streams
+  // of an installation that is on it. Data streams absent from the map keep the manifest's mode.
   columnarIndexModes?: Map<string, string | undefined>
 ): Promise<{
   assetsToAdd: EsAssetReference[];
@@ -311,105 +301,14 @@ export async function installComponentAndIndexTemplateForDataStream({
   componentTemplates: TemplateMap;
   indexTemplate: IndexTemplateEntry;
 }) {
-  const newMode = indexTemplate.indexTemplate.template.settings.index.mode;
-  // The namespace-scoped copies of the index template follow its mode, in the same order.
-  const [namespaceTemplatesFirst, namespaceTemplatesLast] = partition(
-    await getNamespaceTemplatesWithIndexMode({ esClient, logger, indexTemplate }),
-    ({ previousMode }) => isManagedIndexModeRemoved(previousMode, newMode)
-  );
-
-  // update index template first in case a managed index mode (TSDS, logsdb_columnar) was
-  // removed, so that it does not become invalid
-  await updateIndexTemplateIfIndexModeRemoved({ esClient, logger, indexTemplate });
-  for (const template of namespaceTemplatesFirst) {
-    await installTemplate({ esClient, logger, template });
-  }
+  // update index template first in case TSDS was removed, so that it does not become invalid
+  await updateIndexTemplateIfTsdsDisabled({ esClient, logger, indexTemplate });
 
   await installDataStreamComponentTemplates({ esClient, logger, componentTemplates });
   await installTemplate({ esClient, logger, template: indexTemplate });
-  for (const template of namespaceTemplatesLast) {
-    await installTemplate({ esClient, logger, template });
-  }
 }
 
-/**
- * Whether going from `existingMode` to `newMode` removes an index mode Fleet manages. The index
- * template then has to be written before the component templates, so that the composed template
- * is never validated against the old mode with the new (unstripped / non-TSDB) mappings. The
- * reverse — adding a mode — must keep the default order: the component templates carry the
- * mappings the new mode requires.
- */
-function isManagedIndexModeRemoved(existingMode: string | undefined, newMode: string | undefined) {
-  return (
-    existingMode !== undefined &&
-    MODES_REQUIRING_INDEX_TEMPLATE_FIRST.includes(existingMode) &&
-    existingMode !== newMode &&
-    newMode !== LOGSDB_COLUMNAR_INDEX_MODE
-  );
-}
-
-/**
- * The namespace-scoped index templates Fleet created from this index template for namespace-level
- * customization (`<index template>@namespace.<namespace>`) whose index mode differs from it,
- * rewritten with its mode. They are copies of the index template with a higher priority, so a
- * mode change has to reach them too: otherwise the data streams of those namespaces keep the
- * previous mode, and removing a mode fails once the component templates no longer fit the mode a
- * namespace template still declares.
- *
- * A failed lookup is thrown rather than taken for "no namespace templates": the change would
- * otherwise succeed without them and leave those namespaces on the previous mode.
- */
-async function getNamespaceTemplatesWithIndexMode({
-  esClient,
-  logger,
-  indexTemplate,
-}: {
-  esClient: ElasticsearchClient;
-  logger: Logger;
-  indexTemplate: IndexTemplateEntry;
-}): Promise<Array<IndexTemplateEntry & { previousMode?: string }>> {
-  const prefix = generateNamespaceTemplateName(indexTemplate.templateName, '');
-  const newMode: string | undefined = indexTemplate.indexTemplate.template.settings.index.mode;
-  const res = await retryTransientEsErrors(
-    () => esClient.indices.getIndexTemplate({ name: `${prefix}*` }, { ignore: [404] }),
-    { logger }
-  );
-
-  return (res?.index_templates ?? []).flatMap(({ name, index_template: existing }) => {
-    if (!isNamespaceTemplate(name) || !name.startsWith(prefix)) {
-      return [];
-    }
-    const {
-      created_date: _cd,
-      created_date_millis: _cdm,
-      modified_date: _md,
-      modified_date_millis: _mdm,
-      ...namespaceTemplate
-    } = existing as unknown as IndexTemplate & Record<string, unknown>;
-    const { mode: previousMode, ...index } = namespaceTemplate.template?.settings?.index ?? {};
-    if (previousMode === newMode) {
-      return [];
-    }
-    return [
-      {
-        templateName: name,
-        previousMode,
-        indexTemplate: {
-          ...namespaceTemplate,
-          template: {
-            ...namespaceTemplate.template,
-            settings: {
-              ...namespaceTemplate.template?.settings,
-              index: newMode !== undefined ? { ...index, mode: newMode } : index,
-            },
-          },
-        },
-      },
-    ];
-  });
-}
-
-async function updateIndexTemplateIfIndexModeRemoved({
+async function updateIndexTemplateIfTsdsDisabled({
   esClient,
   logger,
   indexTemplate,
@@ -422,17 +321,17 @@ async function updateIndexTemplateIfIndexModeRemoved({
     const existingIndexTemplate = await esClient.indices.getIndexTemplate({
       name: indexTemplate.templateName,
     });
-    const existingMode =
-      existingIndexTemplate.index_templates?.[0]?.index_template.template?.settings?.index?.mode;
-    const newMode = indexTemplate.indexTemplate.template.settings.index.mode;
-
-    if (isManagedIndexModeRemoved(existingMode as string | undefined, newMode)) {
+    if (
+      existingIndexTemplate.index_templates?.[0]?.index_template.template?.settings?.index?.mode ===
+        'time_series' &&
+      indexTemplate.indexTemplate.template.settings.index.mode !== 'time_series'
+    ) {
       await installTemplate({ esClient, logger, template: indexTemplate });
     }
   } catch (e) {
     if (e.statusCode === 404) {
       logger.debug(
-        `Index template ${indexTemplate.templateName} does not exist, skipping index mode check`
+        `Index template ${indexTemplate.templateName} does not exist, skipping time_series check`
       );
     } else {
       logger.warn(
@@ -739,12 +638,7 @@ export function prepareTemplate({
   dataStream: RegistryDataStream;
   experimentalDataStreamFeature?: ExperimentalDataStreamFeature;
   ilmMigrationStatusMap: Map<string, 'success' | undefined | null>;
-  /**
-   * Target `settings.index.mode` resolved outside of the package manifest — today only
-   * `logsdb_columnar`, from the package's columnar readiness and the installation-level user
-   * choice. Ignored for a `time_series` data stream: the two modes are mutually exclusive and
-   * the spec validator rejects the combination.
-   */
+  /** `logsdb_columnar` when the installation is on it. Ignored for a `time_series` data stream. */
   indexMode?: string;
 }): {
   componentTemplates: TemplateMap;
@@ -767,9 +661,6 @@ export function prepareTemplate({
     dataStream.elasticsearch?.index_mode === 'time_series' ||
     !!experimentalDataStreamFeature?.features.tsdb ||
     (isOtelInputType && dataStream.type === 'metrics');
-
-  // `time_series` and `logsdb_columnar` are mutually exclusive; TSDB wins so that a data stream
-  // that somehow ends up with both never emits two modes.
   const resolvedIndexMode = isIndexModeTimeSeries ? undefined : indexMode;
 
   const validFields = processFields(fields);
@@ -791,7 +682,7 @@ export function prepareTemplate({
     ilmMigrationStatusMap,
   });
 
-  const builtComponentTemplates = buildComponentTemplates({
+  const componentTemplates = buildComponentTemplates({
     defaultSettings,
     mappings,
     packageName,
@@ -804,15 +695,6 @@ export function prepareTemplate({
     type: dataStream.type,
     isOtelInputType,
   });
-
-  // Elasticsearch rejects `doc_values: false` and `store: true` in the columnar index modes, so
-  // drop them from the finished component templates (static fields, multi-fields, dynamic
-  // templates and the manifest's index_template.mappings alike) when the data stream is going
-  // columnar.
-  const componentTemplates =
-    resolvedIndexMode === LOGSDB_COLUMNAR_INDEX_MODE
-      ? stripColumnarIncompatibleMappings(builtComponentTemplates)
-      : builtComponentTemplates;
 
   const template = getTemplate({
     templateIndexPattern,

@@ -66,3 +66,20 @@ export function getLogsdbColumnarNotReadyDataStreams<
       !isLogsdbColumnarReady(getLogsdbColumnarReadiness(packageInfo, dataStream))
   );
 }
+
+/**
+ * Whether a new installation of the package starts on `logsdb_columnar`: every logs data stream
+ * is ready for it, and defaults to it.
+ */
+export function isLogsdbColumnarDefault(
+  packageInfo: (ColumnarPackageInfo & { data_streams?: RegistryDataStream[] }) | undefined
+): boolean {
+  const logsDataStreams = (packageInfo?.data_streams ?? []).filter(({ type }) => type === 'logs');
+  return (
+    logsDataStreams.length > 0 &&
+    getLogsdbColumnarNotReadyDataStreams(packageInfo, logsDataStreams).length === 0 &&
+    logsDataStreams.every(
+      (dataStream) => getLogsdbColumnarReadiness(packageInfo, dataStream) === 'default'
+    )
+  );
+}

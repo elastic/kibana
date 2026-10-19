@@ -41,29 +41,20 @@ describe('ColumnarIndexModeSwitch', () => {
     expect(onChange).toHaveBeenCalled();
   });
 
-  it('lists the unsupported data streams when there are any', () => {
-    const result = render({ unsupportedDataStreams: ['Nginx error logs', 'Nginx audit logs'] });
+  it('is greyed out, with the reason instead of the description, when the integration is not ready', () => {
+    const result = render({ checked: true, notReady: true });
 
-    expect(result.getByTestId('columnarIndexModeUnsupportedDataStreams')).toHaveTextContent(
-      'Nginx error logs, Nginx audit logs'
-    );
-  });
-
-  it('explains why the switch is greyed out when the integration is not columnar-ready', () => {
-    const result = render({ notReady: true, disabled: true, unsupportedDataStreams: ['x'] });
-
-    expect(result.getByTestId(COLUMNAR_INDEX_MODE_SWITCH_TEST_SUBJ)).toBeDisabled();
+    const switchEl = result.getByTestId(COLUMNAR_INDEX_MODE_SWITCH_TEST_SUBJ);
+    expect(switchEl).toBeDisabled();
+    expect(switchEl).not.toBeChecked();
     expect(result.getByTestId('columnarIndexModeNotReady')).toHaveTextContent(
       "This integration isn't columnar-ready yet."
     );
-    // The reason replaces the description rather than stacking under it.
-    expect(result.queryByText(/stored once|each field once/)).not.toBeInTheDocument();
-    expect(result.queryByTestId('columnarIndexModeUnsupportedDataStreams')).not.toBeInTheDocument();
+    expect(result.queryByText(/each field once/)).not.toBeInTheDocument();
   });
 
   it('names the data streams that keep a partly ready integration from being columnar-ready', () => {
     const result = render({
-      disabled: true,
       notReady: true,
       notReadyDataStreams: ['Nginx error logs', 'Nginx debug logs'],
     });
@@ -71,26 +62,5 @@ describe('ColumnarIndexModeSwitch', () => {
     expect(result.getByTestId('columnarIndexModeNotReady')).toHaveTextContent(
       "This integration isn't columnar-ready: Nginx error logs, Nginx debug logs don't support columnar storage yet, and every log data stream has to."
     );
-  });
-
-  it('replaces the description with the withdrawn notice', () => {
-    const result = render({ withdrawn: true, disabled: true });
-
-    expect(result.getByTestId('columnarIndexModeWithdrawn')).toBeInTheDocument();
-    expect(result.queryByText(/each field once/)).not.toBeInTheDocument();
-  });
-
-  it('uses the singular for one unsupported data stream', () => {
-    const result = render({ unsupportedDataStreams: ['Nginx error logs'] });
-
-    expect(result.getByTestId('columnarIndexModeUnsupportedDataStreams')).toHaveTextContent(
-      "Nginx error logs doesn't support columnar storage and stays on LogsDB."
-    );
-  });
-
-  it('omits the unsupported line when there are none', () => {
-    const result = render();
-
-    expect(result.queryByTestId('columnarIndexModeUnsupportedDataStreams')).not.toBeInTheDocument();
   });
 });

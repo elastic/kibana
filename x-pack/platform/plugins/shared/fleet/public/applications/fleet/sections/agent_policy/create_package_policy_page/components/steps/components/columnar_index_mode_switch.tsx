@@ -22,39 +22,21 @@ export const COLUMNAR_INDEX_MODE_SWITCH_TEST_SUBJ = 'columnarIndexModeSwitch';
 
 interface Props {
   checked: boolean;
-  disabled?: boolean;
   onChange: () => void;
-  /**
-   * Titles of the logs data streams that aren't columnar-ready, listed while the switch is on:
-   * they stay on LogsDB no matter what the toggle says. The ones marked `unsupported` also carry
-   * a note in their own section.
-   */
-  unsupportedDataStreams?: string[];
   /**
    * Not every logs data stream of the integration declares columnar readiness: the switch is
    * shown off and disabled, with an explanation.
    */
   notReady?: boolean;
-  /**
-   * Titles of the logs data streams that keep a partly ready integration from being
-   * columnar-ready, named in the `notReady` explanation. Empty when none is ready.
-   */
+  /** Titles of the logs data streams that aren't ready, when some are. */
   notReadyDataStreams?: string[];
-  /**
-   * The user opted in, but this package version has no columnar-ready logs data stream left:
-   * the switch stays visible to tell the user the data streams go back to LogsDB.
-   */
-  withdrawn?: boolean;
 }
 
 export const ColumnarIndexModeSwitch: React.FunctionComponent<Props> = ({
   checked,
-  disabled = false,
   onChange,
-  unsupportedDataStreams = [],
   notReady = false,
   notReadyDataStreams = [],
-  withdrawn = false,
 }) => (
   <>
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -67,9 +49,9 @@ export const ColumnarIndexModeSwitch: React.FunctionComponent<Props> = ({
               defaultMessage: 'Columnar index mode',
             }
           )}
-          checked={checked}
+          checked={checked && !notReady}
           onChange={onChange}
-          disabled={disabled}
+          disabled={notReady}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -84,26 +66,18 @@ export const ColumnarIndexModeSwitch: React.FunctionComponent<Props> = ({
       </EuiFlexItem>
     </EuiFlexGroup>
     <EuiSpacer size="s" />
-    {/* One help line, like Fleet's other switches: a state that needs explaining replaces the
-        description rather than stacking under it. */}
     <EuiText color="subdued" size="xs">
       <EuiFlexGroup alignItems="flexStart" gutterSize="xs" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiIcon
-            type={withdrawn ? 'warning' : 'info'}
-            color={withdrawn ? 'warning' : 'subdued'}
-            aria-hidden={true}
-          />
+          <EuiIcon type="info" color="subdued" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem>
-          {withdrawn ? (
-            <span data-test-subj="columnarIndexModeWithdrawn">
-              <FormattedMessage
-                id="xpack.fleet.createPackagePolicy.stepConfigure.columnarIndexModeWithdrawn"
-                defaultMessage="This version of the integration no longer supports columnar storage. Its log data streams move back to LogsDB at the next rollover."
-              />
-            </span>
-          ) : notReady ? (
+          {!notReady ? (
+            <FormattedMessage
+              id="xpack.fleet.createPackagePolicy.stepConfigure.columnarIndexModeDescription"
+              defaultMessage="Stores this integration's log data streams in the logsdb_columnar index mode: each field once, as doc values, with no inverted index except on text fields. Applies from the next rollover; existing data isn't rewritten."
+            />
+          ) : (
             <span data-test-subj="columnarIndexModeNotReady">
               {notReadyDataStreams.length > 0 ? (
                 <FormattedMessage
@@ -121,28 +95,6 @@ export const ColumnarIndexModeSwitch: React.FunctionComponent<Props> = ({
                 />
               )}
             </span>
-          ) : (
-            <>
-              <FormattedMessage
-                id="xpack.fleet.createPackagePolicy.stepConfigure.columnarIndexModeDescription"
-                defaultMessage="Stores this integration's log data streams in the logsdb_columnar index mode: each field once, as doc values, with no inverted index except on text fields. Applies from the next rollover; existing data isn't rewritten."
-              />
-              {unsupportedDataStreams.length > 0 && (
-                <>
-                  {' '}
-                  <span data-test-subj="columnarIndexModeUnsupportedDataStreams">
-                    <FormattedMessage
-                      id="xpack.fleet.createPackagePolicy.stepConfigure.columnarIndexModeUnsupportedDataStreams"
-                      defaultMessage="{dataStreams} {count, plural, one {doesn't} other {don't}} support columnar storage and {count, plural, one {stays} other {stay}} on LogsDB."
-                      values={{
-                        dataStreams: unsupportedDataStreams.join(', '),
-                        count: unsupportedDataStreams.length,
-                      }}
-                    />
-                  </span>
-                </>
-              )}
-            </>
           )}
         </EuiFlexItem>
       </EuiFlexGroup>

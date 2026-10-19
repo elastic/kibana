@@ -5,568 +5,92 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { loggerMock } from '@kbn/logging-mocks';
+import type { Installation, RegistryDataStream } from '../../../../types';
 
-import type { Installation, RegistryDataStream, TemplateMap } from '../../../../types';
-import { ElasticsearchAssetType } from '../../../../types';
+import { resolveColumnarIndexModes } from './columnar_index_mode';
 
-import {
-  isLogsdbColumnarActive,
-  resolveColumnarIndexModes,
-  resolveLogsdbColumnarIndexMode,
-  stripColumnarIncompatibleMappings,
-} from './columnar_index_mode';
+const dataStream = (props: Partial<RegistryDataStream>): RegistryDataStream =>
+  ({
+    type: 'logs',
+    dataset: 'pkg.ds',
+    package: 'pkg',
+    path: 'ds',
+    title: 'ds',
+    release: 'ga',
+    ...props,
+  } as RegistryDataStream);
 
-describe('stripColumnarIncompatibleMappings', () => {
-  const withMappings = (mappings: any): TemplateMap =>
-    ({
-      'logs-pkg.ds@package': { template: { settings: {}, mappings }, _meta: {} },
-    } as unknown as TemplateMap);
+const logs = dataStream({});
+const otherLogs = dataStream({ dataset: 'pkg.other', path: 'other' });
+const metrics = dataStream({ type: 'metrics', dataset: 'pkg.metrics', path: 'metrics' });
 
-  const strippedMappings = (mappings: any) =>
-    (stripColumnarIncompatibleMappings(withMappings(mappings))['logs-pkg.ds@package'] as any)
-      .template.mappings;
-
-  it('removes doc_values: false and store: true from static fields', () => {
-    expect(
-      strippedMappings({
-        properties: {
-          message: { type: 'keyword', doc_values: false, store: true, ignore_above: 1024 },
-        },
-      })
-    ).toEqual({
-      properties: { message: { type: 'keyword', ignore_above: 1024 } },
-    });
-  });
-
-  it('keeps doc_values: true and store: false', () => {
-    expect(
-      strippedMappings({
-        properties: { message: { type: 'keyword', doc_values: true, store: false } },
-      })
-    ).toEqual({
-      properties: { message: { type: 'keyword', doc_values: true, store: false } },
-    });
-  });
-
-  it('recurses into nested properties and multi-fields', () => {
-    expect(
-      strippedMappings({
-        properties: {
-          event: {
-            properties: {
-              original: {
-                type: 'keyword',
-                doc_values: false,
-                fields: { text: { type: 'text', store: true } },
-              },
-            },
-          },
-        },
-      })
-    ).toEqual({
-      properties: {
-        event: {
-          properties: {
-            original: { type: 'keyword', fields: { text: { type: 'text' } } },
-          },
-        },
-      },
-    });
-  });
-
-  it('strips dynamic templates', () => {
-    expect(
-      strippedMappings({
-        properties: {},
-        dynamic_templates: [
-          { strings: { match_mapping_type: 'string', mapping: { type: 'keyword', store: true } } },
-          { longs: { match_mapping_type: 'long', mapping: { type: 'long', doc_values: false } } },
-        ],
-      })
-    ).toEqual({
-      properties: {},
-      dynamic_templates: [
-        { strings: { match_mapping_type: 'string', mapping: { type: 'keyword' } } },
-        { longs: { match_mapping_type: 'long', mapping: { type: 'long' } } },
-      ],
-    });
-  });
-
-  it('leaves component templates without mappings untouched', () => {
-    const templates = {
-      'logs-pkg.ds@custom': { template: { settings: {} }, _meta: {} },
-    } as unknown as TemplateMap;
-
-    expect(stripColumnarIncompatibleMappings(templates)).toEqual(templates);
-  });
+const packageInfo = (
+  readiness: 'opt_in' | 'default',
+  dataStreams = [logs, otherLogs, metrics]
+) => ({
+  elasticsearch: { logsdb_columnar: readiness },
+  data_streams: dataStreams,
 });
 
-describe('resolveLogsdbColumnarIndexMode', () => {
-  it.each(['unsupported', undefined] as const)(
-    'returns undefined when the readiness is %s',
-    (readiness) => {
-      expect(
-        resolveLogsdbColumnarIndexMode({ readiness, userChoice: true, isNewInstall: true })
-      ).toBeUndefined();
-    }
-  );
-
-  it('follows an explicit user choice', () => {
-    expect(
-      resolveLogsdbColumnarIndexMode({
-        readiness: 'opt_in',
-        userChoice: true,
-        isNewInstall: false,
-      })
-    ).toEqual('logsdb_columnar');
-    expect(
-      resolveLogsdbColumnarIndexMode({
-        readiness: 'default',
-        userChoice: false,
-        isNewInstall: true,
-      })
-    ).toBeUndefined();
-  });
-
-  it('applies `default` readiness to a new installation only', () => {
-    expect(resolveLogsdbColumnarIndexMode({ readiness: 'default', isNewInstall: true })).toEqual(
-      'logsdb_columnar'
-    );
-    expect(
-      resolveLogsdbColumnarIndexMode({ readiness: 'default', isNewInstall: false })
-    ).toBeUndefined();
-  });
-
-  it('does not apply `opt_in` readiness on a new installation', () => {
-    expect(
-      resolveLogsdbColumnarIndexMode({ readiness: 'opt_in', isNewInstall: true })
-    ).toBeUndefined();
-  });
-
-  it('does not apply `default` readiness to a new installation of a partly ready integration', () => {
-    expect(
-      resolveLogsdbColumnarIndexMode({
-        readiness: 'default',
-        isNewInstall: true,
-        isIntegrationReady: false,
-      })
-    ).toBeUndefined();
-  });
-
-  it('puts a data stream added by an upgrade on what the installation already uses', () => {
-    const added = { isNewInstall: false, isNewDataStream: true };
-    expect(
-      resolveLogsdbColumnarIndexMode({
-        ...added,
-        readiness: 'default',
-        installationUsesColumnar: true,
-      })
-    ).toEqual('logsdb_columnar');
-    // An integration that already has data on LogsDB does not flip.
-    expect(
-      resolveLogsdbColumnarIndexMode({
-        ...added,
-        readiness: 'default',
-        installationUsesColumnar: false,
-      })
-    ).toBeUndefined();
-    expect(
-      resolveLogsdbColumnarIndexMode({
-        ...added,
-        readiness: 'opt_in',
-        installationUsesColumnar: true,
-      })
-    ).toBeUndefined();
-  });
-
-  it('preserves the current mode on upgrade when the user has not chosen', () => {
-    expect(
-      resolveLogsdbColumnarIndexMode({
-        readiness: 'default',
-        isNewInstall: false,
-        currentIndexMode: 'logsdb_columnar',
-      })
-    ).toEqual('logsdb_columnar');
-    expect(
-      resolveLogsdbColumnarIndexMode({
-        readiness: 'default',
-        isNewInstall: false,
-        currentIndexMode: 'logsdb',
-      })
-    ).toBeUndefined();
-  });
-});
-
-describe('resolveColumnarIndexModes', () => {
-  const dataStream = (props: Partial<RegistryDataStream>): RegistryDataStream =>
-    ({
-      type: 'logs',
-      dataset: 'pkg.ds',
-      package: 'pkg',
-      path: 'ds',
-      title: 'ds',
-      release: 'ga',
-      ...props,
-    } as RegistryDataStream);
-
-  const setupEsClient = (currentIndexMode?: string) => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.indices.getIndexTemplate.mockResponse({
-      index_templates: [
-        {
-          name: 'logs-pkg.ds',
-          index_template: {
-            index_patterns: [],
-            template: { settings: { index: currentIndexMode ? { mode: currentIndexMode } : {} } },
-          },
-        },
-      ],
-    } as any);
-    return esClient;
-  };
-
-  it('applies the package `default` readiness to a fresh install without querying ES', async () => {
-    const esClient = setupEsClient();
-
-    const modes = await resolveColumnarIndexModes({
-      esClient,
-      logger: loggerMock.create(),
-      packageInfo: { name: 'pkg', version: '1.0.0', elasticsearch: { logsdb_columnar: 'default' } },
-      dataStreams: [dataStream({})],
-    });
-
-    expect(modes.get('logs-pkg.ds')).toEqual('logsdb_columnar');
-    expect(esClient.indices.getIndexTemplate).not.toHaveBeenCalled();
-  });
-
-  it('keeps a partly ready `default` package on LogsDB on a fresh install', async () => {
-    const ready = dataStream({});
-    const unsupported = dataStream({
-      dataset: 'pkg.other',
-      path: 'other',
-      elasticsearch: { logsdb_columnar: 'unsupported' },
-    });
-
-    const modes = await resolveColumnarIndexModes({
-      packageInfo: {
-        name: 'pkg',
-        version: '1.0.0',
-        elasticsearch: { logsdb_columnar: 'default' },
-        data_streams: [ready, unsupported],
-      },
-      // Judged on every data stream of the package, even when only some are installed.
-      dataStreams: [ready],
-    });
-
-    expect(modes.get('logs-pkg.ds')).toBeUndefined();
-  });
-
-  it('ignores data streams that are not logs', async () => {
-    const modes = await resolveColumnarIndexModes({
-      packageInfo: { name: 'pkg', version: '1.0.0', elasticsearch: { logsdb_columnar: 'default' } },
-      dataStreams: [dataStream({ type: 'metrics', dataset: 'pkg.metrics' })],
-    });
-
-    expect(modes.size).toEqual(0);
-  });
-
-  it('preserves the existing mode on upgrade when the user has not chosen', async () => {
-    const esClient = setupEsClient('logsdb_columnar');
-
-    const modes = await resolveColumnarIndexModes({
-      esClient,
-      logger: loggerMock.create(),
-      packageInfo: { name: 'pkg', version: '2.0.0', elasticsearch: { logsdb_columnar: 'default' } },
-      dataStreams: [dataStream({})],
-      installedPkg: { name: 'pkg', version: '1.0.0' } as Installation,
-    });
-
-    expect(modes.get('logs-pkg.ds')).toEqual('logsdb_columnar');
-  });
-
-  // `logs-pkg.ds` is new to the installation; `logs-pkg.existing` is already installed.
-  const setupUpgradeEsClient = (existingIndexMode?: string) => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.indices.getIndexTemplate.mockImplementation(
-      async ({ name }: any) =>
-        ({
-          index_templates:
-            name === 'logs-pkg.existing'
-              ? [
-                  {
-                    name,
-                    index_template: {
-                      index_patterns: [],
-                      template: {
-                        settings: { index: existingIndexMode ? { mode: existingIndexMode } : {} },
-                      },
-                    },
-                  },
-                ]
-              : [],
-        } as any)
-    );
-    return esClient;
-  };
-  const installedWithExisting = {
+const installed = (logsdbColumnarEnabled?: boolean) =>
+  ({
     name: 'pkg',
     version: '1.0.0',
-    installed_es: [{ id: 'logs-pkg.existing', type: 'index_template' }],
-  } as Installation;
+    logsdb_columnar_enabled: logsdbColumnarEnabled,
+  } as Installation);
 
-  it('puts a `default` data stream added by an upgrade on columnar when the installation is', async () => {
-    const modes = await resolveColumnarIndexModes({
-      esClient: setupUpgradeEsClient('logsdb_columnar'),
-      logger: loggerMock.create(),
-      packageInfo: { name: 'pkg', version: '2.0.0', elasticsearch: { logsdb_columnar: 'default' } },
-      dataStreams: [dataStream({})],
-      installedPkg: installedWithExisting,
-    });
+describe('resolveColumnarIndexModes', () => {
+  it('puts a new installation of a `default` package on columnar', () => {
+    const info = packageInfo('default');
 
-    expect(modes.get('logs-pkg.ds')).toEqual('logsdb_columnar');
+    expect(
+      Object.fromEntries(
+        resolveColumnarIndexModes({ packageInfo: info, dataStreams: info.data_streams })
+      )
+    ).toEqual({ 'logs-pkg.ds': 'logsdb_columnar', 'logs-pkg.other': 'logsdb_columnar' });
   });
 
-  // A failed install removes the index templates before it retries; the data streams stay.
-  const setupMissingTemplatesEsClient = (
-    writeIndexModes: Record<string, string>,
-    templates: Record<string, string | undefined> = {}
-  ) => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.indices.getIndexTemplate.mockImplementation(
-      async ({ name }: any) =>
-        ({
-          index_templates:
-            name in templates
-              ? [
-                  {
-                    name,
-                    index_template: {
-                      index_patterns: [],
-                      template: {
-                        settings: { index: templates[name] ? { mode: templates[name] } : {} },
-                      },
-                    },
-                  },
-                ]
-              : [],
-        } as any)
-    );
-    esClient.indices.getDataStream.mockImplementation(
-      async ({ name }: any) =>
-        ({
-          data_streams: Object.entries(writeIndexModes)
-            .filter(([templateName]) => name === `${templateName}-*`)
-            .map(([templateName, mode]) => ({
-              name: `${templateName}-default`,
-              indices: [
-                { index_name: '.ds-old', index_mode: 'logsdb' },
-                { index_name: '.ds-write', index_mode: mode },
-              ],
-            })),
-        } as any)
-    );
-    return esClient;
-  };
+  it('leaves a new installation of an `opt_in` package on LogsDB', () => {
+    const info = packageInfo('opt_in');
 
-  it('keeps a data stream whose index template is missing on the mode of its write index', async () => {
-    const esClient = setupMissingTemplatesEsClient({ 'logs-pkg.ds': 'logsdb_columnar' });
-
-    const modes = await resolveColumnarIndexModes({
-      esClient,
-      logger: loggerMock.create(),
-      packageInfo: { name: 'pkg', version: '1.0.0', elasticsearch: { logsdb_columnar: 'default' } },
-      dataStreams: [dataStream({})],
-      installedPkg: {
-        name: 'pkg',
-        version: '1.0.0',
-        installed_es: [{ id: 'logs-pkg.ds', type: 'index_template' }],
-      } as Installation,
-    });
-
-    expect(modes.get('logs-pkg.ds')).toEqual('logsdb_columnar');
-    expect(esClient.indices.getDataStream).toHaveBeenCalledWith(
-      { name: 'logs-pkg.ds-*', expand_wildcards: ['open', 'hidden'] },
-      { ignore: [404] }
-    );
+    expect([
+      ...resolveColumnarIndexModes({ packageInfo: info, dataStreams: info.data_streams }).values(),
+    ]).toEqual([undefined, undefined]);
   });
 
-  it('keeps a data stream whose index template is missing on LogsDB when its write index is', async () => {
-    const esClient = setupMissingTemplatesEsClient(
-      { 'logs-pkg.ds': 'logsdb' },
-      { 'logs-pkg.existing': 'logsdb_columnar' }
-    );
+  it('follows the choice stored on an existing installation', () => {
+    const info = packageInfo('opt_in');
 
-    const modes = await resolveColumnarIndexModes({
-      esClient,
-      logger: loggerMock.create(),
-      packageInfo: { name: 'pkg', version: '2.0.0', elasticsearch: { logsdb_columnar: 'default' } },
-      dataStreams: [dataStream({})],
-      installedPkg: installedWithExisting,
-    });
-
-    expect(modes.get('logs-pkg.ds')).toBeUndefined();
+    expect(
+      resolveColumnarIndexModes({
+        packageInfo: info,
+        dataStreams: [logs],
+        installedPkg: installed(true),
+      }).get('logs-pkg.ds')
+    ).toEqual('logsdb_columnar');
   });
 
-  it('puts a new `default` data stream on columnar when the data streams of the installation are, even without their templates', async () => {
-    const esClient = setupMissingTemplatesEsClient({ 'logs-pkg.other': 'logsdb_columnar' });
+  it('never moves an existing installation without a choice, even to a `default` version', () => {
+    const info = packageInfo('default');
 
-    const modes = await resolveColumnarIndexModes({
-      esClient,
-      logger: loggerMock.create(),
-      packageInfo: { name: 'pkg', version: '1.0.0', elasticsearch: { logsdb_columnar: 'default' } },
-      dataStreams: [dataStream({}), dataStream({ dataset: 'pkg.other', path: 'other' })],
-      installedPkg: { name: 'pkg', version: '1.0.0' } as Installation,
-    });
-
-    expect(modes.get('logs-pkg.ds')).toEqual('logsdb_columnar');
-    expect(modes.get('logs-pkg.other')).toEqual('logsdb_columnar');
+    expect(
+      resolveColumnarIndexModes({
+        packageInfo: info,
+        dataStreams: info.data_streams,
+        installedPkg: installed(),
+      }).get('logs-pkg.ds')
+    ).toBeUndefined();
   });
 
-  it('keeps a `default` data stream added by an upgrade on LogsDB when the installation is', async () => {
-    const modes = await resolveColumnarIndexModes({
-      esClient: setupUpgradeEsClient(),
-      logger: loggerMock.create(),
-      packageInfo: { name: 'pkg', version: '2.0.0', elasticsearch: { logsdb_columnar: 'default' } },
-      dataStreams: [dataStream({})],
-      installedPkg: installedWithExisting,
-    });
+  it('keeps a data stream that is not ready on LogsDB', () => {
+    const unsupported = dataStream({ elasticsearch: { logsdb_columnar: 'unsupported' } });
 
-    expect(modes.get('logs-pkg.ds')).toBeUndefined();
-  });
-
-  it('does not flip an existing data stream on an `opt_in` -> `default` upgrade', async () => {
-    const esClient = setupEsClient();
-
-    const modes = await resolveColumnarIndexModes({
-      esClient,
-      logger: loggerMock.create(),
-      packageInfo: { name: 'pkg', version: '2.0.0', elasticsearch: { logsdb_columnar: 'default' } },
-      dataStreams: [dataStream({})],
-      installedPkg: { name: 'pkg', version: '1.0.0' } as Installation,
-    });
-
-    expect(modes.get('logs-pkg.ds')).toBeUndefined();
-  });
-
-  it('removes the mode and warns when the data stream becomes unsupported', async () => {
-    const esClient = setupEsClient('logsdb_columnar');
-    const logger = loggerMock.create();
-
-    const modes = await resolveColumnarIndexModes({
-      esClient,
-      logger,
-      packageInfo: { name: 'pkg', version: '2.0.0', elasticsearch: { logsdb_columnar: 'default' } },
-      dataStreams: [dataStream({ elasticsearch: { logsdb_columnar: 'unsupported' } })],
-      installedPkg: { name: 'pkg', version: '1.0.0' } as Installation,
-    });
-
-    expect(modes.get('logs-pkg.ds')).toBeUndefined();
-    expect(logger.warn).toHaveBeenCalledWith(
-      'logs-pkg.ds is marked unsupported for logsdb_columnar in pkg 2.0.0; it moves back to LogsDB at the next rollover'
-    );
-  });
-
-  it('says why when the package no longer declares readiness', async () => {
-    const esClient = setupEsClient('logsdb_columnar');
-    const logger = loggerMock.create();
-
-    const modes = await resolveColumnarIndexModes({
-      esClient,
-      logger,
-      packageInfo: { name: 'pkg', version: '2.0.0' },
-      dataStreams: [dataStream({})],
-      installedPkg: { name: 'pkg', version: '1.0.0' } as Installation,
-    });
-
-    expect(modes.get('logs-pkg.ds')).toBeUndefined();
-    expect(logger.warn).toHaveBeenCalledWith(
-      'logs-pkg.ds no longer declares logsdb_columnar readiness in pkg 2.0.0; it moves back to LogsDB at the next rollover'
-    );
-  });
-
-  it('honours the installation-level user choice over the current mode', async () => {
-    const esClient = setupEsClient();
-
-    const modes = await resolveColumnarIndexModes({
-      esClient,
-      logger: loggerMock.create(),
-      packageInfo: { name: 'pkg', version: '2.0.0', elasticsearch: { logsdb_columnar: 'opt_in' } },
-      dataStreams: [dataStream({})],
-      installedPkg: {
-        name: 'pkg',
-        version: '1.0.0',
-        logsdb_columnar_enabled: true,
-      } as Installation,
-    });
-
-    expect(modes.get('logs-pkg.ds')).toEqual('logsdb_columnar');
-  });
-});
-
-describe('isLogsdbColumnarActive', () => {
-  const indexTemplate = (id: string) => ({ id, type: ElasticsearchAssetType.indexTemplate });
-
-  it('is true when a logs index template of the installation is on logsdb_columnar', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.indices.getIndexTemplate.mockImplementation(
-      async ({ name }: any) =>
-        ({
-          index_templates: [
-            {
-              name,
-              index_template: {
-                index_patterns: [],
-                template: {
-                  settings: { index: name === 'logs-pkg.b' ? { mode: 'logsdb_columnar' } : {} },
-                },
-              },
-            },
-          ],
-        } as any)
-    );
-
-    await expect(
-      isLogsdbColumnarActive(esClient, [
-        indexTemplate('logs-pkg.a'),
-        indexTemplate('logs-pkg.b'),
-        indexTemplate('metrics-pkg.c'),
-        { id: 'logs-pkg.a@package', type: ElasticsearchAssetType.componentTemplate },
-      ])
-    ).resolves.toBe(true);
-    expect(esClient.indices.getIndexTemplate).toHaveBeenCalledTimes(2);
-  });
-
-  it('counts the index templates of hidden logs data streams', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.indices.getIndexTemplate.mockImplementation(
-      async ({ name }: any) =>
-        ({
-          index_templates: [
-            {
-              name,
-              index_template: {
-                index_patterns: [],
-                template: { settings: { index: { mode: 'logsdb_columnar' } } },
-              },
-            },
-          ],
-        } as any)
-    );
-
-    await expect(
-      isLogsdbColumnarActive(esClient, [indexTemplate('.logs-pkg.hidden')])
-    ).resolves.toBe(true);
-  });
-
-  it('is false when no logs index template is on logsdb_columnar', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.indices.getIndexTemplate.mockResponse({ index_templates: [] } as any);
-
-    await expect(isLogsdbColumnarActive(esClient, [indexTemplate('logs-pkg.a')])).resolves.toBe(
-      false
-    );
-    await expect(isLogsdbColumnarActive(esClient, [])).resolves.toBe(false);
+    expect(
+      resolveColumnarIndexModes({
+        packageInfo: packageInfo('opt_in', [unsupported]),
+        dataStreams: [unsupported],
+        installedPkg: installed(true),
+      }).get('logs-pkg.ds')
+    ).toBeUndefined();
   });
 });

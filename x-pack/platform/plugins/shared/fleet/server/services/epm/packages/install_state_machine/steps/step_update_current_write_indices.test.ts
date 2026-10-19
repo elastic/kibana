@@ -132,11 +132,7 @@ describe('stepUpdateCurrentWriteIndices', () => {
       expect.anything(),
       expect.anything(),
       [],
-      {
-        ignoreMappingUpdateErrors: undefined,
-        skipDataStreamRollover: undefined,
-        rolloverOnIndexModeReset: true,
-      }
+      { ignoreMappingUpdateErrors: undefined, skipDataStreamRollover: undefined }
     );
   });
 
@@ -163,11 +159,7 @@ describe('stepUpdateCurrentWriteIndices', () => {
       expect.anything(),
       expect.anything(),
       indexTemplates,
-      {
-        ignoreMappingUpdateErrors: true,
-        skipDataStreamRollover: true,
-        rolloverOnIndexModeReset: true,
-      }
+      { ignoreMappingUpdateErrors: true, skipDataStreamRollover: true }
     );
   });
 });

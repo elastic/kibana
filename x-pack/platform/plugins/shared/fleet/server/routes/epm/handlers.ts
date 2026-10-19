@@ -107,8 +107,6 @@ import {
   isNamespaceAllowedByPrefixes,
 } from '../../services/spaces/policy_namespaces';
 import { PolicyNamespaceValidationError } from '../../../common/errors';
-import { getLogsdbColumnarReadiness, isLogsdbColumnarReady } from '../../../common/services';
-import { isLogsdbColumnarActive } from '../../services/epm/elasticsearch/template/columnar_index_mode';
 import {
   bulkRollbackAvailableCheck,
   isIntegrationRollbackTTLExpired,
@@ -281,21 +279,6 @@ export const getInfoHandler: FleetRequestHandler<
     prerelease,
   });
   const flattenedRes = soToInstallationInfo(res) as PackageInfo;
-  const installationInfo =
-    'installationInfo' in flattenedRes ? flattenedRes.installationInfo : undefined;
-  if (
-    installationInfo &&
-    (flattenedRes.data_streams ?? []).some((dataStream) =>
-      isLogsdbColumnarReady(getLogsdbColumnarReadiness(flattenedRes, dataStream))
-    )
-  ) {
-    // The installation-level switch starts from this when the user has not chosen yet.
-    const esClient = (await context.core).elasticsearch.client.asInternalUser;
-    installationInfo.logsdb_columnar_active = await isLogsdbColumnarActive(
-      esClient,
-      installationInfo.installed_es
-    );
-  }
   let metadata: any;
   if (request.query.withMetadata) {
     const allSpaceSoClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();

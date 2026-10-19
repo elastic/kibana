@@ -26,8 +26,7 @@ import {
   getInputEffectiveName,
   buildInputKey,
   getLogsdbColumnarNotReadyDataStreams,
-  getLogsdbColumnarReadiness,
-  isLogsdbColumnarReady,
+  isLogsdbColumnarDefault,
 } from '../../../../../../../../common/services';
 import { isInputAllowedForDeploymentMode } from '../../../../../../../../common/services/agentless_policy_helper';
 
@@ -58,6 +57,10 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
   isAgentlessSelected?: boolean;
   varGroupSelections?: VarGroupSelection;
   bottomExtension?: React.ReactNode;
+  /** The columnar index mode picked on this page; `undefined` until the switch is used. */
+  logsdbColumnar?: boolean;
+  /** Shows the columnar index mode switch. The page applies the choice when it saves. */
+  onLogsdbColumnarChange?: (enabled: boolean) => void;
 }> = ({
   packageInfo,
   showOnlyIntegration,
@@ -71,6 +74,8 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
   isAgentlessSelected = false,
   varGroupSelections = {},
   bottomExtension,
+  logsdbColumnar,
+  onLogsdbColumnarChange,
 }) => {
   const hasIntegrations = useMemo(() => doesPackageHaveIntegrations(packageInfo), [packageInfo]);
   const deploymentMode =
@@ -89,92 +94,47 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
 
   const isSinglePolicyTemplate = packagePolicyTemplates.length === 1;
 
-  // Columnar index mode: one choice per installed integration, stored on the installation rather
-  // than on the policy. Every integration with a logs data stream shows the toggle. It can only be
-  // turned on when all its logs data streams declare readiness, and is greyed out with an
-  // explanation otherwise; turning it off is always possible. Data streams that aren't ready stay
-  // on LogsDB: they are listed under the toggle, and the ones marked `unsupported` are noted in
-  // their own section.
-  const columnarReadyDataStreams = useMemo(
+  // Columnar index mode: one choice per installed integration, stored on the installation and set
+  // through the package API when the page is saved. It can only be turned on when every logs data
+  // stream of the integration declares readiness.
+  const logsDataStreams = useMemo(
     () =>
       packageInfo.type === 'input'
         ? []
-        : (packageInfo.data_streams ?? []).filter((dataStream) =>
-            isLogsdbColumnarReady(getLogsdbColumnarReadiness(packageInfo, dataStream))
-          ),
+        : (packageInfo.data_streams ?? []).filter((dataStream) => dataStream.type === 'logs'),
     [packageInfo]
   );
   const columnarNotReadyDataStreams = useMemo(
     () =>
-      packageInfo.type === 'input'
-        ? []
-        : getLogsdbColumnarNotReadyDataStreams(packageInfo, packageInfo.data_streams).map(
-            (dataStream) => dataStream.title || dataStream.dataset
-          ),
-    [packageInfo]
+      getLogsdbColumnarNotReadyDataStreams(packageInfo, logsDataStreams).map(
+        (dataStream) => dataStream.title || dataStream.dataset
+      ),
+    [packageInfo, logsDataStreams]
   );
-  const hasLogsDataStreams =
-    packageInfo.type !== 'input' &&
-    (packageInfo.data_streams ?? []).some((dataStream) => dataStream.type === 'logs');
-  const isColumnarIndexModeReady = hasLogsDataStreams && columnarNotReadyDataStreams.length === 0;
-  // The pending choice wins, then the one stored on the installation, then the mode the
-  // installation uses today, and for a new installation the package default, which only applies
-  // when every logs data stream is ready.
   const installationInfo =
     'installationInfo' in packageInfo ? packageInfo.installationInfo : undefined;
   const isColumnarIndexModeEnabled =
-    packagePolicy.package?.logsdb_columnar ??
-    installationInfo?.logsdb_columnar_enabled ??
-    installationInfo?.logsdb_columnar_active ??
-    (isColumnarIndexModeReady &&
-      columnarReadyDataStreams.some(
-        (dataStream) => getLogsdbColumnarReadiness(packageInfo, dataStream) === 'default'
-      ));
-  // The user opted in, but this version has no columnar-ready logs data stream left: show the
-  // switch off and disabled so the user learns why the data streams go back to LogsDB.
-  const isColumnarIndexModeWithdrawn =
-    packageInfo.type !== 'input' &&
-    columnarReadyDataStreams.length === 0 &&
-    installationInfo?.logsdb_columnar_enabled === true;
-  // Off while not every logs data stream is ready: it can't be turned on. When it is on (an
-  // upgrade made a data stream unready), it stays usable so that it can be turned off.
-  const isColumnarIndexModeNotReady =
-    hasLogsDataStreams &&
-    !isColumnarIndexModeReady &&
-    !isColumnarIndexModeWithdrawn &&
-    !isColumnarIndexModeEnabled;
-  const toggleColumnarIndexMode = () =>
-    updatePackagePolicy({
-      package: {
-        name: packageInfo.name,
-        title: packageInfo.title,
-        version: packageInfo.version,
-        ...packagePolicy.package,
-        logsdb_columnar: !isColumnarIndexModeEnabled,
-      },
-    });
+    logsdbColumnar ??
+    (installationInfo
+      ? installationInfo.logsdb_columnar_enabled === true
+      : isLogsdbColumnarDefault(packageInfo));
 
   // Configure inputs (and their streams)
   const renderConfigureInputs = () =>
     packagePolicyTemplates.length ? (
       <>
         {!noTopRule && <EuiHorizontalRule margin="m" />}
-        {(hasLogsDataStreams || isColumnarIndexModeWithdrawn) && (
+        {logsDataStreams.length > 0 && onLogsdbColumnarChange && (
           <>
             <ColumnarIndexModeSwitch
-              checked={
-                isColumnarIndexModeEnabled &&
-                !isColumnarIndexModeWithdrawn &&
-                !isColumnarIndexModeNotReady
-              }
-              disabled={isColumnarIndexModeWithdrawn || isColumnarIndexModeNotReady}
-              notReady={isColumnarIndexModeNotReady}
+              checked={isColumnarIndexModeEnabled}
+              notReady={columnarNotReadyDataStreams.length > 0}
               notReadyDataStreams={
-                columnarReadyDataStreams.length > 0 ? columnarNotReadyDataStreams : []
+                columnarNotReadyDataStreams.length < logsDataStreams.length
+                  ? columnarNotReadyDataStreams
+                  : []
               }
-              withdrawn={isColumnarIndexModeWithdrawn}
-              onChange={toggleColumnarIndexMode}
-              unsupportedDataStreams={columnarNotReadyDataStreams}
+              onChange={() => onLogsdbColumnarChange(!isColumnarIndexModeEnabled)}
             />
             <EuiHorizontalRule margin="m" />
           </>

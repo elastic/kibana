@@ -198,14 +198,6 @@ export const PackagePolicyPackageSchema = schema.object(
     experimental_data_stream_features: schema.maybe(ExperimentalDataStreamFeaturesSchema),
     requires_root: schema.maybe(schema.boolean()),
     fips_compatible: schema.maybe(schema.boolean()),
-    logsdb_columnar: schema.maybe(
-      schema.boolean({
-        meta: {
-          description:
-            'Enable or disable the logsdb_columnar index mode for the log data streams of the integration. The choice is stored on the installation, not on the package policy.',
-        },
-      })
-    ),
   },
   { meta: { id: 'package_policy_package' } }
 );

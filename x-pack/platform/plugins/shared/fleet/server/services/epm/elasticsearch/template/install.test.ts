@@ -342,14 +342,14 @@ describe('EPM index template install', () => {
         };
       };
 
-      it('writes the mode and strips doc_values/store when the target mode is columnar', () => {
+      it('writes the mode and leaves the mappings as the package declares them', () => {
         const { settings, properties } = prepare(logsDataStream(), 'logsdb_columnar');
 
         expect(settings).toEqual({ index: { mode: 'logsdb_columnar' } });
-        expect(properties).toEqual({ type: 'keyword' });
+        expect(properties).toEqual({ type: 'keyword', doc_values: false, store: true });
       });
 
-      it('leaves mappings untouched when no columnar mode is requested', () => {
+      it('writes no mode when none is requested', () => {
         const { settings, properties } = prepare(logsDataStream());
 
         expect(settings).toEqual({ index: {} });

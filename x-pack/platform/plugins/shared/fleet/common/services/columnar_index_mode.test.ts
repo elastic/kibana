@@ -10,6 +10,7 @@ import type { RegistryDataStream } from '../types';
 import {
   getLogsdbColumnarNotReadyDataStreams,
   getLogsdbColumnarReadiness,
+  isLogsdbColumnarDefault,
   isLogsdbColumnarReady,
 } from './columnar_index_mode';
 
@@ -111,5 +112,41 @@ describe('getLogsdbColumnarNotReadyDataStreams', () => {
         dataStream({ type: 'metrics', dataset: 'm' }),
       ])
     ).toEqual([]);
+  });
+});
+
+describe('isLogsdbColumnarDefault', () => {
+  const withStreams = (
+    readiness: 'opt_in' | 'default' | undefined,
+    ...streams: Array<Partial<RegistryDataStream>>
+  ) => ({
+    elasticsearch: readiness ? { logsdb_columnar: readiness } : {},
+    data_streams: streams.map((props) => dataStream(props)),
+  });
+
+  it('is true when every logs data stream defaults to columnar', () => {
+    expect(isLogsdbColumnarDefault(withStreams('default', {}, { dataset: 'b' }))).toBe(true);
+  });
+
+  it('is false when a logs data stream is only `opt_in` or not ready', () => {
+    expect(
+      isLogsdbColumnarDefault(
+        withStreams('default', {}, { dataset: 'b', elasticsearch: { logsdb_columnar: 'opt_in' } })
+      )
+    ).toBe(false);
+    expect(
+      isLogsdbColumnarDefault(
+        withStreams(
+          'default',
+          {},
+          { dataset: 'b', elasticsearch: { logsdb_columnar: 'unsupported' } }
+        )
+      )
+    ).toBe(false);
+  });
+
+  it('is false without logs data streams', () => {
+    expect(isLogsdbColumnarDefault(withStreams('default', { type: 'metrics' }))).toBe(false);
+    expect(isLogsdbColumnarDefault(undefined)).toBe(false);
   });
 });

@@ -109,6 +109,7 @@ export {
   LOGSDB_COLUMNAR_INDEX_MODE,
   getLogsdbColumnarNotReadyDataStreams,
   getLogsdbColumnarReadiness,
+  isLogsdbColumnarDefault,
   isLogsdbColumnarReady,
 } from './columnar_index_mode';
 

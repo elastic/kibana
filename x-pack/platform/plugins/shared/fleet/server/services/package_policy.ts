@@ -187,7 +187,6 @@ import { sendTelemetryEvents } from './upgrade_sender';
 import {
   canDeployCustomPackageAsAgentlessOrThrow,
   handleExperimentalDatastreamFeatureOptIn,
-  handleLogsdbColumnarChoice,
   mapPackagePolicySavedObjectToPackagePolicy,
   preflightCheckPackagePolicy,
 } from './package_policies';
@@ -678,13 +677,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       packagePolicy: enrichedPackagePolicy,
     });
 
-    // Apply the installation-level columnar index mode choice carried by the policy editor
-    await handleLogsdbColumnarChoice({
-      soClient,
-      esClient,
-      packagePolicy: enrichedPackagePolicy,
-    });
-
     const pkgInfo =
       options?.packageInfo ??
       (await getPackageInfo({
@@ -784,13 +776,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         {
           ...omit(enrichedPackagePolicy, 'cloud_connector_name', 'spaceIds'),
           ...(enrichedPackagePolicy.package
-            ? {
-                package: omit(
-                  enrichedPackagePolicy.package,
-                  'experimental_data_stream_features',
-                  'logsdb_columnar'
-                ),
-              }
+            ? { package: omit(enrichedPackagePolicy.package, 'experimental_data_stream_features') }
             : {}),
           inputs,
           ...(elasticsearchPrivileges && {
@@ -1063,20 +1049,23 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       isSecretStorageEnabled(esClient, soClient),
     ]);
 
-    // Check every policy first: the installation-level columnar index mode choice a policy carries
-    // rewrites the index templates shared by all the policies of the integration, so it is only
-    // applied for a policy that passed its checks.
-    const validatedPackagePolicies = new Map<
-      string | undefined,
-      NonNullable<ReturnType<typeof packageInfosandAssetsMap.get>>
-    >();
-    for (const packagePolicy of packagePoliciesWithIds) {
+    await pMap(packagePoliciesWithIds, async (packagePolicy) => {
       try {
+        const packagePolicyId = packagePolicy.id ?? uuidv4();
+        const agentPolicyIdsOfPackagePolicy = packagePolicy.policy_ids;
+
         if (!packagePolicy.package) {
           throw new FleetError(
             `Package policy "${packagePolicy.name}" without package are not supported`
           );
         }
+
+        const {
+          id,
+          spaceIds: _spaceIds,
+          ...pkgPolicyWithoutIdInit
+        } = packagePolicy as NewPackagePolicyWithId & { spaceIds?: string[] };
+        let pkgPolicyWithoutId = pkgPolicyWithoutIdInit;
 
         const packageInfoAndAsset = packageInfosandAssetsMap.get(
           `${packagePolicy.package.name}-${packagePolicy.package.version}`
@@ -1087,61 +1076,21 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           );
         }
 
-        const { pkgInfo } = packageInfoAndAsset;
+        const { pkgInfo, assetsMap } = packageInfoAndAsset;
 
         assertFipsCompatiblePackageOrThrow(packagePolicy, pkgInfo, options?.force);
 
+        let inputs = getInputsWithIds(packagePolicy, packagePolicyId, undefined, pkgInfo);
+
         validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
 
-        for (const policyId of packagePolicy.policy_ids) {
+        for (const policyId of agentPolicyIdsOfPackagePolicy) {
           validateAgentlessForPackagePolicy(
             packagePolicy,
             agentPoliciesIndexById[policyId],
             pkgInfo
           );
         }
-
-        validatedPackagePolicies.set(packagePolicy.id, packageInfoAndAsset);
-      } catch (error) {
-        failedPolicies.push({ packagePolicy, error });
-        logger.error(error);
-      }
-    }
-
-    // Then apply the choices, one policy at a time so that policies of the same integration do
-    // not race. A rejected choice fails the policy that carried it, as `create` does.
-    for (const packagePolicy of packagePoliciesWithIds) {
-      if (!validatedPackagePolicies.has(packagePolicy.id)) {
-        continue;
-      }
-      try {
-        await handleLogsdbColumnarChoice({ soClient, esClient, packagePolicy });
-      } catch (error) {
-        validatedPackagePolicies.delete(packagePolicy.id);
-        failedPolicies.push({ packagePolicy, error });
-        logger.error(error);
-      }
-    }
-
-    await pMap(packagePoliciesWithIds, async (packagePolicy) => {
-      const packageInfoAndAsset = validatedPackagePolicies.get(packagePolicy.id);
-      if (!packageInfoAndAsset) {
-        return;
-      }
-      try {
-        const packagePolicyId = packagePolicy.id ?? uuidv4();
-        const agentPolicyIdsOfPackagePolicy = packagePolicy.policy_ids;
-
-        const {
-          id,
-          spaceIds: _spaceIds,
-          ...pkgPolicyWithoutIdInit
-        } = packagePolicy as NewPackagePolicyWithId & { spaceIds?: string[] };
-        let pkgPolicyWithoutId = pkgPolicyWithoutIdInit;
-
-        const { pkgInfo, assetsMap } = packageInfoAndAsset;
-
-        let inputs = getInputsWithIds(packagePolicy, packagePolicyId, undefined, pkgInfo);
 
         let secretReferences: SecretReference[] | undefined;
         if (secretStorageEnabled) {
@@ -1182,13 +1131,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           attributes: {
             ...pkgPolicyWithoutId,
             ...(packagePolicy.package
-              ? {
-                  package: omit(
-                    packagePolicy.package,
-                    'experimental_data_stream_features',
-                    'logsdb_columnar'
-                  ),
-                }
+              ? { package: omit(packagePolicy.package, 'experimental_data_stream_features') }
               : {}),
             inputs,
             elasticsearch,
@@ -1325,13 +1268,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       id: packagePolicy.id,
       ...pkgPolicyWithoutId,
       ...(packagePolicy.package
-        ? {
-            package: omit(
-              packagePolicy.package,
-              'experimental_data_stream_features',
-              'logsdb_columnar'
-            ),
-          }
+        ? { package: omit(packagePolicy.package, 'experimental_data_stream_features') }
         : {}),
       inputs,
       elasticsearch,
@@ -1907,13 +1844,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       packagePolicy: restOfPackagePolicy,
     });
 
-    // Apply the installation-level columnar index mode choice carried by the policy editor
-    await handleLogsdbColumnarChoice({
-      soClient,
-      esClient,
-      packagePolicy: restOfPackagePolicy,
-    });
-
     // If the package version has increased, save the previous package policy revision.
     if (
       appContextService.getExperimentalFeatures().enablePackageRollback &&
@@ -1966,13 +1896,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           // The condition is derived from the package below, never taken from the request.
           ...omit(restOfPackagePolicy, 'cloud_connector_name', 'package_agent_version_condition'),
           ...(restOfPackagePolicy.package
-            ? {
-                package: omit(
-                  restOfPackagePolicy.package,
-                  'experimental_data_stream_features',
-                  'logsdb_columnar'
-                ),
-              }
+            ? { package: omit(restOfPackagePolicy.package, 'experimental_data_stream_features') }
             : {}),
           inputs,
           ...(elasticsearchPrivileges && {
@@ -2432,8 +2356,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         if (!options?.fromBulkUpgrade) {
           // Handle component template/mappings updates for experimental features, e.g. synthetic source
           await handleExperimentalDatastreamFeatureOptIn({ soClient, esClient, packagePolicy });
-          // Apply the installation-level columnar index mode choice carried by the policy editor
-          await handleLogsdbColumnarChoice({ soClient, esClient, packagePolicy });
         }
 
         const targetAgentVersionCondition = pkgInfo?.conditions?.agent?.version;
@@ -2444,13 +2366,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           attributes: {
             ...omit(restOfPackagePolicy, 'cloud_connector_name', 'package_agent_version_condition'),
             ...(restOfPackagePolicy.package
-              ? {
-                  package: omit(
-                    restOfPackagePolicy.package,
-                    'experimental_data_stream_features',
-                    'logsdb_columnar'
-                  ),
-                }
+              ? { package: omit(restOfPackagePolicy.package, 'experimental_data_stream_features') }
               : {}),
             inputs,
             ...(elasticsearchPrivileges && {
@@ -3073,7 +2989,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           package: {
             ...newPP.package!,
             experimental_data_stream_features: newPolicy.package?.experimental_data_stream_features,
-            logsdb_columnar: newPolicy.package?.logsdb_columnar,
           },
           policy_id: newPolicy.policy_id ?? undefined,
           policy_ids: newPolicy.policy_ids ?? undefined,

@@ -20,10 +20,6 @@ export async function stepUpdateCurrentWriteIndices(context: InstallContext) {
     updateCurrentWriteIndices(esClient, logger, indexTemplates || [], {
       ignoreMappingUpdateErrors,
       skipDataStreamRollover,
-      // The install may have removed `logsdb_columnar` from a data stream's index template,
-      // because the data stream is no longer columnar-ready. The write index keeps the mode
-      // until it is rolled over, so ask for the rollover explicitly.
-      rolloverOnIndexModeReset: true,
     })
   );
 }
