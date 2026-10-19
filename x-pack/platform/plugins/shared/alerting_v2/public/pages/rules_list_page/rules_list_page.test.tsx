@@ -72,6 +72,13 @@ jest.mock('@kbn/core-di-browser', () => {
           toasts: { addSuccess: jest.fn(), addError: jest.fn() },
           tours: { isEnabled: () => false },
         },
+        docLinks: {
+          links: {
+            alerting: {
+              viewManageRules: 'https://docs.test/view-manage-rules',
+            },
+          },
+        },
       };
 
       return services[token as string] ?? {};

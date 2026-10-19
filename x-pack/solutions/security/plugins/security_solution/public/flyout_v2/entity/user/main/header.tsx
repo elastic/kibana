@@ -34,7 +34,7 @@ import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared
 import { RiskLevelBadge } from '../../../../flyout/entity_details/shared/components/risk_level_badge';
 import { EntityAnalyticsFlyoutCopyLink } from '../../shared/components/entity_analytics_flyout_copy_link';
 import { toEntityDescriptorMode } from '../../../shared/url_state/flyout_v2_url_param';
-import type { EntityViewMode } from '../../../../flyout/entity_details/shared/types';
+import type { EntityViewMode } from '../../../../../common/entity_analytics/entity_store/resolution_group';
 
 export interface HeaderProps {
   /** User name displayed as the flyout title. */

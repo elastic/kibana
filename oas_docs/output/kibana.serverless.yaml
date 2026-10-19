@@ -114,6 +114,114 @@ tags:
   - description: Data view APIs enable you to manage data views, formerly known as Kibana index patterns.
     name: data views
     x-displayName: Data views
+  - name: Discover sessions
+    description: |
+      A [Discover session](https://www.elastic.co/docs/explore-analyze/discover) is a saved exploration of your data in Discover. Each session contains one or more tabs, and each tab stores its own data source, query, filters, columns, sorting, and chart settings. Use this API to create and manage Discover sessions programmatically.
+
+      ## When to use this API
+
+      - Use this API to define a complete, self-contained Discover session in a single payload, including tabs based on ES|QL queries or data views.
+      - Use the [Dashboards API](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards/operation/create-dashboard) to embed Discover sessions in dashboards as `discover_session` panels, either inline or linked by ID.
+
+      ## Get started
+
+      Before you begin:
+
+      - **Authentication**: Refer to [Authentication](https://www.elastic.co/docs/api/doc/kibana#authentication) in the Kibana API documentation.
+      - **CSRF protection**: Write operations (`POST`, `PUT`, `DELETE`) require the `kbn-xsrf: true` header.
+      - **Spaces**: If you use non-default [Kibana spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces), prepend `s/{space_id}/` to the path.
+
+      ### Try it now
+
+      Create your first Discover session right now using the following example, with an ES|QL tab that lists large requests. You can run it as-is after installing the [Kibana sample logs dataset](https://www.elastic.co/docs/manage-data/ingest/sample-data):
+
+      ```bash
+      curl -X POST "${KIBANA_URL}/api/discover_sessions" \
+        -H "Authorization: ApiKey ${API_KEY}" \
+        -H "kbn-xsrf: true" \
+        -H "Content-Type: application/json" \
+        -d '{
+          "title": "My first API Discover session",
+          "tabs": [
+            {
+              "id": "large-requests",
+              "label": "Large requests",
+              "data_source": {
+                "type": "esql",
+                "query": "FROM kibana_sample_data_logs | WHERE bytes > 10000 | LIMIT 100"
+              },
+              "column_order": ["host", "url", "bytes"]
+            }
+          ]
+        }'
+      ```
+
+      Most examples in this reference use the [Kibana sample logs dataset](https://www.elastic.co/docs/manage-data/ingest/sample-data) (`kibana_sample_data_logs`). Metrics tab examples need a time series data stream, such as `metrics-*`. To use your own data, replace the index pattern and field references.
+
+      ### Discover session structure
+
+      A Discover session is structured as follows:
+
+      - **`title`** (required): the display name of the Discover session.
+      - **`description`**: a short description of the Discover session.
+      - **`tags`**: IDs of tags to associate with the Discover session.
+      - **`tabs`** (required): ordered list of tabs. Each tab requires a unique `id`, which other saved objects and links can reference, and a `label` displayed in Discover. Tab IDs can contain only lowercase letters, numbers, hyphens, and underscores.
+
+      ### Data sources
+
+      The `data_source.type` field in each tab determines how the tab queries data:
+
+      | Type | Description |
+      |------|-------------|
+      | `esql` | An ES&#124;QL query. Set the query in `data_source.query`. |
+      | `data_view_reference` | An existing data view, referenced by ID in `data_source.ref_id`. |
+      | `data_view_spec` | A data view defined inline, with an `index_pattern` and an optional `time_field`. |
+
+      Tabs based on data views also support `query`, `filters`, and `view_mode` (`documents`, `patterns`, or `aggregated`).
+
+      Each tab also has a `type`. `default` tabs support data views and ES|QL. `metrics` tabs support only ES|QL and also store metrics grid settings, such as `dimensions` and aggregations. If omitted, `type` defaults to `default`.
+
+      - **ES|QL tab**:
+
+        ```json
+        {
+          "id": "errors",
+          "label": "Errors",
+          "data_source": {
+            "type": "esql",
+            "query": "FROM kibana_sample_data_logs | WHERE response.keyword == \"503\""
+          }
+        }
+        ```
+
+      - **Data view tab**:
+
+        ```json
+        {
+          "id": "all-logs",
+          "label": "All logs",
+          "data_source": {
+            "type": "data_view_spec",
+            "index_pattern": "kibana_sample_data_logs",
+            "time_field": "timestamp"
+          },
+          "column_order": ["host", "url", "bytes"],
+          "sort": [
+            {
+              "name": "timestamp",
+              "direction": "desc"
+            }
+          ]
+        }
+        ```
+
+      ### Warnings
+
+      Getting a single Discover session (`GET /api/discover_sessions/{id}`) returns the session in a `data` object. When saved content cannot be fully represented in the API response, it is omitted and listed in a `warnings` array. The saved session is not modified.
+    externalDocs:
+      description: Discover documentation
+      url: https://www.elastic.co/docs/explore-analyze/discover
+    x-displayName: Discover sessions
   - name: Elastic Agent actions
     description: |
       Elastic Agent actions APIs enable you to manage actions performed on Elastic Agents, including agent reassignment, diagnostics collection, enrollment management, upgrades, and bulk operations for agent lifecycle management.
@@ -492,8 +600,9 @@ paths:
       responses:
         '200':
           description: Returns the OAuth callback script
-      summary: ''
-      tags: []
+      summary: Get OAuth callback script
+      tags:
+        - connectors
       x-state: ''
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -808,6 +917,85 @@ paths:
         <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/actions/connectors</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+  /api/actions/events/{connector_type_id}/{connector_id}:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/actions/events/{connector_type_id}/{connector_id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Public ingress for Kibana connector-scoped inbound events. Authenticate with an ingest token (`Authorization: Bearer`, or `token` query parameter as fallback). A successful emit returns 202. A connector HTTP ack returns 200 (JSON or a plain-text body) and does not emit.
+      operationId: post-actions-events-connector-type-id-connector-id
+      parameters:
+        - description: The Kibana connector type identifier.
+          in: path
+          name: connector_type_id
+          required: true
+          schema:
+            maxLength: 64
+            minLength: 1
+            type: string
+        - description: The identifier of the Kibana connector instance that should receive the event.
+          in: path
+          name: connector_id
+          required: true
+          schema:
+            maxLength: 36
+            minLength: 1
+            type: string
+        - description: 'Connector ingest token. Prefer `Authorization: Bearer <token>`. Query `token` is only used when the Authorization header is absent.'
+          in: query
+          name: token
+          required: false
+          schema:
+            maxLength: 128
+            minLength: 1
+            type: string
+      requestBody:
+        content:
+          'application/json; application/*+json; application/x-www-form-urlencoded; text/plain; */*':
+            schema: {}
+            examples:
+              ingestEventsRequest:
+                $ref: '#/components/examples/ingest_events_request'
+              ingestEventsChallengeRequest:
+                $ref: '#/components/examples/ingest_events_challenge_request'
+      responses:
+        '200':
+          content:
+            'application/json; application/*+json; application/x-www-form-urlencoded; text/plain; */*':
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_ingest_events_ack_response'
+              examples:
+                ingestEventsAckResponse:
+                  $ref: '#/components/examples/ingest_events_ack_response'
+          description: Connector HTTP 200 ack. No event is emitted. JSON or a plain-text body.
+        '202':
+          content:
+            'application/json; application/*+json; application/x-www-form-urlencoded; text/plain; */*':
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_ingest_events_response'
+              examples:
+                ingestEventsResponse:
+                  $ref: '#/components/examples/ingest_events_response'
+          description: The ingress request was accepted. Downstream emit failures may still be partial; see server logs.
+        '403':
+          description: Inbound connector events are disabled.
+        '404':
+          description: Connector, connector type, or ingest token was not found or failed verification.
+        '429':
+          description: Inbound rate limit exceeded. Retry-After is the seconds until a request is allowed again.
+        '500':
+          description: The connector failed to handle or validate the event.
+      summary: Ingest an external event for a Kibana connector
+      tags:
+        - connectors
+      x-state: Experimental
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/agent_builder/a2a/{agentId}:
     post:
       description: |-
@@ -3371,7 +3559,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Update the origin reference for an attachment. Use this after saving a by-value attachment to link it to its persistent store.<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
+        Update the origin reference for an attachment. Use this after saving a by-value attachment to link it to its persistent store.<br/><br/>[Required authorization] Route required privileges: agentBuilder:read. Extended privileges (optional, expand functionality when granted): agentBuilder:manageAgents.
       operationId: put-agent-builder-conversations-conversation-id-attachments-attachment-id-origin
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -15383,7 +15571,7 @@ paths:
                       count: 1
                   time_field: '@timestamp'
             schema:
-              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_new_rule'
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_put_rule'
       responses:
         '200':
           content:
@@ -29729,6 +29917,780 @@ paths:
       summary: List all detection rule tags
       tags:
         - Security Detections API
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/discover_sessions:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/discover_sessions</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns a paginated summary list of Discover sessions. Use `GET /api/discover_sessions/{id}` for the full session state.
+      operationId: search-discover-sessions
+      parameters:
+        - description: The page of results to return.
+          in: query
+          name: page
+          required: false
+          schema:
+            default: 1
+            minimum: 1
+            type: number
+        - description: The number of results to return per page.
+          in: query
+          name: per_page
+          required: false
+          schema:
+            default: 20
+            maximum: 1000
+            minimum: 1
+            type: number
+        - description: Full-text search (`simple_query_string`) over `title` and `description`. All terms must match.
+          in: query
+          name: query
+          required: false
+          schema:
+            maxLength: 1000
+            type: string
+        - description: A tag ID to include. Accepts a single tag ID or multiple tag IDs. When multiple are specified, Discover sessions matching any of the tag IDs are included.
+          in: query
+          name: tags
+          required: false
+          schema:
+            default: []
+            description: Tag IDs to include.
+            items:
+              maxLength: 250
+              type: string
+            maxItems: 100
+            type: array
+        - description: A tag ID to exclude. Accepts a single tag ID or multiple tag IDs. When multiple are specified, Discover sessions matching any of the tag IDs are excluded.
+          in: query
+          name: excluded_tags
+          required: false
+          schema:
+            default: []
+            description: Tag IDs to exclude.
+            items:
+              maxLength: 250
+              type: string
+            maxItems: 100
+            type: array
+        - description: A tag name to include. Accepts a single tag name or multiple tag names. When multiple are specified, Discover sessions matching any of the tag names are included. If the same name is shared by multiple tags, sessions matching any of those tags are included.
+          in: query
+          name: tag_names
+          required: false
+          schema:
+            items:
+              type: string
+            maxItems: 100
+            type: array
+        - description: A tag name to exclude. Accepts a single tag name or multiple tag names. When multiple are specified, Discover sessions matching any of the tag names are excluded. If the same name is shared by multiple tags, sessions matching any of those tags are excluded.
+          in: query
+          name: excluded_tag_names
+          required: false
+          schema:
+            items:
+              type: string
+            maxItems: 100
+            type: array
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                sessions:
+                  summary: One matching Discover session
+                  value:
+                    data:
+                      - data:
+                          description: ''
+                          tags: []
+                          title: Requests by extension
+                        id: web-log-requests
+                        meta:
+                          created_at: '2026-10-15T09:00:00.000Z'
+                          created_by: u_example
+                          managed: false
+                          updated_at: '2026-10-15T09:00:00.000Z'
+                          updated_by: u_example
+                          version: WzEsMV0=
+                    meta:
+                      page: 1
+                      per_page: 20
+                      total: 1
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    description: List of matching Discover sessions (summaries, not the full session state).
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        data:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            description:
+                              description: Discover session description.
+                              type: string
+                            tags:
+                              default: []
+                              description: Tag IDs associated with this Discover session.
+                              items:
+                                maxLength: 250
+                                type: string
+                              maxItems: 1000
+                              type: array
+                            title:
+                              description: Discover session title.
+                              type: string
+                          required:
+                            - title
+                        id:
+                          description: The Discover session ID.
+                          type: string
+                        meta:
+                          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-meta'
+                      required:
+                        - id
+                        - data
+                        - meta
+                    maxItems: 1000
+                    type: array
+                  meta:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      page:
+                        default: 1
+                        description: The returned page of results.
+                        minimum: 1
+                        type: number
+                      per_page:
+                        default: 20
+                        description: The number of results returned per page.
+                        maximum: 1000
+                        minimum: 1
+                        type: number
+                      total:
+                        description: The total number of results matching the query.
+                        type: number
+                    required:
+                      - total
+                required:
+                  - data
+                  - meta
+          description: Success
+        '400':
+          description: Invalid request
+        '500':
+          description: Internal server error
+      summary: Search Discover sessions
+      tags:
+        - Discover sessions
+      x-codeSamples:
+        - label: cURL
+          lang: cURL
+          source: |
+            curl -X GET "${KIBANA_URL}/api/discover_sessions?query=requests&per_page=20" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "elastic-api-version: 2023-10-31"
+        - label: Console
+          lang: Console
+          source: |
+            GET kbn:/api/discover_sessions?query=requests&per_page=20
+      x-state: Generally available
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/discover_sessions</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Creates a Discover session and returns its ID, full state, and metadata.
+      operationId: create-discover-session
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              data_view:
+                summary: Data view tab with an inline data view
+                value:
+                  tabs:
+                    - column_order:
+                        - timestamp
+                        - response
+                        - url
+                      data_source:
+                        index_pattern: kibana_sample_data_logs
+                        time_field: timestamp
+                        type: data_view_spec
+                      id: logs
+                      label: Logs
+                      query:
+                        expression: 'response: 200'
+                        language: kql
+                  title: Sample web logs
+              data_view_reference:
+                summary: Data view tab with the sample web logs data view
+                value:
+                  tabs:
+                    - column_order:
+                        - timestamp
+                        - response
+                        - url
+                      data_source:
+                        ref_id: 90943e30-9a47-11e8-b64d-95841ca0b247
+                        type: data_view_reference
+                      id: logs
+                      label: Logs
+                      query:
+                        expression: 'response: 200'
+                        language: kql
+                  title: Sample web logs
+              esql:
+                summary: ES|QL tab with requests by extension
+                value:
+                  description: ''
+                  tabs:
+                    - column_order:
+                        - extension
+                        - requests
+                      data_source:
+                        query: FROM kibana_sample_data_logs | STATS requests = COUNT(*) BY extension | SORT requests DESC
+                        type: esql
+                      hide_chart: false
+                      hide_table: false
+                      id: requests
+                      label: Requests
+                      sort: []
+                      type: default
+                  tags: []
+                  title: Requests by extension
+              metrics:
+                summary: Metrics tab on a time series data stream (replace `metrics-*` with your own)
+                value:
+                  tabs:
+                    - counter_aggregation: max
+                      data_source:
+                        query: TS metrics-*
+                        type: esql
+                      dimensions:
+                        - host.name
+                      gauge_aggregation: avg
+                      grid_sort_direction: asc
+                      grid_sort_field: alphabetically
+                      histogram_percentile: p95
+                      id: metrics
+                      label: Metrics
+                      search_term: cpu
+                      type: metrics
+                  title: Host metrics
+            schema:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-discover-session-data'
+      responses:
+        '201':
+          content:
+            application/json:
+              examples:
+                esql:
+                  summary: Response for the ES|QL session example
+                  value:
+                    data:
+                      description: ''
+                      tabs:
+                        - column_order:
+                            - extension
+                            - requests
+                          data_source:
+                            query: FROM kibana_sample_data_logs | STATS requests = COUNT(*) BY extension | SORT requests DESC
+                            type: esql
+                          hide_chart: false
+                          hide_table: false
+                          id: requests
+                          label: Requests
+                          sort: []
+                          type: default
+                      tags: []
+                      title: Requests by extension
+                    id: web-log-requests
+                    meta:
+                      created_at: '2026-10-15T09:00:00.000Z'
+                      created_by: u_example
+                      managed: false
+                      updated_at: '2026-10-15T09:00:00.000Z'
+                      updated_by: u_example
+                      version: WzEsMV0=
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-discover-session-data'
+                  id:
+                    description: The Discover session ID.
+                    type: string
+                  meta:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-meta'
+                required:
+                  - id
+                  - data
+                  - meta
+          description: Created
+        '400':
+          description: Invalid request
+        '403':
+          description: Forbidden
+      summary: Create a Discover session
+      tags:
+        - Discover sessions
+      x-codeSamples:
+        - label: cURL
+          lang: cURL
+          source: |
+            curl -X POST "${KIBANA_URL}/api/discover_sessions" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "elastic-api-version: 2023-10-31" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+              "title": "Requests by extension",
+              "description": "",
+              "tags": [],
+              "tabs": [
+                {
+                  "id": "requests",
+                  "label": "Requests",
+                  "type": "default",
+                  "data_source": {
+                    "type": "esql",
+                    "query": "FROM kibana_sample_data_logs | STATS requests = COUNT(*) BY extension | SORT requests DESC"
+                  },
+                  "column_order": [
+                    "extension",
+                    "requests"
+                  ],
+                  "sort": [],
+                  "hide_chart": false,
+                  "hide_table": false
+                }
+              ]
+            }'
+        - label: Console
+          lang: Console
+          source: |
+            POST kbn:/api/discover_sessions
+            {
+              "title": "Requests by extension",
+              "description": "",
+              "tags": [],
+              "tabs": [
+                {
+                  "id": "requests",
+                  "label": "Requests",
+                  "type": "default",
+                  "data_source": {
+                    "type": "esql",
+                    "query": "FROM kibana_sample_data_logs | STATS requests = COUNT(*) BY extension | SORT requests DESC"
+                  },
+                  "column_order": [
+                    "extension",
+                    "requests"
+                  ],
+                  "sort": [],
+                  "hide_chart": false,
+                  "hide_table": false
+                }
+              ]
+            }
+      x-state: Generally available
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/discover_sessions/{id}:
+    delete:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/discover_sessions/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Permanently deletes a Discover session by ID.
+      operationId: delete-discover-session
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The Discover session ID, as returned by the create or search endpoints.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Deleted
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '500':
+          description: Internal server error
+      summary: Delete a Discover session
+      tags:
+        - Discover sessions
+      x-codeSamples:
+        - label: cURL
+          lang: cURL
+          source: |
+            curl -X DELETE "${KIBANA_URL}/api/discover_sessions/web-log-requests" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "elastic-api-version: 2023-10-31" \
+              -H "kbn-xsrf: true"
+        - label: Console
+          lang: Console
+          source: |
+            DELETE kbn:/api/discover_sessions/web-log-requests
+      x-state: Generally available
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/discover_sessions/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns the complete state of a Discover session by ID.
+      operationId: get-discover-session
+      parameters:
+        - description: The Discover session ID, as returned by the create or search endpoints.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                esql:
+                  summary: Response for the ES|QL session example
+                  value:
+                    data:
+                      description: ''
+                      tabs:
+                        - column_order:
+                            - extension
+                            - requests
+                          data_source:
+                            query: FROM kibana_sample_data_logs | STATS requests = COUNT(*) BY extension | SORT requests DESC
+                            type: esql
+                          hide_chart: false
+                          hide_table: false
+                          id: requests
+                          label: Requests
+                          sort: []
+                          type: default
+                      tags: []
+                      title: Requests by extension
+                    id: web-log-requests
+                    meta:
+                      created_at: '2026-10-15T09:00:00.000Z'
+                      created_by: u_example
+                      managed: false
+                      updated_at: '2026-10-15T09:00:00.000Z'
+                      updated_by: u_example
+                      version: WzEsMV0=
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-discover-session-data'
+                  id:
+                    description: The Discover session ID.
+                    type: string
+                  meta:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-meta'
+                  warnings:
+                    description: Warnings about content omitted from the API response due to conversion or validation errors. The saved session is not modified.
+                    items:
+                      anyOf:
+                        - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-discover-session-dropped-item-warning'
+                        - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-discover-session-dropped-property-warning'
+                    type: array
+                required:
+                  - id
+                  - data
+                  - meta
+          description: Success
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '500':
+          description: Internal server error
+      summary: Get a Discover session
+      tags:
+        - Discover sessions
+      x-codeSamples:
+        - label: cURL
+          lang: cURL
+          source: |
+            curl -X GET "${KIBANA_URL}/api/discover_sessions/web-log-requests" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "elastic-api-version: 2023-10-31"
+        - label: Console
+          lang: Console
+          source: |
+            GET kbn:/api/discover_sessions/web-log-requests
+      x-state: Generally available
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    put:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/discover_sessions/{id}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Creates a Discover session with the specified ID, or fully replaces the existing session.
+      operationId: upsert-discover-session
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The unique ID of the Discover session to create or replace.
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              esql:
+                summary: ES|QL tab with requests by extension
+                value:
+                  description: ''
+                  tabs:
+                    - column_order:
+                        - extension
+                        - requests
+                      data_source:
+                        query: FROM kibana_sample_data_logs | STATS requests = COUNT(*) BY extension | SORT requests DESC
+                        type: esql
+                      hide_chart: false
+                      hide_table: false
+                      id: requests
+                      label: Requests
+                      sort: []
+                      type: default
+                  tags: []
+                  title: Requests by extension
+            schema:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-discover-session-data'
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                esql:
+                  summary: Response for the ES|QL session example
+                  value:
+                    data:
+                      description: ''
+                      tabs:
+                        - column_order:
+                            - extension
+                            - requests
+                          data_source:
+                            query: FROM kibana_sample_data_logs | STATS requests = COUNT(*) BY extension | SORT requests DESC
+                            type: esql
+                          hide_chart: false
+                          hide_table: false
+                          id: requests
+                          label: Requests
+                          sort: []
+                          type: default
+                      tags: []
+                      title: Requests by extension
+                    id: web-log-requests
+                    meta:
+                      created_at: '2026-10-15T09:00:00.000Z'
+                      created_by: u_example
+                      managed: false
+                      updated_at: '2026-10-15T09:00:00.000Z'
+                      updated_by: u_example
+                      version: WzEsMV0=
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-discover-session-data'
+                  id:
+                    description: The Discover session ID.
+                    type: string
+                  meta:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-meta'
+                required:
+                  - id
+                  - data
+                  - meta
+          description: Updated
+        '201':
+          content:
+            application/json:
+              examples:
+                esql:
+                  summary: Response for the ES|QL session example
+                  value:
+                    data:
+                      description: ''
+                      tabs:
+                        - column_order:
+                            - extension
+                            - requests
+                          data_source:
+                            query: FROM kibana_sample_data_logs | STATS requests = COUNT(*) BY extension | SORT requests DESC
+                            type: esql
+                          hide_chart: false
+                          hide_table: false
+                          id: requests
+                          label: Requests
+                          sort: []
+                          type: default
+                      tags: []
+                      title: Requests by extension
+                    id: web-log-requests
+                    meta:
+                      created_at: '2026-10-15T09:00:00.000Z'
+                      created_by: u_example
+                      managed: false
+                      updated_at: '2026-10-15T09:00:00.000Z'
+                      updated_by: u_example
+                      version: WzEsMV0=
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-discover-session-data'
+                  id:
+                    description: The Discover session ID.
+                    type: string
+                  meta:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-meta'
+                required:
+                  - id
+                  - data
+                  - meta
+          description: Created
+        '400':
+          description: Invalid request
+        '403':
+          description: Forbidden
+        '409':
+          description: Conflict
+      summary: Upsert a Discover session
+      tags:
+        - Discover sessions
+      x-codeSamples:
+        - label: cURL
+          lang: cURL
+          source: |
+            curl -X PUT "${KIBANA_URL}/api/discover_sessions/web-log-requests" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "elastic-api-version: 2023-10-31" \
+              -H "kbn-xsrf: true" \
+              -H "Content-Type: application/json" \
+              -d '{
+              "title": "Requests by extension",
+              "description": "",
+              "tags": [],
+              "tabs": [
+                {
+                  "id": "requests",
+                  "label": "Requests",
+                  "type": "default",
+                  "data_source": {
+                    "type": "esql",
+                    "query": "FROM kibana_sample_data_logs | STATS requests = COUNT(*) BY extension | SORT requests DESC"
+                  },
+                  "column_order": [
+                    "extension",
+                    "requests"
+                  ],
+                  "sort": [],
+                  "hide_chart": false,
+                  "hide_table": false
+                }
+              ]
+            }'
+        - label: Console
+          lang: Console
+          source: |
+            PUT kbn:/api/discover_sessions/web-log-requests
+            {
+              "title": "Requests by extension",
+              "description": "",
+              "tags": [],
+              "tabs": [
+                {
+                  "id": "requests",
+                  "label": "Requests",
+                  "type": "default",
+                  "data_source": {
+                    "type": "esql",
+                    "query": "FROM kibana_sample_data_logs | STATS requests = COUNT(*) BY extension | SORT requests DESC"
+                  },
+                  "column_order": [
+                    "extension",
+                    "requests"
+                  ],
+                  "sort": [],
+                  "hide_chart": false,
+                  "hide_table": false
+                }
+              ]
+            }
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -49051,7 +50013,7 @@ paths:
               postInstallByUploadRequestExample:
                 description: Upload a .zip or .tar.gz package archive (max 100MB)
                 value: <binary package archive>
-          application/gzip; application/zip:
+          'application/gzip; application/zip':
             examples:
               postInstallByUploadRequestExample:
                 description: Upload a .zip or .tar.gz package archive (max 100MB)
@@ -49062,7 +50024,7 @@ paths:
       responses:
         '200':
           content:
-            application/gzip; application/zip:
+            'application/gzip; application/zip':
               examples:
                 postInstallByUploadExample:
                   description: Package successfully installed from upload
@@ -49087,7 +50049,7 @@ paths:
           description: Successful response
         '400':
           content:
-            application/gzip; application/zip:
+            'application/gzip; application/zip':
               examples:
                 genericErrorResponseExample:
                   description: Example of a generic error response
@@ -49124,7 +50086,7 @@ paths:
           description: Bad Request
         '403':
           content:
-            application/gzip; application/zip:
+            'application/gzip; application/zip':
               examples:
                 insufficientPrivilegesExample:
                   description: Caller lacks a privilege required by a gated asset type in the archive
@@ -141917,6 +142879,24 @@ components:
           referenced_by_count: 2
           is_missing_secrets: false
           is_system_action: false
+    ingest_events_request:
+      summary: Ingest a connector event.
+      value:
+        eventType: order.created
+        orderId: '1'
+    ingest_events_challenge_request:
+      summary: Inbound webhook handshake. A top-level string challenge is echoed and no event is emitted.
+      value:
+        type: ping
+        challenge: abc
+    ingest_events_ack_response:
+      summary: Connector HTTP 200 ack. No event is emitted.
+      value:
+        challenge: abc
+    ingest_events_response:
+      summary: The ingress request was accepted.
+      value:
+        ok: true
     get_spaces_response1:
       summary: Get all spaces
       description: Get all spaces without specifying any options.
@@ -147569,6 +148549,56 @@ components:
       required:
         - name
         - destinations
+    Kibana_HTTP_APIs_alerting_put_rule:
+      additionalProperties: false
+      type: object
+      properties:
+        artifacts:
+          description: 'Optional objects attached to the rule, such as a runbook or a dashboard. Each item has `id`, `type`, and `data`. The shape of `data` depends on `type`. For example, a `runbook` uses `content` and a `dashboard` uses `dashboard_id`. Known types are validated against that shape. Unknown types are stored when `id`, `type`, and `data` are present. An empty array is rejected: omit `artifacts` on create, or send `null` on PATCH to clear.'
+          items:
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_artifact'
+          maxItems: 100
+          minItems: 1
+          type: array
+        enabled:
+          description: Whether the rule is enabled. On create, defaults to `true` when omitted. On replace, omitting this field preserves the existing enabled state.
+          type: boolean
+        grouping:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_grouping'
+        kind:
+          anyOf:
+            - description: Creates an alert for each matching group and tracks it until it recovers. Use this when you want to detect a problem and notify or automate a response.
+              enum:
+                - alert
+              type: string
+            - description: Stores each match as a rule event you can query. Alerts are not created and notifications are not sent.
+              enum:
+                - signal
+              type: string
+          description: Whether the rule creates alerts (`alert`) or only stores matching events (`signal`).
+        metadata:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_metadata'
+        no_data:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_no_data'
+        query:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_query'
+        recovery:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_recovery'
+        schedule:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_schedule'
+        state_transition:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_state_transition'
+        time_field:
+          default: '@timestamp'
+          description: Document field Kibana uses with `schedule.lookback` to time-filter `query.base`.
+          maxLength: 256
+          minLength: 1
+          type: string
+      required:
+        - kind
+        - metadata
+        - schedule
+        - query
     Kibana_HTTP_APIs_alerting_rule_artifact:
       additionalProperties: false
       type: object
@@ -150525,6 +151555,9 @@ components:
         is_deprecated:
           description: Indicates whether the connector is deprecated.
           type: boolean
+        is_inbound_events_enabled:
+          description: Indicates whether this connector can receive inbound events. Always true for inbound-only connectors. For connectors that also send actions, true after inbound events have been turned on.
+          type: boolean
         is_missing_secrets:
           description: Indicates whether the connector is missing secrets.
           type: boolean
@@ -150571,6 +151604,9 @@ components:
           type: boolean
         is_deprecated:
           description: Indicates whether the connector is deprecated.
+          type: boolean
+        is_inbound_events_enabled:
+          description: Indicates whether this connector can receive inbound events. Always true for inbound-only connectors. For connectors that also send actions, true after inbound events have been turned on.
           type: boolean
         is_missing_secrets:
           description: Indicates whether the connector is missing secrets.
@@ -156248,6 +157284,33 @@ components:
         - params
       title: Index threshold
       type: object
+    Kibana_HTTP_APIs_ingest_events_ack_response:
+      anyOf:
+        - description: Plain-text HTTP ack body.
+          maxLength: 8192
+          minLength: 1
+          type: string
+        - additionalProperties: true
+          description: Connector HTTP 200 JSON ack. `.inboundWebhook` and Slack handshake is `{ challenge }`.
+          type: object
+          properties:
+            challenge:
+              description: When present, echo of a top-level request `challenge` (inbound webhook handshake). No event is emitted.
+              maxLength: 1024
+              minLength: 1
+              type: string
+      description: Connector HTTP 200 ack. JSON or a plain-text body. No event is emitted.
+      title: ingest_events_ack_response
+    Kibana_HTTP_APIs_ingest_events_response:
+      additionalProperties: false
+      properties:
+        ok:
+          description: Indicates the ingress request was accepted for processing.
+          type: boolean
+      required:
+        - ok
+      title: ingest_events_response
+      type: object
     Kibana_HTTP_APIs_IngestStreamLifecycle:
       anyOf:
         - additionalProperties: false
@@ -157894,7 +158957,7 @@ components:
                         type: object
                         properties:
                           column_order:
-                            description: Ordered list of field names to display in the data table. If omitted, defaults to the `defaultColumns` advanced setting or the referenced saved object.
+                            description: Ordered list of field names to display in the data table. If omitted, defaults to the `defaultColumns` advanced setting.
                             items:
                               description: Field name of a column in display order.
                               type: string
@@ -157912,6 +158975,7 @@ components:
                             description: Per-column settings keyed by field name, such as width. Keys should correspond to entries in `column_order` when both are set.
                             type: object
                           data_source:
+                            description: The data view used by the tab, specified by reference or defined inline.
                             discriminator:
                               mapping:
                                 data_view_reference: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
@@ -157926,7 +158990,7 @@ components:
                             minimum: 10
                             type: number
                           density:
-                            description: The table row spacing. If omitted, Discover or the embedding application determines the density from its current settings, such as the user preference.
+                            description: The table row spacing. If omitted, Kibana determines the density from its current settings, such as the user preference.
                             enum:
                               - compact
                               - expanded
@@ -157953,7 +159017,7 @@ components:
                               - enum:
                                   - auto
                                 type: string
-                            description: The table header row height, as a number of lines, or `auto` to size it based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.
+                            description: The table header row height, as a number of lines, or `auto` to size it based on content. If omitted, Kibana determines the height from its current settings, such as the user preference.
                           hide_nulls:
                             description: When `true`, fields with null values are hidden in the JSON document view.
                             type: boolean
@@ -157969,7 +159033,7 @@ components:
                                 type: string
                             description: The table data row height, as a number of lines, or `auto` to size it based on content. If omitted, defaults to the `discover:rowHeightOption` advanced setting.
                           rows_per_page:
-                            description: The number of rows to display per page in the data table. If omitted, defaults to the `discover:sampleRowsPerPage` advanced setting. Has no effect on ES|QL tabs since Kibana 8.16.
+                            description: The number of rows to display per page in the data table. If omitted, defaults to the `discover:sampleRowsPerPage` advanced setting. Has no effect on ES|QL tabs.
                             maximum: 10000
                             minimum: 1
                             type: number
@@ -158023,7 +159087,7 @@ components:
                         type: object
                         properties:
                           column_order:
-                            description: Ordered list of field names to display in the data table. If omitted, defaults to the `defaultColumns` advanced setting or the referenced saved object.
+                            description: Ordered list of field names to display in the data table. If omitted, defaults to the `defaultColumns` advanced setting.
                             items:
                               description: Field name of a column in display order.
                               type: string
@@ -158048,7 +159112,7 @@ components:
                             minimum: 10
                             type: number
                           density:
-                            description: The table row spacing. If omitted, Discover or the embedding application determines the density from its current settings, such as the user preference.
+                            description: The table row spacing. If omitted, Kibana determines the density from its current settings, such as the user preference.
                             enum:
                               - compact
                               - expanded
@@ -158068,7 +159132,7 @@ components:
                               - enum:
                                   - auto
                                 type: string
-                            description: The table header row height, as a number of lines, or `auto` to size it based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.
+                            description: The table header row height, as a number of lines, or `auto` to size it based on content. If omitted, Kibana determines the height from its current settings, such as the user preference.
                           hide_nulls:
                             description: When `true`, fields with null values are hidden in the JSON document view.
                             type: boolean
@@ -158082,7 +159146,7 @@ components:
                                 type: string
                             description: The table data row height, as a number of lines, or `auto` to size it based on content. If omitted, defaults to the `discover:rowHeightOption` advanced setting.
                           rows_per_page:
-                            description: The number of rows to display per page in the data table. If omitted, defaults to the `discover:sampleRowsPerPage` advanced setting. Has no effect on ES|QL tabs since Kibana 8.16.
+                            description: The number of rows to display per page in the data table. If omitted, defaults to the `discover:sampleRowsPerPage` advanced setting. Has no effect on ES|QL tabs.
                             maximum: 10000
                             minimum: 1
                             type: number
@@ -158127,7 +159191,7 @@ components:
                         description: An ES|QL tab with saved metrics grid settings. The dashboard panel stores these settings and restores them in Discover. The panel does not render the metrics grid.
                         properties:
                           column_order:
-                            description: Ordered list of field names to display in the data table. If omitted, defaults to the `defaultColumns` advanced setting or the referenced saved object.
+                            description: Ordered list of field names to display in the data table. If omitted, defaults to the `defaultColumns` advanced setting.
                             items:
                               description: Field name of a column in display order.
                               type: string
@@ -158160,7 +159224,7 @@ components:
                             minimum: 10
                             type: number
                           density:
-                            description: The table row spacing. If omitted, Discover or the embedding application determines the density from its current settings, such as the user preference.
+                            description: The table row spacing. If omitted, Kibana determines the density from its current settings, such as the user preference.
                             enum:
                               - compact
                               - expanded
@@ -158207,7 +159271,7 @@ components:
                               - enum:
                                   - auto
                                 type: string
-                            description: The table header row height, as a number of lines, or `auto` to size it based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.
+                            description: The table header row height, as a number of lines, or `auto` to size it based on content. If omitted, Kibana determines the height from its current settings, such as the user preference.
                           hide_nulls:
                             description: When `true`, fields with null values are hidden in the JSON document view.
                             type: boolean
@@ -158230,7 +159294,7 @@ components:
                                 type: string
                             description: The table data row height, as a number of lines, or `auto` to size it based on content. If omitted, defaults to the `discover:rowHeightOption` advanced setting.
                           rows_per_page:
-                            description: The number of rows to display per page in the data table. If omitted, defaults to the `discover:sampleRowsPerPage` advanced setting. Has no effect on ES|QL tabs since Kibana 8.16.
+                            description: The number of rows to display per page in the data table. If omitted, defaults to the `discover:sampleRowsPerPage` advanced setting. Has no effect on ES|QL tabs.
                             maximum: 10000
                             minimum: 1
                             type: number
@@ -159819,6 +160883,709 @@ components:
         - type
         - index_pattern
       title: Data view inline spec
+      type: object
+    Kibana_HTTP_APIs_kbn-discover-session-api-esql-control-panel:
+      additionalProperties: false
+      description: An ES|QL variable control whose selected value is injected into Discover ES|QL queries using the `?variable_name` syntax.
+      properties:
+        config:
+          description: The ES|QL control settings, including its variable, available options, and selected values.
+          discriminator:
+            mapping:
+              STATIC_VALUES: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-options-list-esql-control-schema-static-values'
+              VALUES_FROM_QUERY: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-options-list-esql-control-schema-values-from-query'
+            propertyName: control_type
+          oneOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-options-list-esql-control-schema-static-values'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-controls-schemas-options-list-esql-control-schema-values-from-query'
+        grow:
+          default: false
+          description: When `true`, the control expands to fill any available horizontal space.
+          type: boolean
+        id:
+          description: The unique ID of the control.
+          minLength: 1
+          type: string
+        type:
+          enum:
+            - esql_control
+          type: string
+        width:
+          default: medium
+          description: The minimum width of the control.
+          enum:
+            - small
+            - medium
+            - large
+          type: string
+      required:
+        - id
+        - type
+        - config
+      title: esql_control
+      type: object
+    Kibana_HTTP_APIs_kbn-discover-session-data:
+      additionalProperties: false
+      description: Configuration data for a Discover session.
+      properties:
+        description:
+          default: ''
+          description: A short description of the Discover session.
+          maxLength: 10000
+          type: string
+        tabs:
+          description: Ordered list of tabs in the Discover session. Each tab requires a stable, unique ID, which other saved objects and links can reference.
+          items:
+            anyOf:
+              - additionalProperties: false
+                type: object
+                properties:
+                  breakdown_field:
+                    description: Field name used to split chart data into series.
+                    maxLength: 1000
+                    type: string
+                  chart_interval:
+                    description: Time interval for the chart histogram on this tab.
+                    enum:
+                      - auto
+                      - ms
+                      - s
+                      - m
+                      - h
+                      - d
+                      - w
+                      - M
+                      - 'y'
+                    type: string
+                  column_order:
+                    description: Ordered list of field names to display in the data table. If omitted, defaults to the `defaultColumns` advanced setting.
+                    items:
+                      description: Field name of a column in display order.
+                      type: string
+                    maxItems: 100
+                    type: array
+                  column_settings:
+                    additionalProperties:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        width:
+                          description: Optional width of the column in pixels.
+                          minimum: 0
+                          type: number
+                    description: Per-column settings keyed by field name, such as width. Keys should correspond to entries in `column_order` when both are set.
+                    type: object
+                  control_panels:
+                    description: The ES|QL controls of the tab.
+                    items:
+                      $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-discover-session-api-esql-control-panel'
+                    maxItems: 1000
+                    type: array
+                  data_source:
+                    description: The data view used by the tab, specified by reference or defined inline.
+                    discriminator:
+                      mapping:
+                        data_view_reference: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
+                        data_view_spec: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
+                      propertyName: type
+                    oneOf:
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-reference-schema'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spec-schema'
+                  default_rendered_nodes:
+                    description: The number of nodes each JSON cell renders by default in the JSON document view.
+                    maximum: 200
+                    minimum: 10
+                    type: number
+                  density:
+                    description: The table row spacing. If omitted, Kibana determines the density from its current settings, such as the user preference.
+                    enum:
+                      - compact
+                      - expanded
+                      - normal
+                    type: string
+                  documents_display_mode:
+                    description: 'How documents are shown: `table` for a formatted table or `json` for a raw JSON tree.'
+                    enum:
+                      - table
+                      - json
+                    type: string
+                  filters:
+                    default: []
+                    description: List of filters to apply to the data in the tab.
+                    items:
+                      $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-filters-schema_asCodeFilterSchema'
+                    maxItems: 100
+                    type: array
+                  header_row_height:
+                    anyOf:
+                      - maximum: 5
+                        minimum: 1
+                        type: number
+                      - enum:
+                          - auto
+                        type: string
+                    description: The table header row height, as a number of lines, or `auto` to size it based on content. If omitted, Kibana determines the height from its current settings, such as the user preference.
+                  hide_aggregated_preview:
+                    description: Applies to the field statistics view. When `true`, hides the distribution preview shown for each field. If omitted, previews are shown.
+                    type: boolean
+                  hide_chart:
+                    default: false
+                    description: When `true`, the chart is hidden.
+                    type: boolean
+                  hide_nulls:
+                    description: When `true`, fields with null values are hidden in the JSON document view.
+                    type: boolean
+                  hide_table:
+                    default: false
+                    description: When `true`, the data table is hidden.
+                    type: boolean
+                  id:
+                    description: A unique identifier. Must contain only lowercase letters, numbers, hyphens, and underscores.
+                    maxLength: 250
+                    minLength: 1
+                    type: string
+                  label:
+                    description: The label of the tab.
+                    maxLength: 120
+                    type: string
+                  query:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-query'
+                  refresh_interval:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-service-server-refreshIntervalSchema'
+                    description: The refresh interval of the tab. Applied only when `time_range` is set. When omitted, Discover uses the global refresh interval.
+                  row_height:
+                    anyOf:
+                      - maximum: 20
+                        minimum: 1
+                        type: number
+                      - enum:
+                          - auto
+                        type: string
+                    description: The table data row height, as a number of lines, or `auto` to size it based on content. If omitted, defaults to the `discover:rowHeightOption` advanced setting.
+                  rows_per_page:
+                    description: The number of rows to display per page in the data table. If omitted, defaults to the `discover:sampleRowsPerPage` advanced setting. Has no effect on ES|QL tabs.
+                    maximum: 10000
+                    minimum: 1
+                    type: number
+                  sample_size:
+                    description: The number of documents to sample for the data table. If omitted, defaults to the `discover:sampleSize` advanced setting.
+                    maximum: 10000
+                    minimum: 10
+                    type: number
+                  sort:
+                    default: []
+                    description: Sort configuration for the data table (field and direction).
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        direction:
+                          description: 'The sort direction: `asc` for ascending or `desc` for descending.'
+                          enum:
+                            - asc
+                            - desc
+                          type: string
+                        name:
+                          description: The name of the field to sort by.
+                          type: string
+                      required:
+                        - name
+                        - direction
+                    maxItems: 100
+                    type: array
+                  time_range:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
+                    description: Time range to restore when the tab is opened. When omitted, Discover uses the global time settings.
+                  type:
+                    default: default
+                    description: The tab type. `default` tabs have no type-specific settings.
+                    enum:
+                      - default
+                    type: string
+                  view_mode:
+                    default: documents
+                    description: 'The Discover view mode: `documents` (search hits), `patterns` (pattern analysis), or `aggregated` (field statistics).'
+                    enum:
+                      - documents
+                      - patterns
+                      - aggregated
+                    type: string
+                  vis_context:
+                    additionalProperties: false
+                    description: The saved chart configuration. Discover reuses it when compatible with the tab’s current settings and query results; otherwise, it rebuilds the chart.
+                    type: object
+                    properties:
+                      attributes:
+                        additionalProperties: {}
+                        description: Lens visualization attributes used to render the Discover chart.
+                        type: object
+                      suggestion_type:
+                        description: Chart suggestion type used by Discover to generate this histogram configuration.
+                        enum:
+                          - lensSuggestion
+                          - histogramForESQL
+                          - histogramForDataView
+                        type: string
+                    required:
+                      - suggestion_type
+                      - attributes
+                  wrap_lines:
+                    description: When `true`, long values wrap in the JSON document view. When `false`, they are truncated to a single line.
+                    type: boolean
+                required:
+                  - id
+                  - label
+                  - data_source
+              - additionalProperties: false
+                type: object
+                properties:
+                  breakdown_field:
+                    description: Field name used to split chart data into series.
+                    maxLength: 1000
+                    type: string
+                  column_order:
+                    description: Ordered list of field names to display in the data table. If omitted, defaults to the `defaultColumns` advanced setting.
+                    items:
+                      description: Field name of a column in display order.
+                      type: string
+                    maxItems: 100
+                    type: array
+                  column_settings:
+                    additionalProperties:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        width:
+                          description: Optional width of the column in pixels.
+                          minimum: 0
+                          type: number
+                    description: Per-column settings keyed by field name, such as width. Keys should correspond to entries in `column_order` when both are set.
+                    type: object
+                  control_panels:
+                    description: The ES|QL controls of the tab.
+                    items:
+                      $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-discover-session-api-esql-control-panel'
+                    maxItems: 1000
+                    type: array
+                  data_source:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlDataSource'
+                  default_rendered_nodes:
+                    description: The number of nodes each JSON cell renders by default in the JSON document view.
+                    maximum: 200
+                    minimum: 10
+                    type: number
+                  density:
+                    description: The table row spacing. If omitted, Kibana determines the density from its current settings, such as the user preference.
+                    enum:
+                      - compact
+                      - expanded
+                      - normal
+                    type: string
+                  documents_display_mode:
+                    description: 'How documents are shown: `table` for a formatted table or `json` for a raw JSON tree.'
+                    enum:
+                      - table
+                      - json
+                    type: string
+                  esql_approximation:
+                    description: When `true`, ES|QL visualizations that use `STATS` run with [approximate execution](https://www.elastic.co/docs/reference/query-languages/esql/esql-query-approximation) for faster, estimated results.
+                    type: boolean
+                  header_row_height:
+                    anyOf:
+                      - maximum: 5
+                        minimum: 1
+                        type: number
+                      - enum:
+                          - auto
+                        type: string
+                    description: The table header row height, as a number of lines, or `auto` to size it based on content. If omitted, Kibana determines the height from its current settings, such as the user preference.
+                  hide_chart:
+                    default: false
+                    description: When `true`, the chart is hidden.
+                    type: boolean
+                  hide_nulls:
+                    description: When `true`, fields with null values are hidden in the JSON document view.
+                    type: boolean
+                  hide_table:
+                    default: false
+                    description: When `true`, the data table is hidden.
+                    type: boolean
+                  id:
+                    description: A unique identifier. Must contain only lowercase letters, numbers, hyphens, and underscores.
+                    maxLength: 250
+                    minLength: 1
+                    type: string
+                  label:
+                    description: The label of the tab.
+                    maxLength: 120
+                    type: string
+                  refresh_interval:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-service-server-refreshIntervalSchema'
+                    description: The refresh interval of the tab. Applied only when `time_range` is set. When omitted, Discover uses the global refresh interval.
+                  row_height:
+                    anyOf:
+                      - maximum: 20
+                        minimum: 1
+                        type: number
+                      - enum:
+                          - auto
+                        type: string
+                    description: The table data row height, as a number of lines, or `auto` to size it based on content. If omitted, defaults to the `discover:rowHeightOption` advanced setting.
+                  rows_per_page:
+                    description: The number of rows to display per page in the data table. If omitted, defaults to the `discover:sampleRowsPerPage` advanced setting. Has no effect on ES|QL tabs.
+                    maximum: 10000
+                    minimum: 1
+                    type: number
+                  sort:
+                    default: []
+                    description: Sort configuration for the data table (field and direction).
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        direction:
+                          description: 'The sort direction: `asc` for ascending or `desc` for descending.'
+                          enum:
+                            - asc
+                            - desc
+                          type: string
+                        name:
+                          description: The name of the field to sort by.
+                          type: string
+                      required:
+                        - name
+                        - direction
+                    maxItems: 100
+                    type: array
+                  time_range:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
+                    description: Time range to restore when the tab is opened. When omitted, Discover uses the global time settings.
+                  type:
+                    default: default
+                    description: The tab type. `default` tabs have no type-specific settings.
+                    enum:
+                      - default
+                    type: string
+                  vis_context:
+                    additionalProperties: false
+                    description: The saved chart configuration. Discover reuses it when compatible with the tab’s current settings and query results; otherwise, it rebuilds the chart.
+                    type: object
+                    properties:
+                      attributes:
+                        additionalProperties: {}
+                        description: Lens visualization attributes used to render the Discover chart.
+                        type: object
+                      suggestion_type:
+                        description: Chart suggestion type used by Discover to generate this histogram configuration.
+                        enum:
+                          - lensSuggestion
+                          - histogramForESQL
+                          - histogramForDataView
+                        type: string
+                    required:
+                      - suggestion_type
+                      - attributes
+                  wrap_lines:
+                    description: When `true`, long values wrap in the JSON document view. When `false`, they are truncated to a single line.
+                    type: boolean
+                required:
+                  - id
+                  - label
+                  - data_source
+              - additionalProperties: false
+                description: An ES|QL tab with saved metrics grid settings.
+                properties:
+                  breakdown_field:
+                    description: Field name used to split chart data into series.
+                    maxLength: 1000
+                    type: string
+                  column_order:
+                    description: Ordered list of field names to display in the data table. If omitted, defaults to the `defaultColumns` advanced setting.
+                    items:
+                      description: Field name of a column in display order.
+                      type: string
+                    maxItems: 100
+                    type: array
+                  column_settings:
+                    additionalProperties:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        width:
+                          description: Optional width of the column in pixels.
+                          minimum: 0
+                          type: number
+                    description: Per-column settings keyed by field name, such as width. Keys should correspond to entries in `column_order` when both are set.
+                    type: object
+                  control_panels:
+                    description: The ES|QL controls of the tab.
+                    items:
+                      $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-discover-session-api-esql-control-panel'
+                    maxItems: 1000
+                    type: array
+                  counter_aggregation:
+                    description: Aggregation applied to counter metric fields.
+                    enum:
+                      - avg
+                      - sum
+                      - min
+                      - max
+                    type: string
+                  data_source:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_esqlDataSource'
+                  default_rendered_nodes:
+                    description: The number of nodes each JSON cell renders by default in the JSON document view.
+                    maximum: 200
+                    minimum: 10
+                    type: number
+                  density:
+                    description: The table row spacing. If omitted, Kibana determines the density from its current settings, such as the user preference.
+                    enum:
+                      - compact
+                      - expanded
+                      - normal
+                    type: string
+                  dimensions:
+                    description: Fields used to group metrics in the metrics grid.
+                    items:
+                      maxLength: 1000
+                      type: string
+                    maxItems: 5
+                    type: array
+                  documents_display_mode:
+                    description: 'How documents are shown: `table` for a formatted table or `json` for a raw JSON tree.'
+                    enum:
+                      - table
+                      - json
+                    type: string
+                  esql_approximation:
+                    description: When `true`, ES|QL visualizations that use `STATS` run with [approximate execution](https://www.elastic.co/docs/reference/query-languages/esql/esql-query-approximation) for faster, estimated results.
+                    type: boolean
+                  gauge_aggregation:
+                    description: Aggregation applied to gauge metric fields.
+                    enum:
+                      - avg
+                      - sum
+                      - min
+                      - max
+                    type: string
+                  grid_sort_direction:
+                    description: Direction of the metrics grid order. If omitted, defaults to ascending.
+                    enum:
+                      - asc
+                      - desc
+                    type: string
+                  grid_sort_field:
+                    description: Criterion used to order metrics in the metrics grid. `recency` orders by the metrics the viewing user explored most recently in their own browser. If omitted, metrics are ordered alphabetically.
+                    enum:
+                      - alphabetically
+                      - recency
+                    type: string
+                  header_row_height:
+                    anyOf:
+                      - maximum: 5
+                        minimum: 1
+                        type: number
+                      - enum:
+                          - auto
+                        type: string
+                    description: The table header row height, as a number of lines, or `auto` to size it based on content. If omitted, Kibana determines the height from its current settings, such as the user preference.
+                  hide_chart:
+                    default: false
+                    description: When `true`, the chart is hidden.
+                    type: boolean
+                  hide_nulls:
+                    description: When `true`, fields with null values are hidden in the JSON document view.
+                    type: boolean
+                  hide_table:
+                    default: false
+                    description: When `true`, the data table is hidden.
+                    type: boolean
+                  histogram_percentile:
+                    description: Percentile displayed for histogram metric fields.
+                    enum:
+                      - p50
+                      - p75
+                      - p90
+                      - p95
+                      - p99
+                    type: string
+                  id:
+                    description: A unique identifier. Must contain only lowercase letters, numbers, hyphens, and underscores.
+                    maxLength: 250
+                    minLength: 1
+                    type: string
+                  label:
+                    description: The label of the tab.
+                    maxLength: 120
+                    type: string
+                  refresh_interval:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-service-server-refreshIntervalSchema'
+                    description: The refresh interval of the tab. Applied only when `time_range` is set. When omitted, Discover uses the global refresh interval.
+                  row_height:
+                    anyOf:
+                      - maximum: 20
+                        minimum: 1
+                        type: number
+                      - enum:
+                          - auto
+                        type: string
+                    description: The table data row height, as a number of lines, or `auto` to size it based on content. If omitted, defaults to the `discover:rowHeightOption` advanced setting.
+                  rows_per_page:
+                    description: The number of rows to display per page in the data table. If omitted, defaults to the `discover:sampleRowsPerPage` advanced setting. Has no effect on ES|QL tabs.
+                    maximum: 10000
+                    minimum: 1
+                    type: number
+                  search_term:
+                    description: Search term used to filter metrics in the metrics grid.
+                    maxLength: 1000
+                    type: string
+                  sort:
+                    default: []
+                    description: Sort configuration for the data table (field and direction).
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        direction:
+                          description: 'The sort direction: `asc` for ascending or `desc` for descending.'
+                          enum:
+                            - asc
+                            - desc
+                          type: string
+                        name:
+                          description: The name of the field to sort by.
+                          type: string
+                      required:
+                        - name
+                        - direction
+                    maxItems: 100
+                    type: array
+                  time_range:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
+                    description: Time range to restore when the tab is opened. When omitted, Discover uses the global time settings.
+                  type:
+                    description: A tab with saved metrics grid settings. Requires an ES|QL data source. These settings are used only when the query supports the metrics experience.
+                    enum:
+                      - metrics
+                    type: string
+                  vis_context:
+                    additionalProperties: false
+                    description: The saved chart configuration. Discover reuses it when compatible with the tab’s current settings and query results; otherwise, it rebuilds the chart.
+                    type: object
+                    properties:
+                      attributes:
+                        additionalProperties: {}
+                        description: Lens visualization attributes used to render the Discover chart.
+                        type: object
+                      suggestion_type:
+                        description: Chart suggestion type used by Discover to generate this histogram configuration.
+                        enum:
+                          - lensSuggestion
+                          - histogramForESQL
+                          - histogramForDataView
+                        type: string
+                    required:
+                      - suggestion_type
+                      - attributes
+                  wrap_lines:
+                    description: When `true`, long values wrap in the JSON document view. When `false`, they are truncated to a single line.
+                    type: boolean
+                required:
+                  - id
+                  - label
+                  - data_source
+                  - type
+                  - dimensions
+                  - search_term
+                  - counter_aggregation
+                  - gauge_aggregation
+                  - histogram_percentile
+                title: Metrics tab
+                type: object
+            description: A Discover tab definition. `data_source.type` identifies the data source; `type` identifies the tab type. The tab type describes the saved settings and does not change how Discover displays the tab. Default tabs support data views and ES|QL; metrics tabs support only ES|QL.
+          maxItems: 25
+          minItems: 1
+          type: array
+        tags:
+          default: []
+          description: Tag IDs to associate with this Discover session.
+          items:
+            maxLength: 250
+            type: string
+          maxItems: 1000
+          type: array
+        title:
+          description: The title of the Discover session.
+          maxLength: 1000
+          minLength: 1
+          type: string
+      required:
+        - title
+        - tabs
+      title: Discover session data
+      type: object
+    Kibana_HTTP_APIs_kbn-discover-session-dropped-item-warning:
+      additionalProperties: false
+      description: An item in a tab that was excluded from the response because it failed validation.
+      properties:
+        item_config:
+          additionalProperties: {}
+          description: The original configuration of the dropped item.
+          type: object
+          properties: {}
+        item_id:
+          description: The ID of the dropped item.
+          type: string
+        item_type:
+          description: The type identifier of the dropped item, when available.
+          type: string
+        key:
+          description: The name of the property that contains the dropped item.
+          type: string
+        message:
+          description: The reason the content was dropped.
+          type: string
+        tab_id:
+          description: The ID of the tab that contains the dropped content.
+          type: string
+        type:
+          enum:
+            - dropped_item
+          type: string
+      required:
+        - message
+        - tab_id
+        - type
+        - key
+        - item_id
+      title: Dropped item
+      type: object
+    Kibana_HTTP_APIs_kbn-discover-session-dropped-property-warning:
+      additionalProperties: false
+      description: A tab property excluded from the response due to malformed data.
+      properties:
+        key:
+          description: The name of the property that was dropped.
+          type: string
+        message:
+          description: The reason the content was dropped.
+          type: string
+        tab_id:
+          description: The ID of the tab that contains the dropped content.
+          type: string
+        type:
+          enum:
+            - dropped_property
+          type: string
+        value:
+          description: The original value of the property that was dropped.
+      required:
+        - message
+        - tab_id
+        - type
+        - key
+      title: Dropped property
       type: object
     Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema:
       additionalProperties: false
@@ -164732,6 +166499,9 @@ components:
           description: The type of connector.
           maxLength: 64
           type: string
+        is_inbound_events_enabled:
+          description: When true, this connector can receive inbound events. Only valid for connectors that both send and receive. Defaults to false. Generate the webhook token after create.
+          type: boolean
         name:
           description: The display name for the connector.
           maxLength: 1024
@@ -173377,6 +175147,9 @@ components:
     Kibana_HTTP_APIs_update_connector:
       additionalProperties: false
       properties:
+        is_inbound_events_enabled:
+          description: Turn receiving inbound events on or off. Omit to keep the current setting. Only valid for connectors that both send and receive.
+          type: boolean
         name:
           description: The display name for the connector.
           maxLength: 1024
@@ -181691,7 +183464,7 @@ components:
       type: object
       properties:
         fill:
-          default: solid
+          default: gradient
           description: 'Area fill type: solid or gradient.'
           enum:
             - solid

@@ -57,6 +57,8 @@ Follow these steps in order.
      function, confirm the mechanism using a connector listed in `/workspace/connectors.md`.
      Tie findings to concrete lines or functions.
 
+   When additional context includes `scope_query`, use it as guidance for the telemetry filters
+   you construct. It describes the operator's requested scope, not an enforced access boundary.
    Don't assume all signals exist. If a query returns nothing useful, note it and move on.
 
    Record: `set_conversation_metadata` with a first `summary` — what happened, as far as the
