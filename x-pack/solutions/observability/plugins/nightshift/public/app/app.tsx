@@ -293,6 +293,7 @@ export function NightshiftApp(): React.ReactElement {
         onChange={handleSearchChange}
         isClearable
         fullWidth
+        compressed
       />
 
       <EuiSpacer size="m" />

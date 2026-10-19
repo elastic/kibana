@@ -21,6 +21,7 @@ import {
   type ListSourcesResponse,
   type NightshiftSource,
   type SourceHealth,
+  type SourceType,
   type SourceWithHealth,
   type UpdateSourceRequest,
 } from '@kbn/nightshift-shared';
@@ -88,11 +89,27 @@ const nextEsqlUpdatedAt = (previous: string, now: string): string => {
 export class SourcesClient {
   constructor(private readonly deps: SourcesClientDependencies) {}
 
+  /**
+   * The checks create and update run on a new query, without writing. Returns the type to store,
+   * and whether any index exists yet behind the query.
+   */
+  async validateQuery({
+    esql,
+  }: {
+    esql: string;
+  }): Promise<{ type: SourceType; indexExists: boolean }> {
+    const type = validateSourceQuery({ esql });
+    const { indexExists } = await assertSourceQueryExecutes({
+      esClient: this.deps.dataEsClient,
+      esql,
+    });
+    return { type, indexExists };
+  }
+
   async create(input: CreateSourceRequest): Promise<NightshiftSource> {
     const { soClient, viewsClient, username } = this.deps;
     const parsed = parseSourceWrite(createSourceRequestSchema, input);
-    const type = validateSourceQuery({ esql: parsed.esql });
-    await assertSourceQueryExecutes({ esClient: this.deps.dataEsClient, esql: parsed.esql });
+    const { type } = await this.validateQuery({ esql: parsed.esql });
 
     const slug = await this.allocateSlug(parsed.title);
     const id = uuidv4();
@@ -142,8 +159,7 @@ export class SourcesClient {
     // A metadata-only save keeps the stored type. The query did not change.
     let type = previous.type;
     if (esqlChanged) {
-      type = validateSourceQuery({ esql: parsed.esql });
-      await assertSourceQueryExecutes({ esClient: this.deps.dataEsClient, esql: parsed.esql });
+      ({ type } = await this.validateQuery({ esql: parsed.esql }));
     }
 
     const now = new Date().toISOString();

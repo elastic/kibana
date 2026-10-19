@@ -33,7 +33,7 @@ describe('useEntityAnalyticsUrlState', () => {
 
     expect(result.current).toEqual(
       expect.objectContaining({
-        timeRange: '30d',
+        timeRange: '24h',
         rowsMode: 'resolved',
         sortField: 'entity.risk.calculated_score_norm',
         sortDirection: 'desc',
@@ -79,7 +79,7 @@ describe('useEntityAnalyticsUrlState', () => {
 
     expect(result.current).toEqual(
       expect.objectContaining({
-        timeRange: '30d',
+        timeRange: '24h',
         rowsMode: 'resolved',
         sortField: 'entity.risk.calculated_score_norm',
         // The direction of an invalid sort field reads as the default too.

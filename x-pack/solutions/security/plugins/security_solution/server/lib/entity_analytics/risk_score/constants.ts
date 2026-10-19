@@ -15,16 +15,36 @@
 export const RIEMANN_ZETA_S_VALUE = 1.5;
 
 /**
- * Represents the value calculated by Riemann Zeta function for RIEMANN_ZETA_S_VALUE with 10.000 iterations (inputs) which is the default alertSampleSizePerShard.
- * The maximum unnormalized risk score value is calculated by multiplying RIEMANN_ZETA_S_VALUE by the maximum alert risk_score (100).
+ * Default number of an entity's highest-scoring alerts that feed its risk score
+ * (`alertSampleSizePerShard`). Alerts past this many add almost nothing to the score: with every
+ * alert at 100, the 500 highest already reach about 97% of the 10,000-alert total. The scoring
+ * query reserves memory for this many values per entity up front, whatever the entity's alert
+ * count, so a large sample size costs memory on every page.
+ */
+export const DEFAULT_ALERT_SAMPLE_SIZE = 500;
+
+const partialZetaSum = (s: number, terms: number): number => {
+  let sum = 0;
+  for (let k = 1; k <= terms; k++) {
+    sum += k ** -s;
+  }
+  return sum;
+};
+
+/**
+ * Represents the value calculated by Riemann Zeta function for RIEMANN_ZETA_S_VALUE with DEFAULT_ALERT_SAMPLE_SIZE iterations (inputs).
+ * The maximum unnormalized risk score value is calculated by multiplying this value by the maximum alert risk_score (100),
+ * so normalization maps an entity whose sampled alerts all score 100 to a normalized score of 100.
  *
- * This value is derived from RIEMANN_ZETA_S_VALUE, but we store the precomputed value here to be used more conveniently in normalization. @see RIEMANN_ZETA_S_VALUE
+ * It's derived from RIEMANN_ZETA_S_VALUE and DEFAULT_ALERT_SAMPLE_SIZE so the two can't drift apart. It was 2.5924 while
+ * the default sample size was 10,000; moving to 500 raised every normalized score by about 2.8%.
  *
  * The Riemann Zeta value for different number of inputs is:
  * | 𝑍(s,inputs)  |
  * | :---------------------------------------|
  * | 𝑍(1.5,10)≈1.9953364933456017            |
  * | 𝑍(1.5,100)≈2.412874098703719            |
+ * | 𝑍(1.5,500)≈2.522977328584379            |
  * | 𝑍(1.5,1000)≈2.5491456029175756          |
  * | 𝑍(1.5,10_000)≈2.5923758486729866        |
  * | 𝑍(1.5,100_000)≈2.6060508091764736       |
@@ -35,7 +55,7 @@ export const RIEMANN_ZETA_S_VALUE = 1.5;
  *
  * Read more: https://en.wikipedia.org/wiki/Riemann_zeta_function
  */
-export const RIEMANN_ZETA_VALUE = 2.5924;
+export const RIEMANN_ZETA_VALUE = partialZetaSum(RIEMANN_ZETA_S_VALUE, DEFAULT_ALERT_SAMPLE_SIZE);
 
 /**
  * This value represents the maximum possible risk score after normalization.
