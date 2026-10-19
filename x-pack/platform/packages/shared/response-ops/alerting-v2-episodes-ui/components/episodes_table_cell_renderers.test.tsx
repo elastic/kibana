@@ -875,7 +875,7 @@ describe('EpisodeMaintenanceWindowsCell', () => {
     renderWithI18n(
       <EpisodeMaintenanceWindowsCell
         {...baseCellProps}
-        columnId="maintenance_windows"
+        columnId="suppressed"
         row={makeRow({ maintenance_window_ids: maintenanceWindowIds })}
       />
     );

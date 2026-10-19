@@ -308,7 +308,7 @@ describe('AlertsListPage', () => {
       'tags',
       'rule_tags',
       'assignees',
-      'maintenance_windows',
+      'suppressed',
     ]);
     expect(lastCall?.externalCustomRenderers).toHaveProperty('severity');
     expect(typeof lastCall?.externalCustomRenderers?.severity).toBe('function');
@@ -317,7 +317,7 @@ describe('AlertsListPage', () => {
   it.each([
     ['tags', 'Alert tags'],
     ['rule_tags', 'Rule tags'],
-    ['maintenance_windows', 'Suppressed'],
+    ['suppressed', 'Suppressed'],
   ])('labels the %s column %p and takes its sort control away', (columnId, label) => {
     const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
     const customize = lastCall?.customGridColumnsConfiguration?.[columnId];
@@ -340,7 +340,7 @@ describe('AlertsListPage', () => {
     'tags',
     'rule_tags',
     'assignees',
-    'maintenance_windows',
+    'suppressed',
   ])('takes the remove column action away from the %s column', (columnId) => {
     const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
     const customize = lastCall?.customGridColumnsConfiguration?.[columnId];
@@ -363,10 +363,10 @@ describe('AlertsListPage', () => {
     expect(customize!({ column: { id: 'rule.id', actions: false } }).actions).toBe(false);
   });
 
-  it('registers a cell renderer for the maintenance windows column', () => {
+  it('registers a cell renderer for the suppressed column', () => {
     const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
 
-    expect(typeof lastCall?.externalCustomRenderers?.maintenance_windows).toBe('function');
+    expect(typeof lastCall?.externalCustomRenderers?.suppressed).toBe('function');
   });
 
   it('does not pass key prop derived from tableKey (no tableKey state)', () => {

@@ -105,7 +105,7 @@ const getAlertsListMenu = ({ manageRulesHref }: { manageRulesHref: string }): Ap
   },
 });
 
-const MAINTENANCE_WINDOWS_COLUMN_ID = 'maintenance_windows';
+const SUPPRESSED_COLUMN_ID = 'suppressed';
 
 // Neither tag column is in the episodes query's `ALLOWLISTED_SORT_FIELDS`, so a sort on them
 // falls back to `@timestamp` and only looks like it works.
@@ -129,7 +129,7 @@ const COLUMN_CUSTOMIZATIONS: CustomGridColumnsConfiguration = {
     displayAsText: i18n.EPISODES_LIST_COLUMN_SOURCE,
     isSortable: false,
   }),
-  [MAINTENANCE_WINDOWS_COLUMN_ID]: ({ column }) => ({
+  [SUPPRESSED_COLUMN_ID]: ({ column }) => ({
     ...column,
     displayAsText: i18n.EPISODES_LIST_COLUMN_MAINTENANCE_WINDOWS,
     isSortable: false,
@@ -590,7 +590,7 @@ const AlertsListPageContent = () => {
     () => ({
       'episode.status': (props) => <EpisodeStatusCell {...props} />,
       alerting_source: (props) => <EpisodeSourceCell {...props} />,
-      [MAINTENANCE_WINDOWS_COLUMN_ID]: (props) => <EpisodeMaintenanceWindowsCell {...props} />,
+      [SUPPRESSED_COLUMN_ID]: (props) => <EpisodeMaintenanceWindowsCell {...props} />,
       duration: (props) => <EpisodeDurationCell {...props} />,
       severity: (props) => <EpisodeSeverityCell {...props} />,
       tags: (props) => <EpisodeTagsCell {...props} />,

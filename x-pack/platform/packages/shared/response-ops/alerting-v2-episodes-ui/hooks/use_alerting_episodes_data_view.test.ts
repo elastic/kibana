@@ -150,7 +150,7 @@ describe('useAlertingEpisodesDataView', () => {
       expect(mockDataView.addRuntimeField).toHaveBeenCalled();
     });
 
-    expect(mockDataView.addRuntimeField).toHaveBeenCalledWith('maintenance_windows', {
+    expect(mockDataView.addRuntimeField).toHaveBeenCalledWith('suppressed', {
       type: 'keyword',
       script: { source: "emit('')" },
       customLabel: 'Suppressed',
