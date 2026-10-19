@@ -51,7 +51,7 @@ import {
 } from '../components/home/entities_grid';
 import { toDsl, toEsql } from '../components/home/entities_grid/active_filters';
 import type { ActiveFilters } from '../components/home/entities_grid/active_filters';
-import type { RowActions, CellHandlers, RowsMode } from '../components/home/entities_grid';
+import type { RowActions, CellHandlers, Row, RowsMode } from '../components/home/entities_grid';
 import { ENTITY_GROUPING_OPTIONS } from '../components/home/entities_table/constants';
 import type { EntityURLStateResult } from '../components/home/entities_table/hooks/use_entity_url_state';
 import { EntityFiltersBar } from '../components/home/entity_filters_bar';
@@ -115,6 +115,18 @@ const toSecurityEntityType = (
   if (rawType === 'host') return SecurityEntityType.host;
   if (rawType === 'user') return SecurityEntityType.user;
   return SecurityEntityType.generic;
+};
+
+/** The entity a row stands for; a row without an id has nothing to open. */
+const getRowEntity = (row: Row) => {
+  const entityId = getEntityId(row);
+  return entityId
+    ? {
+        entityId,
+        entityName: getString(row, 'entity.name'),
+        entityType: getString(row, ENTITY_TYPE_FIELD),
+      }
+    : undefined;
 };
 
 /** A resolved row stands for its whole group, so its flyouts show the group too. */
@@ -214,104 +226,91 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
 
   const activeColumns = rowsMode === 'individual' ? INDIVIDUAL_ROWS_COLUMNS : RESOLVED_ROWS_COLUMNS;
 
-  const onEntityNameClick = useCallback(
-    (row: Record<string, unknown>, rowMode: RowsMode) => {
-      const entityId = getEntityId(row);
-      const entityName = getString(row, 'entity.name');
-      const engineType = getString(row, ENTITY_TYPE_FIELD);
-      if (!entityId) return;
-      openEntityFlyout({
-        entityId,
-        entityName,
-        engineType,
-        scopeId,
-        contextID: scopeId,
-        origin: FLYOUT_ORIGIN.ENTITIES_TABLE,
-        mode: getEntityViewMode(rowMode),
-      });
-    },
-    [openEntityFlyout, scopeId]
-  );
-
-  const onGroupSizeClick = useCallback(
-    (row: Record<string, unknown>) => {
-      const entityId = getEntityId(row);
-      const entityName = getString(row, 'entity.name') ?? '';
-      const entityType = row[ENTITY_TYPE_FIELD];
-      if (!entityId || !isStoreEntityType(entityType)) return;
-      openEntityResolution({
-        entityId,
-        entityName,
-        entityType,
-        scopeId,
-      });
-    },
-    [openEntityResolution, scopeId]
-  );
-
-  const onAlertCountClick = useCallback(
-    (row: Record<string, unknown>, rowMode: RowsMode) => {
-      const entityId = getEntityId(row);
-      const entityName = getString(row, 'entity.name') ?? '';
-      if (!entityId) return;
-      const entityType = toSecurityEntityType(getString(row, ENTITY_TYPE_FIELD));
-      const value = entityType === SecurityEntityType.generic ? entityId : entityName;
-      openEntityAlertsInsights({
-        entityType,
-        value,
-        entityId,
-        scopeId,
-        mode: getEntityViewMode(rowMode),
-      });
-    },
-    [openEntityAlertsInsights, scopeId]
-  );
-
-  const onAnomalyCountClick = useCallback(
-    (row: Record<string, unknown>) => {
-      const entityId = getEntityId(row);
-      const entityName = getString(row, 'entity.name') ?? '';
-      const entityType = toSecurityEntityType(getString(row, ENTITY_TYPE_FIELD));
-      if (!entityId || entityType === SecurityEntityType.generic) return;
-      openEntityAnomalyInsights({ entityType, value: entityName, entityId });
-    },
-    [openEntityAnomalyInsights]
-  );
-
   const cellHandlers = useMemo<CellHandlers>(
-    () => ({ onEntityNameClick, onGroupSizeClick, onAlertCountClick, onAnomalyCountClick }),
-    [onEntityNameClick, onGroupSizeClick, onAlertCountClick, onAnomalyCountClick]
+    () => ({
+      onEntityNameClick: (row, rowMode) => {
+        const entity = getRowEntity(row);
+        if (!entity) return;
+        openEntityFlyout({
+          entityId: entity.entityId,
+          entityName: entity.entityName,
+          engineType: entity.entityType,
+          scopeId,
+          contextID: scopeId,
+          origin: FLYOUT_ORIGIN.ENTITIES_TABLE,
+          mode: getEntityViewMode(rowMode),
+        });
+      },
+      onGroupSizeClick: (row) => {
+        const entity = getRowEntity(row);
+        if (!entity || !isStoreEntityType(entity.entityType)) return;
+        openEntityResolution({
+          entityId: entity.entityId,
+          entityName: entity.entityName ?? '',
+          entityType: entity.entityType,
+          scopeId,
+        });
+      },
+      onAlertCountClick: (row, rowMode) => {
+        const entity = getRowEntity(row);
+        if (!entity) return;
+        const entityType = toSecurityEntityType(entity.entityType);
+        openEntityAlertsInsights({
+          entityType,
+          value:
+            entityType === SecurityEntityType.generic ? entity.entityId : entity.entityName ?? '',
+          entityId: entity.entityId,
+          scopeId,
+          mode: getEntityViewMode(rowMode),
+        });
+      },
+      onAnomalyCountClick: (row) => {
+        const entity = getRowEntity(row);
+        const entityType = toSecurityEntityType(entity?.entityType);
+        if (!entity || entityType === SecurityEntityType.generic) return;
+        openEntityAnomalyInsights({
+          entityType,
+          value: entity.entityName ?? '',
+          entityId: entity.entityId,
+        });
+      },
+    }),
+    [
+      openEntityFlyout,
+      openEntityResolution,
+      openEntityAlertsInsights,
+      openEntityAnomalyInsights,
+      scopeId,
+    ]
   );
 
   const rowActions = useMemo<RowActions>(
     () => ({
       onInvestigateInTimeline: (row) => {
-        const entityType = row[ENTITY_TYPE_FIELD];
-        const entityName = getString(row, 'entity.name');
-        if (!entityName || !isStoreEntityType(entityType)) return;
+        const entity = getRowEntity(row);
+        if (!entity?.entityName || !isStoreEntityType(entity.entityType)) return;
         const kqlFilter = euidApi?.euid.kql.getEuidFilterBasedOnDocument(
-          euidApi.getBuiltInEntityDefinition(entityType),
+          euidApi.getBuiltInEntityDefinition(entity.entityType),
           row
         );
         if (kqlFilter) {
           investigateInTimeline({ query: { query: kqlFilter, language: 'kuery' } });
           return;
         }
-        const field = EntityTypeToIdentifierField[entityType] ?? 'entity.id';
+        const field = EntityTypeToIdentifierField[entity.entityType] ?? 'entity.id';
         const dataProviders = createDataProviders({
           contextId: scopeId,
           field,
-          values: entityName,
+          values: entity.entityName,
         });
         if (dataProviders?.length) investigateInTimeline({ dataProviders });
       },
       onOpenEntityGraph: (row) => {
-        const entityId = getEntityId(row);
-        const entityName = getString(row, 'entity.name') ?? '';
-        if (!entityId) return;
+        const entity = getRowEntity(row);
+        if (!entity) return;
         openEntityGraphView({
-          entityId,
-          entityName,
+          entityId: entity.entityId,
+          entityName: entity.entityName ?? '',
           scopeId,
           onShowEntity: ({ engineType, entityId: relatedId, entityName: relatedName }) => {
             openEntityFlyout({
@@ -325,10 +324,9 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
       },
       onAddToChat: isAgentChatExperienceEnabled
         ? (row) => {
-            const entityType = row[ENTITY_TYPE_FIELD];
-            const entityId = getEntityId(row);
-            const entityName = getString(row, 'entity.name');
-            if (!entityId || !entityName || !isStoreEntityType(entityType)) return;
+            const entity = getRowEntity(row);
+            if (!entity?.entityName || !isStoreEntityType(entity.entityType)) return;
+            const { entityId, entityName, entityType } = entity;
             reportAddToChat({ pathway: 'entities_grid_row_actions', attachments: ['entity'] });
             agentBuilder?.openChat({
               newConversation: true,

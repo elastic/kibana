@@ -9,7 +9,7 @@ export {
   TIME_RANGE_OPTIONS,
   useEntityAnalyticsUrlState,
 } from './hooks/use_entity_analytics_url_state';
-export type { TimeRange, RowsMode } from './common';
+export type { Row, TimeRange, RowsMode } from './common';
 export { EMPTY_ENTITY_FILTERS } from './common';
 export type { EntityFilters } from './common';
 export { EntitiesGrid } from './components/entities_grid';
