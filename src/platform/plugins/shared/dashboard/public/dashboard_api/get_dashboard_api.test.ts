@@ -391,3 +391,79 @@ describe('dashboard_saved telemetry', () => {
     ]);
   });
 });
+
+describe('setState with save: true (restoring a saved version)', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  const settle = () => jest.advanceTimersByTimeAsync(1000);
+  const setup = async () => {
+    const dashboard = getDashboardApi({
+      incomingEmbeddables: [],
+      initialState: { ...DEFAULT_DASHBOARD_STATE, title: 'Original' },
+      savedObjectId: 'existing-id',
+    });
+    await settle();
+    return dashboard;
+  };
+  const getTitle = ({ api }: Awaited<ReturnType<typeof setup>>) => api.getSettings().title;
+
+  test('replaces the editor state and clears unsaved changes', async () => {
+    const dashboard = await setup();
+    const { api, internalApi } = dashboard;
+    api.setState({ ...api.getSerializedState().attributes, title: 'Unsaved edit' });
+    await settle();
+    expect(api.hasUnsavedChanges$.value).toBe(true);
+
+    await api.setState(
+      { ...api.getSerializedState().attributes, title: 'Restored' },
+      { save: true }
+    );
+    await settle();
+
+    expect(getTitle(dashboard)).toBe('Restored');
+    expect(internalApi.getLastSavedState().title).toBe('Restored');
+    expect(api.hasUnsavedChanges$.value).toBe(false);
+  });
+
+  test('makes discarding later edits return to the restored version', async () => {
+    const dashboard = await setup();
+    const { api } = dashboard;
+    await api.setState(
+      { ...api.getSerializedState().attributes, title: 'Restored' },
+      { save: true }
+    );
+    await settle();
+
+    api.setState({ ...api.getSerializedState().attributes, title: 'Edit after restore' });
+    await settle();
+    expect(api.hasUnsavedChanges$.value).toBe(true);
+
+    await api.asyncResetToLastSavedState();
+    await settle();
+
+    expect(getTitle(dashboard)).toBe('Restored');
+    expect(api.hasUnsavedChanges$.value).toBe(false);
+  });
+
+  test('does not return to the pre-restore version when resetting', async () => {
+    const dashboard = await setup();
+    const { api } = dashboard;
+    await api.setState(
+      { ...api.getSerializedState().attributes, title: 'Restored' },
+      { save: true }
+    );
+    await settle();
+
+    await api.asyncResetToLastSavedState();
+    await settle();
+
+    expect(getTitle(dashboard)).not.toBe('Original');
+    expect(getTitle(dashboard)).toBe('Restored');
+  });
+});

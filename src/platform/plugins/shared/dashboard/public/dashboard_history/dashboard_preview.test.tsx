@@ -19,6 +19,12 @@ import { DashboardPreview } from './dashboard_preview';
  * The renderer is replaced with a stand-in that behaves like the real one with respect to `setState`:
  * it renders whatever panels it was last given, and keeps the previous time range when a new state has none.
  */
+const mockSetStateControl = {
+  manual: false,
+  /** `setState` calls that have started but not yet been settled; only populated in manual mode */
+  calls: [] as Array<{ resolve: () => void; reject: (error: Error) => void }>,
+};
+
 jest.mock('..', () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { useEffect, useRef, useState } = require('react');
@@ -40,12 +46,18 @@ jest.mock('..', () => {
           if (cancelled) return;
           setState(getInitialInput());
           onApiAvailable({
-            setState: (next: Record<string, any>) =>
+            setState: async (next: Record<string, any>) => {
+              if (mockSetStateControl.manual) {
+                await new Promise<void>((resolve, reject) => {
+                  mockSetStateControl.calls.push({ resolve, reject });
+                });
+              }
               setState((prev: Record<string, any>) => ({
                 ...next,
                 viewMode: prev?.viewMode,
                 time_range: next.time_range ?? prev?.time_range,
-              })),
+              }));
+            },
           });
         });
         return () => {
@@ -145,6 +157,11 @@ const renderedPanels = () => screen.queryAllByTestId('renderedPanel').map((el) =
 const searchBar = () => screen.getByTestId('searchBar');
 
 describe('DashboardPreview', () => {
+  beforeEach(() => {
+    mockSetStateControl.manual = false;
+    mockSetStateControl.calls = [];
+  });
+
   it('renders the snapshot panels in a non-interactive dashboard and reports the title', async () => {
     const { setPreviewTitle } = renderPreview(fullSnapshot);
 
@@ -240,6 +257,39 @@ describe('DashboardPreview', () => {
         )
       );
       expect(searchBar().dataset.from).toBe('now-1h');
+    });
+
+    describe('while a previous snapshot is still being applied', () => {
+      beforeEach(() => {
+        mockSetStateControl.manual = true;
+      });
+
+      it('waits for the in-flight application before applying the next snapshot', async () => {
+        const { rerender, setPreviewTitle } = renderPreview(bareSnapshot);
+        await waitFor(() => expect(mockSetStateControl.calls).toHaveLength(1));
+
+        rerender(<Wrapper change={fullSnapshot} setPreviewTitle={setPreviewTitle} />);
+        await waitFor(() => expect(setPreviewTitle).toHaveBeenLastCalledWith('Title full'));
+        expect(mockSetStateControl.calls).toHaveLength(1);
+
+        mockSetStateControl.calls[0].resolve();
+        await waitFor(() => expect(mockSetStateControl.calls).toHaveLength(2));
+        mockSetStateControl.calls[1].resolve();
+
+        await waitFor(() => expect(renderedPanels()).toEqual(['panel-a', 'panel-b']));
+      });
+
+      it('still applies the next snapshot after an application fails', async () => {
+        const { rerender, setPreviewTitle } = renderPreview(bareSnapshot);
+        await waitFor(() => expect(mockSetStateControl.calls).toHaveLength(1));
+        rerender(<Wrapper change={fullSnapshot} setPreviewTitle={setPreviewTitle} />);
+
+        mockSetStateControl.calls[0].reject(new Error('failed to apply'));
+        await waitFor(() => expect(mockSetStateControl.calls).toHaveLength(2));
+        mockSetStateControl.calls[1].resolve();
+
+        await waitFor(() => expect(renderedPanels()).toEqual(['panel-a', 'panel-b']));
+      });
     });
   });
 });

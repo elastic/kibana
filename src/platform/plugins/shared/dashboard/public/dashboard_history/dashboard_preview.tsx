@@ -30,18 +30,22 @@ export const DashboardPreview: ChangeHistoryPreviewRenderFn<{
   });
   const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>();
 
+  const applyQueue = useRef<Promise<void>>(Promise.resolve());
+
   useEffect(() => {
     if (!dashboardApi) return;
     setPreviewTitle((change.snapshot as DashboardState).title);
     const snapshot = change.snapshot as DashboardState;
     /** `setState` leaves the previous time range in place when the snapshot has none, so re-apply the inherited one */
-    dashboardApi.setState(
-      snapshot.time_range ? snapshot : { ...snapshot, time_range: inheritedTimeRange }
-    );
+    const state = snapshot.time_range ? snapshot : { ...snapshot, time_range: inheritedTimeRange };
+    /** `setState` awaits async child state application, so wait for the previous call to avoid overlapping */
+    applyQueue.current = applyQueue.current
+      .then(() => dashboardApi.setState(state))
+      .catch(() => {}); // a failed application must not block later snapshots
   }, [change, dashboardApi, inheritedTimeRange, setPreviewTitle]);
 
   const memoized = useMemo(() => {
-    /** Prevent dashboard renderer from remounting with every history item selection; instead, we will call `setState` on the API */
+    /** prevent dashboard renderer from remounting with every history item selection; instead, we will call `setState` on the API */
     return (
       <DashboardRenderer
         getCreationOptions={() =>
