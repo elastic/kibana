@@ -103,6 +103,7 @@ const resolveConnectorAuth = (
   const strategy = getAxiosAuthStrategy(authTypeId);
   const strategyDeps = {
     connectorId,
+    connectorTypeId,
     secrets,
     connectorTokenClient,
     logger,
@@ -115,10 +116,12 @@ const resolveConnectorAuth = (
     getToken: async (opts: GetTokenOpts) => {
       try {
         const token = await strategy.getToken(opts, strategyDeps);
+        // A null token means none could be obtained (missing credentials or a failed refresh), so it is a failure.
         recordConnectorAuth({
           phase: 'token',
           authType: authTypeId,
           connectorType: connectorTypeId,
+          ...(token === null ? { errorType: 'token_request_failed' as const } : {}),
         });
         return token;
       } catch (error) {

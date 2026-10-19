@@ -183,6 +183,12 @@ describe('oauthCallbackRoute', () => {
         body: expect.stringContaining('Unable to retrieve Kibana user profile ID'),
       })
     );
+    expect(connectorAuthCounter.add).toHaveBeenCalledWith(1, {
+      'auth.phase': 'authorize',
+      'connector.auth_type': 'unknown',
+      success: false,
+      'error.type': 'other',
+    });
     expect(mockRateLimiter.log).not.toHaveBeenCalled();
   });
 
@@ -195,6 +201,12 @@ describe('oauthCallbackRoute', () => {
     const res = httpServerMock.createResponseFactory();
 
     await handler(context, req, res);
+    expect(connectorAuthCounter.add).toHaveBeenCalledWith(1, {
+      'auth.phase': 'authorize',
+      'connector.auth_type': 'unknown',
+      success: false,
+      'error.type': 'rate_limited',
+    });
 
     expect(mockRateLimiter.log).toHaveBeenCalledWith('test-profile-uid', 'callback');
     expect(res.ok).toHaveBeenCalledWith(
@@ -272,6 +284,12 @@ describe('oauthCallbackRoute', () => {
     const res = httpServerMock.createResponseFactory();
 
     await handler(context, req, res);
+    expect(connectorAuthCounter.add).toHaveBeenCalledWith(1, {
+      'auth.phase': 'authorize',
+      'connector.auth_type': 'unknown',
+      success: false,
+      'error.type': 'invalid',
+    });
 
     expect(res.ok).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -292,6 +310,12 @@ describe('oauthCallbackRoute', () => {
     const res = httpServerMock.createResponseFactory();
 
     await handler(context, req, res);
+    expect(connectorAuthCounter.add).toHaveBeenCalledWith(1, {
+      'auth.phase': 'authorize',
+      'connector.auth_type': 'unknown',
+      success: false,
+      'error.type': 'invalid',
+    });
 
     expect(res.ok).toHaveBeenCalledWith(
       expect.objectContaining({

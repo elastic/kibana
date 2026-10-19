@@ -27,6 +27,7 @@ import {
   getConnectorAuthType,
   getConnectorCreateErrorType,
   recordConnectorCreate,
+  toBoundedLabel,
 } from '../../../../lib/connector_metrics';
 import { ensureConfigAuthType } from '../../../../lib/ensure_config_auth_type';
 import { ensureNotKibanaManagedAuthType } from '../../../../lib/ensure_not_kibana_managed_auth_type';
@@ -51,9 +52,11 @@ export async function create(params: ConnectorCreateParams): Promise<Connector> 
     recordConnectorCreate({ connectorType: actionTypeId, authType });
     return connector;
   } catch (error) {
+    // A failed request can carry values that were never validated, so unregistered ones are not used as labels.
+    const { actionTypeRegistry, authTypeRegistry } = params.context;
     recordConnectorCreate({
-      connectorType: actionTypeId,
-      authType,
+      connectorType: toBoundedLabel(actionTypeId, actionTypeRegistry.has(actionTypeId)),
+      authType: toBoundedLabel(authType, authType === 'none' || authTypeRegistry.has(authType)),
       errorType: getConnectorCreateErrorType(error),
     });
     throw error;

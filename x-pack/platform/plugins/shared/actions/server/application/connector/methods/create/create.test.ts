@@ -77,6 +77,7 @@ const getAxiosInstanceWithAuth = jest.fn();
 
 const actionTypeRegistry: ActionTypeRegistry = {
   get: jest.fn(),
+  has: jest.fn(),
   isSystemActionType: jest.fn().mockReturnValue(false),
   ensureActionTypeEnabled: jest.fn(),
   isDeprecated: jest.fn().mockReturnValue(false),
@@ -1086,6 +1087,8 @@ describe('create()', () => {
 
     beforeEach(() => {
       jest.spyOn(connectorCreateCounter, 'add').mockImplementation(() => {});
+      (actionTypeRegistry.has as jest.Mock).mockReturnValue(true);
+      (authTypeRegistry.has as jest.Mock).mockReturnValue(true);
     });
 
     afterEach(() => {
@@ -1123,6 +1126,55 @@ describe('create()', () => {
       expect(connectorCreateCounter.add).toHaveBeenCalledWith(1, {
         'connector.type': 'my-connector-type',
         'connector.auth_type': 'ears',
+        success: false,
+        'error.type': 'unauthorized',
+      });
+    });
+
+    test('does not use unregistered connector or auth types as labels on a failed creation', async () => {
+      (actionTypeRegistry.has as jest.Mock).mockReturnValue(false);
+      (authTypeRegistry.has as jest.Mock).mockReturnValue(false);
+      authorization.ensureAuthorized.mockRejectedValueOnce(Boom.forbidden('Unauthorized'));
+
+      await expect(
+        create({
+          context: mockContext,
+          action: {
+            name: 'my name',
+            actionTypeId: 'attacker-chosen-type-123',
+            config: {},
+            secrets: { authType: 'attacker-chosen-auth-456' },
+          },
+        })
+      ).rejects.toThrow('Unauthorized');
+
+      expect(connectorCreateCounter.add).toHaveBeenCalledWith(1, {
+        'connector.type': 'unknown',
+        'connector.auth_type': 'unknown',
+        success: false,
+        'error.type': 'unauthorized',
+      });
+    });
+
+    test('keeps the "none" auth type for a failed creation without auth', async () => {
+      authorization.ensureAuthorized.mockRejectedValueOnce(Boom.forbidden('Unauthorized'));
+      (authTypeRegistry.has as jest.Mock).mockReturnValue(false);
+
+      await expect(
+        create({
+          context: mockContext,
+          action: {
+            name: 'my name',
+            actionTypeId: 'my-connector-type',
+            config: {},
+            secrets: {},
+          },
+        })
+      ).rejects.toThrow('Unauthorized');
+
+      expect(connectorCreateCounter.add).toHaveBeenCalledWith(1, {
+        'connector.type': 'my-connector-type',
+        'connector.auth_type': 'none',
         success: false,
         'error.type': 'unauthorized',
       });

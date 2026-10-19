@@ -49,6 +49,7 @@ export type ConnectorExecuteErrorType =
   | 'invalid'
   | 'unauthorized'
   | 'auth_failed'
+  | 'disabled'
   | 'other';
 export type ConnectorAuthErrorType =
   | 'rate_limited'
@@ -67,6 +68,11 @@ export type ConnectorAuthPhase = 'initiate' | 'authorize' | 'token' | 'execute';
 export type ConnectorErrorSource = 'user' | 'framework';
 
 const NO_AUTH_TYPE = 'none';
+const UNKNOWN_LABEL = 'unknown';
+
+/** Bounds a request-supplied label: values that aren't known to the server are reported as "unknown". */
+export const toBoundedLabel = (value: string, isKnown: boolean): string =>
+  isKnown ? value : UNKNOWN_LABEL;
 
 /** Reads the auth type of a connector from its secrets, falling back to its config. */
 export const getConnectorAuthType = ({

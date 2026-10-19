@@ -471,6 +471,11 @@ export class ActionExecutor {
           try {
             actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
           } catch (e) {
+            recordConnectorExecute({
+              connectorType: actionTypeId,
+              errorType: 'disabled',
+              errorSource: 'framework',
+            });
             throw createTaskRunError(e, TaskErrorSource.FRAMEWORK);
           }
         }

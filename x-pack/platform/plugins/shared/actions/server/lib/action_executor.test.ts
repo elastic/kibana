@@ -2081,6 +2081,28 @@ describe('Connector metrics', () => {
     });
   });
 
+  test('records an execution of a disabled connector type', async () => {
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+      connectorSavedObject
+    );
+    connectorTypeRegistry.isActionExecutable.mockReturnValueOnce(false);
+    connectorTypeRegistry.ensureActionTypeEnabled.mockImplementationOnce(() => {
+      throw new Error('Connector type is disabled');
+    });
+
+    await expect(actionExecutor.execute(executeParams)).rejects.toThrow(
+      'Connector type is disabled'
+    );
+
+    expect(connectorExecuteCounter.add).toHaveBeenCalledWith(1, {
+      'connector.type': 'test',
+      success: false,
+      'error.type': 'disabled',
+      'error.source': 'framework',
+    });
+    expect(connectorExecuteDuration.record).not.toHaveBeenCalled();
+  });
+
   test('records a rate limited execution without a duration', async () => {
     mockRateLimiterIsRateLimited.mockReturnValueOnce(true);
     mockConnector();

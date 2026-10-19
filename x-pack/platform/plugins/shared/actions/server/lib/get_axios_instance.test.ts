@@ -404,6 +404,39 @@ describe('getAxiosInstance', () => {
       });
     });
 
+    test('records a null token as a failed token request', async () => {
+      (getOAuthAuthorizationCodeAccessToken as jest.Mock).mockResolvedValueOnce(null);
+      const getAxios = getAxiosInstanceWithAuth({
+        authTypeRegistry,
+        configurationUtilities,
+        logger,
+      });
+
+      // The auth type itself rejects a missing token, which is existing behavior and unchanged here.
+      await expect(
+        getAxios({
+          connectorId: '1',
+          connectorTypeId: '.github',
+          connectorTokenClient,
+          secrets: {
+            authType: 'oauth_authorization_code',
+            clientId: 'client-id',
+            clientSecret: 'client-secret',
+            tokenUrl: 'https://test/oauth/token',
+          },
+        })
+      ).rejects.toThrow('No access token available');
+
+      expect(connectorAuthCounter.add).toHaveBeenCalledTimes(1);
+      expect(connectorAuthCounter.add).toHaveBeenCalledWith(1, {
+        'auth.phase': 'token',
+        'connector.auth_type': 'oauth_authorization_code',
+        'connector.type': '.github',
+        success: false,
+        'error.type': 'token_request_failed',
+      });
+    });
+
     test('records a failed token request and rethrows the error', async () => {
       (requestOAuthClientCredentialsToken as jest.Mock).mockRejectedValueOnce(
         new Error('token endpoint unavailable')

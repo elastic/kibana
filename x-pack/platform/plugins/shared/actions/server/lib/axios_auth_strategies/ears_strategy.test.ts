@@ -17,6 +17,7 @@ import { connectorTokenClientMock } from '../connector_token_client.mock';
 import { getEarsAccessToken } from '../ears/get_ears_access_token';
 import { resolveEarsUrl } from '../ears/url';
 import { EarsStrategy } from './ears_strategy';
+import { connectorAuthCounter } from '../connector_metrics';
 import type { AuthStrategyDeps } from './types';
 
 const mockGetEarsAccessToken = getEarsAccessToken as jest.MockedFunction<typeof getEarsAccessToken>;
@@ -61,6 +62,7 @@ describe('EarsStrategy', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.spyOn(connectorAuthCounter, 'add').mockImplementation(() => {});
     strategy = new EarsStrategy();
     mockResolveEarsUrl.mockImplementation((url) => `https://ears.example.com${url}`);
   });
@@ -259,6 +261,57 @@ describe('EarsStrategy', () => {
         await expect(onFulfilled(response)).rejects.toThrow(
           'Unable to refresh access token via EARS'
         );
+      });
+    });
+
+    it('records a successful forced token refresh', async () => {
+      const { instance, mockRequest } = createMockAxiosInstance();
+      strategy.installResponseInterceptor(instance, {
+        ...baseDeps,
+        connectorTypeId: '.test_connector',
+      });
+      const onRejected = getOnRejected(instance);
+
+      mockGetEarsAccessToken.mockResolvedValue('Bearer newtoken');
+      mockRequest.mockResolvedValue({ status: 200 });
+
+      await onRejected({
+        config: { _retry: false, headers: {} as Record<string, string> },
+        response: { status: 401 },
+        message: 'Unauthorized',
+      });
+
+      expect(connectorAuthCounter.add).toHaveBeenCalledWith(1, {
+        'auth.phase': 'token',
+        'connector.auth_type': 'ears',
+        'connector.type': '.test_connector',
+        success: true,
+      });
+    });
+
+    it('records a failed forced token refresh', async () => {
+      const { instance } = createMockAxiosInstance();
+      strategy.installResponseInterceptor(instance, {
+        ...baseDeps,
+        connectorTypeId: '.test_connector',
+      });
+      const onRejected = getOnRejected(instance);
+
+      mockGetEarsAccessToken.mockResolvedValue(null);
+
+      const error = {
+        config: { _retry: false, headers: {} },
+        response: { status: 401 },
+        message: '',
+      };
+      await expect(onRejected(error)).rejects.toBe(error);
+
+      expect(connectorAuthCounter.add).toHaveBeenCalledWith(1, {
+        'auth.phase': 'token',
+        'connector.auth_type': 'ears',
+        'connector.type': '.test_connector',
+        success: false,
+        'error.type': 'token_request_failed',
       });
     });
 

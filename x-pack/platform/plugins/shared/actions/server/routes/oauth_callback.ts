@@ -478,6 +478,7 @@ export const oauthCallbackRoute = (
         const { profile_uid: profileUid } = currentUser;
 
         if (!profileUid) {
+          recordConnectorAuth({ phase: 'authorize', authType: 'unknown', errorType: 'other' });
           return respondWithError(res, {
             statusCode: 500,
             details: i18n.translate('xpack.actions.oauthCallback.error.missingProfileUid', {
@@ -489,6 +490,11 @@ export const oauthCallbackRoute = (
         oauthRateLimiter.log(profileUid, 'callback');
         if (oauthRateLimiter.isRateLimited(profileUid, 'callback')) {
           routeLogger.warn(`OAuth callback rate limit exceeded for user: ${profileUid}`);
+          recordConnectorAuth({
+            phase: 'authorize',
+            authType: 'unknown',
+            errorType: 'rate_limited',
+          });
           return respondWithError(res, {
             statusCode: 429,
             details: i18n.translate('xpack.actions.oauthCallback.error.rateLimited', {
@@ -500,6 +506,7 @@ export const oauthCallbackRoute = (
         const { code, state: stateParam, error, error_description: errorDescription } = req.query;
 
         if (!stateParam) {
+          recordConnectorAuth({ phase: 'authorize', authType: 'unknown', errorType: 'invalid' });
           return respondWithError(res, {
             statusCode: 400,
             details: i18n.translate('xpack.actions.oauthCallback.error.missingState', {
@@ -521,6 +528,7 @@ export const oauthCallbackRoute = (
         });
         const oauthState = await oauthStateClient.get(stateParam);
         if (!oauthState) {
+          recordConnectorAuth({ phase: 'authorize', authType: 'unknown', errorType: 'invalid' });
           return respondWithError(res, {
             statusCode: 400,
             details: i18n.translate('xpack.actions.oauthCallback.error.invalidState', {

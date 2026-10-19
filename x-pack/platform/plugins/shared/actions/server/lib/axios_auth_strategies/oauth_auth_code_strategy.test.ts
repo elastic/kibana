@@ -15,6 +15,7 @@ import { actionsConfigMock } from '../../actions_config.mock';
 import { connectorTokenClientMock } from '../connector_token_client.mock';
 import { getOAuthAuthorizationCodeAccessToken } from '../get_oauth_authorization_code_access_token';
 import { OAuthAuthCodeStrategy } from './oauth_auth_code_strategy';
+import { connectorAuthCounter } from '../connector_metrics';
 import type { AuthStrategyDeps } from './types';
 
 const mockGetOAuthAuthorizationCodeAccessToken =
@@ -61,6 +62,7 @@ describe('OAuthAuthCodeStrategy', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.spyOn(connectorAuthCounter, 'add').mockImplementation(() => {});
     strategy = new OAuthAuthCodeStrategy();
   });
 
@@ -156,6 +158,57 @@ describe('OAuthAuthCodeStrategy', () => {
       expect((error as { message: string }).message).toContain(
         'Unable to refresh access token. Please re-authorize'
       );
+    });
+
+    it('records a successful forced token refresh', async () => {
+      const { instance, mockRequest } = createMockAxiosInstance();
+      strategy.installResponseInterceptor(instance, {
+        ...baseDeps,
+        connectorTypeId: '.test_connector',
+      });
+      const onRejected = getOnRejected(instance);
+
+      mockGetOAuthAuthorizationCodeAccessToken.mockResolvedValue('Bearer newtoken');
+      mockRequest.mockResolvedValue({ status: 200 });
+
+      await onRejected({
+        config: { _retry: false, headers: {} as Record<string, string> },
+        response: { status: 401 },
+        message: 'Unauthorized',
+      });
+
+      expect(connectorAuthCounter.add).toHaveBeenCalledWith(1, {
+        'auth.phase': 'token',
+        'connector.auth_type': 'oauth_authorization_code',
+        'connector.type': '.test_connector',
+        success: true,
+      });
+    });
+
+    it('records a failed forced token refresh', async () => {
+      const { instance } = createMockAxiosInstance();
+      strategy.installResponseInterceptor(instance, {
+        ...baseDeps,
+        connectorTypeId: '.test_connector',
+      });
+      const onRejected = getOnRejected(instance);
+
+      mockGetOAuthAuthorizationCodeAccessToken.mockResolvedValue(null);
+
+      const error = {
+        config: { _retry: false, headers: {} },
+        response: { status: 401 },
+        message: '',
+      };
+      await expect(onRejected(error)).rejects.toBe(error);
+
+      expect(connectorAuthCounter.add).toHaveBeenCalledWith(1, {
+        'auth.phase': 'token',
+        'connector.auth_type': 'oauth_authorization_code',
+        'connector.type': '.test_connector',
+        success: false,
+        'error.type': 'token_request_failed',
+      });
     });
 
     it('passes credentials to getOAuthAuthorizationCodeAccessToken with correct shape', async () => {
