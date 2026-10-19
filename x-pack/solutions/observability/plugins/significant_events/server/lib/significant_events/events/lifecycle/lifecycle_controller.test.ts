@@ -167,8 +167,13 @@ describe('decideLifecycle', () => {
         'no_data',
         RECOVERING,
       ],
-      ['does not open a new series on healthy members', undefined, 'recovered', NOT_A_BREACH],
-      ['does not open a new series on unjudged members', undefined, 'no_data', NOT_A_BREACH],
+      [
+        'opens a new series recovering when every member is healthy',
+        undefined,
+        'recovered',
+        RECOVERING,
+      ],
+      ['opens a new series active when a member cannot be judged', undefined, 'no_data', ACTIVE],
       ['does not reopen a closed series on healthy members', 'inactive', 'recovered', NOT_A_BREACH],
       ['does not reopen a closed series on unjudged members', 'inactive', 'no_data', NOT_A_BREACH],
     ])('%s', (_label, status, outcome, expected) => {
@@ -237,11 +242,11 @@ describe('decideLifecycle', () => {
       });
     });
 
-    it('enters recovering only from an assessment of an active series', () => {
+    it('enters recovering only from an assessment of an active or new series', () => {
       everyCase.forEach(({ status, change, decision }) => {
         if (decision.write && decision.status === 'recovering' && status !== 'recovering') {
           expect(change.kind).toBe('assessment');
-          expect(status).toBe('active');
+          expect(['active', undefined]).toContain(status);
         }
       });
     });
@@ -257,11 +262,22 @@ describe('decideLifecycle', () => {
       });
     });
 
-    it('never lets an assessment open or reopen a series unless it is breaching', () => {
+    it('never lets a non-breaching assessment reopen a closed series', () => {
       everyCase.forEach(({ status, change, decision }) => {
-        const notLive = status === undefined || status === 'inactive';
-        if (change.kind === 'assessment' && change.outcome !== 'breached' && notLive) {
+        if (
+          change.kind === 'assessment' &&
+          change.outcome !== 'breached' &&
+          status === 'inactive'
+        ) {
           expect(decision.write).toBe(false);
+        }
+      });
+    });
+
+    it('opens a series with no version on any assessment, never as closed', () => {
+      everyCase.forEach(({ status, change, decision }) => {
+        if (change.kind === 'assessment' && status === undefined) {
+          expect(decision.write).toBe(true);
         }
       });
     });
@@ -312,10 +328,10 @@ describe('discovery assessments: the status comes from the members, never from t
     });
   });
 
-  it('does not open an event from healthy members', () => {
+  it('opens an event from healthy members as recovering, since discovery chose to write it', () => {
     expect(decideFromMembers({ latest: undefined, signals: allHealthy })).toEqual({
-      write: false,
-      reason: 'not_a_breach',
+      write: true,
+      status: 'recovering',
     });
   });
 

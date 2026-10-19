@@ -7,12 +7,7 @@
 
 import type { RunContextStackEntry } from '@kbn/agent-builder-server';
 import type { SignalEntry, SignificantEvent } from '@kbn/significant-events-schema';
-import {
-  MAX_ASSESSMENT_NOTE_LENGTH,
-  MAX_SIGNAL_DESCRIPTION_LENGTH,
-  MAX_SUMMARY_LENGTH,
-  MAX_SYMPTOM_HYPOTHESIS_LENGTH,
-} from '@kbn/significant-events-schema';
+import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
@@ -184,13 +179,20 @@ describe('events_write tool', () => {
       ['inconclusive evidence', [signalWith('inconclusive')]],
       ['refuting evidence', [signalWith('refutes')]],
       ['a quiet not_checked rule', [quiet]],
-      ['no signals at all', []],
-    ])('rejects a new event backed only by %s', (_label, signals) => {
-      const result = eventsWriteSchema.safeParse({ items: [{ ...newEventInput, signals }] });
+    ])('accepts a new event backed only by %s: discovery decides', (_label, signals) => {
+      expect(eventsWriteSchema.safeParse({ items: [{ ...newEventInput, signals }] }).success).toBe(
+        true
+      );
+    });
+
+    it('rejects a new event with no signals at all', () => {
+      const result = eventsWriteSchema.safeParse({
+        items: [{ ...newEventInput, signals: [] }],
+      });
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues.at(-1)?.message).toContain('at least one confirms signal');
+        expect(result.error.issues.at(-1)?.message).toContain('at least one signal');
       }
     });
 
@@ -275,6 +277,51 @@ describe('events_write tool', () => {
     expect(result.success).toBe(false);
     if (!result.success) {
       expect(result.error.issues.at(-1)?.message).toContain('cannot include not_checked');
+    }
+  });
+
+  it('names each not_checked signal to remove, by its position and rule', () => {
+    const detection = (ruleUuid: string, verdict: 'confirms' | 'not_checked'): SignalEntry => ({
+      type: 'detection',
+      source_id: 'logs.test',
+      description: 'description',
+      verdict,
+      ...(verdict === 'confirms'
+        ? { evidence: { esql_query: 'FROM logs.test', result: 'found' as const } }
+        : {}),
+      metadata: {
+        rule_uuid: ruleUuid,
+        detection_id: `${ruleUuid}-d`,
+        change_point_type: 'spike',
+        p_value: 0.01,
+      },
+    });
+    const result = eventsWriteSchema.safeParse({
+      items: [
+        {
+          ...input,
+          signals: [
+            detection('rule-1', 'confirms'),
+            detection('rule-2', 'not_checked'),
+            detection('rule-3', 'confirms'),
+            detection('rule-4', 'not_checked'),
+          ],
+        },
+      ],
+    });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      const notChecked = result.error.issues.filter(({ message }) =>
+        message.includes('cannot include not_checked')
+      );
+      expect(notChecked.map(({ path }) => path)).toEqual([
+        ['items', 0, 'signals', 1],
+        ['items', 0, 'signals', 3],
+      ]);
+      expect(notChecked[0].message).toContain('rule rule-2');
+      expect(notChecked[1].message).toContain('rule rule-4');
+      expect(notChecked[1].message).toContain('written_rule_uuids');
     }
   });
 
@@ -667,14 +714,15 @@ describe('eventsWriteItemSchema', () => {
     summary: 'P99 latency breached SLO',
     severity: 'medium',
     confidence: 0.82,
-    assessment_note: 'Verified via execute_esql',
+    assessment_note:
+      'Verified via execute_esql. Confidence is 82.0% because one source corroborates it.',
     causal_features: [],
     blast_radius: [],
     signals: [
       {
         type: 'detection',
         source_id: 'logs.test',
-        description: 'x'.repeat(MAX_SIGNAL_DESCRIPTION_LENGTH),
+        description: 'x'.repeat(MAX_TEXT_LENGTH),
         verdict: 'confirms',
         evidence: { esql_query: 'FROM logs.test', result: 'found' },
         metadata: {
@@ -689,6 +737,49 @@ describe('eventsWriteItemSchema', () => {
 
   it('accepts a valid item at the field length boundaries', () => {
     expect(eventsWriteItemSchema.safeParse(validItem).success).toBe(true);
+  });
+
+  describe('the confidence in the assessment note', () => {
+    it.each([
+      ['a decimal', 'Confidence is 0.82 because one source corroborates it.'],
+      ['a percentage without the decimal', 'Confidence is 82% because one source corroborates it.'],
+      ['a different percentage', 'Confidence is 70.0% because one source corroborates it.'],
+      ['no figure at all', 'Verified via execute_esql.'],
+    ])('rejects %s, and names the percentage to write', (_name, assessment_note) => {
+      const result = eventsWriteItemSchema.safeParse({ ...validItem, assessment_note });
+
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        const issue = result.error.issues.find(({ path }) => path.includes('assessment_note'));
+        expect(issue?.message).toContain('82.0%');
+      }
+    });
+
+    it('accepts the confidence written as a percentage with one decimal, in any sentence', () => {
+      const result = eventsWriteItemSchema.safeParse({
+        ...validItem,
+        assessment_note:
+          'High: the path is blocked. Nothing was ruled out. Confidence is 82.0% here.',
+      });
+
+      expect(result.success).toBe(true);
+    });
+
+    it('rounds the way the percentage is written, 0.575 as 57.5%', () => {
+      const result = eventsWriteItemSchema.safeParse({
+        ...validItem,
+        confidence: 0.575,
+        assessment_note: 'Confidence is 57.5% because one source corroborates it.',
+      });
+
+      expect(result.success).toBe(true);
+    });
+
+    it('does not ask for a figure when there is no note', () => {
+      const { assessment_note: _omitted, ...withoutNote } = validItem;
+
+      expect(eventsWriteItemSchema.safeParse(withoutNote).success).toBe(true);
+    });
   });
 
   it('accepts no status: the server derives it from the verdicts', () => {
@@ -720,15 +811,13 @@ describe('eventsWriteItemSchema', () => {
     [
       'signal description',
       {
-        signals: [
-          { ...validItem.signals[0], description: 'x'.repeat(MAX_SIGNAL_DESCRIPTION_LENGTH + 1) },
-        ],
+        signals: [{ ...validItem.signals[0], description: 'x'.repeat(MAX_TEXT_LENGTH + 1) }],
       },
     ],
-    ['symptom_hypothesis', { symptom_hypothesis: 'x'.repeat(MAX_SYMPTOM_HYPOTHESIS_LENGTH + 1) }],
-    ['summary', { summary: 'x'.repeat(MAX_SUMMARY_LENGTH + 1) }],
-    ['assessment_note', { assessment_note: 'x'.repeat(MAX_ASSESSMENT_NOTE_LENGTH + 1) }],
-  ])('rejects %s exceeding the length limit', (_, overrides) => {
+    ['symptom_hypothesis', { symptom_hypothesis: 'x'.repeat(MAX_TEXT_LENGTH + 1) }],
+    ['summary', { summary: 'x'.repeat(MAX_TEXT_LENGTH + 1) }],
+    ['assessment_note', { assessment_note: 'x'.repeat(MAX_TEXT_LENGTH + 1) }],
+  ])('rejects %s exceeding the maximum text length', (_, overrides) => {
     expect(eventsWriteItemSchema.safeParse({ ...validItem, ...overrides }).success).toBe(false);
   });
 });

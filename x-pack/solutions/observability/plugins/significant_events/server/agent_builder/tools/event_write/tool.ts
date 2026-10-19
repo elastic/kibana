@@ -14,13 +14,7 @@ import {
 } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import {
-  MAX_ASSESSMENT_NOTE_LENGTH,
-  MAX_SIGNAL_DESCRIPTION_LENGTH,
-  MAX_SUMMARY_LENGTH,
-  MAX_SYMPTOM_HYPOTHESIS_LENGTH,
-  significantEventSchema,
-} from '@kbn/significant-events-schema';
+import { significantEventSchema } from '@kbn/significant-events-schema';
 import { nightshiftSourceSlugsField } from '@kbn/nightshift-shared';
 import { z, lazySchema } from '@kbn/zod/v4';
 import dedent from 'dedent';
@@ -30,7 +24,6 @@ import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import type { KnowledgeIndicatorClient } from '../../../lib/knowledge_indicators';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
-import { isBreachMemberSignal } from '../../../lib/significant_events/events/event_members';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
 import {
   getBulkWriteToolErrorCode,
@@ -94,53 +87,40 @@ export const eventsWriteItemSchema = lazySchema(() =>
         ),
     })
     .partial({ event_id: true })
-    .refine(
-      (item) =>
-        (item.signals ?? []).every((s) => s.description.length <= MAX_SIGNAL_DESCRIPTION_LENGTH),
-      {
-        message: `Signal descriptions must be at most ${MAX_SIGNAL_DESCRIPTION_LENGTH} characters for agent input`,
-      }
-    )
-    .refine(
-      (item) =>
-        item.symptom_hypothesis === undefined ||
-        item.symptom_hypothesis.length <= MAX_SYMPTOM_HYPOTHESIS_LENGTH,
-      {
-        message: `Symptom hypotheses must be at most ${MAX_SYMPTOM_HYPOTHESIS_LENGTH} characters for agent input`,
-      }
-    )
-    .refine((item) => item.summary.length <= MAX_SUMMARY_LENGTH, {
-      message: `Summaries must be at most ${MAX_SUMMARY_LENGTH} characters for agent input`,
-    })
-    .refine(
-      (item) =>
-        item.assessment_note === undefined ||
-        item.assessment_note.length <= MAX_ASSESSMENT_NOTE_LENGTH,
-      {
-        message: `Assessment notes must be at most ${MAX_ASSESSMENT_NOTE_LENGTH} characters for agent input`,
-      }
-    )
     .superRefine((item, ctx) => {
       const signals = item.signals ?? [];
       const hasConfirms = signals.some((s) => s.evidence != null && s.verdict === 'confirms');
-      const hasBreachMember = signals.some(isBreachMemberSignal);
-      const hasNotChecked = signals.some((s) => s.verdict === 'not_checked');
 
-      if (hasConfirms && hasNotChecked) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message:
-            'A confirms item cannot include not_checked signals; leave each not_checked detection out of the write.',
+      // One issue per offending signal, so a retry knows exactly which entries to remove.
+      if (hasConfirms) {
+        signals.forEach((signal, index) => {
+          if (signal.verdict !== 'not_checked') return;
+          const ruleUuid = signal.metadata?.rule_uuid ?? 'unknown';
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['signals', index],
+            message: `A confirms item cannot include not_checked signals; remove the signal of rule ${ruleUuid} from this item, leave that detection out of the write, and add its rule_uuid to written_rule_uuids.`,
+          });
         });
       }
-      // Only a confirmed breach opens an event. A continuation (it names an event_id) may carry any
-      // verdict: a rule turning healthy (`refutes`) is evidence the status is derived from, so it
-      // must be written, never dropped.
-      if (item.event_id === undefined && !hasBreachMember) {
+      // The note states the confidence field as a percentage with one decimal, so it can be checked.
+      if (item.assessment_note && item.confidence !== undefined) {
+        const percentage = `${(Math.round(item.confidence * 1000) / 10).toFixed(1)}%`;
+        if (!item.assessment_note.includes(percentage)) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['assessment_note'],
+            message: `assessment_note must state the confidence of ${item.confidence} as ${percentage} (a percentage with one decimal), not as a decimal.`,
+          });
+        }
+      }
+      // Discovery decides which detections open an event, whatever their verdict: a healthy or
+      // unjudged one opens it recovering or active, and the lifecycle derives that status from the
+      // verdicts. An event with no signal says nothing, so it is the only thing refused.
+      if (item.event_id === undefined && signals.length === 0) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message:
-            'A new event must carry at least one confirms signal, or an off_topic signal with an observed error. Events open on a confirmed breach: do not create an event for refutes, inconclusive, or not_checked detections alone. To record that a rule of an existing event is healthy, continue that event with its event_id and the refutes signal.',
+          message: 'A new event must carry at least one signal.',
         });
       }
       if (item.event_id !== undefined && signals.length === 0) {

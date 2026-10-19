@@ -6,7 +6,7 @@
  */
 
 import type { DataStreamDefinition } from '@kbn/core-data-streams-server';
-import type { Detection } from '@kbn/significant-events-schema';
+import type { Detection, DetectionSkip } from '@kbn/significant-events-schema';
 import type { GetFieldsOf, MappingsDefinition } from '@kbn/es-mappings';
 import { mappings } from '@kbn/es-mappings';
 
@@ -32,6 +32,8 @@ interface UnmappedDetectionFields {
   alert_index?: string;
   workflow_execution_id?: string;
   scanned_by?: string;
+  /** Why the classifier closed the detection; `checked_at` is the marker's own timestamp. */
+  skip?: Omit<DetectionSkip, 'checked_at'>;
 }
 
 export type StoredDetection = GetFieldsOf<typeof detectionsMappings> & UnmappedDetectionFields;

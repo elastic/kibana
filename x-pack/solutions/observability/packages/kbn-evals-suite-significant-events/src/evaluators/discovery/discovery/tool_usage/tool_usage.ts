@@ -13,6 +13,10 @@ import {
   isToolId,
   summarizePersistenceCalls,
 } from '../../utils/tool_usage';
+import {
+  isPrefetchedContextEnabled,
+  isPrefetchedGroundingEnabled,
+} from '../../../../prefetched_context';
 import type { DiscoveryEvaluator } from '../../types';
 import type {
   ContinuationCycle,
@@ -33,6 +37,12 @@ export interface ToolUsageScore {
 }
 
 const isTool = isToolId;
+
+/** With the KI context in the message the agent has nothing to search, so a missing `ki_search` is correct. */
+const kiSearchRequired = (): boolean => !isPrefetchedContextEnabled();
+
+/** With the grounding results in the message the agent has no query of its own to run. */
+const esqlRequired = (): boolean => !isPrefetchedGroundingEnabled();
 
 const calledCanonical = (calledTools: Set<string>, canonical: string): boolean =>
   [...calledTools].some((toolId) => isTool(toolId, canonical));
@@ -126,8 +136,8 @@ const hasGroundedNoEventDecision = ({
   ).length;
 
   return (
-    hasQueryKiSearch &&
-    esqlCallCount >= detectionCount &&
+    (hasQueryKiSearch || !kiSearchRequired()) &&
+    (esqlCallCount >= detectionCount || !esqlRequired()) &&
     calledCanonical(calledTools, TOOL_ID_EVENT_SEARCH)
   );
 };
@@ -268,7 +278,7 @@ export const scoreToolUsage = ({
       Array.isArray(params.kind) &&
       params.kind.includes('query')
   );
-  if (!hasQueryKiSearch) {
+  if (!hasQueryKiSearch && kiSearchRequired()) {
     return {
       score: 0,
       label: `missing-${TOOL_ID_KI_SEARCH}`,
@@ -297,7 +307,11 @@ export const scoreToolUsage = ({
     };
   }
 
-  const expected = [TOOL_ID_EXECUTE_ESQL, TOOL_ID_KI_SEARCH, TOOL_ID_EVENT_SEARCH];
+  const expected = [
+    ...(esqlRequired() ? [TOOL_ID_EXECUTE_ESQL] : []),
+    ...(kiSearchRequired() ? [TOOL_ID_KI_SEARCH] : []),
+    TOOL_ID_EVENT_SEARCH,
+  ];
   const missing = expected.filter((t) => !calledCanonical(calledTools, t));
   const score = (expected.length - missing.length) / expected.length;
   const persistenceCalls = summarizePersistenceCalls(steps, TOOL_ID_EVENTS_WRITE);

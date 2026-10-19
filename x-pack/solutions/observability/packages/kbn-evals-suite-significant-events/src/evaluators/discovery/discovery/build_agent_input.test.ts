@@ -21,4 +21,15 @@ describe('buildDiscoveryInput', () => {
     const input = buildDiscoveryInput({ detections: [] });
     expect(input).toBe('## Detection batch\n[]');
   });
+
+  it('appends the prefetched context after the batch when given', () => {
+    const input = buildDiscoveryInput({
+      detections: [{ rule_uuid: 'r1' }],
+      prefetchedContext: { query_kis: [], unmatched_rule_uuids: ['r1'] },
+    });
+
+    expect(input).toBe(
+      '## Detection batch\n[{"rule_uuid":"r1"}]\n\n## Prefetched context\n{"query_kis":[],"unmatched_rule_uuids":["r1"]}'
+    );
+  });
 });
