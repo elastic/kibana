@@ -41,12 +41,7 @@ const PERIODS: readonly DataStreamPeriod[] = ['recent', 'standard', 'background'
 /** A period's search cost per hour and VCUs, for its tooltip. */
 const PeriodCost = ({ vcus }: { vcus: VcuRange }) => (
   <>
-    <div>
-      {i18n.translate('xpack.boost.dataStreamTimeline.periodCost', {
-        defaultMessage: '{cost} per hour',
-        values: { cost: formatCostRange(vcus) },
-      })}
-    </div>
+    <div>{formatCostRange(vcus)}</div>
     <div>{getVcuRangeText(vcus)}</div>
   </>
 );
@@ -198,7 +193,10 @@ export const DataStreamTimeline = ({
               >
                 {cost ? (
                   <EuiToolTip
-                    title={PERIOD_LABELS[period].title}
+                    title={i18n.translate('xpack.boost.dataStreamTimeline.periodCostTitle', {
+                      defaultMessage: '{period} per hour',
+                      values: { period: PERIOD_LABELS[period].title },
+                    })}
                     content={<PeriodCost vcus={cost} />}
                     display="block"
                   >
