@@ -108,7 +108,7 @@ describe('createDashboardChangeHistoryAdapter', () => {
         { signal: undefined }
       );
       expect(dashboardClient.invalidateCache).toHaveBeenCalledWith('dash-1');
-      expect(dashboardApi.setState).toHaveBeenCalledWith(restored, true);
+      expect(dashboardApi.setState).toHaveBeenCalledWith(restored, { save: true });
     });
   });
 });
