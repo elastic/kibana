@@ -29,9 +29,9 @@ session = out / "session"
 make(
     fixtures / "shot-sensitive.png",
     [
-        "Kibana  https://acme-prod-7f3a.kb.us-east-1.aws.found.io/app/security/alerts",
-        "Host: ACME-FIN-LAPTOP-0042  IP 10.42.7.19",
-        "User: jane.doe@acmecorp.com",
+        "Kibana  https://initech-prod-7f3a.kb.example.invalid/app/security/alerts",
+        "Host: INITECH-FIN-LAPTOP-0042  IP 192.0.2.19",
+        "User: jane.doe@initech-finance.example",
         "Alerts table: 0 results (expected 12)",
     ],
 )
