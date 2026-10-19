@@ -715,12 +715,14 @@ export const getSimilarCases = async ({
   signal,
   perPage,
   page,
+  sortField,
+  sortOrder,
 }: SimilarCasesProps): Promise<CasesSimilarResponseUI> => {
   const response = await KibanaServices.get().http.fetch<CasesSimilarResponse>(
     getCaseSimilarCasesUrl(caseId),
     {
       method: 'POST',
-      body: JSON.stringify({ page, perPage }),
+      body: JSON.stringify({ page, perPage, sortField, sortOrder }),
       signal,
     }
   );

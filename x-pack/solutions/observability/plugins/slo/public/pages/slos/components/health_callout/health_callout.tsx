@@ -17,7 +17,13 @@ import { ContentWithInspectCta } from '../../../slo_details/components/health_ca
 
 const CALLOUT_SESSION_STORAGE_KEY = 'slo_health_callout_hidden';
 
-export function HealthCallout({ sloList = [] }: { sloList: SLOWithSummaryResponse[] }) {
+export function HealthCallout({
+  sloList = [],
+  isInteractive = true,
+}: {
+  sloList: SLOWithSummaryResponse[];
+  isInteractive?: boolean;
+}) {
   const { isLoading, isError, data: results } = useFetchSloHealth({ list: sloList });
   const [showCallOut, setShowCallOut] = useState(
     !sessionStorage.getItem(CALLOUT_SESSION_STORAGE_KEY)
@@ -72,20 +78,24 @@ export function HealthCallout({ sloList = [] }: { sloList: SLOWithSummaryRespons
           />
         </span>
       }
-      actionProps={{
-        primary: {
-          children: isOpen
-            ? i18n.translate('xpack.slo.sloList.healthCallout.collapseLabel', {
-                defaultMessage: 'Hide details',
-              })
-            : i18n.translate('xpack.slo.sloList.healthCallout.expandLabel', {
-                defaultMessage: 'Show details',
-              }),
-          iconType: isOpen ? 'chevronSingleUp' : 'chevronSingleDown',
-          iconSide: 'right',
-          onClick: () => setIsOpen(!isOpen),
-        },
-      }}
+      actionProps={
+        !isInteractive
+          ? undefined
+          : {
+              primary: {
+                children: isOpen
+                  ? i18n.translate('xpack.slo.sloList.healthCallout.collapseLabel', {
+                      defaultMessage: 'Hide details',
+                    })
+                  : i18n.translate('xpack.slo.sloList.healthCallout.expandLabel', {
+                      defaultMessage: 'Show details',
+                    }),
+                iconType: isOpen ? 'chevronSingleUp' : 'chevronSingleDown',
+                iconSide: 'right',
+                onClick: () => setIsOpen(!isOpen),
+              },
+            }
+      }
     >
       {isOpen && (
         <ul>

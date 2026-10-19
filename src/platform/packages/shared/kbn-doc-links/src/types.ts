@@ -332,6 +332,7 @@ export interface DocLinks {
     readonly notesPage: string;
     readonly timelinesPage: string;
     readonly runAttackDiscoveryInWorkflow: string;
+    readonly attackDiscovery: string;
     readonly mitreCoverage: string;
     readonly remapMitreAttack: string;
   };
@@ -502,7 +503,13 @@ export interface DocLinks {
     guide: string;
     actionTypes: string;
     actionPolicies: string;
+    manageActionPolicies: string;
     compareAlertingSystems: string;
+    viewManageRules: string;
+    viewAndManageAlerts: string;
+    investigateAlertEpisodes: string;
+    reviewRuleExecutionHistory: string;
+    reviewActionPolicyExecutionHistory: string;
     apmRulesErrorCount: string;
     apmRulesTransactionDuration: string;
     apmRulesTransactionError: string;
@@ -758,6 +765,7 @@ export interface DocLinks {
     readonly inferenceAPIDocumentation: string;
     readonly featureSettings: string;
     readonly externalInference: string;
+    readonly selfHostedInference: string;
   };
   readonly synonyms: {
     readonly synonymsAPIDocumentation: string;

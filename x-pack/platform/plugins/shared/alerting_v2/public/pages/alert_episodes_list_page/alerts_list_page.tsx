@@ -50,10 +50,12 @@ import { episodeSupportsTimeline } from '@kbn/alerting-v2-episodes-ui/queries/ep
 import { useInvalidateEpisodeQueries } from '@kbn/alerting-v2-episodes-ui/hooks/use_invalidate_episode_queries';
 import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache';
 import { useAlertingRuleSourceDataViews } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rule_source_data_views';
+import { useBulkGetMaintenanceWindowsQuery } from '@kbn/response-ops-alerts-table/hooks/use_bulk_get_maintenance_windows';
 import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { createEpisodeActions, type EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
 import {
   EpisodeDurationCell,
+  EpisodeMaintenanceWindowsCell,
   EpisodeSourceCell,
   EpisodeStatusCell,
   EpisodeTagsCell,
@@ -63,7 +65,10 @@ import {
 } from '@kbn/alerting-v2-episodes-ui/components/episodes_table_cell_renderers';
 import { AlertEpisodeAssigneeCell } from '@kbn/alerting-v2-episodes-ui/components/assignee_cell';
 import type { EpisodeDataSource } from '@kbn/alerting-v2-episodes-ui/types/episode_data_source';
-import { DEFAULT_EPISODES_TABLE_SORT } from './utils/episodes_table_config';
+import {
+  DEFAULT_EPISODES_TABLE_SORT,
+  DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS,
+} from './utils/episodes_table_config';
 import { useEpisodesTableConfig } from './hooks/use_episodes_table_config';
 import { NewAlertingExperienceBanner } from './new_alerting_experience_banner';
 import { RuleSummaryFlyoutContainer } from '../../components/rule/flyouts/rule_summary/rule_summary_flyout_container';
@@ -100,9 +105,11 @@ const getAlertsListMenu = ({ manageRulesHref }: { manageRulesHref: string }): Ap
   },
 });
 
+const MAINTENANCE_WINDOWS_COLUMN_ID = 'maintenance_windows';
+
 // Neither tag column is in the episodes query's `ALLOWLISTED_SORT_FIELDS`, so a sort on them
 // falls back to `@timestamp` and only looks like it works.
-const CUSTOM_GRID_COLUMNS_CONFIGURATION: CustomGridColumnsConfiguration = {
+const COLUMN_CUSTOMIZATIONS: CustomGridColumnsConfiguration = {
   tags: ({ column }: { column: EuiDataGridColumn }): EuiDataGridColumn => ({
     ...column,
     displayAsText: i18n.EPISODES_LIST_COLUMN_ALERT_TAGS,
@@ -122,7 +129,25 @@ const CUSTOM_GRID_COLUMNS_CONFIGURATION: CustomGridColumnsConfiguration = {
     displayAsText: i18n.EPISODES_LIST_COLUMN_SOURCE,
     isSortable: false,
   }),
+  [MAINTENANCE_WINDOWS_COLUMN_ID]: ({ column }) => ({
+    ...column,
+    displayAsText: i18n.EPISODES_LIST_COLUMN_MAINTENANCE_WINDOWS,
+    isSortable: false,
+  }),
 };
+
+// Drops the default column actions this table can't support yet.
+// - showHide: there is no way to add a column back, so a removed column would be lost for good.
+const removeUnsupportedDefaultActions = (column: EuiDataGridColumn): EuiDataGridColumn =>
+  column.actions ? { ...column, actions: { ...column.actions, showHide: false } } : column;
+
+const CUSTOM_GRID_COLUMNS_CONFIGURATION: CustomGridColumnsConfiguration = Object.fromEntries(
+  DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS.map((columnId) => [
+    columnId,
+    (props: Parameters<CustomGridColumnsConfiguration[string]>[0]) =>
+      removeUnsupportedDefaultActions(COLUMN_CUSTOMIZATIONS[columnId]?.(props) ?? props.column),
+  ])
+);
 
 // The table fills the space left below the KPIs and the histogram. On short viewports that space
 // only fits one or two rows, so we keep a floor that shows a usable number of rows and let the page
@@ -560,10 +585,35 @@ const AlertsListPageContent = () => {
   const manageRulesHrefOverride = useManageRulesHref();
   const manageRulesHref = manageRulesHrefOverride ?? locatorHref;
 
+  const maintenanceWindowIds = useMemo(
+    () =>
+      [...new Set((episodesData ?? []).flatMap((row) => row.maintenance_window_ids ?? []))].sort(),
+    [episodesData]
+  );
+
+  const { data: maintenanceWindows, isFetching: isLoadingMaintenanceWindows } =
+    useBulkGetMaintenanceWindowsQuery(
+      {
+        ids: maintenanceWindowIds,
+        http: services.http,
+        notifications: services.notifications,
+        application: services.application,
+        licensing: services.licensing,
+      },
+      { enabled: visibleColumns.includes(MAINTENANCE_WINDOWS_COLUMN_ID) }
+    );
+
   const externalCustomRenderers = useMemo<CustomCellRenderer>(
     () => ({
       'episode.status': (props) => <EpisodeStatusCell {...props} />,
       alerting_source: (props) => <EpisodeSourceCell {...props} />,
+      [MAINTENANCE_WINDOWS_COLUMN_ID]: (props) => (
+        <EpisodeMaintenanceWindowsCell
+          {...props}
+          maintenanceWindows={maintenanceWindows}
+          isLoadingMaintenanceWindows={isLoadingMaintenanceWindows}
+        />
+      ),
       duration: (props) => <EpisodeDurationCell {...props} />,
       severity: (props) => <EpisodeSeverityCell {...props} />,
       tags: (props) => <EpisodeTagsCell {...props} />,
@@ -596,6 +646,8 @@ const AlertsListPageContent = () => {
       openRuleFlyout,
       services.userProfile,
       sourceDataViewsByRule,
+      maintenanceWindows,
+      isLoadingMaintenanceWindows,
     ]
   );
 
@@ -622,6 +674,7 @@ const AlertsListPageContent = () => {
         title={i18n.EPISODES_LIST_PAGE_TITLE}
         spacing="bleed"
         menu={alertsMenu}
+        docLink={services.docLinks.links.alerting.viewAndManageAlerts}
       />
       <EuiSpacer size="m" />
       <NewAlertingExperienceBanner />

@@ -6,9 +6,12 @@
  */
 import { i18n } from '@kbn/i18n';
 
-export const MAINTENANCE_WINDOWS = i18n.translate('xpack.maintenanceWindows', {
-  defaultMessage: 'Maintenance Windows',
-});
+export const MAINTENANCE_WINDOWS = i18n.translate(
+  'xpack.maintenanceWindows.maintenanceWindowsTitle',
+  {
+    defaultMessage: 'Maintenance Windows',
+  }
+);
 
 export const MAINTENANCE_WINDOWS_DESCRIPTION = i18n.translate(
   'xpack.maintenanceWindows.description',
@@ -572,12 +575,12 @@ export const TABLE_SCOPE = i18n.translate('xpack.maintenanceWindows.table.scope'
   defaultMessage: 'Scope',
 });
 
-export const TABLE_SCOPE_BADGE_ALERTS = i18n.translate(
-  'xpack.maintenanceWindows.table.scopeBadgeAlerts',
-  { defaultMessage: 'Alerts' }
+export const TABLE_SCOPE_BADGE_CLASSIC_ALERTING = i18n.translate(
+  'xpack.maintenanceWindows.table.scopeBadgeClassicAlerting',
+  { defaultMessage: 'Classic Alerting' }
 );
 
-export const TABLE_SCOPE_BADGE_EPISODES = i18n.translate(
-  'xpack.maintenanceWindows.table.scopeBadgeEpisodes',
-  { defaultMessage: 'Episodes' }
+export const TABLE_SCOPE_BADGE_UNIVERSAL_ALERTING = i18n.translate(
+  'xpack.maintenanceWindows.table.scopeBadgeUniversalAlerting',
+  { defaultMessage: 'Universal Alerting' }
 );

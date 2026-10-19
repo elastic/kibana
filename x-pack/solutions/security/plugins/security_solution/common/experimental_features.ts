@@ -97,14 +97,12 @@ export const allowedExperimentalValues = Object.freeze({
   defendCrossProjectSearch: true,
 
   /**
-   * AI Agent chat-first endpoint response actions skill (read-only: list endpoints,
-   * endpoint status, response action status)
+   * AI Agent chat-first endpoint response actions skill (isolate, unisolate, etc.)
    * Release: TBD
    *
-   * Ships disabled: it surfaces endpoint response-action state to chat and is
-   * the landing spot for the upcoming dispatch tools, so it must not be enabled
-   * by default on any branch. Enable it explicitly via config (or a Scout
-   * evals config) for local/CI testing.
+   * Ships disabled: this skill dispatches destructive endpoint response actions,
+   * so it must not be enabled by default on any branch. Enable it explicitly via
+   * config (or a Scout evals config) for local/CI testing.
    */
   endpointResponseActionsSkill: false,
 
@@ -218,7 +216,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables custom YARA signature management in Elastic Defend.
    */
-  customYaraSignaturesEnabled: false,
+  customYaraSignaturesEnabled: true,
 
   /**
    * Enables the ability to import and migration dashboards through automatic migration service
@@ -297,15 +295,13 @@ export const allowedExperimentalValues = Object.freeze({
 
   /**
    * Enables the Endpoint Forensic Analysis Agent Builder skill (DFIR / patient zero / timeline).
-   * Shipped dark by default; enable per environment via config.
    */
-  endpointForensicAnalysisSkill: false,
+  endpointForensicAnalysisSkill: true,
 
   /**
-   * Enables the Elastic Defend Policy Management Agent Builder skill (read-only prose workflows).
-   * Shipped dark by default; enable per environment via config.
+   * Enables the Elastic Defend Policy Management Agent Builder skill
    */
-  elasticDefendPolicyManagementSkill: false,
+  elasticDefendPolicyManagementSkill: true,
 
   /**
    * Enables the investigate-rule Agent Builder skill.
@@ -375,7 +371,7 @@ export const allowedExperimentalValues = Object.freeze({
    * per-operating-system protection configuration.
    * Release: 9.6
    */
-  perOsPolicySettings: false,
+  perOsPolicySettings: true,
 
   /**
    * Enables ransomware protection for Linux in Elastic Defend policies.
