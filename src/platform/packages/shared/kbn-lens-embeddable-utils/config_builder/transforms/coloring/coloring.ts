@@ -366,7 +366,13 @@ interface SerializedRangeKey {
   type: 'rangeKey';
   from: string | number | null;
   to: string | number | null;
-  ranges: Array<Partial<Pick<SerializedRangeKey, 'from' | 'to'> & { label: string }>>;
+  ranges: Array<
+    Partial<{
+      from: string | number | null;
+      to: string | number | null;
+      label: string;
+    }>
+  >;
 }
 
 // The SO stores an open-ended range bound as `null`. The API omits it.
@@ -397,8 +403,11 @@ function mapSerializedValueToAPI(value: unknown): SerializableValueType {
       return {
         type: 'range_key',
         ...toAPIRangeBounds({ from, to }),
-        ranges: ranges?.map(({ label, ...bounds }) => ({ ...toAPIRangeBounds(bounds), label })),
-      } as SerializableValueType;
+        ranges: ranges.map(({ label, ...bounds }) => ({
+          ...toAPIRangeBounds(bounds),
+          label: label ?? '',
+        })),
+      } satisfies SerializableValueType;
     }
   }
   return value as SerializableValueType;
