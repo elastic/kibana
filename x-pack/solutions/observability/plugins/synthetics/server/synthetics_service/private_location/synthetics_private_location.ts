@@ -29,7 +29,11 @@ import {
   formatSyntheticsPolicy,
   VAULT_SECRET_STORAGE_DISABLED_MESSAGE,
 } from '../formatters/private_formatters/format_synthetics_policy';
-import { getSecretConnectionDelivery, type HeartbeatVaultConfig } from '../get_secret_connection';
+import {
+  getSecretConnectionDelivery,
+  SecretConnectionError,
+  type HeartbeatVaultConfig,
+} from '../get_secret_connection';
 import type {
   HeartbeatConfig,
   MonitorFields,
@@ -343,7 +347,8 @@ export class SyntheticsPrivateLocation {
       if (
         e instanceof Error &&
         (e.message.includes('Synthetics integration version 1.12.0 or later') ||
-          e.message === VAULT_SECRET_STORAGE_DISABLED_MESSAGE)
+          e.message === VAULT_SECRET_STORAGE_DISABLED_MESSAGE ||
+          e instanceof SecretConnectionError)
       ) {
         throw e;
       }
@@ -644,6 +649,7 @@ export class SyntheticsPrivateLocation {
       getSecretConnectionDelivery(this.server, spaceId),
     ]);
 
+    const secretConnectionErrors: SecretConnectionError[] = [];
     const policiesToUpdate: UpdatePackagePolicyWithId[] = [];
     const policiesToCreate: NewPackagePolicyWithId[] = [];
     const policiesToDelete: string[] = [];
@@ -721,6 +727,11 @@ export class SyntheticsPrivateLocation {
           }
         } catch (e) {
           this.server.logger.error(e);
+          // One monitor's bad connection must not block the rest of the batch.
+          if (e instanceof SecretConnectionError) {
+            secretConnectionErrors.push(e);
+            continue;
+          }
           throwAddEditError(hasPolicy, privateLocation.label, config[ConfigKey.NAME]);
         }
       }
@@ -784,6 +795,11 @@ export class SyntheticsPrivateLocation {
         config: policyConfig?.config,
       };
     });
+
+    // The other monitors are already synced; still report the monitors that couldn't be.
+    if (secretConnectionErrors.length > 0) {
+      throw new SecretConnectionError(secretConnectionErrors.map((e) => e.message).join('; '));
+    }
 
     return {
       failedUpdates,

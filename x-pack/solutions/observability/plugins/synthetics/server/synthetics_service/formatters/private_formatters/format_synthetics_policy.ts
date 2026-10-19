@@ -19,8 +19,8 @@ import {
   replaceStringWithParams,
   resolveHttpAuthParams,
 } from '../formatting_utils';
-import { referencedConnectionNames, stripSecretConnectionNames } from '../vault_param_formatter';
-import { toSecretStoreEntry, type HeartbeatVaultConfig } from '../../get_secret_connection';
+import { referencedConnectionNames } from '../vault_param_formatter';
+import { SecretConnectionError, type HeartbeatVaultConfig } from '../../get_secret_connection';
 import { syntheticsPolicyFormatters } from './formatters';
 import { PARAMS_KEYS_TO_SKIP } from '../common';
 
@@ -31,44 +31,37 @@ export const VAULT_PACKAGE_UPGRADE_MESSAGE =
   'Vault secret references require the Synthetics integration version 1.13.0 or later. Upgrade the Synthetics package in Fleet and try again.';
 
 /**
- * Picks the one Vault connection a monitor uses (Heartbeat takes a single `vault`
- * entry per monitor). `undefined` in `referenced` is the default connection, which
- * is only well-defined when exactly one connection exists. Fails closed: an unknown
- * connection, or more than one distinct connection, throws instead of shipping the
- * wrong credentials.
+ * Picks the connections a monitor references, by name. Fails closed: a reference
+ * without a connection name (`undefined`) or naming an unknown connection throws
+ * instead of shipping the wrong credentials.
  */
-export const selectSecretConnection = (
+export const selectSecretConnections = (
   all: HeartbeatVaultConfig[],
   referenced: Set<string | undefined>,
   monitorName?: string
-): HeartbeatVaultConfig | undefined => {
+): HeartbeatVaultConfig[] => {
   const byName = new Map(all.map((c) => [c.name, c]));
+  const available = all.length ? all.map((c) => `"${c.name}"`).join(', ') : 'none configured';
   const selected = new Map<string, HeartbeatVaultConfig>();
   for (const name of referenced) {
     if (name === undefined) {
-      // With several connections an unqualified reference has no default — don't
-      // guess; the agent reports the unresolved reference at runtime.
-      if (all.length === 1) selected.set(all[0].name, all[0]);
-      continue;
+      throw new SecretConnectionError(
+        `Monitor "${
+          monitorName ?? ''
+        }" has a Vault reference without a connection name. Use vault://<connection>@<path>#<field>; available connections: ${available}`
+      );
     }
     const conn = byName.get(name);
     if (!conn) {
-      throw new Error(
+      throw new SecretConnectionError(
         `Monitor "${
           monitorName ?? ''
-        }" references Vault connection "${name}", which is not configured`
+        }" references Vault connection "${name}", which is not configured; available connections: ${available}`
       );
     }
     selected.set(conn.name, conn);
   }
-  if (selected.size > 1) {
-    throw new Error(
-      `Monitor "${monitorName ?? ''}" references multiple Vault connections (${[
-        ...selected.keys(),
-      ].join(', ')}); a monitor can use only one`
-    );
-  }
-  return [...selected.values()][0];
+  return [...selected.values()];
 };
 
 export interface ProcessorFields {
@@ -187,14 +180,12 @@ export const formatSyntheticsPolicy = (
     }
   });
 
-  // Collect the vault connections this monitor references, then drop the Kibana-only
-  // `<connection>@` prefix so Heartbeat sees plain vault://<path>#<field>. Heartbeat
-  // does not resolve references in the inline script, so it is left alone.
+  // Collect the vault connections this monitor references. Heartbeat does not
+  // resolve references in the inline script, so it is left alone.
   const referencedSecretConnections = new Set<string | undefined>();
   Object.entries(dataStream?.vars ?? {}).forEach(([key, item]) => {
     if (!item || key === ConfigKey.SOURCE_INLINE) return;
     referencedConnectionNames(item.value).forEach((name) => referencedSecretConnections.add(name));
-    item.value = stripSecretConnectionNames(item.value);
   });
 
   // Heartbeat decodes inline scripts when source.inline.encoding=base64.
@@ -254,17 +245,17 @@ export const formatSyntheticsPolicy = (
     if (!secretStoresItem) {
       throw new Error(VAULT_PACKAGE_UPGRADE_MESSAGE);
     }
-    const connection = secretConnections?.length
-      ? selectSecretConnection(
+    // `undefined` means no connections were loaded for this call (inspect path); an empty
+    // list is real, so an unknown connection fails instead of being dropped.
+    const connections = secretConnections
+      ? selectSecretConnections(
           secretConnections,
           referencedSecretConnections,
           config[ConfigKey.NAME]
         )
-      : undefined;
-    if (connection) {
-      secretStoresItem.value = Buffer.from(
-        JSON.stringify([toSecretStoreEntry(connection)])
-      ).toString('base64');
+      : [];
+    if (connections.length) {
+      secretStoresItem.value = Buffer.from(JSON.stringify(connections)).toString('base64');
     }
   }
 

@@ -41,7 +41,7 @@ export const propagate = (server: SyntheticsServerSetup, spaceId: string) =>
 
 export const listConnections = async ({
   savedObjectsClient,
-}: RouteContext): Promise<SecretConnectionStatus[]> => {
+}: Pick<RouteContext, 'savedObjectsClient'>): Promise<SecretConnectionStatus[]> => {
   const finder = savedObjectsClient.createPointInTimeFinder<SyntheticsSecretConnection>({
     type: syntheticsSecretConnectionType,
     perPage: 1000,
@@ -55,3 +55,16 @@ export const listConnections = async ({
   finder.close().catch(() => {});
   return out;
 };
+
+/** The names in `names` that no connection of this space has. */
+export const findUnknownConnections = async (
+  routeContext: Pick<RouteContext, 'savedObjectsClient'>,
+  names: string[]
+): Promise<string[]> => {
+  if (names.length === 0) return [];
+  const known = new Set((await listConnections(routeContext)).map(({ name }) => name));
+  return [...new Set(names)].filter((name) => !known.has(name));
+};
+
+export const unknownConnectionsMessage = (names: string[]): string =>
+  `Vault connection ${names.map((name) => `"${name}"`).join(', ')} is not configured in this space`;

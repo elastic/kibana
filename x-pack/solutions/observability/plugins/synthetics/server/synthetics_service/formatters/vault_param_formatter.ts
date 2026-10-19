@@ -14,15 +14,14 @@ import { z, lazySchema } from '@kbn/zod';
  * secret stored in HashiCorp Vault instead of embedding the secret in Kibana.
  * Kibana-side reference syntax:
  *
- *     vault://[<connection>@]<secret-path>#<field>
+ *     vault://<connection>@<secret-path>#<field>
  *
- * e.g. vault://myapp/creds#password or vault://staging@myapp/creds#password
+ * e.g. vault://staging@myapp/creds#password
  *
- * Heartbeat (secret_stores) understands `vault://<path>#<field>` and, today, a
- * single `vault` entry per monitor. The optional `<connection>@` prefix is a Kibana
- * concept: it picks which of the space's connections is delivered to the monitor.
- * It is stripped from the policy at the Kibana/Heartbeat boundary
- * (`stripSecretConnectionNames`), so Heartbeat never sees it.
+ * Heartbeat (`secret_stores`) resolves the same reference: `<connection>` is the `name` of
+ * the `secret_stores` entry holding the connection, and is required. Kibana delivers every
+ * connection a monitor references, and rejects a reference without a name or with an
+ * unknown one.
  *
  * Contract (the entire Kibana-side responsibility):
  *
@@ -64,12 +63,8 @@ export const isValidSecretConnectionName = (c: string) => SECRET_CONNECTION_NAME
 const PATH_ERROR = 'must contain only letters, numbers, and . _ - / (no "." or ".." segments)';
 const FIELD_ERROR = 'must contain only letters, numbers, and . _ -';
 
-/**
- * Builds the reference stored as a vault-backed param's value. With a connection
- * name it emits vault://<connection>@<path>#<field>; without one,
- * vault://<path>#<field> (the default connection).
- */
-export const buildVaultReference = (path: string, field: string, connection?: string): string => {
+/** Builds the reference stored as a vault-backed param's value: vault://<connection>@<path>#<field>. */
+export const buildVaultReference = (path: string, field: string, connection: string): string => {
   const cleanPath = stripSlashes(path);
   // Defense in depth: routes validate the same charset, but a bad token here would
   // silently corrupt the compiled agent policy, so refuse to build one.
@@ -83,13 +78,12 @@ export const buildVaultReference = (path: string, field: string, connection?: st
       `Invalid Vault field "${field}": allowed characters are letters, numbers, and . _ -`
     );
   }
-  if (connection && !isValidSecretConnectionName(connection)) {
+  if (!isValidSecretConnectionName(connection)) {
     throw new Error(
       `Invalid Vault connection name "${connection}": allowed characters are letters, numbers, and . _ -`
     );
   }
-  const prefix = connection ? `${connection}@` : '';
-  return `vault://${prefix}${cleanPath}#${field}`;
+  return `vault://${connection}@${cleanPath}#${field}`;
 };
 
 interface VaultReference {
@@ -130,8 +124,8 @@ export const valueContainsVaultReference = (value: unknown): boolean => {
 export const extractVaultReferences = (strVal: string): VaultReference[] => matchAll(strVal);
 
 /**
- * The distinct connection names referenced in a value (undefined = the default
- * connection). Used to scope which connection is delivered to an agent.
+ * The distinct connection names referenced in a value (`undefined` = a reference
+ * without a name, which is invalid). Used to pick the connections delivered to an agent.
  */
 export const referencedConnectionNames = (value: unknown): Set<string | undefined> => {
   const names = new Set<string | undefined>();
@@ -142,28 +136,6 @@ export const referencedConnectionNames = (value: unknown): Set<string | undefine
     scan(JSON.stringify(value));
   }
   return names;
-};
-
-/**
- * Removes the Kibana-only `<connection>@` prefix from every reference, leaving the
- * `vault://<path>#<field>` form Heartbeat resolves. Non-string values are rewritten
- * through JSON only when they actually contain a named reference.
- */
-export const stripSecretConnectionNames = <T>(value: T): T => {
-  const rewrite = (s: string) =>
-    s.replace(
-      new RegExp(VAULT_REF_SOURCE, 'g'),
-      (_m, lead, _conn, path, field) => `${lead}vault://${path}#${field}`
-    );
-  if (typeof value === 'string') {
-    return rewrite(value) as T;
-  }
-  if (value && typeof value === 'object') {
-    const json = JSON.stringify(value);
-    const rewritten = rewrite(json);
-    return rewritten === json ? value : (JSON.parse(rewritten) as T);
-  }
-  return value;
 };
 
 /**
@@ -189,10 +161,10 @@ export const VaultParamSourceSchema = lazySchema(() =>
         .describe('Field of the secret to read.'),
       connection: z
         .string()
+        .min(1)
         .max(MAX_REF_PART)
-        .refine((v) => v === '' || isValidSecretConnectionName(v), { message: FIELD_ERROR })
-        .optional()
-        .describe('Name of the Vault connection to use. Omit to use the default connection.'),
+        .refine(isValidSecretConnectionName, { message: FIELD_ERROR })
+        .describe('Name of the Vault connection to resolve the secret with.'),
     })
     .describe('Resolve the parameter value from HashiCorp Vault at runtime.')
 );

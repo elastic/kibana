@@ -10,6 +10,10 @@ import { z } from '@kbn/zod';
 import type { SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
+import {
+  findUnknownConnections,
+  unknownConnectionsMessage,
+} from '../secret_connection/connection_utils';
 import { MAX_PARAM_VALUE_LENGTH, MAX_ROUTE_ID_LENGTH, routeId } from '../../zod_query';
 import { validateRouteSpaceName } from '../../common';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
@@ -91,6 +95,16 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
       return response.badRequest({
         body: { message: 'A parameter cannot set both a value and a vault source' },
       });
+    }
+    if (data.source) {
+      const unknownConnections = await findUnknownConnections(routeContext, [
+        data.source.connection,
+      ]);
+      if (unknownConnections.length > 0) {
+        return response.badRequest({
+          body: { message: unknownConnectionsMessage(unknownConnections) },
+        });
+      }
     }
     const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
 

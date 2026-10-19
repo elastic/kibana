@@ -131347,8 +131347,9 @@ paths:
                   type: object
                   properties:
                     connection:
-                      description: Name of the Vault connection to use. Omit to use the default connection.
+                      description: Name of the Vault connection to resolve the secret with.
                       maxLength: 1024
+                      minLength: 1
                       type: string
                     field:
                       description: Field of the secret to read.
@@ -131368,6 +131369,7 @@ paths:
                     - type
                     - path
                     - field
+                    - connection
                 tags:
                   description: An array of updated tags to categorize the parameter.
                   items:
@@ -169353,8 +169355,9 @@ components:
           type: object
           properties:
             connection:
-              description: Name of the Vault connection to use. Omit to use the default connection.
+              description: Name of the Vault connection to resolve the secret with.
               maxLength: 1024
+              minLength: 1
               type: string
             field:
               description: Field of the secret to read.
@@ -169374,6 +169377,7 @@ components:
             - type
             - path
             - field
+            - connection
         tags:
           description: An array of tags to categorize the parameter.
           items:

@@ -90,7 +90,7 @@ export const ParamValueField = ({
 };
 
 const VaultSourceFields = () => {
-  const { register } = useFormContext<ParamFormData>();
+  const { register, getValues, setValue } = useFormContext<ParamFormData>();
   const { errors } = useFormState<ParamFormData>();
   const { http } = useKibana().services;
   const [connections, setConnections] = useState<string[]>([]);
@@ -98,21 +98,37 @@ const VaultSourceFields = () => {
   useEffect(() => {
     http
       ?.get<SecretConnectionStatus[]>(SYNTHETICS_API_URLS.SECRET_CONNECTION)
-      .then((res) => setConnections((Array.isArray(res) ? res : []).map((c) => c.name ?? '')))
+      .then((res) => {
+        const names = (Array.isArray(res) ? res : []).map((c) => c.name ?? '');
+        setConnections(names);
+        // With a single connection there is nothing to choose.
+        if (names.length === 1 && !getValues('source.connection')) {
+          setValue('source.connection', names[0]);
+        }
+      })
       .catch(() => {});
-  }, [http]);
+  }, [http, getValues, setValue]);
 
   return (
     <>
-      <EuiFormRow fullWidth label={SECRET_CONNECTION_LABEL} helpText={SECRET_CONNECTION_HELP}>
+      <EuiFormRow
+        fullWidth
+        label={SECRET_CONNECTION_LABEL}
+        helpText={SECRET_CONNECTION_HELP}
+        isInvalid={Boolean(errors?.source?.connection)}
+        error={errors?.source?.connection?.message}
+      >
         <EuiSelect
           fullWidth
+          isInvalid={Boolean(errors?.source?.connection)}
           data-test-subj="syntheticsParamSecretConnection"
           options={[
-            { value: '', text: VAULT_DEFAULT_CONNECTION },
+            { value: '', text: VAULT_SELECT_CONNECTION },
             ...connections.map((n) => ({ value: n, text: n })),
           ]}
-          {...register('source.connection')}
+          {...register('source.connection', {
+            required: { value: true, message: VAULT_CONNECTION_REQUIRED },
+          })}
         />
       </EuiFormRow>
       <EuiFormRow
@@ -179,10 +195,13 @@ const SECRET_CONNECTION_LABEL = i18n.translate('xpack.synthetics.paramForm.secre
 const SECRET_CONNECTION_HELP = i18n.translate('xpack.synthetics.paramForm.secretConnectionHelp', {
   defaultMessage: 'Which configured Vault connection to resolve this secret from.',
 });
-const VAULT_DEFAULT_CONNECTION = i18n.translate(
-  'xpack.synthetics.paramForm.vaultDefaultConnection',
+const VAULT_SELECT_CONNECTION = i18n.translate('xpack.synthetics.paramForm.vaultSelectConnection', {
+  defaultMessage: 'Select a connection',
+});
+const VAULT_CONNECTION_REQUIRED = i18n.translate(
+  'xpack.synthetics.paramForm.vaultConnectionRequired',
   {
-    defaultMessage: 'Default connection',
+    defaultMessage: 'A Vault connection is required',
   }
 );
 const VAULT_PATH_LABEL = i18n.translate('xpack.synthetics.paramForm.vaultPathLabel', {

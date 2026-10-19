@@ -15,6 +15,10 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core-saved-objects-api-server';
 import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-server';
+import {
+  findUnknownConnections,
+  unknownConnectionsMessage,
+} from '../secret_connection/connection_utils';
 import { MAX_PARAM_BULK_SIZE, MAX_PARAM_VALUE_LENGTH, MAX_ROUTE_ID_LENGTH } from '../../zod_query';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import type {
@@ -109,6 +113,18 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
           body: {
             message: `Param "${ambiguous.key}" must not set both a value and a vault source`,
           },
+        });
+      }
+
+      const unknownConnections = await findUnknownConnections(
+        { savedObjectsClient },
+        (paramsToValidate as SyntheticsParamRequest[]).flatMap((param) =>
+          param.source ? [param.source.connection] : []
+        )
+      );
+      if (unknownConnections.length > 0) {
+        return response.badRequest({
+          body: { message: unknownConnectionsMessage(unknownConnections) },
         });
       }
 

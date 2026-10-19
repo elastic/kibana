@@ -56,20 +56,18 @@ const toFormData = (item: ListParamItem | null): ParamFormData => {
       description: '',
       value: '',
       sourceType: 'value',
-      source: { type: 'vault', path: '', field: '', connection: undefined },
+      source: { type: 'vault', path: '', field: '', connection: '' },
     };
   }
   const { id: _id, source, ...rest } = item;
   return {
     ...rest,
     sourceType: source?.type === 'vault' ? 'vault' : 'value',
-    // Preserve the selected connection — dropping it here silently rewrites a
-    // named reference (vault://staging@..) to the default connection on any edit.
     source: {
       type: 'vault',
       path: source?.path ?? '',
       field: source?.field ?? '',
-      connection: source?.connection,
+      connection: source?.connection ?? '',
     },
   };
 };
@@ -141,7 +139,7 @@ export const AddParamFlyout = ({
         type: 'vault',
         path: (source?.path ?? '').trim(),
         field: (source?.field ?? '').trim(),
-        connection: source?.connection?.trim() || undefined,
+        connection: (source?.connection ?? '').trim(),
       };
     } else if (!(isEditingItem && id && isEmpty(value))) {
       // include the literal value unless editing and left blank (keep current)

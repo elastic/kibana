@@ -12,14 +12,12 @@ import type { SyntheticsServerSetup } from '../types';
 
 /**
  * A Heartbeat `secret_stores` entry of type `vault`, assembled from an encrypted
- * connection saved object. Heartbeat resolves `vault://<path>#<field>` references
- * with it. Snake-cased to match Heartbeat (go-ucfg) config keys.
+ * connection saved object. Heartbeat resolves `vault://<name>@<path>#<field>`
+ * references with it. Snake-cased to match Heartbeat (go-ucfg) config keys.
  */
 export interface HeartbeatVaultConfig {
   type: 'vault';
-  // Kibana-only: not read by Heartbeat. The saved object name, used to pick the
-  // connection a monitor references (`vault://<name>@...`); never part of the
-  // delivered entry (see `toSecretStoreEntry`).
+  // Selects this entry in references: `vault://<name>@<path>#<field>`.
   name: string;
   address: string;
   namespace?: string;
@@ -32,8 +30,8 @@ export interface HeartbeatVaultConfig {
   version?: string;
 }
 
-/** The entry as delivered to Heartbeat: everything except Kibana's own `name`. */
-export const toSecretStoreEntry = ({ name: _name, ...entry }: HeartbeatVaultConfig) => entry;
+/** A reference Kibana can't deliver (unnamed or unknown connection); shown to the user. */
+export class SecretConnectionError extends Error {}
 
 const toHeartbeatConfig = (attributes: SyntheticsSecretConnection): HeartbeatVaultConfig => {
   const { config, secrets } = attributes;
