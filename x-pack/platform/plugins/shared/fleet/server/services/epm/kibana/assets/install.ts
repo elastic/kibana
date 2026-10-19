@@ -33,6 +33,7 @@ import {
   makeManagedIndexPatternsGlobal,
 } from '../index_pattern/install';
 import { saveKibanaAssetsRefs } from '../../packages/install';
+import { getInstalledWorkflowRefs } from '../workflows/install';
 import { deleteKibanaSavedObjectsAssets, deleteWorkflowAssets } from '../../packages/remove';
 import { FleetError, KibanaSOReferenceError } from '../../../../errors';
 import { withPackageSpan } from '../../packages/utils';
@@ -494,14 +495,18 @@ export async function installKibanaAssetsAndReferences({
     options: { installAsAdditionalSpace, spaceId },
   });
 
+  const saveAsAdditionalSpace =
+    installedPkg && installedPkg.attributes.installed_kibana_space_id === spaceId
+      ? false
+      : installAsAdditionalSpace;
+
+  // Workflows are installed by a later step; keep their refs so a failure in between does not orphan them
   installedKibanaAssetsRefs = await saveKibanaAssetsRefs(
     savedObjectsClient,
     pkgName,
-    assets,
+    [...assets, ...getInstalledWorkflowRefs(installedPkg, spaceId, !!saveAsAdditionalSpace)],
     spaceId,
-    installedPkg && installedPkg.attributes.installed_kibana_space_id === spaceId
-      ? false
-      : installAsAdditionalSpace
+    saveAsAdditionalSpace
   );
 
   await withPackageSpan('Create and assign package tags', () =>

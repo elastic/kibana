@@ -16,7 +16,11 @@ import { appContextService } from '../../../../app_context';
 import { withPackageSpan } from '../../utils';
 import type { InstallContext } from '../_state_machine_package_install';
 import { saveKibanaAssetsRefs } from '../../install';
-import { installWorkflows, isWorkflowAssetPath } from '../../../kibana/workflows/install';
+import {
+  getInstalledWorkflowRefs,
+  installWorkflows,
+  isWorkflowAssetPath,
+} from '../../../kibana/workflows/install';
 
 const isWorkflowAssetsFlagEnabled = async (): Promise<boolean> => {
   const featureFlags = appContextService.getFeatureFlags();
@@ -48,18 +52,18 @@ export const stepInstallWorkflows = async (
       : false);
   const { name: pkgName } = packageInstallContext.packageInfo;
 
-  const previousWorkflowRefs = (
+  const previousWorkflowRefs = getInstalledWorkflowRefs(
+    installedPkg,
+    spaceId,
     installAsAdditionalSpace
-      ? installedPkg?.attributes.additional_spaces_installed_kibana?.[spaceId]
-      : installedPkg?.attributes.installed_kibana
-  )?.filter(({ type }) => type === KibanaSavedObjectType.workflow);
+  );
 
   const hasWorkflowAssets = packageInstallContext.paths.some(isWorkflowAssetPath);
-  if (!hasWorkflowAssets && !previousWorkflowRefs?.length) {
+  if (!hasWorkflowAssets && !previousWorkflowRefs.length) {
     return;
   }
 
-  const saveRefs = (refs: typeof previousWorkflowRefs = []) =>
+  const saveRefs = (refs: typeof previousWorkflowRefs) =>
     saveKibanaAssetsRefs(
       savedObjectsClient,
       pkgName,
@@ -75,8 +79,6 @@ export const stepInstallWorkflows = async (
     : undefined;
   if (!client) {
     logger.warn('Workflows are not available, skipping workflow assets installation');
-    // The kibana assets step replaced the saved refs, put back the workflows that are still installed
-    await saveRefs(previousWorkflowRefs);
     return;
   }
 

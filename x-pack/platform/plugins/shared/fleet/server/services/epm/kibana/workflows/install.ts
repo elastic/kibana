@@ -7,7 +7,7 @@
 
 import { createHash } from 'crypto';
 
-import type { Logger } from '@kbn/core/server';
+import type { Logger, SavedObject } from '@kbn/core/server';
 import pMap from 'p-map';
 import { isMap, parseDocument } from 'yaml';
 import { isValidId } from '@kbn/human-readable-id';
@@ -16,7 +16,11 @@ import { FLEET_PACKAGE_WORKFLOW_ID } from '@kbn/workflows/managed';
 
 import { FleetError } from '../../../../errors';
 import type { ManagedWorkflowsClient } from '../../../app_context';
-import type { KibanaAssetReference, PackageInstallContext } from '../../../../../common/types';
+import type {
+  Installation,
+  KibanaAssetReference,
+  PackageInstallContext,
+} from '../../../../../common/types';
 import { KibanaSavedObjectType } from '../../../../../common/types';
 import { getPathParts } from '../../archive';
 
@@ -35,6 +39,17 @@ const isYamlMapping = (yaml: string) => {
   const document = parseDocument(yaml);
   return document.errors.length === 0 && isMap(document.contents);
 };
+
+/** Workflow refs saved for the given space, which the Kibana assets step would otherwise overwrite. */
+export const getInstalledWorkflowRefs = (
+  installedPkg: SavedObject<Installation> | undefined,
+  spaceId: string,
+  installAsAdditionalSpace: boolean
+): KibanaAssetReference[] =>
+  (installAsAdditionalSpace
+    ? installedPkg?.attributes.additional_spaces_installed_kibana?.[spaceId]
+    : installedPkg?.attributes.installed_kibana
+  )?.filter(({ type }) => type === KibanaSavedObjectType.workflow) ?? [];
 
 export const isWorkflowAssetPath = (path: string) => {
   const { service, type } = getPathParts(path);

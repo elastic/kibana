@@ -21,7 +21,13 @@ import { stepInstallWorkflows } from './step_install_workflows';
 
 jest.mock('../../../../app_context');
 jest.mock('../../install');
-jest.mock('../../../kibana/workflows/install');
+jest.mock('../../../kibana/workflows/install', () => ({
+  ...jest.createMockFromModule<typeof import('../../../kibana/workflows/install')>(
+    '../../../kibana/workflows/install'
+  ),
+  getInstalledWorkflowRefs: (...args: unknown[]) =>
+    jest.requireActual('../../../kibana/workflows/install').getInstalledWorkflowRefs(...args),
+}));
 
 const mockedAppContext = appContextService as jest.Mocked<typeof appContextService>;
 
@@ -143,7 +149,7 @@ describe('stepInstallWorkflows', () => {
     expect(installWorkflows).toHaveBeenCalledWith(expect.objectContaining({ client }));
   });
 
-  it('keeps the previous workflow refs when the client is not available', async () => {
+  it('leaves the saved workflow refs untouched when the client is not available', async () => {
     mockedAppContext.waitForManagedWorkflowsClient.mockResolvedValue(undefined);
     const context = createContext({ paths: [WORKFLOW_PATH], installedKibana: [WORKFLOW_REF] });
 
@@ -151,51 +157,27 @@ describe('stepInstallWorkflows', () => {
 
     expect(installWorkflows).not.toHaveBeenCalled();
     expect(context.logger.warn).toHaveBeenCalled();
-    expect(saveKibanaAssetsRefs).toHaveBeenCalledWith(
-      context.savedObjectsClient,
-      'my_pkg',
-      [WORKFLOW_REF],
-      'default',
-      false,
-      true,
-      [KibanaSavedObjectType.workflow]
-    );
+    expect(saveKibanaAssetsRefs).not.toHaveBeenCalled();
   });
 
-  it('keeps the previous workflow refs when the feature flag is off', async () => {
+  it('leaves the saved workflow refs untouched when the feature flag is off', async () => {
     mockFeatureFlag(false);
     const context = createContext({ paths: [WORKFLOW_PATH], installedKibana: [WORKFLOW_REF] });
 
     await stepInstallWorkflows(context);
 
     expect(installWorkflows).not.toHaveBeenCalled();
-    expect(saveKibanaAssetsRefs).toHaveBeenCalledWith(
-      context.savedObjectsClient,
-      'my_pkg',
-      [WORKFLOW_REF],
-      'default',
-      false,
-      true,
-      [KibanaSavedObjectType.workflow]
-    );
+    expect(saveKibanaAssetsRefs).not.toHaveBeenCalled();
   });
 
-  it('keeps the previous workflow refs when the feature flag service is unavailable', async () => {
+  it('leaves the saved workflow refs untouched when the feature flag service is unavailable', async () => {
     mockedAppContext.getFeatureFlags.mockReturnValue(undefined);
     const context = createContext({ paths: [WORKFLOW_PATH], installedKibana: [WORKFLOW_REF] });
 
     await stepInstallWorkflows(context);
 
     expect(installWorkflows).not.toHaveBeenCalled();
-    expect(saveKibanaAssetsRefs).toHaveBeenCalledWith(
-      context.savedObjectsClient,
-      'my_pkg',
-      [WORKFLOW_REF],
-      'default',
-      false,
-      true,
-      [KibanaSavedObjectType.workflow]
-    );
+    expect(saveKibanaAssetsRefs).not.toHaveBeenCalled();
   });
 
   it('uses the additional space refs when installing in a secondary space', async () => {
