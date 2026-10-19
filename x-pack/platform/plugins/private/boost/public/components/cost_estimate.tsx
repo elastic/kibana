@@ -74,10 +74,15 @@ const RangeChangeIndicator = ({ range, savedRange }: RangeChangeIndicatorProps) 
       type={isHigher ? 'sortUp' : 'sortDown'}
       color={isHigher ? 'danger' : 'success'}
       display="flex"
-      content={i18n.translate('xpack.boost.costEstimate.previousRange', {
-        defaultMessage: 'Previously {cost}',
-        values: { cost: savedCost },
+      title={i18n.translate('xpack.boost.costEstimate.previousRangeTitle', {
+        defaultMessage: 'Previously',
       })}
+      content={
+        <>
+          <div>{savedCost}</div>
+          <div>{getVcuRangeText(savedRange)}</div>
+        </>
+      }
       aria-label={
         isHigher
           ? i18n.translate('xpack.boost.costEstimate.rangeHigherThanSaved', {
