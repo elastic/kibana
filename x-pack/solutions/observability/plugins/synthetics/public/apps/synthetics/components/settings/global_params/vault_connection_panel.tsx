@@ -33,7 +33,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { KbnDangerCallout, KbnSuccessCallout } from '@kbn/ui-callout';
+import { KbnDangerCallout, KbnInfoCallout, KbnSuccessCallout } from '@kbn/ui-callout';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import type { ClientPluginsStart } from '../../../../../plugin';
 import type {
@@ -330,7 +330,8 @@ export const VaultConnectionPanel = () => {
         <EuiFlexGroup gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButton
-              iconType="plusInCircle"
+              size="s"
+              iconType="plusCircle"
               data-test-subj="syntheticsVaultAddConnection"
               isDisabled={!canSave || !!editing}
               onClick={() => {
@@ -343,7 +344,8 @@ export const VaultConnectionPanel = () => {
           </EuiFlexItem>
           {connections.length > 0 && (
             <EuiFlexItem grow={false}>
-              <EuiButton
+              <EuiButtonEmpty
+                size="s"
                 iconType="refresh"
                 data-test-subj="syntheticsVaultRefreshSecrets"
                 isLoading={refreshing}
@@ -351,7 +353,7 @@ export const VaultConnectionPanel = () => {
                 onClick={onRefreshAll}
               >
                 {REFRESH_BUTTON}
-              </EuiButton>
+              </EuiButtonEmpty>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
@@ -380,31 +382,37 @@ export const VaultConnectionPanel = () => {
                 }}
               >
                 <EuiFormRow fullWidth label={PROVIDER_LABEL} helpText={PROVIDER_HELP}>
-                  <EuiSelect
-                    fullWidth
-                    data-test-subj="syntheticsVaultProvider"
-                    value={editing.type}
-                    options={PROVIDER_OPTIONS}
-                    disabled={!editing.isNew || PROVIDER_OPTIONS.length === 1}
-                    onChange={(e) => set('type', e.target.value as SecretProviderType)}
-                  />
+                  {PROVIDER_OPTIONS.length === 1 ? (
+                    <EuiText size="s" data-test-subj="syntheticsVaultProvider">
+                      <strong>{providerLabel(editing.type)}</strong>
+                    </EuiText>
+                  ) : (
+                    <EuiSelect
+                      fullWidth
+                      data-test-subj="syntheticsVaultProvider"
+                      value={editing.type}
+                      options={PROVIDER_OPTIONS}
+                      disabled={!editing.isNew}
+                      onChange={(e) => set('type', e.target.value as SecretProviderType)}
+                    />
+                  )}
                 </EuiFormRow>
+                <EuiSpacer size="l" />
                 {/* Fields below are the HashiCorp Vault provider's. When another
                     provider is added, render its own field section keyed on
                     editing.type. */}
-                <EuiFlexGroup>
-                  <EuiFlexItem>
-                    <EuiFormRow fullWidth label={NAME_LABEL} helpText={NAME_HELP}>
-                      <EuiFieldText
-                        fullWidth
-                        data-test-subj="syntheticsVaultName"
-                        disabled={!editing.isNew}
-                        value={editing.name}
-                        onChange={(e) => set('name', e.target.value)}
-                      />
-                    </EuiFormRow>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
+                <EuiFormRow fullWidth label={NAME_LABEL} helpText={NAME_HELP}>
+                  <EuiFieldText
+                    fullWidth
+                    data-test-subj="syntheticsVaultName"
+                    disabled={!editing.isNew}
+                    value={editing.name}
+                    onChange={(e) => set('name', e.target.value)}
+                  />
+                </EuiFormRow>
+                <EuiSpacer size="m" />
+                <EuiFlexGroup gutterSize="m" alignItems="flexStart">
+                  <EuiFlexItem grow={2}>
                     <EuiFormRow fullWidth label={ADDRESS_LABEL}>
                       <EuiFieldText
                         fullWidth
@@ -415,23 +423,7 @@ export const VaultConnectionPanel = () => {
                       />
                     </EuiFormRow>
                   </EuiFlexItem>
-                </EuiFlexGroup>
-                <EuiFlexGroup>
-                  <EuiFlexItem>
-                    <EuiFormRow fullWidth label={AUTH_METHOD_LABEL}>
-                      <EuiSelect
-                        fullWidth
-                        data-test-subj="syntheticsVaultAuthMethod"
-                        value={editing.authMethod}
-                        options={[
-                          { value: 'approle', text: 'AppRole' },
-                          { value: 'token', text: 'Token' },
-                        ]}
-                        onChange={(e) => set('authMethod', e.target.value as VaultAuthMethod)}
-                      />
-                    </EuiFormRow>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
+                  <EuiFlexItem grow={1}>
                     <EuiFormRow fullWidth label={KV_MOUNT_LABEL}>
                       <EuiFieldText
                         fullWidth
@@ -442,6 +434,20 @@ export const VaultConnectionPanel = () => {
                     </EuiFormRow>
                   </EuiFlexItem>
                 </EuiFlexGroup>
+                <EuiSpacer size="m" />
+                <EuiFormRow fullWidth label={AUTH_METHOD_LABEL}>
+                  <EuiSelect
+                    fullWidth
+                    data-test-subj="syntheticsVaultAuthMethod"
+                    value={editing.authMethod}
+                    options={[
+                      { value: 'approle', text: 'AppRole' },
+                      { value: 'token', text: 'Token' },
+                    ]}
+                    onChange={(e) => set('authMethod', e.target.value as VaultAuthMethod)}
+                  />
+                </EuiFormRow>
+                <EuiSpacer size="m" />
                 {editing.authMethod === 'token' ? (
                   <EuiFormRow
                     fullWidth
@@ -458,7 +464,7 @@ export const VaultConnectionPanel = () => {
                     />
                   </EuiFormRow>
                 ) : (
-                  <EuiFlexGroup>
+                  <EuiFlexGroup gutterSize="m" alignItems="flexStart">
                     <EuiFlexItem>
                       <EuiFormRow fullWidth label={ROLE_ID_LABEL}>
                         <EuiFieldText
@@ -487,7 +493,8 @@ export const VaultConnectionPanel = () => {
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 )}
-                <EuiFormRow fullWidth>
+                <EuiSpacer size="l" />
+                <EuiFormRow fullWidth helpText={TLS_SKIP_HELP}>
                   <EuiSwitch
                     label={TLS_SKIP_LABEL}
                     data-test-subj="syntheticsVaultTlsSkip"
@@ -497,7 +504,7 @@ export const VaultConnectionPanel = () => {
                 </EuiFormRow>
                 {testResult && (
                   <>
-                    <EuiSpacer size="s" />
+                    <EuiSpacer size="l" />
                     {testResult.ok ? (
                       <KbnSuccessCallout size="s" title={testResult.message} />
                     ) : (
@@ -505,6 +512,10 @@ export const VaultConnectionPanel = () => {
                     )}
                   </>
                 )}
+                <EuiSpacer size="l" />
+                <KbnInfoCallout size="s" title={TEST_NOTE_TITLE}>
+                  {TEST_NOTE}
+                </KbnInfoCallout>
               </EuiForm>
             </EuiFlyoutBody>
             <EuiFlyoutFooter>
@@ -524,7 +535,7 @@ export const VaultConnectionPanel = () => {
                     <EuiFlexItem grow={false}>
                       <EuiButton
                         data-test-subj="syntheticsVaultTestConnection"
-                        iconType="online"
+                        iconType="plugs"
                         isLoading={testing}
                         isDisabled={!editing.address}
                         onClick={onTest}
@@ -546,10 +557,6 @@ export const VaultConnectionPanel = () => {
                   </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>
-              <EuiSpacer size="xs" />
-              <EuiText size="xs" color="subdued">
-                {TEST_NOTE}
-              </EuiText>
             </EuiFlyoutFooter>
           </EuiFlyout>
         )}
@@ -622,6 +629,9 @@ const SECRET_ID_LABEL = i18n.translate('xpack.synthetics.vaultConnection.secretI
 const TLS_SKIP_LABEL = i18n.translate('xpack.synthetics.vaultConnection.tlsSkip', {
   defaultMessage: 'Skip TLS verification (dev only)',
 });
+const TLS_SKIP_HELP = i18n.translate('xpack.synthetics.vaultConnection.tlsSkipHelp', {
+  defaultMessage: 'Disables certificate validation. Use only against development Vault servers.',
+});
 const SECRET_SAVED_HELP = i18n.translate('xpack.synthetics.vaultConnection.secretSaved', {
   defaultMessage: 'A secret is already stored. Leave blank to keep it.',
 });
@@ -652,9 +662,12 @@ const REFRESH_BUTTON = i18n.translate('xpack.synthetics.vaultConnection.refreshB
 const TEST_LABEL = i18n.translate('xpack.synthetics.vaultConnection.test', {
   defaultMessage: 'Test connection',
 });
+const TEST_NOTE_TITLE = i18n.translate('xpack.synthetics.vaultConnection.testNoteTitle', {
+  defaultMessage: 'Testing runs from Kibana',
+});
 const TEST_NOTE = i18n.translate('xpack.synthetics.vaultConnection.testNote', {
   defaultMessage:
-    '“Test connection” checks reachability and authentication from Kibana. At runtime the agent (Heartbeat) resolves secrets from its own network, which may differ.',
+    'Test connection checks that Kibana can reach and authenticate with Vault. At runtime, Heartbeat resolves secrets from the private location’s network, so make sure it can reach this address too.',
 });
 const SAVED_TOAST = i18n.translate('xpack.synthetics.vaultConnection.savedToast', {
   defaultMessage: 'Vault connection saved',
