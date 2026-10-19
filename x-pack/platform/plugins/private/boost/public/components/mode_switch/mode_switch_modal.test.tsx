@@ -111,15 +111,13 @@ describe('ModeSwitchModal', () => {
     ]);
   });
 
-  it('switches, and remembers whether to skip this next time', async () => {
+  it('switches when confirmed, with no option to skip it next time', async () => {
     const { onConfirm } = renderModal();
 
-    await userEvent.click(screen.getByTestId('boostModeSwitchConfirm'));
-    expect(onConfirm).toHaveBeenLastCalledWith(false);
+    expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
 
-    await userEvent.click(screen.getByLabelText("Don't show this again"));
     await userEvent.click(screen.getByTestId('boostModeSwitchConfirm'));
-    expect(onConfirm).toHaveBeenLastCalledWith(true);
+    expect(onConfirm).toHaveBeenCalled();
   });
 
   it('cancels without switching', async () => {

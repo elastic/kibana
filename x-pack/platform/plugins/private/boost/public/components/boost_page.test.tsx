@@ -12,6 +12,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import {
+  BUILTIN_INDICES_PROFILE_NAMES,
   BUILTIN_PROFILES,
   DEFAULT_SIMPLE_MODE_DEFAULTS,
   NO_CUSTOM_DEFAULTS,
@@ -64,7 +65,7 @@ const createState = (simple: SimpleModeDefaults): BoostState => ({
   data_sources: [],
 });
 
-const mockState = createState(DEFAULT_SIMPLE_MODE_DEFAULTS);
+let mockState = createState(DEFAULT_SIMPLE_MODE_DEFAULTS);
 const mockUpdateMode = jest.fn();
 const mockSaveDefaults = jest.fn(
   (simple: SimpleModeDefaults, { onSuccess }: { onSuccess: (state: BoostState) => void }) =>
@@ -75,6 +76,13 @@ jest.mock('../hooks/use_boost_state', () => ({
   useBoostState: () => ({ data: mockState }),
   useUpdateMode: () => ({ mutate: mockUpdateMode, isLoading: false }),
   useUpdateSimpleDefaults: () => ({ mutate: mockSaveDefaults, isLoading: false }),
+  useCreateRule: () => ({ mutate: jest.fn(), isLoading: false }),
+  useUpdateRule: () => ({ mutate: jest.fn(), isLoading: false }),
+  useUpdateDefaultRule: () => ({ mutate: jest.fn(), isLoading: false }),
+  useDeleteRule: () => ({ mutate: jest.fn(), isLoading: false }),
+  useCreateProfile: () => ({ mutate: jest.fn(), isLoading: false }),
+  useUpdateProfile: () => ({ mutate: jest.fn(), isLoading: false }),
+  useDeleteProfile: () => ({ mutate: jest.fn(), isLoading: false }),
 }));
 
 const renderPage = () =>
@@ -86,12 +94,13 @@ const renderPage = () =>
     </IntlProvider>
   );
 
-describe('BoostPage turning on advanced mode', () => {
-  beforeEach(() => {
-    mockUpdateMode.mockClear();
-    mockSaveDefaults.mockClear();
-  });
+beforeEach(() => {
+  mockState = createState(DEFAULT_SIMPLE_MODE_DEFAULTS);
+  mockUpdateMode.mockClear();
+  mockSaveDefaults.mockClear();
+});
 
+describe('BoostPage turning on advanced mode', () => {
   it('turns it on right away without unsaved changes', async () => {
     renderPage();
 
@@ -158,5 +167,37 @@ describe('BoostPage turning on advanced mode', () => {
     expect(mockUpdateMode).not.toHaveBeenCalled();
     expect(screen.queryByTestId('boostUnsavedChangesModal')).not.toBeInTheDocument();
     expect(screen.getByTestId('saveSimpleDefaults')).not.toHaveAttribute('aria-disabled', 'true');
+  });
+});
+
+describe('BoostPage turning off advanced mode', () => {
+  it('always confirms a switch that changes a profile', async () => {
+    const simpleState = createState(DEFAULT_SIMPLE_MODE_DEFAULTS);
+    mockState = {
+      ...simpleState,
+      settings: { ...simpleState.settings, mode: 'advanced' },
+      rules: [
+        {
+          name: 'catalogs',
+          index_patterns: ['catalog-*'],
+          boost_profile: BUILTIN_INDICES_PROFILE_NAMES.on_demand,
+          priority: 1,
+          is_builtin: false,
+        },
+        ...simpleState.rules,
+      ],
+      data_sources: [{ name: 'catalog-fall', type: 'index', size_in_bytes: 1e9 }],
+    };
+    renderPage();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Advanced mode' }));
+
+    const modal = screen.getByTestId('boostModeSwitchModal');
+    expect(within(modal).queryByRole('checkbox')).not.toBeInTheDocument();
+    expect(mockUpdateMode).not.toHaveBeenCalled();
+
+    await userEvent.click(screen.getByTestId('boostModeSwitchConfirm'));
+
+    expect(mockUpdateMode).toHaveBeenCalledWith('simple', expect.anything());
   });
 });

@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -37,8 +36,7 @@ interface ModeSwitchModalProps {
   changes: readonly ModeSwitchChange[];
   isSwitching: boolean;
   onCancel: () => void;
-  /** Switches modes, and whether to skip this confirmation next time. */
-  onConfirm: (shouldSkipNextTime: boolean) => void;
+  onConfirm: () => void;
 }
 
 const getCause = (mode: BoostMode, hasCustomRules: boolean, hasDefaultRules: boolean) => {
@@ -120,8 +118,6 @@ export const ModeSwitchModal = ({
 }: ModeSwitchModalProps) => {
   const { euiTheme } = useEuiTheme();
   const titleId = useGeneratedHtmlId();
-  const skipCheckboxId = useGeneratedHtmlId({ prefix: 'modeSwitchSkip' });
-  const [shouldSkipNextTime, setShouldSkipNextTime] = useState(false);
   const isTurningOff = mode === 'simple';
 
   return (
@@ -183,51 +179,29 @@ export const ModeSwitchModal = ({
       </EuiModalBody>
 
       <EuiModalFooter>
-        {/* The footer lays its content out in a row, so the group grows to separate the checkbox
-            from the buttons. */}
-        <EuiFlexGroup
-          justifyContent="spaceBetween"
-          alignItems="center"
-          responsive={false}
-          css={{ flexGrow: 1 }}
-        >
+        <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiCheckbox
-              id={skipCheckboxId}
-              label={i18n.translate('xpack.boost.modeSwitchModal.skipCheckbox', {
-                defaultMessage: "Don't show this again",
+            <EuiButtonEmpty onClick={onCancel} data-test-subj="boostModeSwitchCancel">
+              {i18n.translate('xpack.boost.modeSwitchModal.cancelButton', {
+                defaultMessage: 'Cancel',
               })}
-              checked={shouldSkipNextTime}
-              onChange={({ target: { checked } }) => setShouldSkipNextTime(checked)}
-              data-test-subj="boostModeSwitchSkip"
-            />
+            </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty onClick={onCancel} data-test-subj="boostModeSwitchCancel">
-                  {i18n.translate('xpack.boost.modeSwitchModal.cancelButton', {
-                    defaultMessage: 'Cancel',
+            <EuiButton
+              fill
+              onClick={onConfirm}
+              isLoading={isSwitching}
+              data-test-subj="boostModeSwitchConfirm"
+            >
+              {isTurningOff
+                ? i18n.translate('xpack.boost.modeSwitchModal.turnOffButton', {
+                    defaultMessage: 'Turn off advanced mode',
+                  })
+                : i18n.translate('xpack.boost.modeSwitchModal.turnOnButton', {
+                    defaultMessage: 'Turn on advanced mode',
                   })}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  fill
-                  onClick={() => onConfirm(shouldSkipNextTime)}
-                  isLoading={isSwitching}
-                  data-test-subj="boostModeSwitchConfirm"
-                >
-                  {isTurningOff
-                    ? i18n.translate('xpack.boost.modeSwitchModal.turnOffButton', {
-                        defaultMessage: 'Turn off advanced mode',
-                      })
-                    : i18n.translate('xpack.boost.modeSwitchModal.turnOnButton', {
-                        defaultMessage: 'Turn on advanced mode',
-                      })}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiModalFooter>
