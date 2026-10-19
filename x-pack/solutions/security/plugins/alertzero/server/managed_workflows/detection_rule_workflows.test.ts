@@ -855,10 +855,10 @@ describe('detection rule workflows', () => {
 
       // The per-document exclusions live in the DSL filter so Lucene drops the rows
       // before ES|QL sees them.
-      it('excludes hidden building-block alerts and bounds the window in the filter', () => {
+      it('excludes EQL sequence members and bounds the window in the filter', () => {
         const filter = JSON.stringify(harvest.with?.filter);
 
-        expect(filter).toContain('"exists":{"field":"kibana.alert.building_block_type"}');
+        expect(filter).toContain('"exists":{"field":"kibana.alert.group.index"}');
         expect(filter).toContain(
           '"range":{"@timestamp":{"gte":"now-{{ inputs.analysis_window_days | default: consts.analysis_window_days }}d"}}'
         );
@@ -1453,7 +1453,7 @@ describe('detection rule workflows', () => {
       // An EQL sequence writes one building-block alert per matched event next to the
       // sequence alert. The sweep leaves those out when it counts false positives, so
       // the backtest counts the same way or a two-event sequence reads as three alerts.
-      it('leaves building blocks out of both preview counts', () => {
+      it('leaves EQL sequence members out of both preview counts', () => {
         const preview = parse(getManagedYaml(ALERTZERO_RULE_PREVIEW_WORKFLOW_ID)) as WorkflowYaml;
         const previewSteps = flattenSteps(preview.steps as unknown as NestedStep[]);
         const counts = previewSteps.filter(({ type }) => type === 'elasticsearch.search');
@@ -1467,7 +1467,7 @@ describe('detection rule workflows', () => {
             { term: { 'kibana.alert.rule.uuid': expect.stringContaining('previewId') } },
           ]);
           expect(query.bool.must_not).toEqual([
-            { exists: { field: 'kibana.alert.building_block_type' } },
+            { exists: { field: 'kibana.alert.group.index' } },
           ]);
         }
       });
