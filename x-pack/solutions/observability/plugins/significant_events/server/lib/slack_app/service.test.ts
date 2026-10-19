@@ -205,7 +205,7 @@ describe('SlackAppService', () => {
             feature: {
               nightshift: ['minimal_all'],
               streams: ['read'],
-              agentBuilder: ['read'],
+              agentBuilder: ['all'],
               actions: ['read'],
               workflowsManagement: ['read'],
             },

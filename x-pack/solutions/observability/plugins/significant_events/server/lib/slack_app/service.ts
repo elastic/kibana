@@ -303,6 +303,8 @@ export class SlackAppService {
     //   `streams` (read), and connectors/LLM through `actions` (read). Those go via the
     //   internal Kibana client, so no grants on system/dot indices (unsupported in serverless)
     //   are needed.
+    // - Agent Builder gets `all` because the investigation workflow calls the Nightshift `_ensure`
+    //   route, which requires `agentBuilder:write` to create the investigation conversation.
     const apiKeyResult = await this.server.security.authc.apiKeys.grantAsInternalUser(request, {
       name: 'nightshift-relay-agent-builder',
       metadata: { managed: true, managed_by: 'nightshift-relay', type: 'agent_builder_converse' },
@@ -324,7 +326,7 @@ export class SlackAppService {
               feature: {
                 nightshift: ['minimal_all'],
                 streams: ['read'],
-                agentBuilder: ['read'],
+                agentBuilder: ['all'],
                 actions: ['read'],
                 workflowsManagement: ['read'],
               },
