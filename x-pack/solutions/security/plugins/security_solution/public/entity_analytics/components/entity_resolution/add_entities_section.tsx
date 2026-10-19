@@ -123,7 +123,7 @@ export const AddEntitiesSection: React.FC<AddEntitiesSectionProps> = ({
               <EuiFlexItem grow={false}>
                 <EuiToolTip content={EXPAND_ENTITY_BUTTON} disableScreenReaderOutput>
                   <EuiButtonIcon
-                    iconType="expand"
+                    iconType="maximize"
                     color="primary"
                     aria-label={EXPAND_ENTITY_BUTTON}
                     onClick={() => onEntityNameClick?.(entity)}

@@ -23,6 +23,7 @@ import { generateTablePaginationOptions } from '../../../common/utils/build_quer
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import { OSQUERY_SEARCH_STRATEGY } from '../../search_strategy/constants';
+import { getScopedSearch } from '../../utils/get_scoped_search';
 
 export const getScheduledQueryResultsRoute = (
   router: IRouter<DataRequestHandlerContext>,
@@ -65,6 +66,7 @@ export const getScheduledQueryResultsRoute = (
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 
         try {
+          const cpsActive = await osqueryContext.isCpsActive(request);
           const { scheduleId, executionCount } = request.params;
           const page = request.query.page ?? 0;
           const pageSize = request.query.pageSize ?? 100;
@@ -116,7 +118,12 @@ export const getScheduledQueryResultsRoute = (
             }
           }
 
-          const search = await context.search;
+          const search = await getScopedSearch(
+            context,
+            request,
+            cpsActive,
+            osqueryContext.getStartServices
+          );
           const res = await lastValueFrom(
             search.search<ResultsRequestOptions, ResultsStrategyResponse>(
               {
@@ -136,6 +143,7 @@ export const getScheduledQueryResultsRoute = (
                   },
                 ],
                 integrationNamespaces: namespacesOrUndefined,
+                ...(cpsActive ? { matchMissingSpaceId: false } : {}),
               },
               { abortSignal, strategy: OSQUERY_SEARCH_STRATEGY }
             )

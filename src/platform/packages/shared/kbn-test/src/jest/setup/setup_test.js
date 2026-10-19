@@ -49,3 +49,18 @@ if (typeof process !== 'undefined' && process.versions && process.versions.node)
  */
 global.setImmediate = require('core-js/stable/set-immediate');
 global.clearImmediate = require('core-js/stable/clear-immediate');
+
+// jest-canvas-mock installs
+// `HTMLCanvasElement.prototype.getContext` as a plain `jest.fn()`, not a restorable
+// `jest.spyOn` spy. Many suites across the repo call `jest.resetAllMocks()`/`clearAllMocks()`
+// in an `afterEach` — a common, idiomatic pattern — and `mockReset()` strips a `jest.fn()`'s
+// implementation even when it was supplied at creation time. Left alone, that silently turns
+// `getContext('2d')` into a mock returning `undefined` for every test after the first one that
+// resets mocks in such a file. jest-canvas-mock's own README documents exactly this interaction
+//  and its fix — reinstall the mock in `beforeEach`, after any reset that already ran.
+if (typeof HTMLCanvasElement !== 'undefined') {
+  const { setupJestCanvasMock } = require('jest-canvas-mock');
+  beforeEach(() => {
+    setupJestCanvasMock();
+  });
+}

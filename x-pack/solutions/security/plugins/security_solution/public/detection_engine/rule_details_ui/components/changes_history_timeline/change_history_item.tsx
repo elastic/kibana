@@ -157,7 +157,7 @@ export const ChangeHistoryItem = memo(function ChangeHistoryItem({
                 `}
               >
                 <EuiToolTip content={username} anchorClassName="eui-textTruncate">
-                  <EuiText size="xs" className="eui-textTruncate">
+                  <EuiText size="xs" className="eui-textTruncate" tabIndex={0}>
                     {username}
                   </EuiText>
                 </EuiToolTip>

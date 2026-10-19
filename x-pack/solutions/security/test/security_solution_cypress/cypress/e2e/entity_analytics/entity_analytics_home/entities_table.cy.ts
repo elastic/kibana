@@ -7,6 +7,7 @@
 
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
+import { disableNewFlyout } from '../../../tasks/api_calls/kibana_advanced_settings';
 import {
   interceptEntityStoreStatus,
   setGrouping,
@@ -44,12 +45,7 @@ describe(
     tags: ['@ess'],
     env: {
       ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'entityAnalyticsNewHomePageEnabled',
-          ])}`,
-          '--uiSettings.overrides.securitySolution:entityStoreEnableV2=true',
-        ],
+        kbnServerArgs: ['--uiSettings.overrides.securitySolution:entityStoreEnableV2=true'],
       },
     },
   },
@@ -61,6 +57,7 @@ describe(
     beforeEach(() => {
       interceptEntityStoreStatus('running');
       login();
+      disableNewFlyout();
       setGrouping(['none']);
       visit(ENTITY_ANALYTICS_HOME_PAGE_URL);
       cy.wait('@entityStoreStatus', { timeout: 20000 });

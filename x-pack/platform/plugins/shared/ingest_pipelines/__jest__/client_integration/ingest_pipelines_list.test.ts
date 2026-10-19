@@ -19,6 +19,8 @@ import {
 } from '@testing-library/react';
 import { Route, Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 
 import { PipelinesList } from '../../public/application/sections/pipelines_list';
 import { getListPath, ROUTES } from '../../public/application/services/navigation';
@@ -136,13 +138,13 @@ describe('<PipelinesList />', () => {
       httpRequestsMockHelpers.setLoadPipelinesResponse(pipelines);
       await renderPipelinesList(httpSetup, '', { expectedTestId: 'pipelinesTable' });
 
-      // Verify app title
-      expect(screen.getByTestId('appTitle')).toHaveTextContent('Ingest pipelines');
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+        'Ingest pipelines'
+      );
 
-      // Verify documentation link
-      expect(screen.getByTestId('documentationLink')).toHaveTextContent('Documentation');
+      await openAppMenuOverflow();
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation)).toBeInTheDocument();
 
-      // Verify create dropdown exists
       expect(screen.getByTestId('createPipelineDropdown')).toBeInTheDocument();
 
       // Verify table content
@@ -330,7 +332,9 @@ describe('<PipelinesList />', () => {
           const flyout = await screen.findByTestId('pipelineErrorFlyout');
           expect(within(flyout).getByTestId('title')).toHaveTextContent(customPipeline);
           expect(screen.getByTestId('missingCustomPipeline')).toBeInTheDocument();
-          expect(screen.getByTestId('createCustomPipeline')).toBeInTheDocument();
+          // The callout uses `announceOnMount`, which transiently renders a second,
+          // screen-reader-only copy of the button in a live region, so match all copies.
+          expect(screen.getAllByTestId('createCustomPipeline').length).toBeGreaterThan(0);
         });
       });
 

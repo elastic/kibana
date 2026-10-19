@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
@@ -20,12 +20,16 @@ export function CompositeSloDeleteModal({
   onCancel,
   onConfirm,
 }: CompositeSloDeleteModalProps) {
+  const confirmModalTitleId = useGeneratedHtmlId();
+
   return (
     <EuiConfirmModal
+      aria-labelledby={confirmModalTitleId}
       title={i18n.translate('xpack.slo.compositeSloList.deleteConfirmTitle', {
         defaultMessage: 'Delete "{name}"?',
         values: { name },
       })}
+      titleProps={{ id: confirmModalTitleId }}
       onCancel={onCancel}
       onConfirm={onConfirm}
       cancelButtonText={i18n.translate('xpack.slo.compositeSloList.deleteConfirmCancel', {

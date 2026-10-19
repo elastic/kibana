@@ -22,6 +22,12 @@ import type {
   EntityFromStoreResult,
   EntityStoreRecord,
 } from '../../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import {
+  getEntityGroupLifecycle,
+  getEntityGroupRecords,
+  isEntityGroupView,
+  mergeEntityGroupDetails,
+} from '../../../../../flyout/entity_details/shared/entity_store_group_utils';
 import type { ObservedEntityData } from '../../../shared/components/observed_entity/types';
 import { USER_PANEL_OBSERVED_USER_QUERY_ID, USER_PANEL_RISK_SCORE_QUERY_ID } from '../constants';
 
@@ -59,6 +65,9 @@ export const useObservedUser = (
   const useEntityStoreObservedData =
     Boolean(entityFromStore) && (entityStoreInitialLoading || hasEntityStoreRecord);
 
+  // Resolution-group aliases (empty outside the group view): the observed query covers them too.
+  const aliasRecords = entityFromStore?.aliasRecords;
+
   const [isLoading, { userDetails, inspect: inspectObservedUser, refetch: refetchUserDetails }] =
     useObservedUserDetails({
       endDate: to,
@@ -66,6 +75,7 @@ export const useObservedUser = (
       userName,
       entityId: hasEntityStoreRecord ? entityFromStore?.entityRecord?.entity?.id : undefined,
       entityRecord: hasEntityStoreRecord ? entityFromStore?.entityRecord : undefined,
+      aliasRecords: hasEntityStoreRecord ? aliasRecords : undefined,
       entityStoreInitialLoading,
       indexNames: indexPatterns,
       id: USER_PANEL_RISK_SCORE_QUERY_ID,
@@ -101,20 +111,28 @@ export const useObservedUser = (
 
   return useMemo((): ObservedUserResult => {
     if (useEntityStoreObservedData && entityFromStore) {
+      // merge with entity store record; deduplicate arrays because both sources
+      // derive from the same events and would otherwise duplicate scalar fields
+      // like user.id and user.email.
+      const targetDetails = deepmerge(userDetails, entityFromStore.entityRecord ?? {}, {
+        arrayMerge: (target, source) => [...new Set([...target, ...source])],
+      });
+      const isGroupView = isEntityGroupView(aliasRecords);
+      // Group view: the activity window spans every member of the group.
+      const groupLifecycle = isGroupView
+        ? getEntityGroupLifecycle(getEntityGroupRecords(entityFromStore.entityRecord, aliasRecords))
+        : null;
       return {
-        // merge with entity store record; deduplicate arrays because both sources
-        // derive from the same events and would otherwise duplicate scalar fields
-        // like user.id and user.email.
-        details: deepmerge(userDetails, entityFromStore.entityRecord ?? {}, {
-          arrayMerge: (target, source) => [...new Set([...target, ...source])],
-        }),
+        // Group view: alias attributes are unioned in; scalars that disagree become arrays.
+        details: isGroupView ? mergeEntityGroupDetails(targetDetails, aliasRecords) : targetDetails,
         isLoading: isLoading || entityFromStore.isLoading,
         firstSeen: {
-          date: entityFromStore.firstSeen ?? undefined,
+          date:
+            (groupLifecycle ? groupLifecycle.firstSeen : entityFromStore.firstSeen) ?? undefined,
           isLoading: entityFromStore.isLoading,
         },
         lastSeen: {
-          date: entityFromStore.lastSeen ?? undefined,
+          date: (groupLifecycle ? groupLifecycle.lastSeen : entityFromStore.lastSeen) ?? undefined,
           isLoading: entityFromStore.isLoading,
         },
         entityRecord: entityFromStore.entityRecord ?? null,
@@ -137,6 +155,7 @@ export const useObservedUser = (
   }, [
     useEntityStoreObservedData,
     entityFromStore,
+    aliasRecords,
     userDetails,
     isLoading,
     loadingLastSeen,

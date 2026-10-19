@@ -10,7 +10,7 @@
 import type { RecursivePartial } from '@kbn/utility-types';
 import { isBuiltInStepProperty, type StepSelectionValues } from '@kbn/workflows';
 import { getValueFromValueNode, type StepInfo } from '@kbn/workflows-yaml';
-import { isRecord } from '../../../../../../common/lib/type_guards';
+import { isRecord } from '@kbn/workflows-yaml';
 
 export {
   buildWorkflowLookup,

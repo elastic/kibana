@@ -463,7 +463,6 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         <>
           <EuiButtonGroup
             legend="Events or Process descendants selector"
-            color="primary"
             onChange={handleFilterTypeOnChange}
             css={css`
               .euiButtonGroupButton {

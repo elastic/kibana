@@ -64,11 +64,11 @@ export default function bulkMuteUnmuteTests({ getService }: FtrProviderContext) 
       return alerts;
     };
 
-    const waitForAlerts = async (ruleId: string): Promise<any[]> => {
+    const waitForAlerts = async (ruleId: string, minimumAlertCount = 1): Promise<any[]> => {
       let alerts: any[] = [];
       await retry.try(async () => {
         alerts = await getActiveAlertsByRuleId(ruleId);
-        expect(alerts.length).greaterThan(0);
+        expect(alerts.length).greaterThan(minimumAlertCount - 1);
       });
       return alerts;
     };
@@ -167,7 +167,7 @@ export default function bulkMuteUnmuteTests({ getService }: FtrProviderContext) 
 
       it('should mute multiple alert instances for a single rule', async () => {
         const ruleId = await createRule();
-        const alerts = await waitForAlerts(ruleId);
+        const alerts = await waitForAlerts(ruleId, 2);
 
         expect(alerts.length).greaterThan(1);
 

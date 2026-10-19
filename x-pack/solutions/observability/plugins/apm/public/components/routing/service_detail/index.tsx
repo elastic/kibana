@@ -12,6 +12,7 @@ import qs from 'query-string';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { dynamic } from '@kbn/shared-ux-utility';
+import { ProfilingSchemaStateProvider } from '@kbn/observability-shared-plugin/public';
 import { toBooleanFromString } from '../../../../common/utils/to_boolean_from_string';
 import { offsetSchema } from '../../../../common/comparison_rt';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
@@ -40,8 +41,7 @@ import type { SearchBar } from '../../shared/search_bar/search_bar';
 import { ServiceDependencies } from '../../app/service_dependencies';
 import { ServiceDashboards } from '../../app/service_dashboards';
 import { ErrorGroupDetails } from '../../app/error_group_details';
-import { ServiceMapSearchBar } from '../../app/service_map/service_map_search_bar';
-import { ServiceMapSearchProvider } from '../../app/service_map/service_map_search_context';
+import { RedirectFocusedServiceMapToGlobal } from './redirect_focused_service_map_to_global';
 
 const ErrorGroupOverview = dynamic(() =>
   import('../../app/error_group_overview').then((mod) => ({ default: mod.ErrorGroupOverview }))
@@ -58,9 +58,6 @@ const MetricsDetails = dynamic(() =>
 
 const ServiceLogs = dynamic(() =>
   import('../../app/service_logs').then((mod) => ({ default: mod.ServiceLogs }))
-);
-const ServiceMapServiceDetail = dynamic(() =>
-  import('../../app/service_map').then((mod) => ({ default: mod.ServiceMapServiceDetail }))
 );
 const ServiceOverview = dynamic(() =>
   import('../../app/service_overview').then((mod) => ({ default: mod.ServiceOverview }))
@@ -366,19 +363,9 @@ export const serviceDetailRoute = {
           },
         },
       },
-      '/services/{serviceName}/service-map': page({
-        tab: 'service-map',
-        title: i18n.translate('xpack.apm.views.serviceMap.title', {
-          defaultMessage: 'Service map',
-        }),
-        element: <ServiceMapServiceDetail />,
-        customSearchBar: <ServiceMapSearchBar />,
-        contextWrapper: ServiceMapSearchProvider,
-        searchBarOptions: {
-          showTimeComparison: true,
-          showFilterBar: true,
-        },
-      }),
+      '/services/{serviceName}/service-map': {
+        element: <RedirectFocusedServiceMapToGlobal />,
+      },
       '/services/{serviceName}/logs': page({
         tab: 'logs',
         title: i18n.translate('xpack.apm.views.logs.title', {
@@ -452,6 +439,8 @@ export const serviceDetailRoute = {
             hidden: true,
           },
           bottomHeaderContent: ProfilingHeaderSearchBar,
+          // Shares the selected profiling schema between the header search bar and the profiling views
+          contextWrapper: ProfilingSchemaStateProvider,
         }),
       },
       '/services/{serviceName}/dashboards': {

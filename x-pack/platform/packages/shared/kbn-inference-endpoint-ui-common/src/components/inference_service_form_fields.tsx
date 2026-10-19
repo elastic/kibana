@@ -32,7 +32,7 @@ import type { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public
 import type { HttpSetup, IToasts } from '@kbn/core/public';
 import * as LABELS from '../translations';
 import type { Config, ConfigEntryView, InferenceProvider, Secrets } from '../types/types';
-import { FieldType, isMapWithStringValues } from '../types/types';
+import { FieldType, isMapWithStringValues, isStringArray } from '../types/types';
 import {
   SERVICE_PROVIDERS,
   solutionKeys,
@@ -55,6 +55,7 @@ import {
   generateInferenceEndpointId,
   getTaskTypeOptions,
   mapProviderFields,
+  orderTaskTypes,
 } from '../utils/helpers';
 import { ConfigurationFormItems } from './configuration/configuration_form_items';
 import { MoreOptionsFields } from './more_options_fields';
@@ -317,12 +318,17 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
     (provider?: string) => {
       const newProvider = updatedProviders?.find((p) => p.service === provider);
 
-      const availableTaskTypes = allowedTaskTypes
-        ? (newProvider?.task_types ?? []).filter((t) => (allowedTaskTypes as string[]).includes(t))
-        : newProvider?.task_types ?? [];
+      const availableTaskTypes = orderTaskTypes(
+        allowedTaskTypes
+          ? (newProvider?.task_types ?? []).filter((t) =>
+              (allowedTaskTypes as string[]).includes(t)
+            )
+          : newProvider?.task_types ?? []
+      );
+      const defaultTaskType = availableTaskTypes[0];
       setTaskTypeOptions(getTaskTypeOptions(availableTaskTypes));
-      if (availableTaskTypes.length > 0) {
-        onTaskTypeOptionsSelect(availableTaskTypes[0], provider);
+      if (defaultTaskType) {
+        onTaskTypeOptionsSelect(defaultTaskType, provider);
       }
 
       const defaultProviderConfig: Record<string, unknown> = {};
@@ -332,7 +338,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
       const overrides = getOverrides(newProvider);
 
       const newProviderSchema: ConfigEntryView[] = newProvider
-        ? mapProviderFields(newProvider.task_types[0], newProvider, overrides)
+        ? mapProviderFields(defaultTaskType ?? DEFAULT_TASK_TYPE, newProvider, overrides)
         : [];
       if (newProvider) {
         setProviderSchema(newProviderSchema);
@@ -351,7 +357,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
       const inferenceId = generateInferenceEndpointId({
         ...config,
         provider: newProvider?.service ?? '',
-        taskType: newProvider?.task_types[0] ?? DEFAULT_TASK_TYPE,
+        taskType: defaultTaskType ?? DEFAULT_TASK_TYPE,
       });
 
       updateFieldValues({
@@ -571,6 +577,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
               typeof configValue === 'number' ||
               typeof configValue === 'boolean' ||
               (typeof configValue === 'object' && isMapWithStringValues(configValue)) ||
+              isStringArray(configValue) ||
               configValue === null ||
               configValue === undefined
             ) {
@@ -606,26 +613,23 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
               isInvalid={isInvalid}
               error={errorMessage}
             >
-              <>
-                <EuiSpacer size="s" />
-                <EuiInputPopover
-                  id={'providerInputPopoverId'}
-                  fullWidth
-                  input={selectInput}
-                  isOpen={isProviderPopoverOpen}
-                  closePopover={closeProviderPopover}
-                  className="rightArrowIcon"
-                >
-                  <SelectableProvider
-                    currentSolution={currentSolution}
-                    providers={updatedProviders ?? []}
-                    onClosePopover={closeProviderPopover}
-                    onProviderChange={onProviderChange}
-                    onSolutionFilterChange={toggleAndApplyFilter}
-                    solutionFilter={solutionFilter}
-                  />
-                </EuiInputPopover>
-              </>
+              <EuiInputPopover
+                id={'providerInputPopoverId'}
+                fullWidth
+                input={selectInput}
+                isOpen={isProviderPopoverOpen}
+                closePopover={closeProviderPopover}
+                className="rightArrowIcon"
+              >
+                <SelectableProvider
+                  currentSolution={currentSolution}
+                  providers={updatedProviders ?? []}
+                  onClosePopover={closeProviderPopover}
+                  onProviderChange={onProviderChange}
+                  onSolutionFilterChange={toggleAndApplyFilter}
+                  solutionFilter={solutionFilter}
+                />
+              </EuiInputPopover>
             </EuiFormRow>
           );
           return formRow;

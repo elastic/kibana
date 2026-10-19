@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiButton, EuiLink } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
@@ -30,11 +30,11 @@ export const ExternalInferenceEmptyPrompt: React.FC<ExternalInferenceEmptyPrompt
   return (
     <KibanaPageTemplate.EmptyPrompt
       data-test-subj="externalInferenceEmptyPrompt"
-      iconType="plusInCircle"
+      iconType="machineLearningApp"
       title={
         <h2>
           {i18n.translate('xpack.searchInferenceEndpoints.externalInference.emptyTitle', {
-            defaultMessage: 'Connect to external model providers',
+            defaultMessage: 'External inference',
           })}
         </h2>
       }
@@ -42,18 +42,41 @@ export const ExternalInferenceEmptyPrompt: React.FC<ExternalInferenceEmptyPrompt
         <p>
           {i18n.translate('xpack.searchInferenceEndpoints.externalInference.emptyDescription', {
             defaultMessage:
-              'Add model endpoints from your favorite model providers to use them for AI-powered search.',
+              'Connect to third-party or self-hosted models and use them with Elastic inference features.',
           })}
         </p>
       }
       actions={
-        canManage ? (
-          <EuiButton fill onClick={onFlyoutOpen} data-test-subj="addEndpointButton">
-            {i18n.translate('xpack.searchInferenceEndpoints.addConnectorButtonLabel', {
-              defaultMessage: 'Add endpoint',
-            })}
-          </EuiButton>
-        ) : undefined
+        <EuiFlexGroup justifyContent="center" direction="column" alignItems="center">
+          {canManage && (
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                onClick={onFlyoutOpen}
+                data-test-subj="addEndpointButton"
+                iconType="plusCircle"
+                iconSide="left"
+              >
+                {i18n.translate('xpack.searchInferenceEndpoints.addConnectorButtonLabel', {
+                  defaultMessage: 'Add endpoint',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem grow={false}>
+            <EuiLink
+              href={docLinks.selfHostedInference}
+              target="_blank"
+              data-test-subj="selfHostedDocumentationLink"
+              external
+            >
+              {i18n.translate(
+                'xpack.searchInferenceEndpoints.externalInference.selfHostedLinkLabel',
+                { defaultMessage: 'How to set up self-hosted models' }
+              )}
+            </EuiLink>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       }
       footer={
         <EuiLink
@@ -63,7 +86,7 @@ export const ExternalInferenceEmptyPrompt: React.FC<ExternalInferenceEmptyPrompt
           data-test-subj="viewDocumentationLink"
         >
           {i18n.translate('xpack.searchInferenceEndpoints.providerInference.viewDocumentation', {
-            defaultMessage: 'View documentation',
+            defaultMessage: 'Learn about external inference',
           })}
         </EuiLink>
       }

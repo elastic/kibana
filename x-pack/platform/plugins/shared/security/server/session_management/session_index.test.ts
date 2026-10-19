@@ -56,6 +56,7 @@ describe('Session index', () => {
     },
     signal: new AbortController().signal,
     executionUuid: 'test-execution-uuid',
+    setCustomTaskRunEventFields: jest.fn(),
   };
 
   const createSessionIndexOptions = (
@@ -1154,6 +1155,7 @@ describe('Session index', () => {
         },
         signal: new AbortController().signal,
         executionUuid: 'test-execution-uuid',
+        setCustomTaskRunEventFields: jest.fn(),
       };
 
       await expect(sessionIndex.cleanUp(runContext)).resolves.toEqual({

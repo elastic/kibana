@@ -21,10 +21,11 @@ dependsOn:
   - '@kbn/shared-ux-utility'
   - '@kbn/test-jest-helpers'
   - '@kbn/core-chrome-layout-constants'
+  - '@kbn/ui-callout'
 tags:
   - shared-browser
   - package
-  - prod
+  - dev
   - group-platform
   - shared
   - jest-unit-tests

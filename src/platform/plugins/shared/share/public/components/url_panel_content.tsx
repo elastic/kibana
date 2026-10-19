@@ -31,8 +31,9 @@ import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { Capabilities } from '@kbn/core/public';
 
+import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorPublic } from '../../common';
-import type { ShareableLocatorParams, UrlParamExtension } from '../types';
+import type { UrlParamExtension } from '../types';
 import type {
   AnonymousAccessServiceContract,
   AnonymousAccessState,
@@ -47,8 +48,8 @@ export interface UrlPanelContentProps {
   shareableUrl?: string;
   shareableUrlForSavedObject?: string;
   shareableUrlLocatorParams?: {
-    locator: LocatorPublic<any>;
-    params: ShareableLocatorParams;
+    locator: LocatorPublic<SerializableRecord>;
+    params: SerializableRecord;
   };
   urlParamExtensions?: UrlParamExtension[];
   anonymousAccess?: AnonymousAccessServiceContract;

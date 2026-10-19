@@ -1,0 +1,123 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React, { memo, useMemo, useState } from 'react';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiPopover, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import type { AppHeaderBadge } from './types';
+import { AppBadge } from './app_badge';
+import { asPlainText } from './as_plain_text';
+import { APP_HEADER_TEST_SUBJECTS } from './test_subjects';
+
+const MAX_VISIBLE_BADGES = 2;
+const OVERFLOW_THRESHOLD = 3;
+
+const useBadgesStyle = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return useMemo(() => {
+    const badgesContainer = css`
+      margin-left: ${euiTheme.size.xs};
+
+      &:not(:has(.euiFlexItem:not(:empty))) {
+        display: none;
+      }
+    `;
+
+    const overflowList = css`
+      min-inline-size: 160px;
+      max-inline-size: 240px;
+    `;
+
+    return { badgesContainer, overflowList };
+  }, [euiTheme]);
+};
+
+export interface AppBadgesProps {
+  badges?: AppHeaderBadge[];
+}
+
+export const AppBadges = memo<AppBadgesProps>(({ badges }) => {
+  const { badgesContainer, overflowList } = useBadgesStyle();
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  if (!badges || badges.length === 0) {
+    return null;
+  }
+
+  const shouldOverflow = badges.length > OVERFLOW_THRESHOLD;
+  const visibleBadges = shouldOverflow ? badges.slice(0, MAX_VISIBLE_BADGES) : badges;
+  const overflowBadges = shouldOverflow ? badges.slice(MAX_VISIBLE_BADGES) : [];
+
+  const handleClosePopover = () => {
+    setIsPopoverOpen(false);
+  };
+
+  const handleTogglePopover = () => {
+    setIsPopoverOpen((open) => !open);
+  };
+
+  return (
+    <EuiFlexGroup
+      gutterSize="xs"
+      alignItems="center"
+      responsive={false}
+      wrap={false}
+      css={badgesContainer}
+    >
+      {visibleBadges.map((badge) => (
+        <EuiFlexItem grow={false} key={asPlainText(badge.label)}>
+          <AppBadge badge={badge} />
+        </EuiFlexItem>
+      ))}
+      {overflowBadges.length > 0 && (
+        <EuiFlexItem grow={false}>
+          <EuiPopover
+            aria-label={i18n.translate('kbnUI.appHeader.badges.popoverAriaLabel', {
+              defaultMessage: 'More badges',
+            })}
+            button={
+              <EuiBadge
+                color="hollow"
+                data-test-subj={APP_HEADER_TEST_SUBJECTS.badgesOverflow}
+                onClick={handleTogglePopover}
+                onClickAriaLabel={i18n.translate('kbnUI.appHeader.badges.overflowAriaLabel', {
+                  defaultMessage: 'Show {count} more badges',
+                  values: { count: overflowBadges.length },
+                })}
+              >
+                +{overflowBadges.length}
+              </EuiBadge>
+            }
+            isOpen={isPopoverOpen}
+            closePopover={handleClosePopover}
+            panelPaddingSize="s"
+          >
+            <EuiFlexGroup
+              direction="row"
+              wrap
+              gutterSize="xs"
+              alignItems="flexStart"
+              css={overflowList}
+            >
+              {overflowBadges.map((badge) => (
+                <EuiFlexItem grow={false} key={asPlainText(badge.label)}>
+                  <AppBadge badge={badge} />
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
+          </EuiPopover>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
+  );
+});
+
+AppBadges.displayName = 'AppBadges';

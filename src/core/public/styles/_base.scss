@@ -7,6 +7,7 @@
   &:not([class^='eui']):not(.kbn-resetFocusState) {
     // The focus policy causes double focus rings to appear on EuiSelectableList
     // since the focusable element does not contain a class starting with "eui".
+    // stylelint-disable-next-line selector-no-qualifying-type -- Targets a list inside EUI's selector.
     &:not(.euiSelectableList__list > ul) {
       @include euiFocusRing;
     }

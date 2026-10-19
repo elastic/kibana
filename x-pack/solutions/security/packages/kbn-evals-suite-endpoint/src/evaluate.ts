@@ -8,30 +8,68 @@
 import type { Client } from '@elastic/elasticsearch';
 import { evaluate as base } from '@kbn/evals';
 import { createEsClientForTesting, systemIndicesSuperuser } from '@kbn/test';
-import { SecurityEvalChatClient } from './chat_client';
+import type { EvaluateForensicDataset } from './evaluate_forensic_dataset';
+import { createEvaluateForensicDataset } from './evaluate_forensic_dataset';
+import type { EvaluatePolicyManagementDataset } from './evaluate_policy_management_dataset';
+import { createEvaluatePolicyManagementDataset } from './evaluate_policy_management_dataset';
 import type { EvaluateSecurityDataset } from './evaluate_dataset';
 import { createEvaluateSecurityDataset } from './evaluate_dataset';
+import type { EvaluateResponseActionsDataset } from './evaluate_response_actions_dataset';
+import { createEvaluateResponseActionsDataset } from './evaluate_response_actions_dataset';
 
 export const evaluate = base.extend<
   {},
   {
-    chatClient: SecurityEvalChatClient;
     evaluateDataset: EvaluateSecurityDataset;
+    evaluateForensicDataset: EvaluateForensicDataset;
+    evaluatePolicyManagementDataset: EvaluatePolicyManagementDataset;
+    evaluateResponseActionsDataset: EvaluateResponseActionsDataset;
     internalEsClient: Client;
   }
 >({
-  chatClient: [
-    async ({ fetch, log, connector }, use) => {
-      const chatClient = new SecurityEvalChatClient(fetch, log, connector.id);
-      await use(chatClient);
+  evaluateDataset: [
+    ({ agentBuilderClient, evaluators, executorClient }, use) => {
+      use(
+        createEvaluateSecurityDataset({
+          agentBuilderClient,
+          evaluators,
+          executorClient,
+        })
+      );
     },
     { scope: 'worker' },
   ],
-  evaluateDataset: [
-    ({ chatClient, evaluators, executorClient }, use) => {
+  evaluateForensicDataset: [
+    ({ agentBuilderClient, evaluators, executorClient, traceEsClient, log }, use) => {
       use(
-        createEvaluateSecurityDataset({
-          chatClient,
+        createEvaluateForensicDataset({
+          agentBuilderClient,
+          evaluators,
+          executorClient,
+          traceEsClient,
+          log,
+        })
+      );
+    },
+    { scope: 'worker' },
+  ],
+  evaluatePolicyManagementDataset: [
+    ({ agentBuilderClient, evaluators, executorClient }, use) => {
+      use(
+        createEvaluatePolicyManagementDataset({
+          agentBuilderClient,
+          evaluators,
+          executorClient,
+        })
+      );
+    },
+    { scope: 'worker' },
+  ],
+  evaluateResponseActionsDataset: [
+    ({ agentBuilderClient, evaluators, executorClient }, use) => {
+      use(
+        createEvaluateResponseActionsDataset({
+          agentBuilderClient,
           evaluators,
           executorClient,
         })

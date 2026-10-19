@@ -97,10 +97,10 @@ export type {
 
 export type { CoreId } from '@kbn/core-base-common-internal';
 
-export { ElasticsearchConfig, pollEsNodesVersion } from '@kbn/core-elasticsearch-server-internal';
+export { ElasticsearchConfig, checkEsNodesVersion } from '@kbn/core-elasticsearch-server-internal';
 export type {
   NodesVersionCompatibility,
-  PollEsNodesVersionOptions,
+  CheckEsNodesVersionOptions,
 } from '@kbn/core-elasticsearch-server-internal';
 export type {
   ElasticsearchServicePreboot,
@@ -131,6 +131,13 @@ export type {
   SecurityServiceStart,
   CoreAuthenticationService,
   CoreAuditService,
+  CoreServiceAccountsService,
+  ServiceAccount,
+  CreateServiceAccountParams,
+  CreateServiceAccountServerParams,
+  DeleteServiceAccountResult,
+  ServiceAccountBoundWorkload,
+  ServiceAccountPlatformAssumer,
   AuditEvent,
   AuditHttp,
   AuditKibana,
@@ -244,6 +251,13 @@ export type {
   HttpSelfResponse,
   HttpSelfScopedClient,
   HttpSelfService,
+  HttpSelfUnauthorizedErrorHandler,
+  HttpSelfUnauthorizedErrorHandlerNotHandledResult,
+  HttpSelfUnauthorizedErrorHandlerOptions,
+  HttpSelfUnauthorizedErrorHandlerResult,
+  HttpSelfUnauthorizedErrorHandlerRetryParams,
+  HttpSelfUnauthorizedErrorHandlerRetryResult,
+  HttpSelfUnauthorizedErrorHandlerToolkit,
   RawRequest,
   FakeRawRequest,
   HttpProtocol,
@@ -268,6 +282,13 @@ export type {
   LoggerContextConfigInput,
   LoggerConfigType,
   AppenderConfigType,
+  PluginAppenderConfigType,
+  FileAppenderPluginConfig,
+  LogFileWriteError,
+  LogFileWriteErrorHandler,
+  OtelAppenderPluginConfig,
+  OtelAttributesTransform,
+  RollingFileAppenderPluginConfig,
 } from '@kbn/core-logging-server';
 export type { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from '@kbn/logging';
 export type { Ecs, EcsEvent } from '@elastic/ecs';
@@ -363,6 +384,7 @@ export type {
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
   SavedObjectsFindOptionsReference,
+  SavedObjectsFindSort,
   SavedObjectsPitParams,
   SavedObjectsBulkDeleteObject,
   SavedObjectsBulkDeleteOptions,

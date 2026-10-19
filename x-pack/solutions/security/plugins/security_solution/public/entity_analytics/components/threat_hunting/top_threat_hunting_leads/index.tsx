@@ -129,7 +129,7 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
     <EuiButton
       size="s"
       fill
-      iconType="popout"
+      iconType="external"
       iconSide="right"
       href={genAiSettingsUrl}
       target="_blank"
@@ -268,7 +268,7 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
         <EuiFlexItem grow={false}>
           <EuiToolTip content={isOpen ? i18n.COLLAPSE : i18n.EXPAND} disableScreenReaderOutput>
             <EuiButtonIcon
-              iconType={isOpen ? 'arrowDown' : 'arrowRight'}
+              iconType={isOpen ? 'chevronSingleDown' : 'chevronSingleRight'}
               onClick={toggleOpen}
               aria-label={isOpen ? i18n.COLLAPSE : i18n.EXPAND}
               color="text"
@@ -332,7 +332,7 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   size="s"
-                  iconType="list"
+                  iconType="listBullet"
                   onClick={onSeeAll}
                   data-test-subj="seeAllLeadsButton"
                 >

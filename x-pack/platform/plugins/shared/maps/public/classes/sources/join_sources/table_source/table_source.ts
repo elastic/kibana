@@ -36,6 +36,7 @@ export interface TableSourceDescriptor {
     type: 'string' | 'number';
   }>;
   term: string;
+  [key: string]: unknown;
 }
 
 export class TableSource extends AbstractVectorSource implements ITermJoinSource, IVectorSource {

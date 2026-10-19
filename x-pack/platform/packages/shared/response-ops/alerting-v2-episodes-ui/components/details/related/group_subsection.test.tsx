@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { AlertEpisode } from '../../../queries/episodes_query';
+import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { RuleStateStatus, type LoadedRuleState } from '../../../types/rule_state';
 import { RelatedEpisodesGroupSubsection } from './group_subsection';
@@ -47,6 +47,7 @@ const loadedRuleState: LoadedRuleState = {
 
 const mockRuleProps = {
   ruleState: loadedRuleState,
+  scope: { type: 'rule' as const, ruleId: 'rule-1' },
 };
 const mockGetEpisodeDetailsHref = (id: string) => `/base/${id}`;
 
@@ -80,6 +81,24 @@ describe('RelatedEpisodesGroupSubsection', () => {
     expect(screen.getByText('1 episodes')).toBeInTheDocument();
   });
 
+  it('keeps the subsection title as a heading when compressed', () => {
+    mockUseFetch.mockReturnValue({ data: [], isLoading: false } as any);
+
+    render(
+      <I18nProvider>
+        <RelatedEpisodesGroupSubsection
+          currentEpisodeId="ep-1"
+          groupHash="gh-1"
+          {...mockRuleProps}
+          getEpisodeDetailsHref={mockGetEpisodeDetailsHref}
+          compressed
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByRole('heading', { level: 4, name: 'Same alert group' })).toBeInTheDocument();
+  });
+
   it('shows a loading spinner while fetching', () => {
     mockUseFetch.mockReturnValue({ data: [], isLoading: true } as any);
 
@@ -94,7 +113,11 @@ describe('RelatedEpisodesGroupSubsection', () => {
       </I18nProvider>
     );
 
-    expect(screen.getByTestId('alertingV2RelatedEpisodesGroupLoading')).toBeInTheDocument();
+    expect(
+      screen
+        .getByTestId('alertingV2RelatedEpisodesGroupLoading')
+        .querySelector('.euiSkeletonRectangle')
+    ).not.toBeNull();
   });
 
   it('shows the empty state when there are no episodes', () => {
@@ -112,6 +135,29 @@ describe('RelatedEpisodesGroupSubsection', () => {
     );
 
     expect(screen.getByTestId('alertingV2RelatedEpisodesGroupEmpty')).toBeInTheDocument();
-    expect(screen.getByText('No other episodes in this group.')).toBeInTheDocument();
+    expect(screen.getByText('No other alerts in this group.')).toBeInTheDocument();
+  });
+
+  it('describes the group by source when the episode has no rule', () => {
+    mockUseFetch.mockReturnValue({ data: [], isLoading: false } as any);
+
+    render(
+      <I18nProvider>
+        <RelatedEpisodesGroupSubsection
+          currentEpisodeId="ep-1"
+          groupHash="gh-1"
+          ruleState={{ status: RuleStateStatus.idle }}
+          scope={{ type: 'source', source: 'zabbix' }}
+          getEpisodeDetailsHref={mockGetEpisodeDetailsHref}
+        />
+      </I18nProvider>
+    );
+
+    expect(
+      screen.getByText('Other alerts from this source that share the same group as this alert.')
+    ).toBeInTheDocument();
+    expect(mockUseFetch).toHaveBeenCalledWith(
+      expect.objectContaining({ scope: { type: 'source', source: 'zabbix' } })
+    );
   });
 });

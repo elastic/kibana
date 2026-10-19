@@ -12,6 +12,7 @@ import {
   INTERNAL_API_ACCESS,
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import {
   ENCRYPTION_NOT_CONFIGURED_MESSAGE,
@@ -19,6 +20,7 @@ import {
   forwardToRemoteKibana,
   getDestinationFromRequest,
 } from '../../remote_kibana/forward_to_remote_kibana';
+import { redactSpaceIds } from '../shared/resolve_dataset_spaces';
 import type { RouteDependencies } from '../register_routes';
 import { handleMaximumResponseSizeExceededError } from '../utils/handle_response_size_error';
 
@@ -27,6 +29,8 @@ export const registerGetDatasetRoute = ({
   logger,
   canEncrypt,
   getEncryptedSavedObjectsStart,
+  getSpaceId,
+  getAccessibleSpaceIds,
 }: RouteDependencies) => {
   router.versioned
     .get({
@@ -78,8 +82,9 @@ export const registerGetDatasetRoute = ({
           }
 
           const { datasetId } = request.params;
+          const activeSpaceId = getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID;
           const evalsContext = await context.evals;
-          const datasetClient = evalsContext.datasetService.getClient();
+          const datasetClient = evalsContext.datasetService.getClient({ spaceId: activeSpaceId });
           const dataset = await datasetClient.get(datasetId);
 
           if (!dataset) {
@@ -89,7 +94,13 @@ export const registerGetDatasetRoute = ({
           }
 
           return response.ok({
-            body: dataset,
+            body: {
+              ...dataset,
+              space_ids: redactSpaceIds(
+                dataset.space_ids,
+                getAccessibleSpaceIds ? await getAccessibleSpaceIds(request) : undefined
+              ),
+            },
           });
         } catch (error) {
           if (error instanceof RemoteDecryptionError) {
@@ -107,8 +118,8 @@ export const registerGetDatasetRoute = ({
             context: 'Get evaluation dataset',
           });
           if (tooLarge) return tooLarge;
-
-          logger.error(`Failed to get evaluation dataset: ${error}`);
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          logger.error(`Failed to get evaluation dataset: ${errorMessage}`);
           return response.customError({
             statusCode: 500,
             body: { message: 'Failed to get evaluation dataset' },

@@ -11,6 +11,7 @@ export const eisEndpointsMockData = [
     task_type: 'chat_completion',
     service: 'elastic',
     service_settings: { model_id: 'anthropic-claude-3.7-sonnet' },
+    task_settings: { reasoning: { effort: 'high' } },
     metadata: {
       heuristics: { properties: ['multilingual', 'multimodal'], status: 'ga' },
       display: { name: 'Anthropic Claude Sonnet 3.7', model_creator: 'Anthropic' },
@@ -122,6 +123,16 @@ export const eisEndpointsMockData = [
         end_of_life_date: '2020-01-01',
       },
       display: { name: 'OpenAI Davinci', model_creator: 'OpenAI' },
+    },
+  },
+  {
+    inference_id: '.mock-elastic-preview-chat_completion',
+    task_type: 'chat_completion',
+    service: 'elastic',
+    service_settings: { model_id: 'elastic-preview-model' },
+    metadata: {
+      heuristics: { properties: ['multilingual'], status: 'preview' },
+      display: { name: 'Elastic Preview Model', model_creator: 'Elastic' },
     },
   },
 ];

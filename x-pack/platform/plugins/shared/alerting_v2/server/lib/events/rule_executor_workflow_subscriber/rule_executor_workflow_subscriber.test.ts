@@ -7,6 +7,7 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { LoggerService } from '../../services/logger_service/logger_service';
 import type { WorkflowService } from '../../services/workflow_service/workflow_service';
 import {
@@ -92,7 +93,10 @@ describe('RuleExecutorWorkflowSubscriber', () => {
     it('forwards a succeeded event as the reshaped workflow payload under the acting request', async () => {
       subscriber.start();
 
-      await handlerFor(bus, RULE_EXECUTION_SUCCEEDED_EVENT_TYPE)(succeededEvent, { request });
+      await handlerFor(bus, RULE_EXECUTION_SUCCEEDED_EVENT_TYPE)(succeededEvent, {
+        request,
+        origin: 'user',
+      });
 
       expect(workflowsExtensions.getClient).toHaveBeenCalledWith(request);
       expect(mockEmitEvent).toHaveBeenCalledTimes(1);
@@ -106,7 +110,10 @@ describe('RuleExecutorWorkflowSubscriber', () => {
     it('forwards a failed event as { rule: { id, spaceId }, error }', async () => {
       subscriber.start();
 
-      await handlerFor(bus, RULE_EXECUTION_FAILED_EVENT_TYPE)(failedEvent, { request });
+      await handlerFor(bus, RULE_EXECUTION_FAILED_EVENT_TYPE)(failedEvent, {
+        request,
+        origin: 'user',
+      });
 
       expect(mockEmitEvent).toHaveBeenCalledTimes(1);
       expect(mockEmitEvent).toHaveBeenCalledWith(RuleExecutionFailedTriggerId, {
@@ -120,22 +127,34 @@ describe('RuleExecutorWorkflowSubscriber', () => {
 
       await handlerFor(bus, RULE_EXECUTION_SUCCEEDED_EVENT_TYPE)(
         { ...succeededEvent, payload: { ...succeededEvent.payload, ruleEventsGenerated: 0 } },
-        { request }
+        { request, origin: 'user' }
       );
 
       expect(mockEmitEvent).not.toHaveBeenCalled();
     });
 
-    it('catches WorkflowService failures, logs them, and does not let the rejection escape the handler', async () => {
+    it("catches WorkflowService failures, logs them with the binding's eventType, and does not let the rejection escape the handler", async () => {
       mockEmitEvent.mockRejectedValueOnce(new Error('workflows unreachable'));
 
       subscriber.start();
 
       await expect(
-        handlerFor(bus, RULE_EXECUTION_SUCCEEDED_EVENT_TYPE)(succeededEvent, { request })
+        handlerFor(bus, RULE_EXECUTION_SUCCEEDED_EVENT_TYPE)(succeededEvent, {
+          request,
+          origin: 'user',
+        })
       ).resolves.toBeUndefined();
 
       expect(mockLogger.error).toHaveBeenCalledTimes(1);
+      expect(mockLogger.error).toHaveBeenCalledWith('workflows unreachable', {
+        labels: {
+          event_type: RULE_EXECUTION_SUCCEEDED_EVENT_TYPE,
+          rule_id: succeededEvent.payload.rule.ruleId,
+          space_id: succeededEvent.payload.rule.spaceId,
+          code: ALERTING_LOG_CODES.EVENTS_RULE_EXECUTOR_WORKFLOW_SUBSCRIBER_FAILED,
+        },
+        error: expect.objectContaining({ message: 'workflows unreachable' }),
+      });
     });
   });
 

@@ -21,6 +21,7 @@ import { useObservedServiceItems } from './hooks/use_observed_service_items';
 import type { EntityDetailsPath } from '../shared/components/left_panel/left_panel_header';
 import { VisualizationsSection } from '../shared/components/right/visualizations_section';
 import { ResolutionSection } from '../../../entity_analytics/components/entity_resolution/resolution_section';
+import { useNewEntityAnalyticsPage } from '../../../entity_analytics/hooks/use_new_entity_analytics_page';
 import { useHasEntityResolutionLicense } from '../../../common/hooks/use_has_entity_resolution_license';
 
 export const OBSERVED_SERVICE_QUERY_ID = 'observedServiceDetailsQuery';
@@ -38,6 +39,8 @@ interface ServicePanelContentProps {
   openDetailsPanel: (path: EntityDetailsPath) => void;
   entityRecord?: Entity;
   refetchEntityRecord?: () => void;
+  /** When `true`, hide the legacy asset criticality accordion. Required so every call site wires it explicitly. */
+  entityStoreV2Enabled: boolean;
   entityStoreEntityId?: string;
   /** See {@link RiskSummaryProps.prefetchedResolutionRisk}. */
   prefetchedResolutionRisk?: EntityRiskScore<EntityType.service>;
@@ -55,6 +58,16 @@ interface ServicePanelContentProps {
    * their `useQueryInspector` registration
    */
   riskScoreQueryId: string;
+  /**
+   * When true, hides the "open in tool" header icons on the section panels. Used by the new EUI
+   * system flyout, where sections are opened via {@link openDetailsPanel} instead.
+   */
+  hideHeaderIcons?: boolean;
+  /**
+   * True when the flyout shows a resolution group (alias records were loaded for the open target).
+   * The risk summary then shows only the group's risk score. See {@link RiskSummaryProps.isGroupView}.
+   */
+  isGroupView?: boolean;
 }
 
 export const ServicePanelContent = ({
@@ -70,13 +83,32 @@ export const ServicePanelContent = ({
   isPreviewMode,
   openDetailsPanel,
   onAssetCriticalityChange,
+  entityStoreV2Enabled,
   entityStoreEntityId,
   prefetchedResolutionRisk,
   onShowEntity,
   riskScoreQueryId,
+  hideHeaderIcons = false,
+  isGroupView = false,
 }: ServicePanelContentProps) => {
   const observedFields = useObservedServiceItems(observedService);
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
+  const isNewEntityAnalyticsPage = useNewEntityAnalyticsPage();
+
+  const resolutionSection =
+    entityStoreEntityId && hasEntityResolutionLicense ? (
+      <>
+        <ResolutionSection
+          entityId={entityStoreEntityId}
+          entityType={EntityType.service}
+          scopeId={scopeId}
+          openDetailsPanel={openDetailsPanel}
+          onShowEntity={onShowEntity}
+          hideHeaderIcons={hideHeaderIcons}
+        />
+        <EuiHorizontalRule />
+      </>
+    ) : null;
 
   return (
     <>
@@ -98,10 +130,13 @@ export const ServicePanelContent = ({
             entityType={EntityType.service}
             entityId={entityRecord?.entity?.id}
             prefetchedResolutionRisk={prefetchedResolutionRisk}
+            hideHeaderIcon={hideHeaderIcons}
+            isGroupView={isGroupView}
           />
           <EuiHorizontalRule />
         </>
       )}
+      {isNewEntityAnalyticsPage && resolutionSection}
       {entityStoreEntityId && (
         <>
           <VisualizationsSection
@@ -109,23 +144,13 @@ export const ServicePanelContent = ({
             isPreviewMode={isPreviewMode}
             scopeId={scopeId}
             openDetailsPanel={openDetailsPanel}
+            hideHeaderIcons={hideHeaderIcons}
           />
           <EuiHorizontalRule margin="m" />
         </>
       )}
-      {entityStoreEntityId && hasEntityResolutionLicense && (
-        <>
-          <ResolutionSection
-            entityId={entityStoreEntityId}
-            entityType={EntityType.service}
-            scopeId={scopeId}
-            openDetailsPanel={openDetailsPanel}
-            onShowEntity={onShowEntity}
-          />
-          <EuiHorizontalRule />
-        </>
-      )}
-      {!entityRecord && (
+      {!isNewEntityAnalyticsPage && resolutionSection}
+      {!entityStoreV2Enabled && (
         <AssetCriticalityAccordion
           entity={{ name: serviceName, type: EntityType.service }}
           onChange={onAssetCriticalityChange}

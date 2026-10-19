@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
-import { MemoryDumpResponseActionOutputResult } from '../../memory_dump_response_action_output_result';
+import { memo, useMemo } from 'react';
 import { useSendMemoryDumpRequest } from '../../../hooks/response_actions/use_send_memory_dump_request';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
 import type { MemoryDumpActionRequestBody } from '../../../../../common/api/endpoint/actions/response_actions/memory_dump';
@@ -20,6 +19,7 @@ import type {
 export interface MemoryDumpActionConsoleArguments extends SupportedArguments {
   kernel: boolean;
   process: boolean;
+  raw: boolean;
   pid: number;
   entityId: string;
 }
@@ -35,7 +35,7 @@ export const MemoryDumpActionResult = memo<
   const { agentType, endpointId } = command.commandDefinition?.meta ?? {};
 
   const actionRequestBody = useMemo<undefined | MemoryDumpActionRequestBody>(() => {
-    const { comment, kernel, pid, entityId } = command.args.args;
+    const { comment, kernel, raw, pid, entityId } = command.args.args;
 
     if (!endpointId) {
       return;
@@ -46,7 +46,7 @@ export const MemoryDumpActionResult = memo<
       endpoint_ids: [endpointId],
       ...(comment?.[0] ? { comment: comment?.[0] } : {}),
       parameters: {
-        type: kernel?.[0] ? 'kernel' : 'process',
+        type: kernel?.[0] ? 'kernel' : raw?.[0] ? 'raw' : 'process',
         ...(pid ? { pid: pid[0] } : {}),
         ...(entityId ? { entity_id: entityId[0] } : {}),
       },
@@ -55,7 +55,7 @@ export const MemoryDumpActionResult = memo<
     return reqBody;
   }, [agentType, command.args.args, endpointId]);
 
-  const { result, actionDetails } = useConsoleActionSubmitter<
+  return useConsoleActionSubmitter<
     MemoryDumpActionRequestBody,
     ResponseActionMemoryDumpOutputContent,
     ResponseActionMemoryDumpParameters
@@ -68,20 +68,6 @@ export const MemoryDumpActionResult = memo<
     actionCreator,
     actionRequestBody,
     dataTestSubj: 'memoryDump',
-  });
-
-  if (actionDetails?.isCompleted && actionDetails.wasSuccessful) {
-    return (
-      <ResultComponent>
-        <MemoryDumpResponseActionOutputResult
-          action={actionDetails}
-          agentId={endpointId}
-          data-test-subj="memoryDumpResult"
-        />
-      </ResultComponent>
-    );
-  }
-
-  return result;
+  }).result;
 });
 MemoryDumpActionResult.displayName = 'MemoryDumpActionResult';

@@ -572,6 +572,12 @@ export const AlertAnalysisWorkflowRuleAttachmentSection: React.FC = () => {
                 {canEditRules && selectedRulesCount > 0 && (
                   <EuiFlexItem grow={false}>
                     <EuiPopover
+                      aria-label={i18n.translate(
+                        'xpack.securitySolution.alertAnalysisWorkflow.ruleAttachmentBulkActionsAriaLabel',
+                        {
+                          defaultMessage: 'Bulk actions for selected rules',
+                        }
+                      )}
                       data-test-subj="alertAnalysisWorkflowRuleAttachmentBulkActionsPopover"
                       isOpen={isBulkActionsPopoverOpen}
                       closePopover={closeBulkActionsPopover}
@@ -581,7 +587,7 @@ export const AlertAnalysisWorkflowRuleAttachmentSection: React.FC = () => {
                           data-test-subj="alertAnalysisWorkflowRuleAttachmentBulkActionsButton"
                           size="s"
                           iconSide="right"
-                          iconType="arrowDown"
+                          iconType="chevronSingleDown"
                           flush="left"
                           isLoading={updateMutation.isLoading}
                           onClick={() => setIsBulkActionsPopoverOpen((isOpen) => !isOpen)}
@@ -597,7 +603,7 @@ export const AlertAnalysisWorkflowRuleAttachmentSection: React.FC = () => {
                         items={[
                           <EuiContextMenuItem
                             key="attach"
-                            icon="plusInCircle"
+                            icon="plusCircle"
                             data-test-subj="alertAnalysisWorkflowRuleAttachmentAttachAction"
                             onClick={() => {
                               closeBulkActionsPopover();
@@ -611,7 +617,7 @@ export const AlertAnalysisWorkflowRuleAttachmentSection: React.FC = () => {
                           </EuiContextMenuItem>,
                           <EuiContextMenuItem
                             key="detach"
-                            icon="minusInCircle"
+                            icon="minusCircle"
                             data-test-subj="alertAnalysisWorkflowRuleAttachmentRemoveAction"
                             onClick={() => {
                               closeBulkActionsPopover();

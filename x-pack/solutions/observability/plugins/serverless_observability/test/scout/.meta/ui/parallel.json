@@ -1,36 +1,49 @@
 {
-  "sha1": "469d470d4d8277dfb537e9b8b7224687a72831d1",
+  "sha1": "77a77680cf7b5cb0296cbeef32f569c9504d6243",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "72a167fe5654069-e56c37aa9bfdb56",
+      "title": "Disable alerting v2",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/global.setup.ts",
+        "line": 6,
+        "column": 1
+      }
+    },
     {
       "id": "08c621ad2871856-3596071962e357d",
       "title": "Serverless Observability Navigation - Complete tier body renders expected body nav items with working links",
       "expectedStatus": "passed",
       "tags": [
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_complete.spec.ts",
-        "line": 22,
-        "column": 9
+        "line": 18,
+        "column": 25
       }
     },
     {
-      "id": "08c621ad2871856-a09fd1e365d7489",
-      "title": "Serverless Observability Navigation - Complete tier body clicking body nav items sets the active link, updates breadcrumbs, and navigates",
+      "id": "08c621ad2871856-913984dcecec931",
+      "title": "Serverless Observability Navigation - Complete tier body clicking body nav items sets the active link and navigates",
       "expectedStatus": "passed",
       "tags": [
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_complete.spec.ts",
-        "line": 66,
-        "column": 9
+        "line": 77,
+        "column": 19
       }
     },
     {
@@ -38,13 +51,12 @@
       "title": "Serverless Observability Navigation - Complete tier body footer-panel children navigate to the expected pages",
       "expectedStatus": "passed",
       "tags": [
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_complete.spec.ts",
-        "line": 149,
-        "column": 9
+        "line": 148,
+        "column": 99
       }
     },
     {
@@ -52,13 +64,12 @@
       "title": "Serverless Observability Navigation - Complete tier body Management landing renders cards navigation",
       "expectedStatus": "passed",
       "tags": [
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_complete.spec.ts",
-        "line": 213,
-        "column": 9
+        "line": 208,
+        "column": 11
       }
     },
     {
@@ -66,13 +77,12 @@
       "title": "Serverless Observability Navigation - Complete tier body navigates between apps without a full page reload (SPA) and restores via logo",
       "expectedStatus": "passed",
       "tags": [
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_complete.spec.ts",
-        "line": 222,
-        "column": 9
+        "line": 214,
+        "column": 26
       }
     },
     {
@@ -87,8 +97,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_footer.spec.ts",
-        "line": 22,
-        "column": 9
+        "line": 17,
+        "column": 25
       }
     },
     {
@@ -103,8 +113,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_footer.spec.ts",
-        "line": 46,
-        "column": 9
+        "line": 38,
+        "column": 15
       }
     },
     {
@@ -119,8 +129,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_footer.spec.ts",
-        "line": 73,
-        "column": 9
+        "line": 62,
+        "column": 13
       }
     },
     {
@@ -133,8 +143,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_logs_essentials.spec.ts",
-        "line": 23,
-        "column": 9
+        "line": 17,
+        "column": 61
       }
     },
     {
@@ -147,8 +157,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_logs_essentials.spec.ts",
-        "line": 53,
-        "column": 9
+        "line": 55,
+        "column": 17
       }
     },
     {
@@ -161,8 +171,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_logs_essentials.spec.ts",
-        "line": 87,
-        "column": 9
+        "line": 104,
+        "column": 19
       }
     },
     {
@@ -175,8 +185,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_logs_essentials.spec.ts",
-        "line": 117,
-        "column": 9
+        "line": 125,
+        "column": 15
       }
     },
     {
@@ -189,8 +199,24 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_logs_essentials.spec.ts",
-        "line": 124,
-        "column": 9
+        "line": 130,
+        "column": 20
+      }
+    },
+    {
+      "id": "a8f6c83862db451-a55560dcd95bea7",
+      "title": "Restore the default alerting v2 setting",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/global.teardown.ts",
+        "line": 5,
+        "column": 1
       }
     }
   ]

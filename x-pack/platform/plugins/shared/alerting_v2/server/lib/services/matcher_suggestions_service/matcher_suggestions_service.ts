@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { flattenObject } from '@kbn/object-utils';
 import { inject, injectable } from 'inversify';
-import {
-  ALERT_EVENTS_DATA_STREAM,
-  alertEpisodeStatus,
-} from '../../../resources/datastreams/alert_events';
-import { RULE_SAVED_OBJECT_TYPE, type RuleSavedObjectAttributes } from '../../../saved_objects';
+import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import { alertEventSeveritySchema } from '@kbn/alerting-v2-schemas';
+import { alertEpisodeStatus } from '../../../resources/datastreams/alert_events';
 import { EsServiceScopedToken } from '../es_service/tokens';
-import { RuleSavedObjectsClientToken } from '../rules_saved_object_service/tokens';
 import { buildAlertEventsFiltersFromMatcher } from './build_alert_events_filters_from_matcher';
 
 const MAX_SUGGESTIONS = 10;
@@ -23,31 +20,22 @@ const DATA_FIELD_SAMPLE_SIZE = 1000;
 const ALERT_EVENTS_LOOKBACK = 'now-24h';
 
 const EPISODE_STATUS_VALUES = Object.values(alertEpisodeStatus);
+const EPISODE_INDEX_FIELD_STATIC_VALUES: Readonly<Record<string, readonly string[]>> = {
+  'episode.status': EPISODE_STATUS_VALUES,
+  'alert.status': EPISODE_STATUS_VALUES,
+  severity: Object.values(alertEventSeveritySchema.enum),
+};
 
 enum MatcherField {
-  EpisodeStatus = 'episode_status',
-  RuleName = 'rule.name',
-  RuleTags = 'rule.tags',
-  RuleId = 'rule.id',
-  EpisodeId = 'episode_id',
+  AlertStatus = 'alert_status',
+  AlertId = 'alert_id',
   GroupHash = 'group_hash',
 }
 
-interface RuleSoFieldConfig {
-  searchField: string;
-  accessor: (attrs: RuleSavedObjectAttributes) => string | undefined;
-}
-
-const RULE_SO_FIELD_CONFIG: Partial<Record<MatcherField, RuleSoFieldConfig>> = {
-  [MatcherField.RuleName]: {
-    searchField: 'metadata.name',
-    accessor: (a) => a.metadata.name,
-  },
-};
-
-const MATCHER_FIELD_TO_ES_FIELD: Partial<Record<MatcherField, string>> = {
-  [MatcherField.EpisodeId]: 'episode.id',
+const MATCHER_FIELD_TO_ES_FIELD: Readonly<Record<string, string>> = {
+  [MatcherField.AlertId]: 'alert.id',
   [MatcherField.GroupHash]: 'group_hash',
+  'alert.id': 'alert.id',
 };
 
 const getEscapedQuery = (q: string = '') =>
@@ -64,36 +52,24 @@ const isIndexNotFoundException = (e: unknown): boolean => {
 @injectable()
 export class MatcherSuggestionsService {
   constructor(
-    @inject(RuleSavedObjectsClientToken)
-    private readonly ruleSoClient: SavedObjectsClientContract,
     @inject(EsServiceScopedToken)
     private readonly esClient: ElasticsearchClient
   ) {}
 
   async getSuggestions(field: string, query: string): Promise<string[]> {
-    const soFieldConfig = RULE_SO_FIELD_CONFIG[field as MatcherField];
-    if (soFieldConfig) {
-      return this.getRuleSoFieldSuggestions(
-        query,
-        soFieldConfig.searchField,
-        soFieldConfig.accessor
-      );
+    const episodeIndexStaticValues = EPISODE_INDEX_FIELD_STATIC_VALUES[field];
+    if (Object.hasOwn(EPISODE_INDEX_FIELD_STATIC_VALUES, field) && episodeIndexStaticValues) {
+      return this.getStaticSuggestions([...episodeIndexStaticValues], query);
     }
 
-    const esField = MATCHER_FIELD_TO_ES_FIELD[field as MatcherField];
-    if (esField) {
+    const esField = MATCHER_FIELD_TO_ES_FIELD[field];
+    if (Object.hasOwn(MATCHER_FIELD_TO_ES_FIELD, field) && esField) {
       return this.getAlertEventFieldSuggestions(esField, query);
     }
 
     switch (field) {
-      case MatcherField.EpisodeStatus:
+      case MatcherField.AlertStatus:
         return this.getStaticSuggestions(EPISODE_STATUS_VALUES, query);
-
-      case MatcherField.RuleTags:
-        return this.getRuleTagsSuggestions(query);
-
-      case MatcherField.RuleId:
-        return this.getRuleIdSuggestions(query);
 
       default:
         if (field.startsWith('data.')) {
@@ -103,7 +79,7 @@ export class MatcherSuggestionsService {
     }
   }
 
-  async getDataFieldNames(matcher?: string): Promise<string[]> {
+  async getRuleEventFieldNames(matcher?: string): Promise<string[]> {
     try {
       const result = await this.esClient.search({
         index: ALERT_EVENTS_DATA_STREAM,
@@ -117,7 +93,7 @@ export class MatcherSuggestionsService {
               { term: { type: 'alert' } },
               { range: { '@timestamp': { gte: ALERT_EVENTS_LOOKBACK } } },
               { exists: { field: 'data' } },
-              { terms: { 'episode.status': ['pending', 'active', 'recovering'] } },
+              { terms: { 'alert.status': ['pending', 'active', 'recovering'] } },
               ...buildAlertEventsFiltersFromMatcher(matcher ?? ''),
             ],
           },
@@ -148,68 +124,6 @@ export class MatcherSuggestionsService {
     const lowerQuery = query.toLowerCase();
     return values
       .filter((v) => !lowerQuery || v.toLowerCase().startsWith(lowerQuery))
-      .slice(0, MAX_SUGGESTIONS);
-  }
-
-  private async getRuleSoFieldSuggestions(
-    query: string,
-    searchField: string,
-    accessor: (attrs: RuleSavedObjectAttributes) => string | undefined
-  ): Promise<string[]> {
-    const result = await this.ruleSoClient.find<RuleSavedObjectAttributes>({
-      type: RULE_SAVED_OBJECT_TYPE,
-      page: 1,
-      perPage: MAX_SUGGESTIONS,
-      ...(query ? { search: `${getEscapedQuery(query)}*`, searchFields: [searchField] } : {}),
-      sortField: 'updated_at',
-      sortOrder: 'desc',
-    });
-
-    return result.saved_objects
-      .map((so) => accessor(so.attributes))
-      .filter((v): v is string => typeof v === 'string' && v.length > 0);
-  }
-
-  private async getRuleTagsSuggestions(query: string): Promise<string[]> {
-    const result = await this.ruleSoClient.find<RuleSavedObjectAttributes>({
-      type: RULE_SAVED_OBJECT_TYPE,
-      page: 1,
-      perPage: 100,
-      fields: ['metadata.tags'],
-      sortField: 'updated_at',
-      sortOrder: 'desc',
-    });
-
-    const allTags = new Set<string>();
-    for (const so of result.saved_objects) {
-      const tags = so.attributes.metadata?.tags;
-      if (Array.isArray(tags)) {
-        for (const tag of tags) {
-          allTags.add(tag);
-        }
-      }
-    }
-
-    const lowerQuery = query.toLowerCase();
-    return Array.from(allTags)
-      .filter((tag) => !lowerQuery || tag.toLowerCase().startsWith(lowerQuery))
-      .sort()
-      .slice(0, MAX_SUGGESTIONS);
-  }
-
-  private async getRuleIdSuggestions(query: string): Promise<string[]> {
-    const result = await this.ruleSoClient.find<RuleSavedObjectAttributes>({
-      type: RULE_SAVED_OBJECT_TYPE,
-      page: 1,
-      perPage: 100,
-      sortField: 'updated_at',
-      sortOrder: 'desc',
-    });
-
-    const lowerQuery = query.toLowerCase();
-    return result.saved_objects
-      .map((so) => so.id)
-      .filter((id) => !lowerQuery || id.toLowerCase().startsWith(lowerQuery))
       .slice(0, MAX_SUGGESTIONS);
   }
 

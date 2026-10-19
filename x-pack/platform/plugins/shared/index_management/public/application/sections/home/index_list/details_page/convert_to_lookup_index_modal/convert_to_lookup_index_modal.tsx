@@ -9,7 +9,6 @@ import React from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFieldText,
   EuiFormRow,
   EuiModal,
@@ -21,6 +20,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 
 import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
@@ -140,16 +140,14 @@ export const ConvertToLookupIndexModal = ({
           />
           {errorMessage && (
             <EuiFormRow fullWidth>
-              <EuiCallOut
+              <KbnDangerCallout
+                announceOnMount
                 title={i18n.translate('xpack.idxMgmt.convertToLookupIndexModal.errorCalloutTitle', {
                   defaultMessage: 'An error has occurred',
                 })}
-                color="danger"
-                iconType="error"
                 data-test-subj="errorCallout"
-              >
-                {errorMessage}
-              </EuiCallOut>
+                text={errorMessage}
+              />
             </EuiFormRow>
           )}
         </Form>

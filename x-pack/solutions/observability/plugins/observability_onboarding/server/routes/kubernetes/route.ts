@@ -8,7 +8,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import * as t from 'io-ts';
 import { z } from '@kbn/zod/v4';
-import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import Boom from '@hapi/boom';
 import { termQuery } from '@kbn/observability-plugin/server';
 import type { estypes } from '@elastic/elasticsearch';
@@ -16,7 +15,6 @@ import {
   isNoShardsAvailableError,
   throwHasDataSearchError,
 } from '../../lib/handle_has_data_search_error';
-import { checkPreExistingData } from '../../lib/check_pre_existing_data';
 import { resolveProbe } from './resolve_has_data_probes';
 import type { ElasticAgentVersionInfo } from '../../../common/types';
 import { getFallbackESUrl } from '../../lib/get_fallback_urls';
@@ -41,7 +39,6 @@ export interface HasKubernetesDataRouteResponse {
   hasData: boolean;
   hasLogs?: boolean;
   hasMetrics?: boolean;
-  hasPreExistingData?: boolean;
 }
 
 const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerRoute({
@@ -128,10 +125,6 @@ const hasKubernetesDataRoute = createObservabilityOnboardingServerRoute({
     path: z.object({
       onboardingId: z.string().max(36),
     }),
-    query: z.object({
-      start: z.string().max(64).optional(),
-      respectPreExistingData: BooleanFromString.default(true),
-    }),
   }),
   security: {
     authz: {
@@ -141,7 +134,6 @@ const hasKubernetesDataRoute = createObservabilityOnboardingServerRoute({
   },
   async handler(resources): Promise<HasKubernetesDataRouteResponse> {
     const { onboardingId } = resources.params.path;
-    const { start, respectPreExistingData } = resources.params.query;
     const { elasticsearch } = await resources.context.core;
 
     try {
@@ -170,37 +162,6 @@ const hasKubernetesDataRoute = createObservabilityOnboardingServerRoute({
         },
       };
 
-      const wiredStreamIndices = ['logs.otel*', 'logs.ecs*', 'metrics.otel*', 'metrics.ecs*'];
-
-      // Check if data was already flowing into wired stream indices before
-      // the user started onboarding. The result is included in the response
-      // so UI components that use respectPreExistingData=true can surface
-      // the pre-existing-data state to users.
-      const hasPreExistingData = start
-        ? await checkPreExistingData(elasticsearch.client.asCurrentUser, wiredStreamIndices, start)
-        : false;
-
-      // Wired streams (logs.otel*, logs.ecs*) use passthrough mapping where
-      // onboarding.id is not indexed, so we cannot filter by it without a
-      // runtime mapping (which times out on large clusters). Fall back to a
-      // time-range-only query when a start time is provided.
-      //
-      // Whether the query runs despite pre-existing data depends on the
-      // caller's contract, mirroring the client's respectPreExistingData
-      // prop:
-      // - respectPreExistingData=true (classic EA flow, default): skip the
-      //   query when pre-existing data exists, since old data continuing to
-      //   flow after `start` would make hasData a false positive and the UI
-      //   would report a successful onboarding.
-      // - respectPreExistingData=false (OTel flow): always run it. The
-      //   component ignores the pre-existing-data flag and must see
-      //   hasData=true to show the CTA; skipping the query would deadlock
-      //   the polling.
-      const wiredStreamQuery: estypes.QueryDslQueryContainer | undefined =
-        start && (!hasPreExistingData || !respectPreExistingData)
-          ? { bool: { filter: [{ range: { '@timestamp': { gte: start } } }] } }
-          : undefined;
-
       const searches: Array<Promise<estypes.SearchResponse>> = [
         elasticsearch.client.asCurrentUser.search({
           index: ['logs-*'],
@@ -214,35 +175,16 @@ const hasKubernetesDataRoute = createObservabilityOnboardingServerRoute({
         }),
       ];
 
-      if (wiredStreamQuery) {
-        searches.push(
-          elasticsearch.client.asCurrentUser.search({
-            index: ['logs.otel*', 'logs.ecs*'],
-            ...commonSearchParams,
-            query: wiredStreamQuery,
-          }),
-          elasticsearch.client.asCurrentUser.search({
-            index: ['metrics.otel*', 'metrics.ecs*'],
-            ...commonSearchParams,
-            query: wiredStreamQuery,
-          })
-        );
-      }
-
       const results = await Promise.allSettled(searches);
-      const [logsResult, metricsResult, wiredLogsResult, wiredMetricsResult] = results;
+      const [logsResult, metricsResult] = results;
 
-      const hasLogs =
-        resolveProbe(logsResult) || (wiredLogsResult ? resolveProbe(wiredLogsResult) : false);
-      const hasMetrics =
-        resolveProbe(metricsResult) ||
-        (wiredMetricsResult ? resolveProbe(wiredMetricsResult) : false);
+      const hasLogs = resolveProbe(logsResult);
+      const hasMetrics = resolveProbe(metricsResult);
 
       return {
         hasData: hasLogs || hasMetrics,
         hasLogs,
         hasMetrics,
-        hasPreExistingData: hasPreExistingData || undefined,
       };
     } catch (error) {
       if (isNoShardsAvailableError(error)) {

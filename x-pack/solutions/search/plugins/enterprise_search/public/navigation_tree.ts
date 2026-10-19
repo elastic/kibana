@@ -9,7 +9,6 @@ import type { Location } from 'history';
 import { type Observable, debounceTime, map } from 'rxjs';
 
 import type { EuiSideNavItemType } from '@elastic/eui';
-import { getAlertingV2ManagementNavPanel } from '@kbn/alerting-v2-utils';
 import type { CoreStart } from '@kbn/core/public';
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
@@ -69,17 +68,18 @@ export const getNavigationTreeDefinition = ({
         const navTree: NavigationTreeDefinition = {
           body: [
             {
-              icon,
+              icon: 'home',
               link: SEARCH_HOMEPAGE,
-              renderAs: 'home',
-              title,
+              title: i18n.translate('xpack.enterpriseSearch.searchNav.home', {
+                defaultMessage: 'Home',
+              }),
             },
             {
               icon: 'productAgent',
               link: 'agent_builder',
             },
             {
-              icon: 'sparkles',
+              icon: 'tableSparkles',
               link: 'context_engine',
             },
             {
@@ -174,6 +174,7 @@ export const getNavigationTreeDefinition = ({
                   children: [
                     { link: 'management:index_management' },
                     { link: 'management:data_federation' },
+                    { link: 'management:esql_views' },
                     { link: 'management:index_lifecycle_management' },
                     { link: 'management:snapshot_restore' },
                     { link: 'management:transform' },
@@ -193,11 +194,7 @@ export const getNavigationTreeDefinition = ({
                   }),
                 },
                 {
-                  children: [
-                    { link: 'searchSynonyms:synonyms' },
-                    { link: 'searchQueryRules' },
-                    { link: 'searchPlayground' },
-                  ],
+                  children: [{ link: 'searchSynonyms:synonyms' }, { link: 'searchQueryRules' }],
                   id: 'search_relevance',
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.ingest.relevance.title', {
                     defaultMessage: 'Relevance',
@@ -257,7 +254,6 @@ export const getNavigationTreeDefinition = ({
                   id: 'stack_management_home',
                   title: '',
                 },
-                ...getAlertingV2ManagementNavPanel(core),
                 {
                   children: [
                     { link: 'management:triggersActionsAlerts' },
@@ -268,6 +264,7 @@ export const getNavigationTreeDefinition = ({
                     { link: 'management:watcher' },
                     { link: 'management:maintenanceWindows' },
                   ],
+                  id: 'alerts_and_insights',
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.management.alerts', {
                     defaultMessage: 'Alerts and Insights',
                   }),
@@ -336,6 +333,7 @@ export const getNavigationTreeDefinition = ({
                     { link: 'management:roles' },
                     { link: 'management:api_keys' },
                     { link: 'management:role_mappings' },
+                    { link: 'management:service_accounts' },
                   ],
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.management.security', {
                     defaultMessage: 'Security',

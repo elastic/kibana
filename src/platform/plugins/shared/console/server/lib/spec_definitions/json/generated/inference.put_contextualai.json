@@ -16,6 +16,24 @@
         "rerank"
       ]
     },
+    "data_autocomplete_rules": {
+      "service": {
+        "__one_of": [
+          "contextualai"
+        ]
+      },
+      "service_settings": {
+        "api_key": "",
+        "model_id": "",
+        "rate_limit": {
+          "requests_per_minute": ""
+        }
+      },
+      "task_settings": {
+        "instruction": "",
+        "top_k": ""
+      }
+    },
     "methods": [
       "PUT"
     ],

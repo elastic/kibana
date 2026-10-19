@@ -75,6 +75,44 @@
       ],
       "wait_for_completion": "__flag__"
     },
+    "data_autocomplete_rules": {
+      "max_docs": "",
+      "query": {
+        "__scope_link": "GLOBAL.query"
+      },
+      "script": {
+        "__one_of": [
+          {
+            "source": "",
+            "id": "",
+            "params": {},
+            "lang": {
+              "__one_of": [
+                "painless",
+                "expression",
+                "mustache",
+                "java"
+              ]
+            },
+            "options": {
+              "*": ""
+            }
+          },
+          ""
+        ]
+      },
+      "slice": {
+        "field": "",
+        "id": "",
+        "max": ""
+      },
+      "conflicts": {
+        "__one_of": [
+          "abort",
+          "proceed"
+        ]
+      }
+    },
     "methods": [
       "POST"
     ],

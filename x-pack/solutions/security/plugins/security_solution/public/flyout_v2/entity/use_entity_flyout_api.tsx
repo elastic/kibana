@@ -16,8 +16,8 @@ import {
   FLYOUT_TYPE,
 } from '../../common/lib/telemetry';
 import {
-  defaultToolsFlyoutProperties,
   useDefaultDocumentFlyoutProperties,
+  useDefaultToolsFlyoutProperties,
 } from '../shared/hooks/use_default_flyout_properties';
 import { useOpenFlyout } from '../shared/hooks/use_open_flyout';
 import {
@@ -58,8 +58,10 @@ import type { FlyoutDescriptor } from '../shared/url_state/flyout_v2_url_param';
 import {
   decodeFlyoutV2UrlParam,
   FLYOUT_DESCRIPTOR_KIND,
+  toEntityDescriptorMode,
   urlParamKeyForHistoryKey,
 } from '../shared/url_state/flyout_v2_url_param';
+import type { EntityViewMode } from '../../flyout/entity_details/shared/types';
 
 // Lazy-loaded so consumers of this hook don't statically pull the entity flyout graph into their
 // bundle; each chunk only loads when the corresponding flyout is actually opened.
@@ -127,6 +129,13 @@ export interface OpenEntityDetailsParams extends WithTitle {
   entityName: string | undefined;
   /** Scope id for downstream containers and queries. */
   scopeId: string;
+  /** Optional context ID forwarded to cell-action filters inside the flyout. */
+  contextID?: string;
+  /**
+   * Entity-store lookup mode for host/user/service: `resolved` also loads the entities that resolve
+   * to `entityId` (group view). Ignored for generic entities. Defaults to `single`.
+   */
+  mode?: EntityViewMode;
 }
 
 // Entity tool flyouts — each reuses the tool component's own props, plus an optional title.
@@ -165,6 +174,11 @@ export interface EntityFlyoutApi {
   openGenericEntityFlyout: (params: OpenGenericEntityFlyoutParams) => void;
   /** Opens the generic entity details flyout as a child of the currently open flyout. */
   openGenericEntityFlyoutAsChild: (params: OpenGenericEntityFlyoutParams) => void;
+  /**
+   * Opens the matching entity details flyout (host/user/service/generic, by `engineType`) as a
+   * new, top-level flyout. Use when navigating to an entity from a table or list.
+   */
+  openEntityFlyout: (params: OpenEntityDetailsParams) => void;
   /**
    * Opens the matching entity details flyout (host/user/service/generic, by `engineType`) as a
    * child of the currently open flyout. Use for related-entity navigation (graph, resolution).
@@ -209,6 +223,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
   const history = useHistory();
   const { session: sessionMode, historyKey } = useFlyoutSessionContext();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
+  const defaultToolsFlyoutProperties = useDefaultToolsFlyoutProperties();
   const open = useOpenFlyout();
   const urlParamKey = urlParamKeyForHistoryKey(historyKey);
   const { writeOnOpen, buildOnClose } = useFlyoutV2UrlWriter(urlParamKey, historyKey);
@@ -242,7 +257,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
       session: FLYOUT_SESSION_KIND.START,
       ...(title !== undefined ? { title } : {}),
     }),
-    [historyKey]
+    [defaultToolsFlyoutProperties, historyKey]
   );
 
   // Main entity flyouts.
@@ -254,6 +269,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
         hostName: props.hostName,
         entityId: props.entityId,
         scopeId: props.scopeId,
+        mode: toEntityDescriptorMode(props.mode),
       });
       const onClose = buildOnClose(null);
       open(
@@ -279,6 +295,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
           hostName: props.hostName,
           entityId: props.entityId,
           scopeId: props.scopeId,
+          mode: toEntityDescriptorMode(props.mode),
         },
         'inherit'
       );
@@ -308,6 +325,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
         userName: props.userName,
         entityId: props.entityId,
         scopeId: props.scopeId,
+        mode: toEntityDescriptorMode(props.mode),
       });
       const onClose = buildOnClose(null);
       open(
@@ -333,6 +351,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
           userName: props.userName,
           entityId: props.entityId,
           scopeId: props.scopeId,
+          mode: toEntityDescriptorMode(props.mode),
         },
         'inherit'
       );
@@ -362,6 +381,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
         serviceName: props.serviceName,
         entityId: props.entityId,
         scopeId: props.scopeId,
+        mode: toEntityDescriptorMode(props.mode),
       });
       const onClose = buildOnClose(null);
       open(
@@ -387,6 +407,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
           serviceName: props.serviceName,
           entityId: props.entityId,
           scopeId: props.scopeId,
+          mode: toEntityDescriptorMode(props.mode),
         },
         'inherit'
       );
@@ -468,37 +489,191 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
     [open, mainProperties, readFirstDescriptor, writeOnOpen, buildOnClose]
   );
 
-  const openEntityDetailsAsChild = useCallback(
-    ({ engineType, entityId, entityName, scopeId, title, origin }: OpenEntityDetailsParams) => {
+  const openEntityFlyout = useCallback(
+    ({
+      engineType,
+      entityId,
+      entityName,
+      scopeId,
+      contextID,
+      title,
+      origin,
+      mode,
+    }: OpenEntityDetailsParams) => {
       let children: ReactNode;
       let descriptor: FlyoutDescriptor;
       switch (engineType) {
         case 'host':
-          children = <Host hostName={entityName ?? ''} entityId={entityId} scopeId={scopeId} />;
-          descriptor = { kind: FLYOUT_DESCRIPTOR_KIND.host, hostName: entityName ?? '', entityId };
+          children = (
+            <Host
+              hostName={entityName ?? ''}
+              entityId={entityId}
+              scopeId={scopeId}
+              contextID={contextID}
+              mode={mode}
+            />
+          );
+          descriptor = {
+            kind: FLYOUT_DESCRIPTOR_KIND.host,
+            hostName: entityName ?? '',
+            entityId,
+            scopeId,
+            mode: toEntityDescriptorMode(mode),
+          };
           break;
         case 'user':
-          children = <User userName={entityName ?? ''} entityId={entityId} scopeId={scopeId} />;
-          descriptor = { kind: FLYOUT_DESCRIPTOR_KIND.user, userName: entityName ?? '', entityId };
+          children = (
+            <User
+              userName={entityName ?? ''}
+              entityId={entityId}
+              scopeId={scopeId}
+              contextID={contextID}
+              mode={mode}
+            />
+          );
+          descriptor = {
+            kind: FLYOUT_DESCRIPTOR_KIND.user,
+            userName: entityName ?? '',
+            entityId,
+            scopeId,
+            mode: toEntityDescriptorMode(mode),
+          };
           break;
         case 'service':
           children = (
-            <Service serviceName={entityName ?? ''} entityId={entityId} scopeId={scopeId} />
+            <Service
+              serviceName={entityName ?? ''}
+              entityId={entityId}
+              scopeId={scopeId}
+              contextID={contextID}
+              mode={mode}
+            />
           );
           descriptor = {
             kind: FLYOUT_DESCRIPTOR_KIND.service,
             serviceName: entityName ?? '',
             entityId,
+            scopeId,
+            mode: toEntityDescriptorMode(mode),
           };
           break;
         default:
-          children = <GenericEntity entityId={entityId} scopeId={scopeId} />;
+          children = <GenericEntity entityId={entityId} scopeId={scopeId} contextID={contextID} />;
+          descriptor = { kind: FLYOUT_DESCRIPTOR_KIND.genericEntity, entityId, scopeId };
+      }
+      const flyoutTitle =
+        title ??
+        (engineType === 'host'
+          ? formatFlyoutTitle(HOST_TITLE, entityName)
+          : engineType === 'user'
+          ? formatFlyoutTitle(USER_TITLE, entityName)
+          : engineType === 'service'
+          ? formatFlyoutTitle(SERVICE_TITLE, entityName)
+          : GENERIC_ENTITY_TITLE);
+      writeOnOpen(descriptor);
+      const onClose = buildOnClose(null);
+      open(
+        children,
+        { ...mainProperties(undefined, flyoutTitle), onClose },
+        {
+          surface: FLYOUT_SURFACE.FLYOUT,
+          flyoutType:
+            engineType === 'host' || engineType === 'user' || engineType === 'service'
+              ? (engineType as FlyoutType)
+              : FLYOUT_TYPE.GENERIC,
+          session: sessionMode,
+          origin,
+        }
+      );
+    },
+    [open, mainProperties, sessionMode, writeOnOpen, buildOnClose]
+  );
+
+  const openEntityDetailsAsChild = useCallback(
+    ({
+      engineType,
+      entityId,
+      entityName,
+      scopeId,
+      contextID,
+      title,
+      origin,
+      mode,
+    }: OpenEntityDetailsParams) => {
+      let children: ReactNode;
+      let descriptor: FlyoutDescriptor;
+      switch (engineType) {
+        case 'host':
+          children = (
+            <Host
+              hostName={entityName ?? ''}
+              entityId={entityId}
+              scopeId={scopeId}
+              contextID={contextID}
+              mode={mode}
+            />
+          );
+          descriptor = {
+            kind: FLYOUT_DESCRIPTOR_KIND.host,
+            hostName: entityName ?? '',
+            entityId,
+            scopeId,
+            mode: toEntityDescriptorMode(mode),
+          };
+          break;
+        case 'user':
+          children = (
+            <User
+              userName={entityName ?? ''}
+              entityId={entityId}
+              scopeId={scopeId}
+              contextID={contextID}
+              mode={mode}
+            />
+          );
+          descriptor = {
+            kind: FLYOUT_DESCRIPTOR_KIND.user,
+            userName: entityName ?? '',
+            entityId,
+            scopeId,
+            mode: toEntityDescriptorMode(mode),
+          };
+          break;
+        case 'service':
+          children = (
+            <Service
+              serviceName={entityName ?? ''}
+              entityId={entityId}
+              scopeId={scopeId}
+              contextID={contextID}
+              mode={mode}
+            />
+          );
+          descriptor = {
+            kind: FLYOUT_DESCRIPTOR_KIND.service,
+            serviceName: entityName ?? '',
+            entityId,
+            scopeId,
+            mode: toEntityDescriptorMode(mode),
+          };
+          break;
+        default:
+          children = <GenericEntity entityId={entityId} scopeId={scopeId} contextID={contextID} />;
           descriptor = { kind: FLYOUT_DESCRIPTOR_KIND.genericEntity, entityId, scopeId };
       }
       const parentDescriptor = readFirstDescriptor();
       writeOnOpen(descriptor, 'inherit');
       const onClose = buildOnClose(parentDescriptor);
-      const childTitle = title ?? entityName ?? entityId;
+      const titleValue = entityName ?? entityId;
+      const childTitle =
+        title ??
+        (engineType === 'host'
+          ? formatFlyoutTitle(HOST_TITLE, titleValue)
+          : engineType === 'user'
+          ? formatFlyoutTitle(USER_TITLE, titleValue)
+          : engineType === 'service'
+          ? formatFlyoutTitle(SERVICE_TITLE, titleValue)
+          : GENERIC_ENTITY_TITLE);
       open(
         children,
         {
@@ -523,12 +698,13 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
   // Entity tool flyouts.
   const openEntityRiskInputs = useCallback(
     ({ title, origin, ...props }: OpenEntityRiskInputsParams) => {
-      const { entityType, entityName, entityId } = props;
+      const { entityType, entityName, entityId, subTab } = props;
       writeOnOpen({
         kind: FLYOUT_DESCRIPTOR_KIND.entityRiskInputs,
         entityType: entityType as string,
         entityName,
         entityId,
+        ...(subTab ? { subTab } : {}),
       });
       // Entity tools open session:'start' (roots): the entity main is not persisted alongside the
       // tool, so closing the tool clears the param rather than reverting to the entity.
@@ -575,12 +751,14 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
   );
   const openEntityAlertsInsights = useCallback(
     ({ title, origin, ...props }: OpenEntityAlertsInsightsParams) => {
-      const { entityType, value, entityId } = props;
+      const { entityType, value, entityId, mode, scopeId } = props;
       writeOnOpen({
         kind: FLYOUT_DESCRIPTOR_KIND.entityAlertsInsights,
         entityType: entityType as string,
         value,
         entityId,
+        mode: toEntityDescriptorMode(mode),
+        scopeId,
       });
       const onClose = buildOnClose(null);
       open(
@@ -600,12 +778,13 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
   );
   const openEntityMisconfigurationInsights = useCallback(
     ({ title, origin, ...props }: OpenEntityMisconfigurationInsightsParams) => {
-      const { entityType, value, entityId } = props;
+      const { entityType, value, entityId, mode } = props;
       writeOnOpen({
         kind: FLYOUT_DESCRIPTOR_KIND.entityMisconfigurationInsights,
         entityType: entityType as string,
         value,
         entityId,
+        mode: toEntityDescriptorMode(mode),
       });
       const onClose = buildOnClose(null);
       open(
@@ -628,12 +807,13 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
   );
   const openEntityVulnerabilityInsights = useCallback(
     ({ title, origin, ...props }: OpenEntityVulnerabilityInsightsParams) => {
-      const { value, entityId, entityType } = props;
+      const { value, entityId, entityType, mode } = props;
       writeOnOpen({
         kind: FLYOUT_DESCRIPTOR_KIND.entityVulnerabilityInsights,
         value,
         entityId,
         entityType: entityType as string | undefined,
+        mode: toEntityDescriptorMode(mode),
       });
       const onClose = buildOnClose(null);
       open(
@@ -789,6 +969,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
       openServiceFlyoutAsChild,
       openGenericEntityFlyout,
       openGenericEntityFlyoutAsChild,
+      openEntityFlyout,
       openEntityDetailsAsChild,
       openEntityRiskInputs,
       openEntityAnomalyInsights,
@@ -810,6 +991,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
       openServiceFlyoutAsChild,
       openGenericEntityFlyout,
       openGenericEntityFlyoutAsChild,
+      openEntityFlyout,
       openEntityDetailsAsChild,
       openEntityRiskInputs,
       openEntityAnomalyInsights,

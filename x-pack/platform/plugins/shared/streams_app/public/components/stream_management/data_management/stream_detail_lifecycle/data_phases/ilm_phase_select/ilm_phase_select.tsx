@@ -33,7 +33,6 @@ export interface IlmPhaseSelectRenderButtonProps {
   disabled: boolean;
   onClick: React.MouseEventHandler;
   'data-test-subj': string;
-  'aria-label': string;
 }
 
 export interface IlmPhaseSelectProps {
@@ -160,9 +159,6 @@ export const IlmPhaseSelect = ({
     disabled: isDisabled,
     onClick: () => togglePopover(),
     'data-test-subj': `${dataTestSubj}Button`,
-    'aria-label': i18n.translate('xpack.streams.ilmPhaseSelect.buttonAriaLabel', {
-      defaultMessage: 'Add ILM phase button',
-    }),
   });
 
   return (

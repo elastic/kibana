@@ -8,6 +8,7 @@
  */
 
 import type { RequestHandlerContext } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { LINKS_LIBRARY_TYPE } from '../../../common/constants';
 import { getLinksCRUResponseBody } from '../get_cru_response_body';
 import type { LinksReadResponseBody } from './types';
@@ -22,5 +23,10 @@ export async function read(
     LINKS_LIBRARY_TYPE,
     id
   );
+
+  if (isSavedObjectErrorResult(savedObject)) {
+    throw new Error(savedObject.error.message);
+  }
+
   return getLinksCRUResponseBody(savedObject);
 }

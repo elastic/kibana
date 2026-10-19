@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import React, { useEffect, useRef, useState } from 'react';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { ES_FIELD_TYPES, SerializedFieldFormat } from '../../../shared_imports';
 import { UseField, useFormData, useFormContext } from '../../../shared_imports';
 import { useFieldEditorContext } from '../../field_editor_context';
@@ -55,11 +56,9 @@ export const FormatField = ({ disabled }: Props) => {
           <>
             {isSubmitted && errors.length > 0 && (
               <>
-                <EuiCallOut
+                <KbnDangerCallout
                   announceOnMount
                   title={errors.map((err) => err.message)}
-                  color="danger"
-                  iconType="cross"
                   data-test-subj="formFormatError"
                 />
                 <EuiSpacer size="m" />

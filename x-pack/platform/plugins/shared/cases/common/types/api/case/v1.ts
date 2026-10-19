@@ -23,6 +23,10 @@ import {
   MAX_CATEGORY_FILTER_LENGTH,
   MAX_ASSIGNEES_PER_CASE,
   MAX_CUSTOM_FIELDS_PER_CASE,
+  MAX_EXTENDED_FIELD_FILTER_VALUE_LENGTH,
+  MAX_EXTENDED_FIELD_FILTERS,
+  MAX_TEMPLATE_DEFINITION_LENGTH,
+  MAX_TEMPLATE_KEY_LENGTH,
   CASE_EXTENDED_FIELDS,
 } from '../../../constants';
 import {
@@ -43,7 +47,6 @@ import {
   CaseSeverityRt,
   CasesRt,
   CaseStatusRt,
-  CaseTemplate,
   RelatedCaseRt,
   SimilarCaseRt,
 } from '../../domain/case/v1';
@@ -74,9 +77,19 @@ const TemplateVersionRt = new rt.Type<number, number, unknown>(
 );
 
 /**
- * Template reference accepted on case CREATION. Unlike the stored/domain `CaseTemplate` (and the
- * PATCH request, where switching templates is an explicit versioned action), `version` may be
- * omitted here: the server resolves the template's latest version and pins it on the case.
+ * Template reference accepted on case UPDATE. Both `id` and `version` are required: switching a
+ * template on update is an explicit versioned action; the server does not resolve a latest version
+ * here. `version` must be a positive integer (≥ 1).
+ */
+export const CaseUpdateRequestTemplateRt = rt.strict({
+  id: limitedStringSchema({ fieldName: 'template.id', min: 0, max: MAX_TEMPLATE_KEY_LENGTH }),
+  version: TemplateVersionRt,
+});
+
+/**
+ * Template reference accepted on case CREATION. Unlike `CaseUpdateRequestTemplateRt` (and the
+ * stored/domain `CaseTemplate`), `version` may be omitted here: the server resolves the
+ * template's latest version and pins it on the case.
  */
 export const CaseRequestTemplateRt = rt.intersection([
   rt.strict({
@@ -107,6 +120,10 @@ const CustomFieldRt = rt.union([
   CaseCustomFieldNumberWithValidationRt,
 ]);
 
+/**
+ * @deprecated Use `extended_fields` (CASE_EXTENDED_FIELDS) instead. Values written here still work
+ * during the migration to the field-library / extended-fields system.
+ */
 export const CaseRequestCustomFieldsRt = limitedArraySchema({
   codec: CustomFieldRt,
   fieldName: 'customFields',
@@ -169,7 +186,10 @@ export const CaseBaseOptionalFieldsRequestRt = rt.exact(
      * The alert sync settings
      */
     settings: CaseSettingsRt,
-    template: rt.union([CaseTemplate, rt.null]),
+    template: rt.union([CaseUpdateRequestTemplateRt, rt.null]),
+    // Field-library values keyed by storage key (`<name>_as_<type>`); the replacement for
+    // `customFields`. Only keys defined in the owner's field library (or an applied template) are
+    // accepted. Discover valid keys via `GET /api/cases/fields`.
     [CASE_EXTENDED_FIELDS]: rt.union([rt.undefined, rt.record(rt.string, rt.string)]),
     /**
      * The close reason to sync to attached alerts
@@ -457,8 +477,16 @@ export const CasesSearchRequestSearchFieldsRt = rt.keyof({
 });
 
 const ExtendedFieldFilterRt = rt.strict({
-  label: rt.string,
-  value: rt.string,
+  label: limitedStringSchema({
+    fieldName: 'extendedFieldFilters.label',
+    min: 1,
+    max: MAX_TEMPLATE_DEFINITION_LENGTH,
+  }),
+  value: limitedStringSchema({
+    fieldName: 'extendedFieldFilters.value',
+    min: 1,
+    max: MAX_EXTENDED_FIELD_FILTER_VALUE_LENGTH,
+  }),
 });
 
 export const CasesSearchRequestRt = rt.intersection([
@@ -489,8 +517,14 @@ export const CasesSearchRequestRt = rt.intersection([
     rt.partial({
       /**
        * Extended field filters parsed from label:value syntax in the search bar.
+       * Same-label values are OR'd; distinct labels are AND'd.
        */
-      extendedFieldFilters: rt.array(ExtendedFieldFilterRt),
+      extendedFieldFilters: limitedArraySchema({
+        codec: ExtendedFieldFilterRt,
+        fieldName: 'extendedFieldFilters',
+        min: 0,
+        max: MAX_EXTENDED_FIELD_FILTERS,
+      }),
     })
   ),
 ]);
@@ -503,6 +537,25 @@ export const CasesFindResponseRt = rt.intersection([
     total: rt.number,
   }),
   CasesStatusResponseRt,
+]);
+
+/**
+ * Response of the internal `_search` API. A superset of the public `_find` response: it adds
+ * `mttr` so the (internal-only) cases list metrics bar can reflect the same query as the table.
+ * `mttr` deliberately lives here and NOT on `CasesFindResponseRt` so the public `_find` contract
+ * (and its generated OpenAPI) never advertises a field the public API does not return.
+ */
+export const CasesSearchResponseRt = rt.intersection([
+  CasesFindResponseRt,
+  rt.exact(
+    rt.partial({
+      /**
+       * The average resolve time in seconds of the cases matching the search, ignoring the
+       * status filter (like the status counts). Null when no matching case has been closed.
+       */
+      mttr: rt.union([rt.number, rt.null]),
+    })
+  ),
 ]);
 
 export const CasesSimilarResponseRt = rt.strict({
@@ -651,7 +704,21 @@ export const CasesByAlertIDRequestRt = rt.exact(
 
 export const GetRelatedCasesByAlertResponseRt = rt.array(RelatedCaseRt);
 
-export const SimilarCasesSearchRequestRt = paginationSchema({ maxPerPage: MAX_CASES_PER_PAGE });
+export const SimilarCasesSearchRequestRt = rt.intersection([
+  paginationSchema({ maxPerPage: MAX_CASES_PER_PAGE }),
+  rt.exact(
+    rt.partial({
+      /**
+       * The field to sort similar cases by.
+       */
+      sortField: CasesFindRequestSortFieldsRt,
+      /**
+       * The order to sort by.
+       */
+      sortOrder: rt.union([rt.literal('desc'), rt.literal('asc')]),
+    })
+  ),
+]);
 
 export const FindCasesContainingAllDocumentsRequestRt = rt.exact(
   rt.type({
@@ -683,6 +750,7 @@ export type CasesFindRequestWithCustomFields = rt.TypeOf<typeof CasesFindRequest
 export type CasesSearchRequest = rt.TypeOf<typeof CasesSearchRequestRt>;
 export type CasesFindRequestSortFields = rt.TypeOf<typeof CasesFindRequestSortFieldsRt>;
 export type CasesFindResponse = rt.TypeOf<typeof CasesFindResponseRt>;
+export type CasesSearchResponse = rt.TypeOf<typeof CasesSearchResponseRt>;
 export type CasePatchRequest = rt.TypeOf<typeof CasePatchRequestRt>;
 export type CasesPatchRequest = rt.TypeOf<typeof CasesPatchRequestRt>;
 export type UpdateSummary = rt.TypeOf<typeof UpdateSummaryRt>;

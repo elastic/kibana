@@ -3,13 +3,15 @@ navigation_title: "Sublime Security"
 type: reference
 description: "Use the Sublime Security connector to search flagged email, get verdicts, and quarantine, trash, or restore message groups."
 applies_to:
-  stack: preview 9.6
+  stack: preview 9.5
   serverless: preview
 ---
 
 # Sublime Security connector [sublime-security-action-type]
 
 The Sublime Security connector enables searching flagged and user-reported email, retrieving message details and machine-learning verdicts, and remediating email threats by quarantining, trashing, or restoring message groups in Sublime Security.
+
+You can use this connector in **Agent Builder** and **Workflows**.
 
 ## Create connectors in {{kib}} [define-sublime-security-ui]
 

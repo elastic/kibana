@@ -8,7 +8,7 @@
 import { renderHook } from '@testing-library/react';
 import { useQuery } from '@kbn/react-query';
 import { getESQLResults } from '@kbn/esql-utils';
-import { getLatestEntitiesIndexName } from '@kbn/entity-store/common';
+import { getEntitiesAlias } from '@kbn/entity-store/common';
 import { useRecentAnomaliesQuery } from './recent_anomalies_query_hooks';
 import {
   useRecentAnomaliesTopRowsEsqlSource,
@@ -17,14 +17,17 @@ import {
 import { useKibana } from '../../../../common/lib/kibana';
 import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { useSecurityMlModuleJobIds } from '../../../../common/components/ml/hooks/use_security_ml_module_job_ids';
+import { useInstalledSecurityJobsIds } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
 
 jest.mock('@kbn/react-query', () => ({ useQuery: jest.fn() }));
 jest.mock('@kbn/esql-utils', () => ({
   prettifyQuery: jest.fn((q) => q),
   getESQLResults: jest.fn(),
 }));
-jest.mock('@kbn/entity-store/common', () => ({ getLatestEntitiesIndexName: jest.fn() }));
+jest.mock('@kbn/entity-store/common', () => ({
+  getEntitiesAlias: jest.fn(),
+  ENTITY_LATEST: 'latest',
+}));
 jest.mock('./recent_anomalies_esql_source_query_hooks', () => ({
   useRecentAnomaliesTopRowsEsqlSource: jest.fn(),
   useRecentAnomaliesDataEsqlSource: jest.fn(),
@@ -34,20 +37,20 @@ jest.mock('../../../../common/hooks/use_global_filter_query', () => ({
   useGlobalFilterQuery: jest.fn(),
 }));
 jest.mock('../../../../common/containers/use_global_time', () => ({ useGlobalTime: jest.fn() }));
-jest.mock('../../../../common/components/ml/hooks/use_security_ml_module_job_ids', () => ({
-  useSecurityMlModuleJobIds: jest.fn(),
+jest.mock('../../../../common/components/ml/hooks/use_installed_security_jobs', () => ({
+  useInstalledSecurityJobsIds: jest.fn(),
 }));
 jest.mock('../../../../common/hooks/use_error_toast', () => ({ useErrorToast: jest.fn() }));
 
 const mockUseQuery = useQuery as jest.Mock;
 const mockGetESQLResults = getESQLResults as jest.Mock;
-const mockGetLatestEntitiesIndexName = getLatestEntitiesIndexName as jest.Mock;
+const mockGetEntitiesAlias = getEntitiesAlias as jest.Mock;
 const mockTopRowsSource = useRecentAnomaliesTopRowsEsqlSource as jest.Mock;
 const mockDataSource = useRecentAnomaliesDataEsqlSource as jest.Mock;
 const mockUseKibana = useKibana as jest.Mock;
 const mockUseGlobalFilterQuery = useGlobalFilterQuery as jest.Mock;
 const mockUseGlobalTime = useGlobalTime as jest.Mock;
-const mockUseSecurityJobIds = useSecurityMlModuleJobIds as jest.Mock;
+const mockUseSecurityJobIds = useInstalledSecurityJobsIds as jest.Mock;
 
 const TOP_ROWS_SQL = 'TOP_ROWS_SQL';
 const DATA_SQL = 'DATA_SQL';
@@ -102,7 +105,7 @@ describe('useRecentAnomaliesQuery', () => {
     mockUseGlobalTime.mockReturnValue({ from: 'global-from', to: 'global-to' });
     mockUseSecurityJobIds.mockReturnValue({ jobIds: ['security-job-01'], loading: false });
     mockUseGlobalFilterQuery.mockReturnValue({ filterQuery: EMPTY_BOOL });
-    mockGetLatestEntitiesIndexName.mockReturnValue('entities-latest-default');
+    mockGetEntitiesAlias.mockReturnValue('entities-latest-default');
     mockTopRowsSource.mockReturnValue(TOP_ROWS_SQL);
     mockDataSource.mockReturnValue(DATA_SQL);
     mockGetESQLResults.mockResolvedValue({ response: { columns: [], values: [] } });
@@ -161,6 +164,46 @@ describe('useRecentAnomaliesQuery', () => {
       await topRowsCall()![1]({ signal: undefined });
       const callArgs = mockGetESQLResults.mock.calls.at(-1)![0];
       expect(callArgs.filter).toBeUndefined();
+    });
+  });
+
+  describe('execution context', () => {
+    const homePageContext = (id: string) => ({
+      child: { type: 'security_solution', name: 'entity_analytics:home_page', id },
+    });
+
+    it('labels the top rows query as anomalies_top_rows', async () => {
+      renderHook(() => useRecentAnomaliesQuery(baseParams));
+
+      await topRowsCall()![1]({ signal: undefined });
+
+      expect(mockGetESQLResults).toHaveBeenCalledWith(
+        expect.objectContaining({ executionContext: homePageContext('anomalies_top_rows') })
+      );
+    });
+
+    it('labels the heatmap data query as anomalies_heatmap', async () => {
+      topRowsRecords = [{ entity_id: 'host:test_host_01', entity_name: 'h1', entity_type: 'host' }];
+
+      renderHook(() => useRecentAnomaliesQuery(baseParams));
+
+      await dataCall()![1]({ signal: undefined });
+
+      expect(mockGetESQLResults).toHaveBeenCalledWith(
+        expect.objectContaining({ executionContext: homePageContext('anomalies_heatmap') })
+      );
+    });
+
+    it('labels the entity resolution query as anomalies_entity_filter', async () => {
+      mockUseGlobalFilterQuery.mockReturnValue({ filterQuery: ACTIVE_BOOL });
+
+      renderHook(() => useRecentAnomaliesQuery(baseParams));
+
+      await resolutionCall()![1]({ signal: undefined });
+
+      expect(mockGetESQLResults).toHaveBeenCalledWith(
+        expect.objectContaining({ executionContext: homePageContext('anomalies_entity_filter') })
+      );
     });
   });
 

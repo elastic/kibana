@@ -21,6 +21,9 @@ dependsOn:
   - '@kbn/visualization-utils'
   - '@kbn/zod'
   - '@kbn/core'
+  - '@kbn/utility-types'
+  - '@kbn/es-query'
+  - '@kbn/inference-common'
 tags:
   - shared-common
   - package

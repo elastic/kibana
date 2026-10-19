@@ -18,6 +18,13 @@ import { formatFlyoutTitle, NETWORK_TITLE } from '../../flyout_v2/shared/constan
 import { DataViewManagerBootstrap } from '../alert_flyout_overview_tab_component/data_view_manager_bootstrap';
 import type { StartServices } from '../../types';
 import type { SecurityAppStore } from '../../common/store/types';
+import {
+  FLYOUT_ORIGIN,
+  FLYOUT_SESSION_KIND,
+  FLYOUT_SURFACE,
+  FLYOUT_TYPE,
+} from '../../common/lib/telemetry';
+import { trackFlyoutOpen } from '../../flyout_v2/shared/hooks/use_flyout_telemetry';
 
 export interface IpCellRendererProps extends DataGridCellValueElementProps {
   /** Kibana start services, used to access overlays for opening the network details flyout */
@@ -47,7 +54,7 @@ export const IpCellRenderer = React.memo<IpCellRendererProps>(({ services, store
     (ip: string) => {
       const flyoutContent = buildFlyoutContent(props.columnId, ip);
       if (flyoutContent) {
-        overlays.openSystemFlyout(
+        const ref = overlays.openSystemFlyout(
           flyoutProviders({
             services,
             store,
@@ -65,6 +72,12 @@ export const IpCellRenderer = React.memo<IpCellRendererProps>(({ services, store
             title: formatFlyoutTitle(NETWORK_TITLE, ip),
           }
         );
+        trackFlyoutOpen(services.telemetry, ref, {
+          surface: FLYOUT_SURFACE.FLYOUT,
+          flyoutType: FLYOUT_TYPE.NETWORK,
+          session: FLYOUT_SESSION_KIND.START,
+          origin: FLYOUT_ORIGIN.TABLE_FIELD_LINK,
+        });
       }
     },
     [

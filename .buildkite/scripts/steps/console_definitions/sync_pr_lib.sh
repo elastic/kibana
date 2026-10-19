@@ -4,21 +4,19 @@
 
 KIBANA_MACHINE_USERNAME="kibanamachine"
 
-# create_sync_pr git_scope pr_title pr_body branch_prefix commit_msg slack_key [label...]
+# create_sync_pr git_scope pr_title pr_body branch_prefix commit_msg slack_key auto_merge [label...]
 #
 # Checks for a diff in git_scope, skips (with a slack message) if an open PR for
-# pr_title already exists, otherwise opens a new one with auto-merge.
+# pr_title already exists, otherwise opens a new one and optionally enables auto-merge.
 create_sync_pr() {
-  local git_scope="$1" pr_title="$2" pr_body="$3" branch_prefix="$4" commit_msg="$5" slack_key="$6"
-  shift 6
+  local git_scope="$1" pr_title="$2" pr_body="$3" branch_prefix="$4" commit_msg="$5" slack_key="$6" auto_merge="$7"
+  shift 7
   local labels=("$@")
 
-  # No diff, nothing to do.
-  set +e
-  git diff --exit-code --quiet $git_scope
-  local diff_status=$?
-  set -e
-  if [ $diff_status -eq 0 ]; then
+  # No tracked or untracked changes, nothing to do.
+  local changes
+  changes=$(git status --porcelain --untracked-files=all -- "$git_scope")
+  if [ -z "$changes" ]; then
     echo "No differences found for '$pr_title'. Exiting.."
     return 0
   fi
@@ -31,9 +29,8 @@ create_sync_pr() {
   # Skip (and send message) if last week's PR is still open.
   local existing_pr_title
   existing_pr_title=$(gh pr list \
-    --search "$pr_title" \
+    --search "$pr_title (author:$KIBANA_MACHINE_USERNAME OR author:app/elastic-vault-github-plugin-prod)" \
     --state open \
-    --author "$KIBANA_MACHINE_USERNAME" \
     --limit 1 \
     --json title \
     -q ".[].title")
@@ -48,7 +45,7 @@ create_sync_pr() {
 
   local branch_name="${branch_prefix}_$(date +%s)"
   git checkout -b "$branch_name"
-  git add $git_scope
+  git add -- "$git_scope"
   git commit -m "$commit_msg"
 
   echo "Changes committed. Creating pull request."
@@ -68,21 +65,26 @@ create_sync_pr() {
     --head "$branch_name" \
     "${label_args[@]}")
 
-  echo "Enabling auto-merge (squash)"
-  if ! gh pr merge "$pr_url" --auto --squash; then
-    echo "Warning: Failed to enable auto-merge (squash) for $pr_url"
+  if [[ "$auto_merge" =~ ^(1|true)$ ]]; then
+    echo "Enabling auto-merge (squash)"
+    if ! gh pr merge "$pr_url" --auto --squash; then
+      echo "Warning: Failed to enable auto-merge (squash) for $pr_url"
+    fi
+  else
+    echo "Auto-merge disabled for $pr_url"
   fi
 }
 
 # _notify_existing_pr pr_title slack_key
 #
 # Posts a Slack message via buildkite-agent metadata when
-# KIBANA_SLACK_NOTIFICATIONS_ENABLED is set. Uses a per call slack_key so that
-# multiple syncs skipping in the same build each deliver their own message.
+# ELASTIC_SLACK_NOTIFICATIONS_ENABLED or KIBANA_SLACK_NOTIFICATIONS_ENABLED is
+# set. Uses a per call slack_key so that multiple syncs skipping in the same
+# build each deliver their own message.
 _notify_existing_pr() {
   local pr_title="$1" slack_key="$2"
   local msg="It looks like there is an open \"${pr_title}\" PR that hasn't been merged yet. This week's sync skipped opening a new one — please review/merge the existing PR."
-  if [[ "${KIBANA_SLACK_NOTIFICATIONS_ENABLED:-}" =~ ^(1|true)$ ]]; then
+  if [[ "${ELASTIC_SLACK_NOTIFICATIONS_ENABLED:-}" =~ ^(1|true)$ || "${KIBANA_SLACK_NOTIFICATIONS_ENABLED:-}" =~ ^(1|true)$ ]]; then
     buildkite-agent meta-data set "slack:${slack_key}:body" "$msg" >/dev/null 2>&1 || true
   fi
 }

@@ -44,7 +44,7 @@ export const registerDeleteRoute = (router: TagsPluginRouter, usageCounter?: Usa
       },
     },
     async (ctx, req, res) =>
-      telemetryHandler(req, usageCounter, async () => {
+      telemetryHandler(req, { usageCounter }, async () => {
         const { id } = req.params;
         try {
           await deleteTag(ctx, id);

@@ -54,4 +54,35 @@ describe('<IconButtonGroup />', () => {
 
     expect(await screen.findByRole('tooltip')).toHaveTextContent('Tooltip');
   });
+
+  it('forwards EBT click attributes to the button', () => {
+    renderWithI18n(
+      <IconButtonGroup
+        legend="Legend"
+        buttons={[
+          {
+            label: 'Text',
+            onClick: jest.fn(),
+            iconType: 'text',
+            'data-ebt-action': 'editGridSettings',
+            'data-ebt-element': 'chartsToolbar',
+            'data-ebt-detail': 'detail',
+          },
+        ]}
+      />
+    );
+
+    expect(screen.getByRole('button', { name: 'Text' })).toHaveAttribute(
+      'data-ebt-action',
+      'editGridSettings'
+    );
+    expect(screen.getByRole('button', { name: 'Text' })).toHaveAttribute(
+      'data-ebt-element',
+      'chartsToolbar'
+    );
+    expect(screen.getByRole('button', { name: 'Text' })).toHaveAttribute(
+      'data-ebt-detail',
+      'detail'
+    );
+  });
 });

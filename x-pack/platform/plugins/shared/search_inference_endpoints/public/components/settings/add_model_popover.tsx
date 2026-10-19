@@ -110,7 +110,7 @@ export const AddModelPopover: React.FC<AddModelPopoverProps> = ({
       })}
       button={
         <EuiButtonEmpty
-          iconType="plusInCircle"
+          iconType="plusCircle"
           onClick={() => setIsOpen((prev) => !prev)}
           size="s"
           data-test-subj="add-model-button"

@@ -70,7 +70,7 @@ This is the most common function of the service. It determines the currently act
 - **UI Consumption**: The `ChromeService` subscribes to this stream using the `useObservable` hook and passes the result directly to the Navigation component as props.
 - **Detection Algorithm**: The active node is found by the `findActiveNodes` utility, which uses two methods:
   1.  **Custom Logic (`getIsActive`)**: A node can define its own function for complex activation logic.
-  2.  **Longest URL Match**: As a fallback, the utility finds the most specific link by matching the longest URL prefix.
+  2.  **Longest URL Match**: As a fallback, the utility finds the most specific link by matching the longest URL prefix. App-level links (id without `:`) match `baseUrl`, so they stay active on every path under that app — not only the `defaultPath` stored on `url`. Deep links still match `url`.
 
 #### Breadcrumbs Generation
 

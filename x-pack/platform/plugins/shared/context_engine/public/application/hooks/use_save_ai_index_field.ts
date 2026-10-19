@@ -29,10 +29,15 @@ interface UseSaveAiIndexFieldOptions<TValue> {
  */
 export const toProperties = ({
   id,
+  managed,
   date_created: _dateCreated,
   date_modified: _dateModified,
+  traces,
   ...properties
-}: GetAiIndexResponse): AiIndexProperties => properties;
+}: GetAiIndexResponse): AiIndexProperties => ({
+  ...properties,
+  traces: traces.map(({ type, value }) => ({ type, value })),
+});
 
 /**
  * Shared logic for hooks that update a single field on an existing AI index. The

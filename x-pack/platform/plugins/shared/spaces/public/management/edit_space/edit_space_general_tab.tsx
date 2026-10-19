@@ -5,30 +5,31 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { isEqual } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { ScopedHistory } from '@kbn/core-application-browser';
 import type { CPSPluginStart } from '@kbn/cps/public';
+import { isCustomProjectRouting } from '@kbn/cps-common';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { EditSpaceTabFooter } from './footer';
 import { useEditSpaceServices } from './provider';
 import type { Space } from '../../../common';
 import { SOLUTION_VIEW_CLASSIC } from '../../../common/constants';
 import { getSpaceColor, getSpaceInitials } from '../../space_avatar';
-import { ConfirmDeleteModal } from '../components';
+import { ConfirmDeleteModal, NavigateOnLeave, SpacesUnsavedChangesPrompt } from '../components';
 import { ConfirmAlterActiveSpaceModal } from '../components/confirm_alter_active_space_modal';
 import { CustomizeAvatar } from '../components/customize_avatar';
 import { CustomizeCps } from '../components/customize_cps';
 import { CustomizeSpace } from '../components/customize_space';
 import { EnabledFeatures } from '../components/enabled_features';
 import { SolutionView } from '../components/solution_view';
-import { SpaceValidator } from '../lib';
+import { haveFormValuesChanged, SpaceValidator } from '../lib';
 import type { CustomizeSpaceFormValues } from '../types';
 
 interface Props {
@@ -53,12 +54,16 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
     imageUrl: imageAvatarSelected ? space.imageUrl : '',
   });
 
+  // pristine form values, used to determine whether the user has actually made any changes
+  const initialFormValuesRef = useRef<CustomizeSpaceFormValues>(formValues);
+
   // space initials are blank by default, they must be calculated
   const getSpaceFromFormValues = (newFormValues: CustomizeSpaceFormValues) => {
     return { ...newFormValues, initials: getSpaceInitials(newFormValues) };
   };
 
   const [isDirty, setIsDirty] = useState(false); // track if unsaved changes have been made
+  const [isLeaving, setIsLeaving] = useState(false); // track if the user has chosen to leave the form
   const [isLoading, setIsLoading] = useState(false); // track if user has just clicked the Update button
   const [showUserImpactWarning, setShowUserImpactWarning] = useState(false);
   const [showAlteringActiveSpaceDialog, setShowAlteringActiveSpaceDialog] = useState(false);
@@ -70,29 +75,7 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
 
   const initialFeatureVisibilityRef = useRef<string[]>(space.disabledFeatures ?? []);
   const storedFeatureVisibilityRef = useRef<string[] | undefined>(undefined);
-
-  useUnsavedChangesPrompt({
-    hasUnsavedChanges: isDirty,
-    http,
-    openConfirm: overlays.openConfirm,
-    navigateToUrl,
-    history,
-    titleText: i18n.translate('xpack.spaces.management.spaceDetails.unsavedChangesPromptTitle', {
-      defaultMessage: 'Leave without saving?',
-    }),
-    messageText: i18n.translate(
-      'xpack.spaces.management.spaceDetails.unsavedChangesPromptMessage',
-      {
-        defaultMessage: "Unsaved changes won't be applied to the space and will be lost.",
-      }
-    ),
-    cancelButtonText: i18n.translate('xpack.spaces.management.spaceDetails.keepEditingButton', {
-      defaultMessage: 'Save before leaving',
-    }),
-    confirmButtonText: i18n.translate('xpack.spaces.management.spaceDetails.leavePageButton', {
-      defaultMessage: 'Leave',
-    }),
-  });
+  const requiresReloadRef = useRef(false);
 
   useEffect(() => {
     let unmounted = false;
@@ -123,16 +106,18 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
 
   const onChangeSpaceSettings = useCallback(
     (newFormValues: CustomizeSpaceFormValues) => {
-      setFormValues({ ...formValues, ...newFormValues });
-      setIsDirty(true);
+      const updatedFormValues = { ...formValues, ...newFormValues };
+      setFormValues(updatedFormValues);
+      setIsDirty(haveFormValuesChanged(initialFormValuesRef.current, updatedFormValues));
     },
     [formValues]
   );
 
   const onChangeFeatures = useCallback(
     (updatedSpace: CustomizeSpaceFormValues) => {
-      setFormValues({ ...formValues, ...updatedSpace });
-      setIsDirty(true);
+      const updatedFormValues = { ...formValues, ...updatedSpace };
+      setFormValues(updatedFormValues);
+      setIsDirty(haveFormValuesChanged(initialFormValuesRef.current, updatedFormValues));
       setShowUserImpactWarning(true);
     },
     [formValues]
@@ -166,14 +151,15 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
     [onChangeSpaceSettings]
   );
 
-  const backToSpacesList = useCallback(() => {
-    history.push('/');
-  }, [history]);
+  // Once the user has chosen to leave — by saving, deleting, or cancelling — their changes are
+  // either persisted or deliberately discarded, so the unsaved changes prompt must not fire on the
+  // way back to the spaces list. `isDirty` cannot tell the difference on its own: it compares
+  // against the space as it was loaded, and saving does not change what was loaded.
+  const backToSpacesList = useCallback(() => setIsLeaving(true), []);
 
   const onClickCancel = useCallback(() => {
     setShowAlteringActiveSpaceDialog(false);
     setShowUserImpactWarning(false);
-    setIsDirty(false);
     backToSpacesList();
   }, [backToSpacesList]);
 
@@ -182,7 +168,13 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
   }, []);
 
   const canReadProjectRouting = (): boolean => {
-    return capabilities?.project_routing?.read_space_default === true;
+    if (capabilities?.project_routing?.read_space_default !== true) {
+      return false;
+    }
+    // Show the section either when the project is on a CPS-eligible tier, or
+    // when the space already has a non-default project routing value so users
+    // who downgraded can still unset any custom routing expression.
+    return cps?.isTierEligible === true || isCustomProjectRouting(space.projectRouting);
   };
 
   const updateProjectPicker = useCallback(
@@ -250,11 +242,10 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
 
         updateProjectPicker(spaceClone);
 
-        setIsDirty(false);
+        // the reload is deferred along with the navigation, so that the window reloads on the
+        // spaces list rather than on the space that was just left
+        requiresReloadRef.current = requiresReload;
         backToSpacesList();
-        if (requiresReload) {
-          props.reloadWindow();
-        }
       } catch (error) {
         logger.error('Could not save changes to space!', error);
         const message = error?.body?.message ?? error.toString();
@@ -268,15 +259,7 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
         setIsLoading(false);
       }
     },
-    [
-      backToSpacesList,
-      notifications.toasts,
-      formValues,
-      spacesManager,
-      logger,
-      props,
-      updateProjectPicker,
-    ]
+    [backToSpacesList, notifications.toasts, formValues, spacesManager, logger, updateProjectPicker]
   );
 
   const validator = useMemo(() => new SpaceValidator(), []);
@@ -339,10 +322,9 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
       showUserImpactWarning && (
         <>
           <EuiSpacer />
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount
-            color="warning"
-            iconType="info"
+            size="s"
             title={i18n.translate(
               'xpack.spaces.management.spaceDetails.spaceChangesWarning.impactAllUsersInSpace',
               {
@@ -358,6 +340,23 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
 
   return (
     <>
+      <SpacesUnsavedChangesPrompt
+        hasUnsavedChanges={isDirty && !isLeaving}
+        http={http}
+        overlays={overlays}
+        navigateToUrl={navigateToUrl}
+        history={history}
+      />
+      <NavigateOnLeave
+        isLeaving={isLeaving}
+        history={history}
+        onNavigated={() => {
+          if (requiresReloadRef.current) {
+            props.reloadWindow();
+          }
+        }}
+      />
+
       {doShowAlteringActiveSpaceDialog()}
       {doShowConfirmDeleteSpaceDialog()}
 

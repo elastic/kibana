@@ -9,11 +9,14 @@ import type { NewOutput, OutputType, ValueOf } from '../types';
 
 export const OUTPUT_SAVED_OBJECT_TYPE = 'ingest-outputs';
 
+export const MAX_HOSTS = 100;
+
 export const outputType = {
   Elasticsearch: 'elasticsearch',
   Logstash: 'logstash',
   Kafka: 'kafka',
   RemoteElasticsearch: 'remote_elasticsearch',
+  Otlp: 'otlp',
 } as const;
 
 export const DEFAULT_OUTPUT_ID = 'fleet-default-output';
@@ -42,6 +45,11 @@ export const ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID = 'es-managed-bulk-agentless-o
 export const SERVERLESS_AGENTLESS_MANAGED_BULK_OUTPUT_ID =
   'es-managed-bulk-agentless-output-internal';
 
+export const AGENTLESS_MANAGED_BULK_OUTPUT_IDS: ReadonlySet<string> = new Set([
+  ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
+  SERVERLESS_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
+]);
+
 // Output ID for the private endpoint (PrivateLink) in serverless.
 // Injected by project-controller/kibana-controller when PrivateLink is enabled.
 export const SERVERLESS_PRIVATE_OUTPUT_ID = 'es-private-output';
@@ -64,6 +72,7 @@ export const kafkaAuthType = {
   Userpass: 'user_pass',
   Ssl: 'ssl',
   Kerberos: 'kerberos',
+  OAuth2: 'oauth2',
   None: 'none',
 } as const;
 
@@ -76,6 +85,30 @@ export const kafkaSaslMechanism = {
   Plain: 'PLAIN',
   ScramSha256: 'SCRAM-SHA-256',
   ScramSha512: 'SCRAM-SHA-512',
+} as const;
+
+// SASL mechanism sent to the agent for the OAuth2 authentication method. It is not part of
+// `kafkaSaslMechanism` because users never select it: it comes with `auth_type: oauth2`.
+export const KAFKA_OAUTHBEARER_SASL_MECHANISM = 'OAUTHBEARER';
+
+export const kafkaOAuth2GrantType = {
+  ClientCredentials: 'client_credentials',
+  JwtBearer: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+} as const;
+
+export const kafkaOAuth2SignatureAlgorithm = {
+  Rs256: 'RS256',
+  Rs384: 'RS384',
+  Rs512: 'RS512',
+} as const;
+
+// Elastic Agent supports OAUTHBEARER for the Kafka output from this version.
+export const KAFKA_OAUTH2_MINIMUM_FLEET_SERVER_VERSION = '9.6.0';
+
+// How the agent authenticates to the Kerberos server: with a keytab file or with a password.
+export const kafkaKerberosAuthType = {
+  Keytab: 'keytab',
+  Password: 'password',
 } as const;
 
 export const kafkaPartitionType = {
@@ -107,6 +140,28 @@ export const kafkaVerificationModes = {
   Strict: 'strict',
   Certificate: 'certificate',
 } as const;
+
+export const otlpProtocol = {
+  Grpc: 'grpc',
+  HttpProtobuf: 'http/protobuf',
+} as const;
+
+export const otlpCompressionType = {
+  Gzip: 'gzip',
+  Snappy: 'snappy',
+  Zstd: 'zstd',
+  None: 'none',
+} as const;
+
+// snappy and zstd are gRPC-only; HTTP/protobuf only supports gzip and none
+export const OTLP_GRPC_ONLY_COMPRESSION_TYPES: ReadonlyArray<string> = [
+  otlpCompressionType.Snappy,
+  otlpCompressionType.Zstd,
+];
+
+// Fleet Server gained OTLP output support in this version. Placeholder until the
+// supporting Fleet Server release is confirmed.
+export const OTLP_MINIMUM_FLEET_SERVER_VERSION = '9.6.0';
 
 export const kafkaSupportedVersions = [
   '0.8.2.0',
@@ -182,12 +237,47 @@ export const OUTPUT_TYPES_WITH_PRESET_SUPPORT: Array<ValueOf<OutputType>> = [
   outputType.RemoteElasticsearch,
 ];
 
+// Beats-based output types available to standard (non-OTel) agent policies.
+// otlp is intentionally excluded — it is only valid for OTel-only policies.
+export const BEATS_OUTPUT_TYPES: Array<ValueOf<OutputType>> = [
+  outputType.Elasticsearch,
+  outputType.Logstash,
+  outputType.Kafka,
+  outputType.RemoteElasticsearch,
+];
+
 export const OUTPUT_TYPES_WITH_OTEL_EXPORTER_SUPPORT: Array<ValueOf<OutputType>> = [
   outputType.Elasticsearch,
   outputType.RemoteElasticsearch,
 ];
 
+export const OUTPUT_TYPES_FOR_OTEL_ONLY_POLICIES: Array<ValueOf<OutputType>> = [
+  outputType.Elasticsearch,
+  outputType.RemoteElasticsearch,
+  outputType.Otlp,
+];
+
 export const OUTPUT_HEALTH_DATA_STREAM = 'logs-fleet_server.output_health-default';
+
+/**
+ * Recommended sending_queue settings for outputs pointed at the managed OTLP endpoint.
+ * Source: https://www.elastic.co/docs/reference/opentelemetry/managed-inputs/managed-otlp-endpoint#otlp-client-configuration
+ * Applied automatically at SO creation time when isManagedOtlpEndpoint() matches.
+ */
+export const MANAGED_OTLP_EXPORTER_DEFAULTS = {
+  sending_queue: {
+    enabled: true,
+    sizer: 'bytes' as const,
+    queue_size: 50_000_000,
+    block_on_overflow: true,
+    batch: {
+      flush_timeout: '1s',
+      min_size: 1_000_000,
+      max_size: 4_000_000,
+      sizer: 'bytes' as const,
+    },
+  },
+};
 
 export const LOGSTASH_API_KEY_CLUSTER_PERMISSIONS = ['monitor', 'manage_own_api_key'];
 

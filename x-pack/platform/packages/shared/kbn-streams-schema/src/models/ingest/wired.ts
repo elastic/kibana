@@ -29,6 +29,14 @@ import type { WiredIngestStreamEffectiveSettings } from './settings';
 import { wiredIngestStreamEffectiveSettingsSchema } from './settings';
 import type { WiredIngestStreamEffectiveFailureStore } from './failure_store';
 import { wiredIngestStreamEffectiveFailureStoreSchema } from './failure_store';
+import type {
+  StreamlangIngestStreamProcessing,
+  StreamlangIngestStreamProcessingUpsert,
+} from './processing';
+import {
+  streamlangIngestStreamProcessingSchema,
+  streamlangIngestStreamProcessingUpsertSchema,
+} from './processing';
 
 /* eslint-disable @typescript-eslint/no-namespace */
 
@@ -48,10 +56,14 @@ const ingestWiredShape = {
   }),
 };
 
-export type WiredIngest = IngestBase & IngestWired;
+export type WiredIngest = Omit<IngestBase, 'processing'> &
+  IngestWired & {
+    processing: StreamlangIngestStreamProcessing;
+  };
 
 const wiredIngestSchemaObject = z.object({
   ...ingestBaseSchemaFields,
+  processing: streamlangIngestStreamProcessingSchema,
   ...ingestWiredShape,
 });
 
@@ -60,10 +72,14 @@ export const WiredIngest: Validation<IngestBase, WiredIngest> = validation(
   wiredIngestSchemaObject
 );
 
-export type WiredIngestUpsertRequest = IngestBaseUpsertRequest & IngestWired;
+export type WiredIngestUpsertRequest = Omit<IngestBaseUpsertRequest, 'processing'> &
+  IngestWired & {
+    processing: StreamlangIngestStreamProcessingUpsert;
+  };
 
 const wiredIngestUpsertSchemaObject = z.object({
   ...ingestBaseUpsertSchemaFields,
+  processing: streamlangIngestStreamProcessingUpsertSchema,
   ...ingestWiredShape,
 });
 
@@ -80,7 +96,7 @@ type OmitWiredStreamUpsertProps<
   }
 > = Omit<T, 'ingest'> & {
   ingest: Omit<WiredIngest, 'processing'> & {
-    processing: Omit<WiredIngest['processing'], 'updated_at'> & { updated_at?: never };
+    processing: StreamlangIngestStreamProcessingUpsert;
   };
 };
 

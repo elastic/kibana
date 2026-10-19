@@ -86,7 +86,7 @@ export const ModelEndpointRow: React.FC<ModelEndpointRowProps> = ({
               >
                 <EuiButtonIcon
                   data-test-subj="searchInferenceEndpointsModelEndpointRowCopyButton"
-                  iconType="copyClipboard"
+                  iconType="copy"
                   size="xs"
                   color="text"
                   aria-label={i18n.translate(
@@ -118,6 +118,7 @@ export const ModelEndpointRow: React.FC<ModelEndpointRowProps> = ({
                       aria-label={preconfiguredEndpointAriaLabel}
                       aria-describedby={preconfiguredTooltipDescriptionId}
                     >
+                      {/* eslint-disable-next-line @elastic/eui/no-unnamed-interactive-element */}
                       <EuiButtonIcon
                         data-test-subj="searchInferenceEndpointsModelEndpointRowLockButton"
                         iconType="lock"

@@ -238,11 +238,6 @@ export type CreateSignalInterface = (
   params: EventItem[] | ThreatListItem[]
 ) => Promise<SearchAfterAndBulkCreateReturnType>;
 
-export interface GetSortForThreatList {
-  index: string[];
-  listItemIndex: string;
-}
-
 export enum ThreatMatchQueryType {
   match = 'mq',
   term = 'tq',

@@ -14,8 +14,7 @@ import { test, CUSTOM_ROLES } from '../fixtures';
 const DATA_STREAM_NAME = 'test_data_stream';
 const INDEX_TEMPLATE_NAME = 'generic-logs-scout';
 
-// Failing: See https://github.com/elastic/kibana/issues/272031
-test.describe.skip('Create Data View wizard', { tag: tags.stateful.classic }, () => {
+test.describe('Create Data View wizard', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ esClient }) => {
     await esClient.indices.putIndexTemplate({
       name: INDEX_TEMPLATE_NAME,
@@ -53,8 +52,9 @@ test.describe.skip('Create Data View wizard', { tag: tags.stateful.classic }, ()
 
     await test.step('wizard auto-detects the timestamp field from the data stream mapping', async () => {
       await pageObjects.dataViewEditor.setTitle(DATA_STREAM_NAME);
-      const timestampValue = await pageObjects.dataViewEditor.getTimestampFieldValue();
-      expect(timestampValue).toBe('@timestamp');
+      await expect
+        .poll(() => pageObjects.dataViewEditor.getTimestampFieldValue())
+        .toBe('@timestamp');
     });
 
     await test.step('saving navigates to the data view detail page', async () => {

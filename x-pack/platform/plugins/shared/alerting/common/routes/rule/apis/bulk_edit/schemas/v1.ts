@@ -6,8 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { rRuleRequestSchemaV1 } from '@kbn/response-ops-schedule-schema';
 import { validateDurationV1 } from '../../../validation';
-import { rRuleRequestSchemaV1 } from '../../../../r_rule';
 import { notifyWhenSchemaV1 } from '../../../response';
 import { ruleSnoozeScheduleSchemaV1 } from '../../../request';
 import {

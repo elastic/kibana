@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/router-utils'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/obs-exploration-team'
+  defaultOwner: '@elastic/obs-signals-traces-team'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/router-utils'
   description: Moon project for @kbn/router-utils
   channel: ''
-  owner: '@elastic/obs-exploration-team'
+  owner: '@elastic/obs-signals-traces-team'
   sourceRoot: src/platform/packages/shared/kbn-router-utils
 dependsOn: []
 tags:

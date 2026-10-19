@@ -9,13 +9,12 @@
  * Generic service-detail tab navigation helper for the Service Map.
  *
  * Resolves the service-scoped destination for a given tab from the current map
- * route (`/service-map`, `/services/{serviceName}/service-map`,
- * `/mobile-services/{serviceName}/service-map`, or contextual embed hosts such as
- * service overview / transaction details), picking the `services` vs
- * `mobile-services` variant based on the map context. It preserves the shared
- * time range / environment params and **strips `kuery`** so a node-scoped click
- * doesn't carry the map's service-name filter into a destination where it would
- * yield undesired side effects.
+ * route (`/service-map`, or contextual embed hosts such as service overview /
+ * transaction details), picking the `services` vs `mobile-services` variant
+ * based on the map context. It preserves the shared time range / environment
+ * params and **strips `kuery`** so a node-scoped click doesn't carry the map's
+ * service-name filter into a destination where it would yield undesired side
+ * effects.
  *
  * Relies on `useAnyOfApmParams` and will throw if called outside a matching
  * APM map route — callers must mount inside `ServiceMapGraph`, which is
@@ -26,6 +25,7 @@
  */
 
 import { useCallback } from 'react';
+import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useApmRoutePath } from '../../../hooks/use_apm_route_path';
 import { useApmRouter } from '../../../hooks/use_apm_router';
@@ -35,14 +35,14 @@ export type ServiceMapTab = 'alerts' | 'overview';
 /**
  * Returns a stable `(serviceName) => href` builder for a given service-detail
  * tab from the current map route. `kuery` is stripped — see module header.
+ * For the alerts tab, `rangeTo` is forced to `now` and status to active so the
+ * destination list matches currently-active badge counts.
  */
 export function useServiceMapTabHrefBuilder(tab: ServiceMapTab): (serviceName: string) => string {
   const apmRouter = useApmRouter();
   const routePath = useApmRoutePath();
   const { query } = useAnyOfApmParams(
     '/service-map',
-    '/services/{serviceName}/service-map',
-    '/mobile-services/{serviceName}/service-map',
     '/services/{serviceName}/overview',
     '/mobile-services/{serviceName}/overview',
     '/services/{serviceName}/transactions/view',
@@ -51,7 +51,10 @@ export function useServiceMapTabHrefBuilder(tab: ServiceMapTab): (serviceName: s
 
   return useCallback(
     (serviceName: string) => {
-      const queryWithoutKuery = { ...query, kuery: '' };
+      const queryWithoutKuery =
+        tab === 'alerts'
+          ? { ...query, kuery: '', rangeTo: 'now', alertStatus: ALERT_STATUS_ACTIVE }
+          : { ...query, kuery: '' };
       const isMobileContext = String(routePath).includes('mobile-services');
       if (isMobileContext) {
         return apmRouter.link(`/mobile-services/{serviceName}/${tab}` as const, {

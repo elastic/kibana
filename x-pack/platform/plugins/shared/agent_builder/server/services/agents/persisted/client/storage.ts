@@ -11,6 +11,7 @@ import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type {
   AgentAccessControl,
   AgentAccessControlMode,
+  AgentApprovals,
   ToolSelection,
 } from '@kbn/agent-builder-common';
 import { chatSystemIndex } from '@kbn/agent-builder-server';
@@ -31,14 +32,20 @@ const storageSettings = {
       avatar_symbol: types.keyword({}),
       created_by_id: types.keyword({}),
       created_by_name: types.keyword({}),
+      updated_by_id: types.keyword({}),
+      updated_by_name: types.keyword({}),
       access_control: types.object({
         properties: {
           access_mode: types.keyword({}),
           entries: types.nested({
             properties: {
               type: types.keyword({}),
+              // Stable user id; absent on legacy entries.
+              id: types.keyword({}),
+              // Legacy username; only present on entries written before `id` existed.
               name: types.keyword({}),
               role: types.keyword({}),
+              added_at: types.date({}),
             },
           }),
         },
@@ -47,9 +54,12 @@ const storageSettings = {
       config: types.object({
         properties: {
           workflow_ids: types.keyword({}),
+          post_execution_workflow_ids: types.keyword({}),
           plugin_ids: types.keyword({}),
           skill_ids: types.keyword({}),
           connector_ids: types.keyword({}),
+          ai_indices: types.keyword({}),
+          subagent_ids: types.keyword({}),
         },
         dynamic: false,
       }),
@@ -70,6 +80,8 @@ export interface AgentProperties {
   avatar_symbol?: string;
   created_by_id?: string;
   created_by_name?: string;
+  updated_by_id?: string;
+  updated_by_name?: string;
   access_control?: AgentAccessControl;
   config: AgentConfigurationProperties;
   created_at: string;
@@ -86,8 +98,12 @@ export interface AgentConfigurationProperties {
   skill_ids?: string[];
   enable_elastic_capabilities?: boolean;
   workflow_ids?: string[];
+  post_execution_workflow_ids?: string[];
   plugin_ids?: string[];
   connector_ids?: string[];
+  ai_indices?: string[];
+  subagent_ids?: string[];
+  approvals?: AgentApprovals;
 }
 
 export type AgentProfileStorageSettings = typeof storageSettings;

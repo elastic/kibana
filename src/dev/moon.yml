@@ -17,6 +17,7 @@ project:
   owner: '@elastic/kibana-operations'
   sourceRoot: src/dev
 dependsOn:
+  - '@kbn/scout'
   - '@kbn/core'
   - '@kbn/screenshotting-plugin'
   - '@kbn/test'
@@ -31,9 +32,9 @@ dependsOn:
   - '@kbn/std'
   - '@kbn/dev-utils'
   - '@kbn/utils'
-  - '@kbn/optimizer'
+  - '@kbn/rspack-optimizer'
   - '@kbn/peggy'
-  - '@kbn/babel-transform'
+  - '@kbn/swc-config'
   - '@kbn/import-resolver'
   - '@kbn/find-used-node-modules'
   - '@kbn/ts-projects'
@@ -50,8 +51,7 @@ dependsOn:
   - '@kbn/dot-text'
   - '@kbn/yarn-lock-validator'
   - '@kbn/sort-package-json'
-  - '@kbn/babel-register'
-  - '@kbn/rspack-optimizer'
+  - '@kbn/swc-register'
   - '@kbn/dev-validation-runner'
 tags:
   - tooling

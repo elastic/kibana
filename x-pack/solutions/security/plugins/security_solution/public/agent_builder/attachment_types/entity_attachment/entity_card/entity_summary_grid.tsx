@@ -120,7 +120,7 @@ const EntityIdCell: React.FC<{ entityId?: string }> = ({ entityId }) => {
     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
       <EuiFlexItem className="eui-textTruncate">
         <EuiToolTip content={entityId}>
-          <EuiText size="s" className="eui-textTruncate">
+          <EuiText size="s" className="eui-textTruncate" tabIndex={0}>
             {entityId}
           </EuiText>
         </EuiToolTip>

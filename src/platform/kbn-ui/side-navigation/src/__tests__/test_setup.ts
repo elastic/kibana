@@ -32,6 +32,7 @@ const areFakeTimersEnabled = () =>
 beforeEach(() => {
   jest.useFakeTimers();
   mockedScrollIntoView.mockClear();
+  localStorage.clear();
 });
 
 afterEach(() => {

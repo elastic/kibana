@@ -56,6 +56,7 @@ import type {
   FormBasedLayer,
 } from '@kbn/lens-common';
 import type { KqlPluginStart } from '@kbn/kql/public';
+import { isColumnOfType } from '@kbn/lens-common';
 import {
   changeIndexPattern,
   changeLayerIndexPattern,
@@ -84,6 +85,7 @@ import {
   getNotifiableFeatures,
   getUnsupportedOperationsWarningMessage,
   getPrecisionErrorWarningMessages,
+  getCustomRankLastValueSortFieldWarningMessages,
 } from './utils';
 import { getUniqueLabelGenerator, isDraggedDataViewField, nonNullable } from '../../utils';
 import { hasField, normalizeOperationDataType } from './pure_utils';
@@ -108,7 +110,7 @@ import { getColumnParamsForNewBucket } from './include_empty_rows_defaults';
 import { GeoFieldWorkspacePanel } from '../../editor_frame_service/editor_frame/workspace_panel/geo_field_workspace_panel';
 import { getStateTimeShiftWarningMessages } from './time_shift_utils';
 import { DOCUMENT_FIELD_NAME } from '../../../common/constants';
-import { cleanupFormulaColumns, isColumnOfType } from './operations/definitions/helpers';
+import { cleanupFormulaColumns } from './operations/definitions/helpers';
 import { LayerSettingsPanel } from './layer_settings';
 import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
 import { EDITOR_INVALID_DIMENSION } from '../../user_messages_ids';
@@ -195,6 +197,7 @@ export function columnToOperation(
     scale,
     label: uniqueLabel || label,
     isStaticValue: operationType === 'static_value',
+    ...(column.customLabel ? { customLabel: true } : {}),
     sortingHint: getSortingHint(column, dataView),
     hasTimeShift: Boolean(timeShift),
     hasReducedTimeRange: Boolean(reducedTimeRange),
@@ -209,11 +212,8 @@ export function columnToOperation(
 
 export type { FormatColumnArgs, TimeScaleArgs, CounterRateArgs } from '../../../common/expressions';
 
-export {
-  getSuffixFormatter,
-  unitSuffixesLong,
-  suffixFormatterId,
-} from '../../../common/suffix_formatter';
+export { unitSuffixesLong } from '@kbn/lens-common';
+export { getSuffixFormatter, suffixFormatterId } from '../../../common/suffix_formatter';
 
 export function getFormBasedDatasource({
   core,
@@ -850,6 +850,12 @@ export function getFormBasedDatasource({
         core.docLinks
       );
 
+      const customRankLastValueSortFieldWarningMsg = getCustomRankLastValueSortFieldWarningMessages(
+        state,
+        framePublicAPI,
+        setState
+      );
+
       const infoMessages = getNotifiableFeatures(state, framePublicAPI, visualizationInfo);
 
       return layerErrorMessages.concat(
@@ -857,6 +863,7 @@ export function getFormBasedDatasource({
         timeShiftWarningMessages,
         precisionErrorWarningMsg,
         unsupportedOpsWarningMsg,
+        customRankLastValueSortFieldWarningMsg,
         infoMessages
       );
     },

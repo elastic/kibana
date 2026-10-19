@@ -391,7 +391,6 @@ export class CoreSystem {
         theme,
         userProfile,
         uiSettings,
-        featureFlags,
       });
       const deprecations = this.deprecations.start({ http });
 
@@ -476,7 +475,6 @@ export class CoreSystem {
           chrome,
           application,
           overlays,
-          featureFlags,
           http,
           docLinks,
           customBranding,

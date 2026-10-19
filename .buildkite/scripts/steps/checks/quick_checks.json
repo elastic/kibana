@@ -52,7 +52,7 @@
     "script": ".buildkite/scripts/steps/checks/ftr_configs.sh"
   },
   {
-    "script": ".buildkite/scripts/steps/checks/yarn_deduplicate.sh",
+    "script": ".buildkite/scripts/steps/checks/deduplicate_dependencies.sh",
     "mayChangeFiles": true
   },
   {
@@ -69,9 +69,6 @@
     "script": ".buildkite/scripts/steps/checks/native_modules.sh"
   },
   {
-    "script": ".buildkite/scripts/steps/checks/yarn_install_scripts.sh"
-  },
-  {
     "script": ".buildkite/scripts/steps/checks/test_files_missing_owner.sh"
   },
   {
@@ -84,6 +81,9 @@
   {
     "script": ".buildkite/scripts/steps/checks/validate_pipelines.sh",
     "mayChangeFiles": true
+  },
+  {
+    "script": ".buildkite/scripts/steps/checks/buildkite_unit_tests.sh"
   },
   {
     "script": ".buildkite/scripts/steps/checks/check_scout_config.sh"
@@ -101,7 +101,8 @@
     "mayChangeFiles": true
   },
   {
-    "script": ".buildkite/scripts/steps/checks/unused_deps.sh"
+    "script": ".buildkite/scripts/steps/checks/unused_deps.sh",
+    "requiresStableWorkspace": true
   },
   {
     "script": ".buildkite/scripts/steps/checks/jest_negative.sh"

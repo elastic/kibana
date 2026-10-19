@@ -263,6 +263,9 @@
                                     "ignore_above": 1024
                                 }
                             }
+                        },
+                        "data": {
+                            "type": "flattened"
                         }
                     }
                 },
@@ -715,10 +718,14 @@
                     "properties": {
                         "dispatcher": {
                             "properties": {
-                                "episode_count": {
+                                "failure_reason": {
+                                    "type": "keyword",
+                                    "ignore_above": 1024
+                                },
+                                "alert_count": {
                                     "type": "long"
                                 },
-                                "episode_ids": {
+                                "alert_ids": {
                                     "type": "keyword",
                                     "ignore_above": 1024,
                                     "meta": {

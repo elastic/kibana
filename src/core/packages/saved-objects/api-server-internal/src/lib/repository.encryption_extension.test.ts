@@ -24,8 +24,10 @@ import { kibanaMigratorMock } from '../mocks';
 import type { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
 import {
   MAIN_SAVED_OBJECT_INDEX,
+  isSavedObjectErrorResult,
   type ISavedObjectsEncryptionExtension,
   type SavedObjectsRawDocSource,
+  type SavedObjectBulkResult,
 } from '@kbn/core-saved-objects-server';
 import {
   bulkCreateSuccess,
@@ -47,6 +49,9 @@ import {
   type TypeIdTuple,
 } from '../test_helpers/repository.test.common';
 import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
+
+const errorOf = (so: SavedObjectBulkResult<unknown>) =>
+  isSavedObjectErrorResult(so) ? so.error : undefined;
 
 describe('SavedObjectsRepository Encryption Extension', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
@@ -141,7 +146,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
       expect(client.get).toHaveBeenCalledTimes(1);
       expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledTimes(1);
       expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledWith(nonEncryptedSO.type);
-      expect(mockEncryptionExt.decryptOrStripResponseAttributes).not.toBeCalled();
+      expect(mockEncryptionExt.decryptOrStripResponseAttributes).not.toHaveBeenCalled();
       expect(result).toEqual(
         expect.objectContaining({
           type: nonEncryptedSO.type,
@@ -211,7 +216,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
       expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledTimes(3); // getValidId, optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
       expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledWith(nonEncryptedSO.type);
       expect(mockEncryptionExt.encryptAttributes).not.toHaveBeenCalled();
-      expect(mockEncryptionExt.decryptOrStripResponseAttributes).not.toBeCalled();
+      expect(mockEncryptionExt.decryptOrStripResponseAttributes).not.toHaveBeenCalled();
       expect(result).toEqual(
         expect.objectContaining({
           type: nonEncryptedSO.type,
@@ -289,7 +294,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
           overwrite: true,
           version: mockVersion,
         })
-      ).resolves.not.toThrowError();
+      ).resolves.not.toThrow();
     });
 
     it('allows to opt-out of random ID enforcement', async () => {
@@ -375,7 +380,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
       expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledTimes(2); // (no upsert) optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
       expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledWith(nonEncryptedSO.type);
       expect(mockEncryptionExt.encryptAttributes).not.toHaveBeenCalled();
-      expect(mockEncryptionExt.decryptOrStripResponseAttributes).not.toBeCalled();
+      expect(mockEncryptionExt.decryptOrStripResponseAttributes).not.toHaveBeenCalled();
       expect(result).toEqual(
         expect.objectContaining({
           type: nonEncryptedSO.type,
@@ -459,11 +464,11 @@ describe('SavedObjectsRepository Encryption Extension', () => {
         namespace,
       });
       _expectClientCallArgs([nonEncryptedSO, encryptedSO], { getId });
-      expect(mockEncryptionExt.isEncryptableType).toBeCalledTimes(2);
-      expect(mockEncryptionExt.isEncryptableType).toBeCalledWith(nonEncryptedSO.type);
-      expect(mockEncryptionExt.isEncryptableType).toBeCalledWith(encryptedSO.type);
-      expect(mockEncryptionExt.decryptOrStripResponseAttributes).toBeCalledTimes(1);
-      expect(mockEncryptionExt.decryptOrStripResponseAttributes).toBeCalledWith(
+      expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledTimes(2);
+      expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledWith(nonEncryptedSO.type);
+      expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledWith(encryptedSO.type);
+      expect(mockEncryptionExt.decryptOrStripResponseAttributes).toHaveBeenCalledTimes(1);
+      expect(mockEncryptionExt.decryptOrStripResponseAttributes).toHaveBeenCalledWith(
         expect.objectContaining({ ...encryptedSO }),
         undefined
       );
@@ -508,8 +513,8 @@ describe('SavedObjectsRepository Encryption Extension', () => {
       expect(client.bulk).not.toHaveBeenCalled();
       expect(result.saved_objects).not.toBeUndefined();
       expect(result.saved_objects.length).toBe(1);
-      expect(result.saved_objects[0].error).not.toBeUndefined();
-      expect(result.saved_objects[0].error).toMatchObject({
+      expect(errorOf(result.saved_objects[0])).not.toBeUndefined();
+      expect(errorOf(result.saved_objects[0])).toMatchObject({
         statusCode: 400,
         error: 'Bad Request',
         message:
@@ -523,7 +528,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
       expect(client.bulk).toHaveBeenCalledTimes(1);
       expect(result.saved_objects).not.toBeUndefined();
       expect(result.saved_objects.length).toBe(1);
-      expect(result.saved_objects[0].error).toBeUndefined();
+      expect(errorOf(result.saved_objects[0])).toBeUndefined();
     });
 
     it(`allows a specified ID when overwriting an existing object`, async () => {
@@ -546,7 +551,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
       expect(client.bulk).toHaveBeenCalledTimes(1);
       expect(result.saved_objects).not.toBeUndefined();
       expect(result.saved_objects.length).toBe(1);
-      expect(result.saved_objects[0].error).toBeUndefined();
+      expect(errorOf(result.saved_objects[0])).toBeUndefined();
     });
 
     it('allows to opt-out of random ID enforcement', async () => {
@@ -564,7 +569,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
       expect(client.bulk).toHaveBeenCalled();
       expect(result.saved_objects).not.toBeUndefined();
       expect(result.saved_objects.length).toBe(1);
-      expect(result.saved_objects[0].error).toBeUndefined();
+      expect(errorOf(result.saved_objects[0])).toBeUndefined();
       expect(result.saved_objects[0].id).toBe(encryptedSO.id);
     });
   });
@@ -711,11 +716,11 @@ describe('SavedObjectsRepository Encryption Extension', () => {
         generateSearchResults
       );
       expect(client.search).toHaveBeenCalledTimes(1);
-      expect(mockEncryptionExt.isEncryptableType).toBeCalledTimes(2);
-      expect(mockEncryptionExt.isEncryptableType).toBeCalledWith(encryptedSO.type);
-      expect(mockEncryptionExt.isEncryptableType).toBeCalledWith('index-pattern');
-      expect(mockEncryptionExt.decryptOrStripResponseAttributes).toBeCalledTimes(1);
-      expect(mockEncryptionExt.decryptOrStripResponseAttributes).toBeCalledWith(
+      expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledTimes(2);
+      expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledWith(encryptedSO.type);
+      expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledWith('index-pattern');
+      expect(mockEncryptionExt.decryptOrStripResponseAttributes).toHaveBeenCalledTimes(1);
+      expect(mockEncryptionExt.decryptOrStripResponseAttributes).toHaveBeenCalledWith(
         expect.objectContaining({ type: encryptedSO.type, id: encryptedSO.id }),
         undefined
       );

@@ -80,7 +80,9 @@ export const MetricChartWrapper = React.memo(
         css={css`
           display: flex;
           position: relative;
+          overflow: hidden;
         `}
+        borderRadius="m"
       >
         {loading && !loadedOnce.current ? (
           <ChartPlaceholder style={style} />
@@ -90,7 +92,7 @@ export const MetricChartWrapper = React.memo(
               size={style}
               css={css`
                 .echMetric {
-                  border-radius: ${euiTheme.border.radius.medium};
+                  border-radius: ${euiTheme.border.radius.panel};
                   pointer-events: none;
                 }
               `}
