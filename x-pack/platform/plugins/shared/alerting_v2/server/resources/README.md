@@ -223,8 +223,8 @@ The `alerting_v2:alert_actions_cleanup` task runs daily and deletes the dispatch
 
 | Setting | Default | Notes |
 | --- | --- | --- |
-| `xpack.alerting_v2.retention.dispatcherActions.enabled` | `false` | When `false`, the task is removed at startup. |
-| `xpack.alerting_v2.retention.dispatcherActions.dataRetention` | `90d` | Minimum `1d`. |
+| `xpack.alerting_v2.retention.alertActions.dispatcher.enabled` | `false` | When `false`, the task is removed at startup. |
+| `xpack.alerting_v2.retention.alertActions.dispatcher.dataRetention` | `90d` | Minimum `1d`. |
 
 Deleted docs only free disk space once their segments merge.
 

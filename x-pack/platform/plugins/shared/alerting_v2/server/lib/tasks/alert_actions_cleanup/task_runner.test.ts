@@ -16,7 +16,9 @@ const NOW = new Date('2026-10-15T12:00:00.000Z');
 
 const createConfig = (dataRetention: string) =>
   ({
-    get: jest.fn().mockReturnValue({ retention: { dispatcherActions: { dataRetention } } }),
+    get: jest
+      .fn()
+      .mockReturnValue({ retention: { alertActions: { dispatcher: { dataRetention } } } }),
   } as unknown as PluginInitializerContext<PluginConfig>['config']);
 
 describe('AlertActionsCleanupTaskRunner', () => {

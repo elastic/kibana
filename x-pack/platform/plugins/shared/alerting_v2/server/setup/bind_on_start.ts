@@ -88,7 +88,7 @@ export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
     scheduleAlertActionsCleanupTask({
       logger: tasksLogger,
       taskManager,
-      enabled: config.retention.dispatcherActions.enabled,
+      enabled: config.retention.alertActions.dispatcher.enabled,
     }).catch((error) => {
       tasksLogger.error({
         error,

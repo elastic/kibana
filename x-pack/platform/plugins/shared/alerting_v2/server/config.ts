@@ -139,11 +139,13 @@ const retentionSchema = schema.object({
     enabled: schema.boolean({ defaultValue: false }),
     dataRetention: schema.string({ defaultValue: '90d', validate: validateDataRetention }),
   }),
-  dispatcherActions: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
-    dataRetention: schema.string({
-      defaultValue: '90d',
-      validate: validateDispatcherActionsRetention,
+  alertActions: schema.object({
+    dispatcher: schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+      dataRetention: schema.string({
+        defaultValue: '90d',
+        validate: validateDispatcherActionsRetention,
+      }),
     }),
   }),
 });

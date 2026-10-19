@@ -17,7 +17,7 @@ import type { TaskManagerService } from './task_manager_service';
 
 /**
  * Test-time accessor for the `.alert-actions` cleanup task. The task only
- * exists when `xpack.alerting_v2.retention.dispatcherActions.enabled` is set.
+ * exists when `xpack.alerting_v2.retention.alertActions.dispatcher.enabled` is set.
  */
 export interface AlertActionsCleanupService {
   /** Returns the persisted task instance, or `undefined` if it is not scheduled. */

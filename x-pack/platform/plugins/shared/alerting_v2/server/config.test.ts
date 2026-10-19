@@ -257,36 +257,41 @@ describe('alerting_v2 config schema', () => {
     });
   });
 
-  describe('retention.dispatcherActions', () => {
+  describe('retention.alertActions.dispatcher', () => {
     it('is disabled with a 90d retention by default', () => {
       const config = configSchema.validate({});
-      expect(config.retention.dispatcherActions).toEqual({ enabled: false, dataRetention: '90d' });
+      expect(config.retention.alertActions.dispatcher).toEqual({
+        enabled: false,
+        dataRetention: '90d',
+      });
     });
 
     it('accepts a custom retention', () => {
       expect(
         configSchema.validate({
-          retention: { dispatcherActions: { enabled: true, dataRetention: '7d' } },
-        }).retention.dispatcherActions
+          retention: { alertActions: { dispatcher: { enabled: true, dataRetention: '7d' } } },
+        }).retention.alertActions.dispatcher
       ).toEqual({ enabled: true, dataRetention: '7d' });
     });
 
     it.each(['1d', '24h', '2w'])('accepts %s', (dataRetention) => {
       expect(
-        configSchema.validate({ retention: { dispatcherActions: { dataRetention } } }).retention
-          .dispatcherActions.dataRetention
+        configSchema.validate({ retention: { alertActions: { dispatcher: { dataRetention } } } })
+          .retention.alertActions.dispatcher.dataRetention
       ).toBe(dataRetention);
     });
 
     it.each(['23h', '1h', '500ms'])('rejects %s, below the 1d floor', (dataRetention) => {
       expect(() =>
-        configSchema.validate({ retention: { dispatcherActions: { dataRetention } } })
+        configSchema.validate({ retention: { alertActions: { dispatcher: { dataRetention } } } })
       ).toThrow(/cannot be less than 1d/);
     });
 
     it('rejects a malformed duration', () => {
       expect(() =>
-        configSchema.validate({ retention: { dispatcherActions: { dataRetention: 'abc' } } })
+        configSchema.validate({
+          retention: { alertActions: { dispatcher: { dataRetention: 'abc' } } },
+        })
       ).toThrow(/Invalid duration/);
     });
   });

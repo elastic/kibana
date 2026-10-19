@@ -36,7 +36,7 @@ export class AlertActionsCleanupTaskRunner implements AlertingTaskRunner {
   }
 
   public async run({ signal }: TaskRunParams): Promise<RunResult> {
-    const { dataRetention } = this.config.retention.dispatcherActions;
+    const { dataRetention } = this.config.retention.alertActions.dispatcher;
     const cutoff = new Date(Date.now() - parseDurationToMs(dataRetention)).toISOString();
 
     try {
