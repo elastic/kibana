@@ -30,6 +30,7 @@ import {
   ACTION_POLICY_EVENT_PROVIDER,
 } from '../lib/dispatcher/steps/constants';
 import { registerAlertingAdvancedSettings } from '../settings/advanced_settings';
+import { workflowDispatchedTelemetryEvent } from '../lib/telemetry/workflow_dispatched_ebt_event';
 
 /**
  * Core platform setup-phase registrations (feature privileges, saved objects,
@@ -57,6 +58,8 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
     const uiSettingsSetup = container.get(CoreSetup('uiSettings'));
 
     registerAlertingAdvancedSettings(uiSettingsSetup);
+
+    container.get(CoreSetup('analytics')).registerEventType(workflowDispatchedTelemetryEvent);
 
     const eventLogService = container.get(
       PluginSetup<AlertingServerSetupDependencies['eventLog']>('eventLog')

@@ -5,9 +5,16 @@
  * 2.0.
  */
 
+import type {
+  WorkflowDispatchedEbtData,
+  WorkflowDispatchedEbtEventType,
+} from '@kbn/alerting-v2-schemas';
+
 /**
  * Maps every EBT event type the plugin registers to the data it is reported with.
  */
-export type AlertingEbtEventMap = Record<never, never>;
+export type AlertingEbtEventMap = {
+  [TEventType in WorkflowDispatchedEbtEventType]: WorkflowDispatchedEbtData;
+};
 
 export type AlertingEbtEventType = keyof AlertingEbtEventMap;
