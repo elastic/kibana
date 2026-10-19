@@ -82,7 +82,7 @@ export const AlertEpisodeMetadataSection = ({
 
   const hit = useMemo(() => {
     if (!eventData || !dataView) return undefined;
-    const record = buildDataTableRecord({ _source: eventData.data }, dataView);
+    const record = buildDataTableRecord({ _source: { data: eventData.data } }, dataView);
     // The record is synthesized from the episode's stored `data`, not a real search hit, so it
     // has no real ES metadata. The data view's `metaFields` (`_id`, `_index`, `_score`, `_ignored`)
     // still get merged into `flattened` as `undefined`, rendering as empty rows in the metadata

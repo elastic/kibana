@@ -187,7 +187,7 @@ describe('AlertEpisodeMetadataSection', () => {
       expect.objectContaining({
         hit: expect.objectContaining({
           id: 'mock-id',
-          raw: { _source: { threshold_met: true } },
+          raw: { _source: { data: { threshold_met: true } } },
         }),
         dataView: expect.objectContaining({ id: 'mock-data-view' }),
       })
@@ -199,9 +199,9 @@ describe('AlertEpisodeMetadataSection', () => {
     // view's metaFields into `flattened` even though this hit never had real values for them.
     buildDataTableRecordMock.mockReturnValueOnce({
       id: 'mock-id',
-      raw: { _source: { threshold_met: true } },
+      raw: { _source: { data: { threshold_met: true } } },
       flattened: {
-        threshold_met: true,
+        'data.threshold_met': true,
         _id: undefined,
         _index: undefined,
         _score: undefined,
@@ -224,7 +224,7 @@ describe('AlertEpisodeMetadataSection', () => {
     expect(mockTableRender).toHaveBeenCalledWith(
       expect.objectContaining({
         hit: expect.objectContaining({
-          flattened: { threshold_met: true },
+          flattened: { 'data.threshold_met': true },
         }),
       })
     );
