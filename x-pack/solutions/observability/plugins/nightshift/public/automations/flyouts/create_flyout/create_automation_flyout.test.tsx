@@ -12,6 +12,7 @@ import { CreateAutomationFlyout } from './create_automation_flyout';
 import { useCreateAutomation } from '../../hooks/use_automations';
 
 jest.mock('../../hooks/use_automations', () => ({ useCreateAutomation: jest.fn() }));
+jest.mock('../../../hooks/use_rule_catalog', () => ({ useRuleCatalog: () => ({ data: [] }) }));
 
 const mockUseCreateAutomation = useCreateAutomation as jest.Mock;
 
@@ -86,7 +87,7 @@ describe('CreateAutomationFlyout', () => {
           isEnabled: false,
           trigger: { rows: [{ kind: 'alert' }] },
           execution: { promptTemplate: 'Find the root cause', reasoningMode: 'investigate' },
-          completion: {},
+          completions: [],
           runtime: { dailyDispatchLimit: 20 },
         },
         expect.objectContaining({ onSuccess: expect.any(Function) })
@@ -96,14 +97,17 @@ describe('CreateAutomationFlyout', () => {
     expect(onCreated).toHaveBeenCalledWith('created-1');
   });
 
-  it('blocks saving with an invalid custom cron', async () => {
+  it('requires instructions for a scheduled automation', async () => {
     renderFlyout();
-    await addTrigger('Custom cron…');
-
-    expect(screen.getByTestId('submitAutomation')).toBeEnabled();
-    fireEvent.change(screen.getByTestId('automationCronExpression'), {
-      target: { value: 'not a cron' },
+    await addTrigger('Every…');
+    expect(screen.getByTestId('submitAutomation')).toBeDisabled();
+    const instructions = screen.getByTestId('automationInstructions');
+    expect(instructions).toHaveAttribute('maxlength', '5000');
+    fireEvent.change(instructions, {
+      target: { value: 'Review checkout errors over the last hour.' },
     });
+    expect(screen.getByTestId('submitAutomation')).toBeEnabled();
+    fireEvent.change(instructions, { target: { value: '   ' } });
     expect(screen.getByTestId('submitAutomation')).toBeDisabled();
   });
 

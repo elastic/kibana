@@ -849,7 +849,7 @@ steps:
 
 
         **Approve** to **run a deep forensics investigation**: Forensics Watch picks the
-        attack up and determines the response actions to take. **Dismiss** to **close out
+        attack up and determines the response actions to take. **Decline** to **close out
         the investigation**, which closes this Investigation and the attack. The
         correlated detection alerts are not closed either way.
       action_input:

@@ -104,14 +104,7 @@ const FIELD_CONFIGURATIONS: ContentFrameworkTableProps['fieldConfigurations'] = 
 
 export type GenAiDetailsTableProps = Pick<
   DocViewRenderProps,
-  | 'hit'
-  | 'dataView'
-  | 'columnsMeta'
-  | 'textBasedHits'
-  | 'filter'
-  | 'onAddColumn'
-  | 'onRemoveColumn'
-  | 'columns'
+  'hit' | 'dataView' | 'textBasedHits' | 'filter' | 'onAddColumn' | 'onRemoveColumn' | 'columns'
 >;
 
 /**
@@ -158,7 +151,6 @@ export function hasGenAiDetailFields(flattened: Record<string, unknown>): boolea
 export function GenAiDetailsTable({
   hit,
   dataView,
-  columnsMeta,
   textBasedHits,
   filter,
   onAddColumn,
@@ -175,7 +167,6 @@ export function GenAiDetailsTable({
       fieldConfigurations={FIELD_CONFIGURATIONS}
       hit={hit}
       dataView={dataView}
-      columnsMeta={columnsMeta}
       textBasedHits={textBasedHits}
       filter={filter}
       onAddColumn={onAddColumn}

@@ -46,6 +46,11 @@ import type { UseCspOptions } from '@kbn/cloud-security-posture-common/types/fin
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 import { useUiSetting } from '../../../common/lib/kibana';
 import { useEntityFromStore } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import {
+  combineEntityGroupFilters,
+  getEntityGroupRecords,
+} from '../../../flyout/entity_details/shared/entity_store_group_utils';
+import type { EntityViewMode } from '../../../flyout/entity_details/shared/types';
 import type { CloudPostureEntityIdentifier } from '../entity_insight';
 
 type MisconfigurationSortFieldType =
@@ -175,6 +180,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
     value,
     entityId,
     entityType,
+    mode,
     onShowFinding,
   }: {
     field: CloudPostureEntityIdentifier;
@@ -182,6 +188,8 @@ export const MisconfigurationFindingsDetailsTable = memo(
     /** Canonical entity store id (`host.entity.id` / `user.entity.id`); when set with v2 FF, identity fields are loaded from the store for EUID DSL. */
     entityId?: string;
     entityType?: string;
+    /** Entity-store lookup mode; in `resolved` mode findings of the entities resolving to `entityId` are included. */
+    mode?: EntityViewMode;
     /** Callback executed after expanding a misconfiguration finding. */
     onShowFinding: (resourceId: string, ruleId: string, ruleName?: string) => void;
   }) => {
@@ -204,8 +212,13 @@ export const MisconfigurationFindingsDetailsTable = memo(
 
     const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
 
-    const { entityRecord, isLoading: isEntityRecordLoading } = useEntityFromStore({
+    const {
+      entityRecord,
+      aliasRecords,
+      isLoading: isEntityRecordLoading,
+    } = useEntityFromStore({
       entityId,
+      mode,
       entityType,
       skip: !entityStoreV2Enabled || !entityId,
     });
@@ -215,8 +228,12 @@ export const MisconfigurationFindingsDetailsTable = memo(
       if (!euidApi?.euid || entityRecord == null || entityType == null) {
         return undefined;
       }
-      return euidApi.euid.dsl.getEuidFilterBasedOnDocument(entityType as EntityType, entityRecord);
-    }, [euidApi?.euid, entityType, entityRecord]);
+      const definition = euidApi.getBuiltInEntityDefinition(entityType as EntityType);
+      return combineEntityGroupFilters(
+        getEntityGroupRecords(entityRecord, aliasRecords),
+        (record) => euidApi.euid.dsl.getEuidFilterBasedOnDocument(definition, record)
+      );
+    }, [euidApi, entityType, entityRecord, aliasRecords]);
 
     const cspQueriesEnabled =
       entityRecord !== null && Boolean(euidEntityFilter) && Boolean(euidApi?.euid);

@@ -281,6 +281,16 @@ describe('partials', () => {
       .toCompileTo('Dudes: ');
   });
 
+  it('throws on a function partial that returns no output', () => {
+    expectTemplate('{{> dude}}')
+      .withPartials({
+        dude() {
+          return null as unknown as string;
+        },
+      })
+      .toThrow('The partial dude returned no output: partials must return a string');
+  });
+
   // Skipping test as this only makes sense when there's no `compile` function (i.e. runtime-only mode).
   // We do not support that mode with `@kbn/handlebars`, so there's no need to test it
   it.skip('throw on missing partial', () => {
@@ -451,6 +461,17 @@ describe('partials', () => {
       expectTemplate('{{#*inline "myPartial"}}success{{/inline}}{{> myPartial}}').toCompileTo(
         'success'
       );
+    });
+
+    it('should support recursively invoked inline partials', () => {
+      expectTemplate(
+        '{{#*inline "node"}}{{name}}{{#if children}}<{{#each children}}{{> node}}{{/each}}>{{/if}}{{/inline}}{{> node}}'
+      )
+        .withInput({
+          name: 'root',
+          children: [{ name: 'child', children: [{ name: 'leaf' }] }],
+        })
+        .toCompileTo('root<child<leaf>>');
     });
 
     it('should overwrite multiple partials in the same template', () => {

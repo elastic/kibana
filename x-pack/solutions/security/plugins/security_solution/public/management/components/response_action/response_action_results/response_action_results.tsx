@@ -6,12 +6,11 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import type { EuiTextColorProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiText, EuiHorizontalRule, EuiSpacer, EuiTextColor } from '@elastic/eui';
+import { EuiText, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
+import { ActionHostStatusMessage } from './components/action_host_status_message';
 import { getAgentActionState } from './utils';
 import { FormattedDate } from '../../../../common/components/formatted_date';
-import { RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP } from '../../../../../common/endpoint/service/response_actions/constants';
 import { MemoryDumpResponseActionOutputResult } from '../../memory_dump_response_action_output_result';
 import { CancelActionResults } from '../../cancel_action_results';
 import { RunscriptActionResult } from './components/runscript_results';
@@ -52,7 +51,6 @@ export const ResponseActionResults = memo<ResponseActionResultsProps>(
 
     const isMultiAgent = agents.length > 1;
     const command = action.command;
-    const consoleCommandName = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[command];
 
     if (agentId && !action.agents.includes(agentId)) {
       window.console.warn(
@@ -67,26 +65,12 @@ export const ResponseActionResults = memo<ResponseActionResultsProps>(
         {agents.map((hostAgentId, index) => {
           const agentActionState = getAgentActionState(action, hostAgentId);
           const hostName = action.hosts[hostAgentId]?.name ?? hostAgentId;
-          const hostStatusMessage = !agentActionState.isCompleted
-            ? OUTPUT_MESSAGES.isPending(consoleCommandName)
-            : agentActionState.wasCanceled
-            ? OUTPUT_MESSAGES.wasCanceled(consoleCommandName)
-            : agentActionState.wasSuccessful
-            ? OUTPUT_MESSAGES.wasSuccessful(consoleCommandName)
-            : action.isExpired
-            ? OUTPUT_MESSAGES.hasExpired(consoleCommandName)
-            : OUTPUT_MESSAGES.hasFailed(consoleCommandName);
-          const hostStatusMessageColor: EuiTextColorProps['color'] = !agentActionState.isCompleted
-            ? 'warning'
-            : agentActionState.wasCanceled
-            ? 'default'
-            : agentActionState.wasSuccessful
-            ? 'success'
-            : 'danger';
           const hostStatusDisplay = (
-            <EuiTextColor data-test-subj={getTestId('hostStatus')} color={hostStatusMessageColor}>
-              {hostStatusMessage}
-            </EuiTextColor>
+            <ActionHostStatusMessage
+              action={action}
+              agentId={hostAgentId}
+              data-test-subj={getTestId('hostStatus')}
+            />
           );
 
           return (

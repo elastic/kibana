@@ -15,7 +15,7 @@ export const getMemoryAvailabilityRoute = createNightshiftInvestigationsServerRo
     summary: 'Check whether Semantic Memory is enabled',
     description:
       'Reports xpack.nightshift_investigations.memory.enabled so the UI can hide the ' +
-      'Semantic Memory view when it is off. The flag defaults to false.',
+      'Semantic Memory view when it is off. The flag defaults to true.',
   },
   security: {
     authz: { requiredPrivileges: ['agentBuilder:read'] },
