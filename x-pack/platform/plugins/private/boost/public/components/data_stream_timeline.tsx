@@ -165,7 +165,7 @@ export const DataStreamTimeline = ({
                 // Focusable when it has a tooltip, so keyboard users can reach its cost too.
                 tabIndex={cost ? 0 : undefined}
                 css={{
-                  padding: `${euiTheme.size.xs} var(--boostPeriodPadding)`,
+                  padding: `${euiTheme.size.s} var(--boostPeriodPadding)`,
                   borderRadius: euiTheme.border.radius.small,
                   backgroundColor: colors[period].background,
                   color: colors[period].text,

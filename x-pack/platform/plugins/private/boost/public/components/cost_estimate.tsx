@@ -114,7 +114,7 @@ const EstimateValue = ({ estimate, comparison }: EstimateValueProps) => {
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiText size="s">
-            <span aria-hidden={true}>{formatCostRange(range)}</span>
+            <strong aria-hidden={true}>{formatCostRange(range)}</strong>
             <EuiScreenReaderOnly>
               <span>{getCostRangeLabel(range)}</span>
             </EuiScreenReaderOnly>
@@ -126,7 +126,6 @@ const EstimateValue = ({ estimate, comparison }: EstimateValueProps) => {
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-      <EuiSpacer size="xs" />
       <EuiText size="xs" color="subdued">
         {getVcuRangeText(range)}
       </EuiText>
