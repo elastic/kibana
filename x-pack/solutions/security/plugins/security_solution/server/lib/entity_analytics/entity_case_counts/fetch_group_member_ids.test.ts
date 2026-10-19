@@ -20,9 +20,7 @@ const buildClient = (members: ReadonlyArray<[memberId: string, headId: string]>)
       hits: members.map(([memberId, headId]) => ({
         _index: 'entities',
         _id: memberId,
-        _source: {
-          entity: { id: memberId, relationships: { resolution: { resolved_to: headId } } },
-        },
+        fields: { 'entity.id': [memberId], [RESOLVED_TO_FIELD]: [headId] },
       })),
     },
   });

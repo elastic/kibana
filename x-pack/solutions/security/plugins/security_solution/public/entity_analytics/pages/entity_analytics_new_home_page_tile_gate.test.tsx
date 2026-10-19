@@ -64,6 +64,9 @@ jest.mock('../components/home/entities_table', () => ({
   EntitiesTableSection: () => null,
 }));
 jest.mock('./entity_analytics_home_header', () => ({ EntityAnalyticsHomeHeader: () => null }));
+jest.mock('../components/home/ai_brief/use_generate_ai_brief_action', () => ({
+  useGenerateAiBriefAction: () => ({}),
+}));
 jest.mock('./entity_store_disabled_empty_prompt', () => ({
   EntityStoreDisabledEmptyPrompt: () => null,
 }));

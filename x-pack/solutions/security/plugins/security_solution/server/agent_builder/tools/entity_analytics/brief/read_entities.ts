@@ -85,7 +85,12 @@ export const readEntities = async ({
     GROUP_VALUE_FIELDS
   );
   return {
-    candidates: ranked.map((candidate) => withGroupValues(candidate, membersById[candidate.id])),
+    candidates: ranked.map((candidate) =>
+      withGroupValues(
+        candidate,
+        (membersById[candidate.id] ?? []).map(({ record }) => record)
+      )
+    ),
     capturedCount: entityIds.length,
     isTruncated: candidates.length > MAX_BRIEF_CANDIDATES,
     notFoundCount: entityIds.length - (response.aggregations?.found.value ?? 0),
