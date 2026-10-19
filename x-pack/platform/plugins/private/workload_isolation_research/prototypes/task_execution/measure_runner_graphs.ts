@@ -6,6 +6,8 @@
  */
 
 import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
+import { loadavg } from 'node:os';
 import { once } from 'node:events';
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
@@ -20,6 +22,7 @@ assert.ok(evidence);
 const shape = process.env.WIR_GRAPH_SHAPE;
 assert.ok(shape === 'pool' || shape === 'capsule');
 const runId = `t1-runner-code-floor-${shape}-001`;
+const contended = process.env.WIR_GRAPH_ALLOW_CONTENDED === '1';
 const lock =
   '/Users/jloleysens/.agentic-work/projects/kibana/workload-isolation-research/bench.lock';
 const workers: Worker[] = [];
@@ -39,6 +42,10 @@ const families =
       ];
 write('manifest', {
   run_id: runId,
+  source_commit: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
+  host_loadavg: loadavg(),
+  load_time_comparable: !contended,
+  coordinator_approved_contended_heap_measurement: contended,
   utc: new Date().toISOString(),
   hypothesis:
     'Real uninitialised runner import graphs already consume substantial per-isolate heap; initialized services/data can only add cost, but runtime/bundling can change the graph.',
@@ -56,7 +63,7 @@ write('manifest', {
   status: 'preregistered',
 });
 try {
-  while (!ownsLock) {
+  while (!contended && !ownsLock) {
     controller.signal.throwIfAborted();
     try {
       mkdirSync(lock);
@@ -111,6 +118,8 @@ try {
   write('result', {
     run_id: runId,
     before,
+    host_loadavg: loadavg(),
+    load_time_comparable: !contended,
     after: process.memoryUsage(),
     rows,
     resident,
