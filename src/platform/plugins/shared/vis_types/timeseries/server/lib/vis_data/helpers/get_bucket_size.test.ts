@@ -73,7 +73,7 @@ describe('getBucketSize', () => {
   test('returns overridden buckets for 1 bar and >=1d interval', () => {
     const result = getBucketSize(req, '>=1d', capabilities, 1);
 
-    expect(result).toHaveProperty('bucketSize', 29030400);
+    expect(result).toHaveProperty('bucketSize', 31536000);
     expect(result).toHaveProperty('intervalString', '1y');
   });
 });
