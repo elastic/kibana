@@ -196,12 +196,6 @@ describe('fixAdditionalPropertiesInSchema', () => {
 });
 
 describe('isoDateTime fields', () => {
-  const fieldSchema = (node: { format?: unknown; pattern?: unknown } | undefined) => {
-    expect(node?.format).toBe('date-time');
-    expect(typeof node?.pattern).toBe('string');
-    return new RegExp(node?.pattern as string);
-  };
-
   it('keeps date-time format and a pattern that enforces the datetime contract', () => {
     const jsonSchema = getWorkflowJsonSchema(
       z.object({
@@ -209,21 +203,20 @@ describe('isoDateTime fields', () => {
         atOffset: isoDateTime({ offset: true }),
       })
     );
-    const properties = (
-      jsonSchema as {
-        properties?: {
-          at?: { format?: unknown; pattern?: unknown };
-          atOffset?: { format?: unknown; pattern?: unknown };
-        };
-      }
+    const dateTimeField = { format: 'date-time', pattern: expect.any(String) };
+    expect(jsonSchema).toMatchObject({
+      properties: { at: dateTimeField, atOffset: dateTimeField },
+    });
+    const { at, atOffset } = (
+      jsonSchema as { properties: Record<'at' | 'atOffset', { pattern: string }> }
     ).properties;
 
-    const atPattern = fieldSchema(properties?.at);
+    const atPattern = new RegExp(at.pattern);
     expect(atPattern.test('2024-02-30T10:00Z')).toBe(false);
     expect(atPattern.test('2024-01-01T10:00+02:00')).toBe(false);
     expect(atPattern.test('2024-01-01T10:00Z')).toBe(true);
 
-    const offsetPattern = fieldSchema(properties?.atOffset);
+    const offsetPattern = new RegExp(atOffset.pattern);
     expect(offsetPattern.test('2024-02-30T10:00Z')).toBe(false);
     expect(offsetPattern.test('2024-01-01T10:00Z')).toBe(true);
   });
