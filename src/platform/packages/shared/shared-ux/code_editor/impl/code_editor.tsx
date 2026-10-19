@@ -662,7 +662,12 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     if (!transparentBackground) {
       return chromeOverrides;
     }
-    return (theme) => ({ 'editor.background': 'transparent', ...chromeOverrides?.(theme) });
+
+    return ((theme) => ({
+      ...chromeOverrides?.(theme),
+      'editor.background': 'transparent',
+      'editorGutter.background': 'transparent',
+    })) satisfies KbnCodeEditorChromeOverrides;
   }, [transparentBackground, chromeOverrides]);
 
   const editorInstanceId = useMemo(() => htmlIdGenerator('kbnCodeEditor')(), []);
