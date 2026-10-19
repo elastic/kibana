@@ -7,6 +7,7 @@
 
 import React, { memo, useMemo, useState } from 'react';
 import {
+  EuiBadge,
   EuiButtonIcon,
   EuiCopy,
   EuiFlexGrid,
@@ -27,12 +28,47 @@ import type { CriticalityLevelWithUnassigned } from '../../../../../common/entit
 import { useGetWatchlists } from '../../../../entity_analytics/api/hooks/use_get_watchlists';
 import { getWatchlistName } from '../../../../../common/entity_analytics/watchlists/constants';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
+import { useActiveFaceliftVersion } from '../../../../entity_analytics/components/home/facelift/active_version';
+import { getEntityId } from '../../../../entity_analytics/components/entity_resolution/helpers';
+import { useResolutionGroup } from '../../../../entity_analytics/components/entity_resolution/hooks/use_resolution_group';
 import { EntitySourceValue, TruncatedBadgeList, toEntitySourceArray } from './entity_source_value';
 
 const WATCHLISTS_OVERFLOW_TOOLTIP_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.grid.watchlistsOverflowTitle',
   { defaultMessage: 'Additional watchlists' }
 );
+
+const ENTITY_IDS_OVERFLOW_TOOLTIP_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.entityDetails.grid.entityIdsOverflowTitle',
+  { defaultMessage: 'Additional entity IDs' }
+);
+
+/**
+ * Facelift v.9: a resolved entity has no ID of its own. Show its primary
+ * record's ID and the IDs of the other records it was resolved from.
+ */
+const useResolvedEntityIds = (
+  entityId: string | undefined
+): { primaryId: string; otherIds: string[] } | undefined => {
+  const [faceliftVersion] = useActiveFaceliftVersion();
+  const isV9 = faceliftVersion === 'v9';
+  const { data: group } = useResolutionGroup(entityId ?? '', {
+    enabled: isV9 && Boolean(entityId),
+  });
+
+  return useMemo(() => {
+    if (!isV9 || !entityId || !group?.target || getEntityId(group.target) !== entityId) {
+      return undefined;
+    }
+    const recordIds = group.aliases.map(getEntityId).filter(Boolean);
+    if (recordIds.length === 0) return undefined;
+    const primaryId =
+      group.primary_entity_id && recordIds.includes(group.primary_entity_id)
+        ? group.primary_entity_id
+        : recordIds[0];
+    return { primaryId, otherIds: recordIds.filter((id) => id !== primaryId) };
+  }, [isV9, entityId, group]);
+};
 
 interface EntitySummaryGridProps {
   entityRecord: Entity;
@@ -44,7 +80,9 @@ export const EntitySummaryGrid = memo(
   ({ entityRecord, criticalityLevel, onCriticalitySave }: EntitySummaryGridProps) => {
     const [modalVisible, setModalVisible] = useState(false);
 
-    const entityId = entityRecord.entity?.id;
+    const resolvedIds = useResolvedEntityIds(entityRecord.entity?.id);
+    const entityId = resolvedIds?.primaryId ?? entityRecord.entity?.id;
+    const canEditCriticality = !!onCriticalitySave && !resolvedIds;
 
     const watchlistIds = useMemo(() => {
       const attrs = (entityRecord.entity as Record<string, unknown>)?.attributes as
@@ -65,13 +103,42 @@ export const EntitySummaryGrid = memo(
             )}
           >
             <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
-              <EuiFlexItem className="eui-textTruncate">
+              <EuiFlexItem
+                className="eui-textTruncate"
+                // Keep the +N badge next to the ID, as in the Data source cell.
+                grow={!resolvedIds}
+                css={{ minWidth: 0 }}
+              >
                 <EuiToolTip content={entityId}>
                   <EuiText size="xs" className="eui-textTruncate" tabIndex={0}>
                     {entityId ?? getEmptyTagValue()}
                   </EuiText>
                 </EuiToolTip>
               </EuiFlexItem>
+              {resolvedIds && resolvedIds.otherIds.length > 0 && (
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip
+                    position="top"
+                    title={ENTITY_IDS_OVERFLOW_TOOLTIP_TITLE}
+                    content={resolvedIds.otherIds.join(', ')}
+                  >
+                    <EuiBadge
+                      color="hollow"
+                      tabIndex={0}
+                      data-test-subj="entityIdCell-more"
+                      aria-label={i18n.translate(
+                        'xpack.securitySolution.flyout.entityDetails.grid.entityIdsOverflowAria',
+                        {
+                          defaultMessage: '{count} more',
+                          values: { count: resolvedIds.otherIds.length },
+                        }
+                      )}
+                    >
+                      {`+${resolvedIds.otherIds.length}`}
+                    </EuiBadge>
+                  </EuiToolTip>
+                </EuiFlexItem>
+              )}
               {entityId && (
                 <EuiFlexItem
                   grow={false}
@@ -81,6 +148,7 @@ export const EntitySummaryGrid = memo(
                     height: 0;
                     overflow: visible;
                     align-self: center;
+                    margin-inline-start: auto;
                   `}
                 >
                   <EuiToolTip
@@ -139,7 +207,7 @@ export const EntitySummaryGrid = memo(
           >
             <AssetCriticalityCell
               criticalityLevel={criticalityLevel}
-              canEdit={!!onCriticalitySave}
+              canEdit={canEditCriticality}
               onOpenModal={() => setModalVisible(true)}
             />
           </SummaryPanel>
@@ -153,7 +221,7 @@ export const EntitySummaryGrid = memo(
           </SummaryPanel>
         </EuiFlexGrid>
         <EuiSpacer size="s" />
-        {modalVisible && onCriticalitySave && (
+        {modalVisible && canEditCriticality && onCriticalitySave && (
           <AssetCriticalityModal
             initialCriticalityLevel={
               criticalityLevel === 'unassigned' ? undefined : criticalityLevel

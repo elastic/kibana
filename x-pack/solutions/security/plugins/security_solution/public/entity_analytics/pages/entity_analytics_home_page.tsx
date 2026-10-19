@@ -34,6 +34,7 @@ import {
   type FaceliftVersion,
 } from '../components/home/facelift/active_version';
 import { FaceliftHome, FaceliftPageDescription } from '../components/home/facelift/facelift_home';
+import { requestProductTourStart } from '../components/home/facelift/v9/product_tour';
 
 import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
 import { TabId } from './entity_analytics_management_page';
@@ -101,6 +102,11 @@ const CREATE_WATCHLIST_BUTTON_LABEL = i18n.translate(
 const ADD_INTEGRATIONS_BUTTON_LABEL = i18n.translate(
   'xpack.securitySolution.entityAnalytics.homePage.addIntegrationsButtonLabel',
   { defaultMessage: 'Add integrations' }
+);
+
+const PRODUCT_TOUR_BUTTON_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.homePage.productTourButtonLabel',
+  { defaultMessage: 'Product tour' }
 );
 
 const UEBA_INTEGRATIONS_PATH = '/app/integrations/browse/security/advanced_analytics_ueba';
@@ -257,6 +263,19 @@ const EntityAnalyticsHomePageContent = () => {
             overflow: true,
             testId: 'eaFaceliftSettingsButton',
           },
+          // Last caller item, so it sits directly above the native Feedback item.
+          ...(faceliftVersion === 'v9'
+            ? [
+                {
+                  id: 'entityAnalyticsProductTour',
+                  label: PRODUCT_TOUR_BUTTON_LABEL,
+                  iconType: 'bulb' as const,
+                  run: requestProductTourStart,
+                  overflow: true,
+                  testId: 'eaFaceliftProductTourMenuItem',
+                },
+              ]
+            : []),
         ],
       };
     }

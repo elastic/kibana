@@ -123,6 +123,13 @@ const TOUR_STEPS: TourStepConfig[] = [
 
 const STEPS_TOTAL = TOUR_STEPS.length;
 
+// Lets the app header menu, which renders outside FaceliftHome, restart the tour.
+const START_TOUR_EVENT = 'eaFaceliftV9StartProductTour';
+
+export const requestProductTourStart = () => {
+  window.dispatchEvent(new Event(START_TOUR_EVENT));
+};
+
 export interface ProductTourState {
   isCalloutVisible: boolean;
   /** 1-based; 0 when the tour is not running. */
@@ -147,6 +154,11 @@ export const useProductTour = (): ProductTourState => {
   );
   const endTour = useCallback(() => setCurrentStep(0), []);
   const dismissCallout = useCallback(() => setIsCalloutDismissed(true), []);
+
+  useEffect(() => {
+    window.addEventListener(START_TOUR_EVENT, startTour);
+    return () => window.removeEventListener(START_TOUR_EVENT, startTour);
+  }, [startTour]);
 
   return useMemo(
     () => ({

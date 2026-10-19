@@ -40,15 +40,12 @@ import type { EntityRiskScoresState } from '../../api/hooks/use_entity_risk_scor
 import type { EntityRiskScore } from '../../../../common/search_strategy';
 import { getRiskScoreSummaryAttributes } from '../../lens_attributes/risk_score_summary';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
-import {
-  USE_FACELIFT_MOCK_FLYOUT,
-  isFaceliftMockEntityId,
-} from '../home/facelift/flyout_data';
+import { USE_FACELIFT_MOCK_FLYOUT, isFaceliftMockEntityId } from '../home/facelift/flyout_data';
 
 import {
-  columnsArray,
   getEntityData,
   getItems,
+  getRiskSummaryColumns,
   LAST_30_DAYS,
   LENS_VISUALIZATION_HEIGHT,
   LENS_VISUALIZATION_MIN_WIDTH,
@@ -109,8 +106,7 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
       : undefined;
   const riskData = baseRiskData ?? fallbackRiskData;
   const entityData = getEntityData<T>(entityType, riskData);
-  const useFaceliftStaticMetric =
-    USE_FACELIFT_MOCK_FLYOUT && isFaceliftMockEntityId(entityId);
+  const useFaceliftStaticMetric = USE_FACELIFT_MOCK_FLYOUT && isFaceliftMockEntityId(entityId);
 
   const lensAttributes = useMemo(() => {
     const entityName = entityData?.name ?? '';
@@ -120,7 +116,7 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
     const metricLabel = i18n.translate(
       'xpack.securitySolution.flyout.entityDetails.riskSummary.entityRiskScoreLabel',
       {
-        defaultMessage: 'Entity risk score',
+        defaultMessage: 'Risk score',
       }
     );
 
@@ -153,6 +149,10 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
   const rows = useMemo(
     () => getItems(entityData, isPrivmonModifierEnabled, isWatchlistEnabled),
     [entityData, isPrivmonModifierEnabled, isWatchlistEnabled]
+  );
+  const columnsArray = useMemo(
+    () => getRiskSummaryColumns(entityData?.risk?.calculated_score_norm),
+    [entityData?.risk?.calculated_score_norm]
   );
 
   const onToggle = useCallback(
@@ -232,6 +232,10 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
   const resolutionRows = useMemo(
     () => getItems(resolutionEntityData, isPrivmonModifierEnabled, isWatchlistEnabled),
     [resolutionEntityData, isPrivmonModifierEnabled, isWatchlistEnabled]
+  );
+  const resolutionColumnsArray = useMemo(
+    () => getRiskSummaryColumns(resolutionEntityData?.risk?.calculated_score_norm),
+    [resolutionEntityData?.risk?.calculated_score_norm]
   );
   const showResolutionRiskSummary = hasResolutionGroup && Boolean(resolutionEntityData?.risk);
   const resolutionLensAttributes = useMemo(() => {
@@ -329,7 +333,7 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
           title: (
             <FormattedMessage
               id="xpack.securitySolution.flyout.entityDetails.entityRiskInputs"
-              defaultMessage="Entity risk contributions"
+              defaultMessage="Risk contributions"
             />
           ),
           link: entityTabLink,
@@ -340,10 +344,10 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
         }}
       >
         <EuiFlexGroup gutterSize="m" direction="row" wrap>
-          <EuiFlexItem grow={1}>
+          <EuiFlexItem grow={2}>
             <div
               // Improve Visualization loading state by predefining the size
-              // Set min-width for a fluid layout
+              // Set min-width for a fluid layout; grow={2}/{3} ≈ 40%/60% section width
               css={css`
                 height: ${LENS_VISUALIZATION_HEIGHT}px;
                 min-width: ${LENS_VISUALIZATION_MIN_WIDTH}px;
@@ -447,10 +451,10 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
             }}
           >
             <EuiFlexGroup gutterSize="m" direction="row" wrap>
-              <EuiFlexItem grow={1}>
+              <EuiFlexItem grow={2}>
                 <div
                   // Improve Visualization loading state by predefining the size
-                  // Set min-width for a fluid layout
+                  // Set min-width for a fluid layout; grow={2}/{3} ≈ 40%/60% section width
                   css={css`
                     height: ${LENS_VISUALIZATION_HEIGHT}px;
                     min-width: ${LENS_VISUALIZATION_MIN_WIDTH}px;
@@ -495,7 +499,7 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
                   )}
                   data-test-subj="resolution-risk-summary-table"
                   responsiveBreakpoint={false}
-                  columns={columnsArray}
+                  columns={resolutionColumnsArray}
                   items={resolutionRows}
                   compressed
                   loading={(entityResolutionRiskScore?.loading ?? false) || recalculatingScore}
