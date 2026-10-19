@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { isValidElement } from 'react';
 import type { ReactNode } from 'react';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -92,7 +92,7 @@ export const ContentListEmptyState = ({
   // `<h2>` so this empty state can co-exist with a page-level `<h1>` (e.g.,
   // the page title rendered by `KibanaContentListPage`). Consumers that need a
   // different level can pass a fully formed `title` ReactNode.
-  const titleNode = isPrimitive(resolvedTitle) ? <h2>{resolvedTitle}</h2> : <>{resolvedTitle}</>;
+  const titleNode = isValidElement(resolvedTitle) ? resolvedTitle : <h2>{resolvedTitle}</h2>;
   const bodyNode = isPrimitive(resolvedBody) ? <p>{resolvedBody}</p> : <>{resolvedBody}</>;
 
   return (
