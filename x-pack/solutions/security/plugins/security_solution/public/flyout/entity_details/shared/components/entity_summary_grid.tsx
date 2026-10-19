@@ -27,7 +27,7 @@ import type { CriticalityLevelWithUnassigned } from '../../../../../common/entit
 import { useGetWatchlists } from '../../../../entity_analytics/api/hooks/use_get_watchlists';
 import { getWatchlistName } from '../../../../../common/entity_analytics/watchlists/constants';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
-import { EntitySourceValue, TruncatedBadgeList } from './entity_source_value';
+import { EntitySourceValue, OverflowBadge, TruncatedBadgeList } from './entity_source_value';
 import {
   getMaxCriticality,
   getUnionEntitySources,
@@ -40,14 +40,19 @@ const WATCHLISTS_OVERFLOW_TOOLTIP_TITLE = i18n.translate(
   { defaultMessage: 'Additional watchlists' }
 );
 
+const ENTITY_IDS_OVERFLOW_TOOLTIP_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.entityDetails.grid.entityIdsOverflowTitle',
+  { defaultMessage: 'Other entity IDs in the resolution group' }
+);
+
 interface EntitySummaryGridProps {
-  /** Primary record: drives the Entity ID panel. */
+  /** Primary record: its id is the one shown (and copied) in the Entity ID panel. */
   entityRecord: Entity;
   /**
-   * Other records that resolve to `entityRecord` (its aliases). When non-empty, asset criticality
-   * shows the most severe level across the group, and data sources and watchlists are the union
-   * across the group; criticality is read-only in that mode because a single edit can't target
-   * all members.
+   * Other records that resolve to `entityRecord` (its aliases). When non-empty, the Entity ID panel
+   * lists the alias ids behind a `+N` badge, asset criticality shows the most severe level across
+   * the group, and data sources and watchlists are the union across the group; criticality is
+   * read-only in that mode because a single edit can't target all members.
    */
   aliasRecords?: readonly Entity[];
   criticalityLevel?: CriticalityLevelWithUnassigned | null;
@@ -62,6 +67,7 @@ export const EntitySummaryGrid = memo(
     const isGroupView = isEntityGroupView(aliasRecords);
 
     const groupRecords = isGroupView ? [entityRecord, ...aliasRecords] : [entityRecord];
+    const aliasEntityIds = isGroupView ? getAliasEntityIds(aliasRecords, entityId) : [];
     const dataSources = getUnionEntitySources(groupRecords);
     const watchlistIds = getUnionWatchlistIds(groupRecords);
     const displayedCriticality = isGroupView ? getMaxCriticality(groupRecords) : criticalityLevel;
@@ -86,6 +92,15 @@ export const EntitySummaryGrid = memo(
                   </EuiText>
                 </EuiToolTip>
               </EuiFlexItem>
+              {aliasEntityIds.length > 0 && (
+                <EuiFlexItem grow={false} css={{ flexShrink: 0 }}>
+                  <OverflowBadge
+                    hiddenValues={aliasEntityIds}
+                    tooltipTitle={ENTITY_IDS_OVERFLOW_TOOLTIP_TITLE}
+                    data-test-subj="entityIdCell-more"
+                  />
+                </EuiFlexItem>
+              )}
               {entityId && (
                 <EuiFlexItem
                   grow={false}
@@ -181,6 +196,19 @@ export const EntitySummaryGrid = memo(
   }
 );
 EntitySummaryGrid.displayName = 'EntitySummaryGrid';
+
+/** Distinct `entity.id`s of the aliases, in the order they were loaded, never repeating the target's. */
+const getAliasEntityIds = (
+  aliasRecords: readonly Entity[],
+  targetEntityId: string | undefined
+): string[] =>
+  Array.from(
+    new Set(
+      aliasRecords
+        .map((record) => record.entity?.id)
+        .filter((id): id is string => !!id && id !== targetEntityId)
+    )
+  );
 
 const SummaryPanel = memo(({ label, children }: { label: string; children: React.ReactNode }) => (
   <EuiPanel

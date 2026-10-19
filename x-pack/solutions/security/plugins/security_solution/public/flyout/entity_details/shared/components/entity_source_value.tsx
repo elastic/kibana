@@ -48,6 +48,41 @@ const DEFAULT_OVERFLOW_ARIA_LABEL = (count: number): string =>
     }
   );
 
+interface OverflowBadgeProps {
+  /** Values collapsed behind the badge; the tooltip lists them comma-joined. Renders nothing when empty. */
+  hiddenValues: string[];
+  /** Optional title shown above the tooltip content (e.g. `"Additional data sources"`). */
+  tooltipTitle?: string;
+  'data-test-subj'?: string;
+}
+
+/**
+ * Hollow `+N` badge whose tooltip lists the collapsed values. Shared by {@link TruncatedBadgeList}
+ * and cells that lay out their visible value themselves (e.g. the Entity ID panel with its copy
+ * button) so every "there are more values here" affordance looks the same.
+ */
+export const OverflowBadge = memo(
+  ({ hiddenValues, tooltipTitle, 'data-test-subj': dataTestSubj }: OverflowBadgeProps) => {
+    if (hiddenValues.length === 0) {
+      return null;
+    }
+    return (
+      <EuiToolTip position="top" title={tooltipTitle} content={hiddenValues.join(', ')}>
+        <EuiBadge
+          color="hollow"
+          tabIndex={0}
+          title=""
+          data-test-subj={dataTestSubj}
+          aria-label={DEFAULT_OVERFLOW_ARIA_LABEL(hiddenValues.length)}
+        >
+          {DEFAULT_OVERFLOW_LABEL(hiddenValues.length)}
+        </EuiBadge>
+      </EuiToolTip>
+    );
+  }
+);
+OverflowBadge.displayName = 'OverflowBadge';
+
 interface TruncatedBadgeListProps {
   /**
    * Raw (already resolved) values to render. Empty arrays render the shared
@@ -134,17 +169,11 @@ export const TruncatedBadgeList = memo(
         ))}
         {hidden.length > 0 && (
           <EuiFlexItem grow={false} css={{ flexShrink: 0 }}>
-            <EuiToolTip position="top" title={overflowTooltipTitle} content={hidden.join(', ')}>
-              <EuiBadge
-                color="hollow"
-                tabIndex={0}
-                title=""
-                data-test-subj={overflowTestSubj}
-                aria-label={DEFAULT_OVERFLOW_ARIA_LABEL(hidden.length)}
-              >
-                {DEFAULT_OVERFLOW_LABEL(hidden.length)}
-              </EuiBadge>
-            </EuiToolTip>
+            <OverflowBadge
+              hiddenValues={hidden}
+              tooltipTitle={overflowTooltipTitle}
+              data-test-subj={overflowTestSubj}
+            />
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

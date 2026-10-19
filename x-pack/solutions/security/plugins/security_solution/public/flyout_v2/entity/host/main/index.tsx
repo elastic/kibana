@@ -406,6 +406,7 @@ export const Host: FC<HostProps> = memo(function Host({
             entityType: 'host',
             entityName: hostName,
             scopeId,
+            mode,
             onShowEntity: onShowHost,
             onShowRelatedEntity: onShowRelatedEntityFromResolution,
             title: hostName,

@@ -399,6 +399,7 @@ export const User: FC<UserProps> = memo(function User({
             entityType: 'user',
             entityName: userName,
             scopeId,
+            mode,
             onShowEntity: onOpenUser,
             onShowRelatedEntity: onShowRelatedEntityFromResolution,
             title: userName,

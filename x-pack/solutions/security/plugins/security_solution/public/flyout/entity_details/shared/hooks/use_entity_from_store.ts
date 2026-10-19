@@ -10,6 +10,7 @@ import { useQuery, type QueryClient } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core/public';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { EntityType, SearchEntitiesFromEntityStoreResponse } from '@kbn/entity-store/public';
+import type { InspectQuery } from '@kbn/entity-store/common';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import type {
   HostEntity,
@@ -18,9 +19,12 @@ import type {
 } from '../../../../../common/api/entity_analytics';
 import type { HostItem, UserItem } from '../../../../../common/search_strategy';
 import {
+  buildAliasesFilter,
   buildEntityIdFilter,
+  RESOLUTION_GROUP_RISK_SORT_FIELD,
   RESOLVED_MODE_MAX_RECORDS,
 } from '../../../../../common/entity_analytics/entity_store/resolution_group';
+import type { FetchEntitiesListParams } from '../../../../entity_analytics/api/api';
 import { useEntityAnalyticsRoutes } from '../../../../entity_analytics/api/api';
 import type { EntityViewMode } from '../../../../../common/entity_analytics/entity_store/resolution_group';
 
@@ -61,6 +65,17 @@ export function applyEntityStoreSearchCachePatch(
     }
   );
 }
+
+const mergeInspect = (...parts: Array<InspectQuery | undefined>): InspectQuery | undefined => {
+  const defined = parts.filter((part): part is InspectQuery => part != null);
+  if (defined.length === 0) {
+    return undefined;
+  }
+  return {
+    dsl: defined.flatMap((part) => part.dsl),
+    response: defined.flatMap((part) => part.response),
+  };
+};
 
 export function serializeIdentityFieldsForQueryKey(
   fields: Record<string, string> | null | undefined
@@ -117,8 +132,9 @@ export interface UseEntityFromStoreParams {
    */
   entityId?: string;
   /**
-   * `single` (default) loads the `entityId` record only; `resolved` also loads every record that
-   * resolves to `entityId`. Only applies when `entityId` is set.
+   * `single` (default) loads the `entityId` record only; `resolved` also loads the records that
+   * resolve to `entityId`, riskiest first and capped at `RESOLVED_MODE_MAX_RECORDS` members
+   * including the target. Only applies when `entityId` is set.
    */
   mode?: EntityViewMode;
   /**
@@ -144,7 +160,7 @@ export interface EntityFromStoreResult<T> {
   entityRecord: EntityStoreRecord | null;
   /**
    * In `resolved` mode, the other records that resolve to `entityId` (aliases), excluding
-   * `entityRecord` itself. Always empty in `single` mode.
+   * `entityRecord` itself, riskiest first. Always empty in `single` mode.
    */
   aliasRecords: EntityStoreRecord[];
   firstSeen: string | null;
@@ -248,26 +264,51 @@ export function useEntityFromStore(
       entityId ?? '',
     ],
     queryFn: async ({ signal }) => {
+      // load the entity in its own query to ensure it is always present, even if it is part of a larger resolution group
+      const fetchRecords = (overrides: Partial<FetchEntitiesListParams>) =>
+        fetchEntitiesListV2({
+          signal,
+          params: {
+            entityTypes: [entityType as EntityType],
+            page: 1,
+            perPage: 1,
+            sortField: '@timestamp',
+            sortOrder: 'desc',
+            ...overrides,
+            // The AI summary is loaded separately from the metadata datastream via
+            // useFetchPersistedAiSummary, not from the entity store record.
+          },
+          context: executionContext,
+        });
+
       let filterQuery: string | undefined;
       if (entityId) {
-        filterQuery = JSON.stringify(buildEntityIdFilter(entityId, mode));
+        filterQuery = JSON.stringify(buildEntityIdFilter(entityId, 'single'));
       } else if (storeFilter) {
         filterQuery = JSON.stringify(storeFilter);
       }
-      return fetchEntitiesListV2({
-        signal,
-        params: {
-          entityTypes: [entityType as EntityType],
-          filterQuery,
-          page: 1,
-          perPage: isResolvedMode ? RESOLVED_MODE_MAX_RECORDS : 1,
-          sortField: '@timestamp',
-          sortOrder: 'desc',
-          // The AI summary is loaded separately from the metadata datastream via
-          // useFetchPersistedAiSummary, not from the entity store record.
-        },
-        context: executionContext,
+
+      const targetResponse = await fetchRecords({ filterQuery });
+      if (!entityId || !isResolvedMode) {
+        return targetResponse;
+      }
+
+      // Aliases come riskiest-first so the cap keeps the riskiest members.
+      const aliasesResponse = await fetchRecords({
+        filterQuery: JSON.stringify(buildAliasesFilter(entityId)),
+        // The target takes one of the member slots.
+        perPage: RESOLVED_MODE_MAX_RECORDS,
+        sortField: RESOLUTION_GROUP_RISK_SORT_FIELD,
+        sortOrder: 'desc',
       });
+      return {
+        ...aliasesResponse,
+        records: [
+          ...targetResponse.records,
+          ...aliasesResponse.records.filter((alias) => alias.entity?.id !== entityId),
+        ],
+        inspect: mergeInspect(targetResponse.inspect, aliasesResponse.inspect),
+      };
     },
     enabled: !skip && (hasEntityId || Boolean(storeFilter)),
   });
