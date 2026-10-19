@@ -89,7 +89,12 @@ const jsonStringify = async (
   return {
     blockedMs,
     prepMs,
-    detail: { calls, bytesPerCall: jsonCache.bytes, totalBytes: total, calibratedMsPerCall: jsonCache.msPerCall },
+    detail: {
+      calls,
+      bytesPerCall: jsonCache.bytes,
+      totalBytes: total,
+      calibratedMsPerCall: jsonCache.msPerCall,
+    },
   };
 };
 

@@ -6,7 +6,13 @@
  */
 
 import os from 'os';
-import type { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  CoreStart,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,

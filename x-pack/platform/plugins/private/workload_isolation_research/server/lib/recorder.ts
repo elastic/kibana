@@ -57,7 +57,10 @@ export class Recorder {
     this.push({ source: 'tm', ts: epochNow(), ...(message as Record<string, unknown>) });
   };
 
-  constructor(private readonly config: WorkloadIsolationResearchConfig, private readonly logger: Logger) {
+  constructor(
+    private readonly config: WorkloadIsolationResearchConfig,
+    private readonly logger: Logger
+  ) {
     this.ring = new RingBuffer<Sample>(config.ringCapacity);
   }
 
@@ -108,7 +111,9 @@ export class Recorder {
     this.gcObserver.observe({ entryTypes: ['gc'] });
 
     diagnosticsChannel.subscribe(TM_RESEARCH_CHANNEL, this.onTmEvent);
-    this.logger.info(`workload isolation research recorder started pod=${this.pod} boot=${this.bootId}`);
+    this.logger.info(
+      `workload isolation research recorder started pod=${this.pod} boot=${this.bootId}`
+    );
   }
 
   private startProcSampler(): void {
@@ -181,7 +186,11 @@ export class Recorder {
 
   public async samples(mainSince: number, workerSince: number, limit: number) {
     const main = this.ring.since(mainSince, limit);
-    const worker = await this.request<WorkerSamplesReply>({ type: 'samples', since: workerSince, limit });
+    const worker = await this.request<WorkerSamplesReply>({
+      type: 'samples',
+      since: workerSince,
+      limit,
+    });
     return {
       pod: this.pod,
       boot_id: this.bootId,

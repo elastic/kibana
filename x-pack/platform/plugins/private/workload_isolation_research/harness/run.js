@@ -7,8 +7,10 @@
 
 // RESEARCH ONLY: entry point for the workload isolation harness CLI.
 require('@kbn/setup-node-env');
-require('./src/cli').main().catch((e) => {
-  // eslint-disable-next-line no-console
-  console.error(e);
-  process.exit(1);
-});
+require('./src/cli')
+  .main()
+  .catch((e) => {
+    // eslint-disable-next-line no-console
+    console.error(e);
+    process.exit(1);
+  });

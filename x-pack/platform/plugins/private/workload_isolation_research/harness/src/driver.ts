@@ -23,7 +23,11 @@ interface SamplesResponse {
   pod: string;
   boot_id: string;
   pid: number;
-  main: { samples: Array<{ seq: number; item: Record<string, unknown> }>; dropped: number; last_seq: number };
+  main: {
+    samples: Array<{ seq: number; item: Record<string, unknown> }>;
+    dropped: number;
+    last_seq: number;
+  };
   worker: {
     samples: Array<{ seq: number; item: Record<string, unknown> }>;
     dropped: number;
@@ -35,7 +39,10 @@ interface SamplesResponse {
 /** Pull-with-dedup collector: the load balancer picks the pod; cursors are keyed per process boot. */
 export class Collector {
   public readonly cursors: Record<string, { main: number; worker: number }> = {};
-  public readonly pods = new Map<string, { pod: string; boot_id: string; pid: number; probing: boolean; dropped: number }>();
+  public readonly pods = new Map<
+    string,
+    { pod: string; boot_id: string; pid: number; probing: boolean; dropped: number }
+  >();
   private readonly out: fs.WriteStream;
   public count = 0;
   public pullErrors = 0;
@@ -52,10 +59,16 @@ export class Collector {
 
   public async pullOnce(): Promise<SamplesResponse | undefined> {
     try {
-      const { status, body } = await kbn<SamplesResponse>(this.target, 'POST', `${API}/samples`, {
-        cursors: this.cursors,
-        limit: 50000,
-      }, 30000);
+      const { status, body } = await kbn<SamplesResponse>(
+        this.target,
+        'POST',
+        `${API}/samples`,
+        {
+          cursors: this.cursors,
+          limit: 50000,
+        },
+        30000
+      );
       if (status !== 200) {
         this.pullErrors++;
         return undefined;
@@ -123,11 +136,34 @@ class LaptopProbe {
         kbn(this.target, 'GET', this.probePath, undefined, 120000)
           .then(({ status }) => {
             const end = now();
-            this.collector.write({ source: 'probe', thread: 'driver', pod: 'driver', ts: intended, intended, sent, end, latency_ms: end - intended, service_ms: end - sent, status });
+            this.collector.write({
+              source: 'probe',
+              thread: 'driver',
+              pod: 'driver',
+              ts: intended,
+              intended,
+              sent,
+              end,
+              latency_ms: end - intended,
+              service_ms: end - sent,
+              status,
+            });
           })
           .catch((e) => {
             const end = now();
-            this.collector.write({ source: 'probe', thread: 'driver', pod: 'driver', ts: intended, intended, sent, end, latency_ms: end - intended, service_ms: end - sent, status: 0, error: String(e?.name ?? e) });
+            this.collector.write({
+              source: 'probe',
+              thread: 'driver',
+              pod: 'driver',
+              ts: intended,
+              intended,
+              sent,
+              end,
+              latency_ms: end - intended,
+              service_ms: end - sent,
+              status: 0,
+              error: String(e?.name ?? e),
+            });
           });
         this.next += period;
       }
@@ -164,7 +200,10 @@ export interface RunOptions {
   readonly repoDir: string;
   readonly configOverrides: Record<string, unknown>;
   readonly expectedPods: number;
-  readonly actions?: Record<string, (params: Record<string, unknown>, ctx: ActionContext) => Promise<Record<string, unknown>>>;
+  readonly actions?: Record<
+    string,
+    (params: Record<string, unknown>, ctx: ActionContext) => Promise<Record<string, unknown>>
+  >;
 }
 
 export interface ActionContext {
@@ -220,7 +259,9 @@ export const runScenario = async (opts: RunOptions): Promise<{ runId: string; di
   const collector = new Collector(target, path.join(dir, 'samples.ndjson'));
   const ctx: ActionContext = { target, runId, collector, log };
 
-  const health = await kbn<Record<string, any>>(target, 'GET', '/api/task_manager/_health').catch(() => ({ status: 0, body: {} as Record<string, any> }));
+  const health = await kbn<Record<string, any>>(target, 'GET', '/api/task_manager/_health').catch(
+    () => ({ status: 0, body: {} as Record<string, any> })
+  );
   const tmConfig = health.body?.stats?.configuration?.value ?? {};
 
   const manifest: RunManifest = {
@@ -254,21 +295,28 @@ export const runScenario = async (opts: RunOptions): Promise<{ runId: string; di
     notes: [],
     status: 'running',
   };
-  const writeManifest = () => fs.writeFileSync(path.join(dir, 'manifest.json'), JSON.stringify(manifest, null, 2));
+  const writeManifest = () =>
+    fs.writeFileSync(path.join(dir, 'manifest.json'), JSON.stringify(manifest, null, 2));
   writeManifest();
   log(`run ${runId} start target=${opts.targetKind} poll_interval=${manifest.tm_poll_interval_ms}`);
 
   // Drain any pre-existing buffered samples so the run only contains its own window.
   for (let i = 0; i < Math.max(3, opts.expectedPods * 4); i++) {
     const res = await collector.pullOnce();
-    if (res) collector.cursors[res.boot_id] = { main: res.main.last_seq, worker: res.worker.last_seq };
+    if (res)
+      collector.cursors[res.boot_id] = { main: res.main.last_seq, worker: res.worker.last_seq };
   }
   fs.writeFileSync(path.join(dir, 'samples.ndjson'), '');
   collector.count = 0;
 
   // Contract tracer baseline (cumulative since boot); the run stores the delta.
-  const edgesAtStart = await kbn<{ enabled: boolean; edges: Array<Record<string, any>> }>(target, 'GET', `${API}/edges`).catch(() => undefined);
-  const edgeKey = (e: Record<string, any>) => [e.direction, e.caller, e.callee, e.lifecycle, e.path].join('|');
+  const edgesAtStart = await kbn<{ enabled: boolean; edges: Array<Record<string, any>> }>(
+    target,
+    'GET',
+    `${API}/edges`
+  ).catch(() => undefined);
+  const edgeKey = (e: Record<string, any>) =>
+    [e.direction, e.caller, e.callee, e.lifecycle, e.path].join('|');
   const startEdges = new Map((edgesAtStart?.body?.edges ?? []).map((e) => [edgeKey(e), e]));
 
   // Start in-pod probes; repeat so the load balancer reaches every pod.
@@ -281,20 +329,40 @@ export const runScenario = async (opts: RunOptions): Promise<{ runId: string; di
     });
     probeBodies.push({ status: res.status, ...res.body });
     if (scenario.superviseKillAfterMs) {
-      await kbn(target, 'POST', `${API}/supervise`, { killAfterMs: scenario.superviseKillAfterMs, signal: 'SIGKILL' });
+      await kbn(target, 'POST', `${API}/supervise`, {
+        killAfterMs: scenario.superviseKillAfterMs,
+        signal: 'SIGKILL',
+      });
     }
   }
-  const totalS = scenario.phases.reduce((s, p) => s + p.durationS + (p.offender ? p.offender.doseMs / 1000 + 10 : 0), 0) + 120;
-  await kbn(target, 'POST', `${API}/ticks/_start`, { intervalMs: scenario.ticks.intervalMs, durationS: Math.ceil(totalS), seriesId: runId.slice(-40) });
+  const totalS =
+    scenario.phases.reduce(
+      (s, p) => s + p.durationS + (p.offender ? p.offender.doseMs / 1000 + 10 : 0),
+      0
+    ) + 120;
+  await kbn(target, 'POST', `${API}/ticks/_start`, {
+    intervalMs: scenario.ticks.intervalMs,
+    durationS: Math.ceil(totalS),
+    seriesId: runId.slice(-40),
+  });
 
-  const laptop = new LaptopProbe(target, scenario.laptopProbe.rps, scenario.laptopProbe.path, collector);
+  const laptop = new LaptopProbe(
+    target,
+    scenario.laptopProbe.rps,
+    scenario.laptopProbe.path,
+    collector
+  );
   laptop.start();
   const loop = collector.loop(1000);
 
   try {
     for (const phase of scenario.phases) {
       const start = now();
-      log(`phase ${phase.name} start ${phase.offender ? JSON.stringify(phase.offender) : phase.action ?? ''}`);
+      log(
+        `phase ${phase.name} start ${
+          phase.offender ? JSON.stringify(phase.offender) : phase.action ?? ''
+        }`
+      );
       const result = await runPhase(phase, opts, ctx);
       const end = now();
       manifest.phases.push({ name: phase.name, start, end, offender_result: result });
@@ -317,12 +385,15 @@ export const runScenario = async (opts: RunOptions): Promise<{ runId: string; di
     for (let i = 0; i < Math.max(3, opts.expectedPods * 6); i++) await collector.pullOnce();
     await sleep(2000);
     await collector.close();
-    const info = await kbn<Record<string, unknown>>(target, 'GET', `${API}/info`).catch(() => ({ status: 0, body: {} }));
-    const edges = await kbn<{ enabled: boolean; wrap_errors: number; edges: Array<Record<string, unknown>> }>(
-      target,
-      'GET',
-      `${API}/edges`
-    ).catch(() => undefined);
+    const info = await kbn<Record<string, unknown>>(target, 'GET', `${API}/info`).catch(() => ({
+      status: 0,
+      body: {},
+    }));
+    const edges = await kbn<{
+      enabled: boolean;
+      wrap_errors: number;
+      edges: Array<Record<string, unknown>>;
+    }>(target, 'GET', `${API}/edges`).catch(() => undefined);
     if (edges?.body?.enabled) {
       fs.writeFileSync(
         path.join(dir, 'edges.ndjson'),
@@ -342,17 +413,36 @@ export const runScenario = async (opts: RunOptions): Promise<{ runId: string; di
           .map((e) => JSON.stringify(e))
           .join('\n') + '\n'
       );
-      manifest.notes.push(`tracer: edges=${edges.body.edges.length} wrap_errors=${edges.body.wrap_errors}`);
+      manifest.notes.push(
+        `tracer: edges=${edges.body.edges.length} wrap_errors=${edges.body.wrap_errors}`
+      );
     }
     manifest.pods = [...collector.pods.values()].map((p) => ({ ...p }));
-    manifest.notes.push(`probe_start_responses=${JSON.stringify(probeBodies.map((b) => ({ pod: b.pod, boot_id: b.boot_id, has_auth: b.has_auth, status: b.status })))}`);
-    manifest.config_overrides = { ...manifest.config_overrides, research_plugin_config: (info.body as Record<string, unknown>).config };
+    manifest.notes.push(
+      `probe_start_responses=${JSON.stringify(
+        probeBodies.map((b) => ({
+          pod: b.pod,
+          boot_id: b.boot_id,
+          has_auth: b.has_auth,
+          status: b.status,
+        }))
+      )}`
+    );
+    manifest.config_overrides = {
+      ...manifest.config_overrides,
+      research_plugin_config: (info.body as Record<string, unknown>).config,
+    };
     (manifest.host as Record<string, unknown>).loadavg_end = os.loadavg();
     (manifest as unknown as Record<string, unknown>).kibana_info = info.body;
-    (manifest as unknown as Record<string, unknown>).collector = { samples: collector.count, pull_errors: collector.pullErrors };
+    (manifest as unknown as Record<string, unknown>).collector = {
+      samples: collector.count,
+      pull_errors: collector.pullErrors,
+    };
     manifest.utc_end = new Date().toISOString();
     writeManifest();
-    log(`run ${runId} ${manifest.status} samples=${collector.count} pull_errors=${collector.pullErrors} pods=${collector.pods.size}`);
+    log(
+      `run ${runId} ${manifest.status} samples=${collector.count} pull_errors=${collector.pullErrors} pods=${collector.pods.size}`
+    );
   }
   return { runId, dir };
 };

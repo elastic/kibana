@@ -17,8 +17,6 @@
  *  - self accounting: this worker's own CPU / heap so lanes can subtract it.
  */
 
-'use strict';
-
 const { parentPort, workerData } = require('worker_threads');
 const { performance } = require('perf_hooks');
 const v8 = require('v8');
@@ -64,7 +62,14 @@ setInterval(() => {
       windowHbCount++;
       if (gap > windowMaxGap) windowMaxGap = gap;
       if (gap > stallThresholdMs) {
-        push({ source: 'stall', ts: lastHb, start: lastHb, end: hb, gap_ms: gap, live_detected: !!openStall });
+        push({
+          source: 'stall',
+          ts: lastHb,
+          start: lastHb,
+          end: hb,
+          gap_ms: gap,
+          live_detected: !!openStall,
+        });
       }
     }
     openStall = undefined;
@@ -78,7 +83,12 @@ setInterval(() => {
     // direct fd write because worker stdout is relayed through the (blocked) main thread.
     require('fs').writeSync(
       2,
-      JSON.stringify({ research: 'supervisor_kill', ts: now, stall_ms: now - openStall.start, pid: process.pid }) + '\n'
+      JSON.stringify({
+        research: 'supervisor_kill',
+        ts: now,
+        stall_ms: now - openStall.start,
+        pid: process.pid,
+      }) + '\n'
     );
     process.kill(process.pid, supervisor.signal);
     supervisor = undefined;
@@ -138,7 +148,16 @@ const getFetch = (insecure) => {
 
 const fireOne = (p, intended) => {
   if (inFlight >= p.maxInFlight) {
-    push({ source: 'probe', ts: intended, intended, sent: undefined, end: epochNow(), status: 0, error: 'max_in_flight', run_id: p.runId });
+    push({
+      source: 'probe',
+      ts: intended,
+      intended,
+      sent: undefined,
+      end: epochNow(),
+      status: 0,
+      error: 'max_in_flight',
+      run_id: p.runId,
+    });
     return;
   }
   inFlight++;
@@ -147,11 +166,32 @@ const fireOne = (p, intended) => {
     .then(async (res) => {
       await res.arrayBuffer();
       const end = epochNow();
-      push({ source: 'probe', ts: intended, intended, sent, end, latency_ms: end - intended, service_ms: end - sent, status: res.status, run_id: p.runId });
+      push({
+        source: 'probe',
+        ts: intended,
+        intended,
+        sent,
+        end,
+        latency_ms: end - intended,
+        service_ms: end - sent,
+        status: res.status,
+        run_id: p.runId,
+      });
     })
     .catch((err) => {
       const end = epochNow();
-      push({ source: 'probe', ts: intended, intended, sent, end, latency_ms: end - intended, service_ms: end - sent, status: 0, error: String((err && err.name) || err), run_id: p.runId });
+      push({
+        source: 'probe',
+        ts: intended,
+        intended,
+        sent,
+        end,
+        latency_ms: end - intended,
+        service_ms: end - sent,
+        status: 0,
+        error: String((err && err.name) || err),
+        run_id: p.runId,
+      });
     })
     .finally(() => {
       inFlight--;
@@ -203,12 +243,21 @@ parentPort.on('message', (msg) => {
       parentPort.postMessage({ type: 'ack', reqId: msg.reqId });
       break;
     case 'supervise':
-      supervisor = msg.killAfterMs > 0 ? { killAfterMs: msg.killAfterMs, signal: msg.signal || 'SIGKILL' } : undefined;
+      supervisor =
+        msg.killAfterMs > 0
+          ? { killAfterMs: msg.killAfterMs, signal: msg.signal || 'SIGKILL' }
+          : undefined;
       parentPort.postMessage({ type: 'ack', reqId: msg.reqId });
       break;
     case 'samples': {
       const out = since(msg.since, msg.limit);
-      parentPort.postMessage({ type: 'samples', reqId: msg.reqId, ...out, probing: !!probe, inFlight });
+      parentPort.postMessage({
+        type: 'samples',
+        reqId: msg.reqId,
+        ...out,
+        probing: !!probe,
+        inFlight,
+      });
       break;
     }
     case 'push':

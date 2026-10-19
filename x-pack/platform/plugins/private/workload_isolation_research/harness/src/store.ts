@@ -11,7 +11,10 @@ import readline from 'readline';
 
 /** Research data store (dedicated local ES, default http://localhost:9250). */
 export const researchEs = (): Client =>
-  new Client({ node: process.env.WIR_RESEARCH_ES_URL ?? 'http://localhost:9250', requestTimeout: 120000 });
+  new Client({
+    node: process.env.WIR_RESEARCH_ES_URL ?? 'http://localhost:9250',
+    requestTimeout: 120000,
+  });
 
 export const STREAMS = {
   runs: 'research-runs',
@@ -120,7 +123,12 @@ export const setupStore = async (es: Client): Promise<void> => {
       settings: { number_of_replicas: 0 },
       mappings: {
         dynamic: true,
-        properties: { ...common, phase: { type: 'keyword' }, pod: { type: 'keyword' }, row: { type: 'keyword' } },
+        properties: {
+          ...common,
+          phase: { type: 'keyword' },
+          pod: { type: 'keyword' },
+          row: { type: 'keyword' },
+        },
       },
     },
   });
@@ -162,7 +170,13 @@ export const ingestRunDir = async (es: Client, dir: string): Promise<Record<stri
   await bulkCreate(
     es,
     STREAMS.samples,
-    samples.map((s) => ({ ...s, '@timestamp': Math.round(s.ts as number), run_id: runId, lane, variant }))
+    samples.map((s) => ({
+      ...s,
+      '@timestamp': Math.round(s.ts as number),
+      run_id: runId,
+      lane,
+      variant,
+    }))
   );
   counts.samples = samples.length;
   const edges = await readNdjson(`${dir}/edges.ndjson`);
@@ -185,7 +199,10 @@ export const ingestRunDir = async (es: Client, dir: string): Promise<Record<stri
 };
 
 /** Reads every sample of a run back from the store (raw data for derived results). */
-export const fetchRunSamples = async (es: Client, runId: string): Promise<Array<Record<string, unknown>>> => {
+export const fetchRunSamples = async (
+  es: Client,
+  runId: string
+): Promise<Array<Record<string, unknown>>> => {
   const out: Array<Record<string, unknown>> = [];
   const pit = await es.openPointInTime({ index: STREAMS.samples, keep_alive: '2m' });
   let searchAfter: Array<string | number> | undefined;
@@ -209,7 +226,10 @@ export const fetchRunSamples = async (es: Client, runId: string): Promise<Array<
   return out;
 };
 
-export const fetchManifest = async (es: Client, runId: string): Promise<Record<string, unknown>> => {
+export const fetchManifest = async (
+  es: Client,
+  runId: string
+): Promise<Record<string, unknown>> => {
   const res = await es.search<Record<string, unknown>>({
     index: STREAMS.runs,
     size: 1,

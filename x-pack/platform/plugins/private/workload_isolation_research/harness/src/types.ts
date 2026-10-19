@@ -11,7 +11,12 @@ export type SampleDoc = Record<string, unknown> & {
 };
 
 export interface OffenderSpec {
-  readonly kind: 'cpu_spin' | 'json_stringify' | 'regex_backtrack' | 'microtask_chain' | 'infinite_loop';
+  readonly kind:
+    | 'cpu_spin'
+    | 'json_stringify'
+    | 'regex_backtrack'
+    | 'microtask_chain'
+    | 'infinite_loop';
   readonly doseMs: number;
   readonly mode: 'route' | 'task';
   readonly sizeMb?: number;
@@ -61,7 +66,12 @@ export interface RunManifest {
   tm_claim_strategy: string | null;
   pods: Array<Record<string, unknown>>;
   host: Record<string, unknown>;
-  phases: Array<{ name: string; start: number; end: number; offender_result?: Record<string, unknown> }>;
+  phases: Array<{
+    name: string;
+    start: number;
+    end: number;
+    offender_result?: Record<string, unknown>;
+  }>;
   notes: string[];
   status: 'running' | 'complete' | 'failed';
 }

@@ -25,7 +25,10 @@ export class RingBuffer<T> {
   }
 
   /** Returns entries with seq > since (oldest first), at most `limit`; reports dropped entries. */
-  public since(since: number, limit: number): { entries: Array<{ seq: number; item: T }>; dropped: number } {
+  public since(
+    since: number,
+    limit: number
+  ): { entries: Array<{ seq: number; item: T }>; dropped: number } {
     const oldest = Math.max(1, this.nextSeq - this.capacity);
     const from = Math.max(since + 1, oldest);
     const dropped = Math.max(0, oldest - (since + 1));

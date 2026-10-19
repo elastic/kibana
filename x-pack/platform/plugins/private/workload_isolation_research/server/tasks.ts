@@ -21,7 +21,9 @@ export const OFFENDER_TASK_TYPE = 'workloadIsolationResearch:offender';
 export const TICK_TASK_TYPE = 'workloadIsolationResearch:tick';
 
 const offenderParamsSchema = schema.object({
-  kind: schema.oneOf(OFFENDER_KINDS.map((k) => schema.literal(k)) as [ReturnType<typeof schema.literal>]),
+  kind: schema.oneOf(
+    OFFENDER_KINDS.map((k) => schema.literal(k)) as [ReturnType<typeof schema.literal>]
+  ),
   doseMs: schema.number({ min: 0, max: 3_600_000 }),
   sizeMb: schema.maybe(schema.number({ min: 0.01, max: 512 })),
   runId: schema.maybe(schema.string({ maxLength: 256 })),
@@ -58,7 +60,13 @@ export const registerResearchTasks = (
           };
           const recorder = getRecorder();
           const startTs = epochNow();
-          recorder.push({ source: 'offender_start', ts: startTs, mode: 'task', task_id: taskInstance.id, ...params });
+          recorder.push({
+            source: 'offender_start',
+            ts: startTs,
+            mode: 'task',
+            task_id: taskInstance.id,
+            ...params,
+          });
           const result = await runOffender(params);
           recorder.push({
             source: 'offender',
@@ -121,7 +129,17 @@ export class TickScheduler {
     private readonly recorder: Recorder
   ) {}
 
-  public start({ intervalMs, durationS, seriesId, aheadMs = 30000 }: { intervalMs: number; durationS: number; seriesId: string; aheadMs?: number }): void {
+  public start({
+    intervalMs,
+    durationS,
+    seriesId,
+    aheadMs = 30000,
+  }: {
+    intervalMs: number;
+    durationS: number;
+    seriesId: string;
+    aheadMs?: number;
+  }): void {
     this.stop();
     const t0 = Math.ceil((Date.now() + 2000) / intervalMs) * intervalMs;
     const endAt = t0 + durationS * 1000;
@@ -147,7 +165,12 @@ export class TickScheduler {
           // NB: bulkSchedule() overwrites caller-supplied runAt with now (+jitter), so ticks
           // are scheduled individually to keep their intended runAt.
           await Promise.all(tasks.map((task) => this.taskManager.schedule(task)));
-          this.recorder.push({ source: 'tick_scheduled', ts: Date.now(), count: tasks.length, series_id: seriesId });
+          this.recorder.push({
+            source: 'tick_scheduled',
+            ts: Date.now(),
+            count: tasks.length,
+            series_id: seriesId,
+          });
         } catch (e) {
           this.logger.warn(`tick scheduling failed: ${e.message}`);
         }

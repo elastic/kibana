@@ -25,13 +25,18 @@ export interface RouteDeps {
   router: IRouter;
   logger: Logger;
   getRecorder: () => Recorder;
-  getStart: () => Promise<{ core: CoreStart; taskManager: TaskManagerStartContract; ticks: TickScheduler }>;
+  getStart: () => Promise<{
+    core: CoreStart;
+    taskManager: TaskManagerStartContract;
+    ticks: TickScheduler;
+  }>;
   getInfo: () => Record<string, unknown>;
 }
 
 export const registerRoutes = ({ router, getRecorder, getStart, getInfo }: RouteDeps): void => {
-  router.get({ path: `${API_BASE}/info`, security, options, validate: false }, async (_ctx, _req, res) =>
-    res.ok({ body: getInfo() })
+  router.get(
+    { path: `${API_BASE}/info`, security, options, validate: false },
+    async (_ctx, _req, res) => res.ok({ body: getInfo() })
   );
 
   router.post(
@@ -80,7 +85,9 @@ export const registerRoutes = ({ router, getRecorder, getStart, getInfo }: Route
       const origin = req.body.origin ?? `${info.protocol}://${host}:${info.port}`;
       const url = `${origin}${core.http.basePath.serverBasePath}${req.body.path}`;
       // The caller's credentials are reused for the in-pod probe; kept in memory only.
-      const headers: Record<string, string> = { 'x-elastic-internal-origin': 'kibana-research-probe' };
+      const headers: Record<string, string> = {
+        'x-elastic-internal-origin': 'kibana-research-probe',
+      };
       const auth = req.headers.authorization;
       if (typeof auth === 'string') headers.authorization = auth;
       await getRecorder().startProbe({
@@ -92,26 +99,48 @@ export const registerRoutes = ({ router, getRecorder, getStart, getInfo }: Route
         insecure: info.protocol === 'https',
         runId: req.body.runId,
       });
-      return res.ok({ body: { pod: getRecorder().pod, boot_id: getRecorder().bootId, url, has_auth: !!auth } });
+      return res.ok({
+        body: { pod: getRecorder().pod, boot_id: getRecorder().bootId, url, has_auth: !!auth },
+      });
     }
   );
 
-  router.get({ path: `${API_BASE}/edges`, security, options, validate: false }, async (_ctx, _req, res) => {
-    const tracer = (globalThis as unknown as Record<string, { snapshot(): unknown[]; wrapErrors: number } | undefined>)
-      .__kbnResearchContractTracer;
-    return res.ok({ body: { enabled: !!tracer, wrap_errors: tracer?.wrapErrors ?? 0, edges: tracer?.snapshot() ?? [] } });
-  });
+  router.get(
+    { path: `${API_BASE}/edges`, security, options, validate: false },
+    async (_ctx, _req, res) => {
+      const tracer = (
+        globalThis as unknown as Record<
+          string,
+          { snapshot(): unknown[]; wrapErrors: number } | undefined
+        >
+      ).__kbnResearchContractTracer;
+      return res.ok({
+        body: {
+          enabled: !!tracer,
+          wrap_errors: tracer?.wrapErrors ?? 0,
+          edges: tracer?.snapshot() ?? [],
+        },
+      });
+    }
+  );
 
-  router.post({ path: `${API_BASE}/edges/_reset`, security, options, validate: false }, async (_ctx, _req, res) => {
-    const tracer = (globalThis as unknown as Record<string, { reset(): void } | undefined>).__kbnResearchContractTracer;
-    tracer?.reset();
-    return res.ok({ body: { enabled: !!tracer } });
-  });
+  router.post(
+    { path: `${API_BASE}/edges/_reset`, security, options, validate: false },
+    async (_ctx, _req, res) => {
+      const tracer = (globalThis as unknown as Record<string, { reset(): void } | undefined>)
+        .__kbnResearchContractTracer;
+      tracer?.reset();
+      return res.ok({ body: { enabled: !!tracer } });
+    }
+  );
 
-  router.post({ path: `${API_BASE}/probe/_stop`, security, options, validate: false }, async (_ctx, _req, res) => {
-    await getRecorder().stopProbe();
-    return res.ok({ body: { pod: getRecorder().pod, boot_id: getRecorder().bootId } });
-  });
+  router.post(
+    { path: `${API_BASE}/probe/_stop`, security, options, validate: false },
+    async (_ctx, _req, res) => {
+      await getRecorder().stopProbe();
+      return res.ok({ body: { pod: getRecorder().pod, boot_id: getRecorder().bootId } });
+    }
+  );
 
   router.post(
     {
@@ -121,7 +150,9 @@ export const registerRoutes = ({ router, getRecorder, getStart, getInfo }: Route
       validate: {
         body: schema.object({
           killAfterMs: schema.number({ min: 0, max: 3_600_000 }),
-          signal: schema.oneOf([schema.literal('SIGKILL'), schema.literal('SIGTERM')], { defaultValue: 'SIGKILL' }),
+          signal: schema.oneOf([schema.literal('SIGKILL'), schema.literal('SIGTERM')], {
+            defaultValue: 'SIGKILL',
+          }),
         }),
       },
     },
@@ -151,11 +182,14 @@ export const registerRoutes = ({ router, getRecorder, getStart, getInfo }: Route
     }
   );
 
-  router.post({ path: `${API_BASE}/ticks/_stop`, security, options, validate: false }, async (_ctx, _req, res) => {
-    const { ticks } = await getStart();
-    ticks.stop();
-    return res.ok({ body: {} });
-  });
+  router.post(
+    { path: `${API_BASE}/ticks/_stop`, security, options, validate: false },
+    async (_ctx, _req, res) => {
+      const { ticks } = await getStart();
+      ticks.stop();
+      return res.ok({ body: {} });
+    }
+  );
 
   router.post(
     {
@@ -164,10 +198,14 @@ export const registerRoutes = ({ router, getRecorder, getStart, getInfo }: Route
       options,
       validate: {
         body: schema.object({
-          kind: schema.oneOf(OFFENDER_KINDS.map((k) => schema.literal(k)) as [ReturnType<typeof schema.literal>]),
+          kind: schema.oneOf(
+            OFFENDER_KINDS.map((k) => schema.literal(k)) as [ReturnType<typeof schema.literal>]
+          ),
           doseMs: schema.number({ min: 0, max: 3_600_000 }),
           sizeMb: schema.maybe(schema.number({ min: 0.01, max: 512 })),
-          mode: schema.oneOf([schema.literal('route'), schema.literal('task')], { defaultValue: 'route' }),
+          mode: schema.oneOf([schema.literal('route'), schema.literal('task')], {
+            defaultValue: 'route',
+          }),
           runId: schema.maybe(schema.string({ maxLength: 256 })),
         }),
       },
@@ -189,10 +227,25 @@ export const registerRoutes = ({ router, getRecorder, getStart, getInfo }: Route
           params: { kind, doseMs, sizeMb, runId, scheduledAt },
           state: {},
         });
-        return res.ok({ body: { mode, task_id: task.id, scheduled_at: scheduledAt, pod: recorder.pod, boot_id: recorder.bootId } });
+        return res.ok({
+          body: {
+            mode,
+            task_id: task.id,
+            scheduled_at: scheduledAt,
+            pod: recorder.pod,
+            boot_id: recorder.bootId,
+          },
+        });
       }
       const startTs = epochNow();
-      recorder.push({ source: 'offender_start', ts: startTs, mode, kind, dose_ms: doseMs, run_id: runId });
+      recorder.push({
+        source: 'offender_start',
+        ts: startTs,
+        mode,
+        kind,
+        dose_ms: doseMs,
+        run_id: runId,
+      });
       const result = await runOffender({ kind, doseMs, sizeMb });
       const sample = {
         source: 'offender',

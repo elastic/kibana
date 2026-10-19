@@ -10,7 +10,9 @@ import type { WorkloadIsolationResearchConfig } from './config';
 
 export { config } from './config';
 
-export const plugin = async (context: PluginInitializerContext<WorkloadIsolationResearchConfig>) => {
+export const plugin = async (
+  context: PluginInitializerContext<WorkloadIsolationResearchConfig>
+) => {
   const { WorkloadIsolationResearchPlugin } = await import('./plugin');
   return new WorkloadIsolationResearchPlugin(context);
 };

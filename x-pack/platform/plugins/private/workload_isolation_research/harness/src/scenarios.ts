@@ -11,8 +11,17 @@ const probe = { rps: 10, path: '/api/spaces/space' };
 const laptopProbe = { rps: 2, path: '/api/spaces/space' };
 const ticks = { intervalMs: 1000 };
 
-const sweep = (kind: OffenderSpec['kind'], mode: OffenderSpec['mode'], doses: number[], recoveryS: number): Phase[] =>
-  doses.map((doseMs) => ({ name: `${kind}-${mode}-${doseMs}ms`, durationS: recoveryS, offender: { kind, mode, doseMs } }));
+const sweep = (
+  kind: OffenderSpec['kind'],
+  mode: OffenderSpec['mode'],
+  doses: number[],
+  recoveryS: number
+): Phase[] =>
+  doses.map((doseMs) => ({
+    name: `${kind}-${mode}-${doseMs}ms`,
+    durationS: recoveryS,
+    offender: { kind, mode, doseMs },
+  }));
 
 export const SCENARIOS: Record<string, Scenario> = {
   /** Harness self-check: one 10s CPU block from a route and from a task. */
@@ -25,8 +34,16 @@ export const SCENARIOS: Record<string, Scenario> = {
     phases: [
       { name: 'warmup', durationS: 15 },
       { name: 'baseline', durationS: 40 },
-      { name: 'cpu_spin-route-10000ms', durationS: 15, offender: { kind: 'cpu_spin', mode: 'route', doseMs: 10000 } },
-      { name: 'cpu_spin-task-10000ms', durationS: 15, offender: { kind: 'cpu_spin', mode: 'task', doseMs: 10000 } },
+      {
+        name: 'cpu_spin-route-10000ms',
+        durationS: 15,
+        offender: { kind: 'cpu_spin', mode: 'route', doseMs: 10000 },
+      },
+      {
+        name: 'cpu_spin-task-10000ms',
+        durationS: 15,
+        offender: { kind: 'cpu_spin', mode: 'task', doseMs: 10000 },
+      },
     ],
   },
   /** Tier A dose-response for every offender kind (route mode) plus cpu_spin as a task. */
@@ -69,7 +86,11 @@ export const SCENARIOS: Record<string, Scenario> = {
     phases: [
       { name: 'warmup', durationS: 10 },
       { name: 'baseline', durationS: 30 },
-      { name: 'infinite_loop-task', durationS: 60, offender: { kind: 'infinite_loop', mode: 'task', doseMs: 600000 } },
+      {
+        name: 'infinite_loop-task',
+        durationS: 60,
+        offender: { kind: 'infinite_loop', mode: 'task', doseMs: 600000 },
+      },
     ],
   },
 };

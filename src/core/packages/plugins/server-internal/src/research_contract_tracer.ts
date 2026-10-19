@@ -71,15 +71,20 @@ const MAX_DEPTH = 8;
 const KIND_SCAN_DEPTH = 3;
 
 const isObservable = (v: unknown): boolean =>
-  !!v && typeof v === 'object' && typeof (v as { subscribe?: unknown }).subscribe === 'function' &&
+  !!v &&
+  typeof v === 'object' &&
+  typeof (v as { subscribe?: unknown }).subscribe === 'function' &&
   typeof (v as { pipe?: unknown }).pipe === 'function';
 
 const isPromise = (v: unknown): v is Promise<unknown> =>
-  !!v && (typeof v === 'object' || typeof v === 'function') && typeof (v as { then?: unknown }).then === 'function';
+  !!v &&
+  (typeof v === 'object' || typeof v === 'function') &&
+  typeof (v as { then?: unknown }).then === 'function';
 
 export const kindOf = (v: unknown): ValueKind => {
   if (v === undefined) return 'undefined';
-  if (v === null || typeof v !== 'object') return typeof v === 'function' ? 'function' : 'primitive';
+  if (v === null || typeof v !== 'object')
+    return typeof v === 'function' ? 'function' : 'primitive';
   if (isPromise(v)) return 'promise';
   if (isObservable(v)) return 'observable';
   if (Buffer.isBuffer(v) || v instanceof ArrayBuffer || ArrayBuffer.isView(v)) return 'buffer';
@@ -92,7 +97,12 @@ export const kindOf = (v: unknown): ValueKind => {
 };
 
 /** Collects the set of kinds found in a value (nested up to a small depth). */
-const collectKinds = (v: unknown, into: Set<ValueKind>, depth = 0, seen = new Set<unknown>()): void => {
+const collectKinds = (
+  v: unknown,
+  into: Set<ValueKind>,
+  depth = 0,
+  seen = new Set<unknown>()
+): void => {
   const k = kindOf(v);
   into.add(k);
   if (depth >= KIND_SCAN_DEPTH || k !== 'plain' || seen.has(v)) return;
@@ -102,7 +112,11 @@ const collectKinds = (v: unknown, into: Set<ValueKind>, depth = 0, seen = new Se
 };
 
 /** Cheap structural size estimate used when v8.serialize fails. */
-const estimateBytes = (v: unknown, budget = { nodes: 20000 }, seen = new Set<unknown>()): number => {
+const estimateBytes = (
+  v: unknown,
+  budget = { nodes: 20000 },
+  seen = new Set<unknown>()
+): number => {
   if (budget.nodes-- <= 0) return 0;
   if (v === null || v === undefined) return 1;
   switch (typeof v) {
@@ -193,7 +207,9 @@ class ContractTracer {
       bytes = serialize(value).length;
     } catch {
       const failures = dir === 'in' ? e.serialize_failures_in : e.serialize_failures_out;
-      for (const k of kinds) if (k !== 'plain' && k !== 'primitive' && k !== 'undefined') failures[k] = (failures[k] ?? 0) + 1;
+      for (const k of kinds)
+        if (k !== 'plain' && k !== 'primitive' && k !== 'undefined')
+          failures[k] = (failures[k] ?? 0) + 1;
       bytes = estimateBytes(value);
       if (dir === 'in') e.bytes_in_estimated += bytes;
       else e.bytes_out_estimated += bytes;
@@ -210,9 +226,14 @@ class ContractTracer {
   /** Wraps a value crossing a plugin boundary; identity is stable per (value, edge path). */
   public wrap<T>(value: T, ctx: Ctx): T {
     if (ctx.depth > MAX_DEPTH) return value;
-    if (typeof value === 'function') return this.cached(value as unknown as object, ctx, () => this.wrapFunction(value as unknown as (...a: unknown[]) => unknown, ctx)) as T;
+    if (typeof value === 'function')
+      return this.cached(value as unknown as object, ctx, () =>
+        this.wrapFunction(value as unknown as (...a: unknown[]) => unknown, ctx)
+      ) as T;
     if (value && typeof value === 'object' && shouldWrapObject(value)) {
-      return this.cached(value as unknown as object, ctx, () => this.wrapObject(value as unknown as object, ctx)) as T;
+      return this.cached(value as unknown as object, ctx, () =>
+        this.wrapObject(value as unknown as object, ctx)
+      ) as T;
     }
     return value;
   }
@@ -244,7 +265,10 @@ class ContractTracer {
         if (typeof prop === 'symbol') return typeof v === 'function' ? v.bind(real) : v;
         if (
           typeof v === 'function' ||
-          (v && typeof v === 'object' && shouldWrapObject(v) && (kindOf(v) !== 'plain' || containsFunction(v)))
+          (v &&
+            typeof v === 'object' &&
+            shouldWrapObject(v) &&
+            (kindOf(v) !== 'plain' || containsFunction(v)))
         ) {
           return tracer.wrap(v, { ...ctx, path: `${ctx.path}.${prop}`, depth: ctx.depth + 1 });
         }
@@ -298,7 +322,12 @@ class ContractTracer {
     });
   }
 
-  private call(real: (...a: unknown[]) => unknown, thisArg: unknown, args: unknown[], ctx: Ctx): unknown {
+  private call(
+    real: (...a: unknown[]) => unknown,
+    thisArg: unknown,
+    args: unknown[],
+    ctx: Ctx
+  ): unknown {
     const e = this.edge(ctx);
     e.calls++;
     e.sampled++;
@@ -346,7 +375,11 @@ class ContractTracer {
     }
     e.return_kind.sync = (e.return_kind.sync ?? 0) + 1;
     this.measure(e, result, 'out');
-    if (typeof result === 'function' || containsFunction(result) || kindOf(result) === 'class_instance') {
+    if (
+      typeof result === 'function' ||
+      containsFunction(result) ||
+      kindOf(result) === 'class_instance'
+    ) {
       return this.wrap(result, { ...ctx, path: `${ctx.path}()`, depth: ctx.depth + 1 });
     }
     return result;
@@ -365,7 +398,19 @@ const getTracer = (): ContractTracer => {
 };
 
 /** Wraps one dependency contract handed from `callee` to `caller` (no-op unless enabled). */
-export const traceContract = <T>(caller: string, callee: string, lifecycle: string, contract: T): T => {
+export const traceContract = <T>(
+  caller: string,
+  callee: string,
+  lifecycle: string,
+  contract: T
+): T => {
   if (!isContractTracerEnabled() || contract === null || contract === undefined) return contract;
-  return getTracer().wrap(contract, { caller, callee, lifecycle, path: callee, direction: 'forward', depth: 0 });
+  return getTracer().wrap(contract, {
+    caller,
+    callee,
+    lifecycle,
+    path: callee,
+    direction: 'forward',
+    depth: 0,
+  });
 };

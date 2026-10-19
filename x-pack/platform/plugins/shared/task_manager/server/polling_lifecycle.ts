@@ -17,12 +17,12 @@ import {
   scan,
 } from 'rxjs';
 import { pipe } from 'fp-ts/pipeable';
-import { publishResearchTaskEvent } from './lib/research_channel';
 import { map as mapOptional, none } from 'fp-ts/Option';
 import { tap } from 'rxjs';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { Logger, ExecutionContextStart } from '@kbn/core/server';
 import type { FakeRequestEnricher } from '@kbn/core-security-server';
+import { publishResearchTaskEvent } from './lib/research_channel';
 
 import type { Result } from './lib/result_type';
 import { asErr, mapErr, asOk, map, mapOk, isOk } from './lib/result_type';
