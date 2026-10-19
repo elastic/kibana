@@ -60,6 +60,10 @@ import { getAuthenticatedUser } from './lib/get_user';
 import { checkWorkflowAccess, hasWorkflowAccess } from './lib/has_workflow_access';
 import { logWorkflowTaskFailure } from './lib/log_workflow_task_failure';
 import {
+  bulkScheduleRunTasksOrMarkFailed,
+  scheduleRunTaskOrMarkFailed,
+} from './lib/schedule_workflow_run_task';
+import {
   failExecutionMissingIdentity,
   markScheduledExecutionFailedAfterTaskError,
   resolveExhaustedWorkflowRunTask,
@@ -1425,76 +1429,10 @@ export class WorkflowsExecutionEnginePlugin
       };
     };
 
-    // Task Manager rethrows a per-item saved object error, which is a plain object, not an Error.
-    const getErrorMessage = (error: unknown): string => {
-      if (error instanceof Error) {
-        return error.message;
-      }
-      if (typeof error === 'object' && error !== null && 'message' in error) {
-        return String(error.message);
-      }
-      return String(error);
-    };
-
-    // A persisted execution with no task would otherwise stay pending forever.
-    const markExecutionsFailed = async (executionIds: string[], message: string): Promise<void> => {
-      if (executionIds.length === 0) {
-        return;
-      }
-      const finishedAt = new Date().toISOString();
-      await workflowExecutionRepository
-        .bulkUpdateWorkflowExecutions(
-          executionIds.map((id) => ({
-            id,
-            status: ExecutionStatus.FAILED,
-            error: { type: 'TaskScheduleError', message },
-            finishedAt,
-          }))
-        )
-        .catch((updateError) => {
-          this.logger.error(
-            `Failed to mark workflow executions [${executionIds.join(
-              ', '
-            )}] as FAILED after task schedule error "${message}": ${getErrorMessage(updateError)}`
-          );
-        });
-    };
-
-    const scheduleTaskOrMarkFailed = async (
-      taskInstance: ReturnType<typeof createTaskInstance>,
-      request: KibanaRequest
-    ): Promise<void> => {
-      try {
-        await plugins.taskManager.schedule(taskInstance, { request, cloneApiKey: true });
-      } catch (error) {
-        await markExecutionsFailed([taskInstance.params.workflowRunId], getErrorMessage(error));
-        throw error;
-      }
-    };
-
-    // bulkSchedule can save some tasks and then throw, or skip a task without throwing.
-    const bulkScheduleTasksOrMarkFailed = async (
-      tasks: Array<ReturnType<typeof createTaskInstance>>,
-      request: KibanaRequest
-    ): Promise<{ failedExecutionIds: Set<string>; message: string }> => {
-      let unscheduled: typeof tasks;
-      let message: string;
-      try {
-        const scheduled = await plugins.taskManager.bulkSchedule(tasks, {
-          request,
-          cloneApiKey: true,
-        });
-        const scheduledIds = new Set(scheduled.map(({ id }) => id));
-        unscheduled = tasks.filter(({ id }) => !scheduledIds.has(id));
-        message = 'Task Manager did not schedule the workflow task.';
-      } catch (error) {
-        const found = await plugins.taskManager.bulkGet(tasks.map(({ id }) => id)).catch(() => []);
-        unscheduled = tasks.filter((_task, index) => found[index]?.tag !== 'ok');
-        message = getErrorMessage(error);
-      }
-      const failedExecutionIds = unscheduled.map(({ params }) => params.workflowRunId);
-      await markExecutionsFailed(failedExecutionIds, message);
-      return { failedExecutionIds: new Set(failedExecutionIds), message };
+    const scheduleDeps = {
+      taskManager: plugins.taskManager,
+      workflowExecutionRepository,
+      logger: this.logger,
     };
 
     const executeWorkflow: ExecuteWorkflow = async (workflow, context, originalRequest) => {
@@ -1602,7 +1540,7 @@ export class WorkflowsExecutionEnginePlugin
       } else {
         // Schedule a task: either we're not in a task, or this is a child execution (must not run inline)
         const taskInstance = createTaskInstance(workflowExecution, ['workflows']);
-        await scheduleTaskOrMarkFailed(taskInstance, request as KibanaRequest);
+        await scheduleRunTaskOrMarkFailed(scheduleDeps, taskInstance, request as KibanaRequest);
         this.logger.debug(
           `Scheduling workflow task for workflow ${workflow.id}, execution ${workflowExecution.id}${
             isChildExecution ? ' (child execution)' : ''
@@ -1659,7 +1597,7 @@ export class WorkflowsExecutionEnginePlugin
         generateExecutionTaskScope(workflowExecution as EsWorkflowExecution)
       );
 
-      await scheduleTaskOrMarkFailed(taskInstance, request);
+      await scheduleRunTaskOrMarkFailed(scheduleDeps, taskInstance, request);
       this.logger.debug(
         `Scheduling workflow task with user context for workflow ${workflow.id}, execution ${workflowExecution.id}`
       );
@@ -1874,7 +1812,11 @@ export class WorkflowsExecutionEnginePlugin
             generateExecutionTaskScope(p.workflowExecution as EsWorkflowExecution)
           )
         );
-        const { failedExecutionIds, message } = await bulkScheduleTasksOrMarkFailed(tasks, request);
+        const { failedExecutionIds, message } = await bulkScheduleRunTasksOrMarkFailed(
+          scheduleDeps,
+          tasks,
+          request
+        );
         for (const { idx, workflowExecution } of toSchedule) {
           if (failedExecutionIds.has(workflowExecution.id as string)) {
             results[idx] = { status: 'error', error: { message } };
@@ -1942,7 +1884,7 @@ export class WorkflowsExecutionEnginePlugin
       this.logger.debug(
         `Scheduling workflow step task with user context for workflow ${workflow.id}, step ${stepId}`
       );
-      await scheduleTaskOrMarkFailed(taskInstance, request);
+      await scheduleRunTaskOrMarkFailed(scheduleDeps, taskInstance, request);
 
       return {
         workflowExecutionId: workflowExecution.id as string,
