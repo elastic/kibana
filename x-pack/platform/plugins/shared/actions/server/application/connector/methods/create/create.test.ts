@@ -6,7 +6,7 @@
  */
 
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { actionsAuthorizationMock } from '../../../../authorization/actions_authorization.mock';
 import type { ActionsAuthorization } from '../../../../authorization/actions_authorization';
@@ -1594,7 +1594,7 @@ describe('create()', () => {
   describe('connectors that publish keys', () => {
     const keyContext: ActionsClientContext = {
       ...mockContext,
-      spaceId: 'security',
+      spaceId: asSpaceId('security'),
       publicBaseUrl: 'https://kibana.example.com',
     };
     const action = { name: 'SSF', actionTypeId: '.ssf', config: {}, secrets: {} };
