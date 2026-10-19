@@ -50,7 +50,7 @@ actions:
           }'
         ```
 
-        Most examples on this page use the [Kibana sample logs dataset](https://www.elastic.co/docs/manage-data/ingest/sample-data) (`kibana_sample_data_logs`). Metrics tab examples require a time series data stream, such as `metrics-*`. To use your own data, replace the index pattern and field references.
+        Most examples in this reference use the [Kibana sample logs dataset](https://www.elastic.co/docs/manage-data/ingest/sample-data) (`kibana_sample_data_logs`). Metrics tab examples need a time series data stream, such as `metrics-*`. To use your own data, replace the index pattern and field references.
 
         ### Discover session structure
 
