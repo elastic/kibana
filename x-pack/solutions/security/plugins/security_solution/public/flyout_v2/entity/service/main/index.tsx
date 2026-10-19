@@ -50,7 +50,7 @@ import { FlyoutHeaderActions } from '../../../shared/components/flyout_header_ac
 import { EntityAnalyticsFlyoutCopyLink } from '../../shared/components/entity_analytics_flyout_copy_link';
 import { toEntityDescriptorMode } from '../../../shared/url_state/flyout_v2_url_param';
 import { useNewEntityAnalyticsPage } from '../../../../entity_analytics/hooks/use_new_entity_analytics_page';
-import type { EntityViewMode } from '../../../../flyout/entity_details/shared/types';
+import type { EntityViewMode } from '../../../../../common/entity_analytics/entity_store/resolution_group';
 
 export interface ServiceProps {
   /** Display name from the source row / document (typically `service.name`). */

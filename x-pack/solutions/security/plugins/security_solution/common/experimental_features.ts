@@ -97,14 +97,12 @@ export const allowedExperimentalValues = Object.freeze({
   defendCrossProjectSearch: true,
 
   /**
-   * AI Agent chat-first endpoint response actions skill (read-only: list endpoints,
-   * endpoint status, response action status)
+   * AI Agent chat-first endpoint response actions skill (isolate, unisolate, etc.)
    * Release: TBD
    *
-   * Ships disabled: it surfaces endpoint response-action state to chat and is
-   * the landing spot for the upcoming dispatch tools, so it must not be enabled
-   * by default on any branch. Enable it explicitly via config (or a Scout
-   * evals config) for local/CI testing.
+   * Ships disabled: this skill dispatches destructive endpoint response actions,
+   * so it must not be enabled by default on any branch. Enable it explicitly via
+   * config (or a Scout evals config) for local/CI testing.
    */
   endpointResponseActionsSkill: false,
 
@@ -384,6 +382,13 @@ export const allowedExperimentalValues = Object.freeze({
    * Release: 9.6
    */
   linuxRansomwareProtection: false,
+
+  /**
+   * Enables the Registry credential hardening toggle in the Elastic Defend policy
+   * Attack Surface Reduction section (`windows.attack_surface_reduction.registry_credential_hardening`).
+   * Release: 9.6
+   */
+  registryCredentialHardening: false,
 
   /**
    * Risk score maintainer create-if-missing path: when an alert's EUID passes the entity type's
