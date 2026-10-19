@@ -63,7 +63,7 @@ export const similar = async (
   casesClient: CasesClient
 ): Promise<CasesSimilarResponse> => {
   const {
-    services: { caseService, licensingService },
+    services: { caseService, licensingService, attachmentService },
     logger,
     authorization,
   } = clientArgs;
@@ -142,13 +142,30 @@ export const similar = async (
       }))
     );
 
+    const commentTotals = await attachmentService.getter.getCaseAttatchmentStats({
+      caseIds: cases.saved_objects.map((caseSavedObject) => caseSavedObject.id),
+    });
+
     const res = {
-      cases: cases.saved_objects.map((so) => ({
-        ...flattenCaseSavedObject({ savedObject: so }),
-        similarities: {
-          observables: getSimilarities(retrievedCase, so, availableObservableTypesMap),
-        },
-      })),
+      cases: cases.saved_objects.map((so) => {
+        const { userComments, alerts, events } = commentTotals.get(so.id) ?? {
+          alerts: 0,
+          userComments: 0,
+          events: 0,
+        };
+
+        return {
+          ...flattenCaseSavedObject({
+            savedObject: so,
+            totalComment: userComments,
+            totalAlerts: alerts,
+            totalEvents: events,
+          }),
+          similarities: {
+            observables: getSimilarities(retrievedCase, so, availableObservableTypesMap),
+          },
+        };
+      }),
       page: cases.page,
       per_page: cases.per_page,
       total: cases.total,

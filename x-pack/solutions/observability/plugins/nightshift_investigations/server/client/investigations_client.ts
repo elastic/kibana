@@ -246,21 +246,43 @@ export interface LifecycleSubject {
  * run's `title` input; the first pending proposal stands in for the top recommendation.
  */
 const toNotifiableInvestigation = (
-  { id, title, title_pending: titlePending, metadata, impact, proposals }: SharedInvestigation,
+  {
+    id,
+    title,
+    title_pending: titlePending,
+    metadata,
+    impact,
+    hypotheses,
+    proposals,
+  }: SharedInvestigation,
   fallbackTitle: string | undefined
 ): NotifiableInvestigation => ({
   investigation_id: id,
   title: titlePending ? fallbackTitle ?? '' : title,
   ...(metadata.severity && { severity: metadata.severity }),
   ...(metadata.summary && { summary: metadata.summary }),
+  ...(metadata.verdict && { verdict: metadata.verdict }),
   ...(impact && {
     impact: {
+      ...(impact.summary && { summary: impact.summary }),
       entities: impact.entities.map(({ id: entityId, name }) => ({ name: name ?? entityId })),
     },
   }),
+  ...(hypotheses?.hypotheses.length && {
+    hypotheses: hypotheses.hypotheses.map(({ candidate, confidence, status, reason }) => ({
+      candidate,
+      confidence,
+      status,
+      ...(reason && { reason }),
+    })),
+  }),
   recommendations: proposals
     .filter(({ status }) => status === 'pending')
-    .map(({ title: proposalTitle }) => ({ title: proposalTitle })),
+    .map(({ title: proposalTitle, impact: proposalImpact, confidence }) => ({
+      title: proposalTitle,
+      ...(proposalImpact && { impact: proposalImpact }),
+      ...(confidence && { confidence }),
+    })),
 });
 
 export interface NightshiftInvestigationsClientDeps {
@@ -372,6 +394,7 @@ export class NightshiftInvestigationsClient {
     title,
     trigger_type,
     message,
+    timeout_seconds,
     source_ids,
     connector_id,
     context = {},
@@ -487,7 +510,16 @@ export class NightshiftInvestigationsClient {
     };
 
     const executionId = await workflowsManagement.management.runWorkflow(
-      { ...workflow, definition: workflow.definition },
+      {
+        ...workflow,
+        definition:
+          timeout_seconds === undefined
+            ? workflow.definition
+            : {
+                ...workflow.definition,
+                settings: { ...workflow.definition.settings, timeout: `${timeout_seconds}s` },
+              },
+      },
       spaceId,
       inputs,
       this.request,
@@ -804,7 +836,6 @@ export class NightshiftInvestigationsClient {
     workflowId: string;
     notificationDestinations: InvestigationNotificationDestination[];
   }> {
-    const { agenticInvestigations } = this.requireWriteDeps();
     const { execution, inputs } = await this.readInvestigationExecution(
       investigationId,
       executionId
@@ -815,7 +846,24 @@ export class NightshiftInvestigationsClient {
         .parse(inputs?.notificationDestinations) ?? [];
     notificationDestinations.forEach(validateNotificationDestination);
 
-    const investigation = await agenticInvestigations
+    const investigation = await this.getSharedInvestigation(investigationId);
+
+    return {
+      investigation: toNotifiableInvestigation(investigation, asString(inputs?.title)),
+      conversationId: investigation.id,
+      workflowId: execution.workflowId ?? NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+      notificationDestinations,
+    };
+  }
+
+  /** What a lifecycle message says about the investigation, outside any one execution. */
+  async getNotifiableInvestigation(investigationId: string): Promise<NotifiableInvestigation> {
+    return toNotifiableInvestigation(await this.getSharedInvestigation(investigationId), undefined);
+  }
+
+  private async getSharedInvestigation(investigationId: string): Promise<SharedInvestigation> {
+    const { agenticInvestigations } = this.requireWriteDeps();
+    return agenticInvestigations
       .getInvestigationsClient(this.request)
       .get(investigationId)
       .catch((error: unknown) => {
@@ -824,13 +872,6 @@ export class NightshiftInvestigationsClient {
         }
         throw error;
       });
-
-    return {
-      investigation: toNotifiableInvestigation(investigation, asString(inputs?.title)),
-      conversationId: investigation.id,
-      workflowId: execution.workflowId ?? NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
-      notificationDestinations,
-    };
   }
 
   /**
