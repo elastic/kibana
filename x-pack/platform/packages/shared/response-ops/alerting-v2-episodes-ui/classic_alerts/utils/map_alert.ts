@@ -12,6 +12,7 @@ import {
   ALERT_FLAPPING,
   ALERT_GROUPING,
   ALERT_INSTANCE_ID,
+  ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_NAME,
@@ -59,6 +60,7 @@ export const CLASSIC_ALERT_EPISODE_SOURCE_FIELDS = [
   ALERT_CASE_IDS,
   ALERT_GROUPING,
   ALERT_FLAPPING,
+  ALERT_MAINTENANCE_WINDOW_IDS,
 ] as const;
 
 /**
@@ -93,6 +95,7 @@ export interface ClassicAlertSource {
   [ALERT_CASE_IDS]?: string | string[];
   [ALERT_GROUPING]?: Record<string, unknown>;
   [ALERT_FLAPPING]?: boolean;
+  [ALERT_MAINTENANCE_WINDOW_IDS]?: string | string[];
 }
 
 export interface ClassicAlertActionContext {
@@ -178,6 +181,7 @@ export const mapClassicAlertToEpisode = (
     source_action_context: actionContext,
     source_grouping: grouping ? flattenObject(grouping) : undefined,
     is_flapping: source[ALERT_FLAPPING] ?? false,
+    maintenance_window_ids: asStringArray(source[ALERT_MAINTENANCE_WINDOW_IDS]),
   };
 };
 

@@ -138,3 +138,10 @@ export const ALERTS_ALREADY_ATTACHED_TO_CASE = i18n.translate(
     defaultMessage: 'All selected alerts are already attached to the case',
   }
 );
+
+export const EDIT_ASSIGNEE_NOT_AVAILABLE = i18n.translate(
+  'xpack.alertingV2Episodes.actions.editAssigneeNotAvailable',
+  {
+    defaultMessage: 'Edit assignee is not available for classic alerts',
+  }
+);
