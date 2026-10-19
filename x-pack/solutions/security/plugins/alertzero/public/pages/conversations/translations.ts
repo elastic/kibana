@@ -29,10 +29,6 @@ export const COPY_LINK_TOASTS = Object.freeze({
 });
 
 export const AGENT_BUILDER_PRIVILEGE_REQUIRED = Object.freeze({
-  tooltip: i18n.translate('xpack.alertzero.queue.agentBuilderPrivilegeRequired.tooltip', {
-    defaultMessage:
-      'You need the Agent Builder Kibana privilege to execute actions or view investigations and chats.',
-  }),
   toast: i18n.translate('xpack.alertzero.queue.agentBuilderPrivilegeRequired.toast', {
     defaultMessage:
       'You need the Agent Builder Kibana privilege to view this investigation. Ask an administrator to update your role.',

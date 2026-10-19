@@ -95,14 +95,14 @@ describe('ConversationCardCompact', () => {
     expect(onClickCard).toHaveBeenCalledWith('inv-1');
   });
 
-  it('is inert and disables the chat control while the row is unavailable', () => {
-    const { onClickCard } = renderRow({ unavailableReason: 'Needs a privilege' });
+  it('is inert and hides the chat control when the details cannot be opened', () => {
+    const { onClickCard } = renderRow({ canOpenInvestigationDetails: false });
 
     fireEvent.click(screen.getByText('Rotate the Stripe key'));
 
     expect(onClickCard).not.toHaveBeenCalled();
     expect(screen.queryByRole('button', { name: 'Rotate the Stripe key' })).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Open in chat' })).toBeDisabled();
+    expect(screen.queryByRole('button', { name: 'Open in chat' })).not.toBeInTheDocument();
   });
 
   it('leaves the keyboard to the nested controls, which the row would otherwise swallow', () => {

@@ -26,8 +26,8 @@ export interface ConversationsActionsGroupProps {
    * be able to resolve one; the control still works as a button without it.
    */
   chatHref?: string;
-  /** Disables the chat control; `chatDisabledReason` is what the tooltip tells the user. */
-  chatDisabledReason?: string;
+  /** When false the chat control is hidden. Defaults to true. */
+  canOpenChat?: boolean;
   /** When true escalation actions are shown. Requires the manage escalations capability. */
   canManageEscalations?: boolean;
   /**
@@ -51,7 +51,7 @@ export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
     onClickAction,
     onOpenChat,
     chatHref,
-    chatDisabledReason,
+    canOpenChat = true,
     canManageEscalations,
     canCloseInvestigation,
     onCopyLink,
@@ -73,20 +73,20 @@ export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
             marginRight: euiTheme.size.xs,
           })}
         />
-        <EuiFlexItem grow={false}>
-          <AiButtonIcon
-            variant="empty"
-            size="s"
-            iconType="productAgent"
-            withToolTip
-            toolTipContent={chatDisabledReason}
-            isDisabled={Boolean(chatDisabledReason)}
-            aria-label={ACTIONS_TRANSLATIONS.tooltips.openInChat}
-            href={chatDisabledReason ? undefined : chatHref}
-            onClick={handleChatClick}
-            data-test-subj="conversationCardOpenInChat"
-          />
-        </EuiFlexItem>
+        {canOpenChat && (
+          <EuiFlexItem grow={false}>
+            <AiButtonIcon
+              variant="empty"
+              size="s"
+              iconType="productAgent"
+              withToolTip
+              aria-label={ACTIONS_TRANSLATIONS.tooltips.openInChat}
+              href={chatHref}
+              onClick={handleChatClick}
+              data-test-subj="conversationCardOpenInChat"
+            />
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={false}>
           <BaseActions
             investigation={investigation}

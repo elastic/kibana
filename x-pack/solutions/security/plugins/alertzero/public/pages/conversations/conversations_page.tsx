@@ -301,9 +301,6 @@ const ConversationsPageContent: React.FC = () => {
     manageInvestigations: canManageInvestigations,
     canAccessAgentBuilder,
   } = useAlertZeroInvestigationsCapabilities();
-  const unavailableReason = canAccessAgentBuilder
-    ? undefined
-    : AGENT_BUILDER_PRIVILEGE_REQUIRED.tooltip;
 
   // ---------------------------------------------------------------------------
   // Assignee picker — shared across all non-closed investigation cards
@@ -579,7 +576,7 @@ const ConversationsPageContent: React.FC = () => {
                 onClickAction={onClickAction}
                 onClickCard={onClickCard}
                 onOpenChat={openChatForProposal}
-                unavailableReason={unavailableReason}
+                canOpenInvestigationDetails={canAccessAgentBuilder}
                 getChatHref={getChatHrefForProposal}
                 canManageEscalations={canManageEscalations}
                 canCloseInvestigation={canManageInvestigations}
