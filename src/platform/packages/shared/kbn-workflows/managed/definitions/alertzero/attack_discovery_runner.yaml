@@ -272,7 +272,8 @@ steps:
                 autonomy: "${{ inputs.autonomy }}"
                 parent_run_id: "{{ execution.id }}"
 
-  # Telemetry: once every batch has dispatched, before `emit_result` ends the run.
+  # Telemetry: Attack Discovery's own run event (alerts, batches, attacks), once every batch has
+  # dispatched, before `emit_result` ends the run.
   - name: report_run_completed
     type: alertzero.reportWorkerOutcome
     on-failure:
@@ -303,7 +304,8 @@ steps:
         empty_no_attacks
         {%- endif -%}
 
-  # The same run in the vocabulary every Worker shares; the items are generation batches.
+  # The same run as the shared `worker_run_completed` every Worker sends, so runs compare across
+  # Workers; the items are generation batches.
   - name: report_worker_run_completed
     type: alertzero.reportWorkerOutcome
     on-failure:
