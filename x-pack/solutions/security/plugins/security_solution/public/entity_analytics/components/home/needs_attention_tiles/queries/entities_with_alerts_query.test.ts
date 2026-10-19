@@ -97,12 +97,19 @@ describe('buildAlertBasedTilesQuery', () => {
     expect(query.match(/\| LOOKUP JOIN/g)).toHaveLength(1);
   });
 
-  it('applies entity filter clauses after the LOOKUP JOIN', () => {
+  it('applies entity filter clauses to the main entity, after the rows are grouped', () => {
     const filter = '| WHERE entity.type == "user"';
     const query = buildAlertBasedTilesQuery('.entities-v1', 'default', '24h', [filter]);
-    const joinIdx = query.indexOf('| LOOKUP JOIN');
+    const groupedIdx = query.indexOf('BY effective_id');
+    const mainJoinIdx = query.indexOf(
+      '| EVAL entity.id = effective_id\n| LOOKUP JOIN .entities-v1 ON entity.id'
+    );
     const filterIdx = query.indexOf(filter);
-    expect(filterIdx).toBeGreaterThan(joinIdx);
+    expect(groupedIdx).toBeGreaterThan(-1);
+    expect(mainJoinIdx).toBeGreaterThan(groupedIdx);
+    expect(filterIdx).toBeGreaterThan(mainJoinIdx);
+    // Filtering each member before grouping would drop an alias's alert.
+    expect(query.indexOf(filter)).toBe(query.lastIndexOf(filter));
   });
 
   it('uses the provided time range in the WHERE clause', () => {

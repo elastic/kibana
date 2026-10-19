@@ -81,7 +81,12 @@ describe('series queries apply the entity filters where the count does', () => {
       tile: 'alert based',
       series: buildAlertBasedTilesSeriesQuery(INDEX, NAMESPACE, '7d', FILTERS),
       count: buildAlertBasedTilesQuery(INDEX, NAMESPACE, '7d', FILTERS),
-      shared: lookupJoinTo('| EVAL effective_id'),
+      // After the rows are grouped: the join to the main entity, then the filters.
+      shared: (query: string) =>
+        query.slice(
+          query.indexOf('| EVAL entity.id = effective_id'),
+          query.indexOf(FILTERS[0]) + FILTERS[0].length
+        ),
     },
     {
       tile: 'anomalies',

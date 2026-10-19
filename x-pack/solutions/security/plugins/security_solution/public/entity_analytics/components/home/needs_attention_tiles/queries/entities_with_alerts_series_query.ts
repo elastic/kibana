@@ -6,7 +6,11 @@
  */
 
 import type { TimeRange } from '../../entities_grid/common';
-import { GROUP_ON_WATCHLIST, buildAlertTilesHead } from './entities_with_alerts_query';
+import {
+  GROUP_ON_WATCHLIST,
+  buildAlertTilesHead,
+  buildGroupFilterSteps,
+} from './entities_with_alerts_query';
 import {
   SERIES_BUCKET_COLUMN,
   buildSeriesBucketExpression,
@@ -46,7 +50,6 @@ export const buildAlertBasedTilesSeriesQuery = (
     entitiesIndexName,
     spaceId,
     windowCondition: `@timestamp >= NOW() - ${seriesFetchHours(timeRange)}h`,
-    entityFilterClauses,
     bucketExpression: buildSeriesBucketExpression(timeRange),
   });
 
@@ -74,6 +77,8 @@ export const buildAlertBasedTilesSeriesQuery = (
   parts.push(`    ${perGroup.join(',\n    ')},`);
   parts.push(`    group_on_watchlist = MAX(group_on_watchlist)`);
   parts.push(`    BY effective_id`);
+  // The filters judge the group by its main entity, as the count does.
+  parts.push(...buildGroupFilterSteps(entitiesIndexName, entityFilterClauses));
   parts.push(`| STATS`);
   parts.push(`    ${counts.join(',\n    ')}`);
 

@@ -300,9 +300,11 @@ FROM .alerts-security.alerts-default, .entities.v2.latest.default-00001 METADATA
 | RENAME _ea_entity_id AS \`entity.id\`
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON entity.id
 | WHERE entity.name IS NOT NULL
-| WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
 | EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id), group_on_watchlist = COALESCE(alias_watchlisted, false) OR entity.attributes.watchlists IS NOT NULL
 | STATS has_severe_alert = MAX(has_severe_alert), has_alert = MAX(has_alert), group_on_watchlist = MAX(group_on_watchlist) BY effective_id
+| EVAL entity.id = effective_id
+| LOOKUP JOIN .entities.v2.latest.default-00001 ON entity.id
+| WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
 | EVAL severe_id = CASE(has_severe_alert, effective_id, null)
 | EVAL watchlisted_id = CASE(has_alert AND COALESCE(group_on_watchlist, false), effective_id, null)
 | STATS

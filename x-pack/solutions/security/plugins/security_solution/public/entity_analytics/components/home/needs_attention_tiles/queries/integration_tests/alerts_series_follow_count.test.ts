@@ -15,11 +15,14 @@ import {
   severeAlertsSeriesColumn,
   watchlistedSeriesColumn,
 } from '../entities_with_alerts_series_query';
+import type { RunEsql } from './series_follow_count_suite';
 import {
   describeSeriesFollowsCount,
   moveWindowBack,
   readCounts,
 } from './series_follow_count_suite';
+import { EMPTY_ENTITY_FILTERS } from '../../../entities_grid/common';
+import { buildEntityFilterClauses } from '../../../entities_grid/queries/entity_filters';
 
 /*
  * The sparkline dots must follow the tile count. Dot k is the count query with its alert window
@@ -39,6 +42,7 @@ import {
  * | host:ghost  | no entity   | high 2.5 (dropped: unknown entity)                             |
  * | host:wg     |             | critical 3.5 (its alias host:wga is watchlisted, and never alerts) |
  * | host:wh     | yes         | none (its alias host:wha has a low alert 100.5 hours ago)      |
+ * | host:wi     | yes         | none (its alias host:wia, not watchlisted, has a high alert 4.5 hours ago) |
  *
  * A group is watchlisted when any member is, whichever one alerted.
  */
@@ -63,6 +67,8 @@ const ENTITIES: ReadonlyArray<{ id: string; watchlisted?: boolean; resolvedTo?: 
   { id: 'host:wga', watchlisted: true, resolvedTo: 'host:wg' },
   { id: 'host:wh', watchlisted: true },
   { id: 'host:wha', resolvedTo: 'host:wh' },
+  { id: 'host:wi', watchlisted: true },
+  { id: 'host:wia', resolvedTo: 'host:wi' },
 ];
 
 const ALERTS: ReadonlyArray<[entityId: string, severity: string, hoursAgo: number]> = [
@@ -83,6 +89,7 @@ const ALERTS: ReadonlyArray<[entityId: string, severity: string, hoursAgo: numbe
   ['host:ghost', 'high', 2.5],
   ['host:wg', 'critical', 3.5],
   ['host:wha', 'low', 100.5],
+  ['host:wia', 'high', 4.5],
 ];
 
 const isoHoursAgo = (now: number, hours: number) => new Date(now - hours * HOUR_MS).toISOString();
@@ -141,35 +148,16 @@ const loadFixture = async (client: Client) => {
 };
 
 const COUNT_COLUMNS = ['severe_alerts_count', 'watchlisted_count'];
-const buildCount = (range: TimeRange) => buildAlertBasedTilesQuery(ENTITY_INDEX, NAMESPACE, range);
+const buildCount = (range: TimeRange, filters: string[] = []) =>
+  buildAlertBasedTilesQuery(ENTITY_INDEX, NAMESPACE, range, filters);
 
-describeSeriesFollowsCount({
-  name: 'alert based tile series',
-  loadFixture,
-  tiles: [
-    {
-      name: 'Entities with alerts',
-      column: severeAlertsSeriesColumn,
-      // 24h: host:a (2.5h, and host:alias 5.5h), host:m (0.5 to 19.5h) and host:wg (3.5h). Not
-      // host:e (medium) and not host:ghost (unknown entity).
-      // 30d: host:a, host:b, host:m, host:wg, user:d (critical 10 days ago). host:f is 45 days old.
-      byHand: { '24h': 3, '30d': 5 },
-    },
-    {
-      name: 'Watchlisted',
-      column: watchlistedSeriesColumn,
-      // 24h: user:c (a low alert still counts) and host:wg (through its watchlisted alias).
-      // 30d: those two, user:d and host:wh (its alias alerted, the main entity is watchlisted).
-      byHand: { '24h': 2, '30d': 4 },
-    },
-  ],
-  seriesQuery: (range) => buildAlertBasedTilesSeriesQuery(ENTITY_INDEX, NAMESPACE, range),
-  countNow: async (range, run) => readCounts(await run(buildCount(range)), COUNT_COLUMNS),
-  countStepsAgo: async (range, k, run) =>
+const countStepsAgo =
+  (filters: string[] = []) =>
+  async (range: TimeRange, k: number, run: RunEsql) =>
     readCounts(
       await run(
         moveWindowBack({
-          base: buildCount(range),
+          base: buildCount(range, filters),
           // The alert window sits inside the condition that also keeps the alias rows.
           window: /@timestamp >= NOW\(\) - \d+ (days|hours)/,
           field: '@timestamp',
@@ -178,5 +166,61 @@ describeSeriesFollowsCount({
         })
       ),
       COUNT_COLUMNS
-    ),
+    );
+
+describeSeriesFollowsCount({
+  name: 'alert based tile series',
+  loadFixture,
+  tiles: [
+    {
+      name: 'Entities with alerts',
+      column: severeAlertsSeriesColumn,
+      // 24h: host:a (2.5h, and host:alias 5.5h), host:m (0.5 to 19.5h), host:wg (3.5h) and host:wi
+      // (through its alias, 4.5h). Not host:e (medium) and not host:ghost (unknown entity).
+      // 30d: those four, host:b and user:d (critical 10 days ago). host:f is 45 days old.
+      byHand: { '24h': 4, '30d': 6 },
+    },
+    {
+      name: 'Watchlisted',
+      column: watchlistedSeriesColumn,
+      // 24h: user:c (a low alert still counts), host:wg (through its watchlisted alias) and host:wi
+      // (its alias alerted, the main entity is watchlisted).
+      // 30d: those three, user:d and host:wh (like host:wi).
+      byHand: { '24h': 3, '30d': 5 },
+    },
+  ],
+  seriesQuery: (range) => buildAlertBasedTilesSeriesQuery(ENTITY_INDEX, NAMESPACE, range),
+  countNow: async (range, run) => readCounts(await run(buildCount(range)), COUNT_COLUMNS),
+  countStepsAgo: countStepsAgo(),
+});
+
+/*
+ * The same with the Watchlists filter set to w1, which judges each group by its main entity:
+ * user:c, user:d, host:wh and host:wi are on w1. host:wh and host:wi count though only their
+ * aliases (not on w1) alerted; host:wg does not, because only its alias is on w1.
+ */
+const ON_WATCHLIST_W1 = buildEntityFilterClauses({ ...EMPTY_ENTITY_FILTERS, watchlists: ['w1'] });
+
+describeSeriesFollowsCount({
+  name: 'alert based tile series with the Watchlists filter',
+  loadFixture,
+  tiles: [
+    {
+      name: 'Entities with alerts',
+      column: severeAlertsSeriesColumn,
+      // 24h: host:wi (through its alias). 30d: host:wi and user:d (critical 10 days ago).
+      byHand: { '24h': 1, '30d': 2 },
+    },
+    {
+      name: 'Watchlisted',
+      column: watchlistedSeriesColumn,
+      // 24h: user:c and host:wi. 30d: those two, user:d and host:wh.
+      byHand: { '24h': 2, '30d': 4 },
+    },
+  ],
+  seriesQuery: (range) =>
+    buildAlertBasedTilesSeriesQuery(ENTITY_INDEX, NAMESPACE, range, ON_WATCHLIST_W1),
+  countNow: async (range, run) =>
+    readCounts(await run(buildCount(range, ON_WATCHLIST_W1)), COUNT_COLUMNS),
+  countStepsAgo: countStepsAgo(ON_WATCHLIST_W1),
 });

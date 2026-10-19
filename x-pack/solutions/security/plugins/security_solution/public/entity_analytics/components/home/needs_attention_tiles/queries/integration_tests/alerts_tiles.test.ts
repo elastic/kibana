@@ -9,6 +9,8 @@ import type { Client } from '@elastic/elasticsearch';
 import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import { createTestEsCluster } from '@kbn/test';
 import { ToolingLog } from '@kbn/tooling-log';
+import { EMPTY_ENTITY_FILTERS } from '../../../entities_grid/common';
+import { buildEntityFilterClauses } from '../../../entities_grid/queries/entity_filters';
 import { getAlertsIndex } from '../../../entities_grid/queries/esql';
 import { buildAlertBasedTilesQuery } from '../entities_with_alerts_query';
 
@@ -42,6 +44,10 @@ import { buildAlertBasedTilesQuery } from '../entities_with_alerts_query';
  *
  * Like real entity docs, the host entities carry `host.id` and `host.name`: an alias doc read as
  * if it were an alert would then get an entity id from them, and wrongly count as an alert.
+ *
+ * The entity filters judge a group by its main entity, after its alerts are gathered. With the
+ * Watchlists filter set to w1, host:w3 and host:w6 count though only their aliases (not on w1)
+ * alerted; host:w2 does not, because its main entity is not on w1.
  */
 
 const NAMESPACE = 'default';
@@ -156,6 +162,8 @@ const loadFixture = async (client: Client) => {
 
 const ids = (value: unknown) => [value ?? []].flat().map(String).sort();
 
+const ON_WATCHLIST_W1 = buildEntityFilterClauses({ ...EMPTY_ENTITY_FILTERS, watchlists: ['w1'] });
+
 describe('alert based tiles on Elasticsearch', () => {
   let esServer: ReturnType<typeof createTestEsCluster>;
   let client: Client;
@@ -173,8 +181,8 @@ describe('alert based tiles on Elasticsearch', () => {
     await esServer?.stop();
   });
 
-  const runTiles = async (period: 'current' | 'previous') => {
-    const query = buildAlertBasedTilesQuery(ENTITY_INDEX, NAMESPACE, '7d', [], period);
+  const runTiles = async (period: 'current' | 'previous', filters: string[] = []) => {
+    const query = buildAlertBasedTilesQuery(ENTITY_INDEX, NAMESPACE, '7d', filters, period);
     const { columns, values } = await client.esql.query({ query });
     const row = Object.fromEntries(columns.map(({ name }, i) => [name, values[0]?.[i]]));
     return {
@@ -211,5 +219,21 @@ describe('alert based tiles on Elasticsearch', () => {
     // host:w6). Watchlisted: three now (user:d, host:w2, host:w3), two before (host:e, host:w6).
     expect(current.severe.count - previous.severe.count).toBe(2);
     expect(current.watchlisted.count - previous.watchlisted.count).toBe(1);
+  });
+
+  describe('with an entity filter, judged by the main entity', () => {
+    it('keeps a group whose main entity passes, though only its alias alerted', async () => {
+      // host:w3 is on w1 and only its alias (not on w1) alerted; host:w2's main entity is not on w1.
+      const { severe, watchlisted } = await runTiles('current', ON_WATCHLIST_W1);
+      expect(severe).toEqual({ count: 0, ids: [] });
+      expect(watchlisted).toEqual({ count: 2, ids: ['host:w3', 'user:d'] });
+    });
+
+    it('does the same for the previous period', async () => {
+      // host:w6 is on w1 and only its alias (not on w1) alerted, with a high alert.
+      const { severe, watchlisted } = await runTiles('previous', ON_WATCHLIST_W1);
+      expect(severe.count).toBe(1);
+      expect(watchlisted.count).toBe(2);
+    });
   });
 });

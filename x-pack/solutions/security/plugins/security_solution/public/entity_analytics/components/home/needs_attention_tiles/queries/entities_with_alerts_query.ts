@@ -44,7 +44,6 @@ interface AlertTilesHeadOptions {
   spaceId: string;
   /** The ES|QL condition that keeps the alerts of the window the query covers. */
   windowCondition: string;
-  entityFilterClauses: string[];
   /** Passed to the alert pipeline to get one row per (bucket, entity) for the sparkline series. */
   bucketExpression?: string;
 }
@@ -61,7 +60,9 @@ const RESOLVED_TO = '`entity.relationships.resolution.resolved_to`';
  *   entity as the group and whether the alias is on a watchlist.
  *
  * The rows are then grouped per entity, joined to the entity docs (the member that alerted, or the
- * main entity of an alias row), filtered, and given the group id (`effective_id`). The group is on
+ * main entity of an alias row), and given the group id (`effective_id`). The entity filters are not
+ * applied here: they judge the group by its main entity, after the rows are grouped by
+ * `effective_id` (see {@link buildGroupFilterSteps}). The group is on
  * a watchlist (`group_on_watchlist`) when the member that alerted is, when any alias is, or when the
  * main entity is, which a group with aliases gets from its alias rows. For a single entity, which is
  * most of them, that member is the whole group.
@@ -74,7 +75,6 @@ export const buildAlertTilesHead = ({
   entitiesIndexName,
   spaceId,
   windowCondition,
-  entityFilterClauses,
   bucketExpression,
 }: AlertTilesHeadOptions): string[] => {
   const isEntityDoc = `_index == "${entitiesIndexName}"`;
@@ -99,10 +99,26 @@ export const buildAlertTilesHead = ({
     `| LOOKUP JOIN ${entitiesIndexName} ON entity.id`,
     // Discard entity IDs that have no entity-latest record (unrecognised identifiers).
     '| WHERE entity.name IS NOT NULL',
-    ...entityFilterClauses,
     `| EVAL effective_id = COALESCE(${RESOLVED_TO}, entity.id), group_on_watchlist = COALESCE(alias_watchlisted, false) OR entity.attributes.watchlists IS NOT NULL`,
   ];
 };
+
+/**
+ * Returns the stages that keep only the groups whose main entity passes the entity filters, for
+ * rows already grouped by `effective_id`. Filtering each member before grouping would drop an
+ * alias's alert when only the main entity passes. Without filters there is nothing to join.
+ */
+export const buildGroupFilterSteps = (
+  entitiesIndexName: string,
+  entityFilterClauses: string[]
+): string[] =>
+  entityFilterClauses.length === 0
+    ? []
+    : [
+        '| EVAL entity.id = effective_id',
+        `| LOOKUP JOIN ${entitiesIndexName} ON entity.id`,
+        ...entityFilterClauses,
+      ];
 
 export const buildAlertBasedTilesQuery = (
   entitiesIndexName: string,
@@ -115,7 +131,6 @@ export const buildAlertBasedTilesQuery = (
     entitiesIndexName,
     spaceId,
     windowCondition: buildPeriodCondition('@timestamp', timeRange, period),
-    entityFilterClauses,
   });
 
   // One row per resolved group: whether any of its alerting records has a severe alert, whether it
@@ -123,6 +138,7 @@ export const buildAlertBasedTilesQuery = (
   parts.push(
     `| STATS has_severe_alert = MAX(has_severe_alert), has_alert = MAX(has_alert), group_on_watchlist = MAX(group_on_watchlist) BY effective_id`
   );
+  parts.push(...buildGroupFilterSteps(entitiesIndexName, entityFilterClauses));
 
   // Per-tile ids: null for entities outside the tile so COUNT/VALUES ignore them.
   parts.push(`| EVAL severe_id = CASE(has_severe_alert, effective_id, null)`);
