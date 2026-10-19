@@ -95,6 +95,9 @@ pivot:
       - 'Team:Search & ML UX'
     'Workflows':
       - 'Team:One Workflow'
+    # Not GA yet: rules.bundle drops this area from every bundle until it is.
+    'Context Engine':
+      - 'Team:context'
     'Maps':
       - 'Team:Geo'
     'QA':
@@ -318,9 +321,13 @@ rules:
       'cloud-serverless':
         exclude_types:
           - docs
+        exclude_areas:
+          - 'Context Engine'
       'kibana':
         exclude_types:
           - docs
+        exclude_areas:
+          - 'Context Engine'
       #     # match_areas: any
       #     # include_areas:
       #     #   - "Alerting and Reporting":
@@ -330,9 +337,13 @@ rules:
       'observability':
         exclude_types:
           - docs
+        exclude_areas:
+          - 'Context Engine'
       'security':
         exclude_types:
           - docs
+        exclude_areas:
+          - 'Context Engine'
 
 # Bundle configuration (profiles and defaults)
 bundle:
