@@ -44,6 +44,9 @@ export const syntheticsVaultConnectionSavedObjectType: SavedObjectsType = {
     dynamic: false,
     properties: {},
   },
+  modelVersions: {
+    1: { changes: [] },
+  },
   management: {
     importableAndExportable: false,
     icon: 'lock',

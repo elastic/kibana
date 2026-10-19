@@ -431,7 +431,7 @@ const testHashiCorpVault = async (c: {
 const TestBodySchema = schema.object({
   // When editing a saved connection with the secret left blank, `name` lets the
   // server fall back to the stored secret so Test works without re-entry.
-  name: schema.maybe(schema.string()),
+  name: schema.maybe(schema.string({ maxLength: MAX_LEN })),
   type: schema.maybe(schema.literal('hashicorp_vault')),
   config: HashiCorpVaultConfigSchema,
   secrets: schema.maybe(HashiCorpVaultSecretsSchema),
