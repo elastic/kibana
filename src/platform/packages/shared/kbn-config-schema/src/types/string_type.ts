@@ -23,53 +23,57 @@ export type StringOptions = TypeOptions<string> & {
 
 export class StringType extends Type<string> {
   constructor(options: StringOptions = {}) {
-    super(() => {
-      // We want to allow empty strings, however calling `allow('')` causes
-      // Joi to allow the value and skip any additional validation.
-      // Instead, we reimplement the string validator manually except in the
-      // hostname case where empty strings aren't allowed anyways.
-      let schema =
-        options.hostname === true
-          ? internals.string().hostname()
-          : internals.any().custom((value, { error }) => {
-              if (typeof value !== 'string') {
-                if (options.coerceFromNumber && typeof value === 'number') {
-                  return value.toString(10);
-                }
-                return error('any.custom', {
-                  message: `expected value of type [string] but got [${typeDetect(value)}]`,
-                });
-              }
-              return value;
-            });
+    super(() => StringType.createSchema(options), options);
+  }
 
-      if (options.minLength !== undefined) {
-        schema = schema
-          .custom(
-            convertValidationFunction((value) => {
-              if (value.length < options.minLength!) {
-                return `value has length [${value.length}] but it must have a minimum length of [${options.minLength}].`;
+  // Keep the inline custom validators at this nesting depth: their compiled source text
+  // is hashed into Saved Object model version snapshots by `kbn-check-saved-objects-cli`.
+  private static createSchema(options: StringOptions) {
+    // We want to allow empty strings, however calling `allow('')` causes
+    // Joi to allow the value and skip any additional validation.
+    // Instead, we reimplement the string validator manually except in the
+    // hostname case where empty strings aren't allowed anyways.
+    let schema =
+      options.hostname === true
+        ? internals.string().hostname()
+        : internals.any().custom((value, { error }) => {
+            if (typeof value !== 'string') {
+              if (options.coerceFromNumber && typeof value === 'number') {
+                return value.toString(10);
               }
-            })
-          )
-          .meta({ [META_FIELD_X_OAS_MIN_LENGTH]: options.minLength });
-      }
+              return error('any.custom', {
+                message: `expected value of type [string] but got [${typeDetect(value)}]`,
+              });
+            }
+            return value;
+          });
 
-      if (options.maxLength !== undefined) {
-        schema = schema
-          .custom(
-            convertValidationFunction((value) => {
-              if (value.length > options.maxLength!) {
-                return `value has length [${value.length}] but it must have a maximum length of [${options.maxLength}].`;
-              }
-            })
-          )
-          .meta({ [META_FIELD_X_OAS_MAX_LENGTH]: options.maxLength });
-      }
+    if (options.minLength !== undefined) {
+      schema = schema
+        .custom(
+          convertValidationFunction((value) => {
+            if (value.length < options.minLength!) {
+              return `value has length [${value.length}] but it must have a minimum length of [${options.minLength}].`;
+            }
+          })
+        )
+        .meta({ [META_FIELD_X_OAS_MIN_LENGTH]: options.minLength });
+    }
 
-      schema.type = 'string';
-      return schema;
-    }, options);
+    if (options.maxLength !== undefined) {
+      schema = schema
+        .custom(
+          convertValidationFunction((value) => {
+            if (value.length > options.maxLength!) {
+              return `value has length [${value.length}] but it must have a maximum length of [${options.maxLength}].`;
+            }
+          })
+        )
+        .meta({ [META_FIELD_X_OAS_MAX_LENGTH]: options.maxLength });
+    }
+
+    schema.type = 'string';
+    return schema;
   }
 
   protected handleError(type: string, { limit, value }: Record<string, any>) {
