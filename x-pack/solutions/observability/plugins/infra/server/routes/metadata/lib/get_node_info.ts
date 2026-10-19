@@ -52,12 +52,13 @@ export const getNodeInfo = async (
         sourceConfiguration,
         kubernetesNodeName,
         'host',
-        timeRange
+        timeRange,
+        schema
       );
     }
     return {};
   }
-  const fields = findInventoryFields(nodeType);
+  const fields = findInventoryFields(nodeType, schema);
   const params = {
     allow_no_indices: true,
     ignore_unavailable: true,
