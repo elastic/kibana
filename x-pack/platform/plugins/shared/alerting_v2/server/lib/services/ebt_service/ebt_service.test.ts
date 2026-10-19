@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { RULE_CREATED_EBT_EVENT_TYPE, type RuleChangedEbtData } from '../../telemetry/rule_ebt_schema';
+import {
+  RULE_CREATED_EBT_EVENT_TYPE,
+  type RuleChangedEbtData,
+} from '../../telemetry/rule_ebt_schema';
 import type { AnalyticsServiceStart, Logger } from '@kbn/core/server';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import { createLoggerService } from '../logger_service/logger_service.mock';

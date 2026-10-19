@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { RULE_CREATED_EBT_EVENT_TYPE } from '../../../../../server/lib/telemetry/rule_ebt_schema';
 import { expect } from '@kbn/scout/ui';
+import { RULE_CREATED_EBT_EVENT_TYPE } from '../../../../../server/lib/telemetry/rule_ebt_schema';
 import type { RulesApiService } from '../../../common/services';
 import { test } from '../fixtures';
 

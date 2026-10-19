@@ -6,6 +6,7 @@
  */
 
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import type { EventTypeOpts } from '@kbn/core/server';
 import {
   RULE_CREATED_EBT_EVENT_TYPE,
   RULE_DELETED_EBT_EVENT_TYPE,
@@ -16,7 +17,6 @@ import {
   type RuleChangedEbtData,
   type RuleEbtEventType,
 } from './rule_ebt_schema';
-import type { EventTypeOpts } from '@kbn/core/server';
 import {
   RULE_CREATED_EVENT_TYPE,
   RULE_DELETED_EVENT_TYPE,

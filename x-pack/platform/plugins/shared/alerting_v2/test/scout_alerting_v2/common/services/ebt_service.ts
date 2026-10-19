@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import type { RuleChangedEbtData, RuleEbtEventType } from '../../../../server/lib/telemetry/rule_ebt_schema';
 import type { KbnClient, ScoutLogger } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
+import type {
+  RuleChangedEbtData,
+  RuleEbtEventType,
+} from '../../../../server/lib/telemetry/rule_ebt_schema';
 import { COMMON_HEADERS } from '../constants';
 
 const EBT_HELPERS_PATH = '/internal/analytics_ftr_helpers';
