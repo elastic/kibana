@@ -1,5 +1,5 @@
 {
-  "sha1": "b09b7040f6ef528af6f4e247f618d3d7b09458fd",
+  "sha1": "b274966e80bce0d75f224dc26e769d0f1ccd0222",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,7 +13,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/subscription_status/test/scout_cloud_trial/ui/tests/billing_admin.spec.ts",
-        "line": 33,
+        "line": 34,
         "column": 18
       }
     },
