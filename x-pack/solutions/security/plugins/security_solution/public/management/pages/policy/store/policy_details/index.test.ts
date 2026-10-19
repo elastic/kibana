@@ -352,6 +352,9 @@ describe('policy details: ', () => {
                       credential_hardening: {
                         enabled: false,
                       },
+                      registry_credential_hardening: {
+                        enabled: false,
+                      },
                     },
                     ai_data_collection: { enabled: true },
                     popup: {

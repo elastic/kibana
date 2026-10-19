@@ -50,7 +50,7 @@ export const POLICY_SETTING_SECTION_DESCRIPTIONS = Object.freeze({
     'xpack.securitySolution.endpoint.policy.details.attackSurfaceReductionDescription',
     {
       defaultMessage:
-        'Limit the ways attackers can compromise your endpoints by reducing exposure to common attack techniques. Enable credential hardening to prevent unauthorized access to system credentials on Windows.',
+        'Limit the ways attackers can compromise your endpoints by reducing exposure to common attack techniques. Credential hardening options protect Windows system credentials from unauthorized access.',
     }
   ),
   eventCollection: i18n.translate(

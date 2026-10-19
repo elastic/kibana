@@ -35,6 +35,10 @@ export const toPolicyChangeCapabilities = (
     customYaraSignaturesExperimental: experimentalFeatures.customYaraSignaturesEnabled,
     aiDataCollectionExperimental: isAiDataCollectionEnabled(experimentalFeatures),
     linuxRansomwareProtection: isLinuxRansomwareProtectionEnabled(experimentalFeatures),
+    endpointRegistryCredentialHardening: productFeatures.isEnabled(
+      ProductFeatureSecurityKey.endpointRegistryCredentialHardening
+    ),
+    registryCredentialHardeningExperimental: experimentalFeatures.registryCredentialHardening,
     endpointProtectionUpdates: productFeatures.isEnabled(
       ProductFeatureSecurityKey.endpointProtectionUpdates
     ),

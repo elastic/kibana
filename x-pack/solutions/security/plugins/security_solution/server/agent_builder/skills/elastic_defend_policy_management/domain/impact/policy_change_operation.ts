@@ -29,6 +29,7 @@ export type ProtectionSettingWeakenedSetting =
   | 'malware.on_write_scan'
   | 'behavior_protection.reputation_service'
   | 'attack_surface_reduction.credential_hardening.enabled'
+  | 'attack_surface_reduction.registry_credential_hardening.enabled'
   | 'antivirus_registration.mode';
 
 export type PolicyAssessmentAdvisory =
@@ -144,6 +145,10 @@ export type CustomYaraSignaturesEligibilityReason =
 
 export type AiDataCollectionEligibilityReason = 'ai_data_collection_experimental_disabled';
 
+export type RegistryCredentialHardeningEligibilityReason =
+  | 'endpoint_registry_credential_hardening_disabled'
+  | 'registry_credential_hardening_experimental_disabled';
+
 export interface EligibilityContext {
   readonly proposedConfig: PolicyConfig;
   readonly licenseStripped: PolicyConfig;
@@ -157,6 +162,8 @@ export interface EligibilityContext {
   readonly aiDataCollectionStripped: PolicyConfig;
   readonly aiDataCollectionReason: AiDataCollectionEligibilityReason;
   readonly linuxRansomwareStripped: PolicyConfig;
+  readonly registryCredentialHardeningStripped: PolicyConfig;
+  readonly registryCredentialHardeningReason: RegistryCredentialHardeningEligibilityReason;
   readonly endpointProtectionUpdates: boolean;
   readonly serverless: boolean;
 }

@@ -1043,7 +1043,16 @@ describe('DispatcherService', () => {
       expect(firstCall.executionUuid).not.toBe(secondCall.executionUuid);
     });
 
-    it('logs DISPATCHER_COLD_START when no watermark is provided', async () => {
+    const COLD_START_MESSAGE = 'no persisted watermark';
+
+    const hasColdStartInfoLog = (
+      mockLogger: ReturnType<typeof createLoggerService>['mockLogger']
+    ) =>
+      mockLogger.info.mock.calls.some(([message]) =>
+        (typeof message === 'function' ? message() : message).includes(COLD_START_MESSAGE)
+      );
+
+    it('logs cold start at info level when no watermark is provided', async () => {
       const { loggerService, mockLogger } = createLoggerService();
       const { storageService: noopStorage } = createStorageService();
       const mockPipeline = buildMockPipeline();
@@ -1051,13 +1060,8 @@ describe('DispatcherService', () => {
 
       await service.run({ taskId: 'task-1' });
 
-      // LoggerService.warn forwards (message, { labels: { code } }) to the raw logger
-      expect(mockLogger.warn).toHaveBeenCalledWith(
-        expect.any(Function),
-        expect.objectContaining({
-          labels: expect.objectContaining({ code: 'DISPATCHER_COLD_START' }),
-        })
-      );
+      expect(hasColdStartInfoLog(mockLogger)).toBe(true);
+      expect(mockLogger.warn).not.toHaveBeenCalled();
     });
 
     it('does not log cold start when a watermark is provided', async () => {
@@ -1072,6 +1076,25 @@ describe('DispatcherService', () => {
       });
 
       expect(mockLogger.warn).not.toHaveBeenCalled();
+      expect(hasColdStartInfoLog(mockLogger)).toBe(false);
+    });
+
+    it('logs DISPATCHER_INVALID_WATERMARK when the watermark is an Invalid Date', async () => {
+      const { loggerService, mockLogger } = createLoggerService();
+      const { storageService: noopStorage } = createStorageService();
+      const mockPipeline = buildMockPipeline();
+      const service = new DispatcherService(mockPipeline, noopStorage, loggerService);
+
+      await service.run({ eventWatermark: new Date('invalid'), taskId: 'task-1' });
+
+      // LoggerService.warn forwards (message, { labels: { code } }) to the raw logger
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.any(Function),
+        expect.objectContaining({
+          labels: expect.objectContaining({ code: 'DISPATCHER_INVALID_WATERMARK' }),
+        })
+      );
+      expect(hasColdStartInfoLog(mockLogger)).toBe(false);
     });
   });
 

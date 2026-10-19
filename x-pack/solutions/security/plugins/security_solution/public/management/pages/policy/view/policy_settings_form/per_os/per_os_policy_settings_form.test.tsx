@@ -53,9 +53,13 @@ describe('PerOsPolicySettingsForm', () => {
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
     storageMock = mockedContext.startServices.storage;
-    // trustedDevices is on by default in experimental features; keep it off unless a
-    // test is exercising the device-control gate so card presence stays stable.
-    mockedContext.setExperimentalFlag({ linuxDnsEvents: true, trustedDevices: false });
+    // trustedDevices and custom YARA signatures are on by default; keep them off unless a
+    // test is exercising that gate so card presence stays stable.
+    mockedContext.setExperimentalFlag({
+      linuxDnsEvents: true,
+      trustedDevices: false,
+      customYaraSignaturesEnabled: false,
+    });
 
     formProps = {
       policy: new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy().inputs[0]

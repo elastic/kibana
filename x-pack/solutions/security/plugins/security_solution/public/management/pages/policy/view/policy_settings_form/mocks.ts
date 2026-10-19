@@ -93,6 +93,15 @@ export const getPolicySettingsFormTestSubjects = (
         row: perOsAttackSurfaceTestSubj('windows'),
         enableDisableSwitch: perOsAttackSurfaceTestSubj('windows-enableDisableSwitch'),
         switchLabel: perOsAttackSurfaceTestSubj('windows-switchLabel'),
+        registryCredentialHardeningSwitch: perOsAttackSurfaceTestSubj(
+          'windows-registryCredentialHardeningSwitch'
+        ),
+        registryCredentialHardeningSwitchLabel: perOsAttackSurfaceTestSubj(
+          'windows-registryCredentialHardeningSwitchLabel'
+        ),
+        registryCredentialHardeningTooltipIcon: perOsAttackSurfaceTestSubj(
+          'windows-registryCredentialHardeningTooltipIcon'
+        ),
       },
     },
     ransomware: {
@@ -244,6 +253,13 @@ export const getPolicySettingsFormTestSubjects = (
       enableDisableSwitch: attackSurfaceTestSubj('enableDisableSwitch'),
       switchLabel: attackSurfaceTestSubj('switchLabel'),
       osValues: attackSurfaceTestSubj('osValues'),
+      registryCredentialHardeningSwitch: attackSurfaceTestSubj('registryCredentialHardeningSwitch'),
+      registryCredentialHardeningSwitchLabel: attackSurfaceTestSubj(
+        'registryCredentialHardeningSwitchLabel'
+      ),
+      registryCredentialHardeningTooltipIcon: attackSurfaceTestSubj(
+        'registryCredentialHardeningTooltipIcon'
+      ),
     },
 
     perOsEventCollection: {

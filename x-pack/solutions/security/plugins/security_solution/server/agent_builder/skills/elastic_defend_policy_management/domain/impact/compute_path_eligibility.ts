@@ -142,5 +142,9 @@ export const computePathEligibility = (
     return ineligible(context.aiDataCollectionReason);
   }
 
+  if (!isEqual(proposedValue, get(context.registryCredentialHardeningStripped, path))) {
+    return ineligible(context.registryCredentialHardeningReason);
+  }
+
   return { eligible: true };
 };

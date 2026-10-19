@@ -30,6 +30,8 @@ const eligibilityContext = (
     customYaraSignaturesExperimental?: boolean;
     aiDataCollectionExperimental?: boolean;
     linuxRansomwareProtection?: boolean;
+    endpointRegistryCredentialHardening?: boolean;
+    registryCredentialHardeningExperimental?: boolean;
     endpointProtectionUpdates?: boolean;
     serverless?: boolean;
   } = {}
@@ -44,6 +46,9 @@ const eligibilityContext = (
     customYaraSignaturesExperimental: options.customYaraSignaturesExperimental ?? true,
     aiDataCollectionExperimental: options.aiDataCollectionExperimental ?? true,
     linuxRansomwareProtection: options.linuxRansomwareProtection ?? true,
+    endpointRegistryCredentialHardening: options.endpointRegistryCredentialHardening ?? true,
+    registryCredentialHardeningExperimental:
+      options.registryCredentialHardeningExperimental ?? true,
     endpointProtectionUpdates: options.endpointProtectionUpdates ?? true,
     serverless: options.serverless ?? false,
   });
@@ -312,6 +317,56 @@ describe('computePathEligibility', () => {
     expect(computePathEligibility('windows.ai_data_collection.enabled', context)).toEqual({
       eligible: true,
     });
+  });
+
+  it('marks registry_credential_hardening ineligible when the product feature is disabled', () => {
+    const context = eligibilityContext(policyFactory(), {
+      endpointRegistryCredentialHardening: false,
+    });
+
+    expect(
+      computePathEligibility(
+        'windows.attack_surface_reduction.registry_credential_hardening.enabled',
+        context
+      )
+    ).toEqual({
+      eligible: false,
+      reason: 'endpoint_registry_credential_hardening_disabled',
+    });
+    expect(
+      computePathEligibility(
+        'windows.attack_surface_reduction.credential_hardening.enabled',
+        context
+      )
+    ).toEqual({ eligible: true });
+  });
+
+  it('marks registry_credential_hardening ineligible when the experimental flag is off', () => {
+    const context = eligibilityContext(policyFactory(), {
+      registryCredentialHardeningExperimental: false,
+    });
+
+    expect(
+      computePathEligibility(
+        'windows.attack_surface_reduction.registry_credential_hardening.enabled',
+        context
+      )
+    ).toEqual({
+      eligible: false,
+      reason: 'registry_credential_hardening_experimental_disabled',
+    });
+    expect(computePathEligibility('windows.malware.mode', context)).toEqual({ eligible: true });
+  });
+
+  it('marks registry_credential_hardening eligible when the product feature and experimental flag are both on', () => {
+    const context = eligibilityContext(policyFactory());
+
+    expect(
+      computePathEligibility(
+        'windows.attack_surface_reduction.registry_credential_hardening.enabled',
+        context
+      )
+    ).toEqual({ eligible: true });
   });
 
   it('marks platinum usb_storage read_only eligible when device_control is disabled', () => {
