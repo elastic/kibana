@@ -159,5 +159,19 @@ describe('PerOsAiDataCollectionCard', () => {
 
       expectIsViewOnly(renderResult.getByTestId(testSubj.card));
     });
+
+    it('still shows every OS switch, turned off, when AI Data Collection is off on every OS', () => {
+      for (const os of OS_KEYS) {
+        policy[PolicyOperatingSystem[os]].ai_data_collection = { enabled: false };
+      }
+      render();
+
+      for (const os of OS_KEYS) {
+        expect(renderResult.getByTestId(testSubj[os].enableDisableSwitch)).toHaveAttribute(
+          'aria-checked',
+          'false'
+        );
+      }
+    });
   });
 });

@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { Immutable, PolicyConfig } from '../../../../../../../common/endpoint/types';
 import { PolicyOperatingSystem } from '../../../../../../../common/endpoint/types';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
-import { TECHNICAL_PREVIEW } from '../../../../../../common/components/technical_preview_badge/translations';
+import { TECHNICAL_PREVIEW } from '../../../../../../common/translations';
 import type { AiDataCollectionOSes } from '../../../types';
 import { PerOsSettingCard } from './per_os_setting_card';
 import { SupportedVersionForProtectionNotice } from '../components/notify_user_option';
@@ -46,9 +46,6 @@ export type PerOsAiDataCollectionCardProps = PolicyFormComponentCommonProps;
 export const PerOsAiDataCollectionCard = memo<PerOsAiDataCollectionCardProps>(
   ({ policy, onChange, mode = 'edit', 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
-    const selected = AI_DATA_COLLECTION_OS_VALUES.some(
-      (os) => policy[os].ai_data_collection?.enabled === true
-    );
 
     return (
       <PerOsSettingCard
@@ -62,7 +59,6 @@ export const PerOsAiDataCollectionCard = memo<PerOsAiDataCollectionCardProps>(
         }
         description={POLICY_SETTING_SECTION_DESCRIPTIONS.aiDataCollection}
         dataTestSubj={getTestId()}
-        selected={selected}
         mode={mode}
         rightCorner={
           <SupportedVersionForProtectionNotice
