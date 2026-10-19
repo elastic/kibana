@@ -24,7 +24,7 @@ export const LOCAL_SERVERLESS_TAGS = [
 
 export const getDataStreams = async (
   apiClient: ApiClientFixture,
-  cookieHeader: Record<string, string>,
+  authHeader: Record<string, string>,
   { includeZeroStorage = true }: { includeZeroStorage?: boolean } = {}
 ) => {
   const response = await apiClient.get(
@@ -33,7 +33,7 @@ export const getDataStreams = async (
       headers: {
         'x-elastic-internal-origin': 'kibana',
         'elastic-api-version': '1',
-        ...cookieHeader,
+        ...authHeader,
       },
       responseType: 'json',
     }

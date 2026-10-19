@@ -52,9 +52,11 @@ apiTest.describe('Data Usage data streams API privileges', { tag: LOCAL_SERVERLE
 
   apiTest(
     'returns all data streams for indices with the required privileges',
-    async ({ apiClient, samlAuth }) => {
-      const { cookieHeader } = await samlAuth.asInteractiveUser(roleWithIndices(['*'], ['all']));
-      const { statusCode, names } = await getDataStreams(apiClient, cookieHeader);
+    async ({ apiClient, requestAuth }) => {
+      const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(
+        roleWithIndices(['*'], ['all'])
+      );
+      const { statusCode, names } = await getDataStreams(apiClient, apiKeyHeader);
       expect(statusCode).toBe(200);
       expect(names).toContain(ALLOWED_DATA_STREAM);
       expect(names).toContain(OTHER_DATA_STREAM);
@@ -63,31 +65,33 @@ apiTest.describe('Data Usage data streams API privileges', { tag: LOCAL_SERVERLE
 
   apiTest(
     'returns only the data streams the role has privileges for',
-    async ({ apiClient, samlAuth }) => {
-      const { cookieHeader } = await samlAuth.asInteractiveUser(
+    async ({ apiClient, requestAuth }) => {
+      const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(
         roleWithIndices([`${ALLOWED_DATA_STREAM}*`], ['all'])
       );
-      const { statusCode, names } = await getDataStreams(apiClient, cookieHeader);
+      const { statusCode, names } = await getDataStreams(apiClient, apiKeyHeader);
       expect(statusCode).toBe(200);
       expect(names).toContain(ALLOWED_DATA_STREAM);
       expect(names).not.toContain(OTHER_DATA_STREAM);
     }
   );
 
-  apiTest('returns 403 without the required privileges', async ({ apiClient, samlAuth }) => {
-    const { cookieHeader } = await samlAuth.asInteractiveUser(roleWithIndices(['*'], ['write']));
-    const { statusCode, body } = await getDataStreams(apiClient, cookieHeader);
+  apiTest('returns 403 without the required privileges', async ({ apiClient, requestAuth }) => {
+    const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(
+      roleWithIndices(['*'], ['write'])
+    );
+    const { statusCode, body } = await getDataStreams(apiClient, apiKeyHeader);
     expect(statusCode).toBe(403);
     expect(body.message).toContain(new NoPrivilegeMeteringError().message);
   });
 
   apiTest(
     'returns 404 when the role has no matching data streams',
-    async ({ apiClient, samlAuth }) => {
-      const { cookieHeader } = await samlAuth.asInteractiveUser(
+    async ({ apiClient, requestAuth }) => {
+      const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(
         roleWithIndices(['scout-du-api-none*'], ['all'])
       );
-      const { statusCode, body } = await getDataStreams(apiClient, cookieHeader);
+      const { statusCode, body } = await getDataStreams(apiClient, apiKeyHeader);
       expect(statusCode).toBe(404);
       expect(body.message).toContain(new NoIndicesMeteringError().message);
     }

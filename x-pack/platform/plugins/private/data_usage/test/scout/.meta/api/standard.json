@@ -1,5 +1,5 @@
 {
-  "sha1": "bbd2ea7e99ab5ae0f088ba61c82bc41d096d9009",
+  "sha1": "ad625bee4740af91d9f12838213c16b611c30ff9",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -32,7 +32,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/data_usage/test/scout/api/tests/data_streams_privileges.spec.ts",
-        "line": 57,
+        "line": 59,
         "column": 43
       }
     },
@@ -48,8 +48,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/data_usage/test/scout/api/tests/data_streams_privileges.spec.ts",
-        "line": 67,
-        "column": 47
+        "line": 69,
+        "column": 50
       }
     },
     {
@@ -64,7 +64,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/data_usage/test/scout/api/tests/data_streams_privileges.spec.ts",
-        "line": 77,
+        "line": 79,
         "column": 76
       }
     },
