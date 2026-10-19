@@ -22,10 +22,14 @@ import type { HuntModelTierId } from '@kbn/alertzero-common';
  *  - `efficient`: selection and short grounded text over a small input. Dataset matching picks
  *    names from a list, and recommendations are a few short lines. Both have deterministic
  *    fallbacks, so a small model is enough.
- *  - `balanced`: many tool or model rounds per report, where frontier cost and latency multiply
- *    by the round count. ES|QL generation runs up to `MAX_GENERATED_BEHAVIORS` rounds.
+ *  - `balanced`: no hunt consumer. ES|QL generation ran here briefly, but Claude Sonnet 5 on
+ *    EIS refuses the hunt's generation prompt (the provider content filter ends the response
+ *    with nothing written) for nearly every behavior of a threat report, so the tier is not
+ *    resolved for hunts.
  *  - `frontier`: one pass whose quality bounds everything downstream. Tier 2 technique
- *    extraction decides which behaviors get a query at all.
+ *    extraction decides which behaviors get a query at all, and ES|QL generation runs here
+ *    too: up to `MAX_GENERATED_BEHAVIORS` rounds per report, which is what the hunt paid
+ *    before the tiers were split.
  */
 export type HuntModels = Partial<Record<HuntModelTierId, ScopedModel>>;
 
