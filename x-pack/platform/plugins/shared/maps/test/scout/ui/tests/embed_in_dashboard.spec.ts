@@ -96,50 +96,47 @@ test.describe('Maps - embed in dashboard', { tag: '@local-stateful-classic' }, (
     }
   };
 
-  test('should set "data-title" attribute', async ({ page }) => {
-    await expect(page.locator(`[data-shared-item][data-title="${JOIN_EXAMPLE}"]`)).toBeVisible();
-  });
+  test('should render map embeddables', async ({ page, pageObjects }) => {
+    await test.step('should set "data-title" attribute', async () => {
+      await expect(page.locator(`[data-shared-item][data-title="${JOIN_EXAMPLE}"]`)).toBeVisible();
+    });
 
-  test('should display tools control', async ({ page }) => {
-    await expect(
-      page
-        .locator(`[data-shared-item][data-title="${JOIN_EXAMPLE}"]`)
-        .getByTestId('mapToolsControlPopover')
-    ).toBeVisible();
-  });
+    await test.step('should display tools control', async () => {
+      await expect(
+        page
+          .locator(`[data-shared-item][data-title="${JOIN_EXAMPLE}"]`)
+          .getByTestId('mapToolsControlPopover')
+      ).toBeVisible();
+    });
 
-  test('should pass index patterns to container', async ({ page }) => {
-    await page.testSubj.click('addFilter');
-    const dataViews = await page.components
-      .comboBox('filterIndexPatternsSelect')
-      .getAllVisibleOptions();
-    expect(dataViews.join(',')).toBe('meta_for_geo_shapes*,logstash-*');
-  });
-
-  test('should populate inspector with requests for map embeddable', async ({ pageObjects }) => {
-    await test.step('join example lists its layer and join requests', async () => {
+    await test.step('should populate inspector with requests for join example', async () => {
       await expectPanelRequestNames(pageObjects, JOIN_EXAMPLE, [
         'load layer features (geo_shapes*)',
         'load join metrics (geo_shapes*)',
       ]);
     });
 
-    await test.step('geo grid example has a single request', async () => {
+    await test.step('should populate inspector with a single request for geo grid example', async () => {
       await expectPanelRequestNames(pageObjects, GEO_GRID_EXAMPLE, [
         'load layer features (logstash-*)',
       ]);
     });
+
+    await test.step('should apply container state (time, query, filters) to embeddable', async () => {
+      const response = await getPanelResponse(pageObjects, page, GEO_GRID_EXAMPLE);
+      expect(response.aggregations.gridSplit.buckets).toHaveLength(6);
+    });
+
+    await test.step('should pass index patterns to container', async () => {
+      await page.testSubj.click('addFilter');
+      const dataViews = await page.components
+        .comboBox('filterIndexPatternsSelect')
+        .getAllVisibleOptions();
+      expect(dataViews.join(',')).toBe('meta_for_geo_shapes*,logstash-*');
+    });
   });
 
-  test('should apply container state (time, query, filters) to embeddable when loaded', async ({
-    page,
-    pageObjects,
-  }) => {
-    const response = await getPanelResponse(pageObjects, page, GEO_GRID_EXAMPLE);
-    expect(response.aggregations.gridSplit.buckets).toHaveLength(6);
-  });
-
-  test('should apply new container state (time, query, filters) to embeddable', async ({
+  test('should apply filters added to the dashboard filter bar to map panels', async ({
     page,
     pageObjects,
   }) => {
@@ -181,7 +178,7 @@ test.describe('Maps - embed in dashboard', { tag: '@local-stateful-classic' }, (
       .toBe(1);
   });
 
-  test('should apply embeddable query and filters to panel', async ({ page, pageObjects }) => {
+  test('should apply filters saved in the map panel itself', async ({ page, pageObjects }) => {
     const { dashboard, filterBar, maps } = pageObjects;
 
     await dashboard.switchToEditMode();
@@ -201,32 +198,34 @@ test.describe('Maps - embed in dashboard', { tag: '@local-stateful-classic' }, (
       .toBe(2);
   });
 
-  test('should re-fetch query when "refresh" is clicked', async ({ pageObjects }) => {
-    const before = await getPanelRequestTimestamp(pageObjects, GEO_GRID_EXAMPLE);
-    await pageObjects.dashboard.refresh();
-    await pageObjects.dashboard.waitForRenderComplete();
-    await expect
-      .poll(() => getPanelRequestTimestamp(pageObjects, GEO_GRID_EXAMPLE))
-      .not.toBe(before);
-  });
+  test('should re-fetch documents on refresh', async ({ page, pageObjects }) => {
+    await test.step('when "refresh" is clicked', async () => {
+      const before = await getPanelRequestTimestamp(pageObjects, GEO_GRID_EXAMPLE);
+      await pageObjects.dashboard.refresh();
+      await pageObjects.dashboard.waitForRenderComplete();
+      await expect
+        .poll(() => getPanelRequestTimestamp(pageObjects, GEO_GRID_EXAMPLE))
+        .not.toBe(before);
+    });
 
-  test('should re-fetch documents with refresh timer', async ({ page, pageObjects }) => {
-    let before = '';
-    await expect
-      .poll(async () => {
-        before = await getPanelRequestTimestamp(pageObjects, GEO_GRID_EXAMPLE);
-        return before.length;
-      })
-      .toBe(24);
+    await test.step('with refresh timer', async () => {
+      let before = '';
+      await expect
+        .poll(async () => {
+          before = await getPanelRequestTimestamp(pageObjects, GEO_GRID_EXAMPLE);
+          return before.length;
+        })
+        .toBe(24);
 
-    // let the 1s auto-refresh timer fire at least once, then pause it
-    await pageObjects.datePicker.startAutoRefresh(1);
-    await page.waitForTimeout(1500);
-    await pageObjects.datePicker.pauseAutoRefresh();
-    await pageObjects.dashboard.waitForRenderComplete();
+      // let the 1s auto-refresh timer fire at least once, then pause it
+      await pageObjects.datePicker.startAutoRefresh(1);
+      await page.waitForTimeout(1500);
+      await pageObjects.datePicker.pauseAutoRefresh();
+      await pageObjects.dashboard.waitForRenderComplete();
 
-    await expect
-      .poll(() => getPanelRequestTimestamp(pageObjects, GEO_GRID_EXAMPLE))
-      .not.toBe(before);
+      await expect
+        .poll(() => getPanelRequestTimestamp(pageObjects, GEO_GRID_EXAMPLE))
+        .not.toBe(before);
+    });
   });
 });
