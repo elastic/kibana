@@ -352,6 +352,9 @@ describe('policy details: ', () => {
                       credential_hardening: {
                         enabled: false,
                       },
+                      registry_credential_hardening: {
+                        enabled: false,
+                      },
                     },
                     popup: {
                       malware: {

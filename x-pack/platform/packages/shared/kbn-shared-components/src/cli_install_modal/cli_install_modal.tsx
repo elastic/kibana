@@ -7,45 +7,49 @@
 
 import React from 'react';
 import {
-  EuiModal,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiModalBody,
-  EuiModalFooter,
+  EuiBetaBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiCodeBlock,
-  EuiText,
-  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiBetaBadge,
-  EuiTitle,
-  useGeneratedHtmlId,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
   EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useElasticsearchUrl } from '../../hooks/use_elasticsearch_url';
-import { buildCliConnectCommand } from './util';
 import {
-  CLI_INSTALL_COMMAND,
-  CLI_VERIFY_COMMAND,
-  CLI_REPO_URL,
   CLI_COMMAND_REFERENCE_URL,
+  CLI_INSTALL_COMMAND,
+  CLI_REPO_URL,
+  CLI_VERIFY_COMMAND,
+  buildCliConnectCommand,
 } from './constants';
 
-interface CliInstallModalProps {
+export interface CliInstallModalProps {
+  /** Shown in the connect command. Pass `null` while unknown to show a placeholder. */
+  elasticsearchUrl: string | null;
   onClose: () => void;
+  /** Prefix for the `data-telemetry-id` of the footer links and Close button, so each host keeps its own namespace. */
+  telemetryIdPrefix: string;
 }
 
-const Step: React.FC<{
+interface CliStepProps {
   title: string;
   description?: string;
   command: string;
-  caption?: string;
-  codeTestSubj: string;
-}> = ({ title, description, command, caption, codeTestSubj }) => (
+  dataTestSubj: string;
+}
+
+const CliStep = ({ title, description, command, dataTestSubj }: CliStepProps) => (
   <>
     <EuiTitle size="xs">
       <h4>{title}</h4>
@@ -66,46 +70,44 @@ const Step: React.FC<{
         isCopyable
         paddingSize="m"
         fontSize="m"
-        data-test-subj={codeTestSubj}
+        data-test-subj={dataTestSubj}
       >
         {command}
       </EuiCodeBlock>
     </EuiPanel>
-    {caption && (
-      <>
-        <EuiSpacer size="s" />
-        <EuiText size="xs" color="subdued">
-          <p>{caption}</p>
-        </EuiText>
-      </>
-    )}
   </>
 );
 
-export const CliInstallModal: React.FC<CliInstallModalProps> = ({ onClose }) => {
+export const CliInstallModal = ({
+  elasticsearchUrl,
+  onClose,
+  telemetryIdPrefix,
+}: CliInstallModalProps) => {
   const { euiTheme } = useEuiTheme();
   const modalTitleId = useGeneratedHtmlId({ prefix: 'cliInstallModal' });
-  const elasticsearchUrl = useElasticsearchUrl();
-  const connectCommand = buildCliConnectCommand(elasticsearchUrl);
-
   return (
-    <EuiModal onClose={onClose} aria-labelledby={modalTitleId} maxWidth={euiTheme.base * 40}>
+    <EuiModal
+      onClose={onClose}
+      aria-labelledby={modalTitleId}
+      maxWidth={euiTheme.base * 40}
+      data-test-subj="cliInstallModal"
+    >
       <EuiModalHeader>
         <EuiModalHeaderTitle id={modalTitleId}>
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
-              {i18n.translate('xpack.searchGettingStarted.cliInstallModal.title', {
+              {i18n.translate('xpack.sharedComponents.cliInstallModal.title', {
                 defaultMessage: 'Install Elastic CLI',
               })}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiBetaBadge
                 label={i18n.translate(
-                  'xpack.searchGettingStarted.cliInstallModal.technicalPreviewBadgeLabel',
+                  'xpack.sharedComponents.cliInstallModal.technicalPreviewBadgeLabel',
                   { defaultMessage: 'Technical preview' }
                 )}
                 tooltipContent={i18n.translate(
-                  'xpack.searchGettingStarted.cliInstallModal.technicalPreviewBadgeDescription',
+                  'xpack.sharedComponents.cliInstallModal.technicalPreviewBadgeDescription',
                   {
                     defaultMessage:
                       'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
@@ -120,46 +122,42 @@ export const CliInstallModal: React.FC<CliInstallModalProps> = ({ onClose }) => 
       <EuiModalBody>
         <EuiText size="s" color="subdued">
           <p>
-            {i18n.translate('xpack.searchGettingStarted.cliInstallModal.description', {
+            {i18n.translate('xpack.sharedComponents.cliInstallModal.description', {
               defaultMessage:
                 'Run these commands in your terminal to install the CLI and connect to this project.',
             })}
           </p>
         </EuiText>
         <EuiSpacer size="l" />
-        <Step
-          title={i18n.translate('xpack.searchGettingStarted.cliInstallModal.installStepTitle', {
+        <CliStep
+          title={i18n.translate('xpack.sharedComponents.cliInstallModal.installStepTitle', {
             defaultMessage: 'Install the CLI',
           })}
           command={CLI_INSTALL_COMMAND}
-          caption={i18n.translate(
-            'xpack.searchGettingStarted.cliInstallModal.nodeRequirementDescription',
-            { defaultMessage: 'Requires Node 22+' }
-          )}
-          codeTestSubj="cliInstallModalInstallCode"
+          dataTestSubj="cliInstallModalInstallCode"
         />
         <EuiSpacer size="l" />
-        <Step
-          title={i18n.translate('xpack.searchGettingStarted.cliInstallModal.connectStepTitle', {
+        <CliStep
+          title={i18n.translate('xpack.sharedComponents.cliInstallModal.connectStepTitle', {
             defaultMessage: 'Connect your serverless project',
           })}
           description={i18n.translate(
-            'xpack.searchGettingStarted.cliInstallModal.connectStepDescription',
+            'xpack.sharedComponents.cliInstallModal.connectStepDescription',
             {
               defaultMessage:
                 'Use your project endpoint and an API key to securely add your project to the CLI. Currently only serverless projects are supported.',
             }
           )}
-          command={connectCommand}
-          codeTestSubj="cliInstallModalConnectCode"
+          command={buildCliConnectCommand(elasticsearchUrl)}
+          dataTestSubj="cliInstallModalConnectCode"
         />
         <EuiSpacer size="l" />
-        <Step
-          title={i18n.translate('xpack.searchGettingStarted.cliInstallModal.verifyStepTitle', {
+        <CliStep
+          title={i18n.translate('xpack.sharedComponents.cliInstallModal.verifyStepTitle', {
             defaultMessage: 'Verify the connection',
           })}
           command={CLI_VERIFY_COMMAND}
-          codeTestSubj="cliInstallModalVerifyCode"
+          dataTestSubj="cliInstallModalVerifyCode"
         />
         <EuiSpacer size="l" />
       </EuiModalBody>
@@ -174,32 +172,36 @@ export const CliInstallModal: React.FC<CliInstallModalProps> = ({ onClose }) => 
                 target="_blank"
                 iconType="logoGithub"
                 data-test-subj="cliInstallModalRepoLink"
+                data-telemetry-id={`${telemetryIdPrefix}-repoLink`}
               >
-                {i18n.translate('xpack.searchGettingStarted.cliInstallModal.cliRepoLinkText', {
+                {i18n.translate('xpack.sharedComponents.cliInstallModal.repoLink', {
                   defaultMessage: 'elastic/cli',
                 })}
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
+                color="text"
+                flush="left"
                 href={CLI_COMMAND_REFERENCE_URL}
                 target="_blank"
                 iconType="documentation"
-                iconSide="left"
-                flush="left"
-                color="text"
                 data-test-subj="cliInstallModalCommandReferenceLink"
+                data-telemetry-id={`${telemetryIdPrefix}-commandReference`}
               >
-                {i18n.translate(
-                  'xpack.searchGettingStarted.cliInstallModal.commandReferenceLinkText',
-                  { defaultMessage: 'Command reference' }
-                )}
+                {i18n.translate('xpack.sharedComponents.cliInstallModal.commandReferenceLink', {
+                  defaultMessage: 'Command reference',
+                })}
               </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiButton onClick={onClose} data-test-subj="cliInstallModalCloseBtn">
-          {i18n.translate('xpack.searchGettingStarted.cliInstallModal.closeButtonLabel', {
+        <EuiButton
+          onClick={onClose}
+          data-test-subj="cliInstallModalCloseBtn"
+          data-telemetry-id={`${telemetryIdPrefix}-close`}
+        >
+          {i18n.translate('xpack.sharedComponents.cliInstallModal.close', {
             defaultMessage: 'Close',
           })}
         </EuiButton>
