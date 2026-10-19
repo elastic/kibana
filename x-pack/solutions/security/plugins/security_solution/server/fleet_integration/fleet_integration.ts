@@ -47,6 +47,7 @@ import {
   removeCustomYaraSignatures,
   removeDeviceControl,
   removeLinuxRansomware,
+  removeRegistryCredentialHardening,
 } from '../../common/endpoint/models/policy_config_helpers';
 import {
   ProtectionModes,
@@ -322,6 +323,19 @@ export const getPackagePolicyUpdateCallback = (
         endpointIntegrationData.inputs?.[0]?.config?.policy?.value
       ) {
         endpointIntegrationData.inputs[0].config.policy.value = removeCustomYaraSignatures(
+          endpointIntegrationData.inputs[0].config.policy.value as PolicyConfig
+        );
+      }
+
+      // Stripped before license validation for the same reason as custom YARA signatures above.
+      if (
+        (!productFeatures.isEnabled(
+          ProductFeatureSecurityKey.endpointRegistryCredentialHardening
+        ) ||
+          !experimentalFeatures.registryCredentialHardening) &&
+        endpointIntegrationData.inputs?.[0]?.config?.policy?.value
+      ) {
+        endpointIntegrationData.inputs[0].config.policy.value = removeRegistryCredentialHardening(
           endpointIntegrationData.inputs[0].config.policy.value as PolicyConfig
         );
       }

@@ -190,6 +190,7 @@
       "scoutArch": "serverless",
       "scoutDomain": "observability_complete",
       "scoutHook": "x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations/scout/scout_hook.sh",
+      "vaultSecret": "nightshift",
       "tags": [
         "observability",
         "nightshift-investigations"

@@ -12,6 +12,8 @@ import {
   DefaultPolicyRuleNotificationMessage,
   DefaultPolicyDeviceNotificationMessage,
   policyFactory,
+  policyFactoryWithoutPaidEnterpriseFeatures,
+  policyFactoryWithoutPaidFeatures,
 } from './policy_config';
 import {
   clearCustomYaraSignaturesIfEnabled,
@@ -27,6 +29,7 @@ import {
   removeLinuxDnsEvents,
   removeLinuxRansomware,
   isLinuxRansomwareProtectionEnabled,
+  removeRegistryCredentialHardening,
   setCustomYaraSignatures,
   setProtectionModeAndPopup,
 } from './policy_config_helpers';
@@ -67,6 +70,28 @@ describe('Policy Config helpers', () => {
 
       expect(result.linux.ransomware?.mode).toBe(ProtectionModes.off);
       expect(result.linux.popup).not.toHaveProperty('ransomware');
+    });
+
+    it('leaves an absent registry_credential_hardening absent', () => {
+      const policy = policyFactory();
+      delete policy.windows.attack_surface_reduction.registry_credential_hardening;
+
+      const result = disableProtections(policy);
+
+      expect(result.windows.attack_surface_reduction).not.toHaveProperty(
+        'registry_credential_hardening'
+      );
+    });
+
+    it('turns an enabled registry_credential_hardening into false', () => {
+      const policy = policyFactory();
+      policy.windows.attack_surface_reduction.registry_credential_hardening = { enabled: true };
+
+      const result = disableProtections(policy);
+
+      expect(result.windows.attack_surface_reduction.registry_credential_hardening).toEqual({
+        enabled: false,
+      });
     });
 
     it('does not enable supported fields', () => {
@@ -235,6 +260,11 @@ describe('Policy Config helpers', () => {
         expectedResult: false,
       },
       {
+        keyPath: `${PolicyOperatingSystem.windows}.attack_surface_reduction.registry_credential_hardening.enabled`,
+        keyValue: true,
+        expectedResult: false,
+      },
+      {
         keyPath: `${PolicyOperatingSystem.windows}.antivirus_registration.enabled`,
         keyValue: true,
         expectedResult: false,
@@ -302,6 +332,34 @@ describe('Policy Config helpers', () => {
         }
       }
     );
+  });
+
+  describe('registry credential hardening absent-is-disabled semantics', () => {
+    it('isPolicySetToEventCollectionOnly stays true when the key is absent', () => {
+      const policy = ensureOnlyEventCollectionIsAllowed(policyFactory());
+      delete policy.windows.attack_surface_reduction.registry_credential_hardening;
+
+      expect(isPolicySetToEventCollectionOnly(policy)).toEqual({
+        isOnlyCollectingEvents: true,
+        message: undefined,
+      });
+    });
+
+    it('is not billable when the key is absent', () => {
+      const policy = ensureOnlyEventCollectionIsAllowed(policyFactory());
+      delete policy.windows.attack_surface_reduction.registry_credential_hardening;
+      policy.meta.serverless = true;
+
+      expect(isBillablePolicy(policy)).toBe(false);
+    });
+
+    it('is billable when set to true', () => {
+      const policy = ensureOnlyEventCollectionIsAllowed(policyFactory());
+      policy.meta.serverless = true;
+      policy.windows.attack_surface_reduction.registry_credential_hardening = { enabled: true };
+
+      expect(isBillablePolicy(policy)).toBe(true);
+    });
   });
 
   describe('checkIfPopupMessagesContainCustomNotifications', () => {
@@ -742,6 +800,180 @@ describe('Policy Config helpers', () => {
     });
   });
 
+  describe('removeRegistryCredentialHardening', () => {
+    it('removes the registry_credential_hardening field from Windows', () => {
+      const policy = policyFactory();
+
+      const result = removeRegistryCredentialHardening(policy);
+
+      expect(result.windows.attack_surface_reduction).not.toHaveProperty(
+        'registry_credential_hardening'
+      );
+    });
+
+    it('preserves credential_hardening and other Windows fields', () => {
+      const policy = policyFactory();
+
+      const result = removeRegistryCredentialHardening(policy);
+
+      expect(result.windows.attack_surface_reduction.credential_hardening).toEqual(
+        policy.windows.attack_surface_reduction.credential_hardening
+      );
+      expect(result.windows.malware).toEqual(policy.windows.malware);
+      expect(result.mac).toEqual(policy.mac);
+      expect(result.linux).toEqual(policy.linux);
+    });
+
+    it('returns a new policy object without mutating the original', () => {
+      const policy = policyFactory();
+      const originalPolicy = JSON.parse(JSON.stringify(policy));
+
+      const result = removeRegistryCredentialHardening(policy);
+
+      expect(policy).toEqual(originalPolicy);
+      expect(policy.windows.attack_surface_reduction.registry_credential_hardening).toBeDefined();
+      expect(result).not.toBe(policy);
+      expect(result.windows).not.toBe(policy.windows);
+      expect(result.windows.attack_surface_reduction).not.toBe(
+        policy.windows.attack_surface_reduction
+      );
+    });
+
+    it('is a no-op when the key is already absent', () => {
+      const policy = policyFactory();
+      delete policy.windows.attack_surface_reduction.registry_credential_hardening;
+
+      const result = removeRegistryCredentialHardening(policy);
+
+      expect(result.windows.attack_surface_reduction).not.toHaveProperty(
+        'registry_credential_hardening'
+      );
+      expect(result.windows.attack_surface_reduction.credential_hardening).toEqual(
+        policy.windows.attack_surface_reduction.credential_hardening
+      );
+    });
+
+    it('removes the advanced descendants setting while keeping sibling kernel and advanced settings', () => {
+      const policy = policyFactory();
+      policy.windows.advanced = {
+        kernel: {
+          connect: 'false',
+          registry_credential_hardening: { descendants: 'true', future_setting: 'true' },
+        },
+        alerts: {
+          rollback: { self_healing: { enabled: true } },
+        },
+      };
+
+      const result = removeRegistryCredentialHardening(policy);
+
+      expect(result.windows.advanced).toEqual({
+        kernel: {
+          connect: 'false',
+          registry_credential_hardening: { future_setting: 'true' },
+        },
+        alerts: {
+          rollback: { self_healing: { enabled: true } },
+        },
+      });
+    });
+
+    it('prunes registry_credential_hardening and then kernel once empty, keeping advanced as {}', () => {
+      const policy = policyFactory();
+      policy.windows.advanced = {
+        kernel: { registry_credential_hardening: { descendants: 'true' } },
+      };
+
+      const result = removeRegistryCredentialHardening(policy);
+
+      expect(result.windows.advanced).toEqual({});
+    });
+
+    it('leaves windows.advanced absent when it was not already present', () => {
+      const policy = policyFactory();
+
+      const result = removeRegistryCredentialHardening(policy);
+
+      expect(result.windows).not.toHaveProperty('advanced');
+    });
+
+    it('leaves a malformed windows.advanced untouched instead of throwing', () => {
+      const policy = policyFactory();
+      // `advanced` is free-form, so a policy written straight through the Fleet API can hold a
+      // primitive where a settings namespace is expected.
+      Reflect.set(policy.windows, 'advanced', 'legacy-value');
+
+      const result = removeRegistryCredentialHardening(policy);
+
+      expect(result.windows.advanced).toBe('legacy-value');
+    });
+
+    it('does not mutate the nested windows.advanced objects on the input policy', () => {
+      const policy = policyFactory();
+      policy.windows.advanced = {
+        kernel: {
+          connect: 'false',
+          registry_credential_hardening: { descendants: 'true' },
+        },
+      };
+      const originalPolicy = JSON.parse(JSON.stringify(policy));
+
+      removeRegistryCredentialHardening(policy);
+
+      expect(policy).toEqual(originalPolicy);
+    });
+  });
+
+  describe('policyFactoryWithoutPaidEnterpriseFeatures and policyFactoryWithoutPaidFeatures', () => {
+    it.each([
+      ['policyFactoryWithoutPaidEnterpriseFeatures', policyFactoryWithoutPaidEnterpriseFeatures],
+      ['policyFactoryWithoutPaidFeatures', policyFactoryWithoutPaidFeatures],
+    ])('%s keeps an absent registry_credential_hardening absent', (_name, factory) => {
+      const policy = policyFactory();
+      delete policy.windows.attack_surface_reduction.registry_credential_hardening;
+
+      const result = factory(policy);
+
+      expect(result.windows.attack_surface_reduction).not.toHaveProperty(
+        'registry_credential_hardening'
+      );
+    });
+
+    it.each([
+      ['policyFactoryWithoutPaidEnterpriseFeatures', policyFactoryWithoutPaidEnterpriseFeatures],
+      ['policyFactoryWithoutPaidFeatures', policyFactoryWithoutPaidFeatures],
+    ])('%s turns an enabled registry_credential_hardening into false', (_name, factory) => {
+      const policy = policyFactory();
+      policy.windows.attack_surface_reduction.registry_credential_hardening = { enabled: true };
+
+      const result = factory(policy);
+
+      expect(result.windows.attack_surface_reduction.registry_credential_hardening).toEqual({
+        enabled: false,
+      });
+    });
+
+    it('policyFactoryWithoutPaidEnterpriseFeatures leaves credential_hardening untouched', () => {
+      const policy = policyFactory();
+
+      const result = policyFactoryWithoutPaidEnterpriseFeatures(policy);
+
+      expect(result.windows.attack_surface_reduction.credential_hardening).toEqual(
+        policy.windows.attack_surface_reduction.credential_hardening
+      );
+    });
+
+    it('policyFactoryWithoutPaidFeatures disables credential_hardening', () => {
+      const policy = policyFactory();
+
+      const result = policyFactoryWithoutPaidFeatures(policy);
+
+      expect(result.windows.attack_surface_reduction.credential_hardening).toEqual({
+        enabled: false,
+      });
+    });
+  });
+
   describe('custom_yara_signatures', () => {
     it('writes custom_yara_signatures only for OSes in osList', () => {
       const policy = policyFactory();
@@ -900,7 +1132,10 @@ const eventsOnlyPolicy = (): PolicyConfig => ({
     },
     logging: { file: 'info' },
     antivirus_registration: { enabled: false, mode: AntivirusRegistrationModes.disabled },
-    attack_surface_reduction: { credential_hardening: { enabled: false } },
+    attack_surface_reduction: {
+      credential_hardening: { enabled: false },
+      registry_credential_hardening: { enabled: false },
+    },
   },
   mac: {
     events: { dns: true, process: true, file: true, network: true, security: true },

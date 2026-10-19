@@ -9,13 +9,15 @@ import { getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helper
 import { renderHook, waitFor } from '@testing-library/react';
 import {
   applyEntityStoreSearchCachePatch,
-  buildEntityIdFilter,
   ENTITY_FROM_STORE_QUERY_KEY,
-  RESOLVED_MODE_MAX_RECORDS,
-  RESOLVED_TO_FIELD,
   useEntityFromStore,
   type EntityStoreRecord,
 } from './use_entity_from_store';
+import {
+  buildEntityIdFilter,
+  RESOLVED_MODE_MAX_RECORDS,
+  RESOLVED_TO_FIELD,
+} from '../../../../../common/entity_analytics/entity_store/resolution_group';
 import {
   buildExecutionContext,
   EA_EXECUTION_CONTEXT_NAMES,
