@@ -226,7 +226,7 @@ describe('AlertActionsClient', () => {
       expect(emitEpisodeActionsSpy).not.toHaveBeenCalled();
     });
 
-    it('throws ALERT_EVENT_NOT_FOUND without querying for a series id of another space', async () => {
+    it('throws ALERT_EVENT_NOT_FOUND before any lookup for a series id of another space', async () => {
       const seriesId = toSeriesId({ space_id: 'other-space' });
 
       await expect(
@@ -240,6 +240,7 @@ describe('AlertActionsClient', () => {
       });
 
       expect(queryServiceEsClient.esql.query).not.toHaveBeenCalled();
+      expect(userProfileService.getCurrentProfileId).not.toHaveBeenCalled();
       expect(storageServiceEsClient.bulk).not.toHaveBeenCalled();
     });
 

@@ -8,7 +8,10 @@
 import Boom from '@hapi/boom';
 import { decodeSeriesId, InvalidSeriesIdError, type DecodedSeriesId } from '@kbn/alerting-v2-utils';
 import { ALERTING_ERROR_CODES } from '../../errors/error_codes';
-import { getInvalidSeriesIdMessage } from '../../errors/alert_error_messages';
+import {
+  getAlertSeriesNotFoundMessage,
+  getInvalidSeriesIdMessage,
+} from '../../errors/alert_error_messages';
 import type { AlertEventRecord } from '../types';
 
 /**
@@ -28,6 +31,16 @@ export const decodeSeriesIdOrThrow = (seriesId: string): DecodedSeriesId => {
     throw error;
   }
 };
+
+/**
+ * The `404 ALERT_EVENT_NOT_FOUND` of a series that does not exist in the request's space. A series
+ * id minted for another space gets the same answer, so it reveals nothing about other spaces.
+ */
+export const getSeriesNotFoundError = (seriesId: string): Boom.Boom =>
+  Boom.notFound(getAlertSeriesNotFoundMessage(seriesId), {
+    code: ALERTING_ERROR_CODES.ALERT_EVENT_NOT_FOUND,
+    details: { series_id: seriesId },
+  });
 
 /**
  * The series a stored alert event belongs to, or `null` when the event carries

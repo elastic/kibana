@@ -307,24 +307,6 @@ describe('loadLastSeriesAlertEventOrThrow', () => {
       },
     });
   });
-
-  it('throws `ALERT_EVENT_NOT_FOUND` without querying for a series of another space', async () => {
-    const { queryService, mockEsClient } = setup();
-    const series: DecodedSeriesId = { ...ruleSeries('rule-a'), space_id: 'other-space' };
-    const seriesId = seriesIdOf(series);
-
-    await expect(
-      loadLastSeriesAlertEventOrThrow({ queryService, spaceId: SPACE_ID, seriesId, series })
-    ).rejects.toMatchObject({
-      output: { statusCode: 404 },
-      data: {
-        code: ALERTING_ERROR_CODES.ALERT_EVENT_NOT_FOUND,
-        details: { series_id: seriesId },
-      },
-    });
-
-    expect(mockEsClient.esql.query).not.toHaveBeenCalled();
-  });
 });
 
 describe('loadLastEpisodeAlertEventOrThrow', () => {

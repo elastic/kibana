@@ -12,14 +12,12 @@ import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import { EVENTS_SERIES_ID_EVAL } from '@kbn/alerting-v2-common-queries';
 import { encodeSeriesId, type DecodedSeriesId } from '@kbn/alerting-v2-utils';
 import { ALERTING_ERROR_CODES } from '../../errors/error_codes';
-import {
-  getAlertEpisodeNotFoundMessage,
-  getAlertSeriesNotFoundMessage,
-} from '../../errors/alert_error_messages';
+import { getAlertEpisodeNotFoundMessage } from '../../errors/alert_error_messages';
 import { queryResponseToRecords } from '../../services/query_service/query_response_to_records';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import type { AlertEventRecord, RawAlertEventRow } from '../types';
 import { parseDataJson } from '../utils/parse_data_json';
+import { getSeriesNotFoundError } from '../utils/series_id';
 
 /**
  * Canonicalises an ES|QL response from any of the alert-event projections
@@ -183,18 +181,11 @@ interface LoadLastSeriesAlertEventParams {
   series: DecodedSeriesId;
 }
 
-const throwSeriesNotFound = (seriesId: string): never => {
-  throw Boom.notFound(getAlertSeriesNotFoundMessage(seriesId), {
-    code: ALERTING_ERROR_CODES.ALERT_EVENT_NOT_FOUND,
-    details: { series_id: seriesId },
-  });
-};
-
 /**
  * Single-series adapter over {@link loadLatestAlertEventsBySeries}: returns
  * the most recent `.rule-events` row for one series or throws `Boom.notFound`
  * with the canonical `ALERT_EVENT_NOT_FOUND` shape the series-level route
- * surface relies on. A series of another space is not found without a query.
+ * surface relies on. The series must already belong to `spaceId`.
  */
 export const loadLastSeriesAlertEventOrThrow = async ({
   queryService,
@@ -202,17 +193,17 @@ export const loadLastSeriesAlertEventOrThrow = async ({
   seriesId,
   series,
 }: LoadLastSeriesAlertEventParams): Promise<AlertEventRecord> => {
-  if (series.space_id !== spaceId) {
-    return throwSeriesNotFound(seriesId);
-  }
-
   const events = await loadLatestAlertEventsBySeries({ queryService, spaceId, series: [series] });
   // The owner and hash filter can also match events of another series (the same rule id with
   // an external source), which ES|QL groups apart, so the requested series is picked by its id.
   const requestedSeriesId = encodeSeriesId(series);
   const event = requestedSeriesId ? events.get(requestedSeriesId) : undefined;
 
-  return event ?? throwSeriesNotFound(seriesId);
+  if (!event) {
+    throw getSeriesNotFoundError(seriesId);
+  }
+
+  return event;
 };
 
 interface LoadLastEpisodeAlertEventParams {

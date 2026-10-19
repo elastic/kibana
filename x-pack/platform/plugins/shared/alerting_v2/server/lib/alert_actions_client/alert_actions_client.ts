@@ -70,7 +70,7 @@ import {
   requiresActionState,
   requiresSeriesActionState,
 } from './handlers';
-import { decodeSeriesIdOrThrow, toDecodedSeries } from './utils/series_id';
+import { decodeSeriesIdOrThrow, getSeriesNotFoundError, toDecodedSeries } from './utils/series_id';
 
 /** A single per-item error in a bulk create alert actions response. */
 type BulkAlertActionError = BulkResponse['errors'][number];
@@ -164,6 +164,11 @@ export class AlertActionsClient {
   }): Promise<void> {
     const { seriesId, action } = params;
     const series = decodeSeriesIdOrThrow(seriesId);
+    // The request's space is the authority: an id minted for another space is rejected before
+    // any I/O, with the same answer as a series that doesn't exist.
+    if (!this.isInRequestSpace(series)) {
+      throw getSeriesNotFoundError(seriesId);
+    }
 
     const [userProfileUid, alertEvent, seriesActionStates] = await Promise.all([
       this.userService.getCurrentUserProfileUid(),
@@ -173,12 +178,7 @@ export class AlertActionsClient {
         seriesId,
         series,
       }),
-      // A series of another space is not found by the lookup above, so its state is not needed.
-      this.loadSeriesActionStates(
-        requiresSeriesActionState(action.action_type) && series.space_id === this.spaceId
-          ? [series]
-          : []
-      ),
+      this.loadSeriesActionStates(requiresSeriesActionState(action.action_type) ? [series] : []),
     ]);
 
     const prepared = this.prepareAction({
@@ -254,6 +254,11 @@ export class AlertActionsClient {
       spaceId: this.spaceId,
       episodeIds,
     });
+  }
+
+  /** Whether a decoded series id belongs to the space of the current request. */
+  private isInRequestSpace(series: DecodedSeriesId): boolean {
+    return series.space_id === this.spaceId;
   }
 
   /**
@@ -411,11 +416,11 @@ export class AlertActionsClient {
   public async createBulkSeriesActions(
     items: BulkCreateSeriesAlertActionItemBody[]
   ): Promise<BulkResponse> {
-    const decodedItems = items.map((item) => ({
-      item,
-      series: decodeSeriesIdOrThrow(item.series_id),
-    }));
-    const requestSpaceItems = decodedItems.filter(({ series }) => series.space_id === this.spaceId);
+    const decodedItems = items.map((item) => {
+      const series = decodeSeriesIdOrThrow(item.series_id);
+      return { item, series, inRequestSpace: this.isInRequestSpace(series) };
+    });
+    const requestSpaceItems = decodedItems.filter(({ inRequestSpace }) => inRequestSpace);
 
     const [userProfileUid, latestEvents, seriesActionStates] = await Promise.all([
       this.userService.getCurrentUserProfileUid(),
@@ -434,8 +439,8 @@ export class AlertActionsClient {
     const errors: BulkAlertActionError[] = [];
     const prepared: PreparedAction[] = [];
 
-    for (const { item, series } of decodedItems) {
-      const canonicalSeriesId = series.space_id === this.spaceId ? encodeSeriesId(series) : null;
+    for (const { item, series, inRequestSpace } of decodedItems) {
+      const canonicalSeriesId = inRequestSpace ? encodeSeriesId(series) : null;
       const alertEvent = canonicalSeriesId ? latestEvents.get(canonicalSeriesId) : undefined;
 
       if (!alertEvent) {
