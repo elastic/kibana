@@ -8,12 +8,14 @@
 import { spawn } from 'child_process';
 import type { Command } from '@kbn/dev-cli-runner';
 import {
+  promptForProfile,
   readConcurrencyFlag,
   readSpaceIdsFlag,
   resolveEvalSuite,
   resolveEvaluationConnectorId,
   resolveProfileEnvOverrides,
 } from '../run_helpers';
+import { isTTY } from '../prompts';
 import { buildPlaywrightArgs } from './playwright_args';
 
 const formatEnvPrefix = (overrides: Record<string, string>, redactedKeys: ReadonlySet<string>) =>
@@ -70,7 +72,10 @@ export const runSuiteCmd: Command<void> = {
 
     const { suite, resolvedConfigPath } = await resolveEvalSuite(repoRoot, log, flagsReader);
 
-    const profile = flagsReader.string('profile') ?? undefined;
+    // Same profile choice as `start`, so the profile's default judge is available here too.
+    const profile =
+      flagsReader.string('profile') ??
+      (isTTY() ? await promptForProfile(repoRoot, log) : undefined);
 
     const evaluationConnectorId = await resolveEvaluationConnectorId(
       repoRoot,

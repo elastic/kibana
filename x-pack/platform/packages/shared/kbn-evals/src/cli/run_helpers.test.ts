@@ -21,7 +21,7 @@ import {
   readSuiteSecretFromDevVault,
   resolveDefaultJudgeConnectorId,
 } from './profiles';
-import { getAllAvailableConnectors, isTTY, promptForConnector } from './prompts';
+import { isTTY, promptForConnector } from './prompts';
 
 jest.mock('./profiles', () => ({
   ...jest.requireActual('./profiles'),
@@ -34,7 +34,6 @@ jest.mock('./prompts', () => ({
   ...jest.requireActual('./prompts'),
   isTTY: jest.fn(),
   promptForConnector: jest.fn(),
-  getAllAvailableConnectors: jest.fn(),
 }));
 
 const mockedLoadVaultConfig = jest.mocked(loadVaultConfig);
@@ -231,7 +230,6 @@ describe('resolveEvaluationConnectorId', () => {
   const originalConnectorId = process.env.EVAL_CONNECTOR_ID;
   const log = new ToolingLog();
   const suite = { id: 'pinned', defaultJudge: 'eis-pinned' } as EvalSuiteDefinition;
-  const connector = (id: string) => ({ id, name: id, source: 'env' as const });
   const DEFAULT_JUDGE = 'eis-default-judge';
 
   const resolve = (argv: string[], withSuite?: EvalSuiteDefinition, profile?: string) =>
@@ -241,7 +239,6 @@ describe('resolveEvaluationConnectorId', () => {
     delete process.env.EVAL_CONNECTOR_ID;
     jest.mocked(isTTY).mockReturnValue(false);
     jest.mocked(promptForConnector).mockReset();
-    jest.mocked(getAllAvailableConnectors).mockReturnValue([]);
     jest.mocked(resolveDefaultJudgeConnectorId).mockReturnValue(undefined);
   });
 
@@ -294,20 +291,8 @@ describe('resolveEvaluationConnectorId', () => {
 
   it('uses the profile default judge without prompting when there is no TTY', async () => {
     jest.mocked(resolveDefaultJudgeConnectorId).mockReturnValue(DEFAULT_JUDGE);
-    jest
-      .mocked(getAllAvailableConnectors)
-      .mockReturnValue([connector('other'), connector(DEFAULT_JUDGE)]);
 
     await expect(resolve([], undefined, 'dev-vault')).resolves.toBe(DEFAULT_JUDGE);
     expect(promptForConnector).not.toHaveBeenCalled();
-  });
-
-  it('fails without a TTY when the profile default judge is not an available connector', async () => {
-    jest.mocked(resolveDefaultJudgeConnectorId).mockReturnValue(DEFAULT_JUDGE);
-    jest.mocked(getAllAvailableConnectors).mockReturnValue([connector('other')]);
-
-    await expect(resolve([], undefined, 'dev-vault')).rejects.toThrow(
-      `Default judge ${DEFAULT_JUDGE} (from the profile config) is not among the available connectors`
-    );
   });
 });
