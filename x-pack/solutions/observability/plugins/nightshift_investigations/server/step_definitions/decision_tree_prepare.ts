@@ -22,7 +22,7 @@ export const decisionTreePrepareStepDefinition = ({
   logger,
   isEnabled,
 }: {
-  getTelemetryConnectorId: () => string | undefined;
+  getTelemetryConnectorId: (agentId?: string) => string | undefined;
   logger: Logger;
   isEnabled?: () => boolean;
 }) =>
@@ -87,7 +87,7 @@ export const decisionTreePrepareStepDefinition = ({
         return skippedOutput;
       }
 
-      const telemetryConnectorId = getTelemetryConnectorId();
+      const telemetryConnectorId = getTelemetryConnectorId(agentId);
       const { spaceId } = context.contextManager.getContext().workflow;
       const { message, treeCount, turnKind } = await prepareReinforcementTurn({
         response,

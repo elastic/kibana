@@ -11,6 +11,9 @@ import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
+import type { NightshiftInvestigationsConfig } from '../config';
+import { resolveTelemetryTarget } from '../telemetry_targets';
+import { getInvestigationAgentId, telemetryTargetNameSchema } from '../../common/telemetry_targets';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
 import { NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID } from '../agents/decision_tree_reinforcement';
@@ -34,9 +37,11 @@ const VISIBILITY_RETRY_OPTIONS = { retries: 9, factor: 1, minTimeout: 300 } as c
 export const ensureInvestigationAgentStepDefinition = ({
   getAgentBuilder,
   getAgentAvailability,
+  getTelemetryConfig,
 }: {
   getAgentBuilder: () => AgentBuilderPluginStart | undefined;
   getAgentAvailability: () => AgentAvailabilityConfig;
+  getTelemetryConfig?: () => NightshiftInvestigationsConfig['sandbox'];
 }) =>
   createServerStepDefinition({
     id: 'nightshift.ensureInvestigationAgent',
@@ -45,6 +50,7 @@ export const ensureInvestigationAgentStepDefinition = ({
     description:
       'Installs an investigation agent in the space this workflow runs in, so any caller can start an investigation without installing it first. Idempotent: an existing agent is left untouched.',
     inputSchema: z.object({
+      telemetry_target: telemetryTargetNameSchema.or(z.literal('')).optional(),
       agent_id: z
         .enum([NIGHTSHIFT_INVESTIGATION_AGENT_ID, NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID])
         .optional()
@@ -65,12 +71,22 @@ export const ensureInvestigationAgentStepDefinition = ({
       const { spaceId } = context.contextManager.getContext().workflow;
       // Defaulted here rather than on the schema: a step that omits `with` altogether never
       // reaches zod, so a schema-level default would leave `agent_id` undefined at runtime.
-      const agentId = context.input.agent_id ?? NIGHTSHIFT_INVESTIGATION_AGENT_ID;
+      const baseAgentId = context.input.agent_id ?? NIGHTSHIFT_INVESTIGATION_AGENT_ID;
+      const telemetryTarget =
+        context.input.telemetry_target || getTelemetryConfig?.()?.default_telemetry_target;
+      if (telemetryTarget) resolveTelemetryTarget(getTelemetryConfig?.(), telemetryTarget);
+      const agentId =
+        baseAgentId === NIGHTSHIFT_INVESTIGATION_AGENT_ID
+          ? getInvestigationAgentId(telemetryTarget)
+          : baseAgentId;
 
-      await AGENT_INSTALLERS[agentId]({
+      await AGENT_INSTALLERS[baseAgentId]({
         agentBuilder,
         spaceId,
         availability: getAgentAvailability(),
+        ...(baseAgentId === NIGHTSHIFT_INVESTIGATION_AGENT_ID && telemetryTarget
+          ? { telemetryTarget }
+          : {}),
       });
 
       // Polls in the space the agent was just written to: the fake request carries no space, so

@@ -12,7 +12,10 @@ const { handler, params } =
   ensureInvestigationRoute['POST /internal/nightshift/investigations/{id}/_ensure'];
 
 const ensureOrCreate = jest.fn();
-const getInvestigationsClient = jest.fn().mockReturnValue({ ensureOrCreate });
+const getConversationAgentId = jest.fn().mockResolvedValue('nightshift.investigation.orca');
+const getInvestigationsClient = jest
+  .fn()
+  .mockReturnValue({ ensureOrCreate, getConversationAgentId });
 
 beforeEach(() => jest.clearAllMocks());
 
@@ -29,8 +32,13 @@ it('returns the conversation of the investigation the run works on', async () =>
       getInvestigationsClient,
       params: { path: { id: 'inv-1' }, body: { execution_id: 'exec-2' } },
     } as never)
-  ).resolves.toEqual({ acknowledged: true, conversation_id: 'inv-1' });
+  ).resolves.toEqual({
+    acknowledged: true,
+    conversation_id: 'inv-1',
+    agent_id: 'nightshift.investigation.orca',
+  });
   expect(ensureOrCreate).toHaveBeenCalledWith('inv-1', 'exec-2');
+  expect(getConversationAgentId).toHaveBeenCalledWith('inv-1');
 });
 
 it('names the run itself when the body carries no execution id', async () => {
@@ -42,7 +50,11 @@ it('names the run itself when the body carries no execution id', async () => {
       getInvestigationsClient,
       params: { path: { id: 'exec-1' }, body: null },
     } as never)
-  ).resolves.toEqual({ acknowledged: true, conversation_id: 'exec-1' });
+  ).resolves.toEqual({
+    acknowledged: true,
+    conversation_id: 'exec-1',
+    agent_id: 'nightshift.investigation.orca',
+  });
   expect(ensureOrCreate).toHaveBeenCalledWith('exec-1', undefined);
 });
 

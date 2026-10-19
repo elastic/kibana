@@ -25,6 +25,8 @@ import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extens
 import { NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { InvestigationAttachmentDocService } from '@kbn/agentic-investigations-plugin/server';
+import { getInvestigationTelemetryTarget } from '../common/telemetry_targets';
+import { getTelemetryTargets, resolveTelemetryTarget } from './telemetry_targets';
 import type { NightshiftInvestigationsConfig } from './config';
 import { InvestigationLocatorDefinition } from '../common/locators';
 import { NightshiftInvestigationsClient } from './client/investigations_client';
@@ -248,6 +250,7 @@ export class NightshiftInvestigationsPlugin
         investigationToolsEnabled: Boolean(plugins.agenticInvestigations),
         proposalsEnabled: Boolean(plugins.proposals),
         telemetryConnectorId,
+        telemetryConfig: config.sandbox,
         getCustomContextInstructions: ({ request, spaceId }) =>
           customContextClient.getInstructions(request, spaceId),
         logger: this.logger.get('custom_context'),
@@ -273,6 +276,9 @@ export class NightshiftInvestigationsPlugin
           getDeps: () => ({ actions: this.actionsStart, sandboxSecretsClient }),
           telemetryConnectorId,
           telemetryReadableIndices: config.sandbox?.telemetry_readable_indices,
+          telemetryTargets: getTelemetryTargets(config.sandbox),
+          getTelemetryTarget: (agentId) =>
+            resolveTelemetryTarget(config.sandbox, getInvestigationTelemetryTarget(agentId)),
           logger: sandboxLogger,
         });
         const resolveConnectorCredentials = createConnectorCredentialResolver({
@@ -335,7 +341,9 @@ export class NightshiftInvestigationsPlugin
             this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
           for (const tool of createDecisionTreeTools({
             getSandboxStart,
-            connectorNames: telemetryConnectorId ? [telemetryConnectorId] : [],
+            connectorNames: getTelemetryTargets(config.sandbox).flatMap(({ connectorId }) =>
+              connectorId ? [connectorId] : []
+            ),
             getSpaceId,
             getUsername: (req: KibanaRequest) => this.security?.authc.getCurrentUser(req)?.username,
             logger: decisionTreeLogger,
@@ -359,6 +367,7 @@ export class NightshiftInvestigationsPlugin
           ensureInvestigationAgentStepDefinition({
             getAgentBuilder: () => this.agentBuilder,
             getAgentAvailability: () => this.getInvestigationAvailability(),
+            getTelemetryConfig: () => this.ctx.config.get().sandbox,
           })
         );
         plugins.workflowsExtensions.registerStepDefinition(
@@ -456,7 +465,11 @@ export class NightshiftInvestigationsPlugin
         // reinforcement phase too. The handler no-ops on the flag.
         plugins.workflowsExtensions.registerStepDefinition(
           decisionTreePrepareStepDefinition({
-            getTelemetryConnectorId: () => this.ctx.config.get().sandbox?.telemetry_connector_id,
+            getTelemetryConnectorId: (agentId) =>
+              resolveTelemetryTarget(
+                this.ctx.config.get().sandbox,
+                getInvestigationTelemetryTarget(agentId)
+              ).connectorId,
             logger: this.logger.get('decision_trees'),
             isEnabled: () => this.decisionTreesEnabled,
           })
@@ -645,6 +658,7 @@ export class NightshiftInvestigationsPlugin
 
     return new NightshiftInvestigationsClient({
       request,
+      telemetryConfig: this.ctx.config.get().sandbox,
       workflowsManagement: this.workflowsManagement,
       spaces: this.spaces,
       logger: this.logger,

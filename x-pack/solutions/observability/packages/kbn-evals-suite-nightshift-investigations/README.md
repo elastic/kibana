@@ -265,16 +265,76 @@ restarting a shared local stack.
 
 ## Telemetry targets
 
-A telemetry target is the Elasticsearch the sandbox queries. The hook resolves the target named by
-`NIGHTSHIFT_TELEMETRY_TARGET` to one URL, API key and optional readable-indices hint, which always
-feed the preconfigured `nightshift-evals-telemetry` connector and manifest hint, so datasets, tasks
-and evaluators do not depend on the target. `none` adds no connector: smoke needs no credentials,
-and the synthetic questions need only a sandbox. `profile` uses the settings below. Unset, the
-target is `profile` when any of those settings is present and `none` otherwise; set it to `none` to
-run without the telemetry a profile such as `dev-vault` configures. Other values fail before Scout
-starts.
+An investigation selects its telemetry source with `input.telemetry_target` on its eval example.
+Named targets coexist on one Scout stack, so a weekly job can run c0 and ORCA examples together.
+The target selects the sandbox connector and its readable-index guidance; `connector_id` on the
+investigation request continues to select the LLM.
 
-### Remote telemetry investigations (`profile` target)
+Configure both sources in the profile's Vault config (or private local profile JSON), alongside
+`sandbox`:
+
+```json
+"nightshift": {
+  "defaultTelemetryTarget": "c0",
+  "telemetryTargets": {
+    "c0": {
+      "url": "https://customer0.example.com",
+      "apiKey": "...",
+      "readableIndices": "Read remote-a:logs-service-*"
+    },
+    "orca": {
+      "url": "https://orca.example.com",
+      "apiKey": "...",
+      "readableIndices": "Read logs-orcabench.*, metrics-orcabench.*, traces-orcabench.*"
+    }
+  }
+}
+```
+
+Each named block supplies its own URL and API key; named credentials are never completed from the
+shell. Names start with a lowercase letter and contain only lowercase letters, digits, underscores
+and hyphens, up to 64 characters. At most 20 named targets are supported. `none` is reserved for
+investigations that need no telemetry. URLs with embedded credentials and unknown default targets
+fail before Scout starts.
+
+The hook exports every configured target's URL, key and index hint. It generates a config file
+under `target/nightshift-evals-telemetry/` containing only names and environment references; no
+credential values or index hints are written to that file. Existing preconfigured connectors are
+preserved. Changing any target's settings makes a reused Scout stack stale; changing an example's
+target does not restart Scout. The hook requires `jq` and `shasum`.
+
+Examples from both sources can share one examples file or stored dataset:
+
+```json
+{
+  "dataset": "nightshift/mixed-investigations",
+  "examples": [
+    {
+      "input": { "question": "Investigate the c0 incident in its incident window.", "telemetry_target": "c0" },
+      "metadata": { "case_id": "c0-incident" }
+    },
+    {
+      "input": { "question": "Investigate the ORCA incident in its incident window.", "telemetry_target": "orca" },
+      "metadata": { "case_id": "orca-incident" }
+    }
+  ]
+}
+```
+
+The plugin reads `sandbox.telemetry_targets.<name>.connector_id` and optional `readable_indices`
+from Kibana config. `sandbox.default_telemetry_target` supplies an optional default. The hook fills
+these settings from the profile blocks above. An omitted target preserves the existing
+`nightshift.telemetry` connector unless a default is configured. Without either, no telemetry is
+available. Explicit `none` always selects no telemetry; bundled synthetic examples use it.
+
+Each target uses a separate persisted investigator identity with the same investigator type.
+The conversation retains that identity, so subsequent turns keep their source without mutating
+another investigation's agent. An existing investigation cannot switch to a different target.
+Only its selected connector's authorized index hint is written to `/workspace/elastic.md`.
+Unknown targets fail before investigation execution, and the sandbox rejects an allow-list that
+mixes telemetry sources.
+
+### Legacy remote telemetry configuration
 
 Use the same `trace-only` selection, dataset loader, investigation task, placeholder evaluator and
 trace acceptance checks to investigate an operator-configured Elasticsearch cluster. The telemetry

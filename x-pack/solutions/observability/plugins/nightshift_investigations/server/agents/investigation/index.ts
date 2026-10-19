@@ -22,6 +22,9 @@ import {
   NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../../common';
+import { getInvestigationTelemetryTarget } from '../../../common/telemetry_targets';
+import { resolveTelemetryTarget } from '../../telemetry_targets';
+import type { NightshiftInvestigationsConfig } from '../../config';
 import instructions from './instructions/investigator.md.text';
 import decisionTreesSection from './instructions/decision_trees.text';
 import { SANDBOX_BASH_TOOL_ID } from '../../tools/sandbox_bash/tool';
@@ -84,6 +87,7 @@ export interface InvestigationAgentTypeOptions {
   /** The proposals plugin is enabled, so `proposals.create` is registered. */
   proposalsEnabled: boolean;
   telemetryConnectorId?: string;
+  telemetryConfig?: NightshiftInvestigationsConfig['sandbox'];
   /** Resolves the space's custom context block, appended to the instructions on every run. */
   getCustomContextInstructions?: (ctx: AgentConfigContext) => Promise<string>;
   logger?: Logger;
@@ -128,6 +132,7 @@ export const buildNightshiftAgentConfiguration = ({
   investigationToolsEnabled,
   proposalsEnabled,
   telemetryConnectorId,
+  telemetryConfig,
   getCustomContextInstructions,
   logger,
 }: NightshiftAgentTypeOptions & {
@@ -212,6 +217,7 @@ export const registerInvestigationAgentType = (
     investigationToolsEnabled,
     proposalsEnabled,
     telemetryConnectorId,
+    telemetryConfig,
     getCustomContextInstructions,
     logger,
   }: InvestigationAgentTypeOptions
@@ -225,6 +231,7 @@ export const registerInvestigationAgentType = (
       investigationToolsEnabled,
       proposalsEnabled,
       telemetryConnectorId,
+      telemetryConfig,
       getCustomContextInstructions,
       logger,
     })

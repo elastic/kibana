@@ -8,10 +8,10 @@
 import { AgentAccessControlMode } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
+import { getInvestigationAgentId } from '../../common/telemetry_targets';
 import {
   INVESTIGATION_AGENT_DESCRIPTION,
   INVESTIGATION_AGENT_NAME,
-  NIGHTSHIFT_INVESTIGATION_AGENT_ID,
   NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID,
 } from '../agents/investigation';
 
@@ -19,10 +19,12 @@ export const installInvestigationAgent = async ({
   agentBuilder,
   spaceId,
   availability,
+  telemetryTarget,
 }: {
   agentBuilder: AgentBuilderPluginStart;
   spaceId: string;
   availability: AgentAvailabilityConfig;
+  telemetryTarget?: string;
 }): Promise<void> => {
   await agentBuilder.agents.ensure({
     spaceId,
@@ -30,9 +32,11 @@ export const installInvestigationAgent = async ({
     // Unlike the other Nightshift agents, users chat with the investigator directly.
     hidden: false,
     agent: {
-      id: NIGHTSHIFT_INVESTIGATION_AGENT_ID,
+      id: getInvestigationAgentId(telemetryTarget),
       type: NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID,
-      name: INVESTIGATION_AGENT_NAME,
+      name: telemetryTarget
+        ? `${INVESTIGATION_AGENT_NAME} (${telemetryTarget})`
+        : INVESTIGATION_AGENT_NAME,
       description: INVESTIGATION_AGENT_DESCRIPTION,
       labels: ['observability', 'significant-events', 'investigation', 'cortex', 'sandbox'],
       avatar_symbol: 'NI',

@@ -248,3 +248,33 @@ describe('Nightshift investigation agent type', () => {
     });
   });
 });
+
+it('isolates named targets and none without mutating the shared investigator type', async () => {
+  const type = getInvestigationAgentType({
+    sandboxEnabled: true,
+    cortexEnabled: false,
+    investigationToolsEnabled: false,
+    proposalsEnabled: false,
+    telemetryConfig: {
+      telemetry_connector_id: 'legacy',
+      telemetry_targets: {
+        c0: { connector_id: 'customer0' },
+        orca: { connector_id: 'orca' },
+      },
+    },
+  });
+  if (typeof type.baseConfiguration !== 'function')
+    throw new Error('Expected dynamic configuration');
+  const resolve = type.baseConfiguration;
+  const request = httpServerMock.createKibanaRequest();
+  const [c0, orca, none, legacy] = await Promise.all([
+    resolve({ request, spaceId: 'default', agentId: 'nightshift.investigation.c0' }),
+    resolve({ request, spaceId: 'default', agentId: 'nightshift.investigation.orca' }),
+    resolve({ request, spaceId: 'default', agentId: 'nightshift.investigation.none' }),
+    resolve({ request, spaceId: 'default', agentId: 'nightshift.investigation' }),
+  ]);
+  expect(c0.connector_ids).toEqual(['customer0']);
+  expect(orca.connector_ids).toEqual(['orca']);
+  expect(none.connector_ids).toEqual([]);
+  expect(legacy.connector_ids).toEqual(['legacy']);
+});
