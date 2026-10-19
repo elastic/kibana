@@ -173,6 +173,33 @@ describe('AgentlessPoliciesService', () => {
       );
     });
 
+    it('should pass the logsdb_columnar choice on to the package policy service', async () => {
+      const agentlessPoliciesService = new AgentlessPoliciesServiceImpl(
+        packagePolicyService,
+        savedObjectsClientMock.create(),
+        elasticsearchServiceMock.createClusterClient().asInternalUser,
+        loggingSystemMock.createLogger()
+      );
+
+      await agentlessPoliciesService.createAgentlessPolicy({
+        name: 'Test Agentless Policy',
+        namespace: 'default',
+        package: { name: 'agentless_integration', version: '1.0.0', logsdb_columnar: true },
+        inputs: {},
+      });
+
+      expect(jest.mocked(packagePolicyService.create)).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({
+          package: expect.objectContaining({ logsdb_columnar: true }),
+        }),
+        expect.anything(),
+        undefined,
+        undefined
+      );
+    });
+
     it('should refresh the agent version conditions of the agent policy before deploying it', async () => {
       const soClient = savedObjectsClientMock.create();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -623,6 +650,25 @@ describe('AgentlessPoliciesService', () => {
       expect(result).not.toHaveProperty('supports_agentless');
       expect(result).not.toHaveProperty('policy_ids');
       expect(result).not.toHaveProperty('revision');
+    });
+
+    it('should pass the logsdb_columnar choice on to the package policy service', async () => {
+      await createService().updateAgentlessPolicy(
+        'agentless-policy-id',
+        buildUpdateRequest({
+          package: { name: 'test_agentless', version: '1.0.0', logsdb_columnar: false },
+        })
+      );
+
+      expect(packagePolicyService.update).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        'agentless-policy-id',
+        expect.objectContaining({
+          package: expect.objectContaining({ logsdb_columnar: false }),
+        }),
+        expect.anything()
+      );
     });
 
     it('should preserve the runtime cluster_id on the agent policy across the update', async () => {
