@@ -71,6 +71,42 @@ export const ensureSuite = (suiteId: string, repoRoot: string, log: ToolingLog) 
   );
 };
 
+/** Interactive profile choice (local / golden cluster / custom), used when `--profile` is omitted. */
+export const promptForProfile = async (repoRoot: string, log: ToolingLog): Promise<string> => {
+  type InfraChoice = 'local' | 'golden-cluster' | 'custom';
+  const { choice } = await inquirer.prompt<{ choice: InfraChoice }>({
+    type: 'list',
+    name: 'choice',
+    message: 'How do you want to run evals and export results and traces?',
+    choices: [
+      { name: 'Local (localhost ES/Kibana)', value: 'local' },
+      {
+        name: 'Golden cluster (uses Vault -- no config file needed)',
+        value: 'golden-cluster',
+      },
+      { name: 'Custom (create a config file with your own URLs)', value: 'custom' },
+    ],
+  });
+
+  if (choice === 'local') {
+    await ensureLocalConfig(repoRoot, log);
+    return 'local';
+  }
+  if (choice === 'golden-cluster') {
+    await ensureVaultAuth(log);
+    return 'dev-vault';
+  }
+  const { customProfile } = await inquirer.prompt<{ customProfile: string }>({
+    type: 'input',
+    name: 'customProfile',
+    message: 'Config profile name (creates config.<name>.json, or empty for config.json):',
+    default: '',
+  });
+  const resolvedProfile = customProfile.trim() || 'default';
+  await runConfigInit(repoRoot, log, { profile: resolvedProfile });
+  return resolvedProfile;
+};
+
 export const ensureEvalInit = async (
   repoRoot: string,
   log: ToolingLog,
@@ -85,39 +121,7 @@ export const ensureEvalInit = async (
           '--profile is required in non-interactive mode (e.g. --profile dev-vault, --profile local).'
         );
       }
-
-      type InfraChoice = 'local' | 'golden-cluster' | 'custom';
-      const { choice } = await inquirer.prompt<{ choice: InfraChoice }>({
-        type: 'list',
-        name: 'choice',
-        message: 'How do you want to run evals and export results and traces?',
-        choices: [
-          { name: 'Local (localhost ES/Kibana)', value: 'local' },
-          {
-            name: 'Golden cluster (uses Vault -- no config file needed)',
-            value: 'golden-cluster',
-          },
-          { name: 'Custom (create a config file with your own URLs)', value: 'custom' },
-        ],
-      });
-
-      if (choice === 'local') {
-        await ensureLocalConfig(repoRoot, log);
-        profile = 'local';
-      } else if (choice === 'golden-cluster') {
-        await ensureVaultAuth(log);
-        profile = 'dev-vault';
-      } else {
-        const { customProfile } = await inquirer.prompt<{ customProfile: string }>({
-          type: 'input',
-          name: 'customProfile',
-          message: 'Config profile name (creates config.<name>.json, or empty for config.json):',
-          default: '',
-        });
-        const resolvedProfile = customProfile.trim() || 'default';
-        await runConfigInit(repoRoot, log, { profile: resolvedProfile });
-        profile = resolvedProfile;
-      }
+      profile = await promptForProfile(repoRoot, log);
     } else if (isDevVaultProfile(profile)) {
       await ensureVaultAuth(log);
     } else if (profile === 'local') {
@@ -312,12 +316,7 @@ export const resolveEvaluationConnectorId = async (
     throw createFlagError('EVAL_CONNECTOR_ID is required. Set --evaluation-connector-id or env.');
   }
 
-  if (!getAllAvailableConnectors(repoRoot).some((c) => c.id === defaultConnectorId)) {
-    throw createFlagError(
-      `Default judge ${defaultConnectorId} (from the profile config) is not among the available connectors. Set --judge / EVAL_CONNECTOR_ID, or run \`node scripts/evals init\`.`
-    );
-  }
-
+  // Not validated here: the Playwright config resolves the id once connectors are loaded.
   log.info(`Using default judge: ${defaultConnectorId}`);
   return defaultConnectorId;
 };

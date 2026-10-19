@@ -496,9 +496,7 @@ node scripts/evals start --suite agent-builder --judge eis-claude-4-5-sonnet
 
 #### Default judge
 
-All suites can use the default judge.
-
-> **Note:** The default judge was Gemini 3.1 Pro (`eis-google-gemini-3-1-pro`); it is now GLM-5.2 (`eis-zai-glm-5-2`).
+Without `--judge` / `EVAL_CONNECTOR_ID`, the judge comes from `evaluationConnectorId` in the profile config (`dev-vault`, or a `config.<profile>.json` synced from Vault). Profiles without it, such as `local`, still prompt (or fail without a TTY).
 
 **Exceptions.** Suites that deliberately pin a different judge and document why:
 

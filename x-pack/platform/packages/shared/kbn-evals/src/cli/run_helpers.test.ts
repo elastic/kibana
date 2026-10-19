@@ -14,14 +14,13 @@ import {
   readConcurrencyFlag,
   resolveEvaluationConnectorId,
 } from './run_helpers';
-import { getAllAvailableConnectors, isTTY, promptForConnector } from './prompts';
+import { isTTY, promptForConnector } from './prompts';
 import { resolveDefaultJudgeConnectorId } from './profiles';
 
 jest.mock('./prompts', () => ({
   ...jest.requireActual('./prompts'),
   isTTY: jest.fn(),
   promptForConnector: jest.fn(),
-  getAllAvailableConnectors: jest.fn(),
 }));
 
 jest.mock('./profiles', () => ({
@@ -35,14 +34,12 @@ describe('resolveEvaluationConnectorId', () => {
   const repoRoot = '/repo';
   const log = new ToolingLog();
   const previous = process.env.EVAL_CONNECTOR_ID;
-  const connector = (id: string) => ({ id, name: id, source: 'env' as const });
   const DEFAULT_JUDGE = 'eis-default-judge';
 
   beforeEach(() => {
     delete process.env.EVAL_CONNECTOR_ID;
     jest.mocked(isTTY).mockReturnValue(false);
     jest.mocked(promptForConnector).mockReset();
-    jest.mocked(getAllAvailableConnectors).mockReturnValue([]);
     jest.mocked(resolveDefaultJudgeConnectorId).mockReturnValue(DEFAULT_JUDGE);
   });
 
@@ -91,10 +88,6 @@ describe('resolveEvaluationConnectorId', () => {
   });
 
   it('uses the profile default judge without prompting when there is no TTY', async () => {
-    jest
-      .mocked(getAllAvailableConnectors)
-      .mockReturnValue([connector('other'), connector(DEFAULT_JUDGE)]);
-
     await expect(resolveEvaluationConnectorId(repoRoot, log, readFlags([]))).resolves.toBe(
       DEFAULT_JUDGE
     );
@@ -106,14 +99,6 @@ describe('resolveEvaluationConnectorId', () => {
 
     await expect(resolveEvaluationConnectorId(repoRoot, log, readFlags([]))).rejects.toThrow(
       'EVAL_CONNECTOR_ID is required'
-    );
-  });
-
-  it('fails without a TTY when the profile default judge is not an available connector', async () => {
-    jest.mocked(getAllAvailableConnectors).mockReturnValue([connector('other')]);
-
-    await expect(resolveEvaluationConnectorId(repoRoot, log, readFlags([]))).rejects.toThrow(
-      `Default judge ${DEFAULT_JUDGE} (from the profile config) is not among the available connectors`
     );
   });
 });
