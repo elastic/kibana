@@ -6,7 +6,7 @@
  */
 
 import type { StreamsUnit } from '@kbn/streams-schema';
-import { ITEM_UNIT, SECONDS_UNIT } from './constants';
+import { ITEM_UNIT, SECONDS_UNIT } from '../constants';
 import { noRate, noValue, perSecond, toItemRate, toValue } from './stats_values';
 
 interface DestinationBucket {

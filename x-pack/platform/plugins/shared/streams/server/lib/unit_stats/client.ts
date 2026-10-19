@@ -7,22 +7,26 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { StreamsUnit } from '@kbn/streams-schema';
-import { buildDestinationStatsRequest } from './build_destination_stats_request';
-import { buildProcessorStatsRequest } from './build_processor_stats_request';
+import { buildDestinationStatsRequest } from './query_builders/build_destination_stats_request';
+import { buildProcessorStatsRequest } from './query_builders/build_processor_stats_request';
 import { UNIT_STATS_DEFAULT_WINDOW_MS } from './constants';
 import {
   mapDestinationStatsResponse,
   noDestinationStats,
   type DestinationStatsAggregations,
-} from './map_destination_stats_response';
+} from './mappers/map_destination_stats_response';
 import {
   mapProcessorStatsResponse,
   noProcessorStats,
   type ProcessorStatsAggregations,
-} from './map_processor_stats_response';
-import { isMissingStreamError, toSearchError } from './search_errors';
-import { getSeriesBucketMs } from './series_bucket';
-import { buildEarliestStartRequest, readEarliestStartMs, type StatsWindow } from './unit_filter';
+} from './mappers/map_processor_stats_response';
+import { isMissingStreamError, toSearchError } from './errors/search_errors';
+import { getSeriesBucketMs } from './utils/series_bucket';
+import {
+  buildEarliestStartRequest,
+  readEarliestStartMs,
+  type StatsWindow,
+} from './query_builders/unit_filter';
 import { validateDestination, validateProcessor } from './validate_components';
 
 /** What every stats search for one request shares. */

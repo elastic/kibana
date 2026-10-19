@@ -6,7 +6,7 @@
  */
 
 import type { StreamsUnit } from '@kbn/streams-schema';
-import { SECONDS_UNIT } from './constants';
+import { SECONDS_UNIT } from '../constants';
 import { noRate, noValue, perSecond, toItemRate, toValue } from './stats_values';
 
 interface ProcessorBucket {

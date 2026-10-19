@@ -11,7 +11,7 @@ import {
   STEP_ID_FIELD,
   UNIT_ID_FIELD,
   UNIT_STATS_STREAM,
-} from './constants';
+} from '../constants';
 import { buildProcessorStatsRequest } from './build_processor_stats_request';
 
 const window = { start: '2026-10-19T11:45:00.000Z', end: '2026-10-19T12:00:00.000Z' };

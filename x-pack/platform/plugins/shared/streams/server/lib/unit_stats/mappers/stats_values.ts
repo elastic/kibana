@@ -6,7 +6,7 @@
  */
 
 import type { StreamsUnit } from '@kbn/streams-schema';
-import { ITEM_UNIT, RATE_TIME_UNIT } from './constants';
+import { ITEM_UNIT, RATE_TIME_UNIT } from '../constants';
 
 export type StatsValue = StreamsUnit.StatsDestinationResult['latency']['average'];
 export type StatsRate = StreamsUnit.StatsDestinationResult['events']['incoming']['rate'];

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SERIES_MIN_BUCKET_MS, SERIES_TARGET_POINTS } from './constants';
+import { SERIES_MIN_BUCKET_MS, SERIES_TARGET_POINTS } from '../constants';
 
 const MINUTE_MS = 60 * 1000;
 const HOUR_MS = 60 * MINUTE_MS;

@@ -13,7 +13,7 @@ import {
   OUTCOME_FIELD,
   OUTCOME_SUCCESS,
   TIMESTAMP_FIELD,
-} from './constants';
+} from '../constants';
 import { baseSearchParams, buildUnitFilter, type StatsWindow } from './unit_filter';
 
 /**

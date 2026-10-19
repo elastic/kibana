@@ -6,7 +6,7 @@
  */
 
 import type { StreamsUnit } from '@kbn/streams-schema';
-import { StatusError } from '../streams/errors/status_error';
+import { StatusError } from '../../streams/errors/status_error';
 
 /** The response schema leaves `code` an open string, so the codes live here. */
 export const STATS_ERROR_CODE = {

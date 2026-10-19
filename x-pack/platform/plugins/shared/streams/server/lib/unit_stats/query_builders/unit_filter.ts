@@ -13,7 +13,7 @@ import {
   UNIT_ID_FIELD,
   UNIT_STATS_QUERY_TIMEOUT,
   UNIT_STATS_STREAM,
-} from './constants';
+} from '../constants';
 
 export interface StatsWindow {
   start: string;

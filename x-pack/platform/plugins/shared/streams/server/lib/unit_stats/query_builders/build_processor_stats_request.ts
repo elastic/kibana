@@ -13,7 +13,7 @@ import {
   STEP_DURATION_FIELD,
   STEP_ID_FIELD,
   STEP_ITEMS_FIELD,
-} from './constants';
+} from '../constants';
 import { baseSearchParams, buildUnitFilter, type StatsWindow } from './unit_filter';
 
 /**

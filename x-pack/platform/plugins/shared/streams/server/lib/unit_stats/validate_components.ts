@@ -7,9 +7,9 @@
 
 import type { StreamsUnit } from '@kbn/streams-schema';
 import { DESTINATION_TYPES_WITH_STATS } from './constants';
-import { noDestinationStats } from './map_destination_stats_response';
-import { noProcessorStats } from './map_processor_stats_response';
-import { UnitStatsError } from './unit_stats_error';
+import { noDestinationStats } from './mappers/map_destination_stats_response';
+import { noProcessorStats } from './mappers/map_processor_stats_response';
+import { UnitStatsError } from './errors/unit_stats_error';
 
 /**
  * Checks a requested destination against the unit config alone, so it makes no
