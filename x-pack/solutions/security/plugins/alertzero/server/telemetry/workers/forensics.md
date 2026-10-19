@@ -5,7 +5,7 @@ The Worker reports its sweep, each analysis run reports how it settled its indic
 | Workflow | Step | `event` | Where |
 |---|---|---|---|
 | `forensics_endpoint_analysis.yaml` | `report_worker_run_completed` | `worker_run_completed` | Right before `emit_result`, only when the sweep started or refused a dispatch or its search failed |
-| `forensics_run_endpoint_analysis.yaml` | `report_analysis_completed` | `endpoint_analysis_completed` | Right before `emit_result` |
+| `forensics_run_endpoint_analysis.yaml` | `report_analysis_completed` | `endpoint_analysis_completed` | Right before `mark_processed`, once every verdict condition is decided |
 | `forensics_proposal_gate.yaml` | `report_investigation_closed_settled` | `worker_investigation_closed` | Right after `close_if_settled` |
 
 ## Runs
@@ -23,7 +23,9 @@ A dispatch the engine drops as a duplicate still counts as started. While one an
 
 ## Analysis outcome
 
-`analysis_outcome` follows the same conditions as the run's `mark_*` writes, in their order. Findings an earlier run attached without recording its outcome retire the indicator as `failed`, so they report `failed`. A run that fails on a read or a terminal write (the indicator stays pending) never reaches its report; the engine's failed-run event covers it.
+`analysis_outcome` follows the same conditions as the run's `mark_*` writes, in their order. Findings an earlier run attached without recording its outcome retire the indicator as `failed`, so they report `failed`.
+
+The report runs before the `mark_*` writes, so it is the verdict the run reached, not one it is known to have written. A write that then fails the run (after its retries) leaves the indicator pending; its retry skips the agent and reports again, as `failed` with `reused_prior_assessment: true`, so that indicator has two events. A run that fails earlier, on a read such as `list_written_findings`, never reaches its report; the engine's failed-run event covers it.
 
 ## Closes
 

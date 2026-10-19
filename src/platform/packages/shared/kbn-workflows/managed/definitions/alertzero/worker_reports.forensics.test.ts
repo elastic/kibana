@@ -158,12 +158,18 @@ describe('Endpoint Analysis outcome reports', () => {
     const steps = topLevelSteps(ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW.yaml);
     const report = stepNamed(steps, 'report_analysis_completed');
 
+    // Before the verdict writes, which fail the run once their retries are used up: a failed
+    // write must not lose the report of the run that did the work.
     describeReportStep(
       steps,
       'report_analysis_completed',
       'endpoint_analysis_completed',
-      'emit_result'
+      'mark_processed'
     );
+
+    it('reads no verdict write, so reporting before them changes nothing it sends', () => {
+      expect(JSON.stringify(report.with)).not.toMatch(/steps\.mark_/);
+    });
 
     const FINDING_IDS = { iocs: 'forensic-iocs-ki-1', timeline: 'forensic-timeline-ki-1' };
 
