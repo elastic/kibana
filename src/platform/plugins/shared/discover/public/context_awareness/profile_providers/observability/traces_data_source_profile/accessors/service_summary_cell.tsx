@@ -40,7 +40,7 @@ const dataTestSubj = 'tracesServiceSummaryCell';
 const palette = euiPaletteColorBlind({ rotations: 2 });
 // Hover-intent delays: wait before opening so the popover doesn't flash while the pointer merely
 // passes over the badge, and linger briefly on leave so the pointer can travel into the panel.
-const HOVER_OPEN_DELAY = 350;
+const HOVER_OPEN_DELAY = 700;
 const HOVER_CLOSE_DELAY = 150;
 
 const badgeStyle = css`
