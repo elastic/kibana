@@ -20,12 +20,12 @@ A Rule Coverage review that stops at its manual entry gate (declined or unanswer
 
 | Worker | `candidates_found` | `items_dispatched` | `items_in_flight` | `source_read_failed` / `lookup_failed` |
 |---|---|---|---|---|
-| Rule Tuning | Rules over the false-positive thresholds | Reviews requested | Reviews earlier sweeps still have in flight | The harvest query / the in-flight review lookup |
+| Rule Tuning | Rules over the false-positive thresholds | Reviews requested | Reviews earlier sweeps still have in flight | The harvest query or the enabled-rules lookup / the in-flight review lookup |
 | Rule Coverage | Pending gap indicators in the lookback window | Reviews started | Earlier reviews plus the ones started | The indicator search / the active-review lookup |
 
 Neither sweep reports `items_failed`. The sweeps start their reviews without waiting for them, so the review decisions come from each review's own event.
 
-- **Rule Tuning:** `failed_source_unavailable` when the harvest fails, `produced` when it requested a review, `empty_nothing_found` otherwise.
+- **Rule Tuning:** `failed_source_unavailable` when the harvest or the enabled-rules lookup fails, `produced` when it requested a review, `empty_nothing_found` otherwise.
 - **Rule Coverage:** `failed_source_unavailable` when the search fails, `empty_nothing_pending` with no pending indicator, `empty_at_capacity` when indicators are pending but no review slot is free (`degraded_reason: capacity`), `produced` otherwise.
 - A failed lookup that either sweep carries on without gives `degraded_reason: dependency_unavailable`.
 

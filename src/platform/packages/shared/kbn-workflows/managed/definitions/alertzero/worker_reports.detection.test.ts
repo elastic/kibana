@@ -94,12 +94,14 @@ describe('Rule Tuning outcome reports', () => {
       harvestFailed = false,
       lookupFailed = false,
       requested = 0,
+      rulesLookupFailed = false,
     }: {
       activeReviews?: number;
       candidates?: number;
       harvestFailed?: boolean;
       lookupFailed?: boolean;
       requested?: number;
+      rulesLookupFailed?: boolean;
     }): Record<string, unknown> => ({
       consts: { no_rows: [] },
       steps: {
@@ -111,6 +113,9 @@ describe('Rule Tuning outcome reports', () => {
         list_active_reviews: lookupFailed
           ? { error: { message: 'HTTP 500' } }
           : { output: { results: [] } },
+        list_enabled_candidates: rulesLookupFailed
+          ? { error: { message: 'HTTP 500' } }
+          : { output: { data: [] } },
         resolve_fanout_rows: {
           output: { rows: Array.from({ length: requested }, (_, index) => [`rule-${index}`]) },
         },
@@ -149,6 +154,19 @@ describe('Rule Tuning outcome reports', () => {
         { harvestFailed: true },
         {
           candidates_found: 0,
+          degraded_reason: 'dependency_unavailable',
+          items_dispatched: 0,
+          items_in_flight: 0,
+          lookup_failed: false,
+          run_outcome: 'failed_source_unavailable',
+          source_read_failed: true,
+        },
+      ],
+      [
+        'a failed rules lookup after a harvest that worked, which empties the fan-out',
+        { candidates: 3, rulesLookupFailed: true },
+        {
+          candidates_found: 3,
           degraded_reason: 'dependency_unavailable',
           items_dispatched: 0,
           items_in_flight: 0,

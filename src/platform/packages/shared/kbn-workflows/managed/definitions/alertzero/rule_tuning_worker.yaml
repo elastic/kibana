@@ -330,12 +330,12 @@ steps:
       candidates_found: "${{ steps.collect_candidates.output.count | default: 0 }}"
       items_dispatched: "${{ steps.resolve_fanout_rows.output.rows | default: consts.no_rows | size }}"
       items_in_flight: "${{ steps.collect_active_rules.output.expected | default: 0 }}"
-      source_read_failed: "${{ steps.harvest_fp_alerts_by_rule.error != null }}"
+      source_read_failed: "${{ steps.harvest_fp_alerts_by_rule.error != null or steps.list_enabled_candidates.error != null }}"
       lookup_failed: "${{ steps.list_active_reviews.error != null }}"
-      degraded_reason: "{% if steps.harvest_fp_alerts_by_rule.error != null or steps.list_active_reviews.error != null %}dependency_unavailable{% else %}none{% endif %}"
+      degraded_reason: "{% if steps.harvest_fp_alerts_by_rule.error != null or steps.list_enabled_candidates.error != null or steps.list_active_reviews.error != null %}dependency_unavailable{% else %}none{% endif %}"
       run_outcome: |-
         {%- assign requested = steps.resolve_fanout_rows.output.rows | default: consts.no_rows | size -%}
-        {%- if steps.harvest_fp_alerts_by_rule.error != null -%}
+        {%- if steps.harvest_fp_alerts_by_rule.error != null or steps.list_enabled_candidates.error != null -%}
         failed_source_unavailable
         {%- elsif requested > 0 -%}
         produced
