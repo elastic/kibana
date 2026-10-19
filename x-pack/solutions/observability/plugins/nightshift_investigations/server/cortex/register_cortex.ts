@@ -66,7 +66,7 @@ export const registerCortexAiIndex = (
 const MIN_OPTIMIZE_TOOL_CALLS = 3;
 
 // Only sandbox calls carry the queries and files the optimizer learns from; the rest (e.g.
-// progress reports) would spend its transcript budget and count towards the minimum.
+// recording hypotheses) would spend its transcript budget and count towards the minimum.
 const OPTIMIZER_TOOL_IDS: ReadonlySet<string> = new Set(SANDBOX_TOOL_IDS);
 
 /** gRPC status the sandbox session rethrows when its pod refuses or drops the connection. */

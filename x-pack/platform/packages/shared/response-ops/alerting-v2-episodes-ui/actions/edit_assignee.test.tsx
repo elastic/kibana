@@ -125,7 +125,7 @@ describe('createEditAssigneeAction', () => {
       ]);
     });
 
-    it('surfaces a danger toast when the bulk request fails', async () => {
+    it('surfaces an expandable error toast when the bulk request fails', async () => {
       mockBulkCreate.mockRejectedValue(new Error('boom'));
       const onSuccess = jest.fn();
       const action = createEditAssigneeAction(mockDeps);
@@ -133,7 +133,12 @@ describe('createEditAssigneeAction', () => {
 
       await userEvent.click(screen.getByTestId('mockPopoverItem'));
 
-      await waitFor(() => expect(mockNotifications.toasts.addDanger).toHaveBeenCalled());
+      await waitFor(() =>
+        expect(mockNotifications.toasts.addError).toHaveBeenCalledWith(
+          expect.objectContaining({ stack: 'ep-1 — boom' }),
+          expect.objectContaining({ toastMessage: 'boom' })
+        )
+      );
       expect(onSuccess).not.toHaveBeenCalled();
     });
   });

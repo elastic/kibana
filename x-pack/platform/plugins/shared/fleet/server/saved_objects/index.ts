@@ -776,6 +776,7 @@ export const getSavedObjectTypes = (
             },
           },
           oauth2: { type: 'object', dynamic: false },
+          kerberos: { type: 'object', dynamic: false },
           partition: { type: 'keyword' },
           random: {
             dynamic: false,
@@ -1037,6 +1038,21 @@ export const getSavedObjectTypes = (
           ],
           schemas: {
             // `oauth2` is known to this version: it is kept when reading a newer document
+            forwardCompatibility: schema.object({}, { unknowns: 'allow' }),
+            create: schema.object({}, { unknowns: 'allow' }),
+          },
+        },
+        '13': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                kerberos: { type: 'object', dynamic: false },
+              },
+            },
+          ],
+          schemas: {
+            // `kerberos` is known to this version: it is kept when reading a newer document
             forwardCompatibility: schema.object({}, { unknowns: 'allow' }),
             create: schema.object({}, { unknowns: 'allow' }),
           },

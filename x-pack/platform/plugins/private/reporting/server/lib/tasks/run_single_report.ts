@@ -24,6 +24,7 @@ type SingleReportTaskInstance = Omit<TaskInstance, 'params'> & {
 };
 export class RunSingleReportTask extends RunReportTask<ReportTaskParams> {
   public readonly exportType = EXPORT_TYPE_SINGLE;
+  protected readonly scheduleType = ScheduleType.SINGLE;
 
   public get TYPE() {
     return REPORTING_EXECUTE_TYPE;

@@ -8,9 +8,14 @@
 import expect from '@kbn/expect';
 
 import { OBSERVABLE_TYPES_BUILTIN } from '@kbn/cases-plugin/common/constants';
-import { getPostCaseRequest } from '../../../../common/lib/mock';
+import {
+  getPostCaseRequest,
+  postCommentAlertReq,
+  postCommentUserReq,
+} from '../../../../common/lib/mock';
 import {
   createCase,
+  createComment,
   deleteAllCaseItems,
   addObservable,
   similarCases,
@@ -79,6 +84,41 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         expect(casesSimilarToB.length).to.be(1);
+      });
+
+      it('returns the attachment totals of the similar cases', async () => {
+        const [caseA, caseB] = await Promise.all([
+          createCase(supertest, getPostCaseRequest()),
+          createCase(supertest, getPostCaseRequest()),
+        ]);
+
+        const observable = {
+          value: 'value',
+          typeKey: OBSERVABLE_TYPES_BUILTIN[0].key,
+          description: '',
+        };
+
+        await Promise.all(
+          [caseA, caseB].map(({ id }) =>
+            addObservable({ supertest, caseId: id, params: { observable } })
+          )
+        );
+
+        await createComment({ supertest, caseId: caseB.id, params: postCommentUserReq });
+        await createComment({ supertest, caseId: caseB.id, params: postCommentUserReq });
+        await createComment({ supertest, caseId: caseB.id, params: postCommentAlertReq });
+
+        const { cases } = await similarCases({
+          supertest,
+          body: { perPage: 10, page: 1 },
+          caseId: caseA.id,
+        });
+
+        expect(cases.length).to.be(1);
+        expect(cases[0].id).to.be(caseB.id);
+        expect(cases[0].totalComment).to.be(2);
+        expect(cases[0].totalAlerts).to.be(1);
+        expect(cases[0].totalEvents).to.be(0);
       });
 
       it('does not return cases similar to given case if the owner does not match', async () => {

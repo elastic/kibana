@@ -14,7 +14,10 @@
       "data",
       "dataViews",
       "features",
+      "inference",
       "lens",
+      "licensing",
+      "nightshiftSources",
       "observabilityShared",
       "share",
       "significantEvents",
@@ -23,11 +26,11 @@
     "optionalPlugins": [
       "agentBuilder",
       "agenticInvestigations",
+      "cps",
       "nightshiftInvestigations",
-      "nightshiftSources",
       "serverless",
       "spaces"
     ],
-    "requiredBundles": ["kibanaReact", "nightshiftInvestigations"]
+    "requiredBundles": ["esql", "kibanaReact", "nightshiftInvestigations", "stackConnectors"]
   }
 }
