@@ -531,7 +531,7 @@ Always raise `resetTaskTimeoutMinutes` first if you raise `resetPageDelayMs` —
 | `Event loop utilization exceeded threshold` from `/internal/cases/_analyticsV2/reset` | A runner page is slower than expected on this hardware | Raise `resetPageDelayMs` to 50–100 to throttle further |
 | `Case Analytics` data view missing in Discover / Lens after `/reset` | Lazy recreation hasn't fired in that space yet — `/reset` deletes every per-space data view, and they recreate on the next cases request per space | Open the Cases UI in the affected space, or run `curl /s/<spaceId>/api/cases/_find?perPage=1` to pre-warm. See "Per-space data views after /reset" above. |
 | `extended_fields` missing from `.cases` after a templates migration, no case edits since | The migration backfill wrote `extended_fields` via a raw SO update, which never bumped the case-domain `attributes.updated_at` incremental reconciliation filters on | Handled automatically — see "Templates migration coupling" below. Manual fallback: POST /reset. |
-| `case.incremental_id` missing from `.cases` while the case shows a number in the UI, no case edits since | The incremental-id task assigns the number after creation via a raw SO update, which never bumped `attributes.updated_at`. Fixed going forward: the task now mirrors numbered cases to `.cases` | Docs written before the fix are repaired by a one-time pass in the reconciliation task (9.6 only) — see "Incremental id backfill (9.6)" below. Manual fallback: POST /reset. |
+| `case.incremental_id` missing from `.cases` while the case shows a number in the UI, no case edits since | The incremental-id task assigns the number after creation via a raw SO update, which never bumped `attributes.updated_at`. Fixed going forward: the task now mirrors numbered cases to `.cases` | Docs written before the fix are repaired by a one-time pass in the reconciliation task (removed in 10.0) — see "Incremental id backfill (until 10.0)" below. Manual fallback: POST /reset. |
 
 ### Templates migration coupling
 
@@ -595,7 +595,7 @@ Safety properties (all covered by tests):
   own errors (scheduling failures are logged, never propagated), so it
   can never fail or retry the migration task.
 
-### Incremental id backfill (9.6)
+### Incremental id backfill (until 10.0)
 
 Before 9.6, the incremental-id task numbered cases with a raw SO update that
 didn't bump `attributes.updated_at`, so a case whose `.cases` doc was written
@@ -628,7 +628,9 @@ later ticks skip the repair.
 - **No task type of its own**, so shipping and removing it needs no
   Task Manager registration changes.
 
-Scheduled for removal in 9.7.
+Scheduled for removal in 10.0. A major upgrade must go through the last 9.x
+minor first, so every cluster runs the repair before it's removed, including
+self-managed clusters that skip minors.
 
 ## Activity surface
 
@@ -777,7 +779,7 @@ cases_analytics_v2/
 │   ├── retry.ts                          bounded jittered exponential backoff
 │   └── retry.test.ts
 │
-├── incremental_id_backfill/   one-time 9.6 repair of case.incremental_id in .cases (remove in 9.7)
+├── incremental_id_backfill/   one-time repair of case.incremental_id in .cases (remove in 10.0)
 │   └── runner.ts            search .cases for missing ids → bulkGet → re-emit numbered cases;
 │                            called from the reconciliation tick
 │

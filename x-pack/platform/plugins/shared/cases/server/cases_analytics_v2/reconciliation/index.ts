@@ -95,7 +95,7 @@ interface ReconciliationTaskState {
   attachments_last_run_at?: string;
   /**
    * Set once `runIncrementalIdBackfill` completes a full pass. Remove in
-   * 9.7 together with `../incremental_id_backfill/`.
+   * 10.0 together with `../incremental_id_backfill/`.
    */
   incremental_id_backfill_completed?: boolean;
 }
@@ -235,7 +235,7 @@ export function registerReconciliationTask({
             }
           }
 
-          // One-time 9.6 repair, run last so it never delays the cursor
+          // One-time repair (remove in 10.0), run last so it never delays the cursor
           // walks. It rides this tick instead of its own task type so
           // shipping and removing it touches no Task Manager type list.
           // An unfinished pass leaves the flag unset; docs it already

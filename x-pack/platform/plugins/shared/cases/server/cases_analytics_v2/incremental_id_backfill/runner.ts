@@ -12,9 +12,11 @@
  * `case.incremental_id`, because the id is applied with a raw SO update that
  * doesn't bump the `attributes.updated_at` reconciliation filters on.
  *
- * Runs from the reconciliation tick until one pass completes. Remove in 9.7:
- * delete this folder, and drop its call and the
- * `incremental_id_backfill_completed` state field from `../reconciliation`.
+ * Runs from the reconciliation tick until one pass completes. Kept through
+ * the last 9.x minor because a major upgrade must pass through it, so every
+ * cluster runs the repair before it's removed. Remove in 10.0: delete this
+ * folder, and drop its call and the `incremental_id_backfill_completed` state
+ * field from `../reconciliation`.
  */
 
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
