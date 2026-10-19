@@ -41,8 +41,27 @@ export const setupStore = async (es: Client): Promise<void> => {
       settings: { number_of_replicas: 0 },
       mappings: {
         dynamic: true,
+        // All dynamic numbers as double: epoch-ms fields mapped as float (24-bit mantissa) made
+        // range drills silently wrong (Track 0 fix pass).
+        dynamic_templates: [
+          { numbers_as_double: { match_mapping_type: 'double', mapping: { type: 'double' } } },
+          { longs_as_double: { match_mapping_type: 'long', mapping: { type: 'double' } } },
+          {
+            strings_as_keyword: {
+              match_mapping_type: 'string',
+              mapping: { type: 'keyword', ignore_above: 1024 },
+            },
+          },
+        ],
         properties: {
           ...common,
+          intended: { type: 'double' },
+          sent: { type: 'double' },
+          start: { type: 'double' },
+          timing_start: { type: 'double' },
+          timing_stop: { type: 'double' },
+          window_start: { type: 'double' },
+          status: { type: 'keyword' },
           pod: { type: 'keyword' },
           boot_id: { type: 'keyword' },
           thread: { type: 'keyword' },

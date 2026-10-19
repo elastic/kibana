@@ -11,9 +11,11 @@ import path from 'path';
 import { ACTIONS } from './actions';
 import { overviewChecks, overviewEsql } from './overview';
 import { runScenario } from './driver';
+import { runExternal } from './external';
 import { targetFromEnv } from './kibana_client';
 import { SCENARIOS } from './scenarios';
 import { computeScorecard, scorecardMarkdown, writeScorecard } from './scorecard';
+import { drillToQuery } from './score';
 import { ingestRunDir, researchEs, setupStore } from './store';
 
 const DEFAULT_RUNS_DIR = path.join(
@@ -60,7 +62,11 @@ export const main = async (): Promise<void> => {
     case 'run': {
       const scenario = SCENARIOS[flags.scenario];
       if (!scenario) throw new Error(`unknown scenario ${flags.scenario}\n${USAGE}`);
-      const { runId, dir } = await runScenario({
+      const runner = scenario.externalOnly
+        ? (o: Parameters<typeof runScenario>[0]) =>
+            runExternal({ ...o, kibanaPid: Number(flags['kibana-pid']) })
+        : runScenario;
+      const { runId, dir } = await runner({
         target: targetFromEnv(),
         targetKind: (flags.target as 'local' | 'qaf') ?? 'local',
         scenario,
@@ -108,6 +114,30 @@ export const main = async (): Promise<void> => {
       console.log(md);
       return;
     }
+    case 'verify-drills': {
+      // Re-runs every stored drill query against research-samples and compares the count with
+      // the count the scorer used. Any mismatch means a drill does not reproduce its row.
+      const { rows } = await computeScorecard(es, flags['run-id']);
+      let checked = 0;
+      const mismatches: string[] = [];
+      for (const r of rows) {
+        for (const [name, d] of Object.entries(r.drills)) {
+          const { count } = await es.count({ index: 'research-samples', query: drillToQuery(d) });
+          checked++;
+          if (count !== r.drill_counts[name]) {
+            mismatches.push(
+              `${r.phase}/${r.kind === 'pod' ? r.pod : 'cluster'}/${name}: es=${count} scorer=${
+                r.drill_counts[name]
+              }`
+            );
+          }
+        }
+      }
+      // eslint-disable-next-line no-console
+      console.log(JSON.stringify({ run_id: flags['run-id'], checked, mismatches }, null, 2));
+      if (mismatches.length) process.exitCode = 1;
+      return;
+    }
     case 'variance': {
       // Baseline-phase dispersion per target (project/local) across runs whose variant matches.
       const prefix = flags['variant-prefix'] ?? 'variance';
@@ -127,8 +157,14 @@ export const main = async (): Promise<void> => {
         runs.hits.hits.map((h) => [h._source?.run_id, h._source?.qaf_project_id ?? 'local'])
       );
       const groups = new Map<string, Array<Record<string, any>>>();
+      // Supports both the pre-fix (flat) and fix-pass (metrics.*) scorecard row formats.
+      const flat = (src: Record<string, any>) =>
+        src.metrics
+          ? { ...src, ...src.metrics, longest_slice_ms: src.metrics.hb_gap_max_overlap_ms }
+          : src;
       for (const h of res.hits.hits) {
-        const r = h._source as Record<string, any>;
+        const r = flat(h._source as Record<string, any>);
+        if (r.kind === 'cluster' || r.pod === 'cluster') continue;
         // Group by target and pod role (pods are replaced by image updates; roles are stable).
         const role = String(r.pod).startsWith('kb-background')
           ? 'background'
@@ -162,7 +198,7 @@ export const main = async (): Promise<void> => {
         };
       }
       const all = res.hits.hits
-        .map((h) => h._source as Record<string, any>)
+        .map((h) => flat(h._source as Record<string, any>))
         .filter((r) => project.get(r.run_id) !== 'local' && String(r.pod).startsWith('kb-ui'));
       out.pooled_qaf_ui = {
         probe_p99_ms: stats(all.map((r) => r.probe_p99_ms)),

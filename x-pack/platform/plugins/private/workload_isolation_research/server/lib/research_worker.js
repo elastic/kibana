@@ -18,13 +18,17 @@
  */
 
 const { parentPort, workerData } = require('worker_threads');
+const { Atomics } = global;
 const { performance } = require('perf_hooks');
 const v8 = require('v8');
 
 const epochNow = () => performance.timeOrigin + performance.now();
 
-const { sab, samplerIntervalMs, stallThresholdMs, ringCapacity } = workerData;
+const { sab, countSab, samplerIntervalMs, stallThresholdMs, ringCapacity } = workerData;
+// heartbeat[0]: epoch ms of main's last heartbeat; hbCount[0]: number of heartbeats written
+// (single writer = main thread; read with Atomics so aggregated heartbeats are detectable).
 const heartbeat = new Float64Array(sab);
+const hbCount = new Int32Array(countSab);
 
 let probe = undefined;
 let inFlight = 0;
@@ -49,67 +53,73 @@ const since = (s, limit) => {
 };
 
 // ---- heartbeat sampler -----------------------------------------------------
+// Live stall detector (works while main is blocked). The authoritative post-hoc slice proxy
+// is main-side `main_gap` accounting in recorder.ts; this side only:
+//  - opens a stall when main has not written a heartbeat for > stallThresholdMs,
+//  - records a worker-observed gap only when exactly one heartbeat elapsed (otherwise the
+//    worker itself was late and the observed gap aggregates several healthy heartbeats),
+//  - records its own sampling lateness so its resolution is explicit.
 let lastHb = heartbeat[0];
+let lastCount = Atomics.load(hbCount, 0);
 let openStall = undefined;
 let windowStart = epochNow();
 let supervisor = undefined;
 let windowMaxGap = 0;
 let windowHbCount = 0;
+let windowAggregated = 0;
+let windowLateMax = 0;
+let lastTick = epochNow();
 
 setInterval(() => {
   const now = epochNow();
+  const late = now - lastTick - samplerIntervalMs;
+  lastTick = now;
+  if (late > windowLateMax) windowLateMax = late;
   const hb = heartbeat[0];
-  if (hb !== lastHb) {
+  const count = Atomics.load(hbCount, 0);
+  if (count !== lastCount) {
+    const dCount = count - lastCount;
     const gap = hb - lastHb;
     if (lastHb > 0) {
-      windowHbCount++;
-      if (gap > windowMaxGap) windowMaxGap = gap;
-      if (gap > 1000) {
-        require('fs').writeSync(
-          2,
-          JSON.stringify({
-            research: 'stall',
+      windowHbCount += dCount;
+      if (dCount === 1) {
+        if (gap > windowMaxGap) windowMaxGap = gap;
+        if (gap > stallThresholdMs) {
+          push({
+            source: 'stall',
+            ts: lastHb,
             start: lastHb,
             end: hb,
             gap_ms: gap,
-            pid: process.pid,
-          }) + '\n'
-        );
-      }
-      if (gap > stallThresholdMs) {
-        push({
-          source: 'stall',
-          ts: lastHb,
-          start: lastHb,
-          end: hb,
-          gap_ms: gap,
-          live_detected: !!openStall,
-        });
+            live_detected: !!openStall,
+          });
+        }
+      } else {
+        windowAggregated++;
+        if (openStall) {
+          // The stall ended somewhere among dCount heartbeats; the main-side record is exact.
+          push({
+            source: 'stall',
+            ts: openStall.start,
+            start: openStall.start,
+            end: hb,
+            gap_ms: hb - openStall.start,
+            live_detected: true,
+            aggregated_heartbeats: dCount,
+          });
+        }
       }
     }
     openStall = undefined;
     lastHb = hb;
+    lastCount = count;
   } else if (lastHb > 0 && now - lastHb > stallThresholdMs && !openStall) {
     openStall = { start: lastHb, detectedAt: now };
     push({ source: 'stall_open', ts: now, start: lastHb });
   }
-  if (openStall && !openStall.logged && now - openStall.start > 1000) {
-    // Long stalls are also written straight to fd 2 (shipped by serverless log collection)
-    // so the evidence survives even if the process is killed before the next pull.
-    openStall.logged = true;
-    require('fs').writeSync(
-      2,
-      JSON.stringify({
-        research: 'stall_open',
-        ts: now,
-        start: openStall.start,
-        pid: process.pid,
-      }) + '\n'
-    );
-  }
   if (supervisor && openStall && now - openStall.start > supervisor.killAfterMs) {
-    // Emulated external supervision for non-terminating offenders. Written with a
-    // direct fd write because worker stdout is relayed through the (blocked) main thread.
+    // Emulated supervision. fd-2 write because worker stdout is relayed through the blocked main
+    // thread. NOTE: serverless log shipping does not ingest these raw fd-2 lines (Track 0 report).
     require('fs').writeSync(
       2,
       JSON.stringify({
@@ -131,10 +141,14 @@ setInterval(() => {
       end: now,
       max_gap_ms: Math.max(windowMaxGap, ongoing),
       hb_count: windowHbCount,
+      aggregated_observations: windowAggregated,
+      sampler_late_max_ms: windowLateMax,
     });
     windowStart = now;
     windowMaxGap = 0;
     windowHbCount = 0;
+    windowAggregated = 0;
+    windowLateMax = 0;
   }
 }, samplerIntervalMs);
 

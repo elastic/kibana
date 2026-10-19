@@ -26,6 +26,18 @@ const configSchema = schema.object({
    */
   pushToEs: schema.boolean({ defaultValue: true }),
   pushIntervalMs: schema.number({ defaultValue: 2000, min: 200, max: 60000 }),
+  /** Per-GC samples (PerformanceObserver). Can be switched off for perturbation calibration. */
+  collectGc: schema.boolean({ defaultValue: true }),
+  /**
+   * Canned OpenAI-compatible LLM for the Agent Builder replay. Separately gated; requires a
+   * bearer secret (generated per project, readable by superusers via GET mock_llm/_secret).
+   */
+  mockLlm: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+    maxBodyBytes: schema.number({ defaultValue: 1024 * 1024, min: 1024, max: 64 * 1024 * 1024 }),
+    maxHangMs: schema.number({ defaultValue: 60000, min: 0, max: 600000 }),
+    maxConcurrent: schema.number({ defaultValue: 8, min: 1, max: 100 }),
+  }),
 });
 
 export type WorkloadIsolationResearchConfig = TypeOf<typeof configSchema>;

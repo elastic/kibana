@@ -62,6 +62,62 @@ export const registerRoutes = ({ router, getRecorder, getStart, getInfo }: Route
     }
   );
 
+  // Task completion (phase completion awaits background work by id; one-shot tasks are deleted on
+  // success, so "not found" means done). Also counts outstanding tasks of a type (e.g. actions).
+  router.post(
+    {
+      path: `${API_BASE}/tasks/_status`,
+      security,
+      options,
+      validate: {
+        body: schema.object({
+          ids: schema.arrayOf(schema.string({ maxLength: 256 }), {
+            maxSize: 2000,
+            defaultValue: [],
+          }),
+          countTaskTypes: schema.arrayOf(schema.string({ maxLength: 256 }), {
+            maxSize: 20,
+            defaultValue: [],
+          }),
+        }),
+      },
+    },
+    async (_ctx, req, res) => {
+      const { taskManager } = await getStart();
+      const statuses: Record<string, string> = {};
+      const { ids, countTaskTypes } = req.body;
+      for (let i = 0; i < ids.length; i += 500) {
+        const chunk = ids.slice(i, i + 500);
+        const results = await taskManager.bulkGet(chunk);
+        results.forEach((r, j) => {
+          const id = chunk[j];
+          const result = r as unknown as {
+            tag: 'ok' | 'err';
+            value?: { status?: string };
+            error?: { error?: { statusCode?: number } };
+          };
+          if (result.tag === 'ok') {
+            statuses[id] = String(result.value?.status);
+          } else {
+            const code = result.error?.error?.statusCode;
+            statuses[id] = code === 404 ? 'done' : `error:${code}`;
+          }
+        });
+      }
+      const counts: Record<string, number> = {};
+      for (const taskType of countTaskTypes) {
+        const agg = await taskManager.aggregate({
+          query: { bool: { filter: [{ term: { 'task.taskType': taskType } }] } },
+          aggs: {},
+          size: 0,
+        });
+        const total = agg.hits.total;
+        counts[taskType] = typeof total === 'number' ? total : total?.value ?? 0;
+      }
+      return res.ok({ body: { statuses, counts } });
+    }
+  );
+
   router.post(
     {
       path: `${API_BASE}/samples_es`,

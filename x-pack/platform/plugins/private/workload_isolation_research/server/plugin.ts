@@ -59,7 +59,10 @@ export class WorkloadIsolationResearchPlugin implements Plugin<void, void, Setup
     };
     const router = core.http.createRouter();
     registerTierBRoutes(router, API_BASE, getRecorder, getStart);
-    registerMockLlmRoute(router, API_BASE);
+    registerMockLlmRoute(router, API_BASE, this.config.mockLlm, async () => {
+      const [coreStart] = await core.getStartServices();
+      return coreStart.elasticsearch.client.asInternalUser;
+    });
     registerRoutes({
       router,
       logger: this.logger,
@@ -82,7 +85,7 @@ export class WorkloadIsolationResearchPlugin implements Plugin<void, void, Setup
         exec_argv: process.execArgv,
         node_options: process.env.NODE_OPTIONS ?? null,
         tracer_enabled: process.env.KBN_RESEARCH_CONTRACT_TRACER === 'true',
-        push_dropped: this.recorder.pushDropped,
+        push_stats: this.recorder.pushStats,
       }),
     });
   }

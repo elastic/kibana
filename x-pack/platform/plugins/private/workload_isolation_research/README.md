@@ -9,7 +9,7 @@ Shared measurement harness for the Kibana workload isolation research programme
 | Piece | Where | What |
 |---|---|---|
 | Research plugin | `server/` | Tier A offenders (route + TM task), Tier B replays, in-pod probes, samples endpoint. Enabled by default on this branch only. All routes `access: internal`, superuser only. |
-| Research worker | `server/lib/research_worker.js` | Off-main thread: SharedArrayBuffer heartbeat sampler (stalls, longest slice), open-loop loopback HTTP probe, own CPU/heap, optional emulated supervisor (SIGKILL after N ms stall). Plain CJS: same file in dev and dist. |
+| Research worker | `server/lib/research_worker.js` | Off-main thread: live stall detector over a SharedArrayBuffer heartbeat (+ Atomics heartbeat counter, so worker lateness is never counted as a stall; records its own sampling lateness), open-loop loopback HTTP probe, own CPU/heap, optional emulated supervisor (SIGKILL after N ms stall; HTTP-armed, so UI pods only). Plain CJS: same file in dev and dist. |
 | TM research channel | `task_manager/server/lib/research_channel.ts` | `diagnostics_channel` `kbn:research:task_manager`: poll cycles, claims, runs, discovery heartbeats. No-op without subscribers. |
 | Contract tracer | `src/core/packages/plugins/server-internal/src/research_contract_tracer.ts` | `KBN_RESEARCH_CONTRACT_TRACER=true` only. Proxies every dependency contract; per edge calls, bytes, sync/Promise/Observable, arg/result kinds, reverse (callback) edges, serialize failures. **Never on for perf runs.** |
 | Driver / store / scorecard | `harness/` | Laptop-side CLI: runs scenarios, pulls samples (pull-with-dedup across pods), writes a run dir, ingests into the research ES, derives scorecard rows. |
@@ -25,9 +25,15 @@ Offender kinds: `cpu_spin`, `json_stringify` (repeat-stringify of an `sizeMb` pa
 | source | thread | meaning |
 |---|---|---|
 | `probe` | worker / driver | `intended`, `sent`, `end`, `latency_ms` (from intended → no coordinated omission), `status` |
-| `stall` | worker | main heartbeat gap > `stallThresholdMs` (`gap_ms` = uninterrupted slice upper bound) |
+| `main_gap` | main | **primary slice proxy**: gap between consecutive main heartbeats on main's monotonic clock (> `stallThresholdMs`). A heartbeat-gap proxy for the longest uninterrupted slice — see calibration in the Track 0 report |
+| `main_gap_window` | main | per-second max heartbeat gap and heartbeat count (missing while main is blocked) |
+| `stall` | worker | live-detector view of a stall (only from consecutive heartbeats; `aggregated_heartbeats` when the worker itself was late) |
 | `stall_open` | worker | stall detected live (main still blocked) |
-| `gap_window` | worker | per-second max heartbeat gap (incl. ongoing stall) |
+| `gap_window` | worker | per-second max observed gap (incl. ongoing stall), `sampler_late_max_ms`, `aggregated_observations`; also the **telemetry-coverage clock** used by the scorer |
+| `push_stats` | main | push accounting (`push_ok/duplicate/dropped/ring_overflow/batches/failed_batches`); any drop or overflow invalidates the run |
+| `tick_scheduled` | main | scheduled tick ids + runAt (denominator) |
+| `tick_audit` | driver | per scheduled tick: TM status at run end (`done`/pending/…); `done` without a `tick` sample = lost telemetry → INVALID |
+| `ext_proc` | driver | external `ps` CPU/RSS of the Kibana process (external-only runs) |
 | `worker_proc` | worker | research worker thread CPU ms/s, heap (subtract from variant overhead) |
 | `proc` | main | RSS, heap, external, ELU, process + main-thread CPU, event-loop delay p50/p99/max |
 | `gc` | main | every GC: duration, kind |
@@ -35,7 +41,7 @@ Offender kinds: `cpu_spin`, `json_stringify` (repeat-stringify of an `sizeMb` pa
 | `tick` | main | tiny TM task: `drift_ms` = start − intended runAt |
 | `offender`, `offender_start` | main | offender window and measured `blocked_ms` |
 
-**Serverless role split:** QAF observability projects run separate `kb-ui` and `kb-background-tasks` pods; only UI pods are routable. TM-task offenders, ticks and TM poll data live on the background pod. Every pod therefore also pushes its samples every 2 s to `.kibana-research-samples` (internal user, hidden index); the driver exports them via `POST samples_es` at the end of each run (deduplicated by boot/thread/seq, tagged `via: es_push`). Stalls > 1 s and supervisor kills are also written by the worker straight to fd 2, so they reach serverless logs (QA overview) even if the process dies.
+**Serverless role split:** QAF observability projects run separate `kb-ui` and `kb-background-tasks` pods; only UI pods are routable. TM-task offenders, ticks and TM poll data live on the background pod. Every pod therefore also pushes its samples every 2 s to `.kibana-research-samples-v3` (internal user, hidden index; deterministic ids `boot:thread:seq`, idempotent; per-item accounting, cursors always advance past rejected docs); the driver exports them via `POST samples_es` at the end of each run (deduplicated, tagged `via: es_push`). The worker's supervisor-kill line is written straight to fd 2, but serverless log shipping does **not** ingest raw fd-2 lines, so it does not reach the QA overview (Track 0 report).
 
 Ring buffers: 200k entries per thread (≈ hours at default rates; a 10 s block adds ≤ 100 probe entries). The samples endpoint is served by main, so pulls stall during blocks; the worker keeps recording.
 
@@ -69,6 +75,15 @@ Credentials file (never commit): `WIR_KIBANA_URL`, `WIR_KIBANA_API_KEY` (QAF sta
 Rollout: `qaf elastic-cloud projects update-images <name> --kb-docker-image <image>` returns immediately; the new UI pod serves after ~40–60 s. `describe` keeps the old build hash — verify `GET /internal/workload_isolation_research/info` → `build_sha`. Replaced pods may keep running (and pushing) for a while.
 
 Limits on QAF: `supervise` and `probe/_start` reach only the UI pod (background pods are not routable), so emulated supervision and HTTP probing apply to UI pods only; background-pod evidence comes from the push path.
+
+## Scorecards (fix pass)
+
+- **Pod rows** are per (phase, pod, boot_id) and only read that pod+boot. **Cluster rows** (one per phase) carry ticks (run on any background pod), the laptop probe, offenders and Tier B results.
+- Every metric is computed through a drill spec that is stored as an ES query (`research-scorecards.drills`); `node $H verify-drills --run-id <id>` re-counts each drill in ES and must report 0 mismatches.
+- Interval samples (heartbeat gaps, TM poll gaps, offender/Tier B windows) are attributed by **overlap**; a gap spanning a boundary appears in both windows (overlap and full length reported, `spans_boundary` note). Probes are attributed by intended send time, ticks by intended runAt.
+- **INVALID, never green**: worker coverage < 0.8, TM node without poll telemetry in a window, no tick audit, ticks ran but samples missing, push drops/ring overflow, failed phase, invalid baseline row.
+- Phases with background work wait for completion **by task id** (`POST tasks/_status`; alerting waits for the `actions:.index` queue to drain); timeout → run failed. Only the non-terminating offender waits a fixed safety cap.
+- Heap/RSS are **sampled lower bounds** (1 s point samples timestamped at acquisition).
 
 ## Comparing variants (rule)
 

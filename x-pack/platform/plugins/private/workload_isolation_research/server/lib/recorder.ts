@@ -23,7 +23,7 @@ export const TM_RESEARCH_CHANNEL = 'kbn:research:task_manager';
 export type Sample = Record<string, unknown> & { source: string; ts: number };
 
 /** Versioned: v1 on QAF got `kind` dynamically mapped as long (GC kind) and poisoned pushes. */
-export const PUSH_INDEX = '.kibana-research-samples-v2';
+export const PUSH_INDEX = '.kibana-research-samples-v3';
 
 interface WorkerSamplesReply {
   entries: Array<{ seq: number; item: Sample }>;
@@ -50,6 +50,19 @@ export class Recorder {
   private readonly ring: RingBuffer<Sample>;
   private readonly sab = new SharedArrayBuffer(8);
   private readonly heartbeat = new Float64Array(this.sab);
+  private readonly countSab = new SharedArrayBuffer(4);
+  private readonly hbCount = new Int32Array(this.countSab);
+  // Push accounting (exposed via /info and periodic push_stats samples).
+  // Prefixed names: push_stats samples share the push index with `tm` samples, where `ok` is a
+  // boolean, so un-prefixed counters were themselves rejected as poison docs.
+  public readonly pushStats = {
+    push_ok: 0,
+    push_duplicate: 0,
+    push_dropped: 0,
+    push_ring_overflow: 0,
+    push_batches: 0,
+    push_failed_batches: 0,
+  };
   private worker?: Worker;
   private timers: NodeJS.Timeout[] = [];
   private gcObserver?: PerformanceObserver;
@@ -73,15 +86,12 @@ export class Recorder {
 
   public start(): void {
     this.heartbeat[0] = epochNow();
-    this.timers.push(
-      setInterval(() => {
-        this.heartbeat[0] = epochNow();
-      }, this.config.heartbeatIntervalMs)
-    );
+    this.startMainGapAccounting();
 
     this.worker = new Worker(path.join(__dirname, 'research_worker.js'), {
       workerData: {
         sab: this.sab,
+        countSab: this.countSab,
         samplerIntervalMs: this.config.samplerIntervalMs,
         stallThresholdMs: this.config.stallThresholdMs,
         ringCapacity: this.config.ringCapacity,
@@ -99,6 +109,15 @@ export class Recorder {
 
     this.startProcSampler();
 
+    if (this.config.collectGc) this.startGcObserver();
+
+    diagnosticsChannel.subscribe(TM_RESEARCH_CHANNEL, this.onTmEvent);
+    this.logger.info(
+      `workload isolation research recorder started pod=${this.pod} boot=${this.bootId}`
+    );
+  }
+
+  private startGcObserver(): void {
     this.gcObserver = new PerformanceObserver((list) => {
       for (const entry of list.getEntries()) {
         const detail = (entry as unknown as { detail?: { kind?: number; flags?: number } }).detail;
@@ -112,10 +131,47 @@ export class Recorder {
       }
     });
     this.gcObserver.observe({ entryTypes: ['gc'] });
+  }
 
-    diagnosticsChannel.subscribe(TM_RESEARCH_CHANNEL, this.onTmEvent);
-    this.logger.info(
-      `workload isolation research recorder started pod=${this.pod} boot=${this.bootId}`
+  /**
+   * Main-side heartbeat-gap accounting (the post-hoc slice proxy). Each heartbeat measures the
+   * time since the previous one on main's own monotonic clock, so worker descheduling cannot
+   * inflate it. A gap ≈ uninterrupted main-thread time + timer granularity: it is a proxy for
+   * the longest uninterrupted slice, calibrated against Tier A known doses (Track 0 report).
+   */
+  private startMainGapAccounting(): void {
+    const interval = this.config.heartbeatIntervalMs;
+    let last = performance.now();
+    let windowStart = epochNow();
+    let windowMax = 0;
+    let ticks = 0;
+    this.timers.push(
+      setInterval(() => {
+        const nowMono = performance.now();
+        const now = performance.timeOrigin + nowMono;
+        const gap = nowMono - last;
+        last = nowMono;
+        this.heartbeat[0] = now;
+        Atomics.add(this.hbCount, 0, 1);
+        ticks++;
+        if (gap > windowMax) windowMax = gap;
+        if (gap > this.config.stallThresholdMs) {
+          this.push({ source: 'main_gap', ts: now - gap, start: now - gap, end: now, gap_ms: gap });
+        }
+        if (now - windowStart >= 1000) {
+          this.push({
+            source: 'main_gap_window',
+            ts: windowStart,
+            end: now,
+            max_gap_ms: windowMax,
+            ticks,
+            expected_ticks: Math.floor((now - windowStart) / interval),
+          });
+          windowStart = now;
+          windowMax = 0;
+          ticks = 0;
+        }
+      }, interval)
     );
   }
 
@@ -139,8 +195,10 @@ export class Recorder {
         const eld = this.eld as IntervalHistogram;
         this.push({
           source: 'proc',
-          ts: lastTs,
-          end: now,
+          // Timestamped at acquisition: heap/RSS are point samples (sampled lower bounds of
+          // the window's peak), CPU/ELU/ELD are deltas over [window_start, ts].
+          ts: now,
+          window_start: lastTs,
           rss: mem.rss,
           heap_used: mem.heapUsed,
           heap_total: mem.heapTotal,
@@ -212,10 +270,16 @@ export class Recorder {
   private pushed = { main: 0, worker: 0 };
   private pushing = false;
   private indexReady = false;
-  public pushDropped = 0;
   private lastPushError = 0;
+  private lastStatsPush = 0;
 
-  /** Periodically bulk-indexes new samples into the project's ES (internal user). */
+  /**
+   * Periodically bulk-indexes new samples into the project's ES (internal user). Idempotent:
+   * deterministic ids (boot/thread/seq) + `create`, so retries never duplicate and 409s count
+   * as already-present. Per-item accounting: rejected docs are counted as dropped and the cursor
+   * always advances past them (a poison doc can never stall the stream). Ring overflow before a
+   * push is counted too. Any drop makes a run invalid (scorecard coverage check).
+   */
   public startPush(getEs: () => Promise<ElasticsearchClient>): void {
     if (!this.config.pushToEs) return;
     const push = async () => {
@@ -227,9 +291,15 @@ export class Recorder {
           await es.indices
             .create({
               index: PUSH_INDEX,
-              settings: { 'index.hidden': true, number_of_shards: 1 },
+              settings: { 'index.hidden': true },
               mappings: {
                 dynamic: true,
+                dynamic_templates: [
+                  {
+                    numbers_as_double: { match_mapping_type: 'long', mapping: { type: 'double' } },
+                  },
+                  { doubles: { match_mapping_type: 'double', mapping: { type: 'double' } } },
+                ],
                 properties: {
                   '@timestamp': { type: 'date' },
                   ts: { type: 'double' },
@@ -243,6 +313,7 @@ export class Recorder {
                   tm_event: { type: 'keyword' },
                   task_type: { type: 'keyword' },
                   task_id: { type: 'keyword' },
+                  series_id: { type: 'keyword' },
                   error: { type: 'keyword' },
                   error_code: { type: 'keyword' },
                   detail: { type: 'flattened' },
@@ -255,25 +326,47 @@ export class Recorder {
             });
           this.indexReady = true;
         }
+        if (Date.now() - this.lastStatsPush > 10000) {
+          this.lastStatsPush = Date.now();
+          this.push({ source: 'push_stats', ts: epochNow(), ...this.pushStats });
+        }
         const data = await this.samples(this.pushed.main, this.pushed.worker, 5000);
+        this.pushStats.push_ring_overflow += data.main.dropped + data.worker.dropped;
         const docs = [
           ...data.main.samples.map(({ seq, item }) => ({ ...item, thread: 'main', seq })),
           ...data.worker.samples.map(({ seq, item }) => ({ ...item, thread: 'worker', seq })),
         ];
         if (docs.length) {
+          this.pushStats.push_batches++;
           const operations = docs.flatMap((d) => [
-            { create: { _index: PUSH_INDEX } },
+            { create: { _index: PUSH_INDEX, _id: `${this.bootId}:${d.thread}:${d.seq}` } },
             { ...d, pod: this.pod, boot_id: this.bootId, '@timestamp': Math.round(d.ts as number) },
           ]);
           const res = await es.bulk({ operations, refresh: false });
-          if (res.errors)
-            throw new Error(JSON.stringify(res.items.find((i) => i.create?.error)?.create?.error));
+          let firstError: unknown;
+          for (const item of res.items) {
+            const status = item.create?.status ?? 0;
+            if (status >= 200 && status < 300) this.pushStats.push_ok++;
+            else if (status === 409) this.pushStats.push_duplicate++;
+            else {
+              this.pushStats.push_dropped++;
+              firstError = firstError ?? item.create?.error;
+            }
+          }
+          if (firstError && Date.now() - this.lastPushError > 60000) {
+            this.lastPushError = Date.now();
+            this.logger.warn(`research sample push dropped docs: ${JSON.stringify(firstError)}`);
+          }
         }
+        // Advance past everything attempted (successes, duplicates and counted drops).
         const lastMain = data.main.samples.at(-1)?.seq;
         const lastWorker = data.worker.samples.at(-1)?.seq;
         if (lastMain) this.pushed.main = lastMain;
         if (lastWorker) this.pushed.worker = lastWorker;
       } catch (e) {
+        // Whole-request failure (network, auth): cursors not advanced; retried next interval
+        // with the same deterministic ids, so no duplicates.
+        this.pushStats.push_failed_batches++;
         if (Date.now() - this.lastPushError > 60000) {
           this.lastPushError = Date.now();
           this.logger.warn(`research sample push failed: ${e.message}`);

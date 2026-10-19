@@ -122,6 +122,7 @@ export class TickScheduler {
   private timer?: NodeJS.Timeout;
   private nextIndex = 0;
   private scheduledUntil = 0;
+  private scheduled: Array<{ id: string; runAt: number }> = [];
 
   constructor(
     private readonly taskManager: TaskManagerStartContract,
@@ -141,6 +142,7 @@ export class TickScheduler {
     aheadMs?: number;
   }): void {
     this.stop();
+    this.scheduled = [];
     const t0 = Math.ceil((Date.now() + 2000) / intervalMs) * intervalMs;
     const endAt = t0 + durationS * 1000;
     this.nextIndex = 0;
@@ -161,19 +163,25 @@ export class TickScheduler {
         this.scheduledUntil += intervalMs;
       }
       if (tasks.length) {
-        try {
-          // NB: bulkSchedule() overwrites caller-supplied runAt with now (+jitter), so ticks
-          // are scheduled individually to keep their intended runAt.
-          await Promise.all(tasks.map((task) => this.taskManager.schedule(task)));
-          this.recorder.push({
-            source: 'tick_scheduled',
-            ts: Date.now(),
-            count: tasks.length,
-            series_id: seriesId,
-          });
-        } catch (e) {
-          this.logger.warn(`tick scheduling failed: ${e.message}`);
-        }
+        // NB: bulkSchedule() overwrites caller-supplied runAt with now (+jitter), so ticks
+        // are scheduled individually to keep their intended runAt.
+        const results = await Promise.allSettled(
+          tasks.map((task) => this.taskManager.schedule(task))
+        );
+        const ok = tasks.filter((_, i) => results[i].status === 'fulfilled');
+        for (const task of ok) this.scheduled.push({ id: task.id, runAt: task.runAt.getTime() });
+        // Scheduled tick ids/runAts are the denominator for tick coverage in scorecards.
+        this.recorder.push({
+          source: 'tick_scheduled',
+          ts: Date.now(),
+          count: ok.length,
+          failed: tasks.length - ok.length,
+          series_id: seriesId,
+          ids: ok.map((task) => task.id),
+          run_ats: ok.map((task) => task.runAt.getTime()),
+        });
+        if (ok.length < tasks.length)
+          this.logger.warn(`tick scheduling failed for ${tasks.length - ok.length} ticks`);
       }
       if (this.scheduledUntil >= endAt) this.stop();
     };
@@ -184,5 +192,14 @@ export class TickScheduler {
   public stop(): void {
     if (this.timer) clearInterval(this.timer);
     this.timer = undefined;
+  }
+
+  /** Stops scheduling and removes this series' ticks that are still in the future. */
+  public async stopAndRemoveFuture(): Promise<{ removed: number }> {
+    this.stop();
+    const future = this.scheduled.filter((s) => s.runAt > Date.now() + 2000).map((s) => s.id);
+    this.scheduled = this.scheduled.filter((s) => !future.includes(s.id));
+    if (future.length) await this.taskManager.bulkRemove(future).catch(() => undefined);
+    return { removed: future.length };
   }
 }

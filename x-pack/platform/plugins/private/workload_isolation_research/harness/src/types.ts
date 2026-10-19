@@ -41,6 +41,8 @@ export interface Scenario {
   readonly ticks: { readonly intervalMs: number };
   /** Optional emulated external supervisor (kill after stall ms) for non-terminating offenders. */
   readonly superviseKillAfterMs?: number;
+  /** Driver touches no plugin endpoint (plugin may be disabled); laptop probe + ps sampling only. */
+  readonly externalOnly?: boolean;
 }
 
 /** Run manifest; fields follow the programme PRD (Data and provenance). */
@@ -70,8 +72,12 @@ export interface RunManifest {
     name: string;
     start: number;
     end: number;
+    action?: string;
+    completed_at?: unknown;
     offender_result?: Record<string, unknown>;
   }>;
   notes: string[];
+  /** Reasons that make the whole run invalid (phase failures, audit failures, …). */
+  invalid_reasons: string[];
   status: 'running' | 'complete' | 'failed';
 }

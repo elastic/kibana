@@ -50,7 +50,70 @@ const fieldCapsDose = (label: string, seed: Record<string, number>): Phase[] => 
   },
 ];
 
+const sliceCalibration = (): Phase[] => {
+  const out: Phase[] = [];
+  for (const dose of [10, 20, 50, 100, 200]) {
+    for (let rep = 1; rep <= 5; rep++) {
+      out.push({
+        name: `cal-${dose}ms-${rep}`,
+        durationS: 3,
+        offender: { kind: 'cpu_spin', mode: 'route', doseMs: dose },
+      });
+    }
+  }
+  return out;
+};
+
+/** Interleaved matched-duration idle windows (A/A): quantifies the noise of in-pod ratios. */
+const aaWindows = (pairs: number, windowS: number): Phase[] =>
+  Array.from({ length: pairs }, (_, i) => [
+    { name: `aa-A-${i + 1}`, durationS: windowS, action: 'idle' },
+    { name: `aa-B-${i + 1}`, durationS: windowS, action: 'idle' },
+  ]).flat();
+
 export const SCENARIOS: Record<string, Scenario> = {
+  /** Slice-proxy calibration: known short route doses, 5 repetitions each. */
+  'slice-calibration': {
+    name: 'slice-calibration',
+    description:
+      'cpu_spin route 10/20/50/100/200 ms x5; compares main-side heartbeat gaps with measured block.',
+    probe,
+    laptopProbe,
+    ticks,
+    phases: [
+      { name: 'warmup', durationS: 10 },
+      { name: 'baseline', durationS: 30 },
+      ...sliceCalibration(),
+    ],
+  },
+  /** A/A trials: 10 pairs of 30 s idle windows. */
+  'aa-trials': {
+    name: 'aa-trials',
+    description:
+      'Interleaved idle A/B windows (no treatment) to measure ratio noise and the minimum detectable effect.',
+    probe,
+    laptopProbe,
+    ticks,
+    phases: [
+      { name: 'warmup', durationS: 15 },
+      { name: 'baseline', durationS: 30 },
+      ...aaWindows(10, 30),
+    ],
+  },
+  /** Perturbation calibration: idle only, measured externally (works with the plugin disabled). */
+  'idle-external': {
+    name: 'idle-external',
+    description:
+      'Laptop probe + external process sampling only; run with plugin enabled (instrumented) and disabled.',
+    probe,
+    laptopProbe: { rps: 10, path: '/api/spaces/space' },
+    ticks,
+    externalOnly: true,
+    phases: [
+      { name: 'warmup', durationS: 10 },
+      { name: 'baseline', durationS: 60 },
+    ],
+  },
   /** Harness self-check: one 10s CPU block from a route and from a task. */
   'red-demo': {
     name: 'red-demo',

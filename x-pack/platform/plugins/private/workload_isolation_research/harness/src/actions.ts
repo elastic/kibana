@@ -7,6 +7,7 @@
 
 import type { ActionContext } from './driver';
 import { API, kbn } from './kibana_client';
+import { awaitDrained, awaitTasks } from './await_tasks';
 
 type Action = (
   params: Record<string, unknown>,
@@ -23,6 +24,9 @@ const must = <T>(res: { status: number; body: T }, what: string): T => {
 
 /** Tier B driver actions (phase `action` names). */
 export const ACTIONS: Record<string, Action> = {
+  /** No-op treatment (A/A windows). */
+  idle: async () => ({ completed_at: Date.now() }),
+
   /** Seeds Tier B data through the research plugin (server-side, works on QAF without ES creds). */
   seed: async (params, { target, log }) => {
     if (process.env.WIR_ES_URL && process.env.WIR_ES_API_KEY) {
@@ -74,7 +78,15 @@ export const ACTIONS: Record<string, Action> = {
       'field-caps'
     );
     log(`field-caps ${JSON.stringify(params)} -> ${JSON.stringify(body).slice(0, 400)}`);
-    if (params.mode === 'task') await sleep(Number(params.waitS ?? 30) * 1000);
+    if (params.mode === 'task') {
+      // Phase completion: await the replay task by id (fail on timeout).
+      const done = await awaitTasks(
+        target,
+        [String(body.task_id)],
+        Number(params.timeoutS ?? 900) * 1000
+      );
+      return { ...body, completed_at: done.completedAt, waited_ms: done.waitedMs };
+    }
     return body;
   },
 
@@ -147,6 +159,9 @@ ${fieldLines}
     };
     log(`workflow-map ${JSON.stringify(params)} -> ${JSON.stringify(result).slice(0, 400)}`);
     await kbn(target, 'DELETE', `/api/workflows/workflow/${wf.id}`).catch(() => undefined);
+    if (status.status !== 'completed') {
+      throw new Error(`workflow execution ${execId} ended ${status.status ?? 'timeout'}`);
+    }
     return result;
   },
 
@@ -159,6 +174,8 @@ ${fieldLines}
     const calls = Number(params.calls ?? 5);
     const limit = Number(params.limit ?? 1000);
     const hang = params.hangMs ? `-hang${params.hangMs}` : '';
+    const secretRes = await kbn<{ secret: string }>(target, 'GET', `${API}/mock_llm/_secret`);
+    const mockSecret = must(secretRes, 'mock llm secret').secret;
     const connector = must(
       await kbn<{ id: string }>(target, 'POST', '/api/actions/connector', {
         name: `wir-mock-llm-${runId}`.slice(0, 100),
@@ -171,7 +188,8 @@ ${fieldLines}
           defaultModel: 'gpt-4',
           headers: { 'x-elastic-internal-origin': 'kibana' },
         },
-        secrets: { apiKey: 'research-mock' },
+        // Mock bearer secret (project-wide, superuser-readable) required by the canned LLM route.
+        secrets: { apiKey: mockSecret },
       }),
       'create mock llm connector'
     );
@@ -277,8 +295,16 @@ ${fieldLines}
     log(
       `alerting-esql status=${JSON.stringify({ es: status.execution_status, lr: status.last_run })}`
     );
-    // Let the enqueued action tasks drain before the phase tail.
-    await sleep(Number(params.drainS ?? 30) * 1000);
+    if (!status.last_run?.outcome && !status.execution_status) {
+      throw new Error(`alerting rule ${rule.id} did not execute within ${params.timeoutS ?? 600}s`);
+    }
+    // Phase completion: wait until the enqueued action tasks drained (fail on timeout).
+    const drained = await awaitDrained(
+      target,
+      ['actions:.index'],
+      Number(params.drainTimeoutS ?? 900) * 1000
+    );
+    log(`alerting-esql actions drained after ${drained.waitedMs} ms`);
     await kbn(target, 'POST', `/api/alerting/rule/${rule.id}/_disable`).catch(() => undefined);
     await kbn(target, 'DELETE', `/api/alerting/rule/${rule.id}`).catch(() => undefined);
     // Connector intentionally kept: queued action tasks still reference it (deleting it early
@@ -287,6 +313,8 @@ ${fieldLines}
       rule_id: rule.id,
       execution_status: status.execution_status,
       last_run: status.last_run,
+      completed_at: drained.completedAt,
+      drain_ms: drained.waitedMs,
     };
   },
 };

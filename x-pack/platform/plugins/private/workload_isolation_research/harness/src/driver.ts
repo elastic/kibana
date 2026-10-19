@@ -14,6 +14,7 @@ import type { KibanaTarget } from './kibana_client';
 import { API, kbn } from './kibana_client';
 import type { Phase, RunManifest, Scenario } from './types';
 import { LaptopProbe } from './laptop_probe';
+import { awaitTasks, taskStatus } from './await_tasks';
 
 export const DRIVER_VERSION = '0.1.0';
 
@@ -54,9 +55,15 @@ export class Collector {
   }
 
   public readonly seen = new Set<string>();
+  public readonly tickScheduled: Array<Record<string, unknown>> = [];
 
   public write(doc: Record<string, unknown>): void {
-    if (doc.thread !== 'driver') this.seen.add(`${doc.boot_id}|${doc.thread}|${doc.seq}`);
+    if (doc.thread !== 'driver') {
+      const key = `${doc.boot_id}|${doc.thread}|${doc.seq}`;
+      if (this.seen.has(key)) return;
+      this.seen.add(key);
+    }
+    if (doc.source === 'tick_scheduled') this.tickScheduled.push(doc);
     this.out.write(JSON.stringify(doc) + '\n');
     this.count++;
   }
@@ -170,15 +177,30 @@ const runPhase = async (
       Math.max(120000, phase.offender.doseMs * 3)
     ).catch((e) => ({ status: 0, body: { error: String(e) } as Record<string, unknown> }));
     result = { status, ...body };
+    if (status !== 200)
+      throw new Error(`offender request failed: ${status} ${JSON.stringify(body).slice(0, 300)}`);
     if (phase.offender.mode === 'task') {
-      // Allow the task to be claimed and to complete before the measurement tail.
-      await sleep(phase.offender.doseMs + 5000);
+      if (phase.offender.kind === 'infinite_loop') {
+        // Non-terminating by design: it never completes; wait its safety cap (documented).
+        await sleep(phase.offender.doseMs + 5000);
+      } else {
+        // Phase completion: await the task by id (fail on timeout) before the recovery tail.
+        const done = await awaitTasks(
+          opts.target,
+          [String(body.task_id)],
+          phase.offender.doseMs * 3 + 120000
+        );
+        result.completed_at = done.completedAt;
+      }
+    } else {
+      result.completed_at = Date.now();
     }
   }
   if (phase.action) {
     const action = opts.actions?.[phase.action];
     if (!action) throw new Error(`unknown action ${phase.action}`);
     result = await action(phase.actionParams ?? {}, ctx);
+    if (result && result.completed_at === undefined) result.completed_at = Date.now();
   }
   await sleep(phase.durationS * 1000);
   return result;
@@ -237,6 +259,7 @@ export const runScenario = async (opts: RunOptions): Promise<{ runId: string; di
     },
     phases: [],
     notes: [],
+    invalid_reasons: [],
     status: 'running',
   };
   const writeManifest = () =>
@@ -310,12 +333,20 @@ export const runScenario = async (opts: RunOptions): Promise<{ runId: string; di
       );
       const result = await runPhase(phase, opts, ctx);
       const end = now();
-      manifest.phases.push({ name: phase.name, start, end, offender_result: result });
+      manifest.phases.push({
+        name: phase.name,
+        start,
+        end,
+        action: phase.action,
+        completed_at: result?.completed_at,
+        offender_result: result,
+      });
       writeManifest();
     }
     manifest.status = 'complete';
   } catch (e) {
     manifest.status = 'failed';
+    manifest.invalid_reasons.push(`driver error: ${String(e)}`);
     manifest.notes.push(`driver error: ${String(e)}`);
     log(`ERROR ${String(e)}`);
   } finally {
@@ -359,6 +390,41 @@ export const runScenario = async (opts: RunOptions): Promise<{ runId: string; di
       if (!searchAfter) break;
     }
     manifest.notes.push(`es_push_export_added=${added}`);
+    // Tick audit: every scheduled tick (denominator) with its TM status. Ticks scheduled beyond
+    // the stop time were removed by ticks/_stop and are excluded; pending ticks are not "lost".
+    const stopAt = now();
+    const scheduled = collector.tickScheduled.flatMap((t) =>
+      ((t.ids as string[]) ?? []).map((id, i) => ({
+        id,
+        runAt: (t.run_ats as number[])[i],
+        series_id: t.series_id,
+      }))
+    );
+    const auditable = scheduled.filter((t) => t.runAt <= stopAt - 1000);
+    const statuses: Record<string, string> = {};
+    for (let i = 0; i < auditable.length; i += 1000) {
+      const res = await taskStatus(
+        target,
+        auditable.slice(i, i + 1000).map((t) => t.id)
+      ).catch((e) => {
+        manifest.invalid_reasons.push(`tick audit failed: ${String(e)}`);
+        return { statuses: {} as Record<string, string> };
+      });
+      Object.assign(statuses, res.statuses);
+    }
+    for (const t of auditable) {
+      collector.write({
+        source: 'tick_audit',
+        thread: 'driver',
+        pod: 'driver',
+        ts: t.runAt,
+        id: t.id,
+        index: Number(t.id.split('-').at(-1)),
+        series_id: t.series_id,
+        status: statuses[t.id] ?? 'unknown',
+      });
+    }
+    manifest.notes.push(`tick_audit scheduled=${scheduled.length} auditable=${auditable.length}`);
     await collector.close();
     const info = await kbn<Record<string, unknown>>(target, 'GET', `${API}/info`).catch(() => ({
       status: 0,
