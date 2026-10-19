@@ -30,27 +30,9 @@ const persistVisited = (): void => {
   }
 };
 
-/** Cleared on remount so Strict Mode / HMR do not treat a fake unmount as a real leave. */
-let pendingPersistTimeout: ReturnType<typeof setTimeout> | undefined;
-
-const cancelPendingPersist = (): void => {
-  if (pendingPersistTimeout !== undefined) {
-    clearTimeout(pendingPersistTimeout);
-    pendingPersistTimeout = undefined;
-  }
-};
-
-const schedulePersistOnLeave = (): void => {
-  cancelPendingPersist();
-  pendingPersistTimeout = setTimeout(() => {
-    pendingPersistTimeout = undefined;
-    persistVisited();
-  }, 0);
-};
-
 export interface UseV2RulesTabNewBadgeOptions {
   /**
-   * When true, unmount while Universal is selected schedules a deferred persist
+   * When true, unmount while Universal is selected persists the dismissal
    * (SPA `navigateToApp` leave). Enable only at a stable Universal shell
    * (e.g. RulesApp / Observability host) — not on RulesListHeader, which unmounts
    * for in-app rule details without leaving Universal.
@@ -65,9 +47,8 @@ export interface UseV2RulesTabNewBadgeOptions {
  * Dismissal paths:
  * - SPA tab switch: `isSelected` goes from true to false
  * - Full page unload: `pagehide` while selected
- * - SPA app leave (`navigateToApp`): deferred unmount persist when
- *   `persistOnUnmount` is enabled on a stable shell — Strict Mode / HMR remounts
- *   cancel the pending write on the next mount
+ * - SPA app leave (`navigateToApp`): unmount persist when `persistOnUnmount`
+ *   is enabled on a stable shell
  */
 export const useV2RulesTabNewBadge = (
   isSelected: boolean,
@@ -96,11 +77,8 @@ export const useV2RulesTabNewBadge = (
   }, [isSelected, markVisited]);
 
   useEffect(() => {
-    cancelPendingPersist();
-
     const onPageHide = () => {
       if (isSelectedRef.current) {
-        cancelPendingPersist();
         persistVisited();
       }
     };
@@ -108,7 +86,7 @@ export const useV2RulesTabNewBadge = (
     return () => {
       window.removeEventListener('pagehide', onPageHide);
       if (persistOnUnmountRef.current && isSelectedRef.current) {
-        schedulePersistOnLeave();
+        persistVisited();
       }
     };
   }, []);
