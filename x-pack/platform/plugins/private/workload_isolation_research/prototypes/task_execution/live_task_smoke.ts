@@ -6,6 +6,7 @@
  */
 
 import assert from 'node:assert/strict';
+import { once } from 'node:events';
 import { spawn } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
 import type { ChildProcess } from 'node:child_process';
@@ -17,6 +18,7 @@ import {
   existsSync,
   unlinkSync,
   readFileSync,
+  rmSync,
 } from 'node:fs';
 import { createServer } from 'node:net';
 import { join, resolve } from 'node:path';
@@ -50,6 +52,11 @@ const kibanaPort = Number(process.env.WIR_KIBANA_PORT ?? 5621);
 const esPort = Number(process.env.WIR_ES_PORT ?? 9221);
 const transportPort = Number(process.env.WIR_ES_TRANSPORT_PORT ?? 9321);
 const headless = process.env.WIR_HEADLESS === '1';
+const scored = process.env.WIR_SCORED === '1';
+const benchLock =
+  '/Users/jloleysens/.agentic-work/projects/kibana/workload-isolation-research/bench.lock';
+let ownsLock = false;
+assert.ok(!(headless && scored), 'Headless boot is not a comparative score');
 const localPassword = randomBytes(32).toString('hex');
 const authorization = `Basic ${Buffer.from(`elastic:${localPassword}`).toString('base64')}`;
 const evidence = process.env.WIR_EVIDENCE_DIR;
@@ -78,7 +85,7 @@ const groupAlive = (pid: number): boolean => {
     return false;
   }
 };
-const start = (role: string, args: string[], ports: number[]): void => {
+const start = (role: string, args: string[], ports: number[]): ChildProcess => {
   const fd = openSync(join(evidence, `${runId}_${role}.log`), 'w', 0o600);
   const child = spawn(process.execPath, args, {
     cwd: root,
@@ -90,6 +97,8 @@ const start = (role: string, args: string[], ports: number[]): void => {
       WIR_ES_PORT: String(esPort),
       WIR_ES_TRANSPORT_PORT: String(transportPort),
       WIR_LOCAL_ES_PASSWORD: localPassword,
+      WIR_KIBANA_URL: `http://127.0.0.1:${kibanaPort}`,
+      WIR_KIBANA_BASIC: `elastic:${localPassword}`,
       KBN_RESEARCH_HEADLESS_BOOT: headless ? '1' : '0',
     },
   });
@@ -98,6 +107,7 @@ const start = (role: string, args: string[], ports: number[]): void => {
   children.push(child);
   resources.push({ role, pid: child.pid, cwd: root, ports });
   checkpoint('running_owned_foreground_stack');
+  return child;
 };
 const waitUntil = async (
   condition: () => Promise<boolean>,
@@ -167,10 +177,33 @@ const terminal = async (taskId: string): Promise<Sample> => {
   return found;
 };
 const runId = process.env.WIR_RUN_ID ?? 'unregistered';
-assert.match(runId, /^t1-phase-b-live-\d{3}$/);
+assert.match(runId, /^(t1-phase-b-live|t1-scoring-local)-\d{3}$/);
 const configPath = join(evidence, `${runId}_runtime_config.json`);
 checkpoint('starting');
 try {
+  if (scored) {
+    for (;;) {
+      controller.signal.throwIfAborted();
+      try {
+        mkdirSync(benchLock);
+        ownsLock = true;
+        writeFileSync(
+          join(benchLock, 'owner.json'),
+          JSON.stringify({
+            track: 1,
+            owner: runId,
+            pid: process.pid,
+            start: new Date().toISOString(),
+          })
+        );
+        break;
+      } catch (error) {
+        if (!(error instanceof Error) || !('code' in error) || error.code !== 'EEXIST') throw error;
+        checkpoint('waiting_for_benchmark_lock');
+        await delay(10000);
+      }
+    }
+  }
   await Promise.all([kibanaPort, esPort, transportPort].map(assertPortFree));
   start(
     'es',
@@ -231,7 +264,7 @@ try {
         : []),
       '--config',
       configPath,
-      '--xpack.workload_isolation_research.pushToEs=false',
+      `--xpack.workload_isolation_research.pushToEs=${scored}`,
     ],
     [kibanaPort]
   );
@@ -252,7 +285,56 @@ try {
       90000,
       'local Kibana'
     );
-  if (headless) {
+  if (scored) {
+    const scenarios = [
+      't1-task-curve-main',
+      't1-task-curve-thread',
+      't1-task-curve-main',
+      't1-task-curve-thread',
+      't1-worker-supervised',
+      't1-field-caps-bytes',
+    ];
+    for (const [index, scenario] of scenarios.entries()) {
+      const child = start(
+        `driver-${index}-${scenario}`,
+        [
+          'x-pack/platform/plugins/private/workload_isolation_research/harness/run.js',
+          'run',
+          '--scenario',
+          scenario,
+          '--lane',
+          'track-1',
+          '--variant',
+          `${scenario}-${index}`,
+          '--baseline-commit',
+          '6e854e8b8dce1b62b310b2ca9600ee3b7118ed7a',
+          '--hypothesis',
+          'Main task doses disrupt combined-role control; worker task doses preserve it; termination is failed work, not task success.',
+          '--expected',
+          JSON.stringify({
+            local_main_10s_probe_p95_ratio_min: 10,
+            thread_probe_p95_ratio_max: 2,
+            local_thread_main_gap_ms_max: 50,
+            nonterminating_worker_expected_outcome: 'terminated_and_tm_failed',
+            p99_inference: false,
+            pair_repetitions_per_arm: 2,
+            field_caps_main_data_copy_remains: true,
+          }),
+          '--config-overrides',
+          JSON.stringify({
+            scored_local_owner: runId,
+            bench_lock: benchLock,
+            roles: 'combined',
+            in_pod_probe_both_arms: true,
+          }),
+        ],
+        []
+      );
+      const [exit] = await once(child, 'exit', { signal: controller.signal });
+      assert.equal(exit, 0, `Driver ${scenario} failed; inspect validity before using any scores`);
+      checkpoint(`completed_driver_${index}_${scenario}`);
+    }
+  } else if (headless) {
     const kibanaLog = join(evidence, `${runId}_kibana.log`);
     await waitUntil(
       async () => readFileSync(kibanaLog, 'utf8').includes('Kibana is now available'),
@@ -288,7 +370,7 @@ try {
       assert.equal(response.status, 200);
       return ((await response.json()) as { count: number }).count;
     };
-    console.log(
+    process.stdout.write(
       JSON.stringify({
         run_id: runId,
         correctness_only: true,
@@ -303,7 +385,7 @@ try {
         startup_scheduling_logs: (log.match(/scheduled/g) ?? []).length,
         limits:
           'full_default_plugin_graph_not_minimal_island; no_task_dispatch_or_telemetry_delivery_proof_no_scores',
-      })
+      }) + '\n'
     );
   } else {
     const before = await api<Info>('info');
@@ -350,7 +432,7 @@ try {
     });
     const recovered = await terminal(recovery.task_id);
     assert.equal(recovered.outcome, 'success');
-    console.log(
+    process.stdout.write(
       JSON.stringify({
         run_id: runId,
         correctness_only: true,
@@ -360,7 +442,7 @@ try {
         runaway: killed,
         recovery: recovered,
         limits: 'local_superuser_correctness_only; no_scores_no_adoption_no_QAF',
-      })
+      }) + '\n'
     );
   }
 } finally {
@@ -375,5 +457,13 @@ try {
     })
   );
   if (existsSync(configPath)) unlinkSync(configPath);
+  if (ownsLock && resources.every(({ stopped }) => stopped)) {
+    const owner = JSON.parse(readFileSync(join(benchLock, 'owner.json'), 'utf8')) as {
+      owner: string;
+    };
+    assert.equal(owner.owner, runId);
+    rmSync(benchLock, { recursive: true });
+    ownsLock = false;
+  }
   checkpoint(resources.every(({ stopped }) => stopped) ? 'stopped' : 'cleanup_failed');
 }

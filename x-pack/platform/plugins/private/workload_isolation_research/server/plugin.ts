@@ -55,10 +55,15 @@ export class WorkloadIsolationResearchPlugin implements Plugin<void, void, Setup
   public setup(core: CoreSetup<StartDeps>, { taskManager }: SetupDeps): void {
     const getRecorder = () => this.recorder;
     registerResearchTasks(taskManager, getRecorder, this.isolatedExecutor);
-    registerTierBTasks(taskManager, getRecorder, async () => {
-      const [coreStart] = await core.getStartServices();
-      return coreStart.elasticsearch.client.asInternalUser;
-    });
+    registerTierBTasks(
+      taskManager,
+      getRecorder,
+      async () => {
+        const [coreStart] = await core.getStartServices();
+        return coreStart.elasticsearch.client.asInternalUser;
+      },
+      this.isolatedExecutor
+    );
     const getStart = async () => {
       const [coreStart, { taskManager: tm }] = await core.getStartServices();
       if (!this.ticks) this.ticks = new TickScheduler(tm, this.logger, this.recorder);

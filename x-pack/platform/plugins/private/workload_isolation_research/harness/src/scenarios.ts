@@ -6,6 +6,7 @@
  */
 
 import type { OffenderSpec, Phase, Scenario } from './types';
+import { ISOLATED_SCENARIOS } from './isolated_scenarios';
 
 const probe = { rps: 10, path: '/api/spaces/space' };
 const laptopProbe = { rps: 2, path: '/api/spaces/space' };
@@ -72,6 +73,7 @@ const aaWindows = (pairs: number, windowS: number): Phase[] =>
   ]).flat();
 
 export const SCENARIOS: Record<string, Scenario> = {
+  ...ISOLATED_SCENARIOS,
   /** Slice-proxy calibration: known short route doses, 5 repetitions each. */
   'slice-calibration': {
     name: 'slice-calibration',

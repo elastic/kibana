@@ -15,6 +15,7 @@ import type {
 import { TaskCost, TaskPriority } from '@kbn/task-manager-plugin/server';
 import { epochNow } from '../lib/clock';
 import type { Recorder } from '../lib/recorder';
+import type { IsolatedTaskExecutor } from '../lib/isolated_task_executor';
 import { runFieldCaps } from './field_caps';
 import { seedAlertingWide, seedFieldCaps } from '../../common/seed';
 
@@ -26,7 +27,8 @@ const options = { access: 'internal' as const };
 export const registerTierBTasks = (
   taskManager: TaskManagerSetupContract,
   getRecorder: () => Recorder,
-  getEs: () => Promise<ElasticsearchClient>
+  getEs: () => Promise<ElasticsearchClient>,
+  isolatedExecutor: IsolatedTaskExecutor
 ) => {
   taskManager.registerTaskDefinitions({
     [FIELD_CAPS_TASK_TYPE]: {
@@ -39,23 +41,40 @@ export const registerTierBTasks = (
       paramsSchema: schema.object({
         repeat: schema.number({ min: 1, max: 1000 }),
         decompose: schema.boolean(),
+        execution: schema.maybe(schema.oneOf([schema.literal('main'), schema.literal('thread')])),
         runId: schema.maybe(schema.string({ maxLength: 256 })),
       }),
-      createTaskRunner: ({ taskInstance }) => ({
+      createTaskRunner: ({ taskInstance, signal, executionUuid }) => ({
         run: async () => {
-          const { repeat, decompose, runId } = taskInstance.params as {
+          const { repeat, decompose, runId, execution } = taskInstance.params as {
             repeat: number;
             decompose: boolean;
             runId?: string;
+            execution?: 'main' | 'thread';
           };
           const ts = epochNow();
-          const result = await runFieldCaps(await getEs(), { repeat, decompose });
+          let dispatch = 0;
+          const result = await runFieldCaps(await getEs(), {
+            repeat,
+            decompose,
+            ...(execution === 'thread'
+              ? {
+                  shapeOffMain: (bytes: ArrayBuffer, pattern: string) =>
+                    isolatedExecutor.run(
+                      'field_caps',
+                      { module: 'field_caps', bytes, pattern },
+                      { signal, executionId: `${executionUuid}-${dispatch++}`, killAfterMs: 60000 }
+                    ),
+                }
+              : {}),
+          });
           getRecorder().push({
             source: 'tier_b',
             ts,
             end: epochNow(),
             replay: 'field_caps',
             mode: 'task',
+            execution: execution ?? 'main',
             run_id: runId,
             task_id: taskInstance.id,
             ...result,
@@ -119,6 +138,9 @@ export const registerTierBRoutes = (
         body: schema.object({
           repeat: schema.number({ defaultValue: 5, min: 1, max: 1000 }),
           decompose: schema.boolean({ defaultValue: true }),
+          execution: schema.oneOf([schema.literal('main'), schema.literal('thread')], {
+            defaultValue: 'main',
+          }),
           mode: schema.oneOf([schema.literal('route'), schema.literal('task')], {
             defaultValue: 'route',
           }),
@@ -127,13 +149,18 @@ export const registerTierBRoutes = (
       },
     },
     async (ctx, req, res) => {
-      const { repeat, decompose, mode, runId } = req.body;
+      const { repeat, decompose, mode, runId, execution } = req.body;
+      if (execution === 'thread' && (mode !== 'task' || !decompose)) {
+        return res.badRequest({
+          body: { message: 'Thread execution requires task mode and decomposed streaming' },
+        });
+      }
       const recorder = getRecorder();
       if (mode === 'task') {
         const { taskManager } = await getStart();
         const task = await taskManager.schedule({
           taskType: FIELD_CAPS_TASK_TYPE,
-          params: { repeat, decompose, runId },
+          params: { repeat, decompose, runId, execution },
           state: {},
         });
         return res.ok({ body: { mode, task_id: task.id, pod: recorder.pod } });

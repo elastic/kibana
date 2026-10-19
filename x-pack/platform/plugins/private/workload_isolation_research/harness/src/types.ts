@@ -20,6 +20,8 @@ export interface OffenderSpec {
   readonly doseMs: number;
   readonly mode: 'route' | 'task';
   readonly sizeMb?: number;
+  readonly execution?: 'main' | 'thread';
+  readonly killAfterMs?: number;
 }
 
 export interface Phase {

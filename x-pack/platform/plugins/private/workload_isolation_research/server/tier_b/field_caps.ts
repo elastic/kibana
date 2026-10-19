@@ -9,6 +9,7 @@ import { performance } from 'perf_hooks';
 import type { Readable } from 'stream';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
+import type { FieldCapsResponse } from '../lib/isolated_task_protocol';
 
 export { FIELD_CAPS_PREFIX, seedFieldCaps } from '../../common/seed';
 import { FIELD_CAPS_PREFIX } from '../../common/seed';
@@ -30,6 +31,8 @@ export interface FieldCapsRunResult {
   readonly e2e_ms: number;
   readonly max_sync_ms: number;
   readonly heap_delta_mb: number;
+  readonly worker_thread_id?: number;
+  readonly transferred_bytes: number;
 }
 
 /**
@@ -42,7 +45,13 @@ export const runFieldCaps = async (
     repeat,
     pattern = `${FIELD_CAPS_PREFIX}*`,
     decompose = true,
-  }: { repeat: number; pattern?: string; decompose?: boolean }
+    shapeOffMain,
+  }: {
+    repeat: number;
+    pattern?: string;
+    decompose?: boolean;
+    shapeOffMain?: (bytes: ArrayBuffer, pattern: string) => Promise<FieldCapsResponse>;
+  }
 ): Promise<FieldCapsRunResult> => {
   let io = 0;
   let decode = 0;
@@ -52,6 +61,9 @@ export const runFieldCaps = async (
   let bytes = 0;
   let fields = 0;
   let maxSync = 0;
+  let transferredBytes = 0;
+  let workerThreadId: number | undefined;
+  if (shapeOffMain && !decompose) throw new Error('Off-main field caps requires streamed bytes');
   const heap0 = process.memoryUsage().heapUsed;
   for (let r = 0; r < repeat; r++) {
     if (decompose) {
@@ -69,6 +81,23 @@ export const runFieldCaps = async (
       );
       const buf = await readStream(res.body as unknown as Readable);
       const t1 = performance.now();
+      if (shapeOffMain) {
+        // Dedicated backing store: transferring a pooled Buffer may clone or expose unrelated bytes.
+        const owned = new ArrayBuffer(buf.length);
+        new Uint8Array(owned).set(buf);
+        maxSync = Math.max(maxSync, performance.now() - t1);
+        const response = await shapeOffMain(owned, pattern);
+        const result = response.result;
+        io += t1 - t0;
+        decode += result.decode_ms;
+        parse += result.parse_ms;
+        shape += result.shape_ms;
+        bytes += buf.length;
+        transferredBytes += buf.length;
+        fields = result.fields;
+        workerThreadId = response.threadId;
+        continue;
+      }
       const text = buf.toString('utf8');
       const t2 = performance.now();
       const parsed = JSON.parse(text);
@@ -102,5 +131,7 @@ export const runFieldCaps = async (
     e2e_ms: e2e,
     max_sync_ms: maxSync,
     heap_delta_mb: (process.memoryUsage().heapUsed - heap0) / 1048576,
+    worker_thread_id: workerThreadId,
+    transferred_bytes: transferredBytes,
   };
 };

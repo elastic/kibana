@@ -11,10 +11,20 @@ import type {
   IsolatedTaskClass,
   IsolatedTaskRequest,
   IsolatedTaskResult,
+  OffenderRequest,
+  OffenderResponse,
+  FieldCapsRequest,
+  FieldCapsResponse,
 } from './isolated_task_protocol';
 
 import type { StopReason } from './isolated_task_terminated_error';
 import { IsolatedTaskTerminatedError } from './isolated_task_terminated_error';
+
+interface RunControl {
+  executionId: string;
+  signal: AbortSignal;
+  killAfterMs?: number;
+}
 
 interface PoolEntry {
   readonly pool: Piscina<IsolatedTaskRequest, IsolatedTaskResult>;
@@ -34,12 +44,18 @@ export class IsolatedTaskExecutor {
 
   public async run(
     workloadClass: IsolatedTaskClass,
+    request: OffenderRequest,
+    control: RunControl
+  ): Promise<OffenderResponse>;
+  public async run(
+    workloadClass: IsolatedTaskClass,
+    request: FieldCapsRequest,
+    control: RunControl
+  ): Promise<FieldCapsResponse>;
+  public async run(
+    workloadClass: IsolatedTaskClass,
     request: IsolatedTaskRequest,
-    {
-      executionId,
-      signal,
-      killAfterMs = 30000,
-    }: { executionId: string; signal: AbortSignal; killAfterMs?: number }
+    { executionId, signal, killAfterMs = 30000 }: RunControl
   ): Promise<IsolatedTaskResult> {
     if (signal.aborted) throw new IsolatedTaskTerminatedError('cancelled', [], false);
     const entry = await this.getPool(workloadClass);
@@ -59,7 +75,10 @@ export class IsolatedTaskExecutor {
     const timer =
       killAfterMs === undefined ? undefined : setTimeout(() => stop('deadline'), killAfterMs);
     try {
-      const result = await entry.pool.run(request, { signal: controller.signal });
+      const result = await entry.pool.run(request, {
+        signal: controller.signal,
+        ...(request.module === 'field_caps' ? { transferList: [request.bytes] } : {}),
+      });
       if (entry.reset) {
         await entry.reset;
         throw this.terminationFor(entry, executionId);

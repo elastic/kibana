@@ -1,24 +1,26 @@
 {
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
-    "target": "ES2023",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "strict": true,
     "noEmit": true,
-    "skipLibCheck": true,
     "esModuleInterop": true,
     "allowImportingTsExtensions": true,
     "types": ["node"],
     "typeRoots": ["/Users/jloleysens/repos/work/kibana/node_modules/@types"],
-    "paths": {
-      "esbuild": ["/Users/jloleysens/repos/work/kibana/node_modules/esbuild/lib/main.d.ts"],
-      "peggy": ["/Users/jloleysens/repos/work/kibana/node_modules/peggy/lib/peg.d.ts"],
-      "@kbn/*": [
-        "/Users/jloleysens/repos/work/kibana/node_modules/@kbn/*/target/types",
-        "/Users/jloleysens/repos/work/kibana/node_modules/@kbn/*"
-      ],
-      "*": ["/Users/jloleysens/repos/work/kibana/node_modules/*"]
-    }
+    "outDir": "target/types",
   },
-  "include": ["task_execution/*.ts", "task_capsule/*.ts", "task_capsule/*.cts"]
+  "include": ["task_execution/*.ts", "task_capsule/*.ts", "task_capsule/*.cts"],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/logging",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/core-saved-objects-base-server-internal",
+    "@kbn/core-saved-objects-migration-server-internal",
+    "@kbn/core-saved-objects-api-server-internal",
+    "@kbn/es",
+  ]
 }

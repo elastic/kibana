@@ -8,11 +8,12 @@
 import type { Logger } from '@kbn/core/server';
 import { IsolatedTaskExecutor } from './isolated_task_executor';
 import { IsolatedTaskTerminatedError } from './isolated_task_terminated_error';
-import type { IsolatedTaskRequest } from './isolated_task_protocol';
+import { shapeFieldCapsBytes } from '../tier_b/field_caps_shape';
+import type { OffenderRequest } from './isolated_task_protocol';
 
 jest.setTimeout(20000);
 
-const request = (kind: 'cpu_spin' | 'infinite_loop', doseMs = 20): IsolatedTaskRequest => ({
+const request = (kind: 'cpu_spin' | 'infinite_loop', doseMs = 20): OffenderRequest => ({
   module: 'offender',
   params: { kind, doseMs },
 });
@@ -61,6 +62,30 @@ describe('research isolated task class pools', () => {
     } finally {
       clearTimeout(timer);
     }
+  });
+
+  it('transfers field-caps bytes, shapes with the real fetcher off-main, and returns only a summary', async () => {
+    const encoded = Buffer.from(
+      JSON.stringify({
+        indices: ['test'],
+        fields: {
+          foo: { keyword: { type: 'keyword', searchable: true, aggregatable: true } },
+          count: { long: { type: 'long', searchable: true, aggregatable: true } },
+        },
+      })
+    );
+    const owned = new ArrayBuffer(encoded.length);
+    new Uint8Array(owned).set(encoded);
+    const expected = await shapeFieldCapsBytes(owned.slice(0), 'test');
+    const result = await executor.run(
+      'field_caps',
+      { module: 'field_caps', bytes: owned, pattern: 'test' },
+      options('field-caps')
+    );
+    expect(owned.byteLength).toBe(0);
+    expect(result.threadId).toBeGreaterThan(0);
+    expect(result.result.fields).toBe(2);
+    expect(result.result.field_digest).toBe(expected.field_digest);
   });
 
   it('confirms termination of a genuinely infinite module and recreates a usable pool', async () => {

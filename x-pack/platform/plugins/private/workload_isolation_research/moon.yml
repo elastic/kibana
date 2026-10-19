@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/config-schema'
   - '@kbn/task-manager-plugin'
   - '@kbn/data-views-plugin'
+  - '@kbn/setup-node-env'
 tags:
   - plugin
   - prod

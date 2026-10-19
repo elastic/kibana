@@ -72,7 +72,13 @@ export const ACTIONS: Record<string, Action> = {
         target,
         'POST',
         `${API}/tier_b/field_caps`,
-        { repeat: params.repeat, decompose: params.decompose, mode: params.mode, runId },
+        {
+          repeat: params.repeat,
+          decompose: params.decompose,
+          mode: params.mode,
+          execution: params.execution,
+          runId,
+        },
         30 * 60 * 1000
       ),
       'field-caps'

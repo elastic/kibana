@@ -15,6 +15,7 @@ import { API, kbn } from './kibana_client';
 import type { Phase, RunManifest, Scenario } from './types';
 import { LaptopProbe } from './laptop_probe';
 import { awaitTasks, taskStatus } from './await_tasks';
+import { awaitExpectedTermination } from './await_termination';
 import { buildExpected } from './expected';
 
 export const DRIVER_VERSION = '0.1.0';
@@ -192,8 +193,17 @@ const runPhase = async (
     if (status !== 200)
       throw new Error(`offender request failed: ${status} ${JSON.stringify(body).slice(0, 300)}`);
     if (phase.offender.mode === 'task') {
-      if (phase.offender.kind === 'infinite_loop') {
-        // Non-terminating by design: it never completes; wait its safety cap (documented).
+      if (phase.offender.kind === 'infinite_loop' && phase.offender.execution === 'thread') {
+        const done = await awaitExpectedTermination(
+          opts.target,
+          String(body.task_id),
+          ctx.runId,
+          (phase.offender.killAfterMs ?? 30000) + 120000
+        );
+        result.completed_at = done.completedAt;
+        result.expected_termination = done.terminal;
+      } else if (phase.offender.kind === 'infinite_loop') {
+        // Main control: retains the harness safety cap and optional external supervisor.
         await sleep(phase.offender.doseMs + 5000);
       } else {
         // Phase completion: await the task by id (fail on timeout) before the recovery tail.

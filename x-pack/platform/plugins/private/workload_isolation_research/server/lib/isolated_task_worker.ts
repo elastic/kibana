@@ -13,6 +13,11 @@ import type { IsolatedTaskRequest, IsolatedTaskResult } from './isolated_task_pr
 export const executeIsolatedTask = async (
   request: IsolatedTaskRequest
 ): Promise<IsolatedTaskResult> => {
+  if (request.module === 'field_caps') {
+    const { shapeFieldCapsBytes } = await import('../tier_b/field_caps_shape');
+    const result = await shapeFieldCapsBytes(request.bytes, request.pattern);
+    return { module: 'field_caps', result, threadId, heapUsed: process.memoryUsage().heapUsed };
+  }
   if (request.module !== 'offender') throw new Error('Unknown research task module');
   if (request.params.kind === 'infinite_loop') {
     // No safety cap in the discardable isolate: only independent supervision can stop this.
@@ -21,5 +26,5 @@ export const executeIsolatedTask = async (
     }
   }
   const result = await runOffender(request.params);
-  return { result, threadId, heapUsed: process.memoryUsage().heapUsed };
+  return { module: 'offender', result, threadId, heapUsed: process.memoryUsage().heapUsed };
 };

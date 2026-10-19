@@ -169,7 +169,8 @@ export const runCapsuleProbe = async (
       migrator,
       registry,
       '.kibana',
-      client as ElasticsearchClient,
+      // Fixture-only interop between installed ES declaration graphs; the real get transport is tested.
+      client as unknown as ElasticsearchClient,
       logger,
       [type]
     );
