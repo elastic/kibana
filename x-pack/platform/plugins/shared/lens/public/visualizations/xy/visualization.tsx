@@ -25,7 +25,7 @@ import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { AreaFillOptions, LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import { type AccessorConfig, DimensionTrigger } from '@kbn/visualization-ui-components';
@@ -72,7 +72,12 @@ import type {
   XYByValueAnnotationLayerConfig,
   XYVisualizationState,
 } from './types';
-import { visualizationSubtypes, visualizationTypes, defaultSeriesType } from './types';
+import {
+  visualizationSubtypes,
+  visualizationTypes,
+  defaultSeriesType,
+  defaultAreaFill,
+} from './types';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
 import {
   getAccessorColorConfigs,
@@ -1361,7 +1366,7 @@ export const applyChartDefaultsIfNeeded = (
 
   return {
     ...state,
-    areaFill: AreaFillOptions.SOLID,
+    areaFill: defaultAreaFill,
   };
 };
 

@@ -45,9 +45,10 @@ describe('showSessionWarnings', () => {
     core.overlays.openModal.mockReturnValue(modal);
     const warnings: DiscoverSessionWarning[] = [
       {
-        type: 'dropped_panel',
+        type: 'dropped_item',
         tab_id: 'tab-1',
-        panel_id: 'control-1',
+        key: 'control_panels',
+        item_id: 'control-1',
         message: 'Unable to transform control panel [control-1].\nError: invalid control type.',
       },
       {
@@ -57,9 +58,10 @@ describe('showSessionWarnings', () => {
         message: 'This stored property could not be loaded.',
       },
       {
-        type: 'dropped_panel',
+        type: 'dropped_item',
         tab_id: 'missing-tab',
-        panel_id: 'control-2',
+        key: 'control_panels',
+        item_id: 'control-2',
         message: 'Unable to transform control panel [control-2]. Invalid value: <example>.',
       },
     ];
@@ -68,7 +70,7 @@ describe('showSessionWarnings', () => {
 
     expect(core.notifications.toasts.addWarning).toHaveBeenCalledTimes(1);
     expect(core.notifications.toasts.addWarning).toHaveBeenCalledWith({
-      title: 'Some session content could not be loaded',
+      title: 'Some session content was skipped while loading',
       actionProps: {
         primary: {
           children: 'Learn more',

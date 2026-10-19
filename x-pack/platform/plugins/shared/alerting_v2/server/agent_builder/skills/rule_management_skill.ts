@@ -123,6 +123,9 @@ ${generateRuleOperationsDoc()}
 - The query must return rows for an alert to fire. Use \`| WHERE ...\` to filter for breach conditions.
 - Prefer \`FROM <index-pattern> | STATS ... BY <group-field> | WHERE <condition>\` for threshold-based alerting.
 - **Never** use backtick quoting around index names or field names in ES|QL. Standard index patterns (letters, digits, dashes, dots, underscores, wildcards, and colons for CCS) do not require backticks. Backticks break cross-cluster search and are almost never needed in practice. Write \`FROM remote_cluster:metrics-system.cpu-default\`, not \`FROM \\\`remote_cluster:metrics-system.cpu-default\\\`\`.
+- Target a wildcard index pattern (e.g. \`logs-*\`, \`metrics-system.cpu-*\`) or a data stream name in \`FROM\`, so the rule survives rollovers. **Never** use a concrete backing index (e.g. \`.ds-logs-nginx.access-default-2026.06.11-000001\`) or an index name with a date or generation suffix. When deriving a pattern from an index name the user gives you, strip the data stream generation suffix (\`logs-nginx.access-default-2026.06.11-000001\` → \`logs-nginx.access-default\`).
+- If the user explicitly asks for a specific concrete index, respect the request and tell them the rule may stop matching data after a rollover.
+- When editing an existing rule that already uses a concrete index, warn the user that it may break on rollover, but do not change it unless they ask.
 - The \`set_schedule\` lookback should be >= the execution interval (\`every\`).
 - The \`set_query\` operation validates the query against Elasticsearch automatically.
   If the query references an unknown index or field, the tool will return an error
