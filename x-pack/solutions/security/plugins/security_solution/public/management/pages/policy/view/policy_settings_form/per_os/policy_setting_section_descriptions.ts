@@ -64,7 +64,7 @@ export const POLICY_SETTING_SECTION_DESCRIPTIONS = Object.freeze({
     'xpack.securitySolution.endpoint.policy.details.aiDataCollectionDescription',
     {
       defaultMessage:
-        'Enrich events with AI-related context to improve visibility into AI activity on your hosts.',
+        'Identify AI tools and add that context to events that Elastic Defend collects from them. This improves visibility into AI activity on your hosts.',
     }
   ),
 });
