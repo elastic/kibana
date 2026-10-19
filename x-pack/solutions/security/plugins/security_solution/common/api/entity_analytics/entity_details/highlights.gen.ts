@@ -31,11 +31,12 @@ export const EntityDetailsHighlightsRequestBody = lazySchema(() =>
      */
     entityIdentifier: z
       .string()
+      .max(200)
       .describe(
         'The identifier of the entity (its Entity Store `entity.id` when Entity Store v2 is enabled).'
       ),
     mode: EntityViewMode.optional().default('single'),
-    anonymizationFields: z.array(AnonymizationFieldResponse),
+    anonymizationFields: z.array(AnonymizationFieldResponse).max(1000),
     /**
      * The 'from' date.
      */
@@ -47,7 +48,7 @@ export const EntityDetailsHighlightsRequestBody = lazySchema(() =>
     /**
      * The connector id.
      */
-    connectorId: z.string().describe('The connector id.'),
+    connectorId: z.string().max(200).describe('The connector id.'),
   })
 );
 export type EntityDetailsHighlightsRequestBody = z.infer<typeof EntityDetailsHighlightsRequestBody>;
