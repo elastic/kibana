@@ -329,6 +329,7 @@ describe('CreateMaintenanceWindowForm', () => {
         });
       });
       expect(screen.queryByTestId('saveWithoutScopesConfirmModal')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('applyToAllAlertsConfirmModal')).not.toBeInTheDocument();
     });
 
     it('calls create when user toggles Alerts off then confirms save without scopes modal', async () => {
@@ -351,6 +352,7 @@ describe('CreateMaintenanceWindowForm', () => {
         });
       });
       expect(screen.queryByTestId('saveWithoutScopesConfirmModal')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('applyToAllAlertsConfirmModal')).not.toBeInTheDocument();
     });
 
     it('does not call create when user cancels save without scopes modal', async () => {
@@ -395,6 +397,7 @@ describe('CreateMaintenanceWindowForm', () => {
         expect(createMutate.mock.calls[0][0].scope).toMatchObject({
           alertingV2: { enabled: true },
         });
+        expect(screen.queryByTestId('applyToAllAlertsConfirmModal')).not.toBeInTheDocument();
       });
     });
 
@@ -410,6 +413,7 @@ describe('CreateMaintenanceWindowForm', () => {
           alerting: { enabled: true, kql: v1Filtered.kql },
           alertingV2: { enabled: true },
         });
+        expect(screen.queryByTestId('applyToAllAlertsConfirmModal')).not.toBeInTheDocument();
       });
     });
 
@@ -425,6 +429,7 @@ describe('CreateMaintenanceWindowForm', () => {
           alerting: { enabled: true },
           alertingV2: v2Filtered,
         });
+        expect(screen.queryByTestId('applyToAllAlertsConfirmModal')).not.toBeInTheDocument();
       });
     });
 
@@ -433,8 +438,8 @@ describe('CreateMaintenanceWindowForm', () => {
 
       await user.click(screen.getByTestId('create-submit'));
 
-      await waitFor(() => expect(updateMutate).toHaveBeenCalledTimes(1));
       expect(screen.queryByTestId('applyToAllAlertsConfirmModal')).not.toBeInTheDocument();
+      await waitFor(() => expect(updateMutate).toHaveBeenCalledTimes(1));
     });
   });
 
