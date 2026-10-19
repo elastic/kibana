@@ -260,7 +260,11 @@ export class ReportingPublicPlugin
       shareSetup.registerShareIntegration<ExportShare>(
         // TODO: export the reporting pdf export provider for registration in the actual plugins that depend on it
         withAvailabilityGate(
-          reportingPDFExportShareIntegration({ apiClient, startServices$ }),
+          reportingPDFExportShareIntegration({
+            apiClient,
+            startServices$,
+            isServerless: this.isServerless,
+          }),
           isOnDemandExportAvailable
         )
       );
@@ -268,7 +272,11 @@ export class ReportingPublicPlugin
       shareSetup.registerShareIntegration<ExportShare>(
         // TODO: export the reporting pdf export provider for registration in the actual plugins that depend on it
         withAvailabilityGate(
-          reportingPNGExportShareIntegration({ apiClient, startServices$ }),
+          reportingPNGExportShareIntegration({
+            apiClient,
+            startServices$,
+            isServerless: this.isServerless,
+          }),
           isOnDemandExportAvailable
         )
       );

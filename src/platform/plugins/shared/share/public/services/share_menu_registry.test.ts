@@ -68,6 +68,32 @@ describe('ShareActionsRegistry', () => {
         expect(availableIntegrations('someRandomObjectType')).toHaveLength(2 + 1);
       });
 
+      it('exposes the badge of a registered integration, before and after resolving its config', async () => {
+        const shareRegistry = new ShareRegistry();
+        const badge = { label: 'Experimental', tooltipContent: 'This is experimental.' };
+
+        const { registerShareIntegration } = shareRegistry.setup();
+        const { availableIntegrations, resolveShareItemsForShareContext } =
+          shareRegistry.start(startDeps);
+
+        registerShareIntegration<TestShareIntegration>({
+          id: 'pdfReports',
+          groupId: 'export',
+          badge,
+          getShareIntegrationConfig: () => Promise.resolve({}),
+        });
+
+        expect(availableIntegrations('someRandomObjectType', 'export')).toEqual([
+          expect.objectContaining({ id: 'pdfReports', badge }),
+        ]);
+        expect(
+          await resolveShareItemsForShareContext({
+            objectType: 'someRandomObjectType',
+            isServerless: false,
+          } as ShareContext & { isServerless: boolean })
+        ).toEqual(expect.arrayContaining([expect.objectContaining({ id: 'pdfReports', badge })]));
+      });
+
       it('omits a registered integration that defines a prerequisite check which returns false', () => {
         const shareRegistry = new ShareRegistry();
 

@@ -59,6 +59,14 @@ export interface ShareMenuProviderLegacy {
   getShareMenuItemsLegacy: (context: ShareContext) => ShareMenuItemLegacy[];
 }
 
+/**
+ * @description Badge, for instance a release stage, rendered next to a share integration wherever it is listed
+ */
+export interface ShareIntegrationBadge {
+  label: string;
+  tooltipContent?: string;
+}
+
 type ShareImplementationFactory<
   T extends Omit<ShareTypes, 'legacy'>,
   C extends Record<string, unknown> = Record<string, unknown>,
@@ -68,6 +76,10 @@ type ShareImplementationFactory<
       id: string;
       groupId?: string;
       shareType: T;
+      /**
+       * Optional badge rendered next to the integration wherever it is listed, for instance to mark its release stage
+       */
+      badge?: ShareIntegrationBadge;
       /**
        * Callback that yields the configured methods for the current share implementation as a promise, enables the possibility to dynamically fetch the share configuration
        */
@@ -298,7 +310,7 @@ export type RegisterShareIntegrationArgs<I = ShareIntegration> = I extends Share
 >
   ? P extends Record<string, unknown>
     ? S extends SharingData
-      ? Pick<I, 'id' | 'groupId' | 'prerequisiteCheck'> & {
+      ? Pick<I, 'id' | 'groupId' | 'prerequisiteCheck' | 'badge'> & {
           getShareIntegrationConfig: (ctx: ShareActionConfigArgs<S>) => ReturnType<I['config']>;
         }
       : never

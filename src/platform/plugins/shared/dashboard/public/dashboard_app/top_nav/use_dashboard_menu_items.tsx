@@ -263,7 +263,8 @@ export const useDashboardMenuItems = ({
             testId: 'exportTopNavButton',
             disableButton: disableTopNav,
             items: exportItems,
-            popoverWidth: 160,
+            // Widen the popover so badged labels, e.g. "PDF reports [Experimental]", stay on one line.
+            popoverWidth: exportItems.some(({ labelBadgeText }) => labelBadgeText) ? 260 : 160,
             popoverTestId: 'exportPopoverPanel',
           };
 

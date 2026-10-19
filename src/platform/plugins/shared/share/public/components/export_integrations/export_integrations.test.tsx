@@ -90,6 +90,55 @@ describe('Export Integrations', () => {
     });
   });
 
+  describe('Badge', () => {
+    const badge = { label: 'Experimental', tooltipContent: 'This is experimental.' };
+    const badgedShareContext: IShareContext = {
+      ...mockShareContext,
+      shareMenuItems: [
+        mockShareContext.shareMenuItems[0],
+        {
+          shareType: 'integration',
+          groupId: 'export',
+          id: 'png',
+          badge,
+          config: {
+            icon: 'empty',
+            label: 'PNG',
+          },
+        },
+      ],
+    };
+
+    it('renders the badge next to the label of the export type that defines it', async () => {
+      const user = userEvent.setup();
+
+      render(<ExportPopoverRender shareContext={badgedShareContext} />);
+
+      await user.click(screen.getByText('click me'));
+
+      await waitForEuiPopoverOpen();
+
+      expect(screen.getByTestId('exportMenuItem-PNG')).toHaveTextContent('PNGExperimental');
+      expect(screen.getByTestId('exportMenuItemBadge-PNG')).toBeInTheDocument();
+      expect(screen.getByTestId('exportMenuItem-CSV')).toHaveTextContent(/^CSV$/);
+      expect(screen.queryByTestId('exportMenuItemBadge-CSV')).not.toBeInTheDocument();
+    });
+
+    it('shows the badge tooltip content when hovering the export type', async () => {
+      const user = userEvent.setup();
+
+      render(<ExportPopoverRender shareContext={badgedShareContext} />);
+
+      await user.click(screen.getByText('click me'));
+
+      await waitForEuiPopoverOpen();
+
+      await user.hover(screen.getByTestId('exportMenuItem-PNG'));
+
+      expect(await screen.findByRole('tooltip')).toHaveTextContent('This is experimental.');
+    });
+  });
+
   describe('Export Derivatives', () => {
     const exportDerivativeLabel = 'Export derivative';
     const getMockExportDerivativeConfig = (shouldRender: boolean): ShareConfigs => ({
@@ -194,7 +243,11 @@ describe('Export Integrations', () => {
       config: {},
     };
 
-    function CsvExportFlyoutRender() {
+    function CsvExportFlyoutRender({
+      exportIntegration = mockCsvConfigForFlyout,
+    }: {
+      exportIntegration?: ExportShareConfig;
+    }) {
       const [isFlyoutVisible, setIsFlyoutVisible] = React.useState(false);
       let flyout;
 
@@ -202,7 +255,7 @@ describe('Export Integrations', () => {
         flyout = (
           <EuiFlyout ownFocus onClose={() => setIsFlyoutVisible(false)} aria-label="Export">
             <ManagedExportFlyout
-              exportIntegration={mockCsvConfigForFlyout}
+              exportIntegration={exportIntegration}
               shareObjectType={mockShareContext.objectType}
               shareObjectTypeMeta={mockCsvObjectTypeMeta}
               isDirty={mockShareContext.isDirty}
@@ -234,6 +287,41 @@ describe('Export Integrations', () => {
         expect(screen.queryByTestId('exportItemDetailsFlyoutBody')).not.toBe(null);
         expect(screen.getByText('Test warning')).toBeInTheDocument();
       });
+    });
+
+    it('should render the badge with its tooltip next to the flyout title if defined', async () => {
+      const user = userEvent.setup();
+      render(
+        <CsvExportFlyoutRender
+          exportIntegration={{
+            ...mockCsvConfigForFlyout,
+            badge: { label: 'Experimental', tooltipContent: 'This is experimental.' },
+          }}
+        />
+      );
+
+      await user.click(screen.getByText('Show flyout'));
+
+      expect(await screen.findByRole('heading', { level: 2 })).toHaveTextContent(
+        /^Export type as CSV$/
+      );
+      expect(screen.getByTestId('exportFlyoutTitleBadge')).toHaveTextContent('Experimental');
+
+      await user.hover(screen.getByTestId('exportFlyoutTitleBadge'));
+
+      expect(await screen.findByRole('tooltip')).toHaveTextContent('This is experimental.');
+    });
+
+    it('should not render a badge next to the flyout title if not defined', async () => {
+      const user = userEvent.setup();
+      render(<CsvExportFlyoutRender />);
+
+      await user.click(screen.getByText('Show flyout'));
+
+      expect(await screen.findByRole('heading', { level: 2 })).toHaveTextContent(
+        /^Export type as CSV$/
+      );
+      expect(screen.queryByTestId('exportFlyoutTitleBadge')).not.toBeInTheDocument();
     });
   });
 });
