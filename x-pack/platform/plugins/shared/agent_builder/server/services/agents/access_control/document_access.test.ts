@@ -233,10 +233,11 @@ describe('getAgentPermissions', () => {
     expect(getAgentPermissions({ source, user: nonOwnerUser })).toEqual({
       update_agent: true,
       update_access_control: false,
+      update_approvals: false,
     });
   });
 
-  it('returns both permissions for owners and Manager grants', () => {
+  it('returns every permission for owners and Manager grants', () => {
     const source = {
       ...baseSource,
       access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
@@ -247,10 +248,11 @@ describe('getAgentPermissions', () => {
     expect(getAgentPermissions({ source, user: ownerUser })).toEqual({
       update_agent: true,
       update_access_control: true,
+      update_approvals: true,
     });
   });
 
-  it('blocks access-control management for the default agent', () => {
+  it('blocks access-control and approvals management for non-admins on the default agent', () => {
     const source = {
       ...baseSource,
       id: agentBuilderDefaultAgentId,
@@ -262,6 +264,7 @@ describe('getAgentPermissions', () => {
     expect(getAgentPermissions({ source, user: ownerUser })).toEqual({
       update_agent: true,
       update_access_control: false,
+      update_approvals: false,
     });
   });
 });

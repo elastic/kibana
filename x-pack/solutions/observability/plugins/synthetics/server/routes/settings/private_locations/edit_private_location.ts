@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import path from 'path';
 import { z } from '@kbn/zod';
 import type { SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
-import { asRouteSchema, minLengthMessage, MAX_ROUTE_ID_LENGTH, routeId } from '../../zod_query';
+import { minLengthMessage, MAX_ROUTE_ID_LENGTH, routeId } from '../../zod_query';
 import {
   getPrivateLocations,
   getPrivateLocationsForNamespaces,
@@ -33,17 +34,25 @@ export const EditPrivateLocationSchema = z.strictObject({
     .string()
     .min(1, { error: minLengthMessage(1) })
     .max(MAX_ROUTE_ID_LENGTH)
-    .optional(),
-  tags: z.array(z.string().max(256)).max(100).optional(),
+    .optional()
+    .describe(
+      'A new label for the private location. Monitors using this location are updated to match.'
+    ),
+  tags: z
+    .array(z.string().max(256))
+    .max(100)
+    .optional()
+    .describe('An array of tags to categorize the private location.'),
   agentPolicyId: z
     .string()
     .min(1, { error: minLengthMessage(1) })
     .max(MAX_ROUTE_ID_LENGTH)
-    .optional(),
+    .optional()
+    .describe('The ID of the Fleet agent policy to move the private location to.'),
 });
 
 const EditPrivateLocationQuery = z.strictObject({
-  id: routeId,
+  id: routeId.describe('The unique identifier of the private location to update.'),
 });
 
 export type EditPrivateLocationAttributes = Pick<PrivateLocationAttributes, 'label' | 'tags'> &
@@ -198,10 +207,17 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
 > = () => ({
   method: 'PUT',
   path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS + '/{id}',
+  options: {
+    summary: 'Update a private location',
+    description:
+      "Update an existing private location's label, tags, or agent policy.\n\nYou must have `all` privileges for the Synthetics and Uptime feature in the Observability section of the Kibana feature privileges.\n\nWhen a private location's label is updated, all monitors using this location are also updated to maintain data consistency.\n\nWhen a private location's agent policy is changed, the package policies of all monitors using this location are deleted and recreated on the new agent policy. Monitors stop running on the previous agents until agents on the new policy pick them up. The new agent policy must be available in all spaces of the private location and must not be used by another private location.",
+    operationId: 'put-private-location',
+    oasOperationObject: () => path.join(__dirname, 'examples/put_private_location.yaml'),
+  },
   validate: {},
   validation: {
     request: {
-      body: asRouteSchema(EditPrivateLocationSchema),
+      body: EditPrivateLocationSchema,
       params: EditPrivateLocationQuery,
     },
   },

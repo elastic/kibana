@@ -42,6 +42,7 @@ jest.mock('@kbn/custom-content-renderer', () => ({
     generationVersion: number;
     timeRange: { from: string; to: string } | undefined;
     isGenerating?: boolean;
+    isInteractive?: boolean;
     onLoadingChange: (isLoading: boolean) => void;
     onGenerateWithChat?: () => void;
   }) => {
@@ -54,6 +55,7 @@ jest.mock('@kbn/custom-content-renderer', () => ({
         data-generation-version={props.generationVersion}
         data-time-range={props.timeRange ? `${props.timeRange.from}/${props.timeRange.to}` : ''}
         data-is-generating={String(Boolean(props.isGenerating))}
+        data-is-interactive={String(props.isInteractive)}
       />
     );
   },
@@ -245,6 +247,24 @@ describe('customContentEmbeddableFactory', () => {
       expect(screen.getByTestId('mockCustomContentComponent')).toHaveAttribute(
         'data-time-range',
         `${dashboardRange.from}/${dashboardRange.to}`
+      );
+    });
+  });
+
+  describe('view mode', () => {
+    const parentWithViewMode = (viewMode: string) => ({ viewMode$: new BehaviorSubject(viewMode) });
+
+    it.each([
+      ['edit', 'true'],
+      ['view', 'true'],
+      ['non-interactive', 'false'],
+    ])('sets isInteractive for the %s view mode', async (viewMode, expected) => {
+      const { embeddable } = await buildEmbeddable(baseState, parentWithViewMode(viewMode));
+      await act(async () => render(<embeddable.Component />));
+
+      expect(screen.getByTestId('mockCustomContentComponent')).toHaveAttribute(
+        'data-is-interactive',
+        expected
       );
     });
   });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 
 /**
  * Standard error response shape returned by every alerting v2 route handler.
@@ -20,30 +20,32 @@ import { z } from '@kbn/zod/v4';
  * - `details` — An optional structured context (e.g. the resource id that
  *               conflicted, per-field validation issues).
  */
-export const errorResponseSchema = z
-  .object({
-    code: z
-      .string()
-      .describe(
-        'Stable error code you can branch on, for example `INVALID_SCHEDULE` or `RULE_ALREADY_EXISTS`.'
-      ),
-    error: z
-      .string()
-      .describe(
-        'A short human-readable summary of the error category (e.g., "Not Found", "Bad Request"). Subject to change without notice. Do not parse or rely on its content.'
-      ),
-    message: z
-      .string()
-      .describe(
-        'A readable explanation of the error. The wording can change without notice. Do not parse this field.'
-      ),
-    details: z
-      .record(z.string(), z.unknown())
-      .optional()
-      .describe(
-        'Optional extra information about the error, for example field validation issues or the `rule_id` when that ID already exists.'
-      ),
-  })
-  .meta({ id: 'alerting_error_response' });
+export const errorResponseSchema = lazySchema(() =>
+  z
+    .object({
+      code: z
+        .string()
+        .describe(
+          'Stable error code you can branch on, for example `INVALID_SCHEDULE` or `RULE_ALREADY_EXISTS`.'
+        ),
+      error: z
+        .string()
+        .describe(
+          'A short human-readable summary of the error category (e.g., "Not Found", "Bad Request"). Subject to change without notice. Do not parse or rely on its content.'
+        ),
+      message: z
+        .string()
+        .describe(
+          'A readable explanation of the error. The wording can change without notice. Do not parse this field.'
+        ),
+      details: z
+        .record(z.string(), z.unknown())
+        .optional()
+        .describe(
+          'Optional extra information about the error, for example field validation issues or the `rule_id` when that ID already exists.'
+        ),
+    })
+    .meta({ id: 'alerting_error_response' })
+);
 
 export type ErrorResponse = z.infer<typeof errorResponseSchema>;

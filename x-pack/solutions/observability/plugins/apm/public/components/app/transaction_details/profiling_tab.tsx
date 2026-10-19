@@ -14,13 +14,19 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import { ProfilingEmptyState } from '@kbn/observability-shared-plugin/public';
+import {
+  ProfilingEmptyState,
+  ProfilingSchemaStateProvider,
+  useProfilingSchemaState,
+} from '@kbn/observability-shared-plugin/public';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useProfilingPlugin } from '../../../hooks/use_profiling_plugin';
+import { useTimeRange } from '../../../hooks/use_time_range';
 import { ProfilingFlamegraph } from '../../shared/profiling/flamegraph';
+import { ProfilingSchemaSelector } from '../../shared/profiling/schema_selector';
 import { ProfilingTopNFunctions } from '../../shared/profiling/top_functions';
 
-function ProfilingTab() {
+function ProfilingTabContent() {
   const {
     query: { rangeFrom, rangeTo, environment, kuery, transactionName, transactionType },
     path: { serviceName },
@@ -29,6 +35,8 @@ function ProfilingTab() {
     '/mobile-services/{serviceName}/transactions/view'
   );
   const { isProfilingAvailable, isLoading } = useProfilingPlugin();
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+  const { schema } = useProfilingSchemaState();
 
   const tabs = useMemo((): EuiTabbedContentProps['tabs'] => {
     return [
@@ -48,6 +56,7 @@ function ProfilingTab() {
               transactionName={transactionName}
               transactionType={transactionType}
               environment={environment}
+              schema={schema}
             />
           </>
         ),
@@ -68,12 +77,22 @@ function ProfilingTab() {
               transactionName={transactionName}
               transactionType={transactionType}
               environment={environment}
+              schema={schema}
             />
           </>
         ),
       },
     ];
-  }, [environment, kuery, rangeFrom, rangeTo, serviceName, transactionName, transactionType]);
+  }, [
+    environment,
+    kuery,
+    rangeFrom,
+    rangeTo,
+    schema,
+    serviceName,
+    transactionName,
+    transactionType,
+  ]);
 
   if (isLoading) {
     return (
@@ -89,7 +108,29 @@ function ProfilingTab() {
     return <ProfilingEmptyState />;
   }
 
-  return <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} autoFocus="selected" />;
+  return (
+    <>
+      <EuiSpacer />
+      <ProfilingSchemaSelector
+        serviceName={serviceName}
+        start={start}
+        end={end}
+        environment={environment}
+        kuery={kuery}
+        transactionName={transactionName}
+        transactionType={transactionType}
+      />
+      <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} autoFocus="selected" />
+    </>
+  );
+}
+
+function ProfilingTab() {
+  return (
+    <ProfilingSchemaStateProvider>
+      <ProfilingTabContent />
+    </ProfilingSchemaStateProvider>
+  );
 }
 
 export const profilingTab = {

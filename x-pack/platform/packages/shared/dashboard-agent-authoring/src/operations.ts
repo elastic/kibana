@@ -11,6 +11,7 @@ import type { ResolvePanelContent } from './operations/panels';
 import type { ResolveAttachmentPanel, ResolveControlFieldCapabilities } from './operations/types';
 import type { OperationFailure } from './utils';
 import type { PanelAuthoringNote } from './resolve_panel';
+import { discardInvalidChanges, type DashboardValidator } from './validate_dashboard';
 import {
   dashboardOperationSchema,
   executeOperationHandler,
@@ -28,6 +29,7 @@ interface ExecuteDashboardOperationsParams {
   resolvePanelContent?: ResolvePanelContent;
   resolveAttachmentPanel?: ResolveAttachmentPanel;
   resolveControlFieldCapabilities?: ResolveControlFieldCapabilities;
+  validator?: DashboardValidator;
 }
 
 /**
@@ -36,7 +38,10 @@ interface ExecuteDashboardOperationsParams {
  * persistence, and result shape belong to the calling tool. Inline panel content
  * is resolved via the injected `resolvePanelContent` callback, so the core never
  * reads any store. Control fields are validated against index mappings when
- * the host provides `resolveControlFieldCapabilities`.
+ * the host provides `resolveControlFieldCapabilities`. New panels (full width),
+ * new sections, and panels moved between sections are placed below the existing
+ * ones until the host arranges the layout. When the host provides a `validator`,
+ * changes that make the dashboard invalid are discarded and reported as failures.
  */
 export const executeDashboardOperations = async ({
   dashboardData,
@@ -45,18 +50,20 @@ export const executeDashboardOperations = async ({
   resolvePanelContent,
   resolveAttachmentPanel,
   resolveControlFieldCapabilities,
+  validator,
 }: ExecuteDashboardOperationsParams): Promise<{
   dashboardData: DashboardAttachmentData;
   failures: OperationFailure[];
   panelAuthoringNotes: PanelAuthoringNote[];
 }> => {
-  let nextDashboardData = structuredClone(
+  const originalDashboardData = structuredClone(
     dashboardData ?? {
       title: 'User Dashboard',
       description: undefined,
       panels: [],
     }
   );
+  let nextDashboardData = structuredClone(originalDashboardData);
   const failures: OperationFailure[] = [];
   const panelAuthoringNotes: PanelAuthoringNote[] = [];
 
@@ -79,9 +86,21 @@ export const executeDashboardOperations = async ({
     });
   }
 
-  return {
+  if (!validator) {
+    return { dashboardData: nextDashboardData, failures, panelAuthoringNotes };
+  }
+
+  const validationResult = discardInvalidChanges({
+    originalDashboardData,
     dashboardData: nextDashboardData,
-    failures,
-    panelAuthoringNotes,
+    validator,
+  });
+
+  return {
+    dashboardData: validationResult.dashboardData,
+    failures: [...failures, ...validationResult.failures],
+    panelAuthoringNotes: panelAuthoringNotes.filter(
+      ({ panelId }) => !validationResult.discardedPanelIds.has(panelId)
+    ),
   };
 };
