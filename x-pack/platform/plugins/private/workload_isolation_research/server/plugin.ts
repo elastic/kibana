@@ -22,7 +22,7 @@ import { Recorder } from './lib/recorder';
 import { registerRoutes } from './routes';
 import { registerResearchTasks, TickScheduler } from './tasks';
 import { registerTierBRoutes, registerTierBTasks } from './tier_b';
-import { registerMockLlmRoute } from './tier_b/mock_llm';
+import { registerMockLlmRoute } from './tier_b/canned_llm';
 import { API_BASE } from './routes';
 
 interface SetupDeps {
