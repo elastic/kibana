@@ -7,6 +7,7 @@
 
 import type { RunMetrics } from './utils/run_metrics_tracker';
 import {
+  buildAlertSourceBreakdown,
   buildRiskScoreEntityMaintainerRunSummary,
   buildRiskScorePhase0EntityMaintainerRunSummary,
   buildRiskScoreSkipEntityMaintainerRunSummary,
@@ -270,5 +271,83 @@ describe('buildRiskScoreEntityMaintainerRunSummary', () => {
       skipped: 4,
       failed: 0,
     });
+  });
+});
+
+describe('buildAlertSourceBreakdown', () => {
+  it('emits scored and unmatched entries per source and leaves out zero counts', () => {
+    expect(
+      buildAlertSourceBreakdown({
+        okta: { scored: 10, unmatched: 0 },
+        azure: { scored: 3, unmatched: 4 },
+      })
+    ).toEqual([
+      { name: 'alerts_scored:okta', count: 10 },
+      { name: 'alerts_scored:azure', count: 3 },
+      { name: 'alerts_unmatched:azure', count: 4 },
+    ]);
+  });
+
+  it('keeps the top 30 sources by alert count and adds up the rest as other', () => {
+    const alertSources = Object.fromEntries(
+      Array.from({ length: 33 }, (_, i) => [`source_${i}`, { scored: 100 - i, unmatched: 1 }])
+    );
+
+    const breakdown = buildAlertSourceBreakdown(alertSources);
+    const scored = breakdown.filter(({ name }) => name.startsWith('alerts_scored:'));
+
+    expect(scored).toHaveLength(31);
+    expect(scored[0]).toEqual({ name: 'alerts_scored:source_0', count: 100 });
+    expect(scored[29]).toEqual({ name: 'alerts_scored:source_29', count: 71 });
+    // source_30..source_32 scored 70 + 69 + 68, unmatched 3
+    expect(breakdown).toContainEqual({ name: 'alerts_scored:other', count: 207 });
+    expect(breakdown).toContainEqual({ name: 'alerts_unmatched:other', count: 3 });
+  });
+
+  it('shortens very long source names', () => {
+    const [entry] = buildAlertSourceBreakdown({
+      [`x${'y'.repeat(300)}`]: { scored: 1, unmatched: 0 },
+    });
+
+    expect(entry.name).toBe(`alerts_scored:x${'y'.repeat(99)}`);
+  });
+
+  it('returns nothing when there are no alerts', () => {
+    expect(buildAlertSourceBreakdown({})).toEqual([]);
+  });
+});
+
+describe('buildRiskScoreEntityMaintainerRunSummary alert sources', () => {
+  const stages = [{ name: 'base' as const, status: 'success' as const, durationMs: 1 }];
+
+  it('adds the breakdown when there are alert sources', () => {
+    const summary = buildRiskScoreEntityMaintainerRunSummary({
+      entityType: 'user',
+      metrics: emptyMetrics(),
+      stages,
+      alertSources: { okta: { scored: 2, unmatched: 1 } },
+    });
+
+    expect(summary.breakdown).toEqual([
+      { name: 'alerts_scored:okta', count: 2 },
+      { name: 'alerts_unmatched:okta', count: 1 },
+    ]);
+  });
+
+  it('leaves the breakdown out when there are none', () => {
+    const withEmpty = buildRiskScoreEntityMaintainerRunSummary({
+      entityType: 'user',
+      metrics: emptyMetrics(),
+      stages,
+      alertSources: {},
+    });
+    const without = buildRiskScoreEntityMaintainerRunSummary({
+      entityType: 'user',
+      metrics: emptyMetrics(),
+      stages,
+    });
+
+    expect(withEmpty).not.toHaveProperty('breakdown');
+    expect(without).not.toHaveProperty('breakdown');
   });
 });

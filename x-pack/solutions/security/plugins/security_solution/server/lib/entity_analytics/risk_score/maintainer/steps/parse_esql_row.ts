@@ -15,6 +15,8 @@ export interface ParsedRiskScore {
   score: number;
   normalized_score: number;
   risk_inputs: SearchHitRiskInput[];
+  /** Distinct `entity.source` values of the entity's alerts; absent when the row carries none. */
+  alert_sources?: string[];
 }
 
 export interface ParsedResolutionScore {
@@ -34,7 +36,13 @@ export interface ParsedResolutionScore {
 export const parseEsqlBaseScoreRow =
   (index: string) =>
   (row: unknown[]): ParsedRiskScore => {
-    const [count, score, _inputs, entityId] = row as [number, number, string | string[], string];
+    const [count, score, _inputs, _sources, entityId] = row as [
+      number,
+      number,
+      string | string[],
+      string | string[] | null | undefined,
+      string
+    ];
 
     const inputs = [_inputs]
       .flat()
@@ -86,6 +94,9 @@ export const parseEsqlBaseScoreRow =
       score,
       normalized_score: score / RIEMANN_ZETA_VALUE,
       risk_inputs: inputs,
+      alert_sources: [_sources]
+        .flat()
+        .filter((source): source is string => typeof source === 'string'),
     };
   };
 
@@ -100,7 +111,13 @@ export const parseEsqlResolutionScoreRow =
       string
     ];
 
-    const baseParsed = parseEsqlBaseScoreRow(index)([count, score, _inputs, resolutionTargetId]);
+    const baseParsed = parseEsqlBaseScoreRow(index)([
+      count,
+      score,
+      _inputs,
+      undefined,
+      resolutionTargetId,
+    ]);
 
     const parsedRelatedEntities = [contributingEntitiesRaw]
       .flat()
