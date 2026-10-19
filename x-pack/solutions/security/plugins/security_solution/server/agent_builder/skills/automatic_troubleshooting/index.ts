@@ -9,6 +9,7 @@ import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { platformCoreTools } from '@kbn/agent-builder-common';
 
+import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import {
   getPackageConfigurationsTool,
@@ -33,7 +34,8 @@ export const CHECK_ENDPOINT_PACKAGE_FRESHNESS_TOOL_ID = toolName(
 export const GET_ENDPOINT_ARTIFACTS_TOOL_ID = toolName('get_endpoint_artifacts');
 
 export const createAutomaticTroubleshootingSkill = (
-  endpointAppContextService: EndpointAppContextService
+  endpointAppContextService: EndpointAppContextService,
+  experimentalFeatures: ExperimentalFeatures
 ): SkillDefinition<typeof NAME, typeof BASE_PATH> => {
   const systemInstructions = `# Elastic Defend Configuration Troubleshooting
 
@@ -226,7 +228,7 @@ Use exact terms from the user's request and queried endpoint evidence when calli
       return [
         checkEndpointPackageFreshnessTool(endpointAppContextService),
         getPackageConfigurationsTool(endpointAppContextService),
-        getEndpointArtifactsTool(endpointAppContextService),
+        getEndpointArtifactsTool(endpointAppContextService, experimentalFeatures),
         generateInsightTool(endpointAppContextService),
       ];
     },

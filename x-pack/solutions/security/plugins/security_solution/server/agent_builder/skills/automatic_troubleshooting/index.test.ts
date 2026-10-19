@@ -9,6 +9,7 @@ import { platformCoreTools } from '@kbn/agent-builder-common';
 
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import { createMockEndpointAppContext } from '../../../endpoint/mocks';
+import { allowedExperimentalValues } from '../../../../common/experimental_features';
 import { createAutomaticTroubleshootingSkill } from '.';
 
 describe('createAutomaticTroubleshootingSkill', () => {
@@ -20,7 +21,10 @@ describe('createAutomaticTroubleshootingSkill', () => {
 
   describe('skill definition', () => {
     it('returns a valid skill definition', () => {
-      const skill = createAutomaticTroubleshootingSkill(mockEndpointAppContextService);
+      const skill = createAutomaticTroubleshootingSkill(
+        mockEndpointAppContextService,
+        allowedExperimentalValues
+      );
 
       expect(skill).toBeDefined();
       expect(skill.id).toBe('automatic_troubleshooting');
@@ -33,7 +37,10 @@ describe('createAutomaticTroubleshootingSkill', () => {
     });
 
     it('claims endpoint diagnosis intents near the start of the description', () => {
-      const skill = createAutomaticTroubleshootingSkill(mockEndpointAppContextService);
+      const skill = createAutomaticTroubleshootingSkill(
+        mockEndpointAppContextService,
+        allowedExperimentalValues
+      );
       const description = skill.description ?? '';
 
       expect(description.slice(0, 400)).toMatch(/offline.*unhealthy|unhealthy.*offline/is);
@@ -43,7 +50,10 @@ describe('createAutomaticTroubleshootingSkill', () => {
     });
 
     it('includes available indices in referenced content', () => {
-      const skill = createAutomaticTroubleshootingSkill(mockEndpointAppContextService);
+      const skill = createAutomaticTroubleshootingSkill(
+        mockEndpointAppContextService,
+        allowedExperimentalValues
+      );
 
       expect(skill.referencedContent).toBeDefined();
       expect(skill.referencedContent).toHaveLength(1);
@@ -53,7 +63,10 @@ describe('createAutomaticTroubleshootingSkill', () => {
     });
 
     it('includes system instructions in content', () => {
-      const skill = createAutomaticTroubleshootingSkill(mockEndpointAppContextService);
+      const skill = createAutomaticTroubleshootingSkill(
+        mockEndpointAppContextService,
+        allowedExperimentalValues
+      );
 
       expect(skill.content).toContain('Elastic Defend Configuration Troubleshooting');
       expect(skill.content).toContain('When to use this skill');
@@ -66,7 +79,10 @@ describe('createAutomaticTroubleshootingSkill', () => {
     });
 
     it('documents every scoped-investigation classification the framework branches on', () => {
-      const skill = createAutomaticTroubleshootingSkill(mockEndpointAppContextService);
+      const skill = createAutomaticTroubleshootingSkill(
+        mockEndpointAppContextService,
+        allowedExperimentalValues
+      );
 
       expect(skill.content).toContain('CURRENTLY_HEALTHY');
       expect(skill.content).toContain('CURRENT_POLICY_FAILURE');
@@ -78,7 +94,10 @@ describe('createAutomaticTroubleshootingSkill', () => {
 
   describe('getRegistryTools', () => {
     it('returns the correct platform core tools', () => {
-      const skill = createAutomaticTroubleshootingSkill(mockEndpointAppContextService);
+      const skill = createAutomaticTroubleshootingSkill(
+        mockEndpointAppContextService,
+        allowedExperimentalValues
+      );
 
       const allowedTools = skill.getRegistryTools?.();
 
@@ -92,7 +111,10 @@ describe('createAutomaticTroubleshootingSkill', () => {
 
   describe('getInlineTools', () => {
     it('returns four inline tools', () => {
-      const skill = createAutomaticTroubleshootingSkill(mockEndpointAppContextService);
+      const skill = createAutomaticTroubleshootingSkill(
+        mockEndpointAppContextService,
+        allowedExperimentalValues
+      );
 
       const inlineTools = skill.getInlineTools?.();
 
@@ -101,7 +123,10 @@ describe('createAutomaticTroubleshootingSkill', () => {
     });
 
     it('includes get_package_configurations tool', async () => {
-      const skill = createAutomaticTroubleshootingSkill(mockEndpointAppContextService);
+      const skill = createAutomaticTroubleshootingSkill(
+        mockEndpointAppContextService,
+        allowedExperimentalValues
+      );
 
       const inlineTools = await skill.getInlineTools?.();
 
@@ -114,7 +139,10 @@ describe('createAutomaticTroubleshootingSkill', () => {
     });
 
     it('includes generate_insight tool', async () => {
-      const skill = createAutomaticTroubleshootingSkill(mockEndpointAppContextService);
+      const skill = createAutomaticTroubleshootingSkill(
+        mockEndpointAppContextService,
+        allowedExperimentalValues
+      );
 
       const inlineTools = await skill.getInlineTools?.();
 
