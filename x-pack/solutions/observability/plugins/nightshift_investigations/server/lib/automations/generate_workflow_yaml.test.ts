@@ -25,6 +25,29 @@ const baseAutomation = (): NightshiftAutomationAttributes => ({
 });
 
 describe('generateWorkflowYaml', () => {
+  it.each([
+    [{ kind: 'alert' }],
+    [{ kind: 'slack', event: 'message' }],
+    [{ kind: 'schedule', schedulePreset: 'daily', time: '09:00' }],
+    [
+      { kind: 'alert' },
+      { kind: 'slack', event: 'message' },
+      { kind: 'schedule', schedulePreset: 'daily', time: '09:00' },
+    ],
+  ] as NightshiftTriggerRow[][])(
+    'passes the owning automation ID to every investigation branch: %j',
+    (...rows) => {
+      const automation = baseAutomation();
+      automation.trigger.rows = rows;
+      const workflow = parse(generateWorkflowYaml('auto-123', automation));
+      for (const step of workflow.steps) {
+        for (const investigation of step.steps ?? [step]) {
+          expect(investigation.with.automation_id).toBe('auto-123');
+        }
+      }
+    }
+  );
+
   describe('concurrency settings', () => {
     it('keys alert-triggered runs on the alert, so one alert does not drop the next', () => {
       const yaml = parse(generateWorkflowYaml('auto-123', baseAutomation()));
@@ -51,7 +74,7 @@ describe('generateWorkflowYaml', () => {
 
     it('keys manual runs on the automation, since there is no payload', () => {
       const automation = baseAutomation();
-      automation.trigger.rows = [{ kind: 'schedule' }];
+      automation.trigger.rows = [];
       const yaml = parse(generateWorkflowYaml('auto-123', automation));
       expect(yaml.settings.concurrency.key).toBe('auto-123');
     });
@@ -77,9 +100,9 @@ describe('generateWorkflowYaml', () => {
   });
 
   describe('alert trigger', () => {
-    it('emits alerting.alertStatusChanged when alert rows are present', () => {
+    it('emits alerting.v1.alertStatusChanged when alert rows are present', () => {
       const yaml = parse(generateWorkflowYaml('auto-123', baseAutomation()));
-      expect(yaml.triggers[0].type).toBe('alerting.alertStatusChanged');
+      expect(yaml.triggers[0].type).toBe('alerting.v1.alertStatusChanged');
     });
 
     it('emits no on.condition when alertStatus is any', () => {
@@ -177,23 +200,158 @@ describe('generateWorkflowYaml', () => {
   });
 
   describe('manual trigger fallback', () => {
-    it('emits manual trigger when no alert or slack rows are present', () => {
+    it('emits a manual trigger when no trigger rows are present', () => {
       const automation = baseAutomation();
-      automation.trigger.rows = [{ kind: 'schedule' }];
-      const yaml = parse(generateWorkflowYaml('auto-123', automation));
-      expect(yaml.triggers).toEqual([{ type: 'manual' }]);
+      automation.trigger.rows = [];
+      expect(parse(generateWorkflowYaml('auto-123', automation)).triggers).toEqual([
+        { type: 'manual' },
+      ]);
     });
 
     // An alert investigation requires `context.alerts`, which a manual run has none of.
     it('investigates the prompt rather than an alert', () => {
       const automation = baseAutomation();
-      automation.trigger.rows = [{ kind: 'schedule' }];
+      automation.trigger.rows = [];
+      automation.execution.promptTemplate = 'Review recent service health.';
       const yaml = parse(generateWorkflowYaml('auto-123', automation));
       expect(yaml.steps[0].with).toMatchObject({
         subject_type: 'manual',
         subject_id: 'auto-123',
         title: 'Test automation',
+        message: 'Review recent service health.',
       });
+    });
+  });
+
+  describe('scheduled triggers', () => {
+    const scheduledAutomation = (): NightshiftAutomationAttributes => ({
+      ...baseAutomation(),
+      trigger: {
+        rows: [
+          {
+            kind: 'schedule',
+            schedulePreset: 'daily',
+            time: '09:00',
+            timezone: 'Europe/Berlin',
+            scopeQuery: 'service.name:checkout',
+          },
+        ],
+      },
+      execution: { promptTemplate: 'Assess checkout health in the last hour.' },
+      runtime: { timeoutSeconds: 120 },
+    });
+
+    it('emits a calendar trigger, fresh manual subject, instructions, scope and timeout', () => {
+      const yaml = parse(generateWorkflowYaml('auto-123', scheduledAutomation()));
+      expect(yaml.triggers).toEqual([
+        {
+          type: 'scheduled',
+          with: {
+            rrule: {
+              freq: 'DAILY',
+              interval: 1,
+              tzid: 'Europe/Berlin',
+              byhour: [9],
+              byminute: [0],
+            },
+          },
+        },
+      ]);
+      expect(yaml.settings.timeout).toBe('180s');
+      expect(yaml.steps[0]).toEqual({
+        name: 'trigger_investigation',
+        type: 'nightshift.triggerInvestigation',
+        with: {
+          automation_id: 'auto-123',
+          subject_type: 'manual',
+          subject_id: 'manual',
+          title: 'Test automation',
+          summary: 'Test automation',
+          trigger_type: 'automatic',
+          message: 'Assess checkout health in the last hour.',
+          scope_query: 'service.name:checkout',
+          timeout_seconds: 120,
+        },
+      });
+    });
+
+    it('isolates scheduled and alert steps when both sources are configured', () => {
+      const automation = scheduledAutomation();
+      automation.trigger.rows.push({ kind: 'alert', alertStatus: 'active' });
+      const yaml = parse(generateWorkflowYaml('auto-123', automation));
+      expect(yaml.triggers.map((trigger: { type: string }) => trigger.type)).toEqual([
+        'alerting.v1.alertStatusChanged',
+        'scheduled',
+      ]);
+      expect(yaml.steps[0].condition).toBe("${{ execution.triggeredBy == 'scheduled' }}");
+      expect(yaml.steps[1].condition).toBe(
+        "${{ execution.triggeredBy == 'alerting.v1.alertStatusChanged' }}"
+      );
+      expect(yaml.steps[1].steps[0].with.subject_type).toBe('alert');
+      expect(yaml.steps[1].steps[0].with.scope_query).toBeUndefined();
+    });
+
+    it('isolates all three trigger sources and only sends Slack payload to the Slack step', () => {
+      const automation = scheduledAutomation();
+      automation.trigger.rows.push(
+        { kind: 'alert', alertStatus: 'active' },
+        { kind: 'slack', event: 'message', channels: ['C1'] }
+      );
+      automation.completions = [{ action: 'post_to_slack', targetMode: 'thread' }];
+      const yaml = parse(generateWorkflowYaml('auto-123', automation));
+      expect(yaml.triggers.map((trigger: { type: string }) => trigger.type)).toEqual([
+        'alerting.v1.alertStatusChanged',
+        'slack2.message',
+        'scheduled',
+      ]);
+      expect(yaml.steps.map((step: { condition: string }) => step.condition)).toEqual([
+        "${{ execution.triggeredBy == 'scheduled' }}",
+        "${{ execution.triggeredBy == 'alerting.v1.alertStatusChanged' }}",
+        "${{ execution.triggeredBy == 'slack2.message' }}",
+      ]);
+      const [scheduled, alert, slack] = yaml.steps.map(
+        (guard: { steps: Array<{ name: string; with: Record<string, string> }> }) => guard.steps[0]
+      );
+      expect(new Set([scheduled.name, alert.name, slack.name]).size).toBe(3);
+      expect(scheduled.with).toMatchObject({
+        subject_type: 'manual',
+        subject_id: 'manual',
+        timeout_seconds: 120,
+      });
+      expect(alert.with).toMatchObject({
+        subject_type: 'alert',
+        subject_id: '{{ trigger.alert.uuid }}',
+        timeout_seconds: 120,
+      });
+      expect(slack.with).toMatchObject({
+        subject_type: 'manual',
+        subject_id: '{{ event.connectorId }}:{{ event.channel }}:{{ event.messageId }}',
+        timeout_seconds: 120,
+      });
+      expect(scheduled.with.message).not.toContain('event.text');
+      expect(alert.with.message).not.toContain('event.text');
+      expect(slack.with.message).toContain('{{ event.text | truncate: 4000 }}');
+      expect(scheduled.with.slack_thread).toBeUndefined();
+      expect(alert.with.slack_thread).toBeUndefined();
+      expect(slack.with.slack_thread).toEqual({
+        workspace: '{{ event.workspace }}',
+        channel: '{{ event.channel }}',
+        thread_ts: '{{ event.messageId }}',
+      });
+      expect(scheduled.with.notificationDestinations).toBeUndefined();
+      expect(alert.with.notificationDestinations).toBeUndefined();
+      expect(slack.with.notificationDestinations).toEqual([
+        expect.objectContaining({
+          params: { channel: '{{ event.channel }}', thread_ts: '{{ event.messageId }}' },
+        }),
+      ]);
+    });
+
+    it('preserves the disabled state', () => {
+      expect(
+        parse(generateWorkflowYaml('auto-123', { ...scheduledAutomation(), isEnabled: false }))
+          .enabled
+      ).toBe(false);
     });
   });
 
@@ -384,16 +542,22 @@ describe('generateWorkflowYaml', () => {
       automation.trigger.rows = [slackRow(), { kind: 'alert' }];
       const yaml = parse(generateWorkflowYaml('auto-123', automation));
       expect(yaml.triggers.map((t: { type: string }) => t.type)).toEqual([
-        'alerting.alertStatusChanged',
+        'alerting.v1.alertStatusChanged',
         'slack2.message',
       ]);
     });
 
-    it('emits only the slack trigger for slack and schedule rows', () => {
+    it('emits both slack and scheduled triggers for mixed rows', () => {
       const automation = baseAutomation();
-      automation.trigger.rows = [{ kind: 'schedule' }, slackRow()];
+      automation.trigger.rows = [
+        { kind: 'schedule', schedulePreset: 'daily', time: '09:00' },
+        slackRow(),
+      ];
       const yaml = parse(generateWorkflowYaml('auto-123', automation));
-      expect(yaml.triggers.map((t: { type: string }) => t.type)).toEqual(['slack2.message']);
+      expect(yaml.triggers.map((t: { type: string }) => t.type)).toEqual([
+        'slack2.message',
+        'scheduled',
+      ]);
     });
 
     describe('trigger_investigation step', () => {
@@ -457,7 +621,7 @@ describe('generateWorkflowYaml', () => {
 
         expect(yaml.steps).toHaveLength(2);
         expect(yaml.steps.map((s: { condition: string }) => s.condition)).toEqual([
-          "${{ execution.triggeredBy == 'alerting.alertStatusChanged' }}",
+          "${{ execution.triggeredBy == 'alerting.v1.alertStatusChanged' }}",
           "${{ execution.triggeredBy == 'slack2.message' }}",
         ]);
         const [alertGuard, slackGuard] = yaml.steps;
