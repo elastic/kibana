@@ -79,6 +79,7 @@ export const ConversationCardCompact = memo<ConversationCardCompactProps>(
     onCopyLink,
   }) => {
     const { euiTheme } = useEuiTheme();
+    const { proposalDecidedAt } = investigation;
 
     return (
       <StyledEuiPanel
@@ -106,7 +107,7 @@ export const ConversationCardCompact = memo<ConversationCardCompactProps>(
       >
         <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
           <EuiFlexItem grow={false} css={{ inlineSize: AGE_COLUMN_WIDTH, flexShrink: 0 }}>
-            <ConversationMetaInfo createdAt={investigation.createdAt} />
+            {proposalDecidedAt ? <ConversationMetaInfo timestamp={proposalDecidedAt} /> : null}
           </EuiFlexItem>
           {/* `minInlineSize: 0` lets the item shrink below its text, so the title
               truncates instead of squeezing the age and outcome onto two lines. */}

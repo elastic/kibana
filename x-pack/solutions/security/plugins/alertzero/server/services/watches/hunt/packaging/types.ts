@@ -58,8 +58,7 @@ export type SubjectKind = ActionSubjectKind;
 
 /**
  * One thing packaging could act on. Hosts and processes are reachable when the host is
- * enrolled with an agent id; users and services are always reachable (the identity action
- * is a Kibana API). `value` is the human-readable name the proposal is about.
+ * enrolled with an agent id. `value` is the human-readable name the proposal is about.
  */
 export type Subject =
   | { kind: 'host'; value: string; reachable: boolean; host: CurrentRunHost }
@@ -69,9 +68,7 @@ export type Subject =
       reachable: boolean;
       host: CurrentRunHost;
       processSelector: ProcessSelector;
-    }
-  | { kind: 'user'; value: string; reachable: true }
-  | { kind: 'service'; value: string; reachable: true };
+    };
 
 /** One confirmed Tier 2 behavior, deduped by `technique_id` across current-run SSEs. */
 export interface HuntEvidenceTechnique {
@@ -240,8 +237,11 @@ export interface CoverageWriteResult {
   skipped: Array<{ kiId: string; subject: string; reason: CoverageSkipReason }>;
 }
 
+/** A mint payload before packaging has resolved the id it will be created under. */
+export type UnresolvedMintPayload = Omit<PackageReportMintPayload, 'proposalId'>;
+
 export interface DecidePackageReportResult {
   dismiss: boolean;
-  proposals: PackageReportMintPayload[];
+  proposals: UnresolvedMintPayload[];
   closureSummary: string;
 }

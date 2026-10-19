@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within, act } from '@testing-library/react';
 import { CONTENT_LIST_TEST_SUBJECTS } from '@kbn/content-list-common';
 import { contentListQueryClient } from '@kbn/content-list-provider';
 import { ListPageTestProviders } from '../../test_utils/test_providers';
@@ -70,6 +70,7 @@ jest.mock('@kbn/core-di-browser', () => {
         http: { basePath: { prepend: (p: string) => p } },
         notifications: {
           toasts: { addSuccess: jest.fn(), addError: jest.fn() },
+          tours: { isEnabled: () => false },
         },
       };
 
@@ -79,13 +80,44 @@ jest.mock('@kbn/core-di-browser', () => {
   };
 });
 
-jest.mock('@kbn/alerting-v2-rule-form', () => ({
-  ComposeDiscoverFlyout: ({ onCreateRule }: { onCreateRule: (payload: unknown) => void }) => (
-    <button data-test-subj="composeDiscoverFlyout" onClick={() => onCreateRule({})}>
-      Compose Discover flyout
-    </button>
-  ),
-}));
+let latestComposeHistoryBack: (() => void) | undefined;
+
+jest.mock('@kbn/alerting-v2-rule-form', () => {
+  const ReactActual = jest.requireActual('react') as typeof import('react');
+  return {
+    ComposeDiscoverFlyout: ({
+      onCreateRule,
+      onClose,
+      onHistoryBack,
+      closeRequestRef,
+    }: {
+      onCreateRule: (payload: unknown) => void;
+      onClose: () => void;
+      onHistoryBack: () => void;
+      closeRequestRef?: { current: (() => void) | null };
+    }) => {
+      latestComposeHistoryBack = onHistoryBack;
+      ReactActual.useEffect(() => {
+        if (!closeRequestRef) {
+          return;
+        }
+        closeRequestRef.current = onClose;
+        return () => {
+          closeRequestRef.current = null;
+        };
+      }, [closeRequestRef, onClose]);
+      return ReactActual.createElement(
+        'button',
+        { 'data-test-subj': 'composeDiscoverFlyout', onClick: () => onCreateRule({}) },
+        'Compose Discover flyout'
+      );
+    },
+    RULE_BUILDER_REGISTRY: { threshold: {} },
+    STACKED_FLYOUT_SIZE: 540,
+    STACKED_FLYOUT_MIN_WIDTH: 480,
+    useEuiFlyoutReregister: () => ({ flyoutKey: 0, reregister: jest.fn() }),
+  };
+});
 
 jest.mock('./rules_data_source', () => ({
   ...jest.requireActual('./rules_data_source'),
@@ -218,6 +250,7 @@ describe('RulesListPage', () => {
     mockExperimentalFeaturesEnabled = true;
     mockAlertingV2ExperimentalFeaturesEnabled = true;
     mockCanWriteRules = true;
+    latestComposeHistoryBack = undefined;
     mockUseDeleteRule.mockReturnValue({
       mutate: mockDeleteMutate,
       isLoading: false,
@@ -228,13 +261,6 @@ describe('RulesListPage', () => {
       variables: undefined,
     });
     resolveRules();
-  });
-
-  it('renders the experimental badge in the page header', async () => {
-    renderPage();
-    await waitForRules();
-
-    expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
   });
 
   it('marks the sequence builder entry point as experimental', async () => {
@@ -581,9 +607,41 @@ describe('RulesListPage', () => {
     fireEvent.click(screen.getByTestId('createRuleButton'));
     fireEvent.click(screen.getByTestId('createEsqlRuleCard'));
 
-    expect(screen.queryByTestId('ruleCreateOptionsFlyout')).not.toBeInTheDocument();
+    expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
     expect(screen.getByTestId('composeDiscoverFlyout')).toBeInTheDocument();
     expect(mockNavigateToUrl).not.toHaveBeenCalled();
+  });
+
+  it('can reopen the ES|QL form after going back to the option picker', async () => {
+    renderPage();
+    await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+    fireEvent.click(screen.getByTestId('createEsqlRuleCard'));
+    expect(screen.getByTestId('composeDiscoverFlyout')).toBeInTheDocument();
+
+    act(() => {
+      latestComposeHistoryBack?.();
+    });
+
+    expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
+    expect(screen.queryByTestId('composeDiscoverFlyout')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('createEsqlRuleCard'));
+
+    expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
+    expect(screen.getByTestId('composeDiscoverFlyout')).toBeInTheDocument();
+  });
+
+  it('opens the threshold builder on top of the create rule options flyout', async () => {
+    renderPage();
+    await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+    fireEvent.click(screen.getByRole('button', { name: /threshold rule/i }));
+
+    expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
+    expect(screen.getByTestId('composeDiscoverFlyout')).toBeInTheDocument();
   });
 
   it('stays on the rules list after creating a rule from the flyout', async () => {
@@ -603,8 +661,25 @@ describe('RulesListPage', () => {
       expect.objectContaining({ onSuccess: expect.any(Function) })
     );
     expect(screen.queryByTestId('composeDiscoverFlyout')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('ruleCreateOptionsFlyout')).not.toBeInTheDocument();
     expect(screen.getByTestId('rulesListTable')).toBeInTheDocument();
     expect(mockNavigateToUrl).not.toHaveBeenCalled();
+  });
+
+  it('closes both flyouts when the option picker is dismissed after opening the form', async () => {
+    renderPage();
+    await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+    fireEvent.click(screen.getByTestId('createEsqlRuleCard'));
+
+    expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
+    expect(screen.getByTestId('composeDiscoverFlyout')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('ruleCreateOptionsFlyoutCloseButton'));
+
+    expect(screen.queryByTestId('ruleCreateOptionsFlyout')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('composeDiscoverFlyout')).not.toBeInTheDocument();
   });
 
   it('opens the rule creation flow from the split button dropdown', async () => {

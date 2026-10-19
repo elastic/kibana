@@ -633,6 +633,7 @@ const executeEntityTypeRun = async ({
             abortSignal,
             idBasedRiskScoringEnabled: runConfig.idBasedRiskScoringEnabled,
             writer: runConfig.writer,
+            alertFilters,
           }),
       });
       metricsTracker.recordResolution(runMetrics, resolutionResult);

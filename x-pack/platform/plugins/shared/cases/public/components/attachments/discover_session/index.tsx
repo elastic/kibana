@@ -18,7 +18,10 @@ import {
   defineAttachment,
   type UnifiedReferenceAttachmentViewProps,
 } from '../../../client/attachment_framework/types';
-import { SavedObjectAddedEvent } from '../common/saved_object/saved_object_added_event';
+import {
+  SavedObjectAddedEvent,
+  getSavedObjectDeletedEvent,
+} from '../common/saved_object/saved_object_added_event';
 import { createSavedObjectAttachmentsTab } from '../common/saved_object/saved_object_attachments_tab';
 import * as i18n from './translations';
 
@@ -51,6 +54,17 @@ export const getDiscoverSessionAttachmentType = () =>
       event: <DiscoverSessionEvent {...props} />,
       hideDefaultActions: false,
     }),
-    getRemovalActivity: () => ({ event: i18n.REMOVED_DISCOVER_SESSION }),
+    getRemovalActivity: ({
+      attachmentId,
+      metadata,
+    }: UnifiedReferenceAttachmentViewProps<SavedObjectReferenceMetadata, string>) => ({
+      event: getSavedObjectDeletedEvent({
+        soType: DISCOVER_SESSION_SO_TYPE,
+        attachmentId,
+        title: metadata?.title,
+        label: i18n.REMOVED_DISCOVER_SESSION,
+        'data-test-subj': `cases-discover-session-deleted-event-link-${attachmentId}`,
+      }),
+    }),
     getAttachmentList: () => ({ children: DiscoverSessionAttachmentsTab }),
   });

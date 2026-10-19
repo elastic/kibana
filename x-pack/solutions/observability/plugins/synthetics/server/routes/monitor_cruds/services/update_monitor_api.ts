@@ -135,7 +135,7 @@ export class UpdateMonitorAPI {
       return undefined;
     }
 
-    return this.routeContext.syntheticsMonitorClient.syntheticsService.getMaintenanceWindows(
+    return this.routeContext.syntheticsMonitorClient.getMaintenanceWindows(
       this.routeContext.spaceId
     );
   }

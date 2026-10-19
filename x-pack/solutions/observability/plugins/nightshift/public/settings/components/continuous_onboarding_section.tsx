@@ -77,7 +77,7 @@ export const ContinuousOnboardingSection = ({
             })}
             helpText={i18n.translate('xpack.nightshift.settings.onboardingIntervalHelp', {
               defaultMessage:
-                'Minimum period in hours between onboarding runs for a given stream. Set to 0 for no cooldown between runs.',
+                'Minimum period in hours between onboarding runs for a given source. Set to 0 for no cooldown between runs.',
             })}
           >
             <EuiFieldNumber

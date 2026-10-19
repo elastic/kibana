@@ -57,6 +57,40 @@ describe('createExistingProposalsCounter', () => {
     expect(await counter('conv-1')).toBe(0);
   });
 
+  it('retries a transient failure, so one throttled request does not fail the run', async () => {
+    // A run whose baseline cannot be read mints nothing, and the next sweep does not retry it.
+    const sleep = jest.fn(async () => undefined);
+    const list = jest
+      .fn()
+      .mockRejectedValueOnce(Object.assign(new Error('too many requests'), { statusCode: 429 }))
+      .mockResolvedValue({ proposals: [], total: 2 });
+    const counter = createExistingProposalsCounter({
+      proposalsService: { list } as never,
+      spaceId: 'default',
+      request,
+      retry: { sleep },
+    });
+
+    expect(await counter('conv-1')).toBe(2);
+    expect(list).toHaveBeenCalledTimes(2);
+    expect(sleep).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not retry a failure that would fail the same way again', async () => {
+    const list = jest
+      .fn()
+      .mockRejectedValue(Object.assign(new Error('forbidden'), { statusCode: 403 }));
+    const counter = createExistingProposalsCounter({
+      proposalsService: { list } as never,
+      spaceId: 'default',
+      request,
+      retry: { sleep: async () => undefined },
+    });
+
+    await expect(counter('conv-1')).rejects.toThrow('forbidden');
+    expect(list).toHaveBeenCalledTimes(1);
+  });
+
   it('logs and rethrows on a lookup failure, rather than swallowing it', async () => {
     const logger = loggingSystemMock.createLogger();
     const error = new Error('proposals index unavailable');

@@ -29,7 +29,7 @@ import { createAgentHandlerContextMock } from '../../../test_utils/runner';
 import { createEmptyConversation, createRound } from '../../../test_utils/conversations';
 import { createMockedExecutableTool } from '../../../test_utils/tools';
 
-import { runDefaultAgentMode } from './run_chat_agent';
+import { getRecursionLimit, runDefaultAgentMode } from './run_chat_agent';
 import {
   addRoundCompleteEvent,
   prepareConversation,
@@ -40,10 +40,11 @@ import {
   createPreExecutionSteps,
 } from './utils';
 import { createAgentGraph } from './graph';
-import { createPromptFactory } from './prompts';
 import { registerInternalTools } from './tools/register_internal_tools';
+import { createPromptFactory } from './prompts';
 import { createImageResolver } from './utils/image_resolver';
 import { RunTracker } from './run_tracker';
+import { CycleHookRuntime } from './cycle_hooks/cycle_hook_runtime';
 import { steps as nodeNames } from './constants';
 import { applyStepUpdates, stepUpdates } from './step_state';
 import { createRootStateChunkEvent } from '../../../test_utils/graph_stream';
@@ -456,6 +457,84 @@ describe('runDefaultAgentMode', () => {
     });
   });
 
+  describe('conversation metadata updates from tools', () => {
+    const setupBase = async (context: ReturnType<typeof createAgentHandlerContextMock>) => {
+      jest.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
+        connector: { name: 'test-connector' },
+        chatModel: {} as any,
+      } as any);
+      context.toolManager.getToolIdMapping.mockReturnValue(new Map());
+      context.toolManager.getDynamicToolIds.mockReturnValue([]);
+      getPendingTurnMock.mockReturnValue(undefined);
+      selectToolsMock.mockResolvedValue({ staticTools: [], dynamicTools: [] } as any);
+      prepareConversationMock.mockResolvedValue({
+        timeline: [],
+        nextInput: { message: 'hello', attachments: [] },
+        attachments: [],
+        attachmentTypes: [],
+        attachmentStateManager: context.attachmentStateManager,
+      } as any);
+      extractRoundMock.mockResolvedValue(createRound({ id: 'round-1' }));
+      createAgentGraphMock.mockReturnValue({ streamEvents: jest.fn(() => []) } as any);
+    };
+
+    const updaterPassedToTools = () =>
+      registerInternalToolsMock.mock.calls[0][0].updateConversationMetadata;
+
+    it('attributes a templated conversation metadata patch to the agent and its execution', async () => {
+      const context = createAgentHandlerContextMock();
+      await setupBase(context);
+
+      await runDefaultAgentMode(
+        {
+          nextInput: { message: 'hello' },
+          agentConfiguration: { tools: [] } as any,
+          conversation: createEmptyConversation({ id: 'conv-1', template_id: 'tmpl-1' }),
+          agentId: 'agent-1',
+          // The execution record id: never the form persisted on conversation events.
+          executionId: '0f7a2c1e-4b7d-4c1a-9e3b-2d5f6a7b8c9d',
+          roundId: 'round-1',
+        },
+        context
+      );
+
+      const updateConversationMetadata = updaterPassedToTools();
+      expect(updateConversationMetadata).toBeDefined();
+      await updateConversationMetadata!({ status: 'open' });
+
+      // Stamped with the round's timeline execution id, which the lifecycle events also carry.
+      expect(context.conversationClient.patchMetadata).toHaveBeenCalledWith(
+        'conv-1',
+        { status: 'open' },
+        {
+          source: 'execution',
+          activity: {
+            actor: { type: 'agent', id: 'agent-1' },
+            execution_id: 'round-1::execution',
+          },
+        }
+      );
+    });
+
+    it('offers no metadata updater when the conversation has no template', async () => {
+      const context = createAgentHandlerContextMock();
+      await setupBase(context);
+
+      await runDefaultAgentMode(
+        {
+          nextInput: { message: 'hello' },
+          agentConfiguration: { tools: [] } as any,
+          conversation: createEmptyConversation({ id: 'conv-1' }),
+          agentId: 'agent-1',
+        },
+        context
+      );
+
+      expect(updaterPassedToTools()).toBeUndefined();
+      expect(context.conversationClient.patchMetadata).not.toHaveBeenCalled();
+    });
+  });
+
   it('passes an image resolver built from the attachment state manager to the prompt factory', async () => {
     const context = createAgentHandlerContextMock();
     jest.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
@@ -669,6 +748,83 @@ describe('runDefaultAgentMode', () => {
       expect(command.goto).toEqual([nodeNames.init]);
       expect(command.update).not.toHaveProperty('pendingToolCallIds');
       expect(command.update).toMatchObject({ cycleLimit: 30, steps: new Overwrite([]) });
+    });
+
+    it('starts the cycle hooks before the tool setup and hands the runtime to the graph', async () => {
+      const { context } = setup();
+      const start = jest.spyOn(CycleHookRuntime.prototype, 'start');
+      const getHandler = jest.fn(() => undefined);
+      (context.hooks.listCycleHooks as jest.Mock).mockReturnValue([{ id: 'memory', getHandler }]);
+
+      await runDefaultAgentMode(
+        {
+          nextInput: { message: 'hello' },
+          agentConfiguration: { tools: [] } as any,
+          agentId: 'agent-1',
+          executionId: 'exec-1',
+        },
+        context
+      );
+
+      expect(getHandler).toHaveBeenCalledTimes(1);
+      expect(getHandler).toHaveBeenCalledWith(
+        expect.objectContaining({
+          request: context.request,
+          spaceId: context.spaceId,
+          agent: expect.objectContaining({ id: 'agent-1' }),
+          execution: expect.objectContaining({ id: 'exec-1', resumed: false }),
+          input: { message: 'hello', attachments: [] },
+          conversation: expect.objectContaining({ events: [], executions: [] }),
+        })
+      );
+      // created and started before the tools are selected, so a 'first' hook overlaps the setup
+      expect(getHandler.mock.invocationCallOrder[0]).toBeLessThan(
+        selectToolsMock.mock.invocationCallOrder[0]
+      );
+      expect(createAgentGraphMock.mock.calls[0][0].cycleHooks).toBeInstanceOf(CycleHookRuntime);
+      // the early calls get the summary the first model call will use (none stored here)
+      expect(start).toHaveBeenCalledWith([], undefined);
+      start.mockRestore();
+    });
+
+    it('closes the cycle hook runtime once the round is extracted, before the post-round hooks', async () => {
+      const close = jest.spyOn(CycleHookRuntime.prototype, 'close');
+      const { context } = setup();
+
+      await runDefaultAgentMode(
+        { nextInput: { message: 'hello' }, agentConfiguration: { tools: [] } as any },
+        context
+      );
+
+      const runMock = context.hooks.run as jest.Mock;
+      const afterExecutionCall = runMock.mock.calls.findIndex(
+        ([lifecycle]) => lifecycle === HookLifecycle.afterExecution
+      );
+      expect(afterExecutionCall).toBeGreaterThanOrEqual(0);
+      expect(close.mock.invocationCallOrder[0]).toBeGreaterThan(
+        extractRoundMock.mock.invocationCallOrder[0]
+      );
+      expect(close.mock.invocationCallOrder[0]).toBeLessThan(
+        runMock.mock.invocationCallOrder[afterExecutionCall]
+      );
+
+      close.mockRestore();
+    });
+
+    it('closes the cycle hook runtime when the run fails', async () => {
+      const close = jest.spyOn(CycleHookRuntime.prototype, 'close');
+      const { context } = setup();
+      extractRoundMock.mockRejectedValueOnce(new Error('stream failed'));
+
+      await expect(
+        runDefaultAgentMode(
+          { nextInput: { message: 'hello' }, agentConfiguration: { tools: [] } as any },
+          context
+        )
+      ).rejects.toThrow('stream failed');
+
+      expect(close).toHaveBeenCalledTimes(1);
+      close.mockRestore();
     });
 
     it('also cuts the inherited abort signals for a standalone run', async () => {
@@ -963,6 +1119,72 @@ describe('runDefaultAgentMode', () => {
       expect(tracker.latestState().compactionSummary).toEqual(storedSummary);
     });
 
+    it('attributes a resumed round to its resume execution id, not the execution record', async () => {
+      const { context } = setup();
+      const conversation = createEmptyConversation({
+        id: 'conv-1',
+        template_id: 'tmpl-1',
+        rounds: [
+          createRound({
+            id: 'round-1',
+            status: ConversationRoundStatus.awaitingPrompt,
+            steps: [pausedCall],
+            pending_prompts: [
+              { id: 'p1', type: AgentPromptType.confirmation, title: 't', message: 'm' },
+            ],
+            state: {
+              version: 2,
+              agent: {
+                current_cycle: 1,
+                error_count: 0,
+                nodes: [
+                  {
+                    step: 'execute_tool',
+                    tool_call_id: 'call-1',
+                    tool_id: 'my.tool',
+                    tool_params: { q: 1 },
+                    tool_state: undefined,
+                  },
+                ],
+              },
+            },
+          }),
+        ],
+        // The initial run and one resume are already stored: this run is the second resume.
+        events: [
+          { id: 'round-1::execution_started', execution_id: 'round-1::execution' },
+          { id: 'round-1::execution::1::execution_started', execution_id: 'round-1::execution::1' },
+        ] as any,
+      });
+      getPendingTurnMock.mockImplementation(realGetPendingTurn);
+      (context.promptManager.dump as jest.Mock).mockReturnValue({ responses: {} });
+
+      await runDefaultAgentMode(
+        {
+          nextInput: { prompts: { p1: { allow: true } } },
+          agentConfiguration: { tools: [] } as any,
+          conversation,
+          agentId: 'agent-1',
+          executionId: '0f7a2c1e-4b7d-4c1a-9e3b-2d5f6a7b8c9d',
+          roundId: 'minted-for-the-resume',
+        },
+        context
+      );
+
+      const [params] = registerInternalToolsMock.mock.calls[0];
+      await params.updateConversationMetadata!({ status: 'open' });
+      expect(context.conversationClient.patchMetadata).toHaveBeenCalledWith(
+        'conv-1',
+        { status: 'open' },
+        expect.objectContaining({
+          activity: {
+            actor: { type: 'agent', id: 'agent-1' },
+            execution_id: 'round-1::execution::2',
+          },
+        })
+      );
+    });
+
     it('lets a blocking beforeAgent hook abort a resumed round', async () => {
       const { context } = setup();
       const conversation = createEmptyConversation({
@@ -1117,5 +1339,17 @@ describe('runDefaultAgentMode', () => {
         })
       );
     });
+  });
+});
+
+describe('getRecursionLimit', () => {
+  it('covers a run that spends its whole cycle budget and then answers, with room to spare', () => {
+    // start, init, five nodes per tool-calling cycle, then the answering cycle and finalize (pinned in graph.test)
+    const fullBudget = (cycleLimit: number) => 5 * cycleLimit + 7;
+
+    for (const cycleLimit of [1, 10, 30]) {
+      expect(getRecursionLimit(cycleLimit)).toBeGreaterThan(fullBudget(cycleLimit));
+    }
+    expect(getRecursionLimit(30)).toBe(185);
   });
 });
