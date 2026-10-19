@@ -108,6 +108,58 @@ describe('execution read API', () => {
     });
   });
 
+  it('drops step input and output without narrowing the rest of the document', async () => {
+    stepExecutionsDataClient.getByIds.mockResolvedValue({ items: [], missing: [] } as never);
+
+    await getStepExecutionsByIds(deps, {
+      ids: ['a'],
+      spaceId: 'default',
+      includeInput: false,
+      includeOutput: false,
+    });
+
+    expect(stepExecutionsDataClient.getByIds).toHaveBeenCalledWith(['a'], {
+      sourceIncludes: undefined,
+      sourceExcludes: ['input', 'output'],
+    });
+  });
+
+  it('lets includeInput keep a field without turning the read into an allow-list', async () => {
+    stepExecutionsDataClient.getByIds.mockResolvedValue({ items: [], missing: [] } as never);
+
+    await getStepExecutionsByIds(deps, {
+      ids: ['a'],
+      spaceId: 'default',
+      sourceExcludes: ['input', 'output'],
+      includeInput: true,
+    });
+
+    expect(stepExecutionsDataClient.getByIds).toHaveBeenCalledWith(['a'], {
+      sourceIncludes: undefined,
+      sourceExcludes: ['output'],
+    });
+  });
+
+  it('adds spaceId to a caller include list and strips it from the result', async () => {
+    stepExecutionsDataClient.getByIds.mockResolvedValue({
+      items: [{ document: { id: 'a', spaceId: 'default', status: 'completed' }, index: 'steps' }],
+      missing: [],
+    } as never);
+
+    const steps = await getStepExecutionsByIds(deps, {
+      ids: ['a'],
+      spaceId: 'default',
+      sourceIncludes: ['status'],
+      includeInput: true,
+    });
+
+    expect(stepExecutionsDataClient.getByIds).toHaveBeenCalledWith(['a'], {
+      sourceIncludes: ['status', 'spaceId'],
+      sourceExcludes: undefined,
+    });
+    expect(steps).toEqual([{ id: 'a', status: 'completed' }]);
+  });
+
   it('returns workflow executions in the requested space and leaves the rest out', async () => {
     workflowExecutionsDataClient.getByIds.mockResolvedValue({
       items: [

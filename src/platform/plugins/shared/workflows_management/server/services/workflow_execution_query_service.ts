@@ -140,8 +140,7 @@ export class WorkflowExecutionQueryService {
     options?: { includeInput?: boolean; includeOutput?: boolean; omitStepExecutions?: boolean }
   ): Promise<WorkflowExecutionDto | null> {
     return getWorkflowExecution({
-      workflowExecutionsDataClient: this.deps.workflowExecutionsDataClient,
-      stepExecutionsDataClient: this.deps.stepExecutionsDataClient,
+      workflowsExecutionEngine: this.deps.workflowsExecutionEngine,
       logger: this.deps.logger,
       workflowExecutionId: executionId,
       spaceId,

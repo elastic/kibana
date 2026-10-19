@@ -197,6 +197,10 @@ export interface GetStepExecutionsByIdsParams {
   spaceId: string;
   sourceIncludes?: ReadonlyArray<Extract<keyof EsWorkflowStepExecution, string>>;
   sourceExcludes?: ReadonlyArray<Extract<keyof EsWorkflowStepExecution, string>>;
+  /** `false` drops `input`. Omitted or `true` leaves it, unless `sourceIncludes` already limits `_source`. */
+  includeInput?: boolean;
+  /** `false` drops `output`. Omitted or `true` leaves it, unless `sourceIncludes` already limits `_source`. */
+  includeOutput?: boolean;
 }
 
 export interface GetWorkflowExecutionsByIdParams {
