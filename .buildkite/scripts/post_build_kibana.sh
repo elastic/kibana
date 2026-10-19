@@ -4,6 +4,8 @@ set -euo pipefail
 
 source "$(dirname "$0")/common/util.sh"
 
+BUILDKITE_PIPELINE_SLUG=${BUILDKITE_PIPELINE_SLUG:-}
+
 if [[ ! "${DISABLE_CI_STATS_SHIPPING:-}" ]]; then
   cmd=(
     "node" "scripts/ship_ci_stats"
@@ -11,15 +13,18 @@ if [[ ! "${DISABLE_CI_STATS_SHIPPING:-}" ]]; then
       "--metrics" "build/kibana/node_modules/@kbn/ui-shared-deps-src/shared_built_assets/metrics.json"
   )
 
-  if [[ "$BUILDKITE_PIPELINE_SLUG" == "kibana-on-merge" ]] || [[ "$BUILDKITE_PIPELINE_SLUG" == "kibana-pull-request" ]]; then
-    cmd+=("--validate")
-  fi
+  case "$BUILDKITE_PIPELINE_SLUG" in
+    kibana-on-merge) cmd+=("--validate") ;;
+    kibana-pull-request) cmd+=("--validate") ;;
+    kibana-merge-queue) cmd+=("--validate") ;;
+    *) ;;
+  esac
 
   echo "--- Ship Kibana Distribution Metrics to CI Stats"
   if ! "${cmd[@]}"; then
     # On PR builds, auto-fix limit overages from the metrics this build already produced and push as kibanamachine.
     # Overages above 15% (per-build, vs current limits.yml) are refused and fail as before; the bundle-size-limits-comment workflow is the tripwire for cumulative bumps.
-    if [[ "${BUILDKITE_PIPELINE_SLUG:-}" == "kibana-pull-request" ]] && ! is_auto_commit_disabled; then
+    if [[ "$BUILDKITE_PIPELINE_SLUG" == "kibana-pull-request" ]] && ! is_auto_commit_disabled; then
       echo "--- Attempting to auto-update bundle size limits from build metrics"
       if node scripts/build_kibana_platform_plugins --update-limits-from-metrics target/optimizer_bundle_metrics.json; then
         # check_for_changed_files commits ALL tracked changes, so only auto-commit when limits.yml is the only modified file

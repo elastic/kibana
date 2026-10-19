@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { Detection } from '@kbn/significant-events-schema';
 import { DetectionClient } from './detection_client';
@@ -184,6 +186,210 @@ describe('DetectionClient', () => {
 
       expect(result.hits).toHaveLength(1);
       expect(result.hits[0].processed).toBe(true);
+    });
+  });
+});
+
+describe('DetectionClient.bulkCreate', () => {
+  const createWriteClient = (items: BulkResponse['items']) => {
+    const create = jest.fn(
+      async (): Promise<BulkResponse> => ({ errors: items.length > 0, items, took: 1 })
+    );
+    const client = new DetectionClient({
+      dataStreamClient: { create },
+      esClient: elasticsearchServiceMock.createElasticsearchClient(),
+      space: 'space-a',
+    });
+    return { client, create };
+  };
+
+  it('writes every document in the client space through the data stream client', async () => {
+    const { client, create } = createWriteClient([]);
+    const documents = [
+      { '@timestamp': '2026-01-01T00:00:00.000Z', rule_uuid: 'rule-1', scanned_by: 'exec-1' },
+      { '@timestamp': '2026-01-01T00:00:00.000Z', detection_id: 'd-1', processed_by: 'exec-1' },
+    ];
+
+    await client.bulkCreate(documents);
+
+    expect(create).toHaveBeenCalledWith({ space: 'space-a', documents });
+  });
+
+  it('skips the request when there is nothing to write', async () => {
+    const { client, create } = createWriteClient([]);
+
+    await client.bulkCreate([]);
+
+    expect(create).not.toHaveBeenCalled();
+  });
+
+  it('throws when Elasticsearch rejects a document', async () => {
+    const { client } = createWriteClient([
+      { create: { _index: '.significant_events-detections', status: 403, error: { type: 'x' } } },
+    ]);
+
+    await expect(
+      client.bulkCreate([{ '@timestamp': '2026-01-01T00:00:00.000Z', rule_uuid: 'rule-1' }])
+    ).rejects.toThrow('Bulk create operation failed for 1 out of 1 items');
+  });
+});
+
+describe('DetectionClient.markSourceDetectionsProcessed', () => {
+  const createSweepClient = ({
+    detections,
+    history = detections,
+    processedIds = [],
+    historyPageSize,
+  }: {
+    /** Rows the history read answers per query. Unbounded by default. */
+    historyPageSize?: number;
+    detections: Array<Record<string, unknown>>;
+    /** Every detection of the rules, what the history read answers. Defaults to the latest ones. */
+    history?: Array<Record<string, unknown>>;
+    processedIds?: string[];
+  }) => {
+    const query = jest.fn(async (request: { query: string }) => {
+      if (request.query.includes('STATS total')) {
+        return countResponse(detections.length);
+      }
+      if (request.query.includes('processed_by')) {
+        return markerResponse(processedIds);
+      }
+      if (request.query.includes('rule_uuid IN')) {
+        const lowerBound = /TO_DATETIME\("([^"]+)"\)/.exec(request.query)?.[1];
+        const page = lowerBound
+          ? history.filter(({ '@timestamp': ts }) => String(ts) >= lowerBound)
+          : history;
+        return sourceResponse(page.slice(0, historyPageSize ?? page.length));
+      }
+      return sourceResponse(detections);
+    });
+    const create = jest.fn(
+      async (): Promise<BulkResponse> => ({ errors: false, items: [], took: 1 })
+    );
+    const client = new DetectionClient({
+      dataStreamClient: { create },
+      esClient: { esql: { query } } as never,
+      space: 'default',
+    });
+    return { client, create };
+  };
+
+  it('marks only the unprocessed detections of the deleted source', async () => {
+    const { client, create } = createSweepClient({
+      detections: [
+        createDetection({
+          '@timestamp': '2026-01-01T00:00:00.000Z',
+          detection_id: 'd-gone',
+          source_id: 'gone',
+        }),
+        createDetection({
+          '@timestamp': '2026-01-01T00:00:00.000Z',
+          detection_id: 'd-live',
+          source_id: 'live',
+        }),
+        createDetection({
+          '@timestamp': '2026-01-01T00:00:00.000Z',
+          detection_id: 'd-done',
+          source_id: 'gone',
+        }),
+      ],
+      processedIds: ['d-done'],
+    });
+
+    await expect(
+      client.markSourceDetectionsProcessed({ sourceId: 'gone', processedBy: 'source-deleted' })
+    ).resolves.toBe(1);
+
+    expect(create).toHaveBeenCalledTimes(1);
+    expect(create).toHaveBeenCalledWith({
+      space: 'default',
+      documents: [
+        expect.objectContaining({ detection_id: 'd-gone', processed_by: 'source-deleted' }),
+      ],
+    });
+  });
+
+  it('writes nothing when the source has no unprocessed detections', async () => {
+    const { client, create } = createSweepClient({
+      detections: [
+        createDetection({
+          '@timestamp': '2026-01-01T00:00:00.000Z',
+          detection_id: 'd-live',
+          source_id: 'live',
+        }),
+      ],
+    });
+
+    await expect(
+      client.markSourceDetectionsProcessed({ sourceId: 'gone', processedBy: 'source-deleted' })
+    ).resolves.toBe(0);
+
+    expect(create).not.toHaveBeenCalled();
+  });
+
+  it('marks the older unprocessed detections of a rule, not only its latest', async () => {
+    const latest = createDetection({
+      '@timestamp': '2026-01-02T00:00:00.000Z',
+      detection_id: 'd-new',
+      rule_uuid: 'rule-1',
+      source_id: 'gone',
+    });
+    const older = createDetection({
+      '@timestamp': '2026-01-01T00:00:00.000Z',
+      detection_id: 'd-old',
+      rule_uuid: 'rule-1',
+      source_id: 'gone',
+    });
+    const { client, create } = createSweepClient({
+      detections: [latest],
+      history: [older, latest],
+      processedIds: ['d-done'],
+    });
+
+    await expect(
+      client.markSourceDetectionsProcessed({ sourceId: 'gone', processedBy: 'source-deleted' })
+    ).resolves.toBe(2);
+
+    expect(create).toHaveBeenCalledWith({
+      space: 'default',
+      documents: [
+        expect.objectContaining({ detection_id: 'd-old', processed_by: 'source-deleted' }),
+        expect.objectContaining({ detection_id: 'd-new', processed_by: 'source-deleted' }),
+      ],
+    });
+  });
+
+  it('pages through a rule history longer than one read', async () => {
+    const make = (id: string, day: number) =>
+      createDetection({
+        '@timestamp': `2026-01-0${day}T00:00:00.000Z`,
+        detection_id: id,
+        rule_uuid: 'rule-1',
+        source_id: 'gone',
+      });
+    const all = [make('d-1', 1), make('d-2', 2), make('d-3', 3), make('d-4', 4), make('d-5', 5)];
+    const { client, create } = createSweepClient({
+      detections: [all[4]],
+      history: all,
+      // The first two are processed, the rest are the newer rows a single capped read would drop.
+      processedIds: ['d-1', 'd-2'],
+      historyPageSize: 2,
+    });
+
+    await expect(
+      client.markSourceDetectionsProcessed({
+        sourceId: 'gone',
+        processedBy: 'source-deleted',
+        historyPageSize: 2,
+      })
+    ).resolves.toBe(3);
+
+    expect(create).toHaveBeenCalledWith({
+      space: 'default',
+      documents: ['d-3', 'd-4', 'd-5'].map((id) =>
+        expect.objectContaining({ detection_id: id, processed_by: 'source-deleted' })
+      ),
     });
   });
 });

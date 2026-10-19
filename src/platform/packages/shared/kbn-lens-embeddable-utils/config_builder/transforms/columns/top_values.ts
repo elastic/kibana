@@ -10,6 +10,7 @@
 import {
   LENS_DOCUMENT_FIELD_NAME,
   type FieldBasedIndexPatternColumn,
+  type LastValueOrderAggColumn,
   type PercentileIndexPatternColumn,
   type PercentileRanksIndexPatternColumn,
   type TermsIndexPatternColumn,
@@ -18,6 +19,7 @@ import {
 import type {
   LensApiTermsOperation,
   TermOperationRankByCustomCountOperationType,
+  TermOperationRankByCustomLastValueType,
   TermOperationRankByCustomOperationType,
   TermOperationRankByCustomPercentileRankType,
   TermOperationRankByCustomPercentileType,
@@ -44,6 +46,12 @@ function isCountOrderAgg(
   return orderAgg.operationType === 'count';
 }
 
+function isLastValueOrderAgg(
+  orderAgg: FieldBasedIndexPatternColumn
+): orderAgg is LastValueOrderAggColumn {
+  return orderAgg.operationType === 'last_value';
+}
+
 function isBaseCustomOperation(
   operation: string
 ): operation is TermOperationRankByCustomOperationType['operation'] {
@@ -55,7 +63,6 @@ function isBaseCustomOperation(
     'standard_deviation',
     'unique_count',
     'sum',
-    'last_value',
   ];
   return ops.includes(operation);
 }
@@ -139,6 +146,7 @@ export function fromTermsLensApiToLensState(
 function getCustomOrderAgg(
   rankBy:
     | TermOperationRankByCustomOperationType
+    | TermOperationRankByCustomLastValueType
     | TermOperationRankByCustomCountOperationType
     | TermOperationRankByCustomPercentileType
     | TermOperationRankByCustomPercentileRankType
@@ -173,6 +181,22 @@ function getCustomOrderAgg(
       dataType: 'number',
       isBucketed: false,
       label: '',
+    };
+    return orderAgg;
+  }
+
+  if (rankBy.operation === 'last_value') {
+    const orderAgg: LastValueOrderAggColumn = {
+      operationType: rankBy.operation,
+      sourceField: rankBy.field,
+      dataType: 'number',
+      isBucketed: false,
+      label: '',
+      // `time_field` maps to the state `sortField` (the date field the last value is sorted by) and is
+      // read at render. It is optional on the API: when omitted, the render path falls back to the data
+      // view's default time field to sort, and the editor prompts the user to re-save to persist it.
+      // This solution was needed to avoid a breaking change in the API.
+      ...(rankBy.time_field ? { params: { sortField: rankBy.time_field } } : {}),
     };
     return orderAgg;
   }
@@ -219,6 +243,18 @@ function getCustomRankByFromOrderAgg(
       operation: 'count',
       direction: orderDirection,
       ...(sourceField !== LENS_DOCUMENT_FIELD_NAME ? { field: sourceField } : {}),
+    };
+    return rankBy;
+  }
+
+  if (isLastValueOrderAgg(orderAgg)) {
+    const rankBy: TermOperationRankByCustomLastValueType = {
+      type: 'custom',
+      operation: 'last_value',
+      field: sourceField,
+      direction: orderDirection,
+      // Real persisted order-aggs always carry `sortField`. Only API persisted ones may omit it.
+      ...(orderAgg.params?.sortField ? { time_field: orderAgg.params.sortField } : {}),
     };
     return rankBy;
   }

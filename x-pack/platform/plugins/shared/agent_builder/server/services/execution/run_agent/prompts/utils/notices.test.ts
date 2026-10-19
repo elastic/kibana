@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AIMessage } from '@langchain/core/messages';
 import { isAIMessage, isHumanMessage, isToolMessage } from '@langchain/core/messages';
 import { ExecutionStatus } from '@kbn/agent-builder-common';
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
@@ -13,8 +14,11 @@ import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors
 import {
   EXECUTION_FAILED_NOTICE_MAX_LENGTH,
   createCycleLimitSystemMessage,
+  formatAwaitingPromptNotice,
+  formatExecutionAbortedNotice,
   formatExecutionFailedNotice,
   formatHandover,
+  formatInterruptionNotice,
   formatRetryNotice,
   formatSubagentRosterNotice,
   formatSystemNotice,
@@ -81,6 +85,15 @@ describe('formatRetryNotice', () => {
     expect(isToolMessage(result)).toBe(true);
     expect(result.content).toContain('ERROR: tool_not_found');
     expect((result as any).tool_call_id).toBe((call as any).tool_calls[0].id);
+  });
+
+  it('sanitizes the tool name of a tool-not-found error', () => {
+    const error = createAgentExecutionError('no such tool', AgentExecutionErrorCode.toolNotFound, {
+      toolName: 'ghost.tool',
+      toolArgs: {},
+    });
+    const [call] = formatRetryNotice(error) as [AIMessage];
+    expect(call.tool_calls?.[0].name).toBe('ghost_tool');
   });
 
   it('renders a validation error as a failed tool call carrying the validation message', () => {
@@ -160,7 +173,7 @@ describe('formatExecutionFailedNotice', () => {
     expect(notice).toContain('<system_notice>');
     // the apostrophe is escaped like everything else
     expect(notice).toContain(
-      'The agent&apos;s attempt to answer the previous message failed. No response was produced.'
+      'The agent&apos;s attempt to answer the previous message failed. The steps above were completed; no response was produced.'
     );
     expect(notice).toContain('<error code="internalError">');
     expect(notice).toContain('bad &lt;tag&gt; &amp;');
@@ -196,5 +209,67 @@ describe('formatExecutionFailedNotice', () => {
 
     const rendered = /<error code="internalError">([\s\S]*?)<\/error>/.exec(notice)![1].trim();
     expect(rendered).toBe(`${'x'.repeat(EXECUTION_FAILED_NOTICE_MAX_LENGTH)}…`);
+  });
+});
+
+describe('formatExecutionAbortedNotice', () => {
+  it('renders the aborted notice without a source', () => {
+    const notice = formatExecutionAbortedNotice();
+
+    expect(notice).toContain('<system_notice>');
+    expect(notice).toContain('interrupted before the agent finished');
+    expect(notice).toContain('The steps above were completed; no response was produced.');
+    expect(notice).not.toContain('<interruption');
+  });
+
+  it('renders the aborted notice with the source', () => {
+    expect(formatExecutionAbortedNotice({ source: 'task_manager' })).toContain(
+      '<interruption source="task_manager"'
+    );
+  });
+});
+
+describe('formatInterruptionNotice', () => {
+  it('renders the aborted notice for an abort, with its source when known', () => {
+    expect(formatInterruptionNotice({ type: 'aborted' })).toContain(
+      'interrupted before the agent finished'
+    );
+    expect(formatInterruptionNotice({ type: 'aborted' })).not.toContain('<interruption');
+    expect(
+      formatInterruptionNotice({ type: 'aborted', aborted_by: { source: 'task_manager' } })
+    ).toContain('<interruption source="task_manager"');
+  });
+
+  it('renders the failed notice with code and bounded cause chain', () => {
+    const notice = formatInterruptionNotice({
+      type: 'failed',
+      error: {
+        code: 'internalError',
+        message: 'x'.repeat(600),
+        causes: [{ code: 'c', message: 'root' }],
+      } as never,
+    });
+
+    expect(notice).toContain(
+      'attempt to answer the previous message failed. The steps above were completed; no response was produced.'
+    );
+    expect(notice).toContain('<error code="internalError">');
+    expect(notice).toContain('<cause code="c">');
+    expect(notice).toContain('root');
+    expect(notice).toContain('…');
+  });
+});
+
+describe('formatAwaitingPromptNotice', () => {
+  it('says the round waits on the user and lists the unanswered questions, escaped', () => {
+    const notice = formatAwaitingPromptNotice(['Which index?', 'Use <prod>?']);
+    expect(notice).toContain('<system_notice>');
+    expect(notice).toContain('the user has not answered');
+    expect(notice).toContain('<question>Which index?</question>');
+    expect(notice).toContain('Use &lt;prod&gt;?');
+  });
+
+  it('omits the questions block when nothing was asked', () => {
+    expect(formatAwaitingPromptNotice([])).not.toContain('<unanswered_questions>');
   });
 });

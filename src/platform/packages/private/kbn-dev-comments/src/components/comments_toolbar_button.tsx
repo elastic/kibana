@@ -1,0 +1,60 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React, { type MouseEvent } from 'react';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { COMMENTS_BUTTON_TEST_SUBJ, IGNORE_ATTR } from '../constants';
+import { useComments, useCommentsState } from './comments_context';
+
+const ignoreProps = { [IGNORE_ATTR]: true } as Record<string, unknown>;
+
+const preventFocusChange = (event: MouseEvent) => {
+  event.preventDefault();
+};
+
+/** The toggle shortcut (see `isToggleShortcut`) as the platform writes it. */
+const isMac =
+  typeof navigator !== 'undefined' &&
+  /mac/i.test(
+    (navigator as Navigator & { userAgentData?: { platform?: string } }).userAgentData?.platform ??
+      navigator.userAgent
+  );
+const SHORTCUT = isMac ? '⌘⇧K' : 'Ctrl+Shift+K';
+/** The key that hands pointer input to the page in comment mode (see `holdsPassThrough`). */
+const PASS_THROUGH_KEY = isMac ? '⌥' : 'Alt';
+
+export const CommentsToolbarButton = () => {
+  const controller = useComments();
+  const active = useCommentsState((state) => state.active);
+  const label = active
+    ? i18n.translate('devComments.button.exit', { defaultMessage: 'Exit comment mode' })
+    : i18n.translate('devComments.button.enter', { defaultMessage: 'Comment mode' });
+  return (
+    <EuiToolTip
+      title={`${label} (${SHORTCUT})`}
+      content={i18n.translate('devComments.button.modifiers', {
+        defaultMessage: 'Hold {passThroughKey} to interact with the page',
+        values: { passThroughKey: PASS_THROUGH_KEY },
+      })}
+      anchorProps={ignoreProps}
+    >
+      <EuiButtonIcon
+        iconType="comment"
+        aria-label={label}
+        aria-pressed={active}
+        color={active ? 'primary' : 'text'}
+        display={active ? 'fill' : 'empty'}
+        onClick={() => controller.toggleActive()}
+        onMouseDown={preventFocusChange}
+        data-test-subj={COMMENTS_BUTTON_TEST_SUBJ}
+      />
+    </EuiToolTip>
+  );
+};

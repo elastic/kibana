@@ -11,14 +11,16 @@ import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import type { ArtifactEntryCardMinifiedProps } from './artifact_entry_card_minified';
 import { ArtifactEntryCardMinified } from './artifact_entry_card_minified';
 import { act, fireEvent } from '@testing-library/react';
-import type { AnyArtifact } from './types';
+import type { AnyArtifact, ArtifactInfo } from './types';
 import { getTrustedAppProviderMock, getExceptionProviderMock } from './test_utils';
 import type { ArtifactEntryCardDecoratorProps } from './artifact_entry_card';
+import type { CriteriaConditionsProps } from './components/criteria_conditions';
+import { DISABLED_ARTIFACT_TAG } from '../../../../common/endpoint/service/artifacts';
 
 describe.each([
-  ['trusted apps', getTrustedAppProviderMock],
-  ['exceptions/event filters', getExceptionProviderMock],
-])('when using the ArtifactEntryCardMinified component with %s', (_, generateItem) => {
+  ['trusted apps' as const, getTrustedAppProviderMock],
+  ['exceptions/event filters' as const, getExceptionProviderMock],
+])('when using the ArtifactEntryCardMinified component with %s', (artifactType, generateItem) => {
   let item: AnyArtifact;
   let appTestContext: AppContextTestRender;
   let renderResult: ReturnType<AppContextTestRender['render']>;
@@ -113,5 +115,55 @@ describe.each([
 
     expect(renderResult.getByText('mock decorator')).toBeInTheDocument();
     expect(passedItem).toBe(item);
+  });
+
+  it('should not show an enabled status by default', () => {
+    render({ item, isSelected: false, onToggleSelectedArtifact: onToggleSelectedArtifactMock });
+
+    expect(renderResult.queryByTestId('testCard-enabledStatus')).toBeNull();
+  });
+
+  it('should show Enabled next to the title when showEnabledColumn is set', () => {
+    render({
+      item,
+      isSelected: false,
+      onToggleSelectedArtifact: onToggleSelectedArtifactMock,
+      showEnabledColumn: true,
+    });
+
+    expect(renderResult.getByTestId('testCard-enabledStatus')).toHaveTextContent('Enabled');
+  });
+
+  if (artifactType === 'exceptions/event filters') {
+    it('should show Disabled next to the title when the artifact has the disabled tag', () => {
+      (item as unknown as ArtifactInfo).tags = [
+        ...(item as unknown as ArtifactInfo).tags,
+        DISABLED_ARTIFACT_TAG,
+      ];
+
+      render({
+        item: item as unknown as AnyArtifact,
+        isSelected: false,
+        onToggleSelectedArtifact: onToggleSelectedArtifactMock,
+        showEnabledColumn: true,
+      } as ArtifactEntryCardMinifiedProps);
+
+      expect(renderResult.getByTestId('testCard-enabledStatus')).toHaveTextContent('Disabled');
+    });
+  }
+
+  it('should replace criteria conditions when CriteriaComponent is provided', () => {
+    const MockCriteria = memo<CriteriaConditionsProps>(() => <p>{'custom criteria'}</p>);
+    MockCriteria.displayName = 'MockCriteria';
+
+    render({
+      item,
+      isSelected: false,
+      onToggleSelectedArtifact: onToggleSelectedArtifactMock,
+      CriteriaComponent: MockCriteria,
+    });
+
+    expect(renderResult.getByText('custom criteria')).toBeInTheDocument();
+    expect(renderResult.queryByTestId('testCard-criteriaConditions-condition')).toBeNull();
   });
 });

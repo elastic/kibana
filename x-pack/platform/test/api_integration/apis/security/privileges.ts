@@ -102,7 +102,6 @@ export default function ({ getService }: FtrProviderContext) {
       contextEngine: ['all', 'read', 'minimal_all', 'minimal_read'],
       automatic_import: ['all', 'read', 'minimal_all', 'minimal_read'],
       slo: ['all', 'read', 'minimal_all', 'minimal_read'],
-      searchPlayground: ['all', 'read', 'minimal_all', 'minimal_read'],
       searchSynonyms: ['all', 'read', 'minimal_all', 'minimal_read'],
       searchQueryRules: ['all', 'read', 'minimal_all', 'minimal_read'],
       workflowsManagement: [
@@ -289,6 +288,8 @@ export default function ({ getService }: FtrProviderContext) {
         'event_filters_read',
         'endpoint_exceptions_all',
         'endpoint_exceptions_read',
+        'custom_yara_signatures_all',
+        'custom_yara_signatures_read',
         'policy_management_all',
         'policy_management_read',
         'scripts_management_all',

@@ -14,15 +14,24 @@ import {
   ALERT_EXCEPTION_ACTION_IDS,
   ALERT_STATUS_ACTION_IDS,
   ALERT_TAG_ACTION_ID,
+  ATTACK_ADD_TO_CASE_ACTION_ID,
+  ATTACK_AI_ACTION_IDS,
+  ATTACK_ASSIGNEE_ACTION_IDS,
+  ATTACK_DISCOVERY_ACTION_IDS,
+  ATTACK_INVESTIGATE_IN_TIMELINE_ACTION_ID,
+  ATTACK_STATUS_ACTION_IDS,
+  ATTACK_TAG_ACTION_ID,
   BULK_ADD_TO_CASE_ACTION_ID,
   BULK_INVESTIGATE_IN_TIMELINE_ACTION_ID,
   EVENT_FILTER_ACTION_ID,
   EXPLORE_ACTION_ID,
+  EXPLORE_IN_ATTACKS_ACTION_ID,
   INVESTIGATE_IN_TIMELINE_ACTION_ID,
   ISOLATE_HOST_ACTION_ID,
   OSQUERY_ACTION_ID,
   RESPOND_ACTION_ID,
   RUN_ALERT_WORKFLOW_ACTION_ID,
+  RUN_ATTACK_WORKFLOW_ACTION_ID,
   RUN_DOCUMENT_WORKFLOW_ACTION_ID,
 } from '../constants/action_ids';
 
@@ -39,15 +48,26 @@ export const ACTION_ICONS_BY_ID: Readonly<Record<string, IconType>> = {
   [ALERT_EXCEPTION_ACTION_IDS.addEndpointException]: 'bullseye',
   [ALERT_EXCEPTION_ACTION_IDS.addRuleException]: 'filter',
   [ALERT_TAG_ACTION_ID]: 'tag',
+  [ATTACK_ADD_TO_CASE_ACTION_ID]: 'briefcase',
+  [ATTACK_AI_ACTION_IDS.addToChat]: 'comment',
+  [ATTACK_AI_ACTION_IDS.viewInAiAssistant]: 'sparkles',
+  [ATTACK_ASSIGNEE_ACTION_IDS.assign]: 'users',
+  [ATTACK_ASSIGNEE_ACTION_IDS.unassignAll]: 'users',
+  [ATTACK_DISCOVERY_ACTION_IDS.addToCase]: 'briefcase',
+  [ATTACK_DISCOVERY_ACTION_IDS.addToDataset]: 'database',
+  [ATTACK_INVESTIGATE_IN_TIMELINE_ACTION_ID]: 'timeline',
+  [ATTACK_TAG_ACTION_ID]: 'tag',
   [BULK_ADD_TO_CASE_ACTION_ID]: 'briefcase',
   [BULK_INVESTIGATE_IN_TIMELINE_ACTION_ID]: 'timeline',
   [EVENT_FILTER_ACTION_ID]: 'filter',
   [EXPLORE_ACTION_ID]: 'external',
+  [EXPLORE_IN_ATTACKS_ACTION_ID]: 'external',
   [INVESTIGATE_IN_TIMELINE_ACTION_ID]: 'timeline',
   [ISOLATE_HOST_ACTION_ID]: 'lock',
   [OSQUERY_ACTION_ID]: 'commandLine',
   [RESPOND_ACTION_ID]: 'bolt',
   [RUN_ALERT_WORKFLOW_ACTION_ID]: 'workflow',
+  [RUN_ATTACK_WORKFLOW_ACTION_ID]: 'workflow',
   [RUN_DOCUMENT_WORKFLOW_ACTION_ID]: 'workflow',
 };
 
@@ -55,5 +75,19 @@ export const ACTION_ICONS_BY_ID: Readonly<Record<string, IconType>> = {
 export const ALERT_STATUS_ICON_COLORS: Readonly<Record<string, EuiIconProps['color']>> = {
   [ALERT_STATUS_ACTION_IDS.markAsOpen]: 'danger',
   [ALERT_STATUS_ACTION_IDS.markAsAcknowledged]: 'primary',
+  [ALERT_CLOSE_WITH_REASON_ACTION_ID]: 'subdued',
+};
+
+export const ATTACK_DISCOVERY_STATUS_ICON_COLORS: Readonly<Record<string, EuiIconProps['color']>> =
+  {
+    [ATTACK_DISCOVERY_ACTION_IDS.markAsAcknowledged]: 'primary',
+    [ATTACK_DISCOVERY_ACTION_IDS.markAsClosed]: 'subdued',
+    [ATTACK_DISCOVERY_ACTION_IDS.markAsOpen]: 'danger',
+  };
+
+export const ATTACK_STATUS_ICON_COLORS: Readonly<Record<string, EuiIconProps['color']>> = {
+  [ATTACK_STATUS_ACTION_IDS.markAsAcknowledged]: 'primary',
+  [ATTACK_STATUS_ACTION_IDS.markAsClosed]: 'subdued',
+  [ATTACK_STATUS_ACTION_IDS.markAsOpen]: 'danger',
   [ALERT_CLOSE_WITH_REASON_ACTION_ID]: 'subdued',
 };

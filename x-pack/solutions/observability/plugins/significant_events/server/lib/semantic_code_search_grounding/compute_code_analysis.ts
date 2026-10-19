@@ -10,10 +10,7 @@ import type { ToolsStart } from '@kbn/agent-builder-server';
 import type { ComputedFeatureProvider } from '@kbn/nightshift-ai';
 import { getSigEventsLogPatternsEsql } from '@kbn/ai-tools';
 import { createTracedEsClient } from '@kbn/traced-es-client';
-import {
-  formatToolResults,
-  type BridgedToolResponse,
-} from '../agent_builder/inference_tool_bridge';
+import { formatToolResults, type BridgedToolResponse } from '../agent_builder/format_tool_results';
 import {
   SCS_LIST_REPOS_TOOL_ID,
   SCS_LIST_INDICES_TOOL_ID,
@@ -217,7 +214,7 @@ export const createCodeAnalysisProvider = ({
       return undefined;
     }
 
-    // 3. Score each candidate by how well the stream's distinctive strings match
+    // 3. Score each candidate by how well the source's distinctive strings match
     //    its code, selecting the repository with the most verified strings.
     const query = distinctiveStrings.join('\n');
     const normalizedStrings = distinctiveStrings.map((value) => ({

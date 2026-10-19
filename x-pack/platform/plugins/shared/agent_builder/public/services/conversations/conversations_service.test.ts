@@ -13,6 +13,18 @@ import { publicApiPath, internalApiPath } from '../../../common/constants';
 import { ConversationsService } from './conversations_service';
 
 describe('ConversationsService', () => {
+  it('creates an empty conversation for an agent', async () => {
+    const post = jest.fn().mockResolvedValue({ id: 'conv-1' });
+    const service = new ConversationsService({ http: { post } as never });
+
+    const created = await service.create({ agentId: 'agent-1' });
+
+    expect(post).toHaveBeenCalledWith(`${publicApiPath}/conversations`, {
+      body: JSON.stringify({ agent_id: 'agent-1' }),
+    });
+    expect(created).toEqual({ id: 'conv-1' });
+  });
+
   it('requests _search with the snake_case query mapping', async () => {
     const get = jest.fn().mockResolvedValue({
       pagination: { total: 0, page: 1, per_page: 25 },

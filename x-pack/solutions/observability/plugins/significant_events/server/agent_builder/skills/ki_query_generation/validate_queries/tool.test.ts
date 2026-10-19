@@ -5,15 +5,20 @@
  * 2.0.
  */
 
+import { forbidden } from '@hapi/boom';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import type { Streams } from '@kbn/streams-schema';
 import {
   createQueryValidationContext,
   validateKIQueries,
   type ValidatedKIQuery,
 } from '@kbn/nightshift-ai';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../../../routes/types';
-import { createMockToolContext, invokeHandler } from '../../../utils/test_helpers';
+import {
+  createMockToolContext,
+  createSignificantEventsServer,
+  invokeHandler,
+  mockSourcesClient,
+} from '../../../utils/test_helpers';
 import { createValidateQueriesTool } from './tool';
 
 jest.mock('@kbn/nightshift-ai', () => ({
@@ -29,26 +34,15 @@ const validateKIQueriesMock = validateKIQueries as jest.MockedFunction<typeof va
 
 describe('ki_queries_validate tool', () => {
   const logger = loggingSystemMock.createLogger();
-  const stream: Streams.QueryStream.Definition = {
-    name: 'logs.test',
-    description: 'Test logs',
-    type: 'query',
-    updated_at: new Date().toISOString(),
-    query: {
-      view: '$.logs.test',
-      esql: 'FROM $.logs.test',
-    },
-  };
   const streamDataEsClient = { esql: { query: jest.fn() } };
-  const getStream = jest.fn().mockResolvedValue(stream);
   const getFeatures = jest.fn();
-  const getStreamToQueryLinksMap = jest.fn();
+  const getSourceToQueryLinksMap = jest.fn();
   const getScopedClients = jest.fn(async () => {
     return {
-      streamsClient: { getStream },
+      sourcesClient: mockSourcesClient(['logs.test']),
       getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
         getFeatures,
-        getStreamToQueryLinksMap,
+        getSourceToQueryLinksMap,
       }),
       streamDataEsClient,
       tuningConfig: { query_validation_timeout_ms: 12_000 },
@@ -61,6 +55,7 @@ describe('ki_queries_validate tool', () => {
     description: 'Detects failures',
     category: 'error' as const,
     severity_score: 60,
+    expects_matches: true,
     feature_ids: ['feature-1'],
   };
 
@@ -71,6 +66,7 @@ describe('ki_queries_validate tool', () => {
     description: 'Detects failures',
     category: 'error',
     severity_score: 60,
+    expects_matches: true,
     features: [{ id: 'feature-1', run_id: 'run-1' }],
   };
 
@@ -79,7 +75,7 @@ describe('ki_queries_validate tool', () => {
     getFeatures.mockResolvedValue({
       hits: [{ id: 'feature-1', run_id: 'run-1', type: 'entity' }],
     });
-    getStreamToQueryLinksMap.mockResolvedValue({
+    getSourceToQueryLinksMap.mockResolvedValue({
       'logs.test': [
         {
           query: {
@@ -110,39 +106,50 @@ describe('ki_queries_validate tool', () => {
   const createTool = () =>
     createValidateQueriesTool({
       getScopedClients,
+      server: createSignificantEventsServer({ featurePrivilege: 'read' }),
       logger,
     });
 
-  it('bounds its input', () => {
+  it('bounds its input and keeps evaluation intent optional', () => {
     const tool = createTool();
     if (!('schema' in tool)) {
       throw new Error('Expected a schema-backed tool registration');
     }
 
-    expect(tool.schema.safeParse({ target_id: 'logs.test', queries: [candidate] }).success).toBe(
+    const { expects_matches: _expectsMatches, ...withoutIntent } = candidate;
+    expect(tool.schema.safeParse({ slug: 'logs.test', queries: [candidate] }).success).toBe(true);
+    expect(tool.schema.safeParse({ slug: 'logs.test', queries: [withoutIntent] }).success).toBe(
       true
     );
-    expect(tool.schema.safeParse({ target_id: 'logs.test', queries: [] }).success).toBe(false);
+    expect(tool.schema.safeParse({ slug: 'logs.test', queries: [] }).success).toBe(true);
+    expect(
+      tool.schema.safeParse({
+        slug: 'logs.test',
+        queries: [{ ...candidate, category: 'unsupported' }],
+      }).success
+    ).toBe(false);
+    expect(
+      tool.schema.safeParse({ slug: 'logs.test', queries: Array(101).fill(candidate) }).success
+    ).toBe(false);
   });
 
   it('resolves an analysis target, queries KI state, and returns validated results', async () => {
     const result = await invokeHandler(
       createTool(),
-      { target_id: 'logs.test', queries: [candidate] },
+      { slug: 'logs.test', queries: [candidate] },
       createMockToolContext()
     );
     if (!('results' in result)) {
       throw new Error('Expected a standard tool result');
     }
 
-    expect(getStream).toHaveBeenCalledWith('logs.test');
     expect(getFeatures).toHaveBeenCalledWith('logs.test', {
-      id: ['feature-1'],
+      featureIds: ['feature-1'],
       excludedType: ['log_samples'],
     });
     expect(createQueryValidationContextMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        sources: ['$.logs.test'],
+        sources: ['$.nightshift.sources.default.logs.test'],
         esClient: streamDataEsClient,
         existingQueries: [
           expect.objectContaining({
@@ -160,18 +167,26 @@ describe('ki_queries_validate tool', () => {
         queryValidationTimeoutMs: 12_000,
       })
     );
+    expect(validateKIQueriesMock.mock.calls[0][0]).not.toHaveProperty('requireQueryIntent');
+    expect(validateKIQueriesMock.mock.calls[0][0]).toHaveProperty('collectQueryAttempts', true);
     expect(result.results).toEqual([
       {
         type: 'other',
         data: {
+          slug: 'logs.test',
+          title: 'logs.test',
+          view_name: '$.nightshift.sources.default.logs.test',
           queries: [{ query: candidate, valid: true, status: 'Added' }],
-          accepted_queries: [
+          finalized: true,
+          finalized_queries: [
             {
               type: 'match',
               esql: { query: 'FROM logs.test | WHERE message:"failure"' },
               title: 'Failures',
               description: 'Detects failures',
+              category: 'error',
               severity_score: 60,
+              expects_matches: true,
               features: [{ id: 'feature-1', run_id: 'run-1' }],
             },
           ],
@@ -180,12 +195,85 @@ describe('ki_queries_validate tool', () => {
     ]);
   });
 
+  it('does not finalize a batch containing rejected queries', async () => {
+    validateKIQueriesMock.mockResolvedValueOnce({
+      results: [{ query: candidate, valid: false, status: 'Failed to add' }],
+      acceptedQueries: [],
+      hasIntentFailures: false,
+      hasNonIntentFailures: true,
+    });
+
+    const result = await invokeHandler(
+      createTool(),
+      { slug: 'logs.test', queries: [candidate] },
+      createMockToolContext()
+    );
+    if (!('results' in result)) {
+      throw new Error('Expected a standard tool result');
+    }
+
+    expect(result.results).toEqual([
+      {
+        type: 'other',
+        data: {
+          slug: 'logs.test',
+          title: 'logs.test',
+          view_name: '$.nightshift.sources.default.logs.test',
+          queries: [{ query: candidate, valid: false, status: 'Failed to add' }],
+          finalized: false,
+        },
+      },
+    ]);
+  });
+
+  it('finalizes an explicit empty batch with the resolved source and no KI reads', async () => {
+    const result = await invokeHandler(
+      createTool(),
+      { slug: 'logs.test', queries: [] },
+      createMockToolContext()
+    );
+    if (!('results' in result)) {
+      throw new Error('Expected a standard tool result');
+    }
+
+    expect(getFeatures).not.toHaveBeenCalled();
+    expect(getSourceToQueryLinksMap).not.toHaveBeenCalled();
+    expect(result.results).toEqual([
+      {
+        type: 'other',
+        data: {
+          slug: 'logs.test',
+          title: 'logs.test',
+          view_name: '$.nightshift.sources.default.logs.test',
+          queries: [],
+          finalized: true,
+          finalized_queries: [],
+        },
+      },
+    ]);
+  });
+
+  it('rejects an empty batch for an unknown slug instead of finalizing it', async () => {
+    const result = await invokeHandler(
+      createTool(),
+      { slug: 'logs.missing', queries: [] },
+      createMockToolContext()
+    );
+    if (!('results' in result)) {
+      throw new Error('Expected a standard tool result');
+    }
+
+    expect(result.results).toEqual([
+      { type: 'error', data: { message: 'Source not found in this space: logs.missing' } },
+    ]);
+  });
+
   it('returns an Agent Builder error result when state loading fails', async () => {
     getFeatures.mockRejectedValueOnce(new Error('KI storage unavailable'));
 
     const result = await invokeHandler(
       createTool(),
-      { target_id: 'logs.test', queries: [candidate] },
+      { slug: 'logs.test', queries: [candidate] },
       createMockToolContext()
     );
     if (!('results' in result)) {
@@ -195,5 +283,52 @@ describe('ki_queries_validate tool', () => {
     expect(result.results).toEqual([
       { type: 'error', data: { message: 'KI storage unavailable' } },
     ]);
+  });
+
+  it('does not validate queries without the Nightshift read privilege', async () => {
+    const tool = createValidateQueriesTool({
+      getScopedClients,
+      server: createSignificantEventsServer({ featurePrivilege: 'none' }),
+      logger,
+    });
+
+    const result = await invokeHandler(
+      tool,
+      { slug: 'logs.test', queries: [] },
+      createMockToolContext()
+    );
+
+    expect(result).toMatchObject({ results: [{ type: 'error' }] });
+  });
+
+  it('does not read stored state for a source the caller cannot read', async () => {
+    const sourcesClient = mockSourcesClient(['logs.test']);
+    sourcesClient.assertReadable.mockRejectedValue(forbidden('Cannot read source'));
+    const getScopedClientsDenied = jest.fn(async () => {
+      return {
+        sourcesClient,
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
+          getFeatures,
+          getSourceToQueryLinksMap,
+        }),
+        streamDataEsClient,
+        tuningConfig: { query_validation_timeout_ms: 12_000 },
+      } as unknown as RouteHandlerScopedClients;
+    }) as unknown as jest.MockedFunction<GetScopedClients>;
+    const tool = createValidateQueriesTool({
+      getScopedClients: getScopedClientsDenied,
+      server: createSignificantEventsServer({ featurePrivilege: 'read' }),
+      logger,
+    });
+
+    const result = await invokeHandler(
+      tool,
+      { slug: 'logs.test', queries: [candidate] },
+      createMockToolContext()
+    );
+
+    expect(getFeatures).not.toHaveBeenCalled();
+    expect(getSourceToQueryLinksMap).not.toHaveBeenCalled();
+    expect(result).toMatchObject({ results: [{ type: 'error' }] });
   });
 });

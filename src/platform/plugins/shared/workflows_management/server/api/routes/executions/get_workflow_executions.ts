@@ -207,7 +207,7 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
         try {
           const spaceId = spaces.getSpaceId(request);
           const { workflowId } = request.params;
-          const workflow = await api.getWorkflow(workflowId, spaceId);
+          const workflow = await api.getWorkflow(workflowId, spaceId, request);
           assertCanReadManagedWorkflowExecution(request, workflow);
           const executedBy = request.query.executedBy;
           let searchAfter: FieldValue[] | undefined;
@@ -249,7 +249,7 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
             searchAfter,
           };
           return response.ok({
-            body: await api.getWorkflowExecutions(params, spaceId),
+            body: await api.getWorkflowExecutions({ ...params, request }, spaceId),
           });
         } catch (error) {
           return handleRouteError(response, error);

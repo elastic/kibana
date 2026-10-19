@@ -104,7 +104,7 @@ describe('sendRuleUpdateTelemetryEvents', () => {
       [ThreeWayDiffOutcome.MissingBaseCanUpdate, true],
       [ThreeWayDiffOutcome.CustomizedValueSameUpdate, false],
       [ThreeWayDiffOutcome.StockValueNoUpdate, false],
-      [ThreeWayDiffOutcome.CustomizedValueNoUpdate, false],
+      [ThreeWayDiffOutcome.CustomizedValueNoUpdate, true],
       [ThreeWayDiffOutcome.MissingBaseNoUpdate, false],
     ])('reports %s as hasRuleTypeChange=%s', (diffOutcome, expected) => {
       const analytics = mockAnalytics();

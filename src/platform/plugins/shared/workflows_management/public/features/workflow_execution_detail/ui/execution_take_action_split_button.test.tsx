@@ -9,113 +9,227 @@
 
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
+import { useLocation } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import { ExecutionStatus } from '@kbn/workflows';
-import {
-  useRunWorkflow,
-  useTestWorkflow,
-  useWorkflowsApi,
-  useWorkflowsCapabilities,
-} from '@kbn/workflows-ui';
-import { createMockWorkflowApi, createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
+import { createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
 import { ExecutionTakeActionSplitButton } from './execution_take_action_split_button';
 import { createStartServicesMock } from '../../../mocks';
 import { getTestProvider } from '../../../shared/mocks/test_providers';
 import { createMockWorkflowExecutionDto } from '../../../shared/test_utils';
 
-const mockRunWorkflow = jest.fn();
-const mockTestWorkflow = jest.fn();
-const mockWorkflowApi = createMockWorkflowApi();
+const mockCancelExecution = jest.fn();
+const mockUseWorkflowsCapabilities = jest.fn(createMockWorkflowsCapabilities);
 
-jest.mock('@kbn/workflows-ui', () => ({
-  ...jest.requireActual('@kbn/workflows-ui'),
-  useRunWorkflow: jest.fn(),
-  useTestWorkflow: jest.fn(),
-  useWorkflowsApi: jest.fn(),
-  useWorkflowsCapabilities: jest.fn(),
-}));
+jest.mock('@kbn/workflows-ui', () => {
+  const actual = jest.requireActual('@kbn/workflows-ui');
+  return {
+    ...actual,
+    useWorkflowsCapabilities: () => mockUseWorkflowsCapabilities(),
+    useWorkflowsApi: () => ({
+      cancelExecution: mockCancelExecution,
+    }),
+  };
+});
 
 jest.mock('../../../hooks/navigation/use_navigate_to_execution', () => ({
   useNavigateToExecution: () => ({ href: '/app/workflows/wf-1?executionId=exec-1' }),
 }));
 
+const LocationSearch = () => {
+  const { search } = useLocation();
+  return <div data-test-subj="location-search">{search}</div>;
+};
+
 describe('ExecutionTakeActionSplitButton', () => {
-  const services = createStartServicesMock();
+  const execution = createMockWorkflowExecutionDto({
+    id: 'exec-1',
+    workflowId: 'wf-1',
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockRunWorkflow.mockResolvedValue({ workflowExecutionId: 'new-exec' });
-    mockTestWorkflow.mockResolvedValue({ workflowExecutionId: 'new-test-exec' });
-    mockWorkflowApi.cancelExecution.mockResolvedValue(undefined);
-    jest.mocked(useRunWorkflow).mockReturnValue({
-      mutateAsync: mockRunWorkflow,
-      isLoading: false,
-    } as unknown as ReturnType<typeof useRunWorkflow>);
-    jest.mocked(useTestWorkflow).mockReturnValue({
-      mutateAsync: mockTestWorkflow,
-      isLoading: false,
-    } as unknown as ReturnType<typeof useTestWorkflow>);
-    jest
-      .mocked(useWorkflowsApi)
-      .mockReturnValue(mockWorkflowApi as unknown as ReturnType<typeof useWorkflowsApi>);
-    jest.mocked(useWorkflowsCapabilities).mockReturnValue(createMockWorkflowsCapabilities());
-    services.notifications.toasts.addSuccess = jest.fn();
-    services.notifications.toasts.addError = jest.fn();
+    mockCancelExecution.mockResolvedValue(undefined);
+    mockUseWorkflowsCapabilities.mockReturnValue(createMockWorkflowsCapabilities());
   });
 
-  const renderButton = (overrides: Parameters<typeof createMockWorkflowExecutionDto>[0] = {}) =>
+  it('opens the replay modal without closing the current execution', () => {
+    const services = createStartServicesMock();
+    const navigateToApp = jest.fn();
+    services.application.navigateToApp = navigateToApp;
+
     render(
+      <Route path="/:id">
+        <ExecutionTakeActionSplitButton execution={execution} />
+        <LocationSearch />
+      </Route>,
+      {
+        wrapper: getTestProvider({
+          services,
+          initialEntries: ['/wf-1?tab=executions&executionId=exec-1'],
+        }),
+      }
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Re-run' }));
+
+    const search = screen.getByTestId('location-search').textContent ?? '';
+    expect(search).toContain('executionId=exec-1');
+    expect(search).toContain('replayExecutionId=exec-1');
+    expect(search).not.toContain('replayIsTestRun');
+    expect(navigateToApp).not.toHaveBeenCalled();
+  });
+
+  it('keeps a test re-run as a test run when staying on the workflow', () => {
+    const services = createStartServicesMock();
+    const navigateToApp = jest.fn();
+    services.application.navigateToApp = navigateToApp;
+
+    render(
+      <Route path="/:id">
+        <ExecutionTakeActionSplitButton
+          execution={createMockWorkflowExecutionDto({
+            id: 'exec-1',
+            workflowId: 'wf-1',
+            isTestRun: true,
+          })}
+        />
+        <LocationSearch />
+      </Route>,
+      {
+        wrapper: getTestProvider({
+          services,
+          initialEntries: ['/wf-1?tab=executions&executionId=exec-1'],
+        }),
+      }
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Re-run' }));
+
+    const search = screen.getByTestId('location-search').textContent ?? '';
+    expect(search).toContain('replayExecutionId=exec-1');
+    expect(search).toContain('replayIsTestRun=true');
+    expect(navigateToApp).not.toHaveBeenCalled();
+  });
+
+  it('navigates to the workflow replay modal from another route', () => {
+    const services = createStartServicesMock();
+    const navigateToApp = jest.fn();
+    services.application.navigateToApp = navigateToApp;
+
+    render(
+      <Route path="/:id">
+        <ExecutionTakeActionSplitButton execution={execution} />
+      </Route>,
+      {
+        wrapper: getTestProvider({
+          services,
+          initialEntries: ['/executions?executionId=exec-1'],
+        }),
+      }
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Re-run' }));
+
+    expect(navigateToApp).toHaveBeenCalledWith('workflows', {
+      path: '/wf-1?tab=executions&executionId=exec-1&replayExecutionId=exec-1',
+    });
+  });
+
+  it('navigates a test re-run with the test-run flag', () => {
+    const services = createStartServicesMock();
+    const navigateToApp = jest.fn();
+    services.application.navigateToApp = navigateToApp;
+
+    render(
+      <Route path="/:id">
+        <ExecutionTakeActionSplitButton
+          execution={createMockWorkflowExecutionDto({
+            id: 'exec-1',
+            workflowId: 'wf-1',
+            isTestRun: true,
+          })}
+        />
+      </Route>,
+      {
+        wrapper: getTestProvider({
+          services,
+          initialEntries: ['/executions?executionId=exec-1'],
+        }),
+      }
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Re-run' }));
+
+    expect(navigateToApp).toHaveBeenCalledWith('workflows', {
+      path: '/wf-1?tab=executions&executionId=exec-1&replayExecutionId=exec-1&replayIsTestRun=true',
+    });
+  });
+
+  it('does not open the replay modal without execute privilege', () => {
+    const services = createStartServicesMock();
+    const navigateToApp = jest.fn();
+    services.application.navigateToApp = navigateToApp;
+    mockUseWorkflowsCapabilities.mockReturnValue({
+      ...createMockWorkflowsCapabilities(),
+      canExecuteWorkflow: false,
+    });
+
+    render(
+      <Route path="/:id">
+        <ExecutionTakeActionSplitButton execution={execution} />
+        <LocationSearch />
+      </Route>,
+      {
+        wrapper: getTestProvider({
+          services,
+          initialEntries: ['/wf-1?tab=executions&executionId=exec-1'],
+        }),
+      }
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Re-run' }));
+
+    expect(navigateToApp).not.toHaveBeenCalled();
+    expect(screen.getByTestId('location-search')).not.toHaveTextContent('replayExecutionId');
+  });
+
+  it('opens the replay modal when the workflow route has a trailing slash', () => {
+    const services = createStartServicesMock();
+    const navigateToApp = jest.fn();
+    services.application.navigateToApp = navigateToApp;
+
+    render(
+      <Route path="/:id">
+        <ExecutionTakeActionSplitButton execution={execution} />
+        <LocationSearch />
+      </Route>,
+      {
+        wrapper: getTestProvider({
+          services,
+          initialEntries: ['/wf-1/?tab=executions&executionId=exec-1'],
+        }),
+      }
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Re-run' }));
+
+    const search = screen.getByTestId('location-search').textContent ?? '';
+    expect(search).toContain('replayExecutionId=exec-1');
+    expect(navigateToApp).not.toHaveBeenCalled();
+  });
+
+  const renderButton = (overrides: Parameters<typeof createMockWorkflowExecutionDto>[0] = {}) => {
+    const services = createStartServicesMock();
+    return render(
       <ExecutionTakeActionSplitButton execution={createMockWorkflowExecutionDto(overrides)} />,
       { wrapper: getTestProvider({ services }) }
     );
+  };
 
   const openTakeActionMenu = () => {
     fireEvent.click(screen.getByRole('button', { name: 'More actions' }));
   };
-
-  it('re-runs a production execution through runWorkflow', async () => {
-    renderButton({
-      isTestRun: false,
-      context: { inputs: { alertId: 'a-1' } },
-    });
-
-    fireEvent.click(screen.getByRole('button', { name: 'Re-run' }));
-
-    await waitFor(() => {
-      expect(mockRunWorkflow).toHaveBeenCalledWith({
-        id: 'wf-1',
-        inputs: { alertId: 'a-1' },
-      });
-    });
-    expect(mockTestWorkflow).not.toHaveBeenCalled();
-  });
-
-  it('re-runs a test execution through testWorkflow', async () => {
-    renderButton({
-      isTestRun: true,
-      context: { inputs: { alertId: 'a-1' } },
-    });
-
-    fireEvent.click(screen.getByRole('button', { name: 'Re-run' }));
-
-    await waitFor(() => {
-      expect(mockTestWorkflow).toHaveBeenCalledWith({
-        workflowId: 'wf-1',
-        inputs: { alertId: 'a-1' },
-      });
-    });
-    expect(mockRunWorkflow).not.toHaveBeenCalled();
-  });
-
-  it('disables Re-run while a test re-run is pending', () => {
-    jest.mocked(useTestWorkflow).mockReturnValue({
-      mutateAsync: mockTestWorkflow,
-      isLoading: true,
-    } as unknown as ReturnType<typeof useTestWorkflow>);
-
-    renderButton({ isTestRun: true });
-
-    expect(screen.getByRole('button', { name: 'Re-run' })).toBeDisabled();
-  });
 
   it('cancels a running execution from the take-action menu', async () => {
     renderButton({
@@ -129,7 +243,7 @@ describe('ExecutionTakeActionSplitButton', () => {
     fireEvent.click(cancelItem);
 
     await waitFor(() => {
-      expect(mockWorkflowApi.cancelExecution).toHaveBeenCalledWith('exec-1');
+      expect(mockCancelExecution).toHaveBeenCalledWith('exec-1');
     });
   });
 
@@ -151,7 +265,7 @@ describe('ExecutionTakeActionSplitButton', () => {
 
     openTakeActionMenu();
     fireEvent.click(screen.getByTestId('workflowExecutionFlyoutCancelExecution'));
-    expect(mockWorkflowApi.cancelExecution).not.toHaveBeenCalled();
+    expect(mockCancelExecution).not.toHaveBeenCalled();
   });
 
   it('disables Cancel execution when the run is terminal', () => {
@@ -170,6 +284,6 @@ describe('ExecutionTakeActionSplitButton', () => {
 
     openTakeActionMenu();
     fireEvent.click(screen.getByTestId('workflowExecutionFlyoutCancelExecution'));
-    expect(mockWorkflowApi.cancelExecution).not.toHaveBeenCalled();
+    expect(mockCancelExecution).not.toHaveBeenCalled();
   });
 });

@@ -66,6 +66,7 @@ export const createWorkflowsInboxProvider = ({
       const { results, total, reasoningByStepId } = await api.listWaitingForInputSteps(
         ctx.spaceId,
         {
+          request: ctx.request,
           page: params.page ?? 1,
           perPage: params.perPage ?? pageSize,
           includeReasoning: true,
@@ -84,6 +85,7 @@ export const createWorkflowsInboxProvider = ({
     ): Promise<InboxActionProviderListResult> {
       const { results, total, reasoningByStepId, deletedWorkflowIds } =
         await api.listProcessedWaitForInputSteps(ctx.spaceId, {
+          request: ctx.request,
           page: params.page ?? 1,
           perPage: params.perPage ?? pageSize,
           // Push the filter dimensions the workflows step-exec index can
@@ -110,7 +112,9 @@ export const createWorkflowsInboxProvider = ({
       // the listing (space + waitForInput + terminated-or-audit-stamped) but
       // skips user-supplied filter clauses on purpose. See
       // `listProcessedWaitForInputFacets` for the stability rationale.
-      const { channel, respondedBy } = await api.listProcessedWaitForInputFacets(ctx.spaceId);
+      const { channel, respondedBy } = await api.listProcessedWaitForInputFacets(ctx.spaceId, {
+        request: ctx.request,
+      });
       return { channel, respondedBy };
     },
 
@@ -132,7 +136,8 @@ export const createWorkflowsInboxProvider = ({
       // later waitForInput step from the same execution.
       const stepExecution = await api.getStepExecution(
         { executionId: parsed.executionId, id: parsed.stepExecutionId },
-        ctx.spaceId
+        ctx.spaceId,
+        ctx.request
       );
 
       if (!stepExecution) {

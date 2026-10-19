@@ -86,6 +86,7 @@ const renderHookWithProviders = (
   store.dispatch(setYamlString('version: "1"\nname: test'));
 
   const computedData: ComputedData = {
+    yamlString: 'version: "1"\nname: test',
     workflowLookup: {
       steps: stepInfos,
     },
@@ -113,6 +114,7 @@ describe('useFocusedStepDecoration', () => {
 
     store.dispatch(setYamlString('version: "1"\nname: test'));
     const computedData: ComputedData = {
+      yamlString: 'version: "1"\nname: test',
       workflowLookup: {
         steps: {},
         triggersLineStart: 2,

@@ -22,7 +22,7 @@ export type AlertingLabels = Partial<{
   policy_id: string;
   group_id: string;
   group_hash: string;
-  episode_id: string;
+  alert_id: string;
   workflow_id: string;
   execution_id: string;
   task_id: string;

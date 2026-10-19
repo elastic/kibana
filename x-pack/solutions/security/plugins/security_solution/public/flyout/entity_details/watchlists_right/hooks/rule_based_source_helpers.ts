@@ -8,6 +8,7 @@
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { Query } from '@kbn/es-query';
 import type { CreateWatchlistRequestBodyInput } from '../../../../../common/api/entity_analytics/watchlists/management/create.gen';
+import { WATCHLIST_IDENTIFIER_FIELDS } from '../../../../../common/entity_analytics/watchlists/constants';
 
 /** A single entity source entry from the entitySources array. */
 export type EntitySourceInput = NonNullable<
@@ -38,13 +39,10 @@ export interface InitialByType {
 export const EMPTY_QUERY: Query = { query: '', language: 'kuery' };
 
 /** Real ES field names used as the identifier field for index-type sources. */
-export const ENTITY_FIELD_OPTIONS = [
-  { value: 'host.name', inputDisplay: 'host.name' },
-  { value: 'user.name', inputDisplay: 'user.name' },
-  { value: 'service.name', inputDisplay: 'service.name' },
-  { value: 'host.id', inputDisplay: 'host.id' },
-  { value: 'user.email', inputDisplay: 'user.email' },
-];
+export const ENTITY_FIELD_OPTIONS = WATCHLIST_IDENTIFIER_FIELDS.map((value) => ({
+  value,
+  inputDisplay: value,
+}));
 
 export const toggleToType = (id: ToggleId): SourceType | undefined => {
   if (id === 'entityStore') return 'store';

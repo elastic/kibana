@@ -124,7 +124,7 @@ const RULES_DEFAULT_VISIBLE_COLUMNS: string[] = [
 
 type RuleOutcomeFilter = 'all' | RuleExecutionOutcome;
 
-const toOutcomeParam = (filter: RuleOutcomeFilter): RuleExecutionOutcome[] | undefined =>
+const toOutcomesParam = (filter: RuleOutcomeFilter): RuleExecutionOutcome[] | undefined =>
   filter === 'all' ? undefined : [filter];
 
 const OUTCOME_OPTIONS: Array<{ value: RuleOutcomeFilter; text: string }> = [
@@ -211,8 +211,8 @@ export const RulesTabContent = ({ onRuleClick }: Props) => {
   const { data, isFetching, isError, refetch } = useFetchRuleExecutions({
     page: page + 1,
     perPage,
-    outcome: toOutcomeParam(outcomeFilter),
-    sort: sortField === RULE_EXECUTION_FIELDS.startedAt ? 'startedAt' : 'duration',
+    outcomes: toOutcomesParam(outcomeFilter),
+    sortField: sortField === RULE_EXECUTION_FIELDS.startedAt ? 'startedAt' : 'duration',
     sortOrder: sortDirection,
   });
 
