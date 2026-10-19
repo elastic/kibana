@@ -64,6 +64,8 @@
     "@kbn/flyout-template",
     "@kbn/flyout-sections",
     "@kbn/response-ops-alerts-apis",
+    "@kbn/response-ops-alerts-table",
+    "@kbn/maintenance-windows-plugin",
     "@kbn/connector-specs"
   ]
 }
