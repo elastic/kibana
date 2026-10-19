@@ -50,17 +50,23 @@ function isDurationInterval(i: any): i is moment.Duration {
   return moment.isDuration(i) && Boolean(+i);
 }
 
-function resolveIanaTimeZone(min: TimeRangeBounds['min']): IanaTimeZone {
+function resolveIanaTimeZone(
+  min: TimeRangeBounds['min'],
+  configuredTz?: string
+): IanaTimeZone {
+  if (configuredTz) {
+    return ianaTimeZoneOrUtc(configuredTz);
+  }
   const zoned = min as { tz?: () => string | undefined } | undefined;
   const id = typeof zoned?.tz === 'function' ? zoned.tz() : undefined;
   return ianaTimeZoneOrUtc(id);
 }
 
-function toZonedRange(min: Moment, max: Moment): ZonedDateRange {
+function toZonedRange(min: Moment, max: Moment, configuredTz?: string): ZonedDateRange {
   return {
     from: min.valueOf(),
     to: max.valueOf(),
-    timeZone: resolveIanaTimeZone(min),
+    timeZone: resolveIanaTimeZone(min, configuredTz),
   };
 }
 
@@ -108,6 +114,7 @@ export interface TimeBucketsConfig extends Record<string, any> {
   'histogram:barTarget': number;
   dateFormat: string;
   'dateFormat:scaled': string[][];
+  'dateFormat:tz'?: string;
 }
 
 /**
@@ -317,13 +324,13 @@ export class TimeBuckets {
         getAutoDateBucketTarget(
           (key, defaultOverride) => this._timeBucketConfig[key] ?? defaultOverride
         ),
-        toZonedRange(this._lb, this._ub)
+        toZonedRange(this._lb, this._ub, this._timeBucketConfig['dateFormat:tz'])
       );
       return decoratePicked(picked);
     }
 
     if (useNormalizedEsInterval && this.hasBounds() && this._lb != null && this._ub != null) {
-      const range = toZonedRange(this._lb, this._ub);
+      const range = toZonedRange(this._lb, this._ub, this._timeBucketConfig['dateFormat:tz']);
       const maxBars = this._timeBucketConfig['histogram:maxBars'];
       const manual = toPickerInterval(this._i, this._originalInterval);
       if (!fitsInBuckets(manual, range, maxBars)) {

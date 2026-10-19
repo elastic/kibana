@@ -208,6 +208,30 @@ describe('TimeBuckets', () => {
     expect(interval.forceFixed).toBe(true);
   });
 
+  test('auto uses the configured dateFormat:tz, not the bound Moment zone', () => {
+    const bounds = {
+      min: moment.utc('2024-01-01T00:00:00.000Z'),
+      max: moment.utc('2024-04-10T00:00:00.000Z'),
+    };
+    const config = {
+      ...timeBucketConfig,
+      'histogram:barTarget': 100,
+      'histogram:maxBars': 1000,
+    };
+
+    const utcBuckets = new TimeBuckets({ ...config, 'dateFormat:tz': 'UTC' });
+    utcBuckets.setBounds(bounds);
+    utcBuckets.setInterval(autoInterval);
+
+    const nyBuckets = new TimeBuckets({ ...config, 'dateFormat:tz': 'America/New_York' });
+    nyBuckets.setBounds(bounds);
+    nyBuckets.setInterval(autoInterval);
+
+    // 100 UTC calendar days fit 1d. The same instants are 101 days in New York, so 1d is rejected.
+    expect(utcBuckets.getInterval().expression).toEqual('1d');
+    expect(nyBuckets.getInterval().expression).toEqual('1w');
+  });
+
   test('auto is not scaled when maxBars is smaller than the auto bucket count', () => {
     const timeBuckets = new TimeBuckets({
       ...timeBucketConfig,
