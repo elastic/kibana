@@ -215,9 +215,8 @@ export const importPluginOverrides: OxlintOverride[] = [
     },
   },
   {
-    // The API client templates import per operation, so a bundle has several imports from the same
-    // module. Oxlint merges them over several fix passes, and the merged order differed between CI
-    // and local runs, so these generated bundles keep one import per operation.
+    // ESLint fixes the generated API client bundles with this rule and `no_unused_imports` in one
+    // pass, as the OpenAPI generator expects. See the matching override in `.eslintrc.js`.
     files: ['x-pack/solutions/security/packages/test-api-clients/{supertest,scout}/*.gen.ts'],
     rules: {
       'import/no-duplicates': 'off',

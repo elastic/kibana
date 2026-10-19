@@ -2025,14 +2025,13 @@ module.exports = {
     },
 
     {
-      files: [
-        '.github/scripts/label_flaky_fix_pr.ts',
-        '.github/scripts/label_flaky_fix_pr_test.ts',
-        '.github/scripts/find_duplicate_fix_prs.js',
-      ],
+      // The OpenAPI generator writes these API client bundles with duplicate and unused imports and
+      // relies on these two fixes to clean them up. Both run here, in one ESLint fix pass, so the
+      // generator output stays the same on every machine. Oxlint turns both off for these files.
+      files: ['x-pack/solutions/security/packages/test-api-clients/{supertest,scout}/*.gen.ts'],
       rules: {
-        // GitHub Actions executes these files directly with Node's native TypeScript support.
-        '@kbn/imports/uniform_imports': ['error', { preserveFileExtensions: true }],
+        '@kbn/imports/no_unused_imports': 'error',
+        'import/no-duplicates': 'error',
       },
     },
 

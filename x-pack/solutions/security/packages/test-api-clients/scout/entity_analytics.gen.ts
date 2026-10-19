@@ -44,6 +44,14 @@ import type {
 import type {
   CreateEntitySourceRequestBodyInput,
   CreateEntitySourceResponse,
+  DeleteEntitySourceRequestParamsInput,
+  GetEntitySourceRequestParamsInput,
+  GetEntitySourceResponse,
+  ListEntitySourcesRequestQueryInput,
+  ListEntitySourcesResponse,
+  UpdateEntitySourceRequestParamsInput,
+  UpdateEntitySourceRequestBodyInput,
+  UpdateEntitySourceResponse,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/monitoring_entity_source/monitoring_entity_source.gen';
 import type {
   CreatePrivilegesImportIndexRequestBodyInput,
@@ -66,7 +74,6 @@ import type {
   DeleteAssetCriticalityRecordRequestQueryInput,
   DeleteAssetCriticalityRecordResponse,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/delete_asset_criticality.gen';
-import type { DeleteEntitySourceRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/monitoring_entity_source/monitoring_entity_source.gen';
 import type {
   DeleteMonitoringEngineRequestQueryInput,
   DeleteMonitoringEngineResponse,
@@ -79,6 +86,8 @@ import type { DeleteWatchlistEntitySourceRequestParamsInput } from '@kbn/securit
 import type {
   DeprecatedTriggerRiskScoreCalculationRequestBodyInput,
   DeprecatedTriggerRiskScoreCalculationResponse,
+  TriggerRiskScoreCalculationRequestBodyInput,
+  TriggerRiskScoreCalculationResponse,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/entity_calculation_route.gen';
 import type { DisableMonitoringEngineResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/engine/disable.gen';
 import type { DisableRiskEngineResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/engine_disable_route.gen';
@@ -95,8 +104,6 @@ import type {
   GetAnomalyOverviewRequestParamsInput,
   GetAnomalyOverviewRequestBodyInput,
   GetAnomalyOverviewResponse,
-} from '@kbn/security-solution-plugin/common/api/entity_analytics/anomaly_summary/anomaly_summary.gen';
-import type {
   GetAnomalySummaryRequestParamsInput,
   GetAnomalySummaryRequestBodyInput,
   GetAnomalySummaryResponse,
@@ -106,10 +113,6 @@ import type {
   GetAssetCriticalityRecordResponse,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/get_asset_criticality.gen';
 import type { GetAssetCriticalityStatusResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/get_asset_criticality_status.gen';
-import type {
-  GetEntitySourceRequestParamsInput,
-  GetEntitySourceResponse,
-} from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/monitoring_entity_source/monitoring_entity_source.gen';
 import type { GetPrivilegedAccessDetectionPackageStatusResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/privileged_access_detection/status.gen';
 import type { GetRiskEngineStatusResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/engine_status_route.gen';
 import type {
@@ -127,11 +130,10 @@ import type {
 import type { InitMonitoringEngineResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/engine/init.gen';
 import type { InitRiskEngineResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/engine_init_route.gen';
 import type { InstallPrivilegedAccessDetectionPackageResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/privileged_access_detection/install.gen';
-import type { InternalUploadAssetCriticalityV2CsvResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/upload_asset_criticality_csv.gen';
 import type {
-  ListEntitySourcesRequestQueryInput,
-  ListEntitySourcesResponse,
-} from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/monitoring_entity_source/monitoring_entity_source.gen';
+  InternalUploadAssetCriticalityV2CsvResponse,
+  UploadAssetCriticalityRecordsResponse,
+} from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/upload_asset_criticality_csv.gen';
 import type {
   ListPrivMonUsersRequestQueryInput,
   ListPrivMonUsersResponse,
@@ -166,19 +168,10 @@ import type {
   SyncWatchlistResponse,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/sync/sync.gen';
 import type {
-  TriggerRiskScoreCalculationRequestBodyInput,
-  TriggerRiskScoreCalculationResponse,
-} from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/entity_calculation_route.gen';
-import type {
   UnassignWatchlistEntitiesRequestParamsInput,
   UnassignWatchlistEntitiesRequestBodyInput,
   UnassignWatchlistEntitiesResponse,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/entities/unassign.gen';
-import type {
-  UpdateEntitySourceRequestParamsInput,
-  UpdateEntitySourceRequestBodyInput,
-  UpdateEntitySourceResponse,
-} from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/monitoring_entity_source/monitoring_entity_source.gen';
 import type {
   UpdatePrivMonUserRequestParamsInput,
   UpdatePrivMonUserRequestBodyInput,
@@ -194,7 +187,6 @@ import type {
   UpdateWatchlistEntitySourceRequestBodyInput,
   UpdateWatchlistEntitySourceResponse,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/data_source/update.gen';
-import type { UploadAssetCriticalityRecordsResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/upload_asset_criticality_csv.gen';
 import type {
   UploadWatchlistCsvRequestParamsInput,
   UploadWatchlistCsvResponse,

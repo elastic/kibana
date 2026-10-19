@@ -213,6 +213,17 @@ export const importsOverrides: OxlintOverride[] = [
     },
   },
   {
+    // GitHub Actions executes these files directly with Node's native TypeScript support.
+    files: [
+      '.github/scripts/label_flaky_fix_pr.ts',
+      '.github/scripts/label_flaky_fix_pr_test.ts',
+      '.github/scripts/find_duplicate_fix_prs.js',
+    ],
+    rules: {
+      '@kbn/imports/uniform_imports': ['error', { preserveFileExtensions: true }],
+    },
+  },
+  {
     files: [
       // TODO @kibana/operations
       'scripts/create_observability_rules.js', // is importing "@kbn/observability-alerting-test-data" (observability/private)
@@ -279,6 +290,14 @@ export const importsOverrides: OxlintOverride[] = [
     files: REDUX_TOOLKIT_V1_DIRS.map((dir) => `${dir}/${ESLINT_LINTED_FILES}`),
     rules: {
       '@kbn/imports/no_redux_toolkit_v2_imports': 'error',
+    },
+  },
+  {
+    // ESLint fixes the generated API client bundles with this rule and `import/no-duplicates` in one
+    // pass, as the OpenAPI generator expects. See the matching override in `.eslintrc.js`.
+    files: ['x-pack/solutions/security/packages/test-api-clients/{supertest,scout}/*.gen.ts'],
+    rules: {
+      '@kbn/imports/no_unused_imports': 'off',
     },
   },
 ];
