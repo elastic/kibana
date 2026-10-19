@@ -34,6 +34,7 @@ import {
   removeDeviceControl,
   removeLinuxDnsEvents,
   removeLinuxRansomware,
+  removeRegistryCredentialHardening,
 } from '../../../common/endpoint/models/policy_config_helpers';
 import type { ProductFeaturesService } from '../../lib/product_features_service/product_features_service';
 
@@ -67,6 +68,13 @@ export const createDefaultPolicy = (
     !experimentalFeatures.customYaraSignaturesEnabled
   ) {
     factoryPolicy = removeCustomYaraSignatures(factoryPolicy);
+  }
+
+  if (
+    !productFeatures.isEnabled(ProductFeatureSecurityKey.endpointRegistryCredentialHardening) ||
+    !experimentalFeatures.registryCredentialHardening
+  ) {
+    factoryPolicy = removeRegistryCredentialHardening(factoryPolicy);
   }
 
   let defaultPolicyPerType: PolicyConfig =

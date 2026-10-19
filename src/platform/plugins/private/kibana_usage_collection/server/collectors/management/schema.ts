@@ -1083,6 +1083,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Enable token usage tracking in Kibana',
     },
   },
+  'genAiSettings:inferenceStreaming': {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Enables streaming of LLM interactions in Kibana. When disabled, forces Kibana to use non-streaming inference requests.',
+    },
+  },
   'alerting:v1:showV1ObservabilityAlertsTable': {
     type: 'boolean',
     _meta: {
