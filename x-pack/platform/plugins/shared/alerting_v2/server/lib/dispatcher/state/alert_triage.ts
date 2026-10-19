@@ -9,8 +9,11 @@ import type { Alert, RuleId } from '../types';
 
 export type SuppressedAlert = Alert & { reason: string; maintenance_window_id?: string };
 
-/** A suppression verdict. A bare string is shorthand for `{ reason }`. */
-export type Suppression = string | { reason: string; maintenance_window_id?: string };
+/** A suppression verdict. */
+export interface Suppression {
+  reason: string;
+  maintenance_window_id?: string;
+}
 
 /**
  * The evolving verdict on candidate alerts: which may still notify
@@ -100,10 +103,7 @@ export class AlertTriage {
       const suppression = suppressionFor(alert);
       if (suppression !== undefined) {
         suppressed ??= [...this.suppressed];
-        suppressed.push({
-          ...alert,
-          ...(typeof suppression === 'string' ? { reason: suppression } : suppression),
-        });
+        suppressed.push({ ...alert, ...suppression });
       } else {
         dispatchable.push(alert);
       }

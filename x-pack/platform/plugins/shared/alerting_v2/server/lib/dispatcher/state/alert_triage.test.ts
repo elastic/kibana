@@ -15,7 +15,7 @@ describe('AlertTriage', () => {
       const drop = createAlert({ alert_id: 'drop' });
 
       const triage = AlertTriage.partition([keep, drop], (alert) =>
-        alert.alert_id === 'drop' ? 'ack' : undefined
+        alert.alert_id === 'drop' ? { reason: 'ack' } : undefined
       );
 
       expect(triage.dispatchable).toEqual([keep]);
@@ -31,11 +31,11 @@ describe('AlertTriage', () => {
           createAlert({ alert_id: 'e2' }),
           createAlert({ alert_id: 'e3' }),
         ],
-        (alert) => (alert.alert_id === 'e1' ? 'snooze' : undefined)
+        (alert) => (alert.alert_id === 'e1' ? { reason: 'snooze' } : undefined)
       );
 
       const result = initial.suppressDispatchableWhere((alert) =>
-        alert.alert_id === 'e3' ? 'maintenance_window:mw-1' : undefined
+        alert.alert_id === 'e3' ? { reason: 'maintenance_window:mw-1' } : undefined
       );
 
       expect(result.dispatchable.map((e) => e.alert_id)).toEqual(['e2']);
@@ -48,7 +48,7 @@ describe('AlertTriage', () => {
       expect(initial.suppressed).toHaveLength(1);
     });
 
-    it('keeps the maintenance window id of an object suppression, and omits it for a string one', () => {
+    it('keeps the maintenance window id when present, and omits it otherwise', () => {
       const initial = AlertTriage.partition(
         [createAlert({ alert_id: 'e1' }), createAlert({ alert_id: 'e2' })],
         () => undefined
@@ -57,7 +57,7 @@ describe('AlertTriage', () => {
       const result = initial.suppressDispatchableWhere((alert) =>
         alert.alert_id === 'e1'
           ? { reason: 'maintenance_window:mw-1', maintenance_window_id: 'mw-1' }
-          : 'snooze'
+          : { reason: 'snooze' }
       );
 
       expect(result.suppressed.map((e) => [e.alert_id, e.reason, e.maintenance_window_id])).toEqual(
@@ -79,7 +79,7 @@ describe('AlertTriage', () => {
     it('replaces dispatchable alerts 1:1 and keeps suppressed intact', () => {
       const initial = AlertTriage.partition(
         [createAlert({ alert_id: 'e1' }), createAlert({ alert_id: 'e2' })],
-        (alert) => (alert.alert_id === 'e2' ? 'ack' : undefined)
+        (alert) => (alert.alert_id === 'e2' ? { reason: 'ack' } : undefined)
       );
 
       const result = initial.mapDispatchable((alert) => ({ ...alert, data: { a: 1 } }));
