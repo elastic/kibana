@@ -60,7 +60,13 @@ import { toDsl, toEsql } from '../components/home/entities_grid/active_filters';
 import type { ActiveFilters } from '../components/home/entities_grid/active_filters';
 import { useEntityFilterOverrides } from '../components/home/entities_grid/hooks/use_entity_grid_data';
 import { isFilteringByGroupValue } from '../components/home/entities_grid/queries/resolved_entities';
-import type { RowActions, CellHandlers, Row, RowsMode } from '../components/home/entities_grid';
+import type {
+  RowActions,
+  CellHandlers,
+  ReadAccess,
+  Row,
+  RowsMode,
+} from '../components/home/entities_grid';
 import { ENTITY_GROUPING_OPTIONS } from '../components/home/entities_table/constants';
 import type { EntityURLStateResult } from '../components/home/entities_table/hooks/use_entity_url_state';
 import { EntityFiltersBar } from '../components/home/entity_filters_bar';
@@ -75,7 +81,7 @@ import type { EntityViewMode } from '../../../common/entity_analytics/entity_sto
 import { FLYOUT_ORIGIN } from '../../common/lib/telemetry';
 import { EntityAnalyticsHomeHeader } from './entity_analytics_home_header';
 import { useKibana } from '../../common/lib/kibana';
-import { SecurityAgentBuilderAttachments } from '../../../common/constants';
+import { APP_ID, SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { ENTITY_PROMPT } from '../../agent_builder/components/prompts';
 import { useAgentBuilderAvailability } from '../../agent_builder/hooks/use_agent_builder_availability';
 import { useReportAddToChat } from '../../agent_builder/hooks/use_report_add_to_chat';
@@ -198,16 +204,6 @@ const PAGE_TITLE = i18n.translate('xpack.securitySolution.entityAnalytics.homePa
   defaultMessage: 'Entity analytics',
 });
 
-/**
- * Whether the user can read each source the page queries: `undefined` while its check loads, and
- * `true` when the check fails, so the page still works.
- */
-interface ReadAccess {
-  alerts?: boolean;
-  risk?: boolean;
-  anomalies?: boolean;
-}
-
 const ML_GET_JOBS_PRIVILEGE = 'ui:ml/canGetJobs';
 
 const NO_ALERTS_ACCESS_MESSAGE = i18n.translate(
@@ -245,6 +241,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   } = useUserPrivileges();
   const { hasIndexRead: hasAlertsIndexRead, loading: isAlertsPrivilegesLoading } =
     useAlertsPrivileges();
+  const { cases } = useKibana().services;
 
   const alerts = getReadAccess({
     isLoading: isAlertsPrivilegesLoading,
@@ -264,9 +261,11 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
       anomalyPrivilegesQuery.data?.has_read_permissions === true &&
       anomalyPrivilegesQuery.data.privileges.kibana?.[ML_GET_JOBS_PRIVILEGE] !== false,
   });
+  // Users who can't read Security cases get no case counts: no Cases column, not zeros.
+  const canReadCases = cases.helpers.canUseCases([APP_ID]).read;
   const readAccess = useMemo(
-    (): ReadAccess => ({ alerts, risk, anomalies }),
-    [alerts, risk, anomalies]
+    (): ReadAccess => ({ alerts, risk, anomalies, cases: canReadCases }),
+    [alerts, risk, anomalies, canReadCases]
   );
 
   const isRiskEngineReadPrivilegesLoading =
@@ -1214,6 +1213,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
                 groupSelectorComponent={tableControls}
                 cellHandlers={cellHandlers}
                 rowActions={rowActions}
+                readAccess={readAccess}
               />
             ) : (
               <EntitiesGrid
@@ -1225,6 +1225,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
                 entityExpression={gridEntityExpression}
                 cellHandlers={cellHandlers}
                 rowActions={rowActions}
+                readAccess={readAccess}
                 toolbarControls={tableControls}
                 sortField={sortField}
                 sortDirection={sortDirection}
