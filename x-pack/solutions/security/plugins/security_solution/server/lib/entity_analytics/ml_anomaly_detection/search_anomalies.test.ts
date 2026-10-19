@@ -448,6 +448,7 @@ describe('searchEntityAnomalies', () => {
   });
 
   it("does not pick another user's cause because it shares the entity's host partition", async () => {
+    const winPartition = { partition_field_name: 'host.name', partition_field_value: 'WIN-1' };
     // mockEntityRecord: user.name=alice. Both causes are partitioned on WIN-1 (makeHit default
     // partition_field_value = 'web-01' is overridden per cause); only the second is Alice's.
     const hit = makeHit({
@@ -455,27 +456,13 @@ describe('searchEntityAnomalies', () => {
       byFieldName: 'user.name',
       noByFieldValue: true,
       causes: [
-        { by_field_value: 'mallory', actual: [99], typical: [1] },
-        { by_field_value: 'alice', actual: [42], typical: [3] },
+        { by_field_value: 'mallory', actual: [99], typical: [1], ...winPartition },
+        { by_field_value: 'alice', actual: [42], typical: [3], ...winPartition },
       ],
     });
     delete (hit._source as Record<string, unknown>).actual;
     delete (hit._source as Record<string, unknown>).typical;
-    mockMlAnomalySearch.mockResolvedValueOnce(
-      makeResponse([
-        {
-          ...hit,
-          _source: {
-            ...hit._source,
-            causes: hit._source?.causes?.map((cause) => ({
-              ...cause,
-              partition_field_name: 'host.name',
-              partition_field_value: 'WIN-1',
-            })),
-          },
-        },
-      ])
-    );
+    mockMlAnomalySearch.mockResolvedValueOnce(makeResponse([hit]));
 
     const result = await searchEntityAnomalies({
       ...defaultOpts,

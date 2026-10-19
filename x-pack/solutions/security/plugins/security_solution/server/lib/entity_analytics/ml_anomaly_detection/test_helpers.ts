@@ -40,7 +40,13 @@ export const makeHit = (
     byFieldValue?: string;
     actual?: number[];
     typical?: number[];
-    causes?: Array<{ actual: number[]; typical: number[]; by_field_value?: string }>;
+    causes?: Array<{
+      actual: number[];
+      typical: number[];
+      by_field_value?: string;
+      partition_field_name?: string;
+      partition_field_value?: string;
+    }>;
     /** Omit the top-level by_field_value, as ML does for by+over (population) analyses. */
     noByFieldValue?: boolean;
     sort?: unknown[];
