@@ -84,7 +84,7 @@ export class ComposeDiscoverPage {
   constructor(private readonly page: ScoutPage) {
     this.codeEditor = new KibanaCodeEditorWrapper(page);
 
-    this.flyout = this.page.locator('[aria-labelledby="composeDiscoverFlyoutTitle"]');
+    this.flyout = this.page.testSubj.locator('composeDiscoverFlyout');
     this.nextButton = this.page.testSubj.locator('composeDiscoverNext');
     this.backButton = this.page.testSubj.locator('composeDiscoverBack');
     this.submitButton = this.page.testSubj.locator('composeDiscoverSubmit');

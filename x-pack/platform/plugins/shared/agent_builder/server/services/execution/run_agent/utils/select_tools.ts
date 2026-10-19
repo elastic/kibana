@@ -23,8 +23,7 @@ import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { AttachmentsService, SkillsService } from '@kbn/agent-builder-server/runner';
 import type { ExecutableToolWithOrigin } from '@kbn/agent-builder-server/runner/tool_manager';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
-import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
+import { getLatestVersion, toAttachment } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentFormatContext } from '@kbn/agent-builder-server/attachments';
 import { createAttachmentTools } from '../../../tools/builtin/attachments';
 import type { AiIndexCatalogEntry } from '../types';
@@ -236,15 +235,8 @@ const getVersionedAttachmentBoundTools = async ({
       continue;
     }
 
-    const input: Attachment = {
-      id: attachment.id,
-      type: attachment.type,
-      data: latest.data as Attachment['data'],
-      ...(attachment.hidden !== undefined ? { hidden: attachment.hidden } : {}),
-    };
-
     try {
-      const formatted = await definition.format(input, formatContext);
+      const formatted = await definition.format(toAttachment(attachment, latest), formatContext);
       const boundedTools = formatted.getBoundedTools ? await formatted.getBoundedTools() : [];
       for (const tool of boundedTools) {
         tools.push(attachmentsService.convertAttachmentTool(tool));

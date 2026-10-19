@@ -748,6 +748,7 @@ export const oauthCallbackScriptRoute = (router: IRouter<ActionsRequestHandlerCo
         description: i18n.translate('xpack.actions.oauthCallbackScript.routeDescription', {
           defaultMessage: 'Returns the OAuth callback script',
         }),
+        tags: ['oas-tag:connectors'],
       },
       validate: {
         request: {},

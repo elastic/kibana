@@ -6,6 +6,7 @@
  */
 
 import { defer, of, throwError, concat } from 'rxjs';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
   AgentBuilderErrorCode,
@@ -25,16 +26,20 @@ import { deliverCallbackEvents } from './deliver_callback_events';
 
 const callbackUrl = 'https://callback.example.com/v1/events?token=abc';
 const getTypeDefinition = jest.fn();
+const request = httpServerMock.createKibanaRequest();
+/** What the surface payload is rendered with: the surfaces service, and the request the execution runs as. */
 const surfacesDeps = {
   surfacesService: new SurfacesServiceImpl({
     attachmentsService: { getTypeDefinition } as unknown as AttachmentServiceStart,
     logger: loggerMock.create(),
   }),
+  request,
 };
 const createConversationExecution = (url: string | null = callbackUrl): AgentExecution =>
   ({
     executionId: 'execution-1',
     executionMode: AgentExecutionMode.conversation,
+    spaceId: 'space-1',
     agentParams: {
       nextInput: { message: 'hello' },
       ...(url ? { callback: { url } } : {}),
@@ -369,7 +374,7 @@ describe('deliverCallbackEvents', () => {
     getTypeDefinition.mockImplementation((type: string) =>
       type === 'text'
         ? {
-            toSurfaceComposition: ({ content }: { content: string }) => ({
+            toSurfaceComposition: async ({ data: { content } }: { data: { content: string } }) => ({
               type: 'view',
               body: [{ type: 'markdown', text: content }],
             }),
@@ -395,6 +400,51 @@ describe('deliverCallbackEvents', () => {
 
     expect(slack).toContain('Attached note');
     expect(slack).not.toContain('render_attachment');
+  });
+
+  it("renders the surface payload with the execution's request and space", async () => {
+    const { service } = createCallbackDeliveryServiceMock();
+    const renderPayload = jest.spyOn(surfacesDeps.surfacesService, 'renderPayload');
+
+    await deliverCallbackEvents({
+      execution: createSlackExecution(),
+      events$: of(createRoundCompleteEvent('Hello')),
+      callbackDeliveryService: service,
+      ...surfacesDeps,
+      logger: loggerMock.create(),
+    });
+
+    expect(renderPayload).toHaveBeenCalledWith(expect.anything(), {
+      originType: ConversationOriginType.Slack,
+      request,
+      spaceId: 'space-1',
+    });
+
+    renderPayload.mockRestore();
+  });
+
+  it('delivers round_complete without a surface payload when rendering returns nothing', async () => {
+    const { service } = createCallbackDeliveryServiceMock();
+    const renderPayload = jest
+      .spyOn(surfacesDeps.surfacesService, 'renderPayload')
+      .mockResolvedValue(undefined);
+
+    await deliverCallbackEvents({
+      execution: createSlackExecution(),
+      events$: of(createRoundCompleteEvent('Hello')),
+      callbackDeliveryService: service,
+      ...surfacesDeps,
+      logger: loggerMock.create(),
+    });
+
+    const [[{ payload }]] = service.makeCallbackRequest.mock.calls;
+
+    expect((payload as { event: RoundCompleteEvent }).event).toMatchObject({
+      type: ChatEventType.roundComplete,
+    });
+    expect((payload as { event: RoundCompleteEvent }).event.surface_payload).toBeUndefined();
+
+    renderPayload.mockRestore();
   });
 
   it('does not add a surface payload to rounds without an origin', async () => {

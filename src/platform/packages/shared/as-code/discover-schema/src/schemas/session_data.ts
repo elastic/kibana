@@ -149,7 +149,7 @@ export const discoverSessionApiDataSchema = z
       )
       .meta({
         description:
-          'Ordered list of tabs in the Discover session. Each tab requires a stable, unique ID because Dashboard panels and Discover links can reference it.',
+          'Ordered list of tabs in the Discover session. Each tab requires a stable, unique ID, which other saved objects and links can reference.',
       }),
   })
   .strict()
