@@ -18,7 +18,7 @@ const MAP_EMBEDDABLE_EXAMPLE_DASHBOARD_ID = '19906970-2e40-11e9-85cb-6965aae20f1
 const JOIN_EXAMPLE = 'join example';
 const GEO_GRID_EXAMPLE = 'geo grid vector grid example';
 
-test.describe.only('Maps - embed in dashboard', { tag: '@local-stateful-classic' }, () => {
+test.describe('Maps - embed in dashboard', { tag: '@local-stateful-classic' }, () => {
   let prevDefaultIndex: string | number | boolean | undefined;
 
   test.beforeAll(async ({ kbnClient, esArchiver, uiSettings }) => {
@@ -90,21 +90,22 @@ test.describe.only('Maps - embed in dashboard', { tag: '@local-stateful-classic'
     await dashboard.openInspector(panelTitle);
     try {
       await inspector.openInspectorRequestsView();
-      await expect.poll(() => inspector.getRequestNames()).toEqual(requestNames);
+      await expect.poll(() => inspector.getRequestNames()).toStrictEqual(requestNames);
     } finally {
       await inspector.close();
     }
   };
 
   test('should set "data-title" attribute', async ({ page }) => {
-    await expect(page.locator('[data-shared-item]').first()).toHaveAttribute(
-      'data-title',
-      JOIN_EXAMPLE
-    );
+    await expect(page.locator(`[data-shared-item][data-title="${JOIN_EXAMPLE}"]`)).toBeVisible();
   });
 
   test('should display tools control', async ({ page }) => {
-    await expect(page.testSubj.locator('mapToolsControlPopover').first()).toBeVisible();
+    await expect(
+      page
+        .locator(`[data-shared-item][data-title="${JOIN_EXAMPLE}"]`)
+        .getByTestId('mapToolsControlPopover')
+    ).toBeVisible();
   });
 
   test('should pass index patterns to container', async ({ page }) => {
