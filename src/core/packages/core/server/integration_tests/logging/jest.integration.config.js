@@ -17,5 +17,7 @@ module.exports = {
   roots: ['<rootDir>/src/core/packages/core/server/integration_tests/logging'],
   // must override to match all test given there is no `integration_tests` subfolder.
   // Only direct children: the `otel` subfolder has its own config (node environment).
-  testMatch: ['<rootDir>/src/core/packages/core/server/integration_tests/logging/*.test.{js,mjs,ts,tsx}'],
+  testMatch: [
+    '<rootDir>/src/core/packages/core/server/integration_tests/logging/*.test.{js,mjs,ts,tsx}',
+  ],
 };
