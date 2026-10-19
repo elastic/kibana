@@ -109,8 +109,9 @@ let localClient: ClusterClient | undefined;
 
 const instrument = (client: { diagnostic?: { on(ev: string, cb: Function): void } }) => {
   client.diagnostic?.on('request', (_err: unknown, event: unknown) => {
-    const params = (event as { meta?: { request?: { params?: { method?: string; path?: string } } } })
-      ?.meta?.request?.params;
+    const params = (
+      event as { meta?: { request?: { params?: { method?: string; path?: string } } } }
+    )?.meta?.request?.params;
     countFence(classifyEsPath(params?.method ?? '?', params?.path ?? '?'));
   });
 };

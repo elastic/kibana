@@ -18,10 +18,11 @@ import { mkdtempSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { MessageChannel, Worker } from 'worker_threads';
+import { isKibanaDistributable } from '@kbn/repo-info';
 import type { Msg, Transport } from './wire';
 import { RpcEndpoint } from './wire';
 import { createProcessMainTransport, createThreadMainTransport } from './transports';
-import { applyMainStubs, stubUsage, wrapImportedFnWithStubs } from './stubs';
+import { applyMainStubs, stubUsage, wrapImportedFnWithStubs } from './type_derived_adapters';
 
 type Root = Record<string, (...args: unknown[]) => Promise<unknown>>;
 
@@ -91,7 +92,7 @@ export class IslandHost {
       const flag = new SharedArrayBuffer(4);
       const { port1: syncReplyMain, port2: syncReplyIsland } = new MessageChannel();
       this.worker = new Worker(entry, {
-        workerData: { flag, syncReplyPort: syncReplyIsland },
+        workerData: { flag, syncReplyPort: syncReplyIsland, dist: isKibanaDistributable() },
         transferList: [syncReplyIsland],
         env: process.env,
         argv: [],
@@ -115,6 +116,7 @@ export class IslandHost {
           ...process.env,
           KBN_RESEARCH_ISLAND_FIFO_TO_MAIN: toMain,
           KBN_RESEARCH_ISLAND_FIFO_FROM_MAIN: fromMain,
+          KBN_RESEARCH_ISLAND_DIST: String(isKibanaDistributable()),
         },
         execArgv: process.execArgv.filter((a) => !a.startsWith('--inspect')),
         stdio: ['ignore', 'inherit', 'inherit', 'ipc'],
@@ -232,7 +234,19 @@ export class IslandHost {
 const GLOBAL_KEY = '__kbnResearchIslandHost';
 
 /** Returns the process-wide island host when KBN_RESEARCH_ISLAND is set. */
+/**
+ * Research images (distributables built from this branch) run the workflows island by default so
+ * a QAF experiment project needs no env overrides; KBN_RESEARCH_ISLAND='' disables it.
+ */
+const applyBuildDefaults = (): void => {
+  if (!isKibanaDistributable() || process.env.KBN_RESEARCH_ISLAND !== undefined) return;
+  process.env.KBN_RESEARCH_ISLAND = 'workflowsExtensions,workflowsExecutionEngine';
+  process.env.KBN_RESEARCH_ISLAND_LOCAL_ES ??= 'true';
+  process.env.KBN_RESEARCH_ISLAND_STEP_MODULE ??= 'true';
+};
+
 export const getIslandHost = (): IslandHost | undefined => {
+  applyBuildDefaults();
   const members = process.env.KBN_RESEARCH_ISLAND;
   if (!members) return undefined;
   const g = globalThis as unknown as Record<string, IslandHost | undefined>;

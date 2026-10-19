@@ -8,10 +8,12 @@
  */
 
 // RESEARCH ONLY (Track 2 islands): worker-thread / child-process entry.
-if (process.env.NODE_ENV !== 'production') {
-  require('@kbn/setup-node-env');
-} else {
+const { isMainThread, workerData } = require('worker_threads');
+const dist = isMainThread ? process.env.KBN_RESEARCH_ISLAND_DIST === 'true' : workerData.dist;
+if (dist) {
   require('@kbn/setup-node-env/dist');
+} else {
+  require('@kbn/setup-node-env');
 }
 
 require('./island_runtime').main();

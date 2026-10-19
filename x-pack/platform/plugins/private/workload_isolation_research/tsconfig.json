@@ -9,6 +9,8 @@
     "harness/**/*.ts"
   ],
   "kbn_references": [
+    "@kbn/zod",
+    "@kbn/workflows",
     "@kbn/core",
     "@kbn/config-schema",
     "@kbn/task-manager-plugin",

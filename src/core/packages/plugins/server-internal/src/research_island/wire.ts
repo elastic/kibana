@@ -101,9 +101,11 @@ const isNativeInstance = (v: object): boolean => {
   return native;
 };
 
+/** Realm-agnostic plain-object check (structured clones may come from another realm). */
 const isPlainObject = (v: object): boolean => {
   const proto = Object.getPrototypeOf(v);
-  return proto === Object.prototype || proto === null;
+  if (proto === Object.prototype || proto === null) return true;
+  return Object.getPrototypeOf(proto) === null && proto.constructor?.name === 'Object';
 };
 
 /** True for plain objects/arrays (and cloneable natives) without behaviour, bounded size. */
@@ -368,7 +370,10 @@ export class RpcEndpoint {
       };
     }
     if (obj instanceof Set) {
-      return { $: 'set', e: [...obj].map((val) => this.encode(val, `${label}[]`, depth + 1, seen)) };
+      return {
+        $: 'set',
+        e: [...obj].map((val) => this.encode(val, `${label}[]`, depth + 1, seen)),
+      };
     }
     if (isNativeInstance(obj)) {
       // Date, RegExp, typed arrays: structured clone handles them (or fails loudly).
@@ -419,7 +424,8 @@ export class RpcEndpoint {
   }
 
   private encodeError(err: unknown, label: string): Wire {
-    if (!(err instanceof Error)) return { $: 'err', name: 'Error', message: String(err), props: {} };
+    if (!(err instanceof Error))
+      return { $: 'err', name: 'Error', message: String(err), props: {} };
     const props: Record<string, Wire> = {};
     for (const key of Object.keys(err)) {
       try {
@@ -971,7 +977,10 @@ export class RpcEndpoint {
   }
 
   /** Imports the peer's root (bootstrap) object. */
-  public importRoot(methods: string[], label: string): Record<string, (...a: unknown[]) => unknown> {
+  public importRoot(
+    methods: string[],
+    label: string
+  ): Record<string, (...a: unknown[]) => unknown> {
     return this.importObj({
       id: 0,
       ctor: 'Root',

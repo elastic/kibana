@@ -82,7 +82,11 @@ const REPLICAS: Record<string, ReplicaSpec> = {
     ready: 'isReady',
     snapshot: ['getAllStepDefinitions', 'getAllTriggerDefinitions', 'getManagedWorkflowPluginIds'],
     modules: [
-      { specifier: 'steps', register: 'registerInternalStepDefinitions', member: 'getAllStepDefinitions' },
+      {
+        specifier: 'steps',
+        register: 'registerInternalStepDefinitions',
+        member: 'getAllStepDefinitions',
+      },
       {
         specifier: 'triggers',
         register: 'registerInternalTriggerDefinitions',
@@ -137,7 +141,9 @@ export const applyMainStubs = async (
   const spec = REPLICAS[plugin];
   if (!spec || !contract || typeof contract !== 'object') return contract;
   const replicated = contract as Record<string, unknown>;
-  const locals = await Promise.all(spec.modules.map((mod) => loadLocalDefinitions(serverPath, mod)));
+  const locals = await Promise.all(
+    spec.modules.map((mod) => loadLocalDefinitions(serverPath, mod))
+  );
   let snap: Record<string, unknown> = {};
   const refresh = async () => {
     const next = (await snapshot(spec.snapshot)) as Record<string, unknown>;

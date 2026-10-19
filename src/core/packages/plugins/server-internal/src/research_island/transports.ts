@@ -72,7 +72,7 @@ const frame = (msg: Msg): Buffer => {
 
 /** Incremental length-prefixed frame parser. */
 const createFrameReader = (onFrame: (msg: Msg) => void) => {
-  let buf = Buffer.alloc(0);
+  let buf: Buffer = Buffer.alloc(0);
   return (chunk: Buffer) => {
     buf = buf.length ? Buffer.concat([buf, chunk]) : chunk;
     while (buf.length >= 4) {
@@ -92,7 +92,7 @@ export const createProcessMainTransport = (
 ): Transport => {
   const listeners: Array<(msg: Msg) => void> = [];
   const dispatch = (msg: Msg) => listeners.forEach((cb) => cb(msg));
-  const reader = fs.createReadStream(fifoFromChild, { highWaterMark: 1 << 20 });
+  const reader = fs.createReadStream(fifoFromChild, { highWaterMark: 1048576 });
   reader.on('data', createFrameReader(dispatch) as (chunk: string | Buffer) => void);
   const writer = fs.createWriteStream(fifoToChild);
   return {
