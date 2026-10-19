@@ -5,6 +5,18 @@
  * 2.0.
  */
 
+/**
+ * One-time repair shipped in 9.6 alongside the incremental-id task fix that
+ * mirrors newly assigned ids to `.cases`. Before that fix, a case whose
+ * `.cases` doc was written before it was numbered never received
+ * `case.incremental_id`, because the id is applied with a raw SO update that
+ * doesn't bump the `attributes.updated_at` reconciliation filters on.
+ *
+ * Runs from the reconciliation tick until one pass completes. Remove in 9.7:
+ * delete this folder, and drop its call and the
+ * `incremental_id_backfill_completed` state field from `../reconciliation`.
+ */
+
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type {
   ElasticsearchClient,

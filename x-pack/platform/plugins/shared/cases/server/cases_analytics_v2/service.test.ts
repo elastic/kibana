@@ -20,10 +20,7 @@ import {
 import { ensureCaseIndex } from './ensure_indices/case';
 import { ensureActivityIndex } from './ensure_indices/activity';
 import { RESET_TASK_ID, RESET_TASK_TYPE } from './reconciliation/reset_task';
-import {
-  INCREMENTAL_ID_BACKFILL_TASK_ID,
-  INCREMENTAL_ID_BACKFILL_TASK_TYPE,
-} from './incremental_id_backfill';
+import * as reconciliation from './reconciliation';
 import { makeCase, makeUserAction } from './__test_helpers__';
 
 jest.mock('./ensure_indices/case');
@@ -309,7 +306,7 @@ describe('CasesAnalyticsV2Service', () => {
     });
   });
 
-  describe('incremental id backfill task', () => {
+  describe('reconciliation incremental id backfill wiring', () => {
     const build = (incrementalIdEnabled: boolean) =>
       new CasesAnalyticsV2Service({
         logger: loggerMock.create(),
@@ -322,79 +319,62 @@ describe('CasesAnalyticsV2Service', () => {
       });
 
     const setup = (service: CasesAnalyticsV2Service) => {
-      const taskManagerSetup = taskManagerMock.createSetup();
+      const registerSpy = jest.spyOn(reconciliation, 'registerReconciliationTask');
       service.setup({
         core: coreMock.createSetup(),
-        taskManager: taskManagerSetup,
+        taskManager: taskManagerMock.createSetup(),
       });
-      const definition = (taskManagerSetup.registerTaskDefinitions as jest.Mock).mock.calls
-        .map(([defs]) => defs[INCREMENTAL_ID_BACKFILL_TASK_TYPE])
-        .find(Boolean);
-      const getRunnerDeps = () =>
-        definition
-          .createTaskRunner({ taskInstance: {}, signal: new AbortController().signal })
-          .run();
-      return { definition, getRunnerDeps };
+      return registerSpy.mock.calls[0][0];
     };
 
-    const start = async (service: CasesAnalyticsV2Service) => {
-      const taskManager = taskManagerMock.createStart();
-      await service.start({
+    const start = (service: CasesAnalyticsV2Service) =>
+      service.start({
         esClient: elasticsearchServiceMock.createElasticsearchClient(),
-        taskManager,
+        taskManager: taskManagerMock.createStart(),
         internalSavedObjectsClient: savedObjectsClientMock.create(),
         dataViewsService: {} as unknown as DataViewsServerPluginStart,
       });
-      return taskManager;
-    };
 
-    afterEach(() => jest.clearAllMocks());
+    afterEach(() => jest.restoreAllMocks());
 
-    it('schedules the backfill on start when incremental ids are enabled', async () => {
+    it.each([true, false])(
+      'passes incrementalIdEnabled=%s to the reconciliation task',
+      (incrementalIdEnabled) => {
+        const args = setup(build(incrementalIdEnabled));
+
+        expect(args.incrementalIdBackfillEnabled).toBe(incrementalIdEnabled);
+      }
+    );
+
+    it('fails the run when it fires before start', async () => {
+      const args = setup(build(true));
+
+      await expect(args.getRunnerDeps()).rejects.toThrow('before service start completed');
+    });
+
+    it('reports an enabled cases writer once .cases bootstraps', async () => {
       (ensureCaseIndex as jest.Mock).mockResolvedValue(undefined);
       (ensureActivityIndex as jest.Mock).mockResolvedValue(undefined);
       const service = build(true);
-      const { definition } = setup(service);
+      const args = setup(service);
+      await start(service);
 
-      const taskManager = await start(service);
+      const deps = await args.getRunnerDeps();
 
-      expect(definition).toBeDefined();
-      expect(taskManager.ensureScheduled).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: INCREMENTAL_ID_BACKFILL_TASK_ID,
-          taskType: INCREMENTAL_ID_BACKFILL_TASK_TYPE,
-        })
-      );
+      expect(deps.casesWriterEnabled).toBe(true);
+      expect(deps.esClient).toBeDefined();
     });
 
-    it('registers but never schedules the backfill when incremental ids are disabled', async () => {
-      (ensureCaseIndex as jest.Mock).mockResolvedValue(undefined);
-      (ensureActivityIndex as jest.Mock).mockResolvedValue(undefined);
-      const service = build(false);
-      const { definition } = setup(service);
-
-      const taskManager = await start(service);
-
-      expect(definition).toBeDefined();
-      expect(taskManager.ensureScheduled).not.toHaveBeenCalledWith(
-        expect.objectContaining({ id: INCREMENTAL_ID_BACKFILL_TASK_ID })
-      );
-    });
-
-    it('fails the run (so Task Manager retries) when it fires before start', async () => {
-      const { getRunnerDeps } = setup(build(true));
-
-      await expect(getRunnerDeps()).rejects.toThrow('before service start completed');
-    });
-
-    it('fails the run instead of writing through the no-op writer when .cases failed to bootstrap', async () => {
+    it('reports a disabled cases writer when .cases failed to bootstrap', async () => {
       (ensureCaseIndex as jest.Mock).mockRejectedValue(new Error('shard limit'));
       (ensureActivityIndex as jest.Mock).mockResolvedValue(undefined);
       const service = build(true);
-      const { getRunnerDeps } = setup(service);
+      const args = setup(service);
       await start(service);
 
-      await expect(getRunnerDeps()).rejects.toThrow('before service start completed');
+      const deps = await args.getRunnerDeps();
+
+      expect(deps.casesWriterEnabled).toBe(false);
     });
   });
 });

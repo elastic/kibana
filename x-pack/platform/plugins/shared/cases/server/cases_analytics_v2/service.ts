@@ -23,10 +23,6 @@ import { ensureActivityIndex } from './ensure_indices/activity';
 import { ensureAttachmentsIndex } from './ensure_indices/attachments';
 import { registerReconciliationTask, scheduleReconciliationTask } from './reconciliation';
 import { registerResetTask, scheduleResetTask, RESET_TASK_ID } from './reconciliation/reset_task';
-import {
-  registerIncrementalIdBackfillTask,
-  scheduleIncrementalIdBackfillTask,
-} from './incremental_id_backfill';
 import { registerCasesAnalyticsV2Routes } from './routes';
 import {
   CasesAnalyticsV2Writer,
@@ -275,16 +271,19 @@ export class CasesAnalyticsV2Service {
         // `start()` has populated `internalSavedObjectsClient`
         // (unlikely; Task Manager waits for start), throwing here gets
         // logged and retried on the next tick.
-        if (this.internalSavedObjectsClient == null) {
+        if (this.internalSavedObjectsClient == null || this.esClient == null) {
           throw new Error('cases-analyticsV2: reconciliation fired before service start completed');
         }
         return {
+          esClient: this.esClient,
           savedObjectsClient: this.internalSavedObjectsClient,
           writer: this.writerProxy,
           activityWriter: this.activityWriterProxy,
           attachmentsWriter: this.attachmentsWriterProxy,
+          casesWriterEnabled: this.writer !== V2_NOOP_WRITER,
         };
       },
+      incrementalIdBackfillEnabled: this.incrementalIdEnabled,
     });
 
     // Register the one-shot reset task type. Scheduling an instance
@@ -320,32 +319,6 @@ export class CasesAnalyticsV2Service {
           activityWriter: this.activityWriterProxy,
           attachmentsWriter: this.attachmentsWriterProxy,
           taskManager: this.taskManager,
-        };
-      },
-    });
-
-    // Registered even when incremental ids are disabled (only scheduling is
-    // gated) so a task left over from an earlier start isn't reported by Task
-    // Manager as an unrecognized type.
-    registerIncrementalIdBackfillTask({
-      taskManager: deps.taskManager,
-      logger: this.logger,
-      getRunnerDeps: async () => {
-        if (
-          this.internalSavedObjectsClient == null ||
-          this.esClient == null ||
-          this.writer === V2_NOOP_WRITER
-        ) {
-          // Throwing lets Task Manager retry instead of "repairing" through
-          // the noop writer.
-          throw new Error(
-            'cases-analyticsV2: incremental id backfill fired before service start completed'
-          );
-        }
-        return {
-          esClient: this.esClient,
-          savedObjectsClient: this.internalSavedObjectsClient,
-          writer: this.writerProxy,
         };
       },
     });
@@ -489,13 +462,6 @@ export class CasesAnalyticsV2Service {
       logger: this.logger,
       intervalMinutes: this.reconciliationIntervalMinutes,
     });
-
-    if (this.incrementalIdEnabled) {
-      await scheduleIncrementalIdBackfillTask({
-        taskManager: deps.taskManager,
-        logger: this.logger,
-      });
-    }
   }
 
   /**
