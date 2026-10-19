@@ -27,7 +27,7 @@ actions:
 
         ### Try it now
 
-        Create your first Discover session right now. The following example creates a session with an ES|QL tab that lists large requests. You can run it as-is once you have the [Kibana sample logs dataset](https://www.elastic.co/docs/manage-data/ingest/sample-data) installed:
+        Create your first Discover session right now using the following example, with an ES|QL tab that lists large requests. You can run it as-is after installing the [Kibana sample logs dataset](https://www.elastic.co/docs/manage-data/ingest/sample-data):
 
         ```bash
         curl -X POST "${KIBANA_URL}/api/discover_sessions" \
