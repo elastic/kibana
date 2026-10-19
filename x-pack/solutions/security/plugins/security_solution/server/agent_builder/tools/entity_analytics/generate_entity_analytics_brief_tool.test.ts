@@ -51,7 +51,13 @@ describe('generateEntityAnalyticsBriefTool', () => {
       createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
     )) as ToolHandlerStandardReturn;
 
-    expect(results[0].type).toBe(ToolResultType.error);
+    expect(mockCheckPrivileges).toHaveBeenCalled();
+    expect(results[0]).toMatchObject({
+      type: ToolResultType.error,
+      data: {
+        message: 'You do not have permission to generate the Entity Analytics brief in this space.',
+      },
+    });
     expect(generateBrief).not.toHaveBeenCalled();
   });
 });
