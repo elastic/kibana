@@ -19,7 +19,7 @@ import type { AddToCaseCasesService } from '../components/add_to_case_modal';
 import type { EpisodeDataSource } from '../types/episode_data_source';
 import { createAddToCaseAction } from './add_to_case';
 import { ADD_TO_CASE_EPISODE_ACTION_ID } from './add_to_case_action_id';
-import { createEpisodeActions, READ_SAFE_EPISODE_ACTION_IDS } from './create_episode_actions';
+import { createEpisodeActions } from './create_episode_actions';
 
 const buildActions = (additionalDataSource?: EpisodeDataSource) =>
   createEpisodeActions({
@@ -84,24 +84,23 @@ describe('createEpisodeActions', () => {
   });
 });
 
-describe('READ_SAFE_EPISODE_ACTION_IDS', () => {
-  it('contains the actions that do not require alerting write privilege', () => {
-    expect([...READ_SAFE_EPISODE_ACTION_IDS]).toEqual([
-      'ALERTING_V2_OPEN_EPISODE_IN_DISCOVER',
-      ADD_TO_CASE_EPISODE_ACTION_ID,
-    ]);
+describe('enforcesOwnPrivileges', () => {
+  it('is only set on open in Discover among the built-in actions', () => {
+    const ids = buildActions()
+      .filter((action) => action.enforcesOwnPrivileges === true)
+      .map((action) => action.id);
+
+    expect(ids).toEqual(['ALERTING_V2_OPEN_EPISODE_IN_DISCOVER']);
   });
 
-  it('includes the built-in read-safe actions returned by createEpisodeActions', () => {
-    const allIds = new Set(buildActions().map((action) => action.id));
-    const hostProvidedIds = new Set<string>([ADD_TO_CASE_EPISODE_ACTION_ID]);
+  it('is set on the host add to case action', () => {
+    const addToCaseAction = createAddToCaseAction({
+      cases: {} as AddToCaseCasesService,
+      owner: 'observability',
+      rendering: renderingServiceMock.create(),
+      kibanaServices: {},
+    });
 
-    expect(allIds.has(ADD_TO_CASE_EPISODE_ACTION_ID)).toBe(false);
-    for (const id of READ_SAFE_EPISODE_ACTION_IDS) {
-      if (hostProvidedIds.has(id)) {
-        continue;
-      }
-      expect(allIds.has(id)).toBe(true);
-    }
+    expect(addToCaseAction.enforcesOwnPrivileges).toBe(true);
   });
 });

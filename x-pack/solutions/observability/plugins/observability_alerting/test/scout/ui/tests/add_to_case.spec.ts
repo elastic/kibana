@@ -7,6 +7,7 @@
 
 import type { KibanaRole } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
+import { OBSERVABILITY_OWNER } from '@kbn/cases-plugin/common';
 import { test } from '../fixtures';
 import {
   setAlertingV2EnabledSetting,
@@ -34,7 +35,7 @@ const CASE_PAYLOAD = {
   tags: CASE_TAGS,
   connector: { id: 'none', name: 'none', type: '.none', fields: null },
   settings: { syncAlerts: false, extractObservables: false },
-  owner: 'observability',
+  owner: OBSERVABILITY_OWNER,
 };
 
 /*

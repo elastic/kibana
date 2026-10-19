@@ -27,6 +27,7 @@ import type { EpisodeAction, EpisodeActionsDeps } from '@kbn/alerting-v2-episode
 import { closeAddToCaseModal, createAddToCaseAction } from '@kbn/alerting-v2-episodes-ui/actions';
 import { EuiPageSection } from '@elastic/eui';
 import { ALERTING_V2_RULES_TAB_ID } from '@kbn/alerting-v2-constants';
+import { OBSERVABILITY_OWNER } from '@kbn/cases-plugin/common';
 import { AlertingNavPromo } from '@kbn/observability-plugin/public';
 import {
   OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
@@ -40,8 +41,6 @@ import type { ObservabilityAlertingCases } from '../types';
 import { createInvestigateEpisodeAction } from '../actions/investigate_episode_action';
 import { hasObservabilityAlertingCapabilities } from './has_observability_alerting_privilege';
 
-const OBSERVABILITY_CASES_OWNER = 'observability';
-
 const createObservabilityEpisodeActions = (
   cases: ObservabilityAlertingCases | undefined,
   { rendering }: EpisodeActionsDeps
@@ -51,7 +50,7 @@ const createObservabilityEpisodeActions = (
     ? [
         createAddToCaseAction({
           cases: cases.service,
-          owner: OBSERVABILITY_CASES_OWNER,
+          owner: OBSERVABILITY_OWNER,
           rendering,
           kibanaServices: cases.kibanaServices,
         }),

@@ -25,18 +25,7 @@ import { createResolveAction } from './resolve';
 import { createUnresolveAction } from './unresolve';
 import { createEditTagsAction } from './edit_tags';
 import { createEditAssigneeAction } from './edit_assignee';
-import { createOpenInDiscoverAction, OPEN_IN_DISCOVER_EPISODE_ACTION_ID } from './open_in_discover';
-import { ADD_TO_CASE_EPISODE_ACTION_ID } from './add_to_case_action_id';
-
-/**
- * Episode action ids visible without alerting write privilege.
- * Add to case is included because the Cases plugin checks its own privileges.
- * Any other id is hidden from read-only users.
- */
-export const READ_SAFE_EPISODE_ACTION_IDS: ReadonlySet<string> = new Set([
-  OPEN_IN_DISCOVER_EPISODE_ACTION_ID,
-  ADD_TO_CASE_EPISODE_ACTION_ID,
-]);
+import { createOpenInDiscoverAction } from './open_in_discover';
 
 export interface EpisodeActionsDeps {
   http: HttpStart;

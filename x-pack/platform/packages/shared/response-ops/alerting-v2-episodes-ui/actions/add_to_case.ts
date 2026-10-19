@@ -58,6 +58,7 @@ export const createAddToCaseAction = <TPermissions extends CasesPermissions, TAt
   order: 38,
   displayName: i18n.ADD_TO_CASE,
   iconType: 'casesApp',
+  enforcesOwnPrivileges: true,
   isCompatible: ({ episodes }) => {
     const { create, read } = deps.cases.helpers.canUseCases([deps.owner]);
     return (
