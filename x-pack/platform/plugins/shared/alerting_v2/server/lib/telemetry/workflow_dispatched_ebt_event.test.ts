@@ -1,0 +1,81 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { workflowDispatchedTelemetryDataSchema } from '@kbn/alerting-v2-schemas';
+import {
+  buildWorkflowDispatchedEventData,
+  workflowDispatchedTelemetryEvent,
+} from './workflow_dispatched_ebt_event';
+
+const input = {
+  workflowId: 'wf-abc123',
+  actionPolicyId: 'policy-1',
+  workflowExecutionId: 'exec-xyz789',
+  spaceId: 'default',
+  ruleIds: ['rule-1', 'rule-2'],
+  alertCount: 42,
+};
+
+describe('workflowDispatchedTelemetryEvent', () => {
+  it('registers the workflow dispatched event type', () => {
+    expect(workflowDispatchedTelemetryEvent.eventType).toBe('alerting_v2_workflow_dispatched');
+  });
+
+  it('describes every payload field in the schema', () => {
+    expect(Object.keys(workflowDispatchedTelemetryEvent.schema).sort()).toEqual([
+      'action_policy_id',
+      'alert_count',
+      'rule_count',
+      'rule_id',
+      'space_id',
+      'workflow_execution_id',
+      'workflow_id',
+    ]);
+  });
+
+  it('declares rule_id as an array of keywords', () => {
+    expect(workflowDispatchedTelemetryEvent.schema.rule_id).toEqual(
+      expect.objectContaining({ type: 'array', items: expect.objectContaining({ type: 'keyword' }) })
+    );
+  });
+});
+
+describe('buildWorkflowDispatchedEventData', () => {
+  it('projects the dispatch into the event payload', () => {
+    expect(buildWorkflowDispatchedEventData(input)).toEqual({
+      workflow_id: 'wf-abc123',
+      action_policy_id: 'policy-1',
+      workflow_execution_id: 'exec-xyz789',
+      space_id: 'default',
+      rule_id: ['rule-1', 'rule-2'],
+      alert_count: 42,
+      rule_count: 2,
+    });
+  });
+
+  it('derives rule_count from the rule ids', () => {
+    expect(
+      buildWorkflowDispatchedEventData({ ...input, ruleIds: ['rule-1'] }).rule_count
+    ).toBe(1);
+    expect(buildWorkflowDispatchedEventData({ ...input, ruleIds: [] }).rule_count).toBe(0);
+  });
+
+  it('does not share the rule id array with the input', () => {
+    const ruleIds = ['rule-1'];
+    const data = buildWorkflowDispatchedEventData({ ...input, ruleIds });
+
+    expect(data.rule_id).toEqual(ruleIds);
+    expect(data.rule_id).not.toBe(ruleIds);
+  });
+
+  it('produces a payload accepted by the shared schema', () => {
+    expect(
+      workflowDispatchedTelemetryDataSchema.safeParse(buildWorkflowDispatchedEventData(input))
+        .success
+    ).toBe(true);
+  });
+});
