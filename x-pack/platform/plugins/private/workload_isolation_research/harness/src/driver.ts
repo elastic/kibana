@@ -187,8 +187,8 @@ const runPhase = async (
 /** Executes one scenario run end to end and writes a self-contained run directory. */
 export const runScenario = async (opts: RunOptions): Promise<{ runId: string; dir: string }> => {
   const { target, scenario } = opts;
-  const stamp = new Date().toISOString().replace(/[:.]/g, '').slice(0, 15);
-  const runId = `${opts.lane}-${scenario.name}-${opts.variant}-${stamp}`.toLowerCase();
+  const stamp = new Date().toISOString().replace(/[:.]/g, '').slice(0, 17);
+  const runId = `${opts.lane}-${scenario.name}-${opts.variant}-${stamp}-${Math.random().toString(16).slice(2, 6)}`.toLowerCase();
   const dir = path.join(opts.runsDir, runId);
   fs.mkdirSync(dir, { recursive: true });
   const log = (msg: string) => {
