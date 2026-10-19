@@ -86,6 +86,7 @@ describe('ListKiBody', () => {
     });
     renderListKiWithProviders(<ListKiPanel aiIndex={listKiTestAiIndex} />);
     expect(screen.getByTestId('contextListKiEmpty')).toBeInTheDocument();
-    expect(screen.queryByTestId('contextListKiTypeFilters')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextListKiSearchBox')).toBeInTheDocument();
+    expect(screen.getByTestId('contextListKiTypeFilters')).toBeInTheDocument();
   });
 });
