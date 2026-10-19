@@ -27,8 +27,13 @@ import { buildAlertBasedTilesQuery } from '../entities_with_alerts_query';
  * | user:d      | 100d       | yes         | low 1                              | current watchlisted          |
  * | host:e      | 10d        | yes         | medium 11                          | previous watchlisted |
  * | host:f      | 2d         |             | low 1                              | current, low alert       |
- * | host:g      | 100d       |             | critical 5                         | current severe only          |
+ * | host:g      | 100d       |             | critical 5 (acknowledged)          | current severe only          |
  * | host:ghost  | no entity doc | -        | high 3                             | dropped: unknown entity      |
+ * | host:c1     | 100d       |             | critical 2 (closed)                | dropped: closed alert        |
+ * | user:wc     | 100d       | yes         | low 1 (closed)                     | dropped: closed alert        |
+ * | host:c2     | 100d       |             | critical 9 (closed)                | dropped: closed alert        |
+ *
+ * Closed alerts are left out, as in the entities grid; open and acknowledged alerts count.
  *
  * Groups are judged by the group: it counts as watchlisted when ANY member, the main entity or an
  * alias, is watchlisted (that member need not be the one that alerted) and the group has an alert.
@@ -73,6 +78,9 @@ const ENTITIES: readonly EntitySeed[] = [
   { id: 'host:e', firstSeenDaysAgo: 10, watchlisted: true },
   { id: 'host:f', firstSeenDaysAgo: 2 },
   { id: 'host:g', firstSeenDaysAgo: 100 },
+  { id: 'host:c1', firstSeenDaysAgo: 100 },
+  { id: 'user:wc', firstSeenDaysAgo: 100, watchlisted: true },
+  { id: 'host:c2', firstSeenDaysAgo: 100 },
   { id: 'host:w2', firstSeenDaysAgo: 100 },
   { id: 'host:w2a', firstSeenDaysAgo: 100, watchlisted: true, resolvedTo: 'host:w2' },
   { id: 'host:w3', firstSeenDaysAgo: 100, watchlisted: true },
@@ -86,7 +94,9 @@ const ENTITIES: readonly EntitySeed[] = [
   { id: 'host:w7a', firstSeenDaysAgo: 100, resolvedTo: 'host:w7' },
 ];
 
-const ALERTS: ReadonlyArray<[entityId: string, severity: string, daysAgo: number]> = [
+const ALERTS: ReadonlyArray<
+  [entityId: string, severity: string, daysAgo: number, workflowStatus?: string]
+> = [
   ['host:a', 'high', 3],
   ['host:alias', 'high', 4],
   ['host:b', 'critical', 10],
@@ -95,12 +105,15 @@ const ALERTS: ReadonlyArray<[entityId: string, severity: string, daysAgo: number
   ['user:d', 'low', 1],
   ['host:e', 'medium', 11],
   ['host:f', 'low', 1],
-  ['host:g', 'critical', 5],
+  ['host:g', 'critical', 5, 'acknowledged'],
   ['host:ghost', 'high', 3],
   ['host:w2', 'high', 2],
   ['host:w3a', 'low', 1],
   ['host:w5a', 'critical', 3],
   ['host:w6a', 'high', 10],
+  ['host:c1', 'critical', 2, 'closed'],
+  ['user:wc', 'low', 1, 'closed'],
+  ['host:c2', 'critical', 9, 'closed'],
 ];
 
 const isoDaysAgo = (now: number, days: number) => new Date(now - days * DAY_MS).toISOString();
@@ -130,6 +143,7 @@ const loadFixture = async (client: Client) => {
         '@timestamp': DATE,
         'kibana.alert.entity.id': KEYWORD,
         'kibana.alert.severity': KEYWORD,
+        'kibana.alert.workflow_status': KEYWORD,
       },
     },
   });
@@ -147,12 +161,13 @@ const loadFixture = async (client: Client) => {
         ...(resolvedTo ? { 'entity.relationships.resolution.resolved_to': resolvedTo } : {}),
       },
     ]),
-    ...ALERTS.flatMap(([entityId, severity, daysAgo]) => [
+    ...ALERTS.flatMap(([entityId, severity, daysAgo, workflowStatus]) => [
       { index: { _index: getAlertsIndex(NAMESPACE) } },
       {
         '@timestamp': isoDaysAgo(now, daysAgo),
         'kibana.alert.entity.id': entityId,
         'kibana.alert.severity': severity,
+        ...(workflowStatus ? { 'kibana.alert.workflow_status': workflowStatus } : {}),
       },
     ]),
   ];
@@ -219,6 +234,14 @@ describe('alert based tiles on Elasticsearch', () => {
     // host:w6). Watchlisted: three now (user:d, host:w2, host:w3), two before (host:e, host:w6).
     expect(current.severe.count - previous.severe.count).toBe(2);
     expect(current.watchlisted.count - previous.watchlisted.count).toBe(1);
+  });
+
+  it('leaves out closed alerts, in both periods', async () => {
+    const current = await runTiles('current');
+    expect(current.severe.ids).not.toContain('host:c1');
+    expect(current.watchlisted.ids).not.toContain('user:wc');
+    // host:c2's only alert, critical and closed, is in the previous period: still three.
+    expect((await runTiles('previous')).severe.count).toBe(3);
   });
 
   describe('with an entity filter, judged by the main entity', () => {

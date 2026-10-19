@@ -3,7 +3,7 @@
 exports[`needs attention tile queries over 24h without entity filters builds the alert based tiles query 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM .alerts-security.alerts-default, .entities.v2.latest.default-00001 METADATA _index
-| WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND @timestamp >= NOW() - 1 days) OR (_index == \\".entities.v2.latest.default-00001\\" AND \`entity.relationships.resolution.resolved_to\` IS NOT NULL)
+| WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND @timestamp >= NOW() - 1 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND \`entity.relationships.resolution.resolved_to\` IS NOT NULL)
 | FORK (
     WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
@@ -236,7 +236,7 @@ FROM (
 exports[`needs attention tile queries over 30d with a criticality filter builds the alert based tiles query 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM .alerts-security.alerts-default, .entities.v2.latest.default-00001 METADATA _index
-| WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND @timestamp >= NOW() - 30 days) OR (_index == \\".entities.v2.latest.default-00001\\" AND \`entity.relationships.resolution.resolved_to\` IS NOT NULL)
+| WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND @timestamp >= NOW() - 30 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND \`entity.relationships.resolution.resolved_to\` IS NOT NULL)
 | FORK (
     WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`

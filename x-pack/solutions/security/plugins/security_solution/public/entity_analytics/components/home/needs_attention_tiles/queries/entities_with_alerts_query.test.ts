@@ -69,9 +69,9 @@ describe('buildAlertBasedTilesQuery', () => {
     // FORK cannot run inside a FROM subquery, so the two share one FROM, like the entities grid.
     expect(query).toContain('FROM .alerts-security.alerts-default, .entities-v1 METADATA _index');
     expect(query).not.toContain('FROM (');
-    // The entity docs it reads are the aliases only.
+    // The entity docs it reads are the aliases only; the alerts leave out closed ones, as the grid.
     expect(query).toContain(
-      '| WHERE (NOT _index == ".entities-v1" AND @timestamp >= NOW() - 1 days) OR (_index == ".entities-v1" AND `entity.relationships.resolution.resolved_to` IS NOT NULL)'
+      '| WHERE (NOT _index == ".entities-v1" AND @timestamp >= NOW() - 1 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != "closed")) OR (_index == ".entities-v1" AND `entity.relationships.resolution.resolved_to` IS NOT NULL)'
     );
   });
 

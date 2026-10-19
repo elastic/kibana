@@ -43,6 +43,7 @@ import { buildEntityFilterClauses } from '../../../entities_grid/queries/entity_
  * | host:wg     |             | critical 3.5 (its alias host:wga is watchlisted, and never alerts) |
  * | host:wh     | yes         | none (its alias host:wha has a low alert 100.5 hours ago)      |
  * | host:wi     | yes         | none (its alias host:wia, not watchlisted, has a high alert 4.5 hours ago) |
+ * | user:wx     | yes         | critical 6.5, 200.5, both closed (never counted)                |
  *
  * A group is watchlisted when any member is, whichever one alerted.
  */
@@ -69,9 +70,12 @@ const ENTITIES: ReadonlyArray<{ id: string; watchlisted?: boolean; resolvedTo?: 
   { id: 'host:wha', resolvedTo: 'host:wh' },
   { id: 'host:wi', watchlisted: true },
   { id: 'host:wia', resolvedTo: 'host:wi' },
+  { id: 'user:wx', watchlisted: true },
 ];
 
-const ALERTS: ReadonlyArray<[entityId: string, severity: string, hoursAgo: number]> = [
+const ALERTS: ReadonlyArray<
+  [entityId: string, severity: string, hoursAgo: number, workflowStatus?: string]
+> = [
   ['host:a', 'high', 2.5],
   ['host:a', 'high', 30.5],
   ['host:alias', 'critical', 5.5],
@@ -90,6 +94,8 @@ const ALERTS: ReadonlyArray<[entityId: string, severity: string, hoursAgo: numbe
   ['host:wg', 'critical', 3.5],
   ['host:wha', 'low', 100.5],
   ['host:wia', 'high', 4.5],
+  ['user:wx', 'critical', 6.5, 'closed'],
+  ['user:wx', 'critical', 200.5, 'closed'],
 ];
 
 const isoHoursAgo = (now: number, hours: number) => new Date(now - hours * HOUR_MS).toISOString();
@@ -119,6 +125,7 @@ const loadFixture = async (client: Client) => {
         '@timestamp': DATE,
         'kibana.alert.entity.id': KEYWORD,
         'kibana.alert.severity': KEYWORD,
+        'kibana.alert.workflow_status': KEYWORD,
       },
     },
   });
@@ -134,12 +141,13 @@ const loadFixture = async (client: Client) => {
         ...(resolvedTo ? { 'entity.relationships.resolution.resolved_to': resolvedTo } : {}),
       },
     ]),
-    ...ALERTS.flatMap(([entityId, severity, hoursAgo]) => [
+    ...ALERTS.flatMap(([entityId, severity, hoursAgo, workflowStatus]) => [
       { index: { _index: getAlertsIndex(NAMESPACE) } },
       {
         '@timestamp': isoHoursAgo(now, hoursAgo),
         'kibana.alert.entity.id': entityId,
         'kibana.alert.severity': severity,
+        ...(workflowStatus ? { 'kibana.alert.workflow_status': workflowStatus } : {}),
       },
     ]),
   ];

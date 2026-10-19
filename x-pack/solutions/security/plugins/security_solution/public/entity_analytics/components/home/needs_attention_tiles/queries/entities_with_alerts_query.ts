@@ -6,6 +6,7 @@
  */
 
 import type { TimeRange } from '../../entities_grid/common';
+import { ALERT_OPEN_STATUS_FILTER } from '../../entities_grid/queries/alerts';
 import { getAlertsIndex } from '../../entities_grid/queries/esql';
 import { buildAlertEuidPipeline } from './alert_euid_pipeline';
 import { buildPeriodCondition } from './tile_period';
@@ -81,7 +82,8 @@ export const buildAlertTilesHead = ({
   return [
     `SET unmapped_fields="nullify";`,
     `FROM ${getAlertsIndex(spaceId)}, ${entitiesIndexName} METADATA _index`,
-    `| WHERE (NOT ${isEntityDoc} AND ${windowCondition}) OR (${isEntityDoc} AND ${RESOLVED_TO} IS NOT NULL)`,
+    // Closed alerts are left out, as in the entities grid.
+    `| WHERE (NOT ${isEntityDoc} AND ${windowCondition} AND (${ALERT_OPEN_STATUS_FILTER})) OR (${isEntityDoc} AND ${RESOLVED_TO} IS NOT NULL)`,
     ...buildAlertEuidPipeline(bucketExpression, {
       alertBranchCondition: `NOT ${isEntityDoc}`,
       extraBranch: {
