@@ -10,11 +10,6 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { DOCUMENT_EXTRACTION_ENDPOINT_ID, DOCUMENT_EXTRACTION_TIMEOUT_MS } from './constants';
 import { extractDocument } from './extract_document';
 
-jest.mock('./constants', () => ({
-  ...jest.requireActual('./constants'),
-  USE_FAKE_EXTRACTION: false,
-}));
-
 describe('extractDocument', () => {
   const logger = loggingSystemMock.createLogger();
   const pdf = Buffer.from('%PDF-1.7 fake');
@@ -22,7 +17,7 @@ describe('extractDocument', () => {
   const esClient = { transport: { request } } as unknown as ElasticsearchClient;
 
   const run = (signal?: AbortSignal) =>
-    extractDocument({ esClient, pdf, fileId: 'file-abc', fileName: 'invoice.pdf', signal, logger });
+    extractDocument({ esClient, pdf, fileId: 'file-abc', signal, logger });
 
   beforeEach(() => {
     jest.clearAllMocks();

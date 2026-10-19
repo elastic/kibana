@@ -33,6 +33,7 @@ import { useSubmitMessage } from '../../../hooks/use_submit_message';
 import { useSendUserMessage } from '../../../hooks/use_send_user_message';
 import { ChatTriggerMode } from '../../../../../common/http_api/chat';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
+import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
 import { useValidateAgentId } from '../../../hooks/agents/use_validate_agent_id';
 import { useAgentModel } from '../../../hooks/agents/use_agent_model';
 import {
@@ -345,7 +346,12 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   const isAgentIdValid = validateAgentId(agentId);
   const { isLoading: isAgentModelLoading } = useAgentModel(agentId);
 
-  const isAgentDeleted = !isAgentIdValid && isFetched && Boolean(agentId);
+  const { agent: agentById, isLoading: isLoadingAgentById } = useAgentBuilderAgentById(
+    !isAgentIdValid && isFetched && Boolean(agentId) ? agentId : undefined
+  );
+  const agentExists = isAgentIdValid || Boolean(agentById);
+
+  const isAgentDeleted = !agentExists && !isLoadingAgentById && isFetched && Boolean(agentId);
   const isInputDisabled =
     isAgentDeleted || isAwaitingPrompt || isCreatingConversation || isSendingUserMessage;
   const isMessageTooLong = overLimitCharacterCount > 0;
@@ -355,7 +361,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     isResponseLoading ||
     isSendingUserMessage ||
     isCreatingConversation ||
-    !isAgentIdValid ||
+    !agentExists ||
     isAgentModelLoading ||
     isAwaitingPrompt ||
     isUploading;

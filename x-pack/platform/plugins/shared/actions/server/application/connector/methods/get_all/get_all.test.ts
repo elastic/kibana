@@ -84,6 +84,7 @@ const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
 const getAxiosInstanceWithAuth = jest.fn();
 const isESOCanEncrypt = true;
+const testInMemoryConnectors: Array<ReturnType<typeof createMockInMemoryConnector>> = [];
 
 let actionsClient: ActionsClient;
 const actionTypeRegistry: ActionTypeRegistry = jest.fn() as unknown as ActionTypeRegistry;
@@ -99,6 +100,7 @@ describe('getAll()', () => {
       jest.requireActual('@kbn/connector-specs').connectorTypeIsDual(actionTypeId)
     );
     actionTypeRegistry.isDeprecated = jest.fn().mockReturnValue(false);
+    testInMemoryConnectors.length = 0;
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
@@ -106,7 +108,7 @@ describe('getAll()', () => {
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
-      inMemoryConnectors: [],
+      inMemoryConnectors: testInMemoryConnectors,
       actionExecutor,
       bulkExecutionEnqueuer,
       request,
@@ -365,6 +367,110 @@ describe('getAll()', () => {
           authMode: 'shared',
         },
       ]);
+    });
+
+    test('filters to sandbox-capable connectors when sandboxCapableOnly is true', async () => {
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: 2,
+        per_page: 10,
+        page: 1,
+        saved_objects: [
+          {
+            id: 'github-1',
+            type: 'action',
+            attributes: {
+              name: 'GitHub sandbox',
+              actionTypeId: '.github',
+              isMissingSecrets: false,
+              config: { authType: 'bearer' },
+            },
+            score: 1,
+            references: [],
+          },
+          {
+            id: 'slack-1',
+            type: 'action',
+            attributes: {
+              name: 'Slack',
+              actionTypeId: '.slack',
+              isMissingSecrets: false,
+              config: { authType: 'webhook' },
+            },
+            score: 1,
+            references: [],
+          },
+        ],
+      });
+      scopedClusterClient.asInternalUser.search.mockResponse(
+        // @ts-expect-error not full search response
+        {
+          aggregations: {
+            'github-1': { doc_count: 0 },
+          },
+        }
+      );
+
+      actionTypeRegistry.has = jest.fn((id: string) => id === '.github' || id === '.slack');
+      actionTypeRegistry.get = jest.fn((id: string) => {
+        if (id === '.github') {
+          return {
+            sandboxSupportedAuthTypes: ['bearer', 'oauth_authorization_code'],
+            isSystemActionType: false,
+          };
+        }
+        return { sandboxSupportedAuthTypes: [], isSystemActionType: false };
+      }) as unknown as ActionTypeRegistry['get'];
+
+      const result = await actionsClient.getAll({ sandboxCapableOnly: true });
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual(
+        expect.objectContaining({
+          id: 'github-1',
+          actionTypeId: '.github',
+          config: { authType: 'bearer' },
+        })
+      );
+    });
+
+    test('keeps a preconfigured sandbox-capable connector with exposeConfig false', async () => {
+      const preconfigured = { isPreconfigured: true, exposeConfig: false };
+      testInMemoryConnectors.push(
+        createMockInMemoryConnector({
+          ...preconfigured,
+          id: 'pre-github',
+          actionTypeId: '.github',
+          name: 'github',
+          config: { authType: 'bearer' },
+        }),
+        createMockInMemoryConnector({
+          ...preconfigured,
+          id: 'pre-slack',
+          actionTypeId: '.slack',
+          name: 'slack',
+          config: { authType: 'webhook' },
+        })
+      );
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: 0,
+        per_page: 10,
+        page: 1,
+        saved_objects: [],
+      });
+      scopedClusterClient.asInternalUser.search.mockResponse(
+        // @ts-expect-error not full search response
+        { aggregations: { 'pre-github': { doc_count: 0 } } }
+      );
+      actionTypeRegistry.has = jest.fn(() => true);
+      actionTypeRegistry.get = jest.fn((id: string) => ({
+        sandboxSupportedAuthTypes: id === '.github' ? ['bearer'] : [],
+        isSystemActionType: false,
+      })) as unknown as ActionTypeRegistry['get'];
+
+      const result = await actionsClient.getAll({ sandboxCapableOnly: true });
+
+      expect(result.map(({ id }) => id)).toEqual(['pre-github']);
+      expect(result[0]).not.toHaveProperty('config');
     });
 
     test.skip('get system actions correctly', async () => {

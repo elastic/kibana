@@ -11,10 +11,52 @@ import type {
   RuntimeAgentConfigurationOverrides,
 } from '@kbn/agent-builder-common';
 import { isToolCallStep } from '@kbn/agent-builder-common';
-import type { RoundModelUsageStats } from '@kbn/agent-builder-common/chat';
-import type { ModelProvider, ModelProviderStats } from '@kbn/agent-builder-server/runner';
+import type {
+  ConnectorModelUsageStats,
+  RoundModelUsageStats,
+} from '@kbn/agent-builder-common/chat';
+import type {
+  ModelCallInfo,
+  ModelProvider,
+  ModelProviderStats,
+} from '@kbn/agent-builder-server/runner';
 import { getCurrentTraceId } from '../../../../tracing';
 import type { RunTracker } from '../run_tracker';
+
+/**
+ * Groups the calls by connector: the main connector first (when it made calls), then the others
+ * in order of first call.
+ */
+const getConnectorsUsage = (
+  calls: ModelCallInfo[],
+  mainConnectorId: string
+): ConnectorModelUsageStats[] => {
+  const byConnector = new Map<string, ConnectorModelUsageStats>();
+  for (const { connectorId, tokens, model } of calls) {
+    const usage = byConnector.get(connectorId) ?? {
+      connector_id: connectorId,
+      llm_calls: 0,
+      input_tokens: 0,
+      output_tokens: 0,
+    };
+    usage.llm_calls += 1;
+    usage.input_tokens += tokens?.prompt ?? 0;
+    usage.output_tokens += tokens?.completion ?? 0;
+    if (tokens?.cached !== undefined) {
+      usage.cached_input_tokens = (usage.cached_input_tokens ?? 0) + tokens.cached;
+    }
+    if (model && usage.model === undefined) {
+      usage.model = model;
+    }
+    byConnector.set(connectorId, usage);
+  }
+
+  const mainUsage = byConnector.get(mainConnectorId);
+  const otherUsages = [...byConnector.values()].filter(
+    ({ connector_id: connectorId }) => connectorId !== mainConnectorId
+  );
+  return mainUsage ? [mainUsage, ...otherUsages] : otherUsages;
+};
 
 export const getModelUsage = (
   stats: ModelProviderStats,
@@ -37,6 +79,7 @@ export const getModelUsage = (
   const modelFromResponse = stats.calls.find(
     (call) => call.connectorId === mainConnectorId && call.model
   )?.model;
+  const connectors = getConnectorsUsage(stats.calls, mainConnectorId);
 
   return {
     connector_id: mainConnectorId,
@@ -46,6 +89,7 @@ export const getModelUsage = (
     ...(hasCachedInputTokens ? { cached_input_tokens: cachedInputTokens } : {}),
     ...(modelFromResponse ? { model: modelFromResponse } : {}),
     ...(lastCallInputTokens !== undefined ? { last_call_input_tokens: lastCallInputTokens } : {}),
+    ...(connectors.length > 0 ? { connectors } : {}),
   };
 };
 

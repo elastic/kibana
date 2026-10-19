@@ -13,17 +13,8 @@ import {
   withActiveInferenceSpan,
 } from '@kbn/inference-tracing';
 import type { Logger } from '@kbn/logging';
-import {
-  DOCUMENT_EXTRACTION_ENDPOINT_ID,
-  DOCUMENT_EXTRACTION_TIMEOUT_MS,
-  // FAKE_EXTRACTION:start - remove when Jina Reader document_extraction is live
-  USE_FAKE_EXTRACTION,
-  // FAKE_EXTRACTION:end
-} from './constants';
+import { DOCUMENT_EXTRACTION_ENDPOINT_ID, DOCUMENT_EXTRACTION_TIMEOUT_MS } from './constants';
 import { binaryErrors } from '../errors';
-// FAKE_EXTRACTION:start - remove when Jina Reader document_extraction is live
-import { fakeExtractDocument } from './fake_extract_document';
-// FAKE_EXTRACTION:end
 
 interface DocumentExtractionResponse {
   document_extraction?: Array<{ content?: string; format?: string }>;
@@ -45,14 +36,12 @@ export const extractDocument = ({
   esClient,
   pdf,
   fileId,
-  fileName,
   signal,
   logger,
 }: {
   esClient: ElasticsearchClient;
   pdf: Buffer;
   fileId: string;
-  fileName: string;
   signal?: AbortSignal;
   logger: Logger;
 }): Promise<string> =>
@@ -81,12 +70,6 @@ export const extractDocument = ({
       signal?.addEventListener('abort', abortOnCallerAbort, { once: true });
 
       try {
-        // FAKE_EXTRACTION:start - remove when Jina Reader document_extraction is live
-        if (USE_FAKE_EXTRACTION) {
-          return await fakeExtractDocument({ fileName, signal: controller.signal });
-        }
-        // FAKE_EXTRACTION:end
-
         controller.signal.throwIfAborted();
         const response = await esClient.transport.request<DocumentExtractionResponse>(
           {

@@ -10,7 +10,6 @@ import type { SupportedBinaryMimeType } from '@kbn/agent-builder-common/attachme
 export interface BinaryToTextParams {
   bytes: Buffer;
   fileId: string;
-  fileName: string;
   signal: AbortSignal;
 }
 

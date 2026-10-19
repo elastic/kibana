@@ -185,7 +185,6 @@ describe('binary attachment type', () => {
         expect.objectContaining({
           bytes: Buffer.from('%PDF-1.7 fake'),
           fileId: 'file-abc',
-          fileName: 'invoice.pdf',
         })
       );
     });

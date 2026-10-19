@@ -111,7 +111,6 @@ export const createBinaryAttachmentType = ({
         const text = await converter.toText({
           bytes,
           fileId: origin,
-          fileName: file.data.name,
           signal,
         });
         if (text.length > MAX_BINARY_TEXT_LENGTH) {

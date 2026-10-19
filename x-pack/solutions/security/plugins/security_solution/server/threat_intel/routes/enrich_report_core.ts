@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERTZERO_REASONING_INFERENCE_FEATURE_ID } from '@kbn/alertzero-common';
+import { ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID } from '@kbn/alertzero-common';
 import {
   ENRICH_REPORT_CORE_MAX_BODY_BYTES,
   ENRICH_REPORT_CORE_API_PATH,
@@ -50,7 +50,7 @@ export const registerEnrichReportCoreRoute = ({
           searchInferenceEndpoints: getSearchInferenceEndpoints(),
           request,
           uiSettingsClient: core.uiSettings.client,
-          featureId: ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
+          featureId: ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
           logger,
         });
         if (!modelOutcome.ok) {

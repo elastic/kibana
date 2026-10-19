@@ -297,9 +297,8 @@ export const allowedExperimentalValues = Object.freeze({
 
   /**
    * Enables the Endpoint Forensic Analysis Agent Builder skill (DFIR / patient zero / timeline).
-   * Shipped dark by default; enable per environment via config.
    */
-  endpointForensicAnalysisSkill: false,
+  endpointForensicAnalysisSkill: true,
 
   /**
    * Enables the Elastic Defend Policy Management Agent Builder skill (read-only prose workflows).
@@ -309,9 +308,8 @@ export const allowedExperimentalValues = Object.freeze({
 
   /**
    * Enables the investigate-rule Agent Builder skill.
-   * Gates skill registration so the feature can ship dark and be enabled per environment.
    */
-  investigateRuleSkill: false,
+  investigateRuleSkill: true,
 
   /**
    * Enables the find-security-rules Agent Builder skill.
@@ -377,6 +375,16 @@ export const allowedExperimentalValues = Object.freeze({
    * Release: 9.6
    */
   perOsPolicySettings: false,
+
+  /**
+   * Enables ransomware protection for Linux in Elastic Defend policies.
+   * When disabled, `linux.ransomware` is not added to new policies, is stripped from updated
+   * ones, and is not shown in the UI.
+   * Requires `perOsPolicySettings`: the Linux toggle exists only in the per-OS policy form, so the
+   * feature is treated as disabled unless both flags are on (`isLinuxRansomwareProtectionEnabled`).
+   * Release: 9.6
+   */
+  linuxRansomwareProtection: false,
 
   /**
    * Risk score maintainer create-if-missing path: when an alert's EUID passes the entity type's

@@ -24,7 +24,7 @@ export const createPdfConverter = ({
   logger: Logger;
 }): BinaryConverter => ({
   isAvailable: extractionAvailability.isAvailable,
-  toText: async ({ bytes, fileId, fileName, signal }) => {
+  toText: async ({ bytes, fileId, signal }) => {
     if (bytes.subarray(0, PDF_HEADER.length).toString('latin1') !== PDF_HEADER) {
       throw binaryErrors.invalidContent();
     }
@@ -32,7 +32,6 @@ export const createPdfConverter = ({
       esClient: await getEsClient(),
       pdf: bytes,
       fileId,
-      fileName,
       signal,
       logger,
     });

@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-// placeholder, the real id is not known yet
-export const DOCUMENT_EXTRACTION_ENDPOINT_ID = '.jina-reader-document_extraction';
+// Placeholder on purpose: no such endpoint exists, so PDF reading stays unavailable.
+// Replace with the real id after the Jina OCR model is released and tested locally.
+// See https://github.com/elastic/kibana/issues/298372
+export const DOCUMENT_EXTRACTION_ENDPOINT_ID = '.placeholder-document_extraction';
 
 export const DOCUMENT_EXTRACTION_TIMEOUT_MS = 90 * 1000;
-
-// FAKE_EXTRACTION:start - remove when Jina Reader document_extraction is live
-export const USE_FAKE_EXTRACTION = true;
-// FAKE_EXTRACTION:end
