@@ -6,6 +6,8 @@ Repo: `$TARGET_REPO` (SKILL.md Classify; `elastic/kibana` unless security-sensit
 
 Do not invent steps, expected behaviour, versions, or feature-flag names.
 
+**Stamp:** every create body ends with the visible line `Filed via file-bug` (`check-draft` gaps `stamp` without it). `write` also appends the hidden marker `<!-- filed-via: file-bug v1 -->` so skill-filed tickets can be found by tooling; it adds each line only if missing, so never add the marker by hand.
+
 ## Scope
 
 **Confirmed finding only.** Title, steps, **Current behaviour**, and **Expected behavior** cover the named defect and nothing adjacent.

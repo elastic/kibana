@@ -9,7 +9,7 @@ disable-model-invocation: true
 
 # File bug
 
-Write a bug to `$TARGET_REPO` only after a **write-yes** (the explicit yes): a later message that clearly approves **this** shown draft (for example “yes, file it”). Do not offer to file anything on your own initiative. “Create a bug”, “file this ticket”, or “file finding 2” means **prepare a draft**, not write. `write` ends every body with the visible stamp `Filed via file-bug` and a hidden marker `<!-- filed-via: file-bug v1 -->`.
+Write a bug to `$TARGET_REPO` only after a **write-yes** (the explicit yes): a later message that clearly approves **this** shown draft (for example “yes, file it”). Do not offer to file anything on your own initiative. “Create a bug”, “file this ticket”, or “file finding 2” means **prepare a draft**, not write.
 
 Exploratory-tester may hand off here only after the human **names** the findings. Read `references/drafting.md` while collecting or drafting. `scripts/file-bug.py` is the source of truth (`--help` per command); `scripts/file_bug.py` is the library, not a CLI.
 
@@ -74,7 +74,7 @@ python3 "$FILE_BUG" check-draft --body body.md \
   --label bug --label triage_needed --label "Team:…"
 ```
 
-Run `validate-labels --repo "$TARGET_REPO"` (it uses `--search`; never `gh label list --limit 1000`) and `scan-wip` first. `--finding "$FINDING_JSON"` is Path B only; on Path A omit it everywhere. Path A drafts already end with the visible `Filed via file-bug` stamp that `check-draft` requires; `write` adds only what is missing, never a duplicate. New issues always get `bug` and `triage_needed`; add the `vX.Y.Z` label when `infer-release` is confident (omit it on `Unknown`), and `sec-eng-prod:exploratory-tester` on Path B.
+Run `validate-labels --repo "$TARGET_REPO"` (it uses `--search`; never `gh label list --limit 1000`) and `scan-wip` first. `--finding "$FINDING_JSON"` is Path B only; on Path A omit it everywhere. A Path A draft ends with the visible `Filed via file-bug` line (`check-draft` requires it); `write` adds the hidden marker itself. New issues always get `bug` and `triage_needed`; add the `vX.Y.Z` label when `infer-release` is confident (omit it on `Unknown`), and `sec-eng-prod:exploratory-tester` on Path B.
 
 If `check-draft` reports `security_issue:file_in_security_team`, switch `TARGET_REPO` to `elastic/security-team` and re-run Search there; `write` refuses `elastic/kibana` for that hit unless `--security-ok`.
 

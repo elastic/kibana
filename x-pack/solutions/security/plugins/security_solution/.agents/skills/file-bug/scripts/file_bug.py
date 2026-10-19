@@ -986,7 +986,10 @@ def _finding_with_body_answers(finding: dict, body: str) -> dict:
 
 
 def with_filed_stamp(body: str) -> str:
-    """Append the visible stamp and the hidden marker, each only once."""
+    """Append the visible stamp and the hidden marker, each only once.
+
+    The marker lets tooling find skill-filed tickets; agents never add it by hand.
+    """
     text = body.rstrip()
     if FILED_VIA not in _visible_text(text):
         text = f"{text}\n\n{FILED_VIA}"
