@@ -25,6 +25,34 @@ const must = <T>(res: { status: number; body: T }, what: string): T => {
 export const ACTIONS: Record<string, Action> = {
   /** Seeds Tier B data through the research plugin (server-side, works on QAF without ES creds). */
   seed: async (params, { target, log }) => {
+    if (process.env.WIR_ES_URL && process.env.WIR_ES_API_KEY) {
+      // Direct seeding (serverless: the image's seed route still sets shard counts, which
+      // serverless rejects). Same seed functions as the plugin route.
+      const { Client } = await import('@elastic/elasticsearch');
+      const { seedFieldCaps, seedAlertingWide } = await import('../../common/seed');
+      const es = new Client({
+        node: process.env.WIR_ES_URL,
+        auth: { apiKey: process.env.WIR_ES_API_KEY },
+        requestTimeout: 600000,
+      }) as unknown as Parameters<typeof seedFieldCaps>[0];
+      const result =
+        params.kind === 'field_caps'
+          ? await seedFieldCaps(es, {
+              indices: Number(params.indices ?? 50),
+              fieldsPerIndex: Number(params.fieldsPerIndex ?? 2000),
+              conflictRatio: Number(params.conflictRatio ?? 0.2),
+              uniqueRatio: Number(params.uniqueRatio ?? 0),
+              omitShards: true,
+            })
+          : await seedAlertingWide(
+              es,
+              Number(params.rows ?? 1000),
+              Number(params.fields ?? 100),
+              true
+            );
+      log(`seed (direct ES) ${JSON.stringify(params)} -> ${JSON.stringify(result)}`);
+      return result as Record<string, unknown>;
+    }
     const body = must(
       await kbn(target, 'POST', `${API}/tier_b/seed`, params, 30 * 60 * 1000),
       'seed'

@@ -15,43 +15,13 @@ import type {
 import { TaskCost, TaskPriority } from '@kbn/task-manager-plugin/server';
 import { epochNow } from '../lib/clock';
 import type { Recorder } from '../lib/recorder';
-import { runFieldCaps, seedFieldCaps } from './field_caps';
+import { runFieldCaps } from './field_caps';
+import { seedAlertingWide, seedFieldCaps } from '../../common/seed';
 
 export const FIELD_CAPS_TASK_TYPE = 'workloadIsolationResearch:fieldCaps';
-export const ALERTING_WIDE_INDEX = 'wir-alerting-wide';
 
 const security = { authz: { requiredPrivileges: [ReservedPrivilegesSet.superuser] } };
 const options = { access: 'internal' as const };
-
-const seedAlertingWide = async (es: ElasticsearchClient, rows: number, fields: number) => {
-  await es.indices.delete({ index: ALERTING_WIDE_INDEX, ignore_unavailable: true });
-  await es.indices.create({
-    index: ALERTING_WIDE_INDEX,
-    settings: { 'index.mapping.total_fields.limit': fields + 1000, number_of_shards: 1 },
-    mappings: {
-      properties: {
-        '@timestamp': { type: 'date' },
-        'host.name': { type: 'keyword' },
-        ...Object.fromEntries(
-          Array.from({ length: fields }, (_, f) => [`attr_${f}`, { type: 'keyword' }])
-        ),
-      },
-    },
-  });
-  const now = new Date().toISOString();
-  for (let start = 0; start < rows; start += 500) {
-    const operations: Array<Record<string, unknown>> = [];
-    for (let r = start; r < Math.min(rows, start + 500); r++) {
-      const doc: Record<string, unknown> = { '@timestamp': now, 'host.name': `host-${r}` };
-      for (let f = 0; f < fields; f++)
-        doc[`attr_${f}`] = `value-${r}-${f}-lorem-ipsum-dolor-sit-amet`;
-      operations.push({ index: { _index: ALERTING_WIDE_INDEX } }, doc);
-    }
-    await es.bulk({ operations, refresh: false });
-  }
-  await es.indices.refresh({ index: ALERTING_WIDE_INDEX });
-  return { rows, fields };
-};
 
 export const registerTierBTasks = (
   taskManager: TaskManagerSetupContract,

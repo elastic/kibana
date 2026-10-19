@@ -7,60 +7,11 @@
 
 import { performance } from 'perf_hooks';
 import type { Readable } from 'stream';
-import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 
-export const FIELD_CAPS_PREFIX = 'wir-fc-';
-
-export interface FieldCapsSeedParams {
-  readonly indices: number;
-  readonly fieldsPerIndex: number;
-  /** Fraction of fields whose type differs across indices (type conflicts make shaping heavier). */
-  readonly conflictRatio: number;
-  /** Fraction of fields unique to each index (drives total distinct fields in the response). */
-  readonly uniqueRatio: number;
-}
-
-/** Creates many indices with wide, partially conflicting mappings (no customer data). */
-export const seedFieldCaps = async (
-  es: ElasticsearchClient,
-  { indices, fieldsPerIndex, conflictRatio, uniqueRatio }: FieldCapsSeedParams
-): Promise<Record<string, number>> => {
-  const t0 = performance.now();
-  // Wildcard deletes are rejected (action.destructive_requires_name): resolve names first.
-  const existing = Object.keys(
-    await es.indices.get({
-      index: `${FIELD_CAPS_PREFIX}*`,
-      ignore_unavailable: true,
-      allow_no_indices: true,
-    })
-  );
-  if (existing.length) await es.indices.delete({ index: existing });
-  const types = ['keyword', 'long', 'double', 'date', 'boolean', 'ip', 'text'];
-  for (let i = 0; i < indices; i++) {
-    const properties: Record<string, estypes.MappingProperty> = {};
-    for (let f = 0; f < fieldsPerIndex; f++) {
-      const conflicting = f < fieldsPerIndex * conflictRatio;
-      const type = conflicting ? types[(f + i) % types.length] : types[f % types.length];
-      // Nested object paths (a.b.c) like ECS-ish integrations; shared names across indices.
-      const unique = f >= fieldsPerIndex * (1 - uniqueRatio);
-      const name = unique
-        ? `idx_${i}.group_${f % 50}.field_${f}`
-        : `group_${f % 50}.sub_${Math.floor(f / 50) % 20}.field_${f}`;
-      properties[name] = { type } as estypes.MappingProperty;
-    }
-    await es.indices.create({
-      index: `${FIELD_CAPS_PREFIX}${String(i).padStart(4, '0')}`,
-      settings: {
-        'index.mapping.total_fields.limit': fieldsPerIndex * 3 + 1000,
-        number_of_shards: 1,
-      },
-      mappings: { properties },
-    });
-  }
-  return { indices, fieldsPerIndex, conflictRatio, uniqueRatio, ms: performance.now() - t0 };
-};
+export { FIELD_CAPS_PREFIX, seedFieldCaps } from '../../common/seed';
+import { FIELD_CAPS_PREFIX } from '../../common/seed';
 
 const readStream = async (stream: Readable): Promise<Buffer> => {
   const chunks: Buffer[] = [];

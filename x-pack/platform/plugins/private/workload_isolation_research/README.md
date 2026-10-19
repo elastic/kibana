@@ -64,9 +64,35 @@ node $H run --scenario red-demo --target qaf --qaf-project-id <id> --image-diges
 
 The probe start / supervise / drain calls repeat `expected-pods × 4` times so the load balancer reaches every Kibana pod; rows are computed for the pod that ran the offender.
 
+Credentials file (never commit): `WIR_KIBANA_URL`, `WIR_KIBANA_API_KEY` (QAF stack key from `qaf elastic-cloud projects describe <name> --as-json --show-credentials`), `WIR_QAF_PROJECT_ID`, and for serverless seeding `WIR_ES_URL` / `WIR_ES_API_KEY` (the plugin's seed route sets shard counts, which serverless rejects; with these set the driver seeds ES directly).
+
+Rollout: `qaf elastic-cloud projects update-images <name> --kb-docker-image <image>` returns immediately; the new UI pod serves after ~40–60 s. `describe` keeps the old build hash — verify `GET /internal/workload_isolation_research/info` → `build_sha`. Replaced pods may keep running (and pushing) for a while.
+
+Limits on QAF: `supervise` and `probe/_start` reach only the UI pod (background pods are not routable), so emulated supervision and HTTP probing apply to UI pods only; background-pod evidence comes from the push path.
+
+## Comparing variants (rule)
+
+- Local: paired ABAB, same machine, back to back; note `manifest.host.loadavg_*`.
+- QAF: p99 is noisy **per pod** (CV 0.24–0.55 on identical idle projects, even in the same minute). Never compare raw p99 against a separately measured baseline; compare each run's in-pod `vs_baseline` ratios across images over ≥ 3 runs. p50, `longest_slice_ms`, tick-drift floor and TM poll cadence are stable enough to compare with the shared baseline project directly.
+- Derived dispersion: `node $H variance --variant-prefix <prefix> --out <file>`.
+
+## QA overview export
+
+```bash
+set -a; . ../kibana-operational-skills/.env; set +a   # O11Y_KIBANA_QA_URL / _API_KEY, never printed
+node $H overview --project-id <id> --from <iso> --to <iso> --out <file>     # logs by logger, research lines, event-loop lines
+node $H overview --query 'FROM serverless-metrics-*:metrics-service.kibana-* | ...'
+```
+
+Caveats: the ops gauge `kibana.stats.process.event_loop_delay.ms` is a mean and hides single long blocks; the TM `event loop blocked … while running task X` warning names bystanders, not synchronous culprits (see Lane 0 report).
+
+## Pre-push checklist (CI fail-fast cancels the image job)
+
+`node scripts/lint_ts_projects --fix`, `node scripts/build_plugin_list_docs`, `node scripts/generate codeowners`, `node scripts/regenerate_moon_projects.js --update --filter @kbn/workload-isolation-research-plugin`, `node scripts/eslint --fix <paths>`, scoped `node scripts/type_check --project <tsconfig>` (check for `Found N errors`, output is ANSI-coloured). Draft PRs need a `/ci` comment. Image job ≈ 30 min. Known red on this branch: TM `task_cost_check` / `task_priority_check` integration snapshots (new research task types).
+
 ## Scenarios
 
-`red-demo`, `tier-a-sweep`, `baseline-only`, `infinite-loop-supervised` (see `harness/src/scenarios.ts`). Add one by appending to `SCENARIOS`; Tier B replays are `action` phases implemented in `harness/src/actions/`.
+`red-demo`, `tier-a-sweep`, `tier-a-stress` (30 s / 120 s), `baseline-only`, `infinite-loop-supervised`, `tier-b-alerting`, `tier-b-field-caps`, `tier-b-workflow`, `tier-b-agent-builder`, `tier-b-agent-builder-stress`, `tier-b-tracer-suite` (tracer on; never a perf run). See `harness/src/scenarios.ts`. Add one by appending to `SCENARIOS`; Tier B replays are `action` phases in `harness/src/actions.ts` (`seed`, `alerting-esql`, `field-caps`, `workflow-map`, `agent-builder`).
 
 ## Add a variant
 

@@ -5,6 +5,7 @@
   },
   "include": [
     "server/**/*",
+    "common/**/*",
     "harness/**/*.ts"
   ],
   "kbn_references": [

@@ -130,7 +130,11 @@ export const main = async (): Promise<void> => {
       for (const h of res.hits.hits) {
         const r = h._source as Record<string, any>;
         // Group by target and pod role (pods are replaced by image updates; roles are stable).
-        const role = String(r.pod).startsWith('kb-background') ? 'background' : String(r.pod).startsWith('kb-ui') ? 'ui' : r.pod;
+        const role = String(r.pod).startsWith('kb-background')
+          ? 'background'
+          : String(r.pod).startsWith('kb-ui')
+          ? 'ui'
+          : r.pod;
         const key = `${project.get(r.run_id)}|${role}`;
         groups.set(key, [...(groups.get(key) ?? []), r]);
       }
