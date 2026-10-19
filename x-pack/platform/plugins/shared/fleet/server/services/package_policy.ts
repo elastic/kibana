@@ -1063,10 +1063,27 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       isSecretStorageEnabled(esClient, soClient),
     ]);
 
+    // Apply the installation-level columnar index mode choice carried by each policy, one policy
+    // at a time so that policies of the same package do not race. A rejected choice fails the
+    // policy that carried it, as `create` does.
+    const logsdbColumnarChoiceErrors = new Map<string | undefined, Error>();
+    for (const packagePolicy of packagePoliciesWithIds) {
+      try {
+        await handleLogsdbColumnarChoice({ soClient, esClient, packagePolicy });
+      } catch (error) {
+        logsdbColumnarChoiceErrors.set(packagePolicy.id, error);
+      }
+    }
+
     await pMap(packagePoliciesWithIds, async (packagePolicy) => {
       try {
         const packagePolicyId = packagePolicy.id ?? uuidv4();
         const agentPolicyIdsOfPackagePolicy = packagePolicy.policy_ids;
+
+        const logsdbColumnarChoiceError = logsdbColumnarChoiceErrors.get(packagePolicy.id);
+        if (logsdbColumnarChoiceError) {
+          throw logsdbColumnarChoiceError;
+        }
 
         if (!packagePolicy.package) {
           throw new FleetError(
