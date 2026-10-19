@@ -1,26 +1,42 @@
 {
   "10.2.0": [
     {
-      "TODO": "Please create one or more sample objects with properties that reflect real '[object Object]' objects",
-      "NOTE": "That each modelVersion has a corresponding fixture file, which defines the previous and current versions.",
-      "NOTE2": "These fixtures define the before and after state, and are used for both upgrade and rollback testing.",
-      "HINT": "You can use the template below and create sample objects for 10.2.0 and 10.3.0 versions.",
-      "HINT2": "Alternatively, you can copy the contents from older fixture files (if they exist) and adapt them accordingly.",
-      "IMPORTANT": "The current version fixtures (below) are defining how objects from the previous version fixtures (this array) would look like AFTER upgrading.",
-      "IMPORTANT2": "They are NOT defining random sample objects with properties that are valid for the current model version."
+      "product_name": "kibana",
+      "product_version": "9.1",
+      "installation_status": "installed",
+      "last_installation_date": 1733896800000,
+      "index_name": ".kibana_ai_product_doc_kibana",
+      "inference_id": ".elser-2-elasticsearch",
+      "resource_type": "product_doc"
+    },
+    {
+      "product_name": "security",
+      "product_version": "9.1",
+      "installation_status": "installed",
+      "last_installation_date": 1733896800000,
+      "index_name": ".kibana_ai_product_doc_security",
+      "inference_id": ".elser-2-elasticsearch",
+      "resource_type": "product_doc"
     }
   ],
   "10.3.0": [
     {
-      "product_name": "string",
-      "product_version": "string",
-      "installation_status": "string",
-      "last_installation_date": "number?",
-      "last_installation_failure_reason": "string?",
-      "index_name": "string?",
-      "inference_id": "string?",
-      "resource_type": "string?",
-      "artifact_last_modified": "string?"
+      "product_name": "kibana",
+      "product_version": "9.1",
+      "installation_status": "installed",
+      "last_installation_date": 1733896800000,
+      "index_name": ".kibana_ai_product_doc_kibana",
+      "inference_id": ".elser-2-elasticsearch",
+      "resource_type": "product_doc"
+    },
+    {
+      "product_name": "security",
+      "product_version": "9.1",
+      "installation_status": "installed",
+      "last_installation_date": 1733896800000,
+      "index_name": ".kibana_ai_product_doc_security",
+      "inference_id": ".elser-2-elasticsearch",
+      "resource_type": "product_doc"
     }
   ]
 }

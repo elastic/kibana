@@ -255,14 +255,19 @@ export class DocumentationManager implements DocumentationManagerAPI {
         }]; removing product documentation for [${migration.supersededInferenceIds.join(', ')}]`
       );
 
-      if (migration.installCurrentDefault) {
+      // Some (not all) products of the current default may be installed, or its install may still
+      // be running. Only delete the previous default once the current one is fully installed.
+      const currentStatus = migration.installCurrentDefault
+        ? 'uninstalled'
+        : (await this.getStatus({ inferenceId: migration.currentDefaultInferenceId })).status;
+      if (currentStatus === 'uninstalled' || currentStatus === 'error') {
         // Wait so the previous default is removed only after the new documentation is installed.
         await this.install({
           inferenceId: migration.currentDefaultInferenceId,
           request,
           wait: true,
         });
-      } else {
+      } else if (currentStatus === 'installed') {
         await this.uninstallInferenceIds(migration.supersededInferenceIds, request);
       }
     }
@@ -321,7 +326,8 @@ export class DocumentationManager implements DocumentationManagerAPI {
     request?: KibanaRequest
   ): Promise<void> {
     for (const inferenceId of inferenceIds) {
-      await this.uninstall({ inferenceId, request });
+      // Product docs only: the OpenAPI spec index is not replaced by a product docs install.
+      await this.uninstall({ inferenceId, request, resourceType: ResourceTypes.productDoc });
     }
   }
 

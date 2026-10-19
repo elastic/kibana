@@ -27,6 +27,7 @@ import {
   waitUntilTaskCompleted,
 } from '../../tasks';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import { ResourceTypes } from '@kbn/product-doc-common';
 import { PRODUCT_DOC_INSTALL_LOCK_ID } from '../install_lock';
 
 const scheduleInstallAllTaskMock = scheduleInstallAllTask as jest.MockedFn<
@@ -541,6 +542,7 @@ describe('DocumentationManager', () => {
         taskManager,
         logger,
         inferenceId: defaultInferenceEndpoints.ELSER,
+        resourceType: ResourceTypes.productDoc,
       });
       expect(scheduleEnsureUpToDateTaskMock).toHaveBeenCalledTimes(2);
       expect(scheduleEnsureUpToDateTaskMock).toHaveBeenCalledWith({
@@ -565,6 +567,10 @@ describe('DocumentationManager', () => {
         defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL,
       ]);
 
+      docInstallClient.getInstallationStatus.mockResolvedValue({
+        kibana: { status: 'installed' },
+      } as Awaited<ReturnType<ProductDocInstallClient['getInstallationStatus']>>);
+
       await docManager.updateAll();
 
       expect(scheduleInstallAllTaskMock).not.toHaveBeenCalled();
@@ -572,6 +578,7 @@ describe('DocumentationManager', () => {
         taskManager,
         logger,
         inferenceId: defaultInferenceEndpoints.ELSER,
+        resourceType: ResourceTypes.productDoc,
       });
       expect(scheduleEnsureUpToDateTaskMock).toHaveBeenCalledWith({
         taskManager,

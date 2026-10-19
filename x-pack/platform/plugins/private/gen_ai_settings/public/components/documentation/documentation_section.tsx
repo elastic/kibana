@@ -555,6 +555,8 @@ const InstallUpdateControl: React.FC<{
 };
 
 const UPDATE_STATUS_POLL_MS = 2000;
+// Failed updates that happen before replacement leave the installed status untouched, so give up waiting.
+const UPDATE_STATUS_TIMEOUT_MS = 10 * 60 * 1000;
 
 const DocumentationRowActions: React.FC<{
   item: DocumentationItem;
@@ -655,8 +657,18 @@ const DocumentationRowActions: React.FC<{
     const timer = window.setInterval(() => {
       onRefetch();
     }, UPDATE_STATUS_POLL_MS);
-    return () => window.clearInterval(timer);
-  }, [isUpdating, onRefetch]);
+    const timeout = window.setTimeout(() => {
+      isUpdatingRef.current = false;
+      sawInstallingRef.current = false;
+      baselineRef.current = null;
+      setIsUpdating(false);
+      notifications.toasts.addDanger({ title: i18n.getUpdateErrorTitle(item.name) });
+    }, UPDATE_STATUS_TIMEOUT_MS);
+    return () => {
+      window.clearInterval(timer);
+      window.clearTimeout(timeout);
+    };
+  }, [isUpdating, onRefetch, notifications, item.name]);
 
   useEffect(() => {
     if (!isUpdating || !isUpdatingRef.current) {
