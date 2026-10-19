@@ -170,7 +170,7 @@ export function getDashboardApi({
       forcePublishOnReset$.next();
     }
 
-    if (options.save) {
+    if (options?.save) {
       onSave$.next({
         dashboardState: state,
       });
