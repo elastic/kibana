@@ -4,7 +4,7 @@ Dashboard versions are recorded with `@kbn/change-history` (`module: dashboard`,
 
 ## Sequence policy
 
-The change history is the only source of version numbers; nothing is stored on the dashboard saved object. Every history event stores its version as `object.sequence`. The UI shows it as the version number (`v{n}`), and the history client orders events by it (newest first), falling back to `@timestamp` and `event.id`. The next sequence is always the latest history sequence plus one (`getNextHistorySequenceFromHistory`), or `INITIAL_HISTORY_SEQUENCE` (`1`) when there is no history.
+The change history is the only source of version numbers; nothing is stored on the dashboard saved object. Every history event stores its version as `object.sequence`. The UI shows it as the version number (`v{n}`), and the history client orders events by it (newest first), falling back to `@timestamp` and `event.id`. The next sequence is always the latest history sequence plus one (`getHistorySequences`), or `INITIAL_HISTORY_SEQUENCE` (`1`) when there is no history.
 
 - **Create**: deleting a dashboard does not delete its history, so a dashboard created with an explicit ID that still has history continues from the latest existing sequence + 1, keeping new versions ordered above the deleted dashboard's.
 - **Update**: a new version is recorded only when the stored content (attributes or references) changed (`hasContentChanged`). Otherwise no history event is written.

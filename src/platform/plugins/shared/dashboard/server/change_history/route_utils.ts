@@ -16,7 +16,7 @@ import type {
 } from '@kbn/core/server';
 
 import { getChangeHistoryClient } from './change_history_service';
-import { getLatestHistorySequence } from './util';
+import { getHistorySequences } from './util';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../common/constants';
 import type { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
 import { securityService, spacesService } from '../kibana_services';
@@ -77,6 +77,6 @@ export const getChangeHistoryContext = async <P, Q, B, M extends RouteMethod>(
     };
   }
   // the dashboard exists, so its latest version is the current one
-  const currentSequence = await getLatestHistorySequence({ spaceId, dashboardId });
+  const { latest: currentSequence } = await getHistorySequences({ spaceId, dashboardId });
   return { client, spaceId, currentSequence };
 };

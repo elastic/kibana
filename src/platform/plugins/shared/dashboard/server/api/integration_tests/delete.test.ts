@@ -12,7 +12,7 @@ import supertest from 'supertest';
 import type { SetupServerReturn } from '@kbn/core-test-helpers-test-utils';
 import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import type { RequestHandlerContext } from '@kbn/core/server';
-import { type savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { securityServiceMock, type savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 import { coreServices, taggingService, logger } from '../../kibana_services';
@@ -50,6 +50,11 @@ describe(`delete`, () => {
     savedObjectsClient = handlerContext.savedObjects.client;
     const { versioned } = createRouter<RequestHandlerContext>('/');
     registerDeleteRoute(versioned, undefined, logger);
+
+    Object.assign(handlerContext, {
+      security: securityServiceMock.createRequestHandlerContext(),
+    });
+
     await server.start();
   });
 

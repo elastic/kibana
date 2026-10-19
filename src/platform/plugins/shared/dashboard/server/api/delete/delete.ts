@@ -13,11 +13,7 @@ import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_objec
 import type { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { transformDashboardOut } from '../transforms';
 import type { DashboardDeleteResponseBody } from './types';
-import {
-  addToHistory,
-  getHistorySnapshot,
-  getNextHistorySequenceFromHistory,
-} from '../../change_history/util';
+import { addToHistory, getHistorySnapshot, getHistorySequences } from '../../change_history/util';
 
 export async function deleteDashboard(
   requestCtx: RequestHandlerContext,
@@ -45,7 +41,7 @@ export async function deleteDashboard(
     strictValidationSchema,
   });
   if (snapshot) {
-    const sequence = await getNextHistorySequenceFromHistory({ spaceId, dashboardId: id });
+    const { next: sequence } = await getHistorySequences({ spaceId, dashboardId: id });
     await addToHistory({
       ctx: requestCtx,
       dashboardId: id,

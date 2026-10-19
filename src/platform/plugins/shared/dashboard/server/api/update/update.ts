@@ -24,11 +24,7 @@ import { transformDashboardIn } from '../transforms';
 import type { Operation } from '../types';
 import type { DashboardUpdateResponseBody } from './types';
 import { hasContentChanged } from '../../change_history/history_sequence';
-import {
-  addToHistory,
-  getHistorySnapshot,
-  getNextHistorySequenceFromHistory,
-} from '../../change_history/util';
+import { addToHistory, getHistorySnapshot, getHistorySequences } from '../../change_history/util';
 
 export interface UpdateOptions extends Omit<CreateOptions, 'id'> {
   /** Sequence number of the history version this update restores */
@@ -136,7 +132,7 @@ export async function update(
     references: soReferences,
   });
   const newSequence = hasChanged
-    ? await getNextHistorySequenceFromHistory({ spaceId, dashboardId: id })
+    ? (await getHistorySequences({ spaceId, dashboardId: id })).next
     : undefined;
 
   let savedObject: SavedObjectsUpdateResponse<DashboardSavedObjectAttributes>;

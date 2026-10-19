@@ -50,38 +50,30 @@ export const getHistorySnapshot = ({
 };
 
 /**
- * Sequence of the latest version in the dashboard's change history, which is the only source of
- * version numbers: nothing is stored on the saved object, and history outlives it (deleting a
- * dashboard does not delete its history). Undefined when there is no history or it cannot be read.
+ * Sequences of the dashboard's change history, which is the only source of version numbers: nothing
+ * is stored on the saved object, and history outlives it (deleting a dashboard does not delete its
+ * history). `latest` is undefined when there is no history or it cannot be read. `next` continues
+ * after the latest version, which keeps new versions ordered above existing ones, including those
+ * of a deleted dashboard with the same ID.
  */
-export const getLatestHistorySequence = async ({
+export const getHistorySequences = async ({
   spaceId = 'default',
   dashboardId,
 }: {
   spaceId: string | undefined;
   dashboardId: string;
-}): Promise<number | undefined> => {
+}): Promise<{ latest: number | undefined; next: number }> => {
+  let latest: number | undefined;
   try {
     const {
-      items: [latest],
+      items: [latestItem],
     } = await getChangeHistoryClient().getHistory(spaceId, 'dashboard', dashboardId, { size: 1 });
-    const latestSequence = latest?.object.sequence;
-    return typeof latestSequence === 'number' ? latestSequence : undefined;
+    const latestSequence = latestItem?.object.sequence;
+    latest = typeof latestSequence === 'number' ? latestSequence : undefined;
   } catch {
-    return undefined;
+    latest = undefined;
   }
-};
-
-/**
- * Sequence for the next version of a dashboard. Continuing after the latest version keeps new
- * versions ordered above existing ones, including those of a deleted dashboard with the same ID.
- */
-export const getNextHistorySequenceFromHistory = async (args: {
-  spaceId: string | undefined;
-  dashboardId: string;
-}): Promise<number> => {
-  const latest = await getLatestHistorySequence(args);
-  return latest === undefined ? INITIAL_HISTORY_SEQUENCE : latest + 1;
+  return { latest, next: latest === undefined ? INITIAL_HISTORY_SEQUENCE : latest + 1 };
 };
 
 export const addToHistory = async ({
@@ -117,6 +109,7 @@ export const addToHistory = async ({
     objectType: 'dashboard',
     objectId: dashboardId,
     sequence,
+    timestamp,
     snapshot, // post-change state
   };
 
@@ -126,6 +119,7 @@ export const addToHistory = async ({
     } = await client.getHistory(spaceId, 'dashboard', dashboardId, {
       size: 1,
     });
+
     // stored with the event so that listing history does not need to diff every snapshot
     const changeCount = previous
       ? jsonpatchFormatter.format(jsondiffpatch.diff(previous.object.snapshot, snapshot)).length

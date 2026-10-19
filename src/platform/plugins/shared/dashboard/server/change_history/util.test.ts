@@ -12,7 +12,7 @@ import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 
 import { getChangeHistoryClient } from './change_history_service';
 import { transformDashboardOut } from '../api/transforms';
-import { addToHistory, getNextHistorySequenceFromHistory, getHistorySnapshot } from './util';
+import { addToHistory, getHistorySequences, getHistorySnapshot } from './util';
 
 jest.mock('./change_history_service');
 jest.mock('../api/transforms');
@@ -40,7 +40,7 @@ const baseArgs = {
   snapshot: { title: 'New' } as DashboardState,
 };
 
-describe('getNextHistorySequenceFromHistory', () => {
+describe('getHistorySequences', () => {
   beforeEach(() => jest.resetAllMocks());
 
   it('continues after the latest existing sequence', async () => {
@@ -48,26 +48,20 @@ describe('getNextHistorySequenceFromHistory', () => {
       getHistory: jest.fn().mockResolvedValue({ items: [{ object: { sequence: 2 } }] }),
     };
     mockedGetClient.mockReturnValue(client as never);
-    expect(
-      await getNextHistorySequenceFromHistory({ spaceId: 'default', dashboardId: 'dash-1' })
-    ).toBe(3);
+    expect((await getHistorySequences({ spaceId: 'default', dashboardId: 'dash-1' })).next).toBe(3);
   });
 
   it('starts at the initial sequence when there is no history', async () => {
     const client = { getHistory: jest.fn().mockResolvedValue({ items: [] }) };
     mockedGetClient.mockReturnValue(client as never);
-    expect(
-      await getNextHistorySequenceFromHistory({ spaceId: 'default', dashboardId: 'dash-1' })
-    ).toBe(1);
+    expect((await getHistorySequences({ spaceId: 'default', dashboardId: 'dash-1' })).next).toBe(1);
   });
 
   it('starts at the initial sequence when the client is unavailable', async () => {
     mockedGetClient.mockImplementation(() => {
       throw new Error('not ready');
     });
-    expect(
-      await getNextHistorySequenceFromHistory({ spaceId: 'default', dashboardId: 'dash-1' })
-    ).toBe(1);
+    expect((await getHistorySequences({ spaceId: 'default', dashboardId: 'dash-1' })).next).toBe(1);
   });
 });
 
