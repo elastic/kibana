@@ -33,10 +33,50 @@ export const CHECK_ENDPOINT_PACKAGE_FRESHNESS_TOOL_ID = toolName(
 );
 export const GET_ENDPOINT_ARTIFACTS_TOOL_ID = toolName('get_endpoint_artifacts');
 
+interface CustomYaraSignaturesText {
+  whenToUse: string;
+  artifactType: string;
+  instructions: string;
+  description: string;
+}
+
+const NO_CUSTOM_YARA_SIGNATURES_TEXT: CustomYaraSignaturesText = {
+  whenToUse: '',
+  artifactType: '',
+  instructions: '',
+  description: '',
+};
+
+const CUSTOM_YARA_SIGNATURES_TEXT: CustomYaraSignaturesText = {
+  whenToUse: '- Custom YARA signatures not matching, not alerting, or not reaching endpoints\n',
+  artifactType: ', custom YARA signatures',
+  instructions: `## Custom YARA signatures
+
+Use this guidance when the user asks about a custom YARA signature that is not matching, not alerting, or not reaching an endpoint. Unless the newest policy response shows a current non-success action, classify it as \`OTHER_CURRENT_ISSUE\`.
+
+- Call ${GET_ENDPOINT_ARTIFACTS_TOOL_ID} with artifactType \`custom_yara_signatures\` and the affected endpoint's policyId. Signature items include the artifact \`id\`. Rule text in entries is a truncated preview, not the full rule.
+- A signature tagged \`disabled\` is not packed into the endpoint artifact and never runs.
+- Custom YARA signature alerts in \`logs-endpoint.alerts-*\` carry \`rule.custom_yara_signature.entry_id\`, \`rule.custom_yara_signature.entry_name\`, and \`rule.custom_yara_signature.rule_identifier\`. \`entry_id\` is the artifact \`id\`, not its \`item_id\`. Find the signature by searching for \`entry_name\`, then confirm that its \`id\` equals \`entry_id\`. \`entry_name\` is copied when the signature is packed, so it can be stale after a rename.
+- Packed signatures reach endpoints in the \`endpoint-yararules-<os>-v1\` user artifact. User artifact download failures, which may affect this artifact, appear in the policy response as \`download_user_artifacts\`.
+- To check whether the signatures artifact reached the target endpoint, look for \`endpoint-yararules-<os>-v1\` in \`Endpoint.policy.applied.artifacts.user.identifiers\` of the newest policy response for that endpoint in \`metrics-endpoint.policy-*\`. If it is present, the endpoint applied the artifact, but that does not show that a specific signature is inside it. If it is missing, the endpoint has not applied it, or its Elastic Defend version may not support custom YARA signatures yet.
+- The Elastic Defend knowledge base has no custom YARA signatures content yet. As an exception to the \`OTHER_CURRENT_ISSUE\` rule, do not call ${platformCoreTools.integrationKnowledge} for custom YARA signature questions, unless the newest policy response shows a current \`download_user_artifacts\` failure.
+- A \`not_authorized\` result for \`custom_yara_signatures\` can mean the cluster lacks an Enterprise license or the Endpoint Complete add-on, not only that the user lacks the Custom YARA Signatures privilege.
+- An enabled, correctly assigned signature can still be left out of the packed artifact when it fails validation while the artifact is built. That is only visible in Kibana server logs, which this skill cannot read. Do not claim a signature reached the endpoint based on the artifact list alone.
+- This skill cannot read the \`memory_protection.custom_yara_signatures\` policy setting. A \`memory_protection\` policy response status is not that setting. If the answer depends on whether custom YARA signatures are enabled in the policy, say that this cannot be checked here and ask the user to confirm it in the policy.
+- There is no established troubleshooting playbook for custom YARA signatures yet. Base findings only on the artifact list, alerts, and policy response. Do not invent version-specific bugs or remediation.
+
+`,
+  description: 'custom YARA signatures, ',
+};
+
 export const createAutomaticTroubleshootingSkill = (
   endpointAppContextService: EndpointAppContextService,
   experimentalFeatures: ExperimentalFeatures
 ): SkillDefinition<typeof NAME, typeof BASE_PATH> => {
+  const customYaraSignaturesText = experimentalFeatures.customYaraSignaturesEnabled
+    ? CUSTOM_YARA_SIGNATURES_TEXT
+    : NO_CUSTOM_YARA_SIGNATURES_TEXT;
+
   const systemInstructions = `# Elastic Defend Configuration Troubleshooting
 
 This skill diagnoses and resolves Elastic Defend configuration issues on endpoints.
@@ -57,7 +97,7 @@ You MUST use this skill when the user mentions ANY of these:
 - Elastic Defend package errors, warnings, or install failures
 - Endpoint isolation, response action, or policy sync issues
 - Endpoint exceptions, trusted apps, trusted devices, event filters, blocklists, or host isolation exceptions not working as expected
-- Security alerts or events still appearing despite a configured endpoint exception or allowlist
+${customYaraSignaturesText.whenToUse}- Security alerts or events still appearing despite a configured endpoint exception or allowlist
 - Unexpected allow or block behavior on endpoints
 - Elastic Defend's own output or event-shipping failures — the endpoint's Logstash, Kafka, or Elasticsearch output dropping or rejecting endpoint events/alerts (for example "message size too large", output connectivity or SSL handshake errors), or an endpoint going degraded because of its output. This covers only Elastic Defend's endpoint output layer, not general-purpose Logstash/Kafka pipeline or cluster troubleshooting.
 
@@ -72,7 +112,7 @@ Reference './available_indices' for the list of indices available for troublesho
 - **${platformCoreTools.search}** - Query raw data from available indices for troubleshooting evidence
 - **${platformCoreTools.getDocumentById}** - Retrieve full document content by ID from query results
 - **${GET_PACKAGE_CONFIGURATIONS_TOOL_ID}** - Inspect Elastic Defend package configuration details
-- **${GET_ENDPOINT_ARTIFACTS_TOOL_ID}** - Query endpoint artifacts (endpoint exceptions, trusted apps, trusted devices, event filters, host isolation exceptions, blocklists)
+- **${GET_ENDPOINT_ARTIFACTS_TOOL_ID}** - Query endpoint artifacts (endpoint exceptions, trusted apps, trusted devices, event filters, host isolation exceptions, blocklists${customYaraSignaturesText.artifactType})
 - **${GENERATE_INSIGHT_TOOL_ID}** - Persist structured troubleshooting findings (mandatory final step)
 
 ## Troubleshooting Approach
@@ -131,7 +171,7 @@ Before retrieval or remediation, collect only enough current evidence to choose 
    - If the answer to all checks is no, do not continue searching for a root cause or additional findings. Tell the user the endpoint does not appear currently unhealthy, summarize only the current healthy evidence, and ask for the specific symptom, affected time range, alert/event, or behavior they want investigated.
    - If any check is yes, reclassify into \`CURRENT_POLICY_FAILURE\`, \`NON_POLICY_HEALTH_FAILURE\`, \`OTHER_CURRENT_ISSUE\`, or \`RECOVERED_POLICY_FAILURE\` and continue on that path.
 
-## Example integration knowledge queries
+${customYaraSignaturesText.instructions}## Example integration knowledge queries
 
 Use exact terms from the user's request and queried endpoint evidence when calling ${platformCoreTools.integrationKnowledge}. These examples match common Elastic Defend knowledge base topics:
 
@@ -210,7 +250,7 @@ Use exact terms from the user's request and queried endpoint evidence when calli
       'offline, unhealthy, degraded, missing or not reporting; why a response action such as isolation or release failed; ' +
       'a policy not taking effect or not being enforced; protection not blocking; unexpected quarantine or allow behavior; ' +
       'policy response failures; or failures involving protection updates, trusted applications, exceptions, blocklists, ' +
-      'antivirus compatibility, and endpoint event output.',
+      `${customYaraSignaturesText.description}antivirus compatibility, and endpoint event output.`,
     content: systemInstructions,
     referencedContent: [
       {

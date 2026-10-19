@@ -152,4 +152,43 @@ describe('createAutomaticTroubleshootingSkill', () => {
       expect(generateInsightTool?.description).toContain('Generate and store structured');
     });
   });
+
+  describe('custom YARA signatures', () => {
+    const createSkill = (customYaraSignaturesEnabled: boolean) =>
+      createAutomaticTroubleshootingSkill(mockEndpointAppContextService, {
+        ...allowedExperimentalValues,
+        customYaraSignaturesEnabled,
+      });
+
+    it('does not mention custom YARA signatures when the feature flag is disabled', async () => {
+      const skill = createSkill(false);
+      const inlineTools = await skill.getInlineTools?.();
+      const artifactsTool = inlineTools?.find((tool) => tool.id.includes('get_endpoint_artifacts'));
+
+      expect(skill.content).not.toMatch(/yara/i);
+      expect(skill.description).not.toMatch(/yara/i);
+      expect(artifactsTool?.description).not.toMatch(/yara/i);
+    });
+
+    it('adds custom YARA signatures guidance when the feature flag is enabled', async () => {
+      const skill = createSkill(true);
+      const inlineTools = await skill.getInlineTools?.();
+      const artifactsTool = inlineTools?.find((tool) => tool.id.includes('get_endpoint_artifacts'));
+
+      expect(skill.content).toContain('## Custom YARA signatures');
+      expect(skill.content).toContain('custom_yara_signatures');
+      expect(skill.content).toContain('rule.custom_yara_signature.entry_id');
+      expect(skill.content).toContain('memory_protection.custom_yara_signatures');
+      expect(skill.content).toContain('Do not invent version-specific bugs or remediation');
+      expect(skill.content).toContain('endpoint-yararules');
+      expect(skill.content).toContain('Endpoint.policy.applied.artifacts.user.identifiers');
+      expect(skill.content).toContain(
+        'The Elastic Defend knowledge base has no custom YARA signatures content yet'
+      );
+      expect(skill.content).not.toContain('- `Elastic Defend custom YARA signatures');
+      expect(skill.description).toContain('custom YARA signatures');
+      expect(skill.description?.length).toBeLessThanOrEqual(1024);
+      expect(artifactsTool?.description).toContain('custom YARA signatures');
+    });
+  });
 });
