@@ -126,6 +126,7 @@ const RangeValue = ({ estimate, comparison }: RangeValueProps) => {
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
+      <EuiSpacer size="xs" />
       <EuiText size="xs" color="subdued">
         {getVcuRangeText(range)}
       </EuiText>
@@ -199,6 +200,7 @@ const EstimateContent = ({
               />
             </EuiFlexItem>
           </EuiFlexGroup>
+          <EuiSpacer size="xs" />
           <EuiText size="xs" color="subdued">
             {i18n.translate('xpack.boost.costEstimate.subtitle', {
               defaultMessage: '{targets} · {size}',

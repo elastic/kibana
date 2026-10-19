@@ -57,15 +57,16 @@ const toHours = (maxAge: string | undefined) => {
 };
 
 /**
- * A shade of the assistance color for each period, darkest for the newest data, with text that
+ * A shade of the assistance color for each period, strongest for the newest data, with text that
  * contrasts with it. They avoid the lifecycle phase colors, whose hot to frozen meanings don't apply.
+ * The lightest step of the blend is left out, since it barely stands out from the timeline's track.
  */
 const usePeriodColors = (): Record<DataStreamPeriod, { background: string; text: string }> => {
   const { euiTheme } = useEuiTheme();
   return useMemo(() => {
-    const [background, standard, recent] = colorPalette(
+    const [, background, standard, recent] = colorPalette(
       [euiTheme.colors.backgroundLightAssistance, euiTheme.colors.backgroundFilledAssistance],
-      3
+      4
     );
     const withText = (color: string) => {
       const [red, green, blue] = hexToRgb(color);
@@ -218,6 +219,7 @@ export const DataStreamTimeline = ({
             display: 'grid',
             gridTemplateColumns: 'var(--boostPeriodColumns)',
             paddingInline: euiTheme.size.xxs,
+            marginBlockStart: euiTheme.size.xs,
           }}
         >
           {periods.map((period) => (
