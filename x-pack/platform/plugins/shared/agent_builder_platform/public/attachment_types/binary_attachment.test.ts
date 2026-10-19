@@ -30,9 +30,7 @@ describe('binaryAttachmentDefinition', () => {
   });
 
   it('falls back to "File"', () => {
-    expect(binaryAttachmentDefinition.getLabel({ id: 'a1', type: 'binary' } as never)).toBe(
-      'File'
-    );
+    expect(binaryAttachmentDefinition.getLabel({ id: 'a1', type: 'binary' } as never)).toBe('File');
   });
 
   it('uses the document icon and has no thumbnail or inline content', () => {
