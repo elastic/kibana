@@ -234,4 +234,28 @@ describe('queryHuntsArtifacts', () => {
       )
     ).toBe(false);
   });
+
+  it('is true when the artifact is hunted through an escaped RLIKE pattern', () => {
+    const key = artifactSetKey('seen at evil.example.com', [
+      { type: 'domain', value: 'evil.example.com' },
+    ])!;
+    expect(
+      queryHuntsArtifacts(
+        String.raw`FROM logs-* | WHERE destination.domain RLIKE ".*evil\\.example\\.com.*"`,
+        key
+      )
+    ).toBe(true);
+  });
+
+  it('is true when the artifact is an escaped Windows path in the query', () => {
+    const key = artifactSetKey('dropped at C:\\Users\\Public\\evil.exe', [
+      { type: 'path', value: 'C:\\Users\\Public\\evil.exe' },
+    ])!;
+    expect(
+      queryHuntsArtifacts(
+        'FROM logs-* | WHERE file.path == "C:\\\\Users\\\\Public\\\\evil.exe"',
+        key
+      )
+    ).toBe(true);
+  });
 });
