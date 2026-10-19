@@ -237,7 +237,7 @@ function calendarFits(
 }
 
 function fixedFits(interval: FixedInterval, range: ZonedDateRange, maxBuckets: number): boolean {
-  const alignedFrom = alignFixed(range.from, interval, range.timeZone);
+  const alignedFrom = alignFixed(range.from, interval);
   const width = interval.nominalMs;
   if (!hasDstTransition(alignedFrom, range.to, range.timeZone)) {
     const count = Math.floor((range.to - alignedFrom + width - 1) / width);
@@ -265,29 +265,10 @@ function alignCalendar(from: number, interval: CalendarInterval, timeZone: IanaT
   return moment.tz(from, timeZone).startOf(interval.startOf).valueOf();
 }
 
-function alignFixed(from: number, interval: FixedInterval, timeZone: IanaTimeZone): number {
-  const local = moment.tz(from, timeZone);
-  switch (interval.unit) {
-    case 'millisecond':
-      local.millisecond(local.millisecond() - (local.millisecond() % interval.amount));
-      break;
-    case 'second':
-      local.millisecond(0);
-      local.second(local.second() - (local.second() % interval.amount));
-      break;
-    case 'minute':
-      local.millisecond(0);
-      local.second(0);
-      local.minute(local.minute() - (local.minute() % interval.amount));
-      break;
-    case 'hour':
-      local.millisecond(0);
-      local.second(0);
-      local.minute(0);
-      local.hour(local.hour() - (local.hour() % interval.amount));
-      break;
-  }
-  return local.valueOf();
+function alignFixed(from: number, interval: FixedInterval): number {
+  const width = interval.nominalMs;
+  const offset = ((from % width) + width) % width;
+  return from - offset;
 }
 
 function hasDstTransition(from: number, to: number, timeZone: IanaTimeZone): boolean {

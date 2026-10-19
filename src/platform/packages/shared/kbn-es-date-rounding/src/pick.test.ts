@@ -86,6 +86,22 @@ describe('fitsInBuckets', () => {
       fitsInBuckets({ expression: '20m', kind: 'fixed', nominalMs: 20 * 6e4 }, range, 500)
     ).toBe(true);
   });
+
+  it('counts 45m buckets from unix epoch, not by restarting each hour', () => {
+    const fortyFiveMin = {
+      expression: '45m',
+      kind: 'fixed' as const,
+      nominalMs: 45 * 6e4,
+    };
+    const threeHours: ZonedDateRange = {
+      from: Date.UTC(2024, 0, 1, 10, 0),
+      to: Date.UTC(2024, 0, 1, 13, 0),
+      timeZone,
+    };
+    // Epoch-aligned 45m starts at 09:45 and needs 5 buckets. Hour-restarted 45m would need 6.
+    expect(fitsInBuckets(fortyFiveMin, threeHours, 5)).toBe(true);
+    expect(fitsInBuckets(fortyFiveMin, threeHours, 4)).toBe(false);
+  });
 });
 
 describe('ianaTimeZone', () => {
