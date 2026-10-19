@@ -1241,6 +1241,302 @@ describe('Color util transforms', () => {
       });
     });
 
+    // Lens persists the raw cell value as the color rule value, which for ES|QL charts can be a boolean, `null`, or a
+    // multi-value array, and for form-based range buckets can be a range key with an open (`null`) bound.
+    describe('color assignment value types', () => {
+      describe('categorical', () => {
+        it('should round-trip boolean values', () => {
+          const lensState: ColorMapping.Config = {
+            paletteId: SEMANTIC_PALETTE,
+            specialAssignments: [{ rules: [{ type: 'other' }], color: { type: 'loop' } }],
+            assignments: [
+              {
+                rules: [{ type: 'raw', value: true }],
+                color: { type: 'categorical', paletteId: SEMANTIC_PALETTE, colorIndex: 0 },
+              },
+              {
+                rules: [{ type: 'raw', value: false }],
+                color: { type: 'categorical', paletteId: SEMANTIC_PALETTE, colorIndex: 1 },
+              },
+            ],
+            colorMode: { type: 'categorical' },
+          };
+
+          const apiFormat = fromColorMappingLensStateToAPI(lensState);
+
+          expect(apiFormat).toStrictEqual({
+            palette: SEMANTIC_PALETTE,
+            mode: 'categorical',
+            mapping: [
+              {
+                color: { type: 'from_palette', palette: SEMANTIC_PALETTE, index: 0 },
+                values: [true],
+              },
+              {
+                color: { type: 'from_palette', palette: SEMANTIC_PALETTE, index: 1 },
+                values: [false],
+              },
+            ],
+          });
+
+          expect(fromColorMappingAPIToLensState(apiFormat)).toStrictEqual({
+            colorMapping: lensState,
+          });
+        });
+
+        it('should round-trip a `null` value', () => {
+          const lensState: ColorMapping.Config = {
+            paletteId: SEMANTIC_PALETTE,
+            specialAssignments: [{ rules: [{ type: 'other' }], color: { type: 'loop' } }],
+            assignments: [
+              {
+                rules: [{ type: 'raw', value: null }],
+                color: { type: 'categorical', paletteId: SEMANTIC_PALETTE, colorIndex: 0 },
+              },
+            ],
+            colorMode: { type: 'categorical' },
+          };
+
+          const apiFormat = fromColorMappingLensStateToAPI(lensState);
+
+          expect(apiFormat).toStrictEqual({
+            palette: SEMANTIC_PALETTE,
+            mode: 'categorical',
+            mapping: [
+              {
+                color: { type: 'from_palette', palette: SEMANTIC_PALETTE, index: 0 },
+                values: [null],
+              },
+            ],
+          });
+
+          expect(fromColorMappingAPIToLensState(apiFormat)).toStrictEqual({
+            colorMapping: lensState,
+          });
+        });
+
+        it.each<[string, Array<string | number | boolean>]>([
+          ['strings', ['a', 'b']],
+          ['numbers', [1, 2]],
+          ['booleans', [true, false]],
+        ])('should round-trip a multi-value array of %s', (_, value) => {
+          const lensState: ColorMapping.Config = {
+            paletteId: SEMANTIC_PALETTE,
+            specialAssignments: [{ rules: [{ type: 'other' }], color: { type: 'loop' } }],
+            assignments: [
+              {
+                rules: [{ type: 'raw', value }],
+                color: { type: 'categorical', paletteId: SEMANTIC_PALETTE, colorIndex: 0 },
+              },
+            ],
+            colorMode: { type: 'categorical' },
+          };
+
+          const apiFormat = fromColorMappingLensStateToAPI(lensState);
+
+          expect(apiFormat).toStrictEqual({
+            palette: SEMANTIC_PALETTE,
+            mode: 'categorical',
+            mapping: [
+              {
+                color: { type: 'from_palette', palette: SEMANTIC_PALETTE, index: 0 },
+                values: [value],
+              },
+            ],
+          });
+
+          expect(fromColorMappingAPIToLensState(apiFormat)).toStrictEqual({
+            colorMapping: lensState,
+          });
+        });
+
+        describe('range keys', () => {
+          const ranges = [
+            { from: 0, to: 1000, label: 'Small' },
+            { from: 1000, to: null, label: 'Large' },
+            { from: null, to: 0, label: 'Negative' },
+          ];
+          const apiRanges = [
+            { from: 0, to: 1000, label: 'Small' },
+            { from: 1000, label: 'Large' },
+            { to: 0, label: 'Negative' },
+          ];
+          const openEndedRangeKey = { type: 'rangeKey', from: 1000, to: null, ranges };
+          const openStartRangeKey = { type: 'rangeKey', from: null, to: 0, ranges };
+
+          it('should round-trip an open-ended range key value', () => {
+            const lensState: ColorMapping.Config = {
+              paletteId: SEMANTIC_PALETTE,
+              specialAssignments: [{ rules: [{ type: 'other' }], color: { type: 'loop' } }],
+              assignments: [
+                {
+                  rules: [{ type: 'raw', value: openEndedRangeKey }],
+                  color: { type: 'categorical', paletteId: SEMANTIC_PALETTE, colorIndex: 0 },
+                },
+              ],
+              colorMode: { type: 'categorical' },
+            };
+
+            const apiFormat = fromColorMappingLensStateToAPI(lensState);
+
+            expect(apiFormat).toStrictEqual({
+              palette: SEMANTIC_PALETTE,
+              mode: 'categorical',
+              mapping: [
+                {
+                  color: { type: 'from_palette', palette: SEMANTIC_PALETTE, index: 0 },
+                  values: [{ type: 'range_key', from: 1000, ranges: apiRanges }],
+                },
+              ],
+            });
+
+            expect(fromColorMappingAPIToLensState(apiFormat)).toStrictEqual({
+              colorMapping: lensState,
+            });
+          });
+
+          it('should round-trip an open-start range key value', () => {
+            const lensState: ColorMapping.Config = {
+              paletteId: SEMANTIC_PALETTE,
+              specialAssignments: [{ rules: [{ type: 'other' }], color: { type: 'loop' } }],
+              assignments: [
+                {
+                  rules: [{ type: 'raw', value: openStartRangeKey }],
+                  color: { type: 'categorical', paletteId: SEMANTIC_PALETTE, colorIndex: 0 },
+                },
+              ],
+              colorMode: { type: 'categorical' },
+            };
+
+            const apiFormat = fromColorMappingLensStateToAPI(lensState);
+
+            expect(apiFormat).toStrictEqual({
+              palette: SEMANTIC_PALETTE,
+              mode: 'categorical',
+              mapping: [
+                {
+                  color: { type: 'from_palette', palette: SEMANTIC_PALETTE, index: 0 },
+                  values: [{ type: 'range_key', to: 0, ranges: apiRanges }],
+                },
+              ],
+            });
+
+            expect(fromColorMappingAPIToLensState(apiFormat)).toStrictEqual({
+              colorMapping: lensState,
+            });
+          });
+        });
+      });
+
+      describe('gradient', () => {
+        const COLOR_CODE = '#ff0000';
+
+        it('should round-trip boolean values', () => {
+          const lensState: ColorMapping.Config = {
+            paletteId: SEMANTIC_PALETTE,
+            specialAssignments: [{ rules: [{ type: 'other' }], color: { type: 'loop' } }],
+            assignments: [
+              {
+                rules: [{ type: 'raw', value: true }],
+                color: { type: 'gradient' },
+              },
+              {
+                rules: [{ type: 'raw', value: false }],
+                color: { type: 'gradient' },
+              },
+            ],
+            colorMode: {
+              type: 'gradient',
+              steps: [{ type: 'colorCode', colorCode: COLOR_CODE }],
+              sort: 'asc',
+            },
+          };
+
+          const apiFormat = fromColorMappingLensStateToAPI(lensState);
+
+          expect(apiFormat).toStrictEqual({
+            palette: SEMANTIC_PALETTE,
+            mode: 'gradient',
+            mapping: [{ values: [true] }, { values: [false] }],
+            sort: 'asc',
+            gradient: [{ type: 'color_code', value: COLOR_CODE }],
+          });
+
+          expect(fromColorMappingAPIToLensState(apiFormat)).toStrictEqual({
+            colorMapping: lensState,
+          });
+        });
+
+        it('should round-trip a `null` value', () => {
+          const lensState: ColorMapping.Config = {
+            paletteId: SEMANTIC_PALETTE,
+            specialAssignments: [{ rules: [{ type: 'other' }], color: { type: 'loop' } }],
+            assignments: [
+              {
+                rules: [{ type: 'raw', value: null }],
+                color: { type: 'gradient' },
+              },
+            ],
+            colorMode: {
+              type: 'gradient',
+              steps: [{ type: 'colorCode', colorCode: COLOR_CODE }],
+              sort: 'asc',
+            },
+          };
+
+          const apiFormat = fromColorMappingLensStateToAPI(lensState);
+
+          expect(apiFormat).toStrictEqual({
+            palette: SEMANTIC_PALETTE,
+            mode: 'gradient',
+            mapping: [{ values: [null] }],
+            sort: 'asc',
+            gradient: [{ type: 'color_code', value: COLOR_CODE }],
+          });
+
+          expect(fromColorMappingAPIToLensState(apiFormat)).toStrictEqual({
+            colorMapping: lensState,
+          });
+        });
+
+        it.each<[string, Array<string | number | boolean>]>([
+          ['strings', ['a', 'b']],
+          ['numbers', [1, 2]],
+          ['booleans', [true, false]],
+        ])('should round-trip a multi-value array of %s', (_, value) => {
+          const lensState: ColorMapping.Config = {
+            paletteId: SEMANTIC_PALETTE,
+            specialAssignments: [{ rules: [{ type: 'other' }], color: { type: 'loop' } }],
+            assignments: [
+              {
+                rules: [{ type: 'raw', value }],
+                color: { type: 'gradient' },
+              },
+            ],
+            colorMode: {
+              type: 'gradient',
+              steps: [{ type: 'colorCode', colorCode: COLOR_CODE }],
+              sort: 'asc',
+            },
+          };
+
+          const apiFormat = fromColorMappingLensStateToAPI(lensState);
+
+          expect(apiFormat).toStrictEqual({
+            palette: SEMANTIC_PALETTE,
+            mode: 'gradient',
+            mapping: [{ values: [value] }],
+            sort: 'asc',
+            gradient: [{ type: 'color_code', value: COLOR_CODE }],
+          });
+
+          expect(fromColorMappingAPIToLensState(apiFormat)).toStrictEqual({
+            colorMapping: lensState,
+          });
+        });
+      });
+    });
+
     it('should maintain data integrity for gradient color mapping with mixed assignments', () => {
       const originalColorMapping: ColorMappingType = {
         palette: SEMANTIC_PALETTE,
