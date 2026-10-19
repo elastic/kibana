@@ -4,12 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import type {
-  BackOptions,
-  ListDetails,
-  Rule as UIRule,
-} from '@kbn/securitysolution-exception-list-components';
+import { useCallback, useEffect, useState } from 'react';
+import type { ListDetails, Rule as UIRule } from '@kbn/securitysolution-exception-list-components';
 import { ViewerStatus } from '@kbn/securitysolution-exception-list-components';
 import type { ExceptionListSchema, NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import { useApi } from '@kbn/securitysolution-list-hooks';
@@ -86,20 +82,6 @@ export const useListDetailsView = (exceptionListId: string) => {
   const [disableManageButton, setDisableManageButton] = useState(true);
   const [refreshExceptions, setRefreshExceptions] = useState(false);
   const invalidateFetchRuleByIdQuery = useInvalidateFetchRuleByIdQuery();
-
-  const headerBackOptions: BackOptions = useMemo(
-    () => ({
-      pageId: SecurityPageName.exceptions,
-      path: '',
-      onNavigate: () => {
-        navigateToApp(APP_UI_ID, {
-          deepLinkId: SecurityPageName.exceptions,
-          path: '',
-        });
-      },
-    }),
-    [navigateToApp]
-  );
 
   const handleErrorStatus = useCallback(
     (
@@ -448,7 +430,6 @@ export const useListDetailsView = (exceptionListId: string) => {
     handleOnDownload,
     viewerStatus,
     showManageRulesFlyout,
-    headerBackOptions,
     referenceModalState,
     showReferenceErrorModal,
     showManageButtonLoader,
