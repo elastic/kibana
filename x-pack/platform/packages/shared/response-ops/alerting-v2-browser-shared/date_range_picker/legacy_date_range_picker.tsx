@@ -65,6 +65,9 @@ export const LegacyDateRangePicker = ({
   const manualRefresh = onManualRefresh ?? onRefresh;
   const usesSeparateManualRefresh = Boolean(onManualRefresh);
   const canManuallyRefresh = Boolean(manualRefresh);
+  const handleManualRefresh = useCallback(() => {
+    manualRefresh?.();
+  }, [manualRefresh]);
 
   const picker = (
     <EuiSuperDatePicker
@@ -97,7 +100,7 @@ export const LegacyDateRangePicker = ({
           fill={false}
           size="s"
           aria-label={needsUpdate ? undefined : REFRESH_LABEL}
-          onClick={manualRefresh}
+          onClick={handleManualRefresh}
           isLoading={isLoading}
           isDisabled={isRefreshDisabled}
           needsUpdate={needsUpdate}
