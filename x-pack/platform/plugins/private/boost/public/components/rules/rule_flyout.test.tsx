@@ -306,8 +306,8 @@ describe('RuleFlyout estimate', () => {
       );
 
       const tooltip = await screen.findByRole('tooltip');
-      expect(tooltip).toHaveTextContent(/per hour/);
-      expect(tooltip).toHaveTextContent(/VCUs/);
+      expect(tooltip).toHaveTextContent(/^Recent\$/);
+      expect(tooltip).toHaveTextContent(/VCUs$/);
     });
 
     it('hides a data streams estimate once the rule switches to an indices profile', async () => {

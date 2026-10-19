@@ -190,9 +190,7 @@ export const DataStreamTimeline = ({
               >
                 {cost ? (
                   <EuiToolTip
-                    title={i18n.translate('xpack.boost.dataStreamTimeline.periodCostTitle', {
-                      defaultMessage: 'Search cost per hour',
-                    })}
+                    title={PERIOD_LABELS[period].title}
                     content={<PeriodCost vcus={cost} />}
                     display="block"
                   >
