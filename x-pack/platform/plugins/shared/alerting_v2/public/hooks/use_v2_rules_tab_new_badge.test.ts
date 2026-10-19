@@ -27,10 +27,9 @@ describe('useV2RulesTabNewBadge', () => {
   });
 
   it('keeps the badge while Universal stays selected', () => {
-    const { result, rerender } = renderHook(
-      ({ isSelected }) => useV2RulesTabNewBadge(isSelected),
-      { initialProps: { isSelected: true } }
-    );
+    const { result, rerender } = renderHook(({ isSelected }) => useV2RulesTabNewBadge(isSelected), {
+      initialProps: { isSelected: true },
+    });
 
     expect(result.current).toBeDefined();
     rerender({ isSelected: true });
