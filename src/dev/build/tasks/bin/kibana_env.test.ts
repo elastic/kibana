@@ -35,6 +35,9 @@ const getHeapLimit = async (nodeOptions: string): Promise<string> => {
   return stdout;
 };
 
+// The kibana-pointer-compression pipeline sets this, which would render launchers that require a pointer-compression Node.
+delete process.env.CI_FORCE_NODE_POINTER_COMPRESSION;
+
 const config = getMockConfig();
 const build = new Build(config);
 let root: string;
