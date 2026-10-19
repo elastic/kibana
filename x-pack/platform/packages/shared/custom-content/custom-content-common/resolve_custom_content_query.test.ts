@@ -67,6 +67,18 @@ describe('resolveCustomContentQuery', () => {
       expect(result.query).toBe(EXPLICIT);
     });
 
+    it('treats a blank supplied query as not supplied', async () => {
+      const result = await resolveCustomContentQuery({
+        suppliedQuery: '  ',
+        existingQuery: undefined,
+        isNewPanel: true,
+        generate,
+      });
+
+      expect(generate).toHaveBeenCalledWith([]);
+      expect(result.query).toBe(GENERATED);
+    });
+
     it('propagates a generation failure instead of falling back to a data-free panel', async () => {
       generate.mockRejectedValue(new Error('no suitable index'));
 
@@ -102,6 +114,13 @@ describe('resolveCustomContentQuery', () => {
     it('does not report a change when the supplied query equals the stored one', async () => {
       const result = await resolveCustomContentQuery({ ...edit, suppliedQuery: STORED });
 
+      expect(result).toEqual({ query: STORED, isChanging: false });
+    });
+
+    it('keeps the stored query when the supplied query is blank', async () => {
+      const result = await resolveCustomContentQuery({ ...edit, suppliedQuery: '' });
+
+      expect(generate).not.toHaveBeenCalled();
       expect(result).toEqual({ query: STORED, isChanging: false });
     });
 

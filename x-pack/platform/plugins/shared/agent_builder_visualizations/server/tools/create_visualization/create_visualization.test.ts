@@ -946,6 +946,22 @@ describe('createVisualizationTool handler', () => {
       expect(result.results[0].data.esql).toBe('FROM logs | STATS count() BY host, os');
     });
 
+    it('fails instead of silently dropping the query when regenerate_esql meets has_data: false', async () => {
+      const { result } = await runHandler(
+        {
+          query: 'also split by operating system',
+          target: attachmentTarget('att-1', { regenerate_esql: true, has_data: false }),
+        },
+        { attachments: dataAttachment() }
+      );
+
+      const [{ type, data }] = result.results;
+      expect(type).toBe(ToolResultType.error);
+      expect(data.message).toContain('regenerate_esql');
+      expect(mockGenerateEsql).not.toHaveBeenCalled();
+      expect(mockResolveTemplate).not.toHaveBeenCalled();
+    });
+
     it('lets a supplied esql win over regenerate_esql', async () => {
       await runHandler(
         {

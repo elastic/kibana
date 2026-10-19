@@ -6,7 +6,7 @@
  */
 
 export interface ResolveCustomContentQueryParams {
-  /** A query the caller supplies. It wins: a string replaces the stored query, `null` removes it. */
+  /** A query the caller supplies. It wins: a string replaces the stored query, `null` removes it. A blank string counts as not supplied. */
   suppliedQuery?: string | null;
   /** `false` means no data: the panel ends up without a query. `true` means ensure it has one. */
   hasData?: boolean;
@@ -31,6 +31,9 @@ export interface ResolvedCustomContentQuery {
  * or edits one. A supplied query always wins. A new panel gets a generated query unless it is
  * declared data-free. An edit keeps the stored query unless it is replaced, removed or explicitly
  * regenerated, so a style-only edit never pays for generation or schema sampling.
+ *
+ * `hasData` left undefined on a new panel generates a query. A caller whose default is a static
+ * panel (the dashboard tool) passes `hasData === true` instead of forwarding it.
  */
 export const resolveCustomContentQuery = async ({
   suppliedQuery,
@@ -41,7 +44,7 @@ export const resolveCustomContentQuery = async ({
   generate,
 }: ResolveCustomContentQueryParams): Promise<ResolvedCustomContentQuery> => {
   const resolved = async (): Promise<string | undefined> => {
-    if (suppliedQuery) return suppliedQuery;
+    if (suppliedQuery?.trim()) return suppliedQuery;
     if (suppliedQuery === null || hasData === false) return undefined;
     if (isNewPanel) return generate([]);
     if (regenerate) return generate(existingQuery ? [existingQuery] : []);

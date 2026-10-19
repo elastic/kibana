@@ -58,6 +58,12 @@ describe('custom content panel kind schemas', () => {
       expect(edit({ esql: 'FROM logs-*', regenerateEsql: true }).success).toBe(false);
     });
 
+    it('rejects regenerateEsql together with hasData: false', () => {
+      expect(edit({ query: 'show hosts', regenerateEsql: true, hasData: false }).success).toBe(
+        false
+      );
+    });
+
     it('rejects an empty edit', () => {
       expect(edit({}).success).toBe(false);
     });

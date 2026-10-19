@@ -21,7 +21,7 @@ The template is the source of truth for what renders. It is either generated ser
 
 | Package | Contents |
 |---------|----------|
-| `@kbn/custom-content-common` | Constants (embeddable type, size limits, CSP meta), the zod state schema, the chat tool's update schema (`customContentPanelUpdateSchema`), `resolveEsqlQueryEdit`, `stripMarkdownFences` |
+| `@kbn/custom-content-common` | Constants (embeddable type, size limits, CSP meta), the zod state schema, the chat tool's update schema (`customContentPanelUpdateSchema`), `resolveCustomContentQuery`, `stripMarkdownFences` |
 | `@kbn/custom-content-server` | `createCustomContentTemplateResolver` (the LLM template generator) and `sanitizeCellValue` |
 
 Both packages are separate from `agent_builder_dashboards` because this plugin and the dashboard generation tool consume the same code.

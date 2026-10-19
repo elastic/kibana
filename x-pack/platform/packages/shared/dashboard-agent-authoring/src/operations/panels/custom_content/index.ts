@@ -139,6 +139,9 @@ const customContentEditPanelRequestSchema = z
         'Exact index, alias, or data stream to generate the query from, when regenerating or adding data.'
       ),
   })
+  .refine(({ regenerateEsql, hasData }) => !(regenerateEsql && hasData === false), {
+    message: 'regenerateEsql cannot be combined with hasData: false, which removes the query.',
+  })
   .refine(
     ({ query, esql, regenerateEsql, hasData }) =>
       query !== undefined ||

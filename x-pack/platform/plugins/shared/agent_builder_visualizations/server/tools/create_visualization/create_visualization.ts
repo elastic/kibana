@@ -254,7 +254,7 @@ const readTarget = (target: CreateVisualizationTarget) => ({
 });
 
 const NO_QUERY_HINT =
-  'Pass an explicit "esql" built with the ES|QL tools, or "has_data": false only if the panel genuinely has no data.';
+  'Pass an exact "index" and a more specific "query", an "esql" the user supplied, or "has_data": false only if the panel genuinely has no data.';
 
 export const createVisualizationTool = (): BuiltinToolDefinition<
   typeof createVisualizationSchema
@@ -329,6 +329,12 @@ Ground first: make sure the target index exists and every field you reference is
         let selectedChartTypeForResult: SupportedChartType | undefined;
 
         if (renderer === 'custom_content') {
+          if (regenerateEsql && hasData === false) {
+            throw new Error(
+              '"regenerate_esql" cannot be combined with "has_data": false, which removes the query. Pass only one of them.'
+            );
+          }
+
           // The model supplies intent, never markup. Same resolver the dashboard uses.
           const resolveTemplate = createCustomContentTemplateResolver({
             modelProvider,
