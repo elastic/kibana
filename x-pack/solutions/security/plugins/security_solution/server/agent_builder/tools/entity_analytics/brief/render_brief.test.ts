@@ -6,16 +6,10 @@
  */
 
 import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
-import type { BriefPriority, EntityFacts } from './types';
+import type { BriefPriority } from './prompts';
+import type { EntityFacts } from './types';
 import type { CandidateEntities } from './read_entities';
-import {
-  NO_MATCH_LINE,
-  NO_PRIORITIES_LINE,
-  QUIET_LINE,
-  UNAVAILABLE_TILES_LINE,
-  getRiskChartEntityId,
-  renderBrief,
-} from './render_brief';
+import { NO_PRIORITIES_LINE, QUIET_LINE, getRiskChartEntityId, renderBrief } from './render_brief';
 
 const scopeWith = (overrides: Partial<EntityAnalyticsScope>): EntityAnalyticsScope => ({
   period: '7d',
@@ -88,10 +82,10 @@ describe('renderBrief', () => {
       QUIET_LINE,
     ],
     [
-      'never calls a view quiet when data could not be read',
+      'calls a view quiet when nothing it could read is flagged',
       { riskMovers: { title: 'Risk movers', value: 0, unavailable: true, entityIds: [] } },
       {},
-      UNAVAILABLE_TILES_LINE,
+      QUIET_LINE,
     ],
     [
       'does not call a view quiet when flagged entities were not checked',
@@ -100,10 +94,10 @@ describe('renderBrief', () => {
       NO_PRIORITIES_LINE,
     ],
     [
-      'blames the search when it matches no flagged entity',
+      'has nothing to prioritize when the search matches no flagged entity',
       { riskMovers: { title: 'Risk movers', value: 3, entityIds: ['host:x', 'host:y', 'host:z'] } },
       { capturedCount: 3, hasPageQuery: true },
-      NO_MATCH_LINE,
+      NO_PRIORITIES_LINE,
     ],
   ])('%s', (_name, tiles, entities, line) => {
     const brief = renderBrief({
@@ -242,7 +236,7 @@ describe('renderBrief', () => {
       spaceId: 'default',
       entities,
       verified: {
-        attention: '{{ entity.id host:a }} rose sharply',
+        summary: '{{ entity.id host:a }} rose sharply',
         priorities: [priority('host:a', 'Risk rose'), priority('user:b', 'Alerted')],
         recommendation: 'Start with {{ entity.id user:b }}.',
         droppedPriorityCount: 0,
@@ -279,7 +273,7 @@ Start with **jdoe**.`);
       spaceId: 'default',
       entities: hostA,
       verified: {
-        attention:
+        summary:
           '{{ entity.id host:a }} see [runbook](https://x.test) ![i](https://y.test) <b> www.z.test ops@corp.test extreme_impact *now*',
         priorities: [],
         droppedPriorityCount: 0,
@@ -309,33 +303,36 @@ Start with **jdoe**.`);
       { hasPageQuery: true, capturedCount: 1200, notFoundCount: 2 },
       '_None of the flagged entities match the search query._',
     ],
-  ])('discloses %s', (_name, entities, disclosure) => {
+  ])('notes %s', (_name, entities, note) => {
     const brief = renderBrief({
       scope: scopeWith({ query: { query: 'host.name: web*', language: 'kuery' } }),
       spaceId: 'default',
       entities: { ...noEntities, ...entities },
     });
-    expect(brief).toContain(disclosure);
+    expect(brief).toContain(note);
   });
 });
 
 describe('getRiskChartEntityId', () => {
-  it('picks the first priority whose risk moved by at least 10 points', () => {
-    const facts = (entityId: string, change: number): EntityFacts => ({
+  it('picks the first priority a risk tile flags', () => {
+    const facts = (entityId: string, flaggedFor: EntityFacts['flaggedFor']): EntityFacts => ({
       entityId,
       name: entityId,
       type: 'host',
-      flaggedFor: ['riskMovers'],
-      risk: { of: 'entity', level: 'High', score: 80, atPeriodStart: 80 - change, change },
+      flaggedFor,
     });
-    const all = [facts('host:wobble', 4), facts('host:moved', -12), facts('host:also', 30)];
+    const all = [
+      facts('host:alerted', ['entitiesWithAlerts']),
+      facts('host:rose', ['entitiesWithAlerts', 'newlyHighCritical']),
+      facts('host:moved', ['riskMovers']),
+    ];
 
     expect(
       getRiskChartEntityId(
-        [priority('host:wobble'), priority('host:moved'), priority('host:also')],
+        [priority('host:alerted'), priority('host:rose'), priority('host:moved')],
         all
       )
-    ).toBe('host:moved');
-    expect(getRiskChartEntityId([priority('host:wobble')], all)).toBeUndefined();
+    ).toBe('host:rose');
+    expect(getRiskChartEntityId([priority('host:alerted')], all)).toBeUndefined();
   });
 });

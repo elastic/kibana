@@ -43,6 +43,8 @@ export const EntityAnalyticsScope = lazySchema(() =>
       z.object({
         /** The tile's title as the page shows it, translated. */
         title: z.string().min(1).max(200),
+        /** What the tile counts, as the page describes it, translated. */
+        description: z.string().min(1).max(500).optional(),
         /** The tile's value as shown. 0 is a real zero (the tile shows "—"). */
         value: z.number().int().min(0),
         /** Change against the previous period of equal length. Absent when there is no comparison. */

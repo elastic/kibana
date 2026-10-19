@@ -11,15 +11,12 @@ import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachmen
 import { buildRenderAttachmentTag } from '../attachment_utils';
 import { buildListEntityAttachmentId, ensureEntityAttachment } from '../entity_attachment_utils';
 import { resolveSimpleRiskScoreHistoryInterval } from '../risk_score_history/resolve_risk_score_history_interval';
-import {
-  buildRiskScoreHistoryAttachmentId,
-  ensureRiskScoreHistoryAttachment,
-} from '../risk_score_history/risk_score_history_attachment_utils';
+import { attachRiskScoreHistory } from '../risk_score_history/risk_score_history_attachment_utils';
 import type { BriefCandidate, GenerateBriefParams, GenerateBriefResult } from './types';
 import { buildFacts } from './build_facts';
 import { describeSample, getPeriodStart } from './describe_scope';
 import { draftBrief } from './draft_brief';
-import { getCandidateRisk, readEntities, readRiskAtStart } from './read_entities';
+import { getCandidateRisk, readEntities } from './read_entities';
 import type { RiskChart } from './render_brief';
 import { getRiskChartEntityId, renderBrief } from './render_brief';
 import { verifyDraft } from './verify_draft';
@@ -41,15 +38,8 @@ export const generateBrief = async ({
   if (candidates.length === 0) {
     return { brief: renderBrief({ scope, spaceId, entities }), priorityCount: 0 };
   }
-  // Risk change is supporting detail: when it can't be read, the brief goes without it and says so.
-  const riskAtStart = await readRiskAtStart({ candidates, scope, spaceId, esClient }).catch(
-    (error) => {
-      logger.debug(`AI brief: risk change couldn't be read: ${error.message}`);
-      return undefined;
-    }
-  );
 
-  const facts = buildFacts(candidates, scope, riskAtStart);
+  const facts = buildFacts(candidates, scope);
   const draft = await draftBrief({
     inferenceClient,
     scope,
@@ -57,7 +47,7 @@ export const generateBrief = async ({
     sample: describeSample(scope, entities),
     abortSignal,
   });
-  const verified = verifyDraft(draft, facts, scope);
+  const verified = verifyDraft(draft, facts);
 
   const findCandidate = (entityId: string | undefined) =>
     candidates.find(({ id }) => id === entityId);
@@ -86,7 +76,6 @@ export const generateBrief = async ({
       verified,
       entityTableTag,
       riskChart,
-      riskChangeFailed: !riskAtStart,
     }),
     priorityCount: verified.priorities.length,
   };
@@ -146,23 +135,17 @@ const createRiskChart = async ({
     if (entries.length === 0) {
       return undefined;
     }
-    const label = `${type}: ${name}`;
-    const attachment = await ensureRiskScoreHistoryAttachment({
+    const attachment = await attachRiskScoreHistory({
       attachments,
-      id: buildRiskScoreHistoryAttachmentId(type, scoredId, scoreType),
-      data: {
-        attachmentLabel: label,
-        identifierType: type,
-        identifier: name,
-        entityStoreId: scoredId,
-        from,
-        to,
-        bucketInterval: `${interval.value}${interval.unit}`,
-        scoreType,
-        entries,
-      },
-      description: label,
       logger,
+      identifierType: type,
+      identifier: name,
+      entityStoreId: scoredId,
+      scoreType,
+      from,
+      to,
+      interval,
+      entries,
     });
     return attachment
       ? { tag: buildRenderAttachmentTag(attachment), entityId: candidate.id, of: risk.of }

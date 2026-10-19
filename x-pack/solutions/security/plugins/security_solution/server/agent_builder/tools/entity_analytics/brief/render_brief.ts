@@ -8,8 +8,10 @@
 import { compact, dropRightWhile } from 'lodash';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
+import type { SignalCardId } from '../../../../../common/entity_analytics/home/constants';
 import { SIGNAL_CARD_IDS } from '../../../../../common/entity_analytics/home/constants';
-import type { BriefPriority, EntityFacts } from './types';
+import type { EntityFacts } from './types';
+import type { BriefPriority } from './prompts';
 import {
   BRIEF_PERIOD_LABELS,
   describeDelta,
@@ -24,20 +26,23 @@ import type { CandidateEntities } from './read_entities';
 import type { VerifiedBrief } from './verify_draft';
 import { MENTION_PATTERN } from './verify_draft';
 
+const HEADINGS = {
+  summary: '**What needs attention**',
+  counts: '**This period at a glance**',
+  priorities: '**Priorities**',
+  recommendation: '**Recommended next step**',
+};
+
 export const QUIET_LINE =
   'Nothing in this view is flagged as needing attention. That does not mean the environment is safe.';
-export const UNAVAILABLE_TILES_LINE =
-  "Nothing is flagged in what could be read, and the rest couldn't be checked. That does not mean the environment is safe.";
-export const NO_MATCH_LINE =
-  'The search query excludes every flagged entity, so there is nothing to prioritize. Clear or change the search to brief on them.';
 export const NO_PRIORITIES_LINE =
   'No entity in this view has enough evidence to prioritize. That does not mean the environment is safe.';
 
 const ENTITY_TABLE_INTRO =
   '_The priority entities at a glance, with their current risk score and asset criticality from the Entity Store:_';
 
-/** As the Risk movers tile: a smaller change explains nothing, so it gets no chart. */
-const RISK_CHART_MIN_CHANGE = 10;
+/** A chart explains a priority whose risk the page flags as changed. */
+const RISK_CHART_TILE_IDS: readonly SignalCardId[] = ['riskMovers', 'newlyHighCritical'];
 
 export interface RiskChart {
   tag: string;
@@ -46,15 +51,16 @@ export interface RiskChart {
   of: 'entity' | 'resolution group';
 }
 
-/** The first priority whose risk moved by at least the Risk movers threshold. Only it gets a chart. */
+/** The first priority a risk tile flags. Only it gets a chart. */
 export const getRiskChartEntityId = (
   priorities: BriefPriority[],
   facts: EntityFacts[]
 ): string | undefined =>
-  priorities.find(({ entityId }) => {
-    const change = facts.find((entity) => entity.entityId === entityId)?.risk?.change;
-    return change !== undefined && Math.abs(change) >= RISK_CHART_MIN_CHANGE;
-  })?.entityId;
+  priorities.find(({ entityId }) =>
+    facts
+      .find((entity) => entity.entityId === entityId)
+      ?.flaggedFor.some((tileId) => RISK_CHART_TILE_IDS.includes(tileId))
+  )?.entityId;
 
 /** Renders the brief as markdown, for the agent to present verbatim. */
 export const renderBrief = ({
@@ -64,7 +70,6 @@ export const renderBrief = ({
   verified,
   entityTableTag,
   riskChart,
-  riskChangeFailed = false,
 }: {
   scope: EntityAnalyticsScope;
   spaceId: string;
@@ -73,7 +78,6 @@ export const renderBrief = ({
   verified?: VerifiedBrief;
   entityTableTag?: string;
   riskChart?: RiskChart;
-  riskChangeFailed?: boolean;
 }): string => {
   const namesById = new Map(entities.candidates.map(({ id, name }) => [id, name]));
   const boldName = (entityId: string) =>
@@ -87,13 +91,11 @@ export const renderBrief = ({
   const sample = describeSample(scope, entities);
 
   const sections = [
-    [renderScope(scope, spaceId), ...renderDisclosures(scope, entities, riskChangeFailed)],
-    renderAttention(scope, entities, verified, withNames),
+    [renderScope(scope, spaceId), ...renderNotes(scope, entities)],
+    renderSummary(scope, verified, withNames),
     renderCounts(scope),
     renderPriorities({ verified, entityTableTag, riskChart, boldName, withNames }),
-    verified?.recommendation
-      ? ['**Recommended next step**', withNames(verified.recommendation)]
-      : [],
+    verified?.recommendation ? [HEADINGS.recommendation, withNames(verified.recommendation)] : [],
     sample ? [`_${sample}_`] : [],
   ];
   return sections
@@ -115,16 +117,13 @@ const renderScope = (scope: EntityAnalyticsScope, spaceId: string): string => {
   return `**Scope:** ${escapeMarkdown(compact(parts).join(' · '))}`;
 };
 
-const renderDisclosures = (
-  scope: EntityAnalyticsScope,
-  entities: CandidateEntities,
-  riskChangeFailed: boolean
-): string[] => {
+/** What the reader should know about what was read. */
+const renderNotes = (scope: EntityAnalyticsScope, entities: CandidateEntities): string[] => {
   const unavailableTitles = SIGNAL_CARD_IDS.flatMap((tileId) => {
     const tile = scope.tiles[tileId];
     return tile?.unavailable ? [tile.title] : [];
   });
-  const disclosures = [
+  const notes = [
     matchesNoEntity(entities) ? 'None of the flagged entities match the search query.' : undefined,
     entities.notFoundCount > 0
       ? `${formatCountOf(
@@ -136,9 +135,8 @@ const renderDisclosures = (
     unavailableTitles.length > 0
       ? `Not checked, because the data couldn't be read: ${unavailableTitles.join(', ')}.`
       : undefined,
-    riskChangeFailed ? "Risk change couldn't be read." : undefined,
   ];
-  return compact(disclosures).map((text) => `_${text}_`);
+  return compact(notes).map((text) => `_${text}_`);
 };
 
 /** Flagged entities have records, but the page's search kept none of them. */
@@ -150,31 +148,19 @@ const matchesNoEntity = ({
 }: CandidateEntities): boolean =>
   hasPageQuery && matchedCount === 0 && capturedCount > notFoundCount;
 
-const renderAttention = (
-  scope: EntityAnalyticsScope,
-  entities: CandidateEntities,
+const renderSummary = (
+  { tiles }: EntityAnalyticsScope,
   verified: VerifiedBrief | undefined,
   withNames: (text: string) => string
 ): string[] => {
   if (verified) {
-    return verified.attention ? ['**What needs attention**', withNames(verified.attention)] : [];
+    return verified.summary ? [HEADINGS.summary, withNames(verified.summary)] : [];
   }
-  return ['**What needs attention**', getNoBriefLine(scope, entities)];
-};
-
-/** Why there was nothing to brief on. Only a view whose tiles were all read can be called quiet. */
-const getNoBriefLine = ({ tiles }: EntityAnalyticsScope, entities: CandidateEntities): string => {
-  if (matchesNoEntity(entities)) {
-    return NO_MATCH_LINE;
-  }
-  const allTiles = Object.values(tiles);
-  const isFlagged = allTiles.some(
+  // Without a model call: a view is quiet only when nothing it could read is flagged.
+  const isFlagged = Object.values(tiles).some(
     ({ unavailable, value, entityIds }) => !unavailable && (value > 0 || entityIds.length > 0)
   );
-  if (isFlagged) {
-    return NO_PRIORITIES_LINE;
-  }
-  return allTiles.some(({ unavailable }) => unavailable) ? UNAVAILABLE_TILES_LINE : QUIET_LINE;
+  return [HEADINGS.summary, isFlagged ? NO_PRIORITIES_LINE : QUIET_LINE];
 };
 
 /**
@@ -194,7 +180,7 @@ const renderCounts = ({ tiles, period }: EntityAnalyticsScope): string[] => {
     ? [`|  | Entities | vs previous ${BRIEF_PERIOD_LABELS[period]} |`, '| --- | --- | --- |']
     : ['|  | Entities |', '| --- | --- |'];
   return [
-    '**This period at a glance**',
+    HEADINGS.counts,
     '',
     ...header,
     ...rows.map((tile) => {
@@ -222,7 +208,7 @@ const renderPriorities = ({
     return [];
   }
   if (verified.priorities.length === 0) {
-    return ['**Priorities**', NO_PRIORITIES_LINE];
+    return [HEADINGS.priorities, NO_PRIORITIES_LINE];
   }
   const sentence = (text: string) => {
     const named = withNames(text);
@@ -243,7 +229,7 @@ const renderPriorities = ({
       return [line, '', caption, '', riskChart.tag, ''];
     }
   );
-  return ['**Priorities**', '', ...table, ...dropRightWhile(lines, (line) => line === '')];
+  return [HEADINGS.priorities, '', ...table, ...dropRightWhile(lines, (line) => line === '')];
 };
 
 /**

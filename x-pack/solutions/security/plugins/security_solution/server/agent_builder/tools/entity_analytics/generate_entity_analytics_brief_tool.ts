@@ -25,7 +25,7 @@ import {
 import { RiskScoreDataClient } from '../../../lib/entity_analytics/risk_score/risk_score_data_client';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 import { securityTool } from '../constants';
-import { generateBrief } from './brief';
+import { BRIEF_RESULT_INSTRUCTIONS, BRIEF_TOOL_DESCRIPTION, generateBrief } from './brief';
 import { getEntityAnalyticsToolAvailability } from './entity_analytics_availability';
 import { createToolTelemetryTracker } from './tool_telemetry_tracker';
 
@@ -33,8 +33,6 @@ export const SECURITY_GENERATE_ENTITY_ANALYTICS_BRIEF_TOOL_ID = securityTool(
   'generate_entity_analytics_brief'
 );
 
-const BRIEF_INSTRUCTIONS =
-  'Reply with `brief` exactly as written, every line, then one short follow-up invitation. Copy each <render_attachment> tag character for character: never change, shorten or "correct" its id, which only resolves exactly as given.';
 const NO_SCOPE_MESSAGE =
   'No valid Entity Analytics view is attached, so no brief was generated. Open the brief from the Entity Analytics page.';
 const ENTITY_READ_FAILED_MESSAGE = "Entity details couldn't be read, so no brief was generated.";
@@ -63,7 +61,7 @@ export const generateEntityAnalyticsBriefTool = (
 ): BuiltinToolDefinition<typeof schema> => ({
   id: SECURITY_GENERATE_ENTITY_ANALYTICS_BRIEF_TOOL_ID,
   type: ToolType.builtin,
-  description: `Generates the Entity Analytics AI brief for a captured Entity Analytics page view (a ${ENTITY_ANALYTICS_AI_BRIEF_ATTACHMENT_TYPE} attachment). Use it when the user asks for the brief of an attached Entity Analytics view; for other entity questions use the entity search and lookup tools. It reads the tile values captured from the page and the Entity Store records of the entities in those tiles, and returns a \`brief\` markdown string covering the scope, what needs attention, the counts and their changes, up to three priority entities with a supporting entity table, and a recommended next step.`,
+  description: BRIEF_TOOL_DESCRIPTION,
   schema,
   tags: ['security', 'entity-analytics'],
   annotations: {
@@ -127,7 +125,7 @@ export const generateEntityAnalyticsBriefTool = (
           {
             tool_result_id: getToolResultId(),
             type: ToolResultType.other,
-            data: { brief, instructions: BRIEF_INSTRUCTIONS },
+            data: { brief, instructions: BRIEF_RESULT_INSTRUCTIONS },
           },
         ],
       };

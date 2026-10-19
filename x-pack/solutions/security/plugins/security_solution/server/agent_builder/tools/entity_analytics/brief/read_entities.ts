@@ -17,14 +17,13 @@ import { SIGNAL_CARD_IDS } from '../../../../../common/entity_analytics/home/con
 import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
 import { getEntityType } from '../../../../../common/entity_analytics/entity_store/sanitize_entity_record_for_upsert';
 import { getRiskLevel } from '../../../../../common/entity_analytics/risk_engine/risk_levels';
-import { getRiskScoreTimeSeriesIndex } from '../../../../../common/entity_analytics/risk_engine/indices';
 import { fetchGroupMembers } from '../../../../lib/entity_analytics/entity_case_counts/fetch_group_member_ids';
 import { resolveDisplayName } from '../../../../lib/entity_analytics/lead_generation/entity_conversion';
 import { getHigherCriticality } from '../../../../lib/entity_analytics/risk_score/maintainer/steps/resolution_modifiers';
 import { ENTITY_IDENTIFIER_TYPES } from '../entity_resolution';
 import type { BriefCandidate, BriefEntityType } from './types';
 import { MAX_BRIEF_CANDIDATES } from './types';
-import { getPeriodStart, getScopeFilters } from './describe_scope';
+import { getScopeFilters } from './describe_scope';
 
 /** Display names come from source logs, so an attacker can choose them. */
 const MAX_NAME_LENGTH = 80;
@@ -203,113 +202,6 @@ export const getCandidateRisk = ({ id, record }: BriefCandidate): CandidateRisk 
     scoreType: 'base',
     scoredId: record.entity?.id ?? id,
   };
-};
-
-const RISK_ENTITY_TYPES = ['host', 'user', 'service'] as const;
-/** As the Risk movers tile: scoring runs hourly, so two hours always hold a run. */
-const BOUNDARY_WINDOW_MS = 2 * 3_600_000;
-
-type ScoreSource = Record<string, { risk?: { calculated_score_norm?: number } }>;
-interface StartScoreAggregation {
-  buckets: Array<{
-    key: string;
-    score_type: {
-      buckets: Array<{ key: string; last: { hits: { hits: Array<{ _source?: ScoreSource }> } } }>;
-    };
-  }>;
-}
-
-/**
- * Each candidate's risk score at the start of the period, by candidate id, compared like with like: a
- * group's resolution score or an entity's own base score. The window follows the Risk movers tile
- * (`tile_risk_movers_query.ts`): the last score in the two hours before the start.
- */
-export const readRiskAtStart = async ({
-  candidates,
-  scope,
-  spaceId,
-  esClient,
-}: {
-  candidates: BriefCandidate[];
-  scope: EntityAnalyticsScope;
-  spaceId: string;
-  esClient: ElasticsearchClient;
-}): Promise<Map<string, number>> => {
-  const risks = candidates.flatMap((candidate) => {
-    const risk = getCandidateRisk(candidate);
-    return risk ? [{ candidateId: candidate.id, ...risk }] : [];
-  });
-  const scoredIds = uniq(risks.map(({ scoredId }) => scoredId));
-  const start = getPeriodStart(scope);
-  const response = await esClient.search<unknown, Record<string, StartScoreAggregation>>({
-    index: getRiskScoreTimeSeriesIndex(spaceId),
-    size: 0,
-    ignore_unavailable: true,
-    query: {
-      bool: {
-        filter: [
-          {
-            range: {
-              '@timestamp': {
-                gte: new Date(start.getTime() - BOUNDARY_WINDOW_MS).toISOString(),
-                lte: start.toISOString(),
-              },
-            },
-          },
-          {
-            bool: {
-              should: RISK_ENTITY_TYPES.map((type) => ({
-                terms: { [`${type}.risk.id_value`]: scoredIds },
-              })),
-              minimum_should_match: 1,
-            },
-          },
-        ],
-      },
-    },
-    aggs: Object.fromEntries(
-      RISK_ENTITY_TYPES.map((type) => [
-        type,
-        {
-          terms: { field: `${type}.risk.id_value`, include: scoredIds, size: scoredIds.length },
-          aggs: {
-            // Scores written before `score_type` existed are base scores.
-            score_type: {
-              terms: { field: `${type}.risk.score_type`, missing: 'base', size: 2 },
-              aggs: {
-                last: {
-                  top_hits: {
-                    size: 1,
-                    sort: [{ '@timestamp': 'desc' as const }],
-                    _source: [`${type}.risk.calculated_score_norm`],
-                  },
-                },
-              },
-            },
-          },
-        },
-      ])
-    ),
-  });
-
-  const scores = new Map<string, number>();
-  for (const type of RISK_ENTITY_TYPES) {
-    for (const { key: scoredId, score_type: byScoreType } of response.aggregations?.[type]
-      ?.buckets ?? []) {
-      for (const { key: scoreType, last } of byScoreType.buckets) {
-        const score = last.hits.hits[0]?._source?.[type]?.risk?.calculated_score_norm;
-        if (score !== undefined) {
-          scores.set(`${scoreType}:${scoredId}`, score);
-        }
-      }
-    }
-  }
-  return new Map(
-    risks.flatMap(({ candidateId, scoreType, scoredId }) => {
-      const score = scores.get(`${scoreType}:${scoredId}`);
-      return score === undefined ? [] : [[candidateId, score] as const];
-    })
-  );
 };
 
 /** As detection rules build queries server-side: the page has already accepted the query. */

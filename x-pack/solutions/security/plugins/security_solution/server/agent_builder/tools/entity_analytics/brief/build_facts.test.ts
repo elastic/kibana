@@ -31,48 +31,16 @@ const group = (score: number) => ({
 });
 
 describe('buildFacts', () => {
-  it.each<
-    [string, NonNullable<Entity['entity']>, Map<string, number> | undefined, EntityFacts['risk']]
-  >([
-    [
-      'up',
-      own(71.4),
-      new Map([['user:jdoe', 38.2]]),
-      { of: 'entity', level: 'High', score: 71, atPeriodStart: 38, change: 33 },
-    ],
-    [
-      'down',
-      own(40),
-      new Map([['user:jdoe', 55]]),
-      { of: 'entity', level: 'Moderate', score: 40, atPeriodStart: 55, change: -15 },
-    ],
-    [
-      'unchanged',
-      own(50.2),
-      new Map([['user:jdoe', 49.9]]),
-      { of: 'entity', level: 'Moderate', score: 50, atPeriodStart: 50, change: 0 },
-    ],
-    [
-      'not scored at the start: null, never 0',
-      own(64),
-      new Map(),
-      { of: 'entity', level: 'Moderate', score: 64, atPeriodStart: null, change: undefined },
-    ],
-    [
-      'the start could not be read',
-      own(64),
-      undefined,
-      { of: 'entity', level: 'Moderate', score: 64, atPeriodStart: undefined, change: undefined },
-    ],
+  it.each<[string, NonNullable<Entity['entity']>, EntityFacts['risk']]>([
+    ["the entity's own risk", own(71.4), { of: 'entity', level: 'High', score: 71 }],
     [
       "a resolution group's risk, resolution first",
       group(80),
-      new Map([['user:jdoe', 60]]),
-      { of: 'resolution group', level: 'High', score: 80, atPeriodStart: 60, change: 20 },
+      { of: 'resolution group', level: 'High', score: 80 },
     ],
-    ['no risk', {}, new Map(), undefined],
-  ])('states risk: %s', (_name, entity, riskAtStart, expected) => {
-    const [facts] = buildFacts([candidate(entity)], scope, riskAtStart);
+    ['no risk', {}, undefined],
+  ])('states risk: %s', (_name, entity, expected) => {
+    const [facts] = buildFacts([candidate(entity)], scope);
     expect(facts.risk).toEqual(expected);
   });
 

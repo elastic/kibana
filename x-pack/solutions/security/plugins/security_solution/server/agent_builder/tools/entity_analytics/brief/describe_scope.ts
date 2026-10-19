@@ -7,10 +7,7 @@
 
 import { mapValues, omit, upperFirst } from 'lodash';
 import type { Filter } from '@kbn/es-query';
-import type {
-  SignalCardId,
-  TimeRange,
-} from '../../../../../common/entity_analytics/home/constants';
+import type { TimeRange } from '../../../../../common/entity_analytics/home/constants';
 import type {
   EntityAnalyticsScope,
   EntityAnalyticsScopeTile,
@@ -37,19 +34,6 @@ export const getPeriodStart = ({ capturedAt, period }: EntityAnalyticsScope): Da
   new Date(new Date(capturedAt).getTime() - PERIOD_MS[period]);
 
 // The tiles
-
-/** What each tile's query checks, which is sometimes narrower than the page's description. */
-export const BRIEF_TILE_DEFINITIONS: Record<SignalCardId, (period: string) => string> = {
-  entitiesWithAlerts: (period) =>
-    `had at least one High or Critical alert, open or closed, in the last ${period}`,
-  entitiesWithAnomalies: (period) => `had at least one ML anomaly in the last ${period}`,
-  riskMovers: (period) =>
-    `risk score is at least 10 points higher than at the start of the last ${period}`,
-  newlyHighCritical: (period) =>
-    `is High or Critical now, and was lower or not yet scored at the start of the last ${period}`,
-  watchlisted: (period) => `is on a watchlist and had at least one alert in the last ${period}`,
-  newEntity: (period) => `was first seen in the last ${period} with a risk score above zero`,
-};
 
 /** A tile's change as the page shows it, where the period is already named: `+3` or `no change`. */
 export const describeDelta = ({ delta }: EntityAnalyticsScopeTile): string => {

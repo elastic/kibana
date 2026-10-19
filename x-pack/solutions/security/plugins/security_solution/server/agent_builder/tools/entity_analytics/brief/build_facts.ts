@@ -18,14 +18,10 @@ import type { BriefCandidate, EntityFacts } from './types';
 import { formatStoredValue } from './describe_scope';
 import { getCandidateRisk } from './read_entities';
 
-/**
- * What the model knows about each candidate, as data. `riskAtStart` holds the scores at the start of the
- * period by candidate id; without it, the start is left out.
- */
+/** What the model knows about each candidate, as data. */
 export const buildFacts = (
   candidates: BriefCandidate[],
-  scope: EntityAnalyticsScope,
-  riskAtStart?: Map<string, number>
+  scope: EntityAnalyticsScope
 ): EntityFacts[] =>
   candidates.map((candidate) => {
     const criticality = getAssetCriticality(candidate);
@@ -33,12 +29,13 @@ export const buildFacts = (
     const otherWatchlists = (getEntityAttributes(candidate)?.watchlists ?? []).filter(
       (watchlist) => !matchesPrivilegedWatchlist([watchlist])
     ).length;
+    const risk = getCandidateRisk(candidate);
     return {
       entityId: candidate.id,
       name: candidate.name,
       type: candidate.type,
       flaggedFor: candidate.tileIds,
-      risk: describeRisk(candidate, riskAtStart),
+      risk: risk && { of: risk.of, level: risk.level, score: Math.round(risk.score) },
       assetCriticality: criticality ? formatStoredValue(criticality) : undefined,
       privilegedUser: extractIsPrivileged(candidate) || undefined,
       otherWatchlists: otherWatchlists || undefined,
@@ -46,23 +43,3 @@ export const buildFacts = (
       firstSeen: firstSeen ? moment(firstSeen).from(scope.capturedAt) : undefined,
     };
   });
-
-const describeRisk = (
-  candidate: BriefCandidate,
-  riskAtStart: Map<string, number> | undefined
-): EntityFacts['risk'] => {
-  const risk = getCandidateRisk(candidate);
-  if (!risk) {
-    return undefined;
-  }
-  const score = Math.round(risk.score);
-  const start = riskAtStart?.get(candidate.id);
-  const atPeriodStart = start === undefined ? null : Math.round(start);
-  return {
-    of: risk.of,
-    level: risk.level,
-    score,
-    atPeriodStart: riskAtStart ? atPeriodStart : undefined,
-    change: atPeriodStart === null ? undefined : score - atPeriodStart,
-  };
-};

@@ -29,7 +29,6 @@ import {
   mockBriefRound,
   seedBriefEntities,
   seedUserRiskScores,
-  SEEDED_USER_START_SCORE,
   type ConverseResponseBody,
 } from '../../fixtures/ai_brief_helpers';
 
@@ -141,7 +140,7 @@ apiTest.describe(
     });
 
     apiTest(
-      'states the risk change and charts it under the priority citing it',
+      'charts the risk history under the priority the Risk movers tile flags',
       async ({ apiClient }) => {
         mockBriefRound(llmProxy, buildDraft(SEEDED_USER.id));
 
@@ -153,13 +152,8 @@ apiTest.describe(
           )
         );
 
-        const submitRequests = getSubmitBriefRequests(llmProxy);
-        expect(submitRequests).toHaveLength(1);
-        // The messages are JSON, so the entity's own JSON is escaped inside them.
-        expect(submitRequests[0]).toContain(
-          `\\"score\\":82,\\"atPeriodStart\\":${SEEDED_USER_START_SCORE},\\"change\\":44`
-        );
-        // The table comes before the list, and the chart directly under the priority citing the change.
+        expect(getSubmitBriefRequests(llmProxy)).toHaveLength(1);
+        // The table comes before the list, and the chart directly under the flagged priority.
         const lines = brief.split('\n');
         const priority = lines.findIndex((line) => line.startsWith(PRIORITY_LINE));
         expect(brief.indexOf(ENTITY_TABLE_ID)).toBeLessThan(brief.indexOf(PRIORITY_LINE));

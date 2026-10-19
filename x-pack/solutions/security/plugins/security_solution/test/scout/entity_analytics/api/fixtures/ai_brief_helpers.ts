@@ -14,7 +14,7 @@ import type { EntityAnalyticsScope } from '../../../../../common/entity_analytic
 import { ENTITY_ANALYTICS_AI_BRIEF_ATTACHMENT_TYPE } from '../../../../../common/entity_analytics/ai_brief/scope';
 import { getRiskScoreTimeSeriesIndex } from '../../../../../common/entity_analytics/risk_engine/indices';
 import { getPrivilegedUserWatchlistSavedObjectId } from '../../../../../common/entity_analytics/watchlists/constants';
-import type { BriefDraft } from '../../../../../server/agent_builder/tools/entity_analytics/brief/types';
+import type { BriefDraft } from '../../../../../server/agent_builder/tools/entity_analytics/brief/prompts';
 import { LATEST_ALIAS, LATEST_INDEX } from './maintainers/constants';
 
 const BRIEF_TOOL_ID = 'security.generate_entity_analytics_brief';
@@ -99,12 +99,9 @@ export const seedBriefEntities = async (esClient: EsClient): Promise<void> => {
 };
 
 const RISK_SCORE_INDEX = getRiskScoreTimeSeriesIndex('default');
-/** The seeded user's base risk score at the start of a 7-day view; it is 82 now. */
-export const SEEDED_USER_START_SCORE = 38;
-
 /**
- * Seeds the user's base risk score at the start of a 7-day view and now. Creates the risk score index
- * when the risk engine is not installed, and returns whether it did.
+ * Seeds two base risk scores for the user in a 7-day view, for the risk-history chart. Creates the risk
+ * score index when the risk engine is not installed, and returns whether it did.
  */
 export const seedUserRiskScores = async (esClient: EsClient): Promise<boolean> => {
   const created = !(await esClient.indices.exists({ index: RISK_SCORE_INDEX }));
@@ -120,9 +117,9 @@ export const seedUserRiskScores = async (esClient: EsClient): Promise<boolean> =
     });
   }
   const now = Date.now();
-  const startScoreTime = now - 7 * 24 * 3_600_000 - 30 * 60_000;
+  const threeDaysAgo = now - 3 * 24 * 3_600_000;
   const scores: Array<[number, number]> = [
-    [startScoreTime, SEEDED_USER_START_SCORE],
+    [threeDaysAgo, 38],
     [now, 82],
   ];
   await esClient.bulk({
@@ -173,7 +170,7 @@ export const buildScope = (
 
 /** A model answer with one priority for `entityId`. */
 export const buildDraft = (entityId: string): BriefDraft => ({
-  attention: 'Flagged entities in this view have alerts or newly reached High risk.',
+  summary: 'Flagged entities in this view have alerts or newly reached High risk.',
   priorities: [
     {
       entityId,

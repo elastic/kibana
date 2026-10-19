@@ -115,6 +115,7 @@ const captureScope = ({
         card.id,
         {
           title: card.title,
+          description: card.description,
           value: card.value,
           // The page shows "Not enough history" rather than a delta, so the brief has no comparison.
           delta: card.isDeltaUnavailable ? undefined : card.delta,

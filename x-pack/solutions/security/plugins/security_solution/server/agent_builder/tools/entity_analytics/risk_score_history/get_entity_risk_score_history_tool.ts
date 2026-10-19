@@ -26,10 +26,7 @@ import { buildRenderAttachmentTag } from '../attachment_utils';
 import { getEntityAnalyticsToolAvailability } from '../entity_analytics_availability';
 import { requireResolvedEntity } from '../entity_resolution';
 import { createToolTelemetryTracker } from '../tool_telemetry_tracker';
-import {
-  buildRiskScoreHistoryAttachmentId,
-  ensureRiskScoreHistoryAttachment,
-} from './risk_score_history_attachment_utils';
+import { attachRiskScoreHistory } from './risk_score_history_attachment_utils';
 import { resolveSimpleRiskScoreHistoryInterval } from './resolve_risk_score_history_interval';
 import { resolveResolutionTargetEntityId } from '../resolution_target_ids';
 import { parseTimeBound, timeRangeParseError } from '../time_range_utils';
@@ -317,24 +314,17 @@ Time range via optional \`from\`/\`to\` date-math (default last 90 days). Defaul
 
         // 2 - Build the chart attachment
         const bucketIntervalLabel = `${bucketInterval.value}${bucketInterval.unit}`;
-        const attachmentLabel = `${identifierType}: ${identifier}`;
-
-        const attachmentResult = await ensureRiskScoreHistoryAttachment({
+        const attachmentResult = await attachRiskScoreHistory({
           attachments,
-          id: buildRiskScoreHistoryAttachmentId(identifierType, entityStoreId, scoreType),
-          data: {
-            attachmentLabel,
-            identifierType,
-            identifier,
-            entityStoreId,
-            from,
-            to,
-            bucketInterval: bucketIntervalLabel,
-            scoreType,
-            entries,
-          },
-          description: attachmentLabel,
           logger,
+          identifierType,
+          identifier,
+          entityStoreId,
+          scoreType,
+          from,
+          to,
+          interval: bucketInterval,
+          entries,
         });
 
         // 3 - Build the tool output
