@@ -26,7 +26,13 @@ export const ProposedActionsCount = ({ conversationId }: ProposedActionsCountPro
     () =>
       (data?.pages[0].proposals ?? []).reduce<number>(
         (count, proposal) =>
-          count + (proposal.decision === 'approved' && proposal.status !== 'failed' ? 1 : 0),
+          count +
+          (proposal.status !== 'failed' &&
+          proposal.status !== 'pending' &&
+          proposal.status !== 'executing' &&
+          (proposal.status === 'expired' || proposal.decision)
+            ? 1
+            : 0),
         0
       ),
     [data]
@@ -44,7 +50,7 @@ export const ProposedActionsCount = ({ conversationId }: ProposedActionsCountPro
     >
       <FormattedMessage
         id="xpack.agenticInvestigations.proposedActionsCount"
-        defaultMessage="{appliedCount} of {total} applied"
+        defaultMessage="{appliedCount} of {total} actions closed"
         values={{ total, appliedCount }}
       />
     </EuiText>
