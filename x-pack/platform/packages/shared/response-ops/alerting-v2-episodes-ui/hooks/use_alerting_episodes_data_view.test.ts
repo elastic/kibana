@@ -153,7 +153,7 @@ describe('useAlertingEpisodesDataView', () => {
     expect(mockDataView.addRuntimeField).toHaveBeenCalledWith('maintenance_windows', {
       type: 'keyword',
       script: { source: "emit('')" },
-      customLabel: 'Maintenance windows',
+      customLabel: 'Suppressed',
     });
   });
 

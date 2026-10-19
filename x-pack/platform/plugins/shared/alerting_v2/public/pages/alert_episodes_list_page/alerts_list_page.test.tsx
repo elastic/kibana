@@ -317,7 +317,7 @@ describe('AlertsListPage', () => {
   it.each([
     ['tags', 'Alert tags'],
     ['rule_tags', 'Rule tags'],
-    ['maintenance_windows', 'Maintenance windows'],
+    ['maintenance_windows', 'Suppressed'],
   ])('labels the %s column %p and takes its sort control away', (columnId, label) => {
     const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
     const customize = lastCall?.customGridColumnsConfiguration?.[columnId];

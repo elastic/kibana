@@ -80,6 +80,6 @@ export const SOURCE_FIELD_LABEL = i18n.translate('xpack.alertingV2EpisodesUi.sou
 export const MAINTENANCE_WINDOWS_FIELD_LABEL = i18n.translate(
   'xpack.alertingV2EpisodesUi.maintenanceWindowsFieldLabel',
   {
-    defaultMessage: 'Maintenance windows',
+    defaultMessage: 'Suppressed',
   }
 );
