@@ -13,7 +13,12 @@ import { getAffectedProjectsMoon } from './strategy_moon.ts';
 
 export * from './const.ts';
 export * from './utils.ts';
-export { listChangedFiles } from './strategy_git.ts';
+export {
+  listChangedFiles,
+  getAffectedModulesGit,
+  getDownstreamDependents,
+} from './strategy_git.ts';
+export { findModuleForPath, getModuleLookup } from './module_lookup.ts';
 export { getAffectedProjectsMoon } from './strategy_moon.ts';
 
 export interface AffectedPackagesConfig {

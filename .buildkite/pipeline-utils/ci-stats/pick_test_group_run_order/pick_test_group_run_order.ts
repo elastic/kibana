@@ -19,10 +19,18 @@ import { CiStatsClient } from '../client.ts';
 import { buildCiStatsGroups, buildCiStatsSources } from './ci_stats_sources.ts';
 import { AGENT_DISK_GIB, DURATION_PERCENTILE, STEP_KEYS } from './const.ts';
 import { loadRunOrderConfig } from './env_config.ts';
+import type { RunOrderConfig } from './env_config.ts';
 import { ftrManifest } from './ftr_manifests.ts';
+import type { FTRManifestEntry } from './ftr_manifests.ts';
 import { discoverJestIntegrationConfigs, discoverJestUnitConfigs } from './jest_configs.ts';
 import { getRunGroup, getRunGroups, labelJestSubgroups } from './run_groups.ts';
-import { shouldSkipFtrTests } from './selective_ftr.ts';
+import {
+  FTR_SHARED_DOMAINS,
+  isPlatformOwnedFtrConfig,
+  resolveAffectedFtrDomains,
+  shouldSkipFtrTests,
+} from './selective_ftr.ts';
+import type { AffectedFtrDomains } from './selective_ftr.ts';
 import { isScoutPathOnlyDiff } from './selective_scout.ts';
 import { resolveSelectiveTestingChanges } from './selective_changes.ts';
 import {
@@ -113,6 +121,14 @@ export async function pickTestGroupRunOrder() {
         'Selective testing: FTR configs skipped (excluded modules / irrelevant paths only).'
       );
       ftrManifestEntriesByQueue.clear();
+    }
+
+    if (
+      ftrManifestEntriesByQueue.size &&
+      config.ftrSolutionSelection !== 'off' &&
+      config.limitSolutions === undefined
+    ) {
+      narrowFtrToAffectedSolutions(bk, ftrManifestEntriesByQueue, selectiveChangedFiles, config);
     }
 
     const selectiveCtx = await resolveSelectiveTestingContext(selectiveChangedFiles);
@@ -247,6 +263,76 @@ function requireVariable(value: string | undefined, envName: string): string {
     throw new Error(`Missing required environment variable "${envName}"`);
   }
   return value;
+}
+
+/**
+ * Drop FTR configs of solutions the diff cannot affect (`enabled`), or only annotate
+ * what would be dropped (`dry-run`). Shared domains are kept on solution-only diffs when
+ * `includeSharedFtr` is set. Platform diffs run everything unless `narrowPlatformFtr` is set;
+ * then they keep shared domains, affected solutions and platform-owned configs in any manifest.
+ */
+function narrowFtrToAffectedSolutions(
+  bk: BuildkiteClient,
+  entriesByQueue: Map<string, FTRManifestEntry[]>,
+  changedFiles: string[],
+  { ftrSolutionSelection, includeSharedFtr, narrowPlatformFtr }: RunOrderConfig
+): void {
+  let affected: AffectedFtrDomains | null;
+  try {
+    affected = resolveAffectedFtrDomains(changedFiles);
+  } catch (error) {
+    console.error('FTR solution selection failed, running every domain', error);
+    return;
+  }
+
+  if (affected === null) {
+    console.log('FTR solution selection: diff cannot be narrowed, running every domain');
+    return;
+  }
+
+  const { solutions, platformAffected } = affected;
+  if (platformAffected && !narrowPlatformFtr) {
+    console.log('FTR solution selection: diff affects platform, running every domain');
+    return;
+  }
+
+  const keptDomains = new Set([
+    ...solutions,
+    ...(includeSharedFtr || platformAffected ? FTR_SHARED_DOMAINS : []),
+  ]);
+  const isKept = ({ domain, path }: FTRManifestEntry) =>
+    keptDomains.has(domain) || (platformAffected && isPlatformOwnedFtrConfig(path));
+  const allEntries = [...entriesByQueue.values()].flat();
+  const skipped = allEntries.filter((entry) => !isKept(entry));
+  const isDryRun = ftrSolutionSelection === 'dry-run';
+  const affectedLabels = [...(platformAffected ? ['platform'] : []), ...solutions];
+
+  const summary = [
+    `FTR solution selection${isDryRun ? ' (dry-run)' : ''}:`,
+    `affected **${affectedLabels.join(', ')}**,`,
+    `shared FTR ${keptDomains.has('platform') ? 'included' : 'excluded'};`,
+    `${isDryRun ? 'would skip' : 'skipped'} ${skipped.length} of ${allEntries.length} configs`,
+    `(domains: ${[...new Set(skipped.map(({ domain }) => domain))].join(', ') || 'none'}).`,
+  ].join(' ');
+  console.log(summary);
+  bk.setAnnotation(
+    'selective-testing-ftr-solutions',
+    'info',
+    `${summary}\n\n<details><summary>Skipped configs</summary>\n\n${skipped
+      .map(({ path }) => `- ${path}`)
+      .join('\n')}\n</details>`
+  );
+
+  if (isDryRun) return;
+
+  for (const [queue, entries] of entriesByQueue) {
+    const kept = entries.filter(isKept);
+    if (kept.length) {
+      entriesByQueue.set(queue, kept);
+    } else {
+      entriesByQueue.delete(queue);
+    }
+  }
 }
 
 /**
