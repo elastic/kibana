@@ -12,7 +12,7 @@ import type { TimeRange } from '@kbn/es-query';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { VISUALIZE_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import type { UnifiedHistogramServices } from '../../..';
+import type { UnifiedHistogramLensActionsOptions, UnifiedHistogramServices } from '../../..';
 
 // Avoid taking a dependency on uiActionsPlugin just for this const
 const visualizeFieldTrigger: typeof VISUALIZE_FIELD_TRIGGER = 'VISUALIZE_FIELD_TRIGGER';
@@ -22,11 +22,13 @@ export const useEditVisualization = ({
   dataSource,
   relativeTimeRange,
   lensAttributes,
+  lensEditorOptions,
 }: {
   services: UnifiedHistogramServices;
   dataSource: DataSource | undefined;
   relativeTimeRange?: TimeRange;
   lensAttributes?: TypedLensByValueInput['attributes'];
+  lensEditorOptions?: UnifiedHistogramLensActionsOptions['navigation'];
 }) => {
   const [canVisualize, setCanVisualize] = useState(false);
 
@@ -68,10 +70,10 @@ export const useEditVisualization = ({
           time_range: relativeTimeRange,
           attributes: lensAttributes,
         },
-        { originatingApp: 'discover' }
+        lensEditorOptions
       );
     };
-  }, [canVisualize, lensAttributes, relativeTimeRange, services.lens]);
+  }, [canVisualize, lensAttributes, lensEditorOptions, relativeTimeRange, services.lens]);
 
   useEffect(() => {
     checkCanVisualize().then(setCanVisualize);

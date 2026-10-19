@@ -42,6 +42,7 @@ describe('useEditVisualization', () => {
         dataSource: new DataViewSource(dataViewWithTimefieldMock),
         relativeTimeRange,
         lensAttributes,
+        lensEditorOptions: { originatingApp: 'discover' },
       })
     );
     await waitFor(() => expect(hook.result.current).toBeDefined());
