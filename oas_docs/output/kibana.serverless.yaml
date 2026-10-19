@@ -529,7 +529,8 @@ paths:
         '200':
           description: Returns the OAuth callback script
       summary: ''
-      tags: []
+      tags:
+        - connectors
       x-state: ''
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
