@@ -38,7 +38,7 @@ export const buildScoreRangeFilter = (
 
 interface RequiredHit {
   _id: string;
-  _source: RawAnomalyRecord & { detector_index: number };
+  _source: RawAnomalyRecord;
 }
 
 /**
@@ -171,6 +171,7 @@ export const searchEntityAnomalies = async ({
             filter: [
               { term: { result_type: 'record' } },
               { term: { is_interim: false } },
+              { exists: { field: 'detector_index' } },
               buildScoreRangeFilter(scoreRanges),
               {
                 range: {
@@ -193,13 +194,10 @@ export const searchEntityAnomalies = async ({
     const rawTotal = resp.hits.total;
     const total = rawTotal == null ? 0 : typeof rawTotal === 'number' ? rawTotal : rawTotal.value;
 
-    // Keep every record the query counted in `total` so the page and the total agree; records
-    // without `actual` / `typical` (e.g. population analysis) are listed without a value comparison.
+    // Every record the query counted in `total` is returned; the guard only narrows the client's
+    // optional `_id` / `_source` typing, which search hits always carry.
     const hits = resp.hits.hits
-      .filter(
-        (hit): hit is typeof hit & RequiredHit =>
-          hit._id != null && hit._source?.detector_index != null
-      )
+      .filter((hit): hit is typeof hit & RequiredHit => hit._id != null && hit._source != null)
       .map((hit) =>
         mapToAnomalyHit(hit, getMatchedEntityId(hit.matched_queries, entityIds) ?? entityIds[0])
       );

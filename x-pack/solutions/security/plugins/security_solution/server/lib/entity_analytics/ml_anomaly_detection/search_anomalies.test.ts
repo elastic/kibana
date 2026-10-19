@@ -451,13 +451,13 @@ describe('searchEntityAnomalies', () => {
     expect(result.hits[0]).toMatchObject({ actual: 10, typical: 2 });
   });
 
-  it('skips hits where detector_index is missing', async () => {
-    const hit = makeHit({ entityId: 'user:alice' });
-    delete (hit._source as Record<string, unknown>).detector_index;
-    mockMlAnomalySearch.mockResolvedValueOnce(makeResponse([hit]));
+  it('excludes records without detector_index in the query rather than post-filtering', async () => {
+    await searchEntityAnomalies({ ...defaultOpts, logger, ml: mockMl, soClient });
 
-    const result = await searchEntityAnomalies({ ...defaultOpts, logger, ml: mockMl, soClient });
-    expect(result.hits).toEqual([]);
+    const [body] = mockMlAnomalySearch.mock.calls[0];
+    expect(body.query.bool.filter).toEqual(
+      expect.arrayContaining([{ exists: { field: 'detector_index' } }])
+    );
   });
 
   it('returns empty result and logs a warning when entity filter cannot be built', async () => {

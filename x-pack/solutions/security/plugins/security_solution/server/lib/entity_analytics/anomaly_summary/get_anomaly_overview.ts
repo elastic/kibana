@@ -167,6 +167,7 @@ export const getEntityAnomalyOverview = async ({
             filter: [
               { term: { result_type: 'record' } },
               { term: { is_interim: false } },
+              { exists: { field: 'detector_index' } },
               buildScoreRangeFilter(scoreRanges),
               { range: { timestamp: { gte: effectiveFromMs, lte: effectiveToMs } } },
               entityFilter,
