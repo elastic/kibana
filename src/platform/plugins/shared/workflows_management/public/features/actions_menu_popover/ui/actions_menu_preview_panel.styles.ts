@@ -57,6 +57,13 @@ export const panelStyles = {
       borderRadius: 0,
       borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
     }),
+  // EuiText's prose `pre` margin also hits EuiCodeBlock's inner pre; the code block wrapper
+  // already spaces consecutive blocks, so drop it to avoid a trailing gap under the last snippet.
+  exampleMarkdown: css({
+    pre: {
+      marginBlockEnd: 0,
+    },
+  }),
   fieldRowLast: css({
     borderBottom: 'none',
   }),

@@ -19,6 +19,7 @@ import {
   EuiIcon,
   EuiImage,
   EuiLink,
+  EuiMarkdownFormat,
   EuiNotificationBadge,
   EuiPanel,
   EuiSpacer,
@@ -27,6 +28,7 @@ import {
   EuiText,
   EuiTitle,
   EuiToolTip,
+  getDefaultEuiMarkdownProcessingPlugins,
   useEuiFontSize,
   useEuiTheme,
 } from '@elastic/eui';
@@ -55,20 +57,37 @@ import {
 
 type TabId = 'inputs' | 'outputs' | 'examples';
 
-/** Split documentation example markdown into a title + fenced code for EUI props. */
-function parseExampleSnippet(example: string): {
-  title: string | null;
-  language: string;
-  code: string | null;
-} {
-  const titleMatch = /^##\s+(.+)$/m.exec(example);
-  const fenceMatch = /```(\w*)\n([\s\S]*?)```/.exec(example);
-  return {
-    title: titleMatch?.[1]?.trim() ?? null,
-    language: fenceMatch?.[1] || 'yaml',
-    code: fenceMatch?.[2]?.replace(/\n$/, '') ?? null,
+type MarkdownComponentProps = React.HTMLAttributes<HTMLElement> & { children?: React.ReactNode };
+
+// A div with heading semantics: EuiText (which wraps EuiMarkdownFormat) restyles h1-h6 tags.
+const ExampleHeading = ({ children }: MarkdownComponentProps) => (
+  <>
+    <EuiTitle size="xxxs">
+      <div role="heading" aria-level={4}>
+        {children}
+      </div>
+    </EuiTitle>
+    <EuiSpacer size="s" />
+  </>
+);
+
+/** Markdown renderer for step examples: compact headings and small copyable code blocks. */
+const exampleProcessingPlugins = (() => {
+  const plugins = getDefaultEuiMarkdownProcessingPlugins();
+  const [, rehypeReactConfig] = plugins[1];
+  const { code: DefaultCode } = rehypeReactConfig.components;
+  rehypeReactConfig.components = {
+    ...rehypeReactConfig.components,
+    h1: ExampleHeading,
+    h2: ExampleHeading,
+    h3: ExampleHeading,
+    h4: ExampleHeading,
+    h5: ExampleHeading,
+    h6: ExampleHeading,
+    code: (props: MarkdownComponentProps) => <DefaultCode {...props} fontSize="s" />,
   };
-}
+  return plugins;
+})();
 
 interface ActionsMenuPreviewPanelProps {
   hoveredOption: ActionOptionData | null;
@@ -518,7 +537,6 @@ function StepDetailPanel({
           ) : (
             examples.map((example, idx) => {
               const isLast = idx === examples.length - 1;
-              const { title, language, code } = parseExampleSnippet(example);
               return (
                 <EuiPanel
                   key={idx}
@@ -529,24 +547,13 @@ function StepDetailPanel({
                   borderRadius="none"
                   css={[styles.fieldRow, isLast && styles.fieldRowLast]}
                 >
-                  {title && (
-                    <EuiTitle size="xxxs">
-                      <h4>{title}</h4>
-                    </EuiTitle>
-                  )}
-                  {code != null && (
-                    <>
-                      {title && <EuiSpacer size="s" />}
-                      <EuiCodeBlock
-                        language={language}
-                        fontSize="s"
-                        paddingSize="s"
-                        isCopyable
-                      >
-                        {code}
-                      </EuiCodeBlock>
-                    </>
-                  )}
+                  <EuiMarkdownFormat
+                    textSize="xs"
+                    processingPluginList={exampleProcessingPlugins}
+                    css={styles.exampleMarkdown}
+                  >
+                    {example}
+                  </EuiMarkdownFormat>
                 </EuiPanel>
               );
             })
