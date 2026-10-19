@@ -19,6 +19,7 @@ import { useAgentId } from '../../../../hooks/use_conversation';
 import { useConversationId } from '../../../../context/conversation/use_conversation_id';
 import { ExecutionMetadataPopover } from './execution_metadata_popover';
 import { TraceButton } from './trace_button';
+import { FeedbackActions } from './feedback_actions';
 
 const copyLabels = {
   response: {
@@ -47,6 +48,8 @@ interface ResponseActionsProps {
   steps?: ConversationRoundStep[];
   /** Which side of the exchange `content` comes from, so the copy wording matches it. */
   copyTarget?: keyof typeof copyLabels;
+  /** When set, renders the thumbs up/down feedback buttons. */
+  executionId?: string;
 }
 
 export const ResponseActions: React.FC<ResponseActionsProps> = ({
@@ -55,6 +58,7 @@ export const ResponseActions: React.FC<ResponseActionsProps> = ({
   executionTerminatedEvent,
   steps,
   copyTarget = 'response',
+  executionId,
 }) => {
   const { addSuccessToast } = useToasts();
   const { euiTheme } = useEuiTheme();
@@ -126,6 +130,11 @@ export const ResponseActions: React.FC<ResponseActionsProps> = ({
             conversationId={conversationId}
             agentId={agentId}
           />
+        </EuiFlexItem>
+      )}
+      {executionId && (
+        <EuiFlexItem grow={false}>
+          <FeedbackActions executionId={executionId} />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

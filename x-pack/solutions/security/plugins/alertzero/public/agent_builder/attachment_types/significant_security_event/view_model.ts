@@ -12,7 +12,7 @@ import type { AttachmentNavigationDeps } from '../navigation';
 import { buildAlertsLookupEsql, buildEventsLookupEsql } from '../navigation';
 import { buildDiscoverActionButton, joinSubtitle } from '../shared/attachment_definition_helpers';
 import { formatPercent, severityBadgeColor } from '../shared/severity';
-import { significantSecurityEventAttachmentDataSchema } from '../../../../common/significant_security_event_schema';
+import { significantSecurityEventAttachmentReadSchema } from '../../../../common/significant_security_event_schema';
 import type { SignificantSecurityEventAttachmentData } from '../../../../common/significant_security_event_schema';
 
 export const OPEN_EVENTS_LABEL = i18n.translate(
@@ -57,7 +57,7 @@ export type MapsToProposal = NonNullable<
 export const parseSignificantSecurityEventData = (
   candidate: unknown
 ): SignificantSecurityEventAttachmentData | undefined => {
-  const result = significantSecurityEventAttachmentDataSchema.safeParse(candidate);
+  const result = significantSecurityEventAttachmentReadSchema.safeParse(candidate);
   return result.success ? result.data : undefined;
 };
 

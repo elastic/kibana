@@ -32,6 +32,10 @@ jest.mock('../../../../context/conversation/use_conversation_id', () => ({
   useConversationId: () => undefined,
 }));
 
+jest.mock('../../../../context/conversation/conversation_context', () => ({
+  useConversationContext: () => ({ isEmbeddedContext: false }),
+}));
+
 const copyMock = copy as jest.MockedFunction<typeof copy>;
 const useToastsMock = useToasts as jest.MockedFunction<typeof useToasts>;
 const addSuccessToast = jest.fn();

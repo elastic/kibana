@@ -7,13 +7,14 @@
 
 import { coreMock } from '@kbn/core/public/mocks';
 import React from 'react';
+import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 import { mountObservabilityAlertingApp } from './mount';
 
 const mockCreateAlertingV2HostApp: jest.Mock = jest.fn(
   (appId: string, paths: Record<string, string>) => ({
     rules: { app: appId, pathPrefix: paths.rules },
     ruleLibrary: { app: appId, pathPrefix: paths.ruleLibrary },
-    episodes: { app: appId, pathPrefix: paths.episodes },
+    alerts: { app: appId, pathPrefix: paths.alerts },
     actionPolicies: { app: appId, pathPrefix: paths.actionPolicies },
     executionHistory: { app: appId, pathPrefix: paths.executionHistory },
   })
@@ -23,7 +24,7 @@ describe('mountObservabilityAlertingApp', () => {
   it('renders into the mount element and unmounts', () => {
     const coreStart = coreMock.createStart();
     const params = coreMock.createAppMountParameters();
-    params.history.push('/inbox');
+    params.history.push('/alerts');
 
     const alertingVTwo = {
       RulesPage: () => null,
@@ -38,10 +39,17 @@ describe('mountObservabilityAlertingApp', () => {
       getClassicRulesPage: () => <div />,
     };
 
+    const observabilityShared = {
+      navigation: {
+        PageTemplate: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+      },
+    };
+
     const unmount = mountObservabilityAlertingApp({
       coreStart,
       alertingVTwo,
       triggersActionsUi,
+      observabilityShared: observabilityShared as unknown as ObservabilitySharedPluginStart,
       params,
     });
 

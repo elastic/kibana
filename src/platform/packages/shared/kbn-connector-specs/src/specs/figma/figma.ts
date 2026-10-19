@@ -16,6 +16,9 @@ const FIGMA_API_BASE = 'https://api.figma.com';
 const FILE_PATH_PREFIXES = ['design', 'file', 'board', 'proto', 'slides'] as const;
 const FILE_PATH_PREFIX_SET: Set<string> = new Set(FILE_PATH_PREFIXES);
 const FILE_KEY_REGEX = /^[0-9a-zA-Z_-]+$/;
+const ID_MAX_LENGTH = 200;
+const NODE_IDS_MAX_LENGTH = 10000;
+const URL_MAX_LENGTH = 2048;
 
 export const FigmaConnector: ConnectorSpec = {
   metadata: {
@@ -72,9 +75,11 @@ export const FigmaConnector: ConnectorSpec = {
         z.object({
           fileKey: z
             .string()
+            .max(ID_MAX_LENGTH)
             .describe('File key from the Figma file URL (e.g. from figma.com/file/FILE_KEY/...)'),
           nodeIds: z
             .string()
+            .max(NODE_IDS_MAX_LENGTH)
             .optional()
             .describe('Comma-separated node IDs to retrieve specific nodes (e.g. "1:2,1:3")'),
           depth: z
@@ -118,9 +123,10 @@ export const FigmaConnector: ConnectorSpec = {
         '(?node-id=1:2) or from the getFile action output.',
       input: lazySchema(() =>
         z.object({
-          fileKey: z.string().describe('File key from the Figma file URL'),
+          fileKey: z.string().max(ID_MAX_LENGTH).describe('File key from the Figma file URL'),
           nodeIds: z
             .string()
+            .max(NODE_IDS_MAX_LENGTH)
             .describe(
               'Comma-separated node IDs to render (e.g. "1:2,1:3"); find in URL ?node-id= or get_file output'
             ),
@@ -164,6 +170,7 @@ export const FigmaConnector: ConnectorSpec = {
         z.object({
           projectId: z
             .string()
+            .max(ID_MAX_LENGTH)
             .describe('Figma project ID (from list with type teamProjects or project URL)'),
         })
       ),
@@ -190,12 +197,14 @@ export const FigmaConnector: ConnectorSpec = {
         z.object({
           teamId: z
             .string()
+            .max(ID_MAX_LENGTH)
             .optional()
             .describe(
               'Figma team ID from the team page URL. If you do not have it, use url instead or ask the user to paste the team page URL (e.g. figma.com/team/123/Team-Name).'
             ),
           url: z
             .string()
+            .max(URL_MAX_LENGTH)
             .optional()
             .describe(
               'Figma team page URL. Provide this if teamId is not available; the team ID will be extracted. If neither teamId nor url is provided, ask the user to paste the team page URL.'

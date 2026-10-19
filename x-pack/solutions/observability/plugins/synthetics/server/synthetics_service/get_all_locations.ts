@@ -54,17 +54,17 @@ const getServicePublicLocations = async (
   server: SyntheticsServerSetup,
   syntheticsMonitorClient: SyntheticsMonitorClient
 ) => {
-  if (!syntheticsMonitorClient.syntheticsService.isAllowed) {
+  if (!syntheticsMonitorClient.serviceManagedLocations.isAllowed) {
     return {
       locations: [],
     };
   }
-  if (syntheticsMonitorClient.syntheticsService.locations.length === 0) {
+  if (syntheticsMonitorClient.serviceManagedLocations.locations.length === 0) {
     return await getServiceLocations(server);
   }
 
   return {
-    locations: syntheticsMonitorClient.syntheticsService.locations,
-    throttling: syntheticsMonitorClient.syntheticsService.throttling,
+    locations: syntheticsMonitorClient.serviceManagedLocations.locations,
+    throttling: syntheticsMonitorClient.serviceManagedLocations.throttling,
   };
 };

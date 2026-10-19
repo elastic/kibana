@@ -6,14 +6,15 @@
  */
 
 import type { z } from '@kbn/zod/v4';
+import { lazySchema } from '@kbn/zod/v4';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { exceptionItemBaseSchema } from '@kbn/securitysolution-exceptions-common/workflows';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { securityAttachmentDataSchema } from './security_attachment_data_schema';
 
-export const exceptionAttachmentDataSchema = securityAttachmentDataSchema.extend(
-  exceptionItemBaseSchema.shape
+export const exceptionAttachmentDataSchema = lazySchema(() =>
+  securityAttachmentDataSchema.extend(exceptionItemBaseSchema.shape)
 );
 
 export type ExceptionAttachmentData = z.infer<typeof exceptionAttachmentDataSchema>;

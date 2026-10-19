@@ -57,6 +57,10 @@ export const discoverSessionInternalGetResponseSchema = discoverSessionGetRespon
 });
 
 export type DiscoverSessionInternalData = z.output<typeof discoverSessionInternalDataSchema>;
+export type DiscoverSessionInternalDataInput = z.input<typeof discoverSessionInternalDataSchema>;
 export type DiscoverSessionInternalResponse = z.output<
   typeof discoverSessionInternalResponseSchema
+>;
+export type DiscoverSessionInternalGetResponse = z.output<
+  typeof discoverSessionInternalGetResponseSchema
 >;

@@ -28,7 +28,8 @@ const baseRule: RuleApiResponse = {
   id: 'rule-1',
   kind: 'signal',
   enabled: true,
-  metadata: { name: 'Test Events Rule', version: 1 },
+  version: 1,
+  metadata: { name: 'Test Events Rule' },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '10m' },
   query: { base: 'FROM logs-* | STATS count() BY host.name' },
@@ -42,7 +43,7 @@ const alertRule: RuleApiResponse = {
   ...baseRule,
   id: 'rule-2',
   kind: 'alert',
-  metadata: { name: 'Test Alert Rule', version: 1 },
+  metadata: { name: 'Test Alert Rule' },
   query: { base: 'FROM metrics-* | STATS avg(cpu) BY host.name' },
   recovery: { strategy: 'query', query: 'FROM metrics-* | WHERE avg(cpu) < 0.5' },
   no_data: { strategy: 'ignore' },
@@ -123,7 +124,7 @@ describe('RuleConditions', () => {
     expect(screen.getByTestId('alertingV2RuleDetailsLookback')).toHaveTextContent('10m');
     expect(screen.getByTestId('alertingV2RuleDetailsKind')).toHaveTextContent('Alerts');
     expect(screen.getByTestId('alertingV2RuleDetailsAlertDelay')).toHaveTextContent(
-      'After 3 matches or 5m'
+      'After 4 matches or 5m'
     );
     expect(screen.getByTestId('alertingV2RuleDetailsRecoveryDelay')).toHaveTextContent('-');
     expect(screen.getByTestId('alertingV2RuleDetailsNoDataStrategy')).toHaveTextContent(
@@ -205,7 +206,7 @@ describe('RuleConditions', () => {
       ...alertRule,
       state_transition: { pending: { count: 3 }, recovering: { count: 0 } },
     });
-    expect(screen.getByTestId('alertingV2RuleDetailsAlertDelay')).toHaveTextContent('After 3');
+    expect(screen.getByTestId('alertingV2RuleDetailsAlertDelay')).toHaveTextContent('After 4');
     expect(screen.getByTestId('alertingV2RuleDetailsRecoveryDelay')).toHaveTextContent('Immediate');
   });
 
@@ -215,7 +216,7 @@ describe('RuleConditions', () => {
       state_transition: { pending: { count: 0 }, recovering: { count: 5 } },
     });
     expect(screen.getByTestId('alertingV2RuleDetailsAlertDelay')).toHaveTextContent('Immediate');
-    expect(screen.getByTestId('alertingV2RuleDetailsRecoveryDelay')).toHaveTextContent('After 5');
+    expect(screen.getByTestId('alertingV2RuleDetailsRecoveryDelay')).toHaveTextContent('After 6');
   });
 
   it('renders alert delay with timeframe only', () => {
@@ -243,7 +244,7 @@ describe('RuleConditions', () => {
       },
     });
     expect(screen.getByTestId('alertingV2RuleDetailsAlertDelay')).toHaveTextContent(
-      'After 3 matches and 5m'
+      'After 4 matches and 5m'
     );
   });
 
@@ -256,7 +257,7 @@ describe('RuleConditions', () => {
       },
     });
     expect(screen.getByTestId('alertingV2RuleDetailsRecoveryDelay')).toHaveTextContent(
-      'After 4 recoveries or 20m'
+      'After 5 recoveries or 20m'
     );
   });
 

@@ -7,8 +7,6 @@
 
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { ListPageTestProviders } from '../../test_utils/test_providers';
 import { ActionPoliciesListHeader } from './action_policies_list_header';
 
@@ -42,10 +40,25 @@ jest.mock('../../hooks/use_is_action_policies_license_valid', () => ({
   useIsActionPoliciesLicenseValid: () => mockIsLicenseValid,
 }));
 
-jest.mock('@kbn/core-di-browser', () => ({
-  ...jest.requireActual('@kbn/core-di-browser'),
-  useService: () => ({ capabilities: {}, getUrlForApp: jest.fn() }),
-}));
+jest.mock('@kbn/core-di-browser', () => {
+  const actual = jest.requireActual('@kbn/core-di-browser');
+  return {
+    ...actual,
+    useService: (token: symbol) => {
+      if (token === actual.CoreStart('docLinks')) {
+        return {
+          links: {
+            alerting: {
+              manageActionPolicies: 'https://docs.test/manage-action-policies',
+            },
+          },
+        };
+      }
+
+      return { capabilities: {}, getUrlForApp: jest.fn() };
+    },
+  };
+});
 
 const onCreatePolicy = jest.fn();
 const onCreateWithAgent = jest.fn();
@@ -75,49 +88,41 @@ describe('ActionPoliciesListHeader', () => {
     mockIsLicenseValid = true;
   });
 
-  it('renders the page title and experimental badge', () => {
+  it('renders the create split button when the user can write and the list is populated', async () => {
     renderHeader();
 
-    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Action Policies');
-    expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
+    expect(await screen.findByTestId('createActionPolicyButton')).toBeInTheDocument();
+    expect(
+      await screen.findByTestId('createActionPolicyButton-secondary-button')
+    ).toBeInTheDocument();
   });
 
-  it('renders the create split button when the user can write and the list is populated', () => {
+  it('calls onCreatePolicy when the primary create button is clicked', () => {
     renderHeader();
 
-    expect(screen.getByTestId('createActionPolicyButton')).toBeInTheDocument();
-    expect(screen.getByTestId('createActionPolicyButton-secondary-button')).toBeInTheDocument();
-  });
-
-  it('calls onCreatePolicy when the primary create button is clicked', async () => {
-    const user = userEvent.setup({ delay: null });
-    renderHeader();
-
-    await user.click(screen.getByTestId('createActionPolicyButton'));
+    fireEvent.click(screen.getByTestId('createActionPolicyButton'));
 
     expect(onCreatePolicy).toHaveBeenCalledTimes(1);
     expect(onCreateWithAgent).not.toHaveBeenCalled();
   });
 
   it('calls onCreateWithAgent from the split-button dropdown', async () => {
-    const user = userEvent.setup({ delay: null });
     renderHeader();
 
-    await user.click(screen.getByTestId('createActionPolicyButton-secondary-button'));
+    fireEvent.click(screen.getByTestId('createActionPolicyButton-secondary-button'));
     await waitFor(() =>
       expect(screen.getByTestId('createActionPolicyWithAgentButton')).toBeInTheDocument()
     );
     expect(screen.getByTestId('createActionPolicyWithAgentButton')).toHaveTextContent(
       'Create with agent (Experimental)'
     );
-    await user.click(screen.getByTestId('createActionPolicyWithAgentButton'));
+    fireEvent.click(screen.getByTestId('createActionPolicyWithAgentButton'));
 
     expect(onCreateWithAgent).toHaveBeenCalledTimes(1);
     expect(onCreatePolicy).not.toHaveBeenCalled();
   });
 
   it('disables the agent option (does not hide it) when agent builder is unavailable', async () => {
-    const user = userEvent.setup({ delay: null });
     mockAreAgentBuilderSkillsAvailable = false;
     mockAgentBuilderSkillsRequirements = {
       hasAgentBuilderCapability: false,
@@ -125,7 +130,7 @@ describe('ActionPoliciesListHeader', () => {
     };
     renderHeader();
 
-    await user.click(screen.getByTestId('createActionPolicyButton-secondary-button'));
+    fireEvent.click(screen.getByTestId('createActionPolicyButton-secondary-button'));
     await waitFor(() =>
       expect(screen.getByTestId('createActionPolicyWithAgentButton')).toBeInTheDocument()
     );
@@ -170,8 +175,14 @@ describe('ActionPoliciesListHeader', () => {
       mockIsLicenseValid = false;
       renderHeader();
 
-      expect(screen.getByTestId('createActionPolicyButton')).toBeDisabled();
-      expect(screen.getByTestId('createActionPolicyButton-secondary-button')).toBeDisabled();
+      expect(screen.getByTestId('createActionPolicyButton')).toHaveAttribute(
+        'aria-disabled',
+        'true'
+      );
+      expect(screen.getByTestId('createActionPolicyButton-secondary-button')).toHaveAttribute(
+        'aria-disabled',
+        'true'
+      );
       expect(screen.getByTestId('actionPoliciesLicenseCallout')).toBeInTheDocument();
     });
 

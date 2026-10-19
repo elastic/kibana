@@ -114,6 +114,26 @@ describe('hydrateOnboardingSession', () => {
     expect(auth).not.toHaveProperty('agentPolicyId');
   });
 
+  it('agent-based resume records that the settings were confirmed under agent-based', async () => {
+    mockSendGet.mockResolvedValue({
+      item: makeItem({ connectorId: undefined, mechanisms: ['agent_based'], agentPolicyIds: [] }),
+    });
+    await hydrateOnboardingSession(INTEGRATION_ID, DEPLOYMENT_ID);
+    const auth = JSON.parse(
+      sessionStorage.getItem(`onboarding.${INTEGRATION_ID}.authenticateAndDeployStep`) ?? 'null'
+    );
+    expect(auth).toMatchObject({ serviceSettingsMethod: 'agent_based' });
+  });
+
+  it('managed resume does not set serviceSettingsMethod, so switching to agent-based still warns', async () => {
+    mockSendGet.mockResolvedValue({ item: makeItem({ mechanisms: ['managed_integration'] }) });
+    await hydrateOnboardingSession(INTEGRATION_ID, DEPLOYMENT_ID);
+    const auth = JSON.parse(
+      sessionStorage.getItem(`onboarding.${INTEGRATION_ID}.authenticateAndDeployStep`) ?? 'null'
+    );
+    expect(auth).not.toHaveProperty('serviceSettingsMethod');
+  });
+
   it('agent-based resume with no policies: sets agentHostsMode:new', async () => {
     mockSendGet.mockResolvedValue({
       item: makeItem({
@@ -187,6 +207,36 @@ describe('hydrateOnboardingSession', () => {
       sessionStorage.getItem(`onboarding.${INTEGRATION_ID}.detectAndReviewStep`) ?? 'null'
     );
     expect(detect?.ecfStacks).toBeUndefined();
+  });
+
+  it('restores ecfLaunchStep from ecfStacks including serviceIds for staleness detection', async () => {
+    const ecfStacks = [
+      {
+        family: 'unified',
+        stackName: 'my-stack',
+        templateVersion: '1.10.0',
+        stackArn: 'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/uuid',
+        serviceIds: ['cloudtrail', 'elb'],
+      },
+    ];
+    mockSendGet.mockResolvedValue({ item: makeItem({ ecfStacks }) });
+    await hydrateOnboardingSession(INTEGRATION_ID, DEPLOYMENT_ID);
+    const launchStep = JSON.parse(
+      sessionStorage.getItem(`onboarding.${INTEGRATION_ID}.ecfLaunchStep`) ?? 'null'
+    );
+    expect(launchStep?.launchedFamilies).toEqual(['unified']);
+    expect(launchStep?.stackNames).toEqual({ unified: 'my-stack' });
+    expect(launchStep?.stackVersions).toEqual({ unified: '1.10.0' });
+    expect(launchStep?.stackArns).toEqual({
+      unified: 'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/uuid',
+    });
+    expect(launchStep?.launchedServiceIds).toEqual({ unified: ['cloudtrail', 'elb'] });
+  });
+
+  it('does not write ecfLaunchStep when ecfStacks is absent', async () => {
+    mockSendGet.mockResolvedValue({ item: makeItem({ ecfStacks: undefined }) });
+    await hydrateOnboardingSession(INTEGRATION_ID, DEPLOYMENT_ID);
+    expect(sessionStorage.getItem(`onboarding.${INTEGRATION_ID}.ecfLaunchStep`)).toBeNull();
   });
 });
 

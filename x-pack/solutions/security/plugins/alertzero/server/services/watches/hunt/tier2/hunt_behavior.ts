@@ -17,8 +17,9 @@ import type {
   HuntIncompleteness,
   HuntIncompleteReason,
 } from '@kbn/alertzero-common';
-import { buildMatchesRequired, isIndexPatternAllowed } from '../common/matches_required';
-import { getKnownHuntIndexPatterns } from '../common/resolve_index_scope';
+import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
+import type { HuntBehaviorModels } from '../types';
+import { buildMatchesRequired } from '../common/matches_required';
 import {
   huntBehaviorLlmExtractionSchema,
   EXTRACTION_PROMPT,
@@ -76,11 +77,7 @@ const severityToRiskScore = (severity: SeverityLevel): number => {
   }
 };
 
-const sanitizeRuleName = (
-  techniqueId: string,
-  techniqueName: string,
-  reportId?: string
-): string => {
+const buildHuntTitle = (techniqueId: string, techniqueName: string, reportId?: string): string => {
   const safe = techniqueName.replace(/[()\/\\]/g, '').trim();
   return reportId
     ? `Hunt: ${safe} (${techniqueId}) [${reportId.slice(0, 8)}]`
@@ -101,10 +98,10 @@ const commentBlock = (lines: string[]): string =>
 
 /**
  * Non-executable placeholder when grounded generation is unavailable or fails.
- * Never emits a FROM clause — a prior `FROM *` stub was unsafe to ship as a
- * proposed rule even though the execute path skipped it.
+ * Never emits a FROM clause — a prior `FROM *` stub was unsafe to leave
+ * executable even though the execute path skipped it.
  */
-const proposedEsqlRuleUnavailable = ({
+const huntQueryUnavailable = ({
   technique_id,
   technique_name,
   tactic_ids,
@@ -122,19 +119,19 @@ const proposedEsqlRuleUnavailable = ({
   severity: SeverityLevel;
   report_id?: string;
 }): string => {
-  const name = sanitizeRuleName(technique_id, technique_name, report_id);
+  const title = buildHuntTitle(technique_id, technique_name, report_id);
   return commentBlock([
-    `// rule_name: ${name}`,
+    `// hunt: ${title}`,
     `// technique: ${technique_id} (${technique_name})`,
     `// tactics: ${tactic_ids.join(', ') || '<unmapped>'}`,
     `// severity: ${severity}  confidence: ${confidence.toFixed(2)}`,
     `// evidence: ${evidence_quote.slice(0, 120)}`,
-    `// Grounded ES|QL generation unavailable; no executable query proposed.`,
+    `// Grounded ES|QL generation unavailable; no hunt query executed.`,
   ]);
 };
 
 const buildGroundedEsqlHeader = (b: {
-  rule_name: string;
+  title: string;
   severity: SeverityLevel;
   risk_score: number;
   technique_id: string;
@@ -144,8 +141,7 @@ const buildGroundedEsqlHeader = (b: {
   commentBlock([
     `// Generated from hunt.hunt_behavior — grounded in the report's extracted`,
     `// IOCs/behaviors and validated against the target index mappings.`,
-    `// Review the FROM clause and artifact values before enabling.`,
-    `// rule_name: ${b.rule_name}`,
+    `// hunt: ${b.title}`,
     `// severity: ${b.severity}  risk_score: ${b.risk_score}`,
     `// mitre_attack: ${b.technique_id}${
       b.parent_technique_id ? ` (parent ${b.parent_technique_id})` : ''
@@ -155,6 +151,14 @@ const buildGroundedEsqlHeader = (b: {
 
 const MAX_ESQL_PROMPT_IOCS = 30;
 const MAX_ESQL_PROMPT_TEXT_CHARS = 6000;
+/**
+ * Aggregate budget for the sample-events section, alongside `summarizeHit`'s own per-event
+ * cap. `max_tier2_sample_events` (up to 50) bounds the array length but not its total size, so
+ * without this a full page of events is ~100 KB repeated once per behavior (up to 20 calls),
+ * either a large token bill or a context-limit failure — which surfaces as the retryable
+ * `generation_failed`, so the run comes back and does it again.
+ */
+const MAX_ESQL_PROMPT_SAMPLE_EVENTS_CHARS = 8000;
 /** Concurrent `generateEsql` calls; each one is a multi-step LLM graph plus mapping lookups. */
 const ESQL_GENERATION_CONCURRENCY = 3;
 /**
@@ -166,12 +170,14 @@ const ESQL_GENERATION_CONCURRENCY = 3;
  * `behaviors`, they just do not spend a generation call.
  */
 const MAX_GENERATED_BEHAVIORS = 20;
-/** LIMIT the generator writes into a proposed rule when the caller has no row bound. */
-const DEFAULT_PROPOSED_RULE_LIMIT = 100;
+/** Matches the `evidence_quote` cap of the package-report step input. */
+const MAX_EVIDENCE_QUOTE_CHARS = 2000;
+/** LIMIT the generator writes into a hunt query when the caller has no row bound. */
+const DEFAULT_HUNT_QUERY_LIMIT = 100;
 /**
  * Generation target when neither Tier 1 hits nor the scope name an index (the
  * standalone route). Letting the generator discover one lands on a dated
- * physical index, which is never what a proposed rule should cite.
+ * physical index, which is never what a hunt query should cite.
  */
 const DEFAULT_GENERATION_INDEX = 'logs-*';
 
@@ -205,7 +211,7 @@ const executeValidatedEsql = async ({
   esql,
   window,
   row_limit,
-  requiredIndices,
+  allowedIndices,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
@@ -213,7 +219,7 @@ const executeValidatedEsql = async ({
   esql: string;
   window: { from: string; to: string };
   row_limit: number;
-  requiredIndices: string[];
+  allowedIndices: string[];
 }): Promise<{
   execution: BehaviorExecution;
   affected_hosts?: string[];
@@ -222,11 +228,11 @@ const executeValidatedEsql = async ({
   affected_users_truncated?: boolean;
   hits?: HuntForThreatHit[];
 }> => {
-  const matchesRequired = buildMatchesRequired(requiredIndices);
+  const matchesRequired = buildMatchesRequired(allowedIndices);
 
   try {
     const prepared = prepareEsqlForExecute(esql);
-    const sourcesAllowed = assertEsqlSourcesAllowed(prepared, requiredIndices);
+    const sourcesAllowed = assertEsqlSourcesAllowed(prepared, allowedIndices);
     if (!sourcesAllowed.ok) {
       logger.warn(
         `[hunt:esql] execute for ${techniqueId} refused — ${sourcesAllowed.reason}. ` +
@@ -357,64 +363,36 @@ const executeValidatedEsql = async ({
 };
 
 /**
- * Strip a concrete backing index to the integration stream the hit came from
- * (`.ds-logs-okta.system-default-2026.09.01-000001` → `logs-okta.system-default`).
- * A discovered scope already hands over wildcard patterns; those stay as-is.
+ * Target for `generateEsql`: one query over the full allowed scope
+ * (`tier2_targets`, threaded through as `allowedIndices`), not narrowed to
+ * whichever concrete index Tier 1's per-index buckets happened to hit. A
+ * coincidental IOC match landing in an unrelated dataset that shares a
+ * wildcard can no longer misdirect the FROM this way, since the FROM
+ * always covers the whole allowed scope regardless of which specific bucket
+ * confirmed the hit. Per-behavior host-vs-cloud target choice is future work.
  */
-const matchedIndexBase = (index: string): string => {
-  const base = index.replace(/^\.ds-/, '').replace(/[-.]\d{4}[.-]\d{2}[.-]\d{2}.*$/, '');
-  return base;
+const resolveGenerationIndex = (allowedIndices: string[]): string => {
+  // Exclusion entries (`-logs-elastic_agent*`) belong to the search, not to a FROM.
+  const positives = allowedIndices.filter((pattern) => !pattern.startsWith('-'));
+  return positives.length > 0 ? positives.join(',') : DEFAULT_GENERATION_INDEX;
 };
 
 /**
- * Wildcard patterns for the integrations that produced Tier 1 hits. Prefer the
- * stream wildcard (`logs-okta.system-default*`) so generation covers every
- * generation of that stream, but keep the exact allowed name when adding `*`
- * would cross an exclusion (`logs-elastic` is searchable under `logs-*` with
- * `-logs-elastic_agent*`, while `logs-elastic*` is not).
+ * Caps the joined sample-events section to `maxChars` by keeping as many whole events,
+ * in order, as fit the budget — always at least the first, even if it alone exceeds it,
+ * so one oversized event cannot empty the section. Bounding by whole events rather than
+ * slicing the joined string keeps every kept event complete instead of cut off mid-line.
  */
-const matchedIndexPatterns = (
-  articleContext: HuntBehaviorArticleContext | undefined,
-  allowlist: string[]
-): string[] => [
-  ...new Set(
-    (articleContext?.matched_indices ?? [])
-      .map((index) => {
-        const base = matchedIndexBase(index);
-        if (base.endsWith('*')) {
-          return isIndexPatternAllowed(base, allowlist) ? base : null;
-        }
-        const wildcarded = `${base}*`;
-        if (isIndexPatternAllowed(wildcarded, allowlist)) return wildcarded;
-        if (isIndexPatternAllowed(base, allowlist)) return base;
-        return null;
-      })
-      .filter((pattern): pattern is string => pattern !== null)
-  ),
-];
-
-/**
- * Target for `generateEsql`. Prefer integrations with confirmed hits that sit
- * inside the allowlist (required scope when present, otherwise every known
- * technology pattern), then the scope's required patterns, then the generic
- * logs pattern. Caller-supplied `matched_indices` never steer generation at
- * indices outside that allowlist.
- */
-const resolveGenerationIndex = (
-  articleContext: HuntBehaviorArticleContext | undefined,
-  requiredIndices: string[]
-): string => {
-  const allowlist = requiredIndices.length > 0 ? requiredIndices : getKnownHuntIndexPatterns();
-  const matched = matchedIndexPatterns(articleContext, allowlist);
-  if (matched.length > 0) return matched.join(',');
-  // Exclusion entries (`-logs-elastic_agent*`) belong to the search, not to a FROM.
-  // Filter positives the same way matched indices are filtered: under a broad scope
-  // `logs-*` itself is refused because it overlaps the agent exclusions.
-  const positives = requiredIndices
-    .filter((pattern) => !pattern.startsWith('-'))
-    .filter((pattern) => isIndexPatternAllowed(pattern, allowlist));
-  if (positives.length > 0) return positives.join(',');
-  return DEFAULT_GENERATION_INDEX;
+const boundSampleEvents = (events: string[], maxChars: number): string[] => {
+  const kept: string[] = [];
+  let total = 0;
+  for (const event of events) {
+    const next = total + event.length + 1; // +1 for the joining newline
+    if (kept.length > 0 && next > maxChars) break;
+    kept.push(event);
+    total = next;
+  }
+  return kept;
 };
 
 /** Report-level grounding shared by every per-behavior generation call. */
@@ -429,8 +407,12 @@ const buildGenerationContext = ({
 }): string => {
   const sections: string[] = [];
   if (articleContext?.sample_events?.length) {
+    const boundedEvents = boundSampleEvents(
+      articleContext.sample_events,
+      MAX_ESQL_PROMPT_SAMPLE_EVENTS_CHARS
+    );
     sections.push(
-      `--- SAMPLE MATCHED ENVIRONMENT EVENTS ---\n${articleContext.sample_events
+      `--- SAMPLE MATCHED ENVIRONMENT EVENTS ---\n${boundedEvents
         .map((evt) => `- ${evt}`)
         .join('\n')}`
     );
@@ -454,42 +436,39 @@ const buildGenerationContext = ({
  * falls back to a non-executable placeholder (no FROM clause).
  */
 const generateGroundedEsql = async ({
-  model,
+  esqlModel,
   esClient,
   logger,
   behaviors,
   text,
   iocs,
   articleContext,
-  requiredIndices,
+  allowedIndices,
   rowLimit,
 }: {
-  model: ScopedModel;
+  esqlModel: ScopedModel;
   esClient: ElasticsearchClient;
   logger: Logger;
   behaviors: ValidatedBehavior[];
   text: string;
   iocs?: HuntBehaviorIoc[];
   articleContext?: HuntBehaviorArticleContext;
-  requiredIndices: string[];
+  allowedIndices: string[];
   rowLimit: number;
 }): Promise<Map<string, string>> => {
-  const index = resolveGenerationIndex(articleContext, requiredIndices);
+  const index = resolveGenerationIndex(allowedIndices);
   const additionalContext = buildGenerationContext({ text, iocs, articleContext });
   // The schema probe runs the model's FROM before the publish/execute scope gate, so gate the
   // client it runs on with the same allowlist — an out-of-scope probe is refused before it
   // reaches Elasticsearch, and generation falls back to the non-executable placeholder.
-  const probeClient = scopedEsqlProbeClient(
-    esClient,
-    requiredIndices.length > 0 ? requiredIndices : getKnownHuntIndexPatterns()
-  );
+  const probeClient = scopedEsqlProbeClient(esClient, allowedIndices);
 
   const entries = await pMap(
     behaviors,
     async (behavior): Promise<[string, string] | undefined> => {
       try {
         const { query, error } = await generateEsql({
-          model,
+          model: esqlModel,
           esClient: probeClient,
           logger,
           nlQuery:
@@ -582,10 +561,11 @@ const renderArticleContext = (context: HuntBehaviorArticleContext | undefined): 
 };
 
 export const huntBehavior = async (
-  model: ScopedModel,
+  models: HuntBehaviorModels,
   logger: Logger,
   params: HuntBehaviorParams,
-  esClient?: ElasticsearchClient
+  esClient?: ElasticsearchClient,
+  mitreDataClient?: MitreAttackDataClient
 ): Promise<HuntBehaviorResult> => {
   const {
     text,
@@ -596,17 +576,53 @@ export const huntBehavior = async (
     window,
     size,
     row_limit: rowLimitFromParams,
-    required_indices: requiredIndices = [],
+    allowed_indices: allowedIndices = [],
   } = params;
 
   const rowLimit = size ?? rowLimitFromParams;
   const canExecute =
     window !== undefined &&
     rowLimit !== undefined &&
-    requiredIndices.length > 0 &&
+    allowedIndices.length > 0 &&
     esClient !== undefined;
 
-  const structured = model.chatModel.withStructuredOutput(huntBehaviorLlmExtractionSchema);
+  // Load the catalog first so a run without one pays for no model call. An empty catalog is a
+  // deployment-side gap (population failed or data missing), not evidence the model invented ids.
+  const { techniqueById, subtechniqueById } = await getMitreCatalog({
+    mitreDataClient,
+    logger,
+  });
+  if (techniqueById.size === 0 && subtechniqueById.size === 0) {
+    logger.warn(
+      '[hunt:extract] the managed MITRE ATT&CK data is unavailable; extraction was skipped and ' +
+        'no technique was verified or hunted.'
+    );
+    // Nothing was extracted, so there is no per-technique gap to name: one report-level
+    // entry (no technique_id), retryable by `completeness.ts`.
+    return {
+      status: 'no_behaviors_validated',
+      report_id: reportId,
+      behaviors: [],
+      indexed_behaviors: [],
+      has_hit: false,
+      incomplete: [
+        {
+          reason: 'catalog_unavailable',
+          detail:
+            'The managed MITRE ATT&CK data is unavailable (mitreAttack plugin disabled, ' +
+            'population failed, or data missing), so no technique could be extracted or ' +
+            'verified and the report was not hunted.',
+        },
+      ],
+      next_step:
+        'Managed MITRE ATT&CK data is unavailable; retry the hunt once the mitreAttack plugin ' +
+        'has populated its data.',
+    };
+  }
+
+  const structured = models.extraction.chatModel.withStructuredOutput(
+    huntBehaviorLlmExtractionSchema
+  );
   const contextBlock = renderArticleContext(articleContext);
   const result = (await structured.invoke(
     `${EXTRACTION_PROMPT}${contextBlock}\n\n--- REPORT TEXT ---\n${text}`
@@ -638,7 +654,6 @@ export const huntBehavior = async (
   const droppedIds: string[] = [];
   const ungroundedQuoteIds: string[] = [];
 
-  const { techniqueById, subtechniqueById } = getMitreCatalog();
   for (const candidate of candidates) {
     const technique = techniqueById.get(candidate.technique_id);
     const subtechnique = technique ? undefined : subtechniqueById.get(candidate.technique_id);
@@ -656,7 +671,7 @@ export const huntBehavior = async (
       continue;
     }
     // A revoked id resolves to its live successor; carry the live id forward so
-    // the proposed rule and the indexed projection never cite a retired technique.
+    // the hunt query and the indexed projection never cite a retired technique.
     const techniqueId = entry.id;
     // One behavior per live technique id. The LLM can emit the same id twice
     // (or a revoked id alongside its successor); generation, execution, and the
@@ -673,13 +688,15 @@ export const huntBehavior = async (
     const parentTechniqueId = subtechnique?.parentTechniqueId;
     validated.push({
       ...candidate,
+      // Bounded for packaging's input schema; grounding above already used the full quote.
+      evidence_quote: candidate.evidence_quote.slice(0, MAX_EVIDENCE_QUOTE_CHARS),
       technique_id: techniqueId,
       confidence: candidate.llm_confidence,
       technique_name: entry.name,
       reference: entry.reference,
       tactic_ids: tacticIds,
       ...(parentTechniqueId ? { parent_technique_id: parentTechniqueId } : {}),
-      proposed_esql_rule: proposedEsqlRuleUnavailable({
+      validated_esql: huntQueryUnavailable({
         technique_id: techniqueId,
         technique_name: entry.name,
         tactic_ids: tacticIds,
@@ -689,7 +706,7 @@ export const huntBehavior = async (
         report_id: reportId,
         ...(parentTechniqueId ? { parent_technique_id: parentTechniqueId } : {}),
       }),
-      rule_name: sanitizeRuleName(techniqueId, entry.name, reportId),
+      title: buildHuntTitle(techniqueId, entry.name, reportId),
       severity,
       risk_score: severityToRiskScore(severity),
       // No reason yet: generation below either fills this in with a real query's
@@ -760,15 +777,15 @@ export const huntBehavior = async (
       );
     }
     const groundedEsql = await generateGroundedEsql({
-      model,
+      esqlModel: models.esql,
       esClient,
       logger,
       behaviors: generationTargets,
       text,
       iocs,
       articleContext,
-      requiredIndices,
-      rowLimit: rowLimit ?? DEFAULT_PROPOSED_RULE_LIMIT,
+      allowedIndices,
+      rowLimit: rowLimit ?? DEFAULT_HUNT_QUERY_LIMIT,
     });
     for (const behavior of validated) {
       // Budget-skipped behaviors are already recorded above; re-reporting them here
@@ -789,13 +806,9 @@ export const huntBehavior = async (
       // grounded and authoritative to whoever picks it up in Investigation, so a
       // query reaching outside the indices a hunt may read must not be handed on
       // as one — it keeps the non-executable placeholder instead. The allowlist is
-      // the one generation was steered by: the required scope when there is one,
-      // every known technology pattern otherwise, since a caller that passed no
-      // scope still never asked for `.kibana-*` or `*`.
-      const sourcesAllowed = assertEsqlSourcesAllowed(
-        prepareEsqlForExecute(esql),
-        requiredIndices.length > 0 ? requiredIndices : getKnownHuntIndexPatterns()
-      );
+      // the one generation was steered by; an empty one allows nothing, so a caller
+      // that passed no scope cannot reach `.kibana-*` or `*`.
+      const sourcesAllowed = assertEsqlSourcesAllowed(prepareEsqlForExecute(esql), allowedIndices);
       if (!sourcesAllowed.ok) {
         logger.warn(
           `[hunt:esql] discarding the generated query for ${behavior.technique_id} — ` +
@@ -833,7 +846,7 @@ export const huntBehavior = async (
         );
         continue;
       }
-      behavior.proposed_esql_rule = `${buildGroundedEsqlHeader(behavior)}\n${esql}`;
+      behavior.validated_esql = `${buildGroundedEsqlHeader(behavior)}\n${esql}`;
       if (!canExecute) continue;
       const executed = await executeValidatedEsql({
         esClient,
@@ -842,7 +855,7 @@ export const huntBehavior = async (
         esql,
         window: window!,
         row_limit: rowLimit!,
-        requiredIndices,
+        allowedIndices,
       });
       behavior.execution = executed.execution;
       const executeReason = executed.execution.inconclusive_reason;

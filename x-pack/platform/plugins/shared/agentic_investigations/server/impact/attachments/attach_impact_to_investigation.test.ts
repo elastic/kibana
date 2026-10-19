@@ -71,6 +71,7 @@ describe('attachImpactToInvestigation', () => {
       type: IMPACT_ATTACHMENT_TYPE,
       origin: 'impact-1',
       data: impact,
+      hidden: true,
     });
     expect(writeImpact.mock.invocationCallOrder[0]).toBeLessThan(
       create.mock.invocationCallOrder[0]

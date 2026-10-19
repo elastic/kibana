@@ -53,12 +53,12 @@ describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerles
         getFileRequestResponse = responseBody;
       }, 'get-file');
       submitCommand();
-      cy.contains('Retrieving the file from host.').should('exist');
+      cy.contains('get-file is pending').should('exist');
       cy.wait('@get-file').then(() => {
         sendActionResponse(getFileRequestResponse);
       });
-      cy.getByTestSubj('getFileSuccess').within(() => {
-        cy.contains('File retrieved from the host.');
+      cy.getByTestSubj('getFile-success').within(() => {
+        cy.contains('get-file completed successfully');
         cy.contains('(ZIP file passcode: elastic)');
         cy.contains(
           'Files are periodically deleted to clear storage space. Download and save file locally if needed.'

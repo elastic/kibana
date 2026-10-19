@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALERT_FLAPPING, ALERT_MAINTENANCE_WINDOW_IDS } from '@kbn/rule-data-utils';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import {
   mapClassicAlertToEpisode,
@@ -183,5 +184,30 @@ describe('mapClassicAlertToEpisode', () => {
     expect(episode.source_grouping).toEqual({
       'service.name': 'api',
     });
+  });
+
+  it('maps kibana.alert.flapping true to is_flapping true', () => {
+    const episode = mapClassicAlertToEpisode({ ...baseSource, [ALERT_FLAPPING]: true }, TEST_INDEX);
+    expect(episode.is_flapping).toBe(true);
+  });
+
+  it('defaults is_flapping to false when kibana.alert.flapping is absent', () => {
+    const episode = mapClassicAlertToEpisode(baseSource, TEST_INDEX);
+    expect(episode.is_flapping).toBe(false);
+  });
+
+  it.each([
+    [
+      ['mw-1', 'mw-2'],
+      ['mw-1', 'mw-2'],
+    ],
+    ['mw-1', ['mw-1']],
+    [undefined, []],
+  ])('maps the maintenance window ids %p onto %p', (source, expected) => {
+    const episode = mapClassicAlertToEpisode(
+      { ...baseSource, [ALERT_MAINTENANCE_WINDOW_IDS]: source },
+      TEST_INDEX
+    );
+    expect(episode.maintenance_window_ids).toEqual(expected);
   });
 });

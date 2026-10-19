@@ -520,13 +520,17 @@ describe('callKibanaApi', () => {
           'x-elastic-internal-origin': 'spoof',
           'x-elastic-internal-origin-request': 'spoof',
           'x-kibana-event-chain-depth': '99',
+          'x-client-authentication': 'invented-secret',
+          'es-secondary-x-client-authentication': 'invented-secret',
           'x-custom-trace-id': 'trace-1',
         },
       }
     );
 
     const headers = lastFetchHeaders();
-    // Core owns authorization; the explicit caller content type is preserved for JSON requests.
+    // Core owns authorization and the UIAM shared secret, and forwarding them would make the self
+    // client throw, so they are stripped here. The explicit caller content type is preserved for
+    // JSON requests.
     expect(headers.Authorization).toBeUndefined();
     expect(headers['content-type']).toBe('text/plain');
     expect(headers.cookie).toBeUndefined();
@@ -535,6 +539,8 @@ describe('callKibanaApi', () => {
     expect(headers['x-kbn-self-call']).toBeUndefined();
     expect(headers['x-elastic-internal-origin']).toBeUndefined();
     expect(headers['x-elastic-internal-origin-request']).toBeUndefined();
+    expect(headers['x-client-authentication']).toBeUndefined();
+    expect(headers['es-secondary-x-client-authentication']).toBeUndefined();
     // Engine-stamped, not caller-forgeable.
     expect(headers['x-kibana-event-chain-depth']).toBeUndefined();
     // Genuinely custom headers pass through untouched.

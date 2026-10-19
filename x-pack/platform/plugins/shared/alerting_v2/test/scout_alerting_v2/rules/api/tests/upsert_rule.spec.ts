@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { randomUUID } from 'crypto';
 import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { ID_MAX_LENGTH, MAX_DESCRIPTION_LENGTH, MAX_NAME_LENGTH } from '@kbn/alerting-v2-schemas';
@@ -48,7 +49,7 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
       });
       expect(response).toHaveStatusCode(201);
       expect(response.body.id).toBe(id);
-      expect(response.body.metadata).toStrictEqual({ ...body.metadata, version: 1 });
+      expect(response.body.metadata).toStrictEqual(body.metadata);
       expect(response.body.kind).toBe(body.kind);
       expect(response.body.schedule).toStrictEqual(body.schedule);
       expect(response.body.query).toStrictEqual(body.query);
@@ -56,7 +57,7 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
       const persisted = await apiServices.alertingV2.rules.get(id);
       expect(persisted.id).toBe(id);
       expect(persisted.metadata.name).toBe('created-via-upsert');
-      expect(persisted.metadata.version).toBe(1);
+      expect(persisted.version).toBe(1);
     }
   );
 
@@ -78,18 +79,16 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
       });
       expect(response).toHaveStatusCode(200);
       expect(response.body.id).toBe(created.id);
-      expect(response.body.metadata).toStrictEqual({
-        ...replacementBody.metadata,
-        version: created.metadata.version + 1,
-      });
+      expect(response.body.metadata).toStrictEqual(replacementBody.metadata);
       expect(response.body.schedule).toStrictEqual(replacementBody.schedule);
       expect(response.body.query).toStrictEqual(replacementBody.query);
       // createdAt / createdBy / enabled are preserved across an upsert-replace.
       expect(response.body.created_at).toBe(created.created_at);
       expect(response.body.created_by).toStrictEqual(created.created_by);
       expect(response.body.enabled).toBe(created.enabled);
-      // updatedAt is refreshed on every replace.
+      // updatedAt is refreshed and version advances on every replace.
       expect(response.body.updated_at).not.toBe(created.updated_at);
+      expect(response.body.version).toBe(created.version + 1);
     }
   );
 
@@ -108,6 +107,91 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
       const response = await apiClient.put(getRuleUrl(id), {
         headers: writerHeaders,
         body: buildCreateRuleData({ metadata: { name: 'replaced-while-disabled' } }),
+      });
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.enabled).toBe(false);
+
+      const reFetched = await apiServices.alertingV2.rules.get(id);
+      expect(reFetched.enabled).toBe(false);
+    }
+  );
+
+  apiTest(
+    'upsert: should create an enabled rule when the body omits enabled',
+    async ({ apiClient, apiServices }) => {
+      const id = `rule-created-enabled-by-default-${randomUUID()}`;
+      const response = await apiClient.put(getRuleUrl(id), {
+        headers: writerHeaders,
+        body: buildCreateRuleData({ metadata: { name: 'created-enabled-by-default' } }),
+      });
+      expect(response).toHaveStatusCode(201);
+      expect(response.body.enabled).toBe(true);
+
+      const persisted = await apiServices.alertingV2.rules.get(id);
+      expect(persisted.enabled).toBe(true);
+    }
+  );
+
+  apiTest(
+    'upsert: should create a disabled rule when the body sets enabled=false',
+    async ({ apiClient, apiServices }) => {
+      const id = `rule-created-disabled-${randomUUID()}`;
+      const response = await apiClient.put(getRuleUrl(id), {
+        headers: writerHeaders,
+        body: {
+          ...buildCreateRuleData({ metadata: { name: 'created-disabled' } }),
+          enabled: false,
+        },
+      });
+      expect(response).toHaveStatusCode(201);
+      expect(response.body.enabled).toBe(false);
+
+      const persisted = await apiServices.alertingV2.rules.get(id);
+      expect(persisted.enabled).toBe(false);
+    }
+  );
+
+  apiTest(
+    'upsert: should enable a disabled rule when the replace body sets enabled=true',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'to-be-enabled' } })
+      );
+      const id = created.id;
+
+      await apiServices.alertingV2.rules.bulkDisable({ ids: [id] });
+      expect((await apiServices.alertingV2.rules.get(id)).enabled).toBe(false);
+
+      const response = await apiClient.put(getRuleUrl(id), {
+        headers: writerHeaders,
+        body: {
+          ...buildCreateRuleData({ metadata: { name: 'now-enabled' } }),
+          enabled: true,
+        },
+      });
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.enabled).toBe(true);
+
+      const reFetched = await apiServices.alertingV2.rules.get(id);
+      expect(reFetched.enabled).toBe(true);
+    }
+  );
+
+  apiTest(
+    'upsert: should disable an enabled rule when the replace body sets enabled=false',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'to-be-disabled-via-put' } })
+      );
+      const id = created.id;
+      expect(created.enabled).toBe(true);
+
+      const response = await apiClient.put(getRuleUrl(id), {
+        headers: writerHeaders,
+        body: {
+          ...buildCreateRuleData({ metadata: { name: 'now-disabled' } }),
+          enabled: false,
+        },
       });
       expect(response).toHaveStatusCode(200);
       expect(response.body.enabled).toBe(false);
@@ -327,6 +411,33 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
       expect(response).toHaveStatusCode(403);
       const remaining = await apiServices.alertingV2.rules.find({ per_page: 100 });
       expect(remaining.items.map((rule) => rule.id)).not.toContain(id);
+    }
+  );
+
+  apiTest(
+    'upsert: replace does not merge nested query or metadata leaves',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'replace-me', description: 'original', tags: ['cpu'] },
+          query: {
+            base: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+            breach: { segment: 'WHERE count >= 10' },
+          },
+        })
+      );
+
+      const response = await apiClient.put(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: buildCreateRuleData({
+          metadata: { name: 'replaced' },
+          query: { base: 'FROM logs-* | LIMIT 10' },
+        }),
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.metadata).toStrictEqual({ name: 'replaced' });
+      expect(response.body.query).toStrictEqual({ base: 'FROM logs-* | LIMIT 10' });
     }
   );
 });
