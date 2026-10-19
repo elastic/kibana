@@ -11,6 +11,7 @@ import {
   esqlQuerySchema,
   queryFeatureSchema,
   queryTypeSchema,
+  significantEventTypeSchema,
   type StreamQuery,
 } from '../../queries';
 import {
@@ -54,6 +55,7 @@ export const generatedSignificantEventQuerySchema = lazySchema(() =>
     type: queryTypeSchema,
     title: z.string().max(MAX_TITLE_LENGTH),
     esql: esqlQuerySchema,
+    category: significantEventTypeSchema.optional(),
     severity_score: z.number().min(0).max(100),
     description: z.string().max(MAX_TEXT_LENGTH),
     evidence: z.array(z.string().max(MAX_TEXT_LENGTH)).optional(),
