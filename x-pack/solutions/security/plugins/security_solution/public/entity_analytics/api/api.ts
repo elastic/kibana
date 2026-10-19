@@ -23,9 +23,9 @@ import {
   ENTITY_DETAILS_AI_SUMMARY_INTERNAL_URL,
 } from '../../../common/entity_analytics/entity_analytics/constants';
 import type {
-  AnomalyOverviewRequestBody,
+  GetAnomalyOverviewRequestBodyInput,
   AnomalyOverviewResponse,
-  AnomalySummaryRequestBody,
+  GetAnomalySummaryRequestBodyInput,
   AnomalySummaryResponse,
   AssetCriticalityRecord,
   ConfigureRiskEngineSavedObjectRequestBodyInput,
@@ -1062,7 +1062,7 @@ export const useEntityAnalyticsRoutes = () => {
     }: {
       entityType: string;
       entityId: string;
-      body?: AnomalySummaryRequestBody;
+      body?: GetAnomalySummaryRequestBodyInput;
       signal?: AbortSignal;
       context?: KibanaExecutionContext;
     }) =>
@@ -1089,7 +1089,7 @@ export const useEntityAnalyticsRoutes = () => {
     }: {
       entityType: string;
       entityId: string;
-      body?: AnomalyOverviewRequestBody;
+      body?: GetAnomalyOverviewRequestBodyInput;
       signal?: AbortSignal;
       context?: KibanaExecutionContext;
     }) =>

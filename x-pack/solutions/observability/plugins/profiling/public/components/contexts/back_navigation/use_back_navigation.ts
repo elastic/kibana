@@ -10,12 +10,12 @@ import qs from 'query-string';
 import type { AppHeaderBack } from '@kbn/app-header';
 import { useLocation } from 'react-router-dom';
 import type { PathsOf } from '@kbn/typed-react-router-config';
-import { hasUsableProfilingData } from '@kbn/profiling-utils';
 import { useProfilingDependencies } from '../profiling_dependencies/use_profiling_dependencies';
 import { useProfilingStatus } from '../profiling_status/use_profiling_status';
 import type { ProfilingRoutes } from '../../../routing';
 import { PROFILING_PATHNAMES } from '../../../routing/pathnames';
 import { useSchemaQueryParam } from '../../../hooks/use_schema_query_param';
+import { hasProfilingData } from '../../../utils/has_profiling_data';
 
 // Routes that render a back button in AppHeader.
 // NOTE: This is compared against raw location.pathname, NOT via useProfilingRoutePath(), because
@@ -52,7 +52,7 @@ export const useBackNavigation = (): AppHeaderBack | undefined => {
   // With data from before 8.9.1, going back would only redirect to this page again.
   if (
     pathname === PROFILING_PATHNAMES.addDataInstructions &&
-    (!hasUsableProfilingData(data) || data.universalProfiling.hasLegacyData)
+    (!hasProfilingData(data) || data.universalProfiling.hasLegacyData)
   ) {
     return undefined;
   }

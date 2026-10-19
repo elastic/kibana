@@ -17,8 +17,12 @@ import type {
   ServiceEntity,
 } from '../../../../../common/api/entity_analytics';
 import type { HostItem, UserItem } from '../../../../../common/search_strategy';
+import {
+  buildEntityIdFilter,
+  RESOLVED_MODE_MAX_RECORDS,
+} from '../../../../../common/entity_analytics/entity_store/resolution_group';
 import { useEntityAnalyticsRoutes } from '../../../../entity_analytics/api/api';
-import type { EntityViewMode } from '../types';
+import type { EntityViewMode } from '../../../../../common/entity_analytics/entity_store/resolution_group';
 
 export const ENTITY_FROM_STORE_QUERY_KEY = 'ENTITY_FROM_STORE';
 
@@ -56,34 +60,6 @@ export function applyEntityStoreSearchCachePatch(
       return { ...previous, records };
     }
   );
-}
-
-export const RESOLVED_TO_FIELD = 'entity.relationships.resolution.resolved_to';
-
-/** Upper bound on records fetched for a resolution group; matches the API's `per_page` ceiling. */
-export const RESOLVED_MODE_MAX_RECORDS = 10_000;
-
-/**
- * Builds the store filter for `entityId` according to `mode`. In `resolved` mode the target is matched
- * on `entity.id` and its aliases on `entity.relationships.resolution.resolved_to`.
- */
-export function buildEntityIdFilter(
-  entityId: string,
-  mode: EntityViewMode
-): Record<string, unknown> {
-  if (mode === 'resolved') {
-    return {
-      bool: {
-        should: [{ term: { 'entity.id': entityId } }, { term: { [RESOLVED_TO_FIELD]: entityId } }],
-        minimum_should_match: 1,
-      },
-    };
-  }
-  return {
-    bool: {
-      filter: [{ term: { 'entity.id': entityId } }],
-    },
-  };
 }
 
 export function serializeIdentityFieldsForQueryKey(

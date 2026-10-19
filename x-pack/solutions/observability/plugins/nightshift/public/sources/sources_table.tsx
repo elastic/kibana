@@ -50,13 +50,14 @@ const PAGE_SIZE_OPTIONS = [25, 50, 100];
 interface ISourcesTableProps {
   sources: NightshiftSource[];
   onboardingResultMap: Record<string, SignificantEventsWorkflowStatusResult>;
-  loading?: boolean;
   searchText: string;
   selection?: EuiTableSelectionType<NightshiftSource>;
   /** When true, per-row onboard actions are disabled (global pause / status loading). */
   blocksActivity?: boolean;
   /** Sources whose onboard request is in flight or accepted and not yet reflected in status. */
   generatingSourceIds?: readonly string[];
+  /** Created or edited sources whose new run is not reported yet; their counts are stale. */
+  awaitingRunSourceIds?: readonly string[];
   /** Explains why onboard actions are disabled (loading / error / paused). */
   activityBlockTooltip?: string;
   canManage: boolean;
@@ -72,13 +73,13 @@ interface ISourcesTableProps {
 
 /** Catalog table with selection, inline enable switch, onboarding status and row actions. */
 export function SourcesTable({
-  loading,
   sources,
   onboardingResultMap,
   searchText,
   selection,
   blocksActivity = false,
   generatingSourceIds = [],
+  awaitingRunSourceIds = [],
   activityBlockTooltip,
   canManage,
   pendingEnabledSourceId,
@@ -204,6 +205,7 @@ export function SourcesTable({
         <KnowledgeIndicatorsColumn
           sourceId={source.id}
           streamOnboardingResult={onboardingResultMap[source.id]}
+          isAwaitingRun={awaitingRunSourceIds.includes(source.id)}
         />
       ),
     },
@@ -215,6 +217,7 @@ export function SourcesTable({
         <QueriesColumn
           sourceId={source.id}
           streamOnboardingResult={onboardingResultMap[source.id]}
+          isAwaitingRun={awaitingRunSourceIds.includes(source.id)}
         />
       ),
     },
@@ -246,7 +249,6 @@ export function SourcesTable({
       itemId="id"
       items={items}
       columns={columns}
-      loading={loading}
       selection={selection}
       noItemsMessage={NO_SOURCES_MESSAGE}
       sorting={{ sort: { field: 'title', direction: 'asc' } }}
