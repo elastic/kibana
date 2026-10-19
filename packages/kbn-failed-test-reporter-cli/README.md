@@ -48,12 +48,12 @@ the whole file, has it refreshed instead (`--no-update-issues` turns this off):
   is brought up to the report (`report.count`, `report.history`, `report.generatedAt`), and it
   keeps the test ids and branches recorded before, so `/skip` still covers a branch the suite
   stopped failing on this week;
-- a comment is posted when the suite failed since the owners were last notified, with the
+- a comment is posted when the suite failed since the newest report posted on the issue, with the
   report's numbers for the suite (the flaky tests, then the failures by error message, branch,
   target and pipeline) and how to skip it, at most every `--comment-interval-days` (default 3,
-  the daily pipeline starts at 7). The last notification is recorded as `report.notifiedAt`: the
-  report that filed the issue, whose team label gets the owners pinged, or the latest one that
-  commented, so failures in between are covered by the next comment. In `elastic/kibana`, a
+  the daily pipeline starts at 7). The newest report posted is the latest comment, recorded as
+  `report.commentedAt`, or until the first comment the report that filed the issue, so failures
+  in between are covered by the next comment. In `elastic/kibana`, a
   `kibanamachine` comment on a `failed-test` issue also runs the failed-test alert of `triage/`,
   a Slack message to the teams that opted in to existing-failure alerts (none at the time of
   writing); the alert reads `report.count` from the metadata to tell a new failure from an

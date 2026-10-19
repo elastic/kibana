@@ -12,6 +12,7 @@ import { updateIssueMetadata } from '../failed_tests_reporter/issue_metadata';
 import {
   FLAKY_TEST_SUITE_METADATA_PREFIX,
   flakySuiteIssueTitle,
+  lastPostedAt,
   readFlakySuiteIssueMetadata,
   refreshFlakySuiteIssueMetadata,
   renderFlakySuiteIssueBody,
@@ -533,8 +534,6 @@ describe('renderFlakySuiteIssueBody', () => {
       'report.history': [
         { generatedAt: '2026-09-09T09:04:41.000Z', builds: 509, failedBuilds: 49 },
       ],
-      // filing the issue notifies the owners: its team label gets them pinged
-      'report.notifiedAt': '2026-09-09T09:04:41.000Z',
     });
     expect(readFlakySuiteIssueMetadata('no metadata here')).toBeUndefined();
   });
@@ -630,7 +629,7 @@ describe('refreshing a suite issue', () => {
     const refreshed = refreshFlakySuiteIssueMetadata(filedBody(), suite, {
       report,
       previous,
-      notifies: false,
+      comment: false,
     });
 
     expect(textOf(refreshed)).toBe(textOf(filedBody()));
@@ -644,7 +643,7 @@ describe('refreshing a suite issue', () => {
     const { suite, report } = singleTestReport();
 
     const metadata = readFlakySuiteIssueMetadata(
-      refreshFlakySuiteIssueMetadata(filedBody(), suite, { report, previous, notifies: false })
+      refreshFlakySuiteIssueMetadata(filedBody(), suite, { report, previous, comment: false })
     );
 
     expect(metadata).toEqual({
@@ -658,19 +657,34 @@ describe('refreshing a suite issue', () => {
         ...previous['report.history'],
         { generatedAt: '2026-09-09T09:04:41.000Z', builds: 509, failedBuilds: 49 },
       ],
-      // not recorded before, so the oldest report kept stands in for the one that filed it
-      'report.notifiedAt': '2026-09-07T09:04:41.000Z',
     });
   });
 
-  it('records this report as the notification when the refresh comments', () => {
+  it('records this report as the last comment when the refresh comments, else keeps the last one', () => {
     const { suite, report } = singleTestReport();
+    const commented = { ...previous, 'report.commentedAt': '2026-09-08T09:04:41.000Z' };
 
-    const metadata = readFlakySuiteIssueMetadata(
-      refreshFlakySuiteIssueMetadata(filedBody(), suite, { report, previous, notifies: true })
+    const commenting = readFlakySuiteIssueMetadata(
+      refreshFlakySuiteIssueMetadata(filedBody(), suite, { report, previous, comment: true })
+    );
+    const silent = readFlakySuiteIssueMetadata(
+      refreshFlakySuiteIssueMetadata(filedBody(commented), suite, {
+        report,
+        previous: commented,
+        comment: false,
+      })
     );
 
-    expect(metadata?.['report.notifiedAt']).toBe('2026-09-09T09:04:41.000Z');
+    expect(commenting?.['report.commentedAt']).toBe('2026-09-09T09:04:41.000Z');
+    expect(silent?.['report.commentedAt']).toBe('2026-09-08T09:04:41.000Z');
+  });
+
+  it('takes the report that filed the issue as the last one posted until a comment is recorded', () => {
+    expect(lastPostedAt(previous)).toBe('2026-09-07T09:04:41.000Z');
+    expect(lastPostedAt({ ...previous, 'report.commentedAt': '2026-09-08T09:04:41.000Z' })).toBe(
+      '2026-09-08T09:04:41.000Z'
+    );
+    expect(lastPostedAt({ ...previous, 'report.history': [] })).toBeUndefined();
   });
 
   it('counts the reports of an issue filed before the count was recorded and caps the history', () => {
@@ -686,7 +700,7 @@ describe('refreshing a suite issue', () => {
       refreshFlakySuiteIssueMetadata(filedBody(uncounted), suite, {
         report,
         previous: uncounted,
-        notifies: false,
+        comment: false,
       })
     );
 

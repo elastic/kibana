@@ -59,8 +59,8 @@ export interface FlakySuiteIssueRefreshContext {
   report: FlakyTestReport;
   /** Metadata of the issue being refreshed, merged into the new one. */
   previous: RecordedFlakySuiteIssueMetadata;
-  /** The refresh comes with a comment, so this report notified the owners. */
-  notifies: boolean;
+  /** The refresh posts this report's numbers as a comment, recorded as `report.commentedAt`. */
+  comment: boolean;
 }
 
 export interface FlakySuiteIssueCommentContext {
@@ -99,10 +99,11 @@ export interface FlakySuiteIssueMetadata {
   /** One snapshot per report that found the suite flaky, oldest first. */
   'report.history': FlakySuiteReportSnapshot[];
   /**
-   * Newest report that notified the owners: the one that filed the issue, whose team label gets
-   * them pinged, or the latest that commented. Refreshes comment at most every few days from it.
+   * Newest report whose numbers were posted as a comment; absent until the first comment, while
+   * the body as filed is all the owners have seen. Refreshes comment at most every few days from
+   * it.
    */
-  'report.notifiedAt'?: string;
+  'report.commentedAt'?: string;
 }
 
 /** What an issue body records; older issues lack some of it. */
@@ -140,7 +141,7 @@ export const readFlakySuiteIssueMetadata = (
   const generatedAt = metadataValue(body, 'report.generatedAt');
   const count = metadataValue(body, 'report.count');
   const history = metadataValue(body, 'report.history');
-  const notifiedAt = metadataValue(body, 'report.notifiedAt');
+  const commentedAt = metadataValue(body, 'report.commentedAt');
   return {
     'suite.filePath': filePath,
     'suite.title': typeof title === 'string' ? title : undefined,
@@ -151,16 +152,16 @@ export const readFlakySuiteIssueMetadata = (
     'report.generatedAt': typeof generatedAt === 'string' ? generatedAt : undefined,
     'report.count': typeof count === 'number' ? count : undefined,
     'report.history': Array.isArray(history) ? history.filter(isSnapshot) : [],
-    'report.notifiedAt': typeof notifiedAt === 'string' ? notifiedAt : undefined,
+    'report.commentedAt': typeof commentedAt === 'string' ? commentedAt : undefined,
   };
 };
 
 /**
- * When the owners were last told about the suite; for issues filed before it was recorded, the
- * oldest report kept, which is the one that filed them until the history is capped.
+ * Newest report the owners can see on the issue: the latest comment or, before any comment, the
+ * report that filed it, the oldest kept in the history.
  */
-export const lastNotifiedAt = (metadata: RecordedFlakySuiteIssueMetadata): string | undefined =>
-  metadata['report.notifiedAt'] ?? metadata['report.history'][0]?.generatedAt;
+export const lastPostedAt = (metadata: RecordedFlakySuiteIssueMetadata): string | undefined =>
+  metadata['report.commentedAt'] ?? metadata['report.history'][0]?.generatedAt;
 
 const snapshot = (suite: FlakySuite, report: FlakyTestReport): FlakySuiteReportSnapshot => ({
   generatedAt: report.generatedAt.toISOString(),
@@ -214,12 +215,11 @@ export const flakySuiteIssueMetadata = (
   suite: FlakySuite,
   report: FlakyTestReport,
   previous?: RecordedFlakySuiteIssueMetadata,
-  notifies = false
+  comment = false
 ): FlakySuiteIssueMetadata => {
   const pipelines = failedPipelines(suite, report);
   const history = [...(previous?.['report.history'] ?? []), snapshot(suite, report)];
-  const notifiedAt =
-    !previous || notifies ? report.generatedAt.toISOString() : lastNotifiedAt(previous);
+  const commentedAt = comment ? report.generatedAt.toISOString() : previous?.['report.commentedAt'];
   return {
     'suite.filePath': suite.filePath,
     ...(suite.suiteTitle ? { 'suite.title': suite.suiteTitle } : {}),
@@ -239,7 +239,7 @@ export const flakySuiteIssueMetadata = (
       ? (previous['report.count'] ?? Math.max(previous['report.history'].length, 1)) + 1
       : 1,
     'report.history': history.slice(-MAX_REPORT_HISTORY),
-    ...(notifiedAt ? { 'report.notifiedAt': notifiedAt } : {}),
+    ...(commentedAt ? { 'report.commentedAt': commentedAt } : {}),
   };
 };
 
@@ -750,11 +750,11 @@ export const renderFlakySuiteIssueBody = (suite: FlakySuite, ctx: FlakySuiteIssu
 export const refreshFlakySuiteIssueMetadata = (
   body: string,
   suite: FlakySuite,
-  { report, previous, notifies }: FlakySuiteIssueRefreshContext
+  { report, previous, comment }: FlakySuiteIssueRefreshContext
 ): string =>
   updateIssueMetadata(
     body,
-    flakySuiteIssueMetadata(suite, report, previous, notifies),
+    flakySuiteIssueMetadata(suite, report, previous, comment),
     FLAKY_TEST_SUITE_METADATA_PREFIX
   );
 

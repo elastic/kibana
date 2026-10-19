@@ -18,7 +18,7 @@ import {
 } from '../failed_tests_reporter/github_api';
 import {
   flakySuiteIssueTitle,
-  lastNotifiedAt,
+  lastPostedAt,
   readFlakySuiteIssueMetadata,
   refreshFlakySuiteIssueMetadata,
   renderFlakySuiteIssueBody,
@@ -254,8 +254,8 @@ const daysBetween = (from: Date, to: Date): number =>
 interface Refresh {
   previous: RecordedFlakySuiteIssueMetadata;
   /**
-   * The issue is reopened, or the suite failed since the owners were last notified and that was
-   * at least `commentIntervalDays` ago.
+   * The issue is reopened, or the suite failed since the newest report posted on the issue, the
+   * body as filed or the latest comment, and that was at least `commentIntervalDays` ago.
    */
   comment: boolean;
   reopen: boolean;
@@ -285,12 +285,11 @@ const planRefresh = (
       ? { previous, comment: true, reopen: true }
       : undefined;
   }
-  const notifiedAt = lastNotifiedAt(previous);
-  const failedSinceNotified =
-    failedAt !== undefined && (!notifiedAt || failedAt > new Date(notifiedAt));
+  const postedAt = lastPostedAt(previous);
+  const failedSincePosted = failedAt !== undefined && (!postedAt || failedAt > new Date(postedAt));
   const due =
-    !notifiedAt || daysBetween(new Date(notifiedAt), report.generatedAt) >= commentIntervalDays;
-  return { previous, comment: failedSinceNotified && due, reopen: false };
+    !postedAt || daysBetween(new Date(postedAt), report.generatedAt) >= commentIntervalDays;
+  return { previous, comment: failedSincePosted && due, reopen: false };
 };
 
 const suiteRef = ({ filePath, suiteTitle }: FlakySuite): SuiteRef => ({
@@ -487,11 +486,7 @@ export const reportFlakySuiteIssues = async (
     { previous, comment, reopen }: Refresh
   ) => {
     const ref = suiteRef(suite);
-    const body = refreshFlakySuiteIssueMetadata(issue.body, suite, {
-      report,
-      previous,
-      notifies: comment,
-    });
+    const body = refreshFlakySuiteIssueMetadata(issue.body, suite, { report, previous, comment });
     try {
       await github.editIssue(issue.number, { body, ...(reopen ? { state: 'open' } : {}) });
       if (comment) {

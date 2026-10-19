@@ -598,18 +598,18 @@ describe('reportFlakySuiteIssues', () => {
       ]);
     });
 
-    it('records the comment as the last notification, so the next one waits for the interval', async () => {
+    it('records the comment, so the next one waits for the interval', async () => {
       const github = createGithubApi([suiteIssue(42)]);
 
       await run(github, { report: report() });
 
       const [[, { body }]] = github.editIssue.mock.calls;
-      expect(readFlakySuiteIssueMetadata(body)?.['report.notifiedAt']).toBe(
+      expect(readFlakySuiteIssueMetadata(body)?.['report.commentedAt']).toBe(
         GENERATED_AT.toISOString()
       );
     });
 
-    it('waits --comment-interval-days after the last notification, then covers the failures since', async () => {
+    it('waits --comment-interval-days after the filing report or the last comment, then covers the failures since', async () => {
       // filed two days before the report, after which the suite failed again
       const filedAt = new Date('2026-09-07T10:00:00.000Z');
       const recent = createGithubApi([suiteIssue(42, {}, filedAt)]);
@@ -621,9 +621,9 @@ describe('reportFlakySuiteIssues', () => {
       expect(recent.editIssue).toHaveBeenCalledTimes(1);
       expect(recent.addIssueComment).not.toHaveBeenCalled();
       expect(summary.actions[0]).toMatchObject({ action: 'updated', commented: false });
-      // the notification is not moved forward without a comment
+      // nothing is recorded without a comment: the filing report stays the last one posted
       const [[, { body }]] = recent.editIssue.mock.calls;
-      expect(readFlakySuiteIssueMetadata(body)?.['report.notifiedAt']).toBe(filedAt.toISOString());
+      expect(readFlakySuiteIssueMetadata(body)?.['report.commentedAt']).toBeUndefined();
       // two calendar days, even though the report ran earlier in the day than the filing one
       expect(due.addIssueComment).toHaveBeenCalledTimes(1);
     });
