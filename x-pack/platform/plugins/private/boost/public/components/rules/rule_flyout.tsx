@@ -54,7 +54,7 @@ import { CostEstimate } from '../cost_estimate';
 import { SupersedingRule, getSupersedingDescription } from './target_name';
 import { TargetStatus } from './target_status';
 import type { TargetPreview } from './pattern_matches';
-import { PatternMatchStatus, PatternMatches, getPartialPattern } from './pattern_matches';
+import { PatternMatches, getPartialPattern } from './pattern_matches';
 import { FLYOUT_WIDTH } from '../flyout_width';
 import { ProfileFlyoutContent } from '../profiles/profile_flyout';
 import {
@@ -515,13 +515,6 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
       label={i18n.translate('xpack.boost.ruleForm.patternLabel', {
         defaultMessage: 'Index pattern',
       })}
-      // How well the pattern matches, which is "0 matches" until there's a valid one.
-      labelAppend={
-        <PatternMatchStatus
-          exactCount={patternPreview.length}
-          partialCount={partialPreview.length}
-        />
-      }
       isInvalid={Boolean(patternError)}
       error={patternError}
       fullWidth
