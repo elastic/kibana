@@ -361,7 +361,7 @@ export const SEVERITY_OPTIONS = [
 export const UNCONFIRMED_EVENT_MAX_CONFIDENCE = 0.3;
 
 export const SEVERITY_CONTRACT_RULE = dedent`
-    Severity rates the situation the grounding evidence confirms, whatever triggered the detection. It is the assessing agent's own verdict, decided from the confirming signals and the queries run — never from p_value, change_point_type, alert volume, the rule's severity_score or how alarming the rule looks. A concrete non-benign error in a found off-topic row evidences its own observed-error event; assess it from that row's error signature and impact.
+    Severity rates the situation the grounding evidence confirms.
 
     Decide in order and stop at the first match:
     - "critical": a global outage affecting all or most customers; several distinct core operations confirmed blocked at once (for example balance, history, and payment together); a mandatory service, job, or platform-critical operation confirmed blocked end-to-end so the component can no longer perform its primary function — unless the block is confined to a single endpoint or lookup path affecting only that one operation, which stays at "high"; or confirmed active exposure of PII, PCI DSS data, SSNs, credentials, secrets, or tokens.
@@ -370,14 +370,12 @@ export const SEVERITY_CONTRACT_RULE = dedent`
     - "medium": minor confirmed degradation with limited reach, or the evidence never settled whether the operation fails to complete versus only logs an error or slows (no found row reports the operation's own request or job as not completing). Not for a confirmed failing operation merely because its share or breadth was not measured.
     - "low": confirmed recovery, or confirmed absence of impact: noise, a false alarm, or a non-issue, including an internal dependency error the system demonstrably tolerates.
 
-    Rate what the evidence shows, with the numbers measured: how much of the operation fails, how many parties are affected, and whether it is still happening. Evidence that could not be collected (a query that timed out or returned nothing) leaves the question unsettled.
-    When a failure signature was found but the evidence does not settle whether the operation completes, rate "medium"; when nothing was found, see "Nothing established". Weigh scope by what the operations do, not by how many detections fired.
-    Signals on the same operation overlap: rate that operation from its most direct failure measure (the share of attempts that fail, otherwise the share of log lines), never by adding shares across signals or taking the highest of differently scoped ones.
+    Rate what the evidence shows, with the numbers measured: how much of the operation fails, how many parties are affected, and whether it is still happening. Weigh scope by what the operations do, not by how many detections fired. Signals on the same operation overlap: rate it from its most direct failure measure (the share of attempts that fail, otherwise the share of log lines), never by adding shares across signals or taking the highest of differently scoped ones.
     A mandatory component is one that the event's blast_radius shows other services depending on; when it shows none, that clause does not apply.
 
-    Tie-break: when two adjacent tiers both match the same evidence, choose the lower only when the evidence leaves genuinely unresolved whether the operation still completes, and never below "medium" on that ground.
+    Tie-break: when two adjacent tiers fit the same evidence, choose the lower only when it is genuinely unresolved whether the operation still completes.
 
-    Nothing established: when no signal on the event shows a failure, degradation, or exposure (every query returned nothing, errored, or found only healthy rows), the event is "low" and the tie-break does not apply.
+    Nothing established: when no signal on the event shows a failure, degradation, or exposure (every query returned nothing, errored, or found only healthy rows), the event is "low".
   `;
 
 /** Canonical severity used by storage, APIs, and tools. */
