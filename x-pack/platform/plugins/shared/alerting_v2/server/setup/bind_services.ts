@@ -106,6 +106,8 @@ import { WorkflowService } from '../lib/services/workflow_service/workflow_servi
 import { WorkflowServiceToken } from '../lib/services/workflow_service/tokens';
 import { LicenseService } from '../lib/services/license_service/license_service';
 import { LicenseServiceToken } from '../lib/services/license_service/tokens';
+import { EbtService } from '../lib/services/ebt_service/ebt_service';
+import { EbtServiceToken } from '../lib/services/ebt_service/tokens';
 import { ApiKeyServiceSavedObjectsClientToken } from '../lib/services/api_key_service/tokens';
 import {
   API_KEY_PENDING_INVALIDATION_TYPE,
@@ -196,6 +198,8 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(WorkflowServiceToken).toService(WorkflowService);
   bind(LicenseService).toSelf().inSingletonScope();
   bind(LicenseServiceToken).toService(LicenseService);
+  bind(EbtService).toSelf().inSingletonScope();
+  bind(EbtServiceToken).toService(EbtService);
   bind(ResourceManager).toSelf().inSingletonScope();
 
   bind(EsServiceInternalToken)
