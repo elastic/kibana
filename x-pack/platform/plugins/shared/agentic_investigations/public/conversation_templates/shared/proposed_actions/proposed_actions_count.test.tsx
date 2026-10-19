@@ -141,12 +141,16 @@ describe('ProposedActionsCount', () => {
     );
   });
 
-  it('counts nothing else: pending and superseded proposals stay open', () => {
+  it('does not count proposals that are still pending or executing', () => {
     mockUseConversationProposals.mockReturnValue(
       withPages([
         {
           total: 3,
-          proposals: [{ status: 'pending' }, { status: 'superseded' }, { status: 'executing' }],
+          proposals: [
+            { status: 'pending' },
+            { decision: 'approved', status: 'executing' },
+            { status: 'pending' },
+          ],
         },
       ])
     );

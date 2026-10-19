@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 import { EuiText } from '@elastic/eui';
 import { useConversationProposals } from '@kbn/proposals-plugin/public';
+import { isTerminal } from '@kbn/proposals-common';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 export interface ProposedActionsCountProps {
@@ -26,13 +27,7 @@ export const ProposedActionsCount = ({ conversationId }: ProposedActionsCountPro
     () =>
       (data?.pages[0].proposals ?? []).reduce<number>(
         (count, proposal) =>
-          count +
-          (proposal.status !== 'failed' &&
-          proposal.status !== 'pending' &&
-          proposal.status !== 'executing' &&
-          (proposal.status === 'expired' || proposal.decision)
-            ? 1
-            : 0),
+          count + (isTerminal(proposal.status) && proposal.status !== 'failed' ? 1 : 0),
         0
       ),
     [data]
