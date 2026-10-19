@@ -91,7 +91,7 @@ apiTest.describe(
     });
 
     apiTest(
-      'reports unknown health to a reader without Elasticsearch view privileges',
+      'reports ok health to a reader with only the implicit view grant',
       async ({ apiClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser(NIGHTSHIFT_READ_ONLY_NO_ES_ROLE);
 
@@ -105,7 +105,7 @@ apiTest.describe(
 
         const fetched = await getSource(apiClient, cookieHeader, sourceId);
         expect(fetched).toHaveStatusCode(200);
-        expect(fetched.body.health).toBe('unknown');
+        expect(fetched.body.health).toBe('ok');
       }
     );
 

@@ -11,7 +11,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type {
   useMaintenanceStatus,
   useSignificantEventsMaintenanceActions,
-} from '../hooks/use_significant_events_maintenance';
+} from '../../data/maintenance/use_significant_events_maintenance';
 import { MaintenanceSection } from './maintenance_section';
 
 const pause = jest.fn();
@@ -26,7 +26,7 @@ let mockMaintenanceActions: Pick<
   'pause' | 'resume' | 'isPausing' | 'isResuming'
 >;
 
-jest.mock('../hooks/use_significant_events_maintenance', () => ({
+jest.mock('../../data/maintenance/use_significant_events_maintenance', () => ({
   useMaintenanceStatus: () => mockMaintenanceStatus,
   useSignificantEventsMaintenanceActions: () => mockMaintenanceActions,
 }));
@@ -59,7 +59,7 @@ describe('MaintenanceSection', () => {
 
     expect(screen.getByRole('alertdialog')).toHaveTextContent('Pause detection engine?');
     expect(screen.getByRole('alertdialog')).toHaveTextContent(
-      'This disables all Significant Events managed workflows'
+      'This disables the Significant Events workflows of this space'
     );
     const confirmButton = screen.getByTestId('streams-settings-maintenance-confirm-button');
     expect(confirmButton).toHaveTextContent('Pause');

@@ -6,7 +6,7 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import { z } from '@kbn/zod';
+import { lazySchema, z } from '@kbn/zod';
 import { ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table';
 import type { IKbnUrlStateStorage, Storage } from '@kbn/kibana-utils-plugin/public';
 import { isPlainObject } from 'lodash';
@@ -18,29 +18,33 @@ export const ALERTS_TABLE_APP_STATE_KEY = 'alertsTable' as const;
 export const EPISODES_TABLE_CONFIG_STORAGE_KEY =
   `${ALERTING_V2_SECTION_ID}.${ALERTING_V2_EPISODES_APP_ID}.tableConfiguration` as const;
 
-const episodesTableColumnSettingSchema = z.object({
-  width: z.number().optional(),
-  display: z.string().optional(),
-});
+const episodesTableColumnSettingSchema = lazySchema(() =>
+  z.object({
+    width: z.number().optional(),
+    display: z.string().optional(),
+  })
+);
 
 // Bounds the row height to a valid line count (`auto` is -1). Values come from the URL and
 // localStorage, so an unbounded check would let a bad value render absurdly tall rows. Mirrors
 // @kbn/unified-data-table's `isValidRowHeight`, which isn't exported for reuse.
-const rowHeightSchema = z.number().int().min(-1).max(20);
+const rowHeightSchema = lazySchema(() => z.number().int().min(-1).max(20));
 
 /**
  * One field per persisted display option. Add more fields here as more options are persisted —
  * decode/encode below validate and serialize per-field automatically.
  */
-const episodesTableConfigSchema = z.object({
-  visibleColumns: z.array(z.string()).min(1),
-  sort: z.object({
-    sortField: z.string().min(1),
-    sortDirection: z.enum(['asc', 'desc']),
-  }),
-  rowHeight: rowHeightSchema,
-  columnSettings: z.record(z.string(), episodesTableColumnSettingSchema),
-});
+const episodesTableConfigSchema = lazySchema(() =>
+  z.object({
+    visibleColumns: z.array(z.string()).min(1),
+    sort: z.object({
+      sortField: z.string().min(1),
+      sortDirection: z.enum(['asc', 'desc']),
+    }),
+    rowHeight: rowHeightSchema,
+    columnSettings: z.record(z.string(), episodesTableColumnSettingSchema),
+  })
+);
 
 export type EpisodesTableConfig = z.infer<typeof episodesTableConfigSchema>;
 export type EpisodesTableColumnSettings = EpisodesTableConfig['columnSettings'];
@@ -66,7 +70,7 @@ export const DEFAULT_EPISODES_TABLE_COLUMN_SETTINGS: EpisodesTableColumnSettings
   duration: { width: 110 },
   assignees: { width: 120 },
   'episode.status': { width: 110 },
-  alerting_source: { width: 110 },
+  alerting_source: { width: 140 },
   severity: { width: 100 },
 };
 

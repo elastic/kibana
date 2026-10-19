@@ -101,19 +101,19 @@ const configureAction: ActionCatalogEntry = {
   },
 };
 
-const setAssetCriticality: ActionCatalogEntry = {
+// An installed catalog can still carry the retired "Set asset criticality" action from before it
+// was removed. Packaging must never fill it: criticality is the customer's to set.
+const staleSetAssetCriticality: ActionCatalogEntry = {
   workflowId: 'system-alertzero-action-set-asset-criticality',
   name: 'Set asset criticality',
   category: 'respond',
   impact: 'low',
-  subjects: ['user', 'service'],
   inputSchema: {
     type: 'object',
     properties: {
       id_field: { type: 'string', enum: ['user.name', 'service.name'] },
       id_value: { type: 'string' },
       criticality_level: { type: 'string' },
-      comment: { type: 'string' },
     },
     required: ['id_field', 'id_value'],
   },
@@ -603,7 +603,7 @@ describe('decidePackageReport', () => {
     expect(result.proposals[0].actionInput?.parameters).toEqual({ entity_id: 'ent-1' });
   });
 
-  it('mints byte-identical host and process subject keys (frozen: a change renames every existing proposal)', () => {
+  it('mints pinned host and process subject keys (frozen: a change renames every live proposal)', () => {
     const result = decidePackageReport({
       conversationId,
       state: baseHitState({
@@ -620,28 +620,65 @@ describe('decidePackageReport', () => {
       catalog: { ok: true, actions: [isolateHost, killProcess] },
     });
     const byWorkflow = new Map(result.proposals.map((p) => [p.actionWorkflowId, p.subjectKey]));
-    // uuidv5(`conv-1|agent-a|system-security-action-isolate-host`) under the fixed namespace.
-    expect(byWorkflow.get(isolateHost.workflowId)).toBe('a1ec6d8b-714e-50a2-8715-d6b9cc4402a1');
-    // uuidv5(`conv-1|agent-a|system-security-action-kill-process|entity:ent-4242`).
-    expect(byWorkflow.get(killProcess.workflowId)).toBe('2ece4e12-63c6-5d82-8129-d056e8e7aa8f');
+    // uuidv5(`agent-a|system-security-action-isolate-host`) under the fixed namespace. No
+    // Investigation in the material: that is what lets two of them share a Proposal.
+    expect(byWorkflow.get(isolateHost.workflowId)).toBe('6f30494e-d19c-51d9-94b3-da6a6e4a17fd');
+    // uuidv5(`agent-a|system-security-action-kill-process|entity:ent-4242`).
+    expect(byWorkflow.get(killProcess.workflowId)).toBe('e7f4d23d-c0a4-57a8-804e-a1cbca13bc1c');
   });
 
   it('builds stable subject keys for the same host × action × process', () => {
-    expect(
-      buildProposalSubjectKey({
-        conversationId: 'c',
-        subjectId: 'e',
-        actionWorkflowId: 'a',
-        processKey: 'p',
-      })
-    ).toBe(
-      buildProposalSubjectKey({
-        conversationId: 'c',
-        subjectId: 'e',
-        actionWorkflowId: 'a',
-        processKey: 'p',
-      })
-    );
+    const key = {
+      subjectId: 'e',
+      actionWorkflowId: 'a',
+      processKey: 'p',
+    };
+
+    expect(buildProposalSubjectKey(key)).toBe(buildProposalSubjectKey({ ...key }));
+  });
+
+  it('builds different subject keys for a different host, action or process', () => {
+    const key = { subjectId: 'e', actionWorkflowId: 'a', processKey: 'p' };
+    const keys = [
+      buildProposalSubjectKey(key),
+      buildProposalSubjectKey({ ...key, subjectId: 'e2' }),
+      buildProposalSubjectKey({ ...key, actionWorkflowId: 'a2' }),
+      buildProposalSubjectKey({ ...key, processKey: 'p2' }),
+      buildProposalSubjectKey({ subjectId: 'e', actionWorkflowId: 'a' }),
+    ];
+
+    expect(new Set(keys).size).toBe(keys.length);
+  });
+
+  describe('which Investigation raised a proposal', () => {
+    const decideIn = (
+      investigationId: string,
+      catalog: Parameters<typeof decidePackageReport>[0]['catalog']
+    ) =>
+      decidePackageReport({
+        conversationId: investigationId,
+        state: baseHitState(),
+        catalog,
+      });
+
+    it('does not change the subject key of a host action: two Investigations on one host share it, so their proposals converge', () => {
+      const catalog = { ok: true as const, actions: [isolateHost] };
+
+      const first = decideIn('conv-1', catalog).proposals.map((p) => p.subjectKey);
+      const second = decideIn('conv-2', catalog).proposals.map((p) => p.subjectKey);
+
+      expect(first.length).toBeGreaterThan(0);
+      expect(second).toEqual(first);
+    });
+
+    it('does change the key of the analyst recommendation, which has no host or action to share', () => {
+      const catalog = { ok: false as const, reason: 'catalog_error' as const };
+
+      const keyIn = (id: string) => decideIn(id, catalog).proposals.map((p) => p.subjectKey);
+
+      expect(keyIn('conv-1')).toEqual(keyIn('conv-1'));
+      expect(keyIn('conv-1')).not.toEqual(keyIn('conv-2'));
+    });
   });
 
   it('carries subject and hostName on host and process mints', () => {
@@ -704,147 +741,50 @@ describe('decidePackageReport', () => {
     });
   });
 
-  describe('identity subjects', () => {
-    it('mints one asset-criticality proposal per user and per service with the matching id_field', () => {
+  describe('identities', () => {
+    it('never mints a proposal for an implicated user or service, even from a stale catalog entry', () => {
       const result = decidePackageReport({
         conversationId,
-        state: baseHitState({ users: ['dev-user'], services: ['escalated-role'] }),
-        catalog: { ok: true, actions: [isolateHost, setAssetCriticality] },
+        state: baseHitState({
+          users: ['dev-user'],
+          services: ['escalated-role'],
+          severity: 'critical',
+        }),
+        catalog: { ok: true, actions: [isolateHost, staleSetAssetCriticality] },
       });
-      const identity = result.proposals.filter(
-        (p) => p.actionWorkflowId === setAssetCriticality.workflowId
-      );
-      expect(identity).toHaveLength(2);
-      expect(identity.map((p) => p.actionInput)).toEqual([
-        { id_field: 'user.name', id_value: 'dev-user', criticality_level: 'high_impact' },
-        { id_field: 'service.name', id_value: 'escalated-role', criticality_level: 'high_impact' },
-      ]);
-      expect(identity.map((p) => p.title)).toEqual([
-        'Mark user dev-user high impact',
-        'Mark service escalated-role high impact',
-      ]);
-      expect(identity.map((p) => p.subject)).toEqual([
-        { kind: 'user', value: 'dev-user' },
-        { kind: 'service', value: 'escalated-role' },
-      ]);
-      expect(identity.every((p) => p.hostName === undefined)).toBe(true);
-      // Identity keys never collide with host keys and are stable across reruns.
-      expect(new Set(result.proposals.map((p) => p.subjectKey)).size).toBe(result.proposals.length);
-      const rerun = decidePackageReport({
-        conversationId,
-        state: baseHitState({ users: ['dev-user'], services: ['escalated-role'] }),
-        catalog: { ok: true, actions: [isolateHost, setAssetCriticality] },
-      });
-      expect(rerun.proposals.map((p) => p.subjectKey)).toEqual(
-        result.proposals.map((p) => p.subjectKey)
+      expect(
+        result.proposals.some((p) => p.actionWorkflowId === staleSetAssetCriticality.workflowId)
+      ).toBe(false);
+      expect(result.proposals.every((p) => p.actionInput?.criticality_level === undefined)).toBe(
+        true
       );
     });
 
-    it('sets extreme_impact when the run severity is critical', () => {
-      const result = decidePackageReport({
-        conversationId,
-        state: baseHitState({ users: ['dev-user'], severity: 'critical' }),
-        catalog: { ok: true, actions: [setAssetCriticality] },
-      });
-      const identity = result.proposals.find(
-        (p) => p.actionWorkflowId === setAssetCriticality.workflowId
-      );
-      expect(identity?.actionInput?.criticality_level).toBe('extreme_impact');
-      expect(identity?.title).toBe('Mark user dev-user extreme impact');
-    });
-
-    it('mints identity proposals even when the run has no host at all', () => {
+    it('leaves a run with only identities to the analyst recommendation', () => {
       const result = decidePackageReport({
         conversationId,
         state: baseHitState({ hosts: [], users: ['dev-user'] }),
-        catalog: { ok: true, actions: [isolateHost, setAssetCriticality] },
-      });
-      expect(result.proposals.map((p) => p.title)).toEqual([
-        'Mark user dev-user high impact',
-        'Analyst recommendation',
-      ]);
-    });
-
-    it('never fills an identity action whose required keys fall outside what the kind supplies', () => {
-      const brokenIdentityAction: ActionCatalogEntry = {
-        ...setAssetCriticality,
-        workflowId: 'system-alertzero-action-broken',
-        inputSchema: {
-          type: 'object',
-          properties: {
-            endpoint_ids: { type: 'array', items: { type: 'string' } },
-            id_value: { type: 'string' },
-          },
-          required: ['endpoint_ids', 'id_value'],
-        },
-      };
-      const result = decidePackageReport({
-        conversationId,
-        state: baseHitState({ hosts: [], users: ['dev-user'] }),
-        catalog: { ok: true, actions: [brokenIdentityAction] },
+        catalog: { ok: true, actions: [isolateHost, staleSetAssetCriticality] },
       });
       expect(result.proposals.map((p) => p.title)).toEqual(['Analyst recommendation']);
     });
 
-    it('never fills an identity action whose Elasticsearch document id would exceed 512 bytes', () => {
-      // AssetCriticalityDataClient's document _id is `${id_field}:${id_value}` verbatim, and
-      // Elasticsearch rejects an _id over 512 UTF-8 bytes. "user.name:" is 10 bytes, so a
-      // 503-byte value pushes the id to 513 and a 502-byte value keeps it at 512 (fillable).
-      const fittingUser: Subject = {
-        kind: 'user',
-        value: 'u'.repeat(502),
-        reachable: true,
-      };
-      const overlongUser: Subject = {
-        kind: 'user',
-        value: 'u'.repeat(503),
-        reachable: true,
-      };
-      expect(canFillRespondAction({ entry: setAssetCriticality, subject: fittingUser })).toBe(true);
-      expect(canFillRespondAction({ entry: setAssetCriticality, subject: overlongUser })).toBe(
-        false
-      );
-
-      const result = decidePackageReport({
-        conversationId,
-        state: baseHitState({ hosts: [], users: [overlongUser.value] }),
-        catalog: { ok: true, actions: [setAssetCriticality] },
-      });
-      expect(result.proposals.map((p) => p.title)).toEqual(['Analyst recommendation']);
-    });
-
-    it('tells the recommendation which identities got a proposal and which are unreached', () => {
+    it('names the implicated identities in the recommendation without proposing to change them', () => {
       const result = decidePackageReport({
         conversationId,
         state: baseHitState({ users: ['dev-user'], services: ['escalated-role'] }),
-        catalog: { ok: true, actions: [isolateHost, setAssetCriticality] },
+        catalog: { ok: true, actions: [isolateHost, staleSetAssetCriticality] },
       });
       const recommendation = result.proposals.find((p) => p.title === 'Analyst recommendation');
       expect(recommendation?.comment).toContain(
-        'Asset criticality is proposed for dev-user (user) and escalated-role (service); revoking their credentials is manual until an identity provider action exists.'
+        'Identities dev-user (user) and escalated-role (service) are implicated; a host action does not reach them.'
       );
-      expect(recommendation?.comment).not.toContain('does not reach');
-
-      const userOnlyAction: ActionCatalogEntry = { ...setAssetCriticality, subjects: ['user'] };
-      const partial = decidePackageReport({
-        conversationId,
-        state: baseHitState({ users: ['dev-user'], services: ['escalated-role'] }),
-        catalog: { ok: true, actions: [isolateHost, userOnlyAction] },
-      });
-      const partialRecommendation = partial.proposals.find(
-        (p) => p.title === 'Analyst recommendation'
-      );
-      expect(partialRecommendation?.comment).toContain(
-        'Asset criticality is proposed for dev-user (user); revoking its credentials is manual'
-      );
-      expect(partialRecommendation?.comment).toContain(
-        'Identity escalated-role (service) is implicated; a host action does not reach it.'
-      );
+      expect(recommendation?.comment).not.toContain('Asset criticality is proposed');
     });
   });
 
   describe('collectSubjects', () => {
-    it('yields each host, then its processes, then users, then services, with reachability', () => {
+    it('yields each host, then its processes, with reachability', () => {
       const subjects = collectSubjects(
         baseHitState({
           hosts: [
@@ -867,8 +807,6 @@ describe('decidePackageReport', () => {
               iocMatched: false,
             },
           ],
-          users: ['dev-user'],
-          services: ['escalated-role'],
         })
       );
       expect(subjects.map((s) => [s.kind, s.value, s.reachable])).toEqual([
@@ -876,8 +814,6 @@ describe('decidePackageReport', () => {
         ['process', 'a.exe', true],
         ['host', 'ghost', false],
         ['process', 'g.exe', false],
-        ['user', 'dev-user', true],
-        ['service', 'escalated-role', true],
       ]);
     });
   });
@@ -1177,43 +1113,39 @@ describe('decidePackageReport', () => {
         host: enrolledHost('host-a', 'agent-a'),
         processSelector,
       });
-      const state = baseHitState();
       expect(
-        buildActionInput({ entry: defendMemoryDump, subject: processSubjectFor(rundll), state })
+        buildActionInput({ entry: defendMemoryDump, subject: processSubjectFor(rundll) })
       ).toEqual({
         endpoint_ids: ['agent-a'],
         parameters: { type: 'process', entity_id: 'ent-2' },
       });
       expect(
-        buildActionInput({ entry: defendSuspend, subject: processSubjectFor(rundll), state })
+        buildActionInput({ entry: defendSuspend, subject: processSubjectFor(rundll) })
       ).toEqual({ endpoint_ids: ['agent-a'], parameters: { entity_id: 'ent-2' } });
     });
 
-    it('keeps the kill/suspend/isolate subject keys byte-identical to the pre-table material', () => {
+    it('pins the kill/suspend/isolate subject keys (frozen: a change renames every live proposal)', () => {
       const processKey = 'pid:4212';
       expect(
         buildProposalSubjectKey({
-          conversationId,
           subjectId: 'agent-a',
           actionWorkflowId: ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
           processKey,
         })
-      ).toBe('f13e9429-d7c7-56a4-b6d7-220ca3f59315');
+      ).toBe('4571fe1a-2cf5-5403-9068-fbd7fe17ac0e');
       expect(
         buildProposalSubjectKey({
-          conversationId,
           subjectId: 'agent-a',
           actionWorkflowId: ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
           processKey,
         })
-      ).toBe('75bb185c-5273-55cb-bcb3-5ebb05673d05');
+      ).toBe('290fbfde-55da-5eca-8081-7418fa50a1f0');
       expect(
         buildProposalSubjectKey({
-          conversationId,
           subjectId: 'agent-a',
           actionWorkflowId: ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
         })
-      ).toBe('9336b59d-3846-5306-9cb9-1b588da3694b');
+      ).toBe('206b47f2-780e-5992-9935-6fadb64483fd');
     });
 
     it('mints the same subject keys regardless of catalog order', () => {
@@ -1300,21 +1232,5 @@ describe('buildProposalSummaryBullets', () => {
       bullets: [expect.stringContaining('`host-a`')],
       omittedCount: 0,
     });
-  });
-
-  it('names the identity, not a host, for an identity-subject bullet', () => {
-    const { proposals } = decidePackageReport({
-      conversationId: 'conv-1',
-      state: baseHitState({ hosts: [], users: ['dev-user'] }),
-      catalog: { ok: true, actions: [setAssetCriticality] },
-    });
-    const { bullets } = buildProposalSummaryBullets(proposals);
-    expect(bullets).toEqual(
-      expect.arrayContaining([
-        expect.stringContaining(
-          'for user `dev-user`: runs `system-alertzero-action-set-asset-criticality` on approval'
-        ),
-      ])
-    );
   });
 });
