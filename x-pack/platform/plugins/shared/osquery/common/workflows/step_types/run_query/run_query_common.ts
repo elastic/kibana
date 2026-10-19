@@ -53,7 +53,7 @@ export const runQueryStepCommonDefinition: BaseStepDefinition<
   }),
   description: i18n.translate('xpack.osquery.workflows.steps.runQuery.description', {
     defaultMessage:
-      'Run an osquery saved query on the given agents and wait for the answers. Once the query is dispatched the step never fails: the outcome is returned in `status` (`success`, `partial`, `failed` or `timed_out`) and every row carries the host it came from in `agent`.',
+      'Run an osquery saved query on the given agents and wait for the answers. Once the query is dispatched the step never fails: the outcome is returned in `status` (`success`, `partial`, `failed` or `timed_out`) and every row carries the host it came from in `agent`. A dispatched query cannot be retracted: cancelling the workflow stops the wait, not the query on the agents.',
   }),
   category: StepCategory.KibanaSecurity,
   inputSchema: runQueryInputSchema,

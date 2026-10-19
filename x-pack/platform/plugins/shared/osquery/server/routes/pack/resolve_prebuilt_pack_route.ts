@@ -73,6 +73,16 @@ export const resolvePrebuiltPackRoute = (router: IRouter, osqueryContext: Osquer
           });
         }
 
+        // Copying a pack drops the asset reference, but re-importing an exported prebuilt pack as
+        // a new copy keeps it: picking either copy would run a pack the user did not choose.
+        if (found.total > 1) {
+          return response.conflict({
+            body: {
+              message: `More than one pack in this space is a copy of prebuilt pack ${request.params.assetId}`,
+            },
+          });
+        }
+
         return response.ok({ body: { pack_id: found.saved_objects[0].id } });
       }
     );

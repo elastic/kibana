@@ -58,7 +58,7 @@ const resolvePrebuiltPackId = async (
     if (isConflict(error)) {
       throw stepError(
         PreDispatchErrorCode.PREBUILT_PACK_AMBIGUOUS,
-        `More than one prebuilt pack is named "${assetId}". Use its asset id instead.`
+        `Prebuilt pack "${assetId}" is ambiguous: more than one asset has that name, or this space holds more than one copy of it. Use its asset id, or remove the extra copy.`
       );
     }
 

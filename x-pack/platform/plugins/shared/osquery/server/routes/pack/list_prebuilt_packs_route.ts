@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type IRouter, isSavedObjectErrorResult } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import { API_VERSIONS } from '../../../common/constants';
 import { packAssetSavedObjectType, packSavedObjectType } from '../../../common/types';
@@ -13,7 +13,11 @@ import { PLUGIN_ID } from '../../../common';
 import type { PackSavedObject } from '../../common/types';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
-/** A space has a few dozen prebuilt copies at most; this bounds the read without paging. */
+/**
+ * Prebuilt pack assets come from the osquery_manager package (a few dozen), and a space holds
+ * about one copy of each, so both reads are bounded without paging. Custom packs are never read.
+ */
+const MAX_ASSETS = 1000;
 const MAX_PACKS = 1000;
 
 export interface PrebuiltPackListItem {
@@ -28,8 +32,9 @@ export interface PrebuiltPackListItem {
 
 /**
  * Lists the prebuilt packs loaded in the current space with their `osquery-pack-asset` id and
- * package name; the name is the stable, readable identifier the `osquery.runPack` step stores. The assets status route needs
- * `writePacks`, and the public find route does not expose asset references.
+ * package name; the name is the stable, readable identifier the `osquery.runPack` step stores.
+ * The assets status route needs `writePacks`, and the public find route does not expose asset
+ * references. Reads the assets first, then only the packs that reference one of them.
  */
 export const listPrebuiltPacksRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -50,39 +55,34 @@ export const listPrebuiltPacksRoute = (router: IRouter, osqueryContext: OsqueryA
           request
         );
 
+        const assets = await spaceScopedClient.find<{ name?: string }>({
+          type: packAssetSavedObjectType,
+          perPage: MAX_ASSETS,
+          fields: ['name'],
+        });
+        const assetNameById = new Map(
+          assets.saved_objects.flatMap((asset) =>
+            asset.attributes?.name ? [[asset.id, asset.attributes.name] as const] : []
+          )
+        );
+        if (assetNameById.size === 0) return response.ok({ body: { data: [] } });
+
         const found = await spaceScopedClient.find<PackSavedObject>({
           type: packSavedObjectType,
+          hasReference: [...assetNameById.keys()].map((id) => ({
+            type: packAssetSavedObjectType,
+            id,
+          })),
+          hasReferenceOperator: 'OR',
           perPage: MAX_PACKS,
           // `name` is mapped as `text`, so it cannot be a sort field: sort the small list here.
           fields: ['name', 'description', 'queries'],
         });
 
-        const assetIdByPack = new Map(
-          found.saved_objects.flatMap((pack) => {
-            const asset = pack.references.find(({ type }) => type === packAssetSavedObjectType);
-
-            return asset ? [[pack.id, asset.id] as const] : [];
-          })
-        );
-        const assets = assetIdByPack.size
-          ? await spaceScopedClient.bulkGet<{ name?: string }>(
-              [...new Set(assetIdByPack.values())].map((id) => ({
-                type: packAssetSavedObjectType,
-                id,
-                fields: ['name'],
-              }))
-            )
-          : { saved_objects: [] };
-        const assetNameById = new Map(
-          assets.saved_objects.flatMap((asset) =>
-            !isSavedObjectErrorResult(asset) && asset.attributes?.name
-              ? [[asset.id, asset.attributes.name] as const]
-              : []
-          )
-        );
-
         const data: PrebuiltPackListItem[] = found.saved_objects.flatMap((pack) => {
-          const assetId = assetIdByPack.get(pack.id);
+          const assetId = pack.references.find(
+            ({ type, id }) => type === packAssetSavedObjectType && assetNameById.has(id)
+          )?.id;
           const assetName = assetId && assetNameById.get(assetId);
           if (!assetId || !assetName) return [];
 

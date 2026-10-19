@@ -16,10 +16,19 @@ jest.mock('../../utils/get_internal_saved_object_client', () => ({
   createInternalSavedObjectsClientForSpaceId: jest.fn(),
 }));
 
+interface FakePack {
+  id: string;
+  attributes: { name: string; description?: string; queries: unknown };
+  references: Array<{ type: string; id: string; name: string }>;
+}
+
+const assetRef = (id: string) => ({ type: 'osquery-pack-asset', id, name: 'x' });
+
 describe('listPrebuiltPacksRoute', () => {
   let routeHandler: RequestHandler;
   let find: jest.Mock;
-  let bulkGet: jest.Mock;
+  let assets: Array<{ id: string; attributes: { name?: string } }>;
+  let packs: FakePack[];
 
   const setupRoute = () => {
     const mockRouter = httpServiceMock.createSetupContract().createRouter();
@@ -39,13 +48,23 @@ describe('listPrebuiltPacksRoute', () => {
     return response;
   };
 
+  const packFind = () => find.mock.calls.find(([options]) => options.type === 'osquery-pack')?.[0];
+
   beforeEach(() => {
     jest.clearAllMocks();
-    find = jest.fn();
-    bulkGet = jest.fn(async (objects: Array<{ id: string }>) => ({
-      saved_objects: objects.map(({ id }) => ({ id, attributes: { name: `name-of-${id}` } })),
-    }));
-    (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue({ find, bulkGet });
+    assets = [];
+    packs = [];
+    // Behaves like the saved-objects client: the pack read honours the OR reference filter.
+    find = jest.fn(async (options) => {
+      if (options.type === 'osquery-pack-asset') return { saved_objects: assets };
+
+      const wanted = new Set(options.hasReference.map(({ id }: { id: string }) => id));
+
+      return {
+        saved_objects: packs.filter((pack) => pack.references.some(({ id }) => wanted.has(id))),
+      };
+    });
+    (createInternalSavedObjectsClientForSpaceId as jest.Mock).mockResolvedValue({ find });
   });
 
   it('is an internal route that requires the read packs privilege', () => {
@@ -55,25 +74,19 @@ describe('listPrebuiltPacksRoute', () => {
     expect(route.config.security).toEqual({ authz: { requiredPrivileges: ['osquery-readPacks'] } });
   });
 
-  it('returns only packs that reference a prebuilt pack asset, with the asset id', async () => {
-    find.mockResolvedValue({
-      saved_objects: [
-        {
-          id: 'random-1',
-          attributes: {
-            name: 'forensic-persistence-elastic',
-            description: 'Persistence',
-            queries: [{ id: 'a' }, { id: 'b' }],
-          },
-          references: [{ type: 'osquery-pack-asset', id: 'forensic-persistence', name: 'x' }],
+  it('returns the packs that reference a prebuilt pack asset, with the asset id and name', async () => {
+    assets = [{ id: 'osquery_manager-1', attributes: { name: 'forensic-persistence' } }];
+    packs = [
+      {
+        id: 'random-1',
+        attributes: {
+          name: 'forensic-persistence-elastic',
+          description: 'Persistence',
+          queries: [{ id: 'a' }, { id: 'b' }],
         },
-        {
-          id: 'custom',
-          attributes: { name: 'my pack', queries: [{ id: 'a' }] },
-          references: [],
-        },
-      ],
-    });
+        references: [assetRef('osquery_manager-1')],
+      },
+    ];
     setupRoute();
 
     const response = await run();
@@ -82,8 +95,8 @@ describe('listPrebuiltPacksRoute', () => {
       body: {
         data: [
           {
-            asset_id: 'forensic-persistence',
-            asset_name: 'name-of-forensic-persistence',
+            asset_id: 'osquery_manager-1',
+            asset_name: 'forensic-persistence',
             pack_id: 'random-1',
             name: 'forensic-persistence-elastic',
             description: 'Persistence',
@@ -94,44 +107,77 @@ describe('listPrebuiltPacksRoute', () => {
     });
   });
 
-  it('does not sort on the text-mapped name field and returns packs sorted by name', async () => {
-    find.mockResolvedValue({
-      saved_objects: ['zeta', 'alpha'].map((name) => ({
-        id: name,
-        attributes: { name, queries: [] },
-        references: [{ type: 'osquery-pack-asset', id: name, name: 'x' }],
+  it('reads only the packs that reference an asset, so custom packs cannot crowd them out', async () => {
+    assets = [
+      { id: 'asset-a', attributes: { name: 'a' } },
+      { id: 'asset-b', attributes: { name: 'b' } },
+    ];
+    packs = [
+      ...Array.from({ length: 1500 }, (_, i) => ({
+        id: `custom-${i}`,
+        attributes: { name: `custom ${i}`, queries: [] },
+        references: [],
       })),
-    });
+      {
+        id: 'copy-b',
+        attributes: { name: 'b-elastic', queries: [] },
+        references: [assetRef('asset-b')],
+      },
+    ];
     setupRoute();
 
     const response = await run();
 
-    expect(find.mock.calls[0][0]).not.toHaveProperty('sortField');
+    expect(packFind()).toMatchObject({
+      hasReference: [
+        { type: 'osquery-pack-asset', id: 'asset-a' },
+        { type: 'osquery-pack-asset', id: 'asset-b' },
+      ],
+      hasReferenceOperator: 'OR',
+    });
+    const { data } = response.ok.mock.calls[0][0]?.body as { data: Array<{ pack_id: string }> };
+    expect(data.map(({ pack_id: packId }) => packId)).toEqual(['copy-b']);
+  });
+
+  it('does not sort on the text-mapped name field and returns packs sorted by name', async () => {
+    assets = ['zeta', 'alpha'].map((name) => ({ id: name, attributes: { name } }));
+    packs = ['zeta', 'alpha'].map((name) => ({
+      id: name,
+      attributes: { name, queries: [] },
+      references: [assetRef(name)],
+    }));
+    setupRoute();
+
+    const response = await run();
+
+    expect(packFind()).not.toHaveProperty('sortField');
     const { data } = response.ok.mock.calls[0][0]?.body as { data: Array<{ name: string }> };
     expect(data.map(({ name }) => name)).toEqual(['alpha', 'zeta']);
   });
 
-  it('returns an empty list when no prebuilt packs are loaded', async () => {
-    find.mockResolvedValue({ saved_objects: [] });
+  it('returns an empty list without reading packs when no asset is installed', async () => {
     setupRoute();
 
     const response = await run();
 
     expect(response.ok).toHaveBeenCalledWith({ body: { data: [] } });
-    expect(bulkGet).not.toHaveBeenCalled();
+    expect(packFind()).toBeUndefined();
   });
 
-  it('skips a pack whose asset no longer exists', async () => {
-    find.mockResolvedValue({
-      saved_objects: [
-        {
-          id: 'orphan',
-          attributes: { name: 'orphan', queries: [] },
-          references: [{ type: 'osquery-pack-asset', id: 'gone', name: 'x' }],
-        },
-      ],
-    });
-    bulkGet.mockResolvedValue({ saved_objects: [{ id: 'gone', error: { statusCode: 404 } }] });
+  it('returns an empty list when assets exist but none is loaded in the space', async () => {
+    assets = [{ id: 'asset-a', attributes: { name: 'a' } }];
+    setupRoute();
+
+    const response = await run();
+
+    expect(response.ok).toHaveBeenCalledWith({ body: { data: [] } });
+  });
+
+  it('skips an asset without a name', async () => {
+    assets = [{ id: 'nameless', attributes: {} }];
+    packs = [
+      { id: 'p', attributes: { name: 'p', queries: [] }, references: [assetRef('nameless')] },
+    ];
     setupRoute();
 
     const response = await run();

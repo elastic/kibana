@@ -267,7 +267,9 @@ describe('osquery.runQuery step', () => {
 
       const { output } = (await result) as { output: Record<string, unknown> };
 
-      expect(output).toMatchObject({ status: 'partial', rows: [], row_count: 20, truncated: true });
+      // Every agent answered, so the status is `success`; the rows that never became searchable
+      // before the deadline show up as `truncated`.
+      expect(output).toMatchObject({ status: 'success', rows: [], row_count: 20, truncated: true });
     });
 
     it('truncates at max_rows and reports the total row_count', async () => {

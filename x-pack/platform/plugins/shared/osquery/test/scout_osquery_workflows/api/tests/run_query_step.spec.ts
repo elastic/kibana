@@ -25,6 +25,25 @@ import {
 
 const AGENT_A: FakeAgent = { id: 'osq-wf-rq-agent-a', hostname: 'rq-host-a', platform: 'ubuntu' };
 const AGENT_B: FakeAgent = { id: 'osq-wf-rq-agent-b', hostname: 'rq-host-b', platform: 'ubuntu' };
+const DARWIN_AGENT: FakeAgent = {
+  id: 'osq-wf-rq-agent-mac',
+  hostname: 'rq-mac',
+  platform: 'darwin',
+};
+const DISTROS = [
+  'debian',
+  'centos',
+  'rhel',
+  'amzn',
+  'rocky',
+  'almalinux',
+  'sles',
+  'opensuse-leap',
+  'fedora',
+  'oracle',
+  'arch',
+  'alpine',
+];
 const SAVED_QUERY = 'osq_wf_rq_processes';
 const OTHER_SPACE = 'osq-wf-other';
 const OTHER_SPACE_QUERY = 'osq_wf_rq_other_space_only';
@@ -198,18 +217,42 @@ apiTest.describe('osquery.runQuery workflow step', { tag: ['@local-stateful-clas
 
   apiTest(
     'linux targets every Linux distribution of the online osquery agents',
-    async ({ apiClient }) => {
-      const workflows = workflowsClient(apiClient, adminHeaders);
-      const workflowId = await workflows.create(
-        'osq-wf-linux',
-        runQueryStep('agent_platforms: ["linux"]', '      wait_timeout: 10s')
-      );
-      const executionId = await workflows.run(workflowId);
+    async ({ apiClient, kbnClient }) => {
+      // More distinct platform values than the default terms aggregation size (10).
+      const distroAgents: FakeAgent[] = DISTROS.map((platform) => ({
+        id: `osq-wf-rq-distro-${platform}`,
+        hostname: `rq-${platform}`,
+        platform,
+      }));
+      await indexFakeAgents(systemEs, policyId, [...distroAgents, DARWIN_AGENT]);
 
-      const execution = await workflows.waitForEnd(executionId);
-      const { output } = stepOf(execution, 'q');
-      expect(output?.agents.total).toBeGreaterThanOrEqual(2);
-      await workflows.delete(workflowId);
+      try {
+        const workflows = workflowsClient(apiClient, adminHeaders);
+        const workflowId = await workflows.create(
+          'osq-wf-linux',
+          runQueryStep('agent_platforms: ["linux"]', '      wait_timeout: 10s')
+        );
+        const executionId = await workflows.run(workflowId);
+        const state = await workflows.waitForDispatch(executionId, 'q');
+
+        const { data: details } = await kbnClient.request<{ data: { agents: string[] } }>({
+          method: 'GET',
+          path: `/api/osquery/live_queries/${state.action_id}`,
+          headers: { 'elastic-api-version': '2023-10-31' },
+        });
+        expect(details.data.agents).toStrictEqual(
+          expect.arrayContaining([AGENT_A.id, AGENT_B.id, ...distroAgents.map(({ id }) => id)])
+        );
+        expect(details.data.agents).not.toContain(DARWIN_AGENT.id);
+
+        await workflows.waitForEnd(executionId);
+        await workflows.delete(workflowId);
+      } finally {
+        await deleteFakeAgents(
+          systemEs,
+          [...distroAgents, DARWIN_AGENT].map(({ id }) => id)
+        );
+      }
     }
   );
 

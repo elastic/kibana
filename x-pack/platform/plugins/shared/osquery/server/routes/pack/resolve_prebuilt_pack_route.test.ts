@@ -127,6 +127,44 @@ describe('resolvePrebuiltPackRoute', () => {
     expect(response.notFound).toHaveBeenCalled();
   });
 
+  it('reads past the first page of phrase matches to find the exact name', async () => {
+    const longer = Array.from({ length: 100 }, (_, i) => ({
+      id: `osquery_manager-longer-${i}`,
+      attributes: { name: `forensic-persistence-${i}` },
+    }));
+    find
+      .mockResolvedValueOnce({ total: 101, saved_objects: longer })
+      .mockResolvedValueOnce({
+        total: 101,
+        saved_objects: [
+          { id: 'osquery_manager-exact', attributes: { name: 'forensic-persistence' } },
+        ],
+      })
+      .mockResolvedValueOnce({ total: 1, saved_objects: [{ id: 'copy' }] });
+    setupRoute();
+
+    const response = await run();
+
+    expect(find.mock.calls[1][0]).toMatchObject({ type: 'osquery-pack-asset', page: 2 });
+    expect(find.mock.calls[2][0].hasReference).toEqual({
+      type: 'osquery-pack-asset',
+      id: 'osquery_manager-exact',
+    });
+    expect(response.ok).toHaveBeenCalledWith({ body: { pack_id: 'copy' } });
+  });
+
+  it('returns 409 when two packs in the space copy the same asset', async () => {
+    find
+      .mockResolvedValueOnce(assetsNamed('forensic-persistence'))
+      .mockResolvedValueOnce({ total: 2, saved_objects: [{ id: 'copy-1' }] });
+    setupRoute();
+
+    const response = await run();
+
+    expect(response.conflict).toHaveBeenCalled();
+    expect(response.ok).not.toHaveBeenCalled();
+  });
+
   it('returns 404 when the pack is not loaded in the space', async () => {
     find
       .mockResolvedValueOnce(assetsNamed('forensic-persistence'))

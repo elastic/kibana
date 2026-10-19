@@ -27,6 +27,24 @@ describe('poll_contract', () => {
         'partial',
       ],
       [
+        'deadline passed, finished with nothing failed',
+        counters({ responded: 3, successful: 3, pending: 0 }),
+        true,
+        'success',
+      ],
+      [
+        'deadline passed, finished with none successful',
+        counters({ responded: 3, failed: 3, pending: 0 }),
+        true,
+        'failed',
+      ],
+      [
+        'deadline passed, finished with some failed',
+        counters({ responded: 3, successful: 2, failed: 1, pending: 0 }),
+        true,
+        'partial',
+      ],
+      [
         'nothing pending, nothing failed',
         counters({ responded: 3, successful: 3, pending: 0 }),
         false,

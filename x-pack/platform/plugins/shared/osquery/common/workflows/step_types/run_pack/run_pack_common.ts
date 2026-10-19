@@ -61,7 +61,7 @@ export const runPackStepCommonDefinition: BaseStepDefinition<
   }),
   description: i18n.translate('xpack.osquery.workflows.steps.runPack.description', {
     defaultMessage:
-      'Run an osquery pack on the given agents and wait for the answers. Once the pack is dispatched the step never fails: the outcome is returned in `status` and in one entry per pack query under `queries`.',
+      'Run an osquery pack on the given agents and wait for the answers. Once the pack is dispatched the step never fails: the outcome is returned in `status` and in one entry per pack query under `queries`. A dispatched pack cannot be retracted: cancelling the workflow stops the wait, not the queries on the agents.',
   }),
   category: StepCategory.KibanaSecurity,
   inputSchema: runPackInputSchema,
