@@ -19,8 +19,10 @@ import {
  *
  * Fetch URLs live in `common/threat_intel/catalog_source_urls.ts`, not in the
  * sources index. This fixed catalog contains Elastic Security Labs reporting,
- * CISA vulnerability and advisory data, and publications from the UK NCSC,
- * CERT-FR, and CERT-EU. Operators can only list and enable / disable entries.
+ * CISA advisories, and publications from the UK NCSC, CERT-FR, and CERT-EU.
+ * Operators can only list and enable / disable entries. CISA KEV is left out for
+ * MVP (see `APPROVED_CATALOG_SOURCE_IDS`); a previously seeded KEV row is disabled
+ * by `disableLegacySources` on the next boot like any other retired source.
  */
 interface DefaultSource {
   /**
@@ -39,13 +41,6 @@ interface DefaultSource {
 }
 
 export const DEFAULT_SOURCES: readonly DefaultSource[] = [
-  {
-    id: 'kev:cisa-known-exploited-vulnerabilities',
-    adapter_type: 'kev',
-    name: 'CISA Known Exploited Vulnerabilities',
-    tags: ['vulnerability', 'cisa', 'kev', 'government'],
-    enabled: true,
-  },
   {
     id: 'vendor_api:elastic-security-labs',
     adapter_type: 'rss',

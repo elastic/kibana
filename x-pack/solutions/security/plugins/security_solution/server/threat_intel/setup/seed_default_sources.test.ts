@@ -12,6 +12,7 @@ import {
   GLOBAL_SPACE_ID,
   CATALOG_SOURCE_URLS,
   THREAT_INTEL_SOURCES_INDEX,
+  resolveCatalogSourceUrl,
 } from '../../../common/threat_intel';
 import { DEFAULT_SOURCES, seedDefaultSources } from './seed_default_sources';
 
@@ -76,8 +77,6 @@ const run = async ({
 
 describe('DEFAULT_SOURCES approved catalog', () => {
   const APPROVED_ENDPOINTS: Record<string, string> = {
-    'kev:cisa-known-exploited-vulnerabilities':
-      'https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json',
     'vendor_api:elastic-security-labs': 'https://www.elastic.co/security-labs/rss/feed.xml',
     'rss:cisa-alerts': 'https://www.cisa.gov/cybersecurity-advisories/all.xml',
     'rss:uk-ncsc': 'https://www.ncsc.gov.uk/api/1/services/v1/all-rss-feed.xml',
@@ -93,9 +92,17 @@ describe('DEFAULT_SOURCES approved catalog', () => {
     expect(CATALOG_SOURCE_URLS).toEqual(APPROVED_ENDPOINTS);
   });
 
-  it('ships exactly nine sources enabled', () => {
-    expect(DEFAULT_SOURCES).toHaveLength(9);
+  it('ships exactly eight sources enabled', () => {
+    expect(DEFAULT_SOURCES).toHaveLength(8);
     expect(DEFAULT_SOURCES.every(({ enabled }) => enabled)).toBe(true);
+  });
+
+  // Product decision for MVP: Continuous Threat Hunt cannot act on pure vulnerability
+  // intel yet, so KEV is out of the catalog until a CVE hunt path exists.
+  it('does not seed or resolve a URL for CISA KEV', () => {
+    expect(DEFAULT_SOURCES.some(({ adapter_type }) => adapter_type === 'kev')).toBe(false);
+    expect(APPROVED_SOURCE_IDS.has('kev:cisa-known-exploited-vulnerabilities')).toBe(false);
+    expect(resolveCatalogSourceUrl('kev:cisa-known-exploited-vulnerabilities')).toBeUndefined();
   });
 
   // The list route and the PATCH route only admit approved ids, and reconciliation

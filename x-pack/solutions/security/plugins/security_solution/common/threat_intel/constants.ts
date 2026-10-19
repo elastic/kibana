@@ -76,9 +76,13 @@ export type FetchAdapterType = (typeof FETCH_ADAPTER_TYPES)[number];
 /**
  * Stable document ids for the fixed, code-authoritative source catalog. Keep in
  * sync with `DEFAULT_SOURCES` in server setup seeding.
+ *
+ * CISA KEV is not in the MVP catalog: Continuous Threat Hunt has no Tier 1 path for
+ * pure vulnerability intel yet, so the feed would ingest reports nothing can hunt. The
+ * `kev` adapter stays registered so re-adding the id here (plus its URL and seed row)
+ * is the whole change when that hunt path lands.
  */
 export const APPROVED_CATALOG_SOURCE_IDS = [
-  'kev:cisa-known-exploited-vulnerabilities',
   'vendor_api:elastic-security-labs',
   'rss:cisa-alerts',
   'rss:uk-ncsc',
