@@ -149,7 +149,7 @@ export class GenAiSettingsPlugin
         name: i18n.translate('xpack.genAiSettings.inferenceStreaming.name', {
           defaultMessage: 'Stream inference endpoint responses',
         }),
-        description: i18n.translate('genAiSettings.inferenceStreaming.description', {
+        description: i18n.translate('xpack.genAiSettings.inferenceStreaming.description', {
           defaultMessage:
             "Stream LLM responses. If your LLM provider doesn't support streaming, turn this off and Kibana will wait for the full response instead. Services that do not support non-streaming chat completion keep streaming. This setting only applies to inference endpoints.",
         }),
