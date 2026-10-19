@@ -154,7 +154,7 @@ describe('score_resolution_entities', () => {
     );
   });
 
-  it('scores each page of a full run by the range of targets it covers', async () => {
+  it("scores each page of a full run by the range of targets it covers, from this run's lookup rows", async () => {
     (esClient.search as jest.Mock)
       .mockResolvedValueOnce({
         aggregations: {
@@ -195,10 +195,10 @@ describe('score_resolution_entities', () => {
     const queries = (esClient.esql.query as jest.Mock).mock.calls.map(([{ query }]) => query);
     expect(queries).toHaveLength(2);
     expect(queries[0]).toContain(
-      'WHERE resolution_target_id IS NOT NULL AND resolution_target_id <= "user:target-b"'
+      'WHERE calculation_run_id == "run-1" AND resolution_target_id <= "user:target-b"'
     );
     expect(queries[1]).toContain(
-      'WHERE resolution_target_id IS NOT NULL AND resolution_target_id > "user:target-b" AND resolution_target_id <= "user:target-c"'
+      'WHERE calculation_run_id == "run-1" AND resolution_target_id > "user:target-b" AND resolution_target_id <= "user:target-c"'
     );
   });
 

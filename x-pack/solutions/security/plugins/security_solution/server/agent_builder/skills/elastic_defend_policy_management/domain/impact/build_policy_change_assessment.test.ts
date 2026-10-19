@@ -39,6 +39,8 @@ const capabilities = (
   endpointCustomYaraSignatures: true,
   customYaraSignaturesExperimental: true,
   linuxRansomwareProtection: true,
+  endpointRegistryCredentialHardening: true,
+  registryCredentialHardeningExperimental: true,
   endpointProtectionUpdates: true,
   endpointCustomNotification: true,
   serverless: false,
@@ -98,6 +100,13 @@ const weakenedSettingCases: ReadonlyArray<{
     setting: 'attack_surface_reduction.credential_hardening.enabled',
     os: [PolicyOperatingSystem.windows],
     text: 'Credential hardening on Windows is turned off.',
+  },
+  {
+    path: 'windows.attack_surface_reduction.registry_credential_hardening.enabled',
+    value: false,
+    setting: 'attack_surface_reduction.registry_credential_hardening.enabled',
+    os: [PolicyOperatingSystem.windows],
+    text: 'Registry credential hardening on Windows is turned off.',
   },
   {
     path: 'windows.antivirus_registration.mode',
@@ -325,6 +334,34 @@ describe('buildPolicyChangeAssessment', () => {
     expect(assessment.changes[0]?.eligibility).toEqual({
       eligible: false,
       reason: 'linux_ransomware_protection_experimental_disabled',
+    });
+  });
+
+  it('reports the registry credential hardening gate and marks the change ineligible while the flag is off', () => {
+    const stored = policyFactory();
+    stored.windows.attack_surface_reduction.registry_credential_hardening = { enabled: false };
+
+    const assessment = buildPolicyChangeAssessment(
+      createPolicy(stored),
+      [
+        {
+          op: 'set_field',
+          path: 'windows.attack_surface_reduction.registry_credential_hardening.enabled',
+          value: true,
+        },
+      ],
+      {
+        ...capabilities(),
+        registryCredentialHardeningExperimental: false,
+      }
+    );
+
+    expect(assessment.changes[0]?.registry.productFeatureGate).toBe(
+      ProductFeatureSecurityKey.endpointRegistryCredentialHardening
+    );
+    expect(assessment.changes[0]?.eligibility).toEqual({
+      eligible: false,
+      reason: 'registry_credential_hardening_experimental_disabled',
     });
   });
 

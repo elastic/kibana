@@ -109,6 +109,8 @@ export const calculateResolutionEntityScores = async function* ({
       bounds: targetEntityIds
         ? undefined
         : { lower: previousPageUpperBound, upper: pageUpperBound },
+      // A full run shares its ID with the lookup rows Phase 0 wrote for it.
+      calculationRunId,
       sampleSize,
       pageSize,
       alertsIndex,
@@ -369,6 +371,7 @@ const scoreResolutionPage = async ({
   entityType,
   resolutionTargetIds,
   bounds,
+  calculationRunId,
   sampleSize,
   pageSize,
   alertsIndex,
@@ -379,6 +382,7 @@ const scoreResolutionPage = async ({
   entityType: EntityType;
   resolutionTargetIds: string[];
   bounds: { lower?: string; upper: string } | undefined;
+  calculationRunId: string;
   sampleSize: number;
   pageSize: number;
   alertsIndex: string;
@@ -389,6 +393,7 @@ const scoreResolutionPage = async ({
     ? getResolutionScoreESQLByRange(
         entityType,
         bounds,
+        calculationRunId,
         sampleSize,
         pageSize,
         alertsIndex,
@@ -407,7 +412,9 @@ const scoreResolutionPage = async ({
     { requestTimeout: RISK_SCORING_REQUEST_TIMEOUT }
   );
   return {
-    parsedScores: (esqlResponse.values ?? []).map(parseEsqlResolutionScoreRow(alertsIndex)),
+    parsedScores: (esqlResponse.values ?? []).map(
+      parseEsqlResolutionScoreRow(alertsIndex, sampleSize)
+    ),
     esqlRows: esqlResponse.values?.length ?? 0,
   };
 };
