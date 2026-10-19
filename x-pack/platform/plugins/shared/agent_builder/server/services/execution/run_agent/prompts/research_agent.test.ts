@@ -262,6 +262,69 @@ describe('getResearchAgentPrompt', () => {
     expect(system.indexOf('## AI INDICES')).toBeLessThan(system.indexOf('## INSTRUCTIONS'));
   });
 
+  it('omits the SML sections when experimental features are off', async () => {
+    const messages = await getResearchAgentPrompt(
+      makeParams({
+        experimentalFeatures: {
+          aiIndices: true,
+          defaultAiIndex: false,
+          bash: false,
+          skills: false,
+        },
+      })
+    );
+    const system = asText(messages[0]);
+
+    expect(system).not.toContain('## SML @ REFERENCES');
+    expect(system).not.toContain('## CONNECTOR DISCOVERY');
+  });
+
+  it('keeps connector discovery on sml_search when SML tools exist without the elastic index', async () => {
+    const messages = await getResearchAgentPrompt(
+      makeParams({
+        experimentalFeatures: {
+          aiIndices: true,
+          defaultAiIndex: true,
+          bash: false,
+          skills: false,
+        },
+      })
+    );
+    const system = asText(messages[0]);
+    const discovery = system.slice(system.indexOf('## CONNECTOR DISCOVERY'));
+
+    expect(system).toContain('## SML @ REFERENCES');
+    expect(discovery).toContain('use `sml_search` with `types: ["connector"]`');
+    expect(discovery).not.toContain('`elastic` AI Index');
+  });
+
+  it('points connector discovery at the elastic index when it is in the catalog', async () => {
+    const messages = await getResearchAgentPrompt(
+      makeParams({
+        configuration: {
+          instructions: '',
+          aiIndices: ['elastic'],
+          aiIndexCatalog: [
+            { id: 'elastic', esqlTarget: 'sml-main', description: 'Kibana resources' },
+          ],
+        },
+        experimentalFeatures: {
+          aiIndices: true,
+          defaultAiIndex: true,
+          bash: false,
+          skills: false,
+        },
+      })
+    );
+    const system = asText(messages[0]);
+    const discovery = system.slice(system.indexOf('## CONNECTOR DISCOVERY'));
+
+    expect(discovery).toContain('load the `ki-retrieval` skill');
+    expect(discovery).toContain('query the `elastic` AI Index for connector records');
+    expect(discovery).toContain('call `sml_attach` with its `id`');
+    expect(discovery).not.toContain('sml_search');
+  });
+
   it('renders every catalog entry, including custom AI Indices', async () => {
     const messages = await getResearchAgentPrompt(
       makeParams({
