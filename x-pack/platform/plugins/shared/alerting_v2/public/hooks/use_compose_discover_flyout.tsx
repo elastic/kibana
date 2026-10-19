@@ -275,8 +275,8 @@ export const useComposeDiscoverFlyout = ({
 
   const openEditFlyout = useCallback(
     (rule: RuleApiResponse) => {
-      const pageBuilder = rule.metadata?.builder_type
-        ? PAGE_BUILDERS[rule.metadata.builder_type]
+      const pageBuilder = rule.metadata?.builder
+        ? PAGE_BUILDERS[rule.metadata.builder.type]
         : undefined;
       if (pageBuilder) {
         application.navigateToUrl(http.basePath.prepend(pageBuilder.getEditUrl(rule.id)));
@@ -289,8 +289,8 @@ export const useComposeDiscoverFlyout = ({
 
   const openCloneFlyout = useCallback(
     (rule: RuleApiResponse) => {
-      const pageBuilder = rule.metadata?.builder_type
-        ? PAGE_BUILDERS[rule.metadata.builder_type]
+      const pageBuilder = rule.metadata?.builder
+        ? PAGE_BUILDERS[rule.metadata.builder.type]
         : undefined;
       if (pageBuilder) {
         application.navigateToUrl(http.basePath.prepend(pageBuilder.getCloneUrl(rule.id)));

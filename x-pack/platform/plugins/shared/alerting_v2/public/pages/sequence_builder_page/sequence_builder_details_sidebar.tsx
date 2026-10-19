@@ -27,11 +27,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { CoreStart, useService } from '@kbn/core-di-browser';
 
-import {
-  DetailsAndArtifactsStep,
-  LinkedActionPoliciesStep,
-  NotificationsStep,
-} from '@kbn/alerting-v2-rule-form';
+import { DetailsAndArtifactsStep, LinkedActionPoliciesStep } from '@kbn/alerting-v2-rule-form';
 import type { SequenceFormValues } from '@kbn/alerting-v2-rule-form';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { HttpStart } from '@kbn/core/public';
@@ -122,13 +118,7 @@ const SidebarContent: React.FC<SidebarContentProps> = ({
       >
         {selectedTab === 'execution' && <SequenceRuleExecutionStep seqValues={seqValues} />}
         {selectedTab === 'details' && <DetailsAndArtifactsStep />}
-        {selectedTab === 'actions' && (
-          <>
-            <LinkedActionPoliciesStep http={http} />
-            <EuiHorizontalRule margin="m" />
-            <NotificationsStep />
-          </>
-        )}
+        {selectedTab === 'actions' && <LinkedActionPoliciesStep http={http} />}
       </div>
 
       <div style={{ flexShrink: 0 }}>

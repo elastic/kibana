@@ -148,7 +148,6 @@ export { parseSequenceEsql } from './sequence/parse_esql';
 
 // Compose form sub-steps — re-exported for sequence builder sidebar
 export { DetailsAndArtifactsStep } from './flyout/compose_discover/compose_discover_form/details_and_artifacts_step';
-export { NotificationsStep } from './flyout/compose_discover/compose_discover_form/notifications_step';
 export { LinkedActionPoliciesStep } from './flyout/compose_discover/compose_discover_form/linked_action_policies_step';
 
 // Form fields

@@ -11,6 +11,7 @@ import { useQuery, useQueryClient } from '@kbn/react-query';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import type { FormValues } from '@kbn/alerting-v2-rule-form';
+import { getBreachEsqlQuery, getRecoverEsqlQuery } from '@kbn/alerting-v2-schemas';
 import {
   mapRuleToComposeFormValues,
   parseSequenceEsql,
@@ -84,10 +85,11 @@ export const useSequenceBuilderForm = (
 
   const rawParsedSeqValues = useMemo<SequenceFormValues | undefined>(() => {
     if (!editData) return undefined;
-    if (editData.query.format === 'composed') return undefined;
-    const breachQuery = editData.query.breach?.query;
+    const breachQuery = editData.query ? getBreachEsqlQuery(editData.query) : '';
     if (!breachQuery) return undefined;
-    const recoveryQuery = editData.query.recovery?.query;
+    const recoveryQuery = editData.query
+      ? getRecoverEsqlQuery(editData.query, editData.recovery)
+      : undefined;
     try {
       return parseSequenceEsql(breachQuery, recoveryQuery) ?? undefined;
     } catch {
