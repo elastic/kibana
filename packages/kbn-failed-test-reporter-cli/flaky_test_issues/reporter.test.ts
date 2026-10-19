@@ -582,7 +582,7 @@ describe('reportFlakySuiteIssues', () => {
           /^This test suite still appears to be flaky, with 1 flaky test over 2–9 Sep 2026:\n\n\| Test \|[\s\S]*49 \/ 509[\s\S]*> \[!TIP\]/
         )
       );
-      // The comment's Slack notification reads the metadata, so the body goes first
+      // The failed-test alert a comment runs reads the metadata, so the body goes first
       expect(github.editIssue.mock.invocationCallOrder[0]).toBeLessThan(
         github.addIssueComment.mock.invocationCallOrder[0]
       );

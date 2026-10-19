@@ -477,8 +477,9 @@ export const reportFlakySuiteIssues = async (
   };
 
   /**
-   * Metadata first: the Slack notification the comment triggers reads the report count from it.
-   * The body's text stays as filed, this report's numbers go in the comment.
+   * Metadata first: the failed-test alert a `kibanamachine` comment runs in elastic/kibana reads
+   * the report count from it. The body's text stays as filed, this report's numbers go in the
+   * comment.
    */
   const update = async (
     suite: FlakySuite,

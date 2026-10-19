@@ -89,7 +89,7 @@ export interface FlakySuiteIssueMetadata {
   'suite.branches': string[];
   /**
    * Pipelines in the report scope that the suite's file failed on, latest failure last, the order
-   * the Slack notifications of `triage/` read them in.
+   * the failed-test alerts of `triage/` read them in.
    */
   'suite.pipelines': string[];
   /** Newest report that found the suite flaky. */
@@ -743,9 +743,9 @@ export const renderFlakySuiteIssueBody = (suite: FlakySuite, ctx: FlakySuiteIssu
 
 /**
  * The body of a refreshed issue: the text stays as filed, a record of what the suite did then,
- * and only the hidden metadata is brought up to this report, as `/skip` and the Slack
- * notifications of elastic/kibana-operations `triage/` read the suite's tests, branches,
- * pipelines and report count from it. This report's numbers go in the comment.
+ * and only the hidden metadata is brought up to this report, as `/skip` and the failed-test
+ * alerts of elastic/kibana-operations `triage/` read the suite's tests, branches, pipelines and
+ * report count from it. This report's numbers go in the comment.
  */
 export const refreshFlakySuiteIssueMetadata = (
   body: string,
@@ -765,9 +765,10 @@ const SKIP_TIP =
 
 /**
  * The comment of a refresh that found new failures: this report's numbers for the suite, as the
- * body keeps the ones it was filed with, then how to skip it. A `kibanamachine` comment is what
- * turns into a Slack notification (elastic/kibana-operations `triage/`), so the body's metadata
- * has to be updated first: the notification reads it.
+ * body keeps the ones it was filed with, then how to skip it. In elastic/kibana a `kibanamachine`
+ * comment runs the failed-test alert of elastic/kibana-operations `triage/` (a Slack message for
+ * teams opted in to existing-failure alerts), which reads the report count from the body's
+ * metadata, so the metadata is updated first.
  */
 export const renderFlakySuiteIssueComment = (
   suite: FlakySuite,
