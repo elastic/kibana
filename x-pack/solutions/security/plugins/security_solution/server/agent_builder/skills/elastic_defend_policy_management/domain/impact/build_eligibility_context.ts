@@ -14,6 +14,8 @@ import {
   ensureOnlyEventCollectionIsAllowed,
   removeCustomYaraSignatures,
   removeDeviceControl,
+  removeLinuxRansomware,
+  removeRegistryCredentialHardening,
 } from '../../../../../../common/endpoint/models/policy_config_helpers';
 import type { PolicyConfig } from '../../../../../../common/endpoint/types';
 import { unsetPolicyFeaturesAccordingToLicenseLevel } from '../../../../../../common/license/policy_config';
@@ -27,6 +29,9 @@ export interface BuildEligibilityContextInput {
   readonly trustedDevicesExperimental: boolean;
   readonly endpointCustomYaraSignatures: boolean;
   readonly customYaraSignaturesExperimental: boolean;
+  readonly linuxRansomwareProtection: boolean;
+  readonly endpointRegistryCredentialHardening: boolean;
+  readonly registryCredentialHardeningExperimental: boolean;
   readonly endpointProtectionUpdates: boolean;
   readonly serverless: boolean;
 }
@@ -39,6 +44,9 @@ export const buildEligibilityContext = ({
   trustedDevicesExperimental,
   endpointCustomYaraSignatures,
   customYaraSignaturesExperimental,
+  linuxRansomwareProtection,
+  endpointRegistryCredentialHardening,
+  registryCredentialHardeningExperimental,
   endpointProtectionUpdates,
   serverless,
 }: BuildEligibilityContextInput): EligibilityContext => {
@@ -66,6 +74,16 @@ export const buildEligibilityContext = ({
     customYaraSignaturesReason: endpointCustomYaraSignatures
       ? 'custom_yara_signatures_experimental_disabled'
       : 'endpoint_custom_yara_signatures_disabled',
+    linuxRansomwareStripped: linuxRansomwareProtection
+      ? proposedConfig
+      : removeLinuxRansomware(proposedConfig),
+    registryCredentialHardeningStripped:
+      endpointRegistryCredentialHardening && registryCredentialHardeningExperimental
+        ? proposedConfig
+        : removeRegistryCredentialHardening(proposedConfig),
+    registryCredentialHardeningReason: endpointRegistryCredentialHardening
+      ? 'registry_credential_hardening_experimental_disabled'
+      : 'endpoint_registry_credential_hardening_disabled',
     endpointProtectionUpdates,
     serverless,
   };

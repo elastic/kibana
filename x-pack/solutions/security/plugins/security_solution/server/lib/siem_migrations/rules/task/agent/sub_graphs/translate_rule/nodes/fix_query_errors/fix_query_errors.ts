@@ -15,7 +15,7 @@ export const getFixQueryErrorsNode = (params: GetFixEsqlQueryErrorsParams): Grap
   const fixEsqlQueryErrors = getFixEsqlQueryErrors(params);
   return async (state) => {
     const { query } = await fixEsqlQueryErrors({
-      invalidQuery: state.elastic_rule.query,
+      invalidQuery: state.elastic_rule.query ?? undefined,
       validationErrors: state.validation_errors.esql_errors,
     });
     if (!query) {

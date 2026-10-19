@@ -65,10 +65,6 @@ const ALLOWED_CALLERS = [
   // hmr_client.test uses new Function() to load a browser bundle with injected globals;
   // the bundle itself does not use code generation in production.
   /kbn-rspack-optimizer.*hmr_client\.test/,
-  // @kbn/connector-contract-mock validates requests and responses with Ajv and matches
-  // path templates with uri-template-lite (via Prism), both of which compile with
-  // new Function(). The package is dev-only test tooling and never runs in Kibana.
-  /kbn-connector-contract-mock\//,
 ];
 
 // @kbn/handlebars probes for CSP unsafe-eval support by calling

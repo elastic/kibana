@@ -14,6 +14,7 @@ export const ALERT_ACTIONS_DATA_STREAM = '.alert-actions';
 export const ALERTING_V2_SECTION_ID = 'alertingV2';
 export const ALERTING_V2_RULES_APP_ID = 'rules';
 export const ALERTING_V2_RULES_BASE_PATH = `/app/management/${ALERTING_V2_SECTION_ID}/${ALERTING_V2_RULES_APP_ID}`;
+export const ALERTING_V2_RULES_TAB_ID = 'v2Rules';
 export const ALERTING_V2_RULE_LIBRARY_APP_ID = 'rule_library';
 export const ALERTING_V2_RULE_LIBRARY_LOCATOR = 'ALERTING_V2_RULE_LIBRARY_LOCATOR';
 export const ALERTING_V2_RULES_LOCATOR = 'ALERTING_V2_RULES_LOCATOR';
@@ -38,6 +39,8 @@ export const ALERTING_V2_INTERNAL_ACTION_POLICY_API_PATH =
   '/internal/alerting/v2/action_policies' as const;
 export const ALERTING_V2_INTERNAL_ACTION_POLICY_MATCH_API_PATH =
   `${ALERTING_V2_INTERNAL_ACTION_POLICY_API_PATH}/_match` as const;
+export const ALERTING_V2_INTERNAL_ACTION_POLICY_ROUTING_TAGS_API_PATH =
+  `${ALERTING_V2_INTERNAL_ACTION_POLICY_API_PATH}/routing_tags` as const;
 export const ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH =
   '/api/alerting/v2/execution_history/action_policies' as const;
 export const ALERTING_V2_EXECUTION_HISTORY_RULES_API_PATH =

@@ -197,6 +197,30 @@ export const createDatasetWizardStrings = {
   saveErrorTitle: i18n.translate('xpack.dataFederation.createDatasetWizard.saveErrorTitle', {
     defaultMessage: 'Could not save the dataset',
   }),
+  deletePreviousErrorTitle: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.deletePreviousErrorTitle',
+    {
+      defaultMessage: 'Could not delete the previous dataset',
+    }
+  ),
+  dataSourceRefreshAfterSaveError: (savedName: string, reason: string) =>
+    i18n.translate('xpack.dataFederation.createDatasetWizard.dataSourceRefreshAfterSaveError', {
+      defaultMessage:
+        'Data source "{savedName}" was saved, but the data sources list could not be refreshed: {reason}',
+      values: { savedName, reason },
+    }),
+  refreshAfterSaveErrorTitle: (savedName: string) =>
+    i18n.translate('xpack.dataFederation.createDatasetWizard.refreshAfterSaveErrorTitle', {
+      defaultMessage:
+        'Dataset "{savedName}" was saved, but the datasets list could not be refreshed',
+      values: { savedName },
+    }),
+  deletePreviousErrorText: (savedName: string, previousName: string, reason: string) =>
+    i18n.translate('xpack.dataFederation.createDatasetWizard.deletePreviousErrorText', {
+      defaultMessage:
+        'The dataset was saved as "{savedName}", but the previous dataset "{previousName}" could not be deleted: {reason}',
+      values: { savedName, previousName, reason },
+    }),
   backButton: i18n.translate('xpack.dataFederation.createDatasetWizard.backButtonLabel', {
     defaultMessage: 'Back',
   }),
@@ -264,6 +288,21 @@ export const createDatasetWizardStrings = {
     'xpack.dataFederation.createDatasetForm.dataSourcePlaceholder',
     {
       defaultMessage: 'Select an existing data source or connect a new one',
+    }
+  ),
+
+  dataSourceAuthenticationCalloutTitle: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.dataSourceAuthenticationCalloutTitle',
+    {
+      defaultMessage: 'Check data source permissions',
+    }
+  ),
+
+  dataSourceAuthenticationCalloutDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.dataSourceAuthenticationCalloutDescription',
+    {
+      defaultMessage:
+        'Make sure the selected data source has permission to read the data you want to query. You can update its permissions in your cloud provider.',
     }
   ),
 

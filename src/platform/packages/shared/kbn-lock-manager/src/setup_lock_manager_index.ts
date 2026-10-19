@@ -60,7 +60,7 @@ export async function removeLockIndexWithIncorrectMappings(
   }
 }
 
-export async function ensureTemplatesAndIndexCreated(
+export async function ensureTemplatesCreated(
   esClient: ElasticsearchClient,
   logger: Logger
 ): Promise<void> {
@@ -96,7 +96,12 @@ export async function ensureTemplatesAndIndexCreated(
     },
   });
   logger.info(`Index template ${LOCKS_INDEX_TEMPLATE_NAME} created or updated successfully.`);
+}
 
+export async function ensureIndexCreated(
+  esClient: ElasticsearchClient,
+  logger: Logger
+): Promise<void> {
   try {
     await esClient.indices.create({ index: LOCKS_CONCRETE_INDEX_NAME });
     logger.info(`Index ${LOCKS_CONCRETE_INDEX_NAME} created successfully.`);
@@ -121,6 +126,8 @@ export async function ensureTemplatesAndIndexCreated(
 }
 
 export async function setupLockManagerIndex(esClient: ElasticsearchClient, logger: Logger) {
+  // Templates must exist before the delete below, so a concurrent `acquire()` cannot auto-create the index with dynamic mappings
+  await ensureTemplatesCreated(esClient, logger);
   await removeLockIndexWithIncorrectMappings(esClient, logger); // TODO: should be removed in the future (after 9.1). See https://github.com/elastic/kibana/issues/218944
-  await ensureTemplatesAndIndexCreated(esClient, logger);
+  await ensureIndexCreated(esClient, logger);
 }
