@@ -26,6 +26,7 @@ export {
 export {
   WatchAutonomyLevel,
   Worker,
+  WorkerBlockingReason,
   WorkerRunState,
   WorkerScheduleInterval,
   WorkerSettings,
@@ -88,6 +89,7 @@ export {
 export {
   HuntCoordinatorRequestBody,
   HuntCoordinatorResponse,
+  HuntCoordinatorResult,
   HuntCoordinatorStatus,
 } from './hunt/hunt_coordinator_route.gen';
 export {

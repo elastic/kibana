@@ -103,6 +103,9 @@ export const policyFactory = ({
         credential_hardening: {
           enabled: true,
         },
+        registry_credential_hardening: {
+          enabled: true,
+        },
       },
     },
     mac: {
@@ -179,6 +182,10 @@ export const policyFactory = ({
         blocklist: true,
         on_write_scan: true,
       },
+      ransomware: {
+        mode: ProtectionModes.prevent,
+        supported: true,
+      },
       behavior_protection: {
         mode: ProtectionModes.prevent,
         reputation_service: cloud, // Defaults to true if on cloud
@@ -191,6 +198,10 @@ export const policyFactory = ({
       },
       popup: {
         malware: {
+          message: '',
+          enabled: true,
+        },
+        ransomware: {
           message: '',
           enabled: true,
         },
@@ -229,6 +240,20 @@ const clearedCustomYaraSignatures = ({
   customYaraSignatures === undefined ? {} : { custom_yara_signatures: false };
 
 /**
+ * Registry credential hardening must end up off below Enterprise. An absent field means never
+ * configured and is already treated as disabled, so a downgrade keeps it absent instead of
+ * materializing `false`.
+ */
+const clearedRegistryCredentialHardening = ({
+  registry_credential_hardening: registryCredentialHardening,
+}: {
+  registry_credential_hardening?: { enabled: boolean };
+}): { registry_credential_hardening?: { enabled: boolean } } =>
+  registryCredentialHardening === undefined
+    ? {}
+    : { registry_credential_hardening: { enabled: false } };
+
+/**
  * Strips paid features from an existing or new `PolicyConfig` for license below enterprise
  */
 
@@ -247,6 +272,10 @@ export const policyFactoryWithoutPaidEnterpriseFeatures = (
       memory_protection: {
         ...policy.windows.memory_protection,
         ...clearedCustomYaraSignatures(policy.windows.memory_protection),
+      },
+      attack_surface_reduction: {
+        ...policy.windows.attack_surface_reduction,
+        ...clearedRegistryCredentialHardening(policy.windows.attack_surface_reduction),
       },
       popup: {
         ...policy.windows.popup,
@@ -335,9 +364,11 @@ export const policyFactoryWithoutPaidFeatures = (
         supported: false,
       },
       attack_surface_reduction: {
+        ...policy.windows.attack_surface_reduction,
         credential_hardening: {
           enabled: false,
         },
+        ...clearedRegistryCredentialHardening(policy.windows.attack_surface_reduction),
       },
       device_control: {
         enabled: false,
@@ -413,6 +444,14 @@ export const policyFactoryWithoutPaidFeatures = (
     },
     linux: {
       ...policy.linux,
+      // An absent field must stay absent: materializing it would add it where
+      // `linuxRansomwareProtection` is off.
+      ...(policy.linux.ransomware && {
+        ransomware: {
+          mode: ProtectionModes.off,
+          supported: false,
+        },
+      }),
       behavior_protection: {
         mode: ProtectionModes.off,
         reputation_service: false,
@@ -429,6 +468,13 @@ export const policyFactoryWithoutPaidFeatures = (
           message: '',
           enabled: true, // disabling/configuring malware popup is a paid feature
         },
+        // Mirrors `linux.ransomware`: an absent branch must stay absent.
+        ...(policy.linux.popup?.ransomware && {
+          ransomware: {
+            message: '',
+            enabled: false,
+          },
+        }),
         memory_protection: {
           message: '',
           enabled: false,
@@ -484,6 +530,12 @@ export const policyFactoryWithSupportedFeatures = (
     },
     linux: {
       ...policy.linux,
+      ...(policy.linux.ransomware && {
+        ransomware: {
+          ...policy.linux.ransomware,
+          supported: true,
+        },
+      }),
       behavior_protection: {
         ...policy.linux.behavior_protection,
         supported: true,

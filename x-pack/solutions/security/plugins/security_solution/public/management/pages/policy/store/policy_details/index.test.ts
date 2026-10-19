@@ -200,6 +200,39 @@ describe('policy details: ', () => {
         expect(config.windows.popup.malware.message).not.toEqual(CustomMessage);
       });
     });
+
+    describe('when the user edits linux settings through the legacy (non per-OS) policyConfig action', () => {
+      const Platinum = licenseMock.createLicense({
+        license: { type: 'platinum', mode: 'platinum' },
+      });
+
+      beforeEach(() => {
+        dispatch({ type: 'licenseChanged', payload: Platinum });
+      });
+
+      // `policyConfig`'s `linux` section (selectors/policy_settings_selectors.ts) has no
+      // `ransomware` key in its object literal at all -- Linux ransomware is only editable
+      // through the per-OS form. Because the key is genuinely absent (not set to `undefined`),
+      // the reducer's `{ ...currentOsPolicy, ...newSettings }` merge leaves the existing
+      // `linux.ransomware` branch untouched. If the selector ever added an unconditional
+      // `ransomware: linux.ransomware`, an absent branch would become an explicit `undefined`
+      // own-property and this merge would instead erase it.
+      it('does not drop an existing linux.ransomware branch when saving an unrelated linux change', () => {
+        const config = policyConfig(getState());
+        const newPayload = cloneDeep(config);
+        newPayload.linux.events.file = true;
+
+        dispatch({
+          type: 'userChangedPolicyConfig',
+          payload: { policyConfig: newPayload },
+        });
+
+        const savedPolicy = policyDetails(getState())?.inputs[0].config.policy
+          .value as PolicyConfig;
+        expect(savedPolicy.linux.events.file).toEqual(true);
+        expect(savedPolicy.linux.ransomware).toEqual({ mode: 'prevent', supported: true });
+      });
+    });
   });
 
   describe('when saving policy data', () => {
@@ -319,6 +352,9 @@ describe('policy details: ', () => {
                       credential_hardening: {
                         enabled: false,
                       },
+                      registry_credential_hardening: {
+                        enabled: false,
+                      },
                     },
                     popup: {
                       malware: {
@@ -415,6 +451,7 @@ describe('policy details: ', () => {
                       supported: false,
                       custom_yara_signatures: false,
                     },
+                    ransomware: { mode: 'off', supported: false },
                     popup: {
                       malware: {
                         enabled: true,
@@ -425,6 +462,10 @@ describe('policy details: ', () => {
                         message: '',
                       },
                       memory_protection: {
+                        enabled: false,
+                        message: '',
+                      },
+                      ransomware: {
                         enabled: false,
                         message: '',
                       },

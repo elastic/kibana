@@ -45,13 +45,20 @@ const mockUseActionPolicyConnectorTypes = useActionPolicyConnectorTypes as jest.
 
 const mockUseWatch = useWatch as jest.Mock;
 
+const defaultGetActionPolicyEditHref = (id: string) =>
+  `/app/observability/alerting/action-policies/edit/${id}`;
+
 const renderComponent = (
   props?: Partial<React.ComponentProps<typeof LinkedActionPoliciesStep>>
 ) => {
   const http = httpServiceMock.createStartContract();
   return render(
     <IntlProvider locale="en">
-      <LinkedActionPoliciesStep http={http} {...props} />
+      <LinkedActionPoliciesStep
+        http={http}
+        getActionPolicyEditHref={defaultGetActionPolicyEditHref}
+        {...props}
+      />
     </IntlProvider>
   );
 };
@@ -266,9 +273,47 @@ describe('LinkedActionPoliciesStep', () => {
     expect(screen.getByTestId('matchedPolicyReasonExpression')).toBeInTheDocument();
   });
 
-  it('renders the edit link for each policy row with the correct href', () => {
+  it('renders the edit link for each policy row using the injected host-aware href builder', () => {
     const http = httpServiceMock.createStartContract();
-    // createStartContract uses a real BasePath instance with basePath='', so prepend() is a pass-through.
+    const getActionPolicyEditHref = jest.fn(
+      (id: string) => `/app/observability/alerting/action-policies/edit/${id}`
+    );
+
+    mockUseMatchedActionPolicies.mockReturnValue({
+      isLoading: false,
+      isPreviousData: false,
+      error: null,
+      items: [
+        {
+          action_policy: { id: 'ap-1', name: 'Global Policy', matcher: null } as any,
+          category: 'catch_all',
+        },
+      ],
+      evaluatedCount: 1,
+      isTruncated: false,
+    });
+
+    render(
+      <IntlProvider locale="en">
+        <LinkedActionPoliciesStep http={http} getActionPolicyEditHref={getActionPolicyEditHref} />
+      </IntlProvider>
+    );
+
+    expect(getActionPolicyEditHref).toHaveBeenCalledWith('ap-1');
+
+    const editLink = screen.getByTestId('linkedActionPolicyEdit-ap-1');
+    expect(editLink).toBeInTheDocument();
+    expect(editLink).toHaveTextContent('Global Policy');
+    expect(editLink).toHaveAttribute(
+      'href',
+      '/app/observability/alerting/action-policies/edit/ap-1'
+    );
+    expect(editLink).toHaveAttribute('target', '_blank');
+    expect(editLink).toHaveAttribute('rel', 'noopener noreferrer');
+  });
+
+  it('renders the policy name as plain text when no href builder is injected', () => {
+    const http = httpServiceMock.createStartContract();
 
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
@@ -290,15 +335,8 @@ describe('LinkedActionPoliciesStep', () => {
       </IntlProvider>
     );
 
-    const editLink = screen.getByTestId('linkedActionPolicyEdit-ap-1');
-    expect(editLink).toBeInTheDocument();
-    expect(editLink).toHaveTextContent('Global Policy');
-    expect(editLink).toHaveAttribute(
-      'href',
-      '/app/management/alertingV2/action_policies/edit/ap-1'
-    );
-    expect(editLink).toHaveAttribute('target', '_blank');
-    expect(editLink).toHaveAttribute('rel', 'noopener noreferrer');
+    expect(screen.queryByTestId('linkedActionPolicyEdit-ap-1')).not.toBeInTheDocument();
+    expect(screen.getByTestId('linkedActionPolicyName-ap-1')).toHaveTextContent('Global Policy');
   });
 
   it('renders connector icons for a policy from the batched connector-types hook', () => {

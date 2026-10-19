@@ -25,7 +25,7 @@ interface QueriesApi {
   deleteQueriesInBulk: ({ queryIds }: { queryIds: string[] }) => Promise<void>;
   setQueryDurability: (args: {
     query: StreamQuery;
-    streamName: string;
+    sourceId: string;
     expiresAt: string | undefined;
   }) => Promise<void>;
   abort: () => void;
@@ -79,11 +79,11 @@ export function useQueriesApi(): QueriesApi {
       },
       setQueryDurability: async ({
         query,
-        streamName,
+        sourceId,
         expiresAt,
       }: {
         query: StreamQuery;
-        streamName: string;
+        sourceId: string;
         expiresAt: string | undefined;
       }) => {
         await significantEventsRepositoryClient.fetch(
@@ -99,7 +99,7 @@ export function useQueriesApi(): QueriesApi {
                 evidence: query.evidence,
                 description: query.description,
                 expires_at: expiresAt,
-                target_name: streamName,
+                source_id: sourceId,
               },
             },
           }
