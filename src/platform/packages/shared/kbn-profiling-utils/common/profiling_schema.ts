@@ -22,11 +22,17 @@ export const profilingSchemaRt = t.union([
 
 export const DEFAULT_PROFILING_SCHEMA = ProfilingSchema.OTEL;
 
-// Only events are listed: they are the only profiling indices Kibana queries directly. Stacktraces,
-// stackframes and executables are resolved by the Elasticsearch profiling APIs from the `schema` value.
+// Only events and stacktraces are listed: they are the only profiling indices Kibana queries directly,
+// to check which schemas have data. Stackframes and executables are resolved by the Elasticsearch
+// profiling APIs from the `schema` value.
 export const PROFILING_EVENTS_INDEX_BY_SCHEMA: Readonly<Record<ProfilingSchema, string>> = {
   [ProfilingSchema.ECS]: 'profiling-events-all',
   [ProfilingSchema.OTEL]: 'profiling-events-all.otel-*',
+};
+
+export const PROFILING_STACKTRACES_INDEX_BY_SCHEMA: Readonly<Record<ProfilingSchema, string>> = {
+  [ProfilingSchema.ECS]: 'profiling-stacktraces',
+  [ProfilingSchema.OTEL]: 'profiling-stacktraces.otel-*',
 };
 
 export interface ProfilingSchemasAvailability {

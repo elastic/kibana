@@ -2786,6 +2786,66 @@ describe('bulkEdit()', () => {
       );
     });
 
+    describe('UIAM-only rules', () => {
+      const oldUiamApiKey = Buffer.from('222:essu_old').toString('base64');
+      const newUiamApiKey = Buffer.from('333:essu_new').toString('base64');
+
+      beforeEach(() => {
+        createAPIKeyMock.mockReset();
+        createAPIKeyMock.mockResolvedValueOnce({
+          apiKeysEnabled: true,
+          uiamResult: { id: '333', name: '333', api_key: 'essu_new' },
+        });
+        mockCreatePointInTimeFinderAsInternalUser({
+          saved_objects: [
+            {
+              ...existingDecryptedRule,
+              attributes: {
+                ...existingDecryptedRule.attributes,
+                enabled: true,
+                apiKey: null,
+                apiKeyCreatedByUser: false,
+                uiamApiKey: oldUiamApiKey,
+              },
+            },
+          ],
+        });
+      });
+
+      test('invalidates the UIAM key the rule held before the edit', async () => {
+        await rulesClient.bulkEdit({
+          filter: 'alert.attributes.tags: "APM"',
+          operations: [{ field: 'tags', operation: 'add', value: ['test-1'] }],
+        });
+
+        expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+          { apiKeys: [oldUiamApiKey] },
+          expect.any(Object),
+          expect.any(Object)
+        );
+      });
+
+      test('invalidates the new UIAM key if bulkCreate failed', async () => {
+        unsecuredSavedObjectsClient.bulkCreate.mockImplementation(() => {
+          throw new Error('Fail');
+        });
+
+        await expect(
+          rulesClient.bulkEdit({
+            filter: 'alert.attributes.tags: "APM"',
+            operations: [{ field: 'tags', operation: 'add', value: ['test-1'] }],
+          })
+        ).rejects.toThrow('Fail');
+
+        expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
+        expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
+          { apiKeys: [newUiamApiKey] },
+          expect.any(Object),
+          expect.any(Object)
+        );
+      });
+    });
+
     test('should call bulkMarkApiKeysForInvalidation to invalidate unused keys if bulkCreate failed', async () => {
       unsecuredSavedObjectsClient.bulkCreate.mockImplementation(() => {
         throw new Error('Fail');

@@ -9,7 +9,10 @@ import type { EuiTabbedContentProps } from '@elastic/eui';
 import { EuiLoadingSpinner, EuiSpacer, EuiTabbedContent } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { ProfilingEmptyState } from '@kbn/observability-shared-plugin/public';
+import {
+  ProfilingEmptyState,
+  useProfilingSchemaState,
+} from '@kbn/observability-shared-plugin/public';
 import React, { useMemo } from 'react';
 import { isJavaAgentName as getIsJavaAgentName } from '../../../../common/agent_name';
 import { ApmDocumentType } from '../../../../common/document_type';
@@ -19,9 +22,11 @@ import { usePreferredDataSourceAndBucketSize } from '../../../hooks/use_preferre
 import { useProfilingPlugin } from '../../../hooks/use_profiling_plugin';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { ProfilingFlamegraph } from '../../shared/profiling/flamegraph';
+import { ProfilingSchemaSelector } from '../../shared/profiling/schema_selector';
 import { ProfilingTopNFunctions } from '../../shared/profiling/top_functions';
 import { ProfilingHostsCallout } from './profiling_hosts_callout';
 import { ProfilingHostsFlamegraph } from './profiling_hosts_flamegraph';
+import { ProfilingHostsSchemaSelector } from './profiling_hosts_schema_selector';
 import { ProfilingHostsTopNFunctions } from './profiling_hosts_top_functions';
 
 export { ProfilingHeaderSearchBar } from './profiling_header_search_bar';
@@ -43,6 +48,7 @@ export function ProfilingOverview() {
 
   const { agentName, transactionType } = useApmServiceContext();
   const isJavaAgent = getIsJavaAgentName(agentName);
+  const { schema } = useProfilingSchemaState();
 
   const tabs = useMemo((): EuiTabbedContentProps['tabs'] => {
     // Host-scoped views are the default for non-Java agents and the fallback for Java agents
@@ -57,6 +63,7 @@ export function ProfilingOverview() {
         kuery={kuery}
         rangeFrom={rangeFrom}
         rangeTo={rangeTo}
+        schema={schema}
       />
     );
     const hostsTopNFunctions = (
@@ -71,6 +78,7 @@ export function ProfilingOverview() {
         kuery={kuery}
         rangeFrom={rangeFrom}
         rangeTo={rangeTo}
+        schema={schema}
       />
     );
 
@@ -91,6 +99,7 @@ export function ProfilingOverview() {
                 rangeTo={rangeTo}
                 environment={environment}
                 transactionType={transactionType}
+                schema={schema}
                 fallback={hostsFlamegraph}
               />
             ) : (
@@ -115,6 +124,7 @@ export function ProfilingOverview() {
                 rangeTo={rangeTo}
                 environment={environment}
                 transactionType={transactionType}
+                schema={schema}
                 fallback={hostsTopNFunctions}
               />
             ) : (
@@ -132,6 +142,7 @@ export function ProfilingOverview() {
     preferred?.source,
     rangeFrom,
     rangeTo,
+    schema,
     serviceName,
     start,
     transactionType,
@@ -162,6 +173,29 @@ export function ProfilingOverview() {
           <EuiSpacer />
         </>
       )}
+      {/* Java agents record the profiler stacktrace IDs of each transaction, so their profiling
+      data and schemas with data come from the service's transactions. Other agents can only be
+      correlated through the hosts or containers the service runs on. */}
+      {isJavaAgent ? (
+        <ProfilingSchemaSelector
+          serviceName={serviceName}
+          start={start}
+          end={end}
+          environment={environment}
+          kuery={kuery}
+          transactionType={transactionType}
+        />
+      ) : (
+        <ProfilingHostsSchemaSelector
+          serviceName={serviceName}
+          start={start}
+          end={end}
+          environment={environment}
+          dataSource={preferred?.source}
+          kuery={kuery}
+        />
+      )}
+      <EuiSpacer />
       <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} autoFocus="selected" />
     </>
   );

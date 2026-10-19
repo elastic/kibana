@@ -43,6 +43,14 @@ jest.mock('../../../../flyout_v2/use_flyout_api', () => ({
   }),
 }));
 
+jest.mock('@kbn/elastic-assistant', () => ({
+  ConnectorSelectorInline: () => (
+    <button type="button" data-test-subj="connector-selector">
+      {'Connector'}
+    </button>
+  ),
+}));
+
 const createMockObservation = (overrides: Partial<Observation> = {}): Observation => ({
   entityId: 'entity-1',
   moduleId: 'risk_analysis',
@@ -409,5 +417,17 @@ describe('TopThreatHuntingLeads', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Collapse' }));
     expect(screen.queryByTestId('leadCard-lead-1')).not.toBeInTheDocument();
     expect(window.localStorage.getItem(storageKey)).toBe('false');
+  });
+
+  it('renders the Options popover as a focus-owning dialog so keyboard users land inside it', async () => {
+    render(<TopThreatHuntingLeads {...defaultProps} />);
+
+    fireEvent.click(screen.getByTestId('leadsOptionsButton'));
+
+    const popoverPanel = await screen.findByRole('dialog', { name: 'Options' });
+    expect(popoverPanel).toHaveAttribute('tabindex', '0');
+    expect(popoverPanel).toHaveAccessibleDescription(
+      'You are in a dialog. Press Escape, or tap/click outside the dialog to close.'
+    );
   });
 });

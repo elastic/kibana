@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import {
   routeDefinitions,
   type ProfilingHostsFlamegraphResponse,
   type ProfilingHostsFunctionsResponse,
+  type ProfilingHostsSchemasResponse,
 } from '@kbn/apm-api-shared';
 import type { BaseFlameGraph, TopNFunctions } from '@kbn/profiling-utils';
 import {
@@ -20,7 +22,10 @@ import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
 import { fetchFlamegraph } from '../fetch_flamegraph';
 import { fetchFunctions } from '../fetch_functions';
+import { getProfilingHostsSchemas } from '../get_profiling_schemas';
 import { getServiceCorrelationFields } from '../get_service_correlation_fields';
+import { getProfilingEventsQueryFromKuery } from '../profiling_queries';
+import { toProfilingTimeRange } from '../utils';
 
 /**
  * Runs `fetch` for each candidate scope, most specific first, and returns the first result that
@@ -60,11 +65,11 @@ const profilingHostsFlamegraphRoute = createApmServerRoute({
     const core = await context.core;
     const [esClient, apmEventClient, profilingDataAccessStart] = await Promise.all([
       core.elasticsearch.client,
-      await getApmEventClient(resources),
-      await plugins.profilingDataAccess?.start(),
+      getApmEventClient(resources),
+      plugins.profilingDataAccess?.start(),
     ]);
     if (profilingDataAccessStart) {
-      const { start, end, environment, documentType, rollupInterval, kuery } = params.query;
+      const { start, end, environment, documentType, rollupInterval, kuery, schema } = params.query;
       const { serviceName } = params.path;
 
       const correlation = await getServiceCorrelationFields({
@@ -81,8 +86,7 @@ const profilingHostsFlamegraphRoute = createApmServerRoute({
       if (candidates.length === 0) {
         return undefined;
       }
-      const startSecs = start / 1000;
-      const endSecs = end / 1000;
+      const { startSeconds, endSeconds, totalSeconds } = toProfilingTimeRange({ start, end });
 
       const match = await fetchFirstScopeWithSamples({
         candidates,
@@ -92,9 +96,14 @@ const profilingHostsFlamegraphRoute = createApmServerRoute({
             profilingDataAccessStart,
             core,
             esClient: esClient.asCurrentUser,
-            start: startSecs,
-            end: endSecs,
-            kuery: scopedKuery,
+            totalSeconds,
+            query: getProfilingEventsQueryFromKuery({
+              start: startSeconds,
+              end: endSeconds,
+              kuery: scopedKuery,
+            }),
+            schema,
+            abortSignal: getRequestAbortedSignal(resources.request.events.aborted$),
           }),
         hasSamples: (flamegraph: BaseFlameGraph): boolean => flamegraph.TotalSamples > 0,
       });
@@ -118,12 +127,21 @@ const profilingHostsFunctionsRoute = createApmServerRoute({
     const core = await context.core;
     const [esClient, apmEventClient, profilingDataAccessStart] = await Promise.all([
       core.elasticsearch.client,
-      await getApmEventClient(resources),
-      await plugins.profilingDataAccess?.start(),
+      getApmEventClient(resources),
+      plugins.profilingDataAccess?.start(),
     ]);
     if (profilingDataAccessStart) {
-      const { start, end, environment, startIndex, endIndex, documentType, rollupInterval, kuery } =
-        params.query;
+      const {
+        start,
+        end,
+        environment,
+        startIndex,
+        endIndex,
+        documentType,
+        rollupInterval,
+        kuery,
+        schema,
+      } = params.query;
       const { serviceName } = params.path;
 
       const correlation = await getServiceCorrelationFields({
@@ -141,8 +159,7 @@ const profilingHostsFunctionsRoute = createApmServerRoute({
         return undefined;
       }
 
-      const startSecs = start / 1000;
-      const endSecs = end / 1000;
+      const { startSeconds, endSeconds, totalSeconds } = toProfilingTimeRange({ start, end });
 
       const match = await fetchFirstScopeWithSamples({
         candidates,
@@ -154,9 +171,14 @@ const profilingHostsFunctionsRoute = createApmServerRoute({
             esClient: esClient.asCurrentUser,
             startIndex,
             endIndex,
-            start: startSecs,
-            end: endSecs,
-            kuery: scopedKuery,
+            totalSeconds,
+            query: getProfilingEventsQueryFromKuery({
+              start: startSeconds,
+              end: endSeconds,
+              kuery: scopedKuery,
+            }),
+            schema,
+            abortSignal: getRequestAbortedSignal(resources.request.events.aborted$),
           }),
         hasSamples: (functions: TopNFunctions): boolean => functions.TotalCount > 0,
       });
@@ -171,7 +193,52 @@ const profilingHostsFunctionsRoute = createApmServerRoute({
   },
 });
 
+const profilingHostsSchemasRoute = createApmServerRoute({
+  endpoint: routeDefinitions.profiling.hostsSchemas.endpoint,
+  params: routeDefinitions.profiling.hostsSchemas.params,
+  security: { authz: { requiredPrivileges: ['apm'] } },
+  handler: async (resources): Promise<ProfilingHostsSchemasResponse> => {
+    const { context, plugins, params } = resources;
+    const core = await context.core;
+    const [esClient, apmEventClient, profilingDataAccessStart] = await Promise.all([
+      core.elasticsearch.client,
+      getApmEventClient(resources),
+      plugins.profilingDataAccess?.start(),
+    ]);
+
+    if (!profilingDataAccessStart) {
+      return { schemas: [] };
+    }
+
+    const { start, end, environment, documentType, rollupInterval, kuery } = params.query;
+    const { startSeconds, endSeconds } = toProfilingTimeRange({ start, end });
+    const { serviceName } = params.path;
+
+    const { hostNames, containerIds } = await getServiceCorrelationFields({
+      apmEventClient,
+      start,
+      end,
+      environment,
+      serviceName,
+      documentType,
+      rollupInterval,
+    });
+
+    return getProfilingHostsSchemas({
+      profilingDataAccessStart,
+      esClient: esClient.asCurrentUser,
+      start: startSeconds,
+      end: endSeconds,
+      hostNames,
+      containerIds,
+      kuery,
+      abortSignal: getRequestAbortedSignal(resources.request.events.aborted$),
+    });
+  },
+});
+
 export const profilingHostsRouteRepository = {
   ...profilingHostsFlamegraphRoute,
   ...profilingHostsFunctionsRoute,
+  ...profilingHostsSchemasRoute,
 };

@@ -1,5 +1,5 @@
 {
-  "sha1": "d40644afd34fa2353f73895d464be109efcb30a7",
+  "sha1": "2d009255fd94da8f30ac358295f7f9fa98f49fac",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -131,7 +131,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/embedded_map_search_cancellation.spec.ts",
         "line": 62,
-        "column": 13
+        "column": 7
       }
     },
     {
@@ -233,6 +233,201 @@
       }
     },
     {
+      "id": "4fe0e4ac756e5c3-f4bc6ea92ed25df",
+      "title": "Maps - layer errors should display layer errors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/layer_errors.spec.ts",
+        "line": 61,
+        "column": 8
+      }
+    },
+    {
+      "id": "ead7e80808fca9b-b8246381ace2390",
+      "title": "Maps - Lens choropleth chart should allow creation of choropleth chart",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/lens_choropleth_chart.spec.ts",
+        "line": 30,
+        "column": 11
+      }
+    },
+    {
+      "id": "ead7e80808fca9b-f2d32bf1829bd74",
+      "title": "Maps - Lens choropleth chart should create choropleth chart from suggestion",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/lens_choropleth_chart.spec.ts",
+        "line": 44,
+        "column": 80
+      }
+    },
+    {
+      "id": "5dac839e869fc10-18eb634b7ef8050",
+      "title": "Maps - mapbox styles layer styles",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/mapbox_styles.spec.ts",
+        "line": 22,
+        "column": 8
+      }
+    },
+    {
+      "id": "657df4f8acf7038-84bb3b97bc36e0f",
+      "title": "Maps - mvt geotile grid layer should render with mvt-source (style meta from ES)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/mvt_geotile_grid.spec.ts",
+        "line": 28,
+        "column": 8
+      }
+    },
+    {
+      "id": "657df4f8acf7038-79c15aa1cb1198d",
+      "title": "Maps - mvt geotile grid layer should render with mvt-source (style meta from local - count)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/mvt_geotile_grid.spec.ts",
+        "line": 115,
+        "column": 21
+      }
+    },
+    {
+      "id": "657df4f8acf7038-84801d81c43f98b",
+      "title": "Maps - mvt geotile grid layer should render with mvt-source (style meta from local - metric)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/mvt_geotile_grid.spec.ts",
+        "line": 178,
+        "column": 21
+      }
+    },
+    {
+      "id": "657df4f8acf7038-926e2c591fe0f03",
+      "title": "Maps - mvt geotile grid layer should render heatmap layer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/mvt_geotile_grid.spec.ts",
+        "line": 241,
+        "column": 21
+      }
+    },
+    {
+      "id": "21396f28ec6a4d0-945ae92fd8ca47c",
+      "title": "Maps - vector tile layer with joins legend and tooltip",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/mvt_joins.spec.ts",
+        "line": 23,
+        "column": 39
+      }
+    },
+    {
+      "id": "21396f28ec6a4d0-484d2a3648a11fd",
+      "title": "Maps - vector tile layer with joins query bar",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/mvt_joins.spec.ts",
+        "line": 63,
+        "column": 9
+      }
+    },
+    {
+      "id": "39fec3468e9a3b4-f25bed6628b6b9c",
+      "title": "Maps - MVT scaling layer style",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/mvt_scaling.spec.ts",
+        "line": 54,
+        "column": 11
+      }
+    },
+    {
+      "id": "39fec3468e9a3b4-1e1da2fe874d8b2",
+      "title": "Maps - MVT scaling filtering - applyGlobalQuery: true, applyGlobalTime: true, applyForceRefresh: true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/mvt_scaling.spec.ts",
+        "line": 232,
+        "column": 13
+      }
+    },
+    {
+      "id": "39fec3468e9a3b4-d0b97e311ddf315",
+      "title": "Maps - MVT scaling filtering - applyGlobalQuery: false, applyGlobalTime: true, applyForceRefresh: true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/mvt_scaling.spec.ts",
+        "line": 232,
+        "column": 13
+      }
+    },
+    {
+      "id": "39fec3468e9a3b4-776867b20b550bf",
+      "title": "Maps - MVT scaling filtering - applyGlobalQuery: true, applyGlobalTime: false, applyForceRefresh: true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/mvt_scaling.spec.ts",
+        "line": 232,
+        "column": 13
+      }
+    },
+    {
+      "id": "39fec3468e9a3b4-455b687152f6ecb",
+      "title": "Maps - MVT scaling filtering - applyGlobalQuery: true, applyGlobalTime: true, applyForceRefresh: false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/mvt_scaling.spec.ts",
+        "line": 232,
+        "column": 13
+      }
+    },
+    {
       "id": "9ef7c2e9e572087-f4dfe961da30788",
       "title": "Maps - shapefile upload shapefile upload",
       "expectedStatus": "passed",
@@ -243,6 +438,19 @@
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/shapefile_upload.spec.ts",
         "line": 28,
         "column": 7
+      }
+    },
+    {
+      "id": "52c724750009a53-b70365f0b1ce4b4",
+      "title": "Maps - legacy tile_map visualization should render tile_map with map embeddable",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/tile_map.spec.ts",
+        "line": 16,
+        "column": 21
       }
     },
     {
@@ -308,6 +516,45 @@
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/top_hits.spec.ts",
         "line": 45,
         "column": 15
+      }
+    },
+    {
+      "id": "35c4d63566fa485-9e7c46256ddcc52",
+      "title": "Maps - visualize create menu maps alias with write permission shows maps in create menu and opens Maps app",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/visualize_create_menu.spec.ts",
+        "line": 55,
+        "column": 11
+      }
+    },
+    {
+      "id": "35c4d63566fa485-3ad0ef26b63a6ae",
+      "title": "Maps - visualize create menu maps alias without write permission does not show maps in create menu",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/visualize_create_menu.spec.ts",
+        "line": 65,
+        "column": 9
+      }
+    },
+    {
+      "id": "35c4d63566fa485-d23d47b1ef7a6be",
+      "title": "Maps - visualize create menu edit meta-data: should allow to change meta-data on a map visualization",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/visualize_create_menu.spec.ts",
+        "line": 72,
+        "column": 11
       }
     }
   ]
