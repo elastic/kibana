@@ -84,7 +84,7 @@ export const registerGetExecutionTrackingRoute = (
         try {
           const { execution_id: executionId } = request.params;
 
-          const { coreStart, pluginsStart } = await getStartServices();
+          const { coreStart } = await getStartServices();
           const esClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
           const eventLogIndex = await getEventLogIndex();
 

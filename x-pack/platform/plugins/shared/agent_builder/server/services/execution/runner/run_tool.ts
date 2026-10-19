@@ -287,7 +287,6 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
     request,
     elasticsearch,
     savedObjects,
-    spaces,
     modelProvider,
     toolsService,
     resultStore,

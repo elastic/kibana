@@ -175,7 +175,7 @@ export const registerGetPipelineDataRoute = (
           const { execution_id: executionId } = request.params;
           const { generation_workflow_run_id: clientGenerationWorkflowRunId } = request.query;
 
-          const { coreStart, pluginsStart } = await getStartServices();
+          const { coreStart } = await getStartServices();
           const esClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
           const eventLogIndex = await getEventLogIndex();
 

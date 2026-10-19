@@ -95,8 +95,6 @@ export class UserProfileService {
 
       licensingService.notifyUsage(LICENSING_CASE_ASSIGNMENT_FEATURE);
 
-      const { spaces } = this.options;
-
       UserProfileService.validateSizeParam(size);
 
       if (!this.isSecurityEnabled() || owners.length <= 0) {

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { asSpaceId } from '@kbn/core-spaces-common';
 import { EXECUTION_HISTORY_DEFAULT_PER_PAGE } from '@kbn/alerting-v2-schemas';
@@ -13,7 +12,6 @@ import type { ActionPolicyClient } from '../action_policy_client/action_policy_c
 import type { RulesClient } from '../rules_client';
 import type { EventLogServiceContract } from '../services/event_log_service/event_log_service';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
-import type { AlertingServerStartDependencies } from '../../types';
 import { ACTION_POLICY_EVENT_ACTIONS } from '../dispatcher/steps/constants';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { ActionPolicyExecutionHistoryClient } from './action_policy_execution_history_client';
@@ -81,11 +79,6 @@ const createMocks = () => {
     getWorkflowsByIds,
     getClient: jest.fn(() => ({ getWorkflowsByIds })),
   };
-  const spaces = {
-    spacesService: {
-      getSpaceId: jest.fn().mockReturnValue('default'),
-    },
-  } as unknown as AlertingServerStartDependencies['spaces'];
   const { loggerService, mockLogger } = createLoggerService();
 
   const client = new ActionPolicyExecutionHistoryClient(
@@ -93,7 +86,6 @@ const createMocks = () => {
     actionPolicyClient,
     rulesClient,
     workflowsManagement as any,
-    spaces,
     loggerService
   );
 
@@ -103,7 +95,6 @@ const createMocks = () => {
     actionPolicyClient,
     rulesClient,
     workflowsManagement,
-    spaces,
     logger: mockLogger,
   };
 };
@@ -186,9 +177,7 @@ describe('ActionPolicyExecutionHistoryClient', () => {
         perPage: 100,
         total: 1,
       } as any);
-      const request = kibanaRequestFactory(
-        httpServerMock.createRawRequest({ spaceId: asSpaceId('my-space') })
-      );
+      const request = httpServerMock.createKibanaRequest({ spaceId: asSpaceId('my-space') });
 
       await client.listExecutionHistory({ request });
       expect(eventLogService.findActionPolicyExecutionEvents).toHaveBeenCalledWith(

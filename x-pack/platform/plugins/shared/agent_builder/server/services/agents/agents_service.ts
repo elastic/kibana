@@ -116,7 +116,7 @@ export class AgentsService {
     }
 
     const { logger } = this.setupDeps;
-    const { security, elasticsearch, spaces, toolsService, uiSettings, savedObjects } = startDeps;
+    const { security, elasticsearch, toolsService, uiSettings, savedObjects } = startDeps;
 
     this.validateAgentTypes();
 

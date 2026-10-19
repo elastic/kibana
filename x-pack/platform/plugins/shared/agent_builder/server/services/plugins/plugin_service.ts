@@ -123,7 +123,7 @@ class PluginsServiceImpl implements PluginsService {
   }
 
   private getRequestContext({ request }: { request: KibanaRequest }): RequestContext {
-    const { elasticsearch, logger, spaces } = this.getStartDeps();
+    const { elasticsearch, logger } = this.getStartDeps();
     const esClient = elasticsearch.client.asScoped(request).asInternalUser;
     const space = getCurrentSpaceId({ request });
 
