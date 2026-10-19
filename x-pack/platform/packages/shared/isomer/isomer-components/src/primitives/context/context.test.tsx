@@ -56,6 +56,14 @@ describe('context', () => {
     expect(text.replace(/&amp;/g, '')).not.toContain('&');
   });
 
+  it('keeps the Slack element non-empty when escaping inflates every character', () => {
+    const text = slackText(line(...Array(10).fill('&'.repeat(500))));
+
+    expect(text.length).toBeLessThanOrEqual(SLACK_LIMITS.contextElementChars);
+    expect(text.length).toBeGreaterThan(SLACK_LIMITS.contextElementChars - 10);
+    expect(text.startsWith('&amp;')).toBe(true);
+  });
+
   it('renders one line on the other surfaces', () => {
     const node = line('Owner: SRE', 'Updated\n5 minutes ago');
 
