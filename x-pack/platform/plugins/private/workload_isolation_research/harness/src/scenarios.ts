@@ -22,6 +22,36 @@ const sweep = (
     durationS: recoveryS,
     offender: { kind, mode, doseMs },
   }));
+<<<<<<< HEAD
+=======
+
+const fieldCapsDose = (label: string, seed: Record<string, number>): Phase[] => [
+  {
+    name: `fc-${label}-seed`,
+    durationS: 5,
+    action: 'seed',
+    actionParams: { kind: 'field_caps', conflictRatio: 0.2, ...seed },
+  },
+  {
+    name: `fc-${label}-route-decomposed`,
+    durationS: 10,
+    action: 'field-caps',
+    actionParams: { repeat: 3, decompose: true, mode: 'route' },
+  },
+  {
+    name: `fc-${label}-task-decomposed`,
+    durationS: 10,
+    action: 'field-caps',
+    actionParams: { repeat: 3, decompose: true, mode: 'task', waitS: 20 },
+  },
+  {
+    name: `fc-${label}-route-e2e`,
+    durationS: 10,
+    action: 'field-caps',
+    actionParams: { repeat: 3, decompose: false, mode: 'route' },
+  },
+];
+>>>>>>> 516f0dd2e43f ([Research] harness: Tier B field caps + alerting replays, QA overview export, CI hygiene (moon, codeowners, plugin list, lint))
 
 export const SCENARIOS: Record<string, Scenario> = {
   /** Harness self-check: one 10s CPU block from a route and from a task. */
@@ -73,6 +103,46 @@ export const SCENARIOS: Record<string, Scenario> = {
     phases: [
       { name: 'warmup', durationS: 10 },
       { name: 'baseline', durationS: 60 },
+    ],
+  },
+  /** Tier B #5: repeated large field_caps (SDH top family), route + task origin, decomposed timings. */
+  'tier-b-field-caps': {
+    name: 'tier-b-field-caps',
+    description:
+      'Dose sweep s/m/l of wide/conflicting/unique mappings; 3x field_caps via data views fetcher per phase.',
+    probe,
+    laptopProbe,
+    ticks,
+    phases: [
+      { name: 'warmup', durationS: 10 },
+      { name: 'baseline', durationS: 40 },
+      ...fieldCapsDose('s', { indices: 50, fieldsPerIndex: 2000, uniqueRatio: 0 }),
+      ...fieldCapsDose('m', { indices: 100, fieldsPerIndex: 2000, uniqueRatio: 0.5 }),
+      ...fieldCapsDose('l', { indices: 200, fieldsPerIndex: 3000, uniqueRatio: 0.8 }),
+    ],
+  },
+  /** Tier B #1: ES|QL rule over wide rows, one alert per row, mustache-heavy actions. */
+  'tier-b-alerting': {
+    name: 'tier-b-alerting',
+    description: '1000 rows x 100 fields ES|QL rule (groupBy row) with 2 .index actions per alert.',
+    probe,
+    laptopProbe,
+    ticks,
+    phases: [
+      {
+        name: 'seed',
+        durationS: 5,
+        action: 'seed',
+        actionParams: { kind: 'alerting_wide', rows: 1000, fields: 100 },
+      },
+      { name: 'warmup', durationS: 10 },
+      { name: 'baseline', durationS: 40 },
+      {
+        name: 'alerting-esql-1000x2',
+        durationS: 15,
+        action: 'alerting-esql',
+        actionParams: { rows: 1000, actionsPerAlert: 2, drainS: 30 },
+      },
     ],
   },
   /** Non-terminating offender with emulated external supervision (SIGKILL after 30s stall). */

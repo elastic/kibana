@@ -26,6 +26,9 @@ const epochNow = () => performance.timeOrigin + performance.now();
 const { sab, samplerIntervalMs, stallThresholdMs, ringCapacity } = workerData;
 const heartbeat = new Float64Array(sab);
 
+let probe = undefined;
+let inFlight = 0;
+
 // ---- ring buffer -----------------------------------------------------------
 const ring = new Array(ringCapacity);
 let nextSeq = 1;
@@ -134,8 +137,6 @@ setInterval(() => {
 }, 1000);
 
 // ---- probe -----------------------------------------------------------------
-let probe = undefined;
-let inFlight = 0;
 let dispatcher;
 
 const getFetch = (insecure) => {
@@ -210,6 +211,11 @@ const tick = () => {
   p.timer = setTimeout(tick, Math.max(0, p.next - epochNow()));
 };
 
+const stopProbe = () => {
+  if (probe && probe.timer) clearTimeout(probe.timer);
+  probe = undefined;
+};
+
 const startProbe = (msg) => {
   stopProbe();
   const { fetchImpl, extra } = getFetch(msg.insecure);
@@ -225,11 +231,6 @@ const startProbe = (msg) => {
     next: epochNow(),
   };
   tick();
-};
-
-const stopProbe = () => {
-  if (probe && probe.timer) clearTimeout(probe.timer);
-  probe = undefined;
 };
 
 parentPort.on('message', (msg) => {

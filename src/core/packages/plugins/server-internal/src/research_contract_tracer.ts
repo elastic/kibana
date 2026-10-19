@@ -148,14 +148,42 @@ const containsFunction = (v: unknown, depth = 0): boolean => {
   return values.some((child) => containsFunction(child, depth + 1));
 };
 
+const nativeCtorCache = new WeakMap<object, boolean>();
+/** Instances of built-in/native classes (URL, AbortSignal, ...) rely on internal slots: never proxy them. */
+const isNativeInstance = (v: object): boolean => {
+  const ctor = (v as { constructor?: unknown }).constructor;
+  if (typeof ctor !== 'function') return false;
+  let native = nativeCtorCache.get(ctor);
+  if (native === undefined) {
+    native = Function.prototype.toString.call(ctor).includes('[native code]') && ctor !== Object;
+    nativeCtorCache.set(ctor, native);
+  }
+  return native;
+};
+
 const shouldWrapObject = (v: unknown): boolean => {
   const k = kindOf(v);
+  if (k === 'class_instance' && isNativeInstance(v as object)) return false;
   return k === 'plain' || k === 'class_instance' || k === 'observable';
 };
 
 class ContractTracer {
   private readonly edges = new Map<string, EdgeStats>();
   private readonly proxies = new WeakMap<object, Map<string, unknown>>();
+  /** proxy -> real, so receivers and arguments are unwrapped before reaching real code. */
+  private readonly reals = new WeakMap<object, object>();
+  public unwrapCount = 0;
+
+  private unwrap(v: unknown): unknown {
+    if (v && (typeof v === 'object' || typeof v === 'function')) {
+      const real = this.reals.get(v as object);
+      if (real) {
+        this.unwrapCount++;
+        return real;
+      }
+    }
+    return v;
+  }
   public readonly startedAt = Date.now();
   public wrapErrors = 0;
 
@@ -247,7 +275,9 @@ class ContractTracer {
     }
     if (!byKey.has(key)) {
       try {
-        byKey.set(key, create());
+        const proxy = create();
+        this.reals.set(proxy as object, value);
+        byKey.set(key, proxy);
       } catch {
         this.wrapErrors++;
         return value;
@@ -341,13 +371,17 @@ class ContractTracer {
       depth: ctx.depth + 1,
       path: '',
     };
-    const passedArgs = args.map((a, i) =>
-      containsFunction(a) ? this.wrap(a, { ...reverse, path: `${ctx.path}(arg${i})` }) : a
-    );
+    const passedArgs = args.map((raw, i) => {
+      // Contract proxies handed back to their owner are unwrapped (brand checks, #private).
+      const a = this.unwrap(raw);
+      return a === raw && containsFunction(a)
+        ? this.wrap(a, { ...reverse, path: `${ctx.path}(arg${i})` })
+        : a;
+    });
     let result: unknown;
     try {
       // Unwrapped receiver: private class fields and brand checks keep working.
-      result = Reflect.apply(real, thisArg, passedArgs);
+      result = Reflect.apply(real, this.unwrap(thisArg), passedArgs);
     } catch (err) {
       e.errors++;
       throw err;

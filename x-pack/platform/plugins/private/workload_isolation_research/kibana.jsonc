@@ -20,6 +20,7 @@
     ],
     "optionalPlugins": [
       "security",
+      "dataViews",
       "alerting",
       "actions",
       "workflowsManagement",

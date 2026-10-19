@@ -21,6 +21,8 @@ import type { WorkloadIsolationResearchConfig } from './config';
 import { Recorder } from './lib/recorder';
 import { registerRoutes } from './routes';
 import { registerResearchTasks, TickScheduler } from './tasks';
+import { registerTierBRoutes, registerTierBTasks } from './tier_b';
+import { API_BASE } from './routes';
 
 interface SetupDeps {
   taskManager: TaskManagerSetupContract;
@@ -45,13 +47,19 @@ export class WorkloadIsolationResearchPlugin implements Plugin<void, void, Setup
   public setup(core: CoreSetup<StartDeps>, { taskManager }: SetupDeps): void {
     const getRecorder = () => this.recorder;
     registerResearchTasks(taskManager, getRecorder);
+    registerTierBTasks(taskManager, getRecorder, async () => {
+      const [coreStart] = await core.getStartServices();
+      return coreStart.elasticsearch.client.asInternalUser;
+    });
     const getStart = async () => {
       const [coreStart, { taskManager: tm }] = await core.getStartServices();
       if (!this.ticks) this.ticks = new TickScheduler(tm, this.logger, this.recorder);
       return { core: coreStart as CoreStart, taskManager: tm, ticks: this.ticks };
     };
+    const router = core.http.createRouter();
+    registerTierBRoutes(router, API_BASE, getRecorder, getStart);
     registerRoutes({
-      router: core.http.createRouter(),
+      router,
       logger: this.logger,
       getRecorder,
       getStart,

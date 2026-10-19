@@ -1235,6 +1235,7 @@ x-pack/platform/plugins/private/transform @elastic/kibana-management
 x-pack/platform/plugins/private/translations @elastic/kibana-localization
 x-pack/platform/plugins/private/upgrade_assistant @elastic/kibana-management
 x-pack/platform/plugins/private/watcher @elastic/kibana-management
+x-pack/platform/plugins/private/workload_isolation_research @elastic/kibana-core
 x-pack/platform/plugins/shared/actions @elastic/response-ops
 x-pack/platform/plugins/shared/agent_builder @elastic/workchat-eng
 x-pack/platform/plugins/shared/agent_builder_dashboards @elastic/kibana-dashboards

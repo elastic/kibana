@@ -8,6 +8,8 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
+import { ACTIONS } from './actions';
+import { overviewChecks, overviewEsql } from './overview';
 import { runScenario } from './driver';
 import { targetFromEnv } from './kibana_client';
 import { SCENARIOS } from './scenarios';
@@ -73,6 +75,7 @@ export const main = async (): Promise<void> => {
         repoDir: path.resolve(__dirname, '../../../../../../..'),
         configOverrides: flags['config-overrides'] ? JSON.parse(flags['config-overrides']) : {},
         expectedPods: Number(flags['expected-pods'] ?? 1),
+        actions: ACTIONS,
       });
       if (flags['no-ingest'] === 'true') return;
       await setupStore(es);
@@ -103,6 +106,24 @@ export const main = async (): Promise<void> => {
       }
       // eslint-disable-next-line no-console
       console.log(md);
+      return;
+    }
+    case 'overview': {
+      // Export QA overview slices for a QAF project window (read-only).
+      const checks = flags.query
+        ? { custom: flags.query }
+        : overviewChecks(flags['project-id'], flags.from, flags.to);
+      const out: Record<string, unknown> = {};
+      for (const [name, query] of Object.entries(checks)) {
+        try {
+          out[name] = await overviewEsql(query);
+        } catch (e) {
+          out[name] = { error: String(e) };
+        }
+      }
+      if (flags.out) fs.writeFileSync(flags.out, JSON.stringify(out, null, 2));
+      // eslint-disable-next-line no-console
+      console.log(JSON.stringify(out, null, 2).slice(0, 4000));
       return;
     }
     default:

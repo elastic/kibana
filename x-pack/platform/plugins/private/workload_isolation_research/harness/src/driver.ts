@@ -13,6 +13,7 @@ import { performance } from 'perf_hooks';
 import type { KibanaTarget } from './kibana_client';
 import { API, kbn } from './kibana_client';
 import type { Phase, RunManifest, Scenario } from './types';
+import { LaptopProbe } from './laptop_probe';
 
 export const DRIVER_VERSION = '0.1.0';
 
@@ -115,6 +116,7 @@ export class Collector {
   }
 }
 
+<<<<<<< HEAD
 /** Low-rate laptop-side open-loop probe (cross-check of the in-pod probe; includes WAN). */
 class LaptopProbe {
   private timer?: NodeJS.Timeout;
@@ -177,6 +179,8 @@ class LaptopProbe {
   }
 }
 
+=======
+>>>>>>> 516f0dd2e43f ([Research] harness: Tier B field caps + alerting replays, QA overview export, CI hygiene (moon, codeowners, plugin list, lint))
 const git = (cmd: string, cwd: string): string => {
   try {
     return execSync(`git ${cmd}`, { cwd, encoding: 'utf8' }).trim();
@@ -342,7 +346,11 @@ export const runScenario = async (opts: RunOptions): Promise<{ runId: string; di
     ) + 120;
   await kbn(target, 'POST', `${API}/ticks/_start`, {
     intervalMs: scenario.ticks.intervalMs,
+<<<<<<< HEAD
     durationS: Math.ceil(totalS),
+=======
+    durationS: Math.ceil(totalS) + 3600,
+>>>>>>> 516f0dd2e43f ([Research] harness: Tier B field caps + alerting replays, QA overview export, CI hygiene (moon, codeowners, plugin list, lint))
     seriesId: runId.slice(-40),
   });
 
