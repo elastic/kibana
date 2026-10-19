@@ -146,7 +146,7 @@ tags:
 
       ### Try it now
 
-      Create your first Discover session right now. The following example creates a session with an ES|QL tab that lists large requests. You can run it as-is once you have the [Kibana sample logs dataset](https://www.elastic.co/docs/manage-data/ingest/sample-data) installed:
+      Create your first Discover session right now using the following example, with an ES|QL tab that lists large requests. You can run it as-is after installing the [Kibana sample logs dataset](https://www.elastic.co/docs/manage-data/ingest/sample-data):
 
       ```bash
       curl -X POST "${KIBANA_URL}/api/discover_sessions" \
@@ -169,7 +169,7 @@ tags:
         }'
       ```
 
-      Most examples on this page use the [Kibana sample logs dataset](https://www.elastic.co/docs/manage-data/ingest/sample-data) (`kibana_sample_data_logs`). Metrics tab examples require a time series data stream, such as `metrics-*`. To use your own data, replace the index pattern and field references.
+      Most examples in this reference use the [Kibana sample logs dataset](https://www.elastic.co/docs/manage-data/ingest/sample-data) (`kibana_sample_data_logs`). Metrics tab examples need a time series data stream, such as `metrics-*`. To use your own data, replace the index pattern and field references.
 
       ### Discover session structure
 
@@ -31426,7 +31426,7 @@ paths:
               type: string
             maxItems: 100
             type: array
-        - description: A tag name to include. Accepts a single tag name or multiple tag names. When multiple are specified, library items matching any of the tag names are included. If the same name is shared by multiple tags, items matching any of those tags are included.
+        - description: A tag name to include. Accepts a single tag name or multiple tag names. When multiple are specified, Discover sessions matching any of the tag names are included. If the same name is shared by multiple tags, sessions matching any of those tags are included.
           in: query
           name: tag_names
           required: false
@@ -31435,8 +31435,7 @@ paths:
               type: string
             maxItems: 100
             type: array
-            x-state: Generally available; added in 9.6.0
-        - description: A tag name to exclude. Accepts a single tag name or multiple tag names. When multiple are specified, library items matching any of the tag names are excluded. If the same name is shared by multiple tags, items matching any of those tags are excluded.
+        - description: A tag name to exclude. Accepts a single tag name or multiple tag names. When multiple are specified, Discover sessions matching any of the tag names are excluded. If the same name is shared by multiple tags, sessions matching any of those tags are excluded.
           in: query
           name: excluded_tag_names
           required: false
@@ -31445,7 +31444,6 @@ paths:
               type: string
             maxItems: 100
             type: array
-            x-state: Generally available; added in 9.6.0
       responses:
         '200':
           content:
@@ -165243,7 +165241,7 @@ components:
                                 type: string
                             description: The table data row height, as a number of lines, or `auto` to size it based on content. If omitted, defaults to the `discover:rowHeightOption` advanced setting.
                           rows_per_page:
-                            description: The number of rows to display per page in the data table. If omitted, defaults to the `discover:sampleRowsPerPage` advanced setting. Has no effect on ES|QL tabs since Kibana 8.16.
+                            description: The number of rows to display per page in the data table. If omitted, defaults to the `discover:sampleRowsPerPage` advanced setting. Has no effect on ES|QL tabs.
                             maximum: 10000
                             minimum: 1
                             type: number
@@ -165356,7 +165354,7 @@ components:
                                 type: string
                             description: The table data row height, as a number of lines, or `auto` to size it based on content. If omitted, defaults to the `discover:rowHeightOption` advanced setting.
                           rows_per_page:
-                            description: The number of rows to display per page in the data table. If omitted, defaults to the `discover:sampleRowsPerPage` advanced setting. Has no effect on ES|QL tabs since Kibana 8.16.
+                            description: The number of rows to display per page in the data table. If omitted, defaults to the `discover:sampleRowsPerPage` advanced setting. Has no effect on ES|QL tabs.
                             maximum: 10000
                             minimum: 1
                             type: number
@@ -165504,7 +165502,7 @@ components:
                                 type: string
                             description: The table data row height, as a number of lines, or `auto` to size it based on content. If omitted, defaults to the `discover:rowHeightOption` advanced setting.
                           rows_per_page:
-                            description: The number of rows to display per page in the data table. If omitted, defaults to the `discover:sampleRowsPerPage` advanced setting. Has no effect on ES|QL tabs since Kibana 8.16.
+                            description: The number of rows to display per page in the data table. If omitted, defaults to the `discover:sampleRowsPerPage` advanced setting. Has no effect on ES|QL tabs.
                             maximum: 10000
                             minimum: 1
                             type: number
@@ -167273,7 +167271,7 @@ components:
                         type: string
                     description: The table data row height, as a number of lines, or `auto` to size it based on content. If omitted, defaults to the `discover:rowHeightOption` advanced setting.
                   rows_per_page:
-                    description: The number of rows to display per page in the data table. If omitted, defaults to the `discover:sampleRowsPerPage` advanced setting. Has no effect on ES|QL tabs since Kibana 8.16.
+                    description: The number of rows to display per page in the data table. If omitted, defaults to the `discover:sampleRowsPerPage` advanced setting. Has no effect on ES|QL tabs.
                     maximum: 10000
                     minimum: 1
                     type: number
@@ -167442,7 +167440,7 @@ components:
                         type: string
                     description: The table data row height, as a number of lines, or `auto` to size it based on content. If omitted, defaults to the `discover:rowHeightOption` advanced setting.
                   rows_per_page:
-                    description: The number of rows to display per page in the data table. If omitted, defaults to the `discover:sampleRowsPerPage` advanced setting. Has no effect on ES|QL tabs since Kibana 8.16.
+                    description: The number of rows to display per page in the data table. If omitted, defaults to the `discover:sampleRowsPerPage` advanced setting. Has no effect on ES|QL tabs.
                     maximum: 10000
                     minimum: 1
                     type: number
@@ -167642,7 +167640,7 @@ components:
                         type: string
                     description: The table data row height, as a number of lines, or `auto` to size it based on content. If omitted, defaults to the `discover:rowHeightOption` advanced setting.
                   rows_per_page:
-                    description: The number of rows to display per page in the data table. If omitted, defaults to the `discover:sampleRowsPerPage` advanced setting. Has no effect on ES|QL tabs since Kibana 8.16.
+                    description: The number of rows to display per page in the data table. If omitted, defaults to the `discover:sampleRowsPerPage` advanced setting. Has no effect on ES|QL tabs.
                     maximum: 10000
                     minimum: 1
                     type: number
