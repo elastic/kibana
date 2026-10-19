@@ -24,7 +24,6 @@ const investigation = {
   template_id: 'investigation',
   title: 'Impossible travel',
   createdAt: '2026-09-01T10:00:00.000Z',
-  updatedAt: '2026-09-01T10:00:00.000Z',
   worker_execution_ids: [],
   pendingProposalCount: 0,
   assignees: [],

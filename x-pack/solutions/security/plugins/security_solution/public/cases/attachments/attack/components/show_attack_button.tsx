@@ -25,25 +25,19 @@ const ATTACK_UNAVAILABLE_TOOLTIP = i18n.translate(
 );
 
 export interface ShowAttackButtonProps {
-  /** Id used to build the action's `data-test-subj` and DOM id, usually the attachment saved object id. */
+  /** Used for the action's `data-test-subj` and DOM id, usually the attachment saved object id. */
   id: string;
-  /** The attack document `_id`, saved as the attachment id. */
+  /** The attack document `_id`. */
   attackId: string;
   /** The index the attack lives in, taken from the attachment metadata. */
   indexName: string;
   /** The attack title, used to label the flyout history entry. */
   attackTitle?: string;
-  /**
-   * Disables navigation when the attack document could not be resolved — there is nothing for
-   * the flyout to open. The tooltip explains why instead of silently doing nothing.
-   */
+  /** Set when the attack document could not be resolved, so there is nothing to open. */
   isDisabled?: boolean;
 }
 
-/**
- * Navigates from a `security.attack` case attachment back to the attack it references, by
- * opening the attack flyout.
- */
+/** Opens the attack flyout for a `security.attack` case attachment. */
 export const ShowAttackButton = ({
   id,
   attackId,
@@ -58,8 +52,6 @@ export const ShowAttackButton = ({
       position="top"
       content={<p>{isDisabled ? ATTACK_UNAVAILABLE_TOOLTIP : SHOW_ATTACK_TOOLTIP}</p>}
     >
-      {/* `maximize`, which is what the alerts grid and the Attacks page both use to open a
-          document's details. */}
       <EuiButtonIcon
         aria-label={SHOW_ATTACK_TOOLTIP}
         color="text"

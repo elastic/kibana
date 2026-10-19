@@ -104,8 +104,7 @@ export const ProposedActionsSlot = ({ conversationId }: ProposedActionsSlotProps
   }
 
   // Deduplicated because the pages are offset windows over a list a decision can move rows
-  // within: a proposal decided between two fetches shifts everything after it up. The API
-  // returns them newest first, so a retry sits above the failed attempt it replaced.
+  // within: a proposal decided between two fetches shifts everything after it up.
   const proposals = [
     ...new Map(
       (data?.pages ?? []).flatMap((page) => page.proposals).map((p) => [p.id, p])
