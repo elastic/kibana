@@ -66,7 +66,8 @@ export function ProfilingTopNFunctions({
     [serviceName, start, end, kuery, transactionName, transactionType, environment, schema]
   );
 
-  const isFallback = Boolean(fallback) && status === FETCH_STATUS.SUCCESS && (!data || data.TotalCount === 0);
+  const isFallback =
+    Boolean(fallback) && status === FETCH_STATUS.SUCCESS && (!data || data.TotalCount === 0);
 
   useEffect(() => {
     if (isFallback) {

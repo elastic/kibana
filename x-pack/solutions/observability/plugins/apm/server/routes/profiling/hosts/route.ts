@@ -12,7 +12,11 @@ import {
   type ProfilingHostsFunctionsResponse,
   type ProfilingHostsSchemasResponse,
 } from '@kbn/apm-api-shared';
-import type { BaseFlameGraph, ProfilingSchemasAvailability, TopNFunctions } from '@kbn/profiling-utils';
+import type {
+  BaseFlameGraph,
+  ProfilingSchemasAvailability,
+  TopNFunctions,
+} from '@kbn/profiling-utils';
 import { getProfilingScopeCandidates } from '../../../../common/profiling/hosts_scope';
 import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';

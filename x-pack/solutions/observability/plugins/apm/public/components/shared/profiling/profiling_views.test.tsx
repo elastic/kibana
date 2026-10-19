@@ -136,12 +136,7 @@ describe.each([
       const onFallback = jest.fn();
 
       render(
-        <View
-          {...props}
-          schema={ProfilingSchema.OTEL}
-          fallback={<div />}
-          onFallback={onFallback}
-        />
+        <View {...props} schema={ProfilingSchema.OTEL} fallback={<div />} onFallback={onFallback} />
       );
 
       expect(onFallback).toHaveBeenCalledTimes(1);
@@ -155,12 +150,7 @@ describe.each([
       const onFallback = jest.fn();
 
       render(
-        <View
-          {...props}
-          schema={ProfilingSchema.OTEL}
-          fallback={<div />}
-          onFallback={onFallback}
-        />
+        <View {...props} schema={ProfilingSchema.OTEL} fallback={<div />} onFallback={onFallback} />
       );
 
       expect(onFallback).not.toHaveBeenCalled();

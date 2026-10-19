@@ -8,7 +8,10 @@
 import type { ProfilingScopeCandidate } from '../../../common/profiling/hosts_scope';
 import { fetchFirstScopeWithSamples } from './fetch_first_scope_with_samples';
 
-const makeCandidate = (scope: ProfilingScopeCandidate['scope'], kuery: string): ProfilingScopeCandidate => ({
+const makeCandidate = (
+  scope: ProfilingScopeCandidate['scope'],
+  kuery: string
+): ProfilingScopeCandidate => ({
   scope,
   kuery,
 });
@@ -50,12 +53,13 @@ describe('fetchFirstScopeWithSamples', () => {
 
   it('stops at the first candidate with samples without trying subsequent scopes', async () => {
     const container = makeCandidate('container', '(container.id : "abc")');
-    const workload = makeCandidate('workload', '(host.name : "node-a") AND (orchestrator.resource.name : "cart")');
+    const workload = makeCandidate(
+      'workload',
+      '(host.name : "node-a") AND (orchestrator.resource.name : "cart")'
+    );
     const host = makeCandidate('host', '(host.name : "node-a")');
 
-    const fetch = jest
-      .fn()
-      .mockResolvedValueOnce({ count: 42 }); // container — has samples, stop here
+    const fetch = jest.fn().mockResolvedValueOnce({ count: 42 }); // container — has samples, stop here
 
     const result = await fetchFirstScopeWithSamples({
       candidates: [container, workload, host],
@@ -70,7 +74,10 @@ describe('fetchFirstScopeWithSamples', () => {
 
   it('returns the last candidate when all scopes are empty', async () => {
     const container = makeCandidate('container', '(container.id : "abc")');
-    const workloadAnyHost = makeCandidate('workloadAnyHost', '(orchestrator.resource.name : "cart")');
+    const workloadAnyHost = makeCandidate(
+      'workloadAnyHost',
+      '(orchestrator.resource.name : "cart")'
+    );
 
     const fetch = jest.fn().mockResolvedValue({ count: 0 });
 
@@ -96,9 +103,7 @@ describe('fetchFirstScopeWithSamples', () => {
       hasSamples: () => true,
     });
 
-    expect(fetch).toHaveBeenCalledWith(
-      '(container.id : "abc") AND service.name : "my-service"'
-    );
+    expect(fetch).toHaveBeenCalledWith('(container.id : "abc") AND service.name : "my-service"');
   });
 
   it('passes the scope kuery as-is when the user kuery is empty', async () => {

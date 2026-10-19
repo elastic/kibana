@@ -65,7 +65,8 @@ export function ProfilingFlamegraph({
     [serviceName, start, end, kuery, transactionName, transactionType, environment, schema]
   );
 
-  const isFallback = Boolean(fallback) && status === FETCH_STATUS.SUCCESS && (!data || data.TotalSamples === 0);
+  const isFallback =
+    Boolean(fallback) && status === FETCH_STATUS.SUCCESS && (!data || data.TotalSamples === 0);
 
   useEffect(() => {
     if (isFallback) {
