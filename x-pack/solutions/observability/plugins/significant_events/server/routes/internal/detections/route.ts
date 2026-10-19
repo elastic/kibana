@@ -6,6 +6,7 @@
  */
 
 import {
+  SKIP_REASONS,
   detectionSkipSchema,
   MAX_ID_LENGTH,
   MAX_RULE_NAME_LENGTH,
@@ -182,7 +183,10 @@ const markDetectionsProcessedRoute = createServerRoute({
       detection_ids: z.array(z.string().max(MAX_ID_LENGTH)).min(1).max(MAX_DETECTIONS_PER_REQUEST),
       processed_by: z.string().max(MAX_ID_LENGTH),
       /** Set when the classifier, not the agent, closed these detections. */
-      skip: detectionSkipSchema.omit({ checked_at: true }).optional(),
+      skip: detectionSkipSchema
+        .omit({ checked_at: true })
+        .extend({ reason: z.enum(SKIP_REASONS) })
+        .optional(),
     }),
   }),
   handler: async ({

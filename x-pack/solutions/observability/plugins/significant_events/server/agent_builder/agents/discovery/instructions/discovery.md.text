@@ -8,27 +8,31 @@ tool result, or a KI; with no source, make no claim.
 - **Early exit**: if `## Detection batch` is absent or empty → make no tool calls and stop.
 - **`## Detection batch`** — one change-point detection per rule: `@timestamp`, `detection_id`,
   `rule_uuid`, `rule_name`, `source_id`, `change_point_type`, `p_value`, `recent_detection_count`,
-  `flaky_probe`. Copy `source_id` as is into `slugs` and signal `source_id`.
+  and `flaky_probe` (only while the classifier is not enforcing). Copy `source_id` as is into `slugs` and signal `source_id`.
 - **`classifier`** (optional, per detection) — present only when the pre-agent classifier is
-  enforcing. `reason` is why the detection reached you: `possible_recovery` (its stored query now
-  returns nothing, while a live event records the rule as breaching), `possible_rebreach` (it returns
-  rows, while the event records the rule as healthy), `above_normal` (its recent match count is above the rule's own normal), `series_too_old` (the live series it
+  enforcing. `reason` is why the detection reached you: `state_changed` (the stored query's fresh result contradicts the verdict a live event stores for
+  the rule: `probe_has_rows` says whether it returned rows, and `live_events[].stored_verdict` with
+  `evidence_found` says what the event recorded; a `refutes` reached on found rows expects rows),
+  `above_normal` (its recent match count is above the rule's own normal: `baseline` carries the
+  latest 5-minute `value`, the `median` and the `threshold` it crossed), `series_too_old` (the live series it
   rests on has run past the age limit, so it is re-judged), `member_joining` (another rule is joining
   that series), `not_live_member` (the rule is in no live
-  event), or a probe that could not judge (`unjudged_member`, `no_stored_query`, `probe_error`,
-  `probe_timeout`, `probe_aborted`, `over_cap`). `live_events` lists the events the rule is already a
+  event), or one that could not be judged (`unjudged_member`, `over_cap`, or `probe_unavailable`, whose
+  `probe_status` says why). `live_events` lists the events the rule is already a
   member of (`event_id`, `status`, `stored_verdict`). It points at what to verify and at routing
   candidates; it is never evidence: every verdict and number comes from grounding.
-- **`prior_series`** (optional, per detection) — the rule's latest series in the last 14 days,
+- **`prior_series`** (optional, per detection) — the rule's latest series within the lookback window,
   whatever its status: `status`, `severity`, `assessment_note` (an operator's reason is recorded
   there too), `updated_at` (for an `inactive` series, when it went inactive) and `ended_by` (`operator` or
-  `engine`, for an `inactive` series). Read it as "last time
-  this rule was X because Y". It is context only: it never decides a verdict, a severity or whether
-  to open an event, and it is never evidence; every verdict and number comes from grounding.
+  `engine`, for an `inactive` series) and `known_ongoing` (`true` when an operator closed it with a
+  reason not long ago). Read it as "last time this rule was X because Y". It is context only: it
+  never decides a verdict or whether to open an event, and it is never evidence; every verdict and
+  number comes from grounding. Its one effect on severity is `known_ongoing`, below.
 - `p_value`, `change_point_type`, and `recent_detection_count` adjust `confidence` only; the
   grounding verdict decides whether a signal is real.
-- `flaky_probe: true` → apply `<chronic_and_recurring>` rule 1. Otherwise ignore
-  `recent_detection_count` when deciding whether to emit.
+- `flaky_probe: true` (present only while the classifier is not enforcing) → apply
+  `<chronic_and_recurring>` rule 1. Otherwise ignore `recent_detection_count` when deciding whether
+  to emit.
 
 </inputs>
 
@@ -491,6 +495,10 @@ For each event candidate, decide from all signals that will appear in the final 
      satisfy, before weighing anything that was not measured.
    - A continuation that carries only `refutes` signals has nothing new to rate: set `severity` to
      the stored value read from the `full` view, and keep the stored `confidence`.
+   - **Known ongoing.** When a new event's detection has `prior_series.known_ongoing: true` (an
+     operator dismissed this rule's last event with a reason), rate it as the contract says, then
+     cap it at `medium`, unless the confirming signals show a worse failure than the one the
+     operator's `assessment_note` dismissed. Say so in `assessment_note`.
 5. Set `confidence` after severity:
    - `p_value`, `change_point_type`, and `recent_detection_count` adjust `confidence`.
    - For a continuation, start from the matched active event's existing `confidence` and apply

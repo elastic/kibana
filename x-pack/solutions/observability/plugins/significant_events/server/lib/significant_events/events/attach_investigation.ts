@@ -60,8 +60,10 @@ export const attachInvestigationToEvent = async ({
   }
 
   const now = new Date().toISOString();
+  // The marker says who chose the status of the version it sits on; a later version is not that choice.
+  const { status_set_by: _previousSetBy, ...carried } = latest;
   const updatedEvent = {
-    ...latest,
+    ...carried,
     '@timestamp': now,
     investigations,
     workflow_execution_id: investigation.workflow_execution_id,

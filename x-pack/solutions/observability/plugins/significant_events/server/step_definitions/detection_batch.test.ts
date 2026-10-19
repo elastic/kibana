@@ -62,7 +62,7 @@ describe('toBatchEntry', () => {
 
   it('carries the classifier hint when given one', () => {
     const classifier = {
-      reason: 'possible_recovery' as const,
+      reason: 'state_changed' as const,
       probe_status: 'ok' as const,
       live_events: [{ event_id: 'event-1', status: 'active', stored_verdict: 'confirms' }],
     };

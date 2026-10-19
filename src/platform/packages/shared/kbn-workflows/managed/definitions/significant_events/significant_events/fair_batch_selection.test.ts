@@ -60,7 +60,7 @@ describe('significant events fair batch selection', () => {
     expect(serializedStep).toContain('foreach.item.severity_score');
   });
 
-  it('selects a bounded detection batch with ES|QL severity-plus-age scoring and suppresses flaky rules with an age-based probe', () => {
+  it('selects a bounded, oldest-first detection batch and suppresses flaky rules with an age-based probe', () => {
     const selection = getStep(DISCOVERY_YAML, 'get_detections');
     const query = selection.with?.query;
     const discovery = parse(DISCOVERY_YAML) as { steps: WorkflowStep[] };
@@ -88,10 +88,14 @@ describe('significant events fair batch selection', () => {
     const suppressionLineIdx = queryLines.findIndex((l: string) =>
       l.includes('EVAL flaky_suppressed')
     );
+    const gateLineIdx = queryLines.findIndex((l: string) =>
+      l.includes('EVAL held_back = ?5 AND flaky_suppressed')
+    );
     const limitLineIdx = queryLines.findIndex((l: string) => l.includes('LIMIT ?1'));
     expect(suppressionLineIdx).toBeGreaterThan(-1);
     expect(limitLineIdx).toBeGreaterThan(-1);
-    expect(suppressionLineIdx).toBeLessThan(limitLineIdx);
+    expect(suppressionLineIdx).toBeLessThan(gateLineIdx);
+    expect(gateLineIdx).toBeLessThan(limitLineIdx);
 
     const coalesceLineIdx = queryLines.findIndex((l: string) =>
       l.includes('COALESCE(severity_score')
@@ -148,6 +152,7 @@ describe('significant events fair batch selection', () => {
       'classifierReasonCounts',
       'classifierProbeStatusCounts',
       'classifierGateCounts',
+      'classifierFailed',
     ]);
     expect(discovery.steps.find(({ name }) => name === 'output_result')?.with).toMatchObject({
       hasWork: true,

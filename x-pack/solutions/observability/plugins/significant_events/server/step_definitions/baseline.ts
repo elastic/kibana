@@ -5,24 +5,11 @@
  * 2.0.
  */
 
+import type { BaselineDecision, BaselineObservation } from '@kbn/significant-events-schema';
 import { canCompileMatchMetric } from '../lib/significant_events/rules/can_compile_match_metric';
 import type { ProbeWindow, StoredQueryResult } from './run_probe';
 
-export const BASELINE_DECISIONS = ['above_normal', 'background', 'warming_up'] as const;
-export type BaselineDecision = (typeof BASELINE_DECISIONS)[number];
-
-/**
- * Is a detection above its own normal? Each detection type supplies its own observer returning
- * this shape (see `observeMatchSeries`); the classifier only records it, it never acts on it.
- */
-export interface BaselineObservation {
-  decision: BaselineDecision;
-  /** The latest complete bucket. */
-  value: number;
-  samples: number;
-  median?: number;
-  threshold?: number;
-}
+export type { BaselineDecision, BaselineObservation };
 
 // Same statistic as the detection-engine prototype: median plus a MAD band, with a floor so a flat
 // history does not flag noise.

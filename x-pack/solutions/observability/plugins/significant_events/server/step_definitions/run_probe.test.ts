@@ -62,6 +62,7 @@ describe('isProbeableQuery', () => {
     ['missing ?_tstart', 'FROM $.a | WHERE @timestamp < ?_tend'],
     ['missing ?_tend', 'FROM $.a | WHERE @timestamp >= ?_tstart'],
     ['over the length bound', `${STORED_QUERY} | WHERE y == "${'a'.repeat(MAX_TEXT_LENGTH)}"`],
+    ['aggregating, whose rows do not mean a match', `${STORED_QUERY} | STATS c = COUNT(*)`],
   ])('rejects a query that is %s', (_name, query) => {
     expect(isProbeableQuery(query)).toBe(false);
   });

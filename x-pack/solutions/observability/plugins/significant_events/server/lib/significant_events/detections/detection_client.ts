@@ -61,6 +61,7 @@ const ESQL_MAX_ROWS = 10_000;
 // Cap the per-rule detection history (flyout timeline) to the most recent N transitions so a churny
 // rule doesn't produce an unbounded scroll.
 const DETECTION_HISTORY_LIMIT = 20;
+const RULES_HISTORY_LIMIT = 1000;
 
 // Detections carry `change_point_type`; processed markers carry `processed_by` instead.
 // Every detection read filters on this so marker docs never surface as detections.
@@ -154,6 +155,35 @@ export class DetectionClient {
       where: detectionFilter(),
       // Most recent N transitions, returned chronologically (oldest→newest of that window).
       limit: DETECTION_HISTORY_LIMIT,
+    });
+    return { hits: await this.withDerivedProcessed(hits) };
+  }
+
+  /** The detections of several rules inside a time range, oldest→newest; the newest when capped. */
+  async findHistoryByRuleUuids({
+    ruleUuids,
+    from,
+    to,
+  }: {
+    ruleUuids: string[];
+    from: string;
+    to?: string;
+  }): Promise<{ hits: Detection[] }> {
+    const range = esql.exp`${esql.col('@timestamp')} >= TO_DATETIME(${esql.str(from)})`;
+    const { hits } = await runFindByIdsEsqlQuery<RawDetection>({
+      esClient: this.clients.esClient,
+      space: this.clients.space,
+      index: DETECTIONS_DATA_STREAM,
+      idField: FIELD_RULE_UUID,
+      idValues: ruleUuids,
+      where: to
+        ? andWhere(
+            andWhere(detectionFilter(), range),
+            esql.exp`${esql.col('@timestamp')} <= TO_DATETIME(${esql.str(to)})`
+          )
+        : andWhere(detectionFilter(), range),
+      limit: RULES_HISTORY_LIMIT,
+      keep: 'newest',
     });
     return { hits: await this.withDerivedProcessed(hits) };
   }

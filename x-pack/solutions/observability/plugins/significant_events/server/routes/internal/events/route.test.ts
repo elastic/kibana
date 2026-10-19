@@ -292,7 +292,7 @@ describe('GET /internal/significant_events/events/{id}/lifecycle, skipped detect
     embedded: Array<Record<string, unknown>>;
     history: Array<Record<string, unknown>>;
   }) => {
-    const findHistoryByRuleUuid = jest.fn().mockResolvedValue({ hits: history });
+    const findHistoryByRuleUuids = jest.fn().mockResolvedValue({ hits: history });
     const response = await lifecycleRoute.handler({
       params: { path: { id: event.event_id } },
       request: {},
@@ -303,12 +303,12 @@ describe('GET /internal/significant_events/events/{id}/lifecycle, skipped detect
         }),
         getDetectionClient: () => ({
           findByIds: jest.fn().mockResolvedValue({ hits: embedded }),
-          findHistoryByRuleUuid,
+          findHistoryByRuleUuids,
         }),
       }),
       server: {},
     } as never);
-    return { response, findHistoryByRuleUuid };
+    return { response, findHistoryByRuleUuids };
   };
 
   it("adds the detections of the event's rules that the classifier skipped, with why", async () => {
@@ -318,18 +318,47 @@ describe('GET /internal/significant_events/events/{id}/lifecycle, skipped detect
       checked_at: '2026-01-01T01:00:05.000Z',
     };
 
-    const { response, findHistoryByRuleUuid } = await run({
+    const { response, findHistoryByRuleUuids } = await run({
       embedded: [stored('detection-1')],
       history: [stored('detection-1'), stored('detection-2', { skip })],
     });
 
-    expect(findHistoryByRuleUuid).toHaveBeenCalledWith('rule-1');
+    expect(findHistoryByRuleUuids).toHaveBeenCalledWith({
+      ruleUuids: ['rule-1'],
+      from: event['@timestamp'],
+    });
     expect(response.detections.map(({ detection_id: id }) => id)).toEqual([
       'detection-1',
       'detection-2',
     ]);
     expect(response.detections[1]).toMatchObject({ rule_uuid: 'rule-1', skip });
     expect(response.detections[0]).not.toHaveProperty('skip');
+  });
+
+  it("bounds the history to the event's life once its latest version is inactive", async () => {
+    const findHistoryByRuleUuids = jest.fn().mockResolvedValue({ hits: [] });
+    const closed = { ...event, '@timestamp': '2026-01-02T00:00:00.000Z', status: 'inactive' };
+    await lifecycleRoute.handler({
+      params: { path: { id: event.event_id } },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        licensing: {},
+        getEventSearchClient: () => ({
+          findByEventId: jest.fn().mockResolvedValue({ hits: [closed, event] }),
+        }),
+        getDetectionClient: () => ({
+          findByIds: jest.fn().mockResolvedValue({ hits: [] }),
+          findHistoryByRuleUuids,
+        }),
+      }),
+      server: {},
+    } as never);
+
+    expect(findHistoryByRuleUuids).toHaveBeenCalledWith({
+      ruleUuids: ['rule-1'],
+      from: event['@timestamp'],
+      to: closed['@timestamp'],
+    });
   });
 
   it('does not list a detection twice, nor one the classifier did not skip', async () => {

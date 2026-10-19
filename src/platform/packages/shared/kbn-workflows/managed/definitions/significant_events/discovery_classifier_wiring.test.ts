@@ -107,8 +107,8 @@ describe('discovery workflow detection classifier wiring', () => {
         probe_concurrency: '${{ inputs.classifierProbeConcurrency }}',
         budget_ms: '${{ inputs.classifierBudgetMs }}',
         max_skip_age_hours: '${{ inputs.classifierMaxSkipAgeHours }}',
-        cooldown_hours: '${{ inputs.classifierCooldownHours }}',
-        max_cooldown_hours: '${{ inputs.classifierMaxCooldownHours }}',
+        prior_series_lookback_hours: '${{ inputs.classifierPriorSeriesLookbackHours }}',
+        known_ongoing_days: '${{ inputs.classifierKnownOngoingDays }}',
       });
     });
   });
@@ -148,7 +148,8 @@ describe('discovery workflow detection classifier wiring', () => {
     const inputs = discovery.triggers[0].inputs;
 
     it.each([
-      ['classifierShadowMode', 'boolean', true, undefined, undefined],
+      ['classifierShadowMode', 'boolean', false, undefined, undefined],
+      ['classifierKnownOngoingDays', 'number', 7, 0, 90],
       ['classifierProbeWindowMinutes', 'number', 20, 15, 360],
       ['classifierProbeTimeoutMs', 'number', 8000, 1000, 30000],
       ['classifierProbeConcurrency', 'number', 5, 1, 10],
@@ -165,8 +166,8 @@ describe('discovery workflow detection classifier wiring', () => {
       expect(inputs?.additionalProperties).toBe(false);
     });
 
-    it('ships in shadow mode, so the agent still receives every detection', () => {
-      expect(inputs?.properties?.classifierShadowMode?.default).toBe(true);
+    it('ships enforcing, so the agent only receives the detections the classifier did not skip', () => {
+      expect(inputs?.properties?.classifierShadowMode?.default).toBe(false);
     });
   });
 
@@ -289,11 +290,36 @@ describe('discovery workflow detection classifier wiring', () => {
     it('writes processed markers through the same internal route as the agent path, plus why', () => {
       const { body: skippedBody, ...skipped } = requireStep('write_skipped_marker').with ?? {};
       const { body: writtenBody, ...written } = requireStep('write_processed_marker').with ?? {};
-      const { skip, ...markerBody } = skippedBody as Record<string, unknown>;
+      const { skip, detection_ids: ids, ...markerBody } = skippedBody as Record<string, unknown>;
+      const { detection_ids: _writtenIds, ...writtenRest } = writtenBody as Record<string, unknown>;
 
       expect(skipped).toEqual(written);
-      expect(markerBody).toEqual(writtenBody);
+      expect(markerBody).toEqual(writtenRest);
       expect(typeof skip).toBe('string');
+      expect(typeof ids).toBe('string');
+    });
+
+    it('stamps one rule per request, whether its detections come back as a scalar or a list', () => {
+      const ids = (requireStep('write_skipped_marker').with?.body as Record<string, unknown>)
+        .detection_ids;
+
+      expect(evaluate(ids, { foreach: { item: ['detection-A', 'rule-A'] } })).toEqual([
+        'detection-A',
+      ]);
+      expect(
+        evaluate(ids, { foreach: { item: [['detection-A', 'detection-B'], 'rule-A'] } })
+      ).toEqual(['detection-A', 'detection-B']);
+    });
+
+    it('stamps each rule only up to the detection the classifier judged', () => {
+      const step = requireStep('get_skipped_rules_backlog').with ?? {};
+
+      expect(step.query).toContain('LOCATE(?1, CONCAT(",", detection_id, ",")) > 0');
+      expect(step.query).toContain('classified_at = MAX(@timestamp) WHERE classified BY rule_uuid');
+      expect(step.query).toContain('@timestamp <= classified_at');
+      expect(JSON.stringify(step.params)).toContain(
+        'steps.classify_detections.output.skipped_detection_ids'
+      );
     });
 
     describe('the reason stored on a skipped marker', () => {
@@ -326,7 +352,7 @@ describe('discovery workflow detection classifier wiring', () => {
 
       it('is read from the rule_uuid column of the backlog query', () => {
         expect(requireStep('get_skipped_rules_backlog').with?.query).toContain(
-          'KEEP detection_id, rule_uuid'
+          'STATS detection_ids = VALUES(detection_id) BY rule_uuid'
         );
       });
     });
@@ -357,6 +383,7 @@ describe('discovery workflow detection classifier wiring', () => {
       ['classifierReasonCounts', 'string'],
       ['classifierProbeStatusCounts', 'string'],
       ['classifierGateCounts', 'string'],
+      ['classifierFailed', 'boolean'],
     ] as const;
 
     it.each(classifierOutputs)('declares the %s output as %s', (name, type) => {
@@ -371,6 +398,16 @@ describe('discovery workflow detection classifier wiring', () => {
         for (const [name] of classifierOutputs) {
           expect(outputs).toHaveProperty(name);
         }
+      }
+    );
+
+    it.each(['output_no_detections', 'output_result'])(
+      'reports in %s whether the classifier failed',
+      (stepName) => {
+        const { classifierFailed } = requireStep(stepName).with ?? {};
+
+        expect(evaluate(classifierFailed, withClassify({ error: { message: 'boom' } }))).toBe(true);
+        expect(evaluate(classifierFailed, withClassify({ output: { row_count: 0 } }))).toBe(false);
       }
     );
 

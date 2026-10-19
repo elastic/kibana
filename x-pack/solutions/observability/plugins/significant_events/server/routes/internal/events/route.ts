@@ -79,8 +79,6 @@ const collectEmbeddedDetections = (events: SignificantEvent[]) => {
   return result;
 };
 
-const MAX_SKIPPED_RULES = 20;
-
 const collectRuleUuids = (events: SignificantEvent[]): string[] => [
   ...new Set(
     events.flatMap(({ signals }) =>
@@ -93,24 +91,29 @@ const collectRuleUuids = (events: SignificantEvent[]): string[] => [
 
 /**
  * The detections of the event's rules that the classifier closed without the agent. They are in no
- * signal, so they are read from the rules' detection history, newest rules' markers carrying why.
+ * signal, so they are read from the rules' detection history; each one's marker says why.
  */
 const findSkippedDetections = async ({
   detectionClient,
   events,
   known,
 }: {
-  detectionClient: Pick<DetectionClient, 'findHistoryByRuleUuid'>;
+  detectionClient: Pick<DetectionClient, 'findHistoryByRuleUuids'>;
   events: SignificantEvent[];
   known: ReadonlySet<string>;
 }): Promise<LifecycleDetection[]> => {
-  const histories = await Promise.all(
-    collectRuleUuids(events)
-      .slice(0, MAX_SKIPPED_RULES)
-      .map((ruleUuid) => detectionClient.findHistoryByRuleUuid(ruleUuid))
-  );
-  return histories
-    .flatMap(({ hits }) => hits)
+  const ruleUuids = collectRuleUuids(events);
+  const ordered = [...events].sort((x, y) => x['@timestamp'].localeCompare(y['@timestamp']));
+  const first = ordered.at(0);
+  const last = ordered.at(-1);
+  if (ruleUuids.length === 0 || !first || !last) return [];
+  const { hits } = await detectionClient.findHistoryByRuleUuids({
+    ruleUuids,
+    // A rule's detections outside the event's life belong to other events.
+    from: first['@timestamp'],
+    ...(last.status === 'inactive' ? { to: last['@timestamp'] } : {}),
+  });
+  return hits
     .flatMap((hit) => {
       const changePointType = parseChangePointType(hit.change_point_type);
       return hit.skip && changePointType && !known.has(hit.detection_id)

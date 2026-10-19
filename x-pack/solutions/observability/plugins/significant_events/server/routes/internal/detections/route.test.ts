@@ -110,6 +110,17 @@ describe('detection marker routes', () => {
     ).toBe(false);
   });
 
+  it.each(['state_changed', 'over_cap', 'bogus'])(
+    'refuses a processed marker whose skip reason %s is not a skip reason',
+    (reason) => {
+      const bodySchema = markProcessedRoute.params.shape.body;
+      expect(
+        bodySchema.safeParse({ detection_ids: ['d-1'], processed_by: 'exec-1', skip: { reason } })
+          .success
+      ).toBe(false);
+    }
+  );
+
   it('bound the number of rules marked scanned per request', () => {
     const bodySchema = markScannedRoute.params.shape.body;
     expect(bodySchema.safeParse({ rule_uuids: ['rule-1'], scanned_by: 'exec-1' }).success).toBe(

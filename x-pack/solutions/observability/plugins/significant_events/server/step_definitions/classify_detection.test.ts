@@ -35,13 +35,28 @@ describe('classifyDetection', () => {
   describe('decision table', () => {
     it.each<[string, SignalVerdict, ProbeOutcome, DetectionDecision, DecisionReason]>([
       ['breaching with rows', 'confirms', withRows, 'skip', 'still_breaching'],
-      ['breaching without rows', 'confirms', withoutRows, 'needs_agent', 'possible_recovery'],
-      ['healthy with rows', 'refutes', withRows, 'needs_agent', 'possible_rebreach'],
+      ['breaching without rows', 'confirms', withoutRows, 'needs_agent', 'state_changed'],
+      ['healthy with rows', 'refutes', withRows, 'needs_agent', 'state_changed'],
       ['healthy without rows', 'refutes', withoutRows, 'skip', 'still_healthy'],
     ])('%s', (_name, verdict, probe, decision, reason) => {
       expect(classifyDetection({ memberships: [member(verdict)], probe })).toEqual({
         decision,
         reason,
+      });
+    });
+  });
+
+  describe('a healthy verdict reached on found rows', () => {
+    const healthyOnRows = { verdict: 'refutes' as const, evidenceFound: true };
+
+    it('expects rows: rows skip, no rows go to the agent', () => {
+      expect(classifyDetection({ memberships: [healthyOnRows], probe: withRows })).toEqual({
+        decision: 'skip',
+        reason: 'still_healthy',
+      });
+      expect(classifyDetection({ memberships: [healthyOnRows], probe: withoutRows })).toEqual({
+        decision: 'needs_agent',
+        reason: 'state_changed',
       });
     });
   });
@@ -65,10 +80,10 @@ describe('classifyDetection', () => {
   });
 
   it.each<[ProbeStatus, DecisionReason]>([
-    ['error', 'probe_error'],
-    ['timeout', 'probe_timeout'],
-    ['aborted', 'probe_aborted'],
-    ['no_query', 'no_stored_query'],
+    ['error', 'probe_unavailable'],
+    ['timeout', 'probe_unavailable'],
+    ['aborted', 'probe_unavailable'],
+    ['no_query', 'probe_unavailable'],
   ])('sends the detection to the agent when the probe status is %s', (status, reason) => {
     for (const verdict of ['confirms', 'refutes'] as const) {
       expect(
@@ -98,11 +113,11 @@ describe('classifyDetection', () => {
 
       expect(classifyDetection({ memberships, probe: withRows })).toEqual({
         decision: 'needs_agent',
-        reason: 'possible_rebreach',
+        reason: 'state_changed',
       });
       expect(classifyDetection({ memberships, probe: withoutRows })).toEqual({
         decision: 'needs_agent',
-        reason: 'possible_recovery',
+        reason: 'state_changed',
       });
     });
 

@@ -8,10 +8,10 @@
 import React from 'react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Detection } from '@kbn/significant-events-schema';
+import type { Detection, SkipReason } from '@kbn/significant-events-schema';
 import { formatTimestamp } from '../../../../util/formatters';
 
-const SKIP_REASON_LABELS: Record<string, string> = {
+const SKIP_REASON_LABELS: Readonly<Record<SkipReason, string>> = {
   still_breaching: i18n.translate(
     'xpack.significantEventsApp.detectionStatus.reason.stillBreaching',
     {
@@ -23,13 +23,12 @@ const SKIP_REASON_LABELS: Record<string, string> = {
     defaultMessage:
       "The rule's query returns nothing in the current window and the event already records it as healthy, so nothing changed.",
   }),
-  in_cooldown: i18n.translate('xpack.significantEventsApp.detectionStatus.reason.inCooldown', {
-    defaultMessage:
-      "The rule's last event closed on its own a short while ago, so its detections are held back for a cooldown that grows each time the rule recurs.",
-  }),
 };
 
-const getSkipReasonLabel = (reason: string): string => SKIP_REASON_LABELS[reason] ?? reason;
+// Stored markers can carry a reason this build does not know.
+const labelsByStoredReason: Readonly<Record<string, string>> = SKIP_REASON_LABELS;
+
+const getSkipReasonLabel = (reason: string): string => labelsByStoredReason[reason] ?? reason;
 
 /**
  * Where a detection stands with discovery: skipped by the classifier (with why on hover), or

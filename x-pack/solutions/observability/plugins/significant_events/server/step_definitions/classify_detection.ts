@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import type { SignalVerdict } from '@kbn/significant-events-schema';
-import type { LiveRuleMembership } from '../lib/significant_events/events/rule_events_client';
+import type {
+  DecisionReason,
+  NeedsAgentReason,
+  ProbeStatus,
+  SignalVerdict,
+  SkipReason,
+} from '@kbn/significant-events-schema';
 
-export const PROBE_STATUSES = ['ok', 'error', 'timeout', 'no_query', 'aborted'] as const;
-export type ProbeStatus = (typeof PROBE_STATUSES)[number];
+export type { DecisionReason, ProbeStatus };
 
 /** What re-running a rule's stored query found. `hasRows` only means something when `ok`. */
 export interface ProbeOutcome {
@@ -19,29 +23,9 @@ export interface ProbeOutcome {
 
 export type DetectionDecision = 'skip' | 'needs_agent';
 
-export const DECISION_REASONS = [
-  'still_breaching',
-  'still_healthy',
-  'possible_recovery',
-  'possible_rebreach',
-  'in_cooldown',
-  'above_normal',
-  'series_too_old',
-  'member_joining',
-  'not_live_member',
-  'unjudged_member',
-  'no_stored_query',
-  'probe_error',
-  'probe_timeout',
-  'probe_aborted',
-  'over_cap',
-] as const;
-export type DecisionReason = (typeof DECISION_REASONS)[number];
-
-export interface DetectionClassification {
-  decision: DetectionDecision;
-  reason: DecisionReason;
-}
+export type DetectionClassification =
+  | { decision: 'skip'; reason: SkipReason }
+  | { decision: 'needs_agent'; reason: NeedsAgentReason };
 
 export type MemberState = 'breaching' | 'healthy' | 'unjudged';
 
@@ -52,14 +36,7 @@ export const toMemberState = (verdict: SignalVerdict): MemberState => {
   return 'unjudged';
 };
 
-const NEEDS_AGENT_FOR_PROBE: Record<Exclude<ProbeStatus, 'ok'>, DecisionReason> = {
-  error: 'probe_error',
-  timeout: 'probe_timeout',
-  aborted: 'probe_aborted',
-  no_query: 'no_stored_query',
-};
-
-const needsAgent = (reason: DecisionReason): DetectionClassification => ({
+const needsAgent = (reason: NeedsAgentReason): DetectionClassification => ({
   decision: 'needs_agent',
   reason,
 });
@@ -74,7 +51,7 @@ export const classifyDetection = ({
   memberships,
   probe,
 }: {
-  memberships: ReadonlyArray<Pick<LiveRuleMembership, 'verdict'>>;
+  memberships: ReadonlyArray<{ verdict: SignalVerdict; evidenceFound?: boolean }>;
   probe: ProbeOutcome;
 }): DetectionClassification => {
   if (memberships.length === 0) return needsAgent('not_live_member');
@@ -82,15 +59,25 @@ export const classifyDetection = ({
   const states = memberships.map(({ verdict }) => toMemberState(verdict));
   if (states.includes('unjudged')) return needsAgent('unjudged_member');
 
-  if (probe.status !== 'ok') return needsAgent(NEEDS_AGENT_FOR_PROBE[probe.status]);
+  if (probe.status !== 'ok') return needsAgent('probe_unavailable');
 
-  const hasBreachingWithoutRows = !probe.hasRows && states.includes('breaching');
-  if (hasBreachingWithoutRows) return needsAgent('possible_recovery');
+  // What each member's stored verdict leads the probe to expect. A breach expects rows. A healthy
+  // verdict expects none, unless it was reached on found rows that were healthy: those expect rows.
+  const expectsRows = memberships.map(
+    ({ verdict, evidenceFound }, index) =>
+      states[index] === 'breaching' || (verdict === 'refutes' && evidenceFound === true)
+  );
 
-  const hasHealthyWithRows = probe.hasRows && states.includes('healthy');
-  if (hasHealthyWithRows) return needsAgent('possible_rebreach');
+  if (!probe.hasRows && expectsRows.some(Boolean)) {
+    return needsAgent('state_changed');
+  }
+  if (probe.hasRows && expectsRows.some((expected) => !expected)) {
+    return needsAgent('state_changed');
+  }
 
-  // Past both guards, either every state is breaching and rows exist, or every state is healthy
-  // and no rows exist: fresh evidence matches the stored state everywhere.
-  return { decision: 'skip', reason: probe.hasRows ? 'still_breaching' : 'still_healthy' };
+  // Past both guards, the probe agrees with every member's expectation.
+  return {
+    decision: 'skip',
+    reason: states.includes('breaching') && probe.hasRows ? 'still_breaching' : 'still_healthy',
+  };
 };

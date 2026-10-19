@@ -6,7 +6,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import { detectionSkipSchema, type SignalVerdict } from '@kbn/significant-events-schema';
+import { type SignalVerdict } from '@kbn/significant-events-schema';
 import {
   MAX_CLASSIFIED_ROWS,
   classifyBatch,
@@ -45,7 +45,9 @@ const membership = (
   status: 'active',
   verdict,
   esqlQuery,
+  evidenceFound: verdict === 'confirms',
   createdAt: new Date(NOW - HOUR_MS).toISOString(),
+  verifiedAt: undefined,
   sourceIds: ['logs.checkout'],
 });
 
@@ -58,15 +60,26 @@ const probeResult = (status: ProbeResult['status'], hasRows: boolean): ProbeResu
 const membersOf = (entries: Record<string, LiveRuleMembership[]>) =>
   new Map(Object.entries(entries));
 
-const batchParams = (overrides: Partial<ClassifyBatchParams> = {}): ClassifyBatchParams => ({
+type BatchOverrides = Partial<ClassifyBatchParams> & {
+  findLiveMembers?: (ruleUuids: string[]) => Promise<Map<string, LiveRuleMembership[]>>;
+  findPriorSeries?: (ruleUuids: string[]) => Promise<Map<string, PriorSeries>>;
+};
+
+const batchParams = ({
+  findLiveMembers = async () => new Map(),
+  findPriorSeries = async () => new Map(),
+  ...overrides
+}: BatchOverrides = {}): ClassifyBatchParams => ({
   rows: [],
   shadowMode: false,
   maxSkipAgeMs: 24 * HOUR_MS,
-  cooldownMs: HOUR_MS,
-  maxCooldownMs: 6 * HOUR_MS,
+  knownOngoingMs: 7 * 24 * HOUR_MS,
   now: NOW,
   probeConcurrency: 5,
-  findLiveMembers: jest.fn(async () => new Map()),
+  findRuleSeries: async (ruleUuids) => ({
+    live: await findLiveMembers(ruleUuids),
+    prior: await findPriorSeries(ruleUuids),
+  }),
   probe: jest.fn(async () => probeResult('ok', true)),
   ...overrides,
 });
@@ -79,7 +92,6 @@ describe('classifyBatch', () => {
 
     expect(findLiveMembers).not.toHaveBeenCalled();
     expect(output).toMatchObject({
-      rows: [],
       row_count: 0,
       batch: [],
       decisions: [],
@@ -96,7 +108,7 @@ describe('classifyBatch', () => {
     const output = await classifyBatch(batchParams({ rows, probe }));
 
     expect(probe).not.toHaveBeenCalled();
-    expect(output.rows).toEqual(rows);
+    expect(output.batch.map(({ rule_uuid: id }) => id)).toEqual(['rule-A']);
     expect(output.decisions).toEqual([
       {
         rule_uuid: 'rule-A',
@@ -123,137 +135,20 @@ describe('classifyBatch', () => {
       output.decisions.map(({ rule_uuid: id, decision, reason }) => [id, decision, reason])
     ).toEqual([
       ['rule-A', 'skip', 'still_breaching'],
-      ['rule-B', 'needs_agent', 'possible_rebreach'],
+      ['rule-B', 'needs_agent', 'state_changed'],
       ['rule-C', 'needs_agent', 'not_live_member'],
     ]);
-    expect(output.rows).toEqual([rows[1], rows[2]]);
+    expect(output.batch.map(({ rule_uuid: id }) => id)).toEqual(['rule-B', 'rule-C']);
     expect(output.row_count).toBe(2);
     expect(output.skipped_rule_uuids).toEqual(['rule-A']);
     expect(output.skipped_count).toBe(1);
     expect(output.needs_agent_count).toBe(2);
     expect(output.reason_counts).toEqual({
       still_breaching: 1,
-      possible_rebreach: 1,
+      state_changed: 1,
       not_live_member: 1,
     });
     expect(output.probe_status_counts).toEqual({ ok: 2 });
-  });
-
-  describe('the cooldown after a series closes on its own', () => {
-    const closed = (overrides: Partial<PriorSeries> = {}): PriorSeries => ({
-      eventId: 'event-0',
-      status: 'inactive',
-      severity: 'low',
-      assessmentNote: undefined,
-      updatedAt: new Date(NOW - 30 * 60_000).toISOString(),
-      statusSetBy: undefined,
-      consecutiveInactive: 1,
-      ...overrides,
-    });
-    const decide = async (prior: PriorSeries | undefined, shadowMode = false) =>
-      (
-        await classifyBatch(
-          batchParams({
-            rows: [detectionRow('rule-A')],
-            shadowMode,
-            findPriorSeries: jest.fn(async () => new Map(prior ? [['rule-A', prior]] : [])),
-          })
-        )
-      ).decisions[0];
-
-    it('skips a rule whose series closed within the cooldown', async () => {
-      expect(await decide(closed())).toMatchObject({ decision: 'skip', reason: 'in_cooldown' });
-    });
-
-    it('lets it through once the cooldown has passed', async () => {
-      const aged = closed({ updatedAt: new Date(NOW - 90 * 60_000).toISOString() });
-
-      expect(await decide(aged)).toMatchObject({
-        decision: 'needs_agent',
-        reason: 'not_live_member',
-      });
-    });
-
-    it('doubles the cooldown for each consecutive series that closed, up to the maximum', async () => {
-      const aged = new Date(NOW - 3 * HOUR_MS).toISOString();
-
-      expect(await decide(closed({ updatedAt: aged, consecutiveInactive: 2 }))).toMatchObject({
-        decision: 'needs_agent',
-      });
-      expect(await decide(closed({ updatedAt: aged, consecutiveInactive: 3 }))).toMatchObject({
-        decision: 'skip',
-      });
-      const longAgo = new Date(NOW - 7 * HOUR_MS).toISOString();
-      expect(await decide(closed({ updatedAt: longAgo, consecutiveInactive: 9 }))).toMatchObject({
-        decision: 'needs_agent',
-      });
-    });
-
-    it('leaves a series an operator closed to the operator', async () => {
-      expect(await decide(closed({ statusSetBy: 'operator' }))).toMatchObject({
-        decision: 'needs_agent',
-      });
-    });
-
-    it('does not apply to a rule with no prior series, or one whose series is live', async () => {
-      expect(await decide(undefined)).toMatchObject({ decision: 'needs_agent' });
-      expect(await decide(closed({ status: 'active', consecutiveInactive: 0 }))).toMatchObject({
-        decision: 'needs_agent',
-      });
-    });
-
-    it('is off at zero', async () => {
-      const output = await classifyBatch(
-        batchParams({
-          rows: [detectionRow('rule-A')],
-          cooldownMs: 0,
-          findPriorSeries: jest.fn(async () => new Map([['rule-A', closed()]])),
-        })
-      );
-
-      expect(output.decisions[0]).toMatchObject({ decision: 'needs_agent' });
-    });
-
-    it('says who ended an inactive series to the agent', async () => {
-      const output = await classifyBatch(
-        batchParams({
-          rows: [detectionRow('rule-A')],
-          cooldownMs: 0,
-          findPriorSeries: jest.fn(
-            async () => new Map([['rule-A', closed({ statusSetBy: 'operator' })]])
-          ),
-        })
-      );
-
-      expect(output.batch[0].prior_series).toMatchObject({
-        status: 'inactive',
-        ended_by: 'operator',
-      });
-    });
-  });
-
-  it('lists, per skipped rule, only what a processed marker stores, so the marker route accepts it', async () => {
-    const findLiveMembers = jest.fn(async () => membersOf({ 'rule-A': [membership('confirms')] }));
-
-    const output = await classifyBatch(
-      batchParams({ rows: [detectionRow('rule-A')], findLiveMembers })
-    );
-
-    expect(output.skips).toEqual([
-      { rule_uuid: 'rule-A', skip: { reason: 'still_breaching', probe_status: 'ok' } },
-    ]);
-    const route = detectionSkipSchema.omit({ checked_at: true }).strict();
-    expect(route.safeParse(output.skips[0].skip).success).toBe(true);
-  });
-
-  it('lists no skips while it only records', async () => {
-    const findLiveMembers = jest.fn(async () => membersOf({ 'rule-A': [membership('confirms')] }));
-
-    const output = await classifyBatch(
-      batchParams({ rows: [detectionRow('rule-A')], findLiveMembers, shadowMode: true })
-    );
-
-    expect(output.skips).toEqual([]);
   });
 
   describe('the old flaky-rule gate', () => {
@@ -267,13 +162,16 @@ describe('classifyBatch', () => {
     ];
     const rows = [gatedRow('rule-A', true), gatedRow('rule-B', false)];
 
-    it('keeps the rows it holds back from the agent while the classifier only records', async () => {
+    it('keeps the rows it holds back from the agent, but still decides on them, while the classifier only records', async () => {
       const output = await classifyBatch(batchParams({ rows, columns: COLUMNS, shadowMode: true }));
 
       expect(output.batch.map(({ rule_uuid: id }) => id)).toEqual(['rule-B']);
-      expect(output.rows.map(([id]) => id)).toEqual(['rule-B']);
       expect(output.row_count).toBe(1);
       expect(output.decisions.map(({ rule_uuid: id }) => id)).toEqual(['rule-A', 'rule-B']);
+      expect(output.gate_counts).toEqual({
+        'suppressed:needs_agent': 1,
+        'passed:needs_agent': 1,
+      });
     });
 
     it('does not hold anything back once the classifier enforces', async () => {
@@ -290,7 +188,7 @@ describe('classifyBatch', () => {
       );
 
       const output = await classifyBatch(
-        batchParams({ rows, columns: COLUMNS, shadowMode: true, findLiveMembers })
+        batchParams({ rows, columns: COLUMNS, shadowMode: false, findLiveMembers })
       );
 
       expect(output.decisions[0]).toMatchObject({ legacy_gate: 'suppressed', decision: 'skip' });
@@ -355,6 +253,24 @@ describe('classifyBatch', () => {
       expect(output.skipped_count).toBe(0);
     });
 
+    it('does not treat members of different live series on one source as joining each other', async () => {
+      const findLiveMembers = jest.fn(async () =>
+        membersOf({
+          'rule-A': [{ ...membership('confirms'), eventId: 'event-1' }],
+          'rule-B': [{ ...membership('confirms'), eventId: 'event-2' }],
+        })
+      );
+
+      const output = await classifyBatch(
+        batchParams({
+          rows: [detectionRow('rule-A', 'logs.checkout'), detectionRow('rule-B', 'logs.checkout')],
+          findLiveMembers,
+        })
+      );
+
+      expect(output.decisions.map(({ decision }) => decision)).toEqual(['skip', 'skip']);
+    });
+
     it('does not treat a rule on another source as joining', async () => {
       const findLiveMembers = jest.fn(async () =>
         membersOf({ 'rule-A': [membership('confirms')] })
@@ -393,8 +309,8 @@ describe('classifyBatch', () => {
         detection_id: 'rule-B-detection',
         rule_name: 'Rule rule-B',
         recent_detection_count: 2,
-        flaky_probe: false,
       });
+      expect(output.batch[0]).not.toHaveProperty('flaky_probe');
     });
 
     it('gives each one why it reached the agent, and the events its rule is in, when enforcing', async () => {
@@ -411,7 +327,7 @@ describe('classifyBatch', () => {
       );
 
       expect(output.batch[0].classifier).toMatchObject({
-        reason: 'possible_recovery',
+        reason: 'state_changed',
         probe_status: 'ok',
         live_events: [{ event_id: 'event-1', status: 'active', stored_verdict: 'confirms' }],
       });
@@ -442,7 +358,7 @@ describe('classifyBatch', () => {
         assessmentNote: 'Benign deploy.',
         updatedAt: '2026-10-12T10:00:00.000Z',
         statusSetBy: undefined,
-        consecutiveInactive: 1,
+        closedWithReason: false,
       };
       const findPriorSeries = jest.fn(async () => new Map([['rule-A', prior]]));
 
@@ -471,8 +387,11 @@ describe('classifyBatch', () => {
                 eventId: undefined,
                 status: 'active',
                 severity: 'high',
+                assessmentNote: undefined,
                 updatedAt: 't',
-              } as PriorSeries,
+                statusSetBy: undefined,
+                closedWithReason: false,
+              } satisfies PriorSeries,
             ],
           ])
       );
@@ -501,7 +420,7 @@ describe('classifyBatch', () => {
 
     const output = await classifyBatch(batchParams({ rows, shadowMode: true, findLiveMembers }));
 
-    expect(output.rows).toEqual(rows);
+    expect(output.batch.map(({ rule_uuid: id }) => id)).toEqual(['rule-A']);
     expect(output.row_count).toBe(1);
     expect(output.skipped_rule_uuids).toEqual([]);
     expect(output.shadow_mode).toBe(true);
@@ -604,7 +523,7 @@ describe('classifyBatch', () => {
 
     expect(output.decisions[0]).toMatchObject({
       decision: 'needs_agent',
-      reason: 'probe_timeout',
+      reason: 'probe_unavailable',
       probe_status: 'timeout',
       probe_duration_ms: 7,
     });
@@ -656,7 +575,145 @@ describe('classifyBatch', () => {
       decision: 'needs_agent',
       reason: 'over_cap',
     });
-    expect(output.rows).toEqual([rows[MAX_CLASSIFIED_ROWS]]);
+    expect(output.batch.map(({ rule_uuid: id }) => id)).toEqual([`rule-${MAX_CLASSIFIED_ROWS}`]);
+  });
+
+  describe('the batch the agent reads in enforce mode', () => {
+    const flakyRow = [...detectionRow('rule-A').slice(0, 4), true];
+    const closedBy = (overrides: Partial<PriorSeries>): PriorSeries => ({
+      eventId: 'event-0',
+      status: 'inactive',
+      severity: 'high',
+      assessmentNote: 'Known, tracked elsewhere',
+      updatedAt: new Date(NOW - 24 * HOUR_MS).toISOString(),
+      statusSetBy: 'operator',
+      closedWithReason: true,
+      ...overrides,
+    });
+    const batchOf = async (prior: PriorSeries, overrides: Partial<ClassifyBatchParams> = {}) =>
+      (
+        await classifyBatch(
+          batchParams({
+            rows: [flakyRow],
+            findPriorSeries: jest.fn(async () => new Map([['rule-A', prior]])),
+            ...overrides,
+          })
+        )
+      ).batch[0];
+
+    it('flags a series an operator closed with a reason recently as known ongoing', async () => {
+      expect((await batchOf(closedBy({}))).prior_series).toMatchObject({ known_ongoing: true });
+    });
+
+    it.each([
+      [
+        'closed longer ago than the window',
+        closedBy({ updatedAt: new Date(NOW - 8 * 24 * HOUR_MS).toISOString() }),
+      ],
+      ['closed with no reason', closedBy({ closedWithReason: false })],
+      ['still active', closedBy({ status: 'active' })],
+    ])('does not flag a series that is %s', async (_, prior) => {
+      expect((await batchOf(prior)).prior_series).not.toHaveProperty('known_ongoing');
+    });
+
+    it('does not flag a known-ongoing series in shadow mode, where the agent judges unprompted', async () => {
+      expect((await batchOf(closedBy({}), { shadowMode: true })).prior_series).not.toHaveProperty(
+        'known_ongoing'
+      );
+    });
+
+    it('drops the flaky_probe flag when enforcing, and keeps it in shadow mode', async () => {
+      expect(await batchOf(closedBy({}))).not.toHaveProperty('flaky_probe');
+      const shadow = await classifyBatch(batchParams({ rows: [flakyRow], shadowMode: true }));
+      expect(shadow.batch[0]).toMatchObject({ flaky_probe: true });
+    });
+
+    it('drops the flaky_probe flag from a row it cannot read, too', async () => {
+      const unreadable = [null, {}, 0, 0, true];
+      const output = await classifyBatch(batchParams({ rows: [unreadable] }));
+
+      expect(output.batch).toHaveLength(1);
+      expect(output.batch[0]).not.toHaveProperty('flaky_probe');
+    });
+  });
+
+  describe('skipped_detection_ids, what a skipped rule is stamped up to', () => {
+    const skippable = () => jest.fn(async () => membersOf({ 'rule-A': [membership('confirms')] }));
+
+    it('lists the detections it skipped, so a newer one it never saw is not stamped', async () => {
+      const output = await classifyBatch(
+        batchParams({
+          rows: [detectionRow('rule-A'), detectionRow('rule-B')],
+          findLiveMembers: skippable(),
+        })
+      );
+
+      expect(output.skipped_detection_ids).toEqual(['rule-A-detection']);
+    });
+
+    it('lists none while it only records', async () => {
+      const output = await classifyBatch(
+        batchParams({
+          rows: [detectionRow('rule-A')],
+          findLiveMembers: skippable(),
+          shadowMode: true,
+        })
+      );
+
+      expect(output.skipped_detection_ids).toEqual([]);
+    });
+  });
+
+  describe('the age of the verdict a skip rests on', () => {
+    const aged = (overrides: Partial<LiveRuleMembership>) =>
+      membersOf({ 'rule-A': [{ ...membership('confirms'), ...overrides }] });
+    const decide = async (memberships: Map<string, LiveRuleMembership[]>) =>
+      (
+        await classifyBatch(
+          batchParams({ rows: [detectionRow('rule-A')], findLiveMembers: async () => memberships })
+        )
+      ).decisions[0];
+
+    it('keeps the skip when a fresh verdict sits on an old series', async () => {
+      const decision = await decide(
+        aged({
+          createdAt: new Date(NOW - 72 * HOUR_MS).toISOString(),
+          verifiedAt: new Date(NOW - HOUR_MS).toISOString(),
+        })
+      );
+
+      expect(decision).toMatchObject({ decision: 'skip', reason: 'still_breaching' });
+    });
+
+    it('sends it to the agent when an old verdict sits on a new series', async () => {
+      const decision = await decide(
+        aged({
+          createdAt: new Date(NOW - HOUR_MS).toISOString(),
+          verifiedAt: new Date(NOW - 48 * HOUR_MS).toISOString(),
+        })
+      );
+
+      expect(decision).toMatchObject({ decision: 'needs_agent', reason: 'series_too_old' });
+    });
+
+    it.each([
+      ['in the future', () => new Date(NOW + 48 * HOUR_MS).toISOString()],
+      ['unreadable', () => 'not a date'],
+    ])('does not trust a verdict time that is %s: the series age decides', async (_name, time) => {
+      const decision = await decide(
+        aged({ createdAt: new Date(NOW - 48 * HOUR_MS).toISOString(), verifiedAt: time() })
+      );
+
+      expect(decision).toMatchObject({ decision: 'needs_agent', reason: 'series_too_old' });
+    });
+
+    it('falls back to when the series opened when no verdict time is stored', async () => {
+      const decision = await decide(
+        aged({ createdAt: new Date(NOW - 48 * HOUR_MS).toISOString(), verifiedAt: undefined })
+      );
+
+      expect(decision).toMatchObject({ decision: 'needs_agent', reason: 'series_too_old' });
+    });
   });
 
   it('keeps a row it cannot read, without a decision', async () => {
@@ -665,7 +722,7 @@ describe('classifyBatch', () => {
 
     const output = await classifyBatch(batchParams({ rows }));
 
-    expect(output.rows).toEqual(rows);
+    expect(output.batch).toHaveLength(2);
     expect(output.decisions.map(({ rule_uuid: id }) => id)).toEqual(['rule-A']);
   });
 });
@@ -679,8 +736,8 @@ describe('classifyDetectionsStepDefinition', () => {
     probe_concurrency: 5,
     budget_ms: 20_000,
     max_skip_age_hours: 24,
-    cooldown_hours: 1,
-    max_cooldown_hours: 6,
+    prior_series_lookback_hours: 336,
+    known_ongoing_days: 7,
   };
 
   const createDefinition = () => {
@@ -744,8 +801,6 @@ describe('classifyDetectionsStepDefinition', () => {
     ['probe_timeout_ms above 30000', { probe_timeout_ms: 30_001 }],
     ['budget_ms below 2000', { budget_ms: 1_999 }],
     ['budget_ms above 60000', { budget_ms: 60_001 }],
-    ['cooldown_hours below 0', { cooldown_hours: -1 }],
-    ['max_cooldown_hours below 1', { max_cooldown_hours: 0 }],
     ['max_skip_age_hours below 1', { max_skip_age_hours: 0 }],
     ['max_skip_age_hours above 720', { max_skip_age_hours: 721 }],
   ])('rejects %s', (_name, override) => {
@@ -772,7 +827,7 @@ describe('classifyDetectionsStepDefinition', () => {
     expect(output.decisions).toMatchObject([
       { rule_uuid: 'rule-A', decision: 'skip', reason: 'still_breaching', probe_status: 'ok' },
     ]);
-    expect(output.rows).toEqual([]);
+    expect(output.batch).toEqual([]);
     expect(output.skipped_rule_uuids).toEqual(['rule-A']);
     const probeRequest = query.mock.calls
       .map(([request]) => request as { query: string; params?: unknown })
@@ -783,9 +838,9 @@ describe('classifyDetectionsStepDefinition', () => {
   });
 
   it.each([
-    ['shadow mode', true, 1],
-    ['enforce mode', false, 0],
-  ])('runs the bucketed baseline query only in %s', async (_name, shadowMode, expected) => {
+    ['shadow mode', true],
+    ['enforce mode', false],
+  ])('runs the bucketed baseline query once in %s', async (_name, shadowMode) => {
     const { definition } = createDefinition();
     const query = jest.fn(async (request: { query: string }) =>
       request.query.includes('.rule-events')
@@ -800,12 +855,8 @@ describe('classifyDetectionsStepDefinition', () => {
     );
 
     const bucketed = query.mock.calls.filter(([request]) => request.query.includes('BUCKET'));
-    expect(bucketed).toHaveLength(expected);
-    if (shadowMode) {
-      expect(output.decisions[0].baseline).toMatchObject({ samples: 60 });
-    } else {
-      expect(output.decisions[0].baseline).toBeUndefined();
-    }
+    expect(bucketed).toHaveLength(1);
+    expect(output.decisions[0].baseline).toMatchObject({ samples: 60 });
   });
 
   it('treats a missing rows input as an empty batch', async () => {
@@ -816,7 +867,7 @@ describe('classifyDetectionsStepDefinition', () => {
     const output = await runHandler(definition, settings, { esql: { query } });
 
     expect(query).not.toHaveBeenCalled();
-    expect(output).toMatchObject({ rows: [], row_count: 0, decisions: [] });
+    expect(output).toMatchObject({ batch: [], row_count: 0, decisions: [] });
   });
 
   it('issues no queries for an empty batch', async () => {

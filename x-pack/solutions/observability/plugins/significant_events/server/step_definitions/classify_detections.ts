@@ -7,19 +7,24 @@
 
 import pLimit from 'p-limit';
 import type { Logger } from '@kbn/core/server';
-import { MAX_ID_LENGTH } from '@kbn/significant-events-schema';
+import {
+  DECISION_REASONS,
+  MAX_ID_LENGTH,
+  PROBE_STATUSES,
+  SKIP_REASONS,
+  baselineObservationSchema,
+  type SkipReason,
+} from '@kbn/significant-events-schema';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { lazySchema, z } from '@kbn/zod/v4';
 import {
-  DECISION_REASONS,
-  PROBE_STATUSES,
   classifyDetection,
   toMemberState,
   type DetectionClassification,
   type ProbeOutcome,
 } from './classify_detection';
-import { BASELINE_DECISIONS, observeMatchSeries, type BaselineObservation } from './baseline';
+import { observeMatchSeries, type BaselineObservation } from './baseline';
 import {
   batchEntrySchema,
   toBatchEntry,
@@ -38,8 +43,6 @@ import {
 export const MAX_CLASSIFIED_ROWS = 100;
 const MAX_INPUT_ROWS = 1_000;
 const MAX_ROW_COLUMNS = 20;
-/** How far back a rule's latest series is looked for. */
-const PRIOR_SERIES_LOOKBACK_MS = 14 * 24 * 60 * 60_000;
 
 const rowsSchema = lazySchema(() =>
   z.array(z.array(z.unknown()).max(MAX_ROW_COLUMNS)).max(MAX_INPUT_ROWS)
@@ -61,21 +64,17 @@ const inputSchema = lazySchema(() =>
       .number()
       .min(1)
       .max(24 * 30),
-    /** 0 turns the cooldown off. */
-    cooldown_hours: z.number().min(0).max(72),
-    max_cooldown_hours: z.number().min(1).max(72),
+    /** A series an operator closed with a reason counts as known-ongoing this long after it closed. */
+    known_ongoing_days: z.number().min(0).max(90),
+    /** How far back a rule's latest series is looked for. */
+    prior_series_lookback_hours: z
+      .number()
+      .min(1)
+      .max(24 * 90),
   })
 );
 
-const baselineSchema = lazySchema(() =>
-  z.object({
-    decision: z.enum(BASELINE_DECISIONS),
-    value: z.number(),
-    samples: z.number().int().min(0),
-    median: z.number().optional(),
-    threshold: z.number().optional(),
-  })
-);
+const baselineSchema = baselineObservationSchema;
 
 const decisionSchema = lazySchema(() =>
   z.object({
@@ -91,10 +90,10 @@ const decisionSchema = lazySchema(() =>
   })
 );
 
-/** The part of a decision a processed marker keeps: the marker route refuses any other key. */
+/** The part of a decision a processed marker keeps: the marker route drops any other key. */
 const skipMarkerSchema = lazySchema(() =>
   z.object({
-    reason: z.enum(DECISION_REASONS),
+    reason: z.enum(SKIP_REASONS),
     probe_status: z.enum(PROBE_STATUSES).optional(),
     baseline: baselineSchema.optional(),
   })
@@ -104,18 +103,16 @@ const countsSchema = lazySchema(() => z.record(z.string().max(64), z.number().in
 
 const outputSchema = lazySchema(() =>
   z.object({
-    /** Rows for the agent: every input row in shadow mode, only `needs_agent` rows otherwise. */
-    rows: rowsSchema,
-    /** The same detections by field name, as the agent reads them. */
+    /** The detections the agent reads, by field name: every one in shadow mode, only `needs_agent` ones otherwise. */
     batch: z.array(batchEntrySchema).max(MAX_INPUT_ROWS),
     decisions: z.array(decisionSchema).max(MAX_INPUT_ROWS),
-    /** Rules whose detections were skipped; always empty in shadow mode. */
+    /** Rules whose detections are stamped processed; always empty in shadow mode. */
     skipped_rule_uuids: z.array(z.string().max(MAX_ID_LENGTH)).max(MAX_INPUT_ROWS),
     /** Why each skipped rule was skipped, in the shape a processed marker stores; empty in shadow mode. */
     skips: z
       .array(z.object({ rule_uuid: z.string().max(MAX_ID_LENGTH), skip: skipMarkerSchema }))
       .max(MAX_INPUT_ROWS),
-    /** Number of rows in `rows`; a numeric field so workflows can tell an empty batch from a missing output. */
+    /** Number of detections in `batch`; a numeric field so workflows can tell an empty batch from a missing output. */
     row_count: z.number().int().min(0),
     /** Decisions made, regardless of shadow mode. */
     skipped_count: z.number().int().min(0),
@@ -125,6 +122,11 @@ const outputSchema = lazySchema(() =>
     /** Old gate against the classifier: `<suppressed|passed>:<skip|needs_agent>` to a count. */
     gate_counts: countsSchema,
     shadow_mode: z.boolean(),
+    /**
+     * The skipped detections the classifier judged. A rule's older unprocessed detections are
+     * stamped with them; a newer one, which the classifier never saw, is not.
+     */
+    skipped_detection_ids: z.array(z.string().max(MAX_ID_LENGTH)).max(MAX_INPUT_ROWS),
   })
 );
 
@@ -140,7 +142,11 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 const parseDetectionRow = (
   row: DetectionRow
 ):
-  | { ruleUuid: string; detectionId: string | undefined; sourceId: string | undefined }
+  | {
+      ruleUuid: string;
+      detectionId: string | undefined;
+      sourceId: string | undefined;
+    }
   | undefined => {
   const [ruleUuid, source] = row;
   if (typeof ruleUuid !== 'string' || ruleUuid === '') return undefined;
@@ -158,8 +164,9 @@ const countBy = <T>(items: readonly T[], getKey: (item: T) => string | undefined
   }, {});
 
 /**
- * The live series that a detection of another rule is joining: it arrives for a source the series
- * covers while its rule is not a member. Detections of the series' own members must be re-judged.
+ * The live series that a detection is joining: it arrives for a source the series covers while its
+ * rule is in no live series. A member of any live series is judged by its own series instead, so
+ * two members of different series on one source do not withdraw each other's skip.
  */
 const findJoinedSeries = ({
   detections,
@@ -172,9 +179,9 @@ const findJoinedSeries = ({
   const allSeries = [...memberships.values()].flat();
   for (const { ruleUuid, sourceId } of detections) {
     if (sourceId === undefined) continue;
-    const ownEventIds = new Set((memberships.get(ruleUuid) ?? []).map(({ eventId }) => eventId));
+    if ((memberships.get(ruleUuid) ?? []).length > 0) continue;
     for (const { eventId, sourceIds } of allSeries) {
-      if (eventId !== undefined && !ownEventIds.has(eventId) && sourceIds.includes(sourceId)) {
+      if (eventId !== undefined && sourceIds.includes(sourceId)) {
         joined.add(eventId);
       }
     }
@@ -182,35 +189,7 @@ const findJoinedSeries = ({
   return joined;
 };
 
-/**
- * A rule that is in no live series and whose latest series closed on its own is left alone for a
- * while: `cooldown × 2^(k−1)`, k being how many of its series closed in a row, capped at
- * `maxCooldown`. A series an operator closed is not ours to cool down; that is the operator's call.
- */
-const withCooldown = ({
-  classification,
-  prior,
-  cooldownMs,
-  maxCooldownMs,
-  now,
-}: {
-  classification: DetectionClassification;
-  prior: PriorSeries | undefined;
-  cooldownMs: number;
-  maxCooldownMs: number;
-  now: number;
-}): DetectionClassification => {
-  if (classification.reason !== 'not_live_member' || cooldownMs <= 0) return classification;
-  if (!prior || prior.status !== 'inactive' || prior.statusSetBy === 'operator') {
-    return classification;
-  }
-  const window = Math.min(cooldownMs * 2 ** (prior.consecutiveInactive - 1), maxCooldownMs);
-  return now - Date.parse(prior.updatedAt) < window
-    ? { decision: 'skip', reason: 'in_cooldown' }
-    : classification;
-};
-
-/** A skip is only as good as the series it rests on: an old series or a joining rule withdraws it. */
+/** A skip is only as good as the verdict it rests on: an old verdict or a joining rule withdraws it. */
 const withEscalation = ({
   classification,
   memberships,
@@ -230,15 +209,22 @@ const withEscalation = ({
   // A match count above the rule's own normal is a change the stored verdict has not seen.
   if (baseline?.decision === 'above_normal')
     return { decision: 'needs_agent', reason: 'above_normal' };
-  const isTooOld = memberships.some(
-    ({ createdAt }) => createdAt !== undefined && now - Date.parse(createdAt) > maxSkipAgeMs
-  );
+  // The age of the agent's last verdict for the rule. The agent writes that time, so one that is
+  // missing, unreadable or in the future is not trusted: the age falls back to when the series opened.
+  const isTooOld = memberships.some(({ verifiedAt, createdAt }) => {
+    const verified = verifiedAt === undefined ? NaN : Date.parse(verifiedAt);
+    const anchor = verified <= now ? verifiedAt : createdAt;
+    return anchor !== undefined && now - Date.parse(anchor) > maxSkipAgeMs;
+  });
   if (isTooOld) return { decision: 'needs_agent', reason: 'series_too_old' };
   const isJoining = memberships.some(
     ({ eventId }) => eventId !== undefined && joiningEventIds.has(eventId)
   );
   return isJoining ? { decision: 'needs_agent', reason: 'member_joining' } : classification;
 };
+
+const isSkipReason = (reason: string): reason is SkipReason =>
+  (SKIP_REASONS as readonly string[]).includes(reason);
 
 const LEGACY_GATE_COLUMN = 'flaky_suppressed';
 
@@ -264,21 +250,21 @@ export interface ClassifyBatchParams {
   /** The names of the row columns; the `get_detections` ones when absent. */
   columns?: readonly string[];
   shadowMode: boolean;
-  /** A skip is withdrawn when the series it rests on is older than this. */
+  /** A skip is withdrawn when the verdict it rests on is older than this. */
   maxSkipAgeMs: number;
-  /** The base cooldown after a rule's series closes; 0 turns it off. */
-  cooldownMs: number;
-  /** The most the cooldown grows to as the rule's series keep closing. */
-  maxCooldownMs: number;
+  /** A series an operator closed with a reason is known-ongoing for this long after it closed. */
+  knownOngoingMs: number;
   /** The clock the series ages are read against. */
   now: number;
   probeConcurrency: number;
-  findLiveMembers: (ruleUuids: string[]) => Promise<Map<string, LiveRuleMembership[]>>;
-  /** Each rule's latest series in any status, for the agent to read; none when absent. */
-  findPriorSeries?: (ruleUuids: string[]) => Promise<Map<string, PriorSeries>>;
+  /** The live series each rule is in, and its latest series in any status. Called once. */
+  findRuleSeries: (ruleUuids: string[]) => Promise<{
+    live: Map<string, LiveRuleMembership[]>;
+    prior: Map<string, PriorSeries>;
+  }>;
   /** Re-runs a stored query once; must not throw. */
   probe: (query: string | undefined) => Promise<ProbeResult>;
-  /** Is the detection above its own normal? Recorded in the decision, never acted on. */
+  /** Is the detection above its own normal? A skip is withdrawn when it is. */
   observe?: (query: string | undefined) => Promise<BaselineObservation | undefined>;
 }
 
@@ -292,12 +278,10 @@ export const classifyBatch = async ({
   columns,
   shadowMode,
   maxSkipAgeMs,
-  cooldownMs,
-  maxCooldownMs,
+  knownOngoingMs,
   now,
   probeConcurrency,
-  findLiveMembers,
-  findPriorSeries,
+  findRuleSeries,
   probe,
   observe,
 }: ClassifyBatchParams): Promise<ClassifyDetectionsOutput> => {
@@ -309,15 +293,13 @@ export const classifyBatch = async ({
   const classifiable = parsed.flatMap(({ row, withinCap }) => (row && withinCap ? [row] : []));
   const ruleUuids = [...new Set(classifiable.map(({ ruleUuid }) => ruleUuid))];
 
-  const memberships =
+  const { live: memberships, prior: priorSeries } =
     ruleUuids.length > 0
-      ? await findLiveMembers(ruleUuids)
-      : new Map<string, LiveRuleMembership[]>();
-
-  const priorSeries =
-    findPriorSeries && ruleUuids.length > 0
-      ? await findPriorSeries(ruleUuids)
-      : new Map<string, PriorSeries>();
+      ? await findRuleSeries(ruleUuids)
+      : {
+          live: new Map<string, LiveRuleMembership[]>(),
+          prior: new Map<string, PriorSeries>(),
+        };
   const priorSeriesOf = (ruleUuid: string): BatchPriorSeries | undefined => {
     const series = priorSeries.get(ruleUuid);
     return series
@@ -332,6 +314,14 @@ export const classifyBatch = async ({
                 ended_by:
                   series.statusSetBy === 'operator' ? ('operator' as const) : ('engine' as const),
               }
+            : {}),
+          // An operator dismissed it with a reason not long ago: the prompt caps its severity. Only
+          // when enforcing: in shadow mode the agent judges unprompted.
+          ...(!shadowMode &&
+          series.status === 'inactive' &&
+          series.closedWithReason &&
+          now - Date.parse(series.updatedAt) <= knownOngoingMs
+            ? { known_ongoing: true }
             : {}),
         }
       : undefined;
@@ -362,13 +352,15 @@ export const classifyBatch = async ({
   });
 
   const decisions: Decision[] = [];
-  const entries: BatchEntry[] = rows.map((row) =>
-    toBatchEntry({
+  const entries: BatchEntry[] = rows.map((row, index) => {
+    const ruleUuid = parsed[index].row?.ruleUuid;
+    return toBatchEntry({
       columns,
       row,
-      priorSeries: priorSeriesOf(parseDetectionRow(row)?.ruleUuid ?? ''),
-    })
-  );
+      priorSeries: ruleUuid ? priorSeriesOf(ruleUuid) : undefined,
+      includeFlakyProbe: shadowMode,
+    });
+  });
   const skippedIndexes = new Set<number>();
   // While the classifier only records, the old flaky-rule gate still keeps its rows from the agent.
   const heldBackIndexes = new Set<number>();
@@ -380,15 +372,9 @@ export const classifyBatch = async ({
     const series = memberships.get(ruleUuid) ?? [];
     const classification: DetectionClassification = withinCap
       ? withEscalation({
-          classification: withCooldown({
-            classification: classifyDetection({
-              memberships: series,
-              probe: probed ?? NOT_PROBED,
-            }),
-            prior: priorSeries.get(ruleUuid),
-            cooldownMs,
-            maxCooldownMs,
-            now,
+          classification: classifyDetection({
+            memberships: series,
+            probe: probed ?? NOT_PROBED,
           }),
           memberships: series,
           maxSkipAgeMs,
@@ -401,19 +387,26 @@ export const classifyBatch = async ({
     const legacyGate = readLegacyGate({ columns, row: rows[index] });
     if (shadowMode && legacyGate === 'suppressed') heldBackIndexes.add(index);
     // While the classifier only records, the agent judges unprompted; hints are for enforcement.
-    if (!shadowMode) {
+    // A skipped row is dropped from the batch, so only the rows the agent reads get one.
+    if (!shadowMode && classification.decision === 'needs_agent') {
       entries[index] = toBatchEntry({
         columns,
         row: rows[index],
         priorSeries: priorSeriesOf(ruleUuid),
+        // The classifier replaced the count-based gate the flag belonged to.
+        includeFlakyProbe: false,
         classifier: {
           reason: classification.reason,
           ...(probed ? { probe_status: probed.status } : {}),
+          ...(probed?.status === 'ok' ? { probe_has_rows: probed.hasRows } : {}),
           ...(baseline ? { baseline } : {}),
           live_events: (memberships.get(ruleUuid) ?? []).map((membership) => ({
             ...(membership.eventId ? { event_id: membership.eventId } : {}),
             status: membership.status,
             stored_verdict: membership.verdict,
+            ...(membership.verdict === 'refutes'
+              ? { evidence_found: membership.evidenceFound }
+              : {}),
           })),
         },
       });
@@ -428,36 +421,32 @@ export const classifyBatch = async ({
     });
   }
 
-  const skippedRuleUuids = shadowMode
-    ? []
-    : [...new Set(decisions.filter(({ decision }) => decision === 'skip').map((d) => d.rule_uuid))];
+  const stamped = shadowMode ? [] : decisions.filter(({ decision }) => decision === 'skip');
+  const skippedRuleUuids = [...new Set(stamped.map(({ rule_uuid: ruleUuid }) => ruleUuid))];
 
   const reachesAgent = (index: number): boolean =>
     !heldBackIndexes.has(index) && (shadowMode || !skippedIndexes.has(index));
-  const agentRows = rows.filter((_, index) => reachesAgent(index)).map((row) => [...row]);
 
-  const skips = shadowMode
-    ? []
-    : decisions.flatMap(
-        ({ rule_uuid: ruleUuid, decision, reason, probe_status: probeStatus, baseline }) =>
-          decision === 'skip'
-            ? [
-                {
-                  rule_uuid: ruleUuid,
-                  skip: {
-                    reason,
-                    ...(probeStatus ? { probe_status: probeStatus } : {}),
-                    ...(baseline ? { baseline } : {}),
-                  },
-                },
-              ]
-            : []
-      );
+  const skips = stamped.flatMap(
+    ({ rule_uuid: ruleUuid, reason, probe_status: probeStatus, baseline }) =>
+      isSkipReason(reason)
+        ? [
+            {
+              rule_uuid: ruleUuid,
+              skip: {
+                reason,
+                ...(probeStatus ? { probe_status: probeStatus } : {}),
+                ...(baseline ? { baseline } : {}),
+              },
+            },
+          ]
+        : []
+  );
 
+  const batch = entries.filter((_, index) => reachesAgent(index));
   return {
-    rows: agentRows,
-    batch: entries.filter((_, index) => reachesAgent(index)),
-    row_count: agentRows.length,
+    batch,
+    row_count: batch.length,
     decisions,
     skipped_rule_uuids: skippedRuleUuids,
     skips,
@@ -470,6 +459,7 @@ export const classifyBatch = async ({
       ({ legacy_gate: gate, decision }) => `${gate}:${decision}`
     ),
     shadow_mode: shadowMode,
+    skipped_detection_ids: stamped.flatMap(({ detection_id: id }) => (id ? [id] : [])),
   };
 };
 
@@ -493,8 +483,8 @@ export const classifyDetectionsStepDefinition = ({ logger }: { logger: Logger })
         probe_concurrency: probeConcurrency,
         budget_ms: budgetMs,
         max_skip_age_hours: maxSkipAgeHours,
-        cooldown_hours: cooldownHours,
-        max_cooldown_hours: maxCooldownHours,
+        prior_series_lookback_hours: lookbackHours,
+        known_ongoing_days: knownOngoingDays,
       } = context.input;
       const esClient = context.contextManager.getScopedEsClient();
       const ruleEventsClient = new RuleEventsClient({ esClient, space: spaceId });
@@ -514,20 +504,23 @@ export const classifyDetectionsStepDefinition = ({ logger }: { logger: Logger })
           abortSignal: context.abortSignal,
         });
 
+      // A known-ongoing series must be in the prior window to be seen.
+      const priorHours = Math.max(lookbackHours, knownOngoingDays * 24);
+
       const output = await classifyBatch({
         rows,
         columns,
         shadowMode,
         maxSkipAgeMs: maxSkipAgeHours * 3_600_000,
-        cooldownMs: cooldownHours * 3_600_000,
-        maxCooldownMs: maxCooldownHours * 3_600_000,
         now,
         probeConcurrency,
-        findLiveMembers: (ruleUuids) => ruleEventsClient.findLiveMembers({ ruleUuids }),
-        findPriorSeries: (ruleUuids) =>
-          ruleEventsClient.findPriorSeries({
+        knownOngoingMs: knownOngoingDays * 24 * 3_600_000,
+        // A live series with no write for longer than both limits cannot rest a skip anyway.
+        findRuleSeries: (ruleUuids) =>
+          ruleEventsClient.findRuleSeries({
             ruleUuids,
-            from: new Date(now - PRIOR_SERIES_LOOKBACK_MS).toISOString(),
+            from: new Date(now - Math.max(priorHours, maxSkipAgeHours) * 3_600_000).toISOString(),
+            priorFrom: new Date(now - priorHours * 3_600_000).toISOString(),
           }),
         probe: (query) =>
           runProbe({
@@ -538,8 +531,8 @@ export const classifyDetectionsStepDefinition = ({ logger }: { logger: Logger })
             deadlineAt: now + budgetMs,
             abortSignal: context.abortSignal,
           }),
-        // Only while gathering evidence: it costs a second query per probed rule.
-        observe: shadowMode ? (query) => observeMatchSeries({ query, now, run }) : undefined,
+        // Both modes, so shadow decisions predict enforcement: it costs a second query per probed rule.
+        observe: (query) => observeMatchSeries({ query, now, run }),
       });
 
       logger.info(

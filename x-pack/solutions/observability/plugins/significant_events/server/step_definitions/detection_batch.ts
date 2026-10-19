@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import { MAX_ID_LENGTH, MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
+import {
+  MAX_ID_LENGTH,
+  MAX_TEXT_LENGTH,
+  NEEDS_AGENT_REASONS,
+  PROBE_STATUSES,
+  baselineObservationSchema,
+} from '@kbn/significant-events-schema';
 import { lazySchema, z } from '@kbn/zod/v4';
-import { BASELINE_DECISIONS } from './baseline';
-import { DECISION_REASONS, PROBE_STATUSES } from './classify_detection';
 
 /** The columns `get_detections` returns, used when the caller does not name them. */
 export const DEFAULT_DETECTION_COLUMNS = [
@@ -17,28 +21,25 @@ export const DEFAULT_DETECTION_COLUMNS = [
   'score',
   'recent_detection_count',
   'flaky_probe',
+  'flaky_suppressed',
 ] as const;
 
 /** Why a detection reached the agent, with the events its rule is already a member of. */
 export const batchClassifierSchema = lazySchema(() =>
   z.object({
-    reason: z.enum(DECISION_REASONS),
+    reason: z.enum(NEEDS_AGENT_REASONS),
     probe_status: z.enum(PROBE_STATUSES).optional(),
-    baseline: z
-      .object({
-        decision: z.enum(BASELINE_DECISIONS),
-        value: z.number(),
-        samples: z.number().int().min(0),
-        median: z.number().optional(),
-        threshold: z.number().optional(),
-      })
-      .optional(),
+    /** Whether the re-run stored query returned rows; with `live_events`, the direction of a change. */
+    probe_has_rows: z.boolean().optional(),
+    baseline: baselineObservationSchema.optional(),
     live_events: z
       .array(
         z.object({
           event_id: z.string().max(MAX_ID_LENGTH).optional(),
           status: z.string().max(32),
           stored_verdict: z.string().max(32),
+          /** For a `refutes` verdict: whether it was reached on found (healthy) rows. */
+          evidence_found: z.boolean().optional(),
         })
       )
       .max(50),
@@ -55,6 +56,8 @@ export const batchPriorSeriesSchema = lazySchema(() =>
     updated_at: z.string().max(64),
     /** For an `inactive` series: an operator closed it, or the engine did. */
     ended_by: z.enum(['operator', 'engine']).optional(),
+    /** An operator closed it with a reason not long ago: its severity is capped at `medium`. */
+    known_ongoing: z.boolean().optional(),
   })
 );
 
@@ -95,11 +98,14 @@ export const toBatchEntry = ({
   row,
   classifier,
   priorSeries,
+  includeFlakyProbe = true,
 }: {
   columns?: readonly string[];
   row: readonly unknown[];
   classifier?: BatchClassifier;
   priorSeries?: BatchPriorSeries;
+  /** The count-based flaky flag; left out once the classifier decides instead. */
+  includeFlakyProbe?: boolean;
 }): BatchEntry => {
   const cells = new Map(columns.map((name, index) => [name, row[index]]));
   const source = cells.get('_source');
@@ -115,7 +121,7 @@ export const toBatchEntry = ({
     change_point_type: text(stored.change_point_type),
     p_value: number(stored.p_value),
     recent_detection_count: number(cells.get('recent_detection_count')),
-    flaky_probe: typeof flaky === 'boolean' ? flaky : undefined,
+    ...(includeFlakyProbe && typeof flaky === 'boolean' ? { flaky_probe: flaky } : {}),
     ...(classifier ? { classifier } : {}),
     ...(priorSeries ? { prior_series: priorSeries } : {}),
   };

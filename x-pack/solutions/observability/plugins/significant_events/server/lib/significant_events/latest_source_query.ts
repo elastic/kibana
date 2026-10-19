@@ -391,6 +391,8 @@ interface RunFindByIdsEsqlQueryArgs {
   where?: ESQLAstExpression;
   // Row cap. ES|QL answers 1,000 rows when no limit is given, which silently cuts a long history.
   limit?: number;
+  // Which end of the history a capped read keeps; rows come back oldest→newest either way.
+  keep?: 'oldest' | 'newest';
 }
 
 export const runFindByIdsEsqlQuery = async <T>({
@@ -401,6 +403,7 @@ export const runFindByIdsEsqlQuery = async <T>({
   idValues,
   where: extraWhere,
   limit,
+  keep = 'oldest',
 }: RunFindByIdsEsqlQueryArgs): Promise<{ hits: T[] }> => {
   if (idValues.length === 0) return { hits: [] };
 
@@ -413,14 +416,14 @@ export const runFindByIdsEsqlQuery = async <T>({
   if (where) {
     query = query.where`${where}`;
   }
-  query = query.sort(['@timestamp', 'ASC']);
+  query = query.sort(['@timestamp', keep === 'newest' ? 'DESC' : 'ASC']);
   if (limit !== undefined) {
     query = query.limit(limit);
   }
   query = query.keep('_source');
 
   const hits = await executeEsqlQuery<T>({ esClient, query });
-  return { hits };
+  return { hits: keep === 'newest' ? hits.reverse() : hits };
 };
 
 export type LatestSourceGroupBy = string | [string, string] | [string, string, string];

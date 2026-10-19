@@ -8,6 +8,7 @@
 import type { EsqlQueryRequest, FieldValue } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
+import { canCompileMatchMetric } from '../lib/significant_events/rules/can_compile_match_metric';
 import type { ProbeOutcome, ProbeStatus } from './classify_detection';
 
 export interface ProbeWindow {
@@ -30,15 +31,16 @@ export interface StoredQueryResult {
 const STARTS_WITH_FROM = /^\s*FROM\s/i;
 
 /**
- * A stored query can be re-run only when it is a bounded `FROM` query that takes both time
- * placeholders; anything else cannot be re-run over a fresh window.
+ * A stored query can be re-run only when it is a bounded, filter-only `FROM` query that takes both
+ * time placeholders. An aggregating query always returns a row, so "has rows" would say nothing.
  */
 export const isProbeableQuery = (query: string | undefined): query is string =>
   query !== undefined &&
   query.length <= MAX_TEXT_LENGTH &&
   STARTS_WITH_FROM.test(query) &&
   query.includes('?_tstart') &&
-  query.includes('?_tend');
+  query.includes('?_tend') &&
+  canCompileMatchMetric(query);
 
 // The ES client types `params` as positional values; named parameters (`?_tstart`) are accepted by
 // the API, the same known typing gap `toEsqlRequest` bridges for composed queries.
