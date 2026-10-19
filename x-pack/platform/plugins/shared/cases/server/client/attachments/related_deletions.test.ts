@@ -173,6 +173,7 @@ describe('getRelatedAttachmentsToDelete', () => {
             type: child.type,
             payload: relabelledChild.payload,
             requestedIds: [parent.id],
+            version: child.version,
           },
         ],
       });
@@ -210,6 +211,7 @@ describe('getRelatedAttachmentsToDelete', () => {
             type: child.type,
             payload: shrunkChild.payload,
             requestedIds: [parent.id],
+            version: child.version,
           },
         ],
       });
@@ -284,7 +286,13 @@ describe('getRelatedAttachmentsToDelete', () => {
       });
 
       expect(related.updates).toEqual([
-        { id: child.id, type: child.type, payload: shrunkChild.payload, requestedIds: [parent.id] },
+        {
+          id: child.id,
+          type: child.type,
+          payload: shrunkChild.payload,
+          requestedIds: [parent.id],
+          version: child.version,
+        },
       ]);
       expect(related.updates[0].payload.owner).toBe(child.attributes.owner);
     });
@@ -316,7 +324,13 @@ describe('getRelatedAttachmentsToDelete', () => {
       expect(onDelete).toHaveBeenCalledTimes(1);
       expect(otherOnDelete).toHaveBeenCalledTimes(1);
       expect(related.updates).toEqual([
-        { id: child.id, type: child.type, payload: lastPayload, requestedIds: [unrelated.id] },
+        {
+          id: child.id,
+          type: child.type,
+          payload: lastPayload,
+          requestedIds: [unrelated.id],
+          version: child.version,
+        },
       ]);
     });
   });

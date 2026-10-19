@@ -73,6 +73,8 @@ describe('useRemovableAlertAttachments', () => {
         ids: ['attack-1', 'attack-2'],
         perPage: 2,
         includeAllAuthors: true,
+        // A failed lookup must settle at once rather than keep the prompt loading while retrying.
+        retry: false,
       })
     );
   });

@@ -37,6 +37,8 @@ interface Props {
   page?: number;
   perPage?: number;
   refetchOnWindowFocus?: boolean;
+  /** Overrides the query client's retry policy; a failed request is retried by default. */
+  retry?: boolean;
   shared?: boolean;
   start?: string;
   status?: string[];
@@ -80,6 +82,7 @@ export const useFindAttackDiscoveries = ({
   page = DEFAULT_PAGE,
   perPage = DEFAULT_PER_PAGE,
   refetchOnWindowFocus = false,
+  retry,
   shared,
   start,
   status,
@@ -192,6 +195,7 @@ export const useFindAttackDiscoveries = ({
     queryFn,
     {
       enabled: isAssistantEnabled,
+      ...(retry != null ? { retry } : {}),
       getNextPageParam,
       // Transform the API response's data items into UI-friendly alerts
       select: (response: AttackDiscoveryFindResponse): AttackDiscoveryFindInternalResponse => {

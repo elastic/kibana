@@ -86,9 +86,16 @@ const toAttackReferences = (targets: readonly AttachmentDeleteTarget[]): AttackR
       : [];
   });
 
+const isUnauthorizedRead = (error: unknown): boolean => {
+  const candidate = error as { statusCode?: number; body?: { error?: { type?: string } } };
+
+  return candidate?.statusCode === 403 || candidate?.body?.error?.type === 'security_exception';
+};
+
 /**
  * Reads each attack's current, de-anonymised alert ids as the requesting user. Attacks the user
- * cannot read, or that no longer exist, are absent from the result.
+ * cannot read, or that no longer exist, are absent from the result. Any other read failure is
+ * thrown, failing the deletion rather than silently keeping the attack's alerts.
  */
 const getAlertIdsByAttackId = async ({
   esClient,
@@ -116,19 +123,24 @@ const getAlertIdsByAttackId = async ({
       });
 
       for (const { _id: id, _source: source } of hits.hits) {
-        if (id != null && source != null) {
+        const storedAlertIds = source?.[ALERT_ATTACK_DISCOVERY_ALERT_IDS];
+
+        // Without its alert ids an attack cannot be told apart from one claiming no alerts, which
+        // would free the alerts it shares; it is left unresolved instead.
+        if (id != null && source != null && Array.isArray(storedAlertIds)) {
           const replacementsSource = source[ALERT_ATTACK_DISCOVERY_REPLACEMENTS];
           const replacements = Array.isArray(replacementsSource)
             ? transformInternalReplacements(replacementsSource)
             : undefined;
-          const alertIds = getOriginalAlertIds({
-            alertIds: source[ALERT_ATTACK_DISCOVERY_ALERT_IDS] ?? [],
-            replacements,
-          });
+          const alertIds = getOriginalAlertIds({ alertIds: storedAlertIds, replacements });
           alertIdsByAttackId.set(id, [...new Set(alertIds)]);
         }
       }
     } catch (error) {
+      if (!isUnauthorizedRead(error)) {
+        throw error;
+      }
+
       // An unreadable attack leaves its alerts on the case rather than blocking the deletion.
       logger.debug(`Unable to read attacks in ${index} to resolve their alerts: ${error}`);
     }

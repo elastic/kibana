@@ -31,6 +31,8 @@ export interface RelatedAttachmentUpdate extends RelatedAttachmentRef {
    * so the update is only safe to apply once every one of them is gone.
    */
   requestedIds: string[];
+  /** The version of the copy the hook read, so the write fails rather than overwrite a newer one. */
+  version?: string;
 }
 
 export interface RelatedAttachments {
@@ -121,7 +123,7 @@ export const getRelatedAttachmentsToDelete = async ({
     .filter(({ id }) => relatedIds.has(id))
     .map(({ id, type }) => ({ id, type: type as AttachmentSavedObjectType }));
 
-  const updates = remainingAttachments.flatMap(({ id, type, attributes }) => {
+  const updates = remainingAttachments.flatMap(({ id, type, attributes, version }) => {
     const entry = updatesById.get(id);
 
     // Deleting the attachment makes shrinking it pointless, and a hook may not use an update to
@@ -136,6 +138,7 @@ export const getRelatedAttachmentsToDelete = async ({
             type: type as AttachmentSavedObjectType,
             payload: { ...entry.update.payload, owner: attributes.owner },
             requestedIds: entry.requestedIds,
+            version,
           },
         ]
       : [];

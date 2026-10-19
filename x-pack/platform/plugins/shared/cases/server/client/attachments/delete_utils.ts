@@ -216,6 +216,7 @@ export const deleteCaseAttachments = async (
   // still recorded before throwing, since a retry fails the not found check on those ids.
   const notDeletedIds = savedObjectIds.filter((id) => !deletedIds.has(id));
   const failedUpdateIds: string[] = [];
+  let updateError: unknown;
 
   if (deletedIds.size > 0) {
     // A file is kept while any attachment that was not deleted still references it.
@@ -231,12 +232,17 @@ export const deleteCaseAttachments = async (
       requestedIds.every((id) => deletedIds.has(id))
     );
 
-    failedUpdateIds.push(
-      ...(await applyAttachmentUpdates(
-        { caseId, updates: appliableUpdates, targets: updateTargets },
-        clientArgs
-      ))
-    );
+    // The deletions are already in the index, so they are recorded whatever the updates do.
+    try {
+      failedUpdateIds.push(
+        ...(await applyAttachmentUpdates(
+          { caseId, updates: appliableUpdates, targets: updateTargets },
+          clientArgs
+        ))
+      );
+    } catch (error) {
+      updateError = error;
+    }
 
     await recordDeletion(
       {
@@ -254,6 +260,10 @@ export const deleteCaseAttachments = async (
         notDeletedIds.length === 1 ? 'attachment' : 'attachments'
       } ${notDeletedIds.join(', ')} on case ${caseId}.`
     );
+  }
+
+  if (updateError != null) {
+    throw updateError;
   }
 
   if (failedUpdateIds.length > 0) {
@@ -355,11 +365,11 @@ const applyAttachmentUpdates = async (
 
   // An attachment whose stored fields do not decode cannot be shrunk: without the payload the
   // update replaces there is no way to tell what it is losing.
-  const appliableUpdates = updates.flatMap(({ id, type, payload }) => {
+  const appliableUpdates = updates.flatMap(({ id, type, payload, version }) => {
     const target = targetsById.get(id);
     const [decoded] = target != null ? toDecodedAttachment(target, logger) : [];
 
-    return decoded == null ? [] : [{ id, type, payload, stored: decoded }];
+    return decoded == null ? [] : [{ id, type, payload, stored: decoded, version }];
   });
 
   if (appliableUpdates.length === 0) {
@@ -374,10 +384,10 @@ const applyAttachmentUpdates = async (
   const writtenUpdates = [];
   const failedIds: string[] = [];
 
-  for (const { id, type, payload, stored } of appliableUpdates) {
+  for (const { id, type, payload, stored, version } of appliableUpdates) {
     try {
       const written = await writeAttachmentUpdate(
-        { id, type, payload, stored, updatedAt },
+        { id, type, payload, stored, version, updatedAt },
         clientArgs
       );
 
@@ -462,6 +472,8 @@ interface WriteAttachmentUpdateArgs {
   type: AttachmentSavedObjectType;
   payload: RelatedAttachmentUpdate['payload'];
   stored: DecodedAttachment;
+  /** The version the hook computed the payload from, which may predate `stored`. */
+  version?: string;
   updatedAt: string;
 }
 
@@ -483,7 +495,7 @@ interface WriteAttachmentUpdateArgs {
  * then deleted rather than written back holding no alerts.
  */
 const writeAttachmentUpdate = async (
-  { id, type, payload, stored, updatedAt }: WriteAttachmentUpdateArgs,
+  { id, type, payload, stored, version, updatedAt }: WriteAttachmentUpdateArgs,
   clientArgs: CasesClientArgs
 ): Promise<
   | { payload: RelatedAttachmentUpdate['payload']; stored: DecodedAttachment; deleted: boolean }
@@ -497,6 +509,8 @@ const writeAttachmentUpdate = async (
 
   let current = stored;
   let currentPayload = payload;
+  // The hook read the case before `stored` was read, so a change in between must still conflict.
+  let currentVersion = version ?? stored.version;
 
   for (let attempt = 1; attempt <= MAX_UPDATE_ATTEMPTS; attempt++) {
     try {
@@ -505,7 +519,7 @@ const writeAttachmentUpdate = async (
       await attachmentService.update({
         savedObjectId: id,
         updatedAttributes: { ...currentPayload, updated_at: updatedAt, updated_by: user },
-        options: { references: current.references, refresh: true, version: current.version },
+        options: { references: current.references, refresh: true, version: currentVersion },
       });
 
       return { payload: currentPayload, stored: current, deleted: false };
@@ -537,6 +551,7 @@ const writeAttachmentUpdate = async (
         current: fresh.requestAttributes,
       });
       current = fresh;
+      currentVersion = fresh.version;
 
       if (
         'attachmentId' in currentPayload &&

@@ -80,6 +80,9 @@ export const useRemovableAlertAttachments = ({
     perPage: Math.max(caseAttackIds.length, 1),
     // The hook has no separate `enabled` flag; this doubles as one.
     isAssistantEnabled,
+    // Retrying keeps the prompt loading, with Remove disabled, for several seconds before it can
+    // say the alerts could not be determined.
+    retry: false,
   });
 
   // Absent for any attack the query did not return — deleted, aged into a frozen tier, or outside

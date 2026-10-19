@@ -243,13 +243,50 @@ describe('getAttackOnDelete', () => {
   });
 
   it('keeps every alert attachment when the attacks cannot be read', async () => {
-    esClient.search.mockRejectedValue(new Error('security_exception'));
+    esClient.search.mockRejectedValue(
+      Object.assign(new Error('security_exception'), {
+        statusCode: 403,
+        body: { error: { type: 'security_exception' } },
+      })
+    );
 
     const result = await runOnDelete({
       caseId: 'case-1',
       request,
       attachments: [attackTarget('attack-att-1', 'attack-1')],
       remainingAttachments: [alertTarget('alert-att-1', ['alert-1'])],
+    });
+
+    expect(result).toEqual({ relatedAttachmentIds: [], relatedAttachmentUpdates: [] });
+  });
+
+  it('fails the deletion when the attacks cannot be read for any other reason', async () => {
+    esClient.search.mockRejectedValue(Object.assign(new Error('timeout'), { statusCode: 504 }));
+
+    await expect(
+      runOnDelete({
+        caseId: 'case-1',
+        request,
+        attachments: [attackTarget('attack-att-1', 'attack-1')],
+        remainingAttachments: [alertTarget('alert-att-1', ['alert-1'])],
+      })
+    ).rejects.toThrow('timeout');
+  });
+
+  it('keeps a shared alert when the other attack has no stored alert ids', async () => {
+    mockAttacks([
+      attackHit('attack-1', ['alert-1']),
+      { _id: 'attack-2', _index: ATTACK_INDEX, _source: {} } as ReturnType<typeof attackHit>,
+    ]);
+
+    const result = await runOnDelete({
+      caseId: 'case-1',
+      request,
+      attachments: [attackTarget('attack-att-1', 'attack-1')],
+      remainingAttachments: [
+        attackTarget('attack-att-2', 'attack-2'),
+        alertTarget('alert-att-1', ['alert-1']),
+      ],
     });
 
     expect(result).toEqual({ relatedAttachmentIds: [], relatedAttachmentUpdates: [] });

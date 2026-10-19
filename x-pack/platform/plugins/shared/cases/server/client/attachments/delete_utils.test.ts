@@ -771,8 +771,13 @@ describe('deleteCaseAttachments', () => {
         },
       };
 
-      const toStoredAttachment = ({ id, attributes }: AttachmentForDeletion) =>
-        ({ ...relatedAlert, id, attributes } as unknown as typeof relatedAlert);
+      const toStoredAttachment = ({ id, attributes, version }: AttachmentForDeletion) =>
+        ({
+          ...relatedAlert,
+          id,
+          attributes,
+          version: version ?? relatedAlert.version,
+        } as unknown as typeof relatedAlert);
 
       const mockCaseAttachments = (...shrinkTargets: AttachmentForDeletion[]) => {
         argsWithHook.services.caseService.getAllCaseComments.mockResolvedValue({
@@ -780,8 +785,13 @@ describe('deleteCaseAttachments', () => {
             relatedComment,
             relatedAlert,
             unrelatedAttachment,
-            toStoredAttachment(sharedAlerts),
-            toStoredAttachment(otherAlerts),
+            // The case is read with the same version the shrink target is read with.
+            ...[sharedAlerts, otherAlerts].map((stored) =>
+              toStoredAttachment({
+                ...stored,
+                version: shrinkTargets.find(({ id }) => id === stored.id)?.version,
+              })
+            ),
           ].map((so) => ({ ...so, score: 0 })),
           total: 5,
           per_page: 100,
@@ -816,7 +826,11 @@ describe('deleteCaseAttachments', () => {
             updated_at: expect.any(String),
             updated_by: argsWithHook.user,
           },
-          options: { references: sharedAlerts.references, refresh: true },
+          options: {
+            references: sharedAlerts.references,
+            refresh: true,
+            version: relatedAlert.version,
+          },
         });
       });
 
@@ -1012,7 +1026,11 @@ describe('deleteCaseAttachments', () => {
               updated_at: expect.any(String),
               updated_by: argsWithHook.user,
             },
-            options: { references: sharedAlerts.references, refresh: true },
+            options: {
+              references: sharedAlerts.references,
+              refresh: true,
+              version: relatedAlert.version,
+            },
           });
         });
 
@@ -1185,6 +1203,34 @@ describe('deleteCaseAttachments', () => {
           expect(argsWithHook.services.attachmentService.update).toHaveBeenCalledWith(
             expect.objectContaining({
               options: expect.objectContaining({ version: 'WzEsMV0=' }),
+            })
+          );
+        });
+
+        it('guards the write with the version the hook read, even when the attachment changed since', async () => {
+          // The hook read version 1; another removal wrote version 2 before the attachment was
+          // read again for the update. The write must conflict rather than restore alert-1.
+          argsWithHook.services.caseService.getAllCaseComments.mockResolvedValue({
+            saved_objects: [{ ...toStoredAttachment(versioned), score: 0 }],
+            total: 1,
+            per_page: 100,
+            page: 1,
+          });
+          argsWithHook.services.attachmentService.getter.bulkGetForDeletionByType.mockImplementation(
+            async (refs) =>
+              [afterConcurrentRemoval].filter(({ id }) => refs.some((ref) => ref.id === id))
+          );
+          argsWithHook.services.attachmentService.update.mockRejectedValueOnce(conflict());
+
+          await deleteWithRelated([attackAttachment]);
+
+          const [first, retry] = argsWithHook.services.attachmentService.update.mock.calls;
+
+          expect(first[0].options).toEqual(expect.objectContaining({ version: 'WzEsMV0=' }));
+          expect(retry[0]).toEqual(
+            expect.objectContaining({
+              updatedAttributes: expect.objectContaining({ attachmentId: ['alert-2'] }),
+              options: expect.objectContaining({ version: 'WzIsMV0=' }),
             })
           );
         });
@@ -1444,6 +1490,23 @@ describe('deleteCaseAttachments', () => {
               { id: 'alert-3', index: 'index-3' },
             ],
           });
+        });
+
+        it('records the deletion before surfacing a failure after the shrink was written', async () => {
+          argsWithHook.services.userActionService.creator.createUserAction.mockRejectedValue(
+            new Error('user action failed')
+          );
+
+          await expect(deleteWithRelated([attackAttachment])).rejects.toThrow('user action failed');
+
+          expect(
+            argsWithHook.services.userActionService.creator.bulkCreateAttachmentDeletion
+          ).toHaveBeenCalledWith(
+            expect.objectContaining({
+              attachments: [expect.objectContaining({ id: 'attack-attachment-1' })],
+            })
+          );
+          expect(argsWithHook.services.caseService.patchCase).toHaveBeenCalled();
         });
 
         it('records the deletion before surfacing a write failure that is not a conflict', async () => {
