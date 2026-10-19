@@ -142,7 +142,6 @@ export function toAction({
 }): AlertActionDocument {
   return {
     group_hash: alert.group_hash,
-    alert_id: alert.alert_id,
     last_series_event_timestamp: alert.last_event_timestamp,
     actor: { type: alertActionActorType.internal },
     action_type: actionType,
