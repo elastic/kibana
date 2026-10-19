@@ -564,7 +564,7 @@ src/platform/packages/shared/kbn-coloring @elastic/kibana-dashboards
 src/platform/packages/shared/kbn-config @elastic/kibana-core
 src/platform/packages/shared/kbn-config-schema @elastic/kibana-core
 src/platform/packages/shared/kbn-connector-cli @elastic/workchat-eng
-src/platform/packages/shared/kbn-connector-contract-mock @elastic/nightshift-context-and-research-team
+src/platform/packages/shared/kbn-connector-contract-mock @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-schemas @elastic/response-ops
 src/platform/packages/shared/kbn-connector-specs @elastic/response-ops
 src/platform/packages/shared/kbn-content-management-utils @elastic/kibana-discover
@@ -3558,6 +3558,7 @@ x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/to
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_security_persona_matrix @elastic/security-generative-ai
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_attack_discovery_agent_builder @elastic/security-generative-ai
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_nightshift_investigations @elastic/nightshift
+/src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/nightshift_investigations @elastic/nightshift
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/discover_telemetry @elastic/observability-ui
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/cloud_trial @elastic/appex-sharedux
 # /security_solution/common/endpoint/ and /security_solution/server/endpoint/ children overrides
@@ -3818,12 +3819,6 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /.github/workflows/deploy-my-kibana.yml   @elastic/observablt-robots @elastic/kibana-operations
 /.github/workflows/undeploy-my-kibana.yml @elastic/observablt-robots @elastic/kibana-operations
 
-# Appex QA to own auto-generated scout metadata
-/**/scout/.meta/**
-/**/scout/*/.meta/**
-/**/scout_*/.meta/**
-/**/scout_*/*/.meta/**
-
 # Macroscope Check Run Agents
 /.macroscope/backport-review.md @elastic/appex-qa
 /.macroscope/flaky-test-runner-nudge.md @elastic/appex-qa
@@ -3950,6 +3945,12 @@ pnpm-workspace.yaml @elastic/kibana-operations
 .pnpmfile.cjs @elastic/kibana-operations
 
 /knip.jsonc @elastic/kibana-security
+
+# Auto-generated Scout test metadata has no owner so the automated update PRs are auto-approved.
+/**/scout/.meta/**
+/**/scout/*/.meta/**
+/**/scout_*/.meta/**
+/**/scout_*/*/.meta/**
 
 ####
 ## These rules are always last so they take ultimate priority over everything else
