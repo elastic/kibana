@@ -649,7 +649,7 @@ export function buildComponentTemplates(params: {
   return templatesMap;
 }
 
-export async function installDataStreamComponentTemplates({
+async function installDataStreamComponentTemplates({
   esClient,
   logger,
   componentTemplates,

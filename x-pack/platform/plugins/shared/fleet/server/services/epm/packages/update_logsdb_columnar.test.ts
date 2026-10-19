@@ -72,13 +72,13 @@ const packageInfo = (dataStreamReadiness?: string, packageReadiness = 'opt_in') 
   ],
 });
 
-const nestedCausedByError = () => {
+const nestedCausedByError = (templateName = DATA_STREAM) => {
   const esError: any = new Error('illegal_argument_exception');
   esError.statusCode = 400;
   esError.body = {
     error: {
       type: 'illegal_argument_exception',
-      reason: `composable template [${DATA_STREAM}] template after composition with component templates [${COMPONENT_TEMPLATE}] is invalid`,
+      reason: `composable template [${templateName}] template after composition with component templates [${COMPONENT_TEMPLATE}] is invalid`,
       caused_by: {
         type: 'illegal_argument_exception',
         reason: `invalid composite mappings for [${DATA_STREAM}]`,
@@ -528,6 +528,56 @@ describe('applyLogsdbColumnarIndexMode', () => {
     });
 
     expect(writes).not.toContain(`index:${NAMESPACE_TEMPLATE}`);
+  });
+
+  it('names a rejected namespace-scoped template and puts the data stream back', async () => {
+    mockInstalledPackage(packageInfo());
+    mockIndexTemplates({ [DATA_STREAM]: {}, [NAMESPACE_TEMPLATE]: {} });
+    esClient.indices.putIndexTemplate.mockImplementation(async (params: any) => {
+      if (params.name === NAMESPACE_TEMPLATE && params.template.settings.index.mode) {
+        throw nestedCausedByError(NAMESPACE_TEMPLATE);
+      }
+      return { acknowledged: true } as any;
+    });
+
+    await expect(
+      applyLogsdbColumnarIndexMode({
+        esClient,
+        savedObjectsClient,
+        logger,
+        pkgName: PKG_NAME,
+        enabled: true,
+      })
+    ).rejects.toThrow(
+      `Elasticsearch rejected the logsdb_columnar index template for ${NAMESPACE_TEMPLATE}:`
+    );
+
+    expect(lastIndexTemplateWrite(DATA_STREAM).template.settings.index).toEqual({});
+    expect(templateModule.updateCurrentWriteIndices).not.toHaveBeenCalled();
+  });
+
+  it('puts the index template of a rejected data stream back too', async () => {
+    mockInstalledPackage(packageInfo());
+    mockIndexTemplates({ [DATA_STREAM]: { mode: 'logsdb_columnar' } });
+    trackWrites();
+    // Removing the mode writes the index template first, so a component template rejected after
+    // it leaves the data stream half switched unless the index template is put back as well.
+    esClient.cluster.putComponentTemplate.mockRejectedValueOnce(new Error('rejected'));
+
+    await expect(
+      applyLogsdbColumnarIndexMode({
+        esClient,
+        savedObjectsClient,
+        logger,
+        pkgName: PKG_NAME,
+        enabled: false,
+      })
+    ).rejects.toThrow('rejected');
+
+    expect(lastIndexTemplateWrite(DATA_STREAM).template.settings.index).toEqual({
+      mode: 'logsdb_columnar',
+    });
+    expect(templateModule.updateCurrentWriteIndices).not.toHaveBeenCalled();
   });
 
   it('rejects enabling when no logs data stream is columnar ready', async () => {
