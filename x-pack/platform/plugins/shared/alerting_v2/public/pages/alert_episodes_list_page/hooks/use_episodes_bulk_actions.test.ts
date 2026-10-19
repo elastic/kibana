@@ -34,7 +34,12 @@ describe('useEpisodesBulkActions', () => {
       useEpisodesBulkActions({ actions: [action], episodesData: [], onSuccess: jest.fn() })
     );
     expect(result.current).toEqual([
-      expect.objectContaining({ key: 'STUB', label: 'Stub', icon: 'star' }),
+      expect.objectContaining({
+        key: 'STUB',
+        'data-test-subj': 'episodesBulkAction-STUB',
+        label: 'Stub',
+        icon: 'star',
+      }),
     ]);
   });
 

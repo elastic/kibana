@@ -1,5 +1,5 @@
 {
-  "sha1": "189c8b0c35cdca7f740baa6a5de33742c6e63a50",
+  "sha1": "20d5747c1b0c5a42d0e9cef6c00d4fad019a190a",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -557,8 +557,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_search_bar.spec.ts",
-        "line": 41,
-        "column": 59
+        "line": 46,
+        "column": 15
       }
     },
     {
@@ -570,8 +570,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_search_bar.spec.ts",
-        "line": 75,
-        "column": 24
+        "line": 77,
+        "column": 15
       }
     },
     {
@@ -583,8 +583,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_search_bar.spec.ts",
-        "line": 120,
-        "column": 25
+        "line": 122,
+        "column": 22
       }
     },
     {
@@ -596,8 +596,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_search_bar.spec.ts",
-        "line": 150,
-        "column": 22
+        "line": 152,
+        "column": 20
       }
     },
     {
