@@ -8,7 +8,7 @@
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import type { AvailabilityConfig } from '@kbn/agent-builder-server/availability';
 import {
-  ACTION_POLICY_MANAGEMENT_SKILL_ID,
+  ACTION_POLICY_AUTHORING_SKILL_ID,
   ALERTING_TOOL_IDS,
   ALERTING_V2_ENABLED_SETTING_ID,
 } from '@kbn/alerting-v2-constants';
@@ -27,18 +27,17 @@ import {
   generateMultiRuleActionPolicyDoc,
 } from './schema_to_skill_docs';
 
-type ActionPolicyManagementSkillDeps = ManageActionPolicyToolDeps & {
+type ActionPolicyAuthoringSkillDeps = ManageActionPolicyToolDeps & {
   availability: AvailabilityConfig;
 };
 
-export const createActionPolicyManagementSkill = (deps: ActionPolicyManagementSkillDeps) =>
+export const createActionPolicyAuthoringSkill = (deps: ActionPolicyAuthoringSkillDeps) =>
   defineSkillType({
-    id: ACTION_POLICY_MANAGEMENT_SKILL_ID,
-    name: ACTION_POLICY_MANAGEMENT_SKILL_ID,
+    id: ACTION_POLICY_AUTHORING_SKILL_ID,
+    name: ACTION_POLICY_AUTHORING_SKILL_ID,
     basePath: 'skills/platform/alerting',
     description:
-      'Compose, discover, and modify Alerting V2 action policies within a conversation. Use when the user wants to set up, change, or inspect how alert notifications are matched, grouped, throttled, and dispatched to workflows ("notify me when this rule fires", "set up email notifications for my alert", "create a notification policy", "change my alert to page via PagerDuty", "list my action policies"). Covers workflow destinations, KQL matchers, grouping, and throttling. For composing or editing the underlying alert rules themselves, load the rule-management skill.',
-    experimental: true,
+      'Compose, discover, and modify universal alerting action policies within a conversation. Use when the user wants to set up, change, or inspect how alert notifications are matched, grouped, throttled, and dispatched to workflows ("notify me when this rule fires", "set up email notifications for my alert", "create a notification policy", "change my alert to page via PagerDuty", "list my action policies"). Covers workflow destinations, KQL matchers, grouping, and throttling. For composing or editing the underlying alert rules themselves, load the rule-authoring skill.',
     uiSettingRequired: ALERTING_V2_ENABLED_SETTING_ID,
     availability: deps.availability,
     referencedContent: [
@@ -94,10 +93,10 @@ Use this skill when:
 - A user asks to find, list, inspect, or modify action policies.
 - A user asks to create or configure a new action policy with workflow destinations, matchers, grouping, or throttling.
 - A user wants to set up notifications (email, Slack, PagerDuty, etc.) for an alert rule, or share one policy across several rules.
-- The \`rule-management\` skill has handed off after composing a complete alert rule and the user agreed to set up notifications.
+- The \`rule-authoring\` skill has handed off after composing a complete alert rule and the user agreed to set up notifications.
 
 Do **not** use this skill for:
-- Composing or editing alerting V2 rules themselves — load the \`rule-management\` skill for that.
+- Composing or editing universal alerting rules themselves — load the \`rule-authoring\` skill for that.
 - Classic (V1) Kibana stack rules or Security detection rules.
 - Action connector configuration (connectors are managed separately — load \`workflow-authoring\` for connector discovery).
 - Querying or analyzing data — use data exploration skills for that.

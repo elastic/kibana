@@ -8,10 +8,10 @@
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import type { AvailabilityConfig } from '@kbn/agent-builder-server/availability';
 import {
-  ACTION_POLICY_MANAGEMENT_SKILL_ID,
+  ACTION_POLICY_AUTHORING_SKILL_ID,
   ALERTING_TOOL_IDS,
   ALERTING_V2_ENABLED_SETTING_ID,
-  RULE_MANAGEMENT_SKILL_ID,
+  RULE_AUTHORING_SKILL_ID,
 } from '@kbn/alerting-v2-constants';
 import type { ManageRuleToolDeps } from '../tools/manage_rule';
 import { manageRuleTool } from '../tools/manage_rule';
@@ -25,16 +25,15 @@ import {
   generateNotificationsOverviewDoc,
 } from './schema_to_skill_docs';
 
-type RuleManagementSkillDeps = ManageRuleToolDeps & { availability: AvailabilityConfig };
+type RuleAuthoringSkillDeps = ManageRuleToolDeps & { availability: AvailabilityConfig };
 
-export const createRuleManagementSkill = (deps: RuleManagementSkillDeps) =>
+export const createRuleAuthoringSkill = (deps: RuleAuthoringSkillDeps) =>
   defineSkillType({
-    id: RULE_MANAGEMENT_SKILL_ID,
-    name: RULE_MANAGEMENT_SKILL_ID,
+    id: RULE_AUTHORING_SKILL_ID,
+    name: RULE_AUTHORING_SKILL_ID,
     basePath: 'skills/platform/alerting',
     description:
-      'Compose, discover, and modify alerting V2 rules within a conversation. Use when the user wants to be alerted about conditions in their data — metrics, logs, or any index ("create an alert rule that fires when...", "alert me when CPU goes above...", "set up alerting on my data"). Covers threshold, aggregation, and grouped conditions over any Elasticsearch index. For notification / action policy setup, load the action-policy-management skill. Not for Security/SIEM detection rules (threat detection, MITRE ATT&CK) — use the detection-rule-edit skill for those.',
-    experimental: true,
+      'Compose, discover, and modify universal alerting rules within a conversation. Use when the user wants to be alerted about conditions in their data — metrics, logs, or any index ("create an alert rule that fires when...", "alert me when CPU goes above...", "set up alerting on my data"). Covers threshold, aggregation, and grouped conditions over any Elasticsearch index. For notification / action policy setup, load the action-policy-authoring skill. Not for Security/SIEM detection rules (threat detection, MITRE ATT&CK) — use the detection-rule-edit skill for those.',
     uiSettingRequired: ALERTING_V2_ENABLED_SETTING_ID,
     availability: deps.availability,
     referencedContent: [
@@ -77,7 +76,7 @@ Use this skill when:
 - A user asks to change a rule's query, schedule, thresholds, or metadata.
 
 Do **not** use this skill for:
-- Creating, inspecting, or modifying action policies — load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill instead.
+- Creating, inspecting, or modifying action policies — load the \`${ACTION_POLICY_AUTHORING_SKILL_ID}\` skill instead.
 - Classic (V1) stack, Observability or Security detection rules.
 - Action connector configuration (connectors are managed separately).
 - Querying or analyzing data — use data exploration skills for that.
@@ -160,7 +159,7 @@ The ${
       ALERTING_TOOL_IDS.manageRule
     } tool only manages the **in-memory attachment** — it never writes to Elasticsearch.
 Always direct the user to the rendered attachment's action buttons for persistence:
-- **Create rule** — create a new V2 rule from the in-memory attachment.
+- **Create rule** — create a new universal alerting rule from the in-memory attachment.
 - **Update Rule** — push changes back to the origin rule (only for attached saved rules).
 - **View in Rules** — navigate to the rule detail page (only for attached saved rules).
 
@@ -182,7 +181,7 @@ After composing a complete **alert** rule (has name, query, schedule, and \`kind
 Do not offer notifications if the rule is still incomplete (missing name, query, or schedule).
 If the rule's kind is \`signal\`, follow **Notifications Require Alert Kind** in the [notifications-overview reference](./references/notifications-overview.md) before proceeding.
 
-If the user agrees, load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill via \`filestore.read\` (path: \`skills/platform/alerting/${ACTION_POLICY_MANAGEMENT_SKILL_ID}/SKILL.md\`). Do **not** compose action policies or notification workflows from this skill.
+If the user agrees, load the \`${ACTION_POLICY_AUTHORING_SKILL_ID}\` skill via \`filestore.read\` (path: \`skills/platform/alerting/${ACTION_POLICY_AUTHORING_SKILL_ID}/SKILL.md\`). Do **not** compose action policies or notification workflows from this skill.
 
 ---
 
