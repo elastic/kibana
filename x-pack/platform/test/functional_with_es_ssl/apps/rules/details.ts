@@ -52,6 +52,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       return await testSubjects.getVisibleText('ruleEnabledBadge');
     }
     await testSubjects.click('appHeaderBadgesOverflow');
+    // the overflow popover fades in, and getVisibleText() reads '' until it is displayed
+    await testSubjects.existOrFail('ruleEnabledBadge');
     const text = await testSubjects.getVisibleText('ruleEnabledBadge');
     await testSubjects.click('appHeaderBadgesOverflow');
     return text;

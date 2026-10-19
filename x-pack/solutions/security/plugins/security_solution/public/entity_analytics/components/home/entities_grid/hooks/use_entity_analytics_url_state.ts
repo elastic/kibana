@@ -57,7 +57,7 @@ export const MAX_EXPANDED_ENTITY_IDS = 20;
 // ── defaults ──────────────────────────────────────────────────────────────────
 
 const DEFAULTS = {
-  timeRange: '30d',
+  timeRange: '24h',
   rowsMode: 'resolved',
   sortField: RISK_SCORE_NORM_FIELD,
   sortDirection: 'desc',
@@ -119,7 +119,7 @@ export interface EntityAnalyticsUrlStateResult extends EntityAnalyticsUrlState {
   setEntityFilters: (filters: EntityFilters) => void;
   /** Pass null to clear. */
   setActiveTile: (tile: SignalCardId | null) => void;
-  /** Clears entity filters, active tile, and sort (foreign sorts can yield 0 rows). */
+  /** Clears entity filters, active tile, and sort (computed column sorts can yield 0 rows). */
   resetGridQuery: () => void;
   /** Toggles an entity id in `eaExpanded` without pushing history. */
   toggleExpandedId: (entityId: string) => void;
