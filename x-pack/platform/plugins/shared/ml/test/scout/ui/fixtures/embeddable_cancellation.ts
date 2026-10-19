@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import type { ApiServicesFixture, ScoutPage } from '@kbn/scout';
+import type { ApiServicesFixture, ScoutPage, ScoutWorkerFixtures } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
+
+type EsClient = ScoutWorkerFixtures['esClient'];
 
 type AnomalyJobConfig = Parameters<
   ApiServicesFixture['ml']['anomalyDetection']['createViaKibana']
@@ -98,6 +100,7 @@ export function viewBySwimlaneJobConfig(jobId: string): AnomalyJobConfig {
 
 export async function createOpenedAnomalyJob(
   apiServices: ApiServicesFixture,
+  esClient: EsClient,
   job: AnomalyJobConfig,
   spaceId: string
 ): Promise<void> {
@@ -105,17 +108,25 @@ export async function createOpenedAnomalyJob(
   if (!jobId) {
     throw new Error('job_id is required');
   }
+  await deleteAnomalyJob(esClient, jobId);
   await apiServices.ml.anomalyDetection.createViaKibana(job, spaceId);
   await apiServices.ml.anomalyDetection.openJob(jobId);
   await apiServices.ml.anomalyDetection.waitForJobState(jobId, 'opened');
 }
 
-export async function deleteAnomalyJob(
-  apiServices: ApiServicesFixture,
-  jobId: string
-): Promise<void> {
-  await apiServices.ml.anomalyDetection.closeJob(jobId).catch(() => undefined);
-  await apiServices.ml.anomalyDetection.delete({ jobIds: [jobId] });
+/** Force-deletes a leftover job. The Kibana delete API gives up after 5 seconds. */
+export async function deleteAnomalyJob(esClient: EsClient, jobId: string): Promise<void> {
+  const datafeedId = `datafeed-${jobId}`;
+  await esClient.ml.closeJob({ job_id: jobId }).catch(() => undefined);
+  await esClient.ml.stopDatafeed({ datafeed_id: datafeedId, force: true }).catch(() => undefined);
+  await esClient.ml.deleteDatafeed({ datafeed_id: datafeedId, force: true }).catch(() => undefined);
+  await esClient.ml
+    .deleteJob({ job_id: jobId, force: true, wait_for_completion: true })
+    .catch((error: { statusCode?: number }) => {
+      if (error.statusCode !== 404) {
+        throw error;
+      }
+    });
 }
 
 /**

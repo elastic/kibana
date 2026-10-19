@@ -28,9 +28,14 @@ spaceTest.describe(
     let dashboardId: string;
     let jobId: string | undefined;
 
-    spaceTest.beforeAll(async ({ apiServices, scoutSpace }) => {
+    spaceTest.beforeAll(async ({ apiServices, esClient, scoutSpace }) => {
       jobId = cancellationJobId(scoutSpace.id, 'smv');
-      await createOpenedAnomalyJob(apiServices, singleMetricJobConfig(jobId), scoutSpace.id);
+      await createOpenedAnomalyJob(
+        apiServices,
+        esClient,
+        singleMetricJobConfig(jobId),
+        scoutSpace.id
+      );
 
       dashboardId = await apiServices.dashboard.create(
         {
@@ -56,9 +61,9 @@ spaceTest.describe(
       await holdPendingRequests(page, [ANOMALY_SEARCH_ENDPOINT, '/internal/ml/es_search']);
     });
 
-    spaceTest.afterAll(async ({ apiServices }) => {
+    spaceTest.afterAll(async ({ esClient }) => {
       if (jobId) {
-        await deleteAnomalyJob(apiServices, jobId);
+        await deleteAnomalyJob(esClient, jobId);
       }
     });
 

@@ -12,12 +12,13 @@ import {
   deleteAnomalyJob,
   expectHttpRequestAbortedOnCancel,
   expectHttpRequestAbortedOnNavigate,
-  STALLING_FILTER,
+  holdPendingRequests,
   TIME_RANGE,
   viewBySwimlaneJobConfig,
 } from '../fixtures/embeddable_cancellation';
 
-// View-by applies the dashboard filter. The overall buckets request does not.
+// The view-by search returns as soon as Elasticsearch answers, so the browser
+// request is held until the panel aborts it.
 const VIEW_BY_ENDPOINT = '/internal/ml/results/view_by/influencer_values_by_time';
 
 spaceTest.describe(
@@ -27,9 +28,14 @@ spaceTest.describe(
     let dashboardId: string;
     let jobId: string | undefined;
 
-    spaceTest.beforeAll(async ({ apiServices, scoutSpace }) => {
+    spaceTest.beforeAll(async ({ apiServices, esClient, scoutSpace }) => {
       jobId = cancellationJobId(scoutSpace.id, 'swim');
-      await createOpenedAnomalyJob(apiServices, viewBySwimlaneJobConfig(jobId), scoutSpace.id);
+      await createOpenedAnomalyJob(
+        apiServices,
+        esClient,
+        viewBySwimlaneJobConfig(jobId),
+        scoutSpace.id
+      );
 
       dashboardId = await apiServices.dashboard.create(
         {
@@ -46,19 +52,19 @@ spaceTest.describe(
               },
             },
           ],
-          filters: [STALLING_FILTER],
         },
         scoutSpace.id
       );
     });
 
-    spaceTest.beforeEach(async ({ browserAuth }) => {
+    spaceTest.beforeEach(async ({ browserAuth, page }) => {
       await browserAuth.loginAsAdmin();
+      await holdPendingRequests(page, [VIEW_BY_ENDPOINT]);
     });
 
-    spaceTest.afterAll(async ({ apiServices }) => {
+    spaceTest.afterAll(async ({ esClient }) => {
       if (jobId) {
-        await deleteAnomalyJob(apiServices, jobId);
+        await deleteAnomalyJob(esClient, jobId);
       }
     });
 
