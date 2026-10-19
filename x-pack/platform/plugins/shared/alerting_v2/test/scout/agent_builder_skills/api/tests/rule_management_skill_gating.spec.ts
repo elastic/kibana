@@ -161,9 +161,12 @@ apiTest.describe('Agent Builder — alerting V2 skill gating', () => {
     }
   );
 
+  // Toggling `alerting:v2:enabled` on requires the Alerting V2 plugin, which only
+  // ships enabled on stateful; on serverless the plugin is disabled.
+  // Constantly fails on ECH: https://github.com/elastic/kibana/issues/283926
   apiTest(
     'does not list either Alerting V2 skill when its experimental gate is disabled',
-    { tag: tags.stateful.classic },
+    { tag: getPlaywrightTagsFor('stateful', 'classic', 'local') },
     async ({ apiClient, kbnClient, requestAuth }) => {
       await kbnClient.uiSettings.update({
         [AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID]: true,
