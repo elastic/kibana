@@ -14,8 +14,8 @@ jest.mock('@kbn/fleet-plugin/public', () => ({
   getPackagePolicyUnitSummary: jest.fn(),
   sendGetAgentIncomingData: jest.fn(),
   useBulkGetAgentPoliciesQuery: jest.fn(),
-  useGetAgentsQuery: jest.fn(),
 }));
+jest.mock('./use_policy_agents', () => ({ usePolicyAgents: jest.fn() }));
 
 import { useQuery } from '@kbn/react-query';
 import {
@@ -23,12 +23,12 @@ import {
   getPackagePolicyUnitSummary,
   sendGetAgentIncomingData,
   useBulkGetAgentPoliciesQuery,
-  useGetAgentsQuery,
 } from '@kbn/fleet-plugin/public';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { NOT_RUNNING_GRACE_MS, OTEL_NOT_RUNNING_GRACE_MS } from './agent_detection';
 import { useAgentDetection } from './use_agent_detection';
+import { usePolicyAgents } from './use_policy_agents';
 
 const mockUseQuery = useQuery as jest.Mock;
 const mockUseOnboardingFlow = useOnboardingFlow as jest.Mock;
@@ -36,7 +36,7 @@ const mockGetComponentAlertLevel = getComponentAlertLevel as jest.Mock;
 const mockGetUnitSummary = getPackagePolicyUnitSummary as jest.Mock;
 const mockSendIncomingData = sendGetAgentIncomingData as jest.Mock;
 const mockUseBulkPolicies = useBulkGetAgentPoliciesQuery as jest.Mock;
-const mockUseGetAgents = useGetAgentsQuery as jest.Mock;
+const mockUsePolicyAgents = usePolicyAgents as jest.Mock;
 
 const entry = (id: string, overrides: Record<string, unknown> = {}) =>
   ({ id, packageName: 'aws', ...overrides } as unknown as AwsServiceMatrixEntry);
@@ -98,13 +98,12 @@ function setup({
     agentBasedDeployment,
   });
   mockUseBulkPolicies.mockReturnValue({ data: { items: agentPolicies } });
-  const agentsResponse = { data: { items: agents } };
-  mockUseGetAgents.mockReturnValue({ data: agentsResponse, dataUpdatedAt });
+  mockUsePolicyAgents.mockReturnValue({ agents, dataUpdatedAt, isTruncated: false });
   mockUseQuery.mockReturnValue({ data: incomingData });
   const hook = renderHook(() => useAgentDetection({ instances, shouldPoll }));
   /** Simulates the next poll finishing `ms` after the first one, with the same agents. */
   const pollAfter = (ms: number) => {
-    mockUseGetAgents.mockReturnValue({ data: agentsResponse, dataUpdatedAt: T0 + ms });
+    mockUsePolicyAgents.mockReturnValue({ agents, dataUpdatedAt: T0 + ms, isTruncated: false });
     hook.rerender();
   };
   return { ...hook, pollAfter };
@@ -126,7 +125,7 @@ describe('useAgentDetection', () => {
         [],
         expect.objectContaining({ enabled: false })
       );
-      expect(mockUseGetAgents.mock.calls[0][1]).toMatchObject({ enabled: false });
+      expect(mockUsePolicyAgents).toHaveBeenCalledWith({ policyIds: [], shouldPoll: true });
       expect(mockUseQuery.mock.calls[0][0].enabled).toBe(false);
     });
 
@@ -137,8 +136,10 @@ describe('useAgentDetection', () => {
         ['policy-s3'],
         expect.objectContaining({ full: true, enabled: true })
       );
-      expect(mockUseGetAgents.mock.calls[0][0].kuery).toContain('policy-s3');
-      expect(mockUseGetAgents.mock.calls[0][0].kuery).toContain('fleet-agents.policy_base_id');
+      expect(mockUsePolicyAgents).toHaveBeenCalledWith({
+        policyIds: ['policy-s3'],
+        shouldPoll: true,
+      });
     });
 
     it('resolves agent-based instances through the agent policy, not the package policy id', () => {
@@ -151,7 +152,7 @@ describe('useAgentDetection', () => {
       });
 
       expect(mockUseBulkPolicies.mock.calls[0][0]).toEqual(['agent-policy-1']);
-      expect(mockUseGetAgents.mock.calls[0][0].kuery).not.toContain('package-policy-s3');
+      expect(mockUsePolicyAgents.mock.calls[0][0].policyIds).toEqual(['agent-policy-1']);
     });
 
     it('resolves agent-based instances through every selected existing policy', () => {
@@ -267,6 +268,7 @@ describe('useAgentDetection', () => {
       });
     const policyNeeding94 = agentPolicy('policy-s3', [packagePolicy('policy-s3')], {
       revision: 3,
+      supports_agentless: true,
       min_agent_version: '9.4.0',
       package_agent_version_conditions: [
         { name: 'aws', title: 'AWS', version_condition: '>=9.4.0' },
@@ -535,14 +537,14 @@ describe('useAgentDetection', () => {
     it('polls agents and data every 10s while services are settling', () => {
       setup({ shouldPoll: true });
 
-      expect(mockUseGetAgents.mock.calls[0][1].refetchInterval).toBe(10_000);
+      expect(mockUsePolicyAgents.mock.calls[0][0].shouldPoll).toBe(true);
       expect(mockUseQuery.mock.calls[0][0].refetchInterval).toBe(10_000);
     });
 
     it('stops polling once everything has settled', () => {
       setup({ shouldPoll: false });
 
-      expect(mockUseGetAgents.mock.calls[0][1].refetchInterval).toBe(false);
+      expect(mockUsePolicyAgents.mock.calls[0][0].shouldPoll).toBe(false);
       expect(mockUseQuery.mock.calls[0][0].refetchInterval).toBe(false);
     });
   });
@@ -618,6 +620,9 @@ describe('useAgentDetection', () => {
       mockSendIncomingData.mockResolvedValue({ data: { items: [] } });
       setup({
         awsServicesMap: new Map([['s3', entry('s3', { dataFormat: 'otel' })]]),
+        agentPolicies: [
+          agentPolicy('policy-s3', [packagePolicy('policy-s3')], { supports_agentless: true }),
+        ],
         agents: [agent('a1', 'online', 'policy-s3'), agent('a2', 'online', 'policy-s3')],
       });
 
@@ -683,6 +688,248 @@ describe('useAgentDetection', () => {
       const { result } = setup({ incomingData: { 'aws@4.0.0': ['someone-else'] } });
 
       expect(result.current.hasDataByInstanceId).toEqual({ s3: false });
+    });
+  });
+
+  describe('each agent is judged against its own agent policy', () => {
+    const NONE = { total: 0, stopped: 0 };
+    const onPolicy = (id: string, policyId: string, extra: Record<string, unknown> = {}) =>
+      agent(id, 'online', policyId, {
+        policy_revision: 3,
+        local_metadata: { elastic: { agent: { version: '9.6.0' } } },
+        components: [{ id: 'system-metrics' }],
+        ...extra,
+      });
+    const existingPolicies = {
+      deploymentMethod: 'agent_based' as const,
+      policyIdsByInstance: { s3: 'pp-s3' },
+      agentBasedDeployment: {
+        agentHostsMode: 'existing',
+        selectedAgentPolicyIds: ['ap-a', 'ap-b'],
+      },
+    };
+    // Two selected policies whose revisions are unrelated; both carry the deployed package policy.
+    const policyA = agentPolicy('ap-a', [packagePolicy('pp-s3')], { revision: 100 });
+    const policyB = agentPolicy('ap-b', [packagePolicy('pp-s3')], { revision: 3 });
+
+    it("does not hold an agent to another selected policy's revision", () => {
+      mockGetUnitSummary.mockReturnValue(NONE);
+      const { result, pollAfter } = setup({
+        ...existingPolicies,
+        agentPolicies: [policyA, policyB],
+        agents: [onPolicy('a2', 'ap-b')],
+      });
+
+      pollAfter(NOT_RUNNING_GRACE_MS);
+
+      // The agent is current at revision 3 on its own policy, so a missing integration shows.
+      expect(result.current.summaryByInstanceId.s3.issue).toEqual({ type: 'not_running' });
+    });
+
+    it('still lets an agent that is behind its own policy catch up', () => {
+      mockGetUnitSummary.mockReturnValue(NONE);
+      const { result, pollAfter } = setup({
+        ...existingPolicies,
+        agentPolicies: [policyA, policyB],
+        agents: [onPolicy('a1', 'ap-a', { policy_revision: 99 })],
+      });
+
+      pollAfter(NOT_RUNNING_GRACE_MS);
+
+      expect(result.current.summaryByInstanceId.s3.issue).toBeUndefined();
+    });
+
+    it('shows the policy of the agent the badge represents in the flyout', () => {
+      mockGetComponentAlertLevel.mockImplementation((a: { id: string }) =>
+        a.id === 'a2' ? 'failed' : null
+      );
+      const { result } = setup({
+        ...existingPolicies,
+        agentPolicies: [policyA, policyB],
+        agents: [onPolicy('a1', 'ap-a', { policy_revision: 100 }), onPolicy('a2', 'ap-b')],
+      });
+
+      expect(result.current.summaryByInstanceId.s3.agent).toMatchObject({ id: 'a2' });
+      expect(result.current.agentPolicyByInstanceId.s3?.id).toBe('ap-b');
+      expect(result.current.packagePolicyByInstanceId.s3?.id).toBe('pp-s3');
+    });
+
+    it('resolves an agent on a version-specific policy variant to its policy', () => {
+      mockGetUnitSummary.mockReturnValue(NONE);
+      const { result, pollAfter } = setup({
+        ...existingPolicies,
+        agentPolicies: [policyA, policyB],
+        agents: [onPolicy('a2', 'ap-b#9.2', { policy_base_id: 'ap-b' })],
+      });
+
+      pollAfter(NOT_RUNNING_GRACE_MS);
+
+      expect(result.current.summaryByInstanceId.s3.issue).toEqual({ type: 'not_running' });
+      expect(result.current.agentPolicyByInstanceId.s3?.id).toBe('ap-b');
+    });
+
+    it('falls back to the first selected policy carrying the package policy before any agent exists', () => {
+      const { result } = setup({
+        ...existingPolicies,
+        agentPolicies: [policyA, policyB],
+        agents: [],
+      });
+
+      expect(result.current.agentPolicyByInstanceId.s3?.id).toBe('ap-a');
+      expect(result.current.packagePolicyByInstanceId.s3?.id).toBe('pp-s3');
+    });
+
+    it('judges by agent status alone when the policy of an agent was not fetched', () => {
+      const { result } = setup({
+        ...existingPolicies,
+        agentPolicies: [policyA],
+        agents: [onPolicy('a2', 'ap-b', { status: 'error' })],
+      });
+
+      expect(result.current.summaryByInstanceId.s3.health).toBe('unhealthy');
+    });
+  });
+
+  describe('where an instance data comes from', () => {
+    const otel = new Map([['s3', entry('s3', { dataFormat: 'otel' })]]);
+    const agentless = agentPolicy('policy-s3', [packagePolicy('policy-s3')], {
+      supports_agentless: true,
+    });
+
+    it('uses index patterns for OTel on a policy that is not agentless', () => {
+      // The agent data API cannot attribute OTel data there, and for an input package it matches
+      // whatever else the agent writes, such as its System integration.
+      const { result } = setup({ awsServicesMap: otel });
+
+      expect(result.current.dataSourceByInstanceId).toEqual({ s3: 'patterns' });
+      expect(mockUseQuery.mock.calls[0][0].enabled).toBe(false);
+      expect(result.current.hasDataByInstanceId).toEqual({});
+    });
+
+    it('uses the agent data API for OTel on an agentless policy', () => {
+      const { result } = setup({ awsServicesMap: otel, agentPolicies: [agentless] });
+
+      expect(result.current.dataSourceByInstanceId).toEqual({ s3: 'agent' });
+      expect(mockUseQuery.mock.calls[0][0].enabled).toBe(true);
+    });
+
+    it('does not trust the agent data API for OTel until the policy is known', () => {
+      const { result } = setup({ awsServicesMap: otel, agentPolicies: [] });
+
+      expect(result.current.dataSourceByInstanceId).toEqual({ s3: 'patterns' });
+    });
+
+    it.each([
+      ['not agentless', agentPolicy('policy-s3', [packagePolicy('policy-s3')])],
+      ['agentless', agentless],
+    ])(
+      'uses the agent data API for a package that is not OTel, on a policy that is %s',
+      (_, policy) => {
+        const { result } = setup({ agentPolicies: [policy] });
+
+        expect(result.current.dataSourceByInstanceId).toEqual({ s3: 'agent' });
+      }
+    );
+
+    it('does not list ECF instances, which have no agent', () => {
+      const { result } = setup({ deploymentMethod: 'ecf', policyIdsByInstance: {} });
+
+      expect(result.current.dataSourceByInstanceId).toEqual({});
+    });
+
+    it('still reports the health of an OTel agent when its data comes from patterns', () => {
+      const { result } = setup({ awsServicesMap: otel });
+
+      expect(result.current.summaryByInstanceId.s3.health).toBe('healthy');
+    });
+  });
+
+  describe('only agents running the integration can supply its data', () => {
+    const onlyA1Runs = (a: { id: string }) =>
+      a.id === 'a1' ? { total: 3, stopped: 0 } : { total: 0, stopped: 0 };
+    const online = (id: string) =>
+      agent(id, 'online', 'policy-s3', { policy_revision: 3, components: [{ id: 'system' }] });
+    const policy = agentPolicy('policy-s3', [packagePolicy('policy-s3')], { revision: 3 });
+
+    beforeEach(() => mockGetUnitSummary.mockImplementation(onlyA1Runs));
+
+    it('lists the agents that run it', () => {
+      const { result } = setup({
+        agentPolicies: [policy],
+        agents: [online('a1'), online('a2')],
+      });
+
+      expect(result.current.summaryByInstanceId.s3).toMatchObject({
+        agentIds: ['a1', 'a2'],
+        liveAgentIds: ['a1'],
+      });
+      expect(result.current.summaryByInstanceId.s3.noLiveUnits).toBeUndefined();
+    });
+
+    it('asks only about the agents that run it', async () => {
+      mockSendIncomingData.mockResolvedValue({ data: { items: [] } });
+      setup({ agentPolicies: [policy], agents: [online('a1'), online('a2')] });
+
+      await mockUseQuery.mock.calls[0][0].queryFn();
+
+      expect(mockSendIncomingData).toHaveBeenCalledTimes(1);
+      expect(mockSendIncomingData).toHaveBeenCalledWith(
+        expect.objectContaining({ agentsIds: ['a1'] })
+      );
+    });
+
+    it('ignores data from an agent that has not started the integration', () => {
+      // The second agent can be reporting data from an older integration of the same package.
+      const { result } = setup({
+        agentPolicies: [policy],
+        agents: [online('a1'), online('a2')],
+        incomingData: { 'aws@4.0.0': ['a2'] },
+      });
+
+      expect(result.current.hasDataByInstanceId).toEqual({ s3: false });
+    });
+
+    it('counts data from the agent that runs it', () => {
+      const { result } = setup({
+        agentPolicies: [policy],
+        agents: [online('a1'), online('a2')],
+        incomingData: { 'aws@4.0.0': ['a1'] },
+      });
+
+      expect(result.current.hasDataByInstanceId).toEqual({ s3: true });
+    });
+
+    it('asks per live agent only for OTel services', async () => {
+      mockSendIncomingData.mockResolvedValue({ data: { items: [] } });
+      setup({
+        awsServicesMap: new Map([['s3', entry('s3', { dataFormat: 'otel' })]]),
+        agentPolicies: [
+          agentPolicy('policy-s3', [packagePolicy('policy-s3')], {
+            revision: 3,
+            supports_agentless: true,
+          }),
+        ],
+        agents: [online('a1'), online('a2')],
+      });
+
+      await mockUseQuery.mock.calls[0][0].queryFn();
+
+      expect(mockSendIncomingData).toHaveBeenCalledTimes(1);
+      expect(mockSendIncomingData).toHaveBeenCalledWith(
+        expect.objectContaining({ agentsIds: ['a1'] })
+      );
+    });
+
+    it('reports no data when no agent runs the integration, whatever the data says', () => {
+      mockGetUnitSummary.mockReturnValue({ total: 0, stopped: 0 });
+      const { result } = setup({
+        agentPolicies: [policy],
+        agents: [online('a1'), online('a2')],
+        incomingData: { 'aws@4.0.0': ['a1', 'a2'] },
+      });
+
+      expect(result.current.hasDataByInstanceId).toEqual({ s3: false });
+      expect(result.current.summaryByInstanceId.s3.noLiveUnits).toBe(true);
     });
   });
 });

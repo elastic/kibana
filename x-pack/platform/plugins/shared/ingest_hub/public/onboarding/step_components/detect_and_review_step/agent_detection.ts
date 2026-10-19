@@ -7,7 +7,7 @@
 
 import satisfies from 'semver/functions/satisfies';
 import validRange from 'semver/ranges/valid';
-import type { Agent, AgentPolicy } from '@kbn/fleet-plugin/common';
+import type { Agent, AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { removeVersionSuffixFromPolicyId } from '@kbn/fleet-plugin/common';
 import type { ComponentAlertLevel, PackagePolicyUnitSummary } from '@kbn/fleet-plugin/public';
 import type { DeploymentMethod } from '../../aws_service_matrix';
@@ -32,6 +32,11 @@ export interface InstanceAgentSummary {
   /** Agent that best represents the instance (worst first) — drives the badge and the flyout. */
   agent?: Agent;
   agentIds: string[];
+  /**
+   * The agents that run a live unit of the deployed integration (or whose units are not known).
+   * Only these can have produced data that belongs to it.
+   */
+  liveAgentIds: string[];
   /** Set when the representative agent is unhealthy because it cannot run the integration. */
   issue?: AgentIssue;
   /**
@@ -294,8 +299,10 @@ export const summarizeInstanceAgents = (
   assessmentByAgentId: AssessmentByAgentId = {}
 ): InstanceAgentSummary => {
   const agentIds = agents.map(({ id }) => id);
-  const noLiveUnits =
-    agents.length > 0 && agents.every(({ id }) => assessmentByAgentId[id]?.hasLiveUnits === false);
+  const liveAgentIds = agents
+    .filter(({ id }) => assessmentByAgentId[id]?.hasLiveUnits !== false)
+    .map(({ id }) => id);
+  const noLiveUnits = agents.length > 0 && liveAgentIds.length === 0;
   const flags = noLiveUnits ? { noLiveUnits } : {};
   const healthOf = (agent: Agent) => getAgentHealthState(agent, assessmentByAgentId[agent.id]);
   // Prefer an agent with a known issue so the reason can be shown.
@@ -307,6 +314,7 @@ export const summarizeInstanceAgents = (
       health: 'unhealthy',
       agent: unhealthy,
       agentIds,
+      liveAgentIds,
       issue: assessmentByAgentId[unhealthy.id]?.issue,
       ...flags,
     };
@@ -321,12 +329,58 @@ export const summarizeInstanceAgents = (
       health: 'healthy',
       agent: healthy,
       agentIds,
+      liveAgentIds,
       ...(unhealthyElsewhere && { unhealthyElsewhere }),
       ...flags,
     };
   }
-  return { health: 'pending', agent: agents[0], agentIds, ...flags };
+  return { health: 'pending', agent: agents[0], agentIds, liveAgentIds, ...flags };
 };
+
+const getAgentPolicyBaseId = (agent: Agent): string | undefined => {
+  const id = agent.policy_base_id ?? agent.policy_id;
+  return id ? removeVersionSuffixFromPolicyId(id) : undefined;
+};
+
+/**
+ * The agent policy an agent is enrolled in. Selected policies have independent revisions, so an
+ * agent has to be judged against its own policy, not whichever selected policy comes first.
+ * Matched on the base id so a version-specific variant resolves to its policy.
+ */
+export const findAgentPolicyForAgent = (
+  agent: Agent,
+  agentPolicies: AgentPolicy[]
+): AgentPolicy | undefined => {
+  const baseId = getAgentPolicyBaseId(agent);
+  return baseId
+    ? agentPolicies.find(({ id }) => removeVersionSuffixFromPolicyId(id) === baseId)
+    : undefined;
+};
+
+/** The deployed package policy inside an agent policy, if that policy carries it. */
+export const findPackagePolicyInAgentPolicy = (
+  agentPolicy: AgentPolicy | undefined,
+  packagePolicyId: string
+): PackagePolicy | undefined =>
+  (agentPolicy?.package_policies as PackagePolicy[] | undefined)?.find(
+    ({ id }) => id === packagePolicyId
+  );
+
+/**
+ * Whether the Fleet agent data API can answer for an instance. It cannot attribute native OTel
+ * data to an agent unless the policy is agentless: elsewhere it either filters on an `agent.id`
+ * that OTel data lacks, or, because an input package has no data streams of its own to scope by,
+ * matches whatever else the agent writes (its System integration, its own monitoring). Those
+ * instances are detected through index patterns instead. An unknown policy counts as not
+ * agentless, so OTel never trusts an answer the API may not be able to give.
+ */
+export const usesAgentDataApi = ({
+  isOtel,
+  agentPolicy,
+}: {
+  isOtel: boolean;
+  agentPolicy?: Pick<AgentPolicy, 'supports_agentless'>;
+}): boolean => !isOtel || agentPolicy?.supports_agentless === true;
 
 const AGENT_HEALTH_SEVERITY: Record<AgentHealthState, number> = {
   unhealthy: 0,

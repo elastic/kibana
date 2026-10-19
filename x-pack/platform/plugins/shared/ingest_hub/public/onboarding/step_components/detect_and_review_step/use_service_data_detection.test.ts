@@ -51,6 +51,7 @@ const CLOUDTRAIL = makeEntry('cloudtrail', 'aws.cloudtrail');
 const NO_AGENTS = {
   summaryByInstanceId: {},
   hasDataByInstanceId: {},
+  dataSourceByInstanceId: {},
   packagePolicyByInstanceId: {},
   agentPolicyByInstanceId: {},
 };
@@ -469,6 +470,212 @@ describe('useServiceDataDetection', () => {
       renderHook(() => useServiceDataDetection());
 
       expect(mockUseQuery.mock.calls[0][0].enabled).toBe(true);
+    });
+  });
+
+  describe('polling follows the current effective state', () => {
+    const SINGLE: ServiceSettingsPersistedState = { globalRegion: 'us-east-1', serviceVars: {} };
+    const POLICIES = { cloudtrail: 'policy-1' };
+    const withAgent = (health: string, hasData = true) => ({
+      ...NO_AGENTS,
+      summaryByInstanceId: {
+        cloudtrail: { health, agent: { id: 'a1' }, agentIds: ['a1'], liveAgentIds: ['a1'] },
+      },
+      hasDataByInstanceId: { cloudtrail: hasData },
+      dataSourceByInstanceId: { cloudtrail: 'agent' },
+    });
+    const lastShouldPoll = () => {
+      const { calls } = mockUseAgentDetection.mock;
+      return calls[calls.length - 1][0].shouldPoll;
+    };
+
+    it('polls at first, while nothing is known to be receiving', () => {
+      setup({ serviceSettings: SINGLE, policyIdsByInstance: POLICIES });
+      renderHook(() => useServiceDataDetection());
+
+      expect(mockUseAgentDetection.mock.calls[0][0].shouldPoll).toBe(true);
+    });
+
+    it('stops once every instance is effectively receiving', () => {
+      setup({
+        serviceSettings: SINGLE,
+        serviceStatuses: { cloudtrail: 'receiving' },
+        policyIdsByInstance: POLICIES,
+        agentDetection: withAgent('healthy'),
+      });
+      renderHook(() => useServiceDataDetection());
+
+      expect(lastShouldPoll()).toBe(false);
+    });
+
+    it('keeps polling when a saved "receiving" is overridden by an unhealthy agent', () => {
+      // Re-entering Step 4 after an agent went offline: the saved status says receiving, but the
+      // agent now says otherwise, and polling has to stay on to see it come back.
+      setup({
+        serviceSettings: SINGLE,
+        serviceStatuses: { cloudtrail: 'receiving' },
+        policyIdsByInstance: POLICIES,
+        agentDetection: withAgent('unhealthy'),
+      });
+      const { result } = renderHook(() => useServiceDataDetection());
+
+      expect(result.current.statusByInstanceId.cloudtrail).toBe('error');
+      expect(lastShouldPoll()).toBe(true);
+    });
+
+    it('resumes polling when an agent goes unhealthy after the tile settled', () => {
+      setup({
+        serviceSettings: SINGLE,
+        serviceStatuses: { cloudtrail: 'receiving' },
+        policyIdsByInstance: POLICIES,
+        agentDetection: withAgent('healthy'),
+      });
+      const { rerender } = renderHook(() => useServiceDataDetection());
+      expect(lastShouldPoll()).toBe(false);
+
+      mockUseAgentDetection.mockReturnValue(withAgent('unhealthy'));
+      rerender();
+
+      expect(lastShouldPoll()).toBe(true);
+    });
+
+    it('stops again when the agent comes back, so the tile recovers without a remount', () => {
+      setup({
+        serviceSettings: SINGLE,
+        serviceStatuses: { cloudtrail: 'receiving' },
+        policyIdsByInstance: POLICIES,
+        agentDetection: withAgent('unhealthy'),
+      });
+      const { result, rerender } = renderHook(() => useServiceDataDetection());
+      expect(lastShouldPoll()).toBe(true);
+
+      mockUseAgentDetection.mockReturnValue(withAgent('healthy'));
+      rerender();
+
+      expect(result.current.statusByInstanceId.cloudtrail).toBe('receiving');
+      expect(lastShouldPoll()).toBe(false);
+    });
+
+    it('does not stop while any instance is still detecting', () => {
+      setup({
+        serviceSettings: {
+          globalRegion: 'us-east-1',
+          instances: [
+            { instanceId: 'cloudtrail', serviceId: 'cloudtrail', name: 'CT', isDuplicate: false },
+            {
+              instanceId: 'cloudtrail__dup-1',
+              serviceId: 'cloudtrail',
+              name: 'CT 2',
+              isDuplicate: true,
+            },
+          ],
+          serviceVars: {},
+        },
+        serviceStatuses: { cloudtrail: 'receiving', 'cloudtrail__dup-1': 'detecting' },
+      });
+      renderHook(() => useServiceDataDetection());
+
+      expect(lastShouldPoll()).toBe(true);
+    });
+
+    it('settles an ECF service once its index patterns have data', () => {
+      setup({
+        serviceSettings: SINGLE,
+        serviceStatuses: { cloudtrail: 'detecting' },
+        queryData: { results: { 'logs-aws.cloudtrail-*': true } },
+      });
+      renderHook(() => useServiceDataDetection());
+
+      expect(lastShouldPoll()).toBe(false);
+    });
+  });
+
+  describe('instances whose data is detected through index patterns', () => {
+    const SINGLE: ServiceSettingsPersistedState = { globalRegion: 'us-east-1', serviceVars: {} };
+    const patternsInstance = ({
+      health = 'healthy',
+      noLiveUnits = false,
+    }: { health?: string; noLiveUnits?: boolean } = {}) => ({
+      ...NO_AGENTS,
+      summaryByInstanceId: {
+        cloudtrail: {
+          health,
+          agent: { id: 'a1' },
+          agentIds: ['a1'],
+          liveAgentIds: noLiveUnits ? [] : ['a1'],
+          ...(noLiveUnits && { noLiveUnits }),
+        },
+      },
+      dataSourceByInstanceId: { cloudtrail: 'patterns' },
+    });
+    const HIT = { results: { 'logs-aws.cloudtrail-*': true } };
+
+    it('polls index patterns for an agent-backed instance the agent data API cannot answer for', async () => {
+      const { httpGet } = setup({
+        serviceSettings: SINGLE,
+        policyIdsByInstance: { cloudtrail: 'policy-1' },
+        agentDetection: patternsInstance(),
+      });
+      renderHook(() => useServiceDataDetection());
+
+      expect(mockUseQuery.mock.calls[0][0].enabled).toBe(true);
+      await mockUseQuery.mock.calls[0][0].queryFn();
+      expect(httpGet.mock.calls[0][1].query.dataStreams).toBe('logs-aws.cloudtrail-*');
+    });
+
+    it('is receiving when the patterns have data and the integration is running', () => {
+      setup({
+        serviceSettings: SINGLE,
+        serviceStatuses: { cloudtrail: 'detecting' },
+        policyIdsByInstance: { cloudtrail: 'policy-1' },
+        agentDetection: patternsInstance(),
+        queryData: HIT,
+      });
+      const { result } = renderHook(() => useServiceDataDetection());
+
+      expect(result.current.statusByInstanceId.cloudtrail).toBe('receiving');
+    });
+
+    it('ignores a pattern hit while the integration runs no live unit', () => {
+      // The hit can be another integration of the same package on the agent.
+      setup({
+        serviceSettings: SINGLE,
+        serviceStatuses: { cloudtrail: 'detecting' },
+        policyIdsByInstance: { cloudtrail: 'policy-1' },
+        agentDetection: patternsInstance({ noLiveUnits: true }),
+        queryData: HIT,
+      });
+      const { result } = renderHook(() => useServiceDataDetection());
+
+      expect(result.current.statusByInstanceId.cloudtrail).toBe('detecting');
+    });
+
+    it('still shows an unhealthy agent as an error', () => {
+      setup({
+        serviceSettings: SINGLE,
+        serviceStatuses: { cloudtrail: 'detecting' },
+        policyIdsByInstance: { cloudtrail: 'policy-1' },
+        agentDetection: patternsInstance({ health: 'unhealthy' }),
+        queryData: HIT,
+      });
+      const { result } = renderHook(() => useServiceDataDetection());
+
+      expect(result.current.statusByInstanceId.cloudtrail).toBe('error');
+    });
+
+    it('does not use the agent data signal for that instance', () => {
+      setup({
+        serviceSettings: SINGLE,
+        serviceStatuses: { cloudtrail: 'detecting' },
+        policyIdsByInstance: { cloudtrail: 'policy-1' },
+        agentDetection: {
+          ...patternsInstance(),
+          hasDataByInstanceId: { cloudtrail: true },
+        },
+      });
+      const { result } = renderHook(() => useServiceDataDetection());
+
+      expect(result.current.statusByInstanceId.cloudtrail).toBe('detecting');
     });
   });
 });

@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import type { Agent } from '@kbn/fleet-plugin/common';
+import type { Agent, AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   aggregateInstanceChipStates,
   applyNotRunningGrace,
   assessAgent,
   buildIncomingDataRequests,
   deriveInstanceChipState,
+  findAgentPolicyForAgent,
+  findPackagePolicyInAgentPolicy,
   getApplicableAgents,
   getAgentHealthState,
   getAgentPolicyIdsByInstance,
@@ -19,6 +21,7 @@ import {
   NOT_RUNNING_GRACE_MS,
   pickWorstAgentInstanceId,
   summarizeInstanceAgents,
+  usesAgentDataApi,
 } from './agent_detection';
 
 const makeAgent = (id: string, status: Agent['status'], policyId = 'policy-1'): Agent =>
@@ -178,6 +181,7 @@ describe('summarizeInstanceAgents', () => {
       health: 'pending',
       agent: undefined,
       agentIds: [],
+      liveAgentIds: [],
     });
   });
 
@@ -187,6 +191,7 @@ describe('summarizeInstanceAgents', () => {
       health: 'pending',
       agent,
       agentIds: ['a1'],
+      liveAgentIds: ['a1'],
     });
   });
 
@@ -403,6 +408,7 @@ describe('pickWorstAgentInstanceId', () => {
   const summary = (health: 'healthy' | 'pending' | 'unhealthy') => ({
     health,
     agentIds: [],
+    liveAgentIds: [],
   });
 
   it('picks the unhealthy instance over pending and healthy ones', () => {
@@ -861,5 +867,142 @@ describe('noLiveUnits', () => {
     });
 
     expect(summary).toMatchObject({ health: 'unhealthy', issue, noLiveUnits: true });
+  });
+});
+
+describe('liveAgentIds', () => {
+  const online = (id: string) => makeAgent(id, 'online');
+
+  it('lists only the agents that run a live unit of the deployed integration', () => {
+    const summary = summarizeInstanceAgents([online('a1'), online('a2'), online('a3')], {
+      a1: { alertLevel: null, hasLiveUnits: true },
+      a2: { alertLevel: null, hasLiveUnits: false },
+      a3: { alertLevel: null, hasLiveUnits: true },
+    });
+
+    expect(summary.liveAgentIds).toEqual(['a1', 'a3']);
+    expect(summary.noLiveUnits).toBeUndefined();
+  });
+
+  it('keeps an agent whose units are not known, since nothing says it is not running it', () => {
+    const summary = summarizeInstanceAgents([online('a1'), online('a2')], {
+      a1: { alertLevel: null, hasLiveUnits: false },
+    });
+
+    expect(summary.liveAgentIds).toEqual(['a2']);
+  });
+
+  it('is empty, and flags noLiveUnits, when no agent runs it', () => {
+    const summary = summarizeInstanceAgents([online('a1'), online('a2')], {
+      a1: { alertLevel: null, hasLiveUnits: false },
+      a2: { alertLevel: null, hasLiveUnits: false },
+    });
+
+    expect(summary.liveAgentIds).toEqual([]);
+    expect(summary.noLiveUnits).toBe(true);
+  });
+
+  it('is empty without flagging anything when there are no agents at all', () => {
+    const summary = summarizeInstanceAgents([]);
+
+    expect(summary.liveAgentIds).toEqual([]);
+    expect(summary.noLiveUnits).toBeUndefined();
+  });
+
+  it('is listed for an unhealthy instance as well', () => {
+    const summary = summarizeInstanceAgents([online('a1'), makeAgent('a2', 'offline')], {
+      a1: { alertLevel: null, hasLiveUnits: true },
+      a2: { alertLevel: null, hasLiveUnits: false },
+    });
+
+    expect(summary.health).toBe('unhealthy');
+    expect(summary.liveAgentIds).toEqual(['a1']);
+  });
+});
+
+describe('findAgentPolicyForAgent', () => {
+  const policy = (id: string) => ({ id } as unknown as AgentPolicy);
+  const policies = [policy('ap-a'), policy('ap-b')];
+
+  it('finds the policy an agent is enrolled in', () => {
+    expect(findAgentPolicyForAgent(makeAgent('a1', 'online', 'ap-b'), policies)?.id).toBe('ap-b');
+  });
+
+  it('does not fall back to another policy', () => {
+    expect(findAgentPolicyForAgent(makeAgent('a1', 'online', 'ap-z'), policies)).toBeUndefined();
+  });
+
+  it('resolves a version-specific variant to its base policy', () => {
+    const agent = { ...makeAgent('a1', 'online', 'ap-b#9.2') } as Agent;
+    expect(findAgentPolicyForAgent(agent, policies)?.id).toBe('ap-b');
+  });
+
+  it('prefers the base id the agent reports over its variant id', () => {
+    const agent = { ...makeAgent('a1', 'online', 'ap-a#9.2'), policy_base_id: 'ap-b' } as Agent;
+    expect(findAgentPolicyForAgent(agent, policies)?.id).toBe('ap-b');
+  });
+
+  it('finds nothing for an agent with no policy', () => {
+    expect(findAgentPolicyForAgent({ id: 'a1' } as Agent, policies)).toBeUndefined();
+  });
+
+  it('finds nothing without policies', () => {
+    expect(findAgentPolicyForAgent(makeAgent('a1', 'online', 'ap-a'), [])).toBeUndefined();
+  });
+});
+
+describe('findPackagePolicyInAgentPolicy', () => {
+  const agentPolicy = {
+    id: 'ap-a',
+    package_policies: [{ id: 'pp-1' }, { id: 'pp-2' }],
+  } as unknown as AgentPolicy;
+
+  it('finds the deployed package policy among those on the agent policy', () => {
+    expect(findPackagePolicyInAgentPolicy(agentPolicy, 'pp-2')).toEqual({ id: 'pp-2' });
+  });
+
+  it('finds nothing when the agent policy does not carry it', () => {
+    expect(findPackagePolicyInAgentPolicy(agentPolicy, 'pp-9')).toBeUndefined();
+  });
+
+  it('finds nothing without an agent policy, or without package policies on it', () => {
+    expect(findPackagePolicyInAgentPolicy(undefined, 'pp-1')).toBeUndefined();
+    expect(
+      findPackagePolicyInAgentPolicy({ id: 'ap-a' } as unknown as AgentPolicy, 'pp-1')
+    ).toBeUndefined();
+  });
+
+  it('returns the package policy as the typed object', () => {
+    const found: PackagePolicy | undefined = findPackagePolicyInAgentPolicy(agentPolicy, 'pp-1');
+    expect(found?.id).toBe('pp-1');
+  });
+});
+
+describe('usesAgentDataApi', () => {
+  it('is true for anything that is not OTel, whatever the policy', () => {
+    expect(usesAgentDataApi({ isOtel: false })).toBe(true);
+    expect(usesAgentDataApi({ isOtel: false, agentPolicy: { supports_agentless: false } })).toBe(
+      true
+    );
+    expect(usesAgentDataApi({ isOtel: false, agentPolicy: { supports_agentless: true } })).toBe(
+      true
+    );
+  });
+
+  it('is true for OTel only on an agentless policy', () => {
+    expect(usesAgentDataApi({ isOtel: true, agentPolicy: { supports_agentless: true } })).toBe(
+      true
+    );
+  });
+
+  it('is false for OTel on a policy that is not agentless', () => {
+    expect(usesAgentDataApi({ isOtel: true, agentPolicy: { supports_agentless: false } })).toBe(
+      false
+    );
+    expect(usesAgentDataApi({ isOtel: true, agentPolicy: {} })).toBe(false);
+  });
+
+  it('is false for OTel when the policy is not known yet', () => {
+    expect(usesAgentDataApi({ isOtel: true })).toBe(false);
   });
 });

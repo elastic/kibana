@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useRef, useMemo, useEffect } from 'react';
+import { useRef, useMemo, useCallback, useEffect, useState } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { useQuery } from '@kbn/react-query';
 import type { CoreStart } from '@kbn/core/public';
@@ -54,14 +54,14 @@ function batchPatterns(patterns: string[]): string[] {
   return batches;
 }
 
-// ECF instances have no Fleet agent, so only they are detected through index patterns.
-function getEcfInstancePatterns(
+// Instances that cannot use the Fleet agent data API are detected through index patterns.
+function getInstancePatterns(
   entry: AwsServiceMatrixEntry,
-  ecfInstanceIds: string[],
+  patternInstanceIds: string[],
   serviceSettings: ServiceSettingsPersistedState
 ): string[] {
   const { serviceVars = {} } = serviceSettings;
-  const patterns = ecfInstanceIds.flatMap((instanceId) =>
+  const patterns = patternInstanceIds.flatMap((instanceId) =>
     getServiceIndexPatterns(entry, serviceVars[instanceId]?.namespace)
   );
   return [...new Set(patterns)];
@@ -119,21 +119,41 @@ export function useServiceDataDetection(): ServiceDataDetectionResult {
     [instanceIdsByServiceId]
   );
 
-  // Index patterns for ECF instances only. Instances deployed through Fleet have an agent and are
-  // detected through the agent data API, which is immune to a customised data_stream.dataset.
+  // Whether to keep polling follows the current effective result, not the saved one. A saved
+  // "receiving" can be overridden when an agent goes unhealthy, and polling must resume then.
+  const [isSettled, setIsSettled] = useState(false);
+  const shouldPollAgents = !isSettled && !isTimedOut;
+
+  const {
+    summaryByInstanceId,
+    hasDataByInstanceId,
+    dataSourceByInstanceId,
+    agentPolicyByInstanceId,
+    packagePolicyByInstanceId,
+  } = useAgentDetection({ instances, shouldPoll: shouldPollAgents });
+
+  // Instances detected through index patterns: ECF, which has no Fleet agent, and OTel on a policy
+  // where the agent data API cannot attribute the data. The rest use the agent data API, which is
+  // immune to a customised data_stream.dataset.
   // Filter to only concrete patterns (type-dataset-*) — fallback glob patterns are skipped
   // since they won't pass server-side validation and don't represent known data streams.
+  const isPatternInstance = useCallback(
+    (instanceId: string) =>
+      !policyIdsByInstance[instanceId] || dataSourceByInstanceId[instanceId] === 'patterns',
+    [policyIdsByInstance, dataSourceByInstanceId]
+  );
+
   const patternsByServiceId = useMemo(() => {
     const byId = new Map<string, string[]>();
     for (const [serviceId, instanceIds] of instanceIdsByServiceId) {
       const entry = awsServicesMap?.get(serviceId);
-      const ecfInstanceIds = instanceIds.filter((instanceId) => !policyIdsByInstance[instanceId]);
-      if (entry && ecfInstanceIds.length > 0) {
-        byId.set(serviceId, getEcfInstancePatterns(entry, ecfInstanceIds, serviceSettings));
+      const patternInstanceIds = instanceIds.filter(isPatternInstance);
+      if (entry && patternInstanceIds.length > 0) {
+        byId.set(serviceId, getInstancePatterns(entry, patternInstanceIds, serviceSettings));
       }
     }
     return byId;
-  }, [instanceIdsByServiceId, awsServicesMap, serviceSettings, policyIdsByInstance]);
+  }, [instanceIdsByServiceId, awsServicesMap, serviceSettings, isPatternInstance]);
 
   const allPatterns = useMemo(() => {
     const patterns = new Set<string>();
@@ -145,14 +165,6 @@ export function useServiceDataDetection(): ServiceDataDetectionResult {
     return [...patterns];
   }, [patternsByServiceId]);
 
-  const allReceiving = useMemo(
-    () =>
-      instances.length > 0 &&
-      instances.every(({ instanceId }) => serviceStatuses[instanceId] === 'receiving'),
-    [instances, serviceStatuses]
-  );
-
-  const shouldPollAgents = !allReceiving && !isTimedOut;
   const shouldPoll = allPatterns.length > 0 && shouldPollAgents;
 
   const { data: queryData } = useQuery<HasDataResponse>({
@@ -171,22 +183,20 @@ export function useServiceDataDetection(): ServiceDataDetectionResult {
     enabled: shouldPoll,
   });
 
-  const {
-    summaryByInstanceId,
-    hasDataByInstanceId,
-    agentPolicyByInstanceId,
-    packagePolicyByInstanceId,
-  } = useAgentDetection({ instances, shouldPoll: shouldPollAgents });
-
   // Chip state per instance: context state overlaid with the agent and data signals.
   const instanceStates = useMemo((): Record<string, ServiceChipState> => {
     const result: Record<string, ServiceChipState> = {};
     for (const { instanceId, serviceId } of instances) {
       const agentSummary = summaryByInstanceId[instanceId];
       const patterns = patternsByServiceId.get(serviceId);
-      const hasData = agentSummary
-        ? !!hasDataByInstanceId[instanceId]
-        : !!queryData && !!patterns && patterns.some((p) => queryData.results[p] === true);
+      // A hit in the package's streams is only this integration's if it is running; without a live
+      // unit it can be another integration's data. ECF has no agent, so nothing to wait for.
+      const hasData = isPatternInstance(instanceId)
+        ? !!queryData &&
+          !!patterns &&
+          patterns.some((p) => queryData.results[p] === true) &&
+          !agentSummary?.noLiveUnits
+        : !!hasDataByInstanceId[instanceId];
       result[instanceId] = deriveInstanceChipState({
         contextStatus: serviceStatuses[instanceId] ?? 'instantiating',
         deployError: !!deployErrors[instanceId],
@@ -201,11 +211,19 @@ export function useServiceDataDetection(): ServiceDataDetectionResult {
     summaryByInstanceId,
     hasDataByInstanceId,
     patternsByServiceId,
+    isPatternInstance,
     queryData,
     serviceStatuses,
     deployErrors,
     isTimedOut,
   ]);
+
+  // Settled once every instance is effectively receiving. Evaluated on the effective states, so an
+  // agent that goes unhealthy after a saved "receiving" turns polling back on.
+  useEffect(() => {
+    const states = Object.values(instanceStates);
+    setIsSettled(states.length > 0 && states.every((state) => state === 'receiving'));
+  }, [instanceStates]);
 
   // Step 4 shows one tile per service, so a duplicated service folds its instances together.
   const statusByInstanceId = useMemo((): Record<string, ServiceChipState> => {

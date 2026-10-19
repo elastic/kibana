@@ -7,19 +7,12 @@
 
 import { useMemo, useRef } from 'react';
 import { useQuery } from '@kbn/react-query';
-import {
-  AGENTS_PREFIX,
-  buildPolicyBaseIdsWithFallbackKuery,
-  type Agent,
-  type AgentPolicy,
-  type PackagePolicy,
-} from '@kbn/fleet-plugin/common';
+import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   getComponentAlertLevel,
   getPackagePolicyUnitSummary,
   sendGetAgentIncomingData,
   useBulkGetAgentPoliciesQuery,
-  useGetAgentsQuery,
 } from '@kbn/fleet-plugin/public';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import {
@@ -28,24 +21,35 @@ import {
   OTEL_NOT_RUNNING_GRACE_MS,
   assessAgent,
   buildIncomingDataRequests,
+  findAgentPolicyForAgent,
+  findPackagePolicyInAgentPolicy,
   getAgentPolicyIdsByInstance,
   getApplicableAgents,
   instanceHasData,
   summarizeInstanceAgents,
+  usesAgentDataApi,
   type AssessmentByAgentId,
   type DataRequestInstance,
   type InstanceAgentSummary,
   type NotRunningSince,
 } from './agent_detection';
+import { usePolicyAgents } from './use_policy_agents';
 
 const POLL_INTERVAL_MS = 10_000;
-// Agents per deployment are bounded by the selected policies; this only guards the page size.
-const MAX_AGENTS = 1000;
+
+/** Where an instance's data comes from: the Fleet agent data API, or index patterns. */
+export type InstanceDataSource = 'agent' | 'patterns';
 
 export interface AgentDetectionResult {
   /** Instances backed by a Fleet agent. ECF instances are absent and keep pattern detection. */
   summaryByInstanceId: Record<string, InstanceAgentSummary>;
+  /** Data seen by the Fleet agent data API. Only meaningful for instances whose source is `agent`. */
   hasDataByInstanceId: Record<string, boolean>;
+  /**
+   * How each agent-backed instance's data is detected. `patterns` for OTel on a policy that is not
+   * agentless, where the agent data API cannot attribute the data.
+   */
+  dataSourceByInstanceId: Record<string, InstanceDataSource>;
   /** Package policy each instance deployed, for the status flyout. */
   packagePolicyByInstanceId: Record<string, PackagePolicy | undefined>;
   agentPolicyByInstanceId: Record<string, AgentPolicy | undefined>;
@@ -57,21 +61,6 @@ interface UseAgentDetectionParams {
   /** Keep polling while any service is still settling. */
   shouldPoll: boolean;
 }
-
-const findPackagePolicy = (
-  agentPolicies: AgentPolicy[],
-  agentPolicyIds: string[],
-  packagePolicyId: string
-): { agentPolicy?: AgentPolicy; packagePolicy?: PackagePolicy } => {
-  for (const agentPolicy of agentPolicies) {
-    if (!agentPolicyIds.includes(agentPolicy.id)) continue;
-    const packagePolicy = (agentPolicy.package_policies as PackagePolicy[] | undefined)?.find(
-      ({ id }) => id === packagePolicyId
-    );
-    if (packagePolicy) return { agentPolicy, packagePolicy };
-  }
-  return {};
-};
 
 export function useAgentDetection({
   instances,
@@ -123,97 +112,112 @@ export function useAgentDetection({
     [policiesData?.items]
   );
 
-  const agentsKuery = useMemo(
-    () =>
-      buildPolicyBaseIdsWithFallbackKuery(
-        allPolicyIds,
-        `${AGENTS_PREFIX}.policy_base_id`,
-        `${AGENTS_PREFIX}.policy_id`
-      ),
-    [allPolicyIds]
-  );
-  const { data: agentsData, dataUpdatedAt } = useGetAgentsQuery(
-    { kuery: agentsKuery, perPage: MAX_AGENTS },
-    { enabled: hasPolicies, refetchInterval: shouldPoll ? POLL_INTERVAL_MS : false }
-  );
-  const agents = useMemo(() => (agentsData?.data?.items ?? []) as Agent[], [agentsData]);
+  const { agents, dataUpdatedAt } = usePolicyAgents({ policyIds: allPolicyIds, shouldPoll });
   // Remembers when an agent was first seen not running the integration, across polls.
   const notRunningSinceRef = useRef<NotRunningSince>({});
 
-  const { summaryByInstanceId, packagePolicyByInstanceId, agentPolicyByInstanceId, dataInstances } =
-    useMemo(() => {
-      const summaries: Record<string, InstanceAgentSummary> = {};
-      const packagePolicies: Record<string, PackagePolicy | undefined> = {};
-      const policiesByInstance: Record<string, AgentPolicy | undefined> = {};
-      const requestInstances: Record<string, DataRequestInstance> = {};
-      // The moment the agents were last fetched is when this state was observed.
-      const now = dataUpdatedAt || Date.now();
-      const notRunningSince: NotRunningSince = {};
+  const {
+    summaryByInstanceId,
+    packagePolicyByInstanceId,
+    agentPolicyByInstanceId,
+    dataSourceByInstanceId,
+    dataInstances,
+  } = useMemo(() => {
+    const summaries: Record<string, InstanceAgentSummary> = {};
+    const packagePolicies: Record<string, PackagePolicy | undefined> = {};
+    const policiesByInstance: Record<string, AgentPolicy | undefined> = {};
+    const dataSources: Record<string, InstanceDataSource> = {};
+    const requestInstances: Record<string, DataRequestInstance> = {};
+    // The moment the agents were last fetched is when this state was observed.
+    const now = dataUpdatedAt || Date.now();
+    const notRunningSince: NotRunningSince = {};
 
-      for (const [instanceId, policyIds] of Object.entries(agentPolicyIdsByInstance)) {
-        const applicable = getApplicableAgents(agents, policyIds);
-        const { agentPolicy, packagePolicy } = findPackagePolicy(
-          agentPolicies,
-          policyIds,
-          policyIdsByInstance[instanceId]
-        );
-        packagePolicies[instanceId] = packagePolicy;
-        policiesByInstance[instanceId] = agentPolicy;
+    for (const [instanceId, policyIds] of Object.entries(agentPolicyIdsByInstance)) {
+      const packagePolicyId = policyIdsByInstance[instanceId];
+      const applicable = getApplicableAgents(agents, policyIds);
+      const selectedPolicies = agentPolicies.filter(({ id }) => policyIds.includes(id));
+      const entry = awsServicesMap?.get(serviceIdByInstanceId[instanceId]);
 
-        // Judge each agent by the package policy this instance deployed, not by the agent alone.
-        let assessments: AssessmentByAgentId = {};
-        if (packagePolicy && agentPolicy) {
-          for (const agent of applicable) {
-            assessments[agent.id] = assessAgent({
-              agent,
-              agentPolicy,
-              packageName: packagePolicy.package?.name ?? '',
-              alertLevel: getComponentAlertLevel(agent, packagePolicy),
-              units: getPackagePolicyUnitSummary(agent, packagePolicy),
-            });
-          }
-        }
-        const entry = awsServicesMap?.get(serviceIdByInstanceId[instanceId]);
-        const graced = applyNotRunningGrace({
-          assessments,
-          keyPrefix: instanceId,
-          previousSince: notRunningSinceRef.current,
-          now,
-          graceMs: entry?.dataFormat === 'otel' ? OTEL_NOT_RUNNING_GRACE_MS : NOT_RUNNING_GRACE_MS,
-        });
-        assessments = graced.assessments;
-        Object.assign(notRunningSince, graced.since);
-        const summary = summarizeInstanceAgents(applicable, assessments);
-        summaries[instanceId] = summary;
-
-        const packageVersion = packagePolicy?.package?.version;
-        if (entry && packageVersion && summary.agentIds.length > 0) {
-          requestInstances[instanceId] = {
-            agentIds: summary.agentIds,
-            packageName: entry.packageName,
-            packageVersion,
-            isOtel: entry.dataFormat === 'otel',
-          };
+      // Judge each agent against its own agent policy and the package policy this instance
+      // deployed in it. Selected policies have independent revisions, so one policy's revision
+      // says nothing about an agent on another.
+      let assessments: AssessmentByAgentId = {};
+      for (const agent of applicable) {
+        const agentPolicy = findAgentPolicyForAgent(agent, selectedPolicies);
+        const packagePolicy = findPackagePolicyInAgentPolicy(agentPolicy, packagePolicyId);
+        if (agentPolicy && packagePolicy) {
+          assessments[agent.id] = assessAgent({
+            agent,
+            agentPolicy,
+            packageName: packagePolicy.package?.name ?? '',
+            alertLevel: getComponentAlertLevel(agent, packagePolicy),
+            units: getPackagePolicyUnitSummary(agent, packagePolicy),
+          });
         }
       }
+      const graced = applyNotRunningGrace({
+        assessments,
+        keyPrefix: instanceId,
+        previousSince: notRunningSinceRef.current,
+        now,
+        graceMs: entry?.dataFormat === 'otel' ? OTEL_NOT_RUNNING_GRACE_MS : NOT_RUNNING_GRACE_MS,
+      });
+      assessments = graced.assessments;
+      Object.assign(notRunningSince, graced.since);
+      const summary = summarizeInstanceAgents(applicable, assessments);
+      summaries[instanceId] = summary;
 
-      notRunningSinceRef.current = notRunningSince;
+      // The flyout shows the policy of the agent the badge represents. With no agent yet, fall back
+      // to the first selected policy that carries the package policy.
+      const policyWithPackage = selectedPolicies.find(
+        (policy) => !!findPackagePolicyInAgentPolicy(policy, packagePolicyId)
+      );
+      const agentPolicy =
+        (summary.agent && findAgentPolicyForAgent(summary.agent, selectedPolicies)) ||
+        policyWithPackage;
+      const packagePolicy =
+        findPackagePolicyInAgentPolicy(agentPolicy, packagePolicyId) ??
+        findPackagePolicyInAgentPolicy(policyWithPackage, packagePolicyId);
+      packagePolicies[instanceId] = packagePolicy;
+      policiesByInstance[instanceId] = agentPolicy;
 
-      return {
-        summaryByInstanceId: summaries,
-        packagePolicyByInstanceId: packagePolicies,
-        agentPolicyByInstanceId: policiesByInstance,
-        dataInstances: requestInstances,
-      };
-    }, [
-      dataUpdatedAt,
-      agentPolicyIdsByInstance,
-      agents,
-      agentPolicies,
-      policyIdsByInstance,
-      awsServicesMap,
-      serviceIdByInstanceId,
-    ]);
+      const isOtel = entry?.dataFormat === 'otel';
+      const dataSource: InstanceDataSource = usesAgentDataApi({ isOtel, agentPolicy })
+        ? 'agent'
+        : 'patterns';
+      dataSources[instanceId] = dataSource;
+
+      // Only agents running a live unit of the integration can have produced data that is its own;
+      // another agent may be reporting data from an older integration of the same package.
+      const packageVersion = packagePolicy?.package?.version;
+      if (dataSource === 'agent' && entry && packageVersion && summary.liveAgentIds.length > 0) {
+        requestInstances[instanceId] = {
+          agentIds: summary.liveAgentIds,
+          packageName: entry.packageName,
+          packageVersion,
+          isOtel,
+        };
+      }
+    }
+
+    notRunningSinceRef.current = notRunningSince;
+
+    return {
+      summaryByInstanceId: summaries,
+      packagePolicyByInstanceId: packagePolicies,
+      agentPolicyByInstanceId: policiesByInstance,
+      dataSourceByInstanceId: dataSources,
+      dataInstances: requestInstances,
+    };
+  }, [
+    dataUpdatedAt,
+    agentPolicyIdsByInstance,
+    agents,
+    agentPolicies,
+    policyIdsByInstance,
+    awsServicesMap,
+    serviceIdByInstanceId,
+  ]);
 
   const dataRequests = useMemo(
     () => buildIncomingDataRequests(Object.values(dataInstances)),
@@ -245,18 +249,19 @@ export function useAgentDetection({
 
   const hasDataByInstanceId = useMemo(() => {
     const result: Record<string, boolean> = {};
-    for (const [instanceId, instance] of Object.entries(dataInstances)) {
-      // Data in the package's streams is only this integration's if it is running. Otherwise it
-      // comes from another integration of the same package, such as one already on the policy.
-      const isRunning = !summaryByInstanceId[instanceId]?.noLiveUnits;
-      result[instanceId] = isRunning && instanceHasData(instance, agentIdsWithDataByKey ?? {});
+    for (const [instanceId, dataSource] of Object.entries(dataSourceByInstanceId)) {
+      if (dataSource !== 'agent') continue;
+      // No request means no live agent to ask about, which is no data yet.
+      const instance = dataInstances[instanceId];
+      result[instanceId] = !!instance && instanceHasData(instance, agentIdsWithDataByKey ?? {});
     }
     return result;
-  }, [dataInstances, agentIdsWithDataByKey, summaryByInstanceId]);
+  }, [dataSourceByInstanceId, dataInstances, agentIdsWithDataByKey]);
 
   return {
     summaryByInstanceId,
     hasDataByInstanceId,
+    dataSourceByInstanceId,
     packagePolicyByInstanceId,
     agentPolicyByInstanceId,
   };
