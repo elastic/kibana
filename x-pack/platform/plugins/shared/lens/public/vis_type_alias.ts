@@ -12,7 +12,6 @@ import {
   DOC_TYPE,
   getBasePath,
   getEditPath,
-  LENS_ICON,
   STAGE_ID,
 } from '../common/constants';
 import { getLensBasicClient } from './persistence/basic_lens_client';
@@ -31,7 +30,7 @@ export const lensVisTypeAlias: VisTypeAlias = {
     defaultMessage: 'Build charts, metrics, and tables with a point-and-click editor.',
   }),
   order: 60,
-  icon: LENS_ICON,
+  icon: 'productLens',
   stage: STAGE_ID,
   appExtensions: {
     visualizations: {
@@ -49,7 +48,7 @@ export const lensVisTypeAlias: VisTypeAlias = {
           updatedAt,
           managed,
           editor: { editUrl: getEditPath(id), editApp: 'lens' },
-          icon: LENS_ICON,
+          icon: 'productLens',
           stage: STAGE_ID,
           savedObjectType: type,
           type: DOC_TYPE,
