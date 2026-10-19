@@ -79,7 +79,10 @@ export interface AlertContextMeta {
   schema?: DataSchemaFormat;
 }
 
-type Criteria = InventoryMetricConditions[];
+type Criteria = Array<
+  Omit<InventoryMetricConditions, 'metric'> & { metric?: InventoryMetricConditions['metric'] }
+>;
+
 export type ExpressionsProps = Omit<
   RuleTypeParamsExpressionProps<
     {
@@ -207,8 +210,16 @@ export const Expressions: React.FC<ExpressionsProps> = (props) => {
       if (!isSchemaSelectableForInventoryRule(nt)) {
         setRuleParams('schema', undefined);
       }
+
+      setRuleParams(
+        'criteria',
+        ruleParams.criteria.map((c) => ({
+          ...c,
+          metric: undefined,
+        }))
+      );
     },
-    [setRuleParams]
+    [setRuleParams, ruleParams.criteria]
   );
 
   const updateSchema = useCallback(
@@ -382,16 +393,18 @@ export const Expressions: React.FC<ExpressionsProps> = (props) => {
               errors={(errors[idx] as IErrorObject) || emptyError}
               expression={e || {}}
             >
-              <ExpressionChart
-                expression={e}
-                kuery={ruleParams.filterQueryText}
-                nodeType={ruleParams.nodeType}
-                sourceId={ruleParams.sourceId}
-                accountId={ruleParams.accountId}
-                region={ruleParams.region}
-                schema={effectiveSchema}
-                data-test-subj="preview-chart"
-              />
+              {e.metric && (
+                <ExpressionChart
+                  expression={{ ...e, metric: e.metric }}
+                  kuery={ruleParams.filterQueryText}
+                  nodeType={ruleParams.nodeType}
+                  sourceId={ruleParams.sourceId}
+                  accountId={ruleParams.accountId}
+                  region={ruleParams.region}
+                  schema={effectiveSchema}
+                  data-test-subj="preview-chart"
+                />
+              )}
             </ExpressionRow>
           );
         })}
