@@ -48,7 +48,7 @@ const payload: RuleEvent['payload'] = {
   spaceId: 'my-space',
   rule,
   correlationId: 'corr-1',
-  channel: 'api',
+  origin: { channel: 'api' },
 };
 
 const eventOf = (type: RuleEvent['type'], override = payload): RuleEvent =>
@@ -151,7 +151,7 @@ describe('RuleChangesHistorySubscriber', () => {
           ruleId: 'rule-1',
           spaceId: 'my-space',
           correlationId: 'corr-1',
-          channel: 'api',
+          origin: { channel: 'api' },
         }),
         { request, origin: 'user' }
       );

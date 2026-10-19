@@ -29,7 +29,7 @@ describe('RuleEventPublisher', () => {
     context = { request: httpServerMock.createKibanaRequest(), origin: 'internal' };
   });
 
-  type TestRule = Omit<EventRule, 'channel'>;
+  type TestRule = Omit<EventRule, 'origin'>;
 
   const cases = [
     {
@@ -64,34 +64,40 @@ describe('RuleEventPublisher', () => {
     },
   ];
 
-  const withChannel = (rules: TestRule[]): EventRule[] =>
-    rules.map((rule) => ({ ...rule, channel: 'api' as const }));
+  const withOrigin = (rules: TestRule[]): EventRule[] =>
+    rules.map((rule) => ({ ...rule, origin: { channel: 'api' as const } }));
 
   describe.each(cases)('$name origin', ({ emit }) => {
-    it('carries the channel and app on every event', () => {
+    it('carries the origin on every event', () => {
       emit(publisher, context, [
-        { ruleId: 'rule-1', spaceId: 'space-1', channel: 'ui', app: 'discover' },
-        { ruleId: 'rule-2', spaceId: 'space-1', channel: 'ui', app: 'discover' },
+        { ruleId: 'rule-1', spaceId: 'space-1', origin: { channel: 'ui', app: 'discover' } },
+        { ruleId: 'rule-2', spaceId: 'space-1', origin: { channel: 'ui', app: 'discover' } },
       ]);
 
       expect(eventBus.publish).toHaveBeenCalledTimes(2);
       for (const [event] of eventBus.publish.mock.calls) {
-        expect(event.payload).toEqual(expect.objectContaining({ channel: 'ui', app: 'discover' }));
+        expect((event.payload as RuleEventPayload).origin).toEqual({
+          channel: 'ui',
+          app: 'discover',
+        });
       }
     });
 
-    it('omits app when it is not provided', () => {
-      emit(publisher, context, [{ ruleId: 'rule-1', spaceId: 'space-1', channel: 'system' }]);
+    it('omits app when origin has none', () => {
+      emit(publisher, context, [
+        { ruleId: 'rule-1', spaceId: 'space-1', origin: { channel: 'system' } },
+      ]);
 
       const [[event]] = eventBus.publish.mock.calls;
-      expect(event.payload).toEqual(expect.objectContaining({ channel: 'system' }));
-      expect(event.payload).not.toHaveProperty('app');
+      const { origin } = event.payload as RuleEventPayload;
+      expect(origin).toEqual({ channel: 'system' });
+      expect(origin).not.toHaveProperty('app');
     });
   });
 
   describe.each(cases)('$name', ({ type, emit }) => {
-    it('emits the matching event type with a { ruleId, spaceId, channel } envelope and no correlationId for a single rule, forwarding the publisher context as is', () => {
-      emit(publisher, context, withChannel([{ ruleId: 'rule-1', spaceId: 'space-1' }]));
+    it('emits the matching event type with a { ruleId, spaceId, origin } envelope and no correlationId for a single rule, forwarding the publisher context as is', () => {
+      emit(publisher, context, withOrigin([{ ruleId: 'rule-1', spaceId: 'space-1' }]));
 
       expect(eventBus.publish).toHaveBeenCalledTimes(1);
       expect(eventBus.publish).toHaveBeenCalledWith(
@@ -100,7 +106,7 @@ describe('RuleEventPublisher', () => {
           payload: {
             ruleId: 'rule-1',
             spaceId: 'space-1',
-            channel: 'api',
+            origin: { channel: 'api' },
           },
         },
         context
@@ -115,7 +121,7 @@ describe('RuleEventPublisher', () => {
         version: 3,
         metadata: { name: 'rule-1' },
       } as EventRule['rule'];
-      emit(publisher, context, withChannel([{ ruleId: 'rule-1', spaceId: 'space-1', rule }]));
+      emit(publisher, context, withOrigin([{ ruleId: 'rule-1', spaceId: 'space-1', rule }]));
 
       expect(eventBus.publish.mock.calls[0][0].payload).toEqual(
         expect.objectContaining({ ruleId: 'rule-1', spaceId: 'space-1', rule })
@@ -126,7 +132,7 @@ describe('RuleEventPublisher', () => {
       emit(
         publisher,
         context,
-        withChannel([
+        withOrigin([
           { ruleId: 'rule-1', spaceId: 'space-1' },
           { ruleId: 'rule-2', spaceId: 'space-1' },
         ])

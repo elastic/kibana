@@ -43,10 +43,10 @@ const rule = createRuleResponse({
 
 const eventOfType = (
   type: RuleEvent['type'],
-  payload: Omit<RuleEventPayload, 'channel'> & Partial<Pick<RuleEventPayload, 'channel'>>
+  payload: Omit<RuleEventPayload, 'origin'> & Partial<Pick<RuleEventPayload, 'origin'>>
 ): RuleEvent => ({
   type,
-  payload: { channel: 'api', ...payload },
+  payload: { origin: { channel: 'api' }, ...payload },
 });
 
 const createdEvent = (...args: [Parameters<typeof eventOfType>[1]]): RuleEvent =>
@@ -149,8 +149,7 @@ describe('RuleTelemetrySubscriber', () => {
           ruleId: 'rule-1',
           spaceId: 'default',
           rule,
-          channel: 'ui',
-          app: 'discover',
+          origin: { channel: 'ui', app: 'discover' },
         }),
         context
       );
@@ -195,8 +194,7 @@ describe('RuleTelemetrySubscriber', () => {
         eventOfType(RULE_DELETED_EVENT_TYPE, {
           ruleId: 'rule-1',
           spaceId: 'default',
-          channel: 'system',
-          app: 'nightshift',
+          origin: { channel: 'system', app: 'nightshift' },
         }),
         context
       );

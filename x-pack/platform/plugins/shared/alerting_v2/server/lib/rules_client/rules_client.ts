@@ -661,7 +661,7 @@ export class RulesClient {
       references: persisted.references,
     });
     this.ruleEventPublisher.emitRuleCreated(this.eventContext, [
-      { ruleId: rule.id, spaceId: this.spaceId, rule, ...this.resolveRuleEventOrigin() },
+      { ruleId: rule.id, spaceId: this.spaceId, rule, origin: this.resolveRuleEventOrigin() },
     ]);
     return rule;
   }
@@ -724,7 +724,7 @@ export class RulesClient {
         ruleId: rule.id,
         spaceId,
         rule,
-        ...this.resolveRuleEventOrigin(),
+        origin: this.resolveRuleEventOrigin(),
       });
     }
 
@@ -811,7 +811,7 @@ export class RulesClient {
     });
 
     this.ruleEventPublisher.emitRuleUpdated(this.eventContext, [
-      { ruleId: rule.id, spaceId: this.spaceId, rule, ...this.resolveRuleEventOrigin() },
+      { ruleId: rule.id, spaceId: this.spaceId, rule, origin: this.resolveRuleEventOrigin() },
     ]);
 
     return rule;
@@ -881,7 +881,7 @@ export class RulesClient {
       references,
     });
     this.ruleEventPublisher.emitRuleDeleted(this.eventContext, [
-      { ruleId: id, spaceId: this.spaceId, rule, ...this.resolveRuleEventOrigin() },
+      { ruleId: id, spaceId: this.spaceId, rule, origin: this.resolveRuleEventOrigin() },
     ]);
   }
 
@@ -987,7 +987,7 @@ export class RulesClient {
       references,
     });
     this.ruleEventPublisher.emitRuleEnabled(this.eventContext, [
-      { ruleId: rule.id, spaceId: this.spaceId, rule, ...this.resolveRuleEventOrigin() },
+      { ruleId: rule.id, spaceId: this.spaceId, rule, origin: this.resolveRuleEventOrigin() },
     ]);
     return rule;
   }
@@ -1032,7 +1032,7 @@ export class RulesClient {
       references,
     });
     this.ruleEventPublisher.emitRuleDisabled(this.eventContext, [
-      { ruleId: rule.id, spaceId: this.spaceId, rule, ...this.resolveRuleEventOrigin() },
+      { ruleId: rule.id, spaceId: this.spaceId, rule, origin: this.resolveRuleEventOrigin() },
     ]);
     return rule;
   }
@@ -1237,9 +1237,9 @@ export class RulesClient {
                 attrs: { ...doc.attrs, version: this.getNextVersion(doc.attrs.version) },
                 references: doc.references,
               }),
-              ...this.resolveRuleEventOrigin(),
+              origin: this.resolveRuleEventOrigin(),
             }
-          : { ruleId: result.id, spaceId, ...this.resolveRuleEventOrigin() }
+          : { ruleId: result.id, spaceId, origin: this.resolveRuleEventOrigin() }
       );
     }
 
@@ -1364,7 +1364,7 @@ export class RulesClient {
           ruleId: rule.id,
           spaceId,
           rule,
-          ...this.resolveRuleEventOrigin(),
+          origin: this.resolveRuleEventOrigin(),
         });
       }
 
@@ -1450,7 +1450,7 @@ export class RulesClient {
           ruleId: rule.id,
           spaceId,
           rule,
-          ...this.resolveRuleEventOrigin(),
+          origin: this.resolveRuleEventOrigin(),
         });
       }
     }
@@ -1579,7 +1579,7 @@ export class RulesClient {
         ruleId: rule.id,
         spaceId,
         rule,
-        ...this.resolveRuleEventOrigin(),
+        origin: this.resolveRuleEventOrigin(),
       });
     }
 
@@ -1897,7 +1897,7 @@ export class RulesClient {
       references,
     });
     this.ruleEventPublisher.emitRuleUpdated(this.eventContext, [
-      { ruleId: rule.id, spaceId: this.spaceId, rule, ...this.resolveRuleEventOrigin() },
+      { ruleId: rule.id, spaceId: this.spaceId, rule, origin: this.resolveRuleEventOrigin() },
     ]);
     return { rule, created: false };
   }
