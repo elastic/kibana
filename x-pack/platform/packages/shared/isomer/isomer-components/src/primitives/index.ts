@@ -14,3 +14,4 @@ export { type QuoteNode, quote } from './quote';
 export { type ActionsNode, actions } from './actions';
 export { type FieldsNode, fields } from './fields';
 export { type CodeNode, code } from './code';
+export { type TableNode, table } from './table';
