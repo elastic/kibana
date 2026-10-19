@@ -40,6 +40,7 @@ export const makeHit = (
     byFieldValue?: string;
     actual?: number[];
     typical?: number[];
+    causes?: Array<{ actual: number[]; typical: number[] }>;
     sort?: unknown[];
     noSource?: boolean;
     matchedQueries?: string[];
@@ -57,6 +58,7 @@ export const makeHit = (
     byFieldValue = 'Iran',
     actual = [5],
     typical = [1],
+    causes,
     sort = [timestamp, jobId, detectorIndex],
     noSource = false,
     detectorFunction = 'rare',
@@ -87,6 +89,18 @@ export const makeHit = (
           function_description: 'rare',
           actual,
           typical,
+          ...(causes
+            ? {
+                causes: causes.map((cause) => ({
+                  function: detectorFunction,
+                  function_description: detectorFunction,
+                  probability: 0.01,
+                  by_field_name: byFieldName,
+                  by_field_value: byFieldValue,
+                  ...cause,
+                })),
+              }
+            : {}),
         },
     ...(matchedQueries ? { matched_queries: matchedQueries } : {}),
     sort,

@@ -38,11 +38,27 @@ export const buildScoreRangeFilter = (
 
 interface RequiredHit {
   _id: string;
-  _source: Required<RawAnomalyRecord>;
+  _source: RawAnomalyRecord & { detector_index: number };
 }
+
+/**
+ * Observed / expected values of a record. Population-analysis records (detector with
+ * `over_field_name`) carry them per cause rather than at the top level; use the first cause so
+ * the anomaly still renders with a value comparison.
+ */
+export const getRecordValues = (
+  src: Pick<RawAnomalyRecord, 'actual' | 'typical' | 'causes'>
+): { actual?: number; typical?: number } => {
+  const cause = src.causes?.[0];
+  return {
+    actual: src.actual?.[0] ?? cause?.actual?.[0],
+    typical: src.typical?.[0] ?? cause?.typical?.[0],
+  };
+};
 
 const mapToAnomalyHit = (hit: RequiredHit, entityId: string): AnomalyHit => {
   const { _id: id, _source: src } = hit;
+  const { actual, typical } = getRecordValues(src);
   return {
     _id: id,
     entityId,
@@ -51,8 +67,8 @@ const mapToAnomalyHit = (hit: RequiredHit, entityId: string): AnomalyHit => {
     detectorFunction: src.function ?? '',
     timestamp: src.timestamp,
     recordScore: src.record_score,
-    actual: src.actual[0],
-    typical: src.typical[0],
+    ...(actual !== undefined && { actual }),
+    ...(typical !== undefined && { typical }),
     fieldName: src.field_name,
     byFieldName: src.by_field_name,
     byFieldValue: src.by_field_value,
@@ -177,13 +193,12 @@ export const searchEntityAnomalies = async ({
     const rawTotal = resp.hits.total;
     const total = rawTotal == null ? 0 : typeof rawTotal === 'number' ? rawTotal : rawTotal.value;
 
+    // Keep every record the query counted in `total` so the page and the total agree; records
+    // without `actual` / `typical` (e.g. population analysis) are listed without a value comparison.
     const hits = resp.hits.hits
       .filter(
         (hit): hit is typeof hit & RequiredHit =>
-          hit._id != null &&
-          hit._source?.actual?.[0] != null &&
-          hit._source?.typical?.[0] != null &&
-          hit._source?.detector_index != null
+          hit._id != null && hit._source?.detector_index != null
       )
       .map((hit) =>
         mapToAnomalyHit(hit, getMatchedEntityId(hit.matched_queries, entityIds) ?? entityIds[0])

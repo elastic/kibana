@@ -28,6 +28,10 @@ import {
   CAROL_EUID,
   DAVID_EUID,
   DAVID_GEO_EVENT_IDS,
+  HENRY_EUID,
+  POPULATION_ANOMALY_ACTUAL,
+  POPULATION_ANOMALY_RECORD_ID,
+  POPULATION_ANOMALY_TYPICAL,
   WIN_APP01_EUID,
   NO_BEHAVIORS_EUID,
   OR_SEMANTICS_HOST_EUID,
@@ -423,6 +427,78 @@ apiTest.describe(
         expect(resolved?.anomalousValue).toBe('Crimea');
         expect(resolved?.baselineValues).toStrictEqual(['Texas', 'New York']);
         expect(resolved?.anomalousValueCount).toBe(2);
+      }
+    );
+
+    apiTest(
+      'Anomaly summary API: lists population-analysis records whose actual/typical live only in causes',
+      async ({ apiClient }) => {
+        // Henry's only anomaly comes from auth_rare_hour_for_a_user_ea, a population job
+        // (`over_field_name`). ML writes `actual` / `typical` on `causes[]` for such records, not at
+        // the top level. The page must contain every record the query counts in `total`, with the
+        // values read from the first cause, rather than reporting total=1 and an empty page.
+        const response = await apiClient.post(buildUrl(HENRY_EUID, 'user'), {
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
+          responseType: 'json',
+          body: {},
+        });
+
+        expect(response.statusCode).toBe(200);
+        const body = response.body as AnomalySummaryResponse;
+        expect(body.entity_id).toBe(HENRY_EUID);
+        expect(body.total).toBe(1);
+        expect(body.anomalies).toHaveLength(body.total);
+
+        const [anomaly] = body.anomalies;
+        expect(anomaly.recordId).toBe(POPULATION_ANOMALY_RECORD_ID);
+        expect(anomaly.jobId).toBe('auth_rare_hour_for_a_user_ea');
+        expect(anomaly.jobName).toBe('Unusual Hour for a User to Logon');
+        expect(anomaly.entityId).toBe(HENRY_EUID);
+        expect(anomaly.detectorFunction).toBe('time_of_day');
+        expect(anomaly.overFieldName).toBe('source.geo.region_iso_code');
+        expect(anomaly.overFieldValue).toBe('US-CA');
+        expect(anomaly.actual).toStrictEqual([POPULATION_ANOMALY_ACTUAL]);
+        expect(anomaly.typical).toStrictEqual([POPULATION_ANOMALY_TYPICAL]);
+      }
+    );
+
+    apiTest(
+      'Anomaly summary API: derives baseline and anomalous value of population-analysis records from causes',
+      async ({ apiClient, config }) => {
+        apiTest.skip(
+          config.isCloud && config.serverless,
+          'Skipped on serverless MKI — ML datafeed setup is not properly supported'
+        );
+        const response = await apiClient.post(buildUrl(HENRY_EUID, 'user'), {
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
+          responseType: 'json',
+          body: {},
+        });
+
+        expect(response.statusCode).toBe(200);
+        const [anomaly] = (response.body as AnomalySummaryResponse).anomalies;
+        // time_ detectors use the record's own typical/actual as baseline/anomalous value.
+        expect(anomaly.baselineValues).toStrictEqual([String(POPULATION_ANOMALY_TYPICAL)]);
+        expect(anomaly.anomalousValue).toBe(String(POPULATION_ANOMALY_ACTUAL));
+      }
+    );
+
+    apiTest(
+      'Anomaly overview API: counts and lists population-analysis records consistently with the summary',
+      async ({ apiClient }) => {
+        const response = await apiClient.post(buildOverviewUrl(HENRY_EUID, 'user'), {
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
+          responseType: 'json',
+          body: {},
+        });
+
+        expect(response).toHaveStatusCode(200);
+        const body = response.body as AnomalyOverviewResponse;
+        expect(body.totalAnomaliesCount).toBe(1);
+        expect(body.recentAnomalies).toHaveLength(1);
+        expect(body.recentAnomalies[0].recordId).toBe(POPULATION_ANOMALY_RECORD_ID);
+        // time_of_day: `actual` (seconds since midnight, from causes[0]) formatted as HH:MM.
+        expect(body.recentAnomalies[0].anomalousValue).toBe('03:11');
       }
     );
 

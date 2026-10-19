@@ -404,21 +404,51 @@ describe('searchEntityAnomalies', () => {
     expect(result.hits[1]._id).toBe('h2');
   });
 
-  it('skips hits where actual or typical is missing', async () => {
-    for (const field of ['actual', 'typical'] as const) {
-      jest.clearAllMocks();
-      mockMlAnomalySearch = jest.fn().mockResolvedValue(makeResponse([]));
-      mockMl = {
-        mlSystemProvider: jest.fn().mockReturnValue({ mlAnomalySearch: mockMlAnomalySearch }),
-      } as unknown as MlPluginSetup;
+  it('keeps hits where actual or typical is missing so the page matches the total', async () => {
+    const hit = makeHit({ id: 'no-values', entityId: 'user:alice' });
+    delete (hit._source as Record<string, unknown>).actual;
+    delete (hit._source as Record<string, unknown>).typical;
+    mockMlAnomalySearch.mockResolvedValueOnce(makeResponse([hit], 1));
 
-      const hit = makeHit({ entityId: 'user:alice' });
-      delete (hit._source as Record<string, unknown>)[field];
-      mockMlAnomalySearch.mockResolvedValueOnce(makeResponse([hit]));
+    const result = await searchEntityAnomalies({ ...defaultOpts, logger, ml: mockMl, soClient });
 
-      const result = await searchEntityAnomalies({ ...defaultOpts, logger, ml: mockMl, soClient });
-      expect(result.hits).toEqual([]);
-    }
+    expect(result.total).toBe(1);
+    expect(result.hits).toHaveLength(1);
+    expect(result.hits[0]._id).toBe('no-values');
+    expect(result.hits[0]).not.toHaveProperty('actual');
+    expect(result.hits[0]).not.toHaveProperty('typical');
+  });
+
+  it('falls back to the first cause for actual/typical on population-analysis records', async () => {
+    const hit = makeHit({
+      id: 'population',
+      entityId: 'user:alice',
+      causes: [
+        { actual: [42], typical: [3] },
+        { actual: [7], typical: [1] },
+      ],
+    });
+    delete (hit._source as Record<string, unknown>).actual;
+    delete (hit._source as Record<string, unknown>).typical;
+    mockMlAnomalySearch.mockResolvedValueOnce(makeResponse([hit]));
+
+    const result = await searchEntityAnomalies({ ...defaultOpts, logger, ml: mockMl, soClient });
+
+    expect(result.hits[0]).toMatchObject({ _id: 'population', actual: 42, typical: 3 });
+  });
+
+  it('prefers top-level actual/typical over causes when both are present', async () => {
+    const hit = makeHit({
+      entityId: 'user:alice',
+      actual: [10],
+      typical: [2],
+      causes: [{ actual: [99], typical: [98] }],
+    });
+    mockMlAnomalySearch.mockResolvedValueOnce(makeResponse([hit]));
+
+    const result = await searchEntityAnomalies({ ...defaultOpts, logger, ml: mockMl, soClient });
+
+    expect(result.hits[0]).toMatchObject({ actual: 10, typical: 2 });
   });
 
   it('skips hits where detector_index is missing', async () => {

@@ -175,11 +175,15 @@ const fetchRareBaselineForAnomaly = async ({
   }
 };
 
-const defaultBaselineForAnomaly = ({ anomaly }: QuerySharedOpts): EnrichedAnomalyHit => ({
+// Baseline / anomalous value straight from the record; omitted when the record has none.
+const withRecordValues = (anomaly: AnomalyHit): EnrichedAnomalyHit => ({
   ...anomaly,
-  anomalousValue: anomaly.actual,
-  baselineValues: [anomaly.typical],
+  ...(anomaly.actual !== undefined && { anomalousValue: anomaly.actual }),
+  ...(anomaly.typical !== undefined && { baselineValues: [anomaly.typical] }),
 });
+
+const defaultBaselineForAnomaly = ({ anomaly }: QuerySharedOpts): EnrichedAnomalyHit =>
+  withRecordValues(anomaly);
 
 const fetchTimeBaselineForAnomaly = async ({
   anomaly,
@@ -194,6 +198,12 @@ const fetchTimeBaselineForAnomaly = async ({
   jobConfig,
   jobId,
 }: QuerySharedOpts): Promise<EnrichedAnomalyHit> => {
+  // The anomalous time bucket is derived from `actual`; without it there is no bucket to count.
+  const { actual } = anomaly;
+  if (actual === undefined) {
+    return withRecordValues(anomaly);
+  }
+
   try {
     const termsFields = getNonEntityGroupFields(detector, entityType);
     const isTimeOfWeek = detector.function === 'time_of_week';
@@ -204,10 +214,8 @@ const fetchTimeBaselineForAnomaly = async ({
     });
 
     // Derive the anomalous hour and day from actual (seconds since midnight / week-start)
-    const anomalousHour = Math.floor(
-      (isTimeOfWeek ? anomaly.actual % 86400 : anomaly.actual) / 3600
-    );
-    const anomalousDay = isTimeOfWeek ? Math.floor(anomaly.actual / 86400) : null;
+    const anomalousHour = Math.floor((isTimeOfWeek ? actual % 86400 : actual) / 3600);
+    const anomalousDay = isTimeOfWeek ? Math.floor(actual / 86400) : null;
 
     const timeBucketFilter: QueryDslQueryContainer =
       isTimeOfWeek && anomalousDay != null
@@ -263,14 +271,12 @@ const fetchTimeBaselineForAnomaly = async ({
 
     const aggs = resp.aggregations as unknown as BaselineAggType | undefined;
     return {
-      ...anomaly,
-      baselineValues: [anomaly.typical],
-      anomalousValue: anomaly.actual,
+      ...withRecordValues(anomaly),
       anomalousValueCount: aggs?.time_bucket?.doc_count ?? 0,
     };
   } catch (err) {
     logger.warn(`Baseline agg failed for job ${jobId}, entity ${entityIdLabel}: ${err}`);
-    return { ...anomaly };
+    return withRecordValues(anomaly);
   }
 };
 

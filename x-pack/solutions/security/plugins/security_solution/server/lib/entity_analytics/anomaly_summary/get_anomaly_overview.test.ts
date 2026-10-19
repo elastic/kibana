@@ -10,6 +10,7 @@ import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { getEntityAnomalyOverview } from './get_anomaly_overview';
 import { getJobConfig, getSecurityMlJobIds } from '../ml_anomaly_detection';
+import type { RawAnomalyRecord } from '../ml_anomaly_detection/types';
 
 jest.mock('../ml_anomaly_detection', () => ({
   ...jest.requireActual('../ml_anomaly_detection'),
@@ -84,6 +85,7 @@ interface RawHit {
   record_score: number;
   function?: string;
   actual?: number[];
+  causes?: RawAnomalyRecord['causes'];
   by_field_value?: string;
   field_name?: string;
 }
@@ -437,6 +439,64 @@ describe('getEntityAnomalyOverview', () => {
         jobId: JOB,
         jobName: 'Auth Job',
         timestamp: new Date(FROM_MS + 1000).toISOString(),
+      });
+    });
+
+    it('derives anomalousValue from the first cause on population-analysis records', async () => {
+      mockGetSecurityMlJobIds.mockResolvedValue([JOB]);
+      mockGetJobConfig.mockResolvedValue(
+        new Map([
+          [
+            JOB,
+            {
+              threatTactics: [],
+              threatTechniques: [],
+              detectors: [{ function: 'high_count', over_field_name: 'user.name' }],
+              jobName: 'Population Job',
+            },
+          ],
+        ])
+      );
+      mockMlAnomalySearch.mockResolvedValue(
+        makeSearchResponse(
+          [
+            {
+              key: FROM_MS + 1000,
+              doc_count: 1,
+              max_score: 60,
+              jobBuckets: [{ key: JOB, doc_count: 1 }],
+            },
+          ],
+          [JOB],
+          1,
+          [
+            {
+              _id: 'rec-pop',
+              job_id: JOB,
+              detector_index: 0,
+              timestamp: FROM_MS + 1000,
+              record_score: 60,
+              causes: [
+                {
+                  function: 'high_count',
+                  function_description: 'count',
+                  probability: 0.001,
+                  over_field_name: 'user.name',
+                  over_field_value: 'svc-backup',
+                  actual: [1423],
+                  typical: [12.5],
+                },
+              ],
+            },
+          ]
+        )
+      );
+
+      const result = await getEntityAnomalyOverview(baseParams);
+
+      expect(result.recentAnomalies[0]).toMatchObject({
+        recordId: 'rec-pop',
+        anomalousValue: '1423 events',
       });
     });
   });
