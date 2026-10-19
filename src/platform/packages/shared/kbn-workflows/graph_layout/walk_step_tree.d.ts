@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { Step } from './types';
 /**
  * Discriminated union describing the structural slot (YAML key) a child list
@@ -8,28 +17,38 @@ import type { Step } from './types';
  * `BranchSlot` is the addressable subset used in `WorkflowGraphInsertionContext`;
  * `fallback` / `iteration-fallback` are addressed via `mode: 'fallback'` instead.
  */
-export type StepChildSlot = {
-    readonly kind: 'steps';
-} | {
-    readonly kind: 'else';
-} | {
-    readonly kind: 'branch';
-    readonly index: number;
-    readonly name?: string;
-} | {
-    readonly kind: 'case';
-    readonly index: number;
-    readonly match: string | number | boolean;
-} | {
-    readonly kind: 'default';
-} | {
-    readonly kind: 'fallback';
-} | {
-    readonly kind: 'iteration-fallback';
-};
-export type BranchSlot = Extract<StepChildSlot, {
+export type StepChildSlot =
+  | {
+      readonly kind: 'steps';
+    }
+  | {
+      readonly kind: 'else';
+    }
+  | {
+      readonly kind: 'branch';
+      readonly index: number;
+      readonly name?: string;
+    }
+  | {
+      readonly kind: 'case';
+      readonly index: number;
+      readonly match: string | number | boolean;
+    }
+  | {
+      readonly kind: 'default';
+    }
+  | {
+      readonly kind: 'fallback';
+    }
+  | {
+      readonly kind: 'iteration-fallback';
+    };
+export type BranchSlot = Extract<
+  StepChildSlot,
+  {
     kind: 'steps' | 'else' | 'branch' | 'case' | 'default';
-}>;
+  }
+>;
 /**
  * Enumerates every child-step slot inside a step, calling `visit` once per
  * declared slot. Covers `steps`, `else`, `branches[]`, `cases[]`, `default`,
@@ -39,19 +58,35 @@ export type BranchSlot = Extract<StepChildSlot, {
  * absent or empty — callers may rely on presence vs. absence to distinguish
  * an empty branch from a missing one (e.g. for bypass-lane synthesis).
  */
-export declare const visitStepChildSlots: (step: Step, visit: (slot: StepChildSlot, steps: Step[]) => void) => void;
+export declare const visitStepChildSlots: (
+  step: Step,
+  visit: (slot: StepChildSlot, steps: Step[]) => void
+) => void;
 /**
  * Recursively walks a step tree depth-first, calling `visitor` for every step
  * including nested children in all slot kinds.
  */
-export declare const walkStepTree: (steps: ReadonlyArray<Step>, visitor: (step: Step, depth: number) => void, depth?: number) => void;
+export declare const walkStepTree: (
+  steps: ReadonlyArray<Step>,
+  visitor: (step: Step, depth: number) => void,
+  depth?: number
+) => void;
 /**
  * Canonical list of YAML keys under which child steps may appear, derived from
  * the slot kinds above. Used by YAML-AST walkers that need key names rather
  * than slot objects. Kept in sync with `visitStepChildSlots` by the
  * object-model ↔ AST invariant test.
  */
-export declare const STEP_CHILD_CONTAINER_KEYS: readonly ['steps', 'else', 'branches', 'cases', 'default', 'on-failure', 'iteration-on-failure', 'fallback'];
+export declare const STEP_CHILD_CONTAINER_KEYS: readonly [
+  'steps',
+  'else',
+  'branches',
+  'cases',
+  'default',
+  'on-failure',
+  'iteration-on-failure',
+  'fallback'
+];
 export type StepChildContainerKey = (typeof STEP_CHILD_CONTAINER_KEYS)[number];
 /** @deprecated Use `visitStepChildSlots` instead. Kept for callers not yet migrated. */
 export declare const visitStepChildren: (step: Step, callback: (children: Step[]) => void) => void;

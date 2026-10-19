@@ -1,29 +1,41 @@
-import { z } from '@kbn/zod/v4';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { z } from '@kbn/zod/v4';
 import type { InternalConnectorContract } from '../..';
 /**
  * Enhanced connector definition that extends auto-generated connectors
  * with better examples, documentation, and user-friendly schemas
  */
 export interface EnhancedConnectorDefinition {
-    /** The connector type to enhance (must match generated connector) */
-    type: string;
-    /** Enhanced parameter schema with examples and better descriptions */
-    enhancedParamsSchema?: z.ZodType;
-    /** Enhanced description with usage examples */
-    enhancedDescription?: string;
-    /** Example usage snippets for autocomplete */
-    examples?: {
-        /** Example parameter values for autocomplete */
-        params?: Record<string, any>;
-        /** Full example workflow step */
-        snippet?: string;
-    };
-    /** Override specific parameters with better schemas/examples */
-    parameterEnhancements?: Record<string, {
-        schema?: z.ZodType;
-        example?: unknown;
-        description?: string;
-    }>;
+  /** The connector type to enhance (must match generated connector) */
+  type: string;
+  /** Enhanced parameter schema with examples and better descriptions */
+  enhancedParamsSchema?: z.ZodType;
+  /** Enhanced description with usage examples */
+  enhancedDescription?: string;
+  /** Example usage snippets for autocomplete */
+  examples?: {
+    /** Example parameter values for autocomplete */
+    params?: Record<string, any>;
+    /** Full example workflow step */
+    snippet?: string;
+  };
+  /** Override specific parameters with better schemas/examples */
+  parameterEnhancements?: Record<
+    string,
+    {
+      schema?: z.ZodType;
+      example?: unknown;
+      description?: string;
+    }
+  >;
 }
 /**
  * Enhanced Elasticsearch connectors with better examples and documentation
@@ -32,4 +44,7 @@ export declare const ENHANCED_ELASTICSEARCH_CONNECTORS: EnhancedConnectorDefinit
 /**
  * Merge enhanced connector definitions with auto-generated connectors
  */
-export declare function mergeEnhancedConnectors(generatedConnectors: InternalConnectorContract[], enhancedConnectors: EnhancedConnectorDefinition[]): InternalConnectorContract[];
+export declare function mergeEnhancedConnectors(
+  generatedConnectors: InternalConnectorContract[],
+  enhancedConnectors: EnhancedConnectorDefinition[]
+): InternalConnectorContract[];

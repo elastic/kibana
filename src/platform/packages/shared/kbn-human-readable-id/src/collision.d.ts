@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 /**
  * Builds a single suffixed candidate ID from a base ID and a numeric index.
  * Truncates the base when appending the suffix would exceed HUMAN_READABLE_ID_MAX_LENGTH
@@ -18,4 +27,8 @@ export declare const buildCandidateIds: (baseId: string) => string[];
  * Resolves a non-colliding ID by appending a numeric suffix (-1, -2, ...).
  * Returns the first ID that is not in `conflictIds`, or falls back to `fallbackId`.
  */
-export declare const resolveCollisionId: (baseId: string, conflictIds: ReadonlySet<string>, fallbackId: string) => string;
+export declare const resolveCollisionId: (
+  baseId: string,
+  conflictIds: ReadonlySet<string>,
+  fallbackId: string
+) => string;

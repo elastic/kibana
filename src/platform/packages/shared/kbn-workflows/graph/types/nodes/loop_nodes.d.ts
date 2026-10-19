@@ -1,198 +1,351 @@
-import { z } from '@kbn/zod/v4';
-export declare const EnterForeachNodeConfigurationSchema: z.ZodObject<{
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { z } from '@kbn/zod/v4';
+export declare const EnterForeachNodeConfigurationSchema: z.ZodObject<
+  {
     name: z.ZodString;
     'max-step-size': z.ZodOptional<z.ZodString>;
     if: z.ZodOptional<z.ZodString>;
     timeout: z.ZodOptional<z.ZodString>;
-    'max-iterations': z.ZodOptional<z.ZodUnion<readonly [z.ZodNumber, z.ZodObject<{
-        limit: z.ZodNumber;
-        'on-limit': z.ZodEnum<{
-            continue: "continue";
-            fail: "fail";
-        }>;
-    }, z.core.$strip>]>>;
+    'max-iterations': z.ZodOptional<
+      z.ZodUnion<
+        readonly [
+          z.ZodNumber,
+          z.ZodObject<
+            {
+              limit: z.ZodNumber;
+              'on-limit': z.ZodEnum<{
+                continue: 'continue';
+                fail: 'fail';
+              }>;
+            },
+            z.core.$strip
+          >
+        ]
+      >
+    >;
     'iteration-timeout': z.ZodOptional<z.ZodString>;
-    'iteration-on-failure': z.ZodOptional<z.ZodObject<{
-        retry: z.ZodOptional<z.ZodObject<{
-            'max-attempts': z.ZodNumber;
-            condition: z.ZodOptional<z.ZodString>;
-            delay: z.ZodOptional<z.ZodString>;
-            strategy: z.ZodOptional<z.ZodEnum<{
-                exponential: "exponential";
-                fixed: "fixed";
-            }>>;
-            multiplier: z.ZodOptional<z.ZodNumber>;
-            'max-delay': z.ZodOptional<z.ZodString>;
-            jitter: z.ZodOptional<z.ZodBoolean>;
-        }, z.core.$strip>>;
-        fallback: z.ZodOptional<z.ZodArray<z.ZodObject<{
-            name: z.ZodString;
-            type: z.ZodString;
-            'max-step-size': z.ZodOptional<z.ZodString>;
-            if: z.ZodOptional<z.ZodString>;
-        }, z.core.$strip>>>;
-        continue: z.ZodOptional<z.ZodUnion<readonly [z.ZodBoolean, z.ZodString]>>;
-    }, z.core.$strip>>;
+    'iteration-on-failure': z.ZodOptional<
+      z.ZodObject<
+        {
+          retry: z.ZodOptional<
+            z.ZodObject<
+              {
+                'max-attempts': z.ZodNumber;
+                condition: z.ZodOptional<z.ZodString>;
+                delay: z.ZodOptional<z.ZodString>;
+                strategy: z.ZodOptional<
+                  z.ZodEnum<{
+                    exponential: 'exponential';
+                    fixed: 'fixed';
+                  }>
+                >;
+                multiplier: z.ZodOptional<z.ZodNumber>;
+                'max-delay': z.ZodOptional<z.ZodString>;
+                jitter: z.ZodOptional<z.ZodBoolean>;
+              },
+              z.core.$strip
+            >
+          >;
+          fallback: z.ZodOptional<
+            z.ZodArray<
+              z.ZodObject<
+                {
+                  name: z.ZodString;
+                  type: z.ZodString;
+                  'max-step-size': z.ZodOptional<z.ZodString>;
+                  if: z.ZodOptional<z.ZodString>;
+                },
+                z.core.$strip
+              >
+            >
+          >;
+          continue: z.ZodOptional<z.ZodUnion<readonly [z.ZodBoolean, z.ZodString]>>;
+        },
+        z.core.$strip
+      >
+    >;
     foreach: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnknown>]>;
-    type: z.ZodLiteral<"foreach">;
-}, z.core.$strip>;
+    type: z.ZodLiteral<'foreach'>;
+  },
+  z.core.$strip
+>;
 export type EnterForeachNodeConfiguration = z.infer<typeof EnterForeachNodeConfigurationSchema>;
-export declare const EnterForeachNodeSchema: z.ZodObject<{
+export declare const EnterForeachNodeSchema: z.ZodObject<
+  {
     stepId: z.ZodString;
     stepType: z.ZodString;
     templateDependencies: z.ZodOptional<z.ZodArray<z.ZodUnknown>>;
     id: z.ZodString;
-    type: z.ZodLiteral<"enter-foreach">;
+    type: z.ZodLiteral<'enter-foreach'>;
     exitNodeId: z.ZodString;
-    configuration: z.ZodObject<{
+    configuration: z.ZodObject<
+      {
         name: z.ZodString;
         'max-step-size': z.ZodOptional<z.ZodString>;
         if: z.ZodOptional<z.ZodString>;
         timeout: z.ZodOptional<z.ZodString>;
-        'max-iterations': z.ZodOptional<z.ZodUnion<readonly [z.ZodNumber, z.ZodObject<{
-            limit: z.ZodNumber;
-            'on-limit': z.ZodEnum<{
-                continue: "continue";
-                fail: "fail";
-            }>;
-        }, z.core.$strip>]>>;
+        'max-iterations': z.ZodOptional<
+          z.ZodUnion<
+            readonly [
+              z.ZodNumber,
+              z.ZodObject<
+                {
+                  limit: z.ZodNumber;
+                  'on-limit': z.ZodEnum<{
+                    continue: 'continue';
+                    fail: 'fail';
+                  }>;
+                },
+                z.core.$strip
+              >
+            ]
+          >
+        >;
         'iteration-timeout': z.ZodOptional<z.ZodString>;
-        'iteration-on-failure': z.ZodOptional<z.ZodObject<{
-            retry: z.ZodOptional<z.ZodObject<{
-                'max-attempts': z.ZodNumber;
-                condition: z.ZodOptional<z.ZodString>;
-                delay: z.ZodOptional<z.ZodString>;
-                strategy: z.ZodOptional<z.ZodEnum<{
-                    exponential: "exponential";
-                    fixed: "fixed";
-                }>>;
-                multiplier: z.ZodOptional<z.ZodNumber>;
-                'max-delay': z.ZodOptional<z.ZodString>;
-                jitter: z.ZodOptional<z.ZodBoolean>;
-            }, z.core.$strip>>;
-            fallback: z.ZodOptional<z.ZodArray<z.ZodObject<{
-                name: z.ZodString;
-                type: z.ZodString;
-                'max-step-size': z.ZodOptional<z.ZodString>;
-                if: z.ZodOptional<z.ZodString>;
-            }, z.core.$strip>>>;
-            continue: z.ZodOptional<z.ZodUnion<readonly [z.ZodBoolean, z.ZodString]>>;
-        }, z.core.$strip>>;
+        'iteration-on-failure': z.ZodOptional<
+          z.ZodObject<
+            {
+              retry: z.ZodOptional<
+                z.ZodObject<
+                  {
+                    'max-attempts': z.ZodNumber;
+                    condition: z.ZodOptional<z.ZodString>;
+                    delay: z.ZodOptional<z.ZodString>;
+                    strategy: z.ZodOptional<
+                      z.ZodEnum<{
+                        exponential: 'exponential';
+                        fixed: 'fixed';
+                      }>
+                    >;
+                    multiplier: z.ZodOptional<z.ZodNumber>;
+                    'max-delay': z.ZodOptional<z.ZodString>;
+                    jitter: z.ZodOptional<z.ZodBoolean>;
+                  },
+                  z.core.$strip
+                >
+              >;
+              fallback: z.ZodOptional<
+                z.ZodArray<
+                  z.ZodObject<
+                    {
+                      name: z.ZodString;
+                      type: z.ZodString;
+                      'max-step-size': z.ZodOptional<z.ZodString>;
+                      if: z.ZodOptional<z.ZodString>;
+                    },
+                    z.core.$strip
+                  >
+                >
+              >;
+              continue: z.ZodOptional<z.ZodUnion<readonly [z.ZodBoolean, z.ZodString]>>;
+            },
+            z.core.$strip
+          >
+        >;
         foreach: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnknown>]>;
-        type: z.ZodLiteral<"foreach">;
-    }, z.core.$strip>;
-}, z.core.$strip>;
+        type: z.ZodLiteral<'foreach'>;
+      },
+      z.core.$strip
+    >;
+  },
+  z.core.$strip
+>;
 export type EnterForeachNode = z.infer<typeof EnterForeachNodeSchema>;
-export declare const ExitForeachNodeSchema: z.ZodObject<{
+export declare const ExitForeachNodeSchema: z.ZodObject<
+  {
     stepId: z.ZodString;
     stepType: z.ZodString;
     templateDependencies: z.ZodOptional<z.ZodArray<z.ZodUnknown>>;
     id: z.ZodString;
-    type: z.ZodLiteral<"exit-foreach">;
+    type: z.ZodLiteral<'exit-foreach'>;
     startNodeId: z.ZodString;
     maxIterations: z.ZodOptional<z.ZodNumber>;
-    onLimit: z.ZodOptional<z.ZodEnum<{
-        continue: "continue";
-        fail: "fail";
-    }>>;
-}, z.core.$strip>;
+    onLimit: z.ZodOptional<
+      z.ZodEnum<{
+        continue: 'continue';
+        fail: 'fail';
+      }>
+    >;
+  },
+  z.core.$strip
+>;
 export type ExitForeachNode = z.infer<typeof ExitForeachNodeSchema>;
-export declare const EnterWhileNodeConfigurationSchema: z.ZodObject<{
+export declare const EnterWhileNodeConfigurationSchema: z.ZodObject<
+  {
     name: z.ZodString;
     'max-step-size': z.ZodOptional<z.ZodString>;
     if: z.ZodOptional<z.ZodString>;
     timeout: z.ZodOptional<z.ZodString>;
-    'max-iterations': z.ZodOptional<z.ZodUnion<readonly [z.ZodNumber, z.ZodObject<{
-        limit: z.ZodNumber;
-        'on-limit': z.ZodEnum<{
-            continue: "continue";
-            fail: "fail";
-        }>;
-    }, z.core.$strip>]>>;
+    'max-iterations': z.ZodOptional<
+      z.ZodUnion<
+        readonly [
+          z.ZodNumber,
+          z.ZodObject<
+            {
+              limit: z.ZodNumber;
+              'on-limit': z.ZodEnum<{
+                continue: 'continue';
+                fail: 'fail';
+              }>;
+            },
+            z.core.$strip
+          >
+        ]
+      >
+    >;
     'iteration-timeout': z.ZodOptional<z.ZodString>;
-    'iteration-on-failure': z.ZodOptional<z.ZodObject<{
-        retry: z.ZodOptional<z.ZodObject<{
-            'max-attempts': z.ZodNumber;
-            condition: z.ZodOptional<z.ZodString>;
-            delay: z.ZodOptional<z.ZodString>;
-            strategy: z.ZodOptional<z.ZodEnum<{
-                exponential: "exponential";
-                fixed: "fixed";
-            }>>;
-            multiplier: z.ZodOptional<z.ZodNumber>;
-            'max-delay': z.ZodOptional<z.ZodString>;
-            jitter: z.ZodOptional<z.ZodBoolean>;
-        }, z.core.$strip>>;
-        fallback: z.ZodOptional<z.ZodArray<z.ZodObject<{
-            name: z.ZodString;
-            type: z.ZodString;
-            'max-step-size': z.ZodOptional<z.ZodString>;
-            if: z.ZodOptional<z.ZodString>;
-        }, z.core.$strip>>>;
-        continue: z.ZodOptional<z.ZodUnion<readonly [z.ZodBoolean, z.ZodString]>>;
-    }, z.core.$strip>>;
+    'iteration-on-failure': z.ZodOptional<
+      z.ZodObject<
+        {
+          retry: z.ZodOptional<
+            z.ZodObject<
+              {
+                'max-attempts': z.ZodNumber;
+                condition: z.ZodOptional<z.ZodString>;
+                delay: z.ZodOptional<z.ZodString>;
+                strategy: z.ZodOptional<
+                  z.ZodEnum<{
+                    exponential: 'exponential';
+                    fixed: 'fixed';
+                  }>
+                >;
+                multiplier: z.ZodOptional<z.ZodNumber>;
+                'max-delay': z.ZodOptional<z.ZodString>;
+                jitter: z.ZodOptional<z.ZodBoolean>;
+              },
+              z.core.$strip
+            >
+          >;
+          fallback: z.ZodOptional<
+            z.ZodArray<
+              z.ZodObject<
+                {
+                  name: z.ZodString;
+                  type: z.ZodString;
+                  'max-step-size': z.ZodOptional<z.ZodString>;
+                  if: z.ZodOptional<z.ZodString>;
+                },
+                z.core.$strip
+              >
+            >
+          >;
+          continue: z.ZodOptional<z.ZodUnion<readonly [z.ZodBoolean, z.ZodString]>>;
+        },
+        z.core.$strip
+      >
+    >;
     condition: z.ZodString;
-    type: z.ZodLiteral<"while">;
-}, z.core.$strip>;
+    type: z.ZodLiteral<'while'>;
+  },
+  z.core.$strip
+>;
 export type EnterWhileNodeConfiguration = z.infer<typeof EnterWhileNodeConfigurationSchema>;
-export declare const EnterWhileNodeSchema: z.ZodObject<{
+export declare const EnterWhileNodeSchema: z.ZodObject<
+  {
     stepId: z.ZodString;
     stepType: z.ZodString;
     templateDependencies: z.ZodOptional<z.ZodArray<z.ZodUnknown>>;
     id: z.ZodString;
-    type: z.ZodLiteral<"enter-while">;
+    type: z.ZodLiteral<'enter-while'>;
     exitNodeId: z.ZodString;
-    configuration: z.ZodObject<{
+    configuration: z.ZodObject<
+      {
         name: z.ZodString;
         'max-step-size': z.ZodOptional<z.ZodString>;
         if: z.ZodOptional<z.ZodString>;
         timeout: z.ZodOptional<z.ZodString>;
-        'max-iterations': z.ZodOptional<z.ZodUnion<readonly [z.ZodNumber, z.ZodObject<{
-            limit: z.ZodNumber;
-            'on-limit': z.ZodEnum<{
-                continue: "continue";
-                fail: "fail";
-            }>;
-        }, z.core.$strip>]>>;
+        'max-iterations': z.ZodOptional<
+          z.ZodUnion<
+            readonly [
+              z.ZodNumber,
+              z.ZodObject<
+                {
+                  limit: z.ZodNumber;
+                  'on-limit': z.ZodEnum<{
+                    continue: 'continue';
+                    fail: 'fail';
+                  }>;
+                },
+                z.core.$strip
+              >
+            ]
+          >
+        >;
         'iteration-timeout': z.ZodOptional<z.ZodString>;
-        'iteration-on-failure': z.ZodOptional<z.ZodObject<{
-            retry: z.ZodOptional<z.ZodObject<{
-                'max-attempts': z.ZodNumber;
-                condition: z.ZodOptional<z.ZodString>;
-                delay: z.ZodOptional<z.ZodString>;
-                strategy: z.ZodOptional<z.ZodEnum<{
-                    exponential: "exponential";
-                    fixed: "fixed";
-                }>>;
-                multiplier: z.ZodOptional<z.ZodNumber>;
-                'max-delay': z.ZodOptional<z.ZodString>;
-                jitter: z.ZodOptional<z.ZodBoolean>;
-            }, z.core.$strip>>;
-            fallback: z.ZodOptional<z.ZodArray<z.ZodObject<{
-                name: z.ZodString;
-                type: z.ZodString;
-                'max-step-size': z.ZodOptional<z.ZodString>;
-                if: z.ZodOptional<z.ZodString>;
-            }, z.core.$strip>>>;
-            continue: z.ZodOptional<z.ZodUnion<readonly [z.ZodBoolean, z.ZodString]>>;
-        }, z.core.$strip>>;
+        'iteration-on-failure': z.ZodOptional<
+          z.ZodObject<
+            {
+              retry: z.ZodOptional<
+                z.ZodObject<
+                  {
+                    'max-attempts': z.ZodNumber;
+                    condition: z.ZodOptional<z.ZodString>;
+                    delay: z.ZodOptional<z.ZodString>;
+                    strategy: z.ZodOptional<
+                      z.ZodEnum<{
+                        exponential: 'exponential';
+                        fixed: 'fixed';
+                      }>
+                    >;
+                    multiplier: z.ZodOptional<z.ZodNumber>;
+                    'max-delay': z.ZodOptional<z.ZodString>;
+                    jitter: z.ZodOptional<z.ZodBoolean>;
+                  },
+                  z.core.$strip
+                >
+              >;
+              fallback: z.ZodOptional<
+                z.ZodArray<
+                  z.ZodObject<
+                    {
+                      name: z.ZodString;
+                      type: z.ZodString;
+                      'max-step-size': z.ZodOptional<z.ZodString>;
+                      if: z.ZodOptional<z.ZodString>;
+                    },
+                    z.core.$strip
+                  >
+                >
+              >;
+              continue: z.ZodOptional<z.ZodUnion<readonly [z.ZodBoolean, z.ZodString]>>;
+            },
+            z.core.$strip
+          >
+        >;
         condition: z.ZodString;
-        type: z.ZodLiteral<"while">;
-    }, z.core.$strip>;
-}, z.core.$strip>;
+        type: z.ZodLiteral<'while'>;
+      },
+      z.core.$strip
+    >;
+  },
+  z.core.$strip
+>;
 export type EnterWhileNode = z.infer<typeof EnterWhileNodeSchema>;
-export declare const ExitWhileNodeSchema: z.ZodObject<{
+export declare const ExitWhileNodeSchema: z.ZodObject<
+  {
     stepId: z.ZodString;
     stepType: z.ZodString;
     templateDependencies: z.ZodOptional<z.ZodArray<z.ZodUnknown>>;
     id: z.ZodString;
-    type: z.ZodLiteral<"exit-while">;
+    type: z.ZodLiteral<'exit-while'>;
     startNodeId: z.ZodString;
     condition: z.ZodString;
     maxIterations: z.ZodOptional<z.ZodNumber>;
-    onLimit: z.ZodOptional<z.ZodEnum<{
-        continue: "continue";
-        fail: "fail";
-    }>>;
-}, z.core.$strip>;
+    onLimit: z.ZodOptional<
+      z.ZodEnum<{
+        continue: 'continue';
+        fail: 'fail';
+      }>
+    >;
+  },
+  z.core.$strip
+>;
 export type ExitWhileNode = z.infer<typeof ExitWhileNodeSchema>;

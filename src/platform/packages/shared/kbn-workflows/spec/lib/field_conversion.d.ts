@@ -1,9 +1,20 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import type { JSONSchema7 } from 'json-schema';
 import type { Document } from 'yaml';
 import type { WorkflowOutput, WorkflowYaml } from '../schema';
 import type { JsonModelSchemaType } from '../schema/common/json_model_schema';
 import { type LegacyWorkflowInput } from '../schema/triggers/manual_trigger_schema';
-export type NormalizableFieldSchema = JsonModelSchemaType | Array<LegacyWorkflowInput | WorkflowOutput>;
+export type NormalizableFieldSchema =
+  | JsonModelSchemaType
+  | Array<LegacyWorkflowInput | WorkflowOutput>;
 /**
  * Indicates whether an input value comes from the workflow schema or the caller.
  */
@@ -14,14 +25,18 @@ export type RenderInputValue = (value: unknown, source: RenderInputValueSource) 
  * @param legacyFields - Array of legacy field definitions (inputs or outputs)
  * @returns The fields in the new JSON Schema object format
  */
-export declare function convertLegacyFieldsToJsonSchema(legacyFields: LegacyWorkflowInput[]): JsonModelSchemaType;
+export declare function convertLegacyFieldsToJsonSchema(
+  legacyFields: LegacyWorkflowInput[]
+): JsonModelSchemaType;
 /**
  * Normalizes workflow fields (inputs or outputs) to the JSON Schema object format.
  * If fields are already in JSON Schema format, returns them as-is.
  * If fields are in the legacy array format, converts them.
  * Accepts unknown to avoid explicit casts at call sites (runtime checks handle validation).
  */
-export declare function normalizeFieldsToJsonSchema(fields?: NormalizableFieldSchema | unknown): JsonModelSchemaType | undefined;
+export declare function normalizeFieldsToJsonSchema(
+  fields?: NormalizableFieldSchema | unknown
+): JsonModelSchemaType | undefined;
 /**
  * Resolves workflow inputs from the definition and normalizes them to JSON Schema object form.
  *
@@ -34,7 +49,9 @@ export declare function normalizeFieldsToJsonSchema(fields?: NormalizableFieldSc
  * Falls back to root-level `inputs` on the definition for backward compatibility when the manual
  * trigger block has no inputs.
  */
-export declare const getInputsFromDefinition: (definition: WorkflowYaml | Partial<WorkflowYaml> | undefined | null) => JsonModelSchemaType | undefined;
+export declare const getInputsFromDefinition: (
+  definition: WorkflowYaml | Partial<WorkflowYaml> | undefined | null
+) => JsonModelSchemaType | undefined;
 /**
  * Returns normalized workflow inputs (JSON Schema object form) from a definition and/or raw YAML.
  *
@@ -45,11 +62,17 @@ export declare const getInputsFromDefinition: (definition: WorkflowYaml | Partia
  *
  * Parse or extraction failures are ignored; the function returns `undefined` in those cases.
  */
-export declare function extractNormalizedInputsFromYaml(definition: WorkflowYaml | null, yaml?: Document | string | null): Record<string, unknown> | undefined;
+export declare function extractNormalizedInputsFromYaml(
+  definition: WorkflowYaml | null,
+  yaml?: Document | string | null
+): Record<string, unknown> | undefined;
 /**
  * Recursively checks if a schema has any defaults (direct or nested)
  */
-export declare function hasDefaultsRecursive(schema: JSONSchema7, inputsSchema?: ReturnType<typeof normalizeFieldsToJsonSchema>): boolean;
+export declare function hasDefaultsRecursive(
+  schema: JSONSchema7,
+  inputsSchema?: ReturnType<typeof normalizeFieldsToJsonSchema>
+): boolean;
 /**
  * Resolves a $ref reference within the inputs schema context, or from
  * {@link builtinWorkflowInputDefinitions} when the ref uses
@@ -59,11 +82,18 @@ export declare function hasDefaultsRecursive(schema: JSONSchema7, inputsSchema?:
  * @param inputsSchema - The full inputs schema containing definitions
  * @returns The resolved schema, or null if not found
  */
-export declare function resolveRef(ref: string, inputsSchema: ReturnType<typeof normalizeFieldsToJsonSchema>): JSONSchema7 | null;
+export declare function resolveRef(
+  ref: string,
+  inputsSchema: ReturnType<typeof normalizeFieldsToJsonSchema>
+): JSONSchema7 | null;
 /**
  * Applies default values from JSON Schema to workflow inputs
  * @param inputs - The actual input values provided (may be partial or undefined)
  * @param inputsSchema - The normalized JSON Schema inputs definition
  * @returns The inputs with defaults applied
  */
-export declare function applyInputDefaults(inputs: Record<string, unknown> | undefined, inputsSchema: ReturnType<typeof normalizeFieldsToJsonSchema>, renderInputValue?: RenderInputValue): Record<string, unknown> | undefined;
+export declare function applyInputDefaults(
+  inputs: Record<string, unknown> | undefined,
+  inputsSchema: ReturnType<typeof normalizeFieldsToJsonSchema>,
+  renderInputValue?: RenderInputValue
+): Record<string, unknown> | undefined;

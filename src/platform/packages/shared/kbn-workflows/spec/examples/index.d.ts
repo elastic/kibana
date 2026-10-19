@@ -1,11 +1,20 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 export interface WorkflowExampleEntry {
-    id: string;
-    name: string;
-    description: string;
-    category: string;
-    tags: string[];
-    /** Filename relative to the examples directory (e.g. "basic.yml") */
-    filename: string;
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  tags: string[];
+  /** Filename relative to the examples directory (e.g. "basic.yml") */
+  filename: string;
 }
 /**
  * Catalog of bundled workflow examples. Metadata only -- YAML content is loaded
@@ -22,8 +31,8 @@ export declare const WORKFLOW_EXAMPLE_IDS: Set<string>;
  * Returns metadata only (no YAML content).
  */
 export declare function getWorkflowExamples(filter?: {
-    category?: string;
-    search?: string;
+  category?: string;
+  search?: string;
 }): WorkflowExampleEntry[];
 /**
  * Look up a single catalog entry by id.
