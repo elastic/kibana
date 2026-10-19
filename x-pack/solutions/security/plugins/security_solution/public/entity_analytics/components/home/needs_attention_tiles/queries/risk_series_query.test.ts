@@ -6,6 +6,7 @@
  */
 
 import { buildRiskTilesSeriesQuery } from './risk_series_query';
+import { RISK_MOVER_MIN_SCORE_CHANGE } from './risk_history';
 
 const INDEX = '.entities-v1';
 
@@ -17,7 +18,7 @@ const INDEX = '.entities-v1';
 describe('risk tiles series query', () => {
   it('counts a mover when the score rose by 10 points, and ignores a missing score', () => {
     expect(buildRiskTilesSeriesQuery('default', INDEX, '24h')).toContain(
-      'mover_flag_0 = CASE(score_at_0 - score_at_24 >= 10, 1, null)'
+      `mover_flag_0 = CASE(score_at_0 - score_at_24 >= ${RISK_MOVER_MIN_SCORE_CHANGE}, 1, null)`
     );
   });
 

@@ -194,6 +194,12 @@ describe('RuleSummaryFlyout', () => {
     expect(screen.queryByTestId('mockActionPoliciesArtifacts')).not.toBeInTheDocument();
   });
 
+  it('renders the Universal badge', () => {
+    renderFlyout();
+
+    expect(screen.getByTestId('universalRulesBadge')).toHaveTextContent('Universal');
+  });
+
   it('shows last-update timestamp and audit info blocks in the header', () => {
     renderFlyout();
 
