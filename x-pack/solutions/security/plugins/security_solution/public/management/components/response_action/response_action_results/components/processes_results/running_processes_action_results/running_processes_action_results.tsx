@@ -9,19 +9,19 @@ import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiAccordionProps, EuiTextProps } from '@elastic/eui';
 import { EuiAccordion, EuiBasicTable, EuiSpacer, EuiText, useGeneratedHtmlId } from '@elastic/eui';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/css';
-import { EndpointActionFailureMessage } from '../endpoint_action_failure_message';
-import { useUserPrivileges } from '../../../common/components/user_privileges';
-import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
-import { ResponseActionFileDownloadLink } from '../response_action/response_action_results/components/response_action_file_download_link';
-import { getAgentActionState } from '../response_action/response_action_results/utils';
+import { EndpointActionFailureMessage } from '../../../../../endpoint_action_failure_message';
+import { useUserPrivileges } from '../../../../../../../common/components/user_privileges';
+import { useTestIdGenerator } from '../../../../../../hooks/use_test_id_generator';
+import { ResponseActionFileDownloadLink } from '../../response_action_file_download_link';
+import { getAgentActionState } from '../../../utils';
 import type {
   ActionDetails,
   GetProcessesActionOutputContent,
   MaybeImmutable,
-} from '../../../../common/endpoint/types';
+} from '../../../../../../../../common/endpoint/types';
 
 export interface RunningProcessesActionResultsProps {
   action: MaybeImmutable<ActionDetails<GetProcessesActionOutputContent>>;
@@ -83,16 +83,18 @@ const StyledEuiBasicTable = styled(EuiBasicTable)`
   }
 
   .euiTableHeaderCell {
-    border-bottom: ${(props) => props.theme.eui.euiBorderThin};
+    border-bottom: ${(props) => {
+      return props.theme.euiTheme.border.thin;
+    }};
 
     .euiTableCellContent__text {
-      font-weight: ${(props) => props.theme.eui.euiFontWeightRegular};
+      font-weight: ${(props) => props.theme.euiTheme.font.weight.regular};
     }
   }
 
   .euiTableRow {
     &:hover {
-      background-color: ${({ theme: { eui } }) => eui.euiColorEmptyShade} !important;
+      background-color: ${({ theme: { euiTheme } }) => euiTheme.colors.emptyShade} !important;
     }
 
     .euiTableRowCell {
