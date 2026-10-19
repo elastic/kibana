@@ -25,7 +25,7 @@ describe('risk tiles series query', () => {
   it('reads back 310 hours for 7d and keeps only the docs in the two hours before a moment a dot needs', () => {
     const query = buildRiskTilesSeriesQuery('default', INDEX, '7d');
     expect(query).toContain('| WHERE @timestamp >= NOW() - 310h');
-    expect(query).toContain('| WHERE hours_back % 28 < 2');
+    expect(query).not.toContain('hours_back %');
   });
 
   it('reads only the two-hour window of each moment, as plain time ranges before any EVAL', () => {
