@@ -12,7 +12,7 @@ import { TILE_QUERY_TIMEOUT_MS } from './tile_query_timeout';
 
 export const TILE_TIMEOUT_MESSAGE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.home.tiles.timedOut',
-  { defaultMessage: 'Took too long to load' }
+  { defaultMessage: 'Timed out' }
 );
 
 /**
@@ -28,7 +28,7 @@ export const useTilesTimeoutNotice = (isAnyCountTimedOut: boolean, runKey: strin
     notifiedKey.current = runKey;
     addWarning({
       title: i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.timedOutTitle', {
-        defaultMessage: 'Some tiles took too long to load',
+        defaultMessage: 'Some tiles timed out',
       }),
       text: i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.timedOutText', {
         defaultMessage:

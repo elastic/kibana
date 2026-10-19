@@ -28,7 +28,7 @@ jest.mock('../components/home/needs_attention_tiles/hooks', () => ({
   useRiskTilesSeries: jest.fn(),
   useTilesLoadTelemetry: jest.fn(),
   useTilesTimeoutNotice: jest.fn(),
-  TILE_TIMEOUT_MESSAGE: 'Took too long to load',
+  TILE_TIMEOUT_MESSAGE: 'Timed out',
 }));
 jest.mock('../components/entity_store/hooks/use_entity_store', () => ({
   useEntityStoreStatus: jest.fn(),
@@ -279,8 +279,8 @@ describe('EntityAnalyticsNewHomePage: each tile waits for its own count', () => 
       render(<EntityAnalyticsNewHomePage />);
 
       const messageOf = (id: string) => mockCards.find((card) => card.id === id)?.noDataMessage;
-      expect(messageOf('entitiesWithAlerts')).toBe('Took too long to load');
-      expect(messageOf('watchlisted')).toBe('Took too long to load');
+      expect(messageOf('entitiesWithAlerts')).toBe('Timed out');
+      expect(messageOf('watchlisted')).toBe('Timed out');
       expect(messageOf('newEntity')).toBeUndefined();
       expect(lastOptions('useTilesTimeoutNotice')).toBe(true);
       expect(lastOptions('useTilesLoadTelemetry').tiles.alerts.isTimedOut).toBe(true);
