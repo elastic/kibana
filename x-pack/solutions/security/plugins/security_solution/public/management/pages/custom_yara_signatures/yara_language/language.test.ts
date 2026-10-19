@@ -554,6 +554,22 @@ describe('YARA language', () => {
       ]);
     });
 
+    it('should return to normal tokenization after the tags', () => {
+      expect(tokenize('rule a : b {')).toEqual([
+        [
+          ['rule', 'keyword'],
+          [' ', 'white'],
+          ['a', 'type'],
+          [' ', 'white'],
+          [':', 'delimiter'],
+          [' ', 'white'],
+          ['b', 'tag'],
+          [' ', 'white'],
+          ['{', 'delimiter.curly'],
+        ],
+      ]);
+    });
+
     it('should return to normal tokenization when the rule name is missing', () => {
       expect(tokenize('rule { true }')).toEqual([
         [
@@ -567,5 +583,251 @@ describe('YARA language', () => {
         ],
       ]);
     });
+  });
+
+  describe('string references', () => {
+    it.each(['$a', '$a_1', '$1', '$', '$a*', '$*', '#a', '#', '@a', '@', '!a', '!'])(
+      'should tokenize `%s` as a variable',
+      (reference) => {
+        expect(tokenize(reference)).toEqual([[[reference, 'variable']]]);
+      }
+    );
+
+    it('should tokenize string offsets with an index', () => {
+      expect(tokenize('@a[1]')).toEqual([
+        [
+          ['@a', 'variable'],
+          ['[', 'delimiter.square'],
+          ['1', 'number'],
+          [']', 'delimiter.square'],
+        ],
+      ]);
+    });
+
+    it('should tokenize `!=` as an operator instead of a string length', () => {
+      expect(tokenize('!a!=!b')).toEqual([
+        [
+          ['!a', 'variable'],
+          ['!=', 'operator'],
+          ['!b', 'variable'],
+        ],
+      ]);
+    });
+
+    it('should tokenize the wildcard only for `$` references', () => {
+      expect(tokenize('#a*2')).toEqual([
+        [
+          ['#a', 'variable'],
+          ['*', 'operator'],
+          ['2', 'number'],
+        ],
+      ]);
+    });
+  });
+
+  describe('numbers', () => {
+    it.each([
+      ['100', 'number'],
+      ['200KB', 'number'],
+      ['2MB', 'number'],
+      ['0x5A4D', 'number.hex'],
+      ['7.5', 'number.float'],
+    ])('should tokenize `%s` as %s', (number, type) => {
+      expect(tokenize(number)).toEqual([[[number, type]]]);
+    });
+
+    it('should tokenize a range', () => {
+      expect(tokenize('(0..filesize-1)')).toEqual([
+        [
+          ['(', 'delimiter.parenthesis'],
+          ['0', 'number'],
+          ['..', 'operator'],
+          ['filesize', 'variable.predefined'],
+          ['-', 'operator'],
+          ['1', 'number'],
+          [')', 'delimiter.parenthesis'],
+        ],
+      ]);
+    });
+  });
+
+  describe('operators and delimiters', () => {
+    it.each([
+      '..',
+      '<<',
+      '>>',
+      '<=',
+      '>=',
+      '==',
+      '!=',
+      '<',
+      '>',
+      '=',
+      '+',
+      '-',
+      '*',
+      '\\',
+      '%',
+      '&',
+      '|',
+      '^',
+      '~',
+    ])('should tokenize `%s` as an operator', (operator) => {
+      expect(tokenize(operator)).toEqual([[[operator, 'operator']]]);
+    });
+
+    it('should tokenize member access', () => {
+      expect(tokenize('pe.entry_point')).toEqual([
+        [
+          ['pe', 'identifier'],
+          ['.', 'delimiter'],
+          ['entry_point', 'identifier'],
+        ],
+      ]);
+    });
+
+    it('should tokenize sets', () => {
+      expect(tokenize('($a,$b*)')).toEqual([
+        [
+          ['(', 'delimiter.parenthesis'],
+          ['$a', 'variable'],
+          [',', 'delimiter'],
+          ['$b*', 'variable'],
+          [')', 'delimiter.parenthesis'],
+        ],
+      ]);
+    });
+
+    it('should tokenize section labels', () => {
+      expect(tokenize('condition:')).toEqual([
+        [
+          ['condition', 'keyword'],
+          [':', 'delimiter'],
+        ],
+      ]);
+    });
+
+    it.each([';', '?', '`'])('should tokenize `%s` as invalid', (character) => {
+      expect(tokenize(character)).toEqual([[[character, 'invalid']]]);
+    });
+  });
+
+  it('should tokenize a complete rule', () => {
+    expect(
+      tokenize(
+        [
+          'import "pe"',
+          'rule Example : tag {',
+          '  meta:',
+          '    author = "me"',
+          '  strings:',
+          '    $a = "text" nocase',
+          '    $b = { E2 ?? }',
+          '    $c = /re/i',
+          '  condition:',
+          '    #a > 2 and $b at pe.entry_point and filesize < 2MB',
+          '}',
+        ].join('\n')
+      )
+    ).toEqual([
+      [
+        ['import', 'keyword'],
+        [' ', 'white'],
+        ['"pe"', 'string'],
+      ],
+      [
+        ['rule', 'keyword'],
+        [' ', 'white'],
+        ['Example', 'type'],
+        [' ', 'white'],
+        [':', 'delimiter'],
+        [' ', 'white'],
+        ['tag', 'tag'],
+        [' ', 'white'],
+        ['{', 'delimiter.curly'],
+      ],
+      [
+        ['  ', 'white'],
+        ['meta', 'keyword'],
+        [':', 'delimiter'],
+      ],
+      [
+        ['    ', 'white'],
+        ['author', 'identifier'],
+        [' ', 'white'],
+        ['=', 'operator'],
+        [' ', 'white'],
+        ['"me"', 'string'],
+      ],
+      [
+        ['  ', 'white'],
+        ['strings', 'keyword'],
+        [':', 'delimiter'],
+      ],
+      [
+        ['    ', 'white'],
+        ['$a', 'variable'],
+        [' ', 'white'],
+        ['=', 'operator'],
+        [' ', 'white'],
+        ['"text"', 'string'],
+        [' ', 'white'],
+        ['nocase', 'keyword.modifier'],
+      ],
+      [
+        ['    ', 'white'],
+        ['$b', 'variable'],
+        [' ', 'white'],
+        ['=', 'operator'],
+        [' ', 'white'],
+        ['{', 'delimiter.curly'],
+        [' ', 'white'],
+        ['E2', 'number.hex'],
+        [' ', 'white'],
+        ['??', 'number.hex'],
+        [' ', 'white'],
+        ['}', 'delimiter.curly'],
+      ],
+      [
+        ['    ', 'white'],
+        ['$c', 'variable'],
+        [' ', 'white'],
+        ['=', 'operator'],
+        [' ', 'white'],
+        ['/re/i', 'regexp'],
+      ],
+      [
+        ['  ', 'white'],
+        ['condition', 'keyword'],
+        [':', 'delimiter'],
+      ],
+      [
+        ['    ', 'white'],
+        ['#a', 'variable'],
+        [' ', 'white'],
+        ['>', 'operator'],
+        [' ', 'white'],
+        ['2', 'number'],
+        [' ', 'white'],
+        ['and', 'keyword'],
+        [' ', 'white'],
+        ['$b', 'variable'],
+        [' ', 'white'],
+        ['at', 'keyword'],
+        [' ', 'white'],
+        ['pe', 'identifier'],
+        ['.', 'delimiter'],
+        ['entry_point', 'identifier'],
+        [' ', 'white'],
+        ['and', 'keyword'],
+        [' ', 'white'],
+        ['filesize', 'variable.predefined'],
+        [' ', 'white'],
+        ['<', 'operator'],
+        [' ', 'white'],
+        ['2MB', 'number'],
+      ],
+      [['}', 'delimiter.curly']],
+    ]);
   });
 });

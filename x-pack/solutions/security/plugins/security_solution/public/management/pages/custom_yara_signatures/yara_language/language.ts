@@ -48,6 +48,8 @@ export const languageConfiguration: monaco.languages.LanguageConfiguration = {
  * and https://microsoft.github.io/monaco-editor/monarch.html
  */
 export const lexerRules: monaco.languages.IMonarchLanguage = {
+  defaultToken: 'invalid',
+
   keywords: [
     ...DECLARATION_KEYWORDS,
     ...SECTION_KEYWORDS,
@@ -60,6 +62,8 @@ export const lexerRules: monaco.languages.IMonarchLanguage = {
 
   stringEscapes: /\\(?:["\\rtn]|x[0-9a-fA-F]{2})/,
   regexpEscapes: /\\(?:x[0-9a-fA-F]{2}|.)/,
+  // Multi-character operators come first, so e.g. `!=` is not tokenized as the `!` string length prefix.
+  operators: /\.\.|<<|>>|<=|>=|==|!=|[<>=+\-*\\%&|^~]/,
 
   tokenizer: {
     root: [
@@ -76,6 +80,20 @@ export const lexerRules: monaco.languages.IMonarchLanguage = {
       // A curly bracket after `=` opens a hex string, otherwise it delimits a rule body.
       [/(=)(\s*)(\{)/, ['operator', 'white', { token: 'delimiter.curly', next: '@hexString' }]],
       [/[{}]/, 'delimiter.curly'],
+
+      [/@operators/, 'operator'],
+      [/[()]/, 'delimiter.parenthesis'],
+      [/[[\]]/, 'delimiter.square'],
+      [/[,:.]/, 'delimiter'],
+
+      // String references, the bare prefixes are used inside `for..of` loops.
+      [/\$\w*\*?/, 'variable'],
+      [/[#@!]\w*/, 'variable'],
+
+      // The `KB` and `MB` suffixes are only allowed for decimal integers.
+      [/0x[0-9a-fA-F]+/, 'number.hex'],
+      [/\d+\.\d+/, 'number.float'],
+      [/\d+(?:KB|MB)?/, 'number'],
 
       [
         /[a-zA-Z_]\w*/,
