@@ -72,7 +72,7 @@ jest.mock('../../../../common/hooks/use_has_entity_highlights_license', () => ({
   useHasEntityHighlightsLicense: () => mockUseHasEntityHighlightsLicense(),
 }));
 
-jest.mock('../hooks/use_inference_connector_access', () => ({
+jest.mock('../../../hooks/use_inference_connector_access', () => ({
   useInferenceConnectorAccess: (params: unknown) => mockUseInferenceConnectorAccess(params),
 }));
 
