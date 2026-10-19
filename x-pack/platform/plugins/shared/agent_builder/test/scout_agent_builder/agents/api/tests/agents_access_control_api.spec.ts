@@ -1008,5 +1008,34 @@ apiTest.describe(
         expect(denied).toHaveStatusCode(403);
       }
     );
+
+    // The UI resolves participants, round authors and agent owners through core's
+    // `userProfile.bulkGet`, which needs `bulkGetUserProfiles`.
+    apiTest('user profile bulk get only requires agentBuilder read', async ({ apiClient }) => {
+      const response = await apiClient.post(
+        spaceUrl('/internal/security/user_profile/_bulk_get', accessControlSpaceId),
+        {
+          headers: headersFor(reader),
+          body: { uids: [bobId, eveId] },
+          responseType: 'json',
+        }
+      );
+      expect(response).toHaveStatusCode(200);
+    });
+
+    apiTest(
+      'user profile bulk get rejects callers without Agent Builder privileges',
+      async ({ apiClient }) => {
+        const denied = await apiClient.post(
+          spaceUrl('/internal/security/user_profile/_bulk_get', accessControlSpaceId),
+          {
+            headers: headersFor(noAccess),
+            body: { uids: [bobId, eveId] },
+            responseType: 'json',
+          }
+        );
+        expect(denied).toHaveStatusCode(403);
+      }
+    );
   }
 );

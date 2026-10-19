@@ -25,7 +25,7 @@ import {
 const OBSERVABILITY_HOST: AlertingV2HostApp = createAlertingV2HostApp('observabilityAlerting', {
   rules: '/rules/v2',
   ruleLibrary: '/rule-library',
-  episodes: '/inbox',
+  alerts: '/inbox',
   actionPolicies: '/action-policies',
   executionHistory: '/execution-history',
 });
@@ -33,7 +33,7 @@ const OBSERVABILITY_HOST: AlertingV2HostApp = createAlertingV2HostApp('observabi
 const SEARCH_HOST: AlertingV2HostApp = createAlertingV2HostApp('search', {
   rules: '/alerting',
   ruleLibrary: '/alerting/library',
-  episodes: '/alerting/inbox',
+  alerts: '/alerting/inbox',
   actionPolicies: '/alerting/action-policies',
   executionHistory: '/alerting/execution-history',
 });
@@ -41,40 +41,6 @@ const SEARCH_HOST: AlertingV2HostApp = createAlertingV2HostApp('search', {
 describe('AlertingV2RulesLocatorDefinition', () => {
   it('has the correct id', () => {
     expect(AlertingV2RulesLocatorDefinition.id).toBe(ALERTING_V2_RULES_LOCATOR);
-  });
-
-  describe('management host', () => {
-    const locator = AlertingV2RulesLocatorDefinition;
-
-    it('resolves list', async () => {
-      expect(await locator.getLocation({})).toMatchObject({
-        app: 'management',
-        path: '/alertingV2/rules',
-      });
-    });
-
-    it('resolves rule details', async () => {
-      expect(await locator.getLocation({ ruleId: 'abc-123' })).toMatchObject({
-        app: 'management',
-        path: '/alertingV2/rules/abc-123',
-      });
-    });
-
-    it('encodes ruleId', async () => {
-      const loc = await locator.getLocation({ ruleId: 'has spaces/slashes' });
-      expect(loc.path).toBe('/alertingV2/rules/has%20spaces%2Fslashes');
-    });
-
-    it('resolves sequence create', async () => {
-      expect(await locator.getLocation({ page: 'sequence_create' })).toMatchObject({
-        path: '/alertingV2/rules/sequence/create',
-      });
-    });
-
-    it('resolves list with templateId', async () => {
-      const loc = await locator.getLocation({ templateId: 't-1' });
-      expect(loc.path).toBe('/alertingV2/rules?templateId=t-1');
-    });
   });
 
   describe('observability host', () => {
@@ -96,6 +62,14 @@ describe('AlertingV2RulesLocatorDefinition', () => {
       });
     });
 
+    it('encodes ruleId', async () => {
+      const loc = await locator.getLocation({
+        ruleId: 'has spaces/slashes',
+        host: OBSERVABILITY_HOST.rules,
+      });
+      expect(loc.path).toBe('/rules/v2/has%20spaces%2Fslashes');
+    });
+
     it('resolves sequence create', async () => {
       expect(
         await locator.getLocation({ page: 'sequence_create', host: OBSERVABILITY_HOST.rules })
@@ -103,6 +77,14 @@ describe('AlertingV2RulesLocatorDefinition', () => {
         app: 'observabilityAlerting',
         path: '/rules/v2/sequence/create',
       });
+    });
+
+    it('resolves list with templateId', async () => {
+      const loc = await locator.getLocation({
+        templateId: 't-1',
+        host: OBSERVABILITY_HOST.rules,
+      });
+      expect(loc.path).toBe('/rules/v2?templateId=t-1');
     });
   });
 });
@@ -112,26 +94,21 @@ describe('AlertingV2RuleLibraryLocatorDefinition', () => {
     expect(AlertingV2RuleLibraryLocatorDefinition.id).toBe(ALERTING_V2_RULE_LIBRARY_LOCATOR);
   });
 
-  it('resolves list for management', async () => {
-    const locator = AlertingV2RuleLibraryLocatorDefinition;
-    expect(await locator.getLocation({})).toMatchObject({
-      app: 'management',
-      path: '/alertingV2/rule_library',
-    });
-  });
-
-  it('appends templateId', async () => {
-    const locator = AlertingV2RuleLibraryLocatorDefinition;
-    const loc = await locator.getLocation({ templateId: 'tmpl-1' });
-    expect(loc.path).toBe('/alertingV2/rule_library?templateId=tmpl-1');
-  });
-
-  it('resolves for observability host', async () => {
+  it('resolves list', async () => {
     const locator = AlertingV2RuleLibraryLocatorDefinition;
     expect(await locator.getLocation({ host: OBSERVABILITY_HOST.ruleLibrary })).toMatchObject({
       app: 'observabilityAlerting',
       path: '/rule-library',
     });
+  });
+
+  it('appends templateId', async () => {
+    const locator = AlertingV2RuleLibraryLocatorDefinition;
+    const loc = await locator.getLocation({
+      templateId: 'tmpl-1',
+      host: OBSERVABILITY_HOST.ruleLibrary,
+    });
+    expect(loc.path).toBe('/rule-library?templateId=tmpl-1');
   });
 });
 
@@ -140,56 +117,11 @@ describe('AlertingV2EpisodesLocatorDefinition', () => {
     expect(AlertingV2EpisodesLocatorDefinition.id).toBe(ALERTING_V2_EPISODES_LOCATOR);
   });
 
-  describe('management host', () => {
-    const locator = AlertingV2EpisodesLocatorDefinition;
-
-    it('resolves list', async () => {
-      expect(await locator.getLocation({})).toMatchObject({
-        app: 'management',
-        path: '/alertingV2/episodes',
-      });
-    });
-
-    it('resolves episode details', async () => {
-      expect(await locator.getLocation({ episodeId: 'ep-1' })).toMatchObject({
-        path: '/alertingV2/episodes/ep-1',
-      });
-    });
-
-    it('encodes episodeId', async () => {
-      const loc = await locator.getLocation({ episodeId: 'ep/special chars' });
-      expect(loc.path).toBe('/alertingV2/episodes/ep%2Fspecial%20chars');
-    });
-
-    it('resolves list with filters', async () => {
-      const loc = await locator.getLocation({ filters: { ruleId: 'r-1', status: 'active' } });
-      expect(loc.path).toContain('/alertingV2/episodes?');
-      expect(loc.path).toContain('_a=');
-    });
-
-    it('resolves list with timeRange', async () => {
-      const loc = await locator.getLocation({
-        timeRange: { from: 'now-15m', to: 'now' },
-      });
-      expect(loc.path).toContain('_a=');
-    });
-
-    it('ignores empty filters', async () => {
-      const loc = await locator.getLocation({ filters: {} });
-      expect(loc.path).toBe('/alertingV2/episodes');
-    });
-
-    it('ignores empty groupingValues', async () => {
-      const loc = await locator.getLocation({ filters: { groupingValues: {} } });
-      expect(loc.path).toBe('/alertingV2/episodes');
-    });
-  });
-
   describe('observability host', () => {
     const locator = AlertingV2EpisodesLocatorDefinition;
 
     it('resolves list', async () => {
-      expect(await locator.getLocation({ host: OBSERVABILITY_HOST.episodes })).toMatchObject({
+      expect(await locator.getLocation({ host: OBSERVABILITY_HOST.alerts })).toMatchObject({
         app: 'observabilityAlerting',
         path: '/inbox',
       });
@@ -197,11 +129,52 @@ describe('AlertingV2EpisodesLocatorDefinition', () => {
 
     it('resolves episode details', async () => {
       expect(
-        await locator.getLocation({ episodeId: 'ep-1', host: OBSERVABILITY_HOST.episodes })
+        await locator.getLocation({ episodeId: 'ep-1', host: OBSERVABILITY_HOST.alerts })
       ).toMatchObject({
         app: 'observabilityAlerting',
         path: '/inbox/ep-1',
       });
+    });
+
+    it('encodes episodeId', async () => {
+      const loc = await locator.getLocation({
+        episodeId: 'ep/special chars',
+        host: OBSERVABILITY_HOST.alerts,
+      });
+      expect(loc.path).toBe('/inbox/ep%2Fspecial%20chars');
+    });
+
+    it('resolves list with filters', async () => {
+      const loc = await locator.getLocation({
+        filters: { ruleId: 'r-1', status: 'active' },
+        host: OBSERVABILITY_HOST.alerts,
+      });
+      expect(loc.path).toContain('/inbox?');
+      expect(loc.path).toContain('_a=');
+    });
+
+    it('resolves list with timeRange', async () => {
+      const loc = await locator.getLocation({
+        timeRange: { from: 'now-15m', to: 'now' },
+        host: OBSERVABILITY_HOST.alerts,
+      });
+      expect(loc.path).toContain('_a=');
+    });
+
+    it('ignores empty filters', async () => {
+      const loc = await locator.getLocation({
+        filters: {},
+        host: OBSERVABILITY_HOST.alerts,
+      });
+      expect(loc.path).toBe('/inbox');
+    });
+
+    it('ignores empty groupingValues', async () => {
+      const loc = await locator.getLocation({
+        filters: { groupingValues: {} },
+        host: OBSERVABILITY_HOST.alerts,
+      });
+      expect(loc.path).toBe('/inbox');
     });
   });
 });
@@ -209,43 +182,6 @@ describe('AlertingV2EpisodesLocatorDefinition', () => {
 describe('AlertingV2ActionPoliciesLocatorDefinition', () => {
   it('has the correct id', () => {
     expect(AlertingV2ActionPoliciesLocatorDefinition.id).toBe(ALERTING_V2_ACTION_POLICIES_LOCATOR);
-  });
-
-  describe('management host', () => {
-    const locator = AlertingV2ActionPoliciesLocatorDefinition;
-
-    it('resolves list', async () => {
-      expect(await locator.getLocation({})).toMatchObject({
-        app: 'management',
-        path: '/alertingV2/action_policies',
-      });
-    });
-
-    it('resolves create', async () => {
-      expect(await locator.getLocation({ page: 'create' })).toMatchObject({
-        path: '/alertingV2/action_policies/create',
-      });
-    });
-
-    it('resolves edit', async () => {
-      expect(await locator.getLocation({ page: 'edit', actionPolicyId: 'pol-1' })).toMatchObject({
-        path: '/alertingV2/action_policies/edit/pol-1',
-      });
-    });
-
-    it('encodes actionPolicyId', async () => {
-      const loc = await locator.getLocation({
-        page: 'edit',
-        actionPolicyId: 'id/with spaces',
-      });
-      expect(loc.path).toBe('/alertingV2/action_policies/edit/id%2Fwith%20spaces');
-    });
-
-    it('falls back to list when edit has no id', async () => {
-      expect(await locator.getLocation({ page: 'edit' })).toMatchObject({
-        path: '/alertingV2/action_policies',
-      });
-    });
   });
 
   describe('observability host', () => {
@@ -266,6 +202,35 @@ describe('AlertingV2ActionPoliciesLocatorDefinition', () => {
         path: '/action-policies/create',
       });
     });
+
+    it('resolves edit', async () => {
+      expect(
+        await locator.getLocation({
+          page: 'edit',
+          actionPolicyId: 'pol-1',
+          host: OBSERVABILITY_HOST.actionPolicies,
+        })
+      ).toMatchObject({
+        path: '/action-policies/edit/pol-1',
+      });
+    });
+
+    it('encodes actionPolicyId', async () => {
+      const loc = await locator.getLocation({
+        page: 'edit',
+        actionPolicyId: 'id/with spaces',
+        host: OBSERVABILITY_HOST.actionPolicies,
+      });
+      expect(loc.path).toBe('/action-policies/edit/id%2Fwith%20spaces');
+    });
+
+    it('falls back to list when edit has no id', async () => {
+      expect(
+        await locator.getLocation({ page: 'edit', host: OBSERVABILITY_HOST.actionPolicies })
+      ).toMatchObject({
+        path: '/action-policies',
+      });
+    });
   });
 });
 
@@ -274,14 +239,6 @@ describe('AlertingV2ExecutionHistoryLocatorDefinition', () => {
     expect(AlertingV2ExecutionHistoryLocatorDefinition.id).toBe(
       ALERTING_V2_EXECUTION_HISTORY_LOCATOR
     );
-  });
-
-  it('resolves for management', async () => {
-    const locator = AlertingV2ExecutionHistoryLocatorDefinition;
-    expect(await locator.getLocation({})).toMatchObject({
-      app: 'management',
-      path: '/alertingV2/execution_history',
-    });
   });
 
   it('resolves for observability host', async () => {
@@ -298,24 +255,20 @@ describe('createAlertingV2HostApp', () => {
     const host = createAlertingV2HostApp('myApp', {
       rules: '/r',
       ruleLibrary: '/rl',
-      episodes: '/e',
+      alerts: '/e',
       actionPolicies: '/ap',
       executionHistory: '/eh',
     });
 
     expect(host.rules).toEqual({ app: 'myApp', pathPrefix: '/r' });
-    expect(host.episodes).toEqual({ app: 'myApp', pathPrefix: '/e' });
+    expect(host.alerts).toEqual({ app: 'myApp', pathPrefix: '/e' });
   });
 });
 
 describe('per-call host (classic coexistence)', () => {
-  it('same rules locator resolves management, observability, and search without shared state', async () => {
+  it('same rules locator resolves observability and search without shared state', async () => {
     const locator = AlertingV2RulesLocatorDefinition;
 
-    expect(await locator.getLocation({ ruleId: 'r-1' })).toMatchObject({
-      app: 'management',
-      path: '/alertingV2/rules/r-1',
-    });
     expect(
       await locator.getLocation({ ruleId: 'r-1', host: OBSERVABILITY_HOST.rules })
     ).toMatchObject({

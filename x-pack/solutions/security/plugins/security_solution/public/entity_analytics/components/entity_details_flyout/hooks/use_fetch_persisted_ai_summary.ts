@@ -11,6 +11,15 @@ import { i18n } from '@kbn/i18n';
 import type { PersistedEntityAiSummary } from '@kbn/entity-store/common';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../common/utils/execution_context';
+
+const PERSISTED_AI_SUMMARY_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.ENTITY_DETAILS_FLYOUT,
+  'ai_summary_get'
+);
 
 export const PERSISTED_AI_SUMMARY_QUERY_KEY = 'PERSISTED_AI_SUMMARY';
 
@@ -46,7 +55,12 @@ export const useFetchPersistedAiSummary = ({
 
   const { data, isLoading, isFetching, refetch } = useQuery({
     queryKey: [PERSISTED_AI_SUMMARY_QUERY_KEY, entityType, entityIdentifier],
-    queryFn: ({ signal }) => fetchPersistedAiSummary({ entityType, entityIdentifier }, signal),
+    queryFn: ({ signal }) =>
+      fetchPersistedAiSummary({
+        params: { entityType, entityIdentifier },
+        signal,
+        context: PERSISTED_AI_SUMMARY_CONTEXT,
+      }),
     enabled: !skip && Boolean(entityIdentifier),
     onError: (err: Error) => {
       addError(err, {

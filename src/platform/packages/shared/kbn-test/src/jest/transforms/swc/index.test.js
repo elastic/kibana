@@ -427,6 +427,26 @@ export function boom() {
       expect(code).toContain('module.exports = exports.default;');
     });
 
+    it('replaces module.exports with a sole default export value', () => {
+      const exports = evaluate(`export default function main() { return 'main'; }`);
+
+      expect(exports()).toBe('main');
+    });
+
+    it('keeps the exports object when the sole default export is a module namespace', () => {
+      const namespace = { __esModule: true, parse: () => 'parsed' };
+      const exports = evaluate(
+        `
+          import * as namespace from './namespace';
+          export default namespace;
+        `,
+        { modules: { './namespace': namespace } }
+      );
+
+      expect(exports.__esModule).toBe(true);
+      expect(exports.default.parse()).toBe('parsed');
+    });
+
     it('keeps the exports object when named exports or export star are present', () => {
       expect(getCode('export default 42; export const answer = 42;')).not.toContain(
         'module.exports = exports.default;'

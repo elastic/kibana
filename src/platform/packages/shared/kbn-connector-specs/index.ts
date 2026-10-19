@@ -24,6 +24,7 @@ export {
 } from './src/auth_types/oauth_client_credentials_private_key_jwt';
 
 export { getConnectorSpec } from './src/get_connector_spec';
+export { getSandboxSupportedAuthTypeIds } from './src/get_sandbox_supported_auth_type_ids';
 export {
   connectorSpecHasEvents,
   connectorTypeHasInboundEvents,
@@ -33,6 +34,7 @@ export {
   connectorTypeIsInboundOnly,
 } from './src/is_inbound_only_connector_spec';
 export { isDualConnectorSpec, connectorTypeIsDual } from './src/is_dual_connector_spec';
+export { connectorTypePublishesKeys } from './src/connector_type_publishes_keys';
 export { ingestTokenHashSchema } from './src/ingest_token_hash_schema';
 export {
   INBOUND_WEBHOOK_CONNECTOR_TYPE_ID,
@@ -76,6 +78,15 @@ export {
   type ValidateEmittedEventsResult,
 } from './src/validate_emitted_events';
 export {
+  filterActionsBySelection,
+  formatConnectorActionLine,
+  getEffectiveScope,
+  isSelectedActionEnabled,
+  isSpecificActionsSelection,
+  resolveActionScope,
+  type SelectedActions,
+} from './src/selected_actions';
+export {
   getConnectorActionErrorMeta,
   setConnectorActionErrorMeta,
   getFinitePositiveNumber,
@@ -98,6 +109,9 @@ export {
 } from './src/auth_mode_by_auth_type_id';
 export { getMeta, setMeta, addMeta } from './src/connector_spec_ui';
 export type { BaseMetadata } from './src/connector_spec_ui';
+export { fromConnectorSpecSchema } from './src/lib/deserialize_connector_spec';
+export type { ConnectorZodSchema } from './src/lib/deserialize_connector_spec';
+export { narrowSecretsSchemaForAuthMode } from './src/lib/narrow_secrets_schema_for_auth_mode';
 export type {
   ClientTypeSpec,
   BuildContext,

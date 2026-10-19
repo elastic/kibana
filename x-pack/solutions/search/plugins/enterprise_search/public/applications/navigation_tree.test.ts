@@ -38,6 +38,16 @@ describe('Elasticsearch solution navigation tree', () => {
     expect(alertsLinks).toContain('management:triggersActionsAlerts');
   });
 
+  it('includes Stack Rules in Stack Management > Alerts and Insights', async () => {
+    const stackManagement = await getStackManagement();
+    const alertsSection = stackManagement?.children?.find(
+      (item) => item.id === 'alerts_and_insights'
+    ) as NodeDefinition | undefined;
+    const alertsLinks = alertsSection?.children?.map((item) => item.link) ?? [];
+
+    expect(alertsLinks).toContain('management:triggersActions');
+  });
+
   it('includes service accounts in Stack Management > Security', async () => {
     const stackManagement = await getStackManagement();
     const securitySection = stackManagement?.children?.find(({ children }) =>

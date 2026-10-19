@@ -217,7 +217,7 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
 
     return buildRecoveryAlertEvents({
       ruleId: rule.id,
-      ruleVersion: rule.metadata.version,
+      ruleVersion: rule.version,
       spaceId: input.spaceId,
       activeGroupHashes: activeGroups,
       breachedGroupHashes,
@@ -279,7 +279,7 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
       events.push(
         ...buildNoDataAlertEvents({
           ruleId: rule.id,
-          ruleVersion: rule.metadata.version,
+          ruleVersion: rule.version,
           spaceId: input.spaceId,
           groupHashes: noDataGroupHashes,
           scheduledTimestamp: input.scheduledAt,
@@ -292,7 +292,7 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
       events.push(
         ...buildContinuedBreachAlertEvents({
           ruleId: rule.id,
-          ruleVersion: rule.metadata.version,
+          ruleVersion: rule.version,
           spaceId: input.spaceId,
           groupHashes: continuedBreachGroupHashes,
           scheduledTimestamp: input.scheduledAt,

@@ -22,7 +22,6 @@ export const DEFAULT_OTHER_ASSIGNMENT: ColorMapping.AssignmentBase<
 > = {
   rules: [{ type: 'other' }],
   color: { type: 'loop' },
-  touched: false,
 };
 /**
  * The default color mapping used in Kibana, starts with the EUI color palette

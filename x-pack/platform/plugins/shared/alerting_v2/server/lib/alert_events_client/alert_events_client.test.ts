@@ -171,10 +171,38 @@ describe('AlertEventsClient.createAlertEvent episode lifecycle', () => {
       alert_status: ALERT_EPISODE_STATUS.ACTIVE,
     });
 
-    expect(result.episode_id).toMatch(
+    expect(result.alert_id).toMatch(
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
     );
     expect(storageService.bulkIndexDocs).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns the group hash and the alert id written on the rule event', async () => {
+    const { client, storageService } = createClient([]);
+    const result = await client.createAlertEvent({
+      source: 'datadog',
+      fingerprint: 'lifecycle-fp',
+      alert_status: ALERT_EPISODE_STATUS.ACTIVE,
+    });
+
+    const [{ docs }] = storageService.bulkIndexDocs.mock.calls[0];
+    expect(docs[0]).toMatchObject({
+      group_hash: result.group_hash,
+      alert: { id: result.alert_id },
+    });
+    expect(result).not.toHaveProperty('episode_id');
+  });
+
+  it('resolves the prior episode from the alert.id and alert.status of the series', async () => {
+    const { client, queryService } = createClient([]);
+
+    await client.createAlertEvent({ source: 'datadog', fingerprint: 'lifecycle-fp' });
+
+    const [{ query }] = queryService.executeQueryRows.mock.calls[0];
+    expect(query).toContain('alert.status IS NOT NULL');
+    expect(query).toContain('last_episode_id = LAST(alert.id, @timestamp)');
+    expect(query).toContain('last_episode_status = LAST(alert.status, @timestamp)');
+    expect(query).not.toContain('episode.');
   });
 
   it('reuses the prior episode id while the series is still active', async () => {
@@ -189,7 +217,7 @@ describe('AlertEventsClient.createAlertEvent episode lifecycle', () => {
       alert_status: ALERT_EPISODE_STATUS.ACTIVE,
     });
 
-    expect(result.episode_id).toBe(priorEpisodeId);
+    expect(result.alert_id).toBe(priorEpisodeId);
   });
 
   it('mints a new episode id after an inactive episode when re-firing', async () => {
@@ -204,8 +232,8 @@ describe('AlertEventsClient.createAlertEvent episode lifecycle', () => {
       alert_status: ALERT_EPISODE_STATUS.ACTIVE,
     });
 
-    expect(result.episode_id).not.toBe(priorEpisodeId);
-    expect(result.episode_id).toMatch(
+    expect(result.alert_id).not.toBe(priorEpisodeId);
+    expect(result.alert_id).toMatch(
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
     );
   });
