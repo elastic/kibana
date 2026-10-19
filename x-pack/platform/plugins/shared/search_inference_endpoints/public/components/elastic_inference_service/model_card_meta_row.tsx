@@ -50,7 +50,6 @@ export const ModelCardMetaRow = ({
           component="span"
           size="s"
           color={textColor}
-          css={{ whiteSpace: 'nowrap' }}
           data-test-subj={`eisModelCardMetaDate-${modelName}`}
         >
           {message}
