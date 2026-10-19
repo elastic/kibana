@@ -98,10 +98,7 @@ describe('getProfilingEventsQueryFromKuery', () => {
       })
     ).toEqual({
       bool: {
-        filter: [
-          ...kqlQuery('(orchestrator.resource.name : "cart-php")'),
-          timeRangeFilter,
-        ],
+        filter: [...kqlQuery('(orchestrator.resource.name : "cart-php")'), timeRangeFilter],
       },
     });
   });
