@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -318,6 +319,30 @@ describe('UserMessageText', () => {
 
       expect(screen.getByText('My invoice.pdf')).toBeInTheDocument();
       expect(screen.queryByRole('link')).not.toBeInTheDocument();
+    });
+
+    it.each([
+      ['an image', '[photo.png](image://photo.png)', 'photo.png'],
+      ['a text file', '[notes.md](text://notes.md)', 'notes.md'],
+    ])('shows no tooltip on a short name of %s', async (_label, text, name) => {
+      renderWithProvider(<UserMessageText text={text} />);
+
+      await userEvent.hover(screen.getByText(name));
+
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+    });
+
+    it.each([
+      ['an image', 'image', 'a-very-long-screenshot-name.png'],
+      ['a text file', 'text', 'a-very-long-meeting-notes-file.md'],
+      ['a PDF', 'binary', 'a-very-long-invoice-file-name.pdf'],
+    ])('shows the full name in a tooltip on a long name of %s', async (_label, scheme, name) => {
+      renderWithProvider(<UserMessageText text={`[${name}](${scheme}://${name})`} />);
+
+      await userEvent.hover(screen.getByText(name));
+
+      expect(await screen.findByRole('tooltip')).toHaveTextContent(name);
     });
 
     it('renders image badge alongside plain text', () => {

@@ -28,6 +28,8 @@ import {
   type UserMessageTextStyles,
 } from './use_user_message_text_styles';
 
+const BADGE_NAME_TOOLTIP_MIN_LENGTH = 20;
+
 // Badges are markdown links, e.g. `[/Summarize](skill://skill-1)`. EUI's parser drops links that
 // are not http(s)/mailto, so badge schemes must be allow-listed.
 export const COMMAND_SCHEMES = new Set(
@@ -108,44 +110,36 @@ export const useUserMessageMarkdownPlugins = ({
         const { href, children } = props;
         const parsed = href ? parseSchemeAndPath(href) : undefined;
 
-        if (parsed?.scheme === IMAGE_ATTACHMENT_SCHEME) {
-          const name = decodeBadgeName(parsed.path);
-          return (
-            <EuiToolTip content={name} disableScreenReaderOutput>
-              <span
-                css={styles.imageBadgeWrapper}
-                tabIndex={0}
-                onMouseEnter={onHoverAttachment ? () => onHoverAttachment(name) : undefined}
-                onMouseLeave={onHoverAttachment ? () => onHoverAttachment(null) : undefined}
-              >
-                <EuiIcon type="image" size="s" aria-hidden={true} />
-                <span className="image-badge-label" css={styles.imageBadgeInner}>
-                  {name}
-                </span>
-              </span>
-            </EuiToolTip>
-          );
-        }
-
         if (
+          parsed?.scheme === IMAGE_ATTACHMENT_SCHEME ||
           parsed?.scheme === BINARY_ATTACHMENT_SCHEME ||
           parsed?.scheme === TEXT_ATTACHMENT_SCHEME
         ) {
           const name = decodeBadgeName(parsed.path);
-          return (
-            <EuiToolTip content={name} disableScreenReaderOutput>
-              <span
-                css={styles.imageBadgeWrapper}
-                tabIndex={0}
-                onMouseEnter={onHoverAttachment ? () => onHoverAttachment(name) : undefined}
-                onMouseLeave={onHoverAttachment ? () => onHoverAttachment(null) : undefined}
-              >
-                <EuiIcon type="document" size="s" aria-hidden={true} />
-                <span className="image-badge-label" css={styles.imageBadgeInner}>
-                  {name}
-                </span>
+          const badge = (
+            <span
+              css={styles.imageBadgeWrapper}
+              tabIndex={0}
+              onMouseEnter={onHoverAttachment ? () => onHoverAttachment(name) : undefined}
+              onMouseLeave={onHoverAttachment ? () => onHoverAttachment(null) : undefined}
+            >
+              <EuiIcon
+                type={parsed.scheme === IMAGE_ATTACHMENT_SCHEME ? 'image' : 'document'}
+                size="s"
+                aria-hidden={true}
+              />
+              <span className="image-badge-label" css={styles.imageBadgeInner}>
+                {name}
               </span>
+            </span>
+          );
+          // The badge cuts long names, so only those need a tooltip with the full name.
+          return name.length > BADGE_NAME_TOOLTIP_MIN_LENGTH ? (
+            <EuiToolTip content={name} disableScreenReaderOutput>
+              {badge}
             </EuiToolTip>
+          ) : (
+            badge
           );
         }
 
