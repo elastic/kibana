@@ -97,18 +97,36 @@ describe('createUnresolveAction', () => {
     const universalEpisode = (status: string) =>
       makeEpisode({ 'episode.id': 'universal-1', 'episode.status': status as never });
 
-    it('gives a reason when a resolved selection includes a classic alert', () => {
+    const reasonFor = (episodes: AlertEpisode[]) =>
+      createUnresolveAction(makeDeps()).getBulkDisabledReason!(episodes);
+
+    it('gives a reason when a resolved classic alert is selected', () => {
       expect(
-        createUnresolveAction(makeDeps()).getBulkDisabledReason!([
+        reasonFor([
           universalEpisode(ALERT_EPISODE_STATUS.INACTIVE),
           classicEpisode(ALERT_EPISODE_STATUS.INACTIVE),
         ])
       ).toBe(i18n.UNRESOLVE_NOT_AVAILABLE);
     });
 
-    it('stays out of the menu when every selected alert is still active', () => {
+    it('gives a reason when only a resolved classic alert is selected', () => {
+      expect(reasonFor([classicEpisode(ALERT_EPISODE_STATUS.INACTIVE)])).toBe(
+        i18n.UNRESOLVE_NOT_AVAILABLE
+      );
+    });
+
+    it('gives no reason when the classic alert in the selection is still active', () => {
       expect(
-        createUnresolveAction(makeDeps()).getBulkDisabledReason!([
+        reasonFor([
+          universalEpisode(ALERT_EPISODE_STATUS.INACTIVE),
+          classicEpisode(ALERT_EPISODE_STATUS.ACTIVE),
+        ])
+      ).toBeUndefined();
+    });
+
+    it('gives no reason when every selected alert is still active', () => {
+      expect(
+        reasonFor([
           universalEpisode(ALERT_EPISODE_STATUS.ACTIVE),
           classicEpisode(ALERT_EPISODE_STATUS.ACTIVE),
         ])
@@ -116,11 +134,7 @@ describe('createUnresolveAction', () => {
     });
 
     it('gives no reason when every selected alert is universal', () => {
-      expect(
-        createUnresolveAction(makeDeps()).getBulkDisabledReason!([
-          universalEpisode(ALERT_EPISODE_STATUS.INACTIVE),
-        ])
-      ).toBeUndefined();
+      expect(reasonFor([universalEpisode(ALERT_EPISODE_STATUS.INACTIVE)])).toBeUndefined();
     });
   });
 

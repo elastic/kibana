@@ -22,6 +22,7 @@ import * as i18n from './translations';
 import { createEditAssigneeAction } from './edit_assignee';
 import { bulkAssignEpisodeActions } from './bulk_create_alert_actions';
 import { openAssigneeModal } from '../components/assignee_modal';
+import { CLASSIC_EPISODE_SOURCE_ID } from '../classic_alerts/constants';
 
 jest.mock('./bulk_create_alert_actions');
 jest.mock('../components/assignee_modal');
@@ -150,7 +151,7 @@ describe('createEditAssigneeAction', () => {
       const classicEpisode = {
         ...makeEpisode('classic-1'),
         supports_actions: false,
-        source_id: 'classic-alerts',
+        source_id: CLASSIC_EPISODE_SOURCE_ID,
       };
 
       expect(action.getBulkDisabledReason!([makeEpisode('universal-1'), classicEpisode])).toBe(
