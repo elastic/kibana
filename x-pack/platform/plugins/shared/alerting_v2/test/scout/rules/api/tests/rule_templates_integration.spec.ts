@@ -12,19 +12,27 @@ import {
   type AlertingApiServicesFixture,
   apiTest,
   buildCreateRuleData,
+  buildRuleTemplateData,
   getRuleUrl,
   testData,
 } from '../fixtures';
 
-const TEMPLATE = { id: 'template-1' };
+const TEMPLATE_ID = 'template-1';
+const TEMPLATE = { id: TEMPLATE_ID };
 
-apiTest.describe('Rule metadata.template', { tag: testData.API_ENGINE_NON_MKI_TAG }, () => {
+apiTest.describe('Rule metadata.template', { tag: testData.API_ENGINE_TAG }, () => {
   let writerCredentials: RoleApiCredentials;
   let writerHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ requestAuth }) => {
+  apiTest.beforeAll(async ({ requestAuth, apiServices }) => {
     writerCredentials = await requestAuth.getApiKeyForCustomRole(ALERTING_V2_RULES_ALL_ROLE);
     writerHeaders = { ...testData.COMMON_HEADERS, ...writerCredentials.apiKeyHeader };
+
+    await apiServices.alertingV2.ruleTemplates.cleanUp();
+    await apiServices.alertingV2.ruleTemplates.create({
+      id: TEMPLATE_ID,
+      attributes: buildRuleTemplateData({ metadata: { name: 'metadata-template-source' } }),
+    });
   });
 
   const createdRuleIds: string[] = [];
@@ -40,9 +48,25 @@ apiTest.describe('Rule metadata.template', { tag: testData.API_ENGINE_NON_MKI_TA
     return created;
   };
 
+  const installTemplate = async (
+    apiServices: AlertingApiServicesFixture,
+    name: string
+  ): Promise<{ id: string }> => {
+    const created = await apiServices.alertingV2.ruleTemplates.install(
+      TEMPLATE_ID,
+      buildCreateRuleData({ metadata: { name } })
+    );
+    createdRuleIds.push(created.id);
+    return created;
+  };
+
   apiTest.afterEach(async ({ apiServices }) => {
     await Promise.all(createdRuleIds.map((id) => apiServices.alertingV2.rules.delete(id)));
     createdRuleIds.length = 0;
+  });
+
+  apiTest.afterAll(async ({ apiServices }) => {
+    await apiServices.alertingV2.ruleTemplates.cleanUp();
   });
 
   apiTest('create: rejects metadata.template in the body', async ({ apiClient }) => {
@@ -81,8 +105,7 @@ apiTest.describe('Rule metadata.template', { tag: testData.API_ENGINE_NON_MKI_TA
   apiTest(
     'get and find: return metadata.template when present',
     async ({ apiClient, apiServices }) => {
-      const created = await createRule(apiServices, 'from-template');
-      await apiServices.alertingV2.ruleSavedObject.setMetadataTemplate(created.id, TEMPLATE);
+      const created = await installTemplate(apiServices, 'from-template');
 
       const getResponse = await apiClient.get(getRuleUrl(created.id), { headers: writerHeaders });
       expect(getResponse).toHaveStatusCode(200);
@@ -99,8 +122,7 @@ apiTest.describe('Rule metadata.template', { tag: testData.API_ENGINE_NON_MKI_TA
   );
 
   apiTest('update: keeps metadata.template', async ({ apiClient, apiServices }) => {
-    const created = await createRule(apiServices, 'update-keeps-template');
-    await apiServices.alertingV2.ruleSavedObject.setMetadataTemplate(created.id, TEMPLATE);
+    const created = await installTemplate(apiServices, 'update-keeps-template');
 
     const response = await apiClient.patch(getRuleUrl(created.id), {
       headers: writerHeaders,
@@ -116,8 +138,7 @@ apiTest.describe('Rule metadata.template', { tag: testData.API_ENGINE_NON_MKI_TA
   apiTest(
     'upsert: keeps metadata.template on an existing rule',
     async ({ apiClient, apiServices }) => {
-      const created = await createRule(apiServices, 'upsert-keeps-template');
-      await apiServices.alertingV2.ruleSavedObject.setMetadataTemplate(created.id, TEMPLATE);
+      const created = await installTemplate(apiServices, 'upsert-keeps-template');
 
       const response = await apiClient.put(getRuleUrl(created.id), {
         headers: writerHeaders,

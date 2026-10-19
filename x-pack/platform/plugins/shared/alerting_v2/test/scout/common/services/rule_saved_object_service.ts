@@ -63,16 +63,6 @@ export interface RuleSavedObjectService {
    * directly is the only way to observe that halt without racing the disable.
    */
   setEnabled: (ruleId: string, enabled: boolean, spaceId?: string) => Promise<void>;
-  /**
-   * Sets the server-managed `metadata.template` on a rule saved object. The
-   * rule API never accepts it, so specs seed it here to cover the rules the
-   * template install route creates.
-   */
-  setMetadataTemplate: (
-    ruleId: string,
-    template: { id: string },
-    spaceId?: string
-  ) => Promise<void>;
 }
 
 export const getRuleSavedObjectService = ({
@@ -149,17 +139,6 @@ export const getRuleSavedObjectService = ({
           index: ALERTING_CASES_SAVED_OBJECT_INDEX,
           id: getDocumentId(ruleId, spaceId),
           doc: { [RULE_SAVED_OBJECT_TYPE]: { enabled } },
-          refresh: 'wait_for',
-        });
-      }),
-
-    setMetadataTemplate: (ruleId, template, spaceId = DEFAULT_SPACE_ID) =>
-      measurePerformanceAsync(log, 'ruleSavedObject.setMetadataTemplate', async () => {
-        const client = await getSavedObjectClient();
-        await client.update({
-          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
-          id: getDocumentId(ruleId, spaceId),
-          doc: { [RULE_SAVED_OBJECT_TYPE]: { metadata: { template } } },
           refresh: 'wait_for',
         });
       }),

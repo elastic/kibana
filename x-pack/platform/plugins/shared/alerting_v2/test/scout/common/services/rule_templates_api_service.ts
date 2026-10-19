@@ -7,7 +7,9 @@
 
 import type { KbnClient, ScoutLogger } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
-import { RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../constants';
+import type { CreateRuleData, RuleResponse } from '@kbn/alerting-v2-schemas';
+import { COMMON_HEADERS, RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../constants';
+import { getInstallRuleTemplateUrl } from '../urls';
 
 export interface SeedRuleTemplateParams {
   id: string;
@@ -17,6 +19,8 @@ export interface SeedRuleTemplateParams {
 
 export interface RuleTemplatesApiService {
   create: (params: SeedRuleTemplateParams) => Promise<void>;
+  /** Installs a template, creating a rule that records `metadata.template`. */
+  install: (templateId: string, data: CreateRuleData) => Promise<RuleResponse>;
   cleanUp: () => Promise<void>;
 }
 
@@ -46,6 +50,17 @@ export const getRuleTemplatesApiService = ({
           overwrite: true,
           ...(spaceId ? { space: spaceId } : {}),
         });
+      }),
+
+    install: (templateId, data) =>
+      measurePerformanceAsync(log, 'ruleTemplates.install', async () => {
+        const response = await kbnClient.request<RuleResponse>({
+          method: 'POST',
+          path: getInstallRuleTemplateUrl(templateId),
+          headers: COMMON_HEADERS,
+          body: data,
+        });
+        return response.data;
       }),
 
     cleanUp: () =>
