@@ -8,3 +8,4 @@
 export { type MarkdownNode, markdown } from './markdown';
 export { type HeaderNode, header } from './header';
 export { type ContextNode, context } from './context';
+export { type DividerNode, divider } from './divider';

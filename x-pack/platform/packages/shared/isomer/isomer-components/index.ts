@@ -8,9 +8,11 @@
 export { componentsPack, componentsPrimitives } from './src/pack';
 export {
   type ContextNode,
+  type DividerNode,
   type HeaderNode,
   type MarkdownNode,
   context,
+  divider,
   header,
   markdown,
 } from './src/primitives';
