@@ -93,7 +93,7 @@ export const deriveAuthorizationSecretValues = (authorization: string): string[]
   const fragment = authorization.slice(separatorIndex + 1);
   const candidates = [fragment];
 
-  if (scheme === 'Basic') {
+  if (scheme.toLowerCase() === 'basic') {
     const decoded = decodeBasicCredentials(fragment);
     if (decoded !== undefined) {
       const colonIndex = decoded.indexOf(':');

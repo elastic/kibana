@@ -103,6 +103,33 @@ describe('buildConnectorEnv', () => {
     ]);
   });
 
+  it.each(['Basic', 'basic', 'BASIC', 'bAsIc'])(
+    'redacts decoded Basic credentials when the scheme is %s and preserves the header env value',
+    (scheme) => {
+      const encodedCredentials = Buffer.from('elastic-user:p4ssword').toString('base64');
+      const authorization = `${scheme} ${encodedCredentials}`;
+      const { env, secretValues } = buildConnectorEnv({
+        connectorId: CONNECTOR_ID,
+        actionTypeId: '.http',
+        config: {},
+        headers: { Authorization: authorization },
+      });
+
+      expect(env.CONNECTOR_HEADER_AUTHORIZATION).toBe(authorization);
+      expect(secretValues).toEqual(
+        expect.arrayContaining([
+          encodedCredentials,
+          'elastic-user:p4ssword',
+          'elastic-user',
+          'p4ssword',
+        ])
+      );
+      expect(redactSecrets('user=elastic-user password=p4ssword', secretValues)).toBe(
+        'user=[REDACTED] password=[REDACTED]'
+      );
+    }
+  );
+
   it('derives values from every case variant of Authorization and keeps the later one in env', () => {
     const { env, secretValues } = buildConnectorEnv({
       connectorId: CONNECTOR_ID,
