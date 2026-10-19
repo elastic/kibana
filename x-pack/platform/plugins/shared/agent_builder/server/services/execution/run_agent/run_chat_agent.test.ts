@@ -396,6 +396,24 @@ describe('runDefaultAgentMode', () => {
         expect.objectContaining({ additionalSkillIds: [] })
       );
     });
+
+    it('forwards the aiIndices feature flag to selectSkills', async () => {
+      const context = createAgentHandlerContextMock();
+      await setupBase(context);
+      context.experimentalFeatures = { ...context.experimentalFeatures, aiIndices: true };
+
+      await runDefaultAgentMode(
+        {
+          nextInput: { message: 'hello' },
+          agentConfiguration: { tools: [], ai_indices: ['elastic'] } as any,
+        },
+        context
+      );
+
+      expect(selectSkillsMock).toHaveBeenCalledWith(
+        expect.objectContaining({ aiIndicesEnabled: true })
+      );
+    });
   });
 
   describe('threaded roundId', () => {

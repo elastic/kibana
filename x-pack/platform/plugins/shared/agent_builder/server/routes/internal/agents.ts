@@ -42,7 +42,7 @@ const resolveInheritedAiIndicesForType = async ({
 }): Promise<InheritedAiIndicesResolveResult> => {
   try {
     const base = await agentsService.resolveAgentBaseConfiguration({ agentType, request });
-    return { inherited: base.ai_indices ?? [] };
+    return { inherited: base?.ai_indices ?? [] };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
 

@@ -57,7 +57,7 @@ export interface AgentsServiceStart {
   resolveAgentBaseConfiguration: (opts: {
     agentType: string;
     request: KibanaRequest;
-  }) => Promise<AgentBaseConfiguration>;
+  }) => Promise<AgentBaseConfiguration | undefined>;
   removeToolRefsFromAgents: (params: ToolRefsParams) => Promise<AgentsUsingToolsResult>;
   getAgentsUsingTools: (params: ToolRefsParams) => Promise<AgentsUsingToolsResult>;
   removePluginRefsFromAgents: (params: PluginRefsParams) => Promise<AgentsUsingToolsResult>;
