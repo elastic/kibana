@@ -25,6 +25,7 @@ const runId = 'run-abc';
 
 const isolateHost: ActionCatalogEntry = {
   workflowId: 'system-security-action-isolate-host',
+  approvalPolicy: 'autonomy-dependent',
   name: 'Isolate host',
   category: 'respond',
   inputSchema: {
@@ -38,6 +39,7 @@ const isolateHost: ActionCatalogEntry = {
 
 const killProcess: ActionCatalogEntry = {
   workflowId: 'system-security-action-kill-process',
+  approvalPolicy: 'autonomy-dependent',
   name: 'Kill process',
   category: 'respond',
   inputSchema: {
@@ -52,6 +54,7 @@ const killProcess: ActionCatalogEntry = {
 
 const suspendProcess: ActionCatalogEntry = {
   workflowId: 'system-security-action-suspend-process',
+  approvalPolicy: 'autonomy-dependent',
   name: 'Suspend process',
   category: 'respond',
   inputSchema: {
@@ -67,6 +70,7 @@ const suspendProcess: ActionCatalogEntry = {
 // An installed catalog can still carry the retired action; packaging must never fill it.
 const staleSetAssetCriticality: ActionCatalogEntry = {
   workflowId: 'system-alertzero-action-set-asset-criticality',
+  approvalPolicy: 'autonomy-dependent',
   name: 'Set asset criticality',
   category: 'respond',
   inputSchema: {
