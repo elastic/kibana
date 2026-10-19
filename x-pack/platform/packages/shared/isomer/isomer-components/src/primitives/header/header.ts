@@ -39,12 +39,12 @@ const icon = componentIcon(
 
 const catalog: PrimitiveCatalogEntry = {
   type: 'header',
-  purpose: 'A heading for a message, or a label above the section that follows it.',
-  useWhen: [
-    'The message needs a title.',
-    'A section of the message needs a short label, such as "Impact" or "Conclusion".',
+  purpose: 'A heading for a message, or a label that stands on its own.',
+  useWhen: ['The message needs a title.', 'A label stands on its own, with no content to group.'],
+  avoidWhen: [
+    'The heading is part of Markdown prose. Use a Markdown heading in `markdown`.',
+    'The label groups the content under it. Use a `section`.',
   ],
-  avoidWhen: ['The heading is part of Markdown prose. Use a Markdown heading in `markdown`.'],
   example,
 };
 
