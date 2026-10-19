@@ -92,6 +92,19 @@ describe('CaseDetailsAppHeader', () => {
     expect(screen.getByTestId('case-view-status-badge')).toBeInTheDocument();
   });
 
+  it('gives the severity and status badges accessible names with their context', async () => {
+    renderWithTestingProviders(<CaseDetailsAppHeader {...defaultProps} />);
+
+    expect(await screen.findByTestId('case-view-severity-badge')).toHaveAttribute(
+      'aria-label',
+      'Severity: Low'
+    );
+    expect(screen.getByTestId('case-view-status-badge')).toHaveAttribute(
+      'aria-label',
+      'Status: Open'
+    );
+  });
+
   it('does not render delete modal by default', async () => {
     renderWithTestingProviders(<CaseDetailsAppHeader {...defaultProps} />);
 
