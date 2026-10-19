@@ -14,7 +14,10 @@ import {
   type ClassifyBatchParams,
 } from './classify_detections';
 import type { BaselineObservation } from './baseline';
-import type { LiveRuleMembership } from '../lib/significant_events/events/rule_events_client';
+import type {
+  LiveRuleMembership,
+  PriorSeries,
+} from '../lib/significant_events/events/rule_events_client';
 import type { ProbeResult } from './run_probe';
 
 const STORED_QUERY = 'FROM $.a | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend';
@@ -178,6 +181,53 @@ describe('classifyBatch', () => {
 
       expect(output.batch).toHaveLength(1);
       expect(output.batch[0]).not.toHaveProperty('classifier');
+    });
+
+    it('hands over the latest series of the rule, whatever its status, with its note', async () => {
+      const rows = [rowOf('rule-A'), rowOf('rule-B')];
+      const prior: PriorSeries = {
+        eventId: 'event-9',
+        status: 'inactive',
+        severity: 'low',
+        assessmentNote: 'Benign deploy.',
+        updatedAt: '2026-10-12T10:00:00.000Z',
+      };
+      const findPriorSeries = jest.fn(async () => new Map([['rule-A', prior]]));
+
+      const output = await classifyBatch(batchParams({ rows, findPriorSeries, shadowMode: true }));
+
+      expect(findPriorSeries).toHaveBeenCalledWith(['rule-A', 'rule-B']);
+      expect(output.batch[0].prior_series).toEqual({
+        event_id: 'event-9',
+        status: 'inactive',
+        severity: 'low',
+        assessment_note: 'Benign deploy.',
+        updated_at: '2026-10-12T10:00:00.000Z',
+      });
+      expect(output.batch[1]).not.toHaveProperty('prior_series');
+    });
+
+    it('keeps the prior series next to the classifier hint when enforcing', async () => {
+      const rows = [rowOf('rule-A')];
+      const findPriorSeries = jest.fn(
+        async () =>
+          new Map([
+            [
+              'rule-A',
+              {
+                eventId: undefined,
+                status: 'active',
+                severity: 'high',
+                updatedAt: 't',
+              } as PriorSeries,
+            ],
+          ])
+      );
+
+      const output = await classifyBatch(batchParams({ rows, findPriorSeries, shadowMode: false }));
+
+      expect(output.batch[0].classifier).toBeDefined();
+      expect(output.batch[0].prior_series).toMatchObject({ status: 'active', severity: 'high' });
     });
 
     it('reads cells by the given column names', async () => {

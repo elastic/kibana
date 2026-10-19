@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MAX_ID_LENGTH } from '@kbn/significant-events-schema';
+import { MAX_ID_LENGTH, MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import { lazySchema, z } from '@kbn/zod/v4';
 import { BASELINE_DECISIONS } from './baseline';
 import { DECISION_REASONS, PROBE_STATUSES } from './classify_detection';
@@ -45,6 +45,17 @@ export const batchClassifierSchema = lazySchema(() =>
   })
 );
 
+/** The rule's latest series in any status: what it last was, and why. Context, never evidence. */
+export const batchPriorSeriesSchema = lazySchema(() =>
+  z.object({
+    event_id: z.string().max(MAX_ID_LENGTH).optional(),
+    status: z.string().max(32),
+    severity: z.string().max(32),
+    assessment_note: z.string().max(MAX_TEXT_LENGTH).optional(),
+    updated_at: z.string().max(64),
+  })
+);
+
 /** One detection as the agent reads it: named fields only, no column positions. */
 export const batchEntrySchema = lazySchema(() =>
   z.object({
@@ -59,9 +70,12 @@ export const batchEntrySchema = lazySchema(() =>
     flaky_probe: z.boolean().optional(),
     /** Only when the classifier is enforcing: while it only records, the agent judges unprompted. */
     classifier: batchClassifierSchema.optional(),
+    /** Absent when the rule has no series in the lookback window. */
+    prior_series: batchPriorSeriesSchema.optional(),
   })
 );
 
+export type BatchPriorSeries = z.infer<typeof batchPriorSeriesSchema>;
 export type BatchClassifier = z.infer<typeof batchClassifierSchema>;
 export type BatchEntry = z.infer<typeof batchEntrySchema>;
 
@@ -78,10 +92,12 @@ export const toBatchEntry = ({
   columns = DEFAULT_DETECTION_COLUMNS,
   row,
   classifier,
+  priorSeries,
 }: {
   columns?: readonly string[];
   row: readonly unknown[];
   classifier?: BatchClassifier;
+  priorSeries?: BatchPriorSeries;
 }): BatchEntry => {
   const cells = new Map(columns.map((name, index) => [name, row[index]]));
   const source = cells.get('_source');
@@ -99,5 +115,6 @@ export const toBatchEntry = ({
     recent_detection_count: number(cells.get('recent_detection_count')),
     flaky_probe: typeof flaky === 'boolean' ? flaky : undefined,
     ...(classifier ? { classifier } : {}),
+    ...(priorSeries ? { prior_series: priorSeries } : {}),
   };
 };

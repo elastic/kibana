@@ -598,6 +598,86 @@ describe('RuleEventsClient', () => {
     });
   });
 
+  describe('findPriorSeries', () => {
+    const rowOf = ({
+      eventId,
+      status,
+      timestamp,
+      note,
+      ruleUuid,
+    }: {
+      eventId: string;
+      status: string;
+      timestamp: string;
+      note?: string;
+      ruleUuid: string;
+    }): MockRow => ({
+      source: ruleEventSource({ alert: { status }, '@timestamp': timestamp }),
+      dataJson: JSON.stringify({
+        ...dataDoc,
+        event_id: eventId,
+        ...(note ? { assessment_note: note } : {}),
+        signals: [
+          {
+            type: 'detection',
+            source_id: 'logs.checkout',
+            description: 'Observed rows',
+            verdict: 'confirms',
+            metadata: { rule_uuid: ruleUuid },
+          },
+        ],
+      }),
+    });
+
+    it('returns an empty map without querying when no rules are requested', async () => {
+      const { client, query } = createClient(async () => sourceResponse([]));
+
+      expect((await client.findPriorSeries({ ruleUuids: [], from: 'x' })).size).toBe(0);
+      expect(query).not.toHaveBeenCalled();
+    });
+
+    it('looks at series in any status since the lookback start', async () => {
+      const { client, query } = createClient(async () => sourceResponse([]));
+
+      await client.findPriorSeries({ ruleUuids: ['rule-A'], from: '2026-10-01T00:00:00.000Z' });
+
+      const q = lastQuery(query);
+      expect(q).not.toContain('alert.status` IN');
+      expect(q).toContain('WHERE @timestamp >= TO_DATETIME(?fromIso)');
+      expect(q).toContain(
+        'MV_INTERSECTS(FIELD_EXTRACT(data, "signals.metadata.rule_uuid"), ["rule-A"])'
+      );
+    });
+
+    it('keeps, per rule, the series written most recently, with its status and note', async () => {
+      const rows = [
+        rowOf({
+          eventId: 'old',
+          status: 'active',
+          timestamp: '2026-10-10T10:00:00.000Z',
+          ruleUuid: 'rule-A',
+        }),
+        rowOf({
+          eventId: 'new',
+          status: 'inactive',
+          timestamp: '2026-10-12T10:00:00.000Z',
+          note: 'Benign deploy.',
+          ruleUuid: 'rule-A',
+        }),
+      ];
+      const { client } = createClient(async () => sourceResponse(rows));
+
+      const prior = await client.findPriorSeries({ ruleUuids: ['rule-A'], from: 'x' });
+
+      expect(prior.get('rule-A')).toMatchObject({
+        eventId: 'new',
+        status: 'inactive',
+        assessmentNote: 'Benign deploy.',
+        updatedAt: '2026-10-12T10:00:00.000Z',
+      });
+    });
+  });
+
   describe('findLiveMembers', () => {
     const detectionSignal = ({
       ruleUuid,

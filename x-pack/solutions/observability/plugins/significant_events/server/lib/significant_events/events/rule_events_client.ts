@@ -225,6 +225,17 @@ export type UpdateEventStatusResult =
       reason: LifecycleSkipReason | 'not_found' | 'superseded';
     };
 
+/** A rule's latest series in any status, as last written: context for judging a new detection of it. */
+export interface PriorSeries {
+  eventId: string | undefined;
+  status: SignificantEventStatus;
+  severity: Severity;
+  /** An operator's reason lives here too: the fallback note is written when none is given. */
+  assessmentNote: string | undefined;
+  /** When the latest version was written; for an `inactive` series, when it went inactive. */
+  updatedAt: string;
+}
+
 /** A rule's membership in one live series, with that member's latest stored signal. */
 export interface LiveRuleMembership {
   eventId: string | undefined;
@@ -423,6 +434,53 @@ export class RuleEventsClient {
       fields: ['data_json'],
     });
     return { hits: hits.map(decodeSignificantEvent) };
+  }
+
+  /**
+   * Maps each requested rule to the series it was most recently a member of, whatever its status,
+   * among the series written since `from`. A rule with no such series is absent from the map.
+   *
+   * Capped at MAX_DEDUP_SCAN_LIMIT distinct series, like `findLatestActive`.
+   */
+  async findPriorSeries({
+    ruleUuids,
+    from,
+  }: {
+    ruleUuids: string[];
+    from: string;
+  }): Promise<Map<string, PriorSeries>> {
+    const prior = new Map<string, PriorSeries>();
+    if (ruleUuids.length === 0) return prior;
+
+    const query = pickLatestPerGroup(
+      applyTimeRange({ query: buildBaseQuery(this.clients.space), from }),
+      GROUP_HASH_FIELD
+    ).where`${ruleUuidsIntersects(ruleUuids)}`;
+    const hits = await executeEsqlQuery<RuleEventSourceRow>({
+      esClient: this.clients.esClient,
+      query: withDataJsonProjection(query).keep('_source', 'data_json').limit(MAX_DEDUP_SCAN_LIMIT),
+      fields: ['data_json'],
+    });
+
+    const requested = new Set(ruleUuids);
+    for (const event of hits.map(decodeSignificantEvent)) {
+      const series: PriorSeries = {
+        eventId: event.event_id,
+        status: event.status,
+        severity: event.severity,
+        assessmentNote: event.assessment_note,
+        updatedAt: event['@timestamp'],
+      };
+      for (const signal of event.signals ?? []) {
+        const ruleUuid = signal.metadata.rule_uuid;
+        if (!ruleUuid || !requested.has(ruleUuid)) continue;
+        const known = prior.get(ruleUuid);
+        if (!known || Date.parse(series.updatedAt) > Date.parse(known.updatedAt)) {
+          prior.set(ruleUuid, series);
+        }
+      }
+    }
+    return prior;
   }
 
   /**
