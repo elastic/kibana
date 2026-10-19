@@ -6,22 +6,28 @@
  */
 
 /**
- * Definitions carrying `dynamic` and no `extraction`, shaped like the ones the inventory plugin will
- * register. They exist to prove the shape validates; the field choices are not data-checked.
+ * Test fixtures only. Nothing registers these, the plugin does not export them, and like every
+ * `__fixtures__` directory this one is left out of the distributable, so an import from production
+ * code fails the build rather than shipping them. The real Observability definitions are registered
+ * by the inventory plugin at its setup.
+ *
+ * Each fixture carries `dynamic` and no `extraction`, shaped like a definition the inventory plugin
+ * will register, to prove the schema and the whole-definition rules accept that shape. Index
+ * patterns and field names are illustrative and not checked against data.
  */
 
 import { isNotEmptyCondition } from '../../common_fields';
 import type { EntityDefinitionManagedBy, EntityDefinitionWithoutId } from '../../entity_schema';
 import { buildUserEntityDefinition } from '../../user';
 
-/** A definition with `managedBy` set, so it can go straight to the registry. */
-type ManagedDynamicDefinition = EntityDefinitionWithoutId & {
+/** A fixture with `managedBy` set, so it can go straight to the registry in tests. */
+type DynamicDefinitionFixture = EntityDefinitionWithoutId & {
   managedBy: EntityDefinitionManagedBy;
 };
 
 const managedBy: EntityDefinitionManagedBy = { kind: 'plugin', id: 'entityInventory' };
 
-export const k8sPodDynamicDefinition: ManagedDynamicDefinition = {
+export const k8sPodDynamicFixture: DynamicDefinitionFixture = {
   type: 'k8s.pod',
   name: 'Pod',
   managedBy,
@@ -71,7 +77,7 @@ export const k8sPodDynamicDefinition: ManagedDynamicDefinition = {
   },
 };
 
-export const k8sNodeDynamicDefinition: ManagedDynamicDefinition = {
+export const k8sNodeDynamicFixture: DynamicDefinitionFixture = {
   type: 'k8s.node',
   name: 'Node',
   managedBy,
@@ -87,7 +93,7 @@ export const k8sNodeDynamicDefinition: ManagedDynamicDefinition = {
   },
 };
 
-export const k8sDeploymentDynamicDefinition: ManagedDynamicDefinition = {
+export const k8sDeploymentDynamicFixture: DynamicDefinitionFixture = {
   type: 'k8s.deployment',
   name: 'Deployment',
   managedBy,
@@ -106,7 +112,7 @@ export const k8sDeploymentDynamicDefinition: ManagedDynamicDefinition = {
 };
 
 /** The Security `host` identity, copied rather than imported so the fixture stands alone. */
-export const hostDynamicDefinition: ManagedDynamicDefinition = {
+export const hostDynamicFixture: DynamicDefinitionFixture = {
   type: 'host',
   name: 'Host',
   managedBy,
@@ -148,15 +154,15 @@ export const hostDynamicDefinition: ManagedDynamicDefinition = {
 };
 
 /** Every fixture above, each expected to validate and register. */
-export const DYNAMIC_DEFINITION_FIXTURES: readonly ManagedDynamicDefinition[] = [
-  k8sPodDynamicDefinition,
-  k8sNodeDynamicDefinition,
-  k8sDeploymentDynamicDefinition,
-  hostDynamicDefinition,
+export const DYNAMIC_DEFINITION_FIXTURES: readonly DynamicDefinitionFixture[] = [
+  k8sPodDynamicFixture,
+  k8sNodeDynamicFixture,
+  k8sDeploymentDynamicFixture,
+  hostDynamicFixture,
 ];
 
 /** The Security `user` identity with a `dynamic` block: not servable, so it must be rejected. */
-export const userShapedDynamicDefinition: ManagedDynamicDefinition = {
+export const userShapedDynamicFixture: DynamicDefinitionFixture = {
   type: 'user',
   name: 'User',
   managedBy,

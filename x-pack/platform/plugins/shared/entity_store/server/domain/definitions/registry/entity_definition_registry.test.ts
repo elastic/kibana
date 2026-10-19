@@ -13,10 +13,10 @@ import { genericEntityDefinition } from '../../../../common/domain/definitions/g
 import type { ExtractionBlock } from '../../../../common/domain/definitions/entity_schema';
 import {
   DYNAMIC_DEFINITION_FIXTURES,
-  hostDynamicDefinition,
-  k8sPodDynamicDefinition,
-  userShapedDynamicDefinition,
-} from '../../../../common/domain/definitions/dynamic/__fixtures__/dynamic_definitions';
+  hostDynamicFixture,
+  k8sPodDynamicFixture,
+  userShapedDynamicFixture,
+} from '../../../../common/domain/definitions/dynamic/__fixtures__/dynamic_definition_fixtures';
 import {
   NO_IDENTITY_ATTRIBUTE_RULE,
   SERVABLE_IDENTITY_RULE,
@@ -505,7 +505,7 @@ describe('EntityDefinitionRegistry', () => {
     );
 
     it('rejects the user-shaped definition with the servable identity rule', () => {
-      const result = registry.register(userShapedDynamicDefinition);
+      const result = registry.register(userShapedDynamicFixture);
 
       expect(result.ok).toBe(false);
       expect(result.ok === false && result.reason).toContain(
@@ -515,9 +515,9 @@ describe('EntityDefinitionRegistry', () => {
     });
 
     it('rejects a documentsFilter that is not the derived presence filter', () => {
-      const { identityField } = hostDynamicDefinition;
+      const { identityField } = hostDynamicFixture;
       const result = registry.register({
-        ...hostDynamicDefinition,
+        ...hostDynamicFixture,
         identityField: {
           ...identityField,
           documentsFilter: { field: 'host.id', exists: true },
@@ -532,9 +532,9 @@ describe('EntityDefinitionRegistry', () => {
     it('rejects an identity carrying both variants rather than validating only the ranking', () => {
       // `host.*` is not a literal field path, so the servable identity rule would reject it as a
       // `singleField`; it must not slip past the rule by riding on a valid ranking.
-      const { identityField } = hostDynamicDefinition;
+      const { identityField } = hostDynamicFixture;
       const result = registry.register({
-        ...hostDynamicDefinition,
+        ...hostDynamicFixture,
         identityField: { ...identityField, singleField: 'host.*' },
       });
 
@@ -544,9 +544,9 @@ describe('EntityDefinitionRegistry', () => {
     });
 
     it('rejects an attribute that reads the identity field', () => {
-      const [source] = k8sPodDynamicDefinition.dynamic?.sources ?? [];
+      const [source] = k8sPodDynamicFixture.dynamic?.sources ?? [];
       const result = registry.register({
-        ...k8sPodDynamicDefinition,
+        ...k8sPodDynamicFixture,
         dynamic: { sources: [{ ...source, attributes: [{ name: 'uid', field: 'k8s.pod.uid' }] }] },
       });
 
@@ -557,7 +557,7 @@ describe('EntityDefinitionRegistry', () => {
 
     it('still rejects unknown keys alongside a dynamic block', () => {
       const withStaleId = {
-        ...k8sPodDynamicDefinition,
+        ...k8sPodDynamicFixture,
         id: 'k8s.pod-default',
       } as unknown as RegistrableEntityDefinition;
 

@@ -7,8 +7,8 @@
 
 import {
   DYNAMIC_DEFINITION_FIXTURES,
-  userShapedDynamicDefinition,
-} from './__fixtures__/dynamic_definitions';
+  userShapedDynamicFixture,
+} from './__fixtures__/dynamic_definition_fixtures';
 import { SERVABLE_IDENTITY_RULE } from './dynamic_definition_rules';
 import { ALL_ENTITY_TYPES, entitySchema } from '../entity_schema';
 import { getBuiltInEntityDefinition } from '../registry';
@@ -24,7 +24,7 @@ describe('dynamic definition fixtures', () => {
   );
 
   it('rejects the user-shaped definition with the servable identity rule', () => {
-    const result = entitySchema.safeParse({ ...userShapedDynamicDefinition, id: 'user-default' });
+    const result = entitySchema.safeParse({ ...userShapedDynamicFixture, id: 'user-default' });
     expect(result.success).toBe(false);
     expect(result.error?.issues.map(({ message }) => message).join('; ')).toContain(
       SERVABLE_IDENTITY_RULE
