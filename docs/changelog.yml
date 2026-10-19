@@ -69,45 +69,42 @@ pivot:
     enhancement: 'release_note:enhancement'
     docs: '>docs'
     known-issue:
-    other:
-    regression:
-    security:
+    'other':
+    'regression':
+    'security':
   # Labels that trigger the highlight flag (accepts string or list)
   # highlight:
   #   - ">highlight"
 
-  # Area definitions with labels
+  # Area definitions with labels. The list follows elastic/kibana-release-notes (src/config/templates/common.ts);
+  # Security and Observability PRs get no area, the solution release notes group them.
   areas:
-    'AI and machine Learning':
+    'Logstash':
+      - 'Feature:Logstash Pipelines'
+    'Agent Builder':
+      - 'Team:agent-builder'
+      - 'feature:agent-builder'
+    'Machine learning and inference':
       - ':ml'
+      - 'Team:AI Infra'
       - 'Feature:Anomaly Detection'
       - 'Feature:ml-results'
       - 'Feature:Data Frame Analytics'
       - 'Feature:Inference UI'
       - 'Feature:ML/AIOps'
-      - 'feature:agent-builder'
-      - 'Team:agent-builder'
-    'Alerting and reporting':
-      - 'Feature:Alerting'
-      - 'Feature:Actions'
+    'Workflows':
+      - 'Team:One Workflow'
+    'Maps':
+      - 'Team:Geo'
+    'QA':
+      - 'Team:QA'
+    'Connectivity':
       - 'Feature:Actions/ConnectorTypes'
-      - 'Team:ResponseOps'
-      - 'Team:Cases'
-      - 'Feature:Cases'
-      - 'Feature:Embedding'
-      - 'Feature:SharingURLs'
-      - 'Feature:Reporting:CSV'
-      - 'Feature:Reporting:Framework'
-      - 'Feature:Reporting:Screenshot'
-      - 'Team:Reporting Services'
-      - 'Feature:AlertingV2'
-    'Dashboards and visualizations':
+    'Dashboards and Visualizations':
       - 'Feature:Dashboard'
       - 'Feature:Drilldowns'
       - 'Project:TimeToVisualize'
       - 'Team:Presentation'
-      - 'Team:Dashboards'
-      - 'Project:Dashboards API'
       - 'Feature:Lens'
       - 'Feature:Timelion'
       - 'Feature:TSVB'
@@ -132,20 +129,52 @@ pivot:
       - 'Team:Visualizations'
       - 'Feature:Canvas'
       - 'Feature:Maps'
-      - 'Team:Geo'
+      - 'Team:Dashboards'
+      - 'Project:Dashboards API'
     'Discover':
       - 'Feature:Discover'
       - 'Team:DataDiscovery'
-      - 'Team:Discover'
       - 'Feature:BackgroundSearch'
       - 'Feature:DiscoverTabs'
       - 'Feature:UnifiedDataTable'
       - 'Feature:UnifiedDocViewer'
       - 'Feature:UnifiedFieldList'
+      - 'Team:Discover'
     'ES|QL':
       - 'Team:ESQL'
       - 'Feature:ES|QL'
       - 'Feature:ES|QL editor'
+    'Sharing and reporting':
+      - 'Feature:Embedding'
+      - 'Feature:SharingURLs'
+      - 'Team:Reporting Services'
+      - 'Feature:Reporting:CSV'
+      - 'Feature:Reporting:Framework'
+      - 'Feature:Reporting:Screenshot'
+    'Beats Management':
+      - 'Feature:beats-cm'
+      - 'Team:Beats'
+    'Alerting':
+      - 'Feature:Alerting'
+      - 'Feature:Actions'
+      - 'Team:ResponseOps'
+      - 'Team:Cases'
+      - 'Feature:Cases'
+      - 'Feature:AlertingV2'
+    'Data ingestion and Fleet':
+      - 'Team:Fleet'
+      - 'Feature:Fleet'
+      - 'Feature:Ingest Node Pipelines'
+    'Data management':
+      - 'Feature:Data Views'
+      - 'Feature:Index Management'
+      - 'Feature:FieldFormatters'
+      - 'Feature:ILM'
+      - 'Feature:Transforms'
+    'Developer tools':
+      - 'Feature:Console'
+      - 'Feature:Dev Tools'
+      - 'Feature:Inspector'
     'Kibana platform':
       - 'Team:SharedUX'
       - 'Project:Accessibility'
@@ -161,19 +190,22 @@ pivot:
       - 'Feature:Header'
       - 'Team:Core'
       - 'Feature:Plugins'
+      - 'Feature:New Platform'
       - 'Project:i18n'
+      - 'Feature:ExpressionLanguage'
       - 'Feature:Saved Objects'
+      - 'Feature:NP Migration'
       - 'Feature:Task Manager'
       - 'Team:Security'
       - 'Feature:Security/Spaces'
+      - 'Feature:Security/User Profile'
+      - 'Feature:Users/Roles/API Keys'
       - 'Feature:Security/Authentication'
       - 'Feature:Security/Authorization'
       - 'Feature:Security/Feature Controls'
       - 'Feature:watcher'
       - 'Feature:Kibana Management'
-      - 'Team:Kibana Management'
       - 'Feature:Snapshot and Restore'
-      - 'Feature:CCR and Remote Clusters'
       - 'Feature:Upgrade Assistant'
       - 'Feature:Query Bar'
       - 'Feature:Filters'
@@ -185,26 +217,14 @@ pivot:
       - 'Feature:http'
       - 'Feature:OAS'
       - 'Feature:logging'
-    'Other': 'release_note_area:other'
-    'Search and data':
-      - 'Feature:Logstash Pipelines'
-      - 'Feature:beats-cm'
-      - 'Team:Beats'
-      - 'Team:Fleet'
-      - 'Feature:Fleet'
-      - 'Feature:Ingest Node Pipelines'
-      - 'Feature:Data Views'
-      - 'Feature:Index Management'
-      - 'Feature:FieldFormatters'
-      - 'Feature:ILM'
-      - 'Feature:Transforms'
-      - 'Feature:Console'
-      - 'Feature:Dev Tools'
-      - 'Feature:Inspector'
+      - 'Team:Kibana Management'
+      - 'Feature:CCR and Remote Clusters'
+    'Elasticsearch solution':
       - 'Team:Search'
       - 'Feature:Search Profiler'
       - 'Feature:Search'
       - 'Project:AsyncSearch'
+    'Other': 'release_note_area:other'
 
   # Product definitions with labels (optional).
   products:
@@ -279,7 +299,7 @@ rules:
   # Bundle — filtering applied during 'changelog bundle' and 'changelog gh-release'.
   # Applied after the primary filter (--prs, --issues, --all, ...) has collected changelogs.
   bundle:
-    products:
+    'products':
       'cloud-serverless':
         exclude_types:
           - docs
@@ -319,7 +339,7 @@ bundle:
   #   This release includes new features and bug fixes.
   use_local_changelogs: false
   releases:
-    products:
+    'products':
       kibana: kibana-release
       cloud-serverless: serverless-release
       observability: observability-release
