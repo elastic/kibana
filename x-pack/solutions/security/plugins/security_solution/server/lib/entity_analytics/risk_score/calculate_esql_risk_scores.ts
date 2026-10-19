@@ -37,7 +37,13 @@ import type { AssetCriticalityService } from '../asset_criticality/asset_critica
 
 import type { RiskScoresPreviewResponse } from '../../../../common/api/entity_analytics';
 import type { CalculateScoresParams, RiskScoreBucket, RiskScoreCompositeBuckets } from '../types';
-import { MAX_INPUTS_COUNT, RIEMANN_ZETA_S_VALUE, RIEMANN_ZETA_VALUE } from './constants';
+import {
+  DEFAULT_ALERT_SAMPLE_SIZE,
+  MAX_INPUTS_COUNT,
+  RIEMANN_ZETA_S_VALUE,
+  RIEMANN_ZETA_VALUE,
+} from './constants';
+
 import { filterFromRange } from './helpers';
 import { applyScoreModifiers } from './apply_score_modifiers';
 import type { PrivmonUserCrudService } from '../privilege_monitoring/users/privileged_users_crud';
@@ -204,7 +210,7 @@ export const calculateScoresWithESQL = async (
         const query = getESQL(
           entityType as EntityType,
           bounds,
-          params.alertSampleSizePerShard || 10000,
+          params.alertSampleSizePerShard || DEFAULT_ALERT_SAMPLE_SIZE,
           params.pageSize,
           params.index
         );
@@ -398,7 +404,7 @@ export const getESQL = (
     | STATS
         alert_count = count(risk_score),
         scores = MV_PSERIES_WEIGHTED_SUM(TOP(risk_score, ${
-          sampleSize ?? 10000
+          sampleSize ?? DEFAULT_ALERT_SAMPLE_SIZE
         }, "desc"), ${RIEMANN_ZETA_S_VALUE}),
         risk_inputs = ${RISK_INPUTS_TOP}
     BY ${identifierField}
@@ -639,7 +645,7 @@ export const getBaseScoreESQL = (
     | STATS
         alert_count = count(risk_score),
         scores = MV_PSERIES_WEIGHTED_SUM(TOP(risk_score, ${
-          sampleSize ?? 10000
+          sampleSize ?? DEFAULT_ALERT_SAMPLE_SIZE
         }, "desc"), ${RIEMANN_ZETA_S_VALUE}),
         risk_inputs = ${RISK_INPUTS_TOP}
         BY entity_id
@@ -755,7 +761,7 @@ export const getResolutionScoreESQLByIds = (
     | STATS
         alert_count = count(risk_score),
         scores = MV_PSERIES_WEIGHTED_SUM(TOP(risk_score, ${
-          sampleSize ?? 10000
+          sampleSize ?? DEFAULT_ALERT_SAMPLE_SIZE
         }, "desc"), ${RIEMANN_ZETA_S_VALUE}),
         risk_inputs = ${RISK_INPUTS_TOP},
         contributing_entities_raw = VALUES(entity_with_rel)
