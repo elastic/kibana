@@ -31,6 +31,7 @@
     "@kbn/screenshot-mode-plugin",
     "@kbn/expressions-plugin",
     "@kbn/field-types",
+    "@kbn/es-date-rounding",
     "@kbn/es-query",
     "@kbn/expect",
     "@kbn/datemath",

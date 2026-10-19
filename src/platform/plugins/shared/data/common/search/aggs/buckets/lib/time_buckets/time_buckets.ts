@@ -12,10 +12,12 @@ import { isString, isObject as isObjectLodash, isPlainObject, sortBy } from 'lod
 import type { Moment } from 'moment';
 import moment from 'moment';
 
+import { getAutoDateBucketTarget } from '@kbn/data-service';
 import type { Unit } from '@kbn/datemath';
-import { parseInterval, splitStringInterval } from '../../../utils';
+import type { DateInterval, IanaTimeZone, ZonedDateRange } from '@kbn/es-date-rounding';
+import { fitsInBuckets, ianaTimeZoneOrUtc, pickDateRounding } from '@kbn/es-date-rounding';
+import { parseEsInterval, parseInterval, splitStringInterval } from '../../../utils';
 import type { TimeRangeBounds } from '../../../../../query';
-import { calcAutoIntervalLessThan, calcAutoIntervalNear } from './calc_auto_interval';
 import type { EsInterval } from './calc_es_interval';
 import {
   convertDurationToNormalizedEsInterval,
@@ -30,6 +32,7 @@ export interface TimeBucketsInterval extends moment.Duration {
   esValue: EsInterval['value'];
   esUnit: EsInterval['unit'];
   expression: EsInterval['expression'];
+  forceFixed?: boolean;
   preScaled?: TimeBucketsInterval;
   scale?: number;
   scaled?: boolean;
@@ -45,6 +48,59 @@ function isValidMoment(m: any): boolean {
 
 function isDurationInterval(i: any): i is moment.Duration {
   return moment.isDuration(i) && Boolean(+i);
+}
+
+function resolveIanaTimeZone(min: TimeRangeBounds['min']): IanaTimeZone {
+  const zoned = min as { tz?: () => string | undefined } | undefined;
+  const id = typeof zoned?.tz === 'function' ? zoned.tz() : undefined;
+  return ianaTimeZoneOrUtc(id);
+}
+
+function toZonedRange(min: Moment, max: Moment): ZonedDateRange {
+  return {
+    from: min.valueOf(),
+    to: max.valueOf(),
+    timeZone: resolveIanaTimeZone(min),
+  };
+}
+
+function toPickerInterval(
+  duration: moment.Duration,
+  originalInterval: string | null
+): DateInterval {
+  const fromDuration = convertDurationToNormalizedEsInterval(duration);
+  let expression = fromDuration.expression;
+  if (originalInterval) {
+    try {
+      parseEsInterval(originalInterval);
+      expression = originalInterval;
+    } catch {
+      // setInterval accepts unit-only strings such as 'ms'; the picker needs a numeric ES expression.
+    }
+  }
+  const { type, unit } = parseEsInterval(expression);
+  // parseEsInterval classifies 1m/1h as calendar; the ES picker counts them as fixed TimeValues.
+  const kind: DateInterval['kind'] =
+    unit === 'm' || unit === 'h' || type === 'fixed' ? 'fixed' : 'calendar';
+  return {
+    expression,
+    kind,
+    nominalMs: Number(duration),
+  };
+}
+
+function decoratePicked(picked: DateInterval): TimeBucketsInterval {
+  const split = splitStringInterval(picked.expression);
+  const esValue = split?.value ?? 0;
+  const esUnit = (split?.unit ?? 'ms') as EsInterval['unit'];
+  const prettyUnits = moment.normalizeUnits(esUnit) as moment.unitOfTime.Base;
+  return Object.assign(moment.duration(picked.nominalMs), {
+    description: getPreciseDurationDescription(esValue, prettyUnits),
+    esValue,
+    esUnit,
+    expression: picked.expression,
+    ...(picked.kind === 'fixed' ? { forceFixed: true } : {}),
+  });
 }
 
 export interface TimeBucketsConfig extends Record<string, any> {
@@ -204,11 +260,8 @@ export class TimeBuckets {
   }
 
   /**
-   * Get the interval for the buckets. If the
-   * number of buckets created by the interval set
-   * is larger than config:histogram:maxBars then the
-   * interval will be scaled up. If the number of buckets
-   * created is less than one, the interval is scaled back.
+   * Get the interval for the buckets. Auto uses histogram:barTarget and is never scaled.
+   * Manual intervals that exceed histogram:maxBars are replaced with a coarser picker interval.
    *
    * The interval object returned is a moment.duration
    * object that has been decorated with the following
@@ -231,37 +284,6 @@ export class TimeBuckets {
    *   multiplied by
    */
   getInterval(useNormalizedEsInterval = true): TimeBucketsInterval {
-    const duration = this.getDuration();
-    const parsedInterval = isDurationInterval(this._i)
-      ? this._i
-      : calcAutoIntervalNear(this._timeBucketConfig['histogram:barTarget'], Number(duration));
-
-    // check to see if the interval should be scaled, and scale it if so
-    const maybeScaleInterval = (interval: moment.Duration) => {
-      if (!this.hasBounds() || !duration) {
-        return interval;
-      }
-
-      const maxLength: number = this._timeBucketConfig['histogram:maxBars'];
-      const minInterval = calcAutoIntervalLessThan(maxLength, Number(duration));
-
-      let scaled;
-
-      if (interval < minInterval) {
-        scaled = minInterval;
-      } else {
-        return interval;
-      }
-
-      interval = decorateInterval(interval);
-      return Object.assign(scaled, {
-        preScaled: interval,
-        scale: Number(interval) / Number(scaled),
-        scaled: true,
-      });
-    };
-
-    // append some TimeBuckets specific props to the interval
     const decorateInterval = (
       interval: Assign<moment.Duration, { scaled?: boolean }>
     ): TimeBucketsInterval => {
@@ -286,9 +308,36 @@ export class TimeBuckets {
         expression: esInterval.expression,
       });
     };
-    return decorateInterval(
-      useNormalizedEsInterval ? maybeScaleInterval(parsedInterval) : parsedInterval
-    );
+
+    if (!isDurationInterval(this._i)) {
+      if (!this.hasBounds() || this._lb == null || this._ub == null) {
+        return decorateInterval(moment.duration(0));
+      }
+      const picked = pickDateRounding(
+        getAutoDateBucketTarget(
+          (key, defaultOverride) => this._timeBucketConfig[key] ?? defaultOverride
+        ),
+        toZonedRange(this._lb, this._ub)
+      );
+      return decoratePicked(picked);
+    }
+
+    if (useNormalizedEsInterval && this.hasBounds() && this._lb != null && this._ub != null) {
+      const range = toZonedRange(this._lb, this._ub);
+      const maxBars = this._timeBucketConfig['histogram:maxBars'];
+      const manual = toPickerInterval(this._i, this._originalInterval);
+      if (!fitsInBuckets(manual, range, maxBars)) {
+        const scaled = decoratePicked(pickDateRounding(maxBars, range));
+        const preScaled = decorateInterval(this._i);
+        return Object.assign(scaled, {
+          preScaled,
+          scale: Number(preScaled) / Number(scaled),
+          scaled: true,
+        });
+      }
+    }
+
+    return decorateInterval(this._i);
   }
 
   /**

@@ -231,7 +231,9 @@ export const getDateHistogramBucketAgg = ({
             return;
           }
 
-          const shouldForceFixedInterval: boolean = agg.params.field?.fixedInterval?.length;
+          const shouldForceFixedInterval = Boolean(
+            agg.params.field?.fixedInterval?.length || interval.forceFixed
+          );
 
           output.params = {
             ...output.params,

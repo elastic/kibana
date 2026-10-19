@@ -31,7 +31,7 @@ export const buildDateHistogramCases = (): EsqlConversionCase[] => {
       columnOrder: ['col1', 'col2'],
       expected: {
         success: true,
-        esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS COUNT(*) BY order_date = BUCKET(order_date, 75, ?_tstart, ?_tend)`,
+        esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS COUNT(*) BY order_date = BUCKET(order_date, 100, ?_tstart, ?_tend)`,
         columnNames: ['COUNT(*)', 'order_date'],
         expectedSourceIds: {
           'COUNT(*)': ['col2'],
@@ -69,7 +69,7 @@ export const buildDateHistogramCases = (): EsqlConversionCase[] => {
       columnOrder: ['col1', 'col2'],
       expected: {
         success: true,
-        esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS COUNT(*) BY order_date = BUCKET(order_date, 75, ?_tstart, ?_tend)`,
+        esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS COUNT(*) BY order_date = BUCKET(order_date, 100, ?_tstart, ?_tend)`,
         columnNames: ['COUNT(*)', 'order_date'],
         expectedSourceIds: {
           'COUNT(*)': ['col2'],
@@ -146,7 +146,7 @@ export const buildDateHistogramCases = (): EsqlConversionCase[] => {
       columnOrder: ['col1', 'col2'],
       expected: {
         success: true,
-        esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS COUNT(*) BY order_date = BUCKET(order_date, 75, ?_tstart, ?_tend)`,
+        esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS COUNT(*) BY order_date = BUCKET(order_date, 100, ?_tstart, ?_tend)`,
         columnNames: ['COUNT(*)', 'order_date'],
         expectedSourceIds: {
           'COUNT(*)': ['col2'],
@@ -179,7 +179,7 @@ export const buildDateHistogramCases = (): EsqlConversionCase[] => {
       skipApiExecution: true,
       expected: {
         success: true,
-        esql: `${ecommerceFrom} | WHERE \`order-date\` >= ?_tstart AND \`order-date\` <= ?_tend | STATS COUNT(*) BY \`order-date\` = BUCKET(\`order-date\`, 75, ?_tstart, ?_tend)`,
+        esql: `${ecommerceFrom} | WHERE \`order-date\` >= ?_tstart AND \`order-date\` <= ?_tend | STATS COUNT(*) BY \`order-date\` = BUCKET(\`order-date\`, 100, ?_tstart, ?_tend)`,
         columnNames: ['COUNT(*)', 'order-date'],
         expectedSourceIds: {
           'COUNT(*)': ['col2'],

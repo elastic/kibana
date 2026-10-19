@@ -799,6 +799,7 @@ packages:
   - 'src/platform/packages/shared/kbn-entity-access-control-ui'
   - 'src/platform/packages/shared/kbn-es'
   - 'src/platform/packages/shared/kbn-es-archiver'
+  - 'src/platform/packages/shared/kbn-es-date-rounding'
   - 'src/platform/packages/shared/kbn-es-errors'
   - 'src/platform/packages/shared/kbn-es-mappings'
   - 'src/platform/packages/shared/kbn-es-query'

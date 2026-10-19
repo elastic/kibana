@@ -18,6 +18,7 @@
     "@kbn/presentation-util-plugin",
     "@kbn/data-plugin",
     "@kbn/es-query",
+    "@kbn/es-date-rounding",
     "@kbn/data-views-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/i18n",

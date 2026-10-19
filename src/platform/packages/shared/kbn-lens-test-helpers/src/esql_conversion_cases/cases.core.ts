@@ -137,7 +137,7 @@ export const buildCoreCases = (): EsqlConversionCase[] => {
       columnOrder: ['col1', 'col2'],
       expected: {
         success: true,
-        esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS COUNT(*) WHERE KQL("customer_gender:\\"MALE\\"") BY order_date = BUCKET(order_date, 75, ?_tstart, ?_tend)`,
+        esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS COUNT(*) WHERE KQL("customer_gender:\\"MALE\\"") BY order_date = BUCKET(order_date, 100, ?_tstart, ?_tend)`,
         columnNames: ['COUNT(*) WHERE KQL("customer_gender:\\"MALE\\"")', 'order_date'],
         expectedSourceIds: {
           'COUNT(*) WHERE KQL("customer_gender:\\"MALE\\"")': ['col2'],
@@ -156,7 +156,7 @@ export const buildCoreCases = (): EsqlConversionCase[] => {
       columnOrder: ['col1', 'col2'],
       expected: {
         success: true,
-        esql: `${ecommerceFrom} | STATS COUNT(*) BY order_date = BUCKET(order_date, 75, ?_tstart, ?_tend)`,
+        esql: `${ecommerceFrom} | STATS COUNT(*) BY order_date = BUCKET(order_date, 100, ?_tstart, ?_tend)`,
         columnNames: ['COUNT(*)', 'order_date'],
         expectedSourceIds: {
           'COUNT(*)': ['col2'],
@@ -177,7 +177,7 @@ export const buildCoreCases = (): EsqlConversionCase[] => {
       columnOrder: ['col1', 'col2'],
       expected: {
         success: true,
-        esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS SUM(taxful_total_price) BY order_date = BUCKET(order_date, 75, ?_tstart, ?_tend)`,
+        esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS SUM(taxful_total_price) BY order_date = BUCKET(order_date, 100, ?_tstart, ?_tend)`,
         columnNames: ['SUM(taxful_total_price)', 'order_date'],
         expectedSourceIds: {
           'SUM(taxful_total_price)': ['col2'],
@@ -204,7 +204,7 @@ export const buildCoreCases = (): EsqlConversionCase[] => {
       columnOrder: ['col1', 'col2'],
       expected: {
         success: true,
-        esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS AVG(taxful_total_price) BY order_date = BUCKET(order_date, 75, ?_tstart, ?_tend)`,
+        esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS AVG(taxful_total_price) BY order_date = BUCKET(order_date, 100, ?_tstart, ?_tend)`,
         columnNames: ['AVG(taxful_total_price)', 'order_date'],
         expectedSourceIds: {
           'AVG(taxful_total_price)': ['col2'],

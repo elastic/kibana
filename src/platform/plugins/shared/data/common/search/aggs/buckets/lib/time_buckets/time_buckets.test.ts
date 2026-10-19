@@ -81,10 +81,10 @@ describe('TimeBuckets', () => {
 
     const interval = timeBuckets.getInterval();
 
-    expect(interval.description).toEqual('day');
+    expect(interval.description).toEqual('7 days');
     expect(interval.esValue).toEqual(1);
-    expect(interval.esUnit).toEqual('d');
-    expect(interval.expression).toEqual('1d');
+    expect(interval.esUnit).toEqual('w');
+    expect(interval.expression).toEqual('1w');
   });
 
   test('setInterval/getInterval - intreval is a string and bounds is defined', () => {
@@ -97,12 +97,14 @@ describe('TimeBuckets', () => {
     timeBuckets.setInterval('20m');
     const interval = timeBuckets.getInterval();
 
-    expect(interval.description).toEqual('day');
+    expect(interval.description).toEqual('7 days');
     expect(interval.esValue).toEqual(1);
-    expect(interval.esUnit).toEqual('d');
-    expect(interval.expression).toEqual('1d');
+    expect(interval.esUnit).toEqual('w');
+    expect(interval.expression).toEqual('1w');
     expect(interval.scaled).toBeTruthy();
-    expect(interval.scale).toEqual(0.013888888888888888);
+    expect(interval.scale).toEqual(
+      Number(moment.duration(20, 'minutes')) / Number(moment.duration(1, 'week'))
+    );
 
     if (interval.preScaled) {
       expect(interval.preScaled.description).toEqual('20 minutes');
@@ -149,5 +151,78 @@ describe('TimeBuckets', () => {
 
     timeBuckets.setInterval('2w');
     expect(() => timeBuckets.getInterval(false)).toThrow(InvalidEsCalendarIntervalError);
+  });
+
+  test('auto, 1h UTC range, barTarget 100 → 1m, forceFixed, not scaled', () => {
+    const timeBuckets = new TimeBuckets({
+      ...timeBucketConfig,
+      'histogram:barTarget': 100,
+      'histogram:maxBars': 1000,
+    });
+    timeBuckets.setBounds({
+      min: moment.utc('2024-01-01T00:00:00.000Z'),
+      max: moment.utc('2024-01-01T01:00:00.000Z'),
+    });
+    timeBuckets.setInterval(autoInterval);
+
+    const interval = timeBuckets.getInterval();
+
+    expect(interval.expression).toEqual('1m');
+    expect(interval.forceFixed).toBe(true);
+    expect(interval.scaled).toBeFalsy();
+  });
+
+  test('auto, 4d UTC range, barTarget 100 → 1h, forceFixed', () => {
+    const timeBuckets = new TimeBuckets({
+      ...timeBucketConfig,
+      'histogram:barTarget': 100,
+      'histogram:maxBars': 1000,
+    });
+    timeBuckets.setBounds({
+      min: moment.utc('2024-01-01T00:00:00.000Z'),
+      max: moment.utc('2024-01-05T00:00:00.000Z'),
+    });
+    timeBuckets.setInterval(autoInterval);
+
+    const interval = timeBuckets.getInterval();
+
+    expect(interval.expression).toEqual('1h');
+    expect(interval.forceFixed).toBe(true);
+  });
+
+  test('auto, 4d UTC range, barTarget 75 → 3h, forceFixed', () => {
+    const timeBuckets = new TimeBuckets({
+      ...timeBucketConfig,
+      'histogram:barTarget': 75,
+      'histogram:maxBars': 1000,
+    });
+    timeBuckets.setBounds({
+      min: moment.utc('2024-01-01T00:00:00.000Z'),
+      max: moment.utc('2024-01-05T00:00:00.000Z'),
+    });
+    timeBuckets.setInterval(autoInterval);
+
+    const interval = timeBuckets.getInterval();
+
+    expect(interval.expression).toEqual('3h');
+    expect(interval.forceFixed).toBe(true);
+  });
+
+  test('auto is not scaled when maxBars is smaller than the auto bucket count', () => {
+    const timeBuckets = new TimeBuckets({
+      ...timeBucketConfig,
+      'histogram:barTarget': 100,
+      'histogram:maxBars': 10,
+    });
+    timeBuckets.setBounds({
+      min: moment.utc('2024-01-01T00:00:00.000Z'),
+      max: moment.utc('2024-01-05T00:00:00.000Z'),
+    });
+    timeBuckets.setInterval(autoInterval);
+
+    const interval = timeBuckets.getInterval();
+
+    expect(interval.expression).toEqual('1h');
+    expect(interval.scaled).toBeFalsy();
   });
 });

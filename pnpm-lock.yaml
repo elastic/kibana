@@ -2071,6 +2071,9 @@ importers:
       '@kbn/error-boundary-example-plugin':
         specifier: workspace:*
         version: link:examples/error_boundary
+      '@kbn/es-date-rounding':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-es-date-rounding
       '@kbn/es-errors':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-es-errors
@@ -8074,6 +8077,8 @@ importers:
   src/platform/packages/shared/kbn-es: {}
 
   src/platform/packages/shared/kbn-es-archiver: {}
+
+  src/platform/packages/shared/kbn-es-date-rounding: {}
 
   src/platform/packages/shared/kbn-es-errors: {}
 

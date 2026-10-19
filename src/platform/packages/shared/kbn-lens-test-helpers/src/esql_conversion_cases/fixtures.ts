@@ -52,7 +52,7 @@ export const createEsqlConversionUiSettings = () => ({
       dateFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',
       'dateFormat:scaled': [[]],
       'dateFormat:tz': 'UTC',
-      'histogram:barTarget': 50,
+      'histogram:barTarget': 100,
       'histogram:maxBars': 100,
     };
     return settings[key] as T;
