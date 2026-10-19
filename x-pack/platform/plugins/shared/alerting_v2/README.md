@@ -8,13 +8,14 @@ If you want the system architecture, read [`server/README.md`](server/README.md)
 
 If you want implementation detail for one subsystem, continue with:
 
-| Area                                | Document                                                                   |
-| ----------------------------------- | -------------------------------------------------------------------------- |
-| High-level plugin architecture      | [`server/README.md`](server/README.md)                                     |
-| Rule execution pipeline             | [`server/lib/rule_executor/README.md`](server/lib/rule_executor/README.md) |
-| Alert lifecycle / episodes          | [`server/lib/director/README.md`](server/lib/director/README.md)           |
-| Notification dispatch pipeline      | [`server/lib/dispatcher/README.md`](server/lib/dispatcher/README.md)       |
-| Elasticsearch resources and schemas | [`server/resources/README.md`](server/resources/README.md)                 |
+| Area                                | Document                                                                                       |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------- |
+| High-level plugin architecture      | [`server/README.md`](server/README.md)                                                         |
+| Rule execution pipeline             | [`server/lib/rule_executor/README.md`](server/lib/rule_executor/README.md)                     |
+| Alert lifecycle / episodes          | [`server/lib/director/README.md`](server/lib/director/README.md)                               |
+| Notification dispatch pipeline      | [`server/lib/dispatcher/README.md`](server/lib/dispatcher/README.md)                           |
+| Elasticsearch resources and schemas | [`server/resources/README.md`](server/resources/README.md)                                     |
+| Logging rules and `LoggerService`   | [`server/lib/services/logger_service/README.md`](server/lib/services/logger_service/README.md) |
 
 ## Repository guide
 
@@ -44,6 +45,7 @@ If you want implementation detail for one subsystem, continue with:
 - Notification matching, grouping, throttling, or delivery: start in [`server/lib/dispatcher/README.md`](server/lib/dispatcher/README.md)
 - Document shape or ES|QL views: start in [`server/resources/README.md`](server/resources/README.md)
 - API shape or saved object contracts: inspect `server/routes/` and `server/saved_objects/` together with the relevant subsystem docs
+- Anything that adds or changes a log line: follow the rules in [`server/lib/services/logger_service/README.md`](server/lib/services/logger_service/README.md)
 - Workflow triggers (workflows_extensions registration + runtime emission): see the public and server READMEs
   - [`public/lib/workflow_extensions/README.md`](public/lib/workflow_extensions/README.md)
   - [`server/lib/services/workflow_service/README.md`](server/lib/services/workflow_service/README.md)
