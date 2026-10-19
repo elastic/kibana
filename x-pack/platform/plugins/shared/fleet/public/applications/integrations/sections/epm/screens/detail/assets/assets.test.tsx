@@ -66,7 +66,7 @@ describe('AssetsPage deferred assets', () => {
     useGetPackageInstallStatus.mockReturnValue(() => ({ status: InstallStatus.installed }));
   });
 
-  it('does not list deferred workflows in the deferred installations section', async () => {
+  it('lists deferred workflows in the deferred installations section', async () => {
     const result = render(
       createPackageInfo([
         { id: 'wf-1', type: 'workflow', deferred: true },
@@ -75,13 +75,13 @@ describe('AssetsPage deferred assets', () => {
     );
 
     await waitFor(() => expect(result.getByTestId('deferredAssets')).toBeInTheDocument());
-    expect(result.getByTestId('deferredAssets').textContent).toBe('dashboard-1');
+    expect(result.getByTestId('deferredAssets').textContent).toBe('wf-1,dashboard-1');
   });
 
-  it('does not render the deferred section when only workflows are deferred', async () => {
+  it('renders the deferred section when only workflows are deferred', async () => {
     const result = render(createPackageInfo([{ id: 'wf-1', type: 'workflow', deferred: true }]));
 
-    await waitFor(() => expect(sendGetBulkAssets).toHaveBeenCalled());
-    expect(result.queryByTestId('deferredAssets')).not.toBeInTheDocument();
+    await waitFor(() => expect(result.getByTestId('deferredAssets')).toBeInTheDocument());
+    expect(result.getByTestId('deferredAssets').textContent).toBe('wf-1');
   });
 });

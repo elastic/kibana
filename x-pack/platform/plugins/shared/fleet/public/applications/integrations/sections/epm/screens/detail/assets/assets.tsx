@@ -137,13 +137,11 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
 
       if (pkgAssets.length > 0) {
         const deferredAssets = pkgAssets.filter((asset): asset is EsAssetReference => {
-          // Deferred alert refs belong to the Alerting tab, not the Assets tab, and the deferred
-          // section has no workflow accordion
+          // Deferred alert refs belong to the Alerting tab, not the Assets tab
           return (
             'deferred' in asset &&
             asset.deferred === true &&
-            asset.type !== KibanaSavedObjectType.alert &&
-            asset.type !== KibanaSavedObjectType.workflow
+            asset.type !== KibanaSavedObjectType.alert
           );
         });
         setDeferredInstallations(deferredAssets);

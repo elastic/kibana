@@ -42,7 +42,10 @@ import { KibanaSavedObjectType } from '../../../../../../../../common/types/mode
 
 interface Props {
   packageInfo: PackageInfo;
-  type: ElasticsearchAssetType.transform | KibanaSavedObjectType.alert;
+  type:
+    | ElasticsearchAssetType.transform
+    | KibanaSavedObjectType.alert
+    | KibanaSavedObjectType.workflow;
   deferredInstallations: AssetReference[];
   forceRefreshAssets?: () => void;
 }
@@ -72,6 +75,12 @@ export const getDeferredAssetDescription = (
           values: { assetCount: assetCount ?? 1 },
         }
       );
+    case KibanaSavedObjectType.workflow:
+      return i18n.translate('xpack.fleet.epm.packageDetails.assets.deferredWorkflowsDescription', {
+        defaultMessage:
+          '{assetCount, plural, one {Workflow was} other {# workflows were}} not installed because workflows are not available or not licensed. Check the Kibana logs for details.',
+        values: { assetCount: assetCount ?? 1 },
+      });
     default:
       return i18n.translate(
         'xpack.fleet.epm.packageDetails.assets.deferredInstallationsDescription',
@@ -257,35 +266,37 @@ export const DeferredAssetsAccordion: FunctionComponent<Props> = ({
         </EuiText>
         <EuiSpacer size="m" />
 
-        <EuiButton
-          data-test-subject={`fleetAssetsReauthorizeAll`}
-          disabled={!canEdit}
-          isLoading={isLoading}
-          size={'m'}
-          onClick={(e: MouseEvent<HTMLButtonElement>) => {
-            e.preventDefault();
-            if (type === ElasticsearchAssetType.transform) {
-              authorizeTransforms(deferredAssets.map((t) => ({ transformId: t.id })));
-            } else if (type === KibanaSavedObjectType.alert) {
-              createRules(deferredAssets.map(({ id }) => id));
-            }
-          }}
-          aria-label={getDeferredAssetDescription(type, deferredInstallations.length, {
-            canEdit,
-          })}
-        >
-          {type === ElasticsearchAssetType.transform
-            ? i18n.translate('xpack.fleet.epm.packageDetails.assets.reauthorizeAllButton', {
-                defaultMessage: 'Reauthorize all',
-              })
-            : null}
+        {type !== KibanaSavedObjectType.workflow ? (
+          <EuiButton
+            data-test-subject={`fleetAssetsReauthorizeAll`}
+            disabled={!canEdit}
+            isLoading={isLoading}
+            size={'m'}
+            onClick={(e: MouseEvent<HTMLButtonElement>) => {
+              e.preventDefault();
+              if (type === ElasticsearchAssetType.transform) {
+                authorizeTransforms(deferredAssets.map((t) => ({ transformId: t.id })));
+              } else if (type === KibanaSavedObjectType.alert) {
+                createRules(deferredAssets.map(({ id }) => id));
+              }
+            }}
+            aria-label={getDeferredAssetDescription(type, deferredInstallations.length, {
+              canEdit,
+            })}
+          >
+            {type === ElasticsearchAssetType.transform
+              ? i18n.translate('xpack.fleet.epm.packageDetails.assets.reauthorizeAllButton', {
+                  defaultMessage: 'Reauthorize all',
+                })
+              : null}
 
-          {type === KibanaSavedObjectType.alert
-            ? i18n.translate('xpack.fleet.epm.packageDetails.assets.createRulesButton', {
-                defaultMessage: 'Create rules',
-              })
-            : null}
-        </EuiButton>
+            {type === KibanaSavedObjectType.alert
+              ? i18n.translate('xpack.fleet.epm.packageDetails.assets.createRulesButton', {
+                  defaultMessage: 'Create rules',
+                })
+              : null}
+          </EuiButton>
+        ) : null}
 
         <EuiSpacer size="m" />
 
