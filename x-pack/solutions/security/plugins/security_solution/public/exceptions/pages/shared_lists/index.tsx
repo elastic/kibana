@@ -506,6 +506,7 @@ export const SharedLists = React.memo(() => {
         onCreateExceptionItem={onCreateExceptionItemOpenClick}
         onImport={onImportOpenClick}
       />
+      <EuiSpacer size="m" />
       <EuiScreenReaderLive aria-live="assertive" aria-atomic="true" focusRegionOnTextChange>
         {screenReaderMessage}
       </EuiScreenReaderLive>
