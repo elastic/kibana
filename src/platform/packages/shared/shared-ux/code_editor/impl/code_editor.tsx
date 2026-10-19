@@ -284,6 +284,18 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   overflowWidgetsContainerZIndexOverride,
   chromeOverrides,
 }) => {
+  let resolvedOptions = options ?? {};
+
+  // runtime check to guard against the theme option being provided
+  if (options && 'theme' in resolvedOptions) {
+    const { theme, ...rest } = resolvedOptions;
+    resolvedOptions = rest;
+    // eslint-disable-next-line no-console
+    console.error(
+      'Providing the `theme` option is not supported in the @kbn/code-editor component, see the README for details on how theming is approached.'
+    );
+  }
+
   const { euiTheme } = useEuiTheme();
   const { registerContextMenuActions, unregisterContextMenuActions } = useContextMenuUtils();
 
@@ -738,10 +750,10 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
               },
               // @ts-expect-error, see https://github.com/microsoft/monaco-editor/issues/3829
               'bracketPairColorization.enabled': false,
-              ...options,
+              ...resolvedOptions,
               hover: {
                 sticky: true,
-                ...options?.hover,
+                ...resolvedOptions?.hover,
               },
               // Explicit links prop always takes precedence over any value passed in options
               links,
