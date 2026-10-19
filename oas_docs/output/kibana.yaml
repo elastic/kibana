@@ -154100,11 +154100,11 @@ components:
           type: integer
         search_matches:
           additionalProperties: false
-          description: Match counts for the active search. Omitted when no search was provided. When is_truncated is true the server ID filter was capped and the result may be truncated.
+          description: Match counts for the active search. Omitted when no search was provided.
           type: object
           properties:
             is_truncated:
-              description: True when the server filter cap was reached and results may be truncated.
+              description: True when more than 500 rules matched the search. Only the executions of the first 500 matching rules are returned, so the results are incomplete. Narrow the search to see the rest.
               type: boolean
             rules:
               description: 'Rules matching the search. This count is an estimate: results above 10,000 may be reported as 10,000.'
