@@ -394,6 +394,7 @@ export class NightshiftInvestigationsClient {
     title,
     trigger_type,
     message,
+    timeout_seconds,
     source_ids,
     connector_id,
     context = {},
@@ -509,7 +510,16 @@ export class NightshiftInvestigationsClient {
     };
 
     const executionId = await workflowsManagement.management.runWorkflow(
-      { ...workflow, definition: workflow.definition },
+      {
+        ...workflow,
+        definition:
+          timeout_seconds === undefined
+            ? workflow.definition
+            : {
+                ...workflow.definition,
+                settings: { ...workflow.definition.settings, timeout: `${timeout_seconds}s` },
+              },
+      },
       spaceId,
       inputs,
       this.request,

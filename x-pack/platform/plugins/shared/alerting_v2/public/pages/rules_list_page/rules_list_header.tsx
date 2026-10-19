@@ -134,6 +134,7 @@ export const RulesListHeader = ({
 
   const application = useService(CoreStart('application'));
   const basePath = useService(CoreStart('http')).basePath;
+  const { links } = useService(CoreStart('docLinks'));
   const hostTabs = useHostTabs();
   const showBuildSequence = useAlertingV2ExperimentalFeatures();
   const showCreateWithAgent = useAlertingV2ExperimentalFeatures();
@@ -218,6 +219,7 @@ export const RulesListHeader = ({
         tabs={tabs}
         spacing="bleed"
         menu={headerMenu}
+        docLink={links.alerting.viewManageRules}
       />
       <EuiSpacer size="m" />
     </>

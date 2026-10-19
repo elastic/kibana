@@ -6,10 +6,12 @@
  */
 
 import { stringify } from 'yaml';
+import { DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID } from '../../../common';
+import { parsePresetSchedule } from '../../../common/automation_schedule';
 import type { InvestigationNotificationDestination } from '../../../common';
 import type { NightshiftAutomationAttributes, NightshiftTriggerRow, OverlapPolicy } from './types';
 
-// alerting.alertStatusChanged uses 'active'/'recovered'; our AlertStatus uses 'active'/'inactive'.
+// alerting.v1.alertStatusChanged uses 'active'/'recovered'; our AlertStatus uses 'active'/'inactive'.
 const ALERT_STATUS_TO_KQL: Record<string, string> = {
   active: 'active',
   inactive: 'recovered',
@@ -19,8 +21,9 @@ const ALERT_STATUS_TO_KQL: Record<string, string> = {
 // Mirrors significant_events/server/lib/slack_app/service.ts, which depends on this plugin.
 export const ELASTIC_APPS_SLACK_CONNECTOR_ID = 'elastic-apps-slack';
 
-const ALERT_TRIGGER_TYPE = 'alerting.alertStatusChanged';
+const ALERT_TRIGGER_TYPE = 'alerting.v1.alertStatusChanged';
 const SLACK_MESSAGE_TRIGGER_TYPE = 'slack2.message';
+const AUTOMATION_TIMEOUT_MARGIN_SECONDS = 60;
 
 // Top-level messages only, since replies are handled by the managed Slack thread workflow. Edits
 // carry a subtype and are left out. Posts from other bots are allowed, so an alert another bot
@@ -59,55 +62,153 @@ const OVERLAP_POLICY_TO_STRATEGY: Record<OverlapPolicy, string> = {
   queue: 'queue',
 };
 
-/**
- * Generates a workflow YAML document from a nightshift automation config.
- *
- * Uses the yaml package to serialize all user-provided strings so that special
- * characters (newlines, colons, quotes) in prompt templates never corrupt the document.
- *
- * Alert-trigger support uses alerting.alertStatusChanged (#291886). The code is complete
- * and ready — it activates the moment #291886 lands with no follow-up change needed here.
- *
- * Dispatch budget gating (nightshift.checkBudget step) is added in a follow-up PR that
- * covers both per-automation daily limits and the global Nightshift cap together.
- */
+/** Generates a workflow document from an automation, serializing user input safely. */
 export function generateWorkflowYaml(
   automationId: string,
   automation: NightshiftAutomationAttributes
 ): string {
-  const alertRows = automation.trigger.rows.filter(
-    (r): r is Extract<NightshiftTriggerRow, { kind: 'alert' }> => r.kind === 'alert'
-  );
+  const alertRows = automation.trigger.rows.filter((row): row is AlertRow => row.kind === 'alert');
   const slackRows = automation.trigger.rows.filter(isSlackRow);
+  const schedule = automation.trigger.rows.find((row) => row.kind === 'schedule');
+  const hasMultipleTriggers =
+    Number(alertRows.length > 0) + Number(slackRows.length > 0) + Number(Boolean(schedule)) > 1;
+  const alertWorkflow =
+    alertRows.length > 0 || (slackRows.length === 0 && !schedule)
+      ? generateAlertWorkflow(automationId, automation, alertRows, hasMultipleTriggers)
+      : undefined;
+  const slackWorkflow =
+    slackRows.length > 0
+      ? generateSlackWorkflow(automationId, automation, slackRows, hasMultipleTriggers)
+      : undefined;
+  const scheduledWorkflow = schedule
+    ? generateScheduledWorkflow(automationId, automation, schedule)
+    : undefined;
+  const workflowParts = [scheduledWorkflow, alertWorkflow, slackWorkflow].filter(
+    (part) => part !== undefined
+  );
 
   const strategy = automation.runtime.overlapPolicy
     ? OVERLAP_POLICY_TO_STRATEGY[automation.runtime.overlapPolicy]
     : 'drop';
 
-  const workflowObj: Record<string, unknown> = {
+  const workflowObj = {
     name: automation.name,
     enabled: automation.isEnabled,
     tags: ['nightshift', 'automation'],
     settings: {
+      // The automation starts first and waits for the investigation, so its deadline
+      // needs extra time for setup and returning the investigation result.
+      ...(automation.runtime.timeoutSeconds !== undefined
+        ? { timeout: `${automation.runtime.timeoutSeconds + AUTOMATION_TIMEOUT_MARGIN_SECONDS}s` }
+        : {}),
       concurrency: {
         key: buildWorkflowConcurrencyKey(automationId, alertRows.length > 0, slackRows.length > 0),
         strategy,
         max: 1,
       },
     },
-    triggers: buildTriggers(alertRows, slackRows),
-    steps: buildSteps(automationId, automation, alertRows.length > 0, slackRows.length > 0),
+    triggers: [
+      ...(alertWorkflow?.triggers ?? []),
+      ...(slackWorkflow?.triggers ?? []),
+      ...(scheduledWorkflow?.triggers ?? []),
+    ],
+    steps: workflowParts.flatMap((part) =>
+      hasMultipleTriggers ? [guardedStep(part.kind, part.triggers[0].type, part.steps)] : part.steps
+    ),
   };
 
   return stringify(workflowObj, { lineWidth: 0 });
 }
 
-type TriggerKind = 'alert' | 'slack';
+function generateAlertWorkflow(
+  automationId: string,
+  automation: NightshiftAutomationAttributes,
+  alertRows: Array<Extract<NightshiftTriggerRow, { kind: 'alert' }>>,
+  hasMultipleTriggers: boolean
+) {
+  const condition = buildCondition(alertRows);
+  const notificationDestinations = buildNotificationDestinations(automationId, automation, 'alert');
+
+  return {
+    kind: 'alert' as const,
+    triggers: [
+      alertRows.length > 0
+        ? {
+            type: ALERT_TRIGGER_TYPE,
+            ...(condition ? { on: { condition } } : {}),
+          }
+        : { type: 'manual' },
+    ],
+    steps: [
+      {
+        name: hasMultipleTriggers ? 'trigger_investigation_alert' : 'trigger_investigation',
+        type: 'nightshift.triggerInvestigation',
+        with: {
+          automation_id: automationId,
+          subject_type: alertRows.length > 0 ? 'alert' : 'manual',
+          subject_id: alertRows.length > 0 ? '{{ trigger.alert.uuid }}' : automationId,
+          title: alertRows.length > 0 ? '{{ trigger.rule.name }}' : automation.name,
+          summary: automation.name,
+          trigger_type: 'automatic',
+          ...(automation.execution.promptTemplate
+            ? { message: automation.execution.promptTemplate }
+            : {}),
+          ...(automation.runtime.timeoutSeconds !== undefined
+            ? { timeout_seconds: automation.runtime.timeoutSeconds }
+            : {}),
+          ...(notificationDestinations ? { notificationDestinations } : {}),
+        },
+      },
+    ],
+  };
+}
+
+function generateScheduledWorkflow(
+  automationId: string,
+  automation: NightshiftAutomationAttributes,
+  schedule: Extract<NightshiftTriggerRow, { kind: 'schedule' }>
+) {
+  const parsed = parsePresetSchedule(schedule);
+  if (!parsed.success) throw new Error(parsed.error);
+  const notificationDestinations = buildNotificationDestinations(
+    automationId,
+    automation,
+    'schedule'
+  );
+
+  return {
+    kind: 'schedule' as const,
+    triggers: [parsed.trigger],
+    steps: [
+      {
+        name: 'trigger_investigation',
+        type: 'nightshift.triggerInvestigation',
+        with: {
+          automation_id: automationId,
+          subject_type: 'manual',
+          subject_id: DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID,
+          title: automation.name,
+          summary: automation.name,
+          trigger_type: 'automatic',
+          ...(automation.execution.promptTemplate
+            ? { message: automation.execution.promptTemplate }
+            : {}),
+          ...(schedule.scopeQuery ? { scope_query: schedule.scopeQuery } : {}),
+          ...(automation.runtime.timeoutSeconds !== undefined
+            ? { timeout_seconds: automation.runtime.timeoutSeconds }
+            : {}),
+          ...(notificationDestinations ? { notificationDestinations } : {}),
+        },
+      },
+    ],
+  };
+}
+
+type TriggerKind = 'alert' | 'slack' | 'schedule';
 
 /**
  * One investigation per alert and per Slack message, so a new one does not cancel or drop the
- * previous one. An automation with neither trigger kind runs from the manual trigger and has no
- * payload to key on.
+ * previous one. Scheduled runs have no event payload and share one concurrency key per automation.
  */
 const ALERT_CONCURRENCY_SUFFIX = '{{ trigger.alert.uuid }}';
 const SLACK_CONCURRENCY_SUFFIX = '{{ event.channel }}-{{ event.messageId }}';
@@ -134,34 +235,6 @@ function buildWorkflowConcurrencyKey(
   return buildConcurrencyKey(hasSlackRows ? 'slack' : 'alert', automationId, hasAlertRows);
 }
 
-/**
- * A run is started by exactly one trigger, but its payload differs by kind, so each kind gets its
- * own investigation step. With a single kind the step runs unguarded. With several, each kind's
- * step is guarded on `execution.triggeredBy`, which holds the id of the trigger that fired.
- */
-function buildSteps(
-  automationId: string,
-  automation: NightshiftAutomationAttributes,
-  hasAlertRows: boolean,
-  hasSlack: boolean
-): unknown[] {
-  const stepsFor = (kind: TriggerKind, name: string): unknown[] => [
-    buildInvestigationStep(kind, name, automationId, automation, hasAlertRows),
-  ];
-
-  if (hasAlertRows && hasSlack) {
-    return [
-      guardedStep('alert', ALERT_TRIGGER_TYPE, stepsFor('alert', 'trigger_investigation_alert')),
-      guardedStep(
-        'slack',
-        SLACK_MESSAGE_TRIGGER_TYPE,
-        stepsFor('slack', 'trigger_investigation_slack')
-      ),
-    ];
-  }
-  return stepsFor(hasSlack ? 'slack' : 'alert', 'trigger_investigation');
-}
-
 function guardedStep(
   kind: TriggerKind,
   triggerType: string,
@@ -175,41 +248,45 @@ function guardedStep(
   };
 }
 
-function buildInvestigationStep(
-  kind: TriggerKind,
-  name: string,
+function generateSlackWorkflow(
   automationId: string,
   automation: NightshiftAutomationAttributes,
-  hasAlertRows: boolean
-): Record<string, unknown> {
-  const notificationDestinations = buildNotificationDestinations(automationId, automation, kind);
+  slackRows: SlackRow[],
+  hasMultipleTriggers: boolean
+) {
+  const notificationDestinations = buildNotificationDestinations(automationId, automation, 'slack');
   const repliesInMessageThread = notificationDestinations?.some(({ params }) => params.thread_ts);
+  const condition = buildSlackCondition(slackRows);
+  // One trigger combines all Slack rows so a message matching several rows starts only one run.
   return {
-    name,
-    type: 'nightshift.triggerInvestigation',
-    with: {
-      ...(kind === 'slack'
-        ? {
-            subject_type: 'manual',
-            subject_id: SLACK_SUBJECT_ID,
-            title: automation.name,
-            ...(repliesInMessageThread ? { slack_thread: SLACK_THREAD } : {}),
-          }
-        : hasAlertRows
-        ? {
-            subject_type: 'alert',
-            subject_id: '{{ trigger.alert.uuid }}',
-            title: '{{ trigger.rule.name }}',
-          }
-        : // An automation with no alert or Slack rows runs from the manual trigger and has no
-          // alert payload, and an alert investigation requires `context.alerts`, so the prompt
-          // is the whole subject.
-          { subject_type: 'manual', subject_id: automationId, title: automation.name }),
-      summary: automation.name,
-      trigger_type: 'automatic',
-      ...buildMessage(automation.execution.promptTemplate, kind === 'slack'),
-      ...(notificationDestinations ? { notificationDestinations } : {}),
-    },
+    kind: 'slack' as const,
+    triggers: [
+      {
+        type: SLACK_MESSAGE_TRIGGER_TYPE,
+        'connector-id': ELASTIC_APPS_SLACK_CONNECTOR_ID,
+        ...(condition ? { on: { condition } } : {}),
+      },
+    ],
+    steps: [
+      {
+        name: hasMultipleTriggers ? 'trigger_investigation_slack' : 'trigger_investigation',
+        type: 'nightshift.triggerInvestigation',
+        with: {
+          automation_id: automationId,
+          subject_type: 'manual',
+          subject_id: SLACK_SUBJECT_ID,
+          ...(repliesInMessageThread ? { slack_thread: SLACK_THREAD } : {}),
+          title: automation.name,
+          summary: automation.name,
+          trigger_type: 'automatic',
+          ...buildMessage(automation.execution.promptTemplate, true),
+          ...(automation.runtime.timeoutSeconds !== undefined
+            ? { timeout_seconds: automation.runtime.timeoutSeconds }
+            : {}),
+          ...(notificationDestinations ? { notificationDestinations } : {}),
+        },
+      },
+    ],
   };
 }
 
@@ -269,35 +346,6 @@ function buildMessage(
   return {
     message: [promptTemplate, SLACK_MESSAGE_PROMPT].filter(Boolean).join('\n\n'),
   };
-}
-
-function buildTriggers(alertRows: AlertRow[], slackRows: SlackRow[]): unknown[] {
-  const triggers: unknown[] = [];
-
-  if (alertRows.length > 0) {
-    const trigger: Record<string, unknown> = { type: ALERT_TRIGGER_TYPE };
-    const condition = buildCondition(alertRows);
-    if (condition) {
-      trigger.on = { condition };
-    }
-    triggers.push(trigger);
-  }
-
-  if (slackRows.length > 0) {
-    // One trigger for all Slack rows: two triggers that both match a message would start the
-    // workflow twice for it.
-    const trigger: Record<string, unknown> = {
-      type: SLACK_MESSAGE_TRIGGER_TYPE,
-      'connector-id': ELASTIC_APPS_SLACK_CONNECTOR_ID,
-    };
-    const condition = buildSlackCondition(slackRows);
-    if (condition) {
-      trigger.on = { condition };
-    }
-    triggers.push(trigger);
-  }
-
-  return triggers.length > 0 ? triggers : [{ type: 'manual' }];
 }
 
 /**
