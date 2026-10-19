@@ -444,7 +444,9 @@ describe('Color Schema', () => {
         ['a boolean `true` value', true],
         ['a boolean `false` value', false],
         ['a `null` value', null],
-        ['a multi-value array of primitives', ['a', 1, false]],
+        ['a multi-value array of strings', ['a', 'b']],
+        ['a multi-value array of numbers', [1, 2]],
+        ['a multi-value array of booleans', [true, false]],
         ['an open-ended range key', { type: 'range_key', from: 1000, ranges }],
         ['an open-start range key', { type: 'range_key', to: 0, ranges }],
       ];
