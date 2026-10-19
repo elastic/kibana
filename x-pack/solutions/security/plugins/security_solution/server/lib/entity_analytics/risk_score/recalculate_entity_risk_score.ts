@@ -20,6 +20,7 @@ import { persistZeroBaseScore, scoreBaseEntities } from './maintainer/steps/scor
 import { runResolutionScoringStep } from './maintainer/steps/run_resolution_scoring_step';
 import { fetchWatchlistConfigs } from './maintainer/utils/fetch_watchlist_configs';
 import type { RiskEngineDataWriter } from './risk_engine_data_writer';
+import { DEFAULT_ALERT_SAMPLE_SIZE } from './constants';
 import type { RiskEngineConfiguration } from '../types';
 
 export interface RecalculateEntityRiskScoreParams {
@@ -60,7 +61,7 @@ export const recalculateEntityRiskScore = async ({
   getWriter,
   idBasedRiskScoringEnabled,
   logger,
-  alertSampleSizePerShard = 10000,
+  alertSampleSizePerShard = DEFAULT_ALERT_SAMPLE_SIZE,
   collectScores = false,
 }: RecalculateEntityRiskScoreParams) => {
   const engineConfig = await getConfiguration({

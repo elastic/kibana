@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import type { AttachmentType, AttachmentDataOf } from './attachment_types';
+import type { Attachment } from './attachments';
 
 /**
  * Represents a single version of an attachment's content.
@@ -280,6 +281,22 @@ export const getVersion = <T = unknown>(
 ): AttachmentVersion<T> | undefined => {
   return attachment.versions.find((v) => v.version === version);
 };
+
+/**
+ * The attachment as it was at one of its versions, the shape attachment types receive.
+ */
+export const toAttachment = <Type extends string, DataType>(
+  { id, type, description, hidden, origin, versions }: VersionedAttachment<Type, DataType>,
+  { version, data, created_at: createdAt }: AttachmentVersion<DataType>
+): Attachment<Type, DataType> => ({
+  id,
+  type,
+  data,
+  description,
+  hidden,
+  origin,
+  versionData: { version, versionCount: versions.length, createdAt },
+});
 
 /**
  * Creates a unique identifier for a specific attachment version.
