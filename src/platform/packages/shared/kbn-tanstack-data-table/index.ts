@@ -8,4 +8,10 @@
  */
 
 export { TanStackDataGrid, type TanStackDataGridProps } from './src/tanstack_data_grid';
-export type { RowVirtualizer, UseRowVirtualizer } from './src/tanstack_grid_body';
+export {
+  scrollPositionCache,
+  type RowVirtualizer,
+  type TanStackGridBodyProps,
+  type UseRowVirtualizer,
+} from './src/tanstack_grid_body';
+export { VirtualCell } from './src/tanstack_grid_cell';

@@ -17,11 +17,11 @@ project:
   owner: '@elastic/kibana-discover'
   sourceRoot: src/platform/packages/shared/kbn-rdg-data-table
 dependsOn:
-  - '@kbn/data-source'
-  - '@kbn/data-views-plugin'
+  - '@kbn/cell-actions'
   - '@kbn/discover-utils'
-  - '@kbn/i18n'
+  - '@kbn/kibana-utils-plugin'
   - '@kbn/tanstack-data-table'
+  - '@kbn/test-jest-helpers'
   - '@kbn/unified-data-table'
 tags:
   - shared-browser

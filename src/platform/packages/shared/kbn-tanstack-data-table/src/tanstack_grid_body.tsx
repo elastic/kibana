@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo } from 'react';
-import type { Row } from '@tanstack/react-table';
+import type { Header, HeaderGroup, Row } from '@tanstack/react-table';
 import { useVirtualizer, type VirtualItem } from '@tanstack/react-virtual';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
@@ -177,10 +177,19 @@ export const useGridBodyRowVirtualizer: UseRowVirtualizer = ({
   );
 };
 
-interface TanStackGridBodyProps {
+/** Props of the grid body; another body (see the grid's `gridBody` prop) gets the same props. */
+export interface TanStackGridBodyProps {
   scrollRef: React.MutableRefObject<HTMLDivElement | null>;
   virtualizerRef: React.MutableRefObject<RowVirtualizer | null>;
   header: React.ReactNode;
+  /** Header cells, for bodies that render header cells inside their own header row. */
+  headerGroups: Array<HeaderGroup<DataTableRecord>>;
+  renderHeaderCell: (
+    header: Header<DataTableRecord, unknown>,
+    options?: { embedded?: boolean }
+  ) => React.ReactNode;
+  /** Fixed header row height; undefined for auto height. */
+  headerRowHeight: number | undefined;
   overlay: React.ReactNode;
   tableRows: Array<Row<DataTableRecord>>;
   /** Absolute index of the first row on the current page. */

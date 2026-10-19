@@ -15,6 +15,7 @@ import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { createServicesMock } from '@kbn/unified-data-table/__mocks__/services';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { CellActionsProvider } from '@kbn/cell-actions';
 import { RdgDataGrid, type RdgDataGridProps } from './rdg_data_grid';
 
 const services = { ...createServicesMock(), storage: new Storage(window.localStorage) };
@@ -26,15 +27,17 @@ const rows = [
 
 const renderGrid = (props: Partial<RdgDataGridProps> = {}) =>
   renderWithI18n(
-    <RdgDataGrid
-      rows={rows}
-      columns={['message']}
-      dataView={dataViewMock}
-      showTimeCol={false}
-      services={services}
-      loadingState={DataLoadingState.loaded}
-      {...props}
-    />
+    <CellActionsProvider getTriggerCompatibleActions={() => Promise.resolve([])}>
+      <RdgDataGrid
+        rows={rows}
+        columns={['message']}
+        dataView={dataViewMock}
+        showTimeCol={false}
+        services={services}
+        loadingState={DataLoadingState.loaded}
+        {...props}
+      />
+    </CellActionsProvider>
   );
 
 // react-data-grid sizes its viewport from the DOM, which jsdom does not lay out.
@@ -60,12 +63,20 @@ describe('RdgDataGrid', () => {
 
     const table = screen.getByTestId('discoverDocTable');
     expect(table).toHaveAttribute('data-table-loaded', 'true');
-    expect(table).toHaveAttribute('data-grid-implementation', 'rdg');
+    expect(table.querySelector('.rdg')).not.toBeNull();
     expect(table.querySelectorAll('[data-grid-visible-row-index]')).toHaveLength(2);
     const messageCells = table.querySelectorAll(
       '[data-test-subj="dataGridRowCell"][data-gridcell-column-id="message"]'
     );
     expect(Array.from(messageCells, (cell) => cell.textContent)).toEqual(['a', 'b']);
+  });
+
+  it('renders the header cells of the TanStack grid', () => {
+    renderGrid();
+
+    const header = screen.getByTestId('dataGridHeaderCell-message');
+    expect(header).toHaveTextContent('message');
+    expect(header.closest('[role="columnheader"]')).not.toBeNull();
   });
 
   it('selects a row from its checkbox', () => {

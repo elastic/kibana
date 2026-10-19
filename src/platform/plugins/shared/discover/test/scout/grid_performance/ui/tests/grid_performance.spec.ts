@@ -197,10 +197,9 @@ test.describe(
               )
             )
             .toBeGreaterThan(0);
+          // react-data-grid's root element has the `rdg` class.
           const isRdg =
-            (await page.testSubj
-              .locator('discoverDocTable')
-              .getAttribute('data-grid-implementation')) === 'rdg';
+            (await page.testSubj.locator('discoverDocTable').locator('.rdg').count()) > 0;
           implementation = isRdg
             ? 'rdg'
             : (await dataGrid.isEuiDataGrid())

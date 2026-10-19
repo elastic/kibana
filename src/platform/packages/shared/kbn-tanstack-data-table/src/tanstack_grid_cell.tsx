@@ -90,6 +90,8 @@ const SummaryCellHighlights = ({
   );
 };
 
+const EMBEDDED_CELL_STYLE: React.CSSProperties = { width: '100%', height: '100%' };
+
 // ── Virtual cell with cell actions, popover, and focus support ──
 export const VirtualCell = React.memo(
   ({
@@ -103,6 +105,7 @@ export const VirtualCell = React.memo(
     findTerm,
     isActiveMatch,
     getColumnStyle,
+    embedded = false,
     isRowSelected,
   }: {
     cell: Cell<DataTableRecord, unknown>;
@@ -118,6 +121,8 @@ export const VirtualCell = React.memo(
     isRowSelected: boolean;
     /** Only used to re-render the control cell, whose content reads the expanded doc from a ref. */
     isRowExpanded: boolean;
+    /** Rendered inside a cell of another grid, which owns its width, pinning, role and focus. */
+    embedded?: boolean;
   }) => {
     // Visibility follows the pointer (`:hover`). `actionsDismissed` keeps the control hidden
     // after an action until the pointer actually leaves, even if the cell is still hovered.
@@ -142,9 +147,11 @@ export const VirtualCell = React.memo(
     const isSelect = meta?.isSelect;
     const isSummary = meta?.isSummary;
     const pinned = cell.column.getIsPinned();
-    const isPinned = Boolean(pinned);
-    const isLastLeftPinned = pinned === 'left' && cell.column.getIsLastColumn('left');
+    const isPinned = !embedded && Boolean(pinned);
+    const isLastLeftPinned = !embedded && pinned === 'left' && cell.column.getIsLastColumn('left');
     const pinStyle = getColumnPinningStyle(cell.column);
+    const cellRole = embedded ? undefined : 'gridcell';
+    const cellTabIndex = embedded ? -1 : 0;
     // Same anchor-row class as UnifiedDataTable (surrounding documents view).
     const getCellClassName = (...classNames: Array<string | false>) =>
       [...classNames, cell.row.original.isAnchor && 'unifiedDataTable__cell--highlight']
@@ -164,28 +171,34 @@ export const VirtualCell = React.memo(
             isLastLeftPinned && styles.pinnedCellShadow,
             isFocused && styles.focusedCell,
           ]}
-          style={{
-            width: isSelect ? SELECT_COL_WIDTH : cell.column.getSize(),
-            flexShrink: 0,
-            ...pinStyle,
-          }}
-          role="gridcell"
+          style={
+            embedded
+              ? EMBEDDED_CELL_STYLE
+              : {
+                  width: isSelect ? SELECT_COL_WIDTH : cell.column.getSize(),
+                  flexShrink: 0,
+                  ...pinStyle,
+                }
+          }
+          role={cellRole}
           {...gridCellAttributes}
-          aria-selected={isSelect ? isRowSelected : undefined}
+          aria-selected={isSelect && !embedded ? isRowSelected : undefined}
         >
           {flexRender(cell.column.columnDef.cell, cell.getContext())}
         </div>
       );
     }
 
-    const columnStyle = {
-      ...getColumnStyle({
-        id: cell.column.id,
-        isSummary,
-        isTimestamp: meta?.isTimestamp,
-      }),
-      ...pinStyle,
-    };
+    const columnStyle: React.CSSProperties = embedded
+      ? EMBEDDED_CELL_STYLE
+      : {
+          ...getColumnStyle({
+            id: cell.column.id,
+            isSummary,
+            isTimestamp: meta?.isTimestamp,
+          }),
+          ...pinStyle,
+        };
 
     if (isSummary) {
       const openSummaryPopover = (cellEl: HTMLElement) => {
@@ -215,10 +228,10 @@ export const VirtualCell = React.memo(
             isLastLeftPinned && styles.pinnedCellShadow,
             isFocused && styles.focusedCell,
           ]}
-          role="gridcell"
+          role={cellRole}
           {...gridCellAttributes}
           style={columnStyle}
-          tabIndex={0}
+          tabIndex={cellTabIndex}
           onClick={(e) => openSummaryPopover(e.currentTarget)}
           onKeyDown={(e) => {
             if (e.key === keys.ENTER || e.key === keys.SPACE) {
@@ -277,9 +290,9 @@ export const VirtualCell = React.memo(
           isFocused && styles.focusedCell,
         ]}
         style={columnStyle}
-        role="gridcell"
+        role={cellRole}
         {...gridCellAttributes}
-        tabIndex={0}
+        tabIndex={cellTabIndex}
         onMouseLeave={(event) => {
           const next = event.relatedTarget;
           const leftIntoCell =

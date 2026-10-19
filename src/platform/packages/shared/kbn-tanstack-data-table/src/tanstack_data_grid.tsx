@@ -14,6 +14,7 @@ import {
   getSortedRowModel,
   flexRender,
   type ColumnDef,
+  type Header,
   type SortingState,
   type ColumnSizingState,
   type ColumnPinningState,
@@ -144,6 +145,7 @@ import { formatCellValue, getColumnPinningStyle } from './tanstack_grid_helpers'
 import {
   TanStackGridBody,
   scrollPositionCache,
+  type TanStackGridBodyProps,
   type FindMatch,
   type RowVirtualizer,
   type UseRowVirtualizer,
@@ -220,6 +222,11 @@ export interface TanStackDataGridProps {
    * virtualizing within the grid body. Must not change while the grid is mounted.
    */
   useRowVirtualizer?: UseRowVirtualizer;
+  /**
+   * Renders the rows with another grid engine instead of the built-in TanStack body, e.g. the
+   * react-data-grid proof of concept in `@kbn/rdg-data-table`. Must not change while mounted.
+   */
+  gridBody?: React.ComponentType<TanStackGridBodyProps>;
   /** Same as UnifiedDataTable: maximum number of fields shown in the summary column. */
   maxDocFieldsDisplayed?: UnifiedDataTableProps['maxDocFieldsDisplayed'];
   /** Same as UnifiedDataTable: UI actions trigger whose compatible actions are added to the cell popover. */
@@ -930,6 +937,7 @@ const TanStackDataGridComponent: React.FC<TanStackDataGridProps> = ({
   toolbarBottomSection,
   hideFilteringOnComputedColumns,
   useRowVirtualizer = useGridBodyRowVirtualizer,
+  gridBody: GridBody = TanStackGridBody,
   maxDocFieldsDisplayed = DEFAULT_MAX_DOC_FIELDS_DISPLAYED,
   cellActionsTriggerId,
   cellActionsMetadata,
@@ -2538,6 +2546,235 @@ const TanStackDataGridComponent: React.FC<TanStackDataGridProps> = ({
     );
   }
 
+  // Shared with alternative grid bodies, which render header cells inside their own header cells.
+  const renderHeaderCell = (
+    header: Header<DataTableRecord, unknown>,
+    { embedded = false }: { embedded?: boolean } = {}
+  ): React.ReactNode => {
+    const isControl = header.column.columnDef.meta?.isControl;
+    const isRowIndicator = header.column.columnDef.meta?.isRowIndicator;
+    const isSelect = header.column.columnDef.meta?.isSelect;
+    const isSummary = header.column.columnDef.meta?.isSummary;
+    const sortDir = header.column.getIsSorted();
+    const colId = header.column.id;
+    const isDraggable = !isControl && !isSelect && !isSummary && Boolean(onSetColumns);
+    const isDragging = dragState.dragging === colId;
+    const isDragOver = dragState.over === colId && dragState.dragging !== colId;
+    const dataViewField = getDataViewFieldFromDataSource({
+      dataView,
+      dataSource,
+      fieldName: colId,
+    });
+    const columnDisplayName = getColumnDisplayName(
+      colId,
+      dataViewField?.displayName,
+      settings?.columns?.[colId]?.display,
+      documentsDisplayMode
+    );
+    const columnIndex = effectiveColumns.indexOf(colId);
+
+    // An embedding grid owns the width, pinning and header row height of its header cells.
+    const headerColumnStyle: React.CSSProperties = embedded
+      ? { width: '100%', height: '100%' }
+      : isSelect || isControl
+      ? {
+          width: isSelect ? SELECT_COL_WIDTH : header.column.getSize(),
+          flexShrink: 0,
+          ...getColumnPinningStyle(header.column, { isHeader: true }),
+        }
+      : {
+          ...getColumnStyle({
+            id: colId,
+            isSummary,
+            isTimestamp: header.column.columnDef.meta?.isTimestamp,
+          }),
+          ...getColumnPinningStyle(header.column, { isHeader: true }),
+        };
+    const isPinnedHeader = Boolean(header.column.getIsPinned());
+    const isLastLeftPinnedHeader =
+      header.column.getIsPinned() === 'left' && header.column.getIsLastColumn('left');
+
+    if (isSelect) {
+      return (
+        <div
+          key={header.id}
+          className={!embedded && isPinnedHeader ? 'tsg-pinnedHeaderCell' : undefined}
+          css={[
+            styles.selectHeaderCell,
+            !embedded && isLastLeftPinnedHeader && styles.pinnedCellShadow,
+          ]}
+          style={{
+            ...headerColumnStyle,
+            ...(!embedded && headerCellMinHeightPx != null
+              ? { minHeight: headerCellMinHeightPx }
+              : undefined),
+          }}
+          role={embedded ? undefined : 'columnheader'}
+          data-test-subj={`dataGridHeaderCell-${colId}`}
+          data-gridcell-column-id={colId}
+        >
+          <EuiCheckbox
+            id="select-all"
+            data-test-subj="selectAllDocsOnPageToggle"
+            checked={allSelected}
+            indeterminate={someSelected}
+            onChange={toggleSelectAll}
+            aria-label={selectAllOnPageLabel}
+            title={selectAllOnPageLabel}
+          />
+        </div>
+      );
+    }
+
+    return (
+      <div
+        key={header.id}
+        className={!embedded && isPinnedHeader ? 'tsg-pinnedHeaderCell' : undefined}
+        css={[
+          isRowIndicator
+            ? styles.rowIndicatorHeaderCell
+            : isControl
+            ? styles.controlHeaderCell
+            : styles.headerCell,
+          !isControl && isHeaderMultiline && styles.headerCellMultiline,
+          !isControl && !isSummary && header.column.getCanResize() && styles.headerCellResizable,
+          !embedded && isLastLeftPinnedHeader && styles.pinnedCellShadow,
+          isDraggable && styles.headerCellDraggable,
+          isDragging && styles.headerCellDragging,
+          isDragOver && styles.headerCellDragOver,
+        ]}
+        style={{
+          ...headerColumnStyle,
+          ...(!embedded && headerCellMinHeightPx != null
+            ? { minHeight: headerCellMinHeightPx }
+            : undefined),
+        }}
+        role={embedded ? undefined : 'columnheader'}
+        aria-sort={
+          embedded
+            ? undefined
+            : sortDir === 'asc'
+            ? 'ascending'
+            : sortDir === 'desc'
+            ? 'descending'
+            : undefined
+        }
+        data-test-subj={`dataGridHeaderCell-${colId}`}
+        data-gridcell-column-id={colId}
+        tabIndex={isDraggable ? 0 : undefined}
+        draggable={isDraggable}
+        onDragStart={isDraggable ? () => handleDragStart(colId) : undefined}
+        onDragOver={
+          isDraggable
+            ? (e) => {
+                e.preventDefault();
+                handleDragOver(colId);
+              }
+            : undefined
+        }
+        onDrop={isDraggable ? handleDragEnd : undefined}
+        onDragEnd={handleDragEnd}
+      >
+        {isControl &&
+          (colId === EXPAND_COLUMN_ID ? (
+            <TanStackActionsColumnHeader styles={styles} />
+          ) : (
+            flexRender(header.column.columnDef.header, header.getContext())
+          ))}
+        {!isControl && (
+          <TanStackHeaderActionsBridge
+            styles={styles}
+            isHeaderMultiline={isHeaderMultiline}
+            reserveResizeHandlePadding={!isSummary && header.column.getCanResize()}
+            actionsProps={{
+              columnId: colId,
+              columnDisplayName,
+              columnIndex,
+              visibleColumnIds: effectiveColumns,
+              dataView,
+              dataSource,
+              settings,
+              columnSizing,
+              isSummaryMode,
+              isSortEnabled: headerSortEnabled,
+              sort,
+              onSort,
+              persistVisibleColumns,
+              onResize,
+              onAutoFitColumn: handleAutoFitColumn,
+              onTogglePinColumn: !isSummary ? handleTogglePinColumn : undefined,
+              isColumnPinned: pinnedDataColumnIds.includes(colId),
+              timeFieldName,
+              toastNotifications,
+              valueToStringConverter,
+              rowsCount: displayedRows.length,
+              editField,
+              hasEditDataViewPermission,
+            }}
+          >
+            {showColumnTokens &&
+              !isSummary &&
+              !header.column.columnDef.meta?.isTimestamp &&
+              (() => {
+                const fieldName = header.column.columnDef.meta?.fieldName;
+                if (!fieldName) return null;
+                if (dataSource?.kind === 'esql') {
+                  const esqlColumn = dataSource.getColumn(fieldName);
+                  const iconType = esqlColumn && getFieldIconType(columnToFieldBase(esqlColumn));
+                  if (iconType && iconType !== 'unknown') {
+                    return <FieldIcon type={iconType} css={styles.headerCellFieldIcon} />;
+                  }
+                } else {
+                  const dvField = dataView.getFieldByName(fieldName);
+                  if (dvField) {
+                    return (
+                      <FieldIcon {...getFieldIconProps(dvField)} css={styles.headerCellFieldIcon} />
+                    );
+                  }
+                }
+                return null;
+              })()}
+            <TanStackHeaderCellText
+              text={columnDisplayName}
+              styles={styles}
+              multiline={isHeaderMultiline}
+            />
+            {header.column.columnDef.meta?.isTimestamp && (
+              <EuiIconTip
+                type="clock"
+                color="subdued"
+                size="m"
+                anchorProps={{ css: styles.headerCellIcon }}
+                content={i18n.translate('discover.grid.tanStack.timeFieldIconTooltip', {
+                  defaultMessage: 'This field represents the time that events occurred.',
+                })}
+              />
+            )}
+            {sortDir && (
+              <span css={styles.sortIndicator}>
+                <EuiIcon
+                  type={sortDir === 'asc' ? 'sortUp' : 'sortDown'}
+                  size="m"
+                  color="subdued"
+                  aria-hidden={true}
+                />
+              </span>
+            )}
+          </TanStackHeaderActionsBridge>
+        )}
+        {header.column.getCanResize() && !isControl && !isSummary && (
+          <div
+            css={[styles.resizeHandle, header.column.getIsResizing() && styles.resizeHandleActive]}
+            onMouseDown={header.getResizeHandler()}
+            onTouchStart={header.getResizeHandler()}
+            onClick={stopPropagation}
+            onKeyDown={stopPropagation}
+          />
+        )}
+      </div>
+    );
+  };
+
   return (
     <div
       ref={setWrapperRef}
@@ -3086,8 +3323,11 @@ const TanStackDataGridComponent: React.FC<TanStackDataGridProps> = ({
             data-test-subj="discoverNoResults"
           />
         ) : (
-          <TanStackGridBody
+          <GridBody
             scrollRef={parentRef}
+            headerGroups={headerGroupsRaw}
+            renderHeaderCell={renderHeaderCell}
+            headerRowHeight={headerCellMinHeightPx}
             virtualizerRef={virtualizerRef}
             useRowVirtualizer={useRowVirtualizer}
             isFullScreen={isFullScreen}
@@ -3118,243 +3358,7 @@ const TanStackDataGridComponent: React.FC<TanStackDataGridProps> = ({
                 aria-rowindex={1}
                 style={{ width: totalWidth }}
               >
-                {headerGroup.headers.map((header) => {
-                  const isControl = header.column.columnDef.meta?.isControl;
-                  const isRowIndicator = header.column.columnDef.meta?.isRowIndicator;
-                  const isSelect = header.column.columnDef.meta?.isSelect;
-                  const isSummary = header.column.columnDef.meta?.isSummary;
-                  const sortDir = header.column.getIsSorted();
-                  const colId = header.column.id;
-                  const isDraggable =
-                    !isControl && !isSelect && !isSummary && Boolean(onSetColumns);
-                  const isDragging = dragState.dragging === colId;
-                  const isDragOver = dragState.over === colId && dragState.dragging !== colId;
-                  const dataViewField = getDataViewFieldFromDataSource({
-                    dataView,
-                    dataSource,
-                    fieldName: colId,
-                  });
-                  const columnDisplayName = getColumnDisplayName(
-                    colId,
-                    dataViewField?.displayName,
-                    settings?.columns?.[colId]?.display,
-                    documentsDisplayMode
-                  );
-                  const columnIndex = effectiveColumns.indexOf(colId);
-
-                  const headerColumnStyle =
-                    isSelect || isControl
-                      ? {
-                          width: isSelect ? SELECT_COL_WIDTH : header.column.getSize(),
-                          flexShrink: 0,
-                          ...getColumnPinningStyle(header.column, { isHeader: true }),
-                        }
-                      : {
-                          ...getColumnStyle({
-                            id: colId,
-                            isSummary,
-                            isTimestamp: header.column.columnDef.meta?.isTimestamp,
-                          }),
-                          ...getColumnPinningStyle(header.column, { isHeader: true }),
-                        };
-                  const isPinnedHeader = Boolean(header.column.getIsPinned());
-                  const isLastLeftPinnedHeader =
-                    header.column.getIsPinned() === 'left' && header.column.getIsLastColumn('left');
-
-                  if (isSelect) {
-                    return (
-                      <div
-                        key={header.id}
-                        className={isPinnedHeader ? 'tsg-pinnedHeaderCell' : undefined}
-                        css={[
-                          styles.selectHeaderCell,
-                          isLastLeftPinnedHeader && styles.pinnedCellShadow,
-                        ]}
-                        style={{
-                          ...headerColumnStyle,
-                          ...(headerCellMinHeightPx != null
-                            ? { minHeight: headerCellMinHeightPx }
-                            : undefined),
-                        }}
-                        role="columnheader"
-                        data-test-subj={`dataGridHeaderCell-${colId}`}
-                        data-gridcell-column-id={colId}
-                      >
-                        <EuiCheckbox
-                          id="select-all"
-                          data-test-subj="selectAllDocsOnPageToggle"
-                          checked={allSelected}
-                          indeterminate={someSelected}
-                          onChange={toggleSelectAll}
-                          aria-label={selectAllOnPageLabel}
-                          title={selectAllOnPageLabel}
-                        />
-                      </div>
-                    );
-                  }
-
-                  return (
-                    <div
-                      key={header.id}
-                      className={isPinnedHeader ? 'tsg-pinnedHeaderCell' : undefined}
-                      css={[
-                        isRowIndicator
-                          ? styles.rowIndicatorHeaderCell
-                          : isControl
-                          ? styles.controlHeaderCell
-                          : styles.headerCell,
-                        !isControl && isHeaderMultiline && styles.headerCellMultiline,
-                        !isControl &&
-                          !isSummary &&
-                          header.column.getCanResize() &&
-                          styles.headerCellResizable,
-                        isLastLeftPinnedHeader && styles.pinnedCellShadow,
-                        isDraggable && styles.headerCellDraggable,
-                        isDragging && styles.headerCellDragging,
-                        isDragOver && styles.headerCellDragOver,
-                      ]}
-                      style={{
-                        ...headerColumnStyle,
-                        ...(headerCellMinHeightPx != null
-                          ? { minHeight: headerCellMinHeightPx }
-                          : undefined),
-                      }}
-                      role="columnheader"
-                      aria-sort={
-                        sortDir === 'asc'
-                          ? 'ascending'
-                          : sortDir === 'desc'
-                          ? 'descending'
-                          : undefined
-                      }
-                      data-test-subj={`dataGridHeaderCell-${colId}`}
-                      data-gridcell-column-id={colId}
-                      tabIndex={isDraggable ? 0 : undefined}
-                      draggable={isDraggable}
-                      onDragStart={isDraggable ? () => handleDragStart(colId) : undefined}
-                      onDragOver={
-                        isDraggable
-                          ? (e) => {
-                              e.preventDefault();
-                              handleDragOver(colId);
-                            }
-                          : undefined
-                      }
-                      onDrop={isDraggable ? handleDragEnd : undefined}
-                      onDragEnd={handleDragEnd}
-                    >
-                      {isControl &&
-                        (colId === EXPAND_COLUMN_ID ? (
-                          <TanStackActionsColumnHeader styles={styles} />
-                        ) : (
-                          flexRender(header.column.columnDef.header, header.getContext())
-                        ))}
-                      {!isControl && (
-                        <TanStackHeaderActionsBridge
-                          styles={styles}
-                          isHeaderMultiline={isHeaderMultiline}
-                          reserveResizeHandlePadding={!isSummary && header.column.getCanResize()}
-                          actionsProps={{
-                            columnId: colId,
-                            columnDisplayName,
-                            columnIndex,
-                            visibleColumnIds: effectiveColumns,
-                            dataView,
-                            dataSource,
-                            settings,
-                            columnSizing,
-                            isSummaryMode,
-                            isSortEnabled: headerSortEnabled,
-                            sort,
-                            onSort,
-                            persistVisibleColumns,
-                            onResize,
-                            onAutoFitColumn: handleAutoFitColumn,
-                            onTogglePinColumn: !isSummary ? handleTogglePinColumn : undefined,
-                            isColumnPinned: pinnedDataColumnIds.includes(colId),
-                            timeFieldName,
-                            toastNotifications,
-                            valueToStringConverter,
-                            rowsCount: displayedRows.length,
-                            editField,
-                            hasEditDataViewPermission,
-                          }}
-                        >
-                          {showColumnTokens &&
-                            !isSummary &&
-                            !header.column.columnDef.meta?.isTimestamp &&
-                            (() => {
-                              const fieldName = header.column.columnDef.meta?.fieldName;
-                              if (!fieldName) return null;
-                              if (dataSource?.kind === 'esql') {
-                                const esqlColumn = dataSource.getColumn(fieldName);
-                                const iconType =
-                                  esqlColumn && getFieldIconType(columnToFieldBase(esqlColumn));
-                                if (iconType && iconType !== 'unknown') {
-                                  return (
-                                    <FieldIcon type={iconType} css={styles.headerCellFieldIcon} />
-                                  );
-                                }
-                              } else {
-                                const dvField = dataView.getFieldByName(fieldName);
-                                if (dvField) {
-                                  return (
-                                    <FieldIcon
-                                      {...getFieldIconProps(dvField)}
-                                      css={styles.headerCellFieldIcon}
-                                    />
-                                  );
-                                }
-                              }
-                              return null;
-                            })()}
-                          <TanStackHeaderCellText
-                            text={columnDisplayName}
-                            styles={styles}
-                            multiline={isHeaderMultiline}
-                          />
-                          {header.column.columnDef.meta?.isTimestamp && (
-                            <EuiIconTip
-                              type="clock"
-                              color="subdued"
-                              size="m"
-                              anchorProps={{ css: styles.headerCellIcon }}
-                              content={i18n.translate(
-                                'discover.grid.tanStack.timeFieldIconTooltip',
-                                {
-                                  defaultMessage:
-                                    'This field represents the time that events occurred.',
-                                }
-                              )}
-                            />
-                          )}
-                          {sortDir && (
-                            <span css={styles.sortIndicator}>
-                              <EuiIcon
-                                type={sortDir === 'asc' ? 'sortUp' : 'sortDown'}
-                                size="m"
-                                color="subdued"
-                                aria-hidden={true}
-                              />
-                            </span>
-                          )}
-                        </TanStackHeaderActionsBridge>
-                      )}
-                      {header.column.getCanResize() && !isControl && !isSummary && (
-                        <div
-                          css={[
-                            styles.resizeHandle,
-                            header.column.getIsResizing() && styles.resizeHandleActive,
-                          ]}
-                          onMouseDown={header.getResizeHandler()}
-                          onTouchStart={header.getResizeHandler()}
-                          onClick={stopPropagation}
-                          onKeyDown={stopPropagation}
-                        />
-                      )}
-                    </div>
-                  );
-                })}
+                {headerGroup.headers.map((header) => renderHeaderCell(header))}
               </div>
             ))}
             overlay={
