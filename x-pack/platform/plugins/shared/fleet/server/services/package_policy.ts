@@ -1063,40 +1063,20 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       isSecretStorageEnabled(esClient, soClient),
     ]);
 
-    // Apply the installation-level columnar index mode choice carried by each policy, one policy
-    // at a time so that policies of the same package do not race. A rejected choice fails the
-    // policy that carried it, as `create` does.
-    const logsdbColumnarChoiceErrors = new Map<string | undefined, Error>();
+    // Check every policy first: the installation-level columnar index mode choice a policy carries
+    // rewrites the index templates shared by all the policies of the integration, so it is only
+    // applied for a policy that passed its checks.
+    const validatedPackagePolicies = new Map<
+      string | undefined,
+      NonNullable<ReturnType<typeof packageInfosandAssetsMap.get>>
+    >();
     for (const packagePolicy of packagePoliciesWithIds) {
       try {
-        await handleLogsdbColumnarChoice({ soClient, esClient, packagePolicy });
-      } catch (error) {
-        logsdbColumnarChoiceErrors.set(packagePolicy.id, error);
-      }
-    }
-
-    await pMap(packagePoliciesWithIds, async (packagePolicy) => {
-      try {
-        const packagePolicyId = packagePolicy.id ?? uuidv4();
-        const agentPolicyIdsOfPackagePolicy = packagePolicy.policy_ids;
-
-        const logsdbColumnarChoiceError = logsdbColumnarChoiceErrors.get(packagePolicy.id);
-        if (logsdbColumnarChoiceError) {
-          throw logsdbColumnarChoiceError;
-        }
-
         if (!packagePolicy.package) {
           throw new FleetError(
             `Package policy "${packagePolicy.name}" without package are not supported`
           );
         }
-
-        const {
-          id,
-          spaceIds: _spaceIds,
-          ...pkgPolicyWithoutIdInit
-        } = packagePolicy as NewPackagePolicyWithId & { spaceIds?: string[] };
-        let pkgPolicyWithoutId = pkgPolicyWithoutIdInit;
 
         const packageInfoAndAsset = packageInfosandAssetsMap.get(
           `${packagePolicy.package.name}-${packagePolicy.package.version}`
@@ -1107,21 +1087,61 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           );
         }
 
-        const { pkgInfo, assetsMap } = packageInfoAndAsset;
+        const { pkgInfo } = packageInfoAndAsset;
 
         assertFipsCompatiblePackageOrThrow(packagePolicy, pkgInfo, options?.force);
 
-        let inputs = getInputsWithIds(packagePolicy, packagePolicyId, undefined, pkgInfo);
-
         validatePackagePolicyOrThrow(packagePolicy, pkgInfo);
 
-        for (const policyId of agentPolicyIdsOfPackagePolicy) {
+        for (const policyId of packagePolicy.policy_ids) {
           validateAgentlessForPackagePolicy(
             packagePolicy,
             agentPoliciesIndexById[policyId],
             pkgInfo
           );
         }
+
+        validatedPackagePolicies.set(packagePolicy.id, packageInfoAndAsset);
+      } catch (error) {
+        failedPolicies.push({ packagePolicy, error });
+        logger.error(error);
+      }
+    }
+
+    // Then apply the choices, one policy at a time so that policies of the same integration do
+    // not race. A rejected choice fails the policy that carried it, as `create` does.
+    for (const packagePolicy of packagePoliciesWithIds) {
+      if (!validatedPackagePolicies.has(packagePolicy.id)) {
+        continue;
+      }
+      try {
+        await handleLogsdbColumnarChoice({ soClient, esClient, packagePolicy });
+      } catch (error) {
+        validatedPackagePolicies.delete(packagePolicy.id);
+        failedPolicies.push({ packagePolicy, error });
+        logger.error(error);
+      }
+    }
+
+    await pMap(packagePoliciesWithIds, async (packagePolicy) => {
+      const packageInfoAndAsset = validatedPackagePolicies.get(packagePolicy.id);
+      if (!packageInfoAndAsset) {
+        return;
+      }
+      try {
+        const packagePolicyId = packagePolicy.id ?? uuidv4();
+        const agentPolicyIdsOfPackagePolicy = packagePolicy.policy_ids;
+
+        const {
+          id,
+          spaceIds: _spaceIds,
+          ...pkgPolicyWithoutIdInit
+        } = packagePolicy as NewPackagePolicyWithId & { spaceIds?: string[] };
+        let pkgPolicyWithoutId = pkgPolicyWithoutIdInit;
+
+        const { pkgInfo, assetsMap } = packageInfoAndAsset;
+
+        let inputs = getInputsWithIds(packagePolicy, packagePolicyId, undefined, pkgInfo);
 
         let secretReferences: SecretReference[] | undefined;
         if (secretStorageEnabled) {

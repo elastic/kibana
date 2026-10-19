@@ -2625,6 +2625,33 @@ describe('Package policy service', () => {
         });
       });
 
+      it('should only apply the choice of the policies that pass their checks', async () => {
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        const soClient = createSavedObjectClientMock();
+        soClient.bulkCreate.mockResolvedValueOnce({ saved_objects: [] });
+        const invalid = columnarPolicy('policy-2', false);
+        // No package info is found for this version, so the policy fails its checks.
+        invalid.package.version = '9.9.9';
+
+        const { failed } = await packagePolicyService.bulkCreate(soClient, esClient, [
+          columnarPolicy('policy-1', true),
+          invalid,
+        ]);
+
+        expect(handleLogsdbColumnarChoice).toHaveBeenCalledTimes(1);
+        expect(handleLogsdbColumnarChoice).toHaveBeenCalledWith(
+          expect.objectContaining({
+            packagePolicy: expect.objectContaining({ id: 'policy-1' }),
+          })
+        );
+        expect(failed).toEqual([
+          expect.objectContaining({ packagePolicy: expect.objectContaining({ id: 'policy-2' }) }),
+        ]);
+        expect((soClient.bulkCreate.mock.calls[0][0] as any).map(({ id }: any) => id)).toEqual([
+          'policy-1',
+        ]);
+      });
+
       it('should fail the policy whose choice Elasticsearch rejects', async () => {
         const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
         const soClient = createSavedObjectClientMock();
