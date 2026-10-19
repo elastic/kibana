@@ -67,6 +67,7 @@ const createTextAndBadgeFragment = (sanitizedHtml: DocumentFragment): DocumentFr
 
 export interface HandleEditorPasteOpts {
   onPasteFile?: (file: File) => string | undefined;
+  onUnsupportedFile?: (file: File) => void;
   acceptedFileMimeTypes?: readonly FileMimeType[];
   editorRef: RefObject<HTMLDivElement>;
   onChange: () => void;
@@ -85,19 +86,23 @@ const getPastedFileKind = (
 
 /** Handles the image and file branch of a paste event. Returns true if consumed. */
 const handleFilePaste = (event: ClipboardEvent, opts: HandleEditorPasteOpts): boolean => {
-  const { onPasteFile, acceptedFileMimeTypes = NO_FILE_TYPES, onChange } = opts;
+  const { onPasteFile, onUnsupportedFile, acceptedFileMimeTypes = NO_FILE_TYPES, onChange } = opts;
   if (!onPasteFile || !event.clipboardData) return false;
 
-  const fileItem = Array.from(event.clipboardData.items).find((item) => item.kind === 'file');
-  const file = fileItem?.getAsFile();
-  if (!file) return false;
-
-  const kind = getPastedFileKind(file, acceptedFileMimeTypes);
-  if (!kind) return false;
+  const files = Array.from(event.clipboardData.items)
+    .filter((item) => item.kind === 'file')
+    .flatMap((item) => item.getAsFile() ?? []);
+  if (files.length === 0) return false;
 
   event.preventDefault();
-  const label = onPasteFile(file);
-  if (label) {
+  for (const file of files) {
+    const kind = getPastedFileKind(file, acceptedFileMimeTypes);
+    if (!kind) {
+      onUnsupportedFile?.(file);
+      break;
+    }
+    const label = onPasteFile(file);
+    if (!label) break;
     insertAttachmentPlaceholderChip(label, kind);
     onChange();
   }

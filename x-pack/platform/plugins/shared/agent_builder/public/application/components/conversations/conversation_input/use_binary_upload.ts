@@ -181,7 +181,7 @@ export const useBinaryUpload = ({
       setLoading(name, false);
 
       if (result.status === 'failed') {
-        addErrorToast({ title: result.message });
+        addErrorToast({ title: result.message, text: name });
         messageEditorController.removePlaceholderByName(name, 'binary');
         return;
       }

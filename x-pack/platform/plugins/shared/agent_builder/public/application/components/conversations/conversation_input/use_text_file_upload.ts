@@ -99,7 +99,7 @@ export const useTextFileUpload = ({
         setLoading(name, false);
 
         if (result.status === 'failed') {
-          addErrorToast({ title: result.message });
+          addErrorToast({ title: result.message, text: name });
           messageEditorController.removePlaceholderByName(name, 'text');
           return;
         }

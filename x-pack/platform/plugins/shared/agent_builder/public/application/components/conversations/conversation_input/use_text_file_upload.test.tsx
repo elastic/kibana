@@ -103,7 +103,10 @@ describe('useTextFileUpload', () => {
       act(() => result.current.handlePasteTextFile?.(createFile(), 'notes.md'));
 
       await waitFor(() =>
-        expect(addErrorToast).toHaveBeenCalledWith({ title: 'The file must be UTF-8 text.' })
+        expect(addErrorToast).toHaveBeenCalledWith({
+          title: 'The file must be UTF-8 text.',
+          text: 'notes.md',
+        })
       );
       expect(messageEditorController.removePlaceholderByName).toHaveBeenCalledWith(
         'notes.md',

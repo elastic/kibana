@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { ToastInput } from '@kbn/core/public';
 import {
   AttachmentType,
@@ -20,7 +20,7 @@ import {
   TEXT_FILE_MIME_TYPES,
   type FileMimeType,
 } from './file_type';
-import { rejectIfTooManyFiles, rejectInvalidFile } from './file_checks';
+import { rejectIfTooManyFiles, rejectInvalidFile, showUnsupportedFileToast } from './file_checks';
 import { getUniqueName } from './upload_image';
 import { useImageUpload } from './use_image_upload';
 import { useBinaryUpload } from './use_binary_upload';
@@ -107,6 +107,12 @@ export const useAttachmentUploads = ({
     [uploadingNames, loadingBinaryNames, loadingTextFileNames]
   );
 
+  // Names taken by earlier files of the same paste, before the state shows them.
+  const claimedNames = useRef(new Set<string>());
+  useEffect(() => {
+    claimedNames.current.clear();
+  }, [attachments, loadingBinaryNames, loadingTextFileNames]);
+
   const handlePasteFile = useCallback(
     (file: File): string | undefined => {
       const mimeType = getFileMimeType(file);
@@ -121,12 +127,21 @@ export const useAttachmentUploads = ({
         ...addedFileNames,
         ...loadingBinaryNames,
         ...loadingTextFileNames,
+        ...claimedNames.current,
       ]);
-      if (rejectIfTooManyFiles({ currentFileCount: namesInUse.size, addErrorToast })) {
+      const defaultName = getFileName(file, mimeType);
+      if (
+        rejectIfTooManyFiles({
+          currentFileCount: namesInUse.size,
+          fileName: defaultName,
+          addErrorToast,
+        })
+      ) {
         return undefined;
       }
 
-      const name = getUniqueName(getFileName(file, mimeType), namesInUse);
+      const name = getUniqueName(defaultName, namesInUse);
+      claimedNames.current.add(name);
       if (isSupportedBinaryMimeType(mimeType)) {
         handlePasteBinary?.(file, name, mimeType);
       } else {
@@ -180,6 +195,11 @@ export const useAttachmentUploads = ({
     [loadingBinaryNames, handleRemoveBinary, handleRemoveTextFile]
   );
 
+  const handleUnsupportedFile = useCallback(
+    (file: File) => showUnsupportedFileToast(addErrorToast, file),
+    [addErrorToast]
+  );
+
   return {
     uploadingNames,
     loadingFiles,
@@ -188,6 +208,7 @@ export const useAttachmentUploads = ({
     acceptedFileMimeTypes,
     pendingConversationId,
     handlePasteFile,
+    handleUnsupportedFile,
     handleAfterInput,
     handleRemoveAttachment,
     handleRemoveLoadingFile,

@@ -23,6 +23,14 @@ const labels = {
   }),
 };
 
+/** Shows a toast that the pasted file type is not supported. */
+export const showUnsupportedFileToast = (
+  addErrorToast: (input: ToastInput) => void,
+  file: File
+): void => {
+  addErrorToast({ title: labels.invalidType, text: file.name || undefined });
+};
+
 /** Shows a toast and returns true when the file type is not supported or the file is too large. */
 export const rejectInvalidFile = ({
   file,
@@ -33,7 +41,7 @@ export const rejectInvalidFile = ({
 }): boolean => {
   const mimeType = getFileMimeType(file);
   if (!mimeType) {
-    addErrorToast({ title: labels.invalidType });
+    showUnsupportedFileToast(addErrorToast, file);
     return true;
   }
   const maxBytes = isSupportedBinaryMimeType(mimeType)
@@ -45,6 +53,7 @@ export const rejectInvalidFile = ({
         defaultMessage: 'The file is too large. The maximum size is {maxSize}.',
         values: { maxSize: numeral(maxBytes).format('0.[0] b') },
       }),
+      text: file.name || undefined,
     });
     return true;
   }
@@ -54,12 +63,14 @@ export const rejectInvalidFile = ({
 /** Blocks adding another file once `currentFileCount` has reached the per-message limit. */
 export const rejectIfTooManyFiles = ({
   currentFileCount,
+  fileName,
   addErrorToast,
 }: {
   currentFileCount: number;
+  fileName: string;
   addErrorToast: (input: ToastInput) => void;
 }): boolean => {
   if (currentFileCount < MAX_FILES_PER_MESSAGE) return false;
-  addErrorToast({ title: labels.tooMany });
+  addErrorToast({ title: labels.tooMany, text: fileName });
   return true;
 };

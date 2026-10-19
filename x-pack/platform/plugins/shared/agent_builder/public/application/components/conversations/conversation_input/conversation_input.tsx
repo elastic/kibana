@@ -336,6 +336,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     acceptedFileMimeTypes,
     pendingConversationId,
     handlePasteFile,
+    handleUnsupportedFile,
     handleAfterInput,
     handleRemoveAttachment,
     handleRemoveLoadingFile,
@@ -541,6 +542,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
           ariaLabel={messageEditorAriaLabel}
           data-test-subj="agentBuilderConversationInputEditor"
           onPasteFile={upsertAttachments ? handlePasteFile : undefined}
+          onUnsupportedFile={upsertAttachments ? handleUnsupportedFile : undefined}
           acceptedFileMimeTypes={acceptedFileMimeTypes}
           onAfterInput={handleAfterInput}
           onHoveredPlaceholderChange={setHoveredAttachmentName}

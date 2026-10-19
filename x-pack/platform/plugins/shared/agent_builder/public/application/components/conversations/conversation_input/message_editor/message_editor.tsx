@@ -85,6 +85,7 @@ interface MessageEditorProps {
   ariaLabel?: string;
   'data-test-subj'?: string;
   onPasteFile?: (file: File) => string | undefined;
+  onUnsupportedFile?: (file: File) => void;
   acceptedFileMimeTypes?: readonly FileMimeType[];
   onAfterInput?: () => void;
   onHoveredPlaceholderChange?: (name: string | null) => void;
@@ -99,6 +100,7 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
   ariaLabel,
   'data-test-subj': dataTestSubj,
   onPasteFile,
+  onUnsupportedFile,
   acceptedFileMimeTypes,
   onAfterInput,
   onHoveredPlaceholderChange,
@@ -204,6 +206,7 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
         onPaste={(event) =>
           handleEditorPaste(event.nativeEvent, {
             onPasteFile,
+            onUnsupportedFile,
             acceptedFileMimeTypes,
             editorRef: ref,
             onChange,

@@ -231,7 +231,10 @@ describe('useBinaryUpload', () => {
     paste(result);
 
     await waitFor(() =>
-      expect(addErrorToast).toHaveBeenCalledWith({ title: 'The file is not a valid PDF.' })
+      expect(addErrorToast).toHaveBeenCalledWith({
+        title: 'The file is not a valid PDF.',
+        text: 'invoice.pdf',
+      })
     );
     expect(messageEditorController.removePlaceholderByName).toHaveBeenCalledWith(
       'invoice.pdf',

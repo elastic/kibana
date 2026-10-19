@@ -38,7 +38,10 @@ describe('rejectInvalidFile', () => {
     const addErrorToast = jest.fn();
 
     expect(rejectInvalidFile({ file: createFile({ name, type: '' }), addErrorToast })).toBe(true);
-    expect(addErrorToast).toHaveBeenCalledWith({ title: 'This file type is not supported.' });
+    expect(addErrorToast).toHaveBeenCalledWith({
+      title: 'This file type is not supported.',
+      text: name,
+    });
   });
 
   it.each([
@@ -53,6 +56,7 @@ describe('rejectInvalidFile', () => {
     expect(rejectInvalidFile({ file, addErrorToast })).toBe(true);
     expect(addErrorToast).toHaveBeenCalledWith({
       title: `The file is too large. The maximum size is ${limitLabel}.`,
+      text: name,
     });
   });
 
@@ -74,7 +78,11 @@ describe('rejectIfTooManyFiles', () => {
     const addErrorToast = jest.fn();
 
     expect(
-      rejectIfTooManyFiles({ currentFileCount: MAX_FILES_PER_MESSAGE - 1, addErrorToast })
+      rejectIfTooManyFiles({
+        currentFileCount: MAX_FILES_PER_MESSAGE - 1,
+        fileName: 'notes.md',
+        addErrorToast,
+      })
     ).toBe(false);
     expect(addErrorToast).not.toHaveBeenCalled();
   });
@@ -82,11 +90,16 @@ describe('rejectIfTooManyFiles', () => {
   it('blocks the file after the limit with a toast', () => {
     const addErrorToast = jest.fn();
 
-    expect(rejectIfTooManyFiles({ currentFileCount: MAX_FILES_PER_MESSAGE, addErrorToast })).toBe(
-      true
-    );
+    expect(
+      rejectIfTooManyFiles({
+        currentFileCount: MAX_FILES_PER_MESSAGE,
+        fileName: 'notes.md',
+        addErrorToast,
+      })
+    ).toBe(true);
     expect(addErrorToast).toHaveBeenCalledWith({
       title: 'You can attach up to 10 files per message.',
+      text: 'notes.md',
     });
   });
 

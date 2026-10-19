@@ -94,6 +94,7 @@ jest.mock('../../../hooks/use_supported_binary_types', () => ({
 let mockMessageEditorProps: {
   onSubmit?: () => void;
   onPasteFile?: (file: File) => string | undefined;
+  onUnsupportedFile?: (file: File) => void;
   onAfterInput?: () => void;
   acceptedFileMimeTypes?: readonly string[];
   uploadingNames?: ReadonlySet<string>;
@@ -629,6 +630,19 @@ describe('ConversationInput', () => {
       expect(handlePasteBinary).not.toHaveBeenCalled();
     });
 
+    it('shows a toast when a pasted file type is not supported', () => {
+      renderInput(<ConversationInput />);
+
+      mockMessageEditorProps.onUnsupportedFile?.(
+        new File([new Uint8Array(4)], 'report.docx', { type: '' })
+      );
+
+      expect(addErrorToast).toHaveBeenCalledWith({
+        title: 'This file type is not supported.',
+        text: 'report.docx',
+      });
+    });
+
     it('refuses a text file over 256 KB with a toast', () => {
       renderInput(<ConversationInput />);
       const bigFile = new File([new Uint8Array(257 * 1024)], 'big.txt', { type: 'text/plain' });
@@ -637,6 +651,7 @@ describe('ConversationInput', () => {
 
       expect(addErrorToast).toHaveBeenCalledWith({
         title: 'The file is too large. The maximum size is 256 KB.',
+        text: 'big.txt',
       });
       expect(handlePasteTextFile).not.toHaveBeenCalled();
     });
@@ -656,8 +671,32 @@ describe('ConversationInput', () => {
 
       expect(addErrorToast).toHaveBeenCalledWith({
         title: 'You can attach up to 10 files per message.',
+        text: 'notes.md',
       });
       expect(handlePasteTextFile).not.toHaveBeenCalled();
+    });
+
+    it('counts the files of one paste before the state shows them', () => {
+      renderInput(<ConversationInput />);
+      const files = Array.from(
+        { length: 11 },
+        (_, index) => new File(['x'], `note-${index}.md`, { type: '' })
+      );
+
+      const labels = files.map((file) => mockMessageEditorProps.onPasteFile?.(file));
+
+      expect(labels.filter(Boolean)).toHaveLength(10);
+      expect(labels[10]).toBeUndefined();
+      expect(handlePasteTextFile).toHaveBeenCalledTimes(10);
+    });
+
+    it('gives files with the same name in one paste unique names', () => {
+      renderInput(<ConversationInput />);
+
+      const first = mockMessageEditorProps.onPasteFile?.(markdownFile);
+      const second = mockMessageEditorProps.onPasteFile?.(markdownFile);
+
+      expect([first, second]).toEqual(['notes.md', 'notes 2.md']);
     });
 
     it('counts the files that are still loading', () => {

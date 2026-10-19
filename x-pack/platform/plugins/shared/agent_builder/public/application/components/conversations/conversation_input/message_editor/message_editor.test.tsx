@@ -505,14 +505,16 @@ describe('MessageEditor', () => {
   describe('pasting a file', () => {
     const PDF_FILE = new File([new Uint8Array(4)], 'invoice.pdf', { type: 'application/pdf' });
 
-    const pasteFile = ({
+    const pasteFiles = ({
       acceptedFileMimeTypes,
       onPasteFile,
-      file = PDF_FILE,
+      onUnsupportedFile,
+      files,
     }: {
       acceptedFileMimeTypes?: FileMimeType[];
       onPasteFile: jest.Mock;
-      file?: File;
+      onUnsupportedFile?: jest.Mock;
+      files: File[];
     }) => {
       const { messageEditor } = createMockMessageEditor();
       render(
@@ -520,6 +522,7 @@ describe('MessageEditor', () => {
           messageEditor={messageEditor}
           onSubmit={mockOnSubmit}
           onPasteFile={onPasteFile}
+          onUnsupportedFile={onUnsupportedFile}
           acceptedFileMimeTypes={acceptedFileMimeTypes}
           data-test-subj="messageEditor"
         />
@@ -536,11 +539,21 @@ describe('MessageEditor', () => {
       fireEvent.paste(editor, {
         clipboardData: {
           getData: jest.fn().mockReturnValue(''),
-          items: [{ kind: 'file', type: file.type, getAsFile: () => file }],
+          items: files.map((file) => ({ kind: 'file', type: file.type, getAsFile: () => file })),
         },
       });
-      return { editor, pastedFile: file };
+      return { editor };
     };
+
+    const pasteFile = ({
+      file = PDF_FILE,
+      ...params
+    }: {
+      acceptedFileMimeTypes?: FileMimeType[];
+      onPasteFile: jest.Mock;
+      onUnsupportedFile?: jest.Mock;
+      file?: File;
+    }) => ({ ...pasteFiles({ ...params, files: [file] }), pastedFile: file });
 
     it('calls onPasteFile and inserts a binary chip when the type is accepted', () => {
       const onPasteFile = jest.fn().mockReturnValue('invoice.pdf');
@@ -612,14 +625,96 @@ describe('MessageEditor', () => {
 
     it('ignores a PDF when only Markdown and text are accepted', () => {
       const onPasteFile = jest.fn().mockReturnValue('invoice.pdf');
+      const onUnsupportedFile = jest.fn();
 
       const { editor } = pasteFile({
         acceptedFileMimeTypes: ['text/markdown', 'text/plain'],
         onPasteFile,
+        onUnsupportedFile,
       });
 
       expect(onPasteFile).not.toHaveBeenCalled();
+      expect(onUnsupportedFile).toHaveBeenCalledTimes(1);
       expect(editor.querySelector('[data-attachment-placeholder]')).toBeNull();
+    });
+
+    it('calls onUnsupportedFile for a file type that is not accepted', () => {
+      const onPasteFile = jest.fn();
+      const onUnsupportedFile = jest.fn();
+
+      const { editor } = pasteFile({
+        acceptedFileMimeTypes: ['text/markdown'],
+        onPasteFile,
+        onUnsupportedFile,
+        file: new File(['x'], 'report.docx', { type: '' }),
+      });
+
+      expect(onUnsupportedFile).toHaveBeenCalledTimes(1);
+      expect(onUnsupportedFile).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'report.docx' })
+      );
+      expect(onPasteFile).not.toHaveBeenCalled();
+      expect(editor.querySelector('[data-attachment-placeholder]')).toBeNull();
+    });
+
+    it('does not call onUnsupportedFile for an accepted file', () => {
+      const onUnsupportedFile = jest.fn();
+
+      pasteFile({
+        acceptedFileMimeTypes: ['application/pdf'],
+        onPasteFile: jest.fn().mockReturnValue('invoice.pdf'),
+        onUnsupportedFile,
+      });
+
+      expect(onUnsupportedFile).not.toHaveBeenCalled();
+    });
+
+    it('inserts a chip for every accepted file in one paste', () => {
+      const onPasteFile = jest.fn((file: File) => file.name);
+
+      const { editor } = pasteFiles({
+        acceptedFileMimeTypes: ['text/markdown', 'text/plain'],
+        onPasteFile,
+        files: [
+          new File(['a'], 'a.md', { type: '' }),
+          new File(['b'], 'b.txt', { type: 'text/plain' }),
+        ],
+      });
+
+      expect(onPasteFile).toHaveBeenCalledTimes(2);
+      expect(editor.querySelectorAll('[data-attachment-placeholder]')).toHaveLength(2);
+    });
+
+    it('inserts the accepted files before an unsupported one, then stops and reports it', () => {
+      const onPasteFile = jest.fn((file: File) => file.name);
+      const onUnsupportedFile = jest.fn();
+
+      const { editor } = pasteFiles({
+        acceptedFileMimeTypes: ['text/markdown', 'text/plain'],
+        onPasteFile,
+        onUnsupportedFile,
+        files: [
+          new File(['a'], 'a.md', { type: '' }),
+          new File(['x'], 'report.docx', { type: '' }),
+          new File(['b'], 'b.txt', { type: 'text/plain' }),
+        ],
+      });
+
+      expect(onPasteFile).toHaveBeenCalledTimes(1);
+      expect(onUnsupportedFile).toHaveBeenCalledTimes(1);
+      expect(editor.querySelectorAll('[data-attachment-placeholder]')).toHaveLength(1);
+    });
+
+    it('stops pasting after onPasteFile refuses a file', () => {
+      const onPasteFile = jest.fn().mockReturnValue(undefined);
+
+      pasteFiles({
+        acceptedFileMimeTypes: ['text/markdown'],
+        onPasteFile,
+        files: [new File(['a'], 'a.md', { type: '' }), new File(['b'], 'b.md', { type: '' })],
+      });
+
+      expect(onPasteFile).toHaveBeenCalledTimes(1);
     });
 
     it('still accepts a Markdown file when only Markdown and text are accepted', () => {
