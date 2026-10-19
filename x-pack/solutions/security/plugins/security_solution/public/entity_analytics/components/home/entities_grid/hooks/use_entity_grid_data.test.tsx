@@ -13,13 +13,13 @@ import { httpServiceMock } from '@kbn/core/public/mocks';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { ANOMALY_COUNT_FIELD } from '../common';
 import type { QueryArgs, Row } from '../common';
-import type { SortPageContext } from '../queries/types';
 import { MAX_LOADED_ROWS, useEntityGridData } from './use_entity_grid_data';
 import type { GridContext, UseEntityGridDataOptions } from './use_entity_grid_context';
 import { useGridContext } from './use_entity_grid_context';
 
 const mockFetchSortPage = jest.fn();
 const mockRunQuery = jest.fn();
+const mockFetchResolvedEntityFilterOverrides = jest.fn();
 
 jest.mock('../../../../../common/hooks/use_error_toast');
 jest.mock('./use_entity_grid_context', () => ({
@@ -34,13 +34,14 @@ jest.mock('../queries/esql', () => ({
   ...jest.requireActual('../queries/esql'),
   createEsqlRunner: () => mockRunQuery,
 }));
+jest.mock('../queries/resolved_entities', () => ({
+  ...jest.requireActual('../queries/resolved_entities'),
+  fetchResolvedEntityFilterOverrides: (...args: unknown[]) =>
+    mockFetchResolvedEntityFilterOverrides(...args),
+}));
 jest.mock('./use_entity_grid_rows_enrichment', () => ({
-  useEntityGridRowsEnrichment: (
-    _context: unknown,
-    _options: unknown,
-    batches: Array<{ rows: Row[] }>
-  ) => ({
-    rows: batches.flatMap(({ rows }) => rows),
+  useEntityGridRowsEnrichment: (_context: unknown, _options: unknown, rows: Row[] = []) => ({
+    rows,
     isEnriching: false,
     isFetching: false,
     dataUpdatedAt: 0,
@@ -59,17 +60,11 @@ const OPTIONS: UseEntityGridDataOptions = {
 
 const entityRow = (n: number): Row => ({ 'entity.id': `e${n}`, 'entity.name': `name-e${n}` });
 
-/**
- * A sort query over `total` entities: like the real ones, it returns one page plus one row,
- * starting after the cursor's entity.
- */
+/** A sort query over `total` entities: like the real ones, it returns the rows plus one. */
 const mockSortQueryOver = (total: number) =>
-  mockFetchSortPage.mockImplementation(async ({ cursor, pageSize }: QueryArgs) => {
-    const start = cursor ? Number(cursor.entityId.slice(1)) : 0;
-    return Array.from({ length: Math.min(pageSize + 1, total - start) }, (_, i) =>
-      entityRow(start + i + 1)
-    );
-  });
+  mockFetchSortPage.mockImplementation(async ({ pageSize }: QueryArgs) =>
+    Array.from({ length: Math.min(pageSize + 1, total) }, (_, i) => entityRow(i + 1))
+  );
 
 describe('useEntityGridData', () => {
   let queryClient: QueryClient;
@@ -100,74 +95,37 @@ describe('useEntityGridData', () => {
     queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     mockContext();
     mockRunQuery.mockResolvedValue([{ total: 40 }]);
+    mockFetchResolvedEntityFilterOverrides.mockResolvedValue({ include: ['e9'], exclude: [] });
     mockSortQueryOver(5);
   });
 
   afterEach(() => queryClient.clear());
 
   describe('rows', () => {
-    it('shows one batch, without the extra row that tells there is more', async () => {
+    it('shows the rows, without the extra row that tells there are more', async () => {
       const { result } = renderGridData();
 
       await waitFor(() => expect(result.current.rows).toHaveLength(2));
 
       expect(result.current.rows).toEqual([entityRow(1), entityRow(2)]);
-      expect(result.current.canLoadMore).toBe(true);
+      expect(result.current.isAtLoadLimit).toBe(true);
       expect(mockFetchSortPage).toHaveBeenCalledTimes(1);
       expect(mockFetchSortPage).toHaveBeenCalledWith(
-        expect.objectContaining({ pageSize: 2, cursor: null }),
+        expect.objectContaining({ pageSize: 2 }),
         expect.anything()
       );
     });
 
-    it('loads the next batch after the last shown row', async () => {
-      const { result } = renderGridData();
-      await waitFor(() => expect(result.current.canLoadMore).toBe(true));
-
-      await act(async () => {
-        await result.current.loadMore();
-      });
-      await waitFor(() => expect(result.current.rows).toHaveLength(4));
-
-      expect(result.current.rows.map(({ 'entity.id': id }) => id)).toEqual([
-        'e1',
-        'e2',
-        'e3',
-        'e4',
-      ]);
-      expect(mockFetchSortPage).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          cursor: {
-            sortField: 'entity.name',
-            sortDirection: 'asc',
-            sortValue: 'name-e2',
-            entityId: 'e2',
-          },
-        }),
-        expect.anything()
-      );
-    });
-
-    it('cannot load more when the sort query returned no extra row', async () => {
+    it('is not at the limit when the sort query returned no extra row', async () => {
       mockSortQueryOver(2);
       const { result } = renderGridData();
 
       await waitFor(() => expect(result.current.rows).toHaveLength(2));
 
-      expect(result.current.canLoadMore).toBe(false);
       expect(result.current.isAtLoadLimit).toBe(false);
     });
 
-    it('does not load a batch that would take the grid over the most rows it loads', async () => {
-      mockSortQueryOver(MAX_LOADED_ROWS + 100);
-      const { result } = renderGridData({ ...OPTIONS, pageSize: 300 });
-      await waitFor(() => expect(result.current.rows).toHaveLength(300));
-
-      expect(result.current.canLoadMore).toBe(false);
-      expect(result.current.isAtLoadLimit).toBe(true);
-    });
-
-    it('asks for no more rows in a batch than the most it loads', async () => {
+    it('asks for no more rows than the most it loads', async () => {
       mockSortQueryOver(MAX_LOADED_ROWS + 100);
 
       const { result } = renderGridData({ ...OPTIONS, pageSize: MAX_LOADED_ROWS + 100 });
@@ -177,21 +135,121 @@ describe('useEntityGridData', () => {
         expect.objectContaining({ pageSize: MAX_LOADED_ROWS }),
         expect.anything()
       );
+      expect(result.current.isAtLoadLimit).toBe(true);
+    });
+  });
+
+  describe('the entity filters on the values of the resolved entities', () => {
+    const FILTERED_OPTIONS: UseEntityGridDataOptions = {
+      ...OPTIONS,
+      entityExpression: 'asset.criticality IN ("high_impact")',
+    };
+
+    it('reads the rows and the count with the resolved entities the filters add or remove', async () => {
+      const { result } = renderGridData(FILTERED_OPTIONS);
+
+      await waitFor(() => expect(result.current.rows).toHaveLength(2));
+
+      expect(mockFetchResolvedEntityFilterOverrides).toHaveBeenCalledTimes(1);
+      expect(mockFetchResolvedEntityFilterOverrides).toHaveBeenCalledWith(
+        expect.objectContaining({
+          entityExpression: FILTERED_OPTIONS.entityExpression,
+        }),
+        expect.any(Function)
+      );
+      expect(mockFetchSortPage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          entityExpression: `(${FILTERED_OPTIONS.entityExpression}) OR entity.id IN ("e9")`,
+        }),
+        expect.anything()
+      );
+      expect(mockRunQuery.mock.calls[0][0].join('\n')).toContain('entity.id IN ("e9")');
     });
 
-    it('stops loading once the grid holds the most rows it loads', async () => {
-      mockSortQueryOver(MAX_LOADED_ROWS + 100);
-      const { result } = renderGridData({ ...OPTIONS, pageSize: MAX_LOADED_ROWS / 2 });
-      await waitFor(() => expect(result.current.canLoadMore).toBe(true));
+    it('waits for the overrides before it reads anything', async () => {
+      let resolveOverrides: (overrides: {
+        include: string[];
+        exclude: string[];
+      }) => void = () => {};
+      mockFetchResolvedEntityFilterOverrides.mockReturnValue(
+        new Promise((resolve) => {
+          resolveOverrides = resolve;
+        })
+      );
 
-      await act(async () => {
-        await result.current.loadMore();
+      const { result } = renderGridData(FILTERED_OPTIONS);
+      await waitFor(() => expect(mockFetchResolvedEntityFilterOverrides).toHaveBeenCalled());
+
+      expect(mockFetchSortPage).not.toHaveBeenCalled();
+      expect(mockRunQuery).not.toHaveBeenCalled();
+
+      await act(async () => resolveOverrides({ include: [], exclude: [] }));
+
+      await waitFor(() => expect(result.current.rows).toHaveLength(2));
+    });
+
+    it('reports the overrides it cannot read, and reads no rows', async () => {
+      const error = new Error('too many resolved entities');
+      mockFetchResolvedEntityFilterOverrides.mockRejectedValue(error);
+
+      renderGridData(FILTERED_OPTIONS);
+
+      await waitFor(() =>
+        expect(useErrorToast).toHaveBeenLastCalledWith(expect.any(String), error)
+      );
+      expect(mockFetchSortPage).not.toHaveBeenCalled();
+    });
+
+    it('does not read the overrides without entity filters', async () => {
+      const { result } = renderGridData();
+
+      await waitFor(() => expect(result.current.rows).toHaveLength(2));
+
+      expect(mockFetchResolvedEntityFilterOverrides).not.toHaveBeenCalled();
+    });
+
+    it('does not read the overrides for filters on other columns', async () => {
+      const { result } = renderGridData({
+        ...OPTIONS,
+        entityExpression: 'entity.EngineMetadata.Type IN ("host")',
       });
-      await waitFor(() => expect(result.current.rows).toHaveLength(MAX_LOADED_ROWS));
 
-      expect(result.current.rows).toHaveLength(MAX_LOADED_ROWS);
-      expect(result.current.canLoadMore).toBe(false);
-      expect(result.current.isAtLoadLimit).toBe(true);
+      await waitFor(() => expect(result.current.rows).toHaveLength(2));
+
+      expect(mockFetchResolvedEntityFilterOverrides).not.toHaveBeenCalled();
+    });
+
+    it('does not read the overrides for individual rows', async () => {
+      const { result } = renderGridData({ ...FILTERED_OPTIONS, rowsMode: 'individual' });
+
+      await waitFor(() => expect(result.current.rows).toHaveLength(2));
+
+      expect(mockFetchResolvedEntityFilterOverrides).not.toHaveBeenCalled();
+    });
+
+    it('does not apply the overrides of resolved rows to individual rows', async () => {
+      const { result, rerender } = renderHook(
+        (options: UseEntityGridDataOptions) => useEntityGridData(options),
+        {
+          initialProps: FILTERED_OPTIONS,
+          wrapper: ({ children }: PropsWithChildren) => (
+            <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+          ),
+        }
+      );
+      await waitFor(() => expect(result.current.rows).toHaveLength(2));
+
+      rerender({ ...FILTERED_OPTIONS, rowsMode: 'individual' });
+
+      await waitFor(() =>
+        expect(mockFetchSortPage).toHaveBeenLastCalledWith(
+          expect.objectContaining({
+            rowsMode: 'individual',
+            entityExpression: FILTERED_OPTIONS.entityExpression,
+          }),
+          expect.anything()
+        )
+      );
     });
   });
 
@@ -255,36 +313,14 @@ describe('useEntityGridData', () => {
 
       await waitFor(() => expect(result.current.total).toBe(40));
     });
-  });
 
-  describe('view size', () => {
-    /** Runs the sort query's view size request, as a large-view plan does. */
-    const readViewSize = () => {
-      let viewSize: number | undefined;
-      mockFetchSortPage.mockImplementation(async (_args: QueryArgs, ctx: SortPageContext) => {
-        viewSize = await ctx.fetchViewSize();
-        return [entityRow(1)];
-      });
-      return () => viewSize;
-    };
-
-    it('gives the sort query the number of entities in view', async () => {
-      const getViewSize = readViewSize();
-
+    it('is undefined until the count arrives, not the number of rows loaded', async () => {
+      mockRunQuery.mockReturnValue(new Promise(() => {}));
       const { result } = renderGridData();
 
-      await waitFor(() => expect(result.current.rows).toHaveLength(1));
-      expect(getViewSize()).toBe(40);
-    });
+      await waitFor(() => expect(result.current.rows).toHaveLength(2));
 
-    it('reads as small when the count fails, and still loads the rows', async () => {
-      mockRunQuery.mockRejectedValue(new Error('count failed'));
-      const getViewSize = readViewSize();
-
-      const { result } = renderGridData();
-
-      await waitFor(() => expect(result.current.rows).toHaveLength(1));
-      expect(getViewSize()).toBe(0);
+      expect(result.current.total).toBeUndefined();
     });
   });
 
@@ -302,7 +338,7 @@ describe('useEntityGridData', () => {
   });
 
   describe('prefetch', () => {
-    it('loads the first batch of another view, so it is ready when that view mounts', async () => {
+    it('loads the rows of another view, so they are ready when that view mounts', async () => {
       const childOptions: UseEntityGridDataOptions = {
         ...OPTIONS,
         keyScope: 'children',
