@@ -169,12 +169,20 @@ FROM (
          level_moderate = CASE(risk_level == \\"Moderate\\", 2, level_low),
          level_high = CASE(risk_level == \\"High\\", 3, level_moderate),
          level_num = CASE(risk_level == \\"Critical\\", 4, level_high)
-  | STATS boundary_level_num = LAST(level_num, @timestamp) BY entity_euid
+  | EVAL is_group = CASE(COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) == \\"resolution\\", 1, 0)
+  | STATS last_value = LAST(level_num, @timestamp) BY entity_euid, is_group
+  | EVAL group_part = CASE(is_group == 1, last_value, null), own_part = CASE(is_group == 0, last_value, null)
+  | STATS group_value = MAX(group_part), own_value = MAX(own_part) BY entity_euid
+  | EVAL boundary_level_num = COALESCE(group_value, own_value)
+  | KEEP entity_euid, boundary_level_num
   | RENAME entity_euid AS \`entity.id\`
 ), (
   FROM .entities.v2.latest.default-00001
-  | WHERE entity.risk.calculated_level IN (\\"High\\", \\"Critical\\")
-  | EVAL current_level_num = CASE(entity.risk.calculated_level == \\"Critical\\", 4, 3)
+  | WHERE \`entity.relationships.resolution.resolved_to\` IS NULL
+    AND (entity.risk.calculated_level IN (\\"High\\", \\"Critical\\") OR \`entity.relationships.resolution.risk.calculated_level\` IN (\\"High\\", \\"Critical\\"))
+  | EVAL current_level = COALESCE(\`entity.relationships.resolution.risk.calculated_level\`, entity.risk.calculated_level)
+  | WHERE current_level IN (\\"High\\", \\"Critical\\")
+  | EVAL current_level_num = CASE(current_level == \\"Critical\\", 4, 3)
   | KEEP \`entity.id\`, current_level_num
 )
 | STATS boundary_level_num = MAX(boundary_level_num),
@@ -196,12 +204,18 @@ FROM (
   | EVAL entity_euid = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value)
   | EVAL risk_score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
   | WHERE entity_euid IS NOT NULL
-  | STATS boundary_score = LAST(risk_score, @timestamp) BY entity_euid
+  | EVAL is_group = CASE(COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) == \\"resolution\\", 1, 0)
+  | STATS last_value = LAST(risk_score, @timestamp) BY entity_euid, is_group
+  | EVAL group_part = CASE(is_group == 1, last_value, null), own_part = CASE(is_group == 0, last_value, null)
+  | STATS group_value = MAX(group_part), own_value = MAX(own_part) BY entity_euid
+  | EVAL boundary_score = COALESCE(group_value, own_value)
+  | KEEP entity_euid, boundary_score
   | RENAME entity_euid AS \`entity.id\`
 ), (
   FROM .entities.v2.latest.default-00001
-  | WHERE entity.risk.calculated_score_norm >= 10 AND entity.name IS NOT NULL
-  | EVAL current_score = entity.risk.calculated_score_norm,
+  | WHERE \`entity.relationships.resolution.resolved_to\` IS NULL AND entity.name IS NOT NULL
+    AND COALESCE(\`entity.relationships.resolution.risk.calculated_score_norm\`, entity.risk.calculated_score_norm) >= 10
+  | EVAL current_score = COALESCE(\`entity.relationships.resolution.risk.calculated_score_norm\`, entity.risk.calculated_score_norm),
          effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)
   | KEEP \`entity.id\`, current_score, effective_id
 )
@@ -385,12 +399,20 @@ FROM (
          level_moderate = CASE(risk_level == \\"Moderate\\", 2, level_low),
          level_high = CASE(risk_level == \\"High\\", 3, level_moderate),
          level_num = CASE(risk_level == \\"Critical\\", 4, level_high)
-  | STATS boundary_level_num = LAST(level_num, @timestamp) BY entity_euid
+  | EVAL is_group = CASE(COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) == \\"resolution\\", 1, 0)
+  | STATS last_value = LAST(level_num, @timestamp) BY entity_euid, is_group
+  | EVAL group_part = CASE(is_group == 1, last_value, null), own_part = CASE(is_group == 0, last_value, null)
+  | STATS group_value = MAX(group_part), own_value = MAX(own_part) BY entity_euid
+  | EVAL boundary_level_num = COALESCE(group_value, own_value)
+  | KEEP entity_euid, boundary_level_num
   | RENAME entity_euid AS \`entity.id\`
 ), (
   FROM .entities.v2.latest.default-00001
-  | WHERE entity.risk.calculated_level IN (\\"High\\", \\"Critical\\")
-  | EVAL current_level_num = CASE(entity.risk.calculated_level == \\"Critical\\", 4, 3)
+  | WHERE \`entity.relationships.resolution.resolved_to\` IS NULL
+    AND (entity.risk.calculated_level IN (\\"High\\", \\"Critical\\") OR \`entity.relationships.resolution.risk.calculated_level\` IN (\\"High\\", \\"Critical\\"))
+  | EVAL current_level = COALESCE(\`entity.relationships.resolution.risk.calculated_level\`, entity.risk.calculated_level)
+  | WHERE current_level IN (\\"High\\", \\"Critical\\")
+  | EVAL current_level_num = CASE(current_level == \\"Critical\\", 4, 3)
   | KEEP \`entity.id\`, current_level_num
 )
 | STATS boundary_level_num = MAX(boundary_level_num),
@@ -413,13 +435,19 @@ FROM (
   | EVAL entity_euid = COALESCE(host.risk.id_value, user.risk.id_value, service.risk.id_value)
   | EVAL risk_score = COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)
   | WHERE entity_euid IS NOT NULL
-  | STATS boundary_score = LAST(risk_score, @timestamp) BY entity_euid
+  | EVAL is_group = CASE(COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type) == \\"resolution\\", 1, 0)
+  | STATS last_value = LAST(risk_score, @timestamp) BY entity_euid, is_group
+  | EVAL group_part = CASE(is_group == 1, last_value, null), own_part = CASE(is_group == 0, last_value, null)
+  | STATS group_value = MAX(group_part), own_value = MAX(own_part) BY entity_euid
+  | EVAL boundary_score = COALESCE(group_value, own_value)
+  | KEEP entity_euid, boundary_score
   | RENAME entity_euid AS \`entity.id\`
 ), (
   FROM .entities.v2.latest.default-00001
-  | WHERE entity.risk.calculated_score_norm >= 10 AND entity.name IS NOT NULL
+  | WHERE \`entity.relationships.resolution.resolved_to\` IS NULL AND entity.name IS NOT NULL
+    AND COALESCE(\`entity.relationships.resolution.risk.calculated_score_norm\`, entity.risk.calculated_score_norm) >= 10
   | WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
-  | EVAL current_score = entity.risk.calculated_score_norm,
+  | EVAL current_score = COALESCE(\`entity.relationships.resolution.risk.calculated_score_norm\`, entity.risk.calculated_score_norm),
          effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)
   | KEEP \`entity.id\`, current_score, effective_id
 )
