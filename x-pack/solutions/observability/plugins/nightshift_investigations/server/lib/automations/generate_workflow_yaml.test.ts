@@ -25,6 +25,29 @@ const baseAutomation = (): NightshiftAutomationAttributes => ({
 });
 
 describe('generateWorkflowYaml', () => {
+  it.each([
+    [{ kind: 'alert' }],
+    [{ kind: 'slack', event: 'message' }],
+    [{ kind: 'schedule', schedulePreset: 'daily', time: '09:00' }],
+    [
+      { kind: 'alert' },
+      { kind: 'slack', event: 'message' },
+      { kind: 'schedule', schedulePreset: 'daily', time: '09:00' },
+    ],
+  ] as NightshiftTriggerRow[][])(
+    'passes the owning automation ID to every investigation branch: %j',
+    (...rows) => {
+      const automation = baseAutomation();
+      automation.trigger.rows = rows;
+      const workflow = parse(generateWorkflowYaml('auto-123', automation));
+      for (const step of workflow.steps) {
+        for (const investigation of step.steps ?? [step]) {
+          expect(investigation.with.automation_id).toBe('auto-123');
+        }
+      }
+    }
+  );
+
   describe('concurrency settings', () => {
     it('keys alert-triggered runs on the alert, so one alert does not drop the next', () => {
       const yaml = parse(generateWorkflowYaml('auto-123', baseAutomation()));
@@ -234,11 +257,12 @@ describe('generateWorkflowYaml', () => {
           },
         },
       ]);
-      expect(yaml.settings.timeout).toBe('120s');
+      expect(yaml.settings.timeout).toBe('180s');
       expect(yaml.steps[0]).toEqual({
         name: 'trigger_investigation',
         type: 'nightshift.triggerInvestigation',
         with: {
+          automation_id: 'auto-123',
           subject_type: 'manual',
           subject_id: 'manual',
           title: 'Test automation',

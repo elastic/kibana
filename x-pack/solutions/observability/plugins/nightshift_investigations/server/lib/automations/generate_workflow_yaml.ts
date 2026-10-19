@@ -23,6 +23,7 @@ export const ELASTIC_APPS_SLACK_CONNECTOR_ID = 'elastic-apps-slack';
 
 const ALERT_TRIGGER_TYPE = 'alerting.v1.alertStatusChanged';
 const SLACK_MESSAGE_TRIGGER_TYPE = 'slack2.message';
+const AUTOMATION_TIMEOUT_MARGIN_SECONDS = 60;
 
 // Top-level messages only, since replies are handled by the managed Slack thread workflow. Edits
 // carry a subtype and are left out. Posts from other bots are allowed, so an alert another bot
@@ -95,8 +96,10 @@ export function generateWorkflowYaml(
     enabled: automation.isEnabled,
     tags: ['nightshift', 'automation'],
     settings: {
+      // The automation starts first and waits for the investigation, so its deadline
+      // needs extra time for setup and returning the investigation result.
       ...(automation.runtime.timeoutSeconds !== undefined
-        ? { timeout: `${automation.runtime.timeoutSeconds}s` }
+        ? { timeout: `${automation.runtime.timeoutSeconds + AUTOMATION_TIMEOUT_MARGIN_SECONDS}s` }
         : {}),
       concurrency: {
         key: buildWorkflowConcurrencyKey(automationId, alertRows.length > 0, slackRows.length > 0),
@@ -141,6 +144,7 @@ function generateAlertWorkflow(
         name: hasMultipleTriggers ? 'trigger_investigation_alert' : 'trigger_investigation',
         type: 'nightshift.triggerInvestigation',
         with: {
+          automation_id: automationId,
           subject_type: alertRows.length > 0 ? 'alert' : 'manual',
           subject_id: alertRows.length > 0 ? '{{ trigger.alert.uuid }}' : automationId,
           title: alertRows.length > 0 ? '{{ trigger.rule.name }}' : automation.name,
@@ -180,6 +184,7 @@ function generateScheduledWorkflow(
         name: 'trigger_investigation',
         type: 'nightshift.triggerInvestigation',
         with: {
+          automation_id: automationId,
           subject_type: 'manual',
           subject_id: DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID,
           title: automation.name,
@@ -267,6 +272,7 @@ function generateSlackWorkflow(
         name: hasMultipleTriggers ? 'trigger_investigation_slack' : 'trigger_investigation',
         type: 'nightshift.triggerInvestigation',
         with: {
+          automation_id: automationId,
           subject_type: 'manual',
           subject_id: SLACK_SUBJECT_ID,
           ...(repliesInMessageThread ? { slack_thread: SLACK_THREAD } : {}),

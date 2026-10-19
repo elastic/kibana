@@ -19,10 +19,20 @@ fresh investigation using a `manual` question subject with an `automatic` trigge
 automatic-investigation quotas apply. An assessment that finds no issues still creates a conversation.
 The Investigate/Ask selector does not select a different execution path.
 
+`runtime.dailyDispatchLimit` caps dispatch attempts across all triggers of an automation, per space
+and UTC day. The investigation step reserves a slot atomically before calling the investigation
+client; overlapping runs across Kibana instances cannot exceed the limit. Admitted attempts count
+even if starting or running the investigation fails, or continues an existing investigation. Excess
+attempts create no investigation and appear as skipped with reason `daily_limit` in automation
+history. Skipped attempts do not increase today's usage. An omitted limit allows unlimited dispatches;
+a limit of zero blocks all dispatches. Changing the limit takes effect on the next dispatch. The
+budget is separate from the global automatic-investigation quota.
+
 The API-only `scopeQuery` field is forwarded as `scope_query` guidance in the investigation context.
 It guides the agent's telemetry filters; it is not an enforced data-access boundary. The optional
-`runtime.timeoutSeconds` bounds the generated automation workflow and the investigation workflow
-started by that run. The stored managed investigation definition and its default timeout are unchanged.
+`runtime.timeoutSeconds` bounds the investigation workflow started by that run. When set, the generated
+automation workflow gets an additional 60 seconds for setup and returning the investigation result.
+The stored managed investigation definition and its default timeout are unchanged.
 
 Only one schedule row is supported per automation. It can coexist with alert rows; each source has a
 separate guarded investigation step. Alert publication opt-in and alert snapshot resolution are

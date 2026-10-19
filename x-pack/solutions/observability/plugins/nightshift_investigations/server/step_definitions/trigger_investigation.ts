@@ -20,10 +20,21 @@ import {
   INVESTIGATION_TRIGGER_TYPES,
   investigationNotificationDestinationsSchema,
 } from '../../common';
-import type { GetInvestigationsClient } from '../routes/types';
+import type { GetAutomationsSoClient, GetInvestigationsClient } from '../routes/types';
+import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../saved_objects/automation_saved_object';
+import type { NightshiftAutomationAttributes } from '../lib/automations/types';
+import { consumeAutomationBudget } from '../lib/automations/automation_budget';
 
 const inputSchema = lazySchema(() =>
   z.object({
+    automation_id: z
+      .string()
+      .min(1)
+      .max(512)
+      .optional()
+      .describe(
+        'Owning automation ID. Enforces its current daily dispatch limit before starting an investigation.'
+      ),
     subject_type: z
       .enum(INVESTIGATION_SUBJECT_TYPES)
       .describe(
@@ -100,32 +111,60 @@ const inputSchema = lazySchema(() =>
 );
 
 export const triggerInvestigationStepDefinition = (
-  getInvestigationsClient: GetInvestigationsClient
+  getInvestigationsClient: GetInvestigationsClient,
+  getAutomationsSoClient: GetAutomationsSoClient
 ) =>
   createServerStepDefinition({
     id: 'nightshift.triggerInvestigation',
     label: 'Trigger Nightshift Investigation',
     category: StepCategory.Ai,
     description:
-      'Start an investigation for a given subject (significant event, alert, or other entity). When the subject, or any alert in context.alerts, is already part of an open investigation, that investigation continues instead. Returns investigation_id for tracking.',
+      'Start an investigation for a given subject (significant event, alert, or other entity). When the subject, or any alert in context.alerts, is already part of an open investigation, that investigation continues instead. Returns investigation_id for tracking, or skip_reason when the automation daily limit is reached.',
     inputSchema,
     outputSchema: z.object({
       investigation_id: z
         .string()
+        .optional()
         .describe('The investigation (Agent Builder conversation) the start created or continued'),
+      skip_reason: z
+        .literal('daily_limit')
+        .optional()
+        .describe('Why the investigation was not dispatched'),
+      daily_limit: z
+        .number()
+        .int()
+        .min(0)
+        .optional()
+        .describe('The daily limit that denied this dispatch'),
     }),
     handler: async (context) => {
       const request = context.contextManager.getFakeRequest();
       // getFakeRequest() does not carry space info, so the space ID must be extracted from the
       // workflow context explicitly. See https://github.com/elastic/kibana/issues/284786.
-      const spaceId = context.contextManager.getContext().workflow.spaceId;
-      const client = getInvestigationsClient(request, spaceId);
+      const { workflow } = context.contextManager.getContext();
+      const spaceId = workflow.spaceId;
       const input = inputSchema.parse(context.input);
       if (input.subject_type === 'manual') {
         if (!input.message?.trim()) throw new Error('Manual investigations require a message.');
       } else if (!input.subject_id) {
         throw new Error('Alert and significant event investigations require a subject ID.');
       }
+      if (input.automation_id) {
+        const soClient = getAutomationsSoClient(request, spaceId);
+        const automation = await soClient.get<NightshiftAutomationAttributes>(
+          NIGHTSHIFT_AUTOMATION_SO_TYPE,
+          input.automation_id
+        );
+        if (automation.attributes.workflowId !== workflow.id) {
+          throw new Error('The automation does not belong to this workflow.');
+        }
+        const dailyLimit = automation.attributes.runtime.dailyDispatchLimit;
+        const allowed = await consumeAutomationBudget(soClient, input.automation_id, dailyLimit);
+        if (!allowed) {
+          return { output: { skip_reason: 'daily_limit' as const, daily_limit: dailyLimit } };
+        }
+      }
+      const client = getInvestigationsClient(request, spaceId);
       const result = await client.start({
         subject: {
           type: input.subject_type,
