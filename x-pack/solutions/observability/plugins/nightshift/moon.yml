@@ -83,6 +83,7 @@ dependsOn:
   - '@kbn/streams-schema'
   - '@kbn/tooling-log'
   - '@kbn/ui-callout'
+  - '@kbn/triggers-actions-ui-plugin'
   - '@kbn/unified-search-plugin'
   - '@kbn/unsaved-changes-prompt'
 tags:
