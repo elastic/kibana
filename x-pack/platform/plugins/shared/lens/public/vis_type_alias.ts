@@ -7,13 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { VisTypeAlias } from '@kbn/visualizations-plugin/public';
-import {
-  APP_ID,
-  DOC_TYPE,
-  getBasePath,
-  getEditPath,
-  STAGE_ID,
-} from '../common/constants';
+import { APP_ID, DOC_TYPE, getBasePath, getEditPath, STAGE_ID } from '../common/constants';
 import { getLensBasicClient } from './persistence/basic_lens_client';
 
 export const lensVisTypeAlias: VisTypeAlias = {
