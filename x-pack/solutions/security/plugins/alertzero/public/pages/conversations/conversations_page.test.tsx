@@ -272,10 +272,12 @@ const renderPage = (
     capabilities = {},
     proposalsCapabilities = { showProposals: true, decideProposals: true },
     alertZeroWrite = true,
+    agentBuilderShow = true,
   }: {
     capabilities?: Record<string, unknown>;
     proposalsCapabilities?: Record<string, boolean>;
     alertZeroWrite?: boolean;
+    agentBuilderShow?: boolean;
   } = {}
 ) => {
   const core = coreMock.createStart();
@@ -283,6 +285,7 @@ const renderPage = (
     ...core.application.capabilities,
     alertzero: { show: true, write: alertZeroWrite },
     proposals: proposalsCapabilities,
+    agentBuilder: { show: agentBuilderShow },
   };
   // The real service returns a URL; the mock returns undefined, which would silently drop the
   // chat control's href and make the link assertions vacuous.
@@ -405,6 +408,28 @@ describe('ConversationsPage details flyout', () => {
       expect(agentBuilder.openConversationDetails).toHaveBeenCalledWith(
         expect.objectContaining({ conversationId: 'inv-1' })
       );
+    });
+  });
+
+  describe('without the Agent Builder privilege', () => {
+    it('opens no flyout, warns about the missing privilege and clears the URL', async () => {
+      const { agentBuilder, core, history } = renderPage('/?selectedConversationId=inv-1', {
+        agentBuilderShow: false,
+      });
+
+      await waitFor(() => expect(history.location.search).toBe(''));
+      expect(core.notifications.toasts.addWarning).toHaveBeenCalledWith(
+        expect.stringContaining('Agent Builder Kibana privilege')
+      );
+      expect(agentBuilder.openConversationDetails).not.toHaveBeenCalled();
+    });
+
+    it('leaves the card inert and disables its chat control', () => {
+      const { history } = renderPage('/', { agentBuilderShow: false });
+
+      expect(screen.queryByRole('button', { name: proposal.title })).not.toBeInTheDocument();
+      expect(screen.getByTestId('conversationCardOpenInChat')).toBeDisabled();
+      expect(history.location.search).toBe('');
     });
   });
 

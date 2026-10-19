@@ -84,12 +84,10 @@ describe('getAgenticInvestigationsCapabilities', () => {
   });
 
   it('maps canAccessAgentBuilder correctly', () => {
-    const capabilities = {
-      agenticInvestigations: { canAccessAgentBuilder: true },
-    } as unknown as Capabilities;
+    const withAgentBuilder = (show: unknown) =>
+      getAgenticInvestigationsCapabilities({ agentBuilder: { show } } as unknown as Capabilities);
 
-    expect(getAgenticInvestigationsCapabilities(capabilities)).toMatchObject({
-      canAccessAgentBuilder: true,
-    });
+    expect(withAgentBuilder(true).canAccessAgentBuilder).toBe(true);
+    expect(withAgentBuilder(false).canAccessAgentBuilder).toBe(false);
   });
 });
