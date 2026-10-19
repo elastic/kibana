@@ -355,6 +355,9 @@ function isManagedIndexModeRemoved(existingMode: string | undefined, newMode: st
  * mode change has to reach them too: otherwise the data streams of those namespaces keep the
  * previous mode, and removing a mode fails once the component templates no longer fit the mode a
  * namespace template still declares.
+ *
+ * A failed lookup is thrown rather than taken for "no namespace templates": the change would
+ * otherwise succeed without them and leave those namespaces on the previous mode.
  */
 async function getNamespaceTemplatesWithIndexMode({
   esClient,
@@ -367,18 +370,10 @@ async function getNamespaceTemplatesWithIndexMode({
 }): Promise<Array<IndexTemplateEntry & { previousMode?: string }>> {
   const prefix = generateNamespaceTemplateName(indexTemplate.templateName, '');
   const newMode: string | undefined = indexTemplate.indexTemplate.template.settings.index.mode;
-  let res;
-  try {
-    res = await retryTransientEsErrors(
-      () => esClient.indices.getIndexTemplate({ name: `${prefix}*` }, { ignore: [404] }),
-      { logger }
-    );
-  } catch (e) {
-    logger.warn(
-      `Error while looking up the namespace templates of ${indexTemplate.templateName}: ${e.message}`
-    );
-    return [];
-  }
+  const res = await retryTransientEsErrors(
+    () => esClient.indices.getIndexTemplate({ name: `${prefix}*` }, { ignore: [404] }),
+    { logger }
+  );
 
   return (res?.index_templates ?? []).flatMap(({ name, index_template: existing }) => {
     if (!isNamespaceTemplate(name) || !name.startsWith(prefix)) {

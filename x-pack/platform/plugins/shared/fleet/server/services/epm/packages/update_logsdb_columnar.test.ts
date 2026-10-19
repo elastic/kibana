@@ -706,6 +706,37 @@ describe('setLogsdbColumnarChoice', () => {
     });
   });
 
+  it('fails the change, and stores nothing, when the namespace templates cannot be looked up', async () => {
+    jest.mocked(getInstallationObject).mockResolvedValue(installation());
+    mockInstalledPackage(packageInfo());
+    esClient.indices.getIndexTemplate.mockImplementation(async (params: any) => {
+      if (params.name.endsWith('*')) {
+        throw new Error('lookup failed');
+      }
+      return {
+        index_templates: [
+          {
+            name: DATA_STREAM,
+            index_template: {
+              template: { settings: { index: {} }, mappings: {} },
+              composed_of: [],
+              index_patterns: '',
+            },
+          },
+        ],
+      } as any;
+    });
+
+    await expect(setChoice(true)).rejects.toThrow('lookup failed');
+
+    expect(savedObjectsClient.update).not.toHaveBeenCalled();
+    expect(
+      esClient.indices.putIndexTemplate.mock.calls.filter(
+        ([params]: any) => params.template.settings.index.mode
+      )
+    ).toEqual([]);
+  });
+
   it('is a no-op when the stored choice already matches', async () => {
     jest
       .mocked(getInstallationObject)
