@@ -24,6 +24,9 @@ import { toSecretStoreEntry, type HeartbeatVaultConfig } from '../../get_secret_
 import { syntheticsPolicyFormatters } from './formatters';
 import { PARAMS_KEYS_TO_SKIP } from '../common';
 
+export const VAULT_SECRET_STORAGE_DISABLED_MESSAGE =
+  'Vault secret references require Fleet secret storage, which is not enabled. Enable Fleet secret storage and try again.';
+
 export const VAULT_PACKAGE_UPGRADE_MESSAGE =
   'Vault secret references require the Synthetics integration version 1.13.0 or later. Upgrade the Synthetics package in Fleet and try again.';
 

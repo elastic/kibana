@@ -13,7 +13,7 @@ import { syntheticsSecretConnectionType } from '../../common/types/saved_objects
 // UUID per (space, connection name) so the name is the key (upsert by name) while
 // the SO id stays a valid UUID.
 //
-// The space MUST be part of the id: the type is `namespaceType: 'multiple'` (a
+// The space MUST be part of the id: the type is `namespaceType: 'multiple-isolated'` (a
 // single global id space), so deriving from the name alone collides across spaces
 // — creating "prod" in one space would fail with an unresolvable-conflict when
 // another space already has it, and the 409 would leak which names exist elsewhere.
@@ -28,13 +28,7 @@ export const secretConnectionId = (name: string, spaceId: string) =>
 export const SYNTHETICS_SECRET_CONNECTION_ENCRYPTED_TYPE = {
   type: syntheticsSecretConnectionType,
   attributesToEncrypt: new Set(['secrets']),
-  attributesToIncludeInAAD: new Set([
-    'name',
-    'type',
-    'config',
-    'secretRefreshInterval',
-    'refreshedAt',
-  ]),
+  attributesToIncludeInAAD: new Set(['name', 'type', 'config']),
 };
 
 // Unknown attributes are kept (not stripped) so a rollback never drops encrypted secrets
@@ -52,8 +46,8 @@ const secretConnectionSchemaV1 = schema.object(
 
 export const syntheticsSecretConnectionSavedObjectType: SavedObjectsType = {
   name: syntheticsSecretConnectionType,
-  hidden: false,
-  namespaceType: 'multiple',
+  hidden: true,
+  namespaceType: 'multiple-isolated',
   mappings: {
     dynamic: false,
     properties: {},

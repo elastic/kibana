@@ -32,7 +32,10 @@ export const ParamValueField = ({
     return <VaultSourceFields />;
   }
 
-  if (isEditingItem) {
+  // A Vault-backed param has no stored literal to keep, so switching it to a literal needs a value.
+  const hasStoredValue = isEditingItem && isEditingItem.source?.type !== 'vault';
+
+  if (hasStoredValue) {
     return (
       <>
         <EuiFormRow

@@ -13,8 +13,8 @@ import {
   deleteSecretConnectionRoute,
   refreshSecretConnectionsRoute,
   testSecretConnectionRoute,
-  getFleetSecretStorageStatusRoute,
 } from './settings/secret_connection/secret_connection';
+import { getFleetSecretStorageStatusRoute } from './settings/secret_connection/fleet_secret_storage';
 import { cleanupPrivateLocationRoute } from './settings/private_locations/cleanup_private_locations';
 import { resetPrivateLocationRoute } from './settings/private_locations/reset_private_location';
 import { getSyntheticsTriggerTaskRun } from './tasks/trigger_task_run';

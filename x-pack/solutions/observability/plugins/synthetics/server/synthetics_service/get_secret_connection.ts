@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getFleetSecretStorageEnabled } from './fleet_secret_storage';
 import type { SyntheticsSecretConnection } from '../../common/runtime_types';
 import { syntheticsSecretConnectionType } from '../../common/types/saved_objects';
 import type { SyntheticsServerSetup } from '../types';
@@ -94,4 +95,15 @@ export const getSecretConnectionConfigs = async (
     server.logger?.error(`Vault: failed to load connections for space "${spaceId}": ${e.message}`);
     return [];
   }
+};
+
+/** Connections to deliver plus whether Fleet can store them as secrets (fails closed). */
+export const getSecretConnectionDelivery = async (
+  server: SyntheticsServerSetup,
+  spaceId: string
+): Promise<{ secretConnections: HeartbeatVaultConfig[]; secretStorageEnabled: boolean }> => {
+  const secretConnections = await getSecretConnectionConfigs(server, spaceId);
+  const secretStorageEnabled =
+    secretConnections.length === 0 || (await getFleetSecretStorageEnabled(server, false));
+  return { secretConnections, secretStorageEnabled };
 };

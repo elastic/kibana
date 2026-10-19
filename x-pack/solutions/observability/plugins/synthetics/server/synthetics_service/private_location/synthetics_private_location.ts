@@ -25,8 +25,11 @@ import {
 } from '../synthetics_monitor/synthetics_monitor_client';
 import { scheduleTestNowCleanUp } from '../../tasks/clean_up_package_policies_task';
 import type { SyntheticsServerSetup } from '../../types';
-import { formatSyntheticsPolicy } from '../formatters/private_formatters/format_synthetics_policy';
-import { getSecretConnectionConfigs, type HeartbeatVaultConfig } from '../get_secret_connection';
+import {
+  formatSyntheticsPolicy,
+  VAULT_SECRET_STORAGE_DISABLED_MESSAGE,
+} from '../formatters/private_formatters/format_synthetics_policy';
+import { getSecretConnectionDelivery, type HeartbeatVaultConfig } from '../get_secret_connection';
 import type {
   HeartbeatConfig,
   MonitorFields,
@@ -238,7 +241,8 @@ export class SyntheticsPrivateLocation {
     conditionHosts?: EnrolledAgents,
     existingCondition?: string | null,
     shardingMode: AgentShardingMode = 'inactive',
-    secretConnections?: HeartbeatVaultConfig[]
+    secretConnections?: HeartbeatVaultConfig[],
+    secretStorageEnabled = true
   ): Promise<NewPackagePolicy | null> {
     const { label: locName } = privateLocation;
 
@@ -299,10 +303,8 @@ export class SyntheticsPrivateLocation {
       // compiles vars verbatim (no secret-ization), so attaching them would return
       // plaintext credentials to the caller.
       //
-      // A3 (residual): when Fleet secret storage is disabled the persist path
-      // stores the blob in plaintext rather than as a Fleet secret; hard-failing
-      // in that case needs Fleet to expose `isSecretStorageEnabled` (tracked on the
-      // meta issue). The Private Locations UI warns when this is the case.
+      // When Fleet secret storage is disabled the blob would be stored in plaintext,
+      // so formatSyntheticsPolicy refuses to attach it (`secretStorageEnabled`).
       const { formattedPolicy } = formatSyntheticsPolicy(
         newPolicy,
         config.type,
@@ -329,7 +331,8 @@ export class SyntheticsPrivateLocation {
         globalParams,
         maintenanceWindows,
         undefined,
-        secretConnections
+        secretConnections,
+        secretStorageEnabled
       );
 
       return formattedPolicy;
@@ -339,7 +342,8 @@ export class SyntheticsPrivateLocation {
       // to the caller's generic "unable to create package policy" path.
       if (
         e instanceof Error &&
-        e.message.includes('Synthetics integration version 1.12.0 or later')
+        (e.message.includes('Synthetics integration version 1.12.0 or later') ||
+          e.message === VAULT_SECRET_STORAGE_DISABLED_MESSAGE)
       ) {
         throw e;
       }
@@ -432,7 +436,10 @@ export class SyntheticsPrivateLocation {
     const newPolicyTemplate = await this.buildNewPolicy(spaceId);
     // E1: fetch the space's vault connections ONCE (they're decrypted), not per
     // monitor × location.
-    const secretConnections = await getSecretConnectionConfigs(this.server, spaceId);
+    const { secretConnections, secretStorageEnabled } = await getSecretConnectionDelivery(
+      this.server,
+      spaceId
+    );
     const referencedPrivateLocations = this.getReferencedPrivateLocations(
       configs,
       privateLocations
@@ -485,7 +492,8 @@ export class SyntheticsPrivateLocation {
             enrolledAgents,
             undefined,
             shardingMode,
-            secretConnections
+            secretConnections,
+            secretStorageEnabled
           );
 
           if (!newPolicy) {
@@ -622,16 +630,19 @@ export class SyntheticsPrivateLocation {
     }
 
     // E1: fetch the space's vault connections ONCE, not per monitor × location.
-    const [newPolicyTemplate, { policies: existingPolicies, allSpaces }, secretConnections] =
-      await Promise.all([
-        this.buildNewPolicy(spaceId),
-        this.getExistingPolicies(
-          configs.map(({ config }) => config),
-          allPrivateLocations,
-          spaceId
-        ),
-        getSecretConnectionConfigs(this.server, spaceId),
-      ]);
+    const [
+      newPolicyTemplate,
+      { policies: existingPolicies, allSpaces },
+      { secretConnections, secretStorageEnabled },
+    ] = await Promise.all([
+      this.buildNewPolicy(spaceId),
+      this.getExistingPolicies(
+        configs.map(({ config }) => config),
+        allPrivateLocations,
+        spaceId
+      ),
+      getSecretConnectionDelivery(this.server, spaceId),
+    ]);
 
     const policiesToUpdate: UpdatePackagePolicyWithId[] = [];
     const policiesToCreate: NewPackagePolicyWithId[] = [];
@@ -685,7 +696,8 @@ export class SyntheticsPrivateLocation {
               enrolledAgentsByLocation.get(privateLocation.id),
               existingCondition,
               shardingMode,
-              secretConnections
+              secretConnections,
+              secretStorageEnabled
             );
 
             if (!newPolicy) {
