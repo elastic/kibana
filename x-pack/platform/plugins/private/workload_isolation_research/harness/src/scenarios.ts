@@ -22,8 +22,6 @@ const sweep = (
     durationS: recoveryS,
     offender: { kind, mode, doseMs },
   }));
-<<<<<<< HEAD
-=======
 
 const fieldCapsDose = (label: string, seed: Record<string, number>): Phase[] => [
   {
@@ -51,7 +49,6 @@ const fieldCapsDose = (label: string, seed: Record<string, number>): Phase[] => 
     actionParams: { repeat: 3, decompose: false, mode: 'route' },
   },
 ];
->>>>>>> 516f0dd2e43f ([Research] harness: Tier B field caps + alerting replays, QA overview export, CI hygiene (moon, codeowners, plugin list, lint))
 
 export const SCENARIOS: Record<string, Scenario> = {
   /** Harness self-check: one 10s CPU block from a route and from a task. */

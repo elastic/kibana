@@ -200,8 +200,6 @@ export const computeScorecard = async (
         gc_max_ms: round(max(gc.map((s) => s.duration_ms))),
         probe_worker_cpu_ms_per_s: round(mean(wproc.map((s) => s.thread_cpu_ms ?? 0)), 2),
         probe_worker_heap_mb: round(mean(wproc.map((s) => s.heap_used / 1048576))),
-<<<<<<< HEAD
-=======
         tier_b: samples
           .filter((s) => s.source === 'tier_b' && inWindow(s, start, end))
           .map((s) => ({
@@ -219,7 +217,6 @@ export const computeScorecard = async (
             max_sync_ms: round(s.max_sync_ms),
             heap_delta_mb: round(s.heap_delta_mb),
           })),
->>>>>>> 516f0dd2e43f ([Research] harness: Tier B field caps + alerting replays, QA overview export, CI hygiene (moon, codeowners, plugin list, lint))
         drill: `research-samples: run_id:"${runId}" AND pod:"${pod}" AND ts >= ${Math.round(
           start
         )} AND ts < ${Math.round(end)}`,
@@ -292,12 +289,9 @@ export const scorecardMarkdown = (manifest: Doc, rows: ScorecardRow[]): string =
       } |`;
     })
     .join('\n');
-<<<<<<< HEAD
-=======
   const tierB = rows
     .flatMap((r) => r.tier_b.map((t) => `- ${r.phase}: ${JSON.stringify(t)}`))
     .join('\n');
->>>>>>> 516f0dd2e43f ([Research] harness: Tier B field caps + alerting replays, QA overview export, CI hygiene (moon, codeowners, plugin list, lint))
   return `# Scorecard ${manifest.run_id}\n\n- lane: ${manifest.lane} · variant: ${
     manifest.variant
   } · target: ${manifest.target?.kind} · commit: ${manifest.source_commit}${
@@ -308,11 +302,7 @@ export const scorecardMarkdown = (manifest: Doc, rows: ScorecardRow[]): string =
     manifest.tm_claim_strategy
   })\n- window: ${manifest.utc_start} → ${manifest.utc_end}\n- hypothesis: ${
     manifest.hypothesis
-<<<<<<< HEAD
-  }\n- drill: each row's \`drill\` field in \`research-scorecards\` is the exact \`research-samples\` filter.\n\n${head}${body}\n`;
-=======
   }\n- drill: each row's \`drill\` field in \`research-scorecards\` is the exact \`research-samples\` filter.\n\n${head}${body}\n${
     tierB ? `\n## Tier B replay timings\n\n${tierB}\n` : ''
   }`;
->>>>>>> 516f0dd2e43f ([Research] harness: Tier B field caps + alerting replays, QA overview export, CI hygiene (moon, codeowners, plugin list, lint))
 };
