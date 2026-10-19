@@ -17,12 +17,15 @@ import { registerCommentsRoutes } from './routes';
 describe('comments routes', () => {
   const router = httpServiceMock.createRouter();
   const client = {
+    get: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
   } as unknown as jest.Mocked<CommentsClient>;
   registerCommentsRoutes(router, Promise.resolve(client));
 
-  const handler = (method: 'post' | 'patch', path: string): RequestHandler => {
+  type Method = 'get' | 'post' | 'patch';
+
+  const handler = (method: Method, path: string): RequestHandler => {
     const registration = router[method].mock.calls.find(([config]) => config.path === path);
     if (!registration) {
       throw new Error(`No ${method} route at ${path}`);
@@ -30,7 +33,7 @@ describe('comments routes', () => {
     return registration[1] as RequestHandler;
   };
 
-  const call = async (method: 'post' | 'patch', path: string, body: Record<string, unknown>) => {
+  const call = async (method: Method, path: string, body?: Record<string, unknown>) => {
     const response = httpServerMock.createResponseFactory();
     await handler(method, path)(
       {} as never,
@@ -39,6 +42,18 @@ describe('comments routes', () => {
     );
     return response;
   };
+
+  it('answers for one comment, or that there is none', async () => {
+    const comment = { id: 'a', text: 'Hello' };
+    client.get.mockResolvedValueOnce(comment as never);
+    const found = await call('get', `${COMMENTS_API_PATH}/{id}`);
+    expect(client.get).toHaveBeenCalledWith('a');
+    expect(found.ok).toHaveBeenCalledWith({ body: comment });
+
+    client.get.mockResolvedValueOnce(undefined);
+    const missing = await call('get', `${COMMENTS_API_PATH}/{id}`);
+    expect(missing.notFound).toHaveBeenCalled();
+  });
 
   it('turns limit violations into bad requests the user can act on', async () => {
     client.create.mockRejectedValueOnce(new CommentsLimitError('Store is full'));

@@ -20,6 +20,7 @@ import {
   DynamicTimeoutSchema,
   ElasticsearchStepSchema,
   EventTimestampSchema,
+  HITL_HTTP_DESTINATION_ERROR,
   IfStepSchema,
   KibanaStepSchema,
   LIQUID_MEMORY_LIMIT_MAX,
@@ -30,7 +31,9 @@ import {
   PARALLEL_MODE_REFINEMENT_MESSAGE,
   ParallelStepSchema,
   TimeoutPropSchema,
+  WaitForApprovalChannelsSchema,
   WaitForApprovalStepSchema,
+  WaitForInputChannelsSchema,
   WaitForInputStepSchema,
   WaitStepSchema,
   WorkflowExecuteAsyncStepSchema,
@@ -715,6 +718,47 @@ describe('JsonModelSchema', () => {
     }
   });
 
+  it('should accept additionalProperties as a value schema (typed map)', () => {
+    const inputs = {
+      properties: {
+        rules: {
+          type: 'object',
+          additionalProperties: {
+            type: 'object',
+            properties: { name: { type: 'string' } },
+            required: ['name'],
+            additionalProperties: false,
+          },
+        },
+      },
+    };
+    const result = JsonModelSchema.safeParse(inputs);
+    expect(result.success).toBe(true);
+  });
+
+  it('keeps a map-only inputs schema on the manual trigger', () => {
+    const inputs = {
+      type: 'object' as const,
+      additionalProperties: { type: 'string' as const },
+    };
+    const result = WorkflowSchema.safeParse({
+      name: 'test-workflow',
+      triggers: [{ type: 'manual', inputs }],
+      steps: [
+        {
+          name: 'process',
+          type: 'http',
+          with: { url: 'https://api.example.com' },
+        },
+      ],
+    });
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.triggers[0]).toEqual(expect.objectContaining({ inputs }));
+    }
+  });
+
   it('should validate a nested JSON Schema inputs object', () => {
     const inputs = {
       properties: {
@@ -767,6 +811,18 @@ describe('JsonModelSchema', () => {
     };
     const result = JsonModelSchema.safeParse(inputs);
     expect(result.success).toBe(false);
+  });
+
+  it('should accept a property with only additionalProperties and no type', () => {
+    const inputs = {
+      properties: {
+        tags: {
+          additionalProperties: { type: 'string' },
+        },
+      },
+    };
+    const result = JsonModelSchema.safeParse(inputs);
+    expect(result.success).toBe(true);
   });
 
   it('should accept new JSON Schema object format for inputs', () => {
@@ -1269,6 +1325,206 @@ describe('`if` condition on step schemas', () => {
   });
 });
 
+describe('HITL external channel schemas', () => {
+  const channels = {
+    slack: { 'connector-id': 'slack-1', message: 'webhook note' },
+    slack_api: {
+      'connector-id': 'slack-api-1',
+      channels: ['#alerts'],
+      message: 'api note',
+    },
+    email: {
+      'connector-id': 'email-1',
+      to: ['analyst@example.com'],
+      message: 'Open {{context.hitl.externalFormLink}}',
+    },
+    slack2: {
+      'connector-id': 'slack2-1',
+      channels: ['C0123'],
+      message: 'slack2 note',
+    },
+    teams: {
+      'connector-id': 'teams-1',
+      'team-id': 'team-1',
+      'channel-id': 'channel-1',
+      message: 'teams note',
+    },
+    servicenow: {
+      'connector-id': 'snow-1',
+      table: 'incident',
+      'sys-id': 'abc123',
+      message: 'snow note',
+    },
+    http: {
+      url: 'https://hooks.example/hitl',
+      body: '{{context.hitl.externalFormLink}}',
+    },
+  };
+
+  const channelPropertyNames = (schema: z.ZodType): Record<string, string[]> => {
+    const json = z.toJSONSchema(schema, { target: 'draft-07', unrepresentable: 'any' }) as {
+      properties?: Record<string, { properties?: Record<string, unknown> }>;
+    };
+    return Object.fromEntries(
+      Object.entries(json.properties ?? {}).map(([channel, channelSchema]) => [
+        channel,
+        Object.keys(channelSchema.properties ?? {}),
+      ])
+    );
+  };
+
+  it('keeps an optional channel message on waitForInput', () => {
+    const result = WaitForInputStepSchema.safeParse({
+      name: 's',
+      type: 'waitForInput',
+      with: { channels },
+    });
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.with?.channels).toEqual(channels);
+    }
+    expect(channelPropertyNames(WaitForInputChannelsSchema.unwrap())).toEqual({
+      slack: ['connector-id', 'message'],
+      slack_api: ['connector-id', 'channels', 'message'],
+      email: ['connector-id', 'to', 'cc', 'bcc', 'subject', 'message'],
+      slack2: ['connector-id', 'channels', 'message'],
+      teams: ['connector-id', 'team-id', 'channel-id', 'message'],
+      servicenow: ['connector-id', 'table', 'sys-id', 'message'],
+      http: ['connector-id', 'url', 'path', 'method', 'headers', 'body'],
+    });
+  });
+
+  it('accepts a legacy approval channel message without offering it for autocomplete', () => {
+    const result = WaitForApprovalStepSchema.safeParse({
+      name: 's',
+      type: 'waitForApproval',
+      with: { channels },
+    });
+
+    expect(result.success).toBe(true);
+    expect(channelPropertyNames(WaitForApprovalChannelsSchema.unwrap())).toEqual({
+      slack: ['connector-id'],
+      slack_api: ['connector-id', 'channels'],
+      email: ['connector-id', 'to', 'cc', 'bcc', 'subject'],
+      slack2: ['connector-id', 'channels'],
+      teams: ['connector-id', 'team-id', 'channel-id'],
+      servicenow: ['connector-id', 'table', 'sys-id'],
+      http: ['connector-id', 'url', 'path', 'method', 'headers', 'body'],
+    });
+  });
+
+  it('rejects unknown keys on the HTTP approval channel', () => {
+    const result = WaitForApprovalStepSchema.safeParse({
+      name: 's',
+      type: 'waitForApproval',
+      with: {
+        channels: {
+          http: { url: 'https://hooks.example/hitl', body: 'ping', mthod: 'POST' },
+        },
+      },
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('accepts a saved HTTP connector with a path and no body', () => {
+    const result = WaitForInputStepSchema.safeParse({
+      name: 's',
+      type: 'waitForInput',
+      with: {
+        channels: {
+          http: {
+            'connector-id': 'http-1',
+            path: '/hitl?form={{context.hitl.externalFormLink}}',
+            method: 'GET',
+          },
+        },
+      },
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it('exposes connector-id or url as anyOf without splitting the HTTP channel properties', () => {
+    const json = z.toJSONSchema(WaitForInputChannelsSchema.unwrap(), {
+      target: 'draft-07',
+      unrepresentable: 'any',
+    }) as {
+      properties?: {
+        http?: { anyOf?: Array<{ required?: string[] }>; properties?: Record<string, unknown> };
+      };
+    };
+
+    expect(json.properties?.http?.anyOf).toEqual([
+      { required: ['connector-id'] },
+      { required: ['url'] },
+    ]);
+    expect(Object.keys(json.properties?.http?.properties ?? {})).toEqual([
+      'connector-id',
+      'url',
+      'path',
+      'method',
+      'headers',
+      'body',
+    ]);
+  });
+
+  it('rejects an HTTP channel with neither connector-id nor url', () => {
+    const result = WaitForApprovalStepSchema.safeParse({
+      name: 's',
+      type: 'waitForApproval',
+      with: {
+        channels: {
+          http: { path: '/hitl', method: 'GET' },
+        },
+      },
+    });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.map((issue) => issue.message)).toContain(
+        HITL_HTTP_DESTINATION_ERROR
+      );
+    }
+  });
+});
+
+describe('`on-failure` on step schemas', () => {
+  const onFailure = {
+    retry: { 'max-attempts': 2, delay: '1s' },
+    continue: true,
+    fallback: [{ name: 'handle', type: 'console' }],
+  };
+  const cases = [
+    {
+      name: 'waitForInput',
+      schema: WaitForInputStepSchema,
+      step: { name: 's', type: 'waitForInput', with: { message: 'input?' } },
+    },
+    {
+      name: 'waitForApproval',
+      schema: WaitForApprovalStepSchema,
+      step: { name: 's', type: 'waitForApproval', with: { message: 'approve?' } },
+    },
+    {
+      name: 'workflow.execute',
+      schema: WorkflowExecuteStepSchema,
+      step: { name: 's', type: 'workflow.execute', with: { 'workflow-id': 'child' } },
+    },
+    {
+      name: 'workflow.executeAsync',
+      schema: WorkflowExecuteAsyncStepSchema,
+      step: { name: 's', type: 'workflow.executeAsync', with: { 'workflow-id': 'child' } },
+    },
+  ];
+
+  it.each(cases)('keeps `on-failure` on the $name step', ({ schema, step }) => {
+    expect(getShape(schema)).toHaveProperty('on-failure');
+    expect(schema.parse({ ...step, 'on-failure': onFailure })['on-failure']).toEqual(onFailure);
+  });
+});
+
 describe('DurationSchema', () => {
   it.each(['1ms', '30s', '5m', '2h', '1d', '1w', '1h30m', '1w2d3h4m5s6ms', '1h500ms'])(
     'accepts %s',
@@ -1367,5 +1623,39 @@ describe('dynamic timeout schema', () => {
     expect(encoded).toMatch(/"anyOf"|"oneOf"/);
     expect(encoded).toContain('\\d+w');
     expect(encoded).toContain('{{');
+  });
+});
+
+describe('workflow child identity allowlist', () => {
+  it.each([
+    [WorkflowExecuteStepSchema, 'allowed-workflow-ids'],
+    [WorkflowExecuteStepSchema, 'allowed-workflow-tags'],
+    [WorkflowExecuteAsyncStepSchema, 'allowed-workflow-ids'],
+    [WorkflowExecuteAsyncStepSchema, 'allowed-workflow-tags'],
+  ] as const)('requires bounded literal entries: %p %s', (schema, field) => {
+    const step = {
+      name: 'child',
+      type: schema.shape.type.value,
+      with: {
+        'workflow-id': '{{ variables.action_workflow_id }}',
+        'run-as-mode': 'inherit',
+        [field]: ['approved-child'],
+      },
+    };
+    expect(schema.safeParse(step).success).toBe(true);
+    for (const allowedIds of [
+      [],
+      [''],
+      ['a'.repeat(1025)],
+      Array.from({ length: 101 }, (_, index) => `child-${index}`),
+      ['{{ variables.child }}'],
+      ['${{ variables.child }}'],
+      ['{% if true %}child{% endif %}'],
+      ['child\n{{ variables.suffix }}'],
+    ]) {
+      expect(
+        schema.safeParse({ ...step, with: { ...step.with, [field]: allowedIds } }).success
+      ).toBe(false);
+    }
   });
 });

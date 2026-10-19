@@ -12,7 +12,7 @@ describe('PolicyCatalog', () => {
   const catalog = PolicyCatalog.of(
     new Map([
       ['p1', createActionPolicy({ id: 'p1', spaceId: 'space-a', apiKey: 'key-1' })],
-      ['p2', createActionPolicy({ id: 'p2', spaceId: 'space-b', groupingMode: 'all' })],
+      ['p2', createActionPolicy({ id: 'p2', spaceId: 'space-b', grouping: { mode: 'all' } })],
     ])
   );
 
@@ -27,10 +27,10 @@ describe('PolicyCatalog', () => {
     expect(catalog.inSpace('unknown')).toEqual([]);
   });
 
-  it('falls back to per_episode grouping for absent policies or modes', () => {
-    expect(catalog.groupingModeOf('p1')).toBe('per_episode');
+  it('falls back to per_alert grouping for absent policies or modes', () => {
+    expect(catalog.groupingModeOf('p1')).toBe('per_alert');
     expect(catalog.groupingModeOf('p2')).toBe('all');
-    expect(catalog.groupingModeOf('missing')).toBe('per_episode');
+    expect(catalog.groupingModeOf('missing')).toBe('per_alert');
   });
 
   it('resolves the dispatch api key', () => {

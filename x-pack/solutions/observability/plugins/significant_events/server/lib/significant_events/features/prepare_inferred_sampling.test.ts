@@ -9,12 +9,10 @@ import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { FeatureWithFilter } from '@kbn/significant-events-schema';
+import { MAX_INFERENCE_DOCUMENTS_BYTES } from '@kbn/nightshift-ai';
 import type { KnowledgeIndicatorClient } from '../../knowledge_indicators';
 import { fetchSampleDocuments } from './fetch_sample_documents';
-import {
-  MAX_INFERENCE_DOCUMENTS_BYTES,
-  prepareInferredSampling,
-} from './prepare_inferred_sampling';
+import { prepareInferredSampling } from './prepare_inferred_sampling';
 
 jest.mock('./fetch_sample_documents', () => ({
   fetchSampleDocuments: jest.fn(),
@@ -26,7 +24,7 @@ const createFeature = (runId: string): FeatureWithFilter =>
   ({
     id: 'feature-1',
     uuid: 'feature-uuid-1',
-    stream_name: 'logs.test-default',
+    source_id: 'logs.test-default',
     type: 'system',
     description: 'A test feature',
     properties: {},
@@ -45,7 +43,7 @@ const createHit = (id: string): SearchHit<Record<string, unknown>> => ({
 const createParams = (kiClient: KnowledgeIndicatorClient) => ({
   esClient: {} as ElasticsearchClient,
   kiClient,
-  streamName: 'logs.test-default',
+  sourceId: 'logs.test-default',
   samplingSource: 'logs.test-default',
   start: 100,
   end: 200,

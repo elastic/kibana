@@ -6,6 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import type { ProfilingSchema } from '@kbn/profiling-utils';
 import React from 'react';
 import type { ApmDataSourceWithSummary } from '../../../../common/data_source';
 import type { ApmDocumentType } from '../../../../common/document_type';
@@ -27,6 +28,8 @@ interface Props {
   kuery: string;
   rangeFrom: string;
   rangeTo: string;
+  /** Undefined until a schema is selected, which the request waits for */
+  schema?: ProfilingSchema;
 }
 
 export function ProfilingHostsFlamegraph({
@@ -38,10 +41,11 @@ export function ProfilingHostsFlamegraph({
   kuery,
   rangeFrom,
   rangeTo,
+  schema,
 }: Props) {
   const { data, status } = useFetcher(
     (callApmApi) => {
-      if (dataSource) {
+      if (dataSource && schema) {
         return callApmApi('GET /internal/apm/services/{serviceName}/profiling/hosts/flamegraph', {
           params: {
             path: { serviceName },
@@ -52,12 +56,13 @@ export function ProfilingHostsFlamegraph({
               documentType: dataSource.documentType,
               rollupInterval: dataSource.rollupInterval,
               kuery,
+              schema,
             },
           },
         });
       }
     },
-    [dataSource, serviceName, start, end, environment, kuery]
+    [dataSource, schema, serviceName, start, end, environment, kuery]
   );
 
   const profilingKueryFilter =
@@ -76,6 +81,7 @@ export function ProfilingHostsFlamegraph({
             kuery={mergeKueries([`(${profilingKueryFilter})`, kuery])}
             rangeFrom={rangeFrom}
             rangeTo={rangeTo}
+            schema={schema}
             justifyContent="flexEnd"
           />
         </EuiFlexItem>

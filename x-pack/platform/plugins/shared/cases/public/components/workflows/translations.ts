@@ -15,6 +15,13 @@ export const SELECT_WORKFLOW_TITLE = i18n.translate('xpack.cases.workflows.selec
   defaultMessage: 'Select workflow',
 });
 
+export const WORKFLOW_SETTINGS_LOAD_ERROR = i18n.translate(
+  'xpack.cases.workflows.settingsLoadError',
+  {
+    defaultMessage: 'Workflows are unavailable because the case settings could not be loaded.',
+  }
+);
+
 export const WORKFLOW_ACTIVITY_FAILED = i18n.translate(
   'xpack.cases.workflows.activityFailedWarningMessage',
   {

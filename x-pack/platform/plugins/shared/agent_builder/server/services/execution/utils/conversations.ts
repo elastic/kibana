@@ -6,8 +6,10 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { isEqual } from 'lodash';
 import type { Observable } from 'rxjs';
 import { switchMap, from, firstValueFrom } from 'rxjs';
+import type { Refresh } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/logging';
 import type {
   Conversation,
@@ -45,7 +47,7 @@ import {
   resumeExecutionId,
   roundUserMessageEventId,
 } from '@kbn/agent-builder-common';
-import type { ConversationClient } from '../../conversation';
+import type { ActivityContext, ConversationClient } from '../../conversation';
 import {
   roundToEvents,
   userMessageEvent,
@@ -134,6 +136,8 @@ export const persistUserMessage = async ({
   user,
   additionalEvents = [],
   attachments,
+  activity,
+  appendRefresh,
 }: {
   conversation: ConversationWithOperation;
   conversationClient: ConversationClient;
@@ -147,6 +151,13 @@ export const persistUserMessage = async ({
   /** Attachment change events to store in the same write, after the message. */
   additionalEvents?: TimelineEvent[];
   attachments?: { snapshot: VersionedAttachment[]; produced: VersionedAttachment[] };
+  /** Attribution of the `conversation_created` activity when this write creates the conversation. */
+  activity?: ActivityContext;
+  /**
+   * Refresh of the write onto an existing conversation. Creating one always refreshes: the
+   * origin lookup finds conversations by search.
+   */
+  appendRefresh?: Refresh;
 }): Promise<string> => {
   const event = userMessageEvent(
     {
@@ -169,22 +180,27 @@ export const persistUserMessage = async ({
     const hasResolvedParentUser =
       Boolean(conversation.user) && !isPlaceholderUser(conversation.user);
     try {
-      await conversationClient.create({
-        id: conversation.id,
-        title: DEFAULT_CONVERSATION_TITLE,
-        agent_id: conversation.agent_id,
-        access_control: conversation.access_control,
-        origin: conversation.origin,
-        read_only: conversation.read_only,
-        rounds: [],
-        events,
-        // Nothing is stored yet, so the produced list needs no reconciliation.
-        ...(attachments ? { attachments: attachments.produced } : {}),
-        ...(isPersistentSubagentCreate && hasResolvedParentUser ? { user: conversation.user } : {}),
-        ...(conversation.parent_conversation
-          ? { parent_conversation: conversation.parent_conversation }
-          : {}),
-      });
+      await conversationClient.create(
+        {
+          id: conversation.id,
+          title: DEFAULT_CONVERSATION_TITLE,
+          agent_id: conversation.agent_id,
+          access_control: conversation.access_control,
+          origin: conversation.origin,
+          read_only: conversation.read_only,
+          rounds: [],
+          events,
+          // Nothing is stored yet, so the produced list needs no reconciliation.
+          ...(attachments ? { attachments: attachments.produced } : {}),
+          ...(isPersistentSubagentCreate && hasResolvedParentUser
+            ? { user: conversation.user }
+            : {}),
+          ...(conversation.parent_conversation
+            ? { parent_conversation: conversation.parent_conversation }
+            : {}),
+        },
+        { source: 'execution', ...(activity ? { activity } : {}) }
+      );
       return event.id;
     } catch (error) {
       if (!isConversationAlreadyExistsError(error)) {
@@ -195,7 +211,11 @@ export const persistUserMessage = async ({
 
   await conversationClient.appendEvents(
     { id: conversation.id, events, ...(attachments ? { attachments } : {}) },
-    { access: 'converse' }
+    {
+      access: 'converse',
+      source: 'execution',
+      ...(appendRefresh !== undefined ? { refresh: appendRefresh } : {}),
+    }
   );
 
   return event.id;
@@ -249,7 +269,7 @@ export const appendRoundTerminated$ = ({
                 : {}),
               ...(workspaceId ? { workspaceId } : {}),
             },
-            { access: 'converse' }
+            { access: 'converse', source: 'execution' }
           );
 
           return { persisted, events, round };
@@ -375,7 +395,7 @@ export const appendResumeExecution$ = ({
                 : {}),
               ...(workspaceId ? { workspaceId } : {}),
             },
-            { access: 'converse' }
+            { access: 'converse', source: 'execution' }
           );
 
           return { persisted, executionEvents, round, resumeIndex };
@@ -431,7 +451,8 @@ export interface PersistExecutionInterruptionParams {
  *
  * - Fresh round: `replaceRoundEvents` with `user_message` (rebuilt with the inputs of the receipt
  *   write, its `data` upgraded to the processed input when known) + `execution_started` + steps +
- *   terminal + attachment events. `status: completed`, no `state`.
+ *   terminal + attachment events. `status: completed`; `state` only carries a compaction summary
+ *   produced by the run, the rest of it is left as stored.
  * - HITL resume: `appendEvents` with `prompt_response(k)` + the `exec_k` projection + attachment
  *   events re-stamped with `exec_k`; the answered prompt is consumed: the round reads `completed`
  *   with an `interruption`.
@@ -500,6 +521,14 @@ export const persistExecutionInterruption = async (
       ? { attachments: { snapshot: conversation.attachments ?? [], produced: attachments } }
       : {};
     const workspaceUpdate = workspaceId ? { workspaceId } : {};
+    // A compaction that ran before the interruption must survive it: its summary covers context
+    // the next run would otherwise re-render verbatim. The rest of the state is left as stored.
+    const compactionSummary =
+      interrupted?.compaction_summary ?? completed?.conversation_state?.compaction_summary;
+    const stateUpdate =
+      compactionSummary && !isEqual(compactionSummary, conversation.state?.compaction_summary)
+        ? { state: { ...conversation.state, compaction_summary: compactionSummary } }
+        : {};
 
     /** `[]` when the client skipped the write because a terminal already existed. */
     const writtenTerminals = (
@@ -558,8 +587,9 @@ export const persistExecutionInterruption = async (
           skipIfTerminalExistsFor: executionId,
           ...attachmentsUpdate,
           ...workspaceUpdate,
+          ...stateUpdate,
         },
-        { access: 'converse' }
+        { access: 'converse', source: 'execution' }
       );
       return writtenTerminals(persisted, executionEvents);
     }
@@ -602,8 +632,9 @@ export const persistExecutionInterruption = async (
         skipIfTerminalExistsFor: executionId,
         ...attachmentsUpdate,
         ...workspaceUpdate,
+        ...stateUpdate,
       },
-      { access: 'converse' }
+      { access: 'converse', source: 'execution' }
     );
     return writtenTerminals(persisted, executionEvents);
   } catch (writeError) {

@@ -36,6 +36,7 @@ export const QUERY_PERFORMANCE_PHRASE_QUERY_COUNT = 'phraseQueryCount';
 export const QUERY_PERFORMANCE_MULTI_MATCH_TYPES = 'multiMatchTypes';
 export const QUERY_PERFORMANCE_FETCH_TYPE = 'fetchType';
 export const QUERY_PERFORMANCE_QUERY_SOURCE_COMMAND = 'querySourceCommand';
+export const QUERY_PERFORMANCE_APPROXIMATION = 'approximation';
 
 /**
  * Contextual profile resolved event i.e. when a different contextual profile is resolved at root, data source, or document level
@@ -81,7 +82,7 @@ export const registerDiscoverEBTManagerAnalytics = (
         type: 'keyword',
         _meta: {
           description:
-            'The name of the event that is tracked in the metrics i.e. dataTableSelection, dataTableRemoval',
+            'The name of the event that is tracked in the metrics i.e. dataTableSelection, dataTableRemoval, dataTableClearSelectedFields',
         },
       },
       [FIELD_USAGE_FIELD_NAME]: {
@@ -89,6 +90,19 @@ export const registerDiscoverEBTManagerAnalytics = (
         _meta: {
           description:
             "Field name if it is part of ECS schema. For non ECS compliant fields, there's a <non-ecs> placeholder",
+          optional: true,
+        },
+      },
+      [QUERY_FIELDS_USAGE_FIELD_NAMES]: {
+        type: 'array',
+        items: {
+          type: 'keyword',
+          _meta: {
+            description:
+              "Field names cleared together when eventName is dataTableClearSelectedFields. For non ECS compliant fields, there's a <non-ecs> placeholder",
+          },
+        },
+        _meta: {
           optional: true,
         },
       },
@@ -175,6 +189,13 @@ export const registerDiscoverEBTManagerAnalytics = (
         type: 'keyword',
         _meta: {
           description: 'The ES|QL source command used by the query i.e. FROM, TS, PROMQL',
+          optional: true,
+        },
+      },
+      [QUERY_PERFORMANCE_APPROXIMATION]: {
+        type: 'boolean',
+        _meta: {
+          description: 'Whether the response contains approximate results',
           optional: true,
         },
       },

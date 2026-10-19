@@ -2,11 +2,13 @@
 
 # Scout hook for the nightshift-investigations eval suite (`scoutHook` in evals.suites.json).
 #
-# Reads the evals config JSON on stdin and prints `{"env": {...}}`. Sandbox credentials come from the
-# config's `sandbox` block, falling back to SANDBOX_* already exported in the shell (e.g. a
-# self-hosted sandbox). SANDBOX_KIBANA_CONFIG points the `evals_nightshift_investigations` Scout
-# config set at kibana.sandbox.yml, which reads the credentials from the environment. Without an API
-# key it prints `{}`, so the config set falls back to plain `evals_tracing` and only smoke runs.
+# Reads the evals config JSON on stdin and prints `{"env": {...}}`. The sandbox API key, `url` and
+# optional mTLS file paths (`ssl`) come from the config's `sandbox` block, falling back to SANDBOX_*
+# already exported in the shell (e.g. a self-hosted sandbox). The shared sandbox needs only `apiKey`
+# and `url`: it authenticates by API key over plain TLS.
+# SANDBOX_KIBANA_CONFIG points the `evals_nightshift_investigations` Scout config set at
+# kibana.sandbox.yml, which reads the credentials from the environment. Without an API key it prints
+# `{}`, so the config set falls back to plain `evals_tracing` and only smoke runs.
 
 set -euo pipefail
 
@@ -25,20 +27,62 @@ if ! printf '%s' "$config" | jq -e 'type == "object"' >/dev/null 2>&1; then
   exit 1
 fi
 
-# Config value at a jq path, ignoring `REPLACE_ME` placeholders, else the named shell variable.
+# Config value at a jq path, ignoring `REPLACE_ME` placeholders.
+config_value() {
+  printf '%s' "$config" | jq -r --arg placeholder REPLACE_ME \
+    "$1 // empty | tostring | select(contains(\$placeholder) | not)"
+}
+
+# Config value at a jq path, else the named shell variable.
 resolve() {
   local env_name="$1" path="$2" from_config
-  from_config="$(printf '%s' "$config" | jq -r --arg placeholder REPLACE_ME \
-    "$path // empty | tostring | select(contains(\$placeholder) | not)")"
+  from_config="$(config_value "$path")"
   printf '%s' "${from_config:-${!env_name:-}}"
 }
 
-host="$(resolve SANDBOX_API_HOST '.sandbox.host')"
-port="$(resolve SANDBOX_API_PORT '.sandbox.port')"
 api_key="$(resolve SANDBOX_API_KEY '.sandbox.apiKey')"
-certificate="$(resolve SANDBOX_CLIENT_CERT_PATH '.sandbox.ssl.certificate')"
-key="$(resolve SANDBOX_CLIENT_KEY_PATH '.sandbox.ssl.key')"
-ca="$(resolve SANDBOX_CA_CERT_PATH '.sandbox.ssl.certificateAuthorities')"
+
+# Splits `https://host[:port]` into `host` and `port`. Kibana always connects over TLS, so the scheme
+# only picks the default port.
+parse_url() {
+  local url="$1" authority
+  authority="${url#*://}"
+  authority="${authority%%/*}"
+  host="${authority%:*}"
+  port="${authority##*:}"
+  if [[ "$authority" != *:* ]]; then
+    host="$authority"
+    [[ "$url" == http://* ]] && port=80 || port=443
+  fi
+  if [[ -z "$host" || ! "$port" =~ ^[0-9]+$ ]]; then
+    echo "nightshift-investigations scout hook: sandbox.url must look like https://host[:port]" >&2
+    exit 1
+  fi
+}
+
+# The profile's `url` takes precedence over any shell address.
+profile_url="$(config_value '.sandbox.url')"
+if [[ -n "$profile_url" ]]; then
+  parse_url "$profile_url"
+elif [[ -n "${SANDBOX_API_URL:-}" ]]; then
+  parse_url "$SANDBOX_API_URL"
+else
+  host="${SANDBOX_API_HOST:-}"
+  port="${SANDBOX_API_PORT:-}"
+fi
+
+# Optional mTLS PEM file paths for a self-hosted sandbox. Older evals configs hold PEM contents
+# under `sandbox.ssl`, which Kibana no longer accepts, so inline PEM is ignored rather than read as
+# a path.
+pem_path() {
+  local env_name="$1" path="$2" from_config
+  from_config="$(config_value "$path")"
+  [[ "$from_config" == *-----BEGIN* ]] && from_config=''
+  printf '%s' "${from_config:-${!env_name:-}}"
+}
+certificate="$(pem_path SANDBOX_CLIENT_CERT_PATH '.sandbox.ssl.certificate')"
+key="$(pem_path SANDBOX_CLIENT_KEY_PATH '.sandbox.ssl.key')"
+ca="$(pem_path SANDBOX_CA_CERT_PATH '.sandbox.ssl.certificateAuthorities')"
 
 telemetry_url="$(resolve NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL '.nightshift.telemetry.url')"
 telemetry_key="$(resolve NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY '.nightshift.telemetry.apiKey')"

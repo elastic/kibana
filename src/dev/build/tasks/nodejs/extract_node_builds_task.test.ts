@@ -52,6 +52,7 @@ async function setup() {
     isRelease: true,
     targetAllPlatforms: true,
     targetServerlessPlatforms: false,
+    targetCloudPlatforms: false,
     skipServerless: false,
     dockerContextUseLocalArtifact: false,
     dockerCrossCompile: false,

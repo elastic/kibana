@@ -6,13 +6,10 @@
  */
 
 import { partition } from 'lodash';
-import type {
-  BulkGetAttachmentsResponse,
-  BulkGetAttachmentsResponseV2,
-} from '../../../common/types/api';
+import type { BulkGetUnifiedAttachmentsResponse } from '../../../common/types/api';
 import {
-  BulkGetAttachmentsRequestRt,
-  BulkGetAttachmentsResponseRtV2,
+  BulkGetUnifiedAttachmentsRequestRt,
+  BulkGetUnifiedAttachmentsResponseRt,
 } from '../../../common/types/api';
 import type { AttachmentAttributes, AttachmentAttributesV2 } from '../../../common/types/domain';
 import { flattenAttachmentSavedObjects } from '../../common/utils';
@@ -24,6 +21,7 @@ import type { BulkOptionalAttributes, OptionalAttributes } from '../../services/
 import type { CasesClient } from '../client';
 import type { AttachmentSavedObject, SOWithErrors } from '../../common/types';
 import { partitionByCaseAssociation } from '../../common/partitioning';
+import { getCaseReferenceId } from '../../common/references';
 import { decodeOrThrow, decodeWithExcessOrThrow } from '../../common/runtime_types';
 
 type AttachmentSavedObjectWithErrors = Array<SOWithErrors<AttachmentAttributes>>;
@@ -35,7 +33,7 @@ export async function bulkGet(
   { savedObjectIds, caseID }: BulkGetArgs,
   clientArgs: CasesClientArgs,
   casesClient: CasesClient
-): Promise<BulkGetAttachmentsResponseV2> {
+): Promise<BulkGetUnifiedAttachmentsResponse> {
   const {
     services: { attachmentService },
     logger,
@@ -43,7 +41,9 @@ export async function bulkGet(
   } = clientArgs;
 
   try {
-    const request = decodeWithExcessOrThrow(BulkGetAttachmentsRequestRt)({ ids: savedObjectIds });
+    const request = decodeWithExcessOrThrow(BulkGetUnifiedAttachmentsRequestRt)({
+      ids: savedObjectIds,
+    });
 
     // perform an authorization check for the case
     await casesClient.cases.resolve({ id: caseID });
@@ -70,7 +70,7 @@ export async function bulkGet(
       attachments: flattenAttachmentSavedObjects(authorizedAttachments),
       errors,
     };
-    return decodeOrThrow(BulkGetAttachmentsResponseRtV2)(res);
+    return decodeOrThrow(BulkGetUnifiedAttachmentsResponseRt)(res);
   } catch (error) {
     throw createCaseError({
       message: `Failed to bulk get attachments for case id: ${caseID}: ${error}`,
@@ -83,7 +83,7 @@ export async function bulkGet(
 interface PartitionedAttachments {
   validAttachments: AttachmentSavedObject[];
   attachmentsWithErrors: AttachmentSavedObjectWithErrors;
-  invalidAssociationAttachments: AttachmentSavedObject[];
+  invalidAssociationAttachments: Array<Pick<AttachmentSavedObject, 'id'>>;
 }
 
 const partitionAttachments = (
@@ -95,11 +95,16 @@ const partitionAttachments = (
     caseId,
     attachmentsWithoutErrors
   );
+  // A decode error from another case would leak its type; report it as not attached.
+  const [otherCaseErrors, caseErrors] = partition(errors, ({ references }) => {
+    const caseRefId = getCaseReferenceId(references ?? []);
+    return caseRefId != null && caseRefId !== caseId;
+  });
 
   return {
     validAttachments: caseAttachments,
-    attachmentsWithErrors: errors,
-    invalidAssociationAttachments,
+    attachmentsWithErrors: caseErrors,
+    invalidAssociationAttachments: [...invalidAssociationAttachments, ...otherCaseErrors],
   };
 };
 
@@ -117,10 +122,10 @@ const constructErrors = ({
 }: {
   caseId: string;
   soBulkGetErrors: AttachmentSavedObjectWithErrors;
-  associationErrors: AttachmentSavedObject[];
+  associationErrors: Array<Pick<AttachmentSavedObject, 'id'>>;
   unauthorizedAttachments: AttachmentSavedObject[];
-}): BulkGetAttachmentsResponse['errors'] => {
-  const errors: BulkGetAttachmentsResponse['errors'] = [];
+}): BulkGetUnifiedAttachmentsResponse['errors'] => {
+  const errors: BulkGetUnifiedAttachmentsResponse['errors'] = [];
 
   for (const soError of soBulkGetErrors) {
     errors.push({ ...generateCaseErrorResponse(soError.error), savedObjectId: soError.id });

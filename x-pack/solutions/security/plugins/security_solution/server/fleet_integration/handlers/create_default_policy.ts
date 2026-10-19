@@ -17,6 +17,7 @@ import {
 } from '../../../common/endpoint/models/policy_config';
 import type { LicenseService } from '../../../common/license/license';
 import type { PolicyConfig } from '../../../common/endpoint/types';
+import { ProtectionModes } from '../../../common/endpoint/types';
 import type { AnyPolicyCreateConfig, PolicyCreateEndpointConfig } from '../types';
 import {
   ENDPOINT_CONFIG_PRESET_EDR_COMPLETE,
@@ -28,9 +29,11 @@ import {
   disableProtections,
   ensureOnlyEventCollectionIsAllowed,
   isBillablePolicy,
+  isLinuxRansomwareProtectionEnabled,
   removeCustomYaraSignatures,
   removeDeviceControl,
   removeLinuxDnsEvents,
+  removeLinuxRansomware,
 } from '../../../common/endpoint/models/policy_config_helpers';
 import type { ProductFeaturesService } from '../../lib/product_features_service/product_features_service';
 
@@ -91,6 +94,21 @@ export const createDefaultPolicy = (
 
   if (!experimentalFeatures.linuxDnsEvents) {
     defaultPolicyPerType = removeLinuxDnsEvents(defaultPolicyPerType);
+  }
+
+  if (!isLinuxRansomwareProtectionEnabled(experimentalFeatures)) {
+    defaultPolicyPerType = removeLinuxRansomware(defaultPolicyPerType);
+  }
+
+  // Without the per-OS form macOS ransomware has no card, so new policies keep it opt-in.
+  if (!experimentalFeatures.perOsPolicySettings) {
+    defaultPolicyPerType = {
+      ...defaultPolicyPerType,
+      mac: {
+        ...defaultPolicyPerType.mac,
+        ransomware: { ...defaultPolicyPerType.mac.ransomware, mode: ProtectionModes.off },
+      },
+    };
   }
 
   defaultPolicyPerType.meta.billable = isBillablePolicy(defaultPolicyPerType);
