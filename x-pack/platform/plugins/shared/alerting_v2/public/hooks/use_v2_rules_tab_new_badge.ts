@@ -30,12 +30,33 @@ const persistVisited = (): void => {
   }
 };
 
+/** Cleared on remount so Strict Mode / HMR do not treat a fake unmount as a real leave. */
+let pendingPersistTimeout: ReturnType<typeof setTimeout> | undefined;
+
+const cancelPendingPersist = (): void => {
+  if (pendingPersistTimeout !== undefined) {
+    clearTimeout(pendingPersistTimeout);
+    pendingPersistTimeout = undefined;
+  }
+};
+
+const schedulePersistOnLeave = (): void => {
+  cancelPendingPersist();
+  pendingPersistTimeout = setTimeout(() => {
+    pendingPersistTimeout = undefined;
+    persistVisited();
+  }, 0);
+};
+
 /**
  * “New” dot for the Universal Rules tab: primary blue, dismissed after the user
  * leaves Universal, matching side-nav new-item timing.
  *
- * Uses selection change for SPA tab switches, and `pagehide` (not React unmount)
- * for full navigations — React Strict Mode / HMR remounts must not dismiss the badge.
+ * Dismissal paths:
+ * - SPA tab switch: `isSelected` goes from true to false
+ * - Full page unload: `pagehide` while selected
+ * - SPA app leave (`navigateToApp`): deferred unmount persist — Strict Mode / HMR
+ *   remounts cancel the pending write on the next mount
  */
 export const useV2RulesTabNewBadge = (isSelected: boolean): AppHeaderTabIconBadge | undefined => {
   const [isVisited, setIsVisited] = useLocalStorage<boolean>(
@@ -59,14 +80,20 @@ export const useV2RulesTabNewBadge = (isSelected: boolean): AppHeaderTabIconBadg
   }, [isSelected, markVisited]);
 
   useEffect(() => {
+    cancelPendingPersist();
+
     const onPageHide = () => {
       if (isSelectedRef.current) {
+        cancelPendingPersist();
         persistVisited();
       }
     };
     window.addEventListener('pagehide', onPageHide);
     return () => {
       window.removeEventListener('pagehide', onPageHide);
+      if (isSelectedRef.current) {
+        schedulePersistOnLeave();
+      }
     };
   }, []);
 

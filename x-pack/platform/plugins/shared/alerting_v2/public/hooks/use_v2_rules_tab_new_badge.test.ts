@@ -14,6 +14,12 @@ import {
 describe('useV2RulesTabNewBadge', () => {
   beforeEach(() => {
     localStorage.removeItem(V2_RULES_TAB_NEW_BADGE_VISITED_STORAGE_KEY);
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
   });
 
   it('returns a primary new-dot badge when Universal has not been visited', () => {
@@ -52,6 +58,7 @@ describe('useV2RulesTabNewBadge', () => {
     );
 
     unmount();
+    jest.runAllTimers();
 
     const remounted = renderHook(() => useV2RulesTabNewBadge(false));
     expect(remounted.result.current).toBeUndefined();
@@ -71,13 +78,35 @@ describe('useV2RulesTabNewBadge', () => {
     expect(remounted.result.current).toBeUndefined();
   });
 
-  it('does not mark visited on React unmount (Strict Mode / HMR safe)', () => {
+  it('marks visited after SPA app leave unmount once timers flush', () => {
     const { result, unmount } = renderHook(() => useV2RulesTabNewBadge(true));
 
     expect(result.current).toBeDefined();
     unmount();
 
     expect(localStorage.getItem(V2_RULES_TAB_NEW_BADGE_VISITED_STORAGE_KEY)).toBeNull();
+
+    jest.runAllTimers();
+
+    expect(localStorage.getItem(V2_RULES_TAB_NEW_BADGE_VISITED_STORAGE_KEY)).toBe(
+      JSON.stringify(true)
+    );
+
+    const remounted = renderHook(() => useV2RulesTabNewBadge(true));
+    expect(remounted.result.current).toBeUndefined();
+  });
+
+  it('does not mark visited on Strict Mode remount before timers flush', () => {
+    const { result, unmount } = renderHook(() => useV2RulesTabNewBadge(true));
+
+    expect(result.current).toBeDefined();
+    unmount();
+
+    const remounted = renderHook(() => useV2RulesTabNewBadge(true));
+    jest.runAllTimers();
+
+    expect(localStorage.getItem(V2_RULES_TAB_NEW_BADGE_VISITED_STORAGE_KEY)).toBeNull();
+    expect(remounted.result.current).toBeDefined();
   });
 
   it('does not return a badge when already visited in localStorage', () => {
