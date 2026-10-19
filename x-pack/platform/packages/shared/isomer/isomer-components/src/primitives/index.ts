@@ -7,6 +7,7 @@
 
 export { type MarkdownNode, markdown } from './markdown';
 export { type HeaderNode, header } from './header';
+export { type SectionNode, section } from './section';
 export { type ContextNode, context } from './context';
 export { type DividerNode, divider } from './divider';
 export { type QuoteNode, quote } from './quote';
