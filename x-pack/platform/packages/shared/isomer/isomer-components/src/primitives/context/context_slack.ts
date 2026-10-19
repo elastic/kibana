@@ -6,23 +6,12 @@
  */
 
 import type { SlackContextBlock } from '@elastic/isomer-sdk/slack';
-import { SLACK_LIMITS, clampSlackText, escapeMrkdwn } from '@elastic/isomer-sdk/slack';
+import { SLACK_LIMITS } from '@elastic/isomer-sdk/slack';
 
-import { oneLine } from '../../lib';
+import { clampEscapedMrkdwn, oneLine } from '../../lib';
 import type { ContextNode } from './context';
 
 const SLACK_SEPARATOR = '  ·  ';
-
-/** Escapes `raw` for `mrkdwn` and clamps the escaped text, so the cut never lands inside an entity. */
-const clampEscaped = (raw: string, max: number): string => {
-  let budget = max;
-  let escaped = escapeMrkdwn(clampSlackText(raw, budget));
-  while (escaped.length > max) {
-    budget -= escaped.length - max;
-    escaped = escapeMrkdwn(clampSlackText(raw, budget));
-  }
-  return escaped;
-};
 
 const joined = ({ items }: ContextNode, separator: string): string =>
   items.map(({ text }) => oneLine(text)).join(separator);
@@ -32,7 +21,7 @@ export const contextSlackRenderer = (node: ContextNode): SlackContextBlock => ({
   elements: [
     {
       type: 'mrkdwn',
-      text: clampEscaped(joined(node, SLACK_SEPARATOR), SLACK_LIMITS.contextElementChars),
+      text: clampEscapedMrkdwn(joined(node, SLACK_SEPARATOR), SLACK_LIMITS.contextElementChars),
     },
   ],
 });
