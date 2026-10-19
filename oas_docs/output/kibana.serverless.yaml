@@ -198412,17 +198412,14 @@ components:
         - name
         - riskModifier
         - managed
-    Security_Exceptions_API_BlocklistHashOrPathEntry:
-      type: object
+    Security_Exceptions_API_BlocklistHashEntry:
       properties:
         field:
-          description: File hash or path field
+          description: File hash field
           enum:
             - file.hash.md5
             - file.hash.sha1
             - file.hash.sha256
-            - file.path
-            - file.path.caseless
           type: string
         operator:
           description: Must be the value "included"
@@ -198430,14 +198427,17 @@ components:
             - included
           type: string
         type:
-          description: Must be match_any for blocklists
+          description: Must be match_any for blocklist hash entries
           enum:
             - match_any
           type: string
         value:
-          description: Array of hash values or file paths
+          description: Array of hash values
           items:
+            maxLength: 4096
+            minLength: 1
             type: string
+          maxItems: 2000
           minItems: 1
           type: array
       required:
@@ -198445,6 +198445,8 @@ components:
         - type
         - value
         - operator
+      title: Blocklist hash entry
+      type: object
     Security_Exceptions_API_BlocklistLinuxProperties:
       description: Blocklist list item properties (Linux, code signature not supported).
       type: object
@@ -198453,9 +198455,12 @@ components:
           description: |
             **Validation rules:**
             * Hash entries: up to 3 (one for each hash type: md5, sha1, sha256)
-            * Path entry: only 1 allowed
+            * Path or File Name entry: only 1 allowed
           items:
-            $ref: '#/components/schemas/Security_Exceptions_API_BlocklistHashOrPathEntry'
+            oneOf:
+              - $ref: '#/components/schemas/Security_Exceptions_API_BlocklistHashEntry'
+              - $ref: '#/components/schemas/Security_Exceptions_API_BlocklistPathOrFileNameMatchAnyEntry'
+              - $ref: '#/components/schemas/Security_Exceptions_API_BlocklistPathOrFileNameWildcardEntry'
           minItems: 1
           type: array
         list_id:
@@ -198484,9 +198489,12 @@ components:
           description: |
             **Validation rules:**
             * Hash entries: up to 3 (one for each hash type: md5, sha1, sha256)
-            * Path entry: only 1 allowed
+            * Path or File Name entry: only 1 allowed
           items:
-            $ref: '#/components/schemas/Security_Exceptions_API_BlocklistHashOrPathEntry'
+            oneOf:
+              - $ref: '#/components/schemas/Security_Exceptions_API_BlocklistHashEntry'
+              - $ref: '#/components/schemas/Security_Exceptions_API_BlocklistPathOrFileNameMatchAnyEntry'
+              - $ref: '#/components/schemas/Security_Exceptions_API_BlocklistPathOrFileNameWildcardEntry'
           minItems: 1
           type: array
         list_id:
@@ -198507,8 +198515,77 @@ components:
           $ref: '#/components/schemas/Security_Exceptions_API_EndpointArtifactTags'
       required:
         - list_id
-    Security_Exceptions_API_BlocklistWindowsCodeSignatureEntry:
+    Security_Exceptions_API_BlocklistPathOrFileNameMatchAnyEntry:
+      properties:
+        field:
+          description: File path or file name field (available on all OS)
+          enum:
+            - file.path
+            - file.path.caseless
+            - file.name
+            - file.name.caseless
+          type: string
+        operator:
+          description: Must be the value "included"
+          enum:
+            - included
+          type: string
+        type:
+          description: Must be `match_any` ("is one of")
+          enum:
+            - match_any
+          type: string
+        value:
+          description: Array of values
+          items:
+            maxLength: 4096
+            minLength: 1
+            type: string
+          maxItems: 2000
+          minItems: 1
+          type: array
+      required:
+        - field
+        - type
+        - value
+        - operator
+      title: Blocklist path or file name "is one of" entry
       type: object
+    Security_Exceptions_API_BlocklistPathOrFileNameWildcardEntry:
+      properties:
+        field:
+          description: |
+            File path or file name field (available on all OS). `file.name.caseless` is used for
+            `wildcard` (Match) entries on Windows and macOS, since both have case-insensitive filesystems.
+          enum:
+            - file.path
+            - file.path.caseless
+            - file.name
+            - file.name.caseless
+          type: string
+        operator:
+          description: Must be the value "included"
+          enum:
+            - included
+          type: string
+        type:
+          description: Must be `wildcard` ("Matches", supports `*` and `?` wildcards)
+          enum:
+            - wildcard
+          type: string
+        value:
+          description: Single value
+          maxLength: 4096
+          minLength: 1
+          type: string
+      required:
+        - field
+        - type
+        - value
+        - operator
+      title: Blocklist path or file name "Match" entry
+      type: object
+    Security_Exceptions_API_BlocklistWindowsCodeSignatureEntry:
       properties:
         entries:
           description: Nested subject_name entries
@@ -198561,6 +198638,8 @@ components:
         - field
         - type
         - entries
+      title: Blocklist Windows code signature entry
+      type: object
     Security_Exceptions_API_BlocklistWindowsProperties:
       description: Blocklist list item properties (Windows, supports code signature).
       type: object
@@ -198569,11 +198648,13 @@ components:
           description: |
             **Validation rules:**
             * Hash entries: up to 3 (one for each hash type: md5, sha1, sha256)
-            * Path entry: only 1 allowed
+            * Path or File Name entry: only 1 allowed
             * Code signature entry: only 1 allowed
           items:
             oneOf:
-              - $ref: '#/components/schemas/Security_Exceptions_API_BlocklistHashOrPathEntry'
+              - $ref: '#/components/schemas/Security_Exceptions_API_BlocklistHashEntry'
+              - $ref: '#/components/schemas/Security_Exceptions_API_BlocklistPathOrFileNameMatchAnyEntry'
+              - $ref: '#/components/schemas/Security_Exceptions_API_BlocklistPathOrFileNameWildcardEntry'
               - $ref: '#/components/schemas/Security_Exceptions_API_BlocklistWindowsCodeSignatureEntry'
           minItems: 1
           type: array
