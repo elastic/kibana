@@ -188,7 +188,9 @@ const runPhase = async (
 export const runScenario = async (opts: RunOptions): Promise<{ runId: string; dir: string }> => {
   const { target, scenario } = opts;
   const stamp = new Date().toISOString().replace(/[:.]/g, '').slice(0, 17);
-  const runId = `${opts.lane}-${scenario.name}-${opts.variant}-${stamp}-${Math.random().toString(16).slice(2, 6)}`.toLowerCase();
+  const runId = `${opts.lane}-${scenario.name}-${opts.variant}-${stamp}-${Math.random()
+    .toString(16)
+    .slice(2, 6)}`.toLowerCase();
   const dir = path.join(opts.runsDir, runId);
   fs.mkdirSync(dir, { recursive: true });
   const log = (msg: string) => {
@@ -335,7 +337,11 @@ export const runScenario = async (opts: RunOptions): Promise<{ runId: string; di
     await sleep(Math.max(3000, 0));
     let searchAfter: unknown[] | null = null;
     for (let page = 0; page < 500; page++) {
-      const res = await kbn<{ hits: Array<Record<string, unknown>>; last_sort: unknown[] | null }>(
+      interface EsPage {
+        hits: Array<Record<string, unknown>>;
+        last_sort: unknown[] | null;
+      }
+      const res: { status: number; body: EsPage } | undefined = await kbn<EsPage>(
         target,
         'POST',
         `${API}/samples_es`,

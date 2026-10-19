@@ -205,6 +205,37 @@ export const SCENARIOS: Record<string, Scenario> = {
       },
     ],
   },
+  /** Agent Builder at a larger dose (prod tail p99 110s): 10 parallel calls x 5000 wide rows. */
+  'tier-b-agent-builder-stress': {
+    name: 'tier-b-agent-builder-stress',
+    description:
+      '10 parallel execute_esql calls x 5000 rows x 100 fields; HTTP (local) and TM execution.',
+    probe,
+    laptopProbe,
+    ticks,
+    phases: [
+      {
+        name: 'seed',
+        durationS: 5,
+        action: 'seed',
+        actionParams: { kind: 'alerting_wide', rows: 5000, fields: 100 },
+      },
+      { name: 'warmup', durationS: 10 },
+      { name: 'baseline', durationS: 40 },
+      {
+        name: 'ab-local-10x5000',
+        durationS: 10,
+        action: 'agent-builder',
+        actionParams: { calls: 10, limit: 5000, mode: 'local' },
+      },
+      {
+        name: 'ab-task-10x5000',
+        durationS: 10,
+        action: 'agent-builder',
+        actionParams: { calls: 10, limit: 5000, mode: 'task_manager' },
+      },
+    ],
+  },
   /** Non-terminating offender with emulated external supervision (SIGKILL after 30s stall). */
   'infinite-loop-supervised': {
     name: 'infinite-loop-supervised',

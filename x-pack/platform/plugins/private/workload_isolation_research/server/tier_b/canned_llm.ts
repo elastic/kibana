@@ -19,11 +19,6 @@ import type { IRouter } from '@kbn/core/server';
  * which Kibana cannot authenticate). No side effects; returns canned completions only.
  */
 
-interface ChatMessage {
-  role: string;
-  content?: unknown;
-}
-
 const chunk = (delta: Record<string, unknown>, finish: string | null = null) =>
   `data: ${JSON.stringify({
     id: randomUUID(),
@@ -63,34 +58,39 @@ export const registerMockLlmRoute = (router: IRouter, apiBase: string): void => 
           reason: 'RESEARCH ONLY: .gen-ai connector sends a Bearer key Kibana cannot authenticate',
         },
       },
-      options: { access: 'internal', xsrfRequired: false },
+      // Raw body: never JSON.parse the (possibly huge) tool results on Kibana's main thread,
+      // so the mock does not add its own blocking to the measurement.
+      options: {
+        access: 'internal',
+        xsrfRequired: false,
+        body: { parse: false, output: 'data', maxBytes: 512 * 1024 * 1024 },
+      },
       validate: {
         params: schema.object({ scenario: schema.string({ maxLength: 256 }) }),
-        body: schema.object({}, { unknowns: 'allow' }),
+        body: schema.buffer(),
       },
     },
     async (_ctx, req, res) => {
-      const body = req.body as {
-        messages?: ChatMessage[];
-        tools?: Array<{ function?: { name?: string } }>;
-        stream?: boolean;
-      };
+      const buf = req.body as Buffer;
+      const isStream = buf.includes('"stream":true');
+      const isTitle = buf.includes('title-generation');
+      const hasToolResult = buf.includes('"role":"tool"');
+      const toolsAt = buf.indexOf('"tools"');
+      const toolsSlice =
+        toolsAt >= 0 ? buf.subarray(toolsAt, toolsAt + 200000).toString('utf8') : '';
+      const names = [...toolsSlice.matchAll(/"name":"([^"]+)"/g)].map((m) => m[1]);
       // scenario: "<parallelToolCalls>-<esqlLimit>[-hang<ms>]"
       const [callsRaw, limitRaw, hangRaw] = req.params.scenario.split('-');
       const calls = Math.max(1, Math.min(20, Number(callsRaw) || 3));
       const limit = Math.max(1, Math.min(10000, Number(limitRaw) || 1000));
       const hangMs = hangRaw?.startsWith('hang') ? Number(hangRaw.slice(4)) : 0;
-      const messages = body.messages ?? [];
-      const system = String(messages.find((m) => m.role === 'system')?.content ?? '');
-      const last = messages[messages.length - 1];
       let delta: Record<string, unknown>;
-      if (system.includes('title-generation')) {
+      if (isTitle) {
         delta = { role: 'assistant', content: 'Workload isolation research' };
-      } else if (last?.role === 'tool' || !body.tools?.length) {
+      } else if (hasToolResult || !names.length) {
         if (hangMs > 0) await new Promise((r) => setTimeout(r, hangMs));
         delta = { role: 'assistant', content: 'Research replay complete.' };
       } else {
-        const names = body.tools.map((t) => t.function?.name ?? '');
         const esqlTool =
           names.find((n) => n.includes('execute_esql')) ??
           names.find((n) => n.includes('search')) ??
@@ -109,7 +109,7 @@ export const registerMockLlmRoute = (router: IRouter, apiBase: string): void => 
           })),
         };
       }
-      if (body.stream) {
+      if (isStream) {
         return res.ok({
           body: sse(delta),
           headers: { 'content-type': 'text/event-stream', 'cache-control': 'no-cache' },
