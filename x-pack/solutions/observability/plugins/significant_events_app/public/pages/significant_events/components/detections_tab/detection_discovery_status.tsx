@@ -64,8 +64,7 @@ export const DetectionDiscoveryStatus = ({
         }
       >
         <EuiBadge
-          color="hollow"
-          iconType="eyeClosed"
+          color="primary"
           tabIndex={0}
           data-test-subj="significantEventsAppDetectionSkippedBadge"
         >

@@ -54,12 +54,7 @@ export function SkippedDetectionBadge({ skip }: { skip: DetectionSkip }) {
         </>
       }
     >
-      <EuiBadge
-        color="hollow"
-        iconType="eyeClosed"
-        tabIndex={0}
-        data-test-subj="nightshiftSkippedDetectionBadge"
-      >
+      <EuiBadge color="primary" tabIndex={0} data-test-subj="nightshiftSkippedDetectionBadge">
         {i18n.translate('xpack.nightshift.skippedDetection.badge', {
           defaultMessage: 'Skipped',
         })}
