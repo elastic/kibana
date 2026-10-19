@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useLayoutEffect, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiSpacer,
   EuiText,
   EuiTextTruncate,
@@ -19,11 +20,10 @@ import {
   useResizeObserver,
 } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
-import type { ImpactFilterable } from './entity_ids';
-import { impactPills } from './impact_pills';
+import { entityTypeIcon } from './entity_type_icon';
 import type { ImpactPill } from './impact_pills';
 import { IMPACT_LABELS } from './translations';
-import { findVisiblePills, isVisibleIndex } from './visible_pills';
+import { findVisiblePills, isVisibleIndex, rowsAfterExpansions } from './visible_pills';
 import type { PillMeasurements, VisiblePills } from './visible_pills';
 
 export const IMPACT_PILLS_TEST_SUBJ = 'alertzeroImpactPills';
@@ -32,7 +32,7 @@ export const IMPACT_OVERFLOW_TEST_SUBJ = 'alertzeroImpactOverflow';
 export const IMPACT_COLLAPSE_TEST_SUBJ = 'alertzeroImpactCollapse';
 
 interface ImpactProps {
-  items: readonly ImpactFilterable[];
+  pills: readonly ImpactPill[];
   entityFilter: string | null;
   onEntityFilterChange: (entityId: string | null) => void;
 }
@@ -65,7 +65,8 @@ const PillBadge: React.FC<PillBadgeProps> = ({
   return (
     <EuiBadge
       {...interactiveProps}
-      iconType={iconType}
+      // A labelled pill draws its own 16px icon below; EuiBadge would render it at 12px.
+      iconType={isIconOnly ? iconType : undefined}
       style={{ padding, textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
       css={css({
         background: selected
@@ -81,13 +82,18 @@ const PillBadge: React.FC<PillBadgeProps> = ({
     >
       {label !== undefined && (
         <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false} direction="row">
+          {iconType !== undefined && (
+            <EuiFlexItem grow={false} css={css({ padding: `0 ${euiTheme.size.xs}` })}>
+              <EuiIcon type={iconType} size="m" color="subdued" aria-hidden="true" />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <EuiText size="xs" style={{ padding: `0 ${euiTheme.size.xs}` }}>
               <EuiTextTruncate text={label} width={120} truncation="end" />
             </EuiText>
           </EuiFlexItem>
           {count !== undefined && (
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} css={css({ paddingLeft: euiTheme.size.xs })}>
               <EuiBadge color="hollow">{count}</EuiBadge>
             </EuiFlexItem>
           )}
@@ -97,7 +103,7 @@ const PillBadge: React.FC<PillBadgeProps> = ({
   );
 };
 
-export const Impact: React.FC<ImpactProps> = ({ items, entityFilter, onEntityFilterChange }) => {
+export const Impact: React.FC<ImpactProps> = ({ pills, entityFilter, onEntityFilterChange }) => {
   const { euiTheme } = useEuiTheme();
   const [rowElement, setRowElement] = useState<HTMLDivElement | null>(null);
   const { width: observedWidth } = useResizeObserver(rowElement, 'width');
@@ -105,9 +111,9 @@ export const Impact: React.FC<ImpactProps> = ({ items, entityFilter, onEntityFil
   const pillRefs = useRef<Array<HTMLDivElement | null>>([]);
   const overflowRef = useRef<HTMLDivElement>(null);
   const [measurements, setMeasurements] = useState<PillMeasurements | null>(null);
-  const [isExpanded, setIsExpanded] = useState(false);
+  // How many times `+n` was clicked; each click reveals `ROWS_PER_EXPAND` more rows.
+  const [expansions, setExpansions] = useState(0);
 
-  const pills = useMemo(() => impactPills(items), [items]);
   // `gutterSize="s"` on EuiFlexGroup renders `gap: euiTheme.size.s`.
   const gap = parseFloat(euiTheme.size.s);
 
@@ -132,22 +138,29 @@ export const Impact: React.FC<ImpactProps> = ({ items, entityFilter, onEntityFil
   }
 
   // What the collapsed row would show, derived during render so changing the
-  // filter never re-measures. Tracked even while expanded so the collapse
-  // control disappears once everything fits again. Until the first
-  // measurement every pill is shown.
-  const collapsed: VisiblePills =
-    measurements && measurements.pillWidths.length === pills.length
-      ? findVisiblePills(measurements, pills, entityFilter)
-      : { prefixCount: pills.length, pinnedIndex: null };
+  // filter never re-measures. Tracked even while expanded so the controls
+  // disappear once everything fits again. Until the first measurement every
+  // pill is shown.
+  const isMeasured = measurements !== null && measurements.pillWidths.length === pills.length;
+  const collapsed: VisiblePills = isMeasured
+    ? findVisiblePills(measurements, pills, entityFilter)
+    : { prefixCount: pills.length, pinnedIndex: null };
+  const collapsedCount = pills.filter((_, index) => isVisibleIndex(index, collapsed)).length;
+  const isExpanded = isMeasured && expansions > 0 && collapsedCount < pills.length;
+  // Expanding reveals a few more rows at a time, keeping room for "show fewer" beside `+n`.
+  const shown: VisiblePills = isExpanded
+    ? findVisiblePills(measurements, pills, entityFilter, {
+        maxRows: rowsAfterExpansions(expansions),
+        collapseControl: true,
+      })
+    : collapsed;
 
   // Items stretch to the row height and center their pill, so the shorter +n
   // pill lines up with the count pills beside it.
   const pillItemStyles = css({ justifyContent: 'center' });
 
-  const collapsedPills = pills.filter((_, index) => isVisibleIndex(index, collapsed));
-  const overflowCount = Math.max(0, pills.length - collapsedPills.length);
-  const showAll = isExpanded && overflowCount > 0;
-  const visiblePills = showAll ? pills : collapsedPills;
+  const visiblePills = pills.filter((_, index) => isVisibleIndex(index, shown));
+  const overflowCount = Math.max(0, pills.length - visiblePills.length);
 
   const renderPill = (
     pill: ImpactPill,
@@ -163,6 +176,7 @@ export const Impact: React.FC<ImpactProps> = ({ items, entityFilter, onEntityFil
     >
       <PillBadge
         label={pill.entityId}
+        iconType={entityTypeIcon(pill.entityType)}
         count={pill.count}
         selected={entityFilter === pill.entityId}
         ariaLabel={pill.entityId}
@@ -222,19 +236,7 @@ export const Impact: React.FC<ImpactProps> = ({ items, entityFilter, onEntityFil
           data-test-subj={IMPACT_PILLS_TEST_SUBJ}
         >
           {visiblePills.map((pill) => renderPill(pill, true))}
-          {showAll ? (
-            <EuiFlexItem
-              grow={false}
-              css={pillItemStyles}
-              data-test-subj={IMPACT_COLLAPSE_TEST_SUBJ}
-            >
-              <PillBadge
-                iconType="sortLeft"
-                ariaLabel={IMPACT_LABELS.showFewer}
-                onClick={() => setIsExpanded(false)}
-              />
-            </EuiFlexItem>
-          ) : overflowCount > 0 ? (
+          {overflowCount > 0 && (
             <EuiFlexItem
               grow={false}
               css={pillItemStyles}
@@ -243,10 +245,23 @@ export const Impact: React.FC<ImpactProps> = ({ items, entityFilter, onEntityFil
               <PillBadge
                 label={IMPACT_LABELS.showMore(overflowCount)}
                 ariaLabel={IMPACT_LABELS.showMoreAriaLabel(overflowCount)}
-                onClick={() => setIsExpanded(true)}
+                onClick={() => setExpansions(expansions + 1)}
               />
             </EuiFlexItem>
-          ) : null}
+          )}
+          {isExpanded && (
+            <EuiFlexItem
+              grow={false}
+              css={pillItemStyles}
+              data-test-subj={IMPACT_COLLAPSE_TEST_SUBJ}
+            >
+              <PillBadge
+                iconType="sortLeft"
+                ariaLabel={IMPACT_LABELS.showFewer}
+                onClick={() => setExpansions(0)}
+              />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </div>
     </>
