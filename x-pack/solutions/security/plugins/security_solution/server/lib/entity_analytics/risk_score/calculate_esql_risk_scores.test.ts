@@ -128,6 +128,21 @@ describe('Calculate risk scores with ESQL', () => {
       expect(query).toContain('contributing_entities_raw = VALUES(entity_with_rel)');
     });
 
+    it('keeps the alert timestamp when joining lookup rows that have their own', () => {
+      const query = getResolutionScoreESQLByIds(
+        EntityType.user,
+        ['user:target-a'],
+        5000,
+        1000,
+        '.alerts-security.alerts-default',
+        '.entity_analytics.risk_score.lookup-default'
+      );
+
+      const renameIndex = query.indexOf('| RENAME @timestamp as time');
+      expect(renameIndex).toBeGreaterThan(-1);
+      expect(renameIndex).toBeLessThan(query.indexOf('| LOOKUP JOIN'));
+    });
+
     it('escapes quote and backslash characters in resolution target ID list', () => {
       const query = getResolutionScoreESQLByIds(
         EntityType.user,
@@ -190,6 +205,31 @@ describe('Calculate risk scores with ESQL', () => {
           '.alerts-security.alerts-default'
         )
       ).toThrow('Entity ID contains an unsupported control character');
+    });
+
+    it('ranks risk inputs by the numeric risk score in every scoring query', () => {
+      const queries = [
+        getESQL(EntityType.host, { lower: 'abel', upper: 'zuzanna' }, 10000, 3500),
+        getBaseScoreESQL(
+          EntityType.host,
+          { lower: 'host:abel', upper: 'host:zuzanna' },
+          10000,
+          3500,
+          '.alerts-security.alerts-default'
+        ),
+        getResolutionScoreESQLByIds(
+          EntityType.host,
+          ['host:target-a'],
+          10000,
+          3500,
+          '.alerts-security.alerts-default',
+          '.entity_analytics.risk_score.lookup-default'
+        ),
+      ];
+
+      for (const query of queries) {
+        expect(query).toContain('risk_inputs = TOP(risk_score, 10, "desc", input)');
+      }
     });
   });
 

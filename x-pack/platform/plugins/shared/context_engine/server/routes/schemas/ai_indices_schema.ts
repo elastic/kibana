@@ -311,6 +311,21 @@ const kiLifecycleStatusQuerySchema = schema.oneOf(
   }
 );
 
+const kiLifecycleStatusesQuerySchema = schema.oneOf(
+  [
+    kiLifecycleStatusQuerySchema,
+    schema.arrayOf(kiLifecycleStatusQuerySchema, {
+      maxSize: KI_LIFECYCLE_STATUSES.length,
+    }),
+  ],
+  {
+    meta: {
+      description:
+        'When set, filter by governance.lifecycle.status (unset counts as active). When omitted, deleted KIs are excluded.',
+    },
+  }
+);
+
 export const listKisQuerySchema = schema.object({
   size: schema.number({
     min: 0,
@@ -324,6 +339,7 @@ export const listKisQuerySchema = schema.object({
       meta: { description: 'When set, return only KIs of this type.' },
     })
   ),
+  lifecycle_status: schema.maybe(kiLifecycleStatusesQuerySchema),
 });
 
 export const getKiQuerySchema = schema.object({
@@ -332,22 +348,7 @@ export const getKiQuerySchema = schema.object({
     maxLength: MAX_INDEX_NAME_BYTES,
     meta: { description: 'The Elasticsearch index that stores the Knowledge Indicator.' },
   }),
-  lifecycle_status: schema.maybe(
-    schema.oneOf(
-      [
-        kiLifecycleStatusQuerySchema,
-        schema.arrayOf(kiLifecycleStatusQuerySchema, {
-          maxSize: KI_LIFECYCLE_STATUSES.length,
-        }),
-      ],
-      {
-        meta: {
-          description:
-            'When set, return the KI only if its governance.lifecycle.status is in this list (unset counts as active). When omitted, deleted KIs are excluded.',
-        },
-      }
-    )
-  ),
+  lifecycle_status: schema.maybe(kiLifecycleStatusesQuerySchema),
 });
 
 export const queryAiIndicesBodySchema = schema.object({

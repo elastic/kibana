@@ -13,13 +13,12 @@ import { expect } from '@kbn/scout/ui';
 import { spaceTest, TRACES, setupTracesExperience, teardownTracesExperience } from '../fixtures';
 
 const NON_OBLT_VIEWS: Array<{ name: string; solutionView: SpaceSolutionView }> = [
-  { name: 'Classic', solutionView: 'classic' },
   { name: 'Search', solutionView: 'es' },
   { name: 'Security', solutionView: 'security' },
 ];
 
 spaceTest.describe(
-  'Traces in Discover - Profile disabled in non-observability configs',
+  'Traces in Discover - Profile gated by solution view',
   {
     tag: tags.stateful.all,
   },

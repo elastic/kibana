@@ -37,7 +37,13 @@ import type { AssetCriticalityService } from '../asset_criticality/asset_critica
 
 import type { RiskScoresPreviewResponse } from '../../../../common/api/entity_analytics';
 import type { CalculateScoresParams, RiskScoreBucket, RiskScoreCompositeBuckets } from '../types';
-import { RIEMANN_ZETA_S_VALUE, RIEMANN_ZETA_VALUE } from './constants';
+import {
+  DEFAULT_ALERT_SAMPLE_SIZE,
+  MAX_INPUTS_COUNT,
+  RIEMANN_ZETA_S_VALUE,
+  RIEMANN_ZETA_VALUE,
+} from './constants';
+
 import { filterFromRange } from './helpers';
 import { applyScoreModifiers } from './apply_score_modifiers';
 import type { PrivmonUserCrudService } from '../privilege_monitoring/users/privileged_users_crud';
@@ -45,6 +51,10 @@ import type { PrivmonUserCrudService } from '../privilege_monitoring/users/privi
 type ESQLResults = Array<
   [EntityType, { scores: EntityRiskScoreRecord[]; afterKey: EntityAfterKey }]
 >;
+
+// Ranks risk inputs by their numeric score and returns the input strings. Ranking the
+// strings themselves sorts them as text, which puts a score of 100 below 21 and 9 above 80.
+const RISK_INPUTS_TOP = `TOP(risk_score, ${MAX_INPUTS_COUNT}, "desc", input)`;
 
 const escapeEsqlStringLiteral = (value: string): string =>
   value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
@@ -200,7 +210,7 @@ export const calculateScoresWithESQL = async (
         const query = getESQL(
           entityType as EntityType,
           bounds,
-          params.alertSampleSizePerShard || 10000,
+          params.alertSampleSizePerShard || DEFAULT_ALERT_SAMPLE_SIZE,
           params.pageSize,
           params.index
         );
@@ -394,9 +404,9 @@ export const getESQL = (
     | STATS
         alert_count = count(risk_score),
         scores = MV_PSERIES_WEIGHTED_SUM(TOP(risk_score, ${
-          sampleSize ?? 10000
+          sampleSize ?? DEFAULT_ALERT_SAMPLE_SIZE
         }, "desc"), ${RIEMANN_ZETA_S_VALUE}),
-        risk_inputs = TOP(input, 10, "desc")
+        risk_inputs = ${RISK_INPUTS_TOP}
     BY ${identifierField}
     | SORT scores DESC
     | LIMIT ${pageSize}
@@ -635,9 +645,9 @@ export const getBaseScoreESQL = (
     | STATS
         alert_count = count(risk_score),
         scores = MV_PSERIES_WEIGHTED_SUM(TOP(risk_score, ${
-          sampleSize ?? 10000
+          sampleSize ?? DEFAULT_ALERT_SAMPLE_SIZE
         }, "desc"), ${RIEMANN_ZETA_S_VALUE}),
-        risk_inputs = TOP(input, 10, "desc")
+        risk_inputs = ${RISK_INPUTS_TOP}
         BY entity_id
     | SORT scores DESC
     | LIMIT ${pageSize}
@@ -725,6 +735,8 @@ export const getResolutionScoreESQLByIds = (
   // then LOOKUP JOIN to recover resolution_target_id, then filter on resolution_target_id
   // BEFORE the CONCAT/base64 builders run so per-row string-allocation work only
   // happens for alerts that survive the IN-clause.
+  // The alert timestamp is renamed before the join because lookup rows have their own
+  // @timestamp, which would otherwise replace the alert's (and null it on unmatched rows).
   const query = /* esql */ `
   SET unmapped_fields="nullify";
   FROM ${alertsIndex} METADATA _index
@@ -732,6 +744,7 @@ export const getResolutionScoreESQLByIds = (
     ${fieldEvalsClause}
     ${euidEvalClause}
     ${storedEuidCoalesceClause}
+    | RENAME @timestamp as time
     | LOOKUP JOIN ${lookupIndex} ON entity_id
     | EVAL resolution_target_id = COALESCE(resolution_target_id, entity_id),
            relationship_type = COALESCE(relationship_type, "self")
@@ -740,8 +753,7 @@ export const getResolutionScoreESQLByIds = (
              kibana.alert.rule.name as rule_name,
              kibana.alert.rule.uuid as rule_id,
              kibana.alert.uuid as alert_id,
-             event.kind as category,
-             @timestamp as time
+             event.kind as category
     | EVAL rule_name_b64 = TO_BASE64(rule_name),
            category_b64 = TO_BASE64(category)
     | EVAL input = CONCAT(""" {"risk_score": """", risk_score::keyword, """", "time": """", time::keyword, """", "index": """", _index, """", "rule_name_b64": """", rule_name_b64, """\", "category_b64": """", category_b64, """\", "id": \"""", alert_id, """\" } """)
@@ -749,9 +761,9 @@ export const getResolutionScoreESQLByIds = (
     | STATS
         alert_count = count(risk_score),
         scores = MV_PSERIES_WEIGHTED_SUM(TOP(risk_score, ${
-          sampleSize ?? 10000
+          sampleSize ?? DEFAULT_ALERT_SAMPLE_SIZE
         }, "desc"), ${RIEMANN_ZETA_S_VALUE}),
-        risk_inputs = TOP(input, 10, "desc"),
+        risk_inputs = ${RISK_INPUTS_TOP},
         contributing_entities_raw = VALUES(entity_with_rel)
         BY resolution_target_id
     | SORT scores DESC
