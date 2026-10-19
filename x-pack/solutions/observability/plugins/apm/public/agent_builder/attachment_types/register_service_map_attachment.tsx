@@ -28,7 +28,7 @@ export const registerServiceMapAttachment = (attachments: AttachmentServiceStart
       i18n.translate('xpack.apm.agentBuilder.attachments.serviceMap.label', {
         defaultMessage: 'Service Map',
       }),
-    getIcon: () => 'graphApp',
+    getIcon: () => 'map',
     renderInlineContent: ({ attachment }) => {
       return (
         <div
