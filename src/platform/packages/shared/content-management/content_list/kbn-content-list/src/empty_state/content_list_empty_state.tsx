@@ -23,6 +23,8 @@ export interface ContentListEmptyStatePrimaryAction {
 
 export interface ContentListEmptyStateProps {
   iconType?: string;
+  /** Custom icon, such as an `EuiIllustration`. */
+  icon?: ReactNode;
   title?: ReactNode;
   body?: ReactNode;
   primaryAction?: ContentListEmptyStatePrimaryAction;
@@ -37,7 +39,8 @@ export interface ContentListEmptyStateProps {
  * as `emptyState` when you need custom copy or actions.
  */
 export const ContentListEmptyState = ({
-  iconType = 'documents',
+  iconType,
+  icon,
   title,
   body,
   primaryAction,
@@ -66,7 +69,7 @@ export const ContentListEmptyState = ({
   const actions = primaryAction ? (
     <>
       <EuiButton
-        fill
+        color="text"
         iconType={primaryAction.iconType ?? 'plusCircle'}
         onClick={primaryAction.onClick}
         disabled={primaryAction.disabled}
@@ -94,6 +97,7 @@ export const ContentListEmptyState = ({
 
   return (
     <EuiEmptyPrompt
+      icon={icon}
       iconType={iconType}
       title={titleNode}
       body={bodyNode}
