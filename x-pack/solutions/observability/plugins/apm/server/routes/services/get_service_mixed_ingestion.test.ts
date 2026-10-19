@@ -8,6 +8,7 @@
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
 import { ENVIRONMENT_ALL_VALUE } from '../../../common/environment_filter_values';
 import { SERVICE_ENVIRONMENT } from '../../../common/es_fields/apm';
+import { environmentQuery } from '../../../common/utils/environment_query';
 import { getServiceMixedIngestion } from './get_service_mixed_ingestion';
 
 type SearchMock = jest.Mock<Promise<unknown>>;
@@ -74,14 +75,10 @@ describe('getServiceMixedIngestion', () => {
 
       await getServiceMixedIngestion({ ...baseParams, apmEventClient });
 
-      const filters = getFilterClauses(search);
-      const hasEnvFilter = filters.some(
-        (f: Record<string, unknown>) => 'term' in f && SERVICE_ENVIRONMENT in (f.term as object)
-      );
-      expect(hasEnvFilter).toBe(false);
+      expect(JSON.stringify(getFilterClauses(search))).not.toContain(SERVICE_ENVIRONMENT);
     });
 
-    it('adds a term filter for a specific environment', async () => {
+    it('adds an environment filter for a specific environment', async () => {
       const search: SearchMock = jest.fn().mockResolvedValueOnce(mixedResponse());
       const apmEventClient = { search } as unknown as APMEventClient;
 
@@ -91,11 +88,9 @@ describe('getServiceMixedIngestion', () => {
         apmEventClient,
       });
 
-      const filters = getFilterClauses(search);
-      const envFilter = filters.find(
-        (f: Record<string, unknown>) => 'term' in f && SERVICE_ENVIRONMENT in (f.term as object)
+      expect(getFilterClauses(search)).toEqual(
+        expect.arrayContaining(environmentQuery('production'))
       );
-      expect(envFilter).toEqual({ term: { [SERVICE_ENVIRONMENT]: 'production' } });
     });
   });
 

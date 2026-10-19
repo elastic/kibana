@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
-import { OBSERVABILITY_ALERTING_HOST } from '../observability_alerting_host';
+import { OBSERVABILITY_ALERTING_HOST } from '../../observability_alerting_host';
 import { createRuleAttachmentDefinition } from './rule_attachment_definition';
 
 const mockUpsertRule = jest.fn().mockImplementation(async (id: string) => ({ id }));

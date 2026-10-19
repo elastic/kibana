@@ -58,6 +58,7 @@ const defaultActionsConfig: ActionsConfig = {
     maxEmitted: 25,
     ...defaultInboundEventsLimitConfigs,
   },
+  connectorSigningKeys: { enabled: false },
 };
 
 describe('ensureUriAllowed', () => {
@@ -1036,7 +1037,7 @@ describe('isEarsExperimentalEnabled()', () => {
 });
 
 describe('isInboundEventsEnabled()', () => {
-  test('returns false by default', () => {
+  test('returns false when inboundEvents.enabled is false', () => {
     const acu = getActionsConfigurationUtilities(defaultActionsConfig);
     expect(acu.isInboundEventsEnabled()).toBe(false);
   });
@@ -1050,6 +1051,21 @@ describe('isInboundEventsEnabled()', () => {
       },
     });
     expect(acu.isInboundEventsEnabled()).toBe(true);
+  });
+});
+
+describe('isConnectorSigningKeysEnabled()', () => {
+  test('returns false by default', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    expect(acu.isConnectorSigningKeysEnabled()).toBe(false);
+  });
+
+  test('returns true when connectorSigningKeys.enabled is true', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      connectorSigningKeys: { enabled: true },
+    });
+    expect(acu.isConnectorSigningKeysEnabled()).toBe(true);
   });
 });
 

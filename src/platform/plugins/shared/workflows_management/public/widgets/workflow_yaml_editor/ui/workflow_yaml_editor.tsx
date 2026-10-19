@@ -15,6 +15,7 @@ import type { SchemasSettings } from 'monaco-yaml';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import type { Document } from 'yaml';
+import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
 import { monaco, YAML_LANG_ID } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { isMac } from '@kbn/shared-ux-utility';
@@ -69,6 +70,7 @@ import {
   selectStepExecutions,
   selectWorkflow,
   selectWorkflowDefinition,
+  selectYamlString,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import {
   HIGHLIGHTED_STEP_TRIGGER,
@@ -85,7 +87,7 @@ import { useMonacoMarkersChangedInterceptor } from '../../../features/validate_w
 import { useYamlValidation } from '../../../features/validate_workflow_yaml/lib/use_yaml_validation';
 import { useWorkflowJsonSchema } from '../../../features/validate_workflow_yaml/model/use_workflow_json_schema';
 import { useKibana } from '../../../hooks/use_kibana';
-import { useWorkflowEditorReadOnly } from '../../../hooks/use_workflow_editor_read_only';
+import { useWorkflowEditorReadOnlyReason } from '../../../hooks/use_workflow_editor_read_only';
 import { useWorkflowsExperimentalUiSetting } from '../../../hooks/use_workflows_experimental_ui_setting';
 import { UnsavedChangesPrompt, YamlEditor } from '../../../shared/ui';
 import { triggerSchemas } from '../../../trigger_schemas';
@@ -114,13 +116,16 @@ import { insertTriggerSnippet } from '../lib/snippets/insert_trigger_snippet';
 import { useRegisterHoverCommands } from '../lib/use_register_hover_commands';
 import { useRegisterKeyboardCommands } from '../lib/use_register_keyboard_commands';
 import { navigateToErrorPosition } from '../lib/utils';
-import { MINIMAP_RESERVE_PX } from '../styles/constants';
+import { MINIMAP_HIDE_BREAKPOINT_PX, MINIMAP_RESERVE_PX } from '../styles/constants';
 import { GlobalWorkflowEditorStyles } from '../styles/global_workflow_editor_styles';
 import { useDynamicTypeIcons } from '../styles/use_dynamic_type_icons';
 import {
   EXECUTION_YAML_SNAPSHOT_CLASS,
   useWorkflowEditorStyles,
 } from '../styles/use_workflow_editor_styles';
+
+// Monaco's default `scrollbar.verticalScrollbarSize`.
+const MONACO_VERTICAL_SCROLLBAR_SIZE = 14;
 
 const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
   ...WORKFLOW_MONACO_LAYOUT_OPTIONS,
@@ -183,6 +188,17 @@ export interface WorkflowYAMLEditorProps {
    * floating over the editor (e.g. WorkflowDetailBottomBar) can sit above it.
    */
   onValidationPanelHeightChange?: (height: number) => void;
+  /**
+   * Called when an agent proposal arrives while the user views a past
+   * execution. The proposal shows once the parent opens the Workflow tab.
+   */
+  onAgentProposalHeld?: () => void;
+  /** Prompt from the agentic-first landing, sent when the chat auto-opens. */
+  initialAgentMessage?: string;
+  /** Attachments of that prompt (e.g. pasted images). */
+  initialAgentAttachments?: ConversationAttachment[];
+  /** Opens the Agent Builder sidebar on mount for an unsaved workflow. */
+  autoOpenAgentChat?: boolean;
 }
 
 export const WorkflowYAMLEditor = ({
@@ -194,6 +210,10 @@ export const WorkflowYAMLEditor = ({
   onToggleEditorMode,
   hideEditorTools = false,
   onValidationPanelHeightChange,
+  onAgentProposalHeld,
+  initialAgentMessage,
+  initialAgentAttachments,
+  autoOpenAgentChat,
 }: WorkflowYAMLEditorProps) => {
   const isVisualEditorEnabled = useWorkflowsExperimentalUiSetting(
     WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID,
@@ -203,6 +223,12 @@ export const WorkflowYAMLEditor = ({
   // read-only graph view is GA. The setting is expected to gate the authoring graph view later.
   const { notifications, http } = useKibana().services;
   const euiThemeContext = useEuiTheme();
+  const [editorAreaWrapper, setEditorAreaWrapper] = useState<HTMLDivElement | null>(null);
+  const { width: editorAreaWidth } = useResizeObserver(editorAreaWrapper, 'width');
+  // Width is 0 until the first measurement; keep the minimap until then to avoid a flash.
+  const isMinimapVisible =
+    isVisualEditorEnabled &&
+    (editorAreaWidth === 0 || editorAreaWidth >= MINIMAP_HIDE_BREAKPOINT_PX);
 
   useEffect(() => {
     setStabilityBadgeThemeContext(euiThemeContext);
@@ -213,7 +239,8 @@ export const WorkflowYAMLEditor = ({
   const dispatch = useDispatch();
   const workflow = useSelector(selectWorkflow);
   const isExecutionYaml = useSelector(selectIsExecutionsTab);
-  const isReadOnlyYaml = useWorkflowEditorReadOnly();
+  const readOnlyReason = useWorkflowEditorReadOnlyReason();
+  const isReadOnlyYaml = readOnlyReason !== undefined;
   const isReadOnlyYamlRef = useRef(isReadOnlyYaml);
   isReadOnlyYamlRef.current = isReadOnlyYaml;
   const onChange = useCallback(
@@ -369,6 +396,8 @@ export const WorkflowYAMLEditor = ({
     dispatch(setHasYamlSchemaValidationErrors(hasErrors));
   }, [validationErrors, dispatch]);
 
+  const workflowTabYaml = useSelector(selectYamlString);
+
   // Agent Builder integration for AI-assisted editing
   const { isAgentBuilderAvailable, openAgentChat } = useAgentBuilderIntegration({
     editorRef,
@@ -376,6 +405,14 @@ export const WorkflowYAMLEditor = ({
     workflowId: workflow?.id,
     workflowName: getWorkflowName(workflow, workflowDefinition),
     validationErrors,
+    readOnlyReason,
+    // The store catches up with the URL tab one render later, so wait for both.
+    canApplyProposals: !isReadOnlyYaml && !isExecutionYaml,
+    onProposalDeferred: readOnlyReason === 'executions_tab' ? onAgentProposalHeld : undefined,
+    workflowTabYaml,
+    initialAgentMessage,
+    initialAgentAttachments,
+    autoOpenAgentChat,
   });
 
   const handleErrorClick = useCallback((error: YamlValidationResult) => {
@@ -393,10 +430,10 @@ export const WorkflowYAMLEditor = ({
 
       setPositionStyles({
         top: `${_editor.getTopForLineNumber(stepInfo.lineStart, true) - _editor.getScrollTop()}px`,
-        right: isExecutionYaml || !isVisualEditorEnabled ? '0px' : `${MINIMAP_RESERVE_PX}px`,
+        right: isExecutionYaml || !isMinimapVisible ? '0px' : `${MINIMAP_RESERVE_PX}px`,
       });
     },
-    [isExecutionYaml, isVisualEditorEnabled]
+    [isExecutionYaml, isMinimapVisible]
   );
   const { onFixWithAi } = useFixWithAi({
     editorRef,
@@ -833,15 +870,13 @@ export const WorkflowYAMLEditor = ({
       readOnly: isReadOnlyYaml,
       // The step minimap is the primary scroll indicator — hide Monaco's scrollbar so it
       // doesn't visually compete. Programmatic scrolling (revealLineInCenter, etc.) is
-      // unaffected; only the draggable track is removed.
-      ...(isVisualEditorEnabled && {
-        scrollbar: {
-          vertical: 'hidden' as const,
-          verticalScrollbarSize: 0,
-        },
-      }),
+      // unaffected; only the draggable track is removed. Always pass both values: Monaco merges
+      // option updates, so omitting them would keep the scrollbar hidden.
+      scrollbar: isMinimapVisible
+        ? { vertical: 'hidden' as const, verticalScrollbarSize: 0 }
+        : { vertical: 'auto' as const, verticalScrollbarSize: MONACO_VERTICAL_SCROLLBAR_SIZE },
     };
-  }, [isReadOnlyYaml, isVisualEditorEnabled]);
+  }, [isReadOnlyYaml, isMinimapVisible]);
 
   useEffect(() => {
     // Patch setModelMarkers to set initial markers (monaco-react#70) and to intercept/format
@@ -929,9 +964,9 @@ export const WorkflowYAMLEditor = ({
           <StepActions onStepRun={onStepRun} />
         </div>
       )}
-      <div css={styles.editorAreaWrapper}>
+      <div css={styles.editorAreaWrapper} ref={setEditorAreaWrapper}>
         {/* Step minimap — experimental; hidden with the editor body in graph view. */}
-        {isVisualEditorEnabled && isActive ? (
+        {isMinimapVisible && isActive ? (
           <div
             css={styles.minimapContainer}
             ref={minimapContainerRef}
@@ -947,7 +982,7 @@ export const WorkflowYAMLEditor = ({
         <div
           css={[
             styles.editorContainer,
-            isVisualEditorEnabled && css({ paddingRight: MINIMAP_RESERVE_PX }),
+            isMinimapVisible && css({ paddingRight: MINIMAP_RESERVE_PX }),
           ]}
           className={classnames({ [EXECUTION_YAML_SNAPSHOT_CLASS]: isExecutionYaml })}
         >

@@ -179,7 +179,6 @@ describe('WorkflowsService (facade)', () => {
       'getChildWorkflowExecutions',
       'getExecutionStepExecutions',
       'getWorkflowExecutions',
-      'getWorkflowExecutionHistory',
       'getStepExecutions',
       'searchStepExecutions',
       'getExecutionLogs',
@@ -233,6 +232,7 @@ describe('WorkflowsService (facade)', () => {
       expect(changeHistoryInstance.initialize).toHaveBeenCalledWith({
         elasticsearchClient: esClient,
         authService: coreStart.security!.authc,
+        userProfileService: coreStart.userProfile,
       });
     });
 
@@ -403,7 +403,6 @@ describe('WorkflowsService (facade)', () => {
         'default'
       );
       await service.getWorkflowExecutions({ workflowId: 'wf-1' } as any, 'default');
-      await service.getWorkflowExecutionHistory('exec-1', 'default');
       await service.getStepExecutions({ executionId: 'exec-1' } as any, 'default');
       await service.searchStepExecutions({ executionId: 'exec-1' } as any, 'default');
       await service.getExecutionLogs({ executionId: 'exec-1' } as any);
@@ -422,7 +421,6 @@ describe('WorkflowsService (facade)', () => {
         'default'
       );
       expect(executionQuerySpies.getWorkflowExecutions).toHaveBeenCalled();
-      expect(executionQuerySpies.getWorkflowExecutionHistory).toHaveBeenCalled();
       expect(executionQuerySpies.getStepExecutions).toHaveBeenCalled();
       expect(executionQuerySpies.searchStepExecutions).toHaveBeenCalled();
       expect(executionQuerySpies.getExecutionLogs).toHaveBeenCalled();

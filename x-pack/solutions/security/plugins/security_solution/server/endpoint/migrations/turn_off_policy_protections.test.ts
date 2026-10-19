@@ -21,7 +21,10 @@ import {
 import type { ProductFeaturesService } from '../../lib/product_features_service/product_features_service';
 import { createProductFeaturesServiceMock } from '../../lib/product_features_service/mocks';
 import { merge } from 'lodash';
-import { DefaultPolicyNotificationMessage } from '../../../common/endpoint/models/policy_config';
+import {
+  DefaultPolicyNotificationMessage,
+  DefaultPolicyRuleNotificationMessage,
+} from '../../../common/endpoint/models/policy_config';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { createEndpointFleetServicesFactoryMock } from '../services/fleet/endpoint_fleet_services_factory.mocks';
 
@@ -68,13 +71,13 @@ describe('Turn Off Policy Protections Migration', () => {
       policy.inputs[0].config.policy.value = merge(
         {},
         policy.inputs[0].config.policy.value,
-        resetCustomNotifications()
+        resetCustomNotifications(policy.inputs[0].config.policy.value)
       );
     } else if (withCustomNotifications) {
       policy.inputs[0].config.policy.value = merge(
         {},
         policy.inputs[0].config.policy.value,
-        resetCustomNotifications('custom test')
+        resetCustomNotifications(policy.inputs[0].config.policy.value, 'custom test')
       );
     }
     return policy;
@@ -113,13 +116,13 @@ describe('Turn Off Policy Protections Migration', () => {
                     }),
                     popup: expect.objectContaining({
                       behavior_protection: expect.objectContaining({
-                        message: defaultNotes ? DefaultPolicyNotificationMessage : 'custom test',
+                        message: defaultNotes ? '' : 'custom test',
                       }),
                       memory_protection: expect.objectContaining({
-                        message: defaultNotes ? DefaultPolicyNotificationMessage : 'custom test',
+                        message: defaultNotes ? '' : 'custom test',
                       }),
                       malware: expect.objectContaining({
-                        message: defaultNotes ? DefaultPolicyNotificationMessage : 'custom test',
+                        message: defaultNotes ? '' : 'custom test',
                       }),
                     }),
                   }),
@@ -135,13 +138,13 @@ describe('Turn Off Policy Protections Migration', () => {
                     }),
                     popup: expect.objectContaining({
                       behavior_protection: expect.objectContaining({
-                        message: defaultNotes ? DefaultPolicyNotificationMessage : 'custom test',
+                        message: defaultNotes ? '' : 'custom test',
                       }),
                       memory_protection: expect.objectContaining({
-                        message: defaultNotes ? DefaultPolicyNotificationMessage : 'custom test',
+                        message: defaultNotes ? '' : 'custom test',
                       }),
                       malware: expect.objectContaining({
-                        message: defaultNotes ? DefaultPolicyNotificationMessage : 'custom test',
+                        message: defaultNotes ? '' : 'custom test',
                       }),
                     }),
                   }),
@@ -160,16 +163,16 @@ describe('Turn Off Policy Protections Migration', () => {
                     }),
                     popup: expect.objectContaining({
                       behavior_protection: expect.objectContaining({
-                        message: defaultNotes ? DefaultPolicyNotificationMessage : 'custom test',
+                        message: defaultNotes ? '' : 'custom test',
                       }),
                       memory_protection: expect.objectContaining({
-                        message: defaultNotes ? DefaultPolicyNotificationMessage : 'custom test',
+                        message: defaultNotes ? '' : 'custom test',
                       }),
                       malware: expect.objectContaining({
-                        message: defaultNotes ? DefaultPolicyNotificationMessage : 'custom test',
+                        message: defaultNotes ? '' : 'custom test',
                       }),
                       ransomware: expect.objectContaining({
-                        message: defaultNotes ? DefaultPolicyNotificationMessage : 'custom test',
+                        message: defaultNotes ? '' : 'custom test',
                       }),
                     }),
                   }),
@@ -357,10 +360,10 @@ describe('Turn Off Policy Protections Migration', () => {
         );
         expect(
           mockArguments[0].inputs[0].config.policy.value.windows.popup.memory_protection.message
-        ).toBe(DefaultPolicyNotificationMessage);
+        ).toBe('');
         expect(
           mockArguments[1].inputs[0].config.policy.value.windows.popup.memory_protection.message
-        ).toBe(DefaultPolicyNotificationMessage);
+        ).toBe('');
       });
     });
 
@@ -460,6 +463,56 @@ describe('Turn Off Policy Protections Migration', () => {
           }),
           { user: { username: 'elastic' } }
         );
+      });
+    });
+
+    describe('Essentials tier (endpointCustomNotification disabled, endpointTrustedDevices disabled)', () => {
+      beforeEach(() => {
+        productFeatureService = createProductFeaturesServiceMock(
+          ALL_PRODUCT_FEATURE_KEYS.filter(
+            (key) => key !== 'endpoint_trusted_devices' && key !== 'endpoint_custom_notification'
+          )
+        );
+      });
+
+      const generateStrippedEssentialsPolicy = () => {
+        const policy = new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy();
+        delete policy.inputs[0].config.policy.value.windows.popup.device_control;
+        delete policy.inputs[0].config.policy.value.mac.popup.device_control;
+        return policy;
+      };
+
+      it('does not update a stripped policy holding the templates the policy details UI saves', async () => {
+        const policy = generateStrippedEssentialsPolicy();
+        const policyValue = policy.inputs[0].config.policy.value;
+        for (const os of ['windows', 'mac', 'linux'] as const) {
+          policyValue[os].popup.malware.message = DefaultPolicyNotificationMessage;
+          policyValue[os].popup.memory_protection.message = DefaultPolicyRuleNotificationMessage;
+          policyValue[os].popup.behavior_protection.message = DefaultPolicyRuleNotificationMessage;
+        }
+
+        mockPolicyListResponse({ items: [policy] });
+
+        await callTurnOffPolicyProtections();
+
+        expect(fleetServices.packagePolicy.bulkUpdate).not.toHaveBeenCalled();
+      });
+
+      it('resets a custom memory message to the factory default without recreating popup.device_control', async () => {
+        const policy = generateStrippedEssentialsPolicy();
+        policy.inputs[0].config.policy.value.windows.popup.memory_protection.message = 'custom';
+
+        mockPolicyListResponse({ items: [policy] });
+
+        await callTurnOffPolicyProtections();
+
+        const mockCalls = (fleetServices.packagePolicy.bulkUpdate as jest.Mock).mock.calls;
+        expect(mockCalls).toHaveLength(1);
+        const updatedPolicyValue = mockCalls[0][2][0].inputs[0].config.policy.value;
+
+        expect(updatedPolicyValue.windows.popup.memory_protection.message).toBe('');
+        expect(updatedPolicyValue.windows.popup).not.toHaveProperty('device_control');
+        expect(updatedPolicyValue.mac.popup).not.toHaveProperty('device_control');
       });
     });
   });

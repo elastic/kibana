@@ -15,21 +15,34 @@ import {
 } from '../saved_objects';
 import { DEFAULT_CONFIG_BY_TYPE, getMergedConfig } from './merge_config';
 
-const ALL_TYPES: readonly EntityType[] = ['user', 'host', 'service', 'generic'];
+const TYPES_WITHOUT_BUILT_IN_DEFAULTS: readonly EntityType[] = ['user', 'host'];
 
 describe('getMergedConfig', () => {
   describe('with nothing overridden anywhere', () => {
-    it('is a no-op for existing deployments: every entity type resolves to the built-in defaults', () => {
-      for (const type of ALL_TYPES) {
+    it('is a no-op for existing deployments: user and host resolve to the built-in defaults', () => {
+      for (const type of TYPES_WITHOUT_BUILT_IN_DEFAULTS) {
         expect(getMergedConfig(type, {}, undefined)).toEqual(LATEST_LOG_EXTRACTION_DEFAULTS);
       }
     });
 
-    it('resolves the same config for all four entity types', () => {
-      const [first, ...rest] = ALL_TYPES.map((type) => getMergedConfig(type, {}, undefined));
+    it('resolves the same config for user and host', () => {
+      const [first, ...rest] = TYPES_WITHOUT_BUILT_IN_DEFAULTS.map((type) =>
+        getMergedConfig(type, {}, undefined)
+      );
       for (const config of rest) {
         expect(config).toEqual(first);
       }
+    });
+
+    it('resolves service and generic to their own built-in cadence', () => {
+      expect(getMergedConfig('service', {}, undefined)).toEqual({
+        ...LATEST_LOG_EXTRACTION_DEFAULTS,
+        frequency: '10m',
+      });
+      expect(getMergedConfig('generic', {}, undefined)).toEqual({
+        ...LATEST_LOG_EXTRACTION_DEFAULTS,
+        frequency: '30m',
+      });
     });
   });
 
@@ -119,8 +132,11 @@ describe('getMergedConfig', () => {
       saved.clear();
     });
 
-    it('ships empty, so no entity type currently deviates from the store-wide code defaults', () => {
-      expect(Object.keys(DEFAULT_CONFIG_BY_TYPE)).toEqual([]);
+    it('ships with service and generic cadence overrides only, so user and host stay on the store-wide code defaults', () => {
+      expect(DEFAULT_CONFIG_BY_TYPE).toEqual({
+        service: { frequency: '10m' },
+        generic: { frequency: '30m' },
+      });
     });
 
     it('lets a seeded per entity-type default win over the store-wide code default', () => {
@@ -140,6 +156,14 @@ describe('getMergedConfig', () => {
         ...LATEST_LOG_EXTRACTION_DEFAULTS,
         frequency: '5m',
       });
+    });
+
+    it('lets a store-wide override win over the built-in service cadence default', () => {
+      expect(getMergedConfig('service', { frequency: '5m' }, undefined).frequency).toBe('5m');
+    });
+
+    it('lets a stored per entity-type override win over the built-in service cadence default', () => {
+      expect(getMergedConfig('service', {}, { frequency: '2m' }).frequency).toBe('2m');
     });
   });
 
@@ -352,6 +376,43 @@ describe('getMergedConfig', () => {
       );
 
       expect(merged.maxLogsPerWindowCapBehavior).toBe('drop');
+    });
+  });
+
+  describe('DEFAULT_CONFIG_BY_TYPE and DEFAULT_CONFIG_BY_MODE precedence', () => {
+    it('resolves user and host to the 1m code default frequency in every mode', () => {
+      for (const type of TYPES_WITHOUT_BUILT_IN_DEFAULTS) {
+        expect(getMergedConfig(type, {}, undefined, 'single').frequency).toBe('1m');
+        expect(getMergedConfig(type, {}, undefined, 'priority').frequency).toBe('1m');
+        expect(getMergedConfig(type, {}, undefined, 'nonPriority').frequency).toBe('1m');
+      }
+    });
+
+    it('lets a seeded per entity-type frequency default survive priority and non-priority mode', () => {
+      DEFAULT_CONFIG_BY_TYPE.user = { frequency: '2m' };
+
+      expect(getMergedConfig('user', {}, undefined, 'priority').frequency).toBe('2m');
+      expect(getMergedConfig('user', {}, undefined, 'nonPriority').frequency).toBe('2m');
+
+      delete DEFAULT_CONFIG_BY_TYPE.user;
+    });
+
+    it('still resolves maxLogsPerWindowCapBehavior from the mode layer when a per-type default is seeded', () => {
+      DEFAULT_CONFIG_BY_TYPE.user = { frequency: '2m' };
+
+      expect(getMergedConfig('user', {}, undefined, 'priority').maxLogsPerWindowCapBehavior).toBe(
+        'defer'
+      );
+      expect(
+        getMergedConfig('user', {}, undefined, 'nonPriority').maxLogsPerWindowCapBehavior
+      ).toBe('drop');
+
+      delete DEFAULT_CONFIG_BY_TYPE.user;
+    });
+
+    it('resolves the built-in service cadence default in both single and priority mode', () => {
+      expect(getMergedConfig('service', {}, undefined, 'single').frequency).toBe('10m');
+      expect(getMergedConfig('service', {}, undefined, 'priority').frequency).toBe('10m');
     });
   });
 

@@ -139,7 +139,6 @@ describe('allowedExperimentalValues', () => {
     'enableResolveDependencies',
     'enableOtelUI',
     'enableIncludeTagsInEvents',
-    'enableOtlpOutput',
     'enableIntegrationCollectionTiles',
     'enableIntegrationTileClickToAdd',
   ];

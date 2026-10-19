@@ -43,8 +43,10 @@ import {
   isPolicySetToEventCollectionOnly,
   ensureOnlyEventCollectionIsAllowed,
   isBillablePolicy,
+  isLinuxRansomwareProtectionEnabled,
   removeCustomYaraSignatures,
   removeDeviceControl,
+  removeLinuxRansomware,
 } from '../../common/endpoint/models/policy_config_helpers';
 import {
   ProtectionModes,
@@ -68,12 +70,19 @@ import { createEventFilters } from './handlers/create_event_filters';
 import type { ProductFeaturesService } from '../lib/product_features_service/product_features_service';
 import { removeProtectionUpdatesNote } from './handlers/remove_protection_updates_note';
 import { catchAndWrapError } from '../endpoint/utils';
+import { EndpointIntegrationFleetError } from './handlers/errors';
 
 const isEndpointPackagePolicy = <T extends { package?: { name: string } }>(
   packagePolicy: T
 ): boolean => {
   return packagePolicy.package?.name === 'endpoint';
 };
+
+const isApiPassThroughError = (error: unknown): boolean =>
+  typeof error === 'object' &&
+  error !== null &&
+  'apiPassThrough' in error &&
+  Boolean(error.apiPassThrough);
 
 const getEndpointPolicyForAgentPolicy = async (
   fleetServices: EndpointInternalFleetServicesInterface,
@@ -281,43 +290,72 @@ export const getPackagePolicyUpdateCallback = (
 
     const endpointIntegrationData = newPackagePolicy as NewPolicyData;
 
-    // The advanced settings UI may delete mac.ransomware.mode when cleared;
-    // restore the default before validation so the typed field is never missing.
-    const policyValue = endpointIntegrationData.inputs?.[0]?.config?.policy?.value as
-      | PolicyConfig
-      | undefined;
-    if (policyValue?.mac?.ransomware && !policyValue.mac.ransomware.mode) {
-      policyValue.mac.ransomware.mode = ProtectionModes.off;
-    }
+    try {
+      // The advanced settings UI may delete mac.ransomware.mode when cleared;
+      // restore the default before validation so the typed field is never missing.
+      const policyValue = endpointIntegrationData.inputs?.[0]?.config?.policy?.value as
+        | PolicyConfig
+        | undefined;
+      if (policyValue?.mac?.ransomware && !policyValue.mac.ransomware.mode) {
+        policyValue.mac.ransomware.mode = ProtectionModes.off;
+      }
 
-    // Validate that Endpoint Security policy uses only enabled App Features
-    validatePolicyAgainstProductFeatures(endpointIntegrationData.inputs, productFeatures);
+      // Stripped before product-feature and license validation so deployments with the feature
+      // gated off never get an error about a field they cannot set.
+      if (
+        !isLinuxRansomwareProtectionEnabled(experimentalFeatures) &&
+        endpointIntegrationData.inputs?.[0]?.config?.policy?.value
+      ) {
+        endpointIntegrationData.inputs[0].config.policy.value = removeLinuxRansomware(
+          endpointIntegrationData.inputs[0].config.policy.value as PolicyConfig
+        );
+      }
 
-    // Stripped before license validation so deployments with the feature gated off never get a
-    // license error about a field they cannot set.
-    if (
-      (!productFeatures.isEnabled(ProductFeatureSecurityKey.endpointCustomYaraSignatures) ||
-        !experimentalFeatures.customYaraSignaturesEnabled) &&
-      endpointIntegrationData.inputs?.[0]?.config?.policy?.value
-    ) {
-      endpointIntegrationData.inputs[0].config.policy.value = removeCustomYaraSignatures(
-        endpointIntegrationData.inputs[0].config.policy.value as PolicyConfig
+      // Validate that Endpoint Security policy uses only enabled App Features
+      validatePolicyAgainstProductFeatures(endpointIntegrationData.inputs, productFeatures);
+
+      // Stripped before license validation so deployments with the feature gated off never get a
+      // license error about a field they cannot set.
+      if (
+        (!productFeatures.isEnabled(ProductFeatureSecurityKey.endpointCustomYaraSignatures) ||
+          !experimentalFeatures.customYaraSignaturesEnabled) &&
+        endpointIntegrationData.inputs?.[0]?.config?.policy?.value
+      ) {
+        endpointIntegrationData.inputs[0].config.policy.value = removeCustomYaraSignatures(
+          endpointIntegrationData.inputs[0].config.policy.value as PolicyConfig
+        );
+      }
+
+      // Validate that Endpoint Security policy is valid against current license
+      if (endpointIntegrationData.inputs?.[0]?.config?.policy?.value) {
+        validatePolicyAgainstLicense(
+          // The cast below is needed in order to ensure proper typing for
+          // the policy configuration specific for endpoint
+          endpointIntegrationData.inputs[0].config?.policy?.value as PolicyConfig,
+          licenseService,
+          logger
+        );
+      }
+
+      // Make sure policy includes general expected data
+      validateEndpointPackagePolicy(endpointIntegrationData.inputs, 'update');
+    } catch (error) {
+      // Fleet swallows callback errors lacking `apiPassThrough` and persists the payload unvalidated,
+      // so any unexpected failure while checking it must be converted into a rejection.
+      if (isApiPassThroughError(error)) {
+        throw error;
+      }
+
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error(
+        `Endpoint integration policy [${endpointIntegrationData.id}][${endpointIntegrationData.name}] update rejected: unexpected error while validating payload: ${errorMessage}`,
+        { error }
+      );
+
+      throw new EndpointIntegrationFleetError(
+        `Invalid Elastic Defend policy configuration: ${errorMessage}`
       );
     }
-
-    // Validate that Endpoint Security policy is valid against current license
-    if (endpointIntegrationData.inputs?.[0]?.config?.policy?.value) {
-      validatePolicyAgainstLicense(
-        // The cast below is needed in order to ensure proper typing for
-        // the policy configuration specific for endpoint
-        endpointIntegrationData.inputs[0].config?.policy?.value as PolicyConfig,
-        licenseService,
-        logger
-      );
-    }
-
-    // Make sure policy includes general expected data
-    validateEndpointPackagePolicy(endpointIntegrationData.inputs, 'update');
 
     if (endpointIntegrationData.id) {
       await notifyProtectionFeatureUsage(

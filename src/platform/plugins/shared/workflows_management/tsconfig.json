@@ -109,9 +109,6 @@
     "@kbn/agent-builder-browser",
     "@kbn/share-plugin",
     "@kbn/core-security-server",
-    "@kbn/core-user-profile-common",
-    "@kbn/core-user-profile-server",
-    "@kbn/core-user-profile-server-mocks",
     "@kbn/logging",
     "@kbn/agent-builder-sml-plugin",
     "@kbn/std",
@@ -143,6 +140,7 @@
     "@kbn/test-es-server",
     "@kbn/core-security-common",
     "@kbn/core-http-browser-mocks",
+    "@kbn/core-spaces-common",
   ],
   "exclude": ["target/**/*"]
 }

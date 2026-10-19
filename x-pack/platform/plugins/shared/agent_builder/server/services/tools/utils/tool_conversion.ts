@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { z, type ZodObject } from '@kbn/zod/v4';
+import type { ZodObject } from '@kbn/zod/v4';
+import { zodToolInputToJsonSchema } from '@kbn/agent-builder-genai-utils/tools/utils/json_schema';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolDefinitionWithSchema, ToolDefinition, ToolType } from '@kbn/agent-builder-common';
 import type { Runner, ExecutableTool, InternalToolDefinition } from '@kbn/agent-builder-server';
@@ -49,11 +50,7 @@ export const toDescriptorWithSchema = async (
   const descriptor = toDescriptor(tool);
   const schema = await tool.getSchema();
 
-  const { $schema, ...rest } = z.toJSONSchema(schema, {
-    unrepresentable: 'any',
-    io: 'input',
-  }) as Record<string, any>;
-  const jsonSchema = rest;
+  const jsonSchema = zodToolInputToJsonSchema(schema);
 
   return { ...descriptor, schema: jsonSchema };
 };

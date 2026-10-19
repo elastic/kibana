@@ -21,7 +21,7 @@ export const convertConnector = async ({
   connectorId,
   http,
 }: ConvertConnectorApiLogicArgs): Promise<ConvertConnectorApiLogicResponse | undefined> => {
-  const route = `/internal/content_connectors/connectors/${connectorId}/native`;
+  const route = `/internal/content_connectors/connectors/${encodeURIComponent(connectorId)}/native`;
 
   return await http?.put<{ updated: boolean }>(route, {
     body: JSON.stringify({ is_native: false }),

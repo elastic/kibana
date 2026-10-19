@@ -256,7 +256,11 @@ describe('AgenticInvestigationsPlugin', () => {
 
       expect(
         agentBuilder.conversationEvents.register.mock.calls.map(([definition]) => definition.type)
-      ).toEqual(['escalation_created_from_investigation', 'escalation_investigation_linked']);
+      ).toEqual([
+        'escalation_created_from_investigation',
+        'escalation_investigation_linked',
+        'escalation_attachments_synced',
+      ]);
     });
 
     it('registers no escalation timeline event types when escalations are disabled', () => {
@@ -282,6 +286,7 @@ describe('AgenticInvestigationsPlugin', () => {
 
       expect(contract.getImpactClient).toEqual(expect.any(Function));
       expect(contract.getSubjectsClient).toEqual(expect.any(Function));
+      expect(contract.getInvestigationsClient).toEqual(expect.any(Function));
       expect(contract.getEscalationsService()).toBeDefined();
     });
 

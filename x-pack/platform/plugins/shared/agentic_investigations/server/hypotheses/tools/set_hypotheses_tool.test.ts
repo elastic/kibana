@@ -20,8 +20,8 @@ import {
   SET_HYPOTHESES_TOOL_ID,
 } from '../../../common/hypotheses/constants';
 import type { Hypothesis } from '../../../common/hypotheses/hypotheses';
-import { ImpactForbiddenError } from '../../impact/services/errors';
-import type { ImpactPrivilegesChecker } from '../../impact/services/check_impact_privileges';
+import { InvestigationsForbiddenError } from '../../investigations/services/investigations_forbidden_error';
+import type { InvestigationsPrivilegesChecker } from '../../investigations/services/check_investigations_privileges';
 import { createInMemoryStorage } from '../../investigation_attachments/in_memory_storage.mock';
 import { hypothesesAttachment, registerHypothesesAttachment } from '../attachments';
 import { hypothesesDocumentId, HypothesesService } from '../services/hypotheses_service';
@@ -75,6 +75,7 @@ const setup = ({
     {
       getHypothesesService: () => service,
       privileges: { assertCanManage: jest.fn(), assertCanRead: jest.fn() },
+      assertCanReadConversation: jest.fn().mockResolvedValue(undefined),
       logger: loggerMock.create(),
     }
   );
@@ -83,7 +84,7 @@ const setup = ({
     getTypeDefinition: (type) => (type === HYPOTHESES_ATTACHMENT_TYPE ? definition : undefined),
   });
 
-  const privileges: ImpactPrivilegesChecker = { assertCanManage, assertCanRead: jest.fn() };
+  const privileges: InvestigationsPrivilegesChecker = { assertCanManage, assertCanRead: jest.fn() };
   const tool = createSetHypothesesTool({
     getHypothesesService: () => service,
     resolveUser: jest.fn().mockResolvedValue({ username: 'analyst', fullName: null, email: null }),
@@ -179,7 +180,9 @@ describe('agentic_investigations.set_hypotheses', () => {
 
   it('refuses to write without the investigations manage privilege', async () => {
     const { storage, call } = setup({
-      assertCanManage: jest.fn().mockRejectedValue(new ImpactForbiddenError('Missing privilege')),
+      assertCanManage: jest
+        .fn()
+        .mockRejectedValue(new InvestigationsForbiddenError('Missing privilege')),
     });
 
     const result = await call([deploy]);

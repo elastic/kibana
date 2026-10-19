@@ -25,6 +25,8 @@ jest.mock('@kbn/entity-store/common/euid_helpers', () => ({
         .mockReturnValue({ bool: { filter: [{ term: { 'host.name': 'entity-1' } }] } }),
     },
   },
+  getBuiltInEntityDefinition: jest.requireActual('@kbn/entity-store/common/euid_helpers')
+    .getBuiltInEntityDefinition,
 }));
 
 const mockGetJobConfig = getJobConfig as jest.Mock;
