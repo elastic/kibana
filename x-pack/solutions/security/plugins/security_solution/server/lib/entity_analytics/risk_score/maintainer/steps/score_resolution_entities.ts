@@ -109,6 +109,8 @@ export const calculateResolutionEntityScores = async function* ({
       bounds: targetEntityIds
         ? undefined
         : { lower: previousPageUpperBound, upper: pageUpperBound },
+      // A full run shares its ID with the lookup rows Phase 0 wrote for it.
+      calculationRunId,
       sampleSize,
       pageSize,
       alertsIndex,
@@ -158,6 +160,96 @@ export const calculateResolutionEntityScores = async function* ({
   } while (afterKey !== undefined);
 
   return pagesProcessed;
+};
+
+/**
+ * Builds a zero resolution score for each of the given targets that still carries a resolution
+ * score from an earlier run.
+ *
+ * A group with no alert left to score produces no row in the scoring query, so its target keeps
+ * the last resolution score. A full engine run clears that up in `resetToZero`; this lets a
+ * targeted run do the same right away. The zero goes through the same group modifiers as a normal
+ * score, so criticality and watchlists that sit on an alias still apply.
+ */
+export const buildZeroResolutionScores = async ({
+  esClient,
+  crudClient,
+  logger,
+  entityType,
+  lookupIndex,
+  now,
+  calculationRunId,
+  watchlistConfigs,
+  resolutionTargetIds,
+}: {
+  esClient: ElasticsearchClient;
+  crudClient: EntityUpdateClient;
+  logger: ScopedLogger;
+  entityType: EntityType;
+  lookupIndex: string;
+  now: string;
+  calculationRunId: string;
+  watchlistConfigs: Map<string, WatchlistObject>;
+  resolutionTargetIds: string[];
+}): Promise<EntityRiskScoreRecord[]> => {
+  const { entities: targets } = await crudClient.listEntities({
+    filter: { terms: { 'entity.id': resolutionTargetIds } },
+    size: resolutionTargetIds.length,
+    source: ['entity.id', 'entity.relationships.resolution.risk.calculated_score_norm'],
+  });
+  // A target that was never scored gets no zero, which would put a 0 on screen where there was
+  // nothing before.
+  const previouslyScoredIds = targets.flatMap(({ entity }) =>
+    entity?.id && typeof entity.relationships?.resolution?.risk?.calculated_score_norm === 'number'
+      ? [entity.id]
+      : []
+  );
+  if (previouslyScoredIds.length === 0) {
+    return [];
+  }
+
+  const lookupMemberIds = await fetchResolutionGroupMemberIds({
+    esClient,
+    logger,
+    lookupIndex,
+    resolutionTargetIds: previouslyScoredIds,
+  });
+  const memberEntities = await fetchEntitiesByIds({
+    crudClient,
+    entityIds: [...previouslyScoredIds, ...lookupMemberIds],
+    logger,
+    errorContext:
+      'Error fetching entities for zero resolution scores. Skipping the zero score write',
+  });
+
+  // Without the target in hand we would write a score carrying none of the group's modifiers,
+  // which is worse than leaving the previous score alone. The aliases need no entry of their own:
+  // `applyResolutionModifiers` folds them in through their `resolved_to`.
+  const parsedScores: ParsedResolutionScore[] = previouslyScoredIds
+    .filter((targetId) => memberEntities.has(targetId))
+    .map((targetId) => ({
+      resolution_target_id: targetId,
+      alert_count: 0,
+      score: 0,
+      normalized_score: 0,
+      risk_inputs: [],
+      related_entities: [],
+    }));
+  logger.debug(
+    `[resolution] zero scores: previously_scored=${previouslyScoredIds.length}, built=${parsedScores.length}`
+  );
+  if (parsedScores.length === 0) {
+    return [];
+  }
+
+  return applyResolutionModifiers({
+    parsedScores,
+    memberEntities,
+    now,
+    entityType,
+    calculationRunId,
+    watchlistConfigs,
+  });
 };
 
 const fetchNextResolutionPage = async ({
@@ -279,6 +371,7 @@ const scoreResolutionPage = async ({
   entityType,
   resolutionTargetIds,
   bounds,
+  calculationRunId,
   sampleSize,
   pageSize,
   alertsIndex,
@@ -289,6 +382,7 @@ const scoreResolutionPage = async ({
   entityType: EntityType;
   resolutionTargetIds: string[];
   bounds: { lower?: string; upper: string } | undefined;
+  calculationRunId: string;
   sampleSize: number;
   pageSize: number;
   alertsIndex: string;
@@ -299,6 +393,7 @@ const scoreResolutionPage = async ({
     ? getResolutionScoreESQLByRange(
         entityType,
         bounds,
+        calculationRunId,
         sampleSize,
         pageSize,
         alertsIndex,

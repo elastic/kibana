@@ -6,7 +6,11 @@
  */
 
 /**
- * `single` loads only the record whose `entity.id` matches; `resolved` also loads every record that
- * resolves to that id (the target plus its aliases), so the caller can render the whole resolution group.
+ * Tool UI event sent when an agent tool changes one or more cases,
+ * so an open case view can refresh while the run is still in progress.
  */
-export type EntityViewMode = 'single' | 'resolved';
+export const CASES_UPDATED_UI_EVENT = 'cases:updated';
+
+export interface CasesUpdatedUiEventData {
+  caseIds: string[];
+}
