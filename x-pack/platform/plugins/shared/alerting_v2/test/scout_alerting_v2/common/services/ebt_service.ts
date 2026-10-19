@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import type { WorkflowDispatchedEbtData } from '@kbn/alerting-v2-schemas';
-import { WORKFLOW_DISPATCHED_EBT_EVENT_TYPE } from '@kbn/alerting-v2-schemas';
 import type { KbnClient, ScoutLogger } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
+import {
+  WORKFLOW_DISPATCHED_EBT_EVENT_TYPE,
+  type WorkflowDispatchedEbtData,
+} from '../../../../server/lib/telemetry/workflow_ebt_schema';
 import { COMMON_HEADERS } from '../constants';
 
 const EBT_HELPERS_PATH = '/internal/analytics_ftr_helpers';
@@ -35,6 +37,8 @@ export interface WaitForWorkflowDispatchedEventsParams {
 export interface EbtService {
   /** Opts the server in to EBT so reported events reach the helpers shipper. */
   optIn: () => Promise<void>;
+  /** Restores the default consent so later suites sharing the server do not keep shipping events. */
+  optOut: () => Promise<void>;
   /**
    * Resolves with the `alerting_v2_workflow_dispatched` events reported for the workflow.
    * Returns as soon as `count` events arrived and throws if they do not within the timeout.
@@ -51,18 +55,21 @@ export const getEbtService = ({
   log: ScoutLogger;
   kbnClient: KbnClient;
 }): EbtService => {
-  const optIn = () =>
-    measurePerformanceAsync(log, 'ebt.optIn', async () => {
-      await kbnClient.request({
-        method: 'POST',
-        path: `${EBT_HELPERS_PATH}/opt_in`,
-        headers: COMMON_HEADERS,
-        query: { consent: true },
-      });
+  const setConsent = async (consent: boolean) => {
+    await kbnClient.request({
+      method: 'POST',
+      path: `${EBT_HELPERS_PATH}/opt_in`,
+      headers: COMMON_HEADERS,
+      query: { consent },
     });
+  };
+
+  const optIn = () => measurePerformanceAsync(log, 'ebt.optIn', async () => setConsent(true));
+  const optOut = () => measurePerformanceAsync(log, 'ebt.optOut', async () => setConsent(false));
 
   return {
     optIn,
+    optOut,
     waitForWorkflowDispatchedEvents: ({
       workflowId,
       count = 1,

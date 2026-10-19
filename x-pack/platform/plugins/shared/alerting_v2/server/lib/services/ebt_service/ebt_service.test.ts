@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import type { AnalyticsServiceStart, Logger } from '@kbn/core/server';
+import { analyticsServiceMock } from '@kbn/core/server/mocks';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import {
   WORKFLOW_DISPATCHED_EBT_EVENT_TYPE,
   type WorkflowDispatchedEbtData,
-} from '@kbn/alerting-v2-schemas';
-import type { AnalyticsServiceStart, Logger } from '@kbn/core/server';
-import { ALERTING_LOG_CODES } from '../../errors/error_codes';
+} from '../../telemetry/workflow_ebt_schema';
 import { createLoggerService } from '../logger_service/logger_service.mock';
 import { EbtService } from './ebt_service';
 
@@ -25,12 +26,12 @@ const data: WorkflowDispatchedEbtData = {
 };
 
 describe('EbtService', () => {
-  let analytics: jest.Mocked<Pick<AnalyticsServiceStart, 'reportEvent'>>;
+  let analytics: jest.Mocked<AnalyticsServiceStart>;
   let mockLogger: jest.Mocked<Logger>;
   let service: EbtService;
 
   beforeEach(() => {
-    analytics = { reportEvent: jest.fn() };
+    analytics = analyticsServiceMock.createAnalyticsServiceStart();
     const { loggerService, mockLogger: logger } = createLoggerService();
     mockLogger = logger;
     service = new EbtService(analytics, loggerService);

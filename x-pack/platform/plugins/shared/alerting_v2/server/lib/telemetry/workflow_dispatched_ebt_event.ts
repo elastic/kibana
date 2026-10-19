@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import type { EventTypeOpts } from '@kbn/core/server';
 import {
   WORKFLOW_DISPATCHED_EBT_EVENT_TYPE,
   type WorkflowDispatchedEbtData,
-} from '@kbn/alerting-v2-schemas';
-import type { EventTypeOpts } from '@kbn/core/server';
+} from './workflow_ebt_schema';
 
 export const workflowDispatchedTelemetryEvent: EventTypeOpts<WorkflowDispatchedEbtData> = {
   eventType: WORKFLOW_DISPATCHED_EBT_EVENT_TYPE,

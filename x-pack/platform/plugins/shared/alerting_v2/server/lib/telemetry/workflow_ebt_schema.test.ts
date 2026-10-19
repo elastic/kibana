@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ID_MAX_LENGTH } from './constants';
+import { ID_MAX_LENGTH } from '@kbn/alerting-v2-schemas';
 import { workflowDispatchedTelemetryDataSchema } from './workflow_ebt_schema';
 
 const validData = {

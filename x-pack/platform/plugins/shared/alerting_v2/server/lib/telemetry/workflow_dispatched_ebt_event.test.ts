@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { workflowDispatchedTelemetryDataSchema } from '@kbn/alerting-v2-schemas';
+import { workflowDispatchedTelemetryDataSchema } from './workflow_ebt_schema';
 import {
   buildWorkflowDispatchedEventData,
   workflowDispatchedTelemetryEvent,

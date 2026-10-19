@@ -28,8 +28,9 @@ import {
   testData,
 } from '../fixtures';
 
-const SOURCE_INDEX = 'test-alerting-v2-ebt-dispatch-source';
-const ACTION_POLICY_ID = 'ebt-dispatch-policy';
+const RUN_ID = Date.now().toString(36);
+const SOURCE_INDEX = `test-alerting-v2-ebt-dispatch-source-${RUN_ID}`;
+const ACTION_POLICY_ID = `ebt-dispatch-policy-${RUN_ID}`;
 
 apiTest.describe(
   'Workflow dispatched EBT telemetry',
@@ -59,6 +60,7 @@ apiTest.describe(
     });
 
     apiTest.afterAll(async ({ apiServices }) => {
+      await apiServices.alertingV2.ebt.optOut();
       await apiServices.alertingV2.alertActionsEvents.cleanUp();
       await apiServices.alertingV2.ruleEvents.cleanUp();
       await apiServices.alertingV2.rules.cleanUp();

@@ -6,8 +6,7 @@
  */
 
 import { lazySchema, z } from '@kbn/zod/v4';
-import { ID_MAX_LENGTH } from './constants';
-import { ruleIdSchema } from './rule_data_schema';
+import { ID_MAX_LENGTH, ruleIdSchema } from '@kbn/alerting-v2-schemas';
 
 export const WORKFLOW_DISPATCHED_EBT_EVENT_TYPE = 'alerting_v2_workflow_dispatched' as const;
 

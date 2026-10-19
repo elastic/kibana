@@ -8,7 +8,7 @@
 import type {
   WorkflowDispatchedEbtData,
   WorkflowDispatchedEbtEventType,
-} from '@kbn/alerting-v2-schemas';
+} from './workflow_ebt_schema';
 
 /**
  * Maps every EBT event type the plugin registers to the data it is reported with.

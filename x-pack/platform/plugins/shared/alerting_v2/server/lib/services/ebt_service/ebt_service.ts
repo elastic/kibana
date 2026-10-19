@@ -31,7 +31,7 @@ export class EbtService implements EbtServiceContract {
 
   constructor(
     @inject(CoreStart('analytics'))
-    private readonly analytics: Pick<AnalyticsServiceStart, 'reportEvent'>,
+    private readonly analytics: AnalyticsServiceStart,
     @inject(LoggerServiceToken) loggerService: LoggerServiceContract
   ) {
     this.logger = loggerService.forSubsystem('telemetry');

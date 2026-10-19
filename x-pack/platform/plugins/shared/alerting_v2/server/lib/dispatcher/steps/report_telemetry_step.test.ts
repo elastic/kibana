@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { WORKFLOW_DISPATCHED_EBT_EVENT_TYPE } from '@kbn/alerting-v2-schemas';
 import { createMockEbtService } from '../../services/ebt_service/ebt_service.mock';
+import { WORKFLOW_DISPATCHED_EBT_EVENT_TYPE } from '../../telemetry/workflow_ebt_schema';
 import {
   createActionGroup,
   createAlert,

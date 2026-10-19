@@ -6,10 +6,10 @@
  */
 
 import { inject, injectable } from 'inversify';
-import { WORKFLOW_DISPATCHED_EBT_EVENT_TYPE } from '@kbn/alerting-v2-schemas';
 import type { EbtServiceContract } from '../../services/ebt_service/ebt_service';
 import { EbtServiceToken } from '../../services/ebt_service/tokens';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
+import { WORKFLOW_DISPATCHED_EBT_EVENT_TYPE } from '../../telemetry/workflow_ebt_schema';
 import { buildWorkflowDispatchedEventData } from '../../telemetry/workflow_dispatched_ebt_event';
 import { DispatchOutcome, DispatchPlan } from '../state';
 import type {
