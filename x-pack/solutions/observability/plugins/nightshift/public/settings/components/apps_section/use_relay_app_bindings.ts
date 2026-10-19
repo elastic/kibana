@@ -78,6 +78,61 @@ export function useRelayAppBindings(enabled: boolean, cursor?: string): UseRelay
   };
 }
 
+/** Largest page the bindings route accepts. */
+const ALL_BINDINGS_PAGE_SIZE = 200;
+// Bounds the walk if the Relay keeps returning a cursor.
+const ALL_BINDINGS_MAX_PAGES = 10;
+
+export interface UseAllRelayAppBindings {
+  bindings: SlackChannelBinding[];
+  isLoading: boolean;
+  isError: boolean;
+}
+
+/** Every Slack channel connected to this deployment, for pickers that need the full list. */
+export function useAllRelayAppBindings(): UseAllRelayAppBindings {
+  const {
+    services: { http },
+  } = useKibana();
+
+  const query = useQuery<SlackChannelBinding[], Error>({
+    queryKey: [...RELAY_APP_BINDINGS_QUERY_KEY, 'all'],
+    queryFn: async ({ signal }) => {
+      const bindings: SlackChannelBinding[] = [];
+      let cursor: string | undefined;
+      for (let page = 0; page < ALL_BINDINGS_MAX_PAGES; page++) {
+        const response = await http.get<SlackAppBindingsResponse>(BINDINGS_ROUTE, {
+          query: { perPage: ALL_BINDINGS_PAGE_SIZE, ...(cursor ? { cursor } : {}) },
+          signal,
+        });
+        bindings.push(...response.bindings.filter(({ channel }) => channel != null));
+        if (!response.nextCursor) break;
+        cursor = response.nextCursor;
+      }
+      return bindings.sort((left, right) =>
+        formatChannelLabel(left).localeCompare(formatChannelLabel(right))
+      );
+    },
+    retry: false,
+    staleTime: 30_000,
+  });
+
+  return {
+    bindings: query.data ?? EMPTY_BINDINGS,
+    isLoading: query.isLoading,
+    isError: query.isError,
+  };
+}
+
+export const formatChannelLabel = (binding: SlackChannelBinding): string =>
+  binding.displayName != null ? `#${binding.displayName}` : binding.channel ?? '';
+
+/** Label for a stored channel value; a value that is not a connected channel id is kept as is. */
+export const formatChannelValue = (value: string, bindings: SlackChannelBinding[]): string => {
+  const binding = bindings.find(({ channel }) => channel === value);
+  return binding ? formatChannelLabel(binding) : value;
+};
+
 export interface UseBindChannel {
   bind: (channelId: string) => Promise<void>;
   isLoading: boolean;
