@@ -14,8 +14,8 @@ import { useProfilingDependencies } from '../profiling_dependencies/use_profilin
 import { useProfilingStatus } from '../profiling_status/use_profiling_status';
 import type { ProfilingRoutes } from '../../../routing';
 import { PROFILING_PATHNAMES } from '../../../routing/pathnames';
-import { hasUsableProfilingData } from '../../../utils/has_usable_profiling_data';
 import { useSchemaQueryParam } from '../../../hooks/use_schema_query_param';
+import { hasProfilingData } from '../../../utils/has_profiling_data';
 
 // Routes that render a back button in AppHeader.
 // NOTE: This is compared against raw location.pathname, NOT via useProfilingRoutePath(), because
@@ -52,7 +52,7 @@ export const useBackNavigation = (): AppHeaderBack | undefined => {
   // With data from before 8.9.1, going back would only redirect to this page again.
   if (
     pathname === PROFILING_PATHNAMES.addDataInstructions &&
-    (!hasUsableProfilingData(data) || data.universalProfiling.hasLegacyData)
+    (!hasProfilingData(data) || data.universalProfiling.hasLegacyData)
   ) {
     return undefined;
   }

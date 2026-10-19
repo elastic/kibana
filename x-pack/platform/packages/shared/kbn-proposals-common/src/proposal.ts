@@ -344,6 +344,12 @@ export const listProposalsQuerySchema = proposalFiltersSchema.extend({
   category: proposalCategorySchema.optional(),
   /** Bounds the closed queue to a recency window rather than all decided history. */
   decidedWithinHours: z.coerce.number().int().min(1).max(168).optional(),
+  /**
+   * `priority` (the default) ranks by impact, confidence and deadline, for a queue of open
+   * proposals. `newest` orders a conversation's history by when each proposal was decided, with
+   * an undecided one first, so paging stays consistent with the order shown.
+   */
+  order: z.enum(['priority', 'newest']).optional(),
   size: z.coerce.number().int().min(1).max(MAX_PROPOSALS_PAGE_SIZE).default(50),
   from: z.coerce.number().int().min(0).max(MAX_PROPOSALS_PAGE_OFFSET).default(0),
 });
@@ -429,3 +435,18 @@ export const isProposalSettling = (proposal: Pick<Proposal, 'decision' | 'status
  * so this is not a substitute for comparing `expiresAt` to `now`. */
 export const isExpired = (proposal: Pick<Proposal, 'status'>): boolean =>
   proposal.status === 'expired';
+
+/**
+ * A status that has settled. `pending` and `executing` are the only two a
+ * proposal can still be moved out of.
+ */
+export const isTerminal = (status: ProposalStatus): boolean =>
+  status === 'succeeded' ||
+  status === 'failed' ||
+  status === 'expired' ||
+  status === 'no_action' ||
+  // Undecided, unlike the other four, but equally unable to move: a
+  // superseded proposal is not the live revision anymore, and a caller that
+  // still holds its id (a stale workflow variable, a retried step) must not
+  // be able to resurrect it via update().
+  status === 'superseded';

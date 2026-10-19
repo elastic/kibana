@@ -7,9 +7,11 @@
 
 import { internalTools, platformCoreTools } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
-import { dashboardsSkill as skill } from './dashboards_skill';
+import { createDashboardsSkill } from './dashboards_skill';
 import { ENHANCE_GUIDANCE_PATH } from './generation_guidance/enhance_guidance';
 import { registerSkills } from './register_skills';
+
+const skill = createDashboardsSkill({ getDashboardValidator: jest.fn() });
 
 const enhanceGuidance = (): string => {
   const reference = skill.referencedContent?.find((item) => item.name === 'enhance');
@@ -26,7 +28,7 @@ describe('registerSkills', () => {
       skills: { register },
     } as unknown as AgentBuilderPluginSetup;
 
-    registerSkills(agentBuilder);
+    registerSkills(agentBuilder, { getDashboardValidator: jest.fn() });
 
     expect(register).toHaveBeenCalledTimes(1);
     expect(register).toHaveBeenCalledWith(expect.objectContaining({ id: 'dashboards' }));
@@ -37,9 +39,16 @@ describe('registerSkills', () => {
     expect(skill.content).toContain('platform.core.sml_attach');
   });
 
+  it('finds unnamed data in one broad index search without probing it', () => {
+    expect(skill.content).toContain(
+      'find it in one `platform.core.list_indices` call with a broad pattern around the topic (e.g. `*log*`, not `logs-*`)'
+    );
+    expect(skill.content).toContain('Do not query the data before generating');
+  });
+
   it('inlines the dashboard design guidance directly in the skill body', () => {
     expect(skill.content).toContain('Dashboard Composition Guidelines');
-    expect(skill.content).toContain('Grid Packing Rules');
+    expect(skill.content).toContain('Panel Layout');
     expect(skill.content).toContain('show avg/min/max in the legend');
     expect(skill.content).toContain('at least one and at most two of those primary time-series XY');
   });

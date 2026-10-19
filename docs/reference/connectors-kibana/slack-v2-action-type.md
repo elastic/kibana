@@ -20,7 +20,7 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 Slack (v2) connectors support three authentication methods:
 
 Quick Connect OAuth 2.0 (recommended) {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6`
-:   Elastic's managed OAuth flow. Select this option and authorize access to your Slack workspace through Elastic. No app setup is required.
+:   Elastic's managed OAuth flow. Select this option and authorize access to your Slack workspace through Elastic. No app setup is required. Refer to [Quick Connect OAuth 2.0](/reference/connectors-kibana/quick-connect-oauth.md).
 
 OAuth Authorization Code
 :   Slack's OAuth v2 flow using your own Slack app. You will be redirected to Slack to authorize access to your workspace. Requires a Slack app with a Client ID, Client Secret, and the appropriate user token scopes. See [Get API credentials (OAuth)](#slack-v2-api-credentials-oauth) for setup steps.
@@ -34,11 +34,13 @@ The **Search messages** action requires a user token and is not available when u
 
 ## Receive Slack events [slack-v2-inbound-events]
 ```{applies_to}
-serverless: unavailable
+serverless: preview
 stack: preview 9.6+
 ```
 
-The connector can start a workflow from a Slack Events API `event_callback`. A saved Slack connector does not receive events until **Receive events** is turned on for that connector.
+The connector can start a workflow from a Slack Events API `event_callback`. A saved Slack connector does not receive events until **Receive events** is turned on for that connector. After you save a new connector, {{kib}} shows the **Webhook URL** and the ingest token once, so copy them then. For an existing connector, save it, then select **Rotate ingest token**. A new token stops the previous one from working. This toggle appears when `xpack.actions.inboundEvents.enabled` is `true`.
+
+In {{kib}}, you need an Enterprise license and `server.publicBaseUrl` set to the host that Slack uses to reach {{kib}}. `xpack.actions.inboundEvents.enabled` defaults to `true`. Set it to `false` to turn receive events off.
 
 | Workflow event | Slack `event.type` | Fields |
 | --- | --- | --- |
@@ -199,6 +201,10 @@ Update message {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6
 ## Connector networking configuration [slack-v2-connector-networking-configuration]
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. If you use [`xpack.actions.allowedHosts`](/reference/configuration-reference/alerting-settings.md#action-settings), include `slack.com` in the list.
+
+## Get API credentials (Quick Connect OAuth 2.0) [slack-v2-api-credentials-quick-connect]
+
+No setup required. Select **Quick Connect OAuth 2.0** when you create the connector in {{kib}} and follow the authorization prompt to grant Elastic access to your Slack workspace. Your Slack workspace administrator might need to approve the app. Refer to [Quick Connect OAuth 2.0](/reference/connectors-kibana/quick-connect-oauth.md).
 
 ## Get API credentials (OAuth) [slack-v2-api-credentials-oauth]
 

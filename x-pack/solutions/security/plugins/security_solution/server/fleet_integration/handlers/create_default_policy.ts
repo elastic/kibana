@@ -29,9 +29,12 @@ import {
   disableProtections,
   ensureOnlyEventCollectionIsAllowed,
   isBillablePolicy,
+  isLinuxRansomwareProtectionEnabled,
   removeCustomYaraSignatures,
   removeDeviceControl,
   removeLinuxDnsEvents,
+  removeLinuxRansomware,
+  removeRegistryCredentialHardening,
 } from '../../../common/endpoint/models/policy_config_helpers';
 import type { ProductFeaturesService } from '../../lib/product_features_service/product_features_service';
 
@@ -67,6 +70,13 @@ export const createDefaultPolicy = (
     factoryPolicy = removeCustomYaraSignatures(factoryPolicy);
   }
 
+  if (
+    !productFeatures.isEnabled(ProductFeatureSecurityKey.endpointRegistryCredentialHardening) ||
+    !experimentalFeatures.registryCredentialHardening
+  ) {
+    factoryPolicy = removeRegistryCredentialHardening(factoryPolicy);
+  }
+
   let defaultPolicyPerType: PolicyConfig =
     config?.type === 'cloud'
       ? getCloudPolicyConfig(factoryPolicy)
@@ -92,6 +102,10 @@ export const createDefaultPolicy = (
 
   if (!experimentalFeatures.linuxDnsEvents) {
     defaultPolicyPerType = removeLinuxDnsEvents(defaultPolicyPerType);
+  }
+
+  if (!isLinuxRansomwareProtectionEnabled(experimentalFeatures)) {
+    defaultPolicyPerType = removeLinuxRansomware(defaultPolicyPerType);
   }
 
   // Without the per-OS form macOS ransomware has no card, so new policies keep it opt-in.
