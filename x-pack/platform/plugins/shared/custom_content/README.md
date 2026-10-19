@@ -165,7 +165,7 @@ When a query is changing it samples 3 rows (`appendLimitToQuery`) to give the LL
 
 | Cause | Message |
 |-------|---------|
-| `verification_exception` / `parsing_exception` | Query is invalid; correct it or leave it out so the server generates one, then retry. ES\|QL reports a missing index as `verification_exception`, so this covers unknown indices too. |
+| `verification_exception` / `parsing_exception` | Query is invalid. A supplied query is corrected (or the user is asked for a valid one); a generated one is retried with a more specific description or an exact index. The message is the same for every flow and does not suggest omitting the query, because on an edit that would keep the stored query. ES\|QL reports a missing index as `verification_exception`, so this covers unknown indices too. |
 | `security_exception` | No access to the targeted index. |
 | anything else | Could not sample the schema; likely transient, retry. |
 

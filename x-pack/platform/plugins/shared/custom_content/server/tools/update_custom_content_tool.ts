@@ -111,7 +111,7 @@ On success this returns \`attachment_id\` and \`version\`. You MUST render the u
     let resolved: Awaited<ReturnType<typeof resolveCustomContentQuery>>;
     try {
       resolved = await resolveCustomContentQuery({
-        esql: esqlQuery,
+        suppliedQuery: esqlQuery,
         regenerate: regenerateEsql,
         existingQuery: currentData?.esql_query,
         isNewPanel: false,

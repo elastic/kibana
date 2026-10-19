@@ -340,7 +340,7 @@ Ground first: make sure the target index exists and every field you reference is
 
           const { query: mergedEsql, isChanging: isQueryChanging } =
             await resolveCustomContentQuery({
-              esql,
+              suppliedQuery: esql,
               hasData,
               regenerate: regenerateEsql,
               existingQuery: existingEsql,

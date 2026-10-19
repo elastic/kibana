@@ -39,7 +39,7 @@ const resolveCustomContentState = async (
   if (!existingPanel) {
     // A static panel has no query: only an explicit esql or hasData: true gives it one.
     const { query } = await resolveCustomContentQuery({
-      esql,
+      suppliedQuery: esql,
       hasData: hasData === true,
       existingQuery: undefined,
       isNewPanel: true,
@@ -51,7 +51,7 @@ const resolveCustomContentState = async (
 
   const existing = existingPanel.config as CustomContentState;
   const { query: mergedEsqlQuery, isChanging: isQueryChanging } = await resolveCustomContentQuery({
-    esql,
+    suppliedQuery: esql,
     hasData,
     regenerate: request.regenerateEsql,
     existingQuery: readEsqlQuery(existing),

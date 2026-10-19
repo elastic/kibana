@@ -6,8 +6,8 @@
  */
 
 export interface ResolveCustomContentQueryParams {
-  /** An explicit query wins. A string replaces the stored query and `null` removes it. */
-  esql?: string | null;
+  /** A query the caller supplies. It wins: a string replaces the stored query, `null` removes it. */
+  suppliedQuery?: string | null;
   /** `false` means no data: the panel ends up without a query. `true` means ensure it has one. */
   hasData?: boolean;
   /** Regenerate the query from the request, seeded with the stored one so unrelated parts survive. */
@@ -28,12 +28,12 @@ export interface ResolvedCustomContentQuery {
 
 /**
  * Decides which ES|QL query a custom content panel ends up with, shared by every flow that creates
- * or edits one. An explicit query always wins. A new panel gets a generated query unless it is
+ * or edits one. A supplied query always wins. A new panel gets a generated query unless it is
  * declared data-free. An edit keeps the stored query unless it is replaced, removed or explicitly
  * regenerated, so a style-only edit never pays for generation or schema sampling.
  */
 export const resolveCustomContentQuery = async ({
-  esql,
+  suppliedQuery,
   hasData,
   regenerate,
   existingQuery,
@@ -41,8 +41,8 @@ export const resolveCustomContentQuery = async ({
   generate,
 }: ResolveCustomContentQueryParams): Promise<ResolvedCustomContentQuery> => {
   const resolved = async (): Promise<string | undefined> => {
-    if (esql) return esql;
-    if (esql === null || hasData === false) return undefined;
+    if (suppliedQuery) return suppliedQuery;
+    if (suppliedQuery === null || hasData === false) return undefined;
     if (isNewPanel) return generate([]);
     if (regenerate) return generate(existingQuery ? [existingQuery] : []);
     if (existingQuery) return existingQuery;

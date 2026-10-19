@@ -31,9 +31,9 @@ describe('resolveCustomContentQuery', () => {
       expect(result).toEqual({ query: GENERATED, isChanging: true });
     });
 
-    it('uses an explicit query without generating', async () => {
+    it('uses a supplied query without generating', async () => {
       const result = await resolveCustomContentQuery({
-        esql: EXPLICIT,
+        suppliedQuery: EXPLICIT,
         existingQuery: undefined,
         isNewPanel: true,
         generate,
@@ -55,9 +55,9 @@ describe('resolveCustomContentQuery', () => {
       expect(result).toEqual({ query: undefined, isChanging: false });
     });
 
-    it('lets an explicit query win over hasData: false', async () => {
+    it('lets a supplied query win over hasData: false', async () => {
       const result = await resolveCustomContentQuery({
-        esql: EXPLICIT,
+        suppliedQuery: EXPLICIT,
         hasData: false,
         existingQuery: undefined,
         isNewPanel: true,
@@ -93,14 +93,14 @@ describe('resolveCustomContentQuery', () => {
       expect(result).toEqual({ query: STORED, isChanging: false });
     });
 
-    it('replaces the stored query with an explicit one', async () => {
-      const result = await resolveCustomContentQuery({ ...edit, esql: EXPLICIT });
+    it('replaces the stored query with a supplied one', async () => {
+      const result = await resolveCustomContentQuery({ ...edit, suppliedQuery: EXPLICIT });
 
       expect(result).toEqual({ query: EXPLICIT, isChanging: true });
     });
 
-    it('does not report a change when the explicit query equals the stored one', async () => {
-      const result = await resolveCustomContentQuery({ ...edit, esql: STORED });
+    it('does not report a change when the supplied query equals the stored one', async () => {
+      const result = await resolveCustomContentQuery({ ...edit, suppliedQuery: STORED });
 
       expect(result).toEqual({ query: STORED, isChanging: false });
     });
@@ -111,14 +111,18 @@ describe('resolveCustomContentQuery', () => {
       expect(result).toEqual({ query: undefined, isChanging: true });
     });
 
-    it('removes the query when esql is null', async () => {
-      const result = await resolveCustomContentQuery({ ...edit, esql: null });
+    it('removes the query when suppliedQuery is null', async () => {
+      const result = await resolveCustomContentQuery({ ...edit, suppliedQuery: null });
 
       expect(result).toEqual({ query: undefined, isChanging: true });
     });
 
-    it('lets an explicit query win over hasData: false', async () => {
-      const result = await resolveCustomContentQuery({ ...edit, esql: EXPLICIT, hasData: false });
+    it('lets a supplied query win over hasData: false', async () => {
+      const result = await resolveCustomContentQuery({
+        ...edit,
+        suppliedQuery: EXPLICIT,
+        hasData: false,
+      });
 
       expect(result).toEqual({ query: EXPLICIT, isChanging: true });
     });
@@ -130,10 +134,10 @@ describe('resolveCustomContentQuery', () => {
       expect(result).toEqual({ query: GENERATED, isChanging: true });
     });
 
-    it('lets an explicit query win over regenerate', async () => {
+    it('lets a supplied query win over regenerate', async () => {
       const result = await resolveCustomContentQuery({
         ...edit,
-        esql: EXPLICIT,
+        suppliedQuery: EXPLICIT,
         regenerate: true,
       });
 
