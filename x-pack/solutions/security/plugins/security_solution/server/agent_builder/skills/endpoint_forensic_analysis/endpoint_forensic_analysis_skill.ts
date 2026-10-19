@@ -216,7 +216,9 @@ Do not run the fleet-wide hunt from this skill.
 **Contain → \`endpoint-response-actions\`.** When the analyst asks to isolate, release, scan, or list running
 processes on a host, hand off to the \`endpoint-response-actions\` skill with the host name(s) and, for a scan,
 the path(s) taken from \`file_paths\`. That skill owns confirmation, dispatch, and reporting.
-- Name the specific hosts and actions you recommend, then ask whether to proceed.
+- Name the specific hosts and actions you recommend, then ask whether to proceed. Once the analyst agrees, the
+  confirmation card from \`endpoint-response-actions\` is the only further confirmation before dispatch — do not
+  ask again in chat.
 - \`endpoint-response-actions\` sits behind an experimental flag that is off by default. If it is not available,
   direct the analyst to Endpoint response actions in Security instead and stop.
 - Kill process, get-file, execute, and the other response actions are not available from chat.
