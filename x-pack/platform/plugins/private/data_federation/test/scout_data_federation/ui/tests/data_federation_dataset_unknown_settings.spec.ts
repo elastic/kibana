@@ -20,7 +20,7 @@ interface GetDataSetResponse {
 
 test.describe(
   'ES|QL Data Federation — dataset settings not defined in the Kibana schema',
-  { tag: tags.stateful.classic },
+  { tag: tags.deploymentAgnostic },
   () => {
     const dataSourceName = `scout-data-source-${randomUUID().slice(0, 8)}`;
     const dataSetName = `scout-dataset-multiline-${randomUUID().slice(0, 8)}`;
