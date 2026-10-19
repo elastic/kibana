@@ -8,23 +8,16 @@
 import React from 'react';
 import { EuiPageSection } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
-import { RouterProvider } from '@kbn/typed-react-router-config';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { DatePickerContextProvider } from '@kbn/observability-plugin/public';
-import { InspectorContextProvider } from '@kbn/observability-shared-plugin/public';
-import { CsmSharedContextProvider } from '../app/rum_dashboard/csm_shared_context';
 import { DashboardToolbar } from '../app/rum_dashboard/rum_home';
 import { RumOverview } from '../app/rum_dashboard';
-import { UrlParamsProvider } from '../../context/url_params_context/url_params_context';
 import type { PluginContextValue } from '../../context/plugin_context';
-import { PluginContext } from '../../context/plugin_context';
+import { UxProviders } from '../../application/ux_providers';
 import { createCallApmApi } from '../../services/rest/create_call_apm_api';
-import { uxRouter } from '../../application/ux_app';
 import type { ApmPluginSetupDeps, ApmPluginStartDeps } from '../../plugin';
 import type { ClassicRumDashboardProps } from './types';
 import { useEmbeddedHistory } from './use_embedded_history';
 
-/** Builds the dashboard with the same providers as the ux app, minus the ones its host provides. */
+/** Builds the dashboard inside the ux app's providers, on an in-memory URL and pinned to one service. */
 export const createClassicRumDashboard = ({
   core,
   setupDeps,
@@ -54,26 +47,20 @@ export const createClassicRumDashboard = ({
     const history = useEmbeddedHistory({ serviceName, timeRange, onTimeRangeChange });
 
     return (
-      <KibanaContextProvider services={services}>
-        <PluginContext.Provider value={pluginContext}>
-          {/* React Router keeps its first history, so a new service remounts the router. */}
-          <RouterProvider key={serviceName} history={history} router={uxRouter}>
-            <DatePickerContextProvider>
-              <InspectorContextProvider>
-                <UrlParamsProvider>
-                  <CsmSharedContextProvider>
-                    <EuiPageSection paddingSize="m" restrictWidth={false}>
-                      {/* The host pins the service, so the select that switches it is hidden. */}
-                      <DashboardToolbar showWebApplicationSelect={false} />
-                      <RumOverview />
-                    </EuiPageSection>
-                  </CsmSharedContextProvider>
-                </UrlParamsProvider>
-              </InspectorContextProvider>
-            </DatePickerContextProvider>
-          </RouterProvider>
-        </PluginContext.Provider>
-      </KibanaContextProvider>
+      // React Router keeps its first history, so a new service remounts the providers.
+      <UxProviders
+        key={serviceName}
+        core={core}
+        services={services}
+        pluginContext={pluginContext}
+        history={history}
+      >
+        <EuiPageSection paddingSize="m" restrictWidth={false}>
+          {/* The host pins the service, so the select that switches it is hidden. */}
+          <DashboardToolbar showWebApplicationSelect={false} />
+          <RumOverview />
+        </EuiPageSection>
+      </UxProviders>
     );
   };
 };

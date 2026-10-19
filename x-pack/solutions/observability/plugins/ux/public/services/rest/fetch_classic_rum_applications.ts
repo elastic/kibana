@@ -8,12 +8,8 @@
 import { lastValueFrom } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { serviceNameQuery } from '../data/service_name_query';
+import { getServiceNames, serviceNameQuery } from '../data/service_name_query';
 import { callApmApi, createCallApmApi } from './create_call_apm_api';
-
-interface ServicesAggregation {
-  services?: { buckets?: Array<{ key: string }> };
-}
 
 /** Names of the services with RUM page loads between `start` and `end`. */
 export const fetchClassicRumApplications = async ({
@@ -43,6 +39,5 @@ export const fetchClassicRumApplications = async ({
     )
   );
 
-  const { services } = (rawResponse.aggregations ?? {}) as ServicesAggregation;
-  return services?.buckets?.map(({ key }) => key) ?? [];
+  return getServiceNames(rawResponse.aggregations);
 };
