@@ -18,12 +18,12 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import styled from '@emotion/styled';
-import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import type {
   ResponseActionEndpointRunScriptOutputContent,
   ResponseActionExecuteOutputContent,
-} from '../../../../common/endpoint/types';
-import { getEmptyValue } from '../../../common/components/empty_value';
+} from '../../../../../../../common/endpoint/types';
+import { getEmptyValue } from '../../../../../../common/components/empty_value';
 
 const emptyValue = getEmptyValue();
 

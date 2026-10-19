@@ -8,7 +8,7 @@
 import React, { memo, useMemo } from 'react';
 import { EuiFlexItem, EuiSpacer, type EuiTextProps } from '@elastic/eui';
 import { EndpointActionFailureMessage } from '../../../../../endpoint_action_failure_message';
-import { EndpointHostExecutionResponseOutput } from '../../../../../endpoint_host_execution_response_output';
+import { EndpointHostExecutionResponseOutput } from '../../endpoint_host_execution_response_output';
 import { useUserPrivileges } from '../../../../../../../common/components/user_privileges';
 import { ResponseActionFileDownloadLink } from '../../response_action_file_download_link';
 import { getAgentActionState } from '../../../utils';

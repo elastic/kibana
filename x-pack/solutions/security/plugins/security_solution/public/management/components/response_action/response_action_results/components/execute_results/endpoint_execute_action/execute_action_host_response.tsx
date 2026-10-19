@@ -6,7 +6,7 @@
  */
 import { EuiFlexItem, EuiSpacer, type EuiTextProps } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
-import { EndpointHostExecutionResponseOutput } from '../../../../../endpoint_host_execution_response_output/endpoint_host_execution_response_output';
+import { EndpointHostExecutionResponseOutput } from '../../endpoint_host_execution_response_output/endpoint_host_execution_response_output';
 import type {
   ActionDetails,
   MaybeImmutable,

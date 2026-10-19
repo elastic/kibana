@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { AppContextTestRender } from '../../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
-import type { DeepMutable } from '../../../../common/endpoint/types';
+import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
+import type { DeepMutable } from '../../../../../../../common/endpoint/types';
 import React from 'react';
-import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
+import { EndpointActionGenerator } from '../../../../../../../common/endpoint/data_generators/endpoint_action_generator';
 import { getEmptyValue } from '@kbn/cases-plugin/public/components/empty_value';
 import type { EndpointHostExecutionResponseOutputProps } from './endpoint_host_execution_response_output';
 import {
