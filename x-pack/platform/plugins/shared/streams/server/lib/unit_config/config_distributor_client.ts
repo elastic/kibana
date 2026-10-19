@@ -13,7 +13,8 @@ import type { Logger } from '@kbn/logging';
 import { SslConfig, sslSchema } from '@kbn/server-http-tools';
 import type { StreamsUnit } from '@kbn/streams-schema';
 import { StatusError } from '../streams/errors/status_error';
-import type { UnitConfigHooks, UnitCredential } from './types';
+import { createTargetIdResolver, type ResolveTargetId } from './distributor_target_id';
+import type { UnitConfigHooks, UnitCredential, UnitValidationResult } from './types';
 
 export interface ConfigDistributorClientConfig {
   url?: string;
@@ -24,7 +25,10 @@ export interface ConfigDistributorClientConfig {
   };
 }
 
-export type ConfigDistributorClient = Required<Pick<UnitConfigHooks, 'publish' | 'validate'>>;
+export type ConfigDistributorClient = Required<Pick<UnitConfigHooks, 'publish' | 'validate'>> & {
+  /** The `target_id` the distributor derives from this client's certificate. */
+  resolveTargetId: ResolveTargetId;
+};
 
 export type UnitDiagnosticSeverity = 'error' | 'warning' | 'info';
 
@@ -40,18 +44,15 @@ const REQUEST_TIMEOUT_MS = 30_000;
 
 const serializeUnitYaml = (unit: StreamsUnit.Configuration): string => YAML.stringify(unit);
 
+// The streams-config-distributor docs recipe. Unchanged secrets keep their stored blob, so the hash is stable.
 const hashUnitPublishPayload = (unitYaml: string, credentials: UnitCredential[]): string => {
   const hash = createHash('sha256').update(unitYaml, 'utf8');
 
   if (credentials.length > 0) {
-    // Distributor stores `config_hash` without recomputing it. Hashing
-    // credential ciphertext as well means a secret-only change still rolls
-    // out instead of matching the previous YAML-only hash and no-op'ing.
-    const fingerprint = [...credentials]
-      .sort((left, right) => left.name.localeCompare(right.name))
+    const pairs = [...credentials]
+      .sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0))
       .map(({ name, ciphertext }) => [name, ciphertext]);
-    hash.update('\n');
-    hash.update(JSON.stringify(fingerprint));
+    hash.update(`\n${JSON.stringify(pairs)}`, 'utf8');
   }
 
   return hash.digest('hex');
@@ -69,9 +70,9 @@ type DistributorFetch = (
 
 const createDistributorTls = (
   ssl: ConfigDistributorClientConfig['ssl']
-): HttpsAgent | undefined => {
+): { agent?: HttpsAgent; certificate?: string } => {
   if (!ssl.certificate && !ssl.key && !ssl.certificateAuthorities) {
-    return undefined;
+    return {};
   }
 
   const tlsConfig = new SslConfig(
@@ -85,13 +86,16 @@ const createDistributorTls = (
 
   // A dedicated Agent is required. TLS fields on https.request() are ignored
   // when Node uses https.globalAgent, which Kibana/ES customize.
-  return new HttpsAgent({
+  const agent = new HttpsAgent({
     cert: tlsConfig.certificate,
     key: tlsConfig.key,
     ca: tlsConfig.certificateAuthorities,
     rejectUnauthorized: true,
     allowPartialTrustChain: true,
   });
+
+  // The same PEM the agent presents, so the sealing target cannot drift from the TLS identity.
+  return { agent, certificate: tlsConfig.certificate };
 };
 
 const nodeHttpFetch = (agent: HttpsAgent | undefined): DistributorFetch => {
@@ -147,29 +151,35 @@ const nodeHttpFetch = (agent: HttpsAgent | undefined): DistributorFetch => {
 export const createConfigDistributorClient = ({
   config,
   logger,
-  hooks = {},
+  fallbackTargetId,
   fetchImpl,
 }: {
   config: ConfigDistributorClientConfig;
   logger: Logger;
-  hooks?: Pick<UnitConfigHooks, 'encryptCredentials'>;
+  /** Used as `target_id` only when no client certificate is configured (local fake distributor). */
+  fallbackTargetId?: string;
   fetchImpl?: DistributorFetch;
 }): ConfigDistributorClient => {
   const baseUrl = config.url?.replace(/\/$/, '');
 
   if (!baseUrl) {
+    const distributorNotConfigured = (): never => {
+      const message =
+        'streams-config-distributor URL is not configured; skipping unit validation and publish.';
+      logger.error(message);
+      throw new StatusError(message, 503);
+    };
+
     return {
-      publish: async () => {
-        logger.debug('streams-config-distributor URL is not configured; skipping unit publish.');
-      },
-      validate: async () => {
-        logger.debug('streams-config-distributor URL is not configured; skipping unit validation.');
-      },
+      publish: async (): Promise<void> => distributorNotConfigured(),
+      validate: async (): Promise<UnitValidationResult> => distributorNotConfigured(),
+      resolveTargetId: distributorNotConfigured,
     };
   }
 
   const ssl = config.ssl ?? {};
-  const agent = createDistributorTls(ssl);
+  const { agent, certificate } = createDistributorTls(ssl);
+  const resolveTargetId = createTargetIdResolver({ certificate, fallbackTargetId, logger });
 
   if (baseUrl.startsWith('https:') && !ssl.certificateAuthorities) {
     logger.warn(
@@ -212,12 +222,8 @@ export const createConfigDistributorClient = ({
   };
 
   return {
-    publish: async ({ unitId, unit, secrets }) => {
+    publish: async ({ unitId, unit, credentials }) => {
       const unitYaml = serializeUnitYaml(unit);
-      const credentials =
-        Object.keys(secrets).length > 0
-          ? await encryptSecretsForDistributor(hooks.encryptCredentials, secrets)
-          : [];
       const configHash = hashUnitPublishPayload(unitYaml, credentials);
 
       logger.debug(`Publishing Streams unit [${unitId}] to config distributor`);
@@ -228,7 +234,7 @@ export const createConfigDistributorClient = ({
         body: JSON.stringify({
           unit_yaml: unitYaml,
           config_hash: configHash,
-          ...(credentials.length > 0 ? { credentials } : {}),
+          ...credentialsField(credentials),
         }),
       });
 
@@ -239,7 +245,7 @@ export const createConfigDistributorClient = ({
         );
       }
     },
-    validate: async (unit) => {
+    validate: async ({ unit, credentials }) => {
       const unitYaml = serializeUnitYaml(unit);
 
       logger.debug('Validating Streams unit with config distributor');
@@ -247,13 +253,14 @@ export const createConfigDistributorClient = ({
       const response = await request({
         path: '/v1/validate',
         method: 'POST',
-        body: JSON.stringify({ unit_yaml: unitYaml }),
+        // The distributor compiles references during validate too, so it needs the same blobs.
+        body: JSON.stringify({ unit_yaml: unitYaml, ...credentialsField(credentials) }),
       });
 
       const parsed = parseValidateResponse(response.text);
 
       if (parsed?.valid) {
-        return;
+        return compiledConfigResult(parsed.compiled_config);
       }
 
       if (parsed) {
@@ -262,36 +269,12 @@ export const createConfigDistributorClient = ({
 
       throw statusErrorFromDistributorResponse('Failed to validate Streams unit', response);
     },
+    resolveTargetId,
   };
 };
 
-const encryptSecretsForDistributor = async (
-  encryptCredentials: UnitConfigHooks['encryptCredentials'],
-  secrets: StreamsUnit.Secrets
-): Promise<UnitCredential[]> => {
-  if (!encryptCredentials) {
-    throw new StatusError(
-      'Cannot publish Streams unit credentials: project-key encryption is not configured.',
-      503
-    );
-  }
-
-  const credentials = await encryptCredentials(secrets);
-  const secretNames = Object.keys(secrets).sort();
-  const credentialNames = credentials.map((credential) => credential.name).sort();
-
-  if (
-    secretNames.length !== credentialNames.length ||
-    secretNames.some((name, index) => name !== credentialNames[index])
-  ) {
-    throw new StatusError(
-      'Cannot publish Streams unit credentials: encryption did not return one ciphertext per secret.',
-      500
-    );
-  }
-
-  return credentials;
-};
+const credentialsField = (credentials: UnitCredential[]): { credentials?: UnitCredential[] } =>
+  credentials.length > 0 ? { credentials } : {};
 
 const statusErrorFromDistributorResponse = (
   prefix: string,
@@ -343,9 +326,17 @@ const unitValidationError = (diagnostics: UnitDiagnostic[]): StatusError => {
   return error;
 };
 
+const compiledConfigResult = (compiledConfig: string | undefined): UnitValidationResult => {
+  if (typeof compiledConfig !== 'string' || compiledConfig.length === 0) {
+    return {};
+  }
+
+  return { compiled_config: compiledConfig };
+};
+
 const parseValidateResponse = (
   text: string
-): { valid: boolean; diagnostics: UnitDiagnostic[] } | undefined => {
+): { valid: boolean; diagnostics: UnitDiagnostic[]; compiled_config?: string } | undefined => {
   try {
     const parsed: unknown = JSON.parse(text);
 
@@ -354,6 +345,7 @@ const parseValidateResponse = (
     }
 
     const diagnostics = parsed.diagnostics;
+    const compiledConfig = parsed.compiled_config;
 
     return {
       valid: parsed.valid,
@@ -363,6 +355,7 @@ const parseValidateResponse = (
             return mapped ? [mapped] : [];
           })
         : [],
+      ...(typeof compiledConfig === 'string' ? { compiled_config: compiledConfig } : {}),
     };
   } catch {
     return undefined;

@@ -12,6 +12,7 @@ import {
   MAX_KI_ATTRIBUTE_ARRAY_VALUES,
   MAX_KI_ATTRIBUTE_VALUE_LENGTH,
   MAX_KI_REFERENCES,
+  omitNullKiAttributes,
 } from './ki';
 
 describe('kiFieldsSchema', () => {
@@ -177,5 +178,89 @@ describe('kiFieldsSchema', () => {
     });
 
     expect(result.success).toBe(false);
+  });
+
+  it('omits an attribute whose value is null, so a template can write `| default: nil`', () => {
+    // A KI with no runnable query must not carry `esql: null` or `esql: []`: the ES|QL verifiers
+    // apply whenever the attribute is present, and fail it when it is empty.
+    const result = kiFieldsSchema.safeParse({
+      type: 'document',
+      title: 'title',
+      attributes: { esql: null, topics: ['billing'] },
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.success && result.data.attributes).toEqual({ topics: ['billing'] });
+  });
+
+  it('still rejects an undefined attribute value, which is a missing variable rather than an omission', () => {
+    const result = kiFieldsSchema.safeParse({
+      type: 'document',
+      title: 'title',
+      attributes: { esql: undefined },
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('counts null attributes toward MAX_KI_ATTRIBUTES before omitting them', () => {
+    const result = kiFieldsSchema.safeParse({
+      type: 'index_metadata',
+      title: 'title',
+      attributes: { ...buildAttributes(MAX_KI_ATTRIBUTES), extra: null },
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it('keeps null meaning "clear the expiry" on update while dropping null attributes', () => {
+    const result = kiPartialFieldsSchema.safeParse({
+      expires_at: null,
+      attributes: { esql: null, doc_count: 3 },
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.success && result.data).toEqual({
+      expires_at: null,
+      attributes: { doc_count: 3 },
+    });
+  });
+
+  it('does not treat null as an omission outside attributes', () => {
+    expect(
+      kiFieldsSchema.safeParse({ type: 'index_metadata', title: 'title', references: null }).success
+    ).toBe(false);
+    expect(
+      kiFieldsSchema.safeParse({ type: 'index_metadata', title: 'title', references: [null] })
+        .success
+    ).toBe(false);
+  });
+});
+
+describe('omitNullKiAttributes', () => {
+  it('drops null attributes and leaves every other field untouched', () => {
+    expect(
+      omitNullKiAttributes({
+        title: 'title',
+        expires_at: null,
+        attributes: { esql: null, unit: 'sku-1' },
+      })
+    ).toEqual({ title: 'title', expires_at: null, attributes: { unit: 'sku-1' } });
+  });
+
+  it('removes attributes entirely when every value was null, so a patch writes no empty object', () => {
+    expect(omitNullKiAttributes({ title: 'title', attributes: { esql: null } })).toEqual({
+      title: 'title',
+    });
+  });
+
+  it('keeps an attributes object that was empty to begin with', () => {
+    expect(omitNullKiAttributes({ attributes: {} })).toEqual({ attributes: {} });
+  });
+
+  it('returns a KI without attributes as it is', () => {
+    const ki = { title: 'title' };
+
+    expect(omitNullKiAttributes(ki)).toBe(ki);
   });
 });

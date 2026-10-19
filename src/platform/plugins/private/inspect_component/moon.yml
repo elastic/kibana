@@ -29,7 +29,7 @@ dependsOn:
   - '@kbn/shared-ux-utility'
 tags:
   - plugin
-  - prod
+  - dev
   - group-platform
   - private
   - jest-unit-tests

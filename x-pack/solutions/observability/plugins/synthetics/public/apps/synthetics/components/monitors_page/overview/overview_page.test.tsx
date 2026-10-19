@@ -114,16 +114,17 @@ jest.mock('./overview/overview_status', () => ({
   OverviewStatus: () => null,
 }));
 
-jest.mock('./overview/overview_errors/overview_errors', () => ({
-  OverviewErrors: () => null,
-}));
-
-jest.mock('./overview/overview_alerts', () => ({
-  OverviewAlerts: () => null,
+jest.mock('./overview/overview_activity_chart', () => ({
+  OverviewActivityChart: () => null,
+  useOverviewActivityStats: () => [],
 }));
 
 jest.mock('../common/no_monitors_found', () => ({
   NoMonitorsFound: () => null,
+}));
+
+jest.mock('../../common/components/browser_complete_agent_overview_callout', () => ({
+  BrowserCompleteAgentOverviewCallout: () => null,
 }));
 
 import { OverviewPage } from './overview_page';

@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { ActionPolicySnoozeButton } from './action_policy_snooze_button';
@@ -17,16 +16,10 @@ const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPoli
   name: 'Test policy',
   description: '',
   enabled: true,
-  matcher: null,
-  group_by: null,
-  grouping_mode: null,
-  throttle: null,
-  snoozed_until: null,
   destinations: [],
-  auth: { owner: 'elastic', created_by_user: true },
-  created_by: 'elastic',
+  created_by: { profile_uid: 'elastic' },
   created_at: '2026-01-01T00:00:00.000Z',
-  updated_by: 'elastic',
+  updated_by: { profile_uid: 'elastic' },
   updated_at: '2026-01-01T00:00:00.000Z',
   ...overrides,
 });
@@ -51,8 +44,8 @@ describe('ActionPolicySnoozeButton', () => {
     jest.clearAllMocks();
   });
 
-  it('renders a bell icon when snoozedUntil is null (not snoozed)', () => {
-    renderButton(createPolicy({ snoozed_until: null }));
+  it('renders a bell icon when the policy is not snoozed', () => {
+    renderButton(createPolicy());
 
     expect(screen.getByTestId('actionPolicySnoozeButton')).toBeInTheDocument();
     expect(screen.queryByTestId('actionPolicyUnsnoozeButton')).not.toBeInTheDocument();
@@ -78,22 +71,22 @@ describe('ActionPolicySnoozeButton', () => {
     expect(screen.getByTestId('actionPolicyUnsnoozeButton')).toHaveTextContent(formattedDate);
   });
 
-  it('unsnoozes directly when the snoozed button is clicked', async () => {
+  it('unsnoozes directly when the snoozed button is clicked', () => {
     renderButton(createPolicy({ snoozed_until: new Date(Date.now() + 86_400_000).toISOString() }));
 
-    await userEvent.click(screen.getByTestId('actionPolicyUnsnoozeButton'));
+    fireEvent.click(screen.getByTestId('actionPolicyUnsnoozeButton'));
 
     expect(onCancelSnooze).toHaveBeenCalledWith('policy-1');
     expect(onSnooze).not.toHaveBeenCalled();
   });
 
-  it('opens the snooze modal and applies the selected duration', async () => {
+  it('opens the snooze modal and applies the selected duration', () => {
     renderButton(createPolicy());
 
-    await userEvent.click(screen.getByTestId('actionPolicySnoozeButton'));
+    fireEvent.click(screen.getByTestId('actionPolicySnoozeButton'));
     expect(screen.getByTestId('actionPolicySnoozeModal')).toBeInTheDocument();
 
-    await userEvent.click(screen.getByTestId('actionPolicySnoozeModalApply'));
+    fireEvent.click(screen.getByTestId('actionPolicySnoozeModalApply'));
 
     expect(onSnooze).toHaveBeenCalledTimes(1);
     const [id, snoozedUntil] = onSnooze.mock.calls[0];

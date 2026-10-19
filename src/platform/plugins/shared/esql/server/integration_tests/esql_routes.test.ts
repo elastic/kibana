@@ -125,6 +125,20 @@ describe('ESQL routes', () => {
     });
   });
 
+  it('can strictly load ES|QL views for management (GET /internal/esql/views)', async () => {
+    const url = '/internal/esql/views?strict=true';
+    const result = await testbed.GET(url).send().expect(200);
+
+    expect(result.body).toHaveProperty('views');
+    expect(Array.isArray(result.body.views)).toBe(true);
+    result.body.views.forEach((view: { name: string; query: string }) => {
+      expect(view).toHaveProperty('name');
+      expect(view).toHaveProperty('query');
+      expect(typeof view.name).toBe('string');
+      expect(typeof view.query).toBe('string');
+    });
+  });
+
   it('supports the ES|QL view CRUD lifecycle with descriptions', async () => {
     const viewName = 'kibana-esql-route-test';
     const viewRoute = getViewRoute(viewName);

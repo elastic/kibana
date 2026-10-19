@@ -6,7 +6,12 @@
  */
 
 // Compose Discover flyout — stepped Edit Form + Discover Sandbox
-export { ComposeDiscoverFlyout } from './flyout/compose_discover';
+export {
+  ComposeDiscoverFlyout,
+  STACKED_FLYOUT_SIZE,
+  STACKED_FLYOUT_MIN_WIDTH,
+  useEuiFlyoutReregister,
+} from './flyout/compose_discover';
 export type { ComposeDiscoverFlyoutProps } from './flyout/compose_discover';
 export type { ComposeDiscoverMode } from './flyout/compose_discover/types';
 
@@ -52,19 +57,16 @@ export type {
   RuleFormMeta,
   RuleFormLayout,
   RuleRequestCommon,
-  RuleNotificationsValue,
   RuleQuery,
-  ComposedQuery,
-  StandaloneQuery,
+  RuleRecovery,
+  RuleNoData,
   RuleKind,
+  RecoveryStrategy,
+  NoDataStrategy,
 } from './form';
 
 export {
   buildInlineWorkflowYaml,
-  buildRuleScopedMatcher,
-  buildRuleNotificationTag,
-  resolveRuleNotificationTag,
-  ruleHasNotificationTag,
   InlineWorkflowEditor,
   INLINE_ACTION_STEP_DEFINITIONS,
   getInlineActionStepDefinition,
@@ -73,12 +75,22 @@ export {
 } from './actions_form';
 export type {
   ActionDraft,
+  ConnectorCreationConfig,
   InlineActionStepDefinition,
   InlineActionStepType,
   InlineWorkflowActionDraft,
 } from './actions_form';
-export { useMatchedActionPolicies } from './flyout/compose_discover/compose_discover_form/use_matched_action_policies';
+export {
+  matchedActionPoliciesQueryKey,
+  useMatchedActionPolicies,
+} from './flyout/compose_discover/compose_discover_form/use_matched_action_policies';
 export type { UseMatchedActionPoliciesResult } from './flyout/compose_discover/compose_discover_form/use_matched_action_policies';
+export { MatchedPolicyReason } from './flyout/compose_discover/compose_discover_form/matched_policy_reason';
+export { WorkflowConnectorIcons } from './flyout/compose_discover/compose_discover_form/workflow_connector_icons';
+export {
+  useActionPolicyConnectorTypes,
+  type UseActionPolicyConnectorTypesResult,
+} from './flyout/compose_discover/compose_discover_form/use_action_policy_connector_types';
 
 // Threshold rule-builder ES|QL parser + types — consumed by the episode trend chart
 export { parseThresholdEsql } from './flyout/compose_discover/rule_builder/threshold/parse_esql';

@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import type { z } from '@kbn/zod/v4';
 import type { AlertEpisodeStatus } from './alert_action_schema';
-import type { alertEventSeveritySchema } from './create_alert_event_data_schema';
+import type { AlertEventSeverity } from './severity';
 
 export interface MatcherContext {
   last_event_timestamp: string;
   group_hash: string;
-  episode_id: string;
-  episode_status: AlertEpisodeStatus;
-  severity?: z.infer<typeof alertEventSeveritySchema>;
+  alert_id: string;
+  alert_status: AlertEpisodeStatus;
+  severity?: AlertEventSeverity;
   data?: Record<string, unknown>;
 }
 
@@ -30,11 +29,11 @@ export interface MatcherContextFieldDescriptor {
  * and for Agent Builder skill docs (`generateMatcherContextDoc`).
  */
 export const MATCHER_CONTEXT_FIELDS: MatcherContextFieldDescriptor[] = [
-  { path: 'episode_id', type: 'string', description: 'The episode UUID' },
+  { path: 'alert_id', type: 'string', description: 'The alert UUID' },
   {
-    path: 'episode_status',
+    path: 'alert_status',
     type: 'string',
-    description: 'Episode lifecycle status',
+    description: 'Alert lifecycle status',
   },
   { path: 'group_hash', type: 'string', description: 'Hash of the grouping fields' },
   {
@@ -42,7 +41,7 @@ export const MATCHER_CONTEXT_FIELDS: MatcherContextFieldDescriptor[] = [
     type: 'string',
     description: 'Timestamp of the most recent event',
   },
-  { path: 'severity', type: 'string', description: 'Episode severity when present' },
+  { path: 'severity', type: 'string', description: 'Alert severity when present' },
   {
     path: 'data',
     type: 'object',

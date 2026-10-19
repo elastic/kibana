@@ -175,6 +175,7 @@ export const ControlsContent = ({
         schemas={schemas}
         value={schema ?? DEFAULT_SCHEMA}
         isLoading={isLoading}
+        nodeType="host"
       />
     </ControlGroupContainer>
   );

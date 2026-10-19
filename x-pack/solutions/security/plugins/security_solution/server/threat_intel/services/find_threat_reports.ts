@@ -17,8 +17,8 @@ import {
   type ThreatReportSummary,
 } from '../../../common/threat_intel';
 import { truncate } from './report_content';
-import { HIDDEN_INDEX_SEARCH_OPTIONS } from '../lib/es_options';
-import { USABLE_REPORT_FILTER } from '../lib/usable_report_filter';
+import { HIDDEN_INDEX_PIT_OPTIONS } from '../lib/es_options';
+import { HUNT_USABLE_FILTER, INDICATOR_ELIGIBLE_FILTER } from '../lib/usable_report_filter';
 import { buildSpaceFilterTerms } from '../lib/space_filter';
 import { decodeCursor, encodeCursor, InvalidCursorError } from '../lib/report_cursor';
 
@@ -66,6 +66,7 @@ export const buildFindReportFilters = ({
   from,
   to,
   usableOnly,
+  indicatorEligibleOnly,
 }: {
   spaceId: string;
   source?: string;
@@ -74,6 +75,7 @@ export const buildFindReportFilters = ({
   from?: string;
   to?: string;
   usableOnly?: boolean;
+  indicatorEligibleOnly?: boolean;
 }): estypes.QueryDslQueryContainer[] => {
   const filters: estypes.QueryDslQueryContainer[] = [buildSpaceFilterTerms(spaceId)];
 
@@ -102,8 +104,12 @@ export const buildFindReportFilters = ({
     });
   }
 
-  if (usableOnly) {
-    filters.push(USABLE_REPORT_FILTER);
+  if (usableOnly || indicatorEligibleOnly) {
+    filters.push(HUNT_USABLE_FILTER);
+  }
+
+  if (indicatorEligibleOnly) {
+    filters.push(INDICATOR_ELIGIBLE_FILTER);
   }
 
   return filters;
@@ -169,7 +175,14 @@ const mapHitToSummary = (hit: estypes.SearchHit<ReportSourceDoc>): ThreatReportS
     .map((ioc) => ({ type: ioc.type, value: ioc.value }));
 
   const diamond = source.extracted?.diamond;
-  const summary: ThreatReportSummary = {
+  const summary: {
+    reportId: string;
+    iocs: typeof iocs;
+    title?: string;
+    bodyText?: string;
+    severity?: { level: string; score?: number };
+    diamond?: { signalCount?: number; suitable?: boolean };
+  } = {
     reportId: hit._id ?? '',
     iocs,
   };
@@ -217,6 +230,7 @@ export const findThreatReports = async (
     from,
     to,
     usableOnly,
+    indicatorEligibleOnly,
     sort = 'relevance',
   } = params;
 
@@ -233,6 +247,7 @@ export const findThreatReports = async (
     from,
     to,
     usableOnly,
+    indicatorEligibleOnly,
   });
 
   const query: estypes.QueryDslQueryContainer = {
@@ -266,11 +281,7 @@ export const findThreatReports = async (
         index: THREAT_REPORTS_INDEX_PATTERN,
         keep_alive: PIT_KEEP_ALIVE,
         // Reports live in a hidden index, which a wildcard skips by default.
-        // Only PIT-valid fields go here: `allow_no_indices` (from
-        // HIDDEN_INDEX_SEARCH_OPTIONS) is a search-only parameter ES rejects
-        // on PIT open with x_content_parse_exception.
-        expand_wildcards: HIDDEN_INDEX_SEARCH_OPTIONS.expand_wildcards,
-        ignore_unavailable: HIDDEN_INDEX_SEARCH_OPTIONS.ignore_unavailable,
+        ...HIDDEN_INDEX_PIT_OPTIONS,
       });
       pitId = pit.id;
       openedPit = true;

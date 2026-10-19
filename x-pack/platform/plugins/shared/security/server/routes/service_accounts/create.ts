@@ -5,20 +5,25 @@
  * 2.0.
  */
 
-import { createServiceAccountBodySchema } from './schemas';
+import {
+  getCreateServiceAccountBodySchema,
+  getCreateServiceAccountMaxBodyBytes,
+  getServiceAccountRoleLimits,
+} from './schemas';
+import { serviceAccountsUnavailable } from './unavailable';
 import type { RouteDefinitionParams } from '..';
-import { SERVICE_ACCOUNT_CREATE_MAX_BODY_BYTES } from '../../../common/service_accounts';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
-
-const unavailable = (reason: string) => ({
-  body: { message: `Service accounts are not available: ${reason}` },
-});
 
 export function defineCreateServiceAccountRoute({
   router,
   getServiceAccountsService,
+  buildFlavor,
 }: RouteDefinitionParams) {
+  // The route has authorization disabled, so the body is parsed before the backend's privilege
+  // check runs. Holding it to the active backend's limits keeps that parse as small as it can be.
+  const roleLimits = getServiceAccountRoleLimits(buildFlavor);
+
   router.post(
     {
       path: '/internal/security/service_account',
@@ -26,20 +31,21 @@ export function defineCreateServiceAccountRoute({
         authz: {
           enabled: false,
           reason:
-            'This route delegates authorization to the upstream UIAM service via the forwarded access token',
+            'This route delegates authorization to the service account provider: UIAM via the ' +
+            "forwarded access token, or Elasticsearch via the caller's `manage_security` cluster privilege",
         },
       },
-      validate: { body: createServiceAccountBodySchema },
+      validate: { body: getCreateServiceAccountBodySchema(roleLimits) },
       options: {
         access: 'internal',
-        body: { maxBytes: SERVICE_ACCOUNT_CREATE_MAX_BODY_BYTES },
+        body: { maxBytes: getCreateServiceAccountMaxBodyBytes(roleLimits) },
       },
     },
     createLicensedRouteHandler(async (context, request, response) => {
       try {
         const serviceAccounts = getServiceAccountsService();
         if (!serviceAccounts) {
-          return response.notFound(unavailable('the feature is disabled'));
+          return response.notFound(serviceAccountsUnavailable('the feature is disabled'));
         }
 
         return response.ok({

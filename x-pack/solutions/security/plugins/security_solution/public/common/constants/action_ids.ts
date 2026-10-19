@@ -41,11 +41,38 @@ export const ALERT_CLOSE_WITH_REASON_ACTION_ID = 'close-alert-with-reason' as co
 
 export const ALERT_TAG_ACTION_ID = 'manage-alert-tags' as const;
 
+export const ATTACK_ADD_TO_CASE_ACTION_ID = 'attack-add-to-case' as const;
+
+export const ATTACK_AI_ACTION_IDS = {
+  addToChat: 'viewInAgentBuilder',
+  viewInAiAssistant: 'viewInAiAssistant',
+} as const;
+
+export const ATTACK_ASSIGNEE_ACTION_IDS = {
+  assign: 'manage-attack-assignees',
+  unassignAll: 'remove-all-attack-assignees',
+} as const;
+
+export const ATTACK_DISCOVERY_ACTION_IDS = {
+  addToCase: 'addToCase',
+  addToChat: ATTACK_AI_ACTION_IDS.addToChat,
+  addToDataset: 'addToDataset',
+  markAsAcknowledged: 'markAsAcknowledged',
+  markAsClosed: 'markAsClosed',
+  markAsOpen: 'markAsOpen',
+  viewInAiAssistant: ATTACK_AI_ACTION_IDS.viewInAiAssistant,
+} as const;
+
+export const ATTACK_INVESTIGATE_IN_TIMELINE_ACTION_ID =
+  'attack-investigate-in-timeline-action-item' as const;
+
 export const ATTACK_STATUS_ACTION_IDS = {
   markAsOpen: 'open-attack-status',
   markAsAcknowledged: 'acknowledge-attack-status',
   markAsClosed: 'closed-attack-status',
 } as const;
+
+export const ATTACK_TAG_ACTION_ID = 'manage-attack-tags' as const;
 
 /** Bulk "Add to case" key for the events-table bulk menu. */
 export const BULK_ADD_TO_CASE_ACTION_ID = 'attach-case' as const;
@@ -55,6 +82,8 @@ export const BULK_INVESTIGATE_IN_TIMELINE_ACTION_ID = 'add-bulk-to-timeline' as 
 export const EVENT_FILTER_ACTION_ID = 'add-event-filter-menu-item' as const;
 
 export const EXPLORE_ACTION_ID = 'explore-action' as const;
+
+export const EXPLORE_IN_ATTACKS_ACTION_ID = 'exploreInAttacks' as const;
 
 export const INVESTIGATE_IN_TIMELINE_ACTION_ID = 'investigate-in-timeline-action-item' as const;
 
@@ -70,5 +99,7 @@ export const RISK_INPUT_ACTION_IDS = {
 } as const;
 
 export const RUN_ALERT_WORKFLOW_ACTION_ID = 'run-workflow-action' as const;
+
+export const RUN_ATTACK_WORKFLOW_ACTION_ID = 'run-attack-workflow-action' as const;
 
 export const RUN_DOCUMENT_WORKFLOW_ACTION_ID = 'run-document-workflow-action' as const;

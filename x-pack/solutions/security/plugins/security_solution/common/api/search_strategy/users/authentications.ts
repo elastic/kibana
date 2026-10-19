@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { UsersQueries } from '../model/factory_query_type';
 
 import { requestOptionsPaginatedSchema } from '../model/request_paginated_options';
@@ -16,11 +16,13 @@ export enum AuthStackByField {
   hostName = 'host.name',
 }
 
-export const userAuthenticationsSchema = requestOptionsPaginatedSchema.extend({
-  stackByField: z.enum([AuthStackByField.userName, AuthStackByField.hostName]),
-  timerange,
-  factoryQueryType: z.literal(UsersQueries.authentications),
-});
+export const userAuthenticationsSchema = lazySchema(() =>
+  requestOptionsPaginatedSchema.extend({
+    stackByField: z.enum([AuthStackByField.userName, AuthStackByField.hostName]),
+    timerange,
+    factoryQueryType: z.literal(UsersQueries.authentications),
+  })
+);
 
 export type UserAuthenticationsRequestOptionsInput = z.input<typeof userAuthenticationsSchema>;
 

@@ -49,9 +49,7 @@ export const FooterItem = forwardRef<HTMLAnchorElement, FooterItemProps>(
     `;
 
     const buttonStyles = css`
-      --high-contrast-hover-indicator-color: ${isHighlighted
-        ? euiTheme.colors.textPrimary
-        : euiTheme.colors.textParagraph};
+      --high-contrast-hover-indicator-color: ${euiTheme.colors.textParagraph};
       ${highContrastModeStyles}
     `;
 
@@ -69,7 +67,7 @@ export const FooterItem = forwardRef<HTMLAnchorElement, FooterItemProps>(
       'aria-current': isCurrent ? 'page' : undefined,
       'aria-label': label,
       buttonRef: ref,
-      color: isHighlighted ? 'primary' : 'text',
+      color: 'text',
       'data-highlighted': isHighlighted ? 'true' : 'false',
       'data-test-subj': footerItemTestSubj,
       'data-menu-item': 'true',

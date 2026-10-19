@@ -11,25 +11,19 @@ export {
   InvalidInlineWorkflowError,
 } from './helpers/build_inline_workflow_yaml';
 export {
-  buildRuleScopedMatcher,
-  buildRuleNotificationTag,
-  resolveRuleNotificationTag,
-  ruleHasNotificationTag,
-} from './helpers/rule_scoped_action_policies';
-export {
   DISPATCH_PAYLOAD_VARIABLES,
   INLINE_ACTION_STEP_DEFINITIONS,
   getDefaultInlineActionStepDefinition,
   getInlineActionStepDefinition,
 } from './registry';
 export type { InlineActionStepDefinition, PayloadVariable } from './registry';
-export { ActionForm, createInitialActionFormValue } from './action_form';
 export { InlineWorkflowEditor } from './components/inline_workflow_editor';
 export { isActionValid } from './types';
 export type {
   ActionDraft,
   ActionFormValue,
   ActionSource,
+  ConnectorCreationConfig,
   ExistingWorkflowActionDraft,
   InlineActionStepType,
   InlineWorkflowActionDraft,
