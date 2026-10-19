@@ -6,7 +6,7 @@
  */
 
 import type { CoreSetup, HttpServiceSetup, KibanaRequest, Logger } from '@kbn/core/server';
-import { brandSpaceId, DEFAULT_SPACE_ID, type SpaceId } from '@kbn/core-spaces-common';
+import { brandSpaceId, type SpaceId } from '@kbn/core-spaces-common';
 
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type { InMemoryConnector } from '../types';

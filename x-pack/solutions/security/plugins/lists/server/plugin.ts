@@ -85,8 +85,12 @@ export class ListPlugin implements Plugin<ListPluginSetup, ListsPluginStart, {},
     };
   }
 
-  public start(_core: CoreStart, _plugins: PluginsStart): ListsPluginStart {
-    this.logger.debug('Starting plugin');
+  public start(core: CoreStart, plugins: PluginsStart): ListsPluginStart {
+    this.logger.debug(
+      `Starting plugin (elasticsearch=${Boolean(core.elasticsearch)}, security=${Boolean(
+        plugins.security
+      )})`
+    );
   }
 
   public stop(): void {

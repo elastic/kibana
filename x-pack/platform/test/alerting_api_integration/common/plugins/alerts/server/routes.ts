@@ -17,7 +17,6 @@ import type {
   SavedObject,
 } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { InvalidatePendingApiKey } from '@kbn/alerting-plugin/server/types';
 import type { RawRule } from '@kbn/alerting-plugin/server/types';
 import type {
