@@ -64,6 +64,7 @@ export const summarizeIsolationRuns = (dirs: readonly string[]): object[] =>
             probe_p95_ms: row.metrics.probe_p95_ms,
             probe_p95_ratio: row.vs_baseline.probe_p95,
             hb_gap_full_ms: row.metrics.hb_gap_max_full_ms,
+            hb_gap_overlap_ms: row.metrics.hb_gap_max_overlap_ms,
             hb_window_max_ms: row.metrics.hb_window_max_ms,
             tm_poll_gap_ms: row.metrics.tm_poll_max_gap_ms,
             tm_missed_cycles: row.metrics.tm_missed_poll_cycles,

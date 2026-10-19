@@ -12,7 +12,7 @@ interface CurveRow {
   phase: string;
   role: string;
   probe_p95_ratio: number | null;
-  hb_gap_full_ms: number | null;
+  hb_gap_overlap_ms: number | null;
   hb_window_max_ms: number | null;
 }
 interface CurveRun {
@@ -48,7 +48,7 @@ text(
 text(
   30,
   76,
-  'Left: in-pod p95 / own idle baseline. Right: heartbeat-gap proxy (NOT an exact execution slice).'
+  'Left: in-pod p95 / own idle baseline. Right: phase-overlap gap proxy (full boundary-spanning intervals remain in raw scorecards).'
 );
 const families = ['cpu_spin', 'json_stringify', 'regex_backtrack', 'microtask_chain'];
 for (const [familyIndex, family] of families.entries()) {
@@ -85,7 +85,7 @@ for (const [familyIndex, family] of families.entries()) {
           const value =
             metric === 'probe'
               ? row.probe_p95_ratio
-              : Math.max(row.hb_gap_full_ms ?? 0, row.hb_window_max_ms ?? 0);
+              : row.hb_gap_overlap_ms ?? row.hb_window_max_ms ?? 0;
           return { dose, value };
         })
         .filter(
