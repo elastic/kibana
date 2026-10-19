@@ -299,28 +299,28 @@ describe('discovery workflow detection classifier wiring', () => {
     describe('the reason stored on a skipped marker', () => {
       const skipExpression = () =>
         (requireStep('write_skipped_marker').with?.body as Record<string, unknown>).skip;
-      const decisions = [
-        { rule_uuid: 'rule-A', decision: 'needs_agent', reason: 'not_live_member' },
+      const skips = [
         {
           rule_uuid: 'rule-B',
-          decision: 'skip',
-          reason: 'still_breaching',
-          probe_status: 'ok',
-          baseline: { decision: 'background', value: 150, samples: 60 },
+          skip: {
+            reason: 'still_breaching',
+            probe_status: 'ok',
+            baseline: { decision: 'background', value: 150, samples: 60 },
+          },
         },
       ];
       const forItem = (item: unknown[]) => ({
-        steps: { classify_detections: { output: { decisions } } },
+        steps: { classify_detections: { output: { skips } } },
         foreach: { item },
       });
 
-      it("is the classifier's decision for the detection's rule", () => {
+      it("is the classifier's skip for the detection's rule, and nothing else of its decision", () => {
         expect(evaluate(skipExpression(), forItem(['detection-B', 'rule-B']))).toEqual(
-          decisions[1]
+          skips[0].skip
         );
       });
 
-      it('is absent when the classifier has no decision for the rule', () => {
+      it('is absent when the classifier has no skip for the rule', () => {
         expect(evaluate(skipExpression(), forItem(['detection-C', 'rule-C']))).toBeUndefined();
       });
 

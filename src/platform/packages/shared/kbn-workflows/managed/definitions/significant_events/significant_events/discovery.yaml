@@ -293,7 +293,7 @@ steps:
                   - '{{ foreach.item[0] }}'
                 processed_by: '{{ execution.id }}'
                 # The classifier's decision for this detection's rule, so the marker says why.
-                skip: '${{ steps.classify_detections.output.decisions | where: ''rule_uuid'', foreach.item[1] | first }}'
+                skip: '${{ steps.classify_detections.output.skips | where: ''rule_uuid'', foreach.item[1] | map: ''skip'' | first }}'
             on-failure:
               continue: true
 

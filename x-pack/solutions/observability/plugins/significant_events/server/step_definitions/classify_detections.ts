@@ -67,6 +67,16 @@ const inputSchema = lazySchema(() =>
   })
 );
 
+const baselineSchema = lazySchema(() =>
+  z.object({
+    decision: z.enum(BASELINE_DECISIONS),
+    value: z.number(),
+    samples: z.number().int().min(0),
+    median: z.number().optional(),
+    threshold: z.number().optional(),
+  })
+);
+
 const decisionSchema = lazySchema(() =>
   z.object({
     rule_uuid: z.string().max(MAX_ID_LENGTH),
@@ -77,15 +87,16 @@ const decisionSchema = lazySchema(() =>
     probe_duration_ms: z.number().int().min(0).optional(),
     /** What the old flaky-rule gate made of the detection; absent when the row does not say. */
     legacy_gate: z.enum(['suppressed', 'passed']).optional(),
-    baseline: z
-      .object({
-        decision: z.enum(BASELINE_DECISIONS),
-        value: z.number(),
-        samples: z.number().int().min(0),
-        median: z.number().optional(),
-        threshold: z.number().optional(),
-      })
-      .optional(),
+    baseline: baselineSchema.optional(),
+  })
+);
+
+/** The part of a decision a processed marker keeps: the marker route refuses any other key. */
+const skipMarkerSchema = lazySchema(() =>
+  z.object({
+    reason: z.enum(DECISION_REASONS),
+    probe_status: z.enum(PROBE_STATUSES).optional(),
+    baseline: baselineSchema.optional(),
   })
 );
 
@@ -100,6 +111,10 @@ const outputSchema = lazySchema(() =>
     decisions: z.array(decisionSchema).max(MAX_INPUT_ROWS),
     /** Rules whose detections were skipped; always empty in shadow mode. */
     skipped_rule_uuids: z.array(z.string().max(MAX_ID_LENGTH)).max(MAX_INPUT_ROWS),
+    /** Why each skipped rule was skipped, in the shape a processed marker stores; empty in shadow mode. */
+    skips: z
+      .array(z.object({ rule_uuid: z.string().max(MAX_ID_LENGTH), skip: skipMarkerSchema }))
+      .max(MAX_INPUT_ROWS),
     /** Number of rows in `rows`; a numeric field so workflows can tell an empty batch from a missing output. */
     row_count: z.number().int().min(0),
     /** Decisions made, regardless of shadow mode. */
@@ -421,12 +436,31 @@ export const classifyBatch = async ({
     !heldBackIndexes.has(index) && (shadowMode || !skippedIndexes.has(index));
   const agentRows = rows.filter((_, index) => reachesAgent(index)).map((row) => [...row]);
 
+  const skips = shadowMode
+    ? []
+    : decisions.flatMap(
+        ({ rule_uuid: ruleUuid, decision, reason, probe_status: probeStatus, baseline }) =>
+          decision === 'skip'
+            ? [
+                {
+                  rule_uuid: ruleUuid,
+                  skip: {
+                    reason,
+                    ...(probeStatus ? { probe_status: probeStatus } : {}),
+                    ...(baseline ? { baseline } : {}),
+                  },
+                },
+              ]
+            : []
+      );
+
   return {
     rows: agentRows,
     batch: entries.filter((_, index) => reachesAgent(index)),
     row_count: agentRows.length,
     decisions,
     skipped_rule_uuids: skippedRuleUuids,
+    skips,
     skipped_count: skippedIndexes.size,
     needs_agent_count: decisions.length - skippedIndexes.size,
     reason_counts: countBy(decisions, ({ reason }) => reason),

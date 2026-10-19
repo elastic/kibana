@@ -6,7 +6,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import type { SignalVerdict } from '@kbn/significant-events-schema';
+import { detectionSkipSchema, type SignalVerdict } from '@kbn/significant-events-schema';
 import {
   MAX_CLASSIFIED_ROWS,
   classifyBatch,
@@ -230,6 +230,30 @@ describe('classifyBatch', () => {
         ended_by: 'operator',
       });
     });
+  });
+
+  it('lists, per skipped rule, only what a processed marker stores, so the marker route accepts it', async () => {
+    const findLiveMembers = jest.fn(async () => membersOf({ 'rule-A': [membership('confirms')] }));
+
+    const output = await classifyBatch(
+      batchParams({ rows: [detectionRow('rule-A')], findLiveMembers })
+    );
+
+    expect(output.skips).toEqual([
+      { rule_uuid: 'rule-A', skip: { reason: 'still_breaching', probe_status: 'ok' } },
+    ]);
+    const route = detectionSkipSchema.omit({ checked_at: true }).strict();
+    expect(route.safeParse(output.skips[0].skip).success).toBe(true);
+  });
+
+  it('lists no skips while it only records', async () => {
+    const findLiveMembers = jest.fn(async () => membersOf({ 'rule-A': [membership('confirms')] }));
+
+    const output = await classifyBatch(
+      batchParams({ rows: [detectionRow('rule-A')], findLiveMembers, shadowMode: true })
+    );
+
+    expect(output.skips).toEqual([]);
   });
 
   describe('the old flaky-rule gate', () => {
