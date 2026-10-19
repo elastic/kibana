@@ -39,10 +39,7 @@ spec:
         # failures, a reopen on failures after the close; the body's text stays as filed, only its
         # hidden metadata records the report
         FLAKY_TESTS_UPDATE_ISSUES: 'true'
-        # Days between two comments on the same issue; reopens always comment. A comment notifies
-        # the issue's subscribers and, in elastic/kibana, the Slack channel of teams opted in to
-        # existing-failure alerts in triage (none yet), so start weekly and shorten once the
-        # volume is known.
+        # Days between two comments on the same issue; reopens always comment.
         FLAKY_TESTS_COMMENT_INTERVAL_DAYS: '7'
       allow_rebuilds: true
       branch_configuration: main
