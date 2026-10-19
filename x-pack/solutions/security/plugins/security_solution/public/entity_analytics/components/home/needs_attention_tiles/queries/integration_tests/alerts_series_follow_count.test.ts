@@ -36,6 +36,7 @@ import {
  * | host:e      |             | medium 3.5                                                     |
  * | host:f      |             | critical 1080.5                                                |
  * | host:m      |             | critical 0.5, 7.5, 13.5, 19.5, 25.5 (many buckets of a window) |
+ * | host:n      |             | critical 10.5 (in the 24h dots that reach it, not the older ones) |
  * | host:ghost  | no entity   | high 2.5 (dropped: unknown entity)                             |
  */
 
@@ -55,6 +56,7 @@ const ENTITIES: ReadonlyArray<{ id: string; watchlisted?: boolean; resolvedTo?: 
   { id: 'host:e' },
   { id: 'host:f' },
   { id: 'host:m' },
+  { id: 'host:n' },
 ];
 
 const ALERTS: ReadonlyArray<[entityId: string, severity: string, hoursAgo: number]> = [
@@ -72,6 +74,7 @@ const ALERTS: ReadonlyArray<[entityId: string, severity: string, hoursAgo: numbe
   ['host:m', 'critical', 13.5],
   ['host:m', 'critical', 19.5],
   ['host:m', 'critical', 25.5],
+  ['host:n', 'critical', 10.5],
   ['host:ghost', 'high', 2.5],
 ];
 
@@ -137,10 +140,11 @@ describeSeriesFollowsCount({
     {
       name: 'Entities with alerts',
       column: severeAlertsSeriesColumn,
-      // 24h: host:a (2.5h, and host:alias 5.5h) and host:m (0.5 to 19.5h). Not host:e (medium)
-      // and not host:ghost (unknown entity).
-      // 30d: host:a, host:b, host:m, user:d (critical 10 days ago). host:f is 45 days old.
-      byHand: { '24h': 2, '30d': 4 },
+      // 24h: host:a (2.5h, and host:alias 5.5h), host:m (0.5 to 19.5h) and host:n (10.5h). Not
+      // host:e (medium) and not host:ghost (unknown entity). host:a and host:m alert in every 24h
+      // window a dot covers, so host:n is what makes the 24h dots differ.
+      // 30d: host:a, host:b, host:m, host:n, user:d (critical 10 days ago). host:f is 45 days old.
+      byHand: { '24h': 3, '30d': 5 },
     },
     {
       name: 'Watchlisted',

@@ -181,7 +181,7 @@ const seriesReachesBack = (tile: Tile): boolean | undefined => {
   return options.reachesBack;
 };
 
-describe('EntityAnalyticsNewHomePage: the tiles wait for every count', () => {
+describe('EntityAnalyticsNewHomePage: each tile waits for its own count', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useEntityStoreStatus as jest.Mock).mockReturnValue({
@@ -202,14 +202,16 @@ describe('EntityAnalyticsNewHomePage: the tiles wait for every count', () => {
   });
 
   it.each(TILES)(
-    'holds all the deltas and sparklines back while the %s count is pending',
+    'holds back only the delta and sparkline of the %s tile while its count is pending',
     (stuck) => {
       mockTiles({ [stuck]: { isCountPending: true } });
       render(<EntityAnalyticsNewHomePage />);
 
+      // The two risk tiles share one sparkline query, which waits for both counts.
+      const isRisk = (tile: Tile) => tile === 'riskMovers' || tile === 'newlyHighCritical';
       TILES.forEach((tile) => {
-        expect(deltaIsReady(tile)).toBe(false);
-        expect(seriesIsReady(tile)).toBe(false);
+        expect(deltaIsReady(tile)).toBe(tile !== stuck);
+        expect(seriesIsReady(tile)).toBe(!(tile === stuck || (isRisk(tile) && isRisk(stuck))));
       });
     }
   );

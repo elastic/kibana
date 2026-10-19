@@ -53,6 +53,9 @@ export const useAlertBasedTilesSeries = ({
 }: AlertBasedTilesSeriesOptions): {
   alertsTrend: number[] | undefined;
   watchlistedTrend: number[] | undefined;
+  /** Each tile's own: a hidden line has no placeholder, whatever the other tile does. */
+  alertsTrendLoading: boolean;
+  watchlistedTrendLoading: boolean;
   isTrendLoading: boolean;
 } => {
   const { data: resolvedIndex, isLoading: isIndexLoading } =
@@ -107,6 +110,8 @@ export const useAlertBasedTilesSeries = ({
   return {
     alertsTrend: alerts.trend,
     watchlistedTrend: watchlisted.trend,
+    alertsTrendLoading: alerts.isTrendLoading,
+    watchlistedTrendLoading: watchlisted.isTrendLoading,
     isTrendLoading: alerts.isTrendLoading || watchlisted.isTrendLoading,
   };
 };

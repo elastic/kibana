@@ -56,6 +56,9 @@ export const useRiskTilesSeries = ({
 }: RiskTilesSeriesOptions): {
   riskMoversTrend: number[] | undefined;
   newlyHighCriticalTrend: number[] | undefined;
+  /** Each tile's own: a hidden line has no placeholder, whatever the other tile does. */
+  riskMoversTrendLoading: boolean;
+  newlyHighCriticalTrendLoading: boolean;
   isTrendLoading: boolean;
 } => {
   const { data: resolvedIndex, isLoading: isIndexLoading } =
@@ -118,6 +121,8 @@ export const useRiskTilesSeries = ({
   return {
     riskMoversTrend: riskMovers.trend,
     newlyHighCriticalTrend: newlyHighCritical.trend,
+    riskMoversTrendLoading: riskMovers.isTrendLoading,
+    newlyHighCriticalTrendLoading: newlyHighCritical.isTrendLoading,
     isTrendLoading: riskMovers.isTrendLoading || newlyHighCritical.isTrendLoading,
   };
 };

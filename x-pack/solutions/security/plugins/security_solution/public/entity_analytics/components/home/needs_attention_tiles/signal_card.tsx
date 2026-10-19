@@ -12,6 +12,7 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiLoadingSpinner,
+  EuiSkeletonRectangle,
   EuiText,
   EuiToolTip,
   useEuiFontSize,
@@ -350,6 +351,12 @@ const Sparkline: React.FC<{ values: number[]; title: string }> = ({ values, titl
   );
 };
 
+const trendLoadingLabel = (title: string) =>
+  i18n.translate('xpack.securitySolution.entityAnalytics.facelift.signalCard.trendLoading', {
+    defaultMessage: '{title} over the selected time range',
+    values: { title },
+  });
+
 const filterTableTooltip = (title: string) =>
   i18n.translate('xpack.securitySolution.entityAnalytics.facelift.signalCard.filterTooltip', {
     defaultMessage: 'Filter table: {title}',
@@ -406,6 +413,12 @@ export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, onToggle
     interactive && card.isDeltaUnavailable !== true && trend !== undefined && trend.length > 1
       ? trend
       : undefined;
+  // The number and the delta show first; the line's place is held while it can still arrive.
+  const showTrendLoading =
+    interactive &&
+    card.isDeltaUnavailable !== true &&
+    card.isTrendLoading === true &&
+    shownTrend === undefined;
   const showNoHistory =
     interactive &&
     card.isDeltaUnavailable === true &&
@@ -471,7 +484,7 @@ export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, onToggle
         }
       `}
     >
-      {shownTrend ? (
+      {shownTrend || showTrendLoading ? (
         <div
           css={css`
             position: absolute;
@@ -482,7 +495,17 @@ export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, onToggle
             z-index: 0;
           `}
         >
-          <Sparkline values={shownTrend} title={card.title} />
+          {shownTrend ? (
+            <Sparkline values={shownTrend} title={card.title} />
+          ) : (
+            <EuiSkeletonRectangle
+              width="100%"
+              height="100%"
+              borderRadius="none"
+              contentAriaLabel={trendLoadingLabel(card.title)}
+              data-test-subj="eaFaceliftSignalCardTrendLoading"
+            />
+          )}
         </div>
       ) : null}
 

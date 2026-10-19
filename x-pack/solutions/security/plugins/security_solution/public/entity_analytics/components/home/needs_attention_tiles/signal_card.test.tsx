@@ -198,6 +198,34 @@ describe('SignalCard', () => {
     expect(mockSeriesData).toBeUndefined();
   });
 
+  describe('while the sparkline loads', () => {
+    const PLACEHOLDER = 'eaFaceliftSignalCardTrendLoading';
+
+    it('holds the place of the line, after the number and the delta', () => {
+      renderCard({ delta: 5, isTrendLoading: true });
+      expect(screen.getByTestId(PLACEHOLDER)).toBeInTheDocument();
+      expect(screen.getByText('12,345')).toBeInTheDocument();
+      expect(mockSeriesData).toBeUndefined();
+    });
+
+    it('draws the line instead once it has arrived', () => {
+      renderCard({ trend: [3, 5, 4], isTrendLoading: true });
+      expect(screen.queryByTestId(PLACEHOLDER)).not.toBeInTheDocument();
+      expect(mockSeriesData).toHaveLength(3);
+    });
+
+    it('holds no place for a line that is left out: zero count, short history, loading count', () => {
+      const { unmount } = renderCard({ value: 0, isTrendLoading: true });
+      expect(screen.queryByTestId(PLACEHOLDER)).not.toBeInTheDocument();
+      unmount();
+      const shortHistory = renderCard({ isDeltaUnavailable: true, isTrendLoading: true });
+      expect(screen.queryByTestId(PLACEHOLDER)).not.toBeInTheDocument();
+      shortHistory.unmount();
+      renderCard({ isLoading: true, isTrendLoading: true });
+      expect(screen.queryByTestId(PLACEHOLDER)).not.toBeInTheDocument();
+    });
+  });
+
   it('toggles the filter on click, Enter and Space', () => {
     const onToggle = jest.fn();
     renderCard({}, { onToggle });
