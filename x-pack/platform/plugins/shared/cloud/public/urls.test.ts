@@ -6,7 +6,6 @@
  */
 
 import { coreMock, securityServiceMock } from '@kbn/core/public/mocks';
-import { CLOUD_USER_BILLING_ADMIN_ROLE } from '../common/constants';
 import type { CloudConfigType } from '.';
 import { CloudUrlsService } from './urls';
 
@@ -90,7 +89,7 @@ describe('Cloud Plugin URLs Service', () => {
       const { urls } = setupServiceWithRolesAndCapabilities([role], {}, serverlessConfig);
 
       await expect(urls.getPrivilegedUrls()).resolves.toEqual({
-        billingUrl: undefined,
+        billingUrl: 'https://cloud.elastic.co/billing/',
         usersAndRolesUrl: undefined,
         searchPowerUrl:
           'https://cloud.elastic.co/projects/vectordb/abc123?tab=settings&edit=search_power',
@@ -106,7 +105,7 @@ describe('Cloud Plugin URLs Service', () => {
     );
 
     await expect(urls.getPrivilegedUrls()).resolves.toEqual({
-      billingUrl: undefined,
+      billingUrl: 'https://cloud.elastic.co/billing/',
       usersAndRolesUrl: undefined,
       searchPowerUrl:
         'https://cloud.elastic.co/projects/vectordb/abc123?tab=settings&edit=search_power',
@@ -129,23 +128,11 @@ describe('Cloud Plugin URLs Service', () => {
     );
   });
 
-  it('exposes privileged billing URL', async () => {
-    const { urls } = setupServiceWithRolesAndCapabilities([
-      CLOUD_USER_BILLING_ADMIN_ROLE,
-      'other_role',
-    ]);
-
-    await expect(urls.getPrivilegedUrls()).resolves.toEqual({
-      billingUrl: 'https://cloud.elastic.co/billing/',
-      usersAndRolesUrl: undefined,
-    });
-  });
-
-  it('does not expose privileged billing URL if user does not have billing admin role', async () => {
+  it('exposes the billing URL to users without the billing admin role', async () => {
     const { urls } = setupServiceWithRolesAndCapabilities(['other_role']);
 
     await expect(urls.getPrivilegedUrls()).resolves.toEqual({
-      billingUrl: undefined,
+      billingUrl: 'https://cloud.elastic.co/billing/',
       usersAndRolesUrl: undefined,
     });
   });
@@ -154,7 +141,7 @@ describe('Cloud Plugin URLs Service', () => {
     const { urls } = setupServiceWithRolesAndCapabilities([], { users: { save: true } });
 
     await expect(urls.getPrivilegedUrls()).resolves.toEqual({
-      billingUrl: undefined,
+      billingUrl: 'https://cloud.elastic.co/billing/',
       usersAndRolesUrl: 'https://cloud.elastic.co/users_and_roles/',
     });
   });
@@ -163,19 +150,8 @@ describe('Cloud Plugin URLs Service', () => {
     const { urls } = setupServiceWithRolesAndCapabilities([], { users: { save: false } });
 
     await expect(urls.getPrivilegedUrls()).resolves.toEqual({
-      billingUrl: undefined,
-      usersAndRolesUrl: undefined,
-    });
-  });
-
-  it('exposes both privileged URLs when user has both privileges', async () => {
-    const { urls } = setupServiceWithRolesAndCapabilities([CLOUD_USER_BILLING_ADMIN_ROLE], {
-      users: { save: true },
-    });
-
-    await expect(urls.getPrivilegedUrls()).resolves.toEqual({
       billingUrl: 'https://cloud.elastic.co/billing/',
-      usersAndRolesUrl: 'https://cloud.elastic.co/users_and_roles/',
+      usersAndRolesUrl: undefined,
     });
   });
 });

@@ -10,7 +10,6 @@ import type { CloudConfigType } from '.';
 import {
   CLOUD_PROJECT_SEARCH_POWER_QUERY,
   CLOUD_SNAPSHOTS_PATH,
-  CLOUD_USER_BILLING_ADMIN_ROLE,
   SEARCH_POWER_EDITOR_ROLES,
 } from '../common/constants';
 import { getFullCloudUrl, getProjectPageUrl } from '../common/utils';
@@ -87,10 +86,10 @@ export class CloudUrlsService {
     const coreStart = await this.getCoreStart();
 
     const userRoles = await this.getCurrentUserRoles(coreStart);
-    const showBillingUrl = userRoles.includes(CLOUD_USER_BILLING_ADMIN_ROLE);
-    const conditionalFullCloudBillingUrl = showBillingUrl
-      ? getFullCloudUrl(this.config.base_url, this.config.billing_url)
-      : undefined;
+    // TODO: show billing to everyone until we can check billing access. The `_ec_billing_admin`
+    // role doesn't reach Kibana on Serverless and was never set on ECH:
+    // https://github.com/elastic/kibana-team/issues/4343
+    const fullCloudBillingUrl = getFullCloudUrl(this.config.base_url, this.config.billing_url);
 
     const hasManageSecurity = Boolean(coreStart.application.capabilities.users?.save);
     const conditionalFullCloudUsersAndRolesUrl = hasManageSecurity
@@ -108,7 +107,7 @@ export class CloudUrlsService {
       : undefined;
 
     return {
-      billingUrl: conditionalFullCloudBillingUrl,
+      billingUrl: fullCloudBillingUrl,
       usersAndRolesUrl: conditionalFullCloudUsersAndRolesUrl,
       searchPowerUrl: conditionalFullCloudSearchPowerUrl,
     };

@@ -15,7 +15,7 @@ test.describe('Cloud Links integration: Unprivileged User', { tag: tags.stateful
     await pageObjects.home.goto();
   });
 
-  test('viewer sees nav and org/profile links but not billing', async ({ pageObjects }) => {
+  test('viewer sees nav and org/profile/billing links', async ({ pageObjects }) => {
     const { cloudLinks } = pageObjects;
 
     await test.step('"Manage this deployment" link is visible', async () => {
@@ -23,11 +23,13 @@ test.describe('Cloud Links integration: Unprivileged User', { tag: tags.stateful
       expect(await cloudLinks.isManageDeploymentLinkVisible()).toBe(true);
     });
 
-    await test.step('user menu shows Profile and Organization but hides Billing', async () => {
+    // Billing is shown to everyone until Kibana can check billing access:
+    // https://github.com/elastic/kibana-team/issues/4343
+    await test.step('user menu shows Profile, Organization and Billing', async () => {
       await cloudLinks.openUserMenu();
       expect(await cloudLinks.isProfileLinkVisible()).toBe(true);
       expect(await cloudLinks.isOrganizationLinkVisible()).toBe(true);
-      expect(await cloudLinks.isBillingLinkVisible()).toBe(false);
+      expect(await cloudLinks.isBillingLinkVisible()).toBe(true);
     });
 
     await test.step('Appearance button is visible for viewers', async () => {

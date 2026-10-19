@@ -10,7 +10,6 @@ import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import { useKibana } from './use_kibana';
 
 const CLOUD_USER_ADMIN_ROLE = 'admin';
-const CLOUD_USER_BILLING_ADMIN_ROLE = '_ec_billing_admin';
 
 export const useAuthenticatedUser = () => {
   const {
@@ -35,6 +34,9 @@ export const useAuthenticatedUser = () => {
   return {
     user,
     isAdmin: user?.roles.includes(CLOUD_USER_ADMIN_ROLE) ?? false,
-    isBillingAdmin: user?.roles.includes(CLOUD_USER_BILLING_ADMIN_ROLE) ?? false,
+    // TODO: treat everyone as a billing admin until we can check billing access. The
+    // `_ec_billing_admin` role doesn't reach Kibana on Serverless and was never set on ECH:
+    // https://github.com/elastic/kibana-team/issues/4343
+    isBillingAdmin: true,
   };
 };

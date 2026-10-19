@@ -8,8 +8,10 @@
 import { test } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
+// Users without the billing admin role get the subscribe popover until Kibana can check billing
+// access: https://github.com/elastic/kibana-team/issues/4343
 test.describe(
-  'Subscription status badge for users without billing access',
+  'Subscription status badge for users without the billing admin role',
   { tag: ['@local-serverless-search'] },
   () => {
     test.beforeEach(async ({ browserAuth, page }) => {
@@ -17,15 +19,15 @@ test.describe(
       await page.gotoApp('management');
     });
 
-    test('shows a tooltip asking to contact the administrator', async ({ page }) => {
+    test('shows the trial popover with the subscribe link', async ({ page }) => {
       const badge = page.testSubj.locator('subscriptionStatusBadge');
 
-      await expect(badge).toContainText('Trial');
-      await badge.focus();
-      await expect(page.testSubj.locator('subscriptionStatusTooltip')).toHaveText(
-        'Contact your administrator to update the subscription'
+      await badge.click();
+      await expect(page.testSubj.locator('subscriptionStatusPopover')).toBeVisible();
+      await expect(page.testSubj.locator('subscriptionStatusPrimaryAction')).toHaveAttribute(
+        'href',
+        /\/billing\/overview\/$/
       );
-      await expect(page.testSubj.locator('subscriptionStatusPrimaryAction')).toBeHidden();
     });
   }
 );
