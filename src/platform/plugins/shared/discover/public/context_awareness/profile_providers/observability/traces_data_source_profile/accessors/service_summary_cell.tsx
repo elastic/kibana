@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { EuiBadge, EuiPopover, euiPaletteColorBlind } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -37,13 +37,19 @@ const AgentIcon = dynamic(() => import('@kbn/custom-icons/src/components/agent_i
 
 const dataTestSubj = 'tracesServiceSummaryCell';
 const palette = euiPaletteColorBlind({ rotations: 2 });
+// Hover-intent delays: wait before opening so the popover doesn't flash while the pointer merely
+// passes over the badge, and linger briefly on leave so the pointer can travel into the panel.
+const HOVER_OPEN_DELAY = 350;
+const HOVER_CLOSE_DELAY = 150;
 
 const badgeStyle = css`
   max-width: 100%;
 `;
 
 /**
- * Traces-profile service badge: clicking it opens the service summary popover.
+ * Traces-profile service badge: hovering or focusing it opens the service summary popover
+ * (clicking/tapping also opens it, for touch users); it closes on mouse-leave, blur, Escape, or
+ * an outside click.
  *
  * Data (latency / throughput / error-rate series, active alerts, SLO health, and link targets) is
  * provided through the `discover_shared` features registry, which APM fulfils — Discover never
@@ -61,7 +67,41 @@ export const getServiceSummaryCell =
     ) as AgentName | undefined;
     const environmentValue = getFieldValue(props.row, SERVICE_ENVIRONMENT_FIELD);
 
-    const [isPopoverOpen, { toggle: togglePopover, off: closePopover }] = useBoolean(false);
+    const [isPopoverOpen, { on: openPopover, off: closePopover }] = useBoolean(false);
+
+    // Open/close the popover on hover with a short intent delay (see the delay constants above).
+    const openTimer = useRef<ReturnType<typeof setTimeout>>();
+    const closeTimer = useRef<ReturnType<typeof setTimeout>>();
+
+    const handleMouseEnter = useCallback(() => {
+      clearTimeout(closeTimer.current);
+      openTimer.current = setTimeout(openPopover, HOVER_OPEN_DELAY);
+    }, [openPopover]);
+
+    const handleMouseLeave = useCallback(() => {
+      clearTimeout(openTimer.current);
+      closeTimer.current = setTimeout(closePopover, HOVER_CLOSE_DELAY);
+    }, [closePopover]);
+
+    // Keyboard parity: focusing the badge opens immediately (no hover-intent delay), blurring away
+    // closes it. `onFocus`/`onBlur` bubble, so this also covers focus moving within the panel.
+    const handleFocus = useCallback(() => {
+      clearTimeout(openTimer.current);
+      clearTimeout(closeTimer.current);
+      openPopover();
+    }, [openPopover]);
+
+    const handleBlur = useCallback(() => {
+      closeTimer.current = setTimeout(closePopover, HOVER_CLOSE_DELAY);
+    }, [closePopover]);
+
+    useEffect(
+      () => () => {
+        clearTimeout(openTimer.current);
+        clearTimeout(closeTimer.current);
+      },
+      []
+    );
 
     const serviceName = typeof serviceNameValue === 'string' ? serviceNameValue : '';
     const environment = typeof environmentValue === 'string' ? environmentValue : undefined;
@@ -119,7 +159,7 @@ export const getServiceSummaryCell =
       <EuiBadge
         color="hollow"
         css={badgeStyle}
-        onClick={togglePopover}
+        onClick={openPopover}
         onClickAriaLabel={i18n.translate('discover.tracesServiceSummary.openAriaLabel', {
           defaultMessage: 'Open summary for service {serviceName}',
           values: { serviceName },
@@ -131,33 +171,44 @@ export const getServiceSummaryCell =
     );
 
     return (
-      <EuiPopover
-        button={trigger}
-        isOpen={isPopoverOpen}
-        closePopover={closePopover}
-        anchorPosition="downLeft"
-        panelPaddingSize="none"
-        aria-label={i18n.translate('discover.tracesServiceSummary.popoverAriaLabel', {
-          defaultMessage: 'Summary for service {serviceName}',
-          values: { serviceName },
-        })}
-        data-test-subj={dataTestSubj}
+      // The span receives the hover/focus events; `panelProps` keeps the popover open while the
+      // pointer is inside the panel so its filter/link actions stay reachable.
+      <span
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
       >
-        <ServiceSummary
-          serviceName={serviceName}
-          environment={environment}
-          agentName={agentNameIcon}
-          serviceHref={linkTargets?.serviceOverview}
-          icon={<AgentIcon agentName={agentNameIcon} size="l" />}
-          metrics={metrics}
-          links={links}
-          isLoading={loading}
-          onClose={closePopover}
-          onFilterFor={onFilter('+')}
-          onFilterOut={onFilter('-')}
-          onCopyValue={onCopyValue}
-        />
-      </EuiPopover>
+        <EuiPopover
+          button={trigger}
+          isOpen={isPopoverOpen}
+          closePopover={closePopover}
+          ownFocus={false}
+          anchorPosition="downLeft"
+          panelPaddingSize="none"
+          panelProps={{ onMouseEnter: handleMouseEnter, onMouseLeave: handleMouseLeave }}
+          aria-label={i18n.translate('discover.tracesServiceSummary.popoverAriaLabel', {
+            defaultMessage: 'Summary for service {serviceName}',
+            values: { serviceName },
+          })}
+          data-test-subj={dataTestSubj}
+        >
+          <ServiceSummary
+            serviceName={serviceName}
+            environment={environment}
+            agentName={agentNameIcon}
+            serviceHref={linkTargets?.serviceOverview}
+            icon={<AgentIcon agentName={agentNameIcon} size="l" />}
+            metrics={metrics}
+            links={links}
+            isLoading={loading}
+            onClose={closePopover}
+            onFilterFor={onFilter('+')}
+            onFilterOut={onFilter('-')}
+            onCopyValue={onCopyValue}
+          />
+        </EuiPopover>
+      </span>
     );
   };
 
