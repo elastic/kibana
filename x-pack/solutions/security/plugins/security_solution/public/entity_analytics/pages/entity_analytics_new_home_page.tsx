@@ -237,7 +237,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   const entityEnginePrivilegesQuery = useEntityEnginePrivileges();
   const anomalyPrivilegesQuery = useAnomalyPrivileges();
   const {
-    detectionEnginePrivileges: { error: alertsPrivilegesError },
+    detectionEnginePrivileges: { error: alertsPrivilegesError, result: alertsPrivilegesResult },
   } = useUserPrivileges();
   const { hasIndexRead: hasAlertsIndexRead, loading: isAlertsPrivilegesLoading } =
     useAlertsPrivileges();
@@ -284,6 +284,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         riskEngineReadPrivileges={riskEngineReadPrivileges}
         entityEnginePrivileges={entityEnginePrivilegesQuery.data}
         anomalyPrivileges={anomalyPrivilegesQuery.data}
+        alertsIndexPrivileges={alertsPrivilegesResult?.index}
         id="entity-analytics-home"
       />
       {noPrivileges ? (
