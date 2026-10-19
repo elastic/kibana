@@ -79,6 +79,8 @@ const capabilities = (): PolicyChangeCapabilities => ({
   endpointCustomYaraSignatures: true,
   customYaraSignaturesExperimental: true,
   linuxRansomwareProtection: true,
+  endpointRegistryCredentialHardening: true,
+  registryCredentialHardeningExperimental: true,
   endpointProtectionUpdates: true,
   endpointCustomNotification: true,
   serverless: false,
