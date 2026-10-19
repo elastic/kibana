@@ -51,7 +51,9 @@ test.describe('Maps - save and return work flow', { tag: '@local-stateful-classi
     await pageObjects.maps.waitForLayersToLoad();
   };
 
-  test('new map: save should return to dashboard and add new map panel', async ({ pageObjects }) => {
+  test('new map: save should return to dashboard and add new map panel', async ({
+    pageObjects,
+  }) => {
     const { maps, dashboard } = pageObjects;
 
     await openNewMapFromDashboard(pageObjects);
@@ -72,10 +74,9 @@ test.describe('Maps - save and return work flow', { tag: '@local-stateful-classi
     await openNewMapFromDashboard(pageObjects);
 
     await maps.clickSaveButton();
-    await maps.saveFromModal(
-      'map created from dashboard save and return with originator app cut',
-      { redirectToOrigin: false }
-    );
+    await maps.saveFromModal('map created from dashboard save and return with originator app cut', {
+      redirectToOrigin: false,
+    });
     await maps.waitForLayersToLoad();
     await expect(maps.saveAndReturnButton).toBeHidden();
     await expect(maps.saveButton).toBeVisible();
@@ -85,7 +86,7 @@ test.describe('Maps - save and return work flow', { tag: '@local-stateful-classi
     const { maps, dashboard } = pageObjects;
 
     await editJoinExampleMapFromDashboard(pageObjects);
-    
+
     await test.step('should use dashboard time instead of time stored in map state', async () => {
       // join example map's time is "last 17 minutes"; ensure map has dashboard time
       const timeConfig = await pageObjects.datePicker.getTimeConfig();
