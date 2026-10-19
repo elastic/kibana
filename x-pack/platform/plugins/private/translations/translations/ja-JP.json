@@ -7955,7 +7955,6 @@
     "searchConnectors.nativeConnectors.postgresql.configuration.tablesLabel": "カンマ区切りのテーブルのリスト",
     "searchConnectors.nativeConnectors.postgresql.name": "PostgreSQL",
     "searchConnectors.nativeConnectors.retriesPerRequest.label": "リクエストごとの再試行回数",
-    "searchConnectors.nativeConnectors.salesforce.name": "Salesforce",
     "searchConnectors.nativeConnectors.schemaLabel": "スキーマ",
     "searchConnectors.nativeConnectors.servicenow.configuration.useDocumentLevelSecurityTooltip": "ドキュメントレベルのセキュリティにより、ServiceNowで設定されたIDと権限がElasticsearchでも維持されます。これにより、このインデックス内のドキュメントに対するユーザーやグループの読み取りアクセスを制限し、パーソナライズすることができます。アクセス制御の同期により、Elasticsearchドキュメント内のメタデータは常に最新の状態に保たれます。",
     "searchConnectors.nativeConnectors.servicenow.name": "ServiceNow",

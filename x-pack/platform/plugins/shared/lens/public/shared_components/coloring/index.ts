@@ -8,4 +8,4 @@
 export { PalettePanelContainer } from './palette_panel_container';
 
 export * from './utils';
-export { defaultPaletteParams } from './constants';
+export { defaultPaletteParams, LENS_PALETTE_MAX_COLOR_RANGES } from './constants';

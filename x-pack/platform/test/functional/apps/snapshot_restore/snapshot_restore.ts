@@ -122,6 +122,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
         await es.indices.delete({
           index: `restored_${logsDbIndex}`,
+          ignore_unavailable: true,
         });
       });
 
@@ -142,7 +143,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Open snapshot info flyout
         await pageObjects.snapshotRestore.navToSnapshots(false);
         await pageObjects.header.waitUntilLoadingHasFinished();
-        expect(await testSubjects.exists('snapshotList')).to.be(true);
+        expect(await testSubjects.waitForExists('snapshotList')).to.be(true);
 
         await pageObjects.snapshotRestore.refreshWhileSnapshotIsInProgress();
         await pageObjects.header.waitUntilLoadingHasFinished();
@@ -156,9 +157,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await snapshotLink.click();
 
         // Verify snapshot exists, is complete and contains the logsdb index
-        expect(await testSubjects.exists('detailTitle')).to.be(true);
+        expect(await testSubjects.waitForExists('detailTitle')).to.be(true);
         expect(await testSubjects.getVisibleText('detailTitle')).to.contain(snapshotPrefx);
-        expect(await testSubjects.exists('state')).to.be(true);
+        expect(await testSubjects.waitForExists('state')).to.be(true);
         expect(await testSubjects.getVisibleText('state')).to.contain('Complete');
         await pageObjects.snapshotRestore.clickShowCollapsedIndicesIfPresent();
         expect(await testSubjects.getVisibleText('indices')).to.contain(logsDbIndex);
@@ -257,7 +258,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // Open snapshot info flyout
         await pageObjects.snapshotRestore.navToSnapshots(false);
         await pageObjects.header.waitUntilLoadingHasFinished();
-        expect(await testSubjects.exists('snapshotList')).to.be(true);
+        expect(await testSubjects.waitForExists('snapshotList')).to.be(true);
 
         await pageObjects.snapshotRestore.refreshWhileSnapshotIsInProgress();
         await pageObjects.header.waitUntilLoadingHasFinished();
@@ -271,9 +272,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await snapshotLink.click();
 
         // Verify snapshot exists, is complete and contains the logsdb index
-        expect(await testSubjects.exists('detailTitle')).to.be(true);
+        expect(await testSubjects.waitForExists('detailTitle')).to.be(true);
         expect(await testSubjects.getVisibleText('detailTitle')).to.contain(snapshotPrefx);
-        expect(await testSubjects.exists('state')).to.be(true);
+        expect(await testSubjects.waitForExists('state')).to.be(true);
         expect(await testSubjects.getVisibleText('state')).to.contain('Partial');
         await pageObjects.snapshotRestore.clickShowCollapsedIndicesIfPresent();
         expect(await testSubjects.getVisibleText('indices')).to.contain(sourceOnlyLogsDbIndex);
