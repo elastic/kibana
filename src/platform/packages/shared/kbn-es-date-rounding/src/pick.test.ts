@@ -79,9 +79,9 @@ describe('fitsInBuckets', () => {
   };
 
   it('counts a manual 20m interval that is not on the picker ladder', () => {
-    expect(
-      fitsInBuckets({ expression: '20m', kind: 'fixed', nominalMs: 20 * 6e4 }, range, 4)
-    ).toBe(false);
+    expect(fitsInBuckets({ expression: '20m', kind: 'fixed', nominalMs: 20 * 6e4 }, range, 4)).toBe(
+      false
+    );
     expect(
       fitsInBuckets({ expression: '20m', kind: 'fixed', nominalMs: 20 * 6e4 }, range, 500)
     ).toBe(true);
