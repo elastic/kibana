@@ -1828,6 +1828,18 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'windows.advanced.kernel.registry_credential_hardening.descendants',
+    first_supported_version: '9.6',
+    license: 'enterprise',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.registry_credential_hardening.descendants',
+      {
+        defaultMessage:
+          'Also block saving subkeys of protected credential registry hives (for example, HKLM\\SYSTEM\\Select). Only applies when registry credential hardening is enabled. Default: true.',
+      }
+    ),
+  },
+  {
     key: 'windows.advanced.malware.networkshare',
     first_supported_version: '8.9',
     documentation: i18n.translate(
