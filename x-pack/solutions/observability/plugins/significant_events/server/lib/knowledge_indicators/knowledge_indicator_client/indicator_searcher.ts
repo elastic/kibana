@@ -272,9 +272,15 @@ export class IndicatorSearcher {
       inSpace(this.space)
     );
 
-    const query = this.buildRankQuery(mode, phase2Where, queryText, options.types ?? [], limit);
-    const rankedRows = esqlToObjects<RankedIndicatorRow>(
-      await queryEsql({ esClient: this.esClient, query })
+    const rankedRows = await this.rankWithTieFallback(mode, (semanticMinScore) =>
+      this.buildRankQuery(
+        mode,
+        phase2Where,
+        queryText,
+        options.types ?? [],
+        limit,
+        semanticMinScore
+      )
     );
 
     // Walk the ranked rows and surface each group once, in rank order. A row
@@ -315,12 +321,34 @@ export class IndicatorSearcher {
     return { hits };
   }
 
+  /**
+   * `FUSE LINEAR` minmax normalizes every row to 0.0 when all raw scores tie (a single match, or
+   * identical copies of one feature across sources), so the threshold drops them all. Otherwise
+   * the best match normalizes to 1.0 and always passes, so an empty thresholded result can only be
+   * "no match" or that tie; retrying without the threshold returns exactly the tied rows.
+   */
+  private async rankWithTieFallback(
+    mode: SearchMode,
+    build: (semanticMinScore: number) => ComposerQuery
+  ): Promise<RankedIndicatorRow[]> {
+    const rankedRows = esqlToObjects<RankedIndicatorRow>(
+      await queryEsql({ esClient: this.esClient, query: build(this.config.semantic_min_score) })
+    );
+    if (rankedRows.length > 0 || mode === 'keyword') {
+      return rankedRows;
+    }
+    return esqlToObjects<RankedIndicatorRow>(
+      await queryEsql({ esClient: this.esClient, query: build(0) })
+    );
+  }
+
   private buildRankQuery(
     mode: SearchMode,
     where: LatestSourceWhereCondition,
     queryText: string,
     types: KnowledgeIndicatorType[],
-    limit: number
+    limit: number,
+    semanticMinScore: number
   ): ComposerQuery {
     if (mode === 'semantic') {
       return esql`FROM ${KNOWLEDGE_INDICATORS_DATA_STREAM} METADATA _score, _id, _index
@@ -331,7 +359,7 @@ export class IndicatorSearcher {
             | LIMIT ${limit}
           )
         | FUSE LINEAR WITH {"normalizer":"minmax"}
-        | WHERE _score >= ${this.config.semantic_min_score}
+        | WHERE _score >= ${semanticMinScore}
         | KEEP _id, _index, _score, ${rankGroupKeyColumns()}
         | SORT _score DESC
         | LIMIT ${limit}`;
@@ -359,7 +387,7 @@ export class IndicatorSearcher {
             | LIMIT ${limit}
             | EVAL label = "semantic"
             | FUSE LINEAR GROUP BY label WITH {"normalizer":"minmax"}
-            | WHERE _score >= ${this.config.semantic_min_score}
+            | WHERE _score >= ${semanticMinScore}
             | KEEP _id, _index, _score, ${rankGroupKeyColumns()}
             | SORT _score DESC
             | LIMIT ${limit}

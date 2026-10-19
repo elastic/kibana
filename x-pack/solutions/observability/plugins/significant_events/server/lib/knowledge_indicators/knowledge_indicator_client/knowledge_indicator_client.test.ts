@@ -995,6 +995,43 @@ describe('KnowledgeIndicatorClient.findIndicators search', () => {
     ).rejects.toThrow('inference endpoint unavailable');
     expect(rankEsql).toHaveBeenCalledTimes(1);
   });
+
+  it('retries without the score threshold when the semantic result is empty', async () => {
+    const { client, runEsql, rankEsql } = makeClientWithRanker();
+    const latest = createFeatureDoc();
+    runEsql.mockResolvedValue({ hits: [latest] });
+    rankEsql
+      .mockResolvedValueOnce({ columns: [], values: [] })
+      .mockResolvedValueOnce(rankedResponse([latest]));
+
+    const { hits } = await client.findIndicators(SOURCE, 'checkout', {
+      types: [KI_TYPE_FEATURE],
+      searchMode: 'semantic',
+    });
+
+    expect(rankEsql).toHaveBeenCalledTimes(2);
+    expect(rankRequest(rankEsql).query).toContain('WHERE _score >= 0.15');
+    const retryQuery = (
+      rankEsql.mock.calls[1][0].query as { toRequest: () => { query: string } }
+    ).toRequest().query;
+    expect(retryQuery).toContain('WHERE _score >= 0 ');
+    expect(retryQuery).not.toContain('0.15');
+    expect(hits).toHaveLength(1);
+  });
+
+  it('does not retry when the thresholded semantic result has rows', async () => {
+    const { client, runEsql, rankEsql } = makeClientWithRanker();
+    const latest = createFeatureDoc();
+    runEsql.mockResolvedValue({ hits: [latest] });
+    rankEsql.mockResolvedValueOnce(rankedResponse([latest]));
+
+    await client.findIndicators(SOURCE, 'checkout', {
+      types: [KI_TYPE_FEATURE],
+      searchMode: 'semantic',
+    });
+
+    expect(rankEsql).toHaveBeenCalledTimes(1);
+  });
 });
 
 function createQueryDoc(
