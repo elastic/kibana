@@ -6,7 +6,7 @@
  */
 import { EuiFlexItem, EuiSpacer, type EuiTextProps } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
-import { EndpointHostExecutionResponseOutput } from '../endpoint_host_execution_response_output/endpoint_host_execution_response_output';
+import { EndpointHostExecutionResponseOutput } from '../../../../../endpoint_host_execution_response_output/endpoint_host_execution_response_output';
 import type {
   ActionDetails,
   MaybeImmutable,
@@ -14,9 +14,9 @@ import type {
   ResponseActionRunScriptOutputContent,
   ResponseActionRunScriptParameters,
   ResponseActionsExecuteParameters,
-} from '../../../../common/endpoint/types';
-import { EXECUTE_FILE_LINK_TITLE } from '../endpoint_response_actions_list/translations';
-import { ResponseActionFileDownloadLink } from '../response_action_file_download_link';
+} from '../../../../../../../../common/endpoint/types';
+import { EXECUTE_FILE_LINK_TITLE } from '../../../../../endpoint_response_actions_list/translations';
+import { ResponseActionFileDownloadLink } from '../../../../../response_action_file_download_link';
 
 export interface ExecuteActionHostResponseProps {
   action: MaybeImmutable<

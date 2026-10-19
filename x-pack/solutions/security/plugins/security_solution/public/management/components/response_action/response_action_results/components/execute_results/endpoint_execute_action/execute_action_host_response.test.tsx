@@ -4,20 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { AppContextTestRender } from '../../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../../../common/mock/endpoint';
 import type {
   ResponseActionExecuteOutputContent,
   ResponseActionsExecuteParameters,
   DeepMutable,
-} from '../../../../common/endpoint/types';
+} from '../../../../../../../../common/endpoint/types';
 import React from 'react';
-import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
+import { EndpointActionGenerator } from '../../../../../../../../common/endpoint/data_generators/endpoint_action_generator';
 import {
   ExecuteActionHostResponse,
   type ExecuteActionHostResponseProps,
 } from './execute_action_host_response';
-import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mocks';
+import { responseActionsHttpMocks } from '../../../../../../mocks/response_actions_http_mocks';
 import { waitFor } from '@testing-library/react';
 
 describe('When using the `ExecuteActionHostResponse` component', () => {
