@@ -47,7 +47,7 @@ export const useChangeHistoryAutoSelection = ({
     decidedRef.current = false;
   }, [objectId, setSelectedChangeId]);
 
-  /** Selected item disappeared from the list (e.g. the pending change was saved or discarded) */
+  /** selected item disappeared from the list (e.g. the pending change was saved or discarded) */
   const isSelectionMissing =
     selectedChangeId !== undefined &&
     items.length > 0 &&
@@ -68,7 +68,6 @@ export const useChangeHistoryAutoSelection = ({
     onAutoSelect?.(firstItem);
 
     if (!isFetchingFirstPage) {
-      /** Lock selection when fetching something other than the first page */
       decidedRef.current = true;
     }
   }, [enabled, isFetchingFirstPage, isSelectionMissing, items, onAutoSelect, setSelectedChangeId]);

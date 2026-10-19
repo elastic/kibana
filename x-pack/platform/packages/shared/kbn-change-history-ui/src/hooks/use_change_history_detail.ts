@@ -47,6 +47,7 @@ export const useChangeHistoryDetail = ({
       if (!changeId) {
         throw new Error('changeId is required');
       }
+
       return adapter.getChange({ objectId, changeId, signal });
     },
     {

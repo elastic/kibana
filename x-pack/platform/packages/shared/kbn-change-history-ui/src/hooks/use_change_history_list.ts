@@ -117,6 +117,7 @@ export const useChangeHistoryList = ({
     const result = await refetchQuery();
     return result.data?.pages[0];
   }, [refetchQuery]);
+
   return {
     items: itemsWithPendingChange,
     pendingChange,
