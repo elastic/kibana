@@ -230,6 +230,29 @@ describe('AgentContextualServiceMap', () => {
     expect(screen.queryByTestId('contextualServiceMapGraph')).not.toBeInTheDocument();
   });
 
+  it('renders the static map when the attachment asks for the full view', () => {
+    render(
+      <AgentContextualServiceMap
+        data={{ connections, serviceName: 'frontend', view: 'full' }}
+        deps={deps}
+      />
+    );
+
+    expect(screen.getByTestId('staticAgentServiceMap')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextualServiceMapGraph')).not.toBeInTheDocument();
+  });
+
+  it('renders the contextual map when the attachment asks for the contextual view', () => {
+    render(
+      <AgentContextualServiceMap
+        data={{ connections, serviceName: 'frontend', view: 'contextual' }}
+        deps={deps}
+      />
+    );
+
+    expect(screen.getByTestId('contextualServiceMapGraph')).toBeInTheDocument();
+  });
+
   it('falls back to the static map when serviceName is not part of the topology', () => {
     render(
       <AgentContextualServiceMap

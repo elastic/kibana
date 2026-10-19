@@ -140,6 +140,27 @@ describe('transformTopologyToServiceMap', () => {
     });
   });
 
+  it('maps the anomaly score to the node anomaly stats', () => {
+    const { nodes } = transformTopologyToServiceMap({
+      connections: [
+        {
+          source: serviceNode('opbeans-java', 'java'),
+          target: serviceNode('opbeans-node', 'nodejs'),
+        },
+      ],
+      nodeMetadata: {
+        'opbeans-java': { anomalySeverity: 'major', anomalyScore: 75 },
+      },
+    });
+
+    expect(nodes.find((node) => node.id === 'opbeans-java')?.data).toMatchObject({
+      serviceAnomalyStats: { anomalyScore: 75 },
+    });
+    expect(nodes.find((node) => node.id === 'opbeans-node')?.data).not.toHaveProperty(
+      'serviceAnomalyStats'
+    );
+  });
+
   it('collapses A→B and B→A into a single bidirectional edge and dedupes repeats', () => {
     const { edges } = transformTopologyToServiceMap({
       connections: [

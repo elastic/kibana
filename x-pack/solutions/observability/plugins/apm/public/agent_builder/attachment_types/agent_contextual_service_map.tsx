@@ -19,8 +19,9 @@ import { asAbsoluteDateTime } from '../../../common/utils/formatters';
 import { APM_EBT_ACTIONS } from '../../components/app/ebt_constants';
 import { SERVICE_MAP_EBT_ELEMENTS } from '../../components/app/service_map/ebt_constants';
 import { ContextualServiceMapGraph } from '../../components/app/service_map/contextual_map/contextual_service_map_graph';
-import { EXPLORE_IN_SERVICE_MAP_LABEL } from '../../components/app/service_map/contextual_map/contextual_service_map_section';
+import { EXPLORE_IN_SERVICE_MAP_LABEL } from '../../components/app/service_map/contextual_map/i18n';
 import { useContextualServiceMapState } from '../../components/app/service_map/contextual_map/use_contextual_service_map_state';
+import { PopoverFetchOptionsContext } from '../../components/app/service_map/popover/popover_fetch_options_context';
 import { useApmPluginContext } from '../../context/apm_plugin/use_apm_plugin_context';
 import { useLicenseContext } from '../../context/license/use_license_context';
 import { getDateRange } from '../../context/url_params_context/helpers';
@@ -36,6 +37,8 @@ const SNAPSHOT_TOOLTIP = i18n.translate(
       'The topology was captured when this response was generated. Opening a service or dependency fetches current data for the time range above.',
   }
 );
+
+const POPOVER_FETCH_OPTIONS = { showToastOnError: false };
 
 export interface AgentContextualServiceMapProps {
   data: ServiceMapAttachmentData;
@@ -84,29 +87,33 @@ function ContextualMapContent({
   );
 
   const graph = (
-    <ContextualServiceMapGraph
-      height="100%"
-      nodes={nodes}
-      edges={edges}
-      focalServiceId={serviceName}
-      baseMaxHops={contextualState.baseMaxHops}
-      maxVisibleNodes={contextualState.maxVisibleNodes}
-      expandedNodeIds={contextualState.expandedNodeIds}
-      onExpand={contextualState.onExpand}
-      onCollapse={contextualState.onCollapse}
-      onBaseMaxHopsChange={contextualState.onBaseMaxHopsChange}
-      onMaxVisibleNodesChange={contextualState.onMaxVisibleNodesChange}
-      environment={environment}
-      kuery=""
-      start={start}
-      end={end}
-      // Intentionally omitted: the labeled header link is the attachment's
-      // only full-map entry point, so the graph's toolbar icon stays hidden.
-      showFocusMap
-      clearKueryOnPopoverNavigation
-      alwaysNavigateOnPopoverFocus
-      showContextControls={!isSidebar}
-    />
+    // Popovers render their own empty state, so a failed stats request (e.g. a
+    // 403 on a non-platinum license) shouldn't also raise a global error toast.
+    <PopoverFetchOptionsContext.Provider value={POPOVER_FETCH_OPTIONS}>
+      <ContextualServiceMapGraph
+        height="100%"
+        nodes={nodes}
+        edges={edges}
+        focalServiceId={serviceName}
+        baseMaxHops={contextualState.baseMaxHops}
+        maxVisibleNodes={contextualState.maxVisibleNodes}
+        expandedNodeIds={contextualState.expandedNodeIds}
+        onExpand={contextualState.onExpand}
+        onCollapse={contextualState.onCollapse}
+        onBaseMaxHopsChange={contextualState.onBaseMaxHopsChange}
+        onMaxVisibleNodesChange={contextualState.onMaxVisibleNodesChange}
+        environment={environment}
+        kuery=""
+        start={start}
+        end={end}
+        // Intentionally omitted: the labeled header link is the attachment's
+        // only full-map entry point, so the graph's toolbar icon stays hidden.
+        showFocusMap
+        clearKueryOnPopoverNavigation
+        alwaysNavigateOnPopoverFocus
+        showContextControls={!isSidebar}
+      />
+    </PopoverFetchOptionsContext.Provider>
   );
 
   if (!showExploreLink && !snapshotTime) {
@@ -228,13 +235,15 @@ function ContextualMap({
  * service map (focused on `data.serviceName`, expandable, with popovers and
  * the service flyout), reusing the shared contextual map components.
  *
- * Falls back to the static {@link AgentServiceMap} when the payload has no
- * focal service to center the map on (missing `serviceName`, or a
- * `serviceName` that isn't part of the topology).
+ * Falls back to the static {@link AgentServiceMap} when the user asked for the
+ * full topology (`view: 'full'`) or the payload has no focal service to center
+ * the map on (missing `serviceName`, or a `serviceName` that isn't part of the
+ * topology).
  */
 export function AgentContextualServiceMap(props: AgentContextualServiceMapProps) {
   const { data } = props;
   const serviceName = data.serviceName;
+  const isFullView = data.view === 'full';
 
   const hasFocalService = useMemo(() => {
     if (!serviceName) {
@@ -247,7 +256,7 @@ export function AgentContextualServiceMap(props: AgentContextualServiceMapProps)
     );
   }, [data.connections, serviceName]);
 
-  if (!serviceName || !hasFocalService) {
+  if (isFullView || !serviceName || !hasFocalService) {
     return <AgentServiceMap connections={data.connections} nodeMetadata={data.nodeMetadata} />;
   }
 

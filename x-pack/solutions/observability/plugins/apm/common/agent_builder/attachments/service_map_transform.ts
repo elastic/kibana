@@ -107,6 +107,9 @@ function toReactFlowNode(
         alertsCount: metadata?.alertsCount,
         sloStatus: metadata?.sloStatus,
         sloCount: metadata?.sloCount,
+        ...(metadata?.anomalyScore !== undefined && {
+          serviceAnomalyStats: { anomalyScore: metadata.anomalyScore },
+        }),
       },
     };
   }

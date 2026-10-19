@@ -88,12 +88,18 @@ export const serviceMapAttachmentDataSchema = z.object({
     })
     .optional(),
   /**
-   * Environment the investigation is scoped to, if any. Scopes only the
-   * contextual renderer's drill-down views (popovers/flyout) and its
-   * "Explore in Service map" link — `get_service_topology` itself has no
-   * environment parameter.
+   * Environment the investigation is scoped to, if any. Should match the
+   * `environment` passed to `get_service_topology` (which scopes the badges) so
+   * badges, the contextual renderer's drill-down views (popovers/flyout) and
+   * its "Explore in Service map" link agree.
    */
   environment: z.string().max(MAX_LABEL_LENGTH).optional(),
+  /**
+   * `contextual` (default): interactive map focused on `serviceName`.
+   * `full`: the whole topology the user asked for, rendered as the static map.
+   * Optional for back-compat with stored conversations.
+   */
+  view: z.enum(['contextual', 'full']).optional(),
 });
 
 /**
