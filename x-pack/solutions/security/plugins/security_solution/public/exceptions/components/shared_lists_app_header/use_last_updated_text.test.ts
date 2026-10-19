@@ -44,4 +44,20 @@ describe('useLastUpdatedText', () => {
 
     expect(result.current).toBe('Updated 1 minute ago');
   });
+
+  it('does not show a future time when the lists refresh between two ticks', () => {
+    const { result, rerender } = renderHook(
+      ({ updatedAt }) => useLastUpdatedText({ isLoading: false, updatedAt }),
+      { initialProps: { updatedAt: Date.now() } }
+    );
+
+    // Less than the refresh interval, so the hook's own timer has not fired yet.
+    act(() => {
+      jest.advanceTimersByTime(5_000);
+    });
+
+    rerender({ updatedAt: Date.now() });
+
+    expect(result.current).toBe('Updated now');
+  });
 });

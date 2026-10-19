@@ -21,10 +21,10 @@ interface UseLastUpdatedTextParams {
  * Returns the "Updated <relative time>" app header text, refreshed every 10 seconds.
  */
 export const useLastUpdatedText = ({ isLoading, updatedAt }: UseLastUpdatedTextParams): string => {
-  const [now, setNow] = useState(Date.now());
+  const [, forceRender] = useState(0);
 
   useEffect(() => {
-    const timerId = setInterval(() => setNow(Date.now()), REFRESH_INTERVAL_MS);
+    const timerId = setInterval(() => forceRender((tick) => tick + 1), REFRESH_INTERVAL_MS);
     return () => clearInterval(timerId);
   }, []);
 
@@ -32,7 +32,9 @@ export const useLastUpdatedText = ({ isLoading, updatedAt }: UseLastUpdatedTextP
     return i18nStrings.UPDATING;
   }
 
-  const { value, unit } = selectUnit(updatedAt, now);
+  // Read the clock here rather than from state, so a refresh between two ticks cannot make
+  // `updatedAt` later than the reference time and render a future relative time.
+  const { value, unit } = selectUnit(updatedAt, Date.now());
   const relativeTime = new Intl.RelativeTimeFormat(i18n.getLocale(), { numeric: 'auto' }).format(
     value,
     unit
