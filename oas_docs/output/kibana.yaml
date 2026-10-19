@@ -1019,7 +1019,7 @@ paths:
             type: string
       requestBody:
         content:
-          application/json; application/*+json; application/x-www-form-urlencoded; text/plain; */*:
+          'application/json; application/*+json; application/x-www-form-urlencoded; text/plain; */*':
             schema: {}
             examples:
               ingestEventsRequest:
@@ -1029,7 +1029,7 @@ paths:
       responses:
         '200':
           content:
-            application/json; application/*+json; application/x-www-form-urlencoded; text/plain; */*:
+            'application/json; application/*+json; application/x-www-form-urlencoded; text/plain; */*':
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_ingest_events_ack_response'
               examples:
@@ -1038,7 +1038,7 @@ paths:
           description: Connector HTTP 200 ack. No event is emitted. JSON or a plain-text body.
         '202':
           content:
-            application/json; application/*+json; application/x-www-form-urlencoded; text/plain; */*:
+            'application/json; application/*+json; application/x-www-form-urlencoded; text/plain; */*':
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_ingest_events_response'
               examples:
