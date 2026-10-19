@@ -266,7 +266,12 @@ describe('computeClusterMetrics — tick denominator uses the scheduled series, 
   const from = 1792433208334.4;
   const to = 1792433213913.29;
   const runAts = [1792433211000, 1792433212000, 1792433213000, 1792433214000, 1792433215000];
-  const audit = (ts: number, i: number) => ({ source: 'tick_audit', ts, id: `t-${i}`, status: 'done' });
+  const audit = (ts: number, i: number) => ({
+    source: 'tick_audit',
+    ts,
+    id: `t-${i}`,
+    status: 'done',
+  });
   const tick = (ts: number, i: number) => ({ source: 'tick', ts, task_id: `t-${i}` });
   const ctx = { from, to, ticks: { interval_ms: 1000 }, laptopRps: null, minCoverage: 0.8 };
 
