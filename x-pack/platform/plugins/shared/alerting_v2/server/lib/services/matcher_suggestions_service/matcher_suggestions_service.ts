@@ -58,12 +58,12 @@ export class MatcherSuggestionsService {
 
   async getSuggestions(field: string, query: string): Promise<string[]> {
     const episodeIndexStaticValues = EPISODE_INDEX_FIELD_STATIC_VALUES[field];
-    if (episodeIndexStaticValues) {
+    if (Object.hasOwn(EPISODE_INDEX_FIELD_STATIC_VALUES, field) && episodeIndexStaticValues) {
       return this.getStaticSuggestions([...episodeIndexStaticValues], query);
     }
 
     const esField = MATCHER_FIELD_TO_ES_FIELD[field];
-    if (esField) {
+    if (Object.hasOwn(MATCHER_FIELD_TO_ES_FIELD, field) && esField) {
       return this.getAlertEventFieldSuggestions(esField, query);
     }
 

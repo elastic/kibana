@@ -277,6 +277,25 @@ describe('AlertingDateRangePicker', () => {
     expect(refreshButton).toHaveAttribute('disabled');
   });
 
+  it('shows and disables the update button when pending input is invalid', () => {
+    render(
+      <AlertingDateRangePicker
+        from="now-15m"
+        to="now"
+        onChange={mockOnChange}
+        services={services}
+        onRefresh={jest.fn()}
+        needsUpdate
+        isRefreshDisabled
+        refreshTooltip="Fix the query"
+        data-test-subj="alertingDateRangePicker"
+      />
+    );
+
+    expect(screen.getByTestId('alertingDateRangePicker-refresh')).toBeDisabled();
+    expect(screen.getByText('Update')).toBeInTheDocument();
+  });
+
   it('shows the EuiSuperDatePicker update button only when onRefresh is provided (feature flag off)', () => {
     useNewDateRangePickerFlag = false;
     const onRefresh = jest.fn();

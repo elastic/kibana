@@ -6,48 +6,63 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { Query } from '@kbn/es-query';
 import type { KqlPluginStart, SuggestionsAbstraction } from '@kbn/kql/public';
 import { useService } from '@kbn/core-di-browser';
 import { PluginStart } from '@kbn/core-di';
-import type { HttpStart } from '@kbn/core-http-browser';
+import type { HttpStart, IHttpFetchError } from '@kbn/core-http-browser';
 import { ALERTING_V2_INTERNAL_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH } from '@kbn/alerting-v2-constants';
+import { EPISODE_KQL_FIELDS } from '@kbn/alerting-v2-common-queries';
 import { useAdditionalEpisodesDataSource } from '@kbn/alerting-v2-episodes-ui/context/episode_data_source_context';
 import type { EpisodeSearchField } from '@kbn/alerting-v2-episodes-ui/types/episode_data_source';
-import { isValidKql } from '../utils/episodes_query_filter';
+import useAsync from 'react-use/lib/useAsync';
+import { validateEpisodeKql } from '../utils/episodes_query_filter';
 
 interface EpisodesKqlInputProps {
   value: string;
-  onChange: (value: string, isValid: boolean) => void;
+  onChange: (value: string) => void;
+  onSubmit: () => void;
   placeholder?: string;
   'data-test-subj'?: string;
   http: HttpStart;
 }
 
-const EPISODE_BASE_FIELDS: EpisodeSearchField[] = [
-  'alert.status',
-  'alert.id',
-  'severity',
-  'rule.id',
-  'group_hash',
-  'source',
-].map((name) => ({
+const keywordField = (name: string): EpisodeSearchField => ({
   name,
   type: 'string',
   esTypes: ['keyword'],
   searchable: true,
   aggregatable: true,
+});
+
+const EPISODE_BASE_FIELDS: EpisodeSearchField[] = EPISODE_KQL_FIELDS.map(({ name, type }) => ({
+  name,
+  type: type === 'keyword' ? 'string' : type,
+  esTypes: [type === 'keyword' ? 'keyword' : type === 'number' ? 'long' : 'date'],
+  searchable: true,
+  aggregatable: true,
 }));
+
+const reportUnexpectedFieldLoadError = (message: string, error: unknown) => {
+  const status = (error as IHttpFetchError | undefined)?.response?.status;
+  if ((error as Error | undefined)?.name === 'AbortError' || status === 403) {
+    return;
+  }
+  window.console.warn(message, error);
+};
 
 export const EpisodesKqlInput = ({
   value,
   onChange,
+  onSubmit,
   placeholder,
   'data-test-subj': dataTestSubj,
   http,
 }: EpisodesKqlInputProps) => {
   const { QueryStringInput } = useService(PluginStart('kql')) as KqlPluginStart;
+  const dataViews = useService<DataViewsPublicPluginStart>(PluginStart('dataViews'));
   const additionalDataSource = useAdditionalEpisodesDataSource();
   const [dataFieldNames, setDataFieldNames] = useState<string[]>([]);
   const [additionalSourceFields, setAdditionalSourceFields] = useState<EpisodeSearchField[]>([]);
@@ -59,7 +74,9 @@ export const EpisodesKqlInput = ({
         signal: abortController.signal,
       })
       .then(setDataFieldNames)
-      .catch(() => undefined);
+      .catch((error) =>
+        reportUnexpectedFieldLoadError('Failed to load alert search fields.', error)
+      );
 
     return () => abortController.abort();
   }, [http]);
@@ -70,29 +87,28 @@ export const EpisodesKqlInput = ({
       additionalDataSource
         .fetchSearchFields({ services: { http }, abortSignal: abortController.signal })
         .then(setAdditionalSourceFields)
-        .catch(() => undefined);
+        .catch((error) =>
+          reportUnexpectedFieldLoadError('Failed to load additional alert search fields.', error)
+        );
     }
 
     return () => abortController.abort();
   }, [additionalDataSource, http]);
 
-  const syntheticDataView = useMemo(() => {
-    const dataFields: EpisodeSearchField[] = dataFieldNames.map((name) => ({
-      name,
-      type: 'string',
-      esTypes: ['keyword'],
-      searchable: true,
-      aggregatable: true,
-    }));
+  const syntheticDataViewSpec = useMemo<DataViewSpec>(() => {
+    const dataFields = dataFieldNames.map(keywordField);
+    const fields = [...EPISODE_BASE_FIELDS, ...dataFields, ...additionalSourceFields];
 
-    return [
-      {
-        title: '',
-        fieldFormatMap: {},
-        fields: [...EPISODE_BASE_FIELDS, ...dataFields, ...additionalSourceFields],
-      },
-    ] as unknown as DataView[];
+    return {
+      title: '',
+      fieldFormatMap: {},
+      fields: Object.fromEntries(fields.map((field) => [field.name, field])),
+    };
   }, [additionalSourceFields, dataFieldNames]);
+  const { value: syntheticDataView } = useAsync(
+    () => dataViews.create(syntheticDataViewSpec, true),
+    [dataViews, syntheticDataViewSpec]
+  );
 
   const suggestionsAbstraction = useMemo<SuggestionsAbstraction>(
     () => ({
@@ -106,11 +122,11 @@ export const EpisodesKqlInput = ({
   );
 
   const query: Query = useMemo(() => ({ query: value, language: 'kuery' }), [value]);
-  const isInvalid = !isValidKql(value);
+  const isInvalid = !validateEpisodeKql(value).isValid;
   const handleChange = useCallback(
     (nextQuery: Query) => {
       const nextValue = typeof nextQuery.query === 'string' ? nextQuery.query : '';
-      onChange(nextValue, isValidKql(nextValue));
+      onChange(nextValue);
     },
     [onChange]
   );
@@ -118,9 +134,10 @@ export const EpisodesKqlInput = ({
   return (
     <QueryStringInput
       appName="alertingV2"
-      indexPatterns={syntheticDataView}
+      indexPatterns={syntheticDataView ? [syntheticDataView] : []}
       query={query}
       onChange={handleChange}
+      onSubmit={onSubmit}
       isInvalid={isInvalid}
       disableAutoFocus
       disableLanguageSwitcher

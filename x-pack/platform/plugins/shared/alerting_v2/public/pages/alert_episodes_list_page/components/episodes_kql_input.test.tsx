@@ -23,11 +23,23 @@ const mockQueryStringInput = jest.fn((props: Record<string, unknown>) => (
         language: 'kuery',
       })
     }
+    onKeyDown={(event) => {
+      if (event.key === 'Enter') {
+        (props.onSubmit as () => void)();
+      }
+    }}
   />
 ));
 
+const mockDataView = { id: 'episodes-search-data-view' };
+const mockDataViewsCreate = jest.fn().mockResolvedValue(mockDataView);
+const mockKqlStart = { QueryStringInput: mockQueryStringInput };
+const mockDataViewsStart = { create: mockDataViewsCreate };
+
 jest.mock('@kbn/core-di-browser', () => ({
-  useService: jest.fn(() => ({ QueryStringInput: mockQueryStringInput })),
+  useService: jest.fn((token: string) =>
+    token === 'PluginStart(kql)' ? mockKqlStart : mockDataViewsStart
+  ),
 }));
 
 jest.mock('@kbn/core-di', () => ({
@@ -46,15 +58,18 @@ const mockHttp = {
 describe('EpisodesKqlInput', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockHttp.get.mockResolvedValue(['data.host.name']);
     mockUseAdditionalEpisodesDataSource.mockReturnValue(undefined);
   });
 
-  it('reports whether the changed query is valid KQL', async () => {
+  it('reports changes, validates supported KQL, and submits on Enter', async () => {
     const onChange = jest.fn();
+    const onSubmit = jest.fn();
     const { rerender } = render(
       <EpisodesKqlInput
         value=""
         onChange={onChange}
+        onSubmit={onSubmit}
         http={mockHttp as never}
         data-test-subj="episodesKqlInput"
       />
@@ -67,12 +82,13 @@ describe('EpisodesKqlInput', () => {
       target: { value: 'severity:' },
     });
 
-    expect(onChange).toHaveBeenNthCalledWith(1, 'severity: high', true);
-    expect(onChange).toHaveBeenNthCalledWith(2, 'severity:', false);
+    expect(onChange).toHaveBeenNthCalledWith(1, 'severity: high');
+    expect(onChange).toHaveBeenNthCalledWith(2, 'severity:');
     rerender(
       <EpisodesKqlInput
         value="severity:"
         onChange={onChange}
+        onSubmit={onSubmit}
         http={mockHttp as never}
         data-test-subj="episodesKqlInput"
       />
@@ -82,6 +98,9 @@ describe('EpisodesKqlInput', () => {
       expect(screen.getByTestId('episodesKqlInput')).toHaveAttribute('data-invalid', 'true')
     );
     expect(screen.getByTestId('episodesKqlInput')).toHaveAttribute('data-clearable', 'false');
+
+    fireEvent.keyDown(screen.getByTestId('episodesKqlInput'), { key: 'Enter' });
+    expect(onSubmit).toHaveBeenCalledTimes(1);
   });
 
   it('merges v2, data, and additional source fields into autocomplete', async () => {
@@ -97,30 +116,87 @@ describe('EpisodesKqlInput', () => {
       ]),
     } as never);
 
-    render(<EpisodesKqlInput value="" onChange={jest.fn()} http={mockHttp as never} />);
+    render(
+      <EpisodesKqlInput
+        value=""
+        onChange={jest.fn()}
+        onSubmit={jest.fn()}
+        http={mockHttp as never}
+      />
+    );
 
     await waitFor(() => {
       const latestProps = mockQueryStringInput.mock.calls.at(-1)?.[0] as {
-        indexPatterns: Array<{ fields: Array<{ name: string }> }>;
+        indexPatterns: unknown[];
         suggestionsAbstraction: {
           valueSuggestionTypeByField: Record<string, string>;
         };
       };
-      expect(latestProps.indexPatterns[0].fields.map(({ name }) => name)).toEqual(
-        expect.arrayContaining([
-          'alert.id',
-          'alert.status',
-          'severity',
-          'data.host.name',
-          'kibana.alert.rule.name',
-        ])
-      );
-      expect(latestProps.indexPatterns[0].fields.map(({ name }) => name)).not.toEqual(
-        expect.arrayContaining(['episode.id', 'episode.status'])
-      );
+      expect(latestProps.indexPatterns).toEqual([mockDataView]);
       expect(latestProps.suggestionsAbstraction.valueSuggestionTypeByField).toEqual({
         'kibana.alert.rule.name': 'alerts',
       });
     });
+
+    expect(mockDataViewsCreate).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        fields: expect.objectContaining({
+          'alert.id': expect.objectContaining({ name: 'alert.id', type: 'string' }),
+          'alert.status': expect.objectContaining({ name: 'alert.status', type: 'string' }),
+          '@timestamp': expect.objectContaining({ name: '@timestamp', type: 'date' }),
+          duration: expect.objectContaining({ name: 'duration', type: 'number' }),
+          'data.host.name': expect.objectContaining({ name: 'data.host.name', type: 'string' }),
+          'kibana.alert.rule.name': expect.objectContaining({
+            name: 'kibana.alert.rule.name',
+            type: 'string',
+          }),
+        }),
+      }),
+      true
+    );
+  });
+
+  it('does not surface missing alert permissions as an input error', async () => {
+    const mockConsoleWarn = jest.spyOn(console, 'warn').mockImplementation();
+    mockHttp.get.mockRejectedValue({ response: { status: 403 } });
+
+    render(
+      <EpisodesKqlInput
+        value=""
+        onChange={jest.fn()}
+        onSubmit={jest.fn()}
+        http={mockHttp as never}
+      />
+    );
+
+    await waitFor(() => expect(mockHttp.get).toHaveBeenCalled());
+    expect(mockConsoleWarn).not.toHaveBeenCalled();
+    expect(mockQueryStringInput.mock.calls.at(-1)?.[0]).toEqual(
+      expect.objectContaining({ isInvalid: false })
+    );
+    mockConsoleWarn.mockRestore();
+  });
+
+  it('logs unexpected field loading errors without invalidating the input', async () => {
+    const error = new Error('boom');
+    const mockConsoleWarn = jest.spyOn(console, 'warn').mockImplementation();
+    mockHttp.get.mockRejectedValue(error);
+
+    render(
+      <EpisodesKqlInput
+        value=""
+        onChange={jest.fn()}
+        onSubmit={jest.fn()}
+        http={mockHttp as never}
+      />
+    );
+
+    await waitFor(() =>
+      expect(mockConsoleWarn).toHaveBeenCalledWith('Failed to load alert search fields.', error)
+    );
+    expect(mockQueryStringInput.mock.calls.at(-1)?.[0]).toEqual(
+      expect.objectContaining({ isInvalid: false })
+    );
+    mockConsoleWarn.mockRestore();
   });
 });

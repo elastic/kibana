@@ -16,15 +16,27 @@ import { fetchRulesSearch } from '@kbn/alerting-v2-episodes-ui/apis/fetch_rules_
 import { TestProviders } from '../../../test_utils/test_providers';
 import { EpisodesFilterBar } from './episodes_filter_bar';
 
-const mockUseDebounce = jest.fn();
 const mockEpisodesKqlInput = jest.fn((_props: Record<string, unknown>) => (
   <div data-test-subj="episodesFilterBar-search" />
 ));
+const mockAlertingDateRangePicker = jest.fn(
+  ({
+    collapsed,
+    showTimeWindowButtons,
+    'data-test-subj': dataTestSubj,
+  }: {
+    collapsed?: boolean;
+    showTimeWindowButtons?: boolean;
+    'data-test-subj'?: string;
+  }) => (
+    <div
+      data-test-subj={dataTestSubj}
+      data-collapsed={collapsed}
+      data-show-time-window-buttons={showTimeWindowButtons}
+    />
+  )
+);
 
-jest.mock('react-use/lib/useDebounce', () => ({
-  __esModule: true,
-  default: (...args: unknown[]) => mockUseDebounce(...args),
-}));
 jest.mock('./episodes_kql_input', () => ({
   EpisodesKqlInput: (props: Record<string, unknown>) => mockEpisodesKqlInput(props),
 }));
@@ -40,21 +52,7 @@ jest.mock('@elastic/eui', () => ({
 }));
 
 jest.mock('@kbn/alerting-v2-browser-shared', () => ({
-  AlertingDateRangePicker: ({
-    collapsed,
-    showTimeWindowButtons,
-    'data-test-subj': dataTestSubj,
-  }: {
-    collapsed?: boolean;
-    showTimeWindowButtons?: boolean;
-    'data-test-subj'?: string;
-  }) => (
-    <div
-      data-test-subj={dataTestSubj}
-      data-collapsed={collapsed}
-      data-show-time-window-buttons={showTimeWindowButtons}
-    />
-  ),
+  AlertingDateRangePicker: (props: Record<string, unknown>) => mockAlertingDateRangePicker(props),
 }));
 
 jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_tag_options', () => ({
@@ -107,7 +105,23 @@ const getLatestEpisodesKqlInputProps = () => {
   if (!props) {
     throw new Error('EpisodesKqlInput was not rendered');
   }
-  return props as { onChange: (value: string, isValid: boolean) => void };
+  return props as {
+    onChange: (value: string) => void;
+    onSubmit: () => void;
+  };
+};
+
+const getLatestDateRangePickerProps = () => {
+  const props = mockAlertingDateRangePicker.mock.calls.at(-1)?.[0];
+  if (!props) {
+    throw new Error('AlertingDateRangePicker was not rendered');
+  }
+  return props as {
+    needsUpdate: boolean;
+    isRefreshDisabled: boolean;
+    onRefresh: () => void;
+    refreshTooltip?: string;
+  };
 };
 
 describe('EpisodesFilterBar', () => {
@@ -125,39 +139,65 @@ describe('EpisodesFilterBar', () => {
     } as unknown as ReturnType<typeof useBulkGetProfiles>);
   });
 
-  it('does not apply an invalid KQL query', () => {
+  it('does not apply a query while typing', () => {
     renderFilterBar();
     defaultProps.onFilterChange.mockClear();
 
     act(() => {
       const { onChange } = getLatestEpisodesKqlInputProps();
-      onChange('severity:', false);
-    });
-    act(() => {
-      const debounceCallback = mockUseDebounce.mock.calls.at(-1)?.[0] as () => void;
-      debounceCallback();
+      onChange('severity: high');
     });
 
     expect(defaultProps.onFilterChange).not.toHaveBeenCalled();
+    expect(getLatestDateRangePickerProps()).toMatchObject({
+      needsUpdate: true,
+      isRefreshDisabled: false,
+    });
   });
 
-  it('applies a valid KQL query', () => {
+  it('applies a valid KQL query on submit', () => {
     renderFilterBar();
     defaultProps.onFilterChange.mockClear();
 
     act(() => {
-      const { onChange } = getLatestEpisodesKqlInputProps();
-      onChange('severity: high', true);
+      getLatestEpisodesKqlInputProps().onChange('severity: high');
     });
     act(() => {
-      const debounceCallback = mockUseDebounce.mock.calls.at(-1)?.[0] as () => void;
-      debounceCallback();
+      getLatestEpisodesKqlInputProps().onSubmit();
     });
 
     const updateFilter = defaultProps.onFilterChange.mock.calls[0][0];
     expect(updateFilter({ status: ['active'] })).toEqual({
       status: ['active'],
       queryString: 'severity: high',
+    });
+  });
+
+  it('uses the refresh button to submit a valid draft', () => {
+    renderFilterBar();
+    defaultProps.onFilterChange.mockClear();
+
+    act(() => {
+      getLatestEpisodesKqlInputProps().onChange('severity: high');
+    });
+    act(() => {
+      getLatestDateRangePickerProps().onRefresh();
+    });
+
+    expect(defaultProps.onFilterChange).toHaveBeenCalledTimes(1);
+  });
+
+  it('disables update and exposes the validation error for an unsupported draft', () => {
+    renderFilterBar();
+
+    act(() => {
+      getLatestEpisodesKqlInputProps().onChange('data.enabled > true');
+    });
+
+    expect(getLatestDateRangePickerProps()).toMatchObject({
+      needsUpdate: true,
+      isRefreshDisabled: true,
+      refreshTooltip: expect.stringContaining('data.enabled'),
     });
   });
 

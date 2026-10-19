@@ -5,24 +5,43 @@
  * 2.0.
  */
 
-import type { EpisodesFilterState } from '@kbn/alerting-v2-common-queries';
-import { fromKueryExpression } from '@kbn/es-query';
+import {
+  convertKqlToEsqlExpression,
+  EpisodeKqlTranslationError,
+  type EpisodeKqlTranslationErrorReason,
+  type EpisodesFilterState,
+} from '@kbn/alerting-v2-common-queries';
 
-export const isValidKql = (value: string): boolean => {
+export type EpisodeKqlValidation =
+  | { isValid: true }
+  | {
+      isValid: false;
+      error:
+        | { type: 'syntax' }
+        | { type: 'unsupported'; field: string; reason: EpisodeKqlTranslationErrorReason };
+    };
+
+export const validateEpisodeKql = (value: string): EpisodeKqlValidation => {
   if (!value.trim()) {
-    return true;
+    return { isValid: true };
   }
 
   try {
-    fromKueryExpression(value);
-    return true;
-  } catch {
-    return false;
+    convertKqlToEsqlExpression(value);
+    return { isValid: true };
+  } catch (error) {
+    if (error instanceof EpisodeKqlTranslationError) {
+      return {
+        isValid: false,
+        error: { type: 'unsupported', field: error.field, reason: error.reason },
+      };
+    }
+    return { isValid: false, error: { type: 'syntax' } };
   }
 };
 
 export const getQueryFilterState = (filterState: EpisodesFilterState): EpisodesFilterState => {
-  if (!filterState.queryString || isValidKql(filterState.queryString)) {
+  if (!filterState.queryString || validateEpisodeKql(filterState.queryString).isValid) {
     return filterState;
   }
 

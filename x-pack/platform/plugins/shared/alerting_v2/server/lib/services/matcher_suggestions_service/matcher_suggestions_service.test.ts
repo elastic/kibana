@@ -47,6 +47,14 @@ describe('MatcherSuggestionsService.getSuggestions', () => {
     expect(esClient.search).not.toHaveBeenCalled();
   });
 
+  it.each(['constructor', 'toString', '__proto__'])(
+    'does not treat Object.prototype field %s as a configured suggestion field',
+    async (field) => {
+      await expect(service.getSuggestions(field, '')).resolves.toEqual([]);
+      expect(esClient.search).not.toHaveBeenCalled();
+    }
+  );
+
   it('suggests the alert.id values for alert_id', async () => {
     esClient.search.mockResolvedValue({
       ...buildSearchResponse([]),
