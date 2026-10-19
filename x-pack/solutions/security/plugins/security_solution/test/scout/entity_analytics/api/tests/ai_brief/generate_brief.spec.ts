@@ -9,8 +9,13 @@ import type { LlmProxy } from '@kbn/ftr-llm-proxy';
 import type { ApiClientFixture } from '@kbn/scout-security';
 import { apiTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
+import {
+  ENTITY_LATEST,
+  getEntitiesAlias,
+  getLatestEntitiesIndexName,
+} from '@kbn/entity-store/common';
 import type { EntityAnalyticsScope } from '../../../../../../common/entity_analytics/ai_brief/scope';
-import { LATEST_INDEX, PUBLIC_HEADERS } from '../../fixtures/maintainers/constants';
+import { PUBLIC_HEADERS } from '../../fixtures/maintainers/constants';
 import { cleanupEntity, seedRiskyUserEntity } from '../../fixtures/lead_generation_entity_helpers';
 import {
   cleanupLeadGenerationConnector,
@@ -29,6 +34,8 @@ import {
 } from '../../fixtures/ai_brief_helpers';
 
 const PRIORITY_LINE = `1. **${SEEDED_USER_ID}**`;
+const SPACE_ID = 'brief-scout-space';
+const SPACE_USER_ID = 'user:brief-scout-space-user';
 
 apiTest.describe(
   'Entity Analytics AI brief - security.generate_entity_analytics_brief',
@@ -37,8 +44,12 @@ apiTest.describe(
     let headers: Record<string, string>;
     let connectorId: string;
     let llmProxy: LlmProxy;
-    let createdLatestIndex = false;
+    const createdIndexSpaces: string[] = [];
     const conversationIds: string[] = [];
+    // A user who can read only the other space's entities, in that space only.
+    let spaceUserHeaders: Record<string, string>;
+    let spaceConnectorId: string;
+    let spaceLlmProxy: LlmProxy;
 
     const askForBrief = async (
       apiClient: ApiClientFixture,
@@ -59,8 +70,30 @@ apiTest.describe(
       const { apiKeyHeader } = await requestAuth.getApiKeyForAdmin();
       headers = { ...PUBLIC_HEADERS, ...apiKeyHeader };
       ({ connectorId, llmProxy } = await createLeadGenerationConnector({ apiServices, log }));
-      createdLatestIndex = await ensureLatestEntitiesIndex(esClient);
+      await apiServices.spaces.create({ id: SPACE_ID, name: SPACE_ID });
+      ({ connectorId: spaceConnectorId, llmProxy: spaceLlmProxy } =
+        await createLeadGenerationConnector({ apiServices, log, spaceId: SPACE_ID }));
+      for (const spaceId of ['default', SPACE_ID]) {
+        if (await ensureLatestEntitiesIndex(esClient, spaceId)) {
+          createdIndexSpaces.push(spaceId);
+        }
+      }
       await seedRiskyUserEntity(esClient, { euid: SEEDED_USER_ID, riskScoreNorm: 82 });
+      await seedRiskyUserEntity(esClient, { euid: SPACE_USER_ID, spaceId: SPACE_ID });
+      const spaceUser = await requestAuth.getApiKeyForCustomRole({
+        elasticsearch: {
+          cluster: [],
+          indices: [{ names: [getEntitiesAlias(ENTITY_LATEST, SPACE_ID)], privileges: ['read'] }],
+        },
+        kibana: [
+          {
+            base: [],
+            feature: { siemV5: ['all'], agentBuilder: ['all'], actions: ['read'] },
+            spaces: [SPACE_ID],
+          },
+        ],
+      });
+      spaceUserHeaders = { ...PUBLIC_HEADERS, ...spaceUser.apiKeyHeader };
     });
 
     apiTest.beforeEach(() => {
@@ -72,10 +105,21 @@ apiTest.describe(
         await apiClient.delete(`api/agent_builder/conversations/${conversationId}`, { headers });
       }
       await cleanupLeadGenerationConnector({ apiServices, connectorId, llmProxy });
+      await cleanupLeadGenerationConnector({
+        apiServices,
+        connectorId: spaceConnectorId,
+        llmProxy: spaceLlmProxy,
+        spaceId: SPACE_ID,
+      });
       await cleanupEntity(esClient, SEEDED_USER_ID);
-      if (createdLatestIndex) {
-        await esClient.indices.delete({ index: LATEST_INDEX, ignore_unavailable: true });
+      await cleanupEntity(esClient, SPACE_USER_ID, SPACE_ID);
+      for (const spaceId of createdIndexSpaces) {
+        await esClient.indices.delete({
+          index: getLatestEntitiesIndexName(spaceId),
+          ignore_unavailable: true,
+        });
       }
+      await apiServices.spaces.delete(SPACE_ID);
     });
 
     apiTest('writes a brief with one priority from the tile entities', async ({ apiClient }) => {
@@ -150,5 +194,34 @@ apiTest.describe(
         expect(brief).toContain('Nothing in this view is flagged');
       }
     );
+
+    apiTest("sends the model only the entities of the request's space", async ({ apiClient }) => {
+      mockBriefRound(spaceLlmProxy, buildDraft(SPACE_USER_ID));
+
+      const response = await apiClient.post<ConverseResponseBody>(
+        `s/${SPACE_ID}/api/agent_builder/converse`,
+        {
+          headers: spaceUserHeaders,
+          responseType: 'json',
+          body: buildBriefConverseBody(
+            spaceConnectorId,
+            buildScope({
+              entitiesWithAlerts: {
+                title: 'Entities with alerts',
+                value: 2,
+                entityIds: [SPACE_USER_ID, SEEDED_USER_ID],
+              },
+            })
+          ),
+        }
+      );
+      expect(response).toHaveStatusCode(200);
+      await spaceLlmProxy.waitForAllInterceptorsToHaveBeenCalled();
+
+      const [submitRequest] = getSubmitBriefRequests(spaceLlmProxy);
+      expect(submitRequest).toContain(SPACE_USER_ID);
+      expect(submitRequest).not.toContain(SEEDED_USER_ID);
+      expect(getBriefFromSteps(response.body)).toContain(`1. **${SPACE_USER_ID}**`);
+    });
   }
 );

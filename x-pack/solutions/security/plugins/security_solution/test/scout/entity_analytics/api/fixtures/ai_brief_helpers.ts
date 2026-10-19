@@ -9,10 +9,14 @@ import type { ConversationRoundStep } from '@kbn/agent-builder-common';
 import { isToolCallStep } from '@kbn/agent-builder-common';
 import { createToolCallMessage, type LlmProxy } from '@kbn/ftr-llm-proxy';
 import type { EsClient } from '@kbn/scout-security';
+import {
+  ENTITY_LATEST,
+  getEntitiesAlias,
+  getLatestEntitiesIndexName,
+} from '@kbn/entity-store/common';
 import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
 import { ENTITY_ANALYTICS_AI_BRIEF_ATTACHMENT_TYPE } from '../../../../../common/entity_analytics/ai_brief/scope';
 import type { BriefDraft } from '../../../../../server/agent_builder/tools/entity_analytics/brief/prompts';
-import { LATEST_ALIAS, LATEST_INDEX } from './maintainers/constants';
 
 const BRIEF_TOOL_ID = 'security.generate_entity_analytics_brief';
 /** The brief tool's name on the wire: Agent Builder replaces dots with underscores. */
@@ -42,13 +46,17 @@ const getToolChoiceName = (toolChoice: unknown): string | undefined => {
 };
 
 /** Creates the latest entities index when no Entity Store is installed. Returns whether it did. */
-export const ensureLatestEntitiesIndex = async (esClient: EsClient): Promise<boolean> => {
-  if (await esClient.indices.exists({ index: LATEST_ALIAS })) {
+export const ensureLatestEntitiesIndex = async (
+  esClient: EsClient,
+  spaceId = 'default'
+): Promise<boolean> => {
+  const alias = getEntitiesAlias(ENTITY_LATEST, spaceId);
+  if (await esClient.indices.exists({ index: alias })) {
     return false;
   }
   await esClient.indices.create({
-    index: LATEST_INDEX,
-    aliases: { [LATEST_ALIAS]: {} },
+    index: getLatestEntitiesIndexName(spaceId),
+    aliases: { [alias]: {} },
     mappings: {
       dynamic_templates: [
         { strings_as_keyword: { match_mapping_type: 'string', mapping: { type: 'keyword' } } },
