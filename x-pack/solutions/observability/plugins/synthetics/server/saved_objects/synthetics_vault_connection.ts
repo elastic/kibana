@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { schema } from '@kbn/config-schema';
 import type { SavedObjectsType } from '@kbn/core/server';
 import { v5 as uuidv5 } from 'uuid';
 import { syntheticsVaultConnectionType } from '../../common/types/saved_objects';
@@ -36,6 +37,19 @@ export const SYNTHETICS_VAULT_CONNECTION_ENCRYPTED_TYPE = {
   ]),
 };
 
+// Unknown attributes are kept (not stripped) so a rollback never drops encrypted secrets
+// written by a newer version.
+const vaultConnectionSchemaV1 = schema.object(
+  {
+    name: schema.string({ maxLength: 2048 }),
+    type: schema.string({ maxLength: 64 }),
+    config: schema.object({}, { unknowns: 'allow' }),
+    refreshedAt: schema.maybe(schema.string({ maxLength: 64 })),
+    hasSecret: schema.maybe(schema.boolean()),
+  },
+  { unknowns: 'allow' }
+);
+
 export const syntheticsVaultConnectionSavedObjectType: SavedObjectsType = {
   name: syntheticsVaultConnectionType,
   hidden: false,
@@ -45,7 +59,10 @@ export const syntheticsVaultConnectionSavedObjectType: SavedObjectsType = {
     properties: {},
   },
   modelVersions: {
-    1: { changes: [] },
+    1: {
+      changes: [],
+      schemas: { forwardCompatibility: vaultConnectionSchemaV1 },
+    },
   },
   management: {
     importableAndExportable: false,
