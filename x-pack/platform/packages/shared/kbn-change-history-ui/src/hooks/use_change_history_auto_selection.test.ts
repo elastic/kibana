@@ -95,6 +95,14 @@ describe('useChangeHistoryAutoSelection', () => {
 
     expect(setSelectedChangeId).not.toHaveBeenCalled();
 
+    // the refetch settles while still locked
+    rerender({
+      items: [createItem('evt-2'), createItem('evt-1')],
+      isFetchingFirstPage: false,
+    });
+
+    expect(setSelectedChangeId).not.toHaveBeenCalled();
+
     result.current.unlockSelectionDecision();
 
     rerender({
@@ -103,37 +111,6 @@ describe('useChangeHistoryAutoSelection', () => {
     });
 
     expect(setSelectedChangeId).toHaveBeenCalledWith('evt-2');
-  });
-
-  it('preserves a locked selection across background refetches of the first page', () => {
-    const setSelectedChangeId = jest.fn();
-
-    const { result, rerender } = renderHook(
-      ({ items, isFetchingFirstPage }) =>
-        useChangeHistoryAutoSelection({
-          objectId: 'obj-1',
-          items,
-          isFetchingFirstPage,
-          setSelectedChangeId,
-        }),
-      {
-        initialProps: {
-          items: [createItem('evt-2'), createItem('evt-1')],
-          isFetchingFirstPage: false,
-        },
-      }
-    );
-
-    result.current.lockSelectionDecision();
-    setSelectedChangeId.mockClear();
-
-    rerender({ items: [createItem('evt-2'), createItem('evt-1')], isFetchingFirstPage: true });
-    rerender({
-      items: [createItem('evt-3'), createItem('evt-2'), createItem('evt-1')],
-      isFetchingFirstPage: false,
-    });
-
-    expect(setSelectedChangeId).not.toHaveBeenCalled();
   });
 
   it('re-selects the first item when the selected item leaves the list', () => {
