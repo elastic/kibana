@@ -16,6 +16,7 @@ import {
   MAX_ENTITY_IDS_PER_TILE,
 } from '../../../../../common/entity_analytics/ai_brief/scope';
 import { useAgentBuilderAttachment } from '../../../../agent_builder/hooks/use_agent_builder_attachment';
+import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { inputsSelectors } from '../../../../common/store/inputs';
 import type { SignalCardData, SignalCardId } from '../needs_attention_tiles/data';
@@ -33,7 +34,10 @@ const SCOPE_TOOLTIP = i18n.translate(
   }
 );
 
-/** The page header's "Generate AI brief" button: captures the page's view and opens Agent Builder on it. */
+/**
+ * The page header's "Generate AI brief" button: captures the page's view and opens Agent Builder on it.
+ * Absent when the user can't use Agent Builder.
+ */
 export const useGenerateAiBriefAction = ({
   cards,
   timeRange,
@@ -44,9 +48,10 @@ export const useGenerateAiBriefAction = ({
   timeRange: TimeRange;
   entityFilters: EntityFilters;
   focusTileId?: SignalCardId;
-}): NonNullable<AppHeaderMenu['primaryActionItem']> => {
+}): AppHeaderMenu['primaryActionItem'] => {
   const getGlobalQuery = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const getGlobalFilters = useMemo(() => inputsSelectors.globalFiltersQuerySelector(), []);
+  const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
   const query = useDeepEqualSelector(getGlobalQuery);
   const filters = useDeepEqualSelector(getGlobalFilters);
 
@@ -69,16 +74,19 @@ export const useGenerateAiBriefAction = ({
   const isLoading = cards.some((card) => card.isLoading || card.isDeltaLoading);
   const hasPageQuery = Boolean(scope.query || scope.filters);
   return useMemo(
-    () => ({
-      id: 'generateAiBrief',
-      label: BUTTON_LABEL,
-      iconType: 'sparkles',
-      run: openAgentBuilderFlyout,
-      disableButton: isLoading,
-      tooltipContent: hasPageQuery ? SCOPE_TOOLTIP : undefined,
-      testId: 'generateAiBriefButton',
-    }),
-    [hasPageQuery, isLoading, openAgentBuilderFlyout]
+    () =>
+      isAgentBuilderEnabled
+        ? {
+            id: 'generateAiBrief',
+            label: BUTTON_LABEL,
+            iconType: 'sparkles',
+            run: openAgentBuilderFlyout,
+            disableButton: isLoading,
+            tooltipContent: hasPageQuery ? SCOPE_TOOLTIP : undefined,
+            testId: 'generateAiBriefButton',
+          }
+        : undefined,
+    [hasPageQuery, isAgentBuilderEnabled, isLoading, openAgentBuilderFlyout]
   );
 };
 

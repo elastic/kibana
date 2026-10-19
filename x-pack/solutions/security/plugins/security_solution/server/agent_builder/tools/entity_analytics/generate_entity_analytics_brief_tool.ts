@@ -27,6 +27,7 @@ import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugi
 import { securityTool } from '../constants';
 import { BRIEF_RESULT_INSTRUCTIONS, BRIEF_TOOL_DESCRIPTION, generateBrief } from './brief';
 import { getEntityAnalyticsToolAvailability } from './entity_analytics_availability';
+import { checkResolutionAccess } from './resolution/check_resolution_access';
 import { createToolTelemetryTracker } from './tool_telemetry_tracker';
 
 export const SECURITY_GENERATE_ENTITY_ANALYTICS_BRIEF_TOOL_ID = securityTool(
@@ -85,7 +86,7 @@ export const generateEntityAnalyticsBriefTool = (
   },
   handler: async (
     { scopeAttachmentId },
-    { spaceId, esClient, savedObjectsClient, modelProvider, attachments }
+    { request, spaceId, esClient, savedObjectsClient, modelProvider, attachments }
   ) => {
     const telemetryTracker = createToolTelemetryTracker({
       core,
@@ -94,6 +95,16 @@ export const generateEntityAnalyticsBriefTool = (
       actionType: 'read',
     });
     try {
+      const [, { security }] = await core.getStartServices();
+      const access = await checkResolutionAccess({
+        request,
+        security,
+        action: 'generate the Entity Analytics brief',
+      });
+      if (!access.allowed) {
+        telemetryTracker.recordFailure(access.result.data.message);
+        return { results: [access.result] };
+      }
       const parsedScope = EntityAnalyticsScope.safeParse(
         getScopeData(attachments, scopeAttachmentId)
       );
