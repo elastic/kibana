@@ -6,6 +6,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
+import { isomerPluginMock } from '@kbn/isomer-plugin/server/mocks';
 import type { InvestigationNotificationDestination } from '../../../common';
 import type { NotifiableInvestigation, NotificationExecution } from './notification_delivery';
 import type { NotificationPhase } from './notification_routing';
@@ -34,6 +35,7 @@ const setup = (spaceId = 'default') => {
     data: { ts: '1.000001', channel: 'C123' },
   }));
   const getExecute = jest.fn(async () => execute);
+  const { getRuntime } = isomerPluginMock.createStartContract();
   const logger = loggerMock.create();
   const send = (
     phase: NotificationPhase,
@@ -50,10 +52,11 @@ const setup = (spaceId = 'default') => {
       investigationUrl: 'https://kibana.example/app/nightshift',
       routingClient: context.client,
       getExecute,
+      getRuntime,
       signal: controller.signal,
       logger,
     });
-  return { ...context, controller, execute, getExecute, logger, send };
+  return { ...context, controller, execute, getExecute, getRuntime, logger, send };
 };
 
 describe('investigation notification lifecycle', () => {
@@ -277,6 +280,23 @@ describe('investigation notification lifecycle', () => {
     expect((await client.get())?.attempts.map(({ error }) => error)).toEqual([
       'Actions unavailable',
       'Actions unavailable',
+    ]);
+  });
+
+  it('Isomer runtime failure records each failure without posting', async () => {
+    const { send, getRuntime, execute, client } = setup();
+    getRuntime.mockRejectedValue(new Error('Isomer packs failed to load'));
+    const inputs = [destination, { ...destination, params: { channel: '#oncall' } }];
+    expect(await send('started', 'exec-1', inputs)).toEqual({
+      sent: 0,
+      failed: 2,
+      unconfirmed: 0,
+    });
+    expect(getRuntime).toHaveBeenCalledTimes(1);
+    expect(execute).not.toHaveBeenCalled();
+    expect((await client.get())?.attempts.map(({ error }) => error)).toEqual([
+      'Isomer packs failed to load',
+      'Isomer packs failed to load',
     ]);
   });
 

@@ -7,10 +7,11 @@
 
 import { MockUrlService } from '@kbn/share-plugin/common/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
+import { isomerPluginMock } from '@kbn/isomer-plugin/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { brandSpaceId } from '@kbn/core-spaces-common';
 import { InvestigationLocatorDefinition } from '../../common/locators';
-import type { SlackBlock } from '../lib/notifications/format_investigation_slack_message';
+import type { SlackBlock } from '../lib/notifications/render_investigation_slack_message';
 import { renderSlackMessageStepDefinition } from './render_slack_message';
 
 jest.mock('@kbn/workflows-extensions/server', () => ({
@@ -29,6 +30,7 @@ const setup = (spaceId = 'default') => {
   const definition = renderSlackMessageStepDefinition({
     investigationLocator: urlService.locators.create(new InvestigationLocatorDefinition()),
     getInvestigationsClient,
+    getRuntime: isomerPluginMock.createStartContract().getRuntime,
   });
   const context = (input: Record<string, unknown>) =>
     ({
@@ -73,7 +75,8 @@ describe('nightshift.renderSlackMessage step', () => {
       expect(buttonUrl(output.blocks)).toMatch(
         new RegExp(`^https://kibana\\.example${prefix}/app/r\\?`)
       );
-      expect(output.text).toContain(buttonUrl(output.blocks));
+      // The fallback is mrkdwn, where `&` is escaped; Slack shows and links it as `&`.
+      expect(output.text).toContain(buttonUrl(output.blocks).replace(/&/g, '&amp;'));
     }
   );
 
