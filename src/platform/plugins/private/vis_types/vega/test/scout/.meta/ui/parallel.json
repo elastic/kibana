@@ -1,20 +1,9 @@
 {
-  "sha1": "afc967ee22a422f46bbf6254129c432330a1abb0",
+  "sha1": "f81a96c6f083138e870175b931468d7ab5bd3864",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "fb6a28fdbf970dc-090d26c549810de",
-      "title": "Enable the Vega API feature flag",
-      "expectedStatus": "passed",
-      "tags": [],
-      "location": {
-        "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 14,
-        "column": 16
-      }
-    },
     {
       "id": "fb6a28fdbf970dc-91c1b7602a9ab49",
       "title": "Setup Vega tests data",
@@ -22,8 +11,8 @@
       "tags": [],
       "location": {
         "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 20,
-        "column": 16
+        "line": 8,
+        "column": 1
       }
     },
     {
@@ -35,8 +24,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/embedded_vega_search_cancellation.spec.ts",
-        "line": 39,
-        "column": 14
+        "line": 31,
+        "column": 35
       }
     },
     {
@@ -48,8 +37,34 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/embedded_vega_search_cancellation.spec.ts",
-        "line": 62,
-        "column": 14
+        "line": 46,
+        "column": 9
+      }
+    },
+    {
+      "id": "bcc36143cd273ab-b6ada381ff7bd89",
+      "title": "Vega panels linked to the library adds a library item, unlinks it and saves it back to the library",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/vega_dashboard_library.spec.ts",
+        "line": 55,
+        "column": 33
+      }
+    },
+    {
+      "id": "bcc36143cd273ab-e4d22952f8c7270",
+      "title": "Vega panels linked to the library edits the library item of a linked panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/vega_dashboard_library.spec.ts",
+        "line": 63,
+        "column": 36
       }
     },
     {
@@ -61,8 +76,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/vega_library_editor.spec.ts",
-        "line": 49,
-        "column": 12
+        "line": 45,
+        "column": 40
       }
     },
     {
@@ -74,8 +89,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/vega_library_editor.spec.ts",
-        "line": 82,
-        "column": 12
+        "line": 67,
+        "column": 19
       }
     },
     {
@@ -87,8 +102,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/vega_library_editor.spec.ts",
-        "line": 105,
-        "column": 12
+        "line": 78,
+        "column": 94
       }
     },
     {
@@ -100,19 +115,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/vega_library_editor.spec.ts",
-        "line": 132,
-        "column": 12
-      }
-    },
-    {
-      "id": "824a1c0d9b29284-00ccb12b7f74919",
-      "title": "Disable the Vega API feature flag",
-      "expectedStatus": "passed",
-      "tags": [],
-      "location": {
-        "file": "src/platform/plugins/private/vis_types/vega/test/scout/ui/parallel_tests/global.teardown.ts",
-        "line": 12,
-        "column": 19
+        "line": 103,
+        "column": 4
       }
     }
   ]
