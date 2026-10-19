@@ -56,7 +56,7 @@ export class CpsPlugin
       // Register project picker only after the default project routing is known
       manager.whenReady().then(() =>
         import('@kbn/cps-utils').then(({ ProjectPickerContainer }) => {
-          core.chrome.next.projectPicker.set(<ProjectPickerContainer cpsManager={manager} />);
+          core.chrome.controls.projectPicker.set(<ProjectPickerContainer cpsManager={manager} />);
         })
       );
       cpsManager = manager;

@@ -32,17 +32,24 @@ const createSetupContractMock = (): AgentBuilderPluginSetupMock => {
     renderers: {
       register: jest.fn(),
     },
+    conversationEvents: {
+      register: jest.fn(),
+    },
     skills: {
       register: jest.fn(),
     },
     hooks: {
       register: jest.fn(),
+      registerCycleHook: jest.fn(),
     },
     plugins: {
       register: jest.fn(),
     },
     conversationTemplates: {
       register: jest.fn(),
+    },
+    conversations: {
+      enableUpdatedTrigger: jest.fn(),
     },
     topSnippets: { numSnippets: 2, numWords: 750 },
   };

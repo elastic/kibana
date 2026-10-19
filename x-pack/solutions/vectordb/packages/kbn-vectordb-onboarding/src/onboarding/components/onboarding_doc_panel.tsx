@@ -25,7 +25,7 @@ interface OnboardingDocPanelProps {
 
 export const OnboardingDocPanel = ({ doc, telemetryPrefix }: OnboardingDocPanelProps) => {
   return (
-    <EuiPanel hasShadow={false} paddingSize="none" color="transparent">
+    <EuiPanel hasShadow={false} paddingSize="none" color="transparent" hasBorder={false}>
       <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiIcon type="documentation" aria-hidden={true} />

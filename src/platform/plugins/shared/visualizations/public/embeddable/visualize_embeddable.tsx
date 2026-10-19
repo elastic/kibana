@@ -15,7 +15,11 @@ import type { AggregateQuery } from '@kbn/es-query';
 import type { ExpressionRendererParams } from '@kbn/expressions-plugin/public';
 import { useExpressionRenderer } from '@kbn/expressions-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { apiPublishesSettings, initializeStateApi } from '@kbn/presentation-publishing';
+import {
+  apiPublishesSettings,
+  getViewModeSubject,
+  initializeStateApi,
+} from '@kbn/presentation-publishing';
 import {
   apiHasDisableTriggers,
   apiHasExecutionContext,
@@ -35,7 +39,7 @@ import {
 import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { get, isEqual } from 'lodash';
 import React, { useEffect, useRef } from 'react';
-import { BehaviorSubject, map, merge, skip, switchMap } from 'rxjs';
+import { BehaviorSubject, combineLatest, map, merge, skip, switchMap } from 'rxjs';
 import { useErrorTextStyle } from '@kbn/react-hooks';
 import { VISUALIZE_APP_NAME, VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
 import {
@@ -97,13 +101,9 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
       initialProjectRoutingOverrides
     );
 
-    const usesEsql$ = new BehaviorSubject<boolean>(
-      initialVisInstance.type.usesEsql?.(initialVisInstance.params) ?? false
-    );
+    const initialEsqlQuery = initialVisInstance.type.getEsqlQuery?.(initialVisInstance.params);
+    const esql$ = new BehaviorSubject<AggregateQuery[]>(initialEsqlQuery ? [initialEsqlQuery] : []);
     const approximationApplied$ = new BehaviorSubject<boolean | undefined>(undefined);
-    const query$ = new BehaviorSubject<AggregateQuery | undefined>(
-      initialVisInstance.type.getEsqlQuery?.(initialVisInstance.params)
-    );
 
     const getUsedDataViews = async (visInstance: Vis) => {
       if (visInstance.type.getUsedIndexPattern) {
@@ -136,14 +136,10 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
             }
           }
 
-          const usesEsql = vis.type.usesEsql?.(vis.params) ?? false;
-          if (usesEsql$.getValue() !== usesEsql) {
-            usesEsql$.next(usesEsql);
-          }
-
           const nextQuery = vis.type.getEsqlQuery?.(vis.params);
-          if (!isEqual(query$.getValue(), nextQuery)) {
-            query$.next(nextQuery);
+          const nextEsql = nextQuery ? [nextQuery] : [];
+          if (!isEqual(esql$.getValue(), nextEsql)) {
+            esql$.next(nextEsql);
           }
 
           try {
@@ -189,10 +185,6 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
 
     const executionContext = apiHasExecutionContext(parentApi)
       ? parentApi.executionContext
-      : undefined;
-
-    const disableTriggers = apiHasDisableTriggers(parentApi)
-      ? parentApi.disableTriggers
       : undefined;
 
     const inspectorAdapters$ = new BehaviorSubject<Record<string, unknown>>({});
@@ -284,10 +276,8 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
       dataLoading$,
       dataViews$,
       projectRoutingOverrides$,
-      usesEsql$,
+      esql$,
       approximationApplied$,
-      // `undefined` until the vis type reports an ES|QL query; `apiPublishesESQLQuery` is the runtime check.
-      query$: query$ as VisualizeApi['query$'],
       rendered$: hasRendered$,
       renderCount$,
       supportedTriggers: () => [
@@ -371,9 +361,12 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
       getSerializedStateByReference: (libraryId) => serializeVisualizeEmbeddable(libraryId, true),
     });
 
-    const fetchSubscription = fetch$(api)
+    const fetchSubscription = combineLatest([
+      fetch$(api),
+      getViewModeSubject(api) ?? new BehaviorSubject('view'),
+    ])
       .pipe(
-        switchMap(async (data) => {
+        switchMap(async ([data, viewMode]) => {
           const unifiedSearch = apiPublishesUnifiedSearch(parentApi)
             ? {
                 query: data.query,
@@ -386,6 +379,9 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
           const isApproximate = data.isApproximate;
           const searchSessionId = apiPublishesSearchSession(parentApi) ? data.searchSessionId : '';
           searchSessionId$.next(searchSessionId);
+          const disableTriggers = apiHasDisableTriggers(parentApi)
+            ? parentApi.disableTriggers$.getValue()
+            : undefined;
           const settings = apiPublishesSettings(parentApi)
             ? {
                 syncColors: parentApi.settings.syncColors$.getValue(),
@@ -424,6 +420,7 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
               esqlVariables: data.esqlVariables,
               vis: vis$.getValue(),
               settings,
+              viewMode,
               disableTriggers,
               searchSessionId,
               parentExecutionContext: executionContext,
@@ -512,8 +509,12 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
       api,
       Component: () => {
         const expressionParams = useStateFromPublishingSubject(expressionParams$);
+        const abortController = useStateFromPublishingSubject(expressionAbortController$);
         const domNode = useRef<HTMLDivElement>(null);
-        const { error, isLoading } = useExpressionRenderer(domNode, expressionParams);
+        const { error, isLoading } = useExpressionRenderer(domNode, {
+          ...expressionParams,
+          abortController,
+        });
         const errorTextStyle = useErrorTextStyle();
 
         useEffect(() => {

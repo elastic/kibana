@@ -6,38 +6,25 @@
  */
 import { i18n } from '@kbn/i18n';
 
-import { schema } from '@kbn/config-schema';
-import type { IntervalSchedule } from '@kbn/task-manager-plugin/server';
+import { z } from '@kbn/zod';
+import { MAX_ROUTE_STRING_LENGTH } from '../zod_query';
 import {
+  fromSettingsAttribute,
   getSyntheticsDynamicSettings,
   setSyntheticsDynamicSettings,
 } from '../../saved_objects/synthetics_settings';
-import type { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
+import type { SyntheticsRestApiRouteFactory } from '../types';
 import type { DynamicSettings } from '../../../common/runtime_types';
 import type { DynamicSettingsAttributes } from '../../runtime_types/settings';
-import {
-  SYNTHETICS_API_URLS,
-  DEFAULT_RULE_SETTINGS,
-  MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL,
-  MAX_PRIVATE_LOCATIONS_SYNC_INTERVAL,
-} from '../../../common/constants';
-import {
-  DEFAULT_TASK_SCHEDULE,
-  PRIVATE_LOCATIONS_SYNC_TASK_ID,
-  runSynPrivateLocationMonitorsTaskSoon,
-} from '../../tasks/sync_private_locations_monitors_task';
+import { DEFAULT_RULE_SETTINGS, SYNTHETICS_API_URLS } from '../../../common/constants';
 import { runRebalanceShardsTaskSoon } from '../../tasks/rebalance_private_location_shards_task';
 import {
   getRebalancePrivateLocationShardsEnabled,
   setRebalancePrivateLocationShardsEnabled,
 } from '../../tasks/rebalance_shards_enabled';
-import {
-  WRITE_SYNTHETICS_DEFAULT_RULES_API,
-  WRITE_SYNTHETICS_SETTINGS_API,
-} from '../../constants/privileges';
-
-const parseIntervalMinutes = (interval: string): number =>
-  parseInt(interval, 10) || MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL;
+import { canManageClusterSettings } from './cluster_settings_privileges';
+import { WRITE_SYNTHETICS_SETTINGS_API } from '../../constants/privileges';
+import { WRITE_SYNTHETICS_DEFAULT_RULES_API } from '../../feature';
 
 export const createGetDynamicSettingsRoute: SyntheticsRestApiRouteFactory<
   DynamicSettings
@@ -50,24 +37,12 @@ export const createGetDynamicSettingsRoute: SyntheticsRestApiRouteFactory<
       savedObjectsClient
     );
 
-    let privateLocationsSyncInterval = MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL;
-    try {
-      const task = await server.pluginsStart.taskManager.get(PRIVATE_LOCATIONS_SYNC_TASK_ID);
-      const taskInterval = (task.schedule as IntervalSchedule | undefined)?.interval;
-      if (taskInterval) {
-        privateLocationsSyncInterval = parseIntervalMinutes(taskInterval);
-      }
-    } catch (_err) {
-      // not yet created
-    }
-
     const rebalancePrivateLocationShardsEnabled = await getRebalancePrivateLocationShardsEnabled(
       server.pluginsStart.taskManager
     );
 
     return {
       ...fromSettingsAttribute(dynamicSettingsAttributes),
-      privateLocationsSyncInterval,
       rebalancePrivateLocationShardsEnabled,
     };
   },
@@ -84,8 +59,7 @@ export const createPostDynamicSettingsRoute: SyntheticsRestApiRouteFactory<
   writeAccess: true,
   anyRequiredPrivileges: ['uptime-write', WRITE_SYNTHETICS_SETTINGS_API],
   extendedPrivileges: [WRITE_SYNTHETICS_DEFAULT_RULES_API],
-  handler: async (routeContext): Promise<DynamicSettings> => {
-    const { request, response } = routeContext;
+  handler: async ({ savedObjectsClient, request, response, server }): Promise<DynamicSettings> => {
     const changesDefaultRules = DEFAULT_RULE_SETTINGS.some((setting) => setting in request.body);
     const canManageDefaultRules =
       request.authzResult?.['uptime-write'] === true ||
@@ -101,140 +75,89 @@ export const createPostDynamicSettingsRoute: SyntheticsRestApiRouteFactory<
       }) as never;
     }
 
-    return updateDynamicSettings(routeContext);
+    const {
+      privateLocationsSyncInterval: _ignoredSyncInterval,
+      rebalancePrivateLocationShardsEnabled,
+      ...otherSettings
+    } = request.body;
+
+    const rebalanceChanged =
+      rebalancePrivateLocationShardsEnabled != null &&
+      rebalancePrivateLocationShardsEnabled !==
+        (await getRebalancePrivateLocationShardsEnabled(server.pluginsStart.taskManager));
+
+    if (rebalanceChanged && !(await canManageClusterSettings(server, request))) {
+      return response.forbidden({
+        body: {
+          message: i18n.translate('xpack.synthetics.settings.clusterSettings.forbidden', {
+            defaultMessage:
+              'Changing private location shard rebalancing requires the "Can manage private locations" privilege in all spaces.',
+          }),
+        },
+      }) as never;
+    }
+
+    const prevSettings = await getSyntheticsDynamicSettings(savedObjectsClient);
+    const { rebalancePrivateLocationShardsEnabled: _ignoredRebalance, ...prevWithoutRebalance } =
+      prevSettings;
+
+    const attr = await setSyntheticsDynamicSettings(savedObjectsClient, {
+      ...prevWithoutRebalance,
+      ...otherSettings,
+    } as DynamicSettingsAttributes);
+
+    let persistedRebalance = true;
+    if (rebalanceChanged) {
+      persistedRebalance = await setRebalancePrivateLocationShardsEnabled(
+        server.pluginsStart.taskManager,
+        rebalancePrivateLocationShardsEnabled
+      );
+      // Drain leftover pins (when off) or resume assignment (when on) on the
+      // next task cycle — don't block this request on Fleet rewrites.
+      void runRebalanceShardsTaskSoon({ server });
+    } else {
+      persistedRebalance = await getRebalancePrivateLocationShardsEnabled(
+        server.pluginsStart.taskManager
+      );
+    }
+
+    if (
+      rebalancePrivateLocationShardsEnabled != null &&
+      persistedRebalance !== rebalancePrivateLocationShardsEnabled
+    ) {
+      return response.conflict({
+        body: {
+          message: i18n.translate('xpack.synthetics.settings.rebalanceShards.taskRunning', {
+            defaultMessage:
+              'The rebalance task could not be updated. Please try saving this setting again in a moment.',
+          }),
+        },
+      }) as never;
+    }
+
+    return {
+      ...fromSettingsAttribute(attr as DynamicSettingsAttributes),
+      rebalancePrivateLocationShardsEnabled: persistedRebalance,
+    };
   },
 });
 
-const updateDynamicSettings = async ({
-  savedObjectsClient,
-  request,
-  response,
-  server,
-}: RouteContext): Promise<DynamicSettings> => {
-  const { privateLocationsSyncInterval, rebalancePrivateLocationShardsEnabled, ...otherSettings } =
-    request.body;
-  const prevSettings = await getSyntheticsDynamicSettings(savedObjectsClient);
-  const { rebalancePrivateLocationShardsEnabled: _ignoredRebalance, ...prevWithoutRebalance } =
-    prevSettings;
+const emailList = z.array(z.string().max(MAX_ROUTE_STRING_LENGTH)).max(1000);
 
-  const attr = await setSyntheticsDynamicSettings(savedObjectsClient, {
-    ...prevWithoutRebalance,
-    ...otherSettings,
-  } as DynamicSettingsAttributes);
-
-  if (privateLocationsSyncInterval != null) {
-    await server.pluginsStart.taskManager.bulkUpdateSchedules([PRIVATE_LOCATIONS_SYNC_TASK_ID], {
-      interval: `${privateLocationsSyncInterval}m`,
-    });
-    // Fire-and-forget: the new interval is already persisted, so a failure to
-    // kick the task early only means it starts on its next cycle. Swallow it
-    // here (it is already logged) rather than failing the settings write.
-    void runSynPrivateLocationMonitorsTaskSoon({ server }).catch(() => {});
-  }
-
-  let persistedRebalance = true;
-  if (rebalancePrivateLocationShardsEnabled != null) {
-    persistedRebalance = await setRebalancePrivateLocationShardsEnabled(
-      server.pluginsStart.taskManager,
-      rebalancePrivateLocationShardsEnabled
-    );
-    // Drain leftover pins (when off) or resume assignment (when on) on the
-    // next task cycle — don't block this request on Fleet rewrites.
-    void runRebalanceShardsTaskSoon({ server });
-  } else {
-    persistedRebalance = await getRebalancePrivateLocationShardsEnabled(
-      server.pluginsStart.taskManager
-    );
-  }
-
-  let persistedInterval = MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL;
-  try {
-    const task = await server.pluginsStart.taskManager.get(PRIVATE_LOCATIONS_SYNC_TASK_ID);
-    const taskInterval = (task.schedule as IntervalSchedule | undefined)?.interval;
-    if (taskInterval) {
-      persistedInterval = parseIntervalMinutes(taskInterval);
-    }
-  } catch (_err) {
-    persistedInterval = parseIntervalMinutes(DEFAULT_TASK_SCHEDULE);
-  }
-
-  if (privateLocationsSyncInterval != null && persistedInterval !== privateLocationsSyncInterval) {
-    return response.conflict({
-      body: {
-        message: i18n.translate('xpack.synthetics.settings.syncInterval.taskRunning', {
-          defaultMessage:
-            'The sync task is currently running. Please try saving the interval again in a moment.',
-        }),
-      },
-    }) as never;
-  }
-
-  if (
-    rebalancePrivateLocationShardsEnabled != null &&
-    persistedRebalance !== rebalancePrivateLocationShardsEnabled
-  ) {
-    return response.conflict({
-      body: {
-        message: i18n.translate('xpack.synthetics.settings.rebalanceShards.taskRunning', {
-          defaultMessage:
-            'The rebalance task could not be updated. Please try saving this setting again in a moment.',
-        }),
-      },
-    }) as never;
-  }
-
-  return {
-    ...fromSettingsAttribute(attr as DynamicSettingsAttributes),
-    privateLocationsSyncInterval: persistedInterval,
-    rebalancePrivateLocationShardsEnabled: persistedRebalance,
-  };
-};
-
-export const fromSettingsAttribute = (
-  attr: DynamicSettingsAttributes
-): DynamicSettingsAttributes => {
-  return {
-    certExpirationThreshold: attr.certExpirationThreshold,
-    certAgeThreshold: attr.certAgeThreshold,
-    defaultConnectors: attr.defaultConnectors,
-    defaultEmail: attr.defaultEmail,
-    defaultStatusRuleEnabled: attr.defaultStatusRuleEnabled ?? true,
-    defaultTLSRuleEnabled: attr.defaultTLSRuleEnabled ?? true,
-  };
-};
-
-export const VALUE_MUST_BE_AN_INTEGER = i18n.translate(
-  'xpack.synthetics.settings.invalid.nanError',
-  {
-    defaultMessage: 'Value must be an integer.',
-  }
-);
-
-export const validateInteger = (value: number): string | undefined => {
-  if (value % 1) {
-    return VALUE_MUST_BE_AN_INTEGER;
-  }
-};
-
-export const DynamicSettingsSchema = schema.object({
-  certAgeThreshold: schema.maybe(schema.number({ min: 1, validate: validateInteger })),
-  certExpirationThreshold: schema.maybe(schema.number({ min: 1, validate: validateInteger })),
-  defaultConnectors: schema.maybe(schema.arrayOf(schema.string())),
-  defaultStatusRuleEnabled: schema.maybe(schema.boolean()),
-  defaultTLSRuleEnabled: schema.maybe(schema.boolean()),
-  rebalancePrivateLocationShardsEnabled: schema.maybe(schema.boolean()),
-  defaultEmail: schema.maybe(
-    schema.object({
-      to: schema.arrayOf(schema.string()),
-      cc: schema.maybe(schema.arrayOf(schema.string())),
-      bcc: schema.maybe(schema.arrayOf(schema.string())),
+export const DynamicSettingsSchema = z.strictObject({
+  certAgeThreshold: z.number().int().min(1).optional(),
+  certExpirationThreshold: z.number().int().min(1).optional(),
+  defaultConnectors: z.array(z.string().max(MAX_ROUTE_STRING_LENGTH)).max(1000).optional(),
+  defaultStatusRuleEnabled: z.boolean().optional(),
+  defaultTLSRuleEnabled: z.boolean().optional(),
+  rebalancePrivateLocationShardsEnabled: z.boolean().optional(),
+  defaultEmail: z
+    .strictObject({
+      to: emailList,
+      cc: emailList.optional(),
+      bcc: emailList.optional(),
     })
-  ),
-  privateLocationsSyncInterval: schema.maybe(
-    schema.number({
-      min: MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL,
-      max: MAX_PRIVATE_LOCATIONS_SYNC_INTERVAL,
-      validate: validateInteger,
-    })
-  ),
+    .optional(),
+  // Ignored: MW changes now wake the sync task via runSoon. Kept so older clients don't 400.
+  privateLocationsSyncInterval: z.number().max(1440).optional(),
 });

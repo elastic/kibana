@@ -36,6 +36,67 @@ describe('createRiskScoreMaintainerTelemetryReporter', () => {
       RISK_SCORE_MAINTAINER_RUN_SUMMARY_EVENT.eventType,
       expect.objectContaining({ scoresWrittenTotal: 6 })
     );
+    expect(reportEvent.mock.calls[0][1]).not.toHaveProperty('baseScoreDistribution');
+    expect(reportEvent.mock.calls[0][1]).not.toHaveProperty('resolutionScoreDistribution');
+  });
+
+  it('adds base and resolution risk score distributions to the completion summary', () => {
+    const reporter = createRiskScoreMaintainerTelemetryReporter({
+      telemetry: { reportEvent } as unknown as AnalyticsServiceSetup,
+    });
+
+    reporter
+      .forRun({ namespace: 'default', entityType: 'host', idBasedRiskScoringEnabled: true })
+      .completionSummary({
+        runStatus: 'success',
+        scoresWrittenBase: 1,
+        scoresWrittenResolution: 0,
+        scoresWrittenResetToZero: 0,
+        pagesProcessed: 1,
+        lookupPrunedDocs: 0,
+        baseScoreDistribution: {
+          Critical: 1,
+          High: 2,
+          Moderate: 3,
+          Low: 4,
+          Unknown: 5,
+          normP50: 40,
+          normP90: 90,
+        },
+        resolutionScoreDistribution: {
+          Critical: 6,
+          High: 0,
+          Moderate: 1,
+          Low: 0,
+          Unknown: 0,
+          normP50: 12,
+          normP90: 70,
+        },
+      });
+
+    expect(reportEvent).toHaveBeenCalledWith(
+      RISK_SCORE_MAINTAINER_RUN_SUMMARY_EVENT.eventType,
+      expect.objectContaining({
+        baseScoreDistribution: {
+          critical: 1,
+          high: 2,
+          moderate: 3,
+          low: 4,
+          unknown: 5,
+          normP50: 40,
+          normP90: 90,
+        },
+        resolutionScoreDistribution: {
+          critical: 6,
+          high: 0,
+          moderate: 1,
+          low: 0,
+          unknown: 0,
+          normP50: 12,
+          normP90: 70,
+        },
+      })
+    );
   });
 
   it('deduplicates repeated global skip reports for the same reason', () => {
@@ -64,5 +125,7 @@ describe('createRiskScoreMaintainerTelemetryReporter', () => {
         lookupPrunedDocs: 0,
       })
     );
+    expect(reportEvent.mock.calls[0][1]).not.toHaveProperty('baseScoreDistribution');
+    expect(reportEvent.mock.calls[0][1]).not.toHaveProperty('resolutionScoreDistribution');
   });
 });

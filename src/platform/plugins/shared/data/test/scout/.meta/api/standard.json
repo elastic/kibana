@@ -1,9 +1,29 @@
 {
-  "sha1": "fc9fbd00fc82ca0f7355491d44f285f8d1007a12",
+  "sha1": "5d4f5138f6e3341d0d97a335049aa714c9334349",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "ea5fd1e61e8e168-d8c130fa37fd60e",
+      "title": "Saved query deletion across spaces deletes a shared query from both spaces",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/saved_query_shared_delete.spec.ts",
+        "line": 38,
+        "column": 23
+      }
+    },
     {
       "id": "99d18e3579dd960-646aa7dac1121c1",
       "title": "ese search - delete async search (SNAPSHOT only) should delete an in-progress search",

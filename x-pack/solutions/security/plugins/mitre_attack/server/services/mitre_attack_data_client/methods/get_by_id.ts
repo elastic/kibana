@@ -8,9 +8,11 @@
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
 import type { MitreEntity, MitreListParams } from '@kbn/security-mitre-attack-common';
-import { DEFAULT_MITRE_FRAMEWORK } from '@kbn/security-mitre-attack-common';
-import { MITRE_ATTACK_ENTITY_SO_TYPE } from '../../../saved_objects';
-import { buildSoId } from '../../utils';
+import {
+  DEFAULT_MITRE_FRAMEWORK,
+  MITRE_ATTACK_ENTITY_SO_TYPE,
+  buildSoId,
+} from '@kbn/security-mitre-attack-common';
 import { resolveLatestVersion } from '../resolve_latest_version';
 import { validateMitreEntity } from '../../mitre_entity_validation';
 
@@ -21,6 +23,14 @@ interface GetByIdArgs {
   opts?: Pick<MitreListParams, 'framework' | 'frameworkVersion'>;
 }
 
+/**
+ * Fetches a single MITRE entity by its MITRE id (e.g. 'T1003', 'TA0006', 'AML.T0024').
+ *
+ * The framework defaults to enterprise ATT&CK and the version to the latest indexed one for
+ * that framework. Because the saved object id is `{framework}:{framework_version}:{id}`,
+ * looking up an ATLAS entity (`AML.*` ids) requires passing `framework: 'atlas'`; with the
+ * default framework such ids resolve to `undefined`.
+ */
 export const getById = async ({
   savedObjectsRepository,
   logger,

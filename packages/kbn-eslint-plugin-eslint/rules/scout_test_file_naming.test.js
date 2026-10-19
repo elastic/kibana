@@ -8,7 +8,7 @@
  */
 
 const { RuleTester } = require('eslint');
-const rule = require('./scout_test_file_naming');
+const rule = require('../oxlint_plugin').rules.scout_test_file_naming;
 
 const ruleTester = new RuleTester({
   parser: require.resolve('@typescript-eslint/parser'),

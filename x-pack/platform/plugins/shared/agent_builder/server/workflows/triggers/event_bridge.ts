@@ -6,9 +6,14 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { ConversationUpdatedOptIn } from '@kbn/agent-builder-server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
-import { ConversationMetadataUpdatedTriggerId } from '../../../common/workflows/triggers';
+import {
+  ConversationMetadataUpdatedTriggerId,
+  ConversationUpdatedTriggerId,
+} from '../../../common/workflows/triggers';
 import type { ConversationEventBus } from './conversation_event_bus';
+import { toAttachmentTriggerEvent } from './attachment_trigger_mapping';
 
 /**
  * Registers bridge listeners that forward conversation domain events to workflows_extensions.
@@ -17,7 +22,7 @@ export function registerConversationWorkflowEventBridge(
   conversationEventBus: ConversationEventBus,
   workflowsExtensions: WorkflowsExtensionsServerPluginStart | undefined,
   logger: Logger,
-  isExperimentalEnabled: (request: KibanaRequest) => Promise<boolean>
+  conversationUpdatedOptIns: readonly ConversationUpdatedOptIn[]
 ): void {
   if (!workflowsExtensions) {
     return;
@@ -25,9 +30,6 @@ export function registerConversationWorkflowEventBridge(
 
   const forward = async (eventType: string, payload: unknown, request: KibanaRequest) => {
     try {
-      if (!(await isExperimentalEnabled(request))) {
-        return;
-      }
       const client = await workflowsExtensions.getClient(request);
       await client.emitEvent(eventType, payload as Record<string, unknown>);
     } catch (error) {
@@ -35,7 +37,74 @@ export function registerConversationWorkflowEventBridge(
     }
   };
 
+  // Resolves the client once, then emits each trigger independently so one
+  // failing emit does not drop the rest of the batch.
+  const forwardBatch = async (
+    request: KibanaRequest,
+    triggers: Array<{ triggerId: string; payload: unknown }>
+  ) => {
+    let client: Awaited<ReturnType<typeof workflowsExtensions.getClient>>;
+    try {
+      client = await workflowsExtensions.getClient(request);
+    } catch (error) {
+      logger.warn(`Failed to resolve workflows client for attachment triggers: ${error}`);
+      return;
+    }
+    for (const { triggerId, payload } of triggers) {
+      try {
+        await client.emitEvent(triggerId, payload as Record<string, unknown>);
+      } catch (error) {
+        logger.warn(`Failed to emit workflow trigger "${triggerId}": ${error}`);
+      }
+    }
+  };
+
   conversationEventBus.onMetadataPatched((request, payload) => {
     void forward(ConversationMetadataUpdatedTriggerId, payload, request);
+  });
+
+  conversationEventBus.onAttachmentEvents((request, { conversationId, events }) => {
+    void forwardBatch(
+      request,
+      events.map((event) => toAttachmentTriggerEvent(conversationId, event))
+    );
+  });
+
+  // Opt-in: without a solution enabling the trigger for the conversation's template, the emit is
+  // skipped before the subscriber lookup, so writes nothing listens to don't pay for it.
+  const isConversationUpdatedEnabled = async (
+    request: KibanaRequest,
+    optIns: readonly ConversationUpdatedOptIn[]
+  ): Promise<boolean> => {
+    for (const { isEnabled } of optIns) {
+      try {
+        if (await isEnabled(request)) {
+          return true;
+        }
+      } catch (error) {
+        logger.warn(
+          `Failed to check whether "${ConversationUpdatedTriggerId}" is enabled: ${error}`
+        );
+      }
+    }
+    return false;
+  };
+
+  conversationEventBus.onConversationUpdated((request, payload) => {
+    const { templateId } = payload;
+    if (!templateId) {
+      return;
+    }
+    const optIns = conversationUpdatedOptIns.filter(({ templateIds }) =>
+      templateIds.includes(templateId)
+    );
+    if (optIns.length === 0) {
+      return;
+    }
+    void (async () => {
+      if (await isConversationUpdatedEnabled(request, optIns)) {
+        await forward(ConversationUpdatedTriggerId, payload, request);
+      }
+    })();
   });
 }

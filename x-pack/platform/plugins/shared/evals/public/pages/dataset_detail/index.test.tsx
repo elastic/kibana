@@ -35,6 +35,13 @@ jest.mock('@kbn/llm-trace-waterfall', () => ({
     error: undefined,
   }),
 }));
+jest.mock('../../components/copy_dataset_flyout', () => ({
+  CopyDatasetFlyout: ({ datasetId, datasetName }: { datasetId: string; datasetName: string }) => (
+    <div data-test-subj="copyDatasetFlyoutMock">
+      {datasetId}: {datasetName}
+    </div>
+  ),
+}));
 jest.mock('../../components/import_dataset_flyout', () => ({
   ImportDatasetFlyout: ({
     initialDataset,
@@ -91,7 +98,7 @@ const renderPage = () => {
   );
 };
 
-describe('DatasetDetailPage import entry point', () => {
+describe('DatasetDetailPage dataset actions', () => {
   beforeEach(() => {
     mockedUseEvalsPermissions.mockReturnValue({ canRead: true, canManage: true });
     mockedUseDataset.mockReturnValue({
@@ -130,6 +137,22 @@ describe('DatasetDetailPage import entry point', () => {
       isLoading: false,
       error: null,
     } as unknown as ReturnType<typeof useExampleScores>);
+  });
+
+  it('opens the copy flyout with the current dataset', () => {
+    renderPage();
+
+    fireEvent.click(screen.getByTestId('copyDatasetButton'));
+
+    expect(screen.getByTestId('copyDatasetFlyoutMock')).toHaveTextContent('dataset-1: Dataset one');
+  });
+
+  it('does not render the copy button without manage privilege', () => {
+    mockedUseEvalsPermissions.mockReturnValue({ canRead: true, canManage: false });
+
+    renderPage();
+
+    expect(screen.queryByTestId('copyDatasetButton')).not.toBeInTheDocument();
   });
 
   it('opens the import flyout with the current dataset selected', () => {

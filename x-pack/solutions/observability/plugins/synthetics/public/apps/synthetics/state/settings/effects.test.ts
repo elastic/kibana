@@ -68,20 +68,6 @@ describe('setDynamicSettingsEffect', () => {
     expect(gen.next().done).toBe(true);
   });
 
-  it('does not refresh default alert rules when only the sync interval changes', () => {
-    const payload = { privateLocationsSyncInterval: 15 };
-    const gen = getSetDynamicSettingsWorker()(setDynamicSettingsAction.get(payload));
-
-    expect(gen.next().value).toEqual(select(selectDynamicSettings));
-    expect(gen.next({ settings: savedSettings }).value).toEqual(
-      call(setDynamicSettings, { settings: payload })
-    );
-    expect(gen.next(savedSettings).value).toEqual(
-      put(setDynamicSettingsAction.success(savedSettings))
-    );
-    expect(gen.next().done).toBe(true);
-  });
-
   it('does not refresh default rules when only certificate thresholds change', () => {
     const payload = { certAgeThreshold: 365 };
     const gen = getSetDynamicSettingsWorker()(setDynamicSettingsAction.get(payload));

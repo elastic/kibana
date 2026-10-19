@@ -328,10 +328,25 @@ const createExamplesStorageClient = () => {
     const termQuery = (params.query as { term?: Record<string, string> } | undefined)?.term;
     const termsQuery = (params.query as { terms?: { dataset_id?: string[] } } | undefined)?.terms
       ?.dataset_id;
+    const boolFilter = (
+      params.query as
+        | {
+            bool?: { filter?: Array<{ term?: { dataset_id: string }; terms?: { _id: string[] } }> };
+          }
+        | undefined
+    )?.bool?.filter;
 
     let rows = Array.from(docs.entries()).map(([id, document]) => ({ _id: id, _source: document }));
 
-    if (termQuery?.dataset_id) {
+    if (boolFilter) {
+      rows = rows.filter((row) =>
+        boolFilter.every(
+          ({ term, terms }) =>
+            (!term || row._source.dataset_id === term.dataset_id) &&
+            (!terms || terms._id.includes(row._id))
+        )
+      );
+    } else if (termQuery?.dataset_id) {
       rows = rows.filter((row) => row._source.dataset_id === termQuery.dataset_id);
     } else if (termQuery?._id) {
       rows = rows.filter((row) => row._id === termQuery._id);
@@ -350,8 +365,9 @@ const createExamplesStorageClient = () => {
       });
     }
 
+    const from = (params.from as number | undefined) ?? 0;
     const size = (params.size as number | undefined) ?? rows.length;
-    const hits = rows.slice(0, size).map((row) => ({
+    const hits = rows.slice(from, from + size).map((row) => ({
       _id: row._id,
       _source: projectSource(row._source, params._source),
     }));
@@ -573,6 +589,54 @@ describe('DatasetClient', () => {
     });
   });
 
+  it('reads one page of examples in the order get returns them, with the total', async () => {
+    const { client, examplesStorage } = createClient();
+    const created = await client.create({
+      name: 'dataset-1',
+      description: 'A dataset',
+      examples: [baseExampleA, baseExampleB, baseExampleC],
+    });
+
+    const page = await client.getExamplesPage(created.id, { from: 1, size: 1 });
+
+    expect(page).toEqual({ examples: [created.examples[1]], total: 3 });
+    expect(examplesStorage.client.search).toHaveBeenLastCalledWith(
+      expect.objectContaining({ from: 1, size: 1 })
+    );
+  });
+
+  it('keeps an example page inside the dataset limit', async () => {
+    const { client, examplesStorage } = createClient();
+    const created = await client.create({
+      name: 'dataset-1',
+      description: 'A dataset',
+      examples: [baseExampleA],
+    });
+
+    const page = await client.getExamplesPage(created.id, {
+      from: MAX_EXAMPLES_PER_DATASET,
+      size: 50,
+    });
+
+    expect(page).toEqual({ examples: [], total: 1 });
+    expect(examplesStorage.client.search).toHaveBeenLastCalledWith(
+      expect.objectContaining({ from: MAX_EXAMPLES_PER_DATASET, size: 0 })
+    );
+  });
+
+  it('returns no example page for a dataset outside the space', async () => {
+    const [ownClient, otherClient] = createClientsInSpaces(['default', 'marketing']);
+    const created = await ownClient.create({
+      name: 'dataset-1',
+      description: 'A dataset',
+      examples: [baseExampleA],
+    });
+
+    await expect(otherClient.getExamplesPage(created.id, { from: 0, size: 10 })).resolves.toBe(
+      undefined
+    );
+  });
+
   it('updates dataset description without changing the ID', async () => {
     const { client } = createClient();
 
@@ -646,6 +710,65 @@ describe('DatasetClient', () => {
     expect(examplesStorage.client.search).toHaveBeenCalledWith(
       expect.objectContaining({ _source: ['dataset_id'] })
     );
+  });
+
+  it('deletes several examples in one bulk request and touches the dataset once', async () => {
+    const { client, datasetsStorage, examplesStorage } = createClient();
+    const created = await client.create({
+      name: 'dataset-1',
+      description: 'A dataset',
+      examples: [baseExampleA, baseExampleB, baseExampleC],
+    });
+    const [exampleA, exampleB, exampleC] = created.examples;
+    (examplesStorage.client.bulk as jest.Mock).mockClear();
+    (datasetsStorage.client.index as jest.Mock).mockClear();
+
+    const result = await client.deleteExamples(created.id, [
+      exampleA.id,
+      exampleB.id,
+      exampleA.id,
+      'missing',
+    ]);
+
+    expect(result).toEqual({ deleted: [exampleA.id, exampleB.id], notFound: ['missing'] });
+    expect(examplesStorage.client.bulk).toHaveBeenCalledTimes(1);
+    expect(datasetsStorage.client.index).toHaveBeenCalledTimes(1);
+    const fetched = await client.get(created.id);
+    expect(fetched?.examples.map(({ id }) => id)).toEqual([exampleC.id]);
+    expect(fetched?.examples_count).toBe(1);
+  });
+
+  it('does not delete examples that belong to another dataset', async () => {
+    const { client } = createClient();
+    const first = await client.create({
+      name: 'dataset-1',
+      description: 'A dataset',
+      examples: [baseExampleA],
+    });
+    const second = await client.create({
+      name: 'dataset-2',
+      description: 'Another dataset',
+      examples: [baseExampleB],
+    });
+
+    const result = await client.deleteExamples(first.id, [second.examples[0].id]);
+
+    expect(result).toEqual({ deleted: [], notFound: [second.examples[0].id] });
+    expect((await client.get(second.id))?.examples).toHaveLength(1);
+  });
+
+  it('refuses to delete examples from a dataset outside the space', async () => {
+    const [ownClient, otherClient] = createClientsInSpaces(['default', 'marketing']);
+    const created = await ownClient.create({
+      name: 'dataset-1',
+      description: 'A dataset',
+      examples: [baseExampleA],
+    });
+
+    await expect(
+      otherClient.deleteExamples(created.id, [created.examples[0].id])
+    ).resolves.toBeUndefined();
+    expect((await ownClient.get(created.id))?.examples).toHaveLength(1);
   });
 
   it('throws ExampleNotFoundError when deleting a non-existent example', async () => {
@@ -776,6 +899,105 @@ describe('DatasetClient', () => {
     await expect(client.create({ name: 'dataset-1', description: 'Duplicate' })).rejects.toThrow(
       DatasetAlreadyExistsError
     );
+  });
+
+  it('rolls back a new dataset when adding examples fails', async () => {
+    const { client, examplesStorage } = createClient();
+    (examplesStorage.client.bulk as jest.Mock).mockResolvedValueOnce({
+      items: [{ index: { status: 500 } }],
+    });
+
+    await expect(
+      client.create({
+        name: 'dataset-1',
+        description: 'A dataset',
+        examples: [baseExampleA],
+      })
+    ).rejects.toThrow('Failed to add 1 examples to dataset');
+
+    expect(await client.list()).toMatchObject({ total: 0, datasets: [] });
+    expect(await client.get(getDatasetId(DEFAULT_SPACE_ID, 'dataset-1'))).toBeUndefined();
+
+    const created = await client.create({
+      name: 'dataset-1',
+      description: 'A dataset',
+      examples: [baseExampleA],
+    });
+    expect(created.examples).toHaveLength(1);
+  });
+
+  it('copies a dataset with new identifiers', async () => {
+    const { client, datasetsStorage } = createClient();
+    const source = await client.create({
+      name: 'source-dataset',
+      description: 'Source description',
+      tags: ['source-tag'],
+      maturity: 'golden',
+    });
+    await client.addExamples(source.id, [baseExampleA, baseExampleB]);
+    const sourceBeforeCopy = await client.get(source.id);
+    (datasetsStorage.client.index as jest.Mock).mockClear();
+
+    const copy = await client.copy(source.id, { name: 'copied-dataset' });
+    const sourceAfterCopy = await client.get(source.id);
+
+    expect(copy).toBeDefined();
+    expect(copy?.id).not.toBe(source.id);
+    expect(copy).toMatchObject({
+      name: 'copied-dataset',
+      description: 'Source description',
+      tags: ['source-tag'],
+      maturity: 'golden',
+      examples_count: 2,
+    });
+    expect(
+      copy?.examples.map(({ input, output, metadata }) => ({ input, output, metadata }))
+    ).toEqual(
+      sourceBeforeCopy?.examples.map(({ input, output, metadata }) => ({ input, output, metadata }))
+    );
+    copy?.examples.forEach(({ id }, index) => {
+      expect(id).not.toBe(sourceBeforeCopy?.examples[index].id);
+    });
+    expect(sourceAfterCopy?.updated_at).toBe(sourceBeforeCopy?.updated_at);
+    expect(sourceAfterCopy?.examples_count).toBe(sourceBeforeCopy?.examples_count);
+    expect(datasetsStorage.client.index).not.toHaveBeenCalledWith(
+      expect.objectContaining({ id: source.id })
+    );
+  });
+
+  it('uses an overridden description when copying a dataset', async () => {
+    const { client } = createClient();
+    const source = await client.create({
+      name: 'source-dataset',
+      description: 'Source description',
+    });
+
+    const copy = await client.copy(source.id, {
+      name: 'copied-dataset',
+      description: 'Copy description',
+    });
+
+    expect(copy?.description).toBe('Copy description');
+  });
+
+  it('throws DatasetAlreadyExistsError when copying with the source dataset name', async () => {
+    const { client } = createClient();
+    const source = await client.create({
+      name: 'source-dataset',
+      description: 'Source description',
+    });
+
+    await expect(client.copy(source.id, { name: source.name })).rejects.toThrow(
+      DatasetAlreadyExistsError
+    );
+  });
+
+  it('returns undefined when copying a missing dataset', async () => {
+    const { client } = createClient();
+
+    await expect(
+      client.copy('missing-dataset', { name: 'copied-dataset' })
+    ).resolves.toBeUndefined();
   });
 
   it('upsert diffs examples and reports added removed unchanged', async () => {
@@ -1332,6 +1554,24 @@ describe('DatasetClient', () => {
       const remaining = await sales.get(created.id);
       expect(remaining?.space_ids).toEqual(['sales']);
       expect(remaining?.examples).toHaveLength(1);
+    });
+
+    it('cannot delete or detach a dataset from a space it is not assigned to', async () => {
+      const [marketing, sales] = createClientsInSpaces(['marketing', 'sales']);
+
+      const created = await marketing.create({
+        name: 'dataset-1',
+        description: 'A dataset',
+        examples: [baseExampleA],
+      });
+
+      await expect(sales.delete(created.id)).resolves.toBe('not_found');
+      await expect(sales.delete(created.id, { intent: 'delete' })).resolves.toBe('not_found');
+      await expect(sales.delete(created.id, { intent: 'unshare' })).resolves.toBe('not_found');
+
+      const untouched = await marketing.get(created.id);
+      expect(untouched?.space_ids).toEqual(['marketing']);
+      expect(untouched?.examples).toHaveLength(1);
     });
 
     it('deletes for real once the last space lets go', async () => {

@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/*
+ * Test-only XY (`lnsXY`) attribute normalizer for strict SO ↔ API round-trip checks.
+ */
+
 import { orderBy } from 'lodash';
 import type { FormBasedPersistedState } from '@kbn/lens-common';
 import type { LensAttributes } from '../../../../types';
@@ -21,8 +25,8 @@ import {
 
 // Default colorMappings in Lens state format, mirroring what fromColorMappingAPIToLensState
 // produces for DEFAULT_LINE_CATEGORICAL_COLOR_MAPPING and DEFAULT_CATEGORICAL_COLOR_MAPPING.
-// `touched` is intentionally omitted — it is covered by COMMON_STATE_IGNORE_PATHS and is stripped
-// from the transformed side before comparison, so the original must not carry it either.
+// `touched` is intentionally omitted: the transform no longer emits it and getColorMappingNormalizer
+// strips it from the original side, so neither side carries it at compare time.
 const DEFAULT_LINE_COLOR_MAPPING = {
   colorMode: { type: 'categorical' as const },
   paletteId: 'elastic_line_optimized',

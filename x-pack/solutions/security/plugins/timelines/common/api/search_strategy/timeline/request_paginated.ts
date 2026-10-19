@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import { lazySchema } from '@kbn/zod/v4';
 import { pagination } from '../model/pagination';
 import { timelineRequestBasicOptionsSchema } from './request_basic';
 
-export const requestPaginated = timelineRequestBasicOptionsSchema.extend({
-  pagination,
-});
+export const requestPaginated = lazySchema(() =>
+  timelineRequestBasicOptionsSchema.extend({
+    pagination,
+  })
+);

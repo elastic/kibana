@@ -6,4 +6,3 @@
  */
 
 export const WRITE_SYNTHETICS_SETTINGS_API = 'write_synthetics_settings';
-export const WRITE_SYNTHETICS_DEFAULT_RULES_API = 'write_synthetics_default_rules';

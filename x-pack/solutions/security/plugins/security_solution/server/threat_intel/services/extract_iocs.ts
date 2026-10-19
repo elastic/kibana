@@ -28,9 +28,52 @@ export interface ExtractedIoc {
   tier_heuristic: IocTier;
   tier_basis: string;
   port?: number;
+  /**
+   * URL/domain kept at a heuristic promotable tier because semantic review did
+   * not run (batch budget / overflow). Promote must skip these; they are not a
+   * model rejection.
+   */
+  deferred_unreviewed?: boolean;
+  /**
+   * Source-text window around the best occurrence of this value (url/domain
+   * only), for semantic adjudication to judge without re-finding the value in
+   * the article. Prompt-only: stripped before the result reaches persistence.
+   */
+  context?: string;
 }
 
-type WorkingIoc = ExtractedIoc & { _offset?: number; _sectionKind?: SectionKind };
+type WorkingIoc = ExtractedIoc & {
+  _offset?: number;
+  _sectionKind?: SectionKind;
+  _hasAttributionCue?: boolean;
+};
+
+/** Chars of source text kept on each side of a value when building its context window. */
+const CONTEXT_WINDOW_CHARS = 240;
+
+/**
+ * Prefer an occurrence whose surrounding prose looks like attacker attribution
+ * over a bare first hit (often a citation). Among ties, prefer the later
+ * occurrence so a mid/late campaign write-up wins over an early docs link.
+ */
+const ATTRIBUTION_CONTEXT_CUE =
+  /\b(attacker|adversary|c2|c&c|payload|malware|downloaded|beacon|exfiltrat|command.?and.?control|infrastructure|dropper|staged)\b/i;
+
+const windowAround = (source: string, offset: number, length: number, radius: number): string =>
+  source.slice(Math.max(0, offset - radius), Math.min(source.length, offset + length + radius));
+
+// Exclude the matched span itself: a value like "/payload" or "evil-dropper.com"
+// would otherwise satisfy its own cue regardless of the surrounding prose, making
+// every occurrence of such a value look attributed and collapsing the tie-break
+// to "prefer the later occurrence" no matter which one actually has attribution.
+const hasAttributionCue = (source: string, offset: number, length: number): boolean => {
+  const before = source.slice(Math.max(0, offset - CONTEXT_WINDOW_CHARS), offset);
+  const after = source.slice(
+    offset + length,
+    Math.min(source.length, offset + length + CONTEXT_WINDOW_CHARS)
+  );
+  return ATTRIBUTION_CONTEXT_CUE.test(before) || ATTRIBUTION_CONTEXT_CUE.test(after);
+};
 
 export interface ExtractIocsResult {
   /** How many IOCs were found, before the nested-object cap. */
@@ -64,7 +107,9 @@ const URL_PATTERN = /\bhttps?:\/\/[^\s<>"']{4,}/gi;
  * Closing brackets are only trimmed when they are unbalanced, so a Wikipedia-style
  * `.../Foo_(bar)` path survives.
  */
-const TRAILING_PROSE_CHARS = '.,;:!?\'"';
+// Backticks delimit Markdown inline code. If retained, URL serialization turns
+// one into `%60`, producing an indicator that can never match the source URL.
+const TRAILING_PROSE_CHARS = '.,;:!?\'"`';
 const CLOSER_TO_OPENER: Readonly<Record<string, string>> = { ')': '(', ']': '[', '}': '{' };
 
 const trimUrlPunctuation = (url: string): string => {
@@ -612,7 +657,12 @@ const defangValue = (type: IocType, value: string, shouldDefang: boolean): strin
  *   hxxp:// / hxxps:// (any case)→ http:// / https://   obfuscated scheme prefix
  *   [@] / (at)                   → @    email defang markers
  */
-const refang = (text: string): string =>
+/**
+ * Recover defanged IOC spellings (`hxxps`, `evil[.]com`, …) to their canonical
+ * form. Exported so adjudication can locate canonical candidate values in the
+ * same refanged view that extraction uses.
+ */
+export const refang = (text: string): string =>
   text
     // Bracket/paren/brace-wrapped dot
     .replace(/\[\.\]|\(\.\)|\{\.\}/g, '.')
@@ -954,6 +1004,12 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
     }
   };
 
+  // Only url/domain candidates ever reach semantic adjudication (isSemanticCandidate
+  // in adjudicate_iocs.ts), so only those need a context window tracked across
+  // duplicate occurrences.
+  const isContextCandidate = (ioc: WorkingIoc): boolean =>
+    ioc.type === 'url' || ioc.type === 'domain';
+
   const pushIoc = (ioc: WorkingIoc): WorkingIoc | undefined => {
     // An over-long value is not a usable indicator and it is actively harmful.
     // `extracted.iocs.value` is a keyword on the reports index, and a keyword term
@@ -970,7 +1026,23 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
     const existing = iocByKey.get(dedupKey);
     if (existing) {
       recordSectionKind(existing, ioc._offset);
+      if (isContextCandidate(ioc) && ioc._offset !== undefined) {
+        const cue = hasAttributionCue(refangedText, ioc._offset, ioc.value.length);
+        const existingOffset = existing._offset;
+        const existingCue = existing._hasAttributionCue ?? false;
+        if (
+          existingOffset === undefined ||
+          (cue && !existingCue) ||
+          (cue === existingCue && ioc._offset > existingOffset)
+        ) {
+          existing._offset = ioc._offset;
+          existing._hasAttributionCue = cue;
+        }
+      }
       return existing;
+    }
+    if (isContextCandidate(ioc) && ioc._offset !== undefined) {
+      ioc._hasAttributionCue = hasAttributionCue(refangedText, ioc._offset, ioc.value.length);
     }
     recordSectionKind(ioc, ioc._offset);
     seen.add(dedupKey);
@@ -1343,7 +1415,18 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
           )
           .digest('hex');
 
-  const cleanedIocs: ExtractedIoc[] = iocs.map(({ _offset, _sectionKind, ...rest }) => rest);
+  const cleanedIocs: ExtractedIoc[] = iocs.map(
+    ({ _offset, _sectionKind, _hasAttributionCue, ...rest }) => ({
+      ...rest,
+      ...(rest.type === 'url' || rest.type === 'domain'
+        ? _offset !== undefined
+          ? {
+              context: windowAround(refangedText, _offset, rest.value.length, CONTEXT_WINDOW_CHARS),
+            }
+          : { context: '' }
+        : {}),
+    })
+  );
 
   // Highest tier first, so a truncated report keeps its most promotable indicators
   // rather than whichever happened to appear earliest in the text.

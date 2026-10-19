@@ -12,6 +12,7 @@ import type { RouteContext } from '../types';
 import {
   createGetMultiSpaceSettingsRoute,
   createPutMultiSpaceSettingsRoute,
+  SyntheticsMultiSpaceSettingsSchema,
 } from './multi_space_settings';
 import { WRITE_SYNTHETICS_SETTINGS_API } from '../../constants/privileges';
 
@@ -45,6 +46,27 @@ const buildRouteContext = (overrides: Partial<RouteContext> = {}): RouteContext 
 describe('multi space settings routes', () => {
   afterEach(() => {
     jest.restoreAllMocks();
+  });
+
+  describe('SyntheticsMultiSpaceSettingsSchema', () => {
+    it('rejects unknown keys so a typo cannot reset settings via applyDefaults', () => {
+      const result = SyntheticsMultiSpaceSettingsSchema.safeParse({
+        useAllRemoteCluster: true,
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('accepts known settings', () => {
+      expect(
+        SyntheticsMultiSpaceSettingsSchema.parse({
+          useAllRemoteClusters: true,
+          selectedRemoteClusters: ['cluster-a'],
+        })
+      ).toEqual({
+        useAllRemoteClusters: true,
+        selectedRemoteClusters: ['cluster-a'],
+      });
+    });
   });
 
   describe('createGetMultiSpaceSettingsRoute', () => {

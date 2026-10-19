@@ -1,5 +1,5 @@
 {
-  "sha1": "0d0c6f7b5d077acb263be49b464776685f1df118",
+  "sha1": "299ea9e28b5d57009cb89f73340c6970a519c948",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,7 +13,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/interactive_setup/test/scout_interactive_setup_tls_manual_api/api/tests/manual_configuration_flow.spec.ts",
-        "line": 36,
+        "line": 39,
         "column": 7
       }
     },
@@ -26,7 +26,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/interactive_setup/test/scout_interactive_setup_tls_manual_api/api/tests/manual_configuration_flow.spec.ts",
-        "line": 45,
+        "line": 48,
         "column": 69
       }
     },
@@ -39,7 +39,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/interactive_setup/test/scout_interactive_setup_tls_manual_api/api/tests/manual_configuration_flow.spec.ts",
-        "line": 64,
+        "line": 67,
         "column": 9
       }
     },
@@ -52,7 +52,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/interactive_setup/test/scout_interactive_setup_tls_manual_api/api/tests/manual_configuration_flow.spec.ts",
-        "line": 85,
+        "line": 88,
         "column": 9
       }
     }

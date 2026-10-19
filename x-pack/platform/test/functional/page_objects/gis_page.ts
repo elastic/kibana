@@ -25,6 +25,7 @@ export class GisPageObject extends FtrService {
   private readonly header = this.ctx.getPageObject('header');
   private readonly timePicker = this.ctx.getPageObject('timePicker');
   private readonly visualize = this.ctx.getPageObject('visualize');
+  private readonly appMenu = this.ctx.getPageObject('appMenu');
 
   private readonly log = this.ctx.getService('log');
   private readonly testSubjects = this.ctx.getService('testSubjects');
@@ -88,7 +89,7 @@ export class GisPageObject extends FtrService {
 
   async enterFullScreen() {
     this.log.debug(`enterFullScreen`);
-    await this.testSubjects.click('mapsFullScreenMode');
+    await this.appMenu.clickMenuItem('mapsFullScreenMode');
     await this.retry.try(async () => {
       await this.testSubjects.exists('exitFullScreenModeButton');
     });
@@ -180,8 +181,16 @@ export class GisPageObject extends FtrService {
     await this.waitForLayersToLoad();
   }
 
+  async clickSaveButton() {
+    await this.appMenu.clickMenuItem('mapSaveButton');
+  }
+
+  async expectSaveButtonExists() {
+    await this.appMenu.existOrFail('mapSaveButton');
+  }
+
   async saveMap(name: string, redirectToOrigin = true, saveAsNew = true, tags?: string[]) {
-    await this.testSubjects.click('mapSaveButton');
+    await this.clickSaveButton();
     await this.testSubjects.setValue('savedObjectTitle', name);
     await this.visualize.setSaveModalValues(name, {
       addToDashboard: false,
@@ -233,16 +242,12 @@ export class GisPageObject extends FtrService {
 
   async onMapListingPage() {
     this.log.debug(`onMapListingPage`);
-    return await this.testSubjects.exists('mapLandingPage', {
-      timeout: 5000,
-    });
+    return await this.testSubjects.exists('mapLandingPage');
   }
 
   async onMapPage() {
     this.log.debug(`onMapPage`);
-    return await this.testSubjects.exists('mapLayerTOC', {
-      timeout: 5000,
-    });
+    return await this.testSubjects.exists('mapLayerTOC');
   }
 
   async searchForMapWithName(name: string) {
@@ -329,7 +334,7 @@ export class GisPageObject extends FtrService {
   async clearLegendTooltip() {
     // The tooltip renders instantly when present, so use a short timeout: this is an
     // absence probe called many times per hook, and a long timeout burns hook budget.
-    const isTooltipOpen = await this.testSubjects.exists(`layerTocTooltip`, { timeout: 1000 });
+    const isTooltipOpen = await this.testSubjects.exists(`layerTocTooltip`);
     if (isTooltipOpen) {
       await this.testSubjects.click(`layerTocTooltip`);
       // Wait for tooltip to go away
@@ -396,7 +401,7 @@ export class GisPageObject extends FtrService {
     const escapedDisplayName = escapeLayerName(layerName);
     await this.retry.try(async () => {
       await this.testSubjects.moveMouseTo(`layerTocActionsPanelToggleButton${escapedDisplayName}`);
-      const isOpen = await this.testSubjects.exists(`layerTocTooltip`, { timeout: 5000 });
+      const isOpen = await this.testSubjects.exists(`layerTocTooltip`);
       if (!isOpen) {
         throw new Error('layer TOC tooltip not open');
       }
@@ -583,12 +588,12 @@ export class GisPageObject extends FtrService {
   }
 
   async fullScreenModeMenuItemExists() {
-    return await this.testSubjects.exists('mapsFullScreenMode');
+    return await this.appMenu.menuItemExists('mapsFullScreenMode');
   }
 
   async clickFullScreenMode() {
     this.log.debug(`clickFullScreenMode`);
-    await this.testSubjects.click('mapsFullScreenMode');
+    await this.appMenu.clickMenuItem('mapsFullScreenMode');
   }
 
   async exitFullScreenLogoButtonExists() {
@@ -714,7 +719,7 @@ export class GisPageObject extends FtrService {
   }
 
   async enableAutoFitToBounds() {
-    await this.testSubjects.click('openSettingsButton');
+    await this.appMenu.clickMenuItem('openSettingsButton');
     const isEnabled = await this.testSubjects.getAttribute('autoFitToDataBoundsSwitch', 'checked');
     if (!isEnabled) {
       await this.retry.try(async () => {

@@ -153,6 +153,18 @@ export async function seedRuleMigration({
         },
         status,
         ...(translation_result ? { translation_result } : {}),
+        ...(translation_result
+          ? {
+              elastic_rule: {
+                title: `Translated ${title}`,
+                description: 'Translated test rule for eval seeding',
+                severity: 'medium',
+                risk_score: 47,
+                query: 'FROM logs-* | LIMIT 10',
+                query_language: 'esql',
+              },
+            }
+          : {}),
         updated_at: now,
       },
     ]);

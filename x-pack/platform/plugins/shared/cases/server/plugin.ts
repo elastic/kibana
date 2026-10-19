@@ -42,7 +42,7 @@ import type {
   CloseReasonValidator,
 } from './types';
 import { CasesClientFactory } from './client/factory';
-import type { CasesClientSource } from './client/types';
+import type { CasesClientSource, GetCasesClientOptions } from './client/types';
 import { getCasesKibanaFeatures } from './features';
 import { registerRoutes } from './routes/api/register_routes';
 import { getExternalRoutes } from './routes/api/get_external_routes';
@@ -60,6 +60,7 @@ import type { ConfigType } from './config';
 import { registerConnectorTypes } from './connectors';
 import { registerSavedObjects } from './saved_object_types';
 import type { ServerlessProjectType } from '../common/constants/types';
+import { SERVERLESS_PROJECT_TYPES } from '../common/constants/owners';
 
 import { IncrementalIdTaskManager } from './tasks/incremental_id/incremental_id_task_manager';
 import { TemplatesMigrationTaskManager } from './tasks/templates_migration/templates_migration_task_manager';
@@ -169,7 +170,7 @@ export class CasePlugin
       plugins.features.registerKibanaFeature(casesFeatures.v3);
     }
 
-    this.casesEventBus = new CasesEventBus();
+    this.casesEventBus = new CasesEventBus(this.logger);
 
     registerSavedObjects({
       core,
@@ -237,15 +238,24 @@ export class CasePlugin
             management: plugins.workflowsManagement.management,
             logger: this.logger,
             audit: plugins.security.audit,
-            getWorkflowRunAuthorizer: async (request) => {
-              const [{ savedObjects }] = await core.getStartServices();
-              return this.clientFactory.createWorkflowRunAuthorizer({
-                request,
-                savedObjectsService: savedObjects,
-              });
-            },
+            attachmentTypeRegistry: this.unifiedAttachmentTypeRegistry,
           })
         : undefined;
+
+    // Resolves a request-scoped workflow run context. Defined here and threaded directly into
+    // the route so that `getCasesWorkflowRunContext` does not need to live on `CaseRequestContext`
+    // (which would expose it to all ~20 plugins that depend on the `cases` context).
+    const getWorkflowRunContext = workflowRunService
+      ? async (request: KibanaRequest) => {
+          const [coreStart] = await core.getStartServices();
+          return this.clientFactory.createWorkflowRunContext({
+            request,
+            scopedClusterClient: coreStart.elasticsearch.client.asScoped(request).asCurrentUser,
+            savedObjectsService: coreStart.savedObjects,
+            clientSource: 'rest_api',
+          });
+        }
+      : undefined;
 
     registerRoutes({
       router,
@@ -258,7 +268,9 @@ export class CasePlugin
         ...getInternalRoutes(
           this.userProfileService,
           this.caseConfig,
-          workflowRunService ? { service: workflowRunService, getSpaceId } : undefined
+          workflowRunService && getWorkflowRunContext
+            ? { service: workflowRunService, getSpaceId, getWorkflowRunContext }
+            : undefined
         ),
       ],
       logger: this.logger,
@@ -271,10 +283,10 @@ export class CasePlugin
 
     const getCasesClient = (
       clientSource: CasesClientSource
-    ): ((request: KibanaRequest) => Promise<CasesClient>) => {
-      return async (request: KibanaRequest) => {
+    ): ((request: KibanaRequest, options?: GetCasesClientOptions) => Promise<CasesClient>) => {
+      return async (request: KibanaRequest, options?: GetCasesClientOptions) => {
         const [coreStart] = await core.getStartServices();
-        return this.getCasesClientWithRequest(coreStart, clientSource)(request);
+        return this.getCasesClientWithRequest(coreStart, clientSource)(request, options);
       };
     };
 
@@ -310,7 +322,11 @@ export class CasePlugin
     );
     registerCaseWorkflowTriggers(plugins.workflowsExtensions);
 
-    if (plugins.agentBuilder) {
+    const isCasesAgentBuilderAllowed =
+      !this.isServerless ||
+      (!!serverlessProjectType && SERVERLESS_PROJECT_TYPES.includes(serverlessProjectType));
+
+    if (plugins.agentBuilder && isCasesAgentBuilderAllowed) {
       registerCasesAgentBuilderTools(
         plugins.agentBuilder,
         getCasesClient('agent_builder'),
@@ -578,7 +594,7 @@ export class CasePlugin
 
   private getCasesClientWithRequest =
     (core: CoreStart, clientSource: CasesClientSource) =>
-    async (request: KibanaRequest): Promise<CasesClient> => {
+    async (request: KibanaRequest, options?: GetCasesClientOptions): Promise<CasesClient> => {
       const client = core.elasticsearch.client;
 
       return this.clientFactory.create({
@@ -586,6 +602,7 @@ export class CasePlugin
         scopedClusterClient: client.asScoped(request).asCurrentUser,
         savedObjectsService: core.savedObjects,
         clientSource,
+        actionSource: options?.actionSource,
       });
     };
 }

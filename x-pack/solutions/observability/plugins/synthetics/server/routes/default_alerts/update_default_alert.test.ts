@@ -5,17 +5,14 @@
  * 2.0.
  */
 
-import {
-  WRITE_SYNTHETICS_DEFAULT_RULES_API,
-  WRITE_SYNTHETICS_SETTINGS_API,
-} from '../../constants/privileges';
+import { WRITE_SYNTHETICS_DEFAULT_RULES_API } from '../../feature';
 import { updateDefaultAlertingRoute } from './update_default_alert';
 
 describe('updateDefaultAlertingRoute', () => {
-  it('requires both settings and default-rule management', () => {
+  it('accepts either legacy write or default-rule management', () => {
     expect(updateDefaultAlertingRoute()).toMatchObject({
       writeAccess: false,
-      requiredPrivileges: [WRITE_SYNTHETICS_SETTINGS_API, WRITE_SYNTHETICS_DEFAULT_RULES_API],
+      anyRequiredPrivileges: ['uptime-write', WRITE_SYNTHETICS_DEFAULT_RULES_API],
     });
   });
 });

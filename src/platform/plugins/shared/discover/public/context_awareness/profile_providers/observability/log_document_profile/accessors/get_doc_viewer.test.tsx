@@ -40,15 +40,13 @@ jest.mock('@kbn/unified-doc-viewer-plugin/public', () => {
 
 const LOGS_OVERVIEW_TAB_ID = 'doc_view_logs_overview';
 
-const buildRecord = (id: string) =>
-  buildDataTableRecord(
-    { _id: id, _index: 'logs-synth.docviewer-default', fields: { 'log.level': ['info'] } },
-    dataViewMock
-  );
+const buildRecord = (id: string, fields: Record<string, string[]> = { 'log.level': ['info'] }) =>
+  buildDataTableRecord({ _id: id, _index: 'logs-synth.docviewer-default', fields }, dataViewMock);
 
 const buildDocViewer = (
   logOverviewContext$: BehaviorSubject<LogOverviewContext | undefined>,
-  prevDocViews: DocView[] = []
+  prevDocViews: DocView[] = [],
+  record: ReturnType<typeof buildRecord> = buildRecord('doc-1')
 ) => {
   const registry = new DocViewsRegistry();
 
@@ -65,7 +63,7 @@ const buildDocViewer = (
       context: { logOverviewContext$ },
       toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
     } as never
-  )({} as never);
+  )({ record } as never);
 
   docViewer.docViewsRegistry(registry);
 
@@ -74,8 +72,8 @@ const buildDocViewer = (
     throw new Error(`Expected the profile to register a '${LOGS_OVERVIEW_TAB_ID}' doc view`);
   }
 
-  const renderTab = (record: ReturnType<typeof buildRecord>) =>
-    logsOverviewTab.render!({ hit: record } as unknown as DocViewRenderProps);
+  const renderTab = (hit: ReturnType<typeof buildRecord>) =>
+    logsOverviewTab.render!({ hit } as unknown as DocViewRenderProps);
 
   return { registry, renderTab };
 };
@@ -102,6 +100,84 @@ describe('createGetDocViewer (logs) accordion expansion', () => {
     ]);
   });
 
+  describe('log overview tab availability', () => {
+    const getTabEnabled = (record: ReturnType<typeof buildRecord>) =>
+      buildDocViewer(new BehaviorSubject<LogOverviewContext | undefined>(undefined), [], record)
+        .registry.getAll()
+        .find(({ id }) => id === LOGS_OVERVIEW_TAB_ID)?.enabled;
+
+    const recordsWithContent = [
+      {
+        name: 'a message',
+        record: buildRecord('doc-1', { message: ['hello'] }),
+      },
+      {
+        name: 'an OTel body.text message',
+        record: buildRecord('doc-1', { 'body.text': ['hello'] }),
+      },
+      {
+        name: 'a stacktrace',
+        record: buildRecord('doc-1', { 'error.stack_trace': ['Error: boom'] }),
+      },
+      {
+        name: 'a trace id',
+        record: buildRecord('doc-1', { 'trace.id': ['abc123'] }),
+      },
+      {
+        name: 'an OTel attributes trace id',
+        record: buildRecord('doc-1', { 'attributes.trace.id': ['abc123'] }),
+      },
+      {
+        name: 'an OTel resource attributes trace id',
+        record: buildRecord('doc-1', { 'resource.attributes.trace.id': ['abc123'] }),
+      },
+      {
+        name: 'degraded fields',
+        record: buildDataTableRecord(
+          {
+            _id: 'doc-1',
+            _index: 'logs-synth.docviewer-default',
+            fields: { 'log.level': ['info'] },
+            _ignored: ['log.level'],
+            ignored_field_values: { 'log.level': ['x'.repeat(1025)] },
+          },
+          dataViewMock
+        ),
+      },
+    ];
+
+    recordsWithContent.forEach(({ name, record }) => {
+      it(`enables the tab when the record has ${name}`, () => {
+        expect(getTabEnabled(record)).toBe(true);
+      });
+    });
+
+    it.each(['trace.id', 'attributes.trace.id', 'resource.attributes.trace.id'])(
+      'disables the tab when the record has an empty %s',
+      (field) => {
+        expect(getTabEnabled(buildRecord('doc-1', { [field]: [''] }))).toBe(false);
+      }
+    );
+
+    it('disables the tab when the record has _ignored but no ignored field values', () => {
+      const record = buildDataTableRecord(
+        {
+          _id: 'doc-1',
+          _index: 'logs-synth.docviewer-default',
+          fields: { 'log.level': ['info'] },
+          _ignored: ['log.level'],
+        },
+        dataViewMock
+      );
+
+      expect(getTabEnabled(record)).toBe(false);
+    });
+
+    it('disables the tab when the record only has fields the overview has no section for', () => {
+      expect(getTabEnabled(buildRecord('doc-1', { 'service.name': ['payments'] }))).toBe(false);
+    });
+  });
+
   it('opens the section queued on the context when the tab mounts', async () => {
     const record = buildRecord('doc-1');
     const logOverviewContext$ = new BehaviorSubject<LogOverviewContext | undefined>({
@@ -115,6 +191,20 @@ describe('createGetDocViewer (logs) accordion expansion', () => {
     await waitFor(() => expect(mockOpenAndScrollToSection).toHaveBeenCalledWith('stacktrace'));
     // Consumed, so a remount does not reopen it.
     expect(logOverviewContext$.getValue()).toBeUndefined();
+  });
+
+  it('discards a section queued for another record without opening it', async () => {
+    const record = buildRecord('doc-1');
+    const logOverviewContext$ = new BehaviorSubject<LogOverviewContext | undefined>({
+      recordId: buildRecord('doc-2').id,
+      initialAccordionSection: 'quality_issues',
+    });
+    const { renderTab } = buildDocViewer(logOverviewContext$);
+
+    render(<>{renderTab(record)}</>);
+
+    await waitFor(() => expect(logOverviewContext$.getValue()).toBeUndefined());
+    expect(mockOpenAndScrollToSection).not.toHaveBeenCalled();
   });
 
   // `openAndScrollToSection` only ever opens, never closes, so each ordering starts the hook from a

@@ -54,6 +54,12 @@ describe('FirecrawlConnector', () => {
     expect(FirecrawlConnector.auth?.types).toContain('bearer');
   });
 
+  it('supports Context Engine alongside workflows and Agent Builder', () => {
+    expect(FirecrawlConnector.metadata.supportedFeatureIds).toContain('workflows');
+    expect(FirecrawlConnector.metadata.supportedFeatureIds).toContain('agentBuilder');
+    expect(FirecrawlConnector.metadata.supportedFeatureIds).toContain('contextEngine');
+  });
+
   describe('scrape action', () => {
     it('should scrape URL and return response data', async () => {
       const mockData = { success: true, data: { markdown: '# Hello' } };

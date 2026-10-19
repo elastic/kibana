@@ -40,3 +40,4 @@ export * as fieldDefinitionApiV1 from './field_definition/v1';
 
 // V2
 export * as attachmentApiV2 from './attachment/v2';
+export * as attachmentApiV2Union from './attachment/v2_union';

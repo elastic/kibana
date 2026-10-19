@@ -673,6 +673,16 @@ describe('UrlFormat', () => {
     expect(container.querySelector('mark')).toHaveTextContent('http://elastic.co');
   });
 
+  test('omits the anchor when isInteractive is false, even with openLinkInCurrentTab', () => {
+    const url = new UrlFormat({ openLinkInCurrentTab: true });
+    const container = renderReactNode(
+      url.convertToReact('http://elastic.co', { isInteractive: false })
+    );
+
+    expect(container.querySelector('a')).toBeNull();
+    expect(container).toHaveTextContent('http://elastic.co');
+  });
+
   test('renders a numeric value as text when no URL template is set', () => {
     const url = new UrlFormat({});
 

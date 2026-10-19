@@ -9,14 +9,14 @@
 
 import nock from 'nock';
 
-import { BuildkiteClient } from './client';
+import { BuildkiteClient } from './client.ts';
 import {
   KIBANA_DISTRIBUTABLE_ARTIFACT,
   buildHasKibanaDistributable,
   createTimeBoundedClient,
   findBuildWithKibanaDistributable,
-} from './kibana_distributable';
-import type { Build } from './types/build';
+} from './kibana_distributable.ts';
+import type { Build } from './types/build.ts';
 
 const BASE_URL = 'https://api.buildkite.com';
 const PIPELINE = 'kibana-on-merge';

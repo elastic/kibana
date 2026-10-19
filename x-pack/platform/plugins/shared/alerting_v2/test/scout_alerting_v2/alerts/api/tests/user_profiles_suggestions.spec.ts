@@ -96,18 +96,27 @@ apiTest.describe('Suggest user profiles API', { tag: '@local-stateful-classic' }
     expect(response.body).toStrictEqual([]);
   });
 
-  apiTest('validation: rejects a body without a name', async ({ apiClient }) => {
-    const response = await suggestProfiles(apiClient, { size: 10 }, readerHeaders);
-
-    expect(response).toHaveStatusCode(400);
-    expect(response.body.code).toBe('BAD_REQUEST');
+  apiTest('returns an unfiltered list when the body has no name', async ({ apiClient }) => {
+    // Backs the assignee picker, which shows a list of users before anything is
+    // typed. Profile activation happens asynchronously on login, so poll until
+    // the freshly activated profile shows up.
+    await expect
+      .poll(
+        async () => {
+          const response = await suggestProfiles(apiClient, { size: 10 }, readerHeaders);
+          expect(response).toHaveStatusCode(200);
+          return getSuggestedUsernames(response.body);
+        },
+        { timeout: testData.POLL_TIMEOUT_MS, intervals: [testData.POLL_INTERVAL_MS] }
+      )
+      .toContain(seededUsername);
   });
 
-  apiTest('validation: rejects an empty name', async ({ apiClient }) => {
+  apiTest('returns an unfiltered list when the name is empty', async ({ apiClient }) => {
     const response = await suggestProfiles(apiClient, { name: '' }, readerHeaders);
 
-    expect(response).toHaveStatusCode(400);
-    expect(response.body.code).toBe('BAD_REQUEST');
+    expect(response).toHaveStatusCode(200);
+    expect(Array.isArray(response.body)).toBe(true);
   });
 
   apiTest('validation: rejects a name longer than the schema limit', async ({ apiClient }) => {

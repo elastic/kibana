@@ -14,7 +14,6 @@ import type {
   DynamicSettings,
   LocationMonitorsResponse,
 } from '../../../../../common/runtime_types';
-import { DynamicSettingsCodec, LocationMonitorsType } from '../../../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import type { LocationMonitor } from '.';
 
@@ -23,24 +22,15 @@ interface SaveApiRequest {
 }
 
 export const getDynamicSettings = async (): Promise<DynamicSettings> => {
-  return await apiService.get(
-    SYNTHETICS_API_URLS.DYNAMIC_SETTINGS,
-    { version: '2023-10-31' },
-    DynamicSettingsCodec
-  );
+  return await apiService.get(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS, { version: '2023-10-31' });
 };
 
 export const setDynamicSettings = async ({
   settings,
 }: SaveApiRequest): Promise<DynamicSettings> => {
-  return await apiService.put(
-    SYNTHETICS_API_URLS.DYNAMIC_SETTINGS,
-    settings,
-    DynamicSettingsCodec,
-    {
-      version: '2023-10-31',
-    }
-  );
+  return await apiService.put<DynamicSettings>(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS, settings, {
+    version: '2023-10-31',
+  });
 };
 
 export const triggerMwSync = async (): Promise<void> => {
@@ -53,9 +43,7 @@ export const triggerMwSync = async (): Promise<void> => {
 
 export const fetchLocationMonitors = async (): Promise<LocationMonitor[]> => {
   return await apiService.get<LocationMonitorsResponse>(
-    SYNTHETICS_API_URLS.PRIVATE_LOCATIONS_MONITORS,
-    undefined,
-    LocationMonitorsType
+    SYNTHETICS_API_URLS.PRIVATE_LOCATIONS_MONITORS
   );
 };
 

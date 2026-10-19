@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
   EuiFlyoutBody,
+  EuiFlyoutFooter,
   EuiTitle,
   EuiTabs,
   EuiTab,
@@ -23,19 +24,25 @@ import { i18n } from '@kbn/i18n';
 import { useQuery } from '@kbn/react-query';
 import type { Conversation } from '@kbn/agent-builder-common';
 import type { ConversationTemplateTabDefinition } from '@kbn/agent-builder-browser';
-import { BUILTIN_TAB_IDS } from '@kbn/agent-builder-browser';
+import {
+  BUILTIN_TAB_IDS,
+  CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY,
+} from '@kbn/agent-builder-browser';
 import type { ConversationsService } from '../services/conversations/conversations_service';
 import type { ConversationTemplatesService } from '../services/conversation_templates';
 import { useConversation } from '../application/hooks/use_conversation';
 import { useAgentBuilderServices } from '../application/hooks/use_agent_builder_service';
+import { flyoutMenuRowStyles } from './flyout_menu_row_styles';
 
-const FLYOUT_TITLE = i18n.translate('xpack.agentBuilder.conversationDetailsFlyout.title', {
+export const FLYOUT_TITLE = i18n.translate('xpack.agentBuilder.conversationDetailsFlyout.title', {
   defaultMessage: 'Chat info',
 });
 
 const ERROR_BODY = i18n.translate('xpack.agentBuilder.conversationDetailsFlyout.errorBody', {
   defaultMessage: 'Something went wrong while loading this conversation.',
 });
+
+const POLL_INTERVAL_MS = 5_000;
 
 type ResolvedTab = ConversationTemplateTabDefinition & { id: string };
 
@@ -59,11 +66,13 @@ const buildTabs = (
 
 interface FlyoutFrameProps {
   titleId: string;
+  header?: React.ReactNode;
+  footer?: React.ReactNode;
   tabs?: React.ReactNode;
   children: React.ReactNode;
 }
 
-const FlyoutFrame = ({ titleId, tabs, children }: FlyoutFrameProps) => {
+const FlyoutFrame = ({ titleId, header, footer, tabs, children }: FlyoutFrameProps) => {
   const { euiTheme } = useEuiTheme();
 
   // Align the selected-tab underline with the flyout header border.
@@ -73,10 +82,14 @@ const FlyoutFrame = ({ titleId, tabs, children }: FlyoutFrameProps) => {
 
   return (
     <>
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="xs">
-          <h4 id={titleId}>{FLYOUT_TITLE}</h4>
-        </EuiTitle>
+      <EuiFlyoutHeader hasBorder={Boolean(tabs)}>
+        {header ? (
+          <div id={titleId}>{header}</div>
+        ) : (
+          <EuiTitle size="xs">
+            <h4 id={titleId}>{FLYOUT_TITLE}</h4>
+          </EuiTitle>
+        )}
         {tabs && (
           <EuiTabs css={tabsStyles} bottomBorder={false}>
             {tabs}
@@ -84,21 +97,35 @@ const FlyoutFrame = ({ titleId, tabs, children }: FlyoutFrameProps) => {
         )}
       </EuiFlyoutHeader>
       <EuiFlyoutBody>{children}</EuiFlyoutBody>
+      {footer && (
+        <EuiFlyoutFooter
+          css={{
+            backgroundColor: euiTheme.colors.backgroundBasePlain,
+            borderBlockStart: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
+          }}
+        >
+          {footer}
+        </EuiFlyoutFooter>
+      )}
     </>
   );
 };
 
 export interface ConversationDetailsFlyoutContentProps {
+  isOpenedFromChat: boolean;
   conversation: Conversation;
   conversationTemplatesService: ConversationTemplatesService;
   titleId: string;
+  refetchConversation?: () => Promise<void>;
 }
 
 /** Presentational only — renders whatever conversation it is given; not responsible for data fetching. */
 export const ConversationDetailsFlyoutContent = ({
+  isOpenedFromChat,
   conversation,
   conversationTemplatesService,
   titleId,
+  refetchConversation,
 }: ConversationDetailsFlyoutContentProps) => {
   const [selectedTabId, setSelectedTabId] = useState<string | undefined>(undefined);
 
@@ -114,22 +141,55 @@ export const ConversationDetailsFlyoutContent = ({
   const selectedTab = tabs.find((entry) => entry.id === effectiveSelectedTabId);
   // Render as a component so registered tabs can use hooks.
   const SelectedTabContent = selectedTab?.content;
+  const definition = conversation.template_id
+    ? conversationTemplatesService.getTemplateUIDefinition(conversation.template_id)
+    : undefined;
+  const Header = definition?.detailsFlyout?.header;
+  const Footer = definition?.detailsFlyout?.footer;
+
+  const shouldRenderTabs = tabs.length > 1;
 
   return (
     <FlyoutFrame
       titleId={titleId}
-      tabs={tabs.map((entry) => (
-        <EuiTab
-          key={entry.id}
-          isSelected={entry.id === effectiveSelectedTabId}
-          onClick={() => setSelectedTabId(entry.id)}
-        >
-          {entry.label}
-        </EuiTab>
-      ))}
+      header={
+        Header && (
+          <Header
+            conversation={conversation}
+            isOpenedFromChat={isOpenedFromChat}
+            refetchConversation={refetchConversation}
+          />
+        )
+      }
+      footer={
+        Footer && (
+          <Footer
+            conversation={conversation}
+            isOpenedFromChat={isOpenedFromChat}
+            refetchConversation={refetchConversation}
+          />
+        )
+      }
+      tabs={
+        shouldRenderTabs &&
+        tabs.map((entry) => (
+          <EuiTab
+            key={entry.id}
+            isSelected={entry.id === effectiveSelectedTabId}
+            onClick={() => setSelectedTabId(entry.id)}
+          >
+            {entry.label}
+          </EuiTab>
+        ))
+      }
     >
       {selectedTab && SelectedTabContent && (
-        <SelectedTabContent key={selectedTab.id} conversation={conversation} />
+        <SelectedTabContent
+          key={selectedTab.id}
+          conversation={conversation}
+          isOpenedFromChat={isOpenedFromChat}
+          refetchConversation={refetchConversation}
+        />
       )}
     </FlyoutFrame>
   );
@@ -142,7 +202,11 @@ export interface ConversationDetailsFlyoutSnapshotProps {
   titleId: string;
 }
 
-/** Snapshot variant backed by an isolated, per-open query cache. */
+/**
+ * Snapshot variant backed by an isolated, per-open query cache. Opened outside chat, where nothing
+ * else invalidates the conversation, so it polls while open and hands registered content a way to
+ * refetch on demand.
+ */
 export const ConversationDetailsFlyoutSnapshot = ({
   conversationId,
   conversationsService,
@@ -152,11 +216,16 @@ export const ConversationDetailsFlyoutSnapshot = ({
   const {
     data: conversation,
     isLoading,
-    isError,
+    refetch,
   } = useQuery({
     queryKey: ['conversation-details-flyout-snapshot', conversationId],
     queryFn: () => conversationsService.get({ conversationId }),
+    refetchInterval: POLL_INTERVAL_MS,
   });
+
+  const refetchConversation = useCallback(async () => {
+    await refetch();
+  }, [refetch]);
 
   if (isLoading) {
     return (
@@ -166,7 +235,7 @@ export const ConversationDetailsFlyoutSnapshot = ({
     );
   }
 
-  if (isError || !conversation) {
+  if (!conversation) {
     return (
       <FlyoutFrame titleId={titleId}>
         <EuiText size="s" color="danger">
@@ -178,9 +247,11 @@ export const ConversationDetailsFlyoutSnapshot = ({
 
   return (
     <ConversationDetailsFlyoutContent
+      isOpenedFromChat={false}
       conversation={conversation}
       conversationTemplatesService={conversationTemplatesService}
       titleId={titleId}
+      refetchConversation={refetchConversation}
     />
   );
 };
@@ -197,18 +268,34 @@ export const ConversationDetailsFlyout = ({ onClose }: ConversationDetailsFlyout
   const { conversation, isLoading } = useConversation();
   const { conversationTemplatesService } = useAgentBuilderServices();
 
+  const trailingActions = useMemo(() => {
+    if (!conversation?.template_id) {
+      return undefined;
+    }
+    const definition = conversationTemplatesService.getTemplateUIDefinition(
+      conversation.template_id
+    );
+    return definition?.detailsFlyout?.trailingActions?.({ conversation });
+  }, [conversation, conversationTemplatesService]);
+
   return (
     <EuiFlyout
       onClose={onClose}
+      session="start"
+      historyKey={CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY}
+      flyoutMenuDisplayMode="always"
+      flyoutMenuProps={{ title: FLYOUT_TITLE, trailingActions }}
       size="s"
       type="push"
       paddingSize="m"
+      css={flyoutMenuRowStyles}
       role="region"
       aria-labelledby={titleId}
       data-test-subj="agentBuilderConversationDetailsFlyout-live"
     >
       {conversation ? (
         <ConversationDetailsFlyoutContent
+          isOpenedFromChat
           conversation={conversation}
           conversationTemplatesService={conversationTemplatesService}
           titleId={titleId}

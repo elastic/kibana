@@ -6,16 +6,16 @@
  */
 
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import type { AiIndexTraceWithQuery } from '@kbn/context-engine-plugin/common/http_api/ai_indices';
 import { AI_INDEX_ATTACHMENT_TYPE } from '../../common/agent_builder_attachments';
 import {
   aiIndexAttachmentDataSchema,
   type AiIndexAttachmentData,
 } from '../../common/agent_builder_attachment_schemas';
 import {
-  KI_AUTOMATION_GENERATION_SKILL_ID,
-  KI_RETRIEVAL_SKILL_ID,
-} from '../../common/agent_builder_skills';
-import { CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID } from '../../common/agent_builder_tools';
+  CONTEXT_ENGINE_INSTALL_AUTOMATION_TEMPLATE_TOOL_ID,
+  CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID,
+} from '../../common/agent_builder_tools';
 
 /**
  * Server-side definition for the `ai_index` attachment type — a read-only snapshot
@@ -44,23 +44,23 @@ export const createAiIndexAttachmentType = (): AttachmentTypeDefinition<
       getRepresentation: () => ({ type: 'text', value: formatAiIndex(attachment.data) }),
     };
   },
+  // The attachment carries the index snapshot and the authority to write to it, nothing more.
+  // How a setup conversation goes and how the agent talks live in the Context Engine agent's
+  // instructions (server/agent/instructions/context_engine_setup.md.text): there they are part of
+  // the system prompt, instead of arriving in a user message for whichever agent has the attachment.
   getAgentDescription: () =>
     [
       'An `ai_index` attachment is a read-only snapshot of a Context Engine AI index (destination,',
-      'sources, and workflow automations). Use it to scope the conversation to this index — do not',
+      'sources, workflow automations, and traces). Use it to scope the conversation to this index — do not',
       're-run discovery for destination or sources already listed here.',
-      `For querying KIs in this index, load the \`${KI_RETRIEVAL_SKILL_ID}\` skill.`,
-      `To draft or edit workflow automations, load \`${KI_AUTOMATION_GENERATION_SKILL_ID}\` (or follow`,
-      "the user's initial message if it already references that skill).",
-      'When automations are listed and the user wants to edit one, use `ask_user_question` before',
-      '`generate_workflow`. When editing, ask what should change before calling `generate_workflow`.',
-      `After \`generate_workflow\`, render the diff in chat first, then call \`${CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID}\``,
-      'with the workflow attachment id — in the same assistant turn but a separate model step after',
-      'the diff is visible. Do not batch save with generate_workflow. If save runs in a later turn,',
-      're-render the diff first. Platform confirms before persisting.',
-      'If the user saved manually from the diff card, pass `workflowId` instead.',
+      'This attachment authorizes you to apply changes to this index, not only to propose them: it',
+      `provides \`${CONTEXT_ENGINE_INSTALL_AUTOMATION_TEMPLATE_TOOL_ID}\` and`,
+      `\`${CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID}\` for this index.`,
     ].join(' '),
-  getTools: () => [CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID],
+  getTools: () => [
+    CONTEXT_ENGINE_INSTALL_AUTOMATION_TEMPLATE_TOOL_ID,
+    CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID,
+  ],
 });
 
 const formatAiIndex = (data: AiIndexAttachmentData): string => {
@@ -86,5 +86,19 @@ const formatAiIndex = (data: AiIndexAttachmentData): string => {
       : 'Existing automations: none'
   );
 
+  parts.push(
+    data.traces.length > 0
+      ? `Traces:\n${data.traces.map((trace) => `- ${formatTrace(trace)}`).join('\n')}`
+      : 'Traces: none configured'
+  );
+
   return parts.join('\n');
+};
+
+// For 'esql' traces, value is already the query, so showing both would just repeat it.
+const formatTrace = (trace: AiIndexTraceWithQuery): string => {
+  if (trace.type === 'esql') {
+    return `esql: ${trace.query.replace(/\n/g, ' ')}`;
+  }
+  return `${trace.type}:${trace.value} -> ${trace.query.replace(/\n/g, ' ')}`;
 };

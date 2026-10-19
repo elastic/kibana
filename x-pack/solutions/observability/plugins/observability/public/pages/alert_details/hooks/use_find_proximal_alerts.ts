@@ -7,6 +7,7 @@
 
 import { useSearchAlertsQuery } from '@kbn/alerts-ui-shared/src/common/hooks/use_search_alerts_query';
 import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '@kbn/observability-shared-plugin/common';
+import { PROJECT_ROUTING } from '@kbn/cps-utils';
 import { observabilityAlertFeatureIds } from '../../../../common/constants';
 import type { AlertData } from '../../../hooks/use_fetch_alert_detail';
 import { useKibana } from '../../../utils/kibana_react';
@@ -26,5 +27,9 @@ export const useFindProximalAlerts = (alertDetail: AlertData) => {
     consumers: observabilityAlertFeatureIds,
     query: esQuery,
     skipAlertsQueryContext: true,
+    // Alert documents are always local to the project whose rule created them — they are
+    // never cross-project readable. Pin to origin so the page's READONLY routing (which
+    // widens the scope for APM chart data) does not leak remote-project alerts here.
+    projectRouting: PROJECT_ROUTING.ORIGIN,
   });
 };

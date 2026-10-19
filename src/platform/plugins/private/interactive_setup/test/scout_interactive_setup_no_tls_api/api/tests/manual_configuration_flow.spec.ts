@@ -17,13 +17,16 @@ import {
   KIBANA_SYSTEM_USER,
   SETUP_SPEC_TIMEOUT_MS,
 } from '../../../helpers/constants';
+import { isFipsEnabled } from '../../../helpers/fips';
 import { getVerificationCode, waitForKibanaToBoot } from '../../../helpers/setup_state';
 
 apiTest.describe(
   'Interactive setup - manual configuration flow without TLS',
   { tag: ['@local-stateful-classic'] },
   () => {
-    // Pre-migration tag 'skipFIPS'
+    // Interactive setup reconfigures Kibana's crypto and reboots — unsupported under FIPS (pre-migration 'skipFIPS').
+    apiTest.skip(isFipsEnabled, 'Interactive setup is not supported under FIPS');
+
     let verificationCode: string;
     let elasticsearchHost: string;
 

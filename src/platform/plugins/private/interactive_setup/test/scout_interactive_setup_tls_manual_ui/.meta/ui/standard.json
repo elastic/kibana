@@ -1,5 +1,5 @@
 {
-  "sha1": "ee73cde9f6de00b6078615665856dc049f349f7b",
+  "sha1": "0634eae21c2d7d01c9f7dfd4e201318f0e8893dc",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,8 +13,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/private/interactive_setup/test/scout_interactive_setup_tls_manual_ui/ui/tests/manual_configuration.spec.ts",
-        "line": 25,
-        "column": 5
+        "line": 27,
+        "column": 15
       }
     }
   ]

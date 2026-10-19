@@ -2,7 +2,7 @@
 
 Discover is Kibana's data exploration application: a dynamic chart area above a document table with rich content, for querying and exploring Elasticsearch data. It runs in two query modes, classic (data view with KQL/Lucene) and ES|QL. It also ships the saved search embeddable that renders Discover sessions on dashboards.
 
-Owned by [`@elastic/kibana-data-discovery`](https://github.com/orgs/elastic/teams/kibana-data-discovery).
+Owned by [`@elastic/kibana-discover`](https://github.com/orgs/elastic/teams/kibana-discover).
 
 ## Key concepts
 

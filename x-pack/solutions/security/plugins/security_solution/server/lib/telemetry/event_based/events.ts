@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EventTypeOpts } from '@kbn/core/server';
+import type { EventTypeOpts, RootSchema } from '@kbn/core/server';
+import type { RiskScoreDistribution } from '@kbn/entity-store/common';
 import type { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { BulkUpsertAssetCriticalityRecordsResponse } from '../../../../common/api/entity_analytics';
 import type { CsvErrorCategory } from '../../entity_analytics/entity_resolution/csv_upload';
@@ -38,6 +39,7 @@ import type {
 } from '../../detection_engine/rule_management/logic/detection_rules_client/restore_telemetry';
 import type {
   RuleDuplicateTelemetry,
+  RuleImportTelemetry,
   RuleLifecycleTelemetry,
 } from '../../detection_engine/rule_management/logic/detection_rules_client/rule_lifecycle_telemetry';
 import { TRIAL_COMPANION_EVENTS } from '../../trial_companion/telemetry/trial_companion_ebt_events';
@@ -51,6 +53,13 @@ export const DETECTION_RULE_UPGRADE_EVENT: EventTypeOpts<RuleUpgradeTelemetry> =
     hasBaseVersion: {
       type: 'boolean',
       _meta: { description: 'True if base version exists for this rule' },
+    },
+    hasRuleTypeChange: {
+      type: 'boolean',
+      _meta: {
+        description:
+          "True if the rule's type was force-set to the target version's value during this upgrade",
+      },
     },
     finalResult: {
       type: 'keyword',
@@ -175,9 +184,15 @@ const ruleLifecycleTelemetrySchema = {
   },
 };
 
-export const DETECTION_RULE_IMPORT_EVENT: EventTypeOpts<RuleLifecycleTelemetry> = {
+export const DETECTION_RULE_IMPORT_EVENT: EventTypeOpts<RuleImportTelemetry> = {
   eventType: 'detection_rule_import',
-  schema: ruleLifecycleTelemetrySchema,
+  schema: {
+    ...ruleLifecycleTelemetrySchema,
+    outcome: {
+      type: 'keyword',
+      _meta: { description: 'Result of importing the rule: created, updated or skipped' },
+    },
+  },
 };
 
 export const DETECTION_RULE_REVERT_EVENT: EventTypeOpts<RuleLifecycleTelemetry> = {
@@ -254,6 +269,13 @@ export const DETECTION_RULE_BULK_UPGRADE_EVENT: EventTypeOpts<RuleBulkUpgradeTel
               'Number of successfully updated rules with no conflicts in bulk update request',
           },
         },
+        numOfRulesWithRuleTypeChange: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of successfully updated rules with a rule type change in bulk update request',
+          },
+        },
       },
     },
     errorUpdates: {
@@ -296,6 +318,13 @@ export const DETECTION_RULE_BULK_UPGRADE_EVENT: EventTypeOpts<RuleBulkUpgradeTel
               'Number of rules with no conflicts that failed to update in bulk update request',
           },
         },
+        numOfRulesWithRuleTypeChange: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of rules with a rule type change that failed to update in bulk update request',
+          },
+        },
       },
     },
     skippedUpdates: {
@@ -336,6 +365,13 @@ export const DETECTION_RULE_BULK_UPGRADE_EVENT: EventTypeOpts<RuleBulkUpgradeTel
           _meta: {
             description:
               'Number of rules with no conflicts that were skipped during bulk update request',
+          },
+        },
+        numOfRulesWithRuleTypeChange: {
+          type: 'long',
+          _meta: {
+            description:
+              'Number of rules with a rule type change that were skipped during bulk update request',
           },
         },
       },
@@ -489,6 +525,73 @@ export type RiskScoreMaintainerStageSummaryEvent =
   | Phase2ResolutionScoringSummary
   | ResetToZeroSummary;
 
+type RiskScoreDistributionFieldSchema = RootSchema<{
+  distribution?: RiskScoreDistribution;
+}>['distribution'];
+
+const riskScoreDistributionSchema = (
+  scoreKind: 'base' | 'resolution'
+): RiskScoreDistributionFieldSchema => {
+  const scoreKindLabel = scoreKind === 'base' ? 'Base' : 'Resolution';
+  return {
+    _meta: {
+      optional: true,
+      description: `Distribution of ${scoreKind} scores written in this run by risk band and percentile`,
+    },
+    properties: {
+      critical: {
+        type: 'long',
+        _meta: {
+          optional: true,
+          description: `${scoreKindLabel} scores written whose band is Critical`,
+        },
+      },
+      high: {
+        type: 'long',
+        _meta: {
+          optional: true,
+          description: `${scoreKindLabel} scores written whose band is High`,
+        },
+      },
+      moderate: {
+        type: 'long',
+        _meta: {
+          optional: true,
+          description: `${scoreKindLabel} scores written whose band is Moderate`,
+        },
+      },
+      low: {
+        type: 'long',
+        _meta: {
+          optional: true,
+          description: `${scoreKindLabel} scores written whose band is Low`,
+        },
+      },
+      unknown: {
+        type: 'long',
+        _meta: {
+          optional: true,
+          description: `${scoreKindLabel} scores written whose band is Unknown, including scores with no band`,
+        },
+      },
+      normP50: {
+        type: 'float',
+        _meta: {
+          optional: true,
+          description: `Median calculated_score_norm of ${scoreKind} scores written in this run`,
+        },
+      },
+      normP90: {
+        type: 'float',
+        _meta: {
+          optional: true,
+          description: `90th percentile calculated_score_norm of ${scoreKind} scores written in this run`,
+        },
+      },
+    },
+  };
+};
+
 export const RISK_SCORE_MAINTAINER_RUN_SUMMARY_EVENT: EventTypeOpts<{
   namespace: string;
   entityType: string;
@@ -503,6 +606,8 @@ export const RISK_SCORE_MAINTAINER_RUN_SUMMARY_EVENT: EventTypeOpts<{
   pagesProcessed: number;
   lookupPrunedDocs: number;
   idBasedRiskScoringEnabled: boolean;
+  baseScoreDistribution?: RiskScoreDistribution;
+  resolutionScoreDistribution?: RiskScoreDistribution;
 }> = {
   eventType: 'risk_score_maintainer_run_summary',
   schema: {
@@ -543,6 +648,8 @@ export const RISK_SCORE_MAINTAINER_RUN_SUMMARY_EVENT: EventTypeOpts<{
       type: 'boolean',
       _meta: { description: 'Whether Entity Store dual-write was enabled' },
     },
+    baseScoreDistribution: riskScoreDistributionSchema('base'),
+    resolutionScoreDistribution: riskScoreDistributionSchema('resolution'),
   },
 };
 
@@ -1932,12 +2039,6 @@ export const TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT: EventTypeOpts<Health
           description: 'Circuit breaker metrics such as execution time and memory usage.',
         },
       },
-      descriptorVersion: {
-        type: 'integer',
-        _meta: {
-          description: 'Version of the query descriptor that produced this event.',
-        },
-      },
       status: {
         type: 'keyword',
         _meta: {
@@ -2468,6 +2569,7 @@ export const ALERT_ANALYSIS_WORKFLOW_SETTINGS_UPDATED_EVENT: EventTypeOpts<{
   workflowEnabled: boolean;
   autoCloseEnabled: boolean;
   createConversation: boolean;
+  usePrompt: boolean;
   connectorConfigured: boolean;
   customAgent: boolean;
   autoCloseConfidenceScoreMinThreshold: number;
@@ -2490,6 +2592,12 @@ export const ALERT_ANALYSIS_WORKFLOW_SETTINGS_UPDATED_EVENT: EventTypeOpts<{
     createConversation: {
       type: 'boolean',
       _meta: { description: 'Whether a new AI conversation is created per alert analysis' },
+    },
+    usePrompt: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether the workflow classifies with a single prompt instead of an AI agent',
+      },
     },
     connectorConfigured: {
       type: 'boolean',
@@ -2528,6 +2636,64 @@ export const ANALYZER_CROSS_PROJECT_RENDER_EVENT: EventTypeOpts<{
   },
 };
 
+/**
+ * Temporary sizing telemetry for the New Terms to ES|QL INLINE STATS migration decision. This is a
+ * one-off study to measure the cardinality and value length of the fields customers group by. It should be removed once the migration sizing is settled.
+ *
+ * Removal tracking issue: https://github.com/elastic/kibana/issues/290516
+ */
+export const NEW_TERMS_FIELD_CARDINALITY_EVENT: EventTypeOpts<{
+  isElasticRule: boolean;
+  newTermsFieldsCount: number;
+  distinctFieldCombinations: number;
+  maxCombinationValueLength: number;
+  combinationValueLengthSum: number;
+  interruptedByMaxSignals: boolean;
+}> = {
+  eventType: 'new_terms_field_cardinality_on_rule_execution',
+  schema: {
+    isElasticRule: {
+      type: 'boolean',
+      _meta: {
+        description:
+          'True for an Elastic prebuilt rule, false for a user-created rule. No rule id, name, field names or values are reported.',
+      },
+    },
+    newTermsFieldsCount: {
+      type: 'long',
+      _meta: { description: 'Number of fields the New Terms rule groups by (1-3)' },
+    },
+    distinctFieldCombinations: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of distinct combinations of the grouping-field values seen in the rule run window this execution. Counts every combination scanned, not only the new ones that produced alerts',
+      },
+    },
+    maxCombinationValueLength: {
+      type: 'long',
+      _meta: {
+        description:
+          'Longest combined character length of the grouping-field values across a single distinct combination this run (value lengths only, not the values)',
+      },
+    },
+    combinationValueLengthSum: {
+      type: 'long',
+      _meta: {
+        description:
+          'Sum over the distinct combinations this run of the combined character length of their grouping-field values (lengths only, not the values). Divide by distinctFieldCombinations to get the average',
+      },
+    },
+    interruptedByMaxSignals: {
+      type: 'boolean',
+      _meta: {
+        description:
+          'True if the run stopped early after reaching maxSignals before paging through all terms, in which case the counts are a lower bound. False if it paged through all terms',
+      },
+    },
+  },
+};
+
 export const events = [
   DETECTION_RULE_UPGRADE_EVENT,
   DETECTION_RULE_BULK_UPGRADE_EVENT,
@@ -2544,6 +2710,7 @@ export const events = [
   RISK_SCORE_MAINTAINER_STAGE_SUMMARY_EVENT,
   ASSET_CRITICALITY_SYSTEM_PROCESSED_ASSIGNMENT_FILE_EVENT,
   ALERT_SUPPRESSION_EVENT,
+  NEW_TERMS_FIELD_CARDINALITY_EVENT,
   ENDPOINT_RESPONSE_ACTION_SENT_EVENT,
   ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT,
   ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT,

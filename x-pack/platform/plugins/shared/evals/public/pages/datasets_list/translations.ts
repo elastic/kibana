@@ -131,6 +131,19 @@ export const DELETE_DATASET_ACTION = i18n.translate(
   }
 );
 
+export const COPY_DATASET_ACTION = i18n.translate(
+  'xpack.evals.datasetsList.copyDatasetActionTooltip',
+  {
+    defaultMessage: 'Copy dataset',
+  }
+);
+
+export const getCopyDatasetAriaLabel = (datasetName: string) =>
+  i18n.translate('xpack.evals.datasetsList.copyDatasetAriaLabel', {
+    defaultMessage: 'Copy dataset {datasetName}',
+    values: { datasetName },
+  });
+
 export const getDeleteDatasetAriaLabel = (datasetName: string) =>
   i18n.translate('xpack.evals.datasetsList.deleteDatasetAriaLabel', {
     defaultMessage: 'Delete dataset {datasetName}',
