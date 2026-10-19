@@ -20,6 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const retry = getService('retry');
   const svlCommonApi = getService('svlCommonApi');
   const testSubjects = getService('testSubjects');
 
@@ -95,11 +96,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await PageObjects.savedObjects.clickDelete({ confirmDelete: true });
 
-        const objectNames = (await PageObjects.savedObjects.getTableSummary()).map(
-          (obj) => obj.title
-        );
-        expect(objectNames.includes('hidden object 1')).to.eql(true);
-        expect(objectNames.includes('A Pie')).to.eql(false);
+        await retry.try(async () => {
+          const objectNames = (await PageObjects.savedObjects.getTableSummary()).map(
+            (obj) => obj.title
+          );
+          expect(objectNames.includes('hidden object 1')).to.eql(true);
+          expect(objectNames.includes('A Pie')).to.eql(false);
+        });
       });
     });
 
