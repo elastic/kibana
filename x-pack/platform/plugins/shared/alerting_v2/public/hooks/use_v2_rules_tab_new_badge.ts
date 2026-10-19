@@ -48,6 +48,16 @@ const schedulePersistOnLeave = (): void => {
   }, 0);
 };
 
+export interface UseV2RulesTabNewBadgeOptions {
+  /**
+   * When true, unmount while Universal is selected schedules a deferred persist
+   * (SPA `navigateToApp` leave). Enable only at a stable Universal shell
+   * (e.g. RulesApp / Observability host) — not on RulesListHeader, which unmounts
+   * for in-app rule details without leaving Universal.
+   */
+  persistOnUnmount?: boolean;
+}
+
 /**
  * “New” dot for the Universal Rules tab: primary blue, dismissed after the user
  * leaves Universal, matching side-nav new-item timing.
@@ -55,10 +65,14 @@ const schedulePersistOnLeave = (): void => {
  * Dismissal paths:
  * - SPA tab switch: `isSelected` goes from true to false
  * - Full page unload: `pagehide` while selected
- * - SPA app leave (`navigateToApp`): deferred unmount persist — Strict Mode / HMR
- *   remounts cancel the pending write on the next mount
+ * - SPA app leave (`navigateToApp`): deferred unmount persist when
+ *   `persistOnUnmount` is enabled on a stable shell — Strict Mode / HMR remounts
+ *   cancel the pending write on the next mount
  */
-export const useV2RulesTabNewBadge = (isSelected: boolean): AppHeaderTabIconBadge | undefined => {
+export const useV2RulesTabNewBadge = (
+  isSelected: boolean,
+  { persistOnUnmount = false }: UseV2RulesTabNewBadgeOptions = {}
+): AppHeaderTabIconBadge | undefined => {
   const [isVisited, setIsVisited] = useLocalStorage<boolean>(
     V2_RULES_TAB_NEW_BADGE_VISITED_STORAGE_KEY,
     false
@@ -66,6 +80,8 @@ export const useV2RulesTabNewBadge = (isSelected: boolean): AppHeaderTabIconBadg
   const wasSelectedRef = useRef(isSelected);
   const isSelectedRef = useRef(isSelected);
   isSelectedRef.current = isSelected;
+  const persistOnUnmountRef = useRef(persistOnUnmount);
+  persistOnUnmountRef.current = persistOnUnmount;
 
   const markVisited = useCallback(() => {
     setIsVisited(true);
@@ -91,7 +107,7 @@ export const useV2RulesTabNewBadge = (isSelected: boolean): AppHeaderTabIconBadg
     window.addEventListener('pagehide', onPageHide);
     return () => {
       window.removeEventListener('pagehide', onPageHide);
-      if (isSelectedRef.current) {
+      if (persistOnUnmountRef.current && isSelectedRef.current) {
         schedulePersistOnLeave();
       }
     };

@@ -151,7 +151,10 @@ export const ObservabilityAlertingApp = ({
   );
   const rulesTabVisibility = { showV1: hasV1Rules, showV2: hasV2Rules };
   const isUniversalSelected = pathname.includes(OBSERVABILITY_ALERTING_RULES_V2_PATH);
-  const v2RulesTabNewBadge = useV2RulesTabNewBadge(isUniversalSelected);
+  // Stable host shell: persist on leave/unmount of Observability Alerting, not list-header churn.
+  const v2RulesTabNewBadge = useV2RulesTabNewBadge(isUniversalSelected, {
+    persistOnUnmount: true,
+  });
 
   const manageRulesHref = useMemo(() => {
     const rulesPath = hasV2Rules

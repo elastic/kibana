@@ -143,9 +143,13 @@ export const RulesListHeader = ({
   );
 
   // When host tabs are provided they own the badge; Management defaults treat Universal as selected.
+  // Do not persist on unmount here — this header unmounts for rule details while still in Universal.
+  // App-leave persist lives on RulesApp / Observability shell (`persistOnUnmount: true`).
   const isUniversalSelected =
     hostTabs?.find((tab) => tab.id === ALERTING_V2_RULES_TAB_ID)?.isSelected ?? true;
-  const v2RulesTabNewBadge = useV2RulesTabNewBadge(isUniversalSelected);
+  const v2RulesTabNewBadge = useV2RulesTabNewBadge(isUniversalSelected, {
+    persistOnUnmount: false,
+  });
 
   const defaultTabs = useMemo<AppHeaderTab[]>(() => {
     const headerTabs: AppHeaderTab[] = [

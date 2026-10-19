@@ -78,8 +78,23 @@ describe('useV2RulesTabNewBadge', () => {
     expect(remounted.result.current).toBeUndefined();
   });
 
-  it('marks visited after SPA app leave unmount once timers flush', () => {
+  it('does not persist on list-header unmount by default (rule details stay in Universal)', () => {
     const { result, unmount } = renderHook(() => useV2RulesTabNewBadge(true));
+
+    expect(result.current).toBeDefined();
+    unmount();
+    jest.runAllTimers();
+
+    expect(localStorage.getItem(V2_RULES_TAB_NEW_BADGE_VISITED_STORAGE_KEY)).toBeNull();
+
+    const remounted = renderHook(() => useV2RulesTabNewBadge(true));
+    expect(remounted.result.current).toBeDefined();
+  });
+
+  it('marks visited after SPA app leave when persistOnUnmount is enabled', () => {
+    const { result, unmount } = renderHook(() =>
+      useV2RulesTabNewBadge(true, { persistOnUnmount: true })
+    );
 
     expect(result.current).toBeDefined();
     unmount();
@@ -96,13 +111,15 @@ describe('useV2RulesTabNewBadge', () => {
     expect(remounted.result.current).toBeUndefined();
   });
 
-  it('does not mark visited on Strict Mode remount before timers flush', () => {
-    const { result, unmount } = renderHook(() => useV2RulesTabNewBadge(true));
+  it('does not mark visited on Strict Mode remount when persistOnUnmount is enabled', () => {
+    const { result, unmount } = renderHook(() =>
+      useV2RulesTabNewBadge(true, { persistOnUnmount: true })
+    );
 
     expect(result.current).toBeDefined();
     unmount();
 
-    const remounted = renderHook(() => useV2RulesTabNewBadge(true));
+    const remounted = renderHook(() => useV2RulesTabNewBadge(true, { persistOnUnmount: true }));
     jest.runAllTimers();
 
     expect(localStorage.getItem(V2_RULES_TAB_NEW_BADGE_VISITED_STORAGE_KEY)).toBeNull();
