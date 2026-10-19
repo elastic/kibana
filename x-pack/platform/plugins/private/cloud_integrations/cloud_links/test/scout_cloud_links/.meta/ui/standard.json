@@ -1,5 +1,5 @@
 {
-  "sha1": "cdeaaa95cfec623c78de6571c37f89e307a12a1b",
+  "sha1": "5ff6ce863eefcb2b4f69d13a40786b0e87da6f94",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -33,8 +33,8 @@
       }
     },
     {
-      "id": "0da412ce46ac828-275c418d0df461d",
-      "title": "Cloud Links integration: Unprivileged User viewer sees nav and org/profile/billing links",
+      "id": "0da412ce46ac828-58e728275ad606b",
+      "title": "Cloud Links integration: Unprivileged User viewer sees nav and org/profile links but not billing",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
