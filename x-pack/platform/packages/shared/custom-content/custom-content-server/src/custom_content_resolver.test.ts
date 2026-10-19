@@ -180,7 +180,7 @@ describe('createCustomContentTemplateResolver — ES|QL sampling failures', () =
     [
       'a rejected query',
       responseError('verification_exception', 400, 'Unknown column [nope]'),
-      /ES\|QL query is invalid: Unknown column \[nope\].*generate_esql/,
+      /ES\|QL query is invalid: Unknown column \[nope\].*leave it out so the server generates one/,
     ],
     [
       'unparseable syntax',

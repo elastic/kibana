@@ -87,7 +87,7 @@ Do **not** use this skill when:
      - \`target\` (required) — one of:
        - \`{ "type": "lens", "chartType": <required>, "esql"?: <ES|QL from generate_esql or the user> }\` for a standard chart
        - \`{ "type": "vega", "chartType"?: <styling hint>, "esql"?: <ES|QL from generate_esql or the user> }\` for a custom Vega-Lite visualization
-       - \`{ "type": "custom_content", "esql"?: <ES|QL from generate_esql or the user>, "has_data"?: false }\` for an HTML layout — omit \`esql\` to have a query generated; pass \`has_data: false\` only when the panel genuinely has no data
+       - \`{ "type": "custom_content", "esql"?: <ES|QL the user supplied>, "has_data"?: false }\` for an HTML layout — omit \`esql\` to have a query generated; pass \`has_data: false\` only when the panel genuinely has no data
        - \`{ "type": "attachment", "attachment_id": <id>, "chartType"?, "esql"?, "has_data"?, "regenerate_esql"? }\` to update an existing visualization
        \`esql\` is optional everywhere it appears: pass it only when the query came from ${
          platformCoreTools.generateEsql
