@@ -188,6 +188,9 @@ const getOptionsListDslSuggestions = async ({
       index,
       ...(projectRouting !== undefined && { project_routing: projectRouting }),
       ...body,
+      // Same default as the data plugin search strategy. A data view title can name
+      // several concrete indices while only some exist.
+      ignore_unavailable: true,
     },
     { signal: abortController.signal }
   );
