@@ -10,7 +10,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { SandboxPluginStart, SandboxSession } from '@kbn/sandbox-plugin/server';
 import type { SandboxWorkspaceManager } from './sandbox_workspace_manager';
 import type { ResolveConnectorCredentials } from './connector_credentials';
-import { createSandboxBashTool } from './tool';
+import { createSandboxBashTool, MAX_SANDBOX_COMMAND_TIMEOUT_SECONDS } from './tool';
 
 const GITHUB_TOKEN = 'ghp_sandbox_secret_value';
 const CONNECTOR_TOKEN = 'connector-secret-token';
@@ -158,5 +158,20 @@ describe('sandbox bash tool — sandbox secrets', () => {
     expect(loggedMessage).not.toContain(GITHUB_TOKEN);
     expect(loggedMessage).not.toContain('boom while handling');
     expect(loggedMessage).toContain('Error');
+  });
+});
+
+describe('sandbox bash tool — command timeout', () => {
+  it.each([
+    ['omitted', undefined, MAX_SANDBOX_COMMAND_TIMEOUT_SECONDS],
+    ['zero', 0, MAX_SANDBOX_COMMAND_TIMEOUT_SECONDS],
+    ['below the cap', 60, 60],
+    ['above the cap', 600, MAX_SANDBOX_COMMAND_TIMEOUT_SECONDS],
+  ])('uses a bounded timeout when the requested timeout is %s', async (_, requested, expected) => {
+    const { run, runCommand } = setup();
+
+    await run(requested === undefined ? {} : { timeout_seconds: requested });
+
+    expect(runCommand.mock.calls[0][0].timeout_seconds).toBe(expected);
   });
 });

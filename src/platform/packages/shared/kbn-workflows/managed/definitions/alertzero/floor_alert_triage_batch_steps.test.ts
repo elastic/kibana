@@ -116,6 +116,110 @@ describe('floor_alert_triage_batch — compute_fp_candidates', () => {
 });
 
 // ---------------------------------------------------------------------------
+// compute_fp_entities / build_fp_entity_summary — the title suffix naming the hosts and users
+// behind the candidates, so proposals in the queue can be told apart.
+// ---------------------------------------------------------------------------
+
+interface EntityVerdict {
+  classification: string;
+  confidence_score: number;
+  host_name: string;
+  user_name: string;
+}
+
+const fpVerdict = (host: string, user: string, overrides: Partial<EntityVerdict> = {}) => ({
+  classification: 'false_positive',
+  confidence_score: 0.9,
+  host_name: host,
+  user_name: user,
+  ...overrides,
+});
+
+const MISSING = '__missing__';
+
+const summarizeEntities = (verdicts: EntityVerdict[], confidenceFloor = 0.85): string => {
+  const fpThresholdExpr = renderString(fpThresholdExprTemplate, {
+    inputs: { confidence_floor: confidenceFloor },
+  }).trim();
+  const entitiesStep = stepByName('compute_fp_entities')?.with as Record<string, string>;
+  const context = {
+    steps: { classify_alerts: { output: { verdicts } } },
+    variables: { fp_threshold_expr: fpThresholdExpr } as Record<string, unknown>,
+  };
+  context.variables.fp_hosts = evalExpr(entitiesStep.fp_hosts, context);
+  context.variables.fp_users = evalExpr(entitiesStep.fp_users, context);
+  const summaryStep = stepByName('build_fp_entity_summary')?.with as Record<string, string>;
+  return renderString(summaryStep.fp_entity_summary, context).trim();
+};
+
+const hostsNamed = (count: number) =>
+  Array.from({ length: count }, (_, i) => fpVerdict(`host-${i + 1}`, MISSING));
+
+describe('floor_alert_triage_batch — fp entity summary', () => {
+  it('names a single host', () => {
+    expect(summarizeEntities([fpVerdict('build-agent-01', MISSING)])).toBe('on build-agent-01');
+  });
+
+  it('counts each host once however many of its alerts are candidates', () => {
+    expect(
+      summarizeEntities([
+        fpVerdict('build-agent-01', MISSING),
+        fpVerdict('build-agent-01', MISSING),
+        fpVerdict('build-agent-02', MISSING),
+      ])
+    ).toBe('on build-agent-01, build-agent-02');
+  });
+
+  it('lists the first two hosts and counts the rest, up to five hosts', () => {
+    expect(summarizeEntities(hostsNamed(3))).toBe('on host-1, host-2 +1');
+    expect(summarizeEntities(hostsNamed(5))).toBe('on host-1, host-2 +3');
+  });
+
+  it('collapses to a count above five hosts', () => {
+    expect(summarizeEntities(hostsNamed(6))).toBe('on 6 hosts');
+    expect(summarizeEntities(hostsNamed(37))).toBe('on 37 hosts');
+  });
+
+  it('says "for" and names the users when no candidate has a host', () => {
+    expect(summarizeEntities([fpVerdict(MISSING, 'svc-backup'), fpVerdict(MISSING, 'jdoe')])).toBe(
+      'for svc-backup, jdoe'
+    );
+  });
+
+  it('puts the user after the host in parentheses', () => {
+    expect(summarizeEntities([fpVerdict('DC-01', 'svc-backup')])).toBe('on DC-01 (svc-backup)');
+  });
+
+  it('applies the cap to hosts and users independently', () => {
+    const verdicts = [
+      ...hostsNamed(2),
+      ...['u1', 'u2', 'u3'].map((user) => fpVerdict(MISSING, user)),
+    ];
+    expect(summarizeEntities(verdicts)).toBe('on host-1, host-2 (u1, u2 +1)');
+  });
+
+  it('is empty when no candidate has a host or user, leaving the title unchanged', () => {
+    expect(summarizeEntities([fpVerdict(MISSING, MISSING)])).toBe('');
+  });
+
+  it('never names an entity whose alert is not a candidate', () => {
+    expect(
+      summarizeEntities([
+        fpVerdict('closing-host', MISSING),
+        fpVerdict('below-floor-host', MISSING, { confidence_score: 0.5 }),
+        fpVerdict('tp-host', MISSING, { classification: 'true_positive' }),
+        fpVerdict('inconclusive-host', MISSING, { classification: 'inconclusive' }),
+      ])
+    ).toBe('on closing-host');
+  });
+
+  it('shortens a very long name so one hostname cannot stretch the title', () => {
+    const summary = summarizeEntities([fpVerdict('h'.repeat(300), MISSING)]);
+    expect(summary.length).toBeLessThan(60);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // post_comment_triage_started — alert IDs and feature routing
 // ---------------------------------------------------------------------------
 
@@ -137,9 +241,9 @@ const renderTriageStarted = (alertCount: number): string =>
   });
 
 describe('floor_alert_triage_batch — post_comment_triage_started', () => {
-  it('includes the alertzero_reasoning feature name for model routing', () => {
+  it('includes the alertzero_efficient feature name for model routing', () => {
     const comment = renderTriageStarted(3);
-    expect(comment).toContain('alertzero_reasoning');
+    expect(comment).toContain('alertzero_efficient');
   });
 
   it('reports the alert count without listing individual IDs, since the chip attachment above already shows them', () => {
@@ -382,7 +486,7 @@ describe('floor_alert_triage_batch — guard_classification_nonempty', () => {
   it('does not tell the operator to enable Alert Analysis — that path aborted earlier', () => {
     const comment = stepByName('post_comment_classification_empty');
     const input = (comment?.with as { message?: string } | undefined)?.message ?? '';
-    expect(input).toContain('`alertzero_reasoning` Model Management feature has no connector');
+    expect(input).toContain('`alertzero_efficient` Model Management feature has no connector');
     // The sub-workflow skips its dedupe on the Worker path, so tags cannot empty the batch.
     expect(input).not.toContain('already carry the analysis tag');
     expect(input).not.toContain('Verify the Alert Analysis workflow is enabled');
@@ -967,6 +1071,7 @@ describe('floor_alert_triage_batch — closure review hand-off', () => {
         'autonomy',
         'conversation_id',
         'confidence_floor',
+        'entity_summary',
         'fp_candidate_ids',
         'rule_id',
         'rule_name',
@@ -981,11 +1086,12 @@ describe('floor_alert_triage_batch — closure review hand-off', () => {
         confidence_floor: 0.9,
       },
       steps: { create_investigation: { output: { conversation_id: 'conv-1' } } },
-      variables: { fp_candidate_ids: ['a', 'b'] },
+      variables: { fp_candidate_ids: ['a', 'b'], fp_entity_summary: 'on host-1' },
     };
     expect(renderString(inputs.rule_id, context)).toBe('rule-1');
     expect(renderString(inputs.conversation_id, context)).toBe('conv-1');
     expect(renderString(inputs.autonomy, context)).toBe('supervised');
+    expect(renderString(inputs.entity_summary, context)).toBe('on host-1');
     expect(evalExpr(inputs.fp_candidate_ids, context)).toEqual(['a', 'b']);
     expect(evalExpr(inputs.confidence_floor, context)).toBe(0.9);
   });
@@ -1132,5 +1238,42 @@ describe('floor_alert_triage_batch — closure review hand-off', () => {
     expect(rendered).toContain('handed to the closure review');
     expect(rendered).toContain('A human decision is required.');
     expect(rendered).toContain('The outcome is posted here');
+  });
+});
+
+describe('floor_alert_triage_batch — classification comment attribution', () => {
+  const renderResults = (output: Record<string, unknown>): string =>
+    renderString(
+      (stepByName('post_comment_classification_results')?.with as { message: string }).message,
+      {
+        steps: {
+          classify_alerts: {
+            output: {
+              true_positive_count: 1,
+              false_positive_count: 2,
+              inconclusive_count: 0,
+              grouped_counts_summary: '',
+              generated_summary: 'Looks benign.',
+              ...output,
+            },
+          },
+        },
+      }
+    );
+
+  it('names the connector and the agent when an agent classified the alerts', () => {
+    const comment = renderResults({ connector_id: 'connector-1', agent_id: 'elastic-ai-agent' });
+    expect(comment).toContain('Connector: `connector-1`, Agent: `elastic-ai-agent`');
+  });
+
+  it('names only the connector when a prompt classified the alerts, because no agent ran', () => {
+    const comment = renderResults({ connector_id: 'connector-1', agent_id: '' });
+    expect(comment).toContain('_(Connector: `connector-1`)_');
+    expect(comment).not.toContain('Agent:');
+  });
+
+  it('names neither when no call was made', () => {
+    const comment = renderResults({ connector_id: '', agent_id: '' });
+    expect(comment).not.toContain('Connector:');
   });
 });

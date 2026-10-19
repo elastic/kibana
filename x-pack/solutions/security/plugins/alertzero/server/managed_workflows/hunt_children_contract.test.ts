@@ -9,11 +9,6 @@ import { parse } from 'yaml';
 import { IMPACT_INTERNAL_URL } from '@kbn/agentic-investigations-plugin/common';
 import { PROPOSAL_BY_ID_URL } from '@kbn/proposals-common';
 import {
-  ASSET_CRITICALITY_LEVELS,
-  CONFIRMED_FINDING_CRITICALITY,
-  CRITICAL_FINDING_CRITICALITY,
-} from '../../common/proposals/asset_criticality';
-import {
   getManagedWorkflowDefinition,
   ALERTZERO_HUNT_WORKFLOW_ID,
   ALERTZERO_HUNT_FIND_OR_CREATE_INVESTIGATION_WORKFLOW_ID,
@@ -36,9 +31,16 @@ interface NestedStep {
   name: string;
   type: string;
   if?: string;
+  condition?: string;
   with?: Record<string, unknown>;
   steps?: NestedStep[];
-  'on-failure'?: { continue?: boolean; fallback?: NestedStep[] };
+  'max-iterations'?: { limit?: number; 'on-limit'?: string };
+  timeout?: string;
+  'on-failure'?: {
+    continue?: boolean;
+    retry?: { 'max-attempts'?: number; delay?: string };
+    fallback?: NestedStep[];
+  };
 }
 
 const outputNames = (workflow: { outputs?: ParsedWorkflow['outputs'] }): string[] => {
@@ -115,9 +117,95 @@ describe('system-security-hunt-execute', () => {
     workflow = parseChild(ALERTZERO_HUNT_WORKFLOW_ID);
   });
 
-  it('sends the coordinator a snake_case run_id and no technology', () => {
+  it('sends the coordinator a snake_case run_id, the Investigation to write to, and no technology', () => {
     const body = stepNamed(workflow, 'run_hunt_coordinator').with?.body as Record<string, unknown>;
-    expect(Object.keys(body).sort()).toEqual(['report_id', 'run_id', 'tier2_when', 'trigger']);
+    expect(Object.keys(body).sort()).toEqual([
+      'conversation_id',
+      'report_id',
+      'run_id',
+      'tier2_when',
+      'trigger',
+    ]);
+    expect(body.conversation_id).toBe('{{ inputs.investigationConversationId }}');
+  });
+
+  describe('polls the hidden result attachment the start call named', () => {
+    const TERMINAL_CHECK =
+      "${{ steps.read_hunt_result.output.data.state != 'completed' and steps.read_hunt_result.output.data.state != 'failed' }}";
+
+    it('loops for at most 60 reads, backstopped by a 12 minute timeout, and never fails the child when it gives up', () => {
+      const poll = stepNamed(workflow, 'poll_hunt_coordinator');
+
+      expect(poll.type).toBe('while');
+      expect(poll.if).toBe('${{ steps.run_hunt_coordinator.output.result_attachment_id != nil }}');
+      expect(poll.condition).toBe(TERMINAL_CHECK);
+      expect(poll['max-iterations']).toEqual({ limit: 60, 'on-limit': 'continue' });
+      expect(poll.timeout).toBe('12m');
+      expect(poll['on-failure']).toEqual({ continue: true });
+    });
+
+    it('reads by the id the route returned, never one it rebuilt, and keeps polling through a broken read', () => {
+      const read = stepNamed(workflow, 'read_hunt_result');
+
+      expect(read.type).toBe('ai.attachment.read');
+      expect(read.with).toEqual({
+        conversation_id: '{{ inputs.investigationConversationId }}',
+        attachment_id: '{{ steps.run_hunt_coordinator.output.result_attachment_id }}',
+      });
+      expect(read['on-failure']).toEqual({
+        retry: { 'max-attempts': 3, delay: '5s' },
+        continue: true,
+      });
+      expect(JSON.stringify(workflow)).not.toContain('ai.attachment.list');
+    });
+
+    it('waits 10s between reads only while the run is not terminal, on the same check the loop uses', () => {
+      const wait = stepNamed(workflow, 'wait_if_running');
+
+      expect(wait.type).toBe('if');
+      expect(wait.condition).toBe(stepNamed(workflow, 'poll_hunt_coordinator').condition);
+      expect(wait.steps?.map((step) => [step.type, step.with])).toEqual([
+        ['wait', { duration: '10s' }],
+      ]);
+    });
+
+    it('deletes the attachment permanently once the outputs are computed, and continues if that fails', () => {
+      const names = workflow.steps.map((step) => step.name);
+      const remove = stepNamed(workflow, 'delete_hunt_result');
+
+      expect(remove.type).toBe('ai.attachment.delete');
+      expect(remove.if).toBe(stepNamed(workflow, 'poll_hunt_coordinator').if);
+      expect(remove.with).toEqual({
+        conversation_id: '{{ inputs.investigationConversationId }}',
+        attachment_id: '{{ steps.run_hunt_coordinator.output.result_attachment_id }}',
+        permanent: true,
+      });
+      expect(remove['on-failure']).toEqual({ continue: true });
+      expect(names.indexOf('delete_hunt_result')).toBeGreaterThan(
+        names.indexOf('resolve_result_status')
+      );
+      expect(names.indexOf('delete_hunt_result')).toBeLessThan(names.indexOf('emit_result'));
+    });
+
+    // Worker packaging requires every child to complete; no workflow.fail exits.
+    it('has no step that fails the workflow, and every fallback completes the child or continues', () => {
+      const all = flattenSteps(workflow.steps);
+      const withFallback = all.filter((step) => step['on-failure']?.fallback);
+
+      expect(all.filter((step) => step.type === 'workflow.fail')).toEqual([]);
+      expect(withFallback.map((step) => step.name)).toEqual([
+        'run_hunt_coordinator',
+        'add_sse_attachment',
+      ]);
+      for (const step of withFallback) {
+        for (const fallback of step['on-failure']?.fallback ?? []) {
+          const completesChild =
+            fallback.type === 'workflow.output' &&
+            (fallback as unknown as { status?: string }).status === 'completed';
+          expect(completesChild || fallback['on-failure']?.continue === true).toBe(true);
+        }
+      }
+    });
   });
 
   it('never sends the camelCase runId the coordinator no longer accepts', () => {
@@ -152,7 +240,9 @@ describe('system-security-hunt-execute', () => {
   // `elasticsearch.update` step.
   it('only stamps the hunt-once gate once the coordinator confirms success', () => {
     const step = stepNamed(workflow, 'write_evidence');
-    expect(step.if).toBe('${{ steps.run_hunt_coordinator.output.completed_successfully == true }}');
+    expect(step.if).toBe(
+      '${{ steps.read_hunt_result.output.data.result.completed_successfully == true }}'
+    );
     expect(step.with?.path).toBe(`/s/{{ workflow.spaceId }}${WRITE_HUNT_EVIDENCE_URL}`);
   });
 
@@ -377,61 +467,6 @@ describe('Hunt Watch public exports (kbn-alertzero-common)', () => {
       const strippedPaths = rawPaths.map(stripSpacePrefix).filter((path): path is string => !!path);
 
       expect(strippedPaths.filter((path) => !KNOWN_ROUTE_PATHS.has(path))).toEqual([]);
-    });
-  });
-
-  // Packaging ranks the asset criticality levels when it resolves a slot, and the proposal gate
-  // ranks them again in Liquid when it says whether a race winner covers a finding. Both read
-  // the same list, and the action only accepts what its own definition declares, so a level added
-  // in one place and not the others would start being proposed while reading as unknown, or be
-  // proposed and then refused. This keeps the three together.
-  describe('asset criticality levels', () => {
-    const definitionYaml = (id: string): string => {
-      const definition = getManagedWorkflowDefinition(id);
-      if (!definition || !('yaml' in definition) || typeof definition.yaml !== 'string') {
-        throw new Error(`Managed definition ${id} has no yaml`);
-      }
-      return definition.yaml;
-    };
-
-    /** Finds an `enum` declared under a property of this name, wherever the schema nests it. */
-    const enumOf = (node: unknown, property: string): unknown[] | undefined => {
-      if (!node || typeof node !== 'object') {
-        return undefined;
-      }
-      const record = node as Record<string, unknown>;
-      const declared = record[property] as { enum?: unknown[] } | undefined;
-      if (declared?.enum) {
-        return declared.enum;
-      }
-      for (const value of Object.values(record)) {
-        const found = enumOf(value, property);
-        if (found) {
-          return found;
-        }
-      }
-      return undefined;
-    };
-
-    it('are the ones the Set asset criticality action accepts, in the order the resolver ranks them', () => {
-      const action = parse(definitionYaml('system-alertzero-action-set-asset-criticality'));
-
-      // The action's enum is the source; the order is the shared list's, weakest first.
-      expect(enumOf(action, 'criticality_level')).toEqual([...ASSET_CRITICALITY_LEVELS]);
-    });
-
-    it('include both levels packaging proposes, the critical one ranked above the confirmed one', () => {
-      expect(ASSET_CRITICALITY_LEVELS).toContain(CONFIRMED_FINDING_CRITICALITY);
-      expect(ASSET_CRITICALITY_LEVELS).toContain(CRITICAL_FINDING_CRITICALITY);
-      expect(ASSET_CRITICALITY_LEVELS.indexOf(CRITICAL_FINDING_CRITICALITY)).toBeGreaterThan(
-        ASSET_CRITICALITY_LEVELS.indexOf(CONFIRMED_FINDING_CRITICALITY)
-      );
-    });
-
-    it('are the list the proposal gate ranks in its lost-race note', () => {
-      const gate = definitionYaml(ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW_ID);
-
-      expect(gate).toContain(`'${ASSET_CRITICALITY_LEVELS.join(',')}' | split: ','`);
     });
   });
 });

@@ -20,12 +20,12 @@ export {
   ALERTZERO_APP_PATH,
   ALERTZERO_ENABLED_SETTING_ID,
   ALERTZERO_FEATURE_ID,
-  ALERTZERO_AGENTIC_INFERENCE_FEATURE_ID,
-  ALERTZERO_FAST_INFERENCE_FEATURE_ID,
+  ALERTZERO_BALANCED_INFERENCE_FEATURE_ID,
+  ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
   ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
   ALERTZERO_INTERNAL_URL,
   ALERTZERO_PLUGIN_NAME,
-  ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
+  ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
   ALERTZERO_ACTIONS_URL,
   ALERTZERO_INVESTIGATIONS_COUNT_URL,
   ALERTZERO_SCAN_FAILURES_URL,
@@ -82,10 +82,10 @@ export {
 
 export {
   SECURITY_ROLE_API_VERSION,
-  WORKER_ROLE_DEFINITIONS,
+  WORKER_SERVICE_ACCOUNT_NAMES,
   buildSecurityRoleUrl,
+  getWorkerRoleName,
 } from './worker_roles';
-export type { WorkerRoleDefinition, WorkerRolePayload } from './worker_roles';
 
 export type {
   ScanFailureWorker,
@@ -94,6 +94,9 @@ export type {
   HuntThreatIntelSupplyWorkflowKey,
   HuntThreatIntelSupplyWorkflowStatus,
   HuntThreatIntelSupplyHardGate,
+  HuntModelTierId,
+  HuntModelTierState,
+  HuntModelTierStatus,
   HuntThreatIntelSupplyStatus,
 } from './constants';
 
@@ -171,6 +174,7 @@ export {
   CandidateSkipReason,
   HuntCoordinatorRequestBody,
   HuntCoordinatorResponse,
+  HuntCoordinatorResult,
   HuntCoordinatorStatus,
   FindOrCreateInvestigationRequestBody,
   FindOrCreateInvestigationResponse,
@@ -241,3 +245,11 @@ export type {
   SystemSecurityWorkerCatalogEntry,
   WorkerScheduleUnit,
 } from './constants';
+export {
+  REQUIRED_REPORT_SEMANTIC_FIELDS,
+  THREAT_REPORTS_GET_MAPPING_PARAMS,
+  THREAT_REPORTS_INDEX,
+  getReportEmbeddingEndpointIds,
+  getSemanticTextInferenceId,
+  isReportsIndexManaged,
+} from './threat_intel_mapping';

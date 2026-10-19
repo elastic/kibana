@@ -568,11 +568,10 @@ const OMITTED_WHEN_FALSY_FIELDS = [
   'wait',
 ];
 
-// Optional HTTP auth vars added in synthetics package 1.12.0
-// (elastic/integrations#21116). Present (usually empty) on 1.12.0+ package
-// templates and absent on older ones — drop empty values so golden fixtures
-// work against either package version.
-const OPTIONAL_EMPTY_HTTP_AUTH_VARS = ['kerberos', 'ntlm'] as const;
+// `secret_stores` was added in synthetics package 1.13.0 (elastic/integrations#20440).
+// Present (usually empty) on 1.13.0+ package templates and absent on older ones — drop empty
+// values so golden fixtures work against either package version.
+const OPTIONAL_EMPTY_PACKAGE_VARS = ['secret_stores'] as const;
 
 const isEmptyPackageVar = (entry: unknown): boolean => {
   if (entry == null || typeof entry !== 'object') {
@@ -595,11 +594,11 @@ const normalizeCompiledStreamDefaults = (compiledStream: Record<string, unknown>
   }
 };
 
-const normalizeOptionalHttpAuthVars = (vars: Record<string, unknown> | undefined) => {
+const normalizeOptionalPackageVars = (vars: Record<string, unknown> | undefined) => {
   if (!vars) {
     return;
   }
-  for (const key of OPTIONAL_EMPTY_HTTP_AUTH_VARS) {
+  for (const key of OPTIONAL_EMPTY_PACKAGE_VARS) {
     if (!(key in vars) || isEmptyPackageVar(vars[key])) {
       delete vars[key];
     }
@@ -627,7 +626,7 @@ export const comparePolicies = (aPolicy: PackagePolicy | undefined, bPolicy: Pac
       if (stream.compiled_stream) {
         normalizeCompiledStreamDefaults(stream.compiled_stream as Record<string, unknown>);
       }
-      normalizeOptionalHttpAuthVars(stream.vars as Record<string, unknown> | undefined);
+      normalizeOptionalPackageVars(stream.vars as Record<string, unknown> | undefined);
     });
   });
 

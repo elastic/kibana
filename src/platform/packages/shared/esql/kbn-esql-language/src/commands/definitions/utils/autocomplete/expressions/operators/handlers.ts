@@ -123,7 +123,12 @@ async function getListValueSuggestions(
   ignoredColumns: string[]
 ): Promise<ISuggestionItem[]> {
   const argType = column
-    ? getExpressionType(column, ctx.context?.columns, ctx.context?.unmappedFieldsStrategy)
+    ? getExpressionType(
+        column,
+        ctx.context?.columns,
+        ctx.context?.unmappedFieldsStrategy,
+        ctx.context?.isTimeseriesSource === true
+      )
     : undefined;
   const builder = new SuggestionBuilder(ctx);
 
