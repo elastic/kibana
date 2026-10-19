@@ -530,8 +530,8 @@ export class UserActionPersister {
   }: BulkCreateAttachmentBulkDeletionUserAction): Promise<void> {
     const userActionBuilder = this.builderFactory.getBuilder(UserActionTypes.bulkAttachments);
 
-    const userActions = deletions.flatMap(({ attachmentType, attachmentIds }) => {
-      if (userActionBuilder == null || attachmentIds.length === 0) {
+    const userActions = deletions.flatMap(({ attachmentType, count, ids }) => {
+      if (userActionBuilder == null || count === 0) {
         return [];
       }
 
@@ -539,8 +539,8 @@ export class UserActionPersister {
         caseId,
         user,
         owner,
-        payload: { bulkAttachments: { attachmentType, count: attachmentIds.length } },
-        attachmentIds,
+        payload: { bulkAttachments: { attachmentType, count } },
+        ids,
       });
 
       return userAction == null ? [] : [userAction];

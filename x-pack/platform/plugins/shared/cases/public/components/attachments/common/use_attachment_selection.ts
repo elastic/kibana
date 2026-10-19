@@ -28,7 +28,7 @@ export const useAttachmentSelection = <T>({
 }: UseAttachmentSelectionArgs<T>): UseAttachmentSelection<T> => {
   const [selectedIds, setSelectedIds] = useState<ReadonlySet<string>>(new Set());
 
-  // Ids hidden by a search or page change can't become a bulk target unseen.
+  // Forgets hidden ids, so they don't come back checked when the search clears.
   useEffect(() => {
     setSelectedIds((previous) => {
       const displayedIds = new Set(items.map(getId));

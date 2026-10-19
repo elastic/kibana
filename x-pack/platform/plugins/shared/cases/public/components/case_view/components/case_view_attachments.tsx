@@ -360,7 +360,6 @@ export const CaseViewAttachments = ({
                   <Children
                     caseData={authorFilteredCaseData}
                     searchTerm={searchTerm}
-                    canRemove={canRemove}
                     onRemove={onRemoveSection}
                   />
                 </AttachmentAccordion>

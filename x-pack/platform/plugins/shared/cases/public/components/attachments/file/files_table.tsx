@@ -45,7 +45,6 @@ interface FilesTableProps {
   items: FileJSON[];
   onChange: EuiBasicTableProps<FileJSON>['onChange'];
   pagination: Pagination;
-  canRemove?: boolean;
   onRemove?: (fileIds: string[], options?: AttachmentRemovalOptions) => void;
 }
 
@@ -57,7 +56,6 @@ export const FilesTable = ({
   pagination,
   onChange,
   isLoading,
-  canRemove = false,
   onRemove,
 }: FilesTableProps) => {
   const { isPreviewVisible, showPreview, closePreview } = useFilePreview();
@@ -65,7 +63,7 @@ export const FilesTable = ({
   const { selection, selectedIds, clearSelection } = useAttachmentSelection({
     items,
     getId: getFileId,
-    enabled: canRemove && onRemove != null,
+    enabled: onRemove != null,
   });
 
   const onRemoveSelected = useCallback(

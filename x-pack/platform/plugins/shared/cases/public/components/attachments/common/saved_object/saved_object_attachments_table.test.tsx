@@ -227,14 +227,12 @@ describe('SavedObjectAttachmentsTable', () => {
       soAttachment('c2', DASHBOARD_ATTACHMENT_TYPE, 'dash-2', 'Inventory'),
     ]);
 
-    it('does not render row selection when the user cannot remove', () => {
+    it('does not render row selection without onRemove', () => {
       renderWithTestingProviders(
         <SavedObjectAttachmentsTable
           caseData={data}
           attachmentTypeId={DASHBOARD_ATTACHMENT_TYPE}
           soType="dashboard"
-          canRemove={false}
-          onRemove={jest.fn()}
         />
       );
 
@@ -248,7 +246,6 @@ describe('SavedObjectAttachmentsTable', () => {
           caseData={data}
           attachmentTypeId={DASHBOARD_ATTACHMENT_TYPE}
           soType="dashboard"
-          canRemove
           onRemove={onRemove}
         />
       );
@@ -276,7 +273,6 @@ describe('SavedObjectAttachmentsTable', () => {
         caseData: data,
         attachmentTypeId: DASHBOARD_ATTACHMENT_TYPE,
         soType: 'dashboard',
-        canRemove: true,
         onRemove,
       };
       const { rerender } = renderWithTestingProviders(<SavedObjectAttachmentsTable {...props} />);

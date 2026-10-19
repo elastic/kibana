@@ -120,9 +120,9 @@ View props are flattened. There is no `{ attachment, caseData }` wrapper. Common
 
 ### Removing from the Attachments tab
 
-The `getAttachmentList` children receive `canRemove` and `onRemove`. Cases owns the confirm modal, the API call, the activity entry, and the refresh.
+The `getAttachmentList` children receive `onRemove`. Cases owns the confirm modal, the API call, the activity entry, and the refresh.
 
-- Show remove controls only when `canRemove` is true.
+- Show remove controls only when `onRemove` is set. It's unset when the user can't delete.
 - Call `onRemove({ savedObjectIds })` to remove attachments. The confirm modal counts attachments, so use it only when each attachment references 1 id.
 - Pass `{ onSuccess }` as the second argument to clear a selection after removal.
 - Set `getCountLabel` so the modal and activity entry name the type.

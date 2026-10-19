@@ -79,7 +79,6 @@ export interface AttachmentRemovalOptions {
 export interface CommonAttachmentListViewProps {
   caseData: CaseUI;
   searchTerm?: string;
-  canRemove?: boolean;
   /** Asks the user to confirm, removes the attachments, and refreshes the case. */
   onRemove?: (request: AttachmentRemovalRequest, options?: AttachmentRemovalOptions) => void;
 }

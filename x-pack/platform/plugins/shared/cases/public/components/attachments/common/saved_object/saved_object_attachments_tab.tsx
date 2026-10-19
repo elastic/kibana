@@ -25,7 +25,7 @@ type StaticTabProps = Pick<SavedObjectAttachmentsTableProps, 'attachmentTypeId' 
  *
  * Each attachment type (dashboard / map / discoverSession) bakes in its own
  * constants (`attachmentTypeId`, `soType`) at registration time and passes
- * only the framework-provided per-render props (`caseData`, `searchTerm`, `canRemove`, `onRemove`).
+ * only the framework-provided per-render props (`caseData`, `searchTerm`, `onRemove`).
  */
 export const createSavedObjectAttachmentsTab = ({
   attachmentTypeId,
@@ -34,14 +34,12 @@ export const createSavedObjectAttachmentsTab = ({
   const SavedObjectAttachmentsTab: React.FC<CommonAttachmentListViewProps> = ({
     caseData,
     searchTerm,
-    canRemove,
     onRemove,
   }) => (
     <Suspense fallback={<EuiLoadingSpinner size="m" />}>
       <SavedObjectAttachmentsTableLazy
         caseData={caseData}
         searchTerm={searchTerm}
-        canRemove={canRemove}
         onRemove={onRemove}
         attachmentTypeId={attachmentTypeId}
         soType={soType}

@@ -50,7 +50,7 @@ describe('FilesTable', () => {
 
   it('removes the selected files by file id', async () => {
     const onRemove = jest.fn();
-    renderWithTestingProviders(<FilesTable {...defaultProps} canRemove onRemove={onRemove} />);
+    renderWithTestingProviders(<FilesTable {...defaultProps} onRemove={onRemove} />);
 
     expect(screen.queryByTestId('cases-attachments-remove-selected')).not.toBeInTheDocument();
 

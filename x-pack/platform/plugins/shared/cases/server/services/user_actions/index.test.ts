@@ -1709,8 +1709,8 @@ describe('CaseUserActionService', () => {
         await service.creator.bulkCreateAttachmentBulkDeletion({
           ...commonArgs,
           deletions: [
-            { attachmentType: 'security.alert', attachmentIds: ['alert-1', 'alert-2', 'alert-3'] },
-            { attachmentType: 'file', attachmentIds: ['file-1'] },
+            { attachmentType: 'security.alert', count: 3, ids: ['attachment-1'] },
+            { attachmentType: 'file', count: 1, ids: ['attachment-2'] },
           ],
         });
 
@@ -1728,15 +1728,13 @@ describe('CaseUserActionService', () => {
           }),
         ]);
         expect(mockAuditLogger.log).toHaveBeenCalledTimes(2);
-        expect(mockAuditLogger.log.mock.calls[0][0]?.message).toContain(
-          '(alert-1, alert-2, alert-3)'
-        );
+        expect(mockAuditLogger.log.mock.calls[0][0]?.message).toContain('(attachment-1)');
       });
 
       it('skips attachment types with no deletions', async () => {
         await service.creator.bulkCreateAttachmentBulkDeletion({
           ...commonArgs,
-          deletions: [{ attachmentType: 'file', attachmentIds: [] }],
+          deletions: [{ attachmentType: 'file', count: 0, ids: [] }],
         });
 
         expect(unsecuredSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();

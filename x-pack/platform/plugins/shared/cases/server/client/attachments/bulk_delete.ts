@@ -79,23 +79,26 @@ const recordByType =
     await userActionService.creator.bulkCreateAttachmentBulkDeletion({
       caseId,
       owner: originalCase.attributes.owner,
-      deletions: [...groupIdsByType(attachments)].map(([attachmentType, attachmentIds]) => ({
+      deletions: [...groupByType(attachments)].map(([attachmentType, { count, ids }]) => ({
         attachmentType,
-        attachmentIds,
+        count,
+        ids,
       })),
       user,
     });
   };
 
-/** Alerts and events count each referenced id; other attachments count once. */
-const groupIdsByType = (attachments: DecodedAttachment[]): Map<string, string[]> =>
-  attachments.reduce((idsByType, { id, attributes, owner, requestAttributes }) => {
+/** Counts each referenced id (alert, file, dashboard, ...), or the attachment itself when it has none. */
+const groupByType = (
+  attachments: DecodedAttachment[]
+): Map<string, { count: number; ids: string[] }> =>
+  attachments.reduce((byType, { id, attributes, owner, requestAttributes }) => {
     const type = resolveUnifiedAttachmentType(attributes, owner);
     const { ids: referencedIds } = getIDsAndIndicesAsArrays(requestAttributes);
-    const ids = referencedIds.length > 0 ? referencedIds : [id];
-    idsByType.set(type, [...(idsByType.get(type) ?? []), ...ids]);
-    return idsByType;
-  }, new Map<string, string[]>());
+    const { count, ids } = byType.get(type) ?? { count: 0, ids: [] };
+    byType.set(type, { count: count + Math.max(referencedIds.length, 1), ids: [...ids, id] });
+    return byType;
+  }, new Map<string, { count: number; ids: string[] }>());
 
 /** Deletes files of a case and the attachments that reference them. */
 export const bulkDeleteFileAttachments = async (

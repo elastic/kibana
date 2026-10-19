@@ -115,14 +115,14 @@ describe('bulk_delete', () => {
         expect.objectContaining({
           caseId: 'mock-id-1',
           deletions: [
-            { attachmentType: 'comment', attachmentIds: ['mock-comment-1', 'mock-comment-2'] },
+            { attachmentType: 'comment', count: 2, ids: ['mock-comment-1', 'mock-comment-2'] },
           ],
         })
       );
       expect(creator.bulkCreateAttachmentDeletion).not.toHaveBeenCalled();
     });
 
-    it('counts every id that a grouped attachment references', async () => {
+    it('counts every referenced id and logs the deleted saved object ids', async () => {
       clientArgs.services.attachmentService.getter.bulkGetForDeletion.mockResolvedValue([
         alertAttachment('attachment-1', ['alert-1', 'alert-2', 'alert-3'], 'index-1'),
         userComment,
@@ -138,11 +138,8 @@ describe('bulk_delete', () => {
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           deletions: [
-            {
-              attachmentType: SECURITY_ALERT_ATTACHMENT_TYPE,
-              attachmentIds: ['alert-1', 'alert-2', 'alert-3'],
-            },
-            { attachmentType: 'comment', attachmentIds: ['mock-comment-1'] },
+            { attachmentType: SECURITY_ALERT_ATTACHMENT_TYPE, count: 3, ids: ['attachment-1'] },
+            { attachmentType: 'comment', count: 1, ids: ['mock-comment-1'] },
           ],
         })
       );

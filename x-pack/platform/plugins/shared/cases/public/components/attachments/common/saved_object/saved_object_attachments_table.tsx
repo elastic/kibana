@@ -39,7 +39,7 @@ interface SavedObjectAttachmentRow {
 }
 
 export interface SavedObjectAttachmentsTableProps
-  extends Pick<CommonAttachmentListViewProps, 'canRemove' | 'onRemove'> {
+  extends Pick<CommonAttachmentListViewProps, 'onRemove'> {
   caseData: CaseUI;
   searchTerm?: string;
   /** Attachment registration id (e.g. `dashboard`, `map`, `discoverSession`). */
@@ -98,7 +98,6 @@ export const SavedObjectAttachmentsTable: React.FC<SavedObjectAttachmentsTablePr
   searchTerm,
   attachmentTypeId,
   soType,
-  canRemove = false,
   onRemove,
 }) => {
   const { permissions } = useCasesContext();
@@ -132,7 +131,7 @@ export const SavedObjectAttachmentsTable: React.FC<SavedObjectAttachmentsTablePr
   const { selection, selectedIds, clearSelection } = useAttachmentSelection({
     items: filteredRows,
     getId: getRowId,
-    enabled: canRemove && onRemove != null,
+    enabled: onRemove != null,
   });
 
   const onRemoveSelected = useCallback(
