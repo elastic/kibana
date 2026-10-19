@@ -13,6 +13,7 @@ import {
   kuerySchema,
   serviceTransactionDataSourceSchema,
 } from '../../default_api_types';
+import { profilingSchemaQuerySchema } from './profiling_schema_query';
 
 export interface ProfilingHostsFunctionsResponse {
   functions: TopNFunctions;
@@ -29,7 +30,8 @@ export const profilingHostsFunctionsRoute = defineRoute<ProfilingHostsFunctionsR
         .merge(environmentSchema)
         .merge(serviceTransactionDataSourceSchema)
         .merge(z.object({ startIndex: z.coerce.number(), endIndex: z.coerce.number() }))
-        .merge(kuerySchema),
+        .merge(kuerySchema)
+        .merge(profilingSchemaQuerySchema),
     })
   ),
 });
