@@ -71,6 +71,11 @@ const hasDirectives = (
   directives: Readonly<Record<PermissionsPolicyDirectiveSetting, string[]>> | undefined
 ) => permissionsPolicyDirectiveSettings.some((setting) => directives?.[setting]?.length);
 
+// An explicitly empty report-only list is a configured directive, so it counts as set.
+const hasReportOnlyDirectives = (
+  directives: Readonly<Partial<Record<PermissionsPolicyDirectiveSetting, string[]>>> | undefined
+) => permissionsPolicyDirectiveSettings.some((setting) => directives?.[setting] !== undefined);
+
 /**
  * Throws when a deprecated wholesale policy string is combined with the per-directive settings that
  * replace it. The two cannot be reconciled, so Kibana refuses to start rather than silently
@@ -94,7 +99,7 @@ export function validatePermissionsPolicyConfig(
 
   if (
     raw.permissionsPolicyReportOnly !== undefined &&
-    hasDirectives(rawPermissionsPolicyConfig.report_only)
+    hasReportOnlyDirectives(rawPermissionsPolicyConfig.report_only)
   ) {
     conflicts.push([
       'server.securityResponseHeaders.permissionsPolicyReportOnly',

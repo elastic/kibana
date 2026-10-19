@@ -48,7 +48,7 @@ const settingToDirective: Record<
  * Tokens that are serialized bare. Every other value is an origin and is double-quoted.
  * See https://www.w3.org/TR/permissions-policy/
  */
-const bareTokens = ['self', 'src', '*'];
+const bareTokens = ['self', '*'];
 
 const normalizeDirectiveValue = (value: string) => {
   if (bareTokens.includes(value)) {
@@ -58,7 +58,8 @@ const normalizeDirectiveValue = (value: string) => {
   if (value.startsWith('"') && value.endsWith('"')) {
     return value;
   }
-  return `"${value}"`;
+  // The parsed origin is ASCII (an IDN host becomes punycode), so it is always a valid header value.
+  return `"${new URL(value).origin}"`;
 };
 
 export class PermissionsPolicyDirectives {
@@ -134,7 +135,8 @@ export class PermissionsPolicyDirectives {
       });
 
       const reportOnlyValues = config.report_only?.[setting];
-      if (reportOnlyValues?.length) {
+      // An explicitly empty list is kept, because `name=()` reports every use of the feature.
+      if (reportOnlyValues !== undefined) {
         permissionsPolicyDirectives.ensureDirective(directiveName, false);
         reportOnlyValues.forEach((value) => {
           permissionsPolicyDirectives.addDirectiveValue(directiveName, value, false);

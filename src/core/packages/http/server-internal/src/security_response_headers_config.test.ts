@@ -229,6 +229,18 @@ describe('parseRawSecurityResponseHeadersConfig', () => {
       ).toThrow(/permissionsPolicy\.report_only\.<directive>/);
     });
 
+    it('rejects the legacy report-only policy combined with an explicitly empty report-only directive', () => {
+      expect(() =>
+        validate(
+          schema.validate({ permissionsPolicyReportOnly: 'camera=()' }),
+          permissionsPolicy({
+            report_to: ['violations-endpoint'],
+            report_only: { fullscreen: [] },
+          })
+        )
+      ).toThrow(/permissionsPolicy\.report_only\.<directive>/);
+    });
+
     it('allows the legacy enforce policy alongside report-only directives', () => {
       expect(() =>
         validate(

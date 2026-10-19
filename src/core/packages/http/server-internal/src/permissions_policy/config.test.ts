@@ -33,9 +33,9 @@ describe('permissionsPolicyConfig', () => {
         it('accepts the bare tokens and an origin', () => {
           expect(
             validate({
-              [setting]: ['self', 'src', '*', 'https://example.com', 'http://localhost:5601'],
+              [setting]: ['self', '*', 'https://example.com', 'http://localhost:5601'],
             })[setting]
-          ).toEqual(['self', 'src', '*', 'https://example.com', 'http://localhost:5601']);
+          ).toEqual(['self', '*', 'https://example.com', 'http://localhost:5601']);
         });
 
         it('rejects a value that would break structured-field parsing', () => {
@@ -50,9 +50,17 @@ describe('permissionsPolicyConfig', () => {
           );
         });
 
+        it('rejects `src`, which is valid only in an iframe allow attribute', () => {
+          for (const value of ['src', `'src'`]) {
+            expect(() => validate({ [setting]: [value] })).toThrow(
+              /"src" is valid only in an iframe allow attribute/
+            );
+          }
+        });
+
         it('rejects a non-origin value', () => {
           expect(() => validate({ [setting]: ['example.com'] })).toThrow(
-            /must be self, src, \*, or an origin such as https:\/\/example.com/
+            /must be self, \*, or an origin such as https:\/\/example.com/
           );
         });
 
@@ -182,6 +190,22 @@ describe('permissionsPolicyConfig', () => {
 
     it('is accepted without a reporting endpoint when no directive is set', () => {
       expect(() => validate({ report_only: {} })).not.toThrow();
+    });
+
+    it('leaves an unset directive undefined, rather than defaulting it to an empty list', () => {
+      const config = validate({ report_to: ['endpoint'], report_only: { camera: ['self'] } });
+      expect(config.report_only?.fullscreen).toBeUndefined();
+    });
+
+    it('keeps an explicitly empty directive, which reports every use of the feature', () => {
+      const config = validate({ report_to: ['endpoint'], report_only: { fullscreen: [] } });
+      expect(config.report_only?.fullscreen).toEqual([]);
+    });
+
+    it('rejects an explicitly empty directive without a reporting endpoint', () => {
+      expect(() => validate({ report_only: { fullscreen: [] } })).toThrow(
+        /cannot use `permissionsPolicy.report_only` without `permissionsPolicy.report_to`/
+      );
     });
   });
 });

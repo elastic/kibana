@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { validateHeaderValue } from 'http';
 import type { PermissionsPolicyConfigType } from './config';
 import { permissionsPolicyConfig } from './config';
 import { PermissionsPolicyDirectives } from './permissions_policy_directives';
@@ -54,6 +55,18 @@ describe('PermissionsPolicyDirectives', () => {
       );
     });
 
+    it('serializes an internationalized origin as ASCII, so it is a valid header value', () => {
+      const { enforceHeader } = headers({ camera: ['https://例え.テスト'] });
+      expect(enforceHeader).toContain('camera=("https://xn--r8jz45g.xn--zckzah")');
+      expect(() => validateHeaderValue('Permissions-Policy', enforceHeader)).not.toThrow();
+    });
+
+    it('serializes an origin in its canonical form', () => {
+      expect(headers({ camera: ['https://Example.COM:443/'] }).enforceHeader).toContain(
+        'camera=("https://example.com")'
+      );
+    });
+
     it('collapses an allowlist containing `*` to a bare wildcard', () => {
       expect(headers({ camera: ['self', '*'] }).enforceHeader).toContain('camera=*');
     });
@@ -70,6 +83,12 @@ describe('PermissionsPolicyDirectives', () => {
       expect(reportOnlyHeader).toEqual('camera=(self)');
       // The report-only policy must not leak into the enforced one.
       expect(enforceHeader).toEqual(DEFAULT_POLICY);
+    });
+
+    it('keeps an explicitly empty report-only directive, which reports every use', () => {
+      expect(
+        headers({ report_to: ['endpoint'], report_only: { fullscreen: [] } }).reportOnlyHeader
+      ).toEqual('fullscreen=()');
     });
 
     it('does not throw on a partial config object, as supplied by test mocks', () => {
@@ -98,6 +117,13 @@ describe('PermissionsPolicyDirectives', () => {
         headers({ report_to: ['endpoint'], report_only: { camera: ['self'] } }, 'endpoint')
           .reportOnlyHeader
       ).toEqual('camera=(self);report-to=endpoint');
+    });
+
+    it('is attached to an explicitly empty report-only directive', () => {
+      expect(
+        headers({ report_to: ['endpoint'], report_only: { fullscreen: [] } }, 'endpoint')
+          .reportOnlyHeader
+      ).toEqual('fullscreen=();report-to=endpoint');
     });
   });
 

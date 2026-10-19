@@ -346,7 +346,7 @@ groups:
       - setting: permissionsPolicy.camera
         id: permissionspolicy-camera
         description: |
-          Add sources to the [`camera`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy/camera) directive of the [`Permissions-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) header. The sources are added to Kibana's built-in policy rather than replacing it. Allowed values are `self`, `src`, `*`, or an origin such as `https://example.com`. The default denies the feature to every origin.
+          Add sources to the [`camera`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy/camera) directive of the [`Permissions-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) header. The sources are added to Kibana's built-in policy rather than replacing it. Allowed values are `self`, `*`, or an origin such as `https://example.com`. The default denies the feature to every origin.
         datatype: array of strings
         applies_to:
           - "stack: preview"
@@ -356,7 +356,7 @@ groups:
       - setting: permissionsPolicy.display_capture
         id: permissionspolicy-displaycapture
         description: |
-          Add sources to the [`display-capture`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy/display-capture) directive of the [`Permissions-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) header. The sources are added to Kibana's built-in policy rather than replacing it. Allowed values are `self`, `src`, `*`, or an origin such as `https://example.com`. The default denies the feature to every origin.
+          Add sources to the [`display-capture`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy/display-capture) directive of the [`Permissions-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) header. The sources are added to Kibana's built-in policy rather than replacing it. Allowed values are `self`, `*`, or an origin such as `https://example.com`. The default denies the feature to every origin.
         datatype: array of strings
         applies_to:
           - "stack: preview"
@@ -366,7 +366,7 @@ groups:
       - setting: permissionsPolicy.fullscreen
         id: permissionspolicy-fullscreen
         description: |
-          Add sources to the [`fullscreen`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy/fullscreen) directive of the [`Permissions-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) header. The sources are added to Kibana's built-in policy rather than replacing it. Allowed values are `self`, `src`, `*`, or an origin such as `https://example.com`. By default, the feature is allowed for `self`.
+          Add sources to the [`fullscreen`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy/fullscreen) directive of the [`Permissions-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) header. The sources are added to Kibana's built-in policy rather than replacing it. Allowed values are `self`, `*`, or an origin such as `https://example.com`. By default, the feature is allowed for `self`.
         datatype: array of strings
         applies_to:
           - "stack: preview"
@@ -376,7 +376,7 @@ groups:
       - setting: permissionsPolicy.geolocation
         id: permissionspolicy-geolocation
         description: |
-          Add sources to the [`geolocation`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy/geolocation) directive of the [`Permissions-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) header. The sources are added to Kibana's built-in policy rather than replacing it. Allowed values are `self`, `src`, `*`, or an origin such as `https://example.com`. The default denies the feature to every origin.
+          Add sources to the [`geolocation`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy/geolocation) directive of the [`Permissions-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) header. The sources are added to Kibana's built-in policy rather than replacing it. Allowed values are `self`, `*`, or an origin such as `https://example.com`. The default denies the feature to every origin.
         datatype: array of strings
         applies_to:
           - "stack: preview"
@@ -386,7 +386,7 @@ groups:
       - setting: permissionsPolicy.microphone
         id: permissionspolicy-microphone
         description: |
-          Add sources to the [`microphone`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy/microphone) directive of the [`Permissions-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) header. The sources are added to Kibana's built-in policy rather than replacing it. Allowed values are `self`, `src`, `*`, or an origin such as `https://example.com`. The default denies the feature to every origin.
+          Add sources to the [`microphone`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy/microphone) directive of the [`Permissions-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) header. The sources are added to Kibana's built-in policy rather than replacing it. Allowed values are `self`, `*`, or an origin such as `https://example.com`. The default denies the feature to every origin.
         datatype: array of strings
         applies_to:
           - "stack: preview"
@@ -396,7 +396,7 @@ groups:
       - setting: permissionsPolicy.web_share
         id: permissionspolicy-webshare
         description: |
-          Add sources to the [`web-share`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy/web-share) directive of the [`Permissions-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) header. The sources are added to Kibana's built-in policy rather than replacing it. Allowed values are `self`, `src`, `*`, or an origin such as `https://example.com`. The default denies the feature to every origin.
+          Add sources to the [`web-share`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy/web-share) directive of the [`Permissions-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) header. The sources are added to Kibana's built-in policy rather than replacing it. Allowed values are `self`, `*`, or an origin such as `https://example.com`. The default denies the feature to every origin.
         datatype: array of strings
         applies_to:
           - "stack: preview"
@@ -406,7 +406,7 @@ groups:
       - setting: permissionsPolicy.report_only.camera
         id: permissionspolicy-report-only-camera
         description: |
-          Add sources to the `camera` directive of the [`Permissions-Policy-Report-Only`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) header, which reports violations without enforcing them. The report-only policy is built only from the directives you configure here, not from {{kib}}'s built-in policy. Requires [`permissionsPolicy.report_to`](#permissionspolicy-report-to).
+          Add sources to the `camera` directive of the [`Permissions-Policy-Report-Only`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) header, which reports violations without enforcing them. The report-only policy is built only from the directives you configure here, not from {{kib}}'s built-in policy. An empty list reports every use of the feature, including by {{kib}} itself. Requires [`permissionsPolicy.report_to`](#permissionspolicy-report-to).
         datatype: array of strings
         applies_to:
           - "stack: preview"
@@ -416,7 +416,7 @@ groups:
       - setting: permissionsPolicy.report_only.display_capture
         id: permissionspolicy-report-only-displaycapture
         description: |
-          Add sources to the `display-capture` directive of the [`Permissions-Policy-Report-Only`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) header, which reports violations without enforcing them. The report-only policy is built only from the directives you configure here, not from {{kib}}'s built-in policy. Requires [`permissionsPolicy.report_to`](#permissionspolicy-report-to).
+          Add sources to the `display-capture` directive of the [`Permissions-Policy-Report-Only`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) header, which reports violations without enforcing them. The report-only policy is built only from the directives you configure here, not from {{kib}}'s built-in policy. An empty list reports every use of the feature, including by {{kib}} itself. Requires [`permissionsPolicy.report_to`](#permissionspolicy-report-to).
         datatype: array of strings
         applies_to:
           - "stack: preview"
@@ -426,7 +426,7 @@ groups:
       - setting: permissionsPolicy.report_only.fullscreen
         id: permissionspolicy-report-only-fullscreen
         description: |
-          Add sources to the `fullscreen` directive of the [`Permissions-Policy-Report-Only`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) header, which reports violations without enforcing them. The report-only policy is built only from the directives you configure here, not from {{kib}}'s built-in policy. Requires [`permissionsPolicy.report_to`](#permissionspolicy-report-to).
+          Add sources to the `fullscreen` directive of the [`Permissions-Policy-Report-Only`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) header, which reports violations without enforcing them. The report-only policy is built only from the directives you configure here, not from {{kib}}'s built-in policy. An empty list reports every use of the feature, including by {{kib}} itself. Requires [`permissionsPolicy.report_to`](#permissionspolicy-report-to).
         datatype: array of strings
         applies_to:
           - "stack: preview"
@@ -436,7 +436,7 @@ groups:
       - setting: permissionsPolicy.report_only.geolocation
         id: permissionspolicy-report-only-geolocation
         description: |
-          Add sources to the `geolocation` directive of the [`Permissions-Policy-Report-Only`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) header, which reports violations without enforcing them. The report-only policy is built only from the directives you configure here, not from {{kib}}'s built-in policy. Requires [`permissionsPolicy.report_to`](#permissionspolicy-report-to).
+          Add sources to the `geolocation` directive of the [`Permissions-Policy-Report-Only`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) header, which reports violations without enforcing them. The report-only policy is built only from the directives you configure here, not from {{kib}}'s built-in policy. An empty list reports every use of the feature, including by {{kib}} itself. Requires [`permissionsPolicy.report_to`](#permissionspolicy-report-to).
         datatype: array of strings
         applies_to:
           - "stack: preview"
@@ -446,7 +446,7 @@ groups:
       - setting: permissionsPolicy.report_only.microphone
         id: permissionspolicy-report-only-microphone
         description: |
-          Add sources to the `microphone` directive of the [`Permissions-Policy-Report-Only`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) header, which reports violations without enforcing them. The report-only policy is built only from the directives you configure here, not from {{kib}}'s built-in policy. Requires [`permissionsPolicy.report_to`](#permissionspolicy-report-to).
+          Add sources to the `microphone` directive of the [`Permissions-Policy-Report-Only`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) header, which reports violations without enforcing them. The report-only policy is built only from the directives you configure here, not from {{kib}}'s built-in policy. An empty list reports every use of the feature, including by {{kib}} itself. Requires [`permissionsPolicy.report_to`](#permissionspolicy-report-to).
         datatype: array of strings
         applies_to:
           - "stack: preview"
@@ -456,7 +456,7 @@ groups:
       - setting: permissionsPolicy.report_only.web_share
         id: permissionspolicy-report-only-webshare
         description: |
-          Add sources to the `web-share` directive of the [`Permissions-Policy-Report-Only`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) header, which reports violations without enforcing them. The report-only policy is built only from the directives you configure here, not from {{kib}}'s built-in policy. Requires [`permissionsPolicy.report_to`](#permissionspolicy-report-to).
+          Add sources to the `web-share` directive of the [`Permissions-Policy-Report-Only`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy) header, which reports violations without enforcing them. The report-only policy is built only from the directives you configure here, not from {{kib}}'s built-in policy. An empty list reports every use of the feature, including by {{kib}} itself. Requires [`permissionsPolicy.report_to`](#permissionspolicy-report-to).
         datatype: array of strings
         applies_to:
           - "stack: preview"

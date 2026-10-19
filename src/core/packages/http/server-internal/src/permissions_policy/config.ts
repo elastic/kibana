@@ -18,7 +18,7 @@ import { get } from 'lodash';
  *
  * See https://www.w3.org/TR/permissions-policy/
  */
-const BARE_TOKENS = ['self', 'src', '*'];
+const BARE_TOKENS = ['self', '*'];
 
 /**
  * Characters that would terminate or corrupt the structured-field member this value is serialized
@@ -41,6 +41,9 @@ const validateDirectiveValue = (value: string) => {
   }
   if (value === 'none' || value === `'none'`) {
     return `"none" is a Content Security Policy keyword and is not valid in a permissions policy. To deny a feature, leave its list empty, which is already the default`;
+  }
+  if (value === 'src' || value === `'src'`) {
+    return `"src" is valid only in an iframe allow attribute, not in a Permissions-Policy header`;
   }
 
   let url: URL;
@@ -70,12 +73,21 @@ const directiveValidator = (values: string[]) => {
   }
 };
 
-const directiveSchema = () =>
+const directiveArraySchema = (defaultValue?: string[]) =>
   schema.arrayOf(schema.string({ maxLength: MAX_DIRECTIVE_VALUE_LENGTH }), {
-    defaultValue: [],
+    defaultValue,
     maxSize: MAX_DIRECTIVE_VALUES,
     validate: directiveValidator,
   });
+
+/** An enforced directive. Absent and empty mean the same: nothing is added to the built-in policy. */
+const directiveSchema = () => directiveArraySchema([]);
+
+/**
+ * A report-only directive. It has no default, so an explicitly empty list stays distinct from an
+ * absent one and serializes as `name=()`, which reports every use of the feature.
+ */
+const reportOnlyDirectiveSchema = () => schema.maybe(directiveArraySchema());
 
 /**
  * RFC 8941 sf-token, the grammar the `report-to` structured-field parameter is serialized as. A
@@ -105,13 +117,13 @@ const reportingGroupNameValidator = (values: string[]) => {
   }
 };
 
-const directivesSchema = () => ({
-  camera: directiveSchema(),
-  display_capture: directiveSchema(),
-  fullscreen: directiveSchema(),
-  geolocation: directiveSchema(),
-  microphone: directiveSchema(),
-  web_share: directiveSchema(),
+const directivesSchema = <T>(directive: () => T) => ({
+  camera: directive(),
+  display_capture: directive(),
+  fullscreen: directive(),
+  geolocation: directive(),
+  microphone: directive(),
+  web_share: directive(),
 });
 
 /** The configuration keys that map to a Permissions-Policy directive. */
@@ -129,8 +141,8 @@ export type PermissionsPolicyDirectiveSetting = (typeof permissionsPolicyDirecti
 
 const configSchema = schema.object(
   {
-    ...directivesSchema(),
-    report_only: schema.maybe(schema.object(directivesSchema())),
+    ...directivesSchema(directiveSchema),
+    report_only: schema.maybe(schema.object(directivesSchema(reportOnlyDirectiveSchema))),
     report_to: schema.arrayOf(schema.string({ maxLength: MAX_REPORTING_GROUP_NAME_LENGTH }), {
       defaultValue: [],
       maxSize: MAX_REPORTING_GROUP_NAMES,
@@ -140,7 +152,7 @@ const configSchema = schema.object(
   {
     validate: (config) => {
       const hasReportOnlyDirectives = permissionsPolicyDirectiveSettings.some(
-        (setting) => (config.report_only?.[setting]?.length ?? 0) > 0
+        (setting) => config.report_only?.[setting] !== undefined
       );
       if (hasReportOnlyDirectives && !config.report_to.length) {
         return 'cannot use `permissionsPolicy.report_only` without `permissionsPolicy.report_to`, because the Permissions-Policy-Report-Only header is only sent when a reporting endpoint is configured';
