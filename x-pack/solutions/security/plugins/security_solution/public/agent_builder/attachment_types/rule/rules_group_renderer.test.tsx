@@ -61,25 +61,39 @@ describe('createRulesGroupRenderer', () => {
     );
   });
 
-  it('shows a drafted rule as a static row', () => {
+  it('renders nothing for a drafted rule', () => {
     render(
       <ul>
         <Renderer attachments={[rule({ id: 'rule-draft' })]} />
       </ul>
     );
 
-    expect(screen.getByText('External mailbox forwarding')).toBeInTheDocument();
-    expect(screen.getByText('Rule')).toBeInTheDocument();
-    expect(screen.queryByRole('link')).not.toBeInTheDocument();
-    expect(screen.queryByRole('button')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('groupedAttachmentRowAffordance')).not.toBeInTheDocument();
+    expect(screen.queryByRole('listitem')).not.toBeInTheDocument();
     expect(getUrlForApp).not.toHaveBeenCalled();
   });
 
-  it('does not filter rules management by the draft when several rules are attached', () => {
+  it('ignores a drafted rule next to a saved rule', () => {
     render(
       <ul>
         <Renderer attachments={[rule({ id: 'rule-draft' }), rule({ id: 'b', origin: 'r1' })]} />
+      </ul>
+    );
+
+    expect(screen.getAllByRole('listitem')).toHaveLength(1);
+    expect(screen.getByRole('button')).toBeInTheDocument();
+    expect(getUrlForApp).not.toHaveBeenCalled();
+  });
+
+  it('does not count a drafted rule in the collapsed rules row', () => {
+    render(
+      <ul>
+        <Renderer
+          attachments={[
+            rule({ id: 'rule-draft' }),
+            rule({ id: 'a', origin: 'r1' }),
+            rule({ id: 'b', origin: 'r2' }),
+          ]}
+        />
       </ul>
     );
 

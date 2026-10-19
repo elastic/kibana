@@ -31,8 +31,10 @@ export const createRulesGroupRenderer = ({
     const rules = new Map<string, RuleAttachment>();
     for (const attachment of attachments) {
       const rule = attachment as unknown as RuleAttachment;
-      const key = getSavedRuleId(rule) ?? attachment.id;
-      if (!rules.has(key)) {
+      const savedRuleId = getSavedRuleId(rule);
+      const key = savedRuleId ?? attachment.id;
+      const isUnsavedDraft = !savedRuleId && isRuleDraftAttachment(rule);
+      if (!isUnsavedDraft && !rules.has(key)) {
         rules.set(key, rule);
       }
     }
@@ -70,18 +72,6 @@ export const createRulesGroupRenderer = ({
                 subtitle={RULE_SUBTITLE}
                 descriptor={{ kind: FLYOUT_DESCRIPTOR_KIND.rule, ruleId }}
                 resolveSecurityCanvasContext={resolveSecurityCanvasContext}
-              />
-            );
-          }
-
-          if (isRuleDraftAttachment(ruleAttachment)) {
-            return (
-              <GroupedAttachmentRow
-                key={key}
-                iconType="document"
-                iconColor="subdued"
-                title={title}
-                subtitle={RULE_SUBTITLE}
               />
             );
           }
