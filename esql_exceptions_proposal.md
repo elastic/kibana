@@ -1,4 +1,4 @@
-# Native exceptions for ES|QL rules
+# Exceptions for computed fields in ES|QL rules 
 
 Status: proposal with a working implementation behind an advanced setting that is off by default. Scope: the ES|QL rule type (`siem.esqlRule`) in the current detection engine. Value lists stay as they are today (see [Out of scope](#out-of-scope)).
 
@@ -43,53 +43,67 @@ This solution is behind the advanced setting `securitySolution:enableEsqlRuleCom
 
 An item is placed whole, in one place. It goes to the DSL filter when every field of it is a field in the source indices or exists nowhere. It goes to the end of the query when it has a computed column, every field of it is a column that the query returns, and the item is supported at the end of the query: every entry has an entry type and an operator that we can write for the type of its column (see [Types supported at the end of the query](#types-supported-at-the-end-of-the-query)), and every value can be written for that type. Any other item is not applied, and a value that cannot be written fails the rule. [Items that are not applied](#items-that-are-not-applied) and [Error handling](#error-handling) describe both cases.
 
+**The whole flow**
+
 ```mermaid
 flowchart TD
     start(["Rule execution starts"]) --> enabled{"Does the rule have exceptions,<br/>and is the advanced setting enabled?"}
     enabled -- "No" --> today["Build the DSL filter from all the exception items<br/>(today's behavior)"]
     enabled -- "Yes" --> expired["1. Drop the expired items"]
+    expired --> inspect["2 and 3. Inspect the fields of the items<br/>and the output columns of the query<br/>(see the inspection diagram)"]
 
-    subgraph inspect ["Inspect"]
-        expired --> fieldcaps["2. Ask _field_caps for the type of the fields of the items<br/>and of their parent paths (a.b.c also asks for a and a.b),<br/>to recognize the keys below a flattened field,<br/>in the indices that the real request reads"]
-        fieldcaps --> found{"Does any index have documents<br/>in the time range?"}
-        found -- "Yes" --> needs{"Does at least one exception item have an entry for a field<br/>that is not a source field?"}
-        needs -- "Yes" --> probe["3. Run the rule query followed by LIMIT 0 to get the output columns,<br/>with the filter of the real request<br/>(it includes the exception filter of all the items)"]
-    end
-
-    found -- "No" --> allDsl["Keep every item in the DSL filter"]
-    needs -- "No" --> allDsl
-
-    subgraph place ["4. Place each item, one at a time"]
-        probe --> sourceField{"Is every field of this item a source field<br/>or in neither the source nor the output?"}
-        sourceField -- "Yes" --> dslItems["Add the item to the DSL items"]
-        sourceField -- "No" --> columns{"Is every field of the item<br/>a column of the output?"}
-        columns -- "Yes" --> compileItem{"Can the item be compiled<br/>for the types of the columns?"}
-        compileItem -- "Yes" --> endItems["Add the item to the end-of-query items"]
-        columns -- "No" --> cannot["Mark the item as not applicable"]
-        compileItem -- "No" --> cannot
-        cannot --> invalid{"Is the reason a value that does not fit<br/>the type of a column?"}
-        invalid -- "Yes" --> failValue(["Rule fails before the query runs"])
-        invalid -- "No" --> skipped["Add the item to the items not applied,<br/>with the reason"]
-        dslItems --> placed
-        endItems --> placed
-        skipped --> placed
-        placed(["Collect the DSL items, the end-of-query items<br/>and the items not applied"])
-    end
+    inspect -- "No index has documents in the time range,<br/>or every field is a source field" --> allDsl["Keep every item in the DSL filter"]
+    inspect -- "The output columns are known" --> place["4. Place each item, one at a time<br/>(see the placement diagram)"]
+    inspect -. "a request fails" .-> failInspect(["Rule fails: the fields of the exceptions<br/>could not be inspected"])
+    place -. "a value does not fit the type of its column" .-> failValue(["Rule fails before the query runs"])
 
     subgraph build ["Build"]
-        placed --> compile["5. Write the end-of-query items as one WHERE stage at the end of the query<br/>(at most 200 comparisons,<br/>in a query of at most 1,000,000 characters)"]
-        compile --> log["6. Write one JSON message to the rule execution log:<br/>final query, applied items, items not applied with a reason"]
+        compile["5. Write the end-of-query items as one WHERE stage at the end of the query<br/>(at most 200 comparisons,<br/>in a query of at most 1,000,000 characters)"] --> log["6. Write one JSON message to the rule execution log:<br/>final query, applied items, items not applied with a reason"]
         log --> rebuild["7. Rebuild the DSL filter from the DSL items only"]
     end
 
+    place -- "The DSL items, the end-of-query items<br/>and the items not applied" --> compile
     compile -. "a limit is reached" .-> failLimit(["Rule fails: the message names the limit<br/>that the exception items reached"])
-    fieldcaps -. "request fails" .-> failInspect(["Rule fails: the fields of the exceptions<br/>could not be inspected"])
-    probe -. "request fails" .-> failInspect
 
     today --> run["8. Run the query: the rebuilt DSL filter in the request,<br/>the WHERE stage at the end of the query,<br/>then the page size (LIMIT) that the executor adds"]
     allDsl --> run
     rebuild --> run
     run --> alerts(["Alerts"])
+```
+
+**Inspection (stages 2 and 3)**
+
+```mermaid
+flowchart TD
+    start(["The exception items that did not expire"]) --> fieldcaps["2. Ask _field_caps for the type of the fields of the items<br/>and of their parent paths (a.b.c also asks for a and a.b),<br/>to recognize the keys below a flattened field,<br/>in the indices that the real request reads"]
+    fieldcaps --> found{"Does any index have documents<br/>in the time range?"}
+    found -- "No" --> allDsl(["Keep every item in the DSL filter"])
+    found -- "Yes" --> needs{"Does at least one exception item have an entry for a field<br/>that is not a source field?"}
+    needs -- "No" --> allDsl
+    needs -- "Yes" --> probe["3. Run the rule query followed by LIMIT 0 to get the output columns,<br/>with the filter of the real request<br/>(it includes the exception filter of all the items)"]
+    probe --> columns(["The output columns are known:<br/>place each item"])
+    fieldcaps -. "request fails" .-> failInspect(["Rule fails: the fields of the exceptions<br/>could not be inspected"])
+    probe -. "request fails" .-> failInspect
+```
+
+**Placement of each item (stage 4)**
+
+```mermaid
+flowchart TD
+    start(["An exception item, with the types of the source fields<br/>and the output columns of the query"]) --> sourceField{"Is every field of this item a source field<br/>or in neither the source nor the output?"}
+    sourceField -- "Yes" --> dslItems["Add the item to the DSL items"]
+    sourceField -- "No" --> columns{"Is every field of the item<br/>a column of the output?"}
+    columns -- "Yes" --> compileItem{"Can the item be compiled<br/>for the types of the columns?"}
+    compileItem -- "Yes" --> endItems["Add the item to the end-of-query items"]
+    columns -- "No" --> cannot["Mark the item as not applicable"]
+    compileItem -- "No" --> cannot
+    cannot --> invalid{"Is the reason a value that does not fit<br/>the type of a column?"}
+    invalid -- "Yes" --> failValue(["Rule fails before the query runs"])
+    invalid -- "No" --> skipped["Add the item to the items not applied,<br/>with the reason"]
+    dslItems --> placed
+    endItems --> placed
+    skipped --> placed
+    placed(["Collect the DSL items, the end-of-query items<br/>and the items not applied"])
 ```
 
 ### Stages
@@ -342,7 +356,7 @@ When an item that is placed at the end of the query has such a value, the execut
 The rule did not run because exception items have a value that cannot be used for the type of the field: "src_ip is one of" (list "my-list", item "my-item"): value "bogus" cannot be written for a column of type ip at the end of the query, in the field "src_ip". Fix or delete these exception items.
 ```
 
-The message names up to 5 items and counts the others. The rule creates no alerts and the failure is a user error. No `esql_exceptions` message is written for that run, because the rule status carries the reason.
+The message names up to 5 values that cannot be written, each with its item and its field, and counts the others. An item with several such values is named once for each value, which shows every value to fix in a single run. The rule creates no alerts and the failure is a user error. No `esql_exceptions` message is written for that run, because the rule status carries the reason.
 
 **Why fail.** A failed run is easier to notice and to fix than a run that applies some of the exceptions of a rule. An item that is silently skipped creates the alerts that the analyst already excluded, and alert noise is a main problem for customers. The items at the end of the query are on columns that the query computes, which the DSL filter has never applied. No rule depended on them before the setting.
 
@@ -360,7 +374,7 @@ The message names up to 5 items and counts the others. The rule creates no alert
 
 An item whose fields are all source fields or exist nowhere never fails the rule for a value: it stays in the DSL filter, which is sent to Elasticsearch as today, and Elasticsearch decides. An item that has a computed column and an entry that is not negative on a field that exists nowhere is recorded as `field_not_found` and never fails the rule for a value either.
 
-A value that cannot be written fails the rule only when the compiler checks the values of the item. An item that is skipped earlier is not checked and does not fail the rule: an item skipped because of its fields (an entry that is not negative on a field that exists nowhere, or a source field that the query does not output), or because it is restricted to some operating systems (`os_types`). In an item that is checked, an invalid value fails the rule even when another entry would be skipped, because the value is reported first.
+A value that cannot be written fails the rule only when the compiler checks the values of the item. An item that is skipped earlier is not checked and does not fail the rule: an item skipped because of its fields (an entry that is not negative on a field that exists nowhere, or a source field that the query does not output), or because it is restricted to some operating systems (`os_types`). In an item that is checked, an invalid value fails the rule even when another entry would be skipped for another reason.
 
 ### Differences from the DSL filter
 
@@ -401,7 +415,7 @@ The message is written when at least one item is applied at the end of the query
 
 - `query` is the final query of the rule, with the stage of the items applied at the end of the query and without the page size that the executor adds. It is cut at 20,000 characters, and `queryTruncated` says so. When no item is applied at the end of the query, it is the query of the rule.
 - `dslItemCount` is the number of items in the DSL filter.
-- `notApplied` lists at most 200 items; `notAppliedCount` is the total and `truncated` says that the list was cut.
+- `notApplied` has one entry for each item and reason. An item with two reasons appears twice, each time with its own `code`, `reason` and `fields`. It lists at most 200 entries; `notAppliedCount` is the total and `truncated` says that the list was cut.
 - `code` is stable and meant for the UI. `reason` is an English explanation. `fields` names the fields that cause the reason, when they are known.
 
 | `code` | Meaning |

@@ -8,10 +8,10 @@
 import type { SkippedItem } from './types';
 
 /** The message of a rule status is a line of text, so only the first items are named. */
-const MAX_NAMED_ITEMS = 5;
+const MAX_NAMED_REASONS = 5;
 
-const describeItem = ({ item, reason, fields }: SkippedItem): string =>
-  `"${item.name}" (list "${item.list_id}", item "${item.item_id}"): ${reason}${
+const describeItem = ({ item, explanation, fields }: SkippedItem): string =>
+  `"${item.name}" (list "${item.list_id}", item "${item.item_id}"): ${explanation}${
     fields?.length ? `, in the field "${fields.join('", "')}"` : ''
   }`;
 
@@ -20,10 +20,10 @@ export class InvalidExceptionValuesError extends Error {
   public readonly invalidItems: readonly SkippedItem[];
 
   constructor(invalidItems: readonly SkippedItem[]) {
-    const named = invalidItems.slice(0, MAX_NAMED_ITEMS).map(describeItem).join('; ');
+    const named = invalidItems.slice(0, MAX_NAMED_REASONS).map(describeItem).join('; ');
     const others =
-      invalidItems.length > MAX_NAMED_ITEMS
-        ? ` and ${invalidItems.length - MAX_NAMED_ITEMS} more`
+      invalidItems.length > MAX_NAMED_REASONS
+        ? ` and ${invalidItems.length - MAX_NAMED_REASONS} more`
         : '';
     super(
       `The rule did not run because exception items have a value that cannot be used for the type of the field: ${named}${others}. Fix or delete these exception items.`

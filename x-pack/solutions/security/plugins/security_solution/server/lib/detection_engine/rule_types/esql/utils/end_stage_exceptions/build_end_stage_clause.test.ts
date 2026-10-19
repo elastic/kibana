@@ -124,9 +124,13 @@ describe('compileEndStageItem', () => {
     ])('reports the value of a %s column that cannot be written: %s', (type, value) => {
       // an uncastable literal becomes null, which would make the exception exclude every row
       expect(compile([match('col', value)], { col: type })).toEqual({
-        code: 'value_not_supported',
-        reason: `value "${value}" cannot be written for a column of type ${type} at the end of the query`,
-        fields: ['col'],
+        skipReasons: [
+          {
+            code: 'value_not_supported',
+            explanation: `value "${value}" cannot be written for a column of type ${type} at the end of the query`,
+            fields: ['col'],
+          },
+        ],
       });
     });
 
@@ -146,9 +150,13 @@ describe('compileEndStageItem', () => {
       'reports the value of a %s column that the DSL accepts and the compiler does not write: %s',
       (type, value) => {
         expect(compile([match('col', value)], { col: type })).toEqual({
-          code: 'value_not_supported',
-          reason: `value "${value}" cannot be written for a column of type ${type} at the end of the query`,
-          fields: ['col'],
+          skipReasons: [
+            {
+              code: 'value_not_supported',
+              explanation: `value "${value}" cannot be written for a column of type ${type} at the end of the query`,
+              fields: ['col'],
+            },
+          ],
         });
       }
     );
@@ -274,9 +282,13 @@ describe('compileEndStageItem', () => {
       (value, type) => {
         // the rule fails for a date value that the compiler does not write
         expect(compile([match('d', value)], { d: type })).toEqual({
-          code: 'value_not_supported',
-          reason: `value "${value}" cannot be written for a column of type ${type} because it is not in a supported format`,
-          fields: ['d'],
+          skipReasons: [
+            {
+              code: 'value_not_supported',
+              explanation: `value "${value}" cannot be written for a column of type ${type} because it is not in a supported format`,
+              fields: ['d'],
+            },
+          ],
         });
       }
     );
@@ -341,17 +353,26 @@ describe('compileEndStageItem', () => {
 
     it('does not compile a list with an invalid value', () => {
       expect(compile([matchAny('n', ['1', 'x'])], { n: 'long' })).toEqual({
-        code: 'value_not_supported',
-        reason: 'value "x" cannot be written for a column of type long at the end of the query',
-        fields: ['n'],
+        skipReasons: [
+          {
+            code: 'value_not_supported',
+            explanation:
+              'value "x" cannot be written for a column of type long at the end of the query',
+            fields: ['n'],
+          },
+        ],
       });
     });
 
     it('does not compile an empty list', () => {
       expect(compile([matchAny('risk', [])], { risk: 'keyword' })).toEqual({
-        code: 'list_size_not_supported',
-        reason: 'an "is one of" list must have at least one value',
-        fields: ['risk'],
+        skipReasons: [
+          {
+            code: 'list_size_not_supported',
+            explanation: 'an "is one of" list must have at least one value',
+            fields: ['risk'],
+          },
+        ],
       });
     });
 
@@ -419,18 +440,26 @@ describe('compileEndStageItem', () => {
 
     it('does not compile a pattern that ends with a lone backslash', () => {
       expect(compile([wildcard('user', 'a\\')], { user: 'keyword' })).toEqual({
-        code: 'value_not_supported',
-        reason:
-          'value "a\\" cannot be written for a column of type keyword at the end of the query',
-        fields: ['user'],
+        skipReasons: [
+          {
+            code: 'value_not_supported',
+            explanation:
+              'value "a\\" cannot be written for a column of type keyword at the end of the query',
+            fields: ['user'],
+          },
+        ],
       });
     });
 
     it('does not compile "matches" on a column that is not a string', () => {
       expect(compile([wildcard('count', '1*')], { count: 'long' })).toEqual({
-        code: 'operator_not_supported_on_type',
-        reason: '"matches" with value "1*" is not supported on a long column',
-        fields: ['count'],
+        skipReasons: [
+          {
+            code: 'operator_not_supported_on_type',
+            explanation: '"matches" with value "1*" is not supported on a long column',
+            fields: ['count'],
+          },
+        ],
       });
     });
   });
@@ -446,9 +475,13 @@ describe('compileEndStageItem', () => {
       'does not apply "%s", because a float is widened and an equality can miss the value',
       (_, entry) => {
         expect(compile([entry()], { d: 'double' })).toEqual({
-          code: 'operator_not_supported_on_type',
-          reason: expect.stringContaining('on a double column'),
-          fields: ['d'],
+          skipReasons: [
+            {
+              code: 'operator_not_supported_on_type',
+              explanation: expect.stringContaining('on a double column'),
+              fields: ['d'],
+            },
+          ],
         });
       }
     );
@@ -458,9 +491,11 @@ describe('compileEndStageItem', () => {
     });
 
     it('does not apply "is" on a double column, whatever the value', () => {
-      expect(compile([match('d', 'many')], { d: 'double' })).toEqual(
-        expect.objectContaining({ code: 'operator_not_supported_on_type', fields: ['d'] })
-      );
+      expect(compile([match('d', 'many')], { d: 'double' })).toEqual({
+        skipReasons: [
+          expect.objectContaining({ code: 'operator_not_supported_on_type', fields: ['d'] }),
+        ],
+      });
     });
   });
 
@@ -470,10 +505,14 @@ describe('compileEndStageItem', () => {
     it('does not apply an item that is restricted to operating systems, which only the DSL filter applies', () => {
       const item = getExceptionListItemSchemaMock({ entries, os_types: ['windows', 'linux'] });
       expect(compileEndStageItem(item, new Map([['risk', 'keyword']]))).toEqual({
-        code: 'os_types_not_supported',
-        reason:
-          'the item is restricted to the operating systems windows, linux (os_types), which only the DSL filter applies',
-        fields: ['risk'],
+        skipReasons: [
+          {
+            code: 'os_types_not_supported',
+            explanation:
+              'the item is restricted to the operating systems windows, linux (os_types), which only the DSL filter applies',
+            fields: ['risk'],
+          },
+        ],
       });
     });
 
@@ -554,13 +593,47 @@ describe('compileEndStageItem', () => {
       });
     });
 
-    it('reports a value that cannot be written even when an earlier entry is skipped for another reason', () => {
+    it('reports a value that cannot be written together with the entries that are skipped for another reason', () => {
       expect(
         compile([match('geo', 'a'), match('ip', 'bogus')], { geo: 'geo_point', ip: 'ip' })
       ).toEqual({
-        code: 'value_not_supported',
-        reason: 'value "bogus" cannot be written for a column of type ip at the end of the query',
-        fields: ['ip'],
+        skipReasons: [
+          expect.objectContaining({ code: 'column_type_not_supported', fields: ['geo'] }),
+          {
+            code: 'value_not_supported',
+            explanation:
+              'value "bogus" cannot be written for a column of type ip at the end of the query',
+            fields: ['ip'],
+          },
+        ],
+      });
+    });
+
+    it('reports the value that cannot be written of each entry', () => {
+      expect(compile([match('a', 'x'), match('b', 'y')], { a: 'long', b: 'ip' })).toEqual({
+        skipReasons: [
+          expect.objectContaining({
+            code: 'value_not_supported',
+            explanation:
+              'value "x" cannot be written for a column of type long at the end of the query',
+            fields: ['a'],
+          }),
+          expect.objectContaining({
+            code: 'value_not_supported',
+            explanation:
+              'value "y" cannot be written for a column of type ip at the end of the query',
+            fields: ['b'],
+          }),
+        ],
+      });
+    });
+
+    it('reports every value of a list that cannot be written, and none of the valid ones', () => {
+      expect(compile([matchAny('n', ['1', 'x', '2', 'y'])], { n: 'long' })).toEqual({
+        skipReasons: [
+          expect.objectContaining({ explanation: expect.stringContaining('value "x"') }),
+          expect.objectContaining({ explanation: expect.stringContaining('value "y"') }),
+        ],
       });
     });
 
@@ -576,19 +649,27 @@ describe('compileEndStageItem', () => {
       'does not compile a column of type %s',
       (type) => {
         expect(compile([exists('col')], { col: type })).toEqual({
-          code: 'column_type_not_supported',
-          reason: `column "col" has type "${type}", which cannot be tested at the end of the query`,
-          fields: ['col'],
+          skipReasons: [
+            {
+              code: 'column_type_not_supported',
+              explanation: `column "col" has type "${type}", which cannot be tested at the end of the query`,
+              fields: ['col'],
+            },
+          ],
         });
       }
     );
 
     it('does not compile an entry for a column that the query does not output', () => {
       expect(compile([match('missing', 'a')], {})).toEqual({
-        code: 'column_type_not_supported',
-        reason:
-          'column "missing" has type "unknown", which cannot be tested at the end of the query',
-        fields: ['missing'],
+        skipReasons: [
+          {
+            code: 'column_type_not_supported',
+            explanation:
+              'column "missing" has type "unknown", which cannot be tested at the end of the query',
+            fields: ['missing'],
+          },
+        ],
       });
     });
 
@@ -599,9 +680,13 @@ describe('compileEndStageItem', () => {
           : { field: 'col', type: 'nested', entries: [match('x', 'y')] }
       ) as Entry;
       expect(compile([entry], { col: 'keyword' })).toEqual({
-        code: 'entry_type_not_supported',
-        reason: `entries of type "${type}" are not supported at the end of the query`,
-        fields: ['col'],
+        skipReasons: [
+          {
+            code: 'entry_type_not_supported',
+            explanation: `entries of type "${type}" are not supported at the end of the query`,
+            fields: ['col'],
+          },
+        ],
       });
     });
   });

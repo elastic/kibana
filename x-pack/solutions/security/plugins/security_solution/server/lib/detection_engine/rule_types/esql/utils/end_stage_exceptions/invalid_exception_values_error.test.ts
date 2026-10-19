@@ -9,11 +9,12 @@ import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas
 
 import { InvalidExceptionValuesError } from './invalid_exception_values_error';
 import type { SkippedItem } from './types';
+import { SkipReasonCode } from './types';
 
 const invalidItem = (id: string): SkippedItem => ({
   item: getExceptionListItemSchemaMock({ item_id: id, name: `Name of ${id}`, list_id: 'list-1' }),
-  code: 'value_not_supported',
-  reason: 'value "bogus" cannot be written for a column of type ip at the end of the query',
+  code: SkipReasonCode.ValueNotSupported,
+  explanation: 'value "bogus" cannot be written for a column of type ip at the end of the query',
   fields: ['source.ip'],
 });
 
@@ -27,7 +28,24 @@ describe('InvalidExceptionValuesError', () => {
     );
   });
 
-  it('names the first items and counts the others', () => {
+  it('names each reason of an item', () => {
+    const [first] = [invalidItem('a')];
+    const error = new InvalidExceptionValuesError([
+      first,
+      {
+        ...first,
+        explanation:
+          'value "nope" cannot be written for a column of type ip at the end of the query',
+        fields: ['dest.ip'],
+      },
+    ]);
+
+    expect(error.message).toContain('value "bogus" cannot be written');
+    expect(error.message).toContain('value "nope" cannot be written');
+    expect(error.message).toContain('in the field "dest.ip"');
+  });
+
+  it('names the first 5 reasons and counts the others', () => {
     const items = ['a', 'b', 'c', 'd', 'e', 'f', 'g'].map(invalidItem);
     const error = new InvalidExceptionValuesError(items);
 

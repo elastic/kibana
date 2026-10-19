@@ -10,8 +10,31 @@ import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-t
 /** Field name to the mapping types it has in the source indices, as reported by `_field_caps`. */
 export type SourceFieldTypes = ReadonlyMap<string, readonly string[]>;
 
+/** The ES|QL column types on which an exception can be tested at the end of the query. */
+export const END_STAGE_COLUMN_TYPES = [
+  'keyword',
+  'text',
+  'integer',
+  'long',
+  'unsigned_long',
+  'double',
+  'boolean',
+  'ip',
+  'version',
+  'date',
+  'date_nanos',
+] as const;
+
+export type EndStageColumnType = (typeof END_STAGE_COLUMN_TYPES)[number];
+
+export const isEndStageColumnType = (type: string): type is EndStageColumnType =>
+  (END_STAGE_COLUMN_TYPES as readonly string[]).includes(type);
+
+/** The ES|QL type of a column: one that can be tested at the end of the query, or any other (`geo_point`, `unsupported`, ...). */
+export type OutputColumnType = EndStageColumnType | (string & Record<never, never>);
+
 /** Column name to its ES|QL type, for the output of the rule query. */
-export type OutputColumns = ReadonlyMap<string, string>;
+export type OutputColumns = ReadonlyMap<string, OutputColumnType>;
 
 export interface EndStageItem {
   item: ExceptionListItemSchema;
@@ -22,23 +45,24 @@ export interface EndStageItem {
 }
 
 /** Stable codes for the items that are not applied, so that a UI can group and translate them. */
-export type SkipReasonCode =
+export enum SkipReasonCode {
   /** An item with a computed column and an entry that is not negative on a field that is in neither the source nor the output, which never matches. An item with no computed column stays in the DSL filter. */
-  | 'field_not_found'
-  | 'source_field_not_output'
-  | 'entry_type_not_supported'
-  | 'column_type_not_supported'
-  | 'operator_not_supported_on_type'
-  | 'os_types_not_supported'
-  | 'value_not_supported'
-  | 'list_size_not_supported'
-  | 'item_has_no_entries';
+  FieldNotFound = 'field_not_found',
+  SourceFieldNotOutput = 'source_field_not_output',
+  EntryTypeNotSupported = 'entry_type_not_supported',
+  ColumnTypeNotSupported = 'column_type_not_supported',
+  OperatorNotSupportedOnType = 'operator_not_supported_on_type',
+  OsTypesNotSupported = 'os_types_not_supported',
+  ValueNotSupported = 'value_not_supported',
+  ListSizeNotSupported = 'list_size_not_supported',
+  ItemHasNoEntries = 'item_has_no_entries',
+}
 
 export interface SkipReason {
   code: SkipReasonCode;
   /** Human readable explanation, in English. */
-  reason: string;
-  /** The fields of the item that cause the reason, when they are known. */
+  explanation: string;
+  /** The fields of the item that cause the skip reason, when they are known. */
   fields?: string[];
 }
 

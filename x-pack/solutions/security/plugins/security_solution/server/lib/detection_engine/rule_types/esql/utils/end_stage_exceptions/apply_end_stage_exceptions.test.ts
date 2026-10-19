@@ -317,6 +317,22 @@ describe('applyEndStageExceptions', () => {
       expect(ruleExecutionLogger.info).not.toHaveBeenCalled();
     });
 
+    it('names every invalid value of an item, not only the first', async () => {
+      const twoValues = getExceptionListItemSchemaMock({
+        item_id: 'two',
+        name: 'two',
+        entries: [
+          { field: 'event_count', operator: 'included', type: 'match', value: 'many' },
+          { field: 'event_count', operator: 'included', type: 'match_any', value: ['1', 'few'] },
+        ] as EntriesArray,
+      });
+      const error = await apply([twoValues]).catch((e) => e);
+
+      expect(error.invalidItems).toHaveLength(2);
+      expect(error.message).toContain('value "many" cannot be written');
+      expect(error.message).toContain('value "few" cannot be written');
+    });
+
     it('names every item with an invalid value', async () => {
       const other = item('other', 'event_count', 'few');
       const error = await apply([invalidItem, other]).catch((e) => e);
@@ -454,6 +470,35 @@ describe('applyEndStageExceptions', () => {
         fields: ['host.name'],
       }),
     ]);
+  });
+
+  it('logs each reason of an item as its own entry, with its own fields', async () => {
+    const bothItem = getExceptionListItemSchemaMock({
+      item_id: 'both',
+      name: 'both',
+      entries: [
+        { field: 'host.name', operator: 'included', type: 'match', value: 'web-02' },
+        { field: 'process.name', operator: 'included', type: 'match', value: 'ping' },
+        { field: 'risk', operator: 'included', type: 'match', value: 'high' },
+      ] as EntriesArray,
+    });
+
+    await apply([bothItem]);
+
+    const entry = JSON.parse(ruleExecutionLogger.info.mock.calls[0][0]);
+    expect(entry.notApplied).toEqual([
+      expect.objectContaining({
+        item_id: 'both',
+        code: 'field_not_found',
+        fields: ['process.name'],
+      }),
+      expect.objectContaining({
+        item_id: 'both',
+        code: 'source_field_not_output',
+        fields: ['host.name'],
+      }),
+    ]);
+    expect(entry.notAppliedCount).toBe(2);
   });
 
   describe('when the fields of the exceptions cannot be inspected', () => {

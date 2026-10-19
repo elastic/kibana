@@ -16,6 +16,7 @@ import { EndStageLimitExceededError } from './end_stage_limit_exceeded_error';
 import { buildExceptionsLogEntry } from './build_exceptions_log_entry';
 import { ExceptionsInspectionFailedError } from './exceptions_inspection_failed_error';
 import { InvalidExceptionValuesError } from './invalid_exception_values_error';
+import { SkipReasonCode } from './types';
 import { fetchOutputColumns, fetchSourceFieldTypes } from './get_exception_schemas';
 import {
   getFieldsToInspect,
@@ -36,7 +37,8 @@ export interface EndStageExceptionsResult {
   unprocessedExceptions: ExceptionListItemSchema[];
 }
 
-const inspect = async <T>(request: () => Promise<T>): Promise<T> => {
+/** Runs the request and, when it fails, throws `ExceptionsInspectionFailedError` with the reason of the failure. */
+const withInspectionError = async <T>(request: () => Promise<T>): Promise<T> => {
   try {
     return await request();
   } catch (error) {
@@ -77,7 +79,7 @@ export const applyEndStageExceptions = async ({
     return unchanged;
   }
 
-  const { sourceFieldTypes, hasIndices } = await inspect(() =>
+  const { sourceFieldTypes, hasIndices } = await withInspectionError(() =>
     fetchSourceFieldTypes({
       esClient,
       indices,
@@ -91,11 +93,13 @@ export const applyEndStageExceptions = async ({
     return unchanged;
   }
 
-  const outputColumns = await inspect(() =>
+  const outputColumns = await withInspectionError(() =>
     fetchOutputColumns({ esClient, query, filter: probeFilter })
   );
   const split = splitExceptionItems({ items, sourceFieldTypes, outputColumns });
-  const invalidItems = split.skippedItems.filter(({ code }) => code === 'value_not_supported');
+  const invalidItems = split.skippedItems.filter(
+    ({ code }) => code === SkipReasonCode.ValueNotSupported
+  );
   if (invalidItems.length > 0) {
     throw new InvalidExceptionValuesError(invalidItems);
   }

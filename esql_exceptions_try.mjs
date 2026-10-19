@@ -337,9 +337,19 @@ const planFor = (on) => {
   const plans = exceptions.map((ex) => {
     // A field that exists nowhere stays in the DSL filter too, where a negative operator on it matches every document, as it does today.
     const inDsl = ex.items.every((it) => IN_DSL_KINDS.includes(it.kind) || it.kind === 'missing');
+    // A "matches" or "exists" entry that is not negative on a field that exists nowhere makes Elasticsearch rewrite the whole item to
+    // match nothing before it builds the other entries, so a wildcard or a value that it would reject on another entry does not fail the
+    // query. An "is" or "is one of" entry, or a negative entry, does not: the other entry still fails. For the DSL filter a computed
+    // column is such a field too (with the setting off, it is the DSL filter that gets the item).
+    const neverMatches = ex.items.some(
+      (it) =>
+        (it.kind === 'missing' || it.kind === 'computed') &&
+        it.included &&
+        ['matches', 'exists'].includes(it.base)
+    );
     const dslFailures = () =>
       ex.items.flatMap((it) => {
-        if (!IN_DSL_KINDS.includes(it.kind)) return [];
+        if (neverMatches || !IN_DSL_KINDS.includes(it.kind)) return [];
         if (it.base === 'matches' && !WILDCARD_TYPES.includes(it.type))
           return [`Elasticsearch rejects a wildcard query on the ${it.type} field ${it.field}`];
         if (it.invalid && DSL_FAILS_ON_INVALID(it.type))
@@ -410,9 +420,11 @@ const alertNames = (plan) =>
         .filter((d) => d.excludedBy.length === 0)
         .map((d) => d.name);
 
-const INDEX = 'esql_try';
-const LIST_ID = 'esql-try-list';
-const RULE_ID = 'esql-try-rule';
+// --suffix=x runs on its own index, list and rule, so that several runs (esql_exceptions_try_matrix.mjs) can go on at once
+const suffix = args.suffix ? `-${args.suffix}` : '';
+const INDEX = `esql_try${suffix.replace('-', '_')}`;
+const LIST_ID = `esql-try-list${suffix}`;
+const RULE_ID = `esql-try-rule${suffix}`;
 const SETTING_ID = 'securitySolution:enableEsqlRuleComputedFieldExceptions';
 const allItems = exceptions.flatMap((ex) => ex.items);
 const computed = allItems.filter((it) => it.kind === 'computed');
@@ -592,6 +604,7 @@ const statusOk = plan.failures.length ? last?.status === 'failed' : last?.status
 console.log(
   sameAlerts && statusOk ? 'This matches what to expect.' : 'This DIFFERS from what to expect.'
 );
+if (!(sameAlerts && statusOk)) process.exitCode = 2;
 
 let entryLog;
 for (let i = 0; i < (expectsLog ? 10 : 1) && !entryLog; i++) {

@@ -20,6 +20,7 @@ import {
   removeExpiredExceptions,
 } from '@kbn/lists-plugin/server/services/exception_lists';
 import { buildEsqlSearchRequest } from './build_esql_search_request';
+import type { BuildEqlSearchRequestParams } from './build_esql_search_request';
 import { performEsqlRequest } from './esql_request';
 import { wrapEsqlAlerts } from './wrap_esql_alerts';
 import { wrapSuppressedEsqlAlerts } from './wrap_suppressed_esql_alerts';
@@ -36,6 +37,7 @@ import {
 } from './utils';
 import { fetchSourceDocuments } from './fetch_source_documents';
 import { applyEndStageExceptions } from './utils/end_stage_exceptions/apply_end_stage_exceptions';
+import type { EndStageExceptionsResult } from './utils/end_stage_exceptions/apply_end_stage_exceptions';
 import { EndStageLimitExceededError } from './utils/end_stage_exceptions/end_stage_limit_exceeded_error';
 import {
   ExceptionsClauseLimitError,
@@ -70,6 +72,93 @@ import { bulkCreate } from '../factories';
 import type { ScheduleNotificationResponseActionsService } from '../../rule_response_actions/schedule_notification_response_actions';
 
 const MAX_EXCLUDED_DOCUMENTS = 100 * 1000;
+
+/** Returns the query and the DSL filter with the exceptions on computed columns applied at the end of the query, or `undefined` when the setting is off or there are no exceptions. */
+const getEndStageExceptions = async ({
+  sharedParams,
+  services,
+  transformedQuery,
+  size,
+  filters,
+  excludedDocuments,
+  ruleExecutionTimeout,
+}: {
+  sharedParams: SecuritySharedParams<EsqlRuleParams>;
+  services: SecurityRuleServices;
+  transformedQuery: string;
+  size: number;
+  filters: BuildEqlSearchRequestParams['filters'];
+  excludedDocuments: Record<string, ExcludedDocument[]>;
+  ruleExecutionTimeout: string | undefined;
+}): Promise<EndStageExceptionsResult | undefined> => {
+  const {
+    allExceptionItems,
+    startedAt = new Date(),
+    completeRule,
+    tuple,
+    primaryTimestamp,
+    secondaryTimestamp,
+    exceptionFilter,
+    unprocessedExceptions,
+    ruleExecutionLogger,
+    listClient,
+  } = sharedParams;
+  if (!allExceptionItems?.length) {
+    return undefined;
+  }
+
+  const isEnabled = await services.uiSettingsClient.get<boolean>(
+    ENABLE_ESQL_RULE_COMPUTED_FIELD_EXCEPTIONS_SETTING
+  );
+  if (!isEnabled) {
+    return undefined;
+  }
+
+  return applyEndStageExceptions({
+    esClient: services.scopedClusterClient.asCurrentUser,
+    ruleExecutionLogger,
+    query: transformedQuery,
+    // the same filter as the real request, to resolve the same indices as it does
+    probeFilter: buildEsqlSearchRequest({
+      query: transformedQuery,
+      from: tuple.from.toISOString(),
+      to: tuple.to.toISOString(),
+      size,
+      filters,
+      primaryTimestamp,
+      secondaryTimestamp,
+      exceptionFilter,
+      excludedDocuments,
+      ruleExecutionTimeout,
+    }).filter,
+    // the time range, tiers and namespaces of the real request, without the exceptions: the source fields are those of the indices that the query reads
+    fieldCapsFilter: buildEsqlSearchRequest({
+      query: transformedQuery,
+      from: tuple.from.toISOString(),
+      to: tuple.to.toISOString(),
+      size,
+      filters,
+      primaryTimestamp,
+      secondaryTimestamp,
+      exceptionFilter: undefined,
+      excludedDocuments: {},
+      ruleExecutionTimeout,
+    }).filter,
+    indices: getIndexListFromEsqlQuery(completeRule.ruleParams.query),
+    items: removeExpiredExceptions(allExceptionItems, startedAt),
+    exceptionFilter,
+    unprocessedExceptions,
+    buildDslFilter: (dslItems) =>
+      buildExceptionFilter({
+        startedAt,
+        alias: null,
+        excludeExceptions: true,
+        chunkSize: 10,
+        lists: dslItems,
+        listClient,
+      }),
+  });
+};
 
 export const esqlExecutor = async ({
   sharedParams,
@@ -140,59 +229,15 @@ export const esqlExecutor = async ({
     try {
       // With the advanced setting enabled, exceptions on columns that the query computes are inlined at the
       // end of the query, and the DSL filter only keeps the other exceptions. Without it nothing changes.
-      const { allExceptionItems, startedAt = new Date() } = sharedParams;
-      const endStageExceptionsEnabled = allExceptionItems?.length
-        ? await services.uiSettingsClient.get<boolean>(
-            ENABLE_ESQL_RULE_COMPUTED_FIELD_EXCEPTIONS_SETTING
-          )
-        : false;
-      const endStageExceptions =
-        endStageExceptionsEnabled && allExceptionItems
-          ? await applyEndStageExceptions({
-              esClient: services.scopedClusterClient.asCurrentUser,
-              ruleExecutionLogger,
-              query: transformedQuery,
-              // the same filter as the real request, so that the probe resolves the same indices
-              probeFilter: buildEsqlSearchRequest({
-                query: transformedQuery,
-                from: tuple.from.toISOString(),
-                to: tuple.to.toISOString(),
-                size,
-                filters: [...dataTiersFilters, ...dataStreamNamespaceFilters],
-                primaryTimestamp,
-                secondaryTimestamp,
-                exceptionFilter,
-                excludedDocuments,
-                ruleExecutionTimeout,
-              }).filter,
-              // the time range, tiers and namespaces of the real request, without the exceptions: the source fields are those of the indices that the query reads
-              fieldCapsFilter: buildEsqlSearchRequest({
-                query: transformedQuery,
-                from: tuple.from.toISOString(),
-                to: tuple.to.toISOString(),
-                size,
-                filters: [...dataTiersFilters, ...dataStreamNamespaceFilters],
-                primaryTimestamp,
-                secondaryTimestamp,
-                exceptionFilter: undefined,
-                excludedDocuments: {},
-                ruleExecutionTimeout,
-              }).filter,
-              indices: getIndexListFromEsqlQuery(ruleParams.query),
-              items: removeExpiredExceptions(allExceptionItems, startedAt),
-              exceptionFilter,
-              unprocessedExceptions,
-              buildDslFilter: (dslItems) =>
-                buildExceptionFilter({
-                  startedAt,
-                  alias: null,
-                  excludeExceptions: true,
-                  chunkSize: 10,
-                  lists: dslItems,
-                  listClient: sharedParams.listClient,
-                }),
-            })
-          : undefined;
+      const endStageExceptions = await getEndStageExceptions({
+        sharedParams,
+        services,
+        transformedQuery,
+        size,
+        filters: [...dataTiersFilters, ...dataStreamNamespaceFilters],
+        excludedDocuments,
+        ruleExecutionTimeout,
+      });
       const queryToRun = endStageExceptions?.query ?? transformedQuery;
       const requestExceptionFilter = endStageExceptions
         ? endStageExceptions.exceptionFilter
@@ -232,15 +277,9 @@ export const esqlExecutor = async ({
         };
         const hasLoggedRequestsReachedLimit = iteration >= 2;
 
-        // The trace is the request, as it always was. Only when exceptions were added to the query is the query printed
-        // alone, because the DSL filter of the request then holds only the items that stay in it.
         const exceptionsWereAppended =
           endStageExceptions != null && endStageExceptions.query !== transformedQuery;
-        ruleExecutionLogger.trace(
-          `ES|QL query to execute\n${
-            exceptionsWereAppended ? esqlRequest.query : JSON.stringify(esqlRequest)
-          }`
-        );
+        ruleExecutionLogger.trace(`ES|QL query to execute\n${JSON.stringify(esqlRequest)}`);
         const exceptionsWarning = getUnprocessedExceptionsWarnings(requestUnprocessedExceptions);
         if (exceptionsWarning) {
           result.warningMessages.push(exceptionsWarning);
@@ -256,7 +295,10 @@ export const esqlExecutor = async ({
           ruleExecutionLogger,
           loggedRequests: isLoggedRequestsEnabled ? loggedRequests : undefined,
         }).catch((error) => {
-          throw exceptionsWereAppended ? explainClauseLimit(error) : error;
+          if (exceptionsWereAppended) {
+            throw explainClauseLimit(error);
+          }
+          throw error;
         });
 
         logClusterShardFailuresEsql({ response, result });

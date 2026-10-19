@@ -7,13 +7,16 @@
 
 import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
 import moment from 'moment';
+import { of } from 'rxjs';
 
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { getIndexVersion } from '../../routes/index/get_index_version';
 import { SIGNALS_TEMPLATE_VERSION } from '../../routes/index/get_signals_template';
 import { getEsqlRuleParams } from '../../rule_schema/mocks';
 import { esqlExecutor } from './esql';
 import { getDataTierFilter } from '../utils/get_data_tier_filter';
+import { bulkCreateSuppressedAlertsInMemory } from '../utils/bulk_create_suppressed_alerts_in_memory';
 import { getSharedParamsMock } from '../__mocks__/shared_params';
 import type { PersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
 import { createPersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
@@ -25,6 +28,10 @@ import { ENABLE_ESQL_RULE_COMPUTED_FIELD_EXCEPTIONS_SETTING } from '../../../../
 
 jest.mock('../../routes/index/get_index_version');
 jest.mock('../utils/get_data_tier_filter', () => ({ getDataTierFilter: jest.fn() }));
+jest.mock('../utils/bulk_create_suppressed_alerts_in_memory', () => ({
+  bulkCreateSuppressedAlertsInMemory: jest.fn(),
+}));
+jest.mock('./fetch_source_documents', () => ({ fetchSourceDocuments: jest.fn() }));
 jest.mock('./utils/validate_esql_query', () => ({
   validateEsqlQuery: jest.fn().mockResolvedValue(true),
 }));
@@ -285,6 +292,111 @@ describe('esqlExecutor', () => {
       );
     });
 
+    describe('with alert suppression', () => {
+      const alertSuppression = {
+        groupBy: ['host.name'],
+        missingFieldsStrategy: 'suppress' as const,
+      };
+      const rows = [
+        ['id-1', 'web-1', 'high'],
+        ['id-2', 'web-1', 'high'],
+        ['id-3', 'web-2', 'high'],
+      ];
+
+      beforeEach(async () => {
+        const { fetchSourceDocuments } = jest.requireMock('./fetch_source_documents');
+        fetchSourceDocuments.mockResolvedValue({});
+        (bulkCreateSuppressedAlertsInMemory as jest.Mock).mockResolvedValue({
+          createdItemsCount: 2,
+          suppressedItemsCount: 1,
+          alertsWereTruncated: false,
+        });
+        (buildExceptionFilter as jest.Mock).mockResolvedValue({
+          filter: undefined,
+          unprocessedExceptions: [],
+        });
+        // the rows that Elasticsearch returns are the rows that no exception excluded
+        asyncQueryMock().mockResolvedValue({
+          id: 'QUERY-ID',
+          is_running: false,
+          columns: [
+            { name: '_id', type: 'keyword' },
+            { name: 'host.name', type: 'keyword' },
+            { name: 'risk', type: 'keyword' },
+          ],
+          values: rows,
+        });
+        mockedArguments.licensing = {
+          ...licensing,
+          license$: of(
+            licenseMock.createLicense({ license: { type: 'platinum', mode: 'platinum' } })
+          ),
+        };
+      });
+
+      const withSuppression = (enabled: boolean) => {
+        withExceptions(enabled);
+        mockedArguments.sharedParams = {
+          ...mockedArguments.sharedParams,
+          completeRule: {
+            ...sharedParams.completeRule,
+            ruleParams: { ...params, alertSuppression },
+          },
+        };
+      };
+
+      it('applies the exceptions at the end of the query and gives the suppression the rows that remain', async () => {
+        withSuppression(true);
+
+        const result = await esqlExecutor(mockedArguments);
+
+        expect(result.success).toBe(true);
+        expect(asyncQueryMock().mock.calls[0][0].query).toMatch(
+          /\n\| WHERE NOT \(MV_CONTAINS\(risk, "low"\)\) \| limit \d+$/
+        );
+        expect(bulkCreateSuppressedAlertsInMemory).toHaveBeenCalledTimes(1);
+        const { enrichedEvents, alertSuppression: suppression } = (
+          bulkCreateSuppressedAlertsInMemory as jest.Mock
+        ).mock.calls[0][0];
+        expect(suppression).toEqual(alertSuppression);
+        expect(enrichedEvents.map(({ _id }: { _id: string }) => _id)).toEqual([
+          'id-1',
+          'id-2',
+          'id-3',
+        ]);
+      });
+
+      it('does not change the query or the rows of the suppression when the setting is off', async () => {
+        withSuppression(false);
+
+        await esqlExecutor(mockedArguments);
+
+        expect(asyncQueryMock().mock.calls[0][0].query).not.toContain('WHERE NOT');
+        expect(bulkCreateSuppressedAlertsInMemory).toHaveBeenCalledTimes(1);
+        const { enrichedEvents } = (bulkCreateSuppressedAlertsInMemory as jest.Mock).mock
+          .calls[0][0];
+        expect(enrichedEvents).toHaveLength(rows.length);
+      });
+
+      it('fails the rule before the query runs when an exception has a value that cannot be written, as it does without suppression', async () => {
+        withSuppression(true);
+        mockedArguments.sharedParams = {
+          ...mockedArguments.sharedParams,
+          allExceptionItems: [exceptionItem('computed', 'risk', 'low')],
+        };
+        (
+          ruleServices.scopedClusterClient.asCurrentUser.esql.query as unknown as jest.Mock
+        ).mockResolvedValue({ columns: [{ name: 'risk', type: 'integer' }], values: [] });
+
+        const result = await esqlExecutor(mockedArguments);
+
+        expect(result.success).toBe(false);
+        expect(result.userError).toBe(true);
+        expect(asyncQueryMock()).not.toHaveBeenCalled();
+        expect(bulkCreateSuppressedAlertsInMemory).not.toHaveBeenCalled();
+      });
+    });
+
     describe('expiry', () => {
       // The execution started at 10:03 and its time range ends at 09:58 (a rule with `to: now-5m`, or a manual run)
       const startedAt = new Date('2026-10-14T10:03:00.000Z');
@@ -489,13 +601,14 @@ describe('esqlExecutor', () => {
 
       await esqlExecutor(mockedArguments);
 
-      const [{ filter }] = (ruleServices.scopedClusterClient.asCurrentUser.esql.query as jest.Mock)
-        .mock.calls[0];
+      const [{ filter }] = (
+        ruleServices.scopedClusterClient.asCurrentUser.esql.query as unknown as jest.Mock
+      ).mock.calls[0];
       expect(JSON.stringify(filter)).toContain('data_cold');
       expect(JSON.stringify(filter)).toContain('marker-value');
     });
 
-    it('traces only the final query when exceptions are applied at the end of the query', async () => {
+    it('traces the whole request, with the final query in it, when exceptions are applied at the end of the query', async () => {
       withExceptions(true);
       (buildExceptionFilter as jest.Mock).mockResolvedValue({
         filter: undefined,
@@ -507,10 +620,9 @@ describe('esqlExecutor', () => {
       const trace = (sharedParams.ruleExecutionLogger.trace as jest.Mock).mock.calls
         .map(([message]) => message as string)
         .find((message) => message.startsWith('ES|QL query to execute'));
-      expect(trace).toMatch(
-        /^ES\|QL query to execute\nfrom .*\n\| WHERE NOT \(MV_CONTAINS\(risk, "low"\)\)/is
-      );
-      expect(trace).not.toContain('{"query"');
+      const request = JSON.parse(trace?.replace(/^ES\|QL query to execute\n/, '') ?? '');
+      expect(request.query).toMatch(/\n\| WHERE NOT \(MV_CONTAINS\(risk, "low"\)\)/);
+      expect(request).toHaveProperty('filter');
     });
 
     it('sends the filter of the request with the probe of the output columns', async () => {

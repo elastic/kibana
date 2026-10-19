@@ -6,34 +6,40 @@
  */
 
 import { isIP } from 'net';
-import type { EntriesArray, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  EntriesArray,
+  ExceptionListItemSchema,
+  EntryExists,
+  EntryMatch,
+  EntryMatchAny,
+  EntryMatchWildcard,
+} from '@kbn/securitysolution-io-ts-list-types';
+import { ListOperatorEnum, ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 import { toIpRange } from './ip_range';
-import type { EndStageItem, OutputColumns, SkipReason } from './types';
+import type { EndStageColumnType, EndStageItem, OutputColumns, SkipReason } from './types';
+import { SkipReasonCode, isEndStageColumnType } from './types';
 
 type Entry = EntriesArray[number];
-type Compiled = { clause: string; terms: number } | SkipReason;
+/** The reasons that an item or an entry cannot be written, one for each problem that was found. */
+interface SkipResult {
+  skipReasons: SkipReason[];
+}
+type Compiled = { clause: string; terms: number } | SkipResult;
 /** `predicate` is true for the rows the entry matches. `excluded` entries (is not, does not exist, ...) negate it. */
-type CompiledEntry = { predicate: string; terms: number; negated?: boolean } | SkipReason;
+type CompiledEntry = { predicate: string; terms: number; negated?: boolean } | SkipResult;
 
-/** ES|QL column types on which an exception can be tested after the query pipeline has run. */
-export const END_STAGE_COLUMN_TYPES: ReadonlySet<string> = new Set([
-  'keyword',
-  'text',
-  'integer',
-  'long',
-  'unsigned_long',
-  'double',
-  'boolean',
-  'ip',
-  'version',
+/** The result for an entry or an item that cannot be written, with the reason of each problem found. */
+const toSkipResult = (...skipReasons: SkipReason[]): SkipResult => ({ skipReasons });
+
+type IntegerColumnType = Extract<EndStageColumnType, 'integer' | 'long' | 'unsigned_long'>;
+
+const DATE_TYPES: ReadonlySet<EndStageColumnType> = new Set<EndStageColumnType>([
   'date',
   'date_nanos',
 ]);
 
-const DATE_TYPES: ReadonlySet<string> = new Set(['date', 'date_nanos']);
-
-const INTEGER_RANGES: Readonly<Record<string, readonly [bigint, bigint]>> = {
+const INTEGER_RANGES: Readonly<Record<IntegerColumnType, readonly [bigint, bigint]>> = {
   integer: [BigInt('-2147483648'), BigInt('2147483647')],
   long: [BigInt('-9223372036854775807'), BigInt('9223372036854775807')],
   unsigned_long: [BigInt(0), BigInt('18446744073709551615')],
@@ -96,18 +102,17 @@ export const quoteColumn = (column: string): string => {
     .join('.');
 };
 
-const toIntegerLiteral = (value: string, type: string): string | undefined => {
-  const range = INTEGER_RANGES[type];
-  if (range == null || !/^[+-]?\d+$/.test(value)) {
+const toIntegerLiteral = (value: string, type: IntegerColumnType): string | undefined => {
+  if (!/^[+-]?\d+$/.test(value)) {
     return undefined;
   }
-  const [min, max] = range;
+  const [min, max] = INTEGER_RANGES[type];
   const parsed = BigInt(value);
   return parsed >= min && parsed <= max ? `${parsed.toString()}::${type}` : undefined;
 };
 
 /** A literal for the column type, or `undefined` when the value does not parse as that type (a failed cast would become `null` and exclude every row). */
-const toLiteral = (value: string, type: string): string | undefined => {
+const toLiteral = (value: string, type: EndStageColumnType): string | undefined => {
   switch (type) {
     case 'keyword':
     case 'text':
@@ -128,7 +133,7 @@ const toLiteral = (value: string, type: string): string | undefined => {
 };
 
 /** The conversion that gives a list of strings the type of the column, since the list literal does not accept casts. */
-const LIST_CONVERSIONS: Readonly<Record<string, string>> = {
+const LIST_CONVERSIONS: Readonly<Partial<Record<EndStageColumnType, string>>> = {
   integer: 'TO_INTEGER',
   long: 'TO_LONG',
   unsigned_long: 'TO_UNSIGNED_LONG',
@@ -137,7 +142,7 @@ const LIST_CONVERSIONS: Readonly<Record<string, string>> = {
 };
 
 /** The value as an element of a list: a string for the types that are converted, the literal for the others. */
-const toListElement = (literal: string, type: string): string => {
+const toListElement = (literal: string, type: EndStageColumnType): string => {
   if (type === 'keyword' || type === 'text' || type === 'boolean') {
     return literal;
   }
@@ -145,7 +150,7 @@ const toListElement = (literal: string, type: string): string => {
   return bare.startsWith('"') ? bare : `"${bare}"`;
 };
 
-const toListExpression = (elements: readonly string[], type: string): string => {
+const toListExpression = (elements: readonly string[], type: EndStageColumnType): string => {
   const list = `[${elements.join(', ')}]`;
   const conversion = LIST_CONVERSIONS[type];
   return conversion == null ? list : `${conversion}(${list})`;
@@ -176,11 +181,15 @@ const toOffsetMs = (zone: string | undefined): number | undefined => {
 };
 
 /** The predicate that matches a date value the way the DSL does, rounded to the unit that the value writes. */
-const toDatePredicate = (column: string, value: string, type: string): CompiledEntry => {
+const toDatePredicate = (
+  column: string,
+  value: string,
+  type: EndStageColumnType
+): { predicate: string } | SkipReason => {
   const match = DATE_PATTERN.exec(value);
   const invalid: SkipReason = {
-    code: 'value_not_supported',
-    reason: `value "${value}" cannot be written for a column of type ${type} because it is not in a supported format`,
+    code: SkipReasonCode.ValueNotSupported,
+    explanation: `value "${value}" cannot be written for a column of type ${type} because it is not in a supported format`,
   };
   if (match == null) {
     return invalid;
@@ -264,54 +273,67 @@ const toLikePattern = (value: string): string | undefined => {
 };
 
 /** The value cannot be written for the column. The rule fails, because an item that is not applied lets alerts through. */
-const toInvalidValueReason = (value: string, type: string, field: string): SkipReason => ({
-  code: 'value_not_supported',
-  reason: `value "${value}" cannot be written for a column of type ${type} at the end of the query`,
+const toInvalidValueReason = (
+  value: string,
+  type: EndStageColumnType,
+  field: string
+): SkipReason => ({
+  code: SkipReasonCode.ValueNotSupported,
+  explanation: `value "${value}" cannot be written for a column of type ${type} at the end of the query`,
   fields: [field],
 });
 
-const isExcluded = (entry: Entry): boolean => 'operator' in entry && entry.operator === 'excluded';
+const isExcluded = (entry: Entry): boolean =>
+  'operator' in entry && entry.operator === ListOperatorEnum.EXCLUDED;
+
+type SupportedEntry = EntryMatch | EntryMatchAny | EntryMatchWildcard | EntryExists;
+
+/** The entry types that can be tested at the end of the query. */
+const SUPPORTED_ENTRY_TYPES: ReadonlySet<string> = new Set([
+  ListOperatorTypeEnum.MATCH,
+  ListOperatorTypeEnum.MATCH_ANY,
+  ListOperatorTypeEnum.WILDCARD,
+  ListOperatorTypeEnum.EXISTS,
+]);
+
+const isSupportedEntry = (entry: Entry): entry is SupportedEntry =>
+  SUPPORTED_ENTRY_TYPES.has(entry.type);
 
 const compileEntry = (entry: Entry, columns: OutputColumns): CompiledEntry => {
-  if (
-    entry.type !== 'match' &&
-    entry.type !== 'match_any' &&
-    entry.type !== 'exists' &&
-    entry.type !== 'wildcard'
-  ) {
-    return {
-      code: 'entry_type_not_supported',
-      reason: `entries of type "${entry.type}" are not supported at the end of the query`,
+  if (!isSupportedEntry(entry)) {
+    return toSkipResult({
+      code: SkipReasonCode.EntryTypeNotSupported,
+      explanation: `entries of type "${entry.type}" are not supported at the end of the query`,
       fields: [entry.field],
-    };
+    });
   }
   const columnType = columns.get(entry.field);
-  if (columnType == null || !END_STAGE_COLUMN_TYPES.has(columnType)) {
-    return {
-      code: 'column_type_not_supported',
-      reason: `column "${entry.field}" has type "${
+  if (columnType == null || !isEndStageColumnType(columnType)) {
+    return toSkipResult({
+      code: SkipReasonCode.ColumnTypeNotSupported,
+      explanation: `column "${entry.field}" has type "${
         columnType ?? 'unknown'
       }", which cannot be tested at the end of the query`,
       fields: [entry.field],
-    };
+    });
   }
   const column = quoteColumn(entry.field);
 
-  if (entry.type === 'exists') {
+  if (entry.type === ListOperatorTypeEnum.EXISTS) {
     return { predicate: `${column} IS NOT NULL`, terms: 1, negated: isExcluded(entry) };
   }
 
-  if (entry.type === 'wildcard') {
+  if (entry.type === ListOperatorTypeEnum.WILDCARD) {
     if (columnType !== 'keyword' && columnType !== 'text') {
-      return {
-        code: 'operator_not_supported_on_type',
-        reason: `"matches" with value "${entry.value}" is not supported on a ${columnType} column`,
+      return toSkipResult({
+        code: SkipReasonCode.OperatorNotSupportedOnType,
+        explanation: `"matches" with value "${entry.value}" is not supported on a ${columnType} column`,
         fields: [entry.field],
-      };
+      });
     }
     const pattern = toLikePattern(entry.value);
     if (pattern == null) {
-      return toInvalidValueReason(entry.value, columnType, entry.field);
+      return toSkipResult(toInvalidValueReason(entry.value, columnType, entry.field));
     }
     return {
       predicate: `COALESCE(MV_LIKE(${column}, "${escapeEsqlString(pattern)}"), false)`,
@@ -321,52 +343,65 @@ const compileEntry = (entry: Entry, columns: OutputColumns): CompiledEntry => {
   }
 
   if (columnType === 'double') {
-    return {
-      code: 'operator_not_supported_on_type',
-      reason: `"${
-        entry.type === 'match' ? 'is' : 'is one of'
+    return toSkipResult({
+      code: SkipReasonCode.OperatorNotSupportedOnType,
+      explanation: `"${
+        entry.type === ListOperatorTypeEnum.MATCH ? 'is' : 'is one of'
       }" is not supported on a double column: ES|QL reports float and half_float fields as double with the precision of the original type, so an equality can miss the value`,
       fields: [entry.field],
-    };
+    });
   }
 
-  const isList = entry.type === 'match_any';
-  const values = entry.type === 'match_any' ? entry.value : [entry.value];
+  const isList = entry.type === ListOperatorTypeEnum.MATCH_ANY;
+  const values = entry.type === ListOperatorTypeEnum.MATCH_ANY ? entry.value : [entry.value];
   if (values.length === 0) {
-    return {
-      code: 'list_size_not_supported',
-      reason: 'an "is one of" list must have at least one value',
+    return toSkipResult({
+      code: SkipReasonCode.ListSizeNotSupported,
+      explanation: 'an "is one of" list must have at least one value',
       fields: [entry.field],
-    };
+    });
   }
-  const predicates: string[] = [];
-  const listElements: string[] = [];
-  for (const value of values) {
+  const compileValue = (
+    value: string
+  ): { predicate: string } | { listElement: string } | SkipReason => {
     if (columnType === 'ip' && value.includes('/')) {
       const range = toIpRange(value);
       if (range == null) {
         return toInvalidValueReason(value, columnType, entry.field);
       }
-      predicates.push(
-        `COALESCE(MV_IN_RANGE(${column}, "${range.first}"::ip, "${range.last}"::ip), false)`
-      );
-    } else if (DATE_TYPES.has(columnType)) {
-      const date = toDatePredicate(column, value, columnType);
-      if ('reason' in date) {
-        return { ...date, fields: [entry.field] };
-      }
-      predicates.push(date.predicate);
-    } else {
-      const literal = toLiteral(value, columnType);
-      if (literal == null) {
-        return toInvalidValueReason(value, columnType, entry.field);
-      }
-      if (isList) {
-        listElements.push(toListElement(literal, columnType));
-      } else {
-        predicates.push(`MV_CONTAINS(${column}, ${literal})`);
-      }
+      return {
+        predicate: `COALESCE(MV_IN_RANGE(${column}, "${range.first}"::ip, "${range.last}"::ip), false)`,
+      };
     }
+    if (DATE_TYPES.has(columnType)) {
+      const date = toDatePredicate(column, value, columnType);
+      return 'explanation' in date ? { ...date, fields: [entry.field] } : date;
+    }
+    const literal = toLiteral(value, columnType);
+    if (literal == null) {
+      return toInvalidValueReason(value, columnType, entry.field);
+    }
+    return isList
+      ? { listElement: toListElement(literal, columnType) }
+      : { predicate: `MV_CONTAINS(${column}, ${literal})` };
+  };
+
+  const predicates: string[] = [];
+  const listElements: string[] = [];
+  const invalidValues: SkipReason[] = [];
+  for (const value of values) {
+    const compiled = compileValue(value);
+    if ('explanation' in compiled) {
+      invalidValues.push(compiled);
+    } else if ('listElement' in compiled) {
+      listElements.push(compiled.listElement);
+    } else {
+      predicates.push(compiled.predicate);
+    }
+  }
+  // Every value that cannot be written is reported, not only the first.
+  if (invalidValues.length > 0) {
+    return toSkipResult(...invalidValues);
   }
   // One call tests the whole list, so the values of an "is one of" add one level to the expression, not one each.
   if (listElements.length > 0) {
@@ -387,35 +422,32 @@ export const compileEndStageItem = (
   columns: OutputColumns
 ): Compiled => {
   if (item.os_types != null && item.os_types.length > 0) {
-    return {
-      code: 'os_types_not_supported',
-      reason: `the item is restricted to the operating systems ${item.os_types.join(
+    return toSkipResult({
+      code: SkipReasonCode.OsTypesNotSupported,
+      explanation: `the item is restricted to the operating systems ${item.os_types.join(
         ', '
       )} (os_types), which only the DSL filter applies`,
       fields: [...new Set(item.entries.map(({ field }) => field))],
-    };
+    });
   }
   const entries: Array<{ predicate: string; terms: number; negated?: boolean }> = [];
-  let skip: SkipReason | undefined;
+  const skipReasons: SkipReason[] = [];
   for (const entry of item.entries) {
     const compiled = compileEntry(entry, columns);
-    if ('reason' in compiled) {
-      // A value that cannot be written fails the rule, so it is reported even when another entry is skipped first.
-      if (
-        skip == null ||
-        (compiled.code === 'value_not_supported' && skip.code !== 'value_not_supported')
-      ) {
-        skip = compiled;
-      }
+    if ('skipReasons' in compiled) {
+      skipReasons.push(...compiled.skipReasons);
     } else {
       entries.push(compiled);
     }
   }
-  if (skip != null) {
-    return skip;
+  if (skipReasons.length > 0) {
+    return toSkipResult(...skipReasons);
   }
   if (entries.length === 0) {
-    return { code: 'item_has_no_entries', reason: 'the item has no entries' };
+    return toSkipResult({
+      code: SkipReasonCode.ItemHasNoEntries,
+      explanation: 'the item has no entries',
+    });
   }
   const terms = entries.reduce((sum, entry) => sum + entry.terms, 0);
   if (entries.length === 1) {

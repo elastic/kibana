@@ -62,14 +62,16 @@ export const buildExceptionsLogEntry = ({
     list_id: item.list_id,
     item_id: item.item_id,
   })),
-  notApplied: skippedItems.slice(0, MAX_LOGGED_ITEMS).map(({ item, code, reason, fields }) => ({
-    list_id: item.list_id,
-    item_id: item.item_id,
-    name: item.name,
-    code,
-    reason,
-    ...(fields != null && fields.length > 0 ? { fields } : {}),
-  })),
+  notApplied: skippedItems
+    .slice(0, MAX_LOGGED_ITEMS)
+    .map(({ item, code, explanation, fields }) => ({
+      list_id: item.list_id,
+      item_id: item.item_id,
+      name: item.name,
+      code,
+      reason: explanation,
+      ...(fields != null && fields.length > 0 ? { fields } : {}),
+    })),
   notAppliedCount: skippedItems.length,
   truncated: skippedItems.length > MAX_LOGGED_ITEMS,
 });

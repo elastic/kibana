@@ -13,13 +13,14 @@ import {
   buildExceptionsLogEntry,
 } from './build_exceptions_log_entry';
 import type { SkippedItem } from './types';
+import { SkipReasonCode } from './types';
 
 const item = (id: string) => getExceptionListItemSchemaMock({ item_id: id, name: `name ${id}` });
 
 const skipped = (id: string): SkippedItem => ({
   item: item(id),
-  code: 'value_not_supported',
-  reason: 'value "x" cannot be written for a column of type long at the end of the query',
+  code: SkipReasonCode.ValueNotSupported,
+  explanation: 'value "x" cannot be written for a column of type long at the end of the query',
   fields: ['count'],
 });
 
@@ -59,7 +60,9 @@ describe('buildExceptionsLogEntry', () => {
       query: 'FROM a',
       dslItemCount: 0,
       endStageItems: [],
-      skippedItems: [{ item: item('a'), code: 'item_has_no_entries', reason: 'too many' }],
+      skippedItems: [
+        { item: item('a'), code: SkipReasonCode.ItemHasNoEntries, explanation: 'too many' },
+      ],
     });
 
     expect(notApplied[0]).not.toHaveProperty('fields');

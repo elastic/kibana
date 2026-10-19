@@ -40,6 +40,13 @@ const sourceFieldTypes = new Map<string, string[]>([
   ['nested_user', ['nested']],
   ['nested_user.name', ['keyword']],
 ]);
+// `kubernetes.pod.labels` is a flattened field below two object parents. _field_caps lists it, and its parents, only when it is
+// requested by name; the keys below it (`kubernetes.pod.labels.team`) are never listed.
+const deepFlattenedFieldTypes = new Map<string, string[]>([
+  ['kubernetes', ['object']],
+  ['kubernetes.pod', ['object']],
+  ['kubernetes.pod.labels', ['flattened']],
+]);
 const outputColumns = new Map<string, string>([
   ['event_count', 'long'],
   ['user.name', 'keyword'],
@@ -65,6 +72,13 @@ describe('isFlattenedSourceField', () => {
     expect(isFlattenedSourceField('host.name.extra', sourceFieldTypes)).toBe(false);
     expect(isFlattenedSourceField('risk', sourceFieldTypes)).toBe(false);
   });
+
+  it('finds a key below a flattened field that is not at the root', () => {
+    expect(isFlattenedSourceField('kubernetes.pod.labels.team', deepFlattenedFieldTypes)).toBe(
+      true
+    );
+    expect(isFlattenedSourceField('kubernetes.pod.name', deepFlattenedFieldTypes)).toBe(false);
+  });
 });
 
 describe('getFieldsToInspect', () => {
@@ -75,6 +89,18 @@ describe('getFieldsToInspect', () => {
         item('b', [match('labels.domain', 'y')]),
       ]).sort()
     ).toEqual(['labels', 'labels.domain', 'risk']);
+  });
+
+  // _field_caps lists a flattened field only when it is requested by name, and any of the parents of a key can be the flattened one
+  it('lists every parent path of a field, because a flattened field can be at any depth', () => {
+    expect(
+      getFieldsToInspect([item('a', [match('kubernetes.pod.labels.team', 'blue')])]).sort()
+    ).toEqual([
+      'kubernetes',
+      'kubernetes.pod',
+      'kubernetes.pod.labels',
+      'kubernetes.pod.labels.team',
+    ]);
   });
 
   // _field_caps lists a nested path only when a field below it is requested too
@@ -227,6 +253,56 @@ describe('a column named like an object parent', () => {
   });
 });
 
+describe('an item on a key below a flattened field that is not at the root', () => {
+  const notBlue: Entry = {
+    field: 'kubernetes.pod.labels.team',
+    operator: 'excluded',
+    type: 'match',
+    value: 'blue',
+  };
+  const mixed = item('mixed', [notBlue, match('risk', 'high')]);
+
+  it('stays in the DSL filter when every field of the item is a source field', () => {
+    const onlyKey = item('key', [notBlue]);
+    const result = splitExceptionItems({
+      items: [onlyKey],
+      sourceFieldTypes: deepFlattenedFieldTypes,
+      outputColumns,
+    });
+    expect(result.dslItems).toEqual([onlyKey]);
+    expect(result.skippedItems).toEqual([]);
+  });
+
+  it('is not applied when it also names a computed column, because the key is a source field that the query does not output', () => {
+    const result = splitExceptionItems({
+      items: [mixed],
+      sourceFieldTypes: deepFlattenedFieldTypes,
+      outputColumns,
+    });
+    expect(result.dslItems).toEqual([]);
+    expect(result.endStageItems).toEqual([]);
+    expect(result.skippedItems).toEqual([
+      expect.objectContaining({
+        code: 'source_field_not_output',
+        fields: ['kubernetes.pod.labels.team'],
+      }),
+    ]);
+  });
+
+  // This is why the flattened field has to be requested by name: if _field_caps lists nothing for the key, the negative entry is
+  // read as true for every row and left out, and the item excludes the alerts of every team, not only the ones that are not blue.
+  it('would lose its negative entry if the flattened field were not found', () => {
+    const result = splitExceptionItems({
+      items: [mixed],
+      sourceFieldTypes: new Map(),
+      outputColumns,
+    });
+    expect(result.endStageItems).toEqual([
+      expect.objectContaining({ clause: 'NOT (MV_CONTAINS(risk, "high"))' }),
+    ]);
+  });
+});
+
 describe('splitExceptionItems', () => {
   it('keeps items on a flattened key and on a nested field in the DSL', () => {
     const flattened = item('flattened', [match('labels.domain', 'a')]);
@@ -325,7 +401,7 @@ describe('splitExceptionItems', () => {
       {
         item: ghost,
         code: 'field_not_found',
-        reason: '"user.id" is not in the source indices or in the output of the query',
+        explanation: '"user.id" is not in the source indices or in the output of the query',
         fields: ['user.id'],
       },
     ]);
@@ -361,7 +437,7 @@ describe('splitExceptionItems', () => {
       {
         item: ghostNested,
         code: 'field_not_found',
-        reason: '"ghost_nested" is not in the source indices or in the output of the query',
+        explanation: '"ghost_nested" is not in the source indices or in the output of the query',
         fields: ['ghost_nested'],
       },
     ]);
@@ -381,7 +457,7 @@ describe('splitExceptionItems', () => {
         {
           item: ghost,
           code: 'field_not_found',
-          reason: '"process.name" is not in the source indices or in the output of the query',
+          explanation: '"process.name" is not in the source indices or in the output of the query',
           fields: ['process.name'],
         },
       ],
@@ -394,13 +470,13 @@ describe('splitExceptionItems', () => {
       {
         item: dropped,
         code: 'source_field_not_output',
-        reason: '"host.name" is a field of the source indices that the query does not output',
+        explanation: '"host.name" is a field of the source indices that the query does not output',
         fields: ['host.name'],
       },
     ]);
   });
 
-  it('names both reasons when an item has a computed column, a field that is nowhere and one that the query drops', () => {
+  it('reports each reason with its own fields when an item has a computed column, a field that is nowhere and one that the query drops', () => {
     const both = item('both', [
       match('host.name', 'web-02'),
       match('process.name', 'ping'),
@@ -410,10 +486,32 @@ describe('splitExceptionItems', () => {
       {
         item: both,
         code: 'field_not_found',
-        reason:
-          '"process.name" is not in the source indices or in the output of the query; "host.name" is a field of the source indices that the query does not output',
-        fields: ['process.name', 'host.name'],
+        explanation: '"process.name" is not in the source indices or in the output of the query',
+        fields: ['process.name'],
       },
+      {
+        item: both,
+        code: 'source_field_not_output',
+        explanation: '"host.name" is a field of the source indices that the query does not output',
+        fields: ['host.name'],
+      },
+    ]);
+  });
+
+  it('reports every value that cannot be written, one skipped item for each', () => {
+    const bad = item('bad', [match('event_count', 'many'), match('risk', 'low')]);
+    const worse = item('worse', [match('event_count', 'lots'), match('event_count', 'few')]);
+    const result = split([bad, worse]);
+    expect(
+      result.skippedItems.map(({ item: { item_id: id }, code, explanation }) => [
+        id,
+        code,
+        explanation,
+      ])
+    ).toEqual([
+      ['bad', 'value_not_supported', expect.stringContaining('value "many"')],
+      ['worse', 'value_not_supported', expect.stringContaining('value "lots"')],
+      ['worse', 'value_not_supported', expect.stringContaining('value "few"')],
     ]);
   });
 
@@ -423,7 +521,7 @@ describe('splitExceptionItems', () => {
       {
         item: geo,
         code: 'column_type_not_supported',
-        reason:
+        explanation:
           'column "location" has type "geo_point", which cannot be tested at the end of the query',
         fields: ['location'],
       },
@@ -436,7 +534,8 @@ describe('splitExceptionItems', () => {
       {
         item: bad,
         code: 'value_not_supported',
-        reason: 'value "many" cannot be written for a column of type long at the end of the query',
+        explanation:
+          'value "many" cannot be written for a column of type long at the end of the query',
         fields: ['event_count'],
       },
     ]);
@@ -450,7 +549,7 @@ describe('splitExceptionItems', () => {
       {
         item: list,
         code: 'entry_type_not_supported',
-        reason: 'entries of type "list" are not supported at the end of the query',
+        explanation: 'entries of type "list" are not supported at the end of the query',
         fields: ['risk'],
       },
     ]);

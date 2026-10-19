@@ -664,7 +664,7 @@ _If Fail or Blocked, reply to this comment with details (env, build, repro steps
 ---
 
 <details>
-<summary><strong>Exceptions on computed columns</strong>: 43 scenarios (P0: 7, P1: 26, P2: 10)</summary>
+<summary><strong>Exceptions on computed columns</strong>: 45 scenarios (P0: 7, P1: 28, P2: 10)</summary>
 
 #### Scenario: An exception on a STATS output column excludes only the matching alert rows
 
@@ -1252,6 +1252,62 @@ And the remaining rows are suppressed as configured
 
 _If Fail or Blocked, reply to this comment with details (env, build, repro steps)._
 
+#### Scenario: An exception on a computed column excludes rows before alert suppression, so they create no alert and are not counted as suppressed
+
+**Priority:** P1
+
+**Automation coverage**: 2 API integration tests (`x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/detection_engine/rule_execution_logic/esql/trial_license_complete_tier/esql_suppression.ts`: "with exceptions › on a column that the query computes › should create no alert for the rows that the exception excludes and not count them as suppressed", "with exceptions › on a column that the query computes › should not apply the exception when the advanced setting is disabled"), 3 unit tests (`x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/esql.test.ts`: "exceptions at the end of the query › with alert suppression › applies the exceptions at the end of the query and gives the suppression the rows that remain", "exceptions at the end of the query › with alert suppression › does not change the query or the rows of the suppression when the setting is off", "exceptions at the end of the query › with alert suppression › fails the rule before the query runs when an exception has a value that cannot be written, as it does without suppression"), and the script `esql_exceptions_suppression.mjs` (scenarios 1 and 2), partial: the unit tests mock Elasticsearch, and the API integration tests are written but have not been run yet.
+```gherkin
+Given an ES|QL rule with the query "FROM idx METADATA _id | EVAL tier = TO_UPPER(tier_src) | KEEP _id, doc, host, user, tier"
+And alert suppression on host, per rule execution
+And the exception items "tier is GOLD" (a computed column) and "user is svc" (a source field)
+And host-a has 4 rows with tier GOLD
+And host-b has 3 rows with tier SILVER
+And host-c has 2 rows with tier SILVER and 1 row with tier GOLD
+And host-d has 2 rows with user svc
+And host-e has 1 row with user svc and 1 row with user bob
+When the rule runs with the advanced setting enabled
+Then host-a and host-d have no alert
+And host-b has one alert with 2 suppressed documents
+And host-c has one alert with 1 suppressed document, because the excluded row is not counted
+And host-e has one alert with 0 suppressed documents
+When the same rule runs with the advanced setting disabled
+Then host-a has an alert with 3 suppressed documents, host-b with 2, host-c with 2 and host-e with 0
+And host-d has no alert
+```
+
+**Execution:**
+- [ ] ✅ Pass
+- [ ] ❌ Fail
+- [ ] 🚫 Blocked
+
+_If Fail or Blocked, reply to this comment with details (env, build, repro steps)._
+
+#### Scenario: A rule with alert suppression over a time window applies the exception on every run
+
+**Priority:** P1
+
+**Automation coverage**: No existing tests found covering this scenario. The script `esql_exceptions_suppression.mjs` (scenario 3) runs it against a live stack.
+```gherkin
+Given the rule and the exception items of the previous scenario, with alert suppression on host over 30 minutes
+And the advanced setting enabled
+And a first run that created alerts for host-b, host-c and host-e
+When 2 rows with tier GOLD arrive for host-a, 1 SILVER and 1 GOLD row for host-b, 1 GOLD row for host-c, 1 SILVER row for host-e, and 1 SILVER and 1 GOLD row for host-f
+And the rule runs again
+Then host-a still has no alert
+And the alert of host-b has 3 suppressed documents, because only the SILVER row is added
+And the alert of host-c is unchanged
+And the alert of host-e has 1 suppressed document
+And host-f has a new alert with 0 suppressed documents
+```
+
+**Execution:**
+- [ ] ✅ Pass
+- [ ] ❌ Fail
+- [ ] 🚫 Blocked
+
+_If Fail or Blocked, reply to this comment with details (env, build, repro steps)._
+
 #### Scenario: An exception on a double column applies for "exists" only
 
 **Priority:** P1
@@ -1735,7 +1791,7 @@ _If Fail or Blocked, reply to this comment with details (env, build, repro steps
 
 **Priority:** P1
 
-**Automation coverage**: 4 unit tests (`x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/utils/end_stage_exceptions/split_exception_items.test.ts`: "skips an item that has a computed column and an entry on a field that exists nowhere that is not negative, because the entry never matches", "skips an item that has a computed column and a nested entry on a path that exists nowhere", "names both reasons when an item has a computed column, a field that is nowhere and one that the query drops"; `x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/utils/end_stage_exceptions/apply_end_stage_exceptions.test.ts`: "does not apply an item that has a computed column and a field that is not part of the rule, and logs the reason"; `x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/esql.test.ts`: "does not add a warning to the rule for an exception that cannot be applied"), partial: the unit tests mock the answers of Elasticsearch.
+**Automation coverage**: 4 unit tests (`x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/utils/end_stage_exceptions/split_exception_items.test.ts`: "skips an item that has a computed column and an entry on a field that exists nowhere that is not negative, because the entry never matches", "skips an item that has a computed column and a nested entry on a path that exists nowhere", "reports each reason with its own fields when an item has a computed column, a field that is nowhere and one that the query drops"; `x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/utils/end_stage_exceptions/apply_end_stage_exceptions.test.ts`: "does not apply an item that has a computed column and a field that is not part of the rule, and logs the reason"; `x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/esql.test.ts`: "does not add a warning to the rule for an exception that cannot be applied"), partial: the unit tests mock the answers of Elasticsearch.
 ```gherkin
 Given the advanced setting is enabled
 And an ES|QL rule with STATS failures = COUNT(*) BY user.name
@@ -1863,7 +1919,7 @@ _If Fail or Blocked, reply to this comment with details (env, build, repro steps
 
 **Priority:** P1
 
-**Automation coverage**: 3 unit tests (`x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/utils/end_stage_exceptions/split_exception_items.test.ts` and `x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/utils/end_stage_exceptions/apply_end_stage_exceptions.test.ts`: "skips an item that needs a source field the query does not output", "names both reasons when an item has a computed column, a field that is nowhere and one that the query drops", "logs an item that needs a source field the query does not output"), partial: the unit tests do not check the alerts.
+**Automation coverage**: 6 unit tests (`x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/utils/end_stage_exceptions/split_exception_items.test.ts` and `x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/utils/end_stage_exceptions/apply_end_stage_exceptions.test.ts`: "skips an item that needs a source field the query does not output", "reports each reason with its own fields when an item has a computed column, a field that is nowhere and one that the query drops", "logs an item that needs a source field the query does not output", "an item on a key below a flattened field that is not at the root › is not applied when it also names a computed column, because the key is a source field that the query does not output", "an item on a key below a flattened field that is not at the root › would lose its negative entry if the flattened field were not found", "getFieldsToInspect › lists every parent path of a field, because a flattened field can be at any depth"), partial: the unit tests do not check the alerts.
 ```gherkin
 Given an ES|QL rule with STATS failures = COUNT(*) BY user.name
 And an exception item with the entries host.name is web-01 and failures is 3
@@ -2271,25 +2327,25 @@ _If Fail or Blocked, reply to this comment with details (env, build, repro steps
 
 ## Test Coverage Summary
 
-**Total scenarios:** 93
+**Total scenarios:** 95
 
 | Feature area | Scenarios | P0 | P1 | P2 | Automated | Manual only |
 |---|---|---|---|---|---|---|
 | Exceptions on source fields keep working | 25 | 11 | 12 | 2 | 18 | 7 |
-| Exceptions on computed columns | 43 | 7 | 26 | 10 | 35 | 8 |
+| Exceptions on computed columns | 45 | 7 | 28 | 10 | 36 | 9 |
 | Items that are not applied and how they are reported | 14 | 1 | 9 | 4 | 14 | 0 |
 | Advanced setting and failure handling | 5 | 2 | 2 | 1 | 3 | 2 |
 | Dependency data lifecycle | 4 | 0 | 2 | 2 | 0 | 4 |
 | Spaces and cross-cluster search (to confirm) | 2 | 0 | 0 | 2 | 0 | 2 |
-| **Total** | **93** | **21** | **51** | **21** | **70** | **23** |
+| **Total** | **95** | **21** | **53** | **21** | **71** | **24** |
 
 **Automated coverage notes:**
 - The Automated column counts scenarios with at least one matching unit or API integration test. Almost all of them are partial: the tests check the generated clause, the compiler or the split decision with mocked clients, not the alerts of a running rule. Only the "is" operator on one field has an API integration test.
 - Unit tests (Jest) for the DSL filter builder in `x-pack/solutions/security/plugins/lists/server/services/exception_lists/build_exception_filter.test.ts`: they cover the DSL clause per entry type, not the result of an ES|QL rule.
 - Unit tests (Jest) for the new code in `x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/utils/end_stage_exceptions/` (`build_end_stage_clause.test.ts`, `split_exception_items.test.ts`, `apply_end_stage_exceptions.test.ts`, `invalid_exception_values_error.test.ts`) and in `esql.test.ts` ("exceptions at the end of the query"): they cover the compiler, the split decision, the orchestration and the wiring with mocked Elasticsearch clients.
-- API integration tests in `x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/detection_engine/rule_execution_logic/esql/trial_license_complete_tier/`: `esql.ts` and `esql_suppression.ts` each have one "with exceptions › should apply exceptions" test with an "is" entry on `client.ip`.
-- Two scripts at the root of the repository run against a live stack. `esql_exceptions_smoke.mjs` creates lists with several exceptions, each with several items, one target document per exception and one document that no exception excludes, runs the rule through Kibana with the advanced setting enabled or disabled, and compares the alerts with what it expects. `esql_exceptions_try.mjs` is interactive: you describe an exception (where its field lives, its type, its operator, and whether its value is invalid), and it creates the rule, runs it and compares the alerts and the rule execution log with the expected placement. Two earlier runs, which are not in the repository, excluded the expected rows for 27 operator and type cases against Elasticsearch, and compared `is`, `matches` and their negatives on a computed `text` column with the same exceptions on a `keyword` field, through real rules in Kibana.
-- Not covered: no Scout, Cypress or API integration test exercises exceptions on computed columns, the log message of skipped items, the advanced setting, or the regression matrix of operators and field types for ES|QL rules. Every scenario marked "No existing tests found" needs manual execution or a new automated test.
+- API integration tests in `x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/detection_engine/rule_execution_logic/esql/trial_license_complete_tier/`: `esql.ts` and `esql_suppression.ts` each have one "with exceptions › should apply exceptions" test with an "is" entry on `client.ip`. `esql_suppression.ts` also has two tests for an exception on a column that the query computes, with the advanced setting enabled and disabled ("with exceptions › on a column that the query computes"). They are written but have not been run yet.
+- Four scripts at the root of the repository run against a live stack. `esql_exceptions_try_matrix.mjs` runs `esql_exceptions_try.mjs` for 3,832 combinations of exception kind, field type, operator and invalid value (one item, two items, and lists of two or three exceptions), with the setting enabled and disabled, and all the 7,664 runs ended as the script predicts. `esql_exceptions_suppression.mjs` runs a rule with alert suppression and two exceptions (one on a computed column, one on a source field) with the setting enabled and disabled, and then a second run over a 30-minute suppression window, and compares the suppressed document counts of the alerts with what it expects. `esql_exceptions_smoke.mjs` creates lists with several exceptions, each with several items, one target document per exception and one document that no exception excludes, runs the rule through Kibana with the advanced setting enabled or disabled, and compares the alerts with what it expects. `esql_exceptions_try.mjs` is interactive: you describe an exception (where its field lives, its type, its operator, and whether its value is invalid), and it creates the rule, runs it and compares the alerts and the rule execution log with the expected placement. Two earlier runs, which are not in the repository, excluded the expected rows for 27 operator and type cases against Elasticsearch, and compared `is`, `matches` and their negatives on a computed `text` column with the same exceptions on a `keyword` field, through real rules in Kibana.
+- Not covered: no Scout or Cypress test exercises exceptions on computed columns, and the only API integration tests that do (the two on alert suppression) have not been run. No automated test checks the log message of skipped items or the regression matrix of operators and field types for ES|QL rules. Every scenario marked "No existing tests found" needs manual execution or a new automated test.
 
 ## Test Execution Notes
 
@@ -2370,6 +2426,8 @@ Run the scenarios of "Exceptions on source fields keep working" twice: with the 
 - Many exception items are joined with AND in one WHERE stage
 - A CIDR value on a computed ip column excludes every address in the range, including multi-valued columns
 - More than 200 comparisons fail the rule, name the limit and the largest items
+- An exception on a computed column excludes rows before alert suppression, so they create no alert and are not counted as suppressed
+- A rule with alert suppression over a time window applies the exception on every run
 
 **P2: run as capacity allows, limited blast radius:**
 - A text source field and a computed text column can exclude different documents for the same exception

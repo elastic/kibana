@@ -6,6 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import { castArray } from 'lodash';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type { OutputColumns, SourceFieldTypes } from './types';
@@ -13,7 +14,8 @@ import type { OutputColumns, SourceFieldTypes } from './types';
 /** `_field_caps` takes the field names in the URL, which is limited to 4kb, so they are requested in batches. */
 const MAX_FIELDS_PARAM_LENGTH = 2000;
 
-const toBatches = (fields: readonly string[]): string[][] => {
+/** Splits the field names, in order, into groups whose names joined by commas fit in `MAX_FIELDS_PARAM_LENGTH` characters. Each `_field_caps` request then fits in the URL. A name longer than the limit goes alone in its own group. */
+const splitFieldsByParamLength = (fields: readonly string[]): string[][] => {
   const batches: string[][] = [];
   let current: string[] = [];
   let length = 0;
@@ -49,7 +51,7 @@ export const fetchSourceFieldTypes = async ({
   indexFilter?: estypes.QueryDslQueryContainer;
 }): Promise<{ sourceFieldTypes: SourceFieldTypes; hasIndices: boolean }> => {
   const responses = await Promise.all(
-    toBatches(fields).map((batch) =>
+    splitFieldsByParamLength(fields).map((batch) =>
       esClient.fieldCaps({
         index: indices,
         fields: batch,
@@ -65,7 +67,7 @@ export const fetchSourceFieldTypes = async ({
       types.set(field, Object.keys(capabilities));
     }
   }
-  const hasIndices = responses.some(({ indices: found }) => [found].flat().length > 0);
+  const hasIndices = responses.some(({ indices: found }) => castArray(found).length > 0);
   return { sourceFieldTypes: types, hasIndices };
 };
 
