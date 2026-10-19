@@ -136,8 +136,11 @@ export class WorkflowValidationService {
    * validation, not once per ES|QL step.
    */
   private createEsqlCallbacks(request: KibanaRequest): ESQLCallbacks {
-    const client = this.deps.getCoreStart().elasticsearch.client.asScoped(request).asCurrentUser;
-    const { getSources, getColumnsFor, getPolicies } = buildServerESQLCallbacks({ client });
+    const esClient = this.deps.getCoreStart().elasticsearch.client.asScoped(request);
+    const { getSources, getColumnsFor, getPolicies } = buildServerESQLCallbacks({
+      esClient,
+      logger: this.deps.logger,
+    });
     return {
       getSources: getSources && once(getSources),
       getColumnsFor,

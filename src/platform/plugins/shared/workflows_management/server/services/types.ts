@@ -75,4 +75,5 @@ export interface WorkflowValidationDeps {
   getActionsClient: () => Promise<IUnsecuredActionsClient>;
   getActionsClientWithRequest: (request: KibanaRequest) => Promise<PublicMethodsOf<ActionsClient>>;
   getCoreStart: () => CoreStart;
+  logger: Logger;
 }

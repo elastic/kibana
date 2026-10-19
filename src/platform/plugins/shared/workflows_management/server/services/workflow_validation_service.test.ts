@@ -8,6 +8,7 @@
  */
 
 import { of } from 'rxjs';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { CustomTriggerSchemaConfig } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import type { WorkflowValidationDeps } from './types';
@@ -60,6 +61,7 @@ const makeDeps = (
             client: { asScoped: jest.fn().mockReturnValue({ asCurrentUser: {} }) },
           },
         } as any),
+      logger: loggingSystemMock.createLogger(),
     },
     actionsClient,
     actionsClientWithRequest,
