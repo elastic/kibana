@@ -11,7 +11,7 @@ import type { ConversationRound } from '@kbn/agent-builder-common';
 import {
   getLatestVersion,
   getVersion,
-  type Attachment,
+  toAttachment,
   type VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
 import {
@@ -94,7 +94,6 @@ const resolveAttachmentNode = async (
     context,
     logger,
   }: {
-    /** The conversation's attachments, as carried by `round_complete`. */
     attachments: VersionedAttachment[];
     attachmentsService: AttachmentServiceStart;
     context: AttachmentSurfaceCompositionContext;
@@ -133,18 +132,11 @@ const resolveAttachmentNode = async (
     return [];
   }
 
-  const { id, type, origin, hidden } = attachment;
-
-  const attachmentAtVersion: Attachment = {
-    id,
-    type,
-    data: attachmentVersion.data as Attachment['data'],
-    ...(origin !== undefined ? { origin } : {}),
-    ...(hidden !== undefined ? { hidden } : {}),
-  };
-
   try {
-    const composition = await toSurfaceComposition(attachmentAtVersion, context);
+    const composition = await toSurfaceComposition(
+      toAttachment(attachment, attachmentVersion),
+      context
+    );
 
     const { valid, errors } = isomerRuntime.validate(composition);
 
@@ -181,10 +173,8 @@ export const buildComposition = async ({
   logger,
 }: {
   round: ConversationRound;
-  /** The conversation's attachments, as carried by `round_complete`. */
   attachments: VersionedAttachment[];
   attachmentsService: AttachmentServiceStart;
-  /** The request and space the round ran in, passed to each `toSurfaceComposition`. */
   context: AttachmentSurfaceCompositionContext;
   logger: Logger;
 }): Promise<SurfaceComposition> => {

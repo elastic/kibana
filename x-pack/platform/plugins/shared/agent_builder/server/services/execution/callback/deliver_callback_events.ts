@@ -51,7 +51,6 @@ export const deliverCallbackEvents = ({
 }: {
   execution: AgentExecution;
   events$: Observable<ChatEvent>;
-  /** The request the execution runs as, which the surface payload is rendered with. */
   request: KibanaRequest;
   callbackDeliveryService: CallbackDeliveryService;
   surfacesService: SurfacesService;
@@ -135,7 +134,7 @@ export const deliverCallbackEvents = ({
               return EMPTY;
             }
 
-            const completedEvent = roundCompleteEvent;
+            const completedEvent: RoundCompleteEvent = roundCompleteEvent;
 
             // The response message ready to post on the round's surface, such as Slack.
             const surfacePayload = surfacesService.renderPayload(completedEvent, {

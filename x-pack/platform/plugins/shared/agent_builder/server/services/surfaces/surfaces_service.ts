@@ -25,22 +25,13 @@ export interface SurfacesService {
    */
   renderPayload(
     event: RoundCompleteEvent,
-    options: RenderPayloadOptions
+    options: { originType?: ConversationOriginType } & AttachmentSurfaceCompositionContext
   ): Promise<SurfacePayload | undefined>;
 }
 
-/** Options of {@link SurfacesService.renderPayload}. */
-export interface RenderPayloadOptions extends AttachmentSurfaceCompositionContext {
-  /** Origin type of the round, which picks the surface. */
-  originType?: ConversationOriginType;
-}
-
 export class SurfacesServiceImpl implements SurfacesService {
-  /** Looks up attachment types, whose `toSurfaceComposition` renders attachments in place of their tags. */
   private readonly attachmentsService: AttachmentServiceStart;
   private readonly logger: Logger;
-
-  /** The surface renderers, one per origin type. */
   private readonly surfaceRenderers: SurfaceRenderer[] = [slackSurface];
 
   constructor({
@@ -56,7 +47,11 @@ export class SurfacesServiceImpl implements SurfacesService {
 
   async renderPayload(
     { data: { round, attachments = [] } }: RoundCompleteEvent,
-    { originType, request, spaceId }: RenderPayloadOptions
+    {
+      originType,
+      request,
+      spaceId,
+    }: { originType?: ConversationOriginType } & AttachmentSurfaceCompositionContext
   ): Promise<SurfacePayload | undefined> {
     const renderer = this.surfaceRenderers.find(({ id }) => id === originType);
 

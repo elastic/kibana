@@ -234,7 +234,13 @@ describe('buildComposition', () => {
     });
 
     expect(toSurfaceComposition).toHaveBeenCalledWith(
-      { id: 'a1', type: 'text', data: { version: 1 }, origin: 'origin-1' },
+      {
+        id: 'a1',
+        type: 'text',
+        data: { version: 1 },
+        origin: 'origin-1',
+        versionData: { version: 1, versionCount: 2, createdAt: '2026-10-06T00:00:00.000Z' },
+      },
       context
     );
   });
