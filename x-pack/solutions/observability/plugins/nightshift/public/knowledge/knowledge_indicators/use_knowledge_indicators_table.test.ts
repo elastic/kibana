@@ -9,6 +9,7 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import type { CriteriaWithPagination } from '@elastic/eui';
 import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
 import type { Feature } from '@kbn/significant-events-schema';
+import { BULK_WRITE_CONFLICT_MESSAGE } from '../../common/errors';
 import type { PromoteResult } from '../../data/rules/use_queries_api';
 import type { KnowledgeIndicatorsQuery } from './use_knowledge_indicators_query_params';
 import {
@@ -301,6 +302,23 @@ describe('useKnowledgeIndicatorsTable', () => {
       });
 
       expect(mockToasts.addWarning).toHaveBeenCalled();
+    });
+
+    it('tells the user the source was busy when changes hit a conflict', async () => {
+      const ki = makeFeatureKI({ id: 'f1', source_id: 's1' });
+      mockKnowledgeIndicators = [ki];
+      mockExcludeFeaturesInBulk.mockResolvedValue({ failedCount: 1, conflictCount: 1 });
+
+      const { result } = renderHook(() => useKnowledgeIndicatorsTable());
+      act(() => {
+        result.current.setSelectedKnowledgeIndicators([ki]);
+      });
+
+      await act(async () => {
+        await result.current.handleBulkExclude();
+      });
+
+      expect(mockToasts.addWarning).toHaveBeenCalledWith({ title: BULK_WRITE_CONFLICT_MESSAGE });
     });
 
     it('shows error toast when operation throws', async () => {

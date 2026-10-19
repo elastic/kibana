@@ -9,6 +9,7 @@ import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { DISCOVERY_QUERIES_QUERY_KEY, FEATURES_QUERY_KEY } from '../query_keys';
+import { getFormattedError } from '../../common/errors';
 import { useKibana } from '../../hooks/use_kibana';
 import { useQueriesApi } from '../rules/use_queries_api';
 import { useStreamFeaturesApi } from './use_stream_features_api';
@@ -61,7 +62,7 @@ export function useStreamKnowledgeIndicatorsBulkDelete({
       });
     },
     onError: (error) => {
-      toasts.addError(error, {
+      toasts.addError(getFormattedError(error), {
         title: BULK_DELETE_ERROR_TOAST_TITLE,
       });
     },

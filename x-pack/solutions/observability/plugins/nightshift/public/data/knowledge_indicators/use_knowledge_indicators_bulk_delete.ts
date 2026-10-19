@@ -9,13 +9,16 @@ import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { DISCOVERY_QUERIES_QUERY_KEY, FEATURES_QUERY_KEY } from '../query_keys';
+import { BULK_WRITE_CONFLICT_MESSAGE } from '../../common/errors';
 import { useKibana } from '../../hooks/use_kibana';
 import type { BulkOperationResult } from './use_discovery_features_api';
 import { useDiscoveryFeaturesApi } from './use_discovery_features_api';
 
 interface BulkDeleteResult {
   succeeded: number;
+  /** Includes the `conflicts`. */
   failed: number;
+  conflicts: number;
 }
 
 interface UseKnowledgeIndicatorsBulkDeleteParams {
@@ -73,10 +76,12 @@ export function useKnowledgeIndicatorsBulkDelete({
 
       let succeeded = 0;
       let failed = 0;
+      let conflicts = 0;
 
       if (featuresSettled.status === 'fulfilled') {
         succeeded += featuresSettled.value.succeededCount;
-        failed += featuresSettled.value.failedCount;
+        failed += featuresSettled.value.failedCount + featuresSettled.value.conflictCount;
+        conflicts += featuresSettled.value.conflictCount;
       } else {
         failed += features.length;
       }
@@ -89,14 +94,19 @@ export function useKnowledgeIndicatorsBulkDelete({
       }
 
       if (succeeded === 0 && failed > 0) {
-        throw new Error(BULK_DELETE_REJECTED_ERROR_MESSAGE);
+        throw new Error(
+          conflicts > 0 ? BULK_WRITE_CONFLICT_MESSAGE : BULK_DELETE_REJECTED_ERROR_MESSAGE
+        );
       }
 
-      return { succeeded, failed };
+      return { succeeded, failed, conflicts };
     },
-    onSuccess: ({ succeeded, failed }) => {
+    onSuccess: ({ succeeded, failed, conflicts }) => {
       if (failed > 0) {
-        toasts.addWarning({ title: getBulkDeletePartialToastTitle(succeeded, failed) });
+        toasts.addWarning({
+          title: getBulkDeletePartialToastTitle(succeeded, failed),
+          text: conflicts > 0 ? BULK_WRITE_CONFLICT_MESSAGE : undefined,
+        });
       } else {
         toasts.addSuccess({ title: getBulkDeleteSuccessToastTitle(succeeded) });
       }

@@ -11,7 +11,6 @@ import { useKibana } from '../../hooks/use_kibana';
 
 export interface BulkOperationResult {
   succeededCount: number;
-  /** Operations not applied, including the `conflictCount` ones. */
   failedCount: number;
   /** Operations not applied because their source was busy; the same request can succeed later. */
   conflictCount: number;
@@ -51,7 +50,7 @@ export function useDiscoveryFeaturesApi(): DiscoveryFeaturesApi {
       );
       return {
         succeededCount: succeeded,
-        failedCount: failed + conflicts,
+        failedCount: failed,
         conflictCount: conflicts,
       };
     };
