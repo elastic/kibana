@@ -36,7 +36,6 @@ describe('selectSkills', () => {
     const result = await selectSkills({
       skills,
       skillsStore,
-      aiIndicesEnabled: false,
       agentConfiguration: createConfig(),
     });
 
@@ -52,7 +51,6 @@ describe('selectSkills', () => {
     const result = await selectSkills({
       skills,
       skillsStore,
-      aiIndicesEnabled: false,
       agentConfiguration: createConfig({ skill_ids: [], enable_elastic_capabilities: false }),
     });
 
@@ -68,7 +66,6 @@ describe('selectSkills', () => {
     const result = await selectSkills({
       skills,
       skillsStore,
-      aiIndicesEnabled: false,
       agentConfiguration: createConfig({ skill_ids: ['custom-1'] }),
     });
 
@@ -87,7 +84,6 @@ describe('selectSkills', () => {
     const result = await selectSkills({
       skills,
       skillsStore,
-      aiIndicesEnabled: false,
       agentConfiguration: createConfig({ enable_elastic_capabilities: true }),
     });
 
@@ -113,7 +109,6 @@ describe('selectSkills', () => {
     const result = await selectSkills({
       skills,
       skillsStore,
-      aiIndicesEnabled: false,
       agentConfiguration: createConfig({
         skill_ids: ['builtin-1', 'custom-1'],
         enable_elastic_capabilities: true,
@@ -139,7 +134,6 @@ describe('selectSkills', () => {
     const result = await selectSkills({
       skills,
       skillsStore,
-      aiIndicesEnabled: false,
       agentConfiguration: createConfig({
         skill_ids: ['custom-1'],
         enable_elastic_capabilities: true,
@@ -163,7 +157,6 @@ describe('selectSkills', () => {
     const result = await selectSkills({
       skills,
       skillsStore,
-      aiIndicesEnabled: false,
       agentConfiguration: createConfig({ enable_elastic_capabilities: true }),
     });
 
@@ -183,7 +176,6 @@ describe('selectSkills', () => {
     const result = await selectSkills({
       skills,
       skillsStore,
-      aiIndicesEnabled: false,
       agentConfiguration: createConfig({
         skill_ids: ['streams-management'],
         enable_elastic_capabilities: true,
@@ -202,7 +194,6 @@ describe('selectSkills', () => {
       const result = await selectSkills({
         skills,
         skillsStore,
-        aiIndicesEnabled: false,
         agentConfiguration: createConfig(),
         additionalSkillIds: [],
       });
@@ -223,7 +214,6 @@ describe('selectSkills', () => {
       const result = await selectSkills({
         skills,
         skillsStore,
-        aiIndicesEnabled: false,
         agentConfiguration: createConfig(),
         additionalSkillIds: ['plugin-skill-1'],
       });
@@ -250,7 +240,6 @@ describe('selectSkills', () => {
       const result = await selectSkills({
         skills,
         skillsStore,
-        aiIndicesEnabled: false,
         agentConfiguration: createConfig({ skill_ids: ['shared-skill', 'explicit-only'] }),
         additionalSkillIds: ['shared-skill', 'plugin-only'],
       });
@@ -272,7 +261,6 @@ describe('selectSkills', () => {
       await selectSkills({
         skills,
         skillsStore,
-        aiIndicesEnabled: false,
         agentConfiguration: createConfig({ skill_ids: ['custom-1'] }),
         additionalSkillIds: [],
       });
@@ -285,7 +273,7 @@ describe('selectSkills', () => {
   describe('built-in capability skills', () => {
     const kiRetrievalSkill = createSkill(kiRetrievalSkillId, true);
 
-    it('grants ki-retrieval when AI Indices are enabled and the agent has at least one AI Index', async () => {
+    it('grants ki-retrieval when the agent has at least one AI Index', async () => {
       const skills = createSkillsServiceMock();
       skills.bulkGet.mockResolvedValue(new Map([[kiRetrievalSkillId, kiRetrievalSkill]]));
       const skillsStore = createSkillsStoreMock();
@@ -293,28 +281,12 @@ describe('selectSkills', () => {
       const result = await selectSkills({
         skills,
         skillsStore,
-        aiIndicesEnabled: true,
         agentConfiguration: createConfig({ ai_indices: ['elastic'] }),
       });
 
       expect(skills.bulkGet).toHaveBeenCalledWith([kiRetrievalSkillId]);
       expect(result).toEqual([kiRetrievalSkill]);
       expect(skillsStore.add).toHaveBeenCalledWith(kiRetrievalSkill);
-    });
-
-    it('does not grant ki-retrieval when AI Indices are disabled', async () => {
-      const skills = createSkillsServiceMock();
-      const skillsStore = createSkillsStoreMock();
-
-      const result = await selectSkills({
-        skills,
-        skillsStore,
-        aiIndicesEnabled: false,
-        agentConfiguration: createConfig({ ai_indices: ['elastic'] }),
-      });
-
-      expect(skills.bulkGet).not.toHaveBeenCalled();
-      expect(result).toEqual([]);
     });
 
     it('does not grant ki-retrieval when the agent has no AI Index', async () => {
@@ -324,7 +296,6 @@ describe('selectSkills', () => {
       const result = await selectSkills({
         skills,
         skillsStore,
-        aiIndicesEnabled: true,
         agentConfiguration: createConfig({ ai_indices: [] }),
       });
 
@@ -349,7 +320,6 @@ describe('selectSkills', () => {
       const result = await selectSkills({
         skills,
         skillsStore,
-        aiIndicesEnabled: true,
         agentConfiguration: createConfig({
           skill_ids: ['custom-1', kiRetrievalSkillId],
           ai_indices: ['elastic'],
@@ -361,7 +331,7 @@ describe('selectSkills', () => {
       expect(result.map((s) => s.id)).toEqual(['custom-1', kiRetrievalSkillId, 'plugin-1']);
     });
 
-    it('grants nothing when the registry does not return the skill (unavailable in this space)', async () => {
+    it('grants nothing when the registry does not return the skill (Context Engine off in this space)', async () => {
       const skills = createSkillsServiceMock();
       skills.bulkGet.mockResolvedValue(new Map());
       const skillsStore = createSkillsStoreMock();
@@ -369,7 +339,6 @@ describe('selectSkills', () => {
       const result = await selectSkills({
         skills,
         skillsStore,
-        aiIndicesEnabled: true,
         agentConfiguration: createConfig({ ai_indices: ['elastic'] }),
       });
 

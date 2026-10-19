@@ -10,34 +10,30 @@ import { kiRetrievalSkillId } from '@kbn/agent-builder-common';
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { SkillsService, WritableSkillsStore } from '@kbn/agent-builder-server/runner';
 
-interface BuiltInCapabilityContext {
-  agentConfiguration: AgentConfiguration;
-  /** Whether AI Indices are usable in this run: experimental features and Context Engine both on. */
-  aiIndicesEnabled: boolean;
-}
-
 interface BuiltInCapabilitySkillRule {
   skillId: string;
-  applies: (context: BuiltInCapabilityContext) => boolean;
+  applies: (agentConfiguration: AgentConfiguration) => boolean;
 }
 
 /**
  * Skills Agent Builder grants to an agent as a built-in capability, outside its configuration.
- * The user never picks or removes them, so the skills listed here should be `hidden`. The
- * registry still applies each skill's own availability when it is fetched, so a rule only says
- * when the capability is relevant, not whether the skill exists in this space.
+ * The user never picks or removes them, so the skills listed here should be `hidden`. A rule only
+ * says when the capability is relevant; whether the skill exists in this space is the skill's own
+ * `availability`, which the registry applies when the skill is fetched.
  */
 const builtInCapabilitySkillRules: BuiltInCapabilitySkillRule[] = [
   {
-    // Context Engine retrieval: the agent can reach at least one AI Index.
+    // Context Engine retrieval: the agent can reach at least one AI Index. The skill itself is
+    // unavailable in spaces where `contextEngine:enabled` is off.
     skillId: kiRetrievalSkillId,
-    applies: ({ agentConfiguration, aiIndicesEnabled }) =>
-      aiIndicesEnabled && (agentConfiguration.ai_indices?.length ?? 0) > 0,
+    applies: ({ ai_indices: aiIndices }) => (aiIndices?.length ?? 0) > 0,
   },
 ];
 
-const getBuiltInCapabilitySkillIds = (context: BuiltInCapabilityContext): string[] =>
-  builtInCapabilitySkillRules.filter((rule) => rule.applies(context)).map(({ skillId }) => skillId);
+const getBuiltInCapabilitySkillIds = (agentConfiguration: AgentConfiguration): string[] =>
+  builtInCapabilitySkillRules
+    .filter(({ applies }) => applies(agentConfiguration))
+    .map(({ skillId }) => skillId);
 
 /**
  * Resolves the set of skills available to an agent based on its configuration:
@@ -100,22 +96,17 @@ export const selectSkills = async ({
   skillsStore,
   agentConfiguration,
   additionalSkillIds,
-  aiIndicesEnabled,
 }: {
   skills: SkillsService;
   skillsStore: WritableSkillsStore;
   agentConfiguration: AgentConfiguration;
   additionalSkillIds?: string[];
-  aiIndicesEnabled: boolean;
 }): Promise<InternalSkillDefinition[]> => {
   const agentSkills = await resolveAgentSkills({
     skills,
     agentConfiguration,
     additionalSkillIds,
-    builtInCapabilitySkillIds: getBuiltInCapabilitySkillIds({
-      agentConfiguration,
-      aiIndicesEnabled,
-    }),
+    builtInCapabilitySkillIds: getBuiltInCapabilitySkillIds(agentConfiguration),
   });
   for (const skill of agentSkills) {
     skillsStore.add(skill);

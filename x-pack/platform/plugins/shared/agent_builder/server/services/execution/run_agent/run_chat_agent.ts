@@ -206,7 +206,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     skillsStore,
     agentConfiguration,
     additionalSkillIds: filteredPluginSkillIds,
-    aiIndicesEnabled: experimentalFeatures.aiIndices,
   });
 
   logger.debug(`Running chat agent with connector: ${model.connector.name}, runId: ${runId}`);
