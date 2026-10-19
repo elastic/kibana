@@ -60,6 +60,9 @@ const inputSchema = lazySchema(() =>
       .number()
       .min(1)
       .max(24 * 30),
+    /** 0 turns the cooldown off. */
+    cooldown_hours: z.number().min(0).max(72),
+    max_cooldown_hours: z.number().min(1).max(72),
   })
 );
 
@@ -159,6 +162,34 @@ const findJoinedSeries = ({
   return joined;
 };
 
+/**
+ * A rule that is in no live series and whose latest series closed on its own is left alone for a
+ * while: `cooldown × 2^(k−1)`, k being how many of its series closed in a row, capped at
+ * `maxCooldown`. A series an operator closed is not ours to cool down; that is the operator's call.
+ */
+const withCooldown = ({
+  classification,
+  prior,
+  cooldownMs,
+  maxCooldownMs,
+  now,
+}: {
+  classification: DetectionClassification;
+  prior: PriorSeries | undefined;
+  cooldownMs: number;
+  maxCooldownMs: number;
+  now: number;
+}): DetectionClassification => {
+  if (classification.reason !== 'not_live_member' || cooldownMs <= 0) return classification;
+  if (!prior || prior.status !== 'inactive' || prior.statusSetBy === 'operator') {
+    return classification;
+  }
+  const window = Math.min(cooldownMs * 2 ** (prior.consecutiveInactive - 1), maxCooldownMs);
+  return now - Date.parse(prior.updatedAt) < window
+    ? { decision: 'skip', reason: 'in_cooldown' }
+    : classification;
+};
+
 /** A skip is only as good as the series it rests on: an old series or a joining rule withdraws it. */
 const withEscalation = ({
   classification,
@@ -195,6 +226,10 @@ export interface ClassifyBatchParams {
   shadowMode: boolean;
   /** A skip is withdrawn when the series it rests on is older than this. */
   maxSkipAgeMs: number;
+  /** The base cooldown after a rule's series closes; 0 turns it off. */
+  cooldownMs: number;
+  /** The most the cooldown grows to as the rule's series keep closing. */
+  maxCooldownMs: number;
   /** The clock the series ages are read against. */
   now: number;
   probeConcurrency: number;
@@ -217,6 +252,8 @@ export const classifyBatch = async ({
   columns,
   shadowMode,
   maxSkipAgeMs,
+  cooldownMs,
+  maxCooldownMs,
   now,
   probeConcurrency,
   findLiveMembers,
@@ -250,6 +287,12 @@ export const classifyBatch = async ({
           severity: series.severity,
           ...(series.assessmentNote ? { assessment_note: series.assessmentNote } : {}),
           updated_at: series.updatedAt,
+          ...(series.status === 'inactive'
+            ? {
+                ended_by:
+                  series.statusSetBy === 'operator' ? ('operator' as const) : ('engine' as const),
+              }
+            : {}),
         }
       : undefined;
   };
@@ -295,7 +338,16 @@ export const classifyBatch = async ({
     const series = memberships.get(ruleUuid) ?? [];
     const classification: DetectionClassification = withinCap
       ? withEscalation({
-          classification: classifyDetection({ memberships: series, probe: probed ?? NOT_PROBED }),
+          classification: withCooldown({
+            classification: classifyDetection({
+              memberships: series,
+              probe: probed ?? NOT_PROBED,
+            }),
+            prior: priorSeries.get(ruleUuid),
+            cooldownMs,
+            maxCooldownMs,
+            now,
+          }),
           memberships: series,
           maxSkipAgeMs,
           now,
@@ -372,6 +424,8 @@ export const classifyDetectionsStepDefinition = ({ logger }: { logger: Logger })
         probe_concurrency: probeConcurrency,
         budget_ms: budgetMs,
         max_skip_age_hours: maxSkipAgeHours,
+        cooldown_hours: cooldownHours,
+        max_cooldown_hours: maxCooldownHours,
       } = context.input;
       const esClient = context.contextManager.getScopedEsClient();
       const ruleEventsClient = new RuleEventsClient({ esClient, space: spaceId });
@@ -396,6 +450,8 @@ export const classifyDetectionsStepDefinition = ({ logger }: { logger: Logger })
         columns,
         shadowMode,
         maxSkipAgeMs: maxSkipAgeHours * 3_600_000,
+        cooldownMs: cooldownHours * 3_600_000,
+        maxCooldownMs: maxCooldownHours * 3_600_000,
         now,
         probeConcurrency,
         findLiveMembers: (ruleUuids) => ruleEventsClient.findLiveMembers({ ruleUuids }),

@@ -20,6 +20,10 @@ const SKIP_REASON_LABELS: Record<string, string> = {
     defaultMessage:
       "The rule's query returns nothing in the current window and the event already records it as healthy, so nothing changed.",
   }),
+  in_cooldown: i18n.translate('xpack.nightshift.skippedDetection.reason.inCooldown', {
+    defaultMessage:
+      "The rule's last event closed on its own a short while ago, so its detections are held back for a cooldown that grows each time the rule recurs.",
+  }),
 };
 
 /** What the classifier decided, in words: its reason, or the reason as stored when it is unknown. */

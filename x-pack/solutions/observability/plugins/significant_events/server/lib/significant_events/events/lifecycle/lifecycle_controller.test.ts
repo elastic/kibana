@@ -46,8 +46,21 @@ describe('decideStatusChange', () => {
 
     expect(decideStatusChange({ latest, change: DEACTIVATE, timestamp: TIMESTAMP })).toEqual({
       write: true,
-      event: { ...latest, '@timestamp': TIMESTAMP, status: 'inactive' },
+      event: { ...latest, '@timestamp': TIMESTAMP, status: 'inactive', status_set_by: 'operator' },
     });
+  });
+
+  it('marks only the version an operator wrote, and does not carry the mark forward', () => {
+    const operatorClosed = createEvent({ status: 'inactive', status_set_by: 'operator' });
+
+    const reopened = decideStatusChange({
+      latest: operatorClosed,
+      change: StatusChange.assessed('breached'),
+      timestamp: TIMESTAMP,
+    });
+
+    expect(reopened).toMatchObject({ write: true, event: { status: 'active' } });
+    expect(reopened.write && reopened.event).not.toHaveProperty('status_set_by');
   });
 
   it('records the given note and keeps the stored one when it is omitted or blank', () => {

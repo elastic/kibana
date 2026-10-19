@@ -185,12 +185,15 @@ export const decideStatusChange = ({
 
   // A blank note counts as omitted, so it cannot overwrite the existing one.
   const note = assessmentNote?.trim();
+  // Only the version an operator wrote carries the marker; later versions must not inherit it.
+  const { status_set_by: _previousSetBy, ...carried } = latest;
   return {
     write: true,
     event: {
-      ...latest,
+      ...carried,
       '@timestamp': timestamp,
       status: decision.status,
+      ...(change.kind === 'operator' ? { status_set_by: 'operator' as const } : {}),
       ...(note ? { assessment_note: note } : {}),
     },
   };

@@ -605,18 +605,21 @@ describe('RuleEventsClient', () => {
       timestamp,
       note,
       ruleUuid,
+      setBy,
     }: {
       eventId: string;
       status: string;
       timestamp: string;
       note?: string;
       ruleUuid: string;
+      setBy?: 'operator';
     }): MockRow => ({
       source: ruleEventSource({ alert: { status }, '@timestamp': timestamp }),
       dataJson: JSON.stringify({
         ...dataDoc,
         event_id: eventId,
         ...(note ? { assessment_note: note } : {}),
+        ...(setBy ? { status_set_by: setBy } : {}),
         signals: [
           {
             type: 'detection',
@@ -647,6 +650,45 @@ describe('RuleEventsClient', () => {
       expect(q).toContain(
         'MV_INTERSECTS(FIELD_EXTRACT(data, "signals.metadata.rule_uuid"), ["rule-A"])'
       );
+    });
+
+    it('counts the series that closed in a row, newest first, and who set the latest status', async () => {
+      const rows = [
+        rowOf({
+          eventId: 'a',
+          status: 'inactive',
+          timestamp: '2026-10-10T10:00:00.000Z',
+          ruleUuid: 'rule-A',
+        }),
+        rowOf({
+          eventId: 'b',
+          status: 'active',
+          timestamp: '2026-10-11T10:00:00.000Z',
+          ruleUuid: 'rule-A',
+        }),
+        rowOf({
+          eventId: 'c',
+          status: 'inactive',
+          timestamp: '2026-10-12T10:00:00.000Z',
+          ruleUuid: 'rule-A',
+        }),
+        rowOf({
+          eventId: 'd',
+          status: 'inactive',
+          timestamp: '2026-10-13T10:00:00.000Z',
+          ruleUuid: 'rule-A',
+          setBy: 'operator',
+        }),
+      ];
+      const { client } = createClient(async () => sourceResponse(rows));
+
+      const prior = await client.findPriorSeries({ ruleUuids: ['rule-A'], from: 'x' });
+
+      expect(prior.get('rule-A')).toMatchObject({
+        eventId: 'd',
+        statusSetBy: 'operator',
+        consecutiveInactive: 2,
+      });
     });
 
     it('keeps, per rule, the series written most recently, with its status and note', async () => {

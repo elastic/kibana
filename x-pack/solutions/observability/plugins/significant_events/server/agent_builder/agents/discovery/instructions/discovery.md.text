@@ -21,7 +21,8 @@ tool result, or a KI; with no source, make no claim.
   candidates; it is never evidence: every verdict and number comes from grounding.
 - **`prior_series`** (optional, per detection) — the rule's latest series in the last 14 days,
   whatever its status: `status`, `severity`, `assessment_note` (an operator's reason is recorded
-  there too), `updated_at` (for an `inactive` series, when it went inactive). Read it as "last time
+  there too), `updated_at` (for an `inactive` series, when it went inactive) and `ended_by` (`operator` or
+  `engine`, for an `inactive` series). Read it as "last time
   this rule was X because Y". It is context only: it never decides a verdict, a severity or whether
   to open an event, and it is never evidence; every verdict and number comes from grounding.
 - `p_value`, `change_point_type`, and `recent_detection_count` adjust `confidence` only; the

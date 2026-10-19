@@ -65,6 +65,18 @@ triggers:
           minimum: 1
           maximum: 720
           description: 'A detection is never skipped on the strength of a live series older than this many hours: it goes to the agent, so a long-running event is re-judged at least this often.'
+        classifierCooldownHours:
+          type: number
+          default: 1
+          minimum: 0
+          maximum: 72
+          description: 'After a rule''s series closes on its own, its detections are skipped for this many hours; the wait doubles with each consecutive series that closes, up to classifierMaxCooldownHours. A series an operator closed is never put in cooldown. 0 turns the cooldown off.'
+        classifierMaxCooldownHours:
+          type: number
+          default: 6
+          minimum: 1
+          maximum: 72
+          description: 'The longest a rule''s detections are skipped after its series closes: a real recurrence is delayed by at most this long.'
         classifierBudgetMs:
           type: number
           default: 20000
@@ -211,6 +223,8 @@ steps:
       probe_concurrency: '${{ inputs.classifierProbeConcurrency }}'
       budget_ms: '${{ inputs.classifierBudgetMs }}'
       max_skip_age_hours: '${{ inputs.classifierMaxSkipAgeHours }}'
+      cooldown_hours: '${{ inputs.classifierCooldownHours }}'
+      max_cooldown_hours: '${{ inputs.classifierMaxCooldownHours }}'
     on-failure:
       continue: true
 

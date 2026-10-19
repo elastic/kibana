@@ -108,6 +108,12 @@ export const significantEventSchema = lazySchema(() =>
         `
       ),
     investigations: z.array(significantEventInvestigationSchema).max(100).optional(),
+    status_set_by: z
+      .literal('operator')
+      .optional()
+      .describe(
+        'Set when an operator chose this version’s status; absent when the lifecycle or an engine did.'
+      ),
   })
 );
 

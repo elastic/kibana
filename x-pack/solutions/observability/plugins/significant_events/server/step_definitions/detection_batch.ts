@@ -53,6 +53,8 @@ export const batchPriorSeriesSchema = lazySchema(() =>
     severity: z.string().max(32),
     assessment_note: z.string().max(MAX_TEXT_LENGTH).optional(),
     updated_at: z.string().max(64),
+    /** For an `inactive` series: an operator closed it, or the engine did. */
+    ended_by: z.enum(['operator', 'engine']).optional(),
   })
 );
 

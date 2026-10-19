@@ -62,6 +62,8 @@ const batchParams = (overrides: Partial<ClassifyBatchParams> = {}): ClassifyBatc
   rows: [],
   shadowMode: false,
   maxSkipAgeMs: 24 * HOUR_MS,
+  cooldownMs: HOUR_MS,
+  maxCooldownMs: 6 * HOUR_MS,
   now: NOW,
   probeConcurrency: 5,
   findLiveMembers: jest.fn(async () => new Map()),
@@ -135,6 +137,99 @@ describe('classifyBatch', () => {
       not_live_member: 1,
     });
     expect(output.probe_status_counts).toEqual({ ok: 2 });
+  });
+
+  describe('the cooldown after a series closes on its own', () => {
+    const closed = (overrides: Partial<PriorSeries> = {}): PriorSeries => ({
+      eventId: 'event-0',
+      status: 'inactive',
+      severity: 'low',
+      assessmentNote: undefined,
+      updatedAt: new Date(NOW - 30 * 60_000).toISOString(),
+      statusSetBy: undefined,
+      consecutiveInactive: 1,
+      ...overrides,
+    });
+    const decide = async (prior: PriorSeries | undefined, shadowMode = false) =>
+      (
+        await classifyBatch(
+          batchParams({
+            rows: [detectionRow('rule-A')],
+            shadowMode,
+            findPriorSeries: jest.fn(async () => new Map(prior ? [['rule-A', prior]] : [])),
+          })
+        )
+      ).decisions[0];
+
+    it('skips a rule whose series closed within the cooldown', async () => {
+      expect(await decide(closed())).toMatchObject({ decision: 'skip', reason: 'in_cooldown' });
+    });
+
+    it('lets it through once the cooldown has passed', async () => {
+      const aged = closed({ updatedAt: new Date(NOW - 90 * 60_000).toISOString() });
+
+      expect(await decide(aged)).toMatchObject({
+        decision: 'needs_agent',
+        reason: 'not_live_member',
+      });
+    });
+
+    it('doubles the cooldown for each consecutive series that closed, up to the maximum', async () => {
+      const aged = new Date(NOW - 3 * HOUR_MS).toISOString();
+
+      expect(await decide(closed({ updatedAt: aged, consecutiveInactive: 2 }))).toMatchObject({
+        decision: 'needs_agent',
+      });
+      expect(await decide(closed({ updatedAt: aged, consecutiveInactive: 3 }))).toMatchObject({
+        decision: 'skip',
+      });
+      const longAgo = new Date(NOW - 7 * HOUR_MS).toISOString();
+      expect(await decide(closed({ updatedAt: longAgo, consecutiveInactive: 9 }))).toMatchObject({
+        decision: 'needs_agent',
+      });
+    });
+
+    it('leaves a series an operator closed to the operator', async () => {
+      expect(await decide(closed({ statusSetBy: 'operator' }))).toMatchObject({
+        decision: 'needs_agent',
+      });
+    });
+
+    it('does not apply to a rule with no prior series, or one whose series is live', async () => {
+      expect(await decide(undefined)).toMatchObject({ decision: 'needs_agent' });
+      expect(await decide(closed({ status: 'active', consecutiveInactive: 0 }))).toMatchObject({
+        decision: 'needs_agent',
+      });
+    });
+
+    it('is off at zero', async () => {
+      const output = await classifyBatch(
+        batchParams({
+          rows: [detectionRow('rule-A')],
+          cooldownMs: 0,
+          findPriorSeries: jest.fn(async () => new Map([['rule-A', closed()]])),
+        })
+      );
+
+      expect(output.decisions[0]).toMatchObject({ decision: 'needs_agent' });
+    });
+
+    it('says who ended an inactive series to the agent', async () => {
+      const output = await classifyBatch(
+        batchParams({
+          rows: [detectionRow('rule-A')],
+          cooldownMs: 0,
+          findPriorSeries: jest.fn(
+            async () => new Map([['rule-A', closed({ statusSetBy: 'operator' })]])
+          ),
+        })
+      );
+
+      expect(output.batch[0].prior_series).toMatchObject({
+        status: 'inactive',
+        ended_by: 'operator',
+      });
+    });
   });
 
   describe('the escalations that withdraw a skip', () => {
@@ -273,6 +368,8 @@ describe('classifyBatch', () => {
         severity: 'low',
         assessmentNote: 'Benign deploy.',
         updatedAt: '2026-10-12T10:00:00.000Z',
+        statusSetBy: undefined,
+        consecutiveInactive: 1,
       };
       const findPriorSeries = jest.fn(async () => new Map([['rule-A', prior]]));
 
@@ -285,6 +382,7 @@ describe('classifyBatch', () => {
         severity: 'low',
         assessment_note: 'Benign deploy.',
         updated_at: '2026-10-12T10:00:00.000Z',
+        ended_by: 'engine',
       });
       expect(output.batch[1]).not.toHaveProperty('prior_series');
     });
@@ -310,6 +408,7 @@ describe('classifyBatch', () => {
 
       expect(output.batch[0].classifier).toBeDefined();
       expect(output.batch[0].prior_series).toMatchObject({ status: 'active', severity: 'high' });
+      expect(output.batch[0].prior_series).not.toHaveProperty('ended_by');
     });
 
     it('reads cells by the given column names', async () => {
@@ -490,6 +589,8 @@ describe('classifyDetectionsStepDefinition', () => {
     probe_concurrency: 5,
     budget_ms: 20_000,
     max_skip_age_hours: 24,
+    cooldown_hours: 1,
+    max_cooldown_hours: 6,
   };
 
   const createDefinition = () => {
@@ -553,6 +654,8 @@ describe('classifyDetectionsStepDefinition', () => {
     ['probe_timeout_ms above 30000', { probe_timeout_ms: 30_001 }],
     ['budget_ms below 2000', { budget_ms: 1_999 }],
     ['budget_ms above 60000', { budget_ms: 60_001 }],
+    ['cooldown_hours below 0', { cooldown_hours: -1 }],
+    ['max_cooldown_hours below 1', { max_cooldown_hours: 0 }],
     ['max_skip_age_hours below 1', { max_skip_age_hours: 0 }],
     ['max_skip_age_hours above 720', { max_skip_age_hours: 721 }],
   ])('rejects %s', (_name, override) => {

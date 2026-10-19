@@ -234,6 +234,13 @@ export interface PriorSeries {
   assessmentNote: string | undefined;
   /** When the latest version was written; for an `inactive` series, when it went inactive. */
   updatedAt: string;
+  /** Whether an operator chose the status the series is in. */
+  statusSetBy: 'operator' | undefined;
+  /**
+   * How many of the rule's series, newest first, are `inactive` in a row: 0 when the latest is
+   * live, and it counts only the series written since the lookback start.
+   */
+  consecutiveInactive: number;
 }
 
 /** A rule's membership in one live series, with that member's latest stored signal. */
@@ -467,22 +474,29 @@ export class RuleEventsClient {
     });
 
     const requested = new Set(ruleUuids);
+    const seriesByRule = new Map<string, SignificantEvent[]>();
     for (const event of hits.map(decodeSignificantEvent)) {
-      const series: PriorSeries = {
-        eventId: event.event_id,
-        status: event.status,
-        severity: event.severity,
-        assessmentNote: event.assessment_note,
-        updatedAt: event['@timestamp'],
-      };
       for (const signal of event.signals ?? []) {
         const ruleUuid = signal.metadata.rule_uuid;
         if (!ruleUuid || !requested.has(ruleUuid)) continue;
-        const known = prior.get(ruleUuid);
-        if (!known || Date.parse(series.updatedAt) > Date.parse(known.updatedAt)) {
-          prior.set(ruleUuid, series);
-        }
+        seriesByRule.set(ruleUuid, [...(seriesByRule.get(ruleUuid) ?? []), event]);
       }
+    }
+    for (const [ruleUuid, series] of seriesByRule) {
+      const newestFirst = [...series].sort(
+        (a, b) => Date.parse(b['@timestamp']) - Date.parse(a['@timestamp'])
+      );
+      const [latest] = newestFirst;
+      const liveIndex = newestFirst.findIndex(({ status }) => status !== 'inactive');
+      prior.set(ruleUuid, {
+        eventId: latest.event_id,
+        status: latest.status,
+        severity: latest.severity,
+        assessmentNote: latest.assessment_note,
+        updatedAt: latest['@timestamp'],
+        statusSetBy: latest.status_set_by,
+        consecutiveInactive: liveIndex === -1 ? newestFirst.length : liveIndex,
+      });
     }
     return prior;
   }
