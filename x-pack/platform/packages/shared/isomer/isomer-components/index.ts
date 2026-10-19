@@ -11,8 +11,10 @@ export {
   type DividerNode,
   type HeaderNode,
   type MarkdownNode,
+  type QuoteNode,
   context,
   divider,
   header,
   markdown,
+  quote,
 } from './src/primitives';
