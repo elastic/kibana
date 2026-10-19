@@ -6,6 +6,7 @@
  */
 
 import type { HuntBehaviorIoc } from '@kbn/alertzero-common';
+import { Parser, Walker } from '@elastic/esql';
 import type { ValidatedBehavior } from './types';
 import { assertEsqlGroundedInReport } from './report_grounding';
 
@@ -72,9 +73,13 @@ export const artifactSetKey = (
  * the query grounds in the whole shared set and stops grounding once this artifact is taken
  * away: the alternative needs it, so rows for it come back. A query grounded on one artifact
  * and merely mentioning another fails the second test, because removing the mention changes
- * nothing. The second rule can miss an alternative nested under an `AND` whose other side
- * grounds on its own; that errs toward generating a sibling that was covered, never toward
- * retiring one that was not, which is the right way round for a reason marked final.
+ * nothing. Grounding is also indifferent to a negation elsewhere in the query, since `AND`
+ * needs only one grounded side: `IN (a, b) AND field != b` grounds in both and returns rows
+ * for `a` only. So an artifact the query excludes anywhere is never counted, whatever else the
+ * query does with it. The second rule can still miss an alternative nested under an `AND`
+ * whose other side grounds on its own; that errs toward generating a sibling that was covered,
+ * never toward retiring one that was not, which is the right way round for a reason marked
+ * final.
  *
  * This still says nothing about the action the sibling's technique implies around the
  * artifact; it establishes that the survivor's query searches the environment for the shared
@@ -82,13 +87,49 @@ export const artifactSetKey = (
  */
 export const queryHuntsArtifacts = (esql: string, key: string): boolean => {
   const values = key.split('\u0000');
+  const excluded = excludedLiterals(esql);
   const grounds = (iocValues: string[]): boolean =>
     assertEsqlGroundedInReport(esql, { reportText: '', iocValues }).ok;
   const groundsInWholeSet = grounds(values);
   return values.every(
     (value) =>
-      grounds([value]) || (groundsInWholeSet && !grounds(values.filter((other) => other !== value)))
+      !excluded.some((literal) => literal.includes(value)) &&
+      (grounds([value]) ||
+        (groundsInWholeSet && !grounds(values.filter((other) => other !== value))))
   );
+};
+
+/**
+ * The same operators the grounding gate reads as excluding the value they carry. Kept in step
+ * with the gate by hand rather than imported, because the gate does not export them and this
+ * module's reading of them is a superset on purpose: here a literal under any of these, however
+ * deep, disqualifies its artifact, where the gate only declines to count it.
+ */
+const NEGATING_OPERATORS: ReadonlySet<string> = new Set([
+  '!=',
+  'not',
+  'not in',
+  'not like',
+  'not rlike',
+]);
+
+/** Every normalized string literal that sits anywhere under a negating operator. */
+const excludedLiterals = (esql: string): string[] => {
+  const { root, errors } = Parser.parse(esql);
+  if (errors.length > 0) return [];
+  const excluded: string[] = [];
+  Walker.walk(root, {
+    visitFunction: (fn) => {
+      if (!NEGATING_OPERATORS.has(fn.name.toLowerCase())) return;
+      Walker.walk(fn, {
+        visitLiteral: (literal) => {
+          const value = 'valueUnquoted' in literal ? literal.valueUnquoted : literal.value;
+          excluded.push(normalize(String(value)).replace(/^["'`]+|["'`]+$/g, ''));
+        },
+      });
+    },
+  });
+  return excluded;
 };
 
 /** One behavior dropped because another behavior already covers the same artifact set. */

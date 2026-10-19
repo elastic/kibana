@@ -297,4 +297,27 @@ describe('queryHuntsArtifacts', () => {
       )
     ).toBe(false);
   });
+
+  it('is false when the query hunts both artifacts as alternatives but excludes one of them again', () => {
+    const key = artifactSetKey('seen at a.example and b.example', [
+      { type: 'domain', value: 'a.example' },
+      { type: 'domain', value: 'b.example' },
+    ])!;
+    expect(
+      queryHuntsArtifacts(
+        'FROM logs-* | WHERE destination.domain IN ("a.example", "b.example") AND destination.domain != "b.example"',
+        key
+      )
+    ).toBe(false);
+  });
+
+  it('is false when an artifact is excluded through NOT IN even though another branch hunts it', () => {
+    const key = artifactSetKey('seen at a.example', [{ type: 'domain', value: 'a.example' }])!;
+    expect(
+      queryHuntsArtifacts(
+        'FROM logs-* | WHERE destination.domain == "a.example" AND NOT dns.question.name IN ("a.example")',
+        key
+      )
+    ).toBe(false);
+  });
 });
