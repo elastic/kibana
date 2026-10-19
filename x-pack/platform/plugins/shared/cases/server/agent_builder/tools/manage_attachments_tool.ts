@@ -24,7 +24,11 @@ import {
   CASES_TOOL_TEXT_INSTRUCTION,
   CASES_SOLUTION_CONTEXT_INSTRUCTION,
 } from '../utils/tool_instructions';
-import { emitFromStepResult, injectAttachmentIds } from '../attachments/emit_attachments';
+import {
+  canRenderAttachments,
+  emitFromStepResult,
+  injectAttachmentIds,
+} from '../attachments/emit_attachments';
 
 type GetCasesClientFn = (request: KibanaRequest) => Promise<CasesClient>;
 
@@ -133,7 +137,6 @@ export const manageAttachmentsTool = (
     },
     schema,
     tags: ['cases'],
-    excludeFromMcp: true,
     handler: async (args, toolContext) => {
       const { mode, case_id, attachments, ...rest } = args;
 
@@ -165,8 +168,11 @@ export const manageAttachmentsTool = (
       };
 
       const result = await runStep();
-      const attachmentIds = await emitFromStepResult(toolContext.attachments, result);
-      return injectAttachmentIds(result, attachmentIds);
+      if (canRenderAttachments(toolContext.callContext)) {
+        const attachmentIds = await emitFromStepResult(toolContext.attachments, result);
+        return injectAttachmentIds(result, attachmentIds);
+      }
+      return result;
     },
   };
 };
