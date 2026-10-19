@@ -13,7 +13,10 @@ describe('PolicyCatalog', () => {
     new Map([
       ['p1', createActionPolicy({ id: 'p1', spaceId: 'space-a', apiKey: 'key-1' })],
       ['p2', createActionPolicy({ id: 'p2', spaceId: 'space-b', grouping: { mode: 'all' } })],
-      ['p3', createActionPolicy({ id: 'p3', throttle: { strategy: 'every_time', interval: null } })],
+      [
+        'p3',
+        createActionPolicy({ id: 'p3', throttle: { strategy: 'every_time', interval: null } }),
+      ],
     ])
   );
 

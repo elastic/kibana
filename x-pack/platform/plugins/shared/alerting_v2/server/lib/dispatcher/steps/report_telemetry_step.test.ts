@@ -113,11 +113,15 @@ describe('ReportTelemetryStep', () => {
     );
 
     expect(ebtService.reportEvent).toHaveBeenCalledTimes(2);
-    expect(ebtService.reportEvent.mock.calls.map(([, data]) => [data.workflow_id, data.workflow_execution_id]))
-      .toEqual([
-        ['wf-1', 'exec-1'],
-        ['wf-2', 'exec-2'],
-      ]);
+    expect(
+      ebtService.reportEvent.mock.calls.map(([, data]) => [
+        data.workflow_id,
+        data.workflow_execution_id,
+      ])
+    ).toEqual([
+      ['wf-1', 'exec-1'],
+      ['wf-2', 'exec-2'],
+    ]);
   });
 
   it('reports each group with its own policy, space and counts', async () => {

@@ -51,7 +51,9 @@ export class PolicyCatalog {
   /** Throttle strategy in effect for the policy, including the default its grouping mode implies. */
   public throttleStrategyOf(id: ActionPolicyId): ThrottleStrategy {
     const policy = this.byId.get(id);
-    return policy ? resolveThrottleStrategy(policy) : defaultThrottleStrategy(DEFAULT_GROUPING.mode);
+    return policy
+      ? resolveThrottleStrategy(policy)
+      : defaultThrottleStrategy(DEFAULT_GROUPING.mode);
   }
 
   public apiKeyOf(id: ActionPolicyId): string | undefined {

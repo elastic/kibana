@@ -43,7 +43,10 @@ describe('workflowDispatchedTelemetryEvent', () => {
 
   it('declares rule_id as an array of keywords', () => {
     expect(workflowDispatchedTelemetryEvent.schema.rule_id).toEqual(
-      expect.objectContaining({ type: 'array', items: expect.objectContaining({ type: 'keyword' }) })
+      expect.objectContaining({
+        type: 'array',
+        items: expect.objectContaining({ type: 'keyword' }),
+      })
     );
   });
 });
@@ -64,9 +67,7 @@ describe('buildWorkflowDispatchedEventData', () => {
   });
 
   it('derives rule_count from the rule ids', () => {
-    expect(
-      buildWorkflowDispatchedEventData({ ...input, ruleIds: ['rule-1'] }).rule_count
-    ).toBe(1);
+    expect(buildWorkflowDispatchedEventData({ ...input, ruleIds: ['rule-1'] }).rule_count).toBe(1);
     expect(buildWorkflowDispatchedEventData({ ...input, ruleIds: [] }).rule_count).toBe(0);
   });
 
