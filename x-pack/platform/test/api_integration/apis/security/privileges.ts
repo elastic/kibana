@@ -308,7 +308,7 @@ export default function ({ getService }: FtrProviderContext) {
         'can_run_test_manually',
         'elastic_managed_locations_enabled',
         'can_manage_private_locations',
-        'can_manage_vault_connections',
+        'can_manage_secret_connections',
         'can_read_param_values',
         'can_manage_rules',
       ],

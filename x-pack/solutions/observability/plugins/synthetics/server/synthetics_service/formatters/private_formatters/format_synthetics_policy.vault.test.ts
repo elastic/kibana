@@ -8,10 +8,10 @@
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   formatSyntheticsPolicy,
-  selectVaultConnection,
+  selectSecretConnection,
   VAULT_PACKAGE_UPGRADE_MESSAGE,
 } from './format_synthetics_policy';
-import type { HeartbeatVaultConfig } from '../../get_vault_connection';
+import type { HeartbeatVaultConfig } from '../../get_secret_connection';
 import { ConfigKey, MonitorTypeEnum } from '../../../../common/runtime_types';
 
 const conn = (name: string): HeartbeatVaultConfig => ({
@@ -21,35 +21,35 @@ const conn = (name: string): HeartbeatVaultConfig => ({
   auth: { token: `${name}-token` },
 });
 
-describe('selectVaultConnection', () => {
+describe('selectSecretConnection', () => {
   const conns = [conn('prod'), conn('staging')];
 
   it('returns only the referenced connection (never the others)', () => {
-    expect(selectVaultConnection(conns, new Set(['staging']))?.name).toBe('staging');
+    expect(selectSecretConnection(conns, new Set(['staging']))?.name).toBe('staging');
   });
 
   it('treats a single connection as the default for an unqualified reference', () => {
-    expect(selectVaultConnection([conn('only')], new Set([undefined]))?.name).toBe('only');
+    expect(selectSecretConnection([conn('only')], new Set([undefined]))?.name).toBe('only');
   });
 
   it('does not guess a default when multiple connections exist', () => {
-    expect(selectVaultConnection(conns, new Set([undefined]))).toBeUndefined();
+    expect(selectSecretConnection(conns, new Set([undefined]))).toBeUndefined();
   });
 
   it('fails closed on a reference to a connection that is not configured', () => {
-    expect(() => selectVaultConnection(conns, new Set(['nope']), 'm1')).toThrow(
+    expect(() => selectSecretConnection(conns, new Set(['nope']), 'm1')).toThrow(
       /references Vault connection "nope", which is not configured/
     );
   });
 
   it('fails when a monitor references more than one connection', () => {
-    expect(() => selectVaultConnection(conns, new Set(['prod', 'staging']), 'm1')).toThrow(
+    expect(() => selectSecretConnection(conns, new Set(['prod', 'staging']), 'm1')).toThrow(
       /references multiple Vault connections \(prod, staging\)/
     );
   });
 
   it('accepts the default and the same connection by name together', () => {
-    expect(selectVaultConnection([conn('only')], new Set([undefined, 'only']))?.name).toBe('only');
+    expect(selectSecretConnection([conn('only')], new Set([undefined, 'only']))?.name).toBe('only');
   });
 });
 

@@ -7,7 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import type { SavedObjectsType } from '@kbn/core/server';
 import { v5 as uuidv5 } from 'uuid';
-import { syntheticsVaultConnectionType } from '../../common/types/saved_objects';
+import { syntheticsSecretConnectionType } from '../../common/types/saved_objects';
 
 // Encrypted saved objects require predefined ids to be UUIDs. We derive a stable
 // UUID per (space, connection name) so the name is the key (upsert by name) while
@@ -17,16 +17,16 @@ import { syntheticsVaultConnectionType } from '../../common/types/saved_objects'
 // single global id space), so deriving from the name alone collides across spaces
 // — creating "prod" in one space would fail with an unresolvable-conflict when
 // another space already has it, and the 409 would leak which names exist elsewhere.
-const VAULT_CONNECTION_NAMESPACE = '5efab9a0-0000-4000-8000-000000000001';
-export const vaultConnectionId = (name: string, spaceId: string) =>
-  uuidv5(`${spaceId}:${name}`, VAULT_CONNECTION_NAMESPACE);
+const SECRET_CONNECTION_NAMESPACE = '5efab9a0-0000-4000-8000-000000000001';
+export const secretConnectionId = (name: string, spaceId: string) =>
+  uuidv5(`${spaceId}:${name}`, SECRET_CONNECTION_NAMESPACE);
 
 // The provider-specific secret fields live under a single `secrets` attribute,
 // which is encrypted as one blob. This is what keeps the encryption model stable
 // as providers are added: a new provider adds fields inside `secrets`/`config`,
 // never a new top-level attribute, so this declaration never has to change.
-export const SYNTHETICS_VAULT_CONNECTION_ENCRYPTED_TYPE = {
-  type: syntheticsVaultConnectionType,
+export const SYNTHETICS_SECRET_CONNECTION_ENCRYPTED_TYPE = {
+  type: syntheticsSecretConnectionType,
   attributesToEncrypt: new Set(['secrets']),
   attributesToIncludeInAAD: new Set([
     'name',
@@ -39,7 +39,7 @@ export const SYNTHETICS_VAULT_CONNECTION_ENCRYPTED_TYPE = {
 
 // Unknown attributes are kept (not stripped) so a rollback never drops encrypted secrets
 // written by a newer version.
-const vaultConnectionSchemaV1 = schema.object(
+const secretConnectionSchemaV1 = schema.object(
   {
     name: schema.string({ maxLength: 2048 }),
     type: schema.string({ maxLength: 64 }),
@@ -50,8 +50,8 @@ const vaultConnectionSchemaV1 = schema.object(
   { unknowns: 'allow' }
 );
 
-export const syntheticsVaultConnectionSavedObjectType: SavedObjectsType = {
-  name: syntheticsVaultConnectionType,
+export const syntheticsSecretConnectionSavedObjectType: SavedObjectsType = {
+  name: syntheticsSecretConnectionType,
   hidden: false,
   namespaceType: 'multiple',
   mappings: {
@@ -61,7 +61,7 @@ export const syntheticsVaultConnectionSavedObjectType: SavedObjectsType = {
   modelVersions: {
     1: {
       changes: [],
-      schemas: { forwardCompatibility: vaultConnectionSchemaV1 },
+      schemas: { forwardCompatibility: secretConnectionSchemaV1 },
     },
   },
   management: {

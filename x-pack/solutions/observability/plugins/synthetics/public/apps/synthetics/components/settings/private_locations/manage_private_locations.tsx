@@ -105,11 +105,11 @@ export const ManagePrivateLocations = () => {
       try {
         const res = await http?.get<{
           secretStorageEnabled: boolean;
-          hasVaultConnections: boolean;
+          hasSecretConnections: boolean;
         }>(SYNTHETICS_API_URLS.FLEET_SECRET_STORAGE_STATUS);
         if (!cancelled) {
           setShowSecretStorageWarning(
-            Boolean(res && !res.secretStorageEnabled && res.hasVaultConnections)
+            Boolean(res && !res.secretStorageEnabled && res.hasSecretConnections)
           );
         }
       } catch {

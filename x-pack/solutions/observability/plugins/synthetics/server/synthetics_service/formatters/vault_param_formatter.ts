@@ -22,7 +22,7 @@ import { z, lazySchema } from '@kbn/zod';
  * single `vault` entry per monitor. The optional `<connection>@` prefix is a Kibana
  * concept: it picks which of the space's connections is delivered to the monitor.
  * It is stripped from the policy at the Kibana/Heartbeat boundary
- * (`stripVaultConnectionNames`), so Heartbeat never sees it.
+ * (`stripSecretConnectionNames`), so Heartbeat never sees it.
  *
  * Contract (the entire Kibana-side responsibility):
  *
@@ -44,7 +44,7 @@ const VAULT_REF_SOURCE =
 
 export const VAULT_PATH_REGEX = /^[A-Za-z0-9._/-]+$/;
 export const VAULT_FIELD_REGEX = /^[A-Za-z0-9._-]+$/;
-export const VAULT_CONNECTION_NAME_REGEX = /^[A-Za-z0-9._-]+$/;
+export const SECRET_CONNECTION_NAME_REGEX = /^[A-Za-z0-9._-]+$/;
 
 // Generous upper bound for any single reference part (path/field/connection).
 const MAX_REF_PART = 1024;
@@ -59,7 +59,7 @@ export const isValidVaultPath = (p: string) => {
   return VAULT_PATH_REGEX.test(clean) && !hasDotSegment(clean);
 };
 export const isValidVaultField = (f: string) => VAULT_FIELD_REGEX.test(f);
-export const isValidVaultConnectionName = (c: string) => VAULT_CONNECTION_NAME_REGEX.test(c);
+export const isValidSecretConnectionName = (c: string) => SECRET_CONNECTION_NAME_REGEX.test(c);
 
 const PATH_ERROR = 'must contain only letters, numbers, and . _ - / (no "." or ".." segments)';
 const FIELD_ERROR = 'must contain only letters, numbers, and . _ -';
@@ -83,7 +83,7 @@ export const buildVaultReference = (path: string, field: string, connection?: st
       `Invalid Vault field "${field}": allowed characters are letters, numbers, and . _ -`
     );
   }
-  if (connection && !isValidVaultConnectionName(connection)) {
+  if (connection && !isValidSecretConnectionName(connection)) {
     throw new Error(
       `Invalid Vault connection name "${connection}": allowed characters are letters, numbers, and . _ -`
     );
@@ -149,7 +149,7 @@ export const referencedConnectionNames = (value: unknown): Set<string | undefine
  * `vault://<path>#<field>` form Heartbeat resolves. Non-string values are rewritten
  * through JSON only when they actually contain a named reference.
  */
-export const stripVaultConnectionNames = <T>(value: T): T => {
+export const stripSecretConnectionNames = <T>(value: T): T => {
   const rewrite = (s: string) =>
     s.replace(
       new RegExp(VAULT_REF_SOURCE, 'g'),
@@ -190,7 +190,7 @@ export const VaultParamSourceSchema = lazySchema(() =>
       connection: z
         .string()
         .max(MAX_REF_PART)
-        .refine((v) => v === '' || isValidVaultConnectionName(v), { message: FIELD_ERROR })
+        .refine((v) => v === '' || isValidSecretConnectionName(v), { message: FIELD_ERROR })
         .optional()
         .describe('Name of the Vault connection to use. Omit to use the default connection.'),
     })

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { SyntheticsVaultConnection } from '../../common/runtime_types';
-import { syntheticsVaultConnectionType } from '../../common/types/saved_objects';
+import type { SyntheticsSecretConnection } from '../../common/runtime_types';
+import { syntheticsSecretConnectionType } from '../../common/types/saved_objects';
 import type { SyntheticsServerSetup } from '../types';
 
 /**
@@ -34,7 +34,7 @@ export interface HeartbeatVaultConfig {
 /** The entry as delivered to Heartbeat: everything except Kibana's own `name`. */
 export const toSecretStoreEntry = ({ name: _name, ...entry }: HeartbeatVaultConfig) => entry;
 
-const toHeartbeatConfig = (attributes: SyntheticsVaultConnection): HeartbeatVaultConfig => {
+const toHeartbeatConfig = (attributes: SyntheticsSecretConnection): HeartbeatVaultConfig => {
   const { config, secrets } = attributes;
   return {
     type: 'vault',
@@ -59,7 +59,7 @@ const toHeartbeatConfig = (attributes: SyntheticsVaultConnection): HeartbeatVaul
  * the config delivered to a private-location agent (via a Fleet secret) — never
  * returned to the browser.
  */
-export const getVaultConnectionConfigs = async (
+export const getSecretConnectionConfigs = async (
   server: SyntheticsServerSetup,
   spaceId: string
 ): Promise<HeartbeatVaultConfig[]> => {
@@ -71,9 +71,9 @@ export const getVaultConnectionConfigs = async (
   try {
     const encryptedClient = server.encryptedSavedObjects.getClient();
     const finder =
-      await encryptedClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsVaultConnection>(
+      await encryptedClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsSecretConnection>(
         {
-          type: syntheticsVaultConnectionType,
+          type: syntheticsSecretConnectionType,
           perPage: 1000,
           namespaces: [spaceId],
         }

@@ -26,7 +26,7 @@ import {
 import { scheduleTestNowCleanUp } from '../../tasks/clean_up_package_policies_task';
 import type { SyntheticsServerSetup } from '../../types';
 import { formatSyntheticsPolicy } from '../formatters/private_formatters/format_synthetics_policy';
-import { getVaultConnectionConfigs, type HeartbeatVaultConfig } from '../get_vault_connection';
+import { getSecretConnectionConfigs, type HeartbeatVaultConfig } from '../get_secret_connection';
 import type {
   HeartbeatConfig,
   MonitorFields,
@@ -238,7 +238,7 @@ export class SyntheticsPrivateLocation {
     conditionHosts?: EnrolledAgents,
     existingCondition?: string | null,
     shardingMode: AgentShardingMode = 'inactive',
-    vaultConnections?: HeartbeatVaultConfig[]
+    secretConnections?: HeartbeatVaultConfig[]
   ): Promise<NewPackagePolicy | null> {
     const { label: locName } = privateLocation;
 
@@ -292,7 +292,7 @@ export class SyntheticsPrivateLocation {
 
       newPolicy.namespace = await this.getPolicyNamespace(configNamespace);
 
-      // `vaultConnections` is fetched ONCE per space by the caller
+      // `secretConnections` is fetched ONCE per space by the caller
       // (createPackagePolicies / editMonitors) — E1 — and formatSyntheticsPolicy
       // attaches only the ones THIS monitor references (A2), as a single Fleet
       // secret. It is undefined on the inspect path (A1): Fleet's inspect()
@@ -329,7 +329,7 @@ export class SyntheticsPrivateLocation {
         globalParams,
         maintenanceWindows,
         undefined,
-        vaultConnections
+        secretConnections
       );
 
       return formattedPolicy;
@@ -432,7 +432,7 @@ export class SyntheticsPrivateLocation {
     const newPolicyTemplate = await this.buildNewPolicy(spaceId);
     // E1: fetch the space's vault connections ONCE (they're decrypted), not per
     // monitor × location.
-    const vaultConnections = await getVaultConnectionConfigs(this.server, spaceId);
+    const secretConnections = await getSecretConnectionConfigs(this.server, spaceId);
     const referencedPrivateLocations = this.getReferencedPrivateLocations(
       configs,
       privateLocations
@@ -485,7 +485,7 @@ export class SyntheticsPrivateLocation {
             enrolledAgents,
             undefined,
             shardingMode,
-            vaultConnections
+            secretConnections
           );
 
           if (!newPolicy) {
@@ -576,7 +576,7 @@ export class SyntheticsPrivateLocation {
         conditionHosts,
         undefined,
         shardingMode
-        // vaultConnections omitted (A1): never attach vault credentials to inspect
+        // secretConnections omitted (A1): never attach vault credentials to inspect
         // output — Fleet's inspect() compiles vars verbatim, with no secret-ization.
       );
 
@@ -622,7 +622,7 @@ export class SyntheticsPrivateLocation {
     }
 
     // E1: fetch the space's vault connections ONCE, not per monitor × location.
-    const [newPolicyTemplate, { policies: existingPolicies, allSpaces }, vaultConnections] =
+    const [newPolicyTemplate, { policies: existingPolicies, allSpaces }, secretConnections] =
       await Promise.all([
         this.buildNewPolicy(spaceId),
         this.getExistingPolicies(
@@ -630,7 +630,7 @@ export class SyntheticsPrivateLocation {
           allPrivateLocations,
           spaceId
         ),
-        getVaultConnectionConfigs(this.server, spaceId),
+        getSecretConnectionConfigs(this.server, spaceId),
       ]);
 
     const policiesToUpdate: UpdatePackagePolicyWithId[] = [];
@@ -685,7 +685,7 @@ export class SyntheticsPrivateLocation {
               enrolledAgentsByLocation.get(privateLocation.id),
               existingCondition,
               shardingMode,
-              vaultConnections
+              secretConnections
             );
 
             if (!newPolicy) {

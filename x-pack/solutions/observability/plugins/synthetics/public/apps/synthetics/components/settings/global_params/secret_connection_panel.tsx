@@ -39,7 +39,7 @@ import type { ClientPluginsStart } from '../../../../../plugin';
 import type {
   SecretProviderType,
   VaultAuthMethod,
-  VaultConnectionStatus,
+  SecretConnectionStatus,
 } from '../../../../../../common/runtime_types';
 import { SECRET_PROVIDER_HASHICORP_VAULT } from '../../../../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../../../../common/constants';
@@ -82,7 +82,7 @@ const blankForm = (): FormState => ({
   hasSecret: false,
 });
 
-const toForm = (c: VaultConnectionStatus): FormState => ({
+const toForm = (c: SecretConnectionStatus): FormState => ({
   name: c.name ?? '',
   type: c.type ?? SECRET_PROVIDER_HASHICORP_VAULT,
   address: c.config?.address ?? '',
@@ -97,12 +97,12 @@ const toForm = (c: VaultConnectionStatus): FormState => ({
   hasSecret: c.hasSecret ?? false,
 });
 
-export const VaultConnectionPanel = () => {
+export const SecretConnectionPanel = () => {
   const { http, notifications, application } = useKibana<ClientPluginsStart>().services;
-  const canManage = (application?.capabilities.uptime.canManageVaultConnections ??
+  const canManage = (application?.capabilities.uptime.canManageSecretConnections ??
     false) as boolean;
 
-  const [connections, setConnections] = useState<VaultConnectionStatus[]>([]);
+  const [connections, setConnections] = useState<SecretConnectionStatus[]>([]);
   const [editing, setEditing] = useState<FormState | null>(null);
   const [saving, setSaving] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -110,8 +110,8 @@ export const VaultConnectionPanel = () => {
   const [testResult, setTestResult] = useState<{ ok: boolean; message: string } | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 
-  const accordionId = useGeneratedHtmlId({ prefix: 'vaultConnections' });
-  const flyoutTitleId = useGeneratedHtmlId({ prefix: 'vaultConnectionFlyout' });
+  const accordionId = useGeneratedHtmlId({ prefix: 'secretConnections' });
+  const flyoutTitleId = useGeneratedHtmlId({ prefix: 'secretConnectionFlyout' });
 
   const closeFlyout = () => {
     setTestResult(null);
@@ -120,7 +120,7 @@ export const VaultConnectionPanel = () => {
 
   const load = useCallback(async () => {
     try {
-      const res = await http.get<VaultConnectionStatus[]>(SYNTHETICS_API_URLS.VAULT_CONNECTION);
+      const res = await http.get<SecretConnectionStatus[]>(SYNTHETICS_API_URLS.SECRET_CONNECTION);
       setConnections(Array.isArray(res) ? res : []);
     } catch (e) {
       // Surface the failure rather than showing an empty list (which reads as
@@ -159,7 +159,7 @@ export const VaultConnectionPanel = () => {
         if (editing.secretId) secrets.secretId = editing.secretId;
       }
       const res = await http.post<{ ok: boolean; message: string }>(
-        `${SYNTHETICS_API_URLS.VAULT_CONNECTION}/_test`,
+        `${SYNTHETICS_API_URLS.SECRET_CONNECTION}/_test`,
         {
           body: JSON.stringify({
             // Existing connection: let the server fall back to the stored secret
@@ -205,7 +205,7 @@ export const VaultConnectionPanel = () => {
         config,
         secrets,
       };
-      await http.put(SYNTHETICS_API_URLS.VAULT_CONNECTION, { body: JSON.stringify(body) });
+      await http.put(SYNTHETICS_API_URLS.SECRET_CONNECTION, { body: JSON.stringify(body) });
       notifications?.toasts.addSuccess(SAVED_TOAST);
       setEditing(null);
       await load();
@@ -218,7 +218,7 @@ export const VaultConnectionPanel = () => {
 
   const onDelete = async (name: string) => {
     try {
-      await http.delete(`${SYNTHETICS_API_URLS.VAULT_CONNECTION}/${encodeURIComponent(name)}`);
+      await http.delete(`${SYNTHETICS_API_URLS.SECRET_CONNECTION}/${encodeURIComponent(name)}`);
       await load();
     } catch (e) {
       notifications?.toasts.addError(e as Error, { title: DELETE_ERROR_TOAST });
@@ -228,7 +228,7 @@ export const VaultConnectionPanel = () => {
   const onRefreshAll = async () => {
     setRefreshing(true);
     try {
-      await http.post(`${SYNTHETICS_API_URLS.VAULT_CONNECTION}/_refresh`);
+      await http.post(`${SYNTHETICS_API_URLS.SECRET_CONNECTION}/_refresh`);
       notifications?.toasts.addSuccess(REFRESHED_TOAST);
       await load();
     } catch (e) {
@@ -238,7 +238,7 @@ export const VaultConnectionPanel = () => {
     }
   };
 
-  const columns: Array<EuiBasicTableColumn<VaultConnectionStatus>> = [
+  const columns: Array<EuiBasicTableColumn<SecretConnectionStatus>> = [
     {
       field: 'name',
       name: NAME_LABEL,
@@ -251,11 +251,11 @@ export const VaultConnectionPanel = () => {
     },
     {
       name: ADDRESS_LABEL,
-      render: (c: VaultConnectionStatus) => c.config?.address ?? '',
+      render: (c: SecretConnectionStatus) => c.config?.address ?? '',
     },
     {
       name: AUTH_METHOD_LABEL,
-      render: (c: VaultConnectionStatus) => c.config?.authMethod ?? '',
+      render: (c: SecretConnectionStatus) => c.config?.authMethod ?? '',
     },
     {
       name: ACTIONS_LABEL,
@@ -265,7 +265,7 @@ export const VaultConnectionPanel = () => {
           description: EDIT_LABEL,
           icon: 'pencil',
           type: 'icon',
-          onClick: (c: VaultConnectionStatus) => {
+          onClick: (c: SecretConnectionStatus) => {
             setTestResult(null);
             setEditing(toForm(c));
           },
@@ -278,7 +278,7 @@ export const VaultConnectionPanel = () => {
           color: 'danger',
           type: 'icon',
           // Confirm before deleting (and never issue a delete for an empty name).
-          onClick: (c: VaultConnectionStatus) => {
+          onClick: (c: SecretConnectionStatus) => {
             if (c.name) setDeleteTarget(c.name);
           },
           enabled: () => canManage,
@@ -301,7 +301,7 @@ export const VaultConnectionPanel = () => {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiBadge color={connections.length ? 'success' : 'hollow'}>
-                {i18n.translate('xpack.synthetics.vaultConnection.count', {
+                {i18n.translate('xpack.synthetics.secretConnection.count', {
                   defaultMessage: '{n} connected',
                   values: { n: connections.length },
                 })}
@@ -365,7 +365,7 @@ export const VaultConnectionPanel = () => {
             size="m"
             onClose={closeFlyout}
             aria-labelledby={flyoutTitleId}
-            data-test-subj="syntheticsVaultConnectionFlyout"
+            data-test-subj="syntheticsSecretConnectionFlyout"
           >
             <EuiFlyoutHeader hasBorder>
               <EuiTitle size="m">
@@ -525,7 +525,7 @@ export const VaultConnectionPanel = () => {
                   <EuiButtonEmpty
                     iconType="cross"
                     flush="left"
-                    data-test-subj="syntheticsVaultConnectionPanelButton"
+                    data-test-subj="syntheticsSecretConnectionPanelButton"
                     onClick={closeFlyout}
                   >
                     {CANCEL_LABEL}
@@ -578,7 +578,7 @@ export const VaultConnectionPanel = () => {
           data-test-subj="syntheticsVaultDeleteConfirm"
         >
           <p>
-            {i18n.translate('xpack.synthetics.vaultConnection.deleteConfirmBody', {
+            {i18n.translate('xpack.synthetics.secretConnection.deleteConfirmBody', {
               defaultMessage:
                 'Delete the Vault connection "{name}"? Parameters that reference it will stop resolving at the agent until they are pointed at another connection.',
               values: { name: deleteTarget },
@@ -590,104 +590,104 @@ export const VaultConnectionPanel = () => {
   );
 };
 
-const TITLE = i18n.translate('xpack.synthetics.vaultConnection.title', {
+const TITLE = i18n.translate('xpack.synthetics.secretConnection.title', {
   defaultMessage: 'HashiCorp Vault connections',
 });
-const DESCRIPTION = i18n.translate('xpack.synthetics.vaultConnection.description', {
+const DESCRIPTION = i18n.translate('xpack.synthetics.secretConnection.description', {
   defaultMessage:
     "Connect one or more HashiCorp Vault accounts. Connections are stored encrypted and propagated to your private-location agents (Heartbeat), which resolve vault-backed parameters at runtime. Secret values never leave Vault's trust boundary. Reference a connection from a parameter by its name.",
 });
-const PROVIDER_LABEL = i18n.translate('xpack.synthetics.vaultConnection.provider', {
+const PROVIDER_LABEL = i18n.translate('xpack.synthetics.secretConnection.provider', {
   defaultMessage: 'Provider',
 });
-const PROVIDER_HELP = i18n.translate('xpack.synthetics.vaultConnection.providerHelp', {
+const PROVIDER_HELP = i18n.translate('xpack.synthetics.secretConnection.providerHelp', {
   defaultMessage: 'The secret-management backend this connection resolves secrets from.',
 });
-const NAME_LABEL = i18n.translate('xpack.synthetics.vaultConnection.name', {
+const NAME_LABEL = i18n.translate('xpack.synthetics.secretConnection.name', {
   defaultMessage: 'Name',
 });
-const NAME_HELP = i18n.translate('xpack.synthetics.vaultConnection.nameHelp', {
+const NAME_HELP = i18n.translate('xpack.synthetics.secretConnection.nameHelp', {
   defaultMessage: 'Referenced by params, e.g. "prod". Cannot be changed after creation.',
 });
-const ADDRESS_LABEL = i18n.translate('xpack.synthetics.vaultConnection.address', {
+const ADDRESS_LABEL = i18n.translate('xpack.synthetics.secretConnection.address', {
   defaultMessage: 'Vault address',
 });
-const AUTH_METHOD_LABEL = i18n.translate('xpack.synthetics.vaultConnection.authMethod', {
+const AUTH_METHOD_LABEL = i18n.translate('xpack.synthetics.secretConnection.authMethod', {
   defaultMessage: 'Auth method',
 });
-const KV_MOUNT_LABEL = i18n.translate('xpack.synthetics.vaultConnection.kvMount', {
+const KV_MOUNT_LABEL = i18n.translate('xpack.synthetics.secretConnection.kvMount', {
   defaultMessage: 'KV v2 mount',
 });
-const TOKEN_LABEL = i18n.translate('xpack.synthetics.vaultConnection.token', {
+const TOKEN_LABEL = i18n.translate('xpack.synthetics.secretConnection.token', {
   defaultMessage: 'Token',
 });
-const ROLE_ID_LABEL = i18n.translate('xpack.synthetics.vaultConnection.roleId', {
+const ROLE_ID_LABEL = i18n.translate('xpack.synthetics.secretConnection.roleId', {
   defaultMessage: 'Role ID',
 });
-const SECRET_ID_LABEL = i18n.translate('xpack.synthetics.vaultConnection.secretId', {
+const SECRET_ID_LABEL = i18n.translate('xpack.synthetics.secretConnection.secretId', {
   defaultMessage: 'Secret ID',
 });
-const TLS_SKIP_LABEL = i18n.translate('xpack.synthetics.vaultConnection.tlsSkip', {
+const TLS_SKIP_LABEL = i18n.translate('xpack.synthetics.secretConnection.tlsSkip', {
   defaultMessage: 'Skip TLS verification (dev only)',
 });
-const TLS_SKIP_HELP = i18n.translate('xpack.synthetics.vaultConnection.tlsSkipHelp', {
+const TLS_SKIP_HELP = i18n.translate('xpack.synthetics.secretConnection.tlsSkipHelp', {
   defaultMessage: 'Disables certificate validation. Use only against development Vault servers.',
 });
-const SECRET_SAVED_HELP = i18n.translate('xpack.synthetics.vaultConnection.secretSaved', {
+const SECRET_SAVED_HELP = i18n.translate('xpack.synthetics.secretConnection.secretSaved', {
   defaultMessage: 'A secret is already stored. Leave blank to keep it.',
 });
-const ACTIONS_LABEL = i18n.translate('xpack.synthetics.vaultConnection.actions', {
+const ACTIONS_LABEL = i18n.translate('xpack.synthetics.secretConnection.actions', {
   defaultMessage: 'Actions',
 });
-const ADD_LABEL = i18n.translate('xpack.synthetics.vaultConnection.add', {
+const ADD_LABEL = i18n.translate('xpack.synthetics.secretConnection.add', {
   defaultMessage: 'Add connection',
 });
-const EDIT_TITLE = i18n.translate('xpack.synthetics.vaultConnection.editTitle', {
+const EDIT_TITLE = i18n.translate('xpack.synthetics.secretConnection.editTitle', {
   defaultMessage: 'Edit connection',
 });
-const EDIT_LABEL = i18n.translate('xpack.synthetics.vaultConnection.edit', {
+const EDIT_LABEL = i18n.translate('xpack.synthetics.secretConnection.edit', {
   defaultMessage: 'Edit',
 });
-const DELETE_LABEL = i18n.translate('xpack.synthetics.vaultConnection.delete', {
+const DELETE_LABEL = i18n.translate('xpack.synthetics.secretConnection.delete', {
   defaultMessage: 'Delete',
 });
-const SAVE_LABEL = i18n.translate('xpack.synthetics.vaultConnection.save', {
+const SAVE_LABEL = i18n.translate('xpack.synthetics.secretConnection.save', {
   defaultMessage: 'Save connection',
 });
-const CANCEL_LABEL = i18n.translate('xpack.synthetics.vaultConnection.cancel', {
+const CANCEL_LABEL = i18n.translate('xpack.synthetics.secretConnection.cancel', {
   defaultMessage: 'Cancel',
 });
-const REFRESH_BUTTON = i18n.translate('xpack.synthetics.vaultConnection.refreshButton', {
+const REFRESH_BUTTON = i18n.translate('xpack.synthetics.secretConnection.refreshButton', {
   defaultMessage: 'Refresh secrets',
 });
-const TEST_LABEL = i18n.translate('xpack.synthetics.vaultConnection.test', {
+const TEST_LABEL = i18n.translate('xpack.synthetics.secretConnection.test', {
   defaultMessage: 'Test connection',
 });
-const TEST_NOTE_TITLE = i18n.translate('xpack.synthetics.vaultConnection.testNoteTitle', {
+const TEST_NOTE_TITLE = i18n.translate('xpack.synthetics.secretConnection.testNoteTitle', {
   defaultMessage: 'Testing runs from Kibana',
 });
-const TEST_NOTE = i18n.translate('xpack.synthetics.vaultConnection.testNote', {
+const TEST_NOTE = i18n.translate('xpack.synthetics.secretConnection.testNote', {
   defaultMessage:
     'Test connection checks that Kibana can reach and authenticate with Vault. At runtime, Heartbeat resolves secrets from the private location’s network, so make sure it can reach this address too.',
 });
-const SAVED_TOAST = i18n.translate('xpack.synthetics.vaultConnection.savedToast', {
+const SAVED_TOAST = i18n.translate('xpack.synthetics.secretConnection.savedToast', {
   defaultMessage: 'Vault connection saved',
 });
-const SAVE_ERROR_TOAST = i18n.translate('xpack.synthetics.vaultConnection.saveErrorToast', {
+const SAVE_ERROR_TOAST = i18n.translate('xpack.synthetics.secretConnection.saveErrorToast', {
   defaultMessage: 'Failed to save Vault connection',
 });
-const DELETE_ERROR_TOAST = i18n.translate('xpack.synthetics.vaultConnection.deleteErrorToast', {
+const DELETE_ERROR_TOAST = i18n.translate('xpack.synthetics.secretConnection.deleteErrorToast', {
   defaultMessage: 'Failed to delete Vault connection',
 });
-const DELETE_CONFIRM_TITLE = i18n.translate('xpack.synthetics.vaultConnection.deleteConfirmTitle', {
+const DELETE_CONFIRM_TITLE = i18n.translate('xpack.synthetics.secretConnection.deleteConfirmTitle', {
   defaultMessage: 'Delete Vault connection?',
 });
-const LOAD_ERROR_TOAST = i18n.translate('xpack.synthetics.vaultConnection.loadErrorToast', {
+const LOAD_ERROR_TOAST = i18n.translate('xpack.synthetics.secretConnection.loadErrorToast', {
   defaultMessage: 'Failed to load Vault connections',
 });
-const REFRESHED_TOAST = i18n.translate('xpack.synthetics.vaultConnection.refreshedToast', {
+const REFRESHED_TOAST = i18n.translate('xpack.synthetics.secretConnection.refreshedToast', {
   defaultMessage: 'Refreshing secrets — configs are being re-pushed to agents',
 });
-const REFRESH_ERROR_TOAST = i18n.translate('xpack.synthetics.vaultConnection.refreshErrorToast', {
+const REFRESH_ERROR_TOAST = i18n.translate('xpack.synthetics.secretConnection.refreshErrorToast', {
   defaultMessage: 'Failed to refresh Vault secrets',
 });

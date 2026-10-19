@@ -54,14 +54,14 @@ export interface SecretProviderConnection {
 }
 
 /** Back-compat alias for the stored connection type. */
-export type SyntheticsVaultConnection = SecretProviderConnection;
+export type SyntheticsSecretConnection = SecretProviderConnection;
 
 /**
  * The safe, secret-free view of a connection returned to the browser: the
  * non-secret provider `config` verbatim, plus a `hasSecret` flag so the UI can
  * render "•••• saved" without ever receiving the value.
  */
-export interface VaultConnectionStatus {
+export interface SecretConnectionStatus {
   configured: boolean;
   name?: string;
   type?: SecretProviderType;

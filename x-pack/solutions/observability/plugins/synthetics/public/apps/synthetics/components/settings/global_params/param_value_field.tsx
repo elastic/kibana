@@ -15,7 +15,7 @@ import { OptionalText } from '../components/optional_text';
 import type { ListParamItem } from './params_list';
 import type { ParamFormData, ParamValueSourceType } from './add_param_form';
 import { VALUE_LABEL, VALUE_REQUIRED } from './add_param_form';
-import type { VaultConnectionStatus } from '../../../../../../common/runtime_types';
+import type { SecretConnectionStatus } from '../../../../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../../../../common/constants';
 
 export const ParamValueField = ({
@@ -94,17 +94,17 @@ const VaultSourceFields = () => {
 
   useEffect(() => {
     http
-      ?.get<VaultConnectionStatus[]>(SYNTHETICS_API_URLS.VAULT_CONNECTION)
+      ?.get<SecretConnectionStatus[]>(SYNTHETICS_API_URLS.SECRET_CONNECTION)
       .then((res) => setConnections((Array.isArray(res) ? res : []).map((c) => c.name ?? '')))
       .catch(() => {});
   }, [http]);
 
   return (
     <>
-      <EuiFormRow fullWidth label={VAULT_CONNECTION_LABEL} helpText={VAULT_CONNECTION_HELP}>
+      <EuiFormRow fullWidth label={SECRET_CONNECTION_LABEL} helpText={SECRET_CONNECTION_HELP}>
         <EuiSelect
           fullWidth
-          data-test-subj="syntheticsParamVaultConnection"
+          data-test-subj="syntheticsParamSecretConnection"
           options={[
             { value: '', text: VAULT_DEFAULT_CONNECTION },
             ...connections.map((n) => ({ value: n, text: n })),
@@ -170,10 +170,10 @@ export const NEW_VALUE_LABEL = i18n.translate(
   }
 );
 
-const VAULT_CONNECTION_LABEL = i18n.translate('xpack.synthetics.paramForm.vaultConnectionLabel', {
+const SECRET_CONNECTION_LABEL = i18n.translate('xpack.synthetics.paramForm.secretConnectionLabel', {
   defaultMessage: 'Vault connection',
 });
-const VAULT_CONNECTION_HELP = i18n.translate('xpack.synthetics.paramForm.vaultConnectionHelp', {
+const SECRET_CONNECTION_HELP = i18n.translate('xpack.synthetics.paramForm.secretConnectionHelp', {
   defaultMessage: 'Which configured Vault connection to resolve this secret from.',
 });
 const VAULT_DEFAULT_CONNECTION = i18n.translate(

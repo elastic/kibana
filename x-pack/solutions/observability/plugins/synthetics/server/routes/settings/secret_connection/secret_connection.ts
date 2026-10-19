@@ -16,28 +16,28 @@ import type { SyntheticsServerSetup } from '../../../types';
 import type { RouteContext, SyntheticsRestApiRouteFactory } from '../../types';
 import type {
   SecretProviderType,
-  SyntheticsVaultConnection,
-  VaultConnectionStatus,
+  SyntheticsSecretConnection,
+  SecretConnectionStatus,
 } from '../../../../common/runtime_types';
 import { SECRET_PROVIDER_HASHICORP_VAULT } from '../../../../common/runtime_types';
-import { syntheticsVaultConnectionType } from '../../../../common/types/saved_objects';
+import { syntheticsSecretConnectionType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
-import { VAULT_CONNECTION_WRITE_API } from '../../../feature';
-import { vaultConnectionId } from '../../../saved_objects/synthetics_vault_connection';
-import { VAULT_CONNECTION_NAME_REGEX } from '../../../synthetics_service/formatters/vault_param_formatter';
+import { SECRET_CONNECTION_WRITE_API } from '../../../feature';
+import { secretConnectionId } from '../../../saved_objects/synthetics_secret_connection';
+import { SECRET_CONNECTION_NAME_REGEX } from '../../../synthetics_service/formatters/vault_param_formatter';
 import { asyncGlobalParamsPropagation } from '../../../tasks/sync_global_params_task';
 
 // Whether the connection has its provider secret stored, so the UI can render
 // "•••• saved" without receiving the value. Prefers the stored `hasSecret` marker
 // (present on the non-decrypting list read); falls back to inspecting the secrets
 // for the just-saved attributes, whose secrets are still in memory.
-const hasStoredSecret = (a: SyntheticsVaultConnection): boolean => {
+const hasStoredSecret = (a: SyntheticsSecretConnection): boolean => {
   if (typeof a.hasSecret === 'boolean') return a.hasSecret;
   const secrets = a.secrets ?? {};
   return a.config.authMethod === 'token' ? Boolean(secrets.token) : Boolean(secrets.secretId);
 };
 
-const toStatus = (attributes: SyntheticsVaultConnection): VaultConnectionStatus => ({
+const toStatus = (attributes: SyntheticsSecretConnection): SecretConnectionStatus => ({
   configured: true,
   name: attributes.name,
   type: attributes.type,
@@ -54,12 +54,12 @@ const propagate = (server: SyntheticsServerSetup, spaceId: string) =>
 
 const listConnections = async ({
   savedObjectsClient,
-}: RouteContext): Promise<VaultConnectionStatus[]> => {
-  const finder = savedObjectsClient.createPointInTimeFinder<SyntheticsVaultConnection>({
-    type: syntheticsVaultConnectionType,
+}: RouteContext): Promise<SecretConnectionStatus[]> => {
+  const finder = savedObjectsClient.createPointInTimeFinder<SyntheticsSecretConnection>({
+    type: syntheticsSecretConnectionType,
     perPage: 1000,
   });
-  const out: VaultConnectionStatus[] = [];
+  const out: SecretConnectionStatus[] = [];
   for await (const result of finder.find()) {
     for (const so of result.saved_objects) {
       out.push(toStatus(so.attributes));
@@ -70,11 +70,11 @@ const listConnections = async ({
 };
 
 /** GET: list all Vault connections (secret-free). */
-export const getVaultConnectionsRoute: SyntheticsRestApiRouteFactory<
-  VaultConnectionStatus[]
+export const getSecretConnectionsRoute: SyntheticsRestApiRouteFactory<
+  SecretConnectionStatus[]
 > = () => ({
   method: 'GET',
-  path: SYNTHETICS_API_URLS.VAULT_CONNECTION,
+  path: SYNTHETICS_API_URLS.SECRET_CONNECTION,
   validate: {},
   handler: async (routeContext) => listConnections(routeContext),
 });
@@ -114,7 +114,7 @@ const SaveBodySchema = schema.object({
     minLength: 1,
     maxLength: MAX_LEN,
     validate: (v) =>
-      VAULT_CONNECTION_NAME_REGEX.test(v)
+      SECRET_CONNECTION_NAME_REGEX.test(v)
         ? undefined
         : 'must contain only letters, numbers, and . _ -',
   }),
@@ -126,14 +126,14 @@ const SaveBodySchema = schema.object({
 type SaveBody = TypeOf<typeof SaveBodySchema>;
 
 /** PUT: create or update a connection (keyed by name). Blank secrets are kept. */
-export const saveVaultConnectionRoute: SyntheticsRestApiRouteFactory<
-  VaultConnectionStatus
+export const saveSecretConnectionRoute: SyntheticsRestApiRouteFactory<
+  SecretConnectionStatus
 > = () => ({
   method: 'PUT',
-  path: SYNTHETICS_API_URLS.VAULT_CONNECTION,
+  path: SYNTHETICS_API_URLS.SECRET_CONNECTION,
   validate: { body: SaveBodySchema },
   writeAccess: true,
-  requiredPrivileges: [VAULT_CONNECTION_WRITE_API],
+  requiredPrivileges: [SECRET_CONNECTION_WRITE_API],
   handler: async ({ request, response, savedObjectsClient, server, spaceId }) => {
     const body = request.body as SaveBody;
     const type: SecretProviderType = body.type ?? SECRET_PROVIDER_HASHICORP_VAULT;
@@ -142,12 +142,12 @@ export const saveVaultConnectionRoute: SyntheticsRestApiRouteFactory<
       return response.badRequest({ body: { message: 'approle auth requires a role_id' } });
     }
 
-    const id = vaultConnectionId(body.name, spaceId);
+    const id = secretConnectionId(body.name, spaceId);
     const encryptedClient = server.encryptedSavedObjects.getClient();
-    let existing: SyntheticsVaultConnection | undefined;
+    let existing: SyntheticsSecretConnection | undefined;
     try {
-      const decrypted = await encryptedClient.getDecryptedAsInternalUser<SyntheticsVaultConnection>(
-        syntheticsVaultConnectionType,
+      const decrypted = await encryptedClient.getDecryptedAsInternalUser<SyntheticsSecretConnection>(
+        syntheticsSecretConnectionType,
         id,
         { namespace: spaceId }
       );
@@ -210,7 +210,7 @@ export const saveVaultConnectionRoute: SyntheticsRestApiRouteFactory<
     const hasSecret =
       body.config.authMethod === 'token' ? Boolean(secrets.token) : Boolean(secrets.secretId);
 
-    const attributes: SyntheticsVaultConnection = {
+    const attributes: SyntheticsSecretConnection = {
       name: body.name,
       type,
       config: body.config,
@@ -219,8 +219,8 @@ export const saveVaultConnectionRoute: SyntheticsRestApiRouteFactory<
       hasSecret,
     };
 
-    await savedObjectsClient.create<SyntheticsVaultConnection>(
-      syntheticsVaultConnectionType,
+    await savedObjectsClient.create<SyntheticsSecretConnection>(
+      syntheticsSecretConnectionType,
       attributes,
       { id, overwrite: true, initialNamespaces: [spaceId] }
     );
@@ -230,20 +230,20 @@ export const saveVaultConnectionRoute: SyntheticsRestApiRouteFactory<
 });
 
 /** DELETE /{name}: remove a connection. */
-export const deleteVaultConnectionRoute: SyntheticsRestApiRouteFactory<
+export const deleteSecretConnectionRoute: SyntheticsRestApiRouteFactory<
   { deleted: boolean },
   { name: string }
 > = () => ({
   method: 'DELETE',
-  path: SYNTHETICS_API_URLS.VAULT_CONNECTION + '/{name}',
+  path: SYNTHETICS_API_URLS.SECRET_CONNECTION + '/{name}',
   validate: { params: schema.object({ name: schema.string({ minLength: 1, maxLength: 1024 }) }) },
   writeAccess: true,
-  requiredPrivileges: [VAULT_CONNECTION_WRITE_API],
+  requiredPrivileges: [SECRET_CONNECTION_WRITE_API],
   handler: async ({ request, savedObjectsClient, server, spaceId }) => {
     const { name } = request.params as { name: string };
     await savedObjectsClient.delete(
-      syntheticsVaultConnectionType,
-      vaultConnectionId(name, spaceId)
+      syntheticsSecretConnectionType,
+      secretConnectionId(name, spaceId)
     );
     await propagate(server, spaceId);
     return { deleted: true };
@@ -254,20 +254,20 @@ export const deleteVaultConnectionRoute: SyntheticsRestApiRouteFactory<
  * POST /_refresh: bump refreshedAt on every connection (which changes the blob)
  * and re-push configs, so agents re-resolve all vault-backed secrets.
  */
-export const refreshVaultConnectionsRoute: SyntheticsRestApiRouteFactory<
-  VaultConnectionStatus[]
+export const refreshSecretConnectionsRoute: SyntheticsRestApiRouteFactory<
+  SecretConnectionStatus[]
 > = () => ({
   method: 'POST',
-  path: SYNTHETICS_API_URLS.VAULT_CONNECTION + '/_refresh',
+  path: SYNTHETICS_API_URLS.SECRET_CONNECTION + '/_refresh',
   validate: {},
   writeAccess: true,
-  requiredPrivileges: [VAULT_CONNECTION_WRITE_API],
+  requiredPrivileges: [SECRET_CONNECTION_WRITE_API],
   handler: async (routeContext) => {
     const { savedObjectsClient, server, spaceId } = routeContext;
     const encryptedClient = server.encryptedSavedObjects.getClient();
     const finder =
-      await encryptedClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsVaultConnection>(
-        { type: syntheticsVaultConnectionType, perPage: 1000, namespaces: [spaceId] }
+      await encryptedClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsSecretConnection>(
+        { type: syntheticsSecretConnectionType, perPage: 1000, namespaces: [spaceId] }
       );
 
     const refreshedAt = new Date().toISOString();
@@ -277,8 +277,8 @@ export const refreshVaultConnectionsRoute: SyntheticsRestApiRouteFactory<
         // set and their attributes stripped — re-creating those would wipe the
         // secret. Skip them.
         if (so.error || !so.attributes) continue;
-        await savedObjectsClient.create<SyntheticsVaultConnection>(
-          syntheticsVaultConnectionType,
+        await savedObjectsClient.create<SyntheticsSecretConnection>(
+          syntheticsSecretConnectionType,
           { ...so.attributes, refreshedAt },
           // B5: preserve the object's actual namespaces on overwrite rather than
           // forcing [spaceId], which would narrow (or error on) a shared object.
@@ -444,12 +444,12 @@ const TestBodySchema = schema.object({
 type TestBody = TypeOf<typeof TestBodySchema>;
 
 /** POST /_test: check reachability + auth from Kibana. Never persists anything. */
-export const testVaultConnectionRoute: SyntheticsRestApiRouteFactory<TestResult> = () => ({
+export const testSecretConnectionRoute: SyntheticsRestApiRouteFactory<TestResult> = () => ({
   method: 'POST',
-  path: SYNTHETICS_API_URLS.VAULT_CONNECTION + '/_test',
+  path: SYNTHETICS_API_URLS.SECRET_CONNECTION + '/_test',
   validate: { body: TestBodySchema },
   writeAccess: true,
-  requiredPrivileges: [VAULT_CONNECTION_WRITE_API],
+  requiredPrivileges: [SECRET_CONNECTION_WRITE_API],
   handler: async ({ request, server, spaceId }) => {
     const body = request.body as TestBody;
     const { address, authMethod, namespace, tlsSkipVerify, roleId } = body.config;
@@ -462,9 +462,9 @@ export const testVaultConnectionRoute: SyntheticsRestApiRouteFactory<TestResult>
       try {
         const decrypted = await server.encryptedSavedObjects
           .getClient()
-          .getDecryptedAsInternalUser<SyntheticsVaultConnection>(
-            syntheticsVaultConnectionType,
-            vaultConnectionId(body.name, spaceId),
+          .getDecryptedAsInternalUser<SyntheticsSecretConnection>(
+            syntheticsSecretConnectionType,
+            secretConnectionId(body.name, spaceId),
             { namespace: spaceId }
           );
         token = token || decrypted.attributes.secrets?.token;
@@ -507,7 +507,7 @@ const getFleetSecretStorageEnabled = async (server: SyntheticsServerSetup): Prom
 /** GET: secret-storage status + whether this space has any Vault connections. */
 export const getFleetSecretStorageStatusRoute: SyntheticsRestApiRouteFactory<{
   secretStorageEnabled: boolean;
-  hasVaultConnections: boolean;
+  hasSecretConnections: boolean;
 }> = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.FLEET_SECRET_STORAGE_STATUS,
@@ -517,6 +517,6 @@ export const getFleetSecretStorageStatusRoute: SyntheticsRestApiRouteFactory<{
       getFleetSecretStorageEnabled(routeContext.server),
       listConnections(routeContext),
     ]);
-    return { secretStorageEnabled, hasVaultConnections: connections.length > 0 };
+    return { secretStorageEnabled, hasSecretConnections: connections.length > 0 };
   },
 });

@@ -12,7 +12,7 @@ import {
   extractVaultReferences,
   buildVaultReference,
   referencedConnectionNames,
-  stripVaultConnectionNames,
+  stripSecretConnectionNames,
   VaultParamSourceSchema,
 } from './vault_param_formatter';
 
@@ -59,27 +59,27 @@ describe('vault reference helpers', () => {
   });
 });
 
-describe('stripVaultConnectionNames', () => {
+describe('stripSecretConnectionNames', () => {
   it('drops the connection prefix and keeps the rest of the value', () => {
-    expect(stripVaultConnectionNames('Bearer vault://prod@myapp/api#token')).toBe(
+    expect(stripSecretConnectionNames('Bearer vault://prod@myapp/api#token')).toBe(
       'Bearer vault://myapp/api#token'
     );
-    expect(stripVaultConnectionNames('vault://myapp/api#token')).toBe('vault://myapp/api#token');
-    expect(stripVaultConnectionNames('plain')).toBe('plain');
+    expect(stripSecretConnectionNames('vault://myapp/api#token')).toBe('vault://myapp/api#token');
+    expect(stripSecretConnectionNames('plain')).toBe('plain');
   });
 
   it('rewrites references inside objects and returns untouched objects as is', () => {
-    expect(stripVaultConnectionNames({ h: { a: 'vault://prod@x#y' }, n: 1 })).toEqual({
+    expect(stripSecretConnectionNames({ h: { a: 'vault://prod@x#y' }, n: 1 })).toEqual({
       h: { a: 'vault://x#y' },
       n: 1,
     });
     const untouched = { h: 'static' };
-    expect(stripVaultConnectionNames(untouched)).toBe(untouched);
-    expect(stripVaultConnectionNames(null)).toBeNull();
+    expect(stripSecretConnectionNames(untouched)).toBe(untouched);
+    expect(stripSecretConnectionNames(null)).toBeNull();
   });
 
   it('rewrites references inside JSON strings (e.g. browser params)', () => {
-    expect(stripVaultConnectionNames('{"pw":"vault://prod@x/y#z"}')).toBe('{"pw":"vault://x/y#z"}');
+    expect(stripSecretConnectionNames('{"pw":"vault://prod@x/y#z"}')).toBe('{"pw":"vault://x/y#z"}');
   });
 });
 

@@ -20,7 +20,7 @@ import {
   legacySyntheticsMonitorTypeSingle,
   syntheticsMonitorSavedObjectType,
   syntheticsParamType,
-  syntheticsVaultConnectionType,
+  syntheticsSecretConnectionType,
 } from '../common/types/saved_objects';
 
 import { PLUGIN } from '../common/constants/plugin';
@@ -31,7 +31,7 @@ import {
 import { syntheticsApiKeyObjectType } from './saved_objects/service_api_key';
 
 export const PRIVATE_LOCATION_WRITE_API = 'private-location-write';
-export const VAULT_CONNECTION_WRITE_API = 'vault-connection-write';
+export const SECRET_CONNECTION_WRITE_API = 'secret-connection-write';
 export const MONITOR_RUN_MANUALLY_API = 'monitor-run-manually';
 export const WRITE_SYNTHETICS_DEFAULT_RULES_API = 'write_synthetics_default_rules';
 
@@ -97,21 +97,21 @@ const canManagePrivateLocationsPrivilege: SubFeaturePrivilegeGroupConfig = {
   ],
 };
 
-const canManageVaultConnectionsPrivilege: SubFeaturePrivilegeGroupConfig = {
+const canManageSecretConnectionsPrivilege: SubFeaturePrivilegeGroupConfig = {
   groupType: 'independent' as SubFeaturePrivilegeGroupType,
   privileges: [
     {
-      id: 'can_manage_vault_connections',
-      name: i18n.translate('xpack.synthetics.features.canManageVaultConnections', {
+      id: 'can_manage_secret_connections',
+      name: i18n.translate('xpack.synthetics.features.canManageSecretConnections', {
         defaultMessage: 'Can manage',
       }),
       includeIn: 'all',
-      api: [VAULT_CONNECTION_WRITE_API],
+      api: [SECRET_CONNECTION_WRITE_API],
       savedObject: {
-        all: [syntheticsVaultConnectionType],
+        all: [syntheticsSecretConnectionType],
         read: [],
       },
-      ui: ['canManageVaultConnections'],
+      ui: ['canManageSecretConnections'],
     },
   ],
 };
@@ -200,7 +200,7 @@ export const syntheticsFeature = {
         read: [
           privateLocationSavedObjectName,
           legacyPrivateLocationsSavedObjectName,
-          syntheticsVaultConnectionType,
+          syntheticsSecretConnectionType,
         ],
       },
       alerting: {
@@ -227,7 +227,7 @@ export const syntheticsFeature = {
         all: [],
         read: [
           syntheticsParamType,
-          syntheticsVaultConnectionType,
+          syntheticsSecretConnectionType,
           syntheticsSettingsObjectType,
           syntheticsMonitorSavedObjectType,
           legacySyntheticsMonitorTypeSingle,
@@ -284,14 +284,14 @@ export const syntheticsFeature = {
       privilegeGroups: [canManagePrivateLocationsPrivilege],
     },
     {
-      name: i18n.translate('xpack.synthetics.features.app.vaultConnections', {
-        defaultMessage: 'Vault connections',
+      name: i18n.translate('xpack.synthetics.features.app.secretConnections', {
+        defaultMessage: 'Secret provider connections',
       }),
-      description: i18n.translate('xpack.synthetics.features.app.vaultConnections.description', {
+      description: i18n.translate('xpack.synthetics.features.app.secretConnections.description', {
         defaultMessage:
-          'This feature allows you to manage the HashiCorp Vault connections used to resolve secret references in monitors and global parameters.',
+          'This feature allows you to manage connections to external secret managers, such as HashiCorp Vault, used to resolve secret references in monitors and global parameters.',
       }),
-      privilegeGroups: [canManageVaultConnectionsPrivilege],
+      privilegeGroups: [canManageSecretConnectionsPrivilege],
     },
     {
       name: i18n.translate('xpack.synthetics.features.app.params', {

@@ -13,7 +13,7 @@ export const syntheticsMonitorAttributes = `${syntheticsMonitorSavedObjectType}.
 
 export const syntheticsParamType = 'synthetics-param';
 
-export const syntheticsVaultConnectionType = 'synthetics-vault-connection';
+export const syntheticsSecretConnectionType = 'synthetics-secret-connection';
 
 export const syntheticsMonitorSOTypes = [
   syntheticsMonitorSavedObjectType,

@@ -19,8 +19,8 @@ import {
   replaceStringWithParams,
   resolveHttpAuthParams,
 } from '../formatting_utils';
-import { referencedConnectionNames, stripVaultConnectionNames } from '../vault_param_formatter';
-import { toSecretStoreEntry, type HeartbeatVaultConfig } from '../../get_vault_connection';
+import { referencedConnectionNames, stripSecretConnectionNames } from '../vault_param_formatter';
+import { toSecretStoreEntry, type HeartbeatVaultConfig } from '../../get_secret_connection';
 import { syntheticsPolicyFormatters } from './formatters';
 import { PARAMS_KEYS_TO_SKIP } from '../common';
 
@@ -34,7 +34,7 @@ export const VAULT_PACKAGE_UPGRADE_MESSAGE =
  * connection, or more than one distinct connection, throws instead of shipping the
  * wrong credentials.
  */
-export const selectVaultConnection = (
+export const selectSecretConnection = (
   all: HeartbeatVaultConfig[],
   referenced: Set<string | undefined>,
   monitorName?: string
@@ -111,7 +111,7 @@ export const formatSyntheticsPolicy = (
   params: Record<string, string>,
   mws: MaintenanceWindow[],
   isLegacy?: boolean,
-  vaultConnections?: HeartbeatVaultConfig[]
+  secretConnections?: HeartbeatVaultConfig[]
 ) => {
   const resolvedConfig = resolveHttpAuthParams(config, params);
   const configKeys = Object.keys(resolvedConfig) as ConfigKey[];
@@ -187,11 +187,11 @@ export const formatSyntheticsPolicy = (
   // Collect the vault connections this monitor references, then drop the Kibana-only
   // `<connection>@` prefix so Heartbeat sees plain vault://<path>#<field>. Heartbeat
   // does not resolve references in the inline script, so it is left alone.
-  const referencedVaultConnections = new Set<string | undefined>();
+  const referencedSecretConnections = new Set<string | undefined>();
   Object.entries(dataStream?.vars ?? {}).forEach(([key, item]) => {
     if (!item || key === ConfigKey.SOURCE_INLINE) return;
-    referencedConnectionNames(item.value).forEach((name) => referencedVaultConnections.add(name));
-    item.value = stripVaultConnectionNames(item.value);
+    referencedConnectionNames(item.value).forEach((name) => referencedSecretConnections.add(name));
+    item.value = stripSecretConnectionNames(item.value);
   });
 
   // Heartbeat decodes inline scripts when source.inline.encoding=base64.
@@ -246,13 +246,13 @@ export const formatSyntheticsPolicy = (
   // var, base64-encoded. That var is `secret: true` in the package, so Fleet stores
   // it as a Fleet secret and the compiled policy carries only a
   // $co.elastic.secret{...} reference.
-  if (dataStream && referencedVaultConnections.size > 0) {
+  if (dataStream && referencedSecretConnections.size > 0) {
     const secretStoresItem = dataStream.vars?.secret_stores;
     if (!secretStoresItem) {
       throw new Error(VAULT_PACKAGE_UPGRADE_MESSAGE);
     }
-    const connection = vaultConnections?.length
-      ? selectVaultConnection(vaultConnections, referencedVaultConnections, config[ConfigKey.NAME])
+    const connection = secretConnections?.length
+      ? selectSecretConnection(secretConnections, referencedSecretConnections, config[ConfigKey.NAME])
       : undefined;
     if (connection) {
       secretStoresItem.value = Buffer.from(
