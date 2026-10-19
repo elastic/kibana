@@ -1631,11 +1631,11 @@ describe('Endpoint analysis run', () => {
         );
         expect(render(1, 0, 0, 'supervised')).toContain('for auto-approval.');
         expect(render(1, 2, 1)).toBe(
-          'Endpoint analysis of `web-01` is submitting 1 containment proposal(s) for analyst approval. 2 already raised by another Investigation; the notes below say where. 1 already open on this investigation. The investigation closes once every proposal on it has been decided.'
+          'Endpoint analysis of `web-01` is submitting 1 containment proposal(s) for analyst approval. 2 already raised by another Investigation. 1 already open on this investigation. The investigation closes once every proposal on it has been decided.'
         );
         // Nothing new: the gate never runs, so nothing closes the investigation.
         expect(render(0, 1, 0)).toBe(
-          'Endpoint analysis of `web-01` found containment worth proposing, but every proposal it would have raised already exists, so none was created. 1 already raised by another Investigation; the notes below say where. The investigation stays open until an analyst closes it.'
+          'Endpoint analysis of `web-01` found containment worth proposing, but every proposal it would have raised already exists, so none was created. 1 already raised by another Investigation. The investigation stays open until an analyst closes it.'
         );
       });
 

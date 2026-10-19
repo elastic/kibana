@@ -90,7 +90,7 @@ describe('keyCandidateProposals', () => {
 
 describe(`${RESOLVE_PROPOSALS_STEP_ID} step wiring`, () => {
   const proposalsService = {};
-  const privileges = { canManage: async () => true, assertCanRead: async () => {} };
+  const privileges = { canManage: async () => true, assertCanRead: jest.fn(async () => {}) };
   const conversationClient = { get: jest.fn() };
   const request = {};
   const logger = loggingSystemMock.createLogger();
@@ -167,6 +167,17 @@ describe(`${RESOLVE_PROPOSALS_STEP_ID} step wiring`, () => {
         appendAlsoRaisedBy: 'appender',
       },
     });
+  });
+
+  it('refuses a caller who cannot read Proposals before counting or resolving anything, even with no candidates', async () => {
+    privileges.assertCanRead.mockRejectedValueOnce(new Error('forbidden'));
+
+    await expect(
+      run({ investigationConversationId: 'conv-1', proposals: [] })
+    ).rejects.toMatchObject({ type: 'ApiError', message: 'forbidden' });
+    expect(privileges.assertCanRead).toHaveBeenCalledWith(request);
+    expect(resolveProposalsMock).not.toHaveBeenCalled();
+    expect(createExistingProposalsCounterMock).not.toHaveBeenCalled();
   });
 
   it('rejects input that is not what the schema says', async () => {

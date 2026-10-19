@@ -24,6 +24,7 @@ import {
   createProposalSlotResolver,
   PROPOSAL_SUBJECT_UUID_NAMESPACE,
   resolveProposals,
+  retryTransient,
 } from '../../services/proposals/dedup';
 
 export interface ResolveProposalsStepDependencies {
@@ -87,6 +88,9 @@ export const getResolveProposalsStepDefinition = ({
 
         const proposalsService = getProposalsService();
         const privileges = getProposalPrivileges();
+        // Before anything reads Proposals: the count below runs even with no candidates, and would
+        // otherwise hand back another Investigation's Proposal total to a caller who cannot read them.
+        await retryTransient(() => privileges.assertCanRead(request));
         const conversationClient = await getConversations().getScopedClient({ request });
 
         const output: ResolveProposalsOutput = await resolveProposals({
