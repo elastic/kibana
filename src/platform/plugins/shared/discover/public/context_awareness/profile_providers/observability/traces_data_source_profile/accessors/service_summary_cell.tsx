@@ -31,17 +31,12 @@ import type {
 } from '@kbn/discover-shared-plugin/public';
 import type { ContextAwarenessToolkit } from '../../../../toolkit';
 import { AGENT_NAME_FIELD } from '../../../../../../common/data_types/logs/constants';
-import { useDiscoverServices } from '../../../../../hooks/use_discover_services';
 import { useFetchServiceSummary } from './use_fetch_service_summary';
 
 const AgentIcon = dynamic(() => import('@kbn/custom-icons/src/components/agent_icon'));
 
 const dataTestSubj = 'tracesServiceSummaryCell';
 const palette = euiPaletteColorBlind({ rotations: 2 });
-// APM's sentinel for "all environments"; mirrors ENVIRONMENT_ALL_VALUE from @kbn/apm-types without
-// pulling an APM dependency into Discover.
-const ALL_ENVIRONMENTS = 'ENVIRONMENT_ALL';
-const FLYOUT_SOURCE = 'discover_traces_service_summary';
 
 const badgeStyle = css`
   max-width: 100%;
@@ -50,10 +45,10 @@ const badgeStyle = css`
 /**
  * Traces-profile service badge: clicking it opens the service summary popover.
  *
- * Data (latency / throughput / error-rate series, active alerts, and link targets) is provided
- * through the `discover_shared` features registry, which APM fulfils — Discover never calls the APM
- * internal routes or builds APM URLs directly. "Open overview" opens the APM service flyout in
- * place via the `observability-service-flyout` feature; the rest open the APM app in a new tab.
+ * Data (latency / throughput / error-rate series, active alerts, SLO health, and link targets) is
+ * provided through the `discover_shared` features registry, which APM fulfils — Discover never
+ * calls the APM internal routes or builds APM URLs directly. The service name in the header links
+ * to APM; the alert and SLO rows open their respective APM pages in a new tab.
  */
 export const getServiceSummaryCell =
   (serviceNameField: string, toolkit: ContextAwarenessToolkit) =>
@@ -67,14 +62,6 @@ export const getServiceSummaryCell =
     const environmentValue = getFieldValue(props.row, SERVICE_ENVIRONMENT_FIELD);
 
     const [isPopoverOpen, { toggle: togglePopover, off: closePopover }] = useBoolean(false);
-    const [isFlyoutOpen, { on: openFlyout, off: closeFlyout }] = useBoolean(false);
-
-    const { discoverShared, core, data: dataService } = useDiscoverServices();
-    const serviceFlyoutFeature = discoverShared.features.registry.getById(
-      'observability-service-flyout'
-    );
-    const canOpenServiceFlyout =
-      Boolean(serviceFlyoutFeature) && Boolean(core.application.capabilities.apm?.show);
 
     const serviceName = typeof serviceNameValue === 'string' ? serviceNameValue : '';
     const environment = typeof environmentValue === 'string' ? environmentValue : undefined;
@@ -93,26 +80,6 @@ export const getServiceSummaryCell =
     const links = useMemo<ServiceSummaryLink[]>(
       () => [
         {
-          label: openOverviewLabel,
-          iconType: 'fullScreen',
-          // Open the APM service flyout in place; fall back to navigating to the overview page
-          // when the flyout feature isn't available (e.g. the user lacks APM access).
-          href: canOpenServiceFlyout ? undefined : linkTargets?.serviceOverview,
-          onClick: canOpenServiceFlyout
-            ? () => {
-                closePopover();
-                openFlyout();
-              }
-            : closePopover,
-        },
-        {
-          label: serviceMapLabel,
-          iconType: 'graphApp',
-          external: true,
-          href: linkTargets?.serviceMap,
-          onClick: closePopover,
-        },
-        {
           label: activeAlertsLabel,
           iconType: 'bell',
           external: true,
@@ -130,15 +97,8 @@ export const getServiceSummaryCell =
           href: linkTargets?.slos,
           onClick: closePopover,
         },
-        {
-          label: infraMetricsLabel,
-          iconType: 'storage',
-          external: true,
-          href: linkTargets?.infrastructure,
-          onClick: closePopover,
-        },
       ],
-      [closePopover, linkTargets, activeAlertCount, slo, canOpenServiceFlyout, openFlyout]
+      [closePopover, linkTargets, activeAlertCount, slo]
     );
 
     if (!serviceName) {
@@ -170,63 +130,39 @@ export const getServiceSummaryCell =
       </EuiBadge>
     );
 
-    const { from: rangeFrom, to: rangeTo } = dataService.query.timefilter.timefilter.getTime();
-
     return (
-      <>
-        <EuiPopover
-          button={trigger}
-          isOpen={isPopoverOpen}
-          closePopover={closePopover}
-          anchorPosition="downLeft"
-          panelPaddingSize="none"
-          aria-label={i18n.translate('discover.tracesServiceSummary.popoverAriaLabel', {
-            defaultMessage: 'Summary for service {serviceName}',
-            values: { serviceName },
-          })}
-          data-test-subj={dataTestSubj}
-        >
-          <ServiceSummary
-            serviceName={serviceName}
-            environment={environment}
-            agentName={agentNameIcon}
-            icon={<AgentIcon agentName={agentNameIcon} size="l" />}
-            metrics={metrics}
-            links={links}
-            isLoading={loading}
-            onClose={closePopover}
-            onFilterFor={onFilter('+')}
-            onFilterOut={onFilter('-')}
-            onCopyValue={onCopyValue}
-          />
-        </EuiPopover>
-        {isFlyoutOpen && serviceFlyoutFeature
-          ? serviceFlyoutFeature.renderServiceFlyout({
-              service: { name: serviceName, agentName: agentNameIcon },
-              filters: {
-                environment: environment ?? ALL_ENVIRONMENTS,
-                rangeFrom,
-                rangeTo,
-              },
-              source: FLYOUT_SOURCE,
-              onClose: closeFlyout,
-            })
-          : null}
-      </>
+      <EuiPopover
+        button={trigger}
+        isOpen={isPopoverOpen}
+        closePopover={closePopover}
+        anchorPosition="downLeft"
+        panelPaddingSize="none"
+        aria-label={i18n.translate('discover.tracesServiceSummary.popoverAriaLabel', {
+          defaultMessage: 'Summary for service {serviceName}',
+          values: { serviceName },
+        })}
+        data-test-subj={dataTestSubj}
+      >
+        <ServiceSummary
+          serviceName={serviceName}
+          environment={environment}
+          agentName={agentNameIcon}
+          serviceHref={linkTargets?.serviceOverview}
+          icon={<AgentIcon agentName={agentNameIcon} size="l" />}
+          metrics={metrics}
+          links={links}
+          isLoading={loading}
+          onClose={closePopover}
+          onFilterFor={onFilter('+')}
+          onFilterOut={onFilter('-')}
+          onCopyValue={onCopyValue}
+        />
+      </EuiPopover>
     );
   };
 
-const openOverviewLabel = i18n.translate('discover.tracesServiceSummary.openOverview', {
-  defaultMessage: 'Open overview',
-});
-const serviceMapLabel = i18n.translate('discover.tracesServiceSummary.serviceMap', {
-  defaultMessage: 'Service map',
-});
 const activeAlertsLabel = i18n.translate('discover.tracesServiceSummary.activeAlerts', {
   defaultMessage: 'Active alerts',
-});
-const infraMetricsLabel = i18n.translate('discover.tracesServiceSummary.infrastructureMetrics', {
-  defaultMessage: 'Infrastructure metrics',
 });
 const slosLabel = i18n.translate('discover.tracesServiceSummary.slos', {
   defaultMessage: 'SLOs',

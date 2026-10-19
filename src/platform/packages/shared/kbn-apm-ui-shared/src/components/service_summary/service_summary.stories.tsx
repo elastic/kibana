@@ -35,6 +35,7 @@ const baseProps: ServiceSummaryProps = {
   serviceName: 'checkoutService',
   environment: 'Synthtrace: service_map',
   agentName: 'go',
+  serviceHref: 'https://localhost:5601/app/apm/services/checkoutService/overview',
   icon: <EuiIcon type="compute" size="xl" aria-hidden={true} />,
   health: {
     activeAlertCount: 1,
@@ -67,13 +68,6 @@ const baseProps: ServiceSummaryProps = {
     },
   ],
   links: [
-    { label: 'Open overview', iconType: 'fullScreen', 'data-test-subj': 'linkOpenOverview' },
-    {
-      label: 'Service map',
-      iconType: 'graphApp',
-      external: true,
-      'data-test-subj': 'linkServiceMap',
-    },
     {
       label: 'Active alerts',
       iconType: 'bell',
@@ -89,12 +83,6 @@ const baseProps: ServiceSummaryProps = {
       badgeLabel: 2,
       badgeColor: 'danger',
       'data-test-subj': 'linkSlos',
-    },
-    {
-      label: 'Infrastructure metrics',
-      iconType: 'storage',
-      external: true,
-      'data-test-subj': 'linkInfra',
     },
   ],
   onClose: () => {},

@@ -49,14 +49,8 @@ export const getServiceSummaryLinks = (
     serviceOverview: toHref(
       apmRouter.link('/services/{serviceName}/overview', { path: { serviceName }, query })
     ),
-    serviceMap: toHref(
-      apmRouter.link('/services/{serviceName}/service-map', { path: { serviceName }, query })
-    ),
     alerts: toHref(
       apmRouter.link('/services/{serviceName}/alerts', { path: { serviceName }, query })
-    ),
-    infrastructure: toHref(
-      apmRouter.link('/services/{serviceName}/infrastructure', { path: { serviceName }, query })
     ),
     // The SLO list lives in its own app; the locator applies the APM indicator + service filters.
     // Fall back to the SLOs app root if the locator isn't registered (e.g. SLOs disabled).

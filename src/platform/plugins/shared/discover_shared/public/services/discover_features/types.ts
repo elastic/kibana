@@ -314,9 +314,7 @@ export interface ObservabilityTracesServiceSummaryMetric {
 /** Absolute, ready-to-use hrefs for the service's destinations — built by the fulfilling plugin. */
 export interface ObservabilityTracesServiceSummaryLinks {
   serviceOverview: string;
-  serviceMap: string;
   alerts: string;
-  infrastructure: string;
   slos: string;
 }
 

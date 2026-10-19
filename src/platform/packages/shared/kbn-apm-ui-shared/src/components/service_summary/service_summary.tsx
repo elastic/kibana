@@ -82,6 +82,8 @@ export interface ServiceSummaryProps {
   serviceName: string;
   environment?: string;
   agentName?: string;
+  /** When set, the service name in the header links to this URL (opens in a new tab). */
+  serviceHref?: string;
   /** Service/agent icon rendered in the header. */
   icon?: ReactNode;
   health?: ServiceSummaryHealth;
@@ -115,6 +117,7 @@ export function ServiceSummary({
   serviceName,
   environment,
   agentName,
+  serviceHref,
   icon,
   health,
   metrics,
@@ -140,6 +143,7 @@ export function ServiceSummary({
           serviceName={serviceName}
           environment={environment}
           agentName={agentName}
+          serviceHref={serviceHref}
           icon={icon}
           onClose={onClose}
         />
@@ -198,9 +202,13 @@ function Header({
   serviceName,
   environment,
   agentName,
+  serviceHref,
   icon,
   onClose,
-}: Pick<ServiceSummaryProps, 'serviceName' | 'environment' | 'agentName' | 'icon' | 'onClose'>) {
+}: Pick<
+  ServiceSummaryProps,
+  'serviceName' | 'environment' | 'agentName' | 'serviceHref' | 'icon' | 'onClose'
+>) {
   const subtitle = [environment, agentName].filter(Boolean).join(' · ');
   const closeLabel = i18n.translate('apmUiShared.serviceSummary.closeAriaLabel', {
     defaultMessage: 'Close service summary',
@@ -216,7 +224,15 @@ function Header({
           </EuiText>
         ) : null}
         <EuiTitle size="xs">
-          <h3 data-test-subj="serviceSummaryServiceName">{serviceName}</h3>
+          <h3 data-test-subj="serviceSummaryServiceName">
+            {serviceHref ? (
+              <EuiLink href={serviceHref} target="_blank" external={false}>
+                {serviceName}
+              </EuiLink>
+            ) : (
+              serviceName
+            )}
+          </h3>
         </EuiTitle>
       </EuiFlexItem>
       {onClose ? (
