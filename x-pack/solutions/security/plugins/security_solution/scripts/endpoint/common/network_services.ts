@@ -14,7 +14,8 @@ const ipv4ToInt = (address: string): number =>
 
 // An address identifies its subnet when all of its host bits are zero, which depends on the
 // netmask: `10.224.1.0/20` is an ordinary host address while `10.224.1.0/24` is not. Netmasks
-// are contiguous, so the identifier is always a multiple of the subnet's block size.
+// are contiguous, so the identifier is always a multiple of the subnet's block size. A `/32` or
+// `/31` block reserves no identifier, so its address is always the interface's own host address.
 const isNetworkIdentifier = ({
   address,
   netmask,
@@ -24,7 +25,7 @@ const isNetworkIdentifier = ({
 }): boolean => {
   const blockSize = IPV4_SPACE - ipv4ToInt(netmask);
 
-  return blockSize > 0 && ipv4ToInt(address) % blockSize === 0;
+  return blockSize > 2 && ipv4ToInt(address) % blockSize === 0;
 };
 
 export const getLocalhostRealIp = (): string => {

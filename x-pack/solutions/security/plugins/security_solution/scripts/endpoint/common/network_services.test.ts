@@ -34,6 +34,22 @@ describe('getLocalhostRealIp', () => {
     expect(getLocalhostRealIp()).toBe('10.224.1.0');
   });
 
+  it('returns a `.0` host address advertised with a single-address `/32` netmask', () => {
+    networkInterfacesMock.mockReturnValue({
+      ens4: [ipv4('10.224.1.0', '255.255.255.255')],
+    });
+
+    expect(getLocalhostRealIp()).toBe('10.224.1.0');
+  });
+
+  it('returns a host address from a two-address `/31` point-to-point link', () => {
+    networkInterfacesMock.mockReturnValue({
+      eth0: [ipv4('10.0.0.4', '255.255.255.254')],
+    });
+
+    expect(getLocalhostRealIp()).toBe('10.0.0.4');
+  });
+
   it('skips addresses that are the network identifier of their subnet', () => {
     networkInterfacesMock.mockReturnValue({
       br0: [ipv4('192.168.1.0', '255.255.255.0')],
