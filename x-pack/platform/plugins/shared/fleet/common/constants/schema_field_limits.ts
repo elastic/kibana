@@ -9,11 +9,25 @@
 // These guard against unbounded-input DoS (CWE-770).  Adjust a limit here and the
 // change propagates to every schema that imports it.
 
-/** Identifiers: UUIDs, Saved Object IDs, preconfigured policy IDs, short opaque tokens. */
-export const FLEET_SCHEMA_ID_MAX_LENGTH = 512;
+/**
+ * Machine-generated short text: ISO 8601 timestamps, semver and version-condition
+ * strings, ES duration strings, and fixed enum values.
+ *
+ * Identifiers are deliberately absent here: UUIDs, Saved Object IDs, API key IDs and
+ * policy/output/action IDs use the platform `schema.savedObjectId()` helper instead, so
+ * they share the limit core applies to every Saved Object ID.
+ */
+export const FLEET_SCHEMA_SHORT_TEXT_MAX_LENGTH = 512;
 
 /** Human-readable names: policy names, package names, integration names. */
 export const FLEET_SCHEMA_NAME_MAX_LENGTH = 255;
+
+/**
+ * Data stream namespaces and namespace prefixes. Matches the 100 byte ceiling that
+ * `isValidNamespace` already enforces, so this only makes the existing rule visible to
+ * the generated OAS and to CodeQL.
+ */
+export const FLEET_SCHEMA_NAMESPACE_MAX_LENGTH = 100;
 
 /** URLs: host URLs, proxy URLs, source URIs. */
 export const FLEET_SCHEMA_URL_MAX_LENGTH = 2048;

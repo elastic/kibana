@@ -9,18 +9,28 @@ import { schema } from '@kbn/config-schema';
 
 import { clientAuth } from '../../../common/types';
 
+import {
+  FLEET_SCHEMA_NAME_MAX_LENGTH,
+  FLEET_SCHEMA_URL_MAX_LENGTH,
+  FLEET_SCHEMA_LONG_TEXT_MAX_LENGTH,
+  FLEET_SCHEMA_CERT_MAX_LENGTH,
+} from '../../constants';
+
 // Flat oneOf with null as an explicit alternative — nested oneOf prevents null from
 // matching in @kbn/config-schema, so null must be a sibling alternative, not wrapped.
 const nullableSecretRefSchema = schema.oneOf([
   schema.literal(null),
   schema.object({ id: schema.savedObjectId({ minLength: 0 }) }),
-  schema.string({ maxLength: 10000 }),
+  schema.string({ maxLength: FLEET_SCHEMA_LONG_TEXT_MAX_LENGTH }),
 ]);
 
 export const FleetServerHostBaseSchema = schema.object({
-  name: schema.maybe(schema.string({ maxLength: 255 })),
+  name: schema.maybe(schema.string({ maxLength: FLEET_SCHEMA_NAME_MAX_LENGTH })),
   host_urls: schema.maybe(
-    schema.arrayOf(schema.string({ maxLength: 2048 }), { minSize: 1, maxSize: 10 })
+    schema.arrayOf(schema.string({ maxLength: FLEET_SCHEMA_URL_MAX_LENGTH }), {
+      minSize: 1,
+      maxSize: 10,
+    })
   ),
   is_default: schema.maybe(schema.boolean({ defaultValue: false })),
   is_internal: schema.maybe(schema.boolean()),
@@ -42,20 +52,26 @@ export const FleetServerHostBaseSchema = schema.object({
       schema.literal(null),
       schema.object({
         certificate_authorities: schema.maybe(
-          schema.arrayOf(schema.string({ maxLength: 100000 }), { maxSize: 10 })
+          schema.arrayOf(schema.string({ maxLength: FLEET_SCHEMA_CERT_MAX_LENGTH }), {
+            maxSize: 10,
+          })
         ),
-        certificate: schema.maybe(schema.string({ maxLength: 100000 })),
-        key: schema.maybe(schema.string({ maxLength: 100000 })),
+        certificate: schema.maybe(schema.string({ maxLength: FLEET_SCHEMA_CERT_MAX_LENGTH })),
+        key: schema.maybe(schema.string({ maxLength: FLEET_SCHEMA_CERT_MAX_LENGTH })),
         es_certificate_authorities: schema.maybe(
-          schema.arrayOf(schema.string({ maxLength: 100000 }), { maxSize: 10 })
+          schema.arrayOf(schema.string({ maxLength: FLEET_SCHEMA_CERT_MAX_LENGTH }), {
+            maxSize: 10,
+          })
         ),
-        es_certificate: schema.maybe(schema.string({ maxLength: 100000 })),
-        es_key: schema.maybe(schema.string({ maxLength: 100000 })),
+        es_certificate: schema.maybe(schema.string({ maxLength: FLEET_SCHEMA_CERT_MAX_LENGTH })),
+        es_key: schema.maybe(schema.string({ maxLength: FLEET_SCHEMA_CERT_MAX_LENGTH })),
         agent_certificate_authorities: schema.maybe(
-          schema.arrayOf(schema.string({ maxLength: 100000 }), { maxSize: 10 })
+          schema.arrayOf(schema.string({ maxLength: FLEET_SCHEMA_CERT_MAX_LENGTH }), {
+            maxSize: 10,
+          })
         ),
-        agent_certificate: schema.maybe(schema.string({ maxLength: 100000 })),
-        agent_key: schema.maybe(schema.string({ maxLength: 100000 })),
+        agent_certificate: schema.maybe(schema.string({ maxLength: FLEET_SCHEMA_CERT_MAX_LENGTH })),
+        agent_key: schema.maybe(schema.string({ maxLength: FLEET_SCHEMA_CERT_MAX_LENGTH })),
         client_auth: schema.maybe(
           schema.oneOf([
             schema.literal(clientAuth.Optional),
@@ -70,8 +86,11 @@ export const FleetServerHostBaseSchema = schema.object({
 
 export const FleetServerHostSchema = FleetServerHostBaseSchema.extends({
   id: schema.savedObjectId({ minLength: 0 }),
-  name: schema.string({ maxLength: 255 }),
-  host_urls: schema.arrayOf(schema.string({ maxLength: 2048 }), { minSize: 1, maxSize: 10 }),
+  name: schema.string({ maxLength: FLEET_SCHEMA_NAME_MAX_LENGTH }),
+  host_urls: schema.arrayOf(schema.string({ maxLength: FLEET_SCHEMA_URL_MAX_LENGTH }), {
+    minSize: 1,
+    maxSize: 10,
+  }),
   is_default: schema.boolean({ defaultValue: false }),
   is_internal: schema.maybe(schema.boolean()),
   is_preconfigured: schema.boolean({ defaultValue: false }),

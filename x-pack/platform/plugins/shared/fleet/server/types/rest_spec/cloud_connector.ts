@@ -185,7 +185,8 @@ export const GetCloudConnectorsRequestSchema = {
       })
     ),
     kuery: schema.maybe(
-      schema.string({
+      schema.searchFilter.warn({
+        label: 'fleet.cloud_connectors.kuery',
         meta: { description: 'KQL query to filter cloud connectors.' },
       })
     ),

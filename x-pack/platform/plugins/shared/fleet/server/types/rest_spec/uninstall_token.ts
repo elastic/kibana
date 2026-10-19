@@ -7,24 +7,36 @@
 import { schema } from '@kbn/config-schema';
 
 import {
-  FLEET_SCHEMA_ID_MAX_LENGTH,
+  FLEET_SCHEMA_SHORT_TEXT_MAX_LENGTH,
   FLEET_SCHEMA_NAME_MAX_LENGTH,
+  FLEET_SCHEMA_NAMESPACE_MAX_LENGTH,
   FLEET_SCHEMA_LONG_TEXT_MAX_LENGTH,
 } from '../../constants';
 
 import { ListResponseSchema } from '../../routes/schema/utils';
 
+/** Partial-match filter terms on the uninstall token list endpoint. */
+const UNINSTALL_TOKEN_SEARCH_TERM_MAX_LENGTH = 50;
+
+/** Agent policy ID accepted by the token rotation endpoint. */
+const UNINSTALL_TOKEN_POLICY_ID_MAX_LENGTH = 255;
+
 export const GetUninstallTokensMetadataRequestSchema = {
   query: schema.object({
+    // Both filters keep their pre-existing 50 character limit rather than taking the
+    // savedObjectId default: they are partial-match terms, not whole IDs, and they are
+    // expanded into an Elasticsearch `regexp` / `query_string` query whose cost grows
+    // with the number of wildcards the term produces.
     policyId: schema.maybe(
       schema.savedObjectId({
         minLength: 0,
+        maxLength: UNINSTALL_TOKEN_SEARCH_TERM_MAX_LENGTH,
         meta: { description: 'Partial match filtering for policy IDs' },
       })
     ),
     search: schema.maybe(
       schema.string({
-        maxLength: FLEET_SCHEMA_ID_MAX_LENGTH,
+        maxLength: UNINSTALL_TOKEN_SEARCH_TERM_MAX_LENGTH,
         meta: { description: 'Partial match filtering for uninstall token values' },
       })
     ),
@@ -47,8 +59,12 @@ const UninstallTokenMetadataSchema = schema.object({
   policy_name: schema.maybe(
     schema.oneOf([schema.literal(null), schema.string({ maxLength: FLEET_SCHEMA_NAME_MAX_LENGTH })])
   ),
-  created_at: schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH }),
-  namespaces: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+  created_at: schema.string({ maxLength: FLEET_SCHEMA_SHORT_TEXT_MAX_LENGTH }),
+  namespaces: schema.maybe(
+    schema.arrayOf(schema.string({ maxLength: FLEET_SCHEMA_NAMESPACE_MAX_LENGTH }), {
+      maxSize: 100,
+    })
+  ),
 });
 
 export const GetUninstallTokensMetadataResponseSchema = ListResponseSchema(
@@ -72,8 +88,11 @@ export const GetUninstallTokenResponseSchema = schema.object({
 
 export const RotateUninstallTokenRequestSchema = {
   params: schema.object({
+    // Keeps its pre-existing 255 character limit rather than taking the savedObjectId
+    // default of 512.
     agentPolicyId: schema.savedObjectId({
       minLength: 0,
+      maxLength: UNINSTALL_TOKEN_POLICY_ID_MAX_LENGTH,
       meta: { description: 'The ID of the agent policy whose uninstall token should be rotated' },
     }),
   }),

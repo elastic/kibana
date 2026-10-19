@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 
 import {
-  FLEET_SCHEMA_ID_MAX_LENGTH,
+  FLEET_SCHEMA_SHORT_TEXT_MAX_LENGTH,
   FLEET_SCHEMA_NAME_MAX_LENGTH,
   FLEET_SCHEMA_URL_MAX_LENGTH,
 } from '../../../common/constants';
@@ -794,7 +794,7 @@ export const GetFileRequestSchema = {
       meta: { description: 'Package name' },
     }),
     pkgVersion: schema.string({
-      maxLength: FLEET_SCHEMA_ID_MAX_LENGTH,
+      maxLength: FLEET_SCHEMA_SHORT_TEXT_MAX_LENGTH,
       meta: { description: 'Package version' },
     }),
     filePath: schema.string({
@@ -830,7 +830,7 @@ const PackageVersionRequestParamsSchema = schema.object({
     meta: { description: 'Package name' },
   }),
   pkgVersion: schema.string({
-    maxLength: FLEET_SCHEMA_ID_MAX_LENGTH,
+    maxLength: FLEET_SCHEMA_SHORT_TEXT_MAX_LENGTH,
     meta: { description: 'Package version' },
   }),
 });
@@ -1039,7 +1039,7 @@ export const ReviewUpgradeRequestSchema = {
         schema.literal('decline'),
         schema.literal('pending'),
       ]),
-      target_version: schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH }),
+      target_version: schema.string({ maxLength: FLEET_SCHEMA_SHORT_TEXT_MAX_LENGTH }),
     },
     { meta: { id: 'review_upgrade_request' } }
   ),
@@ -1068,7 +1068,7 @@ export const GetDependenciesRequestSchema = {
       meta: { description: 'Package name' },
     }),
     pkgVersion: schema.string({
-      maxLength: FLEET_SCHEMA_ID_MAX_LENGTH,
+      maxLength: FLEET_SCHEMA_SHORT_TEXT_MAX_LENGTH,
       meta: { description: 'Package version' },
     }),
   }),
@@ -1142,7 +1142,7 @@ export const ReauthorizeTransformRequestSchema = {
     }),
     pkgVersion: schema.maybe(
       schema.string({
-        maxLength: FLEET_SCHEMA_ID_MAX_LENGTH,
+        maxLength: FLEET_SCHEMA_SHORT_TEXT_MAX_LENGTH,
         meta: { description: 'Package version' },
       })
     ),
@@ -1178,7 +1178,7 @@ export const BulkInstallPackagesFromRegistryRequestSchema = {
           schema.displayName({ minLength: 0, maxLength: FLEET_SCHEMA_NAME_MAX_LENGTH }),
           schema.object({
             name: schema.displayName({ minLength: 0, maxLength: FLEET_SCHEMA_NAME_MAX_LENGTH }),
-            version: schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH }),
+            version: schema.string({ maxLength: FLEET_SCHEMA_SHORT_TEXT_MAX_LENGTH }),
             prerelease: schema.maybe(schema.boolean()),
           }),
         ]),
@@ -1214,7 +1214,7 @@ export const BulkUpgradePackagesRequestSchema = {
       packages: schema.arrayOf(
         schema.object({
           name: schema.displayName({ minLength: 0, maxLength: FLEET_SCHEMA_NAME_MAX_LENGTH }),
-          version: schema.maybe(schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH })),
+          version: schema.maybe(schema.string({ maxLength: FLEET_SCHEMA_SHORT_TEXT_MAX_LENGTH })),
         }),
         { minSize: 1, maxSize: 1000 }
       ),
@@ -1232,7 +1232,7 @@ export const BulkUninstallPackagesRequestSchema = {
       packages: schema.arrayOf(
         schema.object({
           name: schema.displayName({ minLength: 0, maxLength: FLEET_SCHEMA_NAME_MAX_LENGTH }),
-          version: schema.string({ maxLength: FLEET_SCHEMA_ID_MAX_LENGTH }),
+          version: schema.string({ maxLength: FLEET_SCHEMA_SHORT_TEXT_MAX_LENGTH }),
         }),
         { minSize: 1, maxSize: 1000 }
       ),
@@ -1325,7 +1325,7 @@ export const InstallKibanaAssetsRequestSchema = {
       meta: { description: 'Package name' },
     }),
     pkgVersion: schema.string({
-      maxLength: FLEET_SCHEMA_ID_MAX_LENGTH,
+      maxLength: FLEET_SCHEMA_SHORT_TEXT_MAX_LENGTH,
       meta: { description: 'Package version' },
     }),
   }),
@@ -1357,7 +1357,7 @@ export const InstallRuleAssetsRequestSchema = {
       meta: { description: 'Package name' },
     }),
     pkgVersion: schema.string({
-      maxLength: FLEET_SCHEMA_ID_MAX_LENGTH,
+      maxLength: FLEET_SCHEMA_SHORT_TEXT_MAX_LENGTH,
       meta: { description: 'Package version' },
     }),
   }),
@@ -1379,7 +1379,7 @@ export const DeleteKibanaAssetsRequestSchema = {
       meta: { description: 'Package name' },
     }),
     pkgVersion: schema.string({
-      maxLength: FLEET_SCHEMA_ID_MAX_LENGTH,
+      maxLength: FLEET_SCHEMA_SHORT_TEXT_MAX_LENGTH,
       meta: { description: 'Package version' },
     }),
   }),
@@ -1393,7 +1393,7 @@ export const DeletePackageDatastreamAssetsRequestSchema = {
       meta: { description: 'Package name' },
     }),
     pkgVersion: schema.string({
-      maxLength: FLEET_SCHEMA_ID_MAX_LENGTH,
+      maxLength: FLEET_SCHEMA_SHORT_TEXT_MAX_LENGTH,
       meta: { description: 'Package version' },
     }),
   }),
@@ -1413,7 +1413,7 @@ export const GetInputsRequestSchema = {
       meta: { description: 'Package name' },
     }),
     pkgVersion: schema.string({
-      maxLength: FLEET_SCHEMA_ID_MAX_LENGTH,
+      maxLength: FLEET_SCHEMA_SHORT_TEXT_MAX_LENGTH,
       meta: { description: 'Package version' },
     }),
   }),

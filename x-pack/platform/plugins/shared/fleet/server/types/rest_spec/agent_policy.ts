@@ -39,7 +39,8 @@ export const GetAgentPoliciesRequestSchema = {
         })
       ),
       kuery: schema.maybe(
-        schema.string({
+        schema.searchFilter.warn({
+          label: 'fleet.agent_policies.kuery',
           meta: { description: 'A KQL query string to filter results' },
           validate: (value: string) => {
             const validationObj = validateKuery(

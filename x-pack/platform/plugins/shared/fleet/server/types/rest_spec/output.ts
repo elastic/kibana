@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 import { NewOutputSchema, OutputResponseItemSchema, UpdateOutputSchema } from '../models';
 import { ListResponseSchema } from '../../routes/schema/utils';
+import { FLEET_SCHEMA_LONG_TEXT_MAX_LENGTH } from '../../constants';
 
 export const GetOneOutputRequestSchema = {
   params: schema.object({
@@ -71,7 +72,7 @@ export const GetLatestOutputHealthResponseSchema = schema.object({
     },
   }),
   message: schema.string({
-    maxLength: 10000,
+    maxLength: FLEET_SCHEMA_LONG_TEXT_MAX_LENGTH,
     meta: {
       description: 'long message if unhealthy',
     },

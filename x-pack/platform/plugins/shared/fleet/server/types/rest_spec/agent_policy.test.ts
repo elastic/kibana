@@ -90,3 +90,19 @@ describe('GetAgentPoliciesRequestSchema.query', () => {
     ).not.toThrow();
   });
 });
+
+describe('KQL fields in reporting mode', () => {
+  // kuery uses searchFilter.warn(): overlong input is recorded in the
+  // kibana.schema.string_length_violation.length histogram, not rejected.
+  it.each([10_000, 10_001, 50_000])('accepts a kuery of %i characters', (length) => {
+    expect(() =>
+      GetAgentPoliciesRequestSchema.query.validate({ kuery: 'a'.repeat(length) })
+    ).not.toThrow();
+  });
+
+  it('still applies KQL validation to the kuery field', () => {
+    expect(() =>
+      GetAgentPoliciesRequestSchema.query.validate({ kuery: 'not_a_field: 1' })
+    ).toThrow();
+  });
+});
