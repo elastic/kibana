@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import { FLEET_PACKAGE_WORKFLOW } from '@kbn/workflows/managed';
+import type { WorkflowsServerPluginStart } from '@kbn/workflows-management-plugin/server';
 import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
@@ -25,16 +26,21 @@ export const registerWorkflowAssetsOwner = ({
 /**
  * Initializes the managed workflows client and hands it over through `setClient` as soon as it is
  * created. Resolves once the client is ready, or to `undefined` if it is unavailable or failed.
+ * Without the workflows management plugin the extensions plugin only provides a noop client whose
+ * calls fail, so no client is created.
  */
 export const startManagedWorkflowsClient = async ({
   workflowsExtensions,
+  workflowsManagement,
   setClient,
   logger,
 }: {
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
+  workflowsManagement?: WorkflowsServerPluginStart;
   setClient: (client: ManagedWorkflowsClient) => void;
   logger?: Logger;
 }): Promise<ManagedWorkflowsClient | undefined> => {
+  if (!workflowsManagement) return undefined;
   try {
     const client = await workflowsExtensions?.initManagedWorkflowsClient(
       FLEET_PACKAGE_WORKFLOW.pluginId

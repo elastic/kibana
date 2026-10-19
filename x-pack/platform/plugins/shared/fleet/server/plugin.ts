@@ -52,6 +52,7 @@ import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
+import type { WorkflowsServerPluginStart } from '@kbn/workflows-management-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
@@ -219,6 +220,7 @@ export interface FleetStartDeps {
   alerting: AlertingServerStart;
   reporting: ReportingStart;
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
+  workflowsManagement?: WorkflowsServerPluginStart;
 }
 
 export interface FleetAppContext {
@@ -883,6 +885,7 @@ export class FleetPlugin
     appContextService.setManagedWorkflowsClientInit(
       startManagedWorkflowsClient({
         workflowsExtensions: plugins.workflowsExtensions,
+        workflowsManagement: plugins.workflowsManagement,
         setClient: (client) => appContextService.setManagedWorkflowsClient(client),
         logger: this.logger,
       })

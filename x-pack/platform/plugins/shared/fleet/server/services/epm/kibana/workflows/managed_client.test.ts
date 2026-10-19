@@ -6,6 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import type { WorkflowsServerPluginStart } from '@kbn/workflows-management-plugin/server';
 import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
@@ -34,6 +35,7 @@ describe('managed workflows client', () => {
   });
 
   describe('startManagedWorkflowsClient', () => {
+    const workflowsManagement = {} as WorkflowsServerPluginStart;
     const logger = loggingSystemMock.createLogger();
     const createStart = (initManagedWorkflowsClient: jest.Mock) =>
       ({ initManagedWorkflowsClient } as unknown as WorkflowsExtensionsServerPluginStart);
@@ -52,6 +54,7 @@ describe('managed workflows client', () => {
 
       const started = startManagedWorkflowsClient({
         workflowsExtensions: createStart(jest.fn().mockResolvedValue(client)),
+        workflowsManagement,
         setClient,
         logger,
       });
@@ -67,6 +70,7 @@ describe('managed workflows client', () => {
 
       await startManagedWorkflowsClient({
         workflowsExtensions: createStart(init),
+        workflowsManagement,
         setClient: jest.fn(),
         logger,
       });
@@ -81,12 +85,28 @@ describe('managed workflows client', () => {
       expect(setClient).not.toHaveBeenCalled();
     });
 
+    it('does not create a client when the workflows management plugin is not available', async () => {
+      const init = jest.fn();
+      const setClient = jest.fn();
+
+      await expect(
+        startManagedWorkflowsClient({
+          workflowsExtensions: createStart(init),
+          setClient,
+          logger,
+        })
+      ).resolves.toBeUndefined();
+      expect(init).not.toHaveBeenCalled();
+      expect(setClient).not.toHaveBeenCalled();
+    });
+
     it('resolves to undefined without setting a client when none is returned', async () => {
       const setClient = jest.fn();
 
       await expect(
         startManagedWorkflowsClient({
           workflowsExtensions: createStart(jest.fn().mockResolvedValue(undefined)),
+          workflowsManagement,
           setClient,
           logger,
         })
@@ -100,6 +120,7 @@ describe('managed workflows client', () => {
       await expect(
         startManagedWorkflowsClient({
           workflowsExtensions: createStart(jest.fn().mockRejectedValue(new Error('boom'))),
+          workflowsManagement,
           setClient,
           logger,
         })
@@ -118,6 +139,7 @@ describe('managed workflows client', () => {
       await expect(
         startManagedWorkflowsClient({
           workflowsExtensions: createStart(jest.fn().mockResolvedValue(client)),
+          workflowsManagement,
           setClient,
           logger,
         })

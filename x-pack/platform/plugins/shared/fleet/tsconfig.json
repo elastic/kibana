@@ -130,6 +130,7 @@
     "@kbn/alerting-plugin",
     "@kbn/alerting-v2-utils",
     "@kbn/workflows-extensions",
+    "@kbn/workflows-management-plugin",
     "@kbn/human-readable-id",
     "@kbn/workflows",
     "@kbn/deeplinks-observability",
