@@ -16,6 +16,11 @@ import {
   getBaseScoreESQL,
   type EuidCompositeAggregation,
 } from '../../calculate_esql_risk_scores';
+import {
+  getStampedEuidCompositeQuery,
+  getStampedEuidRangeFilter,
+  getUnstampedAlertsCountQuery,
+} from '../../stamping_queries';
 import { RISK_SCORING_REQUEST_TIMEOUT } from '../../constants';
 import type { ParsedRiskScore } from './parse_esql_row';
 import { parseEsqlBaseScoreRow } from './parse_esql_row';
@@ -82,11 +87,14 @@ interface EuidPageResult {
 /**
  * Streams base risk scores for one entity type, one page per yield.
  *
- * Each page: a composite aggregation over the alerts index (paginating by EUID
- * via a Painless runtime mapping) discovers the next page's upper-bound EUID,
- * then a single ES|QL query scores every alert in the half-open EUID range
- * `(previousUpper, currentUpper]`. The Phase-0 lookup index is unused here —
- * Phase 2 (resolution scoring) is its only reader.
+ * Each page: a composite aggregation over the alerts index (paginating by EUID)
+ * discovers the next page's upper-bound EUID, then a single ES|QL query scores
+ * every alert in the half-open EUID range `(previousUpper, currentUpper]`. The
+ * Phase-0 lookup index is unused here — Phase 2 (resolution scoring) is its only reader.
+ *
+ * When every in-scope alert carries a stamped EUID for this type, pages come from the stamped field
+ * and each scoring query reads only its page's alerts. Otherwise a Painless runtime mapping derives
+ * the EUIDs of the alerts without one, which runs over every alert on every page.
  *
  * Modifier entities are fetched only for IDs that produced scores.
  */
@@ -108,6 +116,13 @@ export const calculateBaseEntityScores = async function* ({
   let afterKey: Record<string, string> | undefined;
   let previousPageUpperBound: string | undefined;
 
+  const stamped = await allAlertsStamped({ esClient, entityType, alertFilters, alertsIndex });
+  logger.debug(
+    stamped
+      ? 'base scoring pages by stamped entity IDs'
+      : 'base scoring pages by derived entity IDs: some alerts have no stamped entity ID'
+  );
+
   do {
     if (abortSignal?.aborted) {
       logger.info('Base scoring aborted between pages');
@@ -121,6 +136,7 @@ export const calculateBaseEntityScores = async function* ({
       alertsIndex,
       pageSize,
       afterKey,
+      stamped,
     });
     if (!pageResult) {
       return;
@@ -135,6 +151,7 @@ export const calculateBaseEntityScores = async function* ({
       pageSize,
       alertsIndex,
       alertFilters,
+      stamped,
     });
     previousPageUpperBound = pageResult.upperBound;
 
@@ -274,6 +291,29 @@ export const scoreBaseEntities = async ({
   };
 };
 
+/**
+ * Whether every in-scope alert that could resolve to an entity of this type carries a stamped
+ * EUID for it, so pages can come from the stamped field. Checked once per run: alerts written
+ * after the check are scored by the next run.
+ */
+const allAlertsStamped = async ({
+  esClient,
+  entityType,
+  alertFilters,
+  alertsIndex,
+}: {
+  esClient: ElasticsearchClient;
+  entityType: EntityType;
+  alertFilters: QueryDslQueryContainer[];
+  alertsIndex: string;
+}): Promise<boolean> => {
+  const { count } = await esClient.count(
+    getUnstampedAlertsCountQuery(entityType, alertFilters, alertsIndex),
+    { requestTimeout: RISK_SCORING_REQUEST_TIMEOUT }
+  );
+  return count === 0;
+};
+
 const fetchNextEuidPage = async ({
   esClient,
   entityType,
@@ -281,6 +321,7 @@ const fetchNextEuidPage = async ({
   alertsIndex,
   pageSize,
   afterKey,
+  stamped,
 }: {
   esClient: ElasticsearchClient;
   entityType: EntityType;
@@ -288,13 +329,13 @@ const fetchNextEuidPage = async ({
   alertsIndex: string;
   pageSize: number;
   afterKey: Record<string, string> | undefined;
+  stamped: boolean;
 }): Promise<EuidPageResult | null> => {
+  const compositeParams = { index: alertsIndex, pageSize, afterKey };
   const compositeResponse = await esClient.search(
-    getEuidCompositeQuery(entityType, alertFilters, {
-      index: alertsIndex,
-      pageSize,
-      afterKey,
-    }),
+    stamped
+      ? getStampedEuidCompositeQuery(entityType, alertFilters, compositeParams)
+      : getEuidCompositeQuery(entityType, alertFilters, compositeParams),
     { requestTimeout: RISK_SCORING_REQUEST_TIMEOUT }
   );
 
@@ -302,13 +343,21 @@ const fetchNextEuidPage = async ({
     compositeResponse.aggregations as { by_entity_id?: EuidCompositeAggregation } | undefined
   )?.by_entity_id;
   const buckets = compositeAgg?.buckets ?? [];
-  if (buckets.length === 0) {
+
+  // The stamped field also holds other types' EUIDs, which sort after this type's: the first one
+  // ends the type's pages.
+  const typePrefix = `${entityType}:`;
+  const firstOtherType = stamped
+    ? buckets.findIndex((bucket) => !bucket.key.entity_id.startsWith(typePrefix))
+    : -1;
+  const pageBuckets = firstOtherType === -1 ? buckets : buckets.slice(0, firstOtherType);
+  if (pageBuckets.length === 0) {
     return null;
   }
 
   return {
-    upperBound: buckets[buckets.length - 1].key.entity_id,
-    afterKey: compositeAgg?.after_key,
+    upperBound: pageBuckets[pageBuckets.length - 1].key.entity_id,
+    afterKey: firstOtherType === -1 ? compositeAgg?.after_key : undefined,
   };
 };
 
@@ -320,6 +369,7 @@ const scorePageFromAlerts = async ({
   pageSize,
   alertsIndex,
   alertFilters,
+  stamped,
 }: {
   esClient: ElasticsearchClient;
   entityType: EntityType;
@@ -328,12 +378,19 @@ const scorePageFromAlerts = async ({
   pageSize: number;
   alertsIndex: string;
   alertFilters: QueryDslQueryContainer[];
+  stamped: boolean;
 }): Promise<ParsedRiskScore[]> => {
   const query = getBaseScoreESQL(entityType, bounds, sampleSize, pageSize, alertsIndex);
   const esqlResponse = await esClient.esql.query(
     {
       query,
-      filter: { bool: { filter: alertFilters } },
+      filter: {
+        bool: {
+          filter: stamped
+            ? [...alertFilters, getStampedEuidRangeFilter(entityType, bounds)]
+            : alertFilters,
+        },
+      },
     },
     { requestTimeout: RISK_SCORING_REQUEST_TIMEOUT }
   );

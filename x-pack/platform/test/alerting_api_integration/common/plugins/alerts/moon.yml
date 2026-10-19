@@ -35,6 +35,7 @@ dependsOn:
   - '@kbn/alerts-as-data-utils'
   - '@kbn/data-plugin'
   - '@kbn/zod'
+  - '@kbn/core-spaces-common'
 tags:
   - plugin
   - prod

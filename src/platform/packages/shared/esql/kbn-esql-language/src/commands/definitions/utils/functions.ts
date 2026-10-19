@@ -11,6 +11,7 @@ import type { LicenseType } from '@kbn/licensing-types';
 import type { ESQLControlVariable, RecommendedField } from '@kbn/esql-types';
 import { ControlTriggerSource, ESQLVariableType } from '@kbn/esql-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
+import { inlineCasts as inlineCastsMapping } from '@elastic/esql-definitions/inline-cast';
 import {
   type FunctionDefinition,
   type FunctionFilterPredicates,
@@ -23,7 +24,6 @@ import { aggFunctionDefinitions } from '../generated/aggregation_functions';
 import { timeSeriesAggFunctionDefinitions } from '../generated/time_series_agg_functions';
 import { groupingFunctionDefinitions } from '../generated/grouping_functions';
 import { scalarFunctionDefinitions } from '../generated/scalar_functions';
-import { inlineCastsMapping } from '../generated/inline_casts_mapping';
 import { EsqlFunctionNames } from '../generated/function_names';
 import type { ESQLColumnData, ISuggestionItem } from '../../registry/types';
 import { withAutoSuggest } from './autocomplete/helpers';

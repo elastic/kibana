@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiFlexGroup, EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
+import { EuiFlexGroup, EuiLoadingSpinner, EuiPageTemplate, useEuiTheme } from '@elastic/eui';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
@@ -45,6 +46,7 @@ const SourcesPage = React.lazy(() =>
 );
 
 export function NightshiftPage(): React.ReactElement | null {
+  const { euiTheme } = useEuiTheme();
   const {
     application,
     featureFlags,
@@ -190,12 +192,31 @@ export function NightshiftPage(): React.ReactElement | null {
     return null;
   }
 
+  const isHomePage =
+    !isSettingsPage &&
+    !isKnowledgePage &&
+    !isSourcesPage &&
+    !canUseAutomationsPage &&
+    !isOnboarding &&
+    !onboarding.isLoading;
+
   return (
     <ObservabilityPageTemplate
       data-test-subj="nightshiftPage"
       restrictWidth={false}
       pageSectionProps={{
         paddingSize: 'none',
+        ...(isHomePage
+          ? {
+              css: css`
+                background: linear-gradient(
+                  ${euiTheme.colors.backgroundBasePlain},
+                  ${euiTheme.colors.backgroundBaseSubdued},
+                  ${euiTheme.colors.backgroundBasePlain}
+                );
+              `,
+            }
+          : {}),
       }}
     >
       {isSettingsPage ? (
@@ -303,6 +324,7 @@ export function NightshiftPage(): React.ReactElement | null {
           />
           <EuiPageTemplate.Section
             component="div"
+            color={isHomePage ? 'transparent' : undefined}
             restrictWidth={
               canUseAutomationsPage
                 ? false

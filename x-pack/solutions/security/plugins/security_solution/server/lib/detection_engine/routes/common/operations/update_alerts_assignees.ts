@@ -10,6 +10,11 @@ import type { Indices } from '@elastic/elasticsearch/lib/api/types';
 
 import type { SecuritySolutionRequestHandlerContext } from '../../../../../types';
 import type { SetAlertAssigneesRequestBody } from '../../../../../../common/api/detection_engine/alert_assignees';
+import {
+  auditAlertUpdateFailure,
+  auditAlertUpdateIntent,
+  auditAlertUpdateResponseFailure,
+} from './audit_alert_updates';
 
 interface UpdateAlertsAssigneesArgs {
   context: SecuritySolutionRequestHandlerContext;
@@ -29,18 +34,33 @@ export const updateAlertsAssignees = async ({
   assignees,
 }: UpdateAlertsAssigneesArgs) => {
   const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+  const auditLogger = (await context.securitySolution).getAuditLogger();
+  const target = { ids };
 
-  return esClient.updateByQuery({
-    index,
-    refresh: true,
-    script: getUpdateAlertAssigneesScript(assignees),
-    query: {
-      bool: {
-        filter: { terms: { _id: ids } },
+  auditAlertUpdateIntent(auditLogger, target);
+
+  try {
+    const response = await esClient.updateByQuery({
+      index,
+      refresh: true,
+      script: getUpdateAlertAssigneesScript(assignees),
+      query: {
+        bool: {
+          filter: { terms: { _id: ids } },
+        },
       },
-    },
-    ignore_unavailable: true,
-  });
+      ignore_unavailable: true,
+    });
+    auditAlertUpdateResponseFailure(auditLogger, target, response);
+    return response;
+  } catch (error) {
+    auditAlertUpdateFailure(
+      auditLogger,
+      target,
+      error instanceof Error ? error : new Error(String(error))
+    );
+    throw error;
+  }
 };
 
 export const getUpdateAlertAssigneesScript = (
