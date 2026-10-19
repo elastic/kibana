@@ -103,6 +103,13 @@ export const getPolicyProtectionsReference = (): PolicyProtectionReference[] => 
     enableValue: true,
   },
   {
+    keyPath: 'attack_surface_reduction.registry_credential_hardening.enabled',
+    osList: [PolicyOperatingSystem.windows],
+    disableValue: false,
+    enableValue: true,
+    optionalOsList: [PolicyOperatingSystem.windows],
+  },
+  {
     keyPath: 'antivirus_registration.enabled',
     osList: [PolicyOperatingSystem.windows],
     disableValue: false,
@@ -241,6 +248,9 @@ const getDisabledWindowsSpecificProtections = (policy: PolicyConfig) => ({
     credential_hardening: {
       enabled: false,
     },
+    ...(policy.windows.attack_surface_reduction.registry_credential_hardening === undefined
+      ? {}
+      : { registry_credential_hardening: { enabled: false } }),
   },
 });
 
@@ -472,6 +482,78 @@ export const removeLinuxRansomware = (policy: PolicyConfig): PolicyConfig => {
   return {
     ...policy,
     linux: { ...linuxRest, popup: popupRest },
+  };
+};
+
+/** Leaf field removed from `windows.advanced.kernel.registry_credential_hardening`. */
+const REGISTRY_CREDENTIAL_HARDENING_ADVANCED_FIELD = 'descendants';
+
+/**
+ * Mirrors `removeYaraAdvancedSettingsForOs`: narrows each level before descending into it, prunes
+ * `registry_credential_hardening` once `descendants` is gone, then prunes `kernel` once it is
+ * empty, and otherwise leaves `windows.advanced` untouched.
+ */
+const removeRegistryCredentialHardeningAdvancedSettings = (
+  windowsPolicy: PolicyConfig['windows']
+): PolicyConfig['windows'] => {
+  const { advanced } = windowsPolicy;
+
+  if (!isAdvancedSettings(advanced)) {
+    return windowsPolicy;
+  }
+
+  const kernel = advanced.kernel;
+
+  if (!isAdvancedSettings(kernel)) {
+    return windowsPolicy;
+  }
+
+  const registryCredentialHardening = kernel.registry_credential_hardening;
+
+  if (
+    !isAdvancedSettings(registryCredentialHardening) ||
+    !(REGISTRY_CREDENTIAL_HARDENING_ADVANCED_FIELD in registryCredentialHardening)
+  ) {
+    return windowsPolicy;
+  }
+
+  const remainingRegistryCredentialHardening: AdvancedSettings = {
+    ...registryCredentialHardening,
+  };
+  delete remainingRegistryCredentialHardening[REGISTRY_CREDENTIAL_HARDENING_ADVANCED_FIELD];
+
+  const nextKernel: AdvancedSettings = { ...kernel };
+  if (Object.keys(remainingRegistryCredentialHardening).length > 0) {
+    nextKernel.registry_credential_hardening = remainingRegistryCredentialHardening;
+  } else {
+    delete nextKernel.registry_credential_hardening;
+  }
+
+  const nextAdvanced: AdvancedSettings = { ...advanced };
+  if (Object.keys(nextKernel).length > 0) {
+    nextAdvanced.kernel = nextKernel;
+  } else {
+    delete nextAdvanced.kernel;
+  }
+
+  return { ...windowsPolicy, advanced: nextAdvanced } as PolicyConfig['windows'];
+};
+
+/**
+ * Returns a copy of the passed `PolicyConfig` with the Windows registry credential hardening
+ * field removed, along with its `windows.advanced.kernel.registry_credential_hardening.descendants`
+ * advanced setting, which stays hidden in the UI whenever the feature is unavailable.
+ */
+export const removeRegistryCredentialHardening = (policy: PolicyConfig): PolicyConfig => {
+  const { registry_credential_hardening: registryCredentialHardening, ...attackSurfaceReduction } =
+    policy.windows.attack_surface_reduction;
+
+  return {
+    ...policy,
+    windows: removeRegistryCredentialHardeningAdvancedSettings({
+      ...policy.windows,
+      attack_surface_reduction: attackSurfaceReduction,
+    }),
   };
 };
 

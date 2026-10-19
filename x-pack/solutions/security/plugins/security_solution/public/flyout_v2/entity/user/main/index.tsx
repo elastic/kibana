@@ -58,7 +58,7 @@ import {
 import { EntityPanelHeaderTabs } from '../../../../flyout/entity_details/shared/components/entity_panel_tabs';
 import { EntityStoreTableTab } from '../../../../flyout/entity_details/shared/components/entity_store_table_tab';
 import { EntitySummaryGrid } from '../../../../flyout/entity_details/shared/components/entity_summary_grid';
-import type { EntityViewMode } from '../../../../flyout/entity_details/shared/types';
+import type { EntityViewMode } from '../../../../../common/entity_analytics/entity_store/resolution_group';
 
 export interface UserProps {
   /**
@@ -350,6 +350,7 @@ export const User: FC<UserProps> = memo(function User({
             entityType: EntityType.user,
             value: userName,
             entityId: entityStoreEntityId,
+            mode,
             onOpenEntity: onOpenUser,
             title: userName,
             origin: FLYOUT_ORIGIN.ANOMALIES_SECTION,
@@ -361,6 +362,8 @@ export const User: FC<UserProps> = memo(function User({
                 entityType: EntityType.user,
                 value: userName,
                 entityId: panelDisplayEntityId,
+                mode,
+                scopeId,
                 onShowEntity: onOpenUser,
                 title: userName,
                 origin: FLYOUT_ORIGIN.INSIGHTS_ALERTS,
@@ -370,6 +373,7 @@ export const User: FC<UserProps> = memo(function User({
                 entityType: EntityType.user,
                 value: userName,
                 entityId: panelDisplayEntityId,
+                mode,
                 onShowEntity: onOpenUser,
                 title: userName,
                 origin: FLYOUT_ORIGIN.INSIGHTS_MISCONFIGURATION,
@@ -438,6 +442,7 @@ export const User: FC<UserProps> = memo(function User({
       scopeId,
       panelDisplayEntityId,
       entityStoreEntityId,
+      mode,
       managedUser,
       onOpenUser,
       onShowRelatedEntityFromGraph,
@@ -491,9 +496,11 @@ export const User: FC<UserProps> = memo(function User({
             onAssetCriticalityChange={onAssetCriticalityChanged}
             isPreviewMode={false}
             entityRecord={entityStoreV2Enabled ? observedUser.entityRecord ?? undefined : undefined}
+            aliasRecords={aliasRecords}
             noEntityInStore={noEntityInStore}
             entityStoreV2Enabled={entityStoreV2Enabled}
             entityStoreEntityId={entityStoreEntityId}
+            mode={mode}
             onShowEntity={onShowRelatedEntityFromResolution}
             hideHeaderIcons
             riskScoreQueryId={USER_PANEL_RISK_SCORE_QUERY_ID}
