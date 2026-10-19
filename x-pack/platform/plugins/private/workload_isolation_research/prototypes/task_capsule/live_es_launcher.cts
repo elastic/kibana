@@ -17,7 +17,7 @@ const transportPort = Number(process.env.WIR_ES_TRANSPORT_PORT ?? 9321);
 const password = process.env.WIR_LOCAL_ES_PASSWORD;
 if (!password) throw new Error('Local task-owned ES credential was not provisioned');
 const runId = process.env.WIR_RUN_ID;
-if (!runId || !/^t1-phase-b-live-\d{3}$/.test(runId)) throw new Error('Invalid local run ID');
+if (!runId || !/^(t1-phase-b-live|t1-scoring-local)-\d{3}$/.test(runId)) throw new Error('Invalid local run ID');
 const esArgs = [`transport.port=${transportPort}`];
 void cluster
   .installSnapshot({
