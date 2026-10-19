@@ -1,0 +1,10 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/rdg-data-table",
+  "owner": [
+    "@elastic/kibana-discover"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "description": "Proof of concept: react-data-grid based data grid for Discover, evaluated against the TanStack and EUI grids"
+}

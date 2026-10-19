@@ -16,6 +16,7 @@ import {
   type UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
 import { TanStackDataGrid } from '@kbn/tanstack-data-table';
+import { RdgDataGrid } from '@kbn/rdg-data-table';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { useProfileAccessor } from '../../context_awareness';
 import type { DiscoverAppState } from '../../application/main/state_management/redux';
@@ -47,8 +48,9 @@ export interface DiscoverGridProps extends UnifiedDataTableProps {
 }
 
 /**
- * Customized Discover documents grid that can render either UnifiedDataTable (EUI)
- * or TanStackDataGrid, selected by the `discover.enableTanstackTable` feature flag.
+ * Customized Discover documents grid that renders UnifiedDataTable (EUI), TanStackDataGrid, or the
+ * react-data-grid proof of concept, selected by the `discover.enableTanstackTable` and
+ * `discover.enableRdgTable` feature flags.
  */
 export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
   ({
@@ -169,8 +171,10 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
     }
 
     if (!usesUnifiedDataTable) {
+      // The react-data-grid proof of concept takes the same props as the TanStack grid.
+      const CustomGrid = gridImplementation === 'rdg' ? RdgDataGrid : TanStackDataGrid;
       return (
-        <TanStackDataGrid
+        <CustomGrid
           {...sharedGridProps}
           rows={props.rows ?? []}
           columns={props.columns}

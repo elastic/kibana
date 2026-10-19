@@ -14,5 +14,7 @@ export const SEARCH_SESSION_ID_QUERY_PARAM = 'searchSessionId';
 export const CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY = 'discover.cascadeLayoutEnabled';
 export const SESSION_HTTP_API_ENABLED_FEATURE_FLAG_KEY = 'discover.sessionHttpApiEnabled';
 export const ENABLE_TANSTACK_TABLE_FEATURE_FLAG_KEY = 'discover.enableTanstackTable';
+/** Proof of concept: renders the react-data-grid based grid; takes precedence over `discover.enableTanstackTable`. */
+export const ENABLE_RDG_TABLE_FEATURE_FLAG_KEY = 'discover.enableRdgTable';
 
 export { IS_ESQL_DEFAULT_FEATURE_FLAG_KEY } from '@kbn/discover-utils';

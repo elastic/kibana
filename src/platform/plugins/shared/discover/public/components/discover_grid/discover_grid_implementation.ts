@@ -15,17 +15,19 @@ export type { DiscoverGridImplementation };
 export const DEFAULT_ENABLE_TANSTACK_TABLE = true;
 
 export const isDiscoverGridImplementation = (value: unknown): value is DiscoverGridImplementation =>
-  value === 'tanstack' || value === 'unified';
+  value === 'tanstack' || value === 'unified' || value === 'rdg';
 
-/** Maps the `discover.enableTanstackTable` feature flag to a grid implementation. */
+/** Maps the grid feature flags to a grid implementation; `discover.enableRdgTable` wins. */
 export const toDiscoverGridImplementation = (
-  enableTanstackTable: boolean
-): DiscoverGridImplementation => (enableTanstackTable ? 'tanstack' : 'unified');
+  enableTanstackTable: boolean,
+  enableRdgTable: boolean = false
+): DiscoverGridImplementation => {
+  if (enableRdgTable) return 'rdg';
+  return enableTanstackTable ? 'tanstack' : 'unified';
+};
 
 /** Returns a known grid implementation, falling back when the value is missing or invalid. */
 export const resolveDiscoverGridImplementation = (
   value: unknown,
-  fallback: DiscoverGridImplementation = toDiscoverGridImplementation(
-    DEFAULT_ENABLE_TANSTACK_TABLE
-  )
+  fallback: DiscoverGridImplementation = toDiscoverGridImplementation(DEFAULT_ENABLE_TANSTACK_TABLE)
 ): DiscoverGridImplementation => (isDiscoverGridImplementation(value) ? value : fallback);

@@ -3019,6 +3019,9 @@ importers:
       '@kbn/random-sampling':
         specifier: workspace:*
         version: link:x-pack/platform/packages/private/kbn-random-sampling
+      '@kbn/rdg-data-table':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-rdg-data-table
       '@kbn/react-env':
         specifier: workspace:*
         version: link:src/platform/packages/shared/react/env
@@ -4750,6 +4753,9 @@ importers:
       react:
         specifier: 18.2.0
         version: 18.2.0
+      react-data-grid:
+        specifier: 7.0.0-beta.47
+        version: 7.0.0-beta.47(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       react-day-picker:
         specifier: 10.0.1
         version: 10.0.1(@types/react@18.2.79)(react@18.2.0)
@@ -8225,6 +8231,8 @@ importers:
   src/platform/packages/shared/kbn-profiler: {}
 
   src/platform/packages/shared/kbn-profiling-utils: {}
+
+  src/platform/packages/shared/kbn-rdg-data-table: {}
 
   src/platform/packages/shared/kbn-react-field: {}
 
@@ -17273,6 +17281,10 @@ packages:
     resolution: {integrity: sha512-EcR6r5a8bj6pu3ycsa/E/cKVGuTgZJZdsyUYHOksG/UHIiKfjxzRxYJpyVBwYaQeOvghal9fcc4PidlgzugAQg==}
     engines: {node: '>=6'}
 
+  clsx@2.1.1:
+    resolution: {integrity: sha512-eYm0QWBtUrBWZWG0d386OGAw16Z995PiOVo2B7bjWSbHedGl5e0ZWaq65kOGgUSNesEIDkB9ISbTg/JK9dhCZA==}
+    engines: {node: '>=6'}
+
   co@4.6.0:
     resolution: {integrity: sha512-QVb0dM5HvG+uaxitm8wONl7jltx8dqhfU33DcqtOZcLSVIKSDDLDi7+0LbAKiyI8hD9u42m2YxXSkMGWThaecQ==}
     engines: {iojs: '>= 1.0.0', node: '>= 0.12.0'}
@@ -23304,6 +23316,12 @@ packages:
     resolution: {integrity: sha512-ma2FePH0z3px2+WOu6h+YycZcEvFmmxIlAb62cF52bG86eMySciO/EQZeQMXd07kPCYB0a1dWDT5J+KE9mCDUw==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
+
+  react-data-grid@7.0.0-beta.47:
+    resolution: {integrity: sha512-28kjsmwQGD/9RXYC50zn5Zv/SQMhBBoSvG5seq0fM8XXi9TZ0zr9Z5T3YJqLwcEtoNzTOq3y0njkmdujGkIwQQ==}
+    peerDependencies:
+      react: ^18.0 || ^19.0
+      react-dom: ^18.0 || ^19.0
 
   react-day-picker@10.0.1:
     resolution: {integrity: sha512-eNh6BlwcYInWaJtRv18mXQ06Ys/H6rdTZAnTaSdOYJuTpwP1JMCHNd1FDRadA+gbeinq+psdULN5Xnowy9mV8w==}
@@ -35146,6 +35164,8 @@ snapshots:
 
   clsx@1.2.1: {}
 
+  clsx@2.1.1: {}
+
   co@4.6.0: {}
 
   code-block-writer@13.0.3: {}
@@ -42487,6 +42507,12 @@ snapshots:
     dependencies:
       '@babel/runtime': 7.29.7
       react: 18.2.0
+
+  react-data-grid@7.0.0-beta.47(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
+    dependencies:
+      clsx: 2.1.1
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
 
   react-day-picker@10.0.1(@types/react@18.2.79)(react@18.2.0):
     dependencies:

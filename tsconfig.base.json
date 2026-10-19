@@ -2103,6 +2103,8 @@
       "@kbn/query-activity-plugin/*": ["./x-pack/platform/plugins/shared/query_activity/*"],
       "@kbn/random-sampling": ["./x-pack/platform/packages/private/kbn-random-sampling"],
       "@kbn/random-sampling/*": ["./x-pack/platform/packages/private/kbn-random-sampling/*"],
+      "@kbn/rdg-data-table": ["./src/platform/packages/shared/kbn-rdg-data-table"],
+      "@kbn/rdg-data-table/*": ["./src/platform/packages/shared/kbn-rdg-data-table/*"],
       "@kbn/react-env": ["./src/platform/packages/shared/react/env"],
       "@kbn/react-env/*": ["./src/platform/packages/shared/react/env/*"],
       "@kbn/react-field": ["./src/platform/packages/shared/kbn-react-field"],

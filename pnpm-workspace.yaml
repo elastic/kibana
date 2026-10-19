@@ -871,6 +871,7 @@ packages:
   - 'src/platform/packages/shared/kbn-palettes'
   - 'src/platform/packages/shared/kbn-profiler'
   - 'src/platform/packages/shared/kbn-profiling-utils'
+  - 'src/platform/packages/shared/kbn-rdg-data-table'
   - 'src/platform/packages/shared/kbn-react-field'
   - 'src/platform/packages/shared/kbn-react-hooks'
   - 'src/platform/packages/shared/kbn-react-query'

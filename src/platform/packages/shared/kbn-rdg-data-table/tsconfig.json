@@ -1,0 +1,22 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "*.ts",
+    "**/*.tsx",
+    "src/**/*"
+  ],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/data-source",
+    "@kbn/data-views-plugin",
+    "@kbn/discover-utils",
+    "@kbn/i18n",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/tanstack-data-table",
+    "@kbn/test-jest-helpers",
+    "@kbn/unified-data-table"
+  ]
+}

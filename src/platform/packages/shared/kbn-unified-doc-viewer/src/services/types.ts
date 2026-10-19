@@ -60,7 +60,7 @@ export interface DocViewActions {
 }
 
 /** Identifies which grid implementation renders tabular doc views (e.g. the fields table). */
-export type DocViewerGridImplementation = 'tanstack' | 'unified';
+export type DocViewerGridImplementation = 'tanstack' | 'unified' | 'rdg';
 
 export interface DocViewRenderProps {
   hit: DataTableRecord;

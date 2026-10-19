@@ -78,6 +78,7 @@ import type { ProfilesManager } from './context_awareness';
 import type { DiscoverEBTManager } from './ebt_manager';
 import {
   CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY,
+  ENABLE_RDG_TABLE_FEATURE_FLAG_KEY,
   ENABLE_TANSTACK_TABLE_FEATURE_FLAG_KEY,
   IS_ESQL_DEFAULT_FEATURE_FLAG_KEY,
   SESSION_HTTP_API_ENABLED_FEATURE_FLAG_KEY,
@@ -108,6 +109,7 @@ export interface DiscoverFeatureFlags {
   getCascadeLayoutEnabled: () => boolean;
   getIsEsqlDefault: () => boolean;
   getEnableTanstackTable: () => boolean;
+  getEnableRdgTable: () => boolean;
 }
 
 export interface DiscoverServices {
@@ -259,6 +261,7 @@ export const buildServices = ({
           ENABLE_TANSTACK_TABLE_FEATURE_FLAG_KEY,
           DEFAULT_ENABLE_TANSTACK_TABLE
         ),
+      getEnableRdgTable: () => readBooleanFlag(core, ENABLE_RDG_TABLE_FEATURE_FLAG_KEY, false),
     },
     docLinks: core.docLinks,
     embeddable: plugins.embeddable,

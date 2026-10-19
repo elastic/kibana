@@ -67,4 +67,4 @@ export enum DiscoverTabType {
 }
 
 /** Identifies which grid implementation renders the documents table in Discover. */
-export type DiscoverGridImplementation = 'tanstack' | 'unified';
+export type DiscoverGridImplementation = 'tanstack' | 'unified' | 'rdg';

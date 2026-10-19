@@ -15,12 +15,16 @@ import {
 } from './discover_grid_implementation';
 
 /**
- * Returns the active grid implementation from the `discover.enableTanstackTable` feature flag.
+ * Returns the active grid implementation from the `discover.enableRdgTable` and
+ * `discover.enableTanstackTable` feature flags.
  */
 export const useDiscoverGridImplementation = (): DiscoverGridImplementation => {
   const { discoverFeatureFlags } = useDiscoverServices();
   const [implementation] = useState(() =>
-    toDiscoverGridImplementation(discoverFeatureFlags.getEnableTanstackTable())
+    toDiscoverGridImplementation(
+      discoverFeatureFlags.getEnableTanstackTable(),
+      discoverFeatureFlags.getEnableRdgTable()
+    )
   );
   return implementation;
 };
