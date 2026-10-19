@@ -22,31 +22,12 @@ import { SlackAppCard } from '../settings/components/apps_section';
 import { CustomContextSnippets } from '../custom_context/custom_context_flyout';
 import { useFetchCustomContext } from '../custom_context/use_fetch_custom_context';
 import {
-  SandboxSecretsPanel,
-  type SandboxSecretPreset,
-} from '../sandbox_secrets/sandbox_secrets_flyout';
+  CreateConnectorButton,
+  ManageConnectorsLink,
+  SandboxConnectorsTable,
+} from '../sandbox_connectors/sandbox_connectors';
 
-/** Conventional secret names, so the agent recognizes the tool behind a secret. */
-const SECRET_PRESETS: SandboxSecretPreset[] = [
-  {
-    id: 'github',
-    label: i18n.translate('xpack.nightshift.onboarding.connect.githubPreset', {
-      defaultMessage: 'GitHub token',
-    }),
-    iconType: 'logoGithub',
-    keys: ['GITHUB_TOKEN'],
-  },
-  {
-    id: 'elasticsearch',
-    label: i18n.translate('xpack.nightshift.onboarding.connect.elasticsearchPreset', {
-      defaultMessage: 'Another Elastic deployment',
-    }),
-    iconType: 'logoElasticsearch',
-    keys: ['ELASTICSEARCH_URL', 'ELASTICSEARCH_API_KEY'],
-  },
-];
-
-/** Step 1: give the sandbox credentials, connect Slack, and optionally describe the system. */
+/** Step 1: connect tools through connectors, connect Slack, and optionally describe the system. */
 export function OnboardingConnectStep(): React.ReactElement {
   const { application } = useKibana().services;
   // Same privilege as the Apps section of the Nightshift settings.
@@ -65,29 +46,37 @@ export function OnboardingConnectStep(): React.ReactElement {
         <p>
           {i18n.translate('xpack.nightshift.onboarding.connect.description', {
             defaultMessage:
-              "Nightshift already sees this deployment's telemetry. Give it credentials for at least one other tool to look at. Connecting Slack and describing your system are optional.",
+              "Nightshift already sees this deployment's telemetry. Connect other tools through Kibana connectors so it can look there too. Everything on this step is optional.",
           })}
         </p>
       </EuiText>
 
       <EuiSpacer size="m" />
       <SectionTitle
-        isRequired
-        title={i18n.translate('xpack.nightshift.onboarding.secrets.title', {
-          defaultMessage: 'Credentials for your tools',
+        title={i18n.translate('xpack.nightshift.onboarding.connectors.title', {
+          defaultMessage: 'Other sources',
         })}
       />
       <EuiText size="s" color="subdued">
         <p>
-          {i18n.translate('xpack.nightshift.onboarding.secrets.description', {
+          {i18n.translate('xpack.nightshift.onboarding.connectors.description', {
             defaultMessage:
-              "Nightshift works from a sandbox. Save at least one credential, such as a GitHub token or another Elastic deployment's URL and API key, and it looks there too. Values are stored encrypted and never shown again.",
+              'Nightshift works from a sandbox. Any connector it can use from there, such as GitHub or another Elastic deployment, is available to the investigation agent as soon as it exists.',
           })}
         </p>
       </EuiText>
       <EuiSpacer size="s" />
-      <EuiPanel hasBorder paddingSize="m" data-test-subj="nightshiftOnboardingSecrets">
-        <SandboxSecretsPanel presets={SECRET_PRESETS} />
+      <EuiPanel hasBorder paddingSize="m" data-test-subj="nightshiftOnboardingConnectors">
+        <SandboxConnectorsTable />
+        <EuiSpacer size="m" />
+        <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <CreateConnectorButton />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <ManageConnectorsLink />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiPanel>
 
       <EuiSpacer size="l" />

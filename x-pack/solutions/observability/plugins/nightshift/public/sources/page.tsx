@@ -30,7 +30,6 @@ export type SourcesPageHeaderProps = Pick<
   | 'knowledgeHref'
   | 'onSettingsClick'
   | 'settingsHref'
-  | 'onSandboxSecretsClick'
   | 'onAutomationsClick'
   | 'automationsHref'
 >;

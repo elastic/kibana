@@ -46,7 +46,6 @@ export type KnowledgePageHeaderProps = Pick<
   | 'sourcesHref'
   | 'onSettingsClick'
   | 'settingsHref'
-  | 'onSandboxSecretsClick'
   | 'onAutomationsClick'
   | 'automationsHref'
 >;

@@ -24,7 +24,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
 import { useKibana } from '../hooks/use_kibana';
-import { useFetchSandboxSecrets } from '../sandbox_secrets/use_fetch_sandbox_secrets';
+import { useFetchSandboxConnectors } from '../sandbox_connectors/use_fetch_sandbox_connectors';
 
 interface SuggestedAutomation {
   id: string;
@@ -32,7 +32,8 @@ interface SuggestedAutomation {
   title: string;
   description: string;
   /** Only suggested when the space has this sandbox secret. */
-  requiresSecret?: string;
+  /** Only suggested once the agent can reach a tool beyond the cluster's telemetry. */
+  requiresConnector?: boolean;
 }
 
 const SUGGESTED_AUTOMATIONS: SuggestedAutomation[] = [
@@ -78,7 +79,7 @@ const SUGGESTED_AUTOMATIONS: SuggestedAutomation[] = [
       defaultMessage:
         'After a release or merged pull request, check the affected services for new errors.',
     }),
-    requiresSecret: 'GITHUB_TOKEN',
+    requiresConnector: true,
   },
 ];
 
@@ -93,9 +94,9 @@ export function OnboardingAutomationStep({
   automationsHref?: string;
   onInvestigationClick: (investigation: InvestigationSummary) => void;
 }): React.ReactElement {
-  const secretKeys = new Set(useFetchSandboxSecrets().data?.keys ?? []);
+  const hasConnector = (useFetchSandboxConnectors().data?.connectors.length ?? 0) > 0;
   const automations = SUGGESTED_AUTOMATIONS.filter(
-    ({ requiresSecret }) => !requiresSecret || secretKeys.has(requiresSecret)
+    ({ requiresConnector }) => !requiresConnector || hasConnector
   );
 
   return (
