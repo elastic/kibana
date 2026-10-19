@@ -213,7 +213,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       summary: 'Receive an IaC callback',
       operationId: 'receive-iac-callback',
       description:
-        'Called by the CloudFormation stack launched from Kibana to report the IAM role ARN and stack ARN it created. Authenticate with the one-time API key issued when the callback was created, sent as `Authorization: ApiKey <encoded-key>`. The key has no other privileges and is invalidated after the first successful report. `role_arn` and `stack_arn` must be in the same AWS account. A repeat report with the same values succeeds; different values return 409.',
+        'Called by the CloudFormation stack launched from Kibana to report the IAM role ARN and stack ARN it created. Authenticate with the one-time API key issued when the callback was created, sent as `Authorization: ApiKey <encoded-key>`. The key has no other privileges. `role_arn` and `stack_arn` must be in the same AWS account. While the key is valid, a repeat report with the same values succeeds and different values return 409. The key is invalidated once the first report has been applied, so a later retry is rejected with 401 before these checks run.',
       access: 'public',
       security: {
         authz: {
