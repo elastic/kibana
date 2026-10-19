@@ -22,28 +22,31 @@ jest.mock('../hooks/use_kibana_services');
 jest.mock('../hooks/use_time_range');
 jest.mock('../hooks/use_digital_experience_router');
 
-describe('DigitalExperienceLayout', () => {
-  it('registers Digital Experience › Applications, linking Applications with the time range', () => {
-    jest.mocked(useKibanaServices).mockReturnValue({
-      application: {
-        getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}${path}`,
-      },
-    } as unknown as ReturnType<typeof useKibanaServices>);
-    jest.mocked(useTimeRange).mockReturnValue({
-      timeRange: { rangeFrom: 'now-7d', rangeTo: 'now' },
-      isTimeRangeInUrl: true,
-      setTimeRange: jest.fn(),
-    });
-    jest.mocked(useDigitalExperienceRouter).mockReturnValue(digitalExperienceRouter);
+const HREF = '/app/digital_experience/?rangeFrom=now-7d&rangeTo=now';
 
-    renderHook(() => DigitalExperienceLayout());
+const render = () => {
+  jest.mocked(useKibanaServices).mockReturnValue({
+    application: {
+      getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}${path}`,
+    },
+  } as unknown as ReturnType<typeof useKibanaServices>);
+  jest.mocked(useTimeRange).mockReturnValue({
+    timeRange: { rangeFrom: 'now-7d', rangeTo: 'now' },
+    isTimeRangeInUrl: true,
+    setTimeRange: jest.fn(),
+  });
+  jest.mocked(useDigitalExperienceRouter).mockReturnValue(digitalExperienceRouter);
+
+  renderHook(() => DigitalExperienceLayout());
+};
+
+describe('DigitalExperienceLayout', () => {
+  it('registers Digital Experience › Applications, both linking to the list with the time range', () => {
+    render();
 
     expect(useRouteBreadcrumb).toHaveBeenCalledWith([
-      { text: 'Digital Experience' },
-      {
-        text: 'Applications',
-        href: '/app/digital_experience/?rangeFrom=now-7d&rangeTo=now',
-      },
+      { text: 'Digital Experience', href: HREF },
+      { text: 'Applications', href: HREF },
     ]);
   });
 });
