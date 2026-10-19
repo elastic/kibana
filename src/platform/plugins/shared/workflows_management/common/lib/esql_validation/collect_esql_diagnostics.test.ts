@@ -128,7 +128,7 @@ describe('collectEsqlDiagnostics', () => {
     });
   });
 
-  describe('structural Liquid: grammar only, placeholders for each span', () => {
+  describe('structural Liquid', () => {
     it.each([
       'FROM {{ consts.idx }} | LIMIT 1',
       'FROM logs-{{ inputs.env }}-* | LIMIT 1',
@@ -136,12 +136,10 @@ describe('collectEsqlDiagnostics', () => {
       'FROM logs-* | WHERE a > {{ inputs.n }}',
       'FROM logs-* | {{ inputs.cmd }} | LIMIT 1',
       'FROM logs-* | WHERE {{ inputs.cond }} | LIMIT 1',
-      'FROM logs-* {% if inputs.f %}| WHERE b == 1{% endif %} | LIMIT 1',
       'FROM logs-* | STATS c = COUNT(*) BY {{ inputs.field }}',
       'FROM logs-* | WHERE @timestamp > NOW() - {{ inputs.days }} days',
       'FROM {{ consts.idx }} | EVAL x = {{ inputs.a }} + {{ inputs.b }}',
       'FROM {{ consts.idx }} | SORT {{ inputs.f }} {{ inputs.dir }}',
-      '{% raw %}FROM logs-* | LIMIT 1{% endraw %}',
     ])('reports nothing for %s', async (query) => {
       const { diagnostics, notChecked } = await collectEsqlDiagnostics(
         workflow(esqlStep('liquid', query)),
@@ -162,6 +160,35 @@ describe('collectEsqlDiagnostics', () => {
       );
       expect(diagnostics).not.toEqual([]);
       expect(diagnostics.every(({ severity }) => severity === 'error')).toBe(true);
+    });
+
+    it.each([
+      'FROM logs-* {% if inputs.f %}| WHERE b == 1{% endif %} | LIMIT 1',
+      '{% raw %}FROM logs-* | LIMIT 1{% endraw %}',
+      'FROM logs-* | WHERE @timestamp > NOW() - 1 day {% if inputs.h %}AND host.name == "{{ inputs.h }}"{% endif %}',
+    ])('skips a query with a {%% %%} tag outside a string: %s', async (query) => {
+      const { diagnostics, notChecked } = await collectEsqlDiagnostics(
+        workflow(esqlStep('tag', query)),
+        schemaCallbacks
+      );
+      expect(diagnostics).toEqual([]);
+      expect(notChecked).toEqual([expect.stringContaining('{% %} tag outside a string literal')]);
+    });
+
+    it('still validates a {% %} tag inside a string literal', async () => {
+      const { diagnostics, notChecked } = await collectEsqlDiagnostics(
+        workflow(
+          esqlStep(
+            'masked_tag',
+            'FROM logs-app | WHERE host.name == "{% if x %}a{% endif %}" | KEEP nope'
+          )
+        ),
+        schemaCallbacks
+      );
+      expect(notChecked).toEqual([]);
+      expect(diagnostics).toEqual([
+        expect.objectContaining({ message: expect.stringContaining('nope') }),
+      ]);
     });
 
     it('skips a query with an unclosed Liquid tag and says so in notChecked', async () => {

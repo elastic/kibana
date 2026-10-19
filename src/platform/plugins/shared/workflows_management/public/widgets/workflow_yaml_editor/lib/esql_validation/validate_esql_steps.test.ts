@@ -171,16 +171,6 @@ describe('validateEsqlSteps — Liquid policy', () => {
         query: 'FROM logs-* | LIMIT {{ n }}',
       },
       { row: 7, description: 'Liquid wraps the whole query', query: '{{ query }}' },
-      {
-        row: 9,
-        description: 'Liquid `{% raw %}` block outside a string',
-        query: '{% raw %}FROM logs-* | LIMIT 1{% endraw %}',
-      },
-      {
-        row: 'extra',
-        description: 'Liquid `{% if %}` tag outside any string',
-        query: '{%- if env -%} FROM logs {%- endif -%}',
-      },
     ];
 
     for (const { row, description, query } of cases) {
@@ -196,6 +186,17 @@ describe('validateEsqlSteps — Liquid policy', () => {
         expect(mockValidate.mock.calls[0][0].trim()).toHaveLength(query.length);
       });
     }
+  });
+
+  describe('skip path: Liquid tag in structural position', () => {
+    it.each([
+      ['row 9: a `{% raw %}` block outside a string', '{% raw %}FROM logs-* | LIMIT 1{% endraw %}'],
+      ['an `{% if %}` tag outside any string', '{%- if env -%} FROM logs {%- endif -%}'],
+    ])('does not validate %s', async (_name, query) => {
+      const markers = await validateEsqlFromText(buildStep(query), stubCallbacks);
+      expect(markers).toEqual([]);
+      expect(mockValidate).not.toHaveBeenCalled();
+    });
   });
 
   describe('Liquid comments and ES|QL comments stay on the mask path', () => {

@@ -55,12 +55,15 @@ export type EsqlQueryValidationResult =
       fieldsNotChecked: boolean;
     }
   /**
-   * A Liquid span sits in a structural position, so only grammar was checked,
-   * with each such span replaced by a placeholder.
+   * A Liquid `{{ }}` output sits in a structural position, so only grammar was
+   * checked, with each such output replaced by a placeholder.
    */
   | { kind: 'grammar-only'; diagnostics: EsqlQueryDiagnostic[] }
-  /** A Liquid span is unclosed, so the query was not validated. */
-  | { kind: 'skipped-structural-liquid' }
+  /**
+   * The query was not validated: a Liquid span is unclosed, or a `{% %}` tag
+   * sits in a structural position.
+   */
+  | { kind: 'skipped-structural-liquid'; reason: 'unclosed' | 'tag' }
   /** The query is longer than {@link MAX_VALIDATED_ESQL_QUERY_LENGTH}, so it was not validated. */
   | { kind: 'skipped-too-large' }
   /** `validateQuery` threw, e.g. because a callback failed. */
@@ -84,9 +87,11 @@ export interface EsqlQueryValidationOptions {
  *     ES|QL parser run normally. Diagnostics that fall *entirely* inside a
  *     mask are suppressed (the parser can't say anything actionable about a
  *     run of spaces standing in for a string literal).
- *   - When at least one Liquid span occupies a structural position
- *     (identifier, keyword, numeric literal, …), we replace it with a
- *     same-length placeholder identifier and check grammar only, without
+ *   - When a `{% %}` tag occupies a structural position, we skip the query:
+ *     a tag can add or remove any text, so no placeholder stands in for it.
+ *   - When a `{{ }}` output occupies a structural position (identifier,
+ *     keyword, numeric literal, …), we replace it with a same-length
+ *     placeholder identifier and check grammar only, without
  *     callbacks. Diagnostics on or right after a placeholder are dropped: we
  *     don't know the runtime substitution, and false positives are worse than
  *     missing ones — they train authors to ignore squigglies and make agents
@@ -110,9 +115,14 @@ export async function validateEsqlQuery(
   }
   const classification = classifyLiquidPosition(esql);
   if (classification.kind === 'has-structural') {
-    return classification.spans
-      ? validateGrammarWithPlaceholders(esql, classification.spans)
-      : { kind: 'skipped-structural-liquid' };
+    const { spans } = classification;
+    if (!spans) {
+      return { kind: 'skipped-structural-liquid', reason: 'unclosed' };
+    }
+    if (spans.structural.some(({ kind }) => kind === 'tag')) {
+      return { kind: 'skipped-structural-liquid', reason: 'tag' };
+    }
+    return validateGrammarWithPlaceholders(esql, spans);
   }
 
   const { maskedRanges } = classification;

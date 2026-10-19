@@ -11,6 +11,7 @@ import type { Document } from 'yaml';
 import { isMap, isScalar, LineCounter, parseDocument } from 'yaml';
 import { getPathAtOffset } from '@kbn/workflows/common/utils/yaml';
 import {
+  collectEsqlStepsFromLookup,
   ESQL_QUERY_STEP_TYPE,
   type EsqlStepRegion,
   extractEsqlRegionFromScalar,
@@ -34,19 +35,7 @@ export function collectEsqlRegionsFromLookup(
   workflowLookup: WorkflowLookup,
   modelText: string
 ): EsqlStepRegion[] {
-  const out: EsqlStepRegion[] = [];
-  for (const step of Object.values(workflowLookup.steps)) {
-    if (step.stepType === ESQL_QUERY_STEP_TYPE) {
-      const queryProp = step.propInfos['with.query'];
-      if (queryProp?.valueNode) {
-        const region = extractEsqlRegionFromScalar(queryProp.valueNode, modelText);
-        if (region && region.esql.trim().length > 0) {
-          out.push(region);
-        }
-      }
-    }
-  }
-  return out;
+  return collectEsqlStepsFromLookup(workflowLookup, modelText).map(({ region }) => region);
 }
 
 /**

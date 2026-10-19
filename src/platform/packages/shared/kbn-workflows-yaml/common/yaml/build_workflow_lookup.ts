@@ -15,6 +15,8 @@ export interface StepInfo {
   stepId: string;
   stepType: string;
   stepYamlNode: YAML.YAMLMap<unknown, unknown>;
+  /** Path of the step in the document, e.g. `['steps', 1, 'steps', 0]`. */
+  path: Array<string | number>;
   lineStart: number;
   lineEnd: number;
   propInfos: Record<string, StepPropInfo>;
@@ -71,7 +73,7 @@ export function buildWorkflowLookup(
 
   const stepsNode = (yamlDocument.contents as any).get('steps');
   if (stepsNode) {
-    Object.assign(steps, inspectStep(stepsNode, lineCounter));
+    Object.assign(steps, inspectStep(stepsNode, lineCounter, undefined, undefined, ['steps']));
   }
 
   let triggersLineStart: number | undefined;
@@ -143,7 +145,10 @@ export function inspectStep(
   node: any,
   lineCounter: LineCounter,
   parentStepId?: string,
-  branchKey?: string
+  branchKey?: string,
+  // Shared across the recursion: each level pushes its segment and pops it on
+  // return, so a copy is made only for each step found.
+  path: Array<string | number> = []
 ): Record<string, StepInfo> {
   const result: Record<string, StepInfo> = {};
 
@@ -168,10 +173,12 @@ export function inspectStep(
         const keyValue = YAML.isScalar(item.key) ? item.key.value : undefined;
         if (typeof keyValue !== 'string' || !STEP_CHILD_CONTAINER_KEY_SET.has(keyValue)) {
           const currentParentStepId = stepId ?? parentStepId;
+          path.push(typeof keyValue === 'number' ? keyValue : String(keyValue));
           Object.assign(
             result,
-            inspectStep(item.value, lineCounter, currentParentStepId, branchKey)
+            inspectStep(item.value, lineCounter, currentParentStepId, branchKey, path)
           );
+          path.pop();
         }
       }
     });
@@ -195,15 +202,18 @@ export function inspectStep(
             if (YAML.isMap(seqItem)) {
               const innerSteps = seqItem.get('steps', true);
               if (innerSteps) {
+                path.push(nestedKeyValue, idx, 'steps');
                 Object.assign(
                   result,
                   inspectStep(
                     innerSteps,
                     lineCounter,
                     childParentStepId,
-                    `${nestedKeyValue}[${idx}].steps`
+                    `${nestedKeyValue}[${idx}].steps`,
+                    path
                   )
                 );
+                path.splice(-3);
               }
             }
           });
@@ -219,16 +229,20 @@ export function inspectStep(
             (branchKey === 'on-failure' || branchKey === 'iteration-on-failure')
               ? `${branchKey}.fallback`
               : nestedKeyValue;
+          path.push(nestedKeyValue);
           Object.assign(
             result,
-            inspectStep(item.value, lineCounter, childParentStepId, childBranchKey)
+            inspectStep(item.value, lineCounter, childParentStepId, childBranchKey, path)
           );
+          path.pop();
         }
       }
     });
   } else if (YAML.isSeq(node)) {
-    node.items.forEach((subItem) => {
-      Object.assign(result, inspectStep(subItem, lineCounter, parentStepId, branchKey));
+    node.items.forEach((subItem, idx) => {
+      path.push(idx);
+      Object.assign(result, inspectStep(subItem, lineCounter, parentStepId, branchKey, path));
+      path.pop();
     });
   }
 
@@ -252,6 +266,7 @@ export function inspectStep(
       lineStart,
       lineEnd,
       propInfos: propNodes,
+      path: [...path],
       parentStepId,
       branchKey,
     };

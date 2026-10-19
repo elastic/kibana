@@ -7,15 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Node } from 'yaml';
-import { isMap, isScalar, isSeq, LineCounter, parseDocument } from 'yaml';
+import { LineCounter, parseDocument } from 'yaml';
 import type { ESQLCallbacks } from '@kbn/esql-types';
-import { STEP_CHILD_CONTAINER_KEYS } from '@kbn/workflows';
 import type { WorkflowDiagnostic } from '@kbn/workflows/types/v1';
+import { buildWorkflowLookup } from '@kbn/workflows-yaml';
 import {
+  collectEsqlStepsFromLookup,
   ESQL_QUERY_STEP_TYPE,
-  type EsqlStepRegion,
-  extractEsqlRegionFromScalar,
   getEsqlToValidate,
   toFileRange,
 } from './extract_esql_region';
@@ -25,16 +23,9 @@ import {
   validateEsqlQuery,
 } from './validate_esql_query';
 
-interface EsqlStepLocation {
-  stepName: string | undefined;
-  /** Path of the `with.query` value, e.g. `['steps', 0, 'with', 'query']`. */
-  path: Array<string | number>;
-  region: EsqlStepRegion;
-}
-
 /** One ES|QL diagnostic in YAML coordinates (1-based line and column). */
 export interface EsqlStepDiagnostic extends EsqlQueryDiagnostic {
-  stepName: string | undefined;
+  stepName: string;
   path: Array<string | number>;
   line: number;
   column: number;
@@ -61,8 +52,7 @@ export async function collectEsqlStepDiagnostics(
 
   const lineCounter = new LineCounter();
   const document = parseDocument(yaml, { lineCounter, keepSourceTokens: true });
-  const steps = isMap(document.contents) ? document.contents.get('steps', true) : null;
-  const locations = findEsqlSteps(steps as Node | null, ['steps'], yaml);
+  const locations = collectEsqlStepsFromLookup(buildWorkflowLookup(document, lineCounter), yaml);
   const results = await Promise.all(
     locations.map((location) =>
       validateEsqlQuery(getEsqlToValidate(location.region), callbacks, {
@@ -74,8 +64,12 @@ export async function collectEsqlStepDiagnostics(
   const diagnostics: EsqlStepDiagnostic[] = [];
   const notChecked: string[] = [];
   results.forEach((result, index) => {
-    const { stepName, path, region } = locations[index];
-    const label = stepName ? `step "${stepName}"` : `step at ${path.join('.')}`;
+    const {
+      step: { stepId: stepName, path: stepPath },
+      region,
+    } = locations[index];
+    const path = [...stepPath, 'with', 'query'];
+    const label = `step "${stepName}"`;
     if (result.kind === 'skipped-too-large') {
       notChecked.push(
         `ES|QL query of ${label}: it is longer than ${MAX_VALIDATED_ESQL_QUERY_LENGTH} characters, so it was not validated.`
@@ -83,8 +77,12 @@ export async function collectEsqlStepDiagnostics(
       return;
     }
     if (result.kind === 'skipped-structural-liquid') {
+      const cause =
+        result.reason === 'unclosed'
+          ? 'it has an unclosed Liquid tag'
+          : 'it has a Liquid {% %} tag outside a string literal';
       notChecked.push(
-        `ES|QL query of ${label}: it has an unclosed Liquid tag, so the query cannot be validated before it runs.`
+        `ES|QL query of ${label}: ${cause}, so the query cannot be validated before it runs.`
       );
       return;
     }
@@ -131,44 +129,4 @@ export async function collectEsqlDiagnostics(
     })),
     notChecked,
   };
-}
-
-const STEP_CONTAINER_KEYS: ReadonlySet<string> = new Set(STEP_CHILD_CONTAINER_KEYS);
-
-/**
- * Walks step lists and returns the ES|QL query steps, in document order. Only
- * step-list keys are followed, so step-shaped data under `with` is ignored.
- */
-function findEsqlSteps(
-  node: Node | null,
-  path: Array<string | number>,
-  yaml: string
-): EsqlStepLocation[] {
-  if (isSeq(node)) {
-    return node.items.flatMap((item, index) => findEsqlSteps(item as Node, [...path, index], yaml));
-  }
-  if (!isMap(node)) {
-    return [];
-  }
-
-  const found: EsqlStepLocation[] = [];
-  if (node.get('type') === ESQL_QUERY_STEP_TYPE) {
-    const queryNode = node.getIn(['with', 'query'], true);
-    const region = isScalar(queryNode) ? extractEsqlRegionFromScalar(queryNode, yaml) : null;
-    if (region && region.esql.trim().length > 0) {
-      const name = node.get('name');
-      found.push({
-        stepName: typeof name === 'string' ? name : undefined,
-        path: [...path, 'with', 'query'],
-        region,
-      });
-    }
-  }
-  for (const pair of node.items) {
-    const key = isScalar(pair.key) ? pair.key.value : undefined;
-    if (typeof key === 'string' && STEP_CONTAINER_KEYS.has(key)) {
-      found.push(...findEsqlSteps(pair.value as Node, [...path, key], yaml));
-    }
-  }
-  return found;
 }
