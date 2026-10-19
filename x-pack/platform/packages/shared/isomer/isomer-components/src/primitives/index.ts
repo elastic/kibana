@@ -13,3 +13,4 @@ export { type DividerNode, divider } from './divider';
 export { type QuoteNode, quote } from './quote';
 export { type ActionsNode, actions } from './actions';
 export { type FieldsNode, fields } from './fields';
+export { type CodeNode, code } from './code';

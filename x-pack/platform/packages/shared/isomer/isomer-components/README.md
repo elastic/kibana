@@ -25,6 +25,8 @@ Kibana's [Isomer](https://github.com/elastic/isomer) pack of content and layout 
   - `url` follows the navigation policy, so a relative path works in React and HTML. Slack can't open one, so it drops that button, and the block when no button is left. Hosts resolve Kibana paths to absolute URLs before building the node.
 - `fields`: up to 10 labeled values, such as an app and a time range.
   - `{ type: 'fields', items: [{ label, value }] }`. `value` is plain text, or `{ raw, format?, precision?, currency? }` formatted by the SDK's `formatDisplayValue` the same on every surface. Slack gets one `section` with a `mrkdwn` field per item, the value clamped after escaping to 2,000 characters.
+- `code`: code or source shown as written, such as an ES|QL query.
+  - `{ type: 'code', text, language? }`, up to 12,000 characters. Slack gets a `rich_text_preformatted` block, which needs no escaping and splits past 3,000 characters; Markdown gets a fence longer than any backtick run.
 
 There's no list primitive. For a list built from data, such as a graph's nodes, build Markdown with the SDK's `md.list` and `serializeMarkdown` (`@elastic/isomer-sdk/markdown`), which escape each item, and put it in a `markdown` node.
 
