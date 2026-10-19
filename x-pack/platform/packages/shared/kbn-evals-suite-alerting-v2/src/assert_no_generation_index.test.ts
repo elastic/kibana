@@ -16,6 +16,7 @@ describe('assertNoGenerationIndex', () => {
     ['a wildcard over backing indices', 'FROM .ds-logs-app-default-* | LIMIT 1'],
     ['a cross-cluster wildcard', 'FROM remote:logs-* | LIMIT 1'],
     ['a METADATA clause', 'FROM logs-* METADATA _index | LIMIT 1'],
+    ['a quoted wildcard', 'FROM "logs-*" | LIMIT 1'],
     ['a TS source', 'TS metrics-system.cpu-* | LIMIT 1'],
   ])('accepts %s', (_description, esql) => {
     expect(() => assertNoGenerationIndex(esql)).not.toThrow();
@@ -24,7 +25,12 @@ describe('assertNoGenerationIndex', () => {
   it.each([
     ['a backing index', 'FROM .ds-logs-app-default-2026.06.11-000001 | LIMIT 1'],
     ['a generation index without prefix', 'FROM logs-app-default-2026.06.11-000001 | LIMIT 1'],
-    ['a cross-cluster backing index', 'FROM remote:.ds-logs-app-default-2026.06.11-000001 | LIMIT 1'],
+    [
+      'a cross-cluster backing index',
+      'FROM remote:.ds-logs-app-default-2026.06.11-000001 | LIMIT 1',
+    ],
+    ['a double-quoted backing index', 'FROM ".ds-logs-app-default-2026.06.11-000001" | LIMIT 1'],
+    ['a backtick-quoted backing index', 'FROM `.ds-logs-app-default-2026.06.11-000001` | LIMIT 1'],
     ['one bad source in a list', 'FROM logs-*, .ds-logs-app-default-2026.06.11-000001 | LIMIT 1'],
   ])('rejects %s', (_description, esql) => {
     expect(() => assertNoGenerationIndex(esql)).toThrow();

@@ -21,6 +21,7 @@ const getSources = (esql: string): string[] => {
     .split(',')
     .map((source) => source.trim())
     .filter(Boolean)
+    .map((source) => source.replace(/["`]/g, ''))
     .map((source) => source.slice(source.indexOf(':') + 1));
 };
 

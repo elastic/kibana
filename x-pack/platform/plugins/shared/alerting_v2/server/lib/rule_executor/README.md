@@ -189,7 +189,7 @@ Step order is defined in `setup/bind_rule_executor.ts`.
 | 8 | `DirectorStep` | Enrich alert-type events with episode state. |
 | 9 | `StoreAlertEventsStep` | Persist the batch into `.rule-events`. |
 
-The rule executor runs whenever the plugin is enabled (`xpack.alerting_v2.enabled`). The `alerting:v2:enabled` advanced setting gates only the user-facing surface (UI + APIs), not core engine execution, so rules keep producing events even while the UI and APIs stay hidden.
+The rule executor runs whenever the plugin is enabled (`xpack.alerting_v2.enabled`). The `alerting:v2:enabled` advanced setting gates only the user-facing surface (UI + APIs), not core engine execution, so rules keep producing events even while the UI and APIs stay hidden. This is intentional: Kibana cannot subscribe to UI setting changes, and a bail-out inside the executor would also stop internally created rules that must always run. The setting's description tells users to disable their rules before turning it off.
 
 ## How recovery and no-data fit together
 
@@ -276,7 +276,7 @@ For a `no_data` event, the director's FSM decides the next episode status. There
 | `'alert'` | Sets the episode to `'active'` so downstream consumers (dispatcher, actions) keep treating the group as live during the data gap. |
 | `'keep_last'` | Preserves the prior episode status (e.g. an `active` episode stays `active`). |
 | `'resolve'` | Mirrors the `'recovered'` FSM transitions, moving the episode toward `inactive` via the normal lifecycle. |
-| `'ignore'` | The presence query is skipped and no `no_data` event is produced; the episode drifts out of lookback windows over time. |
+| `'ignore'` | The presence query is skipped and no `no_data` event is produced; the episode drifts out of lookback windows over time. With `.rule-events` retention enabled and manual, condition or query recovery, an episode with no new events expires once its last event leaves the retention window, without a recovery event or notification. |
 
 ## Severity behavior
 

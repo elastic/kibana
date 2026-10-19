@@ -42,7 +42,11 @@ export const installHostMetricsDataStream = async (
           host: { properties: { name: { type: 'keyword' } } },
           system: {
             properties: {
-              cpu: { properties: { total: { properties: { norm: { properties: { pct: { type: 'float' } } } } } } },
+              cpu: {
+                properties: {
+                  total: { properties: { norm: { properties: { pct: { type: 'float' } } } } },
+                },
+              },
             },
           },
         },

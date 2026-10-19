@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { EntityUpdateClient } from '@kbn/entity-store/server';
 import type { EntityType } from '../../../../../../common/entity_analytics/types';
 import type { WatchlistObject } from '../../../../../../common/api/entity_analytics/watchlists/management/common.gen';
@@ -31,6 +32,7 @@ interface RunResolutionScoringParams {
   idBasedRiskScoringEnabled: boolean;
   writer: Awaited<ReturnType<RiskScoreDataClient['getWriter']>>;
   targetEntityIds?: string[];
+  alertFilters: QueryDslQueryContainer[];
   refresh?: Parameters<typeof persistScoresToRiskIndex>[0]['refresh'];
   /** When true, populate `scores` in the result. Omit for full-population runs. */
   collectScores?: boolean;
@@ -52,6 +54,7 @@ export const runResolutionScoringStep = async ({
   idBasedRiskScoringEnabled,
   writer,
   targetEntityIds,
+  alertFilters,
   refresh,
   collectScores,
 }: RunResolutionScoringParams): Promise<ResolutionStepResult> => {
@@ -79,6 +82,7 @@ export const runResolutionScoringStep = async ({
     watchlistConfigs,
     abortSignal,
     targetEntityIds,
+    alertFilters,
   })) {
     if (abortSignal?.aborted) {
       runLogger.info('Resolution scoring aborted between pages');
