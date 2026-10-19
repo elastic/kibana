@@ -7,6 +7,7 @@
 
 import type { HuntBehaviorIoc } from '@kbn/alertzero-common';
 import type { ValidatedBehavior } from './types';
+import { assertEsqlGroundedInReport } from './report_grounding';
 
 /**
  * Fold case and whitespace so a value that differs from the quote only in formatting still
@@ -57,17 +58,24 @@ export const artifactSetKey = (
 };
 
 /**
- * Whether a query carries every artifact in a collapse key as a literal, which is what the
+ * Whether a query positively filters on every artifact in a collapse key, which is what the
  * `collapsed` reason claims about the survivor's query. Grounding is report-wide, so a survivor
- * can clear the grounding gate on an unrelated report literal and never mention the artifacts
- * its siblings were collapsed for; a sibling marked `collapsed` against such a query would be
- * retired with a coverage claim nothing ever ran. A plain substring test on the normalized query
- * text, mirroring the way the key was built from the quote.
+ * can clear the grounding gate on an unrelated report literal and never hunt the artifacts its
+ * siblings were collapsed for; a sibling marked `collapsed` against such a query would be
+ * retired with a coverage claim nothing ever ran.
+ *
+ * Each artifact is checked on its own through the grounding gate with that one value as the
+ * only thing the query may ground in, so an artifact counts only where the gate would count it:
+ * in a `WHERE` that constrains rows to the value, not negated, not one alternative among
+ * ungrounded branches, not sitting in an `EVAL` or a comment. Carrying the string is not hunting
+ * it. This still says nothing about the action the sibling's technique implies around that
+ * artifact; it establishes that the survivor's query searches the environment for the shared
+ * artifacts, which is the coverage `collapsed` asserts.
  */
-export const queryCarriesArtifacts = (esql: string, key: string): boolean => {
-  const query = normalize(esql);
-  return key.split('\u0000').every((value) => query.includes(value));
-};
+export const queryHuntsArtifacts = (esql: string, key: string): boolean =>
+  key
+    .split('\u0000')
+    .every((value) => assertEsqlGroundedInReport(esql, { reportText: '', iocValues: [value] }).ok);
 
 /** One behavior dropped because another behavior already covers the same artifact set. */
 export interface CollapsedBehavior {

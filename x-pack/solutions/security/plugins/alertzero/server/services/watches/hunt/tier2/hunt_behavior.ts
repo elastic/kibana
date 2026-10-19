@@ -26,7 +26,7 @@ import {
   CONTEXT_PREAMBLE,
   ESQL_GENERATION_INSTRUCTIONS,
 } from './extraction_contract';
-import { collapseByArtifactSet, queryCarriesArtifacts } from './behavior_artifact_set';
+import { collapseByArtifactSet, queryHuntsArtifacts } from './behavior_artifact_set';
 import { toIndexedBehaviors } from './indexed_behaviors';
 import { getMitreCatalog } from './mitre_catalog';
 import { assertEsqlSourcesAllowed } from './assert_esql_sources_allowed';
@@ -862,7 +862,7 @@ export const huntBehavior = async (
     // one per technique — and do it before the budget slice below, so a duplicate never spends
     // a slot a distinct behavior could have used. Siblings are not written off here, though:
     // `collapsed` claims that the survivor's query hunts the shared artifacts, and that is only
-    // known once the survivor's query has been generated, gated and seen to carry them. Until
+    // known once the survivor's query has been generated, gated and seen to filter on them. Until
     // then a sibling is merely deferred, and one whose survivor never covered it is generated
     // in a second wave with whatever budget remains rather than retired on a claim nothing ran.
     const { survivors, collapsed: collapsedSiblings } = collapseByArtifactSet(validated, iocs);
@@ -1035,14 +1035,14 @@ export const huntBehavior = async (
     }
 
     // Now the survivors' queries are known, settle their siblings. One whose survivor published
-    // a query that carries every shared artifact is `collapsed`: the claim is true. One whose
+    // a query that positively filters on every shared artifact is `collapsed`: the claim is true. One whose
     // survivor kept its placeholder, or published a query grounded on some other report literal,
     // was not covered by anything and goes into a second generation wave instead.
     const retained: ValidatedBehavior[] = [];
     let collapsedCount = 0;
     for (const { behavior, survivor, key } of deferredSiblings) {
       const survivorEsql = published.get(survivor.technique_id);
-      if (survivorEsql && queryCarriesArtifacts(survivorEsql, key)) {
+      if (survivorEsql && queryHuntsArtifacts(survivorEsql, key)) {
         collapsedCount += 1;
         behavior.execution = notExecuted('collapsed');
         const sharedValues = key.split('\u0000').join(', ');
@@ -1057,7 +1057,7 @@ export const huntBehavior = async (
     if (collapsedCount > 0) {
       logger.info(
         `[hunt:esql] collapsed ${collapsedCount} behavior(s) onto survivors whose published ` +
-          `queries hunt the same report artifacts.`
+          `queries filter on the same report artifacts.`
       );
     }
     if (retained.length > 0) {

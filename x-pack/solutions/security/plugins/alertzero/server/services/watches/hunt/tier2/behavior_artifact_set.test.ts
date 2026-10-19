@@ -10,7 +10,7 @@ import type { ValidatedBehavior } from './types';
 import {
   artifactSetKey,
   collapseByArtifactSet,
-  queryCarriesArtifacts,
+  queryHuntsArtifacts,
 } from './behavior_artifact_set';
 
 const ioc = (value: string, type = 'domain'): HuntBehaviorIoc => ({ type, value });
@@ -163,22 +163,22 @@ describe('collapseByArtifactSet', () => {
   });
 });
 
-describe('queryCarriesArtifacts', () => {
-  it('is true when the query names every artifact in the key as a literal', () => {
+describe('queryHuntsArtifacts', () => {
+  it('is true when the query filters on every artifact in the key', () => {
     const key = artifactSetKey('seen at evil.example.com and 10.0.0.1', [
       { type: 'domain', value: 'evil.example.com' },
       { type: 'ip', value: '10.0.0.1' },
     ])!;
     const esql =
       'FROM logs-* | WHERE destination.domain == "evil.example.com" AND source.ip == "10.0.0.1"';
-    expect(queryCarriesArtifacts(esql, key)).toBe(true);
+    expect(queryHuntsArtifacts(esql, key)).toBe(true);
   });
 
   it('is false when the query grounds on a different report literal than the key', () => {
     const key = artifactSetKey('seen at evil.example.com', [
       { type: 'domain', value: 'evil.example.com' },
     ])!;
-    expect(queryCarriesArtifacts('FROM logs-* | WHERE event.action == "AssumeRole"', key)).toBe(
+    expect(queryHuntsArtifacts('FROM logs-* | WHERE event.action == "AssumeRole"', key)).toBe(
       false
     );
   });
@@ -189,7 +189,7 @@ describe('queryCarriesArtifacts', () => {
       { type: 'ip', value: '10.0.0.1' },
     ])!;
     expect(
-      queryCarriesArtifacts('FROM logs-* | WHERE destination.domain == "evil.example.com"', key)
+      queryHuntsArtifacts('FROM logs-* | WHERE destination.domain == "evil.example.com"', key)
     ).toBe(false);
   });
 
@@ -198,7 +198,40 @@ describe('queryCarriesArtifacts', () => {
       { type: 'domain', value: 'evil.example.com' },
     ])!;
     expect(
-      queryCarriesArtifacts('FROM logs-* | WHERE destination.domain == "EVIL.Example.COM"', key)
+      queryHuntsArtifacts('FROM logs-* | WHERE destination.domain == "EVIL.Example.COM"', key)
     ).toBe(true);
+  });
+
+  it('is false when the artifact only appears under a negation', () => {
+    const key = artifactSetKey('seen at evil.example.com', [
+      { type: 'domain', value: 'evil.example.com' },
+    ])!;
+    expect(
+      queryHuntsArtifacts('FROM logs-* | WHERE destination.domain != "evil.example.com"', key)
+    ).toBe(false);
+  });
+
+  it('is false when the artifact only appears in an EVAL rather than a filter', () => {
+    const key = artifactSetKey('seen at evil.example.com', [
+      { type: 'domain', value: 'evil.example.com' },
+    ])!;
+    expect(
+      queryHuntsArtifacts(
+        'FROM logs-* | EVAL label = "evil.example.com" | WHERE event.action == "AssumeRole"',
+        key
+      )
+    ).toBe(false);
+  });
+
+  it('is false when the artifact is one alternative beside an ungrounded OR branch', () => {
+    const key = artifactSetKey('seen at evil.example.com', [
+      { type: 'domain', value: 'evil.example.com' },
+    ])!;
+    expect(
+      queryHuntsArtifacts(
+        'FROM logs-* | WHERE destination.domain == "evil.example.com" OR process.name == "cmd.exe"',
+        key
+      )
+    ).toBe(false);
   });
 });
