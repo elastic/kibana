@@ -29,6 +29,7 @@ import {
   escapeTeamsHtml,
   executeHitlHttpChannel,
   fitHitlTextPreservingSuffix,
+  fitSlackMrkdwnSectionText,
   renderServiceNowField,
   renderTeamsField,
   SERVICENOW_COMMENT_MAX_LENGTH,
@@ -144,10 +145,11 @@ function buildSlackApiBlocks({
 }) {
   const blocks: Array<Record<string, unknown>> = [];
 
-  if (message.length > 0) {
+  const sectionText = fitSlackMrkdwnSectionText(escapeSlackMrkdwnText(message));
+  if (sectionText.length > 0) {
     blocks.push({
       type: 'section',
-      text: { type: 'mrkdwn', text: escapeSlackMrkdwnText(message) },
+      text: { type: 'mrkdwn', text: sectionText },
     });
   }
 

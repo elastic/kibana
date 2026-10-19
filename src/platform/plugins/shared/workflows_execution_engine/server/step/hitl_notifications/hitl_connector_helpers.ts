@@ -26,10 +26,10 @@ function breakHitlSchemeUrls(value: string): string {
   return value.replace(/https?:\/\//gi, (scheme) => `${scheme.slice(0, -2)}${HITL_WORD_JOINER}//`);
 }
 
-/** Escapes generated email text so it cannot add a markdown link. */
+/** Escapes generated email text so it cannot add a markdown link or code fence. */
 export function escapeHitlEmailMarkdown(value: string): string {
   return breakHitlSchemeUrls(
-    value.replace(/\\/g, '\\\\').replace(/[\[\]()<>]/g, (char) => `\\${char}`)
+    value.replace(/\\/g, '\\\\').replace(/[\[\]()<>`~]/g, (char) => `\\${char}`)
   );
 }
 
@@ -53,6 +53,23 @@ export function escapeSlackMrkdwnLabel(value: string): string {
 /** Escapes `&` in a resume URL placed inside Slack mrkdwn. */
 export function escapeSlackMrkdwnUrl(url: string): string {
   return url.replace(/&/g, '&amp;');
+}
+
+export const SLACK_SECTION_TEXT_MAX_LENGTH = 3000;
+
+/** Shortens escaped Slack section text to 3,000 characters without splitting an entity. */
+export function fitSlackMrkdwnSectionText(value: string): string {
+  if (value.length <= SLACK_SECTION_TEXT_MAX_LENGTH) {
+    return value;
+  }
+
+  const slice = value.slice(0, SLACK_SECTION_TEXT_MAX_LENGTH);
+  const ampersand = slice.lastIndexOf('&');
+  if (ampersand !== -1 && !slice.slice(ampersand).includes(';')) {
+    return slice.slice(0, ampersand);
+  }
+
+  return slice;
 }
 
 export type SlackApiChannelTarget = { channelNames: string[] } | { channelIds: string[] };

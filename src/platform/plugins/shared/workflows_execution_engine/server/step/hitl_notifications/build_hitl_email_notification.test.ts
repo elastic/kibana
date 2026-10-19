@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { default as MarkdownIt } from 'markdown-it';
 import {
   absoluteUrlToKibanaFooterPath,
   buildDefaultHitlApprovalEmailMessage,
@@ -103,6 +104,44 @@ describe('build_hitl_email_notification', () => {
       ).toBe(
         'Line one\nhttps:\u2060//elastic.co\n\n[Approve https:\u2060//evil.example](https://kibana.example/approve)  [Decline now](https://kibana.example/reject)'
       );
+    });
+
+    it('keeps both resume links when step text opens a code fence', () => {
+      const markdown = new MarkdownIt({ linkify: true });
+      const hrefs = (source: string) =>
+        [...markdown.render(source).matchAll(/href="([^"]*)"/g)].map((match) => match[1]);
+
+      for (const fence of ['```', '~~~']) {
+        const source = buildDefaultHitlApprovalEmailMessage({
+          message: `Please review\n${fence}`,
+          approveLabel: 'Approve',
+          rejectLabel: 'Decline',
+          approveUrl: 'https://kibana.example/approve',
+          rejectUrl: 'https://kibana.example/reject',
+        });
+
+        expect(markdown.render(source)).not.toContain('<pre');
+        expect(hrefs(source)).toEqual([
+          'https://kibana.example/approve',
+          'https://kibana.example/reject',
+        ]);
+      }
+    });
+
+    it('keeps both resume links when both labels end in a backtick', () => {
+      const markdown = new MarkdownIt({ linkify: true });
+      const source = buildDefaultHitlApprovalEmailMessage({
+        message: 'Approve?',
+        approveLabel: 'Approve`',
+        rejectLabel: 'Decline`',
+        approveUrl: 'https://kibana.example/approve',
+        rejectUrl: 'https://kibana.example/reject',
+      });
+
+      expect(markdown.render(source)).not.toContain('<code');
+      expect(
+        [...markdown.render(source).matchAll(/href="([^"]*)"/g)].map((match) => match[1])
+      ).toEqual(['https://kibana.example/approve', 'https://kibana.example/reject']);
     });
 
     it('builds waitForApproval markdown with approve and reject links', () => {

@@ -32,6 +32,7 @@ import {
   escapeTeamsHtml,
   executeHitlHttpChannel,
   fitHitlTextPreservingSuffix,
+  fitSlackMrkdwnSectionText,
   renderServiceNowField,
   renderTeamsField,
   SERVICENOW_COMMENT_MAX_LENGTH,
@@ -103,7 +104,9 @@ function buildDefaultInputSlackApiBlocks({
   stepMessage: string;
   formUrl: string;
 }) {
-  const blocks = buildInputSlackApiBlocksFromMessage(escapeSlackMrkdwnText(stepMessage));
+  const blocks = buildInputSlackApiBlocksFromMessage(
+    fitSlackMrkdwnSectionText(escapeSlackMrkdwnText(stepMessage))
+  );
 
   blocks.push({
     type: 'actions',

@@ -15,8 +15,10 @@ import {
   escapeSlackMrkdwnText,
   escapeTeamsHtml,
   fitHitlTextPreservingSuffix,
+  fitSlackMrkdwnSectionText,
   SERVICENOW_COMMENT_MAX_LENGTH,
   serviceNowCommentLink,
+  SLACK_SECTION_TEXT_MAX_LENGTH,
   slackApiChannelTarget,
   TEAMS_CONTENT_MAX_LENGTH,
   teamsHtmlLink,
@@ -111,11 +113,27 @@ describe('generated notification text', () => {
       'is https:\u2060//elastic.co a valid indicator'
     );
     expect(escapeHitlEmailMarkdown('see www.elastic.co')).toBe('see www.elastic.co');
+    expect(escapeHitlEmailMarkdown('```\n~~~')).toBe('\\`\\`\\`\n\\~\\~\\~');
   });
 
   it('escapes Slack mrkdwn link syntax and keeps a scheme URL from autolinking', () => {
     expect(escapeSlackMrkdwnText('See <https://evil.example|click> & more')).toBe(
       'See &lt;https:\u2060//evil.example|click&gt; &amp; more'
+    );
+  });
+
+  it('shortens an escaped Slack section to the API limit without splitting an entity', () => {
+    const withinLimit = 'a'.repeat(SLACK_SECTION_TEXT_MAX_LENGTH);
+    expect(fitSlackMrkdwnSectionText(withinLimit)).toBe(withinLimit);
+
+    const splitEntity = `${'a'.repeat(SLACK_SECTION_TEXT_MAX_LENGTH - 2)}&amp;`;
+    expect(fitSlackMrkdwnSectionText(splitEntity)).toBe(
+      'a'.repeat(SLACK_SECTION_TEXT_MAX_LENGTH - 2)
+    );
+
+    const keptEntity = `${'b'.repeat(SLACK_SECTION_TEXT_MAX_LENGTH - 4)}&lt;tail`;
+    expect(fitSlackMrkdwnSectionText(keptEntity)).toBe(
+      `${'b'.repeat(SLACK_SECTION_TEXT_MAX_LENGTH - 4)}&lt;`
     );
   });
 
