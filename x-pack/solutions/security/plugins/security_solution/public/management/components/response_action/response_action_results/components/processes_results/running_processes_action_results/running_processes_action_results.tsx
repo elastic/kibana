@@ -113,7 +113,8 @@ interface EndpointRunningProcessesResultsProps {
 
 /** @internal */
 const EndpointRunningProcessesResults = memo<EndpointRunningProcessesResultsProps>(
-  ({ action, agentId, 'data-test-subj': dataTestSubj }) => {
+  ({ action: _action, agentId, 'data-test-subj': dataTestSubj }) => {
+    const action = _action as ActionDetails<GetProcessesActionOutputContent>; // Casting to remove possible immutability from obejct
     const testId = useTestIdGenerator(dataTestSubj);
     const agentIds: string[] = agentId ? [agentId] : [...action.agents];
     const columns = useMemo(
