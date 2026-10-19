@@ -55,6 +55,17 @@ describe('triggerInvestigationStepDefinition', () => {
     );
   });
 
+  it('starts without a title, which Agent Builder generates', async () => {
+    const start = jest.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
+    const { definition } = createDefinition(start);
+
+    await definition.handler(
+      createContext({ subject_type: 'significant_event', subject_id: 'event-1' })
+    );
+
+    expect(start).toHaveBeenCalledWith(expect.objectContaining({ title: undefined }));
+  });
+
   it('preserves an explicit manual trigger type', async () => {
     const start = jest.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
     const { definition } = createDefinition(start);
@@ -119,6 +130,38 @@ describe('triggerInvestigationStepDefinition', () => {
     );
 
     expect(start).toHaveBeenCalledWith(expect.objectContaining({ notificationDestinations }));
+  });
+
+  it('forwards the Slack thread to the client', async () => {
+    const start = jest.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
+    const { definition } = createDefinition(start);
+    const slackThread = { workspace: 'T1', channel: 'C1', thread_ts: '1.1' };
+
+    await definition.handler(
+      createContext({
+        subject_type: 'manual',
+        subject_id: 'slack:C1:1.1',
+        slack_thread: slackThread,
+      })
+    );
+
+    expect(start).toHaveBeenCalledWith(expect.objectContaining({ slack_thread: slackThread }));
+  });
+
+  it('rejects a Slack thread without a workspace', async () => {
+    const start = jest.fn();
+    const { definition } = createDefinition(start);
+
+    await expect(
+      definition.handler(
+        createContext({
+          subject_type: 'manual',
+          subject_id: 'slack:C1:1.1',
+          slack_thread: { workspace: '', channel: 'C1', thread_ts: '1.1' },
+        })
+      )
+    ).rejects.toThrow();
+    expect(start).not.toHaveBeenCalled();
   });
 
   it('rejects a destination without a connector or channel', async () => {

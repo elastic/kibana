@@ -277,6 +277,7 @@ dependsOn:
   - '@kbn/agentic-investigations-plugin'
   - '@kbn/mitre-attack-plugin'
   - '@kbn/security-mitre-attack-common'
+  - '@kbn/security-mitre-attack-mocks'
   - '@kbn/security-mitre-attack-server'
   - '@kbn/lazy-object'
   - '@kbn/ai-assistant-common'
@@ -304,7 +305,6 @@ dependsOn:
   - '@kbn/evals-plugin'
   - '@kbn/shared-ux-column-presets'
   - '@kbn/core-overlays-browser'
-  - '@kbn/flyout-template'
   - '@kbn/workflows-management-plugin'
   - '@kbn/core-application-browser-mocks'
   - '@kbn/date-range-picker'
@@ -320,8 +320,6 @@ dependsOn:
   - '@kbn/code-editor'
   - '@kbn/code-editor-mock'
   - '@kbn/test-es-server'
-  - '@kbn/core-user-profile-server-mocks'
-  - '@kbn/core-user-profile-server'
   - '@kbn/core-security-server'
 tags:
   - plugin

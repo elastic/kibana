@@ -44,7 +44,7 @@ export function getErrorStatusCode(error: any): number {
  * Extracts detailed error message from Boom and Elasticsearch "native" errors. It's supposed to be
  * only logged on the server side and never returned to the client as it may contain sensitive
  * information.
- * @param error Error instance to extract message from.
+ * @param error Error instance, or any other thrown value, to extract message from.
  */
 export function getDetailedErrorMessage(error: any): string {
   if (error instanceof errors.ResponseError) {
@@ -53,6 +53,11 @@ export function getDetailedErrorMessage(error: any): string {
 
   if (Boom.isBoom(error)) {
     return JSON.stringify(error.output.payload);
+  }
+
+  // Anything can be thrown, so a value that isn't an object is reported as is.
+  if (error === null || typeof error !== 'object') {
+    return String(error);
   }
 
   if (!error.cause) {

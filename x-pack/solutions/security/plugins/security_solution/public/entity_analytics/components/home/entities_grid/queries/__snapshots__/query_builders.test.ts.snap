@@ -25,7 +25,8 @@ exports[`entities grid query builders count builds the count query with no filte
 
 exports[`entities grid query builders enrich queries alert_count builds its query from the page rows 1`] = `
 Array [
-  "FROM .alerts-security.alerts-default
+  "SET unmapped_fields=\\"nullify\\";
+FROM .alerts-security.alerts-default
 | WHERE \`@timestamp\` >= NOW() - 7 days
 | WHERE kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\"
 | FORK (
@@ -50,20 +51,25 @@ Array [
      user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
      host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
      entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+     user_entity_id_present = TO_STRING(user.entity.id) IS NOT NULL AND TO_STRING(user.entity.id) != \\"\\",
      user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
      user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
      user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
      user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
      host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
      entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+     user_entity_id_present_or_null = CASE(user_entity_id_present, TO_STRING(user.entity.id)),
      user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
      user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
      user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
      _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
      _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
-     _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_formula = COALESCE(CONCAT(user_entity_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_cond = (TO_STRING(cloud.provider) == \\"aws\\"),
+     _euid_branch_2_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
      user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
-    TRUE, _euid_branch_1_formula, NULL))
+    _euid_branch_1_cond, _euid_branch_1_formula,
+    TRUE, _euid_branch_2_formula, NULL))
     | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
      _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
      _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -116,20 +122,25 @@ FROM .ml-anomalies-shared*
  user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
  host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
  entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+ user_entity_id_present = TO_STRING(user.entity.id) IS NOT NULL AND TO_STRING(user.entity.id) != \\"\\",
  user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
  user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
  user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
  user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
  host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
  entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+ user_entity_id_present_or_null = CASE(user_entity_id_present, TO_STRING(user.entity.id)),
  user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
  user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
  user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
  _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
  _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
- _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+ _euid_branch_1_formula = COALESCE(CONCAT(user_entity_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+ _euid_branch_1_cond = (TO_STRING(cloud.provider) == \\"aws\\"),
+ _euid_branch_2_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
  user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
-TRUE, _euid_branch_1_formula, NULL))
+_euid_branch_1_cond, _euid_branch_1_formula,
+TRUE, _euid_branch_2_formula, NULL))
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -221,10 +232,11 @@ exports[`entities grid query builders sort by @timestamp builds the sort query w
 `;
 
 exports[`entities grid query builders sort by alert_count builds the sort query 1`] = `
-"FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
+"SET unmapped_fields=\\"nullify\\";
+FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
 | WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND (entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")) AND (entity.relationships.resolution.resolved_to IS NULL))
 | FORK (
-    WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NOT NULL
+    WHERE \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
     | KEEP \`@timestamp\`, \`kibana.alert.severity\`, _ea_entity_id
   )
@@ -244,20 +256,25 @@ exports[`entities grid query builders sort by alert_count builds the sort query 
      user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
      host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
      entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+     user_entity_id_present = TO_STRING(user.entity.id) IS NOT NULL AND TO_STRING(user.entity.id) != \\"\\",
      user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
      user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
      user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
      user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
      host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
      entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+     user_entity_id_present_or_null = CASE(user_entity_id_present, TO_STRING(user.entity.id)),
      user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
      user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
      user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
      _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
      _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
-     _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_formula = COALESCE(CONCAT(user_entity_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_cond = (TO_STRING(cloud.provider) == \\"aws\\"),
+     _euid_branch_2_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
      user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
-    TRUE, _euid_branch_1_formula, NULL))
+    _euid_branch_1_cond, _euid_branch_1_formula,
+    TRUE, _euid_branch_2_formula, NULL))
     | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
      _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
      _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -301,10 +318,11 @@ exports[`entities grid query builders sort by alert_count builds the sort query 
 `;
 
 exports[`entities grid query builders sort by alert_count builds the sort query with a cursor on an empty value 1`] = `
-"FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
+"SET unmapped_fields=\\"nullify\\";
+FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
 | WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND (entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")) AND (entity.relationships.resolution.resolved_to IS NULL))
 | FORK (
-    WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NOT NULL
+    WHERE \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
     | KEEP \`@timestamp\`, \`kibana.alert.severity\`, _ea_entity_id
   )
@@ -324,20 +342,25 @@ exports[`entities grid query builders sort by alert_count builds the sort query 
      user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
      host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
      entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+     user_entity_id_present = TO_STRING(user.entity.id) IS NOT NULL AND TO_STRING(user.entity.id) != \\"\\",
      user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
      user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
      user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
      user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
      host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
      entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+     user_entity_id_present_or_null = CASE(user_entity_id_present, TO_STRING(user.entity.id)),
      user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
      user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
      user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
      _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
      _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
-     _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_formula = COALESCE(CONCAT(user_entity_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_cond = (TO_STRING(cloud.provider) == \\"aws\\"),
+     _euid_branch_2_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
      user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
-    TRUE, _euid_branch_1_formula, NULL))
+    _euid_branch_1_cond, _euid_branch_1_formula,
+    TRUE, _euid_branch_2_formula, NULL))
     | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
      _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
      _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -382,10 +405,11 @@ exports[`entities grid query builders sort by alert_count builds the sort query 
 `;
 
 exports[`entities grid query builders sort by alert_count builds the sort query with entity filters and no search 1`] = `
-"FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
+"SET unmapped_fields=\\"nullify\\";
+FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
 | WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND (entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")) AND (entity.relationships.resolution.resolved_to IS NULL) AND (asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")))
 | FORK (
-    WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NOT NULL
+    WHERE \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
     | KEEP \`@timestamp\`, \`kibana.alert.severity\`, _ea_entity_id
   )
@@ -405,20 +429,25 @@ exports[`entities grid query builders sort by alert_count builds the sort query 
      user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
      host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
      entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+     user_entity_id_present = TO_STRING(user.entity.id) IS NOT NULL AND TO_STRING(user.entity.id) != \\"\\",
      user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
      user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
      user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
      user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
      host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
      entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+     user_entity_id_present_or_null = CASE(user_entity_id_present, TO_STRING(user.entity.id)),
      user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
      user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
      user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
      _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
      _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
-     _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_formula = COALESCE(CONCAT(user_entity_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_cond = (TO_STRING(cloud.provider) == \\"aws\\"),
+     _euid_branch_2_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
      user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
-    TRUE, _euid_branch_1_formula, NULL))
+    _euid_branch_1_cond, _euid_branch_1_formula,
+    TRUE, _euid_branch_2_formula, NULL))
     | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
      _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
      _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -462,10 +491,11 @@ exports[`entities grid query builders sort by alert_count builds the sort query 
 `;
 
 exports[`entities grid query builders sort by alert_count builds the sort query with filters and a cursor 1`] = `
-"FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
+"SET unmapped_fields=\\"nullify\\";
+FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
 | WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND (entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")) AND (KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\")) AND (asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")))
 | FORK (
-    WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NOT NULL
+    WHERE \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
     | KEEP \`@timestamp\`, \`kibana.alert.severity\`, _ea_entity_id
   )
@@ -485,20 +515,25 @@ exports[`entities grid query builders sort by alert_count builds the sort query 
      user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
      host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
      entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+     user_entity_id_present = TO_STRING(user.entity.id) IS NOT NULL AND TO_STRING(user.entity.id) != \\"\\",
      user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
      user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
      user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
      user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
      host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
      entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+     user_entity_id_present_or_null = CASE(user_entity_id_present, TO_STRING(user.entity.id)),
      user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
      user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
      user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
      _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
      _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
-     _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_formula = COALESCE(CONCAT(user_entity_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_cond = (TO_STRING(cloud.provider) == \\"aws\\"),
+     _euid_branch_2_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
      user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
-    TRUE, _euid_branch_1_formula, NULL))
+    _euid_branch_1_cond, _euid_branch_1_formula,
+    TRUE, _euid_branch_2_formula, NULL))
     | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
      _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
      _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -561,20 +596,25 @@ FROM .ml-anomalies-shared*
  user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
  host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
  entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+ user_entity_id_present = TO_STRING(user.entity.id) IS NOT NULL AND TO_STRING(user.entity.id) != \\"\\",
  user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
  user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
  user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
  user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
  host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
  entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+ user_entity_id_present_or_null = CASE(user_entity_id_present, TO_STRING(user.entity.id)),
  user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
  user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
  user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
  _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
  _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
- _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+ _euid_branch_1_formula = COALESCE(CONCAT(user_entity_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+ _euid_branch_1_cond = (TO_STRING(cloud.provider) == \\"aws\\"),
+ _euid_branch_2_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
  user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
-TRUE, _euid_branch_1_formula, NULL))
+_euid_branch_1_cond, _euid_branch_1_formula,
+TRUE, _euid_branch_2_formula, NULL))
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -632,20 +672,25 @@ FROM .ml-anomalies-shared*
  user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
  host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
  entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+ user_entity_id_present = TO_STRING(user.entity.id) IS NOT NULL AND TO_STRING(user.entity.id) != \\"\\",
  user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
  user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
  user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
  user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
  host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
  entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+ user_entity_id_present_or_null = CASE(user_entity_id_present, TO_STRING(user.entity.id)),
  user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
  user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
  user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
  _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
  _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
- _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+ _euid_branch_1_formula = COALESCE(CONCAT(user_entity_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+ _euid_branch_1_cond = (TO_STRING(cloud.provider) == \\"aws\\"),
+ _euid_branch_2_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
  user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
-TRUE, _euid_branch_1_formula, NULL))
+_euid_branch_1_cond, _euid_branch_1_formula,
+TRUE, _euid_branch_2_formula, NULL))
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -704,20 +749,25 @@ FROM .ml-anomalies-shared*
  user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
  host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
  entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+ user_entity_id_present = TO_STRING(user.entity.id) IS NOT NULL AND TO_STRING(user.entity.id) != \\"\\",
  user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
  user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
  user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
  user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
  host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
  entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+ user_entity_id_present_or_null = CASE(user_entity_id_present, TO_STRING(user.entity.id)),
  user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
  user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
  user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
  _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
  _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
- _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+ _euid_branch_1_formula = COALESCE(CONCAT(user_entity_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+ _euid_branch_1_cond = (TO_STRING(cloud.provider) == \\"aws\\"),
+ _euid_branch_2_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
  user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
-TRUE, _euid_branch_1_formula, NULL))
+_euid_branch_1_cond, _euid_branch_1_formula,
+TRUE, _euid_branch_2_formula, NULL))
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -776,20 +826,25 @@ FROM .ml-anomalies-shared*
  user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
  host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
  entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+ user_entity_id_present = TO_STRING(user.entity.id) IS NOT NULL AND TO_STRING(user.entity.id) != \\"\\",
  user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
  user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
  user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
  user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
  host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
  entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+ user_entity_id_present_or_null = CASE(user_entity_id_present, TO_STRING(user.entity.id)),
  user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
  user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
  user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
  _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
  _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
- _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+ _euid_branch_1_formula = COALESCE(CONCAT(user_entity_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+ _euid_branch_1_cond = (TO_STRING(cloud.provider) == \\"aws\\"),
+ _euid_branch_2_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
  user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
-TRUE, _euid_branch_1_formula, NULL))
+_euid_branch_1_cond, _euid_branch_1_formula,
+TRUE, _euid_branch_2_formula, NULL))
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -1100,10 +1155,11 @@ exports[`entities grid query builders sort by group_size builds the sort query w
 `;
 
 exports[`entities grid query builders sort by last_seen_alert builds the sort query 1`] = `
-"FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
+"SET unmapped_fields=\\"nullify\\";
+FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
 | WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND (entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")) AND (entity.relationships.resolution.resolved_to IS NULL))
 | FORK (
-    WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NOT NULL
+    WHERE \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
     | KEEP \`@timestamp\`, \`kibana.alert.severity\`, _ea_entity_id
   )
@@ -1123,20 +1179,25 @@ exports[`entities grid query builders sort by last_seen_alert builds the sort qu
      user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
      host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
      entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+     user_entity_id_present = TO_STRING(user.entity.id) IS NOT NULL AND TO_STRING(user.entity.id) != \\"\\",
      user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
      user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
      user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
      user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
      host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
      entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+     user_entity_id_present_or_null = CASE(user_entity_id_present, TO_STRING(user.entity.id)),
      user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
      user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
      user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
      _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
      _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
-     _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_formula = COALESCE(CONCAT(user_entity_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_cond = (TO_STRING(cloud.provider) == \\"aws\\"),
+     _euid_branch_2_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
      user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
-    TRUE, _euid_branch_1_formula, NULL))
+    _euid_branch_1_cond, _euid_branch_1_formula,
+    TRUE, _euid_branch_2_formula, NULL))
     | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
      _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
      _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -1180,10 +1241,11 @@ exports[`entities grid query builders sort by last_seen_alert builds the sort qu
 `;
 
 exports[`entities grid query builders sort by last_seen_alert builds the sort query with a cursor on an empty value 1`] = `
-"FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
+"SET unmapped_fields=\\"nullify\\";
+FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
 | WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND (entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")) AND (entity.relationships.resolution.resolved_to IS NULL))
 | FORK (
-    WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NOT NULL
+    WHERE \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
     | KEEP \`@timestamp\`, \`kibana.alert.severity\`, _ea_entity_id
   )
@@ -1203,20 +1265,25 @@ exports[`entities grid query builders sort by last_seen_alert builds the sort qu
      user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
      host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
      entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+     user_entity_id_present = TO_STRING(user.entity.id) IS NOT NULL AND TO_STRING(user.entity.id) != \\"\\",
      user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
      user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
      user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
      user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
      host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
      entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+     user_entity_id_present_or_null = CASE(user_entity_id_present, TO_STRING(user.entity.id)),
      user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
      user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
      user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
      _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
      _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
-     _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_formula = COALESCE(CONCAT(user_entity_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_cond = (TO_STRING(cloud.provider) == \\"aws\\"),
+     _euid_branch_2_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
      user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
-    TRUE, _euid_branch_1_formula, NULL))
+    _euid_branch_1_cond, _euid_branch_1_formula,
+    TRUE, _euid_branch_2_formula, NULL))
     | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
      _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
      _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -1261,10 +1328,11 @@ exports[`entities grid query builders sort by last_seen_alert builds the sort qu
 `;
 
 exports[`entities grid query builders sort by last_seen_alert builds the sort query with entity filters and no search 1`] = `
-"FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
+"SET unmapped_fields=\\"nullify\\";
+FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
 | WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND (entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")) AND (entity.relationships.resolution.resolved_to IS NULL) AND (asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")))
 | FORK (
-    WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NOT NULL
+    WHERE \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
     | KEEP \`@timestamp\`, \`kibana.alert.severity\`, _ea_entity_id
   )
@@ -1284,20 +1352,25 @@ exports[`entities grid query builders sort by last_seen_alert builds the sort qu
      user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
      host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
      entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+     user_entity_id_present = TO_STRING(user.entity.id) IS NOT NULL AND TO_STRING(user.entity.id) != \\"\\",
      user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
      user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
      user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
      user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
      host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
      entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+     user_entity_id_present_or_null = CASE(user_entity_id_present, TO_STRING(user.entity.id)),
      user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
      user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
      user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
      _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
      _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
-     _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_formula = COALESCE(CONCAT(user_entity_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_cond = (TO_STRING(cloud.provider) == \\"aws\\"),
+     _euid_branch_2_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
      user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
-    TRUE, _euid_branch_1_formula, NULL))
+    _euid_branch_1_cond, _euid_branch_1_formula,
+    TRUE, _euid_branch_2_formula, NULL))
     | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
      _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
      _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -1341,10 +1414,11 @@ exports[`entities grid query builders sort by last_seen_alert builds the sort qu
 `;
 
 exports[`entities grid query builders sort by last_seen_alert builds the sort query with filters and a cursor 1`] = `
-"FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
+"SET unmapped_fields=\\"nullify\\";
+FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
 | WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND (entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")) AND (KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\")) AND (asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")))
 | FORK (
-    WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NOT NULL
+    WHERE \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
     | KEEP \`@timestamp\`, \`kibana.alert.severity\`, _ea_entity_id
   )
@@ -1364,20 +1438,25 @@ exports[`entities grid query builders sort by last_seen_alert builds the sort qu
      user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
      host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
      entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+     user_entity_id_present = TO_STRING(user.entity.id) IS NOT NULL AND TO_STRING(user.entity.id) != \\"\\",
      user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
      user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
      user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
      user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
      host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
      entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+     user_entity_id_present_or_null = CASE(user_entity_id_present, TO_STRING(user.entity.id)),
      user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
      user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
      user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
      _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
      _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
-     _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_formula = COALESCE(CONCAT(user_entity_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_cond = (TO_STRING(cloud.provider) == \\"aws\\"),
+     _euid_branch_2_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
      user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
-    TRUE, _euid_branch_1_formula, NULL))
+    _euid_branch_1_cond, _euid_branch_1_formula,
+    TRUE, _euid_branch_2_formula, NULL))
     | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
      _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
      _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -1527,7 +1606,8 @@ FROM entities-latest-default
 
 exports[`entities grid query builders sort page by alert_count on a large view runs the queries of a page after a value with entity filters 1`] = `
 Array [
-  "FROM .alerts-security.alerts-default
+  "SET unmapped_fields=\\"nullify\\";
+FROM .alerts-security.alerts-default
 | WHERE \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")
 | FORK (
     WHERE \`kibana.alert.entity.id\` IS NOT NULL
@@ -1550,20 +1630,25 @@ Array [
      user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
      host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
      entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+     user_entity_id_present = TO_STRING(user.entity.id) IS NOT NULL AND TO_STRING(user.entity.id) != \\"\\",
      user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
      user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
      user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
      user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
      host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
      entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+     user_entity_id_present_or_null = CASE(user_entity_id_present, TO_STRING(user.entity.id)),
      user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
      user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
      user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
      _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
      _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
-     _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_formula = COALESCE(CONCAT(user_entity_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_cond = (TO_STRING(cloud.provider) == \\"aws\\"),
+     _euid_branch_2_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
      user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
-    TRUE, _euid_branch_1_formula, NULL))
+    _euid_branch_1_cond, _euid_branch_1_formula,
+    TRUE, _euid_branch_2_formula, NULL))
     | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
      _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
      _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -1600,7 +1685,8 @@ Array [
 | SORT alert_count DESC NULLS LAST, entity.id ASC
 | LIMIT 26
 | KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, alert_count, last_seen_alert, alert_critical, alert_high, alert_medium, alert_low",
-  "FROM .alerts-security.alerts-default
+  "SET unmapped_fields=\\"nullify\\";
+FROM .alerts-security.alerts-default
 | WHERE \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")
 | FORK (
     WHERE \`kibana.alert.entity.id\` IS NOT NULL
@@ -1623,20 +1709,25 @@ Array [
      user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
      host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
      entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+     user_entity_id_present = TO_STRING(user.entity.id) IS NOT NULL AND TO_STRING(user.entity.id) != \\"\\",
      user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
      user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
      user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
      user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
      host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
      entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+     user_entity_id_present_or_null = CASE(user_entity_id_present, TO_STRING(user.entity.id)),
      user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
      user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
      user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
      _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
      _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
-     _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_formula = COALESCE(CONCAT(user_entity_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_cond = (TO_STRING(cloud.provider) == \\"aws\\"),
+     _euid_branch_2_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
      user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
-    TRUE, _euid_branch_1_formula, NULL))
+    _euid_branch_1_cond, _euid_branch_1_formula,
+    TRUE, _euid_branch_2_formula, NULL))
     | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
      _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
      _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -1685,7 +1776,8 @@ Array [
 
 exports[`entities grid query builders sort page by alert_count on a large view runs the queries of a page after an empty value 1`] = `
 Array [
-  "FROM .alerts-security.alerts-default
+  "SET unmapped_fields=\\"nullify\\";
+FROM .alerts-security.alerts-default
 | WHERE \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")
 | FORK (
     WHERE \`kibana.alert.entity.id\` IS NOT NULL
@@ -1708,20 +1800,25 @@ Array [
      user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
      host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
      entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+     user_entity_id_present = TO_STRING(user.entity.id) IS NOT NULL AND TO_STRING(user.entity.id) != \\"\\",
      user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
      user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
      user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
      user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
      host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
      entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+     user_entity_id_present_or_null = CASE(user_entity_id_present, TO_STRING(user.entity.id)),
      user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
      user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
      user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
      _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
      _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
-     _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_formula = COALESCE(CONCAT(user_entity_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_cond = (TO_STRING(cloud.provider) == \\"aws\\"),
+     _euid_branch_2_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
      user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
-    TRUE, _euid_branch_1_formula, NULL))
+    _euid_branch_1_cond, _euid_branch_1_formula,
+    TRUE, _euid_branch_2_formula, NULL))
     | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
      _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
      _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -1769,7 +1866,8 @@ Array [
 
 exports[`entities grid query builders sort page by alert_count on a large view runs the queries of the first page ascending 1`] = `
 Array [
-  "FROM .alerts-security.alerts-default
+  "SET unmapped_fields=\\"nullify\\";
+FROM .alerts-security.alerts-default
 | WHERE \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")
 | FORK (
     WHERE \`kibana.alert.entity.id\` IS NOT NULL
@@ -1792,20 +1890,25 @@ Array [
      user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
      host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
      entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+     user_entity_id_present = TO_STRING(user.entity.id) IS NOT NULL AND TO_STRING(user.entity.id) != \\"\\",
      user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
      user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
      user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
      user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
      host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
      entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+     user_entity_id_present_or_null = CASE(user_entity_id_present, TO_STRING(user.entity.id)),
      user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
      user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
      user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
      _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
      _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
-     _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_formula = COALESCE(CONCAT(user_entity_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_cond = (TO_STRING(cloud.provider) == \\"aws\\"),
+     _euid_branch_2_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
      user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
-    TRUE, _euid_branch_1_formula, NULL))
+    _euid_branch_1_cond, _euid_branch_1_formula,
+    TRUE, _euid_branch_2_formula, NULL))
     | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
      _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
      _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -1847,7 +1950,8 @@ Array [
 | LIMIT 26
 | EVAL alert_count = TO_LONG(0), alert_critical = TO_LONG(0), alert_high = TO_LONG(0), alert_medium = TO_LONG(0), alert_low = TO_LONG(0), last_seen_alert = TO_DATETIME(null)
 | KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, alert_count, last_seen_alert, alert_critical, alert_high, alert_medium, alert_low",
-  "FROM .alerts-security.alerts-default
+  "SET unmapped_fields=\\"nullify\\";
+FROM .alerts-security.alerts-default
 | WHERE \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")
 | FORK (
     WHERE \`kibana.alert.entity.id\` IS NOT NULL
@@ -1870,20 +1974,25 @@ Array [
      user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
      host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
      entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+     user_entity_id_present = TO_STRING(user.entity.id) IS NOT NULL AND TO_STRING(user.entity.id) != \\"\\",
      user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
      user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
      user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
      user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
      host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
      entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+     user_entity_id_present_or_null = CASE(user_entity_id_present, TO_STRING(user.entity.id)),
      user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
      user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
      user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
      _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
      _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
-     _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_formula = COALESCE(CONCAT(user_entity_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_cond = (TO_STRING(cloud.provider) == \\"aws\\"),
+     _euid_branch_2_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
      user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
-    TRUE, _euid_branch_1_formula, NULL))
+    _euid_branch_1_cond, _euid_branch_1_formula,
+    TRUE, _euid_branch_2_formula, NULL))
     | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
      _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
      _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -1923,7 +2032,8 @@ Array [
 
 exports[`entities grid query builders sort page by alert_count on a large view runs the queries of the first page descending 1`] = `
 Array [
-  "FROM .alerts-security.alerts-default
+  "SET unmapped_fields=\\"nullify\\";
+FROM .alerts-security.alerts-default
 | WHERE \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")
 | FORK (
     WHERE \`kibana.alert.entity.id\` IS NOT NULL
@@ -1946,20 +2056,25 @@ Array [
      user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
      host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
      entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+     user_entity_id_present = TO_STRING(user.entity.id) IS NOT NULL AND TO_STRING(user.entity.id) != \\"\\",
      user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
      user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
      user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
      user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
      host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
      entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+     user_entity_id_present_or_null = CASE(user_entity_id_present, TO_STRING(user.entity.id)),
      user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
      user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
      user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
      _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
      _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
-     _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_formula = COALESCE(CONCAT(user_entity_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_cond = (TO_STRING(cloud.provider) == \\"aws\\"),
+     _euid_branch_2_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
      user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
-    TRUE, _euid_branch_1_formula, NULL))
+    _euid_branch_1_cond, _euid_branch_1_formula,
+    TRUE, _euid_branch_2_formula, NULL))
     | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
      _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
      _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -1994,7 +2109,8 @@ Array [
 | SORT alert_count DESC NULLS LAST, entity.id ASC
 | LIMIT 26
 | KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, alert_count, last_seen_alert, alert_critical, alert_high, alert_medium, alert_low",
-  "FROM .alerts-security.alerts-default
+  "SET unmapped_fields=\\"nullify\\";
+FROM .alerts-security.alerts-default
 | WHERE \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")
 | FORK (
     WHERE \`kibana.alert.entity.id\` IS NOT NULL
@@ -2017,20 +2133,25 @@ Array [
      user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
      host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
      entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+     user_entity_id_present = TO_STRING(user.entity.id) IS NOT NULL AND TO_STRING(user.entity.id) != \\"\\",
      user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
      user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
      user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
      user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
      host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
      entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+     user_entity_id_present_or_null = CASE(user_entity_id_present, TO_STRING(user.entity.id)),
      user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
      user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
      user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
      _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
      _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
-     _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_formula = COALESCE(CONCAT(user_entity_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_cond = (TO_STRING(cloud.provider) == \\"aws\\"),
+     _euid_branch_2_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
      user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
-    TRUE, _euid_branch_1_formula, NULL))
+    _euid_branch_1_cond, _euid_branch_1_formula,
+    TRUE, _euid_branch_2_formula, NULL))
     | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
      _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
      _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -2077,10 +2198,11 @@ Array [
 
 exports[`entities grid query builders sort page by alert_count on a large view runs the queries of the first page with a search 1`] = `
 Array [
-  "FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
+  "SET unmapped_fields=\\"nullify\\";
+FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
 | WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND (entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")) AND (entity.relationships.resolution.resolved_to IS NULL) AND (KQL(\\"\\"\\"entity.name: host-001-payments-db\\"\\"\\")))
 | FORK (
-    WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NOT NULL
+    WHERE \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
     | KEEP \`@timestamp\`, \`kibana.alert.severity\`, _ea_entity_id
   )
@@ -2100,20 +2222,25 @@ Array [
      user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
      host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
      entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+     user_entity_id_present = TO_STRING(user.entity.id) IS NOT NULL AND TO_STRING(user.entity.id) != \\"\\",
      user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
      user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
      user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
      user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
      host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
      entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+     user_entity_id_present_or_null = CASE(user_entity_id_present, TO_STRING(user.entity.id)),
      user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
      user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
      user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
      _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
      _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
-     _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_formula = COALESCE(CONCAT(user_entity_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_cond = (TO_STRING(cloud.provider) == \\"aws\\"),
+     _euid_branch_2_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
      user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
-    TRUE, _euid_branch_1_formula, NULL))
+    _euid_branch_1_cond, _euid_branch_1_formula,
+    TRUE, _euid_branch_2_formula, NULL))
     | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
      _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
      _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -2176,20 +2303,25 @@ FROM .ml-anomalies-shared*
  user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
  host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
  entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+ user_entity_id_present = TO_STRING(user.entity.id) IS NOT NULL AND TO_STRING(user.entity.id) != \\"\\",
  user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
  user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
  user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
  user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
  host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
  entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+ user_entity_id_present_or_null = CASE(user_entity_id_present, TO_STRING(user.entity.id)),
  user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
  user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
  user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
  _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
  _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
- _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+ _euid_branch_1_formula = COALESCE(CONCAT(user_entity_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+ _euid_branch_1_cond = (TO_STRING(cloud.provider) == \\"aws\\"),
+ _euid_branch_2_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
  user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
-TRUE, _euid_branch_1_formula, NULL))
+_euid_branch_1_cond, _euid_branch_1_formula,
+TRUE, _euid_branch_2_formula, NULL))
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -2236,20 +2368,25 @@ FROM .ml-anomalies-shared*
  user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
  host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
  entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+ user_entity_id_present = TO_STRING(user.entity.id) IS NOT NULL AND TO_STRING(user.entity.id) != \\"\\",
  user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
  user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
  user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
  user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
  host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
  entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+ user_entity_id_present_or_null = CASE(user_entity_id_present, TO_STRING(user.entity.id)),
  user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
  user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
  user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
  _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
  _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
- _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+ _euid_branch_1_formula = COALESCE(CONCAT(user_entity_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+ _euid_branch_1_cond = (TO_STRING(cloud.provider) == \\"aws\\"),
+ _euid_branch_2_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
  user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
-TRUE, _euid_branch_1_formula, NULL))
+_euid_branch_1_cond, _euid_branch_1_formula,
+TRUE, _euid_branch_2_formula, NULL))
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -2308,20 +2445,25 @@ FROM .ml-anomalies-shared*
  user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
  host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
  entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+ user_entity_id_present = TO_STRING(user.entity.id) IS NOT NULL AND TO_STRING(user.entity.id) != \\"\\",
  user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
  user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
  user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
  user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
  host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
  entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+ user_entity_id_present_or_null = CASE(user_entity_id_present, TO_STRING(user.entity.id)),
  user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
  user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
  user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
  _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
  _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
- _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+ _euid_branch_1_formula = COALESCE(CONCAT(user_entity_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+ _euid_branch_1_cond = (TO_STRING(cloud.provider) == \\"aws\\"),
+ _euid_branch_2_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
  user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
-TRUE, _euid_branch_1_formula, NULL))
+_euid_branch_1_cond, _euid_branch_1_formula,
+TRUE, _euid_branch_2_formula, NULL))
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -2379,20 +2521,25 @@ FROM .ml-anomalies-shared*
  user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
  host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
  entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+ user_entity_id_present = TO_STRING(user.entity.id) IS NOT NULL AND TO_STRING(user.entity.id) != \\"\\",
  user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
  user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
  user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
  user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
  host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
  entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+ user_entity_id_present_or_null = CASE(user_entity_id_present, TO_STRING(user.entity.id)),
  user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
  user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
  user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
  _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
  _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
- _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+ _euid_branch_1_formula = COALESCE(CONCAT(user_entity_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+ _euid_branch_1_cond = (TO_STRING(cloud.provider) == \\"aws\\"),
+ _euid_branch_2_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
  user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
-TRUE, _euid_branch_1_formula, NULL))
+_euid_branch_1_cond, _euid_branch_1_formula,
+TRUE, _euid_branch_2_formula, NULL))
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -2437,20 +2584,25 @@ FROM .ml-anomalies-shared*
  user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
  host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
  entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+ user_entity_id_present = TO_STRING(user.entity.id) IS NOT NULL AND TO_STRING(user.entity.id) != \\"\\",
  user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
  user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
  user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
  user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
  host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
  entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+ user_entity_id_present_or_null = CASE(user_entity_id_present, TO_STRING(user.entity.id)),
  user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
  user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
  user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
  _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
  _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
- _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+ _euid_branch_1_formula = COALESCE(CONCAT(user_entity_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+ _euid_branch_1_cond = (TO_STRING(cloud.provider) == \\"aws\\"),
+ _euid_branch_2_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
  user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
-TRUE, _euid_branch_1_formula, NULL))
+_euid_branch_1_cond, _euid_branch_1_formula,
+TRUE, _euid_branch_2_formula, NULL))
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -2507,20 +2659,25 @@ FROM .ml-anomalies-shared*
  user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
  host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
  entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+ user_entity_id_present = TO_STRING(user.entity.id) IS NOT NULL AND TO_STRING(user.entity.id) != \\"\\",
  user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
  user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
  user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
  user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
  host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
  entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+ user_entity_id_present_or_null = CASE(user_entity_id_present, TO_STRING(user.entity.id)),
  user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
  user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
  user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
  _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
  _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
- _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+ _euid_branch_1_formula = COALESCE(CONCAT(user_entity_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+ _euid_branch_1_cond = (TO_STRING(cloud.provider) == \\"aws\\"),
+ _euid_branch_2_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
  user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
-TRUE, _euid_branch_1_formula, NULL))
+_euid_branch_1_cond, _euid_branch_1_formula,
+TRUE, _euid_branch_2_formula, NULL))
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -2565,20 +2722,25 @@ FROM .ml-anomalies-shared*
  user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
  host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
  entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+ user_entity_id_present = TO_STRING(user.entity.id) IS NOT NULL AND TO_STRING(user.entity.id) != \\"\\",
  user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
  user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
  user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
  user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
  host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
  entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+ user_entity_id_present_or_null = CASE(user_entity_id_present, TO_STRING(user.entity.id)),
  user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
  user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
  user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
  _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
  _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
- _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+ _euid_branch_1_formula = COALESCE(CONCAT(user_entity_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+ _euid_branch_1_cond = (TO_STRING(cloud.provider) == \\"aws\\"),
+ _euid_branch_2_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
  user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
-TRUE, _euid_branch_1_formula, NULL))
+_euid_branch_1_cond, _euid_branch_1_formula,
+TRUE, _euid_branch_2_formula, NULL))
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -2636,20 +2798,25 @@ FROM .ml-anomalies-shared*
  user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
  host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
  entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+ user_entity_id_present = TO_STRING(user.entity.id) IS NOT NULL AND TO_STRING(user.entity.id) != \\"\\",
  user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
  user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
  user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
  user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
  host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
  entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+ user_entity_id_present_or_null = CASE(user_entity_id_present, TO_STRING(user.entity.id)),
  user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
  user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
  user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
  _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
  _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
- _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+ _euid_branch_1_formula = COALESCE(CONCAT(user_entity_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+ _euid_branch_1_cond = (TO_STRING(cloud.provider) == \\"aws\\"),
+ _euid_branch_2_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
  user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
-TRUE, _euid_branch_1_formula, NULL))
+_euid_branch_1_cond, _euid_branch_1_formula,
+TRUE, _euid_branch_2_formula, NULL))
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
  _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -2809,7 +2976,8 @@ Array [
 
 exports[`entities grid query builders sort page by last_seen_alert on a large view runs the queries of a page after a value with entity filters 1`] = `
 Array [
-  "FROM .alerts-security.alerts-default
+  "SET unmapped_fields=\\"nullify\\";
+FROM .alerts-security.alerts-default
 | WHERE \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")
 | FORK (
     WHERE \`kibana.alert.entity.id\` IS NOT NULL
@@ -2832,20 +3000,25 @@ Array [
      user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
      host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
      entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+     user_entity_id_present = TO_STRING(user.entity.id) IS NOT NULL AND TO_STRING(user.entity.id) != \\"\\",
      user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
      user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
      user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
      user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
      host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
      entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+     user_entity_id_present_or_null = CASE(user_entity_id_present, TO_STRING(user.entity.id)),
      user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
      user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
      user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
      _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
      _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
-     _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_formula = COALESCE(CONCAT(user_entity_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_cond = (TO_STRING(cloud.provider) == \\"aws\\"),
+     _euid_branch_2_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
      user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
-    TRUE, _euid_branch_1_formula, NULL))
+    _euid_branch_1_cond, _euid_branch_1_formula,
+    TRUE, _euid_branch_2_formula, NULL))
     | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
      _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
      _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -2882,7 +3055,8 @@ Array [
 | SORT last_seen_alert DESC NULLS LAST, entity.id ASC
 | LIMIT 26
 | KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, last_seen_alert, alert_count, alert_critical, alert_high, alert_medium, alert_low",
-  "FROM .alerts-security.alerts-default
+  "SET unmapped_fields=\\"nullify\\";
+FROM .alerts-security.alerts-default
 | WHERE \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")
 | FORK (
     WHERE \`kibana.alert.entity.id\` IS NOT NULL
@@ -2905,20 +3079,25 @@ Array [
      user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
      host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
      entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+     user_entity_id_present = TO_STRING(user.entity.id) IS NOT NULL AND TO_STRING(user.entity.id) != \\"\\",
      user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
      user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
      user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
      user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
      host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
      entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+     user_entity_id_present_or_null = CASE(user_entity_id_present, TO_STRING(user.entity.id)),
      user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
      user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
      user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
      _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
      _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
-     _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_formula = COALESCE(CONCAT(user_entity_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_cond = (TO_STRING(cloud.provider) == \\"aws\\"),
+     _euid_branch_2_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
      user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
-    TRUE, _euid_branch_1_formula, NULL))
+    _euid_branch_1_cond, _euid_branch_1_formula,
+    TRUE, _euid_branch_2_formula, NULL))
     | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
      _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
      _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -2967,7 +3146,8 @@ Array [
 
 exports[`entities grid query builders sort page by last_seen_alert on a large view runs the queries of a page after an empty value 1`] = `
 Array [
-  "FROM .alerts-security.alerts-default
+  "SET unmapped_fields=\\"nullify\\";
+FROM .alerts-security.alerts-default
 | WHERE \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")
 | FORK (
     WHERE \`kibana.alert.entity.id\` IS NOT NULL
@@ -2990,20 +3170,25 @@ Array [
      user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
      host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
      entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+     user_entity_id_present = TO_STRING(user.entity.id) IS NOT NULL AND TO_STRING(user.entity.id) != \\"\\",
      user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
      user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
      user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
      user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
      host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
      entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+     user_entity_id_present_or_null = CASE(user_entity_id_present, TO_STRING(user.entity.id)),
      user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
      user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
      user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
      _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
      _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
-     _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_formula = COALESCE(CONCAT(user_entity_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_cond = (TO_STRING(cloud.provider) == \\"aws\\"),
+     _euid_branch_2_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
      user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
-    TRUE, _euid_branch_1_formula, NULL))
+    _euid_branch_1_cond, _euid_branch_1_formula,
+    TRUE, _euid_branch_2_formula, NULL))
     | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
      _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
      _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -3051,7 +3236,8 @@ Array [
 
 exports[`entities grid query builders sort page by last_seen_alert on a large view runs the queries of the first page ascending 1`] = `
 Array [
-  "FROM .alerts-security.alerts-default
+  "SET unmapped_fields=\\"nullify\\";
+FROM .alerts-security.alerts-default
 | WHERE \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")
 | FORK (
     WHERE \`kibana.alert.entity.id\` IS NOT NULL
@@ -3074,20 +3260,25 @@ Array [
      user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
      host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
      entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+     user_entity_id_present = TO_STRING(user.entity.id) IS NOT NULL AND TO_STRING(user.entity.id) != \\"\\",
      user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
      user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
      user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
      user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
      host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
      entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+     user_entity_id_present_or_null = CASE(user_entity_id_present, TO_STRING(user.entity.id)),
      user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
      user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
      user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
      _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
      _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
-     _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_formula = COALESCE(CONCAT(user_entity_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_cond = (TO_STRING(cloud.provider) == \\"aws\\"),
+     _euid_branch_2_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
      user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
-    TRUE, _euid_branch_1_formula, NULL))
+    _euid_branch_1_cond, _euid_branch_1_formula,
+    TRUE, _euid_branch_2_formula, NULL))
     | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
      _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
      _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -3122,7 +3313,8 @@ Array [
 | SORT last_seen_alert ASC NULLS LAST, entity.id ASC
 | LIMIT 26
 | KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, last_seen_alert, alert_count, alert_critical, alert_high, alert_medium, alert_low",
-  "FROM .alerts-security.alerts-default
+  "SET unmapped_fields=\\"nullify\\";
+FROM .alerts-security.alerts-default
 | WHERE \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")
 | FORK (
     WHERE \`kibana.alert.entity.id\` IS NOT NULL
@@ -3145,20 +3337,25 @@ Array [
      user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
      host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
      entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+     user_entity_id_present = TO_STRING(user.entity.id) IS NOT NULL AND TO_STRING(user.entity.id) != \\"\\",
      user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
      user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
      user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
      user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
      host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
      entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+     user_entity_id_present_or_null = CASE(user_entity_id_present, TO_STRING(user.entity.id)),
      user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
      user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
      user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
      _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
      _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
-     _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_formula = COALESCE(CONCAT(user_entity_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_cond = (TO_STRING(cloud.provider) == \\"aws\\"),
+     _euid_branch_2_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
      user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
-    TRUE, _euid_branch_1_formula, NULL))
+    _euid_branch_1_cond, _euid_branch_1_formula,
+    TRUE, _euid_branch_2_formula, NULL))
     | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
      _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
      _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -3205,7 +3402,8 @@ Array [
 
 exports[`entities grid query builders sort page by last_seen_alert on a large view runs the queries of the first page descending 1`] = `
 Array [
-  "FROM .alerts-security.alerts-default
+  "SET unmapped_fields=\\"nullify\\";
+FROM .alerts-security.alerts-default
 | WHERE \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")
 | FORK (
     WHERE \`kibana.alert.entity.id\` IS NOT NULL
@@ -3228,20 +3426,25 @@ Array [
      user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
      host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
      entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+     user_entity_id_present = TO_STRING(user.entity.id) IS NOT NULL AND TO_STRING(user.entity.id) != \\"\\",
      user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
      user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
      user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
      user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
      host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
      entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+     user_entity_id_present_or_null = CASE(user_entity_id_present, TO_STRING(user.entity.id)),
      user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
      user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
      user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
      _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
      _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
-     _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_formula = COALESCE(CONCAT(user_entity_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_cond = (TO_STRING(cloud.provider) == \\"aws\\"),
+     _euid_branch_2_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
      user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
-    TRUE, _euid_branch_1_formula, NULL))
+    _euid_branch_1_cond, _euid_branch_1_formula,
+    TRUE, _euid_branch_2_formula, NULL))
     | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
      _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
      _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -3276,7 +3479,8 @@ Array [
 | SORT last_seen_alert DESC NULLS LAST, entity.id ASC
 | LIMIT 26
 | KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace, last_seen_alert, alert_count, alert_critical, alert_high, alert_medium, alert_low",
-  "FROM .alerts-security.alerts-default
+  "SET unmapped_fields=\\"nullify\\";
+FROM .alerts-security.alerts-default
 | WHERE \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")
 | FORK (
     WHERE \`kibana.alert.entity.id\` IS NOT NULL
@@ -3299,20 +3503,25 @@ Array [
      user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
      host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
      entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+     user_entity_id_present = TO_STRING(user.entity.id) IS NOT NULL AND TO_STRING(user.entity.id) != \\"\\",
      user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
      user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
      user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
      user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
      host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
      entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+     user_entity_id_present_or_null = CASE(user_entity_id_present, TO_STRING(user.entity.id)),
      user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
      user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
      user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
      _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
      _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
-     _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_formula = COALESCE(CONCAT(user_entity_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_cond = (TO_STRING(cloud.provider) == \\"aws\\"),
+     _euid_branch_2_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
      user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
-    TRUE, _euid_branch_1_formula, NULL))
+    _euid_branch_1_cond, _euid_branch_1_formula,
+    TRUE, _euid_branch_2_formula, NULL))
     | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
      _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
      _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),
@@ -3359,10 +3568,11 @@ Array [
 
 exports[`entities grid query builders sort page by last_seen_alert on a large view runs the queries of the first page with a search 1`] = `
 Array [
-  "FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
+  "SET unmapped_fields=\\"nullify\\";
+FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
 | WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND (entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")) AND (entity.relationships.resolution.resolved_to IS NULL) AND (KQL(\\"\\"\\"entity.name: host-001-payments-db\\"\\"\\")))
 | FORK (
-    WHERE (NOT _index == \\".entities.v2.latest.default-00001\\") AND \`kibana.alert.entity.id\` IS NOT NULL
+    WHERE \`kibana.alert.entity.id\` IS NOT NULL
     | EVAL _ea_entity_id = \`kibana.alert.entity.id\`
     | KEEP \`@timestamp\`, \`kibana.alert.severity\`, _ea_entity_id
   )
@@ -3382,20 +3592,25 @@ Array [
      user_name_present = TO_STRING(user.name) IS NOT NULL AND TO_STRING(user.name) != \\"\\",
      host_id_present = TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\",
      entity_namespace_present = TO_STRING(entity.namespace) IS NOT NULL AND TO_STRING(entity.namespace) != \\"\\",
+     user_entity_id_present = TO_STRING(user.entity.id) IS NOT NULL AND TO_STRING(user.entity.id) != \\"\\",
      user_email_present = TO_STRING(user.email) IS NOT NULL AND TO_STRING(user.email) != \\"\\",
      user_id_present = TO_STRING(user.id) IS NOT NULL AND TO_STRING(user.id) != \\"\\",
      user_domain_present = TO_STRING(user.domain) IS NOT NULL AND TO_STRING(user.domain) != \\"\\",
      user_name_present_or_null = CASE(user_name_present, TO_STRING(user.name)),
      host_id_present_or_null = CASE(host_id_present, TO_STRING(host.id)),
      entity_namespace_present_or_null = CASE(entity_namespace_present, TO_STRING(entity.namespace)),
+     user_entity_id_present_or_null = CASE(user_entity_id_present, TO_STRING(user.entity.id)),
      user_email_present_or_null = CASE(user_email_present, TO_STRING(user.email)),
      user_id_present_or_null = CASE(user_id_present, TO_STRING(user.id)),
      user_domain_present_or_null = CASE(user_domain_present, TO_STRING(user.domain)),
      _euid_branch_0_formula = CONCAT(user_name_present_or_null, \\"@\\", host_id_present_or_null, \\"@\\", entity_namespace_present_or_null),
      _euid_branch_0_cond = (TO_STRING(entity.namespace) == \\"local\\"),
-     _euid_branch_1_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_formula = COALESCE(CONCAT(user_entity_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
+     _euid_branch_1_cond = (TO_STRING(cloud.provider) == \\"aws\\"),
+     _euid_branch_2_formula = COALESCE(CONCAT(user_email_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_id_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", user_domain_present_or_null, \\"@\\", entity_namespace_present_or_null), CONCAT(user_name_present_or_null, \\"@\\", entity_namespace_present_or_null)),
      user_euid = CONCAT(\\"user:\\", CASE(_euid_branch_0_cond, _euid_branch_0_formula,
-    TRUE, _euid_branch_1_formula, NULL))
+    _euid_branch_1_cond, _euid_branch_1_formula,
+    TRUE, _euid_branch_2_formula, NULL))
     | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
      _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
      _src_entity_source2 = MV_FIRST(TO_STRING(data_stream.dataset)),

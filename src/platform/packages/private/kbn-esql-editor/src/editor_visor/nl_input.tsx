@@ -6,9 +6,13 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useRef } from 'react';
 import { EuiTextArea } from '@elastic/eui';
 import type { SerializedStyles } from '@emotion/react';
+
+export interface NLInputApi {
+  focus: () => void;
+}
 
 interface NLInputProps {
   value: string;
@@ -19,15 +23,13 @@ interface NLInputProps {
   inputStyles: SerializedStyles;
 }
 
-export function NLInput({
-  value,
-  placeholder,
-  disabled,
-  onChange,
-  onSubmit,
-  inputStyles,
-}: NLInputProps) {
+export const NLInput = forwardRef<NLInputApi, NLInputProps>(function NLInput(
+  { value, placeholder, disabled, onChange, onSubmit, inputStyles },
+  ref
+) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useImperativeHandle(ref, () => ({ focus: () => textareaRef.current?.focus() }), []);
 
   const updateHeight = useCallback(() => {
     const textarea = textareaRef.current;
@@ -78,4 +80,4 @@ export function NLInput({
       />
     </div>
   );
-}
+});
