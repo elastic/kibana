@@ -177,17 +177,17 @@ describe('ProposedActionsSlot', () => {
   });
 
   it('keeps the order the API returned, so paging and display agree', () => {
-    const retry = { ...mockProposal, id: 'retry' };
-    const failedLast = { ...decidedProposal, id: 'failed-last', status: 'failed' as const };
-    const failedFirst = { ...decidedProposal, id: 'failed-first', status: 'failed' as const };
-    mockConversationProposalsPage([retry, failedLast, failedFirst]);
+    const pending = { ...mockProposal, id: 'pending' };
+    const decidedLast = { ...decidedProposal, id: 'decided-last' };
+    const decidedFirst = { ...decidedProposal, id: 'decided-first' };
+    mockConversationProposalsPage([pending, decidedLast, decidedFirst]);
     renderSlot();
 
     const rows = screen.getAllByTestId(/^investigationFlyoutProposedAction-/);
     expect(rows.map((row) => row.getAttribute('data-test-subj'))).toEqual([
-      'investigationFlyoutProposedAction-retry',
-      'investigationFlyoutProposedAction-failed-last',
-      'investigationFlyoutProposedAction-failed-first',
+      'investigationFlyoutProposedAction-pending',
+      'investigationFlyoutProposedAction-decided-last',
+      'investigationFlyoutProposedAction-decided-first',
     ]);
   });
 

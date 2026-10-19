@@ -115,6 +115,46 @@ describe('ApprovalContent', () => {
     expect(screen.getByTestId('approvalContent-confirm')).toBeDisabled();
   });
 
+  it("shows a replaced attempt's own error in a danger callout when its action failed", () => {
+    renderContent({
+      proposal: {
+        ...baseProposal,
+        status: 'failed',
+        decision: 'approved',
+        decidedBy: { username: 'elastic', fullName: null, email: null },
+        decidedAt: '2026-10-09T14:05:00.000Z',
+        supersededBy: 'successor',
+        executionError: 'HTTP 500: host unreachable',
+      },
+    });
+    expect(screen.getByText('This attempt failed to execute the action')).toBeInTheDocument();
+    expect(screen.getByText('HTTP 500: host unreachable')).toBeInTheDocument();
+    expect(screen.getByTestId('approvalContent-failed-attempt')).toHaveClass('euiCallOut--danger');
+    expect(
+      isBefore(
+        screen.getByTestId('approvalContent-failed-attempt'),
+        screen.getByTestId('approvalContent-confirm')
+      )
+    ).toBe(true);
+  });
+
+  it('leaves the error to the outcome banner when a failed proposal was not replaced', () => {
+    renderContent({
+      proposal: {
+        ...baseProposal,
+        status: 'failed',
+        decision: 'approved',
+        decidedBy: { username: 'elastic', fullName: null, email: null },
+        decidedAt: '2026-10-09T14:05:00.000Z',
+        executionError: 'HTTP 500: host unreachable',
+      },
+    });
+    expect(screen.queryByTestId('approvalContent-failed-attempt')).not.toBeInTheDocument();
+    expect(screen.getByTestId('approvalContent-outcome')).toHaveTextContent(
+      'HTTP 500: host unreachable'
+    );
+  });
+
   it('shows no status badge on a replaced revision that was never decided', () => {
     renderContent({ proposal: { ...baseProposal, status: 'superseded', supersededBy: 'next' } });
     expect(screen.queryByText('Needs review')).not.toBeInTheDocument();
@@ -484,8 +524,8 @@ describe('ApprovalContent', () => {
         },
       });
 
-      expect(screen.getByText('Approved')).toBeInTheDocument();
-      expect(screen.getByText('Approved — no action to run')).toBeInTheDocument();
+      // The badge's short label and the banner's title read the same.
+      expect(screen.getAllByText('Approved')).toHaveLength(2);
       expect(screen.queryByText('Applied')).not.toBeInTheDocument();
     });
 
