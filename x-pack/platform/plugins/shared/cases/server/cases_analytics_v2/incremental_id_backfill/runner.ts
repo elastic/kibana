@@ -38,6 +38,12 @@ export interface RunIncrementalIdBackfillDeps {
   writer: CasesAnalyticsV2WriterContract;
   logger: Logger;
   signal?: AbortSignal;
+  /**
+   * Epoch ms after which no new page is started. The pass returns
+   * `completed: false` instead of throwing, so the caller can persist its
+   * other progress and resume on a later run.
+   */
+  deadline?: number;
 }
 
 /**
@@ -52,7 +58,8 @@ export async function runIncrementalIdBackfill({
   writer,
   logger,
   signal,
-}: RunIncrementalIdBackfillDeps): Promise<{ repaired: number }> {
+  deadline,
+}: RunIncrementalIdBackfillDeps): Promise<{ repaired: number; completed: boolean }> {
   let repaired = 0;
   let searchAfter: SortResults | undefined;
 
@@ -61,6 +68,13 @@ export async function runIncrementalIdBackfill({
       throw new Error(
         `cases-analyticsV2: incremental id backfill aborted after repaired=${repaired}`
       );
+    }
+
+    if (deadline != null && Date.now() >= deadline) {
+      logger.info(
+        `cases-analyticsV2: incremental id backfill paused at its time budget after repaired=${repaired}; resuming on the next run`
+      );
+      return { repaired, completed: false };
     }
 
     const { hits } = await esClient.search<{ space_id?: string }>({
@@ -106,5 +120,5 @@ export async function runIncrementalIdBackfill({
 
   logger.info(`cases-analyticsV2: incremental id backfill repaired=${repaired}`);
 
-  return { repaired };
+  return { repaired, completed: true };
 }

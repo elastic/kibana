@@ -21,6 +21,7 @@ import { runAttachmentsReconciliation } from './attachments_runner';
 import { runIncrementalIdBackfill } from '../incremental_id_backfill/runner';
 import {
   clampCursorToNotFuture,
+  INCREMENTAL_ID_BACKFILL_TICK_BUDGET_MS,
   registerReconciliationTask,
   resetReconciliationTask,
   RECONCILIATION_TASK_ID,
@@ -261,7 +262,7 @@ describe('registerReconciliationTask run()', () => {
       newLastRunAt: 'ATTACHMENTS_NEW',
       processed: 1,
     });
-    mockRunIncrementalIdBackfill.mockResolvedValue({ repaired: 1 });
+    mockRunIncrementalIdBackfill.mockResolvedValue({ repaired: 1, completed: true });
   });
 
   afterEach(() => {
@@ -411,6 +412,34 @@ describe('registerReconciliationTask run()', () => {
         mockRunIncrementalIdBackfill.mock.invocationCallOrder[0]
       );
       expect(state).toEqual({ ...cursors, incremental_id_backfill_completed: true });
+      expect(taskRunError).toBeUndefined();
+    });
+
+    it('bounds the backfill to a budget measured from the start of the tick', async () => {
+      const tickStartedAt = 1_700_000_000_000;
+      const nowSpy = jest.spyOn(Date, 'now').mockReturnValue(tickStartedAt);
+      const { run } = setupRun({ incrementalIdBackfillEnabled: true });
+
+      try {
+        await run();
+      } finally {
+        nowSpy.mockRestore();
+      }
+
+      expect(mockRunIncrementalIdBackfill).toHaveBeenCalledWith(
+        expect.objectContaining({
+          deadline: tickStartedAt + INCREMENTAL_ID_BACKFILL_TICK_BUDGET_MS,
+        })
+      );
+    });
+
+    it('leaves the flag unset without an error when the backfill pauses at its budget', async () => {
+      mockRunIncrementalIdBackfill.mockResolvedValue({ repaired: 5, completed: false });
+      const { run } = setupRun({ incrementalIdBackfillEnabled: true });
+
+      const { state, taskRunError } = await run();
+
+      expect(state).toEqual(cursors);
       expect(taskRunError).toBeUndefined();
     });
 

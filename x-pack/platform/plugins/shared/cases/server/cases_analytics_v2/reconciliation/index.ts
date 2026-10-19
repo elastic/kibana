@@ -38,6 +38,14 @@ export const RECONCILIATION_TASK_TYPE = 'cases.analyticsV2.reconciliation';
  */
 export const RECONCILIATION_TASK_ID = 'cases-analyticsV2-reconciliation';
 
+/**
+ * How long into a tick the incremental id backfill may start new pages.
+ * This task runs under Task Manager's default 5m timeout, and a timed-out
+ * run's returned state is discarded, so the backfill stops well short of it
+ * to keep the surface cursors this tick advanced. Exported for tests.
+ */
+export const INCREMENTAL_ID_BACKFILL_TICK_BUDGET_MS = 3 * 60 * 1000;
+
 interface RegisterReconciliationTaskArgs {
   taskManager: TaskManagerSetupContract;
   logger: Logger;
@@ -118,6 +126,7 @@ export function registerReconciliationTask({
       maxAttempts: 1,
       createTaskRunner: ({ taskInstance, signal }) => ({
         run: async () => {
+          const tickStartedAt = Date.now();
           const previousState = (taskInstance.state ?? {}) as ReconciliationTaskState;
           const casesLastRunAt = clampCursorToNotFuture(previousState.cases_last_run_at, logger);
           const activityLastRunAt = clampCursorToNotFuture(
@@ -240,14 +249,17 @@ export function registerReconciliationTask({
             !signal.aborted
           ) {
             try {
-              await runIncrementalIdBackfill({
+              const { completed } = await runIncrementalIdBackfill({
                 esClient: deps.esClient,
                 savedObjectsClient: deps.savedObjectsClient,
                 writer: deps.writer,
                 logger,
                 signal,
+                deadline: tickStartedAt + INCREMENTAL_ID_BACKFILL_TICK_BUDGET_MS,
               });
-              nextState.incremental_id_backfill_completed = true;
+              if (completed) {
+                nextState.incremental_id_backfill_completed = true;
+              }
             } catch (err) {
               incrementalIdBackfillError = err;
               logger.error(

@@ -611,9 +611,14 @@ incremental-id task mirrors them when it numbers them. A completed pass sets
 `incremental_id_backfill_completed` in the reconciliation task state, and
 later ticks skip the repair.
 
-- **Shares the tick's budget.** A pass that times out or fails leaves the
-  flag unset and the next tick tries again. Docs already repaired drop out
-  of the search, so each retry only re-reads what's left.
+- **Time-boxed within the tick.** The reconciliation task runs under Task
+  Manager's default 5m timeout, and a timed-out run's state is discarded,
+  cursors included. So the repair starts no new page once the tick is 3
+  minutes old (`INCREMENTAL_ID_BACKFILL_TICK_BUDGET_MS`); it pauses, the
+  tick's state persists, and the next tick picks up the rest. Docs already
+  repaired drop out of the search, so each tick only re-reads what's left.
+- **A failed pass** leaves the flag unset, is reported via `taskRunError`,
+  and is retried on the next tick.
 - **Skipped** when `xpack.cases.incrementalId.enabled` is false, or when
   `.cases` failed to bootstrap and the case writer is a no-op. Either way the
   flag stays unset, so the repair runs once the cause is fixed.
