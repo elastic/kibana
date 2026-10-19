@@ -36,6 +36,9 @@ const labels = {
   userMessage: i18n.translate('xpack.agentBuilder.userMessage.userInput', {
     defaultMessage: 'User input',
   }),
+  serviceAccount: i18n.translate('xpack.agentBuilder.userMessage.serviceAccountLabel', {
+    defaultMessage: 'Service account',
+  }),
 };
 
 interface UserMessageProps {
@@ -69,6 +72,7 @@ export const UserMessage = ({
     profile: authorProfile,
     name: authorName,
     isCurrentUser,
+    isServiceAccount,
   } = useUserMessageAuthor({ author, origin, isPendingCurrentRound });
   const thumbnails = useUserMessageThumbnails({
     attachmentRefs,
@@ -115,7 +119,12 @@ export const UserMessage = ({
       >
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem grow={false}>
-            <AuthorHeader name={authorName} origin={origin} startedAt={startedAt} />
+            <AuthorHeader
+              name={authorName}
+              label={isServiceAccount ? labels.serviceAccount : undefined}
+              origin={origin}
+              startedAt={startedAt}
+            />
           </EuiFlexItem>
           {hasBubble && (
             <EuiFlexItem grow={false}>

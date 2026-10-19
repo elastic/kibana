@@ -15,6 +15,10 @@ import { ResponseActions } from '../response/response_actions';
 import { UserMessageImages } from './user_message_images';
 import { useUserMessageThumbnails } from './use_user_message_thumbnails';
 import type { UserMessageThumbnail } from './use_user_message_thumbnails';
+import {
+  clearServiceAccountDisplayNameResolvers,
+  registerServiceAccountDisplayName,
+} from '../../../../../service_account_display_name';
 
 jest.mock('../../../../hooks/use_current_user', () => ({
   useCurrentUser: jest.fn(),
@@ -72,6 +76,7 @@ const currentUser = {
 
 describe('UserMessage', () => {
   beforeEach(() => {
+    clearServiceAccountDisplayNameResolvers();
     MockResponseActions.mockClear();
     MockUserMessageImages.mockClear();
     mockUseUserMessageThumbnails.mockReturnValue([]);
@@ -97,6 +102,30 @@ describe('UserMessage', () => {
     const [props] = MockResponseActions.mock.calls[0];
     expect(props.content).toBe('hello agent');
     expect(props.copyTarget).toBe('prompt');
+  });
+
+  it('shows the worker name and a service account label instead of the principal', () => {
+    mockUseUserProfiles.mockReturnValue({ data: [] } as unknown as ReturnType<
+      typeof useUserProfiles
+    >);
+    registerServiceAccountDisplayName(() => 'Alert Triage');
+
+    render(
+      <UserMessage
+        input="Closure of 1 alert"
+        author={{
+          id: 'service_account:kibana/alertzero_alert_triage',
+          username: 'kibana/alertzero_alert_triage',
+          type: 'service_account',
+        }}
+        isPendingCurrentRound={false}
+        startedAt="2026-01-01T23:22:00.000Z"
+      />
+    );
+
+    expect(screen.getByText('Alert Triage')).toBeInTheDocument();
+    expect(screen.getByText('Service account')).toBeInTheDocument();
+    expect(screen.queryByText('kibana/alertzero_alert_triage')).not.toBeInTheDocument();
   });
 
   it('renders the avatar beside the authored input content', () => {

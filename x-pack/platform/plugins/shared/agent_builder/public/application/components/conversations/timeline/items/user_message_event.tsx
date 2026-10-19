@@ -19,10 +19,11 @@ interface UserMessageEventProps {
   conversationAttachments?: VersionedAttachment[];
 }
 
-const toRoundAuthor = (actor: UserMessageEventData['actor']): ConversationRoundAuthor => ({
+export const toRoundAuthor = (actor: UserMessageEventData['actor']): ConversationRoundAuthor => ({
   id: actor.id,
-  username: actor.username,
-  full_name: actor.full_name,
+  ...(actor.username ? { username: actor.username } : {}),
+  ...(actor.full_name ? { full_name: actor.full_name } : {}),
+  ...(actor.principal_type ? { type: actor.principal_type } : {}),
 });
 
 export const UserMessageEvent: React.FC<UserMessageEventProps> = ({

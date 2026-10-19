@@ -34,7 +34,12 @@ import {
   ALERTZERO_ENABLED_SETTING_ID,
 } from '@kbn/alertzero-common';
 import React from 'react';
+import { registerProposalActorDisplayName } from '@kbn/proposals-ui';
 import { getSubscriptionAvailability, type SubscriptionAvailability } from '../common/availability';
+import {
+  serviceAccountActorName,
+  workerDisplayNameForServiceAccount,
+} from '../common/service_account_display_name';
 import { getAlertZeroDeepLinks } from './deep_links';
 import { registerAlertZeroAttachmentTypesUI } from './agent_builder/attachment_types';
 import type {
@@ -142,6 +147,11 @@ export class AlertZeroPublicPlugin
         )
       )
       .subscribe(this.availability$);
+
+    startDeps.agentBuilder?.registerServiceAccountDisplayName(({ username }) =>
+      workerDisplayNameForServiceAccount(username)
+    );
+    registerProposalActorDisplayName(({ username }) => serviceAccountActorName(username));
 
     const canRead = core.application.capabilities[ALERTZERO_FEATURE_ID]?.show === true;
     const settingEnabled$ = core.uiSettings.get$<boolean>(ALERTZERO_ENABLED_SETTING_ID, false);

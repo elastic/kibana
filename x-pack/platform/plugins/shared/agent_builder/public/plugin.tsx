@@ -57,6 +57,7 @@ import { createPublicAgentsContract } from './services/agents';
 import { createPublicEventsContract } from './services/events';
 import { createPublicConversationsContract } from './services/conversations';
 import { registerWorkflowSteps } from './step_types';
+import { registerServiceAccountDisplayName } from './service_account_display_name';
 import type {
   ConfigSchema,
   AgentBuilderPluginSetup,
@@ -407,6 +408,7 @@ export class AgentBuilderPlugin
       events: createPublicEventsContract({ eventsService }),
       conversationEvents: createPublicConversationEventsContract({ conversationEventsService }),
       conversations: createPublicConversationsContract({ conversationsService }),
+      registerServiceAccountDisplayName,
       getAgentBuilderAccess: createPublicEmbeddableChatAccess({
         accessChecker,
         application: core.application,

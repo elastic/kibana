@@ -8,6 +8,10 @@
 import { renderHook } from '@testing-library/react';
 import { ConversationOriginType } from '@kbn/agent-builder-common';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import {
+  clearServiceAccountDisplayNameResolvers,
+  registerServiceAccountDisplayName,
+} from '../../service_account_display_name';
 import { useCurrentUser } from './use_current_user';
 import { useUserProfiles } from './use_user_profiles';
 import { useUserMessageAuthor } from './use_user_message_author';
@@ -59,6 +63,7 @@ const mockUserProfiles = (profiles: UserProfileWithAvatar[]) => {
 
 describe('useUserMessageAuthor', () => {
   beforeEach(() => {
+    clearServiceAccountDisplayNameResolvers();
     jest.clearAllMocks();
     mockUseCurrentUser.mockReturnValue({ currentUser, isLoading: false } as ReturnType<
       typeof useCurrentUser
@@ -129,6 +134,43 @@ describe('useUserMessageAuthor', () => {
     expect(result.current.profile).toBeUndefined();
     expect(result.current.name).toBeUndefined();
     expect(result.current.isCurrentUser).toBe(false);
+  });
+
+  it('uses a registered worker name for a service account and does not look up a profile', () => {
+    registerServiceAccountDisplayName(() => 'Alert Triage');
+
+    const { result } = renderHook(() =>
+      useUserMessageAuthor({
+        author: {
+          id: 'service_account:kibana/alertzero_alert_triage',
+          username: 'kibana/alertzero_alert_triage',
+          type: 'service_account',
+        },
+        isPendingCurrentRound: false,
+      })
+    );
+
+    expect(mockUseUserProfiles).toHaveBeenCalledWith({ uids: [] });
+    expect(result.current.profile).toBeUndefined();
+    expect(result.current.name).toBe('Alert Triage');
+    expect(result.current.isServiceAccount).toBe(true);
+    expect(result.current.isCurrentUser).toBe(false);
+  });
+
+  it('keeps the username when no display name is registered for the service account', () => {
+    const { result } = renderHook(() =>
+      useUserMessageAuthor({
+        author: {
+          id: 'service_account:kibana/nightshift',
+          username: 'kibana/nightshift',
+          type: 'service_account',
+        },
+        isPendingCurrentRound: false,
+      })
+    );
+
+    expect(result.current.name).toBe('kibana/nightshift');
+    expect(result.current.isServiceAccount).toBe(true);
   });
 
   it('flags a persisted author matching the current user before their profile resolves', () => {

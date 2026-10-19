@@ -24,6 +24,11 @@ export {
   getProposalTone,
   isProposalExpired,
 } from './src/proposal_helpers';
+export { registerProposalActorDisplayName } from './src/proposal_actor_display_name';
+export type {
+  ProposalActorDisplayNameResolver,
+  ProposalActorRef,
+} from './src/proposal_actor_display_name';
 export type {
   ApprovalProposal,
   ApprovalAction,
