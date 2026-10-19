@@ -195,6 +195,9 @@ describe('transformRequestToMetricsAPIRequest', () => {
       ...snapshotRequest,
       nodeType: 'host',
       schema: 'semconv',
+      // `cpu` is an ecs-only legacy host metric; use a semconv-available metric so the
+      // aggregation resolves and the filter/groupBy assertions below are exercised.
+      metrics: [{ type: 'cpuV2' }],
     };
 
     const result = await transformRequestToMetricsAPIRequest({
@@ -319,6 +322,9 @@ describe('transformRequestToMetricsAPIRequest', () => {
     const s3Request: SnapshotRequest = {
       ...snapshotRequest,
       nodeType: 'awsS3',
+      // `cpu` is not an awsS3 aggregation; use an awsS3-available metric so the
+      // aggregation resolves and the filter/groupBy assertions below are exercised.
+      metrics: [{ type: 's3BucketSize' }],
     };
 
     const result = await transformRequestToMetricsAPIRequest({
@@ -363,6 +369,9 @@ describe('transformRequestToMetricsAPIRequest', () => {
     const sqsRequest: SnapshotRequest = {
       ...snapshotRequest,
       nodeType: 'awsSQS',
+      // `cpu` is not an awsSQS aggregation; use an awsSQS-available metric so the
+      // aggregation resolves and the filter/groupBy assertions below are exercised.
+      metrics: [{ type: 'sqsMessagesVisible' }],
     };
 
     const result = await transformRequestToMetricsAPIRequest({
