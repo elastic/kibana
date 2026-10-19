@@ -8,6 +8,24 @@
 import { RIEMANN_ZETA_S_VALUE, getRiemannZetaValue } from '../../constants';
 import { parseEsqlBaseScoreRow, parseEsqlResolutionScoreRow } from './parse_esql_row';
 
+describe('parseEsqlBaseScoreRow', () => {
+  const parseRow = parseEsqlBaseScoreRow('.alerts-security.alerts-default', 500);
+  const input = '{ "risk_score": "60", "time": "2026-01-01T00:00:00.000Z", "id": "alert-1" }';
+
+  it('reads the entity id after the alert sources column', () => {
+    const parsed = parseRow([2, 100, input, ['okta', 'azure'], 'user:a@okta']);
+
+    expect(parsed.entity_id).toBe('user:a@okta');
+    expect(parsed.alert_count).toBe(2);
+    expect(parsed.alert_sources).toEqual(['okta', 'azure']);
+  });
+
+  it('wraps a single source and drops null sources', () => {
+    expect(parseRow([1, 10, input, 'okta', 'user:a@okta']).alert_sources).toEqual(['okta']);
+    expect(parseRow([1, 10, input, null, 'user:a@okta']).alert_sources).toEqual([]);
+  });
+});
+
 describe('parseEsqlResolutionScoreRow', () => {
   it('parses resolution row and filters self related entities', () => {
     const parseRow = parseEsqlResolutionScoreRow('.alerts-security.alerts-default', 500);
@@ -54,7 +72,7 @@ describe('normalization by sample size', () => {
       const parsed = parseEsqlBaseScoreRow(
         index,
         sampleSize
-      )([sampleSize, saturatedRaw(sampleSize), [input], 'host:h1']);
+      )([sampleSize, saturatedRaw(sampleSize), [input], undefined, 'host:h1']);
 
       expect(parsed.normalized_score).toBeCloseTo(100, 8);
     }
@@ -63,7 +81,7 @@ describe('normalization by sample size', () => {
   it('keeps an overridden sample size within 100 instead of using the default normalizer', () => {
     const raw = saturatedRaw(1_000);
 
-    const followed = parseEsqlBaseScoreRow(index, 1_000)([1_000, raw, [input], 'host:h1']);
+    const followed = parseEsqlBaseScoreRow(index, 1_000)([1_000, raw, [input], undefined, 'host:h1']);
     const defaultNormalizer = raw / getRiemannZetaValue(500);
 
     expect(followed.normalized_score).toBeLessThanOrEqual(100.000000001);
@@ -71,7 +89,7 @@ describe('normalization by sample size', () => {
   });
 
   it('scales risk input contributions by the same normalizer', () => {
-    const parsed = parseEsqlBaseScoreRow(index, 1_000)([1, 100, [input], 'host:h1']);
+    const parsed = parseEsqlBaseScoreRow(index, 1_000)([1, 100, [input], undefined, 'host:h1']);
 
     expect(parsed.risk_inputs[0].contribution).toBeCloseTo(100 / getRiemannZetaValue(1_000), 12);
   });
