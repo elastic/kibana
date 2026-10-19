@@ -303,6 +303,48 @@ describe('Executor', () => {
     });
   });
 
+  it('forwards connectorVersion from executor options to getService', async () => {
+    const getService = jest.fn(
+      (serviceParams: ServiceParams<TestConfig, TestSecrets>) => new TestExecutor(serviceParams)
+    );
+    const connector = {
+      id: '.test',
+      name: 'Test',
+      minimumLicenseRequired: 'basic' as const,
+      supportedFeatureIds: ['alerting'],
+      schema: {
+        config: TestConfigSchema,
+        secrets: TestSecretsSchema,
+      },
+      getService,
+    };
+
+    const executor = buildExecutor({
+      configurationUtilities: mockedActionsConfig,
+      logger,
+      connector,
+    });
+
+    await executor({
+      actionId,
+      params: { subAction: 'echo', subActionParams: { id: 'test-id' } },
+      config,
+      secrets,
+      services,
+      configurationUtilities: mockedActionsConfig,
+      logger,
+      connectorUsageCollector,
+      connectorVersion: 'WzEsMV0=',
+    });
+
+    expect(getService).toHaveBeenCalledWith(
+      expect.objectContaining({
+        connector: { id: actionId, type: '.test' },
+        connectorVersion: 'WzEsMV0=',
+      })
+    );
+  });
+
   it('Passes connectorUsageCollector to the subAction method as a second param', async () => {
     let echoSpy;
 

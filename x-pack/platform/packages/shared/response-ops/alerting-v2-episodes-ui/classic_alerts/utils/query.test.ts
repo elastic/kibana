@@ -55,15 +55,10 @@ describe('buildClassicAlertsQuery', () => {
 
   it('maps inactive episode status to recovered and untracked', () => {
     const query = buildClassicAlertsQuery({ status: [ALERT_EPISODE_STATUS.INACTIVE] });
-
     const filters = getFilters(query);
-    const statusFilter = filters.find((f) => f != null && typeof f === 'object' && 'terms' in f) as
-      | { terms: { 'kibana.alert.status': string[] } }
-      | undefined;
-
-    expect(statusFilter?.terms['kibana.alert.status']).toEqual(
-      expect.arrayContaining(['recovered', 'untracked'])
-    );
+    expect(filters).toContainEqual({
+      terms: { 'kibana.alert.status': expect.arrayContaining(['recovered', 'untracked']) },
+    });
   });
 
   it('adds a ruleId filter', () => {
@@ -78,15 +73,58 @@ describe('buildClassicAlertsQuery', () => {
     const query = buildClassicAlertsQuery({ tags: ['error', 'prod'] });
 
     expect(getFilters(query)).toEqual(
-      expect.arrayContaining([{ terms: { 'kibana.alert.rule.tags': ['error', 'prod'] } }])
+      expect.arrayContaining([{ terms: { 'kibana.alert.workflow_tags': ['error', 'prod'] } }])
     );
   });
 
   it('adds a severity filter for known values', () => {
     const query = buildClassicAlertsQuery({ severity: ['critical', 'high'] });
+    expect(getFilters(query)).toContainEqual({
+      bool: {
+        should: [{ terms: { 'kibana.alert.severity': ['critical', 'high'] } }],
+        minimum_should_match: 1,
+      },
+    });
+  });
+
+  it('filters warning to only warning results', () => {
+    const query = buildClassicAlertsQuery({ severity: ['warning'] });
     const filters = getFilters(query);
-    const severityFilter = filters.find((f) => f != null && typeof f === 'object' && 'bool' in f);
-    expect(severityFilter).toBeDefined();
+    expect(filters).toContainEqual({
+      bool: {
+        should: [{ terms: { 'kibana.alert.severity': ['warning'] } }],
+        minimum_should_match: 1,
+      },
+    });
+    expect(filters).not.toContainEqual(
+      expect.objectContaining({
+        bool: expect.objectContaining({
+          should: expect.arrayContaining([
+            { terms: { 'kibana.alert.severity': expect.arrayContaining(['medium']) } },
+          ]),
+        }),
+      })
+    );
+  });
+
+  it('filters medium to only medium results', () => {
+    const query = buildClassicAlertsQuery({ severity: ['medium'] });
+    const filters = getFilters(query);
+    expect(filters).toContainEqual({
+      bool: {
+        should: [{ terms: { 'kibana.alert.severity': ['medium'] } }],
+        minimum_should_match: 1,
+      },
+    });
+    expect(filters).not.toContainEqual(
+      expect.objectContaining({
+        bool: expect.objectContaining({
+          should: expect.arrayContaining([
+            { terms: { 'kibana.alert.severity': expect.arrayContaining(['warning']) } },
+          ]),
+        }),
+      })
+    );
   });
 
   it('returns MATCH_NONE when assigneeUid is set (no classic equivalent)', () => {
@@ -134,5 +172,16 @@ describe('buildClassicAlertsSort', () => {
   it('falls back to @timestamp for unknown fields', () => {
     const sort = buildClassicAlertsSort({ sortField: 'unknown_field', sortDirection: 'asc' });
     expect(sort).toEqual([{ '@timestamp': { order: 'asc', unmapped_type: 'keyword' } }]);
+  });
+
+  it('generates a Painless script sort that includes severity extensions', () => {
+    const sort = buildClassicAlertsSort({ sortField: 'severity', sortDirection: 'desc' }, [
+      { value: 'warning', label: 'Warning', color: 'warning', sortRank: 1 },
+    ]);
+    expect(sort).toHaveLength(2);
+    const scriptSort = sort[0] as { _script: { script: { source: string } } };
+    expect(scriptSort._script.script.source).toContain("if (v == 'warning') { return 1; }");
+    expect(scriptSort._script.script.source).toContain("if (v == 'critical') { return 4; }");
+    expect(sort[1]).toEqual({ '@timestamp': { order: 'desc', unmapped_type: 'keyword' } });
   });
 });

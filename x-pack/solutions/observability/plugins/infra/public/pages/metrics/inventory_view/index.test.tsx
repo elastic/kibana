@@ -38,8 +38,9 @@ jest.mock('../../../hooks/use_fetcher', () => ({
   },
   isPending: (status: string) =>
     status === 'loading' || status === 'not_initiated' || status === 'pending',
+  isSuccess: (status: string) => status === 'success',
   useFetcher: () => ({
-    data: { hasData: mockFetcherState.hasData },
+    data: mockFetcherState.status === 'failure' ? undefined : { hasData: mockFetcherState.hasData },
     status: mockFetcherState.status,
   }),
 }));
@@ -161,6 +162,20 @@ describe('SnapshotPage', () => {
   it('does not show onboarding while metrics data is loading', async () => {
     mockFetcherState.hasData = false;
     mockFetcherState.status = 'loading';
+
+    renderSnapshotPage();
+
+    expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+      inventoryTitle
+    );
+    expect(screen.queryByTestId('kbnNoDataPage')).not.toBeInTheDocument();
+    expect(screen.getByTestId('inventorySnapshotContainer')).toBeInTheDocument();
+    expect(lastInfraPageTemplateProps.hasDataOverride).toBe(true);
+  });
+
+  it('keeps the waffle mounted when the has-data check fails', async () => {
+    mockFetcherState.hasData = false;
+    mockFetcherState.status = 'failure';
 
     renderSnapshotPage();
 

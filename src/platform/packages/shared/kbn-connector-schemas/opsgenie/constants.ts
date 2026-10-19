@@ -24,3 +24,12 @@ export const MESSAGE_NON_EMPTY = i18n.translate(
     defaultMessage: 'must be populated with a value other than just whitespace',
   }
 );
+
+/** Opsgenie's create-alert `message` API limit. */
+export const MESSAGE_MAX_LENGTH = 130;
+
+/**
+ * HTTP-facing schema bound for `message`. Matches the vendor `description` max so Mustache-expanded
+ * messages can pass validation and be truncated to `MESSAGE_MAX_LENGTH`. Values above this still fail.
+ */
+export const MESSAGE_SCHEMA_MAX_LENGTH = 15000;

@@ -31,7 +31,7 @@ const meta: Meta<DateRangePickerProps> = {
   argTypes: {
     locale: {
       control: 'select',
-      options: ['en', 'de-DE', 'fr-FR', 'ja-JP', 'zh-CN'],
+      options: ['en', 'de-DE', 'fr-FR', 'ja-JP', 'zh-CN', 'pt-BR'],
       description: 'English input always parses, whichever locale is active.',
     },
   },
@@ -89,6 +89,11 @@ const LOCALIZED_PRESETS: Record<string, TimeRangeBoundsOption[]> = {
     { start: 'now-15m', end: 'now', label: '最近 15 分钟' },
     { start: 'now-7d', end: 'now', label: '最近 7 天' },
     { start: 'now/d', end: 'now/d', label: '今天' },
+  ],
+  'pt-BR': [
+    { start: 'now-15m', end: 'now', label: 'Últimos 15 minutos' },
+    { start: 'now-7d', end: 'now', label: 'Últimos 7 dias' },
+    { start: 'now/d', end: 'now/d', label: 'Hoje' },
   ],
 };
 

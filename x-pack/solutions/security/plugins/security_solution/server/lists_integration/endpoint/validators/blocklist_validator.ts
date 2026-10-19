@@ -185,12 +185,21 @@ const entriesSchemaOptions = {
 const EntriesSchema = schema.conditional(
   schema.contextRef('os'),
   OperatingSystem.WINDOWS,
-  schema.arrayOf(WindowsEntrySchema, entriesSchemaOptions),
+  schema.arrayOf(WindowsEntrySchema, {
+    ...entriesSchemaOptions,
+    maxSize: entriesSchemaOptions.maxSize,
+  }),
   schema.conditional(
     schema.contextRef('os'),
     OperatingSystem.LINUX,
-    schema.arrayOf(LinuxEntrySchema, entriesSchemaOptions),
-    schema.arrayOf(MacEntrySchema, entriesSchemaOptions)
+    schema.arrayOf(LinuxEntrySchema, {
+      ...entriesSchemaOptions,
+      maxSize: entriesSchemaOptions.maxSize,
+    }),
+    schema.arrayOf(MacEntrySchema, {
+      ...entriesSchemaOptions,
+      maxSize: entriesSchemaOptions.maxSize,
+    })
   )
 );
 

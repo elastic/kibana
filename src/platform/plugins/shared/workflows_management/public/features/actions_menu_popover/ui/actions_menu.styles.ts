@@ -8,30 +8,27 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { euiFontSize } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { aiIconTileCss } from './ai_icon_tile';
+import { actionIconTileStyles } from './action_icon_tile.styles';
+import { kbdStyles } from '../../../widgets/workflow_yaml_editor/ui/kbd_styles';
 
+/**
+ * Layout that EUI components cannot express on their own:
+ * modal split panes, selectable overflow, and command shortcut keys.
+ */
 export const componentStyles = {
-  container: css({
+  fill: css({
     display: 'flex',
     flexDirection: 'column',
     width: '100%',
+    height: '100%',
   }),
   header: ({ euiTheme }: UseEuiTheme) =>
     css({
       flexShrink: 0,
-      padding: `16px ${euiTheme.size.base} 12px`,
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '10px',
-      borderBottom: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
+      padding: `${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.m}`,
+      borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
     }),
-  title: css({
-    margin: 0,
-    fontSize: '12.25px',
-    lineHeight: '20px',
-  }),
   body: css({
     height: 'min(520px, calc(100vh - 160px))',
     overflow: 'hidden',
@@ -42,193 +39,82 @@ export const componentStyles = {
       display: 'flex',
       flexDirection: 'column',
       overflow: 'hidden',
-      borderRight: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
+      borderRight: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
     }),
-  listViewport: css({
+  listFill: css({
     flex: 1,
     minHeight: 0,
-    position: 'relative',
     overflow: 'hidden',
-  }),
-  listPane: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      height: '100%',
-      width: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-      backgroundColor: euiTheme.colors.backgroundBasePlain,
-      '& > *': {
-        flex: 1,
-        minHeight: 0,
-      },
-    }),
-  breadcrumbRow: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      flexShrink: 0,
-      marginTop: -1,
-      padding: `8px 16px`,
-      borderBottom: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
-      backgroundColor: euiTheme.colors.backgroundBasePlain,
-      position: 'relative',
-      zIndex: 1,
-      fontSize: '12px',
-    }),
-  noResults: css({
-    flex: 1,
     display: 'flex',
     flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '16px',
-    padding: '24px',
-  }),
-  rightColumn: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      flex: 1,
-      overflow: 'hidden',
-      userSelect: 'text',
-      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-    }),
-  selectable: ({ euiTheme }: UseEuiTheme) =>
-    css({
+    '& > *': {
       flex: 1,
       minHeight: 0,
-      display: 'flex',
-      flexDirection: 'column',
-      backgroundColor: euiTheme.colors.backgroundBasePlain,
-    }),
-  actionOptionWrapper: css({
-    width: '100%',
-    padding: `12px 16px`,
+    },
+    // Square rows; own padding lives on optionPad (EUI list items add their own).
+    '.euiSelectableListItem': {
+      borderRadius: 0,
+      padding: 0,
+    },
+    '.euiSelectableListItem__text': {
+      padding: 0,
+    },
   }),
-  compactOptionWrapper: css({
-    width: '100%',
-    padding: `12px 16px`,
-  }),
-  actionOption: css({
-    gap: '11px',
-  }),
-  actionInfo: css({
+  optionInfo: css({
     flex: 1,
     minWidth: 0,
     display: 'flex',
     flexDirection: 'column',
-    gap: '2px',
-  }),
-  iconOuter: css({
-    width: '40px',
-    height: '40px',
-    flexShrink: 0,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: '8px',
-    boxSizing: 'border-box',
-  }),
-  iconOuterPlatform: aiIconTileCss,
-  iconOuterTrigger: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      backgroundColor: euiTheme.colors.backgroundBaseAccent,
-      border: `1px solid ${euiTheme.colors.borderBaseAccent}`,
-    }),
-  iconOuterAppLogo: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-      border: `1px solid ${euiTheme.colors.borderBasePlain}`,
-    }),
-  iconOuterCommand: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-      border: `1px solid ${euiTheme.colors.borderBasePlain}`,
-    }),
-  iconOuterDataTransformation: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      backgroundColor: euiTheme.colors.backgroundBaseWarning,
-      border: `1px solid ${euiTheme.colors.borderBaseWarning}`,
-    }),
-  iconOuterFlowControl: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      backgroundColor: euiTheme.colors.backgroundBaseAccentSecondary,
-      border: `1px solid ${euiTheme.colors.borderBaseAccentSecondary}`,
-    }),
-  groupIconInner: css({
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '16px',
-    height: '16px',
-  }),
-  actionIconInner: css({
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '16px',
-    height: '16px',
-  }),
-  arrowContainer: css({
-    flexShrink: 0,
-    display: 'flex',
-    alignItems: 'center',
-  }),
-  arrow: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      color: euiTheme.colors.textSubdued,
-    }),
-  viewAllLink: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      cursor: 'pointer',
-      width: '100%',
-      color: euiTheme.colors.primaryText,
-    }),
-  actionTitle: (euiThemeContext: UseEuiTheme) =>
-    css({
-      lineHeight: euiFontSize(euiThemeContext, 's').lineHeight,
-      '&::first-letter': {
-        textTransform: 'capitalize',
-      },
-      '& h6': {
-        fontSize: '12.25px',
-        fontWeight: 700,
-      },
-    }),
-  actionDescription: (euiThemeContext: UseEuiTheme) =>
-    css({
-      lineHeight: euiFontSize(euiThemeContext, 's').lineHeight,
-      fontSize: '12px',
-      color: euiThemeContext.euiTheme.colors.textSubdued,
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-      whiteSpace: 'nowrap',
-      display: 'block',
-    }),
-  techPreviewBadge: css({
-    marginBottom: '-4px',
-  }),
-  shortcutContainer: css({
-    display: 'flex',
-    flexDirection: 'row',
-    flexWrap: 'nowrap',
-    alignItems: 'center',
     gap: 2,
-    flexShrink: 0,
   }),
-  shortcutKey: ({ euiTheme }: UseEuiTheme) =>
+  optionDescription: css({
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+  }),
+  breadcrumbRow: ({ euiTheme }: UseEuiTheme) =>
     css({
-      display: 'inline-flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      minWidth: 20,
-      textAlign: 'center',
-      padding: `${euiTheme.size.xxs} ${euiTheme.size.xs}`,
-      borderRadius: euiTheme.border.radius.small,
-      border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
-      backgroundColor: 'transparent',
-      color: euiTheme.colors.textSubdued,
-      fontFamily: euiTheme.font.familyCode,
-      fontSize: '12px',
-      fontWeight: euiTheme.font.weight.medium,
-      lineHeight: 1,
-      whiteSpace: 'nowrap',
+      flexShrink: 0,
+      marginTop: -1,
+      padding: `${euiTheme.size.s} ${euiTheme.size.base}`,
+      borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
+    }),
+  rightColumn: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      flex: 1,
+      minHeight: 0,
+      overflow: 'hidden',
+      userSelect: 'text',
+      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+    }),
+  optionPad: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      width: '100%',
+      padding: euiTheme.size.base,
       boxSizing: 'border-box',
     }),
+  shortcutContainer: (euiThemeContext: UseEuiTheme) => {
+    const { euiTheme } = euiThemeContext;
+    return css({
+      display: 'inline-flex',
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: euiTheme.size.xxs,
+      flexShrink: 0,
+      '& kbd': {
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minWidth: 20,
+        fontFamily: euiTheme.font.familyCode,
+        fontSize: euiTheme.size.m,
+        fontWeight: euiTheme.font.weight.medium,
+        lineHeight: 1,
+        color: euiTheme.colors.textSubdued,
+        backgroundColor: 'transparent',
+        ...kbdStyles(euiThemeContext),
+      },
+    });
+  },
+  ...actionIconTileStyles,
 };

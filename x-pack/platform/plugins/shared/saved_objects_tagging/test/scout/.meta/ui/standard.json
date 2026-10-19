@@ -1,5 +1,5 @@
 {
-  "sha1": "b46d38e3da2d594a11da9b645a6087e846b0b009",
+  "sha1": "dfb3bc7e9d50ad6208437f1d9f87760a0216d635",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -266,7 +266,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_discover_integration.spec.ts",
-        "line": 48,
+        "line": 40,
         "column": 23
       }
     },
@@ -280,7 +280,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_discover_integration.spec.ts",
-        "line": 53,
+        "line": 45,
         "column": 42
       }
     },
@@ -294,8 +294,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_discover_integration.spec.ts",
-        "line": 59,
-        "column": 22
+        "line": 50,
+        "column": 11
       }
     },
     {
@@ -308,8 +308,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_discover_integration.spec.ts",
-        "line": 67,
-        "column": 98
+        "line": 60,
+        "column": 9
       }
     },
     {
@@ -322,8 +322,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_discover_integration.spec.ts",
-        "line": 92,
-        "column": 98
+        "line": 87,
+        "column": 8
       }
     },
     {
@@ -336,8 +336,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_discover_integration.spec.ts",
-        "line": 117,
-        "column": 24
+        "line": 109,
+        "column": 97
       }
     },
     {

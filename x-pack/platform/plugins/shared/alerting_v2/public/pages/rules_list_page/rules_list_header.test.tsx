@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { triggersActionsRoute } from '@kbn/rule-data-utils';
 import { ALERTING_V2_RULES_BASE_PATH } from '@kbn/alerting-v2-constants';
 import { ListPageTestProviders } from '../../test_utils/test_providers';
@@ -16,6 +15,12 @@ import { RulesListHeader } from './rules_list_header';
 
 let mockPhase: 'initialLoad' | 'empty' | 'populated' | 'filtering' | 'filtered' = 'populated';
 let mockCanReadV1Rules = true;
+let mockExperimentalFeaturesEnabled = true;
+let mockAreAgentBuilderSkillsAvailable = true;
+let mockAgentBuilderSkillsRequirements = {
+  hasAgentBuilderCapability: true,
+  isExperimentalFeaturesEnabled: true,
+};
 
 /** Non-empty so the assertions below prove each href is run through `basePath.prepend`. */
 const MOCK_BASE_PATH = '/mock-base';
@@ -47,10 +52,29 @@ jest.mock('@kbn/core-di-browser', () => {
         return { basePath: { prepend: (path: string) => `${MOCK_BASE_PATH}${path}` } };
       }
 
+      if (token === actual.CoreStart('docLinks')) {
+        return {
+          links: {
+            alerting: {
+              viewManageRules: 'https://docs.test/view-manage-rules',
+            },
+          },
+        };
+      }
+
       return {};
     },
   };
 });
+
+jest.mock('../../hooks/use_alerting_v2_experimental_features', () => ({
+  useAlertingV2ExperimentalFeatures: () => mockExperimentalFeaturesEnabled,
+}));
+
+jest.mock('../../hooks/use_are_agent_builder_skills_available', () => ({
+  useAreAgentBuilderSkillsAvailable: () => mockAreAgentBuilderSkillsAvailable,
+  useAgentBuilderSkillsRequirements: () => mockAgentBuilderSkillsRequirements,
+}));
 
 const onCreateRule = jest.fn();
 const onCreateEsqlRule = jest.fn();
@@ -76,13 +100,12 @@ describe('RulesListHeader', () => {
     jest.clearAllMocks();
     mockPhase = 'populated';
     mockCanReadV1Rules = true;
-  });
-
-  it('renders the page title and experimental badge', () => {
-    renderHeader();
-
-    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Rules');
-    expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
+    mockExperimentalFeaturesEnabled = true;
+    mockAreAgentBuilderSkillsAvailable = true;
+    mockAgentBuilderSkillsRequirements = {
+      hasAgentBuilderCapability: true,
+      isExperimentalFeaturesEnabled: true,
+    };
   });
 
   it('renders V1 rules and V2 rules tabs with V2 selected', async () => {
@@ -93,10 +116,12 @@ describe('RulesListHeader', () => {
 
     expect(v1Tab).toHaveAttribute('aria-selected', 'false');
     expect(v2Tab).toHaveAttribute('aria-selected', 'true');
+    expect(v1Tab).toHaveTextContent('Classic');
+    expect(v2Tab).toHaveTextContent('Universal');
     expect(await screen.findAllByRole('tab')).toHaveLength(2);
   });
 
-  it('orders the V2 rules tab before the V1 rules tab', async () => {
+  it('orders the Universal tab before the Classic tab', async () => {
     renderHeader();
 
     const tabs = await screen.findAllByRole('tab');

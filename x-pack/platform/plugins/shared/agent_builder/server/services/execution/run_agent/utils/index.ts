@@ -11,25 +11,28 @@ export { prepareMessages } from './to_langchain_messages';
 export { prepareConversation } from './prepare_conversation';
 export {
   groupTimelineRounds,
-  sliceTimelineRounds,
+  isTimelineCustomEvent,
+  customEvents,
+  type ContextTimelineEvent,
   type ProcessedTimelineEvent,
+  type ProcessedCustomEvent,
   type TimelineRound,
+  type TimelineCustomEvent,
 } from './context_timeline';
 export { selectSkills } from './select_skills';
 export { selectTools } from './select_tools';
-export { getPendingRound } from './prompts';
-export { evictInternalEvents } from './evict_internal_events';
+export {
+  foldConversationTurns,
+  getPendingTurn,
+  type ConversationTurn,
+  type PendingTurn,
+} from './conversation_turn';
 export { formatAttachmentsMetadata } from './attachment_presentation';
 export { createPreExecutionSteps } from './round_steps';
 export {
-  createResultTransformer,
-  type CreateResultTransformerOptions,
-  FS_TOOL_CALL_TOKEN_THRESHOLD,
-} from './create_result_transformer';
-export {
   type ToolCallResultTransformer,
-  type ToolCallResultTransformerOptions,
   createSummarizationTransformer,
 } from './tool_summarization';
-export { estimateMessagesTokens, estimatePerRoundTokens } from './estimate_conversation_tokens';
+export { estimateMessagesTokens } from './estimate_conversation_tokens';
+export { legacyEligibleRoundIds, coveredRoundIds } from './compaction_coverage';
 export { createImageResolver, type CreateImageResolverOptions } from './image_resolver';

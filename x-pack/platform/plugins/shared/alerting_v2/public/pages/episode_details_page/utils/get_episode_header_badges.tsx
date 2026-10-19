@@ -86,8 +86,8 @@ const getSeverityBadgeColor = (severity: string): AppHeaderBadgeColor => {
 };
 
 const getSnoozeTooltip = (groupAction: AlertEpisodeGroupAction): string => {
-  if (groupAction.snoozeExpiry) {
-    return i18n.getSnoozedUntilTooltip(new Date(groupAction.snoozeExpiry));
+  if (groupAction.snoozedUntil) {
+    return i18n.getSnoozedUntilTooltip(new Date(groupAction.snoozedUntil));
   }
 
   return i18n.SNOOZED_BADGE_TOOLTIP;
@@ -172,7 +172,7 @@ export const getEpisodeHeaderBadges = ({
     });
   }
 
-  if (groupAction && isEpisodeSnoozed(groupAction.lastSnoozeAction, groupAction.snoozeExpiry)) {
+  if (groupAction && isEpisodeSnoozed(groupAction.lastSnoozeAction, groupAction.snoozedUntil)) {
     const snoozeTooltip = getSnoozeTooltip(groupAction);
     badges.push({
       label: i18n.SNOOZED_BADGE_LABEL,

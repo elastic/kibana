@@ -149,7 +149,7 @@ describe('EditForm', () => {
     mockUseKibana.mockReturnValue({
       services: {
         featureFlags: {
-          getBooleanValue: jest.fn().mockResolvedValue(false),
+          useBooleanValue: jest.fn().mockReturnValue(false),
         },
         lens: {
           EmbeddableComponent: () => <div data-test-subj="mockEmbeddableComponent" />,
@@ -732,7 +732,7 @@ describe.skip('EditForm — empty alert retrieval workflows (deferred validation
     mockUseKibana.mockReturnValue({
       services: {
         featureFlags: {
-          getBooleanValue: jest.fn().mockResolvedValue(true),
+          useBooleanValue: jest.fn().mockReturnValue(true),
         },
         lens: {
           EmbeddableComponent: () => <div data-test-subj="mockEmbeddableComponent" />,

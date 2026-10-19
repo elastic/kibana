@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { parse, stringify } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
 
 import {
@@ -111,6 +112,54 @@ describe('applyFieldUpdates', () => {
   it('patches tags', () => {
     const { patch } = applyFieldUpdates({ tags: ['a', 'b'] }, baseSource);
     expect(patch.tags).toEqual(['a', 'b']);
+  });
+
+  it.each([{ tags: ['action'] }, { tags: [] }, { tags: ['action', 'new-delegation-tag'] }])(
+    'synchronizes field-only tags with YAML and the definition: %j',
+    ({ tags }) => {
+      const definition = {
+        name: 'Original',
+        enabled: true,
+        version: '1',
+        triggers: [{ type: 'manual' }],
+        steps: [],
+        tags: ['action', 'auto-approvable'],
+      } satisfies WorkflowYaml;
+      const source = {
+        ...baseSource,
+        definition,
+        tags: definition.tags,
+        yaml: stringify(definition),
+      };
+      const { patch } = applyFieldUpdates({ tags }, source);
+      const updated = { ...source, ...patch };
+      expect(updated.tags).toEqual(tags);
+      expect(parse(updated.yaml).tags).toEqual(tags);
+      expect(updated.definition).toEqual({ ...definition, tags });
+      expect(source.definition.tags).toEqual(['action', 'auto-approvable']);
+    }
+  );
+
+  it('preserves both tags and enabled when updating them together', () => {
+    const definition: WorkflowYaml = {
+      name: 'Original',
+      enabled: true,
+      version: '1',
+      triggers: [{ type: 'manual' }],
+      steps: [],
+      tags: ['auto-approvable'],
+    };
+    const { patch } = applyFieldUpdates(
+      { tags: [], enabled: false },
+      { ...baseSource, definition, yaml: stringify(definition) }
+    );
+    expect(patch.definition).toEqual({ ...definition, tags: [], enabled: false });
+  });
+
+  it('does not create a definition when updating tags on an invalid workflow', () => {
+    const { patch } = applyFieldUpdates({ tags: [] }, baseSource);
+    expect(patch.tags).toEqual([]);
+    expect(patch).not.toHaveProperty('definition');
   });
 
   it('allows disabling a workflow and syncs definition.enabled', () => {
@@ -287,6 +336,71 @@ describe('applyYamlUpdate', () => {
     expect(result.updatedDataPatch).not.toHaveProperty('description');
     expect(result.updatedDataPatch).not.toHaveProperty('tags');
   });
+
+  it('logs kibana.request fetcher on YAML updates when the self-client path is on', () => {
+    const zodSchema = getWorkflowZodSchema({});
+    const logger = { warn: jest.fn() } as unknown as import('@kbn/logging').Logger;
+    const yaml = [
+      "version: '1'",
+      'name: kibana-fetcher',
+      'enabled: true',
+      'triggers:',
+      '  - type: manual',
+      'steps:',
+      '  - name: status',
+      '    type: kibana.request',
+      '    with:',
+      '      method: GET',
+      '      path: /api/status',
+      '      fetcher:',
+      '        skip_ssl_verification: true',
+    ].join('\n');
+
+    applyYamlUpdate({
+      workflowYaml: yaml,
+      zodSchema,
+      triggerDefinitions: [],
+      logger,
+      warnIgnoredKibanaFetcher: true,
+      workflowId: 'wf-1',
+    });
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('fetcher'),
+      expect.objectContaining({
+        labels: expect.objectContaining({ workflow_id: 'wf-1', step_names: 'status' }),
+      })
+    );
+  });
+
+  it('does not log kibana.request fetcher on YAML updates when the self-client path is off', () => {
+    const zodSchema = getWorkflowZodSchema({});
+    const logger = { warn: jest.fn() } as unknown as import('@kbn/logging').Logger;
+    const yaml = [
+      "version: '1'",
+      'name: kibana-fetcher',
+      'enabled: true',
+      'triggers:',
+      '  - type: manual',
+      'steps:',
+      '  - name: status',
+      '    type: kibana.request',
+      '    with:',
+      '      method: GET',
+      '      path: /api/status',
+      '      fetcher:',
+      '        skip_ssl_verification: true',
+    ].join('\n');
+
+    applyYamlUpdate({
+      workflowYaml: yaml,
+      zodSchema,
+      triggerDefinitions: [],
+      logger,
+    });
+
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
 });
 
 describe('prepareWorkflowDocumentFromYaml', () => {
@@ -409,5 +523,105 @@ describe('prepareWorkflowDocumentFromYaml', () => {
     });
 
     expect(result.workflowData.name).toBe('From YAML');
+  });
+
+  it('logs once when kibana YAML still includes fetcher', () => {
+    const zodSchema = getWorkflowZodSchema({});
+    const logger = { warn: jest.fn() } as unknown as import('@kbn/logging').Logger;
+    const yaml = [
+      "version: '1'",
+      'name: kibana-fetcher',
+      'enabled: true',
+      'triggers:',
+      '  - type: manual',
+      'steps:',
+      '  - name: status',
+      '    type: kibana.request',
+      '    with:',
+      '      method: GET',
+      '      path: /api/status',
+      '      fetcher:',
+      '        skip_ssl_verification: true',
+    ].join('\n');
+
+    prepareWorkflowDocumentFromYaml({
+      yaml,
+      zodSchema,
+      authenticatedUser: 'user1',
+      now,
+      spaceId: 'default',
+      logger,
+      warnIgnoredKibanaFetcher: true,
+    });
+
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('fetcher'),
+      expect.objectContaining({
+        tags: expect.arrayContaining(['deprecated']),
+        labels: expect.objectContaining({ step_names: 'status' }),
+      })
+    );
+  });
+
+  it('does not log kibana fetcher when the self-client path is off', () => {
+    const zodSchema = getWorkflowZodSchema({});
+    const logger = { warn: jest.fn() } as unknown as import('@kbn/logging').Logger;
+    const yaml = [
+      "version: '1'",
+      'name: kibana-fetcher',
+      'enabled: true',
+      'triggers:',
+      '  - type: manual',
+      'steps:',
+      '  - name: status',
+      '    type: kibana.request',
+      '    with:',
+      '      method: GET',
+      '      path: /api/status',
+      '      fetcher:',
+      '        skip_ssl_verification: true',
+    ].join('\n');
+
+    prepareWorkflowDocumentFromYaml({
+      yaml,
+      zodSchema,
+      authenticatedUser: 'user1',
+      now,
+      spaceId: 'default',
+      logger,
+    });
+
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('does not log generated kibana.* fetcher when the self-client flag is off', () => {
+    const zodSchema = getWorkflowZodSchema({});
+    const logger = { warn: jest.fn() } as unknown as import('@kbn/logging').Logger;
+    const yaml = [
+      "version: '1'",
+      'name: kibana-generated-fetcher',
+      'enabled: true',
+      'triggers:',
+      '  - type: manual',
+      'steps:',
+      '  - name: get-case',
+      '    type: kibana.getCase',
+      '    with:',
+      '      caseId: test-case',
+      '      fetcher:',
+      '        skip_ssl_verification: true',
+    ].join('\n');
+
+    prepareWorkflowDocumentFromYaml({
+      yaml,
+      zodSchema,
+      authenticatedUser: 'user1',
+      now,
+      spaceId: 'default',
+      logger,
+    });
+
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 });

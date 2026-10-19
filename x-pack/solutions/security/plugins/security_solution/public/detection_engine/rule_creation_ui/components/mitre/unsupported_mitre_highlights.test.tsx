@@ -8,6 +8,12 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import type { Threats } from '@kbn/securitysolution-io-ts-alerting-types';
+import {
+  buildMockMitreTacticSummary,
+  buildMockMitreTechniqueSummary,
+  buildMockMitreSubtechniqueSummary,
+} from '../../../../../common/detection_engine/mitre/mitre_entity_builders.mock';
+import type { MitreTechniqueSummary } from '@kbn/security-mitre-attack-common';
 
 import { AddMitreAttackThreat } from '.';
 import { TestProviders, useFormFieldMock } from '../../../../common/mock';
@@ -19,54 +25,51 @@ jest.mock('../../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
 }));
 
-jest.mock('../../../../../common/detection_engine/mitre/mitre_tactics_techniques', () => ({
-  tactics: [
-    {
-      name: 'Tactic 1',
-      id: 'TA001',
-      reference: 'https://example.com/TA001',
-      label: 'Tactic 1',
-      value: 'tactic1',
-    },
-    {
-      name: 'Tactic 2',
-      id: 'TA002',
-      reference: 'https://example.com/TA002',
-      label: 'Tactic 2',
-      value: 'tactic2',
-    },
-  ],
-  techniques: [
-    {
-      name: 'Technique 1',
-      id: 'T001',
-      reference: 'https://example.com/T001',
-      tactics: ['tactic-1'],
-      label: 'Technique 1',
-      value: 'technique1',
-    },
-    // Belongs to Tactic 2 only - used to validate the reassigned-from-tactic path.
-    {
-      name: 'Moved Technique',
-      id: 'T002',
-      reference: 'https://example.com/T002',
-      tactics: ['tactic-2'],
-      label: 'Moved Technique',
-      value: 'movedtechnique',
-    },
-  ],
-  subtechniques: [
-    {
-      name: 'Subtechnique 1',
-      id: 'T001.001',
-      reference: 'https://example.com/T001/001',
-      tactics: ['tactic-1'],
-      techniqueId: 'T001',
-      label: 'Subtechnique 1',
-      value: 'subtechnique1',
-    },
-  ],
+const mockUseMitreConfiguration = jest.fn();
+jest.mock('../../../../common/hooks/mitre/use_mitre_configuration', () => ({
+  useMitreConfiguration: (...args: unknown[]) => mockUseMitreConfiguration(...args),
 }));
+
+const testTactics = [
+  buildMockMitreTacticSummary({
+    id: 'TA001',
+    name: 'Tactic 1',
+    reference: 'https://example.com/TA001',
+    position: 0,
+  }),
+  buildMockMitreTacticSummary({
+    id: 'TA002',
+    name: 'Tactic 2',
+    reference: 'https://example.com/TA002',
+    position: 1,
+  }),
+];
+
+const testTechniques: MitreTechniqueSummary[] = [
+  buildMockMitreTechniqueSummary({
+    id: 'T001',
+    name: 'Technique 1',
+    reference: 'https://example.com/T001',
+    tactic_ids: ['TA001'],
+  }),
+  // Belongs to Tactic 2 only - used to validate the reassigned-from-tactic path.
+  buildMockMitreTechniqueSummary({
+    id: 'T002',
+    name: 'Moved Technique',
+    reference: 'https://example.com/T002',
+    tactic_ids: ['TA002'],
+  }),
+];
+
+const testSubtechniques = [
+  buildMockMitreSubtechniqueSummary({
+    id: 'T001.001',
+    name: 'Subtechnique 1',
+    reference: 'https://example.com/T001/001',
+    tactic_ids: ['TA001'],
+    technique_id: 'T001',
+  }),
+];
 
 const MITRE_FRAMEWORK = 'MITRE ATT&CK';
 
@@ -84,6 +87,17 @@ const renderWithThreats = (threats: Threats) => {
   };
   return render(<Component />, { wrapper: TestProviders });
 };
+
+beforeEach(() => {
+  mockUseMitreConfiguration.mockReturnValue({
+    tactics: testTactics,
+    techniques: testTechniques,
+    subtechniques: testSubtechniques,
+    frameworkVersion: '16.1',
+    isLoading: false,
+    isError: false,
+  });
+});
 
 describe('AddMitreAttackThreat - unsupported MITRE ID highlighting', () => {
   it('does not highlight anything when all referenced IDs are supported', async () => {
@@ -104,7 +118,7 @@ describe('AddMitreAttackThreat - unsupported MITRE ID highlighting', () => {
 
     renderWithThreats(threats);
 
-    // wait for the lazy MITRE dataset load to settle before asserting absence
+    // wait for assertions to settle before asserting absence
     await waitFor(() => {
       expect(screen.queryByText(/not in the currently supported MITRE/)).toBeNull();
     });
@@ -207,7 +221,7 @@ describe('AddMitreAttackThreat - renamed MITRE entity handling', () => {
     renderWithThreats(threats);
 
     // Trigger reflects the current dataset label rather than rendering blank.
-    expect(await screen.findByText('Tactic 1')).toBeInTheDocument();
+    expect(await screen.findByText('Tactic 1 (TA001)')).toBeInTheDocument();
     // Helper text explains the drift to the user.
     expect(await screen.findByText(/Renamed from "Tactic Old Name"/)).toBeInTheDocument();
     // Not flagged as unsupported (the id is still in the dataset).
@@ -228,7 +242,7 @@ describe('AddMitreAttackThreat - renamed MITRE entity handling', () => {
 
     // The technique trigger renders its label (not the placeholder), proving
     // the technique was matched against the parent tactic resolved by id.
-    expect(await screen.findByText('Technique 1')).toBeInTheDocument();
+    expect(await screen.findByText('Technique 1 (T001)')).toBeInTheDocument();
     // No "unsupported" indicators for the technique row either.
     expect(screen.queryByText(/T001 \(unsupported\)/)).toBeNull();
   });
@@ -244,7 +258,7 @@ describe('AddMitreAttackThreat - renamed MITRE entity handling', () => {
 
     renderWithThreats(threats);
 
-    expect(await screen.findByText('Technique 1')).toBeInTheDocument();
+    expect(await screen.findByText('Technique 1 (T001)')).toBeInTheDocument();
     expect(await screen.findByText(/Renamed from "Technique Old Name"/)).toBeInTheDocument();
   });
 
@@ -266,7 +280,7 @@ describe('AddMitreAttackThreat - renamed MITRE entity handling', () => {
 
     renderWithThreats(threats);
 
-    expect(await screen.findByText('Subtechnique 1')).toBeInTheDocument();
+    expect(await screen.findByText('Subtechnique 1 (T001.001)')).toBeInTheDocument();
     expect(await screen.findByText(/Renamed from "Subtechnique Old Name"/)).toBeInTheDocument();
   });
 
@@ -294,8 +308,8 @@ describe('AddMitreAttackThreat - renamed MITRE entity handling', () => {
   });
 
   it('renders a ghost option and form-row error when the technique was reassigned to a different tactic', async () => {
-    // T002 lives under Tactic 2 in the dataset but the rule still stores it
-    // under Tactic 1 - this previously left the technique select blank.
+    // T002 lives under Tactic 2 (TA002) in the dataset but the rule still stores it
+    // under Tactic 1 (TA001), so the select has no matching option to show.
     const threats: Threats = [
       {
         framework: MITRE_FRAMEWORK,
@@ -319,5 +333,36 @@ describe('AddMitreAttackThreat - renamed MITRE entity handling', () => {
     // Reassigned technique is still in the dataset, so we don't mislead users
     // by flagging it as removed.
     expect(screen.queryByText(/"T002" is not in the currently supported MITRE/)).toBeNull();
+  });
+
+  it('renders technique under each tactic it belongs to when it has multiple tactic_ids', async () => {
+    // A technique that belongs to both TA001 and TA002 should appear in both cascades.
+    const multiTacticTechnique = buildMockMitreTechniqueSummary({
+      id: 'T003',
+      name: 'Multi Tactic Technique',
+      reference: 'https://example.com/T003',
+      tactic_ids: ['TA001', 'TA002'],
+    });
+    mockUseMitreConfiguration.mockReturnValue({
+      tactics: testTactics,
+      techniques: [...testTechniques, multiTacticTechnique],
+      subtechniques: testSubtechniques,
+      frameworkVersion: '16.1',
+      isLoading: false,
+      isError: false,
+    });
+
+    const threats: Threats = [
+      {
+        framework: MITRE_FRAMEWORK,
+        tactic: { id: 'TA001', name: 'Tactic 1', reference: '' },
+        technique: [{ id: 'T003', name: 'Multi Tactic Technique', reference: '' }],
+      },
+    ];
+
+    renderWithThreats(threats);
+
+    expect(await screen.findByText('Multi Tactic Technique (T003)')).toBeInTheDocument();
+    expect(screen.queryByText(/not in the currently supported MITRE/)).toBeNull();
   });
 });

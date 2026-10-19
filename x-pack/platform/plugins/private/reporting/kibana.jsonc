@@ -37,7 +37,8 @@
       "security",
       "spaces",
       "usageCollection",
-      "screenshotting"
+      "screenshotting",
+      "pageRenderScreenshotting"
     ],
     "requiredBundles": [
       "esUiShared",

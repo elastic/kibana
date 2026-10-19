@@ -24,9 +24,9 @@ import type { RuntimeGraphView } from './workflow_runtime_graph';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import { toExecutionError } from '../step/errors';
 import type { RunStepResult } from '../step/node_implementation';
-import { extractConnectorId, extractTokenUsage, parseDuration } from '../utils';
+import { extractConnectorId, extractTokenUsage, parseDuration, renderDuration } from '../utils';
 
-import type { IWorkflowEventLogger, WorkflowEventFlushOptions } from '../workflow_event_logger';
+import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
 interface StepExecutionRuntimeInit {
   contextManager: WorkflowContextManager;
@@ -115,6 +115,25 @@ export class StepExecutionRuntime {
     this.stackFrames = stepExecutionRuntimeInit.stackFrames;
   }
 
+  /** Returns the rendered step `timeout` in milliseconds, or undefined when the node has none. */
+  public getStepTimeoutMs(): number | undefined {
+    if (
+      !('configuration' in this.node) ||
+      this.node.configuration == null ||
+      typeof this.node.configuration !== 'object' ||
+      !('timeout' in this.node.configuration) ||
+      typeof this.node.configuration.timeout !== 'string'
+    ) {
+      return undefined;
+    }
+
+    return parseDuration(
+      renderDuration(this.node.configuration.timeout, (value) =>
+        this.contextManager.renderValueAccordingToContext(value)
+      )
+    );
+  }
+
   public get error(): ExecutionError | undefined {
     const errorInStep = this.workflowExecutionState.getStepExecution(this.stepExecutionId)?.error;
     return errorInStep ? new ExecutionError(errorInStep) : undefined;
@@ -136,6 +155,45 @@ export class StepExecutionRuntime {
     };
   }
 
+  /**
+   * Brings the given step executions' outputs back into in-memory state so a
+   * subsequent {@link getCurrentStepResult} can read them.
+   *
+   * Needed by callers that read another step execution's output *directly*
+   * rather than through a template: the template path is pre-warmed by
+   * `StepIoService.prepareForRead`, which targets outputs by static template
+   * analysis and therefore cannot see a direct read. Resume-time `load()` marks
+   * every non-pinned step deferred, so without this a direct read of an output
+   * written in an earlier tick silently yields `{}`.
+   *
+   * Takes a list so a caller reading many outputs pays one ES round trip.
+   * No-op for ids that are already resident.
+   *
+   * Read-pins the whole requested set for `consumerId` before awaiting, and the
+   * caller MUST {@link releaseReadOutputPins} once its synchronous reads are
+   * done. Pinning is not bookkeeping: `rehydrateOutputs` snapshots only the ids
+   * that are evicted when it starts, so without a pin a *resident* id in the
+   * set can be flushed and evicted by the concurrent persistence loop during
+   * the ES round trip — after which it was neither fetched by that call nor
+   * still in memory, and reads back as `{}`. `prepareForRead` pins before its
+   * own await for exactly this reason.
+   */
+  public async rehydrateStepOutputs(
+    stepExecutionIds: ReadonlyArray<string>,
+    consumerId: string = this.stepExecutionId
+  ): Promise<void> {
+    this.stepIoService.pinOutputsForRead(consumerId, stepExecutionIds);
+    await this.stepIoService.rehydrateOutputs(stepExecutionIds);
+  }
+
+  /**
+   * Releases the pins taken by {@link rehydrateStepOutputs}. Idempotent, so it
+   * is safe in a `finally`.
+   */
+  public releaseReadOutputPins(consumerId: string = this.stepExecutionId): void {
+    this.stepIoService.releaseReadPins(consumerId);
+  }
+
   public getCurrentStepState(): Record<string, unknown> | undefined {
     return this.workflowExecutionState.getStepExecution(this.stepExecutionId)?.state;
   }
@@ -152,6 +210,9 @@ export class StepExecutionRuntime {
   public startStep(): void {
     const stepId = this.node.stepId;
     const stepStartedAt = new Date();
+    // Capture before upsert: the write below sets startedAt, so a later read cannot
+    // tell a first start from a durable poll resume of the same step execution.
+    const alreadyStarted = this.stepExecution?.startedAt != null;
 
     this.workflowExecutionState.upsertStep({
       id: this.stepExecutionId,
@@ -162,7 +223,9 @@ export class StepExecutionRuntime {
       status: ExecutionStatus.RUNNING,
       startedAt: this.stepExecution?.startedAt ?? stepStartedAt.toISOString(),
     });
-    this.logStepStart(stepId, this.stepExecutionId);
+    if (!alreadyStarted) {
+      this.logStepStart(stepId, this.stepExecutionId);
+    }
   }
 
   public setInput(input: Record<string, unknown>): void {
@@ -340,10 +403,6 @@ export class StepExecutionRuntime {
       });
     }
     return usage;
-  }
-
-  public async flushEventLogs(options?: WorkflowEventFlushOptions): Promise<void> {
-    await this.stepLogger?.flushEvents(options);
   }
 
   /**

@@ -8,23 +8,21 @@
  */
 
 import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
+import type { DiscoverSessionApiClassicTabBase } from '@kbn/as-code-discover-schema';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { getSearchEmbeddableTransforms } from './search_embeddable_transforms';
 import type {
+  DiscoverSessionEmbeddableByReferenceState,
+  DiscoverSessionEmbeddableByValueState,
+  DiscoverSessionEmbeddableState,
   SearchEmbeddableState,
   StoredSearchEmbeddableByValueState,
   StoredSearchEmbeddableState,
 } from './types';
-import type {
-  DiscoverSessionClassicTab,
-  DiscoverSessionEmbeddableByReferenceState,
-  DiscoverSessionEmbeddableByValueState,
-  DiscoverSessionEmbeddableState,
-} from '../../server';
 import { SavedSearchType } from '@kbn/saved-search-plugin/common';
 import { SAVED_SEARCH_SAVED_OBJECT_REF_NAME } from './constants';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
-import { DataGridDensity } from '@kbn/discover-session-constants';
+import { DataGridDensity, DiscoverTabType } from '@kbn/discover-session-constants';
 
 const mockDrilldownTransforms = {
   transformIn: jest.fn().mockImplementation((state: DiscoverSessionEmbeddableState) => ({
@@ -121,6 +119,7 @@ describe('searchEmbeddableTransforms', () => {
       expect(result.title).toBe('Panel Title');
       expect(result.description).toBe('Panel description');
       expect(result.tabs).toHaveLength(1);
+      expect(result.tabs[0]).toHaveProperty('type', DiscoverTabType.Default);
       expect(result.tabs[0].column_order).toEqual(['message', '@timestamp']);
       expect(result.tabs[0].column_settings).toEqual({
         '@timestamp': { width: 200 },
@@ -130,7 +129,7 @@ describe('searchEmbeddableTransforms', () => {
         view_mode: viewMode,
         density,
         data_source: dataSource,
-      } = result.tabs[0] as DiscoverSessionClassicTab;
+      } = result.tabs[0] as DiscoverSessionApiClassicTabBase;
       expect(sort).toEqual([{ name: '@timestamp', direction: 'desc' }]);
       expect(viewMode).toBe(VIEW_MODE.DOCUMENT_LEVEL);
       expect(density).toBeUndefined();
@@ -230,6 +229,7 @@ describe('searchEmbeddableTransforms', () => {
           description: 'Panel description',
           tabs: [
             {
+              type: DiscoverTabType.Default,
               column_order: ['message', '@timestamp'],
               column_settings: { '@timestamp': { width: 200 } },
               sort: [{ name: '@timestamp', direction: 'desc' }],
@@ -271,6 +271,7 @@ describe('searchEmbeddableTransforms', () => {
           title: 'Panel Title',
           tabs: [
             {
+              type: DiscoverTabType.Default,
               column_order: ['_source'],
               sort: [],
               view_mode: VIEW_MODE.DOCUMENT_LEVEL,

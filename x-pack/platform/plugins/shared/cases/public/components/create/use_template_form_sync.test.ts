@@ -38,6 +38,11 @@ jest.mock('../../containers/configure/use_get_supported_action_connectors', () =
   useGetSupportedActionConnectors: () => mockUseGetSupportedActionConnectors(),
 }));
 
+const mockUseGetAllCaseConfigurations = jest.fn();
+jest.mock('../../containers/configure/use_get_all_case_configurations', () => ({
+  useGetAllCaseConfigurations: () => mockUseGetAllCaseConfigurations(),
+}));
+
 const jiraConnector = { id: 'jira-1', actionTypeId: '.jira', name: 'My Jira' };
 
 const mockTemplate = {
@@ -125,6 +130,8 @@ describe('useTemplateFormSync', () => {
       isLoading: false,
     });
     mockUseGetSupportedActionConnectors.mockReturnValue({ data: [], isLoading: false });
+    // Empty configs fall back to initialConfiguration.extractObservables === true.
+    mockUseGetAllCaseConfigurations.mockReturnValue({ data: [], isLoading: false });
   });
 
   it('returns the template and loading state', () => {
@@ -999,11 +1006,11 @@ describe('useTemplateFormSync', () => {
       renderHook(() => useTemplateFormSync(innerForm, new Set()));
 
       expect(mockSetFieldValue).toHaveBeenCalledWith('syncAlerts', false);
-      // extractObservables is omitted by the template, so it resets to its default (not inherited).
+      // extractObservables omitted by the template inherits the space default; no owner → false.
       expect(mockSetFieldValue).toHaveBeenCalledWith('extractObservables', false);
     });
 
-    it('reverts settings to off (the template default) when a settings-bearing template is cleared', () => {
+    it('reverts settings to space defaults when a settings-bearing template is cleared', () => {
       mockUseFormData.mockReturnValue([{ templateId: 'template-settings' }]);
       mockUseGetTemplate.mockReturnValue({ data: templateWithSettings, isLoading: false });
 
@@ -1016,10 +1023,141 @@ describe('useTemplateFormSync', () => {
       rerender();
 
       expect(mockSetFieldValue).toHaveBeenCalledWith('syncAlerts', false);
+      // No owner → initialConfiguration → false.
       expect(mockSetFieldValue).toHaveBeenCalledWith('extractObservables', false);
     });
 
-    it('reverts settings to off when switching to a template that declares no settings', () => {
+    it('reverts extractObservables to the case owner space default when clearing a template', () => {
+      // Space config is false for the case owner. Clearing must not fall back to
+      // initialConfiguration.true via a missing template.owner.
+      mockUseGetAllCaseConfigurations.mockReturnValue({
+        data: [
+          {
+            id: 'cfg-1',
+            owner: 'securitySolution',
+            extractObservables: false,
+            closureType: 'close-by-user',
+            connector: { fields: null, id: 'none', name: 'none', type: '.none' },
+            customFields: [],
+            templates: [],
+            mappings: [],
+            version: '1',
+            observableTypes: [],
+          },
+        ],
+        isLoading: false,
+      });
+      mockUseFormData.mockReturnValue([
+        { templateId: 'template-settings', owner: 'securitySolution' },
+      ]);
+      mockUseGetTemplate.mockReturnValue({ data: templateWithSettings, isLoading: false });
+
+      const { rerender } = renderHook(() => useTemplateFormSync(innerForm, new Set()));
+
+      mockSetFieldValue.mockClear();
+      mockUseFormData.mockReturnValue([{ templateId: '', owner: 'securitySolution' }]);
+      mockUseGetTemplate.mockReturnValue({ data: undefined, isLoading: false });
+
+      rerender();
+
+      expect(mockSetFieldValue).toHaveBeenCalledWith('syncAlerts', false);
+      expect(mockSetFieldValue).toHaveBeenCalledWith('extractObservables', false);
+    });
+
+    it('applies the correct extractObservables once configs finish loading after the template', () => {
+      // Production flow: template loads while configurations are still fetching (isLoading: true).
+      // The key must not be committed until configs resolve so the real space default is used.
+      const loadedConfig = {
+        id: 'cfg-1',
+        owner: 'securitySolution',
+        extractObservables: false,
+        closureType: 'close-by-user',
+        connector: { fields: null, id: 'none', name: 'none', type: '.none' },
+        customFields: [],
+        templates: [],
+        mappings: [],
+        version: '1',
+        observableTypes: [],
+      };
+      mockUseFormData.mockReturnValue([
+        { templateId: 'template-partial', owner: 'securitySolution' },
+      ]);
+      mockUseGetTemplate.mockReturnValue({
+        data: {
+          templateId: 'template-partial',
+          templateVersion: 1,
+          definition: { name: 'Partial', fields: [], settings: { syncAlerts: false } },
+        },
+        isLoading: false,
+      });
+      // Configs still fetching — guard blocks key commit.
+      mockUseGetAllCaseConfigurations.mockReturnValue({ data: [], isLoading: true });
+
+      const { rerender } = renderHook(() => useTemplateFormSync(innerForm, new Set()));
+
+      mockSetFieldValue.mockClear();
+
+      // Configs resolve with false — guard now passes, settings are applied with correct value.
+      mockUseGetAllCaseConfigurations.mockReturnValue({
+        data: [loadedConfig],
+        isLoading: false,
+      });
+
+      rerender();
+
+      expect(mockSetFieldValue).toHaveBeenCalledWith('syncAlerts', false);
+      expect(mockSetFieldValue).toHaveBeenCalledWith('extractObservables', false);
+    });
+
+    it('does not reapply standard template fields when only the space config changes after template is committed', () => {
+      // If the user has already had the template applied (key committed with configs loaded),
+      // a later space-config change must not reset title/description/tags/etc — those edits
+      // belong to the user. extractObservables is not re-synced either, because
+      // spaceExtractObservables is no longer in the committed key.
+      mockUseFormData.mockReturnValue([
+        { templateId: 'template-partial', owner: 'securitySolution' },
+      ]);
+      mockUseGetTemplate.mockReturnValue({
+        data: {
+          templateId: 'template-partial',
+          templateVersion: 1,
+          definition: { name: 'Partial', fields: [], settings: { syncAlerts: false } },
+        },
+        isLoading: false,
+      });
+      // Configs already loaded when template is applied — key is committed immediately.
+      mockUseGetAllCaseConfigurations.mockReturnValue({ data: [], isLoading: false });
+
+      const { rerender } = renderHook(() => useTemplateFormSync(innerForm, new Set()));
+
+      // Key is now committed. Simulate the user editing the title, then the space config changing.
+      mockSetFieldValue.mockClear();
+      mockUseGetAllCaseConfigurations.mockReturnValue({
+        data: [
+          {
+            id: 'cfg-1',
+            owner: 'securitySolution',
+            extractObservables: false,
+            closureType: 'close-by-user',
+            connector: { fields: null, id: 'none', name: 'none', type: '.none' },
+            customFields: [],
+            templates: [],
+            mappings: [],
+            version: '1',
+            observableTypes: [],
+          },
+        ],
+        isLoading: false,
+      });
+
+      rerender();
+
+      // The committed key is unchanged — the effect returns early.
+      expect(mockSetFieldValue).not.toHaveBeenCalledWith('title', expect.anything());
+      expect(mockSetFieldValue).not.toHaveBeenCalledWith('extractObservables', expect.anything());
+    });
+
+    it('reverts extractObservables to the space default when switching to a template that declares no settings', () => {
       // Direct A -> B switch: templateId goes straight from A's id to B's id (never through '').
       mockUseFormData.mockReturnValue([{ templateId: 'template-settings' }]);
       mockUseGetTemplate.mockReturnValue({ data: templateWithSettings, isLoading: false });
@@ -1040,12 +1178,32 @@ describe('useTemplateFormSync', () => {
       rerender();
 
       expect(mockSetFieldValue).toHaveBeenCalledWith('syncAlerts', false);
+      // No owner in form data → initialConfiguration → false.
+      expect(mockSetFieldValue).toHaveBeenCalledWith('extractObservables', false);
+    });
+
+    it('forces extractObservables to false for a blocked owner when the template omits the key', () => {
+      // Observability owner has observables disabled. A template that declares only `syncAlerts`
+      // must not fall through to the space default (true) — it must stay false.
+      mockUseFormData.mockReturnValue([{ templateId: 'template-obs', owner: 'observability' }]);
+      mockUseGetTemplate.mockReturnValue({
+        data: {
+          templateId: 'template-obs',
+          templateVersion: 1,
+          definition: { name: 'Obs', fields: [], settings: { syncAlerts: false } },
+        },
+        isLoading: false,
+      });
+
+      renderHook(() => useTemplateFormSync(innerForm, new Set()));
+
+      expect(mockSetFieldValue).toHaveBeenCalledWith('syncAlerts', false);
       expect(mockSetFieldValue).toHaveBeenCalledWith('extractObservables', false);
     });
 
     it('resets undeclared settings keys when switching to a template with a partial settings block', () => {
       // A declares both `true`; B declares only `syncAlerts`. B's omitted `extractObservables` must
-      // reset to its default rather than inheriting A's `true`.
+      // reset to the space default rather than inheriting A's value.
       mockUseFormData.mockReturnValue([{ templateId: 'template-a' }]);
       mockUseGetTemplate.mockReturnValue({
         data: {
@@ -1076,6 +1234,7 @@ describe('useTemplateFormSync', () => {
       rerender();
 
       expect(mockSetFieldValue).toHaveBeenCalledWith('syncAlerts', false);
+      // No owner in form data → initialConfiguration → false.
       expect(mockSetFieldValue).toHaveBeenCalledWith('extractObservables', false);
     });
   });
