@@ -25,7 +25,7 @@ import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { CUSTOM_YARA_SIGNATURE_FIELD_TYPE } from '../../../../../../common/endpoint/service/artifacts/constants';
 import { useCustomYaraSignatureEditorMarkers } from '../../hooks/use_custom_yara_signature_editor_markers';
 import { useValidateCustomYaraSignature } from '../../hooks/use_validate_custom_yara_signature';
-import { registerYaraLanguage, YARA_LANG_ID } from '../../yara_language';
+import { registerYaraLanguage, YARA_LANG_ID, YARA_THEME_ID } from '../../yara_language';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import type { EffectedPolicySelectProps } from '../../../../components/effected_policy_select';
 import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
@@ -379,6 +379,7 @@ export const CustomYaraSignaturesForm = memo<ArtifactFormComponentProps>(
                   width="100%"
                   height={signatureEditorHeight}
                   options={{
+                    theme: YARA_THEME_ID,
                     minimap: { enabled: false },
                     scrollBeyondLastLine: false,
                     wordWrap: 'on',

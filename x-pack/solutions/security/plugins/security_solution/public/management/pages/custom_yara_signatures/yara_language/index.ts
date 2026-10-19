@@ -8,16 +8,18 @@
 import { monaco } from '@kbn/code-editor';
 import { YARA_LANG_ID } from './constants';
 import { languageConfiguration, lexerRules } from './language';
+import { buildYaraTheme } from './theme';
 
-export { YARA_LANG_ID } from './constants';
+export { YARA_LANG_ID, YARA_THEME_ID } from './constants';
 
-/** Registers the YARA language in Monaco, it is safe to call it multiple times. */
+/** Registers the YARA language and its theme in Monaco, it is safe to call it multiple times. */
 export const registerYaraLanguage = (): void => {
   if (monaco.languages.getLanguages().some(({ id }) => id === YARA_LANG_ID)) {
     return;
   }
 
   monaco.languages.register({ id: YARA_LANG_ID });
+  monaco.editor.registerLanguageThemeResolver(YARA_LANG_ID, buildYaraTheme);
 
   monaco.languages.onLanguage(YARA_LANG_ID, () => {
     monaco.languages.setMonarchTokensProvider(YARA_LANG_ID, lexerRules);
