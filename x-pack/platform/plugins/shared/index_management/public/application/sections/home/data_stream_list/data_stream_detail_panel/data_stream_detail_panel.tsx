@@ -243,7 +243,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
     if (!discoverLocator) {
       return;
     }
-    await discoverLocator.navigate({ dataViewSpec: { title: dataStreamName } });
+    await discoverLocator.navigate({ query: { esql: `FROM ${dataStreamName}` } });
   }, [dataStreamName, discoverLocator]);
 
   // Scope the secondary flyouts to the app's main scroll container so they stack

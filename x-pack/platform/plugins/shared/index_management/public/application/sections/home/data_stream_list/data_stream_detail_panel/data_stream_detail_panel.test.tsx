@@ -87,6 +87,32 @@ describe('DataStreamDetailPanel', () => {
     });
   });
 
+  describe('view in Discover', () => {
+    it('navigates to Discover with an ES|QL query for the data stream', async () => {
+      const navigate = jest.fn();
+      mockAppContext.url.locators.get = jest.fn(() => ({
+        getRedirectUrl: jest.fn(() => '/app/path'),
+        navigate,
+      })) as unknown as typeof mockAppContext.url.locators.get;
+
+      mockUseLoadDataStream.mockReturnValue({
+        data: createMockDataStream({ name: 'test-data-stream' }),
+        isLoading: false,
+        error: null,
+        resendRequest: jest.fn(),
+        isInitialRequest: false,
+      } as unknown as ReturnType<typeof useLoadDataStream>);
+
+      const { getByTestId } = renderWithI18n(
+        <DataStreamDetailPanel dataStreamName="test-data-stream" onClose={onCloseMock} />
+      );
+
+      await userEvent.click(getByTestId('viewInDiscoverButton'));
+
+      expect(navigate).toHaveBeenCalledWith({ query: { esql: 'FROM test-data-stream' } });
+    });
+  });
+
   describe('failed ingest lifecycle', () => {
     it('displays "Disabled" when failure store is not enabled', async () => {
       const dataStream = createMockDataStream({
