@@ -133,19 +133,19 @@ pivot:
       - 'Feature:Canvas'
       - 'Feature:Maps'
       - 'Team:Geo'
-    'Discover and ES|QL':
+    'Discover':
       - 'Feature:Discover'
       - 'Team:DataDiscovery'
-      - 'Team:ESQL'
       - 'Team:Discover'
-      - 'Feature:ES|QL'
-      - 'Feature:ES|QL editor'
-      - 'Feature:Metrics in Discover'
       - 'Feature:BackgroundSearch'
       - 'Feature:DiscoverTabs'
       - 'Feature:UnifiedDataTable'
       - 'Feature:UnifiedDocViewer'
       - 'Feature:UnifiedFieldList'
+    'ES|QL':
+      - 'Team:ESQL'
+      - 'Feature:ES|QL'
+      - 'Feature:ES|QL editor'
     'Kibana platform':
       - 'Team:SharedUX'
       - 'Project:Accessibility'
@@ -227,6 +227,12 @@ pivot:
       - 'Team:Observability'
       - 'author:actionable-obs'
       - 'Feature:Streams'
+      - 'Feature:Metrics in Discover'
+      - 'Team:obs-presentation'
+      - 'Team:obs-onboarding'
+      - 'Team:obs-ux-management'
+      - 'Team:actionable-obs'
+      - 'Team:obs-ai - DEPRECATED'
     'security':
       - 'Team:SIEM'
       - 'Team:Security Solution'
@@ -252,6 +258,12 @@ pivot:
       - 'Feature:Rule Exceptions'
       - 'Feature:AutomaticImport'
       - 'Feature:Event Correlation (EQL) Rule'
+      - 'Team:Security Investigations'
+      - 'Team:Detection Engineering'
+      - 'Team:Automatic Migrations'
+      - 'Team:Security Deployment'
+      - 'Feature:Endpoint'
+      - 'Feature:Security ML Jobs'
 
 # Rules configuration — controls which PRs create changelogs and which entries are published.
 # Global match default for multi-valued fields (labels, areas, products).
