@@ -98,7 +98,7 @@ interface EstimateValueProps {
   comparison?: VcuRange;
 }
 
-/** The cost range, from at rest to at peak, with any change indicator. */
+/** The cost range, from at rest to at peak, with any change indicator, and its VCUs below. */
 const EstimateValue = ({ estimate, comparison }: EstimateValueProps) => {
   const range = { atRest: roundVcus(estimate.atRest), atPeak: roundVcus(estimate.atPeak) };
   const savedRange = comparison && {
@@ -110,26 +110,27 @@ const EstimateValue = ({ estimate, comparison }: EstimateValueProps) => {
     (savedRange.atRest !== range.atRest || savedRange.atPeak !== range.atPeak);
 
   return (
-    <EuiFlexGroup
-      gutterSize="s"
-      alignItems="center"
-      responsive={false}
-      data-test-subj="boostCostEstimate-range"
-    >
-      <EuiFlexItem grow={false}>
-        <EuiText size="s">
-          <span aria-hidden={true}>{formatCostRange(range)}</span>
-          <EuiScreenReaderOnly>
-            <span>{getCostRangeLabel(range)}</span>
-          </EuiScreenReaderOnly>
-        </EuiText>
-      </EuiFlexItem>
-      {hasChanged && savedRange && (
+    <div data-test-subj="boostCostEstimate-range">
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
-          <RangeChangeIndicator range={range} savedRange={savedRange} />
+          <EuiText size="s">
+            <span aria-hidden={true}>{formatCostRange(range)}</span>
+            <EuiScreenReaderOnly>
+              <span>{getCostRangeLabel(range)}</span>
+            </EuiScreenReaderOnly>
+          </EuiText>
         </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
+        {hasChanged && savedRange && (
+          <EuiFlexItem grow={false}>
+            <RangeChangeIndicator range={range} savedRange={savedRange} />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+      <EuiSpacer size="xs" />
+      <EuiText size="xs" color="subdued">
+        {getVcuRangeText(range)}
+      </EuiText>
+    </div>
   );
 };
 
@@ -141,7 +142,7 @@ interface EstimateContentProps {
 
 /**
  * The estimate as a stat: its title, with what it covers on the right, then its cost range and VCUs
- * below. For data streams, a timeline below splits it between the profile's periods.
+ * below it. For data streams, a timeline below splits it between the profile's periods.
  */
 const EstimateContent = ({
   estimate: { impact, type },
@@ -171,7 +172,7 @@ const EstimateContent = ({
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiText size="s">
+              <EuiText size="xs">
                 <strong>
                   {i18n.translate('xpack.boost.costEstimate.title', {
                     defaultMessage: 'Search cost per hour',
@@ -183,6 +184,7 @@ const EstimateContent = ({
               <EuiIconTip
                 type="info"
                 color="subdued"
+                size="s"
                 // A flex anchor sizes to the icon, so the row's flex alignment centers it. The
                 // default inline-block anchor gets a line box from the inherited font, which
                 // offsets the icon.
@@ -207,7 +209,6 @@ const EstimateContent = ({
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="xs" />
       <div aria-live="polite">
         {isStale && (
           <EuiScreenReaderOnly>
@@ -219,13 +220,6 @@ const EstimateContent = ({
           </EuiScreenReaderOnly>
         )}
         <EstimateValue estimate={estimate} comparison={comparison} />
-        <EuiSpacer size="xs" />
-        <EuiText size="xs" color="subdued">
-          {getVcuRangeText({
-            atRest: roundVcus(estimate.atRest),
-            atPeak: roundVcus(estimate.atPeak),
-          })}
-        </EuiText>
       </div>
       {periods && (
         <>
