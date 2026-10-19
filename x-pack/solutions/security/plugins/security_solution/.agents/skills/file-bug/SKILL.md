@@ -39,7 +39,7 @@ No write-yes request until `check-draft` exits 0 (create: pass `--title`, `--rep
 
 ### 0. Classify
 
-Ask once, then **Hard stop**: “Does this expose a vulnerability, credentials or secrets, customer data or PII, or an exploit path?” — but only if the report (text or media) shows one of: a user reading or changing data or actions they lack access to; script or markup running from user-controlled input; credentials, tokens or keys; customer or host data. Otherwise do not ask: use `elastic/kibana` and show the target repo in the draft.
+A **signal** is any of: a user reading or changing data or actions they lack access to; script or markup running from user-controlled input; credentials, tokens or keys; customer or host data. **Path A:** if the report (text or media) shows a signal, ask once, then **Hard stop**: “Does this expose a vulnerability, credentials or secrets, customer data or PII, or an exploit path?” **Path B:** run `prepare` first; the finding and its output are the report. If they show a signal, do not ask — set `TARGET_REPO="elastic/security-team"`, search and label only there, and state the repo and the signal in one line in the draft; if the human replies it is not sensitive, switch to `elastic/kibana` and redo Search there. With no signal, do not ask on either path: use `elastic/kibana` and show the target repo in the draft.
 
 - **Yes / unsure** → `TARGET_REPO="elastic/security-team"`; the human confirms the repo in the draft. Search, label, upload and write only against `$TARGET_REPO` — nothing in `elastic/kibana`.
 - **No** → `TARGET_REPO="elastic/kibana"`. If `scan-sensitive` later raises `security_issue`, ask and switch repo instead of overriding.

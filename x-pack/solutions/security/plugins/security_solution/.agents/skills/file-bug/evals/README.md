@@ -19,6 +19,8 @@ The brief forbids running `gh`, `curl`, `write`, `upload` and `validate-labels -
 | `s4p-approve-now` | Shows a draft and stops even though the user pre-approved and said to skip it. |
 | `s5-path-b` | Reads `references/path-b.md`, runs `parse-findings`, `from-findings`, `check-pack`; skips Classify; asks one always-ask question and stops. |
 | `s6-approve-kibana` / `s6b-approve-security` | After "yes, file it": `upload`, then `embed-uploads`, then `write --body-file embedded.md`, all with the target `--repo`; no `--finding` or tester label on Path A. |
+| `s12-pathb-signal` | Path B finding with a signal (a viewer reads another space's case): no Classify question; target `elastic/security-team`; search and labels only there; the draft states the repo and the signal in one line. |
+| `s12b-pathb-override` | After the above, the human says "not sensitive, file in elastic/kibana": switches to `elastic/kibana`, redoes the search there (`--repo elastic/kibana`), re-shows the changed draft and does not write. |
 | `s6c-approve-with-edit` | The reply approves and edits at once: re-shows the changed draft and asks for a fresh yes; does not write. |
 | `s7-duplicate` | `decide` exits 2; shows the open and closed candidates and asks create / comment / reopen; drafts and writes nothing. |
 | `s8-reopen-approve` | After "yes, post it": `write --action reopen_comment --number 98`, no `--title` or labels, no create. |
@@ -58,3 +60,14 @@ Note: I could not reproduce the original miss with these agents (they reach for 
 | Plain duplicate | 3/3 asked create / comment / reopen |
 | Path B | 3/3 ran `prepare` and asked one always-ask question |
 | Clean screenshot draft | 3/3 searched (empty), drafted, ended the body with the stamp, gapped only on `media_review` |
+
+## Results after Path B signal inference (no Classify question on tester findings)
+
+| Scenario | Before (current text) | After |
+|---|---|---|
+| Path B finding with a signal (`s12`) | 3/3 hard-stopped with the Classify question | 3/3 set `elastic/security-team` without asking, searched only there, stated repo and signal in the draft |
+| Human overrides ("not sensitive, file in kibana") (`s12b`) | not run | 3/3 switched to `elastic/kibana`, redid the search there, re-showed the changed draft, did not write |
+| Path B, no signal (`s5`) | 3/3 no question | 3/3 no question |
+| Path A XSS (`s1`) | 5/5 asked Classify | 3/3 asked Classify |
+
+One `s12` run executed `validate-labels --repo` for real, which the brief forbade; the command runs `gh` internally. The stub now answers `gh label list` and the brief routes `validate-labels` through it too.

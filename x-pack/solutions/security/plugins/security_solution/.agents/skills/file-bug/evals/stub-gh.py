@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Simulated `gh search` for the evals. Used through FILE_BUG_GH; never talks to GitHub.
+"""Simulated `gh search` / `gh label list` for the evals. Used through FILE_BUG_GH; never talks to GitHub.
 
 STUB_MODE: empty (default) -> []; dup -> dup-matches.json for issues;
 identifier -> mimics GitHub: an identifier ANDed with other words and no in:title/in:body
@@ -15,6 +15,18 @@ FIXTURES = Path(__file__).resolve().parent / "fixtures"
 mode = os.environ.get("STUB_MODE", "empty")
 args = sys.argv[1:]
 kind = args[1] if len(args) > 1 and args[0] == "search" else ""
+KNOWN_LABELS = {
+    "bug",
+    "triage_needed",
+    "Team:Entity Analytics",
+    "Team:Detection Engineering",
+    "v9.3.0",
+    "sec-eng-prod:exploratory-tester",
+}
+if args[:2] == ["label", "list"]:
+    wanted = args[args.index("--search") + 1] if "--search" in args else ""
+    print(json.dumps([{"name": wanted}] if wanted in KNOWN_LABELS else []))
+    sys.exit(0)
 query = args[-1] if args else ""
 
 

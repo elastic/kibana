@@ -52,8 +52,18 @@ make(
 )
 for name in ("findings-flow-1.md", "config.json"):
     shutil.copy(HERE / "fixtures" / name, session / name)
+signal = out / "session-signal"
+make(
+    signal / "screenshots" / "cases-flow1.png",
+    [
+        "Kibana http://localhost:5601/app/security/cases/abc123",
+        "Logged in as viewer (space A) - case from space B is visible",
+    ],
+)
+shutil.copy(HERE / "fixtures" / "findings-flow-1-signal.md", signal / "findings-flow-1.md")
+shutil.copy(HERE / "fixtures" / "config.json", signal / "config.json")
 for source in (HERE / "fixtures").iterdir():
-    if source.name in ("findings-flow-1.md", "config.json"):
+    if source.name in ("findings-flow-1.md", "findings-flow-1-signal.md", "config.json"):
         continue
     text = source.read_text(encoding="utf-8")
     (fixtures / source.name).write_text(text.replace("$FIXTURES", str(fixtures)), encoding="utf-8")
@@ -62,7 +72,11 @@ rendered = out / "scenarios"
 rendered.mkdir(parents=True, exist_ok=True)
 for scenario in sorted((HERE / "scenarios").glob("*.txt")):
     text = scenario.read_text(encoding="utf-8")
-    text = text.replace("$FIXTURES", str(fixtures)).replace("$SESSION_DIR", str(session))
+    text = (
+        text.replace("$FIXTURES", str(fixtures))
+        .replace("$SESSION_DIR_SIGNAL", str(signal))
+        .replace("$SESSION_DIR", str(session))
+    )
     (rendered / scenario.name).write_text(text, encoding="utf-8")
 shutil.copy(HERE / "stub-gh.py", out / "stub-gh.py")
 brief = (HERE / "agent-brief.md").read_text(encoding="utf-8")
