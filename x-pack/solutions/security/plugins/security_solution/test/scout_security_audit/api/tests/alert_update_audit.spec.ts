@@ -8,7 +8,7 @@
 import { readFileSync } from 'fs';
 
 import type { RoleApiCredentials } from '@kbn/scout-security';
-import { apiTest, PUBLIC_API_HEADERS, tags } from '@kbn/scout-security';
+import { apiTest, getPlaywrightTagsFor, PUBLIC_API_HEADERS } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import {
   DETECTION_ENGINE_ALERT_ASSIGNEES_URL,
@@ -55,7 +55,12 @@ const eventOutcome = (event: Record<string, unknown>): string | undefined =>
 
 apiTest.describe(
   'Security Solution alert update audit events',
-  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
+  {
+    tag: [
+      ...getPlaywrightTagsFor('stateful', 'classic', 'local'),
+      ...getPlaywrightTagsFor('serverless', 'security_complete', 'local'),
+    ],
+  },
   () => {
     let admin: RoleApiCredentials;
 
