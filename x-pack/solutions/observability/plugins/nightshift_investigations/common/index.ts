@@ -163,6 +163,11 @@ export {
 } from './sandbox_secrets';
 
 export {
+  SANDBOX_CONNECTORS_API_PATH,
+  type SandboxConnector,
+  type GetSandboxConnectorsResponse,
+} from './sandbox_connectors';
+export {
   CUSTOM_CONTEXT_API_PATH,
   MAX_CUSTOM_CONTEXT_SNIPPET_LENGTH,
   MAX_CUSTOM_CONTEXT_SNIPPETS,

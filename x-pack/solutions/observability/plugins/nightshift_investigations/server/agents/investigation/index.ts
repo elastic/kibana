@@ -22,6 +22,7 @@ import {
   NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../../common';
+import type { ListSandboxConnectors } from '../../lib/list_sandbox_connectors';
 import instructions from './instructions/investigator.md.text';
 import decisionTreesSection from './instructions/decision_trees.text';
 import { SANDBOX_BASH_TOOL_ID } from '../../tools/sandbox_bash/tool';
@@ -84,6 +85,8 @@ interface InvestigationAgentTypeOptions {
   /** The proposals plugin is enabled, so `proposals.create` is registered. */
   proposalsEnabled: boolean;
   telemetryConnectorId?: string;
+  /** Lists the connectors the sandbox can hand credentials for. Ignored when the sandbox is not configured */
+  listSandboxConnectors?: ListSandboxConnectors;
   /** Resolves the space's custom context block, appended to the instructions on every run. */
   getCustomContextInstructions?: (ctx: AgentConfigContext) => Promise<string>;
   logger?: Logger;
@@ -110,10 +113,32 @@ const appendCustomContext = async ({
   }
 };
 
+const resolveConnectorIds = async ({
+  telemetryConnectorId,
+  ctx,
+  listSandboxConnectors,
+  logger,
+}: {
+  telemetryConnectorId?: string;
+  ctx: AgentConfigContext;
+  listSandboxConnectors: ListSandboxConnectors;
+  logger?: Logger;
+}): Promise<string[]> => {
+  const telemetryIds = telemetryConnectorId ? [telemetryConnectorId] : [];
+  try {
+    const connectors = await listSandboxConnectors(ctx.request);
+    return [...new Set([...telemetryIds, ...connectors.map(({ id }) => id)])];
+  } catch (error) {
+    logger?.warn(`Failed to list sandbox connectors for space "${ctx.spaceId}": ${error.message}`);
+    return telemetryIds;
+  }
+};
+
 /**
  * Builds the Nightshift investigation agent type. It works from the sandbox, so it carries a
  * standalone prompt and no Elastic tools. Telemetry is reached through `telemetryConnectorId` as
- * described in `/workspace/elastic.md`.
+ * described in `/workspace/elastic.md`; the other sandbox connectors come from
+ * `listSandboxConnectors`.
  */
 export const getInvestigationAgentType = ({
   sandboxEnabled,
@@ -123,9 +148,11 @@ export const getInvestigationAgentType = ({
   investigationToolsEnabled,
   proposalsEnabled,
   telemetryConnectorId,
+  listSandboxConnectors: listSandboxConnectorsOption,
   getCustomContextInstructions,
   logger,
 }: InvestigationAgentTypeOptions): AgentTypeDefinition => {
+  const listSandboxConnectors = sandboxEnabled ? listSandboxConnectorsOption : undefined;
   const baseConfiguration = {
     instructions: fillContextInstructions({
       includeDecisionTrees: sandboxEnabled && decisionTreesEnabled,
@@ -168,17 +195,28 @@ export const getInvestigationAgentType = ({
     name: INVESTIGATION_AGENT_NAME,
     description: INVESTIGATION_AGENT_DESCRIPTION,
     avatar_icon: 'logoElastic',
-    baseConfiguration: getCustomContextInstructions
-      ? async (ctx) => ({
-          ...baseConfiguration,
-          instructions: await appendCustomContext({
-            instructions: baseConfiguration.instructions,
-            ctx,
-            getCustomContextInstructions,
-            logger,
-          }),
-        })
-      : baseConfiguration,
+    baseConfiguration:
+      getCustomContextInstructions || listSandboxConnectors
+        ? async (ctx) => ({
+            ...baseConfiguration,
+            instructions: getCustomContextInstructions
+              ? await appendCustomContext({
+                  instructions: baseConfiguration.instructions,
+                  ctx,
+                  getCustomContextInstructions,
+                  logger,
+                })
+              : baseConfiguration.instructions,
+            connector_ids: listSandboxConnectors
+              ? await resolveConnectorIds({
+                  telemetryConnectorId,
+                  ctx,
+                  listSandboxConnectors,
+                  logger,
+                })
+              : baseConfiguration.connector_ids,
+          })
+        : baseConfiguration,
   };
 };
 
@@ -192,6 +230,7 @@ export const registerInvestigationAgentType = (
     investigationToolsEnabled,
     proposalsEnabled,
     telemetryConnectorId,
+    listSandboxConnectors,
     getCustomContextInstructions,
     logger,
   }: InvestigationAgentTypeOptions
@@ -205,6 +244,7 @@ export const registerInvestigationAgentType = (
       investigationToolsEnabled,
       proposalsEnabled,
       telemetryConnectorId,
+      listSandboxConnectors,
       getCustomContextInstructions,
       logger,
     })

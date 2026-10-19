@@ -8,11 +8,7 @@
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID } from '@kbn/workflows/managed';
-import {
-  createOnboardingClient,
-  OnboardingUnavailableError,
-  OnboardingValidationError,
-} from './onboarding_client';
+import { createOnboardingClient, OnboardingUnavailableError } from './onboarding_client';
 
 const suggestion = {
   title: 'checkout 5xx spike',
@@ -25,9 +21,7 @@ const setup = ({
   executions = [],
   execution,
   workflow = { id: NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID, definition: {} },
-  secretKeys = ['GITHUB_TOKEN'],
 }: {
-  secretKeys?: string[];
   executions?: Array<{ id: string }>;
   execution?: Record<string, unknown>;
   workflow?: Record<string, unknown> | null;
@@ -42,7 +36,6 @@ const setup = ({
     getDeps: () => ({
       workflowsManagement: { management } as unknown as WorkflowsServerPluginSetup,
     }),
-    listSandboxSecretKeys: jest.fn().mockResolvedValue(secretKeys),
     logger: loggingSystemMock.createLogger(),
   });
   return { client, management, request: httpServerMock.createKibanaRequest() };
@@ -109,12 +102,6 @@ describe('createOnboardingClient', () => {
       request,
       'nightshift-onboarding'
     );
-  });
-
-  it('refuses to start without a sandbox secret', async () => {
-    const { client, management, request } = setup({ secretKeys: [] });
-    await expect(client.start(request)).rejects.toBeInstanceOf(OnboardingValidationError);
-    expect(management.runWorkflow).not.toHaveBeenCalled();
   });
 
   it('fails when the workflow is not installed', async () => {

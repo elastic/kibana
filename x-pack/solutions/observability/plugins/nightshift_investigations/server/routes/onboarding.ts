@@ -53,7 +53,7 @@ const startOnboardingSuggestionsRoute = createNightshiftInvestigationsServerRout
     access: 'internal',
     summary: 'Suggest first investigations',
     description:
-      'Starts the onboarding suggestions workflow: the investigation agent explores the space from its sandbox and suggests first investigations. Requires at least one sandbox secret.',
+      'Starts the onboarding suggestions workflow: the investigation agent explores the space from its sandbox and suggests first investigations.',
   },
   security: { authz: { requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage] } },
   params: z.object({}),

@@ -92,6 +92,7 @@ import {
   NIGHTSHIFT_AUTOMATION_SO_TYPE,
 } from './saved_objects';
 import { createOnboardingClient } from './onboarding/onboarding_client';
+import { createListSandboxConnectors } from './lib/list_sandbox_connectors';
 import { createSandboxSecretsClient } from './sandbox_secrets';
 import { createCustomContextClient } from './custom_context';
 import type {
@@ -207,8 +208,12 @@ export class NightshiftInvestigationsPlugin
         workflowsManagement: this.workflowsManagement,
         spaces: this.spaces,
       }),
-      listSandboxSecretKeys: (request) => sandboxSecretsClient.listKeysForSandbox(request),
       logger: this.logger.get('onboarding'),
+    });
+
+    const listSandboxConnectors = createListSandboxConnectors({
+      getActions: () => this.actionsStart,
+      logger: this.logger.get('sandbox_connectors'),
     });
 
     const getTriggerEmitter = (request: KibanaRequest): TriggerEmitter | undefined =>
@@ -245,6 +250,7 @@ export class NightshiftInvestigationsPlugin
         investigationToolsEnabled: Boolean(plugins.agenticInvestigations),
         proposalsEnabled: Boolean(plugins.proposals),
         telemetryConnectorId,
+        listSandboxConnectors,
         getCustomContextInstructions: ({ request, spaceId }) =>
           customContextClient.getInstructions(request, spaceId),
         logger: this.logger.get('custom_context'),
@@ -469,6 +475,7 @@ export class NightshiftInvestigationsPlugin
           getWorkflowsManagement: () => this.workflowsManagement,
           isCortexEnabled: () => this.cortexEnabled,
           sandboxSecretsClient,
+          listSandboxConnectors,
           customContextClient,
           onboardingClient,
           getCortexPageStore: (request: KibanaRequest) => {
