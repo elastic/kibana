@@ -276,7 +276,7 @@ For a `no_data` event, the director's FSM decides the next episode status. There
 | `'alert'` | Sets the episode to `'active'` so downstream consumers (dispatcher, actions) keep treating the group as live during the data gap. |
 | `'keep_last'` | Preserves the prior episode status (e.g. an `active` episode stays `active`). |
 | `'resolve'` | Mirrors the `'recovered'` FSM transitions, moving the episode toward `inactive` via the normal lifecycle. |
-| `'ignore'` | The presence query is skipped and no `no_data` event is produced; the episode drifts out of lookback windows over time. |
+| `'ignore'` | The presence query is skipped and no `no_data` event is produced; the episode drifts out of lookback windows over time. With `.rule-events` retention enabled and manual, condition or query recovery, an episode with no new events expires once its last event leaves the retention window, without a recovery event or notification. |
 
 ## Severity behavior
 

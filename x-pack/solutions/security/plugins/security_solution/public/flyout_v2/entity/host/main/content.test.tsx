@@ -53,8 +53,9 @@ jest.mock(
     EntityHighlightsAccordion: () => null,
   })
 );
+const mockEntityInsight = jest.fn((_props: { aliasRecords?: readonly unknown[] }) => null);
 jest.mock('../../../../cloud_security_posture/components/entity_insight', () => ({
-  EntityInsight: () => null,
+  EntityInsight: (props: { aliasRecords?: readonly unknown[] }) => mockEntityInsight(props),
 }));
 jest.mock('../../shared/components/observed_data_section', () => ({
   ObservedDataSection: () => null,
@@ -206,6 +207,14 @@ describe('Content — group view', () => {
     expect(mockFlyoutRiskSummary).toHaveBeenLastCalledWith(
       expect.objectContaining({ isGroupView: true })
     );
+  });
+
+  it('forwards the alias records to the insights so alerts and findings cover the whole group', () => {
+    const aliasRecords = [{ entity: { id: 'host:alias' }, host: { name: 'alias' } }] as never;
+    render(<Content {...defaultProps} isGroupView aliasRecords={aliasRecords} />, {
+      wrapper: TestProviders,
+    });
+    expect(mockEntityInsight).toHaveBeenLastCalledWith(expect.objectContaining({ aliasRecords }));
   });
 });
 

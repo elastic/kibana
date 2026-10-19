@@ -7,7 +7,11 @@
 
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import { EXCEPTION_LIST_NAMESPACE_AGNOSTIC } from '@kbn/securitysolution-list-constants';
-import { EngineDescriptorTypeName, EntityStoreGlobalStateTypeName } from '@kbn/entity-store/server';
+import {
+  EngineDescriptorTypeName,
+  EntityResolutionRuleTypeName,
+  EntityStoreGlobalStateTypeName,
+} from '@kbn/entity-store/server';
 import {
   timelineSavedObjectTypes,
   notesSavedObjectTypes,
@@ -60,6 +64,10 @@ export const securityV5SavedObjects = [
   // Entity Store v2 saved objects
   EngineDescriptorTypeName,
   EntityStoreGlobalStateTypeName,
+  // Built-in entity resolution rule overrides. Writes through the HTTP routes
+  // also need `securitySolution-entity-analytics-manage`; the maintainer reads
+  // them as its API key owner.
+  EntityResolutionRuleTypeName,
   ...savedObjectTypes.filter(
     (type) =>
       ![
