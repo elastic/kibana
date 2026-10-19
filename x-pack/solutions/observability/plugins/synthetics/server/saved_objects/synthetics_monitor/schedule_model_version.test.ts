@@ -15,9 +15,15 @@ describe('backfillScheduleInterval', () => {
     );
 
   it('stores seconds and minutes as a duration in seconds', () => {
-    expect(backfill({ number: '10', unit: 's' }).attributes).toEqual({ schedule_interval_seconds: 10 });
-    expect(backfill({ number: '10', unit: 'm' }).attributes).toEqual({ schedule_interval_seconds: 600 });
-    expect(backfill({ number: '5', unit: 'm' }).attributes).toEqual({ schedule_interval_seconds: 300 });
+    expect(backfill({ number: '10', unit: 's' }).attributes).toEqual({
+      schedule_interval_seconds: 10,
+    });
+    expect(backfill({ number: '10', unit: 'm' }).attributes).toEqual({
+      schedule_interval_seconds: 600,
+    });
+    expect(backfill({ number: '5', unit: 'm' }).attributes).toEqual({
+      schedule_interval_seconds: 300,
+    });
   });
 
   it('skips a schedule it cannot convert', () => {
