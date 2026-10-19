@@ -287,6 +287,7 @@ describe('Policy Advanced Settings section', () => {
 
   describe('custom YARA signatures advanced settings', () => {
     it('should hide custom YARA rescan interval options when the experimental flag is off', async () => {
+      mockedContext.setExperimentalFlag({ customYaraSignaturesEnabled: false });
       await render(true);
 
       for (const key of CUSTOM_YARA_RESCAN_INTERVAL_KEYS) {

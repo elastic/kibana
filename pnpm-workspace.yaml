@@ -46,10 +46,11 @@ allowBuilds:
 # deprecated `$@elastic/esql` override syntax). Must match `@elastic/esql` in
 # package.json; the renovate `esql-js` group bumps them together.
 catalog:
-  '@elastic/esql-grammar': '4.29.0'
-  '@elastic/esql-promql-grammar': '4.29.0'
-  '@elastic/esql-types': '4.29.0'
-  '@elastic/pretty-printer': '4.29.0'
+  '@elastic/esql-definitions': '4.32.0'
+  '@elastic/esql-grammar': '4.32.0'
+  '@elastic/esql-promql-grammar': '4.32.0'
+  '@elastic/esql-types': '4.32.0'
+  '@elastic/pretty-printer': '4.32.0'
 overrides:
   # Generated from package.json#resolutions by `kbn bootstrap` — edit
   # resolutions, not this block (yarn keys are mapped: `**/a` -> `a`, `a/b` -> `a>b`).
@@ -111,6 +112,7 @@ overrides:
   '@babel/plugin-transform-typescript': '7.24.7'
   '@bufbuild/protobuf': '2.5.2'
   '@elastic/elasticsearch@9>@elastic/transport': '9.4.0'
+  '@elastic/esql-definitions': 'catalog:'
   '@elastic/esql-grammar': 'catalog:'
   '@elastic/esql-promql-grammar': 'catalog:'
   '@elastic/esql-types': 'catalog:'

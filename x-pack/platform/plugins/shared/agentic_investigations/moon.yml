@@ -56,6 +56,7 @@ dependsOn:
   - '@kbn/charts-theme'
   - '@kbn/core-ui-settings-browser'
   - '@kbn/visualization-utils'
+  - '@kbn/shared-ux-ai-components'
 tags:
   - plugin
   - prod

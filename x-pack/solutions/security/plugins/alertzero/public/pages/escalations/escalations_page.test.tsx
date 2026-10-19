@@ -229,13 +229,11 @@ describe('EscalationsPage', () => {
     expect(screen.getByTestId('escalationQueue-closed')).toBeInTheDocument();
   });
 
-  it('explains in the Open section that escalations are created from the Alert Zero page', () => {
+  it('does not show the Alert Zero note in the Open section when there are open escalations', () => {
     mockBothQueues([openEscalation], [closedEscalation]);
     renderPage();
 
-    expect(screen.getByTestId('escalationQueueNote-open')).toHaveTextContent(
-      'Escalations start in Alert Zero'
-    );
+    expect(screen.queryByTestId('alertZeroEscalationsOpenNote')).not.toBeInTheDocument();
   });
 
   it('says there are no open escalations when the Open list is empty', () => {
