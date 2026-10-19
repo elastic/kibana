@@ -216,7 +216,7 @@ export const streamsUnitStatsErrorSchema = z.object({
   reason: z.string(),
 });
 
-/** `null` means no data. `unit` is a UCUM string, for example `ms` or `{item}`. */
+/** `null` means no data. `unit` is a UCUM string, for example `s` or `{item}`. */
 const statsValueSchema = z.object({ value: z.number().nullable(), unit: z.string().nullable() });
 /** A rate is always per unit of time. `time_unit` is the UCUM time unit, for example `s`. */
 const statsRateSchema = statsValueSchema.extend({ time_unit: z.string().nullable() });
