@@ -111,7 +111,7 @@ const projectRule = (rule: GetRuleMigrationRulesResponse['data'][number]) => ({
     : undefined,
   translation_result: rule.translation_result,
   status: rule.status,
-  comments: rule.comments,
+  comments: rule.original_rule.vendor === 'splunk' ? [] : rule?.comments[0],
 });
 
 const projectRuleSummary = (rule: GetRuleMigrationRulesResponse['data'][number]) => ({
