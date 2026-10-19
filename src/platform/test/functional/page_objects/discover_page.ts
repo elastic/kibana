@@ -1332,11 +1332,13 @@ export class DiscoverPageObject extends FtrService {
   }
 
   /**
-   * Seeds the persisted query mode in localStorage. Discover ignores `currentMode`
-   * unless `defaultMode` matches the resolved default (the `discover.isEsqlDefault`
-   * flag), so `defaultMode` defaults to `'esql'` to match the current application default.
+   * Seeds the persisted query mode in localStorage. Discover discards `currentMode`
+   * and falls back to the resolved default (the `discover.isEsqlDefault` flag) unless
+   * the recorded `defaultMode` still matches that default, so the snapshot records the
+   * opposite mode: `currentMode` is then the outcome whether the seed is honored or
+   * discarded, and the mode no longer depends on how the flag resolves.
    */
-  public async setQueryMode(currentMode: string, defaultMode: string = 'esql') {
+  public async setQueryMode(currentMode: 'classic' | 'esql') {
     const kibanaUrl = getUrl.noAuth(this.config.get('servers.kibana'), {});
     const currentUrl = await this.browser.getCurrentUrl();
     if (new URL(currentUrl).origin !== new URL(kibanaUrl).origin) {
@@ -1345,7 +1347,10 @@ export class DiscoverPageObject extends FtrService {
 
     return this.browser.setLocalStorageItem(
       DISCOVER_QUERY_MODE_KEY,
-      JSON.stringify({ currentMode, defaultMode })
+      JSON.stringify({
+        currentMode,
+        defaultMode: currentMode === 'esql' ? 'classic' : 'esql',
+      })
     );
   }
 
