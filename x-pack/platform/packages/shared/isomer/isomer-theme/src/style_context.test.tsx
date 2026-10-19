@@ -48,6 +48,22 @@ describe('createIsomerStyleContext', () => {
     expect(css).toMatch(/\.isomer\[data-theme='dark'\]\{--isomer-shadow-s:/);
   });
 
+  it('renders with the render options given with a sink', async () => {
+    const parent = document.createElement('div');
+    const { resolveClassName } = createIsomerStyleContext({
+      sink: createDomSink({ document, parent }),
+      render: { scheme: 'light' },
+    });
+
+    resolveClassName(noteStyles.handles.root as unknown as StyleHandle);
+    await Promise.resolve();
+    const css = parent.querySelector('style')?.textContent ?? '';
+
+    expect(css).toContain('.testLiveNote-root{');
+    expect(css).not.toContain("[data-theme='dark']");
+    expect(css).not.toContain('light-dark(');
+  });
+
   it('writes one stylesheet to the document head by default, however often it is asked for', async () => {
     const handle = noteStyles.handles.root as unknown as StyleHandle;
     createIsomerStyleContext().resolveClassName(handle);
