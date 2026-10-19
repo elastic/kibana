@@ -11,6 +11,9 @@ Kibana's [Isomer](https://github.com/elastic/isomer) pack of content and layout 
 - `header`: a message title, or a section label with `level` 1 to 4.
   - `{ type: 'header', text, level? }`. Slack gets a `header` block, clamped to 150 characters; React and Markdown nest it below the composition title.
   - A labeled section is a level 3 `header` followed by its content.
+- `context`: a line of small, secondary facts.
+  - `{ type: 'context', items: [{ text }] }`, 1 to 10 plain-text items. Slack gets one escaped `mrkdwn` element, clamped to 2,000 characters; other surfaces join the items with ` · `.
+  - Plain text reaches every surface as written, so use Unicode emoji (⚠️), not Slack shortcodes (`:warning:`).
 
 React and HTML are styled with [`@kbn/isomer-theme`](../isomer-theme): each primitive has a style module on Borealis tokens, and the pack's `styleAdapter` emits the CSS a render uses under the `.isomer` root, in light and dark. Rendered through `createKibanaIsomerRuntime`, React output is styled with no further setup.
 
