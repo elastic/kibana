@@ -39,20 +39,24 @@ export const getComponentAlertLevel = (
 };
 
 export interface PackagePolicyUnitSummary {
-  /** Units the agent reports for the package policy; 0 means it is not running it at all. */
+  /** Input units the agent reports for the package policy; 0 means it is not running it at all. */
   total: number;
-  /** Units that are stopping or stopped. */
+  /** Input units that are stopping or stopped. */
   stopped: number;
 }
 
-/** How many units of the given package policy the agent reports, and how many are not running. */
+/**
+ * How many input units of the given package policy the agent reports, and how many are not running.
+ * Only inputs count: an output is shared with whatever else the component runs, so a healthy output
+ * says nothing about whether this integration is.
+ */
 export const getPackagePolicyUnitSummary = (
   agent: Agent,
   packagePolicy: PackagePolicy
 ): PackagePolicyUnitSummary => {
-  const units = getPackagePolicyUnits(agent, packagePolicy);
+  const inputs = getPackagePolicyUnits(agent, packagePolicy).filter((u) => u.type === 'input');
   return {
-    total: units.length,
-    stopped: units.filter((u) => u.status === 'STOPPING' || u.status === 'STOPPED').length,
+    total: inputs.length,
+    stopped: inputs.filter((u) => u.status === 'STOPPING' || u.status === 'STOPPED').length,
   };
 };

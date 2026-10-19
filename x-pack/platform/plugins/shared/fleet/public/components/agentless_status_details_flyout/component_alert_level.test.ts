@@ -66,11 +66,11 @@ describe('getPackagePolicyUnitSummary', () => {
     expect(getPackagePolicyUnitSummary(agent, packagePolicy)).toEqual({ total: 0, stopped: 0 });
   });
 
-  it('counts the package policy units and the ones that are not running', () => {
+  it('counts the input units of the package policy and the ones that are not running', () => {
     const agent = agentWith([
       unit('input-1', 'input', 'STOPPING'),
-      unit('x-input-1', 'output', 'STOPPED'),
       unit('input-1-b', 'input', 'HEALTHY'),
+      unit('input-1-c', 'input', 'STOPPED'),
       unit('other-input', 'input', 'STOPPED'),
     ]);
     expect(getPackagePolicyUnitSummary(agent, packagePolicy)).toEqual({ total: 3, stopped: 2 });
@@ -79,8 +79,35 @@ describe('getPackagePolicyUnitSummary', () => {
   it('does not count starting or configuring units as stopped', () => {
     const agent = agentWith([
       unit('input-1', 'input', 'STARTING'),
-      unit('x-input-1', 'output', 'CONFIGURING'),
+      unit('input-1-b', 'input', 'CONFIGURING'),
     ]);
     expect(getPackagePolicyUnitSummary(agent, packagePolicy)).toEqual({ total: 2, stopped: 0 });
+  });
+
+  describe('outputs are shared, so they say nothing about this integration running', () => {
+    it('does not count a healthy output as a live unit when the input has stopped', () => {
+      // The output belongs to the same component but is kept alive by another integration.
+      const agent = agentWith([
+        unit('input-1', 'input', 'STOPPED'),
+        unit('x-input-1', 'output', 'HEALTHY'),
+      ]);
+
+      expect(getPackagePolicyUnitSummary(agent, packagePolicy)).toEqual({ total: 1, stopped: 1 });
+    });
+
+    it('reports zero units when only a shared output matches the package policy', () => {
+      const agent = agentWith([unit('x-input-1', 'output', 'HEALTHY')]);
+
+      expect(getPackagePolicyUnitSummary(agent, packagePolicy)).toEqual({ total: 0, stopped: 0 });
+    });
+
+    it('is unaffected by an output that is not running', () => {
+      const agent = agentWith([
+        unit('input-1', 'input', 'HEALTHY'),
+        unit('x-input-1', 'output', 'STOPPED'),
+      ]);
+
+      expect(getPackagePolicyUnitSummary(agent, packagePolicy)).toEqual({ total: 1, stopped: 0 });
+    });
   });
 });

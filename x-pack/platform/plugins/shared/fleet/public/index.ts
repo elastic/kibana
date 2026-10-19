@@ -313,7 +313,11 @@ export { sendCreatePackagePolicyForRq as sendCreatePackagePolicy } from './hooks
 
 // Agents query and incoming-data check — used by step 4 to resolve the deployed agents and
 // detect data per agent (immune to a customised data_stream.dataset).
-export { useGetAgentsQuery, sendGetAgentIncomingData } from './hooks/use_request/agents';
+export {
+  useGetAgentsQuery,
+  sendGetAgents,
+  sendGetAgentIncomingData,
+} from './hooks/use_request/agents';
 
 // Agent status badge — the same badge the Agent list and Managed integrations table render.
 export const LazyAgentHealth = lazy(() =>
