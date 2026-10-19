@@ -14,14 +14,17 @@ import {
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
+  EuiTextColor,
   euiCanAnimate,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { BoostProfileType } from '../../common/types';
 import type { CostImpact, VcuRange } from '../../common/vcu_estimate';
 import {
   COST_DISCLAIMER,
+  formatCost,
   formatCostRange,
   formatSize,
   getCostRangeLabel,
@@ -93,13 +96,16 @@ const RangeChangeIndicator = ({ range, savedRange }: RangeChangeIndicatorProps) 
   );
 };
 
-interface RangeValueProps {
+interface EstimateValueProps {
   estimate: VcuRange;
   comparison?: VcuRange;
 }
 
-/** The whole range, from at rest to at peak, with any change indicator and the VCUs below. */
-const RangeValue = ({ estimate, comparison }: RangeValueProps) => {
+/**
+ * The cost range, from at rest to at peak, with any change indicator. When both ends cost the same,
+ * it's one cost, with no ends to name.
+ */
+const EstimateValue = ({ estimate, comparison }: EstimateValueProps) => {
   const range = { atRest: roundVcus(estimate.atRest), atPeak: roundVcus(estimate.atPeak) };
   const savedRange = comparison && {
     atRest: roundVcus(comparison.atRest),
@@ -108,29 +114,42 @@ const RangeValue = ({ estimate, comparison }: RangeValueProps) => {
   const hasChanged =
     savedRange !== undefined &&
     (savedRange.atRest !== range.atRest || savedRange.atPeak !== range.atPeak);
+  const isRange = formatCost(range.atRest) !== formatCost(range.atPeak);
 
   return (
-    <div data-test-subj="boostCostEstimate-range">
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+    <EuiFlexGroup
+      gutterSize="s"
+      alignItems="center"
+      responsive={false}
+      data-test-subj="boostCostEstimate-range"
+    >
+      <EuiFlexItem grow={false}>
+        <EuiText size="s">
+          <span aria-hidden={true}>
+            {isRange ? (
+              <FormattedMessage
+                id="xpack.boost.costEstimate.rangeWithEnds"
+                defaultMessage="{cost} <ends>at rest to at peak</ends>"
+                values={{
+                  cost: formatCostRange(range),
+                  ends: (chunks) => <EuiTextColor color="subdued">{chunks}</EuiTextColor>,
+                }}
+              />
+            ) : (
+              formatCostRange(range)
+            )}
+          </span>
+          <EuiScreenReaderOnly>
+            <span>{getCostRangeLabel(range)}</span>
+          </EuiScreenReaderOnly>
+        </EuiText>
+      </EuiFlexItem>
+      {hasChanged && savedRange && (
         <EuiFlexItem grow={false}>
-          <EuiText size="s">
-            <span aria-hidden={true}>{formatCostRange(range)}</span>
-            <EuiScreenReaderOnly>
-              <span>{getCostRangeLabel(range)}</span>
-            </EuiScreenReaderOnly>
-          </EuiText>
+          <RangeChangeIndicator range={range} savedRange={savedRange} />
         </EuiFlexItem>
-        {hasChanged && savedRange && (
-          <EuiFlexItem grow={false}>
-            <RangeChangeIndicator range={range} savedRange={savedRange} />
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-      <EuiSpacer size="xs" />
-      <EuiText size="xs" color="subdued">
-        {getVcuRangeText(range)}
-      </EuiText>
-    </div>
+      )}
+    </EuiFlexGroup>
   );
 };
 
@@ -141,8 +160,8 @@ interface EstimateContentProps {
 }
 
 /**
- * The estimate's title, what it covers, and its range. For data streams, a timeline below splits it
- * between the profile's periods.
+ * The estimate as a stat: its title, the cost range below it, then its VCUs and what it covers. For
+ * data streams, a timeline below splits it between the profile's periods.
  */
 const EstimateContent = ({
   estimate: { impact, type },
@@ -162,70 +181,57 @@ const EstimateContent = ({
         transition: `opacity ${euiTheme.animation.fast}`,
       }}
     >
-      <EuiFlexGroup
-        gutterSize="s"
-        alignItems="flexStart"
-        justifyContent="spaceBetween"
-        responsive={false}
-        wrap
-        css={{
-          // Matches the height of the small buttons below the divider, so both halves of the
-          // footer are the same height.
-          minBlockSize: euiTheme.size.xl,
-        }}
-      >
+      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">
-                <strong>
-                  {i18n.translate('xpack.boost.costEstimate.title', {
-                    defaultMessage: 'Search cost per hour',
-                  })}
-                </strong>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiIconTip
-                type="info"
-                color="subdued"
-                // A flex anchor sizes to the icon, so the row's flex alignment centers it. The
-                // default inline-block anchor gets a line box from the inherited font, which
-                // offsets the icon.
-                display="flex"
-                content={COST_DISCLAIMER}
-                aria-label={i18n.translate('xpack.boost.costEstimate.disclaimerLabel', {
-                  defaultMessage: 'About this estimate',
-                })}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="xs" />
-          <EuiText size="xs" color="subdued">
-            {i18n.translate('xpack.boost.costEstimate.subtitle', {
-              defaultMessage: '{targets} · {size}',
-              values: {
-                targets: formatDataSourceCount(type, dataSourceCount),
-                size: formatSize(sizeInBytes),
-              },
-            })}
+          <EuiText size="s">
+            <strong>
+              {i18n.translate('xpack.boost.costEstimate.title', {
+                defaultMessage: 'Search cost per hour',
+              })}
+            </strong>
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <div aria-live="polite">
-            {isStale && (
-              <EuiScreenReaderOnly>
-                <span>
-                  {i18n.translate('xpack.boost.costEstimate.staleLabel', {
-                    defaultMessage: 'Last available estimate:',
-                  })}
-                </span>
-              </EuiScreenReaderOnly>
-            )}
-            <RangeValue estimate={estimate} comparison={comparison} />
-          </div>
+          <EuiIconTip
+            type="info"
+            color="subdued"
+            // A flex anchor sizes to the icon, so the row's flex alignment centers it. The default
+            // inline-block anchor gets a line box from the inherited font, which offsets the icon.
+            display="flex"
+            content={COST_DISCLAIMER}
+            aria-label={i18n.translate('xpack.boost.costEstimate.disclaimerLabel', {
+              defaultMessage: 'About this estimate',
+            })}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="xs" />
+      <div aria-live="polite">
+        {isStale && (
+          <EuiScreenReaderOnly>
+            <span>
+              {i18n.translate('xpack.boost.costEstimate.staleLabel', {
+                defaultMessage: 'Last available estimate:',
+              })}
+            </span>
+          </EuiScreenReaderOnly>
+        )}
+        <EstimateValue estimate={estimate} comparison={comparison} />
+        <EuiSpacer size="xs" />
+        <EuiText size="xs" color="subdued">
+          {i18n.translate('xpack.boost.costEstimate.details', {
+            defaultMessage: '{vcus} · {targets} · {size}',
+            values: {
+              vcus: getVcuRangeText({
+                atRest: roundVcus(estimate.atRest),
+                atPeak: roundVcus(estimate.atPeak),
+              }),
+              targets: formatDataSourceCount(type, dataSourceCount),
+              size: formatSize(sizeInBytes),
+            },
+          })}
+        </EuiText>
+      </div>
       {periods && (
         <>
           <EuiSpacer size="s" />
