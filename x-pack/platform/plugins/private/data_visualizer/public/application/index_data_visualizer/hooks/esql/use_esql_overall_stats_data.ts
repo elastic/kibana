@@ -224,6 +224,7 @@ export const useESQLOverallStatsData = (
   const previousExecutionTs = useRef<number | undefined>(undefined);
   const previousDocCountRequest = useRef('');
   const previousError = useRef<Error | undefined>();
+  const fetchGeneration = useRef(0);
 
   const { runRequest, cancelRequest } = useCancellableSearch(data);
 
@@ -267,6 +268,9 @@ export const useESQLOverallStatsData = (
         previousExecutionTs.current = fieldStatsRequest.lastRefresh;
 
         cancelRequest();
+        // An aborted request resolves with `null` rather than throwing, so a superseded run resumes past its awaits and keeps writing state.
+        const generation = ++fetchGeneration.current;
+        const isStale = () => fetchGeneration.current !== generation;
 
         setOverallStatsProgress({
           ...getInitialProgress(),
@@ -312,6 +316,7 @@ export const useESQLOverallStatsData = (
           },
           { strategy: ESQL_ASYNC_SEARCH_STRATEGY }
         )) as ESQLResponse | undefined;
+        if (isStale()) return;
         setQueryHistoryStatus(false);
         const columnInfo = columnsResp?.rawResponse
           ? columnsResp.rawResponse.all_columns ?? columnsResp.rawResponse.columns
@@ -375,6 +380,7 @@ export const useESQLOverallStatsData = (
             timeRange
           );
 
+          if (isStale()) return;
           totalCount = results.totalCount;
           documentCountStats = results.documentCountStats;
           setTableData({ totalCount, documentCountStats });
@@ -458,7 +464,7 @@ export const useESQLOverallStatsData = (
             onError,
             timeRange,
           });
-          if (!stats) return;
+          if (!stats || isStale()) return;
           stats.aggregatableNotExistsFields = aggregatableNotExistsFields;
           stats.nonAggregatableNotExistsFields = nonAggregatableNotExistsFields;
 
