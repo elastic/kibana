@@ -355,11 +355,11 @@ steps:
             on-failure:
               continue: true
             agent-id: alertzero-thin-agent
-            # Keep in sync with ALERTZERO_AGENTIC_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
-            # Agentic rather than reasoning: this is a tool-driven reconstruction that
+            # Keep in sync with ALERTZERO_BALANCED_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
+            # Balanced rather than frontier: this is a tool-driven reconstruction that
             # iterates over telemetry and then calls the action catalog, so its cost scales
             # with the round count rather than with one long answer.
-            connector-id-by-feature: alertzero_agentic
+            connector-id-by-feature: alertzero_balanced
             # plugin-id: per-Worker cost attribution; aggregate-by: ALERTZERO_INFERENCE_PARENT_FEATURE_ID.
             plugin-id: alertzero_endpoint_analysis
             aggregate-by: alertzero_parent
@@ -376,10 +376,18 @@ steps:
                 I have an alert on {{ steps.resolve_host.output.host_name }}.
                 Perform forensic analysis and extract all IoCs.
                 Write the reconstruction to `timeline.events` and the indicators to `iocs`,
-                matching this step's schema. Use `rationale` only for the assessment:
-                - Whether this is a real incident, which other hosts are affected, what the
-                  data gaps are, and why the evidence supports any actions you recommend.
-                  Do not restate `timeline` or `iocs` there.
+                matching this step's schema. Use `rationale` only for the assessment.
+
+                Write `rationale` as markdown, in ASD-STE100 Simplified Technical English.
+                Use short sentences. Put one idea in each sentence.
+                - One paragraph first. State whether this is a real incident and give the strongest reason.
+                  Say why the evidence supports containment, or why it does not.
+                - Then these headings, each with a bullet list. Omit a heading that has nothing to report:
+                  - `## Affected hosts`. One bullet per host. Name the host and its role.
+                  - `## Data gaps`. One bullet per gap. Name the telemetry that is missing.
+                - Do not list the actions. `recommendedActions` carries each action, and each card's
+                  `title` and `comment` name its target and the evidence.
+                - Do not restate `timeline` or `iocs`. Do not repeat the journal label as a heading.
 
                 After the forensic reconstruction,
                 - Assess whether this represents a real incident that warrants containment.
@@ -406,7 +414,6 @@ steps:
                 - If the evidence cannot fill what an entry's `inputSchema.properties.actionInput` requires, drop that action. Set
                   propose=false when that leaves nothing. Never guess an id, pid, path, or command that is
                   not in the evidence.
-                - Cite hosts, process/path, tactics, and why this action now in rationale.
                 - Set `title` on every recommendation to a short plain-text label of that one action
                   and its target, using the catalog entry's `name`. A host action names the host
                   (`Isolate host WIN-ANALYST01`). A process action names the process and the host
@@ -445,9 +452,13 @@ steps:
                     minLength: 1
                     maxLength: 7900
                     description: >
-                      Assessment only: whether this is a real incident, other affected hosts,
-                      data gaps, and why the evidence supports the recommended actions. The
-                      reconstruction itself belongs in `timeline`, the indicators in `iocs`.
+                      Assessment only, as markdown in ASD-STE100 Simplified Technical English.
+                      One opening paragraph, then the headings `## Affected hosts` and `## Data gaps`,
+                      each with one bullet per item. Omit a heading that has nothing to report.
+                      Say whether this is a real incident, which other hosts are affected, what the
+                      data gaps are, and why the evidence supports containment or does not. Do not
+                      list the actions; `recommendedActions` carries those. The reconstruction itself
+                      belongs in `timeline`, the indicators in `iocs`.
                   # `timeline` and `iocs` mirror the `security.investigation.timeline` and
                   # `security.investigation.iocs` attachment payloads exactly, so the attach steps
                   # below can pass them through untouched. Changing a field name here without
@@ -757,8 +768,13 @@ steps:
               run-as-mode: inherit
               inputs:
                 conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
-                message: >-
-                  {%- if steps.forensic_analysis.output.structured_output.propose == true -%}Rationale for proposed actions{%- else -%}Rationale for ending investigation{%- endif -%}: {{ steps.forensic_analysis.output.structured_output.rationale }}
+                # `#` renders larger than the `##` sections inside `rationale`. A blank line
+                # after it keeps the first section on its own line. The journal renders
+                # this user message as markdown.
+                message: |-
+                  {%- if steps.forensic_analysis.output.structured_output.propose == true -%}# Rationale for proposed actions{%- else -%}# Rationale for ending investigation{%- endif %}
+
+                  {{ steps.forensic_analysis.output.structured_output.rationale }}
 
         else:
           - name: journal_no_host
@@ -908,13 +924,53 @@ steps:
           Endpoint analysis of `{{ steps.resolve_host.output.host_name }}` is submitting
           {{ steps.forensic_analysis.output.structured_output.recommendedActions.size }} containment proposal(s)
           {%- if steps.resolve_autonomy.output.level == 'supervised' %} for auto-approval{% else %} for analyst approval{% endif %}.
+          The investigation closes once every proposal on it has been decided.
+
+  # The gate closes the investigation once every proposal on it is settled, and
+  # its creation barrier (`created >= expectedProposalCount`) counts every
+  # proposal on the investigation, not just this run's. This investigation
+  # already holds at least the approved handoff that requested the analysis,
+  # and possibly triage or attack proposals, so the barrier has to be baselined
+  # on what is there now or the first containment gate to settle would read
+  # the handoff as "all created" and close under the siblings still queueing.
+  # Same baseline Hunt's packaging takes inside `hunt.packageReport`; this run
+  # has no step type, so it reads the route. `size: 1`: only `total` is read.
+  # Failing open to `0` here is the lesser risk: a premature close is undone by
+  # the bridge's own reopen on the next proposal, a blocked close is manual.
+  - name: count_existing_proposals
+    type: kibana.request
+    if: >-
+      ${{ steps.resolve_run_outcome.output.attached == true
+        and steps.forensic_analysis.output.structured_output.propose == true
+        and steps.forensic_analysis.output.structured_output.recommendedActions.size > 0 }}
+    with:
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/internal/proposals"
+      headers:
+        elastic-api-version: "1"
+      query:
+        conversationId: "{{ steps.resolve_request.output.investigation_id }}"
+        size: 1
+    on-failure:
+      continue: true
+
+  # Filters apply left to right, so `default: 0` covers only the count read
+  # (skipped or failed) before the recommended actions are added on.
+  - name: resolve_expected_proposals
+    type: data.set
+    if: >-
+      ${{ steps.resolve_run_outcome.output.attached == true
+        and steps.forensic_analysis.output.structured_output.propose == true
+        and steps.forensic_analysis.output.structured_output.recommendedActions.size > 0 }}
+    with:
+      count: "${{ steps.count_existing_proposals.output.total | default: 0 | plus: steps.forensic_analysis.output.structured_output.recommendedActions.size }}"
 
   # Containment is proposed on the investigation, not returned as run output.
   # `executeAsync` so this run does not sit in the 72h approval gate; each
-  # proposal workflow parks on its own. Continue on failure so a single bad
-  # action cannot fail the run. Runs after investigation items are attached.
-  # `parallel` with `settled` keeps every dispatch's outcome: `foreach` would
-  # keep only the last one, and continuing on failure would clear a rejection.
+  # gate parks on its own. Continue on failure so a single bad action cannot
+  # fail the run. Runs after investigation items are attached. `parallel` with
+  # `settled` keeps every dispatch's outcome: `foreach` would keep only the last
+  # one, and continuing on failure would clear a rejection.
   #
   # The `if` gates the whole step, including `foreach`. `| default: []` does not
   # produce an array in this engine, and `foreach` hard-fails when its source is
@@ -935,12 +991,16 @@ steps:
       - name: propose_action
         type: workflow.executeAsync
         with:
-          # The bridge rather than the gate: it owns `origin`, so a Worker
-          # cannot stamp someone else's queue and lose the proposal.
-          workflow-id: system-create-alertzero-proposal
+          # The gate rather than the bridge: it wraps the bridge (so `origin` is
+          # still stamped there) and closes the investigation once every
+          # proposal on it is approved, dismissed or otherwise settled. Without
+          # it the investigation stayed open after the last decision.
+          workflow-id: system-security-forensics-proposal-gate
           run-as-mode: inherit
           inputs:
             conversationId: "{{ steps.resolve_request.output.investigation_id }}"
+            investigationConversationId: "{{ steps.resolve_request.output.investigation_id }}"
+            expectedProposalCount: "${{ steps.resolve_expected_proposals.output.count }}"
             # Without this the proposal stores the action's own name, so two isolates
             # of different hosts share one label. Truncated to the proposal step's
             # title limit: a longer one fails the dispatch.

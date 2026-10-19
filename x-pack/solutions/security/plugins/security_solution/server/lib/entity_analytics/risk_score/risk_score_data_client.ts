@@ -190,6 +190,12 @@ export class RiskScoreDataClient {
    * executes a `date_histogram` and returns, per bucket, the maximum-scoring
    * document so each entry keeps a real document `@timestamp` (the point-in-time
    * contributions flow refetches by exact timestamp).
+   *
+   * TODO: normalized scores written before the alert sample size dropped from 10,000 to 500
+   * (see DEFAULT_ALERT_SAMPLE_SIZE) are on the old scale, about 2.8% lower than the same alerts
+   * score today, so history shows a step at the upgrade. Either rescale older entries here
+   * (score documents don't record which normalizer produced them, so that needs a cutover
+   * timestamp or a new field on the score document) or mark the change in the history UI.
    */
   public getRiskScoreHistory = async (params: {
     entityType: string;

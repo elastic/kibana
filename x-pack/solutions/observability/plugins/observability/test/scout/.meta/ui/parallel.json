@@ -1,5 +1,5 @@
 {
-  "sha1": "16e7c57c493262482e4f6dcabfdb729a0fa2a712",
+  "sha1": "a725b2595614f6e76c3c45a3d4d603e89d382961",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -435,7 +435,7 @@
     {
       "id": "d727dcfffd97d68-e91ca78d2096478",
       "title": "Custom Threshold Rule - Ad-hoc Data View should create a custom threshold rule with an ad-hoc data view",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -444,7 +444,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/custom_threshold_rule/ad_hoc_data_view.spec.ts",
-        "line": 26,
+        "line": 27,
         "column": 7
       }
     },

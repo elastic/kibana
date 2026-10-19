@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+import type { IndicesGetMappingResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { KibanaRequest, Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import {
-  ALERTZERO_FAST_INFERENCE_FEATURE_ID,
-  ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
+  ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
+  ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
+  THREAT_REPORTS_GET_MAPPING_PARAMS,
+  getReportEmbeddingEndpointIds,
+  isReportsIndexManaged,
 } from '@kbn/alertzero-common';
 import {
   DIAMOND_SUMMARY_EMBEDDING_INFERENCE_ID,
@@ -21,9 +25,7 @@ import {
 } from '../../../common/threat_intel';
 import { HIDDEN_INDEX_SEARCH_OPTIONS } from '../lib/es_options';
 import { buildSpaceFilterTerms } from '../lib/space_filter';
-import { USABLE_REPORT_FILTER } from '../lib/usable_report_filter';
-
-const REQUIRED_REPORT_SEMANTIC_FIELDS = ['title', 'body_text'] as const;
+import { HUNT_USABLE_FILTER, INDICATOR_ELIGIBLE_FILTER } from '../lib/usable_report_filter';
 
 export interface ReadinessDeps {
   esClient: ElasticsearchClient;
@@ -67,21 +69,30 @@ const checkReportsIndexState = async (
 };
 
 /**
- * The reports index template sets `dynamic: strict`; an index auto-created by a write
- * before the template existed does not. Anything else (including a failed read) is
- * treated as managed so unrelated errors do not masquerade as a template-free index.
+ * One `indices.getMapping` round trip feeds both the managed-index and the embedding
+ * checks. `getMapping`, not `getFieldMapping`: the latter is unavailable (410) on
+ * serverless. A failed read yields `undefined`; each check decides what that means.
  */
-const checkReportsIndexManaged = async (esClient: ElasticsearchClient): Promise<boolean> => {
+const fetchReportsMapping = async (
+  esClient: ElasticsearchClient,
+  logger: Logger
+): Promise<IndicesGetMappingResponse | undefined> => {
   try {
-    const response = await esClient.indices.getMapping({
-      index: THREAT_REPORTS_INDEX,
-      expand_wildcards: ['open', 'hidden'],
-    });
-    return Object.values(response).every((entry) => entry.mappings?.dynamic === 'strict');
-  } catch {
-    return true;
+    return await esClient.indices.getMapping({ ...THREAT_REPORTS_GET_MAPPING_PARAMS });
+  } catch (err) {
+    logger.debug(
+      `Readiness reports mapping read failed: ${err instanceof Error ? err.message : String(err)}`
+    );
+    return undefined;
   }
 };
+
+/**
+ * Anything other than a readable, non-strict mapping (including a failed read) is
+ * treated as managed so unrelated errors do not masquerade as a template-free index.
+ */
+const checkReportsIndexManaged = (mappings: IndicesGetMappingResponse | undefined): boolean =>
+  mappings === undefined || isReportsIndexManaged(mappings);
 
 /**
  * Verifies report-content semantic_text embedding endpoints (cluster default).
@@ -89,27 +100,13 @@ const checkReportsIndexManaged = async (esClient: ElasticsearchClient): Promise<
  */
 const checkEmbeddingEndpoints = async (
   esClient: ElasticsearchClient,
+  mappings: IndicesGetMappingResponse | undefined,
   logger: Logger
 ): Promise<boolean> => {
+  if (!mappings) return false;
+  const endpointIds = getReportEmbeddingEndpointIds(mappings);
+  if (!endpointIds) return false;
   try {
-    const mappings = await esClient.indices.getFieldMapping({
-      index: THREAT_REPORTS_INDEX,
-      fields: REQUIRED_REPORT_SEMANTIC_FIELDS.map((field) => `content.${field}`),
-      include_defaults: true,
-    });
-    const fieldMappings = mappings[THREAT_REPORTS_INDEX]?.mappings;
-    const endpointIds = new Set<string>();
-
-    for (const field of REQUIRED_REPORT_SEMANTIC_FIELDS) {
-      const fullName = `content.${field}`;
-      const fieldMapping = fieldMappings?.[fullName];
-      const mapping = fieldMapping?.mapping[field] ?? fieldMapping?.mapping[fullName];
-      if (mapping?.type !== 'semantic_text' || !mapping.inference_id) {
-        return false;
-      }
-      endpointIds.add(mapping.inference_id);
-    }
-
     for (const endpointId of endpointIds) {
       await esClient.inference.get({ inference_id: endpointId });
     }
@@ -165,6 +162,7 @@ const loadUsableStats = async ({
   spaceId: string;
 }): Promise<{
   usableReportCount: number;
+  indicatorEligibleReportCount: number;
   lastIngestAt: string | null;
   lastEnrichAt: string | null;
 }> => {
@@ -175,12 +173,13 @@ const loadUsableStats = async ({
     track_total_hits: true,
     query: {
       bool: {
-        filter: [buildSpaceFilterTerms(spaceId), USABLE_REPORT_FILTER],
+        filter: [buildSpaceFilterTerms(spaceId), HUNT_USABLE_FILTER],
       },
     },
     aggs: {
       last_ingest: { max: { field: 'lineage.ingested_at' } },
       last_enrich: { max: { field: 'lineage.extracted_at' } },
+      indicator_eligible: { filter: INDICATOR_ELIGIBLE_FILTER },
     },
   });
 
@@ -188,8 +187,13 @@ const loadUsableStats = async ({
   const usableReportCount =
     typeof total === 'number' ? total : typeof total?.value === 'number' ? total.value : 0;
 
+  const indicatorEligibleAgg = response.aggregations?.indicator_eligible as
+    | { doc_count?: number }
+    | undefined;
+
   return {
     usableReportCount,
+    indicatorEligibleReportCount: indicatorEligibleAgg?.doc_count ?? 0,
     lastIngestAt: maxAggToIso(
       response.aggregations?.last_ingest as
         | { value?: number | null; value_as_string?: string }
@@ -234,8 +238,10 @@ export const getThreatIntelReadiness = async ({
     reasonCodes.push('reports_index_check_failed');
   }
 
+  const reportsMapping =
+    reportsIndexState === 'exists' ? await fetchReportsMapping(esClient, logger) : undefined;
   const reportsIndexUnmanaged =
-    reportsIndexState === 'exists' && !(await checkReportsIndexManaged(esClient));
+    reportsIndexState === 'exists' && !checkReportsIndexManaged(reportsMapping);
   if (reportsIndexUnmanaged) {
     reasonCodes.push('reports_index_unmanaged');
   }
@@ -245,6 +251,7 @@ export const getThreatIntelReadiness = async ({
       status: 'blocked',
       reasonCodes,
       usableReportCount: 0,
+      indicatorEligibleReportCount: 0,
       lastIngestAt: null,
       lastEnrichAt: null,
       ...(optional.length > 0 ? { optional } : {}),
@@ -254,7 +261,7 @@ export const getThreatIntelReadiness = async ({
   const inference = getInference();
   const searchInferenceEndpoints = getSearchInferenceEndpoints();
 
-  const embeddingOk = await checkEmbeddingEndpoints(esClient, logger);
+  const embeddingOk = await checkEmbeddingEndpoints(esClient, reportsMapping, logger);
   if (!embeddingOk) {
     reasonCodes.push('embedding_endpoint_unavailable');
   }
@@ -263,7 +270,7 @@ export const getThreatIntelReadiness = async ({
     Boolean(inference) &&
     (await featureHasEndpoint({
       searchInferenceEndpoints,
-      featureId: ALERTZERO_FAST_INFERENCE_FEATURE_ID,
+      featureId: ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
       request,
       logger,
     }));
@@ -277,7 +284,7 @@ export const getThreatIntelReadiness = async ({
     Boolean(inference) &&
     (await featureHasEndpoint({
       searchInferenceEndpoints,
-      featureId: ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
+      featureId: ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
       request,
       logger,
     }));
@@ -286,12 +293,14 @@ export const getThreatIntelReadiness = async ({
   }
 
   let usableReportCount = 0;
+  let indicatorEligibleReportCount = 0;
   let lastIngestAt: string | null = null;
   let lastEnrichAt: string | null = null;
   let statsAvailable = true;
   try {
     const stats = await loadUsableStats({ esClient, spaceId });
     usableReportCount = stats.usableReportCount;
+    indicatorEligibleReportCount = stats.indicatorEligibleReportCount;
     lastIngestAt = stats.lastIngestAt;
     lastEnrichAt = stats.lastEnrichAt;
   } catch (err) {
@@ -314,6 +323,7 @@ export const getThreatIntelReadiness = async ({
     status,
     reasonCodes,
     usableReportCount,
+    indicatorEligibleReportCount,
     lastIngestAt,
     lastEnrichAt,
     ...(optional.length > 0 ? { optional } : {}),

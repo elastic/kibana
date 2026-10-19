@@ -1,5 +1,5 @@
 {
-  "sha1": "04229655d89bcd40f8e7ec67622f6432f1222ec8",
+  "sha1": "7c8a9a9160b969814b4cf841c551353156b2f158",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -64,190 +64,190 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/alert_investigation_action.spec.ts",
-        "line": 119,
-        "column": 16
+        "line": 121,
+        "column": 18
       }
     },
     {
       "id": "9d390434634ed3b-58712110a029990",
       "title": "Semantic Memory page E1 lists the seeded memories on a cold load of the route",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/memory_page.spec.ts",
-        "line": 299,
-        "column": 6
+        "line": 300,
+        "column": 10
       }
     },
     {
       "id": "9d390434634ed3b-b6067ec567e3e30",
       "title": "Semantic Memory page E1b keeps the Memory tab in the header once the gate has settled",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/memory_page.spec.ts",
-        "line": 314,
-        "column": 7
+        "line": 311,
+        "column": 13
       }
     },
     {
       "id": "9d390434634ed3b-6a2e8452b9241b5",
       "title": "Semantic Memory page E2 opens one memory and shows its title, content, usefulness and confidence",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/memory_page.spec.ts",
-        "line": 323,
+        "line": 313,
         "column": 24
       }
     },
     {
       "id": "9d390434634ed3b-d232f5210f3715f",
       "title": "Semantic Memory page E4 separates archived memories by their reason",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/memory_page.spec.ts",
-        "line": 350,
+        "line": 349,
         "column": 13
       }
     },
     {
       "id": "9d390434634ed3b-1dbe2a15bdcb29d",
       "title": "Semantic Memory page E5 pages past the first 25 rows without skipping or repeating one",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/memory_page.spec.ts",
-        "line": 367,
-        "column": 10
+        "line": 363,
+        "column": 73
       }
     },
     {
       "id": "9d390434634ed3b-004df82bac7f351",
       "title": "Semantic Memory page E6 names the direct sources of a merge, each one linking to its memory",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/memory_page.spec.ts",
-        "line": 410,
-        "column": 24
+        "line": 407,
+        "column": 9
       }
     },
     {
       "id": "9d390434634ed3b-5ced73f14e94dbb",
       "title": "Semantic Memory page E7 links a memory to the Agent Builder conversation that produced it",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/memory_page.spec.ts",
-        "line": 431,
-        "column": 7
+        "line": 428,
+        "column": 13
       }
     },
     {
       "id": "9d390434634ed3b-96f57bab4e4af61",
       "title": "Semantic Memory page E8 archives a memory from the UI and E9 restores it",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/memory_page.spec.ts",
-        "line": 466,
-        "column": 11
+        "line": 463,
+        "column": 7
       }
     },
     {
       "id": "9d390434634ed3b-daa6163058d2a87",
       "title": "Semantic Memory page E10 deletes a memory permanently, and it is gone from the index",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/memory_page.spec.ts",
-        "line": 491,
-        "column": 56
+        "line": 488,
+        "column": 13
       }
     },
     {
       "id": "9d390434634ed3b-866de1ff7786191",
       "title": "Semantic Memory page E11 finds a memory by the context text it was learned from",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/memory_page.spec.ts",
-        "line": 524,
-        "column": 13
+        "line": 523,
+        "column": 26
       }
     },
     {
       "id": "9d390434634ed3b-f0508419f6509e7",
       "title": "Semantic Memory page E12 keeps one Space out of another",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/memory_page.spec.ts",
-        "line": 539,
-        "column": 26
+        "line": 536,
+        "column": 23
       }
     },
     {
       "id": "9d390434634ed3b-d5400376710bac1",
       "title": "Semantic Memory page E13 filters the view by one keyword cell, then ANDs a second",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/memory_page.spec.ts",
-        "line": 622,
-        "column": 22
+        "line": 619,
+        "column": 25
       }
     },
     {
       "id": "9d390434634ed3b-6ec0f0b1e601186",
       "title": "Semantic Memory page U2 shows the actions only to the tiers that hold the privilege",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations/ui/tests/memory_page.spec.ts",
-        "line": 666,
-        "column": 24
+        "line": 663,
+        "column": 25
       }
     }
   ]

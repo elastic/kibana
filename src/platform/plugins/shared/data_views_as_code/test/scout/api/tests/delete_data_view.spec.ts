@@ -40,7 +40,7 @@ apiTest.describe(
         responseType: 'json',
       });
 
-      expect(deleteResponse).toHaveStatusCode(200);
+      expect(deleteResponse).toHaveStatusCode(204);
 
       // Verify it no longer exists
       const getResponse = await apiClient.get(`${BASE_PATH}/${dataView.id}`, {

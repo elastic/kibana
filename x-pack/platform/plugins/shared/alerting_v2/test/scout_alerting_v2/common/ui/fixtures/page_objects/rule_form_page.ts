@@ -43,8 +43,9 @@ export class RuleFormPage {
     this.flyoutNextButton = this.page.testSubj.locator('composeDiscoverNext');
     this.flyoutSubmitButton = this.page.testSubj.locator('composeDiscoverSubmit');
     this.flyoutSaveButton = this.flyoutNextButton;
-    // The ComposeDiscoverFlyout title ID.
-    this.flyout = this.page.locator('[aria-labelledby="composeDiscoverFlyoutTitle"]');
+    // Stacked create sessions render EUI's flyout menu, which appends its own
+    // title id to aria-labelledby. The test subject stays exact.
+    this.flyout = this.page.testSubj.locator('composeDiscoverFlyout');
     // EuiFormRow puts `id` on the label; the error text is a sibling, not a descendant.
     this.nameFieldError = this.flyout.getByText(/Name is required/);
     this.flyoutValidationCallout = this.page.testSubj.locator('ruleV2FlyoutValidationErrors');

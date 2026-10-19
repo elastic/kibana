@@ -16,6 +16,7 @@ import { useCustomContentHtml } from './use_custom_content_html';
 import { CustomContentEmptyPrompt } from './custom_content_empty_prompt';
 import { CustomContentGeneratingPrompt } from './custom_content_generating_prompt';
 import type { CustomContentRendererServices } from './types';
+import { CUSTOM_CONTENT_IFRAME_SANDBOX } from './constants';
 
 export interface CustomContentComponentProps {
   services: CustomContentRendererServices;
@@ -34,6 +35,8 @@ export interface CustomContentComponentProps {
   isAiAvailable?: boolean;
   /** True while the agent is generating or updating this panel, to show a generating state. */
   isGenerating?: boolean;
+  /** False in a read-only view such as a dashboard preview, where nothing may navigate away. */
+  isInteractive?: boolean;
   onLoadingChange: (isLoading: boolean) => void;
   setApproximationApplied?: (approximationApplied: boolean | undefined) => void;
   onGenerateWithChat?: () => void;
@@ -73,6 +76,7 @@ export const CustomContentComponent = ({
   previewHtml,
   isAiAvailable = false,
   isGenerating = false,
+  isInteractive = true,
   onLoadingChange,
   setApproximationApplied,
   onGenerateWithChat,
@@ -92,6 +96,7 @@ export const CustomContentComponent = ({
     query,
     filters,
     esqlVariables,
+    isInteractive,
     setApproximationApplied,
   });
 
@@ -138,7 +143,12 @@ export const CustomContentComponent = ({
         !noContent &&
         html && (
           <div css={iframeContainerCss}>
-            <iframe css={iframeCss} srcDoc={html} sandbox="" title={IFRAME_TITLE} />
+            <iframe
+              css={iframeCss}
+              srcDoc={html}
+              sandbox={isInteractive ? CUSTOM_CONTENT_IFRAME_SANDBOX : ''}
+              title={IFRAME_TITLE}
+            />
           </div>
         )
       )}

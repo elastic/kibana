@@ -145,6 +145,7 @@ export interface FleetConfigType {
   };
   versionSpecificPolicyAssignment?: {
     taskInterval?: string;
+    orphanSweepIntervalMs?: number;
   };
   unenrollInactiveAgents?: {
     taskInterval?: string;

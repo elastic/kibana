@@ -76,10 +76,10 @@ export const getCreateProposalStepDefinition = ({
         );
 
         // Fail closed when the action did not resolve: `create` swallows both a
-        // workflow read failure and invalid `consts.actionMetadata`, and they
-        // arrive here indistinguishable from an action that simply declares no
-        // policy. Reading that as "auto-approval allowed" would run an action
-        // whose author forbade it on nothing more than a transient lookup error.
+        // workflow read failure and invalid `consts.actionMetadata` (which
+        // includes a missing policy). Reading that as "auto-approval allowed"
+        // would run an action whose author forbade it on nothing more than a
+        // transient lookup error.
         const alwaysGate = !proposal.action || proposal.action.approvalPolicy === 'always-gate';
 
         context.logger.debug(
