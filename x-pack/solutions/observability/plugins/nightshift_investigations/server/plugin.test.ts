@@ -7,6 +7,8 @@
 
 import { MockUrlService } from '@kbn/share-plugin/common/mocks';
 import { coreMock } from '@kbn/core/server/mocks';
+import { BehaviorSubject } from 'rxjs';
+import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import { NIGHTSHIFT_INVESTIGATION_LOCATOR_ID } from '../common/locators';
 import type { InvestigationQuotaCallback, NightshiftInvestigationsSetupDeps } from './types';
 import { NightshiftInvestigationsPlugin } from './plugin';
@@ -37,6 +39,31 @@ describe('NightshiftInvestigationsPlugin setup', () => {
       path: '?investigationId=inv%2F1',
       state: {},
     });
+  });
+
+  it('opts in to alert status changes and follows the Nightshift flag', async () => {
+    const enableAlertStatusChanged = jest.fn();
+    const coreSetup = coreMock.createSetup();
+    const coreStart = coreMock.createStart();
+    const flag$ = new BehaviorSubject(true);
+    coreStart.featureFlags.getBooleanValue$.mockImplementation((name) => {
+      expect(name).toBe(NIGHTSHIFT_ENABLED_FLAG);
+      return flag$;
+    });
+    coreSetup.getStartServices.mockResolvedValue([coreStart, {}, {}]);
+
+    createPlugin().setup(coreSetup, {
+      ...createSetupDeps(),
+      alerting: { enableAlertStatusChanged },
+    } as unknown as NightshiftInvestigationsSetupDeps);
+
+    expect(enableAlertStatusChanged).toHaveBeenCalledTimes(1);
+    const [{ isEnabled }] = enableAlertStatusChanged.mock.calls[0];
+    await new Promise(process.nextTick);
+    expect(await isEnabled()).toBe(true);
+
+    flag$.next(false);
+    expect(await isEnabled()).toBe(false);
   });
 
   it('accepts one investigation quota callback', () => {
