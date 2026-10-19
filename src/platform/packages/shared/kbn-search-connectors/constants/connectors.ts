@@ -50,7 +50,7 @@ export const getConnectorsDict = (): Record<string, ConnectorClientSideDefinitio
     platinumOnly: true,
   },
   exchange_server: {
-    docsUrl: docLinks.connectorsOutlook,
+    docsUrl: docLinks.connectorsExchangeServer,
     externalAuthDocsUrl: '',
     externalDocsUrl: '',
     platinumOnly: true,

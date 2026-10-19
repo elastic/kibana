@@ -137,6 +137,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       connectorsClients: `${ELASTIC_DOCS}reference/search-connectors`,
       connectorsConfluence: `${ELASTIC_DOCS}reference/search-connectors/es-connectors-confluence`,
       connectorsDropbox: `${ELASTIC_DOCS}reference/search-connectors/es-connectors-dropbox`,
+      connectorsExchangeServer: `${ELASTIC_DOCS}reference/search-connectors/es-connectors-exchange-server`,
       connectorsContentExtraction: `${ELASTIC_DOCS}reference/search-connectors/es-connectors-content-extraction`,
       connectorsGithub: `${ELASTIC_DOCS}reference/search-connectors/es-connectors-github`,
       connectorsGitlab: `${ELASTIC_DOCS}reference/search-connectors/es-connectors-gitlab`,
