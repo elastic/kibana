@@ -7,7 +7,7 @@
 
 import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
 import { z } from '@kbn/zod/v4';
-import type { PanelContent, PanelContentAttempt } from '../../resolve_panel';
+import type { PanelContent, PanelContentAttempt } from '../resolve_panel';
 import { sectionIdField, type ConfigPanelKind, type RequestPanelKind } from './panel_kind';
 import { lensPanelKind, vegaPanelKind, type VisPanelResolutionRequest } from './vis';
 import { markdownPanelKind } from './markdown';
@@ -33,14 +33,6 @@ import { attachmentPanelInputSchema } from './attachment_source';
  * the embeddable-type lookups, and the type lists in descriptions and errors. List order is the
  * order of the schema unions sent to the model.
  */
-export { attachmentPanelInputSchema } from './attachment_source';
-export type { AttachmentPanelInput } from './attachment_source';
-export type { VisPanelResolutionRequest } from './vis';
-export type {
-  CustomContentPanelAddRequest,
-  CustomContentPanelEditRequest,
-  CustomContentPanelResolutionRequest,
-} from './custom_content';
 
 const CONFIG_PANEL_KINDS = [
   markdownPanelKind,

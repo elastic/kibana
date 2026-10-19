@@ -52,6 +52,16 @@ jest.mock('@kbn/core-di-browser', () => {
         return { basePath: { prepend: (path: string) => `${MOCK_BASE_PATH}${path}` } };
       }
 
+      if (token === actual.CoreStart('docLinks')) {
+        return {
+          links: {
+            alerting: {
+              viewManageRules: 'https://docs.test/view-manage-rules',
+            },
+          },
+        };
+      }
+
       return {};
     },
   };
