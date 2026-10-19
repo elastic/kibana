@@ -75,11 +75,6 @@ const useChromeHeaderStyles = () => {
       align-items: center;
       flex-shrink: 0;
       margin-inline-start: ${euiTheme.size.xs};
-
-      // The picker renders nothing for a single project
-      &:empty {
-        display: none;
-      }
     `;
 
     const subscriptionBadgeSlot = css`
@@ -96,21 +91,12 @@ const useChromeHeaderStyles = () => {
       background: ${euiTheme.colors.borderBasePlain};
     `;
 
-    const subscriptionBadgeSeparator = css`
-      ${separator}
-
-      [data-test-subj='${CHROME_HEADER_TEST_SUBJECTS.projectPicker}']:empty + & {
-        display: none;
-      }
-    `;
-
     return {
       root,
       leftGroup,
       switcherSlot,
       projectPickerSlot,
       subscriptionBadgeSlot,
-      subscriptionBadgeSeparator,
       spacer,
       separator,
     };
@@ -149,7 +135,7 @@ export const ChromeHeaderShell = React.memo<ChromeHeaderShellProps>(
         )}
         {subscriptionBadge && (
           <>
-            {projectPicker && <div css={styles.subscriptionBadgeSeparator} />}
+            {projectPicker && <div css={styles.separator} />}
             <div
               css={styles.subscriptionBadgeSlot}
               data-test-subj={CHROME_HEADER_TEST_SUBJECTS.subscriptionBadge}
