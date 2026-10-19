@@ -26,6 +26,7 @@ import type {
   ActionPolicyId,
   Alert,
   SuppressionRow,
+  DispatchDelivery,
   DispatchFailure,
   DispatcherPipelineInput,
   DispatcherPipelineState,
@@ -78,6 +79,7 @@ export interface DispatcherPipelineStateOverrides
   dispatch?: ActionGroup[];
   throttled?: ActionGroup[];
   dispatchedExecutions?: Map<ActionGroupId, string[]>;
+  dispatchDeliveries?: DispatchDelivery[];
   dispatchFailures?: DispatchFailure[];
 }
 
@@ -94,6 +96,7 @@ export function createDispatcherPipelineState(
     dispatch,
     throttled,
     dispatchedExecutions,
+    dispatchDeliveries,
     dispatchFailures,
     input,
     ...rest
@@ -121,11 +124,12 @@ export function createDispatcherPipelineState(
           }),
         }
       : {}),
-    ...(dispatchedExecutions || dispatchFailures
+    ...(dispatchedExecutions || dispatchDeliveries || dispatchFailures
       ? {
           outcome: DispatchOutcome.of({
             executionsByGroup: dispatchedExecutions ?? new Map(),
             failures: dispatchFailures ?? [],
+            deliveries: dispatchDeliveries ?? [],
           }),
         }
       : {}),

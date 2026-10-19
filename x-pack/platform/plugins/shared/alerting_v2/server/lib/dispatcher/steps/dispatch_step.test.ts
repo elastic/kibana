@@ -19,7 +19,7 @@ import {
   createDispatcherPipelineInput,
   createDispatcherPipelineState,
 } from '../fixtures/test_utils';
-import type { DispatchFailure } from '../types';
+import type { DispatchDelivery, DispatchFailure } from '../types';
 import { DISPATCH_FAILURE_REASONS } from './constants';
 import { DispatchStep } from './dispatch_step';
 
@@ -33,6 +33,11 @@ const getExecutionIds = (
   groupId: string
 ): readonly string[] =>
   result.type === 'continue' ? result.data?.outcome?.executionIdsFor(groupId) ?? [] : [];
+
+const getDeliveries = (
+  result: Awaited<ReturnType<DispatchStep['execute']>>
+): readonly DispatchDelivery[] =>
+  result.type === 'continue' ? result.data?.outcome?.deliveries ?? [] : [];
 
 const getScheduledGroupCount = (result: Awaited<ReturnType<DispatchStep['execute']>>): number =>
   result.type === 'continue' ? result.data?.outcome?.scheduledGroupCount ?? 0 : 0;
@@ -307,6 +312,10 @@ describe('DispatchStep', () => {
     expect(mockWfm.bulkScheduleWorkflow.mock.calls[0][0]).toHaveLength(2);
     expect(getExecutionIds(result, 'g1')).toEqual(['exec-1', 'exec-2']);
     expect(getScheduledGroupCount(result)).toBe(1);
+    expect(getDeliveries(result)).toEqual([
+      { actionGroupId: 'g1', workflowId: 'workflow-1', workflowExecutionId: 'exec-1' },
+      { actionGroupId: 'g1', workflowId: 'workflow-2', workflowExecutionId: 'exec-2' },
+    ]);
   });
 
   it('continues with no-op when dispatch is empty', async () => {
@@ -607,6 +616,9 @@ describe('DispatchStep', () => {
     );
 
     expect(getFailures(result)).toEqual([]);
+    expect(getDeliveries(result)).toEqual([
+      { actionGroupId: 'g1', workflowId: 'workflow-1', workflowExecutionId: 'exec-1' },
+    ]);
   });
 
   it('records a missing_api_key failure per destination when the policy has no API key', async () => {
@@ -679,6 +691,7 @@ describe('DispatchStep', () => {
       workflowId: 'missing-workflow',
       reason: DISPATCH_FAILURE_REASONS.WORKFLOW_NOT_FOUND,
     });
+    expect(getDeliveries(result)).toEqual([]);
     expect(mockWfm.bulkScheduleWorkflow).not.toHaveBeenCalled();
   });
 
@@ -708,6 +721,7 @@ describe('DispatchStep', () => {
       workflowId: 'workflow-1',
       reason: DISPATCH_FAILURE_REASONS.WORKFLOW_DISABLED,
     });
+    expect(getDeliveries(result)).toEqual([]);
     expect(mockWfm.bulkScheduleWorkflow).not.toHaveBeenCalled();
   });
 
@@ -775,6 +789,9 @@ describe('DispatchStep', () => {
 
     expect(getExecutionIds(result, 'g1')).toEqual(['exec-1']);
     expect(getScheduledGroupCount(result)).toBe(1);
+    expect(getDeliveries(result)).toEqual([
+      { actionGroupId: 'g1', workflowId: 'workflow-1', workflowExecutionId: 'exec-1' },
+    ]);
     const failures = getFailures(result);
     expect(failures).toHaveLength(1);
     expect(failures[0]).toMatchObject({
@@ -968,6 +985,7 @@ describe('DispatchStep', () => {
       reason: DISPATCH_FAILURE_REASONS.SCHEDULE_ERROR,
     });
     expect(getExecutionIds(result, 'g1')).toEqual([]);
+    expect(getDeliveries(result)).toEqual([]);
   });
 
   it('does not start a second chunk once the signal is aborted', async () => {
