@@ -30,7 +30,7 @@ const DEFAULT_TRACKING_REPO = DEFAULT_GITHUB_REPO;
 const DEFAULT_CLOSED_SINCE_DAYS = 365;
 const DEFAULT_MAX_NEW_ISSUES = 10;
 /** A daily report would otherwise comment on a suite failing every day each morning. */
-const DEFAULT_COMMENT_INTERVAL_DAYS = 3;
+const DEFAULT_COMMENT_COOLDOWN_DAYS = 3;
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 /** `owner/name`, as GitHub spells a repository. */
@@ -66,9 +66,9 @@ export function runReportFlakyTestIssuesCli() {
       if (!Number.isInteger(maxNewIssues) || maxNewIssues < 0) {
         throw createFlagError('--max-new-issues must be a non-negative integer');
       }
-      const commentIntervalDays = flagsReader.requiredNumber('comment-interval-days');
-      if (!Number.isInteger(commentIntervalDays) || commentIntervalDays < 1) {
-        throw createFlagError('--comment-interval-days must be a positive integer');
+      const commentCooldownDays = flagsReader.requiredNumber('comment-cooldown-days');
+      if (!Number.isInteger(commentCooldownDays) || commentCooldownDays < 1) {
+        throw createFlagError('--comment-cooldown-days must be a positive integer');
       }
       const closedSince = new Date(Date.now() - closedSinceDays * MS_PER_DAY);
 
@@ -93,8 +93,8 @@ export function runReportFlakyTestIssuesCli() {
           `; at most ${maxNewIssues} new issues` +
           (omitSkippedTests ? ', flaky tests skipped since are left out' : '') +
           (updateIssues
-            ? `, suite issues of suites flaky again are refreshed and commented on at most ` +
-              `every ${commentIntervalDays} days`
+            ? `, suite issues of suites flaky again are refreshed and commented on, with ` +
+              `${commentCooldownDays} days between comments at least`
             : '')
       );
 
@@ -108,7 +108,7 @@ export function runReportFlakyTestIssuesCli() {
         maxNewIssues,
         omitSkippedTests,
         updateIssues,
-        commentIntervalDays,
+        commentCooldownDays,
         dryRun,
       });
 
@@ -140,8 +140,8 @@ export function runReportFlakyTestIssuesCli() {
         issues it takes over from. Flaky tests skipped since are left out. A suite
         with an issue of its own in --github-repo has it refreshed: the body's metadata records
         this report, a comment with its numbers is posted when the suite failed since the issue
-        was filed or last commented on, at most every --comment-interval-days, and an issue
-        closed before such a failure is reopened. The body's text stays as filed.
+        was filed or last commented on, and that was --comment-cooldown-days ago at least, and
+        an issue closed before such a failure is reopened. The body's text stays as filed.
 
         Examples:
           GITHUB_TOKEN=... node scripts/report_flaky_test_issues --input .scout/flaky_tests.json --dry-run
@@ -155,7 +155,7 @@ export function runReportFlakyTestIssuesCli() {
           'tracking-repo',
           'closed-since-days',
           'max-new-issues',
-          'comment-interval-days',
+          'comment-cooldown-days',
         ],
         boolean: ['dry-run', 'omit-skipped-tests', 'update-issues'],
         default: {
@@ -165,7 +165,7 @@ export function runReportFlakyTestIssuesCli() {
           'tracking-repo': DEFAULT_TRACKING_REPO,
           'closed-since-days': String(DEFAULT_CLOSED_SINCE_DAYS),
           'max-new-issues': String(DEFAULT_MAX_NEW_ISSUES),
-          'comment-interval-days': String(DEFAULT_COMMENT_INTERVAL_DAYS),
+          'comment-cooldown-days': String(DEFAULT_COMMENT_COOLDOWN_DAYS),
           'dry-run': false,
           'omit-skipped-tests': true,
           'update-issues': true,
@@ -179,7 +179,7 @@ export function runReportFlakyTestIssuesCli() {
           --max-new-issues      Issues created per run, worst suites first [default: ${DEFAULT_MAX_NEW_ISSUES}]
           --no-omit-skipped-tests  Keep flaky tests that were skipped since
           --no-update-issues    Skip suites with an issue of their own instead of refreshing it
-          --comment-interval-days  Days between two comments on a refreshed issue; reopens always comment [default: ${DEFAULT_COMMENT_INTERVAL_DAYS}]
+          --comment-cooldown-days  Days to wait after a comment before the issue can get another; reopens always comment [default: ${DEFAULT_COMMENT_COOLDOWN_DAYS}]
           --dry-run             Read issues and log what would be filed or updated without writing
         `,
       },

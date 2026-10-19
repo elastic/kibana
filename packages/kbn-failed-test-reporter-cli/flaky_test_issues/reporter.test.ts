@@ -76,7 +76,7 @@ const run = (
     maxNewIssues: 10,
     omitSkippedTests: true,
     updateIssues: true,
-    commentIntervalDays: 3,
+    commentCooldownDays: 3,
     dryRun: false,
     ...overrides,
   });
@@ -598,7 +598,7 @@ describe('reportFlakySuiteIssues', () => {
       ]);
     });
 
-    it('records the comment, so the next one waits for the interval', async () => {
+    it('records the comment, so the next one waits out the cooldown', async () => {
       const github = createGithubApi([suiteIssue(42)]);
 
       await run(github, { report: report() });
@@ -609,14 +609,14 @@ describe('reportFlakySuiteIssues', () => {
       );
     });
 
-    it('waits --comment-interval-days after the filing report or the last comment, then covers the failures since', async () => {
+    it('waits --comment-cooldown-days after the filing report or the last comment, then covers the failures since', async () => {
       // filed two days before the report, after which the suite failed again
       const filedAt = new Date('2026-09-07T10:00:00.000Z');
       const recent = createGithubApi([suiteIssue(42, {}, filedAt)]);
       const due = createGithubApi([suiteIssue(42, {}, filedAt)]);
 
       const summary = await run(recent, { report: report() });
-      await run(due, { report: report(), commentIntervalDays: 2 });
+      await run(due, { report: report(), commentCooldownDays: 2 });
 
       expect(recent.editIssue).toHaveBeenCalledTimes(1);
       expect(recent.addIssueComment).not.toHaveBeenCalled();

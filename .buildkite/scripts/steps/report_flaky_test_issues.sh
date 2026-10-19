@@ -17,8 +17,8 @@ set -euo pipefail
 # out flaky tests that were skipped since. Unless FLAKY_TESTS_UPDATE_ISSUES is 'false', a suite
 # that has an issue of its own gets it refreshed: its metadata records the report, a comment
 # with the report's numbers is posted when it failed since the issue was filed or last commented
-# on (at most every FLAKY_TESTS_COMMENT_INTERVAL_DAYS days), and it is reopened when it failed
-# after the close. The body's text stays as filed.
+# on, and that was FLAKY_TESTS_COMMENT_COOLDOWN_DAYS days ago at least, and it is reopened when
+# it failed after the close. The body's text stays as filed.
 # GITHUB_TOKEN (kibanamachine) comes from Vault via .buildkite/scripts/common/setup_job_env.sh.
 
 source .buildkite/scripts/common/util.sh
@@ -31,7 +31,7 @@ FLAKY_TESTS_CLOSED_ISSUES_DAYS="${FLAKY_TESTS_CLOSED_ISSUES_DAYS:-365}"
 FLAKY_TESTS_MAX_NEW_ISSUES="${FLAKY_TESTS_MAX_NEW_ISSUES:-10}"
 FLAKY_TESTS_OMIT_SKIPPED_TESTS="${FLAKY_TESTS_OMIT_SKIPPED_TESTS:-true}"
 FLAKY_TESTS_UPDATE_ISSUES="${FLAKY_TESTS_UPDATE_ISSUES:-true}"
-FLAKY_TESTS_COMMENT_INTERVAL_DAYS="${FLAKY_TESTS_COMMENT_INTERVAL_DAYS:-3}"
+FLAKY_TESTS_COMMENT_COOLDOWN_DAYS="${FLAKY_TESTS_COMMENT_COOLDOWN_DAYS:-3}"
 FLAKY_TESTS_TRACKING_REPO="${FLAKY_TESTS_TRACKING_REPO-elastic/kibana}"
 
 REPORT_DIR="target/flaky_tests"
@@ -66,7 +66,7 @@ echo "    Repository          : $GITHUB_REPO"
 echo "    Closed issues since : $FLAKY_TESTS_CLOSED_ISSUES_DAYS days ago"
 echo "    Max new issues      : $FLAKY_TESTS_MAX_NEW_ISSUES"
 echo "    Omit skipped tests  : $FLAKY_TESTS_OMIT_SKIPPED_TESTS"
-echo "    Update issues       : $FLAKY_TESTS_UPDATE_ISSUES (comments every $FLAKY_TESTS_COMMENT_INTERVAL_DAYS days at most)"
+echo "    Update issues       : $FLAKY_TESTS_UPDATE_ISSUES ($FLAKY_TESTS_COMMENT_COOLDOWN_DAYS days between comments at least)"
 if [[ -n "$FLAKY_TESTS_TRACKING_REPO" && "$FLAKY_TESTS_TRACKING_REPO" != "$GITHUB_REPO" ]]; then
   echo "    Also tracked in     : $FLAKY_TESTS_TRACKING_REPO (suites whose every test has an issue there get none)"
 fi
@@ -78,7 +78,7 @@ args=(
   --closed-since-days "$FLAKY_TESTS_CLOSED_ISSUES_DAYS"
   --max-new-issues "$FLAKY_TESTS_MAX_NEW_ISSUES"
   --tracking-repo "$FLAKY_TESTS_TRACKING_REPO"
-  --comment-interval-days "$FLAKY_TESTS_COMMENT_INTERVAL_DAYS"
+  --comment-cooldown-days "$FLAKY_TESTS_COMMENT_COOLDOWN_DAYS"
 )
 if [[ ${#DRY_RUN_ARGS[@]} -gt 0 ]]; then
   args+=("${DRY_RUN_ARGS[@]}")

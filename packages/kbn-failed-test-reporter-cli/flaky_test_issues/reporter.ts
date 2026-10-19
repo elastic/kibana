@@ -82,10 +82,10 @@ export interface ReportFlakySuiteIssuesOptions {
    */
   updateIssues: boolean;
   /**
-   * Days between two comments on the same issue, counted from the newest report posted on it (the
-   * one that filed it, or the latest comment). Failures in between are covered by the next one.
+   * Days to wait after the newest report posted on an issue (the one that filed it, or the latest
+   * comment) before it can get another comment. Failures in between are covered by the next one.
    */
-  commentIntervalDays: number;
+  commentCooldownDays: number;
   dryRun: boolean;
 }
 
@@ -255,7 +255,7 @@ interface Refresh {
   previous: RecordedFlakySuiteIssueMetadata;
   /**
    * The issue is reopened, or the suite failed since the newest report posted on the issue, the
-   * body as filed or the latest comment, and that was at least `commentIntervalDays` ago.
+   * body as filed or the latest comment, and that was at least `commentCooldownDays` ago.
    */
   comment: boolean;
   reopen: boolean;
@@ -270,7 +270,7 @@ const planRefresh = (
   suite: FlakySuite,
   issue: GithubIssue,
   report: FlakyTestReport,
-  commentIntervalDays: number
+  commentCooldownDays: number
 ): Refresh | undefined => {
   const previous = readFlakySuiteIssueMetadata(issue.body);
   const recordedAt = previous?.['report.generatedAt'];
@@ -288,7 +288,7 @@ const planRefresh = (
   const postedAt = lastPostedAt(previous);
   const failedSincePosted = failedAt !== undefined && (!postedAt || failedAt > new Date(postedAt));
   const due =
-    !postedAt || daysBetween(new Date(postedAt), report.generatedAt) >= commentIntervalDays;
+    !postedAt || daysBetween(new Date(postedAt), report.generatedAt) >= commentCooldownDays;
   return { previous, comment: failedSincePosted && due, reopen: false };
 };
 
@@ -379,7 +379,7 @@ export const reportFlakySuiteIssues = async (
     maxNewIssues,
     omitSkippedTests,
     updateIssues,
-    commentIntervalDays,
+    commentCooldownDays,
     dryRun,
   } = options;
   const omitted = omitSkippedTests ? report.flaky.filter(isSkippedTest) : [];
@@ -526,7 +526,7 @@ export const reportFlakySuiteIssues = async (
     const { tracked, superseded } = coverage(suite, index);
     const refresh =
       updateIssues && tracked && isOwnSuiteIssue(tracked, suite)
-        ? planRefresh(suite, tracked.issue, report, commentIntervalDays)
+        ? planRefresh(suite, tracked.issue, report, commentCooldownDays)
         : undefined;
     if (tracked && refresh) {
       await update(suite, tracked.issue, refresh);

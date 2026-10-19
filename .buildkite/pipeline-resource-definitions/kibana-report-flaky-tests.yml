@@ -39,8 +39,8 @@ spec:
         # failures, a reopen on failures after the close; the body's text stays as filed, only its
         # hidden metadata records the report
         FLAKY_TESTS_UPDATE_ISSUES: 'true'
-        # Days between two comments on the same issue; reopens always comment.
-        FLAKY_TESTS_COMMENT_INTERVAL_DAYS: '7'
+        # Days to wait after a comment before the issue can get another; reopens always comment.
+        FLAKY_TESTS_COMMENT_COOLDOWN_DAYS: '7'
       allow_rebuilds: true
       branch_configuration: main
       cancel_intermediate_builds: true
