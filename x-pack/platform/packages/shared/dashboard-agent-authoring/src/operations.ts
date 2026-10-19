@@ -104,3 +104,23 @@ export const executeDashboardOperations = async ({
     ),
   };
 };
+
+const hasNonEmptyValue = (value: string | undefined): value is string =>
+  value !== undefined && value.trim().length > 0;
+
+const hasRequiredCreateTitleOperation = (operations: DashboardOperation[]): boolean =>
+  operations.some(
+    (operation) => operation.operation === 'set_metadata' && hasNonEmptyValue(operation.title)
+  );
+
+const hasBlankTitleUpdate = (operations: DashboardOperation[]): boolean =>
+  operations.some((operation) => {
+    if (operation.operation !== 'set_metadata') {
+      return false;
+    }
+
+    return operation.title !== undefined && !hasNonEmptyValue(operation.title);
+  });
+
+export const hasValidCreateMetadataOperations = (operations: DashboardOperation[]): boolean =>
+  hasRequiredCreateTitleOperation(operations) && !hasBlankTitleUpdate(operations);

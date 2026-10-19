@@ -6,13 +6,13 @@
  */
 
 import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
-import type { PanelCreationRequest } from '../operations/panel_creation';
 import {
   findConfigPanelType,
   findPanelRenderer,
   type EditPanelRequestInput,
+  type PanelRequestInput,
   type PanelResolutionRequest,
-} from '.';
+} from './registry';
 
 /** Error for a panel that cannot be edited with a request. */
 export const getPanelEditError = ({ id, type }: AttachmentPanel): string => {
@@ -78,7 +78,10 @@ export const toEditResolutionRequest = (
 export const toCreationResolutionRequest = ({
   operationType,
   panelInput,
-}: PanelCreationRequest): PanelResolutionRequest => {
+}: {
+  operationType: 'add_section' | 'add_panels';
+  panelInput: PanelRequestInput;
+}): PanelResolutionRequest => {
   const { query, esql } = panelInput;
   const base = { operationType, identifier: query, nlQuery: query, esql };
 

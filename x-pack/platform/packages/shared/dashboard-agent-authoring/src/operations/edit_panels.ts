@@ -18,11 +18,11 @@ import {
   CONFIG_PANEL_TYPE_LIST,
   editPanelItemSchema,
   getConfigPanelEditError,
+  toEditResolutionRequest,
   type EditPanelItem,
   type EditPanelRequestInput,
   type PanelResolutionRequest,
 } from '../panels';
-import { toEditResolutionRequest } from '../panels/resolution_requests';
 import { defineOperation } from './types';
 
 /** An edit that passed validation; request edits carry their resolution request. */

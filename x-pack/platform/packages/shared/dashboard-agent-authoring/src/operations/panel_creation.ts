@@ -11,11 +11,11 @@ import type { DashboardOperation } from './registry';
 import type { ResolveAttachmentPanel } from '../types';
 import {
   buildConfigPanelContent,
+  toCreationResolutionRequest,
   type NewPanelInput,
   type PanelRequestInput,
   type ResolvePanelContent,
 } from '../panels';
-import { toCreationResolutionRequest } from '../panels/resolution_requests';
 
 type ResolvedPanelContent = Awaited<ReturnType<ResolvePanelContent>>;
 
