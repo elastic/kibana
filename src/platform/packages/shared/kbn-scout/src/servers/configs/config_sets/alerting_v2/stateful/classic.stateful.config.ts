@@ -7,8 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { resolve } from 'path';
+import { REPO_ROOT } from '@kbn/repo-info';
 import type { ScoutServerConfig } from '../../../../../types';
 import { defaultConfig } from '../../default/stateful/base.config';
+
+// Buffers server-side EBT events behind `/internal/analytics_ftr_helpers/events` so API tests
+// can assert on the plugin's EBT events (for example `alerting_v2_workflow_dispatched`). A config
+// set is server args, so those assertions are local-only: Cloud attaches to an existing deployment.
+const analyticsFtrHelpersPluginPath = `--plugin-path=${resolve(
+  REPO_ROOT,
+  'src/platform/test/analytics/plugins/analytics_ftr_helpers'
+)}`;
 
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
@@ -22,6 +32,7 @@ export const servers: ScoutServerConfig = {
       '--xpack.alerting_v2.rules.minimumScheduleInterval=5s',
       '--xpack.alerting_v2.rules.maxScheduledPerMinute=32000',
       '--uiSettings.globalOverrides.alerting:v2:enabled=true',
+      analyticsFtrHelpersPluginPath,
     ],
   },
 };
