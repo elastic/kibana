@@ -12,7 +12,7 @@ import {
   noDestinationStats,
   type DestinationStatsAggregations,
 } from './map_destination_stats_response';
-import { errorForSearchFailure, isMissingStreamError } from './search_errors';
+import { isMissingStreamError, toSearchError } from './search_errors';
 import type { UnitStatsQueryContext } from './types';
 
 /**
@@ -48,7 +48,7 @@ export const getDestinationStats = async ({
   } catch (error) {
     const failure = isMissingStreamError(error)
       ? undefined
-      : errorForSearchFailure(error, 'destination stats');
+      : toSearchError(error, 'destination stats').toStatsError();
     if (failure) {
       logger.debug(`Destination stats failed for unit [${unitId}]: ${(error as Error).message}`);
     }

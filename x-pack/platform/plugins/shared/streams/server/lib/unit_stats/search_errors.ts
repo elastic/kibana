@@ -6,8 +6,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import type { StreamsUnit } from '@kbn/streams-schema';
-import { FORBIDDEN_ERROR, UNAVAILABLE_ERROR, failedError, timeoutError } from './stats_errors';
+import { UnitStatsError } from './unit_stats_error';
 
 /**
  * A missing stats stream means no data. A new unit has no stream until its first
@@ -17,16 +16,18 @@ export const isMissingStreamError = (error: unknown): boolean =>
   error instanceof errors.ResponseError && error.statusCode === 404;
 
 /**
- * Maps a failed search to an error. A 403 is a ResponseError with security_exception and
- * a timeout is a TimeoutError.
+ * Maps a failed search to a stats error. A 403 is a ResponseError with security_exception
+ * and a timeout is a TimeoutError. The original error is kept as the cause, for logging.
  */
-export const errorForSearchFailure = (error: unknown, what: string): StreamsUnit.StatsError => {
+export const toSearchError = (error: unknown, what: string): UnitStatsError => {
   if (error instanceof errors.TimeoutError) {
-    return timeoutError(what);
+    return UnitStatsError.timeout(what, { cause: error });
   }
   if (error instanceof errors.ResponseError) {
-    if (error.statusCode === 403) return FORBIDDEN_ERROR;
-    if (error.statusCode === 429 || error.statusCode === 503) return UNAVAILABLE_ERROR;
+    if (error.statusCode === 403) return UnitStatsError.forbidden({ cause: error });
+    if (error.statusCode === 429 || error.statusCode === 503) {
+      return UnitStatsError.unavailable({ cause: error });
+    }
   }
-  return failedError(what);
+  return UnitStatsError.queryFailed(what, { cause: error });
 };

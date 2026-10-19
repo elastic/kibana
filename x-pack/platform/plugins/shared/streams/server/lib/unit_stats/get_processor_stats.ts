@@ -12,7 +12,7 @@ import {
   noProcessorStats,
   type ProcessorStatsAggregations,
 } from './map_processor_stats_response';
-import { errorForSearchFailure, isMissingStreamError } from './search_errors';
+import { isMissingStreamError, toSearchError } from './search_errors';
 import type { UnitStatsQueryContext } from './types';
 
 /**
@@ -42,7 +42,7 @@ export const getProcessorStats = async ({
   } catch (error) {
     const failure = isMissingStreamError(error)
       ? undefined
-      : errorForSearchFailure(error, 'processor stats');
+      : toSearchError(error, 'processor stats').toStatsError();
     if (failure) {
       logger.debug(`Processor stats failed for unit [${unitId}]: ${(error as Error).message}`);
     }

@@ -9,11 +9,7 @@ import type { StreamsUnit } from '@kbn/streams-schema';
 import { DESTINATION_TYPES_WITH_STATS } from './constants';
 import { noDestinationStats } from './map_destination_stats_response';
 import { noProcessorStats } from './map_processor_stats_response';
-import {
-  DESTINATION_NOT_FOUND_ERROR,
-  DESTINATION_UNSUPPORTED_ERROR,
-  PROCESSOR_NOT_FOUND_ERROR,
-} from './stats_errors';
+import { UnitStatsError } from './unit_stats_error';
 
 /**
  * Checks a requested destination against the unit config alone, so it makes no
@@ -29,13 +25,19 @@ export const validateDestination = ({
 }): { result: StreamsUnit.StatsDestinationResult; queryable: boolean } => {
   if (!config) {
     return {
-      result: { ...noDestinationStats(bucketMs), error: DESTINATION_NOT_FOUND_ERROR },
+      result: {
+        ...noDestinationStats(bucketMs),
+        error: UnitStatsError.notFound('destination').toStatsError(),
+      },
       queryable: false,
     };
   }
   if (!DESTINATION_TYPES_WITH_STATS.includes(config.type)) {
     return {
-      result: { ...noDestinationStats(bucketMs), error: DESTINATION_UNSUPPORTED_ERROR },
+      result: {
+        ...noDestinationStats(bucketMs),
+        error: UnitStatsError.unsupported().toStatsError(),
+      },
       queryable: false,
     };
   }
@@ -50,4 +52,10 @@ export const validateProcessor = ({
 }): { result: StreamsUnit.StatsProcessorResult; queryable: boolean } =>
   config
     ? { result: noProcessorStats(), queryable: true }
-    : { result: { ...noProcessorStats(), error: PROCESSOR_NOT_FOUND_ERROR }, queryable: false };
+    : {
+        result: {
+          ...noProcessorStats(),
+          error: UnitStatsError.notFound('processor').toStatsError(),
+        },
+        queryable: false,
+      };

@@ -11,7 +11,7 @@ import { UNIT_STATS_DEFAULT_WINDOW_MS } from './constants';
 import { getDestinationStats } from './get_destination_stats';
 import { getEarliestStartMs } from './get_earliest_start';
 import { getProcessorStats } from './get_processor_stats';
-import { errorForSearchFailure, isMissingStreamError } from './search_errors';
+import { isMissingStreamError, toSearchError } from './search_errors';
 import { getSeriesBucketMs } from './series_bucket';
 import type { UnitStatsQueryContext } from './types';
 import { validateDestination, validateProcessor } from './validate_components';
@@ -101,7 +101,7 @@ export const getUnitStats = async ({
   } catch (error) {
     if (isMissingStreamError(error)) return finish();
     logger.debug(`Unit stats lookup failed for unit [${unitId}]: ${(error as Error).message}`);
-    return finish(errorForSearchFailure(error, 'stats'));
+    return finish(toSearchError(error, 'stats').toStatsError());
   }
 
   // No document for the unit (and hash) at all: no data, no error.
