@@ -57,13 +57,17 @@ export const AlertEpisodesRelatedSection = ({
 
   const source = getConnectorSource(episode?.source);
 
-  // An episode with neither a rule nor an external source has nothing to be related by.
-  if (isEpisodeError || (!ruleId && !source)) {
+  if (isEpisodeError) {
     return (
       <EuiText size="s" color="danger" data-test-subj="alertingV2EpisodesRelatedSectionError">
         {i18n.RELATED_SECTION_LOAD_ERROR}
       </EuiText>
     );
+  }
+
+  // An episode with neither a rule nor an external source has nothing to be related by.
+  if (!ruleId && !source) {
+    return null;
   }
 
   return (

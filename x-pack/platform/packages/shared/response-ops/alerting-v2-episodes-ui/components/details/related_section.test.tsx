@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitForElementToBeRemoved } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
@@ -151,13 +151,13 @@ describe('AlertEpisodesRelatedSection', () => {
     expect(mockHttp.get).not.toHaveBeenCalled();
   });
 
-  it('renders the error state for an episode with neither a rule nor an external source', async () => {
+  it('renders nothing for an episode with neither a rule nor an external source', async () => {
     runEsqlAsyncSearchMock.mockResolvedValue({
       columns: mockEpisodeEventsResponse.columns,
       values: [['2024-01-01T00:00:00.000Z', ALERT_EPISODE_STATUS.ACTIVE, null, 'gh-1']],
     });
 
-    render(
+    const { container } = render(
       <I18nProvider>
         <AlertEpisodesRelatedSection
           episodeId="ep-1"
@@ -168,7 +168,10 @@ describe('AlertEpisodesRelatedSection', () => {
       { wrapper }
     );
 
-    expect(await screen.findByTestId('alertingV2EpisodesRelatedSectionError')).toBeInTheDocument();
+    await waitForElementToBeRemoved(() =>
+      screen.queryByTestId('alertingV2EpisodesRelatedSectionLoading')
+    );
+    expect(container).toBeEmptyDOMElement();
   });
 
   it('renders the loading state while events are loading', () => {
