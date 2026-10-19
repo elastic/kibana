@@ -13,7 +13,7 @@ import {
   ProfilingEmptyState,
   useProfilingSchemaState,
 } from '@kbn/observability-shared-plugin/public';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { isJavaAgentName as getIsJavaAgentName } from '../../../../common/agent_name';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
@@ -49,6 +49,12 @@ export function ProfilingOverview() {
   const { agentName, transactionType } = useApmServiceContext();
   const isJavaAgent = getIsJavaAgentName(agentName);
   const { schema } = useProfilingSchemaState();
+
+  // Set to true when the Java service's transactions have no profiler stack-trace IDs and the
+  // host-scoped fallback has rendered. At that point we switch to the hosts schema selector so
+  // the user can pick the schema available on the profiling hosts rather than on the transactions.
+  const [javaFallbackActive, setJavaFallbackActive] = useState(false);
+  const onJavaFallback = useCallback(() => setJavaFallbackActive(true), []);
 
   const tabs = useMemo((): EuiTabbedContentProps['tabs'] => {
     // Host-scoped views are the default for non-Java agents and the fallback for Java agents
@@ -101,6 +107,7 @@ export function ProfilingOverview() {
                 transactionType={transactionType}
                 schema={schema}
                 fallback={hostsFlamegraph}
+                onFallback={onJavaFallback}
               />
             ) : (
               hostsFlamegraph
@@ -126,6 +133,7 @@ export function ProfilingOverview() {
                 transactionType={transactionType}
                 schema={schema}
                 fallback={hostsTopNFunctions}
+                onFallback={onJavaFallback}
               />
             ) : (
               hostsTopNFunctions
@@ -174,9 +182,10 @@ export function ProfilingOverview() {
         </>
       )}
       {/* Java agents record the profiler stacktrace IDs of each transaction, so their profiling
-      data and schemas with data come from the service's transactions. Other agents can only be
-      correlated through the hosts or containers the service runs on. */}
-      {isJavaAgent ? (
+      data and schemas with data come from the service's transactions — unless the Java service
+      has no stack-trace IDs (e.g. upstream OTel Java), in which case the host-scoped fallback
+      renders and the hosts schema selector is used instead (javaFallbackActive). */}
+      {isJavaAgent && !javaFallbackActive ? (
         <ProfilingSchemaSelector
           serviceName={serviceName}
           start={start}

@@ -42,6 +42,13 @@ export function getProfilingScopeKuery({
 /**
  * Lists the correlation scopes worth trying for a service, most specific first. A scope is only a
  * candidate when every key it filters on is known.
+ *
+ * Known limitation — `workloadAnyHost` and `workload`:
+ * `orchestrator.resource.name` is not globally unique across Kubernetes namespaces or clusters.
+ * When multiple namespaces or clusters ship profiling data to the same deployment, this tier can
+ * mix samples from unrelated workloads that share a name. Until namespace/cluster keys are
+ * available on both APM telemetry and profiling events, prefer using `container` or `host` tiers
+ * where possible and treat the workload tiers as a best-effort fallback.
  */
 export function getProfilingScopeCandidates(
   correlation: Omit<ProfilingHostsCorrelation, 'scope'>
