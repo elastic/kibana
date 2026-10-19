@@ -14,7 +14,7 @@ import {
 import {
   buildLensConfig,
   buildVegaConfig,
-  generateVisualizationEsql,
+  generateCustomContentEsql,
   selectDefaultTimeRange,
 } from '@kbn/agent-builder-visualizations-server';
 import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
@@ -23,7 +23,7 @@ import { createVisualizationTool } from './create_visualization';
 jest.mock('@kbn/agent-builder-visualizations-server', () => ({
   buildLensConfig: jest.fn(),
   buildVegaConfig: jest.fn(),
-  generateVisualizationEsql: jest.fn(),
+  generateCustomContentEsql: jest.fn(),
   selectDefaultTimeRange: jest.fn(),
 }));
 
@@ -34,7 +34,7 @@ jest.mock('@kbn/custom-content-server', () => ({
 const mockBuildLens = buildLensConfig as jest.Mock;
 const mockBuildVega = buildVegaConfig as jest.Mock;
 const mockSelectDefaultTimeRange = selectDefaultTimeRange as jest.Mock;
-const mockGenerateEsql = generateVisualizationEsql as jest.Mock;
+const mockGenerateEsql = generateCustomContentEsql as jest.Mock;
 const mockCreateTemplateResolver = createCustomContentTemplateResolver as jest.Mock;
 const mockResolveTemplate = jest.fn();
 

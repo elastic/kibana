@@ -19,6 +19,7 @@ import {
   type VisualizationAttachmentData,
   type VisualizationRenderer,
 } from '@kbn/agent-builder-visualizations-common';
+import { resolveCustomContentQuery } from '@kbn/custom-content-common';
 import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
 import {
   ToolResultType,
@@ -28,7 +29,7 @@ import {
 import {
   buildLensConfig,
   buildVegaConfig,
-  generateVisualizationEsql,
+  generateCustomContentEsql,
   selectDefaultTimeRange,
   type VisualizationConfig,
 } from '@kbn/agent-builder-visualizations-server';
@@ -55,9 +56,6 @@ const getExistingVegaSpec = (data: VisualizationAttachmentData | undefined): str
   const candidate = data.visualization?.spec;
   return typeof candidate === 'string' ? candidate : undefined;
 };
-
-const CUSTOM_CONTENT_ESQL_INSTRUCTIONS =
-  'The query results feed an HTML template that can only loop over the returned rows — it cannot aggregate, group, or sort them. Any grouping or aggregation the content needs must happen in the query itself (STATS ... BY ...), and rows should come back already sorted and limited to what the panel will display.';
 
 const getExistingTemplate = (data: VisualizationAttachmentData | undefined): string | undefined => {
   if (!data || !isCustomContentVisualization(data)) {
@@ -248,39 +246,6 @@ const readTarget = (target: CreateVisualizationTarget) => ({
 const NO_QUERY_HINT =
   'Pass an explicit "esql" built with the ES|QL tools, or "has_data": false only if the panel genuinely has no data.';
 
-const resolveCustomContentEsql = async ({
-  esql,
-  hasData,
-  existingData,
-  existingEsql,
-  generate,
-}: {
-  esql: string | undefined;
-  hasData: boolean | undefined;
-  existingData: VisualizationAttachmentData | undefined;
-  existingEsql: string | undefined;
-  generate: () => Promise<string>;
-}): Promise<string | undefined> => {
-  // A supplied query is the strongest signal that the panel has data, so it wins over
-  // a has_data: false passed alongside it.
-  if (esql) {
-    return esql;
-  }
-  if (hasData === false) {
-    return undefined;
-  }
-  if (!existingData) {
-    return generate();
-  }
-  // On update a stored query always survives unless explicitly replaced (esql) or
-  // dropped (has_data: false) — a redundant has_data: true must not regenerate it
-  // from what may be a style-only prompt.
-  if (existingEsql) {
-    return existingEsql;
-  }
-  return hasData === true ? generate() : undefined;
-};
-
 export const createVisualizationTool = (): BuiltinToolDefinition<
   typeof createVisualizationSchema
 > => {
@@ -362,37 +327,36 @@ Ground first: make sure the target index exists and every field you reference is
           const existingTemplate = getExistingTemplate(existingData);
           const existingEsql = existingData?.esql;
 
-          const mergedEsql = await resolveCustomContentEsql({
-            esql,
-            hasData,
-            existingData,
-            existingEsql,
-            generate: async () => {
-              const generated = await generateVisualizationEsql({
-                nlQuery,
-                index,
-                modelProvider,
-                events,
-                logger,
-                esClient,
-                ...(requestedTimeRange ? { timeRange: requestedTimeRange } : {}),
-                extraInstructions: CUSTOM_CONTENT_ESQL_INSTRUCTIONS,
-              });
-              if (!generated.query) {
-                throw new Error(
-                  `Could not generate an ES|QL query for this panel: ${
-                    generated.error ?? 'no query was produced'
-                  }. ${NO_QUERY_HINT}`
-                );
-              }
-              return generated.query;
-            },
-          });
+          const { query: mergedEsql, isChanging: isQueryChanging } =
+            await resolveCustomContentQuery({
+              esql,
+              hasData,
+              existingQuery: existingEsql,
+              isNewPanel: !existingData,
+              generate: async (existingQueries) => {
+                const generated = await generateCustomContentEsql({
+                  nlQuery,
+                  index,
+                  existingQueries,
+                  modelProvider,
+                  events,
+                  logger,
+                  esClient,
+                  ...(requestedTimeRange ? { timeRange: requestedTimeRange } : {}),
+                });
+                if (!generated.query) {
+                  throw new Error(
+                    `Could not generate an ES|QL query for this panel: ${
+                      generated.error ?? 'no query was produced'
+                    }. ${NO_QUERY_HINT}`
+                  );
+                }
+                return generated.query;
+              },
+            });
 
-          // Sampling costs a round trip, so only when the query actually changes —
+          // Sampling costs a round trip, so it only happens when the query actually changes,
           // including when has_data: false clears a stored query.
-          const isQueryChanging = mergedEsql !== existingEsql;
-
           const { template, height } = await resolveTemplate({
             prompt: nlQuery,
             esqlQuery: isQueryChanging ? mergedEsql : undefined,
