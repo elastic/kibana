@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import React from 'react';
 import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -166,6 +168,17 @@ const makeClient = () =>
     remove: jest.fn().mockResolvedValue({ id: 'app-1' }),
   } as jest.Mocked<SavedAppsClient>);
 
+/** The menu of the header keeps what does not fit in a popover, as it does here: open it for an item. */
+const findMenuItem = async (testId: string) => {
+  if (!screen.queryByTestId(testId)) await openAppMenuOverflow();
+  return screen.findByTestId(testId);
+};
+
+const queryMenuItem = async (testId: string) => {
+  if (!screen.queryByTestId(testId)) await openAppMenuOverflow();
+  return screen.queryByTestId(testId);
+};
+
 const setup = ({
   canSave = true,
   canWriteDashboards = true,
@@ -194,17 +207,19 @@ const setup = ({
   const notifications = { toasts: { addDanger: jest.fn() } };
   const chrome = { setBreadcrumbs: jest.fn() };
   render(
-    <App
-      history={history as unknown as ScopedHistory}
-      client={client}
-      chrome={chrome as never}
-      notifications={notifications as never}
-      canSave={canSave}
-      agentBuilder={agentBuilder as never}
-      onAppLeave={onAppLeave}
-      stateTransfer={{ navigateToWithEmbeddablePackages } as never}
-      canWriteDashboards={canWriteDashboards}
-    />
+    <MockAppHeaderProvider>
+      <App
+        history={history as unknown as ScopedHistory}
+        client={client}
+        chrome={chrome as never}
+        notifications={notifications as never}
+        canSave={canSave}
+        agentBuilder={agentBuilder as never}
+        onAppLeave={onAppLeave}
+        stateTransfer={{ navigateToWithEmbeddablePackages } as never}
+        canWriteDashboards={canWriteDashboards}
+      />
+    </MockAppHeaderProvider>
   );
   return { client, history, notifications, chrome, onAppLeave, navigateToWithEmbeddablePackages };
 };
@@ -429,7 +444,7 @@ describe('the custom apps page', () => {
         await userEvent.click(await screen.findByTestId('customAppEmptyBuild'));
         await userEvent.click(await screen.findByRole('button', { name: 'save draft' }));
 
-        await userEvent.click(await screen.findByTestId('customAppRefineWithAi'));
+        await userEvent.click(await findMenuItem('customAppRefineWithAi'));
 
         expect(agent.openChat).toHaveBeenCalledWith(
           expect.objectContaining({ initialMessage: 'Change this app so that ' })
@@ -441,7 +456,7 @@ describe('the custom apps page', () => {
         setup({ path: '/create', agentBuilder: makeAgentBuilder() });
         await screen.findByText('Build your app');
 
-        expect(screen.queryByTestId('customAppRefineWithAi')).not.toBeInTheDocument();
+        expect(await queryMenuItem('customAppRefineWithAi')).not.toBeInTheDocument();
       });
     });
 
@@ -539,7 +554,7 @@ describe('the custom apps page', () => {
       await openEditor();
       await apply();
 
-      await userEvent.click(screen.getByTestId('customAppEdit'));
+      await userEvent.click(await findMenuItem('customAppEdit'));
 
       expect(await screen.findByTestId('editor')).toHaveAttribute('data-starts-from', 'edited:0');
     });
@@ -608,21 +623,21 @@ describe('the custom apps page', () => {
       setup({ path: '/view/app-1', agentBuilder: makeAgentBuilder() });
       await screen.findByTestId('liveApp');
 
-      expect(screen.getByTestId('customAppRefineWithAi')).toBeInTheDocument();
+      expect(await findMenuItem('customAppRefineWithAi')).toBeInTheDocument();
     });
 
     it('is not offered when the assistant is not available', async () => {
       setup({ path: '/view/app-1' });
       await screen.findByTestId('liveApp');
 
-      expect(screen.queryByTestId('customAppRefineWithAi')).not.toBeInTheDocument();
+      expect(await queryMenuItem('customAppRefineWithAi')).not.toBeInTheDocument();
     });
 
     it('is not offered to someone who may only read, who could not save what it makes', async () => {
       setup({ path: '/view/app-1', canSave: false, agentBuilder: makeAgentBuilder() });
       await screen.findByTestId('liveApp');
 
-      expect(screen.queryByTestId('customAppRefineWithAi')).not.toBeInTheDocument();
+      expect(await queryMenuItem('customAppRefineWithAi')).not.toBeInTheDocument();
     });
 
     it('sends the app as it is saved, to be changed, with the start of a request', async () => {
@@ -630,7 +645,7 @@ describe('the custom apps page', () => {
       setup({ path: '/view/app-1', agentBuilder: agent });
       await screen.findByTestId('liveApp');
 
-      await userEvent.click(screen.getByTestId('customAppRefineWithAi'));
+      await userEvent.click(await findMenuItem('customAppRefineWithAi'));
 
       expect(agent.openChat).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -645,7 +660,7 @@ describe('the custom apps page', () => {
       const agent = makeAgentBuilder();
       const { client } = setup({ path: '/view/app-1', agentBuilder: agent });
       await screen.findByTestId('liveApp');
-      await userEvent.click(screen.getByTestId('customAppRefineWithAi'));
+      await userEvent.click(await findMenuItem('customAppRefineWithAi'));
 
       await act(async () => agent.answer(attachedTo(agent).id, madeByTheAgent));
 
@@ -670,7 +685,7 @@ describe('the custom apps page', () => {
       const agent = makeAgentBuilder();
       setup({ path: '/view/app-1', agentBuilder: agent });
       await screen.findByTestId('liveApp');
-      await userEvent.click(screen.getByTestId('customAppRefineWithAi'));
+      await userEvent.click(await findMenuItem('customAppRefineWithAi'));
 
       await act(async () => agent.answer(attachedTo(agent).id, savedApp().document));
 
@@ -705,7 +720,7 @@ describe('the custom apps page', () => {
       const { history } = setup({ path: '/view/app-1' });
       await screen.findByTestId('liveApp');
 
-      await userEvent.click(screen.getByRole('link', { name: 'Custom apps' }));
+      await userEvent.click(screen.getByRole('link', { name: 'Back to Custom apps' }));
 
       expect(history.location.pathname).toBe('/');
     });
@@ -714,7 +729,7 @@ describe('the custom apps page', () => {
       const { history } = setup({ path: '/create' });
       await screen.findByText('Build your app');
 
-      await userEvent.click(screen.getByRole('link', { name: 'Custom apps' }));
+      await userEvent.click(screen.getByRole('link', { name: 'Back to Custom apps' }));
 
       expect(history.location.pathname).toBe('/');
     });
@@ -723,7 +738,10 @@ describe('the custom apps page', () => {
       setup({ path: '/view/app-1' });
       await screen.findByTestId('liveApp');
 
-      expect(screen.getByRole('link', { name: 'Custom apps' })).toHaveAttribute('href', '/');
+      expect(screen.getByRole('link', { name: 'Back to Custom apps' })).toHaveAttribute(
+        'href',
+        '/'
+      );
     });
 
     it('asks first when a new app has changes that are not saved, and stays if told not to leave', async () => {
@@ -731,7 +749,7 @@ describe('the custom apps page', () => {
       await userEvent.click(await screen.findByTestId('customAppEmptyBuild'));
       await userEvent.click(await screen.findByRole('button', { name: 'save draft' }));
 
-      await userEvent.click(screen.getByRole('link', { name: 'Custom apps' }));
+      await userEvent.click(screen.getByRole('link', { name: 'Back to Custom apps' }));
 
       expect(history.location.pathname).toBe('/create');
     });
@@ -755,7 +773,7 @@ describe('the custom apps page', () => {
     it('is offered for an app that has something in it', async () => {
       await open();
 
-      expect(screen.getByTestId('customAppAddToDashboard')).toBeEnabled();
+      expect(await findMenuItem('customAppAddToDashboard')).toBeEnabled();
     });
 
     it('is not offered for an app that is empty, which would add a blank panel', async () => {
@@ -773,19 +791,19 @@ describe('the custom apps page', () => {
       });
       await screen.findByText('Build your app');
 
-      expect(screen.queryByTestId('customAppAddToDashboard')).not.toBeInTheDocument();
+      expect(await queryMenuItem('customAppAddToDashboard')).not.toBeInTheDocument();
     });
 
     it('is offered to someone who may only read apps, since it does not change the app', async () => {
       await open({ canSave: false });
 
-      expect(screen.getByTestId('customAppAddToDashboard')).toBeEnabled();
+      expect(await findMenuItem('customAppAddToDashboard')).toBeEnabled();
     });
 
     it('is disabled for someone who may not change dashboards', async () => {
       await open({ canWriteDashboards: false });
 
-      expect(screen.getByTestId('customAppAddToDashboard')).toBeDisabled();
+      expect(await findMenuItem('customAppAddToDashboard')).toBeDisabled();
     });
 
     it('is disabled while there are changes that are not saved, as the dashboard shows the saved app', async () => {
@@ -793,13 +811,14 @@ describe('the custom apps page', () => {
       await userEvent.click(screen.getByTestId('customAppEdit'));
       await userEvent.click(screen.getByRole('button', { name: 'save draft' }));
 
-      await waitFor(() => expect(screen.getByTestId('customAppAddToDashboard')).toBeDisabled());
+      await screen.findByTestId('customAppSave');
+      expect(await findMenuItem('customAppAddToDashboard')).toBeDisabled();
     });
 
     it('adds a link to the app, not a copy, to the dashboard that is chosen', async () => {
       const { navigateToWithEmbeddablePackages } = await open();
 
-      await userEvent.click(screen.getByTestId('customAppAddToDashboard'));
+      await userEvent.click(await findMenuItem('customAppAddToDashboard'));
       await userEvent.click(screen.getByRole('button', { name: 'confirm unchanged' }));
 
       expect(navigateToWithEmbeddablePackages).toHaveBeenCalledWith('dashboards', {
@@ -811,7 +830,7 @@ describe('the custom apps page', () => {
     it('gives the panel a title of its own only when it was changed in the dialog', async () => {
       const { navigateToWithEmbeddablePackages } = await open();
 
-      await userEvent.click(screen.getByTestId('customAppAddToDashboard'));
+      await userEvent.click(await findMenuItem('customAppAddToDashboard'));
       await userEvent.click(screen.getByRole('button', { name: 'confirm renamed' }));
 
       expect(navigateToWithEmbeddablePackages).toHaveBeenCalledWith('dashboards', {
@@ -825,7 +844,7 @@ describe('the custom apps page', () => {
     it('opens a new dashboard with the panel when that is what was chosen', async () => {
       const { navigateToWithEmbeddablePackages } = await open();
 
-      await userEvent.click(screen.getByTestId('customAppAddToDashboard'));
+      await userEvent.click(await findMenuItem('customAppAddToDashboard'));
       await userEvent.click(screen.getByRole('button', { name: 'confirm new dashboard' }));
 
       expect(navigateToWithEmbeddablePackages).toHaveBeenCalledWith(
@@ -934,7 +953,7 @@ describe('the custom apps page', () => {
       await userEvent.click(screen.getByTestId('customAppEdit'));
       await userEvent.click(screen.getByRole('button', { name: 'save draft' }));
 
-      await userEvent.click(await screen.findByTestId('customAppDiscard'));
+      await userEvent.click(await findMenuItem('customAppDiscard'));
       expect(screen.getByTestId('liveApp')).toHaveTextContent('edited');
       await userEvent.click(
         within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Discard changes' })
@@ -964,25 +983,90 @@ describe('the custom apps page', () => {
       expect(history.location.pathname).toBe('/view/app-1');
     });
 
-    it('changes the name and description without touching the document', async () => {
-      const { client } = setup({ path: '/view/app-1' });
-      await screen.findByTestId('liveApp');
+    describe('renaming it from the header', () => {
+      const rename = async (name: string) => {
+        await userEvent.click(await screen.findByTestId('appHeaderTitleButton'));
+        const input = screen.getByTestId('appHeaderTitleInput');
+        await userEvent.clear(input);
+        await userEvent.type(input, `${name}{Enter}`);
+      };
 
-      await userEvent.click(screen.getByTestId('customAppEditDetails'));
-      const title = screen.getByTestId('customAppDetailsTitle');
-      await userEvent.clear(title);
-      await userEvent.type(title, 'Renamed');
-      await userEvent.click(screen.getByTestId('customAppDetailsConfirm'));
+      it('saves the new name without touching the document', async () => {
+        const { client } = setup({ path: '/view/app-1' });
+        await screen.findByTestId('liveApp');
 
-      await waitFor(() =>
-        expect(client.update).toHaveBeenCalledWith(
-          'app-1',
-          expect.objectContaining({
-            title: 'Renamed',
-            document: expect.objectContaining({ root: expect.objectContaining({ id: 'title' }) }),
-          })
-        )
-      );
+        await rename('Renamed');
+
+        await waitFor(() =>
+          expect(client.update).toHaveBeenCalledWith(
+            'app-1',
+            expect.objectContaining({
+              title: 'Renamed',
+              document: expect.objectContaining({ root: expect.objectContaining({ id: 'title' }) }),
+            })
+          )
+        );
+      });
+
+      it('keeps what was changed and is not saved yet as it is, and saves only the name', async () => {
+        const { client } = setup({ path: '/view/app-1' });
+        await screen.findByTestId('liveApp');
+        await userEvent.click(screen.getByTestId('customAppEdit'));
+        await userEvent.click(screen.getByRole('button', { name: 'save draft' }));
+        await screen.findByTestId('customAppSave');
+
+        await rename('Renamed');
+
+        await waitFor(() => expect(client.update).toHaveBeenCalledTimes(1));
+        // The draft is not what is saved, and it is still there to be saved.
+        expect(client.update.mock.calls[0][1].document).toEqual(
+          (await client.get.mock.results[0].value).document
+        );
+        expect(screen.getByTestId('customAppSave')).toBeInTheDocument();
+      });
+
+      it('does not save a name that is empty, and says so', async () => {
+        const { client } = setup({ path: '/view/app-1' });
+        await screen.findByTestId('liveApp');
+
+        await userEvent.click(await screen.findByTestId('appHeaderTitleButton'));
+        await userEvent.clear(screen.getByTestId('appHeaderTitleInput'));
+        await userEvent.type(screen.getByTestId('appHeaderTitleInput'), '   {Enter}');
+
+        expect(await screen.findByTestId('appHeaderTitleError')).toBeInTheDocument();
+        expect(client.update).not.toHaveBeenCalled();
+      });
+
+      it('does not save when the name is the same', async () => {
+        const { client } = setup({ path: '/view/app-1' });
+        await screen.findByTestId('liveApp');
+
+        await rename('Service explorer');
+
+        expect(client.update).not.toHaveBeenCalled();
+      });
+
+      it('stays open, with a reason, when the name could not be saved', async () => {
+        const { client, notifications } = setup({
+          path: '/view/app-1',
+          prepare: (c) => c.update.mockRejectedValue({ body: { message: 'Not allowed' } }),
+        });
+        await screen.findByTestId('liveApp');
+
+        await rename('Renamed');
+
+        expect(await screen.findByText('The name could not be saved.')).toBeInTheDocument();
+        expect(notifications.toasts.addDanger).toHaveBeenCalled();
+        expect(client.update).toHaveBeenCalledTimes(1);
+      });
+
+      it('is not possible for someone who may only read', async () => {
+        setup({ path: '/view/app-1', canSave: false });
+        await screen.findByTestId('liveApp');
+
+        expect(screen.queryByTestId('appHeaderTitleButton')).not.toBeInTheDocument();
+        expect(screen.getByTestId('appHeaderTitle')).toHaveTextContent('Service explorer');
+      });
     });
 
     it('cannot be edited by someone who may only read', async () => {
@@ -990,7 +1074,6 @@ describe('the custom apps page', () => {
       await screen.findByTestId('liveApp');
 
       expect(screen.queryByTestId('customAppEdit')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('customAppEditDetails')).not.toBeInTheDocument();
     });
 
     it('says what is wrong with an app that cannot be shown, instead of showing it broken', async () => {

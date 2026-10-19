@@ -37,6 +37,7 @@ dependsOn:
   - '@kbn/agent-builder-common'
   - '@kbn/agent-builder-browser'
   - '@kbn/shared-ux-ai-components'
+  - '@kbn/app-header'
   - '@kbn/presentation-util'
   - '@kbn/presentation-util-plugin'
   - '@kbn/react-kibana-mount'

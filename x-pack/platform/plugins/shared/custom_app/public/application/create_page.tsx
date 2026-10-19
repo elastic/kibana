@@ -7,9 +7,9 @@
 
 import React, { useCallback, useEffect, useId, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { EuiBadge, EuiButton, EuiButtonEmpty, EuiFlyout, EuiPageTemplate } from '@elastic/eui';
+import { EuiFlyout, EuiPageTemplate } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AiButton } from '@kbn/shared-ux-ai-components';
+import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 import { isEmptyDocument, type AppDocument } from '@kbn/custom-app-common';
 import { EmptyApp } from '../components/empty_app';
 import { LiveApp } from '../components/live_app';
@@ -17,7 +17,7 @@ import { createDefaultDocument, createEmptyDocument } from '../default_document'
 import { EditorFlyout } from '../editor/editor_flyout';
 import { DetailsModal } from './details_modal';
 import { useChatWithPage } from './use_chat_with_page';
-import { useListBreadcrumb } from './list_breadcrumb';
+import { useListBack, useListBreadcrumb } from './list_breadcrumb';
 import { useUnsavedChangesGuard } from './use_unsaved_changes_guard';
 import type { AppServices } from './app';
 
@@ -59,6 +59,7 @@ export const CreatePage = ({
     if (savedId) history.replace(`/view/${encodeURIComponent(savedId)}`);
   }, [history, savedId]);
 
+  const listBack = useListBack();
   const listBreadcrumb = useListBreadcrumb();
   const breadcrumbs = useMemo(
     () => [
@@ -114,60 +115,69 @@ export const CreatePage = ({
     [client, draft, notifications]
   );
 
+  const menu: AppHeaderMenu = {
+    primaryActionItem: {
+      id: 'save',
+      label: i18n.translate('xpack.customApp.standalone.save', { defaultMessage: 'Save' }),
+      iconType: 'save',
+      disableButton: isEmpty,
+      testId: 'customAppSave',
+      run: () => setIsNaming(true),
+    },
+    items: isEmpty
+      ? []
+      : [
+          {
+            id: 'edit',
+            order: 1,
+            label: i18n.translate('xpack.customApp.standalone.edit', { defaultMessage: 'Edit' }),
+            iconType: 'pencil',
+            disableButton: isEditing,
+            testId: 'customAppEdit',
+            run: () => setIsEditing(true),
+          },
+          ...(describe
+            ? [
+                {
+                  id: 'refine',
+                  order: 2,
+                  label: i18n.translate('xpack.customApp.standalone.refine', {
+                    defaultMessage: 'Refine with AI',
+                  }),
+                  iconType: 'sparkles',
+                  testId: 'customAppRefineWithAi',
+                  run: () =>
+                    describe(
+                      i18n.translate('xpack.customApp.standalone.refinePrompt', {
+                        defaultMessage: 'Change this app so that ',
+                      })
+                    ),
+                },
+              ]
+            : []),
+        ],
+  };
+
   return (
     <EuiPageTemplate offset={0} restrictWidth={false} data-test-subj="customAppCreatePage">
-      <EuiPageTemplate.Header
-        breadcrumbs={breadcrumbs}
-        pageTitle={i18n.translate('xpack.customApp.standalone.newTitle', {
+      <AppHeader
+        back={listBack}
+        title={i18n.translate('xpack.customApp.standalone.newTitle', {
           defaultMessage: 'New app',
         })}
-        rightSideItems={[
-          <EuiButton
-            fill
-            iconType="save"
-            isDisabled={isEmpty}
-            onClick={() => setIsNaming(true)}
-            data-test-subj="customAppSave"
-          >
-            {i18n.translate('xpack.customApp.standalone.save', { defaultMessage: 'Save' })}
-          </EuiButton>,
-          ...(isEmpty
-            ? []
+        badges={
+          isEmpty
+            ? undefined
             : [
-                ...(describe
-                  ? [
-                      <AiButton
-                        iconType="sparkles"
-                        onClick={() =>
-                          describe(
-                            i18n.translate('xpack.customApp.standalone.refinePrompt', {
-                              defaultMessage: 'Change this app so that ',
-                            })
-                          )
-                        }
-                        data-test-subj="customAppRefineWithAi"
-                      >
-                        {i18n.translate('xpack.customApp.standalone.refine', {
-                          defaultMessage: 'Refine with AI',
-                        })}
-                      </AiButton>,
-                    ]
-                  : []),
-                <EuiButtonEmpty
-                  iconType="pencil"
-                  isDisabled={isEditing}
-                  onClick={() => setIsEditing(true)}
-                  data-test-subj="customAppEdit"
-                >
-                  {i18n.translate('xpack.customApp.standalone.edit', { defaultMessage: 'Edit' })}
-                </EuiButtonEmpty>,
-                <EuiBadge color="warning">
-                  {i18n.translate('xpack.customApp.standalone.unsaved', {
+                {
+                  label: i18n.translate('xpack.customApp.standalone.unsaved', {
                     defaultMessage: 'Unsaved',
-                  })}
-                </EuiBadge>,
-              ]),
-        ]}
+                  }),
+                  color: 'warning',
+                },
+              ]
+        }
+        menu={menu}
       />
       <EuiPageTemplate.Section grow>
         {isEmptyDocument(preview ?? draft) ? (

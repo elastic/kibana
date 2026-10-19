@@ -8,18 +8,9 @@
 import React, { useCallback, useEffect, useId, useMemo, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import isEqual from 'lodash/isEqual';
-import {
-  EuiBadge,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiConfirmModal,
-  EuiFlyout,
-  EuiLoadingSpinner,
-  EuiPageTemplate,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiConfirmModal, EuiFlyout, EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AiButton } from '@kbn/shared-ux-ai-components';
+import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import {
   appDocumentSchema,
@@ -32,9 +23,8 @@ import { EmptyApp } from '../components/empty_app';
 import { LiveApp } from '../components/live_app';
 import { createDefaultDocument, createEmptyDocument } from '../default_document';
 import { EditorFlyout } from '../editor/editor_flyout';
-import { DetailsModal } from './details_modal';
 import { useChatWithPage } from './use_chat_with_page';
-import { useListBreadcrumb } from './list_breadcrumb';
+import { useListBack, useListBreadcrumb } from './list_breadcrumb';
 import { useUnsavedChangesGuard } from './use_unsaved_changes_guard';
 import type { AppServices } from './app';
 import type { SavedApp } from './saved_apps_client';
@@ -73,7 +63,6 @@ export const ViewPage = ({
   const discardTitleId = useId();
   const [state, setState] = useState<ViewState>({ status: 'loading' });
   const [isEditing, setIsEditing] = useState(false);
-  const [isEditingDetails, setIsEditingDetails] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   /** The draft the editor is showing, so that it is seen on the page before it is saved. */
   const [preview, setPreview] = useState<AppDocument>();
@@ -105,6 +94,7 @@ export const ViewPage = ({
 
   const title =
     state.status === 'ready' || state.status === 'invalid' ? state.app.title : undefined;
+  const listBack = useListBack();
   const listBreadcrumb = useListBreadcrumb();
   const breadcrumbs = useMemo(
     () => [listBreadcrumb, ...(title ? [{ text: title }] : [])],
@@ -214,48 +204,15 @@ export const ViewPage = ({
     }
   };
 
-  const editButton =
-    canSave && state.status === 'ready' ? (
-      <EuiButton
-        fill={!hasDraft}
-        color={hasDraft ? 'text' : 'primary'}
-        iconType="pencil"
-        isDisabled={isEditing}
-        onClick={() => setIsEditing(true)}
-        data-test-subj="customAppEdit"
-      >
-        {i18n.translate('xpack.customApp.standalone.edit', { defaultMessage: 'Edit' })}
-      </EuiButton>
-    ) : undefined;
-
-  const addToDashboardButton =
-    state.status === 'ready' && !isEmptyDocument(state.document) ? (
-      <EuiToolTip
-        content={
-          !canWriteDashboards
-            ? i18n.translate('xpack.customApp.standalone.noDashboardAccess', {
-                defaultMessage:
-                  'You need dashboard write permissions to add an app to a dashboard.',
-              })
-            : hasDraft
-            ? i18n.translate('xpack.customApp.standalone.saveFirst', {
-                defaultMessage: 'Save your changes first: the dashboard shows the saved app.',
-              })
-            : undefined
-        }
-      >
-        <EuiButtonEmpty
-          iconType="dashboardApp"
-          isDisabled={!canWriteDashboards || hasDraft}
-          onClick={() => setIsAddingToDashboard(true)}
-          data-test-subj="customAppAddToDashboard"
-        >
-          {i18n.translate('xpack.customApp.standalone.addToDashboard', {
-            defaultMessage: 'Add to dashboard',
-          })}
-        </EuiButtonEmpty>
-      </EuiToolTip>
-    ) : undefined;
+  const addToDashboardTooltip = !canWriteDashboards
+    ? i18n.translate('xpack.customApp.standalone.noDashboardAccess', {
+        defaultMessage: 'You need dashboard write permissions to add an app to a dashboard.',
+      })
+    : hasDraft
+    ? i18n.translate('xpack.customApp.standalone.saveFirst', {
+        defaultMessage: 'Save your changes first: the dashboard shows the saved app.',
+      })
+    : undefined;
 
   const addToDashboard = async ({
     dashboardId,
@@ -286,77 +243,144 @@ export const ViewPage = ({
     });
   };
 
-  const refineButton =
-    canSave && describe && state.status === 'ready' && !isEmptyDocument(draft ?? state.document) ? (
-      <AiButton
-        iconType="sparkles"
-        onClick={() =>
-          describe(
-            i18n.translate('xpack.customApp.standalone.refinePrompt', {
-              defaultMessage: 'Change this app so that ',
-            })
-          )
-        }
-        data-test-subj="customAppRefineWithAi"
-      >
-        {i18n.translate('xpack.customApp.standalone.refine', { defaultMessage: 'Refine with AI' })}
-      </AiButton>
-    ) : undefined;
+  const canRefine =
+    canSave && describe && state.status === 'ready' && !isEmptyDocument(draft ?? state.document);
 
-  const detailsButton = canSave ? (
-    <EuiButtonEmpty
-      iconType="pencil"
-      onClick={() => setIsEditingDetails(true)}
-      data-test-subj="customAppEditDetails"
-    >
-      {i18n.translate('xpack.customApp.standalone.editDetails', { defaultMessage: 'Name' })}
-    </EuiButtonEmpty>
-  ) : undefined;
+  const menu: AppHeaderMenu = {
+    // What the page asks for next: to save what was changed, or else to change it.
+    primaryActionItem: hasDraft
+      ? {
+          id: 'save',
+          label: i18n.translate('xpack.customApp.standalone.save', { defaultMessage: 'Save' }),
+          iconType: 'save',
+          isLoading: isSaving,
+          testId: 'customAppSave',
+          run: saveDraft,
+        }
+      : canSave && state.status === 'ready'
+      ? {
+          id: 'edit',
+          label: i18n.translate('xpack.customApp.standalone.edit', { defaultMessage: 'Edit' }),
+          iconType: 'pencil',
+          disableButton: isEditing,
+          testId: 'customAppEdit',
+          run: () => setIsEditing(true),
+        }
+      : undefined,
+    items: [
+      ...(hasDraft && canSave && state.status === 'ready'
+        ? [
+            {
+              id: 'edit',
+              order: 1,
+              label: i18n.translate('xpack.customApp.standalone.edit', {
+                defaultMessage: 'Edit',
+              }),
+              iconType: 'pencil',
+              disableButton: isEditing,
+              testId: 'customAppEdit',
+              run: () => setIsEditing(true),
+            },
+          ]
+        : []),
+      ...(canRefine
+        ? [
+            {
+              id: 'refine',
+              order: 2,
+              label: i18n.translate('xpack.customApp.standalone.refine', {
+                defaultMessage: 'Refine with AI',
+              }),
+              iconType: 'sparkles',
+              testId: 'customAppRefineWithAi',
+              run: () =>
+                describe(
+                  i18n.translate('xpack.customApp.standalone.refinePrompt', {
+                    defaultMessage: 'Change this app so that ',
+                  })
+                ),
+            },
+          ]
+        : []),
+      ...(state.status === 'ready' && !isEmptyDocument(state.document)
+        ? [
+            {
+              id: 'addToDashboard',
+              order: 3,
+              label: i18n.translate('xpack.customApp.standalone.addToDashboard', {
+                defaultMessage: 'Add to dashboard',
+              }),
+              iconType: 'dashboardApp',
+              disableButton: !canWriteDashboards || hasDraft,
+              tooltipContent: addToDashboardTooltip,
+              testId: 'customAppAddToDashboard',
+              run: () => setIsAddingToDashboard(true),
+            },
+          ]
+        : []),
+      ...(hasDraft
+        ? [
+            {
+              id: 'discard',
+              order: 5,
+              overflow: true as const,
+              isDestructive: true,
+              label: i18n.translate('xpack.customApp.standalone.discard', {
+                defaultMessage: 'Discard changes',
+              }),
+              iconType: 'trash',
+              disableButton: isSaving,
+              testId: 'customAppDiscard',
+              run: () => setIsDiscarding(true),
+            },
+          ]
+        : []),
+    ],
+  };
+
+  // The header does not ask to save a name that is empty or the same.
+  const renameApp = async (name: string): Promise<string | void> => {
+    // A draft stays as it is: only the name is saved.
+    if (
+      state.status === 'ready' &&
+      (await save({ title: name, description: app.description }, state.document))
+    ) {
+      return;
+    }
+    return i18n.translate('xpack.customApp.standalone.renameError', {
+      defaultMessage: 'The name could not be saved.',
+    });
+  };
 
   return (
     <EuiPageTemplate offset={0} restrictWidth={false} data-test-subj="customAppViewPage">
-      <EuiPageTemplate.Header
-        breadcrumbs={breadcrumbs}
-        pageTitle={app.title}
+      <AppHeader
+        back={listBack}
+        title={
+          canSave && state.status === 'ready'
+            ? {
+                text: app.title,
+                onSave: renameApp,
+                ariaLabel: i18n.translate('xpack.customApp.standalone.renameAria', {
+                  defaultMessage: 'Name of the app',
+                }),
+              }
+            : app.title
+        }
         description={app.description}
-        rightSideItems={[
-          ...(hasDraft
+        badges={
+          hasDraft
             ? [
-                <EuiButton
-                  fill
-                  iconType="save"
-                  isLoading={isSaving}
-                  onClick={saveDraft}
-                  data-test-subj="customAppSave"
-                >
-                  {i18n.translate('xpack.customApp.standalone.save', { defaultMessage: 'Save' })}
-                </EuiButton>,
-                <EuiButtonEmpty
-                  color="text"
-                  isDisabled={isSaving}
-                  onClick={() => setIsDiscarding(true)}
-                  data-test-subj="customAppDiscard"
-                >
-                  {i18n.translate('xpack.customApp.standalone.discard', {
-                    defaultMessage: 'Discard changes',
-                  })}
-                </EuiButtonEmpty>,
-              ]
-            : []),
-          ...(editButton ? [editButton] : []),
-          ...(refineButton ? [refineButton] : []),
-          ...(addToDashboardButton ? [addToDashboardButton] : []),
-          ...(detailsButton ? [detailsButton] : []),
-          ...(hasDraft
-            ? [
-                <EuiBadge color="warning">
-                  {i18n.translate('xpack.customApp.standalone.unsaved', {
+                {
+                  label: i18n.translate('xpack.customApp.standalone.unsaved', {
                     defaultMessage: 'Unsaved',
-                  })}
-                </EuiBadge>,
+                  }),
+                  color: 'warning',
+                },
               ]
-            : []),
-        ]}
+            : undefined
+        }
+        menu={menu}
       />
       <EuiPageTemplate.Section>
         {state.status === 'invalid' ? (
@@ -421,25 +445,6 @@ export const ViewPage = ({
             }}
           />
         </EuiFlyout>
-      )}
-      {isEditingDetails && (
-        <DetailsModal
-          heading={i18n.translate('xpack.customApp.standalone.detailsHeading', {
-            defaultMessage: 'Name and description',
-          })}
-          confirmLabel={i18n.translate('xpack.customApp.standalone.detailsConfirm', {
-            defaultMessage: 'Save',
-          })}
-          initialTitle={app.title}
-          initialDescription={app.description}
-          isSaving={isSaving}
-          onCancel={() => setIsEditingDetails(false)}
-          onConfirm={async (details) => {
-            if (state.status === 'ready' && (await save(details, state.document))) {
-              setIsEditingDetails(false);
-            }
-          }}
-        />
       )}
       {isAddingToDashboard && (
         <SavedObjectSaveModalDashboard

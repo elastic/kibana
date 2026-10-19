@@ -8,17 +8,18 @@
 import { useMemo, type MouseEvent } from 'react';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
+import type { AppHeaderBack } from '@kbn/app-header';
 
 /**
- * The way back to the list, as a breadcrumb: a real link, so that it can be opened in another tab,
- * and a plain click stays in the app. It asks first, through the history, when there are unsaved
- * changes.
+ * The way back to the list, for the header of a page and for the breadcrumbs of Kibana: a real
+ * link, so that it can be opened in another tab, and a plain click stays in the app. It asks first,
+ * through the history, when there are unsaved changes.
  */
-export const useListBreadcrumb = () => {
+export const useListBack = (): AppHeaderBack => {
   const history = useHistory();
   return useMemo(
     () => ({
-      text: i18n.translate('xpack.customApp.standalone.breadcrumb', {
+      label: i18n.translate('xpack.customApp.standalone.breadcrumb', {
         defaultMessage: 'Custom apps',
       }),
       href: history.createHref({ pathname: '/' }),
@@ -30,4 +31,10 @@ export const useListBreadcrumb = () => {
     }),
     [history]
   );
+};
+
+/** The same way back, as the first breadcrumb of Kibana. */
+export const useListBreadcrumb = () => {
+  const { label, href, onClick } = useListBack();
+  return useMemo(() => ({ text: label, href, onClick }), [label, href, onClick]);
 };
