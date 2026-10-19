@@ -22,6 +22,7 @@ import {
   type TimeRange,
 } from '../../entities_grid/common';
 import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
+import { isTileQueryTimeout, retryUnlessTimedOut, runWithTileTimeout } from './tile_query_timeout';
 
 export const useRiskMoversCount = ({
   spaceId,
@@ -66,8 +67,13 @@ export const useRiskMoversCount = ({
     ['riskMoversCount', query],
     async ({ signal }) => {
       if (!query) return { count: 0, entityIds: [] };
-      const raw = await lastValueFrom(
-        data.search.search({ params: { query } }, { abortSignal: signal, strategy: 'esql_async' })
+      const raw = await runWithTileTimeout(signal, (tileSignal) =>
+        lastValueFrom(
+          data.search.search(
+            { params: { query } },
+            { abortSignal: tileSignal, strategy: 'esql_async' }
+          )
+        )
       );
       const response = raw.rawResponse as unknown as ESQLSearchResponse;
       const row = response.values?.[0];
@@ -87,7 +93,7 @@ export const useRiskMoversCount = ({
       keepPreviousData: true,
       ...TILE_QUERY_CACHE_OPTIONS,
       refetchOnWindowFocus: false,
-      retry: 1,
+      retry: retryUnlessTimedOut,
     }
   );
 
@@ -99,7 +105,8 @@ export const useRiskMoversCount = ({
     i18n.translate('xpack.securitySolution.entityAnalytics.home.riskMovers.queryError', {
       defaultMessage: 'There was an error loading risk movers data',
     }),
-    filteredError ?? indexError
+    // A timeout gets one notice for the whole page, and a message on the tile, not a toast per tile.
+    (isTileQueryTimeout(error) ? undefined : filteredError) ?? indexError
   );
 
   return {
@@ -111,6 +118,7 @@ export const useRiskMoversCount = ({
     // True while the count is on its way, not when its query can never run (skipped, no index, no job).
     isCountPending: isIndexLoading || (isEnabled && Boolean(query) && (isLoading || isFetching)),
     isMissingIndex,
+    isTimedOut: isTileQueryTimeout(error),
     error: filteredError ?? indexError,
   };
 };

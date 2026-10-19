@@ -26,6 +26,9 @@ jest.mock('../components/home/needs_attention_tiles/hooks', () => ({
   useRiskMoversCount: jest.fn(),
   useRiskMoversDelta: jest.fn(),
   useRiskTilesSeries: jest.fn(),
+  useTilesLoadTelemetry: jest.fn(),
+  useTilesTimeoutNotice: jest.fn(),
+  TILE_TIMEOUT_MESSAGE: 'Took too long to load',
 }));
 jest.mock('../components/entity_store/hooks/use_entity_store', () => ({
   useEntityStoreStatus: jest.fn(),
@@ -53,8 +56,12 @@ jest.mock('../components/home/use_entity_filters_param', () => ({
 }));
 jest.mock('../components/home/entity_search_bar', () => ({ EntitySearchBar: () => null }));
 jest.mock('../components/home/entity_filters_bar', () => ({ EntityFiltersBar: () => null }));
+let mockCards: Array<{ id: string; noDataMessage?: string }> = [];
 jest.mock('../components/home/needs_attention_tiles/signal_cards', () => ({
-  SignalCards: () => null,
+  SignalCards: ({ cards }: { cards: Array<{ id: string; noDataMessage?: string }> }) => {
+    mockCards = cards;
+    return null;
+  },
 }));
 jest.mock('../components/home/entities_table', () => ({
   DataViewContext: { Provider: ({ children }: { children: React.ReactNode }) => <>{children}</> },
@@ -254,6 +261,35 @@ describe('EntityAnalyticsNewHomePage: each tile waits for its own count', () => 
       mockTiles({ [tile]: { reachesBack: undefined } });
       render(<EntityAnalyticsNewHomePage />);
       expect(seriesReachesBack(tile)).toBeUndefined();
+    });
+  });
+
+  describe('when a count times out', () => {
+    it('says so on its tiles, warns once for the page, and reports the timeout', () => {
+      mockTiles();
+      hooks.useAlertBasedTiles.mockReturnValue({
+        severeAlertsCount: 0,
+        severeAlertsEntityIds: [],
+        watchlistedCount: 0,
+        watchlistedEntityIds: [],
+        isLoading: false,
+        isCountPending: false,
+        isTimedOut: true,
+      });
+      render(<EntityAnalyticsNewHomePage />);
+
+      const messageOf = (id: string) => mockCards.find((card) => card.id === id)?.noDataMessage;
+      expect(messageOf('entitiesWithAlerts')).toBe('Took too long to load');
+      expect(messageOf('watchlisted')).toBe('Took too long to load');
+      expect(messageOf('newEntity')).toBeUndefined();
+      expect(lastOptions('useTilesTimeoutNotice')).toBe(true);
+      expect(lastOptions('useTilesLoadTelemetry').tiles.alerts.isTimedOut).toBe(true);
+    });
+
+    it('warns for nothing when no count timed out', () => {
+      mockTiles();
+      render(<EntityAnalyticsNewHomePage />);
+      expect(lastOptions('useTilesTimeoutNotice')).toBeFalsy();
     });
   });
 });

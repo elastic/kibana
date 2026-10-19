@@ -23,6 +23,7 @@ import {
   type TimeRange,
 } from '../../entities_grid/common';
 import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
+import { isTileQueryTimeout, retryUnlessTimedOut, runWithTileTimeout } from './tile_query_timeout';
 
 const esqlSearch = async (
   searchService: ReturnType<typeof useKibana>['services']['data']['search'],
@@ -81,7 +82,9 @@ export const useEntitiesWithAnomaliesCount = ({
     ['entitiesWithAnomaliesCount', query],
     async ({ signal }) => {
       if (!query) return { count: 0, entityIds: [] };
-      const raw = await esqlSearch(data.search, query, signal);
+      const raw = await runWithTileTimeout(signal, (tileSignal) =>
+        esqlSearch(data.search, query, tileSignal)
+      );
       const row = raw.values?.[0];
       const valueIndex = raw.columns?.findIndex((c) => c.name === 'value') ?? 0;
       const entityIdsIndex = raw.columns?.findIndex((c) => c.name === 'entity_ids') ?? -1;
@@ -99,7 +102,7 @@ export const useEntitiesWithAnomaliesCount = ({
       keepPreviousData: true,
       ...TILE_QUERY_CACHE_OPTIONS,
       refetchOnWindowFocus: false,
-      retry: 1,
+      retry: retryUnlessTimedOut,
     }
   );
 
@@ -111,7 +114,8 @@ export const useEntitiesWithAnomaliesCount = ({
     i18n.translate('xpack.securitySolution.entityAnalytics.home.entitiesWithAnomalies.queryError', {
       defaultMessage: 'There was an error loading entities with anomalies count',
     }),
-    filteredError ?? indexError
+    // A timeout gets one notice for the whole page, and a message on the tile, not a toast per tile.
+    (isTileQueryTimeout(error) ? undefined : filteredError) ?? indexError
   );
 
   return {
@@ -127,5 +131,6 @@ export const useEntitiesWithAnomaliesCount = ({
     /** No security ML job is installed, so the tile has nothing to count. */
     isMissingJobs: !isJobsLoading && jobIds.length === 0,
     error: filteredError ?? indexError,
+    isTimedOut: isTileQueryTimeout(error),
   };
 };

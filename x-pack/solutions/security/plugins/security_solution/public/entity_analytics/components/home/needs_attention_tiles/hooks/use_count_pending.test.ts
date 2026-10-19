@@ -15,6 +15,8 @@ import { useEntitiesWithAnomaliesCount } from './use_entities_with_anomalies_cou
 import { useNewEntityCount } from './use_new_entity_count';
 import { useNewlyHighCriticalCount } from './use_newly_high_critical_count';
 import { useRiskMoversCount } from './use_risk_movers_count';
+import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
+import { TileQueryTimeoutError, retryUnlessTimedOut } from './tile_query_timeout';
 
 jest.mock('@kbn/react-query', () => ({ useQuery: jest.fn() }));
 jest.mock('../../../../../common/lib/kibana', () => ({ useKibana: jest.fn() }));
@@ -109,6 +111,33 @@ describe.each([
       isLoading: false,
     });
     expect(pending()).toBe(false);
+  });
+
+  it('says it timed out, without a toast of its own (the page shows one for every tile)', () => {
+    query({ error: new TileQueryTimeoutError() });
+    const result = renderHook(() => useCount({ spaceId: 'default' })).result.current;
+    expect(result.isTimedOut).toBe(true);
+    expect(result.isLoading).toBe(false);
+    const toastCalls = (useErrorToast as jest.Mock).mock.calls;
+    expect(toastCalls[toastCalls.length - 1][1]).toBeUndefined();
+  });
+
+  it('reports other errors as before, with a toast, and does not call them a timeout', () => {
+    const error = new Error('boom');
+    query({ error });
+    const result = renderHook(() => useCount({ spaceId: 'default' })).result.current;
+    expect(result.isTimedOut).toBe(false);
+    const toastCalls = (useErrorToast as jest.Mock).mock.calls;
+    expect(toastCalls[toastCalls.length - 1][1]).toBe(error);
+  });
+
+  it('retries an error once but not a timeout', () => {
+    renderHook(() => useCount({ spaceId: 'default' }));
+    const countOptions = mockUseQuery.mock.calls
+      .map((call) => call[2])
+      .filter((options) => options?.retry !== undefined)
+      .pop();
+    expect(countOptions.retry).toBe(retryUnlessTimedOut);
   });
 
   it('stops the spinner when the query can never run, so the tile settles instead of loading for ever', () => {

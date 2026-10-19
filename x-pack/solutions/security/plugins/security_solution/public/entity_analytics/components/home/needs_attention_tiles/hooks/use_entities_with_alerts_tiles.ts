@@ -22,6 +22,7 @@ import {
   type TimeRange,
 } from '../../entities_grid/common';
 import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
+import { isTileQueryTimeout, retryUnlessTimedOut, runWithTileTimeout } from './tile_query_timeout';
 
 interface AlertBasedTilesResult {
   severeAlertsCount: number;
@@ -109,8 +110,13 @@ export const useAlertBasedTiles = ({
     ['alertBasedTiles', query],
     async ({ signal }) => {
       if (!query) return EMPTY_RESULT;
-      const raw = await lastValueFrom(
-        data.search.search({ params: { query } }, { abortSignal: signal, strategy: 'esql_async' })
+      const raw = await runWithTileTimeout(signal, (tileSignal) =>
+        lastValueFrom(
+          data.search.search(
+            { params: { query } },
+            { abortSignal: tileSignal, strategy: 'esql_async' }
+          )
+        )
       );
       return parseAlertBasedTilesResponse(raw.rawResponse as unknown as ESQLSearchResponse);
     },
@@ -119,7 +125,7 @@ export const useAlertBasedTiles = ({
       keepPreviousData: true,
       ...TILE_QUERY_CACHE_OPTIONS,
       refetchOnWindowFocus: false,
-      retry: 1,
+      retry: retryUnlessTimedOut,
     }
   );
 
@@ -127,11 +133,12 @@ export const useAlertBasedTiles = ({
     ? undefined
     : (error as SecurityAppError | undefined);
 
+  // A timeout gets one notice for the whole page, and a message on the tile, not a toast per tile.
   useErrorToast(
     i18n.translate('xpack.securitySolution.entityAnalytics.home.alertBasedTiles.queryError', {
       defaultMessage: 'There was an error loading entity alert data',
     }),
-    filteredError ?? indexError
+    (isTileQueryTimeout(error) ? undefined : filteredError) ?? indexError
   );
 
   return {
@@ -149,5 +156,6 @@ export const useAlertBasedTiles = ({
     // True while the count is on its way, not when its query can never run (skipped, no index, no job).
     isCountPending: isIndexLoading || (isEnabled && Boolean(query) && (isLoading || isFetching)),
     error: filteredError ?? indexError,
+    isTimedOut: isTileQueryTimeout(error),
   };
 };

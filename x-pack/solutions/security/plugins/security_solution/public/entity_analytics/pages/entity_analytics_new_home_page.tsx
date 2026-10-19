@@ -45,6 +45,9 @@ import {
   useRiskMoversCount,
   useRiskMoversDelta,
   useRiskTilesSeries,
+  useTilesLoadTelemetry,
+  useTilesTimeoutNotice,
+  TILE_TIMEOUT_MESSAGE,
 } from '../components/home/needs_attention_tiles/hooks';
 import { RISK_MOVER_MIN_SCORE_CHANGE } from '../components/home/needs_attention_tiles/queries/risk_history';
 import { SignalCards } from '../components/home/needs_attention_tiles/signal_cards';
@@ -146,6 +149,8 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     watchlistedEntityIds,
     isLoading: alertBasedLoading,
     isCountPending: alertBasedPending,
+    isTimedOut: alertBasedTimedOut,
+    error: alertBasedError,
   } = useAlertBasedTiles({
     spaceId: resolvedSpaceId,
     timeRange,
@@ -158,6 +163,8 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     isLoading: anomaliesLoading,
     isMissingJobs: anomaliesMissingJobs,
     isCountPending: anomaliesPending,
+    isTimedOut: anomaliesTimedOut,
+    error: anomaliesError,
   } = useEntitiesWithAnomaliesCount({
     spaceId: resolvedSpaceId,
     timeRange,
@@ -169,6 +176,8 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     entityIds: newEntityEntityIds,
     isLoading: newEntityLoading,
     isCountPending: newEntityPending,
+    isTimedOut: newEntityTimedOut,
+    error: newEntityError,
   } = useNewEntityCount({
     spaceId: resolvedSpaceId,
     timeRange,
@@ -181,6 +190,8 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     isLoading: riskMoversLoading,
     isMissingIndex: riskMoversMissingIndex,
     isCountPending: riskMoversPending,
+    isTimedOut: riskMoversTimedOut,
+    error: riskMoversError,
   } = useRiskMoversCount({
     spaceId: resolvedSpaceId,
     timeRange,
@@ -193,6 +204,8 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     isLoading: newlyHCLoading,
     isMissingIndex: newlyHCMissingIndex,
     isCountPending: newlyHCPending,
+    isTimedOut: newlyHCTimedOut,
+    error: newlyHCError,
   } = useNewlyHighCriticalCount({
     spaceId: resolvedSpaceId,
     timeRange,
@@ -251,20 +264,25 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
 
   // The sparklines follow the deltas: each starts once its own counts and deltas have settled, and
   // only for a tile whose history reaches back twice the range, so they never delay them.
-  const { alertsTrend, watchlistedTrend } = useAlertBasedTilesSeries({
+  const {
+    alertsTrend,
+    watchlistedTrend,
+    isTrendLoading: alertBasedTrendLoading,
+  } = useAlertBasedTilesSeries({
     ...deltaOptions,
     isReady: !alertBasedPending && !isDeltaLoading,
     reachesBack: alertBasedReachesBack,
     severeAlertsCount: alertsCount,
     watchlistedCount,
   });
-  const { trend: anomaliesTrend } = useEntitiesWithAnomaliesSeries({
-    ...deltaOptions,
-    isReady: !anomaliesPending && !anomaliesDeltaLoading,
-    reachesBack: anomaliesReachesBack,
-    count: anomaliesCount,
-  });
-  const { trend: newEntityTrend } = useNewEntitySeries({
+  const { trend: anomaliesTrend, isTrendLoading: anomaliesTrendLoading } =
+    useEntitiesWithAnomaliesSeries({
+      ...deltaOptions,
+      isReady: !anomaliesPending && !anomaliesDeltaLoading,
+      reachesBack: anomaliesReachesBack,
+      count: anomaliesCount,
+    });
+  const { trend: newEntityTrend, isTrendLoading: newEntityTrendLoading } = useNewEntitySeries({
     ...deltaOptions,
     isReady: !newEntityPending && !newEntityDeltaLoading,
     reachesBack: newEntityReachesBack,
@@ -272,7 +290,11 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   });
   // The two risk tiles read the same risk score history, so one query serves both sparklines: it
   // waits for both risk tiles.
-  const { riskMoversTrend, newlyHighCriticalTrend: newlyHCTrend } = useRiskTilesSeries({
+  const {
+    riskMoversTrend,
+    newlyHighCriticalTrend: newlyHCTrend,
+    isTrendLoading: riskTrendLoading,
+  } = useRiskTilesSeries({
     ...deltaOptions,
     isReady:
       !riskMoversPending && !newlyHCPending && !riskMoversDeltaLoading && !newlyHCDeltaLoading,
@@ -280,6 +302,73 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     newlyHighCriticalReachesBack: newlyHCReachesBack,
     riskMoversCount,
     newlyHighCriticalCount: newlyHCCount,
+  });
+
+  // A new range or filter is a new page load for the timeout notice and the load telemetry.
+  const tilesRunKey = `${timeRange}:${JSON.stringify(entityFilters)}`;
+  useTilesTimeoutNotice(
+    alertBasedTimedOut ||
+      anomaliesTimedOut ||
+      newEntityTimedOut ||
+      riskMoversTimedOut ||
+      newlyHCTimedOut,
+    tilesRunKey
+  );
+  const tileLoadState = (
+    countPending: boolean,
+    deltaLoading: boolean,
+    trendLoading: boolean,
+    timedOut: boolean,
+    error: unknown
+  ) => ({
+    isCountPending: countPending,
+    isDeltaLoading: deltaLoading,
+    isTrendLoading: trendLoading,
+    isTimedOut: timedOut,
+    hasError: Boolean(error),
+  });
+  useTilesLoadTelemetry({
+    skip: skipTileQueries,
+    runKey: tilesRunKey,
+    timeRange,
+    hasEntityFilters: Object.values(entityFilters).some((values) => values.length > 0),
+    tiles: {
+      alerts: tileLoadState(
+        alertBasedPending,
+        isDeltaLoading,
+        alertBasedTrendLoading,
+        alertBasedTimedOut,
+        alertBasedError
+      ),
+      anomalies: tileLoadState(
+        anomaliesPending,
+        anomaliesDeltaLoading,
+        anomaliesTrendLoading,
+        anomaliesTimedOut,
+        anomaliesError
+      ),
+      newEntity: tileLoadState(
+        newEntityPending,
+        newEntityDeltaLoading,
+        newEntityTrendLoading,
+        newEntityTimedOut,
+        newEntityError
+      ),
+      riskMovers: tileLoadState(
+        riskMoversPending,
+        riskMoversDeltaLoading,
+        riskTrendLoading,
+        riskMoversTimedOut,
+        riskMoversError
+      ),
+      newlyHighCritical: tileLoadState(
+        newlyHCPending,
+        newlyHCDeltaLoading,
+        riskTrendLoading,
+        newlyHCTimedOut,
+        newlyHCError
+      ),
+    },
   });
 
   const handleFilterForCard = useCallback((cardId: ActiveFilter['cardId']) => {
@@ -368,6 +457,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         isDeltaUnavailable: alertBasedHistoryMissing,
         trend: alertsTrend,
         isLoading: alertBasedLoading,
+        noDataMessage: alertBasedTimedOut ? TILE_TIMEOUT_MESSAGE : undefined,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAlerts.description',
           {
@@ -398,7 +488,9 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         isDeltaUnavailable: anomaliesHistoryMissing,
         trend: anomaliesTrend,
         isLoading: anomaliesLoading,
-        noDataMessage: anomaliesMissingJobs
+        noDataMessage: anomaliesTimedOut
+          ? TILE_TIMEOUT_MESSAGE
+          : anomaliesMissingJobs
           ? i18n.translate(
               'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAnomalies.noJobs',
               { defaultMessage: 'Requires anomaly detection jobs' }
@@ -433,7 +525,9 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         isDeltaUnavailable: riskMoversHistoryMissing,
         trend: riskMoversTrend,
         isLoading: riskMoversLoading,
-        noDataMessage: riskMoversMissingIndex
+        noDataMessage: riskMoversTimedOut
+          ? TILE_TIMEOUT_MESSAGE
+          : riskMoversMissingIndex
           ? i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.riskMovers.noData', {
               defaultMessage: 'Requires risk score history data',
             })
@@ -476,7 +570,9 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         isDeltaUnavailable: newlyHCHistoryMissing,
         trend: newlyHCTrend,
         isLoading: newlyHCLoading,
-        noDataMessage: newlyHCMissingIndex
+        noDataMessage: newlyHCTimedOut
+          ? TILE_TIMEOUT_MESSAGE
+          : newlyHCMissingIndex
           ? i18n.translate(
               'xpack.securitySolution.entityAnalytics.home.tiles.newlyHighCritical.noData',
               {
@@ -522,6 +618,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         isDeltaUnavailable: alertBasedHistoryMissing,
         trend: watchlistedTrend,
         isLoading: alertBasedLoading,
+        noDataMessage: alertBasedTimedOut ? TILE_TIMEOUT_MESSAGE : undefined,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.watchlisted.description',
           {
@@ -548,6 +645,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         isDeltaUnavailable: newEntityHistoryMissing,
         trend: newEntityTrend,
         isLoading: newEntityLoading,
+        noDataMessage: newEntityTimedOut ? TILE_TIMEOUT_MESSAGE : undefined,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.newEntity.description',
           {
@@ -570,6 +668,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
       alertsDelta,
       alertsTrend,
       alertBasedLoading,
+      alertBasedTimedOut,
       isDeltaLoading,
       alertBasedHistoryMissing,
       anomaliesCount,
@@ -578,6 +677,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
       anomaliesDeltaLoading,
       anomaliesHistoryMissing,
       anomaliesLoading,
+      anomaliesTimedOut,
       anomaliesMissingJobs,
       riskMoversCount,
       riskMoversDelta,
@@ -585,12 +685,14 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
       riskMoversDeltaLoading,
       riskMoversHistoryMissing,
       riskMoversLoading,
+      riskMoversTimedOut,
       newlyHCCount,
       newlyHCDelta,
       newlyHCTrend,
       newlyHCDeltaLoading,
       newlyHCHistoryMissing,
       newlyHCLoading,
+      newlyHCTimedOut,
       newlyHCMissingIndex,
       watchlistedCount,
       watchlistedDelta,
@@ -601,6 +703,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
       newEntityDeltaLoading,
       newEntityHistoryMissing,
       newEntityLoading,
+      newEntityTimedOut,
       riskMoversMissingIndex,
       timeRange,
     ]
