@@ -35,6 +35,8 @@ export async function deleteDashboard(
     strictValidationSchema
   );
   await core.savedObjects.client.delete(DASHBOARD_SAVED_OBJECT_TYPE, id);
+  const deletedAt = new Date().toISOString();
+
   const snapshot = getHistorySnapshot({
     attributes: savedObject.attributes,
     references: savedObject.references,
@@ -48,7 +50,7 @@ export async function deleteDashboard(
       snapshot,
       spaceId,
       sequence,
-      timestamp: savedObject.updated_at ?? new Date(Date.now()).toISOString(),
+      timestamp: deletedAt,
       type: 'delete',
     });
   }
