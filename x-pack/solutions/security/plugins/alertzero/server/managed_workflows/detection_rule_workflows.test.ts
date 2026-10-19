@@ -1466,9 +1466,7 @@ describe('detection rule workflows', () => {
           expect(query.bool.filter).toEqual([
             { term: { 'kibana.alert.rule.uuid': expect.stringContaining('previewId') } },
           ]);
-          expect(query.bool.must_not).toEqual([
-            { exists: { field: 'kibana.alert.group.index' } },
-          ]);
+          expect(query.bool.must_not).toEqual([{ exists: { field: 'kibana.alert.group.index' } }]);
         }
       });
 
