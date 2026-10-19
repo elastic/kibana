@@ -26,7 +26,6 @@ const scopeWith = (overrides: Partial<EntityAnalyticsScope>): EntityAnalyticsSco
 
 const noEntities: CandidateEntities = {
   candidates: [],
-  identityCount: 0,
   isTruncated: false,
   capturedCount: 0,
   notFoundCount: 0,
@@ -37,7 +36,6 @@ const noEntities: CandidateEntities = {
 const hostA: CandidateEntities = {
   ...noEntities,
   candidates: [{ id: 'host:a', name: 'web_01', type: 'host', tileIds: ['riskMovers'], record: {} }],
-  identityCount: 1,
   capturedCount: 1,
   matchedCount: 1,
 };
@@ -124,12 +122,6 @@ describe('renderBrief', () => {
       undefined,
     ],
     [
-      'no note when aliases fold into fewer identities',
-      { newEntity: { title: 'New entity', value: 1, entityIds: ['host:a', 'host:a-alias'] } },
-      { capturedCount: 2 },
-      undefined,
-    ],
-    [
       'a cap left entities out',
       {
         riskMovers: {
@@ -138,7 +130,7 @@ describe('renderBrief', () => {
           entityIds: Array.from({ length: 30 }, (_, i) => `host:${i}`),
         },
       },
-      { identityCount: 30, isTruncated: true },
+      { matchedCount: 30, isTruncated: true },
       '_Based on the 1 highest-ranked of 30 flagged entities._',
     ],
     [

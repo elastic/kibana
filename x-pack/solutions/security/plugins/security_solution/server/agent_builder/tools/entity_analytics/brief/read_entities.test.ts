@@ -8,7 +8,7 @@
 import type { SignalCardId } from '../../../../../common/entity_analytics/home/constants';
 import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
 import type { BriefCandidate } from './types';
-import { foldAliases, rankCandidates, selectCandidateTiles } from './read_entities';
+import { rankCandidates, selectCandidateTiles } from './read_entities';
 
 const scopeWith = (
   tiles: EntityAnalyticsScope['tiles'],
@@ -24,7 +24,7 @@ const candidate = (
   id: string,
   tileIds: SignalCardId[],
   score?: number,
-  resolution?: { resolved_to?: string; risk?: { calculated_score_norm: number } }
+  resolution?: { risk?: { calculated_score_norm: number } }
 ): BriefCandidate => ({
   id,
   name: id,
@@ -104,45 +104,5 @@ describe('rankCandidates', () => {
     ],
   ])('%s', (_name, candidates, focusTileId, expected) => {
     expect(rankCandidates(candidates, focusTileId).map(({ id }) => id)).toEqual(expected);
-  });
-});
-
-describe('foldAliases', () => {
-  const alias = (id: string, tileIds: SignalCardId[], goldenId: string) =>
-    candidate(id, tileIds, 10, { resolved_to: goldenId });
-
-  it.each<
-    [string, BriefCandidate[], Array<[id: string, recordId: string, tileIds: SignalCardId[]]>]
-  >([
-    [
-      'merges an alias into its golden entity and keeps the golden record',
-      [alias('user:alias', ['newEntity'], 'user:gold'), candidate('user:gold', ['riskMovers'])],
-      [['user:gold', 'user:gold', ['riskMovers', 'newEntity']]],
-    ],
-    [
-      'stands an alias in for a golden entity that was not read',
-      [
-        alias('user:a1', ['newEntity'], 'user:gold'),
-        alias('user:a2', ['entitiesWithAlerts'], 'user:gold'),
-      ],
-      [['user:gold', 'user:a1', ['entitiesWithAlerts', 'newEntity']]],
-    ],
-    [
-      'merges tiles in the page order',
-      [candidate('user:gold', ['newEntity']), alias('user:a', ['entitiesWithAlerts'], 'user:gold')],
-      [['user:gold', 'user:gold', ['entitiesWithAlerts', 'newEntity']]],
-    ],
-    [
-      'leaves unrelated entities alone',
-      [candidate('host:x', ['riskMovers']), candidate('host:y', ['riskMovers'])],
-      [
-        ['host:x', 'host:x', ['riskMovers']],
-        ['host:y', 'host:y', ['riskMovers']],
-      ],
-    ],
-  ])('%s', (_name, candidates, expected) => {
-    expect(
-      foldAliases(candidates).map(({ id, record, tileIds }) => [id, record.entity?.id, tileIds])
-    ).toEqual(expected);
   });
 });

@@ -32,8 +32,6 @@ export interface CandidateEntities {
   candidates: BriefCandidate[];
   /** Distinct entity ids in the view's tiles. */
   capturedCount: number;
-  /** Identities among the records read, with aliases folded into their golden entity. */
-  identityCount: number;
   /** True when the cap left out flagged entities. */
   isTruncated: boolean;
   /** Ids with no Entity Store record. */
@@ -80,12 +78,10 @@ export const readEntities = async ({
     return [{ id, name, type, tileIds, record }];
   });
 
-  const identities = foldAliases(candidates);
   return {
-    candidates: rankCandidates(identities, scope.focusTileId),
+    candidates: rankCandidates(candidates, scope.focusTileId),
     capturedCount: entityIds.length,
-    identityCount: identities.length,
-    isTruncated: identities.length > MAX_BRIEF_CANDIDATES,
+    isTruncated: candidates.length > MAX_BRIEF_CANDIDATES,
     notFoundCount: entityIds.length - (response.aggregations?.found.value ?? 0),
     matchedCount: getTotal(response.hits.total),
     hasPageQuery,
@@ -105,24 +101,6 @@ export const selectCandidateTiles = ({
     }
   }
   return tileIdsByEntityId;
-};
-
-/** Folds aliases into their golden entity, keeping its own record when read, otherwise the first alias's. */
-export const foldAliases = (candidates: BriefCandidate[]): BriefCandidate[] => {
-  const byIdentityId = new Map<string, BriefCandidate>();
-  for (const candidate of candidates) {
-    const identityId =
-      candidate.record.entity?.relationships?.resolution?.resolved_to ?? candidate.id;
-    const folded = byIdentityId.get(identityId);
-    const tileIds = [...(folded?.tileIds ?? []), ...candidate.tileIds];
-    const kept = candidate.id === identityId || !folded ? candidate : folded;
-    byIdentityId.set(identityId, {
-      ...kept,
-      id: identityId,
-      tileIds: SIGNAL_CARD_IDS.filter((tileId) => tileIds.includes(tileId)),
-    });
-  }
-  return [...byIdentityId.values()];
 };
 
 /** Ranks by the selected tile, then how many tiles flag the entity, then risk, and keeps the first few. */

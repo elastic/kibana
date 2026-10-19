@@ -125,7 +125,6 @@ const renderDisclosures = (
     return tile?.unavailable ? [tile.title] : [];
   });
   const disclosures = [
-    // No count: with no records read, aliases can't be folded, so ids would overcount people.
     matchesNoEntity(entities) ? 'None of the flagged entities match the search query.' : undefined,
     entities.notFoundCount > 0
       ? `${formatCountOf(

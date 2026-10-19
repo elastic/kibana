@@ -117,7 +117,7 @@ export const formatStoredValue = (value: string): string => upperFirst(value.rep
 /** Only when a cap left out flagged entities: the brief, and the model, are told it is a sample. */
 export const describeSample = (
   { tiles }: EntityAnalyticsScope,
-  { candidates, identityCount, isTruncated }: CandidateEntities
+  { candidates, matchedCount, isTruncated }: CandidateEntities
 ): string | undefined => {
   const available = Object.values(tiles).filter(({ unavailable }) => !unavailable);
   // A tile that sent fewer ids than its value makes the total a lower bound.
@@ -126,7 +126,7 @@ export const describeSample = (
     return undefined;
   }
   // The largest count, never a sum: the tiles overlap.
-  const total = Math.max(identityCount, ...available.map(({ value }) => value));
+  const total = Math.max(matchedCount, ...available.map(({ value }) => value));
   return `Based on the ${formatCount(candidates.length)} highest-ranked of ${
     isSampled ? 'at least ' : ''
   }${formatCountOf(total, 'flagged entity', 'flagged entities')}.`;
