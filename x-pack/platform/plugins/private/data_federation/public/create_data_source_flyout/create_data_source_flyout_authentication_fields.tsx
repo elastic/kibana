@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
-import type { Control, UseFormUnregister } from 'react-hook-form';
+import type { Control } from 'react-hook-form';
 import type { DataSourceType } from '../../common/datasource_types';
 import type { CreateDataSourceFlyoutFormValues } from './types';
 import type { FederatedIdentityClusterInfo } from './federated_identity_cluster_info';
@@ -38,7 +38,6 @@ export function CreateDataSourceFlyoutAuthenticationFields({
   requireGcsFederatedIdentity,
   requireAzureCredentials,
   control,
-  unregister,
 }: {
   authenticationMode: CreateDataSourceAuthenticationMode;
   cloudInfo?: FederatedIdentityClusterInfo;
@@ -49,7 +48,6 @@ export function CreateDataSourceFlyoutAuthenticationFields({
   requireGcsFederatedIdentity: boolean;
   requireAzureCredentials: boolean;
   control: Control<CreateDataSourceFlyoutFormValues, any>;
-  unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
 }) {
   if (
     !DATA_SOURCE_TYPES_WITH_AUTHENTICATION.has(dataSourceType) ||
@@ -65,7 +63,6 @@ export function CreateDataSourceFlyoutAuthenticationFields({
         {dataSourceType === 's3' && authenticationMode === 'access_and_secret_keys' ? (
           <CreateDataSourceFlyoutTypeSettingsS3Credentials
             control={control}
-            unregister={unregister}
             areCredentialsRequired={requireS3Credentials}
           />
         ) : null}
@@ -73,21 +70,18 @@ export function CreateDataSourceFlyoutAuthenticationFields({
           <CreateDataSourceFlyoutTypeSettingsS3FederatedIdentity
             control={control}
             cloudInfo={cloudInfo}
-            unregister={unregister}
             areFieldsRequired={requireS3FederatedIdentity}
           />
         ) : null}
         {dataSourceType === 'gcs' && authenticationMode === 'access_and_secret_keys' ? (
           <CreateDataSourceFlyoutTypeSettingsGcsCredentials
             control={control}
-            unregister={unregister}
             areCredentialsRequired={requireGcsCredentials}
           />
         ) : null}
         {dataSourceType === 'gcs' && authenticationMode === 'federated_identity' ? (
           <CreateDataSourceFlyoutTypeSettingsGcsFederatedIdentity
             control={control}
-            unregister={unregister}
             areFieldsRequired={requireGcsFederatedIdentity}
           />
         ) : null}
@@ -96,7 +90,6 @@ export function CreateDataSourceFlyoutAuthenticationFields({
             authenticationMode={authenticationMode as AzureAuthenticationMode}
             areFieldsRequired={requireAzureCredentials}
             control={control}
-            unregister={unregister}
           />
         ) : null}
       </div>

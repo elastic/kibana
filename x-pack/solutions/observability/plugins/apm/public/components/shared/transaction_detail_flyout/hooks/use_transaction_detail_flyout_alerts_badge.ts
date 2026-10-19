@@ -31,7 +31,7 @@ export interface TransactionDetailFlyoutAlertsBadge {
 export function useTransactionDetailFlyoutAlertsBadge(): TransactionDetailFlyoutAlertsBadge {
   const {
     deps: { core, share },
-    filters: { serviceName, transactionName, transactionType, environment, start, end },
+    filters: { serviceName, transactionName, transactionType, environment, start },
     alertsCount,
   } = useTransactionDetailFlyoutContext();
 
@@ -53,9 +53,9 @@ export function useTransactionDetailFlyoutAlertsBadge(): TransactionDetailFlyout
         serviceName,
         transactionName,
         transactionType,
-        // Prefer absolute bounds so the alerts page matches the flyout window.
         rangeFrom: start,
-        rangeTo: end,
+        // Match currently-active badge counts (locator also forces alertStatus=active).
+        rangeTo: 'now',
         ...(environmentKuery ? { kuery: environmentKuery } : {}),
       });
 
@@ -69,6 +69,5 @@ export function useTransactionDetailFlyoutAlertsBadge(): TransactionDetailFlyout
     transactionType,
     environment,
     start,
-    end,
   ]);
 }
