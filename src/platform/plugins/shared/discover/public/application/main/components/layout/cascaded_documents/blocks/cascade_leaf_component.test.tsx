@@ -12,7 +12,8 @@ import type { AggregateQuery } from '@kbn/es-query';
 import { BehaviorSubject } from 'rxjs';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { esHitsMock } from '@kbn/discover-utils/src/__mocks__';
@@ -114,13 +115,13 @@ const renderLeafCellWithContext = ({
   contextValue,
   services,
   stickyHeaderExtensionPoint = createInactiveStickyHeaderExtensionPoint(),
+  virtualizerController = createVirtualizerController(),
 }: {
   contextValue: CascadedDocumentsContext;
   services: DiscoverServices;
   stickyHeaderExtensionPoint?: StickyHeaderExtensionPoint;
+  virtualizerController?: ReturnType<typeof createVirtualizerController>;
 }) => {
-  const virtualizerController = createVirtualizerController();
-
   return (
     <DiscoverTestProvider services={services}>
       <CascadedDocumentsProvider value={contextValue}>
@@ -285,32 +286,35 @@ describe('ESQLDataCascadeLeafCell', () => {
      * `UnifiedDataTable` is mocked, so render the toolbar and custom grid body the leaf cell
      * hands to it, the same way `EuiDataGrid` would: toolbar first, then the grid body.
      */
-    const renderGridPartsFromProps = (props: UnifiedDataTableProps) => (
-      <div data-test-subj="gridRoot">
-        {props.renderCustomToolbar!({
-          toolbarProps: {
-            hasRoomForGridControls: true,
-            columnControl: null,
-            columnSortingControl: null,
-            keyboardShortcutsControl: null,
-            displayControl: null,
-            fullScreenControl: null,
-          },
-          gridProps: {},
-        })}
-        <div data-test-subj="gridBody">
-          {props.renderCustomGridBody!({
-            Cell: () => null,
-            visibleColumns: [],
-            visibleRowData: { startRow: 0, endRow: 0, visibleRowCount: 0 },
-            headerRow: <div data-test-subj="gridHeaderRow" />,
-            footerRow: null,
-            gridWidth: 800,
-            setCustomGridBodyProps: jest.fn(),
+    const renderGridPartsFromProps = (props: UnifiedDataTableProps) => {
+      const BodyElement = props.renderCustomGridBody!;
+      return (
+        <div data-test-subj="gridRoot">
+          {props.renderCustomToolbar!({
+            toolbarProps: {
+              hasRoomForGridControls: true,
+              columnControl: null,
+              columnSortingControl: null,
+              keyboardShortcutsControl: null,
+              displayControl: null,
+              fullScreenControl: null,
+            },
+            gridProps: {},
           })}
+          <div data-test-subj="gridBody">
+            <BodyElement
+              Cell={() => null}
+              visibleColumns={[]}
+              visibleRowData={{ startRow: 0, endRow: 0, visibleRowCount: 0 }}
+              headerRow={<div data-test-subj="gridHeaderRow" />}
+              footerRow={null}
+              gridWidth={800}
+              setCustomGridBodyProps={jest.fn()}
+            />
+          </div>
         </div>
-      </div>
-    );
+      );
+    };
 
     const renderLeafAndGridParts = (stickyHeaderExtensionPoint: StickyHeaderExtensionPoint) => {
       const services = createDiscoverServicesMock();
@@ -321,17 +325,20 @@ describe('ESQLDataCascadeLeafCell', () => {
         services,
       });
 
-      renderWithI18n(
-        renderLeafCellWithContext({ contextValue, services, stickyHeaderExtensionPoint })
-      );
-
-      const unifiedDataTableProps = unifiedDataTableMock.mock.lastCall?.[0]!;
-
-      renderWithI18n(
-        <DiscoverTestProvider services={services}>
-          {renderGridPartsFromProps(unifiedDataTableProps)}
-        </DiscoverTestProvider>
-      );
+      unifiedDataTableMock.mockImplementation(renderGridPartsFromProps);
+      const virtualizerController = createVirtualizerController();
+      const renderLeaf = (extensionPoint: StickyHeaderExtensionPoint) =>
+        renderLeafCellWithContext({
+          contextValue,
+          services,
+          stickyHeaderExtensionPoint: extensionPoint,
+          virtualizerController,
+        });
+      const view = render(renderLeaf(stickyHeaderExtensionPoint), { wrapper: I18nProvider });
+      return {
+        rerender: (extensionPoint: StickyHeaderExtensionPoint) =>
+          view.rerender(renderLeaf(extensionPoint)),
+      };
     };
 
     it('renders the toolbar and header row in place when the row is not the active sticky row', () => {
@@ -360,12 +367,48 @@ describe('ESQLDataCascadeLeafCell', () => {
 
         expect(extensionPointElement).toContainElement(toolbar);
         expect(extensionPointElement).toContainElement(headerRow);
+        // the body flags that it is reserving the relocated content's space
+        expect(screen.getByTestId('discoverCascadeCustomDataGridBody')).toHaveAttribute(
+          'data-sticky-header-active',
+          'true'
+        );
         expect(gridRoot).not.toContainElement(toolbar);
         expect(gridRoot).not.toContainElement(headerRow);
         expect(
           // eslint-disable-next-line no-bitwise
           toolbar.compareDocumentPosition(headerRow) & Node.DOCUMENT_POSITION_FOLLOWING
         ).toBeTruthy();
+      } finally {
+        extensionPointElement.remove();
+      }
+    });
+
+    it('preserves the grid body and its measured spacer through sticky header transitions', () => {
+      const extensionPointElement = document.createElement('div');
+      document.body.appendChild(extensionPointElement);
+
+      try {
+        const view = renderLeafAndGridParts({ isDisplayed: false, extensionPointElement });
+        const body = screen.getByTestId('discoverCascadeCustomDataGridBody');
+        const toolbar = screen.getByTestId('unifiedDataTableToolbar');
+        const headerRow = screen.getByTestId('gridHeaderRow');
+        body.style.setProperty('--discoverCascadeStickyHeaderSpacer', '70px');
+
+        view.rerender({ isDisplayed: true, extensionPointElement });
+
+        expect(screen.getByTestId('discoverCascadeCustomDataGridBody')).toBe(body);
+        expect(body).toHaveAttribute('data-sticky-header-active', 'true');
+        expect(body.style.getPropertyValue('--discoverCascadeStickyHeaderSpacer')).toBe('70px');
+        expect(extensionPointElement).toContainElement(toolbar);
+        expect(extensionPointElement).toContainElement(headerRow);
+
+        view.rerender({ isDisplayed: false, extensionPointElement });
+
+        expect(screen.getByTestId('discoverCascadeCustomDataGridBody')).toBe(body);
+        expect(body).toHaveAttribute('data-sticky-header-active', 'false');
+        expect(body.style.getPropertyValue('--discoverCascadeStickyHeaderSpacer')).toBe('70px');
+        expect(screen.getByTestId('gridRoot')).toContainElement(toolbar);
+        expect(body).toContainElement(headerRow);
       } finally {
         extensionPointElement.remove();
       }
@@ -379,7 +422,7 @@ describe('ESQLDataCascadeLeafCell', () => {
 
       unifiedDataTableProps.scrollToCell!({ rowIndex: 7, columnIndex: 1, align: 'center' });
 
-      expect(mockScrollToIndex).toHaveBeenCalledWith(7, { align: 'center', behavior: 'auto' });
+      expect(mockScrollToIndex).toHaveBeenCalledWith(7, { align: 'auto', behavior: 'auto' });
     });
 
     it('keeps the toolbar and header row in place while the sticky header is not displayed for the row', () => {
@@ -393,7 +436,10 @@ describe('ESQLDataCascadeLeafCell', () => {
 
       expect(gridRoot).toContainElement(screen.getByTestId('unifiedDataTableToolbar'));
       expect(gridBody).toContainElement(screen.getByTestId('gridHeaderRow'));
-      expect(screen.queryByTestId('discoverCascadeStickyHeaderSpacer')).toBeNull();
+      expect(screen.getByTestId('discoverCascadeCustomDataGridBody')).toHaveAttribute(
+        'data-sticky-header-active',
+        'false'
+      );
     });
   });
 });

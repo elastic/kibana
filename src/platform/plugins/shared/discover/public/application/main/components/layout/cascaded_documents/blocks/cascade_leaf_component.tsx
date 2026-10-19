@@ -8,7 +8,9 @@
  */
 
 import React, {
+  createContext,
   useCallback,
+  useContext,
   useEffect,
   useImperativeHandle,
   useLayoutEffect,
@@ -43,6 +45,8 @@ import { useDiscoverServices } from '../../../../../../hooks/use_discover_servic
 import {
   getCustomCascadeGridBodyStyle,
   cascadeToolbarPortalNodeTestSubjAttribute,
+  stickyHeaderActiveAttribute,
+  stickyHeaderSpacerHeightProperty,
 } from './cascade_leaf_component.styles';
 import type { ESQLDataGroupNode } from './types';
 import { useCascadedDocumentsContext } from '../cascaded_documents_provider';
@@ -66,9 +70,8 @@ interface ESQLDataCascadeLeafCellProps
   rowIndex: number;
 }
 
-interface CustomCascadeGridBodyProps
-  extends EuiDataGridCustomBodyProps,
-    Pick<ESQLDataCascadeLeafCellProps, 'virtualizerController'> {
+interface CascadeGridBodyContextValue
+  extends Pick<ESQLDataCascadeLeafCellProps, 'virtualizerController'> {
   data: DataTableRecord[];
   isFullScreenMode?: boolean;
   cellId: string;
@@ -95,6 +98,8 @@ interface CustomCascadeGridBodyProps
   scrollApiRef: React.Ref<CustomCascadeGridBodyScrollApi>;
 }
 
+const CascadeGridBodyContext = createContext<CascadeGridBodyContextValue | null>(null);
+
 export interface CustomCascadeGridBodyScrollApi {
   scrollToRow: (rowIndex: number) => void;
 }
@@ -111,27 +116,74 @@ const DEFAULT_ESTIMATED_ROW_HEIGHT = 65;
  * that allows for nested cascade virtualization that's compatible with the EUI Data Grid.
  */
 export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGridBody({
-  isFullScreenMode,
-  data,
-  virtualizerController,
-  cellId,
-  rowIndex,
   Cell,
   visibleColumns,
   visibleRowData,
   headerRow,
   footerRow,
-  toolbarPortalNode,
-  headerPortalNode,
-  stickyHeaderPortalTarget,
-  scrollApiRef,
-}: CustomCascadeGridBodyProps) {
+}: EuiDataGridCustomBodyProps) {
+  const context = useContext(CascadeGridBodyContext);
+  if (!context) {
+    throw new Error('CustomCascadeGridBody must be rendered within CascadeGridBodyContext');
+  }
+  const {
+    isFullScreenMode,
+    data,
+    virtualizerController,
+    cellId,
+    rowIndex,
+    toolbarPortalNode,
+    headerPortalNode,
+    stickyHeaderPortalTarget,
+    scrollApiRef,
+  } = context;
+
   const visibleRows = useMemo(
     () => data.slice(visibleRowData.startRow, visibleRowData.endRow),
     [data, visibleRowData.startRow, visibleRowData.endRow]
   );
 
   const customGridBodyScrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const customGridBodyWrapperRef = useRef<HTMLDivElement | null>(null);
+
+  const isStickyHeaderActive = stickyHeaderPortalTarget !== null;
+  const isStickyHeaderActiveRef = useRef(isStickyHeaderActive);
+  isStickyHeaderActiveRef.current = isStickyHeaderActive;
+
+  // While the toolbar and header row are rendered in place their heights are observed and written to
+  // a custom property on the body; a pseudo element reserves that height once they are relocated to
+  // the sticky header. Written outside of React so the value never triggers a render.
+  useEffect(() => {
+    if (typeof ResizeObserver === 'undefined') {
+      return;
+    }
+
+    const inlineHeights = { toolbar: 0, header: 0 };
+
+    const observer = new ResizeObserver((entries) => {
+      if (isStickyHeaderActiveRef.current) {
+        // only measurements taken in the inline position are representative
+        return;
+      }
+      for (const entry of entries) {
+        const height = entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height;
+        if (entry.target === toolbarPortalNode.element) {
+          inlineHeights.toolbar = height;
+        } else if (entry.target === headerPortalNode.element) {
+          inlineHeights.header = height;
+        }
+      }
+      customGridBodyWrapperRef.current?.style.setProperty(
+        stickyHeaderSpacerHeightProperty,
+        `${inlineHeights.toolbar + inlineHeights.header}px`
+      );
+    });
+
+    observer.observe(toolbarPortalNode.element);
+    observer.observe(headerPortalNode.element);
+
+    return () => observer.disconnect();
+  }, [toolbarPortalNode, headerPortalNode]);
 
   const { euiTheme } = useEuiTheme();
 
@@ -140,16 +192,103 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
     [euiTheme]
   );
 
+  // Rows are not measured individually, so the estimate positions every row. Leaf rows share one
+  // fixed height, so one rendered row is observed and its height used for all of them. Observing
+  // (rather than sampling once) keeps the estimate correct when the height changes, e.g. when the
+  // density or the row height setting is adjusted.
+  const [estimatedRowHeight, setEstimatedRowHeight] = useState(DEFAULT_ESTIMATED_ROW_HEIGHT);
+  const rowResizeObserverRef = useRef<ResizeObserver | null>(null);
+  const observedRowRef = useRef<HTMLElement | null>(null);
+
+  const sampleRowHeight = useCallback((element: HTMLDivElement | null) => {
+    if (!element || observedRowRef.current?.isConnected) {
+      // nothing mounted, or a live row is already being observed
+      return;
+    }
+
+    if (typeof ResizeObserver === 'undefined') {
+      const height = element.offsetHeight;
+      if (height > 0) {
+        observedRowRef.current = element;
+        setEstimatedRowHeight(height);
+      }
+      return;
+    }
+
+    if (!rowResizeObserverRef.current) {
+      rowResizeObserverRef.current = new ResizeObserver((entries) => {
+        const entry = entries[entries.length - 1];
+        const height = entry?.borderBoxSize?.[0]?.blockSize ?? entry?.contentRect.height ?? 0;
+        if (height > 0) {
+          setEstimatedRowHeight(height);
+        }
+      });
+    }
+
+    if (observedRowRef.current) {
+      rowResizeObserverRef.current.unobserve(observedRowRef.current);
+    }
+    observedRowRef.current = element;
+    rowResizeObserverRef.current.observe(element);
+  }, []);
+
+  useEffect(() => () => rowResizeObserverRef.current?.disconnect(), []);
+
+  // Geometry the child virtualizer needs to place rows relative to the shared scroll element: where
+  // the grid body starts within the cascade row, and how much of the viewport's top is covered by the
+  // sticky header while it is displayed.
+  const [scrollGeometry, setScrollGeometry] = useState({
+    bodyOffsetWithinRow: 0,
+    stickyHeaderHeight: 0,
+  });
+
+  useLayoutEffect(() => {
+    const bodyElement = customGridBodyScrollContainerRef.current;
+    const rowElement = bodyElement?.closest<HTMLElement>('[role="row"]');
+    const bodyOffsetWithinRow =
+      bodyElement && rowElement
+        ? bodyElement.getBoundingClientRect().top - rowElement.getBoundingClientRect().top
+        : 0;
+
+    const scrollElement = stickyHeaderPortalTarget?.closest<HTMLElement>(
+      '[data-test-subj="dataCascadeScrollContainer"]'
+    );
+    // the extension point is the last child of the sticky header, so its bottom edge is the overlay's
+    const stickyHeaderHeight =
+      stickyHeaderPortalTarget && scrollElement
+        ? Math.max(
+            0,
+            stickyHeaderPortalTarget.getBoundingClientRect().bottom -
+              scrollElement.getBoundingClientRect().top
+          )
+        : 0;
+
+    setScrollGeometry((previous) =>
+      previous.bodyOffsetWithinRow === bodyOffsetWithinRow &&
+      previous.stickyHeaderHeight === stickyHeaderHeight
+        ? previous
+        : { bodyOffsetWithinRow, stickyHeaderHeight }
+    );
+  }, [stickyHeaderPortalTarget]);
+
   const { virtualizer, handle, isDetached } = useConnectedChildVirtualizer({
     controller: virtualizerController,
     cellId,
     rowIndex,
     // @ts-expect-error - required to allow the use of the visibleRows array
     rows: visibleRows,
-    estimatedRowHeight: DEFAULT_ESTIMATED_ROW_HEIGHT,
+    estimatedRowHeight,
     overscan: 10,
+    scrollMarginOffset: scrollGeometry.bodyOffsetWithinRow,
+    scrollPaddingStart: scrollGeometry.stickyHeaderHeight,
     privateScrollElement: customGridBodyScrollContainerRef,
   });
+
+  // The virtualizer caches row positions and does not invalidate them when the estimate changes, so
+  // the cache is dropped explicitly whenever a new row height has been observed.
+  useLayoutEffect(() => {
+    virtualizer.measure();
+  }, [virtualizer, estimatedRowHeight]);
 
   useLayoutEffect(() => {
     if (isFullScreenMode && !isDetached) {
@@ -163,7 +302,11 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
     scrollApiRef,
     () => ({
       scrollToRow: (targetRowIndex) => {
-        virtualizer.scrollToIndex(targetRowIndex, { align: 'center', behavior: 'auto' });
+        // 'auto' leaves rows that are already visible (between the sticky header and the bottom edge)
+        // where they are, places rows above the viewport just below the sticky header, and rows below
+        // it at the bottom edge; it never scrolls above the leaf's own start, which would hide the
+        // sticky header and move its content back inline
+        virtualizer.scrollToIndex(targetRowIndex, { align: 'auto', behavior: 'auto' });
       },
     }),
     [virtualizer]
@@ -176,9 +319,11 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
 
   return (
     <div
+      ref={customGridBodyWrapperRef}
       data-test-subj="discoverCascadeCustomDataGridBody"
       role="rowgroup"
       css={customCascadeGridBodyStyle.wrapper}
+      {...{ [stickyHeaderActiveAttribute]: isStickyHeaderActive }}
     >
       <InPortal node={headerPortalNode}>{headerRow}</InPortal>
       {stickyHeaderPortalTarget ? (
@@ -212,6 +357,7 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
               <div
                 key={virtualRow.key}
                 data-index={virtualRow.index}
+                ref={sampleRowHeight}
                 className="euiDataGridRow"
                 css={customCascadeGridBodyStyle.displayFlex}
               >
@@ -363,44 +509,24 @@ export const ESQLDataCascadeLeafCell = React.memo(
       [toolbarPortalNode, renderToolbarWithElements, isToolbarInStickyHeader]
     );
 
-    const renderCustomCascadeGridBodyCallback = useCallback<
-      NonNullable<UnifiedDataTableProps['renderCustomGridBody']>
-    >(
-      ({
-        Cell,
-        visibleColumns,
-        visibleRowData,
-        setCustomGridBodyProps,
-        gridWidth,
-        headerRow,
-        footerRow,
-      }) => (
-        <CustomCascadeGridBodyMemoized
-          key={cellId}
-          Cell={Cell}
-          data={cellData}
-          visibleColumns={visibleColumns}
-          visibleRowData={visibleRowData}
-          headerRow={headerRow}
-          footerRow={footerRow}
-          gridWidth={gridWidth}
-          setCustomGridBodyProps={setCustomGridBodyProps}
-          virtualizerController={virtualizerController}
-          cellId={cellId}
-          rowIndex={rowIndex}
-          isFullScreenMode={isCellInFullScreenMode}
-          toolbarPortalNode={toolbarPortalNode}
-          headerPortalNode={headerPortalNode}
-          stickyHeaderPortalTarget={stickyHeaderPortalTarget}
-          scrollApiRef={scrollApiRef}
-        />
-      ),
-      [
+    const gridBodyContext = useMemo<CascadeGridBodyContextValue>(
+      () => ({
+        data: cellData,
         virtualizerController,
-        isCellInFullScreenMode,
         cellId,
-        cellData,
         rowIndex,
+        isFullScreenMode: isCellInFullScreenMode,
+        toolbarPortalNode,
+        headerPortalNode,
+        stickyHeaderPortalTarget,
+        scrollApiRef,
+      }),
+      [
+        cellData,
+        virtualizerController,
+        cellId,
+        rowIndex,
+        isCellInFullScreenMode,
         toolbarPortalNode,
         headerPortalNode,
         stickyHeaderPortalTarget,
@@ -408,37 +534,39 @@ export const ESQLDataCascadeLeafCell = React.memo(
     );
 
     return (
-      <UnifiedDataTable
-        dataView={dataView}
-        showTimeCol={showTimeCol}
-        services={services}
-        sort={EMPTY_SORT}
-        isSortEnabled={false}
-        enableInTableSearch
-        enableComparisonMode
-        scrollToCell={scrollToCell}
-        showKeyboardShortcuts={false}
-        ariaLabelledBy="data-cascade-leaf-cell"
-        rows={cellData}
-        loadingState={DataLoadingState.loaded}
-        columns={selectedColumns}
-        dataSource={cascadedLeafDataSource}
-        onSetColumns={setSelectedColumns}
-        renderCustomToolbar={renderCustomToolbar}
-        expandedDoc={expandedDocOwner === cellId ? expandedDoc : undefined}
-        setExpandedDoc={setExpandedDoc}
-        dataGridDensityState={cascadeDataGridDensityState}
-        onUpdateDataGridDensity={setCascadeDataGridDensityState}
-        renderDocumentView="external"
-        setRenderDocumentViewMeta={setRenderDocumentViewMeta}
-        renderCustomGridBody={renderCustomCascadeGridBodyCallback}
-        onFullScreenChange={setIsCellInFullScreenMode}
-        externalCustomRenderers={externalCustomRenderers}
-        paginationMode="infinite"
-        sampleSizeState={cellData.length}
-        initialState={initialGridState}
-        onInitialStateChange={onInitialStateChange}
-      />
+      <CascadeGridBodyContext.Provider value={gridBodyContext}>
+        <UnifiedDataTable
+          dataView={dataView}
+          showTimeCol={showTimeCol}
+          services={services}
+          sort={EMPTY_SORT}
+          isSortEnabled={false}
+          enableInTableSearch
+          enableComparisonMode
+          scrollToCell={scrollToCell}
+          showKeyboardShortcuts={false}
+          ariaLabelledBy="data-cascade-leaf-cell"
+          rows={cellData}
+          loadingState={DataLoadingState.loaded}
+          columns={selectedColumns}
+          dataSource={cascadedLeafDataSource}
+          onSetColumns={setSelectedColumns}
+          renderCustomToolbar={renderCustomToolbar}
+          expandedDoc={expandedDocOwner === cellId ? expandedDoc : undefined}
+          setExpandedDoc={setExpandedDoc}
+          dataGridDensityState={cascadeDataGridDensityState}
+          onUpdateDataGridDensity={setCascadeDataGridDensityState}
+          renderDocumentView="external"
+          setRenderDocumentViewMeta={setRenderDocumentViewMeta}
+          renderCustomGridBody={CustomCascadeGridBodyMemoized}
+          onFullScreenChange={setIsCellInFullScreenMode}
+          externalCustomRenderers={externalCustomRenderers}
+          paginationMode="infinite"
+          sampleSizeState={cellData.length}
+          initialState={initialGridState}
+          onInitialStateChange={onInitialStateChange}
+        />
+      </CascadeGridBodyContext.Provider>
     );
   }
 );
