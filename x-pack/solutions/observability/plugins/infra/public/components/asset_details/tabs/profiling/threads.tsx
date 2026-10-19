@@ -38,7 +38,7 @@ export function Threads({ kuery, schema }: Props) {
         to={dateRange.to}
         profilingLinkLocator={stacktracesProfilingLinkLocator}
         profilingLinkLabel={i18n.translate('xpack.infra.flamegraph.profilingAppThreadsLink', {
-          defaultMessage: 'Go to Universal Profiling Threads',
+          defaultMessage: 'Go to Profiling Threads',
         })}
         schema={schema}
       />
