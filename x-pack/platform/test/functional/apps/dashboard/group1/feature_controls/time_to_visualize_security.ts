@@ -13,24 +13,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     timeToVisualize,
     timePicker,
     dashboard,
-    visEditor,
+    visualBuilder,
     visualize,
     security,
     header,
     lens,
-    vegaChart,
-    visChart,
   } = getPageObjects([
     'timeToVisualize',
     'timePicker',
     'dashboard',
-    'visEditor',
+    'visualBuilder',
     'visualize',
     'security',
     'header',
     'lens',
-    'vegaChart',
-    'visChart',
   ]);
 
   const dashboardAddPanel = getService('dashboardAddPanel');
@@ -183,12 +179,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await dashboard.clickNewDashboard();
       });
 
-      it('can add a markdown panel by value', async () => {
+      it('can add a TSVB panel by value', async () => {
         await dashboard.navigateToApp();
         await dashboard.clickNewDashboard();
         await dashboard.waitForRenderComplete();
 
-        await dashboardAddPanel.clickAddVega();
+        await dashboardAddPanel.clickAddTsvb();
+        await visualBuilder.checkVisualBuilderIsPresent();
 
         await visualize.saveVisualizationAndReturn();
         const newPanelCount = await dashboard.getPanelCount();
@@ -199,20 +196,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await dashboardPanelActions.clickEdit();
         await header.waitUntilLoadingHasFinished();
 
-        const { spec, isValid } = await vegaChart.getSpecAsJSON();
-        expect(isValid).to.be(true);
-        // add SVG renderer to read the Y axis labels
-        const updatedSpec = { ...spec, config: { kibana: { renderer: 'svg' } } };
-        await vegaChart.fillSpec(JSON.stringify(updatedSpec, null, 2));
-        await visEditor.clickGo();
-        await visChart.waitForVisualizationRenderingStabilized();
+        await visualBuilder.checkVisualBuilderIsPresent();
+        await visualBuilder.clickMarkdown();
+        await visualBuilder.markdownSwitchSubTab('markdown');
+        await visualBuilder.enterMarkdown('Modified');
+        // TSVB applies edits as you type; wait for it so the saved vis has the new text.
+        expect(await visualBuilder.getMarkdownText()).to.eql('Modified');
 
         await visualize.saveVisualizationAndReturn();
         await dashboard.waitForRenderComplete();
-        const fullDataLabels = await vegaChart.getYAxisLabels();
-        expect(fullDataLabels[0]).to.eql('0');
+        expect(await visualBuilder.getMarkdownText()).to.eql('Modified');
 
-        const newPanelCount = dashboard.getPanelCount();
+        const newPanelCount = await dashboard.getPanelCount();
         expect(newPanelCount).to.eql(1);
       });
 

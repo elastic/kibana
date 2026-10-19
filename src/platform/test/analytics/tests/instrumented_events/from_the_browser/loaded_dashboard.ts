@@ -15,17 +15,11 @@ const DASHBOARD_LOADED_EVENT = 'dashboard_loaded';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const ebtUIHelper = getService('kibana_ebt_ui');
-  const PageObjects = getPageObjects([
-    'common',
-    'home',
-    'header',
-    'dashboard',
-    'visEditor',
-    'visualize',
-  ]);
+  const PageObjects = getPageObjects(['common', 'home', 'header', 'dashboard']);
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const queryBar = getService('queryBar');
+  const testSubjects = getService('testSubjects');
 
   // Failing: See https://github.com/elastic/kibana/issues/142548
   describe.skip('Loaded Dashboard', () => {
@@ -82,7 +76,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const SAVED_SEARCH_PANEL_TITLE = '[Flights] Flight Log';
       const VIS_PANEL_TITLE = '[Flights] Delay Buckets';
       const MAP_PANEL_TITLE = '[Flights] Origin Time Delayed';
-      const VEGA_PANEL_TITLE = 'Vega vis';
 
       before(async () => {
         await PageObjects.common.navigateToApp('dashboards');
@@ -144,10 +137,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
        */
       it('emits when a vega panel is added', async () => {
         await dashboardAddPanel.clickAddVega();
-        await PageObjects.visualize.saveVisualizationExpectSuccess(VEGA_PANEL_TITLE, {
-          saveAsNew: false,
-          redirectToOrigin: true,
-        });
+        await testSubjects.click('vegaEditorFlyoutSaveButton');
         await checkEmitsOnce();
       });
 
@@ -157,7 +147,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it("doesn't emit when removing vega panel", async () => {
-        await dashboardPanelActions.removePanelByTitle(VEGA_PANEL_TITLE);
+        // The Vega panel has no title and is the only panel left at this point.
+        await dashboardPanelActions.removePanelByTitle();
         await checkDoesNotEmit();
       });
 
