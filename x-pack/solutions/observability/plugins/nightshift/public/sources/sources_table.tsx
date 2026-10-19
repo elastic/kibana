@@ -90,7 +90,9 @@ export function SourcesTable({
 }: ISourcesTableProps) {
   const { cps } = useKibana().services;
   const isCpsMultiProject = useIsCpsMultiProject(cps?.cpsManager);
-  const items = filterSourcesByQuery(sources, searchText);
+  // Surrounding whitespace is ignored, for both the filter and the title highlight.
+  const searchTerm = searchText.trim();
+  const items = filterSourcesByQuery(sources, searchTerm);
   // Controlled: EuiInMemoryTable goes back to page 1 whenever `items` is a new array, which happens
   // after every toggle, save, delete or status poll. A new search still starts from page 1.
   const [page, setPage] = useState({ index: 0, size: PAGE_SIZE_OPTIONS[0], searchText });
@@ -126,7 +128,7 @@ export function SourcesTable({
           data-test-subj={`significantEventsAppSourcesTableTitleLink-${source.id}`}
           onClick={() => onOpenSource(source)}
         >
-          <EuiHighlight search={searchText.trim()}>{title}</EuiHighlight>
+          <EuiHighlight search={searchTerm}>{title}</EuiHighlight>
         </EuiLink>
       ),
     },

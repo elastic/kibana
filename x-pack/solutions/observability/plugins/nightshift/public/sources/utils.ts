@@ -22,16 +22,15 @@ export function isOnboardingInProgress(
   return status !== undefined && KIS_ONBOARDING_IN_PROGRESS_STATUSES.has(status);
 }
 
-/** Keeps the sources whose title, tags or query contain the text, ignoring case and surrounding whitespace. */
+/** Keeps the sources whose title, tags or query contain the text, ignoring case. */
 export function filterSourcesByQuery(
   sources: NightshiftSource[],
   query: string
 ): NightshiftSource[] {
-  const term = query.trim();
-  if (!term) {
+  if (!query) {
     return sources;
   }
-  const lowerQuery = term.toLowerCase();
+  const lowerQuery = query.toLowerCase();
   return sources.filter(
     ({ title, tags, esql }) =>
       title.toLowerCase().includes(lowerQuery) ||

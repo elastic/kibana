@@ -69,7 +69,7 @@ export async function retireSourceDetections({
 /**
  * Drops the owned rules, queries and knowledge indicators of a source id. Onboarding runs, the view
  * and the saved object are left alone. The reconcile calls it for ids that left the catalog, and
- * `resetSourceKnowledge` for a live or just-deleted source after cancelling its run.
+ * `resetSourceKnowledge` or `retireDeletedSource` after cancelling the source's run.
  */
 export async function retireSourceKnowledge({
   sourceId,
@@ -119,20 +119,17 @@ async function cancelOnboardingThen({
 
 /**
  * Cancels the source's onboarding run, then drops its owned rules, queries and knowledge
- * indicators, even when the cancel fails. Runs when a source is deleted and when its knowledge is
- * reset; the view and the saved object are left to the caller. With `sourceKnowledgeState` the
- * state object of the source is deleted too, so pass it only for a source that left the catalog.
+ * indicators, even when the cancel fails. Runs when a source's knowledge is reset; the view and the
+ * saved object are left to the caller.
  */
 export async function resetSourceKnowledge({
   source,
   kiClient,
   onboardingClient,
   request,
-  sourceKnowledgeState,
 }: {
   source: Pick<NightshiftSource, 'id' | 'slug'>;
   kiClient: Pick<CatalogKiClient, 'deleteOwnedRules' | 'deleteAllQueries' | 'deleteIndicators'>;
-  sourceKnowledgeState?: SourceKnowledgeStateClient;
   onboardingClient?: Pick<OnboardingClient, 'cancelBySource'>;
   request: KibanaRequest;
 }): Promise<void> {
@@ -140,13 +137,33 @@ export async function resetSourceKnowledge({
     onboardingClient,
     source,
     request,
+    cleanup: () => retireSourceKnowledge({ sourceId: source.id, kiClient }),
+  });
+}
+
+/** Like `resetSourceKnowledge`, for a deleted source: its knowledge state object is deleted too. */
+export async function retireDeletedSource({
+  source,
+  kiClient,
+  onboardingClient,
+  sourceKnowledgeState,
+  request,
+}: {
+  source: Pick<NightshiftSource, 'id' | 'slug'>;
+  kiClient: Pick<CatalogKiClient, 'deleteOwnedRules' | 'deleteAllQueries' | 'deleteIndicators'>;
+  onboardingClient?: Pick<OnboardingClient, 'cancelBySource'>;
+  sourceKnowledgeState: SourceKnowledgeStateClient;
+  request: KibanaRequest;
+}): Promise<void> {
+  await cancelOnboardingThen({
+    onboardingClient,
+    source,
+    request,
     cleanup: () =>
-      sourceKnowledgeState
-        ? sourceKnowledgeState.retire({
-            sourceId: source.id,
-            run: () => retireSourceKnowledge({ sourceId: source.id, kiClient }),
-          })
-        : retireSourceKnowledge({ sourceId: source.id, kiClient }),
+      sourceKnowledgeState.retire({
+        sourceId: source.id,
+        run: () => retireSourceKnowledge({ sourceId: source.id, kiClient }),
+      }),
   });
 }
 
@@ -355,14 +372,14 @@ export async function reconcileSourceCatalog({
   maintenanceService: Pick<SignificantEventsMaintenanceService, 'getState'>;
   request: KibanaRequest;
 }): Promise<{ sources: NightshiftSource[]; reconcileIds: string[] }> {
-  const [sources, ownedRuleIds, maintenanceState, runningSources, stateSourceIds] =
-    await Promise.all([
-      listAllSources(sourcesClient),
-      kiClient.findSourceIdsWithOwnedRules(),
-      maintenanceService.getState({ request }),
-      loadRunningSources(onboardingClient, request),
-      sourceKnowledgeState?.listSourceIds(),
-    ]);
+  // Listed before the catalog, so a source created during the sweep can't pass for an orphan.
+  const stateSourceIds = await sourceKnowledgeState?.listSourceIds();
+  const [sources, ownedRuleIds, maintenanceState, runningSources] = await Promise.all([
+    listAllSources(sourcesClient),
+    kiClient.findSourceIdsWithOwnedRules(),
+    maintenanceService.getState({ request }),
+    loadRunningSources(onboardingClient, request),
+  ]);
   let remainingSlots =
     maxScheduled === undefined ? Infinity : Math.max(0, maxScheduled - runningSources.size);
   // Once the budget is spent the scheduler declines, which leaves the source unscheduled so the
@@ -409,9 +426,7 @@ export async function reconcileSourceCatalog({
         skipRuleToggle: !ownedRuleSourceIds.has(source.id),
       });
     } catch (error) {
-      // A 409 means a write holds the source's lease or its cancelled run is still winding down.
-      // The next sweep retries it, and failing the sweep here would skip every other source too.
-      if (!(error instanceof StatusError && error.statusCode === 409)) {
+      if (!isRetriedNextSweep(error)) {
         failures.push(error);
       }
     }
@@ -454,7 +469,9 @@ export async function reconcileSourceCatalog({
         await retireSourceKnowledge({ sourceId, kiClient });
       }
     } catch (error) {
-      failures.push(error);
+      if (!isRetriedNextSweep(error)) {
+        failures.push(error);
+      }
     }
   }
 
@@ -466,6 +483,10 @@ export async function reconcileSourceCatalog({
 
   return { sources, reconcileIds: survivingReconcileIds };
 }
+
+/** A 409 means a held lease or a cancelled run still winding down, which the next sweep retries. */
+export const isRetriedNextSweep = (error: unknown): boolean =>
+  error instanceof StatusError && error.statusCode === 409;
 
 /** The sources with a run going, by source id. A run carries the slug its source had at the time. */
 async function loadRunningSources(

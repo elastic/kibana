@@ -171,6 +171,23 @@ describe('source knowledge write coordination', () => {
     expect(documents.has('default:source')).toBe(false);
   });
 
+  it('keeps other writes out until the state object of a retired source is deleted', async () => {
+    const { client, repository } = setup();
+    const competingWrite = jest.fn(async () => {});
+    let competingResult: Promise<void> = Promise.resolve();
+    const deleteDocument = repository.delete.getMockImplementation();
+    repository.delete.mockImplementationOnce(async (...args) => {
+      competingResult = client.runExclusive({ sourceId: 'source', run: competingWrite });
+      await competingResult.catch(() => {});
+      return deleteDocument?.(...args) ?? {};
+    });
+
+    await client.retire({ sourceId: 'source', run: async () => {} });
+
+    await expect(competingResult).rejects.toThrow('being updated');
+    expect(competingWrite).not.toHaveBeenCalled();
+  });
+
   it('isolates equal source ids in different spaces', async () => {
     const { clientForSpace, documents } = setup();
     await Promise.all(
@@ -182,6 +199,21 @@ describe('source knowledge write coordination', () => {
     await clientForSpace('a').write({ sourceId: 'only-in-a', run: async () => {} });
     await expect(clientForSpace('a').listSourceIds()).resolves.toEqual(['same-id', 'only-in-a']);
     await expect(clientForSpace('b').listSourceIds()).resolves.toEqual(['same-id']);
+  });
+
+  it('closes the point-in-time finder when listing the state objects fails', async () => {
+    const { client, repository } = setup();
+    const close = jest.fn();
+    repository.createPointInTimeFinder.mockImplementationOnce(() => ({
+      async *find() {
+        yield { saved_objects: [{ id: 'first-page' }] };
+        throw new Error('search failed');
+      },
+      close,
+    }));
+
+    await expect(client.listSourceIds()).rejects.toThrow('search failed');
+    expect(close).toHaveBeenCalledTimes(1);
   });
 
   it('rejects disabled sources before writing', async () => {

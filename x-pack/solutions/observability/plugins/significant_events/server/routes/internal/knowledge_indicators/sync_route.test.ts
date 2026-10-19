@@ -7,6 +7,7 @@
 
 import { syncRoutes } from './sync_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
+import { StatusError } from '../../../lib/errors/status_error';
 
 jest.mock('../../utils/assert_significant_events_access', () => ({
   assertSignificantEventsAccess: jest.fn().mockResolvedValue(undefined),
@@ -90,7 +91,7 @@ describe('reconcileSourceRoute', () => {
       ),
       retire: jest.fn(async ({ run }: { run: () => Promise<void> }) => run()),
     };
-    const logger = { error: jest.fn() };
+    const logger = { error: jest.fn(), warn: jest.fn() };
     const handlerParams = {
       params: { path: { sourceId: SOURCE.id }, body: { sourceSlug: SOURCE.slug } },
       request: {},
@@ -152,10 +153,19 @@ describe('reconcileSourceRoute', () => {
       expect.objectContaining({ sourceId: SOURCE.id })
     );
 
-    sourceKnowledgeState.retire.mockRejectedValueOnce(new Error('lease held'));
+    sourceKnowledgeState.retire.mockRejectedValueOnce(new Error('cleanup failed'));
+
+    await expect(reconcileSource.handler(handlerParams)).rejects.toThrow('cleanup failed');
+    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining(SOURCE.id));
+  });
+
+  it('only warns when the cleanup of a deleted source waits on a held lease', async () => {
+    const { handlerParams, sourceKnowledgeState, logger } = makeReconcileParams({ sources: [] });
+    sourceKnowledgeState.retire.mockRejectedValueOnce(new StatusError('lease held', 409));
 
     await expect(reconcileSource.handler(handlerParams)).rejects.toThrow('lease held');
-    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining(SOURCE.id));
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining(SOURCE.id));
+    expect(logger.error).not.toHaveBeenCalled();
   });
 
   it('leaves the detections of a live source alone', async () => {

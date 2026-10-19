@@ -13,7 +13,8 @@ import {
   reconcileSourceCatalog,
   retireSourceDetections,
   reconcileSourceRevision,
-  resetSourceKnowledge,
+  retireDeletedSource,
+  isRetriedNextSweep,
   applySourceEnabled,
 } from './reconcile_source_catalog';
 
@@ -120,7 +121,7 @@ const reconcileSourceRoute = createServerRoute({
       // id, so a failed marker write must leave them in place for the retry.
       try {
         await retireSourceDetections({ sourceId: params.path.sourceId, getDetectionClient });
-        await resetSourceKnowledge({
+        await retireDeletedSource({
           source: { id: params.path.sourceId, slug: params.body.sourceSlug },
           kiClient,
           onboardingClient,
@@ -128,10 +129,14 @@ const reconcileSourceRoute = createServerRoute({
           request,
         });
       } catch (error) {
-        // The source is already deleted: the next sync sweep retries this cleanup.
-        logger.error(
-          `Failed to clean up the knowledge of deleted source ${params.path.sourceId}: ${error}`
-        );
+        // The source is already deleted: the next sync sweep retries this cleanup. A held lease is
+        // expected while a write finishes, so it is not reported as an error.
+        const message = `Failed to clean up the knowledge of deleted source ${params.path.sourceId}: ${error}`;
+        if (isRetriedNextSweep(error)) {
+          logger.warn(message);
+        } else {
+          logger.error(message);
+        }
         throw error;
       }
       return { reconciled: true };

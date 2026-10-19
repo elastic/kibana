@@ -25,7 +25,7 @@ export interface SourceClassificationResult {
   candidates: SourceCandidate[];
   upToDate: SourceCandidate[];
   unsupported: string[];
-  disabled: Array<{ sourceId: string; sourceSlug: string }>;
+  disabled: Array<Pick<SourceCandidate, 'sourceId' | 'sourceSlug'>>;
 }
 
 interface ClassifySourcesArgs {
@@ -35,8 +35,7 @@ interface ClassifySourcesArgs {
 }
 
 /**
- * Buckets sources by the latest onboarding execution. A disabled source goes in
- * `disabled` and is not classified further.
+ * Buckets sources by the latest onboarding execution, with disabled sources only in `disabled`.
  * A non-terminal run stays in `alreadyRunning` even when `esql_updated_at`
  * moved during that run. A terminal run that started before the stored ES|QL
  * changed is a candidate, even inside the interval. A title edit does not
