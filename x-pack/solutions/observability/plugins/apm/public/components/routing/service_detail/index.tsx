@@ -12,6 +12,7 @@ import qs from 'query-string';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { dynamic } from '@kbn/shared-ux-utility';
+import { ProfilingSchemaStateProvider } from '@kbn/observability-shared-plugin/public';
 import { toBooleanFromString } from '../../../../common/utils/to_boolean_from_string';
 import { offsetSchema } from '../../../../common/comparison_rt';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
@@ -438,6 +439,8 @@ export const serviceDetailRoute = {
             hidden: true,
           },
           bottomHeaderContent: ProfilingHeaderSearchBar,
+          // Shares the selected profiling schema between the header search bar and the profiling views
+          contextWrapper: ProfilingSchemaStateProvider,
         }),
       },
       '/services/{serviceName}/dashboards': {
