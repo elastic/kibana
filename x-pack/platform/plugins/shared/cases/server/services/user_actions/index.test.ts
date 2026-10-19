@@ -1704,6 +1704,45 @@ describe('CaseUserActionService', () => {
       });
     });
 
+    describe('bulkCreateAttachmentBulkDeletion', () => {
+      it('creates one user action per attachment type', async () => {
+        await service.creator.bulkCreateAttachmentBulkDeletion({
+          ...commonArgs,
+          deletions: [
+            { attachmentType: 'security.alert', attachmentIds: ['alert-1', 'alert-2', 'alert-3'] },
+            { attachmentType: 'file', attachmentIds: ['file-1'] },
+          ],
+        });
+
+        const [userActions] = unsecuredSavedObjectsClient.bulkCreate.mock.calls[0];
+        expect(userActions.map(({ attributes }) => attributes)).toEqual([
+          expect.objectContaining({
+            action: 'delete',
+            type: 'bulkAttachments',
+            payload: { bulkAttachments: { attachmentType: 'security.alert', count: 3 } },
+          }),
+          expect.objectContaining({
+            action: 'delete',
+            type: 'bulkAttachments',
+            payload: { bulkAttachments: { attachmentType: 'file', count: 1 } },
+          }),
+        ]);
+        expect(mockAuditLogger.log).toHaveBeenCalledTimes(2);
+        expect(mockAuditLogger.log.mock.calls[0][0]?.message).toContain(
+          '(alert-1, alert-2, alert-3)'
+        );
+      });
+
+      it('skips attachment types with no deletions', async () => {
+        await service.creator.bulkCreateAttachmentBulkDeletion({
+          ...commonArgs,
+          deletions: [{ attachmentType: 'file', attachmentIds: [] }],
+        });
+
+        expect(unsecuredSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();
+      });
+    });
+
     describe('getUniqueConnectors', () => {
       const findResponse = createUserActionFindSO(createConnectorUserAction());
       const aggregationResponse = {

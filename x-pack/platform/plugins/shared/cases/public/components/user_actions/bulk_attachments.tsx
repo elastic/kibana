@@ -29,11 +29,23 @@ const getLabel = (
     );
   }
 
+  const registeredType = unifiedAttachmentTypeRegistry.get(attachmentType);
+  const countLabel = registeredType.getCountLabel?.({ count });
+  if (countLabel != null) {
+    return (
+      <FormattedMessage
+        id="xpack.cases.caseView.userActions.bulkAttachmentsRemovedCountLabel"
+        defaultMessage="removed {attachments}"
+        values={{ attachments: countLabel }}
+      />
+    );
+  }
+
   return (
     <FormattedMessage
       id="xpack.cases.caseView.userActions.bulkAttachmentsRemovedLabel"
       defaultMessage="removed {count, plural, one {# attachment} other {# attachments}} from {section}"
-      values={{ count, section: unifiedAttachmentTypeRegistry.get(attachmentType).getLabel() }}
+      values={{ count, section: registeredType.getLabel() }}
     />
   );
 };

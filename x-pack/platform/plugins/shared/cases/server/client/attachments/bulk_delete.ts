@@ -11,16 +11,22 @@ import {
   BulkDeleteAttachmentsRequestRt,
   BulkDeleteFileAttachmentsRequestRt,
 } from '../../../common/types/api';
+import { resolveUnifiedAttachmentType } from '../../../common/utils/attachments';
 import { decodeWithExcessOrThrow } from '../../common/runtime_types';
+import { getIDsAndIndicesAsArrays } from '../../common/utils';
 import type { CasesClientArgs } from '../types';
 import { createCaseError } from '../../common/error';
 import { Operations } from '../../authorization';
 import type { BulkDeleteArgs, BulkDeleteFileArgs } from './types';
 import type { CasesClient } from '../client';
 import { deleteFiles, getFileEntitiesForCase } from '../files';
+import type { DecodedAttachment, RecordUserActions } from './delete_utils';
 import { deleteCaseAttachments, doNotExistOnCaseMessage } from './delete_utils';
 
-/** Deletes attachments of any type from a case, rejecting the request if any id is not found. */
+/**
+ * Deletes attachments of any type from a case and records one `bulkAttachments` user action per
+ * attachment type. Rejects the request if any id is not found.
+ */
 export const bulkDeleteAttachments = async (
   { caseId, savedObjectIds }: BulkDeleteArgs,
   clientArgs: CasesClientArgs
@@ -49,6 +55,7 @@ export const bulkDeleteAttachments = async (
         caseId,
         attachments,
         operation: Operations.deleteComment,
+        recordUserActions: recordByType(caseId, clientArgs),
       },
       clientArgs
     );
@@ -60,6 +67,35 @@ export const bulkDeleteAttachments = async (
     });
   }
 };
+
+const recordByType =
+  (caseId: string, clientArgs: CasesClientArgs): RecordUserActions =>
+  async ({ attachments, originalCase }) => {
+    const {
+      user,
+      services: { userActionService },
+    } = clientArgs;
+
+    await userActionService.creator.bulkCreateAttachmentBulkDeletion({
+      caseId,
+      owner: originalCase.attributes.owner,
+      deletions: [...groupIdsByType(attachments)].map(([attachmentType, attachmentIds]) => ({
+        attachmentType,
+        attachmentIds,
+      })),
+      user,
+    });
+  };
+
+/** Alerts and events count each referenced id; other attachments count once. */
+const groupIdsByType = (attachments: DecodedAttachment[]): Map<string, string[]> =>
+  attachments.reduce((idsByType, { id, attributes, owner, requestAttributes }) => {
+    const type = resolveUnifiedAttachmentType(attributes, owner);
+    const { ids: referencedIds } = getIDsAndIndicesAsArrays(requestAttributes);
+    const ids = referencedIds.length > 0 ? referencedIds : [id];
+    idsByType.set(type, [...(idsByType.get(type) ?? []), ...ids]);
+    return idsByType;
+  }, new Map<string, string[]>());
 
 /** Deletes files of a case and the attachments that reference them. */
 export const bulkDeleteFileAttachments = async (

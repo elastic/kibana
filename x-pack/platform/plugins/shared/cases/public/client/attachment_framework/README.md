@@ -99,7 +99,8 @@ Import UI types from `@kbn/cases-plugin/public`: `UnifiedValueAttachmentViewProp
 | `getLabel()` | yes | Filter / tab label. |
 | `getCreationActivity(props)` | yes | Activity-row create event. |
 | `getRemovalActivity(props)` | no | Activity-row delete event. |
-| `getAttachmentList(props?)` | no | Case-view table/tab (`AttachmentList`). |
+| `getAttachmentList(props?)` | no | Case-view table/tab (`AttachmentList`). See [Removing from the Attachments tab](#removing-from-the-attachments-tab). |
+| `getCountLabel({ count })` | no | Counted noun, lowercase except brand names, e.g. "2 files" or "2 Discover sessions". Use an ICU plural. Cases builds "Remove 2 files?" and "removed 2 files" from it. Unset falls back to "2 attachments". |
 | `workflow.getActivityLabel(props)` | no | Opts the public registration into attachment workflow activity rendering. Receives the linked workflow name and an optional bulk count. |
 | `getDocumentAction(props)` | no | Control that opens the ES document this type points at, rendered from activity rows that reference the document but are not the attachment's own row (e.g. workflow runs). Return `null` when the target can't be resolved. |
 
@@ -116,6 +117,15 @@ Import UI types from `@kbn/cases-plugin/public`: `UnifiedValueAttachmentViewProp
 | `className` / `css` | Row styling. |
 
 View props are flattened. There is no `{ attachment, caseData }` wrapper. Common fields are `savedObjectId`, `caseData`, `permissions`, `createdBy`, `version`, and `rowContext`. Kind-specific fields are `attachmentId`, `data`, and `metadata`.
+
+### Removing from the Attachments tab
+
+The `getAttachmentList` children receive `canRemove` and `onRemove`. Cases owns the confirm modal, the API call, the activity entry, and the refresh.
+
+- Show remove controls only when `canRemove` is true.
+- Call `onRemove({ savedObjectIds })` to remove attachments. The confirm modal counts attachments, so use it only when each attachment references 1 id.
+- Pass `{ onSuccess }` as the second argument to clear a selection after removal.
+- Set `getCountLabel` so the modal and activity entry name the type.
 
 ## Schema
 

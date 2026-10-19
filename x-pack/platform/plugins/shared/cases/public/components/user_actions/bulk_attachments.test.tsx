@@ -58,6 +58,15 @@ describe('createBulkAttachmentsUserActionBuilder', () => {
     );
   });
 
+  it('renders the count label of the registered type', () => {
+    renderUserAction('test.widget', 2, {
+      ...widgetAttachmentType,
+      getCountLabel: ({ count }) => `${count} widgets`,
+    });
+
+    expect(screen.getByTestId('bulk-attachments-action')).toHaveTextContent('removed 2 widgets');
+  });
+
   it('leaves out the section when the type is not registered', () => {
     renderUserAction('unknown.type', 1);
 

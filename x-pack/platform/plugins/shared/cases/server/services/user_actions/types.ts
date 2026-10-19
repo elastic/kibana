@@ -131,7 +131,11 @@ export interface BuilderParameters {
     parameters: { payload: WorkflowUserActionPayload };
   };
   bulkAttachments: {
-    parameters: { payload: { bulkAttachments: BulkAttachmentsPayload } };
+    parameters: {
+      payload: { bulkAttachments: BulkAttachmentsPayload };
+      /** Audit log only, not stored on the user action. */
+      attachmentIds?: string[];
+    };
   };
 }
 
@@ -430,6 +434,12 @@ export interface BulkCreateAttachmentUserAction
     attachment: AttachmentRequestV2;
     savedObjectType?: AttachmentSavedObjectType;
   }>;
+}
+
+export interface BulkCreateAttachmentBulkDeletionUserAction
+  extends CommonUserActionArgs,
+    IndexRefresh {
+  deletions: Array<{ attachmentType: string; attachmentIds: string[] }>;
 }
 
 export type CreateUserActionArgs<T extends keyof BuilderParameters> = {

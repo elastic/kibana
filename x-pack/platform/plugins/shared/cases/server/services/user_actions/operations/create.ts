@@ -32,6 +32,7 @@ import type {
   BuildUserActionsDictParams,
   BuilderParameters,
   BulkCreateAttachmentUserAction,
+  BulkCreateAttachmentBulkDeletionUserAction,
   BulkCreateBulkUpdateCaseUserActions,
   CommonUserActionArgs,
   CreatePayloadFunction,
@@ -517,6 +518,35 @@ export class UserActionPersister {
       action: UserActionActions.create,
       refresh,
     });
+  }
+
+  /** Records one `bulkAttachments` user action per attachment type. */
+  public async bulkCreateAttachmentBulkDeletion({
+    caseId,
+    owner,
+    deletions,
+    user,
+    refresh,
+  }: BulkCreateAttachmentBulkDeletionUserAction): Promise<void> {
+    const userActionBuilder = this.builderFactory.getBuilder(UserActionTypes.bulkAttachments);
+
+    const userActions = deletions.flatMap(({ attachmentType, attachmentIds }) => {
+      if (userActionBuilder == null || attachmentIds.length === 0) {
+        return [];
+      }
+
+      const userAction = userActionBuilder.build({
+        caseId,
+        user,
+        owner,
+        payload: { bulkAttachments: { attachmentType, count: attachmentIds.length } },
+        attachmentIds,
+      });
+
+      return userAction == null ? [] : [userAction];
+    });
+
+    await this.bulkCreateAndLog({ userActions, refresh });
   }
 
   private async bulkCreateAttachment({

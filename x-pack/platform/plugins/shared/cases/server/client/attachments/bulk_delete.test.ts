@@ -8,15 +8,18 @@
 import type { File } from '@kbn/files-plugin/common';
 import { bulkDeleteAttachments, bulkDeleteFileAttachments } from './bulk_delete';
 import {
+  CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   MAX_BULK_DELETE_ATTACHMENTS,
   MAX_DELETE_FILES,
 } from '../../../common/constants';
+import { SECURITY_ALERT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
+import type { AttachmentAttributesV2 } from '../../../common/types/domain';
 import { constructFileKindIdByOwner } from '../../../common/files';
 import { Operations } from '../../authorization';
 import type { AttachmentForDeletion } from '../../services/attachments/types';
-import { mockCaseComments } from '../../mocks';
+import { mockCaseComments, mockCases } from '../../mocks';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
 import { commentFileExternalReference } from '../cases/mock';
 import { toAttachmentForDeletion } from './test_utils/deletion';
@@ -26,6 +29,22 @@ describe('bulk_delete', () => {
     const clientArgs = createCasesClientMockArgs();
     const userComment = toAttachmentForDeletion(mockCaseComments[0]);
     const otherUserComment = toAttachmentForDeletion(mockCaseComments[1]);
+
+    const alertAttachment = (
+      id: string,
+      attachmentId: string | string[],
+      index: string | string[]
+    ): AttachmentForDeletion => ({
+      ...userComment,
+      id,
+      type: CASE_ATTACHMENT_SAVED_OBJECT,
+      attributes: {
+        ...mockCaseComments[0].attributes,
+        type: SECURITY_ALERT_ATTACHMENT_TYPE,
+        attachmentId,
+        metadata: { index, rule: { id: 'rule-1', name: 'Rule 1' } },
+      } as unknown as AttachmentAttributesV2,
+    });
 
     beforeEach(() => {
       jest.resetAllMocks();
@@ -40,6 +59,7 @@ describe('bulk_delete', () => {
       clientArgs.services.attachmentService.bulkDelete.mockImplementation(
         async ({ savedObjectIds }) => savedObjectIds
       );
+      clientArgs.services.caseService.getCase.mockResolvedValue(mockCases[0]);
     });
 
     it('deletes all the requested attachments in a single call and refreshes', async () => {
@@ -81,6 +101,50 @@ describe('bulk_delete', () => {
 
       expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith(
         expect.objectContaining({ operation: Operations.deleteComment })
+      );
+    });
+
+    it('records one user action per attachment type', async () => {
+      await bulkDeleteAttachments(
+        { caseId: 'mock-id-1', savedObjectIds: ['mock-comment-1', 'mock-comment-2'] },
+        clientArgs
+      );
+
+      const { creator } = clientArgs.services.userActionService;
+      expect(creator.bulkCreateAttachmentBulkDeletion).toHaveBeenCalledWith(
+        expect.objectContaining({
+          caseId: 'mock-id-1',
+          deletions: [
+            { attachmentType: 'comment', attachmentIds: ['mock-comment-1', 'mock-comment-2'] },
+          ],
+        })
+      );
+      expect(creator.bulkCreateAttachmentDeletion).not.toHaveBeenCalled();
+    });
+
+    it('counts every id that a grouped attachment references', async () => {
+      clientArgs.services.attachmentService.getter.bulkGetForDeletion.mockResolvedValue([
+        alertAttachment('attachment-1', ['alert-1', 'alert-2', 'alert-3'], 'index-1'),
+        userComment,
+      ]);
+
+      await bulkDeleteAttachments(
+        { caseId: 'mock-id-1', savedObjectIds: ['attachment-1', 'mock-comment-1'] },
+        clientArgs
+      );
+
+      expect(
+        clientArgs.services.userActionService.creator.bulkCreateAttachmentBulkDeletion
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          deletions: [
+            {
+              attachmentType: SECURITY_ALERT_ATTACHMENT_TYPE,
+              attachmentIds: ['alert-1', 'alert-2', 'alert-3'],
+            },
+            { attachmentType: 'comment', attachmentIds: ['mock-comment-1'] },
+          ],
+        })
       );
     });
 

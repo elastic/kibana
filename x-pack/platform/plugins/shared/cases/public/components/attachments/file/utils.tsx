@@ -126,3 +126,21 @@ export const getFileIdsFromComments = (
   }
   return ids;
 };
+
+/** Ids of the file attachments that reference any of the file ids. */
+export const getFileAttachmentIds = (
+  comments: CaseUI['comments'],
+  owner: string,
+  fileIds: string[]
+): string[] => {
+  const requestedIds = new Set(fileIds);
+  return comments.flatMap((comment) => {
+    if (!isFileAttachment(comment, owner) || !('attachmentId' in comment)) {
+      return [];
+    }
+    const attachmentIds = Array.isArray(comment.attachmentId)
+      ? comment.attachmentId
+      : [comment.attachmentId];
+    return attachmentIds.some((id) => requestedIds.has(id)) ? [comment.id] : [];
+  });
+};

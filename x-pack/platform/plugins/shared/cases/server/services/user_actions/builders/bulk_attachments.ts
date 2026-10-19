@@ -12,7 +12,7 @@ import type { EventDetails, UserActionParameters, UserActionEvent } from '../typ
 
 export class BulkAttachmentsUserActionBuilder extends UserActionBuilder {
   build(args: UserActionParameters<'bulkAttachments'>): UserActionEvent {
-    const { caseId, payload } = args;
+    const { caseId, payload, attachmentIds } = args;
     const action = UserActionActions.delete;
 
     const parameters = this.buildCommonUserAction({
@@ -25,8 +25,10 @@ export class BulkAttachmentsUserActionBuilder extends UserActionBuilder {
 
     const { attachmentType, count } = payload.bulkAttachments;
     const noun = count === 1 ? 'attachment' : 'attachments';
+    const ids =
+      attachmentIds != null && attachmentIds.length > 0 ? ` (${attachmentIds.join(', ')})` : '';
     const getMessage = (id?: string) =>
-      `User deleted ${count} ${attachmentType} ${noun} from case id: ${caseId} - user action id: ${id}`;
+      `User deleted ${count} ${attachmentType} ${noun}${ids} from case id: ${caseId} - user action id: ${id}`;
 
     const eventDetails: EventDetails = {
       getMessage,

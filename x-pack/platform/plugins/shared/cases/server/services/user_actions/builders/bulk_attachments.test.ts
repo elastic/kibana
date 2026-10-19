@@ -85,6 +85,14 @@ describe('BulkAttachmentsUserActionBuilder', () => {
     );
   });
 
+  it('lists the removed ids in the log message', () => {
+    const res = builder.build({ ...args, attachmentIds: ['alert-1', 'alert-2', 'alert-3'] });
+
+    expect(res.eventDetails.getMessage('ua-id')).toBe(
+      'User deleted 3 security.alert attachments (alert-1, alert-2, alert-3) from case id: test-id - user action id: ua-id'
+    );
+  });
+
   it('uses the singular in the log message for a single attachment', () => {
     const res = builder.build({
       ...args,
