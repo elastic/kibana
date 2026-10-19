@@ -41,8 +41,7 @@ export GCS_CREDENTIALS='{"type":"service_account",...}'
 The default run ID is pinned in code (`SIGEVENTS_SNAPSHOT_RUN`). Override it at runtime:
 
 ```bash
-# If --judge is not passed, the default judge model is used
-SIGEVENTS_SNAPSHOT_RUN=2026-09-18 node scripts/evals run --suite significant-events --judge gemini-3-pro
+SIGEVENTS_SNAPSHOT_RUN=2026-09-18 node scripts/evals run --suite significant-events
 ```
 
 ### Tracing setup (optional — for token and latency metrics)
@@ -114,8 +113,16 @@ explicit selection, and every spec fails when a selected snapshot is missing.
 ```bash
 node scripts/evals run \
   --suite significant-events \
+  --project <connector-id>
+```
+
+The LLM judge comes from the default judge (see the kbn-evals README). To override it, pass `--judge`:
+
+```bash
+node scripts/evals run \
+  --suite significant-events \
   --project <connector-id> \
-  --judge <gemini-3-pro-connector-id> # skip this flag to use the default judge model
+  --judge <judge-connector-id>
 ```
 
 ### Run every registered dataset
@@ -126,8 +133,7 @@ Set `SIGEVENTS_DATASET=all` to run the default datasets along with the opt-in on
 ```bash
 SIGEVENTS_DATASET=all node scripts/evals run \
   --suite significant-events \
-  --project <connector-id> \
-  --judge <gemini-3-pro-connector-id> # skip this flag to use the default judge model
+  --project <connector-id>
 ```
 
 ### Run a specific dataset
@@ -138,8 +144,7 @@ the data sent to the selected task model and judges.
 ```bash
 SIGEVENTS_DATASET=otel-demo node scripts/evals run \
   --suite significant-events \
-  --project <connector-id> \
-  --judge <gemini-3-pro-connector-id> # skip this flag to use the default judge model
+  --project <connector-id>
 ```
 
 The generic probe and replay scripts do not support datasets that use
@@ -150,11 +155,9 @@ those datasets through their evaluation spec.
 ### Run a specific spec file
 
 ```bash
-# Skip the --judge flag to use the default judge model
 node scripts/evals run \
   --suite significant-events \
   --project <connector-id> \
-  --judge <gemini-3-pro-connector-id> \
   ki_feature_extraction.spec.ts
 ```
 
@@ -258,10 +261,8 @@ node scripts/capture_sigevents_my_app_snapshots.js --connector-id <id> --run-id 
 ### 3. Run evals
 
 ```bash
-SIGEVENTS_DATASET=my-app node scripts/evals run --suite significant-events --judge <gemini-3-pro-connector-id>
+SIGEVENTS_DATASET=my-app node scripts/evals run --suite significant-events
 ```
-
-> **Note:** Use the `--judge` flag to override the default judge model.
 
 ## Adding a new eval spec
 
