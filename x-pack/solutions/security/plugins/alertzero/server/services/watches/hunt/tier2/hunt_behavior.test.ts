@@ -1066,8 +1066,8 @@ describe('huntBehavior', () => {
       },
     ];
 
-    it('generates once for two behaviors whose evidence names the same artifact, and marks the loser collapsed', async () => {
-      generateByTechnique({ 'T1078.004': COVERING_ESQL });
+    it('generates the survivor first and the sibling in a second wave when budget remains', async () => {
+      generateByTechnique({ 'T1078.004': COVERING_ESQL, T1566: COVERING_ESQL });
 
       const result = await huntBehavior(
         buildMockModel(sharedCandidates),
@@ -1076,37 +1076,23 @@ describe('huntBehavior', () => {
         esClient
       );
 
-      expect(generateEsqlMock).toHaveBeenCalledTimes(1);
+      // Sharing an artifact set orders generation; it does not drop the second technique.
+      expect(generateEsqlMock).toHaveBeenCalledTimes(2);
+      expect(generateEsqlMock.mock.calls[0][0].nlQuery).toContain('T1078.004');
+      expect(generateEsqlMock.mock.calls[1][0].nlQuery).toContain('T1566');
 
       const winner = result.behaviors.find((b) => b.technique_id === 'T1078.004');
-      const loser = result.behaviors.find((b) => b.technique_id === 'T1566');
+      const sibling = result.behaviors.find((b) => b.technique_id === 'T1566');
       expect(winner?.validated_esql).toContain(COVERING_ESQL);
-      expect(loser?.execution).toEqual({
-        executed: false,
-        row_count: 0,
-        hit: false,
-        inconclusive_reason: 'collapsed',
-      });
-
-      // The loser stays in both output arrays, exactly as a generation_budget behavior does.
-      expect(result.behaviors.map((b) => b.technique_id)).toEqual(
-        expect.arrayContaining(['T1078.004', 'T1566'])
-      );
-      expect(result.indexed_behaviors.some((b) => b.technique_id === 'T1566')).toBe(true);
-
-      expect(result.incomplete).toContainEqual(
-        expect.objectContaining({
-          reason: 'collapsed',
-          technique_id: 'T1566',
-          detail: expect.stringContaining('T1078.004'),
-        })
-      );
+      expect(sibling?.validated_esql).toContain(COVERING_ESQL);
+      expect(sibling?.execution?.inconclusive_reason).toBeUndefined();
+      expect(result.incomplete?.some((i) => i.reason === 'collapsed')).not.toBe(true);
     });
 
-    it('generates the sibling in a second wave when the survivor grounds on a different report literal', async () => {
+    it('generates the sibling in a second wave even when the survivor grounds on a different report literal', async () => {
       // The survivor's query clears the grounding gate on `AssumeRole`, never mentioning the
-      // domain its sibling was deferred for. Nothing hunted that domain, so the sibling is not
-      // `collapsed`; it gets its own generation instead.
+      // domain its sibling was deferred for. Budget remains, so the sibling generates either
+      // way; this locks that nothing about the survivor's query can retire it while it does.
       generateByTechnique({ 'T1078.004': GROUNDED_ESQL, T1566: COVERING_ESQL });
 
       const result = await huntBehavior(
@@ -1124,8 +1110,8 @@ describe('huntBehavior', () => {
     });
 
     it('generates the sibling in a second wave when the survivor produced no usable query', async () => {
-      // Only the sibling has a fixture; the survivor's generation errors out. A sibling
-      // collapsed onto a survivor with no query would be retired on a claim nothing ran.
+      // Only the sibling has a fixture; the survivor's generation errors out. The sibling's
+      // generation does not depend on the survivor's outcome while budget remains.
       generateByTechnique({ T1566: COVERING_ESQL });
 
       const result = await huntBehavior(
@@ -1144,9 +1130,9 @@ describe('huntBehavior', () => {
     });
 
     it('charges uncovered siblings to the generation budget when the first wave used it all', async () => {
-      // 20 survivors fill the budget. Their queries ground on `AssumeRole`, so the two deferred
-      // siblings are not covered, but no budget remains to generate them: they report
-      // `generation_budget`, never `collapsed`, and no 21st generation call is made.
+      // 20 survivors fill the budget. Their queries ground on `AssumeRole`, so nothing searched
+      // the two deferred siblings' artifacts, and no budget remains to generate them: they
+      // report `generation_budget`, never `collapsed`, and no 21st generation call is made.
       const ids = [...enterpriseCatalog.techniqueById.keys()].slice(0, 22);
       const sharedQuote = 'evidence mentioning evil.example.com directly';
       generateEsqlMock.mockResolvedValue({ query: GROUNDED_ESQL });
@@ -1203,7 +1189,7 @@ describe('huntBehavior', () => {
       expect(result.incomplete?.some((i) => i.reason === 'collapsed')).not.toBe(true);
     });
 
-    it('collapses before the budget, so 22 behaviors sharing one artifact across 3 of them fit inside it', async () => {
+    it('records collapsed only for a sibling that lost to the budget after its survivor searched its artifacts', async () => {
       const ids = [...enterpriseCatalog.techniqueById.keys()].slice(0, 22);
       const sharedQuote = 'evidence mentioning evil.example.com directly';
       generateEsqlMock.mockResolvedValue({ query: COVERING_ESQL });
@@ -1224,11 +1210,26 @@ describe('huntBehavior', () => {
       );
 
       expect(result.behaviors).toHaveLength(22);
-      expect(result.incomplete?.filter((i) => i.reason === 'collapsed')).toHaveLength(2);
-      expect(result.incomplete?.some((i) => i.reason === 'generation_budget')).not.toBe(true);
-      // 22 behaviors minus the 2 collapsed siblings leaves exactly 20 survivors, which fits
-      // the budget with no slot wasted on a duplicate.
+      // 20 survivors fill the budget first, so distinct artifact sets never lose a slot to a
+      // duplicate. The 2 siblings then have no budget left; their survivor's query filters on
+      // the shared domain, so they are `collapsed` rather than `generation_budget`.
       expect(generateEsqlMock).toHaveBeenCalledTimes(20);
+      expect(result.incomplete?.some((i) => i.reason === 'generation_budget')).not.toBe(true);
+      const collapsed = result.incomplete?.filter((i) => i.reason === 'collapsed') ?? [];
+      expect(collapsed).toHaveLength(2);
+      expect(collapsed[0].detail).toContain('evil.example.com');
+      expect(collapsed[0].detail).toContain('reached its budget');
+      const sibling = result.behaviors.find((b) => b.technique_id === collapsed[0].technique_id);
+      expect(sibling?.execution).toEqual({
+        executed: false,
+        row_count: 0,
+        hit: false,
+        inconclusive_reason: 'collapsed',
+      });
+      // The sibling stays in both output arrays, exactly as a generation_budget behavior does.
+      expect(result.indexed_behaviors.some((b) => b.technique_id === sibling?.technique_id)).toBe(
+        true
+      );
     });
 
     it('does not mark siblings collapsed when their survivor is cut by the generation budget', async () => {

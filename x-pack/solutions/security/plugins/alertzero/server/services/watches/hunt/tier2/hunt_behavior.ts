@@ -861,10 +861,9 @@ export const huntBehavior = async (
     // under different technique ids, so pay for one query per shared artifact set rather than
     // one per technique — and do it before the budget slice below, so a duplicate never spends
     // a slot a distinct behavior could have used. Siblings are not written off here, though:
-    // `collapsed` claims that the survivor's query hunts the shared artifacts, and that is only
-    // known once the survivor's query has been generated, gated and seen to filter on them. Until
-    // then a sibling is merely deferred, and one whose survivor never covered it is generated
-    // in a second wave with whatever budget remains rather than retired on a claim nothing ran.
+    // they are deferred behind their survivor and generated in a second wave with whatever
+    // budget remains, and only one that loses to the budget is settled on what the survivor's
+    // query turned out to search.
     const { survivors, collapsed: collapsedSiblings } = collapseByArtifactSet(validated, iocs);
 
     // Highest confidence first, so a report that overruns the budget spends it on
@@ -1034,72 +1033,74 @@ export const huntBehavior = async (
       if (esql) published.set(behavior.technique_id, esql);
     }
 
-    // Now the survivors' queries are known, settle their siblings. One whose survivor published
-    // a query that positively filters on every shared artifact is `collapsed`: the claim is true. One whose
-    // survivor kept its placeholder, or published a query grounded on some other report literal,
-    // was not covered by anything and goes into a second generation wave instead.
-    const retained: ValidatedBehavior[] = [];
+    // Now the survivors' queries are known, settle their siblings. Sharing an artifact set was
+    // reason enough to let the survivor generate first; it is not reason to drop the sibling's
+    // technique for good, because a query written for the survivor's technique and evidence can
+    // filter on the shared artifacts and still not express what the sibling's technique does
+    // with them. So every deferred sibling gets its own generation while budget remains. Only
+    // one that loses to the budget is settled on what its survivor did: `collapsed` when the
+    // survivor published a query seen to filter on every shared artifact, since the artifacts
+    // were at least searched, and `generation_budget` otherwise, since nothing searched them.
+    const remainingBudget = Math.max(0, MAX_GENERATED_BEHAVIORS - generationTargets.length);
+    const secondWave = deferredSiblings
+      .map(({ behavior }) => behavior)
+      .sort((a, b) => b.confidence - a.confidence)
+      .slice(0, remainingBudget);
+    const secondWaveIds = new Set(secondWave.map((b) => b.technique_id));
     let collapsedCount = 0;
+    let budgetCount = 0;
     for (const { behavior, survivor, key } of deferredSiblings) {
+      if (secondWaveIds.has(behavior.technique_id)) continue;
       const survivorEsql = published.get(survivor.technique_id);
+      const sharedValues = key.split('\u0000').join(', ');
       if (survivorEsql && queryHuntsArtifacts(survivorEsql, key)) {
         collapsedCount += 1;
         behavior.execution = notExecuted('collapsed');
-        const sharedValues = key.split('\u0000').join(', ');
-        const detail =
-          `${behavior.technique_id} shares the same report artifacts (${sharedValues}) as ` +
-          `${survivor.technique_id}, whose query already hunts them, so it was never generated.`;
-        gap(behavior.technique_id, 'collapsed', detail.slice(0, 500));
+        gap(
+          behavior.technique_id,
+          'collapsed',
+          (
+            `The run reached its budget of ${MAX_GENERATED_BEHAVIORS} generated queries before ` +
+            `${behavior.technique_id}; its report artifacts (${sharedValues}) were searched by the ` +
+            `query for ${survivor.technique_id}, but no query for ${behavior.technique_id} itself ` +
+            `was written.`
+          ).slice(0, 500)
+        );
       } else {
-        retained.push(behavior);
-      }
-    }
-    if (collapsedCount > 0) {
-      logger.info(
-        `[hunt:esql] collapsed ${collapsedCount} behavior(s) onto survivors whose published ` +
-          `queries filter on the same report artifacts.`
-      );
-    }
-    if (retained.length > 0) {
-      const remainingBudget = Math.max(0, MAX_GENERATED_BEHAVIORS - generationTargets.length);
-      const secondWave = [...retained]
-        .sort((a, b) => b.confidence - a.confidence)
-        .slice(0, remainingBudget);
-      const secondWaveIds = new Set(secondWave.map((b) => b.technique_id));
-      for (const behavior of retained) {
-        if (secondWaveIds.has(behavior.technique_id)) continue;
+        budgetCount += 1;
         behavior.execution = notExecuted('generation_budget');
         gap(
           behavior.technique_id,
           'generation_budget',
           `The run reached its budget of ${MAX_GENERATED_BEHAVIORS} generated queries before ` +
-            `${behavior.technique_id}, whose artifacts no other query ended up hunting, so no ` +
-            `query was written for it and it was never searched.`
+            `${behavior.technique_id}, and the query for ${survivor.technique_id} did not search ` +
+            `its report artifacts (${sharedValues}), so it was never searched.`
         );
       }
+    }
+    if (deferredSiblings.length > 0) {
       logger.info(
-        `[hunt:esql] ${retained.length} deferred behavior(s) were not covered by their ` +
-          `survivor's query; generating ${secondWave.length} with the remaining budget` +
-          (secondWave.length < retained.length
-            ? ` and leaving ${retained.length - secondWave.length} to the budget gap.`
-            : '.')
+        `[hunt:esql] ${deferredSiblings.length} behavior(s) share report artifacts with a ` +
+          `survivor; generating ${secondWave.length} with the remaining budget, ` +
+          `${collapsedCount} collapsed onto a survivor query that searches their artifacts, ` +
+          `${budgetCount} left to the budget gap.`
       );
-      if (secondWave.length > 0) {
-        const secondWaveEsql = await generateGroundedEsql({
-          esqlModel: models.esql,
-          esClient,
-          logger,
-          behaviors: secondWave,
-          text,
-          iocs,
-          articleContext,
-          allowedIndices,
-          rowLimit: rowLimit ?? DEFAULT_HUNT_QUERY_LIMIT,
-        });
-        for (const behavior of validated) {
-          if (!secondWaveIds.has(behavior.technique_id)) continue;
-          await publishBehavior(behavior, secondWaveEsql);
-        }
+    }
+    if (secondWave.length > 0) {
+      const secondWaveEsql = await generateGroundedEsql({
+        esqlModel: models.esql,
+        esClient,
+        logger,
+        behaviors: secondWave,
+        text,
+        iocs,
+        articleContext,
+        allowedIndices,
+        rowLimit: rowLimit ?? DEFAULT_HUNT_QUERY_LIMIT,
+      });
+      for (const behavior of validated) {
+        if (!secondWaveIds.has(behavior.technique_id)) continue;
+        await publishBehavior(behavior, secondWaveEsql);
       }
     }
   }
