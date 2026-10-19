@@ -234,6 +234,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
 
   // Platform – Discover
   'discover-data-analysis',
+  'discover-session',
 
   // Platform – Streams
   'streams-management',
@@ -371,6 +372,7 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
 
   // Platform – Discover
   'esql.query_results',
+  'discover.session',
 
   // Platform – Workflows
   'workflow.yaml',
@@ -415,6 +417,8 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   // gated behind xpack.alertzero.enabled
   'security.threat',
   'security.significant_security_event',
+  // hidden; server-registered only
+  'security.hunt_coordinator_result',
 
   // Observability
   'observability.ai_insight',

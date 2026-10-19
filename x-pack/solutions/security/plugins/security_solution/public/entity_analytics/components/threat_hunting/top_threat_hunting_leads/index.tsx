@@ -175,7 +175,6 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
     <EuiPopover
       isOpen={isOptionsOpen}
       closePopover={closeOptions}
-      ownFocus={false}
       anchorPosition="downRight"
       panelPaddingSize="m"
       aria-label={i18n.OPTIONS}

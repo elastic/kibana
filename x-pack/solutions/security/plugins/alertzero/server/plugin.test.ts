@@ -121,6 +121,23 @@ describe('AlertZeroPlugin feature-flag gating', () => {
       });
     });
 
+    it('does not register the investigations AI index with Context Engine', () => {
+      const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: false })));
+      const contextEngine = { registerAiIndex: jest.fn() };
+
+      plugin.setup(
+        coreMock.createSetup() as never,
+        {
+          features: { registerKibanaFeature: jest.fn() },
+          workflowsExtensions: { registerManagedWorkflowOwner: jest.fn() },
+          workflowsManagement: undefined,
+          contextEngine,
+        } as never
+      );
+
+      expect(contextEngine.registerAiIndex).not.toHaveBeenCalled();
+    });
+
     it('does not install managed worker workflows on start', () => {
       const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: false })));
       const coreStart = coreMock.createStart();
@@ -167,6 +184,53 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         expect(ensureAgentSafe).not.toHaveBeenCalled();
       }
     );
+
+    // Hunt writes indicators straight to the backing index, so without this registration
+    // `context-engine.updateKi` cannot resolve `security-investigations`.
+    it('registers the investigations AI index with Context Engine during setup', () => {
+      const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
+      const contextEngine = { registerAiIndex: jest.fn() };
+
+      plugin.setup(
+        coreMock.createSetup() as never,
+        {
+          features: { registerKibanaFeature: jest.fn() },
+          workflowsExtensions: {
+            registerManagedWorkflowOwner: jest.fn(),
+            registerStepDefinition: jest.fn(),
+          },
+          workflowsManagement: { management: {} },
+          contextEngine,
+        } as never
+      );
+
+      expect(contextEngine.registerAiIndex).toHaveBeenCalledTimes(1);
+      expect(contextEngine.registerAiIndex).toHaveBeenCalledWith(
+        'security-investigations',
+        expect.objectContaining({
+          dest: { type: 'index', value: 'ai-index-idx-security-investigations' },
+        })
+      );
+    });
+
+    it('sets up without Context Engine installed', () => {
+      const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
+
+      const result = plugin.setup(
+        coreMock.createSetup() as never,
+        {
+          features: { registerKibanaFeature: jest.fn() },
+          workflowsExtensions: {
+            registerManagedWorkflowOwner: jest.fn(),
+            registerStepDefinition: jest.fn(),
+          },
+          workflowsManagement: { management: {} },
+          contextEngine: undefined,
+        } as never
+      );
+
+      expect(result.isEnabled).toBe(true);
+    });
 
     it('registers ownership, feature privileges, and routes during setup', () => {
       const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
@@ -357,7 +421,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
       );
 
       expect(registerAgentType).toHaveBeenCalledWith(agentBuilder);
-      expect(agentBuilder.attachments.registerType).toHaveBeenCalledTimes(2);
+      expect(agentBuilder.attachments.registerType).toHaveBeenCalledTimes(3);
     });
 
     describe('ai.conversation.updated opt-in', () => {
