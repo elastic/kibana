@@ -36,7 +36,6 @@ import {
   buildWorkflowExecutionsSpaceFilter,
 } from '../api/lib/build_workflow_executions_search_query';
 import { isIndexNotFoundError } from '../api/lib/es_error_helpers';
-import { getChildWorkflowExecutions } from '../api/lib/get_child_workflow_executions';
 import {
   getExecutionStepExecutions,
   type GetExecutionStepExecutionsResult,
@@ -175,9 +174,7 @@ export class WorkflowExecutionQueryService {
     parentExecutionId: string,
     spaceId: string
   ): Promise<ChildWorkflowExecutionItem[]> {
-    return getChildWorkflowExecutions({
-      workflowExecutionsDataClient: this.deps.workflowExecutionsDataClient,
-      stepExecutionsDataClient: this.deps.stepExecutionsDataClient,
+    return this.deps.workflowsExecutionEngine.getChildExecutions({
       parentExecutionId,
       spaceId,
     });
