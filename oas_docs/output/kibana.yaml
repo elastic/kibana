@@ -124,8 +124,13 @@ tags:
     description: |
       Data stream APIs enable you to manage data streams, which are collections of indices that share the same index template and are managed as a single unit for time-series data.
     x-displayName: Data streams
-  - name: data views
+  - description: Data view APIs enable you to manage data views, formerly known as Kibana index patterns.
+    name: data views
     x-displayName: Data views
+  - name: data-views-v2
+    description: |
+      Data view APIs enable you to manage data views, formerly known as Kibana index patterns. Use these endpoints to list, retrieve, create, replace, and delete data views with the as-code data view definition.
+    x-displayName: Data views v2
   - name: Discover sessions
     description: |
       A [Discover session](https://www.elastic.co/docs/explore-analyze/discover) is a saved exploration of your data in Discover. Each session contains one or more tabs, and each tab stores its own data source, query, filters, columns, sorting, and chart settings. Use this API to create and manage Discover sessions programmatically.
@@ -26391,7 +26396,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Get all data views paginated
+        Returns a paginated list of the data views in the current space. Each item includes only the name, index pattern, and time field. To get the full definition, use `GET /api/data_views/v2/{id}`.
       operationId: get-data-views-v2
       parameters:
         - description: The page of results to return.
@@ -26480,6 +26485,7 @@ paths:
                           required:
                             - index_pattern
                         id:
+                          description: The ID of the data view.
                           maxLength: 1000
                           type: string
                         meta:
@@ -26499,6 +26505,7 @@ paths:
                               description: Identifier of the plugin or team that owns this object.
                               type: string
                             spaces:
+                              description: The IDs of the spaces where the data view is available.
                               items:
                                 maxLength: 1000
                                 type: string
@@ -26545,9 +26552,9 @@ paths:
           description: OK
         '400':
           description: bad request
-      summary: ''
+      summary: Get data views
       tags:
-        - data views
+        - data-views-v2
       x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
@@ -26560,7 +26567,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create a data view<br/><br/>[Required authorization] Route required privileges: indexPatterns:manage.
+        Creates a data view and returns it. Kibana generates the data view ID. If a data view with the same name already exists, the request fails with a conflict.<br/><br/>[Required authorization] Route required privileges: indexPatterns:manage.
       operationId: post-data-views-v2
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -26593,6 +26600,8 @@ paths:
                 field_settings:
                   additionalProperties:
                     $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-field-settings-entry'
+                  description: Settings for individual fields, keyed by field name. To change how Kibana displays a field from the backing indices, set its label, description, format, or popularity. To define a runtime field, use the runtime field name and set `type`.
+                  title: Field settings
                   type: object
                 index_pattern:
                   $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-index-pattern-schema'
@@ -26630,11 +26639,14 @@ paths:
                 properties:
                   data:
                     $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-data-view-spec-schema'
+                    description: The data view definition.
                   id:
+                    description: The ID of the data view.
                     maxLength: 1000
                     type: string
                   meta:
                     additionalProperties: false
+                    description: Metadata about the data view.
                     type: object
                     properties:
                       created_at:
@@ -26650,6 +26662,7 @@ paths:
                         description: Identifier of the plugin or team that owns this object.
                         type: string
                       spaces:
+                        description: The IDs of the spaces where the data view is available.
                         items:
                           maxLength: 1000
                           type: string
@@ -26668,18 +26681,16 @@ paths:
                   - id
                   - data
                   - meta
-          description: created
+          description: The data view was created.
         '400':
-          description: invalid request
+          description: The request is invalid, for example when a field format type does not exist.
         '403':
           description: forbidden
-        '404':
-          description: not found
         '409':
-          description: conflict
-      summary: ''
+          description: A data view with the same name already exists.
+      summary: Create a data view
       tags:
-        - data views
+        - data-views-v2
       x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
@@ -26693,7 +26704,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Delete a data view by id<br/><br/>[Required authorization] Route required privileges: indexPatterns:manage.
+        Permanently deletes a data view by ID. You can't recover a deleted data view.<br/><br/>[Required authorization] Route required privileges: indexPatterns:manage.
       operationId: delete-data-views-v2-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -26703,7 +26714,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The id of the data view.
+        - description: The ID of the data view to delete.
           in: path
           name: id
           required: true
@@ -26712,15 +26723,15 @@ paths:
             minLength: 1
             type: string
       responses:
-        '200':
+        '204':
           description: deleted
         '403':
           description: forbidden
         '404':
           description: not found
-      summary: ''
+      summary: Delete a data view
       tags:
-        - data views
+        - data-views-v2
       x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
@@ -26733,10 +26744,10 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Get a data view by id
+        Returns a data view by ID, including its field settings and runtime fields.
       operationId: get-data-views-v2-id
       parameters:
-        - description: The id of the data view.
+        - description: The ID of the data view to return.
           in: path
           name: id
           required: true
@@ -26768,11 +26779,14 @@ paths:
                 properties:
                   data:
                     $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-data-view-spec-schema'
+                    description: The data view definition.
                   id:
+                    description: The ID of the data view.
                     maxLength: 1000
                     type: string
                   meta:
                     additionalProperties: false
+                    description: Metadata about the data view.
                     type: object
                     properties:
                       created_at:
@@ -26788,6 +26802,7 @@ paths:
                         description: Identifier of the plugin or team that owns this object.
                         type: string
                       spaces:
+                        description: The IDs of the spaces where the data view is available.
                         items:
                           maxLength: 1000
                           type: string
@@ -26809,9 +26824,9 @@ paths:
           description: OK
         '404':
           description: not found
-      summary: ''
+      summary: Get a data view
       tags:
-        - data views
+        - data-views-v2
       x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
@@ -26824,7 +26839,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Update a data view by id<br/><br/>[Required authorization] Route required privileges: indexPatterns:manage.
+        Creates the data view with the ID in the path, or replaces its definition if it already exists. Returns `201` when the request creates a data view and `200` when it replaces one. A replacement removes any optional property you omit, such as `time_field`.<br/><br/>[Required authorization] Route required privileges: indexPatterns:manage.
       operationId: put-data-views-v2-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -26834,7 +26849,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The id of the data view that will be created or updated.
+        - description: The ID of the data view to create or update.
           in: path
           name: id
           required: true
@@ -26865,6 +26880,8 @@ paths:
                 field_settings:
                   additionalProperties:
                     $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-field-settings-entry'
+                  description: Settings for individual fields, keyed by field name. To change how Kibana displays a field from the backing indices, set its label, description, format, or popularity. To define a runtime field, use the runtime field name and set `type`.
+                  title: Field settings
                   type: object
                 index_pattern:
                   $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-index-pattern-schema'
@@ -26902,11 +26919,14 @@ paths:
                 properties:
                   data:
                     $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-data-view-spec-schema'
+                    description: The data view definition.
                   id:
+                    description: The ID of the data view.
                     maxLength: 1000
                     type: string
                   meta:
                     additionalProperties: false
+                    description: Metadata about the data view.
                     type: object
                     properties:
                       created_at:
@@ -26922,6 +26942,7 @@ paths:
                         description: Identifier of the plugin or team that owns this object.
                         type: string
                       spaces:
+                        description: The IDs of the spaces where the data view is available.
                         items:
                           maxLength: 1000
                           type: string
@@ -26964,11 +26985,14 @@ paths:
                 properties:
                   data:
                     $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-data-view-spec-schema'
+                    description: The data view definition.
                   id:
+                    description: The ID of the data view.
                     maxLength: 1000
                     type: string
                   meta:
                     additionalProperties: false
+                    description: Metadata about the data view.
                     type: object
                     properties:
                       created_at:
@@ -26984,6 +27008,7 @@ paths:
                         description: Identifier of the plugin or team that owns this object.
                         type: string
                       spaces:
+                        description: The IDs of the spaces where the data view is available.
                         items:
                           maxLength: 1000
                           type: string
@@ -27007,13 +27032,11 @@ paths:
           description: invalid request
         '403':
           description: forbidden
-        '404':
-          description: not found
         '409':
           description: conflict
-      summary: ''
+      summary: Upsert a data view
       tags:
-        - data views
+        - data-views-v2
       x-state: Generally available; added in 9.6.0
       x-metaTags:
         - content: Kibana
@@ -167730,6 +167753,8 @@ components:
         field_settings:
           additionalProperties:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-settings-entry'
+          description: Settings for individual fields, keyed by field name. To change how Kibana displays a field from the backing indices, set its label, description, or format. To define a runtime field, use the runtime field name and set `type`.
+          title: Field settings
           type: object
         index_pattern:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-index-pattern-schema'
@@ -169376,6 +169401,8 @@ components:
         field_settings:
           additionalProperties:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-saved-field-settings-entry'
+          description: Settings for individual fields, keyed by field name. To change how Kibana displays a field from the backing indices, set its label, description, format, or popularity. To define a runtime field, use the runtime field name and set `type`.
+          title: Field settings
           type: object
         id:
           description: Kibana provides a unique identifier for each data view, or you can create your own.
