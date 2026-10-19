@@ -47,8 +47,9 @@ export function useGenAiData({
   );
 
   // The fetcher keeps the previous event's data and status until the next request starts, and
-  // keeps both when `id` is cleared, so data fetched for another event counts as loading.
-  const isOtherEvent = eventMetadata?.id !== id;
+  // keeps both when `id` is cleared, so data fetched for another event counts as loading. A failed
+  // request clears the data, which leaves nothing to compare.
+  const isOtherEvent = eventMetadata !== undefined && eventMetadata.id !== id;
   const isMetadataLoading = isPending(metadataStatus) || isOtherEvent;
 
   return useMemo(() => {

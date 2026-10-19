@@ -19,10 +19,13 @@ const mockUseFetcher = useFetcher as jest.MockedFunction<typeof useFetcher>;
 
 const genAiMetadata = { 'gen_ai.operation.name': 'chat', 'gen_ai.system': 'openai' };
 
-const setFetch = (data: { id: string; metadata: Record<string, unknown> } | undefined) =>
+const setFetch = (
+  data: { id: string; metadata: Record<string, unknown> } | undefined,
+  status = FETCH_STATUS.SUCCESS
+) =>
   mockUseFetcher.mockReturnValue({
     data,
-    status: FETCH_STATUS.SUCCESS,
+    status,
     refetch: jest.fn(),
   } as unknown as ReturnType<typeof useFetcher>);
 
@@ -58,5 +61,15 @@ describe('useGenAiData', () => {
     expect(isMetadataLoading).toBe(true);
     expect(isGenAiSpan).toBe(false);
     expect(genAi).toBeUndefined();
+  });
+
+  it('stops loading with empty metadata when the request fails', () => {
+    setFetch(undefined, FETCH_STATUS.FAILURE);
+
+    const { metadata, isMetadataLoading, isGenAiSpan } = renderGenAiData('span-1');
+
+    expect(metadata).toEqual({});
+    expect(isMetadataLoading).toBe(false);
+    expect(isGenAiSpan).toBe(false);
   });
 });
