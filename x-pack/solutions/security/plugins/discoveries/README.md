@@ -102,7 +102,7 @@ Attack Discovery 2.0 has three entry paths, all of which converge on the same ge
 
 `executeGenerationWorkflow` (in [`@kbn/discoveries`](../../packages/kbn-discoveries/impl/attack_discovery/generation/execute_generation_workflow.ts)) is the single shared entry point. It runs **pre-execution validation** and a **managed-workflow integrity check**, then delegates to [`runManualOrchestration`](../../packages/kbn-discoveries/impl/attack_discovery/generation/run_manual_orchestration/index.ts), which chains the phases with timeout budgets.
 
-The generation phase begins with an **always-on ground-truthing gate** — a separate `ai.agent` workflow that runs before the untouched generate workflow. The gate runs for every trigger **except `agent_builder`** (the conversational skill has already ground-truthed its own data — see [`shouldRunGate`](../../packages/kbn-discoveries/impl/attack_discovery/generation/should_run_gate/index.ts)); that skip is also the recursion break. A run step can also turn it off with `ground_truth_gate_enabled: false`, which the AlertZero Attack Discovery Worker does. The gate is **fail-closed** (a gate failure fails the run), runs a **bounded multi-skill corroboration** that stays decision-only, decides which candidate alerts to keep (original bytes pass through by `_id`), may add the `_id`s of net-new alerts it retrieved itself (Skill toggle, ids only), and threads a `conversation_id` to a **fire-and-forget report phase** after validation (which renders the report and drafts missed-detection rule proposals behind the verbatim `create the rule` approval gate, never auto-persisting rules). See [Always-on generation-phase gate](#always-on-generation-phase-gate).
+The generation phase begins with a **ground-truthing gate**, on by default — a separate `ai.agent` workflow that runs before the untouched generate workflow. The gate runs for every trigger **except `agent_builder`** (the conversational skill has already ground-truthed its own data — see [`shouldRunGate`](../../packages/kbn-discoveries/impl/attack_discovery/generation/should_run_gate/index.ts)); that skip is also the recursion break. A run step can also turn it off with `ground_truth_gate_enabled: false`, which the AlertZero Attack Discovery Worker does. The gate is **fail-closed** (a gate failure fails the run), runs a **bounded multi-skill corroboration** that stays decision-only, decides which candidate alerts to keep (original bytes pass through by `_id`), may add the `_id`s of net-new alerts it retrieved itself (Skill toggle, ids only), and threads a `conversation_id` to a **fire-and-forget report phase** after validation (which renders the report and drafts missed-detection rule proposals behind the verbatim `create the rule` approval gate, never auto-persisting rules). See [Generation-phase gate](#generation-phase-gate).
 
 ```mermaid
 flowchart TB
@@ -127,7 +127,7 @@ flowchart TB
   USER --> EGW
   RUNTOOL --> EGW
   EGW --> RMO --> R --> SKIP
-  SKIP -->|"no (manual / schedule / workflow)"| GATE --> G
+  SKIP -->|"no (manual / schedule / workflow with the gate on)"| GATE --> G
   SKIP -->|"yes (skill already ground-truthed,<br/>or run step ground_truth_gate_enabled: false)"| G
   G --> V --> REPORT
   EGW --> EBT
@@ -684,7 +684,7 @@ The `replacements` map is **excluded by the step's output schema** — not just 
 
 Definition: [`server/agent_builder/skills/attack_discovery_generator/attack_discovery_generator_skill.ts`](server/agent_builder/skills/attack_discovery_generator/attack_discovery_generator_skill.ts). Registration: [`server/agent_builder/skills/register_skills.ts`](server/agent_builder/skills/register_skills.ts).
 
-The skill plays **two roles**: (1) the conversational front door described in this section (Modes A/B, the `agent_builder` trigger), and (2) the **always-on generation-phase gate** that the orchestration invokes for every other trigger — see [Always-on generation-phase gate](#always-on-generation-phase-gate).
+The skill plays **two roles**: (1) the conversational front door described in this section (Modes A/B, the `agent_builder` trigger), and (2) the **generation-phase gate** that the orchestration invokes for every other trigger unless a run step turns it off — see [Generation-phase gate](#generation-phase-gate).
 
 ### Skill capabilities and how each path invokes them
 
@@ -748,9 +748,9 @@ flowchart TD
 
 Capability → pipeline embodiment for the gated paths: *review alert data* → Mode C `remove_alert_ids` decision (informed by the gate's bounded multi-skill corroboration; keep = candidates − removed); *retrieve own alert data* → Mode C `added_alert_ids` when the Skill toggle is on; *report on results* → persisted discoveries in the AD UI plus the Mode B skill report, which renders the rich report and drafts missed-detection rule proposals behind the `create the rule` gate.
 
-### Always-on generation-phase gate
+### Generation-phase gate
 
-Every non-`agent_builder` generation (`manual`, `schedule`, `workflow`) runs the skill as an **always-on ground-truthing gate** during the generation phase. The gate is a **separate workflow** executed before the untouched generate workflow — the generation workflow YAML and the `generate` step's LangGraph logic are not modified. Orchestration: [`run_gate_phase/index.ts`](../../packages/kbn-discoveries/impl/attack_discovery/generation/run_gate_phase/index.ts), invoked from [`run_manual_orchestration/index.ts`](../../packages/kbn-discoveries/impl/attack_discovery/generation/run_manual_orchestration/index.ts).
+Every non-`agent_builder` generation (`manual`, `schedule`, `workflow`) runs the skill as a **ground-truthing gate** during the generation phase, unless a run step sets `ground_truth_gate_enabled: false`. The gate is a **separate workflow** executed before the untouched generate workflow — the generation workflow YAML and the `generate` step's LangGraph logic are not modified. Orchestration: [`run_gate_phase/index.ts`](../../packages/kbn-discoveries/impl/attack_discovery/generation/run_gate_phase/index.ts), invoked from [`run_manual_orchestration/index.ts`](../../packages/kbn-discoveries/impl/attack_discovery/generation/run_manual_orchestration/index.ts).
 
 - **Single chokepoint, universal gate.** All four entry points (`_generate` manual, scheduled, run step `workflow`, the `agent_builder` run tool) flow through the same `executeGenerationWorkflow` → `runManualOrchestration` path. The gate is invoked from that single TS path and **skipped for `agent_builder`** ([`shouldRunGate`](../../packages/kbn-discoveries/impl/attack_discovery/generation/should_run_gate/index.ts)) — the conversational skill has already ground-truthed its own data before delegating to the pipeline, so re-running the gate would double-invoke the skill. That trigger check is also the **recursion break**: if the gate's `ai.agent` ever called `security.attack-discovery.run`, the re-entry carries `trigger === 'agent_builder'` and skips the gate instead of recursing.
 - **Opt-out for callers that own the false-positive decision.** The `security.attack-discovery.run` step takes `ground_truth_gate_enabled` (default `true`). With `false`, the run skips the gate, the skill's own additional retrieval and, because no gate conversation exists, the report phase. The AlertZero Attack Discovery Worker sets it in `attack_discovery_batched_generation.yaml`: every attack it generates goes to a review whose FP/TP analysis reads the same entities and raw events, and with the gate on, the gate's false-positive triage in `additional_context` made generation drop false-positive chains before any review saw them. `manual`, `schedule` and every other run step keep the gate.
@@ -763,7 +763,7 @@ Every non-`agent_builder` generation (`manual`, `schedule`, `workflow`) runs the
 
 ### What it does
 
-The skill registers a single Agent Builder skill. In its conversational role it supports two modes (Mode C, the always-on gate, is covered in [Always-on generation-phase gate](#always-on-generation-phase-gate)):
+The skill registers a single Agent Builder skill. In its conversational role it supports two modes (Mode C, the generation-phase gate, is covered in [Generation-phase gate](#generation-phase-gate)):
 
 1. **Loads the analyst prompt** — same "world-class cyber security analyst" framing used by the LangGraph generate node, plus stricter rules layered on top: a Validation Standard ("when in doubt, discard"), a default-to-split independent-evaluation rule, and Entity Correlation Hygiene guidance that calls out service accounts, shared infrastructure, and same-tactic-different-host coincidence as **not** sufficient correlation evidence.
 2. **Tells the agent to corroborate before deciding** — the skill content intentionally does not enumerate which tools to use. It instructs the agent to *enumerate the tools available in this conversation* and call those that gather supporting evidence (threat hunting, threat intelligence, entity context, knowledge base, etc.). The skill exposes a small set of platform tools (`execute_esql`, `generate_esql`, `search`, `get_document_by_id`, `get_index_mapping`, `get_workflow_execution_status`) plus the inline `get_default_esql_query` and `security.attack-discovery.get_status` tools, but other tools active in the session are also fair game.

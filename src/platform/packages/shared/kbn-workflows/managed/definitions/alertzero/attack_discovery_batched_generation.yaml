@@ -153,7 +153,9 @@ steps:
           # analysis owns the false-positive decision. The gate corroborates the
           # alerts against the same entities and raw events and hands its
           # false-positive triage to the generation prompt, so generation dropped
-          # false-positive chains before any review saw them.
+          # false-positive chains before any review saw them. It also keeps each
+          # batch on its own ids: the gate's additional retrieval could add alerts
+          # from outside this batch, so two batches could build on the same ones.
           ground_truth_gate_enabled: false
           # The discoveries are read back from the index below instead. They
           # dominate this step's output, and an output above the engine's
