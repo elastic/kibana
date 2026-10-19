@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { Composition, PrimitiveNode } from '@elastic/isomer-sdk';
 import type { MaybePromise } from '@kbn/utility-types';
 import type {
   Attachment,
-  SurfaceComposition,
   VersionedAttachmentWithOrigin,
 } from '@kbn/agent-builder-common/attachments';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -125,6 +125,22 @@ export interface AttachmentResolveContext extends AttachmentFormatContext {
  * request and space it renders for, like {@link AttachmentFormatContext}.
  */
 export type AttachmentSurfaceCompositionContext = AttachmentFormatContext;
+
+/** A block of GitHub-flavored markdown in a {@link SurfaceComposition}. */
+export interface MarkdownNode extends PrimitiveNode {
+  type: 'markdown';
+  text: string;
+}
+
+/** The node types of a {@link SurfaceComposition}, the ones Agent Builder's Isomer pack renders. */
+export type SurfaceNode = MarkdownNode;
+
+/**
+ * An [Isomer](https://github.com/elastic/isomer) composition built from Agent Builder's node
+ * types: the same document renders to every surface, such as Slack. What an attachment type's
+ * `toSurfaceComposition` returns, and what a response message becomes.
+ */
+export type SurfaceComposition = Composition<SurfaceNode>;
 
 /**
  * Return type for attachment's validation handlers.

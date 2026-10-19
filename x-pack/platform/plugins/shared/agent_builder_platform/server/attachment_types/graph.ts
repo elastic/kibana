@@ -8,7 +8,6 @@
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import type { GraphAttachment, GraphAttachmentData, GraphEdge } from '../../common/attachments';
 import { GRAPH_ATTACHMENT_TYPE, graphAttachmentDataSchema } from '../../common/attachments';
-import { toBulletList } from './markdown';
 
 export const createGraphAttachmentType = (): AttachmentTypeDefinition<
   typeof GRAPH_ATTACHMENT_TYPE,
@@ -31,28 +30,6 @@ export const createGraphAttachmentType = (): AttachmentTypeDefinition<
           type: 'text' as const,
           value: formatGraphAttachment(attachment.data),
         }),
-      };
-    },
-    toSurfaceComposition: ({ data: { title, description, nodes, edges } }) => {
-      const labels = new Map(nodes.map(({ id, data }) => [id, data.label]));
-      const toLabel = (id: string) => labels.get(id) ?? id;
-
-      const sections = [
-        `**Nodes**\n${toBulletList(nodes.map(({ data }) => data.label))}`,
-        edges.length > 0 &&
-          `**Edges**\n${toBulletList(
-            edges.map(({ source, target, label }) => {
-              const relation = `${toLabel(source)} → ${toLabel(target)}`;
-              return label ? `${relation} (${label})` : relation;
-            })
-          )}`,
-      ];
-
-      return {
-        type: 'view',
-        title: title ?? 'Graph',
-        subtitle: description,
-        body: [{ type: 'markdown', text: sections.filter(Boolean).join('\n\n') }],
       };
     },
     getAgentDescription: () => {

@@ -13,13 +13,6 @@ import {
   type ConnectorSetupAttachmentData,
 } from '../../common/attachments';
 
-/** The connector type's name, from the attachment, its spec, or its id. */
-const getConnectorDisplayName = ({
-  connector_type: connectorType,
-  connector_type_name: connectorTypeName,
-}: ConnectorSetupAttachmentData): string =>
-  connectorTypeName ?? getConnectorSpec(connectorType)?.metadata.displayName ?? connectorType;
-
 /**
  * Server-side definition for the `connector_setup` attachment type.
  */
@@ -44,33 +37,18 @@ export const createConnectorSetupAttachmentType = (): AttachmentTypeDefinition<
   format: (attachment) => {
     return {
       getRepresentation: () => {
-        const { data } = attachment;
-        const displayName = getConnectorDisplayName(data);
+        const { connector_type: connectorType, connector_type_name: connectorTypeName } =
+          attachment.data;
+        const spec = getConnectorSpec(connectorType);
+        const displayName = connectorTypeName ?? spec?.metadata.displayName ?? connectorType;
         const value = [
-          `Connector setup card shown to the user for: ${displayName} (${data.connector_type}).`,
+          `Connector setup card shown to the user for: ${displayName} (${connectorType}).`,
           'The user enters configuration and secrets in the connector form; those never appear in chat.',
           'Once the user creates the connector it becomes available automatically — you do not need to ask for the connector id.',
           'After the user confirms it is set up, proceed using the connector tools on a later turn.',
         ].join('\n');
         return { type: 'text', value };
       },
-    };
-  },
-  toSurfaceComposition: ({ data, origin }) => {
-    const displayName = getConnectorDisplayName(data);
-
-    const text = [
-      data.reason ?? `Configure the ${displayName} connector so the agent can use it here.`,
-      !origin && 'Finish setting it up in Kibana.',
-    ]
-      .filter(Boolean)
-      .join('\n\n');
-
-    return {
-      type: 'view',
-      title: displayName,
-      subtitle: origin ? 'Connected' : 'Setup',
-      body: [{ type: 'markdown', text }],
     };
   },
   getAgentDescription: () => {

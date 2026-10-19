@@ -12,16 +12,18 @@ import {
   getLatestVersion,
   getVersion,
   type Attachment,
-  type MarkdownNode,
-  type SurfaceComposition,
-  type SurfaceNode,
   type VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
 import {
   renderAttachmentElement,
   type RenderAttachmentElementAttributes,
 } from '@kbn/agent-builder-common/tools/custom_rendering';
-import type { AttachmentSurfaceCompositionContext } from '@kbn/agent-builder-server/attachments';
+import type {
+  AttachmentSurfaceCompositionContext,
+  SurfaceComposition,
+  SurfaceNode,
+  MarkdownNode,
+} from '@kbn/agent-builder-server/attachments';
 import type { Logger } from '@kbn/logging';
 import type { AttachmentServiceStart } from '../attachments';
 import { isomerRuntime } from './pack';

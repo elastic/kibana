@@ -135,19 +135,17 @@ export const deliverCallbackEvents = ({
               return EMPTY;
             }
 
-            const completedRound = roundCompleteEvent;
+            const completedEvent = roundCompleteEvent;
 
             // The response message ready to post on the round's surface, such as Slack.
-            return from(
-              surfacesService.renderPayload(completedRound, {
-                originType: execution.agentParams.origin?.type,
-                request,
-                spaceId: execution.spaceId,
-              })
-            ).pipe(
-              concatMap((surfacePayload) =>
-                deliverEvent({ ...completedRound, surface_payload: surfacePayload })
-              )
+            const surfacePayload = surfacesService.renderPayload(completedEvent, {
+              originType: execution.agentParams.origin?.type,
+              request,
+              spaceId: execution.spaceId,
+            });
+
+            return from(surfacePayload).pipe(
+              concatMap((payload) => deliverEvent({ ...completedEvent, surface_payload: payload }))
             );
           })
         ),
