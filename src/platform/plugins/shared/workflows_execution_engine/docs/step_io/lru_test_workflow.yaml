@@ -1,0 +1,100 @@
+# Test workflow for the LRU-based StepIoService
+#
+# Exercises every code path changed in the LRU simplification:
+#   1. Linear output passing — write(output) → LRU cache → read(output)
+#   2. data.set variables — new inline getVariables() in WorkflowContextManager
+#   3. foreach loop — scope-stack entries rehydrated uniformly (no foreach-specific pin/unpin)
+#   4. while loop — LRU evicts stale iteration outputs automatically (no evictStaleLoopOutputs)
+#   5. wait (pause/resume) — on resume load() excludes outputs; prepareForRead rehydrates from ES
+
+name: lru-implementation-test
+enabled: false
+triggers:
+  - type: manual
+
+steps:
+  # ── 1. data.set + variables ────────────────────────────────────────────────
+  # Exercises the new inline getVariables() in WorkflowContextManager.
+  # The old code called StepIoService.getDataSetVariables(); the new code
+  # iterates getAllStepExecutions() and calls read(step.id, 'output') directly.
+  - name: init_vars
+    type: data.set
+    with:
+      env: production
+      threshold: 100
+
+  - name: check_vars
+    type: console
+    with:
+      message: 'env={{variables.env}} threshold={{variables.threshold}}'
+
+  # ── 2. Linear output passing ───────────────────────────────────────────────
+  # write(id, 'output', value, bytes) routes to both LRU cache and state.
+  # read(id, 'output') at check_vars returns the cached value without touching ES.
+  - name: produce
+    type: data.set
+    with:
+      result: computed-value
+
+  - name: consume
+    type: console
+    with:
+      message: 'got={{steps.produce.output.result}}'
+
+  # ── 3. foreach — scope-stack entries rehydrated uniformly ─────────────────
+  # Old code: pinForeachSource / unpinForeachScope on enter/exit.
+  # New code: computeRehydrationTargets walks the scope stack uniformly.
+  # Each iteration reads the loop-source step output via the scope-stack path.
+  - name: process_items
+    type: foreach
+    foreach: '["alpha", "beta", "gamma"]'
+    steps:
+      - name: handle_item
+        type: console
+        with:
+          message: 'item={{foreach.item}} env={{variables.env}} produce_result={{steps.produce.output.result}}'
+
+  # ── 4. while — stale iteration outputs evicted by LRU recency ─────────────
+  # Old code: evictStaleLoopOutputs called on exit-while, loop-break, loop-continue.
+  # New code: nothing — the LRU evicts by recency automatically.
+  - name: count_init
+    type: data.set
+    with:
+      count: 0
+
+  - name: count_loop
+    type: while
+    condition: '${{variables.count > 3}}'
+    max-iterations: 5
+    steps:
+      - name: increment
+        type: data.set
+        with:
+          count: '{{variables.count | plus: 1}}'
+
+  - name: after_loop
+    type: console
+    with:
+      message: 'final count={{variables.count}}'
+
+  # ── 5. pause — forces cold-cache resume ────────────────────────────────────
+  # On resume: WorkflowExecutionState.load() fetches step docs with
+  # excludeFields: ['output']. The LRU cache is empty (new StepIoService instance).
+  # prepareForRead detects cache misses and calls getStepExecutionsByIds to
+  # rehydrate the outputs needed by `summary` below.
+  - name: pause
+    type: wait
+    with:
+      duration: 7s
+
+  # ── 6. summary — reads across all prior steps after cold-cache resume ──────
+  # prepareForRead rehydrates produce and increment outputs from ES.
+  # Variables (data.set) are loaded via state; foreach/while contexts are gone.
+  - name: summary
+    type: console
+    with:
+      message: >
+        env={{variables.env}}
+        threshold={{variables.threshold}}
+        produce_result={{steps.produce.output.result}}
+        final_count={{variables.count}}

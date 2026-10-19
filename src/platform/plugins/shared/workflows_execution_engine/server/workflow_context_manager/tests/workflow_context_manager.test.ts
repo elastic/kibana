@@ -109,6 +109,24 @@ describe('WorkflowContextManager', () => {
       .fn()
       .mockReturnValue({} as EsWorkflowStepExecution);
     workflowExecutionState.getAllStepExecutions = jest.fn().mockReturnValue([]);
+    workflowExecutionState.getWorkflowExecutionId = jest.fn().mockReturnValue('test-execution-id');
+    workflowExecutionState.getWorkflowExecutionScopeStack = jest.fn().mockReturnValue([]);
+    // Fixtures mocked through `getAllStepExecutions` often omit `id`; synthesize a stable one so
+    // the service mock can resolve their baked-in output by id.
+    const withFixtureId = <T extends { id?: string; globalExecutionIndex?: number }>(
+      exec: T,
+      index: number
+    ): T & { id: string; input?: unknown; output?: unknown } => ({
+      ...exec,
+      id: exec.id ?? `fixture_${exec.globalExecutionIndex ?? index}`,
+    });
+    // Tests mock `getAllStepExecutions`; derive the data.set index from it.
+    workflowExecutionState.getDataSetStepExecutions = jest.fn(() =>
+      workflowExecutionState
+        .getAllStepExecutions()
+        .map(withFixtureId)
+        .filter((exec) => exec.stepType === 'data.set')
+    );
 
     // Service is sovereign over IO. The mock keeps its own input/output
     // maps but also falls back to reading IO directly off the state mock
@@ -123,19 +141,36 @@ describe('WorkflowContextManager', () => {
       const exec = workflowExecutionState.getStepExecution(id) as
         | { input?: unknown; output?: unknown }
         | undefined;
-      return exec?.[field];
+      if (exec?.[field] !== undefined) return exec[field];
+      return workflowExecutionState
+        .getAllStepExecutions()
+        .map(withFixtureId)
+        .find((candidate) => candidate.id === id)?.[field];
     };
+    // The mocked service writes bypass state, so track an IO version for the variables memo.
+    let ioVersion = 0;
+    workflowExecutionState.getDataSetStepExecutionCount = jest.fn(
+      () => workflowExecutionState.getDataSetStepExecutions().length
+    );
+    workflowExecutionState.getStepIoVersion = jest.fn(() => ioVersion);
     const stepIoService = {
       hasEvictedOutputs: jest.fn().mockReturnValue(false),
-      prepareForRead: jest.fn().mockResolvedValue(undefined),
+      rehydrate: jest.fn().mockResolvedValue(undefined),
       rehydrateOutputs: jest.fn().mockResolvedValue(undefined),
       releaseReadPins: jest.fn(),
       releaseTransientlyRehydratedOutputs: jest.fn(),
-      setStepInput: jest.fn((id: string, input: unknown) => stepInputs.set(id, input)),
-      setStepOutput: jest.fn((id: string, output: unknown) => stepOutputs.set(id, output)),
+      setStepInput: jest.fn((id: string, input: unknown) => {
+        ioVersion++;
+        return stepInputs.set(id, input);
+      }),
+      setStepOutput: jest.fn((id: string, output: unknown) => {
+        ioVersion++;
+        return stepOutputs.set(id, output);
+      }),
       getStepInput: jest.fn((id: string) => readIo(id, 'input')),
       getStepOutput: jest.fn((id: string) => readIo(id, 'output')),
       getStepError: jest.fn((id: string) => workflowExecutionState.getStepExecution(id)?.error),
+      read: jest.fn((id: string, type: 'input' | 'output') => readIo(id, type)),
       getLatestStepIO: jest.fn((stepId: string) => {
         const latest = workflowExecutionState.getLatestStepExecution(stepId) as
           | { id?: string; input?: unknown; output?: unknown; error?: unknown }
@@ -2088,26 +2123,15 @@ describe('WorkflowContextManager', () => {
       testContainer = createTestContainer(workflow);
     });
 
-    // ensureContextReady is a thin pass-through to stepIoService.prepareForRead.
-    // The full coverage of static-analysis branches (targeted vs. fallback,
-    // scope-stack walk, no-op when nothing evicted) lives in
-    // step_io_service.test.ts where prepareForRead is exercised directly.
-    it('delegates to stepIoService.prepareForRead with the current node', async () => {
+    // ensureContextReady resolves rehydration targets (via resolveRehydrationTargets)
+    // and then delegates the actual cache-miss fetch to stepIoService.rehydrate.
+    // Full coverage of the static-analysis branches lives in the
+    // resolveRehydrationTargets unit tests.
+    it('delegates to stepIoService.rehydrate with resolved IDs', async () => {
       await testContainer.underTest.ensureContextReady();
 
-      expect(testContainer.stepIoService.prepareForRead).toHaveBeenCalledWith(
-        expect.objectContaining({ node: testContainer.underTest.node })
-      );
-    });
-
-    it('passes a predecessorsResolver that returns predecessors from the graph', async () => {
-      await testContainer.underTest.ensureContextReady();
-
-      const args = (testContainer.stepIoService.prepareForRead as jest.Mock).mock.calls[0][0];
-      expect(typeof args.predecessorsResolver).toBe('function');
-      // Resolver delegates to graph.getAllPredecessors — for step_a (no
-      // predecessors) the resolver returns [].
-      expect(args.predecessorsResolver(testContainer.underTest.node)).toEqual([]);
+      // step_a has no predecessors and no scope-stack frames → empty output and input ID sets.
+      expect(testContainer.stepIoService.rehydrate).toHaveBeenCalledWith([], []);
     });
   });
 

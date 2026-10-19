@@ -41,11 +41,10 @@ describe('workflowExecutionLoop', () => {
     },
     workflowExecutionState: {
       updateWorkflowExecution: jest.fn(),
+      flushWorkflowAndSteps: jest.fn().mockResolvedValue(undefined),
     },
     stepIoService: {
-      flush: jest.fn().mockResolvedValue(undefined),
-      // Workflow-end safety release added with the deferred-release pattern.
-      releaseTransientlyRehydratedOutputs: jest.fn(),
+      rehydrate: jest.fn().mockResolvedValue(undefined),
     },
     workflowLogger: {
       logWarn: jest.fn(),
@@ -74,9 +73,7 @@ describe('workflowExecutionLoop', () => {
     expect(flushState).toHaveBeenCalled();
     expect(params.workflowExecutionCursor.start).toHaveBeenCalled();
     expect(params.workflowRuntime.saveState).toHaveBeenCalled();
-    expect(params.stepIoService.flush).toHaveBeenCalled();
-    // Workflow-end cleanup for transient rehydrations (deferred-release pattern).
-    expect(params.stepIoService.releaseTransientlyRehydratedOutputs).toHaveBeenCalled();
+    expect(params.workflowExecutionState.flushWorkflowAndSteps).toHaveBeenCalled();
     expect(params.eventQueue.flush).toHaveBeenCalled();
   });
 
@@ -132,7 +129,7 @@ describe('workflowExecutionLoop', () => {
       workflowLogFlushSignal: params.signal,
     });
     expect(params.workflowRuntime.saveState).toHaveBeenCalled();
-    expect(params.stepIoService.flush).toHaveBeenCalled();
+    expect(params.workflowExecutionState.flushWorkflowAndSteps).toHaveBeenCalled();
     expect(params.eventQueue.flush).toHaveBeenCalledWith({
       signal: params.signal,
     });
