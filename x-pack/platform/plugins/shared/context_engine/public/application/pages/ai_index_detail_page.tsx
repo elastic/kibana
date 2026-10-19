@@ -21,7 +21,6 @@ import {
   MemoryPanel,
   SignalsPanel,
   SourcesPanel,
-  TracesPanel,
 } from '../components/ai_index_detail';
 import { ListKiPanel } from '../components/ki';
 import { useAiIndex } from '../hooks/use_ai_index';
@@ -199,13 +198,6 @@ export const AiIndexDetailPage = () => {
           <MemoryPanel isLoading={isLoading} aiIndex={aiIndex} onSaved={refetch} />
         </>
       )}
-      <EuiSpacer size="m" />
-      <TracesPanel
-        isLoading={isLoading}
-        aiIndex={aiIndex}
-        onSaved={refetch}
-        isManaged={!!aiIndex?.managed}
-      />
       <EuiSpacer size="m" />
       <SourcesPanel
         isLoading={isLoading}
