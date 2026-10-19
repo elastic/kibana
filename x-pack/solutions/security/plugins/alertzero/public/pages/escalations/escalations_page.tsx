@@ -130,7 +130,10 @@ export const EscalationsPage: React.FC = () => {
 
   const openIsEmpty = !entityFilter && openQuery.data?.pagination.total === 0;
   // Stable element so the memoized queue is not re-rendered by unrelated page updates.
-  const openNote = useMemo(() => <EscalationsOpenNote isEmpty={openIsEmpty} />, [openIsEmpty]);
+  const openNote = useMemo(
+    () => (openIsEmpty ? <EscalationsOpenNote /> : undefined),
+    [openIsEmpty]
+  );
 
   const isLoading = openQuery.isLoading || closedQuery.isLoading;
   const hasAnyData = openQuery.data ?? closedQuery.data;
