@@ -9,9 +9,9 @@ import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiCode, EuiTextColor } from '@elastic/eui';
-import { endpointActionResponseCodes } from '../../endpoint_responder/lib/endpoint_action_response_codes';
-import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
-import type { KillProcessActionOutputContent } from '../../../../../common/endpoint/types';
+import { endpointActionResponseCodes } from '../../../../../../endpoint_responder/lib/endpoint_action_response_codes';
+import { useTestIdGenerator } from '../../../../../../../hooks/use_test_id_generator';
+import type { KillProcessActionOutputContent } from '../../../../../../../../../common/endpoint/types';
 
 const KILLED_LABEL = i18n.translate(
   'xpack.securitySolution.management.killProcessActionResult.killedLabel',

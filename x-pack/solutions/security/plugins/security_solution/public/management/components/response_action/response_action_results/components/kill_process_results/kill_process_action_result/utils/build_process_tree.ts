@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KilledProcessDescendant } from '../../../../../common/endpoint/types';
+import type { KilledProcessDescendant } from '../../../../../../../../../common/endpoint/types';
 
 export interface ProcessTreeNode {
   /** The process data for this PID that was provided on input */

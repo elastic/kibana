@@ -11,11 +11,11 @@ import type {
   KillProcessActionOutputContent,
   ResponseActionParametersWithProcessData,
   SuspendProcessActionOutputContent,
-} from '../../../../common/endpoint/types';
-import type { AppContextTestRender } from '../../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
-import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
-import { RESPONSE_ACTION_STATUS } from '../../common/translations';
+} from '../../../../../../../../common/endpoint/types';
+import type { AppContextTestRender } from '../../../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../../../common/mock/endpoint';
+import { EndpointActionGenerator } from '../../../../../../../../common/endpoint/data_generators/endpoint_action_generator';
+import { RESPONSE_ACTION_STATUS } from '../../../../../../common/translations';
 import type { KillSuspendProcessActionResultProps } from './kill_process_action_result';
 import { KillSuspendProcessActionResult } from './kill_process_action_result';
 

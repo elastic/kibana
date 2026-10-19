@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
-import type { AppContextTestRender } from '../../../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
-import { EndpointActionGenerator } from '../../../../../common/endpoint/data_generators/endpoint_action_generator';
-import type { KilledProcessDescendant } from '../../../../../common/endpoint/types';
+import type { AppContextTestRender } from '../../../../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../../../../common/mock/endpoint';
+import { EndpointActionGenerator } from '../../../../../../../../../common/endpoint/data_generators/endpoint_action_generator';
+import type { KilledProcessDescendant } from '../../../../../../../../../common/endpoint/types';
 import type { ProcessTreeProps } from './process_tree';
 import { ProcessTree } from './process_tree';
-import { endpointActionResponseCodes } from '../../endpoint_responder/lib/endpoint_action_response_codes';
+import { endpointActionResponseCodes } from '../../../../../../endpoint_responder/lib/endpoint_action_response_codes';
 
 describe('ProcessTree', () => {
   const testPrefix = 'test';

@@ -19,7 +19,7 @@ import { EndpointUploadActionResult } from '../../endpoint_upload_action_result'
 import { GetFileResults } from './components/get_file_results';
 import { IsolationResults } from './components/isolation_results';
 import type { ResponseActionResultsProps } from './types';
-import { KillSuspendProcessActionResult } from '../../kill_process_action_result';
+import { KillSuspendProcessActionResult } from './components/kill_process_results/kill_process_action_result';
 import { OUTPUT_MESSAGES } from '../../endpoint_response_actions_list/translations';
 import { KeyValueDisplay } from '../../key_value_display';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';

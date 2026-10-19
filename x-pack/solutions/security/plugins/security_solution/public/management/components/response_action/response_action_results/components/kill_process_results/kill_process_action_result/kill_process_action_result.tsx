@@ -12,17 +12,17 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { ProcessTree } from './components/process_tree';
 import { ProcessResult } from './components/process_result';
-import { RESPONSE_ACTION_STATUS } from '../../common/translations';
-import { EndpointActionFailureMessage } from '../endpoint_action_failure_message';
-import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
-import { getAgentActionState } from '../response_action/response_action_results/utils';
+import { RESPONSE_ACTION_STATUS } from '../../../../../../common/translations';
+import { EndpointActionFailureMessage } from '../../../../../endpoint_action_failure_message';
+import { useTestIdGenerator } from '../../../../../../hooks/use_test_id_generator';
+import { getAgentActionState } from '../../../utils';
 import type {
   ActionDetails,
   KillProcessActionOutputContent,
   MaybeImmutable,
   ResponseActionParametersWithProcessData,
   SuspendProcessActionOutputContent,
-} from '../../../../common/endpoint/types';
+} from '../../../../../../../../common/endpoint/types';
 
 export interface KillSuspendProcessActionResultProps {
   action: MaybeImmutable<

@@ -6,7 +6,7 @@
  */
 
 import { buildProcessTree } from './build_process_tree';
-import type { KilledProcessDescendant } from '../../../../../common/endpoint/types';
+import type { KilledProcessDescendant } from '../../../../../../../../../common/endpoint/types';
 
 describe('buildProcessTree()', () => {
   let descendants: KilledProcessDescendant[];

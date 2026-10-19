@@ -12,8 +12,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { ProcessResult } from './process_result';
 import type { ProcessTreeNode } from '../utils/build_process_tree';
 import { buildProcessTree } from '../utils/build_process_tree';
-import type { KilledProcessDescendant } from '../../../../../common/endpoint/types';
-import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
+import type { KilledProcessDescendant } from '../../../../../../../../../common/endpoint/types';
+import { useTestIdGenerator } from '../../../../../../../hooks/use_test_id_generator';
 
 const TreeNodeConnector = styled.div`
   .top,
