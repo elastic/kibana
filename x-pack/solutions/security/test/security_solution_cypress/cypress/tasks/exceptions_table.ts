@@ -44,7 +44,7 @@ import {
   INCLUDE_EXPIRED_EXCEPTION_ITEMS_SWITCH,
   LINKED_RULES_BADGE,
   MANAGE_EXCEPTION_CREATE_BUTTON_EXCEPTION,
-  MANAGE_EXCEPTION_CREATE_BUTTON_MENU,
+  MANAGE_EXCEPTION_MENU_DROPDOWN,
   MANAGE_EXCEPTION_CREATE_LIST_BUTTON,
   MANAGE_RULES_SAVE,
   RULE_ACTION_LINK_RULE_SWITCH,
@@ -254,8 +254,8 @@ export const validateSharedListLinkedRules = (
 };
 
 export const addExceptionListFromSharedExceptionListHeaderMenu = () => {
-  // Click on "Create shared exception list" button on the header
-  cy.get(MANAGE_EXCEPTION_CREATE_BUTTON_MENU).click();
+  // Open the create menu from the chevron of the "Create shared exception list" split button
+  cy.get(MANAGE_EXCEPTION_MENU_DROPDOWN).click();
   // Click on "Create exception item"
   cy.get(MANAGE_EXCEPTION_CREATE_BUTTON_EXCEPTION).click();
 };

@@ -164,7 +164,7 @@ export const EXCEPTION_COMMENTS_ACCORDION_BTN = '[data-test-subj="exceptionItemC
 export const EXCEPTION_COMMENT_TEXT_AREA = '[data-test-subj="newExceptionItemCommentTextArea"]';
 
 // Shared Exception List Management Page
-export const MANAGE_EXCEPTION_CREATE_BUTTON_MENU =
+export const MANAGE_EXCEPTION_MENU_DROPDOWN =
   '[data-test-subj="manageExceptionListCreateButton-secondary-button"]';
 
 export const MANAGE_EXCEPTION_CREATE_BUTTON_EXCEPTION =
