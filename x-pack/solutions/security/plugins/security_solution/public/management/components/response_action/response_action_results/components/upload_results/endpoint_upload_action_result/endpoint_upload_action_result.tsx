@@ -12,7 +12,7 @@ import type { EuiTextProps } from '@elastic/eui';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
-import { EndpointActionFailureMessage } from '../../../../../endpoint_action_failure_message';
+import { EndpointActionFailureMessage } from '../../endpoint_action_failure_message';
 import type {
   ActionDetails,
   ResponseActionUploadOutputContent,

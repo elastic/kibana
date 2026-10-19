@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import type { ActionDetails, MaybeImmutable } from '../../../../common/endpoint/types';
-import type { AppContextTestRender } from '../../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
-import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
+import type { ActionDetails, MaybeImmutable } from '../../../../../../../common/endpoint/types';
+import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
+import { EndpointActionGenerator } from '../../../../../../../common/endpoint/data_generators/endpoint_action_generator';
 import { EndpointActionFailureMessage } from './endpoint_action_failure_message';
 
 describe('EndpointActionFailureMessage', () => {

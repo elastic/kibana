@@ -12,7 +12,7 @@ import { EuiAccordion, EuiBasicTable, EuiSpacer, EuiText, useGeneratedHtmlId } f
 import styled from '@emotion/styled';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/css';
-import { EndpointActionFailureMessage } from '../../../../../endpoint_action_failure_message';
+import { EndpointActionFailureMessage } from '../../endpoint_action_failure_message';
 import { useUserPrivileges } from '../../../../../../../common/components/user_privileges';
 import { useTestIdGenerator } from '../../../../../../hooks/use_test_id_generator';
 import { ResponseActionFileDownloadLink } from '../../response_action_file_download_link';

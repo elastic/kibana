@@ -9,13 +9,13 @@ import React, { memo, useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { UX_MESSAGES } from '../endpoint_response_actions_list/translations';
-import { getEmptyValue } from '../../../common/components/empty_value';
-import { endpointActionResponseCodes } from '../endpoint_responder/lib/endpoint_action_response_codes';
-import type { ActionDetails, MaybeImmutable } from '../../../../common/endpoint/types';
-import { KeyValueDisplay } from '../key_value_display';
-import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
-import { getAgentActionState } from '../response_action/response_action_results/utils';
+import { UX_MESSAGES } from '../../../../endpoint_response_actions_list/translations';
+import { getEmptyValue } from '../../../../../../common/components/empty_value';
+import { endpointActionResponseCodes } from '../../../../endpoint_responder/lib/endpoint_action_response_codes';
+import type { ActionDetails, MaybeImmutable } from '../../../../../../../common/endpoint/types';
+import { KeyValueDisplay } from '../../../../key_value_display';
+import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
+import { getAgentActionState } from '../../utils';
 
 const emptyValue = getEmptyValue();
 

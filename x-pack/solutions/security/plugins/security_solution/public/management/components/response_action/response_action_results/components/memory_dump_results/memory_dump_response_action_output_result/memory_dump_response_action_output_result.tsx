@@ -34,7 +34,7 @@ import type {
   ResponseActionMemoryDumpOutputContent,
   ResponseActionMemoryDumpParameters,
 } from '../../../../../../../../common/endpoint/types';
-import { EndpointActionFailureMessage } from '../../../../../endpoint_action_failure_message';
+import { EndpointActionFailureMessage } from '../../endpoint_action_failure_message';
 import { getAgentActionState } from '../../../utils';
 
 export interface MemoryDumpResponseActionOutputResultProps {

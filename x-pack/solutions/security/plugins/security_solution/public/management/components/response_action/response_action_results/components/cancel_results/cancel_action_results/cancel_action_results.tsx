@@ -16,7 +16,7 @@ import type {
 } from '../../../../../../../../common/endpoint/types';
 import { useTestIdGenerator } from '../../../../../../hooks/use_test_id_generator';
 import { RESPONSE_ACTION_STATUS } from '../../../../../../common/translations';
-import { EndpointActionFailureMessage } from '../../../../../endpoint_action_failure_message';
+import { EndpointActionFailureMessage } from '../../endpoint_action_failure_message';
 import { endpointActionResponseCodes } from '../../../../../endpoint_responder/lib/endpoint_action_response_codes';
 import { getAgentActionState } from '../../../utils';
 

@@ -6,4 +6,4 @@
  */
 
 // TODO:PT move component to this new location and refactor it
-export * from '../../../endpoint_action_failure_message';
+export * from './endpoint_action_failure_message';
