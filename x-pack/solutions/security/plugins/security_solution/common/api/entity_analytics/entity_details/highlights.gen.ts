@@ -31,7 +31,7 @@ export const EntityDetailsHighlightsRequestBody = lazySchema(() =>
      */
     entityIdentifier: z
       .string()
-      .max(200)
+      .max(1024)
       .describe(
         'The identifier of the entity (its Entity Store `entity.id` when Entity Store v2 is enabled).'
       ),
