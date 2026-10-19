@@ -40,7 +40,8 @@ describe('ParamValueField', () => {
         isEditingItem={{
           id: 'p1',
           key: 'apiKey',
-          source: { type: 'vault', path: 'app/api', field: 'key' },
+          value: '',
+          source: { type: 'vault', path: 'app/api', field: 'key', connection: 'prod' },
         }}
       />
     );

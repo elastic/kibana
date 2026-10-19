@@ -10,6 +10,7 @@ import {
   formatSyntheticsPolicy,
   selectSecretConnections,
   VAULT_PACKAGE_UPGRADE_MESSAGE,
+  VAULT_SECRET_STORAGE_DISABLED_MESSAGE,
 } from './format_synthetics_policy';
 import { SecretConnectionError, type HeartbeatVaultConfig } from '../../get_secret_connection';
 import { ConfigKey, MonitorTypeEnum } from '../../../../common/runtime_types';
@@ -169,5 +170,20 @@ describe('formatSyntheticsPolicy vault secret_stores', () => {
     expect(() => format('vault://prod@a#b', [conn('prod')], buildPolicy(false))).toThrow(
       VAULT_PACKAGE_UPGRADE_MESSAGE
     );
+  });
+
+  it('fails closed when Fleet secret storage is disabled', () => {
+    expect(() =>
+      formatSyntheticsPolicy(
+        buildPolicy(),
+        MonitorTypeEnum.HTTP,
+        { [ConfigKey.NAME]: 'm1', [ConfigKey.PASSWORD]: 'vault://prod@a#b' },
+        {},
+        [],
+        false,
+        [conn('prod')],
+        false
+      )
+    ).toThrow(VAULT_SECRET_STORAGE_DISABLED_MESSAGE);
   });
 });

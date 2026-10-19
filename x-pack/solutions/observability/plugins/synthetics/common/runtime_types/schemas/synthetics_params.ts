@@ -16,8 +16,8 @@ export const SyntheticsParamVaultSourceCodec = lazySchema(() =>
     type: z.literal('vault'),
     path: z.string(),
     field: z.string(),
-    // Name of the Vault connection to resolve against; always set by the routes.
-    connection: z.string().optional(),
+    // Name of the Vault connection to resolve the secret with.
+    connection: z.string(),
   })
 );
 

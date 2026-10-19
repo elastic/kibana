@@ -107,7 +107,8 @@ export const formatSyntheticsPolicy = (
   params: Record<string, string>,
   mws: MaintenanceWindow[],
   isLegacy?: boolean,
-  secretConnections?: HeartbeatVaultConfig[]
+  secretConnections?: HeartbeatVaultConfig[],
+  secretStorageEnabled = true
 ) => {
   const resolvedConfig = resolveHttpAuthParams(config, params);
   const configKeys = Object.keys(resolvedConfig) as ConfigKey[];
@@ -235,8 +236,8 @@ export const formatSyntheticsPolicy = (
     formattedPolicy.inputs = formattedPolicy.inputs.filter((input) => input.enabled);
   }
 
-  // Vault: when this monitor references a vault secret (vault://[<name>@]<path>#<field>
-  // in any resolved field) attach the one connection it uses to the `secret_stores`
+  // Vault: when this monitor references a vault secret (vault://<name>@<path>#<field>
+  // in any resolved field) attach the connections it uses to the `secret_stores`
   // var, base64-encoded. That var is `secret: true` in the package, so Fleet stores
   // it as a Fleet secret and the compiled policy carries only a
   // $co.elastic.secret{...} reference.
@@ -244,6 +245,10 @@ export const formatSyntheticsPolicy = (
     const secretStoresItem = dataStream.vars?.secret_stores;
     if (!secretStoresItem) {
       throw new Error(VAULT_PACKAGE_UPGRADE_MESSAGE);
+    }
+    // Without Fleet secret storage the var would be stored (and shipped) in plaintext.
+    if (secretConnections && !secretStorageEnabled) {
+      throw new Error(VAULT_SECRET_STORAGE_DISABLED_MESSAGE);
     }
     // `undefined` means no connections were loaded for this call (inspect path); an empty
     // list is real, so an unknown connection fails instead of being dropped.
