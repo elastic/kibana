@@ -50,10 +50,7 @@ function isDurationInterval(i: any): i is moment.Duration {
   return moment.isDuration(i) && Boolean(+i);
 }
 
-function resolveIanaTimeZone(
-  min: TimeRangeBounds['min'],
-  configuredTz?: string
-): IanaTimeZone {
+function resolveIanaTimeZone(min: TimeRangeBounds['min'], configuredTz?: string): IanaTimeZone {
   if (configuredTz) {
     return ianaTimeZoneOrUtc(configuredTz);
   }
