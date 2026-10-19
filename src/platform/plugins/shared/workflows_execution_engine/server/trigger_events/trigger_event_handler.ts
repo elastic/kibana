@@ -32,8 +32,8 @@ import { findMatchingWorkflowTrigger } from './filter_workflows_by_trigger_condi
 import { resolveWorkflowEventsModeFromOn } from './lib/resolve_workflow_events_mode_from_on';
 import { groupSubscribedWorkflows, matchSubscriptionGroups } from './subscription_groups';
 import {
-  SubscriptionResolutionCache,
   type SubscriptionCacheGroup,
+  SubscriptionResolutionCache,
 } from './subscription_resolution_cache';
 import {
   createEmptyTriggerScheduleStats,
