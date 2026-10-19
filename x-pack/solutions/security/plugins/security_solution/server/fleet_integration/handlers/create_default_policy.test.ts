@@ -263,6 +263,7 @@ describe('Create Default Policy tests ', () => {
       const policy = await createDefaultPolicyCallback(config, {
         ...experimentalFeatures,
         perOsPolicySettings: true,
+        registryCredentialHardening: true,
       });
       const license = 'platinum';
       const isCloud = true;
@@ -286,6 +287,7 @@ describe('Create Default Policy tests ', () => {
       const policy = await createDefaultPolicyCallback(config, {
         ...experimentalFeatures,
         perOsPolicySettings: true,
+        registryCredentialHardening: true,
       });
       const license = 'enterprise';
       const isCloud = true;
@@ -862,6 +864,115 @@ describe('Create Default Policy tests ', () => {
           expectCustomYaraSignaturesAbsent(policy);
         }
       );
+    });
+  });
+
+  describe('Registry credential hardening gating', () => {
+    const edrCompleteConfig: PolicyCreateEndpointConfig = {
+      type: 'endpoint',
+      endpointConfig: { preset: 'EDRComplete' },
+    };
+    const edrEssentialConfig: PolicyCreateEndpointConfig = {
+      type: 'endpoint',
+      endpointConfig: { preset: 'EDREssential' },
+    };
+    const ngavConfig: PolicyCreateEndpointConfig = {
+      type: 'endpoint',
+      endpointConfig: { preset: 'NGAV' },
+    };
+    const dataCollectionConfig: PolicyCreateEndpointConfig = {
+      type: 'endpoint',
+      endpointConfig: { preset: 'DataCollection' },
+    };
+    const cloudConfig: PolicyCreateCloudConfig = { type: 'cloud' };
+
+    const enabledExperimentalFeatures: ExperimentalFeatures = {
+      ...experimentalFeatures,
+      registryCredentialHardening: true,
+    };
+
+    const getRegistryCredentialHardening = (policy: PolicyConfig) =>
+      policy.windows.attack_surface_reduction.registry_credential_hardening;
+
+    it.each<[name: string, config: AnyPolicyCreateConfig]>([
+      ['EDRComplete', edrCompleteConfig],
+      ['EDREssential', edrEssentialConfig],
+      ['NGAV', ngavConfig],
+    ])(
+      'should enable registry credential hardening for the %s preset on Enterprise when the flag and product feature are on',
+      async (_name, config) => {
+        licenseEmitter.next(Enterprise);
+
+        const policy = await createDefaultPolicyCallback(config, enabledExperimentalFeatures);
+
+        expect(getRegistryCredentialHardening(policy)).toEqual({ enabled: true });
+      }
+    );
+
+    it.each<[name: string, config: AnyPolicyCreateConfig]>([
+      ['DataCollection', dataCollectionConfig],
+      ['cloud', cloudConfig],
+    ])(
+      'should disable registry credential hardening for the %s preset on Enterprise when the flag and product feature are on',
+      async (_name, config) => {
+        licenseEmitter.next(Enterprise);
+
+        const policy = await createDefaultPolicyCallback(config, enabledExperimentalFeatures);
+
+        expect(getRegistryCredentialHardening(policy)).toEqual({ enabled: false });
+      }
+    );
+
+    it('should disable registry credential hardening for the EDRComplete preset on a Platinum license', async () => {
+      const policy = await createDefaultPolicyCallback(
+        edrCompleteConfig,
+        enabledExperimentalFeatures
+      );
+
+      expect(getRegistryCredentialHardening(policy)).toEqual({ enabled: false });
+    });
+
+    it('should omit registry credential hardening when the experimental flag is off', async () => {
+      licenseEmitter.next(Enterprise);
+
+      const policy = await createDefaultPolicyCallback(edrCompleteConfig, {
+        ...experimentalFeatures,
+        registryCredentialHardening: false,
+      });
+
+      expect(getRegistryCredentialHardening(policy)).toBeUndefined();
+    });
+
+    it('should omit registry credential hardening when the endpointRegistryCredentialHardening product feature is off', async () => {
+      licenseEmitter.next(Enterprise);
+      productFeaturesService = createProductFeaturesServiceMock(
+        ALL_PRODUCT_FEATURE_KEYS.filter(
+          (key) => key !== ProductFeatureSecurityKey.endpointRegistryCredentialHardening
+        )
+      );
+
+      const policy = await createDefaultPolicyCallback(
+        edrCompleteConfig,
+        enabledExperimentalFeatures
+      );
+
+      expect(getRegistryCredentialHardening(policy)).toBeUndefined();
+    });
+
+    it('should not enable registry credential hardening when the endpointPolicyProtections product feature is off (serverless)', async () => {
+      licenseEmitter.next(Enterprise);
+      productFeaturesService = createProductFeaturesServiceMock(
+        ALL_PRODUCT_FEATURE_KEYS.filter(
+          (key) => key !== ProductFeatureSecurityKey.endpointPolicyProtections
+        )
+      );
+
+      const policy = await createDefaultPolicyCallback(
+        edrCompleteConfig,
+        enabledExperimentalFeatures
+      );
+
+      expect(getRegistryCredentialHardening(policy)?.enabled).not.toBe(true);
     });
   });
 

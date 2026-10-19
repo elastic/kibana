@@ -41,8 +41,9 @@ export interface UseEntityGridDataOptions {
 }
 
 /** The scope of a view's queries; the grid rows (`page`) unless told otherwise. */
-export const getKeyScope = ({ keyScope = 'page' }: UseEntityGridDataOptions): EntityGridKeyScope =>
-  keyScope;
+export const getKeyScope = ({
+  keyScope = 'page',
+}: Pick<UseEntityGridDataOptions, 'keyScope'>): EntityGridKeyScope => keyScope;
 
 const ENTITIES_INDEX_UNAVAILABLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.home.entitiesGrid.entitiesIndexUnavailable',

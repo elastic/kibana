@@ -10,7 +10,7 @@ paths:
       x-codegen-enabled: true
       operationId: GetAnomalyOverview
       summary: Get anomaly overview for an entity
-      description: Returns time-bucketed anomaly counts and tactic distribution for a given entity.
+      description: Returns time-bucketed anomaly counts and tactic distribution for a given entity. In `resolved` mode the entity's resolution group is combined.
       parameters:
         - name: entity_type
           in: path
@@ -26,6 +26,7 @@ paths:
             type: string
             minLength: 1
             maxLength: 1000
+          description: Entity Store id (`entity.id`) of the target entity
       requestBody:
         required: true
         content:
@@ -75,7 +76,7 @@ paths:
       x-codegen-enabled: true
       operationId: GetAnomalySummary
       summary: Get anomaly summary for an entity
-      description: Queries ML anomaly records on demand, enriches them with baseline data, and returns results for a given entity.
+      description: Queries ML anomaly records on demand, enriches them with baseline data, and returns results for a given entity. In `resolved` mode the entity's resolution group is combined.
       parameters:
         - name: entity_type
           in: path
@@ -91,6 +92,7 @@ paths:
             type: string
             minLength: 1
             maxLength: 1000
+          description: Entity Store id (`entity.id`) of the target entity
       requestBody:
         required: true
         content:
@@ -178,9 +180,17 @@ components:
           maximum: 100
           description: Maximum record_score (exclusive); omit for an unbounded upper end
 
+    AnomalyEntityMode:
+      type: string
+      enum: [single, resolved]
+      description: Which Entity Store records the request covers. `single` queries the target entity only; `resolved` also includes every entity resolved to the target (its resolution group).
+
     AnomalySummaryRequestBody:
       type: object
       properties:
+        mode:
+          $ref: '#/components/schemas/AnomalyEntityMode'
+          default: single
         page:
           type: integer
           minimum: 1
@@ -240,6 +250,7 @@ components:
       type: object
       required:
         - recordId
+        - entityId
         - jobId
         - detectorIndex
         - detectorFunction
@@ -260,6 +271,10 @@ components:
           type: string
           maxLength: 200
           description: Elasticsearch document ID of the ML anomaly record
+        entityId:
+          type: string
+          maxLength: 200
+          description: Id of the Entity Store record this anomaly was matched to; in resolved mode this identifies which member of the resolution group it belongs to
         jobId:
           type: string
           maxLength: 150
@@ -375,6 +390,9 @@ components:
     AnomalyOverviewRequestBody:
       type: object
       properties:
+        mode:
+          $ref: '#/components/schemas/AnomalyEntityMode'
+          default: single
         from:
           type: integer
           format: int64

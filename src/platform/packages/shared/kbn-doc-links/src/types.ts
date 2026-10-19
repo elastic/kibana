@@ -132,6 +132,7 @@ export interface DocLinks {
     readonly connectorsConfluence: string;
     readonly connectorsContentExtraction: string;
     readonly connectorsDropbox: string;
+    readonly connectorsExchangeServer: string;
     readonly connectorsGithub: string;
     readonly connectorsGitlab: string;
     readonly connectorsGoogleCloudStorage: string;

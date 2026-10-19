@@ -155,16 +155,18 @@ describe('cells with a click handler', () => {
 });
 
 describe('RowActionsCell', () => {
-  const renderActions = () => {
+  const renderActions = ({ canAddToChat = true } = {}) => {
     const onInvestigateInTimeline = jest.fn();
     const onOpenEntityGraph = jest.fn();
+    const onAddToChat = jest.fn();
     renderInProviders(
       <RowActionsCell
         onInvestigateInTimeline={onInvestigateInTimeline}
         onOpenEntityGraph={onOpenEntityGraph}
+        onAddToChat={canAddToChat ? onAddToChat : undefined}
       />
     );
-    return { onInvestigateInTimeline, onOpenEntityGraph };
+    return { onInvestigateInTimeline, onOpenEntityGraph, onAddToChat };
   };
 
   it.each([
@@ -178,14 +180,26 @@ describe('RowActionsCell', () => {
 
   it('opens and closes the more actions menu', async () => {
     renderActions();
-    const moreActions = screen.getByRole('button', { name: 'More actions' });
+    const getMoreActions = () => screen.getByRole('button', { name: 'More actions' });
     expect(screen.queryByText('Add to chat')).not.toBeInTheDocument();
 
-    fireEvent.click(moreActions);
+    fireEvent.click(getMoreActions());
     expect(await screen.findByText('Add to chat')).toBeInTheDocument();
 
-    fireEvent.click(moreActions);
+    fireEvent.click(getMoreActions());
     await waitFor(() => expect(screen.queryByText('Add to chat')).not.toBeInTheDocument());
+  });
+
+  it('adds the entity to chat from the more actions menu', async () => {
+    const { onAddToChat } = renderActions();
+    fireEvent.click(screen.getByRole('button', { name: 'More actions' }));
+    fireEvent.click(await screen.findByText('Add to chat'));
+    expect(onAddToChat).toHaveBeenCalledTimes(1);
+  });
+
+  it('hides the more actions menu without the agent chat', () => {
+    renderActions({ canAddToChat: false });
+    expect(screen.queryByRole('button', { name: 'More actions' })).not.toBeInTheDocument();
   });
 });
 
