@@ -72,9 +72,10 @@ export function EsqlNotificationPopover({ api }: { api: EsqlNotificationActionAp
       <EuiFlexGroup
         direction="column"
         gutterSize="s"
-        css={css`
-          min-width: 300px;
-          max-height: 400px;
+        css={({ euiTheme }) => css`
+          min-width: calc(${euiTheme.size.xxxxl} * 5); // 320px
+          max-width: calc(${euiTheme.size.xxxxl} * 12); // 768px
+          max-height: calc(${euiTheme.size.xxxxl} * 6); // 384px
           overflow-y: auto;
         `}
       >
