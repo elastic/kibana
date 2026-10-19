@@ -76,6 +76,10 @@ describe('formatSyntheticsPolicy vault secret_stores', () => {
               vars: {
                 [ConfigKey.PASSWORD]: { type: 'text', value: null },
                 [ConfigKey.SOURCE_INLINE]: { type: 'text', value: null },
+                [ConfigKey.URLS]: { type: 'text', value: null },
+                [ConfigKey.NAME]: { type: 'text', value: null },
+                [ConfigKey.REQUEST_HEADERS_CHECK]: { type: 'yaml', value: null },
+                [ConfigKey.TLS_KEY]: { type: 'yaml', value: null },
                 ...(withSecretStores ? { secret_stores: { type: 'text', value: null } } : {}),
               },
             },
@@ -185,5 +189,50 @@ describe('formatSyntheticsPolicy vault secret_stores', () => {
         false
       )
     ).toThrow(VAULT_SECRET_STORAGE_DISABLED_MESSAGE);
+  });
+
+  describe('allowed fields', () => {
+    const formatConfig = (config: Record<string, unknown>) =>
+      formatSyntheticsPolicy(
+        buildPolicy(),
+        MonitorTypeEnum.HTTP,
+        { [ConfigKey.NAME]: 'm1', [ConfigKey.METADATA]: { is_tls_enabled: true }, ...config },
+        {},
+        [],
+        false,
+        [conn('prod')]
+      ).formattedPolicy.inputs[0].streams[0].vars ?? {};
+
+    it.each([
+      [ConfigKey.URLS, 'https://attacker.example/?k=vault://prod@a#b'],
+      [ConfigKey.NAME, 'vault://prod@a#b'],
+    ])('rejects a reference in %s', (key, value) => {
+      expect(() => formatConfig({ [key]: value })).toThrow(
+        new RegExp(`Vault reference in "${key}"`)
+      );
+    });
+
+    it('rejects a reference that arrives through a param in a disallowed field', () => {
+      expect(() =>
+        formatSyntheticsPolicy(
+          buildPolicy(),
+          MonitorTypeEnum.HTTP,
+          { [ConfigKey.NAME]: 'm1', [ConfigKey.URLS]: 'https://x/?k=${secret}' },
+          { secret: 'vault://prod@a#b' },
+          [],
+          false,
+          [conn('prod')]
+        )
+      ).toThrow(SecretConnectionError);
+    });
+
+    it.each([
+      [ConfigKey.PASSWORD, 'vault://prod@a#b'],
+      [ConfigKey.REQUEST_HEADERS_CHECK, { Authorization: 'Bearer vault://prod@a#b' }],
+      [ConfigKey.TLS_KEY, 'vault://prod@a#b'],
+    ])('allows a reference in %s', (key, value) => {
+      const vars = formatConfig({ [key]: value });
+      expect(decode(vars.secret_stores.value)[0].name).toBe('prod');
+    });
   });
 });

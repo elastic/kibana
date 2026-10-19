@@ -31,6 +31,25 @@ export const VAULT_PACKAGE_UPGRADE_MESSAGE =
   'Vault secret references require the Synthetics integration version 1.13.0 or later. Upgrade the Synthetics package in Fleet and try again.';
 
 /**
+ * The only fields a Vault reference may resolve in: credentials and request content, never
+ * where a request goes (url, hosts, proxy) or what is stored in results (name, tags). The TLS
+ * key material is only used locally by the agent.
+ */
+export const VAULT_REFERENCE_FIELDS: ReadonlySet<string> = new Set([
+  ConfigKey.USERNAME,
+  ConfigKey.PASSWORD,
+  ConfigKey.KERBEROS,
+  ConfigKey.NTLM,
+  ConfigKey.REQUEST_HEADERS_CHECK,
+  ConfigKey.REQUEST_BODY_CHECK,
+  ConfigKey.REQUEST_SEND_CHECK,
+  ConfigKey.PARAMS,
+  ConfigKey.TLS_CERTIFICATE,
+  ConfigKey.TLS_KEY,
+  ConfigKey.TLS_KEY_PASSPHRASE,
+]);
+
+/**
  * Picks the connections a monitor references, by name. Fails closed: a reference
  * without a connection name (`undefined`) or naming an unknown connection throws
  * instead of shipping the wrong credentials.
@@ -186,7 +205,17 @@ export const formatSyntheticsPolicy = (
   const referencedSecretConnections = new Set<string | undefined>();
   Object.entries(dataStream?.vars ?? {}).forEach(([key, item]) => {
     if (!item || key === ConfigKey.SOURCE_INLINE) return;
-    referencedConnectionNames(item.value).forEach((name) => referencedSecretConnections.add(name));
+    const names = referencedConnectionNames(item.value);
+    if (names.size > 0 && !VAULT_REFERENCE_FIELDS.has(key)) {
+      throw new SecretConnectionError(
+        `Monitor "${
+          config[ConfigKey.NAME] ?? ''
+        }" uses a Vault reference in "${key}". References are only allowed in: ${[
+          ...VAULT_REFERENCE_FIELDS,
+        ].join(', ')}`
+      );
+    }
+    names.forEach((name) => referencedSecretConnections.add(name));
   });
 
   // Heartbeat decodes inline scripts when source.inline.encoding=base64.
