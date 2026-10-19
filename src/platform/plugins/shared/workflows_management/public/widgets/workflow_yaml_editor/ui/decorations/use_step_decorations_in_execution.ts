@@ -62,7 +62,7 @@ export const useStepDecorationsInExecution = (
       // Glyph decoration for status icon - position at the dash line
       const glyphDecoration: monaco.editor.IModelDeltaDecoration = {
         range: new monaco.Range(stepInfo.lineStart, 1, stepInfo.lineStart, 1),
-        options: { linesDecorationsClassName: glyphClassNames.join(' ') },
+        options: { glyphMarginClassName: glyphClassNames.join(' ') },
       };
 
       // Only apply background decoration if the step is not nested
