@@ -17,7 +17,14 @@ export type HuntRunOutcome = 'completed' | 'partial' | 'failed';
 
 export type HuntCohort = 'golden' | 'hard' | 'canary' | 'holdout';
 
-/** Expected structural result for one report in a run. Scored by the CODE evaluators. */
+/**
+ * Expected structural result for one report in a run. Scored by the CODE evaluators.
+ *
+ * Omission convention: an optional field a row leaves out is unpinned. Its evaluator returns
+ * `N/A` and the judge is told the value is open. Absence is never implied by omission; it is
+ * pinned explicitly (`pendingProposals: 0`, `sseAttachment: false`, `investigationStatus:
+ * 'none'`), so a reader can tell "not measured" from "measured and expected to be nothing".
+ */
 export interface HuntReportExpectation {
   reportId: string;
   hasConfirmedHit: boolean;
@@ -25,8 +32,15 @@ export interface HuntReportExpectation {
   tier1Status?: HuntTier1Status;
   /** Whether any Tier 2 behavior executes. `false` for prose-only reports with nothing searchable. */
   tier2Executed?: boolean;
-  /** Expected number of pending `respond` Proposals attached to the report's Investigation. */
-  pendingProposals: number | { min: number };
+  /**
+   * Pending `respond` Proposals on the report's Investigation: an exact count, or a minimum of
+   * at least one. `0` means the run created no Proposal in any status, not merely none pending.
+   * Omit it where the count is genuinely out of scope (an IOC-only hit that may or may not carry
+   * an actionable principal, a multi-candidate row where convergence decides which Investigation
+   * holds the shared Proposal). `{ min: 0 }` is always true and is rejected by
+   * `src/dataset_contract.test.ts`.
+   */
+  pendingProposals?: number | { min: number };
   /**
    * Whether report `evidence[]` and `last_hunted_at` are written. The hunt child writes evidence
    * exactly when the coordinator result's `completed_successfully` is true (`write_evidence` in
@@ -52,7 +66,12 @@ export interface HuntExpected {
    * gated on the scope gate / skip reason / zero writes instead.
    */
   outcome?: HuntRunOutcome[];
-  /** Expected `incomplete_stage` when `partial`, e.g. `packaging`. */
+  /**
+   * Expected `incomplete_stage` for a run that does not complete, e.g. `hunt` or `packaging`.
+   * Checked only when the actual outcome is not `completed`, so a row that accepts `completed`
+   * or `partial` can still pin where a partial run is allowed to stop. Required on every row
+   * whose `outcome` admits `partial` (enforced by `src/dataset_contract.test.ts`).
+   */
   incompleteStage?: string;
   /** Whether the scope gate short-circuits before find-or-create (`index_scope_blocked`). */
   indexScopeBlocked: boolean;

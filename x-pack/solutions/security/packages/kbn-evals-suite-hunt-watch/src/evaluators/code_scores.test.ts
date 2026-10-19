@@ -55,10 +55,16 @@ const CLEAN_HUNT_RESULT: HuntResult = {
   },
 };
 
+const RUN_STARTED_AT = '2026-01-01T12:00:00.000Z';
+
+const proposalAt = (createdAt: string, status: ProposalWithMetadata['status']) =>
+  ({ id: `p-${createdAt}`, status, createdAt } as ProposalWithMetadata);
+
 const buildArtifacts = (report: Partial<HuntReportArtifacts> = {}): HuntArtifacts => ({
   spaceId: 'default',
   workflowExecutionId: 'w',
   executionStatus: 'completed',
+  runStartedAt: RUN_STARTED_AT,
   selectedIds: [REPORT_ID],
   skipped: [],
   pendingProposalsInSpace: [],
@@ -113,6 +119,21 @@ describe('code scores', () => {
     ).toBe(1);
   });
 
+  it('does not hold a completed run to the incomplete stage pinned for its partial alternative', () => {
+    const expected = buildExpected(
+      {},
+      { outcome: ['completed', 'partial'], incompleteStage: 'hunt' }
+    );
+    expect(scoreOutcome(expected, buildArtifacts({ outcome: 'completed' })).score).toBe(1);
+    expect(
+      scoreOutcome(expected, buildArtifacts({ outcome: 'partial', incompleteStage: 'hunt' })).score
+    ).toBe(1);
+    expect(
+      scoreOutcome(expected, buildArtifacts({ outcome: 'partial', incompleteStage: 'packaging' }))
+        .score
+    ).toBe(0);
+  });
+
   it('reads Tier 1 status from the headline when there is no SSE attachment', () => {
     expect(
       scoreTier1Status(
@@ -129,7 +150,41 @@ describe('code scores', () => {
   });
 
   it('scores 1 when pending Proposals meet the exact expected count', () => {
-    expect(scoreProposalPresence(buildExpected({}), buildArtifacts()).score).toBe(1);
+    expect(
+      scoreProposalPresence(
+        buildExpected({ pendingProposals: 1 }),
+        buildArtifacts({ proposals: [proposalAt('2026-01-01T12:05:00.000Z', 'pending')] })
+      ).score
+    ).toBe(1);
+  });
+
+  it('returns N/A when the Proposal count is not pinned', () => {
+    expect(
+      scoreProposalPresence(buildExpected({ pendingProposals: undefined }), buildArtifacts()).label
+    ).toBe('N/A');
+  });
+
+  it('scores 0 for a zero row when the run minted a Proposal and already executed it', () => {
+    const result = scoreProposalPresence(
+      buildExpected({ pendingProposals: 0 }),
+      buildArtifacts({ proposals: [proposalAt('2026-01-01T12:05:00.000Z', 'succeeded')] })
+    );
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('1 Proposal(s) created by this run, report 0');
+  });
+
+  it('scores 1 for a zero row when the only Proposals predate the run', () => {
+    expect(
+      scoreProposalPresence(
+        buildExpected({ pendingProposals: 0 }),
+        buildArtifacts({
+          proposals: [
+            proposalAt('2025-12-31T12:00:00.000Z', 'no_action'),
+            proposalAt('2025-12-31T13:00:00.000Z', 'succeeded'),
+          ],
+        })
+      ).score
+    ).toBe(1);
   });
 
   it('scores evidence as written when the coordinator retired the report as incomplete_final, even though the hunt child reports partial', () => {
@@ -185,6 +240,48 @@ describe('code scores', () => {
 
   it('returns MISSING for the canary when the hunt produced no output', () => {
     expect(scoreCanaryTripped(buildExpected({}), buildArtifacts()).label).toBe('MISSING');
+  });
+
+  it('inverts the canary: 0 when the hunt failed without searching, even though nothing was invented', () => {
+    const result = scoreCanaryTripped(
+      buildExpected({ tier1Status: 'no_searchable_terms' }),
+      buildArtifacts({ outcome: 'failed', hunt: { status: 'failed', hit: false, behaviors: [] } })
+    );
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('did not reach a verdict');
+  });
+
+  it('inverts the canary: 0 when Tier 1 did not report no_searchable_terms', () => {
+    expect(
+      scoreCanaryTripped(
+        buildExpected({ tier1Status: 'no_searchable_terms' }),
+        buildArtifacts({
+          outcome: 'completed',
+          hunt: { status: 'completed', hit: false, headline: 'Tier 1 found no matches' },
+        })
+      ).score
+    ).toBe(0);
+  });
+
+  it('inverts the canary: MISSING when Tier 1 is pinned but cannot be read from the run', () => {
+    expect(
+      scoreCanaryTripped(
+        buildExpected({ tier1Status: 'no_searchable_terms' }),
+        buildArtifacts({ outcome: 'completed', hunt: { status: 'completed', hit: false } })
+      ).label
+    ).toBe('MISSING');
+  });
+
+  it('inverts the canary: 1 when the hunt completed with nothing searchable and nothing invented', () => {
+    expect(
+      scoreCanaryTripped(
+        buildExpected({ tier1Status: 'no_searchable_terms' }),
+        buildArtifacts({
+          outcome: 'completed',
+          hunt: { status: 'completed', hit: false, headline: 'Report had no searchable terms' },
+        })
+      ).score
+    ).toBe(1);
   });
 
   it('scores 1 for an SSE attachment whose hunt_result passed huntResultSchema', () => {
@@ -325,6 +422,7 @@ describe('scoreProposalConvergence', () => {
     spaceId: 'default',
     workflowExecutionId: 'w',
     executionStatus: 'completed',
+    runStartedAt: RUN_STARTED_AT,
     selectedIds: ['r1', 'r2'],
     skipped: [],
     pendingProposalsInSpace: proposalsInSpace,

@@ -113,6 +113,8 @@ export interface HuntArtifacts {
   spaceId: string;
   workflowExecutionId: string;
   executionStatus: string;
+  /** When the Worker execution started; separates what this run created from earlier runs' leftovers. */
+  runStartedAt: string;
   durationMs?: number;
   indexScopeBlocked?: boolean;
   selectedIds: string[];
@@ -434,6 +436,7 @@ export const collectHuntArtifacts = async ({
     spaceId,
     workflowExecutionId: run.workflowExecutionId,
     executionStatus: execution.status,
+    runStartedAt: execution.startedAt,
     durationMs: execution.duration ?? undefined,
     indexScopeBlocked: gate?.index_scope_blocked,
     selectedIds,

@@ -40,30 +40,42 @@ export const computeScoreStats = (scores: Array<number | null>): ScoreStats => {
 };
 
 /**
+ * Fewest scored examples per arm before a CI band means anything. At n=1 the
+ * sample variance is undefined and `ci95` is 0, so a single 0-vs-1 pair would
+ * read as a clean separation; at n=2 the band rests on one degree of freedom.
+ */
+export const MIN_DISTINGUISHABLE_N = 3;
+
+export type DistinguishabilityVerdict = 'distinguishable' | 'not_distinguishable' | 'indeterminate';
+
+/**
  * Two arms are distinguishable only when their CI bands do not overlap. With
  * small n this correctly reports "no difference" for deltas that eyeballing a
- * means table would call a regression or an improvement.
+ * means table would call a regression or an improvement, and below
+ * {@link MIN_DISTINGUISHABLE_N} it returns no verdict at all rather than one
+ * built on a band that cannot be estimated.
  */
 export const areDistinguishable = (
   a: ScoreStats,
   b: ScoreStats
-): { distinguishable: boolean; note: string } => {
-  if (a.n === 0 || b.n === 0) {
-    return { distinguishable: false, note: 'one arm has no scored examples' };
+): { verdict: DistinguishabilityVerdict; note: string } => {
+  if (a.n < MIN_DISTINGUISHABLE_N || b.n < MIN_DISTINGUISHABLE_N) {
+    return {
+      verdict: 'indeterminate',
+      note: `n=${a.n} vs n=${b.n}: fewer than ${MIN_DISTINGUISHABLE_N} scored examples on one arm, so no CI band can be estimated`,
+    };
   }
   const gap = Math.abs(a.mean - b.mean);
   const band = a.ci95 + b.ci95;
   if (gap > band) {
     return {
-      distinguishable: true,
+      verdict: 'distinguishable',
       note: `delta ${gap.toFixed(3)} exceeds combined CI ${band.toFixed(3)}`,
     };
   }
   return {
-    distinguishable: false,
-    note: `delta ${gap.toFixed(3)} within combined CI ${band.toFixed(
-      3
-    )} — not resolvable at this n`,
+    verdict: 'not_distinguishable',
+    note: `delta ${gap.toFixed(3)} within combined CI ${band.toFixed(3)}, not resolvable at this n`,
   };
 };
 

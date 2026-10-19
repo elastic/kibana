@@ -33,9 +33,14 @@ export const evaluate = base.extend<
         connectorId: connector.id,
         evaluationConnector,
       });
-      await assertWorkflowInstalled({ fetch, log, spaceIds: EVAL_SPACE_IDS });
-      await use();
-      await cleanup();
+      // The preflight has already swapped the default AI connector in every eval space by the
+      // time it returns, so a failed install check must still restore it.
+      try {
+        await assertWorkflowInstalled({ fetch, log, spaceIds: EVAL_SPACE_IDS });
+        await use();
+      } finally {
+        await cleanup();
+      }
     },
     { scope: 'worker', auto: true },
   ],
@@ -43,10 +48,11 @@ export const evaluate = base.extend<
   // worker, then verifies every bound report id exists in its expected space. `auto` so an
   // unseeded stack cannot be scored. Runs after the preflight (spaces must exist for the copies).
   huntWatchSeed: [
-    async ({ config, esClient, log, huntWatchPreflight }, use) => {
+    async ({ config, esClient, fetch, log, huntWatchPreflight }, use) => {
       void huntWatchPreflight;
       const cleanup = await seedHuntData({
         esClient,
+        fetch,
         log,
         target: {
           kibanaUrl: config.hosts.kibana,

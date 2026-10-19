@@ -118,7 +118,12 @@ export const scoreOutcome = (expected: HuntExpected, artifacts: HuntArtifacts): 
           reason: actual.packaging?.reason ?? actual.hunt?.reason,
         });
       }
-      if (incompleteStage && actual.incompleteStage !== incompleteStage) {
+      // A completed run has no incomplete stage, so the pin only binds the runs that stopped.
+      if (
+        incompleteStage &&
+        actual.outcome !== 'completed' &&
+        actual.incompleteStage !== incompleteStage
+      ) {
         return fail(
           `incomplete_stage "${actual.incompleteStage ?? ''}", expected "${incompleteStage}"`
         );
@@ -353,8 +358,22 @@ export const scoreProposalPresence = (
     expected,
     artifacts,
     (report, actual) => {
-      const pending = actual.proposals.filter((p) => p.status === 'pending');
       const want = report.pendingProposals;
+      if (want === undefined) return notApplicable('Proposal count not pinned');
+      if (want === 0) {
+        // A Proposal the run minted and then executed is `executing` or `succeeded`, never
+        // `pending`, so a zero row checks that this run created nothing in any status. Earlier
+        // runs' settled Proposals share the Investigation id and are excluded by creation time.
+        const runStart = Date.parse(artifacts.runStartedAt);
+        const minted = actual.proposals.filter((p) => Date.parse(p.createdAt) >= runStart);
+        return minted.length === 0
+          ? pass('no Proposal created by this run', { total: actual.proposals.length })
+          : fail(`${minted.length} Proposal(s) created by this run, report 0`, {
+              total: actual.proposals.length,
+              statuses: minted.map((p) => p.status),
+            });
+      }
+      const pending = actual.proposals.filter((p) => p.status === 'pending');
       const ok = typeof want === 'number' ? pending.length === want : pending.length >= want.min;
       const wanted = typeof want === 'number' ? `${want}` : `>= ${want.min}`;
       return ok
@@ -391,17 +410,34 @@ export const scoreInvestigationStatus = (
   );
 
 /**
- * Canary: 1 only when nothing was invented from a prose-only report: no hit, no Tier 2 execution,
- * no Proposals, no SSE attachment, and no narrative claiming a hit. A 0 is a Worker that found
- * something in nothing.
+ * Canary: 1 only when the hunt ran to a verdict and invented nothing from a prose-only report:
+ * Tier 1 reports the pinned `no_searchable_terms`, no hit, no Tier 2 execution, no Proposals, no
+ * SSE attachment, and no narrative claiming a hit. A 0 is a Worker that found something in
+ * nothing, or one that failed before it could be judged: a hunt that never ran also invented
+ * nothing, and must not look like a correct rejection.
  */
 export const scoreCanaryTripped = (expected: HuntExpected, artifacts: HuntArtifacts): CodeScore =>
   reportScores(
     expected,
     artifacts,
-    (_expected, actual) => {
+    (report, actual) => {
       if (!actual.hunt) return missing('hunt step produced no output');
+      if (actual.outcome === 'failed' || actual.hunt.status === 'failed') {
+        return fail(
+          `hunt did not reach a verdict (hunt ${actual.hunt.status}, outcome ${actual.outcome})`,
+          { reason: actual.hunt.reason }
+        );
+      }
       const violations: string[] = [];
+      if (report.tier1Status) {
+        const status = resolveTier1Status(actual);
+        if (!status) {
+          return missing(`could not determine Tier 1 status (headline: "${actual.hunt.headline}")`);
+        }
+        if (status !== report.tier1Status) {
+          violations.push(`tier1 "${status}", report "${report.tier1Status}"`);
+        }
+      }
       if (actual.hunt.hit) violations.push('hunt reported a hit');
       if (tier2Executed(actual)) violations.push('Tier 2 executed behaviors');
       if (actual.proposals.length > 0) violations.push(`${actual.proposals.length} Proposal(s)`);

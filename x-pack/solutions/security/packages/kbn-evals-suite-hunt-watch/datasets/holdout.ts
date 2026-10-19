@@ -30,14 +30,16 @@ export const holdoutDataset: HuntWatchExample[] = [
     // scenario Tier 2 often ends `incomplete_retryable` (a derived technique it cannot ground a
     // query or quote for), so the run is `partial` with no evidence written. The row therefore
     // accepts either label and checks evidence against the hunt's own success, and does not pin
-    // Tier 2 execution, which is zero when every generated query fails. See the README's
-    // "Known Worker behavior" section for the run history and when to tighten this.
+    // Tier 2 execution, which is zero when every generated query fails. A partial run may only
+    // stop at `hunt`, and still has to confirm the hit, attach an SSE and raise a Proposal. See
+    // the README's "Known Worker behavior" section for the run history and when to tighten this.
     id: 'holdout-hit-aws-iam-assume-role',
     cohort: 'holdout',
     input: { spaceId: DEFAULT_EVAL_SPACE_ID, reportIds: [ASSUME_ROLE_HOLDOUT] },
     output: {
       expected: {
         outcome: ['completed', 'partial'],
+        incompleteStage: 'hunt',
         indexScopeBlocked: false,
         reports: [
           {
@@ -57,12 +59,14 @@ export const holdoutDataset: HuntWatchExample[] = [
     },
   },
   {
+    // Mirrors `hard-difficult-hit-ioc-only`: Proposal count unpinned, partial only at `hunt`.
     id: 'holdout-difficult-hit-aws-iam-ioc-only',
     cohort: 'holdout',
     input: { spaceId: DEFAULT_EVAL_SPACE_ID, reportIds: [IOC_ONLY_HOLDOUT] },
     output: {
       expected: {
         outcome: ['completed', 'partial'],
+        incompleteStage: 'hunt',
         indexScopeBlocked: false,
         reports: [
           {
@@ -70,7 +74,6 @@ export const holdoutDataset: HuntWatchExample[] = [
             hasConfirmedHit: true,
             tier1Status: 'environment_hits_found',
             tier2Executed: false,
-            pendingProposals: { min: 0 },
             evidenceWritten: 'iff_completed_successfully',
             sseAttachment: true,
             investigationStatus: 'open',

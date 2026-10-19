@@ -382,15 +382,42 @@ export const deleteSeededReports = async ({
 };
 
 /**
+ * Suite teardown for what scored runs leave behind on a reused stack: pending Proposals (and the
+ * gate workflows waiting on them) and Investigation conversations on every seeded report. Each
+ * report is settled the way the per-row reset settles it. Best effort per report, so one that
+ * will not settle does not stop the rest, or the report deletion after it.
+ */
+export const settleSeededReports = async ({
+  esClient,
+  fetch,
+  log,
+}: {
+  esClient: Client;
+  fetch: HttpHandler;
+  log: ToolingLog;
+}): Promise<void> => {
+  for (const [reportId, spaceId] of EXPECTED_REPORT_SPACES) {
+    try {
+      await resetHuntReport({ esClient, fetch, log, reportId, spaceId });
+    } catch (error) {
+      log.warning(`Teardown could not settle ${reportId} in "${spaceId}": ${errorMessage(error)}`);
+    }
+  }
+};
+
+/**
  * Seeds everything the quality, approval, and isolation specs need, once per worker: generator
- * pack, space copies, and the canary. Returns a teardown that removes the seeded reports.
+ * pack, space copies, and the canary. Returns a teardown that settles every seeded report's
+ * Proposals and Investigation, then removes the seeded reports.
  */
 export const seedHuntData = async ({
   esClient,
+  fetch,
   log,
   target,
 }: {
   esClient: Client;
+  fetch: HttpHandler;
   log: ToolingLog;
   target: GeneratorTarget;
 }): Promise<() => Promise<void>> => {
@@ -428,6 +455,7 @@ export const seedHuntData = async ({
   log.info(`Seeded and verified ${ALL_SEEDED_REPORT_IDS.length} threat report(s)`);
 
   return async () => {
+    await settleSeededReports({ esClient, fetch, log });
     await deleteSeededReports({ esClient, log });
   };
 };

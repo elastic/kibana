@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { areDistinguishable, computeScoreStats, pairedDeltas } from './score_stats';
+import {
+  areDistinguishable,
+  computeScoreStats,
+  MIN_DISTINGUISHABLE_N,
+  pairedDeltas,
+} from './score_stats';
 
 describe('computeScoreStats', () => {
   it('computes mean/std/CI over scored values and counts N/A separately', () => {
@@ -48,14 +53,33 @@ describe('areDistinguishable', () => {
     const a = computeScoreStats([1, 1, 1, 1, 0.83, 0.83, 0.67, 0.67, 0.5]);
     const b = computeScoreStats([1, 0.83, 0.83, 0.75, 0.67, 0.67, 0.67, 0.5, 0.75]);
     const r = areDistinguishable(a, b);
-    expect(r.distinguishable).toBe(false);
+    expect(r.verdict).toBe('not_distinguishable');
     expect(r.note).toContain('not resolvable');
   });
 
   it('marks a gap larger than the combined CI as distinguishable', () => {
     const a = computeScoreStats([1, 1, 1, 1, 1, 1, 0.8, 0.8, 0.8]);
     const b = computeScoreStats([0, 0, 0, 0.2, 0.2, 0.2, 0.3, 0.3, 0.1]);
-    expect(areDistinguishable(a, b).distinguishable).toBe(true);
+    expect(areDistinguishable(a, b).verdict).toBe('distinguishable');
+  });
+
+  it('returns indeterminate, not a verdict, for a single 0-vs-1 observation pair', () => {
+    // At n=1 ci95 is 0, so without the guard the gap of 1 would exceed a band of 0.
+    const r = areDistinguishable(computeScoreStats([0]), computeScoreStats([1]));
+    expect(r.verdict).toBe('indeterminate');
+    expect(r.note).toContain(`fewer than ${MIN_DISTINGUISHABLE_N}`);
+  });
+
+  it('returns indeterminate when one arm is below the minimum n and the other is not', () => {
+    const a = computeScoreStats([1, 1]);
+    const b = computeScoreStats([0, 0, 0, 0, 0]);
+    expect(areDistinguishable(a, b).verdict).toBe('indeterminate');
+  });
+
+  it('returns indeterminate when one arm has no scored examples', () => {
+    expect(
+      areDistinguishable(computeScoreStats([null, null]), computeScoreStats([1, 1, 1])).verdict
+    ).toBe('indeterminate');
   });
 });
 

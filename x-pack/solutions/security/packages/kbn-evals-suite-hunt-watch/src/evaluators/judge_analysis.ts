@@ -43,10 +43,12 @@ const TIER1_WORDING: Record<NonNullable<HuntReportExpectation['tier1Status']>, s
 };
 
 const describeProposals = (count: HuntReportExpectation['pendingProposals']): string => {
+  if (count === undefined) {
+    return 'The number of Proposals raised for action is not pinned; any number is acceptable.';
+  }
   if (typeof count === 'number') {
     return `${count} pending Proposal${count === 1 ? '' : 's'} raised for action.`;
   }
-  if (count.min === 0) return 'Any number of Proposals may be raised for action.';
   return `At least ${count.min} pending Proposal${count.min === 1 ? '' : 's'} raised for action.`;
 };
 

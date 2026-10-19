@@ -29,6 +29,10 @@ import type { HuntWatchClient } from '../src/hunt_watch_client';
  * every Proposal as `no_action` with the reason, so an action that ran would show up as the wrong
  * status. Both paths end `closed` / `resolved`: the gate closes once nothing is pending or
  * executing, whatever the decision was.
+ *
+ * Setup requires at least one pending Proposal that carries an action. Without it both tests
+ * settle entirely through `no_action` and never show an approved action running or a dismissed
+ * one staying unrun, which is the boundary this spec exists to exercise.
  */
 
 const spaceId = DEFAULT_EVAL_SPACE_ID;
@@ -62,6 +66,14 @@ const mintPendingProposals = async ({
     throw new Error(
       `${reportId} raised no pending Proposal (outcome: ${report?.outcome ?? 'none'}, ` +
         `Proposals: ${report?.proposals.map((p) => `${p.id}:${p.status}`).join(', ') || 'none'})`
+    );
+  }
+  if (!pending.some((p) => p.actionWorkflowId)) {
+    throw new Error(
+      `${reportId} raised no pending Proposal with an action, so approve and dismiss would both ` +
+        `settle through no_action only (pending: ${pending
+          .map((p) => `${p.id}:${p.actionWorkflowId ?? 'no action'}`)
+          .join(', ')})`
     );
   }
   if (report?.conversation?.metadata?.status === 'closed') {

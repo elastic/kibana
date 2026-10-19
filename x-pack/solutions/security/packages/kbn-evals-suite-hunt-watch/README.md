@@ -16,7 +16,7 @@ never part of that gate.
 
 | Name | Kind | What it checks |
 |---|---|---|
-| Outcome Label | CODE | `resolve_run_outcome` is one of the accepted labels, plus `incomplete_stage` when pinned |
+| Outcome Label | CODE | `resolve_run_outcome` is one of the accepted labels, plus `incomplete_stage` when pinned and the run did not complete |
 | Index Scope Gate | CODE | `index_scope_blocked` matches, and a blocked run opens no Investigation |
 | Candidate Selection | CODE | named reports were selected; expected skip reasons (`not_found`) reported |
 | Stage Progression | CODE | find-or-create, hunt, package, conclusion all completed, in order |
@@ -25,10 +25,10 @@ never part of that gate.
 | Tier 2 Execution | CODE | whether any behavior query executed |
 | SSE Attachment | CODE | a `security.significant_security_event` attachment with a `hunt_result` exists iff expected |
 | Evidence Honesty | CODE | report `evidence[]` written iff the coordinator result's `completed_successfully` is true (`complete` or `incomplete_final`, never `incomplete_retryable`), the same flag the hunt child's `write_evidence` step reads |
-| Proposal Presence | CODE | pending Proposals on the Investigation match the exact count or minimum |
+| Proposal Presence | CODE | pending Proposals on the Investigation match the exact count or minimum; a row pinned to zero checks the run created no Proposal in any status |
 | Proposal Convergence | CODE | multi-candidate only: each actioned subject (target plus criticality level, the key packaging converges on) is pending under one Investigation, and a convergence note or `Also raised by [Investigation]` line is present |
 | Investigation Status | CODE | conversation `metadata.status`, or no conversation at all |
-| Canary Inverted | CODE | 1 iff a prose-only report produced no hit, no Tier 2 execution, no Proposal, no SSE |
+| Canary Inverted | CODE | 1 iff the hunt reached a verdict with Tier 1 `no_searchable_terms` and the prose-only report produced no hit, no Tier 2 execution, no Proposal, no SSE; a hunt that failed before searching scores 0 |
 | Narrative Rubric | LLM | per-row criteria over the messages the Worker posted to the Investigation; reported, not gated |
 | Factuality | LLM | narrative claims against a ground truth synthesized from the row's pinned expectations; reported, not gated |
 | Relevance | LLM | share of narrative claims that answer the hunt question; reported, not gated |
@@ -43,11 +43,23 @@ and runs both analyses once per row inside the task. Sequence Accuracy is left o
 hunt narrative is a verdict, not a procedure. The canary cohort runs CODE only: an LLM score
 cannot rescue it.
 
+An expectation field a row omits is unpinned: its evaluator returns `N/A` and the judge is told
+the value is open. Absence is never implied by omission; it is pinned explicitly
+(`pendingProposals: 0`, `sseAttachment: false`, `investigationStatus: 'none'`), so "not
+measured" and "measured and expected to be nothing" read differently. `src/dataset_contract.test.ts`
+enforces the two shapes that would make a pin vacuous: no `pendingProposals: { min: 0 }`, and an
+`incompleteStage` on every row whose `outcome` admits `partial`.
+
+The gate itself has a positive control. `src/evaluators/dataset_evaluator.test.ts` drives the
+whole seam (stub executor, task, evaluator callbacks, score collector, `assertCodeScoresPass`)
+and asserts that a known-bad output turns the dataset red and a known-good one does not, so a
+wiring regression that left the suite green while measuring nothing would fail there.
+
 Read the LLM scores against their ceilings. The ground truth is synthesized from the row's
 pinned expectations, so Factuality docks the narrative's peripheral detail (publish date,
 indicator values, search window) as "not in ground truth"; about 0.9 is a healthy row, and a
 drop below that points at a central claim the judge contradicted. Counts a row leaves unpinned
-(no `tier1Status`, no `tier2Executed`, `pendingProposals: { min: 0 }`) are stated to the judge
+(no `tier1Status`, no `tier2Executed`, no `pendingProposals`) are stated to the judge
 as open, so the narrative is not docked for reporting them. Groundedness judges the same
 narrative against the collected hunt facts (report doc, hunt output, coordinator result, SSE,
 packaging, Proposals, evidence, plus every pending Proposal in the space because convergence
@@ -89,7 +101,10 @@ generator source so an id, slug, or Investigation-id drift fails in Jest before 
 
 The `huntWatchSeed` worker fixture runs the generator once per worker, copies one report into
 each non-default eval space (`hunt-a`, `hunt-b`, `hunt-blocked`), writes the canary, and
-verifies every bound id exists. Teardown deletes the seeded reports. The eval spaces themselves
+verifies every bound id exists. Teardown first settles every seeded report the way the per-row
+reset does (dismiss pending Proposals, wait for the gate to settle, delete the Investigation), so
+a reused stack is not left with live gates and Investigations, then deletes the seeded reports.
+The eval spaces themselves
 are created once and left in place: deleting and recreating them between runs races the
 per-space Worker install and its service-account binding on a long-lived stack.
 
@@ -258,6 +273,8 @@ d=$(mktemp -d) && cp gate_checklist.yaml "$d/gate-checklist.yaml"
   holdout `historic-03` run grounded and hit all three techniques and ended `completed`, while
   `historic-01` still ended `incomplete_retryable`, this time on `quote_ungrounded` for a
   technique the report does not name (T1562.008). Rows on that scenario accept `completed` or
-  `partial`, check evidence with `iff_completed_successfully`, and do not pin Tier 2 execution. The golden
+  `partial`, pin `incompleteStage: 'hunt'` so a partial run has to be Tier 2 stopping short
+  rather than packaging giving up, check evidence with `iff_completed_successfully`, and do not
+  pin Tier 2 execution. The golden
   hit (`aws-iam-historic-01`) does not show this and keeps its exact pins. Tighten the holdout
   row to `completed` once a few more runs hold.

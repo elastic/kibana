@@ -21,13 +21,22 @@ export const hardCases: HuntWatchExample[] = [
   {
     // The three report ids share principals (dev-user, 192.0.2.30/31), so packaging must
     // mint each actioned subject once and converge the other Investigations onto that Proposal
-    // (`Also raised by [Investigation]` / "no second Proposal was created").
+    // (`Also raised by [Investigation]` / "no second Proposal was created"). Per-report Proposal
+    // counts are not pinned because which Investigation holds the shared Proposal is packaging's
+    // choice; `Proposal Convergence` asserts the count across the run instead (at least one
+    // pending actioned Proposal, each subject minted once, the convergence note present).
+    //
+    // `partial` is accepted because Tier 2 on the assume-role scenario can end
+    // `incomplete_retryable` (README, "Known Worker behavior"). A partial run still has to stop
+    // at `hunt`, confirm the hit, attach a valid SSE, leave the Investigation open and converge
+    // its Proposals, so a run that gave up fails those checks rather than passing on this label.
     id: 'hard-multi-candidate',
     cohort: 'hard',
     input: { spaceId: DEFAULT_EVAL_SPACE_ID, reportIds: [...HUNT_REPORT_IDS.multiCandidate] },
     output: {
       expected: {
         outcome: ['completed', 'partial'],
+        incompleteStage: 'hunt',
         indexScopeBlocked: false,
         proposalConvergence: true,
         reports: [
@@ -35,7 +44,6 @@ export const hardCases: HuntWatchExample[] = [
             reportId: HUNT_REPORT_IDS.multiCandidate[0],
             hasConfirmedHit: true,
             tier1Status: 'environment_hits_found',
-            pendingProposals: { min: 0 },
             evidenceWritten: 'iff_completed_successfully',
             sseAttachment: true,
             investigationStatus: 'open',
@@ -44,7 +52,6 @@ export const hardCases: HuntWatchExample[] = [
             reportId: HUNT_REPORT_IDS.multiCandidate[1],
             hasConfirmedHit: true,
             tier1Status: 'environment_hits_found',
-            pendingProposals: { min: 0 },
             evidenceWritten: 'iff_completed_successfully',
             sseAttachment: true,
             investigationStatus: 'open',
@@ -54,7 +61,6 @@ export const hardCases: HuntWatchExample[] = [
             hasConfirmedHit: true,
             tier1Status: 'environment_hits_found',
             tier2Executed: false,
-            pendingProposals: { min: 0 },
             evidenceWritten: 'iff_completed_successfully',
             sseAttachment: true,
             investigationStatus: 'open',
@@ -111,12 +117,16 @@ export const hardCases: HuntWatchExample[] = [
     },
   },
   {
+    // IOC-only hit: Tier 1 matches the environment, there is no technique for Tier 2 to run.
+    // Whether the matched principal is actionable enough to mint a Proposal is not pinned; the
+    // hit, the SSE and the open Investigation are. A partial run may only stop at `hunt`.
     id: 'hard-difficult-hit-ioc-only',
     cohort: 'hard',
     input: { spaceId: DEFAULT_EVAL_SPACE_ID, reportIds: [HUNT_REPORT_IDS.difficultHit] },
     output: {
       expected: {
         outcome: ['completed', 'partial'],
+        incompleteStage: 'hunt',
         indexScopeBlocked: false,
         reports: [
           {
@@ -124,7 +134,6 @@ export const hardCases: HuntWatchExample[] = [
             hasConfirmedHit: true,
             tier1Status: 'environment_hits_found',
             tier2Executed: false,
-            pendingProposals: { min: 0 },
             evidenceWritten: 'iff_completed_successfully',
             sseAttachment: true,
             investigationStatus: 'open',

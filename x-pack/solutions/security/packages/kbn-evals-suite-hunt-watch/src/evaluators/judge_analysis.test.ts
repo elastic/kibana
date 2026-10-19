@@ -41,6 +41,7 @@ const buildArtifacts = (report: Partial<HuntReportArtifacts> = {}): HuntArtifact
   spaceId: 'default',
   workflowExecutionId: 'w',
   executionStatus: 'completed',
+  runStartedAt: '2026-01-01T12:00:00.000Z',
   selectedIds: [REPORT_ID],
   skipped: [],
   pendingProposalsInSpace: [],
@@ -80,9 +81,11 @@ describe('judge_analysis', () => {
   });
 
   it('states unpinned counts as open rather than as zero', () => {
-    expect(
-      buildGroundTruth(buildOutput({ pendingProposals: { min: 0 }, tier2Executed: undefined }))
-    ).toContain('any number of behaviors is acceptable');
+    const groundTruth = buildGroundTruth(
+      buildOutput({ pendingProposals: undefined, tier2Executed: undefined })
+    );
+    expect(groundTruth).toContain('any number of behaviors is acceptable');
+    expect(groundTruth).toContain('Proposals raised for action is not pinned');
   });
 
   it('states that a partial-only row expects an incomplete run', () => {
