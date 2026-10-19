@@ -111,6 +111,16 @@ describe('SharedListsAppHeader', () => {
     expect(screen.queryByTestId('importSharedExceptionList')).not.toBeInTheDocument();
   });
 
+  it('shows a plus icon on the main create button', () => {
+    renderHeader();
+
+    expect(
+      screen
+        .getByTestId('manageExceptionListCreateButton')
+        .querySelector('[data-euiicon-type="plusCircle"]')
+    ).toBeInTheDocument();
+  });
+
   it('opens the create shared list flyout from the main create button', async () => {
     const onCreateSharedList = jest.fn();
     renderHeader({ onCreateSharedList });

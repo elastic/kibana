@@ -80,8 +80,7 @@ export const SharedListsAppHeader = React.memo<SharedListsAppHeaderProps>(
         primaryActionItem: {
           id: 'create',
           label: i18n.CREATE_BUTTON,
-          // `iconType` is required by the app menu; an empty value renders the split button without an icon.
-          iconType: '',
+          iconType: 'plusCircle',
           run: (params) => onCreateSharedList(params?.returnFocus),
           testId: 'manageExceptionListCreateButton',
           splitButtonProps: {

@@ -78,7 +78,7 @@ describe('useCreateRulePrimaryAction', () => {
       expect(action).toMatchObject({
         testId: 'create-rule-button',
         href: `/app/security/${SecurityPageName.rulesCreate}`,
-        iconType: '',
+        iconType: 'plusCircle',
         isLoading: true,
       });
       expect(action.items).toBeUndefined();

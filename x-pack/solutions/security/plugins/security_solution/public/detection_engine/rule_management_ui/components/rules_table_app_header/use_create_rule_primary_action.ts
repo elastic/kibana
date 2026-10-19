@@ -86,8 +86,7 @@ export const useCreateRulePrimaryAction = ({
     return {
       id: 'createRule',
       label: i18n.CREATE_RULE_MENU_BUTTON,
-      // `iconType` is required by the app menu; an empty value renders the split button without an icon.
-      iconType: '',
+      iconType: 'plusCircle',
       href: createRuleUrl,
       disableButton: isDisabled,
       isLoading,
