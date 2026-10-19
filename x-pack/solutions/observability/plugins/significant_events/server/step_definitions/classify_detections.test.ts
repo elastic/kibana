@@ -6,7 +6,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import { type SignalVerdict } from '@kbn/significant-events-schema';
+import { detectionSkipSchema, type SignalVerdict } from '@kbn/significant-events-schema';
 import {
   MAX_CLASSIFIED_ROWS,
   classifyBatch,
@@ -49,6 +49,7 @@ const membership = (
   createdAt: new Date(NOW - HOUR_MS).toISOString(),
   verifiedAt: undefined,
   sourceIds: ['logs.checkout'],
+  eventTitle: 'Checkout — request failures',
 });
 
 const probeResult = (status: ProbeResult['status'], hasRows: boolean): ProbeResult => ({
@@ -73,6 +74,7 @@ const batchParams = ({
   rows: [],
   shadowMode: false,
   maxSkipAgeMs: 24 * HOUR_MS,
+  probeWindowMinutes: 20,
   knownOngoingMs: 7 * 24 * HOUR_MS,
   now: NOW,
   probeConcurrency: 5,
@@ -649,6 +651,29 @@ describe('classifyBatch', () => {
       );
 
       expect(output.skipped_detection_ids).toEqual(['rule-A-detection']);
+    });
+
+    it('records on each skip what it saw, in a shape the marker route accepts', async () => {
+      const output = await classifyBatch(
+        batchParams({ rows: [detectionRow('rule-A')], findLiveMembers: skippable() })
+      );
+
+      expect(output.skips).toEqual([
+        {
+          rule_uuid: 'rule-A',
+          skip: {
+            reason: 'still_breaching',
+            probe_status: 'ok',
+            probe_has_rows: true,
+            probe_window_minutes: 20,
+            event_id: 'event-1',
+            event_title: 'Checkout — request failures',
+            stored_verdict: 'confirms',
+          },
+        },
+      ]);
+      const route = detectionSkipSchema.omit({ checked_at: true }).strict();
+      expect(route.safeParse(output.skips[0].skip).success).toBe(true);
     });
 
     it('lists none while it only records', async () => {

@@ -37,7 +37,12 @@ describe('DetectionDiscoveryStatus', () => {
   it('shows Skipped instead of Processed, with the reason on hover', async () => {
     renderStatus({
       processed: true,
-      skip: { reason: 'still_breaching', checked_at: '2026-10-19T09:56:14.743Z' },
+      skip: {
+        reason: 'still_breaching',
+        probe_has_rows: true,
+        probe_window_minutes: 20,
+        checked_at: '2026-10-19T09:56:14.743Z',
+      },
     });
 
     expect(screen.getByText('Skipped')).toBeInTheDocument();
@@ -45,7 +50,7 @@ describe('DetectionDiscoveryStatus', () => {
 
     await userEvent.hover(screen.getByTestId('significantEventsAppDetectionSkippedBadge'));
 
-    expect(await screen.findByText(/still matches in the current window/)).toBeInTheDocument();
+    expect(await screen.findByText(/The rule still matches \(last 20 min\)/)).toBeInTheDocument();
     expect(screen.getByText(/Checked/)).toBeInTheDocument();
   });
 

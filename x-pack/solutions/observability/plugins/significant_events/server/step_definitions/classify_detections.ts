@@ -10,6 +10,7 @@ import type { Logger } from '@kbn/core/server';
 import {
   DECISION_REASONS,
   MAX_ID_LENGTH,
+  MAX_TITLE_LENGTH,
   PROBE_STATUSES,
   SKIP_REASONS,
   baselineObservationSchema,
@@ -95,7 +96,12 @@ const skipMarkerSchema = lazySchema(() =>
   z.object({
     reason: z.enum(SKIP_REASONS),
     probe_status: z.enum(PROBE_STATUSES).optional(),
+    probe_has_rows: z.boolean().optional(),
+    probe_window_minutes: z.number().int().min(0).optional(),
     baseline: baselineSchema.optional(),
+    event_id: z.string().max(MAX_ID_LENGTH).optional(),
+    event_title: z.string().max(MAX_TITLE_LENGTH).optional(),
+    stored_verdict: z.string().max(32).optional(),
   })
 );
 
@@ -133,6 +139,7 @@ const outputSchema = lazySchema(() =>
 export type ClassifyDetectionsOutput = z.infer<typeof outputSchema>;
 type DetectionRow = readonly unknown[];
 type Decision = z.infer<typeof decisionSchema>;
+type SkipContext = Omit<z.infer<typeof skipMarkerSchema>, 'reason' | 'probe_status' | 'baseline'>;
 
 const NOT_PROBED: ProbeOutcome = { status: 'no_query', hasRows: false };
 
@@ -256,6 +263,8 @@ export interface ClassifyBatchParams {
   knownOngoingMs: number;
   /** The clock the series ages are read against. */
   now: number;
+  /** How far back the probe looked, so a skip can say what it saw. */
+  probeWindowMinutes: number;
   probeConcurrency: number;
   /** The live series each rule is in, and its latest series in any status. Called once. */
   findRuleSeries: (ruleUuids: string[]) => Promise<{
@@ -280,6 +289,7 @@ export const classifyBatch = async ({
   maxSkipAgeMs,
   knownOngoingMs,
   now,
+  probeWindowMinutes,
   probeConcurrency,
   findRuleSeries,
   probe,
@@ -362,6 +372,8 @@ export const classifyBatch = async ({
     });
   });
   const skippedIndexes = new Set<number>();
+  // What a skip saw, by rule, so the marker can say why.
+  const skipContext = new Map<string, SkipContext>();
   // While the classifier only records, the old flaky-rule gate still keeps its rows from the agent.
   const heldBackIndexes = new Set<number>();
   for (const { index, row, withinCap } of parsed) {
@@ -383,7 +395,18 @@ export const classifyBatch = async ({
           baseline,
         })
       : { decision: 'needs_agent', reason: 'over_cap' };
-    if (classification.decision === 'skip') skippedIndexes.add(index);
+    if (classification.decision === 'skip') {
+      skippedIndexes.add(index);
+      const member = series[0];
+      skipContext.set(ruleUuid, {
+        ...(probed?.status === 'ok'
+          ? { probe_has_rows: probed.hasRows, probe_window_minutes: probeWindowMinutes }
+          : {}),
+        ...(member?.eventId ? { event_id: member.eventId } : {}),
+        ...(member?.eventTitle ? { event_title: member.eventTitle } : {}),
+        ...(member ? { stored_verdict: member.verdict } : {}),
+      });
+    }
     const legacyGate = readLegacyGate({ columns, row: rows[index] });
     if (shadowMode && legacyGate === 'suppressed') heldBackIndexes.add(index);
     // While the classifier only records, the agent judges unprompted; hints are for enforcement.
@@ -437,6 +460,7 @@ export const classifyBatch = async ({
                 reason,
                 ...(probeStatus ? { probe_status: probeStatus } : {}),
                 ...(baseline ? { baseline } : {}),
+                ...skipContext.get(ruleUuid),
               },
             },
           ]
@@ -513,6 +537,7 @@ export const classifyDetectionsStepDefinition = ({ logger }: { logger: Logger })
         shadowMode,
         maxSkipAgeMs: maxSkipAgeHours * 3_600_000,
         now,
+        probeWindowMinutes: windowMinutes,
         probeConcurrency,
         knownOngoingMs: knownOngoingDays * 24 * 3_600_000,
         // A live series with no write for longer than both limits cannot rest a skip anyway.

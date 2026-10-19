@@ -8,26 +8,8 @@
 import React from 'react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { DetectionSkip, SkipReason } from '@kbn/significant-events-schema';
+import { describeSkip, type DetectionSkip } from '@kbn/significant-events-schema';
 import { useFormatTimestamp } from '../common/format_timestamp';
-
-const SKIP_REASON_LABELS: Readonly<Record<SkipReason, string>> = {
-  still_breaching: i18n.translate('xpack.nightshift.skippedDetection.reason.stillBreaching', {
-    defaultMessage:
-      "The rule's query still matches in the current window and the event already records it as breaching, so nothing changed.",
-  }),
-  still_healthy: i18n.translate('xpack.nightshift.skippedDetection.reason.stillHealthy', {
-    defaultMessage:
-      "The rule's query returns nothing in the current window and the event already records it as healthy, so nothing changed.",
-  }),
-};
-
-// Stored markers can carry a reason this build does not know.
-const labelsByStoredReason: Readonly<Record<string, string>> = SKIP_REASON_LABELS;
-
-/** What the classifier decided, in words: its reason, or the reason as stored when it is unknown. */
-export const getSkipReasonLabel = ({ reason }: Pick<DetectionSkip, 'reason'>): string =>
-  labelsByStoredReason[reason] ?? reason;
 
 /** A detection the classifier closed without the discovery agent, with why on hover. */
 export function SkippedDetectionBadge({ skip }: { skip: DetectionSkip }) {
@@ -41,7 +23,9 @@ export function SkippedDetectionBadge({ skip }: { skip: DetectionSkip }) {
       })}
       content={
         <>
-          <p>{getSkipReasonLabel(skip)}</p>
+          {describeSkip(skip).map((line) => (
+            <p key={line}>{line}</p>
+          ))}
           {skip.checked_at && (
             <p>
               {i18n.translate('xpack.nightshift.skippedDetection.checkedAt', {

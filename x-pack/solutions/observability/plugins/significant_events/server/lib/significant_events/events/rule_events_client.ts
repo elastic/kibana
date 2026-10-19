@@ -265,6 +265,8 @@ export interface LiveRuleMembership {
   createdAt: string | undefined;
   /** The sources the series covers. */
   sourceIds: string[];
+  /** The series' title, for saying which event a decision rests on. */
+  eventTitle: string | undefined;
 }
 
 /**
@@ -541,6 +543,7 @@ export class RuleEventsClient {
               verifiedAt: signal.collected_at,
               createdAt: row.created_at,
               sourceIds: event.source_ids,
+              eventTitle: event.title,
             },
           ]);
         }

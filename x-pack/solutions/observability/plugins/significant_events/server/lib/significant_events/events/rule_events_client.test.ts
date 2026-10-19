@@ -976,6 +976,7 @@ describe('RuleEventsClient', () => {
           evidenceFound: true,
           createdAt: undefined,
           sourceIds: ['logs.checkout'],
+          eventTitle: 'Checkout errors',
         },
       ]);
     });
@@ -1059,6 +1060,7 @@ describe('RuleEventsClient', () => {
           evidenceFound: false,
           createdAt: undefined,
           sourceIds: ['logs.checkout'],
+          eventTitle: 'Checkout errors',
         },
       ]);
     });

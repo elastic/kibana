@@ -112,6 +112,7 @@ export {
   getSeverityLabel,
   detectionSchema,
   detectionSkipSchema,
+  describeSkip,
   PROBE_STATUSES,
   type ProbeStatus,
   BASELINE_DECISIONS,
