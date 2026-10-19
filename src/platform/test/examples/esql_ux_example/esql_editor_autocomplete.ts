@@ -11,9 +11,10 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../functional/ftr_provider_context';
 
 /**
- * Migration recommendation: MIXED. See individual tests. Suggestion content is Jest in
- * kbn-esql-language (src/language/autocomplete/autocomplete.test.ts); only the Monaco widget wiring needs a browser. Consolidate into one Scout
- * test in the Discover ES|QL suite.
+ * Migration recommendation: MOVE ALL TO SCOUT; delete nothing. Suggestion content is covered by Jest
+ * in kbn-esql-language (src/language/autocomplete/autocomplete.test.ts), but every test here checks the
+ * Monaco widget wiring, which needs a real browser. Move to the Discover ES|QL Scout suite, merging
+ * only where flows are identical (e.g. the blur/refocus tests).
  */
 
 const SOURCE_QUERY = 'FROM logstash-* ';
@@ -54,8 +55,12 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     /**
-     * Migration recommendation: DELETE. Same widget behavior as above; which commands are suggested
-     * after a pipe is covered by autocomplete.test.ts.
+     * Migration recommendation: MIGRATE TO SCOUT (as a step of the single widget test). The pipe
+     * trigger is a different path from "FROM " (autocomplete.test.ts only asserts suggestion content, not
+     * that the widget opens on its own), so keep browser coverage rather than delete.
+     *
+     * Goal: src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_editor_autocomplete.spec.ts
+     * (new spec; one test covering the whole suggest-widget flow).
      */
     it('should show suggestions automatically after pipe and space', async () => {
       await esql.typeEsqlEditorQuery(`${SOURCE_QUERY}| `);

@@ -12,9 +12,9 @@ import { Key } from 'selenium-webdriver';
 import type { FtrProviderContext } from '../../functional/ftr_provider_context';
 
 /**
- * Migration recommendation: MIXED. See individual tests. Most are already covered by Jest in
- * kbn-esql-editor; move the error flow (one smoke test) and the prettify button to the ES|QL / Discover
- * Scout suite.
+ * Migration recommendation: MOVE ALL TO SCOUT; delete nothing. The Jest tests in kbn-esql-editor mock
+ * Monaco actions, QueryStringInput and validation, so none of them exercises the real wiring these
+ * tests check. Move to the ES|QL / Discover Scout suite, merging only where flows are identical.
  */
 
 // eslint-disable-next-line import/no-default-export
@@ -53,8 +53,12 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     /**
-     * Migration recommendation: DELETE. Covered by editor_visor.test.tsx ("should submit a KQL filter
-     * using indexes from the editor query").
+     * Migration recommendation: MIGRATE TO SCOUT (its own short test). editor_visor.test.tsx covers the
+     * query building, but it mocks QueryStringInput and calls onSubmit directly; it does not cover typing
+     * in the real input, the submit button and the editor update.
+     *
+     * Goal: src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_editor.spec.ts
+     * (extend the existing "Discover ES|QL editor" suite).
      */
     it('should search with visor using the editor query source', async () => {
       await esql.setEsqlEditorQuery('FROM logstash-*');
@@ -76,8 +80,13 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     /**
-     * Migration recommendation: DELETE. Covered by custom_editor_commands.test.ts ("calls onQuerySubmit
-     * on CMD+Enter ..."). The callout asserted here is only example plugin state.
+     * Migration recommendation: MIGRATE TO SCOUT (its own short test). custom_editor_commands.test.ts
+     * calls the registered Monaco action's run() on a mocked editor; it does not prove that a real
+     * Ctrl/Cmd+Enter keypress reaches it. Assert on the submitted query/results in Discover rather than
+     * the example plugin callout.
+     *
+     * Goal: src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_editor.spec.ts
+     * (extend the existing "Discover ES|QL editor" suite).
      */
     it('should submit query with Ctrl+Enter keyboard shortcut', async () => {
       await esql.setEsqlEditorQuery('FROM logstash-* | LIMIT 10');
@@ -93,9 +102,9 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     /**
-     * Migration recommendation: MIGRATE TO SCOUT (single smoke test, together with the validation test
-     * below). Jest covers errors and the popover but mocks validate; keep one end-to-end check with the real
-     * validator.
+     * Migration recommendation: MIGRATE TO SCOUT (together with the validation test below, as one
+     * footer error flow). Jest (esql_editor.test.tsx) covers the popover but mocks validate; keep an
+     * end-to-end check with the real validator.
      *
      * Goal: src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_editor.spec.ts
      * (extend the existing "Discover ES|QL editor" suite).
@@ -118,8 +127,13 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     /**
-     * Migration recommendation: DELETE. Query validity is covered by the kbn-esql-language validation
-     * tests; Jest mocks validate, so fold one invalid -> fixed transition into the Scout smoke test above.
+     * Migration recommendation: MIGRATE TO SCOUT (merge with the error details test above). Keep the
+     * valid -> invalid -> fixed transitions for the footer error button; the eight steps can be trimmed
+     * to the distinct ones (e.g. missing operand and mistyped command), since validity of each
+     * query is covered by the kbn-esql-language tests.
+     *
+     * Goal: src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_editor.spec.ts
+     * (extend the existing "Discover ES|QL editor" suite).
      */
     it('should update validation when modifying query', async () => {
       // Step 1: Build a complete query
