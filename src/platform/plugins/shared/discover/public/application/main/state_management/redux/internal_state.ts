@@ -77,7 +77,7 @@ const initialState: DiscoverInternalState = {
   userId: undefined,
   spaceId: undefined,
   persistedDiscoverSession: undefined,
-  draftSessionTitle: undefined,
+  saveSessionModal: { isOpen: false, initialTitle: undefined, initialCopyOnSave: false },
   hasUnsavedChanges: false,
   defaultProfileAdHocDataViewIds: [],
   defaultProfileEsqlQuery: undefined,
@@ -197,8 +197,19 @@ const internalStateSliceDef = createSlice({
       state.persistedDiscoverSession = action.payload;
     },
 
-    setDraftSessionTitle: (state, action: PayloadAction<string | undefined>) => {
-      state.draftSessionTitle = action.payload;
+    openSaveSessionModal: (
+      state,
+      action: PayloadAction<{ initialTitle?: string; initialCopyOnSave?: boolean }>
+    ) => {
+      state.saveSessionModal = {
+        isOpen: true,
+        initialTitle: action.payload.initialTitle,
+        initialCopyOnSave: action.payload.initialCopyOnSave ?? false,
+      };
+    },
+
+    closeSaveSessionModal: (state) => {
+      state.saveSessionModal = { isOpen: false, initialTitle: undefined, initialCopyOnSave: false };
     },
 
     setUnsavedChanges: (state, action: PayloadAction<HasUnsavedChangesResult>) => {
@@ -666,10 +677,7 @@ const createMiddleware = (options: InternalStateDependencies) => {
   >;
 
   startListening({
-    matcher: isAnyOf(
-      internalStateSlice.actions.setTabs,
-      internalStateSlice.actions.setDraftSessionTitle
-    ),
+    matcher: isAnyOf(internalStateSlice.actions.setTabs),
     effect: throttle<
       ListenerEffect<
         UnknownAction,
@@ -690,8 +698,7 @@ const createMiddleware = (options: InternalStateDependencies) => {
         void tabsStorageManager.persistLocally(
           { allTabs: selectAllTabs(state), recentlyClosedTabs: selectRecentlyClosedTabs(state) },
           getTabInternalState,
-          state.persistedDiscoverSession?.id,
-          state.draftSessionTitle
+          state.persistedDiscoverSession?.id
         );
       },
       MIDDLEWARE_THROTTLE_MS,
