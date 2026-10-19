@@ -158,6 +158,7 @@
     "@elastic/elasticsearch": "9.5.1",
     "@elastic/ems-client": "8.7.0",
     "@elastic/esql": "4.32.0",
+    "@elastic/esql-definitions": "4.32.0",
     "@elastic/eui": "123.1.0",
     "@elastic/eui-illustrations": "1.1.0",
     "@elastic/eui-theme-borealis": "8.1.0",
