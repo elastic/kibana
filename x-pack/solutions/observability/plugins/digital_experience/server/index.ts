@@ -10,4 +10,4 @@ export const plugin = async () => {
   return new Plugin();
 };
 
-export { config } from '../common/config';
+export { config } from './config';
