@@ -56,6 +56,10 @@ const inputSchema = lazySchema(() =>
     probe_timeout_ms: z.number().int().min(1_000).max(30_000),
     probe_concurrency: z.number().int().min(1).max(10),
     budget_ms: z.number().int().min(2_000).max(60_000),
+    max_skip_age_hours: z
+      .number()
+      .min(1)
+      .max(24 * 30),
   })
 );
 
@@ -112,12 +116,16 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 
 const parseDetectionRow = (
   row: DetectionRow
-): { ruleUuid: string; detectionId: string | undefined } | undefined => {
+):
+  | { ruleUuid: string; detectionId: string | undefined; sourceId: string | undefined }
+  | undefined => {
   const [ruleUuid, source] = row;
   if (typeof ruleUuid !== 'string' || ruleUuid === '') return undefined;
   const detectionId =
     isRecord(source) && typeof source.detection_id === 'string' ? source.detection_id : undefined;
-  return { ruleUuid, detectionId };
+  const sourceId =
+    isRecord(source) && typeof source.source_id === 'string' ? source.source_id : undefined;
+  return { ruleUuid, detectionId, sourceId };
 };
 
 const countBy = <T>(items: readonly T[], getKey: (item: T) => string | undefined) =>
@@ -125,6 +133,56 @@ const countBy = <T>(items: readonly T[], getKey: (item: T) => string | undefined
     const key = getKey(item);
     return key === undefined ? counts : { ...counts, [key]: (counts[key] ?? 0) + 1 };
   }, {});
+
+/**
+ * The live series that a detection of another rule is joining: it arrives for a source the series
+ * covers while its rule is not a member. Detections of the series' own members must be re-judged.
+ */
+const findJoinedSeries = ({
+  detections,
+  memberships,
+}: {
+  detections: ReadonlyArray<{ ruleUuid: string; sourceId: string | undefined }>;
+  memberships: ReadonlyMap<string, readonly LiveRuleMembership[]>;
+}): Set<string> => {
+  const joined = new Set<string>();
+  const allSeries = [...memberships.values()].flat();
+  for (const { ruleUuid, sourceId } of detections) {
+    if (sourceId === undefined) continue;
+    const ownEventIds = new Set((memberships.get(ruleUuid) ?? []).map(({ eventId }) => eventId));
+    for (const { eventId, sourceIds } of allSeries) {
+      if (eventId !== undefined && !ownEventIds.has(eventId) && sourceIds.includes(sourceId)) {
+        joined.add(eventId);
+      }
+    }
+  }
+  return joined;
+};
+
+/** A skip is only as good as the series it rests on: an old series or a joining rule withdraws it. */
+const withEscalation = ({
+  classification,
+  memberships,
+  maxSkipAgeMs,
+  now,
+  joiningEventIds,
+}: {
+  classification: DetectionClassification;
+  memberships: readonly LiveRuleMembership[];
+  maxSkipAgeMs: number;
+  now: number;
+  joiningEventIds: ReadonlySet<string>;
+}): DetectionClassification => {
+  if (classification.decision !== 'skip') return classification;
+  const isTooOld = memberships.some(
+    ({ createdAt }) => createdAt !== undefined && now - Date.parse(createdAt) > maxSkipAgeMs
+  );
+  if (isTooOld) return { decision: 'needs_agent', reason: 'series_too_old' };
+  const isJoining = memberships.some(
+    ({ eventId }) => eventId !== undefined && joiningEventIds.has(eventId)
+  );
+  return isJoining ? { decision: 'needs_agent', reason: 'member_joining' } : classification;
+};
 
 /** A rule needs a probe only when every one of its live series judged it. */
 const needsProbe = (series: readonly LiveRuleMembership[]): boolean =>
@@ -135,6 +193,10 @@ export interface ClassifyBatchParams {
   /** The names of the row columns; the `get_detections` ones when absent. */
   columns?: readonly string[];
   shadowMode: boolean;
+  /** A skip is withdrawn when the series it rests on is older than this. */
+  maxSkipAgeMs: number;
+  /** The clock the series ages are read against. */
+  now: number;
   probeConcurrency: number;
   findLiveMembers: (ruleUuids: string[]) => Promise<Map<string, LiveRuleMembership[]>>;
   /** Each rule's latest series in any status, for the agent to read; none when absent. */
@@ -154,6 +216,8 @@ export const classifyBatch = async ({
   rows,
   columns,
   shadowMode,
+  maxSkipAgeMs,
+  now,
   probeConcurrency,
   findLiveMembers,
   findPriorSeries,
@@ -209,6 +273,11 @@ export const classifyBatch = async ({
       )
   );
 
+  const joiningEventIds = findJoinedSeries({
+    detections: classifiable,
+    memberships,
+  });
+
   const decisions: Decision[] = [];
   const entries: BatchEntry[] = rows.map((row) =>
     toBatchEntry({
@@ -223,10 +292,14 @@ export const classifyBatch = async ({
     const { ruleUuid, detectionId } = row;
     const probed = probes.get(ruleUuid);
     const baseline = baselines.get(ruleUuid);
+    const series = memberships.get(ruleUuid) ?? [];
     const classification: DetectionClassification = withinCap
-      ? classifyDetection({
-          memberships: memberships.get(ruleUuid) ?? [],
-          probe: probed ?? NOT_PROBED,
+      ? withEscalation({
+          classification: classifyDetection({ memberships: series, probe: probed ?? NOT_PROBED }),
+          memberships: series,
+          maxSkipAgeMs,
+          now,
+          joiningEventIds,
         })
       : { decision: 'needs_agent', reason: 'over_cap' };
     if (classification.decision === 'skip') skippedIndexes.add(index);
@@ -298,6 +371,7 @@ export const classifyDetectionsStepDefinition = ({ logger }: { logger: Logger })
         probe_timeout_ms: timeoutMs,
         probe_concurrency: probeConcurrency,
         budget_ms: budgetMs,
+        max_skip_age_hours: maxSkipAgeHours,
       } = context.input;
       const esClient = context.contextManager.getScopedEsClient();
       const ruleEventsClient = new RuleEventsClient({ esClient, space: spaceId });
@@ -321,6 +395,8 @@ export const classifyDetectionsStepDefinition = ({ logger }: { logger: Logger })
         rows,
         columns,
         shadowMode,
+        maxSkipAgeMs: maxSkipAgeHours * 3_600_000,
+        now,
         probeConcurrency,
         findLiveMembers: (ruleUuids) => ruleEventsClient.findLiveMembers({ ruleUuids }),
         findPriorSeries: (ruleUuids) =>

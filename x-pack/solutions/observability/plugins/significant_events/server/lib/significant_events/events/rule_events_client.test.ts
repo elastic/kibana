@@ -746,7 +746,14 @@ describe('RuleEventsClient', () => {
 
       expect([...members.keys()]).toEqual(['rule-A']);
       expect(members.get('rule-A')).toEqual([
-        { eventId: 'event-1', status: 'active', verdict: 'confirms', esqlQuery: 'FROM $.a' },
+        {
+          eventId: 'event-1',
+          status: 'active',
+          verdict: 'confirms',
+          esqlQuery: 'FROM $.a',
+          createdAt: undefined,
+          sourceIds: ['logs.checkout'],
+        },
       ]);
     });
 
@@ -786,7 +793,14 @@ describe('RuleEventsClient', () => {
       const members = await client.findLiveMembers({ ruleUuids: ['rule-A'] });
 
       expect(members.get('rule-A')).toEqual([
-        { eventId: 'event-1', status: 'active', verdict: 'not_checked', esqlQuery: undefined },
+        {
+          eventId: 'event-1',
+          status: 'active',
+          verdict: 'not_checked',
+          esqlQuery: undefined,
+          createdAt: undefined,
+          sourceIds: ['logs.checkout'],
+        },
       ]);
     });
 

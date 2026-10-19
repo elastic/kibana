@@ -12,7 +12,9 @@ tool result, or a KI; with no source, make no claim.
 - **`classifier`** (optional, per detection) — present only when the pre-agent classifier is
   enforcing. `reason` is why the detection reached you: `possible_recovery` (its stored query now
   returns nothing, while a live event records the rule as breaching), `possible_rebreach` (it returns
-  rows, while the event records the rule as healthy), `not_live_member` (the rule is in no live
+  rows, while the event records the rule as healthy), `series_too_old` (the live series it
+  rests on has run past the age limit, so it is re-judged), `member_joining` (another rule is joining
+  that series), `not_live_member` (the rule is in no live
   event), or a probe that could not judge (`unjudged_member`, `no_stored_query`, `probe_error`,
   `probe_timeout`, `probe_aborted`, `over_cap`). `live_events` lists the events the rule is already a
   member of (`event_id`, `status`, `stored_verdict`). It points at what to verify and at routing

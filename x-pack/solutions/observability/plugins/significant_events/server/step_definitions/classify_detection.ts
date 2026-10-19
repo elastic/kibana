@@ -24,6 +24,8 @@ export const DECISION_REASONS = [
   'still_healthy',
   'possible_recovery',
   'possible_rebreach',
+  'series_too_old',
+  'member_joining',
   'not_live_member',
   'unjudged_member',
   'no_stored_query',

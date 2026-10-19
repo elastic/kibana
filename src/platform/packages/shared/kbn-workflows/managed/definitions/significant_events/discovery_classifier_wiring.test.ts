@@ -106,6 +106,7 @@ describe('discovery workflow detection classifier wiring', () => {
         probe_timeout_ms: '${{ inputs.classifierProbeTimeoutMs }}',
         probe_concurrency: '${{ inputs.classifierProbeConcurrency }}',
         budget_ms: '${{ inputs.classifierBudgetMs }}',
+        max_skip_age_hours: '${{ inputs.classifierMaxSkipAgeHours }}',
       });
     });
   });

@@ -243,6 +243,10 @@ export interface LiveRuleMembership {
   verdict: SignalVerdict;
   /** The stored verification query, absent when the signal ran no query. */
   esqlQuery: string | undefined;
+  /** When the series was opened: its earliest version. */
+  createdAt: string | undefined;
+  /** The sources the series covers. */
+  sourceIds: string[];
 }
 
 /**
@@ -488,7 +492,7 @@ export class RuleEventsClient {
    * member's latest stored signal. Every series version carries the latest signal per rule, so the
    * latest version per series is enough. A rule that is in no live series is absent from the map.
    *
-   * Built on `findLatestActive`, so it shares its cap: a space with more live series than
+   * Shares the cap of `findLatestActive`: a space with more live series than
    * MAX_DEDUP_SCAN_LIMIT can omit members, which callers must read as "not a live member".
    */
   async findLiveMembers({
@@ -500,8 +504,23 @@ export class RuleEventsClient {
     if (ruleUuids.length === 0) return memberships;
 
     const requested = new Set(ruleUuids);
-    const { hits } = await this.findLatestActive({ ruleUuids });
-    for (const event of hits) {
+    // `created_at` is the earliest version of the series, computed before the latest-reduction.
+    const query = pickLatestPerGroup(
+      buildBaseQuery(this.clients.space)
+        .pipe`INLINE STATS created_at = MIN(@timestamp) BY ${esql.col(GROUP_HASH_FIELD)}`,
+      GROUP_HASH_FIELD
+    ).where`${esql.col('alert.status')} IN (${SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS.map((status) =>
+      esql.str(status)
+    )})`.where`${ruleUuidsIntersects(ruleUuids)}`;
+    const rows = await executeEsqlQuery<RuleEventSourceRowWithCreatedAt>({
+      esClient: this.clients.esClient,
+      query: withDataJsonProjection(query)
+        .keep('_source', 'data_json', 'created_at')
+        .limit(MAX_DEDUP_SCAN_LIMIT),
+      fields: ['data_json', 'created_at'],
+    });
+    for (const row of rows) {
+      const event = decodeSignificantEvent(row);
       for (const signal of event.signals ?? []) {
         const ruleUuid = signal.metadata.rule_uuid;
         if (!ruleUuid || !requested.has(ruleUuid)) continue;
@@ -512,6 +531,8 @@ export class RuleEventsClient {
             status: event.status,
             verdict: signal.verdict,
             esqlQuery: signal.evidence?.esql_query,
+            createdAt: row.created_at,
+            sourceIds: event.source_ids,
           },
         ]);
       }

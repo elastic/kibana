@@ -22,9 +22,16 @@ import type { ProbeResult } from './run_probe';
 
 const STORED_QUERY = 'FROM $.a | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend';
 
-const detectionRow = (ruleUuid: string) => [
+const NOW = Date.parse('2026-10-19T12:00:00.000Z');
+const HOUR_MS = 3_600_000;
+
+const detectionRow = (ruleUuid: string, sourceId?: string) => [
   ruleUuid,
-  { detection_id: `${ruleUuid}-detection`, rule_uuid: ruleUuid },
+  {
+    detection_id: `${ruleUuid}-detection`,
+    rule_uuid: ruleUuid,
+    ...(sourceId ? { source_id: sourceId } : {}),
+  },
   70,
   1,
   false,
@@ -33,7 +40,14 @@ const detectionRow = (ruleUuid: string) => [
 const membership = (
   verdict: SignalVerdict,
   esqlQuery: string | undefined = STORED_QUERY
-): LiveRuleMembership => ({ eventId: 'event-1', status: 'active', verdict, esqlQuery });
+): LiveRuleMembership => ({
+  eventId: 'event-1',
+  status: 'active',
+  verdict,
+  esqlQuery,
+  createdAt: new Date(NOW - HOUR_MS).toISOString(),
+  sourceIds: ['logs.checkout'],
+});
 
 const probeResult = (status: ProbeResult['status'], hasRows: boolean): ProbeResult => ({
   status,
@@ -47,6 +61,8 @@ const membersOf = (entries: Record<string, LiveRuleMembership[]>) =>
 const batchParams = (overrides: Partial<ClassifyBatchParams> = {}): ClassifyBatchParams => ({
   rows: [],
   shadowMode: false,
+  maxSkipAgeMs: 24 * HOUR_MS,
+  now: NOW,
   probeConcurrency: 5,
   findLiveMembers: jest.fn(async () => new Map()),
   probe: jest.fn(async () => probeResult('ok', true)),
@@ -119,6 +135,72 @@ describe('classifyBatch', () => {
       not_live_member: 1,
     });
     expect(output.probe_status_counts).toEqual({ ok: 2 });
+  });
+
+  describe('the escalations that withdraw a skip', () => {
+    it('sends a skippable detection to the agent when its series is older than the limit', async () => {
+      const old = {
+        ...membership('confirms'),
+        createdAt: new Date(NOW - 25 * HOUR_MS).toISOString(),
+      };
+      const findLiveMembers = jest.fn(async () => membersOf({ 'rule-A': [old] }));
+
+      const output = await classifyBatch(
+        batchParams({ rows: [detectionRow('rule-A')], findLiveMembers })
+      );
+
+      expect(output.skipped_count).toBe(0);
+      expect(output.decisions[0]).toMatchObject({
+        decision: 'needs_agent',
+        reason: 'series_too_old',
+      });
+    });
+
+    it('still skips when the series is within the limit', async () => {
+      const findLiveMembers = jest.fn(async () =>
+        membersOf({ 'rule-A': [membership('confirms')] })
+      );
+
+      const output = await classifyBatch(
+        batchParams({ rows: [detectionRow('rule-A')], findLiveMembers })
+      );
+
+      expect(output.decisions[0]).toMatchObject({ decision: 'skip', reason: 'still_breaching' });
+    });
+
+    it('sends a member to the agent when another rule joins its series for the same source', async () => {
+      const findLiveMembers = jest.fn(async () =>
+        membersOf({ 'rule-A': [membership('confirms')], 'rule-B': [] })
+      );
+
+      const output = await classifyBatch(
+        batchParams({
+          rows: [detectionRow('rule-A', 'logs.checkout'), detectionRow('rule-B', 'logs.checkout')],
+          findLiveMembers,
+        })
+      );
+
+      expect(output.decisions.map(({ reason }) => reason)).toEqual([
+        'member_joining',
+        'not_live_member',
+      ]);
+      expect(output.skipped_count).toBe(0);
+    });
+
+    it('does not treat a rule on another source as joining', async () => {
+      const findLiveMembers = jest.fn(async () =>
+        membersOf({ 'rule-A': [membership('confirms')] })
+      );
+
+      const output = await classifyBatch(
+        batchParams({
+          rows: [detectionRow('rule-A', 'logs.checkout'), detectionRow('rule-B', 'logs.other')],
+          findLiveMembers,
+        })
+      );
+
+      expect(output.decisions[0]).toMatchObject({ decision: 'skip', reason: 'still_breaching' });
+    });
   });
 
   describe('the batch the agent reads', () => {
@@ -356,7 +438,12 @@ describe('classifyBatch', () => {
     );
 
     await classifyBatch(
-      batchParams({ rows: ruleIds.map(detectionRow), probe, findLiveMembers, probeConcurrency: 2 })
+      batchParams({
+        rows: ruleIds.map((id) => detectionRow(id)),
+        probe,
+        findLiveMembers,
+        probeConcurrency: 2,
+      })
     );
 
     expect(probe).toHaveBeenCalledTimes(6);
@@ -365,7 +452,7 @@ describe('classifyBatch', () => {
 
   it('classifies at most MAX_CLASSIFIED_ROWS rows and keeps the rest for the agent', async () => {
     const ruleIds = Array.from({ length: MAX_CLASSIFIED_ROWS + 1 }, (_, i) => `rule-${i}`);
-    const rows = ruleIds.map(detectionRow);
+    const rows = ruleIds.map((id) => detectionRow(id));
     const probe = jest.fn(async () => probeResult('ok', true));
     const findLiveMembers = jest.fn(async (requested: string[]) =>
       membersOf(Object.fromEntries(requested.map((id) => [id, [membership('confirms')]])))
@@ -402,6 +489,7 @@ describe('classifyDetectionsStepDefinition', () => {
     probe_timeout_ms: 8_000,
     probe_concurrency: 5,
     budget_ms: 20_000,
+    max_skip_age_hours: 24,
   };
 
   const createDefinition = () => {
@@ -465,6 +553,8 @@ describe('classifyDetectionsStepDefinition', () => {
     ['probe_timeout_ms above 30000', { probe_timeout_ms: 30_001 }],
     ['budget_ms below 2000', { budget_ms: 1_999 }],
     ['budget_ms above 60000', { budget_ms: 60_001 }],
+    ['max_skip_age_hours below 1', { max_skip_age_hours: 0 }],
+    ['max_skip_age_hours above 720', { max_skip_age_hours: 721 }],
   ])('rejects %s', (_name, override) => {
     const { definition } = createDefinition();
 

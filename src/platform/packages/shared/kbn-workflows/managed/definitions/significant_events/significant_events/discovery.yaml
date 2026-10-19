@@ -59,6 +59,12 @@ triggers:
           minimum: 1
           maximum: 10
           description: 'Maximum stored-query probes the classifier runs at once.'
+        classifierMaxSkipAgeHours:
+          type: number
+          default: 24
+          minimum: 1
+          maximum: 720
+          description: 'A detection is never skipped on the strength of a live series older than this many hours: it goes to the agent, so a long-running event is re-judged at least this often.'
         classifierBudgetMs:
           type: number
           default: 20000
@@ -204,6 +210,7 @@ steps:
       probe_timeout_ms: '${{ inputs.classifierProbeTimeoutMs }}'
       probe_concurrency: '${{ inputs.classifierProbeConcurrency }}'
       budget_ms: '${{ inputs.classifierBudgetMs }}'
+      max_skip_age_hours: '${{ inputs.classifierMaxSkipAgeHours }}'
     on-failure:
       continue: true
 
