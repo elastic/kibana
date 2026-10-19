@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import type { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 
 export interface SyncBadgeProps {
@@ -72,17 +70,4 @@ export function getSyncBadgeDescriptor({
 }: SyncBadgeProps): SyncBadgeDescriptor | undefined {
   const label = getSyncLabel(agentName, sync);
   return label ? { label, toolTipContent: TOOLTIP_CONTENT } : undefined;
-}
-
-export function SyncBadge(props: SyncBadgeProps) {
-  const descriptor = getSyncBadgeDescriptor(props);
-  if (!descriptor) {
-    return null;
-  }
-
-  return (
-    <EuiToolTip content={descriptor.toolTipContent}>
-      <EuiBadge tabIndex={0}>{descriptor.label}</EuiBadge>
-    </EuiToolTip>
-  );
 }

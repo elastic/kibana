@@ -5,16 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
 import type { EuiThemeComputed } from '@elastic/eui';
-import { EuiBadge, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import styled from '@emotion/styled';
 import type { EventOutcome } from '../../../../typings/es_schemas/raw/fields/event_outcome';
-
-const ResetLineHeight = styled.span`
-  line-height: initial;
-`;
 
 export interface FailureBadgeDescriptor {
   label: string;
@@ -40,23 +33,4 @@ export function getFailureBadgeDescriptor(
       defaultMessage: 'event.outcome = failure',
     }),
   };
-}
-
-export function FailureBadge({ outcome }: { outcome?: EventOutcome }) {
-  const { euiTheme } = useEuiTheme();
-  const descriptor = getFailureBadgeDescriptor(outcome, euiTheme);
-
-  if (!descriptor) {
-    return null;
-  }
-
-  return (
-    <ResetLineHeight>
-      <EuiToolTip content={descriptor.toolTipContent}>
-        <EuiBadge color={descriptor.color} tabIndex={0}>
-          {descriptor.label}
-        </EuiBadge>
-      </EuiToolTip>
-    </ResetLineHeight>
-  );
 }
