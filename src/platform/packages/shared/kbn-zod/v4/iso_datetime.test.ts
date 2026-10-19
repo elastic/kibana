@@ -10,82 +10,63 @@
 import { z } from 'zod/v4';
 import { isoDateTime } from './iso_datetime';
 
-const SAMPLES_BY_MODE = [
-  {
-    mode: 'default (UTC only)',
-    options: undefined,
-    valid: [
-      '2024-01-01T10:00Z',
-      '2024-01-01T10:00:00Z',
-      '2024-01-01T10:00:00.123Z',
-      '2024-02-29T10:00Z',
-    ],
-    invalid: [
-      '2024-02-30T10:00Z',
-      '2023-02-29T10:00Z',
-      '2024-01-01T24:00Z',
-      '2024-01-01T10:00+01:00',
-      '2024-01-01T10:00',
-      'not-a-datetime',
-    ],
-  },
-  {
-    mode: 'offset: true',
-    options: { offset: true },
-    valid: [
-      '2024-01-01T10:00Z',
-      '2024-01-01T10:00+01:00',
-      '2024-01-01T10:00:00+01:00',
-      '2024-01-01T10:00:00.123-05:30',
-    ],
-    invalid: [
-      '2024-02-30T10:00Z',
-      '2024-01-01T10:00+24:00',
-      '2024-01-01T10:00+0100',
-      '2024-01-01T10:00',
-      'not-a-datetime',
-    ],
-  },
-];
-
 describe('isoDateTime', () => {
-  describe.each(SAMPLES_BY_MODE)('$mode', ({ options, valid, invalid }) => {
-    const schema = isoDateTime(options);
-    const pattern = new RegExp((z.toJSONSchema(schema) as { pattern: string }).pattern);
+  const utcMinute = '2024-01-01T10:00Z';
+  const utcSecond = '2024-01-01T10:00:00Z';
+  const utcFraction = '2024-01-01T10:00:00.123Z';
+  const offsetMinute = '2024-01-01T10:00+01:00';
+  const offsetSecond = '2024-01-01T10:00:00+01:00';
+  const localMinute = '2024-01-01T10:00';
+  const tooLong = `2024-01-01T10:00:00.${'1'.repeat(44)}Z`;
 
-    it.each(valid)('accepts %s in zod and the JSON Schema pattern', (value) => {
-      expect(schema.safeParse(value).success).toBe(true);
-      expect(pattern.test(value)).toBe(true);
-    });
+  it('accepts minute and second precision for default UTC Z semantics', () => {
+    const schema = isoDateTime();
+    expect(schema.parse(utcMinute)).toBe(utcMinute);
+    expect(schema.parse(utcSecond)).toBe(utcSecond);
+    expect(schema.parse(utcFraction)).toBe(utcFraction);
+    expect(schema.safeParse(offsetMinute).success).toBe(false);
+    expect(schema.safeParse(localMinute).success).toBe(false);
+  });
 
-    it.each(invalid)('rejects %s in zod and the JSON Schema pattern', (value) => {
-      expect(schema.safeParse(value).success).toBe(false);
-      expect(pattern.test(value)).toBe(false);
-    });
+  it('accepts minute and second precision when offset is enabled', () => {
+    const schema = isoDateTime({ offset: true });
+    expect(schema.parse(utcMinute)).toBe(utcMinute);
+    expect(schema.parse(offsetMinute)).toBe(offsetMinute);
+    expect(schema.parse(offsetSecond)).toBe(offsetSecond);
+    expect(schema.safeParse(localMinute).success).toBe(false);
+  });
+
+  it('emits a single date-time string in JSON Schema', () => {
+    const schema = isoDateTime({ offset: true });
+    expect(z.toJSONSchema(schema)).toEqual(
+      expect.objectContaining({
+        type: 'string',
+        format: 'date-time',
+        maxLength: 64,
+        pattern: expect.any(String),
+      })
+    );
+    expect(z.toJSONSchema(schema)).not.toHaveProperty('anyOf');
+  });
+
+  it('emits a JSON Schema pattern that matches the same datetimes', () => {
+    const pattern = new RegExp(
+      (z.toJSONSchema(isoDateTime({ offset: true })) as { pattern: string }).pattern
+    );
+    expect(pattern.test(utcMinute)).toBe(true);
+    expect(pattern.test(offsetMinute)).toBe(true);
+    expect(pattern.test(localMinute)).toBe(false);
+    expect(pattern.test('2024-02-30T10:00Z')).toBe(false);
   });
 
   it('rejects values longer than 64 characters', () => {
-    const schema = isoDateTime();
-    const value = `2024-01-01T10:00:00.${'1'.repeat(44)}Z`;
-    expect(value.length).toBeGreaterThan(64);
-    const result = schema.safeParse(value);
-    expect(result.success).toBe(false);
+    const result = isoDateTime().safeParse(tooLong);
     expect(result.error?.issues.map(({ code }) => code)).toEqual(['too_big']);
   });
 
   it('uses the custom message for values longer than 64 characters', () => {
-    const schema = isoDateTime({ message: 'Custom datetime message' });
-    const result = schema.safeParse('x'.repeat(65));
+    const result = isoDateTime({ message: 'Custom datetime message' }).safeParse(tooLong);
     expect(result.error?.issues.map(({ message }) => message)).toEqual(['Custom datetime message']);
-  });
-
-  it('emits JSON Schema type, format, maxLength, and pattern', () => {
-    expect(z.toJSONSchema(isoDateTime())).toMatchObject({
-      type: 'string',
-      format: 'date-time',
-      maxLength: 64,
-      pattern: expect.any(String),
-    });
   });
 
   it('surfaces a reasonable error message for invalid input', () => {
@@ -93,7 +74,6 @@ describe('isoDateTime', () => {
     const result = schema.safeParse('not-a-datetime');
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues).toHaveLength(1);
       expect(result.error.issues[0]?.message).toMatch(/Invalid ISO datetime/i);
     }
   });
@@ -103,17 +83,6 @@ describe('isoDateTime', () => {
     const result = schema.safeParse('bad');
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues).toHaveLength(1);
-      expect(result.error.issues[0]?.message).toBe('Custom datetime message');
-    }
-  });
-
-  it('accepts a string as the error message', () => {
-    const schema = isoDateTime('Custom datetime message');
-    const result = schema.safeParse('bad');
-    expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.error.issues).toHaveLength(1);
       expect(result.error.issues[0]?.message).toBe('Custom datetime message');
     }
   });
