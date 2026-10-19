@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleChangedEbtData, RuleEbtEventType } from '@kbn/alerting-v2-schemas';
+import type { RuleChangedEbtData, RuleEbtEventType } from '../../../../server/lib/telemetry/rule_ebt_schema';
 import type { KbnClient, ScoutLogger } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
 import { COMMON_HEADERS } from '../constants';

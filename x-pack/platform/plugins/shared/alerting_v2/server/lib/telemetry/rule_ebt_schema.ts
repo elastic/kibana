@@ -6,8 +6,10 @@
  */
 
 import { isoDateTime, lazySchema, z } from '@kbn/zod/v4';
-import { ID_MAX_LENGTH, RULE_EVENT_APP_MAX_LENGTH } from './constants';
-import { ruleIdSchema, ruleKindSchema } from './rule_data_schema';
+import { ID_MAX_LENGTH, ruleIdSchema, ruleKindSchema } from '@kbn/alerting-v2-schemas';
+
+/** Maximum length of an app id carried on a rule-change event. */
+export const RULE_EVENT_APP_MAX_LENGTH = 64;
 
 export const RULE_CREATED_EBT_EVENT_TYPE = 'alerting_v2_rule_created' as const;
 export const RULE_UPDATED_EBT_EVENT_TYPE = 'alerting_v2_rule_updated' as const;

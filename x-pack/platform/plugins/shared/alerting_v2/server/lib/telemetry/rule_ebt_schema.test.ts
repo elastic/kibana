@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RULE_EVENT_APP_MAX_LENGTH } from './constants';
+import { RULE_EVENT_APP_MAX_LENGTH } from './rule_ebt_schema';
 import {
   RULE_EBT_EVENT_TYPES,
   ruleChangedEventOriginTelemetrySchema,

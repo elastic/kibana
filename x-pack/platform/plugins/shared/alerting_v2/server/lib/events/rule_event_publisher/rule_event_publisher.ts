@@ -7,7 +7,8 @@
 
 import { inject, injectable } from 'inversify';
 import { v4 as uuidv4 } from 'uuid';
-import type { RuleResponse, RuleEbtChannel } from '@kbn/alerting-v2-schemas';
+import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import type { RuleEbtChannel } from '../../telemetry/rule_ebt_schema';
 import {
   AlertingDomainEventBusToken,
   type AlertingDomainEvent,

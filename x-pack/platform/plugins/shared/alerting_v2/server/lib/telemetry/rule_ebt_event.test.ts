@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleChangedEventOrigin } from '@kbn/alerting-v2-schemas';
+import type { RuleChangedEventOrigin } from './rule_ebt_schema';
 import { createRuleResponse } from '../test_utils';
 import {
   buildRuleChangedEventData,

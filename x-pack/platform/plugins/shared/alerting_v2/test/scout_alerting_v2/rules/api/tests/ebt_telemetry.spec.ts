@@ -11,7 +11,7 @@ import {
   RULE_DISABLED_EBT_EVENT_TYPE,
   RULE_ENABLED_EBT_EVENT_TYPE,
   RULE_UPDATED_EBT_EVENT_TYPE,
-} from '@kbn/alerting-v2-schemas';
+} from '../../../../../server/lib/telemetry/rule_ebt_schema';
 import { expect } from '@kbn/scout/api';
 import {
   ALERTING_V2_RULES_ALL_ROLE,

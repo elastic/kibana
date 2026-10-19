@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { RuleResponse, RuleEbtChannel } from '@kbn/alerting-v2-schemas';
+import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import type { RuleEbtChannel } from '../../telemetry/rule_ebt_schema';
 
 /**
  * Data carried by every rule-lifecycle domain event.

@@ -11,7 +11,7 @@ import {
   ruleEventAppTelemetrySchema,
   type RuleEbtChannel,
   type RuleEbtOrigin,
-} from '@kbn/alerting-v2-schemas';
+} from './rule_ebt_schema';
 
 /** Options an in-process caller passes when it asks for a rules client. */
 export interface CreateRulesClientOptions {

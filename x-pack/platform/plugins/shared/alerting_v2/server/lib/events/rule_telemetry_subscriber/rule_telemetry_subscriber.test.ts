@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RULE_CREATED_EBT_EVENT_TYPE, RULE_DELETED_EBT_EVENT_TYPE } from '@kbn/alerting-v2-schemas';
+import { RULE_CREATED_EBT_EVENT_TYPE, RULE_DELETED_EBT_EVENT_TYPE } from '../../telemetry/rule_ebt_schema';
 import type { KibanaRequest } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { EbtServiceContract } from '../../services/ebt_service/ebt_service';

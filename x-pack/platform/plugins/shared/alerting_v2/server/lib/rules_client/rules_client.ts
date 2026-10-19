@@ -16,8 +16,8 @@ import {
   isStateTransitionAllowed,
   updateRuleDataSchema,
   type RuleKind,
-  type RuleEbtOrigin,
 } from '@kbn/alerting-v2-schemas';
+import type { RuleEbtOrigin } from '../telemetry/rule_ebt_schema';
 import { PluginStart } from '@kbn/core-di';
 import { Request, PluginInitializer } from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
