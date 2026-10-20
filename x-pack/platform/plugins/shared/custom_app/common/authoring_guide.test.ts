@@ -128,6 +128,12 @@ describe('the authoring guide', () => {
     expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('so no Markdown in them');
   });
 
+  it('teaches a select that takes its options from a query, and how an All option is kept', () => {
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('"optionsQuery"');
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('whose first column is the value of each option');
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('put an "All" option there');
+  });
+
   it('says that a component has a query or a source, not both, and that a chart cannot show cases', () => {
     expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('either a "query" or a "source", never both');
     expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('A chart cannot show cases');

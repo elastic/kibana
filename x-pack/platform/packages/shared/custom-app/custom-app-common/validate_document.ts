@@ -209,6 +209,13 @@ export const validateDocument = (document: DocumentToValidate, ctx: z.Refinement
       }
     }
 
+    if (node.type === 'select' && node.options.length === 0 && node.optionsQuery === undefined) {
+      issue(
+        `Node "${node.id}" has no options; give it some, or a query that returns them`,
+        node.id
+      );
+    }
+
     if (node.type === 'select' || node.type === 'button_group') {
       const seen = new Set<string>();
       node.options.forEach(({ value }) => {

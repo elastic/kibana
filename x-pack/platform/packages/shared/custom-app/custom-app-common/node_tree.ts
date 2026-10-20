@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { OPTIONS_SOURCE_SUFFIX } from './constants';
 import type { Action, AppNode, DataSource } from './document_schema';
 
 /** Returns the direct children of a node, empty for leaf nodes. */
@@ -60,11 +61,17 @@ export const getNodeSource = (node: AppNode): DataSource | undefined => {
   return query === undefined ? undefined : { type: 'esql', query };
 };
 
-/** Every source in the tree, by the id of the node that shows it. */
+/** The id the source of the options of a select is known by, which is not that of a component. */
+export const getOptionsSourceId = (nodeId: string): string => `${nodeId}${OPTIONS_SOURCE_SUFFIX}`;
+
+/** Every source in the tree, by the id of the node that shows it, and of the options of a select. */
 export const collectSources = (root: AppNode): Record<string, DataSource> => {
   const source = getNodeSource(root);
   return {
     ...(source === undefined ? {} : { [root.id]: source }),
+    ...(root.type === 'select' && root.optionsQuery !== undefined
+      ? { [getOptionsSourceId(root.id)]: { type: 'esql', query: root.optionsQuery } }
+      : {}),
     ...Object.assign({}, ...getNodeChildren(root).map(collectSources)),
   };
 };

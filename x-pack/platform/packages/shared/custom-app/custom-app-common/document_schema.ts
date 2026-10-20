@@ -294,10 +294,16 @@ const formNodeSchema = z.object({
   onSubmit: actionsSchema.default([]),
 });
 
+/**
+ * The options are the ones written here, and the ones a query gives after them: the first column
+ * is the value, and a second column, when there is one, its label. Either is enough, which
+ * validation checks.
+ */
 const selectNodeSchema = z.object({
   type: z.literal('select'),
   ...inputFields,
-  options: z.array(inputOptionSchema).min(1).max(MAX_INPUT_OPTIONS),
+  options: z.array(inputOptionSchema).max(MAX_INPUT_OPTIONS).default([]),
+  optionsQuery: querySchema.optional(),
 });
 
 const buttonGroupNodeSchema = z.object({

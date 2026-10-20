@@ -12,6 +12,7 @@ import {
   getInterpolatedText,
   getNodeChildren,
   getNodeSource,
+  getOptionsSourceId,
   getSourceStateKeys,
 } from './node_tree';
 import {
@@ -968,6 +969,61 @@ describe('input nodes', () => {
       issuesOf(inputDoc({ type: 'button_group', options: [{ value: 'a' }, { value: 'b' }] }))
     ).toEqual([]);
     expect(issuesOf(inputDoc({ type: 'search', placeholder: 'Find a service' }))).toEqual([]);
+  });
+
+  describe('the options of a select from a query', () => {
+    it('can be a query alone, or follow the options that are written', () => {
+      expect(
+        issuesOf(select({ options: [], optionsQuery: 'FROM logs | STATS BY event.outcome' }))
+      ).toEqual([]);
+      expect(issuesOf(select({ optionsQuery: 'FROM logs | STATS BY event.outcome' }))).toEqual([]);
+    });
+
+    it('needs options, or a query that gives them', () => {
+      expect(JSON.stringify(issuesOf(select({ options: [] })))).toContain('has no options');
+    });
+
+    it('does not need written options when there is a query, and they default to none', () => {
+      const result = appDocumentSchema.parse(
+        inputDoc({ type: 'select', optionsQuery: 'ROW a = 1' })
+      );
+
+      expect(result.root).toMatchObject({ type: 'select', options: [] });
+    });
+
+    it('needs a query that is not empty, and not too long', () => {
+      expect(appDocumentSchema.safeParse(select({ optionsQuery: '' })).success).toBe(false);
+      expect(
+        appDocumentSchema.safeParse(select({ optionsQuery: 'x'.repeat(MAX_QUERY_LENGTH + 1) }))
+          .success
+      ).toBe(false);
+    });
+
+    it('is a source of its own, named after the select, so it runs with the app', () => {
+      const { root } = appDocumentSchema.parse({
+        root: {
+          type: 'stack',
+          id: 'root',
+          children: [{ type: 'table', id: 'rows', query: 'FROM rows' }],
+        },
+      });
+      expect(collectSources(root)).toEqual({ rows: { type: 'esql', query: 'FROM rows' } });
+
+      const withSelect = appDocumentSchema.parse({
+        state: { severity: { type: 'string', default: '' } },
+        root: {
+          type: 'select',
+          id: 'pick',
+          label: 'Severity',
+          bind: 'severity',
+          optionsQuery: 'FROM logs | STATS BY level',
+        },
+      }).root;
+      expect(collectSources(withSelect)).toEqual({
+        'pick:options': { type: 'esql', query: 'FROM logs | STATS BY level' },
+      });
+      expect(getOptionsSourceId('pick')).toBe('pick:options');
+    });
   });
 
   it.each(['select', 'button_group', 'search'])(

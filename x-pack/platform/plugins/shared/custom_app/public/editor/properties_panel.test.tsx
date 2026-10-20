@@ -67,6 +67,14 @@ const initial = (): AppDocument =>
           ],
         },
         {
+          type: 'select',
+          id: 'with-query',
+          label: 'Level',
+          bind: 'filter',
+          options: [],
+          optionsQuery: 'FROM logs | STATS BY level',
+        },
+        {
           type: 'button_group',
           id: 'group',
           label: 'Group',
@@ -253,6 +261,40 @@ describe('PropertiesPanel', () => {
       setup('isolate');
 
       expect(screen.getByRole('heading', { name: 'Button' })).toBeInTheDocument();
+    });
+  });
+
+  describe('a select with options from a query', () => {
+    it('can take options from a query as well as the ones that are written', async () => {
+      const { onChange } = setup('pick');
+      expect(screen.queryByLabelText('ES|QL query editor')).not.toBeInTheDocument();
+
+      await userEvent.click(screen.getByRole('switch', { name: 'Also take options from a query' }));
+
+      expect(onChange).toHaveBeenLastCalledWith({ optionsQuery: 'ROW value = 1' });
+    });
+
+    it('edits that query, and says what its columns are', () => {
+      const { latest } = setup('with-query');
+
+      expect(screen.getByLabelText('ES|QL query editor')).toHaveValue('FROM logs | STATS BY level');
+      expect(screen.getByText(/The first column is the value of an option/)).toBeInTheDocument();
+      expect(latest.document).toBeDefined();
+    });
+
+    it('can stop taking options from a query', async () => {
+      const { onChange } = setup('with-query');
+
+      await userEvent.click(screen.getByRole('switch', { name: 'Also take options from a query' }));
+
+      expect(onChange).toHaveBeenLastCalledWith({ optionsQuery: undefined });
+    });
+
+    it('asks what it starts as in words and not from a list, since the options are not known here', () => {
+      setup('with-query');
+
+      expect(screen.getByRole('textbox', { name: 'Starts as' })).toBeInTheDocument();
+      expect(screen.queryByRole('combobox', { name: 'Starts as' })).not.toBeInTheDocument();
     });
   });
 

@@ -492,9 +492,49 @@ export const PropertiesPanel = ({
                 options={node.options}
                 onChange={(options) => onChange<'select' | 'button_group'>({ options })}
               />
+              {node.type === 'select' && (
+                <>
+                  <EuiSpacer size="m" />
+                  <EuiSwitch
+                    compressed
+                    id={`options-query-${node.id}`}
+                    label={i18n.translate('xpack.customApp.editor.optionsFromQuery', {
+                      defaultMessage: 'Also take options from a query',
+                    })}
+                    checked={node.optionsQuery !== undefined}
+                    onChange={(event) =>
+                      onChange<'select'>({
+                        optionsQuery: event.target.checked ? DEFAULT_QUERY : undefined,
+                      })
+                    }
+                  />
+                  {node.optionsQuery !== undefined && (
+                    <>
+                      <EuiSpacer size="s" />
+                      <EuiText size="xs" color="subdued">
+                        <p>
+                          {i18n.translate('xpack.customApp.editor.optionsQueryHelp', {
+                            defaultMessage:
+                              'The first column is the value of an option and a second column, if there is one, its label. They come after the options written above, and follow the period of the app.',
+                          })}
+                        </p>
+                      </EuiText>
+                      <EuiSpacer size="s" />
+                      <QueryField
+                        query={node.optionsQuery}
+                        state={document.state}
+                        onChange={(optionsQuery) => onChange<'select'>({ optionsQuery })}
+                      />
+                    </>
+                  )}
+                </>
+              )}
             </Section>
             <Section title={sections.value}>
-              {startsAs(node.bind, node.options)}
+              {startsAs(
+                node.bind,
+                node.type === 'select' && node.optionsQuery !== undefined ? undefined : node.options
+              )}
               {valueName(node.bind)}
             </Section>
           </Sections>

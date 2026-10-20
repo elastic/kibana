@@ -36,6 +36,10 @@ export const MAX_KEY_VALUE_FIELDS = 50;
 /** ES|QL reserves these parameter names for the query's time range. */
 export const RESERVED_STATE_KEYS: readonly string[] = ['_tstart', '_tend'];
 export const MAX_INPUT_OPTIONS = 50;
+/** The most options a query can give a select, as many as a person can look through in one. */
+export const MAX_QUERY_OPTIONS = 500;
+/** What is added to the id of a select to name the source of its options, which is not a component. */
+export const OPTIONS_SOURCE_SUFFIX = ':options';
 
 /** What a filter of the cases a component shows can hold: a search text, a tag. */
 export const MAX_CASES_FILTER_LENGTH = 256;
