@@ -28,7 +28,7 @@ const renderBadge = (item: ChangeHistoryListItem) =>
 
 describe('renderDashboardChangeHistoryBadge', () => {
   it('renders the unsaved changes badge for pending changes', () => {
-    renderBadge(getItem({ metadata: { unsavedChanges: true } }));
+    renderBadge(getItem({ action: 'dashboard_unsaved_changes' }));
     expect(screen.getByText('Unsaved changes')).toBeInTheDocument();
   });
 

@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 
 import type { ChangeHistoryBadgeRenderFn, ChangeHistoryListItem } from '@kbn/change-history-ui';
+import { DASHBOARD_DELETE_ACTION, DASHBOARD_UNSAVED_CHANGES_ACTION } from '../../common/constants';
 import { unsavedChangesBadgeStrings } from '../dashboard_app/_dashboard_app_strings';
 
 const DashboardChangeHistoryBadge = ({
@@ -22,7 +23,7 @@ const DashboardChangeHistoryBadge = ({
 }): JSX.Element | null => {
   const { euiTheme } = useEuiTheme();
 
-  if (item.metadata?.unsavedChanges) {
+  if (item.action === DASHBOARD_UNSAVED_CHANGES_ACTION) {
     return (
       <EuiBadge color={euiTheme.colors.backgroundLightWarning}>
         {unsavedChangesBadgeStrings.getUnsavedChangedBadgeText()}
@@ -41,7 +42,7 @@ const DashboardChangeHistoryBadge = ({
           </EuiBadge>
         </EuiFlexItem>
       )}
-      {item.action === 'dashboard_delete' && (
+      {item.action === DASHBOARD_DELETE_ACTION && (
         <EuiFlexItem grow={false}>
           <EuiBadge color="danger">
             {i18n.translate('dashboard.changeHistory.deletedBadge', {

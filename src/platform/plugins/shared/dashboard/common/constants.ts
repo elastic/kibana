@@ -13,6 +13,10 @@ import { DASHBOARD_GRID_COLUMN_COUNT } from './page_bundle_constants';
 export const DASHBOARD_API_PATH = '/api/dashboards';
 export const DASHBOARD_API_VERSION = '2023-10-31';
 
+/** Change history actions the UI treats specially. */
+export const DASHBOARD_UNSAVED_CHANGES_ACTION = 'dashboard_unsaved_changes';
+export const DASHBOARD_DELETE_ACTION = 'dashboard_delete';
+
 /** The base API path for internal dashboard endpoints. */
 export const DASHBOARD_INTERNAL_API_PATH = '/internal/dashboards';
 export const DASHBOARD_APP_API_PATH = `${DASHBOARD_INTERNAL_API_PATH}/app`;

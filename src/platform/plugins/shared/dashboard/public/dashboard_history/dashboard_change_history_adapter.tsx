@@ -12,6 +12,7 @@ import { buildPath, type HttpSetup } from '@kbn/core-http-browser';
 import type { ChangeDetailsResponse } from '../../server/change_history/register_details_route';
 import type { HistoryListResponse } from '../../server/change_history/register_list_route';
 import type { RestoreChangeResponse } from '../../server/change_history/register_restore_route';
+import { DASHBOARD_UNSAVED_CHANGES_ACTION } from '../../common/constants';
 import type { DashboardApi } from '../dashboard_api/types';
 import { dashboardClient } from '../dashboard_client';
 
@@ -75,10 +76,9 @@ export const createDashboardChangeHistoryAdapter = (
           ? {
               id: dashboardApi.uuid,
               actor: { name: dashboardApi.user?.name ?? '' },
-              action: 'dashboard_unsaved_changes',
+              action: DASHBOARD_UNSAVED_CHANGES_ACTION,
               timestamp: new Date(Date.now()).toISOString(),
               snapshot: dashboardApi.getSerializedState().attributes,
-              metadata: { unsavedChanges: true },
             }
           : undefined;
       }

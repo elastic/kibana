@@ -95,7 +95,7 @@ describe('createDashboardChangeHistoryAdapter', () => {
           id: dashboardApi.uuid,
           actor: { name: 'Peter P.' },
           snapshot: expect.objectContaining({ title: 'Unsaved' }),
-          metadata: { unsavedChanges: true },
+          action: 'dashboard_unsaved_changes',
         })
       );
     });

@@ -20,7 +20,6 @@ export const toChangeHistoryPendingListItem = (
   },
   action: pendingChange.action,
   isCurrent: true,
-  ...(pendingChange.metadata ? { metadata: pendingChange.metadata } : {}),
   ...(pendingChange.changes ? { changes: pendingChange.changes } : {}),
 });
 
