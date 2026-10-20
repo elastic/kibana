@@ -16,10 +16,12 @@ import {
   EuiText,
   EuiTextTruncate,
   EuiTitle,
+  EuiToolTip,
   useEuiTheme,
   useResizeObserver,
 } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
+import { entityPillAriaLabel, entityPillLabel } from './entity_pill_label';
 import { entityTypeIcon } from './entity_type_icon';
 import type { ImpactPill } from './impact_pills';
 import { IMPACT_LABELS } from './translations';
@@ -43,6 +45,8 @@ interface PillBadgeProps {
   selected?: boolean;
   iconType?: IconType;
   ariaLabel: string;
+  /** Full name, and the id when they differ, shown on hover. */
+  tooltip?: string;
   /** Omitted for the hidden measuring copy, which must not be interactive. */
   onClick?: () => void;
 }
@@ -53,6 +57,7 @@ const PillBadge: React.FC<PillBadgeProps> = ({
   selected = false,
   iconType,
   ariaLabel,
+  tooltip,
   onClick,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -62,7 +67,7 @@ const PillBadge: React.FC<PillBadgeProps> = ({
   // Icon-only pills get the same horizontal footprint as a short text pill.
   const padding = isIconOnly ? `${euiTheme.size.xs} ${euiTheme.size.m}` : euiTheme.size.xs;
 
-  return (
+  const badge = (
     <EuiBadge
       {...interactiveProps}
       // A labelled pill draws its own 16px icon below; EuiBadge would render it at 12px.
@@ -101,6 +106,8 @@ const PillBadge: React.FC<PillBadgeProps> = ({
       )}
     </EuiBadge>
   );
+
+  return tooltip ? <EuiToolTip content={tooltip}>{badge}</EuiToolTip> : badge;
 };
 
 export const Impact: React.FC<ImpactProps> = ({ pills, entityFilter, onEntityFilterChange }) => {
@@ -175,11 +182,12 @@ export const Impact: React.FC<ImpactProps> = ({ pills, entityFilter, onEntityFil
       data-test-subj={IMPACT_PILL_TEST_SUBJ}
     >
       <PillBadge
-        label={pill.entityId}
+        label={entityPillLabel(pill)}
         iconType={entityTypeIcon(pill.entityType)}
         count={pill.count}
         selected={entityFilter === pill.entityId}
-        ariaLabel={pill.entityId}
+        ariaLabel={entityPillAriaLabel(pill)}
+        tooltip={entityPillAriaLabel(pill)}
         onClick={
           interactive
             ? () => onEntityFilterChange(entityFilter === pill.entityId ? null : pill.entityId)
