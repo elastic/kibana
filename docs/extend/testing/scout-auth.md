@@ -8,7 +8,7 @@ This article goes through how authentication is set up in Scout and which fixtur
 
 ## Default setup [scout-auth-default-setup]
 
-Scout uses [SAML](https://www.elastic.co/docs/deploy-manage/users-roles/cluster-or-deployment-auth/saml) to authenticate in tests, the same way Elastic Cloud does. The login selector is disabled.
+Scout uses [SAML](https://www.elastic.co/docs/deploy-manage/users-roles/cluster-or-deployment-auth/saml) to authenticate in tests, the same way Elastic Cloud does. The login selector (the page that lets a user pick between authentication providers) is disabled, so every login goes straight to SAML.
 
 | Deployment | Local run                               | Cloud run (ECH, MKI)                             |
 | ---------- | --------------------------------------- | ------------------------------------------------ |
