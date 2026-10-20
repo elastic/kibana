@@ -111,7 +111,8 @@ export const runTask: TaskEntry = async (rawInput: CodecInput, context: WorkerCo
       const licenseSeen: string[] = [];
       const statusSeen: string[] = [];
       const licenseSub = current.platform.license$.subscribe((value) => {
-        licenseSeen.push(String((value as { type?: string }).type ?? ''));
+        const raw = value as { type?: string; license?: { type?: string } };
+        licenseSeen.push(String(raw.license?.type ?? raw.type ?? ''));
       });
       const statusSub = current.platform.status$.subscribe((value) => statusSeen.push(value.overall));
       try {
