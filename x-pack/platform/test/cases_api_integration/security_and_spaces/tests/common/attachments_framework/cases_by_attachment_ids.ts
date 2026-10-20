@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 import { CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
-import type { CasesByAttachmentIDsRequest } from '@kbn/cases-plugin/server/client/cases/get';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   getPostCaseRequest,
@@ -19,34 +18,44 @@ import {
   createCase,
   createComment,
   deleteAllCaseItems,
+  getCasesByAttachmentIds,
   updateCaseStatus,
 } from '../../../../common/lib/api';
+import {
+  globalRead,
+  noKibanaPrivileges,
+  obsOnlyRead,
+  obsSecRead,
+  secOnly,
+  secOnlyRead,
+  superUser,
+} from '../../../../common/lib/authentication/users';
+import type { User } from '../../../../common/lib/authentication/types';
 
 const ENTITY_OWNER = 'securitySolutionFixture';
 // Legacy alert rows map to `security.alert` through the real owner only.
 const ALERT_OWNER = 'securitySolution';
 const ALERT_INDEX = '.alerts-test-cases-security-alerts';
 
+const sortCaseIds = (res: Array<{ attachmentId: string; caseIds: string[] }>) =>
+  res.map(({ attachmentId, caseIds }) => ({ attachmentId, caseIds: [...caseIds].sort() }));
+
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
 
-  const getCasesByAttachmentIds = async (
-    request: CasesByAttachmentIDsRequest
-  ): Promise<Array<{ attachmentId: string; caseIds: string[] }>> => {
-    const { body } = await supertest
-      .post('/api/cases_fixture/cases:getCasesByAttachmentIds')
-      .set('kbn-xsrf', 'true')
-      .send(request)
-      .expect(200);
-    return body.map(({ attachmentId, caseIds }: { attachmentId: string; caseIds: string[] }) => ({
-      attachmentId,
-      caseIds: [...caseIds].sort(),
-    }));
-  };
-
-  const attachEntity = (caseId: string, attachmentId: string) =>
-    createComment({ supertest, caseId, params: { ...postCommentEntityReq, attachmentId } });
+  const attachEntity = (
+    caseId: string,
+    attachmentId: string,
+    auth?: { user: User; space: string | null }
+  ) =>
+    createComment({
+      supertest: auth ? supertestWithoutAuth : supertest,
+      caseId,
+      params: { ...postCommentEntityReq, attachmentId },
+      ...(auth ? { auth } : {}),
+    });
 
   const attachUnifiedAlert = (caseId: string, attachmentId: string | string[]) =>
     bulkCreateAttachments({
@@ -62,12 +71,12 @@ export default ({ getService }: FtrProviderContext): void => {
       ],
     });
 
-  describe('cases client getCasesByAttachmentIDs', () => {
+  describe('get cases by attachment ids', () => {
     afterEach(async () => {
       await deleteAllCaseItems(es);
     });
 
-    it('maps each attachment id to the cases it is attached to, leaving out ids in no case', async () => {
+    it('should map each attachment id to the cases it is attached to', async () => {
       const [caseA, caseB] = await Promise.all([
         createCase(supertest, getPostCaseRequest({ owner: ENTITY_OWNER })),
         createCase(supertest, getPostCaseRequest({ owner: ENTITY_OWNER })),
@@ -77,18 +86,21 @@ export default ({ getService }: FtrProviderContext): void => {
       await attachEntity(caseB.id, 'entity-2');
 
       const res = await getCasesByAttachmentIds({
-        type: 'security.entity',
-        owner: ENTITY_OWNER,
-        attachmentIds: ['entity-1', 'entity-2', 'entity-none'],
+        supertest,
+        params: {
+          type: 'security.entity',
+          owner: ENTITY_OWNER,
+          attachmentIds: ['entity-1', 'entity-2', 'entity-none'],
+        },
       });
 
-      expect(res).to.eql([
+      expect(sortCaseIds(res)).to.eql([
         { attachmentId: 'entity-1', caseIds: [caseA.id, caseB.id].sort() },
         { attachmentId: 'entity-2', caseIds: [caseB.id] },
       ]);
     });
 
-    it('keeps only the cases with one of the requested statuses', async () => {
+    it('should return only the cases with one of the requested statuses', async () => {
       const [openCase, closedCase] = await Promise.all([
         createCase(supertest, getPostCaseRequest({ owner: ENTITY_OWNER })),
         createCase(supertest, getPostCaseRequest({ owner: ENTITY_OWNER })),
@@ -104,29 +116,35 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       const res = await getCasesByAttachmentIds({
-        type: 'security.entity',
-        owner: ENTITY_OWNER,
-        attachmentIds: ['entity-1'],
-        status: CaseStatuses.open,
+        supertest,
+        params: {
+          type: 'security.entity',
+          owner: ENTITY_OWNER,
+          attachmentIds: ['entity-1'],
+          status: CaseStatuses.open,
+        },
       });
 
       expect(res).to.eql([{ attachmentId: 'entity-1', caseIds: [openCase.id] }]);
     });
 
-    it('reads only the cases of the requested owner', async () => {
+    it('should return no cases when the owner filters them out', async () => {
       const postedCase = await createCase(supertest, getPostCaseRequest({ owner: ENTITY_OWNER }));
       await attachEntity(postedCase.id, 'entity-1');
 
       const res = await getCasesByAttachmentIds({
-        type: 'security.entity',
-        owner: 'observabilityFixture',
-        attachmentIds: ['entity-1'],
+        supertest,
+        params: {
+          type: 'security.entity',
+          owner: 'observabilityFixture',
+          attachmentIds: ['entity-1'],
+        },
       });
 
       expect(res).to.eql([]);
     });
 
-    it('finds the cases of an alert attached as legacy on one case and unified on another', async () => {
+    it('should return the cases of an alert attached as legacy on one case and unified on another', async () => {
       const [legacyCase, unifiedCase] = await Promise.all([
         createCase(supertest, getPostCaseRequest({ owner: ALERT_OWNER })),
         createCase(supertest, getPostCaseRequest({ owner: ALERT_OWNER })),
@@ -140,27 +158,89 @@ export default ({ getService }: FtrProviderContext): void => {
       await attachUnifiedAlert(unifiedCase.id, 'alert-1');
 
       const res = await getCasesByAttachmentIds({
-        type: 'security.alert',
-        owner: ALERT_OWNER,
-        attachmentIds: ['alert-1'],
+        supertest,
+        params: { type: 'security.alert', owner: ALERT_OWNER, attachmentIds: ['alert-1'] },
       });
 
-      expect(res).to.eql([
+      expect(sortCaseIds(res)).to.eql([
         { attachmentId: 'alert-1', caseIds: [legacyCase.id, unifiedCase.id].sort() },
       ]);
     });
 
-    it('returns only the requested ids of an attachment that holds several', async () => {
+    it('should return only the requested ids of an attachment that holds several', async () => {
       const postedCase = await createCase(supertest, getPostCaseRequest({ owner: ALERT_OWNER }));
       await attachUnifiedAlert(postedCase.id, ['alert-a', 'alert-b']);
 
       const res = await getCasesByAttachmentIds({
-        type: 'security.alert',
-        owner: ALERT_OWNER,
-        attachmentIds: ['alert-b'],
+        supertest,
+        params: { type: 'security.alert', owner: ALERT_OWNER, attachmentIds: ['alert-b'] },
       });
 
       expect(res).to.eql([{ attachmentId: 'alert-b', caseIds: [postedCase.id] }]);
+    });
+
+    describe('rbac', () => {
+      it('should return the cases of the owners the user can read', async () => {
+        const postedCase = await createCase(
+          supertestWithoutAuth,
+          getPostCaseRequest({ owner: ENTITY_OWNER }),
+          200,
+          { user: superUser, space: 'space1' }
+        );
+        await attachEntity(postedCase.id, 'entity-1', { user: superUser, space: 'space1' });
+
+        for (const scenario of [
+          { user: globalRead, caseIds: [postedCase.id] },
+          { user: superUser, caseIds: [postedCase.id] },
+          { user: secOnlyRead, caseIds: [postedCase.id] },
+          { user: obsSecRead, caseIds: [postedCase.id] },
+          { user: obsOnlyRead, caseIds: [] },
+        ]) {
+          const res = await getCasesByAttachmentIds({
+            supertest: supertestWithoutAuth,
+            params: {
+              type: 'security.entity',
+              owner: ENTITY_OWNER,
+              attachmentIds: ['entity-1'],
+            },
+            auth: { user: scenario.user, space: 'space1' },
+          });
+
+          expect(res).to.eql(
+            scenario.caseIds.length > 0
+              ? [{ attachmentId: 'entity-1', caseIds: scenario.caseIds }]
+              : []
+          );
+        }
+      });
+
+      for (const scenario of [
+        { user: noKibanaPrivileges, space: 'space1' },
+        { user: secOnly, space: 'space2' },
+      ]) {
+        it(`User ${scenario.user.username} with role(s) ${scenario.user.roles.join()} and space ${
+          scenario.space
+        } - should not get cases`, async () => {
+          const postedCase = await createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest({ owner: ENTITY_OWNER }),
+            200,
+            { user: superUser, space: scenario.space }
+          );
+          await attachEntity(postedCase.id, 'entity-1', { user: superUser, space: scenario.space });
+
+          await getCasesByAttachmentIds({
+            supertest: supertestWithoutAuth,
+            params: {
+              type: 'security.entity',
+              owner: ENTITY_OWNER,
+              attachmentIds: ['entity-1'],
+            },
+            auth: { user: scenario.user, space: scenario.space },
+            expectedHttpCode: 403,
+          });
+        });
+      }
     });
   });
 };

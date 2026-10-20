@@ -8,7 +8,12 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { getFilesAttachmentReq, getPostCaseRequest } from '../../../../common/lib/mock';
-import { createCase, createComment, deleteAllCaseItems } from '../../../../common/lib/api';
+import {
+  createCase,
+  createComment,
+  deleteAllCaseItems,
+  getCasesByAttachmentIds,
+} from '../../../../common/lib/api';
 
 const OWNER = 'securitySolutionFixture';
 
@@ -16,12 +21,12 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
 
-  describe('cases client getCasesByAttachmentIDs (legacy rows)', () => {
+  describe('get cases by attachment ids (legacy rows)', () => {
     afterEach(async () => {
       await deleteAllCaseItems(es);
     });
 
-    it('finds the cases of a file whose legacy rows keep its id only in their references', async () => {
+    it('should return the cases of a file whose legacy rows keep its id only in their references', async () => {
       const [caseA, caseB] = await Promise.all([
         createCase(supertest, getPostCaseRequest({ owner: OWNER })),
         createCase(supertest, getPostCaseRequest({ owner: OWNER })),
@@ -34,15 +39,14 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       }
 
-      const { body } = await supertest
-        .post('/api/cases_fixture/cases:getCasesByAttachmentIds')
-        .set('kbn-xsrf', 'true')
-        .send({ type: 'file', owner: OWNER, attachmentIds: ['file-1', 'file-none'] })
-        .expect(200);
+      const res = await getCasesByAttachmentIds({
+        supertest,
+        params: { type: 'file', owner: OWNER, attachmentIds: ['file-1', 'file-none'] },
+      });
 
-      expect(body.length).to.be(1);
-      expect(body[0].attachmentId).to.be('file-1');
-      expect([...body[0].caseIds].sort()).to.eql([caseA.id, caseB.id].sort());
+      expect(res.map(({ attachmentId, caseIds }) => [attachmentId, [...caseIds].sort()])).to.eql([
+        ['file-1', [caseA.id, caseB.id].sort()],
+      ]);
     });
   });
 };
