@@ -149,7 +149,6 @@ export { SignificantEventsWorkflowStatus } from './src/workflows';
 
 export {
   type SourceWriteConflictReason,
-  SOURCE_WRITE_CONFLICT_REASONS,
   isRetryableSourceWriteConflict,
   isSourceWriteConflictReason,
 } from './src/source_write_conflict';

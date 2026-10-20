@@ -320,8 +320,8 @@ describe('useKnowledgeIndicatorsTable', () => {
       const ki = makeFeatureKI({ id: 'f1', source_id: 's1' });
       mockKnowledgeIndicators = [ki];
       mockExcludeFeaturesInBulk.mockResolvedValue({
-        succeededCount: 1,
-        failedCount: 1,
+        succeededCount: 0,
+        failedCount: 0,
         conflictCount: 1,
       });
 

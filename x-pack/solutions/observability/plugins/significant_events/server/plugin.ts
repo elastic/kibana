@@ -283,20 +283,21 @@ export class SignificantEventsPlugin
           space,
           context,
           config: tuningConfig,
-          withSourceWrite: (sourceId, run, options) =>
-            sourceKnowledgeState.write({
+          withSourceWrite: (sourceId, run, options) => {
+            const shouldWaitForLease = options?.waitForLease !== false;
+            return sourceKnowledgeState.write({
               sourceId,
               allowDisabled: options?.allowDisabled,
-              waitForLeaseMs:
-                options?.waitForLease === false ? undefined : SOURCE_WRITE_LEASE_WAIT_MS,
-              signal: getRequestAbortSignal(request),
+              waitForLeaseMs: shouldWaitForLease ? SOURCE_WRITE_LEASE_WAIT_MS : undefined,
+              signal: shouldWaitForLease ? getRequestAbortSignal(request) : undefined,
               expectedRevision:
                 typeof request.headers['x-nightshift-source-revision'] === 'string' &&
                 request.headers['x-nightshift-source-revision']
                   ? request.headers['x-nightshift-source-revision']
                   : source?.esql_updated_at,
               run,
-            }),
+            });
+          },
         });
 
       let kiClientPromise: ReturnType<typeof createKnowledgeIndicatorClient> | undefined;

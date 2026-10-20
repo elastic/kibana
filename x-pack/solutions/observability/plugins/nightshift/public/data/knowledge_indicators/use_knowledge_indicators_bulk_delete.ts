@@ -12,11 +12,10 @@ import { DISCOVERY_QUERIES_QUERY_KEY, FEATURES_QUERY_KEY } from '../query_keys';
 import { BULK_WRITE_CONFLICT_MESSAGE } from '../../common/errors';
 import { useKibana } from '../../hooks/use_kibana';
 import type { BulkOperationResult } from './use_discovery_features_api';
-import { useDiscoveryFeaturesApi } from './use_discovery_features_api';
+import { EMPTY_BULK_OPERATION_RESULT, useDiscoveryFeaturesApi } from './use_discovery_features_api';
 
 interface BulkDeleteResult {
   succeeded: number;
-  /** Includes the `conflicts`. */
   failed: number;
   conflicts: number;
 }
@@ -53,7 +52,7 @@ export function useKnowledgeIndicatorsBulkDelete({
       const featuresPromise: Promise<BulkOperationResult> =
         features.length > 0
           ? deleteFeaturesInBulk(features)
-          : Promise.resolve({ succeededCount: 0, failedCount: 0, conflictCount: 0 });
+          : Promise.resolve(EMPTY_BULK_OPERATION_RESULT);
 
       const queriesPromise: Promise<BulkOperationResult> =
         queryIds.length > 0
@@ -67,7 +66,7 @@ export function useKnowledgeIndicatorsBulkDelete({
                 failedCount: failed,
                 conflictCount: 0,
               }))
-          : Promise.resolve({ succeededCount: 0, failedCount: 0, conflictCount: 0 });
+          : Promise.resolve(EMPTY_BULK_OPERATION_RESULT);
 
       const [featuresSettled, queriesSettled] = await Promise.allSettled([
         featuresPromise,
@@ -80,7 +79,7 @@ export function useKnowledgeIndicatorsBulkDelete({
 
       if (featuresSettled.status === 'fulfilled') {
         succeeded += featuresSettled.value.succeededCount;
-        failed += featuresSettled.value.failedCount + featuresSettled.value.conflictCount;
+        failed += featuresSettled.value.failedCount;
         conflicts += featuresSettled.value.conflictCount;
       } else {
         failed += features.length;
@@ -93,18 +92,18 @@ export function useKnowledgeIndicatorsBulkDelete({
         failed += queryIds.length;
       }
 
-      if (succeeded === 0 && failed > 0) {
+      if (succeeded === 0 && failed + conflicts > 0) {
         throw new Error(
-          conflicts > 0 ? BULK_WRITE_CONFLICT_MESSAGE : BULK_DELETE_REJECTED_ERROR_MESSAGE
+          failed === 0 ? BULK_WRITE_CONFLICT_MESSAGE : BULK_DELETE_REJECTED_ERROR_MESSAGE
         );
       }
 
       return { succeeded, failed, conflicts };
     },
     onSuccess: ({ succeeded, failed, conflicts }) => {
-      if (failed > 0) {
+      if (failed + conflicts > 0) {
         toasts.addWarning({
-          title: getBulkDeletePartialToastTitle(succeeded, failed),
+          title: getBulkDeletePartialToastTitle(succeeded, failed + conflicts),
           text: conflicts > 0 ? BULK_WRITE_CONFLICT_MESSAGE : undefined,
         });
       } else {

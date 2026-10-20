@@ -16,6 +16,12 @@ export interface BulkOperationResult {
   conflictCount: number;
 }
 
+export const EMPTY_BULK_OPERATION_RESULT: BulkOperationResult = {
+  succeededCount: 0,
+  failedCount: 0,
+  conflictCount: 0,
+};
+
 type CrossStreamOp =
   | { delete: { id: string } }
   | { exclude: { id: string } }
@@ -39,7 +45,7 @@ export function useDiscoveryFeaturesApi(): DiscoveryFeaturesApi {
     // partially-applied mutation.
     const runBulk = async (features: Feature[], buildOp: BuildOp): Promise<BulkOperationResult> => {
       if (features.length === 0) {
-        return { succeededCount: 0, failedCount: 0, conflictCount: 0 };
+        return EMPTY_BULK_OPERATION_RESULT;
       }
       const { succeeded, failed, conflicts } = await significantEventsRepositoryClient.fetch(
         'POST /internal/streams/features/_bulk',

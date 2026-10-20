@@ -31,6 +31,7 @@ jest.mock('../../hooks/use_kibana', () => ({
 }));
 
 jest.mock('./use_discovery_features_api', () => ({
+  ...jest.requireActual('./use_discovery_features_api'),
   useDiscoveryFeaturesApi: () => ({ deleteFeaturesInBulk: mockDeleteFeaturesInBulk }),
 }));
 
@@ -129,5 +130,17 @@ describe('useKnowledgeIndicatorsBulkDelete', () => {
       title: 'Failed to delete selected knowledge indicators',
     });
     expect(mockToasts.addWarning).not.toHaveBeenCalled();
+  });
+
+  it('does not blame a busy source when nothing was deleted and other items failed for another reason', async () => {
+    givenFeatureResult({ succeededCount: 0, failedCount: 0, conflictCount: 1 });
+    mockFetch.mockResolvedValue({ succeeded: 0, failed: 1 });
+    const { result } = renderBulkDelete();
+
+    await act(async () => {
+      await expect(
+        result.current.deleteKnowledgeIndicatorsInBulk([featureKI('a'), queryKI('q1')])
+      ).rejects.toThrow('Some knowledge indicators could not be deleted');
+    });
   });
 });

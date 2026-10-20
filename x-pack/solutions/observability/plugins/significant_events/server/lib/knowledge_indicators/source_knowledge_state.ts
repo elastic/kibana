@@ -7,6 +7,7 @@
 
 import { randomUUID } from 'node:crypto';
 import pLimit from 'p-limit';
+import { setTimeout as sleep } from 'timers/promises';
 import type { SavedObjectsClientContract, SavedObjectsType } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
@@ -78,11 +79,6 @@ const rethrowConflictAsLeaseHeld = (error: unknown): never => {
   throw error;
 };
 
-const sleep = (ms: number): Promise<void> =>
-  new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-
 /** Runs `attempt` again, with a growing delay, for as long as it fails on a held lease and `signal` is not aborted. */
 const retryWhileLeaseHeld = async <T>(
   maxWaitMs: number,
@@ -103,7 +99,7 @@ const retryWhileLeaseHeld = async <T>(
       ) {
         throw error;
       }
-      await sleep(Math.min(delayMs, remainingMs));
+      await sleep(Math.min(delayMs, remainingMs), undefined, { signal }).catch(() => undefined);
       if (signal?.aborted) {
         throw error;
       }
@@ -253,7 +249,7 @@ export const createSourceKnowledgeStateClient = ({
 
   return {
     runExclusive,
-    write: (args) =>
-      retryWhileLeaseHeld(args.waitForLeaseMs ?? 0, () => writeOnce(args), args.signal),
+    write: ({ waitForLeaseMs = 0, signal, ...args }) =>
+      retryWhileLeaseHeld(waitForLeaseMs, () => writeOnce(args), signal),
   };
 };

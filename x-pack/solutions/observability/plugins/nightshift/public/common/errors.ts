@@ -22,23 +22,6 @@ const getConflictReason = (body: unknown): SourceWriteConflictReason | undefined
   return isSourceWriteConflictReason(reason) ? reason : undefined;
 };
 
-const getConflictMessage = (reason: SourceWriteConflictReason): string => {
-  switch (reason) {
-    case 'lease_held':
-      return LEASE_HELD_MESSAGE;
-    case 'reconcile_pending':
-      return RECONCILE_PENDING_MESSAGE;
-    case 'source_disabled':
-      return SOURCE_DISABLED_MESSAGE;
-    case 'stale_revision':
-      return STALE_REVISION_MESSAGE;
-    default: {
-      const unhandled: never = reason;
-      throw new Error(`Unhandled source write conflict reason: ${String(unhandled)}`);
-    }
-  }
-};
-
 const getBodyMessage = (body: unknown): string | undefined => {
   if (typeof body === 'string') {
     return body;
@@ -70,7 +53,7 @@ export const getFormattedError = (error: unknown): Error => {
   if (isRecord(error) && 'body' in error) {
     const reason = getConflictReason(error.body);
     if (reason) {
-      return new Error(getConflictMessage(reason));
+      return new Error(CONFLICT_MESSAGE_BY_REASON[reason]);
     }
 
     const message = getBodyMessage(error.body);
@@ -90,12 +73,12 @@ export const getFormattedError = (error: unknown): Error => {
   return new Error('Unknown error');
 };
 
-const LEASE_HELD_MESSAGE = i18n.translate('xpack.nightshift.common.errors.leaseHeldMessage', {
+const LEASE_HELD_MESSAGE = i18n.translate('xpack.nightshift.common.errors.leaseHeldErrorMessage', {
   defaultMessage: 'This source is being updated. Try again in a few seconds.',
 });
 
 const RECONCILE_PENDING_MESSAGE = i18n.translate(
-  'xpack.nightshift.common.errors.reconcilePendingMessage',
+  'xpack.nightshift.common.errors.reconcilePendingErrorMessage',
   {
     defaultMessage:
       'This source is still applying a change to its query. Try again in a few seconds.',
@@ -103,21 +86,28 @@ const RECONCILE_PENDING_MESSAGE = i18n.translate(
 );
 
 const SOURCE_DISABLED_MESSAGE = i18n.translate(
-  'xpack.nightshift.common.errors.sourceDisabledMessage',
+  'xpack.nightshift.common.errors.sourceDisabledErrorMessage',
   {
     defaultMessage: 'This source is disabled. Enable it to change its knowledge indicators.',
   }
 );
 
 const STALE_REVISION_MESSAGE = i18n.translate(
-  'xpack.nightshift.common.errors.staleRevisionMessage',
+  'xpack.nightshift.common.errors.staleRevisionErrorMessage',
   {
     defaultMessage: 'This source changed since the page was loaded. Refresh and try again.',
   }
 );
 
+const CONFLICT_MESSAGE_BY_REASON: Record<SourceWriteConflictReason, string> = {
+  lease_held: LEASE_HELD_MESSAGE,
+  reconcile_pending: RECONCILE_PENDING_MESSAGE,
+  source_disabled: SOURCE_DISABLED_MESSAGE,
+  stale_revision: STALE_REVISION_MESSAGE,
+};
+
 export const BULK_WRITE_CONFLICT_MESSAGE = i18n.translate(
-  'xpack.nightshift.common.errors.bulkWriteConflictMessage',
+  'xpack.nightshift.common.errors.bulkWriteConflictErrorMessage',
   {
     defaultMessage: 'Some changes were not applied because the source is being updated.',
   }

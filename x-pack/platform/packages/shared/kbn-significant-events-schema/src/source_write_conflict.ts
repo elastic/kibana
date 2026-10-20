@@ -24,18 +24,13 @@ export type SourceWriteConflictReason = (typeof SOURCE_WRITE_CONFLICT_REASONS)[n
 export const isSourceWriteConflictReason = (value: unknown): value is SourceWriteConflictReason =>
   SOURCE_WRITE_CONFLICT_REASONS.some((reason) => reason === value);
 
-/** Whether repeating the same request later can succeed without the user changing anything. */
-export const isRetryableSourceWriteConflict = (reason: SourceWriteConflictReason): boolean => {
-  switch (reason) {
-    case 'lease_held':
-    case 'reconcile_pending':
-      return true;
-    case 'source_disabled':
-    case 'stale_revision':
-      return false;
-    default: {
-      const unhandled: never = reason;
-      throw new Error(`Unhandled source write conflict reason: ${String(unhandled)}`);
-    }
-  }
+const RETRYABLE_BY_REASON: Record<SourceWriteConflictReason, boolean> = {
+  lease_held: true,
+  reconcile_pending: true,
+  source_disabled: false,
+  stale_revision: false,
 };
+
+/** Whether repeating the same request later can succeed without the user changing anything. */
+export const isRetryableSourceWriteConflict = (reason: SourceWriteConflictReason): boolean =>
+  RETRYABLE_BY_REASON[reason];

@@ -312,7 +312,8 @@ describe('source knowledge write coordination', () => {
 
       controller.abort();
       seedLease({ documents, lease: null, version: '2' });
-      await jest.advanceTimersByTimeAsync(FIRST_RETRY_MS);
+      await jest.advanceTimersByTimeAsync(0);
+      expect(write.isSettled()).toBe(true);
 
       await expect(write.promise).rejects.toMatchObject(conflict('lease_held'));
       expect(run).not.toHaveBeenCalled();

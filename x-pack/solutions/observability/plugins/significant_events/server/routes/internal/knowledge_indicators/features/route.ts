@@ -13,14 +13,13 @@ import {
   MAX_TEXT_LENGTH,
   baseFeatureSchema,
   featureUpsertSchema,
-  isRetryableSourceWriteConflict,
   type Feature,
 } from '@kbn/significant-events-schema';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { searchModeSchema } from '../../../utils/search_mode';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
-import { getSourceWriteConflictReason } from '../../../../lib/errors/source_write_conflict_error';
+import { getSourceWriteConflictMetadata } from '../../../../lib/errors/source_write_conflict_error';
 import { StatusError } from '../../../../lib/errors/status_error';
 import {
   filterReadableSourceIds,
@@ -437,8 +436,7 @@ const bulkFeaturesAcrossStreamsRoute = createServerRoute({
                 error instanceof Error ? error.message : String(error)
               }`
             );
-            const reason = getSourceWriteConflictReason(error);
-            if (reason && isRetryableSourceWriteConflict(reason)) {
+            if (getSourceWriteConflictMetadata(error)?.retryable) {
               conflicts += ops.length;
             } else {
               failed += ops.length;
