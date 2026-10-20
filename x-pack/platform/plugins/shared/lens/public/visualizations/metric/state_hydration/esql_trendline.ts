@@ -20,11 +20,6 @@ import {
 import { isTextBasedState } from '../../../datasources/text_based/hydrate_time_field';
 import { isMetricVisualizationState } from './is_metric_state';
 
-function getEsqlQuery(layer: TextBasedLayer): string | undefined {
-  const { query } = layer;
-  return query && 'esql' in query ? query.esql : undefined;
-}
-
 function timeColumnFieldName(
   layer: TextBasedLayer,
   timeAccessor: string | undefined
@@ -269,7 +264,7 @@ export function hydrateEsqlMetricTrendline(
   const existingTrendlineLayer = textBasedState.layers[trendlineLayerId];
 
   const mainLayer = textBasedState.layers[layerId];
-  const esqlQuery = mainLayer ? getEsqlQuery(mainLayer) : undefined;
+  const esqlQuery = mainLayer?.query?.esql;
   if (!esqlQuery) {
     return unchanged;
   }

@@ -6,6 +6,7 @@
  */
 
 import type { DatasourceStates, MetricVisualizationState } from '@kbn/lens-common';
+import { isRecord } from '../../../types_guards';
 
 interface FormBasedLikeLayer {
   columns: Record<string, { label?: string; customLabel?: boolean }>;
@@ -17,10 +18,6 @@ interface TextBasedLikeLayer {
 
 interface LayersState {
   layers: Record<string, unknown>;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null;
 }
 
 function isLayersState(state: unknown): state is LayersState {

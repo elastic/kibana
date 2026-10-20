@@ -6,10 +6,7 @@
  */
 
 import type { MetricVisualizationState } from '@kbn/lens-common';
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null;
-}
+import { isRecord } from '../../../types_guards';
 
 export function isMetricVisualizationState(state: unknown): state is MetricVisualizationState {
   return isRecord(state) && typeof state.layerId === 'string';

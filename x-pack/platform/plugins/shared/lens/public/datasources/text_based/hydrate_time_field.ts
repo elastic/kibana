@@ -13,10 +13,7 @@ import type {
   TextBasedPersistedState,
 } from '@kbn/lens-common';
 import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
+import { isRecord } from '../../types_guards';
 
 function isTextBasedLayerColumn(value: unknown): value is TextBasedLayerColumn {
   return (
