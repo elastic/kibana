@@ -57,6 +57,9 @@ test('writer rejects unbounded fire-and-forget queue and wrong ACK', async () =>
       throw new Error('unused');
     },
     call: async () => wait,
+    callSync: () => {
+      throw new Error('unused');
+    },
   };
   const stream = createBatchStream(context, 'events', { maxPendingBatches: 1 });
   const first = stream.write([1]);

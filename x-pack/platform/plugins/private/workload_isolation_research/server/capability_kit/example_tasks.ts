@@ -42,6 +42,9 @@ export const services = async (input: CodecInput, context: WorkerContext): Promi
     await clients.close();
   }
 };
+export const syncLookup = async (input: CodecInput, context: WorkerContext): Promise<CodecInput> =>
+  context.callSync('fixture', String(input), { value: 'sync-fixture' }, { maxReplyBytes: 256 });
+
 export const serviceHandles = async (
   _input: CodecInput,
   context: WorkerContext

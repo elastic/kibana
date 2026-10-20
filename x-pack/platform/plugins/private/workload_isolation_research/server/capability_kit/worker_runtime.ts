@@ -9,7 +9,7 @@ import { parentPort } from 'worker_threads';
 import { createRequire } from 'module';
 import { randomUUID } from 'crypto';
 import { encode, decode } from './codecs';
-import type { CodecInput } from './codecs';
+import type { CodecInput, WireValue } from './codecs';
 import type { AsyncCallback, Packet, TaskEntry, WorkerContext } from './protocol';
 
 const requireModule = createRequire(__filename);
@@ -22,6 +22,7 @@ const send = (packet: Packet): void => {
 interface RunState {
   readonly controller: AbortController;
   readonly callbacks: Map<string, AsyncCallback>;
+  syncCalls: number;
   readonly pending: Map<
     number,
     { resolve: (value: CodecInput) => void; reject: (error: Error) => void }
@@ -94,6 +95,7 @@ const startRuntime = (): void => {
       controller: new AbortController(),
       pending: new Map(),
       callbacks: new Map(),
+      syncCalls: 0,
     };
     runs.set(bundle.runId, run);
     let value: CodecInput;
@@ -113,6 +115,55 @@ const startRuntime = (): void => {
         bundle,
         signal: run.controller.signal,
         load,
+        callSync: (capability, operation, args, options = {}) => {
+          if (!parentPort)
+            throw new Error(
+              'Sync proxy is thread-only; use async capability/snapshot in a process'
+            );
+          if (++run.syncCalls > 8) throw new Error('Sync call budget exceeded');
+          const timeout = options.timeoutMs ?? 50;
+          const capacity = options.maxReplyBytes ?? 65536;
+          if (
+            !Number.isInteger(timeout) ||
+            timeout < 1 ||
+            timeout > 1000 ||
+            !Number.isInteger(capacity) ||
+            capacity < 256 ||
+            capacity > 65536
+          )
+            throw new Error('Invalid sync proxy bounds');
+          const grant = bundle.grants[capability];
+          if (!grant) throw new Error('Sync capability not granted');
+          const encoded = encode(args);
+          if (Buffer.byteLength(JSON.stringify(encoded)) > 65536)
+            throw new Error('Sync request exceeds bounds');
+          const state = new Int32Array(new SharedArrayBuffer(8));
+          const buffer = new SharedArrayBuffer(capacity);
+          send({
+            version: 1,
+            kind: 'sync_call',
+            runId: bundle.runId,
+            capability,
+            grant,
+            operation,
+            args: encoded,
+            state: state.buffer as SharedArrayBuffer,
+            buffer,
+          });
+          const result = Atomics.wait(state, 0, 0, timeout);
+          if (result === 'timed-out') {
+            Atomics.store(state, 0, 2);
+            throw new DOMException('Sync proxy timed out', 'TimeoutError');
+          }
+          const length = Atomics.load(state, 1);
+          if (length < 1 || length > capacity) throw new Error('Invalid sync reply length');
+          const response = decode(
+            JSON.parse(Buffer.from(buffer, 0, length).toString('utf8')) as WireValue
+          );
+          if (Atomics.load(state, 0) === -1)
+            throw response instanceof Error ? response : new Error('Sync proxy failed');
+          return response;
+        },
         exportCallback: (callback) => {
           if (run.callbacks.size >= 256) throw new Error('Callback handle limit');
           const id = randomUUID();

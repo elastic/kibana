@@ -75,6 +75,12 @@ export interface WorkerContext {
   readonly bundle: Bundle;
   readonly signal: AbortSignal;
   call(capability: string, operation: string, args: CodecInput): Promise<CodecInput>;
+  callSync(
+    capability: string,
+    operation: string,
+    args: CodecInput,
+    options?: { timeoutMs?: number; maxReplyBytes?: number }
+  ): CodecInput;
   load(id: string): Promise<object>;
   exportCallback(callback: AsyncCallback): CallbackRef;
   releaseCallback(reference: CallbackRef): void;
@@ -145,6 +151,17 @@ export type Packet =
       readonly id: number;
       readonly value: WireValue;
       readonly failed: boolean;
+    }
+  | {
+      readonly version: 1;
+      readonly kind: 'sync_call';
+      readonly runId: string;
+      readonly capability: string;
+      readonly grant: string;
+      readonly operation: string;
+      readonly args: WireValue;
+      readonly state: SharedArrayBuffer;
+      readonly buffer: SharedArrayBuffer;
     }
   | { readonly version: 1; readonly kind: 'ready' };
 

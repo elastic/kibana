@@ -20,6 +20,7 @@ export interface Binding {
   readonly handler: HostHandler;
   readonly lever: Lever;
   readonly onRunEnd?: (bundle: Bundle) => void;
+  readonly syncHandler?: (operation: string, args: CodecInput, bundle: Bundle) => CodecInput;
 }
 export interface RunOptions {
   readonly workloadClass: string;
@@ -244,6 +245,76 @@ export class ExecutionHost {
       packet.runId !== execution.bundle.runId
     )
       return;
+    if (packet.kind === 'sync_call') {
+      if (
+        !(packet.state instanceof SharedArrayBuffer) ||
+        packet.state.byteLength !== 8 ||
+        !(packet.buffer instanceof SharedArrayBuffer) ||
+        packet.buffer.byteLength > 65536
+      )
+        throw new Error('Invalid sync proxy buffers');
+      const state = new Int32Array(packet.state);
+      const started = performance.now();
+      const cpuStarted = this.options.onCrossing ? process.threadCpuUsage() : undefined;
+      const binding = execution.options.capabilities[packet.capability];
+      let value: CodecInput;
+      let failed = false;
+      try {
+        if (Buffer.byteLength(JSON.stringify(packet.args)) > 65536)
+          throw new Error('Sync request exceeds bounds');
+        if (!binding?.syncHandler || execution.bundle.grants[packet.capability] !== packet.grant)
+          throw new Error('Sync operation not allowlisted');
+        this.record(
+          execution,
+          packet.capability + '.' + packet.operation,
+          'sync_proxy',
+          'isolate_to_host',
+          packet,
+          0
+        );
+        value = binding.syncHandler(packet.operation, decode(packet.args), execution.bundle);
+      } catch (error) {
+        failed = true;
+        value = error instanceof Error ? error : new Error('Sync operation failed');
+      }
+      let encoded;
+      try {
+        encoded = encode(value);
+      } catch {
+        failed = true;
+        encoded = encode(new Error('Sync result not transportable'));
+      }
+      let bytes = Buffer.from(JSON.stringify(encoded));
+      if (bytes.byteLength > packet.buffer.byteLength) {
+        failed = true;
+        encoded = {
+          kind: 'error',
+          codec: 'error',
+          name: 'BoundaryError',
+          message: 'Sync reply exceeds bounds',
+          fields: { kind: 'object', entries: [] },
+        } as const;
+        bytes = Buffer.from(JSON.stringify(encoded));
+      }
+      if (bytes.byteLength > packet.buffer.byteLength)
+        throw new Error('Sync reply buffer too small');
+      const cpu = cpuStarted ? process.threadCpuUsage(cpuStarted) : { user: 0, system: 0 };
+      this.record(
+        execution,
+        packet.capability + '.' + packet.operation,
+        'sync_proxy',
+        'host_to_isolate',
+        { version: 1, kind: 'reply', runId: packet.runId, id: 0, failed, value: encoded },
+        performance.now() - started,
+        { handlerSyncCpuUs: cpu.user + cpu.system, handlerWindowCpuUs: cpu.user + cpu.system }
+      );
+      if (Atomics.load(state, 0) !== 0) return;
+      new Uint8Array(packet.buffer).set(bytes);
+      Atomics.store(state, 1, bytes.byteLength);
+      Atomics.store(state, 0, failed ? -1 : 1);
+      Atomics.notify(state, 0);
+      return;
+    }
     if (packet.kind === 'callback_result') {
       const callback = execution.callbacks.get(packet.id);
       if (!callback) return;
@@ -521,7 +592,9 @@ export class ExecutionHost {
         lever: LEVER_LABELS[lever],
         generic: GENERIC_LEVERS.some((entry) => entry === lever),
         direction,
-        bytes: serialize(packet).byteLength,
+        bytes: serialize(
+          packet.kind === 'sync_call' ? { ...packet, state: undefined, buffer: undefined } : packet
+        ).byteLength,
         durationMs,
         ...cpu,
       });
