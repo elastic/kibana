@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { randomUUID } from 'crypto';
 import type { ApiClientFixture } from '@kbn/scout-security';
 import {
   ALERTZERO_ENABLED_SETTING_ID,
@@ -113,7 +114,8 @@ interface InferenceSettingsResponse {
   };
 }
 
-const uniqueSuffix = () => `${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
+/** Unique per call; `randomUUID` rather than `Math.random` since the suffix names a service account. */
+const uniqueSuffix = () => `${Date.now()}-${randomUUID().slice(0, 8)}`;
 
 export interface HuntPrerequisites {
   connectorId: string;
