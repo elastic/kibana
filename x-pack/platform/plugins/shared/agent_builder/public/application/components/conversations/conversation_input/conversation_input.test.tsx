@@ -194,6 +194,13 @@ const editorController = {
 
 const renderInput = (ui: React.ReactElement) => render(ui, { wrapper: EuiProvider });
 
+/**
+ * `ConversationInput` is memoized, so `rerender` with the same props is skipped. A new callback
+ * makes it render again and read the changed hook mocks, as a real hook update would.
+ */
+const rerenderInput = (rerender: (ui: React.ReactElement) => void) =>
+  rerender(<ConversationInput onEditorFocus={jest.fn()} />);
+
 // ConversationInput replaces this bar with a fake selector. These cases render the real one.
 const { InputActions } = jest.requireActual('./input_actions') as typeof import('./input_actions');
 
@@ -352,7 +359,7 @@ describe('ConversationInput', () => {
 
       selectTalkToUsers();
       mockedUseIsSharedConversation.mockReturnValue(false);
-      rerender(<ConversationInput />);
+      rerenderInput(rerender);
 
       expect(screen.getByTestId('agentBuilderConversationInputPostToTeamHeader')).toHaveAttribute(
         'aria-hidden',
@@ -370,7 +377,7 @@ describe('ConversationInput', () => {
 
       selectTalkToUsers();
       mockedUseConversationId.mockReturnValue('conv-2');
-      rerender(<ConversationInput />);
+      rerenderInput(rerender);
 
       expect(screen.getByTestId('mock-trigger-mode-selector')).toHaveValue('always');
     });
@@ -380,9 +387,9 @@ describe('ConversationInput', () => {
 
       selectTalkToUsers();
       mockedUseIsSharedConversation.mockReturnValue(false);
-      rerender(<ConversationInput />);
+      rerenderInput(rerender);
       mockedUseIsSharedConversation.mockReturnValue(true);
-      rerender(<ConversationInput />);
+      rerenderInput(rerender);
 
       expect(screen.getByTestId('mock-trigger-mode-selector')).toHaveValue('always');
     });
@@ -569,7 +576,7 @@ describe('ConversationInput', () => {
       editorController.clear.mockClear();
 
       mockedUseConversationId.mockReturnValue('conv-2');
-      rerender(<ConversationInput />);
+      rerenderInput(rerender);
 
       expect(editorController.clear).toHaveBeenCalledTimes(1);
     });

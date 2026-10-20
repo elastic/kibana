@@ -115,7 +115,7 @@ const renderContent = (
   );
 };
 
-export const AgentTurn: React.FC<AgentTurnProps> = ({
+const AgentTurnComponent: React.FC<AgentTurnProps> = ({
   item,
   agent,
   conversationAttachments,
@@ -164,3 +164,6 @@ export const AgentTurn: React.FC<AgentTurnProps> = ({
     </EuiFlexGroup>
   );
 };
+
+export const AgentTurn = React.memo(AgentTurnComponent);
+AgentTurn.displayName = 'AgentTurn';

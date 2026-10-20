@@ -7,15 +7,15 @@
 
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import type { Observable } from 'rxjs';
 import type { ChatEvent, Conversation, ConversationEvent } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { BrowserChatEvent } from '@kbn/agent-builder-browser/events';
+import useObservable from 'react-use/lib/useObservable';
 import { ConversationStreamService } from '../../../../services/events/conversation_stream_service';
-import { useConversation } from '../../../hooks/use_conversation';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
-import { useStreamRecord } from '../../../context/streaming/streaming_context';
+import type { StreamRecord } from '../../../context/streaming/types';
 import { createUserMessageEvent } from './items/user_message_event.factory';
 import { createExecutionStartedEvent } from './items/execution_started.factory';
 import { createExecutionTerminatedEvent } from './items/execution_terminated_event.factory';
@@ -25,8 +25,18 @@ import { CUSTOM_EVENT_TYPE, createCustomEvent } from './items/custom_event.facto
 import type { TimelineItem } from './types';
 import { TimelineConnector } from './timeline_connector';
 
+interface MockState {
+  conversation?: Conversation;
+  record: StreamRecord;
+}
+const mockStore = {
+  state$: new BehaviorSubject<MockState>({ record: {} }),
+  // Like the real hooks, the mocks render their caller when the cache or the stream record change.
+  useMockState: (): MockState => useObservable(mockStore.state$, mockStore.state$.getValue()),
+};
+
 jest.mock('../../../hooks/use_conversation', () => ({
-  useConversation: jest.fn(),
+  useConversation: () => ({ conversation: mockStore.useMockState().conversation }),
   useAgentId: () => 'agent-1',
 }));
 jest.mock('../../../hooks/agents/use_agent_by_id', () => ({
@@ -36,7 +46,7 @@ jest.mock('../../../context/conversation/use_conversation_id', () => ({
   useConversationId: jest.fn(),
 }));
 jest.mock('../../../context/streaming/streaming_context', () => ({
-  useStreamRecord: jest.fn(),
+  useStreamRecord: () => mockStore.useMockState().record,
   useConversationStreamService: () => mockStreamService,
 }));
 jest.mock('./screen_reader_status', () => ({
@@ -103,12 +113,14 @@ const setState = ({
   withAttachments?: boolean;
 }) => {
   jest.mocked(useConversationId).mockReturnValue(conversationId);
-  jest
-    .mocked(useConversation)
-    .mockReturnValue({ conversation } as ReturnType<typeof useConversation>);
-  jest.mocked(useStreamRecord).mockReturnValue({
-    pendingMessage,
-    pendingAttachments: withAttachments ? pendingAttachments : undefined,
+  act(() => {
+    mockStore.state$.next({
+      conversation,
+      record: {
+        pendingMessage,
+        pendingAttachments: withAttachments ? pendingAttachments : undefined,
+      },
+    });
   });
 };
 
@@ -137,12 +149,19 @@ describe('TimelineConnector', () => {
     mockStreamService.clearPersistedExecution(conversationId, 'round-1::execution');
   });
 
-  const streamCompletedExecution = () => {
+  // `useLiveEvents` tells React about stream updates at most once per animation frame.
+  const flushFrame = () =>
+    act(async () => {
+      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+    });
+
+  const streamCompletedExecution = async () => {
     act(() => {
       chatEvents$.next(started as ChatEvent);
       chatEvents$.next(terminated as ChatEvent);
       streamEnded$.next();
     });
+    await flushFrame();
   };
 
   it('shows a running turn under the message until the stream reports the run started', () => {
@@ -155,11 +174,11 @@ describe('TimelineConnector', () => {
     ]);
   });
 
-  it('keeps the pending message and the finished turn visible after the stream ends', () => {
+  it('keeps the pending message and the finished turn visible after the stream ends', async () => {
     setState({ conversation: conversationWith([]), pendingMessage: 'hello' });
     render(<TimelineConnector />);
 
-    streamCompletedExecution();
+    await streamCompletedExecution();
 
     // `execution_started` renames the local copy to the id the server gave it.
     expect(renderedItems()).toEqual([
@@ -168,16 +187,15 @@ describe('TimelineConnector', () => {
     ]);
   });
 
-  it('shows only the saved copies once the fetched events contain them', () => {
+  it('shows only the saved copies once the fetched events contain them', async () => {
     setState({ conversation: conversationWith([]), pendingMessage: 'hello' });
-    const { rerender } = render(<TimelineConnector />);
-    streamCompletedExecution();
+    render(<TimelineConnector />);
+    await streamCompletedExecution();
 
     setState({
       conversation: conversationWith([savedUserMessage, started, terminated]),
       pendingMessage: 'hello',
     });
-    rerender(<TimelineConnector />);
 
     expect(renderedItems()).toEqual([
       'userMessage:round-1::user_message:',
@@ -185,10 +203,10 @@ describe('TimelineConnector', () => {
     ]);
   });
 
-  it('keeps local content when the fetched events do not contain the replacement', () => {
+  it('keeps local content when the fetched events do not contain the replacement', async () => {
     setState({ conversation: conversationWith([]), pendingMessage: 'hello' });
-    const { rerender } = render(<TimelineConnector />);
-    streamCompletedExecution();
+    render(<TimelineConnector />);
+    await streamCompletedExecution();
 
     const olderUserMessage = createUserMessageEvent({ id: 'round-0::user_message' });
     const olderTerminated = createExecutionTerminatedEvent({
@@ -200,7 +218,6 @@ describe('TimelineConnector', () => {
       conversation: conversationWith([olderUserMessage, olderTerminated]),
       pendingMessage: 'hello',
     });
-    rerender(<TimelineConnector />);
 
     expect(renderedItems()).toEqual([
       'userMessage:round-0::user_message:',
@@ -221,16 +238,17 @@ describe('TimelineConnector', () => {
     expect(renderedItems()[0]).toBe('userMessage:pending::user_message:a-1');
   });
 
-  it('keeps the staged attachments on the saved message until its refs are saved', () => {
+  it('keeps the staged attachments on the saved message until its refs are saved', async () => {
     setState({
       conversation: conversationWith([]),
       pendingMessage: 'hello',
       withAttachments: true,
     });
-    const { rerender } = render(<TimelineConnector />);
+    render(<TimelineConnector />);
     act(() => {
       chatEvents$.next(started as ChatEvent);
     });
+    await flushFrame();
 
     // The early fetch returns the saved message without refs.
     setState({
@@ -238,7 +256,6 @@ describe('TimelineConnector', () => {
       pendingMessage: 'hello',
       withAttachments: true,
     });
-    rerender(<TimelineConnector />);
     expect(renderedItems()[0]).toBe('userMessage:round-1::user_message:a-1');
 
     // The completion refetch carries the refs; the local copy is no longer used.
@@ -253,7 +270,6 @@ describe('TimelineConnector', () => {
       pendingMessage: 'hello',
       withAttachments: true,
     });
-    rerender(<TimelineConnector />);
     expect(renderedItems()[0]).toBe('userMessage:round-1::user_message:saved-1');
   });
 
@@ -264,7 +280,7 @@ describe('TimelineConnector', () => {
     it('shows the card once a refetch brings the event and its record', () => {
       registeredAttachmentTypes.add(record.type);
       setState({ conversation: conversationWith([savedUserMessage, started, terminated]) });
-      const { rerender } = render(<TimelineConnector />);
+      render(<TimelineConnector />);
       expect(renderedItems()).toHaveLength(2);
 
       setState({
@@ -273,7 +289,6 @@ describe('TimelineConnector', () => {
           [record]
         ),
       });
-      rerender(<TimelineConnector />);
 
       expect(renderedItems()).toEqual([
         'userMessage:round-1::user_message:',
@@ -314,11 +329,10 @@ describe('TimelineConnector', () => {
     it('shows the event once a refetch brings it and its type has a UI here', () => {
       registeredEventTypes.add(CUSTOM_EVENT_TYPE);
       setState({ conversation: conversationWith([savedUserMessage, started, terminated]) });
-      const { rerender } = render(<TimelineConnector />);
+      render(<TimelineConnector />);
       expect(renderedItems()).toHaveLength(2);
 
       setState({ conversation: conversationWith([savedUserMessage, started, terminated, note]) });
-      rerender(<TimelineConnector />);
 
       expect(renderedItems()).toEqual([
         'userMessage:round-1::user_message:',
