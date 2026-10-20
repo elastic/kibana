@@ -56,6 +56,7 @@ import type {
   CreateAgentAndPackagePolicyRequestSchema,
   RunAgentPolicyRevisionsCleanupTaskRequestSchema,
   RunAgentPolicyRevisionsCleanupTaskResponseSchema,
+  GetAgentPoliciesPackagePoliciesSummaryRequestSchema,
 } from '../../types';
 
 import type {
@@ -71,6 +72,7 @@ import type {
   GetFullAgentConfigMapResponse,
   GetFullAgentManifestResponse,
   BulkGetAgentPoliciesResponse,
+  GetAgentPoliciesPackagePoliciesSummaryResponse,
   GetAgentPolicyOutputsResponse,
   GetListAgentPolicyOutputsResponse,
   CreatePackagePolicyRequest,
@@ -620,6 +622,17 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
 
     const requestSpaceId = spaceId;
 
+    // Validate before any side effect: the space update below is applied immediately, so rejecting
+    // after it would report an error while the space change has already been persisted.
+    const existingAgentPolicy = await agentPolicyService.get(
+      appContextService.getInternalUserSOClientForSpaceId(requestSpaceId),
+      request.params.agentPolicyId,
+      false
+    );
+    if (existingAgentPolicy?.supports_agentless || data.supports_agentless) {
+      throw new FleetError('To update managed integrations, use the managed integrations API.');
+    }
+
     if (spaceIds?.length) {
       const authorizedSpaces = await getAuthorizedSpacesWithAgentPoliciesAllPrivileges(
         request,
@@ -637,15 +650,6 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
       logger.debug(
         `spaceId now set to [${spaceId}] for updating agent policy [${request.params.agentPolicyId}]`
       );
-    }
-    const soClient = appContextService.getInternalUserSOClientForSpaceId(spaceId);
-    const existingAgentPolicy = await agentPolicyService.get(
-      soClient,
-      request.params.agentPolicyId,
-      false
-    );
-    if (existingAgentPolicy?.supports_agentless || data.supports_agentless) {
-      throw new FleetError('To update managed integrations, use the managed integrations API.');
     }
 
     const agentPolicy = await agentPolicyService.update(
@@ -1086,6 +1090,26 @@ export const GetListAgentPolicyOutputsHandler: FleetRequestHandler<
   return response.ok({
     body,
   });
+};
+
+export const getAgentPoliciesPackagePoliciesSummaryHandler: FleetRequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof GetAgentPoliciesPackagePoliciesSummaryRequestSchema.body>
+> = async (context, request, response) => {
+  const coreContext = await context.core;
+  const ids = deduplicateIds(request.body.ids);
+
+  const summaries = await packagePolicyService.getSummaryForAgentPolicies(
+    coreContext.savedObjects.client,
+    ids
+  );
+
+  const body: GetAgentPoliciesPackagePoliciesSummaryResponse = {
+    items: Object.fromEntries(summaries),
+  };
+
+  return response.ok({ body });
 };
 
 export const RunAgentPolicyRevisionsCleanupTaskHandler: FleetRequestHandler<

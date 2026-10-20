@@ -111,6 +111,7 @@ export const CasesConnectorRunParamsSchema = schema.object({
   templateVersion: schema.nullable(
     schema.string({ maxLength: MAX_TEMPLATE_VERSION_STRING_LENGTH })
   ),
+  extractObservables: schema.maybe(schema.nullable(schema.boolean())),
   /** Pre-upgrade tasks may omit this and send `internallyManagedAlerts`. */
   source: schema.maybe(schema.oneOf([schema.literal('attack'), schema.literal('rule')])),
   internallyManagedAlerts: schema.maybe(schema.nullable(schema.boolean())),
@@ -208,6 +209,7 @@ export const ZCasesConnectorRunParamsSchema = z
       .default(DEFAULT_MAX_OPEN_CASES),
     templateId: z.string().max(MAX_TEMPLATE_KEY_LENGTH).nullable().default(null),
     templateVersion: z.string().max(MAX_TEMPLATE_VERSION_STRING_LENGTH).nullable().default(null),
+    extractObservables: z.boolean().nullable().optional(),
     source: z.enum(['attack', 'rule']).optional(),
     internallyManagedAlerts: z.boolean().nullable().optional(),
   })
@@ -247,6 +249,7 @@ export const CasesConnectorRuleActionParamsSchema = schema.object({
         defaultValue: DEFAULT_MAX_OPEN_CASES,
       })
     ),
+    extractObservables: schema.maybe(schema.nullable(schema.boolean())),
   }),
 });
 

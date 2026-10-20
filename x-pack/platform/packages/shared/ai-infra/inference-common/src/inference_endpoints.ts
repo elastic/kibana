@@ -38,6 +38,7 @@ export const defaultInferenceEndpoints = {
   OPENAI_GPT_OSS_120B: '.openai-gpt-oss-120b-chat_completion',
   ANTHROPIC_CLAUDE_4_6_OPUS: '.anthropic-claude-4.6-opus-chat_completion',
   ANTHROPIC_CLAUDE_4_6_SONNET: '.anthropic-claude-4.6-sonnet-chat_completion',
+  ANTHROPIC_CLAUDE_5_5_SONNET: '.anthropic-claude-5.5-sonnet-chat_completion',
 } as const;
 
 /**
@@ -75,6 +76,20 @@ export interface GeoOnlyRegion {
 /** Union of all region entry shapes returned by the EIS metadata.regions field. */
 export type EisRegion = CspRegion | GeoOnlyRegion;
 
+/**
+ * Model capabilities advertised by EIS for chat completion endpoints.
+ */
+export interface EisInferenceEndpointCapabilities {
+  reasoning?: {
+    supported_effort_levels?: string[];
+    default_effort_level?: string;
+  };
+  context_window?: {
+    max_input_tokens?: number;
+    max_output_tokens?: number;
+  };
+}
+
 export type EisInferenceEndpointMetadata = {
   heuristics?: {
     properties?: string[];
@@ -88,4 +103,5 @@ export type EisInferenceEndpointMetadata = {
   } & Record<string, unknown>;
   regions?: EisRegion[];
   denied_by_region_policy?: boolean;
+  capabilities?: EisInferenceEndpointCapabilities;
 } & Record<string, unknown>;

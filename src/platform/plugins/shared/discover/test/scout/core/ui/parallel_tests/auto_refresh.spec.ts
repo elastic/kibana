@@ -42,6 +42,6 @@ spaceTest.describe('auto refresh', { tag: tags.deploymentAgnostic }, () => {
     await inspector.openRequestsStatisticsTab();
 
     const requestTimestampBefore = await inspector.getRequestTimestamp();
-    await expect(inspector.requests.timestamp).not.toHaveText(requestTimestampBefore);
+    await expect.poll(() => inspector.getRequestTimestamp()).not.toBe(requestTimestampBefore);
   });
 });

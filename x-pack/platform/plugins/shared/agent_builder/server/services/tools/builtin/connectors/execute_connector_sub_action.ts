@@ -10,8 +10,17 @@ import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import { AuthorizationStatus, isAuthorizationMethod } from '@kbn/agent-builder-common/agents';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
-import { getConnectorSpec, isToolAction } from '@kbn/connector-specs';
+import {
+  getToolResultId,
+  createErrorResult,
+  resolveAllowedConnectorIds,
+} from '@kbn/agent-builder-server';
+import {
+  getConnectorSpec,
+  isSelectedActionEnabled,
+  isToolAction,
+  type SelectedActions,
+} from '@kbn/connector-specs';
 import type { ConnectorToolsOptions } from './types';
 
 const connectorIdValidationMessage =
@@ -78,23 +87,18 @@ export const createExecuteConnectorSubActionTool = ({
     openWorldHint: true,
   },
   handler: async ({ connectorId, subAction, params }, context) => {
-    const { agentConfiguration } = context;
     // Runtime-imposed scoping: the connector allow-list comes from the resolved agent
-    // configuration. When an agent configuration is present, undefined/null connector_ids
-    // means no connectors are assigned; scoping is skipped only when there is no agent
-    // context at all (mirrors sml_search.ts).
-    if (agentConfiguration) {
-      const allowedIds = agentConfiguration.connector_ids ?? [];
-      if (!allowedIds.includes(connectorId)) {
-        return {
-          results: [
-            createErrorResult({
-              message: `Connector '${connectorId}' is not available to this agent. Use list_connectors to see available connectors.`,
-              metadata: { connectorId, subAction },
-            }),
-          ],
-        };
-      }
+    // configuration (undefined only when there is no agent context at all).
+    const allowedIds = resolveAllowedConnectorIds(context.agentConfiguration);
+    if (allowedIds && !allowedIds.includes(connectorId)) {
+      return {
+        results: [
+          createErrorResult({
+            message: `Connector '${connectorId}' is not available to this agent because it is not assigned to it. Do not retry; tell the user the connector must be added to this agent's connectors.`,
+            metadata: { connectorId, subAction },
+          }),
+        ],
+      };
     }
 
     const actions = await getActions();
@@ -102,9 +106,11 @@ export const createExecuteConnectorSubActionTool = ({
 
     // Resolve the connector type from the connector ID
     let connectorType: string;
+    let selectedActions: SelectedActions;
     try {
       const connector = await actionsClient.get({ id: connectorId });
       connectorType = connector.actionTypeId;
+      selectedActions = connector.config?.selectedActions as SelectedActions;
     } catch (error) {
       return {
         results: [
@@ -131,14 +137,28 @@ export const createExecuteConnectorSubActionTool = ({
       };
     }
 
-    // Validate that the sub-action is marked as a tool in the connector spec
+    // Reject workflow-only actions — isTool: false actions are not callable by agents.
     if (!isToolAction(spec, subAction)) {
       return {
         results: [
           createErrorResult({
             message:
-              `Sub-action '${subAction}' is not available as a tool on connector type '${connectorType}'. ` +
-              'Read the connector attachment to find the correct sub-action names.',
+              `Sub-action '${subAction}' is not available as an agent tool for connector '${connectorId}'. ` +
+              'It can only be called from a workflow.',
+            metadata: { connectorId, connectorType, subAction },
+          }),
+        ],
+      };
+    }
+
+    // Enforce instance allowlist / recommended-mode rules.
+    if (!isSelectedActionEnabled(subAction, selectedActions)) {
+      return {
+        results: [
+          createErrorResult({
+            message:
+              `Sub-action '${subAction}' is not enabled for connector '${connectorId}'. ` +
+              'Read the connector attachment to find the allowed sub-action names.',
             metadata: { connectorId, connectorType, subAction },
           }),
         ],

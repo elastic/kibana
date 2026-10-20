@@ -526,6 +526,9 @@ describe('test advanced policy config overlap ', () => {
         malware: {
           quarantine: null,
         },
+        ransomware: {
+          diagnostic: null,
+        },
         memory_protection: {
           memory_scan_collect_sample: null,
           memory_scan: null,

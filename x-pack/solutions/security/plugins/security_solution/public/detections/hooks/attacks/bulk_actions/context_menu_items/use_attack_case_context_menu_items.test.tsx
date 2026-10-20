@@ -35,6 +35,36 @@ describe('useAttackCaseContextMenuItems', () => {
     });
   });
 
+  it('should forward the attacks to attach to the bulk hook', () => {
+    const attacksToAttach = [
+      {
+        id: 'attack-1',
+        index: '.alerts-security.attack.discovery.alerts-default',
+        title: 'Attack title',
+        alertIds: ['alert-1'],
+      },
+    ];
+
+    renderHook(() =>
+      useAttackCaseContextMenuItems({
+        attacksWithCase: [
+          {
+            attackId: 'attack-1',
+            relatedAlertIds: ['alert-1'],
+            markdownComment: 'markdown',
+          },
+        ],
+        title: 'Attack title',
+        closePopover,
+        attacksToAttach,
+      })
+    );
+
+    expect(mockUseBulkAttackCaseItems).toHaveBeenCalledWith(
+      expect.objectContaining({ attacksToAttach })
+    );
+  });
+
   it('should return items from transformed bulk hook', () => {
     const { result } = renderHook(() =>
       useAttackCaseContextMenuItems({
