@@ -2244,7 +2244,9 @@ describe('NightshiftInvestigationsClient.findAlertRecovered() & route', () => {
     executionId: 'exec-rec-1',
   };
   const { handler, params } =
-    findAlertRecoveredInvestigationRoute['POST /internal/nightshift/investigations/_alert_recovered'];
+    findAlertRecoveredInvestigationRoute[
+      'POST /internal/nightshift/investigations/_alert_recovered'
+    ];
 
   it('finds an open investigation, records recovery_execution_id, and ignores missing/closed ones', async () => {
     await expect(makeClient().findAlertRecovered(RECOVERY)).resolves.toBeUndefined();
@@ -2300,10 +2302,25 @@ describe('NightshiftInvestigationsClient.findAlertRecovered() & route', () => {
     await makeClient().start({
       subject: { type: 'alert', id: 'alert-1' },
       trigger_type: 'automatic',
-      context: { alerts: [{ id: 'alert-1', rule_id: 'rule-1', rule_name: 'Latency', rule_type_id: 'apm', rule_category: 'Latency', status: 'active', start: '2026-08-24T13:00:00.000Z' }] },
+      context: {
+        alerts: [
+          {
+            id: 'alert-1',
+            rule_id: 'rule-1',
+            rule_name: 'Latency',
+            rule_type_id: 'apm',
+            rule_category: 'Latency',
+            status: 'active',
+            start: '2026-08-24T13:00:00.000Z',
+          },
+        ],
+      },
     });
     expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-1', [
-      expect.objectContaining({ id: 'alert-1', snapshot: expect.not.objectContaining({ recovery_execution_id: expect.anything() }) }),
+      expect.objectContaining({
+        id: 'alert-1',
+        snapshot: expect.not.objectContaining({ recovery_execution_id: expect.anything() }),
+      }),
     ]);
   });
 
@@ -2322,8 +2339,14 @@ describe('NightshiftInvestigationsClient.findAlertRecovered() & route', () => {
     expect(params?.safeParse({ body: { ...body, alert_uuid: '' } }).success).toBe(false);
     const findAlertRecovered = jest.fn().mockResolvedValue(undefined);
     await expect(
-      handler({ request: {}, getInvestigationsClient: () => ({ findAlertRecovered }), params: { body } } as never)
+      handler({
+        request: {},
+        getInvestigationsClient: () => ({ findAlertRecovered }),
+        params: { body },
+      } as never)
     ).resolves.toEqual({});
-    expect(findAlertRecovered).toHaveBeenCalledWith(expect.objectContaining({ alertUuid: 'alert-1', releaseEvent: true }));
+    expect(findAlertRecovered).toHaveBeenCalledWith(
+      expect.objectContaining({ alertUuid: 'alert-1', releaseEvent: true })
+    );
   });
 });

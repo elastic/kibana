@@ -1109,7 +1109,11 @@ export class NightshiftInvestigationsClient {
     }
     if (!recordedExecutionId) {
       await subjectsClient.upsertSubjects(existing.id, [
-        { type: 'alert', id: alertUuid, snapshot: { ...snapshot, recovery_execution_id: executionId } },
+        {
+          type: 'alert',
+          id: alertUuid,
+          snapshot: { ...snapshot, recovery_execution_id: executionId },
+        },
       ]);
     }
     return { investigation_id: existing.id, message };

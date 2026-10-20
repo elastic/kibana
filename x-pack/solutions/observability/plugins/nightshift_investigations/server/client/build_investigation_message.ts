@@ -104,7 +104,10 @@ function describeEntity(alert: Partial<AlertSnapshot>): string | undefined {
   }
   if (Array.isArray(alert.group) && alert.group.length > 0) {
     return alert.group
-      .filter((g): g is { field: string; value: string } => isPlainObject(g) && isString(g.field) && isString(g.value))
+      .filter(
+        (g): g is { field: string; value: string } =>
+          isPlainObject(g) && isString(g.field) && isString(g.value)
+      )
       .map(({ field, value }) => `${sanitize(field)}: ${sanitize(value)}`)
       .join(', ');
   }
@@ -253,7 +256,8 @@ export function buildAlertRecoveredFollowUpMessage({
   snapshot,
 }: AlertRecoveredMessageInput): string {
   const start =
-    (alertStart || undefined) ?? (isString(snapshot?.start) ? snapshot.start || undefined : undefined);
+    (alertStart || undefined) ??
+    (isString(snapshot?.start) ? snapshot.start || undefined : undefined);
   const duration = start ? formatDuration(start, recoveredAt) : undefined;
   const startClause = start
     ? `, first active at ${sanitize(start)}${duration ? ` (duration ${duration})` : ''}`
@@ -261,14 +265,21 @@ export function buildAlertRecoveredFollowUpMessage({
   const lines = [
     `Alert "${sanitize(ruleName)}" (UUID ${sanitize(alertUuid)}, instance "${sanitize(
       alertId
-    )}", rule ${sanitize(ruleId)}, type ${sanitize(ruleTypeId)}) transitioned to recovered${startClause}.`,
+    )}", rule ${sanitize(ruleId)}, type ${sanitize(
+      ruleTypeId
+    )}) transitioned to recovered${startClause}.`,
   ];
-  if (isString(snapshot?.reason) && snapshot.reason) lines.push(`Reason: ${sanitize(snapshot.reason)}`);
+  if (isString(snapshot?.reason) && snapshot.reason)
+    lines.push(`Reason: ${sanitize(snapshot.reason)}`);
   const entity = snapshot ? describeEntity(snapshot) : undefined;
   if (entity) lines.push(`Affected entity: ${entity}`);
   const condition = snapshot ? describeCondition(snapshot) : undefined;
   if (condition) lines.push(`Condition: ${condition}`);
-  const tags = ruleTags?.length ? ruleTags : Array.isArray(snapshot?.rule_tags) ? snapshot.rule_tags.filter(isString) : [];
+  const tags = ruleTags?.length
+    ? ruleTags
+    : Array.isArray(snapshot?.rule_tags)
+    ? snapshot.rule_tags.filter(isString)
+    : [];
   if (tags.length > 0) lines.push(`Rule tags: ${tags.map(sanitize).join(', ')}`);
 
   return [
