@@ -62,7 +62,7 @@ interface MockRouterProps<ExtraCore> extends MockKibanaProviderProps<ExtraCore> 
 interface RenderRouterOptions<ExtraCore> extends KibanaProviderOptions<ExtraCore> {
   history?: History;
   renderOptions?: Omit<RenderOptions, 'queries'>;
-  state?: DeepPartial<AppState>;
+  state?: Partial<AppState> | DeepPartial<AppState>;
   url?: Url;
   path?: string;
 }

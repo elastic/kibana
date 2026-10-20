@@ -37,7 +37,7 @@ export type Url =
 export interface HookWrapperProps {
   history?: History;
   path?: string;
-  state?: DeepPartial<AppState>;
+  state?: Partial<AppState> | DeepPartial<AppState>;
   url?: Url;
 }
 
@@ -53,7 +53,7 @@ export const getHistoryFromUrl = (url: Url) => {
   });
 };
 
-export const mergeTestState = (state?: DeepPartial<AppState>): AppState =>
+export const mergeTestState = (state?: Partial<AppState> | DeepPartial<AppState>): AppState =>
   state
     ? mergeWith({}, mockState, state, (objValue, srcValue) => {
         if (Array.isArray(objValue)) {
