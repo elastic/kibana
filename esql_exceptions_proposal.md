@@ -316,7 +316,7 @@ When an item that is placed at the end of the query has such a value, the execut
 The rule did not run because exception items have a value that cannot be used for the type of the field: "src_ip is one of" (list "my-list", item "my-item"): value "bogus" cannot be written for a column of type ip at the end of the query, in the field "src_ip". Fix or delete these exception items.
 ```
 
-The message names up to 5 values that cannot be written, each with its item and its field, and counts the others. An item with several such values is named once for each value, which shows every value to fix in a single run. The rule creates no alerts and the failure is a user error. No `esql_exceptions` message is written for that run, because the rule status carries the reason.
+The message names up to 5 values that cannot be written, each with its item and its field, and counts the others. An item with several such values is named once for each value, which shows every value to fix in a single run. The rule creates no alerts and the failure is a user error.
 
 **Why fail.** A failed run is easier to notice and to fix than a run that applies some of the exceptions of a rule. An item that is silently skipped creates the alerts that the analyst already excluded, and alert noise is a main problem for customers. The items at the end of the query are on columns that the query computes, which the DSL filter has never applied, and no rule depended on them before the setting.
 
@@ -393,73 +393,116 @@ The rule did not run because its exceptions do not fit in the query: the excepti
 
 ### Why 200 comparisons stay under the depth limit
 
-ES|QL rejects a statement with an expression nested deeper than 300 levels (`ES|QL statement exceeded the maximum expression depth allowed (300)`), and it counts the depth for each stage. Our stage is one `WHERE` expression, which means that its depth must stay below that.
+ES|QL rejects a statement with an expression nested deeper than 300 levels (`ES|QL statement exceeded the maximum expression depth allowed (300)`). The deepest stage that the limit of 200 comparisons allows has 214 levels, which leaves a margin of 86 levels.
 
-Every comparison adds at most one level, whether it is a new item (one more `AND`), a new entry (one more `AND`) or a new range of a CIDR or date value (one more `OR`). The levels that no comparison pays for are fixed ones around the deepest piece: the `NOT`s, the parentheses and the range test. The deepest form that the compiler writes is a first item with several entries, whose deepest entry is negated and made of ranges. For `n` items, `m` entries in the first item and `w` ranges in its deepest entry, the depth is `n + m + w + 12`, and the stage has at least `n + m + w - 2` comparisons. The depth is therefore at most the number of comparisons plus 14. With at most 200 comparisons the depth is at most **214**, a margin of 86 levels. [How the depth of the stage is counted](#how-the-depth-of-the-stage-is-counted) gives the derivation.
+#### The worst case
 
-We checked the formulas on Elasticsearch by finding the largest stage that runs for each shape. Every breakpoint matched:
+Take these exceptions, which use all the 200 comparisons (a comparison is one test on a column, and each CIDR value of an "is one of" entry counts as one):
 
-| Shape | Largest stage that runs | Depth at that size |
-|---|---|---|
-| Items `is` | 293 items | n + 7 = 300 |
-| First item with a positive entry of ranges (m = 2, w = 10) | 279 items | n + m + w + 9 = 300 |
-| First item with a negated entry of ranges (m = 2, w = 10) | 276 items | n + m + w + 12 = 300 |
-| A single entry of ranges (w = 10) | 282 items | n + w + 8 = 300 |
+- Exception 1 has two entries: `source.ip` is not one of a list of 100 CIDR ranges (`10.0.0.0/24`, `10.0.1.0/24`, ..., `10.0.99.0/24`), and `user.name` is `svc-backup`. It has 101 comparisons.
+- Exceptions 2 to 100 are 99 exceptions with one entry each: `host.name` is `host-0`, `host.name` is `host-1`, and so on up to `host-98`. They have 99 comparisons.
 
-A worst-case stage of 200 comparisons ran: a first item with a negated entry of 100 ranges and one more entry, then 99 simple items, 214 levels. The bound assumes that the compiler keeps writing these forms. A new predicate with more than 4 levels, or a new way of wrapping an entry, needs the constants to be measured again. Elasticsearch has also lowered this limit before (500, then 400, then 300), and a limit below about 215 would leave no room.
+#### The stage that they become
 
-### How the depth of the stage is counted
+The compiler writes the stage on one line. It is split here, with comments, and the repeated parts are abbreviated:
 
-The depth of an expression is the largest number of levels that surround one innermost piece. The derivation below gives the depth of the stage that the compiler writes.
+```text
+| WHERE
+  (NOT (                                                                                   // exception 1
+    (NOT (COALESCE(MV_IN_RANGE(source.ip, "10.0.0.0"::ip, "10.0.0.255"::ip), false)         // entry 1, range 1
+          OR COALESCE(MV_IN_RANGE(source.ip, "10.0.1.0"::ip, "10.0.1.255"::ip), false)      // range 2
+          OR ...                                                                            // ranges 3 to 99
+          OR COALESCE(MV_IN_RANGE(source.ip, "10.0.99.0"::ip, "10.0.99.255"::ip), false)))  // range 100
+    AND (MV_CONTAINS(user.name, "svc-backup"))                                              // entry 2
+  ))
+  AND (NOT (MV_CONTAINS(host.name, "host-0")))                                              // exception 2
+  AND (NOT (MV_CONTAINS(host.name, "host-1")))                                              // exception 3
+  AND ...                                                                                   // exceptions 4 to 99
+  AND (NOT (MV_CONTAINS(host.name, "host-98")))                                             // exception 100
+```
 
-**What counts.** In `NOT (a AND b)`, `a` is inside the `AND`, which is inside the parentheses, which are inside the `NOT`. Each piece adds levels like this:
+Elasticsearch groups the `AND`s and the `OR`s from the left. The first exception and the first range are therefore the innermost pieces, below all the `AND`s and `OR`s of their level:
+
+```text
+WHERE (((e1 AND e2) AND e3) ... AND e100)             99 nested ANDs, with e1 inside all of them
+  e1      = NOT ((entry 1) AND (entry 2))
+  entry 1 = NOT (((r1 OR r2) OR r3) ... OR r100)      99 nested ORs, with r1 inside all of them
+  r1      = COALESCE(MV_IN_RANGE(source.ip, "10.0.0.0"::ip, "10.0.0.255"::ip), false)
+```
+
+#### Why no other stage is deeper
+
+The path from the `WHERE` to the first range crosses 214 levels, which the table in [How Elasticsearch counts the depth](#how-elasticsearch-counts-the-depth) lists one by one. This is the number of comparisons (200) plus 14, and the following lines show where the 14 comes from. Let `exceptions` be the number of exceptions (100), `entries` the number of entries of the first one (2) and `ranges` the number of ranges of its first entry (100):
+
+- The levels that depend on the stage are the `AND`s that join the exceptions (`exceptions - 1`), the `AND`s that join the entries (`entries - 1`) and the `OR`s that join the ranges (`ranges - 1`). Together they are `exceptions + entries + ranges - 3` levels.
+- The other levels are fixed, which means that they are the same for any number of exceptions, entries and ranges: the eight rows of the kind "fixed" in the table of [How Elasticsearch counts the depth](#how-elasticsearch-counts-the-depth). They are the `WHERE`, the parentheses and the `NOT`s around the exception and around the entry, and the range test, and they sum to **15**.
+- The comparisons are the `exceptions - 1` other exceptions, the `entries - 1` other entries of the first exception and the ranges (`ranges`), which is `comparisons = exceptions + entries + ranges - 2`.
+
+The depth is therefore `(exceptions + entries + ranges - 3) + 15 = (comparisons - 1) + 15 = comparisons + 14`. The **14** is the 15 fixed levels minus 1, because the ranges are joined by only `ranges - 1` `OR`s, which makes the levels that depend on the stage one fewer than the comparisons. With the numbers of the worst case, `comparisons = 200` and the depth is 214.
+
+A comparison adds one level wherever it goes: another exception adds an `AND` at the top, another entry adds an `AND` inside the exception, and another range adds an `OR` inside the entry.
+
+If we wanted to make this stage deeper we would add a range to exception 1, but the budget of 200 is spent, therefore the comparison has to come from another place, for example from removing exception 100. That removes one `AND` at the top and the new `OR` replaces it, which still leaves the depth at 214. Moving a comparison from one place to another never changes the depth. Only the fixed levels can, and this form has the most of them.
+
+#### How Elasticsearch counts the depth
+
+Elasticsearch checks the depth twice, against the same limit of 300 ([`MAX_EXPRESSION_DEPTH`](https://github.com/elastic/elasticsearch/blob/dff80b95fa15d152772be93804c9a134e8aab7dc/x-pack/plugin/esql/src/main/java/org/elasticsearch/xpack/esql/parser/ExpressionBuilder.java#L129)). The first check reads the tokens before the parser runs and counts the open parentheses plus any run of consecutive `NOT`s ([`EsqlParser`](https://github.com/elastic/elasticsearch/blob/dff80b95fa15d152772be93804c9a134e8aab7dc/x-pack/plugin/esql/src/main/java/org/elasticsearch/xpack/esql/parser/EsqlParser.java#L212-L227)). The worst case reaches 6 there. The second check is the one that binds. While the parser builds the expression, [`expression()`](https://github.com/elastic/elasticsearch/blob/dff80b95fa15d152772be93804c9a134e8aab7dc/x-pack/plugin/esql/src/main/java/org/elasticsearch/xpack/esql/parser/ExpressionBuilder.java#L191-L205) adds one level each time it visits an expression nested inside another, and fails above 300. These are the levels that the pieces of our stage add:
 
 | Construct | Levels |
 |---|---|
 | The expression of the `WHERE` itself | 1 |
-| Each `AND` / `OR`, nested from the left, so `a AND b AND c` is `((a AND b) AND c)` | 1 |
+| Each `AND` / `OR`, nested from the left (`a AND b AND c` is `((a AND b) AND c)`) | 1 |
 | `NOT` | 1 |
-| Parentheses | 2 |
+| Parentheses (the parenthesized expression, then the expression inside it) | 2 |
 | A column, a literal or a function call used as an operand or a function argument | 1 |
 | `IS [NOT] NULL` | 2 |
 | A cast like `"x"::ip` | 1 |
 | The function call itself | 0, only its deepest argument counts |
 
-**The highest depth that our stage can reach.** Consider the following example: a rule has three exception items on columns of its query. `src_ip` is an `ip` column, and `user`, `host` and `tier` are `keyword` columns:
-
-1. "external backup": `src_ip` is not one of `10.0.0.0/8`, `192.168.0.0/16` **and** `user` is `svc-backup`
-2. "scanner": `host` is `scanner-01`
-3. "gold": `tier` is `gold`
-
-The stage that we write for them is the following (the compiler writes it on one line, and the comments are added here). Each CIDR value is written as the range from its first address to its last.
+With these levels, we can follow the path from the `WHERE` to the first literal of the worst case, `"10.0.0.0"`. The example below keeps only the pieces that the path crosses and writes `...` for the rest, with 3 exceptions instead of 100. This is how the compiler writes the stage:
 
 ```text
-| WHERE
-  (NOT (                                                                                      // item 1
-    (NOT (COALESCE(MV_IN_RANGE(src_ip, "10.0.0.0"::ip, "10.255.255.255"::ip), false)          // entry 1, range 1
-          OR COALESCE(MV_IN_RANGE(src_ip, "192.168.0.0"::ip, "192.168.255.255"::ip), false))) // entry 1, range 2
-    AND (MV_CONTAINS(user, "svc-backup"))                                                     // entry 2
-  ))
-  AND (NOT (MV_CONTAINS(host, "scanner-01")))                                                 // item 2
-  AND (NOT (MV_CONTAINS(tier, "gold")))                                                       // item 3
+| WHERE (NOT ((NOT (COALESCE(MV_IN_RANGE(source.ip, "10.0.0.0"::ip, ...), false) OR ...)) AND (...))) AND (...) AND (...)
 ```
 
-The depth is measured along one path, from the top of the stage to its innermost piece. The stage joins its items with `AND`, an item joins its entries with `AND`, and an entry joins its ranges with `OR`. Because they are nested from the left, the path to the first item, entry and range crosses all the `AND`s and `OR`s of its level, and the items on the other branches add nothing. Let `n` be the number of items of the stage (3 here), `m` the number of entries of its first item (2) and `w` the number of ranges of the deepest entry (2). The first item is the worst position for the heaviest item, and the deepest form that the compiler writes for it is a negated entry made of ranges, as in the example. The path to the literal `"10.0.0.0"` adds up like this:
+Elasticsearch groups the `AND`s and the `OR`s from the left. The same stage is nested like this, with the grouping written as square brackets:
 
-| Part of the path | Levels | In the example |
+```text
+| WHERE [[(NOT ((NOT (COALESCE(MV_IN_RANGE(source.ip, "10.0.0.0"::ip, ...), false) OR ...)) AND (...))) AND (...)] AND (...)]
+```
+
+The first exception is inside both `AND`s, although they are written after it. The same holds for the `AND` between the two entries and the `OR`s between the ranges: each one is written after its left operand and encloses it. In the worst case there are 99 bracket pairs around the first exception and 99 `OR`s around the first range. The path crosses these pieces, in the order of the nesting and not of the text:
+
+| Piece that the path enters | Levels | Kind | Depth so far |
+|---|---|---|---|
+| The expression of the `WHERE` | 1 | fixed | 1 |
+| The 99 `AND`s that join the 100 exceptions, nested from the left | 99 | `exceptions - 1` | 100 |
+| The parentheses written around exception 1 | 2 | fixed | 102 |
+| The `NOT` of exception 1 | 1 | fixed | 103 |
+| The parentheses after that `NOT`, which hold the entries | 2 | fixed | 105 |
+| The `AND` that joins the 2 entries | 1 | `entries - 1` | 106 |
+| The parentheses written around entry 1 | 2 | fixed | 108 |
+| The `NOT` of entry 1 (it is "is not one of") | 1 | fixed | 109 |
+| The parentheses after that `NOT`, which hold the ranges | 2 | fixed | 111 |
+| The 99 `OR`s that join the 100 ranges, nested from the left | 99 | `ranges - 1` | 210 |
+| The range test: `COALESCE` as an operand (1), `MV_IN_RANGE` as its argument (1), the cast `::ip` (1) and the literal (1) | 4 | fixed | **214** |
+
+The parentheses that are written around exceptions 2 to 100 enclose only their own exception and sit beside exception 1, so they are not on the path.
+
+The eight rows of the kind "fixed" are the same for any number of exceptions, entries and ranges, and they sum to 1 + 2 + 1 + 2 + 2 + 1 + 2 + 4 = 15. The three other rows sum to `exceptions + entries + ranges - 3 = 199`. In general, the depth is `exceptions + entries + ranges + 12`, which is the number of comparisons plus 14. This is below the limit of 300 by 86 levels, for every stage of at most 200 comparisons.
+
+#### What we checked on Elasticsearch
+
+The worst-case stage above, written by the compiler, ran. The same shape with 186 exceptions (286 comparisons, 300 levels) ran and with 187 it failed, which confirms that the stage of 100 exceptions has 214 levels. We also found the largest stage that runs for each shape, and every breakpoint matched its formula:
+
+| Shape | Largest stage that runs | Depth at that size |
 |---|---|---|
-| The expression of the `WHERE` | 1 | 1 |
-| The `AND`s that join the items | n - 1 | 2 |
-| The parentheses around the item (2) and its `NOT` (1) | 3 | 3 |
-| The parentheses inside the `NOT`, around the entries | 2 | 2 |
-| The `AND`s that join the entries | m - 1 | 1 |
-| The parentheses around the entry | 2 | 2 |
-| The `NOT` and the parentheses of the negated entry | 3 | 3 |
-| The `OR`s that join the ranges | w - 1 | 1 |
-| The range test, `COALESCE(MV_IN_RANGE(col, "a"::ip, "b"::ip), false)`: `COALESCE` as an operand, `MV_IN_RANGE` as its argument, the cast and the literal | 4 | 4 |
-| **Depth of the stage** | **n + m + w + 12** | **19** |
+| Items `is` | 293 items | exceptions + 7 = 300 |
+| First item with a positive entry of ranges (entries = 2, ranges = 10) | 279 items | exceptions + entries + ranges + 9 = 300 |
+| First item with a negated entry of ranges (entries = 2, ranges = 10) | 276 items | exceptions + entries + ranges + 12 = 300 |
+| A single entry of ranges (ranges = 10) | 282 items | exceptions + ranges + 8 = 300 |
 
-Every other form that the compiler writes is lower for the same number of comparisons. A stage whose heaviest item is a single `is` entry has a depth of n + 7, one whose deepest entry is not negated has n + m + w + 9, and one whose heaviest item is a single entry of `w` ranges has n + w + 8. The last one has at least `w + n - 1` comparisons, which bounds its depth at the comparisons plus 9. A second entry costs one more comparison and adds the levels of the `AND`, the parentheses and the `NOT` of the entries, which is why the item with several entries is the deepest for its number of comparisons.
+The bound assumes that the compiler keeps writing these forms. A new predicate with more than 4 levels, or a new way of wrapping an entry, needs the constants to be measured again. Elasticsearch has also lowered this limit before (500, then 400, then 300), and a limit below about 215 would leave no room.
 
 ### Clauses of the query
 
