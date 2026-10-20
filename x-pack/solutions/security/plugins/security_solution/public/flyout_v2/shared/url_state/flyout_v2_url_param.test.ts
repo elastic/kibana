@@ -186,7 +186,6 @@ describe('flyoutV2 URL param', () => {
           documentId: 'd',
           indexName: 'i',
           scopeId: 's',
-          isRulePreview: false,
         },
       ],
       [
