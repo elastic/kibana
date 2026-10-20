@@ -8,24 +8,16 @@
 import { TIME_RANGE_OPTIONS } from '../components/home/entities_grid/common';
 import { ENTITY_ANALYTICS_TABLE_ID } from '../components/home/constants';
 import {
-  SCOPE_ALERT_TIME_RANGE_OVERRIDES,
   getEntityAnalyticsNewHomeScopeId,
   getScopeFlyoutTimeRange,
   getScopeFlyoutTimeRangeMs,
-} from './alert_time_range_overrides';
+} from './scope_time_ranges';
 
 describe('getEntityAnalyticsNewHomeScopeId', () => {
   it('gives each time range its own scope', () => {
     const scopeIds = TIME_RANGE_OPTIONS.map(getEntityAnalyticsNewHomeScopeId);
 
     expect(new Set(scopeIds).size).toBe(TIME_RANGE_OPTIONS.length);
-  });
-
-  it.each(TIME_RANGE_OPTIONS)('queries alerts over the last %s in its scope', (timeRange) => {
-    expect(SCOPE_ALERT_TIME_RANGE_OVERRIDES[getEntityAnalyticsNewHomeScopeId(timeRange)]).toEqual({
-      from: `now-${timeRange}`,
-      to: 'now',
-    });
   });
 });
 

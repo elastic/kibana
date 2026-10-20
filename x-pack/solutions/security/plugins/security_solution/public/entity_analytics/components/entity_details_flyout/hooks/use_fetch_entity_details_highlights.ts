@@ -24,7 +24,7 @@ import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { useCurrentUser } from '../../../../common/lib/kibana';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
-import { getScopeFlyoutTimeRangeMs } from '../../../common/alert_time_range_overrides';
+import { getScopeFlyoutTimeRangeMs } from '../../../common/scope_time_ranges';
 import {
   buildExecutionContext,
   EA_EXECUTION_CONTEXT_NAMES,

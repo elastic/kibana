@@ -34,7 +34,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import { ENTITY_ANOMALY_DEFAULT_LOOKBACK_DAYS } from '../../../../common/entity_analytics/anomalies/constants';
 
 import { useAnomalyOverview } from '../../api/hooks/use_anomaly_overview';
-import { getScopeFlyoutTimeRange } from '../../common/alert_time_range_overrides';
+import { getScopeFlyoutTimeRange } from '../../common/scope_time_ranges';
 import {
   ENTITY_ANOMALIES_TAB_MANAGE_ML_JOBS,
   ENTITY_ANOMALIES_TAB_ATTACK_CHAIN_TITLE,

@@ -13,7 +13,7 @@ import type { EntityViewMode } from '../../../../../common/entity_analytics/enti
 import { ObservedDataSection } from '../../shared/components/observed_data_section';
 import { useAnomalyOverview } from '../../../../entity_analytics/api/hooks/use_anomaly_overview';
 import { useAnomalyPrivileges } from '../../../../entity_analytics/api/hooks/use_anomaly_privileges';
-import { getScopeFlyoutTimeRangeMs } from '../../../../entity_analytics/common/alert_time_range_overrides';
+import { getScopeFlyoutTimeRangeMs } from '../../../../entity_analytics/common/scope_time_ranges';
 import { useHasEntityResolutionLicense } from '../../../../common/hooks/use_has_entity_resolution_license';
 import { EntityHighlightsAccordion } from '../../../../entity_analytics/components/entity_details_flyout/components/entity_highlights';
 import { EntityInsight } from '../../../../cloud_security_posture/components/entity_insight';

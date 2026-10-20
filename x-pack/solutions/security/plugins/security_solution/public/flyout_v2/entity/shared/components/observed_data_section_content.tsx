@@ -10,7 +10,7 @@ import { type EntityStoreEuidApi, useEntityStoreEuidApi } from '@kbn/entity-stor
 import { hostToCriteria } from '../../../../common/components/ml/criteria/host_to_criteria';
 import { getCriteriaFromUsersType } from '../../../../common/components/ml/criteria/get_criteria_from_users_type';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { getScopeFlyoutTimeRange } from '../../../../entity_analytics/common/alert_time_range_overrides';
+import { getScopeFlyoutTimeRange } from '../../../../entity_analytics/common/scope_time_ranges';
 import { useInstalledSecurityJobNameById } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
 import type { ObservedEntityData } from './observed_entity/types';
 import { ObservedEntity } from './observed_entity';

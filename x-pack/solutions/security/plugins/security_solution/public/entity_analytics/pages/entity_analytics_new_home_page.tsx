@@ -90,7 +90,7 @@ import {
 } from '../components/home/needs_attention_tiles/hooks';
 import { RISK_MOVER_MIN_SCORE_CHANGE } from '../components/home/needs_attention_tiles/queries/risk_history';
 import { SignalCards } from '../components/home/needs_attention_tiles/signal_cards';
-import { getEntityAnalyticsNewHomeScopeId } from '../common/alert_time_range_overrides';
+import { getEntityAnalyticsNewHomeScopeId } from '../common/scope_time_ranges';
 import {
   MAX_TILE_FILTER_ENTITY_IDS,
   getCappedTileEntityIds,

@@ -38,7 +38,7 @@ import { getRiskScoreSummaryAttributes } from '../../lens_attributes/risk_score_
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
-import { getScopeFlyoutTimeRange } from '../../common/alert_time_range_overrides';
+import { getScopeFlyoutTimeRange } from '../../common/scope_time_ranges';
 
 import { getEntityData, getItems, LAST_30_DAYS } from './common';
 import { RiskContributionsPanel } from './risk_contributions_panel';

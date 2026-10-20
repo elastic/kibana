@@ -37,7 +37,7 @@ import { normalizeTimeRange } from '../../../../../common/utils/normalize_time_r
 import { useKibana, useToasts } from '../../../../../common/lib/kibana';
 import { useGraphTelemetry } from '../../../../shared/hooks/use_graph_telemetry';
 import { extractTimelineCapabilities } from '../../../../../common/utils/timeline_capabilities';
-import { getScopeFlyoutTimeRange } from '../../../../../entity_analytics/common/alert_time_range_overrides';
+import { getScopeFlyoutTimeRange } from '../../../../../entity_analytics/common/scope_time_ranges';
 
 const GraphInvestigationLazy = React.lazy(() =>
   import('@kbn/cloud-security-posture-graph').then((module) => ({

@@ -6,11 +6,7 @@
  */
 
 import dateMath from '@kbn/datemath';
-import {
-  ENTITY_ANALYTICS_TABLE_ID,
-  ENTITY_ANALYTICS_ALERTS_FROM,
-  ENTITY_ANALYTICS_ALERTS_TO,
-} from '../components/home/constants';
+import { ENTITY_ANALYTICS_ALERTS_TO } from '../components/home/constants';
 import { TIME_RANGE_OPTIONS, type TimeRange } from '../components/home/entities_grid/common';
 
 /** Each time range has its own scope, so flyouts from the table read alerts over the range it shows. */
@@ -58,21 +54,4 @@ export const getScopeFlyoutTimeRangeMs = (scopeId?: string): ScopeTimeRangeMs | 
   const to = dateMath.parse(timeRange.to, { roundUp: true });
   if (!from?.isValid() || !to?.isValid()) return undefined;
   return { from: from.valueOf(), to: to.valueOf() };
-};
-
-/**
- * Maps a scope ID to the alert query time range that should be used when an
- * entity flyout or insights tab is opened from that scope. Components look up
- * their `scopeId` here and, when a match is found, use the returned `{ from, to }`
- * instead of the global Kibana time range.
- *
- * Add an entry here whenever a new surface pins alerts (only) to a fixed window; surfaces that
- * pin the whole flyout belong in {@link SCOPE_FLYOUT_TIME_RANGES}, which is included here.
- */
-export const SCOPE_ALERT_TIME_RANGE_OVERRIDES: Readonly<Record<string, ScopeTimeRange>> = {
-  [ENTITY_ANALYTICS_TABLE_ID]: {
-    from: ENTITY_ANALYTICS_ALERTS_FROM,
-    to: ENTITY_ANALYTICS_ALERTS_TO,
-  },
-  ...SCOPE_FLYOUT_TIME_RANGES,
 };

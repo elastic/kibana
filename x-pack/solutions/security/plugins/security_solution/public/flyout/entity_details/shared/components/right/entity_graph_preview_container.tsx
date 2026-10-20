@@ -12,7 +12,7 @@ import {
   type GraphPreviewPanelProps,
 } from '../../../../../flyout_v2/shared/components/graph_preview_panel';
 import { useShouldShowGraph } from '../../../../shared/hooks/use_should_show_graph';
-import { getScopeFlyoutTimeRange } from '../../../../../entity_analytics/common/alert_time_range_overrides';
+import { getScopeFlyoutTimeRange } from '../../../../../entity_analytics/common/scope_time_ranges';
 
 const DEFAULT_PREVIEW_TIME_RANGE = { from: 'now-30d', to: 'now' } as const;
 
