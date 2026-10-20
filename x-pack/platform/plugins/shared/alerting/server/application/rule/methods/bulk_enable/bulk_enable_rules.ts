@@ -42,6 +42,7 @@ import {
   createNewAPIKeySet,
   updateMetaAttributes,
   bulkMigrateLegacyActions,
+  deleteLegacyActionsForRules,
   migrateLegacyLastRunOutcomeMsg,
 } from '../../../../rules_client/lib';
 import type { RulesClientContext, BulkOperationError } from '../../../../rules_client/types';
@@ -179,6 +180,7 @@ const bulkEnableRulesWithOCC = async (
 
   const rulesFinderRules: Array<SavedObjectsFindResult<RawRule>> = [];
   const rulesToEnable: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
+  let migratedRuleIds: string[] = [];
   const tasksToSchedule: TaskInstanceWithDeprecatedFields[] = [];
   const errors: BulkOperationError[] = [];
   const ruleNameToRuleIdMapping: Record<string, string> = {};
@@ -213,7 +215,7 @@ const bulkEnableRulesWithOCC = async (
         });
       }
 
-      await bulkMigrateLegacyActions({ context, rules: rulesFinderRules });
+      migratedRuleIds = await bulkMigrateLegacyActions({ context, rules: rulesFinderRules });
 
       await pMap(
         rulesFinderRules,
@@ -457,9 +459,13 @@ const bulkEnableRulesWithOCC = async (
 
   const rules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
   const taskIdsToEnable: string[] = [];
+  const savedMigratedRuleIds: string[] = [];
 
   result.saved_objects.forEach((rule) => {
     if (!isSavedObjectErrorResult(rule)) {
+      if (migratedRuleIds.includes(rule.id)) {
+        savedMigratedRuleIds.push(rule.id);
+      }
       if (rule.attributes.scheduledTaskId) {
         taskIdsToEnable.push(rule.attributes.scheduledTaskId);
       }
@@ -475,6 +481,9 @@ const bulkEnableRulesWithOCC = async (
       });
     }
   });
+  // Legacy actions are deleted only once the rules carrying them are saved, so a conflict can be retried
+  await deleteLegacyActionsForRules(context, savedMigratedRuleIds);
+
   return {
     errors,
     // TODO: delete the casting when we do versioning of bulk disable api

@@ -10,6 +10,7 @@ import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder } from '@kbn/es-query';
 import type { SavedObject } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import type { RuleChangeTracking } from '@kbn/alerting-types';
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import {
@@ -24,7 +25,7 @@ import { tryToRemoveTasks } from '../../../../rules_client/common';
 import {
   getAuthorizationFilter,
   checkAuthorizationAndGetTotal,
-  bulkMigrateLegacyActions,
+  deleteLegacyActionsForRules,
 } from '../../../../rules_client/lib';
 import {
   retryIfBulkOperationConflicts,
@@ -208,11 +209,6 @@ const bulkDeleteWithOCC = async (
     { name: 'Get rules, collect them and their attributes', type: 'rules' },
     async () => {
       for await (const response of rulesFinder.find()) {
-        await bulkMigrateLegacyActions({
-          context,
-          rules: response.saved_objects,
-          skipActionsValidation: true,
-        });
         for (const rule of response.saved_objects) {
           const { apiKey, apiKeyCreatedByUser, uiamApiKey } = rule.attributes;
 
@@ -291,6 +287,14 @@ const bulkDeleteWithOCC = async (
     }
   });
   const rules = rulesToDelete.filter((rule) => deletedRuleIds.includes(rule.id));
+
+  // Legacy SIEM actions have nothing to migrate for a deleted rule, so they are removed along with it
+  await deleteLegacyActionsForRules(
+    context,
+    rules
+      .filter(({ attributes }) => attributes.consumer === AlertConsumers.SIEM)
+      .map(({ id }) => id)
+  );
 
   if (deletedRuleIds.length > 0) {
     try {

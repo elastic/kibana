@@ -28,6 +28,7 @@ import {
   enabledRuleForBulkOpsWithActions2WithUiam,
 } from '../../../../rules_client/tests/test_helpers';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import { deleteLegacyActionsForRules } from '../../../../rules_client/lib';
 import type { AlertsService } from '../../../../alerts_service';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
@@ -39,6 +40,13 @@ import type { RegistryRuleType } from '../../../../rule_type_registry';
 jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
 }));
+
+jest.mock(
+  '../../../../rules_client/lib/siem_legacy_actions/find_and_transform_legacy_actions',
+  () => ({
+    deleteLegacyActionsForRules: jest.fn(),
+  })
+);
 
 jest.mock('../../../../lib/rule_gaps/soft_delete_gaps_by_query', () => ({
   softDeleteGapsByQuery: jest.fn(),
@@ -212,6 +220,37 @@ describe('bulkDelete', () => {
       errors: [],
       total: 2,
       taskIdsFailedToBeDeleted: [],
+    });
+  });
+
+  describe('legacy SIEM actions', () => {
+    const asSiemRule = (rule: typeof enabledRuleForBulkOps1) => ({
+      ...rule,
+      attributes: { ...rule.attributes, consumer: 'siem' },
+    });
+
+    test('deletes the legacy actions only for the SIEM rules that were deleted', async () => {
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [
+          asSiemRule(enabledRuleForBulkOps1),
+          asSiemRule(enabledRuleForBulkOps2),
+          enabledRuleForBulkOps3,
+        ],
+      });
+      unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+        statuses: [
+          { id: 'id1', type: RULE_SAVED_OBJECT_TYPE, success: true },
+          getBulkOperationStatusErrorResponse(500),
+          { id: 'id3', type: RULE_SAVED_OBJECT_TYPE, success: true },
+        ],
+      });
+
+      await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
+
+      expect(deleteLegacyActionsForRules).toHaveBeenCalledWith(expect.anything(), ['id1']);
+      expect(
+        (unsecuredSavedObjectsClient.bulkDelete as jest.Mock).mock.invocationCallOrder[0]
+      ).toBeLessThan((deleteLegacyActionsForRules as jest.Mock).mock.invocationCallOrder[0]);
     });
   });
 

@@ -51,9 +51,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   const createWebHookConnector = () => createConnector(getWebHookAction());
 
-  // Failing: See https://github.com/elastic/kibana/issues/196462
-
-  describe.skip('@ess perform_bulk_action - ESS specific logic', () => {
+  describe('@ess perform_bulk_action - ESS specific logic', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
     });

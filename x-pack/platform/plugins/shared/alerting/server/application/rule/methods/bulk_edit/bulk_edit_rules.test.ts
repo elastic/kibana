@@ -23,9 +23,25 @@ import type { RawRule } from '../../../../types';
 import type { Rule } from '../../../../../common';
 import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
 
+import {
+  bulkMigrateLegacyActions,
+  deleteLegacyActionsForRules,
+} from '../../../../rules_client/lib';
+
 jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
 }));
+
+jest.mock('../../../../rules_client/lib/siem_legacy_actions/migrate_legacy_actions', () => ({
+  bulkMigrateLegacyActions: jest.fn(),
+}));
+
+jest.mock(
+  '../../../../rules_client/lib/siem_legacy_actions/find_and_transform_legacy_actions',
+  () => ({
+    deleteLegacyActionsForRules: jest.fn(),
+  })
+);
 
 jest.mock('../../../../lib/snooze/get_active_snooze_if_exist', () => ({
   getActiveSnoozeIfExist: jest.fn(),
@@ -72,6 +88,8 @@ const MOCK_API_KEY = Buffer.from('123:abc').toString('base64');
 beforeEach(() => {
   getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
   (auditLogger.log as jest.Mock).mockClear();
+  (bulkMigrateLegacyActions as jest.Mock).mockReset().mockResolvedValue([]);
+  (deleteLegacyActionsForRules as jest.Mock).mockReset();
 });
 
 setGlobalDate();
@@ -215,6 +233,72 @@ describe('bulkEdit()', () => {
 
     rulesClientParams.isSystemAction.mockImplementation((id: string) => id === 'system_action-id');
     actionsClient.isSystemAction.mockImplementation((id: string) => id === 'system_action-id');
+  });
+
+  describe('legacy SIEM actions', () => {
+    const savedRule = {
+      id: '1',
+      type: RULE_SAVED_OBJECT_TYPE,
+      attributes: {
+        enabled: true,
+        tags: ['foo', 'test-1'],
+        alertTypeId: 'myType',
+        schedule: { interval: '1m' },
+        consumer: 'myApp',
+        scheduledTaskId: 'task-123',
+        executionStatus: {
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
+          status: 'pending',
+        },
+        params: {},
+        throttle: null,
+        notifyWhen: null,
+        actions: [],
+        revision: 0,
+      },
+      references: [],
+      version: '123',
+    };
+    const operations = [{ field: 'tags' as const, operation: 'add' as const, value: ['test-1'] }];
+
+    beforeEach(() => {
+      (bulkMigrateLegacyActions as jest.Mock).mockResolvedValue(['1']);
+      mockCreatePointInTimeFinderAsInternalUser({
+        saved_objects: [
+          {
+            ...existingDecryptedRule,
+            attributes: { ...existingDecryptedRule.attributes, tags: ['foo'] },
+          },
+        ],
+      });
+    });
+
+    test('deletes the migrated legacy actions only after the rule is saved', async () => {
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({ saved_objects: [savedRule] });
+
+      await rulesClient.bulkEdit({ filter: '', operations });
+
+      expect(deleteLegacyActionsForRules).toHaveBeenCalledWith(expect.anything(), ['1']);
+      expect(
+        (unsecuredSavedObjectsClient.bulkCreate as jest.Mock).mock.invocationCallOrder[0]
+      ).toBeLessThan((deleteLegacyActionsForRules as jest.Mock).mock.invocationCallOrder[0]);
+    });
+
+    test('keeps the legacy actions of a rule that failed to save', async () => {
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: '1',
+            type: RULE_SAVED_OBJECT_TYPE,
+            error: { statusCode: 500, message: 'boom', error: 'Internal Server Error' },
+          },
+        ],
+      } as never);
+
+      await rulesClient.bulkEdit({ filter: '', operations });
+
+      expect(deleteLegacyActionsForRules).toHaveBeenCalledWith(expect.anything(), []);
+    });
   });
 
   describe('tags operations', () => {
