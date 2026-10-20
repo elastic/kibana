@@ -1,11 +1,39 @@
 {
-  "sha1": "bf08bdc3296de5457b62ee3257215ee10f7957fc",
+  "sha1": "ecc85ef26e52bc74b617eff5f7ecec51349130f7",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "e82d748e4d78420-f516b1f17d085ef",
+      "id": "d26af6f4779bb94-fed40caaf10d9e8",
+      "title": "AlertZero e2e - attack discovery to host isolation turns a seeded attack chain into an approved host isolation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/attack_discovery_to_isolate.spec.ts",
+        "line": 106,
+        "column": 21
+      }
+    },
+    {
+      "id": "9b2010df3aa164c-1188c6b53ff2712",
+      "title": "AlertZero e2e - endpoint analysis analyzes a seeded endpoint, cites ids that exist in the seed, and keeps two hosts distinguishable (security-team#19991)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/endpoint_analysis.spec.ts",
+        "line": 272,
+        "column": 26
+      }
+    },
+    {
+      "id": "f71b7e19573c864-f516b1f17d085ef",
       "title": "Threat Intel - report ingest API ingests a pasted report, then dedups an identical repeat",
       "expectedStatus": "passed",
       "tags": [
@@ -19,7 +47,7 @@
       }
     },
     {
-      "id": "e82d748e4d78420-35b6f23f231b0cb",
+      "id": "f71b7e19573c864-35b6f23f231b0cb",
       "title": "Threat Intel - report ingest API rejects a report body that fails schema validation",
       "expectedStatus": "passed",
       "tags": [
@@ -33,7 +61,7 @@
       }
     },
     {
-      "id": "e82d748e4d78420-53949f0f794f735",
+      "id": "f71b7e19573c864-53949f0f794f735",
       "title": "Threat Intel - report ingest API extracts indicators from pasted text without calling a model",
       "expectedStatus": "passed",
       "tags": [
@@ -47,7 +75,77 @@
       }
     },
     {
-      "id": "d146d645e6035ce-7d3321514ba68c7",
+      "id": "c7af268757bd0dd-b64a3774585f9ee",
+      "title": "AlertZero e2e - rule coverage completes a coverage sweep and reports its counts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_coverage.spec.ts",
+        "line": 49,
+        "column": 48
+      }
+    },
+    {
+      "id": "c7af268757bd0dd-3f040dddb1a4206",
+      "title": "AlertZero e2e - rule coverage treats an absent AI index as empty, not as an error (security-team#19988, elastic/kibana#296929)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_coverage.spec.ts",
+        "line": 74,
+        "column": 14
+      }
+    },
+    {
+      "id": "3ec923da60545bd-d9a9d259fe3fb56",
+      "title": "AlertZero e2e - rule tuning tunes a noisy rule with an exception scoped to the FP pattern",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_tuning.spec.ts",
+        "line": 641,
+        "column": 11
+      }
+    },
+    {
+      "id": "3ec923da60545bd-cce3f511e6a2f92",
+      "title": "AlertZero e2e - rule tuning keeps alerting on a true positive from another user after the tuning",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_tuning.spec.ts",
+        "line": 673,
+        "column": 27
+      }
+    },
+    {
+      "id": "3ec923da60545bd-5e966f521a25c6b",
+      "title": "AlertZero e2e - rule tuning renders the false-positive rate rounded (security-team#19992)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/rule_tuning.spec.ts",
+        "line": 732,
+        "column": 7
+      }
+    },
+    {
+      "id": "7157ea8e83a720a-7d3321514ba68c7",
       "title": "Threat Intel - source catalog API returns the source catalog and creates the space-filtered indicator alias",
       "expectedStatus": "passed",
       "tags": [
@@ -61,7 +159,7 @@
       }
     },
     {
-      "id": "d146d645e6035ce-d4894bee88697ad",
+      "id": "7157ea8e83a720a-d4894bee88697ad",
       "title": "Threat Intel - source catalog API stays consistent on a second call once the alias is memoized",
       "expectedStatus": "passed",
       "tags": [
@@ -75,7 +173,7 @@
       }
     },
     {
-      "id": "d146d645e6035ce-0f54cc42eb18431",
+      "id": "7157ea8e83a720a-0f54cc42eb18431",
       "title": "Threat Intel - source catalog API returns 404 when updating a source that does not exist",
       "expectedStatus": "passed",
       "tags": [
@@ -89,7 +187,7 @@
       }
     },
     {
-      "id": "d146d645e6035ce-57f339f81c76436",
+      "id": "7157ea8e83a720a-57f339f81c76436",
       "title": "Threat Intel - source catalog API denies a read-only Security user write access to the source catalog",
       "expectedStatus": "passed",
       "tags": [
@@ -100,6 +198,62 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/source_catalog.spec.ts",
         "line": 107,
         "column": 11
+      }
+    },
+    {
+      "id": "5a884990e42f7bf-83d619f856d1450",
+      "title": "AlertZero e2e - worker control lists the managed security workers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/worker_control.spec.ts",
+        "line": 71,
+        "column": 28
+      }
+    },
+    {
+      "id": "5a884990e42f7bf-0ad915243afad21",
+      "title": "AlertZero e2e - worker control refuses to enable a worker that has no service account",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/worker_control.spec.ts",
+        "line": 79,
+        "column": 69
+      }
+    },
+    {
+      "id": "5a884990e42f7bf-594cee81ef81e87",
+      "title": "AlertZero e2e - worker control resets a worker that a previous spec left enabled with a service account bound",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/worker_control.spec.ts",
+        "line": 102,
+        "column": 7
+      }
+    },
+    {
+      "id": "5a884990e42f7bf-9e1a0a3f30d75e1",
+      "title": "AlertZero e2e - worker control enables a worker once a service account is selected, then disables it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/worker_control.spec.ts",
+        "line": 136,
+        "column": 7
       }
     }
   ]

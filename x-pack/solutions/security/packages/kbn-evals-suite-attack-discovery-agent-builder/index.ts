@@ -9,6 +9,7 @@ export {
   AD2_ALERTS_INDEX,
   AD2_SCENARIO_ALL_INDICES,
   buildAd2SeedPlan,
+  getAd2Scenario,
   getAd2ScenarioAlertIds,
 } from './src/scenario_registry';
 export { ad2SeedId } from './src/scenario_registry/ids';
