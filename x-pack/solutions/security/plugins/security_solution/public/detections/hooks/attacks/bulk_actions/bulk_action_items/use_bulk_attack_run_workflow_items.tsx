@@ -33,7 +33,9 @@ export interface UseBulkAttackRunWorkflowItemsProps {
 /**
  * Hook that provides bulk action items and panels for running workflows on attacks.
  */
-export const useBulkAttackRunWorkflowItems = ({ originAttackId }: UseBulkAttackRunWorkflowItemsProps = {}): BulkAttackActionItems => {
+export const useBulkAttackRunWorkflowItems = ({
+  originAttackId,
+}: UseBulkAttackRunWorkflowItemsProps = {}): BulkAttackActionItems => {
   const { canExecuteWorkflow } = useWorkflowsCapabilities();
   const workflowUIEnabled = useWorkflowsUIEnabledSetting();
   const { hasIndexWrite, hasAttackIndexWrite, loading } = useAttacksPrivileges();
