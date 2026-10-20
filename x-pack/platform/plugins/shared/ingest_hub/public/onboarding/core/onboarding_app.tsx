@@ -21,13 +21,13 @@ import {
   KibanaVersionContext,
   sendGetCloudOnboardingDeployment,
 } from '@kbn/fleet-plugin/public';
-import { fromSOAuthMethod } from './step_components/authenticate_and_deploy_step/agent_based_section/credential_method_selector';
-import type { IngestHubStartDependencies } from '../types';
+import { fromSOAuthMethod } from '../step_components/authenticate_and_deploy_step/agent_based_section/credential_method_selector';
+import type { IngestHubStartDependencies } from '../../types';
 
 import { OnboardingShell } from './onboarding_shell';
-import { OnboardingFlowProvider } from './onboarding_flow_context';
+import { OnboardingFlowProvider } from '../onboarding_flow_context';
 import { clearOnboardingSession, getOnboardingSessionKey } from './onboarding_session_storage';
-import { ECF_LAUNCH_STEP_SESSION_KEY } from './step_components/ecf_deployment_section';
+import { ECF_LAUNCH_STEP_SESSION_KEY } from '../step_components/ecf_deployment_section';
 import { ONBOARDING_STEPS } from './steps';
 
 const DEFAULT_RETURN_APP = 'integrations';
