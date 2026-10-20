@@ -46,9 +46,12 @@ export function getTelemetrySource(
   if (!incomingState || (incomingState.embeddableId && !isCopy)) {
     return undefined;
   }
-  const { originatingApp } = incomingState;
+  const { originatingApp, originatingContainer } = incomingState;
   if (isSaveAndReturn(incomingState)) {
-    return originatingApp === DASHBOARD_APP_ID ? 'dashboards' : undefined;
+    const isDashboard = originatingContainer
+      ? originatingContainer === 'dashboard'
+      : originatingApp === DASHBOARD_APP_ID;
+    return isDashboard ? 'dashboards' : undefined;
   }
   // without an originating path, the chart is created in the library, i.e., Visualize or the Dashboards' Visualizations tab.
   if (originatingApp === VISUALIZE_APP_ID || originatingApp === DASHBOARD_APP_ID) {
@@ -58,6 +61,14 @@ export function getTelemetrySource(
     return 'discover';
   }
   return undefined;
+}
+/**
+ * Returns where a chart created inline (edit flyout) is being created, for creation telemetry.
+ */
+export function getInlineTelemetrySource(
+  containerType: string | undefined
+): LensTelemetrySource | undefined {
+  return containerType === 'dashboard' ? 'dashboards' : undefined;
 }
 
 export function isLegacyEditorEmbeddable(

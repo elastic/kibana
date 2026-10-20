@@ -419,9 +419,11 @@ describe('LensEditConfigurationFlyout', () => {
       jest.mocked(trackCreateUiCounterEvents).mockClear();
     });
 
+    const dashboardParentApi = { executionContext: { type: 'dashboard' } };
+
     it('should track an ES|QL creation when a new panel is applied', async () => {
       await renderConfigFlyout(
-        { isNewPanel: true, attributes: esqlLensAttributes },
+        { isNewPanel: true, parentApi: dashboardParentApi, attributes: esqlLensAttributes },
         { esql: 'from index1 | limit 10' }
       );
       await userEvent.click(screen.getByTestId('applyFlyoutButton'));
@@ -430,7 +432,7 @@ describe('LensEditConfigurationFlyout', () => {
     });
 
     it('should track a DSL creation when a new form-based panel is applied', async () => {
-      await renderConfigFlyout({ isNewPanel: true }, undefined, {
+      await renderConfigFlyout({ isNewPanel: true, parentApi: dashboardParentApi }, undefined, {
         datasourceStates: {
           formBased: { isLoading: false, state: mockFormBasedStateChanged },
           textBased: { isLoading: false, state: { layers: {} } },

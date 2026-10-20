@@ -8,7 +8,7 @@
 import { renderHook, act } from '@testing-library/react';
 import { faker } from '@faker-js/faker';
 import type { UseNavigateBackToAppProps } from './app_helpers';
-import { getTelemetrySource, useNavigateBackToApp } from './app_helpers';
+import { getInlineTelemetrySource, getTelemetrySource, useNavigateBackToApp } from './app_helpers';
 import { defaultDoc, makeDefaultServices } from '../mocks/services_mock';
 import type { LensDocument } from '@kbn/lens-common';
 
@@ -108,6 +108,16 @@ describe('App helpers', () => {
       expect(
         getTelemetrySource({ originatingApp: 'securitySolutionUI', originatingPath: '/dashboards' })
       ).toBeUndefined();
+    });
+
+    it('returns dashboards when created from a dashboard hosted in another app', () => {
+      expect(
+        getTelemetrySource({
+          originatingApp: 'securitySolutionUI',
+          originatingPath: '/dashboards/123/edit',
+          originatingContainer: 'dashboard',
+        })
+      ).toBe('dashboards');
     });
 
     it('returns library when creating from the Visualize library', () => {
