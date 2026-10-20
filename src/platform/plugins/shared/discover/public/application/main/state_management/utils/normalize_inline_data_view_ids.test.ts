@@ -527,6 +527,110 @@ describe('normalizeInlineDataViewIds', () => {
     expect(second.dataViewIdMap.size).toBe(0);
     expect(input).toStrictEqual(originalInput);
   });
+
+  describe('saved chart request data', () => {
+    const createVisContext = (dataViewId: string | undefined) => ({
+      suggestionType: 'lensSuggestion',
+      requestData: { dataViewId, timeField: '@timestamp' },
+      attributes: { visualizationType: 'lnsXY' },
+    });
+    const withChart = (tab: DiscoverSessionTab, dataViewId: string | undefined) => ({
+      ...tab,
+      visContext: createVisContext(dataViewId),
+    });
+    const createStoredChartTab = (dataView: DataViewSpec, dataViewId: string | undefined) =>
+      createStoredTab({
+        internalState: { serializedSearchSource: { index: dataView } },
+        attributes: {
+          visContext: createVisContext(dataViewId),
+          controlGroupState: undefined,
+          timeRestore: false,
+        },
+      });
+
+    it('remaps the previous ID of the tab view in session and stored tabs', () => {
+      const legacyDataView = { ...inlineDataView, id: 'legacy-id' };
+
+      const { sessionTabs, openTabs, closedTabs } = normalize({
+        sessionTabs: [withChart(createSessionTab('tab', legacyDataView), 'legacy-id')],
+        openTabs: [createStoredChartTab(legacyDataView, 'legacy-id')],
+        closedTabs: [{ ...createStoredChartTab(legacyDataView, 'legacy-id'), closedAt: 1 }],
+      });
+
+      expect(sessionTabs[0].visContext).toStrictEqual(createVisContext(inlineDataViewId));
+      expect(openTabs[0].attributes?.visContext).toStrictEqual(createVisContext(inlineDataViewId));
+      expect(closedTabs[0].attributes?.visContext).toStrictEqual(
+        createVisContext(inlineDataViewId)
+      );
+    });
+
+    it('remaps a previous ID shared by different specs with the view of each tab', () => {
+      const { sessionTabs, dataViewIdMap } = normalize({
+        sessionTabs: [
+          withChart(createSessionTab('a', { ...inlineDataView, id: 'legacy-id' }), 'legacy-id'),
+          withChart(createSessionTab('b', { ...editedDataView, id: 'legacy-id' }), 'legacy-id'),
+        ],
+      });
+
+      expect(dataViewIdMap.has('legacy-id')).toBe(false);
+      expect(sessionTabs.map(({ visContext }) => visContext)).toStrictEqual([
+        createVisContext(inlineDataViewId),
+        createVisContext(editedDataViewId),
+      ]);
+    });
+
+    it.each([
+      ['another view', 'other-data-view'],
+      ['no view', undefined],
+    ])('keeps a chart for %s', (_description, dataViewId) => {
+      const sessionTab = withChart(
+        createSessionTab('tab', { ...inlineDataView, id: 'legacy-id' }),
+        dataViewId
+      );
+      const storedTab = createStoredChartTab({ ...inlineDataView, id: 'legacy-id' }, dataViewId);
+
+      const { sessionTabs, openTabs } = normalize({
+        sessionTabs: [sessionTab],
+        openTabs: [storedTab],
+      });
+
+      expect(sessionTabs[0].visContext).toBe(sessionTab.visContext);
+      expect(openTabs[0].attributes).toBe(storedTab.attributes);
+    });
+
+    it('keeps an ES|QL chart and a cleared chart', () => {
+      const esqlTab: DiscoverSessionTab = {
+        ...createSessionTab('esql', { id: 'esql-dv', title: 'logs-*', type: 'esql' }, []),
+        isTextBasedQuery: true,
+        serializedSearchSource: {
+          query: { esql: 'FROM logs-*' },
+          index: { id: 'esql-dv', title: 'logs-*', type: 'esql' },
+        },
+        visContext: createVisContext('esql-dv'),
+      };
+      const clearedTab = { ...createSessionTab('cleared'), visContext: {} };
+      const legacyTab = withChart(
+        createSessionTab('legacy', { ...inlineDataView, id: 'esql-dv-legacy' }),
+        'esql-dv-legacy'
+      );
+
+      const { sessionTabs } = normalize({ sessionTabs: [esqlTab, clearedTab, legacyTab] });
+
+      expect(sessionTabs[0]).toBe(esqlTab);
+      expect(sessionTabs[1].visContext).toBe(clearedTab.visContext);
+      expect(sessionTabs[2].visContext).toStrictEqual(createVisContext(inlineDataViewId));
+    });
+
+    it('does not change charts that already use the derived ID', () => {
+      const sessionTab = withChart(createSessionTab('tab'), inlineDataViewId);
+
+      const first = normalize({ sessionTabs: [sessionTab] });
+      const second = normalize(first);
+
+      expect(first.sessionTabs[0].visContext).toBe(sessionTab.visContext);
+      expect(second.sessionTabs).toBe(first.sessionTabs);
+    });
+  });
 });
 
 describe('prepareInlineDataViewLoadState', () => {

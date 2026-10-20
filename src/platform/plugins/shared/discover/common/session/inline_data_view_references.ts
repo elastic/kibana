@@ -10,6 +10,7 @@
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { isCombinedFilter, isFilterPinned } from '@kbn/es-query';
+import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import type { DiscoverDataSource } from '../data_sources';
 import { createDataViewDataSource, isDataViewSource } from '../data_sources';
 import { getInitialDataViewId } from './initial_data_view';
@@ -151,6 +152,30 @@ export const remapDataViewReferences = <T extends DataViewReferenceState>(
   return normalized.dataSource === dataSource && normalized.filters === filters
     ? state
     : normalized;
+};
+
+type VisContextUnmapped = NonNullable<DiscoverSessionTab['visContext']>;
+type VisContextWithRequestData = Extract<VisContextUnmapped, { requestData: object }>;
+
+const hasRequestData = (visContext: VisContextUnmapped): visContext is VisContextWithRequestData =>
+  'requestData' in visContext && Boolean(visContext.requestData);
+
+/** Remaps the view in a saved chart's request data, which the chart requires to match the tab view. */
+export const remapVisContextDataViewId = <T extends VisContextUnmapped | undefined>(
+  visContext: T,
+  idMap: DataViewIdMap
+): T => {
+  if (!visContext || !hasRequestData(visContext)) {
+    return visContext;
+  }
+
+  const { requestData } = visContext;
+  const id = requestData.dataViewId === undefined ? undefined : idMap.get(requestData.dataViewId);
+  if (id === undefined) {
+    return visContext;
+  }
+
+  return { ...visContext, requestData: { ...requestData, dataViewId: id } };
 };
 
 /** Normalizes a tab's app references using its own definition and associated document. */

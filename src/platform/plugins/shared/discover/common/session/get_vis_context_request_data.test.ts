@@ -8,12 +8,18 @@
  */
 
 import { UnifiedHistogramSuggestionType, VIEW_MODE } from '@kbn/discover-session-constants';
+import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
+import { fromStoredDataView } from '@kbn/as-code-data-views-transforms';
 import { cloneDeep } from 'lodash';
 import type {
   DiscoverSessionApiClassicTab,
   DiscoverSessionApiEsqlTab,
 } from '@kbn/as-code-discover-schema';
 import { getVisContextRequestData } from './get_vis_context_request_data';
+import { generateInlineDataViewId } from './inline_data_view';
+import { inlineDataViewIdCases } from './inline_data_view.fixtures';
+import { getInlineDataViewIdentity } from './inline_data_view_references';
+import { toStoredSearchSource } from './search_and_table_mapping';
 
 describe('getVisContextRequestData', () => {
   const inlineTab: DiscoverSessionApiClassicTab = {
@@ -38,12 +44,27 @@ describe('getVisContextRequestData', () => {
     const before = cloneDeep(inlineTab);
 
     expect(getVisContextRequestData(inlineTab)).toStrictEqual({
+      dataViewId: generateInlineDataViewId({ title: 'logs-*', timeFieldName: '@timestamp' }),
       timeField: '@timestamp',
       timeInterval: 'h',
       breakdownField: 'host.name',
     });
     expect(inlineTab).toStrictEqual(before);
   });
+
+  it.each(inlineDataViewIdCases)(
+    'uses the ID Discover derives for %s',
+    (_description, spec, expectedId) => {
+      const dataSource = fromStoredDataView(spec);
+      if (dataSource.type !== AS_CODE_DATA_VIEW_SPEC_TYPE) {
+        throw new Error('Expected an inline Data View spec');
+      }
+      const tab = { ...inlineTab, data_source: dataSource };
+
+      expect(getVisContextRequestData(tab).dataViewId).toBe(expectedId);
+      expect(getInlineDataViewIdentity(toStoredSearchSource(tab))?.id).toBe(expectedId);
+    }
+  );
 
   it('keeps a saved Data View reference', () => {
     expect(

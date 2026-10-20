@@ -920,7 +920,7 @@ describe('chart state from API responses', () => {
     });
   });
 
-  it('uses the inline time field and classic interval without inventing a data view ID', () => {
+  it('uses the inline time field, classic interval, and the ID derived from the inline spec', () => {
     const visContext: ApiVisContext = {
       suggestion_type: UnifiedHistogramSuggestionType.histogramForDataView,
       attributes: { visualizationType: 'lnsXY' },
@@ -947,7 +947,11 @@ describe('chart state from API responses', () => {
     ).toStrictEqual({
       suggestionType: visContext.suggestion_type,
       attributes: visContext.attributes,
-      requestData: { timeField: '@timestamp', timeInterval: 'h' },
+      requestData: {
+        dataViewId: generateInlineDataViewId({ title: 'logs-*', timeFieldName: '@timestamp' }),
+        timeField: '@timestamp',
+        timeInterval: 'h',
+      },
     });
   });
 

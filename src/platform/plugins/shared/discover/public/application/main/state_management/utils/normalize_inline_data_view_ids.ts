@@ -23,6 +23,7 @@ import {
   normalizeInlineAppState,
   normalizeInlineSearchSource,
   remapDataViewReferences,
+  remapVisContextDataViewId,
   type InlineDataViewReferenceContext,
 } from '../../../../../common/session/inline_data_view_references';
 import {
@@ -75,6 +76,22 @@ const bindConventionalAppFilters = (
   return boundFilters === filters ? appState : { ...appState, filters: boundFilters };
 };
 
+// The chart was saved for the tab's own view, so its previous ID follows the tab's own mapping.
+const normalizeVisContext = <T extends Pick<DiscoverSessionTab, 'visContext'>>(
+  container: T,
+  searchSource: SerializedSearchSourceFields | undefined,
+  dataViewIdMap: DataViewIdMap
+): T => {
+  if (!container.visContext) {
+    return container;
+  }
+
+  const ownIdMap = withOwnInlineDataViewId(getInlineDataViewIdentity(searchSource), dataViewIdMap);
+  const visContext = remapVisContextDataViewId(container.visContext, ownIdMap);
+
+  return visContext === container.visContext ? container : { ...container, visContext };
+};
+
 const normalizeStoredInternalState = (
   internalState: TabStateInLocalStorage['internalState'],
   references: InlineDataViewReferenceContext
@@ -102,12 +119,15 @@ const normalizeStoredTab = <T extends TabStateInLocalStorage>({
   documentSearchSource?: SerializedSearchSourceFields;
   dataViewIdMap: DataViewIdMap;
 }): T => {
-  const { internalState, appState, globalState } = tab;
+  const { internalState, attributes, appState, globalState } = tab;
   const references = {
     documentSearchSource,
     sharedIdMap: dataViewIdMap,
   };
   const normalizedInternalState = normalizeStoredInternalState(internalState, references);
+  const normalizedAttributes =
+    attributes &&
+    normalizeVisContext(attributes, internalState?.serializedSearchSource, dataViewIdMap);
   let normalizedAppState = appState;
   if (appState) {
     normalizedAppState = normalizeInlineAppState(appState, {
@@ -123,6 +143,7 @@ const normalizeStoredTab = <T extends TabStateInLocalStorage>({
 
   if (
     normalizedInternalState === internalState &&
+    normalizedAttributes === attributes &&
     normalizedAppState === appState &&
     normalizedGlobalState === globalState
   ) {
@@ -132,6 +153,7 @@ const normalizeStoredTab = <T extends TabStateInLocalStorage>({
   return {
     ...tab,
     internalState: normalizedInternalState,
+    attributes: normalizedAttributes,
     appState: normalizedAppState,
     globalState: normalizedGlobalState,
   };
@@ -141,10 +163,11 @@ const normalizeDocumentTab = (tab: DiscoverSessionTab, dataViewIdMap: DataViewId
   const serializedSearchSource = normalizeInlineSearchSource(tab.serializedSearchSource, {
     sharedIdMap: dataViewIdMap,
   });
+  const normalizedTab = normalizeVisContext(tab, tab.serializedSearchSource, dataViewIdMap);
 
   return serializedSearchSource === tab.serializedSearchSource
-    ? tab
-    : { ...tab, serializedSearchSource };
+    ? normalizedTab
+    : { ...normalizedTab, serializedSearchSource };
 };
 
 // An inline navigation view takes the ID derived from its spec; other views keep their own.

@@ -8,10 +8,27 @@
  */
 
 import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
+import { toStoredDataView } from '@kbn/as-code-data-views-transforms';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { get, isUndefined, omitBy } from 'lodash';
 import type { DiscoverSessionApiTab } from '@kbn/as-code-discover-schema';
+import { generateInlineDataViewId, getInlineDataView } from './inline_data_view';
 import type { StoredVisContextRequestData } from './vis_context';
+
+// An inline view has no stored ID; Discover identifies its instance by the ID derived from its spec.
+const getDataViewId = ({ data_source: dataSource }: DiscoverSessionApiTab) => {
+  if ('ref_id' in dataSource) {
+    return dataSource.ref_id;
+  }
+
+  if (dataSource.type !== AS_CODE_DATA_VIEW_SPEC_TYPE) {
+    return undefined;
+  }
+
+  const inlineDataView = getInlineDataView({ index: toStoredDataView(dataSource) });
+
+  return inlineDataView && generateInlineDataViewId(inlineDataView);
+};
 
 /** Rebuilds the chart fingerprint from the tab's data source and saved ES|QL chart. */
 export const getVisContextRequestData = (
@@ -29,7 +46,7 @@ export const getVisContextRequestData = (
   }
 
   const { data_source: dataSource } = tab;
-  const dataViewId = 'ref_id' in dataSource ? dataSource.ref_id : undefined;
+  const dataViewId = getDataViewId(tab);
 
   const timeField =
     dataSource.type === AS_CODE_DATA_VIEW_SPEC_TYPE ? dataSource.time_field : undefined;

@@ -9,6 +9,7 @@
 
 import {
   AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+  AS_CODE_DATA_VIEW_SPEC_TYPE,
   AS_CODE_ESQL_DATA_SOURCE_TYPE,
 } from '@kbn/as-code-data-views-schema';
 import {
@@ -28,6 +29,8 @@ import { type DiscoverSessionTabTypeState, VIEW_MODE } from '@kbn/saved-search-p
 import { SCHEMA_DISCOVER_SESSION_LATEST } from '@kbn/saved-search-plugin/server';
 import { fromStoredSearchEmbeddableByValue } from '../../../common/embeddable/transform_utils';
 import { toByValuePanelState } from '../../../common/embeddable/transform_utils.fixtures';
+import { generateInlineDataViewId } from '../../../common/session/inline_data_view';
+import { getInlineDataViewIdentity } from '../../../common/session/inline_data_view_references';
 import {
   fromStoredSessionSearchAndTable,
   fromStoredClassicSessionSettings,
@@ -814,6 +817,39 @@ describe('discover session API transforms', () => {
     const getStoredVisContext = (tab: DiscoverSessionApiData['tabs'][number]) =>
       transformDiscoverSessionIn({ ...apiData, tabs: [tab] }).attributes.tabs[0].attributes
         .visContext;
+
+    it('stores the ID Discover derives from the stored spec for an inline classic tab', () => {
+      const inlineTab: DiscoverSessionApiClassicTab = {
+        ...classicApiTab,
+        data_source: {
+          type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+          index_pattern: 'logs-*',
+          time_field: '@timestamp',
+        },
+        vis_context: {
+          suggestion_type: UnifiedHistogramSuggestionType.histogramForDataView,
+          attributes: { visualizationType: 'lnsXY' },
+        },
+      };
+
+      const { attributes, references } = transformDiscoverSessionIn({
+        ...apiData,
+        tabs: [inlineTab],
+      });
+      const [{ attributes: storedTab }] = attributes.tabs;
+      const searchSource = injectReferences(
+        parseSearchSourceJSON(storedTab.kibanaSavedObjectMeta.searchSourceJSON),
+        references
+      );
+      const storedDataViewId = getInlineDataViewIdentity(searchSource)?.id;
+
+      expect(storedDataViewId).toBe(
+        generateInlineDataViewId({ title: 'logs-*', timeFieldName: '@timestamp' })
+      );
+      expect(storedTab.visContext).toMatchObject({
+        requestData: { dataViewId: storedDataViewId, timeField: '@timestamp' },
+      });
+    });
 
     it('extracts the fingerprint from the chart blob for ES|QL tabs', () => {
       const layers = { 'layer-1': { index: 'esql-dv' } };

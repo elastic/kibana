@@ -64,7 +64,7 @@ import {
 import { getConnectedCustomizationService } from '../../../customizations';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
-import { DiscoverTabType } from '@kbn/discover-session-constants';
+import { DiscoverTabType, UnifiedHistogramSuggestionType } from '@kbn/discover-session-constants';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import { FILTERS, FilterStateStore } from '@kbn/es-query';
@@ -554,6 +554,47 @@ describe('Discover state', () => {
         services,
       }).hasUnsavedChanges;
 
+    const chart = {
+      suggestion_type: UnifiedHistogramSuggestionType.lensSuggestion as const,
+      attributes: {
+        title: 'Edit visualization',
+        visualizationType: 'lnsXY',
+        state: { visualization: { preferredSeriesType: 'line' } },
+      },
+    };
+    // The previous ID is the one the chart was saved for, before IDs were derived from the spec.
+    const withLegacyChart = (session: DiscoverSession): DiscoverSession => ({
+      ...session,
+      tabs: session.tabs.map((tab) => ({
+        ...tab,
+        visContext: {
+          suggestionType: chart.suggestion_type,
+          requestData: { dataViewId: 'stored-inline-id' },
+          attributes: chart.attributes,
+        },
+      })),
+    });
+    const withApiChart = (apiResponse: DiscoverSessionApiResponse): DiscoverSessionApiResponse => ({
+      ...apiResponse,
+      data: {
+        ...apiResponse.data,
+        tabs: apiResponse.data.tabs.map((tab) => ({ ...tab, vis_context: chart })),
+      },
+    });
+    // A saved chart is reused only while its request data refers to the view the tab uses.
+    const expectChartOnTabView = (state: InternalStateMockToolkit, tabId: string) => {
+      const dataViewId = getCurrentDataViewId(state, tabId);
+      const persistedTab = state.internalState
+        .getState()
+        .persistedDiscoverSession?.tabs.find(({ id }) => id === tabId);
+
+      expect(dataViewId).toBe(apiDataViewId);
+      expect(state.getCurrentTab().attributes.visContext).toMatchObject({
+        requestData: { dataViewId },
+      });
+      expect(persistedTab?.visContext).toMatchObject({ requestData: { dataViewId } });
+    };
+
     beforeEach(() => {
       localStorage.removeItem(TABS_LOCAL_STORAGE_KEY);
     });
@@ -690,6 +731,117 @@ describe('Discover state', () => {
           services: reloadedServices,
         }).hasUnsavedChanges
       ).toBe(false);
+    });
+
+    it.each([
+      { source: 'legacy', loadSession: () => withLegacyChart(cloneDeep(legacySession)) },
+      {
+        source: 'HTTP',
+        loadSession: () => fromDiscoverSessionApiResponse(withApiChart(cloneDeep(response))),
+      },
+    ])('binds the saved chart to the tab view after $source load', async ({ loadSession }) => {
+      const services = createServices();
+      const state = createState(services);
+
+      await state.initializeTabs({ persistedDiscoverSession: loadSession() });
+      const tabId = state.getCurrentTab().id;
+      await state.initializeSingleTab({ tabId });
+
+      expectChartOnTabView(state, tabId);
+      expect(hasUnsavedChanges(state, services)).toBe(false);
+    });
+
+    it('binds the chart of a tab stored locally before the upgrade', async () => {
+      const services = createServices();
+      const firstLoad = createState(services);
+      await firstLoad.initializeTabs({
+        persistedDiscoverSession: withLegacyChart(cloneDeep(legacySession)),
+      });
+      const tabId = firstLoad.getCurrentTab().id;
+      await firstLoad.initializeSingleTab({ tabId });
+      await waitFor(() => {
+        expect(services.storage.get(TABS_LOCAL_STORAGE_KEY)).toMatchObject({
+          openTabs: [{ id: tabId, attributes: { visContext: { requestData: {} } } }],
+        });
+      });
+      const url = services.history.createHref(services.history.location);
+      firstLoad.internalState.dispatch(internalStateActions.disconnectTab({ tabId }));
+
+      // Restore the stored tab as an earlier version saved it, with the previous IDs.
+      const storedTabs = services.storage.get(TABS_LOCAL_STORAGE_KEY);
+      const [storedTab] = storedTabs.openTabs;
+      services.storage.set(TABS_LOCAL_STORAGE_KEY, {
+        ...storedTabs,
+        openTabs: [
+          {
+            ...storedTab,
+            internalState: {
+              ...storedTab.internalState,
+              serializedSearchSource: legacySession.tabs[0].serializedSearchSource,
+            },
+            attributes: {
+              ...storedTab.attributes,
+              visContext: withLegacyChart(legacySession).tabs[0].visContext,
+            },
+          },
+        ],
+      });
+      const reloadedServices = createServices([url]);
+      reloadedServices.storage = services.storage;
+      const reloaded = createState(reloadedServices);
+
+      await reloaded.initializeTabs({
+        persistedDiscoverSession: withLegacyChart(cloneDeep(legacySession)),
+      });
+      await reloaded.initializeSingleTab({ tabId });
+
+      expectChartOnTabView(reloaded, tabId);
+      expect(hasUnsavedChanges(reloaded, reloadedServices)).toBe(false);
+    });
+
+    it('keeps the chart bound to the tab view after an HTTP save and reload', async () => {
+      const services = createServices();
+      const firstLoad = createState(services);
+      await firstLoad.initializeTabs({
+        persistedDiscoverSession: withLegacyChart(cloneDeep(legacySession)),
+      });
+      const tabId = firstLoad.getCurrentTab().id;
+      await firstLoad.initializeSingleTab({ tabId });
+
+      const savedResponse = cloneDeep(response);
+      const apiClient: jest.Mocked<DiscoverSessionClient> = {
+        create: jest.fn(),
+        upsert: jest.fn(async (_id: string, data: DiscoverSessionClientRequestData) => {
+          savedResponse.data = discoverSessionApiDataSchema.parse(data);
+          return cloneDeep(savedResponse);
+        }),
+        get: jest.fn(async (_id: string) => ({ ...cloneDeep(savedResponse), resolve: {} })),
+      };
+      const discoverSessionService = createDiscoverSessionService({
+        apiClient,
+        legacyClient: services.savedSearch,
+        useHttpApi: true,
+      });
+      jest
+        .spyOn(services.discoverSessionService, 'save')
+        .mockImplementation(discoverSessionService.save);
+
+      await firstLoad.saveDiscoverSession({ newCopyOnSave: false });
+
+      expect(savedResponse.data.tabs[0].vis_context).toStrictEqual(chart);
+      expectChartOnTabView(firstLoad, tabId);
+      expect(hasUnsavedChanges(firstLoad, services)).toBe(false);
+
+      // Without local tab state, the chart must match the view derived from the response spec.
+      const reloadedServices = createDiscoverServicesMock();
+      reloadedServices.history = createMemoryHistory();
+      const reloaded = createState(reloadedServices);
+      const { session } = await discoverSessionService.get(response.id);
+      await reloaded.initializeTabs({ persistedDiscoverSession: session });
+      await reloaded.initializeSingleTab({ tabId });
+
+      expectChartOnTabView(reloaded, tabId);
+      expect(hasUnsavedChanges(reloaded, reloadedServices)).toBe(false);
     });
 
     it.each([
