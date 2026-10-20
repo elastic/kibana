@@ -307,29 +307,18 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   );
 };
 
-const isAvailable = async (check: () => Promise<boolean>) => {
-  try {
-    return await check();
-  } catch {
-    return false;
-  }
-};
-
-const hasEsqlDatasets = async (http: DiscoverServices['core']['http']) => {
-  const { datasets } = await http.get<EsqlDatasetsResult>(DATASETS_ROUTE);
-
-  return datasets.length > 0;
-};
-
 const fetchDataAvailability = async ({
   core,
   dataViews,
 }: DiscoverServices): Promise<DataAvailability> => {
   const [hasESData, hasDataView, defaultDataViewExists, hasESQLDatasets] = await Promise.all([
-    isAvailable(() => dataViews.hasData.hasESData()),
-    isAvailable(() => dataViews.hasData.hasDataView()),
-    isAvailable(() => dataViews.defaultDataViewExists()),
-    isAvailable(() => hasEsqlDatasets(core.http)),
+    dataViews.hasData.hasESData().catch(() => false),
+    dataViews.hasData.hasDataView().catch(() => false),
+    dataViews.defaultDataViewExists().catch(() => false),
+    core.http
+      .get<EsqlDatasetsResult>(DATASETS_ROUTE)
+      .then(({ datasets }) => datasets.length > 0)
+      .catch(() => false),
   ]);
 
   return {

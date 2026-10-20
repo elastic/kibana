@@ -335,9 +335,20 @@ describe('DiscoverMainRoute', () => {
     expect(screen.getByTestId(expectedView)).toBeVisible();
   });
 
-  test.each(['profile', 'space'])(
-    'opens the %s default ES|QL query with only ES|QL datasets',
-    async (defaultQuerySource) => {
+  test('shows the data view prompt with only ES|QL datasets and no query or configured default', async () => {
+    setupComponent({ hasESData: false, hasDataView: false, hasESQLDatasets: true });
+    await waitForLoad();
+
+    expect(screen.getByTestId('noDataViewsPrompt')).toBeVisible();
+  });
+
+  test.each([
+    { defaultQuerySource: 'profile', hasESData: false, hasESQLDatasets: true },
+    { defaultQuerySource: 'space', hasESData: false, hasESQLDatasets: true },
+    { defaultQuerySource: 'profile', hasESData: true, hasESQLDatasets: false },
+  ])(
+    'opens the $defaultQuerySource default ES|QL query without a data view (local ES data: $hasESData)',
+    async ({ defaultQuerySource, hasESData, hasESQLDatasets }) => {
       mockRootProfileState = {
         ...defaultRootProfileState,
         getDefaultEsqlQuery: () =>
@@ -360,7 +371,7 @@ describe('DiscoverMainRoute', () => {
       getIsEsqlDefaultMock.mockImplementation(() => true);
 
       try {
-        setupComponent({ hasESData: false, hasDataView: false, hasESQLDatasets: true });
+        setupComponent({ hasESData, hasDataView: false, hasESQLDatasets });
         await waitForLoad();
 
         expect(screen.getByTestId('discover-main-app')).toBeVisible();

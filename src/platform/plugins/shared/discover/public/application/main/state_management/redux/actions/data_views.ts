@@ -20,12 +20,10 @@ export const loadDataViewList = createInternalStateAsyncThunk(
 /** Loads the data view list, once per Discover instance. */
 export const loadInitialDataViewList: InternalStateThunkActionCreator<[], Promise<void>> = () =>
   function loadInitialDataViewListThunkFn(dispatch, _, { runtimeStateManager }) {
-    const fetchDataViewList = async () => {
-      await dispatch(loadDataViewList());
-    };
-
     if (!runtimeStateManager.initialDataViewListRequest) {
-      runtimeStateManager.initialDataViewListRequest = fetchDataViewList();
+      runtimeStateManager.initialDataViewListRequest = dispatch(loadDataViewList()).then(
+        () => undefined
+      );
     }
 
     return runtimeStateManager.initialDataViewListRequest;
