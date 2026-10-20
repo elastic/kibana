@@ -60,7 +60,7 @@ const DetectionRoute = ({
   const { search } = useLocation();
 
   if (!tab || !isDetectionTabId(tab)) {
-    return <Redirect to={{ pathname: '/detection/events', search }} />;
+    return <Redirect to={{ pathname: '/detections/events', search }} />;
   }
 
   return <DetectionPage headerProps={headerProps} tab={tab} />;
@@ -85,6 +85,9 @@ export function NightshiftPage(): React.ReactElement | null {
   const settingsHref = application.getUrlForApp(NIGHTSHIFT_APP_ID, {
     path: '/settings',
   });
+  const detectionSettingsHref = application.getUrlForApp(NIGHTSHIFT_APP_ID, {
+    path: '/settings/detections',
+  });
   const knowledgeHref = application.getUrlForApp(NIGHTSHIFT_APP_ID, {
     path: '/knowledge',
   });
@@ -104,6 +107,10 @@ export function NightshiftPage(): React.ReactElement | null {
     () => application.navigateToUrl(settingsHref),
     [application, settingsHref]
   );
+  const navigateToDetectionSettings = useCallback(
+    () => application.navigateToUrl(detectionSettingsHref),
+    [application, detectionSettingsHref]
+  );
   const navigateToKnowledge = useCallback(
     () => application.navigateToUrl(knowledgeHref),
     [application, knowledgeHref]
@@ -122,7 +129,10 @@ export function NightshiftPage(): React.ReactElement | null {
   );
   const isKnowledgePage = pathname === '/knowledge' || pathname.startsWith('/knowledge/');
   const isSourcesPage = pathname === '/sources' || pathname.startsWith('/sources/');
-  const isDetectionPage = pathname === '/detection' || pathname.startsWith('/detection/');
+  // `/detection` shipped first; keep its links working.
+  const isLegacyDetectionPath = pathname === '/detection' || pathname.startsWith('/detection/');
+  const isDetectionPage =
+    isLegacyDetectionPath || pathname === '/detections' || pathname.startsWith('/detections/');
   const isSettingsPage = pathname === '/settings' || pathname.startsWith('/settings/');
   const canUseAutomationsPage = canUseAutomations && pathname.startsWith('/automations');
   const isAutomationDetailRoute = pathname.startsWith('/automations/');
@@ -274,14 +284,19 @@ export function NightshiftPage(): React.ReactElement | null {
         >
           <Routes>
             <Route path="/detection/:tab?">
+              <Redirect
+                to={{ pathname: pathname.replace(/^\/detection(?=\/|$)/, '/detections'), search }}
+              />
+            </Route>
+            <Route path="/detections/:tab?">
               <DetectionRoute
                 headerProps={{
                   onSourcesClick: navigateToSources,
                   sourcesHref,
                   onKnowledgeClick: navigateToKnowledge,
                   knowledgeHref,
-                  onSettingsClick: canManageAndConfigure ? navigateToSettings : undefined,
-                  settingsHref: canManageAndConfigure ? settingsHref : undefined,
+                  onSettingsClick: canManageAndConfigure ? navigateToDetectionSettings : undefined,
+                  settingsHref: canManageAndConfigure ? detectionSettingsHref : undefined,
                   onSandboxSecretsClick: canManageSandboxSecrets
                     ? openSandboxSecretsFlyout
                     : undefined,

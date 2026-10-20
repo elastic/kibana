@@ -7,14 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const DETECTION_PROCESS_LABEL = i18n.translate(
-  'xpack.nightshift.detectionPage.detectionProcessLabel',
-  { defaultMessage: 'Detection process' }
+export const DETECTION_ENGINE_LABEL = i18n.translate(
+  'xpack.nightshift.detectionPage.detectionEngineLabel',
+  { defaultMessage: 'Detection engine' }
 );
 
-export const ENABLED_STATUS_LABEL = i18n.translate(
-  'xpack.nightshift.detectionPage.enabledStatusLabel',
-  { defaultMessage: 'Enabled' }
+export const MONITORING_STATUS_LABEL = i18n.translate(
+  'xpack.nightshift.detectionPage.monitoringStatusLabel',
+  { defaultMessage: 'Monitoring' }
 );
 
 export const PAUSED_STATUS_LABEL = i18n.translate(
@@ -34,50 +34,56 @@ export const STATUS_ERROR_TOOLTIP = i18n.translate(
 
 export const STATUS_LOADING_LABEL = i18n.translate(
   'xpack.nightshift.detectionPage.statusLoadingLabel',
-  { defaultMessage: 'Loading detection process status' }
+  { defaultMessage: 'Loading detection engine status' }
 );
 
-export const SOURCES_LABEL = i18n.translate('xpack.nightshift.detectionPage.sourcesLabel', {
-  defaultMessage: 'Sources',
-});
+export const getSourcesLabel = (count: number): string =>
+  i18n.translate('xpack.nightshift.detectionPage.sourcesCountLabel', {
+    defaultMessage: '{count, plural, one {source} other {sources}}',
+    values: { count },
+  });
 
 export const SOURCES_TOOLTIP = i18n.translate('xpack.nightshift.detectionPage.sourcesTooltip', {
   defaultMessage: 'Sources in this space',
 });
 
-export const KNOWLEDGE_INDICATORS_LABEL = i18n.translate(
-  'xpack.nightshift.detectionPage.knowledgeIndicatorsLabel',
-  { defaultMessage: 'Knowledge indicators' }
-);
+export const getKnowledgeIndicatorsLabel = (count: number): string =>
+  i18n.translate('xpack.nightshift.detectionPage.knowledgeIndicatorsCountLabel', {
+    defaultMessage: '{count, plural, one {knowledge indicator} other {knowledge indicators}}',
+    values: { count },
+  });
 
 export const KNOWLEDGE_INDICATORS_TOOLTIP = i18n.translate(
   'xpack.nightshift.detectionPage.knowledgeIndicatorsTooltip',
   { defaultMessage: 'Features and queries' }
 );
 
-export const ACTIVE_RULES_LABEL = i18n.translate(
-  'xpack.nightshift.detectionPage.activeRulesLabel',
-  { defaultMessage: 'Active rules' }
-);
+export const getRulesLabel = (count: number): string =>
+  i18n.translate('xpack.nightshift.detectionPage.rulesCountLabel', {
+    defaultMessage: '{count, plural, one {rule} other {rules}}',
+    values: { count },
+  });
 
-export const ACTIVE_RULES_TOOLTIP = i18n.translate(
-  'xpack.nightshift.detectionPage.activeRulesTooltip',
-  { defaultMessage: 'Alerting rules' }
-);
-
-export const DETECTIONS_LABEL = i18n.translate('xpack.nightshift.detectionPage.detectionsLabel', {
-  defaultMessage: 'Detections',
+export const RULES_TOOLTIP = i18n.translate('xpack.nightshift.detectionPage.activeRulesTooltip', {
+  defaultMessage: 'Alerting rules',
 });
 
-export const DETECTIONS_TOOLTIP = i18n.translate(
+export const getDiscoveriesLabel = (count: number): string =>
+  i18n.translate('xpack.nightshift.detectionPage.discoveriesCountLabel', {
+    defaultMessage: '{count, plural, one {discovery} other {discoveries}}',
+    values: { count },
+  });
+
+export const DISCOVERIES_TOOLTIP = i18n.translate(
   'xpack.nightshift.detectionPage.detectionsTooltip',
   { defaultMessage: 'Change-point detections in the selected time range' }
 );
 
-export const SIGNIFICANT_EVENTS_LABEL = i18n.translate(
-  'xpack.nightshift.detectionPage.significantEventsLabel',
-  { defaultMessage: 'Significant events' }
-);
+export const getSignificantEventsLabel = (count: number): string =>
+  i18n.translate('xpack.nightshift.detectionPage.significantEventsCountLabel', {
+    defaultMessage: '{count, plural, one {significant event} other {significant events}}',
+    values: { count },
+  });
 
 export const SIGNIFICANT_EVENTS_TOOLTIP = i18n.translate(
   'xpack.nightshift.detectionPage.significantEventsTooltip',

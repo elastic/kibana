@@ -65,11 +65,11 @@ export const DetectionPage = ({
     label: DETECTION_TAB_LABELS[id],
     isSelected: tab === id,
     href: application.getUrlForApp(NIGHTSHIFT_APP_ID, {
-      path: `/detection/${id}${tabSearch}`,
+      path: `/detections/${id}${tabSearch}`,
     }),
     onClick: (event?: React.MouseEvent) => {
       event?.preventDefault();
-      history.push(`/detection/${id}${tabSearch}`);
+      history.push(`/detections/${id}${tabSearch}`);
     },
     'data-test-subj': `nightshiftDetectionTab-${id}`,
   }));

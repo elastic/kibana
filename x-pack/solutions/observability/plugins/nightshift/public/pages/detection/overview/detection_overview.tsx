@@ -6,7 +6,6 @@
  */
 
 import { css } from '@emotion/react';
-import type { IconType } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,21 +18,21 @@ import type { SignificantEventsMaintenanceStatus } from '@kbn/significant-events
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import React from 'react';
 import { DetectionStatusBadge } from './detection_status_badge';
-import { MetricCell } from './metric_cell';
+import { MetricCell, type MetricCellProps } from './metric_cell';
 import {
-  ACTIVE_RULES_LABEL,
-  ACTIVE_RULES_TOOLTIP,
-  DETECTION_PROCESS_LABEL,
-  DETECTIONS_LABEL,
-  DETECTIONS_TOOLTIP,
-  KNOWLEDGE_INDICATORS_LABEL,
+  DETECTION_ENGINE_LABEL,
+  DISCOVERIES_TOOLTIP,
+  getDiscoveriesLabel,
+  getKnowledgeIndicatorsLabel,
+  getRulesLabel,
+  getSignificantEventsLabel,
+  getSourcesLabel,
   KNOWLEDGE_INDICATORS_TOOLTIP,
   OVERVIEW_ERROR_MESSAGE,
   OVERVIEW_ERROR_TITLE,
   OVERVIEW_RETRY_LABEL,
-  SIGNIFICANT_EVENTS_LABEL,
+  RULES_TOOLTIP,
   SIGNIFICANT_EVENTS_TOOLTIP,
-  SOURCES_LABEL,
   SOURCES_TOOLTIP,
 } from './translations';
 
@@ -65,56 +64,55 @@ export const DetectionOverview = ({
   onRetry,
 }: DetectionOverviewProps): React.ReactElement => {
   const { euiTheme } = useEuiTheme();
-  const metrics: Array<{
-    icon: IconType;
-    value: number | undefined;
-    label: string;
-    tooltip: string;
-    testSubject: string;
-  }> = [
+  const metrics: Array<Omit<MetricCellProps, 'isLoading'>> = [
     {
-      icon: 'database',
-      value: counts?.sources,
-      label: SOURCES_LABEL,
-      tooltip: SOURCES_TOOLTIP,
-      testSubject: 'nightshiftDetectionOverviewSources',
-    },
-    {
-      icon: 'documents',
+      icon: 'chartTagCloud',
+      tone: 'subdued',
       value: counts?.knowledge_indicators,
-      label: KNOWLEDGE_INDICATORS_LABEL,
+      getLabel: getKnowledgeIndicatorsLabel,
       tooltip: KNOWLEDGE_INDICATORS_TOOLTIP,
       testSubject: 'nightshiftDetectionOverviewKnowledgeIndicators',
     },
     {
-      icon: 'bolt',
+      icon: 'database',
+      tone: 'subdued',
+      value: counts?.sources,
+      getLabel: getSourcesLabel,
+      tooltip: SOURCES_TOOLTIP,
+      testSubject: 'nightshiftDetectionOverviewSources',
+    },
+    {
+      icon: 'radar',
+      tone: 'subdued',
       value: counts?.active_rules,
-      label: ACTIVE_RULES_LABEL,
-      tooltip: ACTIVE_RULES_TOOLTIP,
+      getLabel: getRulesLabel,
+      tooltip: RULES_TOOLTIP,
       testSubject: 'nightshiftDetectionOverviewActiveRules',
     },
     {
-      icon: 'visLine',
+      icon: 'moon',
+      tone: 'warning',
       value: counts?.detections,
-      label: DETECTIONS_LABEL,
-      tooltip: DETECTIONS_TOOLTIP,
+      getLabel: getDiscoveriesLabel,
+      tooltip: DISCOVERIES_TOOLTIP,
       testSubject: 'nightshiftDetectionOverviewDetections',
     },
     {
-      icon: 'bell',
+      icon: 'warning',
+      tone: 'danger',
       value: counts?.significant_events,
-      label: SIGNIFICANT_EVENTS_LABEL,
+      getLabel: getSignificantEventsLabel,
       tooltip: SIGNIFICANT_EVENTS_TOOLTIP,
       testSubject: 'nightshiftDetectionOverviewSignificantEvents',
     },
   ];
 
   return (
-    <EuiPanel hasBorder hasShadow={false} paddingSize="l">
+    <EuiPanel hasBorder hasShadow={false} paddingSize="m">
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxs">
-            <h2>{DETECTION_PROCESS_LABEL}</h2>
+            <h2>{DETECTION_ENGINE_LABEL}</h2>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -125,7 +123,7 @@ export const DetectionOverview = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="l" />
+      <EuiSpacer size="m" />
       {isCountsError ? (
         <KbnDangerCallout
           announceOnMount

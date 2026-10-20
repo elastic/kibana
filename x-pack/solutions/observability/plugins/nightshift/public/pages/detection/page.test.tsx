@@ -75,13 +75,14 @@ describe('DetectionPage', () => {
 
     expect(await screen.findByTestId('eventsTabStub')).toBeInTheDocument();
     expect(screen.getByTestId('nightshiftDetectionStatus')).toHaveTextContent('Paused');
-    expect(screen.getByText('Knowledge indicators')).toBeInTheDocument();
+    expect(screen.getByText('knowledge indicators')).toBeInTheDocument();
+    expect(screen.getByText('discoveries')).toBeInTheDocument();
   });
 
   it('renders the workspace tabs below the shared Detection overview', async () => {
     renderPage();
 
-    const overviewTitle = screen.getByText('Detection process');
+    const overviewTitle = screen.getByText('Detection engine');
     const eventsTab = screen.getByTestId('nightshiftDetectionTab-events');
 
     expect(overviewTitle.compareDocumentPosition(eventsTab)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);

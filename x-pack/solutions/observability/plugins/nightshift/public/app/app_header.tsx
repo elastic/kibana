@@ -34,7 +34,7 @@ export const SOURCES_PAGE_TITLE = i18n.translate('xpack.nightshift.sourcesPage.t
 });
 
 export const DETECTION_PAGE_TITLE = i18n.translate('xpack.nightshift.detectionPage.title', {
-  defaultMessage: 'Detection',
+  defaultMessage: 'Detections',
 });
 
 const sourcesLabel = i18n.translate('xpack.nightshift.sourcesLinkLabel', {
@@ -218,7 +218,7 @@ export function NightshiftAppHeader({
                   void onSettingsClick();
                 },
                 testId: 'nightshiftSettingsLink',
-                overflow: !isAutomationsPage,
+                overflow: !isAutomationsPage && !isDetectionPage,
               },
             ]
           : []),

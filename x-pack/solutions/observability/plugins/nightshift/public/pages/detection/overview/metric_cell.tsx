@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type { IconType } from '@elastic/eui';
+import type { EuiPanelProps, IconType } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiPanel,
   EuiSkeletonRectangle,
   EuiText,
   EuiTitle,
@@ -18,10 +19,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
+export type MetricTone = Extract<EuiPanelProps['color'], 'subdued' | 'warning' | 'danger'>;
+
 export interface MetricCellProps {
   icon: IconType;
+  tone: MetricTone;
   value: number | undefined;
-  label: string;
+  getLabel: (count: number) => string;
   tooltip: string;
   isLoading: boolean;
   testSubject: string;
@@ -29,33 +33,40 @@ export interface MetricCellProps {
 
 export const MetricCell = ({
   icon,
+  tone,
   value,
-  label,
+  getLabel,
   tooltip,
   isLoading,
   testSubject,
 }: MetricCellProps): React.ReactElement => (
   <EuiToolTip content={tooltip} position="bottom">
-    <div data-test-subj={testSubject} tabIndex={0}>
-      <EuiTitle size="s">
-        <div>
-          {isLoading ? (
-            <EuiSkeletonRectangle width={48} height={24} borderRadius="s" />
-          ) : (
-            value?.toLocaleString(i18n.getLocale())
-          )}
-        </div>
-      </EuiTitle>
-      <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiIcon type={icon} color="subdued" aria-hidden={true} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            <span>{label}</span>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </div>
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="m"
+      responsive={false}
+      data-test-subj={testSubject}
+      tabIndex={0}
+    >
+      <EuiFlexItem grow={false}>
+        <EuiPanel color={tone} paddingSize="s" hasBorder={false} hasShadow={false} grow={false}>
+          <EuiIcon type={icon} size="l" aria-hidden={true} />
+        </EuiPanel>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiTitle size="xs">
+          <div>
+            {isLoading ? (
+              <EuiSkeletonRectangle width={40} height={20} borderRadius="s" />
+            ) : (
+              value?.toLocaleString(i18n.getLocale())
+            )}
+          </div>
+        </EuiTitle>
+        <EuiText size="s">
+          <span>{getLabel(value ?? 0)}</span>
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   </EuiToolTip>
 );

@@ -317,12 +317,21 @@ describe('NightshiftPage', () => {
     );
   });
 
-  it.each(['/detection', '/detection/unknown'])('redirects %s to the Events tab', async (path) => {
-    const { history } = renderPage(path);
+  it.each(['/detections', '/detections/unknown', '/detection', '/detection/events'])(
+    'redirects %s to the Events tab',
+    async (path) => {
+      const { history } = renderPage(path);
+
+      expect(await screen.findByTestId('detectionPageStub')).toBeInTheDocument();
+      expect(history.location.pathname).toBe('/detections/events');
+    }
+  );
+
+  it('shows Sources and detection Settings in the Detections header', async () => {
+    renderPage('/detections/events');
 
     expect(await screen.findByTestId('detectionPageStub')).toBeInTheDocument();
-    expect(history.location.pathname).toBe('/detection/events');
-    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Detection');
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Detections');
     expect(screen.queryByTestId('nightshiftAppStub')).not.toBeInTheDocument();
 
     const sourcesLink = screen.getByTestId('nightshiftSourcesLink');
@@ -331,6 +340,10 @@ describe('NightshiftPage', () => {
 
     await act(async () => fireEvent.click(sourcesLink));
     expect(navigateToUrl).toHaveBeenCalledWith('/app/nightshift/sources');
+
+    const settingsLink = screen.getByTestId('nightshiftSettingsLink');
+    expect(settingsLink).toBeVisible();
+    expect(settingsLink).toHaveAttribute('href', '/app/nightshift/settings/detections');
 
     await openAppMenuOverflow();
     expect(screen.queryByTestId('nightshiftManagementLink')).not.toBeInTheDocument();
