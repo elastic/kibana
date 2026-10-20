@@ -129,9 +129,10 @@ function ContextualMapContent({
         <EuiFlexGroup
           gutterSize="m"
           alignItems="center"
-          justifyContent="flexEnd"
+          justifyContent="flexStart"
           responsive={false}
-          // Wraps to a second line instead of overflowing in the narrow chat sidebar.
+          // Left-aligned so the content stays visible, and wraps to a second line instead of
+          // overflowing in the narrow chat sidebar.
           wrap
         >
           {snapshotTime && (
