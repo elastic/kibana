@@ -19,6 +19,7 @@ import type { Endpoint } from './transport';
 export interface Binding {
   readonly handler: HostHandler;
   readonly lever: Lever;
+  readonly onRunEnd?: (bundle: Bundle) => void;
 }
 export interface RunOptions {
   readonly workloadClass: string;
@@ -419,6 +420,13 @@ export class ExecutionHost {
     if (execution.termination?.timer) clearTimeout(execution.termination.timer);
     if (execution.abort) execution.options.signal?.removeEventListener('abort', execution.abort);
     this.activeIds.delete(execution.bundle.runId);
+    for (const binding of Object.values(execution.options.capabilities)) {
+      try {
+        binding.onRunEnd?.(execution.bundle);
+      } catch {
+        /* Cleanup cannot change a terminal task outcome. */
+      }
+    }
   }
   private record(
     execution: Execution,

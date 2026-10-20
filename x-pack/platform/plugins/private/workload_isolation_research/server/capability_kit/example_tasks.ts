@@ -9,6 +9,7 @@ import { threadId } from 'worker_threads';
 import type { CodecInput } from './codecs';
 import type { WorkerContext } from './protocol';
 import { createRunServices } from './services';
+import { createBatchStream } from './batch_stream';
 
 export const echo = async (input: CodecInput): Promise<CodecInput> => input;
 export const alternate = async (): Promise<CodecInput> => 'new-revision';
@@ -36,6 +37,19 @@ export const services = async (input: CodecInput, context: WorkerContext): Promi
     await clients.close();
   }
 };
+export const streaming = async (
+  _input: CodecInput,
+  context: WorkerContext
+): Promise<CodecInput> => {
+  const stream = createBatchStream(context, 'events', { maxPendingBatches: 2, maxEvents: 2 });
+  await Promise.all([
+    stream.write([{ ordinal: 1 }, { ordinal: 2 }]),
+    stream.write([{ ordinal: 3 }]),
+  ]);
+  await stream.close();
+  return { closed: true };
+};
+
 export const hold = async (input: CodecInput, context: WorkerContext): Promise<CodecInput> => {
   const result = await context.call('fixture', 'hold', input);
   return { result, threadId, principal: context.bundle.principal, space: context.bundle.space };

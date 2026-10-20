@@ -11,3 +11,4 @@ require('@kbn/setup-node-env');
 require('./kit.node_test');
 require('./es_parity.node_test');
 require('./concurrency.node_test');
+require('./batch_stream.node_test');

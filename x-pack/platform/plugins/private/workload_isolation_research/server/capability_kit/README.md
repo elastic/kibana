@@ -1,4 +1,4 @@
-# Track 7 capability kit — 0.1.2 pre-release research slice
+# Track 7 capability kit — 0.1.3 pre-release research slice
 
 PRIVATE research code; no public Core API, plugin lifecycle hook, or automatic enablement.
 Base harness fd3138c. Only main owns TM claims/leases/results.
@@ -107,6 +107,21 @@ spaceId overrides are denied; pass a genuine Core space-scoped security-wrapped
 client, not an unwrapped internal repository. Principal/space must match its binding.
 This bridge preserves actual migration/security/ESO behavior ON MAIN; no claim of
 worker-local SO/ESO, large-state isolation or RBAC proof from fixture clients.
+
+## Acknowledged event streams (0.1.3)
+
+Main: bindBatchStream(async(batch, bundle) => { await consume(batch.events); }).
+Grant it as capability events. Worker: const stream = createBatchStream(context,
+'events'); await stream.write(events); ... await stream.close(). Both transports
+share ordered sequence+RPC correlation; ACK comes ONLY after the consumer settles.
+Task must await every write/close before returning. Default bounds:64events,
+64KiB encoded payload/batch,2pending batches/writer,4stream IDs/run (including
+terminal tombstones). Configure BatchLimits at BOTH ends; host limits win.
+Over-limit fire-and-forget writers reject explicitly; awaiting writes supplies
+backpressure. No silent drops/reordering or unbounded queue. Consumer errors poison
+the stream; later writes fail. Host cleans all stream state at run end. This is
+not crash-persistent/exactly-once delivery: consumers own idempotency; no retransmit.
+Cooperative cancellation may flush bounded terminal events during abortGraceMs.
 
 ## Adoption instrumentation
 

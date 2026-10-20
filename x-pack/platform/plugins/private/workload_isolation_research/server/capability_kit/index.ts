@@ -9,6 +9,8 @@ export { ExecutionHost } from './host';
 export type { RunOptions, Binding } from './host';
 export { ModuleRegistry } from './registry';
 export { LEVER_LABELS } from './protocol';
+export { createBatchStream, bindBatchStream } from './batch_stream';
+export type { EventBatch, BatchLimits } from './batch_stream';
 export { encode, decode } from './codecs';
 export type { CodecInput, WireValue } from './codecs';
 export { createRunServices, bindSavedObjects, bindTaskManager, bindLogger } from './services';
