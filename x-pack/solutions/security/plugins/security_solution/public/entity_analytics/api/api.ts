@@ -112,7 +112,10 @@ import {
   WATCHLISTS_CSV_UPLOAD_URL,
   WATCHLISTS_PRIVILEGES_URL,
 } from '../../../common/entity_analytics/watchlists/constants';
-import { RISK_SCORE_HISTORY_URL } from '../../../common/entity_analytics/risk_score/constants';
+import {
+  RISK_SCORE_HISTORY_URL,
+  RISK_SCORE_MAINTAINER_ID,
+} from '../../../common/entity_analytics/risk_score/constants';
 import type { UploadWatchlistCsvResponse } from '../../../common/api/entity_analytics/watchlists/csv_upload/csv_upload.gen';
 import {
   GENERATE_LEADS_URL,
@@ -143,7 +146,6 @@ export interface DeleteAssetCriticalityResponse {
  * It is used to identify the only entity source that can be edited by the UI.
  */
 const ENTITY_SOURCE_NAME = 'User Monitored Indices';
-const RISK_SCORE_MAINTAINER_ID = 'risk-score';
 const ENTITY_STORE_V2_QUERY = { apiVersion: ENTITY_STORE_API_VERSIONS.internal.v2 } as const;
 
 const getMaintainerRouteWithId = (route: string, id: string): string =>
