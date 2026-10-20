@@ -85,7 +85,7 @@ const renderRulesPage = (history = createMemoryHistory({ initialEntries: ['/'] }
     </IntlProvider>
   );
 
-const setAlertsAppStatus = (status: AppStatus) => {
+const useSetAlertsAppStatus = (status: AppStatus) => {
   useKibanaMock().services.application.applications$ = new BehaviorSubject(
     new Map([['observability-overview', { status }]])
   ) as unknown as ApplicationStart['applications$'];
@@ -103,7 +103,7 @@ describe('rulesPage', () => {
     useKibanaMock().services.http.basePath.prepend = jest.fn(
       (path: string) => `${MOCK_BASE_PATH}${path}`
     );
-    setAlertsAppStatus(AppStatus.accessible);
+    useSetAlertsAppStatus(AppStatus.accessible);
     useKibanaMock().services.hideListBackButton = undefined;
     useKibanaMock().services.tabs = undefined;
   });
@@ -152,7 +152,7 @@ describe('rulesPage', () => {
   });
 
   it('omits the list back button when the observability-overview app is inaccessible', async () => {
-    setAlertsAppStatus(AppStatus.inaccessible);
+    useSetAlertsAppStatus(AppStatus.inaccessible);
     const history = createMemoryHistory({ initialEntries: ['/'] });
     renderRulesPage(history);
 
