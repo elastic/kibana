@@ -102,11 +102,11 @@ describe('useSpanFlyoutHeader', () => {
     expect(screen.getByTestId('spanFlyoutInfo-name')).toHaveTextContent('SELECT *');
   });
 
-  it('renders the request as a meta block after the name for an HTTP span', () => {
+  it('renders the request and response as meta blocks after the name for an HTTP span', () => {
     const httpSpan = {
       ...baseSpan,
       url: { original: 'https://example.com/api/products/1' },
-      http: { request: { method: 'GET' }, response: { status_code: 200 } },
+      http: { request: { method: 'GET' }, response: { status_code: 503 } },
     } as unknown as Span;
 
     const parts = renderHeader(httpSpan, baseTransaction);
@@ -114,10 +114,16 @@ describe('useSpanFlyoutHeader', () => {
     expect(getTestSubjects(parts.metaBlocks)).toEqual([
       'spanFlyoutInfo-name',
       'spanFlyoutInfo-request',
+      'spanFlyoutInfo-response',
     ]);
     expect(parts.metaBlocks[1].props.title).toBe('Request');
     expect(parts.metaBlocks[1].props.children.props.fitToContainer).toBe(true);
+    expect(parts.metaBlocks[2].props.title).toBe('Response');
     expect(getTestSubjects(parts.infoBlocks)).not.toContain('spanFlyoutInfo-request');
+
+    renderParts(parts);
+    expect(screen.getByTestId('spanFlyoutInfo-request')).not.toHaveTextContent('503');
+    expect(screen.getByTestId('spanFlyoutInfo-response')).toHaveTextContent('503');
   });
 
   it('renders N/A when span.span is missing', () => {

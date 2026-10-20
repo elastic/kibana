@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
-import { asDuration, PercentOfParent, Timestamp } from '@kbn/apm-ui-shared';
+import { asDuration, HttpStatusCode, PercentOfParent, Timestamp } from '@kbn/apm-ui-shared';
 import { FlyoutTemplate } from '@kbn/flyout-template';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE, useUiTracker } from '@kbn/observability-shared-plugin/public';
@@ -35,6 +35,7 @@ import {
   DURATION_LABEL,
   NAME_LABEL,
   REQUEST_LABEL,
+  RESPONSE_LABEL,
   SERVICE_LABEL,
   TRANSACTION_LABEL,
 } from '../waterfall_item_flyout/constants';
@@ -132,6 +133,9 @@ export function useSpanFlyoutHeader({
   ];
 
   if (spanHttpUrl) {
+    const responseCode =
+      span.http?.response?.status_code || span.span?.http?.response?.status_code;
+
     metaBlocks.push(
       <MetaBlock
         key="request"
@@ -142,11 +146,23 @@ export function useSpanFlyoutHeader({
         <HttpInfoSummaryItem
           method={span.http?.request?.method || span.span?.http?.method}
           url={spanHttpUrl}
-          status={span.http?.response?.status_code || span.span?.http?.response?.status_code}
           fitToContainer
         />
       </MetaBlock>
     );
+
+    if (responseCode) {
+      metaBlocks.push(
+        <MetaBlock
+          key="response"
+          id="response"
+          title={RESPONSE_LABEL}
+          data-test-subj="spanFlyoutInfo-response"
+        >
+          <HttpStatusCode code={responseCode} showTooltip />
+        </MetaBlock>
+      );
+    }
   }
 
   const infoBlocks: ReactElement[] = [];

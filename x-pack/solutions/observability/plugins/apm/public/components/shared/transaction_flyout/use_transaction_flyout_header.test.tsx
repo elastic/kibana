@@ -148,6 +148,29 @@ describe('useTransactionFlyoutHeader', () => {
     expect(screen.queryByTestId('transactionFlyoutInfo-duration')).not.toBeInTheDocument();
   });
 
+  it('splits the request and the response into separate meta blocks', () => {
+    const httpTransaction = {
+      ...baseTransaction,
+      url: { full: 'https://example.com/api' },
+      http: { request: { method: 'GET' }, response: { status_code: 500 } },
+    } as unknown as Transaction;
+
+    const parts = renderHeader(httpTransaction);
+    expect(getTestSubjects(parts.metaBlocks)).toEqual([
+      'transactionFlyoutInfo-name',
+      'transactionFlyoutInfo-request',
+      'transactionFlyoutInfo-response',
+    ]);
+    expect(parts.metaBlocks[2].props.title).toBe('Response');
+
+    renderParts(parts);
+    expect(screen.getByTestId('transactionFlyoutInfo-request')).toHaveTextContent(
+      'GET https://example.com/api'
+    );
+    expect(screen.getByTestId('transactionFlyoutInfo-request')).not.toHaveTextContent('500');
+    expect(screen.getByTestId('transactionFlyoutInfo-response')).toHaveTextContent('500');
+  });
+
   it('shows the result badge without a URL, and the request block and error count otherwise', () => {
     const withResult = {
       ...baseTransaction,

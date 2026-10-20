@@ -32,6 +32,7 @@ import {
   DATE_LABEL,
   DURATION_LABEL,
   REQUEST_LABEL,
+  RESPONSE_LABEL,
   SERVICE_LABEL,
   TRANSACTION_LABEL,
 } from '../waterfall_item_flyout/constants';
@@ -136,6 +137,8 @@ export function useTransactionFlyoutHeader({
     </MetaBlock>,
   ];
 
+  const responseCode = transaction.http?.response?.status_code;
+
   if (url) {
     metaBlocks.push(
       <MetaBlock
@@ -144,14 +147,22 @@ export function useTransactionFlyoutHeader({
         title={REQUEST_LABEL}
         data-test-subj="transactionFlyoutInfo-request"
       >
-        <HttpInfoSummaryItem
-          method={transaction.http?.request?.method}
-          status={transaction.http?.response?.status_code}
-          url={url}
-          fitToContainer
-        />
+        <HttpInfoSummaryItem method={transaction.http?.request?.method} url={url} fitToContainer />
       </MetaBlock>
     );
+
+    if (responseCode) {
+      metaBlocks.push(
+        <MetaBlock
+          key="response"
+          id="response"
+          title={RESPONSE_LABEL}
+          data-test-subj="transactionFlyoutInfo-response"
+        >
+          <HttpStatusCode code={responseCode} showTooltip />
+        </MetaBlock>
+      );
+    }
   }
 
   const infoBlocks = [

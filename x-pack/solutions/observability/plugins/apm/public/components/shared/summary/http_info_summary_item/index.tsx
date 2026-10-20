@@ -89,7 +89,7 @@ export function HttpInfoSummaryItem({ status, method, url, fitToContainer }: Htt
                   {method.toUpperCase()}
                 </span>
               </EuiToolTip>
-            )}
+            )}{' '}
             <EuiToolTip content={url} display="block" anchorClassName={URL_ANCHOR_CLASS_NAME}>
               <span tabIndex={0} data-test-subj="apmHttpInfoUrl" css={fittedUrlStyles}>
                 {url}

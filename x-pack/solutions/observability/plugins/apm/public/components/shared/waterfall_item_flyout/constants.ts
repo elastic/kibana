@@ -19,7 +19,11 @@ export const REQUEST_LABEL = i18n.translate('xpack.apm.waterfallItemFlyout.reque
   defaultMessage: 'Request',
 });
 
-export const NAME_LABEL = i18n.translate('xpack.apm.transactionDetails.spanFlyout.nameLabel', {
+export const RESPONSE_LABEL = i18n.translate('xpack.apm.waterfallItemFlyout.responseLabel', {
+  defaultMessage: 'Response',
+});
+
+export const NAME_LABEL =i18n.translate('xpack.apm.transactionDetails.spanFlyout.nameLabel', {
   defaultMessage: 'Name',
 });
 

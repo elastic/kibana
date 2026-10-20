@@ -70,6 +70,9 @@ describe('HttpInfoSummaryItem', () => {
 
       expect(screen.getByTestId('apmHttpInfoRequestMethod')).toHaveTextContent('GET');
       expect(screen.getByTestId('apmHttpInfoUrl')).toHaveTextContent(url);
+      expect(screen.getByTestId('apmHttpInfoRequestMethod').closest('.euiBadge')).toHaveTextContent(
+        `GET ${url}`
+      );
       expect(screen.getByTestId(httpStatusCodeBadgeTestId)).toHaveTextContent('502');
     });
 
