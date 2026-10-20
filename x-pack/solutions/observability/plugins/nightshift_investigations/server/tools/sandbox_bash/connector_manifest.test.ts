@@ -27,7 +27,7 @@ const createRawConnector = (overrides: Record<string, unknown> = {}) => ({
   id: 'connector-1',
   name: 'My GitHub',
   actionTypeId: '.github',
-  isPreconfigured: false,
+  isPreconfigured: true,
   isDeprecated: false,
   config: {
     apiUrl: 'https://api.github.com',
@@ -165,6 +165,21 @@ describe('writeConnectorManifest', () => {
       expect(content).toContain('`secret_keys` parameter of the bash tool');
       expect(content).toContain('- `GITHUB_TOKEN`');
       expect(content).toContain('- `PAGERDUTY_KEY`');
+    });
+
+    it('uses the first configured secret in the usage example', async () => {
+      const { content } = await renderManifest({ secretKeys: ['PAGERDUTY_KEY', 'OTHER_KEY'] });
+
+      expect(content).toContain('`secret_keys: ["PAGERDUTY_KEY"]`');
+      expect(content).toContain('Bearer $PAGERDUTY_KEY');
+      expect(content).not.toContain('GITHUB_TOKEN');
+    });
+
+    it('uses a neutral placeholder in the usage example when no secrets are configured', async () => {
+      const { content } = await renderManifest({ secretKeys: [] });
+
+      expect(content).toContain('`secret_keys: ["MY_SECRET"]`');
+      expect(content).not.toContain('GITHUB_TOKEN');
     });
 
     it('notes when no secrets are configured', async () => {

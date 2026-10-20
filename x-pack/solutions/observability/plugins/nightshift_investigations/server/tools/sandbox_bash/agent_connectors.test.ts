@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import type { SandboxCallContext } from './tool_utils';
 import { listAgentConnectors } from './agent_connectors';
@@ -22,18 +23,20 @@ const createConnector = ({
   name,
   actionTypeId,
   config = {},
+  isPreconfigured = true,
 }: {
   id: string;
   name: string;
   actionTypeId: string;
   config?: Record<string, unknown>;
+  isPreconfigured?: boolean;
 }) => ({
   id,
   name,
   actionTypeId,
   config,
   isMissingSecrets: false,
-  isPreconfigured: false,
+  isPreconfigured,
   isDeprecated: false,
   isSystemAction: false,
   isConnectorTypeDeprecated: false,
@@ -80,6 +83,28 @@ describe('listAgentConnectors', () => {
     );
 
     expect(result).toEqual([{ id: 'slack-1', name: 'My Slack', actionTypeId: '.slack' }]);
+  });
+
+  it('excludes allowed connectors that are not preconfigured, which the sandbox rejects', async () => {
+    actionsClient.getAll.mockResolvedValue([
+      createConnector({ id: 'slack-1', name: 'My Slack', actionTypeId: '.slack' }),
+      createConnector({
+        id: 'github-ui',
+        name: 'UI GitHub',
+        actionTypeId: '.github',
+        isPreconfigured: false,
+      }),
+    ]);
+    const logger = loggingSystemMock.createLogger();
+
+    const result = await listAgentConnectors(
+      createCallContext(['slack-1', 'github-ui']),
+      getActionsClient,
+      logger
+    );
+
+    expect(result).toEqual([{ id: 'slack-1', name: 'My Slack', actionTypeId: '.slack' }]);
+    expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('github-ui'));
   });
 
   it('exposes only id, name and actionTypeId, never config or secrets', async () => {

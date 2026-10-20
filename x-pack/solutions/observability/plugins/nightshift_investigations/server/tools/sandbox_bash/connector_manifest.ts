@@ -15,6 +15,7 @@ const renderConnectorSection = (connector: AgentConnector): string =>
   `## ${connector.name} (connector-id: ${connector.id}, type: ${connector.actionTypeId})`;
 
 const renderSecretsSections = (secretKeys: readonly string[]): string[] => {
+  const exampleKey = secretKeys[0] ?? 'MY_SECRET';
   const sections = [
     '',
     '---',
@@ -23,9 +24,9 @@ const renderSecretsSections = (secretKeys: readonly string[]): string[] => {
     '',
     'Secrets configured for this space are never stored in this sandbox either. To use one, pass its',
     'name in the `secret_keys` parameter of the bash tool. For that single command only, the',
-    'environment contains a variable of the same name, e.g. with `secret_keys: ["GITHUB_TOKEN"]`:',
+    `environment contains a variable of the same name, e.g. with \`secret_keys: ["${exampleKey}"]\`:`,
     '```bash',
-    'curl -sS -H "Authorization: Bearer $GITHUB_TOKEN" "https://api.example.com/..."',
+    `curl -sS -H "Authorization: Bearer $${exampleKey}" "https://api.example.com/..."`,
     '```',
     'Never print, log, or write secret values to files; they are redacted from command output.',
     'Only the secrets listed below can be requested.',
@@ -52,7 +53,7 @@ export const writeConnectorManifest = async ({
   secretKeys: readonly string[];
   logger: Logger;
 }): Promise<void> => {
-  const connectors = await listAgentConnectors(callContext, getActionsClient);
+  const connectors = await listAgentConnectors(callContext, getActionsClient, logger);
 
   const sections: string[] = [
     '# Sandbox Connectors',
