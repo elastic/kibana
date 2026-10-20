@@ -21,7 +21,10 @@ describe('Nightshift alert recovery workflow', () => {
     expect(managedWorkflowDefinitions).toContain(NIGHTSHIFT_ALERT_RECOVERY_WORKFLOW);
     expect(NIGHTSHIFT_ALERT_RECOVERY_WORKFLOW.id).toBe(NIGHTSHIFT_ALERT_RECOVERY_WORKFLOW_ID);
     expect(workflow.triggers).toEqual([
-      { type: 'alerting.v1.alertStatusChanged', on: { condition: 'event.alert.status: "recovered"' } },
+      {
+        type: 'alerting.v1.alertStatusChanged',
+        on: { condition: 'event.alert.status: "recovered"' },
+      },
     ]);
     expect(workflow.settings.concurrency).toEqual({
       key: 'nightshift-alert-recovery-{{ event.alert.uuid }}',
@@ -50,4 +53,3 @@ describe('Nightshift alert recovery workflow', () => {
     ]);
   });
 });
-
