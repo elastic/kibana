@@ -212,7 +212,7 @@ describe('EntitySummaryGrid', () => {
       await waitFor(() => {
         expect(screen.getByText('alias-id')).toBeInTheDocument();
       });
-      expect(screen.getByText('Other entity IDs in the resolution group')).toBeInTheDocument();
+      expect(screen.getByText('Additional entity IDs')).toBeInTheDocument();
     });
 
     it('counts each alias id once and never counts the target itself', () => {

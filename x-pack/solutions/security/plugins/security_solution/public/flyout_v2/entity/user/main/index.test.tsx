@@ -434,9 +434,7 @@ describe('<User />', () => {
 
         expect(getByTestId('risk-summary-table')).toBeInTheDocument();
         expect(queryByTestId('resolution-risk-summary-table')).not.toBeInTheDocument();
-        expect(getByTestId('entityRiskInputsTitleLink')).toHaveTextContent(
-          'Entity risk contributions'
-        );
+        expect(getByTestId('entityRiskInputsTitleLink')).toHaveTextContent('Risk contributions');
       });
 
       it('keeps showing the resolution group score next to the individual score when the feature flag is off', () => {

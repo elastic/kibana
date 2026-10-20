@@ -56,9 +56,9 @@ export const getWatchlistIds = (record: Pick<Entity, 'entity'>): string[] => {
     | Record<string, unknown>
     | undefined;
   const watchlists = attributes?.watchlists;
-  return Array.isArray(watchlists)
-    ? watchlists.filter((id): id is string => typeof id === 'string' && id !== '')
-    : [];
+  // A single watchlist membership is serialized as a bare string rather than a one-element array.
+  const ids = Array.isArray(watchlists) ? watchlists : [watchlists];
+  return ids.filter((id): id is string => typeof id === 'string' && id !== '');
 };
 
 /** De-duplicated watchlist ids across the records, preserving first-seen order. */

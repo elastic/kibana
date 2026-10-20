@@ -42,7 +42,7 @@ const WATCHLISTS_OVERFLOW_TOOLTIP_TITLE = i18n.translate(
 
 const ENTITY_IDS_OVERFLOW_TOOLTIP_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.grid.entityIdsOverflowTitle',
-  { defaultMessage: 'Other entity IDs in the resolution group' }
+  { defaultMessage: 'Additional entity IDs' }
 );
 
 interface EntitySummaryGridProps {

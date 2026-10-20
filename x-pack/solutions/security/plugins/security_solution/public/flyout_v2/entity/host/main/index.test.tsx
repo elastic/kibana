@@ -410,9 +410,7 @@ describe('<Host />', () => {
 
         expect(getByTestId('risk-summary-table')).toBeInTheDocument();
         expect(queryByTestId('resolution-risk-summary-table')).not.toBeInTheDocument();
-        expect(getByTestId('entityRiskInputsTitleLink')).toHaveTextContent(
-          'Entity risk contributions'
-        );
+        expect(getByTestId('entityRiskInputsTitleLink')).toHaveTextContent('Risk contributions');
       });
     });
     describe('detail tools', () => {

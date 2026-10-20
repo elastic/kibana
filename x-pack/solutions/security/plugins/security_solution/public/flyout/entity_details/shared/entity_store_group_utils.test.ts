@@ -104,8 +104,12 @@ describe('getWatchlistIds', () => {
     expect(getWatchlistIds(withWatchlists())).toEqual([]);
   });
 
-  it('returns an empty list when watchlists is not an array', () => {
-    expect(getWatchlistIds(withWatchlists('wl-1'))).toEqual([]);
+  it('wraps a single watchlist stored as a bare string', () => {
+    expect(getWatchlistIds(withWatchlists('wl-1'))).toEqual(['wl-1']);
+  });
+
+  it('returns an empty list when watchlists is neither a string nor an array', () => {
+    expect(getWatchlistIds(withWatchlists(42))).toEqual([]);
   });
 
   it('drops non-string and empty entries', () => {
