@@ -142,7 +142,7 @@ describe('createKibanaIsomerRuntime', () => {
       expect(width).toBe(kibanaCardFrame.defaultWidth);
       expect(height).toBeGreaterThan(0);
       expect(html).toMatch(
-        /^<div class="isomer" style="[^"]*">.*All services are healthy\.<\/p><\/div>$/
+        /^<div class="isomer" style="[^"]*">.*All services are healthy\.<\/p><\/div><\/div>$/
       );
     });
 
@@ -157,7 +157,7 @@ describe('createKibanaIsomerRuntime', () => {
         ],
       }).surfaces.snapshot.render(noticeComposition);
 
-      expect(html).toMatch(/^<div class="isomer"[^>]*><p class="testKibanaNotice-root">/);
+      expect(html).toMatch(/^<div class="isomer"[^>]*><div[^>]*><p class="testKibanaNotice-root">/);
       expect(css).toMatch(/\.testKibanaNotice-root\{color:var\(--isomer-color-text-subdued\)/);
       expect(css).toMatch(/\.isomer\{[^}]*--isomer-color-text-subdued:/);
     });

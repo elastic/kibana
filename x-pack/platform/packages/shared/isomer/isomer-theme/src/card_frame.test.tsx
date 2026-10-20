@@ -11,6 +11,7 @@ import type { FrameDispatcher } from '@elastic/isomer-sdk';
 import { bindFrame } from '@elastic/isomer-sdk';
 import { borealisDark, borealisLight } from './borealis_tokens.generated';
 import { CARD_FALLBACK_NODE_HEIGHT, kibanaCardFrame } from './card_frame';
+import { isomerStyleAdapter } from './style_adapter';
 
 const markdown = { type: 'markdown', text: 'There are **3** open alerts.' };
 
@@ -32,8 +33,22 @@ describe('kibanaCardFrame', () => {
 
     expect(isValidElement(element)).toBe(true);
     expect(renderToStaticMarkup(<>{element}</>)).toMatch(
-      /^<div class="isomer" style="[^"]*"><p>markdown<\/p><p>markdown<\/p><\/div>$/
+      /^<div class="isomer" style="[^"]*"><div class="isomerCardBody-root" style="display:block"><p>markdown<\/p><p>markdown<\/p><\/div><\/div>$/
     );
+  });
+
+  it('centers the body vertically, so an estimate that runs tall pads it evenly', () => {
+    expect(renderToStaticMarkup(<>{draw()}</>)).toMatch(
+      /^<div class="isomer" style="[^"]*justify-content:center/
+    );
+  });
+
+  it("emits the body styles that drop its first and last nodes' outer margins", () => {
+    const collector = isomerStyleAdapter.createCollector({});
+    const css = isomerStyleAdapter.renderStyles(collector, { scheme: 'light' });
+
+    expect(css).toContain('.isomerCardBody-root>:first-child{margin-top:0}');
+    expect(css).toContain('.isomerCardBody-root>:last-child{margin-bottom:0}');
   });
 
   it('estimates a positive height for a body whose primitives declare none', () => {
@@ -42,9 +57,9 @@ describe('kibanaCardFrame', () => {
     );
   });
 
-  it('sums declared heights, padding and gaps', () => {
+  it('sums declared heights and padding', () => {
     expect(kibanaCardFrame.estimateHeight({ body: [markdown, markdown] }, dispatcher(50))).toBe(
-      48 + 50 + 16 + 50
+      48 + 50 + 50
     );
   });
 
