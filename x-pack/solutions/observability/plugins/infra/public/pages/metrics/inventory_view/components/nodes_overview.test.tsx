@@ -119,11 +119,11 @@ const mockSchemas = (schemas: DataSchemaFormat[]) => {
   });
 };
 
-const renderOverview = () =>
+const renderOverview = (overrides: Partial<typeof baseProps> = {}) =>
   render(
     <EuiProvider>
       <I18nProvider>
-        <NodesOverview {...baseProps} />
+        <NodesOverview {...baseProps} {...overrides} />
       </I18nProvider>
     </EuiProvider>
   );
@@ -144,5 +144,21 @@ describe('NodesOverview', () => {
     expect(mockedUseWaffleOptionsContext()).toEqual(
       expect.objectContaining({ preferredSchema: 'semconv' })
     );
+  });
+
+  it('stretches the table container to fill the available height', () => {
+    mockPreferredSchema('ecs');
+    mockSchemas(['ecs']);
+
+    renderOverview({ view: 'table', nodeType: 'host', nodes: [], loading: false });
+
+    const tableContainer = screen.getByTestId('infraNodesOverviewTable');
+    const styles = window.getComputedStyle(tableContainer);
+
+    // The table branch must fill its parent (mirroring the map branch) instead of
+    // collapsing to its content height. See elastic/kibana#294749.
+    expect(styles.display).toBe('flex');
+    expect(styles.flexDirection).toBe('column');
+    expect(styles.height).toBe('100%');
   });
 });

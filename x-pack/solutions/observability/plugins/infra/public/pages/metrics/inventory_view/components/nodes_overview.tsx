@@ -187,7 +187,7 @@ export const NodesOverview = ({
           hasShadow={false}
           borderRadius="m"
           paddingSize="none"
-          css={{ overflow: 'hidden' }}
+          css={{ overflow: 'hidden', display: 'flex', flexDirection: 'column', flex: '1 1 auto' }}
         >
           <TableView
             nodeType={nodeType}
@@ -250,6 +250,11 @@ export const NodesOverview = ({
 };
 
 const TableContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
   padding: ${(props) => props.theme.euiTheme.size.l};
 `;
 
