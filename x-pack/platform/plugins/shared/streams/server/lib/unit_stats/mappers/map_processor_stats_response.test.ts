@@ -9,6 +9,7 @@ import { streamsUnitStatsProcessorResultSchema } from '@kbn/streams-schema';
 import {
   averageSecondsPerEvent,
   mapProcessorStatsResponse,
+  mapProcessorStatsRows,
   noProcessorStats,
   type ProcessorStatsAggregations,
 } from './map_processor_stats_response';
@@ -33,6 +34,76 @@ const bucket = (overrides: Partial<ProcessorStatsAggregations['by_id']> = {}) =>
     ],
     ...overrides,
   },
+});
+
+describe('mapProcessorStatsRows', () => {
+  const joined = {
+    incoming_rate: 4.6,
+    sum_items_in: 3870,
+    avg_duration_per_item: 5.2e-6,
+  };
+
+  it('places the joined rows into the result, with units', () => {
+    const result = mapProcessorStatsRows({ rows: { 'uppercase-message': joined } })[
+      'uppercase-message'
+    ];
+
+    expect(result).toEqual({
+      processing_duration: { average: { value: 5.2e-6, unit: 's' } },
+      events: {
+        incoming: {
+          rate: { value: 4.6, unit: '{item}', time_unit: 's' },
+          failures: { rate: { value: null, unit: null, time_unit: null } },
+        },
+      },
+    });
+    expect(streamsUnitStatsProcessorResultSchema.parse(result)).toEqual(result);
+  });
+
+  it('has a result for every processor', () => {
+    const rows = { 'uppercase-message': joined, 'add-tags': { ...joined, incoming_rate: 2.1 } };
+
+    const results = mapProcessorStatsRows({ rows });
+
+    expect(Object.keys(results)).toEqual(['uppercase-message', 'add-tags']);
+    expect(results['add-tags'].events.incoming.rate.value).toBe(2.1);
+  });
+
+  it('leaves a column that ES|QL returned as null as no data', () => {
+    const rows = {
+      'uppercase-message': {
+        incoming_rate: null,
+        sum_items_in: 3870,
+        avg_duration_per_item: null,
+      },
+    };
+
+    const result = mapProcessorStatsRows({ rows })['uppercase-message'];
+
+    expect(result.events.incoming.rate).toEqual({ value: null, unit: null, time_unit: null });
+    expect(result.processing_duration.average).toEqual({ value: null, unit: null });
+  });
+
+  // Processor failures are not queried yet, so there is no failed_rate column.
+  it('leaves the failures rate as no data when there is no failed_rate column', () => {
+    const result = mapProcessorStatsRows({ rows: { 'uppercase-message': joined } })[
+      'uppercase-message'
+    ];
+
+    expect(result.events.incoming.failures.rate.value).toBeNull();
+  });
+
+  it('places the failures rate once the query returns it, including a real zero', () => {
+    const rows = { 'uppercase-message': { ...joined, failed_rate: 0 } };
+
+    const result = mapProcessorStatsRows({ rows })['uppercase-message'];
+
+    expect(result.events.incoming.failures.rate).toEqual({
+      value: 0,
+      unit: '{item}',
+      time_unit: 's',
+    });
+  });
 });
 
 describe('averageSecondsPerEvent', () => {

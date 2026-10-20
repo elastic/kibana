@@ -6,7 +6,9 @@
  */
 
 import type { StreamsUnit } from '@kbn/streams-schema';
-import { SECONDS_UNIT } from '../constants';
+import { SECONDS_UNIT, STATS_COLUMN } from '../constants';
+import { numberOrNull } from './esql_rows';
+import type { ProcessorRow } from './join_processor_rows';
 import { noRate, noValue, perSecond, toItemRate, toValue } from './stats_values';
 
 interface ProcessorBucket {
@@ -83,3 +85,30 @@ export const mapProcessorStatsResponse = ({
 
   return results;
 };
+
+/**
+ * Places the joined rows of each processor into its result. A column that ES|QL returned as
+ * null stays no data. Processor failures are not queried yet, see `buildProcessorRateQuery`, so
+ * there is no failures column and that rate stays no data.
+ */
+export const mapProcessorStatsRows = ({
+  rows,
+}: {
+  rows: Record<string, ProcessorRow>;
+}): Record<string, StreamsUnit.StatsProcessorResult> =>
+  Object.fromEntries(
+    Object.entries(rows).map(([id, row]) => [
+      id,
+      {
+        processing_duration: {
+          average: toValue(numberOrNull(row[STATS_COLUMN.avgDurationPerItem]), SECONDS_UNIT),
+        },
+        events: {
+          incoming: {
+            rate: toItemRate(numberOrNull(row[STATS_COLUMN.incomingRate])),
+            failures: { rate: toItemRate(numberOrNull(row[STATS_COLUMN.failedRate])) },
+          },
+        },
+      },
+    ])
+  );
