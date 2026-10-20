@@ -150,7 +150,7 @@ export function applyConfigOverrides(rawConfig, opts, extraCliOptions, keystoreC
 
     if (opts.ssl !== undefined) {
       set('server.ssl.enabled', opts.ssl);
-    } else if (opts.http2 || !has('server.ssl.enabled')) {
+    } else if (opts.http2 || (opts.devConfig !== false && !has('server.ssl.enabled'))) {
       set('server.ssl.enabled', true);
     }
 
@@ -310,7 +310,10 @@ export default function (program) {
       .option('--no-watch', 'Prevents automatic restarts of the server in --dev mode')
       .option('--no-optimizer', 'Disable the kbn/optimizer completely')
       .option('--no-cache', 'Disable the kbn/optimizer cache')
-      .option('--no-dev-config', 'Prevents loading the kibana.dev.yml file in --dev mode')
+      .option(
+        '--no-dev-config',
+        'Prevents loading the kibana.dev.yml file and enabling TLS by default in --dev mode'
+      )
       .option(
         '--no-dev-credentials',
         'Prevents setting default values for `elasticsearch.username` and `elasticsearch.password` in --dev mode'
@@ -353,7 +356,7 @@ export default function (program) {
       watch: !!opts.watch,
       runExamples: !!opts.runExamples,
       // We want to run without base path when the `--run-examples` flag is given so that we can use local
-      // links in other documentation sources, like "View this tutorial [here](http://localhost:5601/app/tutorial/xyz)".
+      // links in other documentation sources, like "View this tutorial [here](https://localhost:5601/app/tutorial/xyz)".
       // We can tell users they only have to run with `pnpm start --run-examples` to get those
       // local links to work.  Similar to what we do for "View in Console" links in our
       // elastic.co links.

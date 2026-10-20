@@ -68,11 +68,11 @@ To run Kibana with an alternate yml file entirely, use the `--config` option: `p
 
 ### HTTPS and certificates
 
-`pnpm start` (or `node scripts/kibana --dev`) enables TLS using the bundled development certificate and key. You do not need to generate certificates or pass `--http2`. This default does not change the connection from {{kib}} to {{es}}. To enable TLS on that connection too, start both processes with `pnpm start --ssl` and `pnpm es snapshot --ssl`.
+`pnpm start` (or `node scripts/kibana --dev`) enables TLS using the bundled development certificate and key. You do not need to generate certificates or pass `--http2`. Test runners that start {{kib}} with `--no-dev-config` keep plain HTTP unless they enable TLS explicitly. This default does not change the connection from {{kib}} to {{es}}. To enable TLS on that connection too, start both processes with `pnpm start --ssl` and `pnpm es snapshot --ssl`.
 
 The bundled certificate is signed by the development Certificate Authority (CA), which browsers do not trust by default. To avoid certificate warnings, import `src/platform/packages/shared/kbn-dev-utils/certs/ca.crt` into the trust store used by your browser:
 
-* **macOS:** Open the CA certificate in Keychain Access, add it to your login keychain, and configure its trust settings to trust it for Secure Sockets Layer (SSL).
+* **macOS:** Open the CA certificate in Keychain Access, add it to your login keychain, and configure its trust settings to trust it for Secure Sockets Layer (SSL). Safari still rejects the bundled certificate because its validity period exceeds Apple's limits for TLS server certificates; use Chrome or Firefox, or configure your own certificate as described below.
 * **Windows:** Import the CA certificate into the current user's **Trusted Root Certification Authorities** store.
 * **Linux:** Import the CA certificate through your browser's certificate settings, or the system trust store if your browser uses it.
 * **Firefox:** If Firefox does not use your operating system's trust store, import the CA under **Settings → Privacy & Security → Certificates → View Certificates → Authorities**, and enable trust for identifying websites.
@@ -97,7 +97,7 @@ server.ssl.certificate: /absolute/path/to/localhost.crt
 server.ssl.key: /absolute/path/to/localhost.key
 ```
 
-To use HTTP/1 without TLS, run `pnpm start --no-ssl`, or set `server.ssl.enabled: false` in `config/kibana.dev.yml`. To keep TLS but use HTTP/1, run `pnpm start --server.protocol=http1`, or set `server.protocol: http1`. The `--http2` flag remains available to explicitly enable HTTP/2 with TLS; it cannot be combined with `--no-ssl`.
+To use HTTP/1 without TLS, run `pnpm start --no-ssl`, or set `server.ssl.enabled: false` in `config/kibana.dev.yml`. In serverless mode, `--no-ssl` also disables TLS for the connection to {{es}} and the SAML setup, so use `--server.ssl.enabled=false` instead. To keep TLS but use HTTP/1, run `pnpm start --server.protocol=http1`, or set `server.protocol: http1`. The `--http2` flag remains available to explicitly enable HTTP/2 with TLS; it cannot be combined with `--no-ssl`.
 
 To verify the protocol, open your browser's developer tools, enable the **Protocol** column in the **Network** tab, and reload {{kib}}. Requests to {{kib}} should use `h2`.
 
@@ -146,14 +146,14 @@ pnpm start --mockIdpPlugin.enabled=false --no-base-path
 **Custom base path** — both SAML and basic login are supported; SAML is the default.
 
 ```sh
-pnpm es snapshot --kibanaUrl https://localhost:5601/your_path
+pnpm es snapshot
 pnpm start --server.basePath=/your_path
 ```
 
 **No base path with SAML** — both SAML and basic login are supported; SAML is the default:
 
 ```sh
-pnpm es snapshot --kibanaUrl https://localhost:5601
+pnpm es snapshot
 pnpm start --no-base-path
 ```
 

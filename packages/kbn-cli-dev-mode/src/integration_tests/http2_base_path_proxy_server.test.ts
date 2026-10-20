@@ -244,4 +244,51 @@ describe('Http2BasePathProxyServer', () => {
 
     expect(propagated).toEqual(true);
   });
+
+  describe('shouldRedirect', () => {
+    let proxyServerWithoutShouldRedirect: BasePathProxyServer;
+    let proxyWithoutShouldRedirectSupertest: supertest.Agent;
+
+    beforeEach(async () => {
+      // setup and start a proxy server which does not use "shouldRedirectFromOldBasePath"
+      const proxyConfig: HttpConfig = { ...config, port: 10014 };
+      const devConfig = new DevConfig({ basePathProxyTarget: config.port });
+      proxyServerWithoutShouldRedirect = getBasePathProxyServer({
+        log: logger,
+        httpConfig: proxyConfig,
+        devConfig,
+      });
+      await proxyServerWithoutShouldRedirect.start({
+        shouldRedirectFromOldBasePath: () => false,
+        delayUntil: () => EMPTY,
+      });
+      proxyWithoutShouldRedirectSupertest = supertest(`https://127.0.0.1:${proxyConfig.port}`, {
+        http2: true,
+      });
+    });
+
+    afterEach(async () => {
+      await proxyServerWithoutShouldRedirect.stop();
+    });
+
+    test('it will do a redirect if it detects what looks like a stale or previously used base path', async () => {
+      const fakeBasePath = basePath !== '/abc' ? 'abc' : 'efg';
+      const res = await proxySupertest.get(`/${fakeBasePath}/app/home?foo=bar`).expect(302);
+      expect(res.header.location).toEqual(`${basePath}/app/home?foo=bar`);
+    });
+
+    test('it will NOT do a redirect if it detects what looks like a stale or previously used base path if we intentionally turn it off', async () => {
+      const fakeBasePath = basePath !== '/abc' ? 'abc' : 'efg';
+      await proxyWithoutShouldRedirectSupertest.get(`/${fakeBasePath}`).expect(404);
+    });
+
+    test('it will NOT redirect if it detects a larger path than 3 characters', async () => {
+      await proxySupertest.get('/abcde').expect(404);
+    });
+
+    test('it will NOT redirect if it is not a GET verb', async () => {
+      const fakeBasePath = basePath !== '/abc' ? 'abc' : 'efg';
+      await proxySupertest.put(`/${fakeBasePath}`).expect(404);
+    });
+  });
 });
