@@ -10,7 +10,12 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { definePrimitive, definePrimitivePack } from '@elastic/isomer-sdk';
 import { md } from '@elastic/isomer-sdk/markdown';
 import type { SlackBlock } from '@elastic/isomer-sdk/slack';
-import { classNames, isomerDistillery } from '@kbn/isomer-theme';
+import {
+  classNames,
+  isomerDistillery,
+  isomerStyleAdapter,
+  kibanaCardFrame,
+} from '@kbn/isomer-theme';
 import { z } from '@kbn/zod';
 import type { Composition } from '..';
 import { CompositionValidationError, createKibanaIsomerRuntime } from '..';
@@ -127,6 +132,45 @@ describe('createKibanaIsomerRuntime', () => {
 
   it('throws the exported CompositionValidationError for an invalid composition', () => {
     expect(() => runtime.surfaces.text.render(invalid)).toThrow(CompositionValidationError);
+  });
+
+  describe('snapshot renders', () => {
+    it('draw in the Kibana card frame by default', () => {
+      const { html, width, height } = runtime.surfaces.snapshot.render(composition);
+
+      expect(runtime.getCapabilities().surfaces).toContain('snapshot');
+      expect(width).toBe(kibanaCardFrame.defaultWidth);
+      expect(height).toBeGreaterThan(0);
+      expect(html).toMatch(
+        /^<div class="isomer" style="[^"]*">.*All services are healthy\.<\/p><\/div>$/
+      );
+    });
+
+    it('draw styled primitives inside the .isomer root that scopes their CSS', () => {
+      const { html, css } = createKibanaIsomerRuntime({
+        packs: [
+          definePrimitivePack({
+            id: 'styled',
+            primitives: [notice],
+            styleAdapter: isomerStyleAdapter,
+          }),
+        ],
+      }).surfaces.snapshot.render(noticeComposition);
+
+      expect(html).toMatch(/^<div class="isomer"[^>]*><p class="testKibanaNotice-root">/);
+      expect(css).toMatch(/\.testKibanaNotice-root\{color:var\(--isomer-color-text-subdued\)/);
+      expect(css).toMatch(/\.isomer\{[^}]*--isomer-color-text-subdued:/);
+    });
+
+    it("use the caller's frames in place of the default", () => {
+      const custom = createKibanaIsomerRuntime({
+        packs: [definePrimitivePack({ id: 'test', primitives: [note] })],
+        frames: { wide: { ...kibanaCardFrame, defaultWidth: 1200 } },
+      });
+
+      expect(custom.surfaces.snapshot.render(composition).width).toBe(1200);
+      expect(() => custom.surfaces.snapshot.render(composition, { frame: 'card' })).toThrow();
+    });
   });
 
   describe('styled React renders', () => {
