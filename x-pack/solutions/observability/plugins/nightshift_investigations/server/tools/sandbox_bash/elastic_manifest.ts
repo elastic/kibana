@@ -104,7 +104,7 @@ export const renderElasticManifest = (
     '  -d \'{"query":"FROM logs-* | WHERE @timestamp >= \\"2026-01-01T00:00:00Z\\" AND @timestamp < \\"2026-01-01T01:00:00Z\\" | STATS count = COUNT(*) BY service.name | SORT count DESC | LIMIT 20"}\'',
     '',
     '# Find the data streams that match a keyword on one remote',
-    `curl --fail-with-body -sS --max-time 120 -H "Authorization: ApiKey ${apiKey}" \\`,
+    `curl --fail-with-body -sS --max-time 120 -H "Authorization: ${authHeader}" \\`,
     `  "${url}/_resolve/index/logging-us-east-1:logs-*nginx*"`,
     '',
     '# Count one data stream on every remote whose name starts with logging-, 8 at a time, each line',
