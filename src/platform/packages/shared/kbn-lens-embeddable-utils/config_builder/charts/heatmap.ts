@@ -42,13 +42,13 @@ function buildVisualizationState(config: LensHeatmapConfig): HeatmapVisualizatio
     gridConfig: {
       type: 'heatmap_grid',
       isCellLabelVisible: false,
-      isXAxisLabelVisible: false,
+      isXAxisLabelVisible: config.axisLabel?.xAxis ?? false,
       isXAxisTitleVisible: false,
-      isYAxisLabelVisible: false,
+      isYAxisLabelVisible: config.axisLabel?.yAxis ?? false,
       isYAxisTitleVisible: false,
     },
     legend: {
-      isVisible: config.legend?.show || true,
+      isVisible: config.legend?.show ?? true,
       position: config.legend?.position || 'left',
       type: 'heatmap_legend',
     },
