@@ -57,6 +57,7 @@ import type {
   EvidenceChart,
   EvidenceChartAnnotation,
   EvidenceChartSeries,
+  EvidenceReference,
   Hypothesis,
   Impact,
   ImpactEntity,
@@ -175,9 +176,14 @@ const timeChart = ({
   ...(annotations && { annotations }),
 });
 
-const evidence = (description: string, chart?: EvidenceChart): InvestigationEvidence => ({
+const evidence = (
+  description: string,
+  chart?: EvidenceChart,
+  references?: EvidenceReference[]
+): InvestigationEvidence => ({
   description,
   ...(chart && { chart }),
+  ...(references && { references }),
 });
 
 const hypothesis = (
@@ -447,7 +453,23 @@ const SCENARIOS: Scenario[] = [
       summary:
         'For about 20 minutes each night, cart and pricing reads from cache-service slow from 2ms to 40ms P99. It is a low-traffic hour, so few shoppers notice, and there are no errors.',
       evidence: evidence(
-        'P99 latency on cache-service during the batch window:\n\n| Window | P99 latency |\n| --- | --- |\n| 01:40–02:00 | 2ms |\n| 02:00–02:20 | 40ms |\n| 02:20–02:40 | 3ms |'
+        'P99 latency on cache-service during the batch window:\n\n| Window | P99 latency |\n| --- | --- |\n| 01:40–02:00 | 2ms |\n| 02:00–02:20 | 40ms |\n| 02:20–02:40 | 3ms |',
+        undefined,
+        [
+          {
+            type: 'link',
+            url: 'https://github.com/elastic/kibana/pull/1',
+            label: 'Price-sync job change',
+          },
+          { type: 'link', url: 'https://example.com/dashboards/cache-service' },
+          {
+            type: 'query',
+            language: 'esql',
+            label: 'P99 latency per 20 minutes',
+            query:
+              'FROM metrics-*\n| WHERE service.name == "cache-service"\n| STATS p99 = PERCENTILE(latency, 99) BY BUCKET(@timestamp, 20 minutes)',
+          },
+        ]
       ),
     },
   }),

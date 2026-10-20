@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { EvidenceChart, InvestigationEvidence } from '../../common/evidence';
+import type {
+  EvidenceChart,
+  EvidenceReference,
+  InvestigationEvidence,
+} from '../../common/evidence';
 
 const formatRange = (values: number[]): string =>
   values.length === 0 ? 'no points' : `${Math.min(...values)} to ${Math.max(...values)}`;
@@ -29,11 +33,23 @@ const formatChart = (chart: EvidenceChart): string => {
     .join('\n');
 };
 
+const formatReference = (reference: EvidenceReference): string => {
+  const label = reference.label ? `${reference.label}: ` : '';
+  return reference.type === 'link'
+    ? `Link: ${label}${reference.url}`
+    : `Query (${reference.language}): ${label}${reference.query}`;
+};
+
 /**
  * Compact text of a piece of evidence for the LLM: the Markdown description and a one-line
- * summary of the chart, not its raw points.
+ * summary of the chart (not its raw points), and its references.
  */
-export const formatEvidenceForAgent = ({ description, chart }: InvestigationEvidence): string =>
+export const formatEvidenceForAgent = ({
+  description,
+  chart,
+  references = [],
+}: InvestigationEvidence): string =>
   [description?.trim() || undefined, chart ? formatChart(chart) : undefined]
+    .concat(references.map(formatReference))
     .filter((part): part is string => part !== undefined)
     .join('\n');
