@@ -706,6 +706,7 @@ export class NightshiftInvestigationsPlugin
       workflowsExtensions: this.workflowsExtensionsStart,
       workflowsManagement: this.workflowsManagement,
       spaces: this.spaces,
+      getAutomationsSoClient: this.getAutomationsSoClient,
       isServerless: this.ctx.env.packageInfo.buildFlavor === 'serverless',
       reinforcementAgent:
         this.decisionTreesEnabled && this.agentBuilder

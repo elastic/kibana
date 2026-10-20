@@ -113,6 +113,12 @@ A space counts as set up when its entry point is installed, enabled and bound to
 - `_ensure` rejects any run that does not execute as the agent account. Anyone allowed to run workflows can start the global investigation directly, but such a run executes as them and fails before it touches an investigation.
 - The Slack thread workflow is installed per space, bound to the agent account (`system-nightshift-slack-thread-bound-<space>`), and no longer globally. It only runs when a `slack2.message` event starts it.
 
+### Automations
+
+An automation's workflow runs as `kibana/nightshift_automations` (`settings.run_as`), so it keeps working whoever created it. Its `nightshift.triggerInvestigation` step starts the investigation through the space's entry point, which runs it as the agent account.
+
+The workflows plugin requires `manage_security` for every create, update and delete of a workflow bound to a service account. Creating, changing (including enabling or disabling) and deleting automations therefore requires `manage_security` in addition to Nightshift manage, and the routes refuse other callers before writing anything. The Automations page shows the edit actions disabled for them, with a callout that says why. Creating or changing an automation also requires the space to be set up. `_enable` binds automations that already exist. When service accounts are off, automations keep running as their authors.
+
 ### Agent Builder hooks
 
 Agent Builder starts hook workflows with the request of the agent run, and the workflows engine runs a workflow started that way as the original caller. In a set-up space, the investigation agent and the decision-tree reinforcement agent therefore name the space's bound hook entry points instead of the global hooks, so hooks run as the agent account:
