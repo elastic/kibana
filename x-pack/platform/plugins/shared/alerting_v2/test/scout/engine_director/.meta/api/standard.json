@@ -1,5 +1,5 @@
 {
-  "sha1": "e407da2ba057cbb597be5198736d758d2ce9f7e0",
+  "sha1": "eef432a93d8dbe3f8b0fc7cd6773ac4c413451ff",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -361,8 +361,8 @@
       }
     },
     {
-      "id": "4a7a792eea1cb6f-18deee7335bace1",
-      "title": "Director no_data.strategy 'resolve' resolves the episode to inactive via a no_data event",
+      "id": "4a7a792eea1cb6f-1cf1f1a7082736a",
+      "title": "Director no_data.strategy 'keep_last' writes one no_data marker while a group stays absent and resumes when data returns",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -374,6 +374,22 @@
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_director/api/tests/director.spec.ts",
         "line": 1418,
         "column": 52
+      }
+    },
+    {
+      "id": "4a7a792eea1cb6f-18deee7335bace1",
+      "title": "Director no_data.strategy 'resolve' resolves the episode to inactive via a no_data event",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_director/api/tests/director.spec.ts",
+        "line": 1517,
+        "column": 7
       }
     },
     {

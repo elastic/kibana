@@ -1,5 +1,5 @@
 {
-  "sha1": "5db5097ceff7c98e020ff4d3c30d95cbc24b57f0",
+  "sha1": "875c7b3b42aee84b7cf1de84ec3a6db68998a3a8",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -2692,7 +2692,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 37,
+        "line": 44,
         "column": 11
       }
     },
@@ -2708,7 +2708,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 65,
+        "line": 72,
         "column": 16
       }
     },
@@ -2724,7 +2724,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 102,
+        "line": 109,
         "column": 78
       }
     },
@@ -2740,7 +2740,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 123,
+        "line": 130,
         "column": 14
       }
     },
@@ -2756,7 +2756,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 130,
+        "line": 137,
         "column": 7
       }
     },
@@ -2772,7 +2772,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 136,
+        "line": 143,
         "column": 82
       }
     },
@@ -2788,7 +2788,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 144,
+        "line": 151,
         "column": 69
       }
     },
@@ -2804,7 +2804,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 148,
+        "line": 155,
         "column": 12
       }
     },
@@ -2820,7 +2820,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 153,
+        "line": 160,
         "column": 22
       }
     },
@@ -2836,7 +2836,71 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 162,
+        "line": 169,
+        "column": 16
+      }
+    },
+    {
+      "id": "30e7de065b28dbd-e3d1101b0cbcc1a",
+      "title": "List rule executions API search: returns only the executions of rules whose name matches the search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_rule_executions.spec.ts",
+        "line": 178,
+        "column": 96
+      }
+    },
+    {
+      "id": "30e7de065b28dbd-e3773d06cd2590e",
+      "title": "List rule executions API search: applies the other filters on top of the search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_rule_executions.spec.ts",
+        "line": 211,
+        "column": 49
+      }
+    },
+    {
+      "id": "30e7de065b28dbd-5e5dd13542b313c",
+      "title": "List rule executions API search: returns an empty page, not an error, when nothing matches",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_rule_executions.spec.ts",
+        "line": 243,
+        "column": 90
+      }
+    },
+    {
+      "id": "30e7de065b28dbd-0b9294a6ff34ea0",
+      "title": "List rule executions API validation: rejects a search longer than the maximum",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/list_rule_executions.spec.ts",
+        "line": 256,
         "column": 16
       }
     },
