@@ -7,6 +7,7 @@
 
 /** The step of a dashboard update that failed. */
 export const DASHBOARD_FAILURE_TYPES = {
+  upsertDashboard: 'upsert_dashboard',
   addSection: 'add_section',
   addPanels: 'add_panels',
   addControls: 'add_controls',
