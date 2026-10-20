@@ -10,12 +10,12 @@
 import { existsSync } from 'fs';
 import fs from 'fs/promises';
 import path from 'path';
-import type { ContractCall, OpenApiDocument } from '@kbn/connector-contract-mock';
+import type { ContractCall, OpenApiDocument } from '@kbn/connector-emulate';
 import {
   createCertificateAuthority,
-  createContractMockFetch,
-  createContractMockProxy,
-} from '@kbn/connector-contract-mock';
+  createEmulatorFetch,
+  createEmulatorProxy,
+} from '@kbn/connector-emulate';
 import { run } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -24,7 +24,7 @@ import { findConnector } from '../src/test/vendor_api/find_connector';
 import { loadVendorSpecs, readOptional } from '../src/test/vendor_api/load_vendor_specs';
 
 const DEFAULT_PORT = 5690;
-const DEFAULT_CA_DIRECTORY = path.join(REPO_ROOT, 'data', 'connector_contract_mock');
+const DEFAULT_CA_DIRECTORY = path.join(REPO_ROOT, 'data', 'connector_emulate');
 
 const fetchText = async (url: string): Promise<string> => {
   const response = await fetch(url);
@@ -113,7 +113,7 @@ run(
       fetchText,
       log,
     });
-    const mock = createContractMockFetch({ specs, pagination });
+    const mock = createEmulatorFetch({ specs, pagination });
     let logged = 0;
     const answer: typeof fetch = async (input, init) => {
       const response = await mock.fetch(input, init);
@@ -124,7 +124,7 @@ run(
     };
 
     const { certificateAuthority, certFile } = await loadCertificateAuthority(caDirectory);
-    const proxy = createContractMockProxy({ fetch: answer, certificateAuthority });
+    const proxy = createEmulatorProxy({ fetch: answer, certificateAuthority });
     const proxyUrl = await proxy.listen(port, host);
 
     log.success(
@@ -154,7 +154,7 @@ run(
         --spec       snapshot (default) for the committed snapshots, or latest to fetch each source's current spec
         --port       Port to listen on (default ${DEFAULT_PORT})
         --host       Address to listen on (default 127.0.0.1)
-        --ca-dir     Where the CA's ca.crt and ca.key are kept, created on first use (default data/connector_contract_mock)
+        --ca-dir     Where the CA's ca.crt and ca.key are kept, created on first use (default data/connector_emulate)
       `,
     },
   }

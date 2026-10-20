@@ -8,4 +8,4 @@
  */
 
 require('@kbn/setup-node-env');
-require('@kbn/connector-specs/scripts/connector_contract_mock');
+require('@kbn/connector-specs/scripts/connector_emulate');
