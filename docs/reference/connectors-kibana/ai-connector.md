@@ -11,14 +11,8 @@ applies_to:
 
 The AI Connector uses the [Inference API](docs-content://explore-analyze/elastic-inference/inference-api.md) to connect to third-party Large Language Model (LLM) services to enable AI-powered {{kib}} features such as AI Assistant. It can connect with LLM services including Amazon Bedrock, Azure, Google Gemini, and OpenAI. It can also connect with models you've enabled in Elastic Inference Service (EIS). 
 
-::::{important}
-:applies_to: {"stack": "deprecated 9.5", "serverless": "deprecated"}
-This connector is deprecated. Existing connectors and their rule actions continue to work.
-
-{applies_to}`serverless: deprecated` {applies_to}`stack: deprecated 9.6+` You can still create connectors of this type through the API, but {{kib}} no longer lists this type when you select **Create connector**.
-
-For new AI integrations, create an {{es}} {{infer}} endpoint with the `chat_completion` task type instead. To get started, refer to [Elastic Inference](docs-content://explore-analyze/elastic-inference.md) and [External inference](docs-content://explore-analyze/elastic-inference/external.md). Migrate existing LLM connectors and related rule actions before the future removal.
-::::
+:::{include} _snippets/deprecated-llm-connector-note.md
+:::
 
 ## Requirements
 
@@ -29,8 +23,6 @@ For new AI integrations, create an {{es}} {{infer}} endpoint with the `chat_comp
 
 
 ## Set up an AI connector
-
-In {{stack}} 9.5 and earlier, set up an AI connector with the following steps:
 
 1. Use the [global search field](docs-content://explore-analyze/find-and-organize/find-apps-and-objects.md) to find the **Connectors** page.
 2. Click **+ Create connector**. Select **AI Connector**.
