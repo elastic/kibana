@@ -533,6 +533,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               previewHtml={previewHtml}
               isAiAvailable={Boolean(agentBuilder) && viewMode === 'edit'}
               isGenerating={isGenerating}
+              isInteractive={viewMode !== 'non-interactive'}
               onLoadingChange={handleLoadingChange}
               setApproximationApplied={setApproximationApplied}
               onGenerateWithChat={handleGenerateWithChat}

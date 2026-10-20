@@ -34,9 +34,11 @@ import {
   CasePatchRequestSchema,
   CasePostRequestSchema,
   CasesFindRequestSchema,
+  CasesFindRequestSortFieldsSchema,
   CasesPatchRequestSchema,
   CasesSearchRequestSchema,
   CaseUpdateRequestTemplateSchema,
+  SimilarCasesSearchRequestSchema,
 } from './v1';
 
 const validPostRequest: CasePostRequest = {
@@ -448,6 +450,61 @@ describe('CasesSearchRequestSchema', () => {
     },
   ])('rejects extended field filters above the $field limit', ({ extendedFieldFilters }) => {
     expect(CasesSearchRequestSchema.safeParse({ extendedFieldFilters }).success).toBe(false);
+  });
+});
+
+describe('SimilarCasesSearchRequestSchema', () => {
+  it('accepts a request without pagination or sort params', () => {
+    expect(SimilarCasesSearchRequestSchema.parse({})).toStrictEqual({});
+  });
+
+  it('parses pagination params and keeps them as numbers', () => {
+    expect(SimilarCasesSearchRequestSchema.parse({ page: '2', perPage: '25' })).toStrictEqual({
+      page: 2,
+      perPage: 25,
+    });
+  });
+
+  it('parses sortField and sortOrder together with pagination params', () => {
+    const request = { page: '1', perPage: '10', sortField: 'createdAt', sortOrder: 'desc' };
+
+    expect(SimilarCasesSearchRequestSchema.parse(request)).toStrictEqual({
+      ...request,
+      page: 1,
+      perPage: 10,
+    });
+  });
+
+  it.each(CasesFindRequestSortFieldsSchema.options)('accepts %s as sortField', (sortField) => {
+    expect(SimilarCasesSearchRequestSchema.parse({ sortField })).toStrictEqual({ sortField });
+  });
+
+  it.each(['asc', 'desc'])('accepts %s as sortOrder', (sortOrder) => {
+    expect(SimilarCasesSearchRequestSchema.parse({ sortOrder })).toStrictEqual({ sortOrder });
+  });
+
+  it('rejects an unsupported sortField', () => {
+    expect(SimilarCasesSearchRequestSchema.safeParse({ sortField: 'not-a-field' }).success).toBe(
+      false
+    );
+  });
+
+  it('rejects an unsupported sortOrder', () => {
+    expect(SimilarCasesSearchRequestSchema.safeParse({ sortOrder: 'ascending' }).success).toBe(
+      false
+    );
+  });
+
+  it('rejects perPage above the maximum', () => {
+    expect(
+      parseErrors(SimilarCasesSearchRequestSchema, {
+        page: '1',
+        perPage: String(MAX_CASES_PER_PAGE + 1),
+        sortField: 'createdAt',
+      })
+    ).toContain(
+      `The provided perPage value is too high. The maximum allowed perPage value is ${MAX_CASES_PER_PAGE}.`
+    );
   });
 });
 

@@ -634,7 +634,18 @@ export const CasesByAlertIDRequestSchema = z.object({
 
 export const GetRelatedCasesByAlertResponseSchema = z.array(RelatedCaseSchema);
 
-export const SimilarCasesSearchRequestSchema = paginationSchema({ maxPerPage: MAX_CASES_PER_PAGE });
+export const SimilarCasesSearchRequestSchema = paginationSchema({
+  maxPerPage: MAX_CASES_PER_PAGE,
+}).extend({
+  /**
+   * The field to sort similar cases by.
+   */
+  sortField: CasesFindRequestSortFieldsSchema.optional(),
+  /**
+   * The order to sort by.
+   */
+  sortOrder: z.enum(['desc', 'asc']).optional(),
+});
 
 export const FindCasesContainingAllDocumentsRequestSchema = z.object({
   /**

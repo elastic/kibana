@@ -1883,7 +1883,7 @@ describe('CaseUserActionService', () => {
             unsecuredSavedObjectsClient.find.mockResolvedValue(findMockReturn);
 
             await expect(service.getAll('1')).rejects.toThrowErrorMatchingInlineSnapshot(
-              `"type: Invalid input: expected \\"create_case\\", payload: Invalid input: expected object, received undefined, type: Invalid input: expected \\"connector\\", payload: Invalid input: expected object, received undefined, type: Invalid input: expected \\"pushed\\", and 30 more"`
+              `"type: Invalid input: expected \\"create_case\\", payload: Invalid input: expected object, received undefined, type: Invalid input: expected \\"connector\\", payload: Invalid input: expected object, received undefined, type: Invalid input: expected \\"pushed\\", and 32 more"`
             );
           });
 

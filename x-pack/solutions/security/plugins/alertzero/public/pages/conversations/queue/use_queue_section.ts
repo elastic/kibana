@@ -181,29 +181,35 @@ const useSection = (
   };
 };
 
-export const useCategoryQueueSection = (category: RecommendedAction): QueueSection => {
+export const useCategoryQueueSection = (
+  category: RecommendedAction,
+  entity?: string | null
+): QueueSection => {
   const state = useSectionState(category);
   const pagesQuery = useProposalsByCategory(category, {
     firstPageSize: CATEGORY_PAGE_SIZE,
     step: SHOW_MORE_STEP,
     enabled: state.isOpen,
+    entity,
   });
   const countQuery = useProposalsByCategoryCount(
     category,
-    needsCountRequest(state.isOpen, pagesQuery)
+    needsCountRequest(state.isOpen, pagesQuery),
+    entity
   );
 
   return useSection(category, CATEGORY_PAGE_SIZE, state, countQuery, pagesQuery);
 };
 
-export const useClosedQueueSection = (): QueueSection => {
+export const useClosedQueueSection = (entity?: string | null): QueueSection => {
   const state = useSectionState(CLOSED_GROUP_KEY);
   const pagesQuery = useClosedProposals({
     firstPageSize: CLOSED_PAGE_SIZE,
     step: SHOW_MORE_STEP,
     enabled: state.isOpen,
+    entity,
   });
-  const countQuery = useClosedProposalsCount(needsCountRequest(state.isOpen, pagesQuery));
+  const countQuery = useClosedProposalsCount(needsCountRequest(state.isOpen, pagesQuery), entity);
 
   return useSection(CLOSED_GROUP_KEY, CLOSED_PAGE_SIZE, state, countQuery, pagesQuery);
 };

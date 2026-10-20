@@ -234,10 +234,10 @@ export const defaultConfig: ScoutServerConfig = {
       })}`,
       `--server.publicBaseUrl=${kbnUrl}`,
       // Synthetics service config — matches the FTR deployment-agnostic base
-      '--xpack.uptime.service.password=test',
-      '--xpack.uptime.service.username=localKibanaIntegrationTestsUser',
-      '--xpack.uptime.service.devUrl=mockDevUrl',
-      '--xpack.uptime.service.manifestUrl=mockDevUrl',
+      '--xpack.synthetics.service.password=test',
+      '--xpack.synthetics.service.username=localKibanaIntegrationTestsUser',
+      '--xpack.synthetics.service.devUrl=mockDevUrl',
+      '--xpack.synthetics.service.manifestUrl=mockDevUrl',
       // Allow dynamic config overrides in tests
       `--coreApp.allowDynamicConfigOverrides=true`,
     ],

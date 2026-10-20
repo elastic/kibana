@@ -41,6 +41,7 @@ import { ObservablesUserActionSchema } from './observables/v1';
 import { TemplateUserActionSchema } from './template/v1';
 import { ExtendedFieldsUserActionSchema } from './extended_fields/v1';
 import { WorkflowUserActionSchema } from './workflow/v1';
+import { BulkAttachmentsUserActionSchema } from './bulk_attachments/v1';
 
 export { UserActionTypes, UserActionActions } from './action/v1';
 export { StatusUserActionSchema } from './status/v1';
@@ -92,6 +93,7 @@ const BasicUserActionsSchema = z.union([
   ExtendedFieldsUserActionSchema,
   TemplateUserActionSchema,
   WorkflowUserActionSchema,
+  BulkAttachmentsUserActionSchema,
 ]);
 
 const CommonUserActionsWithIdsSchema = z.union([BasicUserActionsSchema, CommentUserActionSchema]);
@@ -185,5 +187,7 @@ export type ObservablesUserAction = UserAction<z.infer<typeof ObservablesUserAct
 export type ExtendedFieldsUserAction = UserAction<z.infer<typeof ExtendedFieldsUserActionSchema>>;
 export type TemplateUserAction = UserAction<z.infer<typeof TemplateUserActionSchema>>;
 export type WorkflowUserAction = UserAction<z.infer<typeof WorkflowUserActionSchema>>;
+export type BulkAttachmentsUserAction = UserAction<z.infer<typeof BulkAttachmentsUserActionSchema>>;
+export type { BulkAttachmentsPayload } from './bulk_attachments/v1';
 export { WorkflowUserActionSchema, WorkflowOriginSchema } from './workflow/v1';
 export type { WorkflowPayload, WorkflowOrigin, WorkflowUserActionPayload } from './workflow/v1';
