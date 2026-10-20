@@ -37,7 +37,7 @@ export const getAiIndicesInstructions = ({
     );
   let catalogSection = '';
   if (catalog.length === 0) {
-    catalogSection = `No AI Indices are assigned to this agent. Use \`list_ai_indices\` to list the ones you can read in this space.`;
+    catalogSection = `No AI Indices are assigned to this agent. The \`${kiRetrievalSkillId}\` skill can list the ones you can read in this space.`;
   } else if (entries.length > 0) {
     catalogSection = `Available to this agent:\n\n${entries.join('\n')}`;
   }

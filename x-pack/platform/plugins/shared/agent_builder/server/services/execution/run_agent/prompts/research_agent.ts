@@ -9,6 +9,7 @@ import type { BaseMessageLike } from '@langchain/core/messages';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import {
   agentBuilderDefaultAiIndexId,
+  kiRetrievalSkillId,
   type SerializedMetadataValue,
 } from '@kbn/agent-builder-common';
 import type { ConversationTemplatesService } from '@kbn/agent-builder-server/runner/conversation_templates_service';
@@ -217,7 +218,7 @@ When the user picks from the @ menu, the message includes markdown links: \`[@la
 ## CONNECTOR DISCOVERY
 ${
   elasticAssigned
-    ? `This agent may have connectors that reach external services (APIs, messaging systems, databases, etc.). When the user's request could plausibly be fulfilled or assisted by an external integration, query the \`${agentBuilderDefaultAiIndexId}\` AI Index for connector records (\`type\` is \`connector\`) with \`query_ai_indices\` before concluding the task is out of scope. If a hit looks applicable, call \`sml_attach\` with its \`id\` to load its full spec — including available sub-actions and their parameters — before invoking it.`
+    ? `This agent may have connectors that reach external services (APIs, messaging systems, databases, etc.). When the user's request could plausibly be fulfilled or assisted by an external integration, load the \`${kiRetrievalSkillId}\` skill and query the \`${agentBuilderDefaultAiIndexId}\` AI Index for connector records (\`type\` is \`connector\`) before concluding the task is out of scope. If a hit looks applicable, call \`sml_attach\` with its \`id\` to load its full spec — including available sub-actions and their parameters — before invoking it.`
     : `This agent may have connectors that reach external services (APIs, messaging systems, databases, etc.). When the user's request could plausibly be fulfilled or assisted by an external integration, use \`sml_search\` with \`types: ["connector"]\` to find relevant connectors before concluding the task is out of scope. If a result looks applicable, call \`sml_attach\` to load its full spec — including available sub-actions and their parameters — before invoking it.`
 }`
     : ''

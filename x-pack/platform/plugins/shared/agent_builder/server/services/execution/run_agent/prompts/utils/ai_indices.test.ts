@@ -35,7 +35,7 @@ describe('getAiIndicesInstructions', () => {
     expect(instructions).toContain('## AI INDICES');
     expect(instructions).toContain('No AI Indices are assigned to this agent');
     expect(instructions).toContain(
-      'Use `list_ai_indices` to list the ones you can read in this space.'
+      'The `ki-retrieval` skill can list the ones you can read in this space.'
     );
     expect(instructions).not.toContain('Available to this agent:');
   });
