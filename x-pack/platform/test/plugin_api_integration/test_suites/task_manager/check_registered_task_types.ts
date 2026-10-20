@@ -257,6 +257,7 @@ export default function ({ getService }: FtrProviderContext) {
         'reporting_telemetry',
         'search:agentless-connectors-manager',
         'security-solution-ea-asset-criticality-ecs-migration',
+        'security-solution-ea-backfill-alert-entity-id',
         'security:endpoint-diagnostics',
         'security:endpoint-meta-telemetry',
         'security:health-diagnostic',

@@ -880,7 +880,7 @@ describe('schema_to_skill_docs', () => {
     });
   });
 
-  describe('Alerting v2 agent builder start contract', () => {
+  describe('Universal alerting agent builder start contract', () => {
     it.each([
       ['zodToJsonSchema via generateRuleSchemaDoc', generateRuleSchemaDoc],
       ['zodToJsonSchema via generateActionPolicySchemaDoc', generateActionPolicySchemaDoc],

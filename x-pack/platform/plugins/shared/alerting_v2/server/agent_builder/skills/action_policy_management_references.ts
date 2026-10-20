@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ACTION_POLICY_MANAGEMENT_SKILL_ID } from '@kbn/alerting-v2-constants';
+import { ACTION_POLICY_AUTHORING_SKILL_ID } from '@kbn/alerting-v2-constants';
 
-export const ACTION_POLICY_MANAGEMENT_SKILL_BASE_PATH = 'skills/platform/alerting';
+export const ACTION_POLICY_AUTHORING_SKILL_BASE_PATH = 'skills/platform/alerting';
 
 export const WORKFLOW_DISPATCH_PAYLOAD_REFERENCE = {
   name: 'workflow-dispatch-payload',
@@ -31,7 +31,7 @@ export const referencedContentSkillPath = ({
 };
 
 export const WORKFLOW_DISPATCH_PAYLOAD_SKILL_REF = referencedContentSkillPath({
-  basePath: ACTION_POLICY_MANAGEMENT_SKILL_BASE_PATH,
-  name: ACTION_POLICY_MANAGEMENT_SKILL_ID,
+  basePath: ACTION_POLICY_AUTHORING_SKILL_BASE_PATH,
+  name: ACTION_POLICY_AUTHORING_SKILL_ID,
   referencedContent: WORKFLOW_DISPATCH_PAYLOAD_REFERENCE,
 });

@@ -13,7 +13,7 @@ import type {
 } from '@kbn/agent-builder-dashboards-common';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown-schemas';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
-import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
+import { DASHBOARD_FAILURE_TYPES } from '../failure_types';
 import { arrangeDashboardLayout } from './arrange_layout';
 import type { ArrangeDashboardLayout, LayoutArrangement, LayoutRequest } from './types';
 
@@ -389,7 +389,7 @@ describe('arrangeDashboardLayout', () => {
 
     expect(result.dashboardData).toBe(dashboardWithNewPanel);
     expect(result.failure).toEqual({
-      type: DASHBOARD_OPERATION_FAILURE_TYPES.layout,
+      type: DASHBOARD_FAILURE_TYPES.layout,
       identifier: 'layout',
       error: expect.stringContaining('section "section-a" is missing'),
     });
