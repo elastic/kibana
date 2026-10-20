@@ -12,20 +12,22 @@ Each Worker's global sweep reports the run, and each review reports its own rule
 | `coverage_worker.yaml` | `report_worker_run_completed` | `worker_run_completed` | Right before `emit_result` |
 | `coverage_review.yaml` | `report_investigation_closed_resolved`, `_dismissed` | `worker_investigation_closed` | Right after each close in the `close_investigation` switch |
 | `coverage_review.yaml` | `report_investigation_closed_declined` | `worker_investigation_closed` | Right after `close_investigation_declined`, in the entry gate's `dismissed` arm |
+| `coverage_review.yaml` | `report_review_completed_declined` | `rule_coverage_review_completed` | Right before `stop_declined`, in the entry gate's `dismissed` arm |
+| `coverage_review.yaml` | `report_review_completed_undecided` | `rule_coverage_review_completed` | Right before `stop_expired`, in the entry gate's `expired` arm |
 | `coverage_review.yaml` | `report_review_completed` | `rule_coverage_review_completed` | Right before `emit_result` |
 
-A Rule Coverage review that stops at its manual entry gate (declined or unanswered) ends before `report_review_completed`, so it sends no review event. A declined gate still reports its close.
+Both reviews report a manual entry gate the same way: the gate's own arm reports `entry_gate: declined` or `undecided` (with `decision: none`) right before the step that ends the run, and the review's main report sends `approved` or `skipped`.
 
 ## Runs
 
 | Worker | `candidates_found` | `items_dispatched` | `items_in_flight` | `source_read_failed` / `lookup_failed` |
 |---|---|---|---|---|
-| Rule Tuning | Rules over the false-positive thresholds | Reviews requested | Reviews earlier sweeps still have in flight | The harvest query or the enabled-rules lookup / the in-flight review lookup |
+| Rule Tuning | Rules over the false-positive thresholds | Reviews requested | Earlier reviews plus the ones requested | The harvest query or the enabled-rules lookup / the in-flight review lookup |
 | Rule Coverage | Pending gap indicators in the lookback window | Reviews started | Earlier reviews plus the ones started | The indicator search / the active-review lookup |
 
 Neither sweep reports `items_failed`. The sweeps start their reviews without waiting for them, so the review decisions come from each review's own event.
 
-- **Rule Tuning:** `failed_source_unavailable` when the harvest or the enabled-rules lookup fails, `produced` when it requested a review, `empty_nothing_found` otherwise.
+- **Rule Tuning:** `failed_source_unavailable` when the harvest or the enabled-rules lookup fails, `produced` when it requested a review, `empty_at_capacity` when it requested none while reviews are in flight, `empty_nothing_found` otherwise. The harvest drops rules already under review, so `empty_at_capacity` means nothing new to review, not a limit; it keeps `degraded_reason: none`. It can also cover a sweep that found no noisy rule at all while unrelated reviews run.
 - **Rule Coverage:** `failed_source_unavailable` when the search fails, `empty_nothing_pending` with no pending indicator, `empty_at_capacity` when indicators are pending but no review slot is free (`degraded_reason: capacity`), `produced` otherwise.
 - A failed lookup that either sweep carries on without gives `degraded_reason: dependency_unavailable`.
 
@@ -33,7 +35,14 @@ Neither sweep reports `items_failed`. The sweeps start their reviews without wai
 
 - **Rule Tuning** reads both from the reviewed rule (`fetch_rule`).
 - **Rule Coverage** reads them from the rule the review is about: the one it proposes to enable, install or confirm, read back after the change when there was one. A proposed new rule is always `esql` and `custom`, since rule creation only drafts ES|QL. An install proposal is `prebuilt` even when the install didn't land, and then has no `rule_type`.
-- `machine_learning` is sent as `ml`, `saved_query` as `query`, and any type outside the list as `other`. A rule is `prebuilt` when its `rule_source.type` is `external` or it is `immutable`.
+- Both reviews pass the rule's own `type`, and the step maps it: `machine_learning` to `ml`, `saved_query` to `query`, and any type outside the list to `other`. A rule is `prebuilt` when its `rule_source.type` is `external` or it is `immutable`.
+
+## Applied
+
+Both reviews send `applied` only when the change landed, and `approved_not_applied` when an approved change did not.
+
+- **Rule Tuning** re-reads the rule after an action reported success (`refetch_rule`). A query, risk score, threshold or schedule change bumps the rule's revision; an added exception item does not, so that arm counts on the action's success. An approved change identical to the rule (no new revision) counts as not applied. A `manual` change has no action, so neither flag is set.
+- **Rule Coverage** re-reads the rule after an approved enable or install, and requires it enabled.
 
 ## Closes
 

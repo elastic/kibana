@@ -299,17 +299,7 @@ steps:
                   backtest_ran: false
                   backtest_reduced_alerts: false
                   rule_unavailable: false
-                  rule_type: |-
-                    {%- assign t = steps.fetch_rule.output.type -%}
-                    {%- if t == 'machine_learning' -%}
-                    ml
-                    {%- elsif t == 'saved_query' -%}
-                    query
-                    {%- elsif t == 'query' or t == 'eql' or t == 'esql' or t == 'threshold' or t == 'new_terms' or t == 'threat_match' -%}
-                    {{ t }}
-                    {%- elsif t != blank -%}
-                    other
-                    {%- endif -%}
+                  rule_type: "{{ steps.fetch_rule.output.type }}"
                   rule_source: |-
                     {%- if steps.fetch_rule.output.rule_source.type == 'external' or steps.fetch_rule.output.immutable == true -%}
                     prebuilt
@@ -347,17 +337,7 @@ steps:
                   backtest_ran: false
                   backtest_reduced_alerts: false
                   rule_unavailable: false
-                  rule_type: |-
-                    {%- assign t = steps.fetch_rule.output.type -%}
-                    {%- if t == 'machine_learning' -%}
-                    ml
-                    {%- elsif t == 'saved_query' -%}
-                    query
-                    {%- elsif t == 'query' or t == 'eql' or t == 'esql' or t == 'threshold' or t == 'new_terms' or t == 'threat_match' -%}
-                    {{ t }}
-                    {%- elsif t != blank -%}
-                    other
-                    {%- endif -%}
+                  rule_type: "{{ steps.fetch_rule.output.type }}"
                   rule_source: |-
                     {%- if steps.fetch_rule.output.rule_source.type == 'external' or steps.fetch_rule.output.immutable == true -%}
                     prebuilt
@@ -1317,6 +1297,19 @@ steps:
     on-failure:
       continue: true
 
+  # Telemetry: whether an approved change landed. The gate's `succeeded` only says the action
+  # workflow completed; a change to the rule bumps its revision, and an added exception item
+  # does not, so that arm counts on the action's success.
+  - name: resolve_applied
+    type: data.set
+    with:
+      landed: >-
+        ${{ steps.record_proposal_action_decision.output.applied == true
+          and steps.refetch_rule.error == null
+          and steps.refetch_rule.output.id != null
+          and (steps.propose_exception.output.status == 'succeeded'
+            or steps.refetch_rule.output.revision > steps.fetch_rule.output.revision) }}
+
   # The rule attachment is a snapshot and never refreshes, so after the patch it
   # would silently show the pre-tuning rule. This writes the patched rule as
   # version 2; version 1 keeps the before state in the attachment history.
@@ -1469,21 +1462,17 @@ steps:
         {%- else -%}
         none
         {%- endif -%}
-      applied: "${{ steps.record_proposal_action_decision.output.applied == true }}"
+      applied: "${{ steps.resolve_applied.output.landed == true }}"
+      # An approved action whose change did not land. A `manual` change has no action.
+      approved_not_applied: >-
+        ${{ steps.record_proposal_action_decision.output.approved == true
+          and steps.propose_manual.output.decision != 'approved'
+          and steps.resolve_applied.output.landed != true }}
       backtest_ran: "${{ steps.record_preview_outcome.output.current_succeeded == true and steps.record_preview_outcome.output.proposed_succeeded == true }}"
       backtest_reduced_alerts: "${{ steps.record_preview_outcome.output.current_succeeded == true and steps.record_preview_outcome.output.proposed_succeeded == true and steps.record_preview_outcome.output.proposed_alert_count < steps.record_preview_outcome.output.current_alert_count }}"
       rule_unavailable: "${{ steps.fetch_rule.error != null or steps.fetch_rule.output.enabled != true }}"
-      rule_type: |-
-        {%- assign t = steps.fetch_rule.output.type -%}
-        {%- if t == 'machine_learning' -%}
-        ml
-        {%- elsif t == 'saved_query' -%}
-        query
-        {%- elsif t == 'query' or t == 'eql' or t == 'esql' or t == 'threshold' or t == 'new_terms' or t == 'threat_match' -%}
-        {{ t }}
-        {%- elsif t != blank -%}
-        other
-        {%- endif -%}
+      # The rule's own type; the step maps it to the event's vocabulary.
+      rule_type: "{{ steps.fetch_rule.output.type }}"
       rule_source: |-
         {%- if steps.fetch_rule.output.rule_source.type == 'external' or steps.fetch_rule.output.immutable == true -%}
         prebuilt

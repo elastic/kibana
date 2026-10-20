@@ -589,9 +589,10 @@ describe('Detection Coverage review', () => {
         'mark_declined',
         'close_investigation_declined',
         'report_investigation_closed_declined',
+        'report_review_completed_declined',
         'stop_declined',
       ]);
-      expect(entryCaseOf('expired')).toEqual(['stop_expired']);
+      expect(entryCaseOf('expired')).toEqual(['report_review_completed_undecided', 'stop_expired']);
       // Approval has no case, so it falls through to the check.
       expect(decisionSwitch?.default).toBeUndefined();
       expect(stepIndex('create_investigation')).toBeLessThan(stepIndex('entry_gate'));

@@ -227,6 +227,20 @@ steps:
                   investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
                   close_reason: other
 
+              # Telemetry: the review's outcome when the analyst declined it.
+              - name: report_review_completed_declined
+                type: alertzero.reportWorkerOutcome
+                on-failure:
+                  continue: true
+                with:
+                  event: rule_coverage_review_completed
+                  entry_gate: declined
+                  verdict: none
+                  proposal_kind: none
+                  decision: none
+                  ki_processed: "${{ steps.mark_declined.output.result != null }}"
+                  investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
+
               # workflow.output ends the run.
               - name: stop_declined
                 type: workflow.output
@@ -241,6 +255,19 @@ steps:
           # stays open, so the next sweep asks again.
           - match: expired
             steps:
+              # Telemetry: the review's outcome when nobody answered.
+              - name: report_review_completed_undecided
+                type: alertzero.reportWorkerOutcome
+                on-failure:
+                  continue: true
+                with:
+                  event: rule_coverage_review_completed
+                  entry_gate: undecided
+                  verdict: none
+                  proposal_kind: none
+                  decision: none
+                  investigation_id: "{{ steps.create_investigation.output.conversation_id }}"
+
               - name: stop_expired
                 type: workflow.output
                 status: completed
@@ -871,6 +898,12 @@ steps:
       continue: true
     with:
       event: rule_coverage_review_completed
+      entry_gate: |-
+        {%- if steps.propose_entry.output.decision == 'approved' -%}
+        approved
+        {%- else -%}
+        skipped
+        {%- endif -%}
       verdict: |-
         {%- assign verdict = steps.coverage_check.output.structured_output.verdict -%}
         {%- if verdict == 'covered_enabled' or verdict == 'covered_disabled' or verdict == 'prebuilt_available' or verdict == 'no_coverage' -%}
@@ -911,18 +944,12 @@ steps:
       creation_failed: "${{ steps.run_rule_creation.error != null }}"
       check_failed: "${{ steps.coverage_check.output.structured_output.verdict == null or steps.coverage_check.output.structured_output.verdict == '' }}"
       ki_processed: "${{ steps.mark_processed.output.result != null }}"
+      # The rule's own type, which the step maps to the event's vocabulary. A created rule is ES|QL.
       rule_type: |-
-        {%- assign t = steps.refetch_rule.output.type | default: steps.resolve_rule.output.type -%}
         {%- if steps.coverage_check.output.structured_output.verdict == 'no_coverage' and steps.run_rule_creation.error == null and steps.run_rule_creation.output.skip_reason == blank -%}
         esql
-        {%- elsif t == 'machine_learning' -%}
-        ml
-        {%- elsif t == 'saved_query' -%}
-        query
-        {%- elsif t == 'query' or t == 'eql' or t == 'esql' or t == 'threshold' or t == 'new_terms' or t == 'threat_match' -%}
-        {{ t }}
-        {%- elsif t != blank -%}
-        other
+        {%- else -%}
+        {{ steps.refetch_rule.output.type | default: steps.resolve_rule.output.type }}
         {%- endif -%}
       rule_source: |-
         {%- if steps.propose_install.output.status != blank -%}

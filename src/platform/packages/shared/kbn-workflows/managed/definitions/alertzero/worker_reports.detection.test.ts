@@ -130,7 +130,7 @@ describe('Rule Tuning outcome reports', () => {
           candidates_found: 3,
           degraded_reason: 'none',
           items_dispatched: 2,
-          items_in_flight: 1,
+          items_in_flight: '3',
           lookup_failed: false,
           run_outcome: 'produced',
           source_read_failed: false,
@@ -143,7 +143,7 @@ describe('Rule Tuning outcome reports', () => {
           candidates_found: 0,
           degraded_reason: 'none',
           items_dispatched: 0,
-          items_in_flight: 0,
+          items_in_flight: '0',
           lookup_failed: false,
           run_outcome: 'empty_nothing_found',
           source_read_failed: false,
@@ -156,7 +156,7 @@ describe('Rule Tuning outcome reports', () => {
           candidates_found: 0,
           degraded_reason: 'dependency_unavailable',
           items_dispatched: 0,
-          items_in_flight: 0,
+          items_in_flight: '0',
           lookup_failed: false,
           run_outcome: 'failed_source_unavailable',
           source_read_failed: true,
@@ -169,7 +169,7 @@ describe('Rule Tuning outcome reports', () => {
           candidates_found: 3,
           degraded_reason: 'dependency_unavailable',
           items_dispatched: 0,
-          items_in_flight: 0,
+          items_in_flight: '0',
           lookup_failed: false,
           run_outcome: 'failed_source_unavailable',
           source_read_failed: true,
@@ -182,9 +182,23 @@ describe('Rule Tuning outcome reports', () => {
           candidates_found: 2,
           degraded_reason: 'dependency_unavailable',
           items_dispatched: 2,
-          items_in_flight: 0,
+          items_in_flight: '2',
           lookup_failed: true,
           run_outcome: 'produced',
+          source_read_failed: false,
+        },
+      ],
+      [
+        // The harvest drops rules already under review, so nothing new is left to start.
+        'nothing new to review while reviews are in flight',
+        { activeReviews: 2 },
+        {
+          candidates_found: 0,
+          degraded_reason: 'none',
+          items_dispatched: 0,
+          items_in_flight: '2',
+          lookup_failed: false,
+          run_outcome: 'empty_at_capacity',
           source_read_failed: false,
         },
       ],
@@ -281,6 +295,7 @@ describe('Rule Tuning outcome reports', () => {
       proposalStatus = 'succeeded',
       rule = { immutable: false, rule_source: { type: 'internal' }, type: 'query' },
       ruleAvailable = true,
+      ruleChanged = true,
     }: {
       changeType?: string;
       confidence?: string;
@@ -291,13 +306,16 @@ describe('Rule Tuning outcome reports', () => {
       proposalStatus?: string;
       rule?: Record<string, unknown>;
       ruleAvailable?: boolean;
+      /** Whether the re-read rule has a newer revision than the one the review read. */
+      ruleChanged?: boolean;
     }): Record<string, unknown> => {
       const knownArm = ['query', 'risk_score', 'exception', 'threshold', 'schedule'].includes(
         changeType
       )
         ? `propose_${changeType}`
         : 'propose_manual';
-      return {
+      const applied = decision === 'approved' && knownArm !== 'propose_manual';
+      const context: { steps: Record<string, unknown> } = {
         steps: {
           ...(ruleAvailable
             ? {
@@ -305,7 +323,14 @@ describe('Rule Tuning outcome reports', () => {
                 diagnose_rule: {
                   output: { structured_output: { change_type: changeType, confidence } },
                 },
-                fetch_rule: { output: { ...rule, enabled: true } },
+                fetch_rule: { output: { ...rule, enabled: true, revision: 1 } },
+                ...(applied
+                  ? {
+                      refetch_rule: {
+                        output: { id: 'rule-so-id', revision: ruleChanged ? 2 : 1 },
+                      },
+                    }
+                  : {}),
                 [knownArm]: { output: { decision, status: proposalStatus } },
                 record_preview_outcome: {
                   output: previews
@@ -324,7 +349,7 @@ describe('Rule Tuning outcome reports', () => {
                 },
                 record_proposal_action_decision: {
                   output: {
-                    applied: decision === 'approved' && knownArm !== 'propose_manual',
+                    applied,
                     approved: decision === 'approved',
                     dismissed: decision === 'dismissed',
                   },
@@ -336,6 +361,13 @@ describe('Rule Tuning outcome reports', () => {
             : {}),
         },
       };
+      // The review computes whether the change landed in its own step before it reports.
+      return {
+        steps: {
+          ...context.steps,
+          resolve_applied: { output: renderReport(stepNamed(steps, 'resolve_applied'), context) },
+        },
+      };
     };
 
     it.each([
@@ -344,6 +376,7 @@ describe('Rule Tuning outcome reports', () => {
         { decision: 'approved' as const },
         {
           applied: true,
+          approved_not_applied: false,
           backtest_ran: true,
           backtest_reduced_alerts: true,
           change_type: 'query',
@@ -369,6 +402,7 @@ describe('Rule Tuning outcome reports', () => {
         },
         {
           applied: false,
+          approved_not_applied: false,
           backtest_ran: false,
           backtest_reduced_alerts: false,
           change_type: 'exception',
@@ -386,6 +420,7 @@ describe('Rule Tuning outcome reports', () => {
         { changeType: 'disable_rule', confidence: 'certain', decision: 'approved' as const },
         {
           applied: false,
+          approved_not_applied: false,
           backtest_ran: true,
           backtest_reduced_alerts: true,
           change_type: 'manual',
@@ -409,6 +444,7 @@ describe('Rule Tuning outcome reports', () => {
         },
         {
           applied: false,
+          approved_not_applied: false,
           backtest_ran: true,
           backtest_reduced_alerts: false,
           change_type: 'risk_score',
@@ -426,6 +462,7 @@ describe('Rule Tuning outcome reports', () => {
         { ruleAvailable: false },
         {
           applied: false,
+          approved_not_applied: false,
           backtest_ran: false,
           backtest_reduced_alerts: false,
           change_type: 'none',
@@ -438,21 +475,56 @@ describe('Rule Tuning outcome reports', () => {
           rule_unavailable: true,
         },
       ],
+      [
+        'an approved query change whose rule did not change, which did not land',
+        { decision: 'approved' as const, ruleChanged: false },
+        {
+          applied: false,
+          approved_not_applied: true,
+          backtest_ran: true,
+          backtest_reduced_alerts: true,
+          change_type: 'query',
+          confidence: 'high',
+          decision: 'approved',
+          entry_gate: 'skipped',
+          investigation_id: INVESTIGATION_ID,
+          rule_source: 'custom',
+          rule_type: 'query',
+          rule_unavailable: false,
+        },
+      ],
+      [
+        // An added exception item leaves the rule's revision alone.
+        'an approved exception, which lands without a new rule revision',
+        { changeType: 'exception', decision: 'approved' as const, ruleChanged: false },
+        {
+          applied: true,
+          approved_not_applied: false,
+          backtest_ran: true,
+          backtest_reduced_alerts: true,
+          change_type: 'exception',
+          confidence: 'high',
+          decision: 'approved',
+          entry_gate: 'skipped',
+          investigation_id: INVESTIGATION_ID,
+          rule_source: 'custom',
+          rule_type: 'query',
+          rule_unavailable: false,
+        },
+      ],
     ])('renders %s', (_scenario, scenario, expected) => {
       expect(renderReport(report, reviewContext(scenario))).toEqual(expected);
     });
 
-    it.each([
-      ['machine_learning', 'ml'],
-      ['saved_query', 'query'],
-      ['threat_match', 'threat_match'],
-      ['esql', 'esql'],
-      ['a_type_added_later', 'other'],
-    ])('reports a %s rule as rule_type %s', (type, ruleType) => {
-      expect(renderReport(report, reviewContext({ decision: 'approved', rule: { type } }))).toEqual(
-        expect.objectContaining({ rule_type: ruleType })
-      );
-    });
+    // The step maps the type to the event's vocabulary (`to_detection_rule_type.ts`).
+    it.each([['machine_learning'], ['saved_query'], ['threat_match'], ['a_type_added_later']])(
+      "passes a %s rule's own type through",
+      (type) => {
+        expect(
+          renderReport(report, reviewContext({ decision: 'approved', rule: { type } }))
+        ).toEqual(expect.objectContaining({ rule_type: type }));
+      }
+    );
 
     it.each([
       [
@@ -594,6 +666,13 @@ describe('Rule Coverage outcome reports', () => {
   describe('the review (coverage_review.yaml)', () => {
     const steps = topLevelSteps(ALERTZERO_COVERAGE_REVIEW_WORKFLOW.yaml);
     const report = stepNamed(steps, 'report_review_completed');
+    // As in tuning, the manual entry gate ends the run in its `dismissed` and `expired` arms.
+    const entryArm = (match: string): YamlStep[] =>
+      stepNamed(stepNamed(steps, 'entry_gate').steps ?? [], 'entry_decision').cases?.find(
+        (entryCase) => entryCase.match === match
+      )?.steps ?? [];
+    const declinedArm = entryArm('dismissed');
+    const undecidedArm = entryArm('expired');
 
     describeReportStep(
       steps,
@@ -601,6 +680,48 @@ describe('Rule Coverage outcome reports', () => {
       'rule_coverage_review_completed',
       'emit_result'
     );
+    describeReportStep(
+      declinedArm,
+      'report_review_completed_declined',
+      'rule_coverage_review_completed',
+      'stop_declined'
+    );
+    describeReportStep(
+      undecidedArm,
+      'report_review_completed_undecided',
+      'rule_coverage_review_completed',
+      'stop_expired'
+    );
+
+    it.each([
+      [
+        'a declined review',
+        () => stepNamed(declinedArm, 'report_review_completed_declined'),
+        { mark_declined: { output: { result: 'updated' } } },
+        { entry_gate: 'declined', ki_processed: true },
+      ],
+      [
+        'an unanswered entry gate',
+        () => stepNamed(undecidedArm, 'report_review_completed_undecided'),
+        {},
+        { entry_gate: 'undecided' },
+      ],
+    ])('renders %s, which ends the review before the check', (_label, getReport, outputs, gate) => {
+      expect(
+        renderReport(getReport(), {
+          steps: {
+            create_investigation: { output: { conversation_id: INVESTIGATION_ID } },
+            ...outputs,
+          },
+        })
+      ).toEqual({
+        decision: 'none',
+        investigation_id: INVESTIGATION_ID,
+        proposal_kind: 'none',
+        verdict: 'none',
+        ...gate,
+      });
+    });
 
     const NOTHING_HAPPENED = {
       applied: false,
@@ -608,6 +729,7 @@ describe('Rule Coverage outcome reports', () => {
       check_failed: false,
       creation_failed: false,
       creation_skipped: false,
+      entry_gate: 'skipped',
       investigation_id: INVESTIGATION_ID,
       ki_processed: false,
       rule_created: false,
@@ -733,9 +855,10 @@ describe('Rule Coverage outcome reports', () => {
         },
       ],
       [
-        'a dismissed confirmation',
+        'a dismissed confirmation after an approved entry gate',
         reviewContext('covered_enabled', {
           propose_confirm: { output: { decision: 'dismissed', status: 'no_action' } },
+          propose_entry: { output: { decision: 'approved', status: 'no_action' } },
           record_decision: { output: { applied: false, approved: false, dismissed: true } },
           resolve_rule: {
             output: {
@@ -750,9 +873,11 @@ describe('Rule Coverage outcome reports', () => {
         {
           ...NOTHING_HAPPENED,
           decision: 'dismissed',
+          entry_gate: 'approved',
           proposal_kind: 'confirm_coverage',
           rule_source: 'prebuilt',
-          rule_type: 'ml',
+          // The rule's own type; the step maps it to `ml`.
+          rule_type: 'machine_learning',
           verdict: 'covered_enabled',
         },
       ],

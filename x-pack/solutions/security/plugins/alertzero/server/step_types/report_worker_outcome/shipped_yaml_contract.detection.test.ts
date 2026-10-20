@@ -94,6 +94,7 @@ describe('shipped Rule Tuning and Rule Coverage Worker YAML and the reportWorker
               record_proposal_action_decision: {
                 output: { applied: true, approved: true, dismissed: false },
               },
+              resolve_applied: { output: { landed: true } },
             },
           },
           SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID
@@ -105,6 +106,7 @@ describe('shipped Rule Tuning and Rule Coverage Worker YAML and the reportWorker
           watch_tag: 'watch-detection',
           worker_id: 'system-security-detection-rule-tuning',
           applied: true,
+          approved_not_applied: false,
           backtest_ran: true,
           backtest_reduced_alerts: true,
           change_type: 'query',
@@ -113,6 +115,7 @@ describe('shipped Rule Tuning and Rule Coverage Worker YAML and the reportWorker
           entry_gate: 'skipped',
           investigation_id: INVESTIGATION_ID,
           rule_source: 'custom',
+          // The YAML sends the rule's own `saved_query`; the step maps it.
           rule_type: 'query',
           rule_unavailable: false,
         },
