@@ -6,6 +6,7 @@
  */
 
 import { appDocumentSchema, appDocumentShapeSchema, customAppStateSchema } from './document_schema';
+import { pruneUnusedValues } from './document_mutations';
 import {
   collectQueries,
   collectSources,
@@ -396,7 +397,7 @@ describe('buttons and the workflows they run', () => {
     });
 
     expect(text).toContain(
-      'a workflow can only be run by a button, a row click or a form that is submitted'
+      'a workflow can only be run by a button, a row click, a click on a chart or a form that is submitted'
     );
   });
 
@@ -724,6 +725,92 @@ describe('lists', () => {
   });
 });
 
+describe('what happens when a chart is clicked', () => {
+  const chartDoc = (onClick: unknown[], state: Record<string, unknown> = {}) => ({
+    state,
+    root: {
+      type: 'stack',
+      id: 'root',
+      children: [
+        {
+          type: 'chart',
+          id: 'users-chart',
+          query: 'FROM logs | STATS c = COUNT(*) BY user.name',
+          onClick,
+        },
+        { type: 'flyout', id: 'more', title: 'More', children: [] },
+      ],
+    },
+  });
+  const issues = (document: unknown) =>
+    JSON.stringify(appDocumentSchema.safeParse(document).error?.issues ?? []);
+  const remember = { type: 'setState', key: 'user', value: { fromColumn: 'user.name' } };
+  const state = { user: { type: 'string', default: '' } };
+
+  it('is nothing, until it is told', () => {
+    const { root } = appDocumentSchema.parse({
+      root: { type: 'chart', id: 'c', query: 'FROM logs | STATS c = COUNT(*)' },
+    });
+
+    expect(root).toMatchObject({ type: 'chart', onClick: [] });
+  });
+
+  it('can remember a column of what was clicked, and open a flyout', () => {
+    expect(
+      appDocumentSchema.safeParse(
+        chartDoc([remember, { type: 'openFlyout', flyout: 'more' }], state)
+      ).success
+    ).toBe(true);
+  });
+
+  it('can run a workflow with a column of what was clicked, or a value of the app', () => {
+    expect(
+      appDocumentSchema.safeParse(
+        chartDoc(
+          [
+            {
+              type: 'runWorkflow',
+              workflow: 'w',
+              inputs: { user: { fromColumn: 'user.name' }, again: { fromState: 'user' } },
+            },
+          ],
+          state
+        )
+      ).success
+    ).toBe(true);
+  });
+
+  it('is not given the value of an input, as there is none when a chart is clicked', () => {
+    expect(
+      issues(chartDoc([{ type: 'setState', key: 'user', value: { fromInput: true } }], state))
+    ).toContain('fromInput is only valid on input nodes');
+  });
+
+  it('refuses a value that does not exist, and a flyout that is not one', () => {
+    expect(issues(chartDoc([remember]))).toContain('unknown state key');
+    expect(issues(chartDoc([{ type: 'openFlyout', flyout: 'nope' }], state))).toContain(
+      'which is not a flyout'
+    );
+  });
+
+  it('counts the value it remembers among those that are used', () => {
+    const document = appDocumentSchema.parse(chartDoc([remember], state));
+
+    expect(Object.keys(pruneUnusedValues(document).state)).toEqual(['user']);
+  });
+
+  it('does not take more actions than any other event', () => {
+    expect(
+      appDocumentSchema.safeParse(
+        chartDoc(
+          Array.from({ length: 6 }, () => remember),
+          state
+        )
+      ).success
+    ).toBe(false);
+  });
+});
+
 describe('chart nodes', () => {
   const chartDocument = (overrides: Record<string, unknown> = {}) => ({
     root: { type: 'chart', id: 'trend', query: 'ROW a = 1', ...overrides },
@@ -734,6 +821,7 @@ describe('chart nodes', () => {
       type: 'chart',
       id: 'trend',
       query: 'ROW a = 1',
+      onClick: [],
     });
   });
 

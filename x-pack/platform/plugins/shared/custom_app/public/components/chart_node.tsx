@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { EuiPanel, EuiTitle } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -16,9 +16,12 @@ import { useDataLayer } from '../data/data_layer_context';
 import { toEsqlVariables } from '../data/esql_variables';
 import { useSource } from '../data/use_source';
 import { useStateValues } from '../runtime/app_runtime_context';
+import { useActionRunner } from '../workflows/use_action_runner';
 import { getServices } from '../services';
 import { useSubjectValue } from '../utils/use_subject_value';
+import { getClickedRow } from './clicked_row';
 import { DataState } from './data_state';
+import { DroppedActions } from './dropped_actions';
 import { useChartAttributes } from './use_chart_attributes';
 import type { SourceData } from '../data/data_layer';
 
@@ -31,6 +34,8 @@ const Chart = ({ node, data }: { node: AppNodeOfType<'chart'>; data: SourceData 
   const state = useStateValues();
   const context = useSubjectValue(layer.context$);
   const { attributes, error } = useChartAttributes(node, data.columns);
+  const run = useActionRunner(node.id);
+  const [dropped, setDropped] = useState<string[]>([]);
   // One id for as long as the chart is shown, so Lens keeps its own state between refreshes.
   const id = useMemo(() => uuidv4(), []);
 
@@ -49,19 +54,35 @@ const Chart = ({ node, data }: { node: AppNodeOfType<'chart'>; data: SourceData 
   }
   if (!attributes) return null;
 
+  const isClickable = node.onClick.length > 0;
+
   return (
-    <div css={css({ height: CHART_HEIGHT })} data-test-subj="customAppChart">
-      <lens.EmbeddableComponent
-        id={id}
-        attributes={attributes}
-        timeRange={context?.timeRange}
-        filters={context?.filters}
-        esqlVariables={toEsqlVariables(context ?? { esqlVariables: undefined }, state)}
-        searchSessionId={context?.searchSessionId}
-        style={{ height: '100%' }}
-        noPadding
-      />
-    </div>
+    <>
+      <div css={css({ height: CHART_HEIGHT })} data-test-subj="customAppChart">
+        <lens.EmbeddableComponent
+          id={id}
+          attributes={attributes}
+          timeRange={context?.timeRange}
+          filters={context?.filters}
+          esqlVariables={toEsqlVariables(context ?? { esqlVariables: undefined }, state)}
+          searchSessionId={context?.searchSessionId}
+          style={{ height: '100%' }}
+          noPadding
+          // A chart that has actions of its own does them when it is clicked, and not what a
+          // dashboard does by default, which is to offer to filter the dashboard by what was clicked.
+          {...(isClickable
+            ? {
+                onFilter: (event) => {
+                  event.preventDefault();
+                  const row = getClickedRow(event);
+                  if (row) setDropped(run(node.onClick, { row }));
+                },
+              }
+            : {})}
+        />
+      </div>
+      <DroppedActions reasons={dropped} onDismiss={() => setDropped([])} />
+    </>
   );
 };
 

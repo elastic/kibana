@@ -82,7 +82,7 @@ export const createDefaultNode = (
         title: i18n.translate('xpack.customApp.defaults.stat', { defaultMessage: 'Stat' }),
       };
     case 'chart':
-      return { type, id, query: DEFAULT_QUERY };
+      return { type, id, query: DEFAULT_QUERY, onClick: [] };
     case 'custom_content':
       return { type, id, query: DEFAULT_QUERY, template: STARTER_TEMPLATE };
     case 'time_range':

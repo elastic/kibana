@@ -111,6 +111,9 @@ const sections = {
   whenSubmitted: i18n.translate('xpack.customApp.editor.sectionWhenSubmitted', {
     defaultMessage: 'When it is submitted',
   }),
+  chartClick: i18n.translate('xpack.customApp.editor.sectionChartClick', {
+    defaultMessage: 'When a bar, point or slice is clicked',
+  }),
   rowClick: i18n.translate('xpack.customApp.editor.sectionRowClick', {
     defaultMessage: 'When a row is clicked',
   }),
@@ -312,6 +315,16 @@ export const PropertiesPanel = ({
                 query={node.query}
                 state={document.state}
                 onChange={(query) => onChange<'chart'>({ query })}
+              />
+            </Section>
+            <Section title={sections.chartClick}>
+              <RowClickEditor
+                nodeId={node.id}
+                nodeType="chart"
+                actions={node.onClick}
+                document={document}
+                flyoutIds={collectFlyoutIds(document.root)}
+                onEdit={onEdit}
               />
             </Section>
           </Sections>

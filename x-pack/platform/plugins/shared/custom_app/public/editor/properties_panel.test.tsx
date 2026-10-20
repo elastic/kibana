@@ -306,6 +306,17 @@ describe('PropertiesPanel', () => {
     });
   });
 
+  describe('a chart', () => {
+    it('says what happens when a bar, point or slice is clicked, and lets columns be remembered', () => {
+      setup('trend');
+
+      expect(
+        screen.getByRole('heading', { name: 'When a bar, point or slice is clicked' })
+      ).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Remember a column' })).toBeInTheDocument();
+    });
+  });
+
   describe('a list of values', () => {
     it('edits what is written above the box and its placeholder', async () => {
       const { onChange } = setup('names');

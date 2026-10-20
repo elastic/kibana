@@ -142,6 +142,18 @@ describe('the authoring guide', () => {
     expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('WHERE user.name IN (?users)');
     expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('Nothing written or chosen is an empty list');
     expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('A list is not kept in the address of the page');
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('makes a list of that one value');
+  });
+
+  it('teaches clicking a chart: the actions, the row behind a bar and how to get back', () => {
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain(
+      'clicking a bar, a point or a slice runs the actions'
+    );
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain(
+      'a chart split by a series gives both the bar and the series'
+    );
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('keep a way to clear the value');
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('a chart\'s "onClick"');
   });
 
   it('says that a component has a query or a source, not both, and that a chart cannot show cases', () => {

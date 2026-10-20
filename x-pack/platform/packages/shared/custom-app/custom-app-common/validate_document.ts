@@ -35,6 +35,7 @@ interface DocumentToValidate {
 /** Where each action's `fromColumn` and `fromInput` values make sense. */
 const ACTION_VALUE_SOURCES: Record<string, { fromColumn: boolean; fromInput: boolean }> = {
   onRowClick: { fromColumn: true, fromInput: false },
+  onChartClick: { fromColumn: true, fromInput: false },
   onChange: { fromColumn: false, fromInput: true },
   onClick: { fromColumn: false, fromInput: false },
   onSubmit: { fromColumn: false, fromInput: false },
@@ -44,7 +45,7 @@ const ACTION_VALUE_SOURCES: Record<string, { fromColumn: boolean; fromInput: boo
  * Where an action may run a workflow: when something is pressed or a row is clicked, never when an
  * input changes, which is every key that is typed and would start a workflow for each.
  */
-const WORKFLOW_EVENTS: readonly string[] = ['onClick', 'onRowClick', 'onSubmit'];
+const WORKFLOW_EVENTS: readonly string[] = ['onClick', 'onRowClick', 'onChartClick', 'onSubmit'];
 
 const collectNodes = (
   root: AppNode,
@@ -251,7 +252,7 @@ export const validateDocument = (document: DocumentToValidate, ctx: z.Refinement
         if (action.type === 'runWorkflow') {
           if (!WORKFLOW_EVENTS.includes(event)) {
             issue(
-              `Node "${node.id}" runs a workflow on ${event}; a workflow can only be run by a button, a row click or a form that is submitted`,
+              `Node "${node.id}" runs a workflow on ${event}; a workflow can only be run by a button, a row click, a click on a chart or a form that is submitted`,
               node.id
             );
           }
@@ -274,6 +275,21 @@ export const validateDocument = (document: DocumentToValidate, ctx: z.Refinement
         }
         if (action.type === 'openFlyout' && !flyoutIds.has(action.flyout)) {
           issue(`Node "${node.id}" opens "${action.flyout}", which is not a flyout`, node.id);
+        }
+        if (action.type === 'toggleInList') {
+          const target = state[action.key];
+          if (!target) {
+            issue(`Node "${node.id}" toggles unknown state key "${action.key}"`, node.id);
+          } else if (target.type !== 'list') {
+            issue(
+              `Node "${node.id}" toggles state key "${action.key}" (${target.type}), which is not a list`,
+              node.id
+            );
+          }
+          if (typeof action.value === 'object' && !allowed.fromColumn) {
+            issue(`Node "${node.id}": fromColumn is not valid in ${event}`, node.id);
+          }
+          return;
         }
         if (action.type !== 'setState') return;
 

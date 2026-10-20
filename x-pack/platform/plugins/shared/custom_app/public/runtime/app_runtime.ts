@@ -157,6 +157,19 @@ export const createAppRuntime = (document: Pick<AppDocument, 'state' | 'root'>):
       resolved = input.input;
     }
 
+    // A value that comes from a column of a clicked row, or from an input, and not one that was
+    // written down: a list takes a single one as a list of that one, an empty one as an empty list.
+    const isLiteral = typeof value !== 'object' || Array.isArray(value);
+    if (
+      declaration.type === 'list' &&
+      !isLiteral &&
+      (typeof resolved === 'string' ||
+        typeof resolved === 'number' ||
+        typeof resolved === 'boolean')
+    ) {
+      resolved = resolved === '' ? [] : [String(resolved)];
+    }
+
     // A column often holds a number, such as an id or a count; a text value takes it as text.
     if (
       declaration.type === 'string' &&
@@ -186,6 +199,42 @@ export const createAppRuntime = (document: Pick<AppDocument, 'state' | 'root'>):
           case 'setState':
             setState(action.key, action.value, input, dropped);
             break;
+          case 'toggleInList': {
+            const declaration = declarations[action.key];
+            if (!declaration || declaration.type !== 'list') {
+              dropped.push(`"${action.key}" is not a list`);
+              break;
+            }
+            let picked: unknown = action.value;
+            if (typeof action.value === 'object') {
+              const { fromColumn } = action.value;
+              if (!input.row || !(fromColumn in input.row)) {
+                dropped.push(`Column "${fromColumn}" is not in the row`);
+                break;
+              }
+              picked = input.row[fromColumn];
+            }
+            if (
+              (typeof picked !== 'string' && typeof picked !== 'number' && typeof picked !== 'boolean') ||
+              String(picked) === ''
+            ) {
+              dropped.push(`There is nothing to add to "${action.key}"`);
+              break;
+            }
+            const value = String(picked);
+            const current = state$.getValue()[action.key];
+            const list = Array.isArray(current) ? (current as readonly string[]) : [];
+            const next = list.includes(value)
+              ? list.filter((item) => item !== value)
+              : [...list, value];
+            const rejection = rejectValue(action.key, declaration, next);
+            if (rejection) {
+              dropped.push(rejection);
+              break;
+            }
+            state$.next({ ...state$.getValue(), [action.key]: next });
+            break;
+          }
           case 'openFlyout':
             if (flyoutIds.has(action.flyout)) {
               openFlyoutId$.next(action.flyout);

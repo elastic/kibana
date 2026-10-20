@@ -351,6 +351,45 @@ describe('createAppRuntime', () => {
       expect(runtime.state$.getValue().users).toEqual(['dave']);
     });
 
+    it('is set to a list of one by a column that holds one value, as a click on a bar gives', () => {
+      const runtime = createAppRuntime(listDocument);
+
+      runtime.run([setState('users', { fromColumn: 'user.name' })], {
+        row: { 'user.name': 'alice' },
+      });
+      expect(runtime.state$.getValue().users).toEqual(['alice']);
+
+      runtime.run([setState('users', { fromColumn: 'count' })], { row: { count: 42 } });
+      expect(runtime.state$.getValue().users).toEqual(['42']);
+    });
+
+    it('is emptied by a column that holds nothing, not set to a list of an empty value', () => {
+      const runtime = createAppRuntime(listDocument);
+      runtime.run([setState('users', ['alice'])]);
+
+      runtime.run([setState('users', { fromColumn: 'user.name' })], { row: { 'user.name': '' } });
+
+      expect(runtime.state$.getValue().users).toEqual([]);
+    });
+
+    it('does not take a null, which is not a value, and says so', () => {
+      const runtime = createAppRuntime(listDocument);
+
+      const { dropped } = runtime.run([setState('users', { fromColumn: 'user.name' })], {
+        row: { 'user.name': null },
+      });
+
+      expect(dropped).toEqual(['"users" expects a list but got null']);
+    });
+
+    it('still refuses a text that was written down for a list, which is a mistake of the author', () => {
+      const runtime = createAppRuntime(listDocument);
+
+      expect(runtime.run([setState('users', 'alice')]).dropped).toEqual([
+        '"users" expects a list but got string',
+      ]);
+    });
+
     it('says nothing, and does not change, when it is set to the same values', () => {
       const runtime = createAppRuntime(listDocument);
       runtime.run([setState('users', ['alice'])]);

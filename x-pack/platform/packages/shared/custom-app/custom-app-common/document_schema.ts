@@ -106,11 +106,26 @@ const runWorkflowActionSchema = z.object({
     .default({}),
 });
 
+/**
+ * Adds a value to a list of the app, or takes it out when it is there: a click on a bar then adds
+ * that bar to what the app is filtered by, and a second click takes it out. The value is a fixed
+ * text, or a column of the row that was clicked.
+ */
+const toggleInListActionSchema = z.object({
+  type: z.literal('toggleInList'),
+  key: stateKeySchema,
+  value: z.union([
+    z.string().min(1).max(MAX_STATE_STRING_LENGTH),
+    z.object({ fromColumn: z.string().min(1).max(MAX_HEADING_LENGTH) }),
+  ]),
+});
+
 const openFlyoutActionSchema = z.object({ type: z.literal('openFlyout'), flyout: nodeIdSchema });
 const closeFlyoutActionSchema = z.object({ type: z.literal('closeFlyout') });
 
 export const actionSchema = z.discriminatedUnion('type', [
   setStateActionSchema,
+  toggleInListActionSchema,
   openFlyoutActionSchema,
   closeFlyoutActionSchema,
   runWorkflowActionSchema,
@@ -189,6 +204,11 @@ const chartNodeSchema = z.object({
   query: querySchema,
   /** Left out, the chart is suggested from the columns of the query, as Discover does. */
   chartType: z.enum(CHART_TYPES).optional(),
+  /**
+   * What happens when a bar, a point or a slice is clicked. The columns of the clicked row of the
+   * query can be remembered, as a row click of a table does.
+   */
+  onClick: actionsSchema.default([]),
 });
 
 /**

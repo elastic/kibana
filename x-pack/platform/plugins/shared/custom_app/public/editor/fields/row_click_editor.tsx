@@ -34,12 +34,15 @@ const isRemembered = (action: Action): action is SetState & { value: { fromColum
  */
 export const RowClickEditor = ({
   nodeId,
+  nodeType = 'table',
   actions,
   document,
   flyoutIds,
   onEdit,
 }: {
   nodeId: string;
+  /** What is clicked: a row of a table, or a bar, a point or a slice of a chart. */
+  nodeType?: 'table' | 'chart';
   actions: readonly Action[];
   document: AppDocument;
   flyoutIds: readonly string[];
@@ -62,15 +65,17 @@ export const RowClickEditor = ({
         declare === undefined || declare in current.state
           ? current
           : setStateDeclaration(current, declare, { type: 'string', default: '' });
-      const result = updateNode<'table'>(withValue, nodeId, {
-        onRowClick: [
-          ...next.remembered.map(
-            ({ key, column }): Action => ({ type: 'setState', key, value: { fromColumn: column } })
-          ),
-          ...others,
-          ...(next.flyout === '' ? [] : [{ type: 'openFlyout' as const, flyout: next.flyout }]),
-        ],
-      });
+      const rebuilt: Action[] = [
+        ...next.remembered.map(
+          ({ key, column }): Action => ({ type: 'setState', key, value: { fromColumn: column } })
+        ),
+        ...others,
+        ...(next.flyout === '' ? [] : [{ type: 'openFlyout' as const, flyout: next.flyout }]),
+      ];
+      const result =
+        nodeType === 'chart'
+          ? updateNode<'chart'>(withValue, nodeId, { onClick: rebuilt })
+          : updateNode<'table'>(withValue, nodeId, { onRowClick: rebuilt });
       return result.ok ? result.document : current;
     });
 

@@ -57,6 +57,121 @@ const documentWith = (chart: Record<string, unknown> = {}) =>
     },
   });
 
+describe('clicking the chart', () => {
+  beforeEach(() => {
+    runQuery.mockClear();
+    suggestions.mockReset().mockReturnValue([{ suggestion: true }]);
+    embeddableProps.mockClear();
+  });
+
+  const clickable = (
+    onClick: unknown[] = [{ type: 'setState', key: 'user', value: { fromColumn: 'user.name' } }]
+  ) =>
+    appDocumentSchema.parse({
+      state: { user: { type: 'string', default: '' } },
+      root: {
+        type: 'stack',
+        id: 'root',
+        children: [
+          {
+            type: 'chart',
+            id: 'users',
+            query: 'FROM logs | STATS count = COUNT(*) BY user.name',
+            onClick,
+          },
+          { type: 'flyout', id: 'more', title: 'More', children: [] },
+        ],
+      },
+    });
+
+  const event = (row = 1) => ({
+    data: [
+      {
+        table: {
+          columns: [
+            { id: 'user_name', name: 'user.name' },
+            { id: 'count', name: 'count' },
+          ],
+          rows: [
+            { user_name: 'alice', count: 4 },
+            { user_name: 'bob', count: 9 },
+          ],
+        },
+        column: 0,
+        row,
+        value: 'bob',
+      },
+    ],
+    preventDefault: jest.fn(),
+  });
+
+  const click = async (clicked: ReturnType<typeof event>) => {
+    await screen.findByTestId('lensChart');
+    const { onFilter } = embeddableProps.mock.calls.at(-1)?.[0];
+    act(() => onFilter(clicked));
+  };
+
+  it('is not listened to when the chart has nothing to do on a click, so a dashboard keeps its own', async () => {
+    await renderApp(clickable([]), runQuery);
+    await screen.findByTestId('lensChart');
+
+    expect(embeddableProps.mock.calls.at(-1)?.[0].onFilter).toBeUndefined();
+  });
+
+  it('remembers the column of what was clicked', async () => {
+    const { runtime } = await renderApp(clickable(), runQuery);
+
+    await click(event(1));
+
+    expect(runtime.state$.getValue().user).toBe('bob');
+  });
+
+  it('takes the place of what a dashboard does with a click, which is to filter the dashboard', async () => {
+    await renderApp(clickable(), runQuery);
+    const clicked = event();
+
+    await click(clicked);
+
+    expect(clicked.preventDefault).toHaveBeenCalledTimes(1);
+  });
+
+  it('opens a flyout as well, when it was asked to', async () => {
+    const { runtime } = await renderApp(
+      clickable([
+        { type: 'setState', key: 'user', value: { fromColumn: 'user.name' } },
+        { type: 'openFlyout', flyout: 'more' },
+      ]),
+      runQuery
+    );
+
+    await click(event(0));
+
+    expect(runtime.state$.getValue().user).toBe('alice');
+    expect(runtime.openFlyoutId$.getValue()).toBe('more');
+  });
+
+  it('does nothing for a click that does not point at a row', async () => {
+    const { runtime } = await renderApp(clickable(), runQuery);
+    const clicked = event(99);
+
+    await click(clicked);
+
+    expect(runtime.state$.getValue().user).toBe('');
+    expect(clicked.preventDefault).toHaveBeenCalled();
+  });
+
+  it('says what could not be done, when a column is not in the row, and lets it be dismissed', async () => {
+    await renderApp(
+      clickable([{ type: 'setState', key: 'user', value: { fromColumn: 'nope' } }]),
+      runQuery
+    );
+
+    await click(event());
+
+    expect(await screen.findByText('Column "nope" is not in the row')).toBeInTheDocument();
+  });
+});
+
 describe('the chart node', () => {
   beforeEach(() => {
     runQuery.mockClear();

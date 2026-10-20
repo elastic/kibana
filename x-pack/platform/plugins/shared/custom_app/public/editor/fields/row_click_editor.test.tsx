@@ -264,3 +264,95 @@ describe('RowClickEditor', () => {
     });
   });
 });
+
+describe('RowClickEditor for a chart', () => {
+  const chartDocument = (onClick: unknown[] = []): AppDocument =>
+    appDocumentSchema.parse({
+      state: { user: { type: 'string', default: '' } },
+      root: {
+        type: 'stack',
+        id: 'root',
+        children: [
+          {
+            type: 'chart',
+            id: 'users',
+            query: 'FROM logs | STATS c = COUNT(*) BY user.name',
+            onClick,
+          },
+          { type: 'flyout', id: 'detail', title: 'Detail', children: [] },
+        ],
+      },
+    });
+
+  const setupChart = (initial: AppDocument) => {
+    const latest: { document: AppDocument } = { document: initial };
+    const Host = () => {
+      const [document, setDocument] = useState(initial);
+      latest.document = document;
+      const chart = findNode(document.root, 'users')!.node;
+      return (
+        <RowClickEditor
+          nodeId="users"
+          nodeType="chart"
+          actions={chart.type === 'chart' ? chart.onClick : []}
+          document={document}
+          flyoutIds={['detail']}
+          onEdit={(change) => setDocument((current) => change(current))}
+        />
+      );
+    };
+    render(<Host />);
+    return latest;
+  };
+
+  const chartOf = (document: AppDocument) => findNode(document.root, 'users')!.node;
+
+  it('remembers a column of what was clicked, as a value named after it, on the chart', async () => {
+    const latest = setupChart(chartDocument());
+
+    await userEvent.click(screen.getByRole('button', { name: 'Remember a column' }));
+    await userEvent.type(screen.getByRole('textbox', { name: 'Column 1' }), 'user.name');
+    await userEvent.tab();
+
+    expect(chartOf(latest.document)).toMatchObject({
+      onClick: [{ type: 'setState', key: 'user_name', value: { fromColumn: 'user.name' } }],
+    });
+    expect(latest.document.state.user_name).toEqual({ type: 'string', default: '' });
+    expect(chartOf(latest.document)).not.toHaveProperty('onRowClick');
+  });
+
+  it('opens a flyout after the columns are remembered', async () => {
+    const latest = setupChart(
+      chartDocument([{ type: 'setState', key: 'user', value: { fromColumn: 'user.name' } }])
+    );
+
+    await userEvent.selectOptions(
+      screen.getByRole('combobox', { name: 'Then open a flyout' }),
+      'detail'
+    );
+
+    expect(chartOf(latest.document)).toMatchObject({
+      onClick: [
+        { type: 'setState', key: 'user', value: { fromColumn: 'user.name' } },
+        { type: 'openFlyout', flyout: 'detail' },
+      ],
+    });
+  });
+
+  it('keeps what else the chart does, which an agent may have written, as it is', async () => {
+    const workflow = { type: 'runWorkflow', workflow: 'w', inputs: {} };
+    const latest = setupChart(
+      chartDocument([
+        { type: 'setState', key: 'user', value: { fromColumn: 'user.name' } },
+        workflow,
+      ])
+    );
+
+    await userEvent.selectOptions(
+      screen.getByRole('combobox', { name: 'Then open a flyout' }),
+      'detail'
+    );
+
+    expect((chartOf(latest.document) as { onClick: unknown[] }).onClick).toContainEqual(workflow);
+  });
+});

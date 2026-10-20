@@ -115,6 +115,8 @@ export const getNodeActions = (
   switch (node.type) {
     case 'table':
       return [{ event: 'onRowClick', actions: node.onRowClick }];
+    case 'chart':
+      return [{ event: 'onChartClick', actions: node.onClick }];
     case 'button':
       return [{ event: 'onClick', actions: node.onClick }];
     case 'form':
