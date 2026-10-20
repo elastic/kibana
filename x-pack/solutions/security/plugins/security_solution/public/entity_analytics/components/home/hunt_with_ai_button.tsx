@@ -10,8 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { AiButton } from '@kbn/shared-ux-ai-components';
 import { useKibana } from '../../../common/lib/kibana';
 import { EntityEventTypes } from '../../../common/lib/telemetry';
-import { useAgentBuilderAvailability } from '../../../agent_builder/hooks/use_agent_builder_availability';
 import { HUNT_LATEST_LEADS_PROMPT } from '../../prompts';
+import { useHuntWithAiAvailability } from './use_hunt_with_ai_availability';
 
 export const HUNT_WITH_AI_BUTTON_TEST_ID = 'eaHuntWithAiButton';
 
@@ -23,7 +23,7 @@ const HUNT_WITH_AI_LABEL = i18n.translate(
 /** Opens an Agent Builder chat prefilled with a prompt for the latest hunting leads. */
 export const HuntWithAiButton: React.FC = () => {
   const { telemetry, agentBuilder } = useKibana().services;
-  const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
+  const isHuntWithAiAvailable = useHuntWithAiAvailability();
 
   const handleClick = useCallback(() => {
     telemetry.reportEvent(EntityEventTypes.LeadGenerationHuntWithAiClicked, {});
@@ -35,13 +35,12 @@ export const HuntWithAiButton: React.FC = () => {
     });
   }, [agentBuilder, telemetry]);
 
-  if (!isAgentChatExperienceEnabled || !agentBuilder) return null;
+  if (!isHuntWithAiAvailable) return null;
 
   return (
     <AiButton
       variant="empty"
       size="s"
-      flush="both"
       iconType="productAgent"
       onClick={handleClick}
       data-test-subj={HUNT_WITH_AI_BUTTON_TEST_ID}
