@@ -29,6 +29,8 @@ import {
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 
+import { MotionPrototype } from './motion_prototype';
+
 /**
  * Props for the KibanaEuiProvider.
  */
@@ -156,6 +158,7 @@ export const KibanaEuiProvider: FC<PropsWithChildren<KibanaEuiProviderProps>> = 
         componentDefaults,
       }}
     >
+      <MotionPrototype />
       {children}
     </EuiProvider>
   );

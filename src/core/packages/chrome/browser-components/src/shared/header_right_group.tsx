@@ -17,6 +17,7 @@ export interface HeaderRightGroupProps {
   search?: ReactNode;
   help?: ReactNode;
   actions?: ReactNode;
+  motion?: ReactNode;
   userMenu?: ReactNode;
 }
 
@@ -64,7 +65,7 @@ const useHeaderRightGroupStyles = () => {
 };
 
 export const HeaderRightGroup = React.memo<HeaderRightGroupProps>(
-  ({ search, help, actions, userMenu }) => {
+  ({ search, help, actions, motion, userMenu }) => {
     const styles = useHeaderRightGroupStyles();
 
     return (
@@ -84,6 +85,7 @@ export const HeaderRightGroup = React.memo<HeaderRightGroupProps>(
             {actions}
           </div>
         )}
+        {motion}
         {userMenu && (
           <div css={styles.userMenuSlot} data-test-subj={CHROME_HEADER_TEST_SUBJECTS.userMenu}>
             {userMenu}

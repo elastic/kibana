@@ -24,6 +24,10 @@ import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { SidebarService } from '@kbn/core-chrome-sidebar-internal';
+import {
+  MOTION_REFRESH_SIDEBAR_APP_ID,
+  MotionRefreshSidebar,
+} from '@kbn/core-chrome-browser-components';
 
 import { DocTitleService } from './services/doc_title';
 import { NavLinksService } from './services/nav_links';
@@ -88,8 +92,17 @@ export class ChromeService {
     this.docTitleParts$ = titleParts$;
     registerAnalyticsContextProvider(analytics, title$);
 
+    const sidebar = this.sidebar.setup();
+    if (process.env.NODE_ENV === 'development') {
+      sidebar.registerApp({
+        appId: MOTION_REFRESH_SIDEBAR_APP_ID,
+        restoreOnReload: false,
+        loadComponent: async () => MotionRefreshSidebar,
+      });
+    }
+
     return {
-      sidebar: this.sidebar.setup(),
+      sidebar,
     };
   }
 

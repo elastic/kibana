@@ -15,6 +15,10 @@ export { ChromeHeader, ChromeAppHeaderRenderer, useHasChromeAppHeaderContent } f
 export { GridLayoutProjectSideNav } from './src/project/sidenav/grid_layout_sidenav';
 export { Sidebar } from './src/sidebar';
 export { HeaderBreadcrumbsBadges, HeaderTopBanner, ChromelessHeader } from './src/shared';
+export {
+  MotionRefreshSidebar,
+  MOTION_REFRESH_SIDEBAR_APP_ID,
+} from './src/shared/motion_refresh_sidebar';
 export { useHasInlineAppHeader } from './src/shared/chrome_hooks';
 export {
   HeaderActionButton,

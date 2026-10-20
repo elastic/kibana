@@ -9,3 +9,13 @@
 
 export { KibanaRootContextProvider, type KibanaRootContextProviderProps } from './root_provider';
 export { KibanaEuiProvider, type KibanaEuiProviderProps } from './eui_provider';
+export {
+  getMotionRefreshSettings,
+  setMotionRefreshEnabled,
+  setMotionRefreshItem,
+  subscribeMotionRefreshSettings,
+  useMotionRefreshSettings,
+} from './motion_settings';
+export type { MotionRefreshId, MotionRefreshSettings } from './motion_settings';
+export { resolveMotionTokens } from './motion_tokens';
+export type { MotionTokens } from './motion_tokens';
