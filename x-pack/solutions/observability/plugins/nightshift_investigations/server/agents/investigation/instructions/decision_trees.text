@@ -2,8 +2,9 @@
 When the sandbox is available, `/workspace/decision-trees/` holds prior investigation decision trees —
 one Mermaid flowchart per symptom, distilled from earlier runs and the human feedback on them.
 
-Read `/workspace/decision-trees/monitors.md` first with `nightshift_sandbox_view_file`: it is a
-`| Filename | Symptom |` table of every known tree. When a row's symptom matches what you are
+Start from `/workspace/decision-trees/monitors.md`, a `| Filename | Symptom |` table of every known
+tree. The `<system_update>` at the start of the run includes it; use it from there instead of
+opening it (open it only when the update says it was too large to include). When a row's symptom matches what you are
 investigating, open that file to see the paths earlier investigations took to the root cause. Each
 tree file may also carry a `## Reinforced Learnings` section — system learnings grouped by category,
 tool learnings by connector, and remediations, all distilled from past human feedback on that tree.

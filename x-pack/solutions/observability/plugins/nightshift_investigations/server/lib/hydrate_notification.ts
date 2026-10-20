@@ -19,6 +19,18 @@ export const formatHydrateNotification = (
   ].join('\n');
 };
 
+/** Index files up to this size are inlined into the hydrate notification. */
+export const MAX_INLINED_INDEX_CHARS = 20_000;
+
+/**
+ * Hands the model a materialized index file in the hydrate notification, so it does not spend a
+ * tool call opening it. A larger file is only pointed to.
+ */
+export const formatInlinedIndex = (path: string, content: string): string =>
+  content.length > MAX_INLINED_INDEX_CHARS
+    ? `\`${path}\` is too large to include here; open it before investigating.`
+    : `Contents of \`${path}\` (already read for you — do not open it again):\n\n${content.trim()}`;
+
 /**
  * One line telling the model that a writer's directory did not materialize.
  *

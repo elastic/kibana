@@ -21,7 +21,7 @@ import {
   type InvestigationToolCall,
 } from './accessed_trees';
 import { createLearningStore } from './learning_store';
-import { materializeDecisionTrees } from './materialize';
+import { materializeDecisionTrees, renderMonitorsIndex } from './materialize';
 import { createDecisionTreeStore } from './store';
 import { buildReinforcementPrompt } from './turn';
 
@@ -66,7 +66,7 @@ export const hydrateDecisionTreeWorkspace = async ({
   spaceId: string;
   prompt?: string;
   signal?: AbortSignal;
-}): Promise<number> => {
+}): Promise<{ treeCount: number; index?: string }> => {
   const store = createDecisionTreeStore({ esClient, logger, spaceId, signal });
   const accessedTreeIds = parseAccessedTreesMarker(prompt);
   const trees = await materializeDecisionTrees({
@@ -76,7 +76,10 @@ export const hydrateDecisionTreeWorkspace = async ({
     signal,
     ...(accessedTreeIds ? { treeIds: accessedTreeIds } : {}),
   });
-  return trees.length;
+  // Only the investigator scans the index; the reinforcement prompt already names its trees.
+  return accessedTreeIds
+    ? { treeCount: trees.length }
+    : { treeCount: trees.length, index: renderMonitorsIndex(trees) };
 };
 
 /**

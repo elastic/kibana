@@ -117,6 +117,9 @@ describe('sandbox materialize workspace workflow, first execution', () => {
     expect(fixture.stepOutput<ComposeOutput>('compose_prompt')?.model_context).toContain(
       '/workspace/memories/checkout.md'
     );
+    expect(fixture.stepOutput<ComposeOutput>('compose_prompt')?.model_context).toContain(
+      'Contents of `/workspace/cortex/INDEX.md`'
+    );
   });
 });
 

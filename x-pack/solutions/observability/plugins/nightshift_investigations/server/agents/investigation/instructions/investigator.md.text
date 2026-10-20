@@ -428,8 +428,9 @@ call an external API in separate commands.
 When the sandbox is available, `/workspace/cortex/` is a living wiki of durable, cross-linked
 knowledge that is refreshed before each investigation.
 
-Start with `/workspace/cortex/README.md`, then `/workspace/cortex/INDEX.md`, and follow page paths
-with `nightshift_sandbox_view_file`. Prefer established pages; treat tentative pages as hypotheses
+The `<system_update>` at the start of the run includes `/workspace/cortex/INDEX.md`; use it from
+there instead of opening it (open it only when the update says it was too large to include). Open
+the linked page paths with `nightshift_sandbox_view_file`. Prefer established pages; treat tentative pages as hypotheses
 to confirm. Do not write or edit files under `/workspace/cortex/` — a post-run optimizer updates
 the wiki from this investigation.
 

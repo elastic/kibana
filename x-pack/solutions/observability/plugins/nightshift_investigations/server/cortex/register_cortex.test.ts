@@ -69,9 +69,9 @@ describe('hydrateCortexWorkspace', () => {
   });
 
   it('materializes once when the sandbox accepts the writes', async () => {
-    materialize.mockResolvedValueOnce(undefined);
+    materialize.mockResolvedValueOnce({ index: '# Cortex index' });
 
-    await hydrate();
+    await expect(hydrate()).resolves.toEqual({ index: '# Cortex index' });
 
     expect(materialize).toHaveBeenCalledTimes(1);
   });
@@ -79,9 +79,11 @@ describe('hydrateCortexWorkspace', () => {
   // The first call to a freshly allocated pod can be refused before the pod listens. The sandbox
   // moves the conversation to a new pod on UNAVAILABLE, so the retry is what gets the wiki written.
   it('retries once when the sandbox is unavailable', async () => {
-    materialize.mockRejectedValueOnce(unavailable()).mockResolvedValueOnce(undefined);
+    materialize
+      .mockRejectedValueOnce(unavailable())
+      .mockResolvedValueOnce({ index: '# Cortex index' });
 
-    await hydrate();
+    await expect(hydrate()).resolves.toEqual({ index: '# Cortex index' });
 
     expect(materialize).toHaveBeenCalledTimes(2);
   });

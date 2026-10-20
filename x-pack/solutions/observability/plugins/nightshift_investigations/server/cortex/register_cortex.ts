@@ -91,13 +91,13 @@ export const hydrateCortexWorkspace = async ({
   analytics: AnalyticsServiceSetup;
   conversationId?: string;
   logger: Logger;
-}): Promise<void> => {
+}): Promise<{ index: string }> => {
   const store = createCortexStore({ esClient, logger, spaceId, signal });
   const telemetry = createCortexTelemetry({ analytics, conversationId, logger });
   const materialize = () => materializeCortex({ session, store, telemetry, logger });
 
   try {
-    await materialize();
+    return await materialize();
   } catch (err) {
     if (!isSandboxUnavailable(err) || signal?.aborted) throw err;
 
@@ -106,7 +106,7 @@ export const hydrateCortexWorkspace = async ({
     // UNAVAILABLE and allocates a new pod for the next call, so a single retry lands on a pod
     // that is ready. Without it the run continues with no wiki, because nothing else seeds it.
     logger.warn(`Cortex hydrate reached an unavailable sandbox, retrying once: ${err.message}`);
-    await materialize();
+    return materialize();
   }
 };
 

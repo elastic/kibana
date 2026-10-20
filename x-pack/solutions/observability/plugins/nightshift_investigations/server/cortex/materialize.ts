@@ -90,7 +90,7 @@ export const materializeCortex = async ({
   store: CortexPageStore;
   telemetry: CortexTelemetry;
   logger: Logger;
-}): Promise<void> => {
+}): Promise<{ index: string }> => {
   await store.pruneDuplicates();
   const { pages: allPages } = await store.list();
   // Archived means the optimizer retired the fact as stale, so materializing it would feed the
@@ -116,9 +116,10 @@ export const materializeCortex = async ({
       content: Buffer.from(renderPage(page), 'utf8'),
     }))
   );
+  const index = renderIndex(pages);
   await session.writeFiles([
     { path: `${CORTEX_WORKSPACE_ROOT}/README.md`, content: Buffer.from(README_CONTENT, 'utf8') },
-    { path: `${CORTEX_WORKSPACE_ROOT}/INDEX.md`, content: Buffer.from(renderIndex(pages), 'utf8') },
+    { path: `${CORTEX_WORKSPACE_ROOT}/INDEX.md`, content: Buffer.from(index, 'utf8') },
   ]);
 
   telemetry.reportHydrated(fullPages);
@@ -127,4 +128,5 @@ export const materializeCortex = async ({
       ? `Materialized ${fullPages.length} Cortex page(s) into sandbox`
       : 'Materialized 0 Cortex page(s) into sandbox — store.list returned no live pages'
   );
+  return { index };
 };

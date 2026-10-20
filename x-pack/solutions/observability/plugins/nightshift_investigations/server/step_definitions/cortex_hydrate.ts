@@ -12,7 +12,7 @@ import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
 import type { SandboxPluginStart } from '@kbn/sandbox-plugin/server';
 import { hydrateCortexWorkspace } from '../cortex/register_cortex';
 import { CORTEX_WORKSPACE_ROOT } from '../cortex/materialize';
-import { degradeOnWriterFailure } from '../lib/hydrate_notification';
+import { degradeOnWriterFailure, formatInlinedIndex } from '../lib/hydrate_notification';
 import { scopeConversationId, unscopeConversationId } from '../tools/sandbox_bash/tool_utils';
 import { withTimeout } from './with_timeout';
 
@@ -66,8 +66,8 @@ export const cortexHydrateStepDefinition = ({
       notification: z
         .string()
         .describe(
-          'Empty on success. On failure, the incomplete-materialization notice for ' +
-            '/workspace/cortex.'
+          'On success, the Cortex index (or a pointer to it when large). On failure, the ' +
+            'incomplete-materialization notice for /workspace/cortex.'
         ),
     }),
     handler: async (context) => {
@@ -113,8 +113,9 @@ export const cortexHydrateStepDefinition = ({
       // this is a before-agent hook, and aborting the investigator round because one
       // writer could not reach the sandbox is worse than telling the model the
       // directory may be incomplete.
+      let index: string;
       try {
-        await withTimeout(
+        ({ index } = await withTimeout(
           (signal) =>
             hydrateCortexWorkspace({
               session,
@@ -127,7 +128,7 @@ export const cortexHydrateStepDefinition = ({
             }),
           HYDRATE_TIMEOUT_MS,
           `Cortex hydrate timed out after ${HYDRATE_TIMEOUT_MS}ms`
-        );
+        ));
       } catch (error) {
         return {
           output: {
@@ -148,7 +149,7 @@ export const cortexHydrateStepDefinition = ({
         output: {
           sandbox_id: sandboxId,
           conversation_id: resolvedConversationId,
-          notification: '',
+          notification: formatInlinedIndex(`${CORTEX_WORKSPACE_ROOT}/INDEX.md`, index),
         },
       };
     },

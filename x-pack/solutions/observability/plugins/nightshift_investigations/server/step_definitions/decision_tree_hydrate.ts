@@ -11,8 +11,11 @@ import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { Logger } from '@kbn/core/server';
 import type { SandboxPluginStart } from '@kbn/sandbox-plugin/server';
 import { hydrateDecisionTreeWorkspace } from '../decision_trees/register_decision_trees';
-import { DECISION_TREE_WORKSPACE_ROOT } from '../decision_trees/materialize';
-import { degradeOnWriterFailure } from '../lib/hydrate_notification';
+import {
+  DECISION_TREE_WORKSPACE_ROOT,
+  MONITORS_INDEX_FILENAME,
+} from '../decision_trees/materialize';
+import { degradeOnWriterFailure, formatInlinedIndex } from '../lib/hydrate_notification';
 import { unscopeConversationId } from '../tools/sandbox_bash/tool_utils';
 import { withTimeout } from './with_timeout';
 
@@ -61,8 +64,9 @@ export const decisionTreeHydrateStepDefinition = ({
       notification: z
         .string()
         .describe(
-          'Always empty on success. On failure, the incomplete-materialization notice for ' +
-            '/workspace/decision-trees.'
+          'On success, the decision-tree index for the investigator (or a pointer to it when ' +
+            'large), empty for reinforcement. On failure, the incomplete-materialization notice ' +
+            'for /workspace/decision-trees.'
         ),
     }),
     handler: async (context) => {
@@ -104,8 +108,9 @@ export const decisionTreeHydrateStepDefinition = ({
       // step is also a before-agent hook for the reinforcement agent, so throwing would
       // abort that round over one writer.
       let treeCount: number;
+      let index: string | undefined;
       try {
-        treeCount = await withTimeout(
+        ({ treeCount, index } = await withTimeout(
           (signal) =>
             hydrateDecisionTreeWorkspace({
               session,
@@ -117,7 +122,7 @@ export const decisionTreeHydrateStepDefinition = ({
             }),
           HYDRATE_TIMEOUT_MS,
           `Decision tree hydrate timed out after ${HYDRATE_TIMEOUT_MS}ms`
-        );
+        ));
       } catch (error) {
         return {
           output: {
@@ -140,7 +145,13 @@ export const decisionTreeHydrateStepDefinition = ({
           sandbox_id: sandboxId,
           conversation_id: conversationId,
           tree_count: treeCount,
-          notification: '',
+          notification:
+            index === undefined
+              ? ''
+              : formatInlinedIndex(
+                  `${DECISION_TREE_WORKSPACE_ROOT}/${MONITORS_INDEX_FILENAME}`,
+                  index
+                ),
         },
       };
     },

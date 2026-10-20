@@ -184,9 +184,9 @@ export const memoryOptimizeSummary = {
 
 /** Defaults for the faked ES/sandbox boundary: a healthy round every test starts from. */
 const setHealthyBoundary = (): void => {
-  jest.mocked(hydrateCortexWorkspace).mockResolvedValue(undefined);
+  jest.mocked(hydrateCortexWorkspace).mockResolvedValue({ index: '# Cortex index' });
   jest.mocked(runCortexOptimize).mockResolvedValue(undefined);
-  jest.mocked(hydrateDecisionTreeWorkspace).mockResolvedValue(3);
+  jest.mocked(hydrateDecisionTreeWorkspace).mockResolvedValue({ treeCount: 3 });
   jest.mocked(hydrateMemoryWorkspace).mockResolvedValue({
     summary: MEMORY_SUMMARY,
     recalledIds: ['mem-1', 'mem-2'],

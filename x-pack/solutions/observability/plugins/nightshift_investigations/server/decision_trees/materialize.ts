@@ -147,7 +147,7 @@ export const buildTreeFileContent = (markdown: string, learnings: LearningRecord
  * Renders `monitors.md`: a `| Filename | Symptom |` table the agent scans at the start of an
  * investigation to find a prior tree for the symptom it is looking at, then opens by filename.
  */
-const renderIndex = (trees: DecisionTreeSummary[]): string => {
+export const renderMonitorsIndex = (trees: DecisionTreeSummary[]): string => {
   const lines = [
     '# Decision trees',
     '',
@@ -217,7 +217,7 @@ export const materializeDecisionTrees = async ({
   await session.writeFiles([
     {
       path: `${DECISION_TREE_WORKSPACE_ROOT}/${MONITORS_INDEX_FILENAME}`,
-      content: Buffer.from(renderIndex(trees), 'utf8'),
+      content: Buffer.from(renderMonitorsIndex(trees), 'utf8'),
     },
     ...stored.map((tree) => ({
       path: workspacePathForTree(tree.tree_id),

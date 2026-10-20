@@ -55,8 +55,14 @@ describe('materializeCortex', () => {
     } as unknown as SandboxSession;
 
     const telemetry = createTelemetry();
-    await materializeCortex({ session, store, telemetry, logger: loggerMock.create() });
+    const { index } = await materializeCortex({
+      session,
+      store,
+      telemetry,
+      logger: loggerMock.create(),
+    });
 
+    expect(index).toContain('/workspace/cortex/services/checkout.md');
     expect(store.pruneDuplicates).toHaveBeenCalled();
     expect(session.mkdirs).toHaveBeenCalledWith(
       expect.arrayContaining(['/workspace/cortex', '/workspace/cortex/services'])

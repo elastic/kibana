@@ -12,12 +12,14 @@ import { hydrateCortexWorkspace } from '../cortex/register_cortex';
 import { cortexHydrateStepDefinition } from './cortex_hydrate';
 
 jest.mock('../cortex/register_cortex', () => ({
-  hydrateCortexWorkspace: jest
-    .fn()
-    .mockResolvedValue(
-      'Cortex pages materialized this turn:\n- `/workspace/cortex/services/checkout.md`'
-    ),
+  hydrateCortexWorkspace: jest.fn().mockResolvedValue({
+    index: '# Cortex index\n\n- **Checkout** — `/workspace/cortex/services/checkout.md`\n',
+  }),
 }));
+
+const INLINED_INDEX =
+  'Contents of `/workspace/cortex/INDEX.md` (already read for you — do not open it again):\n\n' +
+  '# Cortex index\n\n- **Checkout** — `/workspace/cortex/services/checkout.md`';
 
 describe('cortexHydrateStepDefinition', () => {
   const esClient = { search: jest.fn() };
@@ -84,7 +86,7 @@ describe('cortexHydrateStepDefinition', () => {
       output: {
         sandbox_id: 'default__conv-1',
         conversation_id: 'conv-1',
-        notification: '',
+        notification: INLINED_INDEX,
       },
     });
   });
@@ -107,7 +109,7 @@ describe('cortexHydrateStepDefinition', () => {
       output: {
         sandbox_id: 'marketing__conv-1',
         conversation_id: 'conv-1',
-        notification: '',
+        notification: INLINED_INDEX,
       },
     });
   });
@@ -130,7 +132,7 @@ describe('cortexHydrateStepDefinition', () => {
       output: {
         sandbox_id: 'marketing__conv-1',
         conversation_id: 'conv-1',
-        notification: '',
+        notification: INLINED_INDEX,
       },
     });
   });

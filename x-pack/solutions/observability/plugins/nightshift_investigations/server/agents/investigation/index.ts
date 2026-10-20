@@ -53,7 +53,7 @@ export const INVESTIGATION_AGENT_DESCRIPTION =
 
 /** Interpolated only when hydrate will actually write `/workspace/decision-trees/`. */
 const DECISION_TREES_LOAD_STEP =
-  ' Also check `/workspace/decision-trees/monitors.md` for a prior decision tree matching this symptom — see <decision_trees>.';
+  ' Also check the decision-tree index (`/workspace/decision-trees/monitors.md`, included in the `<system_update>`) for a prior decision tree matching this symptom — see <decision_trees>.';
 
 const SEMANTIC_MEMORY_LOAD_STEP = ` Also inspect this turn's Semantic Memory paths from
 <system_update>, or /workspace/memories/.index.json when present. Treat memories as historical

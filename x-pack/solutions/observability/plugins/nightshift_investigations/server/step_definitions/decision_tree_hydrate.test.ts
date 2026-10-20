@@ -11,8 +11,15 @@ import { hydrateDecisionTreeWorkspace } from '../decision_trees/register_decisio
 import { decisionTreeHydrateStepDefinition } from './decision_tree_hydrate';
 
 jest.mock('../decision_trees/register_decision_trees', () => ({
-  hydrateDecisionTreeWorkspace: jest.fn().mockResolvedValue(3),
+  hydrateDecisionTreeWorkspace: jest.fn().mockResolvedValue({
+    treeCount: 3,
+    index: '# Decision trees\n\n| Filename | Symptom |\n',
+  }),
 }));
+
+const INLINED_INDEX =
+  'Contents of `/workspace/decision-trees/monitors.md` (already read for you — do not open it again):' +
+  '\n\n# Decision trees\n\n| Filename | Symptom |';
 
 describe('decisionTreeHydrateStepDefinition', () => {
   const esClient = { search: jest.fn() };
@@ -74,7 +81,7 @@ describe('decisionTreeHydrateStepDefinition', () => {
         sandbox_id: 'default__conv-1',
         conversation_id: 'conv-1',
         tree_count: 3,
-        notification: '',
+        notification: INLINED_INDEX,
       },
     });
   });
@@ -99,7 +106,7 @@ describe('decisionTreeHydrateStepDefinition', () => {
         sandbox_id: 'marketing__conv-1',
         conversation_id: 'conv-1',
         tree_count: 3,
-        notification: '',
+        notification: INLINED_INDEX,
       },
     });
   });
@@ -115,6 +122,25 @@ describe('decisionTreeHydrateStepDefinition', () => {
     expect(hydrateDecisionTreeWorkspace).toHaveBeenCalledWith(
       expect.objectContaining({ prompt: 'why is checkout slow?' })
     );
+  });
+
+  it('stays silent on success when no index is returned (reinforcement hydrate)', async () => {
+    jest.mocked(hydrateDecisionTreeWorkspace).mockResolvedValueOnce({ treeCount: 2 });
+    const definition = decisionTreeHydrateStepDefinition({
+      getSandboxStart: () => makeSandboxStart(),
+      logger: loggerMock.create(),
+    });
+
+    const result = await definition.handler(createContext('default__conv-1'));
+
+    expect(result).toEqual({
+      output: {
+        sandbox_id: 'default__conv-1',
+        conversation_id: 'conv-1',
+        tree_count: 2,
+        notification: '',
+      },
+    });
   });
 
   // The combined materialize workflow installs with Cortex or Memory, so this step is registered
