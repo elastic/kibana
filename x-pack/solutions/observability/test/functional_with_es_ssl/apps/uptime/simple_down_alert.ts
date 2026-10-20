@@ -27,7 +27,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     const DEFAULT_DATE_END = 'Sep 11, 2019 @ 19:40:08.078';
 
     const hideErrorToast = async () => {
-      if (await testSubjects.exists('errorToastMessage', { timeout: 0 })) {
+      if (await testSubjects.exists('errorToastMessage')) {
         await testSubjects.click('toastCloseButton');
       }
     };

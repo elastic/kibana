@@ -594,8 +594,9 @@ paths:
       responses:
         '200':
           description: Returns the OAuth callback script
-      summary: ''
-      tags: []
+      summary: Get OAuth callback script
+      tags:
+        - connectors
       x-state: Added in 9.4.0
       x-metaTags:
         - content: Kibana
@@ -172322,6 +172323,7 @@ components:
           oneOf:
             - $ref: '#/components/schemas/Security_Detections_API_BulkEditSkipReason'
             - $ref: '#/components/schemas/Security_Detections_API_BulkGapsFillingSkipReason'
+            - $ref: '#/components/schemas/Security_Detections_API_BulkDeleteSkipReason'
       required:
         - id
         - skip_reason
@@ -172359,6 +172361,10 @@ components:
           type: string
       required:
         - action
+    Security_Detections_API_BulkDeleteSkipReason:
+      enum:
+        - RULE_NOT_FOUND
+      type: string
     Security_Detections_API_BulkDisableRules:
       type: object
       properties:
