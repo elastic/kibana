@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createContractMockFetch } from '../fetch/create_contract_mock_fetch';
+import { createEmulatorFetch } from '../fetch/create_emulator_fetch';
 import { convertDiscovery, isDiscoveryDocument } from './convert_discovery';
 
 const SCOPE = 'https://www.googleapis.com/auth/cloud-platform';
@@ -218,7 +218,7 @@ describe('convertDiscovery', () => {
   });
 
   it('lets the contract mock match and validate requests, including custom verbs', async () => {
-    const { fetch, calls } = createContractMockFetch({ specs: [converted] });
+    const { fetch, calls } = createEmulatorFetch({ specs: [converted] });
     const headers = { authorization: 'Bearer token' };
     const base = 'https://secretmanager.googleapis.com/v1/projects/p1/secrets';
 

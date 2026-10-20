@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createContractMockFetch } from '../fetch/create_contract_mock_fetch';
+import { createEmulatorFetch } from '../fetch/create_emulator_fetch';
 import type { OverlayAction } from '.';
 import { applyOverlay, InvalidOverlayError } from '.';
 
@@ -170,7 +170,7 @@ describe('applyOverlay', () => {
       },
     ];
     const post = (specs: Array<Record<string, unknown>>) => {
-      const mock = createContractMockFetch({ specs, recordings });
+      const mock = createEmulatorFetch({ specs, recordings });
       const response = mock.fetch('https://api.example.com/cards', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },

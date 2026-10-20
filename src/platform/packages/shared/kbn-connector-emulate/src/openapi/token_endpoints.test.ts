@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createContractMockFetch } from '../fetch/create_contract_mock_fetch';
+import { createEmulatorFetch } from '../fetch/create_emulator_fetch';
 
 const spec = {
   openapi: '3.0.3',
@@ -31,7 +31,7 @@ const spec = {
 const FORM = { 'content-type': 'application/x-www-form-urlencoded' };
 
 describe('token endpoints', () => {
-  const { fetch, calls } = createContractMockFetch({ specs: [spec] });
+  const { fetch, calls } = createEmulatorFetch({ specs: [spec] });
   const requestToken = async (url: string, init: RequestInit) => {
     const response = await fetch(url, { method: 'POST', headers: FORM, ...init });
     return { status: response.status, body: await response.json() };

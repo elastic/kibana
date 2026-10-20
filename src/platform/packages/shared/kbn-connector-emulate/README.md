@@ -9,9 +9,9 @@ This package is being built in stages (see [#295684](https://github.com/elastic/
 ## In-process mock
 
 ```ts
-import { createContractMockFetch } from '@kbn/connector-emulate';
+import { createEmulatorFetch } from '@kbn/connector-emulate';
 
-const { fetch, calls } = createContractMockFetch({ specs: [openApiDocument] });
+const { fetch, calls } = createEmulatorFetch({ specs: [openApiDocument] });
 ```
 
 The mock is a standard `fetch`. Connector clients built on axios use it through axios's fetch adapter, `{ adapter: 'fetch', env: { fetch } }`, so axios still builds the URL and serializes parameters exactly as it would against the vendor. The package itself doesn't depend on axios, whose new use Kibana disallows.
@@ -27,7 +27,7 @@ Each request is recorded in `calls` with its operation, status, and request and 
 Connectors that call several vendor specs (one per API version or product) can name them:
 
 ```ts
-const { fetch, calls } = createContractMockFetch({ specs: { v1: datadogV1, v2: datadogV2 } });
+const { fetch, calls } = createEmulatorFetch({ specs: { v1: datadogV1, v2: datadogV2 } });
 ```
 
 Each call's `matched.source` then says which spec answered it. Fixtures, recordings and pagination entries can name a `source` next to their method and path template to apply to that spec only; without one, they apply to the operation in every spec.
@@ -60,7 +60,7 @@ Responses come from, in order of preference:
 Fixtures and recordings name their operation by method and path template, not by URL, so they apply whatever the request's parameters are:
 
 ```ts
-const { fetch, rejectedResponses } = createContractMockFetch({
+const { fetch, rejectedResponses } = createEmulatorFetch({
   specs: [openApiDocument],
   recordings: [
     {
@@ -117,7 +117,7 @@ actions:
 
 ```ts
 const { document, findings } = applyOverlay(vendorSpec, overlay);
-const { fetch } = createContractMockFetch({ specs: [document], recordings });
+const { fetch } = createEmulatorFetch({ specs: [document], recordings });
 ```
 
 The mock then enforces the API's real contract, and recordings the vendor's spec contradicted are served. Say in each action's `description` (or an `x-` field) what showed the spec to be wrong, so the correction can be dropped once the vendor fixes it.

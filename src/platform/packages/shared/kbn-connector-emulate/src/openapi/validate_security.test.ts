@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createContractMockFetch } from '../fetch/create_contract_mock_fetch';
+import { createEmulatorFetch } from '../fetch/create_emulator_fetch';
 import { loadContractOperations } from '.';
 
 const ok = { '200': { description: 'ok' } };
@@ -44,7 +44,7 @@ const spec = {
 };
 
 describe('validateSecurity', () => {
-  const { fetch, calls } = createContractMockFetch({ specs: [spec] });
+  const { fetch, calls } = createEmulatorFetch({ specs: [spec] });
   const statusOf = async (path: string, headers: Record<string, string> = {}) =>
     (await fetch(`https://api.example.com${path}`, { headers })).status;
 

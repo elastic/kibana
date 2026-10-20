@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createContractMockFetch } from '../fetch/create_contract_mock_fetch';
+import { createEmulatorFetch } from '../fetch/create_emulator_fetch';
 import type { PaginatedOperation } from './paginate';
 import type { RecordedExchange, Recording } from './response_engine';
 
@@ -194,7 +194,7 @@ const pagination: PaginatedOperation[] = [
 ];
 
 const createMock = (collectionSize: number) =>
-  createContractMockFetch({ specs: [spec], pagination, collectionSize });
+  createEmulatorFetch({ specs: [spec], pagination, collectionSize });
 
 const toChannels = (...names: string[]) => names.map((id) => ({ id }));
 
@@ -212,7 +212,7 @@ const slackPage = (
 });
 
 const createRecordedMock = (exchanges: Recording['exchanges'], collectionSize?: number) =>
-  createContractMockFetch({
+  createEmulatorFetch({
     specs: [spec],
     pagination,
     collectionSize,
@@ -447,7 +447,7 @@ describe('withPagination', () => {
     });
 
     it('ignores recordings for operations with a fixture', async () => {
-      const { fetch } = createContractMockFetch({
+      const { fetch } = createEmulatorFetch({
         specs: [spec],
         pagination,
         recordings: [{ exchanges: recordedPages }],

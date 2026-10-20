@@ -38,7 +38,7 @@ export interface ContractCall {
   readonly responseViolations: readonly Violation[];
 }
 
-export interface ContractMockOptions extends PaginationOptions {
+export interface EmulatorOptions extends PaginationOptions {
   /**
    * The vendor specs the connector targets, e.g. both API versions it calls. Named specs (such
    * as `{ v1, v2 }`) let `calls`, fixtures, recordings and pagination tell their operations apart.
@@ -55,7 +55,7 @@ export interface ContractMockOptions extends PaginationOptions {
   readonly respond?: Responder;
 }
 
-export interface ContractMock {
+export interface Emulator {
   readonly fetch: typeof fetch;
   readonly calls: ContractCall[];
   /** Fixtures and recordings that aren't served because the spec contradicts them. */
@@ -99,7 +99,7 @@ const toContractRequest = async (request: Request): Promise<ContractRequest> => 
   };
 };
 
-const isDocumentList = (specs: ContractMockOptions['specs']): specs is readonly OpenApiDocument[] =>
+const isDocumentList = (specs: EmulatorOptions['specs']): specs is readonly OpenApiDocument[] =>
   Array.isArray(specs);
 
 // Loading copies and normalizes the document, which takes seconds and gigabytes for specs such
@@ -114,7 +114,7 @@ const loadSpec = (document: OpenApiDocument, source?: string): ContractOperation
   return operations;
 };
 
-const loadSpecs = (specs: ContractMockOptions['specs']): ContractOperation[] =>
+const loadSpecs = (specs: EmulatorOptions['specs']): ContractOperation[] =>
   isDocumentList(specs)
     ? specs.flatMap((document) => loadSpec(document))
     : Object.entries(specs).flatMap(([source, document]) => loadSpec(document, source));
@@ -144,14 +144,14 @@ const toResponse = ({ statusCode, headers, body }: ContractResponse): Response =
  * break the spec get 422 listing the violations; every request is recorded in `calls`. The
  * token URLs of the specs' OAuth 2 flows issue stub tokens. Axios clients can use it with `{ adapter: 'fetch', env: { fetch } }`.
  */
-export const createContractMockFetch = ({
+export const createEmulatorFetch = ({
   specs,
   fixtures,
   recordings,
   pagination,
   collectionSize,
   respond = sampleResponse,
-}: ContractMockOptions): ContractMock => {
+}: EmulatorOptions): Emulator => {
   const operations = loadSpecs(specs);
   const tokenEndpoints = findTokenEndpoints(operations);
   const engine = createResponseEngine(operations, { fixtures, recordings, fallback: respond });

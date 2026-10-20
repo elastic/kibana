@@ -8,7 +8,7 @@
  */
 
 import type { Responder } from '../contract/types';
-import { createContractMockFetch } from './create_contract_mock_fetch';
+import { createEmulatorFetch } from './create_emulator_fetch';
 
 const item = {
   type: 'object',
@@ -61,10 +61,10 @@ const postJson = (body: unknown): RequestInit => ({
   body: JSON.stringify(body),
 });
 
-describe('createContractMockFetch', () => {
+describe('createEmulatorFetch', () => {
   it('answers valid requests with the responder and records the call', async () => {
     const respond = jest.fn(listResponder);
-    const { fetch, calls } = createContractMockFetch({ specs: [spec], respond });
+    const { fetch, calls } = createEmulatorFetch({ specs: [spec], respond });
 
     const response = await fetch(`${BASE_URL}/items?limit=10`);
 
@@ -84,7 +84,7 @@ describe('createContractMockFetch', () => {
   });
 
   it('sends no body with 204 responses, even when the responder gives one', async () => {
-    const { fetch } = createContractMockFetch({
+    const { fetch } = createEmulatorFetch({
       specs: [spec],
       respond: () => ({ statusCode: 204, headers: json, body: { name: 'a' } }),
     });
@@ -96,7 +96,7 @@ describe('createContractMockFetch', () => {
   });
 
   it('answers unmatched requests with 404 naming the request', async () => {
-    const { fetch } = createContractMockFetch({ specs: [spec], respond: listResponder });
+    const { fetch } = createEmulatorFetch({ specs: [spec], respond: listResponder });
 
     const response = await fetch(`${BASE_URL}/unknown`);
 
@@ -109,7 +109,7 @@ describe('createContractMockFetch', () => {
     ['undeclared', 'offset=1', ['query', 'offset'], 'undeclared'],
     ['repeated explode: false', 'ids=a&ids=b', ['query', 'ids'], 'explode'],
   ])('answers %s query parameters with 422', async (_, search, path, code) => {
-    const { fetch, calls } = createContractMockFetch({ specs: [spec], respond: listResponder });
+    const { fetch, calls } = createEmulatorFetch({ specs: [spec], respond: listResponder });
 
     const response = await fetch(`${BASE_URL}/items?${search}`);
     const { operation, violations } = await response.json();
@@ -121,14 +121,14 @@ describe('createContractMockFetch', () => {
   });
 
   it('accepts comma-separated values for explode: false parameters', async () => {
-    const { fetch } = createContractMockFetch({ specs: [spec], respond: listResponder });
+    const { fetch } = createEmulatorFetch({ specs: [spec], respond: listResponder });
 
     expect((await fetch(`${BASE_URL}/items?ids=a,b`)).status).toBe(200);
   });
 
   it('validates JSON request bodies', async () => {
     const respond: Responder = () => ({ statusCode: 201, headers: json, body: { name: 'a' } });
-    const { fetch } = createContractMockFetch({ specs: [spec], respond });
+    const { fetch } = createEmulatorFetch({ specs: [spec], respond });
 
     const invalid = await fetch(`${BASE_URL}/items`, postJson({ title: 'a' }));
     const valid = await fetch(`${BASE_URL}/items`, postJson({ name: 'a' }));
@@ -142,7 +142,7 @@ describe('createContractMockFetch', () => {
 
   it('records responses that break the spec', async () => {
     const respond: Responder = () => ({ statusCode: 200, headers: json, body: [{ id: 1 }] });
-    const { fetch, calls } = createContractMockFetch({ specs: [spec], respond });
+    const { fetch, calls } = createEmulatorFetch({ specs: [spec], respond });
 
     await fetch(`${BASE_URL}/items`);
 
@@ -157,7 +157,7 @@ describe('createContractMockFetch', () => {
     });
 
     it('records which spec each call matched', async () => {
-      const { fetch, calls } = createContractMockFetch({ specs: { v1: spec, v2 } });
+      const { fetch, calls } = createEmulatorFetch({ specs: { v1: spec, v2 } });
 
       await fetch('https://api.example.com/v2/items');
 
@@ -165,8 +165,8 @@ describe('createContractMockFetch', () => {
     });
 
     it('applies fixtures to the spec they name, or to every spec', async () => {
-      const named = createContractMockFetch({ specs: { v1: spec, v2 }, fixtures: [fixture('v2')] });
-      const unnamed = createContractMockFetch({ specs: { v1: spec, v2 }, fixtures: [fixture()] });
+      const named = createEmulatorFetch({ specs: { v1: spec, v2 }, fixtures: [fixture('v2')] });
+      const unnamed = createEmulatorFetch({ specs: { v1: spec, v2 }, fixtures: [fixture()] });
       const bodyOf = async (mockFetch: typeof fetch, version: string) =>
         (await mockFetch(`https://api.example.com/${version}/items`)).json();
 
@@ -177,7 +177,7 @@ describe('createContractMockFetch', () => {
     });
 
     it('rejects fixtures naming a spec without the operation', () => {
-      const { rejectedResponses } = createContractMockFetch({
+      const { rejectedResponses } = createEmulatorFetch({
         specs: { v1: spec },
         fixtures: [fixture('v2')],
       });

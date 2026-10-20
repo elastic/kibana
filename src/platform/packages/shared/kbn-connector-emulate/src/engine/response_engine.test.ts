@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createContractMockFetch } from '../fetch/create_contract_mock_fetch';
+import { createEmulatorFetch } from '../fetch/create_emulator_fetch';
 import type { Recording, ResponseFixture } from './response_engine';
 
 const user = {
@@ -44,7 +44,7 @@ const getBody = async (options: {
   fixtures?: ResponseFixture[];
   recordings?: Recording[];
 }): Promise<unknown> => {
-  const { fetch } = createContractMockFetch({ specs: [spec], ...options });
+  const { fetch } = createEmulatorFetch({ specs: [spec], ...options });
   return (await fetch('https://api.example.com/users/7')).json();
 };
 
@@ -64,7 +64,7 @@ describe('createResponseEngine', () => {
   });
 
   it('rejects recordings that no longer conform to the spec, serving the next one', async () => {
-    const { fetch, rejectedResponses } = createContractMockFetch({
+    const { fetch, rejectedResponses } = createEmulatorFetch({
       specs: [spec],
       recordings: [recording({ name: 'no id' }, { id: 1 })],
     });
@@ -81,7 +81,7 @@ describe('createResponseEngine', () => {
 
   it('rejects fixtures and recordings for operations the spec lacks', () => {
     const removed = { method: 'delete', path: '/users/{id}' };
-    const { rejectedResponses } = createContractMockFetch({
+    const { rejectedResponses } = createEmulatorFetch({
       specs: [spec],
       fixtures: [{ operation: removed, response: { status: 204 } }],
       recordings: [{ exchanges: [{ operation: removed, response: { status: 204 } }] }],

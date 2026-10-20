@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createContractMockFetch } from '../fetch/create_contract_mock_fetch';
+import { createEmulatorFetch } from '../fetch/create_emulator_fetch';
 import { sampleBoundaryResponse } from './sample_response';
 
 const spec = {
@@ -47,7 +47,7 @@ const spec = {
 };
 
 describe('sampleResponse', () => {
-  const { fetch, calls } = createContractMockFetch({ specs: [spec] });
+  const { fetch, calls } = createEmulatorFetch({ specs: [spec] });
 
   afterEach(() => {
     calls.length = 0;
@@ -62,7 +62,7 @@ describe('sampleResponse', () => {
   });
 
   it('honours Accept and samples required headers', async () => {
-    const { fetch: reportFetch } = createContractMockFetch({
+    const { fetch: reportFetch } = createEmulatorFetch({
       specs: [
         {
           ...spec,
@@ -110,7 +110,7 @@ describe('sampleResponse', () => {
   });
 
   it('answers operations without a success response with a status they declare', async () => {
-    const { fetch: statusFetch, calls: statusCalls } = createContractMockFetch({
+    const { fetch: statusFetch, calls: statusCalls } = createEmulatorFetch({
       specs: [
         {
           ...spec,
@@ -149,7 +149,7 @@ describe('sampleResponse', () => {
   });
 
   it('answers at the schema bounds with sampleBoundaryResponse', async () => {
-    const { fetch: boundaryFetch, calls: boundaryCalls } = createContractMockFetch({
+    const { fetch: boundaryFetch, calls: boundaryCalls } = createEmulatorFetch({
       specs: [
         {
           ...spec,
@@ -195,7 +195,7 @@ describe('sampleResponse', () => {
   });
 
   it('serves the first media type example that matches the schema, following refs', async () => {
-    const { fetch: exampleFetch } = createContractMockFetch({
+    const { fetch: exampleFetch } = createEmulatorFetch({
       specs: [
         {
           ...spec,
@@ -255,7 +255,7 @@ describe('sampleResponse', () => {
         },
       },
     };
-    const memberMock = createContractMockFetch({
+    const memberMock = createEmulatorFetch({
       specs: [
         {
           openapi: '3.0.3',

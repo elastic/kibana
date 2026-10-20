@@ -7,15 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { createContractMockFetch } from './src/fetch/create_contract_mock_fetch';
+export { createEmulatorFetch } from './src/fetch/create_emulator_fetch';
 export { sampleBoundaryResponse, sampleResponse } from './src/engine/sample_response';
 export { sampleJsonSchema } from './src/engine/sample_schema';
 export type { SampleJsonSchemaOptions } from './src/engine/sample_schema';
-export type {
-  ContractCall,
-  ContractMock,
-  ContractMockOptions,
-} from './src/fetch/create_contract_mock_fetch';
+export type { ContractCall, Emulator, EmulatorOptions } from './src/fetch/create_emulator_fetch';
 export type {
   CursorRequest,
   NextUrlRequest,
