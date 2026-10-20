@@ -95,7 +95,7 @@ outputs:
   - name: entry_decision
     type: string
 steps:
-  # Step 1 of 10: read the indicator. No `on-failure: continue`: if the read fails, the
+  # Step 1 of 11: read the indicator. No `on-failure: continue`: if the read fails, the
   # run fails, the indicator stays pending, and the next sweep starts a new review. If the
   # read finds no indicator, the check below does not run and `emit_result` reports
   # `check_error`.
@@ -116,7 +116,7 @@ steps:
             - term:
                 attributes.space_id: "{{ workflow.spaceId }}"
 
-  # Step 2 of 10: prepare the gap text for the model. The text is truncated. Indicator
+  # Step 2 of 11: prepare the gap text for the model. The text is truncated. Indicator
   # content can be 64 kB.
   - name: gap
     type: data.set
@@ -125,7 +125,7 @@ steps:
       description: "{{ steps.read_ki.output.hits.hits[0]._source.title | truncate: 2000, '' }}"
       evidence: "{{ steps.read_ki.output.hits.hits[0]._source.content | truncate: 4000, '' }}"
 
-  # Step 3 of 10: open the investigation, the human-facing record of this review. It is
+  # Step 3 of 11: open the investigation, the human-facing record of this review. It is
   # deliberately separate from coverage_check's own conversation: the agent transcript
   # stays opaque, the investigation is where analysts collaborate and where every
   # proposal attaches its decision, including the drafted rule on the no_coverage path.
@@ -240,7 +240,7 @@ steps:
                   ki_id: "{{ inputs.ki_id }}"
                   ki_processed: false
 
-  # Step 4 of 10: ask the coverage skill for a verdict. A new rule is the last option. A
+  # Step 4 of 11: ask the coverage skill for a verdict. A new rule is the last option. A
   # reported gap is often covered by a rule that is disabled or not installed.
   - name: coverage_check
     type: ai.agent
@@ -253,9 +253,20 @@ steps:
     timeout: "10m"
     # Runs only when the read found the indicator.
     if: "${{ steps.read_ki.output.hits.total.value > 0 }}"
-    # A failed check must not kill the run: with no verdict, no route below matches, no
-    # investigation opens and `emit_result` reports it. Never fall through into an action.
+    # One retry, and only for a transport stall: `Request timed out` (180s) is transient,
+    # so a second attempt usually answers. The 300s inference stream cap is deliberately
+    # NOT retried — two capped attempts plus the delay would consume the whole 10m step
+    # timeout, and the timeout zone would then fail the step with a message about the
+    # timeout instead of about the cap.
+    #
+    # A failed check must not be reported as a completed run: with no verdict, no route
+    # below matches and no investigation opens, and `fail_coverage_check` ends the run
+    # failed with the check's own error. Never fall through into an action.
     on-failure:
+      retry:
+        max-attempts: 1
+        delay: 5s
+        condition: "${{ error.message contains 'timed out' }}"
       continue: true
     create-conversation: true
     with:
@@ -306,7 +317,18 @@ steps:
             type: string
         required: [verdict, rule_id, rule_name, prebuilt_version, rationale]
 
-  # Step 5 of 10: resolve the matched rule to its saved object. Only an installed rule
+  # Step 5 of 11: the check errored and retried, so the review has no verdict. End the run
+  # failed and carry the check's own error — an inference `Request timed out` or the 300s
+  # stream cap — instead of completing with an empty message and no verdict. Nothing
+  # downstream can run without a verdict, so there is nothing to continue into.
+  - name: fail_coverage_check
+    type: workflow.fail
+    if: "${{ steps.coverage_check.error != null }}"
+    with:
+      message: >-
+        coverage check failed: {{ steps.coverage_check.error.message }}
+
+  # Step 6 of 11: resolve the matched rule to its saved object. Only an installed rule
   # has one. Step `if` cannot group with parentheses, so the verdict test lives here and
   # is read below as a flag.
   - name: rule_lookup
@@ -415,7 +437,7 @@ steps:
         **On approval**
         The agent applies nothing. If you approve, you acknowledge the follow-up. If you approve or dismiss, the gap is removed from future coverage checks.
 
-  # Step 6 of 10: propose the fix, one case per verdict. A missing or unknown verdict
+  # Step 7 of 11: propose the fix, one case per verdict. A missing or unknown verdict
   # matches no case and goes to the default, never to rule creation. Inside a case the
   # investigation exists (its create step has no on-failure), so no step re-checks it.
   #
@@ -641,7 +663,7 @@ steps:
             impact: low
             confidence: low
 
-  # Step 7 of 10: read the gate's outcome and re-read the rule. The gate reports its
+  # Step 8 of 11: read the gate's outcome and re-read the rule. The gate reports its
   # outcome on two independent axes: `decision` is what the analyst concluded
   # (`approved` / `dismissed`, absent until someone decides), and `status` is how far
   # it got (`succeeded` once the action ran, `no_action` when there was nothing to
@@ -732,7 +754,7 @@ steps:
     on-failure:
       continue: true
 
-  # Step 8 of 10: decide whether each approved action was applied, and whether anyone
+  # Step 9 of 11: decide whether each approved action was applied, and whether anyone
   # decided at all. The gate's `succeeded` only says the action workflow completed;
   # each flag below also reads the re-read rule, so a re-read that failed or found the
   # rule unchanged counts as not applied. `close_investigation`, `mark_processed` and
@@ -764,7 +786,7 @@ steps:
           or steps.record_decision.output.approved == true
           or steps.record_decision.output.dismissed == true }}
 
-  # Step 9 of 10: close the investigation. Metadata writes fire the
+  # Step 10 of 11: close the investigation. Metadata writes fire the
   # ai.conversation.metadataUpdated trigger, which is the emit point for downstream
   # feedback signals. Two outcomes match neither case, and the investigation stays
   # open on purpose: an expired gate, because nobody decided, and an approval whose
@@ -801,7 +823,7 @@ steps:
             on-failure:
               continue: true
 
-  # Step 10 of 10: mark the indicator processed. Except for a declined entry gate,
+  # Step 11 of 11: mark the indicator processed. Except for a declined entry gate,
   # this is the only write to the indicator. It runs only after an applied decision.
   # A check without a verdict asked nobody. An expired proposal decided nothing. A failed
   # rule-creation run decided nothing, and one that asked nobody (an incomplete draft,
