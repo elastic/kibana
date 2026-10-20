@@ -9,29 +9,37 @@
 
 import Path from 'path';
 import Fs from 'fs';
+import { extract } from '@kbn/dev-utils';
 import type { GlobalTask } from '../../lib';
-import { untar, copy } from '../../lib';
+import { copy } from '../../lib';
 import { getNodeDownloadInfo } from './node_download_info';
 
 export const ExtractNodeBuilds: GlobalTask = {
   global: true,
   description: 'Extracting node.js builds for all platforms',
   async run(config) {
+    const nodeBuilds = new Map(
+      config
+        .getNodePlatforms()
+        .flatMap((platform) => getNodeDownloadInfo(config, platform))
+        .map((nodeInfo) => [nodeInfo.extractDir, nodeInfo])
+    );
+
     await Promise.all(
-      config.getNodePlatforms().map(async (platform) => {
-        await Promise.all(
-          getNodeDownloadInfo(config, platform).map((nodeInfo) => {
-            if (Fs.existsSync(nodeInfo.extractDir)) return;
-            if (platform.isWindows()) {
-              // windows executable is not extractable, it's just an .exe file
-              return copy(nodeInfo.downloadPath, Path.resolve(nodeInfo.extractDir, 'node.exe'), {
-                clone: true,
-              });
-            } else {
-              return untar(nodeInfo.downloadPath, nodeInfo.extractDir, { strip: 1 });
-            }
-          })
-        );
+      Array.from(nodeBuilds.values(), (nodeInfo) => {
+        if (Fs.existsSync(nodeInfo.extractDir)) return;
+        if (nodeInfo.downloadName.endsWith('node.exe')) {
+          // windows executable is not extractable, it's just an .exe file
+          return copy(nodeInfo.downloadPath, Path.resolve(nodeInfo.extractDir, 'node.exe'), {
+            clone: true,
+          });
+        }
+
+        return extract({
+          archivePath: nodeInfo.downloadPath,
+          targetDir: nodeInfo.extractDir,
+          stripComponents: 1,
+        });
       })
     );
   },
