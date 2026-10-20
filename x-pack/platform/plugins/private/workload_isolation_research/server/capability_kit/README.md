@@ -6,6 +6,13 @@
 > share an isolate by default (`coResidency: 'same-principal'`). `coResidency: 'any'` is an
 > explicit opt-in that puts every co-resident run in one trust domain. That is no weaker than
 > today's single-process Kibana, but it must not be described as per-run isolation.
+> **Known limit (sequential slot reuse):** `'same-principal'` prevents *concurrent* sharing
+> only. A drained slot is reused for the next queued run, which may be a different identity.
+> Code from an earlier run that left a listener on the isolate's port/IPC (or patched shared
+> globals) can still observe that later run's packets, including its grants and credential
+> capture. An isolate stays one trust domain across its lifetime. Nothing in the kit
+> retires a slot on identity change. Restart-on-identity-switch would close this at one cold
+> start per switch, and is not implemented.
 
 PRIVATE research code; no public Core API, plugin lifecycle hook, or automatic enablement.
 Base harness fd3138c. Only main owns TM claims/leases/results.
