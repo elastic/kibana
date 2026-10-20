@@ -11,7 +11,7 @@ import type { IRouter, RequestHandlerContext } from '@kbn/core/server';
 import { z } from '@kbn/zod';
 
 import { getDashboardStateSchema } from '../api/dashboard_state_schemas';
-import { CHANGE_HISTORY_ROUTE_SECURITY, getChangeHistoryContext } from './route_utils';
+import { CHANGE_HISTORY_ROUTE_SECURITY, getChangeHistoryContext } from './util';
 
 const detailsResponseSchema = z.object({
   id: z.string(),

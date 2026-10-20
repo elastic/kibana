@@ -15,11 +15,11 @@ import type { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { getDashboardCRUResponseBody } from '../get_cru_response_body';
 import { transformDashboardIn } from '../transforms';
 import type { DashboardCreateResponseBody } from './types';
-import { INITIAL_HISTORY_SEQUENCE } from '../../change_history/history_sequence';
 import {
   addToHistory,
   getHistorySnapshot,
   getNextHistorySequence,
+  INITIAL_HISTORY_SEQUENCE,
 } from '../../change_history/util';
 
 export interface CreateOptions {

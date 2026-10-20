@@ -10,10 +10,10 @@
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 
 import { registerChangeDetailsRoute } from './register_details_route';
-import { getChangeHistoryContext } from './route_utils';
+import { getChangeHistoryContext } from './util';
 
-jest.mock('./route_utils', () => ({
-  ...jest.requireActual('./route_utils'),
+jest.mock('./util', () => ({
+  ...jest.requireActual('./util'),
   getChangeHistoryContext: jest.fn(),
 }));
 

@@ -7,19 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { RequestHandlerContext } from '@kbn/core/server';
+import type { KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 
 import { getChangeHistoryClient } from './change_history_service';
 import { transformDashboardOut } from '../api/transforms';
+import type { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
 import {
   addToHistory,
   getHistorySequences,
+  getChangeHistoryContext,
   getHistorySnapshot,
   getNextHistorySequence,
+  hasContentChanged,
 } from './util';
 
 jest.mock('./change_history_service');
+const mockUseRbacForRequest = jest.fn();
+jest.mock('../kibana_services', () => ({
+  securityService: {
+    authz: { mode: { useRbacForRequest: (...args: unknown[]) => mockUseRbacForRequest(...args) } },
+  },
+  spacesService: { getSpaceId: (req: { id: string }) => `space-for-${req.id}` },
+}));
 jest.mock('../api/transforms');
 
 const mockedGetClient = getChangeHistoryClient as jest.MockedFunction<
@@ -246,5 +258,164 @@ describe('getHistorySnapshot', () => {
       throw new Error('bad panel');
     });
     expect(getHistorySnapshot(args)).toBeUndefined();
+  });
+});
+
+const getObject = (attributes: Partial<DashboardSavedObjectAttributes>, references = []) => ({
+  attributes: { title: 'Dashboard', ...attributes } as DashboardSavedObjectAttributes,
+  references,
+});
+
+describe('hasContentChanged', () => {
+  it('is false when the content is unchanged', () => {
+    expect(hasContentChanged(getObject({}), getObject({}))).toBe(false);
+  });
+
+  it('ignores the history sequence', () => {
+    expect(
+      hasContentChanged(getObject({ historySequence: 1 }), getObject({ historySequence: 2 }))
+    ).toBe(false);
+    expect(hasContentChanged(getObject({ historySequence: 1 }), getObject({}))).toBe(false);
+  });
+
+  it('is true when attributes change', () => {
+    expect(hasContentChanged(getObject({}), getObject({ title: 'Changed' }))).toBe(true);
+  });
+
+  it('is true when references change', () => {
+    const next = { ...getObject({}), references: [{ id: '1', name: 'panel_0', type: 'lens' }] };
+    expect(hasContentChanged(getObject({}), next)).toBe(true);
+  });
+});
+
+const hasPrivileges = jest.fn();
+const getSavedObject = jest.fn();
+
+const getRouteContext = (hasAllRequested: boolean) => {
+  hasPrivileges.mockResolvedValue({ has_all_requested: hasAllRequested });
+  return {
+    core: Promise.resolve({
+      elasticsearch: {
+        client: {
+          asCurrentUser: {
+            security: { hasPrivileges },
+          },
+        },
+      },
+      savedObjects: { client: { get: getSavedObject } },
+    }),
+  } as unknown as RequestHandlerContext;
+};
+
+describe('getChangeHistoryContext', () => {
+  const req = { id: 'req-1' } as unknown as KibanaRequest<unknown, unknown, unknown, 'get'>;
+
+  beforeEach(() => {
+    jest.resetAllMocks();
+    mockUseRbacForRequest.mockReturnValue(true);
+    getSavedObject.mockResolvedValue({ attributes: {} });
+  });
+
+  it('skips the privileges check when security is disabled', async () => {
+    mockUseRbacForRequest.mockReturnValue(false);
+    getSavedObject.mockResolvedValue({ attributes: {} });
+    const client = { getHistory: jest.fn().mockResolvedValue({ items: [] }) };
+    mockedGetClient.mockReturnValue(client as never);
+    const res = httpServerMock.createResponseFactory();
+    const result = await getChangeHistoryContext(getRouteContext(false), req, res, 'dash-1');
+
+    expect(hasPrivileges).not.toHaveBeenCalled();
+    expect(result).toEqual({ client, spaceId: 'space-for-req-1', currentSequence: undefined });
+  });
+
+  it('returns a forbidden response without dashboard edit privileges', async () => {
+    const res = httpServerMock.createResponseFactory();
+    const forbidden = { status: 403 };
+    res.forbidden.mockReturnValue(forbidden as never);
+    const result = await getChangeHistoryContext(getRouteContext(false), req, res, 'dash-1');
+
+    expect(result).toEqual({ error: forbidden });
+    expect(mockedGetClient).not.toHaveBeenCalled();
+  });
+
+  it('returns forbidden when the user cannot access the dashboard saved object', async () => {
+    getSavedObject.mockRejectedValue(SavedObjectsErrorHelpers.decorateForbiddenError(new Error()));
+    const res = httpServerMock.createResponseFactory();
+    const forbidden = { status: 403 };
+    res.forbidden.mockReturnValue(forbidden as never);
+    const result = await getChangeHistoryContext(getRouteContext(true), req, res, 'dash-1');
+
+    expect(getSavedObject).toHaveBeenCalledWith('dashboard', 'dash-1');
+    expect(result).toEqual({ error: forbidden });
+    expect(mockedGetClient).not.toHaveBeenCalled();
+  });
+
+  it('returns not found when the dashboard saved object does not exist', async () => {
+    getSavedObject.mockRejectedValue(
+      SavedObjectsErrorHelpers.createGenericNotFoundError('dashboard', 'dash-1')
+    );
+    const res = httpServerMock.createResponseFactory();
+    const notFound = { status: 404 };
+    res.notFound.mockReturnValue(notFound as never);
+    const result = await getChangeHistoryContext(getRouteContext(true), req, res, 'dash-1');
+
+    expect(result).toEqual({ error: notFound });
+    expect(mockedGetClient).not.toHaveBeenCalled();
+  });
+
+  it('checks dashboard edit privileges on the space of the request', async () => {
+    mockedGetClient.mockReturnValue({} as never);
+    await getChangeHistoryContext(
+      getRouteContext(true),
+      req,
+      httpServerMock.createResponseFactory(),
+      'dash-1'
+    );
+
+    expect(hasPrivileges).toHaveBeenCalledWith({
+      application: [
+        {
+          application: 'kibana-.kibana',
+          resources: ['space:space-for-req-1'],
+          privileges: ['feature_dashboard_v2.all'],
+        },
+      ],
+    });
+  });
+
+  it('returns a 503 when the change history client is not ready', async () => {
+    mockedGetClient.mockImplementation(() => {
+      throw new Error('not ready');
+    });
+    const res = httpServerMock.createResponseFactory();
+    const unavailable = { status: 503 };
+    res.customError.mockReturnValue(unavailable as never);
+    const result = await getChangeHistoryContext(getRouteContext(true), req, res, 'dash-1');
+
+    expect(res.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 503 }));
+    expect(result).toEqual({ error: unavailable });
+  });
+
+  it('uses the saved object history sequence even when history is behind', async () => {
+    getSavedObject.mockResolvedValue({ attributes: { historySequence: 5 } });
+    const client = {
+      getHistory: jest.fn().mockResolvedValue({ items: [{ object: { sequence: 3 } }] }),
+    };
+    mockedGetClient.mockReturnValue(client as never);
+    const res = httpServerMock.createResponseFactory();
+    const result = await getChangeHistoryContext(getRouteContext(true), req, res, 'dash-1');
+
+    expect(result).toEqual({ client, spaceId: 'space-for-req-1', currentSequence: 5 });
+  });
+
+  it('falls back to the latest history sequence when the saved object has none', async () => {
+    const client = {
+      getHistory: jest.fn().mockResolvedValue({ items: [{ object: { sequence: 3 } }] }),
+    };
+    mockedGetClient.mockReturnValue(client as never);
+    const res = httpServerMock.createResponseFactory();
+    const result = await getChangeHistoryContext(getRouteContext(true), req, res, 'dash-1');
+
+    expect(result).toEqual({ client, spaceId: 'space-for-req-1', currentSequence: 3 });
   });
 });

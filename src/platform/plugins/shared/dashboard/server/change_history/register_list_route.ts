@@ -12,7 +12,7 @@ import { z } from '@kbn/zod';
 
 import type { StartDeps } from '../plugin';
 import type { DashboardPluginStart } from '../types';
-import { CHANGE_HISTORY_ROUTE_SECURITY, getChangeHistoryContext } from './route_utils';
+import { CHANGE_HISTORY_ROUTE_SECURITY, getChangeHistoryContext } from './util';
 
 const listResponseSchema = z.object({
   items: z.array(

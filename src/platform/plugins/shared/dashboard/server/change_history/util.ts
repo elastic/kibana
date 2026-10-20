@@ -7,19 +7,41 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import equal from 'fast-deep-equal';
 import * as jsondiffpatch from 'jsondiffpatch';
 import * as jsonpatchFormatter from 'jsondiffpatch/formatters/jsonpatch';
+import { omit } from 'lodash';
 
 import type { ObjectChange } from '@kbn/change-history';
-import type { RequestHandlerContext } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type {
+  KibanaRequest,
+  KibanaResponseFactory,
+  RequestHandlerContext,
+  RouteMethod,
+} from '@kbn/core/server';
 
-import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
+import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import type { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
 import type { getDashboardStateSchema } from '../api/dashboard_state_schemas';
 import { transformDashboardOut } from '../api/transforms';
+import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../common/constants';
+import { securityService, spacesService } from '../kibana_services';
 import { getChangeHistoryClient } from './change_history_service';
-import { INITIAL_HISTORY_SEQUENCE } from './history_sequence';
+
+export const INITIAL_HISTORY_SEQUENCE = 1;
+
+/**
+ * Whether the stored content (attributes or references, ignoring the history sequence) differs between two versions of a dashboard.
+ */
+export const hasContentChanged = (
+  existing: Pick<SavedObject<DashboardSavedObjectAttributes>, 'attributes' | 'references'>,
+  next: Pick<SavedObject<DashboardSavedObjectAttributes>, 'attributes' | 'references'>
+): boolean =>
+  // the history sequence is bookkeeping, not content
+  !equal(omit(existing.attributes, 'historySequence'), omit(next.attributes, 'historySequence')) ||
+  !equal(existing.references, next.references);
 
 /**
  * Builds the snapshot to record in history from the stored attributes, always in the dashboard-app
@@ -160,4 +182,70 @@ export const addToHistory = async ({
   } catch {
     // history is best-effort; a failed write must not fail the save
   }
+};
+
+export const CHANGE_HISTORY_ROUTE_SECURITY = {
+  authz: {
+    enabled: false,
+    reason: 'This route delegates authorization to the scoped ES client',
+  },
+} as const;
+
+/**
+ * Checks the dashboard "all" privilege and access to the target dashboard saved object, then resolves the change history client and space for a
+ * request, along with the saved dashboard's current history sequence (its stored `historySequence`). Returns the error response to send when the request cannot be served.
+ */
+export const getChangeHistoryContext = async <P, Q, B, M extends RouteMethod>(
+  ctx: RequestHandlerContext,
+  req: KibanaRequest<P, Q, B, M>,
+  res: KibanaResponseFactory,
+  dashboardId: string
+) => {
+  const core = await ctx.core;
+  const spaceId = spacesService?.getSpaceId(req) ?? 'default';
+  // the privileges API is unavailable when Elasticsearch security is disabled; in that case, requests are not subject to RBAC
+  const isRbacEnabled = securityService?.authz.mode.useRbacForRequest(req) ?? false;
+  if (isRbacEnabled) {
+    const { has_all_requested: hasAllPrivileges } =
+      await core.elasticsearch.client.asCurrentUser.security.hasPrivileges({
+        application: [
+          {
+            application: 'kibana-.kibana',
+            resources: [`space:${spaceId}`],
+            privileges: ['feature_dashboard_v2.all'],
+          },
+        ],
+      });
+    if (!hasAllPrivileges) return { error: res.forbidden() };
+  }
+
+  // history is read with an internally privileged client, so access to the dashboard must be verified
+  let storedSequence: number | undefined;
+  try {
+    const { attributes } = await core.savedObjects.client.get<DashboardSavedObjectAttributes>(
+      DASHBOARD_SAVED_OBJECT_TYPE,
+      dashboardId
+    );
+    storedSequence = attributes.historySequence;
+  } catch (e) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(e)) return { error: res.notFound() };
+    if (SavedObjectsErrorHelpers.isForbiddenError(e)) return { error: res.forbidden() };
+    throw e;
+  }
+
+  let client;
+  try {
+    client = getChangeHistoryClient();
+  } catch {
+    return {
+      error: res.customError({ statusCode: 503, body: 'Change history service is not ready' }),
+    };
+  }
+  // The saved object is the source of truth for the current version: history is eventually consistent and failed history writes are
+  // swallowed, so the latest searchable event can lag behind it. Only dashboards saved before the sequence was stored fall back to history.
+  const currentSequence =
+    typeof storedSequence === 'number'
+      ? storedSequence
+      : (await getHistorySequences({ spaceId, dashboardId })).latest;
+  return { client, spaceId, currentSequence };
 };

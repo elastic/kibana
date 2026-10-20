@@ -23,11 +23,11 @@ import { getDashboardCRUResponseBody } from '../get_cru_response_body';
 import { transformDashboardIn } from '../transforms';
 import type { Operation } from '../types';
 import type { DashboardUpdateResponseBody } from './types';
-import { hasContentChanged } from '../../change_history/history_sequence';
 import {
   addToHistory,
   getHistorySnapshot,
   getNextHistorySequence,
+  hasContentChanged,
 } from '../../change_history/util';
 
 export interface UpdateOptions extends Omit<CreateOptions, 'id'> {
