@@ -71,6 +71,10 @@ export interface EventActor {
   origin?: ConversationRoundOrigin;
 }
 
+/** Display name of an event actor, or `undefined` when it has neither a full name nor a username. */
+export const getEventActorDisplayName = (actor: EventActor): string | undefined =>
+  actor.full_name || actor.username;
+
 /**
  * Whether a chat request executes the agent. `never` appends the user message to the conversation
  * and returns, leaving the execution options unused.

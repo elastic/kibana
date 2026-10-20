@@ -6,10 +6,11 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import { entityStoreIdType, type ImpactPill } from '@kbn/agentic-investigations-common';
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
-import type { ImpactPill } from '@kbn/agentic-investigations-common';
 import type { ProposalImpactPillsQuery } from '../../../common/impact/impact_pills';
 import type { EscalationsService } from '../../escalations/services/escalations_service';
+import { applyEntityStoreNames } from './entity_store_names';
 import { buildImpactPills } from './impact_pills';
 import type { ImpactPillEntity } from './impact_pills';
 import type { ImpactReadClient } from './impact_client';
@@ -22,6 +23,14 @@ export interface ImpactPillsServiceDeps {
   getSpaceId: (request: KibanaRequest) => string;
   getProposals: () => ProposalsPluginStart | undefined;
   getEscalationsService: () => EscalationsService | undefined;
+  /**
+   * Entity Store `entity.name` by id. Absent when Entity Store is not installed. Must not throw:
+   * a failed read is an empty map, and pills keep the name stored on the impact.
+   */
+  getEntityStoreNames?: (
+    request: KibanaRequest,
+    entityIds: readonly string[]
+  ) => Promise<ReadonlyMap<string, string>>;
 }
 
 /** Entity pills over a whole queue, so they do not move with paging or open sections. */
@@ -72,7 +81,7 @@ export class ImpactPillsService {
     const entities = await this.deps
       .getImpactClient(request)
       .getEntitiesByConversationId([...weights.keys()]);
-    return buildImpactPills(weights, entities);
+    return this.withEntityStoreNames(request, buildImpactPills(weights, entities));
   }
 
   /** Pills over every open and closed escalation, one row each. */
@@ -86,13 +95,36 @@ export class ImpactPillsService {
     ]);
     const weights = new Map<string, number>();
     const entities = new Map<string, ImpactPillEntity[]>();
-    for (const { id, entity_ids: ids, entity_types: types } of [...open, ...closed]) {
+    for (const { id, entity_ids: ids, entity_types: types, entity_names: names } of [
+      ...open,
+      ...closed,
+    ]) {
       weights.set(id, 1);
       entities.set(
         id,
-        (ids ?? []).map((entityId) => ({ id: entityId, type: types?.[entityId] }))
+        (ids ?? []).map((entityId) => ({
+          id: entityId,
+          type: types?.[entityId],
+          name: names?.[entityId],
+        }))
       );
     }
-    return buildImpactPills(weights, entities);
+    return this.withEntityStoreNames(request, buildImpactPills(weights, entities));
+  }
+
+  /** Replaces a stored name with Entity Store `entity.name` for ids the store knows. */
+  private async withEntityStoreNames(
+    request: KibanaRequest,
+    pills: ImpactPill[]
+  ): Promise<ImpactPill[]> {
+    const lookup = this.deps.getEntityStoreNames;
+    if (!lookup || pills.length === 0) {
+      return pills;
+    }
+    const ids = pills.map((pill) => pill.entityId).filter((id) => entityStoreIdType(id));
+    if (ids.length === 0) {
+      return pills;
+    }
+    return applyEntityStoreNames(pills, await lookup(request, ids));
   }
 }

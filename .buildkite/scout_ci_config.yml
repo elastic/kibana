@@ -26,6 +26,7 @@ plugins:
     - dashboard_markdown
     - data
     - data_federation
+    - data_usage
     - data_view_editor
     - data_view_field_editor
     - data_view_management
