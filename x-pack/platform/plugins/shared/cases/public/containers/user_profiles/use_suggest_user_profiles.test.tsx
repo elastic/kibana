@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
+import React from 'react';
 import { GENERAL_CASES_OWNER } from '../../../common/constants';
 import { waitFor, renderHook } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useToasts } from '../../common/lib/kibana';
 
 import * as api from './api';
 import { useSuggestUserProfiles } from './use_suggest_user_profiles';
-import { TestProviders } from '../../common/mock';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('./api');
@@ -25,22 +27,32 @@ describe('useSuggestUserProfiles', () => {
   const addSuccess = jest.fn();
   (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError: jest.fn() });
 
+  const createWrapper = () => {
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+      logger: { log: jest.fn(), warn: jest.fn(), error: jest.fn() },
+    });
+
+    return function Wrapper({ children }: PropsWithChildren<{}>) {
+      return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+    };
+  };
+
   it('calls suggestUserProfiles with correct arguments', async () => {
     const spyOnSuggestUserProfiles = jest.spyOn(api, 'suggestUserProfiles');
 
-    const { result } = renderHook(() => useSuggestUserProfiles(props), {
-      wrapper: TestProviders,
+    renderHook(() => useSuggestUserProfiles(props), {
+      wrapper: createWrapper(),
     });
 
-    await waitFor(() => {
-      expect(result.current.isSuccess).toBeDefined();
+    await waitFor(() =>
       expect(spyOnSuggestUserProfiles).toHaveBeenCalledWith({
         ...props,
         size: 10,
         http: expect.anything(),
         signal: expect.anything(),
-      });
-    });
+      })
+    );
   });
 
   it('shows a toast error message when an error occurs in the response', async () => {
@@ -54,12 +66,11 @@ describe('useSuggestUserProfiles', () => {
     (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
 
     const { result } = renderHook(() => useSuggestUserProfiles(props), {
-      wrapper: TestProviders,
+      wrapper: createWrapper(),
     });
 
-    await waitFor(() => {
-      expect(result.current.isError).toBeDefined();
-      expect(addError).toHaveBeenCalled();
-    });
+    await waitFor(() => expect(result.current.isError).toBe(true));
+
+    expect(addError).toHaveBeenCalled();
   });
 });
