@@ -74,12 +74,16 @@ export const getIncrementalIdAssignedTriggerTaskId = (caseId: string) =>
  * incremental ID service has assigned IDs, `runSoon` is called on the tasks of those cases. The
  * task emits the trigger once the ID is on the case. If `runSoon` is missed, the task still runs on
  * its own, a bit later than the ID service does.
+ *
+ * Granting the credentials and storing the task has a cost, so tasks are only scheduled when
+ * workflows are available (license and config), because otherwise the trigger is dropped anyway.
  */
 export class IncrementalIdAssignedTriggerTask {
   private readonly logger: Logger;
   private internalRepo?: ISavedObjectsRepository;
   private taskManager?: TaskManagerStartContract;
   private forward?: ReturnType<typeof createWorkflowTriggerForwarder>;
+  private workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
 
   constructor(
     taskManagerSetup: TaskManagerSetupContract,
@@ -112,6 +116,7 @@ export class IncrementalIdAssignedTriggerTask {
   }) {
     this.taskManager = taskManager;
     this.internalRepo = core.savedObjects.createInternalRepository([CASE_SAVED_OBJECT]);
+    this.workflowsExtensions = workflowsExtensions;
     this.forward = workflowsExtensions
       ? createWorkflowTriggerForwarder(workflowsExtensions, this.logger)
       : undefined;
@@ -132,17 +137,21 @@ export class IncrementalIdAssignedTriggerTask {
       return;
     }
 
-    const now = Date.now();
-    const eventChainContext = getEventChainContext(request);
-    const params: TaskParams = {
-      caseId,
-      owner,
-      spaceId: request.spaceId,
-      expiresAt: now + INCREMENTAL_ID_ASSIGNED_TRIGGER_TTL_MS,
-      ...(eventChainContext && { eventChainContext }),
-    };
-
     try {
+      if (!(await this.areWorkflowsAvailable(request))) {
+        return;
+      }
+
+      const now = Date.now();
+      const eventChainContext = getEventChainContext(request);
+      const params: TaskParams = {
+        caseId,
+        owner,
+        spaceId: request.spaceId,
+        expiresAt: now + INCREMENTAL_ID_ASSIGNED_TRIGGER_TTL_MS,
+        ...(eventChainContext && { eventChainContext }),
+      };
+
       await this.taskManager.schedule(
         {
           id: getIncrementalIdAssignedTriggerTaskId(caseId),
@@ -163,6 +172,15 @@ export class IncrementalIdAssignedTriggerTask {
         `Failed to schedule the incremental ID trigger task for case ${caseId}: ${error}`
       );
     }
+  }
+
+  /** Without workflows (license or config) `emitEvent` drops the event, so there's nothing to schedule */
+  private async areWorkflowsAvailable(request: KibanaRequest): Promise<boolean> {
+    if (!this.workflowsExtensions) {
+      return false;
+    }
+    const { isWorkflowsAvailable } = await this.workflowsExtensions.getClient(request);
+    return isWorkflowsAvailable;
   }
 
   /**

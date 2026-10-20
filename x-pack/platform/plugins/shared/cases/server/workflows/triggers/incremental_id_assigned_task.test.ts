@@ -139,6 +139,24 @@ describe('IncrementalIdAssignedTriggerTask', () => {
       expect(scheduledParams).not.toHaveProperty('eventChainContext');
     });
 
+    it('does not schedule when workflows are not available', async () => {
+      workflowsExtensions.getClient.mockResolvedValue(
+        createWorkflowsClientMock({ isWorkflowsAvailable: false })
+      );
+
+      await task.schedule(request, { caseId: 'case-1', owner: 'cases' });
+
+      expect(taskManager.schedule).not.toHaveBeenCalled();
+    });
+
+    it('does not schedule without the workflows plugin', async () => {
+      task.start({ core, taskManager });
+
+      await task.schedule(request, { caseId: 'case-1', owner: 'cases' });
+
+      expect(taskManager.schedule).not.toHaveBeenCalled();
+    });
+
     it('does not throw when scheduling fails', async () => {
       taskManager.schedule.mockRejectedValue(new Error('no api key'));
 
