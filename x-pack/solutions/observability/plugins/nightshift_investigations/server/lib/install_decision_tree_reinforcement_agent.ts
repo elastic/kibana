@@ -34,11 +34,12 @@ export const installDecisionTreeReinforcementAgent = async ({
       description: DECISION_TREE_REINFORCEMENT_AGENT_DESCRIPTION,
       labels: ['observability', 'significant-events', 'investigation', 'decision-tree'],
       avatar_symbol: 'DT',
-      // Public, so agent optimize can run it via `ai.agent` as whoever runs the hook, including
-      // the Nightshift agent service account. Agent Builder hides it from UI listings, because it
-      // is a system-created non-chat agent, and its submit tool writes decision trees as the
-      // caller, so running it directly grants nothing the caller's index privileges don't.
-      access_control: { access_mode: AgentAccessControlMode.Public },
+      // Shared: everyone can run it, so agent optimize can run it via `ai.agent` as whoever runs
+      // the hook, including the Nightshift agent service account. Only admins can change it.
+      // Agent Builder hides it from UI listings, because it is a system-created non-chat agent,
+      // and its submit tool writes decision trees as the caller, so running it directly grants
+      // nothing beyond the caller's own index privileges.
+      access_control: { access_mode: AgentAccessControlMode.Shared },
       configuration: {
         tools: [],
         skill_ids: [],
