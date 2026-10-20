@@ -26,12 +26,7 @@ stack: deprecated =9.5, removed 9.6+
 serverless: unavailable
 ```
 
-You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.  For example:
-
-:::{image} ../images/gen-ai-connector.png
-:alt: OpenAI connector
-:screenshot:
-:::
+You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 
 ### Connector configuration [openai-connector-configuration]
 
@@ -74,12 +69,7 @@ When using the `Other` provider (for example, to [connect a local LLM](#connect-
 
 ## Test connectors [gen-ai-action-configuration]
 
-You can test connectors as you're creating or editing the connector in {{kib}}. For example:
-
-:::{image} ../images/gen-ai-params-test.png
-:alt: OpenAI params test
-:screenshot:
-:::
+You can test connectors as you're creating or editing the connector in {{kib}}.
 
 The OpenAI actions have the following configuration properties.
 

@@ -22,12 +22,7 @@ stack: deprecated =9.5, removed 9.6+
 serverless: unavailable
 ```
 
-You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.  For example:
-
-:::{image} ../images/gemini-connector.png
-:alt: {{gemini}} connector
-:screenshot:
-:::
+You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 
 ### Connector configuration [gemini-connector-configuration]
 
@@ -57,12 +52,7 @@ Credentials JSON
 
 ## Test connectors [gemini-action-configuration]
 
-You can test connectors as you're creating or editing the connector in {{kib}}. For example:
-
-:::{image} ../images/gemini-params.png
-:alt: {{gemini}} params test
-:screenshot:
-:::
+You can test connectors as you're creating or editing the connector in {{kib}}.
 
 The {{gemini}} actions have the following configuration properties.
 

@@ -21,12 +21,7 @@ stack: deprecated =9.5, removed 9.6+
 serverless: unavailable
 ```
 
-You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.  For example:
-
-:::{image} ../images/bedrock-connector.png
-:alt: {{bedrock}} connector
-:screenshot:
-:::
+You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 
 ### Connector configuration [bedrock-connector-configuration]
 
@@ -52,12 +47,7 @@ Secret
 
 ## Test connectors [bedrock-action-configuration]
 
-You can test connectors as you’re creating or editing the connector in {{kib}}. For example:
-
-:::{image} ../images/bedrock-params.png
-:alt: {{bedrock}} params test
-:screenshot:
-:::
+You can test connectors as you’re creating or editing the connector in {{kib}}.
 
 The {{bedrock}} actions have the following configuration properties.
 
