@@ -11,7 +11,8 @@ import { join } from 'path';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { MemoryRouter, Route, Router } from '@kbn/shared-ux-router';
-import { createMemoryHistory } from 'history';
+import { createMemoryHistory, type MemoryHistory } from 'history';
+import type { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import {
   RULE_COVERAGE_DEFAULT_EXTRAS,
   RULE_TUNING_DEFAULT_EXTRAS,
@@ -32,6 +33,7 @@ import {
 } from '@kbn/alertzero-common';
 import { WatchDetailPage } from './watch_detail';
 import * as settingsI18n from './settings_translations';
+import { workerName } from './workers/translations';
 import { useCanWriteAlertZero } from '../../hooks/use_can_write_alertzero';
 import { useWatch } from '../../hooks/use_watches_api';
 import { useUpdateWorker, useWorkers } from '../../hooks/use_workers_api';
@@ -42,17 +44,60 @@ jest.mock('../../hooks/use_can_write_alertzero', () => ({
 }));
 jest.mock('../../hooks/use_watches_api');
 jest.mock('../../hooks/use_workers_api');
+jest.mock('../../hooks/use_hunt_threat_intel_supply', () => ({
+  useHuntThreatIntelSupplyStatus: jest.fn(() => ({
+    data: {
+      huntEnabled: false,
+      drift: false,
+      hardGate: { ok: true, reasonCodes: [] },
+      workflows: [],
+    },
+    isLoading: false,
+    isError: false,
+  })),
+  useRestoreHuntThreatIntelSupply: jest.fn(() => ({
+    mutate: jest.fn(),
+    isLoading: false,
+  })),
+}));
 jest.mock('../../components/worker_dependencies/worker_dependencies_callout', () => ({
   WorkerDependenciesCallout: ({ worker, surface }: { worker: { id: string }; surface: string }) => (
     <div data-test-subj={`alertZeroWorkerDependencies-${surface}-${worker.id}`} />
   ),
 }));
+const mockOpenConfirm = jest.fn();
+const mockNavigateToUrl = jest.fn();
+// Stands in for the app's ScopedHistory; reassigned per render so the real prompt hook blocks it.
+let mockAppHistory: MemoryHistory;
+// Records the props, then runs the real hook so history blocking and beforeunload are exercised.
+const mockUseUnsavedChangesPrompt = jest.fn<
+  void,
+  [Parameters<typeof useUnsavedChangesPrompt>[0]]
+>();
+jest.mock('@kbn/unsaved-changes-prompt', () => ({
+  useUnsavedChangesPrompt: (props: Parameters<typeof useUnsavedChangesPrompt>[0]) => {
+    mockUseUnsavedChangesPrompt(props);
+    return jest.requireActual('@kbn/unsaved-changes-prompt').useUnsavedChangesPrompt(props);
+  },
+}));
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   ...jest.requireActual('@kbn/kibana-react-plugin/public'),
   useKibana: () => ({
     services: {
-      http: { get: jest.fn().mockResolvedValue(undefined) },
-      application: { getUrlForApp: jest.fn(() => '/app/workflows') },
+      http: {
+        get: jest.fn().mockResolvedValue(undefined),
+        basePath: { prepend: (p: string) => p },
+      },
+      application: {
+        getUrlForApp: jest.fn(() => '/app/workflows'),
+        navigateToUrl: mockNavigateToUrl,
+      },
+      overlays: { openConfirm: mockOpenConfirm },
+      appParams: {
+        get history() {
+          return mockAppHistory;
+        },
+      },
     },
   }),
 }));
@@ -250,23 +295,26 @@ const renderWatch = (watchId: string, workers: Worker[], canModifyWorkers?: bool
   );
   mockUseUpdateWorker.mockReturnValue({ mutate, mutateAsync } as never);
 
+  mockAppHistory = createMemoryHistory({ initialEntries: [`/watches/${watchId}`] });
   render(
     <I18nProvider>
-      <MemoryRouter initialEntries={[`/watches/${watchId}`]}>
+      <Router history={mockAppHistory}>
         <Route path="/watches/:watchId">
           <WatchDetailPage />
         </Route>
-      </MemoryRouter>
+      </Router>
     </I18nProvider>
   );
 
-  return { mutate, mutateAsync };
+  return { mutate, mutateAsync, history: mockAppHistory };
 };
 
 describe('WatchDetailPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseCanWriteAlertZero.mockReturnValue(true);
+    mockAppHistory = createMemoryHistory();
+    mockOpenConfirm.mockResolvedValue(false);
   });
 
   it('shows Floor Workers with per-Worker enablement and autonomy, and no Watch switch', () => {
@@ -732,7 +780,7 @@ describe('WatchDetailPage', () => {
     expect(screen.queryByText(settingsI18n.WORKER_SETTINGS_UNAVAILABLE)).not.toBeInTheDocument();
   });
 
-  it('blocks Save while the Worker reload has failed and allows the retry with the original revision', async () => {
+  it('blocks Save while the Worker reload has failed, asks before Discard, and allows the retry with the original revision', async () => {
     const installed = detectionWorkers.map((worker) => ({ ...worker, settingsRevision: 1 }));
     const workersQuery = (error: Error | null) =>
       ({ data: { workers: installed }, isLoading: false, error, refetch: jest.fn() } as never);
@@ -770,6 +818,16 @@ describe('WatchDetailPage', () => {
     fireEvent.click(screen.getByTestId('alertZeroWatchSettingsSave'));
     expect(mutateAsync).not.toHaveBeenCalled();
 
+    // The error replaces every Worker panel, so the draft is out of sight: Discard asks first.
+    fireEvent.click(screen.getByTestId('alertZeroWatchSettingsDiscard'));
+    const discardModal = screen.getByTestId('alertZeroWatchDiscardConfirmModal');
+    expect(
+      within(discardModal)
+        .getAllByRole('listitem')
+        .map((item) => item.textContent)
+    ).toEqual([workerName(SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID, 'Rule Tuning')]);
+    fireEvent.click(within(discardModal).getByText(settingsI18n.KEEP_EDITING_BUTTON_LABEL));
+
     // Retry succeeded: the draft and its original revision are still there to retry with.
     mockUseWorkers.mockReturnValue(workersQuery(null));
     rerender(tree());
@@ -786,16 +844,15 @@ describe('WatchDetailPage', () => {
     });
   });
 
-  it('enables Save once the analysis window is committed on blur and saves that value', async () => {
+  it('enables Save as soon as a valid analysis window is typed and saves the final value', async () => {
     const { mutateAsync } = renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
     const field = screen.getByTestId('alertZeroAnalysisWindowDays');
     const save = screen.getByTestId('alertZeroWatchSettingsSave');
 
-    // Keystrokes stay local: "2" on the way to "21" must not reach the draft.
+    // "2" is valid and differs from the saved 14, so the draft is dirty while still typing.
     fireEvent.change(field, { target: { value: '2' } });
-    expect(save).toBeDisabled();
+    expect(save).toBeEnabled();
     fireEvent.change(field, { target: { value: '21' } });
-    expect(save).toBeDisabled();
     fireEvent.blur(field);
     expect(save).toBeEnabled();
     expect(mutateAsync).not.toHaveBeenCalled();
@@ -810,6 +867,23 @@ describe('WatchDetailPage', () => {
         settingsRevision: null,
       },
     });
+  });
+
+  it('returns to a clean draft when an out-of-range analysis window is abandoned', () => {
+    renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
+    const field = screen.getByTestId('alertZeroAnalysisWindowDays');
+    const save = screen.getByTestId('alertZeroWatchSettingsSave');
+
+    fireEvent.focus(field);
+    fireEvent.change(field, { target: { value: '3' } });
+    fireEvent.change(field, { target: { value: '31' } });
+    // The valid prefix "3" already reached the draft.
+    expect(save).toBeEnabled();
+
+    fireEvent.blur(field);
+
+    expect(field).toHaveValue(14);
+    expect(save).toBeDisabled();
   });
 
   it('renders the Rule Coverage controls from the registry and saves an edited lookback', async () => {
@@ -1030,6 +1104,20 @@ describe('WatchDetailPage', () => {
 
       expect(enabledSwitch(ruleTuning)).toHaveAttribute('aria-checked', 'false');
       expect(screen.getByTestId('alertZeroWatchSettingsSave')).toBeEnabled();
+    });
+
+    it('shows no no-model warning to a user who cannot change Workers', () => {
+      renderWatch(
+        SYSTEM_SECURITY_WATCH_DETECTION_ID,
+        [blocked(ruleTuning, true), blocked(ruleCoverage, false)],
+        false
+      );
+
+      for (const worker of [ruleTuning, ruleCoverage]) {
+        expect(
+          screen.queryByTestId(`alertZeroWorkerWarningIcon-${worker.id}`)
+        ).not.toBeInTheDocument();
+      }
     });
 
     it('gives Hunt the Models row and the block like every other Worker', () => {
@@ -1446,7 +1534,229 @@ describe('WatchDetailPage', () => {
     ).toBeInTheDocument();
   });
 
-  describe('hard Worker dependencies', () => {
+  describe('unsaved changes', () => {
+    const RULE_TUNING = SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID;
+    const RULE_COVERAGE = SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID;
+    const BADGE = 'alertZeroWatchUnsavedChangesBadge';
+
+    const editAnalysisWindow = () => {
+      const field = screen.getByTestId('alertZeroAnalysisWindowDays');
+      fireEvent.change(field, { target: { value: '7' } });
+      fireEvent.blur(field);
+    };
+    const toggleAccordion = (workerId: string) =>
+      fireEvent.click(screen.getByTestId(`alertZeroWorkerAccordionHeader-${workerId}`));
+    const lastPromptProps = () => mockUseUnsavedChangesPrompt.mock.calls.at(-1)?.[0];
+
+    it('shows the badge only while there are unsaved changes', () => {
+      renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
+
+      expect(screen.queryByTestId(BADGE)).not.toBeInTheDocument();
+
+      editAnalysisWindow();
+      expect(screen.getByTestId(BADGE)).toHaveTextContent(settingsI18n.UNSAVED_CHANGES_BADGE_LABEL);
+
+      fireEvent.click(screen.getByTestId('alertZeroWatchSettingsDiscard'));
+      expect(screen.queryByTestId(BADGE)).not.toBeInTheDocument();
+    });
+
+    it('counts an invalid trigger amount as unsaved, like Discard does', () => {
+      renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
+
+      fireEvent.change(screen.getByTestId(`alertZeroTriggerAmount-${RULE_TUNING}`), {
+        target: { value: '1.9' },
+      });
+
+      expect(screen.getByTestId(BADGE)).toBeInTheDocument();
+      expect(lastPromptProps()).toMatchObject({ hasUnsavedChanges: true });
+    });
+
+    it('explains the disabled Save only when there is nothing to save', () => {
+      renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
+      const save = screen.getByTestId('alertZeroWatchSettingsSave');
+
+      expect(save).toBeDisabled();
+      expect(save).toHaveAttribute('title', settingsI18n.NO_CHANGES_TO_SAVE_TOOLTIP);
+
+      editAnalysisWindow();
+      expect(save).toBeEnabled();
+      expect(save).not.toHaveAttribute('title');
+
+      // Changes exist but cannot be saved yet; the invalid-amount message explains that instead.
+      fireEvent.change(screen.getByTestId(`alertZeroTriggerAmount-${RULE_TUNING}`), {
+        target: { value: '1.9' },
+      });
+      expect(save).toBeDisabled();
+      expect(save).not.toHaveAttribute('title');
+    });
+
+    it('keeps the read-only tooltip ahead of the no-changes one', () => {
+      mockUseCanWriteAlertZero.mockReturnValue(false);
+      renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
+
+      expect(screen.getByTestId('alertZeroWatchSettingsSave')).toHaveAttribute(
+        'title',
+        settingsI18n.READ_ONLY_TOOLTIP
+      );
+    });
+
+    it('passes the unsaved state and the leave copy to the shared prompt', () => {
+      renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
+
+      expect(lastPromptProps()).toMatchObject({
+        hasUnsavedChanges: false,
+        history: mockAppHistory,
+        openConfirm: mockOpenConfirm,
+        navigateToUrl: mockNavigateToUrl,
+        titleText: settingsI18n.LEAVE_PROMPT_TITLE,
+        messageText: settingsI18n.LEAVE_PROMPT_DESCRIPTION,
+        cancelButtonText: settingsI18n.KEEP_EDITING_BUTTON_LABEL,
+        confirmButtonText: settingsI18n.LEAVE_PROMPT_CONFIRM_BUTTON_LABEL,
+      });
+
+      editAnalysisWindow();
+      expect(lastPromptProps()).toMatchObject({ hasUnsavedChanges: true });
+
+      fireEvent.click(screen.getByTestId('alertZeroWatchSettingsDiscard'));
+      expect(lastPromptProps()).toMatchObject({ hasUnsavedChanges: false });
+    });
+
+    it('keeps prompting while a save is in flight and stops once it has succeeded', async () => {
+      const { mutateAsync } = renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
+      const pendingSave: { resolve?: (value: { worker: Worker }) => void } = {};
+      mutateAsync.mockImplementation(
+        () =>
+          new Promise<{ worker: Worker }>((resolve) => {
+            pendingSave.resolve = resolve;
+          })
+      );
+
+      fireEvent.click(screen.getByTestId(`alertZeroWorkerEnabledSwitch-${RULE_TUNING}`));
+      expect(lastPromptProps()).toMatchObject({ hasUnsavedChanges: true });
+
+      fireEvent.click(screen.getByTestId('alertZeroWatchSettingsSave'));
+      await waitFor(() => expect(mutateAsync).toHaveBeenCalledTimes(1));
+      expect(lastPromptProps()).toMatchObject({ hasUnsavedChanges: true });
+
+      await act(async () => {
+        pendingSave.resolve?.({ worker: { ...detectionWorkers[0], enabled: true } });
+      });
+      expect(lastPromptProps()).toMatchObject({ hasUnsavedChanges: false });
+      expect(screen.queryByTestId(BADGE)).not.toBeInTheDocument();
+    });
+
+    it('asks before switching Watch with unsaved changes and only leaves on confirm', async () => {
+      const { history } = renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
+
+      act(() => {
+        history.push(`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`);
+      });
+      expect(mockOpenConfirm).not.toHaveBeenCalled();
+      expect(history.location.pathname).toBe(`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`);
+      act(() => {
+        history.goBack();
+      });
+
+      editAnalysisWindow();
+      act(() => {
+        history.push(`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`);
+      });
+
+      expect(history.location.pathname).toBe(`/watches/${SYSTEM_SECURITY_WATCH_DETECTION_ID}`);
+      await waitFor(() => expect(mockOpenConfirm).toHaveBeenCalledTimes(1));
+      expect(mockOpenConfirm).toHaveBeenCalledWith(
+        settingsI18n.LEAVE_PROMPT_DESCRIPTION,
+        expect.objectContaining({
+          title: settingsI18n.LEAVE_PROMPT_TITLE,
+          cancelButtonText: settingsI18n.KEEP_EDITING_BUTTON_LABEL,
+          confirmButtonText: settingsI18n.LEAVE_PROMPT_CONFIRM_BUTTON_LABEL,
+        })
+      );
+      expect(mockNavigateToUrl).not.toHaveBeenCalled();
+      expect(screen.getByTestId(BADGE)).toBeInTheDocument();
+
+      mockOpenConfirm.mockResolvedValue(true);
+      act(() => {
+        history.push(`/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`);
+      });
+      await waitFor(() =>
+        expect(mockNavigateToUrl).toHaveBeenCalledWith(
+          `/watches/${SYSTEM_SECURITY_WATCH_FLOOR_ID}`,
+          expect.anything()
+        )
+      );
+    });
+
+    it('asks the browser to confirm closing the tab only while changes are unsaved', () => {
+      renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
+      const closeTab = () => {
+        const event = new Event('beforeunload', { cancelable: true });
+        window.dispatchEvent(event);
+        return event.defaultPrevented;
+      };
+
+      expect(closeTab()).toBe(false);
+
+      editAnalysisWindow();
+      expect(closeTab()).toBe(true);
+    });
+
+    it('discards right away when every changed Worker is in view', () => {
+      renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
+
+      editAnalysisWindow();
+      // Collapsing a Worker without changes does not hide anything that would be lost.
+      toggleAccordion(RULE_COVERAGE);
+      fireEvent.click(screen.getByTestId('alertZeroWatchSettingsDiscard'));
+
+      expect(screen.queryByTestId('alertZeroWatchDiscardConfirmModal')).not.toBeInTheDocument();
+      expect(screen.getByTestId('alertZeroAnalysisWindowDays')).toHaveValue(14);
+      expect(screen.queryByTestId(BADGE)).not.toBeInTheDocument();
+    });
+
+    it('names the collapsed Workers with changes before discarding, and keeps them on Keep editing', () => {
+      renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
+
+      editAnalysisWindow();
+      fireEvent.click(screen.getByTestId(`alertZeroWorkerEnabledSwitch-${RULE_COVERAGE}`));
+      toggleAccordion(RULE_TUNING);
+      fireEvent.click(screen.getByTestId('alertZeroWatchSettingsDiscard'));
+
+      const modal = screen.getByTestId('alertZeroWatchDiscardConfirmModal');
+      expect(within(modal).getByText(settingsI18n.DISCARD_CONFIRM_TITLE)).toBeInTheDocument();
+      // Only the collapsed Worker is listed; Rule Coverage is open, so its change is in view.
+      expect(
+        within(modal)
+          .getAllByRole('listitem')
+          .map((item) => item.textContent)
+      ).toEqual([workerName(RULE_TUNING, 'Rule Tuning')]);
+
+      fireEvent.click(within(modal).getByText(settingsI18n.KEEP_EDITING_BUTTON_LABEL));
+
+      expect(screen.queryByTestId('alertZeroWatchDiscardConfirmModal')).not.toBeInTheDocument();
+      expect(screen.getByTestId(BADGE)).toBeInTheDocument();
+    });
+
+    it('discards every change once the modal is confirmed', () => {
+      renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
+
+      editAnalysisWindow();
+      fireEvent.click(screen.getByTestId(`alertZeroWorkerEnabledSwitch-${RULE_COVERAGE}`));
+      toggleAccordion(RULE_TUNING);
+      fireEvent.click(screen.getByTestId('alertZeroWatchSettingsDiscard'));
+      fireEvent.click(
+        within(screen.getByTestId('alertZeroWatchDiscardConfirmModal')).getByText(
+          settingsI18n.DISCARD_CONFIRM_BUTTON_LABEL
+        )
+      );
+
+      expect(screen.queryByTestId('alertZeroWatchDiscardConfirmModal')).not.toBeInTheDocument();
+      expect(screen.queryByTestId(BADGE)).not.toBeInTheDocument();
+      expect(screen.getByTestId('alertZeroWatchSettingsSave')).toBeDisabled();
+    });
+  });
+
+  describe('Worker dependencies', () => {
     const HUNT = SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID;
     const RULE_COVERAGE = SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID;
     const ATTACK_DISCOVERY = SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID;
@@ -1624,6 +1934,21 @@ describe('WatchDetailPage', () => {
       expect(enabledSwitch(ATTACK_DISCOVERY)).not.toBeChecked();
     });
 
+    it('asks before turning off Endpoint Analysis while Attack Discovery is enabled', () => {
+      renderWatch(
+        SYSTEM_SECURITY_WATCH_FORENSICS_ID,
+        allWorkers([ATTACK_DISCOVERY, ENDPOINT_ANALYSIS])
+      );
+
+      fireEvent.click(enabledSwitch(ENDPOINT_ANALYSIS));
+      expect(disableModal()).toHaveTextContent('Disable Endpoint Analysis?');
+      expect(disableModal()).toHaveTextContent(
+        "While Endpoint Analysis is off, those handoffs aren't analyzed"
+      );
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+      expect(enabledSwitch(ENDPOINT_ANALYSIS)).not.toBeChecked();
+    });
+
     it('never asks when turning a provider on, even with its dependent enabled', () => {
       renderWatch(SYSTEM_SECURITY_WATCH_HUNT_ID, allWorkers([RULE_COVERAGE]));
 
@@ -1671,6 +1996,29 @@ describe('WatchDetailPage', () => {
     it('warns Endpoint Analysis on the Forensics Watch while Attack Discovery is saved as off', () => {
       renderWatch(SYSTEM_SECURITY_WATCH_FORENSICS_ID, allWorkers([ENDPOINT_ANALYSIS]));
       expect(warningIcon(ENDPOINT_ANALYSIS)).toBeInTheDocument();
+    });
+
+    it('warns Attack Discovery on the Floor Watch while Endpoint Analysis is saved as off', () => {
+      renderWatch(SYSTEM_SECURITY_WATCH_FLOOR_ID, allWorkers([ATTACK_DISCOVERY]));
+      expect(warningIcon(ATTACK_DISCOVERY)).toBeInTheDocument();
+    });
+
+    it('warns Endpoint Analysis while it is off and Attack Discovery is enabled', () => {
+      renderWatch(SYSTEM_SECURITY_WATCH_FORENSICS_ID, allWorkers([ATTACK_DISCOVERY]));
+      expect(warningIcon(ENDPOINT_ANALYSIS)).toBeInTheDocument();
+    });
+
+    it('tells the user after Save that Attack Discovery depends on Endpoint Analysis being on', async () => {
+      renderWatch(SYSTEM_SECURITY_WATCH_FLOOR_ID, allWorkers([]));
+
+      fireEvent.click(enabledSwitch(ATTACK_DISCOVERY));
+      fireEvent.click(screen.getByTestId('alertZeroWatchSettingsSave'));
+
+      const notice = await screen.findByTestId('alertZeroWorkerBlockedAfterSaveModal');
+      expect(notice).toHaveTextContent("Saved — but Attack Discovery won't run properly yet");
+      expect(notice).toHaveTextContent(
+        "Endpoint Analysis is disabled — attacks handed off for analysis aren't analyzed."
+      );
     });
 
     it('tells the user after Save that an enabled Worker still will not run, without blocking the save', async () => {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { applyOverlay, loadContractOperations } from '@kbn/connector-contract-mock';
+import { applyOverlay, loadContractOperations } from '@kbn/connector-emulate';
 import { projectSpec } from './project_spec';
 
 const ok = (schema: unknown) => ({

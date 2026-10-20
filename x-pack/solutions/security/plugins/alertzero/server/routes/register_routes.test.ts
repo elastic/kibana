@@ -24,8 +24,10 @@ const setup = () => {
     getConversationProposalsService: service,
     getActionsService: service,
     getAgentBuilderConversations: service,
+    getAgentBuilderAttachments: service,
     getHuntServices: service,
     getScanFailuresService: service,
+    getThreatIntelSupplyService: service,
   });
   const routes = (['get', 'post', 'put', 'patch', 'delete'] as const).flatMap((method) =>
     router.versioned[method].mock.calls.map(([{ path }]) => router.versioned.getRoute(method, path))

@@ -66,4 +66,39 @@ describe('updateScoutHtmlReport', () => {
     expect(updatedContent).toContain('id="failure-count">6<');
     expect(updatedContent).toContain('https://github.com/elastic/kibana/issues/123');
   });
+
+  it('explains why no GitHub issue was created when the failure is attributed to infra', () => {
+    const tempDir = fs.mkdtempSync(Path.join(os.tmpdir(), 'scout-html-'));
+    const htmlPath = Path.join(tempDir, 'failure-id.html');
+    const htmlTemplate = `
+      <html>
+        <body>
+          <div class="section" id="tracked-branches-status">
+            <strong>No failures found in tracked branches</strong>
+          </div>
+        </body>
+      </html>
+    `;
+    fs.writeFileSync(htmlPath, htmlTemplate.trim(), 'utf-8');
+
+    const failure = createFailure({
+      likelyIrrelevant: true,
+      infraReason: {
+        category: 'cdn',
+        message: 'Kibana bundles failed to load from the CDN <chunk 1> & more.',
+      },
+    });
+
+    updateScoutHtmlReport({
+      log: new ToolingLog(),
+      reportDir: tempDir,
+      failure,
+      reportUpdate: true,
+    });
+
+    const updatedContent = fs.readFileSync(htmlPath, 'utf-8');
+    expect(updatedContent).toContain('Likely infrastructure issue (cdn), no GitHub issue created');
+    expect(updatedContent).toContain('the CDN &lt;chunk 1&gt; &amp; more.');
+    expect(updatedContent).not.toContain('No failures found in tracked branches');
+  });
 });

@@ -7,9 +7,17 @@
 
 import { ALERT_EPISODE_ACTION_TYPE, type CreateAlertActionBody } from '@kbn/alerting-v2-schemas';
 import type { AlertAction } from '../../../resources/datastreams/alert_actions';
+import { EMPTY_ALERT_ACTION_STATE } from '../context_loaders/load_alert_action_states';
+import { EMPTY_SERIES_ACTION_STATE } from '../context_loaders/load_series_action_states';
 import type { ActionHandler, HandlerItem, PreparedAction } from '../handler';
 import type { AlertEventRecord } from '../types';
-import { ACTION_HANDLERS, type ActionHandlersRegistry, prepareWithHandler } from '.';
+import {
+  ACTION_HANDLERS,
+  type ActionHandlersRegistry,
+  prepareWithHandler,
+  requiresActionState,
+  requiresSeriesActionState,
+} from '.';
 
 /**
  * `prepareWithHandler` takes the registry as a parameter, so tests
@@ -33,6 +41,8 @@ const makeAckItem = (): HandlerItem<
   },
   alertEvent: fakeAlertEvent,
   alertActionDoc: fakeAuditDoc,
+  alertActionState: EMPTY_ALERT_ACTION_STATE,
+  seriesActionState: EMPTY_SERIES_ACTION_STATE,
 });
 
 const makeUnsnoozeItem = (): HandlerItem<
@@ -43,6 +53,8 @@ const makeUnsnoozeItem = (): HandlerItem<
   },
   alertEvent: fakeAlertEvent,
   alertActionDoc: fakeAuditDoc,
+  alertActionState: EMPTY_ALERT_ACTION_STATE,
+  seriesActionState: EMPTY_SERIES_ACTION_STATE,
 });
 
 /**
@@ -83,41 +95,47 @@ describe('production handler registry (ACTION_HANDLERS)', () => {
 
     expect(registeredActionTypes).toEqual(declaredActionTypes);
   });
+});
 
-  /**
-   * Behavioural coverage for the audit-only singleton. The orchestrator
-   * tests cover ack/tag/snooze/etc. end-to-end, but the singleton
-   * itself is the production behaviour for six action types and
-   * deserves an isolated pin so any future tweak to its contract
-   * surfaces here first.
-   */
-  describe('audit-only slots', () => {
-    const AUDIT_ONLY_ACTION_TYPES = [
-      ALERT_EPISODE_ACTION_TYPE.ACK,
-      ALERT_EPISODE_ACTION_TYPE.UNACK,
-      ALERT_EPISODE_ACTION_TYPE.ASSIGN,
-      ALERT_EPISODE_ACTION_TYPE.TAG,
-      ALERT_EPISODE_ACTION_TYPE.SNOOZE,
-      ALERT_EPISODE_ACTION_TYPE.UNSNOOZE,
-    ] as const;
+describe('requiresActionState', () => {
+  it.each([
+    ALERT_EPISODE_ACTION_TYPE.ACK,
+    ALERT_EPISODE_ACTION_TYPE.UNACK,
+    ALERT_EPISODE_ACTION_TYPE.ASSIGN,
+    ALERT_EPISODE_ACTION_TYPE.TAG,
+  ])('reports that %s needs the current action state to detect a no-op', (actionType) => {
+    expect(requiresActionState(actionType)).toBe(true);
+  });
 
-    it('shares one singleton across every audit-only slot', () => {
-      // Identity check: the design relies on one prepare-function
-      // serving six slots. Anyone replacing one slot with a bespoke
-      // handler in the future should do so deliberately — this test
-      // makes that intent visible.
-      const singletons = AUDIT_ONLY_ACTION_TYPES.map((type) => ACTION_HANDLERS[type]);
-      for (const handler of singletons) {
-        expect(handler).toBe(singletons[0]);
-      }
-    });
+  it.each([
+    // Activate / deactivate read their precondition off the alert event
+    // the orchestrator already loads; snooze / unsnooze read the series state.
+    ALERT_EPISODE_ACTION_TYPE.ACTIVATE,
+    ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
+    ALERT_EPISODE_ACTION_TYPE.SNOOZE,
+    ALERT_EPISODE_ACTION_TYPE.UNSNOOZE,
+  ])('reports that %s does not', (actionType) => {
+    expect(requiresActionState(actionType)).toBe(false);
+  });
+});
 
-    it('returns only the precomputed audit doc — no synthetic rule event', () => {
-      const item = makeAckItem();
-      const prepared = ACTION_HANDLERS[ALERT_EPISODE_ACTION_TYPE.ACK].prepare(item);
+describe('requiresSeriesActionState', () => {
+  it.each([ALERT_EPISODE_ACTION_TYPE.SNOOZE, ALERT_EPISODE_ACTION_TYPE.UNSNOOZE])(
+    'reports that %s needs the series snooze to detect a no-op',
+    (actionType) => {
+      expect(requiresSeriesActionState(actionType)).toBe(true);
+    }
+  );
 
-      expect(prepared).toEqual({ alertActionDoc: item.alertActionDoc });
-    });
+  it.each([
+    ALERT_EPISODE_ACTION_TYPE.ACK,
+    ALERT_EPISODE_ACTION_TYPE.UNACK,
+    ALERT_EPISODE_ACTION_TYPE.ASSIGN,
+    ALERT_EPISODE_ACTION_TYPE.TAG,
+    ALERT_EPISODE_ACTION_TYPE.ACTIVATE,
+    ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
+  ])('reports that %s does not', (actionType) => {
+    expect(requiresSeriesActionState(actionType)).toBe(false);
   });
 });
 

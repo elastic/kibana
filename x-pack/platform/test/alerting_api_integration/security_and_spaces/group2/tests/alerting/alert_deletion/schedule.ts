@@ -1338,6 +1338,7 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
         await es.bulk({ refresh: 'wait_for', operations });
 
         // schedule the task
+        const scheduledAt = new Date().toISOString();
         await retry.try(async () => {
           await supertest
             .post(
@@ -1380,7 +1381,12 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
         await retry.try(async () => {
           const results = await es.search<IValidatedEvent>({
             index: '.kibana-event-log*',
-            query: { bool: { must: [{ match: { 'event.action': 'delete-alerts' } }] } },
+            query: {
+              bool: {
+                must: [{ match: { 'event.action': 'delete-alerts' } }],
+                filter: [{ range: { '@timestamp': { gte: scheduledAt } } }],
+              },
+            },
           });
           expect(results.hits.hits.length).to.eql(2);
           expect(results.hits.hits[0]._source?.event?.outcome).to.eql('success');
