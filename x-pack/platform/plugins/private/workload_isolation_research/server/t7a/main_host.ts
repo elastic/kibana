@@ -53,6 +53,8 @@ export interface T7aConfig {
   readonly concurrency: number;
   readonly abortGraceMs: number;
   readonly deadlineMs: number;
+  /** D: isolate-local SO repository + co-located ESO (else async SO/ESO bridges to main). */
+  readonly localSo: boolean;
 }
 
 interface EdgeAgg {
@@ -81,6 +83,7 @@ export class T7aController {
     concurrency: 10,
     abortGraceMs: 2000,
     deadlineMs: 10 * 60_000,
+    localSo: false,
   };
   private host?: ExecutionHost;
   private readonly registry: ModuleRegistry;
@@ -122,7 +125,8 @@ export class T7aController {
       previous.transport !== this.config.transport ||
       previous.slots !== this.config.slots ||
       previous.concurrency !== this.config.concurrency ||
-      previous.abortGraceMs !== this.config.abortGraceMs;
+      previous.abortGraceMs !== this.config.abortGraceMs ||
+      previous.localSo !== this.config.localSo;
     if (hostChanged || this.config.mode === 'main') await this.stopHost();
     return this.config;
   }
@@ -323,6 +327,7 @@ export class T7aController {
       capabilities: this.capabilities(),
       data: {
         snapshot: this.buildSnapshot(),
+        localSo: this.config.localSo,
         elasticsearch: (this.esCapability ??= captureResearchEsCapability(
           this.deps.core.elasticsearch.client as never,
           fake,

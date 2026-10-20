@@ -46,9 +46,10 @@ const getIsland = (context: WorkerContext): Promise<Island> => {
     const data = (context.bundle.data ? decode(context.bundle.data) : {}) as {
       snapshot: IslandSnapshot;
       elasticsearch: ResearchEsCapability;
+      localSo?: boolean;
     };
     bootStartedAt = performance.now();
-    island = bootIsland(data.snapshot, data.elasticsearch);
+    island = bootIsland(data.snapshot, data.elasticsearch, Boolean(data.localSo));
     island.then((i) => (islandTaskTypes = [...i.taskCapture.definitions.keys()])).catch(() => undefined);
     island.catch(() => {
       island = undefined;

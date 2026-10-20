@@ -57,6 +57,7 @@ export const registerT7aRoutes = (
           concurrency: schema.maybe(schema.number({ min: 1, max: 1000 })),
           abortGraceMs: schema.maybe(schema.number({ min: 0, max: 30000 })),
           deadlineMs: schema.maybe(schema.number({ min: 1000, max: 3600000 })),
+          localSo: schema.maybe(schema.boolean()),
         }),
       },
     },

@@ -33,6 +33,11 @@ import type { ResearchEsCapability } from '@kbn/core-elasticsearch-client-server
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { ServiceStatusLevels } from '@kbn/core-status-common';
+import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
+import { DocumentMigrator, buildActiveMappings, buildTypesMappings } from '@kbn/core-saved-objects-migration-server-internal';
+import { SavedObjectsRepository, SavedObjectsClient } from '@kbn/core-saved-objects-api-server-internal';
+import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import type { IKibanaMigrator } from '@kbn/core-saved-objects-base-server-internal';
 import { Actions as SecurityActions } from '@kbn/security-authorization-core';
 import { Locator } from '@kbn/share-plugin/common/url_service/locators/locator';
 import { License } from '@kbn/licensing-plugin/common/license';
@@ -177,7 +182,11 @@ export interface CoreLite {
   readonly clusterClient: ClusterClient;
 }
 
-export const createCoreLite = (snapshot: IslandSnapshot, es: ResearchEsCapability): CoreLite => {
+export const createCoreLite = (
+  snapshot: IslandSnapshot,
+  es: ResearchEsCapability,
+  localSo: boolean
+): CoreLite => {
   const logger = createLogger('core');
   // REAL Core ClusterClient: same configureClient/transport/scoping code as main.
   const clusterClient = new ClusterClient({
@@ -217,11 +226,78 @@ export const createCoreLite = (snapshot: IslandSnapshot, es: ResearchEsCapabilit
     }),
   });
 
+  // ---- D (frontier 2): isolate-local SO repository + co-located ESO encryption extension ----
+  // Types are the ones the island plugins register (their own types); migrate-on-read only; the
+  // index migrations/readiness fence stays on main. Security/spaces extensions are NOT here, so
+  // only internal repositories and security-excluded default-space scoped clients run locally.
+  const typeRegistry = new SavedObjectTypeRegistry();
+  let encryptionExtensionFactory: ((o: { typeRegistry: unknown; request: KibanaRequest }) => unknown) | undefined;
+  let migrator: IKibanaMigrator | undefined;
+  const getMigrator = (): IKibanaMigrator => {
+    if (migrator) return migrator;
+    const documentMigrator = new DocumentMigrator({
+      kibanaVersion: snapshot.kibanaVersion,
+      typeRegistry,
+      log: logger.get('migrator'),
+    } as never);
+    documentMigrator.prepareMigrations();
+    const mappings = buildActiveMappings(buildTypesMappings(typeRegistry.getAllTypes()));
+    migrator = {
+      kibanaVersion: snapshot.kibanaVersion,
+      prepareMigrations: () => documentMigrator.prepareMigrations(),
+      getActiveMappings: () => mappings,
+      getDocumentMigrator: () => documentMigrator,
+      migrateDocument: (document: never, options: never) => documentMigrator.migrate(document, options),
+      getStatus$: () => of({ status: 'completed' as const }),
+      runMigrations: async () => {
+        throw new Error('t7a: index migrations belong to main');
+      },
+    } as unknown as IKibanaMigrator;
+    return migrator;
+  };
+  // Mirrors Core: createInternalRepository() has NO extensions by default (ESO decrypts raw
+  // attributes itself); scoped clients get the encryption extension for their request.
+  const localRepository = (client: unknown, types: string[], request?: KibanaRequest) =>
+    SavedObjectsRepository.createRepository(
+      getMigrator(),
+      typeRegistry,
+      MAIN_SAVED_OBJECT_INDEX,
+      client as never,
+      logger.get('repository'),
+      types,
+      request
+        ? {
+            encryptionExtension: encryptionExtensionFactory?.({ typeRegistry, request }) as never,
+            securityExtension: undefined,
+            spacesExtension: undefined,
+          }
+        : undefined
+    );
+  const isDefaultSpace = (request: KibanaRequest) =>
+    ((request as KibanaRequest & { spaceId?: string }).spaceId ?? DEFAULT_SPACE_ID) === DEFAULT_SPACE_ID;
+  const typesKnown = (types: string[]) => types.every((t) => typeRegistry.getType(t));
+
   const savedObjectsStart = strict('core.savedObjects', {
     createInternalRepository: (types?: string[]) =>
-      soFacade({ target: 'internal', types: types ?? [] }),
-    getScopedClient: (request: KibanaRequest, options?: Obj) =>
-      soFacade({ target: 'scoped', request: encodeFakeRequest(request), options: options ?? {} }),
+      localSo && typesKnown(types ?? [])
+        ? (countFence('so.local.internalRepository'),
+          localRepository(clusterClient.asInternalUser, types ?? []))
+        : soFacade({ target: 'internal', types: types ?? [] }),
+    getScopedClient: (request: KibanaRequest, options?: Obj) => {
+      const excluded = (options?.excludedExtensions as string[] | undefined) ?? [];
+      const hidden = (options?.includedHiddenTypes as string[] | undefined) ?? [];
+      if (localSo && excluded.includes('security') && isDefaultSpace(request) && typesKnown(hidden)) {
+        countFence('so.local.unsecuredScopedClient');
+        // Mirrors security's SO client factory provider: with RBAC the repository runs as the
+        // internal user (authorization is the security extension's job — excluded here).
+        const esClient = snapshot.useRbacForFakeRequest
+          ? clusterClient.asInternalUser
+          : clusterClient.asScoped(request).asCurrentUser;
+        return new SavedObjectsClient(localRepository(esClient, hidden, request));
+      }
+      return soFacade({ target: 'scoped', request: encodeFakeRequest(request), options: options ?? {} });
+    },
+    getTypeRegistry: () => typeRegistry,
     getUnsafeInternalClient: (options?: Obj) =>
       soFacade({ target: 'unsafeInternal', options: options ?? {} }),
     getAllIndices: () => [...snapshot.allIndices],
@@ -263,7 +339,13 @@ export const createCoreLite = (snapshot: IslandSnapshot, es: ResearchEsCapabilit
         getServerInfo: () => ({ hostname: 'localhost', port: 0, name: 't7a', protocol: 'http' }),
       }),
       savedObjects: strict('core.savedObjects(setup)', {
-        registerType: fence('core.savedObjects.registerType'),
+        registerType: (type: { name: string }) => {
+          countFence('core.savedObjects.registerType');
+          if (localSo) typeRegistry.registerType(type as never);
+        },
+        setEncryptionExtension: (factory: typeof encryptionExtensionFactory) => {
+          encryptionExtensionFactory = factory;
+        },
         getDefaultIndex: () => snapshot.defaultIndex,
         getKibanaIndex: () => snapshot.defaultIndex,
         setClientFactoryProvider: fence('core.savedObjects.setClientFactoryProvider'),
@@ -584,10 +666,11 @@ export interface Island {
 /** Boots the real alerting execution plugin set inside this isolate. */
 export const bootIsland = async (
   snapshot: IslandSnapshot,
-  es: ResearchEsCapability
+  es: ResearchEsCapability,
+  localSo = false
 ): Promise<Island> => {
   const t0 = performance.now();
-  const core = createCoreLite(snapshot, es);
+  const core = createCoreLite(snapshot, es, localSo);
   const deps = createDepFacades(snapshot);
   const validationContext = {
     dev: snapshot.dev,
@@ -635,6 +718,8 @@ export const bootIsland = async (
     return instance;
   };
 
+  // D: co-locate the REAL ESO plugin (same config schema → same key in dev; prod needs a key handover).
+  const eso = localSo ? await load('@kbn/encrypted-saved-objects-plugin/server', 'encryptedSavedObjects') : undefined;
   const eventLog = await load('@kbn/event-log-plugin/server', 'eventLog');
   const actions = await load('@kbn/actions-plugin/server', 'actions');
   const stackConnectors = await load('@kbn/stack-connectors-plugin/server', 'stackConnectors');
@@ -657,6 +742,11 @@ export const bootIsland = async (
   };
 
   // ---- setup (Core's topological order) ----
+  const esoStartDeferred = deferred<unknown>();
+  if (eso) {
+    const esoSetup = eso.setup(core.setupFor(Promise.resolve({}), esoStartDeferred.promise), {}) as object;
+    (deps as { esoSetup: object }).esoSetup = esoSetup;
+  }
   const eventLogSetup = eventLog.setup(
     core.setupFor(depsStart.eventLog.promise, starts.eventLog.promise),
     { spaces: deps.spacesSetup }
@@ -703,6 +793,11 @@ export const bootIsland = async (
   });
 
   // ---- start ----
+  if (eso) {
+    const esoStart = eso.start(core.start, {}) as object;
+    esoStartDeferred.resolve(esoStart);
+    (deps as { esoStart: object }).esoStart = esoStart;
+  }
   depsStart.eventLog.resolve({ spaces: deps.spacesStart });
   const eventLogStart = eventLog.start(core.start, { spaces: deps.spacesStart }) as object;
   starts.eventLog.resolve(eventLogStart);
