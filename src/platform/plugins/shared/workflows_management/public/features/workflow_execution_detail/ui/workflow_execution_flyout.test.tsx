@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowExecutionFlyout } from './workflow_execution_flyout';
 import { createStartServicesMock } from '../../../mocks';
@@ -422,5 +423,64 @@ describe('WorkflowExecutionFlyout child workflow steps', () => {
     expect(resumeButton).toHaveAttribute('data-execution-id', 'child-exec-1');
     expect(resumeButton).toHaveAttribute('data-approve-label', '');
     expect(resumeButton).toHaveAttribute('data-schema-fields', 'reason');
+  });
+});
+
+describe('WorkflowExecutionFlyout triggered by', () => {
+  const profileUid = 'u_mGBROF_q5bm_A5E_0';
+  const profile: UserProfileWithAvatar = {
+    uid: profileUid,
+    enabled: true,
+    user: { username: 'elastic' },
+    data: {},
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockChildExecutions.clear();
+    mockPollingResult.error = null;
+    mockPollingResult.workflowExecution = createMockWorkflowExecutionDto({
+      id: 'exec-1',
+      executedBy: profileUid,
+    });
+  });
+
+  const renderFlyout = (services = createStartServicesMock()) => {
+    render(<WorkflowExecutionFlyout executionId="exec-1" onClose={jest.fn()} />, {
+      wrapper: getTestProvider({ services }),
+    });
+    return services;
+  };
+
+  it('resolves the profile UID to the user display name', async () => {
+    const services = createStartServicesMock();
+    services.userProfile.bulkGet.mockResolvedValue([profile]);
+
+    renderFlyout(services);
+
+    await waitFor(() =>
+      expect(screen.getByTestId('workflowExecutionFlyoutExecutedBy')).toHaveTextContent('elastic')
+    );
+    expect(screen.getByTestId('workflowExecutionFlyoutExecutedBy')).not.toHaveTextContent(
+      profileUid
+    );
+    expect(services.userProfile.bulkGet).toHaveBeenCalledWith({
+      uids: new Set([profileUid]),
+      dataPath: 'avatar',
+    });
+  });
+
+  it('keeps the raw UID when the profile cannot be resolved', async () => {
+    const services = createStartServicesMock();
+    services.userProfile.bulkGet.mockResolvedValue([]);
+
+    renderFlyout(services);
+
+    // Let any profile lookup settle before asserting the fallback.
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    expect(screen.getByTestId('workflowExecutionFlyoutExecutedBy')).toHaveTextContent(profileUid);
   });
 });
