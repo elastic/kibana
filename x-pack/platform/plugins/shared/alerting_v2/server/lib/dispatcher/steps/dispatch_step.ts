@@ -192,7 +192,8 @@ export class DispatchStep implements DispatcherStep {
 
   /**
    * Writes the records the latest chunk made safe. Runs even after the tick signal fired: the
-   * workflows they describe are already scheduled.
+   * workflows they describe are already scheduled. A failed write rethrows to stop scheduling:
+   * every workflow scheduled after it would also lack its record and be dispatched again next tick.
    */
   private async commit(docs: AlertActionDocument[], logger: LoggerServiceContract): Promise<void> {
     if (docs.length === 0) {
@@ -230,6 +231,8 @@ export class DispatchStep implements DispatcherStep {
   /**
    * Schedules the workflows of `groups` and yields each group once, after its last schedule
    * attempt. Stops when the tick signal fires; groups not yielded by then were never attempted.
+   * Groups that cannot be scheduled (license, API key, workflow lookup) are yielded with their
+   * failures too: a group never yielded holds back its series' records and halts the tick as aborted.
    */
   private async *dispatchGroups(
     groups: readonly ActionGroup[],
@@ -498,12 +501,11 @@ export class DispatchStep implements DispatcherStep {
       alerts: group.alerts,
       rules: group.rules,
     };
-    const inputs: Record<string, unknown> = { payload };
 
     return {
       workflow: model,
       spaceId: group.spaceId,
-      inputs,
+      inputs: { payload },
       triggeredBy: ACTION_POLICY_TRIGGER,
     };
   }
@@ -516,9 +518,7 @@ export class DispatchStep implements DispatcherStep {
     logger: LoggerServiceContract
   ): Promise<void> {
     try {
-      const results: BulkScheduleWorkflowResult = await client.bulkScheduleWorkflow(
-        chunk.map((pending) => pending.item)
-      );
+      const results = await client.bulkScheduleWorkflow(chunk.map((pending) => pending.item));
       for (let i = 0; i < chunk.length; i++) {
         this.applyScheduleResult(
           chunk[i],
@@ -529,6 +529,8 @@ export class DispatchStep implements DispatcherStep {
         );
       }
     } catch (err) {
+      // Unlike a failed commit, a failed schedule leaves no workflow to record,
+      // so later chunks still run.
       const error = toError(err);
       for (const pending of chunk) {
         this.recordScheduleError(
@@ -604,6 +606,10 @@ export class DispatchStep implements DispatcherStep {
     };
   }
 
+  /**
+   * Workflows are looked up and scheduled as the policy's API key owner, so a policy only reaches
+   * the workflows its owner may access.
+   */
   private craftFakeRequest(apiKey: string): KibanaRequest {
     const requestHeaders: Headers = {
       authorization: `ApiKey ${getUiamApiKeySecret(apiKey)}`,
