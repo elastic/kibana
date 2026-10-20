@@ -279,7 +279,7 @@ export class DispatchStep implements DispatcherStep {
       workflowsBySpace: new Map(),
       failedSpaces: new Map(),
     }));
-    await this.prefetchWorkflows(batches);
+    await this.prefetchWorkflows(batches, logger);
     for (const { groups: batchGroups, request, workflowsBySpace, failedSpaces } of batches) {
       if (signal.aborted) return;
       const pendingByGroup = Map.groupBy(
@@ -351,7 +351,10 @@ export class DispatchStep implements DispatcherStep {
     );
   }
 
-  private async prefetchWorkflows(batches: DispatchBatch[]): Promise<void> {
+  private async prefetchWorkflows(
+    batches: DispatchBatch[],
+    logger: LoggerServiceContract
+  ): Promise<void> {
     const lookups: Array<{
       batch: DispatchBatch;
       ids: string[];
@@ -373,9 +376,18 @@ export class DispatchStep implements DispatcherStep {
       lookups.map(({ ids, spaceId, request }) => ({ ids, spaceId, request }))
     );
     results.forEach((result, index) => {
-      const { batch, spaceId } = lookups[index];
+      const { batch, ids, spaceId } = lookups[index];
       if (result.status === 'rejected') {
-        batch.failedSpaces.set(spaceId, toError(result.reason));
+        const error = toError(result.reason);
+        batch.failedSpaces.set(spaceId, error);
+        logger.error({
+          error,
+          code: ALERTING_LOG_CODES.DISPATCH_WORKFLOW_SCHEDULE_FAILED,
+          message: () =>
+            `Failed to look up ${ids.length} workflow(s) in space ${spaceId}; ` +
+            `their action groups are not dispatched. ${error.message}`,
+          labels: { space_id: spaceId },
+        });
       } else {
         batch.workflowsBySpace.set(
           spaceId,
@@ -397,9 +409,13 @@ export class DispatchStep implements DispatcherStep {
     for (const group of groups) {
       const prefetchError = failedSpaces.get(group.spaceId);
       if (prefetchError) {
-        for (const destination of workflowDestinations(group)) {
-          this.recordScheduleError(group, destination.id, prefetchError, dispatchFailures, logger);
-        }
+        dispatchFailures.push(
+          ...this.buildGroupFailures(
+            group,
+            DISPATCH_FAILURE_REASONS.SCHEDULE_ERROR,
+            prefetchError.message
+          )
+        );
         continue;
       }
 
@@ -532,13 +548,22 @@ export class DispatchStep implements DispatcherStep {
       // Unlike a failed commit, a failed schedule leaves no workflow to record,
       // so later chunks still run.
       const error = toError(err);
-      for (const pending of chunk) {
-        this.recordScheduleError(
-          pending.group,
-          pending.workflowId,
-          error,
-          dispatchFailures,
-          logger
+      const groupCount = new Set(chunk.map(({ group }) => group.id)).size;
+      logger.error({
+        error,
+        code: ALERTING_LOG_CODES.DISPATCH_WORKFLOW_SCHEDULE_FAILED,
+        message: () =>
+          `Failed to schedule ${chunk.length} workflow(s) for ${groupCount} action group(s). ` +
+          error.message,
+      });
+      for (const { group, workflowId } of chunk) {
+        dispatchFailures.push(
+          this.buildFailure(
+            group,
+            workflowId,
+            DISPATCH_FAILURE_REASONS.SCHEDULE_ERROR,
+            error.message
+          )
         );
       }
     }

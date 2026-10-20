@@ -387,43 +387,81 @@ describe('DispatchStep', () => {
     expect(mockLogger.error).toHaveBeenCalledWith('network timeout', expect.anything());
   });
 
-  it('logs error when scheduleWorkflow throws', async () => {
+  it('logs once per chunk and records every schedule as failed when scheduleWorkflow throws', async () => {
     const step = createStep();
 
     mockWfm.getWorkflowsByIdsForRequests.mockResolvedValue([
-      { status: 'fulfilled', value: [createWorkflowDetailDto()] },
+      {
+        status: 'fulfilled',
+        value: [
+          createWorkflowDetailDto({ id: 'workflow-1' }),
+          createWorkflowDetailDto({ id: 'workflow-2' }),
+        ],
+      },
     ]);
     mockWfm.bulkScheduleWorkflow.mockRejectedValue(new Error('service unavailable'));
 
-    const group = createActionGroup({
-      id: 'g1',
-      policyId: 'p1',
-      destinations: [{ type: 'workflow', id: 'workflow-1' }],
-    });
+    const groups = [
+      createActionGroup({
+        id: 'g1',
+        policyId: 'p1',
+        destinations: [
+          { type: 'workflow', id: 'workflow-1' },
+          { type: 'workflow', id: 'workflow-2' },
+        ],
+      }),
+      createActionGroup({
+        id: 'g2',
+        policyId: 'p1',
+        destinations: [{ type: 'workflow', id: 'workflow-1' }],
+      }),
+    ];
     const policy = createActionPolicy({
       id: 'p1',
       apiKey: API_KEY,
     });
 
     const state = createDispatcherPipelineState({
-      dispatch: [group],
+      dispatch: groups,
       policies: new Map([['p1', policy]]),
     });
 
     const result = await step.execute(state, loggerService);
 
     expect(result.type).toBe('continue');
+    const message = 'Failed to schedule 3 workflow(s) for 2 action group(s). service unavailable';
     expect(mockLogger.error).toHaveBeenCalledTimes(1);
-    expect(mockLogger.error).toHaveBeenCalledWith('service unavailable', {
-      labels: {
-        group_id: 'g1',
-        policy_id: 'p1',
-        workflow_id: 'workflow-1',
-        space_id: 'default',
-        code: ALERTING_LOG_CODES.DISPATCH_WORKFLOW_SCHEDULE_FAILED,
-      },
-      error: expect.objectContaining({ message: 'service unavailable' }),
+    expect(mockLogger.error).toHaveBeenCalledWith(message, {
+      labels: { code: ALERTING_LOG_CODES.DISPATCH_WORKFLOW_SCHEDULE_FAILED },
+      error: expect.objectContaining({ message }),
     });
+    expect(
+      getFailures(result).map(({ actionGroupId, workflowId, reason, message: failure }) => ({
+        actionGroupId,
+        workflowId,
+        reason,
+        failure,
+      }))
+    ).toEqual([
+      {
+        actionGroupId: 'g1',
+        workflowId: 'workflow-1',
+        reason: DISPATCH_FAILURE_REASONS.SCHEDULE_ERROR,
+        failure: 'service unavailable',
+      },
+      {
+        actionGroupId: 'g1',
+        workflowId: 'workflow-2',
+        reason: DISPATCH_FAILURE_REASONS.SCHEDULE_ERROR,
+        failure: 'service unavailable',
+      },
+      {
+        actionGroupId: 'g2',
+        workflowId: 'workflow-1',
+        reason: DISPATCH_FAILURE_REASONS.SCHEDULE_ERROR,
+        failure: 'service unavailable',
+      },
+    ]);
   });
 
   it('continues dispatching remaining destinations when one destination fails', async () => {
@@ -925,6 +963,12 @@ describe('DispatchStep', () => {
         destinations: [{ type: 'workflow', id: 'workflow-1' }],
       }),
       createActionGroup({
+        id: 'g3',
+        policyId: 'p1',
+        spaceId: 'space-a',
+        destinations: [{ type: 'workflow', id: 'workflow-2' }],
+      }),
+      createActionGroup({
         id: 'g2',
         policyId: 'p1',
         spaceId: 'space-b',
@@ -941,13 +985,29 @@ describe('DispatchStep', () => {
     );
 
     const failures = getFailures(result);
-    expect(failures).toHaveLength(1);
+    expect(failures).toHaveLength(2);
     expect(failures[0]).toMatchObject({
       actionGroupId: 'g1',
       workflowId: 'workflow-1',
       reason: DISPATCH_FAILURE_REASONS.SCHEDULE_ERROR,
       message: 'es down',
     });
+    expect(failures[1]).toMatchObject({
+      actionGroupId: 'g3',
+      workflowId: 'workflow-2',
+      reason: DISPATCH_FAILURE_REASONS.SCHEDULE_ERROR,
+      message: 'es down',
+    });
+    expect(mockLogger.error).toHaveBeenCalledTimes(1);
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      'Failed to look up 2 workflow(s) in space space-a; their action groups are not dispatched. es down',
+      expect.objectContaining({
+        labels: {
+          space_id: 'space-a',
+          code: ALERTING_LOG_CODES.DISPATCH_WORKFLOW_SCHEDULE_FAILED,
+        },
+      })
+    );
     expect(getExecutionIds(result, 'g2')).toEqual(['exec-b']);
     expect(getScheduledGroupCount(result)).toBe(1);
   });
