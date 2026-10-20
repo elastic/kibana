@@ -117,7 +117,7 @@ describe('useAttachmentRemoval', () => {
     expect(result.current.isRemoving).toBe(true);
 
     act(() => {
-      result.current.onRemove({})({ savedObjectIds: ['attachment-1'] });
+      result.current.onRemove({ id: 'file' })({ savedObjectIds: ['attachment-1'] });
     });
 
     expect(result.current.modal).toBeNull();
