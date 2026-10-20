@@ -110,6 +110,7 @@ describe('reportOutcome', () => {
       ALERTZERO_TELEMETRY_EVENTS.RuleTuningReviewCompleted,
       {
         applied: false,
+        approved_not_applied: false,
         backtest_ran: false,
         backtest_reduced_alerts: false,
         change_type: 'none' as const,
@@ -129,6 +130,7 @@ describe('reportOutcome', () => {
         creation_failed: false,
         creation_skipped: false,
         decision: 'none' as const,
+        entry_gate: 'skipped' as const,
         event: 'rule_coverage_review_completed' as const,
         ki_processed: false,
         proposal_kind: 'none' as const,
@@ -205,6 +207,34 @@ describe('reportOutcome', () => {
       );
     }
   );
+
+  // A YAML author who sets a flag but forgets the reason must not ship a run as healthy.
+  it.each([
+    ['a failed lookup', { lookup_failed: true }],
+    ['a failed source read', { source_read_failed: true }],
+    ['a failed item', { items_failed: 1 }],
+  ] as const)('reports a run with %s as degraded even when it names no reason', (_case, flags) => {
+    const report = jest.fn().mockReturnValue(true);
+
+    reportOutcome({
+      envelope,
+      input: {
+        candidates_found: 1,
+        degraded_reason: 'none',
+        event: 'worker_run_completed',
+        items_dispatched: 1,
+        items_failed: 0,
+        items_in_flight: 0,
+        lookup_failed: false,
+        run_outcome: 'produced',
+        source_read_failed: false,
+        ...flags,
+      },
+      report,
+    });
+
+    expect(report.mock.calls[0][1]).toEqual(expect.objectContaining({ degraded: true }));
+  });
 
   it('merges the envelope and drops the discriminator', () => {
     const report = jest.fn().mockReturnValue(true);

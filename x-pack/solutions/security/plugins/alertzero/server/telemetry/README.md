@@ -164,7 +164,7 @@ Emitted once by a Worker run, at its end, in one vocabulary for every Worker, so
 |---|---|---|---|
 | envelope | | | See above. `worker_id` says which Worker ran |
 | `run_outcome` | keyword | yes | `produced` (did the work it found), `empty_nothing_pending` (no work was queued), `empty_nothing_found` (searched and found nothing), `empty_at_capacity` (work existed but a limit held all of it back), `degraded_partial` (some items produced results, others failed or were held back), `failed_source_unavailable` (the source of work could not be read), `failed_all_items` (every item failed) or `blocked_precondition` (a precondition such as a readable data scope was not met) |
-| `degraded` | boolean | yes | Whether the run did less than the work it found: some items failed, a lookup failed and the run carried on without it, or a limit held work back. Derived on the server: true exactly when `degraded_reason` isn't `none` |
+| `degraded` | boolean | yes | Whether the run did less than the work it found: some items failed, a lookup failed and the run carried on without it, reading its source failed, or a limit held work back. Derived on the server: true when `degraded_reason` isn't `none`, `lookup_failed` or `source_read_failed` is true, or `items_failed` is above 0 |
 | `degraded_reason` | keyword | yes | The main reason, `none` when `degraded` is false: `missing_data` (an input or intermediate result was missing), `dependency_unavailable` (a service, model or child workflow failed or could not be read), `partial_timeout` (some items ran out of time), `capacity` (a limit held work back) or `other` |
 | `candidates_found` | long | yes | Work items the run found, in the Worker's own unit |
 | `items_dispatched` | long | yes | Work items the run started or handed on |
@@ -218,11 +218,12 @@ Emitted by a Rule Tuning review for one rule, when it ends: after the manual ent
 | `change_type` | keyword | yes | The tuning change proposed: `query`, `risk_score`, `exception`, `threshold`, `schedule`, `manual` (the action-less arm, which also takes any type the other arms do not name) or `none` |
 | `confidence` | keyword | yes | The diagnosis's stated confidence: `low`, `medium`, `high` or `none` |
 | `decision` | keyword | yes | `approved`, `dismissed`, `undecided` (a proposal nobody decided) or `none` (no proposal) |
-| `applied` | boolean | yes | Whether an approved change was applied to the rule |
+| `applied` | boolean | yes | Whether an approved change landed on the rule, confirmed by re-reading it: a new revision, or the exception item the change added |
+| `approved_not_applied` | boolean | yes | Whether an approved change with an action did not land. The alerts then stay untagged, so a later sweep retries the rule |
 | `backtest_ran` | boolean | yes | Whether both backtest previews (current and proposed rule) succeeded |
 | `backtest_reduced_alerts` | boolean | yes | Whether the proposed rule produced fewer preview alerts. False when the backtest did not run |
 | `rule_unavailable` | boolean | yes | Whether the rule could not be read or was disabled, so the review did nothing |
-| `rule_type` | keyword | no | The reviewed rule's type: `query`, `eql`, `esql`, `threshold`, `new_terms`, `ml`, `threat_match` or `other` (`ml` is machine learning; `query` includes saved query). Absent when the rule could not be read |
+| `rule_type` | keyword | no | The reviewed rule's type: `query`, `eql`, `esql`, `threshold`, `new_terms`, `ml`, `threat_match` or `other` (`ml` is machine learning; `query` includes saved query). The YAML passes the rule's own `type` and the step maps it, so the vocabulary lives in one place. Absent when the rule could not be read |
 | `rule_source` | keyword | no | `prebuilt` (an Elastic prebuilt rule) or `custom`. Absent when the rule could not be read |
 | `investigation_id` | keyword | no | The Investigation the review opened. It joins to the close. Absent only when `rule_unavailable` is true, because the review opens none for a rule it cannot read or that is disabled |
 
@@ -234,12 +235,13 @@ Emitted by a Rule Coverage review for one detection gap (a knowledge indicator),
 |---|---|---|---|
 | envelope | | | See above |
 | `verdict` | keyword | yes | The coverage check's verdict: `covered_enabled`, `covered_disabled`, `prebuilt_available`, `no_coverage` or `none` |
+| `entry_gate` | keyword | yes | `skipped` (no entry gate ran: assisted autonomy, or no Investigation was opened), `approved`, `declined` or `undecided` (nobody answered it). A declined or unanswered gate ends the review, so its event has `decision: none` |
 | `proposal_kind` | keyword | yes | What the review proposed: `enable_rule`, `install_prebuilt_rule`, `create_rule`, `confirm_coverage`, `manual_follow_up` (an action-less report when the check's result could not be acted on) or `none` |
 | `decision` | keyword | yes | `approved`, `dismissed`, `undecided` (a proposal nobody decided) or `none` (no proposal) |
 | `applied` | boolean | yes | Whether an approved enable or install landed, confirmed by re-reading the rule |
 | `approved_not_applied` | boolean | yes | Whether an approved enable or install did not land. The indicator then stays pending |
 | `rule_created` | boolean | yes | Whether a new rule was created for the gap |
-| `rule_type` | keyword | no | The type of the rule the review is about (the one it proposed to enable, install, confirm or create): `query`, `eql`, `esql`, `threshold`, `new_terms`, `ml`, `threat_match` or `other` (`ml` is machine learning; `query` includes saved query). Absent when there is none or the type is unknown |
+| `rule_type` | keyword | no | The type of the rule the review is about (the one it proposed to enable, install, confirm or create): `query`, `eql`, `esql`, `threshold`, `new_terms`, `ml`, `threat_match` or `other` (`ml` is machine learning; `query` includes saved query), mapped by the step from the rule's own `type`. Absent when there is none |
 | `rule_source` | keyword | no | `prebuilt` or `custom`, for the same rule. Absent when there is none |
 | `creation_skipped` | boolean | yes | Whether the rule-creation run completed without proposing a rule |
 | `creation_failed` | boolean | yes | Whether the rule-creation run failed |

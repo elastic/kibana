@@ -63,10 +63,20 @@ const EVENT_TYPE_BY_OUTCOME = {
 const omitUndefined = <T extends object>(value: T): T =>
   Object.fromEntries(Object.entries(value).filter(([, entry]) => entry !== undefined)) as T;
 
-/** A run is degraded exactly when it names a reason, so YAML sends only the reason. */
+/**
+ * A run is degraded when it names a reason, or when its own flags or counts say it did less than
+ * the work it found, so YAML never sends `degraded`.
+ */
 const withDerivedFields = (input: ReportWorkerOutcomeStepInput) =>
   input.event === 'worker_run_completed'
-    ? { ...input, degraded: input.degraded_reason !== 'none' }
+    ? {
+        ...input,
+        degraded:
+          input.degraded_reason !== 'none' ||
+          input.lookup_failed ||
+          input.source_read_failed ||
+          input.items_failed > 0,
+      }
     : input;
 
 /** Reports the event a parsed step input names, with the run's envelope fields taking precedence. */

@@ -13,15 +13,15 @@ A workflow step that reports an allowlisted AlertZero Worker outcome as an EBT e
 | `ad_worker_run_completed` | `alertzero_ad_worker_run_completed` | `alerts_analyzed`, `batches_total`, `batches_failed`, `attacks_generated`, `attacks_persisted` (counts, default `0`), `run_outcome` (required) |
 | `ad_worker_review_started` | `alertzero_ad_worker_review_started` | `investigation_id` (UUID, required), `is_rereview` (required) |
 | `ad_worker_analysis_completed` | `alertzero_ad_worker_analysis_completed` | `verdict` (required), `analysis_error` (default `false`) |
-| `ad_worker_handoff_resolved` | `alertzero_ad_worker_handoff_resolved` | `outcome`, `verdict`, `auto_approve_requested` (required) |
+| `ad_worker_handoff_resolved` | `alertzero_ad_worker_handoff_resolved` | `outcome`, `verdict` (`true_positive` or `inconclusive`, the verdicts that escalate), `auto_approve_requested` (required) |
 | `worker_investigation_closed` | `alertzero_worker_investigation_closed` | `investigation_id` (UUID, required), `close_reason` (required, the Investigation template's close reason, or the class the Worker's close maps to) |
-| `worker_run_completed` | `alertzero_worker_run_completed` | `run_outcome` (required), `degraded_reason` (default `none`; the event's `degraded` is derived from it), `candidates_found`, `items_dispatched`, `items_failed`, `items_in_flight` (counts, default `0`), `source_read_failed`, `lookup_failed` (default `false`) |
+| `worker_run_completed` | `alertzero_worker_run_completed` | `run_outcome` (required), `degraded_reason` (default `none`; the event's `degraded` is derived from it and from `lookup_failed`, `source_read_failed` and `items_failed`), `candidates_found`, `items_dispatched`, `items_failed`, `items_in_flight` (counts, default `0`), `source_read_failed`, `lookup_failed` (default `false`) |
 | `alert_triage_batch_classified` | `alertzero_alert_triage_batch_classified` | `alerts_total`, `verdicts_true_positive`, `verdicts_false_positive`, `verdicts_inconclusive`, `alerts_without_verdict`, `fp_candidates`, `fp_below_floor` (counts), `investigation_id` (UUID, required) |
-| `alert_triage_closure_resolved` | `alertzero_alert_triage_closure_resolved` | `outcome` (required), `alerts_proposed`, `alerts_retag_failed` (counts), `auto_approve_requested`, `proposal_read_failed` (flags), `investigation_id` (UUID, required) |
-| `rule_tuning_review_completed` | `alertzero_rule_tuning_review_completed` | `entry_gate`, `change_type`, `decision` (required), `confidence` (default `none`), `applied`, `backtest_ran`, `backtest_reduced_alerts`, `rule_unavailable` (flags), `rule_type`, `rule_source` (optional), `investigation_id` (UUID, required unless `rule_unavailable`) |
-| `rule_coverage_review_completed` | `alertzero_rule_coverage_review_completed` | `verdict`, `proposal_kind`, `decision` (required), `applied`, `approved_not_applied`, `rule_created`, `creation_skipped`, `creation_failed`, `check_failed`, `ki_processed` (flags), `rule_type`, `rule_source` (optional), `investigation_id` (UUID, required unless `check_failed`) |
+| `alert_triage_closure_resolved` | `alertzero_alert_triage_closure_resolved` | `outcome` (required), `alerts_proposed`, `alerts_retag_failed` (counts), `auto_approve_requested` (required flag), `proposal_read_failed` (flag), `investigation_id` (UUID, required) |
+| `rule_tuning_review_completed` | `alertzero_rule_tuning_review_completed` | `entry_gate`, `change_type`, `decision` (required), `confidence` (default `none`), `applied`, `approved_not_applied`, `backtest_ran`, `backtest_reduced_alerts`, `rule_unavailable` (flags), `rule_type` (the rule's own `type`, which the step maps to the event's vocabulary), `rule_source` (optional), `investigation_id` (UUID, required unless `rule_unavailable`) |
+| `rule_coverage_review_completed` | `alertzero_rule_coverage_review_completed` | `verdict`, `proposal_kind`, `decision`, `entry_gate` (required), `applied`, `approved_not_applied`, `rule_created`, `creation_skipped`, `creation_failed`, `check_failed`, `ki_processed` (flags), `rule_type` (the rule's own `type`, mapped as for tuning), `rule_source` (optional), `investigation_id` (UUID, required unless `check_failed`) |
 | `hunt_report_completed` | `alertzero_hunt_report_completed` | `hunt_status`, `package_status` (required), `mint_suppression` (default `none`), `has_confirmed_hit`, `closed_clean` (flags), `tier2_invoked` (optional), `proposals_prepared`, `proposals_dispatch_failed`, `coverage_kis_written`, `coverage_kis_skipped` (counts), `investigation_id` (UUID, required unless `package_status` is `run_incomplete`) |
-| `endpoint_analysis_completed` | `alertzero_endpoint_analysis_completed` | `analysis_outcome` (required), `reused_prior_assessment`, `host_resolved`, `agent_failed`, `timeline_found`, `iocs_found`, `findings_attached`, `auto_approve_requested` (flags), `actions_recommended`, `proposals_dispatched`, `proposals_dispatch_failed` (counts) |
+| `endpoint_analysis_completed` | `alertzero_endpoint_analysis_completed` | `analysis_outcome` (required), `reused_prior_assessment`, `host_resolved`, `agent_failed`, `timeline_found`, `iocs_found`, `findings_attached` (flags), `auto_approve_requested` (required flag), `actions_recommended`, `proposals_dispatched`, `proposals_dispatch_failed` (counts) |
 
 Liquid renders a missing value as `''`, so every count and flag treats `''` and `null` as absent, and a count or flag also accepts the text a `{{ }}` template renders (`'12'`, `'true'`). Prefer `${{ }}` typed values with a `default`. The engine does not apply the input schema at runtime, so the handler parses it itself.
 
@@ -78,9 +78,11 @@ The caller check is best-effort. It checks every hop, not only the root, because
 
 ## Skip reasons
 
-A skip is written to the AlertZero server logger (`plugins.alertzero.telemetry`), never to the workflow event log or the step output, so the step cannot be used to probe other executions.
+A skip is written to the AlertZero server logger (`plugins.alertzero.telemetry`), never to the workflow event log or the step output, so the step cannot be used to probe other executions. When a read fails (a timeout, an Elasticsearch error, or a denial for the Worker's own service account), a debug line before the skip names the execution or workflow and the error's type and message, never the document.
+
+At the deadline, or when the run is cancelled, the step stops waiting on its reads and starts no new one. It cannot cancel a read already sent: neither `getWorkflowExecution` nor `getInstalledWorkflowState` takes an abort signal.
 
 | Reason | Level |
 |---|---|
 | `opted_out`, `test_run`, `not_managed`, `lineage_unavailable`, `service_accounts_disabled`, `not_catalog_root`, `aborted`, `deadline_exceeded` (the step ran past its 20s deadline) | debug |
-| `invalid_input` (issue paths and codes only, never the rendered values), `wrong_worker` (the event name), `report_error` | warn |
+| `invalid_input` (issue paths and codes only, never the rendered values), `wrong_worker` (the event name), `report_error` (the error's type and HTTP status only, never its message) | warn |

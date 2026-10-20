@@ -19,6 +19,7 @@ import {
 import type { AlertZeroTelemetryAnalytics } from '../../telemetry';
 import { buildAlertZeroEnvelope, createAlertZeroTelemetryReporter } from '../../telemetry';
 import { checkWorkflowManaged } from './check_workflow_managed';
+import { describeErrorKind } from './describe_error';
 import { isEventFromItsWorker } from './event_worker_ids';
 import { findOutcomeContradictions } from './find_outcome_contradictions';
 import { reportOutcome } from './report_outcome';
@@ -97,9 +98,11 @@ const verifyAndReport = async (
   }
 
   const unmanaged = await checkWorkflowManaged({
+    abortSignal,
     areServiceAccountsEnabled: deps.areServiceAccountsEnabled,
     getManagedWorkflowState: deps.getManagedWorkflowState,
     hopTimeoutMs: HOP_TIMEOUT_MS,
+    logger: deps.logger,
     spaceId: workflow.spaceId,
     workflowId: workflow.id,
   });
@@ -121,6 +124,7 @@ const verifyAndReport = async (
         request,
       }),
     hopTimeoutMs: HOP_TIMEOUT_MS,
+    logger: deps.logger,
     spaceId: workflow.spaceId,
   });
   if (!chain.verified) {
@@ -176,8 +180,7 @@ export const getReportWorkerOutcomeStepDefinition = (deps: ReportWorkerOutcomeSt
         onDeadline: () => skipped('deadline_exceeded'),
         task: (signal) =>
           verifyAndReport(deps, { abortSignal: signal, contextManager, input }).catch(
-            (error: unknown) =>
-              skipped('report_error', error instanceof Error ? error.message : String(error))
+            (error: unknown) => skipped('report_error', describeErrorKind(error))
           ),
       });
       if (!outcome.reported) {

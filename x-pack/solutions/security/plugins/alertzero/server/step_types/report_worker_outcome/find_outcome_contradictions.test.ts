@@ -57,6 +57,7 @@ describe('findOutcomeContradictions', () => {
   const coverage = (override: Record<string, unknown>) =>
     parse({
       decision: 'none',
+      entry_gate: 'skipped',
       event: 'rule_coverage_review_completed',
       proposal_kind: 'none',
       verdict: 'none',

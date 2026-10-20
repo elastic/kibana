@@ -31,6 +31,23 @@ describe('withTimeout', () => {
     await expect(pending).rejects.toThrow('Timed out after 1000ms');
   });
 
+  it('rejects once the signal aborts, without waiting for the timeout', async () => {
+    const controller = new AbortController();
+    const pending = withTimeout(new Promise<never>(() => {}), 1000, controller.signal);
+    controller.abort();
+
+    await expect(pending).rejects.toThrow('Aborted');
+  });
+
+  it('rejects at once when the signal has already aborted', async () => {
+    const controller = new AbortController();
+    controller.abort();
+
+    await expect(
+      withTimeout(new Promise<never>(() => {}), 1000, controller.signal)
+    ).rejects.toThrow('Aborted');
+  });
+
   it('clears its timer when the promise settles first', async () => {
     await withTimeout(Promise.resolve('value'), 1000);
 

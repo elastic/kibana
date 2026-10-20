@@ -11,6 +11,7 @@ import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { lazySchema, z } from '@kbn/zod/v4';
 import {
   AD_WORKER_ANALYSIS_VERDICTS,
+  AD_WORKER_ESCALATED_VERDICTS,
   AD_WORKER_HANDOFF_OUTCOMES,
   AD_WORKER_RUN_OUTCOMES,
   ALERT_TRIAGE_CLOSURE_OUTCOMES,
@@ -23,13 +24,14 @@ import {
   INVESTIGATION_CLOSE_REASONS,
   RULE_COVERAGE_PROPOSAL_KINDS,
   RULE_COVERAGE_VERDICTS,
+  RULE_REVIEW_ENTRY_GATES,
   RULE_TUNING_CHANGE_TYPES,
-  RULE_TUNING_ENTRY_GATES,
   WORKER_DEGRADED_REASONS,
   WORKER_RECOMMENDATION_CONFIDENCES,
   WORKER_REVIEW_DECISIONS,
   WORKER_RUN_OUTCOMES,
 } from '../telemetry/constants';
+import { toDetectionRuleType } from '../telemetry/to_detection_rule_type';
 
 export const ReportWorkerOutcomeStepId = 'alertzero.reportWorkerOutcome' as const;
 
@@ -112,6 +114,13 @@ const oneOfOrDefault = <T extends readonly [string, ...string[]]>(
 const optionalOneOf = <T extends readonly [string, ...string[]]>(values: T, description: string) =>
   z.preprocess(toAbsent, z.enum(values).optional()).describe(description);
 
+/**
+ * A detection rule's own `type`, mapped to the #19891 vocabulary here so Worker YAML passes it
+ * through; absent when Liquid renders nothing.
+ */
+const detectionRuleType = (description: string) =>
+  z.preprocess(toDetectionRuleType, z.enum(DETECTION_RULE_TYPES).optional()).describe(description);
+
 /** The Worker's own Investigation, which every step reporting the event has. */
 const investigationId = (description: string) =>
   z.preprocess(toAbsent, z.uuid()).describe(description);
@@ -157,7 +166,7 @@ const adWorkerHandoffResolvedInputSchema = lazySchema(() =>
     auto_approve_requested: requiredFlag('Whether the review asked the gate to auto-approve'),
     outcome: z.enum(AD_WORKER_HANDOFF_OUTCOMES).describe('How the escalation gate resolved'),
     verdict: oneOf(
-      AD_WORKER_ANALYSIS_VERDICTS,
+      AD_WORKER_ESCALATED_VERDICTS,
       'FP/TP analysis verdict that led to the escalation'
     ),
   })
@@ -210,7 +219,7 @@ const alertTriageClosureResolvedInputSchema = lazySchema(() =>
     event: z.literal('alert_triage_closure_resolved'),
     alerts_proposed: count('Alerts the closure proposal covered'),
     alerts_retag_failed: count('Alerts a dismissal could not re-tag'),
-    auto_approve_requested: flag('Whether the review asked the gate to auto-approve'),
+    auto_approve_requested: requiredFlag('Whether the review asked the gate to auto-approve'),
     investigation_id: investigationId('Investigation the closure review settles'),
     outcome: oneOf(ALERT_TRIAGE_CLOSURE_OUTCOMES, 'How the closure proposal settled'),
     proposal_read_failed: flag('Whether the decided proposal could not be read back'),
@@ -220,7 +229,8 @@ const alertTriageClosureResolvedInputSchema = lazySchema(() =>
 const ruleTuningReviewCompletedInputSchema = lazySchema(() =>
   z.strictObject({
     event: z.literal('rule_tuning_review_completed'),
-    applied: flag('Whether an approved tuning change was applied to the rule'),
+    applied: flag('Whether an approved tuning change landed on the rule'),
+    approved_not_applied: flag('Whether an approved tuning change did not land'),
     backtest_ran: flag('Whether both backtest previews succeeded'),
     backtest_reduced_alerts: flag('Whether the proposed rule produced fewer preview alerts'),
     change_type: oneOf(RULE_TUNING_CHANGE_TYPES, 'Kind of tuning change proposed'),
@@ -230,12 +240,12 @@ const ruleTuningReviewCompletedInputSchema = lazySchema(() =>
       "The diagnosis's stated confidence"
     ),
     decision: oneOf(WORKER_REVIEW_DECISIONS, 'What the tuning proposal came to'),
-    entry_gate: oneOf(RULE_TUNING_ENTRY_GATES, 'How the manual-autonomy entry gate went'),
+    entry_gate: oneOf(RULE_REVIEW_ENTRY_GATES, 'How the manual-autonomy entry gate went'),
     investigation_id: optionalInvestigationId(
       'Investigation the review opened; absent only when rule_unavailable'
     ),
     rule_source: optionalOneOf(DETECTION_RULE_SOURCES, 'Whether the reviewed rule is prebuilt'),
-    rule_type: optionalOneOf(DETECTION_RULE_TYPES, "The reviewed rule's type"),
+    rule_type: detectionRuleType("The reviewed rule's type"),
     rule_unavailable: flag('Whether the rule could not be read or was disabled'),
   })
 );
@@ -249,6 +259,7 @@ const ruleCoverageReviewCompletedInputSchema = lazySchema(() =>
     creation_failed: flag('Whether the rule-creation run failed'),
     creation_skipped: flag('Whether the rule-creation run proposed nothing'),
     decision: oneOf(WORKER_REVIEW_DECISIONS, 'What the coverage proposal came to'),
+    entry_gate: oneOf(RULE_REVIEW_ENTRY_GATES, 'How the manual-autonomy entry gate went'),
     investigation_id: optionalInvestigationId(
       'Investigation the review opened; absent only when check_failed'
     ),
@@ -259,7 +270,7 @@ const ruleCoverageReviewCompletedInputSchema = lazySchema(() =>
       DETECTION_RULE_SOURCES,
       'Whether the rule the review is about is prebuilt'
     ),
-    rule_type: optionalOneOf(DETECTION_RULE_TYPES, 'The type of the rule the review is about'),
+    rule_type: detectionRuleType('The type of the rule the review is about'),
     verdict: oneOf(RULE_COVERAGE_VERDICTS, "The coverage check's verdict"),
   })
 );
@@ -293,7 +304,7 @@ const endpointAnalysisCompletedInputSchema = lazySchema(() =>
     actions_recommended: count('Containment actions the analysis recommended'),
     agent_failed: flag('Whether the forensic agent failed'),
     analysis_outcome: oneOf(ENDPOINT_ANALYSIS_OUTCOMES, 'How the run settled its indicator'),
-    auto_approve_requested: flag('Whether the proposals asked the gate to auto-approve'),
+    auto_approve_requested: requiredFlag('Whether the proposals asked the gate to auto-approve'),
     findings_attached: flag('Whether the timeline and IoC findings are on the Investigation'),
     host_resolved: flag('Whether a host was found to analyze'),
     iocs_found: flag('Whether the analysis extracted any IoC'),
@@ -393,17 +404,18 @@ export const reportWorkerOutcomeStepCommonDefinition: CommonStepDefinition<
 \`\`\``,
       `## Report the same run with the event every Worker shares
 \`\`\`yaml
-# The same run in the vocabulary every Worker shares; the items are generation batches.
+# The same run in the vocabulary every Worker shares. The items are generation batches, which the
+# run waits for, so none is in flight; alerts and attacks are on its own event.
 - name: report_worker_run_completed
   type: ${ReportWorkerOutcomeStepId}
   on-failure:
     continue: true
   with:
     event: worker_run_completed
-    candidates_found: "\${{ steps.run_generation.output.alerts_analyzed | default: 0 }}"
+    candidates_found: "\${{ steps.run_generation.output.batches_total | default: 0 }}"
     items_dispatched: "\${{ steps.run_generation.output.batches_total | default: 0 }}"
     items_failed: "\${{ steps.run_generation.output.batches_failed | default: 0 }}"
-    items_in_flight: "\${{ steps.resolve_fanout.output.attack_count | default: 0 }}"
+    items_in_flight: 0
     degraded_reason: "{% if steps.run_generation.output.batches_failed > 0 %}dependency_unavailable{% else %}none{% endif %}"
     run_outcome: |-
       {%- assign batches_total = steps.run_generation.output.batches_total | default: 0 -%}

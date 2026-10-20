@@ -9,6 +9,7 @@ import type { EventTypeOpts, RootSchema } from '@kbn/core/server';
 import { WATCH_AUTONOMY_LEVELS } from '@kbn/alertzero-common';
 import type {
   AdWorkerAnalysisVerdict,
+  AdWorkerEscalatedVerdict,
   AdWorkerHandoffOutcome,
   AdWorkerRunOutcome,
   AlertTriageClosureOutcome,
@@ -21,8 +22,8 @@ import type {
   InvestigationCloseReason,
   RuleCoverageProposalKind,
   RuleCoverageVerdict,
+  RuleReviewEntryGate,
   RuleTuningChangeType,
-  RuleTuningEntryGate,
   WorkerDegradedReason,
   WorkerRecommendationConfidence,
   WorkerReviewDecision,
@@ -30,6 +31,7 @@ import type {
 } from '../../common/telemetry/constants';
 import {
   AD_WORKER_ANALYSIS_VERDICTS,
+  AD_WORKER_ESCALATED_VERDICTS,
   AD_WORKER_HANDOFF_OUTCOMES,
   AD_WORKER_RUN_OUTCOMES,
   ALERT_TRIAGE_CLOSURE_OUTCOMES,
@@ -42,8 +44,8 @@ import {
   INVESTIGATION_CLOSE_REASONS,
   RULE_COVERAGE_PROPOSAL_KINDS,
   RULE_COVERAGE_VERDICTS,
+  RULE_REVIEW_ENTRY_GATES,
   RULE_TUNING_CHANGE_TYPES,
-  RULE_TUNING_ENTRY_GATES,
   WORKER_DEGRADED_REASONS,
   WORKER_RECOMMENDATION_CONFIDENCES,
   WORKER_REVIEW_DECISIONS,
@@ -93,7 +95,7 @@ export interface AlertZeroAdWorkerAnalysisCompletedPayload extends AlertZeroEnve
 export interface AlertZeroAdWorkerHandoffResolvedPayload extends AlertZeroEnvelope {
   auto_approve_requested: boolean;
   outcome: AdWorkerHandoffOutcome;
-  verdict: AdWorkerAnalysisVerdict;
+  verdict: AdWorkerEscalatedVerdict;
 }
 
 export interface AlertZeroWorkerInvestigationClosedPayload extends AlertZeroEnvelope {
@@ -135,12 +137,13 @@ export interface AlertZeroAlertTriageClosureResolvedPayload extends AlertZeroEnv
 
 export interface AlertZeroRuleTuningReviewCompletedPayload extends AlertZeroEnvelope {
   applied: boolean;
+  approved_not_applied: boolean;
   backtest_ran: boolean;
   backtest_reduced_alerts: boolean;
   change_type: RuleTuningChangeType;
   confidence: WorkerRecommendationConfidence;
   decision: WorkerReviewDecision;
-  entry_gate: RuleTuningEntryGate;
+  entry_gate: RuleReviewEntryGate;
   investigation_id?: string;
   rule_source?: DetectionRuleSource;
   rule_type?: DetectionRuleType;
@@ -154,6 +157,7 @@ export interface AlertZeroRuleCoverageReviewCompletedPayload extends AlertZeroEn
   creation_failed: boolean;
   creation_skipped: boolean;
   decision: WorkerReviewDecision;
+  entry_gate: RuleReviewEntryGate;
   investigation_id?: string;
   ki_processed: boolean;
   proposal_kind: RuleCoverageProposalKind;
@@ -382,8 +386,9 @@ export const ALERTZERO_AD_WORKER_HANDOFF_RESOLVED_EVENT: EventTypeOpts<AlertZero
       verdict: {
         type: 'keyword',
         _meta: {
-          description:
-            'FP/TP analysis verdict that led to the escalation (`true_positive` or `inconclusive`)',
+          description: `FP/TP analysis verdict that led to the escalation: ${formatVocabulary(
+            AD_WORKER_ESCALATED_VERDICTS
+          )}`,
           optional: false,
         },
       },
@@ -459,7 +464,7 @@ export const ALERTZERO_WORKER_RUN_COMPLETED_EVENT: EventTypeOpts<AlertZeroWorker
         "Work items the run found to work on, in the Worker's own unit (alerts, rules, indicators or reports)"
       ),
       degraded: flagField(
-        'Whether the run did less than the work it found: some items failed, a lookup failed and the run carried on without it, or a limit held work back'
+        'Whether the run did less than the work it found: true when it reported a `degraded_reason` other than `none`, some items failed, a lookup failed and the run carried on without it, or reading its source failed'
       ),
       degraded_reason: vocabularyField(
         'Main reason the run did less than the work it found, `none` when it did not',
@@ -534,7 +539,12 @@ export const ALERTZERO_RULE_TUNING_REVIEW_COMPLETED_EVENT: EventTypeOpts<AlertZe
     eventType: ALERTZERO_TELEMETRY_EVENTS.RuleTuningReviewCompleted,
     schema: {
       ...ENVELOPE_SCHEMA,
-      applied: flagField('Whether an approved tuning change was applied to the rule'),
+      applied: flagField(
+        'Whether an approved tuning change landed, confirmed by re-reading the rule (a changed revision, or the exception item the change added)'
+      ),
+      approved_not_applied: flagField(
+        'Whether an approved tuning change with an action did not land on the rule; the alerts then stay untagged for a later sweep'
+      ),
       backtest_ran: flagField(
         'Whether both backtest previews (current and proposed rule) succeeded'
       ),
@@ -552,7 +562,7 @@ export const ALERTZERO_RULE_TUNING_REVIEW_COMPLETED_EVENT: EventTypeOpts<AlertZe
       decision: vocabularyField('What the tuning proposal came to', WORKER_REVIEW_DECISIONS),
       entry_gate: vocabularyField(
         'How the manual-autonomy entry gate went (`skipped` when none ran: assisted autonomy, or a rule that could not be read)',
-        RULE_TUNING_ENTRY_GATES
+        RULE_REVIEW_ENTRY_GATES
       ),
       investigation_id: optionalInvestigationIdField(
         'The Investigation the review opened; joins to its close. Absent only when `rule_unavailable` is true, because the review opens none for a rule it cannot read or that is disabled'
@@ -590,6 +600,10 @@ export const ALERTZERO_RULE_COVERAGE_REVIEW_COMPLETED_EVENT: EventTypeOpts<Alert
         'Whether the rule-creation run completed without proposing a rule'
       ),
       decision: vocabularyField('What the coverage proposal came to', WORKER_REVIEW_DECISIONS),
+      entry_gate: vocabularyField(
+        'How the manual-autonomy entry gate went (`skipped` when none ran: assisted autonomy, or no Investigation was opened). A declined or unanswered gate ends the review, so its event has `decision: none`',
+        RULE_REVIEW_ENTRY_GATES
+      ),
       investigation_id: optionalInvestigationIdField(
         'The Investigation the review opened; joins to its close. Absent only when `check_failed` is true, because the review opens none when the indicator is not found'
       ),

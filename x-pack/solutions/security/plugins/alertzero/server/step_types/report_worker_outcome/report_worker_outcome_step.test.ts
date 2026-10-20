@@ -187,9 +187,16 @@ const skipFootprint = ({
   warn: logger.warn.mock.calls.map(([message]) => message),
 });
 
-/** The footprint of a run that skipped as `reason`, logging only that at `level`. */
-const expectedSkip = (reason: ReportWorkerOutcomeSkipReason, level: SkipLogLevel) => ({
-  debug: level === 'debug' ? [expect.stringContaining(`(${reason})`)] : [],
+/**
+ * The footprint of a run that skipped as `reason`, logging only that at `level`, after any
+ * `debugBefore` lines saying why a read failed.
+ */
+const expectedSkip = (
+  reason: ReportWorkerOutcomeSkipReason,
+  level: SkipLogLevel,
+  debugBefore: readonly string[] = []
+) => ({
+  debug: [...debugBefore, ...(level === 'debug' ? [expect.stringContaining(`(${reason})`)] : [])],
   reportEvent: 0,
   result: NOT_REPORTED,
   warn: level === 'warn' ? [expect.stringContaining(`(${reason})`)] : [],
@@ -203,6 +210,8 @@ interface SkipCase {
     abortSignal?: AbortSignal;
     overrides?: Partial<ReportWorkerOutcomeStepDeps>;
   };
+  /** Debug lines a failed read logs before the skip itself. */
+  debugBefore?: readonly string[];
   input?: unknown;
   isTestRun?: boolean;
   level: SkipLogLevel;
@@ -215,6 +224,7 @@ interface SkipCase {
 /** Runs a skip case, and asserts its footprint and that none of its `unread` reads happened. */
 const expectSkip = async ({
   arrange = () => ({}),
+  debugBefore,
   input = RUN_COMPLETED_INPUT,
   isTestRun = false,
   level,
@@ -236,7 +246,7 @@ const expectSkip = async ({
     ...skipFootprint({ analytics, logger, result }),
     reads: Object.fromEntries(unread.map((read) => [read, readCounts[read]()])),
   }).toEqual({
-    ...expectedSkip(reason, level),
+    ...expectedSkip(reason, level, debugBefore),
     reads: Object.fromEntries(unread.map((read) => [read, 0])),
   });
 };
@@ -563,6 +573,7 @@ describe('alertzero.reportWorkerOutcome step', () => {
         {
           check_failed: 'true',
           decision: 'dismissed',
+          entry_gate: 'skipped',
           event: 'rule_coverage_review_completed',
           investigation_id: '',
           proposal_kind: 'install_prebuilt_rule',
@@ -587,6 +598,7 @@ describe('alertzero.reportWorkerOutcome step', () => {
         {
           actions_recommended: 1,
           analysis_outcome: 'proposals_lost',
+          auto_approve_requested: 'false',
           event: 'endpoint_analysis_completed',
           findings_attached: true,
           host_resolved: true,
@@ -773,6 +785,9 @@ describe('alertzero.reportWorkerOutcome step', () => {
             )
           ),
         }),
+        debugBefore: [
+          'Could not check that system-alertzero-attack-discovery-review is managed: Error: Workflows is not available in this environment',
+        ],
         level: 'debug',
         reason: 'lineage_unavailable',
         title: 'when the managed state lookup throws',
@@ -872,6 +887,20 @@ describe('alertzero.reportWorkerOutcome step', () => {
       await run(deps, createContext(RUN_COMPLETED_INPUT, { isTestRun: true }));
 
       expect(isTelemetryOptedIn).not.toHaveBeenCalled();
+    });
+
+    it('a failure at warn level by its error type, not its message, which may echo rendered input', async () => {
+      const { deps, logger } = createDeps({
+        isTelemetryOptedIn: async () => {
+          throw new Error('index [secret-index] not found');
+        },
+      });
+
+      await run(deps, createContext(RUN_COMPLETED_INPUT));
+
+      expect(logger.warn.mock.calls).toEqual([
+        ['Skipped alertzero.reportWorkerOutcome (report_error): Error'],
+      ]);
     });
 
     it('an invalid input without echoing the rendered values', async () => {

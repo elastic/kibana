@@ -22,7 +22,7 @@ import {
   RULE_COVERAGE_PROPOSAL_KINDS,
   RULE_COVERAGE_VERDICTS,
   RULE_TUNING_CHANGE_TYPES,
-  RULE_TUNING_ENTRY_GATES,
+  RULE_REVIEW_ENTRY_GATES,
   WORKER_DEGRADED_REASONS,
   WORKER_RECOMMENDATION_CONFIDENCES,
   WORKER_REVIEW_DECISIONS,
@@ -212,6 +212,7 @@ const FIXTURES: {
   [ALERTZERO_TELEMETRY_EVENTS.RuleTuningReviewCompleted]: {
     ...envelope,
     applied: true,
+    approved_not_applied: false,
     backtest_ran: true,
     backtest_reduced_alerts: true,
     change_type: 'exception',
@@ -233,6 +234,7 @@ const FIXTURES: {
     creation_failed: false,
     creation_skipped: false,
     decision: 'approved',
+    entry_gate: 'skipped',
     investigation_id: '5f0c3c8e-2d51-4b8a-9e0f-7c1d2b3a4e5f',
     ki_processed: true,
     proposal_kind: 'enable_rule',
@@ -479,6 +481,8 @@ describe('AlertZero telemetry event types', () => {
       [ALERTZERO_TELEMETRY_EVENTS.AdWorkerHandoffResolved, 'verdict'],
       [ALERTZERO_TELEMETRY_EVENTS.AlertTriageBatchClassified, 'investigation_id'],
       [ALERTZERO_TELEMETRY_EVENTS.AlertTriageClosureResolved, 'investigation_id'],
+      [ALERTZERO_TELEMETRY_EVENTS.RuleTuningReviewCompleted, 'approved_not_applied'],
+      [ALERTZERO_TELEMETRY_EVENTS.RuleCoverageReviewCompleted, 'entry_gate'],
     ] as const;
 
     const schemaFieldOf = (eventType: string, field: string): Record<string, unknown> => {
@@ -525,7 +529,12 @@ describe('AlertZero telemetry event types', () => {
         WORKER_RECOMMENDATION_CONFIDENCES,
       ],
       [ALERTZERO_TELEMETRY_EVENTS.RuleTuningReviewCompleted, 'decision', WORKER_REVIEW_DECISIONS],
-      [ALERTZERO_TELEMETRY_EVENTS.RuleTuningReviewCompleted, 'entry_gate', RULE_TUNING_ENTRY_GATES],
+      [ALERTZERO_TELEMETRY_EVENTS.RuleTuningReviewCompleted, 'entry_gate', RULE_REVIEW_ENTRY_GATES],
+      [
+        ALERTZERO_TELEMETRY_EVENTS.RuleCoverageReviewCompleted,
+        'entry_gate',
+        RULE_REVIEW_ENTRY_GATES,
+      ],
       [ALERTZERO_TELEMETRY_EVENTS.RuleCoverageReviewCompleted, 'decision', WORKER_REVIEW_DECISIONS],
       [
         ALERTZERO_TELEMETRY_EVENTS.RuleCoverageReviewCompleted,

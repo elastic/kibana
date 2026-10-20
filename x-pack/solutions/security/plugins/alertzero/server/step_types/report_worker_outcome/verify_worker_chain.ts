@@ -6,10 +6,12 @@
  */
 
 import { SYSTEM_SECURITY_WORKER_IDS } from '@kbn/alertzero-common';
+import type { Logger } from '@kbn/core/server';
 import type { WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import { isTopLevelWorkflowExecution } from '@kbn/workflows';
 import { ALERTZERO_MANAGED_WORKFLOW_OWNER_ID } from '../../../common/constants';
 import type { AlertZeroEnvelopeRoot } from '../../telemetry';
+import { describeError } from './describe_error';
 import { getParentExecutionId } from './get_parent_execution_id';
 import type { ExecutionChainHop } from './parse_execution_chain';
 import { parseExecutionChain } from './parse_execution_chain';
@@ -46,6 +48,8 @@ export interface VerifyWorkerChainParams {
   /** Reads one persisted execution in `spaceId`, or `null` when it is missing or hidden. */
   getExecution: (executionId: string) => Promise<WorkerChainExecution | null>;
   hopTimeoutMs: number;
+  /** Says at debug why a read failed; the caller logs only the skip reason. */
+  logger: Logger;
   spaceId: string;
 }
 
@@ -75,12 +79,15 @@ const toEnvelopeRoot = ({
 });
 
 const readExecution = async (
-  { getExecution, hopTimeoutMs }: VerifyWorkerChainParams,
+  { abortSignal, getExecution, hopTimeoutMs, logger }: VerifyWorkerChainParams,
   executionId: string
 ): Promise<WorkerChainExecution | null> => {
   try {
-    return await withTimeout(getExecution(executionId), hopTimeoutMs);
-  } catch {
+    return await withTimeout(getExecution(executionId), hopTimeoutMs, abortSignal);
+  } catch (error) {
+    if (!abortSignal.aborted) {
+      logger.debug(() => `Could not read execution ${executionId}: ${describeError(error)}`);
+    }
     return null;
   }
 };

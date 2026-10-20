@@ -221,7 +221,10 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         expect(registerOwner).toHaveBeenCalledWith({ workflowsExtensions });
         // Step definitions register regardless: an installed workflow that reaches one of these
         // steps must fail on the named missing dependency, not on an unregistered step type.
-        expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalled();
+        // The outcome step too, since the browser offers it whenever AlertZero is enabled.
+        expect(
+          workflowsExtensions.registerStepDefinition.mock.calls.map(([definition]) => definition.id)
+        ).toContain('alertzero.reportWorkerOutcome');
         expect(registerAgentType).not.toHaveBeenCalled();
         expect(initializeManagedWorkflows).not.toHaveBeenCalled();
         expect(ensureAgentSafe).not.toHaveBeenCalled();

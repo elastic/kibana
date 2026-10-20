@@ -6,6 +6,7 @@
  */
 
 import { SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID } from '@kbn/alertzero-common';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { ReportWorkerOutcomeSkipReason } from './skip_reasons';
 import type { VerifyWorkerChainParams, WorkerChainExecution } from './verify_worker_chain';
 import { MAX_LINEAGE_HOPS, verifyWorkerChain } from './verify_worker_chain';
@@ -28,6 +29,7 @@ const createParams = (
   executionId: REVIEW_EXECUTION_ID,
   getExecution: createExecutionReader(createAttackDiscoveryChain()),
   hopTimeoutMs: 5000,
+  logger: loggingSystemMock.createLogger(),
   spaceId: SPACE_ID,
   ...overrides,
 });
@@ -74,6 +76,36 @@ const createChainOfDepth = (depth: number): Record<string, WorkerChainExecution>
 const readIds = (getExecution: jest.Mock) => getExecution.mock.calls.map(([id]) => id);
 
 describe('verifyWorkerChain', () => {
+  // A failed read becomes `lineage_unavailable`; the debug log says why, without the document.
+  it('logs why an execution read failed, at debug', async () => {
+    const params = createParams({
+      getExecution: jest.fn().mockRejectedValue(new Error('security_exception: unauthorized')),
+    });
+
+    await verifyWorkerChain(params);
+
+    const debug = params.logger.debug as jest.Mock;
+    const messages = debug.mock.calls.map(([message]) =>
+      typeof message === 'function' ? message() : message
+    );
+    expect(messages).toEqual([
+      `Could not read execution ${REVIEW_EXECUTION_ID}: Error: security_exception: unauthorized`,
+    ]);
+  });
+
+  it('stops waiting on a read once the signal aborts', async () => {
+    const controller = new AbortController();
+    const result = verifyWorkerChain(
+      createParams({
+        abortSignal: controller.signal,
+        getExecution: jest.fn(() => new Promise<never>(() => {})),
+      })
+    );
+    controller.abort();
+
+    expect(await result).toEqual({ reason: 'aborted', verified: false });
+  });
+
   it.each([
     ['the review, two hops below the root', REVIEW_EXECUTION_ID],
     ['the runner, one hop below the root', RUNNER_EXECUTION_ID],

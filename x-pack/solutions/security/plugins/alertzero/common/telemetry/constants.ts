@@ -33,6 +33,11 @@ export const AD_WORKER_ANALYSIS_VERDICTS = [
 
 export type AdWorkerAnalysisVerdict = (typeof AD_WORKER_ANALYSIS_VERDICTS)[number];
 
+/** The analysis verdicts that escalate an attack to a forensics handoff. */
+export const AD_WORKER_ESCALATED_VERDICTS = ['true_positive', 'inconclusive'] as const;
+
+export type AdWorkerEscalatedVerdict = (typeof AD_WORKER_ESCALATED_VERDICTS)[number];
+
 /** How a completed escalation gate resolved the forensics handoff. */
 export const AD_WORKER_HANDOFF_OUTCOMES = [
   'approved',
@@ -137,13 +142,12 @@ export const RULE_TUNING_CHANGE_TYPES = [
 export type RuleTuningChangeType = (typeof RULE_TUNING_CHANGE_TYPES)[number];
 
 /**
- * The manual-autonomy entry gate of a Rule Tuning review: `skipped` when no entry gate ran
- * (assisted autonomy, or a rule that could not be read), else how an analyst answered it, or
- * `undecided` when nobody did.
+ * The manual-autonomy entry gate of a Rule Tuning or Rule Coverage review: `skipped` when no
+ * entry gate ran, else how an analyst answered it, or `undecided` when nobody did.
  */
-export const RULE_TUNING_ENTRY_GATES = ['skipped', 'approved', 'declined', 'undecided'] as const;
+export const RULE_REVIEW_ENTRY_GATES = ['skipped', 'approved', 'declined', 'undecided'] as const;
 
-export type RuleTuningEntryGate = (typeof RULE_TUNING_ENTRY_GATES)[number];
+export type RuleReviewEntryGate = (typeof RULE_REVIEW_ENTRY_GATES)[number];
 
 /** The coverage check's verdict on a detection gap, or `none` when the check produced none. */
 export const RULE_COVERAGE_VERDICTS = [

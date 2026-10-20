@@ -182,23 +182,25 @@ export class AlertZeroPlugin
     if (contextEngine) {
       registerInvestigationsAiIndex({ contextEngine });
     }
+    // Outside the optional-plugin guard below: the browser offers this step whenever AlertZero is
+    // enabled, and an unregistered step type fails the run before `on-failure: continue` applies.
+    // The handler reports only for a managed Worker, which needs those plugins.
+    registerAlertZeroStepDefinitions({
+      analytics: coreSetup.analytics,
+      areServiceAccountsEnabled: () => this.serviceAccountsEnabled,
+      getManagedWorkflowState: async () => this.managedWorkflows,
+      getWorkflowsManagement: () => this.workflowsManagementApi,
+      isTelemetryOptedIn: async () => {
+        const [, { telemetry }] = await coreSetup.getStartServices();
+        return readTelemetryOptIn({
+          isOptedIn$: telemetry?.isOptedIn$,
+          timeoutMs: REPORT_STEP_OPT_IN_TIMEOUT_MS,
+        });
+      },
+      logger: this.logger.get('telemetry'),
+      workflowsExtensions,
+    });
     if (agentBuilder && proposals && agenticInvestigations) {
-      // The Worker YAML that calls this step is installed only when these plugins are present.
-      registerAlertZeroStepDefinitions({
-        analytics: coreSetup.analytics,
-        areServiceAccountsEnabled: () => this.serviceAccountsEnabled,
-        getManagedWorkflowState: async () => this.managedWorkflows,
-        getWorkflowsManagement: () => this.workflowsManagementApi,
-        isTelemetryOptedIn: async () => {
-          const [, { telemetry }] = await coreSetup.getStartServices();
-          return readTelemetryOptIn({
-            isOptedIn$: telemetry?.isOptedIn$,
-            timeoutMs: REPORT_STEP_OPT_IN_TIMEOUT_MS,
-          });
-        },
-        logger: this.logger.get('telemetry'),
-        workflowsExtensions,
-      });
       const assertAlertZeroAccess = createAssertAlertZeroAccess(async () => {
         const [core, { security }] = await coreSetup.getStartServices();
         return { core, security };

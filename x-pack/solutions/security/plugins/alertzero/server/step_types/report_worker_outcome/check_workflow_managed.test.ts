@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { ManagedWorkflowStateApi } from '@kbn/workflows/server/types';
 import { checkWorkflowManaged } from './check_workflow_managed';
 const STATE = {
@@ -28,9 +29,11 @@ const check = (
   serviceAccountsEnabled = true
 ) =>
   checkWorkflowManaged({
+    abortSignal: new AbortController().signal,
     areServiceAccountsEnabled: () => serviceAccountsEnabled,
     getManagedWorkflowState: async () => state,
     hopTimeoutMs: 5000,
+    logger: loggingSystemMock.createLogger(),
     spaceId,
     workflowId: 'wf-review',
   });
@@ -74,13 +77,60 @@ describe('checkWorkflowManaged', () => {
     expect(await check(state)).toBe('lineage_unavailable');
   });
 
+  it('logs why the lookup failed, at debug', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const state = createState(async () => {
+      throw new Error('Workflows is not available in this environment');
+    });
+
+    await checkWorkflowManaged({
+      abortSignal: new AbortController().signal,
+      areServiceAccountsEnabled: () => true,
+      getManagedWorkflowState: async () => state,
+      hopTimeoutMs: 5000,
+      logger,
+      spaceId: 'default',
+      workflowId: 'wf-review',
+    });
+
+    const messages = (logger.debug as jest.Mock).mock.calls.map(([message]) =>
+      typeof message === 'function' ? message() : message
+    );
+    expect(messages).toEqual([
+      'Could not check that wf-review is managed: Error: Workflows is not available in this environment',
+    ]);
+  });
+
+  it('reads nothing once the signal has aborted', async () => {
+    const controller = new AbortController();
+    controller.abort();
+    const state = createState(async () => STATE);
+
+    const result = await checkWorkflowManaged({
+      abortSignal: controller.signal,
+      areServiceAccountsEnabled: () => true,
+      getManagedWorkflowState: async () => state,
+      hopTimeoutMs: 5000,
+      logger: loggingSystemMock.createLogger(),
+      spaceId: 'default',
+      workflowId: 'wf-review',
+    });
+
+    expect({ result, reads: (state.getInstalledWorkflowState as jest.Mock).mock.calls }).toEqual({
+      reads: [],
+      result: 'aborted',
+    });
+  });
+
   it('cannot verify when the lookup outlives the timeout', async () => {
     const state = createState(() => new Promise(() => {}));
 
     const result = await checkWorkflowManaged({
+      abortSignal: new AbortController().signal,
       areServiceAccountsEnabled: () => true,
       getManagedWorkflowState: async () => state,
       hopTimeoutMs: 1,
+      logger: loggingSystemMock.createLogger(),
       spaceId: 'default',
       workflowId: 'wf-review',
     });

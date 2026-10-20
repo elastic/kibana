@@ -21,7 +21,7 @@ import {
   RULE_COVERAGE_PROPOSAL_KINDS,
   RULE_COVERAGE_VERDICTS,
   RULE_TUNING_CHANGE_TYPES,
-  RULE_TUNING_ENTRY_GATES,
+  RULE_REVIEW_ENTRY_GATES,
   WORKER_DEGRADED_REASONS,
   WORKER_RECOMMENDATION_CONFIDENCES,
   WORKER_REVIEW_DECISIONS,
@@ -115,6 +115,7 @@ const VALID_FIELDS: Readonly<Record<ReportWorkerOutcomeEvent, Override>> = {
     creation_failed: false,
     creation_skipped: false,
     decision: 'approved',
+    entry_gate: 'skipped',
     investigation_id: INVESTIGATION_ID,
     ki_processed: true,
     proposal_kind: 'create_rule',
@@ -125,6 +126,7 @@ const VALID_FIELDS: Readonly<Record<ReportWorkerOutcomeEvent, Override>> = {
   },
   rule_tuning_review_completed: {
     applied: true,
+    approved_not_applied: false,
     backtest_ran: true,
     backtest_reduced_alerts: true,
     change_type: 'query',
@@ -326,7 +328,8 @@ describe('alertzero.reportWorkerOutcome input schema', () => {
     ['rule_tuning_review_completed', 'change_type', RULE_TUNING_CHANGE_TYPES],
     ['rule_tuning_review_completed', 'confidence', WORKER_RECOMMENDATION_CONFIDENCES],
     ['rule_tuning_review_completed', 'decision', WORKER_REVIEW_DECISIONS],
-    ['rule_tuning_review_completed', 'entry_gate', RULE_TUNING_ENTRY_GATES],
+    ['rule_tuning_review_completed', 'entry_gate', RULE_REVIEW_ENTRY_GATES],
+    ['rule_coverage_review_completed', 'entry_gate', RULE_REVIEW_ENTRY_GATES],
     ['rule_coverage_review_completed', 'proposal_kind', RULE_COVERAGE_PROPOSAL_KINDS],
     ['rule_coverage_review_completed', 'verdict', RULE_COVERAGE_VERDICTS],
     ['hunt_report_completed', 'hunt_status', HUNT_REPORT_HUNT_STATUSES],
@@ -337,6 +340,53 @@ describe('alertzero.reportWorkerOutcome input schema', () => {
     const rejected = values.filter((value) => !parse(inputFor(event, { [field]: value })).success);
 
     expect(rejected).toEqual([]);
+  });
+
+  describe.each<ReportWorkerOutcomeEvent>([
+    'rule_tuning_review_completed',
+    'rule_coverage_review_completed',
+  ])('%s rule_type', (event) => {
+    // Worker YAML passes the rule's own `type`, so the vocabulary lives in one place.
+    it.each([
+      ['machine_learning', 'ml'],
+      ['saved_query', 'query'],
+      ['query', 'query'],
+      ['eql', 'eql'],
+      ['esql', 'esql'],
+      ['threshold', 'threshold'],
+      ['new_terms', 'new_terms'],
+      ['threat_match', 'threat_match'],
+      ['ml', 'ml'],
+      ['a_rule_type_added_later', 'other'],
+    ])('maps the rule type %s to %s', (ruleType, expected) => {
+      expect(parse(inputFor(event, { rule_type: ruleType }))).toEqual({
+        data: { ...inputFor(event), rule_type: expected },
+        success: true,
+      });
+    });
+
+    it('is absent when Liquid renders nothing', () => {
+      const { rule_type: _ruleType, ...expected } = inputFor(event);
+
+      expect(parse(inputFor(event, { rule_type: '' }))).toEqual({ data: expected, success: true });
+    });
+  });
+
+  it('rule_tuning_review_completed defaults approved_not_applied to false', () => {
+    const { approved_not_applied: _approvedNotApplied, ...input } = inputFor(
+      'rule_tuning_review_completed'
+    );
+
+    expect(parse(input)).toEqual({
+      data: { ...input, approved_not_applied: false },
+      success: true,
+    });
+  });
+
+  it('rule_coverage_review_completed requires entry_gate, which every coverage report renders', () => {
+    const { entry_gate: _entryGate, ...input } = inputFor('rule_coverage_review_completed');
+
+    expect(parse(input).success).toBe(false);
   });
 
   it.each<[ReportWorkerOutcomeEvent, string, Override]>([
