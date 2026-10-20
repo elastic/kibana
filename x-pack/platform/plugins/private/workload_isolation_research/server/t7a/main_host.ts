@@ -23,6 +23,8 @@ import {
   researchDefinitionMeta,
 } from '@kbn/task-manager-plugin/server';
 import {
+  CONFIG_CAPTURE_KEY,
+  classifyFlagOverrides,
   configKeyPaths,
   fingerprintSavedObjectType,
   toPlainConfig,
@@ -60,6 +62,7 @@ export interface T7aDeps {
       subscribe: (fn: (l: { toJSON: () => Obj }) => void) => { unsubscribe: () => void };
     };
   };
+  readonly features?: { getKibanaFeatures?: () => unknown[] };
 }
 
 export interface T7aConfig {
@@ -110,10 +113,18 @@ export class T7aController {
   private snapshot?: IslandSnapshot;
   private license?: Obj;
   private licenseGeneration = 0;
+  private pricingGeneration = 0;
+  private flagGeneration = 1;
+  private flagSeen = false;
+  private probeFlag: boolean | undefined;
   private statusGeneration = 1;
   private overallStatus = 'available';
+  private featuresGeneration = 1;
+  private featuresHash = '';
+  private featureList: unknown[] = [];
   private configKeyCount = 0;
   private configErrors: string[] = [];
+  private readonly forwarded = { log: 0, audit: 0, analytics: 0 };
   private esCapability?: Obj;
 
   constructor(
@@ -125,9 +136,23 @@ export class T7aController {
     this.registry = new ModuleRegistry(new Set([this.entry]));
     for (const type of OFFMAIN_TASK_TYPES) this.registry.register(type, this.entry, 'runTask');
     deps.licensing?.license$.subscribe((license) => {
-      this.license = license.toJSON();
-      this.licenseGeneration += 1;
-      this.snapshot = undefined;
+      const next = license.toJSON();
+      const same = JSON.stringify(next) === JSON.stringify(this.license ?? null);
+      this.license = next;
+      if (!same) {
+        this.licenseGeneration += 1;
+        this.pricingGeneration += 1;
+        this.snapshot = undefined;
+      }
+    });
+    deps.core.featureFlags.getBooleanValue$('workerCore.liveProbe', false).subscribe((value) => {
+      const changed = this.flagSeen && this.probeFlag !== value;
+      this.flagSeen = true;
+      this.probeFlag = value;
+      if (changed) {
+        this.flagGeneration += 1;
+        this.snapshot = undefined;
+      }
     });
     const status = deps.core.status as {
       overall$?: {
@@ -187,8 +212,9 @@ export class T7aController {
     this.runs.length = 0;
   }
 
-  /** Dispatches a control phase (stats/gc) to warm slots; used by memory probes. */
-  public async probe(kind: 'stats' | 'gc' | 'boot' | 'coldstart'): Promise<Obj> {
+  /** Dispatches a control phase (stats/gc/platform) to warm slots; used by memory probes. */
+  public async probe(kind: 'stats' | 'gc' | 'boot' | 'coldstart' | 'platform'): Promise<Obj> {
+    if (kind === 'platform') return this.platformProbe();
     if (kind === 'coldstart') {
       await this.stopHost();
       const t0 = performance.now();
@@ -284,17 +310,51 @@ export class T7aController {
     return this.snapshot;
   }
 
+  private activeProductName(): string | undefined {
+    const product = (
+      this.deps.core.pricing as {
+        getActiveProduct?: () => { name?: string; type?: string; tier?: string } | undefined;
+      }
+    ).getActiveProduct?.();
+    if (!product) return undefined;
+    if (typeof product.name === 'string' && product.name.length > 0) return product.name;
+    const parts = [product.type, product.tier].filter((part): part is string => Boolean(part));
+    return parts.length > 0 ? parts.join(':') : undefined;
+  }
+
+  private featureSnapshot(): unknown[] {
+    let list: unknown[] = [];
+    try {
+      list = JSON.parse(
+        JSON.stringify(this.deps.features?.getKibanaFeatures?.() ?? [])
+      ) as unknown[];
+    } catch (error) {
+      this.configErrors = [...this.configErrors, `features: ${(error as Error).name ?? 'Error'}`];
+      list = this.featureList;
+    }
+    const ids = list.map((item) =>
+      item && typeof item === 'object' && 'id' in item ? String((item as { id: unknown }).id) : ''
+    );
+    const hash = `${list.length}:${ids.join(',')}`;
+    if (hash !== this.featuresHash) {
+      if (this.featuresHash !== '') this.featuresGeneration += 1;
+      this.featuresHash = hash;
+      this.featureList = list;
+    }
+    return this.featureList;
+  }
+
   private replicas(_unused?: unknown): PlatformReplicas {
-    const pricing = this.deps.core.pricing as { getActiveProduct?: () => { name?: string } | undefined };
-    const product = pricing.getActiveProduct?.();
-    const features = (this.deps as T7aDeps & { features?: { getKibanaFeatures?: () => unknown[] } })
-      .features;
+    const flags = classifyFlagOverrides(readResearchConfig('feature_flags'));
+    if (this.flagGeneration > 1 && this.probeFlag !== undefined) {
+      flags.booleans['workerCore.liveProbe'] = this.probeFlag;
+    }
     return {
       license: { generation: Math.max(this.licenseGeneration, 1), value: this.license ?? {} },
-      featureFlags: { generation: 1, value: { booleans: {}, strings: {}, numbers: {} } },
+      featureFlags: { generation: this.flagGeneration, value: flags },
       pricing: {
-        generation: 1,
-        value: { available: {}, activeProduct: product?.name },
+        generation: Math.max(this.pricingGeneration, 1),
+        value: { available: {}, activeProduct: this.activeProductName() },
       },
       status: {
         generation: this.statusGeneration,
@@ -304,19 +364,55 @@ export class T7aController {
           overall: this.overallStatus,
         },
       },
-      features: {
-        generation: 1,
-        value: {
-          kibana: (() => {
-            try {
-              return JSON.parse(JSON.stringify(features?.getKibanaFeatures?.() ?? [])) as unknown[];
-            } catch (error) {
-              this.configErrors = [...this.configErrors, `features: ${(error as Error).name ?? 'Error'}`];
-              return [];
-            }
-          })(),
+      features: { generation: this.featuresGeneration, value: { kibana: this.featureSnapshot() } },
+    };
+  }
+
+  private async platformProbe(): Promise<Obj> {
+    const before = { ...this.forwarded };
+    const token = `wc-${Date.now().toString(36)}`;
+    const outcome: Outcome = await this.getHost().run(
+      this.runOptions(
+        'alerting:.es-query',
+        {
+          phase: 'platform',
+          taskType: 'platform',
+          taskInstance: {},
+          token,
+          executionContext: { type: 'task manager', name: 'worker-core-platform', id: token },
         },
+        'default',
+        undefined
+      )
+    );
+    if (outcome.status === 'failure') {
+      return { status: 'failure', error: `${outcome.error.name}: ${outcome.error.message}` };
+    }
+    if (outcome.status !== 'success') return { status: outcome.status };
+    const snapshot = this.snapshot;
+    const replicas = snapshot?.replicas;
+    return {
+      status: 'success',
+      token,
+      configKeyCount: this.configKeyCount,
+      configPlugins: Object.keys(snapshot?.effectiveConfig ?? {}),
+      configErrors: this.configErrors,
+      replicaGenerations: {
+        license: replicas?.license.generation ?? 0,
+        featureFlags: replicas?.featureFlags.generation ?? 0,
+        pricing: replicas?.pricing.generation ?? 0,
+        status: replicas?.status.generation ?? 0,
+        features: replicas?.features.generation ?? 0,
       },
+      probeFlag: replicas?.featureFlags.value.booleans['workerCore.liveProbe'] ?? null,
+      activeProduct: replicas?.pricing.value.activeProduct ?? null,
+      featureCount: replicas?.features.value.kibana.length ?? 0,
+      forwarded: {
+        log: this.forwarded.log - before.log,
+        audit: this.forwarded.audit - before.audit,
+        analytics: this.forwarded.analytics - before.analytics,
+      },
+      observation: outcome.value,
     };
   }
 
@@ -373,19 +469,22 @@ export class T7aController {
         else if (level === 'warn') this.logger.warn(message);
         else if (level === 'debug' || level === 'trace') this.logger.debug(message);
         else this.logger.info(message);
+        this.forwarded.log += 1;
         return { ok: true };
       }),
       audit: asBinding(async (op, args) => {
         if (op !== 'write') throw new Error('t7a audit: op not allowlisted');
         const audit = core.security.audit as { withoutRequest?: { log?: (event: unknown) => void } };
         if (audit.withoutRequest?.log) audit.withoutRequest.log(args);
-        else this.logger.info(`[worker-core][audit] ${JSON.stringify(args).slice(0, 1000)}`);
+        else this.logger.info('[worker-core][audit] event forwarded');
+        this.forwarded.audit += 1;
         return { ok: true };
       }),
       analytics: asBinding(async (op, args) => {
         if (op !== 'write') throw new Error('t7a analytics: op not allowlisted');
         const report = (core.analytics as { reportEvent?: (event: unknown) => void }).reportEvent;
         if (report) report(args);
+        this.forwarded.analytics += 1;
         return { ok: true };
       }),
       replica: asBinding(async (op, args) => {
@@ -554,15 +653,24 @@ const PLUGIN_CONFIG_PATHS: Record<string, string> = {
   encryptedSavedObjects: 'xpack.encryptedSavedObjects',
 };
 
+/** Reads one config path. Failures become an empty capture, never a logged value. */
+const readResearchConfig = (path: string): unknown => {
+  const at = (globalThis as Record<symbol, (configPath: string) => unknown>)[CONFIG_CAPTURE_KEY];
+  if (typeof at !== 'function') return undefined;
+  try {
+    return at(path);
+  } catch {
+    return undefined;
+  }
+};
+
 /** Reads main's effective plugin config. Returns key paths only to callers that log. */
 const captureEffectiveConfig = (): {
   effectiveConfig: Record<string, Record<string, unknown>>;
   keyPaths: string[];
   errors: string[];
 } => {
-  const at = (globalThis as Record<symbol, (path: string) => unknown>)[
-    Symbol.for('kbn.research.config.atPathSync')
-  ];
+  const at = (globalThis as Record<symbol, (path: string) => unknown>)[CONFIG_CAPTURE_KEY];
   const effectiveConfig: Record<string, Record<string, unknown>> = {};
   const errors: string[] = [];
   if (typeof at !== 'function') {

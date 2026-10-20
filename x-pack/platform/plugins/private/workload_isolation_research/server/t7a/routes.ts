@@ -84,12 +84,13 @@ export const registerT7aRoutes = (
             schema.literal('gc'),
             schema.literal('boot'),
             schema.literal('coldstart'),
+            schema.literal('platform'),
           ]),
         }),
       },
     },
-    withController((c, body: { kind: 'stats' | 'gc' | 'boot' | 'coldstart' }) =>
-      c.probe(body.kind)
+    withController(
+      (c, body: { kind: 'stats' | 'gc' | 'boot' | 'coldstart' | 'platform' }) => c.probe(body.kind)
     ) as never
   );
   router.post(

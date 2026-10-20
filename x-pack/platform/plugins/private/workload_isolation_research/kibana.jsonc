@@ -28,7 +28,8 @@
       "encryptedSavedObjects",
       "spaces",
       "maintenanceWindows",
-      "licensing"
+      "licensing",
+      "features"
     ]
   }
 }

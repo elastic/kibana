@@ -37,6 +37,7 @@ interface StartDeps {
   security?: T7aDeps['security'];
   maintenanceWindows?: T7aDeps['maintenanceWindows'];
   licensing?: T7aDeps['licensing'];
+  features?: T7aDeps['features'];
 }
 
 /** RESEARCH ONLY: workload isolation measurement harness. Never merge. */

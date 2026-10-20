@@ -31,12 +31,13 @@ const slotStartedAt = performance.now();
 let runs = 0;
 
 interface RunInput {
-  readonly phase: 'run' | 'cleanup' | 'stats' | 'boot';
+  readonly phase: 'run' | 'cleanup' | 'stats' | 'boot' | 'platform';
   readonly taskType: string;
   readonly taskInstance: Record<string, unknown>;
   readonly executionUuid?: string;
   readonly fakeRequest?: FakeRequestDescriptor;
   readonly executionContext?: Record<string, unknown>;
+  readonly token?: string;
 }
 
 const memory = () => {
@@ -94,6 +95,13 @@ export const runTask: TaskEntry = async (rawInput: CodecInput, context: WorkerCo
     if (input.phase === 'stats') {
       if (input.taskType === 'gc') forceGc();
       return stats() as CodecInput;
+    }
+    if (input.phase === 'platform') {
+      const current = await getIsland(context);
+      current.applyReplicas(dataSnapshot(context));
+      return (await runWithExecutionContext(input.executionContext, () =>
+        current.observePlatform(String(input.token ?? ''))
+      )) as CodecInput;
     }
     if (input.phase === 'boot') {
       const t = performance.now();

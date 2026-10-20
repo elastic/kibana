@@ -164,6 +164,29 @@ export const createEventForwarder = (
 
 const emptyFlags: FeatureFlagReplica = { booleans: {}, strings: {}, numbers: {} };
 
+/** Classifies `feature_flags` config (or its `overrides` object). Absent keys stay absent. */
+export const classifyFlagOverrides = (raw: unknown): FeatureFlagReplica => {
+  const source =
+    raw && typeof raw === 'object' && 'overrides' in raw
+      ? (raw as { overrides?: unknown }).overrides
+      : raw;
+  const booleans: Record<string, boolean> = {};
+  const strings: Record<string, string> = {};
+  const numbers: Record<string, number> = {};
+  const walk = (value: unknown, prefix: string) => {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return;
+    for (const [key, child] of Object.entries(value as Record<string, unknown>)) {
+      const path = prefix ? `${prefix}.${key}` : key;
+      if (typeof child === 'boolean') booleans[path] = child;
+      else if (typeof child === 'string') strings[path] = child;
+      else if (typeof child === 'number' && Number.isFinite(child)) numbers[path] = child;
+      else walk(child, path);
+    }
+  };
+  walk(source, '');
+  return { booleans, strings, numbers };
+};
+
 /** Lookup helpers. A miss is a miss: callers must ask main, not substitute a constant. */
 export const lookupBooleanFlag = (
   replica: FeatureFlagReplica,

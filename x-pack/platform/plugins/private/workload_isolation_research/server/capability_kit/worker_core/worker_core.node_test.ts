@@ -21,6 +21,7 @@ import {
 import {
   NAMED_EVENT_EXCLUSIONS,
   configKeyPaths,
+  classifyFlagOverrides,
   createBootEsWriteFence,
   createEventForwarder,
   createExecutionContextService,
@@ -67,6 +68,23 @@ test('elasticsearch write classification treats search as read and bulk as write
   fence.endBoot();
   handler({ scoped: false }, { method: 'POST', path: '/_bulk' }, {}, {} as never);
   assert.equal(fence.summary().writes, 1);
+});
+
+test('flag overrides are classified and unknown flags stay absent', () => {
+  const classified = classifyFlagOverrides({
+    overrides: {
+      'workerCore.liveProbe': true,
+      'workerCore.label': 'on',
+      'workerCore.limit': 3,
+      nested: { alsoOn: false },
+    },
+  });
+  assert.equal(classified.booleans['workerCore.liveProbe'], true);
+  assert.equal(classified.booleans['nested.alsoOn'], false);
+  assert.equal(classified.strings['workerCore.label'], 'on');
+  assert.equal(classified.numbers['workerCore.limit'], 3);
+  assert.equal(Object.hasOwn(classified.booleans, 'alertingFeature'), false);
+  assert.equal(classifyFlagOverrides(undefined).booleans['workerCore.liveProbe'], undefined);
 });
 
 test('replicas refresh on generation change and do not invent flag or price defaults', () => {

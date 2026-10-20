@@ -13,6 +13,7 @@ export {
 export type { BootEsWriteFence, EsRequestRecord, EsWriteAllow, EsWriteSummary } from './es_write_fence';
 export {
   NAMED_EVENT_EXCLUSIONS,
+  classifyFlagOverrides,
   createEventForwarder,
   createExecutionContextService,
   createForwardingLogger,

@@ -51,10 +51,11 @@ import { License } from '@kbn/licensing-plugin/common/license';
 import { map } from 'rxjs';
 import { encodeFakeRequest } from '../request_codec';
 import type { IslandSnapshot } from '../snapshot';
-import { bridge, bridgeSync, countFence, runContext, strict, toData } from './bridge';
+import { bridge, bridgeSync, countFence, edgeStats, fenceStats, runContext, strict, toData } from './bridge';
 import {
   ALERTING_BOOT_ES_WRITE_ALLOW,
   createBootEsWriteFence,
+  configKeyPaths,
   createEventForwarder,
   createExecutionContextService,
   createForwardingLogger,
@@ -199,6 +200,7 @@ export interface CoreLite {
   readonly esFence: ReturnType<typeof createBootEsWriteFence>;
   readonly registeredSoTypes: SoTypeFingerprintInput[];
   readonly platform: ReturnType<typeof createPlatformReplica>;
+  readonly observePlatform: (token: string) => Promise<Record<string, unknown>>;
 }
 
 const statusLevel = (id: string) => {
@@ -536,7 +538,8 @@ export const createCoreLite = (
         registerSecurityDelegate: fence('core.security.registerSecurityDelegate'),
       }),
       executionContext: strict('core.executionContext(setup)', {
-        withContext: (_ctx: unknown, fn: () => unknown) => fn(),
+        withContext: (ctx: Record<string, unknown>, fn: () => unknown) =>
+          executionContext.withContext(ctx, fn),
       }),
       featureFlags: strict('core.featureFlags(setup)', {
         setProvider: fence('core.featureFlags.setProvider'),
@@ -546,7 +549,83 @@ export const createCoreLite = (
       }),
     });
 
-  return { setupFor, start, clusterClient, esFence, registeredSoTypes, platform };
+  const safeBridge = async (capability: string, operation: string, payload: unknown) => {
+    try {
+      await bridge(capability, operation, toData(payload) as never);
+      return null;
+    } catch (error) {
+      return (error as Error).name || 'Error';
+    }
+  };
+  const observePlatform = async (token: string) => {
+    const ctx = currentExecutionContext();
+    const id = ctx?.id ? String(ctx.id) : '';
+    const message = `worker-core-live token=${token} ctx=${id}`;
+    const logError = await safeBridge('log', 'write', {
+      level: 'info',
+      context: 'worker-core',
+      message,
+    });
+    logger.info(message);
+    const auditEvent = {
+      message: 'worker-core live probe',
+      event: { action: 'access', outcome: 'unknown' },
+    };
+    events.send('audit', auditEvent);
+    const auditError = await safeBridge('audit', 'write', auditEvent);
+    const analyticsEvent = { eventType: 'worker_core_live', properties: { token } };
+    events.send('analytics', analyticsEvent);
+    const analyticsError = await safeBridge('analytics', 'write', analyticsEvent);
+    events.send('usage.collector.fetch', { collector: 'worker-core' });
+    const localBefore = fenceStats.get('so.local.internal.get') ?? 0;
+    const getBefore = edgeStats.get('so.get')?.calls ?? 0;
+    const pitBefore = edgeStats.get('so.openPointInTimeForType')?.calls ?? 0;
+    let getError: string | undefined;
+    let pitError: string | undefined;
+    try {
+      const repo = savedObjectsStart.createInternalRepository(['alert']) as {
+        get: (type: string, id: string) => Promise<unknown>;
+        openPointInTimeForType: (types: string[]) => Promise<{ id?: string }>;
+        closePointInTime: (pitId: string) => Promise<unknown>;
+      };
+      try {
+        await repo.get('alert', 'worker-core-missing');
+      } catch (error) {
+        getError = (error as Error).name || 'Error';
+      }
+      try {
+        const pit = await repo.openPointInTimeForType(['alert']);
+        if (pit?.id) await repo.closePointInTime(pit.id);
+      } catch (error) {
+        pitError = (error as Error).name || 'Error';
+      }
+    } catch (error) {
+      getError = (error as Error).name || 'Error';
+    }
+    return {
+      token,
+      executionContextId: id || null,
+      generations: platform.generation(),
+      probeFlag: platform.booleanFlag('workerCore.liveProbe') ?? null,
+      activeProduct: platform.activeProduct() ?? null,
+      featureCount: platform.features().length,
+      configPlugins: Object.keys(snapshot.effectiveConfig ?? {}),
+      configKeyCount: configKeyPaths(snapshot.effectiveConfig ?? {}).length,
+      exclusions: events.excluded(),
+      logError,
+      auditError,
+      analyticsError,
+      so: {
+        localGetDelta: (fenceStats.get('so.local.internal.get') ?? 0) - localBefore,
+        getBridgeDelta: (edgeStats.get('so.get')?.calls ?? 0) - getBefore,
+        pitBridgeDelta: (edgeStats.get('so.openPointInTimeForType')?.calls ?? 0) - pitBefore,
+        getError: getError ?? null,
+        pitError: pitError ?? null,
+      },
+    };
+  };
+
+  return { setupFor, start, clusterClient, esFence, registeredSoTypes, platform, observePlatform };
 };
 
 // ---------------------------------------------------------------------------------------------
@@ -856,6 +935,7 @@ export interface Island {
     stateSchemaVersions: number[];
   }>;
   readonly applyReplicas: (next: IslandSnapshot) => void;
+  readonly observePlatform: (token: string) => Promise<Record<string, unknown>>;
 }
 
 /** Boots the real alerting execution plugin set inside this isolate. */
@@ -1084,5 +1164,6 @@ export const bootIsland = async (
       if (next.replicas) core.platform.apply(next.replicas);
       if (localSo) verifyRegistryReadiness(next.readiness, core.registeredSoTypes);
     },
+    observePlatform: (token: string) => core.observePlatform(token),
   };
 };
