@@ -12,7 +12,7 @@ describe('formatEvidenceForAgent', () => {
     expect(
       formatEvidenceForAgent({
         description: 'Errors spiked.',
-        resources: [
+        references: [
           { url: 'https://github.com/elastic/kibana/pull/1', label: 'Deploy PR' },
           { query: 'FROM logs-* | LIMIT 1' },
         ],

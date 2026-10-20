@@ -7,18 +7,18 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const resourcesToggleLabel = (count: number): string =>
-  i18n.translate('xpack.agenticInvestigations.evidence.resources.toggle', {
-    defaultMessage: '{count, plural, one {# resource} other {# resources}}',
+export const referencesToggleLabel = (count: number): string =>
+  i18n.translate('xpack.agenticInvestigations.evidence.references.toggle', {
+    defaultMessage: '{count, plural, one {# reference} other {# references}}',
     values: { count },
   });
 
 export const COPY_QUERY_LABEL = i18n.translate(
-  'xpack.agenticInvestigations.evidence.resources.copyQuery',
+  'xpack.agenticInvestigations.evidence.references.copyQuery',
   { defaultMessage: 'Copy query to clipboard' }
 );
 
 export const EXTERNAL_LINK_LABEL = i18n.translate(
-  'xpack.agenticInvestigations.evidence.resources.externalLink',
+  'xpack.agenticInvestigations.evidence.references.externalLink',
   { defaultMessage: 'Opens in a new tab' }
 );

@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiMarkdownFormat, EuiPanel, EuiSpacer } from '@elastic/eui';
 import type { InvestigationEvidence } from '../../common/evidence';
 import { EvidenceChart } from './evidence_chart';
-import { EvidenceResources } from './evidence_resources';
+import { EvidenceReferences } from './evidence_references';
 
 export interface EvidenceViewProps {
   evidence: InvestigationEvidence;
@@ -23,12 +23,12 @@ export interface EvidenceViewProps {
  * whether the data was local or fetched remotely.
  */
 export const EvidenceView: React.FC<EvidenceViewProps> = ({
-  evidence: { description, chart, resources = [] },
+  evidence: { description, chart, references = [] },
   outlineChart = true,
 }) => {
   const hasDescription = Boolean(description?.trim());
-  const hasResources = resources.length > 0;
-  if (!chart && !hasDescription && !hasResources) {
+  const hasReferences = references.length > 0;
+  if (!chart && !hasDescription && !hasReferences) {
     return null;
   }
   return (
@@ -43,10 +43,10 @@ export const EvidenceView: React.FC<EvidenceViewProps> = ({
         ))}
       {chart && hasDescription && <EuiSpacer size="s" />}
       {hasDescription && <EuiMarkdownFormat textSize="s">{description ?? ''}</EuiMarkdownFormat>}
-      {hasResources && (
+      {hasReferences && (
         <>
           {(chart || hasDescription) && <EuiSpacer size="xs" />}
-          <EvidenceResources resources={resources} />
+          <EvidenceReferences references={references} />
         </>
       )}
     </div>

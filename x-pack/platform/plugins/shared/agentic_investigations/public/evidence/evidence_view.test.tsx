@@ -27,7 +27,7 @@ const chart: EvidenceChart = {
 };
 
 describe('EvidenceView', () => {
-  const expandResources = () => fireEvent.click(screen.getByRole('button', { name: /resource/ }));
+  const expandReferences = () => fireEvent.click(screen.getByRole('button', { name: /reference/ }));
 
   it('renders the chart followed by the Markdown description', () => {
     render(
@@ -41,30 +41,30 @@ describe('EvidenceView', () => {
       'href',
       'https://example.com'
     );
-    expect(screen.queryByTestId('investigationEvidenceResources')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('investigationEvidenceReferences')).not.toBeInTheDocument();
   });
 
-  it('keeps the description visible and the resources collapsed by default', () => {
+  it('keeps the description visible and the references collapsed by default', () => {
     render(
       <EuiProvider>
         <EvidenceView
           evidence={{
             description: 'Errors spiked.',
-            resources: [{ url: 'https://example.com' }, { query: 'FROM logs-*' }],
+            references: [{ url: 'https://example.com' }, { query: 'FROM logs-*' }],
           }}
         />
       </EuiProvider>
     );
 
     expect(screen.getByText('Errors spiked.')).toBeVisible();
-    const toggle = screen.getByRole('button', { name: '2 resources' });
+    const toggle = screen.getByRole('button', { name: '2 references' });
     expect(toggle).toHaveAttribute('aria-expanded', 'false');
-    expect(screen.getByTestId('evidenceResourceQuery')).not.toBeVisible();
+    expect(screen.getByTestId('evidenceReferenceQuery')).not.toBeVisible();
 
-    expandResources();
+    expandReferences();
 
     expect(toggle).toHaveAttribute('aria-expanded', 'true');
-    expect(screen.getByTestId('evidenceResourceQuery')).toBeVisible();
+    expect(screen.getByTestId('evidenceReferenceQuery')).toBeVisible();
   });
 
   it('renders links in a new tab, with an icon for GitHub, and copyable queries', () => {
@@ -72,7 +72,7 @@ describe('EvidenceView', () => {
       <EuiProvider>
         <EvidenceView
           evidence={{
-            resources: [
+            references: [
               { url: 'https://github.com/elastic/kibana/pull/1', label: 'The PR' },
               { url: 'https://example.com/dash' },
               { query: 'FROM logs-* | LIMIT 1' },
@@ -81,17 +81,17 @@ describe('EvidenceView', () => {
         />
       </EuiProvider>
     );
-    expandResources();
+    expandReferences();
 
-    const [github, other] = screen.getAllByTestId('evidenceResourceLink');
+    const [github, other] = screen.getAllByTestId('evidenceReferenceLink');
     expect(github).toHaveAttribute('href', 'https://github.com/elastic/kibana/pull/1');
     expect(github).toHaveTextContent('The PR');
     expect(github).toHaveAttribute('target', '_blank');
     expect(github).toHaveAttribute('rel', expect.stringContaining('noopener'));
     expect(other).toHaveAttribute('href', 'https://example.com/dash');
-    expect(screen.getAllByTestId('evidenceResourceIcon')).toHaveLength(1);
-    expect(screen.getByTestId('evidenceResourceQuery')).toHaveTextContent('FROM logs-* | LIMIT 1');
-    expect(screen.getByTestId('evidenceResourceCopyQuery')).toBeInTheDocument();
+    expect(screen.getAllByTestId('evidenceReferenceIcon')).toHaveLength(1);
+    expect(screen.getByTestId('evidenceReferenceQuery')).toHaveTextContent('FROM logs-* | LIMIT 1');
+    expect(screen.getByTestId('evidenceReferenceCopyQuery')).toBeInTheDocument();
   });
 
   it('renders nothing for empty evidence', () => {

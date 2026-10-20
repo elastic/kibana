@@ -57,7 +57,7 @@ import type {
   EvidenceChart,
   EvidenceChartAnnotation,
   EvidenceChartSeries,
-  EvidenceResource,
+  EvidenceReference,
   Hypothesis,
   Impact,
   ImpactEntity,
@@ -179,11 +179,11 @@ const timeChart = ({
 const evidence = (
   description: string,
   chart?: EvidenceChart,
-  resources?: EvidenceResource[]
+  references?: EvidenceReference[]
 ): InvestigationEvidence => ({
   description,
   ...(chart && { chart }),
-  ...(resources && { resources }),
+  ...(references && { references }),
 });
 
 const hypothesis = (

@@ -22,12 +22,12 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type {
-  EvidenceLinkResource,
-  EvidenceQueryResource,
-  EvidenceResource,
+  EvidenceLinkReference,
+  EvidenceQueryReference,
+  EvidenceReference,
 } from '../../common/evidence';
-import { isEvidenceLinkResource } from '../../common/evidence';
-import { COPY_QUERY_LABEL, EXTERNAL_LINK_LABEL, resourcesToggleLabel } from './translations';
+import { isEvidenceLinkReference } from '../../common/evidence';
+import { COPY_QUERY_LABEL, EXTERNAL_LINK_LABEL, referencesToggleLabel } from './translations';
 
 const KNOWN_HOST_ICONS: ReadonlyArray<{ host: string; icon: string }> = [
   { host: 'github.com', icon: 'logoGithub' },
@@ -52,8 +52,8 @@ export const getLinkIcon = (url: string): string | undefined => {
     ?.icon;
 };
 
-const LinkResource: React.FC<{ resource: EvidenceLinkResource }> = ({
-  resource: { url, label },
+const LinkReference: React.FC<{ reference: EvidenceLinkReference }> = ({
+  reference: { url, label },
 }) => {
   const icon = getLinkIcon(url);
   const text = label || url;
@@ -61,7 +61,7 @@ const LinkResource: React.FC<{ resource: EvidenceLinkResource }> = ({
     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
       {icon && (
         <EuiFlexItem grow={false}>
-          <EuiIcon type={icon} size="s" aria-hidden={true} data-test-subj="evidenceResourceIcon" />
+          <EuiIcon type={icon} size="s" aria-hidden={true} data-test-subj="evidenceReferenceIcon" />
         </EuiFlexItem>
       )}
       <EuiFlexItem
@@ -77,7 +77,7 @@ const LinkResource: React.FC<{ resource: EvidenceLinkResource }> = ({
           rel="noopener noreferrer"
           external
           aria-label={`${text}. ${EXTERNAL_LINK_LABEL}`}
-          data-test-subj="evidenceResourceLink"
+          data-test-subj="evidenceReferenceLink"
         >
           {text}
         </EuiLink>
@@ -86,12 +86,14 @@ const LinkResource: React.FC<{ resource: EvidenceLinkResource }> = ({
   );
 };
 
-const QueryResource: React.FC<{ resource: EvidenceQueryResource }> = ({ resource: { query } }) => (
+const QueryReference: React.FC<{ reference: EvidenceQueryReference }> = ({
+  reference: { query },
+}) => (
   <EuiFlexGroup
     gutterSize="xs"
     alignItems="flexStart"
     responsive={false}
-    data-test-subj="evidenceResourceQuery"
+    data-test-subj="evidenceReferenceQuery"
   >
     <EuiFlexItem
       css={css`
@@ -119,7 +121,7 @@ const QueryResource: React.FC<{ resource: EvidenceQueryResource }> = ({ resource
               color="text"
               aria-label={COPY_QUERY_LABEL}
               onClick={copy}
-              data-test-subj="evidenceResourceCopyQuery"
+              data-test-subj="evidenceReferenceCopyQuery"
             />
           </EuiToolTip>
         )}
@@ -128,18 +130,18 @@ const QueryResource: React.FC<{ resource: EvidenceQueryResource }> = ({ resource
   </EuiFlexGroup>
 );
 
-export interface EvidenceResourcesProps {
-  resources: EvidenceResource[];
+export interface EvidenceReferencesProps {
+  references: EvidenceReference[];
 }
 
 /**
- * The links and queries behind a piece of evidence, behind a small collapsed "N resources" toggle.
+ * The links and queries behind a piece of evidence, behind a small collapsed "N references" toggle.
  * Links open in a new tab, with an icon for well-known hosts; queries have a copy button.
  */
-export const EvidenceResources: React.FC<EvidenceResourcesProps> = ({ resources }) => {
+export const EvidenceReferences: React.FC<EvidenceReferencesProps> = ({ references }) => {
   const { euiTheme } = useEuiTheme();
-  const accordionId = useGeneratedHtmlId({ prefix: 'investigationEvidenceResources' });
-  if (resources.length === 0) {
+  const accordionId = useGeneratedHtmlId({ prefix: 'investigationEvidenceReferences' });
+  if (references.length === 0) {
     return null;
   }
   return (
@@ -148,26 +150,26 @@ export const EvidenceResources: React.FC<EvidenceResourcesProps> = ({ resources 
       arrowProps={{ size: 's', color: 'text' }}
       buttonContent={
         <EuiText size="xs" color="subdued">
-          {resourcesToggleLabel(resources.length)}
+          {referencesToggleLabel(references.length)}
         </EuiText>
       }
-      data-test-subj="investigationEvidenceResources"
+      data-test-subj="investigationEvidenceReferences"
     >
       <EuiText size="xs">
         <EuiFlexGroup
           direction="column"
-          gutterSize="xs"
+          gutterSize="m"
           role="list"
           css={css`
-            padding: ${euiTheme.size.xs} 0 0 ${euiTheme.size.l};
+            padding: ${euiTheme.size.s} 0 0 ${euiTheme.size.l};
           `}
         >
-          {resources.map((resource, index) => (
+          {references.map((reference, index) => (
             <EuiFlexItem key={index} grow={false} role="listitem">
-              {isEvidenceLinkResource(resource) ? (
-                <LinkResource resource={resource} />
+              {isEvidenceLinkReference(reference) ? (
+                <LinkReference reference={reference} />
               ) : (
-                <QueryResource resource={resource} />
+                <QueryReference reference={reference} />
               )}
             </EuiFlexItem>
           ))}
