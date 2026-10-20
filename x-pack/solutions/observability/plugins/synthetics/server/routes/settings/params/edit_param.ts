@@ -17,6 +17,7 @@ import type { SyntheticsParamRequest, SyntheticsParams } from '../../../../commo
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { asyncGlobalParamsPropagation } from '../../../tasks/sync_global_params_task';
+import { findParamVaultReferenceError } from '../secret_connection/connection_utils';
 
 const RequestParamsSchema = z.strictObject({
   id: routeId.describe('The unique identifier for the parameter.'),
@@ -78,6 +79,10 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
     const data = request.body as SyntheticsParamRequest;
     if (isEmpty(data)) {
       return response.badRequest({ body: { message: 'Request body cannot be empty' } });
+    }
+    const vaultReferenceError = await findParamVaultReferenceError(routeContext, [data.value]);
+    if (vaultReferenceError) {
+      return response.badRequest({ body: { message: vaultReferenceError } });
     }
     const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
 
