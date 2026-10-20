@@ -29,6 +29,7 @@ const setup = async ({
     title: 'Test Session',
     description: 'Test Description',
     tags: ['tag1'],
+    version: 'opened-version',
     tabs: [getPersistedTabMock({ tabId: 'test-tab', dataView: dataViewMock, services })],
   });
 
@@ -43,6 +44,7 @@ const setup = async ({
         ...persistedDiscoverSession,
         description: 'Description saved elsewhere',
         tags: ['tag2'],
+        version: 'saved-elsewhere-version',
         tabs: [
           ...persistedDiscoverSession.tabs,
           getPersistedTabMock({ tabId: 'tab-saved-elsewhere', dataView: dataViewMock, services }),
@@ -52,6 +54,12 @@ const setup = async ({
   jest
     .mocked(services.discoverSessionService.get)
     .mockResolvedValue({ session: latestDiscoverSession, warnings: [] });
+  jest.mocked(services.discoverSessionService.save).mockImplementation(async (session) => ({
+    ...session,
+    id: 'test-session',
+    managed: false,
+    version: 'renamed-version',
+  }));
 
   // Opening the session already remembers it, so only track calls made after setup
   jest.mocked(services.chrome.recentlyAccessed.add).mockClear();
@@ -108,7 +116,7 @@ describe('renameDiscoverSession', () => {
     });
   });
 
-  it('should add the renamed session to the recently accessed list', async () => {
+  it('should remember the renamed session and adopt its saved version', async () => {
     const { toolkit, services } = await setup();
 
     await toolkit.internalState
@@ -120,6 +128,9 @@ describe('renameDiscoverSession', () => {
       '/app/discover#/view/test-session',
       'Renamed Session',
       'test-session'
+    );
+    expect(toolkit.internalState.getState().persistedDiscoverSession?.version).toBe(
+      'renamed-version'
     );
   });
 
