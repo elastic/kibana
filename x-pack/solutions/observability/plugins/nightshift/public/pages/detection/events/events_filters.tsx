@@ -5,33 +5,56 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
+import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiFieldSearch,
   EuiFilterButton,
   EuiFilterGroup,
-  EuiFilterSelectItem,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
+  EuiNotificationBadge,
   EuiPopover,
+  EuiSelectable,
+  useEuiTheme,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import {
-  getSeverityLabel,
+  SIGNIFICANT_EVENT_INVESTIGATION_STATES,
+  type SignificantEventInvestigationState,
+  type SignificantEventsFacets,
+} from '@kbn/significant-events-plugin/common';
+import {
   SEVERITY_OPTIONS,
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
   type Severity,
   type SignificantEventStatus,
 } from '@kbn/significant-events-schema';
 import React, { useState } from 'react';
-import { SIGNIFICANT_EVENT_STATUS_LABELS } from '../../../components/entities/significant_event/significant_event_status';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
+import {
+  SIGNIFICANT_EVENT_INVESTIGATION_STATE_LABELS,
+  SIGNIFICANT_EVENT_STATUS_ICONS,
+  SIGNIFICANT_EVENT_STATUS_LABELS,
+} from '../../../components/entities/significant_event/significant_event_status';
+import { SIGNIFICANT_EVENT_SEVERITY } from '../../../components/ui/severity_badge';
 import { useKibana } from '../../../hooks/use_kibana';
 import type { DetectionTimeRange } from '../use_detection_time_range';
-import { SEARCH_PLACEHOLDER, SEVERITY_FILTER_LABEL, STATUS_FILTER_LABEL } from './translations';
+import {
+  INVESTIGATION_FILTER_LABEL,
+  SEARCH_PLACEHOLDER,
+  SEVERITY_FILTER_LABEL,
+  STATUS_FILTER_LABEL,
+} from './translations';
 
 interface EventsFilterPopoverProps<Value extends string> {
   label: string;
   options: readonly Value[];
   selected: Value[];
+  counts: Record<Value, number> | undefined;
   getLabel: (value: Value) => string;
+  getPrepend?: (value: Value) => React.ReactNode;
   onChange: (selected: Value[]) => void;
   testSubject: string;
 }
@@ -40,11 +63,27 @@ const EventsFilterPopover = <Value extends string>({
   label,
   options,
   selected,
+  counts,
   getLabel,
+  getPrepend,
   onChange,
   testSubject,
 }: EventsFilterPopoverProps<Value>) => {
+  const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(false);
+  const selectableOptions: Array<EuiSelectableOption<{ value: Value }>> = options.map((value) => ({
+    key: value,
+    value,
+    label: getLabel(value),
+    checked: selected.includes(value) ? 'on' : undefined,
+    prepend: getPrepend?.(value),
+    append: (
+      <EuiNotificationBadge color="subdued" size="s">
+        {counts?.[value] ?? 0}
+      </EuiNotificationBadge>
+    ),
+    'data-test-subj': `${testSubject}Option-${value}`,
+  }));
 
   return (
     <EuiPopover
@@ -52,11 +91,17 @@ const EventsFilterPopover = <Value extends string>({
       button={
         <EuiFilterButton
           data-test-subj={`${testSubject}Button`}
-          iconType="chevronSingleDown"
+          iconType="arrowDown"
           isSelected={isOpen}
+          numFilters={options.length}
           hasActiveFilters={selected.length > 0}
           numActiveFilters={selected.length}
           onClick={() => setIsOpen((current) => !current)}
+          {...getEbtProps({
+            action: NIGHTSHIFT_EBT_ACTIONS.FILTER_SIGNIFICANT_EVENTS,
+            element: NIGHTSHIFT_EBT_ELEMENTS.DETECTION_EVENTS_FILTERS,
+            detail: testSubject,
+          })}
         >
           {label}
         </EuiFilterButton>
@@ -65,25 +110,24 @@ const EventsFilterPopover = <Value extends string>({
       closePopover={() => setIsOpen(false)}
       panelPaddingSize="none"
     >
-      {options.map((option) => {
-        const isSelected = selected.includes(option);
-        return (
-          <EuiFilterSelectItem
-            key={option}
-            checked={isSelected ? 'on' : undefined}
-            data-test-subj={`${testSubject}Option-${option}`}
-            onClick={() =>
-              onChange(
-                isSelected
-                  ? selected.filter((selectedOption) => selectedOption !== option)
-                  : [...selected, option]
-              )
-            }
+      <EuiSelectable<{ value: Value }>
+        aria-label={label}
+        options={selectableOptions}
+        onChange={(nextOptions) =>
+          onChange(nextOptions.filter(({ checked }) => checked === 'on').map(({ value }) => value))
+        }
+        listProps={{ isVirtualized: false }}
+      >
+        {(list) => (
+          <div
+            css={css`
+              min-inline-size: ${euiTheme.base * 15}px;
+            `}
           >
-            {getLabel(option)}
-          </EuiFilterSelectItem>
-        );
-      })}
+            {list}
+          </div>
+        )}
+      </EuiSelectable>
     </EuiPopover>
   );
 };
@@ -93,11 +137,14 @@ export interface EventsFiltersProps {
   searchValue: string;
   status: SignificantEventStatus[];
   severity: Severity[];
+  investigation: SignificantEventInvestigationState[];
+  facets: SignificantEventsFacets | undefined;
   onTimeRangeChange: (timeRange: DetectionTimeRange) => void;
   onRefresh: () => void;
   onSearchChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onStatusChange: (status: SignificantEventStatus[]) => void;
   onSeverityChange: (severity: Severity[]) => void;
+  onInvestigationChange: (investigation: SignificantEventInvestigationState[]) => void;
 }
 
 export const EventsFilters = ({
@@ -105,12 +152,16 @@ export const EventsFilters = ({
   searchValue,
   status,
   severity,
+  investigation,
+  facets,
   onTimeRangeChange,
   onRefresh,
   onSearchChange,
   onStatusChange,
   onSeverityChange,
+  onInvestigationChange,
 }: EventsFiltersProps): React.ReactElement => {
+  const { euiTheme } = useEuiTheme();
   const {
     unifiedSearch: {
       ui: { SearchBar },
@@ -123,31 +174,13 @@ export const EventsFilters = ({
         <EuiFieldSearch
           data-test-subj="nightshiftDetectionEventsSearch"
           fullWidth
+          isClearable
           maxLength={500}
           placeholder={SEARCH_PLACEHOLDER}
+          aria-label={SEARCH_PLACEHOLDER}
           value={searchValue}
           onChange={onSearchChange}
         />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiFilterGroup>
-          <EventsFilterPopover
-            label={STATUS_FILTER_LABEL}
-            options={SIGNIFICANT_EVENT_STATUS_OPTIONS}
-            selected={status}
-            getLabel={(value) => SIGNIFICANT_EVENT_STATUS_LABELS[value]}
-            onChange={onStatusChange}
-            testSubject="nightshiftDetectionEventsStatusFilter"
-          />
-          <EventsFilterPopover
-            label={SEVERITY_FILTER_LABEL}
-            options={SEVERITY_OPTIONS}
-            selected={severity}
-            getLabel={getSeverityLabel}
-            onChange={onSeverityChange}
-            testSubject="nightshiftDetectionEventsSeverityFilter"
-          />
-        </EuiFilterGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <SearchBar
@@ -175,6 +208,51 @@ export const EventsFilters = ({
           showTimeWindowButtons
           submitButtonStyle="iconOnly"
         />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiFilterGroup>
+          <EventsFilterPopover
+            label={SEVERITY_FILTER_LABEL}
+            options={SEVERITY_OPTIONS}
+            selected={severity}
+            counts={facets?.severity}
+            getLabel={(value) => SIGNIFICANT_EVENT_SEVERITY[value].label}
+            getPrepend={(value) => (
+              <EuiIcon
+                type="dot"
+                color={euiTheme.colors.severity[SIGNIFICANT_EVENT_SEVERITY[value].color]}
+                aria-hidden={true}
+              />
+            )}
+            onChange={onSeverityChange}
+            testSubject="nightshiftDetectionEventsSeverityFilter"
+          />
+          <EventsFilterPopover
+            label={STATUS_FILTER_LABEL}
+            options={SIGNIFICANT_EVENT_STATUS_OPTIONS}
+            selected={status}
+            counts={facets?.status}
+            getLabel={(value) => SIGNIFICANT_EVENT_STATUS_LABELS[value]}
+            getPrepend={(value) => (
+              <EuiIcon
+                type={SIGNIFICANT_EVENT_STATUS_ICONS[value].iconType}
+                color={SIGNIFICANT_EVENT_STATUS_ICONS[value].color}
+                aria-hidden={true}
+              />
+            )}
+            onChange={onStatusChange}
+            testSubject="nightshiftDetectionEventsStatusFilter"
+          />
+          <EventsFilterPopover
+            label={INVESTIGATION_FILTER_LABEL}
+            options={SIGNIFICANT_EVENT_INVESTIGATION_STATES}
+            selected={investigation}
+            counts={facets?.investigation}
+            getLabel={(value) => SIGNIFICANT_EVENT_INVESTIGATION_STATE_LABELS[value]}
+            onChange={onInvestigationChange}
+            testSubject="nightshiftDetectionEventsInvestigationFilter"
+          />
+        </EuiFilterGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

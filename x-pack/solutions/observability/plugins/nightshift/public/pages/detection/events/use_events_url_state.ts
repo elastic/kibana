@@ -7,6 +7,14 @@
 
 import { useDebouncedValue } from '@kbn/react-hooks';
 import {
+  SIGNIFICANT_EVENT_INVESTIGATION_STATES,
+  SIGNIFICANT_EVENTS_SORT_FIELDS,
+  SIGNIFICANT_EVENTS_SORT_ORDERS,
+  type SignificantEventInvestigationState,
+  type SignificantEventsSortField,
+  type SignificantEventsSortOrder,
+} from '@kbn/significant-events-plugin/common';
+import {
   SEVERITY_OPTIONS,
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
   type Severity,
@@ -24,6 +32,11 @@ import {
 const SEARCH_QUERY_PARAM = 'search';
 const STATUS_QUERY_PARAM = 'status';
 const SEVERITY_QUERY_PARAM = 'severity';
+const INVESTIGATION_QUERY_PARAM = 'investigation';
+const SORT_FIELD_QUERY_PARAM = 'sortField';
+const SORT_ORDER_QUERY_PARAM = 'sortOrder';
+// The design leads with the most severe events.
+const DEFAULT_SORT: EventsSort = { field: 'severity', order: 'desc' };
 const PAGE_QUERY_PARAM = 'page';
 const SEARCH_DEBOUNCE_MS = 300;
 const MAX_SEARCH_LENGTH = 500;
@@ -33,6 +46,23 @@ const isSignificantEventStatus = (value: string): value is SignificantEventStatu
 
 const isSeverity = (value: string): value is Severity =>
   SEVERITY_OPTIONS.includes(value as Severity);
+
+const isInvestigationState = (value: string): value is SignificantEventInvestigationState =>
+  SIGNIFICANT_EVENT_INVESTIGATION_STATES.includes(value as SignificantEventInvestigationState);
+
+export interface EventsSort {
+  field: SignificantEventsSortField;
+  order: SignificantEventsSortOrder;
+}
+
+const getSort = (params: URLSearchParams): EventsSort => {
+  const field = params.get(SORT_FIELD_QUERY_PARAM);
+  const order = params.get(SORT_ORDER_QUERY_PARAM);
+  return {
+    field: SIGNIFICANT_EVENTS_SORT_FIELDS.find((option) => option === field) ?? DEFAULT_SORT.field,
+    order: SIGNIFICANT_EVENTS_SORT_ORDERS.find((option) => option === order) ?? DEFAULT_SORT.order,
+  };
+};
 
 const getPage = (params: URLSearchParams): number => {
   const value = Number(params.get(PAGE_QUERY_PARAM));
@@ -48,6 +78,8 @@ export const useEventsUrlState = () => {
   const debouncedSearch = useDebouncedValue(searchValue, SEARCH_DEBOUNCE_MS).trim();
   const status = params.getAll(STATUS_QUERY_PARAM).filter(isSignificantEventStatus);
   const severity = params.getAll(SEVERITY_QUERY_PARAM).filter(isSeverity);
+  const investigation = params.getAll(INVESTIGATION_QUERY_PARAM).filter(isInvestigationState);
+  const sort = getSort(params);
   const page = getPage(params);
   const eventId = getNightshiftEventIdFromSearch(search);
 
@@ -85,7 +117,13 @@ export const useEventsUrlState = () => {
   }, [debouncedSearch, updateParams, urlSearch]);
 
   const setListParam = useCallback(
-    (key: typeof STATUS_QUERY_PARAM | typeof SEVERITY_QUERY_PARAM, values: readonly string[]) => {
+    (
+      key:
+        | typeof STATUS_QUERY_PARAM
+        | typeof SEVERITY_QUERY_PARAM
+        | typeof INVESTIGATION_QUERY_PARAM,
+      values: readonly string[]
+    ) => {
       updateParams((nextParams) => {
         nextParams.delete(key);
         values.forEach((value) => nextParams.append(key, value));
@@ -112,6 +150,17 @@ export const useEventsUrlState = () => {
     [updateParams]
   );
 
+  const setSort = useCallback(
+    (nextSort: EventsSort) => {
+      updateParams((nextParams) => {
+        nextParams.set(SORT_FIELD_QUERY_PARAM, nextSort.field);
+        nextParams.set(SORT_ORDER_QUERY_PARAM, nextSort.order);
+        nextParams.delete(PAGE_QUERY_PARAM);
+      });
+    },
+    [updateParams]
+  );
+
   const openEvent = useCallback(
     (nextEventId: string) => {
       updateParams((nextParams) => setNightshiftEventIdParam(nextParams, nextEventId));
@@ -129,6 +178,7 @@ export const useEventsUrlState = () => {
       nextParams.delete(SEARCH_QUERY_PARAM);
       nextParams.delete(STATUS_QUERY_PARAM);
       nextParams.delete(SEVERITY_QUERY_PARAM);
+      nextParams.delete(INVESTIGATION_QUERY_PARAM);
       nextParams.delete(PAGE_QUERY_PARAM);
     });
   }, [updateParams]);
@@ -138,13 +188,20 @@ export const useEventsUrlState = () => {
     debouncedSearch,
     status,
     severity,
+    investigation,
+    sort,
     page,
     eventId,
-    hasFilters: Boolean(debouncedSearch || status.length || severity.length),
+    hasFilters: Boolean(
+      debouncedSearch || status.length || severity.length || investigation.length
+    ),
     onSearchChange,
     setStatus: (nextStatus: SignificantEventStatus[]) =>
       setListParam(STATUS_QUERY_PARAM, nextStatus),
     setSeverity: (nextSeverity: Severity[]) => setListParam(SEVERITY_QUERY_PARAM, nextSeverity),
+    setInvestigation: (nextInvestigation: SignificantEventInvestigationState[]) =>
+      setListParam(INVESTIGATION_QUERY_PARAM, nextInvestigation),
+    setSort,
     setPage,
     openEvent,
     closeEvent,

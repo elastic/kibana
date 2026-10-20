@@ -18,7 +18,6 @@ import { useSignificantEventsList } from '../../../data/significant_events/use_s
 import { EventsTab } from './events_tab';
 
 const mockTriggerInvestigation = jest.fn();
-const mockCloseSignificantEvent = jest.fn();
 const mockRefreshEvents = jest.fn();
 const mockRefreshOverview = jest.fn();
 const mockTimeRangeChange = jest.fn();
@@ -34,9 +33,6 @@ jest.mock('../../../components/entities/significant_event/event_flyout', () => (
     <div data-test-subj="eventFlyoutStub">{event.title}</div>
   ),
 }));
-jest.mock('../../../components/ui/severity_badge', () => ({
-  SeverityBadge: ({ severity }: { severity: string }) => <span>{severity}</span>,
-}));
 jest.mock('../../../data/significant_events/use_fetch_event_by_id');
 jest.mock('../../../data/significant_events/use_significant_events_list');
 jest.mock('../../../data/significant_events/use_trigger_event_investigation', () => ({
@@ -51,9 +47,14 @@ jest.mock('../../../data/maintenance/use_significant_events_maintenance', () => 
     activityBlockTooltip: undefined,
   }),
 }));
-jest.mock('../../../data/sources/use_sources_by_id', () => ({
-  useSourcesById: () => ({
-    getSourceTitle: (sourceId: string) => `Source ${sourceId}`,
+jest.mock('../../../data/significant_events/use_significant_events_facets', () => ({
+  useSignificantEventsFacets: () => ({
+    data: {
+      severity: { critical: 0, high: 1, medium: 0, low: 0 },
+      status: { active: 1, recovering: 0, inactive: 0 },
+      investigation: { not_started: 1, in_progress: 0, completed: 0 },
+    },
+    refetch: jest.fn(),
   }),
 }));
 jest.mock('../../../hooks/use_kibana', () => ({
@@ -80,12 +81,6 @@ jest.mock('../../../hooks/use_kibana', () => ({
     },
   }),
 }));
-jest.mock('../../../hooks/use_close_significant_event', () => ({
-  useCloseSignificantEvent: () => ({
-    closeSignificantEvent: mockCloseSignificantEvent,
-    closingEventId: undefined,
-  }),
-}));
 jest.mock('../../../investigation/investigation_status_badge', () => ({
   InvestigationStatusBadge: () => null,
 }));
@@ -106,7 +101,7 @@ const event = {
   confidence: 0.9,
 } as SignificantEventResponse;
 
-const renderTab = (initialPath = '/detection/events') => {
+const renderTab = (initialPath = '/detections/events') => {
   const history = createMemoryHistory({ initialEntries: [initialPath] });
   render(
     <I18nProvider>
@@ -145,7 +140,7 @@ describe('EventsTab', () => {
 
     expect(screen.getByText('Checkout latency increased')).toBeInTheDocument();
     expect(screen.getByText('Checkout latency increased after a deployment.')).toBeInTheDocument();
-    expect(screen.getByText('Source source-1')).toBeInTheDocument();
+    expect(screen.getByText('Not started')).toBeInTheDocument();
   });
 
   it('uses compact time navigation and refreshes the overview and events', () => {
@@ -175,23 +170,47 @@ describe('EventsTab', () => {
     expect(mockRefreshOverview).toHaveBeenCalled();
   });
 
-  it('runs investigations and marks active events inactive from the actions column', () => {
-    renderTab();
+  it('starts an investigation when none exists, and otherwise opens the event', () => {
+    const investigatedEvent = {
+      ...event,
+      event_id: 'event-2',
+      title: 'Payment errors',
+      investigations: [{ workflow_execution_id: 'run-1', started_at: '2026-10-20T10:31:00.000Z' }],
+    } as SignificantEventResponse;
+    mockUseSignificantEventsList.mockReturnValue({
+      data: { hits: [event, investigatedEvent], page: 1, perPage: 25, total: 2 },
+      isLoading: false,
+      isFetching: false,
+      refetch: mockRefreshEvents,
+    });
+    const history = renderTab();
 
     fireEvent.click(screen.getByTestId('nightshiftRunEventInvestigation-event-1'));
     expect(mockTriggerInvestigation).toHaveBeenCalledWith('event-1');
 
-    fireEvent.click(screen.getByTestId('nightshiftMarkEventInactive-event-1'));
-    fireEvent.change(screen.getByTestId('nightshiftMarkSignificantEventInactiveReason'), {
-      target: { value: 'Known maintenance' },
-    });
-    fireEvent.click(screen.getByTestId('nightshiftMarkSignificantEventInactiveConfirm'));
+    expect(screen.getByText('In progress')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('nightshiftViewEvent-event-2'));
+    expect(new URLSearchParams(history.location.search).get('eventId')).toBe('event-2');
+  });
 
-    expect(mockCloseSignificantEvent).toHaveBeenCalledWith('event-1', 'Known maintenance');
+  it('sorts by a column header and keeps the choice in the URL', async () => {
+    const history = renderTab();
+
+    expect(mockUseSignificantEventsList).toHaveBeenLastCalledWith(
+      expect.objectContaining({ sortField: 'severity', sortOrder: 'desc' })
+    );
+    fireEvent.click(screen.getByRole('button', { name: /^Time/ }));
+
+    await waitFor(() =>
+      expect(mockUseSignificantEventsList).toHaveBeenLastCalledWith(
+        expect.objectContaining({ sortField: 'created_at', page: 1 })
+      )
+    );
+    expect(new URLSearchParams(history.location.search).get('sortField')).toBe('created_at');
   });
 
   it('sends search and filter query params and resets the page', async () => {
-    const history = renderTab('/detection/events?page=3');
+    const history = renderTab('/detections/events?page=3');
 
     fireEvent.change(screen.getByTestId('nightshiftDetectionEventsSearch'), {
       target: { value: 'checkout' },
@@ -210,6 +229,10 @@ describe('EventsTab', () => {
     fireEvent.click(
       await screen.findByTestId('nightshiftDetectionEventsSeverityFilterOption-high')
     );
+    fireEvent.click(screen.getByTestId('nightshiftDetectionEventsInvestigationFilterButton'));
+    fireEvent.click(
+      await screen.findByTestId('nightshiftDetectionEventsInvestigationFilterOption-not_started')
+    );
 
     await waitFor(() =>
       expect(mockUseSignificantEventsList).toHaveBeenLastCalledWith(
@@ -218,6 +241,7 @@ describe('EventsTab', () => {
           search: 'checkout',
           status: ['active'],
           severity: ['high'],
+          investigation: ['not_started'],
         })
       )
     );
@@ -226,6 +250,7 @@ describe('EventsTab', () => {
     expect(params.get('search')).toBe('checkout');
     expect(params.getAll('status')).toEqual(['active']);
     expect(params.getAll('severity')).toEqual(['high']);
+    expect(params.getAll('investigation')).toEqual(['not_started']);
   });
 
   it('shows an error with a retry when the list fails to load', () => {
@@ -266,7 +291,7 @@ describe('EventsTab', () => {
       isSuccess: true,
     });
 
-    renderTab('/detection/events?eventId=event-deep');
+    renderTab('/detections/events?eventId=event-deep');
 
     expect(mockUseFetchEventById).toHaveBeenCalledWith('event-deep', { enabled: true });
     expect(screen.getByTestId('eventFlyoutStub')).toHaveTextContent('Deep-linked event');

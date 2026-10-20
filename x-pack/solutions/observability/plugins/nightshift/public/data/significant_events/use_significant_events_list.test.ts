@@ -82,6 +82,9 @@ describe('useSignificantEventsList', () => {
         search: 'checkout',
         status: ['active', 'recovering'],
         severity: ['critical', 'high'],
+        investigation: ['in_progress'],
+        sortField: 'severity',
+        sortOrder: 'desc',
       })
     );
 
@@ -99,6 +102,9 @@ describe('useSignificantEventsList', () => {
             search: 'checkout',
             status: ['active', 'recovering'],
             severity: ['critical', 'high'],
+            investigation_state: ['in_progress'],
+            sort_field: 'severity',
+            sort_order: 'desc',
           },
         },
         signal: null,
@@ -116,6 +122,9 @@ describe('useSignificantEventsList', () => {
         search: '',
         status: [],
         severity: [],
+        investigation: [],
+        sortField: 'severity',
+        sortOrder: 'desc',
       })
     );
 

@@ -27,41 +27,32 @@ export const INVESTIGATION_COLUMN_LABEL = i18n.translate(
   'xpack.nightshift.detectionPage.events.columns.investigation',
   { defaultMessage: 'Investigation' }
 );
-export const SOURCES_COLUMN_LABEL = i18n.translate(
-  'xpack.nightshift.detectionPage.events.columns.sources',
-  { defaultMessage: 'Sources' }
-);
-export const CREATED_COLUMN_LABEL = i18n.translate(
-  'xpack.nightshift.detectionPage.events.columns.created',
-  { defaultMessage: 'Created' }
+export const TIME_COLUMN_LABEL = i18n.translate(
+  'xpack.nightshift.detectionPage.events.columns.time',
+  { defaultMessage: 'Time' }
 );
 export const ACTIONS_COLUMN_LABEL = i18n.translate(
   'xpack.nightshift.detectionPage.events.columns.actions',
   { defaultMessage: 'Actions' }
 );
+export const VIEW_EVENT_LABEL = i18n.translate('xpack.nightshift.detectionPage.events.viewEvent', {
+  defaultMessage: 'View event and investigation',
+});
 export const RUN_INVESTIGATION_LABEL = i18n.translate(
   'xpack.nightshift.detectionPage.events.runInvestigation',
   { defaultMessage: 'Run investigation' }
 );
-export const RESTART_INVESTIGATION_LABEL = i18n.translate(
-  'xpack.nightshift.detectionPage.events.restartInvestigation',
-  { defaultMessage: 'Restart investigation' }
-);
-export const RESTART_INVESTIGATION_TOOLTIP = i18n.translate(
-  'xpack.nightshift.detectionPage.events.restartInvestigationTooltip',
-  { defaultMessage: 'This will cancel the running investigation and start a new one.' }
-);
-export const MARK_INACTIVE_LABEL = i18n.translate(
-  'xpack.nightshift.detectionPage.events.markInactive',
-  { defaultMessage: 'Mark significant event inactive' }
-);
 export const SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.nightshift.detectionPage.events.searchPlaceholder',
-  { defaultMessage: 'Search significant events' }
+  { defaultMessage: 'Search events' }
 );
 export const STATUS_FILTER_LABEL = i18n.translate(
   'xpack.nightshift.detectionPage.events.statusFilterLabel',
   { defaultMessage: 'Status' }
+);
+export const INVESTIGATION_FILTER_LABEL = i18n.translate(
+  'xpack.nightshift.detectionPage.events.investigationFilterLabel',
+  { defaultMessage: 'Investigation' }
 );
 export const SEVERITY_FILTER_LABEL = i18n.translate(
   'xpack.nightshift.detectionPage.events.severityFilterLabel',

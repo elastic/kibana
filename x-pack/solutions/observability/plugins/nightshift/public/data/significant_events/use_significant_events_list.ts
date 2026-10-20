@@ -5,73 +5,51 @@
  * 2.0.
  */
 
-import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import { useQuery } from '@kbn/react-query';
 import type {
-  Severity,
-  SignificantEvent,
-  SignificantEventStatus,
-} from '@kbn/significant-events-schema';
+  SignificantEventsSortField,
+  SignificantEventsSortOrder,
+} from '@kbn/significant-events-plugin/common';
+import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { useFetchErrorToast } from '../../hooks/use_fetch_error_toast';
 import { applyPendingInvestigationCompletions } from '../../hooks/use_fetch_significant_events';
 import { useKibana } from '../../hooks/use_kibana';
 import { significantEventsListQueryKey } from '../query_keys';
+import { toEventsFilterQuery, type SignificantEventsFilters } from './events_filter_query';
 
 const RUNNING_INVESTIGATIONS_REFETCH_INTERVAL_MS = 5_000;
 
-// Local copy: data/ must not import from components/.
+// Local copy: data/ must not import from components/. Same rule as the investigation filter.
 const hasRunningInvestigations = (events: SignificantEvent[]): boolean =>
-  events.some(({ investigations }) => {
-    const latestInvestigation = investigations?.at(-1);
-    return latestInvestigation != null && latestInvestigation.completed_at == null;
-  });
+  events.some(({ investigations }) =>
+    (investigations ?? []).some(({ completed_at: completedAt }) => completedAt == null)
+  );
 
-export interface SignificantEventsListParams {
-  from: string;
-  to: string;
+export interface SignificantEventsListParams extends SignificantEventsFilters {
   page: number;
   perPage: number;
-  search: string;
-  status: SignificantEventStatus[];
-  severity: Severity[];
+  sortField: SignificantEventsSortField;
+  sortOrder: SignificantEventsSortOrder;
 }
 
-export const useSignificantEventsList = ({
-  from,
-  to,
-  page,
-  perPage,
-  search,
-  status,
-  severity,
-}: SignificantEventsListParams) => {
+export const useSignificantEventsList = (params: SignificantEventsListParams) => {
   const { significantEventsRepositoryClient } = useKibana().services.significantEvents;
   const showFetchErrorToast = useFetchErrorToast();
+  const { page, perPage, sortField, sortOrder, ...filters } = params;
 
   return useQuery({
-    queryKey: significantEventsListQueryKey({
-      from,
-      to,
-      page,
-      perPage,
-      search,
-      status,
-      severity,
-    }),
+    queryKey: significantEventsListQueryKey(params),
     queryFn: async ({ signal }) => {
-      const absoluteRange = getAbsoluteTimeRange({ from, to }, { forceNow: new Date() });
-
       const response = await significantEventsRepositoryClient.fetch(
         'GET /internal/significant_events/events',
         {
           params: {
             query: {
-              ...absoluteRange,
+              ...toEventsFilterQuery(filters),
               page,
               perPage,
-              search: search || undefined,
-              status: status.length > 0 ? status : undefined,
-              severity: severity.length > 0 ? severity : undefined,
+              sort_field: sortField,
+              sort_order: sortOrder,
             },
           },
           signal: signal ?? null,

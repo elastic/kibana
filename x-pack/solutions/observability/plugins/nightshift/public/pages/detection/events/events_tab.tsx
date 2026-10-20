@@ -11,6 +11,7 @@ import { KbnDangerCallout } from '@kbn/ui-callout';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { EventFlyout } from '../../../components/entities/significant_event/event_flyout';
 import { useFetchEventById } from '../../../data/significant_events/use_fetch_event_by_id';
+import { useSignificantEventsFacets } from '../../../data/significant_events/use_significant_events_facets';
 import { useSignificantEventsList } from '../../../data/significant_events/use_significant_events_list';
 import { useKibana } from '../../../hooks/use_kibana';
 import type { DetectionTimeRange } from '../use_detection_time_range';
@@ -46,25 +47,36 @@ export const EventsTab = ({
     debouncedSearch,
     status,
     severity,
+    investigation,
+    sort,
     page,
     eventId,
     hasFilters,
     onSearchChange,
     setStatus,
     setSeverity,
+    setInvestigation,
+    setSort,
     setPage,
     openEvent,
     closeEvent,
     clearFilters,
   } = useEventsUrlState();
-  const eventsQuery = useSignificantEventsList({
+  const filters = {
     ...timeRange,
-    page,
-    perPage,
     search: debouncedSearch,
     status,
     severity,
+    investigation,
+  };
+  const eventsQuery = useSignificantEventsList({
+    ...filters,
+    page,
+    perPage,
+    sortField: sort.field,
+    sortOrder: sort.order,
   });
+  const facetsQuery = useSignificantEventsFacets(filters);
   const events = eventsQuery.data?.hits ?? [];
   const eventOnPage = eventId ? events.find((event) => event.event_id === eventId) : undefined;
   const eventByIdQuery = useFetchEventById(eventId, {
@@ -126,10 +138,14 @@ export const EventsTab = ({
         status={status}
         severity={severity}
         onTimeRangeChange={onTimeRangeChange}
+        investigation={investigation}
+        facets={facetsQuery.data}
         onRefresh={() => {
           void eventsQuery.refetch();
+          void facetsQuery.refetch();
           onRefresh();
         }}
+        onInvestigationChange={setInvestigation}
         onSearchChange={onSearchChange}
         onStatusChange={setStatus}
         onSeverityChange={setSeverity}
@@ -171,6 +187,8 @@ export const EventsTab = ({
           total={eventsQuery.data?.total ?? 0}
           page={page}
           perPage={perPage}
+          sort={sort}
+          onSortChange={setSort}
           isLoading={eventsQuery.isFetching}
           selectedEventId={eventId}
           onEventClick={(event: SignificantEventResponse) => openEvent(event.event_id)}

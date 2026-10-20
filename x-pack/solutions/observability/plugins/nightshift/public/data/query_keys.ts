@@ -17,30 +17,11 @@ export const SIGNIFICANT_EVENTS_LIST_QUERY_KEY = ['nightshift.significantEventsL
 export const EVENT_BY_ID_QUERY_KEY = ['nightshift.eventById'] as const;
 export const EVENT_LIFECYCLE_QUERY_KEY = ['nightshift.eventLifecycle'] as const;
 
-export const significantEventsListQueryKey = ({
-  from,
-  to,
-  page,
-  perPage,
-  search,
-  status,
-  severity,
-}: {
-  from: string;
-  to: string;
-  page: number;
-  perPage: number;
-  search: string;
-  status: readonly string[];
-  severity: readonly string[];
-}) =>
-  [
-    ...SIGNIFICANT_EVENTS_LIST_QUERY_KEY,
-    from,
-    to,
-    page,
-    perPage,
-    search,
-    status,
-    severity,
-  ] as const;
+export const SIGNIFICANT_EVENTS_FACETS_QUERY_KEY = ['nightshift.significantEventsFacets'] as const;
+
+/** Keys hold the whole request; react-query hashes objects by value. */
+export const significantEventsListQueryKey = (params: object) =>
+  [...SIGNIFICANT_EVENTS_LIST_QUERY_KEY, params] as const;
+
+export const significantEventsFacetsQueryKey = (params: object) =>
+  [...SIGNIFICANT_EVENTS_FACETS_QUERY_KEY, params] as const;
