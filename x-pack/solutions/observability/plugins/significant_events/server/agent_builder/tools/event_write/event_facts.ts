@@ -123,8 +123,9 @@ const escalatesStoredVerdict = ({
   );
 };
 
+/** A confirming signal, or an off-topic row with its own observed error: both are rated on what they show. */
 const hasConfirmingSignal = (signals: SignificantEvent['signals']): boolean =>
-  (signals ?? []).some(({ verdict }) => verdict === 'confirms');
+  (signals ?? []).some(({ verdict }) => verdict === 'confirms' || verdict === 'off_topic');
 
 /**
  * The agent decides the tier under the `severity` field contract; the writer stores it. An inactive

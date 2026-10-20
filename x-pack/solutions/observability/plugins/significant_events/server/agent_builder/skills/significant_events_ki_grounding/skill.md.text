@@ -285,8 +285,7 @@ search.
 <output_format>
 
 **signals** — always emit one entry per rule that ran `platform_core_execute_esql`, plus one per
-no-query rule. The no-query
-(`not_checked`) entries are grounding evidence only; the discovery write never carries them in an event item. `[]` only when no ES|QL calls were made and no rules were active.
+no-query rule. `[]` only when no ES|QL calls were made and no rules were active.
 
 Each entry:
 - `type`: always `"detection"`.
@@ -317,7 +316,7 @@ Each entry:
   - `time_range`: the absolute `{ from, to }` window bound at execution. Always record it: without
     it a placeholder query cannot be interpreted.
   - `result`: `"found"` | `"empty"` | `"error"`.
-- `metadata`: `{ detection_id, rule_uuid }` copied from the detection input; the rest is filled in.
+- `metadata`: detection input.
 - `causal_features`: array of cause entries (`<topology_entry_shapes>`); `[]` when empty.
 - `blast_radius`: array of dependency, entity, and infrastructure entries
   (`<topology_entry_shapes>`); `[]` when empty.

@@ -103,7 +103,10 @@ export const eventsWriteItemSchema = lazySchema(() =>
     .superRefine((item, ctx) => {
       const signals = item.signals ?? [];
       const hasConfirms = signals.some((s) => s.evidence != null && s.verdict === 'confirms');
-      const hasConfirmingSignal = signals.some((s) => s.verdict === 'confirms');
+      // An off-topic row with its own observed error is rated on what it shows, like a confirmation.
+      const hasConfirmingSignal = signals.some(
+        (s) => s.verdict === 'confirms' || s.verdict === 'off_topic'
+      );
 
       // One issue per offending signal, so a retry knows exactly which entries to remove.
       if (hasConfirms) {
