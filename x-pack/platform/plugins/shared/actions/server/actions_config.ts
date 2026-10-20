@@ -10,7 +10,6 @@ import { rootCertificates } from 'node:tls';
 
 import { i18n } from '@kbn/i18n';
 import { tryCatch, map, mapNullable, getOrElse } from 'fp-ts/Option';
-import url from 'url';
 import { curry } from 'lodash';
 import { pipe } from 'fp-ts/pipeable';
 
@@ -205,10 +204,20 @@ function isAllowed({ allowedHosts }: ActionsConfig, hostname: string | null): bo
   return false;
 }
 
+function parseUri(uri: string): URL {
+  // network path references (`//host/path`) have no scheme, which URL requires
+  return new URL(uri.startsWith('//') ? `http:${uri}` : uri);
+}
+
+// URL wraps IPv6 hostnames in brackets, but allowedHosts entries don't have them
+function unbracketHostname(hostname: string): string {
+  return hostname.startsWith('[') && hostname.endsWith(']') ? hostname.slice(1, -1) : hostname;
+}
+
 function isHostnameAllowedInUri(config: ActionsConfig, uri: string): boolean {
   return pipe(
-    tryCatch(() => url.parse(uri, false /* parseQueryString */, true /* slashesDenoteHost */)),
-    map((parsedUrl) => parsedUrl.hostname),
+    tryCatch(() => parseUri(uri)),
+    map((parsedUrl) => unbracketHostname(parsedUrl.hostname)),
     mapNullable((hostname) => isAllowed(config, hostname)),
     getOrElse<boolean>(() => false)
   );

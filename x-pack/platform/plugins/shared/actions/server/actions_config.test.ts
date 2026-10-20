@@ -192,6 +192,48 @@ describe('isUriAllowed', () => {
       getActionsConfigurationUtilities(config).isUriAllowed('https://github.com/elastic/kibana')
     ).toEqual(true);
   });
+
+  test('returns false when an encoded dot hides the real hostname', () => {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      allowedHosts: ['github.com'],
+    };
+    expect(
+      getActionsConfigurationUtilities(config).isUriAllowed(
+        'http://github.com%2e127.0.0.1.nip.io:18080/internal'
+      )
+    ).toEqual(false);
+  });
+
+  test('uses the decoded hostname for allowlist checks', () => {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      allowedHosts: ['github.com.127.0.0.1.nip.io'],
+    };
+    expect(
+      getActionsConfigurationUtilities(config).isUriAllowed(
+        'http://github.com%2e127.0.0.1.nip.io:18080/internal'
+      )
+    ).toEqual(true);
+  });
+
+  test('uses the normalized IPv4 address for allowlist checks', () => {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      allowedHosts: ['0x7f.1'],
+    };
+    expect(getActionsConfigurationUtilities(config).isUriAllowed('http://0x7f.1/')).toEqual(false);
+  });
+
+  test('returns true for IPv6 hostnames in the allowedHosts', () => {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      allowedHosts: ['::1'],
+    };
+    expect(getActionsConfigurationUtilities(config).isUriAllowed('http://[::1]:8080/foo')).toEqual(
+      true
+    );
+  });
 });
 
 describe('isHostnameAllowed', () => {
