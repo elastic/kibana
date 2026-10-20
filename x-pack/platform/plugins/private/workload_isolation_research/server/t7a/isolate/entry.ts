@@ -9,6 +9,8 @@
  * set) is booted lazily per slot and kept warm; each dispatched TM task builds its runner from
  * the island's captured task definitions — the same `createTaskRunner` main would have used. */
 
+import { setFlagsFromString } from 'v8';
+import { runInNewContext } from 'vm';
 import { decode } from '../../capability_kit/codecs';
 import type { CodecInput } from '../../capability_kit/codecs';
 import type { TaskEntry, WorkerContext } from '../../capability_kit/protocol';
@@ -27,7 +29,7 @@ const slotStartedAt = performance.now();
 let runs = 0;
 
 interface RunInput {
-  readonly phase: 'run' | 'cleanup' | 'stats';
+  readonly phase: 'run' | 'cleanup' | 'stats' | 'boot';
   readonly taskType: string;
   readonly taskInstance: Record<string, unknown>;
   readonly executionUuid?: string;
@@ -54,6 +56,14 @@ const getIsland = (context: WorkerContext): Promise<Island> => {
   return island;
 };
 
+/** Measurement only: full GC (twice) so heap numbers are retained, not garbage. */
+const forceGc = () => {
+  setFlagsFromString('--expose_gc');
+  const gc = runInNewContext('gc') as () => void;
+  gc();
+  gc();
+};
+
 const stats = () => ({
   edges: Object.fromEntries(edgeStats),
   fences: Object.fromEntries(fenceStats),
@@ -68,8 +78,13 @@ export const runTask: TaskEntry = async (rawInput: CodecInput, context: WorkerCo
   runContext.run(context, async () => {
     const input = rawInput as RunInput;
     if (input.phase === 'stats') {
-      if (input.taskType === 'gc' && typeof globalThis.gc === 'function') globalThis.gc();
+      if (input.taskType === 'gc') forceGc();
       return stats() as CodecInput;
+    }
+    if (input.phase === 'boot') {
+      const t = performance.now();
+      const current = await getIsland(context);
+      return { bootMs: current.bootMs, waitedMs: performance.now() - t, slotAgeMs: performance.now() - slotStartedAt, memory: memory() } as CodecInput;
     }
     const t0 = performance.now();
     const wasCold = !island;

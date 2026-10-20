@@ -20,7 +20,7 @@ import { createHash } from 'crypto';
 import { createRequire } from 'module';
 
 const lz = createRequire(import.meta.url)('lz-string') as {
-  decompressFromEncodedURIComponent: (s: string) => string | null;
+  decompressFromBase64: (s: string) => string | null;
 };
 
 const KBN = process.env.T7A_KBN ?? 'http://localhost:5675';
@@ -140,8 +140,9 @@ const normaliser = (ids: Record<string, string>) => {
   const uuidRe = /\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/g;
   const isoRe = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z/g;
   const replaceStr = (s: string): string => {
-    let out = s.replace(/lz=([A-Za-z0-9%\-_+$]+)/g, (_m, enc: string) => {
-      const decoded = lz.decompressFromEncodedURIComponent(decodeURIComponent(enc));
+    // share's redirect URLs carry lz-string *base64* of the locator params (format_search_params.ts).
+    let out = s.replace(/lz=([A-Za-z0-9%+/=]+)/g, (_m, enc: string) => {
+      const decoded = lz.decompressFromBase64(decodeURIComponent(enc));
       return `lz=<${decoded ?? 'UNDECODABLE'}>`;
     });
     for (const [name, value] of Object.entries(ids)) if (value) out = out.split(value).join(`<${name}>`);

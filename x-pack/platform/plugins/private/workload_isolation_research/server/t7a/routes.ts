@@ -76,10 +76,19 @@ export const registerT7aRoutes = (
       security,
       options,
       validate: {
-        body: schema.object({ kind: schema.oneOf([schema.literal('stats'), schema.literal('gc')]) }),
+        body: schema.object({
+          kind: schema.oneOf([
+            schema.literal('stats'),
+            schema.literal('gc'),
+            schema.literal('boot'),
+            schema.literal('coldstart'),
+          ]),
+        }),
       },
     },
-    withController((c, body: { kind: 'stats' | 'gc' }) => c.probe(body.kind)) as never
+    withController((c, body: { kind: 'stats' | 'gc' | 'boot' | 'coldstart' }) =>
+      c.probe(body.kind)
+    ) as never
   );
   router.post(
     { path: `${base}/t7a/host/_stop`, security, options, validate: false },
