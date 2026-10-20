@@ -7,21 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 
-import type {
-  AppHeaderBadge,
-  AppHeaderExperimentalDashboardAiAction,
-  AppHeaderShareAction,
-} from '@kbn/app-header';
+import type { AppHeaderExperimentalDashboardAiAction, AppHeaderShareAction } from '@kbn/app-header';
 import { AppMenuComponent } from '@kbn/core-chrome-app-menu-components';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { useChromeStyle } from '@kbn/core-chrome-browser-hooks';
 import type { TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import { DashboardFavoritesProvider } from '../dashboard_favorite_button';
-import { HostedAppHeader } from './hosted_app_header';
 import { LegacyDashboardHeader } from './legacy_dashboard_header';
-import { StandaloneAppHeader } from './standalone_app_header';
+import { NextChromeAppHeader } from './next_chrome_app_header';
 
 interface Props {
   title: string;
@@ -52,15 +47,6 @@ export const DashboardHeader = ({
 }: Props) => {
   const chromeStyle = useChromeStyle();
 
-  const appHeaderBadges = useMemo<AppHeaderBadge[]>(
-    () =>
-      badges.map((badge) => ({
-        label: badge.badgeText,
-        renderCustomBadge: badge.renderCustomBadge,
-      })),
-    [badges]
-  );
-
   // URL embed (`embed=true`), any chrome style. Chrome is hidden, so pushing the menu through
   // `chrome.setAppMenu` would render nothing. Render the app menu inline instead, and only when
   // `show-top-menu=true` forces it visible.
@@ -83,25 +69,15 @@ export const DashboardHeader = ({
   // Next chrome
   return (
     <DashboardFavoritesProvider>
-      {isHostedByApp ? (
-        <HostedAppHeader
-          title={title}
-          menu={menu}
-          badges={appHeaderBadges}
-          dashboardId={dashboardId}
-          share={share}
-          experimentalDashboardAiAction={experimentalDashboardAiAction}
-        />
-      ) : (
-        <StandaloneAppHeader
-          title={title}
-          menu={menu}
-          badges={appHeaderBadges}
-          dashboardId={dashboardId}
-          share={share}
-          experimentalDashboardAiAction={experimentalDashboardAiAction}
-        />
-      )}
+      <NextChromeAppHeader
+        isHostedByApp={isHostedByApp}
+        title={title}
+        menu={menu}
+        badges={badges}
+        dashboardId={dashboardId}
+        share={share}
+        experimentalDashboardAiAction={experimentalDashboardAiAction}
+      />
     </DashboardFavoritesProvider>
   );
 };
