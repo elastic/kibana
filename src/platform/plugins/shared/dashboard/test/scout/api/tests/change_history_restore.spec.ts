@@ -30,11 +30,13 @@ apiTest.describe(
   'dashboard change history - restore round trip and authorization',
   { tag: tags.stateful.classic },
   () => {
-    const spaceA = `history-a-${randomUUID()}`;
-    const spaceB = `history-b-${randomUUID()}`;
-    const dashboardId = 'history-restore-dashboard';
-    // dashboards are isolated to a single Space, so their ids are unique across Spaces
-    const dashboardIdB = 'history-restore-dashboard-b';
+    // Dashboard ids are globally unique (multiple-isolated), so a new Space does not avoid
+    // collisions with dashboards left by an interrupted run or created by another execution
+    const runId = randomUUID();
+    const spaceA = `history-a-${runId}`;
+    const spaceB = `history-b-${runId}`;
+    const dashboardId = `history-restore-dashboard-${runId}`;
+    const dashboardIdB = `history-restore-dashboard-b-${runId}`;
 
     const editorBothSpaces = dashboardRole([spaceA, spaceB], 'all');
     const editorSpaceAOnly = dashboardRole([spaceA], 'all');
@@ -197,7 +199,7 @@ apiTest.describe(
     });
 
     apiTest('restore brings back configured panels and their references', async ({ apiClient }) => {
-      const id = 'history-restore-panels';
+      const id = `history-restore-panels-${runId}`;
       const byValuePanel = {
         id: 'by-value-lens-panel',
         type: 'vis',
@@ -297,7 +299,7 @@ apiTest.describe(
     apiTest(
       'a user with read-only access cannot read or restore history',
       async ({ apiClient }) => {
-        const id = 'history-read-only';
+        const id = `history-read-only-${runId}`;
         const path = `${spacePrefix(spaceA)}${HISTORY_PATH}/${id}`;
         expect(
           await apiClient.put(`${spacePrefix(spaceA)}${DASHBOARD_API_PATH}/${id}`, {
@@ -360,7 +362,7 @@ apiTest.describe(
       'privileges in one space do not grant access to history in another space',
       async ({ apiClient }) => {
         // the dashboard and its history exist in space A; the user only has access to space A
-        const id = 'history-authz-dashboard';
+        const id = `history-authz-dashboard-${runId}`;
         const itemsA = await seedVersions(apiClient, spaceA, id, ['Space A one', 'Space A two']);
 
         // the user can read space A history, proving the rejections below are about space B
@@ -378,7 +380,7 @@ apiTest.describe(
     apiTest(
       'history and restore never cross Spaces for a user who can access both',
       async ({ apiClient }) => {
-        const dashboardIdA = 'history-cross-space-dashboard-a';
+        const dashboardIdA = `history-cross-space-dashboard-a-${runId}`;
         const asA = [editorBothSpaces, dashboardIdA] as const;
         const asB = [editorBothSpaces, dashboardIdB] as const;
         const itemsA = await seedVersions(apiClient, spaceA, dashboardIdA, [
@@ -421,6 +423,62 @@ apiTest.describe(
           'Space A title'
         );
         expect((await listHistory(apiClient, spaceA, ...asA)).body.total).toBe(2);
+      }
+    );
+
+    apiTest(
+      'retained history of a deleted dashboard is not reachable from another space reusing its id',
+      async ({ apiClient }) => {
+        // the same id exists in both spaces, so only Space isolation can reject the requests below:
+        // the dashboard exists in B and the history object-id filter matches A's retained events
+        const id = `history-reused-id-${runId}`;
+        const asB = [editorBothSpaces, id] as const;
+        const itemsA = await seedVersions(apiClient, spaceA, id, ['Space A one', 'Space A two']);
+        const retainedIds = itemsA.map((item) => item.id);
+
+        const deleted = await apiClient.delete(
+          `${spacePrefix(spaceA)}${DASHBOARD_API_PATH}/${id}`,
+          {
+            headers: await headers(editorBothSpaces),
+            responseType: 'json',
+          }
+        );
+        expect(deleted).toHaveStatusCode(204);
+        expect(await getDashboard(apiClient, spaceA, id)).toHaveStatusCode(404);
+
+        expect(await saveDashboard(apiClient, spaceB, 'Space B only', ...asB)).toHaveStatusCode(
+          201
+        );
+        // wait for B's own event; a leak of A's retained events would show up before or with it
+        await expect
+          .poll(async () => (await listHistory(apiClient, spaceB, ...asB)).body.total, {
+            timeout: 30_000,
+          })
+          .toBeGreaterThanOrEqual(1);
+
+        // B only lists its own history, never A's retained snapshots
+        const listB = await listHistory(apiClient, spaceB, ...asB);
+        expect(listB).toHaveStatusCode(200);
+        expect(listB.body.total).toBe(1);
+        const itemsB = listB.body.items as Array<{ id: string; metadata: { version: number } }>;
+        expect(itemsB.map((item) => item.metadata.version)).toStrictEqual([1]);
+        expect(retainedIds).not.toContain(itemsB[0].id);
+
+        // A's retained snapshots can be neither fetched nor restored through B
+        for (const changeId of retainedIds) {
+          expect(await getChange(apiClient, spaceB, changeId, ...asB)).toHaveStatusCode(404);
+          expect(await restore(apiClient, spaceB, changeId, ...asB)).toHaveStatusCode(404);
+        }
+
+        // B's dashboard and history are untouched by the rejected restores
+        expect((await getDashboard(apiClient, spaceB, id)).body.data.title).toBe('Space B only');
+        await expect
+          .poll(async () => (await listHistory(apiClient, spaceB, ...asB)).body.total, {
+            timeout: 5_000,
+          })
+          .toBe(1);
+        // and A did not get the dashboard back
+        expect(await getDashboard(apiClient, spaceA, id)).toHaveStatusCode(404);
       }
     );
   }

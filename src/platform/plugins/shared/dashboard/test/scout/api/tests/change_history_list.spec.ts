@@ -28,8 +28,10 @@ interface HistoryItem {
 const HISTORY_PATH = 'internal/dashboard/change_history';
 
 apiTest.describe('dashboard change history - list', { tag: tags.stateful.classic }, () => {
-  const spaceId = `history-list-${randomUUID()}`;
-  const dashboardId = 'history-list-dashboard';
+  const runId = randomUUID();
+  const spaceId = `history-list-${runId}`;
+  // dashboard ids are globally unique, so they need a per-run suffix as well
+  const dashboardId = `history-list-dashboard-${runId}`;
   const titles = ['Version one', 'Version two', 'Version three', 'Version four', 'Version five'];
 
   const editor = {
