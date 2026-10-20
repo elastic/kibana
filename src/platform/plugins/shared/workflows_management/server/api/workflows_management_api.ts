@@ -1392,6 +1392,7 @@ export class WorkflowsManagementApi {
 
       const claimed = await this.workflowsService.markStepAsResponded(
         stepExecutionId,
+        executionId,
         request,
         channel,
         spaceId

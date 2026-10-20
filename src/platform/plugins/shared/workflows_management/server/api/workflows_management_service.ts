@@ -639,6 +639,7 @@ export class WorkflowsService {
 
   public async markStepAsResponded(
     stepExecutionId: string,
+    executionId: string,
     request: KibanaRequest,
     channel: string | undefined,
     spaceId: string
@@ -648,6 +649,7 @@ export class WorkflowsService {
     const respondedBy = getAuthenticatedUser(request, this.coreStart?.security);
     return this.executionQueryService.markStepAsResponded(
       stepExecutionId,
+      executionId,
       { respondedBy, respondedAt: new Date().toISOString(), channel },
       spaceId
     );
@@ -655,12 +657,14 @@ export class WorkflowsService {
 
   public async claimHitlStepForExternalResume(
     stepExecutionId: string,
+    executionId: string,
     respondedBy: string,
     spaceId: string
   ): Promise<boolean> {
     await this.ensureInitialized();
     return this.executionQueryService.markStepAsResponded(
       stepExecutionId,
+      executionId,
       { respondedBy, respondedAt: new Date().toISOString(), channel: 'external' },
       spaceId
     );
