@@ -7,10 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Observable } from 'rxjs';
 import type { PluginName } from '@kbn/core-base-common';
+import type { PluginInitStatus } from '@kbn/core-deferred-init-common';
 
 /**
  * Setup contract of Core's `plugins` service.
+ *
+ * Besides the runtime contract resolvers, it carries the cross-plugin initialization API
+ * (`initializePlugin`, `pluginInitStatus$`, `getPluginInitStatus`). Core alone decides when a
+ * plugin's `initialize()` runs (`plugins.initializeOnBoot`: at boot by default, otherwise on
+ * first use); these functions let a dependent wait for, or observe, a declared dependency's
+ * initialization on this Kibana instance without caring which mode core is in.
  *
  * @public
  */
@@ -81,10 +89,40 @@ export interface PluginsServiceSetup {
    * ```
    */
   onStart: PluginContractResolver;
+  /**
+   * Make sure a declared dependency is initialized. `pluginName` must be listed in this
+   * plugin's manifest (`requiredPlugins`, `optionalPlugins` or `runtimePluginDependencies`),
+   * otherwise it throws.
+   *
+   * Resolves once the dependency's `initialize()` has succeeded on this instance and joins
+   * an attempt already in flight. When the dependency's last attempt failed and a retry is
+   * scheduled, it waits for that retry rather than forcing one; once background retries are
+   * exhausted it starts a new attempt. Rejects with a {@link PluginInitializationError} on
+   * failure, and rejects when called during `setup` or `start`, where awaiting it would
+   * block boot. Dependencies without `initialize()` resolve once they have started; a
+   * disabled or absent dependency rejects. When core has not run the dependency's
+   * `initialize()` at boot (`plugins.initializeOnBoot: false`), this call is one of the
+   * triggers that starts it.
+   */
+  initializePlugin: (pluginName: PluginName) => Promise<void>;
+  /**
+   * Status of a declared dependency's initialization. Never triggers anything and replays
+   * the current value. Dependencies without `initialize()` report `available` once started;
+   * disabled or absent plugins report `idle`.
+   */
+  pluginInitStatus$: (pluginName: PluginName) => Observable<PluginInitStatus>;
+  /** Current value of `pluginInitStatus$`, synchronous. Never triggers anything. */
+  getPluginInitStatus: (pluginName: PluginName) => PluginInitStatus;
 }
 
 /**
  * Start contract of Core's `plugins` service.
+ *
+ * Besides the runtime contract resolvers, it carries the cross-plugin initialization API
+ * (`initializePlugin`, `pluginInitStatus$`, `getPluginInitStatus`). Core alone decides when a
+ * plugin's `initialize()` runs (`plugins.initializeOnBoot`: at boot by default, otherwise on
+ * first use); these functions let a dependent wait for, or observe, a declared dependency's
+ * initialization on this Kibana instance without caring which mode core is in.
  *
  * @public
  */
@@ -122,6 +160,30 @@ export interface PluginsServiceStart {
    * @experimental
    */
   onStart: PluginContractResolver;
+  /**
+   * Make sure a declared dependency is initialized. `pluginName` must be listed in this
+   * plugin's manifest (`requiredPlugins`, `optionalPlugins` or `runtimePluginDependencies`),
+   * otherwise it throws.
+   *
+   * Resolves once the dependency's `initialize()` has succeeded on this instance and joins
+   * an attempt already in flight. When the dependency's last attempt failed and a retry is
+   * scheduled, it waits for that retry rather than forcing one; once background retries are
+   * exhausted it starts a new attempt. Rejects with a {@link PluginInitializationError} on
+   * failure, and rejects when called during `setup` or `start`, where awaiting it would
+   * block boot. Dependencies without `initialize()` resolve once they have started; a
+   * disabled or absent dependency rejects. When core has not run the dependency's
+   * `initialize()` at boot (`plugins.initializeOnBoot: false`), this call is one of the
+   * triggers that starts it.
+   */
+  initializePlugin: (pluginName: PluginName) => Promise<void>;
+  /**
+   * Status of a declared dependency's initialization. Never triggers anything and replays
+   * the current value. Dependencies without `initialize()` report `available` once started;
+   * disabled or absent plugins report `idle`.
+   */
+  pluginInitStatus$: (pluginName: PluginName) => Observable<PluginInitStatus>;
+  /** Current value of `pluginInitStatus$`, synchronous. Never triggers anything. */
+  getPluginInitStatus: (pluginName: PluginName) => PluginInitStatus;
 }
 
 /**

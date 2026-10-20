@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { of } from 'rxjs';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type { CoreSetup, StartServicesAccessor } from '@kbn/core-lifecycle-server';
 import type { MockedKeys } from '@kbn/utility-types-jest';
@@ -89,6 +90,9 @@ export function createCoreSetupMock({
     plugins: lazyObject({
       onSetup: jest.fn(),
       onStart: jest.fn(),
+      initializePlugin: jest.fn().mockResolvedValue(undefined),
+      pluginInitStatus$: jest.fn().mockReturnValue(of({ state: 'available', attempts: 0 })),
+      getPluginInitStatus: jest.fn().mockReturnValue({ state: 'available', attempts: 0 }),
     }),
     pricing: pricingServiceMock.createSetupContract(),
     injection: injectionServiceMock.createSetupContract(),

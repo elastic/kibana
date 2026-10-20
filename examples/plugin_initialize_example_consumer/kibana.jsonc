@@ -1,0 +1,14 @@
+{
+  "type": "plugin",
+  "id": "@kbn/plugin-initialize-example-consumer-plugin",
+  "owner": "@elastic/kibana-core",
+  "description": "Example plugin depending on pluginInitializeExample: receives its contract at boot and uses core's cross-plugin initialization API",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "pluginInitializeExampleConsumer",
+    "browser": false,
+    "server": true,
+    "requiredPlugins": ["pluginInitializeExample"]
+  }
+}

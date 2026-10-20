@@ -29,6 +29,7 @@ const basic: PluginPackageManifest = {
     type: 'preboot',
     configPath: ['some', 'legacy'],
     enabledOnAnonymousPages: false,
+    hasInitialization: true,
     extraPublicDirs: ['foo', 'bar'],
     optionalPlugins: ['someOtherPlugin'],
     requiredBundles: ['someRequiresBundlePlugin'],
@@ -47,6 +48,7 @@ describe('pluginManifestFromPluginPackage()', () => {
           "legacy",
         ],
         "enabledOnAnonymousPages": false,
+        "hasInitialization": true,
         "id": "someLegacyPluginId",
         "kibanaVersion": "static",
         "optionalPlugins": Array [
@@ -80,6 +82,7 @@ describe('pluginManifestFromPluginPackage()', () => {
     const pm = pluginManifestFromPluginPackage(kibanaVersion, minimal);
     expect(pm).toHaveProperty('type', PluginType.standard);
     expect(pm.enabledOnAnonymousPages).toBeUndefined();
+    expect(pm.hasInitialization).toBeUndefined();
     expect(pm.serviceFolders).toBeUndefined();
     expect(pm).toHaveProperty('kibanaVersion', kibanaVersion);
     expect(pm).toHaveProperty('optionalPlugins', []);

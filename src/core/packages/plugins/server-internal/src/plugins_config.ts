@@ -18,6 +18,7 @@ import { ENABLE_ALL_PLUGINS_CONFIG_PATH, INCLUDED_PLUGIN_GROUPS } from './consta
 
 const configSchema = schema.object({
   initialize: schema.boolean({ defaultValue: true }),
+  initializeOnBoot: schema.boolean({ defaultValue: true }),
 
   /**
    * Defines an array of directories where another plugin should be loaded from.
@@ -68,6 +69,9 @@ export class PluginsConfig {
    */
   public readonly initialize: boolean;
 
+  /** Run `initialize()` for every plugin that has one right after boot (`true`), or only on first use (`false`). */
+  public readonly initializeOnBoot: boolean;
+
   /**
    * Defines directories that we should scan for the plugin subdirectories.
    */
@@ -94,6 +98,7 @@ export class PluginsConfig {
 
   constructor(rawConfig: PluginsConfigType, env: Env) {
     this.initialize = rawConfig.initialize;
+    this.initializeOnBoot = rawConfig.initializeOnBoot;
     this.pluginSearchPaths = env.pluginSearchPaths;
     this.additionalPluginPaths = rawConfig.paths;
     this.allowlistPluginGroups = get(rawConfig, INCLUDED_PLUGIN_GROUPS);
