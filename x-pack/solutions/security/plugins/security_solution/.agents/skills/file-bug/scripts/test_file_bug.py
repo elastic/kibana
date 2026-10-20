@@ -2377,6 +2377,7 @@ class WriteLocalPathGuardTest(unittest.TestCase):
             '<img src="/missing.png" onerror="alert(1)">',
             'Payload: `<video src="missing.mp4" onerror="alert(1)">`',
             'Payload: `![x](./x.png)`',
+            'Payload: ``![s](`./a.png`)`` renders',
             '```html\n<video src="missing.mp4" onerror="alert(1)">\n![x](./x.png)\n```',
             "Payload: `<img src=/a/b.png onerror=alert(1)>` renders",
             "```html\n<img src=\"/tmp/x/shot.png\">\n```",

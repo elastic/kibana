@@ -124,6 +124,8 @@ _LOCAL_MEDIA_EMBED_RE = re.compile(
     re.I | re.M,
 )
 _FENCE_RE = re.compile(r"```.*?```", re.S)
+# A code span delimited by two or more backticks may contain single backticks (CommonMark).
+_MULTI_TICK_SPAN_RE = re.compile(r"(`{2,})(?!`).+?(?<!`)\1(?!`)", re.S)
 # Backticks inside an image destination are literal URL characters, not a code span.
 _LOCAL_MEDIA_TICKED_EMBED_RE = re.compile(
     rf"!\[[^\]]*\]\(\s*`+(?!https?://)[^)`]*\.{_MEDIA_EXT}`*\s*\)", re.I
@@ -135,7 +137,7 @@ def _local_media(body: str) -> str | None:
     match = (
         _LOCAL_MEDIA_LABEL_RE.search(_FENCE_RE.sub("", body).replace("`", ""))
         or _LOCAL_MEDIA_EMBED_RE.search(outside_code)
-        or _LOCAL_MEDIA_TICKED_EMBED_RE.search(_FENCE_RE.sub("", body))
+        or _LOCAL_MEDIA_TICKED_EMBED_RE.search(_MULTI_TICK_SPAN_RE.sub("", _FENCE_RE.sub("", body)))
         or _LOCAL_MEDIA_BARE_RE.search(outside_code)
     )
     return match.group(0) if match else None
