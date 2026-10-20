@@ -107,6 +107,7 @@ export class IndicatorReader {
     );
     const postGroupingWhere = combineWhere(
       IS_NOT_DELETED,
+      IS_NOT_EXPIRED,
       esql.exp`${esql.col(QUERY_RULE_BACKED)} == true`
     );
 

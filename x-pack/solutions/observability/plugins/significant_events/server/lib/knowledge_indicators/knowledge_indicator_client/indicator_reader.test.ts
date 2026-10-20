@@ -145,6 +145,7 @@ describe('IndicatorReader overview counts', () => {
     expect(query).toContain(`\`source.id\` IN ("${SOURCE}")`);
     expect(query).toContain('"query"');
     expect(query).toContain('deleted IS NULL OR deleted == FALSE');
+    expect(query).toContain(IS_NOT_EXPIRED_FRAGMENT);
     expect(query).toContain('`query.rule_backed` == TRUE');
   });
 });

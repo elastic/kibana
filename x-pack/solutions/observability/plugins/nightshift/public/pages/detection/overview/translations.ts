@@ -64,7 +64,7 @@ export const ACTIVE_RULES_LABEL = i18n.translate(
 
 export const ACTIVE_RULES_TOOLTIP = i18n.translate(
   'xpack.nightshift.detectionPage.activeRulesTooltip',
-  { defaultMessage: 'Rules with an alerting rule attached' }
+  { defaultMessage: 'Query indicators with an attached alerting rule' }
 );
 
 export const DETECTIONS_LABEL = i18n.translate('xpack.nightshift.detectionPage.detectionsLabel', {

@@ -10,12 +10,11 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiSkeletonText,
+  EuiSkeletonRectangle,
   EuiText,
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
@@ -41,12 +40,7 @@ export const MetricCell = ({
       <EuiTitle size="s">
         <div>
           {isLoading ? (
-            <EuiSkeletonText
-              lines={1}
-              css={css`
-                width: 3rem;
-              `}
-            />
+            <EuiSkeletonRectangle width={48} height={24} borderRadius="s" />
           ) : (
             value?.toLocaleString(i18n.getLocale())
           )}
