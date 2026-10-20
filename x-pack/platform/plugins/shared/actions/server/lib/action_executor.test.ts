@@ -2715,3 +2715,94 @@ describe('execute() - spaceId override', () => {
     );
   });
 });
+
+describe('execute() - EARS structured logging', () => {
+  const earsExecutor = jest.fn();
+  const earsConnectorType: jest.Mocked<ConnectorType> = {
+    ...connectorType,
+    id: 'test-ears',
+    validate: {
+      config: { schema: z.object({ bar: z.boolean(), authType: z.string().optional() }) },
+      secrets: { schema: z.object({ baz: z.boolean(), authType: z.string().optional() }) },
+      params: { schema: z.object({ foo: z.boolean() }) },
+    },
+    executor: earsExecutor,
+  };
+
+  const setup = ({
+    authMode,
+    authType,
+    executorResult = { status: 'ok', actionId: CONNECTOR_ID },
+  }: {
+    authMode?: 'per-user' | 'shared';
+    authType?: string;
+    executorResult?: Awaited<ReturnType<NonNullable<ConnectorType['executor']>>>;
+  }) => {
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      id: CONNECTOR_ID,
+      type: 'action',
+      attributes: {
+        name: 'ears-connector',
+        actionTypeId: 'test-ears',
+        authMode,
+        config: { bar: true, ...(authType ? { authType } : {}) },
+        secrets: { baz: true },
+        isMissingSecrets: false,
+      },
+      references: [],
+    });
+    earsExecutor.mockResolvedValueOnce(executorResult);
+    connectorTypeRegistry.get.mockReturnValueOnce(earsConnectorType);
+  };
+
+  const earsLines = () =>
+    [...loggerMock.info.mock.calls, ...loggerMock.warn.mock.calls].filter(([, meta]) =>
+      (meta as { tags?: string[] } | undefined)?.tags?.includes('ears')
+    );
+
+  test('logs one line per execution for a per-user EARS connector', async () => {
+    setup({ authMode: 'per-user', authType: 'ears' });
+
+    await actionExecutor.execute(executeParams);
+
+    expect(earsLines()).toEqual([
+      [
+        `EARS execute success: connectorId=${CONNECTOR_ID} profileUid=${mockUser.profile_uid} spaceId=some-namespace executionId=${ACTION_EXECUTION_ID} actionTypeId=test-ears`,
+        { tags: ['ears', 'execute', 'success'] },
+      ],
+    ]);
+  });
+
+  test('logs a failure line when the connector execution errors', async () => {
+    setup({
+      authMode: 'per-user',
+      authType: 'ears',
+      executorResult: { status: 'error', actionId: CONNECTOR_ID, message: 'boom' },
+    });
+
+    await actionExecutor.execute(executeParams);
+
+    expect(earsLines()).toEqual([
+      [
+        expect.stringContaining('EARS execute failure: connectorId=1'),
+        { tags: ['ears', 'execute', 'failure'] },
+      ],
+    ]);
+  });
+
+  test('does not log for a shared-auth EARS connector', async () => {
+    setup({ authMode: 'shared', authType: 'ears' });
+
+    await actionExecutor.execute(executeParams);
+
+    expect(earsLines()).toEqual([]);
+  });
+
+  test('does not log for a per-user connector that is not EARS', async () => {
+    setup({ authMode: 'per-user', authType: 'oauth_authorization_code' });
+
+    await actionExecutor.execute(executeParams);
+
+    expect(earsLines()).toEqual([]);
+  });
+});

@@ -413,6 +413,13 @@ describe('oauthAuthorizeRoute', () => {
       state: 'random-state',
       codeChallenge: 'code-challenge-value',
     });
+
+    // EARS-specific log lines are only emitted for EARS connectors
+    expect(
+      (mockLogger.info as jest.Mock).mock.calls.filter(
+        ([, meta]: [unknown, { tags?: string[] } | undefined]) => meta?.tags?.includes('ears')
+      )
+    ).toEqual([]);
   });
 
   it('returns EARS authorization URL and checks resolved EARS host against allowedHosts', async () => {
@@ -461,6 +468,11 @@ describe('oauthAuthorizeRoute', () => {
         state: 'ears-state',
       },
     });
+
+    expect(mockLogger.info).toHaveBeenCalledWith(
+      'EARS authorize success: connectorId=connector-ears provider=google profileUid=test-profile-uid spaceId=default state=ears-state',
+      { tags: ['ears', 'authorize', 'success'] }
+    );
   });
 
   it('returns error when resolved EARS authorize URL host is not in allowedHosts', async () => {
