@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { get, isPlainObject } from 'lodash';
+import { get, isPlainObject, mergeWith } from 'lodash';
 import type { ConfigDeprecation, PluginConfigDescriptor } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
@@ -31,72 +31,40 @@ const uptimeConfig = schema.object({
 const LEGACY_CONFIG_PATH = 'xpack.uptime';
 const CONFIG_PATH = 'xpack.synthetics';
 
-const isPlainRecord = (value: unknown): value is Record<string, unknown> => isPlainObject(value);
-
-const getLeaves = (
-  value: Record<string, unknown>,
-  parentPath = ''
-): Array<{ path: string; value: unknown }> =>
-  Object.entries(value).flatMap(([key, child]) => {
-    const path = parentPath ? `${parentPath}.${key}` : key;
-    return isPlainRecord(child) ? getLeaves(child, path) : [{ path, value: child }];
-  });
-
 /**
- * Moves each `xpack.uptime.*` setting to `xpack.synthetics.*`. Unlike `renameFromRoot`, settings
- * are migrated individually so the legacy and new namespaces can be set by different sources
- * (e.g. bundled yml and control plane) without the legacy ones being discarded.
- * If a setting is present in both, the new one wins.
+ * Merges `xpack.uptime` into `xpack.synthetics` instead of using `renameFromRoot`, which drops
+ * the whole legacy subtree when the new namespace is already set. The two namespaces can come
+ * from different sources (e.g. bundled yml and control plane), so non-overlapping settings must
+ * survive. `xpack.synthetics` wins on overlaps.
  */
 const migrateLegacyNamespace: ConfigDeprecation = (config, _fromPath, addDeprecation) => {
   const legacyConfig = get(config, LEGACY_CONFIG_PATH);
-  if (!isPlainRecord(legacyConfig)) {
+  if (!isPlainObject(legacyConfig)) {
     return;
   }
 
-  const moved: Array<{ path: string; value: unknown }> = [];
-  const conflicting: string[] = [];
-  getLeaves(legacyConfig).forEach(({ path, value }) => {
-    const newPath = `${CONFIG_PATH}.${path}`;
-    if (get(config, newPath) === undefined) {
-      moved.push({ path: newPath, value });
-    } else {
-      conflicting.push(path);
-    }
+  const currentConfig = get(config, CONFIG_PATH);
+  const message = `Setting "${LEGACY_CONFIG_PATH}" has been replaced by "${CONFIG_PATH}"`;
+  addDeprecation({
+    configPath: LEGACY_CONFIG_PATH,
+    title: `Setting "${LEGACY_CONFIG_PATH}" is deprecated`,
+    message:
+      currentConfig === undefined
+        ? message
+        : `${message}. However, both are present. Settings in "${CONFIG_PATH}" take precedence over "${LEGACY_CONFIG_PATH}"`,
+    level: 'warning',
+    correctiveActions: {
+      manualSteps: [
+        `Replace "${LEGACY_CONFIG_PATH}" with "${CONFIG_PATH}" in the Kibana config file, CLI flag, or environment variable (in Docker only).`,
+      ],
+    },
   });
 
-  if (moved.length > 0) {
-    addDeprecation({
-      configPath: LEGACY_CONFIG_PATH,
-      title: `Setting "${LEGACY_CONFIG_PATH}" is deprecated`,
-      message: `Setting "${LEGACY_CONFIG_PATH}" has been replaced by "${CONFIG_PATH}"`,
-      level: 'warning',
-      correctiveActions: {
-        manualSteps: [
-          `Replace "${LEGACY_CONFIG_PATH}" with "${CONFIG_PATH}" in the Kibana config file, CLI flag, or environment variable (in Docker only).`,
-        ],
-      },
-    });
-  }
-
-  conflicting.forEach((path) => {
-    const legacyPath = `${LEGACY_CONFIG_PATH}.${path}`;
-    const newPath = `${CONFIG_PATH}.${path}`;
-    addDeprecation({
-      configPath: legacyPath,
-      title: `Setting "${legacyPath}" is deprecated`,
-      message: `Setting "${legacyPath}" has been replaced by "${newPath}". However, both keys are present. Ignoring "${legacyPath}"`,
-      level: 'warning',
-      correctiveActions: {
-        manualSteps: [
-          `Make sure "${newPath}" contains the correct value in the config file, CLI flag, or environment variable (in Docker only).`,
-          `Remove "${legacyPath}" from the config.`,
-        ],
-      },
-    });
-  });
-
-  return { set: moved, unset: [{ path: LEGACY_CONFIG_PATH }] };
+  // Arrays are replaced rather than merged by index.
+  const merged = mergeWith({}, legacyConfig, currentConfig, (_, source) =>
+    Array.isArray(source) ? source : undefined
+  );
+  return { set: [{ path: CONFIG_PATH, value: merged }], unset: [{ path: LEGACY_CONFIG_PATH }] };
 };
 
 export const config: PluginConfigDescriptor = {

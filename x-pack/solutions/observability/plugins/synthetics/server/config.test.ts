@@ -11,6 +11,9 @@ import { config } from './config';
 
 const CONFIG_PATH = 'xpack.synthetics';
 
+const BOTH_PRESENT_MESSAGE =
+  'Setting "xpack.uptime" has been replaced by "xpack.synthetics". However, both are present. Settings in "xpack.synthetics" take precedence over "xpack.uptime"';
+
 const deprecationContext = configDeprecationsMock.createContext();
 
 const applySyntheticsDeprecations = (rootConfig: Record<string, unknown>) => {
@@ -80,10 +83,7 @@ describe('synthetics config deprecations', () => {
         },
       },
     });
-    expect(messages).toEqual([
-      'Setting "xpack.uptime" has been replaced by "xpack.synthetics"',
-      'Setting "xpack.uptime.service.tls.key" has been replaced by "xpack.synthetics.service.tls.key". However, both keys are present. Ignoring "xpack.uptime.service.tls.key"',
-    ]);
+    expect(messages).toEqual([BOTH_PRESENT_MESSAGE]);
   });
 
   it('prefers the xpack.synthetics value when a setting is in both namespaces', () => {
@@ -95,9 +95,18 @@ describe('synthetics config deprecations', () => {
     });
 
     expect(migrated).toEqual({ xpack: { synthetics: { service: { manifestUrl: 'new' } } } });
-    expect(messages).toEqual([
-      'Setting "xpack.uptime.service.manifestUrl" has been replaced by "xpack.synthetics.service.manifestUrl". However, both keys are present. Ignoring "xpack.uptime.service.manifestUrl"',
-    ]);
+    expect(messages).toEqual([BOTH_PRESENT_MESSAGE]);
+  });
+
+  it('replaces arrays instead of merging them by index', () => {
+    const { migrated } = applySyntheticsDeprecations({
+      xpack: {
+        uptime: { service: { hosts: ['https://a', 'https://b', 'https://c'] } },
+        synthetics: { service: { hosts: ['https://x'] } },
+      },
+    });
+
+    expect(migrated).toEqual({ xpack: { synthetics: { service: { hosts: ['https://x'] } } } });
   });
 
   it('flags unused keys under the migrated namespace', () => {
