@@ -103,7 +103,9 @@ import {
   extractAndWriteOutputSecrets,
   isOutputSecretStorageEnabled,
 } from './secrets';
+import { withSavedSecrets } from './secrets/preserve';
 import { findAgentlessPolicies, checkOtlpOutputAllowed } from './outputs/helpers';
+import { getOutputSecretFields } from './outputs/secret_fields';
 import { checkKafkaAuthMethodAllowed } from './outputs/kafka_auth_gate';
 import type { KafkaAuthMethod, KafkaAuthOutput } from './outputs/kafka_auth';
 import {
@@ -1252,6 +1254,18 @@ class OutputService {
       );
     }
 
+    const secretStorageEnabled = await isOutputSecretStorageEnabled(esClient, soClient);
+    if (secretStorageEnabled) {
+      // an update that does not touch a credential kept as a secret keeps it, and a plain text
+      // value for such a credential is stored as a secret too. Applied before the payload is
+      // validated and turned into saved object attributes, so that every step sees the same data.
+      data = withSavedSecrets({
+        fields: getOutputSecretFields(mergedType),
+        original: originalOutput,
+        update: data,
+      });
+    }
+
     // an edit that keeps the authentication as it is does not need its method to be allowed
     if (!fromPreconfiguration) {
       await this.assertKafkaAuthMethodsAllowed(
@@ -1659,7 +1673,7 @@ class OutputService {
     await remoteSyncIntegrationsCheck(esClient, data);
 
     // Store secret values if enabled; if not, store plain text values
-    if (await isOutputSecretStorageEnabled(esClient, soClient)) {
+    if (secretStorageEnabled) {
       const secretsRes = await extractAndUpdateOutputSecrets({
         oldOutput: originalOutput,
         outputUpdate: data,

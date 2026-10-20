@@ -11,6 +11,18 @@ import type { NewFleetServerHost, FleetServerHost, SOSecretPath } from '../../..
 import type { SecretReference } from '../../types';
 
 import { deleteSOSecrets, extractAndWriteSOSecrets, extractAndUpdateSOSecrets } from './common';
+import type { SecretFieldDefinition } from './preserve';
+
+/**
+ * The credentials a Fleet Server host can store as a secret, so that an update that does not touch
+ * one of them keeps it (see `withSavedSecrets`). Each one is removed by an explicit `null`, either
+ * of the credential itself or of the whole `ssl` object.
+ */
+export const FLEET_SERVER_HOST_SECRET_FIELDS: SecretFieldDefinition[] = [
+  { secretPath: 'secrets.ssl.key', plainPath: 'ssl.key', clearedBy: ['ssl'] },
+  { secretPath: 'secrets.ssl.es_key', plainPath: 'ssl.es_key', clearedBy: ['ssl'] },
+  { secretPath: 'secrets.ssl.agent_key', plainPath: 'ssl.agent_key', clearedBy: ['ssl'] },
+];
 
 export async function extractAndWriteFleetServerHostsSecrets(opts: {
   fleetServerHost: NewFleetServerHost;
