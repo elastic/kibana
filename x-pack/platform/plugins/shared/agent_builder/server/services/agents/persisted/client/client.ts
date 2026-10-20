@@ -21,6 +21,7 @@ import {
   createBadRequestError,
   isAgentNotFoundError,
   getAccessControlEntryKey,
+  getDefaultAgentAccessControl,
   isAgentAccessControlRole,
   isEntryCoveredByOwner,
   AGENT_ACCESS_CONTROL_MAX_ENTRIES,
@@ -176,7 +177,10 @@ export interface AgentClient {
 }
 
 export interface SystemAgentClient {
-  ensureAgent(profile: AgentCreateRequest): Promise<void>;
+  ensureAgent(
+    profile: AgentCreateRequest,
+    options?: { accessControlEntries?: AgentAccessControlEntry[] }
+  ): Promise<void>;
 }
 
 const getAgentDocument = async ({
@@ -220,10 +224,13 @@ const ensureSystemAgent = async ({
   storage,
   space,
   profile,
+  accessControlEntries = [],
 }: {
   storage: AgentProfileStorage;
   space: string;
   profile: AgentCreateRequest;
+  /** Written only when this call creates the agent. */
+  accessControlEntries?: AgentAccessControlEntry[];
 }): Promise<void> => {
   // System-installed agents may use protected platform namespaces even though they are
   // persisted (and therefore editable) rather than registered as built-in agents.
@@ -245,12 +252,25 @@ const ensureSystemAgent = async ({
   }
 
   const creationDate = new Date();
-  const document = createRequestToEs({
+  const created = createRequestToEs({
     profile,
     space,
     creationDate,
     user: { username: SYSTEM_USER_ID },
   });
+  const document =
+    accessControlEntries.length > 0
+      ? {
+          ...created,
+          access_control: {
+            ...(created.access_control ?? getDefaultAgentAccessControl()),
+            entries: accessControlEntries.map((entry) => ({
+              ...entry,
+              added_at: entry.added_at ?? creationDate.toISOString(),
+            })),
+          },
+        }
+      : created;
 
   try {
     await storage.getClient().index({
@@ -311,7 +331,8 @@ export const createSystemClient = ({
   const storage = createStorage({ logger, esClient: elasticsearch.client.asInternalUser });
 
   return {
-    ensureAgent: (profile) => ensureSystemAgent({ storage, space, profile }),
+    ensureAgent: (profile, { accessControlEntries } = {}) =>
+      ensureSystemAgent({ storage, space, profile, accessControlEntries }),
   };
 };
 

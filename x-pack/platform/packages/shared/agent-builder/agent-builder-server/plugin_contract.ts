@@ -7,7 +7,11 @@
 
 import type { ZodObject } from '@kbn/zod/v4';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { AgentCreateRequest, ConversationTemplate } from '@kbn/agent-builder-common';
+import type {
+  AgentAccessControlEntry,
+  AgentCreateRequest,
+  ConversationTemplate,
+} from '@kbn/agent-builder-common';
 import type { ConversationPublicClient } from './conversations';
 import type { StaticToolRegistration, ToolRegistry } from './tools';
 import type { AttachmentTypeDefinition, AttachmentPublicClient } from './attachments';
@@ -165,11 +169,16 @@ export interface AgentsStart {
    * Optional `availability` is kept in memory and keyed by `agent.id` (never persisted). Use the
    * same {@link AgentAvailabilityConfig} shape as built-in agents. Prefer passing it on every
    * `ensure` call for that id.
+   *
+   * Optional `accessControlEntries` are written with the agent when `ensure` creates it, so a
+   * private system agent can be usable by specific principals (e.g. a service account) from the
+   * start. They are not applied to an agent that already exists.
    */
   ensure: (opts: {
     spaceId: string;
     agent: AgentCreateRequest;
     availability?: AgentAvailabilityConfig;
+    accessControlEntries?: AgentAccessControlEntry[];
   }) => Promise<void>;
 }
 
