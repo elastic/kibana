@@ -12,6 +12,7 @@ import {
   ALERTING_V2_RULES_READ_ROLE,
   apiTest,
   buildCreateRuleData,
+  buildRuleTemplateData,
   MAX_PER_PAGE,
   NO_ACCESS_ROLE,
   testData,
@@ -304,6 +305,48 @@ apiTest.describe('Find rules API', { tag: testData.API_ENGINE_TAG }, () => {
     expect(response.body.items).toHaveLength(1);
     expect(response.body.items[0].metadata.name).toBe('prod-rule');
   });
+
+  apiTest(
+    'filter: should filter rules by the template they were created from',
+    async ({ apiClient, apiServices }) => {
+      try {
+        for (const id of ['a-template', 'b-template']) {
+          await apiServices.alertingV2.ruleTemplates.create({
+            id,
+            attributes: buildRuleTemplateData({ metadata: { name: id } }),
+          });
+        }
+        const installs = [
+          { templateId: 'a-template', name: 'rule-from-a-1' },
+          { templateId: 'a-template', name: 'rule-from-a-2' },
+          { templateId: 'b-template', name: 'rule-from-b' },
+        ];
+        for (const { templateId, name } of installs) {
+          await apiServices.alertingV2.ruleTemplates.install(
+            templateId,
+            buildCreateRuleData({ metadata: { name } })
+          );
+        }
+        await apiServices.alertingV2.rules.create(
+          buildCreateRuleData({ metadata: { name: 'standalone-rule' } })
+        );
+
+        const response = await apiClient.get(
+          findRulesUrl({ filter: 'metadata.template.id: "a-template"', per_page: 100 }),
+          { headers: adminHeaders }
+        );
+
+        expect(response).toHaveStatusCode(200);
+        expect(response.body.total).toBe(2);
+        expect(getRuleNames(response.body.items).sort()).toStrictEqual([
+          'rule-from-a-1',
+          'rule-from-a-2',
+        ]);
+      } finally {
+        await apiServices.alertingV2.ruleTemplates.cleanUp();
+      }
+    }
+  );
 
   apiTest(
     'filter: should support compound expressions with AND/OR/NOT',

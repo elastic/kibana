@@ -18,7 +18,7 @@ const SCOUT_TEST_FILE_GLOBS = [
   '{src/platform,src/core}/{plugins,packages}/**/test/scout{_*,}/**/*.ts',
   'x-pack/**/{plugins,packages}/**/test/scout{_*,}/**/*.ts',
   '{examples,x-pack/examples}/**/test/scout{_*,}/**/*.ts',
-  'src/core/test/scout{_*,}/**/*.ts',
+  'src/core/packages/core/test/scout{_*,}/**/*.ts',
   'packages/**/test/scout{_*,}/**/*.ts',
 ];
 

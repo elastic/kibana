@@ -17,6 +17,7 @@ import {
   getActionPoliciesApiService,
   getActionPolicySavedObjectService,
   getAlertActionsApiService,
+  getAlertActionsCleanupService,
   getAlertActionsEventsService,
   getDispatcherApiService,
   getMaintenanceWindowsApiService,
@@ -33,6 +34,7 @@ import {
   type ActionPoliciesApiService,
   type ActionPolicySavedObjectService,
   type AlertActionsApiService,
+  type AlertActionsCleanupService,
   type AlertActionsEventsService,
   type DispatcherApiService,
   type MaintenanceWindowsApiService,
@@ -59,6 +61,7 @@ export interface AlertingApiServices {
   ruleEvents: RuleEventsApiService;
   alertActionsEvents: AlertActionsEventsService;
   alertActions: AlertActionsApiService;
+  alertActionsCleanup: AlertActionsCleanupService;
   actionPolicies: ActionPoliciesApiService;
   actionPolicySavedObject: ActionPolicySavedObjectService;
   maintenanceWindows: MaintenanceWindowsApiService;
@@ -105,6 +108,7 @@ export const buildAlertingApiServices = ({
     ruleEvents,
     alertActionsEvents: getAlertActionsEventsService({ esClient, log }),
     alertActions: getAlertActionsApiService({ kbnClient, log }),
+    alertActionsCleanup: getAlertActionsCleanupService({ esClient, log, taskManager }),
     actionPolicies: getActionPoliciesApiService({
       kbnClient: withAdminApiKey(kbnClient, requestAuth),
       log,

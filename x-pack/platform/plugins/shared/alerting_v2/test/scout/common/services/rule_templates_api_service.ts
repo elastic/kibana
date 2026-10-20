@@ -19,7 +19,7 @@ export interface SeedRuleTemplateParams {
 
 export interface RuleTemplatesApiService {
   create: (params: SeedRuleTemplateParams) => Promise<void>;
-  /** Installs a template, creating a rule that records `metadata.template`. */
+  /** Creates a rule from `data` through the install route, recording `templateId` on it. */
   install: (templateId: string, data: CreateRuleData) => Promise<RuleResponse>;
   cleanUp: () => Promise<void>;
 }
