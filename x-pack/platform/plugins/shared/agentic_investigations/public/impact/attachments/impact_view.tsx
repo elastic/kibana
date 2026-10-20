@@ -211,7 +211,7 @@ const ImpactSummary = ({ summary }: { summary: string }) => {
 };
 
 /**
- * Impact of an investigation: evidence, the summary, and the affected entities. The details
+ * Impact of an investigation: the summary, its evidence, and the affected entities. The details
  * flyout matches Nightshift's impact section. A host, user, or service opens the entity flyout;
  * the inline chat render lists entities only.
  */
@@ -252,14 +252,14 @@ export const ImpactContent: React.FC<ImpactContentProps> = ({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="investigationImpact">
-      {evidence && (
-        <EuiFlexItem grow={false} data-test-subj="investigationImpactEvidence">
-          <EvidenceView evidence={evidence} />
-        </EuiFlexItem>
-      )}
       {hasSummary && (
         <EuiFlexItem grow={false}>
           <ImpactSummary summary={summary ?? ''} />
+        </EuiFlexItem>
+      )}
+      {evidence && (
+        <EuiFlexItem grow={false} data-test-subj="investigationImpactEvidence">
+          <EvidenceView evidence={evidence} />
         </EuiFlexItem>
       )}
       {entities.length > 0 && (

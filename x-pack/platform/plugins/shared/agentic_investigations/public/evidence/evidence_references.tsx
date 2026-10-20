@@ -96,7 +96,7 @@ const QueryReference: React.FC<{ reference: EvidenceQueryReference }> = ({
           {(copy) => (
             <EuiToolTip content={COPY_QUERY_LABEL} disableScreenReaderOutput>
               <EuiButtonIcon
-                iconType="copyClipboard"
+                iconType="copy"
                 size="xs"
                 color="text"
                 aria-label={COPY_QUERY_LABEL}
