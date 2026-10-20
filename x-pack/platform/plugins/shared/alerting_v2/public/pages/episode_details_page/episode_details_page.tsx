@@ -248,13 +248,16 @@ export function EpisodeDetailsPage() {
     [services, queryClient, showRuleDependentUi, ruleState, alertsCapability]
   );
 
-  const applicableActions = useMemo(
-    () =>
-      episode
-        ? episodeActions.filter((action) => action.isCompatible({ episodes: [episode] }))
-        : [],
-    [episodeActions, episode]
-  );
+  const applicableActions = useMemo(() => {
+    if (!episode) {
+      return [];
+    }
+    const episodes = [episode];
+    return episodeActions.filter(
+      (action) =>
+        action.isCompatible({ episodes }) || Boolean(action.showWhenDisabled?.({ episodes }))
+    );
+  }, [episodeActions, episode]);
 
   const headerTabs = useMemo(
     () =>

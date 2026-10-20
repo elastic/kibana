@@ -47,22 +47,28 @@ describe('createOpenAlertEventsHistoryAction', () => {
     ).toBe(true);
   });
 
-  it('is not compatible when Discover cannot open the history', () => {
+  it('stays visible but disabled when Discover cannot open the history', () => {
     const deps = makeDeps();
     deps.isAvailable.mockReturnValue(false);
+    const action = createOpenAlertEventsHistoryAction(deps);
+    const episodes = [makeEpisode()];
 
-    expect(
-      createOpenAlertEventsHistoryAction(deps).isCompatible({ episodes: [makeEpisode()] })
-    ).toBe(false);
+    expect(action.isCompatible({ episodes })).toBe(false);
+    expect(action.showWhenDisabled?.({ episodes })).toBe(true);
+    expect(action.disabledTooltip).toBe(
+      'Discover with ES|QL is required to open alert events history.'
+    );
   });
 
   it('is not compatible with multiple or source episodes', () => {
     const action = createOpenAlertEventsHistoryAction(makeDeps());
+    const multiple = [makeEpisode(), makeEpisode()];
+    const source = [makeEpisode({ supports_timeline: false })];
 
-    expect(action.isCompatible({ episodes: [makeEpisode(), makeEpisode()] })).toBe(false);
-    expect(action.isCompatible({ episodes: [makeEpisode({ supports_timeline: false })] })).toBe(
-      false
-    );
+    expect(action.isCompatible({ episodes: multiple })).toBe(false);
+    expect(action.showWhenDisabled?.({ episodes: multiple })).toBe(false);
+    expect(action.isCompatible({ episodes: source })).toBe(false);
+    expect(action.showWhenDisabled?.({ episodes: source })).toBe(false);
   });
 
   it('opens Discover with the episode history query', async () => {

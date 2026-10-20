@@ -76,7 +76,7 @@ describe('createEpisodeActions', () => {
     );
   });
 
-  it('hides alert events history when Discover is unavailable', () => {
+  it('disables alert events history when Discover is unavailable', () => {
     const episode = { 'episode.id': 'e1' } as AlertEpisode;
     const available = buildActions().find(
       ({ id }) => id === 'ALERTING_V2_OPEN_ALERT_EVENTS_HISTORY_IN_DISCOVER'
@@ -86,7 +86,9 @@ describe('createEpisodeActions', () => {
     );
 
     expect(available?.isCompatible({ episodes: [episode] })).toBe(true);
+    expect(available?.showWhenDisabled?.({ episodes: [episode] })).toBe(false);
     expect(unavailable?.isCompatible({ episodes: [episode] })).toBe(false);
+    expect(unavailable?.showWhenDisabled?.({ episodes: [episode] })).toBe(true);
   });
 
   it('sorts the host add to case action before edit alert tags', () => {
