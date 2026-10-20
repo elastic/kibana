@@ -5,17 +5,7 @@
  * 2.0.
  */
 
-import type { EuiTabbedContentTab } from '@elastic/eui';
-import {
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiLink,
-  EuiResizableContainer,
-  EuiSpacer,
-  EuiTab,
-  EuiTabs,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiLink, EuiResizableContainer, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
@@ -58,6 +48,7 @@ import * as ruleI18n from '../../../common/translations';
 import type { DefineStepRule } from '../../../common/types';
 import { RuleStep } from '../../../common/types';
 import * as i18n from './translations';
+import { RuleEditTabs } from './rule_edit_tabs';
 import { SecurityPageName } from '../../../../app/types';
 import { ruleStepsOrder } from '../../../common/utils';
 import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
@@ -516,33 +507,6 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     saveChanges,
   ]);
 
-  const onTabClick = useCallback(async (tab: EuiTabbedContentTab) => {
-    const targetStep = tab.id as RuleStep;
-    setActiveStep(targetStep);
-  }, []);
-
-  const renderTabs = () => {
-    // The tooltip is rendered inside the tab so each tab stays a direct child of the tablist,
-    // which lets screen readers announce the correct tab position and count.
-    return tabs.map((tab) => (
-      <EuiTab
-        key={tab.id}
-        onClick={() => onTabClick(tab)}
-        isSelected={tab.id === activeStep}
-        disabled={tab.disabled}
-        data-test-subj={tab['data-test-subj']}
-      >
-        {tab.tooltip !== undefined ? (
-          <EuiToolTip position="top" content={tab.tooltip}>
-            <span tabIndex={0}>{tab.name}</span>
-          </EuiToolTip>
-        ) : (
-          tab.name
-        )}
-      </EuiTab>
-    ));
-  };
-
   const goToDetailsRule = useCallback(
     (ev: React.SyntheticEvent) => {
       ev.preventDefault();
@@ -696,7 +660,11 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
                         </EuiCallOut>
                       )}
 
-                      <EuiTabs>{renderTabs()}</EuiTabs>
+                      <RuleEditTabs
+                        tabs={tabs}
+                        activeStep={activeStep}
+                        onTabClick={setActiveStep}
+                      />
 
                       {tabs.map((tab) => tab.content)}
 
