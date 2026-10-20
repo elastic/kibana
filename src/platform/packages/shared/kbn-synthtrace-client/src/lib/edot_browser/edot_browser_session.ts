@@ -380,7 +380,8 @@ const loadDocument = (
         },
         resourceTimings: {
           ...documentTimings,
-          duration: responseEnd,
+          // The navigation entry lasts until the end of the load event
+          duration: loadEventEnd,
           requestStart: documentTimings.connectEnd + 0.5,
           responseStart,
           responseEnd,

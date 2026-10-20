@@ -16,7 +16,8 @@
  *   `browser.resource_timing`, `browser.web_vital`, `browser.user_action.click` and
  *   `exception` events
  * - `traces-generic.otel-default`: fetch/XHR CLIENT spans
- * - timings and web vital values always carry a fractional part, so they map as `float`
+ * - non-zero timings and web vital values always carry a fractional part, so they map as `float`;
+ *   like EDOT Browser, phases that didn't happen are written as 0
  *
  * Apps (`service.name`):
  * - storefront-web: healthy, high traffic

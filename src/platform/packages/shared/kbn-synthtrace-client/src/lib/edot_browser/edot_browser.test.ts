@@ -252,8 +252,8 @@ describe('edotBrowser', () => {
         expect(raw).toMatch(new RegExp(`"${key}":\\d+\\.\\d+`));
       });
       expect(attributes['browser.navigation_timing.redirect_count']).toBe(0);
-      expect(attributes).not.toHaveProperty('browser.navigation_timing.unload_event_start');
-      expect(attributes).not.toHaveProperty('browser.navigation_timing.unload_event_end');
+      expect(attributes['browser.navigation_timing.unload_event_start']).toBe(0);
+      expect(attributes['browser.navigation_timing.unload_event_end']).toBe(0);
       expect(raw).toContain('"browser.resource_timing.transfer_size":5120,');
     });
 
@@ -276,6 +276,9 @@ describe('edotBrowser', () => {
         'browser.resource_timing.next_hop_protocol': 'h2',
         'browser.resource_timing.render_blocking_status': 'blocking',
         'browser.resource_timing.decoded_body_size': 16000,
+        'browser.resource_timing.redirect_start': 0,
+        'browser.resource_timing.redirect_end': 0,
+        'browser.resource_timing.worker_start': 0,
       });
     });
 
@@ -618,7 +621,7 @@ describe('edotBrowser', () => {
       }
     });
 
-    it('writes all timings and web vital values with a fractional part', () => {
+    it('writes all non-zero timings and web vital values with a fractional part', () => {
       const docs = Array.from({ length: 10 }, (_, seed) => createSession({ seed })).flat();
       const timingPattern =
         /"browser\.(resource_timing\.(duration|[a-z_]+_(start|end))|navigation_timing\.([a-z_]+_(start|end)|dom_[a-z_]+)|web_vital\.(value|delta))":(-?[\d.e-]+)/g;
@@ -626,8 +629,10 @@ describe('edotBrowser', () => {
 
       docs.forEach((doc) => {
         for (const [, , , , , , , value] of JSON.stringify(doc).matchAll(timingPattern)) {
-          matches++;
-          expect(value).toContain('.');
+          if (value !== '0') {
+            matches++;
+            expect(value).toContain('.');
+          }
         }
       });
       expect(matches).toBeGreaterThan(100);
@@ -665,7 +670,7 @@ describe('edotBrowser', () => {
           expect(value).toBeGreaterThanOrEqual(values[index]);
         });
         expect(timing('response_end') - timing('fetch_start')).toBeCloseTo(timing('duration'), 0);
-        if ('browser.resource_timing.secure_connection_start' in attributes) {
+        if (timing('secure_connection_start') > 0) {
           expect(timing('secure_connection_start')).toBeGreaterThanOrEqual(timing('connect_start'));
           expect(timing('secure_connection_start')).toBeLessThanOrEqual(timing('connect_end'));
         }
@@ -698,22 +703,36 @@ describe('edotBrowser', () => {
       expect(pairs).toBeGreaterThan(50);
     });
 
-    it('omits timings of phases that did not happen', () => {
+    it('writes timings of phases that did not happen as 0', () => {
       const docs = Array.from({ length: 10 }, (_, seed) => createSession({ seed })).flat();
-      const resourceDocs = docs.filter(
-        (doc) => 'event_name' in doc && doc.event_name === 'browser.resource_timing'
+      const timingDocs = docs.filter(
+        (doc) =>
+          'event_name' in doc &&
+          ['browser.resource_timing', 'browser.navigation_timing'].includes(String(doc.event_name))
       );
 
       expect(
-        resourceDocs.some(
-          ({ attributes }) => !attributes?.['browser.resource_timing.secure_connection_start']
+        timingDocs.some(
+          ({ attributes }) => attributes?.['browser.resource_timing.secure_connection_start'] === 0
         )
       ).toBe(true);
-      docs.forEach(({ attributes = {} }) => {
+      timingDocs.forEach(({ attributes = {} }) => {
+        expect(attributes).toHaveProperty(['browser.resource_timing.secure_connection_start']);
         Object.entries(attributes)
           .filter(([key]) => /_(start|end)$/.test(key))
-          .forEach(([, value]) => expect(value).toBeGreaterThan(0.01));
+          .forEach(([, value]) => expect(value === 0 || Number(value) > 0.01).toBe(true));
       });
+    });
+
+    it('gives the navigation timing the duration of the whole page load', () => {
+      const [doc] = createSession({ pageViews: 1 }).filter(
+        (event) => 'event_name' in event && event.event_name === 'browser.navigation_timing'
+      );
+
+      expect(Number(doc.attributes?.['browser.resource_timing.duration'])).toBeCloseTo(
+        Number(doc.attributes?.['browser.navigation_timing.load_event_end']),
+        0
+      );
     });
 
     it('omits session.id by default', () => {

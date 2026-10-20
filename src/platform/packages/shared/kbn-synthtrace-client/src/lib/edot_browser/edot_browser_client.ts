@@ -34,7 +34,7 @@ export interface EdotBrowserClientOptions {
 
 /**
  * Timings relative to the time origin, in milliseconds, plus byte sizes. A timing of 0 means the
- * phase didn't happen (e.g. `secureConnectionStart` on a reused connection) and is omitted.
+ * phase didn't happen (e.g. `secureConnectionStart` on a reused connection).
  */
 export interface ResourceTimingValues {
   duration: number;
@@ -88,8 +88,8 @@ const toTimingAttributes = (
       if (INTEGER_TIMING_KEYS.has(key)) {
         return [[attributeKey, Math.round(value)]];
       }
-      // A nudged 0 would read as a real timestamp, and a plain 0 would map the field as `long`
-      return value === 0 ? [] : [[attributeKey, asFloat(value)]];
+      // Like the instrumentation, phases that didn't happen are written as a plain 0
+      return [[attributeKey, value === 0 ? 0 : asFloat(value)]];
     })
   );
 
@@ -179,6 +179,10 @@ export class EdotBrowserClient {
       'url.full': url,
       'browser.resource_timing.initiator_type': initiatorType,
       ...toTimingAttributes('browser.resource_timing', timings),
+      // Redirects and service workers aren't simulated
+      'browser.resource_timing.redirect_start': 0,
+      'browser.resource_timing.redirect_end': 0,
+      'browser.resource_timing.worker_start': 0,
       ...(nextHopProtocol ? { 'browser.resource_timing.next_hop_protocol': nextHopProtocol } : {}),
       ...(renderBlockingStatus
         ? { 'browser.resource_timing.render_blocking_status': renderBlockingStatus }

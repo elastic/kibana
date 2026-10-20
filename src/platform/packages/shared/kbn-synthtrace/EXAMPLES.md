@@ -902,7 +902,7 @@ These scenarios generate browser Real User Monitoring data for Digital Experienc
 - `logs-generic.otel-default`: `browser.navigation`, `browser.navigation_timing`, `browser.resource_timing`, `browser.web_vital` (LCP, INP, CLS, FCP, TTFB), `browser.user_action.click` and `exception` events
 - `traces-generic.otel-default`: fetch/XHR `CLIENT` spans
 
-Timings and web vital values always have a fractional part, so dynamic mapping types them as `float`.
+Non-zero timings and web vital values always have a fractional part, so dynamic mapping types them as `float`. Like EDOT Browser, timings of phases that didn't happen are written as `0`.
 
 The data is written through the `otelEsClient`, which indexes documents as-is. In code and Scout tests, use the `edotBrowser` DSL from `@kbn/synthtrace-client` (`edotBrowser.app()`, `edotBrowser.session()`) with the `otelSynthtraceEsClient` fixture from `@kbn/scout-synthtrace`.
 
