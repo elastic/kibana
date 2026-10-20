@@ -7,6 +7,7 @@
 
 import Path from 'path';
 import { createIsomerRuntime } from '@elastic/isomer-runtime';
+import { exampleNodes } from '@elastic/isomer-sdk';
 import { createRuntimeConformanceHarness } from '@elastic/isomer-runtime/testing';
 import {
   assertPackIconsValid,
@@ -14,6 +15,7 @@ import {
   primitiveConformanceRows,
   runPrimitiveInventoryConformance,
 } from '@elastic/isomer-sdk/testing';
+import { createKibanaIsomerRuntime } from '@kbn/isomer';
 import { componentsPack, componentsPrimitives } from './pack';
 import type { MarkdownNode } from './primitives';
 
@@ -48,6 +50,21 @@ describe('componentsPack', () => {
     expect(html).toContain('class="componentsMarkdown-root"');
     expect(css).toMatch(/\.isomer\{[^}]*font-family:var\(--isomer-font-family-sans\)/);
     expect(css).toContain('.componentsMarkdown-root{');
+  });
+
+  it('sizes every example for the Kibana card frame', () => {
+    const { snapshot } = createKibanaIsomerRuntime({ packs: [componentsPack] }).surfaces;
+    const measured = componentsPrimitives.flatMap((primitive) =>
+      exampleNodes(primitive).map((node, index) => {
+        const { height, warnings } = snapshot.render({ type: 'view', body: [node] });
+        return {
+          example: `${primitive.type} #${index}`,
+          sized: height > 48 && warnings.length === 0,
+        };
+      })
+    );
+
+    expect(measured.filter(({ sized }) => !sized)).toEqual([]);
   });
 
   it('passes inventory conformance', () => {

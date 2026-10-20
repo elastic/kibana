@@ -15,4 +15,5 @@ export default {
   title: '@kbn/isomer-components',
   runtime: createKibanaIsomerRuntime({ packs: [componentsPack] }),
   createReactContext: (root: ShadowRoot) => createIsomerStyleContext({ root }),
+  imageFonts: './isomer-studio.fonts.ts',
 };

@@ -354,6 +354,7 @@ module.exports = {
         '**/*.playwright.config.ts',
         '**/parallel.playwright.config.ts',
         '**/isomer-studio.config.ts',
+        '**/isomer-studio.fonts.ts',
       ],
       rules: {
         'import/no-default-export': 'off',
