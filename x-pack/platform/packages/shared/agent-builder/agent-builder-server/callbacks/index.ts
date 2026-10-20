@@ -6,8 +6,8 @@
  */
 
 export type {
-  CallbackOriginResolver,
-  CallbackOriginResolverContext,
+  CallbackConversationResolver,
+  CallbackConversationResolverContext,
   CallbackTransportDefinition,
   CallbacksSetup,
 } from './types';

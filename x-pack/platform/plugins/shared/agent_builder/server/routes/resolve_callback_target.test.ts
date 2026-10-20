@@ -24,7 +24,7 @@ describe('resolveCallbackTarget', () => {
 
   const setup = () => {
     const client = createConversationClientMock();
-    const resolveOrigin = jest.fn().mockResolvedValue(undefined);
+    const resolveConversation = jest.fn().mockResolvedValue(undefined);
     const getExecution = jest.fn().mockResolvedValue(undefined);
     const resolve = (overrides: Partial<ChatCallbackRequestBodyPayload> = {}) =>
       resolveCallbackTarget({
@@ -32,23 +32,23 @@ describe('resolveCallbackTarget', () => {
         spaceId: 'default',
         executionId: 'execution-1',
         request,
-        callbackDeliveryService: { resolveOrigin },
+        callbackDeliveryService: { resolveConversation },
         conversations: { getScopedClient: jest.fn().mockResolvedValue(client) },
         executionService: { getExecution },
       });
-    return { client, resolveOrigin, getExecution, resolve };
+    return { client, resolveConversation, getExecution, resolve };
   };
 
   it('continues the resolved conversation on its stored agent', async () => {
-    const { client, resolveOrigin, resolve } = setup();
-    resolveOrigin.mockResolvedValue({ conversationId: 'investigation-1' });
+    const { client, resolveConversation, resolve } = setup();
+    resolveConversation.mockResolvedValue({ conversationId: 'investigation-1' });
     client.get.mockResolvedValue(
       createEmptyConversation({ id: 'investigation-1', agent_id: 'investigation-agent' })
     );
 
     const target = await resolve();
 
-    expect(resolveOrigin).toHaveBeenCalledWith({ origin, spaceId: 'default', request });
+    expect(resolveConversation).toHaveBeenCalledWith({ origin, spaceId: 'default', request });
     expect(client.get).toHaveBeenCalledWith('investigation-1');
     expect(target).toEqual({
       payload: { ...payload, conversation_id: 'investigation-1', agent_id: 'investigation-agent' },
@@ -63,42 +63,42 @@ describe('resolveCallbackTarget', () => {
   });
 
   it('keeps the payload without resolving when the request names its conversation', async () => {
-    const { resolveOrigin, resolve } = setup();
+    const { resolveConversation, resolve } = setup();
 
     const target = await resolve({ conversation_id: 'conversation-1' });
 
     expect(target.payload.conversation_id).toBe('conversation-1');
     expect(target.autoCreateConversationWithId).toBe(true);
-    expect(resolveOrigin).not.toHaveBeenCalled();
+    expect(resolveConversation).not.toHaveBeenCalled();
   });
 
   it('keeps the payload without resolving when the request has no origin', async () => {
-    const { resolveOrigin, resolve } = setup();
+    const { resolveConversation, resolve } = setup();
 
     await resolve({ origin: undefined });
 
-    expect(resolveOrigin).not.toHaveBeenCalled();
+    expect(resolveConversation).not.toHaveBeenCalled();
   });
 
   it('leaves a replay to the execution service without resolving', async () => {
-    const { resolveOrigin, getExecution, resolve } = setup();
+    const { resolveConversation, getExecution, resolve } = setup();
     getExecution.mockResolvedValue({ executionId: 'execution-1' });
 
     await expect(resolve()).resolves.toEqual({ payload, autoCreateConversationWithId: true });
     expect(getExecution).toHaveBeenCalledWith('execution-1');
-    expect(resolveOrigin).not.toHaveBeenCalled();
+    expect(resolveConversation).not.toHaveBeenCalled();
   });
 
   it('propagates a resolver error', async () => {
-    const { resolveOrigin, resolve } = setup();
-    resolveOrigin.mockRejectedValue(new Error('lookup failed'));
+    const { resolveConversation, resolve } = setup();
+    resolveConversation.mockRejectedValue(new Error('lookup failed'));
 
     await expect(resolve()).rejects.toThrow('lookup failed');
   });
 
   it('propagates when the caller cannot read the resolved conversation', async () => {
-    const { client, resolveOrigin, resolve } = setup();
-    resolveOrigin.mockResolvedValue({ conversationId: 'investigation-1' });
+    const { client, resolveConversation, resolve } = setup();
+    resolveConversation.mockResolvedValue({ conversationId: 'investigation-1' });
     client.get.mockRejectedValue(
       createConversationNotFoundError({ conversationId: 'investigation-1' })
     );

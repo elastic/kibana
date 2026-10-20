@@ -37,7 +37,7 @@ import {
   type ConsumptionService,
 } from './metering';
 import { type PluginsService, createPluginsService } from './plugins';
-import { CallbackDeliveryService, createDefaultOriginResolver } from './execution/callback';
+import { CallbackDeliveryService, createDefaultConversationResolver } from './execution/callback';
 import { createSpaceSettingsService } from './space_settings';
 import { SurfacesServiceImpl } from './surfaces';
 import { ConversationTemplatesService } from './conversation/templates';
@@ -228,7 +228,7 @@ export class ServiceManager {
     });
 
     this.services.callbackDelivery.start({
-      defaultOriginResolver: createDefaultOriginResolver({ conversations }),
+      defaultConversationResolver: createDefaultConversationResolver({ conversations }),
     });
 
     const runnerFactory = new RunnerFactoryImpl({

@@ -52,7 +52,7 @@ const createSetupContractMock = (): AgentBuilderPluginSetupMock => {
       enableUpdatedTrigger: jest.fn(),
     },
     callbacks: {
-      registerOriginResolver: jest.fn(),
+      registerConversationResolver: jest.fn(),
       registerTransport: jest.fn(),
     },
     topSnippets: { numSnippets: 2, numWords: 750 },

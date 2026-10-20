@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { CallbackOriginResolver } from '@kbn/agent-builder-server';
+import type { CallbackConversationResolver } from '@kbn/agent-builder-server';
 import type { ConversationService } from '../../conversation';
 
 /** Finds the conversation that already has the origin, reading as the caller. */
-export const createDefaultOriginResolver =
-  ({ conversations }: { conversations: ConversationService }): CallbackOriginResolver =>
+export const createDefaultConversationResolver =
+  ({ conversations }: { conversations: ConversationService }): CallbackConversationResolver =>
   async ({ origin, request }) => {
     const client = await conversations.getScopedClient({ request });
     const conversation = await client.getByOrigin({

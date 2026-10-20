@@ -35,7 +35,7 @@ export const resolveCallbackTarget = async ({
   spaceId: string;
   executionId: string | undefined;
   request: KibanaRequest;
-  callbackDeliveryService: Pick<CallbackDeliveryService, 'resolveOrigin'>;
+  callbackDeliveryService: Pick<CallbackDeliveryService, 'resolveConversation'>;
   conversations: Pick<ConversationService, 'getScopedClient'>;
   executionService: Pick<AgentExecutionService, 'getExecution'>;
 }): Promise<CallbackTarget> => {
@@ -50,7 +50,7 @@ export const resolveCallbackTarget = async ({
     return unresolved;
   }
 
-  const resolved = await callbackDeliveryService.resolveOrigin({
+  const resolved = await callbackDeliveryService.resolveConversation({
     origin: { type: origin.type, external_conversation_id: origin.external_conversation_id },
     spaceId,
     request,

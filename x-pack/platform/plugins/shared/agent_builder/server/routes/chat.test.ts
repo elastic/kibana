@@ -374,7 +374,7 @@ describe('registerChatRoutes', () => {
       router,
       getInternalServices: jest.fn().mockReturnValue({
         execution: { executeAgent, getExecution: jest.fn() },
-        callbackDeliveryService: { validateCallbackUrl, resolveOrigin: jest.fn() },
+        callbackDeliveryService: { validateCallbackUrl, resolveConversation: jest.fn() },
       }),
       coreSetup: {} as never,
       pluginsSetup: {},
@@ -440,7 +440,7 @@ describe('registerChatRoutes', () => {
       conversationId: 'investigation-1',
       events$: of(),
     });
-    const resolveOrigin = jest.fn().mockResolvedValue(undefined);
+    const resolveConversation = jest.fn().mockResolvedValue(undefined);
     const conversationClient = {
       get: jest.fn().mockResolvedValue({ id: 'investigation-1', agent_id: 'investigation-agent' }),
     };
@@ -466,7 +466,7 @@ describe('registerChatRoutes', () => {
       },
       getInternalServices: jest.fn().mockReturnValue({
         execution: { executeAgent, getExecution: jest.fn() },
-        callbackDeliveryService: { validateCallbackUrl: jest.fn(), resolveOrigin },
+        callbackDeliveryService: { validateCallbackUrl: jest.fn(), resolveConversation },
         conversations: { getScopedClient: jest.fn().mockResolvedValue(conversationClient) },
       }),
       coreSetup: {} as never,
@@ -498,7 +498,7 @@ describe('registerChatRoutes', () => {
       );
 
     await send();
-    resolveOrigin.mockResolvedValueOnce({ conversationId: 'investigation-1' });
+    resolveConversation.mockResolvedValueOnce({ conversationId: 'investigation-1' });
     await send();
 
     const [[unresolved], [resolved]] = executeAgent.mock.calls;
@@ -554,7 +554,7 @@ describe('registerChatRoutes', () => {
       router,
       getInternalServices: jest.fn().mockReturnValue({
         execution: { executeAgent, getExecution: jest.fn() },
-        callbackDeliveryService: { validateCallbackUrl, resolveOrigin: jest.fn() },
+        callbackDeliveryService: { validateCallbackUrl, resolveConversation: jest.fn() },
       }),
       coreSetup: {} as never,
       pluginsSetup: {},
@@ -655,7 +655,7 @@ describe('registerChatRoutes', () => {
       router,
       getInternalServices: jest.fn().mockReturnValue({
         execution: { executeAgent, getExecution: jest.fn() },
-        callbackDeliveryService: { validateCallbackUrl, resolveOrigin: jest.fn() },
+        callbackDeliveryService: { validateCallbackUrl, resolveConversation: jest.fn() },
       }),
       coreSetup: {} as never,
       pluginsSetup: {},
@@ -745,7 +745,7 @@ describe('registerChatRoutes', () => {
       router,
       getInternalServices: jest.fn().mockReturnValue({
         execution: { executeAgent, getExecution: jest.fn() },
-        callbackDeliveryService: { validateCallbackUrl, resolveOrigin: jest.fn() },
+        callbackDeliveryService: { validateCallbackUrl, resolveConversation: jest.fn() },
       }),
       coreSetup: {} as never,
       pluginsSetup: {},

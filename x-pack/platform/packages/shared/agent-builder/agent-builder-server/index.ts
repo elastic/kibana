@@ -222,8 +222,8 @@ export type {
   ConversationAddEventsRequest,
 } from './conversations';
 export type {
-  CallbackOriginResolver,
-  CallbackOriginResolverContext,
+  CallbackConversationResolver,
+  CallbackConversationResolverContext,
   CallbackTransportDefinition,
   CallbacksSetup,
 } from './callbacks';

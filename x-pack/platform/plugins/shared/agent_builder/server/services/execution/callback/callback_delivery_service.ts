@@ -8,8 +8,8 @@
 import pRetry, { AbortError } from 'p-retry';
 import type { PluginSetupContract as ActionsPluginSetup } from '@kbn/actions-plugin/server';
 import type {
-  CallbackOriginResolver,
-  CallbackOriginResolverContext,
+  CallbackConversationResolver,
+  CallbackConversationResolverContext,
   CallbackTransportDefinition,
   CallbacksSetup,
 } from '@kbn/agent-builder-server';
@@ -30,8 +30,8 @@ export type CallbackTransport = (
 export class CallbackDeliveryService {
   private readonly actions: ActionsPluginSetup;
   private readonly transports: CallbackTransportDefinition[] = [];
-  private originResolver?: CallbackOriginResolver;
-  private defaultOriginResolver?: CallbackOriginResolver;
+  private conversationResolver?: CallbackConversationResolver;
+  private defaultConversationResolver?: CallbackConversationResolver;
 
   constructor({ actions }: { actions: ActionsPluginSetup }) {
     this.actions = actions;
@@ -39,12 +39,12 @@ export class CallbackDeliveryService {
 
   setup(): CallbacksSetup {
     return {
-      registerOriginResolver: (resolver) => {
-        if (this.originResolver) {
-          throw new Error('A callback origin resolver is already registered');
+      registerConversationResolver: (resolver) => {
+        if (this.conversationResolver) {
+          throw new Error('A callback conversation resolver is already registered');
         }
 
-        this.originResolver = resolver;
+        this.conversationResolver = resolver;
       },
       registerTransport: (transport) => {
         if (this.transports.some(({ id }) => id === transport.id)) {
@@ -57,24 +57,28 @@ export class CallbackDeliveryService {
   }
 
   /** Sets the lookup that runs when the registered resolver finds nothing; it needs start services. */
-  start({ defaultOriginResolver }: { defaultOriginResolver: CallbackOriginResolver }): void {
-    this.defaultOriginResolver = defaultOriginResolver;
+  start({
+    defaultConversationResolver,
+  }: {
+    defaultConversationResolver: CallbackConversationResolver;
+  }): void {
+    this.defaultConversationResolver = defaultConversationResolver;
   }
 
   /**
    * The conversation an external conversation continues: the registered resolver's answer, else
    * the default lookup's. An error from the registered resolver propagates.
    */
-  async resolveOrigin(
-    context: CallbackOriginResolverContext
+  async resolveConversation(
+    context: CallbackConversationResolverContext
   ): Promise<{ conversationId: string } | undefined> {
-    const resolved = await this.originResolver?.(context);
+    const resolved = await this.conversationResolver?.(context);
 
     if (resolved) {
       return resolved;
     }
 
-    return this.defaultOriginResolver?.(context);
+    return this.defaultConversationResolver?.(context);
   }
 
   validateCallbackUrl(callbackUrl: string): void {

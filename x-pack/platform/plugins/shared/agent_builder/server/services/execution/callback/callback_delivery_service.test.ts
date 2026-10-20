@@ -189,7 +189,7 @@ describe('createTransport', () => {
   });
 });
 
-describe('resolveOrigin', () => {
+describe('resolveConversation', () => {
   const context = {
     origin: { type: ConversationOriginType.Slack, external_conversation_id: 'thread-1' },
     spaceId: 'default',
@@ -199,54 +199,58 @@ describe('resolveOrigin', () => {
   it('returns the registered resolver answer without asking the default', async () => {
     const service = createCallbackDeliveryService();
     const registered = jest.fn().mockResolvedValue({ conversationId: 'investigation-1' });
-    const defaultOriginResolver = jest.fn();
-    service.setup().registerOriginResolver(registered);
-    service.start({ defaultOriginResolver });
+    const defaultConversationResolver = jest.fn();
+    service.setup().registerConversationResolver(registered);
+    service.start({ defaultConversationResolver });
 
-    await expect(service.resolveOrigin(context)).resolves.toEqual({
+    await expect(service.resolveConversation(context)).resolves.toEqual({
       conversationId: 'investigation-1',
     });
     expect(registered).toHaveBeenCalledWith(context);
-    expect(defaultOriginResolver).not.toHaveBeenCalled();
+    expect(defaultConversationResolver).not.toHaveBeenCalled();
   });
 
   it('falls through to the default when the registered resolver finds nothing', async () => {
     const service = createCallbackDeliveryService();
-    service.setup().registerOriginResolver(jest.fn().mockResolvedValue(undefined));
+    service.setup().registerConversationResolver(jest.fn().mockResolvedValue(undefined));
     service.start({
-      defaultOriginResolver: jest.fn().mockResolvedValue({ conversationId: 'conversation-1' }),
+      defaultConversationResolver: jest
+        .fn()
+        .mockResolvedValue({ conversationId: 'conversation-1' }),
     });
 
-    await expect(service.resolveOrigin(context)).resolves.toEqual({
+    await expect(service.resolveConversation(context)).resolves.toEqual({
       conversationId: 'conversation-1',
     });
   });
 
   it('runs only the default when no resolver is registered', async () => {
     const service = createCallbackDeliveryService();
-    const defaultOriginResolver = jest.fn().mockResolvedValue(undefined);
-    service.start({ defaultOriginResolver });
+    const defaultConversationResolver = jest.fn().mockResolvedValue(undefined);
+    service.start({ defaultConversationResolver });
 
-    await expect(service.resolveOrigin(context)).resolves.toBeUndefined();
-    expect(defaultOriginResolver).toHaveBeenCalledWith(context);
+    await expect(service.resolveConversation(context)).resolves.toBeUndefined();
+    expect(defaultConversationResolver).toHaveBeenCalledWith(context);
   });
 
   it('propagates a registered resolver error without asking the default', async () => {
     const service = createCallbackDeliveryService();
-    const defaultOriginResolver = jest.fn();
-    service.setup().registerOriginResolver(jest.fn().mockRejectedValue(new Error('lookup failed')));
-    service.start({ defaultOriginResolver });
+    const defaultConversationResolver = jest.fn();
+    service
+      .setup()
+      .registerConversationResolver(jest.fn().mockRejectedValue(new Error('lookup failed')));
+    service.start({ defaultConversationResolver });
 
-    await expect(service.resolveOrigin(context)).rejects.toThrow('lookup failed');
-    expect(defaultOriginResolver).not.toHaveBeenCalled();
+    await expect(service.resolveConversation(context)).rejects.toThrow('lookup failed');
+    expect(defaultConversationResolver).not.toHaveBeenCalled();
   });
 
   it('rejects a second resolver', () => {
-    const { registerOriginResolver } = createCallbackDeliveryService().setup();
-    registerOriginResolver(jest.fn());
+    const { registerConversationResolver } = createCallbackDeliveryService().setup();
+    registerConversationResolver(jest.fn());
 
-    expect(() => registerOriginResolver(jest.fn())).toThrow(
-      'A callback origin resolver is already registered'
+    expect(() => registerConversationResolver(jest.fn())).toThrow(
+      'A callback conversation resolver is already registered'
     );
   });
 });

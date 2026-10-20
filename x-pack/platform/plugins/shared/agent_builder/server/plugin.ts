@@ -328,7 +328,7 @@ export class AgentBuilderPlugin
         },
       },
       callbacks: {
-        registerOriginResolver: serviceSetups.callbacks.registerOriginResolver,
+        registerConversationResolver: serviceSetups.callbacks.registerConversationResolver,
         registerTransport: serviceSetups.callbacks.registerTransport,
       },
       topSnippets: this.config.topSnippets,

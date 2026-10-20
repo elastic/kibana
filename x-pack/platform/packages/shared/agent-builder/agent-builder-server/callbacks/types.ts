@@ -9,7 +9,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ChatCallbackResponse, ConversationOriginType } from '@kbn/agent-builder-common';
 
 /** The external conversation a callback turn came from. */
-export interface CallbackOriginResolverContext {
+export interface CallbackConversationResolverContext {
   origin: { type: ConversationOriginType; external_conversation_id: string };
   spaceId: string;
   /** The callback request, for resolvers that read as the caller. */
@@ -17,8 +17,8 @@ export interface CallbackOriginResolverContext {
 }
 
 /** The conversation an external conversation continues, or `undefined` when none does. Throws when the lookup fails. */
-export type CallbackOriginResolver = (
-  context: CallbackOriginResolverContext
+export type CallbackConversationResolver = (
+  context: CallbackConversationResolverContext
 ) => Promise<{ conversationId: string } | undefined>;
 
 /** Delivers callback payloads to the callback URLs it handles. */
@@ -40,7 +40,7 @@ export interface CallbacksSetup {
    * conversation. When it returns `undefined`, the default lookup by origin runs. Only one may be
    * registered.
    */
-  registerOriginResolver(resolver: CallbackOriginResolver): void;
+  registerConversationResolver(resolver: CallbackConversationResolver): void;
   /** Registers a callback transport. The first registered transport that handles a URL delivers to it. */
   registerTransport(transport: CallbackTransportDefinition): void;
 }

@@ -11,16 +11,16 @@ import {
   createConversationClientMock,
   createEmptyConversation,
 } from '../../../test_utils/conversations';
-import { createDefaultOriginResolver } from './default_origin_resolver';
+import { createDefaultConversationResolver } from './default_conversation_resolver';
 
-describe('createDefaultOriginResolver', () => {
+describe('createDefaultConversationResolver', () => {
   const request = httpServerMock.createKibanaRequest();
   const origin = { type: ConversationOriginType.Slack, external_conversation_id: 'thread-1' };
 
   const setup = () => {
     const client = createConversationClientMock();
     const getScopedClient = jest.fn().mockResolvedValue(client);
-    const resolve = createDefaultOriginResolver({
+    const resolve = createDefaultConversationResolver({
       conversations: { getScopedClient, getScopedClientAsUser: jest.fn() },
     });
     return { client, getScopedClient, resolve };
