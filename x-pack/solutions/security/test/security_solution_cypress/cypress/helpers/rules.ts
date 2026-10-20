@@ -9,47 +9,6 @@ import moment from 'moment';
 import type { PrebuiltRuleAsset } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules';
 import { getPrebuiltRuleMock } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/mocks';
 
-import type { ThreatArray } from '@kbn/security-solution-plugin/common/api/detection_engine';
-
-const formatMitreThreatEntry = (threat: ThreatArray[number]) =>
-  `${threat.tactic.name} (${threat.tactic.id})${
-    threat.technique
-      ? threat.technique
-          .map((technique) => {
-            return `${technique.name} (${technique.id})${
-              technique.subtechnique
-                ? technique.subtechnique
-                    .map((subtechnique) => `${subtechnique.name} (${subtechnique.id})`)
-                    .join('')
-                : ''
-            }`;
-          })
-          .join('')
-      : ''
-  }`;
-
-/**
- * Mirrors the rule details rendering: entries are grouped by framework and each
- * group is preceded by its framework label.
- */
-export const formatMitreAttackDescription = (mitre: ThreatArray) => {
-  const knownFrameworks = ['MITRE ATT&CK', 'MITRE ATLAS'];
-  const present = new Set(mitre.map((threat) => threat.framework));
-  const frameworks = [
-    ...knownFrameworks.filter((framework) => present.has(framework)),
-    ...Array.from(present).filter((framework) => !knownFrameworks.includes(framework)),
-  ];
-  return frameworks
-    .map(
-      (framework) =>
-        `${framework || 'Unknown framework'}${mitre
-          .filter((threat) => threat.framework === framework)
-          .map(formatMitreThreatEntry)
-          .join('')}`
-    )
-    .join('');
-};
-
 export const elementsOverlap = ($element1: JQuery<HTMLElement>, $element2: JQuery<HTMLElement>) => {
   const rectA = $element1[0].getBoundingClientRect();
   const rectB = $element2[0].getBoundingClientRect();

@@ -9,7 +9,6 @@
       "platform/packages/shared/ml/aiops_log_rate_analysis",
       "platform/plugins/shared/aiops"
     ],
-    "xpack.aiAnonymization": "platform/packages/shared/ai-infra/ai-anonymization-server",
     "xpack.aiAnonymizationSettings": "platform/plugins/private/ai_anonymization_settings",
     "xpack.aiAssistant": [
       "platform/packages/shared/kbn-ai-assistant",
@@ -59,6 +58,7 @@
     "xpack.dataQuality": "platform/plugins/shared/data_quality",
     "xpack.datasetQuality": "platform/plugins/shared/dataset_quality",
     "xpack.dataUsage": "platform/plugins/private/data_usage",
+    "xpack.digitalExperience": "solutions/observability/plugins/digital_experience",
     "xpack.discover": "platform/plugins/private/discover_enhanced",
     "xpack.createClassicStreamFlyout": "platform/packages/shared/kbn-classic-stream-flyout",
     "xpack.crossClusterReplication": "platform/plugins/private/cross_cluster_replication",

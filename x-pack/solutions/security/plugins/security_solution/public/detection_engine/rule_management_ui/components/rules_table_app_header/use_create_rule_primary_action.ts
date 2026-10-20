@@ -86,26 +86,25 @@ export const useCreateRulePrimaryAction = ({
     return {
       id: 'createRule',
       label: i18n.CREATE_RULE_MENU_BUTTON,
-      iconType: 'chevronSingleDown',
+      iconType: 'plusCircle',
+      href: createRuleUrl,
       disableButton: isDisabled,
       isLoading,
       testId: 'create-rule-button',
       popoverTestId: 'create-rule-context-menu-popover',
-      items: [
-        {
-          id: 'aiRuleCreation',
-          label: i18n.AI_RULE_CREATION,
-          iconType: 'productAgent',
-          run: startAiRuleCreation,
-          testId: 'ai-rule-creation',
-        },
-        {
-          id: 'manualRuleCreation',
-          label: i18n.MANUAL_RULE_CREATION,
-          href: createRuleUrl,
-          testId: 'manual-rule-creation',
-        },
-      ],
+      splitButtonProps: {
+        secondaryButtonAriaLabel: i18n.CREATE_RULE_MORE_OPTIONS,
+        isSecondaryButtonDisabled: isDisabled,
+        items: [
+          {
+            id: 'aiRuleCreation',
+            label: i18n.AI_RULE_CREATION,
+            iconType: 'productAgent',
+            run: startAiRuleCreation,
+            testId: 'ai-rule-creation',
+          },
+        ],
+      },
     };
   }, [createRuleUrl, isAiRuleCreationAvailable, isDisabled, isLoading, startAiRuleCreation]);
 };
