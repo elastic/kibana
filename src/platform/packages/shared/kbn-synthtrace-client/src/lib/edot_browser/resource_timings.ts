@@ -26,7 +26,7 @@ export const resourceTimings = (
   const dns = newConnection ? between(random, 5, 40) : 0;
   const connect = newConnection ? between(random, 20, 80) : 0;
   // Connection setup is part of the fetch, so it can't take longer than the whole request
-  const total = Math.max(duration, dns + connect + MIN_EXCHANGE_MS);
+  const total = newConnection ? Math.max(duration, dns + connect + MIN_EXCHANGE_MS) : duration;
   const exchange = total - dns - connect;
   const domainLookupEnd = fetchStart + dns;
   const connectEnd = domainLookupEnd + connect;

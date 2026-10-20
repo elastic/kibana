@@ -10,7 +10,8 @@
 import { asFloat } from './as_float';
 import { BROWSER_PROFILES, pickBrowserProfile } from './browser_profiles';
 import { HEALTH_PROFILES, getWebVitalRating } from './health_profiles';
-import { edotBrowser, type EdotBrowserSite } from '.';
+import type { EdotBrowserSpanDocument } from './edot_browser_span';
+import { edotBrowser, type EdotBrowserDocument, type EdotBrowserSite } from '.';
 
 const LOGS_INDEX = 'logs-generic.otel-default';
 const TRACES_INDEX = 'traces-generic.otel-default';
@@ -84,6 +85,9 @@ const seededRandom = (seed: number) => {
     return (state - 1) / 2147483646;
   };
 };
+
+const isSpan = (doc: EdotBrowserDocument): doc is EdotBrowserSpanDocument =>
+  'span_id' in doc && 'kind' in doc;
 
 const hasFractionalPart = (value: number) => JSON.stringify(value).includes('.');
 
@@ -448,12 +452,14 @@ describe('edotBrowser', () => {
       health = HEALTH_PROFILES.healthy,
       sessionId,
       site = SITE,
+      sessionDurationMs = SESSION_DURATION,
     }: {
       seed?: number;
       pageViews?: number;
       health?: (typeof HEALTH_PROFILES)[keyof typeof HEALTH_PROFILES];
       sessionId?: string;
       site?: EdotBrowserSite;
+      sessionDurationMs?: number;
     } = {}) =>
       edotBrowser
         .session({
@@ -462,7 +468,7 @@ describe('edotBrowser', () => {
           health,
           start: TIMESTAMP,
           pageViews,
-          sessionDurationMs: SESSION_DURATION,
+          sessionDurationMs,
           random: seededRandom(seed),
         })
         .flatMap((event) => event.serialize());
@@ -620,6 +626,32 @@ describe('edotBrowser', () => {
           expect(timing('secure_connection_start')).toBeLessThanOrEqual(timing('connect_end'));
         }
       });
+    });
+
+    it('gives fetch spans the duration of their resource timing entry', () => {
+      // Short page views with slow requests, so request durations get capped to the page view
+      const docs = Array.from({ length: 30 }, (_, seed) =>
+        createSession({
+          seed,
+          pageViews: 5,
+          sessionDurationMs: 3_000,
+          health: HEALTH_PROFILES.critical,
+        })
+      ).flat();
+      let pairs = 0;
+
+      docs.forEach((doc, index) => {
+        if (!isSpan(doc) || doc.attributes['http.response.status_code'] === undefined) {
+          return;
+        }
+        const durationMs = Number(doc.duration) / 1_000_000;
+        const { attributes = {}, '@timestamp': timestamp } = docs[index + 1];
+        pairs++;
+        expect(attributes['url.full']).toBe(doc.attributes['url.full']);
+        expect(Number(attributes['browser.resource_timing.duration'])).toBeCloseTo(durationMs, 0);
+        expect(timestamp).toBe(Math.floor(Number(doc['@timestamp']) + durationMs));
+      });
+      expect(pairs).toBeGreaterThan(50);
     });
 
     it('omits timings of phases that did not happen', () => {
