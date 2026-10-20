@@ -81,5 +81,6 @@
     "@kbn/nightshift-investigations-plugin",
     "@kbn/agentic-investigations-plugin",
     "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/core-http-server-mocks",
   ]
 }
