@@ -44,6 +44,9 @@ import type { Row, TimeRange } from '../common';
 
 const MAX_GROUP_RECORDS = 100;
 
+/** A large group scrolls within this many rows, so its parent row stays in view. */
+const MAX_VISIBLE_GROUP_RECORDS = 10;
+
 const getTruncatedGroupLabel = (shown: number, total: number) =>
   i18n.translate('xpack.securitySolution.entityAnalytics.home.grid.getTruncatedGroupLabel', {
     defaultMessage: 'Showing {shown} of {total} records',
@@ -134,6 +137,14 @@ const nameContentCss = css`
   flex: 1;
   min-width: 0;
   overflow: hidden;
+`;
+
+// As wide as its rows, so only the grid scrolls sideways.
+const groupRecordsCss = css`
+  inline-size: fit-content;
+  min-inline-size: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 `;
 
 const mainEntityIconCss = css`
@@ -302,17 +313,24 @@ export const ExpandedEntityGroup: React.FC<ExpandedEntityGroupProps> = ({
   const { euiTheme, cellPadding } = rowProps;
   return (
     <>
-      {rows.map((child, i) => (
-        <ExpandedEntityRow
-          key={getEntityId(child) ?? i}
-          child={child}
-          isLast={i === rows.length - 1}
-          isEnriching={isEnriching}
-          isMainEntity={getEntityId(child) === entityId}
-          columnsById={columnsById}
-          {...rowProps}
-        />
-      ))}
+      <div
+        css={css`
+          ${groupRecordsCss}
+          max-block-size: ${ROW_HEIGHT_PX[cellPadding] * MAX_VISIBLE_GROUP_RECORDS}px;
+        `}
+      >
+        {rows.map((child, i) => (
+          <ExpandedEntityRow
+            key={getEntityId(child) ?? i}
+            child={child}
+            isLast={i === rows.length - 1}
+            isEnriching={isEnriching}
+            isMainEntity={getEntityId(child) === entityId}
+            columnsById={columnsById}
+            {...rowProps}
+          />
+        ))}
+      </div>
       {total != null && total > rows.length && rows.length > 0 && (
         <div
           role="row"
