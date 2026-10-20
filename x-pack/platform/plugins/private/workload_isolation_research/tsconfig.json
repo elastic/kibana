@@ -19,7 +19,19 @@
     "@kbn/core-spaces-common",
     "@kbn/core-saved-objects-server",
     "@kbn/sse-utils",
-    "@kbn/agent-builder-common"
+    "@kbn/agent-builder-common",
+    "@kbn/core-http-server",
+    "@kbn/core-http-server-utils",
+    "@kbn/core-http-router-server-internal",
+    "@kbn/core-security-server",
+    "@kbn/core-saved-objects-utils-server",
+    "@kbn/core-saved-objects-base-server-internal",
+    "@kbn/core-saved-objects-migration-server-internal",
+    "@kbn/core-saved-objects-api-server-internal",
+    "@kbn/core-status-common",
+    "@kbn/security-authorization-core",
+    "@kbn/share-plugin",
+    "@kbn/licensing-plugin"
   ],
   "exclude": [
     "target/**/*"

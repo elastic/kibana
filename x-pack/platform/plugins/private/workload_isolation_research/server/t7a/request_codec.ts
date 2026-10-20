@@ -28,7 +28,7 @@ export interface FakeRequestDescriptor {
 export const encodeFakeRequest = (request: KibanaRequest): FakeRequestDescriptor => {
   if (!request.isFakeRequest) throw new Error('t7a request codec: only fake requests can cross');
   const headers: Record<string, string | string[]> = {};
-  // Raw headers: KibanaRequest.headers strips secret headers (authorization) by design.
+  // Raw headers: what Core's ES client scoping reads (ensureRawRequest), not the filtered view.
   for (const [key, value] of Object.entries(ensureRawRequest(request).headers as Headers)) {
     if (typeof value === 'string' || Array.isArray(value)) headers[key] = value;
   }

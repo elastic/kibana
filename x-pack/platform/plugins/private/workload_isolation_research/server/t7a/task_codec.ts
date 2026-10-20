@@ -60,12 +60,21 @@ export interface WireRunResult {
   readonly error?: WireTaskError;
 }
 
+const tagDates = (value: unknown): unknown => {
+  if (value instanceof Date) return { __date: value.toISOString() };
+  if (Array.isArray(value)) return value.map(tagDates);
+  if (value && typeof value === 'object')
+    return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, tagDates(v)]));
+  return value;
+};
+
 /** Encodes a RunResult: `taskRunError`/`error` fields carry decorated errors. */
 export const encodeRunResult = (result: unknown): WireRunResult => {
   if (!result || typeof result !== 'object') return { result: undefined };
   const { taskRunError, error, ...rest } = result as Record<string, unknown>;
   return {
-    result: JSON.parse(JSON.stringify(rest, (_k, v) => (v instanceof Date ? { __date: v.toISOString() } : v))),
+    // NB: a JSON.stringify replacer sees Date.toJSON() strings, never Dates — tag Dates first.
+    result: JSON.parse(JSON.stringify(tagDates(rest))),
     ...(taskRunError instanceof Error ? { taskRunError: encodeTaskError(taskRunError) } : {}),
     ...(error instanceof Error ? { error: encodeTaskError(error) } : {}),
   };
