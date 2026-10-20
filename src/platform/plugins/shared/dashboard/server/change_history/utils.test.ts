@@ -64,20 +64,18 @@ describe('getHistorySequences', () => {
     const client = {
       getHistory: jest.fn().mockResolvedValue({ items: [{ object: { sequence: 2 } }] }),
     };
-    mockedGetClient.mockReturnValue(client as never);
+    mockedGetClient.mockResolvedValue(client as never);
     expect((await getHistorySequences({ spaceId: 'default', dashboardId: 'dash-1' })).next).toBe(3);
   });
 
   it('starts at the initial sequence when there is no history', async () => {
     const client = { getHistory: jest.fn().mockResolvedValue({ items: [] }) };
-    mockedGetClient.mockReturnValue(client as never);
+    mockedGetClient.mockResolvedValue(client as never);
     expect((await getHistorySequences({ spaceId: 'default', dashboardId: 'dash-1' })).next).toBe(1);
   });
 
   it('starts at the initial sequence when the client is unavailable', async () => {
-    mockedGetClient.mockImplementation(() => {
-      throw new Error('not ready');
-    });
+    mockedGetClient.mockRejectedValue(new Error('not ready'));
     expect((await getHistorySequences({ spaceId: 'default', dashboardId: 'dash-1' })).next).toBe(1);
   });
 });
@@ -100,7 +98,7 @@ describe('getNextHistorySequence', () => {
     const client = {
       getHistory: jest.fn().mockResolvedValue({ items: [{ object: { sequence: 7 } }] }),
     };
-    mockedGetClient.mockReturnValue(client as never);
+    mockedGetClient.mockResolvedValue(client as never);
     expect(
       await getNextHistorySequence({
         spaceId: 'default',
@@ -116,7 +114,7 @@ describe('addToHistory', () => {
 
   it('logs without an actor when there is no authenticated user (security disabled)', async () => {
     const client = getClient();
-    mockedGetClient.mockReturnValue(client as never);
+    mockedGetClient.mockResolvedValue(client as never);
     await addToHistory({ ...baseArgs, ctx: getContext(null), sequence: 1 });
     expect(client.log).toHaveBeenCalledWith(
       expect.anything(),
@@ -125,9 +123,7 @@ describe('addToHistory', () => {
   });
 
   it('does nothing when the change history client is not ready', async () => {
-    mockedGetClient.mockImplementation(() => {
-      throw new Error('not ready');
-    });
+    mockedGetClient.mockRejectedValue(new Error('not ready'));
     await expect(
       addToHistory({ ...baseArgs, ctx: getContext(), sequence: 1 })
     ).resolves.toBeUndefined();
@@ -135,7 +131,7 @@ describe('addToHistory', () => {
 
   it('logs the first version without a change count', async () => {
     const client = getClient();
-    mockedGetClient.mockReturnValue(client as never);
+    mockedGetClient.mockResolvedValue(client as never);
     await addToHistory({ ...baseArgs, ctx: getContext(), sequence: 1 });
 
     expect(client.log).toHaveBeenCalledWith(
@@ -158,7 +154,7 @@ describe('addToHistory', () => {
 
   it('logs deletes with their sequence', async () => {
     const client = getClient();
-    mockedGetClient.mockReturnValue(client as never);
+    mockedGetClient.mockResolvedValue(client as never);
     await addToHistory({ ...baseArgs, ctx: getContext(), sequence: 4, type: 'delete' });
 
     expect(client.log).toHaveBeenCalledWith(
@@ -169,7 +165,7 @@ describe('addToHistory', () => {
 
   it('stores the change count compared with the previous snapshot', async () => {
     const client = getClient();
-    mockedGetClient.mockReturnValue(client as never);
+    mockedGetClient.mockResolvedValue(client as never);
     await addToHistory({
       ...baseArgs,
       ctx: getContext(),
@@ -184,7 +180,7 @@ describe('addToHistory', () => {
   it('ignores the latest searchable history event when computing the change count', async () => {
     // history lags behind (e.g. v1 is still the latest searchable event while saving v3)
     const client = getClient({ ...baseArgs.snapshot, title: 'v1' } as DashboardState);
-    mockedGetClient.mockReturnValue(client as never);
+    mockedGetClient.mockResolvedValue(client as never);
     await addToHistory({
       ...baseArgs,
       ctx: getContext(),
@@ -198,7 +194,7 @@ describe('addToHistory', () => {
 
   it('records restoredFrom and waits for refresh on restore', async () => {
     const client = getClient();
-    mockedGetClient.mockReturnValue(client as never);
+    mockedGetClient.mockResolvedValue(client as never);
     await addToHistory({
       ...baseArgs,
       ctx: getContext(),
@@ -214,7 +210,7 @@ describe('addToHistory', () => {
 
   it('waits for refresh on delete so that a recreated ID continues after it', async () => {
     const client = getClient();
-    mockedGetClient.mockReturnValue(client as never);
+    mockedGetClient.mockResolvedValue(client as never);
     await addToHistory({ ...baseArgs, ctx: getContext(), sequence: 4, type: 'delete' });
 
     expect(client.log.mock.calls[0][1].refresh).toBe('wait_for');
@@ -223,7 +219,7 @@ describe('addToHistory', () => {
   it('swallows history write failures', async () => {
     const client = getClient();
     client.log.mockRejectedValue(new Error('boom'));
-    mockedGetClient.mockReturnValue(client as never);
+    mockedGetClient.mockResolvedValue(client as never);
     await expect(
       addToHistory({ ...baseArgs, ctx: getContext(), sequence: 1 })
     ).resolves.toBeUndefined();
@@ -320,7 +316,7 @@ describe('getChangeHistoryContext', () => {
     mockUseRbacForRequest.mockReturnValue(false);
     getSavedObject.mockResolvedValue({ attributes: {} });
     const client = { getHistory: jest.fn().mockResolvedValue({ items: [] }) };
-    mockedGetClient.mockReturnValue(client as never);
+    mockedGetClient.mockResolvedValue(client as never);
     const res = httpServerMock.createResponseFactory();
     const result = await getChangeHistoryContext(getRouteContext(false), req, res, 'dash-1');
 
@@ -364,7 +360,7 @@ describe('getChangeHistoryContext', () => {
   });
 
   it('checks dashboard edit privileges on the space of the request', async () => {
-    mockedGetClient.mockReturnValue({} as never);
+    mockedGetClient.mockResolvedValue({} as never);
     await getChangeHistoryContext(
       getRouteContext(true),
       req,
@@ -384,9 +380,7 @@ describe('getChangeHistoryContext', () => {
   });
 
   it('returns a 503 when the change history client is not ready', async () => {
-    mockedGetClient.mockImplementation(() => {
-      throw new Error('not ready');
-    });
+    mockedGetClient.mockRejectedValue(new Error('not ready'));
     const res = httpServerMock.createResponseFactory();
     const unavailable = { status: 503 };
     res.customError.mockReturnValue(unavailable as never);
@@ -401,7 +395,7 @@ describe('getChangeHistoryContext', () => {
     const client = {
       getHistory: jest.fn().mockResolvedValue({ items: [{ object: { sequence: 3 } }] }),
     };
-    mockedGetClient.mockReturnValue(client as never);
+    mockedGetClient.mockResolvedValue(client as never);
     const res = httpServerMock.createResponseFactory();
     const result = await getChangeHistoryContext(getRouteContext(true), req, res, 'dash-1');
 
@@ -412,7 +406,7 @@ describe('getChangeHistoryContext', () => {
     const client = {
       getHistory: jest.fn().mockResolvedValue({ items: [{ object: { sequence: 3 } }] }),
     };
-    mockedGetClient.mockReturnValue(client as never);
+    mockedGetClient.mockResolvedValue(client as never);
     const res = httpServerMock.createResponseFactory();
     const result = await getChangeHistoryContext(getRouteContext(true), req, res, 'dash-1');
 

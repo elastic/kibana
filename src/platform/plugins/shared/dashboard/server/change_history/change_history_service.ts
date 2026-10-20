@@ -8,57 +8,38 @@
  */
 
 import type { ChangeHistoryClient } from '@kbn/change-history';
-import type { CoreStart, Logger } from '@kbn/core/server';
+import type { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
 
-const INITIAL_RETRY_DELAY_MS = 1000;
-const MAX_RETRY_DELAY_MS = 60000;
+let changeHistoryClient: ChangeHistoryClient | undefined;
+let esClient: ElasticsearchClient;
+let logger: Logger;
+let initPromise: Promise<void> | undefined;
 
-let ready = false;
-let changeHistoryClient: ChangeHistoryClient;
-let retryTimer: ReturnType<typeof setTimeout> | undefined;
+const initialize = (): Promise<void> => {
+  if (!changeHistoryClient) return Promise.reject(new Error('ChangeHistoryClient is not started.'));
+  const promise: Promise<void> = changeHistoryClient.initialize(esClient).catch((cause) => {
+    // Clear so the next request retries, unless the service was restarted in the meantime
+    if (initPromise === promise) initPromise = undefined;
+    throw new Error('Unable to initialize dashboard change history', { cause });
+  });
+  initPromise = promise;
+  return promise;
+};
 
 export const startChangeHistoryClient = (
   client: ChangeHistoryClient,
   core: CoreStart,
-  logger: Logger
+  pluginLogger: Logger
 ) => {
   changeHistoryClient = client;
-  ready = false;
-  stopChangeHistoryClient();
-
-  const attemptInitialize = (retryDelayMs: number) => {
-    changeHistoryClient
-      .initialize(core.elasticsearch.client.asInternalUser)
-      .then(() => {
-        ready = true;
-        retryTimer = undefined;
-      })
-      .catch((cause) => {
-        const error = new Error(
-          `Unable to initialize dashboard change history, retrying in ${retryDelayMs}ms`,
-          { cause }
-        );
-        logger.error(error);
-        retryTimer = setTimeout(
-          () => attemptInitialize(Math.min(retryDelayMs * 2, MAX_RETRY_DELAY_MS)),
-          retryDelayMs
-        );
-      });
-  };
-
-  attemptInitialize(INITIAL_RETRY_DELAY_MS);
+  esClient = core.elasticsearch.client.asInternalUser;
+  logger = pluginLogger;
+  // warm up eagerly; a failure is retried lazily by the next getChangeHistoryClient call
+  initialize().catch((error) => logger.error(error));
 };
 
-export const stopChangeHistoryClient = () => {
-  if (retryTimer) {
-    clearTimeout(retryTimer);
-    retryTimer = undefined;
-  }
-};
-
-export const getChangeHistoryClient = () => {
-  if (!ready || !changeHistoryClient) {
-    throw new Error('ChangeHistoryClient is not ready yet.');
-  }
+export const getChangeHistoryClient = async (): Promise<ChangeHistoryClient> => {
+  await (initPromise ?? initialize());
+  if (!changeHistoryClient) throw new Error('ChangeHistoryClient is not started.');
   return changeHistoryClient;
 };

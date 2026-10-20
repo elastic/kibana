@@ -106,7 +106,7 @@ describe(`create`, () => {
       getHistory: jest.fn().mockResolvedValue({ items: [{ object: { sequence: 4 } }] }),
       log: jest.fn().mockResolvedValue(undefined),
     };
-    mockedGetClient.mockReturnValue(changeHistoryClient as never);
+    mockedGetClient.mockResolvedValue(changeHistoryClient as never);
     savedObjectsClient.get.mockRejectedValue(
       SavedObjectsErrorHelpers.createGenericNotFoundError('dashboard', 'old')
     );

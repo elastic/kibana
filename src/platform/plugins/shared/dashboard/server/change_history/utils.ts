@@ -89,7 +89,9 @@ export const getHistorySequences = async ({
   try {
     const {
       items: [latestItem],
-    } = await getChangeHistoryClient().getHistory(spaceId, 'dashboard', dashboardId, { size: 1 });
+    } = await (
+      await getChangeHistoryClient()
+    ).getHistory(spaceId, 'dashboard', dashboardId, { size: 1 });
     const latestSequence = latestItem?.object.sequence;
     latest = typeof latestSequence === 'number' ? latestSequence : undefined;
   } catch {
@@ -143,7 +145,7 @@ export const addToHistory = async ({
   const user = core.security.authc.getCurrentUser();
   let client;
   try {
-    client = getChangeHistoryClient();
+    client = await getChangeHistoryClient();
   } catch {
     return;
   }
@@ -235,7 +237,7 @@ export const getChangeHistoryContext = async <P, Q, B, M extends RouteMethod>(
 
   let client;
   try {
-    client = getChangeHistoryClient();
+    client = await getChangeHistoryClient();
   } catch {
     return {
       error: res.customError({ statusCode: 503, body: 'Change history service is not ready' }),

@@ -28,8 +28,6 @@ const mockedGetClient = getChangeHistoryClient as jest.MockedFunction<
 const ID = 'dash-1';
 
 const getState = (title: string): DashboardState => ({ ...DEFAULT_DASHBOARD_STATE, title });
-
-// stored exactly as a save of `{ title: 'Initial' }` would store it, so that saving it again is no change
 const getInitialAttributes = (): DashboardSavedObjectAttributes => ({
   ...transformDashboardIn(getState('Initial'), false).attributes,
   historySequence: 1,
@@ -85,7 +83,7 @@ describe('update history sequence', () => {
     } as unknown as RequestHandlerContext;
 
     // history that never refreshes: it only ever returns the first version
-    mockedGetClient.mockReturnValue({
+    mockedGetClient.mockResolvedValue({
       getHistory: jest.fn().mockResolvedValue({
         items: [{ object: { sequence: 1, snapshot: { title: 'Initial' } } }],
       }),
