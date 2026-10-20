@@ -47,6 +47,7 @@ import {
 import { formatSecrets } from '../../synthetics_service/utils/secrets';
 import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';
 import { getBrowserTimeoutWarningForMonitor } from './monitor_warnings';
+import { isSecretConnectionsEnabled } from '../../config';
 
 // Simplify return promise type and type it with runtime_types
 export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
@@ -149,9 +150,13 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
         (editedMonitor as MonitorFields)[ConfigKey.SOURCE_INLINE] !==
         (normalizedPreviousMonitor as MonitorFields)[ConfigKey.SOURCE_INLINE];
 
-      const validationResult = validateMonitor(editedMonitor as MonitorFields, spaceId, undefined, {
-        checkInlineScript,
-      });
+      const validationResult = validateMonitor(
+        editedMonitor as MonitorFields,
+        spaceId,
+        undefined,
+        isSecretConnectionsEnabled(server.config),
+        { checkInlineScript }
+      );
 
       if (!validationResult.valid || !validationResult.decodedMonitor) {
         const { reason: message, details, payload } = validationResult;

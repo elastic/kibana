@@ -1047,19 +1047,24 @@ describe('SourcesClient', () => {
       });
     });
 
-    it('escapes KQL metacharacters in the title prefix filter', async () => {
+    it('trims the search and escapes KQL metacharacters in the title prefix filter', async () => {
       const { client, soClient } = setup();
       soClient.find.mockResolvedValue({ saved_objects: [], total: 0, page: 1, per_page: 25 });
-      const search = 'foo AND "bar"';
 
-      await client.list({ page: 1, perPage: 25, search, enabled: true });
+      await client.list({ page: 1, perPage: 25, search: '  foo AND "bar"  ', enabled: true });
 
       expect(soClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
           filter: `nightshift-source.attributes.title: ${escapeKuery(
-            search
+            'foo AND "bar"'
           )}* AND nightshift-source.attributes.enabled: true`,
         })
+      );
+
+      await client.list({ page: 1, perPage: 25, search: '   ' });
+
+      expect(soClient.find).toHaveBeenLastCalledWith(
+        expect.objectContaining({ filter: undefined })
       );
     });
   });

@@ -33,6 +33,7 @@ import {
   assertCanPerformMonitorBulkActionInAllSpaces,
   validateMonitorPrivateLocationSpaces,
 } from './monitor_locations_utils';
+import { isSecretConnectionsEnabled } from '../../config';
 
 export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
@@ -120,6 +121,7 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
         monitorWithDefaults,
         spaceId,
         server.cloud?.isServerlessEnabled,
+        isSecretConnectionsEnabled(server.config),
         { checkInlineScript: true }
       );
 

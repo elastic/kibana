@@ -87,7 +87,7 @@ const getCountKey = (
     { spaceId: context.spaceId, countQuery: countQuery.join('\n') },
   ] as const;
 
-const getFilterOverridesKey = (context: GridContext, options: UseEntityGridDataOptions) =>
+const getFilterOverridesKey = (context: GridContext, options: OverridesOptions) =>
   [
     'entity-grid',
     getKeyScope(options),
@@ -138,24 +138,34 @@ const fetchRows = async (
   };
 };
 
+type OverridesOptions = Pick<
+  UseEntityGridDataOptions,
+  'rowsMode' | 'entityExpression' | 'keyScope'
+>;
+
 const fetchFilterOverrides = (
   context: GridContext,
-  options: UseEntityGridDataOptions,
+  { rowsMode, entityExpression }: OverridesOptions,
   signal?: AbortSignal
-) =>
-  fetchResolvedEntityFilterOverrides(
-    getQueryArgs(context, options),
+) => {
+  const ready = getReadyContext(context);
+  if (!ready) throw new Error('entities index not resolved');
+  return fetchResolvedEntityFilterOverrides(
+    {
+      namespace: ready.spaceId,
+      concreteEntityIndexName: ready.concreteEntityIndexName,
+      rowsMode,
+      entityExpression,
+    },
     createEsqlRunner(context.searchService, signal)
   );
+};
 
 const limitPageSize = (options: UseEntityGridDataOptions): UseEntityGridDataOptions =>
   options.pageSize <= MAX_LOADED_ROWS ? options : { ...options, pageSize: MAX_LOADED_ROWS };
 
 /** The resolved entities the entity filters add or remove, read before any query uses them. */
-const useResolvedEntityFilterOverrides = (
-  context: GridContext,
-  options: UseEntityGridDataOptions
-) =>
+const useResolvedEntityFilterOverrides = (context: GridContext, options: OverridesOptions) =>
   useQuery(
     getFilterOverridesKey(context, options),
     ({ signal }) => fetchFilterOverrides(context, options, signal),
@@ -203,6 +213,10 @@ const usePrefetch = (context: GridContext) =>
   );
 
 /** The rows of the sort column's query, the count of the view, and the computed columns of rows in view. */
+/** The overrides the grid's rows read, for another view of the same rows (Group by). */
+export const useEntityFilterOverrides = (options: OverridesOptions) =>
+  useResolvedEntityFilterOverrides(useGridContext(), options);
+
 export const useEntityGridData = (
   requestedOptions: UseEntityGridDataOptions,
   /** Enrich only the rows the grid reports in view, through `onRowsInViewChange`. */

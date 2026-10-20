@@ -472,7 +472,9 @@ describe('validateMonitor', () => {
 
     it('rejects a browser script with a syntax error when checkInlineScript is set', () => {
       const testMonitor = browserMonitorWith('step("x", async () => {{{ this is not js');
-      const result = validateMonitor(testMonitor, 'default', false, { checkInlineScript: true });
+      const result = validateMonitor(testMonitor, 'default', false, true, {
+        checkInlineScript: true,
+      });
       expect(result).toMatchObject({
         valid: false,
         reason: 'Invalid browser monitor script',
@@ -483,6 +485,87 @@ describe('validateMonitor', () => {
     it('does not inspect the script unless checkInlineScript is set', () => {
       const testMonitor = browserMonitorWith('step("x", async () => {{{ this is not js');
       expect(validateMonitor(testMonitor, 'default')).toMatchObject({ valid: true });
+    });
+  });
+
+  describe('Vault references', () => {
+    const privateLocation = { id: 'private-1', label: 'Private', isServiceManaged: false };
+
+    it.each([
+      [ConfigKey.PASSWORD, 'vault://prod@app/creds#password'],
+      [ConfigKey.REQUEST_HEADERS_CHECK, { Authorization: 'Bearer vault://prod@app/creds#token' }],
+      [ConfigKey.PASSWORD, 'vault://prod@app%2Fcreds#password'],
+    ])('rejects a reference in %s on an Elastic managed location', (key, value) => {
+      const result = validateMonitor(
+        { ...testHTTPFields, [ConfigKey.USERNAME]: 'user', [key]: value } as MonitorFields,
+        'default'
+      );
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Vault references cannot be used on Elastic managed locations',
+      });
+    });
+
+    it('rejects a reference when a managed location is mixed with a private one', () => {
+      const result = validateMonitor(
+        {
+          ...testHTTPFields,
+          [ConfigKey.PASSWORD]: 'vault://prod@app/creds#password',
+          [ConfigKey.LOCATIONS]: [...testHTTPFields[ConfigKey.LOCATIONS], privateLocation],
+        } as MonitorFields,
+        'default'
+      );
+      expect(result.valid).toBe(false);
+    });
+
+    it('allows a reference on private locations only', () => {
+      const result = validateMonitor(
+        {
+          ...testHTTPFields,
+          [ConfigKey.PASSWORD]: 'vault://prod@app/creds#password',
+          [ConfigKey.LOCATIONS]: [privateLocation],
+        } as MonitorFields,
+        'default'
+      );
+      expect(result.valid).toBe(true);
+    });
+
+    it('rejects a reference when secret connections are disabled', () => {
+      const result = validateMonitor(
+        {
+          ...testHTTPFields,
+          [ConfigKey.PASSWORD]: 'vault://prod@app/creds#password',
+          [ConfigKey.LOCATIONS]: [privateLocation],
+        } as MonitorFields,
+        'default',
+        false,
+        false
+      );
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Vault references are not available in this deployment',
+      });
+    });
+
+    it('allows a monitor without references when secret connections are disabled', () => {
+      const result = validateMonitor(
+        { ...testHTTPFields, [ConfigKey.LOCATIONS]: [privateLocation] } as MonitorFields,
+        'default',
+        false,
+        false
+      );
+      expect(result.valid).toBe(true);
+    });
+
+    it('ignores vault:// text in a browser script on a managed location', () => {
+      const result = validateMonitor(
+        {
+          ...testBrowserFields,
+          [ConfigKey.SOURCE_INLINE]: "step('x', () => page.goto('vault://prod@a#b'));",
+        } as MonitorFields,
+        'default'
+      );
+      expect(result.valid).toBe(true);
     });
   });
 

@@ -220,9 +220,13 @@ export class UpdateMonitorAPI {
       normalizedMonitor[ConfigKey.SOURCE_INLINE] !==
       (prevAttrs as MonitorFields)[ConfigKey.SOURCE_INLINE];
 
-    const validation = validateMonitor(normalizedMonitor, this.routeContext.spaceId, undefined, {
-      checkInlineScript,
-    });
+    const validation = validateMonitor(
+      normalizedMonitor,
+      this.routeContext.spaceId,
+      undefined,
+      undefined,
+      { checkInlineScript }
+    );
     if (!validation.valid || !validation.decodedMonitor) {
       this.result.perIdErrors[monitorId] = {
         code: 'validation_failed',

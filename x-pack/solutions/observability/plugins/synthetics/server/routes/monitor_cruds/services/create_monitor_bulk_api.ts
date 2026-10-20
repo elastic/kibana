@@ -192,6 +192,7 @@ export class CreateMonitorBulkAPI {
         normalizedMonitor,
         this.routeContext.spaceId,
         this.routeContext.server.cloud?.isServerlessEnabled,
+        undefined,
         { checkInlineScript: true }
       );
       if (!validation.valid || !validation.decodedMonitor) {

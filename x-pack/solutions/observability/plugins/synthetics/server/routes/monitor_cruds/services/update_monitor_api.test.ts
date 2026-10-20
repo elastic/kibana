@@ -309,6 +309,7 @@ describe('UpdateMonitorAPI', () => {
         expect.objectContaining({ [ConfigKey.URLS]: 'https://new.example.com' }),
         'default',
         undefined,
+        undefined,
         { checkInlineScript: false }
       );
       const persisted = result.survivors[0].monitorWithRevision as Record<string, unknown>;
@@ -340,6 +341,7 @@ describe('UpdateMonitorAPI', () => {
           expect.objectContaining({ [ConfigKey.SOURCE_INLINE]: 'step("b", async () => {})' }),
           'default',
           undefined,
+          undefined,
           { checkInlineScript: true }
         );
       });
@@ -360,6 +362,7 @@ describe('UpdateMonitorAPI', () => {
         expect(validateMonitor).toHaveBeenCalledWith(
           expect.objectContaining({ [ConfigKey.SOURCE_INLINE]: brokenScript }),
           'default',
+          undefined,
           undefined,
           { checkInlineScript: false }
         );

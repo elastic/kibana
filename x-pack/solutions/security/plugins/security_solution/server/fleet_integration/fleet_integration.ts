@@ -42,8 +42,10 @@ import { validateEndpointPackagePolicy } from './handlers/validate_endpoint_pack
 import {
   isPolicySetToEventCollectionOnly,
   ensureOnlyEventCollectionIsAllowed,
+  isAiDataCollectionEnabled,
   isBillablePolicy,
   isLinuxRansomwareProtectionEnabled,
+  removeAiDataCollection,
   removeCustomYaraSignatures,
   removeDeviceControl,
   removeLinuxRansomware,
@@ -308,6 +310,17 @@ export const getPackagePolicyUpdateCallback = (
         endpointIntegrationData.inputs?.[0]?.config?.policy?.value
       ) {
         endpointIntegrationData.inputs[0].config.policy.value = removeLinuxRansomware(
+          endpointIntegrationData.inputs[0].config.policy.value as PolicyConfig
+        );
+      }
+
+      // The AI Data Collection card only exists behind its flags, so deployments with it off
+      // (e.g. Serverless before Endpoint 9.6 is GA) never persist the setting via the API.
+      if (
+        !isAiDataCollectionEnabled(experimentalFeatures) &&
+        endpointIntegrationData.inputs?.[0]?.config?.policy?.value
+      ) {
+        endpointIntegrationData.inputs[0].config.policy.value = removeAiDataCollection(
           endpointIntegrationData.inputs[0].config.policy.value as PolicyConfig
         );
       }
