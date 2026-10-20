@@ -35,6 +35,7 @@ import {
   buildVaultReference,
   findMalformedVaultReferences,
   malformedVaultReferencesMessage,
+  valueContainsVaultReference,
   VaultParamSourceSchema,
 } from '../../../synthetics_service/formatters/vault_param_formatter';
 
@@ -122,7 +123,9 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
 
       if (
         !isSecretConnectionsEnabled(server.config) &&
-        (paramsToValidate as SyntheticsParamRequest[]).some((param) => param.source)
+        (paramsToValidate as SyntheticsParamRequest[]).some(
+          (param) => param.source || valueContainsVaultReference(param.value)
+        )
       ) {
         return response.badRequest({ body: { message: SECRET_CONNECTIONS_DISABLED_MESSAGE } });
       }

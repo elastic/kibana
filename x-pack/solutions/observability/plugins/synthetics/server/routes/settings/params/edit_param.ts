@@ -27,6 +27,7 @@ import {
   buildVaultReference,
   findMalformedVaultReferences,
   malformedVaultReferencesMessage,
+  valueContainsVaultReference,
   VaultParamSourceSchema,
 } from '../../../synthetics_service/formatters/vault_param_formatter';
 
@@ -100,7 +101,10 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
         body: { message: 'A parameter cannot set both a value and a vault source' },
       });
     }
-    if (data.source && !isSecretConnectionsEnabled(server.config)) {
+    if (
+      (data.source || valueContainsVaultReference(data.value)) &&
+      !isSecretConnectionsEnabled(server.config)
+    ) {
       return response.badRequest({ body: { message: SECRET_CONNECTIONS_DISABLED_MESSAGE } });
     }
     const malformed = findMalformedVaultReferences(data.value);
