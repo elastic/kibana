@@ -22,20 +22,17 @@ import {
 import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  AWS_ONBOARDING_TITLE,
-  AWS_ONBOARDING_DESCRIPTION,
-} from '../../common/providers/aws/constants';
+import { getOnboardingProvider } from './provider_registry';
 import { ONBOARDING_STEPS } from './steps';
 import { useStepState } from './use_step_state';
 import { useInvalidateDownstreamSteps } from './use_invalidate_downstream_steps';
-import { useOnboardingFlow } from './onboarding_flow_context';
+import { useOnboardingFlow } from '../onboarding_flow_context';
 import {
   AuthenticateAndDeployStep,
   ServicesStep,
   ServiceSettingsStep,
   DetectAndReviewStep,
-} from './step_components';
+} from '../step_components';
 
 const DOWNSTREAM_OF_SERVICES_STEP_IDS = ONBOARDING_STEPS.slice(1).map((s) => s.id);
 
@@ -51,21 +48,11 @@ const STEP_COMPONENTS: Record<string, React.ComponentType<StepComponentProps>> =
   'detect-and-review': DetectAndReviewStep,
 };
 
-interface IntegrationMeta {
-  title: string;
-  description: string;
-  icon: string;
-}
-
-const INTEGRATION_META: Record<string, IntegrationMeta> = {
-  aws: { title: AWS_ONBOARDING_TITLE, description: AWS_ONBOARDING_DESCRIPTION, icon: 'logoAWS' },
-};
-
 export function OnboardingShell() {
   const { integrationId } = useParams<{ integrationId: string }>();
   const history = useHistory();
   const location = useLocation();
-  const meta = INTEGRATION_META[integrationId];
+  const meta = getOnboardingProvider(integrationId)?.meta;
 
   useEffect(() => {
     if (!meta) {
