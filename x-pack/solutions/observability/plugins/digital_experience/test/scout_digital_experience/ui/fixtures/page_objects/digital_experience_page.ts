@@ -20,6 +20,8 @@ export class DigitalExperiencePage {
   public readonly navEntry: Locator;
   public readonly legacyNavEntry: Locator;
   public readonly projectNavEntry: Locator;
+  public readonly apmTracesNavEntry: Locator;
+  public readonly fatalErrorScreen: Locator;
   public readonly appNotFound: Locator;
   public readonly permissionDenied: Locator;
   public readonly classicRumPageLoadMetric: Locator;
@@ -35,6 +37,8 @@ export class DigitalExperiencePage {
     this.navEntry = page.getByTestId('observability-nav-digital_experience-applications');
     this.legacyNavEntry = page.getByTestId('observability-nav-ux-dashboard');
     this.projectNavEntry = page.testSubj.locator('~nav-item-deepLinkId-digital_experience');
+    this.apmTracesNavEntry = page.getByTestId('observability-nav-apm-traces');
+    this.fatalErrorScreen = page.getByTestId('fatalErrorScreen');
     this.appNotFound = page.getByTestId('appNotFoundPageContent');
     // The server denies the app route itself when the role has no digital_experience privilege.
     this.permissionDenied = page.getByTestId('ResetSessionButton');

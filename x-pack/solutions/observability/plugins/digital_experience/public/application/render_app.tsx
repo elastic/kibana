@@ -50,6 +50,8 @@ export const renderApp = ({
   );
 
   return () => {
+    // The embedded Classic RUM dashboard starts a search session, which the app must clear on leave.
+    pluginsStart.data.search.session.clear();
     ReactDOM.unmountComponentAtNode(element);
   };
 };

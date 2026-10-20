@@ -34,6 +34,21 @@ test.describe(
       await expect(digitalExperience.classicRumServiceSelect).toBeHidden();
     });
 
+    test('leaves the Overview for another app without leaving its search session open', async ({
+      page,
+      pageObjects: { digitalExperience },
+    }) => {
+      await digitalExperience.gotoApplication(testData.SERVICE_NAME);
+      await expect(digitalExperience.classicRumPageLoadMetric).toBeVisible();
+
+      // An in-app navigation, so dev mode raises a fatal error if the session is still open.
+      await digitalExperience.apmTracesNavEntry.click();
+
+      await expect(page).toHaveURL(/\/app\/apm\/traces/);
+      await expect(digitalExperience.breadcrumbs).toContainText('Traces');
+      await expect(digitalExperience.fatalErrorScreen).toBeHidden();
+    });
+
     test('keeps the time range in sync between the dashboard and the page URL', async ({
       page,
       pageObjects: { digitalExperience, datePicker },
