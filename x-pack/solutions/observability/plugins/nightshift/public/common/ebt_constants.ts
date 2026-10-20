@@ -53,11 +53,13 @@ export const NIGHTSHIFT_EBT_ACTIONS = {
   VIEW_SETTINGS: 'viewSettings',
   VIEW_SIGNIFICANT_EVENT: 'viewSignificantEvent',
   VIEW_SIGNIFICANT_EVENTS: 'viewSignificantEvents',
+  VIEW_SOURCES: 'viewSources',
 } as const;
 
 export const NIGHTSHIFT_EBT_ELEMENTS = {
   AUTOMATIONS_CREATE_FLYOUT: 'automationsCreateFlyout',
   AUTOMATIONS_DETAIL_FLYOUT: 'automationsDetailFlyout',
+  AUTOMATIONS_FORM: 'automationsForm',
   AUTOMATIONS_LIST: 'automationsList',
   IMPACTED_SERVICES: 'nightshiftImpactedServices',
   INVESTIGATIONS_LIST: 'nightshiftInvestigationsList',
