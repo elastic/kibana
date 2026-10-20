@@ -8,7 +8,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/test-jest',
   rootDir: '../../../../..',
   roots: ['<rootDir>/src/platform/plugins/shared/content_management'],
   coverageDirectory:

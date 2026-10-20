@@ -13,9 +13,8 @@ export { setupJUnitReportGeneration } from './junit_report_generation';
 // @ts-ignore not typed yet
 // @internal
 export { recordLog, snapshotLogsForRunnable, getSnapshotOfRunnableLogs } from './log_cache';
-// @ts-ignore not typed yet
 // @internal
-export { escapeCdata } from './xml';
+export { escapeCdata } from '@kbn/test-reporting';
 // @internal
 export { reconcileRetryJunitReports } from './reconcile_retry_junit_reports';
 // @internal

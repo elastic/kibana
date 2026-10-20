@@ -1,0 +1,11 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "stripInternal": true,
+    "types": ["jest", "node"]
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["**/__fixtures__/**/*", "target/**/*"],
+  "kbn_references": ["@kbn/test-es-server"]
+}

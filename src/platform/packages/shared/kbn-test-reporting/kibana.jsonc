@@ -1,0 +1,8 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/test-reporting",
+  "owner": ["@elastic/kibana-operations", "@elastic/appex-qa"],
+  "group": "platform",
+  "visibility": "shared",
+  "devOnly": true
+}

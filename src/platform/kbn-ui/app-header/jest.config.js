@@ -8,7 +8,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/test-jest',
   rootDir: '../../../..',
   roots: ['<rootDir>/src/platform/kbn-ui/app-header'],
   setupFilesAfterEnv: ['<rootDir>/src/platform/kbn-ui/app-header/setup_tests.ts'],

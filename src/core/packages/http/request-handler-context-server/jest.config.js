@@ -8,7 +8,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test/jest_node',
+  preset: '@kbn/test-jest/jest_node',
   rootDir: '../../../../..',
   roots: ['<rootDir>/src/core/packages/http/request-handler-context-server'],
 };

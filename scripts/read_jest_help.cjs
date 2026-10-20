@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('../src/setup_node_env');
+require('@kbn/setup-node-env');
 
 const Fsp = require('fs/promises');
 const Path = require('path');
@@ -16,7 +16,7 @@ const { createFailError } = require('@kbn/dev-cli-errors');
 const { run } = require('@kbn/dev-cli-runner');
 const { REPO_ROOT } = require('@kbn/repo-info');
 
-const FLAGS_FILE = 'src/platform/packages/shared/kbn-test/src/jest/jest_flags.json';
+const FLAGS_FILE = 'src/platform/packages/shared/kbn-test-jest/src/jest/jest_flags.json';
 
 function readStdin() {
   return new Promise((resolve, reject) => {
@@ -112,7 +112,7 @@ run(
     );
 
     log.success('wrote jest flag info to', FLAGS_FILE);
-    log.warning('make sure you bootstrap to rebuild @kbn/test');
+    log.warning('make sure you bootstrap to rebuild @kbn/test-jest');
   },
   {
     usage: `pnpm exec jest --help | node scripts/read_jest_help.cjs`,

@@ -5925,12 +5925,18 @@ importers:
       '@kbn/test-eui-helpers':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-test-eui-helpers
+      '@kbn/test-jest':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-test-jest
       '@kbn/test-jest-helpers':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-test-jest-helpers
       '@kbn/test-kibana-server':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-test-kibana-server
+      '@kbn/test-reporting':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-test-reporting
       '@kbn/test-saml-auth':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-test-saml-auth
@@ -8329,9 +8335,13 @@ importers:
 
   src/platform/packages/shared/kbn-test-es-server: {}
 
+  src/platform/packages/shared/kbn-test-jest: {}
+
   src/platform/packages/shared/kbn-test-jest-helpers: {}
 
   src/platform/packages/shared/kbn-test-kibana-server: {}
+
+  src/platform/packages/shared/kbn-test-reporting: {}
 
   src/platform/packages/shared/kbn-test-saml-auth: {}
 

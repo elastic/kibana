@@ -7,7 +7,7 @@
 
 /** @type {import('@jest/types').Config.InitialOptions} */
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/test-jest',
   rootDir: '../../../../../..',
   roots: ['<rootDir>/x-pack/solutions/security/plugins/security_solution_ess/server/'],
 };

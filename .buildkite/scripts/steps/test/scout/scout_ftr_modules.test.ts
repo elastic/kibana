@@ -41,6 +41,8 @@ describe('SCOUT_EXCLUDED_MODULES', () => {
 
   it('includes expected FTR core modules', () => {
     expect(SCOUT_EXCLUDED_MODULES.has('@kbn/test')).toBe(true);
+    expect(SCOUT_EXCLUDED_MODULES.has('@kbn/test-jest')).toBe(true);
+    expect(SCOUT_EXCLUDED_MODULES.has('@kbn/test-reporting')).toBe(true);
     expect(SCOUT_EXCLUDED_MODULES.has('@kbn/ftr-common-functional-services')).toBe(true);
     expect(SCOUT_EXCLUDED_MODULES.has('@kbn/test-suites-src')).toBe(true);
   });

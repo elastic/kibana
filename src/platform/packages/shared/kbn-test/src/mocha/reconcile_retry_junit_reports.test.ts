@@ -13,7 +13,7 @@ import { dirname, resolve } from 'path';
 import xml2js from 'xml2js';
 import { ToolingLog } from '@kbn/tooling-log';
 
-import { getJunitReportPath } from '../report_path';
+import { getJunitReportPath } from '@kbn/test-reporting';
 import { reconcileRetryJunitReports } from './reconcile_retry_junit_reports';
 
 const ROOT = resolve(__dirname, '__fixtures__/reconcile_tmp');

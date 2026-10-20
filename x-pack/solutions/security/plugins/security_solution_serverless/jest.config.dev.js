@@ -6,7 +6,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/test-jest',
   rootDir: '../../../../../',
   projects: [
     '<rootDir>/x-pack/solutions/security/plugins/security_solution_serverless/public/jest.config.js',
