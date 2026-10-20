@@ -9,6 +9,7 @@ import { TIME_RANGE_OPTIONS } from '../components/home/entities_grid/common';
 import { ENTITY_ANALYTICS_TABLE_ID } from '../components/home/constants';
 import {
   getEntityAnalyticsNewHomeScopeId,
+  getScopeFlyoutLookback,
   getScopeFlyoutTimeRange,
   getScopeFlyoutTimeRangeMs,
 } from './scope_time_ranges';
@@ -57,5 +58,20 @@ describe('getScopeFlyoutTimeRangeMs', () => {
   it('is undefined when the scope does not pin the flyout', () => {
     expect(getScopeFlyoutTimeRangeMs(ENTITY_ANALYTICS_TABLE_ID)).toBeUndefined();
     expect(getScopeFlyoutTimeRangeMs(undefined)).toBeUndefined();
+  });
+});
+
+describe('getScopeFlyoutLookback', () => {
+  it.each([
+    ['24h', { amount: 24, unit: 'hours' }],
+    ['7d', { amount: 7, unit: 'days' }],
+    ['30d', { amount: 30, unit: 'days' }],
+  ] as const)('parses the %s scope', (timeRange, lookback) => {
+    expect(getScopeFlyoutLookback(getEntityAnalyticsNewHomeScopeId(timeRange))).toEqual(lookback);
+  });
+
+  it('is undefined for scopes that pin no range', () => {
+    expect(getScopeFlyoutLookback(ENTITY_ANALYTICS_TABLE_ID)).toBeUndefined();
+    expect(getScopeFlyoutLookback(undefined)).toBeUndefined();
   });
 });

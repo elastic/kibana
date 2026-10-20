@@ -6,7 +6,7 @@
  */
 
 import dateMath from '@kbn/datemath';
-import { ENTITY_ANALYTICS_ALERTS_TO } from '../components/home/constants';
+import { ENTITY_ANALYTICS_DEFAULT_TIMERANGE_TO } from '../components/home/constants';
 import { TIME_RANGE_OPTIONS, type TimeRange } from '../components/home/entities_grid/common';
 
 /** Each time range has its own scope, so flyouts from the table read alerts over the range it shows. */
@@ -35,7 +35,7 @@ export const SCOPE_FLYOUT_TIME_RANGES: Readonly<Record<string, ScopeTimeRange>> 
   Object.fromEntries(
     TIME_RANGE_OPTIONS.map((timeRange) => [
       getEntityAnalyticsNewHomeScopeId(timeRange),
-      { from: `now-${timeRange}`, to: ENTITY_ANALYTICS_ALERTS_TO },
+      { from: `now-${timeRange}`, to: ENTITY_ANALYTICS_DEFAULT_TIMERANGE_TO },
     ])
   );
 
@@ -54,4 +54,20 @@ export const getScopeFlyoutTimeRangeMs = (scopeId?: string): ScopeTimeRangeMs | 
   const to = dateMath.parse(timeRange.to, { roundUp: true });
   if (!from?.isValid() || !to?.isValid()) return undefined;
   return { from: from.valueOf(), to: to.valueOf() };
+};
+
+/** A look-back length parsed from a relative `from`, e.g. `now-7d` is `{ amount: 7, unit: 'days' }`. */
+export interface ScopeLookback {
+  amount: number;
+  unit: 'hours' | 'days';
+}
+
+const RELATIVE_LOOKBACK_REGEX = /^now-(\d+)([hd])$/;
+
+/** Returns the look-back length pinned by `scopeId`, if its range starts at `now-<n>h` or `now-<n>d`. */
+export const getScopeFlyoutLookback = (scopeId?: string): ScopeLookback | undefined => {
+  const match = RELATIVE_LOOKBACK_REGEX.exec(getScopeFlyoutTimeRange(scopeId)?.from ?? '');
+  if (!match) return undefined;
+  const [, amount, unit] = match;
+  return { amount: Number(amount), unit: unit === 'h' ? 'hours' : 'days' };
 };

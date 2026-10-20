@@ -146,7 +146,6 @@ export const Content = ({
   const { data: anomalyPrivilegesData } = useAnomalyPrivileges(isAnomalyDetailsEnabled);
   const hasAnomalyPrivileges = anomalyPrivilegesData?.has_all_required ?? false;
   const loadAnomalies = isAnomalyDetailsEnabled && hasAnomalyPrivileges && !!entityStoreEntityId;
-  // Pinned by the opener's scope (new Entity Analytics home); otherwise the server applies its default lookback.
   const flyoutTimeRangeMs = useMemo(() => getScopeFlyoutTimeRangeMs(scopeId), [scopeId]);
   const anomalyOverview = useAnomalyOverview({
     entityId: entityStoreEntityId ?? '',
@@ -218,6 +217,7 @@ export const Content = ({
             <AnomaliesSection
               data={anomalyOverview.data ?? EMPTY_ANOMALY_OVERVIEW}
               entityId={entityStoreEntityId}
+              scopeId={scopeId}
               isPreviewMode={isPreviewMode}
               openDetailsPanel={openDetailsPanel}
               hideHeaderIcons={hideHeaderIcons}

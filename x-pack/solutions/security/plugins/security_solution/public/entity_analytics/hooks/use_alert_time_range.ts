@@ -8,7 +8,7 @@
 import { useGlobalTime } from '../../common/containers/use_global_time';
 import {
   ENTITY_ANALYTICS_ALERTS_FROM,
-  ENTITY_ANALYTICS_ALERTS_TO,
+  ENTITY_ANALYTICS_DEFAULT_TIMERANGE_TO,
   ENTITY_ANALYTICS_TABLE_ID,
 } from '../components/home/constants';
 import { getScopeFlyoutTimeRange, type ScopeTimeRange } from '../common/scope_time_ranges';
@@ -17,7 +17,7 @@ import { getScopeFlyoutTimeRange, type ScopeTimeRange } from '../common/scope_ti
 const SCOPE_ALERT_TIME_RANGE_OVERRIDES: Readonly<Record<string, ScopeTimeRange>> = {
   [ENTITY_ANALYTICS_TABLE_ID]: {
     from: ENTITY_ANALYTICS_ALERTS_FROM,
-    to: ENTITY_ANALYTICS_ALERTS_TO,
+    to: ENTITY_ANALYTICS_DEFAULT_TIMERANGE_TO,
   },
 };
 
