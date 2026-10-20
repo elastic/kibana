@@ -1,5 +1,5 @@
 ::::{important}
-This connector is being replaced by {{es}} {{infer}} endpoints. To configure access to an LLM provider, create an {{infer}} endpoint with the `chat_completion` task type. To get started, refer to [Elastic Inference](docs-content://explore-analyze/elastic-inference.md) and [External inference](docs-content://explore-analyze/elastic-inference/external.md).
+This connector is being replaced by {{es}} {{infer}} endpoints. To configure access to an LLM provider, create an {{infer}} endpoint with the `chat_completion` task type. For steps that use your own provider account and API key, refer to [External inference](docs-content://explore-analyze/elastic-inference/external.md). To use models that Elastic hosts instead, refer to [Elastic Managed LLMs](/reference/connectors-kibana/elastic-managed-llm.md).
 
 Availability of this connector depends on your deployment and version:
 
