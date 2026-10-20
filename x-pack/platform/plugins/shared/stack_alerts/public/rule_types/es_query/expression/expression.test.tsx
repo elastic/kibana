@@ -161,6 +161,7 @@ const applicationMock = {
 };
 const mockIsAlertingV2Enabled = jest.fn(() => true);
 const settingsMock = { globalClient: { get: mockIsAlertingV2Enabled, isDeclared: () => true } };
+const getActiveSolutionNavId = jest.fn((): string | null => null);
 
 (dataMock.search.searchSource.create as jest.Mock).mockImplementation(() =>
   Promise.resolve(searchSourceMock)
@@ -250,6 +251,7 @@ const setup = (
         notifications: notificationsMock,
         application: applicationMock,
         settings: settingsMock,
+        chrome: { getActiveSolutionNavId },
       }}
     >
       <Wrapper ruleParams={ruleParams} metadata={metadata} />
@@ -263,6 +265,7 @@ describe('EsQueryRuleTypeExpression', () => {
 
     uiSettingsMock.get.mockReturnValue(true);
     mockIsAlertingV2Enabled.mockReturnValue(true);
+    getActiveSolutionNavId.mockReturnValue(null);
   });
 
   test('should render options by default', () => {
@@ -387,6 +390,28 @@ describe('EsQueryRuleTypeExpression', () => {
     });
     expect(screen.queryByTestId('esQueryUniversalRulesBanner')).not.toBeInTheDocument();
   });
+
+  test('should render the Universal rules banner in Observability', async () => {
+    getActiveSolutionNavId.mockReturnValue('oblt');
+    setup(defaultEsQueryRuleParams, { adHocDataViewList: [] });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('esQueryUniversalRulesBanner')).toBeInTheDocument();
+    });
+  });
+
+  test.each(['security', 'es'])(
+    'should not render the Universal rules banner in the %s solution',
+    async (solutionNavId) => {
+      getActiveSolutionNavId.mockReturnValue(solutionNavId);
+      setup(defaultEsQueryRuleParams, { adHocDataViewList: [] });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('selectIndexExpression')).toBeInTheDocument();
+      });
+      expect(screen.queryByTestId('esQueryUniversalRulesBanner')).not.toBeInTheDocument();
+    }
+  );
 
   test('should render KQL and Lucene view without the form type chooser', async () => {
     setup(defaultSearchSourceRuleParams, {

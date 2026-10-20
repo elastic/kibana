@@ -10,7 +10,7 @@ import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERTING_V2_RULES_BASE_PATH, ALERTING_V2_RULES_TAB_ID } from '@kbn/alerting-v2-constants';
-import { canAccessAlertingV2Rules } from '@kbn/alerting-v2-utils';
+import { canAccessAlertingV2Rules, isAlertingV2AvailableInSolution } from '@kbn/alerting-v2-utils';
 import { useTriggerUiActionServices } from '../util';
 
 const BANNER_TITLE = i18n.translate('xpack.stackAlerts.esQuery.ui.universalRulesBanner.title', {
@@ -26,7 +26,10 @@ export const EsQueryUniversalRulesBanner = () => {
   const services = useTriggerUiActionServices();
   const { application, http, tabs } = services;
 
-  if (!canAccessAlertingV2Rules(services)) {
+  if (
+    !canAccessAlertingV2Rules(services) ||
+    !isAlertingV2AvailableInSolution(services.chrome.getActiveSolutionNavId())
+  ) {
     return null;
   }
 
