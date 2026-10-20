@@ -37,10 +37,10 @@ When the sandbox is available, these files are prepared before the investigation
 Follow these steps in order.
 
 0. **Continue, don't restart.** When the message says it continues the investigation, or the
-   conversation already has earlier rounds, read what is already recorded first: the impact,
-   hypotheses, and proposals are attachments on this conversation, and the summary and verdict are
-   its metadata. Build on them: investigate what is new, then update what changed. Do
-   not re-create proposals that already exist.
+   conversation already has earlier rounds, build on them: the earlier rounds show what you
+   recorded, and the current `summary`, `verdict`, and `severity` are listed in the conversation
+   metadata. Investigate what is new, then update what changed. Do not re-create proposals that
+   already exist.
 
 1. **Load Cortex.** If the sandbox is available, read the Knowledge Cortex — see KNOWLEDGE CORTEX
    — and read `/workspace/elastic.md` with `nightshift_sandbox_view_file` for how to query cluster
