@@ -157,11 +157,12 @@ export const toInvestigationReport = ({
 
 /**
  * Runs a manual investigation and retains a bounded report with references to its full evidence.
- * It names no model, so the investigation runs on the same default as production.
+ * Without `modelOverride` it names no model, so the investigation runs on the production default.
  */
 export const runInvestigation = async (
   fetch: HttpHandler,
-  example: InvestigationExample
+  example: InvestigationExample,
+  modelOverride?: string
 ): Promise<InvestigationTaskOutput> => {
   const started = Date.now();
   const output: InvestigationTaskOutput = {
@@ -177,6 +178,7 @@ export const runInvestigation = async (
         body: JSON.stringify({
           subject: { type: 'manual' },
           message: example.input.question,
+          ...(modelOverride ? { connector_id: modelOverride } : {}),
         }),
       }
     );

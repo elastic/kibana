@@ -317,3 +317,17 @@ it('reports an investigation that never appeared', async () => {
     clock.mockRestore();
   }
 });
+
+it('starts the investigation on the production default when no model is given', async () => {
+  const fetch = jest.fn().mockRejectedValue(new Error('stop'));
+  await runInvestigation(fetch, example);
+  expect(JSON.parse(fetch.mock.calls[0][1].body)).not.toHaveProperty('connector_id');
+});
+
+it('sends the model override as connector_id', async () => {
+  const fetch = jest.fn().mockRejectedValue(new Error('stop'));
+  await runInvestigation(fetch, example, 'eis-anthropic-claude-5-5-opus');
+  expect(JSON.parse(fetch.mock.calls[0][1].body)).toMatchObject({
+    connector_id: 'eis-anthropic-claude-5-5-opus',
+  });
+});
