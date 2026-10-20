@@ -98,6 +98,24 @@ export const createDefaultNode = (
       return { type, id, query: DEFAULT_QUERY, onRowClick: [] };
     case 'key_value':
       return { type, id, query: DEFAULT_QUERY };
+    case 'form':
+      return {
+        type,
+        id,
+        submitLabel: i18n.translate('xpack.customApp.defaults.formSubmit', {
+          defaultMessage: 'Submit',
+        }),
+        fields: [
+          {
+            bind,
+            kind: 'text',
+            label: i18n.translate('xpack.customApp.defaults.formField', {
+              defaultMessage: 'Question 1',
+            }),
+          },
+        ],
+        onSubmit: [],
+      };
     case 'select':
       return {
         type,

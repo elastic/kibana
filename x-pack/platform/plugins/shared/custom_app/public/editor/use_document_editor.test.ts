@@ -124,6 +124,22 @@ describe('useDocumentEditor', () => {
         expect(state.view).toEqual({ type: 'string', default: 'option-1' });
       });
 
+      it('is a form that asks one question, whose answer is a value made with it', () => {
+        const { hook } = setup();
+
+        act(() => {
+          hook.result.current.add('form');
+        });
+
+        const { document } = hook.result.current;
+        expect(findNode(document.root, 'form-1')!.node).toMatchObject({
+          submitLabel: 'Submit',
+          fields: [{ bind: 'question_1', kind: 'text' }],
+        });
+        expect(document.state.question_1).toEqual({ type: 'string', default: '' });
+        expect(hook.result.current.issues).toEqual([]);
+      });
+
       it('gets a value of its own even when another input has the same name', () => {
         const { hook } = setup();
 

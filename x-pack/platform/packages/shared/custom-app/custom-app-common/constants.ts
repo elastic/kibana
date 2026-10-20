@@ -54,3 +54,5 @@ export const CASES_SORT_FIELDS = [
 /** The filters of a cases source that can be set from a value of the app, in the order they are shown. */
 export const CASES_FILTERS = ['status', 'severity', 'search', 'tag'] as const;
 export const MAX_BUTTON_GROUP_OPTIONS = 10;
+/** A form asks a few things; more than this is a page, not a form. */
+export const MAX_FORM_FIELDS = 10;

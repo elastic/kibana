@@ -14,7 +14,13 @@ import {
   getNodeSource,
   getSourceStateKeys,
 } from './node_tree';
-import { MAX_NODE_COUNT, MAX_NODE_DEPTH, MAX_QUERY_LENGTH, MAX_TEMPLATE_LENGTH } from './constants';
+import {
+  MAX_FORM_FIELDS,
+  MAX_NODE_COUNT,
+  MAX_NODE_DEPTH,
+  MAX_QUERY_LENGTH,
+  MAX_TEMPLATE_LENGTH,
+} from './constants';
 
 const stackOf = (id: string, children: unknown[] = []) => ({ type: 'stack', id, children });
 
@@ -387,7 +393,9 @@ describe('buttons and the workflows they run', () => {
       root: { type: 'search', id: 'find', label: 'Find', bind: 'q', onChange: [run()] },
     });
 
-    expect(text).toContain('a workflow can only be run by a button or a row click');
+    expect(text).toContain(
+      'a workflow can only be run by a button, a row click or a form that is submitted'
+    );
   });
 
   it('names where the workflow of an action can be found, within a limit', () => {
@@ -418,6 +426,184 @@ describe('buttons and the workflows they run', () => {
     const parsed = appDocumentSchema.parse(buttonDocument([run()]));
 
     expect(collectQueries(parsed.root)).toEqual({});
+  });
+});
+
+describe('forms', () => {
+  const reason = { bind: 'reason', kind: 'textarea', label: 'Reason', required: true };
+  const formDocument = (
+    form: Record<string, unknown> = {},
+    state: Record<string, unknown> = { reason: { type: 'string', default: '' } }
+  ) => ({
+    state,
+    root: {
+      type: 'form',
+      id: 'escalate',
+      submitLabel: 'Escalate',
+      fields: [reason],
+      ...form,
+    },
+  });
+  const issuesOf = (document: unknown) =>
+    JSON.stringify(appDocumentSchema.safeParse(document).error?.issues ?? []);
+
+  it('is some fields and a label for submitting them, which does nothing until it is told', () => {
+    const result = appDocumentSchema.parse(formDocument());
+
+    expect(result.root).toEqual({
+      type: 'form',
+      id: 'escalate',
+      submitLabel: 'Escalate',
+      fields: [reason],
+      onSubmit: [],
+    });
+  });
+
+  it('asks in text, in long text or from a few choices', () => {
+    const result = appDocumentSchema.safeParse(
+      formDocument(
+        {
+          fields: [
+            { bind: 'reason', kind: 'text', label: 'Reason', placeholder: 'Why?' },
+            { bind: 'details', kind: 'textarea', label: 'Details' },
+            {
+              bind: 'urgency',
+              kind: 'select',
+              label: 'Urgency',
+              options: [{ value: 'low' }, { value: 'high', label: 'High' }],
+            },
+          ],
+        },
+        {
+          reason: { type: 'string', default: '' },
+          details: { type: 'string', default: '' },
+          urgency: { type: 'string', default: 'low' },
+        }
+      )
+    );
+
+    expect(result.success).toBe(true);
+  });
+
+  it('needs a field, a label on each and on the submit button, and a kind it knows', () => {
+    expect(appDocumentSchema.safeParse(formDocument({ fields: [] })).success).toBe(false);
+    expect(appDocumentSchema.safeParse(formDocument({ submitLabel: '' })).success).toBe(false);
+    expect(
+      appDocumentSchema.safeParse(formDocument({ fields: [{ ...reason, label: '' }] })).success
+    ).toBe(false);
+    expect(
+      appDocumentSchema.safeParse(formDocument({ fields: [{ ...reason, kind: 'number' }] })).success
+    ).toBe(false);
+  });
+
+  it('needs options for a choice', () => {
+    expect(
+      appDocumentSchema.safeParse(
+        formDocument({ fields: [{ bind: 'reason', kind: 'select', label: 'Reason', options: [] }] })
+      ).success
+    ).toBe(false);
+  });
+
+  it('asks only so much, as a form is not a page', () => {
+    const many = Array.from({ length: MAX_FORM_FIELDS + 1 }, (_, index) => ({
+      ...reason,
+      bind: `reason_${index}`,
+    }));
+
+    expect(appDocumentSchema.safeParse(formDocument({ fields: many })).success).toBe(false);
+  });
+
+  it('puts each answer in a value of the app that exists and is text', () => {
+    expect(issuesOf(formDocument({}, {}))).toContain('binds unknown state key \\"reason\\"');
+    expect(issuesOf(formDocument({}, { reason: { type: 'number', default: 1 } }))).toContain(
+      'an input needs a string key'
+    );
+  });
+
+  it('does not put two answers in one value', () => {
+    expect(issuesOf(formDocument({ fields: [reason, { ...reason, label: 'Again' }] }))).toContain(
+      'two fields that set'
+    );
+  });
+
+  it('does not offer a choice twice', () => {
+    expect(
+      issuesOf(
+        formDocument({
+          fields: [
+            {
+              bind: 'reason',
+              kind: 'select',
+              label: 'Urgency',
+              options: [{ value: 'low' }, { value: 'low' }],
+            },
+          ],
+        })
+      )
+    ).toContain('more than once');
+  });
+
+  it('runs a workflow when it is submitted, handing it what was answered', () => {
+    const result = appDocumentSchema.safeParse(
+      formDocument({
+        onSubmit: [
+          {
+            type: 'runWorkflow',
+            workflow: 'escalate',
+            inputs: { reason: { fromState: 'reason' } },
+          },
+        ],
+      })
+    );
+
+    expect(result.success).toBe(true);
+  });
+
+  it('cannot hand a workflow a column, as there is no row to take it from', () => {
+    expect(
+      issuesOf(
+        formDocument({
+          onSubmit: [
+            { type: 'runWorkflow', workflow: 'escalate', inputs: { id: { fromColumn: 'id' } } },
+          ],
+        })
+      )
+    ).toContain('takes a column');
+  });
+
+  it('can set a value or open a flyout when it is submitted', () => {
+    const result = appDocumentSchema.safeParse({
+      state: { reason: { type: 'string', default: '' }, sent: { type: 'string', default: '' } },
+      root: {
+        type: 'stack',
+        id: 'root',
+        children: [
+          {
+            type: 'form',
+            id: 'escalate',
+            submitLabel: 'Send',
+            fields: [reason],
+            onSubmit: [
+              { type: 'setState', key: 'sent', value: 'yes' },
+              { type: 'openFlyout', flyout: 'thanks' },
+            ],
+          },
+          { type: 'flyout', id: 'thanks', title: 'Thanks', children: [] },
+        ],
+      },
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it('is not given the value of an input, as there is none when it is submitted', () => {
+    expect(
+      issuesOf(
+        formDocument({
+          onSubmit: [{ type: 'setState', key: 'reason', value: { fromInput: true } }],
+        })
+      )
+    ).toContain('fromInput is only valid on input nodes');
   });
 });
 

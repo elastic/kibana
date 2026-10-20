@@ -16,6 +16,7 @@ import {
   MAX_CASES_LIMIT,
   MAX_INPUT_OPTIONS,
   MAX_CHILDREN_PER_NODE,
+  MAX_FORM_FIELDS,
   MAX_HEADING_LENGTH,
   MAX_KEY_VALUE_FIELDS,
   MAX_NODE_ID_LENGTH,
@@ -254,6 +255,45 @@ const inputFields = {
   onChange: actionsSchema.default([]),
 };
 
+const formFieldFields = {
+  /** The value of the app the answer is put in when the form is submitted. */
+  bind: stateKeySchema,
+  label: z.string().min(1).max(MAX_HEADING_LENGTH),
+  /** A form is not submitted while a required field is empty. */
+  required: z.boolean().optional(),
+};
+
+const formFieldSchema = z.discriminatedUnion('kind', [
+  z.object({
+    ...formFieldFields,
+    kind: z.literal('text'),
+    placeholder: z.string().max(MAX_HEADING_LENGTH).optional(),
+  }),
+  z.object({
+    ...formFieldFields,
+    kind: z.literal('textarea'),
+    placeholder: z.string().max(MAX_HEADING_LENGTH).optional(),
+  }),
+  z.object({
+    ...formFieldFields,
+    kind: z.literal('select'),
+    options: z.array(inputOptionSchema).min(1).max(MAX_INPUT_OPTIONS),
+  }),
+]);
+
+/**
+ * Asks for a few answers and does something with them when it is submitted. Unlike an input, a
+ * field changes nothing while it is typed in: on submit the answers are put in their values of the
+ * app, and then `onSubmit` runs, so that it, a workflow in particular, is given what was answered.
+ */
+const formNodeSchema = z.object({
+  type: z.literal('form'),
+  id: nodeIdSchema,
+  fields: z.array(formFieldSchema).min(1).max(MAX_FORM_FIELDS),
+  submitLabel: z.string().min(1).max(MAX_HEADING_LENGTH),
+  onSubmit: actionsSchema.default([]),
+});
+
 const selectNodeSchema = z.object({
   type: z.literal('select'),
   ...inputFields,
@@ -305,6 +345,7 @@ type LeafNode =
   | z.output<typeof buttonGroupNodeSchema>
   | z.output<typeof searchNodeSchema>
   | z.output<typeof buttonNodeSchema>
+  | z.output<typeof formNodeSchema>
   | z.output<typeof timeRangeNodeSchema>;
 
 type StackNode = z.output<z.ZodObject<typeof stackFields>> & { children: AppNode[] };
@@ -318,6 +359,7 @@ export type AppNode = LeafNode | StackNode | FlyoutNode;
 export type AppNodeType = AppNode['type'];
 export type AppNodeOfType<T extends AppNodeType> = Extract<AppNode, { type: T }>;
 export type Action = z.output<typeof actionSchema>;
+export type FormField = z.output<typeof formFieldSchema>;
 export type CasesSource = z.output<typeof casesSourceSchema>;
 /** Where a component gets what it shows. */
 export type DataSource = { type: 'esql'; query: string } | CasesSource;
@@ -349,6 +391,7 @@ export const nodeSchema = z.discriminatedUnion('type', [
   buttonGroupNodeSchema,
   searchNodeSchema,
   buttonNodeSchema,
+  formNodeSchema,
   timeRangeNodeSchema,
   stackNodeSchema,
   flyoutNodeSchema,

@@ -501,6 +501,28 @@ describe('pruneUnusedValues', () => {
     expect(Object.keys(pruneUnusedValues(document).state)).toEqual(['find', 'service']);
   });
 
+  it('keeps the value of each field of a form, which is what a workflow it runs is given', () => {
+    const document = withValues(
+      { reason: text('a'), urgency: text('b'), orphan: text('c') },
+      {
+        type: 'form',
+        id: 'ask',
+        submitLabel: 'Send',
+        fields: [
+          { bind: 'reason', kind: 'text', label: 'Reason' },
+          {
+            bind: 'urgency',
+            kind: 'select',
+            label: 'Urgency',
+            options: [{ value: 'low' }],
+          },
+        ],
+      }
+    );
+
+    expect(Object.keys(pruneUnusedValues(document).state)).toEqual(['reason', 'urgency']);
+  });
+
   it('keeps a value that filters the cases of a component, though no query uses it', () => {
     const document = withValues(
       { status: text('open'), orphan: text('c') },

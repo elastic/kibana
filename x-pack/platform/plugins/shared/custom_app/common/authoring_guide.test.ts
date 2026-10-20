@@ -38,6 +38,7 @@ describe('the authoring guide', () => {
     'button_group',
     'search',
     'button',
+    'form',
     'time_range',
     'flyout',
   ])('describes the %s component', (type) => {
@@ -103,6 +104,14 @@ describe('the authoring guide', () => {
     expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('fromState');
     expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('assignee_count');
     expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('"count": true');
+  });
+
+  it('teaches forms: what they are for, how answers reach a workflow, and that they are not filters', () => {
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('"onSubmit"');
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('"textarea"');
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('only when it is submitted');
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('hands them over with { "fromState": "<bind>" }');
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('a form\'s "onSubmit"');
   });
 
   it('says that a component has a query or a source, not both, and that a chart cannot show cases', () => {

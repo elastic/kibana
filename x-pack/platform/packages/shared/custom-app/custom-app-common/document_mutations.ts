@@ -15,7 +15,7 @@ import type {
 } from './document_schema';
 import {
   getNodeActions,
-  getNodeBinding,
+  getNodeBindings,
   getNodeChildren,
   getNodeSource,
   getSourceStateKeys,
@@ -276,8 +276,7 @@ export const pruneUnusedValues = (document: AppDocument): AppDocument => {
   const used = new Set<string>();
   const pending: AppNode[] = [document.root];
   for (let node = pending.pop(); node; node = pending.pop()) {
-    const binding = getNodeBinding(node);
-    if (binding !== undefined) used.add(binding);
+    getNodeBindings(node).forEach((binding) => used.add(binding));
     // A value that filters the cases of a component is used, though nothing may query with it.
     const source = getNodeSource(node);
     if (source) getSourceStateKeys(source).forEach((key) => used.add(key));

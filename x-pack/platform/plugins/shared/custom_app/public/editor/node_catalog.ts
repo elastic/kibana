@@ -156,6 +156,15 @@ const ENTRIES: Record<AppNodeType, Omit<NodeCatalogEntry, 'type'>> = {
     group: 'input',
     isContainer: false,
   },
+  form: {
+    label: i18n.translate('xpack.customApp.catalog.form.label', { defaultMessage: 'Form' }),
+    description: i18n.translate('xpack.customApp.catalog.form.description', {
+      defaultMessage: 'Asks a few questions, and runs a workflow with the answers.',
+    }),
+    iconType: 'editorComment',
+    group: 'input',
+    isContainer: false,
+  },
   search: {
     label: i18n.translate('xpack.customApp.catalog.search.label', { defaultMessage: 'Search' }),
     description: i18n.translate('xpack.customApp.catalog.search.description', {

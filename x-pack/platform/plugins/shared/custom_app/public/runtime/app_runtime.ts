@@ -56,6 +56,15 @@ export interface AppRuntime {
   run: (actions: readonly Action[], input?: ActionInput) => RunActionsResult;
   /** Follows the document when it changes, keeping the values that are still valid. */
   setDocument: (document: Pick<AppDocument, 'state' | 'root'>) => void;
+  /**
+   * Puts the app as a view says: the values it names are set, every other value of `keys` goes
+   * back to how it starts, and the flyout of the view is open, or none. A value that is not
+   * valid for its key is left at how it starts.
+   */
+  restoreView: (
+    view: { values: Readonly<Record<string, StateValue>>; flyout?: string },
+    keys: readonly string[]
+  ) => void;
 }
 
 const describe = (value: unknown): string => (value === null ? 'null' : typeof value);
@@ -203,6 +212,23 @@ export const createAppRuntime = (document: Pick<AppDocument, 'state' | 'root'>):
       });
 
       return { dropped, workflows };
+    },
+    restoreView: ({ values, flyout }, keys) => {
+      const current = state$.getValue();
+      const next = { ...current };
+      keys.forEach((key) => {
+        const declaration = declarations[key];
+        if (!declaration) return;
+        const value = values[key];
+        next[key] =
+          value !== undefined && rejectValue(key, declaration, value) === undefined
+            ? value
+            : declaration.default;
+      });
+      if (Object.keys(next).some((key) => next[key] !== current[key])) state$.next(next);
+
+      const open = flyout !== undefined && flyoutIds.has(flyout) ? flyout : undefined;
+      if (openFlyoutId$.getValue() !== open) openFlyoutId$.next(open);
     },
     setDocument: (next) => {
       declarations = next.state;

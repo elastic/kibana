@@ -19,7 +19,8 @@ const message = i18n.translate('xpack.customApp.standalone.unsavedMessage', {
 
 /**
  * Asks before changes that were not saved are lost, as a dashboard does: on leaving the page for
- * another in the app, and on leaving the app, or closing the tab, for another.
+ * another in the app, and on leaving the app, or closing the tab, for another. Staying on the page,
+ * such as when its filters change the URL, is not leaving.
  */
 export const useUnsavedChangesGuard = (
   hasUnsavedChanges: boolean,
@@ -29,7 +30,10 @@ export const useUnsavedChangesGuard = (
 
   useEffect(() => {
     if (!hasUnsavedChanges) return;
-    return history.block(message);
+    // Changing the URL of the page it is on, which is how the app keeps what is seen, is not leaving.
+    return history.block((next) =>
+      next.pathname === history.location.pathname ? undefined : message
+    );
   }, [history, hasUnsavedChanges]);
 
   useEffect(() => {

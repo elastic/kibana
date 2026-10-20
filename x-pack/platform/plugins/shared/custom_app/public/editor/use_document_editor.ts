@@ -102,12 +102,20 @@ export const useDocumentEditor = (initial: AppDocument): DocumentEditor => {
     add: (type, parentId = defaultParentId(document, selectedId)) => {
       const id = createNodeId(document, type);
       const probe = createDefaultNode(type, id, { valueKey: '' });
-      if (probe.type !== 'select' && probe.type !== 'button_group' && probe.type !== 'search') {
+      if (
+        probe.type !== 'select' &&
+        probe.type !== 'button_group' &&
+        probe.type !== 'search' &&
+        probe.type !== 'form'
+      ) {
         return commit(addNode(document, parentId, probe), id);
       }
 
       // An input sets a value, which is made with it and named after what it is called.
-      const valueKey = createStateKey(document, probe.label);
+      const valueKey = createStateKey(
+        document,
+        probe.type === 'form' ? probe.fields[0].label : probe.label
+      );
       const node = createDefaultNode(type, id, { valueKey });
       const startsAs = 'options' in node ? node.options[0]?.value ?? '' : '';
       const withValue = setStateDeclaration(document, valueKey, {

@@ -6,12 +6,11 @@
  */
 
 import React, { useState } from 'react';
-import { EuiButton, EuiSpacer, EuiToolTip } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { KbnWarningCallout } from '@kbn/ui-callout';
+import { EuiButton, EuiToolTip } from '@elastic/eui';
 import type { AppNodeOfType } from '@kbn/custom-app-common';
 import { useActionRunner } from '../workflows/use_action_runner';
 import { useWorkflowRunner } from '../workflows/workflow_runner';
+import { DroppedActions } from './dropped_actions';
 
 /**
  * What a person presses to make something happen. It looks the same everywhere, and says why when
@@ -38,25 +37,7 @@ export const ButtonNode = ({ node }: { node: AppNodeOfType<'button'> }) => {
           {node.label}
         </EuiButton>
       </EuiToolTip>
-      {dropped.length > 0 && (
-        <>
-          <EuiSpacer size="s" />
-          <KbnWarningCallout
-            announceOnMount
-            size="s"
-            title={i18n.translate('xpack.customApp.buttonNode.droppedTitle', {
-              defaultMessage: 'Part of that could not be done',
-            })}
-            onDismiss={() => setDropped([])}
-          >
-            <ul>
-              {dropped.map((reason) => (
-                <li key={reason}>{reason}</li>
-              ))}
-            </ul>
-          </KbnWarningCallout>
-        </>
-      )}
+      <DroppedActions reasons={dropped} onDismiss={() => setDropped([])} />
     </div>
   );
 };

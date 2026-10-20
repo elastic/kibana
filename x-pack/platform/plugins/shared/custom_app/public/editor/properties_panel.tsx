@@ -37,6 +37,7 @@ import { DataSourceField } from './fields/data_source_field';
 import { QueryField } from './fields/query_field';
 import { RowClickEditor } from './fields/row_click_editor';
 import { ButtonActionsEditor } from './fields/workflow_action_editor';
+import { FormFieldsEditor } from './fields/form_fields_editor';
 import { TemplateField } from './fields/template_field';
 import { Section } from './fields/section';
 
@@ -102,6 +103,12 @@ const sections = {
   }),
   whenPressed: i18n.translate('xpack.customApp.editor.sectionWhenPressed', {
     defaultMessage: 'When it is pressed',
+  }),
+  questions: i18n.translate('xpack.customApp.editor.sectionQuestions', {
+    defaultMessage: 'Questions',
+  }),
+  whenSubmitted: i18n.translate('xpack.customApp.editor.sectionWhenSubmitted', {
+    defaultMessage: 'When it is submitted',
   }),
   rowClick: i18n.translate('xpack.customApp.editor.sectionRowClick', {
     defaultMessage: 'When a row is clicked',
@@ -373,6 +380,36 @@ export const PropertiesPanel = ({
                 actions={node.onClick}
                 stateKeys={stateKeys}
                 onChange={(onClick) => onChange<'button'>({ onClick })}
+              />
+            </Section>
+          </Sections>
+        );
+      case 'form':
+        return (
+          <Sections>
+            <Section title={sections.content}>
+              <TextField
+                label={i18n.translate('xpack.customApp.editor.fieldSubmitLabel', {
+                  defaultMessage: 'Submit button',
+                })}
+                value={node.submitLabel}
+                maxLength={MAX_HEADING_LENGTH}
+                onChange={(submitLabel) => onChange<'form'>({ submitLabel })}
+              />
+            </Section>
+            <Section title={sections.questions}>
+              <FormFieldsEditor
+                nodeId={node.id}
+                fields={node.fields}
+                onChange={(fields) => onChange<'form'>({ fields })}
+                onEdit={onEdit}
+              />
+            </Section>
+            <Section title={sections.whenSubmitted}>
+              <ButtonActionsEditor
+                actions={node.onSubmit}
+                stateKeys={stateKeys}
+                onChange={(onSubmit) => onChange<'form'>({ onSubmit })}
               />
             </Section>
           </Sections>

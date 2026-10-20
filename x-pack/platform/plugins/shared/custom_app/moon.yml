@@ -37,6 +37,8 @@ dependsOn:
   - '@kbn/agent-builder-common'
   - '@kbn/agent-builder-browser'
   - '@kbn/shared-ux-ai-components'
+  - '@kbn/rison'
+  - '@kbn/datemath'
   - '@kbn/app-header'
   - '@kbn/presentation-util'
   - '@kbn/presentation-util-plugin'

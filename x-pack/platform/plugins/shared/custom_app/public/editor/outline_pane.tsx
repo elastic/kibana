@@ -59,6 +59,8 @@ const summarize = (node: AppNode): string => {
     case 'search':
     case 'button':
       return node.label;
+    case 'form':
+      return node.submitLabel;
     case 'table':
     case 'key_value':
       // The first line of the query, as the text that tells two tables apart.

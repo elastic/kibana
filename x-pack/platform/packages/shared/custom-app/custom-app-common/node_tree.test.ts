@@ -6,7 +6,13 @@
  */
 
 import { appDocumentSchema } from './document_schema';
-import { collectQueries, getNodeActions, getNodeQuery, isEmptyDocument } from './node_tree';
+import {
+  collectQueries,
+  getNodeActions,
+  getNodeBindings,
+  getNodeQuery,
+  isEmptyDocument,
+} from './node_tree';
 
 const { root } = appDocumentSchema.parse({
   root: {
@@ -110,5 +116,38 @@ describe('getNodeActions of a button', () => {
     });
 
     expect(getNodeActions(parsed.root)).toEqual([{ event: 'onClick', actions: [action] }]);
+  });
+});
+
+describe('forms in the tree', () => {
+  const { root: form } = appDocumentSchema.parse({
+    state: { a: { type: 'string', default: '' }, b: { type: 'string', default: '' } },
+    root: {
+      type: 'form',
+      id: 'ask',
+      submitLabel: 'Send',
+      fields: [
+        { bind: 'a', kind: 'text', label: 'A' },
+        { bind: 'b', kind: 'text', label: 'B' },
+      ],
+      onSubmit: [{ type: 'setState', key: 'a', value: 'x' }],
+    },
+  });
+
+  it('binds a value for each of its fields', () => {
+    expect(getNodeBindings(form)).toEqual(['a', 'b']);
+  });
+
+  it('binds the value of an input, and nothing for what has none', () => {
+    expect(
+      getNodeBindings({ type: 'search', id: 's', label: 'S', bind: 'q', onChange: [] })
+    ).toEqual(['q']);
+    expect(getNodeBindings({ type: 'heading', id: 'h', text: 'H' })).toEqual([]);
+  });
+
+  it('runs its actions when it is submitted', () => {
+    expect(getNodeActions(form)).toEqual([
+      { event: 'onSubmit', actions: [{ type: 'setState', key: 'a', value: 'x' }] },
+    ]);
   });
 });

@@ -22,6 +22,7 @@ import { CustomContentNode } from './custom_content_node';
 import { ButtonGroupNode } from './button_group_node';
 import { ButtonNode } from './button_node';
 import { FlyoutNode } from './flyout_node';
+import { FormNode } from './form_node';
 import { KeyValueNode } from './key_value_node';
 import { SearchNode } from './search_node';
 import { SelectNode } from './select_node';
@@ -94,6 +95,8 @@ export const NodeRenderer = ({ node }: NodeRendererProps) => {
       return <SearchNode node={node} />;
     case 'button':
       return <ButtonNode node={node} />;
+    case 'form':
+      return <FormNode node={node} />;
     case 'time_range':
       return <TimeRangeNode node={node} />;
     case 'flyout':

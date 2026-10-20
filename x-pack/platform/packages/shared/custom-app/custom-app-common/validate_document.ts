@@ -20,7 +20,7 @@ import { findStateReferences, hasMalformedReference } from './interpolation';
 import {
   getInterpolatedText,
   getNodeActions,
-  getNodeBinding,
+  getNodeBindings,
   getNodeChildren,
   getNodeSource,
   getSourceStateKeys,
@@ -36,13 +36,14 @@ const ACTION_VALUE_SOURCES: Record<string, { fromColumn: boolean; fromInput: boo
   onRowClick: { fromColumn: true, fromInput: false },
   onChange: { fromColumn: false, fromInput: true },
   onClick: { fromColumn: false, fromInput: false },
+  onSubmit: { fromColumn: false, fromInput: false },
 };
 
 /**
  * Where an action may run a workflow: when something is pressed or a row is clicked, never when an
  * input changes, which is every key that is typed and would start a workflow for each.
  */
-const WORKFLOW_EVENTS: readonly string[] = ['onClick', 'onRowClick'];
+const WORKFLOW_EVENTS: readonly string[] = ['onClick', 'onRowClick', 'onSubmit'];
 
 const collectNodes = (
   root: AppNode,
@@ -113,8 +114,8 @@ export const validateDocument = (document: DocumentToValidate, ctx: z.Refinement
   const flyoutIds = new Set(nodes.filter(({ type }) => type === 'flyout').map(({ id }) => id));
 
   nodes.forEach((node) => {
-    const binding = getNodeBinding(node);
-    if (binding !== undefined) {
+    const bindings = getNodeBindings(node);
+    bindings.forEach((binding) => {
       const declaration = state[binding];
       if (binding === '') {
         // Reported as too short.
@@ -126,6 +127,31 @@ export const validateDocument = (document: DocumentToValidate, ctx: z.Refinement
           node.id
         );
       }
+    });
+
+    if (node.type === 'form') {
+      const seenKeys = new Set<string>();
+      node.fields.forEach((field) => {
+        if (seenKeys.has(field.bind)) {
+          issue(
+            `Node "${node.id}" has two fields that set "${field.bind}"; each needs a value of its own`,
+            node.id
+          );
+        }
+        seenKeys.add(field.bind);
+        if (field.kind === 'select') {
+          const seen = new Set<string>();
+          field.options.forEach(({ value }) => {
+            if (seen.has(value)) {
+              issue(
+                `Node "${node.id}" has the option "${value}" more than once in "${field.label}"`,
+                node.id
+              );
+            }
+            seen.add(value);
+          });
+        }
+      });
     }
 
     if (node.type === 'stat' || node.type === 'table' || node.type === 'key_value') {
@@ -212,7 +238,7 @@ export const validateDocument = (document: DocumentToValidate, ctx: z.Refinement
         if (action.type === 'runWorkflow') {
           if (!WORKFLOW_EVENTS.includes(event)) {
             issue(
-              `Node "${node.id}" runs a workflow on ${event}; a workflow can only be run by a button or a row click`,
+              `Node "${node.id}" runs a workflow on ${event}; a workflow can only be run by a button, a row click or a form that is submitted`,
               node.id
             );
           }

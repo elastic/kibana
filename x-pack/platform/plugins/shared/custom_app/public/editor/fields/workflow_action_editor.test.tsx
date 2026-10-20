@@ -53,7 +53,7 @@ describe('the editor of what a button does', () => {
     it('says so, and offers to run a workflow', () => {
       setup([]);
 
-      expect(screen.getByText('This button does nothing yet.')).toBeInTheDocument();
+      expect(screen.getByText('This does nothing yet.')).toBeInTheDocument();
       expect(screen.queryByTestId('customAppWorkflowPicker')).not.toBeInTheDocument();
     });
 

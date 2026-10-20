@@ -325,6 +325,58 @@ describe('createAppRuntime', () => {
     });
   });
 
+  describe('restoreView', () => {
+    const keys = ['service', 'limit', 'compact'];
+
+    it('sets the values the view holds, and the flyout', () => {
+      const runtime = createAppRuntime(document);
+
+      runtime.restoreView({ values: { service: 'cart', limit: 5 }, flyout: 'detail' }, keys);
+
+      expect(runtime.state$.getValue()).toEqual({ service: 'cart', limit: 5, compact: false });
+      expect(runtime.openFlyoutId$.getValue()).toBe('detail');
+    });
+
+    it('puts back to how it starts every value of the keys that the view does not hold', () => {
+      const runtime = createAppRuntime(document);
+      runtime.run([setState('service', 'cart'), setState('limit', 99)]);
+      runtime.run([{ type: 'openFlyout', flyout: 'detail' }]);
+
+      runtime.restoreView({ values: { limit: 5 } }, keys);
+
+      expect(runtime.state$.getValue()).toEqual({ service: 'all', limit: 5, compact: false });
+      expect(runtime.openFlyoutId$.getValue()).toBeUndefined();
+    });
+
+    it('leaves a value that is not of the keys as it is, as a form answer should be', () => {
+      const runtime = createAppRuntime(document);
+      runtime.run([setState('service', 'typed')]);
+
+      runtime.restoreView({ values: {} }, ['limit']);
+
+      expect(runtime.state$.getValue().service).toBe('typed');
+    });
+
+    it('does not take a value of the wrong type, nor a flyout that is not there', () => {
+      const runtime = createAppRuntime(document);
+
+      runtime.restoreView({ values: { limit: 'ten' as unknown as number }, flyout: 'nope' }, keys);
+
+      expect(runtime.state$.getValue().limit).toBe(10);
+      expect(runtime.openFlyoutId$.getValue()).toBeUndefined();
+    });
+
+    it('says nothing when the view is what the app already is', () => {
+      const runtime = createAppRuntime(document);
+      const states: unknown[] = [];
+      runtime.state$.subscribe((state) => states.push(state));
+
+      runtime.restoreView({ values: {} }, keys);
+
+      expect(states).toHaveLength(1);
+    });
+  });
+
   describe('setDocument', () => {
     it('keeps the values of keys that are still declared with the same type', () => {
       const runtime = createAppRuntime(document);

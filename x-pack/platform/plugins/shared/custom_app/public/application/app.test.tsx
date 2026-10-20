@@ -72,9 +72,28 @@ jest.mock('@kbn/presentation-util-plugin/public', () => ({
   ),
 }));
 jest.mock('../components/live_app', () => ({
-  LiveApp: ({ document, appId }: { document: { root: { id: string } }; appId?: string }) => (
-    <div data-test-subj="liveApp" data-app-id={appId}>
+  LiveApp: ({
+    document,
+    appId,
+    view,
+    onViewChange,
+  }: {
+    document: { root: { id: string } };
+    appId?: string;
+    view?: unknown;
+    onViewChange?: (view: unknown) => void;
+  }) => (
+    <div data-test-subj="liveApp" data-app-id={appId} data-view={JSON.stringify(view)}>
       {document.root.id}
+      <button
+        type="button"
+        onClick={() => onViewChange?.({ values: { severity: 'high' }, flyout: 'more' })}
+      >
+        {'change view'}
+      </button>
+      <button type="button" onClick={() => onViewChange?.({ values: {} })}>
+        {'reset view'}
+      </button>
     </div>
   ),
 }));
@@ -712,6 +731,109 @@ describe('the custom apps page', () => {
       await act(async () => agent.answer(attachedTo(agent).id, madeByTheAgent));
 
       await waitFor(() => expect(screen.getByTestId('liveApp')).toHaveTextContent('agent-made'));
+    });
+  });
+
+  describe('how the app is seen, in the URL', () => {
+    const withValues = (client: jest.Mocked<SavedAppsClient>) =>
+      client.get.mockResolvedValue(
+        savedApp({
+          document: {
+            state: { severity: { type: 'string', default: 'all' } },
+            root: {
+              type: 'stack',
+              id: 'root',
+              children: [{ type: 'flyout', id: 'more', title: 'More', children: [] }],
+            },
+          },
+        })
+      );
+    const seen = () => JSON.parse(screen.getByTestId('liveApp').getAttribute('data-view') ?? '{}');
+    const viewOf = (history: { location: { search: string } }) =>
+      new URLSearchParams(history.location.search).get('view');
+
+    it('starts as the link says, so a refresh or a shared link shows the same view', async () => {
+      setup({
+        path: '/view/app-1?view=(f:more,v:(severity:high))',
+        prepare: withValues,
+      });
+      await screen.findByTestId('liveApp');
+
+      expect(seen()).toEqual({ values: { severity: 'high' }, flyout: 'more' });
+    });
+
+    it('has no view when the link has none, or only what the app does not have', async () => {
+      setup({
+        path: '/view/app-1?view=(f:nope,v:(nope:1,severity:5))',
+        prepare: withValues,
+      });
+      await screen.findByTestId('liveApp');
+
+      expect(seen()).toEqual({ values: {} });
+    });
+
+    it('writes what is seen in the link, replacing the page in the history and not adding to it', async () => {
+      const { history } = setup({ path: '/view/app-1', prepare: withValues });
+      await screen.findByTestId('liveApp');
+      const entries = history.length;
+
+      await userEvent.click(screen.getByRole('button', { name: 'change view' }));
+
+      expect(viewOf(history)).toBe('(f:more,v:(severity:high))');
+      expect(history.length).toBe(entries);
+      expect(history.location.pathname).toBe('/view/app-1');
+    });
+
+    it('leaves the link clean when the app is back to how it starts', async () => {
+      const { history } = setup({
+        path: '/view/app-1?view=(v:(severity:high))',
+        prepare: withValues,
+      });
+      await screen.findByTestId('liveApp');
+
+      await userEvent.click(screen.getByRole('button', { name: 'reset view' }));
+
+      expect(history.location.search).toBe('');
+    });
+
+    it('keeps the rest of the link as it is', async () => {
+      const { history } = setup({ path: '/view/app-1?other=1', prepare: withValues });
+      await screen.findByTestId('liveApp');
+
+      await userEvent.click(screen.getByRole('button', { name: 'change view' }));
+
+      expect(new URLSearchParams(history.location.search).get('other')).toBe('1');
+    });
+
+    it('does not ask about unsaved changes when only what is seen changes, as the page is not left', async () => {
+      const { history } = setup({
+        path: '/view/app-1',
+        prepare: withValues,
+        confirmLeave: false,
+      });
+      await screen.findByTestId('liveApp');
+      await userEvent.click(screen.getByTestId('customAppEdit'));
+      await userEvent.click(screen.getByRole('button', { name: 'save draft' }));
+      await screen.findByTestId('customAppSave');
+
+      await userEvent.click(screen.getByRole('button', { name: 'change view' }));
+
+      expect(viewOf(history)).toBe('(f:more,v:(severity:high))');
+      // Leaving is still asked about, and refused here.
+      act(() => history.push('/'));
+      expect(history.location.pathname).toBe('/view/app-1');
+    });
+
+    it('is kept in the link of a new app too', async () => {
+      const { history } = setup({ path: '/create' });
+      await userEvent.click(await screen.findByTestId('customAppEmptyBuild'));
+      await userEvent.click(await screen.findByRole('button', { name: 'save draft' }));
+      await screen.findByTestId('liveApp');
+
+      await userEvent.click(screen.getByRole('button', { name: 'change view' }));
+
+      expect(history.location.pathname).toBe('/create');
+      expect(viewOf(history)).not.toBeNull();
     });
   });
 

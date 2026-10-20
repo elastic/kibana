@@ -261,7 +261,7 @@ export const ButtonActionsEditor = ({ actions, stateKeys, onChange }: ButtonActi
         <EuiText size="s" color="subdued">
           <p>
             {i18n.translate('xpack.customApp.editor.buttonDoesNothing', {
-              defaultMessage: 'This button does nothing yet.',
+              defaultMessage: 'This does nothing yet.',
             })}
           </p>
         </EuiText>

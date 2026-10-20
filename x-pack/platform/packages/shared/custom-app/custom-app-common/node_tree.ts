@@ -77,11 +77,19 @@ export const getSourceStateKeys = (source: DataSource): string[] => {
   );
 };
 
-/** The state key an input node reads and writes, if it is one. */
-export const getNodeBinding = (node: AppNode): string | undefined =>
-  node.type === 'select' || node.type === 'button_group' || node.type === 'search'
-    ? node.bind
-    : undefined;
+/** The state keys an input node reads and writes: one for an input, one for each field of a form. */
+export const getNodeBindings = (node: AppNode): string[] => {
+  switch (node.type) {
+    case 'select':
+    case 'button_group':
+    case 'search':
+      return [node.bind];
+    case 'form':
+      return node.fields.map(({ bind }) => bind);
+    default:
+      return [];
+  }
+};
 
 /** The actions a node can run, with the event that runs them. */
 export const getNodeActions = (
@@ -92,6 +100,8 @@ export const getNodeActions = (
       return [{ event: 'onRowClick', actions: node.onRowClick }];
     case 'button':
       return [{ event: 'onClick', actions: node.onClick }];
+    case 'form':
+      return [{ event: 'onSubmit', actions: node.onSubmit }];
     case 'select':
     case 'button_group':
     case 'search':

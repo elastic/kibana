@@ -37,6 +37,7 @@ const initial = (): AppDocument =>
     state: {
       service: { type: 'string', default: 'checkout' },
       filter: { type: 'string', default: 'x' },
+      reason: { type: 'string', default: '' },
     },
     root: {
       type: 'stack',
@@ -74,6 +75,13 @@ const initial = (): AppDocument =>
         },
         { type: 'search', id: 'find', label: 'Find', bind: 'filter', placeholder: 'Look' },
         { type: 'button', id: 'isolate', label: 'Isolate host', onClick: [] },
+        {
+          type: 'form',
+          id: 'escalate',
+          submitLabel: 'Escalate',
+          fields: [{ bind: 'reason', kind: 'text', label: 'Reason', placeholder: 'Why?' }],
+          onSubmit: [],
+        },
         { type: 'time_range', id: 'period' },
         { type: 'table', id: 'case-list', source: { type: 'cases', status: 'open' } },
         {
@@ -233,7 +241,7 @@ describe('PropertiesPanel', () => {
       const { onChange } = setup('isolate');
 
       expect(screen.getByRole('heading', { name: 'When it is pressed' })).toBeInTheDocument();
-      expect(screen.getByText('This button does nothing yet.')).toBeInTheDocument();
+      expect(screen.getByText('This does nothing yet.')).toBeInTheDocument();
 
       await userEvent.click(screen.getByTestId('customAppAddWorkflowAction'));
       expect(onChange).toHaveBeenLastCalledWith({
@@ -245,6 +253,108 @@ describe('PropertiesPanel', () => {
       setup('isolate');
 
       expect(screen.getByRole('heading', { name: 'Button' })).toBeInTheDocument();
+    });
+  });
+
+  describe('a form', () => {
+    it('edits what is written on its button', async () => {
+      const { onChange } = setup('escalate');
+
+      await userEvent.type(screen.getByRole('textbox', { name: 'Submit button' }), '!');
+
+      expect(onChange).toHaveBeenLastCalledWith({ submitLabel: 'Escalate!' });
+    });
+
+    it('shows each question, what it is answered with, and the value its answer is', () => {
+      setup('escalate');
+
+      expect(screen.getByRole('heading', { name: 'Questions' })).toBeInTheDocument();
+      expect(screen.getByRole('textbox', { name: 'Question 1' })).toHaveValue('Reason');
+      expect(screen.getByRole('combobox', { name: 'Answered with 1' })).toHaveValue('text');
+      expect(screen.getByRole('textbox', { name: 'Placeholder 1' })).toHaveValue('Why?');
+      expect(screen.getByText(/The answer is the value reason/)).toBeInTheDocument();
+    });
+
+    it('edits the words of a question', async () => {
+      const { onChange } = setup('escalate');
+
+      await userEvent.type(screen.getByRole('textbox', { name: 'Question 1' }), '?');
+
+      expect(onChange).toHaveBeenLastCalledWith({
+        fields: [{ bind: 'reason', kind: 'text', label: 'Reason?', placeholder: 'Why?' }],
+      });
+    });
+
+    it('makes a question required', async () => {
+      const { onChange } = setup('escalate');
+
+      await userEvent.click(screen.getByRole('switch', { name: 'Required (question 1)' }));
+
+      expect(onChange).toHaveBeenLastCalledWith({
+        fields: [
+          { bind: 'reason', kind: 'text', label: 'Reason', placeholder: 'Why?', required: true },
+        ],
+      });
+    });
+
+    it('turns a question into a choice, which starts with two options and has no placeholder', async () => {
+      const { onChange } = setup('escalate');
+
+      await userEvent.selectOptions(
+        screen.getByRole('combobox', { name: 'Answered with 1' }),
+        'select'
+      );
+
+      expect(onChange).toHaveBeenLastCalledWith({
+        fields: [
+          {
+            bind: 'reason',
+            kind: 'select',
+            label: 'Reason',
+            options: [{ value: 'option-1' }, { value: 'option-2' }],
+          },
+        ],
+      });
+    });
+
+    it('adds a question with a value of its own, made with it', async () => {
+      const { latest } = setup('escalate');
+
+      await userEvent.click(screen.getByTestId('customAppAddFormField'));
+
+      const form = findNode(latest.document.root, 'escalate')!.node;
+      expect(form).toMatchObject({
+        fields: [
+          { bind: 'reason', kind: 'text' },
+          { bind: 'question_2', kind: 'text', label: 'Question 2' },
+        ],
+      });
+      expect(latest.document.state.question_2).toEqual({ type: 'string', default: '' });
+      expect(getDocumentIssues(latest.document)).toEqual([]);
+    });
+
+    it('cannot lose its only question, as a form that asks nothing is not a form', () => {
+      setup('escalate');
+
+      expect(screen.queryByRole('button', { name: 'Remove question 1' })).not.toBeInTheDocument();
+    });
+
+    it('says what it does when it is submitted, which is nothing until a workflow is added', async () => {
+      const { onChange } = setup('escalate');
+
+      expect(screen.getByRole('heading', { name: 'When it is submitted' })).toBeInTheDocument();
+      expect(screen.getByText('This does nothing yet.')).toBeInTheDocument();
+
+      await userEvent.click(screen.getByTestId('customAppAddWorkflowAction'));
+      expect(onChange).toHaveBeenLastCalledWith({
+        onSubmit: [{ type: 'runWorkflow', workflow: '', inputs: {} }],
+      });
+    });
+
+    it('is a component of its own, named as one', () => {
+      setup('escalate');
+
+      expect(screen.getByRole('heading', { name: 'Form' })).toBeInTheDocument();
     });
   });
 
