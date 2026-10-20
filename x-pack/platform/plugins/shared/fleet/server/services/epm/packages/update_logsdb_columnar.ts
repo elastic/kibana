@@ -122,11 +122,23 @@ export async function setLogsdbColumnarChoice({
       .map(({ id }) => id),
   ];
   const templates: IndexTemplateEntry[] = [];
+  const missing: string[] = [];
   for (const templateName of templateNames) {
     const indexTemplate = await fetchIndexTemplate(esClient, templateName, 'logsdb_columnar');
     if (indexTemplate) {
       templates.push({ templateName, indexTemplate });
+    } else {
+      missing.push(templateName);
     }
+  }
+  // Storing the choice with a template missing would leave its data stream on the other mode.
+  if (missing.length > 0) {
+    throw new FleetErrorWithStatusCode(
+      `Could not change the ${LOGSDB_COLUMNAR_INDEX_MODE} index mode of ${pkgName}: missing index templates ${missing.join(
+        ', '
+      )}. Reinstall the package to restore them, then try again.`,
+      409
+    );
   }
   const switched = templates.map((template) =>
     withIndexMode(template, enabled ? LOGSDB_COLUMNAR_INDEX_MODE : undefined)

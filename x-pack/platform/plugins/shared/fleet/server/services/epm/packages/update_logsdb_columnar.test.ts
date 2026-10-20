@@ -181,6 +181,22 @@ describe('setLogsdbColumnarChoice', () => {
     expect(handleNamespaceTemplateRestoreAfterPackageInstall).toHaveBeenCalledTimes(2);
   });
 
+  it('refuses with 409 and changes nothing when an index template is missing', async () => {
+    jest
+      .mocked(fetchIndexTemplate)
+      .mockImplementation(async (_esClient, name) =>
+        name === 'logs-pkg.error' ? undefined : (indexTemplate({}) as any)
+      );
+
+    const error = await setChoice(true).catch((err) => err);
+    expect(error.message).toBe(
+      'Could not change the logsdb_columnar index mode of pkg: missing index templates logs-pkg.error. Reinstall the package to restore them, then try again.'
+    );
+    expect(error.statusCode).toBe(409);
+    expect(esClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+    expect(savedObjectsClient.update).not.toHaveBeenCalled();
+  });
+
   it('throws when the package is not installed', async () => {
     jest.mocked(getInstallationObject).mockResolvedValue(undefined);
 
