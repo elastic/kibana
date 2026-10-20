@@ -81,10 +81,10 @@ export interface MigrateDocumentOptions {
    */
   allowDowngrade?: boolean;
   /**
-   * Only deep clone the document when a migration is going to run, see {@link DocumentMigrateOptions.lazyClone}.
+   * Allow skipping the deep clone of the document when no migration is going to run, see {@link DocumentMigrateOptions.allowSkipClone}.
    * Defaults to `false`.
    */
-  lazyClone?: boolean;
+  allowSkipClone?: boolean;
 }
 
 /** @internal */

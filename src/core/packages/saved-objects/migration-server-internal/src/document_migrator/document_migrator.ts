@@ -31,7 +31,7 @@ interface TransformOptions {
   convertNamespaceTypes?: boolean;
   allowDowngrade?: boolean;
   targetTypeVersion?: string;
-  lazyClone?: boolean;
+  allowSkipClone?: boolean;
 }
 
 interface DocumentMigratorOptions {
@@ -123,12 +123,16 @@ export class DocumentMigrator implements IDocumentMigrator {
    */
   public migrate(
     doc: SavedObjectUnsanitizedDoc,
-    { allowDowngrade = false, targetTypeVersion, lazyClone = false }: DocumentMigrateOptions = {}
+    {
+      allowDowngrade = false,
+      targetTypeVersion,
+      allowSkipClone = false,
+    }: DocumentMigrateOptions = {}
   ): SavedObjectUnsanitizedDoc {
     const { document } = this.transform(doc, {
       allowDowngrade,
       targetTypeVersion,
-      lazyClone,
+      allowSkipClone,
     });
     return document;
   }
@@ -166,7 +170,7 @@ export class DocumentMigrator implements IDocumentMigrator {
       convertNamespaceTypes = false,
       allowDowngrade = false,
       targetTypeVersion,
-      lazyClone = false,
+      allowSkipClone = false,
     }: TransformOptions = {}
   ) {
     if (!this.migrations) {
@@ -205,7 +209,7 @@ export class DocumentMigrator implements IDocumentMigrator {
       return this.transformUp(effectiveDoc, {
         convertNamespaceTypes,
         targetTypeVersion,
-        lazyClone,
+        allowSkipClone,
       });
     }
   }
@@ -215,8 +219,8 @@ export class DocumentMigrator implements IDocumentMigrator {
     {
       convertNamespaceTypes,
       targetTypeVersion,
-      lazyClone,
-    }: { convertNamespaceTypes: boolean; targetTypeVersion?: string; lazyClone?: boolean }
+      allowSkipClone,
+    }: { convertNamespaceTypes: boolean; targetTypeVersion?: string; allowSkipClone?: boolean }
   ) {
     if (!this.migrations) {
       throw new Error('Migrations are not ready. Make sure prepareMigrations is called first.');
@@ -228,7 +232,7 @@ export class DocumentMigrator implements IDocumentMigrator {
       migrations: this.migrations,
       kibanaVersion: this.options.kibanaVersion,
       convertNamespaceTypes,
-      lazyClone,
+      allowSkipClone,
     });
     const { document, additionalDocs } = pipeline.run();
 

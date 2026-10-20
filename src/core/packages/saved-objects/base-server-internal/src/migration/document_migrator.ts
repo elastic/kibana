@@ -58,13 +58,14 @@ export interface DocumentMigrateOptions {
   /**
    * By default the document is deep cloned before being migrated, so that migration functions that mutate it
    * cannot alter the caller's object.
-   * If `true`, the document is only cloned when a migration is going to run. When the document is already
-   * up to date, the returned document shares its nested objects (e.g. `attributes`) with the provided one.
+   * If `true`, the caller hands over ownership of the document: it is only cloned when a migration is going
+   * to run, and may not be cloned at all. When the document is already up to date, the returned document
+   * shares its nested objects (e.g. `attributes`) with the provided one.
    * Only use it when the caller owns the document and does not rely on it staying separate from the result,
    * e.g. a document that was just read from Elasticsearch.
    * Defaults to `false`.
    */
-  lazyClone?: boolean;
+  allowSkipClone?: boolean;
 }
 
 /**

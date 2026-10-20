@@ -76,7 +76,7 @@ describe('MigrationHelper', () => {
       expect(migrator.migrateDocument).toHaveBeenCalledTimes(1);
       expect(migrator.migrateDocument).toHaveBeenCalledWith(doc, {
         allowDowngrade: true,
-        lazyClone: true,
+        allowSkipClone: true,
       });
     });
 
@@ -158,7 +158,7 @@ describe('MigrationHelper', () => {
 
       expect(migrator.migrateDocument).toHaveBeenCalledWith(decryptedDoc, {
         allowDowngrade: true,
-        lazyClone: true,
+        allowSkipClone: true,
       });
     });
   });

@@ -194,7 +194,7 @@ describe('DocumentMigrator', () => {
       expect(_.get(migratedDoc, 'attributes.name')).toBe('Mike');
     });
 
-    describe('lazyClone', () => {
+    describe('allowSkipClone', () => {
       const createMigrator = () => {
         const migrator = new DocumentMigrator({
           ...testOpts(),
@@ -230,11 +230,11 @@ describe('DocumentMigrator', () => {
         expect(_.get(migratedDoc, 'attributes.nested')).not.toBe(originalDoc.attributes.nested);
       });
 
-      it('does not clone an up to date document when lazyClone is true', () => {
+      it('does not clone an up to date document when allowSkipClone is true', () => {
         const migrator = createMigrator();
         const originalDoc = upToDateDoc();
 
-        const migratedDoc = migrator.migrate(originalDoc, { lazyClone: true });
+        const migratedDoc = migrator.migrate(originalDoc, { allowSkipClone: true });
 
         expect(migratedDoc).toEqual(upToDateDoc());
         expect(migratedDoc.attributes).toBe(originalDoc.attributes);
@@ -243,11 +243,11 @@ describe('DocumentMigrator', () => {
         expect(originalDoc).toEqual(upToDateDoc());
       });
 
-      it(`still doesn't mutate the original document when a migration runs with lazyClone`, () => {
+      it(`still doesn't mutate the original document when a migration runs with allowSkipClone`, () => {
         const migrator = createMigrator();
         const originalDoc = { ...upToDateDoc(), attributes: {}, typeMigrationVersion: '' };
 
-        const migratedDoc = migrator.migrate(originalDoc, { lazyClone: true });
+        const migratedDoc = migrator.migrate(originalDoc, { allowSkipClone: true });
 
         expect(_.get(originalDoc, 'attributes.name')).toBeUndefined();
         expect(_.get(migratedDoc, 'attributes.name')).toBe('Mike');

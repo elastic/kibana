@@ -232,8 +232,8 @@ export class KibanaMigrator implements IKibanaMigrator {
 
   public migrateDocument(
     doc: SavedObjectUnsanitizedDoc,
-    { allowDowngrade = false, lazyClone = false }: MigrateDocumentOptions = {}
+    { allowDowngrade = false, allowSkipClone = false }: MigrateDocumentOptions = {}
   ): SavedObjectUnsanitizedDoc {
-    return this.documentMigrator.migrate(doc, { allowDowngrade, lazyClone });
+    return this.documentMigrator.migrate(doc, { allowDowngrade, allowSkipClone });
   }
 }

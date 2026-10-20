@@ -53,7 +53,7 @@ export class MigrationHelper {
    */
   migrateStorageDocument(document: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc {
     // the document was just read from Elasticsearch, there is no need to clone it unless it gets migrated
-    return this.migrator.migrateDocument(document, { allowDowngrade: true, lazyClone: true });
+    return this.migrator.migrateDocument(document, { allowDowngrade: true, allowSkipClone: true });
   }
 
   async migrateAndDecryptStorageDocument<T, A extends string>({
@@ -72,7 +72,7 @@ export class MigrationHelper {
         // the document was just read from Elasticsearch, there is no need to clone it unless it gets migrated
         return this.migrator.migrateDocument(doc, {
           allowDowngrade: true,
-          lazyClone: true,
+          allowSkipClone: true,
         }) as SavedObject<T>;
       } catch (error) {
         throw SavedObjectsErrorHelpers.decorateGeneralError(
