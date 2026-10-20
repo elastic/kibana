@@ -50,11 +50,6 @@ const declaresPilotInput = (workflow: WorkflowDetailDto | null | undefined): boo
       trigger.inputs.properties?.[PILOT_SIZE_INPUT] !== undefined
   );
 
-interface CreateKiCounts {
-  kisWritten: number;
-  kisFailedVerification: number;
-}
-
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
@@ -78,7 +73,7 @@ const countCreateKiOutputs = async ({
   spaceId: string;
   request: KibanaRequest;
   logger: Logger;
-}): Promise<CreateKiCounts | undefined> => {
+}): Promise<{ kisWritten: number; kisFailedVerification: number } | undefined> => {
   try {
     const execution = await workflowsManagement.getWorkflowExecution(executionId, spaceId, {
       includeOutput: true,

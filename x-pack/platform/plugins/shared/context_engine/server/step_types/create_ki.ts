@@ -6,11 +6,9 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { z } from '@kbn/zod/v4';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { createKiStepCommonDefinition } from '../../common/step_types/create_ki';
 import type { CreateKiOutput } from '../../common/step_types/create_ki';
-import type { VerifyKiOutputSchemaType } from '../../common/step_types/verify_ki_step';
 import { omitNullKiAttributes } from '../../common/step_types/ki';
 import type { KiStepDependencies } from './helpers';
 import {
@@ -22,10 +20,12 @@ import {
   withKiWriteTelemetry,
 } from './helpers';
 import type { VerifyKi } from './verify_ki';
+import type { KiVerificationSummary } from '../ki_verification';
 
-type VerifyKiOutput = z.infer<VerifyKiOutputSchemaType>;
-
-const toKiVerificationRecord = ({ passed, results }: VerifyKiOutput, verifiedAt: string) => ({
+const toKiVerificationRecord = (
+  { passed, results }: KiVerificationSummary,
+  verifiedAt: string
+) => ({
   passed,
   verified_at: verifiedAt,
   failed_verifier_ids: results.filter((result) => !result.passed).map(({ verifier }) => verifier),

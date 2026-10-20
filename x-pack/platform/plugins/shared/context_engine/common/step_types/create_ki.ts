@@ -16,7 +16,6 @@ import { VerifyKiOutputSchema, kiVerifiersSchema } from './verify_ki_step';
 export const CREATE_KI_STEP_ID = 'context-engine.createKi' as const;
 
 export const KI_VERIFICATION_FAILURE_ACTIONS = ['skip', 'write_as_failed'] as const;
-export type KiVerificationFailureAction = (typeof KI_VERIFICATION_FAILURE_ACTIONS)[number];
 
 export const createKiInputSchema = z.object({
   ai_index_id: aiIndexIdSchema,
