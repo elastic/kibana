@@ -262,9 +262,9 @@ node $SEED --help
 node $SEED --kibana-url http://localhost:5611/kbn --es-url http://localhost:9201 \
   --include-unregistered
 
-# serverless: its own credentials, and Elasticsearch on HTTPS
+# serverless: its own Kibana credentials, and Elasticsearch on HTTPS
 node $SEED --kibana-url http://localhost:5601 --es-url https://localhost:9200 \
-  --es-username elastic_serverless
+  --kibana-username elastic_serverless
 
 node $SEED --kibana-url http://localhost:5611/kbn --es-url http://localhost:9201 --clean
 ```
@@ -274,18 +274,29 @@ reads the list route once before writing anything: that is what makes the plugin
 stream, and writing first would let Elasticsearch auto-create a plain index under the same name,
 permanently blocking the plugin from creating it.
 
-The credentials are used for both Elasticsearch and Kibana, which is why serverless needs
-`elastic_serverless`: SAML is only the default _UI_ provider there, and basic auth still works.
+Elasticsearch and Kibana take separate credentials because they need different users.
+
+`.kibana-notifications` is a system data stream, so the writes need a user holding
+`allow_restricted_indices` — `superuser` grants that for reads only, so `elastic` cannot seed.
+`--es-username` therefore defaults to `system_indices_superuser`, the test-only role `kbn-es`
+creates for exactly this (`kbn-es/src/stateful_resources/roles.yml`). The client also sends
+`x-elastic-product-origin: kibana`, which Elasticsearch requires before it serves the stream at
+all. Serverless has no such role, so seeding there needs a user you know can write a restricted
+index; this has not been verified.
+
+`--kibana-username` is the user whose bell you will open, and defaults to `elastic`. Serverless
+needs `elastic_serverless`: SAML is only the default _UI_ provider there, and basic auth still
+works.
 
 The plugin's `notificationWriteSchema` rejects an unknown `namespace` or `type`. `--include-unregistered`
 writes those directly to the cluster to exercise the read path and the UI against a mixed feed.
 
 Every fixture is backdated, and a user's catch-up marker is stamped at `now` the first time they
 open the bell — which is always after seeding — so the whole chunk would otherwise arrive already
-read. The script therefore logs in as the Elasticsearch user and backdates that marker to 30 days
+read. The script therefore logs in as `--kibana-username` and backdates that marker to 30 days
 ago, leaving the newer fixtures unread. `--read-horizon` takes an age (`12h`) or a date
-(`2026-09-01`) instead, and `--clean` drops the marker and per-id overrides. Read state is per user profile:
-if you browse Kibana as somebody other than `--es-username`, their bell is unaffected.
+(`2026-09-01`) instead, and `--clean` drops the marker and per-id overrides. Read state is per user
+profile: if you browse Kibana as somebody other than `--kibana-username`, their bell is unaffected.
 
 ## Running tests
 

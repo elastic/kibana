@@ -47,6 +47,9 @@ export const makeDoc = (id: string, overrides: Partial<NotificationDoc> = {}): N
  * Append notifications directly to the backing data stream and wait for them to become
  * searchable. Mirrors how the plugin writes (append-only `create`), so the GET route sees
  * them exactly as produced notifications.
+ *
+ * Takes the `systemEsClient` fixture: the stream is a system data stream and Scout's `esClient`
+ * cannot write it.
  */
 export const seedNotifications = async (esClient: Client, docs: NotificationDoc[]) => {
   await esClient.bulk({

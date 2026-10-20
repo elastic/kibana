@@ -14,16 +14,25 @@ import { OVERRIDES_KEY, READ_ALL_BEFORE_KEY } from '../../server/storage/user_st
 export interface SeedTarget {
   esUrl: string;
   kibanaUrl: string;
-  username: string;
-  password: string;
+  /**
+   * Credentials for the direct Elasticsearch writes. Appending to and deleting from a system
+   * data stream needs `allow_restricted_indices`, which `superuser` grants for reads only
+   * (`ReservedRolesStore.SUPERUSER_ROLE_DESCRIPTOR`), so `elastic` cannot seed.
+   */
+  esAuth: { username: string; password: string };
+  /** Credentials for Kibana. Read state is keyed by profile, so this is whoever opens the bell. */
+  kibanaAuth: { username: string; password: string };
 }
 
 const LOCAL_HOSTNAMES = new Set(['localhost', '127.0.0.1', '[::1]']);
 
-export const createEsClient = ({ esUrl, username, password }: SeedTarget): Client =>
+export const createEsClient = ({ esUrl, esAuth }: SeedTarget): Client =>
   new Client({
     node: esUrl,
-    auth: { username, password },
+    auth: esAuth,
+    // Elasticsearch serves a system data stream only to a caller whose product origin the
+    // descriptor allows. Without this the bulk append and the cleanup delete are both refused.
+    headers: { 'x-elastic-product-origin': 'kibana' },
     // Serverless dev clusters serve a self-signed cert. Local only: a remote https cluster
     // reached over an unverified connection is nobody's intent.
     ...(esUrl.startsWith('https:') &&
@@ -40,7 +49,7 @@ const HEADERS = {
  * Never send this alongside a session cookie: HTTP authentication wins over the session, and the
  * request loses the `profile_uid` that read state is keyed by.
  */
-const basicAuth = ({ username, password }: SeedTarget) => ({
+const basicAuth = ({ kibanaAuth: { username, password } }: SeedTarget) => ({
   authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`,
 });
 
@@ -99,7 +108,10 @@ export const clearNotifications = async (esClient: Client): Promise<number> => {
  * session carries one — a plain `Authorization: Basic` request has no read state at all.
  */
 const login = async (target: SeedTarget): Promise<string> => {
-  const { kibanaUrl, username, password } = target;
+  const {
+    kibanaUrl,
+    kibanaAuth: { username, password },
+  } = target;
   const response = await fetch(`${kibanaUrl}/internal/security/login`, {
     method: 'POST',
     headers: HEADERS,
