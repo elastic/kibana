@@ -43,7 +43,15 @@ describe('getNodeInfo', () => {
     it('matches on the ECS id field when the schema is ecs', async () => {
       const { framework, callWithRequest } = createFramework();
 
-      await getNodeInfo(framework, requestContext, sourceConfiguration, 'host-1', 'host', timeRange, 'ecs');
+      await getNodeInfo(
+        framework,
+        requestContext,
+        sourceConfiguration,
+        'host-1',
+        'host',
+        timeRange,
+        'ecs'
+      );
 
       expect(idMatchClause(callWithRequest.mock.calls[0][2])).toEqual({ 'host.name': 'host-1' });
     });
