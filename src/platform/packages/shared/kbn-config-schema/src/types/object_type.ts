@@ -81,7 +81,6 @@ export type ObjectTypeOptions<P extends Props = any> = TypeOptions<ObjectResultT
 export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>> {
   private props: P;
   private options: ObjectTypeOptions<P>;
-  private propSchemas: Record<string, AnySchema>;
 
   constructor(props: P, options: ObjectTypeOptions<P> = {}) {
     const schemaKeys = {} as Record<string, AnySchema>;
@@ -108,7 +107,6 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
 
     super(schema, typeOptions);
     this.props = props;
-    this.propSchemas = schemaKeys;
     this.options = options;
   }
 
@@ -236,10 +234,10 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
   }
 
   validateKey(key: string, value: any) {
-    if (!this.propSchemas[key]) {
+    if (!Object.prototype.hasOwnProperty.call(this.props, key)) {
       throw new Error(`${key} is not a valid part of this schema`);
     }
-    const { value: validatedValue, error } = this.propSchemas[key].validate(value);
+    const { value: validatedValue, error } = this.props[key].getSchema().validate(value);
     if (error) {
       throw new ValidationError(error as any, key);
     }
