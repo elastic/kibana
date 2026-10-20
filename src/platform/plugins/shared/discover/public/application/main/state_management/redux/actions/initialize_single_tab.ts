@@ -228,6 +228,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
         persistedTab,
         services,
         defaultProfileEsqlQuery,
+        hasLocationDataView: locationStateHasDataViewSpec,
       });
       if (isNonEmptyEsqlQuery(configuredEsqlQuery)) {
         return {
@@ -258,6 +259,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
           services,
           dataView,
           defaultProfileEsqlQuery,
+          hasLocationDataView: locationStateHasDataViewSpec,
         });
 
       if (isNonEmptyEsqlQuery(query)) {
