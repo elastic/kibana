@@ -70,5 +70,4 @@ steps:
           verifiers:
             - esql-valid-syntax
             - esql-valid-runtime
-          on_verification_failure: write_as_failed
 

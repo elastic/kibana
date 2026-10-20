@@ -51,7 +51,7 @@ export const getCreateKiStepDefinition = ({
         ai_index_id: aiIndexId,
         ki_id: kiId,
         verifiers,
-        on_verification_failure: onVerificationFailure = 'skip',
+        on_verification_failure: onVerificationFailure = 'write_as_failed',
         refresh = false,
       } = context.input;
       const ki = omitNullKiAttributes(context.input.ki);

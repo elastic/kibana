@@ -629,16 +629,11 @@ describe('getCreateKiStepDefinition', () => {
       });
     });
 
-    it('writes the KI as verification_failed when on_verification_failure is write_as_failed', async () => {
+    it('writes the KI as verification_failed by default when verification fails', async () => {
       verifyKi.mockResolvedValue(failed);
       const esClient = { index: jest.fn().mockResolvedValue({ _id: 'ki-1' }) };
       const context = createMockStepContext({
-        input: {
-          ai_index_id: 'my-ai-index',
-          ki: kiInput,
-          verifiers,
-          on_verification_failure: 'write_as_failed',
-        },
+        input: { ai_index_id: 'my-ai-index', ki: kiInput, verifiers },
         esClient,
       });
       const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
@@ -668,11 +663,16 @@ describe('getCreateKiStepDefinition', () => {
       expect(telemetry.analyticsService.reportKiWrite).toHaveBeenCalledTimes(1);
     });
 
-    it('skips the write when verification fails', async () => {
+    it('skips the write when verification fails and on_verification_failure is skip', async () => {
       verifyKi.mockResolvedValue(failed);
       const esClient = { index: jest.fn() };
       const context = createMockStepContext({
-        input: { ai_index_id: 'my-ai-index', ki: kiInput, verifiers },
+        input: {
+          ai_index_id: 'my-ai-index',
+          ki: kiInput,
+          verifiers,
+          on_verification_failure: 'skip',
+        },
         esClient,
       });
       const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });

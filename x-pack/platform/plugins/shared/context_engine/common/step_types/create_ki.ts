@@ -34,7 +34,7 @@ export const createKiInputSchema = z.object({
     .enum(KI_VERIFICATION_FAILURE_ACTIONS)
     .optional()
     .describe(
-      'What to do with a KI that fails verification: `skip` (default) writes nothing and leaves any existing KI with the same id untouched; `write_as_failed` writes it with lifecycle status `verification_failed`, replacing any existing KI with the same id, out of search but visible in the AI index.'
+      'What to do with a KI that fails verification: `write_as_failed` (default) writes it with lifecycle status `verification_failed`, replacing any existing KI with the same id, out of search but visible in the AI index; `skip` writes nothing and leaves any existing KI with the same id untouched.'
     ),
   refresh: z
     .boolean()
@@ -80,10 +80,10 @@ export const createKiStepCommonDefinition: CommonStepDefinition<
         'When the AI index does not exist yet, it is created automatically with an index backing ' +
         'store derived from its id. Pass ki_id to set a stable id; re-runs with the same id ' +
         'replace the KI on an index and append a new revision on a data stream. Pass verifiers to ' +
-        'run KI verifiers before writing: when any fails, nothing is written and the output carries ' +
-        'no id, unless on_verification_failure is write_as_failed, which writes the KI with lifecycle ' +
-        'status verification_failed so it stays out of search but visible in the AI index. Either way ' +
-        'verification.results names the failing verifiers. The write is not refreshed ' +
+        'run KI verifiers before writing: when any fails, the KI is written with lifecycle status ' +
+        'verification_failed so it stays out of search but visible in the AI index, unless ' +
+        'on_verification_failure is skip, which writes nothing and leaves the output without an id. ' +
+        'Either way verification.results names the failing verifiers. The write is not refreshed ' +
         'unless refresh is true, so set it when a later step in the same run reads the KI back. ' +
         'The step returns the id of the created KI, which can be used by later steps to update ' +
         'or delete it.',
@@ -114,7 +114,6 @@ export const createKiStepCommonDefinition: CommonStepDefinition<
     verifiers:
       - ${ESQL_VALID_SYNTAX_VERIFIER_ID}
       - ${ESQL_VALID_RUNTIME_VERIFIER_ID}
-    on_verification_failure: write_as_failed
     ki:
       type: "detection"
       title: "Failed login burst"
