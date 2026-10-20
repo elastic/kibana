@@ -19,6 +19,7 @@ import { runReconciliation } from './runner';
 import { runActivityReconciliation } from './activity_runner';
 import { runAttachmentsReconciliation } from './attachments_runner';
 import { runIncrementalIdBackfill } from '../incremental_id_backfill/runner';
+import { sweepDeletedSpaces } from './deleted_spaces_sweep';
 
 /**
  * Task type registered with Task Manager. Namespaced with `cases.analyticsV2.`
@@ -71,6 +72,8 @@ interface RegisterReconciliationTaskArgs {
      * that repaired nothing.
      */
     casesWriterEnabled: boolean;
+    /** False when the Spaces plugin is disabled, so there are no `space` SOs to compare against. */
+    deletedSpacesSweepEnabled: boolean;
   }>;
   /**
    * Resolved value of `xpack.cases.incrementalId.enabled`. Without it no
@@ -115,7 +118,7 @@ export function registerReconciliationTask({
     [RECONCILIATION_TASK_TYPE]: {
       title: 'Cases analytics v2 reconciliation',
       description:
-        'Periodically re-emits analytics docs for cases updated since the last successful tick. Durability backstop for the fire-and-forget write hooks.',
+        'Periodically re-emits analytics docs for cases updated since the last successful tick and deletes docs of deleted spaces. Durability backstop for the fire-and-forget write hooks.',
       // No auto-retry. The runner pins the cursor on failure and the
       // next scheduled tick re-walks the same window naturally. A retry
       // inside the same poll interval would stack a second failing run
@@ -235,6 +238,26 @@ export function registerReconciliationTask({
             }
           }
 
+          let deletedSpacesError: unknown;
+          if (deps.deletedSpacesSweepEnabled && !signal.aborted) {
+            try {
+              await sweepDeletedSpaces({
+                esClient: deps.esClient,
+                savedObjectsClient: deps.savedObjectsClient,
+                logger,
+                signal,
+              });
+            } catch (err) {
+              deletedSpacesError = err;
+              logger.error(
+                `cases-analyticsV2: deleted-spaces sweep failed: ${
+                  err instanceof Error ? err.message : String(err)
+                }. It will be retried on the next tick.`,
+                { error: err }
+              );
+            }
+          }
+
           // One-time repair (remove in 10.0), run last so it never delays the cursor
           // walks. It rides this tick instead of its own task type so
           // shipping and removing it touches no Task Manager type list.
@@ -288,6 +311,7 @@ export function registerReconciliationTask({
             casesError != null ||
             activityError != null ||
             attachmentsError != null ||
+            deletedSpacesError != null ||
             incrementalIdBackfillError != null
           ) {
             // Surface the failure via Task Manager's `taskRunError` so
@@ -299,6 +323,7 @@ export function registerReconciliationTask({
               cases: casesError,
               activity: activityError,
               attachments: attachmentsError,
+              deletedSpaces: deletedSpacesError,
               incrementalIdBackfill: incrementalIdBackfillError,
             });
             return {
@@ -475,12 +500,15 @@ function composeReconciliationError(errors: {
   cases?: unknown;
   activity?: unknown;
   attachments?: unknown;
+  deletedSpaces?: unknown;
   incrementalIdBackfill?: unknown;
 }): Error {
   const failing: string[] = [];
   if (errors.cases != null) failing.push(`cases (${asMessage(errors.cases)})`);
   if (errors.activity != null) failing.push(`activity (${asMessage(errors.activity)})`);
   if (errors.attachments != null) failing.push(`attachments (${asMessage(errors.attachments)})`);
+  if (errors.deletedSpaces != null)
+    failing.push(`deleted spaces (${asMessage(errors.deletedSpaces)})`);
   if (errors.incrementalIdBackfill != null) {
     failing.push(`incremental id backfill (${asMessage(errors.incrementalIdBackfill)})`);
   }

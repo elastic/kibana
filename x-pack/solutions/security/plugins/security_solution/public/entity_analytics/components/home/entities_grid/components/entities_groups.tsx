@@ -15,6 +15,7 @@ import type { EntityURLStateResult } from '../../entities_table/hooks/use_entity
 import { TEST_SUBJ_GROUPING, TEST_SUBJ_GROUPING_LOADING } from '../../entities_table/constants';
 import { EntitiesGrid } from './entities_grid';
 import { CHILD_ROWS_COLUMNS } from '../grid_columns';
+import type { ReadAccess } from '../grid_columns';
 import { RISK_SCORE_NORM_FIELD } from '../common';
 import { joinAnd } from '../queries/esql';
 import type { RowsMode, SortDir, TimeRange } from '../common';
@@ -38,6 +39,7 @@ interface GroupViewProps {
   entityExpression?: string;
   cellHandlers?: CellHandlers;
   rowActions?: RowActions;
+  readAccess: ReadAccess;
   /** False while the page still reads what its grouping query needs. */
   isQueryReady?: boolean;
 }
@@ -214,6 +216,7 @@ const LeafGrid: React.FC<LeafGridProps> = ({
   entityExpression,
   cellHandlers,
   rowActions,
+  readAccess,
 }) => {
   const [sortField, setSortField] = useState(RISK_SCORE_NORM_FIELD);
   const [sortDirection, setSortDirection] = useState<SortDir>('desc');
@@ -244,6 +247,7 @@ const LeafGrid: React.FC<LeafGridProps> = ({
       onSortChange={handleSortChange}
       cellHandlers={cellHandlers}
       rowActions={rowActions}
+      readAccess={readAccess}
     />
   );
 };

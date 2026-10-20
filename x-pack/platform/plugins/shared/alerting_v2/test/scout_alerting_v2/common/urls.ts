@@ -102,13 +102,13 @@ export const getRuleTemplateTagsUrl = (search?: string): string => {
   return search === undefined ? path : `${path}?${toQueryString({ search })}`;
 };
 
-const getSeriesActionUrl = (groupHash: string, suffix: string) =>
-  `${SERIES_API_PATH}/${encodeURIComponent(groupHash)}/${suffix}`;
+const getSeriesActionUrl = (seriesId: string, suffix: string) =>
+  `${SERIES_API_PATH}/${encodeURIComponent(seriesId)}/${suffix}`;
 
-export const getSnoozeSeriesActionUrl = (groupHash: string) =>
-  getSeriesActionUrl(groupHash, '_snooze');
-export const getUnsnoozeSeriesActionUrl = (groupHash: string) =>
-  getSeriesActionUrl(groupHash, '_unsnooze');
+export const getSnoozeSeriesActionUrl = (seriesId: string) =>
+  getSeriesActionUrl(seriesId, '_snooze');
+export const getUnsnoozeSeriesActionUrl = (seriesId: string) =>
+  getSeriesActionUrl(seriesId, '_unsnooze');
 
 export const BULK_SNOOZE_SERIES_ACTION_URL = `${SERIES_API_PATH}/_bulk_snooze`;
 export const BULK_UNSNOOZE_SERIES_ACTION_URL = `${SERIES_API_PATH}/_bulk_unsnooze`;

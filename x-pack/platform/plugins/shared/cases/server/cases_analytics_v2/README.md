@@ -530,6 +530,7 @@ Always raise `resetTaskTimeoutMinutes` first if you raise `resetPageDelayMs` —
 | `/state.active_reset.status: "running"` for hours | Backfill task is mid-walk on a large tenant | Wait. Raise `resetTaskTimeoutMinutes` in `kibana.yml` if it exceeds your tolerance window (see "Tuning /reset at scale") |
 | `Event loop utilization exceeded threshold` from `/internal/cases/_analyticsV2/reset` | A runner page is slower than expected on this hardware | Raise `resetPageDelayMs` to 50–100 to throttle further |
 | `Case Analytics` data view missing in Discover / Lens after `/reset` | Lazy recreation hasn't fired in that space yet — `/reset` deletes every per-space data view, and they recreate on the next cases request per space | Open the Cases UI in the affected space, or run `curl /s/<spaceId>/api/cases/_find?perPage=1` to pre-warm. See "Per-space data views after /reset" above. |
+| Analytics docs whose `space_id` names a deleted space | Deleting a space removes the cases SOs by namespace, bypassing the cases delete cascade | Handled automatically — each reconciliation tick deletes the analytics docs of spaces that no longer exist. |
 | `extended_fields` missing from `.cases` after a templates migration, no case edits since | The migration backfill wrote `extended_fields` via a raw SO update, which never bumped the case-domain `attributes.updated_at` incremental reconciliation filters on | Handled automatically — see "Templates migration coupling" below. Manual fallback: POST /reset. |
 | `case.incremental_id` missing from `.cases` while the case shows a number in the UI, no case edits since | The incremental-id task assigns the number after creation via a raw SO update, which never bumped `attributes.updated_at`. Fixed going forward: the task now mirrors numbered cases to `.cases` | Docs written before the fix are repaired by a one-time pass in the reconciliation task (removed in 10.0) — see "Incremental id backfill (until 10.0)" below. Manual fallback: POST /reset. |
 
@@ -604,7 +605,7 @@ going forward (the incremental-id task mirrors newly numbered cases) and ships
 a one-time repair for docs written before the fix (`incremental_id_backfill/`).
 
 The repair runs at the end of each reconciliation tick, after the three
-cursor walks, until one pass completes. It searches `.cases` for docs
+cursor walks and the deleted-spaces sweep, until one pass completes. It searches `.cases` for docs
 without `case.incremental_id`, re-reads those cases, and re-emits the ones
 that now have a number. Cases that are still unnumbered are skipped; the
 incremental-id task mirrors them when it numbers them. A completed pass sets
@@ -785,7 +786,8 @@ cases_analytics_v2/
 │
 ├── reconciliation/
 │   ├── index.ts             periodic task type registration + scheduling
-│   │                        (cases → activity → attachments per tick;
+│   │                        (cases → activity → attachments → deleted
+│   │                        spaces sweep → incremental id backfill per tick;
 │   │                        independent cursors; per-surface error
 │   │                        isolation via taskRunError; maxAttempts: 1)
 │   ├── runner.ts            walks cases by `updated_at > last_run_at OR
@@ -797,6 +799,8 @@ cases_analytics_v2/
 │   │                        `find` opt into `namespaces: ['*']` — the
 │   │                        unscoped internal SO client otherwise silently
 │   │                        scopes to `default`.
+│   ├── deleted_spaces_sweep.ts  deletes analytics docs whose `space_id` no
+│   │                        longer names an existing space.
 │   ├── activity_runner.ts      walks user-actions by `created_at > last_run_at`
 │   │                           (immutable SOs — no `updated_at` branch needed).
 │   ├── attachments_runner.ts   walks cases-comments + cases-attachments (both unconditionally)

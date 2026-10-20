@@ -19,6 +19,7 @@ import { runReconciliation } from './runner';
 import { runActivityReconciliation } from './activity_runner';
 import { runAttachmentsReconciliation } from './attachments_runner';
 import { runIncrementalIdBackfill } from '../incremental_id_backfill/runner';
+import { sweepDeletedSpaces } from './deleted_spaces_sweep';
 import {
   clampCursorToNotFuture,
   INCREMENTAL_ID_BACKFILL_TICK_BUDGET_MS,
@@ -32,6 +33,7 @@ jest.mock('./runner');
 jest.mock('./activity_runner');
 jest.mock('./attachments_runner');
 jest.mock('../incremental_id_backfill/runner');
+jest.mock('./deleted_spaces_sweep');
 const mockRunReconciliation = runReconciliation as jest.MockedFunction<typeof runReconciliation>;
 const mockRunActivityReconciliation = runActivityReconciliation as jest.MockedFunction<
   typeof runActivityReconciliation
@@ -42,6 +44,7 @@ const mockRunAttachmentsReconciliation = runAttachmentsReconciliation as jest.Mo
 const mockRunIncrementalIdBackfill = runIncrementalIdBackfill as jest.MockedFunction<
   typeof runIncrementalIdBackfill
 >;
+const mockSweepDeletedSpaces = sweepDeletedSpaces as jest.MockedFunction<typeof sweepDeletedSpaces>;
 
 describe('clampCursorToNotFuture', () => {
   const logger = loggerMock.create();
@@ -220,11 +223,13 @@ describe('registerReconciliationTask run()', () => {
     state = {},
     incrementalIdBackfillEnabled = false,
     casesWriterEnabled = true,
+    deletedSpacesSweepEnabled = true,
   }: {
     signal?: AbortSignal;
     state?: Record<string, unknown>;
     incrementalIdBackfillEnabled?: boolean;
     casesWriterEnabled?: boolean;
+    deletedSpacesSweepEnabled?: boolean;
   } = {}) => {
     const taskManager = taskManagerMock.createSetup() as unknown as TaskManagerSetupContract;
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
@@ -240,6 +245,7 @@ describe('registerReconciliationTask run()', () => {
         activityWriter: V2_NOOP_ACTIVITY_WRITER,
         attachmentsWriter: V2_NOOP_ATTACHMENTS_WRITER,
         casesWriterEnabled,
+        deletedSpacesSweepEnabled,
       }),
       incrementalIdBackfillEnabled,
     });
@@ -263,6 +269,7 @@ describe('registerReconciliationTask run()', () => {
       processed: 1,
     });
     mockRunIncrementalIdBackfill.mockResolvedValue({ repaired: 1, completed: true });
+    mockSweepDeletedSpaces.mockResolvedValue();
   });
 
   afterEach(() => {
@@ -391,6 +398,45 @@ describe('registerReconciliationTask run()', () => {
     );
   });
 
+  it('runs the deleted-spaces sweep after the three surface walks', async () => {
+    const { run } = setupRun();
+
+    await run();
+
+    expect(mockSweepDeletedSpaces).toHaveBeenCalledTimes(1);
+    expect(mockSweepDeletedSpaces.mock.invocationCallOrder[0]).toBeGreaterThan(
+      mockRunAttachmentsReconciliation.mock.invocationCallOrder[0]
+    );
+  });
+
+  it('skips the deleted-spaces sweep when the Spaces plugin is disabled', async () => {
+    const { run } = setupRun({ deletedSpacesSweepEnabled: false });
+
+    const { state, taskRunError } = await run();
+
+    expect(mockSweepDeletedSpaces).not.toHaveBeenCalled();
+    expect(state).toEqual({
+      cases_last_run_at: 'CASES_NEW',
+      activity_last_run_at: 'ACTIVITY_NEW',
+      attachments_last_run_at: 'ATTACHMENTS_NEW',
+    });
+    expect(taskRunError).toBeUndefined();
+  });
+
+  it('reports a deleted-spaces sweep failure as taskRunError and still advances every cursor', async () => {
+    mockSweepDeletedSpaces.mockRejectedValue(new Error('sweep boom'));
+    const { run } = setupRun();
+
+    const { state, taskRunError } = await run();
+
+    expect(state).toEqual({
+      cases_last_run_at: 'CASES_NEW',
+      activity_last_run_at: 'ACTIVITY_NEW',
+      attachments_last_run_at: 'ATTACHMENTS_NEW',
+    });
+    expect(taskRunError).toBeDefined();
+  });
+
   describe('incremental id backfill', () => {
     const cursors = {
       cases_last_run_at: 'CASES_NEW',
@@ -413,6 +459,16 @@ describe('registerReconciliationTask run()', () => {
       );
       expect(state).toEqual({ ...cursors, incremental_id_backfill_completed: true });
       expect(taskRunError).toBeUndefined();
+    });
+
+    it('runs after the deleted-spaces sweep so the sweep keeps its share of the tick', async () => {
+      const { run } = setupRun({ incrementalIdBackfillEnabled: true });
+
+      await run();
+
+      expect(mockSweepDeletedSpaces.mock.invocationCallOrder[0]).toBeLessThan(
+        mockRunIncrementalIdBackfill.mock.invocationCallOrder[0]
+      );
     });
 
     it('bounds the backfill to a budget measured from the start of the tick', async () => {

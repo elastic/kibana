@@ -23,6 +23,8 @@ steps:
         label: 'Trigger Kibana PR pipeline'
         key: trigger_pr_opened
         timeout_in_minutes: 10
+        agents:
+          image: family/kibana-minimal-ubuntu-2604
         retry:
           automatic:
             - exit_status: '*'
@@ -36,6 +38,8 @@ steps:
         label: 'Trigger Kibana PR pipeline'
         key: trigger_pr_updated
         timeout_in_minutes: 10
+        agents:
+          image: family/kibana-minimal-ubuntu-2604
         retry:
           automatic:
             - exit_status: '*'
