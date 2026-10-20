@@ -399,11 +399,10 @@ Step 4.
      own candidate, as does an `inconclusive` detection whose rows point to an error (never
      grouped). Other excluded detections never enter the graph or any later assignment.
    - **Index first.** List each confirmed detection with the `features[].id` values of its matched
-     query KI and the services its signal names. A `features[].id` counts only when it matches a
-     fetched dependency, entity, or infrastructure KI; computed KIs such as `log_patterns` and
-     `dataset_analysis` never do, so a rule that lists only those, or whose rows span many services,
-     bridges nothing. A detection whose list reaches another detection's services or features is a
-     bridge candidate; check each one below.
+     query KI and the services its signal names. A `features[].id` counts only when the Step 1
+     feature search returned it; any other id never does, so a rule that lists only those, or whose
+     rows span many services, bridges nothing. A detection whose list reaches another detection's
+     services or features is a bridge candidate; check each one below.
    - **Bridge edges first.** When a detection's matched query KI `features[]` names topology nodes
      present in two or more confirmed detections, add a direct edge between every pair of those
      detections before pairwise matching, and record every induced edge. Example: detection A's KI
