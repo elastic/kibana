@@ -41,6 +41,17 @@ echo "--- Resolve distributables"
 
 TARGET_BUILD_ID="${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
 
+# The PR bot only reuses a build when the PR changes no runtime code, so a reused
+# kibana-on-merge distributable is plain main and there is nothing of this PR to measure.
+if [[ "${KIBANA_REUSABLE_BUILD_JOB_URL:-}" == */kibana-on-merge/builds/* ]]; then
+  message="This build reuses a kibana-on-merge distributable, so this PR changes no server runtime code. No memory comparison is needed."
+  echo "--- Warm-start memory benchmark not needed"
+  echo "$message"
+  buildkite-agent annotate --context "warm-start-memory-bench" --style "info" "$message" \
+    || echo "Warning: failed to annotate the build"
+  exit 0
+fi
+
 if ! BASELINE_BUILD_ID=$(node .buildkite/scripts/steps/bench/resolve_merge_base_build.ts); then
   soft_fail "Baseline build lookup failed; see the step log. No memory comparison was made for this PR."
 fi
