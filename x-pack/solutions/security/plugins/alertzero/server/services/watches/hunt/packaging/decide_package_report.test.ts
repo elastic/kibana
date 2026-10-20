@@ -30,6 +30,7 @@ import type { CurrentRunHost, CurrentRunState, ProcessSelector, Subject } from '
 // selection table does not name.
 const isolateHost: ActionCatalogEntry = {
   workflowId: 'system-security-action-isolate-host',
+  approvalPolicy: 'autonomy-dependent',
   name: 'Isolate host',
   category: 'respond',
   impact: 'high',
@@ -44,6 +45,7 @@ const isolateHost: ActionCatalogEntry = {
 
 const killProcess: ActionCatalogEntry = {
   workflowId: 'system-security-action-kill-process',
+  approvalPolicy: 'autonomy-dependent',
   name: 'Kill process',
   category: 'respond',
   impact: 'high',
@@ -59,6 +61,7 @@ const killProcess: ActionCatalogEntry = {
 
 const suspendProcess: ActionCatalogEntry = {
   workflowId: 'system-security-action-suspend-process',
+  approvalPolicy: 'autonomy-dependent',
   name: 'Suspend process',
   category: 'respond',
   impact: 'high',
@@ -75,6 +78,7 @@ const suspendProcess: ActionCatalogEntry = {
 /** Required field `buildActionInput` has no way to supply — neither endpoint_ids nor parameters. */
 const quarantineFileWithJustification: ActionCatalogEntry = {
   workflowId: 'system-security-action-quarantine-file',
+  approvalPolicy: 'autonomy-dependent',
   name: 'Quarantine file',
   category: 'respond',
   impact: 'medium',
@@ -90,6 +94,7 @@ const quarantineFileWithJustification: ActionCatalogEntry = {
 
 const configureAction: ActionCatalogEntry = {
   workflowId: 'system-security-action-configure-something',
+  approvalPolicy: 'autonomy-dependent',
   name: 'Configure',
   category: 'configure',
   inputSchema: {
@@ -105,6 +110,7 @@ const configureAction: ActionCatalogEntry = {
 // was removed. Packaging must never fill it: criticality is the customer's to set.
 const staleSetAssetCriticality: ActionCatalogEntry = {
   workflowId: 'system-alertzero-action-set-asset-criticality',
+  approvalPolicy: 'autonomy-dependent',
   name: 'Set asset criticality',
   category: 'respond',
   impact: 'low',
@@ -124,6 +130,7 @@ const hostSchema = isolateHost.inputSchema;
 const processSchema = killProcess.inputSchema;
 const defendIsolate: ActionCatalogEntry = {
   workflowId: ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
+  approvalPolicy: 'autonomy-dependent',
   name: 'Isolate host',
   category: 'respond',
   impact: 'high',
@@ -131,6 +138,7 @@ const defendIsolate: ActionCatalogEntry = {
 };
 const defendKill: ActionCatalogEntry = {
   workflowId: ALERTZERO_ACTION_KILL_PROCESS_WORKFLOW_ID,
+  approvalPolicy: 'autonomy-dependent',
   name: 'Kill process',
   category: 'respond',
   impact: 'high',
@@ -138,6 +146,7 @@ const defendKill: ActionCatalogEntry = {
 };
 const defendSuspend: ActionCatalogEntry = {
   workflowId: ALERTZERO_ACTION_SUSPEND_PROCESS_WORKFLOW_ID,
+  approvalPolicy: 'autonomy-dependent',
   name: 'Suspend process',
   category: 'respond',
   impact: 'medium',
@@ -145,6 +154,7 @@ const defendSuspend: ActionCatalogEntry = {
 };
 const defendMemoryDump: ActionCatalogEntry = {
   workflowId: ALERTZERO_ACTION_MEMORY_DUMP_WORKFLOW_ID,
+  approvalPolicy: 'autonomy-dependent',
   name: 'Dump memory of process',
   category: 'investigate',
   impact: 'low',
@@ -155,6 +165,7 @@ const defendCatalog = [defendIsolate, defendKill, defendSuspend, defendMemoryDum
 /** The forensics handoff: `investigate`, no `endpoint_ids`, required ids of its own. */
 const forensicsHandoff: ActionCatalogEntry = {
   workflowId: 'system-alertzero-action-handoff-to-forensics',
+  approvalPolicy: 'autonomy-dependent',
   name: 'Run a deep forensics investigation',
   category: 'investigate',
   impact: 'medium',

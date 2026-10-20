@@ -1,0 +1,36 @@
+{
+  "sha1": "ff409a2262122318e2a14b09cb1dc3fa30c7f7f5",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "a6f07b195b9007a-2eaacec3fd3e8a5",
+      "title": "ES|QL Data Federation — data source update API removes settings omitted from an update",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_federation/test/scout_data_federation/api/tests/data_source_update_settings.spec.ts",
+        "line": 38,
+        "column": 11
+      }
+    },
+    {
+      "id": "a59e36419e42ea5-2ab84c7a13a1b20",
+      "title": "ES|QL Data Federation — S3 data source settings contract with Elasticsearch Kibana supports every S3 setting Elasticsearch knows",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/data_federation/test/scout_data_federation/api/tests/s3_settings_contract.spec.ts",
+        "line": 41,
+        "column": 9
+      }
+    }
+  ]
+}

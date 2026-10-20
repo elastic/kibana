@@ -67,6 +67,7 @@ dependsOn:
   - '@kbn/proposals-common'
   - '@kbn/core-security-common'
   - '@kbn/eval-kql'
+  - '@kbn/rrule'
 tags:
   - plugin
   - prod
