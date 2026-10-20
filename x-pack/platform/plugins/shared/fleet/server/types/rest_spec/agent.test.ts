@@ -10,6 +10,7 @@ import { AGENTS_PREFIX } from '../../constants';
 
 import {
   GetAgentsRequestSchema,
+  PostNewAgentActionResponseSchema,
   PostBulkAgentUnenrollRequestSchema,
   PostBulkAgentReassignRequestSchema,
 } from './agent';
@@ -88,5 +89,24 @@ describe('schema field length limits', () => {
         agents: ['valid-id'],
       })
     ).toThrow();
+  });
+});
+
+describe('namespaces are Kibana Space IDs', () => {
+  // Agent `namespaces` hold Space IDs (see the space-awareness filter in
+  // services/agents/crud.ts), so they take the 512 character spaceId limit rather than
+  // the 100 byte data stream namespace limit.
+  const action = (namespaces: string[]) => ({
+    item: { id: 'action-1', type: 'UPGRADE', created_at: '2026-10-20T00:00:00.000Z', namespaces },
+  });
+
+  it('accepts a space ID longer than the data stream namespace limit', () => {
+    expect(() =>
+      PostNewAgentActionResponseSchema.validate(action(['a'.repeat(101)]))
+    ).not.toThrow();
+  });
+
+  it('rejects a space ID over 512 characters', () => {
+    expect(() => PostNewAgentActionResponseSchema.validate(action(['a'.repeat(513)]))).toThrow();
   });
 });

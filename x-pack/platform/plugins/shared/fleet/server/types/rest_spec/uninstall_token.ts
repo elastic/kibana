@@ -9,7 +9,6 @@ import { schema } from '@kbn/config-schema';
 import {
   FLEET_SCHEMA_SHORT_TEXT_MAX_LENGTH,
   FLEET_SCHEMA_NAME_MAX_LENGTH,
-  FLEET_SCHEMA_NAMESPACE_MAX_LENGTH,
   FLEET_SCHEMA_LONG_TEXT_MAX_LENGTH,
 } from '../../constants';
 
@@ -60,11 +59,9 @@ const UninstallTokenMetadataSchema = schema.object({
     schema.oneOf([schema.literal(null), schema.string({ maxLength: FLEET_SCHEMA_NAME_MAX_LENGTH })])
   ),
   created_at: schema.string({ maxLength: FLEET_SCHEMA_SHORT_TEXT_MAX_LENGTH }),
-  namespaces: schema.maybe(
-    schema.arrayOf(schema.string({ maxLength: FLEET_SCHEMA_NAMESPACE_MAX_LENGTH }), {
-      maxSize: 100,
-    })
-  ),
+  // Kibana Space IDs, not data stream namespaces: the service copies the agent
+  // policy's `space_ids` into this field.
+  namespaces: schema.maybe(schema.arrayOf(schema.spaceId({ minLength: 0 }), { maxSize: 100 })),
 });
 
 export const GetUninstallTokensMetadataResponseSchema = ListResponseSchema(

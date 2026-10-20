@@ -26,6 +26,9 @@ export const FLEET_SCHEMA_NAME_MAX_LENGTH = 255;
  * Data stream namespaces and namespace prefixes. Matches the 100 byte ceiling that
  * `isValidNamespace` already enforces, so this only makes the existing rule visible to
  * the generated OAS and to CodeQL.
+ *
+ * Not for the `namespaces` field on agents, agent actions and uninstall tokens: despite
+ * the name, those hold Kibana Space IDs and use `schema.spaceId()`.
  */
 export const FLEET_SCHEMA_NAMESPACE_MAX_LENGTH = 100;
 

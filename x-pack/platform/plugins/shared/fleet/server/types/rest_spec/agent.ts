@@ -444,7 +444,7 @@ export const AgentResponseSchema = schema.object({
       ),
     ])
   ),
-  namespaces: schema.maybe(schema.arrayOf(schema.string({ maxLength: 100 }), { maxSize: 100 })),
+  namespaces: schema.maybe(schema.arrayOf(schema.spaceId({ minLength: 0 }), { maxSize: 100 })),
   upgrade: schema.maybe(
     schema.object({
       rollbacks: schema.maybe(
@@ -542,7 +542,7 @@ export const PostNewAgentActionResponseSchema = schema.object({
     agents: schema.maybe(
       schema.arrayOf(schema.savedObjectId({ minLength: 0 }), { maxSize: 10000 })
     ),
-    namespaces: schema.maybe(schema.arrayOf(schema.string({ maxLength: 100 }), { maxSize: 100 })),
+    namespaces: schema.maybe(schema.arrayOf(schema.spaceId({ minLength: 0 }), { maxSize: 100 })),
     expiration: schema.maybe(schema.string({ maxLength: FLEET_SCHEMA_SHORT_TEXT_MAX_LENGTH })),
     start_time: schema.maybe(schema.string({ maxLength: FLEET_SCHEMA_SHORT_TEXT_MAX_LENGTH })),
     minimum_execution_duration: schema.maybe(schema.number()),
