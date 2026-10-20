@@ -212,14 +212,14 @@ export const DiscoverTopNav = ({
     dataStateContainer.inspectorAdapters.requests
   );
 
+  // The modal needs the data view list to know whether tabs that
+  // have not been opened yet are time-based, which decides if "Store time" is offered.
   const onOpenSaveModal = useCallback(async () => {
-    // The modal needs the catalog to detect time-based tabs that have not been opened yet.
     await dispatch(internalStateActions.loadInitialDataViewList());
     dispatch(internalStateActions.openSaveSessionModal({}));
   }, [dispatch]);
 
   const onOpenSaveAsModal = useCallback(async () => {
-    // The modal needs the catalog to detect time-based tabs that have not been opened yet.
     await dispatch(internalStateActions.loadInitialDataViewList());
     dispatch(internalStateActions.openSaveSessionModal({ initialCopyOnSave: true }));
   }, [dispatch]);
