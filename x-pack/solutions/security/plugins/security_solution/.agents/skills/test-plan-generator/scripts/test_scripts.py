@@ -105,6 +105,23 @@ class PublishNormalizationTests(ScriptTestCase):
             f"{MARKER}\n<!-- generated-by: gpt-5 -->\n<!-- verbosity: detailed -->\n{TOKENS}\n# Plan\n",
         )
 
+    def test_blank_line_after_markers_is_kept(self) -> None:
+        result = self.dry_run("<!-- verbosity: lean -->\n\n# Plan\n", "--model", "gpt-5")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertTrue(result.stdout.endswith("<!-- verbosity: lean -->\n\n# Plan\n"))
+
+    def test_model_with_spaces_and_parentheses_is_accepted(self) -> None:
+        result = self.dry_run("# Plan\n", "--model", "cursor-agent claude-sonnet-5-5-medium")
+        self.assertIn("<!-- generated-by: cursor-agent claude-sonnet-5-5-medium -->", result.stdout)
+        result = self.dry_run("<!-- generated-by: Claude Sonnet 4.6 (thinking) -->\n# Plan\n")
+        self.assertIn("<!-- generated-by: Claude Sonnet 4.6 (thinking) -->", result.stdout)
+
+    def test_update_draft_with_published_markers_left_on_top_fails(self) -> None:
+        draft = f"<!-- verbosity: standard -->\n{TOKENS}\n{MARKER}\n<!-- generated-by: m -->\n{TOKENS}\n# Plan\n"
+        result = self.dry_run(draft, "--model", "m")
+        self.assertEqual(result.returncode, 65)
+        self.assertIn("published comment", result.stderr)
+
     def test_model_flag_replaces_draft_model(self) -> None:
         result = self.dry_run(f"<!-- generated-by: old -->\n<!-- verbosity: standard -->\n# Plan\n", "--model", "new")
         self.assertIn("<!-- generated-by: new -->", result.stdout)

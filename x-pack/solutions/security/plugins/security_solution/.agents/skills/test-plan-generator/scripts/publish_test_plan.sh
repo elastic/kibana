@@ -116,7 +116,7 @@ if [[ ! -f "$DRAFT_FILE" ]]; then
 fi
 
 # The model id ends up inside an HTML comment, so it must not be able to close it.
-MODEL_RE='^[A-Za-z0-9][A-Za-z0-9._:/@+-]{0,99}$'
+MODEL_RE='^[A-Za-z0-9][A-Za-z0-9 ._:/@+()-]{0,99}$'
 GENERATED_BY_RE='^<!-- generated-by: (.*) -->$'
 VERBOSITY_RE='^<!-- verbosity: (.*) -->$'
 TOKENS_RE='^<!-- tokens: (.*) -->$'
@@ -132,32 +132,43 @@ malformed() {
   exit 65
 }
 
-# Read the leading block of known top markers (blank lines between them are dropped).
+duplicated() {
+  malformed "duplicated $1 marker (remove the top markers copied from the published comment)"
+}
+
+# Read the leading block of known top markers. Blank lines between them are
+# dropped; blank lines after the last one stay in the body.
 HEADER_LINES=0
+PENDING_BLANKS=0
 SEEN_MARKER='false'
 DRAFT_MODEL=''
 VERBOSITY=''
 TOKENS=''
 while IFS= read -r line || [[ -n "$line" ]]; do
   line="${line%$'\r'}"
+  if [[ -z "$line" ]]; then
+    PENDING_BLANKS=$((PENDING_BLANKS + 1))
+    continue
+  fi
   if [[ "$line" == "$MARKER" ]]; then
-    [[ "$SEEN_MARKER" == 'false' ]] || malformed "duplicated '$MARKER' marker"
+    [[ "$SEEN_MARKER" == 'false' ]] || duplicated "'$MARKER'"
     SEEN_MARKER='true'
   elif [[ "$line" =~ $GENERATED_BY_RE ]]; then
-    [[ -z "$DRAFT_MODEL" ]] || malformed 'duplicated generated-by marker'
+    [[ -z "$DRAFT_MODEL" ]] || duplicated 'generated-by'
     DRAFT_MODEL="${BASH_REMATCH[1]}"
   elif [[ "$line" =~ $VERBOSITY_RE ]]; then
-    [[ -z "$VERBOSITY" ]] || malformed 'duplicated verbosity marker'
+    [[ -z "$VERBOSITY" ]] || duplicated 'verbosity'
     VERBOSITY="${BASH_REMATCH[1]}"
     [[ "$VERBOSITY" =~ ^(lean|standard|detailed)$ ]] || malformed "invalid verbosity '$VERBOSITY'"
   elif [[ "$line" =~ $TOKENS_RE ]]; then
-    [[ -z "$TOKENS" ]] || malformed 'duplicated tokens marker'
+    [[ -z "$TOKENS" ]] || duplicated 'tokens'
     TOKENS="${BASH_REMATCH[1]}"
     [[ "$TOKENS" =~ $TOKENS_VALUE_RE ]] || malformed "invalid tokens marker '$TOKENS'"
-  elif [[ -n "$line" ]]; then
+  else
     break
   fi
-  HEADER_LINES=$((HEADER_LINES + 1))
+  HEADER_LINES=$((HEADER_LINES + PENDING_BLANKS + 1))
+  PENDING_BLANKS=0
 done <"$DRAFT_FILE"
 
 if [[ -z "$MODEL" ]]; then

@@ -115,7 +115,7 @@ _If Fail or Blocked, reply to this comment with details (env, build, repro steps
   | Code-derived | `Code-derived (<what was found> in <path>)` — e.g. `Code-derived (new endpoint POST /rules in escalation_service.ts)` | Scenario covers a fact discovered only in code (a route registered outside the PR description, a schema change surfaced in a `.gen.ts` file consumers rely on, etc.). Used sparingly; if the same fact is also cited in a PR body, prefer the PR-artifact category. |
 
 - Never invent a source. If a scenario has no traceable AC, PR artifact, always-evaluated trigger, or code-derived fact, apply the Core rule and stop — do not fabricate a `**Source:**` value. This is a hard failure of `detailed` traceability, not a soft downgrade to `standard`.
-- The `Source` line derives from the corpus already gathered in Step 1 and consolidated in Step 2 (and, for Always-evaluated coverage, the trigger rule in `optional-scenarios.md`). It never triggers new fetches.
+- The `Source` line derives from the corpus already gathered in Step 1 and consolidated in Step 2 (and, for Always-evaluated coverage, the trigger rule in `optional-scenarios.md`). Writing it never triggers new fetches; when an update moves to `detailed`, [`mode-update.md`](mode-update.md) Step 3 re-reads the sources before the draft is written.
 
 **Execution block rules:**
 - Render exactly the three task-list items shown above, in that order, with the leading emoji on each line. The italic instruction line is part of the canonical block — do not reword or omit it.
@@ -302,7 +302,7 @@ The goal is to give the user full traceability of what the agent read, what it u
 | Issue #<number> — <title> | ✅ Read |
 | Parent issue #<number> — <title> | ✅ Read / ⛔ No parent |
 | Sub-issue #<number> — <title> | ✅ Read |
-| PR #<number> — <title> | ✅ Read / ✅ Re-read (activity since plan published) / ➖ Skipped (no activity since plan published) / ⚠️ Partially read (N files skipped — too large) / ⛔ Not found |
+| PR #<number> — <title> | ✅ Read / ✅ Re-read (activity since plan published) / ✅ Re-read (level change to <VERBOSITY_LEVEL>) / ➖ Skipped (no activity since plan published) / ⚠️ Partially read (N files skipped — too large) / ⛔ Not found |
 | Figma — <file or node name> | ✅ Metadata read (N fetchable elements catalogued) / ✅ Metadata read + K opened PNGs for visual verification / ✅ Metadata read + K opened PNGs for visual verification (cap raised from 8 by user) / ✅ Metadata read (M of N children catalogued — narrowed by user selection) / ✅ Design context read (Figma Make — code-only; no screenshot support) / ✅ K opened PNGs (Slides — <node name>) / ✅ K opened PNGs (Slides — <node name>) (cap raised from 8 by user) / ✅ FigJam read / ⚠️ Screenshot budget reached (K PNGs opened — remaining scenarios verified from metadata only) / ⚠️ Screenshot budget reached (Slides link catalogued without screenshot; no Figma-derived context) / ⚠️ get_metadata budget reached (3 fetched — remaining Figma links not inspected; scenarios derived from non-Figma sources) / ⚠️ get_design_context budget reached (2 fetched — remaining escape-hatch calls skipped; affected scenarios fall back to metadata and any screenshot already gathered) / ⚠️ get_design_context budget reached (2 fetched — remaining Make links catalogued without design context) / ⚠️ Read with errors / ⚠️ Node not found in file / ⛔ Inaccessible |
 | Image — <url or description> | ✅ Analyzed / ⛔ Could not fetch |
 | Google Doc — <title or url> | ✅ Read / ⛔ MCP not available |
