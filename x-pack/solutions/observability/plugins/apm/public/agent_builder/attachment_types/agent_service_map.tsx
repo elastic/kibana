@@ -63,9 +63,11 @@ export function AgentServiceMap({ connections, nodeMetadata }: AgentServiceMapPr
   const { euiTheme, colorMode } = useEuiTheme();
 
   const { nodes, edges } = useMemo(() => {
+    // Resources stay ungrouped: this static map can't expand or inspect a group.
     const { nodes: rawNodes, edges: rawEdges } = transformTopologyToServiceMap({
       connections,
       nodeMetadata,
+      groupResources: false,
     });
     // The static map has no popovers, so RED metrics render as edge labels.
     const labeledEdges = rawEdges.map((edge) => ({

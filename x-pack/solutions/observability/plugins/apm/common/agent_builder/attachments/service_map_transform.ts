@@ -150,15 +150,22 @@ type EdgeWithData = ServiceMapEdge & { data: ServiceMapEdgeData };
 /**
  * Builds service map nodes/edges from attachment connections, merging
  * per-service badge metadata, collapsing A→B/B→A pairs into a single
- * bidirectional edge, and grouping external resource nodes the same way the
- * full service map does. Edge `data` mirrors `transformToReactFlow` output
- * (`sourceData`/`targetData`/`resources`/labels) so the edge popover can
- * fetch dependency stats (`GET /internal/apm/service-map/dependency`).
+ * bidirectional edge, and (unless `groupResources` is off) grouping external
+ * resource nodes the same way the full service map does. Edge `data` mirrors
+ * `transformToReactFlow` output (`sourceData`/`targetData`/`resources`/labels)
+ * so the edge popover can fetch dependency stats
+ * (`GET /internal/apm/service-map/dependency`).
+ *
+ * Grouping hides the individual resources behind a node that can only be
+ * inspected in the interactive map, so the static map turns it off.
  */
 export function transformTopologyToServiceMap({
   connections,
   nodeMetadata,
-}: Pick<ServiceMapAttachmentData, 'connections' | 'nodeMetadata'>): TopologyServiceMap {
+  groupResources = true,
+}: Pick<ServiceMapAttachmentData, 'connections' | 'nodeMetadata'> & {
+  groupResources?: boolean;
+}): TopologyServiceMap {
   const nodesById = new Map<string, ServiceMapNode>();
   const edgesById = new Map<string, EdgeWithData>();
 
@@ -218,6 +225,10 @@ export function transformTopologyToServiceMap({
         metrics: connection.metrics,
       },
     });
+  }
+
+  if (!groupResources) {
+    return { nodes: [...nodesById.values()], edges: [...edgesById.values()] };
   }
 
   const grouped = groupResourceNodes([...nodesById.values()], [...edgesById.values()]);

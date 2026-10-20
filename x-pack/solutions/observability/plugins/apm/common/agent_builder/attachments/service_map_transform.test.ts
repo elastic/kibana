@@ -223,6 +223,19 @@ describe('transformTopologyToServiceMap', () => {
     expect(nodes).toHaveLength(2); // service + grouped resources
     expect(edges).toHaveLength(1);
   });
+
+  it('keeps external resource nodes ungrouped when grouping is off', () => {
+    const connections: ServiceMapAttachmentData['connections'] = [1, 2, 3, 4].map((i) => ({
+      source: serviceNode('opbeans-java', 'java'),
+      target: externalNode(`api-${i}.example.com:443`, 'external', 'http'),
+    }));
+
+    const { nodes, edges } = transformTopologyToServiceMap({ connections, groupResources: false });
+
+    expect(nodes.some((node) => 'isGrouped' in node.data)).toBe(false);
+    expect(nodes).toHaveLength(5); // service + 4 resources
+    expect(edges).toHaveLength(4);
+  });
 });
 
 describe('topologyHasService', () => {
