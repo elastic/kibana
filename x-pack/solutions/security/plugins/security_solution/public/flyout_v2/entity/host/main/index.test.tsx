@@ -31,7 +31,7 @@ jest.mock('../../../../common/components/visualization_actions/visualization_emb
 jest.mock('../../../use_flyout_api');
 const mockFlyoutApi = createFlyoutApiMock();
 
-// Wrap the real content with trigger buttons so `openDetailsPanel` can be exercised for the CSP tools.
+// Wrap the real content with trigger buttons so `openDetailsPanel` can be exercised for the tools.
 jest.mock('./content', () => {
   const actual = jest.requireActual('./content');
   const { CspInsightLeftPanelSubTab, EntityDetailsLeftPanelTab } = jest.requireActual(
@@ -39,6 +39,11 @@ jest.mock('./content', () => {
   );
   const Content = (props: { openDetailsPanel: (path: EntityDetailsPath) => void }) => (
     <>
+      <button
+        type="button"
+        data-test-subj="openAnomalyInsights"
+        onClick={() => props.openDetailsPanel({ tab: EntityDetailsLeftPanelTab.ANOMALIES })}
+      />
       {Object.values(CspInsightLeftPanelSubTab).map((subTab) => (
         <button
           key={subTab as string}
@@ -391,7 +396,7 @@ describe('<Host />', () => {
         );
       });
     });
-    describe('CSP insights tools', () => {
+    describe('detail tools', () => {
       const renderResolved = () => {
         mockedUseNewEntityAnalyticsPage.mockReturnValue(true);
         withStoreRecords(targetRecord, [aliasRecord]);
@@ -401,6 +406,13 @@ describe('<Host />', () => {
           </TestProviders>
         );
       };
+
+      it('passes the panel mode to the anomaly insights tool', () => {
+        fireEvent.click(renderResolved().getByTestId('openAnomalyInsights'));
+        expect(mockFlyoutApi.openEntityAnomalyInsights).toHaveBeenCalledWith(
+          expect.objectContaining({ value: 'test', mode: 'resolved' })
+        );
+      });
 
       it('passes the panel mode and scope to the alerts insights tool', () => {
         fireEvent.click(renderResolved().getByTestId('openCspInsights-alertsTabId'));

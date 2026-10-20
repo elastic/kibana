@@ -8,6 +8,7 @@
  */
 
 import { differenceBy, orderBy, pick, uniqBy, omit } from 'lodash';
+import { v4 as uuid } from 'uuid';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
   createStateContainer,
@@ -55,9 +56,11 @@ interface TabsStateInLocalStorage {
   userId: string;
   spaceId: string;
   discoverSessionId: string | undefined;
+  discoverSessionVersion?: string;
   draftSessionTitle: string | undefined;
   openTabs: TabStateInLocalStorage[];
   closedTabs: RecentlyClosedTabStateInLocalStorage[];
+  unsavedTabIds?: string[];
 }
 
 const defaultTabsStateInLocalStorage: TabsStateInLocalStorage = {
@@ -82,9 +85,9 @@ export interface TabsStorageManager {
   startUrlSync: (props: { onChanged?: (nextState: TabsUrlState) => void }) => () => void;
   pushSelectedTabIdToUrl: (selectedTabId: string, options?: { replace?: boolean }) => Promise<void>;
   persistLocally: (
-    props: Omit<TabsInternalStatePayload, 'selectedTabId'>,
+    props: Omit<TabsInternalStatePayload, 'selectedTabId'> & { unsavedTabIds?: string[] },
     getInternalState: (tabId: string) => TabState['initialInternalState'] | undefined,
-    discoverSessionId: string | undefined,
+    discoverSession: Pick<DiscoverSession, 'id' | 'version'> | undefined,
     draftSessionTitle?: string
   ) => Promise<void>;
   updateTabStateLocally: (
@@ -92,7 +95,8 @@ export interface TabsStorageManager {
     tabState: Pick<
       TabStateInLocalStorage,
       'internalState' | 'attributes' | 'appState' | 'globalState' | 'profileState' | 'visorMode'
-    >
+    >,
+    discoverSession: Pick<DiscoverSession, 'id' | 'version'> | undefined
   ) => void;
   loadLocally: (props: {
     userId: string;
@@ -109,6 +113,10 @@ export interface TabsStorageManager {
   }) => TabsInternalStatePayload & {
     updatedDiscoverSession: DiscoverSession | undefined;
     draftSessionTitle: string | undefined;
+    /** The selected draft replaced by a newer saved session, used to recognize its stale URL. */
+    outdatedSelectedTab?: TabState;
+    /** Whether a newer saved session replaced the local tabs; unsaved changes moved to recently closed tabs. */
+    hasNewSavedVersion?: boolean;
   };
   getNRecentlyClosedTabs: (params: {
     previousOpenTabs: TabState[];
@@ -331,9 +339,11 @@ export const createTabsStorageManager = ({
       userId: storedTabsState?.userId || '',
       spaceId: storedTabsState?.spaceId || '',
       discoverSessionId: storedTabsState?.discoverSessionId || undefined,
+      discoverSessionVersion: storedTabsState?.discoverSessionVersion,
       draftSessionTitle: storedTabsState?.draftSessionTitle || undefined,
       openTabs: storedTabsState?.openTabs || [],
       closedTabs: storedTabsState?.closedTabs || [],
+      unsavedTabIds: storedTabsState?.unsavedTabIds,
     };
   };
 
@@ -380,9 +390,9 @@ export const createTabsStorageManager = ({
   };
 
   const persistLocally: TabsStorageManager['persistLocally'] = async (
-    { allTabs, recentlyClosedTabs },
+    { allTabs, recentlyClosedTabs, unsavedTabIds },
     getInternalState,
-    discoverSessionId,
+    discoverSession,
     draftSessionTitle
   ) => {
     if (!enabled) {
@@ -399,10 +409,12 @@ export const createTabsStorageManager = ({
     const nextTabsInStorage: TabsStateInLocalStorage = {
       userId: sessionInfo.userId,
       spaceId: sessionInfo.spaceId,
-      discoverSessionId,
+      discoverSessionId: discoverSession?.id,
+      discoverSessionVersion: discoverSession?.version,
       draftSessionTitle,
       openTabs,
       closedTabs, // wil be used for "Recently closed tabs" feature
+      unsavedTabIds,
     };
 
     storage.set(TABS_LOCAL_STORAGE_KEY, nextTabsInStorage);
@@ -410,15 +422,24 @@ export const createTabsStorageManager = ({
 
   const updateTabStateLocally: TabsStorageManager['updateTabStateLocally'] = (
     tabId,
-    tabStatePartial
+    tabStatePartial,
+    discoverSession
   ) => {
     if (!enabled) {
       return;
     }
     let hasModifications = false;
     const storedTabsState = readFromLocalStorage();
+
+    // Another browser tab may have stored a different session whose tab IDs match these ones
+    if (storedTabsState.discoverSessionId !== discoverSession?.id) {
+      return;
+    }
+
     const updatedTabsState = {
       ...storedTabsState,
+      // Another browser tab may have stored a newer version that these changes are not based on
+      discoverSessionVersion: discoverSession?.version,
       openTabs: storedTabsState.openTabs.map((tab) => {
         if (tab.id === tabId) {
           hasModifications = true;
@@ -471,17 +492,29 @@ export const createTabsStorageManager = ({
     sessionInfo.userId = userId;
     sessionInfo.spaceId = spaceId;
 
+    const isSameSession = persistedDiscoverSession?.id === storedTabsState.discoverSessionId;
+    const savedVersion = persistedDiscoverSession?.version;
+    const storedVersion = storedTabsState.discoverSessionVersion;
+    // Drafts stored without a version predate this check, so they are kept.
+    const hasBothVersions = Boolean(savedVersion && storedVersion);
+    const hasNewSavedVersion = isSameSession && hasBothVersions && savedVersion !== storedVersion;
+    const canReuseLocalTabs = isSameSession && !hasNewSavedVersion;
+
     const previousOpenTabs = storedTabsState.openTabs.map((tab) =>
       toTabState(tab, defaultTabState)
     );
     let openTabs = shouldClearAllTabs ? [] : previousOpenTabs;
     let updatedDiscoverSession = persistedDiscoverSession;
+    let outdatedSelectedTab: TabState | undefined;
+
+    if (hasNewSavedVersion) {
+      outdatedSelectedTab = previousOpenTabs.find(({ id }) => id === selectedTabId);
+    }
 
     // Prepare before mapping tabs so inline views can reuse matching local IDs. Return the same
     // prepared session below so restored tabs and the unsaved-changes baseline use consistent IDs.
     if (persistedDiscoverSession && prepareSession) {
-      const localTabs =
-        persistedDiscoverSession.id === storedTabsState.discoverSessionId ? openTabs : [];
+      const localTabs = canReuseLocalTabs ? openTabs : [];
       updatedDiscoverSession = prepareSession(persistedDiscoverSession, localTabs, selectedTabId);
     }
 
@@ -489,13 +522,35 @@ export const createTabsStorageManager = ({
       fromSavedObjectTabToTabState({ tab, profileStateRegistry })
     );
 
-    if (updatedDiscoverSession?.id !== storedTabsState.discoverSessionId) {
-      // if the discover session has changed, use the tabs from the session
+    if (!canReuseLocalTabs) {
+      // a different session, or this one saved elsewhere since, opens its saved tabs
       openTabs = persistedTabs ?? [];
     }
     const closedTabs = storedTabsState.closedTabs.map((tab) =>
       toRecentlyClosedTabState(tab, defaultTabState)
     );
+    // Unsaved changes of draft tabs replaced by a newer saved version stay restorable as recently
+    // closed tabs. They get new IDs because the saved tabs that replace them keep the original ones.
+    const replacedUnsavedTabs = hasNewSavedVersion
+      ? previousOpenTabs
+          .filter(
+            ({ id }) =>
+              storedTabsState.unsavedTabIds?.includes(id) &&
+              persistedTabs?.some((persistedTab) => persistedTab.id === id)
+          )
+          .map((tab) => ({ ...tab, id: uuid() }))
+      : [];
+
+    const getRecentlyClosedTabs = (nextOpenTabs: TabState[]) =>
+      getNRecentlyClosedTabs({
+        previousOpenTabs,
+        previousRecentlyClosedTabs: closedTabs,
+        nextOpenTabs,
+        justRemovedTabs: [
+          ...differenceBy(previousOpenTabs, nextOpenTabs, 'id'),
+          ...replacedUnsavedTabs,
+        ],
+      });
     // The draft title belongs to the unsaved session, so only keep it when restoring its open tabs
     const restoredDraftSessionTitle =
       !updatedDiscoverSession && !storedTabsState.discoverSessionId
@@ -512,14 +567,12 @@ export const createTabsStorageManager = ({
       ) {
         return {
           allTabs: openTabs,
+          outdatedSelectedTab,
+          hasNewSavedVersion,
           selectedTabId,
           updatedDiscoverSession,
           draftSessionTitle: restoredDraftSessionTitle,
-          recentlyClosedTabs: getNRecentlyClosedTabs({
-            previousOpenTabs,
-            previousRecentlyClosedTabs: closedTabs,
-            nextOpenTabs: openTabs,
-          }),
+          recentlyClosedTabs: getRecentlyClosedTabs(openTabs),
         };
       }
 
@@ -541,14 +594,11 @@ export const createTabsStorageManager = ({
         const allTabsWithNewTab = [...openTabs, newTab];
         return {
           allTabs: allTabsWithNewTab,
+          hasNewSavedVersion,
           selectedTabId: newTab.id,
           updatedDiscoverSession,
           draftSessionTitle: restoredDraftSessionTitle,
-          recentlyClosedTabs: getNRecentlyClosedTabs({
-            previousOpenTabs,
-            previousRecentlyClosedTabs: closedTabs,
-            nextOpenTabs: allTabsWithNewTab,
-          }),
+          recentlyClosedTabs: getRecentlyClosedTabs(allTabsWithNewTab),
         };
       }
 
@@ -566,11 +616,7 @@ export const createTabsStorageManager = ({
             selectedTabId,
             updatedDiscoverSession,
             draftSessionTitle: undefined,
-            recentlyClosedTabs: getNRecentlyClosedTabs({
-              previousOpenTabs,
-              previousRecentlyClosedTabs: closedTabs,
-              nextOpenTabs: restoredTabs,
-            }),
+            recentlyClosedTabs: getRecentlyClosedTabs(restoredTabs),
           };
         }
       }
@@ -596,14 +642,12 @@ export const createTabsStorageManager = ({
 
     return {
       allTabs,
+      outdatedSelectedTab,
+      hasNewSavedVersion,
       selectedTabId: selectedTab.id,
       updatedDiscoverSession,
       draftSessionTitle: undefined,
-      recentlyClosedTabs: getNRecentlyClosedTabs({
-        previousOpenTabs,
-        previousRecentlyClosedTabs: closedTabs,
-        nextOpenTabs: allTabs,
-      }),
+      recentlyClosedTabs: getRecentlyClosedTabs(allTabs),
     };
   };
 

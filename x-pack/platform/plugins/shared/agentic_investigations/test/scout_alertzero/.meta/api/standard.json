@@ -1,5 +1,5 @@
 {
-  "sha1": "24f8cd5535e3194f08b3f3016d7a7a474f76e56d",
+  "sha1": "69e089242c5dbc048c72033445a26ccfbd8ce739",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -859,8 +859,8 @@
       }
     },
     {
-      "id": "d74a17ad3340e1b-d39bd8311e9c3bb",
-      "title": "GET /internal/investigations/investigations — investigation query API pages a filtered list and reports the total",
+      "id": "d74a17ad3340e1b-ebafe8f67a2e92a",
+      "title": "GET /internal/investigations/investigations — investigation query API in_progress=false includes idle investigations; true excludes them",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -873,6 +873,20 @@
       }
     },
     {
+      "id": "d74a17ad3340e1b-d39bd8311e9c3bb",
+      "title": "GET /internal/investigations/investigations — investigation query API pages a filtered list and reports the total",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_alertzero/api/tests/investigations/query.spec.ts",
+        "line": 235,
+        "column": 7
+      }
+    },
+    {
       "id": "d74a17ad3340e1b-0fab7fc36cb7c6a",
       "title": "GET /internal/investigations/investigations — investigation query API filters by status on the conversation search path",
       "expectedStatus": "passed",
@@ -882,8 +896,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_alertzero/api/tests/investigations/query.spec.ts",
-        "line": 242,
-        "column": 14
+        "line": 256,
+        "column": 25
       }
     },
     {
@@ -896,8 +910,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_alertzero/api/tests/investigations/query.spec.ts",
-        "line": 251,
-        "column": 13
+        "line": 264,
+        "column": 14
       }
     },
     {
@@ -910,8 +924,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_alertzero/api/tests/investigations/query.spec.ts",
-        "line": 266,
-        "column": 58
+        "line": 282,
+        "column": 23
       }
     },
     {
@@ -924,8 +938,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_alertzero/api/tests/investigations/query.spec.ts",
-        "line": 275,
-        "column": 19
+        "line": 285,
+        "column": 29
       }
     },
     {
@@ -938,8 +952,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_alertzero/api/tests/investigations/query.spec.ts",
-        "line": 294,
-        "column": 57
+        "line": 309,
+        "column": 14
       }
     },
     {
@@ -952,8 +966,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_alertzero/api/tests/investigations/query.spec.ts",
-        "line": 299,
-        "column": 23
+        "line": 314,
+        "column": 24
       }
     },
     {
@@ -966,8 +980,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_alertzero/api/tests/investigations/query.spec.ts",
-        "line": 321,
-        "column": 54
+        "line": 337,
+        "column": 21
       }
     },
     {
