@@ -26,7 +26,7 @@ spaceTest.describe('Vector DB onboarding paths', { tag: [...tags.serverless.vect
   );
 
   spaceTest(
-    'offers both embedding paths alongside the project connection details',
+    'shows the embedding paths, project connection details and setup options',
     async ({ pageObjects }) => {
       await pageObjects.onboarding.gotoPathSelection();
 
@@ -37,8 +37,19 @@ spaceTest.describe('Vector DB onboarding paths', { tag: [...tags.serverless.vect
       await expect(pageObjects.onboarding.copyEndpointUrlButton).toBeVisible();
       await expect(pageObjects.onboarding.documentationLink).toBeVisible();
       await expect(pageObjects.onboarding.skipSetupButton).toBeVisible();
+      await expect(pageObjects.onboarding.viewPromptButton).toBeVisible();
+      await expect(pageObjects.onboarding.installCliButton).toBeVisible();
     }
   );
+
+  spaceTest('opens the Elastic AI Agent in the sidebar', async ({ pageObjects }) => {
+    const { onboarding } = pageObjects;
+    await onboarding.gotoPathSelection();
+
+    await onboarding.openElasticAgentButton.click();
+
+    await expect(onboarding.agentBuilderSidebar).toBeVisible();
+  });
 
   spaceTest(
     'walks the generate embeddings path through to the home page',

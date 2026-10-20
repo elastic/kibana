@@ -323,6 +323,30 @@ export const bulkDeleteAttachments = async ({
   return body;
 };
 
+export const bulkDeleteAttachmentReferences = async ({
+  supertest,
+  caseId,
+  type,
+  attachmentIds,
+  expectedHttpCode = 204,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.Agent;
+  caseId: string;
+  type: string;
+  attachmentIds: string[];
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<void> => {
+  await supertest
+    .post(`${getSpaceUrlPrefix(auth.space)}${getCaseBulkDeleteAttachmentsUrl(caseId)}`)
+    .set('kbn-xsrf', 'true')
+    .set('x-elastic-internal-origin', 'foo')
+    .auth(auth.user.username, auth.user.password)
+    .send({ type, attachmentIds })
+    .expect(expectedHttpCode);
+};
+
 export const bulkDeleteFileAttachments = async ({
   supertest,
   caseId,

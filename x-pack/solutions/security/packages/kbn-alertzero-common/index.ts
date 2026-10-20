@@ -159,6 +159,8 @@ export {
   HuntIncompleteReason,
   HuntIoc,
   HuntIocType,
+  huntResultSchema,
+  isoDatetimeSchema,
   HuntIndexScopeResponse,
   HuntScope,
   HuntScopeResolution,
@@ -174,12 +176,14 @@ export {
   CandidateSkipReason,
   HuntCoordinatorRequestBody,
   HuntCoordinatorResponse,
+  HuntCoordinatorResult,
   HuntCoordinatorStatus,
   FindOrCreateInvestigationRequestBody,
   FindOrCreateInvestigationResponse,
   WriteHuntEvidenceRequestBody,
   WriteHuntEvidenceResponse,
 } from './impl/schemas';
+export type { HuntResult } from './impl/schemas';
 
 export { isWorkerEnableBlocked } from './impl/workers/blocking_reasons';
 
@@ -244,3 +248,11 @@ export type {
   SystemSecurityWorkerCatalogEntry,
   WorkerScheduleUnit,
 } from './constants';
+export {
+  REQUIRED_REPORT_SEMANTIC_FIELDS,
+  THREAT_REPORTS_GET_MAPPING_PARAMS,
+  THREAT_REPORTS_INDEX,
+  getReportEmbeddingEndpointIds,
+  getSemanticTextInferenceId,
+  isReportsIndexManaged,
+} from './threat_intel_mapping';

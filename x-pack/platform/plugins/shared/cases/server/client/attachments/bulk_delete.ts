@@ -6,199 +6,68 @@
  */
 
 import Boom from '@hapi/boom';
+import type { KueryNode } from '@kbn/es-query';
 
-import pMap from 'p-map';
-import { partition } from 'lodash';
-import type { Logger, SavedObject } from '@kbn/core/server';
-import type { File, FileJSON } from '@kbn/files-plugin/common';
-import type { FileServiceStart } from '@kbn/files-plugin/server';
-import { FileNotFoundError } from '@kbn/files-plugin/server/file_service/errors';
-import type { AttachmentAttributesV2 } from '../../../common/types/domain';
+import { CASE_ATTACHMENT_SAVED_OBJECT, CASE_COMMENT_SAVED_OBJECT } from '../../../common/constants';
+import type {
+  UnifiedAttachmentAttributes,
+  UnifiedReferenceAttachmentPayload,
+} from '../../../common/types/domain';
 import {
-  AttachmentRequestRtV2,
-  BulkDeleteAttachmentsRequestRt,
+  BulkDeleteAttachmentsByAttachmentIdRequestRt,
+  BulkDeleteAttachmentsBySavedObjectIdRequestRt,
   BulkDeleteFileAttachmentsRequestRt,
 } from '../../../common/types/api';
-import { decodeOrThrow, decodeWithExcessOrThrow } from '../../common/runtime_types';
-import { MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import { FILE_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
+import {
+  getIndexFromMetadata,
+  isUnifiedReferenceAttachmentRequest,
+  resolveUnifiedAttachmentType,
+} from '../../../common/utils/attachments';
+import { decodeWithExcessOrThrow } from '../../common/runtime_types';
+import { getAlertInfoFromComments, getIDsAndIndicesAsArrays } from '../../common/utils';
+import type { SOWithErrors } from '../../common/types';
+import type { AttachmentForDeletion } from '../../services/attachments/types';
 import type { CasesClientArgs } from '../types';
-import { createCaseError } from '../../common/error';
+import { buildFilter, combineFilters, NodeBuilderOperators } from '../utils';
+import { createCaseError, generateCaseErrorResponse, isSOError } from '../../common/error';
 import { Operations } from '../../authorization';
 import type { BulkDeleteArgs, BulkDeleteFileArgs } from './types';
-import { CaseFileMetadataForDeletionRt } from '../../../common/files';
 import type { CasesClient } from '../client';
-import { createFileEntities, deleteFiles } from '../files';
-import { handleAlerts, updateCaseAttachmentStats } from './delete';
-import { emitAttachmentsDeletedEvents } from './trigger_utils';
-import { isAssociatedToCase } from '../../common/partitioning';
-import type { AttachmentSavedObjectType } from '../../services/user_actions/types';
-
-interface BulkDeleteClassification {
-  missingIds: string[];
-  foundAttachments: Array<SavedObject<AttachmentAttributesV2>>;
-  attachmentsNotInCase: Array<SavedObject<AttachmentAttributesV2>>;
-  fileAttachments: Array<SavedObject<AttachmentAttributesV2>>;
-  attachmentsInCase: Array<SavedObject<AttachmentAttributesV2>>;
-}
-
-const doNotExistOnCaseMessage = (ids: string[], caseId: string): string =>
-  ids.length === 1
-    ? `Attachment ${ids[0]} does not exist on case ${caseId}.`
-    : `Attachments ${ids.join(', ')} do not exist on case ${caseId}.`;
+import { deleteFiles, getFileEntitiesForCase } from '../files';
+import type { DecodedAttachment, RecordUserActions } from './delete_utils';
+import {
+  deleteCaseAttachments,
+  doNotExistOnCaseMessage,
+  updateCaseAttachmentStats,
+} from './delete_utils';
+import { buildAttachmentTypeFilter } from './type_filter';
+import { emitAttachmentsDeletedEvent } from './trigger_utils';
 
 /**
- * Deletes multiple attachments of a case in a single call.
- *
- * Unlike {@link bulkDeleteFileAttachments} this is type agnostic, with one exception: file
- * attachments must go through {@link bulkDeleteFileAttachments}. A file lives in two places — the
- * attachment saved object and the file object owned by the files plugin — and deleting only the
- * former would orphan the blob, so they are rejected here instead of being silently half-deleted.
- *
- * The request is rejected as a whole if any of the ids cannot be found on the case, so callers
- * never end up with a partially applied deletion they did not ask for.
+ * Deletes attachments from a case, by saved object id or by the ids an attachment type references,
+ * and records one `bulkAttachments` user action per attachment type. Rejects the request if any id
+ * is not found.
  */
 export const bulkDeleteAttachments = async (
-  { caseId, savedObjectIds }: BulkDeleteArgs,
+  args: BulkDeleteArgs,
   clientArgs: CasesClientArgs
 ): Promise<void> => {
-  const {
-    user,
-    services: { caseService, attachmentService, userActionService, alertsService },
-    logger,
-    authorization,
-  } = clientArgs;
+  const { caseId } = args;
+  const { logger } = clientArgs;
 
   try {
-    const request = decodeWithExcessOrThrow(BulkDeleteAttachmentsRequestRt)({
-      ids: savedObjectIds,
-    });
-    const uniqueIds = [...new Set(request.ids)];
-
-    const { saved_objects: soAttachments } = await attachmentService.getter.bulkGet(uniqueIds);
-
-    const {
-      missingIds,
-      foundAttachments,
-      attachmentsNotInCase,
-      fileAttachments,
-      attachmentsInCase,
-    } = soAttachments.reduce<BulkDeleteClassification>(
-      (acc, attachment) => {
-        if (attachment.error != null || attachment.attributes == null) {
-          acc.missingIds.push(attachment.id);
-          return acc;
-        }
-
-        const found = attachment as SavedObject<AttachmentAttributesV2>;
-
-        acc.foundAttachments.push(found);
-
-        if (!isAssociatedToCase(caseId, found)) {
-          acc.attachmentsNotInCase.push(found);
-          return acc;
-        }
-
-        if (found.attributes.type === FILE_ATTACHMENT_TYPE) {
-          acc.fileAttachments.push(found);
-          return acc;
-        }
-
-        acc.attachmentsInCase.push(found);
-        return acc;
-      },
-      {
-        missingIds: [],
-        foundAttachments: [],
-        attachmentsNotInCase: [],
-        fileAttachments: [],
-        attachmentsInCase: [],
-      }
-    );
-
-    if (missingIds.length > 0) {
-      throw Boom.notFound(doNotExistOnCaseMessage(missingIds, caseId));
-    }
-
-    // Authorized before the case and file checks below, so their error messages cannot tell an
-    // unauthorized caller which case an attachment belongs to, or what type it is.
-    await authorization.ensureAuthorized({
-      entities: foundAttachments.map((attachment) => ({
-        id: attachment.id,
-        owner: attachment.attributes.owner,
-      })),
-      operation: Operations.deleteComment,
-    });
-
-    if (attachmentsNotInCase.length > 0) {
-      throw Boom.notFound(
-        doNotExistOnCaseMessage(
-          attachmentsNotInCase.map((attachment) => attachment.id),
-          caseId
-        )
-      );
-    }
-
-    if (fileAttachments.length > 0) {
-      const ids = fileAttachments.map((attachment) => attachment.id);
-      throw Boom.badRequest(
-        `${ids.length === 1 ? 'Attachment' : 'Attachments'} ${ids.join(
-          ', '
-        )} of type ${FILE_ATTACHMENT_TYPE} cannot be deleted through this endpoint. Use the file attachments deletion endpoint instead.`
-      );
-    }
-
-    // Built before anything is deleted: the decode strips the non request fields (created_at etc.)
-    // the same way the single delete does, and it throws on an attachment it cannot represent. If
-    // that happened after the delete, the attachments would be gone with no user action recording it.
-    const attachmentDeletions = attachmentsInCase.map((attachment) => ({
-      id: attachment.id,
-      owner: attachment.attributes.owner,
-      attachment: decodeOrThrow(AttachmentRequestRtV2)(attachment.attributes),
-      savedObjectType: attachment.type as AttachmentSavedObjectType,
-    }));
-
-    const deletedIds = await attachmentService.bulkDelete({
-      savedObjectIds: uniqueIds,
-      refresh: true,
-    });
-
-    // Core's bulk delete reports per-object failures instead of throwing, and only confirmed
-    // deletes come back, so a partial failure is possible here.
-    const deletedIdsSet = new Set(deletedIds);
-    const notDeletedIds = uniqueIds.filter((id) => !deletedIdsSet.has(id));
-    const deletedAttachments = attachmentsInCase.filter(({ id }) => deletedIdsSet.has(id));
-
-    // Record the attachments that did delete before surfacing the ones that did not. Everything
-    // below is scoped to the confirmed deletes, so the case is never recorded as having lost an
-    // attachment that is in fact still there; skipping it instead would leave a case the caller
-    // cannot repair by retrying, since the deleted ids are genuinely gone and the retry fails the
-    // missing-id check. The stats are recomputed from the index rather than decremented, so they
-    // are correct whichever subset survived.
-    if (deletedAttachments.length > 0) {
-      await updateCaseAttachmentStats({ caseService, attachmentService, caseId, user });
-
-      await userActionService.creator.bulkCreateAttachmentDeletion({
-        caseId,
-        attachments: attachmentDeletions.filter(({ id }) => deletedIdsSet.has(id)),
-        user,
+    if ('savedObjectIds' in args) {
+      const request = decodeWithExcessOrThrow(BulkDeleteAttachmentsBySavedObjectIdRequestRt)({
+        ids: args.savedObjectIds,
       });
-
-      await handleAlerts({
-        alertsService,
-        attachments: deletedAttachments.map((attachment) => attachment.attributes),
-        caseId,
+      await deleteBySavedObjectIds({ caseId, savedObjectIds: request.ids }, clientArgs);
+    } else {
+      const request = decodeWithExcessOrThrow(BulkDeleteAttachmentsByAttachmentIdRequestRt)({
+        type: args.type,
+        attachmentIds: args.attachmentIds,
       });
-
-      emitAttachmentsDeletedEvents(clientArgs, caseId, deletedAttachments);
-    }
-
-    if (notDeletedIds.length > 0) {
-      throw Boom.internal(
-        `Failed to delete ${
-          notDeletedIds.length === 1 ? 'attachment' : 'attachments'
-        } ${notDeletedIds.join(', ')} on case ${caseId}.`
-      );
+      await deleteByAttachmentIds({ caseId, ...request }, clientArgs);
     }
   } catch (error) {
     throw createCaseError({
@@ -209,75 +78,422 @@ export const bulkDeleteAttachments = async (
   }
 };
 
+const deleteBySavedObjectIds = async (
+  { caseId, savedObjectIds }: { caseId: string; savedObjectIds: string[] },
+  clientArgs: CasesClientArgs
+): Promise<void> => {
+  const {
+    services: { attachmentService },
+  } = clientArgs;
+
+  const uniqueIds = [...new Set(savedObjectIds)];
+  const attachments = await attachmentService.getter.bulkGetForDeletion(uniqueIds);
+  const foundIds = new Set(attachments.map(({ id }) => id));
+  const missingIds = uniqueIds.filter((id) => !foundIds.has(id));
+
+  if (missingIds.length > 0) {
+    throw Boom.notFound(doNotExistOnCaseMessage(missingIds, caseId));
+  }
+
+  await deleteCaseAttachments(
+    {
+      caseId,
+      attachments,
+      operation: Operations.deleteComment,
+      recordUserActions: recordByType(caseId, clientArgs),
+    },
+    clientArgs
+  );
+};
+
+type ReferenceAttributes = UnifiedAttachmentAttributes & UnifiedReferenceAttachmentPayload;
+
+interface OwnedReferenceAttachment extends AttachmentForDeletion {
+  owner: string;
+  attributes: ReferenceAttributes;
+}
+
+interface PartialDeletion {
+  attachment: OwnedReferenceAttachment;
+  removedIds: string[];
+  remainingIds: string[];
+  remainingIndex?: string | string[];
+}
+
+const notAttachedMessage = (type: string, ids: string[], caseId: string): string =>
+  `${type} ${ids.join(', ')} ${ids.length === 1 ? 'is' : 'are'} not attached to case ${caseId}.`;
+
+const deleteByAttachmentIds = async (
+  { caseId, type, attachmentIds }: { caseId: string; type: string; attachmentIds: string[] },
+  clientArgs: CasesClientArgs
+): Promise<void> => {
+  const {
+    user,
+    logger,
+    authorization,
+    services: { attachmentService, caseService, alertsService },
+  } = clientArgs;
+
+  const originalCase = await caseService.getCase({ id: caseId });
+  const caseOwner = originalCase.attributes.owner;
+
+  // Authorized before the not attached check below, so its message cannot tell an unauthorized
+  // caller which ids are attached to the case.
+  await authorization.ensureAuthorized({
+    entities: [{ id: caseId, owner: caseOwner }],
+    operation: Operations.deleteComment,
+  });
+
+  if (type === FILE_ATTACHMENT_TYPE) {
+    await deleteCaseFiles(
+      {
+        caseId,
+        fileIds: attachmentIds,
+        notFoundMessage: (ids) => notAttachedMessage(type, ids, caseId),
+        recordUserActions: recordByType(caseId, clientArgs),
+      },
+      clientArgs
+    );
+    return;
+  }
+
+  const requestedIds = new Set(attachmentIds);
+  const candidates = await attachmentService.getter.getCaseAttachmentsForDeletion({
+    caseId,
+    filter: combineFilters([
+      buildAttachmentTypeFilter([type]),
+      buildReferencedIdsFilter(attachmentIds),
+    ]),
+  });
+
+  const toDelete: OwnedReferenceAttachment[] = [];
+  const toUpdate: PartialDeletion[] = [];
+  const matchedIds = new Set<string>();
+
+  const referenceAttachments = candidates
+    .map((candidate) => toOwnedReferenceAttachment(candidate, caseOwner))
+    .filter((attachment): attachment is OwnedReferenceAttachment => attachment != null);
+
+  for (const attachment of referenceAttachments) {
+    const ids = toArray(attachment.attributes.attachmentId);
+    const matched = ids.filter((id) => requestedIds.has(id));
+    matched.forEach((id) => matchedIds.add(id));
+
+    if (matched.length > 0 && matched.length === ids.length) {
+      toDelete.push(attachment);
+    } else if (matched.length > 0) {
+      toUpdate.push(splitReferenceIds(attachment, requestedIds));
+    }
+  }
+
+  const missingIds = attachmentIds.filter((id) => !matchedIds.has(id));
+  if (missingIds.length > 0) {
+    throw Boom.notFound(notAttachedMessage(type, missingIds, caseId));
+  }
+
+  if (toUpdate.length > 0) {
+    await authorization.ensureAuthorized({
+      entities: toUpdate.map(({ attachment: { id, owner } }) => ({ id, owner })),
+      operation: Operations.deleteComment,
+    });
+  }
+
+  const deletedIds = new Set<string>();
+  let updated: PartialDeletion[] = [];
+  let failed: Array<SOWithErrors<unknown>> = [];
+
+  // Deleted and updated attachments are recorded as 1 change, also when a later step fails, so the
+  // case and its activity match what changed.
+  const recordChanges = async () => {
+    const deleted = toDelete.filter(({ id }) => deletedIds.has(id));
+    if (deleted.length === 0 && updated.length === 0) {
+      return;
+    }
+
+    const removedFromUpdated = updated.map(toRemovedAttributes);
+    const removedAttributes = [
+      ...deleted.map(({ attributes }) => attributes),
+      ...removedFromUpdated,
+    ];
+
+    await updateCaseAttachmentStats({ caseService, attachmentService, caseId, user });
+
+    // Updated attachments still exist, so only the deleted ones get a deletion audit event.
+    await recordDeletions(
+      {
+        caseId,
+        owner: caseOwner,
+        byType: new Map([
+          [
+            type,
+            {
+              items: new Set(
+                removedAttributes.flatMap(({ attachmentId }) => toArray(attachmentId))
+              ),
+              attachments: deleted.map(({ id, type: savedObjectType }) => ({
+                id,
+                savedObjectType,
+              })),
+            },
+          ],
+        ]),
+      },
+      clientArgs
+    );
+
+    // The deleted attachments' alerts are unlinked by the shared deletion.
+    const alerts = getAlertInfoFromComments(removedFromUpdated);
+    if (alerts.length > 0) {
+      await alertsService.removeCaseIdFromAlerts({ alerts, caseId });
+    }
+
+    emitAttachmentsDeletedEvent(clientArgs, {
+      caseId,
+      owner: caseOwner,
+      attachmentType: type,
+      attachmentIds: deleted.map(({ id }) => id),
+      removedAttributes,
+    });
+  };
+
+  try {
+    if (toDelete.length > 0) {
+      await deleteCaseAttachments(
+        {
+          caseId,
+          attachments: toDelete,
+          operation: Operations.deleteComment,
+          onDeleted: (ids) => ids.forEach((id) => deletedIds.add(id)),
+        },
+        clientArgs
+      );
+    }
+
+    ({ updated, failed } = await removeReferencedIds({ partialDeletions: toUpdate }, clientArgs));
+  } catch (error) {
+    await recordChanges().catch((recordError) =>
+      logger.error(`Failed to record the partial removal on case ${caseId}: ${recordError}`)
+    );
+    throw error;
+  }
+
+  await recordChanges();
+
+  if (failed.length > 0) {
+    const message = `Failed to remove ${type} ids from ${
+      failed.length === 1 ? 'attachment' : 'attachments'
+    } ${failed.map(({ id }) => id).join(', ')} on case ${caseId}.`;
+    const isConflict = failed.every(({ error }) => generateCaseErrorResponse(error).status === 409);
+
+    throw isConflict ? Boom.conflict(message) : Boom.internal(message);
+  }
+};
+
+/**
+ * Removes the requested ids from attachments that reference other ids too. An attachment that
+ * changed since it was read is not updated.
+ */
+const removeReferencedIds = async (
+  { partialDeletions }: { partialDeletions: PartialDeletion[] },
+  clientArgs: CasesClientArgs
+): Promise<{ updated: PartialDeletion[]; failed: Array<SOWithErrors<unknown>> }> => {
+  if (partialDeletions.length === 0) {
+    return { updated: [], failed: [] };
+  }
+
+  const {
+    user,
+    services: { attachmentService },
+  } = clientArgs;
+
+  const updatedAt = new Date().toISOString();
+  const { saved_objects: savedObjects } = await attachmentService.bulkUpdate({
+    comments: partialDeletions.map(({ attachment, remainingIds, remainingIndex }) => ({
+      savedObjectId: attachment.id,
+      updatedAttributes: {
+        ...attachment.attributes,
+        attachmentId: remainingIds,
+        metadata: withIndex(attachment.attributes.metadata, remainingIndex),
+        updated_at: updatedAt,
+        updated_by: user,
+      },
+      options: { version: attachment.version },
+    })),
+    refresh: true,
+  });
+
+  const failed = savedObjects.filter((savedObject) => isSOError(savedObject));
+  const failedIds = new Set(failed.map(({ id }) => id));
+  const updated = partialDeletions.filter(({ attachment }) => !failedIds.has(attachment.id));
+
+  return { updated, failed };
+};
+
+/** The fields of the ids removed from an attachment that keeps its other ids. */
+const toRemovedAttributes = ({
+  attachment: { attributes },
+  removedIds,
+}: PartialDeletion): ReferenceAttributes => ({
+  ...attributes,
+  attachmentId: removedIds,
+  metadata: withIndex(attributes.metadata, pickIndexFor(attributes, removedIds)),
+});
+
+/** Matches attachments that reference any of the ids, in either storage model. */
+const buildReferencedIdsFilter = (ids: string[]): KueryNode | undefined =>
+  combineFilters(
+    [
+      buildFilter({
+        filters: ids,
+        field: 'attachmentId',
+        operator: 'or',
+        type: CASE_ATTACHMENT_SAVED_OBJECT,
+      }),
+      buildFilter({
+        filters: ids,
+        field: 'alertId',
+        operator: 'or',
+        type: CASE_COMMENT_SAVED_OBJECT,
+      }),
+      buildFilter({
+        filters: ids,
+        field: 'eventId',
+        operator: 'or',
+        type: CASE_COMMENT_SAVED_OBJECT,
+      }),
+    ],
+    NodeBuilderOperators.or
+  );
+
+const recordByType =
+  (caseId: string, clientArgs: CasesClientArgs): RecordUserActions =>
+  async ({ attachments }) => {
+    const [firstAttachment] = attachments;
+    if (firstAttachment == null) {
+      return;
+    }
+
+    await recordDeletions(
+      { caseId, owner: firstAttachment.owner, byType: groupByType(attachments) },
+      clientArgs
+    );
+  };
+
+interface TypeDeletion {
+  /** The referenced ids (alert, file, dashboard, ...), or the attachment id when it has none. */
+  items: Set<string>;
+  /** The deleted attachments, audited one by one. */
+  attachments: Array<{ id: string; savedObjectType: string }>;
+}
+
+const recordDeletions = async (
+  { caseId, owner, byType }: { caseId: string; owner: string; byType: Map<string, TypeDeletion> },
+  clientArgs: CasesClientArgs
+): Promise<void> => {
+  const {
+    user,
+    services: { userActionService },
+  } = clientArgs;
+
+  await userActionService.creator.bulkCreateAttachmentBulkDeletion({
+    caseId,
+    owner,
+    deletions: [...byType].map(([attachmentType, deletion]) => ({
+      attachmentType,
+      count: deletion.items.size,
+      attachments: deletion.attachments,
+    })),
+    user,
+  });
+};
+
+const groupByType = (attachments: DecodedAttachment[]): Map<string, TypeDeletion> =>
+  attachments.reduce(
+    (byType, { id, type: savedObjectType, attributes, owner, requestAttributes }) => {
+      const type = resolveUnifiedAttachmentType(attributes, owner);
+      const { ids: referencedIds } = getIDsAndIndicesAsArrays(requestAttributes);
+      const deletion = byType.get(type) ?? { items: new Set<string>(), attachments: [] };
+      (referencedIds.length > 0 ? referencedIds : [id]).forEach((item) => deletion.items.add(item));
+      deletion.attachments.push({ id, savedObjectType });
+      byType.set(type, deletion);
+      return byType;
+    },
+    new Map<string, TypeDeletion>()
+  );
+
+const toOwnedReferenceAttachment = (
+  attachment: AttachmentForDeletion,
+  caseOwner: string
+): OwnedReferenceAttachment | undefined => {
+  const { attributes } = attachment;
+  if (attributes == null || !isUnifiedReferenceAttachmentRequest(attributes)) {
+    return;
+  }
+
+  return {
+    ...attachment,
+    owner: attachment.owner ?? caseOwner,
+    attributes,
+  };
+};
+
+const splitReferenceIds = (
+  attachment: OwnedReferenceAttachment,
+  requestedIds: Set<string>
+): PartialDeletion => {
+  const ids = toArray(attachment.attributes.attachmentId);
+  const removed = ids.filter((id) => requestedIds.has(id));
+  const remaining = ids.filter((id) => !requestedIds.has(id));
+
+  return {
+    attachment,
+    removedIds: removed,
+    remainingIds: remaining,
+    remainingIndex: pickIndexFor(attachment.attributes, remaining),
+  };
+};
+
+/** A scalar index applies to every id; an array index is aligned 1-to-1 with the ids. */
+const pickIndexFor = (
+  attributes: ReferenceAttributes,
+  keptIds: string[]
+): string | string[] | undefined => {
+  const index = getIndexFromMetadata(attributes.metadata);
+  if (index == null || typeof index === 'string') {
+    return index;
+  }
+
+  const ids = toArray(attributes.attachmentId);
+  if (index.length !== ids.length) {
+    return index;
+  }
+
+  const kept = new Set(keptIds);
+  return index.filter((_, position) => kept.has(ids[position]));
+};
+
+const withIndex = (
+  metadata: ReferenceAttributes['metadata'],
+  index: string | string[] | undefined
+): ReferenceAttributes['metadata'] =>
+  metadata == null || index == null ? metadata : { ...metadata, index };
+
+const toArray = (value: string | string[]): string[] => (Array.isArray(value) ? value : [value]);
+
+/** Deletes files of a case and the attachments that reference them. */
 export const bulkDeleteFileAttachments = async (
   { caseId, fileIds }: BulkDeleteFileArgs,
   clientArgs: CasesClientArgs,
   casesClient: CasesClient
-) => {
-  const {
-    user,
-    services: { attachmentService, userActionService },
-    logger,
-    authorization,
-    fileService,
-  } = clientArgs;
+): Promise<void> => {
+  const { logger } = clientArgs;
 
   try {
     const request = decodeWithExcessOrThrow(BulkDeleteFileAttachmentsRequestRt)({ ids: fileIds });
 
     await casesClient.cases.resolve({ id: caseId, includeComments: false });
 
-    const fileEntities = await getFileEntities({
-      caseId,
-      fileIds: request.ids,
-      fileService,
-      logger,
-    });
-
-    // It's possible for this to return an empty array if there was an error creating file attachments in which case the
-    // file would be present but the case attachment would not
-    const fileAttachments = await attachmentService.getter.getFileAttachments({
-      caseId,
-      fileIds: request.ids,
-    });
-
-    await authorization.ensureAuthorized({
-      entities: [
-        ...fileAttachments.map((attachment) => ({
-          id: attachment.id,
-          owner: attachment.attributes.owner,
-        })),
-        ...fileEntities,
-      ],
-      operation: Operations.deleteComment,
-    });
-
-    const [, deletedAttachmentIds] = await Promise.all([
-      deleteFiles(
-        fileEntities.map((entity) => entity.id),
-        fileService
-      ),
-      attachmentService.bulkDelete({
-        savedObjectIds: fileAttachments.map((so) => so.id),
-        refresh: false,
-      }),
-    ]);
-
-    await userActionService.creator.bulkCreateAttachmentDeletion({
-      caseId,
-      attachments: fileAttachments.map((attachment) => ({
-        id: attachment.id,
-        owner: attachment.attributes.owner,
-        attachment: attachment.attributes,
-      })),
-      user,
-    });
-
-    emitAttachmentsDeletedEvents(
-      clientArgs,
-      caseId,
-      fileAttachments.filter(({ id }) => deletedAttachmentIds.includes(id))
-    );
+    await deleteCaseFiles({ caseId, fileIds: request.ids }, clientArgs);
   } catch (error) {
     throw createCaseError({
       message: `Failed to delete file attachments for case: ${caseId}: ${error}`,
@@ -287,112 +503,71 @@ export const bulkDeleteFileAttachments = async (
   }
 };
 
-const getFileEntities = async ({
-  caseId,
-  fileIds,
-  fileService,
-  logger,
-}: {
-  caseId: BulkDeleteFileArgs['caseId'];
-  fileIds: BulkDeleteFileArgs['fileIds'];
-  fileService: FileServiceStart;
-  logger: Logger;
-}) => {
-  const files = await getFiles({ caseId, fileIds, fileService, logger });
+interface DeleteCaseFilesArgs {
+  caseId: string;
+  fileIds: string[];
+  /** When set, rejects ids that are neither a file of the case nor attached to it. */
+  notFoundMessage?: (ids: string[]) => string;
+  recordUserActions?: RecordUserActions;
+}
 
-  const fileEntities = createFileEntities(files);
+/** Deletes files of a case and their attachments, including a file whose attachment was never created. */
+const deleteCaseFiles = async (
+  { caseId, fileIds, notFoundMessage, recordUserActions }: DeleteCaseFilesArgs,
+  clientArgs: CasesClientArgs
+): Promise<void> => {
+  const {
+    services: { attachmentService },
+    logger,
+    authorization,
+    fileService,
+  } = clientArgs;
 
-  return fileEntities;
-};
-
-const getFiles = async ({
-  caseId,
-  fileIds,
-  fileService,
-  logger,
-}: {
-  caseId: BulkDeleteFileArgs['caseId'];
-  fileIds: BulkDeleteFileArgs['fileIds'];
-  fileService: FileServiceStart;
-  logger: Logger;
-}): Promise<FileJSON[]> => {
-  // it's possible that we're trying to delete a file when an attachment wasn't created (for example if the create
-  // attachment request failed)
-  const fileSettleResults = await pMap(
+  // Rejects a file linked to another case before anything is deleted.
+  const fileEntities = await getFileEntitiesForCase({
+    caseId,
     fileIds,
-    async (fileId) => {
-      try {
-        return await fileService.getById({ id: fileId });
-      } catch (error) {
-        return error;
-      }
-    },
-    {
-      concurrency: MAX_CONCURRENT_SEARCHES,
-    }
-  );
-
-  const files = retrieveFilesIgnoringNotFound(fileSettleResults, fileIds, logger);
-
-  const [validFiles, invalidFiles] = partition(files, (file) => {
-    return (
-      CaseFileMetadataForDeletionRt.is(file.data.meta) &&
-      file.data.meta.caseIds.length === 1 &&
-      file.data.meta.caseIds.includes(caseId)
-    );
-  }) as [File[], File[]];
-
-  if (invalidFiles.length > 0) {
-    const invalidIds = invalidFiles.map((fileInfo) => fileInfo.id);
-
-    // I'm intentionally being vague here because it's possible an unauthorized user could attempt to delete files
-    throw Boom.badRequest(`Failed to delete files because filed ids were invalid: ${invalidIds}`);
-  }
-
-  return validFiles.map((fileInfo) => fileInfo.data);
-};
-
-export const retrieveFilesIgnoringNotFound = (
-  results: Array<File<unknown> | Error>,
-  fileIds: BulkDeleteFileArgs['fileIds'],
-  logger: Logger
-) => {
-  const files: File[] = [];
-
-  results.forEach((result, index) => {
-    if (result instanceof FileNotFoundError) {
-      const warningMessage = getFileNotFoundErrorMessage({
-        resultsLength: results.length,
-        fileIds,
-        index,
-        result,
-      });
-
-      logger.warn(warningMessage);
-    } else if (result instanceof Error) {
-      throw result;
-    } else if (result) {
-      files.push(result);
-    }
+    fileService,
+    logger,
   });
 
-  return files;
-};
+  const attachments = await attachmentService.getter.getFileAttachmentsForDeletion({
+    caseId,
+    fileIds,
+  });
 
-const getFileNotFoundErrorMessage = ({
-  resultsLength,
-  fileIds,
-  index,
-  result,
-}: {
-  resultsLength: number;
-  fileIds: BulkDeleteFileArgs['fileIds'];
-  index: number;
-  result: Error;
-}) => {
-  if (resultsLength === fileIds.length) {
-    return `Failed to find file id: ${fileIds[index]}: ${result}`;
+  if (notFoundMessage != null) {
+    const foundIds = new Set([
+      ...fileEntities.map(({ id }) => id),
+      ...attachments.flatMap(({ fileId }) => (fileId != null ? [fileId] : [])),
+    ]);
+    const missingIds = fileIds.filter((id) => !foundIds.has(id));
+
+    if (missingIds.length > 0) {
+      throw Boom.notFound(notFoundMessage(missingIds));
+    }
   }
 
-  return `Failed to find file: ${result}`;
+  // A file has no attachment when creating the attachment failed after the upload.
+  const attachedFileIds = new Set(attachments.map(({ fileId }) => fileId));
+  const unattachedFileEntities = fileEntities.filter(({ id }) => !attachedFileIds.has(id));
+
+  if (unattachedFileEntities.length > 0) {
+    await authorization.ensureAuthorized({
+      entities: unattachedFileEntities,
+      operation: Operations.deleteComment,
+    });
+  }
+
+  if (attachments.length > 0) {
+    await deleteCaseAttachments(
+      { caseId, attachments, operation: Operations.deleteComment, recordUserActions },
+      clientArgs
+    );
+  }
+
+  await deleteFiles(
+    unattachedFileEntities.map(({ id }) => id),
+    fileService
+  );
 };
