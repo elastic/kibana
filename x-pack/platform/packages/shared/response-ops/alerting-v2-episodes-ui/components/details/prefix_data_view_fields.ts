@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import type {
-  DataView,
-  DataViewSpec,
-  DataViewsPublicPluginStart,
-  FieldSpec,
-} from '@kbn/data-views-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataViewSpec, FieldSpec } from '@kbn/data-views-plugin/common';
+import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 
 /** Prefix applied to evaluation fields stored under the episode `data` object. */
 export const DATA_CONTAINER_FIELD_PREFIX = 'data.';
@@ -31,6 +28,24 @@ const prefixRecordKeys = <T>(
 
   return Object.fromEntries(
     Object.entries(record).map(([key, value]) => [prefixDataContainerFieldName(key), value])
+  );
+};
+
+const prefixFieldAttrs = (fieldAttrs: DataViewSpec['fieldAttrs']): DataViewSpec['fieldAttrs'] => {
+  if (!fieldAttrs) {
+    return fieldAttrs;
+  }
+
+  // Drop custom labels so the table shows `data.host.name` rather than the source field's label.
+  return Object.fromEntries(
+    Object.entries(fieldAttrs).flatMap(([key, attrs]) => {
+      const rest = { ...attrs };
+      delete rest.customLabel;
+      if (Object.keys(rest).length === 0) {
+        return [];
+      }
+      return [[prefixDataContainerFieldName(key), rest]];
+    })
   );
 };
 
@@ -65,7 +80,10 @@ export const prefixDataViewSpecFields = (spec: DataViewSpec): DataViewSpec => {
         Object.values(spec.fields).map((field) => {
           const name = prefixDataContainerFieldName(field.name);
           const subType = prefixSubType(field.subType);
-          return [name, { ...field, name, ...(subType ? { subType } : {}) }];
+          // A source label such as "Host" would hide the `data.` name the table is meant to show.
+          const withoutLabel = { ...field };
+          delete withoutLabel.customLabel;
+          return [name, { ...withoutLabel, name, ...(subType ? { subType } : {}) }];
         })
       )
     : undefined;
@@ -77,7 +95,7 @@ export const prefixDataViewSpecFields = (spec: DataViewSpec): DataViewSpec => {
       ? prefixDataContainerFieldName(spec.timeFieldName)
       : undefined,
     fields,
-    fieldAttrs: prefixRecordKeys(spec.fieldAttrs),
+    fieldAttrs: prefixFieldAttrs(spec.fieldAttrs),
     fieldFormats: prefixRecordKeys(spec.fieldFormats),
     runtimeFieldMap: prefixRecordKeys(spec.runtimeFieldMap),
     sourceFilters: spec.sourceFilters?.map((filter) => ({
@@ -87,10 +105,14 @@ export const prefixDataViewSpecFields = (spec: DataViewSpec): DataViewSpec => {
   };
 };
 
-/** Builds a data view whose fields line up with a synthetic `{ data: ... }` hit. */
+/** Clones a data view in memory so `data.*` names keep the source field types and formatters. */
 export const createDataContainerDataView = (
   dataView: DataView,
-  dataViews: DataViewsPublicPluginStart
-): Promise<DataView> =>
-  // Skip the field refresh so the prefixed names are not replaced by the source index mapping.
-  dataViews.create(prefixDataViewSpecFields(dataView.toSpec()), true);
+  fieldFormats: FieldFormatsStartCommon
+): DataView =>
+  new DataView({
+    spec: prefixDataViewSpecFields(dataView.toSpec()),
+    fieldFormats,
+    // No field is named `data`, so flattenHit walks into the synthetic hit and `data.C` matches.
+    metaFields: dataView.metaFields,
+  });

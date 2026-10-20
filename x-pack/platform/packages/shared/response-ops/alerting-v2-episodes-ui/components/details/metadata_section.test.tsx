@@ -33,7 +33,13 @@ const runEsqlAsyncSearchMock = jest.mocked(runEsqlAsyncSearch);
 const buildDataTableRecordMock = jest.mocked(buildDataTableRecord);
 const useAlertingEpisodeSourceDataViewMock = jest.mocked(useAlertingEpisodeSourceDataView);
 
-const mockTableRender = jest.fn(() => <div data-test-subj="mock-doc-viewer-table" />);
+const mockTableRender = jest.fn(
+  (_props: {
+    dataView: {
+      getFieldByName: (name: string) => { type: string } | undefined;
+    };
+  }) => <div data-test-subj="mock-doc-viewer-table" />
+);
 
 const mockUnifiedDocViewer = {
   registry: {
@@ -123,13 +129,10 @@ const sourceDataView = {
   }),
 };
 
-const prefixedDataView = { id: 'prefixed-data-view' };
-
 describe('AlertEpisodeMetadataSection', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     queryClient.clear();
-    (mockServices.dataViews.create as jest.Mock).mockResolvedValue(prefixedDataView);
     useAlertingEpisodeSourceDataViewMock.mockReturnValue({
       value: sourceDataView,
       loading: false,
@@ -202,27 +205,20 @@ describe('AlertEpisodeMetadataSection', () => {
 
     await waitFor(() => expect(screen.getByTestId('mock-doc-viewer-table')).toBeInTheDocument());
 
-    expect(mockServices.dataViews.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: 'mock-data-view-data-container',
-        fields: expect.objectContaining({
-          'data.host.name': expect.objectContaining({
-            name: 'data.host.name',
-            type: 'string',
-          }),
-        }),
-      }),
-      true
-    );
     expect(mockTableRender).toHaveBeenCalledWith(
       expect.objectContaining({
         hit: expect.objectContaining({
           id: 'mock-id',
           raw: { _source: { data: { threshold_met: true } } },
         }),
-        dataView: prefixedDataView,
+        dataView: expect.objectContaining({
+          id: 'mock-data-view-data-container',
+        }),
       })
     );
+    const passedDataView = mockTableRender.mock.calls.at(-1)?.[0]?.dataView;
+    expect(passedDataView?.getFieldByName('host.name')).toBeUndefined();
+    expect(passedDataView?.getFieldByName('data.host.name')?.type).toBe('string');
   });
 
   it('strips _id/_index/_score/_ignored metadata fields from the rendered hit', async () => {

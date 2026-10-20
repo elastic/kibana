@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import type { DataViewSpec, FieldSpec } from '@kbn/data-views-plugin/public';
-import { prefixDataViewSpecFields } from './prefix_data_view_fields';
+import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataViewSpec, FieldSpec } from '@kbn/data-views-plugin/common';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import { createDataContainerDataView, prefixDataViewSpecFields } from './prefix_data_view_fields';
 
 const field = (spec: Partial<FieldSpec> & Pick<FieldSpec, 'name' | 'type'>): FieldSpec => ({
   searchable: true,
@@ -29,7 +32,7 @@ describe('prefixDataViewSpecFields', () => {
         }),
         _id: field({ name: '_id', type: 'string', esTypes: ['_id'] }),
       },
-      fieldAttrs: { 'host.name': { customLabel: 'Host' } },
+      fieldAttrs: { 'host.name': { customLabel: 'Host', customDescription: 'The host' } },
       fieldFormats: { severity: { id: 'string' } },
       runtimeFieldMap: { severity: { type: 'keyword' } },
       sourceFilters: [{ value: 'host.name' }],
@@ -48,10 +51,48 @@ describe('prefixDataViewSpecFields', () => {
         }),
         _id: field({ name: '_id', type: 'string', esTypes: ['_id'] }),
       },
-      fieldAttrs: { 'data.host.name': { customLabel: 'Host' } },
+      fieldAttrs: { 'data.host.name': { customDescription: 'The host' } },
       fieldFormats: { 'data.severity': { id: 'string' } },
       runtimeFieldMap: { 'data.severity': { type: 'keyword' } },
       sourceFilters: [{ value: 'data.host.name' }],
     });
+  });
+});
+
+describe('createDataContainerDataView', () => {
+  it('keeps source field types on data.* names for a synthetic hit', () => {
+    const source = new DataView({
+      spec: {
+        id: 'logs-view',
+        title: 'logs-*',
+        fields: {
+          C: field({ name: 'C', type: 'number', esTypes: ['long'] }),
+          'host.name': field({
+            name: 'host.name',
+            type: 'string',
+            esTypes: ['keyword'],
+            customLabel: 'Host',
+          }),
+        },
+      },
+      fieldFormats: fieldFormatsMock,
+      metaFields: ['_id', '_index'],
+    });
+
+    const prefixed = createDataContainerDataView(source, fieldFormatsMock);
+
+    expect(prefixed.getFieldByName('data')).toBeUndefined();
+    expect(prefixed.getFieldByName('data.C')?.type).toBe('number');
+    expect(prefixed.getFieldByName('data.C')?.esTypes).toEqual(['long']);
+    expect(prefixed.getFieldByName('data.host.name')?.type).toBe('string');
+    expect(prefixed.getFieldByName('data.host.name')?.displayName).toBe('data.host.name');
+
+    const record = buildDataTableRecord(
+      { _id: '1', _source: { data: { C: 3, host: { name: 'web' } } } },
+      prefixed
+    );
+
+    expect(record.flattened['data.C']).toBe(3);
+    expect(record.flattened['data.host.name']).toBe('web');
   });
 });
