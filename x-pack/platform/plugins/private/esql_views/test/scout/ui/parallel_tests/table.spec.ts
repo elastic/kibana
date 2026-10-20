@@ -6,6 +6,7 @@
  */
 
 import { randomUUID } from 'node:crypto';
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { createEsqlView, deleteEsqlViews, type TestEsqlView } from '../fixtures/esql_views_api';
 import { spaceTest } from '../fixtures';
@@ -31,7 +32,7 @@ const RELOADED_VIEW: TestEsqlView = {
 };
 const VIEW_NAMES = [...INITIAL_VIEWS.map(({ name }) => name), RELOADED_VIEW.name];
 
-spaceTest.describe('ES|QL Views table', { tag: '@local-stateful-classic' }, () => {
+spaceTest.describe('ES|QL Views table', { tag: tags.stateful.classic }, () => {
   spaceTest.beforeAll(async ({ esClient }) => {
     await esClient.indices.create({ index: SOURCE_INDEX });
     await esClient.index({

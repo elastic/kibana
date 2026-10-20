@@ -6,6 +6,7 @@
  */
 
 import { randomUUID } from 'node:crypto';
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   createEsqlView,
@@ -23,7 +24,7 @@ const VIEWS = [
 ] as const satisfies readonly TestEsqlView[];
 const VIEW_NAMES = VIEWS.map(({ name }) => name);
 
-spaceTest.describe('ES|QL View deletion', { tag: '@local-stateful-classic' }, () => {
+spaceTest.describe('ES|QL View deletion', { tag: tags.stateful.classic }, () => {
   spaceTest.beforeAll(async ({ esClient }) => {
     await Promise.all(VIEWS.map((view) => createEsqlView(esClient, view)));
   });
