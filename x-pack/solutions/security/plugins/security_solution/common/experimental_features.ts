@@ -384,6 +384,20 @@ export const allowedExperimentalValues = Object.freeze({
   linuxRansomwareProtection: false,
 
   /**
+   * Enables the AI Data Collection card in the per-OS Elastic Defend policy settings form and
+   * turns AI event enrichment on by default for new policies (requires `perOsPolicySettings`).
+   * Release: 9.6
+   */
+  endpointAiDataCollection: false,
+
+  /**
+   * Enables the Registry credential hardening toggle in the Elastic Defend policy
+   * Attack Surface Reduction section (`windows.attack_surface_reduction.registry_credential_hardening`).
+   * Release: 9.6
+   */
+  registryCredentialHardening: false,
+
+  /**
    * Risk score maintainer create-if-missing path: when an alert's EUID passes the entity type's
    * creation policy but has no entity store record, create the entity (with its risk score)
    * instead of silently dropping the score.

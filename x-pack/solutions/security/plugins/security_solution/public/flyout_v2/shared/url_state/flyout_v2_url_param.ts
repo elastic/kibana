@@ -262,6 +262,7 @@ export interface EntityAnomalyInsightsDescriptor {
   entityType: string;
   value: string;
   entityId?: string;
+  mode?: EntityDescriptorMode;
 }
 
 export interface EntityAlertsInsightsDescriptor {
