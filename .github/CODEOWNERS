@@ -3117,7 +3117,7 @@ x-pack/platform/plugins/shared/entity_store @elastic/security-entity-analytics
 /x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/alert_triage @elastic/security-investigations
 /x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/evals/security/alert_triage_skill @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/threat_hunting @elastic/security-investigations
-/x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/siem_migrations @elastic/security-threat-hunting
+/x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/siem_migration @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/server/agent_builder/tools/siem_migrations @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/server/lib/timeline @elastic/security-investigations
