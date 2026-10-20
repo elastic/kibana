@@ -5,33 +5,24 @@
  * 2.0.
  */
 
-import React from 'react';
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import React, { useState } from 'react';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { useKibana } from '../hooks/use_kibana';
 import { SlackAppCard } from '../settings/components/apps_section';
 import { CustomContextSnippets } from '../custom_context/custom_context_flyout';
 import { useFetchCustomContext } from '../custom_context/use_fetch_custom_context';
-import {
-  CreateConnectorButton,
-  ManageConnectorsLink,
-  SandboxConnectorsTable,
-} from '../sandbox_connectors/sandbox_connectors';
+import { ConnectSourcesGrid } from '../sandbox_connectors/connect_sources_grid';
+import { ConnectedConnectors } from '../sandbox_connectors/connected_connectors';
 
 /** Step 1: connect tools through connectors, connect Slack, and optionally describe the system. */
 export function OnboardingConnectStep(): React.ReactElement {
   const { application } = useKibana().services;
   // Same privilege as the Apps section of the Nightshift settings.
   const { canManageAndConfigure } = getNightshiftCapabilities(application.capabilities.nightshift);
+  // Bumped after a new connect so the Connected accordion folds, like the prototype.
+  const [connectedCollapseSignal, setConnectedCollapseSignal] = useState(0);
 
   return (
     <div data-test-subj="nightshiftOnboardingConnectStep">
@@ -54,30 +45,23 @@ export function OnboardingConnectStep(): React.ReactElement {
       <EuiSpacer size="m" />
       <SectionTitle
         title={i18n.translate('xpack.nightshift.onboarding.connectors.title', {
-          defaultMessage: 'Other sources',
+          defaultMessage: 'Connect other sources',
         })}
       />
       <EuiText size="s" color="subdued">
         <p>
           {i18n.translate('xpack.nightshift.onboarding.connectors.description', {
             defaultMessage:
-              'Nightshift works from a sandbox. Any connector it can use from there, such as GitHub or another Elastic deployment, is available to the investigation agent as soon as it exists.',
+              'Nightshift works from a sandbox. Any connector it can use from there is available to the investigation agent as soon as it exists.',
           })}
         </p>
       </EuiText>
-      <EuiSpacer size="s" />
-      <EuiPanel hasBorder paddingSize="m" data-test-subj="nightshiftOnboardingConnectors">
-        <SandboxConnectorsTable />
-        <EuiSpacer size="m" />
-        <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <CreateConnectorButton />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <ManageConnectorsLink />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
+      <EuiSpacer size="m" />
+      <div data-test-subj="nightshiftOnboardingConnectors">
+        <ConnectSourcesGrid onConnected={() => setConnectedCollapseSignal((n) => n + 1)} />
+        <EuiSpacer size="l" />
+        <ConnectedConnectors collapseSignal={connectedCollapseSignal} />
+      </div>
 
       <EuiSpacer size="l" />
       <div data-test-subj="nightshiftOnboardingSlack">
