@@ -11,13 +11,15 @@ import { omit } from 'lodash';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
 import { createKbnUrlStateStorage, Storage } from '@kbn/kibana-utils-plugin/public';
-import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import { mockControlState } from '../../../__mocks__/esql_controls';
 import { createDiscoverServicesMock } from '../../../__mocks__/services';
 import {
   createTabsStorageManager,
   TABS_LOCAL_STORAGE_KEY,
   type TabsInternalStatePayload,
+  type TabStateInLocalStorage,
 } from './tabs_storage_manager';
 import type { RecentlyClosedTabState, TabState } from './redux';
 import { NEW_TAB_ID, TAB_STATE_URL_KEY } from '../../../../common/constants';
@@ -28,7 +30,14 @@ import {
 } from './redux/__mocks__/internal_state.mocks';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { TEST_PROFILE_STATE_DEF } from '../../../context_awareness/__mocks__/profile_state';
+import { createDataViewDataSource } from '../../../../common/data_sources';
+import { generateInlineDataViewId } from '../../../../common/session/inline_data_view';
+import {
+  createFilter,
+  unreferencedFilter,
+} from '../../../../common/session/inline_data_view.fixtures';
 
 const mockUserId = 'testUserId';
 const mockSpaceId = 'testSpaceId';
@@ -93,7 +102,7 @@ const mockRecentlyClosedTab3: RecentlyClosedTabState = {
 };
 
 describe('TabsStorageManager', () => {
-  const create = () => {
+  const create = ({ enabled = true } = {}) => {
     const urlStateStorage = createKbnUrlStateStorage();
     const services = createDiscoverServicesMock();
     services.storage = new Storage(localStorage);
@@ -106,7 +115,7 @@ describe('TabsStorageManager', () => {
         urlStateStorage,
         storage: services.storage,
         profileStateRegistry: services.profileStateRegistry,
-        enabled: true,
+        enabled,
       }),
     };
   };
@@ -133,6 +142,33 @@ describe('TabsStorageManager', () => {
     appState: storedTab.appState,
     globalState: storedTab.globalState,
     ...('closedAt' in storedTab ? { closedAt: storedTab.closedAt } : {}),
+  });
+
+  const inlineSpec: DataViewSpec = { id: 'legacy-id', title: 'logs-*' };
+  const inlineId = generateInlineDataViewId(inlineSpec);
+  const createInlineDocument = (spec = inlineSpec): DiscoverSessionTab => ({
+    id: 'inline-tab',
+    label: 'Inline tab',
+    columns: ['message'],
+    sort: [],
+    grid: {},
+    hideChart: false,
+    hideTable: false,
+    isTextBasedQuery: false,
+    usesAdHocDataView: true,
+    serializedSearchSource: { index: spec, filter: [createFilter(spec.id)] },
+  });
+  const createInlineStoredTab = (spec = inlineSpec): TabStateInLocalStorage => ({
+    id: 'inline-tab',
+    label: 'Inline tab',
+    internalState: { serializedSearchSource: { index: spec, filter: [createFilter(spec.id)] } },
+    attributes: undefined,
+    appState: {
+      dataSource: spec.id ? createDataViewDataSource({ dataViewId: spec.id }) : undefined,
+      filters: [createFilter(spec.id)],
+    },
+    globalState: undefined,
+    profileState: undefined,
   });
 
   it('should push tab state to URL', async () => {
@@ -215,7 +251,7 @@ describe('TabsStorageManager', () => {
     tabsStorageManager.loadLocally({
       userId: mockUserId, // register userId and spaceId in tabsStorageManager
       spaceId: mockSpaceId,
-      defaultTabState: DEFAULT_TAB_STATE,
+      savedDataViewIds: [],
     });
 
     jest.spyOn(urlStateStorage, 'set');
@@ -253,7 +289,7 @@ describe('TabsStorageManager', () => {
     tabsStorageManager.loadLocally({
       userId: mockUserId,
       spaceId: mockSpaceId,
-      defaultTabState: DEFAULT_TAB_STATE,
+      savedDataViewIds: [],
     });
 
     jest.spyOn(storage, 'set');
@@ -336,10 +372,10 @@ describe('TabsStorageManager', () => {
     const loadedProps = tabsStorageManager.loadLocally({
       userId: mockUserId,
       spaceId: mockSpaceId,
-      defaultTabState: DEFAULT_TAB_STATE,
+      savedDataViewIds: [],
     });
 
-    expect(loadedProps).toEqual({
+    expect(omit(loadedProps, 'inlineDataViewIds')).toEqual({
       allTabs: [toRestoredTab(mockTab1), toRestoredTab(mockTab2)],
       selectedTabId: 'tab2',
       recentlyClosedTabs: [toRestoredTab(mockRecentlyClosedTab)],
@@ -349,6 +385,175 @@ describe('TabsStorageManager', () => {
     expect(storage.get).toHaveBeenCalledWith(TABS_LOCAL_STORAGE_KEY);
     expect(urlStateStorage.set).not.toHaveBeenCalled();
     expect(storage.set).not.toHaveBeenCalled();
+  });
+
+  it('normalizes a local edit independently from the saved document before selecting tabs', () => {
+    const {
+      tabsStorageManager,
+      urlStateStorage,
+      services: { storage },
+    } = create();
+    const document = createInlineDocument({ ...inlineSpec, id: undefined });
+    const editedSpec = { ...inlineSpec, title: 'edited-logs-*' };
+    const editedId = generateInlineDataViewId(editedSpec);
+    const storedTab = createInlineStoredTab(editedSpec);
+    storedTab.appState = { ...storedTab.appState, filters: [createFilter(undefined)] };
+    const persistedDiscoverSession = createDiscoverSessionMock({
+      id: 'test-session',
+      title: 'Original session',
+      tabs: [document],
+    });
+    storage.set(TABS_LOCAL_STORAGE_KEY, {
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      discoverSessionId: persistedDiscoverSession.id,
+      openTabs: [storedTab],
+      closedTabs: [{ ...createInlineStoredTab(), id: 'closed', closedAt: 1 }],
+    });
+    urlStateStorage.set(TAB_STATE_URL_KEY, { tabId: storedTab.id });
+
+    const loadedProps = tabsStorageManager.loadLocally({
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      persistedDiscoverSession,
+      savedDataViewIds: [],
+    });
+
+    expect(loadedProps.selectedTabId).toBe(storedTab.id);
+    expect(loadedProps.updatedDiscoverSession?.tabs[0].serializedSearchSource).toStrictEqual({
+      index: { ...inlineSpec, id: inlineId },
+      filter: [createFilter(inlineId)],
+    });
+    expect(loadedProps.allTabs[0].appState).toStrictEqual({
+      dataSource: createDataViewDataSource({ dataViewId: editedId }),
+      filters: [createFilter(editedId)],
+    });
+    expect(loadedProps.allTabs[0].initialInternalState?.serializedSearchSource).toStrictEqual({
+      index: { ...editedSpec, id: editedId },
+      filter: [createFilter(editedId)],
+    });
+    expect(loadedProps.recentlyClosedTabs[0]).toMatchObject({
+      id: 'closed',
+      closedAt: 1,
+      appState: { dataSource: createDataViewDataSource({ dataViewId: inlineId }) },
+    });
+  });
+
+  it('normalizes tabs of another session before closing them without inheriting its convention', () => {
+    const {
+      tabsStorageManager,
+      services: { storage },
+    } = create();
+    const newClosedAt = Date.now() + 1000;
+    jest.spyOn(Date, 'now').mockReturnValue(newClosedAt);
+
+    storage.set(TABS_LOCAL_STORAGE_KEY, {
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      discoverSessionId: 'other-session',
+      openTabs: [{ ...createInlineStoredTab(), appState: { filters: [unreferencedFilter] } }],
+      closedTabs: [],
+    });
+
+    const loadedProps = tabsStorageManager.loadLocally({
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      persistedDiscoverSession: createDiscoverSessionMock({
+        id: 'test-session',
+        tabs: [{ ...createInlineDocument({ ...inlineSpec, id: undefined }), id: 'new-tab' }],
+      }),
+      savedDataViewIds: [],
+    });
+
+    expect(loadedProps.recentlyClosedTabs).toHaveLength(1);
+    expect(loadedProps.recentlyClosedTabs[0]).toMatchObject({
+      closedAt: newClosedAt,
+      initialInternalState: {
+        serializedSearchSource: { index: { ...inlineSpec, id: inlineId } },
+      },
+    });
+    expect(loadedProps.recentlyClosedTabs[0].appState.filters).toStrictEqual([unreferencedFilter]);
+  });
+
+  it('reopens normalized closed tabs without a persisted discover session', () => {
+    const {
+      tabsStorageManager,
+      urlStateStorage,
+      services: { storage },
+    } = create();
+
+    storage.set(TABS_LOCAL_STORAGE_KEY, {
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      openTabs: [toStoredTab(mockTab1)],
+      closedTabs: [{ ...createInlineStoredTab(), closedAt: 1 }],
+    });
+    urlStateStorage.set(TAB_STATE_URL_KEY, { tabId: 'inline-tab' });
+
+    const loadedProps = tabsStorageManager.loadLocally({
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      savedDataViewIds: [],
+    });
+
+    expect(loadedProps.selectedTabId).toBe('inline-tab');
+    expect(loadedProps.allTabs).toHaveLength(1);
+    expect(loadedProps.allTabs[0].appState).toStrictEqual({
+      dataSource: createDataViewDataSource({ dataViewId: inlineId }),
+      filters: [createFilter(inlineId)],
+    });
+    expect(loadedProps.allTabs[0]).not.toHaveProperty('closedAt');
+    expect(loadedProps.recentlyClosedTabs[0].id).toBe(mockTab1.id);
+  });
+
+  it('returns navigation normalization when opening a new tab from the URL', () => {
+    const { tabsStorageManager, urlStateStorage, services } = create();
+    services.storage.set(TABS_LOCAL_STORAGE_KEY, {
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      openTabs: [],
+      closedTabs: [],
+    });
+    urlStateStorage.set(TAB_STATE_URL_KEY, { tabId: NEW_TAB_ID });
+
+    const loadedProps = tabsStorageManager.loadLocally({
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      savedDataViewIds: [],
+      navigationDataViewSpec: inlineSpec,
+    });
+
+    expect(loadedProps.inlineDataViewIds.navigationDataViewSpec).toStrictEqual({
+      ...inlineSpec,
+      id: inlineId,
+    });
+    expect(loadedProps.inlineDataViewIds.dataViewIdMap.get('legacy-id')).toBe(inlineId);
+    expect(loadedProps.allTabs).toHaveLength(1);
+    expect(loadedProps.selectedTabId).toBe(loadedProps.allTabs[0].id);
+  });
+
+  it('derives both app states from the normalized by-value document without creating a session', () => {
+    const { tabsStorageManager } = create({ enabled: false });
+    const defaultTab = createInlineDocument({ ...inlineSpec, id: undefined });
+    const loadedProps = tabsStorageManager.loadLocally({
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      defaultTab,
+      savedDataViewIds: [],
+    });
+    const [tab] = loadedProps.allTabs;
+
+    expect(loadedProps.updatedDiscoverSession).toBeUndefined();
+    expect(tab.initialInternalState?.serializedSearchSource).toStrictEqual({
+      index: { ...inlineSpec, id: inlineId },
+      filter: [createFilter(inlineId)],
+    });
+    expect(tab.appState.dataSource).toStrictEqual(
+      createDataViewDataSource({ dataViewId: inlineId })
+    );
+    expect(tab.appState.filters).toStrictEqual([createFilter(inlineId)]);
+    expect(tab.previousAppState).toStrictEqual(tab.appState);
+    expect(defaultTab.serializedSearchSource.index).toStrictEqual({ ...inlineSpec, id: undefined });
   });
 
   it('should restore persistent and url profile state from local storage stripped of defaults', () => {
@@ -392,7 +597,7 @@ describe('TabsStorageManager', () => {
     const loadedProps = tabsStorageManager.loadLocally({
       userId: mockUserId,
       spaceId: mockSpaceId,
-      defaultTabState: DEFAULT_TAB_STATE,
+      savedDataViewIds: [],
     });
 
     expect(loadedProps.allTabs[0].profileState).toEqual({
@@ -451,7 +656,7 @@ describe('TabsStorageManager', () => {
     const loadedProps = tabsStorageManager.loadLocally({
       userId: mockUserId,
       spaceId: mockSpaceId,
-      defaultTabState: DEFAULT_TAB_STATE,
+      savedDataViewIds: [],
     });
 
     const loadedTab = loadedProps.allTabs[0];
@@ -508,7 +713,7 @@ describe('TabsStorageManager', () => {
     const loadedProps = tabsStorageManager.loadLocally({
       userId: mockUserId,
       spaceId: mockSpaceId,
-      defaultTabState: DEFAULT_TAB_STATE,
+      savedDataViewIds: [],
     });
 
     expect(loadedProps.allTabs[0]?.attributes.controlGroupState).toStrictEqual({
@@ -556,7 +761,7 @@ describe('TabsStorageManager', () => {
     const loadedProps = tabsStorageManager.loadLocally({
       userId: mockUserId,
       spaceId: mockSpaceId,
-      defaultTabState: DEFAULT_TAB_STATE,
+      savedDataViewIds: [],
       shouldClearAllTabs: true,
     });
 
@@ -611,10 +816,10 @@ describe('TabsStorageManager', () => {
     const loadedProps = tabsStorageManager.loadLocally({
       userId: mockUserId,
       spaceId: mockSpaceId,
-      defaultTabState: DEFAULT_TAB_STATE,
+      savedDataViewIds: [],
     });
 
-    expect(loadedProps).toEqual({
+    expect(omit(loadedProps, 'inlineDataViewIds')).toEqual({
       allTabs: [
         toRestoredTab(omit(mockRecentlyClosedTab, 'closedAt')),
         toRestoredTab(omit(mockRecentlyClosedTab2, 'closedAt')),
@@ -666,7 +871,7 @@ describe('TabsStorageManager', () => {
     const loadedProps = tabsStorageManager.loadLocally({
       userId: 'different',
       spaceId: mockSpaceId,
-      defaultTabState: DEFAULT_TAB_STATE,
+      savedDataViewIds: [],
     });
 
     expect(loadedProps.recentlyClosedTabs).toHaveLength(0);
@@ -710,7 +915,7 @@ describe('TabsStorageManager', () => {
     const loadedProps = tabsStorageManager.loadLocally({
       userId: mockUserId,
       spaceId: mockSpaceId,
-      defaultTabState: DEFAULT_TAB_STATE,
+      savedDataViewIds: [],
     });
 
     expect(loadedProps).toEqual(
@@ -1057,10 +1262,10 @@ describe('TabsStorageManager', () => {
       userId: mockUserId,
       spaceId: mockSpaceId,
       persistedDiscoverSession,
-      defaultTabState: DEFAULT_TAB_STATE,
+      savedDataViewIds: [],
     });
 
-    expect(loadedProps).toEqual({
+    expect(omit(loadedProps, 'inlineDataViewIds')).toEqual({
       allTabs: [toRestoredTab(mockTab1), toRestoredTab(mockTab2)],
       selectedTabId: mockTab2.id,
       recentlyClosedTabs: [toRestoredTab(mockRecentlyClosedTab)],
@@ -1095,7 +1300,7 @@ describe('TabsStorageManager', () => {
       userId: mockUserId,
       spaceId: mockSpaceId,
       persistedDiscoverSession,
-      defaultTabState: DEFAULT_TAB_STATE,
+      savedDataViewIds: [],
     });
 
     expect(loadedProps.allTabs.map(({ id }) => id)).toEqual([savedTab.id]);
@@ -1130,7 +1335,7 @@ describe('TabsStorageManager', () => {
       userId: mockUserId,
       spaceId: mockSpaceId,
       persistedDiscoverSession,
-      defaultTabState: DEFAULT_TAB_STATE,
+      savedDataViewIds: [],
     });
 
     expect(recentlyClosedTabs).toEqual([
@@ -1173,7 +1378,7 @@ describe('TabsStorageManager', () => {
       userId: mockUserId,
       spaceId: mockSpaceId,
       persistedDiscoverSession,
-      defaultTabState: DEFAULT_TAB_STATE,
+      savedDataViewIds: [],
     });
 
     expect(loadedProps.allTabs.map((t) => t.id)).toEqual([persistedTabId]);
@@ -1217,7 +1422,7 @@ describe('TabsStorageManager', () => {
       userId: mockUserId,
       spaceId: mockSpaceId,
       persistedDiscoverSession,
-      defaultTabState: DEFAULT_TAB_STATE,
+      savedDataViewIds: [],
     });
 
     expect(loadedProps.allTabs.map((t) => t.id)).toEqual([persistedTabId]);
@@ -1261,7 +1466,7 @@ describe('TabsStorageManager', () => {
       userId: mockUserId,
       spaceId: mockSpaceId,
       persistedDiscoverSession,
-      defaultTabState: DEFAULT_TAB_STATE,
+      savedDataViewIds: [],
     });
 
     expect(loadedProps.allTabs.map((t) => t.id)).toEqual([persistedTabId]);
@@ -1296,7 +1501,7 @@ describe('TabsStorageManager', () => {
     const loadedProps = tabsStorageManager.loadLocally({
       userId: mockUserId,
       spaceId: mockSpaceId,
-      defaultTabState: DEFAULT_TAB_STATE,
+      savedDataViewIds: [],
     });
 
     expect(loadedProps.recentlyClosedTabs).toEqual([toRestoredTab(mockRecentlyClosedTab)]);
@@ -1356,7 +1561,7 @@ describe('TabsStorageManager', () => {
       userId: mockUserId,
       spaceId: mockSpaceId,
       persistedDiscoverSession,
-      defaultTabState: DEFAULT_TAB_STATE,
+      savedDataViewIds: [],
     });
 
     expect(loadedProps.recentlyClosedTabs.map((t) => t.id)).toEqual([
@@ -1417,7 +1622,7 @@ describe('TabsStorageManager', () => {
       userId: mockUserId,
       spaceId: mockSpaceId,
       persistedDiscoverSession,
-      defaultTabState: DEFAULT_TAB_STATE,
+      savedDataViewIds: [],
     });
 
     expect(loadedProps.recentlyClosedTabs).toHaveLength(2);
@@ -1472,7 +1677,7 @@ describe('TabsStorageManager', () => {
       userId: mockUserId,
       spaceId: mockSpaceId,
       persistedDiscoverSession,
-      defaultTabState: DEFAULT_TAB_STATE,
+      savedDataViewIds: [],
     });
 
     expect(loadedProps.recentlyClosedTabs).toHaveLength(3);
@@ -1513,7 +1718,7 @@ describe('TabsStorageManager', () => {
     const loadedProps = tabsStorageManager.loadLocally({
       userId: mockUserId,
       spaceId: mockSpaceId,
-      defaultTabState: DEFAULT_TAB_STATE,
+      savedDataViewIds: [],
     });
 
     expect(loadedProps.recentlyClosedTabs).toHaveLength(2);
@@ -1539,7 +1744,7 @@ describe('TabsStorageManager', () => {
     tabsStorageManager.loadLocally({
       userId: mockUserId, // register userId and spaceId in tabsStorageManager
       spaceId: mockSpaceId,
-      defaultTabState: DEFAULT_TAB_STATE,
+      savedDataViewIds: [],
     });
 
     await tabsStorageManager.persistLocally(
@@ -1578,10 +1783,10 @@ describe('TabsStorageManager', () => {
     const loadedProps = tabsStorageManager.loadLocally({
       userId: mockUserId,
       spaceId: mockSpaceId,
-      defaultTabState: DEFAULT_TAB_STATE,
+      savedDataViewIds: [],
     });
 
-    expect(loadedProps).toEqual({
+    expect(omit(loadedProps, 'inlineDataViewIds')).toEqual({
       allTabs: [toRestoredTab(mockTab1), toRestoredTab(mockTab2)],
       selectedTabId: mockTab2.id,
       recentlyClosedTabs: [toRestoredTab(mockRecentlyClosedTab)],
@@ -1646,7 +1851,7 @@ describe('TabsStorageManager', () => {
       const loadedProps = tabsStorageManager.loadLocally({
         userId: mockUserId,
         spaceId: mockSpaceId,
-        defaultTabState: DEFAULT_TAB_STATE,
+        savedDataViewIds: [],
         ...loadOptions,
       });
 

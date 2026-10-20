@@ -16,7 +16,8 @@ import {
   syncState,
 } from '@kbn/kibana-utils-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
-import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
+import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { VisorMode } from '@kbn/esql-editor';
 import {
   LOCALLY_PERSISTED_PROFILE_STATE_TYPES,
@@ -33,6 +34,11 @@ import {
   type TabState,
 } from './redux';
 import type { TabsUrlState } from '../../../../common/types';
+import { DEFAULT_TAB_STATE } from './redux/constants';
+import {
+  normalizeInlineDataViewIds,
+  type NormalizedInlineDataViewIds,
+} from './utils/normalize_inline_data_view_ids';
 
 export const TABS_LOCAL_STORAGE_KEY = 'discover.tabs';
 export const RECENTLY_CLOSED_TABS_LIMIT = 50;
@@ -49,7 +55,7 @@ export type TabStateInLocalStorage = Pick<TabState, 'id' | 'label'> & {
 const isVisorMode = (value: unknown): value is VisorMode =>
   typeof value === 'string' && Object.values<string>(VisorMode).includes(value);
 
-type RecentlyClosedTabStateInLocalStorage = TabStateInLocalStorage &
+export type RecentlyClosedTabStateInLocalStorage = TabStateInLocalStorage &
   Pick<RecentlyClosedTabState, 'closedAt'>;
 
 interface TabsStateInLocalStorage {
@@ -78,6 +84,26 @@ export interface TabsInternalStatePayload {
   recentlyClosedTabs: RecentlyClosedTabState[];
 }
 
+interface LoadTabsOptions {
+  userId: string;
+  spaceId: string;
+  persistedDiscoverSession?: DiscoverSession;
+  shouldClearAllTabs?: boolean;
+  defaultTab?: DiscoverSessionTab;
+  navigationDataViewSpec?: DataViewSpec;
+  savedDataViewIds: readonly string[];
+}
+
+interface LoadedTabs extends TabsInternalStatePayload {
+  updatedDiscoverSession: DiscoverSession | undefined;
+  inlineDataViewIds: NormalizedInlineDataViewIds;
+  draftSessionTitle: string | undefined;
+  /** The selected draft replaced by a newer saved session, used to recognize its stale URL. */
+  outdatedSelectedTab?: TabState;
+  /** Whether a newer saved session replaced the local tabs; unsaved changes moved to recently closed tabs. */
+  hasNewSavedVersion?: boolean;
+}
+
 export interface TabsStorageManager {
   /**
    * Supports two-way sync of the selected tab id with the URL.
@@ -98,26 +124,8 @@ export interface TabsStorageManager {
     >,
     discoverSession: Pick<DiscoverSession, 'id' | 'version'> | undefined
   ) => void;
-  loadLocally: (props: {
-    userId: string;
-    spaceId: string;
-    persistedDiscoverSession?: DiscoverSession;
-    shouldClearAllTabs?: boolean;
-    defaultTabState: Omit<TabState, keyof TabItem>;
-    /** Prepares the returned session before mapping its tabs, using local tabs from the same session. */
-    prepareSession?: (
-      session: DiscoverSession,
-      localTabs: TabState[],
-      selectedTabId: string | undefined
-    ) => DiscoverSession;
-  }) => TabsInternalStatePayload & {
-    updatedDiscoverSession: DiscoverSession | undefined;
-    draftSessionTitle: string | undefined;
-    /** The selected draft replaced by a newer saved session, used to recognize its stale URL. */
-    outdatedSelectedTab?: TabState;
-    /** Whether a newer saved session replaced the local tabs; unsaved changes moved to recently closed tabs. */
-    hasNewSavedVersion?: boolean;
-  };
+  /** Normalizes input documents and stored records before constructing and selecting runtime tabs. */
+  loadLocally(props: LoadTabsOptions): LoadedTabs;
   getNRecentlyClosedTabs: (params: {
     previousOpenTabs: TabState[];
     previousRecentlyClosedTabs: RecentlyClosedTabState[];
@@ -462,14 +470,15 @@ export const createTabsStorageManager = ({
     }
   };
 
-  const loadLocally: TabsStorageManager['loadLocally'] = ({
+  const loadLocally = ({
     userId,
     spaceId,
     persistedDiscoverSession,
     shouldClearAllTabs,
-    defaultTabState,
-    prepareSession,
-  }) => {
+    defaultTab,
+    navigationDataViewSpec,
+    savedDataViewIds,
+  }: LoadTabsOptions): LoadedTabs => {
     const tabsStateFromURL = getTabsStateFromURL();
     const selectedTabId = enabled
       ? shouldClearAllTabs
@@ -500,22 +509,41 @@ export const createTabsStorageManager = ({
     const hasNewSavedVersion = isSameSession && hasBothVersions && savedVersion !== storedVersion;
     const canReuseLocalTabs = isSameSession && !hasNewSavedVersion;
 
-    const previousOpenTabs = storedTabsState.openTabs.map((tab) =>
-      toTabState(tab, defaultTabState)
+    const inlineDataViewIds = normalizeInlineDataViewIds({
+      sessionTabs: persistedDiscoverSession?.tabs ?? [],
+      openTabs: storedTabsState.openTabs,
+      closedTabs: storedTabsState.closedTabs,
+      defaultTab,
+      navigationDataViewSpec,
+      savedDataViewIds,
+      openTabsFromSession: persistedDiscoverSession !== undefined && canReuseLocalTabs,
+    });
+    const { sessionTabs, defaultTab: normalizedDefaultTab } = inlineDataViewIds;
+
+    let updatedDiscoverSession = persistedDiscoverSession;
+    if (persistedDiscoverSession && sessionTabs !== persistedDiscoverSession.tabs) {
+      updatedDiscoverSession = { ...persistedDiscoverSession, tabs: sessionTabs };
+    }
+
+    let preparedDefaultTabState = DEFAULT_TAB_STATE;
+    if (normalizedDefaultTab) {
+      preparedDefaultTabState = fromSavedObjectTabToTabState({
+        tab: normalizedDefaultTab,
+        profileStateRegistry,
+      });
+    }
+
+    const previousOpenTabs = inlineDataViewIds.openTabs.map((tab) =>
+      toTabState(tab, preparedDefaultTabState)
+    );
+    const closedTabs = inlineDataViewIds.closedTabs.map((tab) =>
+      toRecentlyClosedTabState(tab, preparedDefaultTabState)
     );
     let openTabs = shouldClearAllTabs ? [] : previousOpenTabs;
-    let updatedDiscoverSession = persistedDiscoverSession;
     let outdatedSelectedTab: TabState | undefined;
 
     if (hasNewSavedVersion) {
       outdatedSelectedTab = previousOpenTabs.find(({ id }) => id === selectedTabId);
-    }
-
-    // Prepare before mapping tabs so inline views can reuse matching local IDs. Return the same
-    // prepared session below so restored tabs and the unsaved-changes baseline use consistent IDs.
-    if (persistedDiscoverSession && prepareSession) {
-      const localTabs = canReuseLocalTabs ? openTabs : [];
-      updatedDiscoverSession = prepareSession(persistedDiscoverSession, localTabs, selectedTabId);
     }
 
     const persistedTabs = updatedDiscoverSession?.tabs.map((tab) =>
@@ -526,9 +554,6 @@ export const createTabsStorageManager = ({
       // a different session, or this one saved elsewhere since, opens its saved tabs
       openTabs = persistedTabs ?? [];
     }
-    const closedTabs = storedTabsState.closedTabs.map((tab) =>
-      toRecentlyClosedTabState(tab, defaultTabState)
-    );
     // Unsaved changes of draft tabs replaced by a newer saved version stay restorable as recently
     // closed tabs. They get new IDs because the saved tabs that replace them keep the original ones.
     const replacedUnsavedTabs = hasNewSavedVersion
@@ -571,6 +596,7 @@ export const createTabsStorageManager = ({
           hasNewSavedVersion,
           selectedTabId,
           updatedDiscoverSession,
+          inlineDataViewIds,
           draftSessionTitle: restoredDraftSessionTitle,
           recentlyClosedTabs: getRecentlyClosedTabs(openTabs),
         };
@@ -583,7 +609,7 @@ export const createTabsStorageManager = ({
         (selectedTabId && tabsStateFromURL?.tabLabel && updatedDiscoverSession)
       ) {
         const newTab = {
-          ...defaultTabState,
+          ...preparedDefaultTabState,
           ...createTabItem(openTabs),
         };
 
@@ -597,6 +623,7 @@ export const createTabsStorageManager = ({
           hasNewSavedVersion,
           selectedTabId: newTab.id,
           updatedDiscoverSession,
+          inlineDataViewIds,
           draftSessionTitle: restoredDraftSessionTitle,
           recentlyClosedTabs: getRecentlyClosedTabs(allTabsWithNewTab),
         };
@@ -604,17 +631,18 @@ export const createTabsStorageManager = ({
 
       // otherwise try to reopen some of the previously closed tabs
       if (selectedTabId && !updatedDiscoverSession && !tabsStateFromURL?.tabLabel) {
-        const storedClosedTab = storedTabsState.closedTabs.find((tab) => tab.id === selectedTabId);
+        const closedTab = closedTabs.find((tab) => tab.id === selectedTabId);
 
-        if (storedClosedTab) {
+        if (closedTab) {
           // restore previously closed tabs, for example when only the default tab was shown
-          const restoredTabs = storedTabsState.closedTabs
-            .filter((tab) => tab.closedAt === storedClosedTab.closedAt)
-            .map((tab) => toTabState(tab, defaultTabState));
+          const restoredTabs = closedTabs
+            .filter((tab) => tab.closedAt === closedTab.closedAt)
+            .map((tab) => omit(tab, 'closedAt'));
           return {
             allTabs: restoredTabs,
             selectedTabId,
             updatedDiscoverSession,
+            inlineDataViewIds,
             draftSessionTitle: undefined,
             recentlyClosedTabs: getRecentlyClosedTabs(restoredTabs),
           };
@@ -624,7 +652,7 @@ export const createTabsStorageManager = ({
 
     // otherwise open the first tab from the Discover Session SO or a new default tab as a fallback
     const newDefaultTab = {
-      ...defaultTabState,
+      ...preparedDefaultTabState,
       ...createTabItem([]),
     };
 
@@ -646,6 +674,7 @@ export const createTabsStorageManager = ({
       hasNewSavedVersion,
       selectedTabId: selectedTab.id,
       updatedDiscoverSession,
+      inlineDataViewIds,
       draftSessionTitle: undefined,
       recentlyClosedTabs: getRecentlyClosedTabs(allTabs),
     };

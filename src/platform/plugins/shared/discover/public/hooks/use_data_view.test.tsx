@@ -9,67 +9,66 @@
 
 import React from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { useDataView } from './use_data_view';
 import { DiscoverTestProvider } from '../__mocks__/test_provider';
 import type { DiscoverServices } from '../build_services';
 import { createDiscoverServicesMock } from '../__mocks__/services';
-
-const adhocDataView = {
-  id: '2',
-  title: 'test2',
-  fields: [],
-};
-
-const dataViews = [
-  {
-    id: '1',
-    title: 'test',
-    fields: [],
-  },
-  adhocDataView,
-];
-
-const mockServices = {
-  ...createDiscoverServicesMock(),
-  dataViews: {
-    get: jest.fn((dataViewId: string) =>
-      Promise.resolve(dataViews.find(({ id }) => id === dataViewId))
-    ),
-    create: jest.fn((spec) => Promise.resolve(spec)),
-  },
-} as unknown as DiscoverServices;
-const mockDataViewsGet = jest.spyOn(mockServices.dataViews, 'get');
-
-const render = async ({ dataViewId }: { dataViewId: string }) => {
-  const hookResult = renderHook(() => useDataView({ index: dataViewId }), {
-    wrapper: ({ children }: React.PropsWithChildren) => (
-      <DiscoverTestProvider services={mockServices}>{children}</DiscoverTestProvider>
-    ),
-  });
-  await waitFor(() => new Promise((resolve) => resolve(null)));
-
-  return hookResult;
-};
+import { dataViewAdHoc } from '../__mocks__/data_view_complex';
 
 describe('useDataView', () => {
-  it('should load save data view', async () => {
-    const { result } = await render({ dataViewId: '1' });
-    expect(mockDataViewsGet).toHaveBeenCalledWith('1');
-    expect(result.current.dataView).toEqual(dataViews[0]);
+  let services: DiscoverServices;
+
+  const render = (index: string | DataViewSpec) =>
+    renderHook(() => useDataView({ index }), {
+      wrapper: ({ children }: React.PropsWithChildren) => (
+        <DiscoverTestProvider services={services}>{children}</DiscoverTestProvider>
+      ),
+    });
+
+  beforeEach(() => {
+    services = createDiscoverServicesMock();
   });
 
-  it('should throw an error on saved data view load ', async () => {
-    mockDataViewsGet.mockImplementationOnce(() => Promise.reject(new Error('can not load')));
+  afterEach(() => jest.restoreAllMocks());
 
-    const { result } = await render({ dataViewId: '1' });
-    expect(result.current.error!.message).toEqual('can not load');
+  it('loads a data view by ID', async () => {
+    const get = jest.spyOn(services.dataViews, 'get').mockResolvedValueOnce(dataViewMock);
+    const resolve = jest.spyOn(services.inlineDataViews, 'resolve');
+
+    const { result } = render('the-data-view-id');
+
+    await waitFor(() => expect(result.current.dataView).toBe(dataViewMock));
+    expect(get).toHaveBeenCalledWith('the-data-view-id');
+    expect(resolve).not.toHaveBeenCalled();
   });
 
-  it('should get adhoc data view from cache', async () => {
-    const { result } = await render({ dataViewId: '2' });
+  it('resolves a spec through the inline data view service', async () => {
+    const spec: DataViewSpec = { id: 'inline-id', title: 'logs-*' };
+    const resolve = jest
+      .spyOn(services.inlineDataViews, 'resolve')
+      .mockResolvedValueOnce(dataViewAdHoc);
+    const get = jest.spyOn(services.dataViews, 'get');
 
-    expect(mockDataViewsGet).toHaveBeenCalledWith(adhocDataView.id);
-    expect(mockServices.dataViews.create).toHaveBeenCalledTimes(0);
-    expect(result.current.dataView).toEqual(adhocDataView);
+    const { result } = render(spec);
+
+    await waitFor(() => expect(result.current.dataView).toBe(dataViewAdHoc));
+    expect(resolve).toHaveBeenCalledWith(spec);
+    expect(get).not.toHaveBeenCalled();
+  });
+
+  it.each<[string, string | DataViewSpec]>([
+    ['an ID', 'the-data-view-id'],
+    ['a spec', { title: 'logs-*' }],
+  ])('exposes the error when %s cannot be loaded', async (_description, index) => {
+    const error = new Error('Cannot load');
+    jest.spyOn(services.dataViews, 'get').mockRejectedValueOnce(error);
+    jest.spyOn(services.inlineDataViews, 'resolve').mockRejectedValueOnce(error);
+
+    const { result } = render(index);
+
+    await waitFor(() => expect(result.current.error).toBe(error));
+    expect(result.current.dataView).toBeUndefined();
   });
 });

@@ -18,15 +18,15 @@ import type { SaveDiscoverSessionParams } from '@kbn/saved-search-plugin/public'
 import { internalStateActions, selectHasUnsavedChanges } from '..';
 import { createDiscoverSessionService, type DiscoverSessionClient } from '../../../../../session';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
-import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { internalStateSlice } from '../internal_state';
 import type { SaveDiscoverSessionThunkParams } from './save_discover_session';
 import * as tabStateDataViewActions from './tab_state_data_view';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { getPersistedTabMock } from '../__mocks__/internal_state.mocks';
-
-jest.mock('uuid', () => ({ v4: jest.fn(() => 'test-uuid') }));
+import { generateInlineDataViewId } from '../../../../../../common/session/inline_data_view';
+import { BooleanRelation, buildCombinedFilter, FilterStateStore } from '@kbn/es-query';
+import { createFilter } from '../../../../../../common/session/inline_data_view.fixtures';
 
 const getSaveDiscoverSessionParams = (
   overrides: Partial<SaveDiscoverSessionThunkParams> = {}
@@ -49,10 +49,10 @@ const setup = async ({
   const services = createDiscoverServicesMock();
   const saveDiscoverSessionSpy = jest
     .spyOn(services.discoverSessionService, 'save')
-    .mockImplementation((discoverSession) =>
+    .mockImplementation((discoverSession, { copyOnSave }) =>
       Promise.resolve({
         ...discoverSession,
-        id: discoverSession.id ?? 'new-session',
+        id: copyOnSave ? 'copied-session' : discoverSession.id ?? 'new-session',
         managed: false,
       })
     );
@@ -97,6 +97,10 @@ const setup = async ({
 describe('saveDiscoverSession', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it('should call saveDiscoverSession with the expected params', async () => {
@@ -218,11 +222,11 @@ describe('saveDiscoverSession', () => {
   });
 
   it('should not update local state if saveDiscoverSession returns undefined', async () => {
+    const { toolkit, saveDiscoverSessionSpy } = await setup();
     const resetOnSavedSearchChangeSpy = jest.spyOn(
       internalStateSlice.actions,
       'resetOnSavedSearchChange'
     );
-    const { toolkit, saveDiscoverSessionSpy } = await setup();
     const initialPersisted = toolkit.internalState.getState().persistedDiscoverSession;
 
     saveDiscoverSessionSpy.mockResolvedValueOnce(undefined);
@@ -481,139 +485,181 @@ describe('saveDiscoverSession', () => {
     });
   });
 
-  it('should replace custom ad hoc data view when copying on save', async () => {
-    const oldId = 'adhoc-id';
-    const filters = [
-      { meta: { index: oldId, alias: null, disabled: false }, query: { match_all: {} } },
-    ];
+  it('should preserve inline views and their sharing when copying a session', async () => {
+    const sharedSpec = { id: 'adhoc-id', title: 'Adhoc', name: 'Adhoc Name' };
+    const otherSpec = { id: 'other-id', title: 'Other', name: 'Other Name' };
+    const specs = [sharedSpec, sharedSpec, otherSpec];
     const { toolkit, saveDiscoverSessionSpy, dataViewCreateSpy, dataViewsClearCacheSpy } =
       await setup({
-        additionalPersistedTabs: (services) => [
-          fromTabStateToSavedObjectTab({
-            tab: getTabStateMock({
-              id: 'adhoc-replace-tab',
-              initialInternalState: {
-                serializedSearchSource: {
-                  index: { id: oldId, title: 'Adhoc', name: 'Adhoc Name' },
-                  filter: filters,
+        additionalPersistedTabs: (services) =>
+          specs.map((spec, index) =>
+            fromTabStateToSavedObjectTab({
+              tab: getTabStateMock({
+                id: `inline-tab-${index}`,
+                initialInternalState: {
+                  serializedSearchSource: {
+                    index: spec,
+                    filter: [createFilter(spec.id)],
+                  },
                 },
-              },
-            }),
-            services,
-            currentDataView: undefined,
-            tabType: undefined,
-          }),
-        ],
+              }),
+              services,
+              currentDataView: undefined,
+              tabType: undefined,
+            })
+          ),
       });
+    const originalSession = toolkit.internalState.getState().persistedDiscoverSession;
+    dataViewCreateSpy.mockClear();
+    dataViewsClearCacheSpy.mockClear();
 
-    await toolkit.internalState.dispatch(
-      internalStateActions.saveDiscoverSession(
-        getSaveDiscoverSessionParams({ newCopyOnSave: true })
+    await toolkit.internalState
+      .dispatch(
+        internalStateActions.saveDiscoverSession(
+          getSaveDiscoverSessionParams({ newCopyOnSave: true })
+        )
       )
-    );
+      .unwrap();
 
-    expect(saveDiscoverSessionSpy).toHaveBeenCalled();
-    expect(dataViewCreateSpy).toHaveBeenCalled();
-    expect(dataViewsClearCacheSpy).toHaveBeenCalledWith(oldId);
-
-    const createdSpec = dataViewCreateSpy.mock.calls[0][0];
-    expect(createdSpec.id).toBe('test-uuid');
-    expect(createdSpec.name).toBe('Adhoc Name');
-
+    expect(dataViewCreateSpy).not.toHaveBeenCalled();
+    expect(dataViewsClearCacheSpy).not.toHaveBeenCalled();
+    expect(toolkit.internalState.getState().persistedDiscoverSession?.id).toBe('copied-session');
     const tabs = saveDiscoverSessionSpy.mock.calls[0][0].tabs;
-    expect(tabs).toHaveLength(2);
-    const savedTab = tabs[1];
-    expect(savedTab?.id).toBe('test-uuid');
-    expect((savedTab?.serializedSearchSource?.index as DataViewSpec).id).toBe('test-uuid');
-    expect(savedTab?.serializedSearchSource?.filter?.[0].meta.index).toBe('test-uuid');
+    expect(tabs.map((tab) => tab.serializedSearchSource)).toStrictEqual(
+      originalSession?.tabs.map((tab) => tab.serializedSearchSource)
+    );
+    expect(new Set(tabs.map((tab) => tab.id)).size).toBe(tabs.length);
+    for (const [index, tab] of tabs.entries()) {
+      expect(tab.id).not.toBe(originalSession?.tabs[index].id);
+    }
+    expect(
+      tabs.slice(1).map((tab) => tab.serializedSearchSource.filter?.[0].meta.index)
+    ).toStrictEqual(specs.map(generateInlineDataViewId));
   });
 
-  it('should copy default profile ad hoc data view on save', async () => {
+  it.each([
+    { action: 'Save', newCopyOnSave: false },
+    { action: 'Save As', newCopyOnSave: true },
+  ])('should copy a shared profile view by value on $action', async ({ newCopyOnSave }) => {
     const defaultProfileId = 'default-profile-id';
     const filters = [
-      { meta: { index: defaultProfileId, alias: null, disabled: false }, query: { match_all: {} } },
+      buildCombinedFilter(BooleanRelation.OR, [createFilter(defaultProfileId)], {
+        id: defaultProfileId,
+      }),
+      {
+        ...createFilter(defaultProfileId),
+        $state: { store: FilterStateStore.GLOBAL_STATE },
+      },
     ];
+    const copySpec = { title: 'Adhoc', name: 'Adhoc Name (new title)', managed: false };
+    const copyId = generateInlineDataViewId(copySpec);
     const { toolkit, saveDiscoverSessionSpy, dataViewCreateSpy, dataViewsClearCacheSpy } =
       await setup({
-        additionalPersistedTabs: (services) => [
-          fromTabStateToSavedObjectTab({
-            tab: getTabStateMock({
-              id: 'adhoc-copy-tab',
-              initialInternalState: {
-                serializedSearchSource: {
-                  index: { id: defaultProfileId, title: 'Adhoc', name: 'Adhoc Name' },
-                  filter: filters,
+        additionalPersistedTabs: (services) =>
+          ['profile-tab', 'duplicate-tab'].map((id) =>
+            fromTabStateToSavedObjectTab({
+              tab: getTabStateMock({
+                id,
+                initialInternalState: {
+                  serializedSearchSource: {
+                    index: {
+                      id: defaultProfileId,
+                      title: 'Adhoc',
+                      name: 'Adhoc Name',
+                      managed: true,
+                    },
+                    filter: filters,
+                  },
                 },
-              },
-            }),
-            services,
-            currentDataView: undefined,
-            tabType: undefined,
-          }),
-        ],
+              }),
+              services,
+              currentDataView: undefined,
+              tabType: undefined,
+            })
+          ),
       });
 
     toolkit.internalState.dispatch(
       internalStateSlice.actions.setDefaultProfileAdHocDataViewIds([defaultProfileId])
     );
 
-    await toolkit.internalState.dispatch(
-      internalStateActions.saveDiscoverSession(getSaveDiscoverSessionParams())
-    );
-
-    expect(saveDiscoverSessionSpy).toHaveBeenCalled();
-    expect(dataViewCreateSpy).toHaveBeenCalled();
-    expect(dataViewsClearCacheSpy).not.toHaveBeenCalled();
-
-    const createdSpec = dataViewCreateSpy.mock.calls[0][0];
-    expect(createdSpec.id).toBe('test-uuid');
-    expect(createdSpec.name).toBe('Adhoc Name (new title)');
-
-    const tabs = saveDiscoverSessionSpy.mock.calls[0][0].tabs;
-    const savedTab = tabs.find((t) => t.id === 'adhoc-copy-tab');
-
-    expect((savedTab?.serializedSearchSource?.index as DataViewSpec).id).toBe('test-uuid');
-    expect(savedTab?.serializedSearchSource?.filter?.[0].meta.index).toBe('test-uuid');
-  });
-
-  it('should not clone ad hoc ES|QL data views', async () => {
-    const esqlId = 'adhoc-esql-id';
-    const { toolkit, saveDiscoverSessionSpy, dataViewCreateSpy, dataViewsClearCacheSpy } =
-      await setup({
-        additionalPersistedTabs: (services) => [
-          fromTabStateToSavedObjectTab({
-            tab: getTabStateMock({
-              id: 'esql-tab',
-              initialInternalState: {
-                serializedSearchSource: {
-                  index: { id: esqlId, title: 'ES|QL Adhoc', type: ESQL_TYPE },
-                },
-              },
-            }),
-            services,
-            currentDataView: undefined,
-            tabType: undefined,
-          }),
-        ],
-      });
-
-    await toolkit.internalState.dispatch(
-      internalStateActions.saveDiscoverSession(
-        getSaveDiscoverSessionParams({ newCopyOnSave: true })
+    await toolkit.internalState
+      .dispatch(
+        internalStateActions.saveDiscoverSession(getSaveDiscoverSessionParams({ newCopyOnSave }))
       )
-    );
+      .unwrap();
 
-    expect(saveDiscoverSessionSpy).toHaveBeenCalled();
-    expect(dataViewCreateSpy).not.toHaveBeenCalled();
+    expect(dataViewCreateSpy).toHaveBeenCalledWith({ ...copySpec, id: copyId });
     expect(dataViewsClearCacheSpy).not.toHaveBeenCalled();
-
-    const tabs = saveDiscoverSessionSpy.mock.calls[0][0].tabs;
-    expect(tabs).toHaveLength(2);
-
-    const savedTab = tabs[1];
-    expect(savedTab?.id).toBe('test-uuid');
-    expect((savedTab?.serializedSearchSource.index as DataViewSpec).id).toBe(esqlId);
+    expect(toolkit.internalState.getState().defaultProfileAdHocDataViewIds).toStrictEqual([
+      defaultProfileId,
+    ]);
+    const copiedTabs = saveDiscoverSessionSpy.mock.calls[0][0].tabs.slice(1);
+    expect(copiedTabs).toHaveLength(2);
+    for (const tab of copiedTabs) {
+      expect(tab.serializedSearchSource.index).toStrictEqual({ ...copySpec, id: copyId });
+      expect(tab.serializedSearchSource.filter).toMatchObject([
+        { meta: { index: copyId, params: [{ meta: { index: copyId } }] } },
+        { meta: { index: copyId }, $state: { store: FilterStateStore.GLOBAL_STATE } },
+      ]);
+    }
   });
+
+  it.each([
+    {
+      description: 'ES|QL views',
+      spec: { id: 'excluded-id', title: 'ES|QL Adhoc', type: ESQL_TYPE },
+      expectedSpec: { id: 'excluded-id', type: ESQL_TYPE },
+      creationCount: 0,
+    },
+    {
+      description: 'managed views outside the profile',
+      spec: { id: 'excluded-id', title: 'Managed', managed: true },
+      expectedSpec: { id: expect.stringMatching(/^[0-9a-f]{8}-/), managed: false },
+      creationCount: 1,
+    },
+  ])(
+    'should retain Save As behavior for $description',
+    async ({ spec, expectedSpec, creationCount }) => {
+      const { toolkit, saveDiscoverSessionSpy, dataViewCreateSpy, dataViewsClearCacheSpy } =
+        await setup({
+          additionalPersistedTabs: (services) => [
+            fromTabStateToSavedObjectTab({
+              tab: getTabStateMock({
+                id: 'excluded-tab',
+                initialInternalState: {
+                  serializedSearchSource: {
+                    index: spec,
+                  },
+                },
+              }),
+              services,
+              currentDataView: undefined,
+              tabType: undefined,
+            }),
+          ],
+        });
+
+      await toolkit.internalState
+        .dispatch(
+          internalStateActions.saveDiscoverSession(
+            getSaveDiscoverSessionParams({ newCopyOnSave: true })
+          )
+        )
+        .unwrap();
+
+      expect(saveDiscoverSessionSpy).toHaveBeenCalled();
+      expect(dataViewCreateSpy).toHaveBeenCalledTimes(creationCount);
+      expect(dataViewsClearCacheSpy).toHaveBeenCalledTimes(creationCount);
+
+      const tabs = saveDiscoverSessionSpy.mock.calls[0][0].tabs;
+      expect(tabs).toHaveLength(2);
+
+      const savedTab = tabs[1];
+      expect(savedTab?.id).not.toBe('excluded-tab');
+      expect(savedTab?.serializedSearchSource.index).toMatchObject(expectedSpec);
+    }
+  );
 
   it('should apply overriddenVisContextAfterInvalidation to the saved tab', async () => {
     const { toolkit, saveDiscoverSessionSpy } = await setup({

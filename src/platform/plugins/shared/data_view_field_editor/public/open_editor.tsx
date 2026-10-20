@@ -42,6 +42,8 @@ export interface OpenFieldEditorOptions {
    * @param field - the fields that were saved
    */
   onSave?: (field: DataViewField[]) => void;
+  /** Called after cancellation, including an accepted flyout close, but never after saving. */
+  onCancel?: () => void;
   /**
    * field to edit, for existing field
    */
@@ -94,15 +96,28 @@ export const getFieldEditorOpener =
 
     const openEditor = async ({
       onSave,
+      onCancel,
       fieldName: fieldNameToEdit,
       fieldToCreate,
       ctx: { dataView: dataViewLazyOrNot },
     }: OpenFieldEditorOptions): Promise<CloseEditor> => {
       const closeEditor = () => {
-        if (overlayRef) {
-          overlayRef.close();
-          overlayRef = null;
+        if (!overlayRef) {
+          return;
         }
+
+        const overlay = overlayRef;
+        overlayRef = null;
+        overlay.close();
+      };
+
+      const cancelEditor = () => {
+        if (!overlayRef) {
+          return;
+        }
+
+        closeEditor();
+        onCancel?.();
       };
 
       const onSaveField = (updatedField: DataViewField[]) => {
@@ -153,7 +168,7 @@ export const getFieldEditorOpener =
           values: { fieldName: fieldNameToEdit },
         });
         notifications.toasts.addDanger(err);
-        return closeEditor;
+        return cancelEditor;
       }
 
       const isNewRuntimeField = !fieldNameToEdit;
@@ -197,7 +212,7 @@ export const getFieldEditorOpener =
           <KibanaReactContextProvider>
             <FieldEditorLoader
               onSave={onSaveField}
-              onCancel={closeEditor}
+              onCancel={cancelEditor}
               onMounted={onMounted}
               docLinks={docLinks}
               fieldToEdit={field}
@@ -236,16 +251,25 @@ export const getFieldEditorOpener =
                   fieldName: fieldNameToEdit,
                 },
               }),
-          onClose: (flyout) => {
+          onClose: () => {
             const canClose = canCloseValidator.current();
             if (canClose) {
-              flyout.close();
+              cancelEditor();
             }
           },
         }
       );
 
-      return closeEditor;
+      if (onCancel) {
+        void overlayRef.onClose.then(() => {
+          if (overlayRef) {
+            overlayRef = null;
+            onCancel();
+          }
+        });
+      }
+
+      return cancelEditor;
     };
 
     return openEditor(options);

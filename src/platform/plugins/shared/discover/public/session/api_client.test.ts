@@ -10,8 +10,8 @@
 import { createHttpFetchError } from '@kbn/core-http-browser-mocks';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import {
-  DISCOVER_SESSION_INTERNAL_API_BASE_PATH,
-  DISCOVER_SESSION_INTERNAL_API_VERSION,
+  DISCOVER_SESSION_API_BASE_PATH,
+  DISCOVER_SESSION_API_VERSION,
 } from '../../common/constants';
 import { createDiscoverSessionClient } from './api_client';
 
@@ -29,8 +29,8 @@ describe('Discover session API client', () => {
     http.post.mockResolvedValue(response);
 
     await expect(client.create(data)).resolves.toBe(response);
-    expect(http.post).toHaveBeenCalledWith(DISCOVER_SESSION_INTERNAL_API_BASE_PATH, {
-      version: DISCOVER_SESSION_INTERNAL_API_VERSION,
+    expect(http.post).toHaveBeenCalledWith(DISCOVER_SESSION_API_BASE_PATH, {
+      version: DISCOVER_SESSION_API_VERSION,
       body: JSON.stringify(data),
     });
   });
@@ -53,8 +53,8 @@ describe('Discover session API client', () => {
         aliasPurpose: undefined,
       },
     });
-    expect(http.get).toHaveBeenCalledWith(`${DISCOVER_SESSION_INTERNAL_API_BASE_PATH}/session-id`, {
-      version: DISCOVER_SESSION_INTERNAL_API_VERSION,
+    expect(http.get).toHaveBeenCalledWith(`${DISCOVER_SESSION_API_BASE_PATH}/session-id`, {
+      version: DISCOVER_SESSION_API_VERSION,
       asResponse: true,
     });
   });
@@ -65,8 +65,8 @@ describe('Discover session API client', () => {
     http.put.mockResolvedValue(response);
 
     await expect(client.upsert('session-id', data)).resolves.toBe(response);
-    expect(http.put).toHaveBeenCalledWith(`${DISCOVER_SESSION_INTERNAL_API_BASE_PATH}/session-id`, {
-      version: DISCOVER_SESSION_INTERNAL_API_VERSION,
+    expect(http.put).toHaveBeenCalledWith(`${DISCOVER_SESSION_API_BASE_PATH}/session-id`, {
+      version: DISCOVER_SESSION_API_VERSION,
       body: JSON.stringify(data),
     });
   });
