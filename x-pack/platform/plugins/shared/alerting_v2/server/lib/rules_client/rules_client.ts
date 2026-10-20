@@ -645,7 +645,21 @@ export class RulesClient {
     }
 
     await this.writeRuleAttrs({ id, attrs, version, references });
-    await this.taskManager.removeIfExists(getRuleExecutorTaskId({ ruleId: id, spaceId }));
+
+    // The rule is already saved as disabled, so a failed removal doesn't fail
+    // the request. The leftover task halts on its next run, like in bulk disable.
+    try {
+      await this.taskManager.removeIfExists(getRuleExecutorTaskId({ ruleId: id, spaceId }));
+    } catch (e) {
+      this.logger.error({
+        error: new Error(
+          `Failed to remove executor task for rule [${id}]; the task may still exist but the executor defense halts it: ${errorMessage(
+            e
+          )}`
+        ),
+        code: ALERTING_LOG_CODES.RULE_TASK_MANAGER_DRIFT,
+      });
+    }
   }
 
   @withApm

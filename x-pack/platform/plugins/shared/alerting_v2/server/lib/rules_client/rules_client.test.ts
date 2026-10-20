@@ -4872,18 +4872,27 @@ describe('RulesClient', () => {
         expect(ruleEventPublisher.emitRuleDisabled).not.toHaveBeenCalled();
       });
 
-      it('keeps the rule stored as disabled when the task removal fails', async () => {
+      it('keeps the rule stored as disabled and still emits when the task removal fails', async () => {
         const client = createClient();
         rulesSavedObjectService.get.mockResolvedValueOnce(enabledDoc);
         taskManager.removeIfExists.mockRejectedValueOnce(new Error('task manager unavailable'));
 
-        await expect(client.disableRule({ id: 'rule-id-1' })).rejects.toThrow(
-          'task manager unavailable'
-        );
+        const rule = await client.disableRule({ id: 'rule-id-1' });
 
+        expect(rule.enabled).toBe(false);
         expect(rulesSavedObjectService.update).toHaveBeenCalledTimes(1);
         expect(rulesSavedObjectService.update).toHaveBeenCalledWith(
           expect.objectContaining({ attrs: expect.objectContaining({ enabled: false }) })
+        );
+        expect(mockLogger.error).toHaveBeenCalledWith(
+          expect.stringContaining('Failed to remove executor task for rule [rule-id-1]'),
+          expect.objectContaining({
+            labels: { code: ALERTING_LOG_CODES.RULE_TASK_MANAGER_DRIFT },
+          })
+        );
+        expect(ruleEventPublisher.emitRuleDisabled).toHaveBeenCalledWith(
+          { request, origin: 'user' },
+          [expect.objectContaining({ ruleId: 'rule-id-1', spaceId: 'space-1' })]
         );
       });
     });
