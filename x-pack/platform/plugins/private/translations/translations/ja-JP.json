@@ -42125,7 +42125,6 @@
     "xpack.securitySolution.detectionEngine.createRule.cancelButtonLabel": "キャンセル",
     "xpack.securitySolution.detectionEngine.createRule.contextMenu.aiRuleCreation": "AIルール作成",
     "xpack.securitySolution.detectionEngine.createRule.contextMenu.buttonLabel": "ルールを作成",
-    "xpack.securitySolution.detectionEngine.createRule.contextMenu.manual": "手動ルール作成",
     "xpack.securitySolution.detectionEngine.createRule.editRuleButton": "編集",
     "xpack.securitySolution.detectionEngine.createRule.eqlQueryLabel": "EQL クエリ",
     "xpack.securitySolution.detectionEngine.createRule.eqlRuleTypeDescription": "イベント相関関係",
