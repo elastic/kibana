@@ -14,7 +14,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiSpacer, useEuiTheme } from '@
 
 import { i18n } from '@kbn/i18n';
 import type { Connector } from '@kbn/search-connectors';
-import { SyncJobsTable } from '@kbn/search-connectors';
+import { SyncJobsTable } from '@kbn/search-connectors-ui';
 
 import { KibanaLogic } from '../../../../shared/kibana';
 

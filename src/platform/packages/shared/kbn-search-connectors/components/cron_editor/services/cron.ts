@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FieldToValueMap } from '../../../types/cron_editor';
+import type { FieldToValueMap } from '@kbn/search-connectors';
 
 export function cronExpressionToParts(expression: string): FieldToValueMap {
   const parsedCron: FieldToValueMap = {

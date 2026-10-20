@@ -14,7 +14,7 @@ import { EuiBasicTable } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import type { IngestPipelineParams } from '../..';
+import type { IngestPipelineParams } from '@kbn/search-connectors';
 
 import { FlyoutPanel } from './flyout_panel';
 

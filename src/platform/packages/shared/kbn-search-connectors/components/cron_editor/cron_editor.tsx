@@ -14,6 +14,7 @@ import { EuiSelect, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import type { Frequency, Field, FieldToValueMap } from '@kbn/search-connectors';
 import {
   MINUTE_OPTIONS,
   HOUR_OPTIONS,
@@ -32,7 +33,6 @@ import { CronMonthly } from './cron_monthly';
 import { CronWeekly } from './cron_weekly';
 import { CronYearly } from './cron_yearly';
 import { cronExpressionToParts, cronPartsToExpression } from './services';
-import type { Frequency, Field, FieldToValueMap } from '../../types/cron_editor';
 
 const excludeBlockListedFrequencies = (
   units: EuiSelectOption[],

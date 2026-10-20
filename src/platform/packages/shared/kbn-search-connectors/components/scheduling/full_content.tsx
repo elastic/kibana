@@ -22,8 +22,8 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-import type { Connector, SchedulingConfiguraton } from '../../types/connectors';
-import { SyncJobType } from '../../types/connectors';
+import type { Connector, SchedulingConfiguraton } from '@kbn/search-connectors';
+import { SyncJobType } from '@kbn/search-connectors';
 import { PlatinumLicensePopover } from '../configuration/platinum_license_popover';
 import { ConnectorCronEditor } from './connector_cron_editor';
 export interface ConnectorContentSchedulingProps {

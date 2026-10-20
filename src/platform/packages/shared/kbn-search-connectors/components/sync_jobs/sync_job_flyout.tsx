@@ -22,7 +22,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import type { ConnectorSyncJob } from '../../types';
+import type { ConnectorSyncJob } from '@kbn/search-connectors';
 import { SyncJobDocumentsPanel } from './documents_panel';
 import { SyncJobEventsPanel } from './events_panel';
 import { FilteringPanel } from './filtering_panel';

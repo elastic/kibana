@@ -13,7 +13,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIconTip, EuiPanel } from '@el
 
 import { i18n } from '@kbn/i18n';
 
-import { DisplayType } from '../..';
+import { DisplayType } from '@kbn/search-connectors';
 
 import type { ConfigEntryView } from './connector_configuration';
 import { ConnectorConfigurationField } from './connector_configuration_field';

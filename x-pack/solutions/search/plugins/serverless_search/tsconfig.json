@@ -34,6 +34,7 @@
     "@kbn/core-lifecycle-browser",
     "@kbn/react-kibana-context-theme",
     "@kbn/search-connectors",
+    "@kbn/search-connectors-ui",
     "@kbn/shared-ux-router",
     "@kbn/data-views-plugin",
     "@kbn/kibana-utils-plugin",

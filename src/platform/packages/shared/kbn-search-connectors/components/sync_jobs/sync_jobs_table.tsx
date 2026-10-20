@@ -14,12 +14,12 @@ import { EuiBadge, EuiBasicTable, EuiButtonIcon, EuiCode, EuiIcon, EuiToolTip } 
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ConnectorSyncJob, SyncJobType, SyncStatus } from '../..';
-import { isSyncCancellable } from '../..';
+import type { ConnectorSyncJob, SyncJobType, SyncStatus } from '@kbn/search-connectors';
+import { isSyncCancellable } from '@kbn/search-connectors';
 
-import { syncJobTypeToText, syncStatusToColor, syncStatusToText } from '../..';
-import { durationToText, getSyncJobDuration } from '../../utils/duration_to_text';
-import { FormattedDateTime } from '../../utils/formatted_date_time';
+import { syncJobTypeToText, syncStatusToColor, syncStatusToText } from '@kbn/search-connectors';
+import { durationToText, getSyncJobDuration } from '../utils/duration_to_text';
+import { FormattedDateTime } from '../utils/formatted_date_time';
 import { SyncJobFlyout } from './sync_job_flyout';
 import type { CancelSyncModalProps } from './sync_job_cancel_modal';
 import { CancelSyncJobModal } from './sync_job_cancel_modal';

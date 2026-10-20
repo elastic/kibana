@@ -8,7 +8,7 @@
  */
 
 import moment from 'moment';
-import type { ConnectorSyncJob } from '../types';
+import type { ConnectorSyncJob } from '@kbn/search-connectors';
 
 export function getSyncJobDuration(syncJob: ConnectorSyncJob): moment.Duration | undefined {
   return syncJob.started_at

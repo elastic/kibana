@@ -23,9 +23,9 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { isCategoryEntry } from '../../utils';
-import { sortAndFilterConnectorConfiguration } from '../../utils/connector_configuration_utils';
-import type { ConnectorConfiguration } from '../../types';
+import { isCategoryEntry } from '@kbn/search-connectors';
+import type { ConnectorConfiguration } from '@kbn/search-connectors';
+import { sortAndFilterConnectorConfiguration } from '../utils/connector_configuration_utils';
 import type { ConfigView } from './connector_configuration';
 import { ConnectorConfigurationFormItems } from './connector_configuration_form_items';
 

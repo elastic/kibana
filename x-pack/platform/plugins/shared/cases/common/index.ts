@@ -33,7 +33,7 @@ export type {
   CasesCapabilities,
 } from './ui/types';
 
-export { CaseSeverity } from './types/domain';
+export { CaseSeverity, CaseStatuses } from './types/domain';
 
 export {
   APP_ID,

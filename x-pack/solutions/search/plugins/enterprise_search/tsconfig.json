@@ -54,6 +54,7 @@
     "@kbn/search-api-panels",
     "@kbn/search-index-documents",
     "@kbn/search-connectors",
+    "@kbn/search-connectors-ui",
     "@kbn/logs-shared-plugin",
     "@kbn/code-editor",
     "@kbn/console-plugin",

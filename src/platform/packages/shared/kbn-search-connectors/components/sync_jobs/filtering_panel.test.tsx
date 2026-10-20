@@ -12,7 +12,7 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 
-import type { FilteringRule } from '../..';
+import type { FilteringRule } from '@kbn/search-connectors';
 
 import { FilteringPanel } from './filtering_panel';
 

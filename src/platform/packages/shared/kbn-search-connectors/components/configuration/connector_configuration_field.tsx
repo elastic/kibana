@@ -26,7 +26,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { DisplayType } from '../..';
+import { DisplayType } from '@kbn/search-connectors';
 
 import type { ConfigEntryView } from './connector_configuration';
 import { LicenseContext } from './connector_configuration';
@@ -35,7 +35,7 @@ import {
   ensureBooleanType,
   ensureCorrectTyping,
   ensureStringType,
-} from '../../utils/connector_configuration_utils';
+} from '../utils/connector_configuration_utils';
 import { PlatinumLicensePopover } from './platinum_license_popover';
 
 interface ConnectorConfigurationFieldProps {

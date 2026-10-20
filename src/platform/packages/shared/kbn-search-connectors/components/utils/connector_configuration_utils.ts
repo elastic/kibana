@@ -8,17 +8,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ConnectorConfigProperties, ConnectorConfiguration, Dependency } from '..';
-import { FieldType, isConfigEntry } from '..';
-
 import type {
+  ConnectorConfigProperties,
+  ConnectorConfiguration,
+  Dependency,
   ConfigEntryView,
   ConfigView,
-} from '../components/configuration/connector_configuration';
-
-import { isCategoryEntry } from './is_category_entry';
-
-import { isNotNullish } from './is_not_nullish';
+} from '@kbn/search-connectors';
+import { FieldType, isConfigEntry, isCategoryEntry, isNotNullish } from '@kbn/search-connectors';
 
 export type ConnectorConfigEntry = ConnectorConfigProperties & { key: string };
 

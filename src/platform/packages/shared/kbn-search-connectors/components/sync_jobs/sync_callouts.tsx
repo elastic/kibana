@@ -15,10 +15,10 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { durationToText, getSyncJobDuration } from '../../utils/duration_to_text';
-import { FormattedDateTime } from '../../utils/formatted_date_time';
-import type { ConnectorSyncJob } from '../..';
-import { SyncStatus, TriggerMethod } from '../..';
+import type { ConnectorSyncJob } from '@kbn/search-connectors';
+import { SyncStatus, TriggerMethod } from '@kbn/search-connectors';
+import { durationToText, getSyncJobDuration } from '../utils/duration_to_text';
+import { FormattedDateTime } from '../utils/formatted_date_time';
 
 interface SyncJobCalloutsProps {
   syncJob: ConnectorSyncJob;

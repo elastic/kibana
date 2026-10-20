@@ -16,8 +16,8 @@ import { EuiBasicTable } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { FormattedDateTime } from '../../utils/formatted_date_time';
-import { TriggerMethod } from '../..';
+import { TriggerMethod } from '@kbn/search-connectors';
+import { FormattedDateTime } from '../utils/formatted_date_time';
 
 import { FlyoutPanel } from './flyout_panel';
 

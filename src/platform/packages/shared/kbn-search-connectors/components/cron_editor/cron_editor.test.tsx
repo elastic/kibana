@@ -13,7 +13,7 @@ import { screen, fireEvent } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { CronEditor } from './cron_editor';
-import type { Frequency } from '../../types/cron_editor';
+import type { Frequency } from '@kbn/search-connectors';
 
 describe('CronEditor', () => {
   ['MINUTE', 'HOUR', 'DAY', 'WEEK', 'MONTH', 'YEAR'].forEach((unit) => {

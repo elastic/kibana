@@ -21,13 +21,14 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import type { Connector, ConnectorConfiguration, ConfigEntryView } from '@kbn/search-connectors';
+import { ConnectorStatus, FeatureName } from '@kbn/search-connectors';
+export type { CategoryEntry, ConfigEntryView, ConfigView } from '@kbn/search-connectors';
 
 import isDeepEqual from 'fast-deep-equal/react';
-import { sortAndFilterConnectorConfiguration } from '../../utils/connector_configuration_utils';
-import type { Connector, ConnectorConfigProperties, ConnectorConfiguration } from '../..';
-import { ConnectorStatus, FeatureName } from '../..';
 
 import { ConnectorConfigurationForm } from './connector_configuration_form';
+import { sortAndFilterConnectorConfiguration } from '../utils/connector_configuration_utils';
 
 function entryToDisplaylistItem(entry: ConfigEntryView): { description: string; title: string } {
   return {
@@ -47,28 +48,6 @@ interface ConnectorConfigurationProps {
   stackManagementLink?: string;
   subscriptionLink?: string;
   children?: React.ReactNode;
-}
-
-interface ConfigEntry extends ConnectorConfigProperties {
-  key: string;
-}
-
-export interface ConfigEntryView extends ConfigEntry {
-  isValid: boolean;
-  validationErrors: string[];
-}
-
-export interface CategoryEntry {
-  configEntries: ConfigEntryView[];
-  key: string;
-  label: string;
-  order: number;
-}
-
-export interface ConfigView {
-  advancedConfigurations: ConfigEntryView[];
-  categories: CategoryEntry[];
-  unCategorizedItems: ConfigEntryView[];
 }
 
 export const LicenseContext = createContext<{

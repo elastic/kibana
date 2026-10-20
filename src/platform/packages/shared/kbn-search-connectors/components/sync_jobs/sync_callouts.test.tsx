@@ -12,7 +12,7 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 
-import { SyncJobType, SyncStatus, TriggerMethod } from '../..';
+import { SyncJobType, SyncStatus, TriggerMethod } from '@kbn/search-connectors';
 
 import { SyncJobCallouts } from './sync_callouts';
 
