@@ -79,14 +79,6 @@ describe('AlertingV2RulesLocatorDefinition', () => {
       });
     });
 
-    it('resolves list with templateId', async () => {
-      const loc = await locator.getLocation({
-        templateId: 't-1',
-        host: OBSERVABILITY_HOST.rules,
-      });
-      expect(loc.path).toBe('/rules/v2?templateId=t-1');
-    });
-
     it('resolves list filtered to the rules derived from a template', async () => {
       const loc = await locator.getLocation({
         derivedFromTemplateId: 'nginx-error-rate',

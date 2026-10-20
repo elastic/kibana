@@ -150,8 +150,6 @@ const tagFieldDefinition: FieldDefinition = {
   resolveDisplayToId: (displayValue) => displayValue,
 };
 
-// Registers `template:<id>` so the search bar and `?q=` links recognize it as a
-// structured filter. Ids are shown as-is: there is no popover to pick from.
 const templateFieldDefinition: FieldDefinition = {
   fieldName: TEMPLATE_FILTER_ID,
   resolveIdToDisplay: (id) => id,

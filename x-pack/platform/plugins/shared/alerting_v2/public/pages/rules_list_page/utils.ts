@@ -8,7 +8,6 @@
 /** Backslashes must be escaped before quotes so the added `\"` is not re-escaped. */
 const escapeKqlValue = (value: string) => value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 
-/** `field: "a" OR field: "b"`, wrapped so it can be negated as a unit. */
 const buildAnyOfClause = (field: string, values: string[] | undefined): string | undefined =>
   values && values.length > 0
     ? `(${values.map((value) => `${field}: "${escapeKqlValue(value)}"`).join(' OR ')})`
@@ -29,9 +28,7 @@ export const buildRulesListFilter = ({
   kind?: string;
   tags?: string[];
   excludedTags?: string[];
-  /** Only the rules created from any of these rule templates. */
   templateIds?: string[];
-  /** Hides the rules created from any of these rule templates. */
   excludedTemplateIds?: string[];
 }) => {
   const enabledValue = enabled === 'true' ? true : enabled === 'false' ? false : undefined;

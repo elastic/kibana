@@ -38,9 +38,8 @@ export interface RulesQueryParams {
  * Enabled filter values are `'true'` / `'false'` (matching the rules status
  * filter UI). Kind filter values are `'alert'` / `'signal'`. Both are
  * single-select popovers, so only the first included value is honored and
- * exclusions are not offered. The template filter takes rule template ids and, like
- * tags, supports several included values (OR) and exclusions (NOT); it has no popover
- * and is set from the search bar or a `?q=template:"<id>"` link.
+ * exclusions are not offered. The template filter takes template ids and, like
+ * tags, supports included values (OR) and exclusions (NOT).
  *
  * Narrows filter dimensions with a cast (same pattern as action policies) because
  * `getIncludeExcludeFilter` is not part of `@kbn/content-list-provider`'s public

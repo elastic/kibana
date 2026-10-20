@@ -31,13 +31,6 @@ export const getRulesLocation = (params: AlertingV2RulesLocatorParams): KibanaLo
   if (params.ruleId) {
     return { app, path: `${pathPrefix}/${encodeURIComponent(params.ruleId)}`, state: {} };
   }
-  if (params.templateId) {
-    return {
-      app,
-      path: `${pathPrefix}?templateId=${encodeURIComponent(params.templateId)}`,
-      state: {},
-    };
-  }
   if (params.derivedFromTemplateId) {
     const search = new URLSearchParams({ q: buildTemplateQuery(params.derivedFromTemplateId) });
     return { app, path: `${pathPrefix}?${search.toString()}`, state: {} };
