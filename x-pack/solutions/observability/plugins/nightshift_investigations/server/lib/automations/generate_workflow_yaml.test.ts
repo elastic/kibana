@@ -99,6 +99,25 @@ describe('generateWorkflowYaml', () => {
     });
   });
 
+  describe('service account', () => {
+    it('runs as the given account', () => {
+      const yaml = parse(
+        generateWorkflowYaml('auto-123', baseAutomation(), {
+          serviceAccountId: 'kibana/nightshift-automations-default',
+        })
+      );
+      expect(yaml.settings.run_as).toBe('kibana/nightshift-automations-default');
+      // The concurrency settings are kept next to it.
+      expect(yaml.settings.concurrency).toBeDefined();
+    });
+
+    it('is unbound without one', () => {
+      expect(parse(generateWorkflowYaml('auto-123', baseAutomation())).settings.run_as).toBe(
+        undefined
+      );
+    });
+  });
+
   describe('alert trigger', () => {
     it('emits alerting.v1.alertStatusChanged when alert rows are present', () => {
       const yaml = parse(generateWorkflowYaml('auto-123', baseAutomation()));

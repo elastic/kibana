@@ -39,17 +39,23 @@ export const deleteAutomationRoute = createNightshiftInvestigationsServerRoute({
     );
 
     // Delete the backing workflow first so it cannot fire after the SO is gone.
-    // Best-effort: if workflow deletion fails the SO is still removed; any orphaned
-    // workflow will be inert because the automation SO is the source of truth for routing.
     if (workflowsManagement && existing.attributes.workflowId) {
-      try {
-        await workflowsManagement.management.deleteWorkflows(
-          [existing.attributes.workflowId],
-          spaceId,
-          request
-        );
-      } catch {
-        // Intentionally swallowed — the SO delete below is the authoritative cleanup.
+      const { workflowId } = existing.attributes;
+      const workflow = await workflowsManagement.management
+        .getWorkflow(workflowId, spaceId, request)
+        .catch(() => null);
+      if (workflow?.definition?.settings?.run_as) {
+        // A workflow bound to a service account keeps running as that account, so it must not
+        // outlive its automation: a failed delete fails the request and keeps the automation.
+        await workflowsManagement.management.deleteWorkflows([workflowId], spaceId, request);
+      } else {
+        // Best-effort: if workflow deletion fails the SO is still removed; an orphaned unbound
+        // workflow is inert because the automation SO is the source of truth for routing.
+        try {
+          await workflowsManagement.management.deleteWorkflows([workflowId], spaceId, request);
+        } catch {
+          // Intentionally swallowed — the SO delete below is the authoritative cleanup.
+        }
       }
     }
 
