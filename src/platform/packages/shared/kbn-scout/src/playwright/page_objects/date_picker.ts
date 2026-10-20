@@ -278,7 +278,10 @@ export class DatePicker {
       // not the human-readable format passed as `from`/`to`. Matching it would require
       // resolving `dateFormat:tz`, which this page object cannot read, so we assert
       // visibility only to confirm the picker updated.
-      await expect(controlButton, `Date picker should reflect the updated time range`).toBeVisible();
+      await expect(
+        controlButton,
+        `Date picker should reflect the updated time range`
+      ).toBeVisible();
     }
   }
 
