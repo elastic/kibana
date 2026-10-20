@@ -1798,7 +1798,7 @@ paths:
       summary: Delete all case comments and alerts
       operationId: deleteCaseCommentsDefaultSpace
       description: |
-        Deletes all comments and alerts from a case. You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're deleting.
+        Deletes all comments and alerts from a case. The files of any file attachments are also deleted. You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're deleting.
       tags:
         - cases
       parameters:
@@ -1903,7 +1903,7 @@ paths:
       summary: Delete a case comment or alert
       operationId: deleteCaseCommentDefaultSpace
       description: |
-        You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're deleting.
+        Deletes a comment or alert from a case. If it is a file attachment, its file is also deleted. You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're deleting.
       tags:
         - cases
       parameters:
@@ -2459,6 +2459,7 @@ components:
             - alert
             - assignees
             - attachment
+            - bulkAttachments
             - comment
             - connector
             - create_case
@@ -4854,6 +4855,26 @@ components:
       properties:
         assignees:
           $ref: '#/components/schemas/assignees'
+    payload_bulk_attachments:
+      type: object
+      description: The payload for a bulk attachments user action, recorded when a user removes one or more attachments of the same type from a case in a single action.
+      required:
+        - bulkAttachments
+      properties:
+        bulkAttachments:
+          type: object
+          required:
+            - attachmentType
+            - count
+          properties:
+            attachmentType:
+              type: string
+              description: The attachment type, such as `security.alert` or `file`.
+              example: security.alert
+            count:
+              type: integer
+              description: The number of attachments of this type.
+              example: 3
     payload_connector:
       type: object
       properties:
@@ -5240,6 +5261,7 @@ components:
           oneOf:
             - $ref: '#/components/schemas/payload_alert_comment'
             - $ref: '#/components/schemas/payload_assignees'
+            - $ref: '#/components/schemas/payload_bulk_attachments'
             - $ref: '#/components/schemas/payload_connector'
             - $ref: '#/components/schemas/payload_create_case'
             - $ref: '#/components/schemas/payload_delete'
@@ -5260,6 +5282,7 @@ components:
           description: The type of action.
           enum:
             - assignees
+            - bulkAttachments
             - category
             - comment
             - connector
