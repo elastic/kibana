@@ -558,7 +558,7 @@ describe('ConversationsPage decisions', () => {
     title: 'Revoke sessions',
     actionWorkflowId: 'system-alertzero-action-revoke-sessions',
     actionInput: { user: 'cfo@corp' },
-    action: { name: 'Revoke sessions' },
+    action: { name: 'Revoke sessions', approvalPolicy: 'always-gate' },
   };
 
   beforeEach(() => {

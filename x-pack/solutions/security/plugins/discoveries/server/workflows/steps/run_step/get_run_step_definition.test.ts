@@ -723,6 +723,68 @@ describe('getRunStepDefinition', () => {
     });
   });
 
+  describe('ground_truth_gate_enabled', () => {
+    it('keeps the gate and the skill on when the input is omitted', async () => {
+      const stepDefinition = getStepDefinition();
+
+      await stepDefinition.handler(syncMockContext as never);
+
+      expect(mockExecuteGenerationWorkflow).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workflowConfig: expect.objectContaining({
+            ground_truth_gate_enabled: true,
+            skill_enabled: true,
+          }),
+        })
+      );
+    });
+
+    // With no deterministic source and the skill off, the config names no alert
+    // source, so `validateRetrievalResults` fails the run instead of leaving it to
+    // a gate that never runs (that throw is covered in its own tests).
+    it('leaves no alert source for custom_only without workflows when the gate is off', async () => {
+      const stepDefinition = getStepDefinition();
+
+      await stepDefinition.handler({
+        ...baseMockContext,
+        input: {
+          ...syncMockContext.input,
+          alert_retrieval_mode: 'custom_only',
+          alert_retrieval_workflow_ids: [],
+          ground_truth_gate_enabled: false,
+        },
+      } as never);
+
+      expect(mockExecuteGenerationWorkflow).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workflowConfig: expect.objectContaining({
+            alert_retrieval_workflows_enabled: false,
+            default_retrieval_enabled: false,
+            skill_enabled: false,
+          }),
+        })
+      );
+    });
+
+    it('turns off the gate and the skill when false', async () => {
+      const stepDefinition = getStepDefinition();
+
+      await stepDefinition.handler({
+        ...baseMockContext,
+        input: { ...syncMockContext.input, ground_truth_gate_enabled: false },
+      } as never);
+
+      expect(mockExecuteGenerationWorkflow).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workflowConfig: expect.objectContaining({
+            ground_truth_gate_enabled: false,
+            skill_enabled: false,
+          }),
+        })
+      );
+    });
+  });
+
   describe('provided alerts auto-detection', () => {
     it('disables default retrieval and forwards alerts when alerts are non-empty', async () => {
       const contextWithAlerts = {
