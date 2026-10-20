@@ -70,6 +70,8 @@ interface CreateChatCompleteApiOptions {
   isDefaultConnectorOnly?: () => Promise<boolean>;
   getDefaultConnectorId?: () => Promise<string | undefined>;
   resolveConnectorId?: (connectorId: string) => Promise<string>;
+  /** Decides whether an inference endpoint of the given service is called with `_stream`. */
+  shouldStreamInferenceEndpoint?: (service?: string) => Promise<boolean>;
 }
 
 type CreateChatCompleteApiOptionsKey =
@@ -130,6 +132,7 @@ export function createChatCompleteCallbackApi({
   isDefaultConnectorOnly,
   getDefaultConnectorId,
   resolveConnectorId,
+  shouldStreamInferenceEndpoint,
 }: CreateChatCompleteApiOptions) {
   return (
     {
@@ -161,6 +164,7 @@ export function createChatCompleteCallbackApi({
         isDefaultConnectorOnly,
         getDefaultConnectorId,
         resolveConnectorId,
+        shouldStreamInferenceEndpoint,
       })
     ).pipe(
       retryHoldingTokenCountEvents({
@@ -366,6 +370,7 @@ function resolveAndCreatePipeline({
   isDefaultConnectorOnly,
   getDefaultConnectorId,
   resolveConnectorId,
+  shouldStreamInferenceEndpoint,
 }: {
   connectorId: string;
   endpointIdCache: InferenceEndpointIdCache;
@@ -385,6 +390,7 @@ function resolveAndCreatePipeline({
   isDefaultConnectorOnly?: () => Promise<boolean>;
   getDefaultConnectorId?: () => Promise<string | undefined>;
   resolveConnectorId?: (connectorId: string) => Promise<string>;
+  shouldStreamInferenceEndpoint?: (service?: string) => Promise<boolean>;
 }) {
   return from(
     throwIfConnectorNotAllowed({
@@ -399,37 +405,12 @@ function resolveAndCreatePipeline({
       let resolvedAsInferenceEndpoint = isInferenceEndpoint;
 
       const resolve: () => Promise<ResolvedPipelineContext> = isInferenceEndpoint
-        ? async () => {
-            const endpointMeta = await resolveInferenceEndpoint({
+        ? () =>
+            resolveInferenceEndpointContext({
               inferenceId: connectorId,
               esClient,
-            });
-            const executor = createInferenceEndpointExecutor({
-              inferenceId: connectorId,
-              esClient,
-            });
-
-            return {
-              callbackContext: {
-                model: endpointMeta.modelId ? { id: endpointMeta.modelId } : undefined,
-              },
-              getSpanModel: (modelName) =>
-                endpointMeta.provider
-                  ? ({
-                      id: modelName ?? endpointMeta.modelId,
-                      provider: endpointMeta.provider,
-                    } as SpanModel)
-                  : undefined,
-              supportsTemplates: true,
-              chatComplete: (options) =>
-                inferenceEndpointAdapter.chatComplete({
-                  ...options,
-                  executor,
-                  endpointModelId: endpointMeta.modelId,
-                  provider: endpointMeta.provider,
-                }),
-            };
-          }
+              shouldStreamInferenceEndpoint,
+            })
         : async () => {
             const executor = await getInferenceExecutor({
               connectorId,
@@ -442,36 +423,11 @@ function resolveAndCreatePipeline({
 
             if (connector.isInferenceEndpoint) {
               resolvedAsInferenceEndpoint = true;
-              const inferenceId = connector.connectorId;
-              const endpointMeta = await resolveInferenceEndpoint({
-                inferenceId,
+              return resolveInferenceEndpointContext({
+                inferenceId: connector.connectorId,
                 esClient,
+                shouldStreamInferenceEndpoint,
               });
-              const endpointExecutor = createInferenceEndpointExecutor({
-                inferenceId,
-                esClient,
-              });
-
-              return {
-                callbackContext: {
-                  model: endpointMeta.modelId ? { id: endpointMeta.modelId } : undefined,
-                },
-                getSpanModel: (modelName) =>
-                  endpointMeta.provider
-                    ? ({
-                        id: modelName ?? endpointMeta.modelId,
-                        provider: endpointMeta.provider,
-                      } as SpanModel)
-                    : undefined,
-                supportsTemplates: true,
-                chatComplete: (options) =>
-                  inferenceEndpointAdapter.chatComplete({
-                    ...options,
-                    executor: endpointExecutor,
-                    endpointModelId: endpointMeta.modelId,
-                    provider: endpointMeta.provider,
-                  }),
-              };
             }
 
             const connectorType = connector.type;
@@ -538,6 +494,43 @@ function resolveAndCreatePipeline({
       );
     })
   );
+}
+
+async function resolveInferenceEndpointContext({
+  inferenceId,
+  esClient,
+  shouldStreamInferenceEndpoint,
+}: {
+  inferenceId: string;
+  esClient: ElasticsearchClient;
+  shouldStreamInferenceEndpoint?: (service?: string) => Promise<boolean>;
+}): Promise<ResolvedPipelineContext> {
+  const endpointMeta = await resolveInferenceEndpoint({ inferenceId, esClient });
+  const stream = shouldStreamInferenceEndpoint
+    ? await shouldStreamInferenceEndpoint(endpointMeta.provider)
+    : true;
+  const executor = createInferenceEndpointExecutor({ inferenceId, esClient, stream });
+
+  return {
+    callbackContext: {
+      model: endpointMeta.modelId ? { id: endpointMeta.modelId } : undefined,
+    },
+    getSpanModel: (modelName) =>
+      endpointMeta.provider
+        ? ({
+            id: modelName ?? endpointMeta.modelId,
+            provider: endpointMeta.provider,
+          } as SpanModel)
+        : undefined,
+    supportsTemplates: true,
+    chatComplete: (options) =>
+      inferenceEndpointAdapter.chatComplete({
+        ...options,
+        executor,
+        endpointModelId: endpointMeta.modelId,
+        provider: endpointMeta.provider,
+      }),
+  };
 }
 
 async function throwIfConnectorNotAllowed({

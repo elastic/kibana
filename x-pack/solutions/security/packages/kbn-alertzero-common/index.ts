@@ -160,6 +160,8 @@ export {
   HuntIncompleteReason,
   HuntIoc,
   HuntIocType,
+  huntResultSchema,
+  isoDatetimeSchema,
   HuntIndexScopeResponse,
   HuntScope,
   HuntScopeResolution,
@@ -182,6 +184,7 @@ export {
   WriteHuntEvidenceRequestBody,
   WriteHuntEvidenceResponse,
 } from './impl/schemas';
+export type { HuntResult } from './impl/schemas';
 
 export { isWorkerEnableBlocked } from './impl/workers/blocking_reasons';
 

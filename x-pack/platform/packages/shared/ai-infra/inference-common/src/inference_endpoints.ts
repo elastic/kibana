@@ -38,6 +38,7 @@ export const defaultInferenceEndpoints = {
   OPENAI_GPT_OSS_120B: '.openai-gpt-oss-120b-chat_completion',
   ANTHROPIC_CLAUDE_4_6_OPUS: '.anthropic-claude-4.6-opus-chat_completion',
   ANTHROPIC_CLAUDE_4_6_SONNET: '.anthropic-claude-4.6-sonnet-chat_completion',
+  ANTHROPIC_CLAUDE_5_5_SONNET: '.anthropic-claude-5.5-sonnet-chat_completion',
 } as const;
 
 /**

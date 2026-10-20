@@ -10,7 +10,7 @@ import type { AttachmentPanel, DashboardSection } from '@kbn/agent-builder-dashb
 import { z } from '@kbn/zod/v4';
 import { createPanelInputMaterializer } from './panel_creation';
 import { defineOperation } from './types';
-import { addSectionPanelItemSchema } from './panels';
+import { addSectionPanelItemSchema } from '../panels';
 import { findSectionIndex, getPlaceholderGrid, getWidgetsBottomY } from '../dashboard_state';
 
 export const addSectionOperation = defineOperation({
