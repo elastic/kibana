@@ -49,6 +49,59 @@ export const getWidgetsBottomY = (widgets: DashboardWidget[]): number => {
   }, 0);
 };
 
+export const getSectionsById = ({
+  panels,
+}: DashboardAttachmentData): Map<string, DashboardSection> =>
+  new Map(panels.filter(isSection).map((section) => [section.id, section]));
+
+/** Section id of every panel, or null for panels at the top level. */
+export const getSectionIdByPanelId = ({
+  panels,
+}: DashboardAttachmentData): Map<string, string | null> =>
+  new Map(
+    panels.flatMap(
+      (widget): Array<[string, string | null]> =>
+        isSection(widget) ? widget.panels.map(({ id }) => [id, widget.id]) : [[widget.id, null]]
+    )
+  );
+
+type DashboardControl = NonNullable<DashboardAttachmentData['pinned_panels']>[number];
+
+export const getControlId = ({ id }: DashboardControl): string | undefined =>
+  typeof id === 'string' ? id : undefined;
+
+export interface DashboardIndex {
+  panelsById: Map<string, AttachmentPanel>;
+  sectionsById: Map<string, DashboardSection>;
+  /** Section id of every panel, or null for panels at the top level. */
+  sectionIdByPanelId: Map<string, string | null>;
+  controlsById: Map<string, DashboardControl>;
+}
+
+/** Indexes the panels, sections and controls of a dashboard by id. */
+export const indexDashboard = (dashboardData: DashboardAttachmentData): DashboardIndex => ({
+  panelsById: indexPanelsById(dashboardData.panels),
+  sectionsById: getSectionsById(dashboardData),
+  sectionIdByPanelId: getSectionIdByPanelId(dashboardData),
+  controlsById: new Map(
+    (dashboardData.pinned_panels ?? []).flatMap((control) => {
+      const id = getControlId(control);
+      return id === undefined ? [] : [[id, control] as const];
+    })
+  ),
+});
+
+/** Every panel, section and control id of an indexed dashboard. */
+export const getIndexedIds = ({
+  panelsById,
+  sectionsById,
+  controlsById,
+}: DashboardIndex): string[] => [
+  ...panelsById.keys(),
+  ...sectionsById.keys(),
+  ...controlsById.keys(),
+];
+
 /** Height of a new panel until the layout call places it. */
 const PLACEHOLDER_HEIGHT = 10;
 

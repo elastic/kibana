@@ -15,6 +15,7 @@ export { arrangeDashboardLayout, buildLayoutPrompt, parseLayoutAnswer } from './
 export type { ArrangeDashboardLayout, LayoutArrangement, LayoutRequest } from './src/layout';
 
 export { getErrorMessage } from './src/utils';
+export type { DashboardFailure } from './src/utils';
 
 export { createPanelFailureResult } from './src/resolve_panel';
 export type {
