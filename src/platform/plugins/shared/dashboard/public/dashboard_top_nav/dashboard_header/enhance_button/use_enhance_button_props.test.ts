@@ -11,7 +11,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { BehaviorSubject, map, skip } from 'rxjs';
 import type { DashboardApi } from '../../../dashboard_api/types';
 import { uiActionsService } from '../../../services/kibana_services';
-import { ENHANCE_DASHBOARD_ACTION_ID } from './enhance_dashboard_action';
+import { ENHANCE_DASHBOARD_ACTION_ID } from './constants';
 import { useEnhanceButtonProps } from './use_enhance_button_props';
 
 type TestDashboardApi = DashboardApi & {

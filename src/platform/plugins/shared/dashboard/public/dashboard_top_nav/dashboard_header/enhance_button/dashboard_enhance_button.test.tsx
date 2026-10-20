@@ -23,7 +23,7 @@ const TOOLTIP = 'Improve the content and style of your dashboard using AI';
 const renderButton = (onClick = jest.fn()) => {
   render(
     <EuiThemeProvider>
-      <DashboardEnhanceButton action={{ onClick, tooltip: TOOLTIP }} />
+      <DashboardEnhanceButton onClick={onClick} tooltip={TOOLTIP} />
     </EuiThemeProvider>
   );
   return onClick;

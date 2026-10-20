@@ -13,10 +13,8 @@ import type { Action } from '@kbn/ui-actions-plugin/public';
 import { catchError, EMPTY, from, map, of, startWith, switchMap } from 'rxjs';
 import type { DashboardApi } from '../../../dashboard_api/types';
 import { uiActionsService } from '../../../services/kibana_services';
-import {
-  ENHANCE_DASHBOARD_ACTION_ID,
-  type EnhanceDashboardActionContext,
-} from './enhance_dashboard_action';
+import { ENHANCE_DASHBOARD_ACTION_ID } from './constants';
+import type { EnhanceDashboardActionContext } from './types';
 
 const getEnhanceAction = async (): Promise<Action<EnhanceDashboardActionContext>> =>
   (await uiActionsService.getAction(

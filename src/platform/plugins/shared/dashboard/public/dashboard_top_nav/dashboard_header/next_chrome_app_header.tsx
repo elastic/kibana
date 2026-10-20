@@ -14,7 +14,7 @@ import type { AppHeaderBack, AppHeaderBadge, AppHeaderShareAction } from '@kbn/a
 import { useFavorite } from '@kbn/content-management-favorites-public';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { TopNavMenuProps } from '@kbn/navigation-plugin/public';
-import { useEnhanceButtonProps } from './enhance/use_enhance_button_props';
+import { useEnhanceButtonProps } from './enhance_button/use_enhance_button_props';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { DASHBOARD_APP_ID, LANDING_PAGE_PATH } from '../../../common/page_bundle_constants';
 import { getDashboardBreadcrumb } from '../../dashboard_app/_dashboard_app_strings';

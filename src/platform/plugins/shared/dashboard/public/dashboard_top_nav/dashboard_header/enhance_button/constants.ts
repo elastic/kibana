@@ -7,10 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DashboardApi } from '../../../dashboard_api/types';
-
 export const ENHANCE_DASHBOARD_ACTION_ID = 'enhanceDashboard';
-
-export interface EnhanceDashboardActionContext {
-  dashboardApi: DashboardApi;
-}

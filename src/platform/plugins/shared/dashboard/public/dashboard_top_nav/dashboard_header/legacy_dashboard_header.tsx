@@ -13,10 +13,10 @@ import { AppMenu } from '@kbn/core-chrome-app-menu';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { TopNavMenuProps } from '@kbn/navigation-plugin/public';
 
-import { useEnhanceButtonProps } from './enhance/use_enhance_button_props';
+import { useEnhanceButtonProps } from './enhance_button/use_enhance_button_props';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { coreServices } from '../../services/kibana_services';
-import { DashboardEnhanceButton } from './enhance/dashboard_enhance_button';
+import { DashboardEnhanceButton } from './enhance_button/dashboard_enhance_button';
 import { DashboardFavoriteButton } from './dashboard_favorite_button';
 
 export interface LegacyDashboardHeaderProps {
@@ -56,7 +56,7 @@ export const LegacyDashboardHeader = ({
     }
 
     return coreServices.chrome.setBreadcrumbsAppendExtension({
-      content: <DashboardEnhanceButton action={enhanceButtonProps} />,
+      content: <DashboardEnhanceButton {...enhanceButtonProps} />,
       order: 1,
     });
   }, [enhanceButtonProps]);

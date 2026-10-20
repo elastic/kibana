@@ -20,10 +20,10 @@ const ENHANCE_LABEL = i18n.translate('dashboard.topNav.enhanceButtonLabel', {
 });
 
 export const DashboardEnhanceButton = ({
-  action,
-}: {
-  action: AppHeaderExperimentalDashboardAiAction;
-}) => {
+  onClick,
+  isDisabled,
+  tooltip,
+}: Omit<AppHeaderExperimentalDashboardAiAction, 'testId'>) => {
   const applicationBreakpoint = useCurrentChromeApplicationBreakpoint();
   const viewportBreakpoint = useCurrentEuiBreakpoint();
   const breakpoint = applicationBreakpoint ?? viewportBreakpoint;
@@ -31,7 +31,7 @@ export const DashboardEnhanceButton = ({
 
   const handleClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
     const triggerElement = event.currentTarget;
-    action.onClick({
+    onClick({
       returnFocus: () => triggerElement.focus(),
     });
   };
@@ -43,8 +43,8 @@ export const DashboardEnhanceButton = ({
       size="xs"
       iconType="sparkles"
       aria-label={ENHANCE_LABEL}
-      isDisabled={action.isDisabled}
-      data-test-subj={action.testId ?? 'dashboardEnhanceButton'}
+      isDisabled={isDisabled}
+      data-test-subj="dashboardEnhanceButton"
       onClick={handleClick}
     />
   ) : (
@@ -53,13 +53,13 @@ export const DashboardEnhanceButton = ({
       size="xs"
       iconType="sparkles"
       aria-label={ENHANCE_LABEL}
-      isDisabled={action.isDisabled}
-      data-test-subj={action.testId ?? 'dashboardEnhanceButton'}
+      isDisabled={isDisabled}
+      data-test-subj="dashboardEnhanceButton"
       onClick={handleClick}
     >
       {ENHANCE_LABEL}
     </AiButton>
   );
 
-  return <EuiToolTip content={action.tooltip}>{button}</EuiToolTip>;
+  return <EuiToolTip content={tooltip}>{button}</EuiToolTip>;
 };
