@@ -19,6 +19,7 @@ import {
   investigationRoundInputsSchema,
   withToolResults,
 } from '../investigation_round';
+import { withNightshiftBackgroundSpan } from '../tracing';
 import { withTimeout } from './with_timeout';
 
 /**
@@ -72,6 +73,11 @@ export const cortexOptimizeStepDefinition = ({
         .max(MAX_KEYWORD_LENGTH)
         .optional()
         .describe('Inference connector the triggering agent used for this round.'),
+      background_trace_id: z
+        .string()
+        .max(128)
+        .optional()
+        .describe('Deterministic T_background trace id from materialize.'),
     }),
     outputSchema: z.object({
       status: z.literal('ok').describe('The optimizer finished without throwing.'),
@@ -95,34 +101,58 @@ export const cortexOptimizeStepDefinition = ({
         `Running Cortex optimize for agent ${context.input.agent_id ?? 'unknown'}`
       );
       const { workflow, execution } = context.contextManager.getContext();
-      const result = await withTimeout(
-        (signal) =>
-          runCortexOptimize({
-            request: context.contextManager.getFakeRequest(),
-            agentId: context.input.agent_id,
-            userMessage: context.input.prompt,
-            assistantMessage: context.input.response,
-            toolCalls: withToolResults(
-              (context.input.tool_calls ?? []) as InvestigationToolCall[],
-              context.input.tool_results ?? []
-            ),
-            esClient: context.contextManager.getScopedEsClient(),
-            spaceId: workflow.spaceId,
-            interactionId: execution.id,
-            signal,
-            analytics,
-            conversationId: context.input.conversation_id,
-            roundId: context.input.round_id,
-            requestedConnectorId: context.input.connector_id,
-            roundConnectorId: context.input.round_connector_id,
-            logger,
-            getAgentBuilder,
-            getInference,
-            getSavedObjects,
-            getUiSettings,
-          }),
-        OPTIMIZE_TIMEOUT_MS,
-        `Cortex optimize timed out after ${OPTIMIZE_TIMEOUT_MS}ms`
+      const request = context.contextManager.getFakeRequest();
+      const result = await withNightshiftBackgroundSpan(
+        {
+          name: 'nightshift.cortexOptimize',
+          traceId: context.input.background_trace_id || execution.id,
+          roundId: context.input.round_id,
+          conversationId: context.input.conversation_id,
+          spaceId: workflow.spaceId,
+          workflowExecutionId: execution.id,
+          request,
+          getSavedObjects,
+          getUiSettings,
+          logger,
+        },
+        async (span) => {
+          const res = await withTimeout(
+            (signal) =>
+              runCortexOptimize({
+                request,
+                agentId: context.input.agent_id,
+                userMessage: context.input.prompt,
+                assistantMessage: context.input.response,
+                toolCalls: withToolResults(
+                  (context.input.tool_calls ?? []) as InvestigationToolCall[],
+                  context.input.tool_results ?? []
+                ),
+                esClient: context.contextManager.getScopedEsClient(),
+                spaceId: workflow.spaceId,
+                interactionId: execution.id,
+                signal,
+                analytics,
+                conversationId: context.input.conversation_id,
+                roundId: context.input.round_id,
+                requestedConnectorId: context.input.connector_id,
+                roundConnectorId: context.input.round_connector_id,
+                logger,
+                getAgentBuilder,
+                getInference,
+                getSavedObjects,
+                getUiSettings,
+              }),
+            OPTIMIZE_TIMEOUT_MS,
+            `Cortex optimize timed out after ${OPTIMIZE_TIMEOUT_MS}ms`
+          );
+          if (res?.openedIds) {
+            span?.setAttribute('nightshift.opened_ids', JSON.stringify(res.openedIds));
+          }
+          if (res?.appliedWrites) {
+            span?.setAttribute('nightshift.applied_writes', JSON.stringify(res.appliedWrites));
+          }
+          return res;
+        }
       );
 
       return {

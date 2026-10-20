@@ -27,6 +27,7 @@ import {
   reinforcementSessionRegistry,
 } from '../tools/decision_tree';
 import { scopeConversationId } from '../tools/sandbox_bash/tool_utils';
+import { withNightshiftBackgroundSpan } from '../tracing';
 
 const MAX_INPUT_CHARS = 100_000;
 
@@ -63,6 +64,11 @@ export const decisionTreeReinforceStepDefinition = ({
         .max(MAX_KEYWORD_LENGTH)
         .optional()
         .describe('Inference connector for the reinforcement run.'),
+      background_trace_id: z
+        .string()
+        .max(128)
+        .optional()
+        .describe('Deterministic T_background trace id from materialize.'),
     }),
     outputSchema: z.object({
       message: z.string().describe("The reinforcement agent's final response."),
@@ -141,27 +147,55 @@ export const decisionTreeReinforceStepDefinition = ({
           : undefined;
 
       try {
-        // The workflow step's `timeout` bounds the run: its timeout zone aborts this signal.
-        const { result } = await agentBuilder.agents.runAgent({
-          request,
-          agentId: NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID,
-          interactive: { enabled: false },
-          defaultConnectorId: connectorId || undefined,
-          abortSignal: context.abortSignal,
-          telemetryMetadata: {
-            pluginId: 'nightshift_investigation_memory',
-            aggregateBy: 'nightshift',
-            productSolution: 'observability',
-            productFeature: 'nightshift',
-            interactionId: executionId,
+        // Wrapping `runAgent` in `withNightshiftBackgroundSpan` joins the entire reinforcement
+        // sub-agent run (`invoke_agent` -> `chat <model>` -> `execute_tool nightshift_*`)
+        // under `T_background` in `traces-agent_builder.otel-<spaceId>`.
+        const { result, sessionState } = await withNightshiftBackgroundSpan(
+          {
+            name: 'nightshift.decisionTreeReinforce',
+            traceId: context.input.background_trace_id || executionId,
+            foregroundTraceId: loadedRound.traceId,
+            roundId: roundId || undefined,
+            conversationId: conversationId || undefined,
+            spaceId,
+            workflowExecutionId: executionId,
+            request,
+            logger: context.logger,
+            attributes: {
+              'nightshift.reinforcement_conversation_id': conversation.id,
+              'nightshift.turn_kind': turnKind,
+            },
           },
-          agentParams: {
-            conversation,
-            nextInput: { message },
-            ...(configurationOverrides ? { configurationOverrides } : {}),
-          },
-        });
-        const sessionState = reinforcementSessionRegistry.drainSession(scopedReinforcementConvId);
+          async (span) => {
+            const agentReturn = await agentBuilder.agents.runAgent({
+              request,
+              agentId: NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID,
+              interactive: { enabled: false },
+              defaultConnectorId: connectorId || undefined,
+              abortSignal: context.abortSignal,
+              telemetryMetadata: {
+                pluginId: 'nightshift_investigation_memory',
+                aggregateBy: 'nightshift',
+                productSolution: 'observability',
+                productFeature: 'nightshift',
+                interactionId: executionId,
+              },
+              agentParams: {
+                conversation,
+                nextInput: { message },
+                ...(configurationOverrides ? { configurationOverrides } : {}),
+              },
+            });
+            const drained = reinforcementSessionRegistry.drainSession(scopedReinforcementConvId);
+            if (drained.appliedWrites.length > 0) {
+              span?.setAttribute(
+                'nightshift.applied_writes',
+                JSON.stringify(drained.appliedWrites)
+              );
+            }
+            return { result: agentReturn.result, sessionState: drained };
+          }
+        );
 
         return {
           output: {

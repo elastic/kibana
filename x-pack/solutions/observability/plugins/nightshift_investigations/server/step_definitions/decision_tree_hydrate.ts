@@ -13,6 +13,7 @@ import type { SandboxPluginStart } from '@kbn/sandbox-plugin/server';
 import { hydrateDecisionTreeWorkspace } from '../decision_trees/register_decision_trees';
 import { DECISION_TREE_WORKSPACE_ROOT } from '../decision_trees/materialize';
 import { degradeOnWriterFailure } from '../lib/hydrate_notification';
+import { withNightshiftBackgroundSpan } from '../tracing';
 import { unscopeConversationId } from '../tools/sandbox_bash/tool_utils';
 import { withTimeout } from './with_timeout';
 
@@ -71,7 +72,9 @@ export const decisionTreeHydrateStepDefinition = ({
     }),
     handler: async (context) => {
       const { sandbox_id: sandboxId, prompt } = context.input;
-      const { spaceId } = context.contextManager.getContext().workflow;
+      const workflowContext = context.contextManager.getContext();
+      const { spaceId } = workflowContext.workflow;
+      const executionId = workflowContext.execution?.id;
       const conversationId = unscopeConversationId(spaceId, sandboxId);
 
       // The combined materialize workflow installs with Cortex or Memory, so this step is
@@ -109,18 +112,36 @@ export const decisionTreeHydrateStepDefinition = ({
       // abort that round over one writer.
       let hydrateResult: Awaited<ReturnType<typeof hydrateDecisionTreeWorkspace>>;
       try {
-        hydrateResult = await withTimeout(
-          (signal) =>
-            hydrateDecisionTreeWorkspace({
-              session,
-              esClient: context.contextManager.getScopedEsClient(),
-              logger,
-              spaceId,
-              prompt,
-              signal,
-            }),
-          HYDRATE_TIMEOUT_MS,
-          `Decision tree hydrate timed out after ${HYDRATE_TIMEOUT_MS}ms`
+        hydrateResult = await withNightshiftBackgroundSpan(
+          {
+            name: 'nightshift.decisionTreeHydrate',
+            traceId: executionId,
+            conversationId,
+            spaceId,
+            workflowExecutionId: executionId,
+            logger,
+          },
+          async (span) => {
+            const res = await withTimeout(
+              (signal) =>
+                hydrateDecisionTreeWorkspace({
+                  session,
+                  esClient: context.contextManager.getScopedEsClient(),
+                  logger,
+                  spaceId,
+                  prompt,
+                  signal,
+                }),
+              HYDRATE_TIMEOUT_MS,
+              `Decision tree hydrate timed out after ${HYDRATE_TIMEOUT_MS}ms`
+            );
+            const count = typeof res === 'number' ? res : res.treeCount;
+            span?.setAttribute('nightshift.tree_count', count);
+            if (typeof res === 'object' && res !== null && Array.isArray(res.hydratedIds)) {
+              span?.setAttribute('nightshift.hydrated_ids', JSON.stringify(res.hydratedIds));
+            }
+            return res;
+          }
         );
       } catch (error) {
         return {

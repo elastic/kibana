@@ -204,6 +204,8 @@ describe('nightshift agent optimize workflow', () => {
       response: '{{ inputs.response }}',
       conversation_id: '{{ inputs.conversation_id }}',
       round_id: '{{ inputs.round_id }}',
+      background_trace_id:
+        '{{ inputs.workflow_context["nightshift.semantic_memory.recall"].data.background_trace_id }}',
       message: '{{ steps.prepare_turn.output.message }}',
       turn_kind: '{{ steps.prepare_turn.output.turn_kind }}',
       connector_id: '{{ steps.resolve_model.output.connector_id }}',

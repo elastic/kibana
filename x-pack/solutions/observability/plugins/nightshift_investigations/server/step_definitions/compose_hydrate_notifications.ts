@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { composeHydrateNotificationContext } from '../lib/hydrate_notification';
+import { withNightshiftBackgroundSpan } from '../tracing';
 
 export const composeHydrateNotificationsStepDefinition = () =>
   createServerStepDefinition({
@@ -66,7 +67,9 @@ export const composeHydrateNotificationsStepDefinition = () =>
       const { model_context: modelContext } = composeHydrateNotificationContext({
         writers: context.input.writers,
       });
-      const executionId = context.contextManager.getContext()?.execution?.id;
+      const workflowCtx = context.contextManager.getContext();
+      const executionId = workflowCtx?.execution?.id;
+      const spaceId = workflowCtx?.workflow?.spaceId ?? 'default';
       const candidateTraceId =
         typeof executionId === 'string' ? executionId.replace(/-/g, '').toLowerCase() : undefined;
       const isValidOtelTraceId = Boolean(
@@ -74,6 +77,21 @@ export const composeHydrateNotificationsStepDefinition = () =>
           /^[0-9a-f]{32}$/.test(candidateTraceId) &&
           candidateTraceId !== '00000000000000000000000000000000'
       );
+      if (isValidOtelTraceId && executionId) {
+        await withNightshiftBackgroundSpan(
+          {
+            name: 'nightshift.composeHydrateNotifications',
+            traceId: candidateTraceId,
+            spaceId,
+            workflowExecutionId: executionId,
+            logger: context.logger,
+            attributes: {
+              'nightshift.recalled_ids': JSON.stringify(context.input.recalled_ids),
+            },
+          },
+          async () => undefined
+        );
+      }
       return {
         output: {
           ...(modelContext ? { model_context: modelContext } : {}),

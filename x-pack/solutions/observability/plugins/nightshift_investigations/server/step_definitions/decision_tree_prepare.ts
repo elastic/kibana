@@ -13,6 +13,7 @@ import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { prepareReinforcementTurn } from '../decision_trees/register_decision_trees';
 import { withToolResults } from '../investigation_round';
+import { withNightshiftBackgroundSpan } from '../tracing';
 import { toolCallsSchema, toolResultsSchema } from './tool_calls_schema';
 
 const MAX_INPUT_CHARS = 100_000;
@@ -49,6 +50,11 @@ export const decisionTreePrepareStepDefinition = ({
       tool_results: toolResultsSchema.describe(
         'Results of the investigator tool calls, keyed by tool_call_id.'
       ),
+      background_trace_id: z
+        .string()
+        .max(128)
+        .optional()
+        .describe('Deterministic T_background trace id from materialize.'),
     }),
     outputSchema: z.object({
       message: z.string().describe('Message to hand the reinforcement agent.'),
@@ -92,15 +98,37 @@ export const decisionTreePrepareStepDefinition = ({
       }
 
       const telemetryConnectorId = getTelemetryConnectorId();
-      const { spaceId } = context.contextManager.getContext().workflow;
-      const { message, treeCount, turnKind, openedTreeIds } = await prepareReinforcementTurn({
-        response,
-        connectorNames: telemetryConnectorId ? [telemetryConnectorId] : [],
-        esClient: context.contextManager.getScopedEsClient(),
-        logger,
-        spaceId,
-        toolCalls: withToolResults((toolCalls ?? []) as InvestigationToolCall[], toolResults ?? []),
-      });
+      const workflowContext = context.contextManager.getContext();
+      const { spaceId } = workflowContext.workflow;
+      const executionId = workflowContext.execution?.id;
+      const { message, treeCount, turnKind, openedTreeIds } = await withNightshiftBackgroundSpan(
+        {
+          name: 'nightshift.decisionTreePrepare',
+          traceId: context.input.background_trace_id || executionId,
+          spaceId,
+          workflowExecutionId: executionId,
+          logger,
+        },
+        async (span) => {
+          const res = await prepareReinforcementTurn({
+            response,
+            connectorNames: telemetryConnectorId ? [telemetryConnectorId] : [],
+            esClient: context.contextManager.getScopedEsClient(),
+            logger,
+            spaceId,
+            toolCalls: withToolResults(
+              (toolCalls ?? []) as InvestigationToolCall[],
+              toolResults ?? []
+            ),
+          });
+          span?.setAttribute('nightshift.tree_count', res.treeCount);
+          span?.setAttribute('nightshift.turn_kind', res.turnKind);
+          if (res.openedTreeIds) {
+            span?.setAttribute('nightshift.opened_tree_ids', JSON.stringify(res.openedTreeIds));
+          }
+          return res;
+        }
+      );
 
       return {
         output: {
