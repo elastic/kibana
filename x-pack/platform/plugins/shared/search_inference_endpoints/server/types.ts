@@ -26,7 +26,7 @@ export interface InferenceFeatureConfig {
   isBeta?: boolean;
   ignoreGlobalDefault?: boolean;
   /**
-   * When true, the feature's Add model list includes endpoints whose
+   * When true, the feature's model list contains only endpoints whose
    * `capabilities.templates.policy` is `required`. Other features keep those
    * endpoints hidden.
    */

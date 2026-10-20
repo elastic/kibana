@@ -42,8 +42,8 @@ interface AddModelPopoverProps {
   taskType?: string;
   panelWidth?: number;
   /**
-   * Endpoints with `capabilities.templates.policy: required` stay out of the list
-   * unless the feature opts in. Ordinary models stay listed either way.
+   * When true, the list contains only endpoints with
+   * `capabilities.templates.policy: required`. Otherwise those endpoints are hidden.
    */
   allowTemplateRequiredModels?: boolean;
 }
@@ -64,7 +64,8 @@ export const AddModelPopover: React.FC<AddModelPopoverProps> = ({
       if (existingSet.has(connector.connectorId)) {
         return false;
       }
-      if (!allowTemplateRequiredModels && isTemplateRequiredConnector(connector)) {
+      const templateRequired = isTemplateRequiredConnector(connector);
+      if (allowTemplateRequiredModels !== templateRequired) {
         return false;
       }
       if (!taskType) {

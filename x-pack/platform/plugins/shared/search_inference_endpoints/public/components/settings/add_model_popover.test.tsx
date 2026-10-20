@@ -159,7 +159,7 @@ describe('AddModelPopover', () => {
     expect(screen.getByText('OpenAI GPT-4o')).toBeInTheDocument();
   });
 
-  it('lists template-only endpoints when the feature opts in, and still lists ordinary models', () => {
+  it('lists only template endpoints when the feature opts in', () => {
     mockUseConnectors.mockReturnValue({
       data: [
         ...mockConnectors,
@@ -180,7 +180,7 @@ describe('AddModelPopover', () => {
     fireEvent.click(screen.getByTestId('add-model-button'));
 
     expect(screen.getByText('Cyber template model')).toBeInTheDocument();
-    expect(screen.getByText('OpenAI GPT-4o')).toBeInTheDocument();
+    expect(screen.queryByText('OpenAI GPT-4o')).not.toBeInTheDocument();
   });
 
   it('lists all connectors returned by useConnectors (stack OpenAI, Bedrock, Gemini, and chat_completion endpoints)', () => {

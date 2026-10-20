@@ -76,11 +76,12 @@ export const defineInferenceConnectorsRoute = ({
           logger,
         });
 
-        // The template feature still resolves a saved Daybreak model. Every other
-        // selector uses this route, and a template-only endpoint fails a messages call.
-        const connectors = feature?.allowTemplateRequiredModels
-          ? result.connectors
-          : result.connectors.filter((connector) => !isTemplateRequiredConnector(connector));
+        // A template feature lists only template endpoints. Every other selector
+        // hides them, because a template-only endpoint fails a messages call.
+        const templateOnly = feature?.allowTemplateRequiredModels === true;
+        const connectors = result.connectors.filter(
+          (connector) => isTemplateRequiredConnector(connector) === templateOnly
+        );
 
         return response.ok({
           body: {
