@@ -273,11 +273,11 @@ export const formatSyntheticsPolicy = (
   if (dataStream && referencedSecretConnections.size > 0) {
     const secretStoresItem = dataStream.vars?.secret_stores;
     if (!secretStoresItem) {
-      throw new Error(VAULT_PACKAGE_UPGRADE_MESSAGE);
+      throw new SecretConnectionError(VAULT_PACKAGE_UPGRADE_MESSAGE);
     }
     // Without Fleet secret storage the var would be stored (and shipped) in plaintext.
     if (secretConnections && !secretStorageEnabled) {
-      throw new Error(VAULT_SECRET_STORAGE_DISABLED_MESSAGE);
+      throw new SecretConnectionError(VAULT_SECRET_STORAGE_DISABLED_MESSAGE);
     }
     // `undefined` means no connections were loaded for this call (inspect path); an empty
     // list is real, so an unknown connection fails instead of being dropped.

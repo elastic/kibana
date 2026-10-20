@@ -27,7 +27,6 @@ import { scheduleTestNowCleanUp } from '../../tasks/clean_up_package_policies_ta
 import type { SyntheticsServerSetup } from '../../types';
 import {
   formatSyntheticsPolicy,
-  VAULT_SECRET_STORAGE_DISABLED_MESSAGE,
 } from '../formatters/private_formatters/format_synthetics_policy';
 import {
   getSecretConnectionDelivery,
@@ -89,7 +88,8 @@ export type CreatePackagePoliciesResult = BulkCreatedPolicies & {
 };
 
 export interface FailedPolicyUpdate {
-  packagePolicy: NewPackagePolicyWithId;
+  /** Absent when the policy could not be generated at all. */
+  packagePolicy?: NewPackagePolicyWithId;
   config?: HeartbeatConfig;
   error?: Error | SavedObjectError;
 }
@@ -347,7 +347,6 @@ export class SyntheticsPrivateLocation {
       if (
         e instanceof Error &&
         (e.message.includes('Synthetics integration version 1.12.0 or later') ||
-          e.message === VAULT_SECRET_STORAGE_DISABLED_MESSAGE ||
           e instanceof SecretConnectionError)
       ) {
         throw e;
@@ -649,7 +648,7 @@ export class SyntheticsPrivateLocation {
       getSecretConnectionDelivery(this.server, spaceId),
     ]);
 
-    const secretConnectionErrors: SecretConnectionError[] = [];
+    const failedSecretConnectionUpdates: FailedPolicyUpdate[] = [];
     const policiesToUpdate: UpdatePackagePolicyWithId[] = [];
     const policiesToCreate: NewPackagePolicyWithId[] = [];
     const policiesToDelete: string[] = [];
@@ -668,6 +667,13 @@ export class SyntheticsPrivateLocation {
       const { locations } = config;
 
       const monitorPrivateLocations = locations.filter((loc) => !loc.isServiceManaged);
+
+      // Queued per monitor so a monitor that fails on a secret connection applies none of its
+      // policy changes — the caller reverts its saved object, and the two must stay in sync.
+      const monitorPoliciesToUpdate: UpdatePackagePolicyWithId[] = [];
+      const monitorPoliciesToCreate: NewPackagePolicyWithId[] = [];
+      const monitorPoliciesToDelete: string[] = [];
+      let secretConnectionError: SecretConnectionError | undefined;
 
       for (const privateLocation of allPrivateLocations) {
         const hasLocation = monitorPrivateLocations?.some((loc) => loc.id === privateLocation.id);
@@ -711,30 +717,41 @@ export class SyntheticsPrivateLocation {
             }
 
             if (hasNewFormatPolicyId) {
-              policiesToUpdate.push({ ...newPolicy, id: newId } as UpdatePackagePolicyWithId);
-              policiesToDelete.push(...legacyPolicyIds);
+              monitorPoliciesToUpdate.push({
+                ...newPolicy,
+                id: newId,
+              } as UpdatePackagePolicyWithId);
+              monitorPoliciesToDelete.push(...legacyPolicyIds);
             } else if (hasAnyLegacyPolicyId) {
-              policiesToDelete.push(...legacyPolicyIds);
-              policiesToCreate.push({ ...newPolicy, id: newId } as NewPackagePolicyWithId);
+              monitorPoliciesToDelete.push(...legacyPolicyIds);
+              monitorPoliciesToCreate.push({ ...newPolicy, id: newId } as NewPackagePolicyWithId);
             } else {
-              policiesToCreate.push({ ...newPolicy, id: newId } as NewPackagePolicyWithId);
+              monitorPoliciesToCreate.push({ ...newPolicy, id: newId } as NewPackagePolicyWithId);
             }
           } else {
             if (hasNewFormatPolicyId) {
-              policiesToDelete.push(newId);
+              monitorPoliciesToDelete.push(newId);
             }
-            policiesToDelete.push(...legacyPolicyIds);
+            monitorPoliciesToDelete.push(...legacyPolicyIds);
           }
         } catch (e) {
           this.server.logger.error(e);
           // One monitor's bad connection must not block the rest of the batch.
           if (e instanceof SecretConnectionError) {
-            secretConnectionErrors.push(e);
-            continue;
+            secretConnectionError = e;
+            break;
           }
           throwAddEditError(hasPolicy, privateLocation.label, config[ConfigKey.NAME]);
         }
       }
+
+      if (secretConnectionError) {
+        failedSecretConnectionUpdates.push({ config, error: secretConnectionError });
+        continue;
+      }
+      policiesToUpdate.push(...monitorPoliciesToUpdate);
+      policiesToCreate.push(...monitorPoliciesToCreate);
+      policiesToDelete.push(...monitorPoliciesToDelete);
     }
 
     const uniqueToDelete = [...new Set(policiesToDelete)];
@@ -796,13 +813,8 @@ export class SyntheticsPrivateLocation {
       };
     });
 
-    // The other monitors are already synced; still report the monitors that couldn't be.
-    if (secretConnectionErrors.length > 0) {
-      throw new SecretConnectionError(secretConnectionErrors.map((e) => e.message).join('; '));
-    }
-
     return {
-      failedUpdates,
+      failedUpdates: [...(failedUpdates ?? []), ...failedSecretConnectionUpdates],
       failedCreates: createResponse.failed,
     };
   }
