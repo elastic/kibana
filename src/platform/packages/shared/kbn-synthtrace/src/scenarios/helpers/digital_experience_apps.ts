@@ -17,7 +17,6 @@ import {
   type SynthtraceGenerator,
   type Timerange,
 } from '@kbn/synthtrace-client';
-import { getBooleanOpt, getNumberOpt } from './scenario_opts_helpers';
 
 export interface DigitalExperienceApp {
   serviceName: string;
@@ -353,7 +352,38 @@ export const DIGITAL_EXPERIENCE_APPS: readonly DigitalExperienceApp[] = [
   },
 ];
 
-/** Parses `--scenarioOpts` for the digital experience scenarios, rejecting unknown keys. */
+type BooleanOptKey = 'withSessionId' | 'includeRawAttribution';
+
+const parseBooleanOpt = (
+  opts: Record<string, unknown> | undefined,
+  key: BooleanOptKey
+): boolean => {
+  const value = opts?.[key];
+  if (value === undefined) {
+    return DEFAULT_SCENARIO_OPTS[key];
+  }
+  const normalized = typeof value === 'string' ? value.trim().toLowerCase() : value;
+  if (normalized === true || normalized === 'true') {
+    return true;
+  }
+  if (normalized === false || normalized === 'false') {
+    return false;
+  }
+  throw new Error(`${key} must be true or false`);
+};
+
+const parseScale = (value: unknown): number => {
+  if (value === undefined) {
+    return DEFAULT_SCENARIO_OPTS.scale;
+  }
+  const scale = typeof value === 'string' && value.trim() !== '' ? Number(value) : value;
+  if (typeof scale !== 'number' || !Number.isFinite(scale) || scale <= 0) {
+    throw new Error('scale must be a positive number');
+  }
+  return scale;
+};
+
+/** Parses `--scenarioOpts` for the digital experience scenarios, rejecting unknown keys and values. */
 export const parseDigitalExperienceScenarioOpts = (
   opts: Record<string, unknown> | undefined
 ): DigitalExperienceScenarioOpts => {
@@ -364,19 +394,10 @@ export const parseDigitalExperienceScenarioOpts = (
     throw new Error(`Unknown scenarioOpts: ${unknownKeys.join(', ')}`);
   }
 
-  const scale = getNumberOpt(opts, 'scale', DEFAULT_SCENARIO_OPTS.scale);
-  if (scale <= 0) {
-    throw new Error('scale must be a positive number');
-  }
-
   return {
-    withSessionId: getBooleanOpt(opts, 'withSessionId', DEFAULT_SCENARIO_OPTS.withSessionId),
-    includeRawAttribution: getBooleanOpt(
-      opts,
-      'includeRawAttribution',
-      DEFAULT_SCENARIO_OPTS.includeRawAttribution
-    ),
-    scale,
+    withSessionId: parseBooleanOpt(opts, 'withSessionId'),
+    includeRawAttribution: parseBooleanOpt(opts, 'includeRawAttribution'),
+    scale: parseScale(opts?.scale),
   };
 };
 

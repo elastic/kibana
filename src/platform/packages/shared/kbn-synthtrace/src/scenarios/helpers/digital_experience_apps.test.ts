@@ -41,6 +41,16 @@ describe('digital experience apps', () => {
       });
     });
 
+    it('accepts typed values', () => {
+      expect(
+        parseDigitalExperienceScenarioOpts({
+          withSessionId: false,
+          includeRawAttribution: true,
+          scale: 3,
+        })
+      ).toEqual({ withSessionId: false, includeRawAttribution: true, scale: 3 });
+    });
+
     it('parses string options from the CLI', () => {
       expect(
         parseDigitalExperienceScenarioOpts({
@@ -62,8 +72,18 @@ describe('digital experience apps', () => {
       expect(() => parseDigitalExperienceScenarioOpts({ toString: 'x' })).toThrow(
         'Unknown scenarioOpts: toString'
       );
-      expect(() => parseDigitalExperienceScenarioOpts({ scale: 0 })).toThrow(
-        'scale must be a positive number'
+      ['0', 0, -1, 'abc', '2x', '', Infinity].forEach((scale) => {
+        expect(() => parseDigitalExperienceScenarioOpts({ scale })).toThrow(
+          'scale must be a positive number'
+        );
+      });
+      ['yes', '1', 1, ''].forEach((withSessionId) => {
+        expect(() => parseDigitalExperienceScenarioOpts({ withSessionId })).toThrow(
+          'withSessionId must be true or false'
+        );
+      });
+      expect(() => parseDigitalExperienceScenarioOpts({ includeRawAttribution: 'on' })).toThrow(
+        'includeRawAttribution must be true or false'
       );
     });
   });
