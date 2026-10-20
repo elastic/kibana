@@ -17,6 +17,7 @@ import {
   ADD_ENTITIES_SHOWING_TEST_ID,
 } from './test_ids';
 import { useSearchEntities } from './hooks/use_search_entities';
+import { INSUFFICIENT_PRIVILEGES_TOOLTIP } from './translations';
 
 jest.mock('./hooks/use_search_entities');
 
@@ -125,6 +126,21 @@ describe('AddEntitiesSection', () => {
     fireEvent.click(addButtons[0]);
 
     expect(defaultProps.onAddEntity).toHaveBeenCalledWith(mockRecords[0]);
+  });
+
+  it('exposes the permission explanation to screen readers when the user cannot modify', async () => {
+    const { getByTestId, getAllByLabelText, findByText } = render(
+      <TestProviders>
+        <AddEntitiesSection {...defaultProps} canModify={false} />
+      </TestProviders>
+    );
+
+    fireEvent.click(getByTestId(ADD_ENTITIES_ACCORDION_TEST_ID).querySelector('button')!);
+
+    const [addButton] = getAllByLabelText(/add to resolution group/i);
+    fireEvent.mouseOver(addButton.parentElement!);
+    const tooltip = await findByText(INSUFFICIENT_PRIVILEGES_TOOLTIP);
+    expect(tooltip).toBeInTheDocument();
   });
 
   it('calls onEntityNameClick when expand button is clicked', () => {

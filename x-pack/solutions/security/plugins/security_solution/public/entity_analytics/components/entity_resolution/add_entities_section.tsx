@@ -136,7 +136,7 @@ export const AddEntitiesSection: React.FC<AddEntitiesSectionProps> = ({
               <EuiFlexItem grow={false}>
                 <EuiToolTip
                   content={canModify ? ADD_ENTITY_BUTTON : INSUFFICIENT_PRIVILEGES_TOOLTIP}
-                  disableScreenReaderOutput
+                  disableScreenReaderOutput={canModify}
                 >
                   <EuiButtonIcon
                     iconType="plus"

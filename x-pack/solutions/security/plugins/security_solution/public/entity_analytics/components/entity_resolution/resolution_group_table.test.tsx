@@ -11,6 +11,7 @@ import { TestProviders } from '../../../common/mock';
 import { ResolutionGroupTable } from './resolution_group_table';
 import { RESOLUTION_GROUP_TABLE_TEST_ID, RESOLUTION_EMPTY_STATE_TEST_ID } from './test_ids';
 import type { ResolutionGroup } from './hooks/use_resolution_group';
+import { INSUFFICIENT_PRIVILEGES_TOOLTIP } from './translations';
 
 const mockGroup: ResolutionGroup = {
   target: {
@@ -121,6 +122,25 @@ describe('ResolutionGroupTable', () => {
     expect(aliasButton).toBeDefined();
     fireEvent.click(aliasButton!);
     expect(onRemove).toHaveBeenCalledWith('alice-azure-id');
+  });
+
+  it('exposes the permission explanation to screen readers when the user cannot modify', async () => {
+    const { getAllByLabelText, findByText } = render(
+      <TestProviders>
+        <ResolutionGroupTable
+          group={mockGroup}
+          isLoading={false}
+          showActions
+          canModify={false}
+          targetEntityId="alice-id"
+        />
+      </TestProviders>
+    );
+
+    const removeButtons = getAllByLabelText(/remove from resolution group/i);
+    fireEvent.mouseOver(removeButtons[1].parentElement!);
+    const tooltip = await findByText(INSUFFICIENT_PRIVILEGES_TOOLTIP);
+    expect(tooltip).toBeInTheDocument();
   });
 
   it('disables expand button for current entity', () => {

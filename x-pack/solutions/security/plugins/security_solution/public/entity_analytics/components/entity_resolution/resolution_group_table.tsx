@@ -114,7 +114,10 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
             <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>{expandButton}</EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiToolTip content={getRemoveButtonTooltip(canModify, isTarget)}>
+                <EuiToolTip
+                  content={getRemoveButtonTooltip(canModify, isTarget)}
+                  disableScreenReaderOutput={canModify && !isTarget}
+                >
                   <EuiButtonIcon
                     iconType="cross"
                     color="primary"
