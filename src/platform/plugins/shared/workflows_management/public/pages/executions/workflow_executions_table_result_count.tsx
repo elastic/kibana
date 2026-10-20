@@ -30,7 +30,7 @@ export const WorkflowExecutionsTableResultCount =
 
       const countLabel = useMemo(() => {
         if (isCapped) {
-          return i18n.translate('workflowsManagement.executionsPage.table.resultCountCapped', {
+          return i18n.translate('workflows.executionsPage.table.resultCountCapped', {
             defaultMessage: 'Showing {rangeStart}–{rangeEnd} of {maxResults}+ executions',
             values: {
               rangeStart: formatCount(rangeStart),
@@ -40,7 +40,7 @@ export const WorkflowExecutionsTableResultCount =
           });
         }
 
-        return i18n.translate('workflowsManagement.executionsPage.table.resultCountExact', {
+        return i18n.translate('workflows.executionsPage.table.resultCountExact', {
           defaultMessage: 'Showing {rangeStart}–{rangeEnd} of {totalHits} executions',
           values: {
             rangeStart: formatCount(rangeStart),
@@ -50,14 +50,11 @@ export const WorkflowExecutionsTableResultCount =
         });
       }, [isCapped, rangeEnd, rangeStart, totalHits]);
 
-      const limitTip = i18n.translate(
-        'workflowsManagement.executionsPage.table.resultCountLimitTip',
-        {
-          defaultMessage:
-            'Results are limited to the first {maxResults} executions. Refine your search or narrow the time range to see more.',
-          values: { maxResults: formatCount(WORKFLOWS_EXECUTIONS_MAX_RESULT_WINDOW) },
-        }
-      );
+      const limitTip = i18n.translate('workflows.executionsPage.table.resultCountLimitTip', {
+        defaultMessage:
+          'Results are limited to the first {maxResults} executions. Refine your search or narrow the time range to see more.',
+        values: { maxResults: formatCount(WORKFLOWS_EXECUTIONS_MAX_RESULT_WINDOW) },
+      });
 
       return (
         <EuiFlexGroup
