@@ -65,6 +65,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       defaults: {
         'accessibility:disableAnimations': true,
         'dateFormat:tz': 'UTC',
+        'histogram:barTarget': 50,
       },
       globalDefaults: {
         // Disable tours globally for all tests
@@ -203,9 +204,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       },
       obsAIAssistantManagement: {
         pathname: '/app/management/ai/observabilityAiAssistantManagement',
-      },
-      searchPlayground: {
-        pathname: '/app/search_playground',
       },
       agentBuilder: {
         pathname: '/app/agent_builder',

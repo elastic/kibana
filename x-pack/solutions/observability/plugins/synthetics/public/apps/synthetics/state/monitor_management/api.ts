@@ -57,7 +57,7 @@ export const inspectMonitorAPI = async ({
 
 export const fetchMonitorAPI = async ({ id }: { id: string }): Promise<SyntheticsMonitorWithId> => {
   return await apiService.get<SyntheticsMonitorWithId>(
-    SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR.replace('{monitorId}', id)
+    SYNTHETICS_API_URLS.GET_SYNTHETICS_MONITOR.replace('{id}', id)
   );
 };
 

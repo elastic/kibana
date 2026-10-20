@@ -25,6 +25,7 @@ import {
   MonitorTypeEnum,
   FormMonitorType,
   HTTPMethod,
+  KerberosAuthType,
   Mode,
   ResponseBodyIndexPolicy,
   ScheduleUnit,
@@ -257,6 +258,25 @@ export const DEFAULT_HTTP_ADVANCED_FIELDS: HTTPAdvancedFields = {
   [ConfigKey.RESPONSE_BODY_MAX_BYTES]: '1024',
   [ConfigKey.IPV4]: true,
   [ConfigKey.IPV6]: true,
+  [ConfigKey.KERBEROS]: {
+    enabled: false,
+    auth_type: KerberosAuthType.PASSWORD,
+    username: '',
+    password: '',
+    keytab: '',
+    config_path: '',
+    krb5_conf: '',
+    realm: '',
+    service_name: '',
+    enable_krb5_fast: false,
+  },
+  [ConfigKey.NTLM]: {
+    enabled: false,
+    username: '',
+    password: '',
+    domain: '',
+    workstation: '',
+  },
 };
 
 export const DEFAULT_ICMP_SIMPLE_FIELDS: ICMPSimpleFields = {

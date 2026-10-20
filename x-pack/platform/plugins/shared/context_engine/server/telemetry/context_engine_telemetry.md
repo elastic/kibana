@@ -25,7 +25,7 @@ All reporting is gated on the `contextEngine:enabled` advanced setting. KI workf
 | `context_engine_ki_create` | The `context-engine.createKi` workflow step indexes a KI document, or fails to. |
 | `context_engine_ki_update` | The `context-engine.updateKi` workflow step updates a KI document, or fails to. |
 | `context_engine_ki_delete` | The `context-engine.deleteKi` workflow step deletes a KI document, or fails to. |
-| `context_engine_ki_verification` | The `context-engine.verifyKi` workflow step completes a verifier run, or fails to. |
+| `context_engine_ki_verification` | The `context-engine.verifyKi` step, or `context-engine.createKi` given `verifiers`, completes a verifier run, or fails to. |
 
 The AI index HTTP routes are not instrumented. Their ECS audit events in `server/audit/audit_events.ts` remain the record of AI index reads and writes.
 

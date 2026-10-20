@@ -16,6 +16,7 @@ import { BaseAlertingRoute } from '../base_alerting_route';
 import { disableActionPolicyOasExamples } from './disable_action_policy_oas_example';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
 import {
   ACTION_POLICY_NOT_FOUND_DESCRIPTION,
   ACTION_POLICY_VERSION_CONFLICT_DESCRIPTION,
@@ -33,6 +34,7 @@ export class DisableActionPolicyRoute extends BaseAlertingRoute {
   };
   static routeOptions = {
     access: 'public' as const,
+    availability: { stability: 'stable', since: '9.6.0' },
     summary: 'Disable an action policy',
     description: 'Disable an action policy by identifier.',
     oasOperationObject: disableActionPolicyOasExamples,
@@ -45,6 +47,10 @@ export class DisableActionPolicyRoute extends BaseAlertingRoute {
       200: {
         body: () => actionPolicyResponseSchema,
         description: 'Returns the disabled action policy.',
+      },
+      400: {
+        body: () => errorResponseSchema,
+        description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
       },
       404: {
         body: () => errorResponseSchema,

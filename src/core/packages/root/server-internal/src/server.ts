@@ -561,7 +561,6 @@ export class Server {
     });
 
     const deprecationsStart = this.deprecations.start();
-    const userActivityStart = this.userActivity.start();
     const soStartSpan = startTransaction.startSpan('saved_objects.migration', 'migration');
     const savedObjectsStart = await withActiveSpan(
       'saved_objects.migration',
@@ -591,6 +590,10 @@ export class Server {
         }
       }
     );
+
+    const userActivityStart = this.userActivity.start({
+      typeRegistry: savedObjectsStart.getTypeRegistry(),
+    });
 
     if (this.nodeRoles?.migrator === true) {
       this.log.info('Detected migrator node role; shutting down Kibana...');

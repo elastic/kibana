@@ -8,6 +8,7 @@
 import { createHash } from 'crypto';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
+  CHAT_MESSAGE_MAX_LENGTH,
   ChatEventType,
   ConversationOriginType,
   TimelineEventType,
@@ -16,7 +17,6 @@ import { firstValueFrom, of, Subject, toArray } from 'rxjs';
 import { internalApiPath, publicApiPath } from '../../common/constants';
 import {
   callbackConversePayloadSchema,
-  chatPayloadSchema,
   conversePayloadSchema,
   promptResponseEntrySchema,
   registerChatRoutes,
@@ -82,6 +82,18 @@ describe('promptResponseEntrySchema', () => {
 });
 
 describe('conversePayloadSchema', () => {
+  it('accepts an input of the maximum length', () => {
+    expect(() =>
+      conversePayloadSchema.validate({ input: 'a'.repeat(CHAT_MESSAGE_MAX_LENGTH) })
+    ).not.toThrow();
+  });
+
+  it('rejects an input longer than the maximum length', () => {
+    expect(() =>
+      conversePayloadSchema.validate({ input: 'a'.repeat(CHAT_MESSAGE_MAX_LENGTH + 1) })
+    ).toThrow(/input/);
+  });
+
   it('rejects trigger_mode', () => {
     expect(() => conversePayloadSchema.validate({ input: 'Hello', trigger_mode: 'never' })).toThrow(
       /trigger_mode/
@@ -146,35 +158,6 @@ describe('conversePayloadSchema', () => {
         configuration_overrides: { enable_elastic_capabilities: 'yes' },
       })
     ).toThrow(/enable_elastic_capabilities/);
-  });
-});
-
-describe('chatPayloadSchema', () => {
-  it('accepts trigger_mode for sync chat requests', () => {
-    expect(chatPayloadSchema.validate({ input: 'hi' }).trigger_mode).toBe('always');
-    expect(
-      chatPayloadSchema.validate({
-        trigger_mode: 'never',
-        conversation_id: '00000000-0000-4000-8000-000000000001',
-        input: 'hi',
-      })
-    ).toMatchObject({ trigger_mode: 'never' });
-  });
-
-  it('rejects unsupported trigger_mode values', () => {
-    expect(() => chatPayloadSchema.validate({ trigger_mode: 'auto' })).toThrow();
-  });
-
-  it('accepts execution options alongside trigger_mode never', () => {
-    expect(() =>
-      chatPayloadSchema.validate({
-        trigger_mode: 'never',
-        conversation_id: '00000000-0000-4000-8000-000000000001',
-        input: 'hi',
-        connector_id: 'connector-1',
-        read_only: true,
-      })
-    ).not.toThrow();
   });
 });
 
@@ -355,6 +338,7 @@ describe('registerChatRoutes', () => {
     const validateCallbackUrl = jest.fn();
     const executeAgent = jest.fn().mockResolvedValue({
       executionId: 'execution-1',
+      conversationId: 'conversation-1',
       events$: of(),
     });
     const origin = {
@@ -429,7 +413,7 @@ describe('registerChatRoutes', () => {
 
     expect(result).toEqual({
       status: 202,
-      payload: { execution_id: 'execution-1' },
+      payload: { execution_id: 'execution-1', conversation_id: 'conversation-1' },
     });
     expect(validateCallbackUrl).toHaveBeenCalledWith(
       'https://callback.example.com/events?token=abc'
@@ -454,6 +438,7 @@ describe('registerChatRoutes', () => {
     const validateCallbackUrl = jest.fn();
     const executeAgent = jest.fn().mockResolvedValue({
       executionId: 'execution-1',
+      conversationId: 'conversation-1',
       events$: of(),
     });
 
@@ -522,7 +507,7 @@ describe('registerChatRoutes', () => {
 
     expect(result).toEqual({
       status: 202,
-      payload: { execution_id: 'execution-1' },
+      payload: { execution_id: 'execution-1', conversation_id: 'conversation-1' },
     });
     expect(executeAgent).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -554,6 +539,7 @@ describe('registerChatRoutes', () => {
     const validateCallbackUrl = jest.fn();
     const executeAgent = jest.fn().mockResolvedValue({
       executionId: '5c48249e-28e9-4711-b9c8-0a09a1a35c02',
+      conversationId: 'conversation-1',
       events$: of(),
     });
 
@@ -626,6 +612,7 @@ describe('registerChatRoutes', () => {
       status: 202,
       payload: {
         execution_id: '5c48249e-28e9-4711-b9c8-0a09a1a35c02',
+        conversation_id: 'conversation-1',
       },
     });
     expect(executeAgent).toHaveBeenCalledWith(

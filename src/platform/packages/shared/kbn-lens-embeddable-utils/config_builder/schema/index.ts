@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import type { ZodType } from '@kbn/zod';
 
 import type {
@@ -148,30 +148,32 @@ import { pieConfigSchema, pieConfigSchemaESQL, pieConfigSchemaNoESQL } from './c
 /**
  * Schema for Lens API configs
  */
-export const lensApiConfigSchema: ZodType<LensApiConfig> = z
-  // lazy needed to break the type inference limit
-  .lazy(() =>
-    z.union([
-      metricConfigSchema,
-      legacyMetricConfigSchema,
-      xyConfigSchema,
-      gaugeConfigSchema,
-      heatmapConfigSchema,
-      tagcloudConfigSchema,
-      regionMapConfigSchema,
-      datatableConfigSchema,
-      pieConfigSchema,
-      mosaicConfigSchema,
-      treemapConfigSchema,
-      waffleConfigSchema,
-    ])
-  )
-  .meta({
-    id: 'visApiConfig',
-    title: 'Visualizations',
-    description:
-      'Visualization configuration. Use the `type` field to specify the chart type. Each chart type has its own set of required and optional fields.',
-  });
+export const lensApiConfigSchema: ZodType<LensApiConfig> = lazySchema(() =>
+  z
+    // lazy needed to break the type inference limit
+    .lazy(() =>
+      z.union([
+        metricConfigSchema,
+        legacyMetricConfigSchema,
+        xyConfigSchema,
+        gaugeConfigSchema,
+        heatmapConfigSchema,
+        tagcloudConfigSchema,
+        regionMapConfigSchema,
+        datatableConfigSchema,
+        pieConfigSchema,
+        mosaicConfigSchema,
+        treemapConfigSchema,
+        waffleConfigSchema,
+      ])
+    )
+    .meta({
+      id: 'visApiConfig',
+      title: 'Visualizations',
+      description:
+        'Visualization configuration. Use the `type` field to specify the chart type. Each chart type has its own set of required and optional fields.',
+    })
+);
 
 /**
  * Lens API configs
@@ -210,25 +212,27 @@ export type LensApiConfigInput =
 /**
  * Schema for Lens API configs (DSL)
  */
-export const lensApiConfigSchemaNoESQL: ZodType<LensApiConfigNoESQL> = z
-  // lazy needed to break the type inference limit
-  .lazy(() =>
-    z.union([
-      metricConfigSchemaNoESQL,
-      legacyMetricConfigSchemaNoESQL,
-      xyConfigSchemaNoESQL,
-      gaugeConfigSchemaNoESQL,
-      heatmapConfigSchemaNoESQL,
-      tagcloudConfigSchemaNoESQL,
-      regionMapConfigSchemaNoESQL,
-      datatableConfigSchemaNoESQL,
-      pieConfigSchemaNoESQL,
-      mosaicConfigSchemaNoESQL,
-      treemapConfigSchemaNoESQL,
-      waffleConfigSchemaNoESQL,
-    ])
-  )
-  .meta({ id: 'visApiConfigNoESQL', title: 'Visualizations (DSL)' });
+export const lensApiConfigSchemaNoESQL: ZodType<LensApiConfigNoESQL> = lazySchema(() =>
+  z
+    // lazy needed to break the type inference limit
+    .lazy(() =>
+      z.union([
+        metricConfigSchemaNoESQL,
+        legacyMetricConfigSchemaNoESQL,
+        xyConfigSchemaNoESQL,
+        gaugeConfigSchemaNoESQL,
+        heatmapConfigSchemaNoESQL,
+        tagcloudConfigSchemaNoESQL,
+        regionMapConfigSchemaNoESQL,
+        datatableConfigSchemaNoESQL,
+        pieConfigSchemaNoESQL,
+        mosaicConfigSchemaNoESQL,
+        treemapConfigSchemaNoESQL,
+        waffleConfigSchemaNoESQL,
+      ])
+    )
+    .meta({ id: 'visApiConfigNoESQL', title: 'Visualizations (DSL)' })
+);
 
 /**
  * Lens API configs (DSL)
@@ -250,24 +254,26 @@ export type LensApiConfigNoESQL =
 /**
  * Schema for Lens API configs (ES|QL)
  */
-export const lensApiConfigSchemaESQL: ZodType<LensApiConfigESQL> = z
-  // lazy needed to break the type inference limit
-  .lazy(() =>
-    z.union([
-      metricConfigSchemaESQL,
-      xyConfigSchemaESQL,
-      gaugeConfigSchemaESQL,
-      heatmapConfigSchemaESQL,
-      tagcloudConfigSchemaESQL,
-      regionMapConfigSchemaESQL,
-      datatableConfigSchemaESQL,
-      pieConfigSchemaESQL,
-      mosaicConfigSchemaESQL,
-      treemapConfigSchemaESQL,
-      waffleConfigSchemaESQL,
-    ])
-  )
-  .meta({ id: 'visApiConfigESQL', title: 'Visualizations (ES|QL)' });
+export const lensApiConfigSchemaESQL: ZodType<LensApiConfigESQL> = lazySchema(() =>
+  z
+    // lazy needed to break the type inference limit
+    .lazy(() =>
+      z.union([
+        metricConfigSchemaESQL,
+        xyConfigSchemaESQL,
+        gaugeConfigSchemaESQL,
+        heatmapConfigSchemaESQL,
+        tagcloudConfigSchemaESQL,
+        regionMapConfigSchemaESQL,
+        datatableConfigSchemaESQL,
+        pieConfigSchemaESQL,
+        mosaicConfigSchemaESQL,
+        treemapConfigSchemaESQL,
+        waffleConfigSchemaESQL,
+      ])
+    )
+    .meta({ id: 'visApiConfigESQL', title: 'Visualizations (ES|QL)' })
+);
 
 /**
  * Lens API configs (ES|QL)

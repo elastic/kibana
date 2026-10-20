@@ -42,12 +42,15 @@ apiTest.describe(
     });
 
     apiTest(
-      'returns 400 for a significant event body without a title',
+      'returns 400 for a significant event subject, which is not accepted by this route',
       async ({ apiClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_WRITE_ROLE);
         const response = await apiClient.post(START_PATH, {
           headers: { ...COMMON_HEADERS, ...cookieHeader },
-          body: { subject: { type: 'significant_event', id: 'se-1' } },
+          body: {
+            subject: { type: 'significant_event', id: 'se-1' },
+            title: 'Investigate significant event',
+          },
           responseType: 'json',
         });
         expect(response).toHaveStatusCode(400);

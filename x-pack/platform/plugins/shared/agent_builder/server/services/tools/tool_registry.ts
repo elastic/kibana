@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
+import { withTimeout } from '@kbn/std';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import {
   createToolNotFoundError,
@@ -233,18 +234,15 @@ class ToolRegistryImpl implements ToolRegistry {
       request: this.request,
       uiSettings: uiSettingsClient,
     };
-    let timeoutHandle: ReturnType<typeof setTimeout>;
-    const checkPromise = Promise.resolve(tool.isAvailable(context)).then((s) => {
-      clearTimeout(timeoutHandle);
-      return s.status === 'available';
+    const outcome = await withTimeout({
+      promise: Promise.resolve(tool.isAvailable(context)).then((s) => s.status === 'available'),
+      timeoutMs,
     });
-    const timeoutPromise = new Promise<boolean>((resolve) => {
-      timeoutHandle = setTimeout(() => {
-        this.logger.warn(`Tool availability check for "${tool.id}" timed out after ${timeoutMs}ms`);
-        resolve(false);
-      }, timeoutMs);
-    });
-    return Promise.race([checkPromise, timeoutPromise]);
+    if (outcome.timedout) {
+      this.logger.warn(`Tool availability check for "${tool.id}" timed out after ${timeoutMs}ms`);
+      return false;
+    }
+    return outcome.value;
   }
 
   /**

@@ -38,7 +38,6 @@ jest.mock('../../../../../hooks', () => ({
       getUrlForApp: jest.fn().mockReturnValue('/app/onboarding/aws'),
     },
   }),
-  useLink: () => ({ getHref: jest.fn().mockReturnValue('/app/integrations/detail/aws/overview') }),
 }));
 
 jest.mock('../../../../../hooks/use_merge_epr_with_replacements', () => ({
@@ -69,6 +68,9 @@ jest.mock('../../../../../services', () => ({
 jest.mock('../../../../../../../../common/services', () => ({
   isInputOnlyPolicyTemplate: (template: any) => template.type === 'input',
   isIntegrationPolicyTemplate: (template: any) => template.type === 'integration',
+  shouldAddIntegrationFromCatalog: jest.requireActual(
+    '../../../../../../../../common/services/package_helpers'
+  ).shouldAddIntegrationFromCatalog,
   filterPolicyTemplatesTiles: (_behavior: any, topPackage: any, integrations: any[]) => {
     if (integrations.length > 0) {
       return integrations;
@@ -115,6 +117,7 @@ jest.mock('..', () => ({
     categories: item.categories || [],
     url: `/detail/${item.name}`,
     supportsAgentless: item.supportsAgentless,
+    addIntegrationFromCatalog: item.addIntegrationFromCatalog,
   }),
 }));
 
@@ -317,6 +320,47 @@ describe('useAvailablePackages', () => {
 
       expect(result.current.filteredCards).toHaveLength(1);
       expect(result.current.filteredCards[0].title).toBe('Nginx');
+    });
+
+    it('should classify packages with policy templates and no data streams as addable before policy templates are stripped', () => {
+      mockUseGetPackagesQuery.mockReturnValue({
+        data: {
+          items: [
+            {
+              ...mockBasicPackage,
+              id: 'apm-1.0.0',
+              name: 'apm',
+              title: 'APM',
+              policy_templates: [
+                { name: 'apmserver', title: 'APM Server', description: 'APM', type: 'integration' },
+              ],
+            },
+          ],
+        },
+        isLoading: false,
+        error: null,
+      });
+
+      const { result } = renderHook(() =>
+        useAvailablePackages({ prereleaseIntegrationsEnabled: false })
+      );
+
+      expect(result.current.filteredCards).toHaveLength(1);
+      expect(result.current.filteredCards[0]).toMatchObject({ addIntegrationFromCatalog: true });
+    });
+
+    it('should classify packages without data streams or policy templates as not addable', () => {
+      mockUseGetPackagesQuery.mockReturnValue({
+        data: { items: [mockBasicPackage] },
+        isLoading: false,
+        error: null,
+      });
+
+      const { result } = renderHook(() =>
+        useAvailablePackages({ prereleaseIntegrationsEnabled: false })
+      );
+
+      expect(result.current.filteredCards[0]).toMatchObject({ addIntegrationFromCatalog: false });
     });
 
     it('should remove Kubernetes package granularity', () => {

@@ -47,7 +47,7 @@ describe('createSeriesActionRouteForType', () => {
     const { ctx } = createRouteDependencies();
     const request = {
       params: { group_hash: 'group-1' },
-      body: { expiry: '2026-08-12T00:00:00.000Z' },
+      body: { snoozed_until: '2026-08-12T00:00:00.000Z' },
     } as unknown as KibanaRequest;
     const alertActionsClient = createAlertActionsClientMock();
     const route = new RouteClass(ctx, request, alertActionsClient as unknown as AlertActionsClient);
@@ -58,7 +58,7 @@ describe('createSeriesActionRouteForType', () => {
       groupHash: 'group-1',
       action: {
         action_type: 'snooze',
-        expiry: '2026-08-12T00:00:00.000Z',
+        snoozed_until: '2026-08-12T00:00:00.000Z',
       },
     });
     expect(ctx.response.noContent).toHaveBeenCalled();
@@ -74,7 +74,7 @@ describe('createSeriesActionRouteForType', () => {
     const { ctx } = createRouteDependencies();
     const request = {
       params: { group_hash: 'group-1' },
-      body: { expiry: '2026-08-12T00:00:00.000Z' },
+      body: { snoozed_until: '2026-08-12T00:00:00.000Z' },
     } as unknown as KibanaRequest;
     const alertActionsClient = createAlertActionsClientMock();
     alertActionsClient.createSeriesAction.mockRejectedValueOnce(new Error('boom'));

@@ -137,12 +137,14 @@ describe('bulkDisableRules', () => {
           id: 'id1',
           attributes: expect.objectContaining({
             enabled: false,
+            updatedByProfileUid: null,
           }),
         }),
         expect.objectContaining({
           id: 'id2',
           attributes: expect.objectContaining({
             enabled: false,
+            updatedByProfileUid: null,
           }),
         }),
       ]),
@@ -169,12 +171,14 @@ describe('bulkDisableRules', () => {
           id: 'id1',
           attributes: expect.objectContaining({
             enabled: false,
+            updatedByProfileUid: null,
           }),
         }),
         expect.objectContaining({
           id: 'id2',
           attributes: expect.objectContaining({
             enabled: false,
+            updatedByProfileUid: null,
           }),
         }),
       ]),
@@ -202,12 +206,14 @@ describe('bulkDisableRules', () => {
           id: 'id1',
           attributes: expect.objectContaining({
             enabled: false,
+            updatedByProfileUid: null,
           }),
         }),
         expect.objectContaining({
           id: 'id2',
           attributes: expect.objectContaining({
             enabled: false,
+            updatedByProfileUid: null,
           }),
         }),
       ]),
@@ -237,12 +243,14 @@ describe('bulkDisableRules', () => {
           id: 'id1',
           attributes: expect.objectContaining({
             enabled: false,
+            updatedByProfileUid: null,
           }),
         }),
         expect.objectContaining({
           id: 'id2',
           attributes: expect.objectContaining({
             enabled: false,
+            updatedByProfileUid: null,
           }),
         }),
       ]),
@@ -272,6 +280,7 @@ describe('bulkDisableRules', () => {
           id: 'id1',
           attributes: expect.objectContaining({
             enabled: false,
+            updatedByProfileUid: null,
           }),
         }),
       ]),
@@ -431,12 +440,14 @@ describe('bulkDisableRules', () => {
           id: 'id1',
           attributes: expect.objectContaining({
             enabled: false,
+            updatedByProfileUid: null,
           }),
         }),
         expect.objectContaining({
           id: 'id2',
           attributes: expect.objectContaining({
             enabled: false,
+            updatedByProfileUid: null,
           }),
         }),
       ]),
@@ -464,12 +475,14 @@ describe('bulkDisableRules', () => {
           id: 'id1',
           attributes: expect.objectContaining({
             enabled: false,
+            updatedByProfileUid: null,
           }),
         }),
         expect.objectContaining({
           id: 'id2',
           attributes: expect.objectContaining({
             enabled: false,
+            updatedByProfileUid: null,
           }),
         }),
       ]),
@@ -500,12 +513,14 @@ describe('bulkDisableRules', () => {
           id: 'id1',
           attributes: expect.objectContaining({
             enabled: false,
+            updatedByProfileUid: null,
           }),
         }),
         expect.objectContaining({
           id: 'id2',
           attributes: expect.objectContaining({
             enabled: false,
+            updatedByProfileUid: null,
           }),
         }),
       ]),

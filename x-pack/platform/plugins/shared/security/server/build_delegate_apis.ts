@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
+import { getAuthenticatedPrincipal } from '@kbn/core-security-common';
 import type {
   CoreSecurityDelegateContract,
   GrantUiamAPIKeyParams,
@@ -48,15 +49,31 @@ export const buildSecurityApi = ({
     return serviceAccounts;
   };
 
+  const getCurrentUser: CoreSecurityDelegateContract['authc']['getCurrentUser'] = (request) => {
+    if (request.isFakeRequest) {
+      const override = enrichment.getOverride(request);
+      if (override) return override;
+    }
+    return getAuthc().getCurrentUser(request);
+  };
+
+  const getPrincipal: CoreSecurityDelegateContract['authc']['getPrincipal'] = (request) => {
+    // Fake requests never pass through the authenticator. Only the ones the service accounts
+    // backend minted are known without I/O. The enrichment override is deliberately not
+    // classified: it names the user a request acts for, not the credential (usually an API key)
+    // that Elasticsearch authenticates it with.
+    if (request.isFakeRequest) {
+      return getServiceAccounts()?.backend.getFakeRequestPrincipal(request) ?? null;
+    }
+
+    const user = getCurrentUser(request);
+    return user ? getAuthenticatedPrincipal(user) : null;
+  };
+
   return {
     authc: {
-      getCurrentUser: (request) => {
-        if (request.isFakeRequest) {
-          const override = enrichment.getOverride(request);
-          if (override) return override;
-        }
-        return getAuthc().getCurrentUser(request);
-      },
+      getCurrentUser,
+      getPrincipal,
       getRedactedSessionId: async (request) => {
         const sid = await getSession().getSID(request);
         return sid ? getPrintableSessionId(sid) : undefined;
@@ -107,6 +124,8 @@ export const buildSecurityApi = ({
       // `async` so that a disabled feature surfaces as a rejected promise rather than a
       // synchronous throw, which callers of a promise-returning API would not expect.
       create: async (request, params) => requireServiceAccounts().backend.create(request, params),
+      delete: async (request, id, params) =>
+        requireServiceAccounts().management.delete(request, id, params),
       bindWorkload: async (pluginId, request, params) =>
         requireServiceAccounts().workloads.bindWorkload(pluginId, request, params),
       unbindWorkload: async (pluginId, request, params) =>

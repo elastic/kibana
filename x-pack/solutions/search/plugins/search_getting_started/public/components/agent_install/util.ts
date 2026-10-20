@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  INSTALL_LINES_CLI,
-  type Environment,
-  AGENT_ONBOARDING_MESSAGE,
-  CLI_CONTEXT_NAME,
-  CLI_API_KEY_PLACEHOLDER,
-} from './constants';
+import { INSTALL_LINES_CLI, type Environment, AGENT_ONBOARDING_MESSAGE } from './constants';
 
 export const buildPrompt = (environment: Environment): string => {
   switch (environment) {
@@ -30,10 +24,3 @@ const joinLines = (installLines: readonly string[], message: string): string => 
   const parts = [...installLines, message];
   return parts.join('\n');
 };
-
-export const buildCliConnectCommand = (elasticsearchUrl: string): string =>
-  [
-    `elastic config context add ${CLI_CONTEXT_NAME} \\`,
-    `   --es-url ${elasticsearchUrl} \\`,
-    `   --es-api-key ${CLI_API_KEY_PLACEHOLDER}`,
-  ].join('\n');

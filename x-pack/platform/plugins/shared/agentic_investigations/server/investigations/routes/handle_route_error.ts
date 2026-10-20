@@ -8,6 +8,11 @@
 import type { KibanaResponseFactory, Logger } from '@kbn/core/server';
 import { isAgentBuilderError } from '@kbn/agent-builder-common';
 import { WrongTemplateError } from '../../assignments/assignments_service';
+import { InvestigationAttachmentInvalidRequestError } from '../../investigation_attachments';
+import { InvestigationsForbiddenError } from '../services/investigations_forbidden_error';
+import { MissingDismissReasonError } from '../services/investigation_status_service';
+import { CloseTargetsChangedError } from '../services/close_targets_changed_error';
+import { ProposalDismissFailedError } from '../services/proposal_dismiss_failed_error';
 
 export const handleInvestigationRouteError = (
   error: unknown,
@@ -16,6 +21,40 @@ export const handleInvestigationRouteError = (
 ) => {
   if (error instanceof WrongTemplateError) {
     return response.notFound({ body: { message: error.message } });
+  }
+
+  if (error instanceof InvestigationsForbiddenError) {
+    return response.forbidden({ body: { message: error.message } });
+  }
+
+  if (error instanceof InvestigationAttachmentInvalidRequestError) {
+    return response.badRequest({ body: { message: error.message } });
+  }
+
+  if (error instanceof MissingDismissReasonError) {
+    return response.badRequest({ body: { message: error.message } });
+  }
+
+  if (error instanceof CloseTargetsChangedError) {
+    return response.conflict({
+      body: { message: error.message, attributes: { code: error.code } },
+    });
+  }
+
+  if (error instanceof ProposalDismissFailedError) {
+    return response.customError({
+      statusCode: 500,
+      body: {
+        message: error.message,
+        attributes: { code: error.code, failed_proposal_ids: error.failedProposalIds },
+      },
+    });
+  }
+
+  // ProposalForbiddenError is thrown by the proposals plugin's privilege helpers.
+  // We match by name to avoid importing across plugin boundaries.
+  if (error instanceof Error && error.name === 'ProposalForbiddenError') {
+    return response.forbidden({ body: { message: error.message } });
   }
 
   if (isAgentBuilderError(error)) {

@@ -15,8 +15,11 @@ import type { ConversationRoundStep, ExecutionTerminatedEvent } from '@kbn/agent
 import { getEbtProps } from '@kbn/ebt-click';
 import { useToasts } from '../../../../hooks/use_toasts';
 import { useTracingEnabled } from '../../../../hooks/use_tracing_enabled';
+import { useAgentId } from '../../../../hooks/use_conversation';
+import { useConversationId } from '../../../../context/conversation/use_conversation_id';
 import { ExecutionMetadataPopover } from './execution_metadata_popover';
 import { TraceButton } from './trace_button';
+import { FeedbackActions } from './feedback_actions';
 
 const copyLabels = {
   response: {
@@ -45,6 +48,8 @@ interface ResponseActionsProps {
   steps?: ConversationRoundStep[];
   /** Which side of the exchange `content` comes from, so the copy wording matches it. */
   copyTarget?: keyof typeof copyLabels;
+  /** When set, renders the thumbs up/down feedback buttons. */
+  executionId?: string;
 }
 
 export const ResponseActions: React.FC<ResponseActionsProps> = ({
@@ -53,10 +58,13 @@ export const ResponseActions: React.FC<ResponseActionsProps> = ({
   executionTerminatedEvent,
   steps,
   copyTarget = 'response',
+  executionId,
 }) => {
   const { addSuccessToast } = useToasts();
   const { euiTheme } = useEuiTheme();
   const isTracingEnabled = useTracingEnabled();
+  const conversationId = useConversationId();
+  const agentId = useAgentId();
 
   const { action: copyLabel, success: copySuccessLabel } = copyLabels[copyTarget];
 
@@ -119,7 +127,14 @@ export const ResponseActions: React.FC<ResponseActionsProps> = ({
           <ExecutionMetadataPopover
             executionTerminatedEvent={executionTerminatedEvent}
             steps={steps}
+            conversationId={conversationId}
+            agentId={agentId}
           />
+        </EuiFlexItem>
+      )}
+      {executionId && (
+        <EuiFlexItem grow={false}>
+          <FeedbackActions executionId={executionId} />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

@@ -21,6 +21,7 @@ const makeStep = (lineStart: number, lineEnd: number, stepId = 'step'): StepInfo
   stepId,
   stepType: 'wait',
   stepYamlNode: new YAML.YAMLMap(),
+  path: ['steps', 0],
   propInfos: {},
   lineStart,
   lineEnd,

@@ -8,7 +8,6 @@
 import React, { useCallback, useMemo } from 'react';
 import {
   ConversationQueue,
-  investigationEntityIds,
   type BaseActionsProps,
   type ConversationsActionsGroupProps,
   type Investigation,
@@ -18,23 +17,27 @@ import type { QueueSection as QueueSectionState } from './use_queue_section';
 
 export interface QueueSectionProps {
   section: QueueSectionState;
-  surfaceFilter: string | null;
-  /** Conversation behind the open flyout; its cards are marked as current. */
-  selectedConversationId?: string;
+  entityFilter: string | null;
+  /** Proposal whose card opened the flyout; only that card is marked as current. */
+  selectedProposalId?: string;
   onClickAction: BaseActionsProps['onClickAction'];
   onClickCard: (id: Investigation['id']) => void;
   onOpenChat: (id: Investigation['id']) => void;
   onClickRecommendedAction: ConversationsActionsGroupProps['onClickRecommendedAction'];
   getChatHref: (id: Investigation['id']) => string | undefined;
   canManageEscalations?: boolean;
+  /** When true the "Close investigation" action is shown on each card. */
+  canCloseInvestigation?: boolean;
   /** Optional: render the assignee picker widget for each non-closed card. */
   renderAssignees: (investigation: Investigation) => React.ReactNode;
+  onCopyLink: (id: Investigation['id']) => void;
+  renderInFlightStatus?: (investigation: Investigation) => React.ReactNode;
 }
 
 export const QueueSection = ({
   section,
-  surfaceFilter,
-  selectedConversationId,
+  entityFilter,
+  selectedProposalId,
   ...handlers
 }: QueueSectionProps) => {
   const {
@@ -55,24 +58,9 @@ export const QueueSection = ({
     isLoadingMore,
   } = section;
 
-  const briefingList = useMemo(
-    () =>
-      surfaceFilter
-        ? investigations.filter((investigation) =>
-            investigationEntityIds(investigation).includes(surfaceFilter)
-          )
-        : investigations,
-    [investigations, surfaceFilter]
-  );
-
   const selectedIds = useMemo(
-    () =>
-      selectedConversationId
-        ? proposals
-            .filter(({ conversationId }) => conversationId === selectedConversationId)
-            .map(({ id: proposalId }) => proposalId)
-        : [],
-    [proposals, selectedConversationId]
+    () => (selectedProposalId ? [selectedProposalId] : []),
+    [selectedProposalId]
   );
 
   // Read off the raw proposals: the adapted Investigation carries no decision.
@@ -85,7 +73,7 @@ export const QueueSection = ({
   return (
     <ConversationQueue
       briefingType={id}
-      briefingList={briefingList}
+      briefingList={investigations}
       count={total}
       isOpen={isOpen}
       onToggle={onToggle}
@@ -97,7 +85,7 @@ export const QueueSection = ({
       onShowMore={loadMore}
       isLoadingMore={isLoadingMore}
       hasLoadMoreError={hasLoadMoreError}
-      isFiltered={Boolean(surfaceFilter)}
+      isFiltered={Boolean(entityFilter)}
       selectedIds={selectedIds}
       getOutcomeLabel={getOutcomeLabel}
       {...handlers}

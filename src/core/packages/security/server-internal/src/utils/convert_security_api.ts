@@ -19,6 +19,7 @@ export const convertSecurityApi = (
   return {
     authc: {
       getCurrentUser: privateApi.authc.getCurrentUser,
+      getPrincipal: privateApi.authc.getPrincipal,
       getRedactedSessionId: privateApi.authc.getRedactedSessionId,
       apiKeys: privateApi.authc.apiKeys,
     },

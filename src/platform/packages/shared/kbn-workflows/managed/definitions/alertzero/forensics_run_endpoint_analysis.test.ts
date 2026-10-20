@@ -13,6 +13,10 @@ import {
   ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID,
 } from '.';
 import FORENSICS_ENDPOINT_ANALYSIS_YAML from './forensics_endpoint_analysis.yaml';
+import {
+  ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW,
+  ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW_ID,
+} from './forensics_proposal_gate';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
 
 interface YamlStep {
@@ -22,8 +26,14 @@ interface YamlStep {
   steps?: YamlStep[];
   else?: YamlStep[];
   if?: string;
+  foreach?: string;
   condition?: string;
-  'on-failure'?: { continue?: boolean };
+  mode?: string;
+  concurrency?: { max?: number };
+  'on-failure'?: {
+    continue?: boolean;
+    retry?: { 'max-attempts'?: number; delay?: string; strategy?: string };
+  };
 }
 
 const definition = parse(ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW.yaml) as {
@@ -34,7 +44,7 @@ const definition = parse(ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW.yaml
     type: string;
     inputs?: {
       required?: string[];
-      properties?: Record<string, { pattern?: string; maxLength?: number }>;
+      properties?: Record<string, { pattern?: string; maxLength?: number; enum?: string[] }>;
     };
   }>;
   consts?: Record<string, unknown>;
@@ -63,6 +73,21 @@ const evaluate = (expression: string, context: Record<string, unknown>): unknown
   );
 
 describe('Endpoint analysis run', () => {
+  it('records the forensic execution on the verified investigation before processing it', () => {
+    const validRequest = stepByName('when_ki_valid');
+    expect(validRequest?.condition).toContain('steps.resolve_request.output.has_request == true');
+    expect(validRequest?.condition).toContain('steps.verify_investigation.output.metadata != null');
+    expect(validRequest?.steps?.[0]).toEqual({
+      name: 'append_workflow_execution',
+      type: 'investigations.appendWorkflowExecutionId',
+      'on-failure': { continue: true },
+      with: {
+        conversationId: '{{ steps.resolve_request.output.investigation_id }}',
+        workflowExecutionId: '{{ execution.id }}',
+      },
+    });
+  });
+
   it('is the untagged global forensic pass, dispatched rather than scheduled', () => {
     expect(ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW.id).toBe(
       ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID
@@ -145,6 +170,31 @@ describe('Endpoint analysis run', () => {
       expect(termValue('attributes.status')).toBe('pending');
     });
 
+    // The sweep sends the logical `id`. An `ids` query matches document `_id`, which
+    // on a data stream is a revision, so the child would find nothing. Documents
+    // written before `id` existed still have to match `_id`.
+    it('matches the logical id and falls back to _id only when id is absent', () => {
+      const idClause = readFilters.find((clause) => clause.bool !== undefined)?.bool as
+        | {
+            should?: Array<Record<string, unknown>>;
+            minimum_should_match?: number;
+          }
+        | undefined;
+      expect(idClause?.minimum_should_match).toBe(1);
+      expect(idClause?.should).toEqual([
+        { term: { id: '{{ inputs.ki_id }}' } },
+        {
+          bool: {
+            filter: [{ ids: { values: ['{{ inputs.ki_id }}'] } }],
+            must_not: [{ exists: { field: 'id' } }],
+          },
+        },
+      ]);
+      expect(stepByName('read_ki')?.with?.sort).toEqual([
+        { '@timestamp': { order: 'desc', unmapped_type: 'date' } },
+      ]);
+    });
+
     // The filters have to sit on the read rather than on each write, because the read
     // is the single thing every later gate derives from. An id that fails them yields
     // no hits, which the conditions below already treat as nothing to act on.
@@ -161,13 +211,16 @@ describe('Endpoint analysis run', () => {
       ).toBe('');
     });
 
-    // Both terminal writes in the else branch key off the read. `mark_invalid` needs a
-    // document to have been found; `mark_unreachable` needs a request, which only a
-    // found document can supply. A foreign id satisfies neither, so nothing is written.
+    // `mark_invalid` needs a document to have been found. `mark_unreachable` needs a
+    // request whose investigation could not be read, which only a found document can
+    // supply. A foreign id satisfies neither, so nothing is written.
     it('issues no terminal update for an indicator it could not read', () => {
       expect(stepByName('mark_invalid')?.if).toContain('steps.read_ki.output.hits.hits[0]._id');
       expect(stepByName('mark_unreachable')?.if).toContain(
         'steps.resolve_request.output.has_request == true'
+      );
+      expect(stepByName('mark_unreachable')?.if).toContain(
+        'steps.verify_investigation.output.metadata == null'
       );
 
       const noHits = {
@@ -206,6 +259,7 @@ describe('Endpoint analysis run', () => {
     expect(mark?.if).toContain('steps.resolve_request.output.has_request == true');
     expect(mark?.if).toContain('steps.verify_investigation.output.metadata != null');
     expect(mark?.if).toContain('steps.resolve_run_outcome.output.settled == true');
+    expect(mark?.if).toContain('steps.resolve_run_outcome.output.outcome_unrecorded != true');
     expect(mark?.with).toEqual(
       expect.objectContaining({
         ai_index_id: '{{ inputs.ai_index_id }}',
@@ -238,14 +292,21 @@ describe('Endpoint analysis run', () => {
 
       const attached = String(stepByName('resolve_run_outcome')?.with?.attached);
       expect(attached).not.toContain('host_name');
+      expect(attached).not.toContain('telemetry');
     });
 
     it('leaves no valid request on a status the sweep still selects', () => {
-      const statuses = ['mark_processed', 'mark_failed', 'mark_invalid'].map(
+      const statuses = [
+        'mark_processed',
+        'mark_failed',
+        'mark_proposals_failed',
+        'mark_invalid',
+      ].map(
         (name) => (stepByName(name)?.with?.ki as { attributes?: { status?: string } })?.attributes
       );
       expect(statuses.map((attributes) => attributes?.status)).toEqual([
         'processed',
+        'failed',
         'failed',
         'invalid',
       ]);
@@ -262,7 +323,6 @@ describe('Endpoint analysis run', () => {
       expect(attachmentIds).toEqual([
         '{{ steps.finding_ids.output.timeline }}',
         '{{ steps.finding_ids.output.iocs }}',
-        '{{ steps.finding_ids.output.assessment }}',
       ]);
       for (const id of attachmentIds) {
         const reference = String(id)
@@ -347,28 +407,31 @@ describe('Endpoint analysis run', () => {
 
       expect(render('timeline')).toBe('forensic-timeline-ki-1');
       expect(render('iocs')).toBe('forensic-iocs-ki-1');
-      expect(render('assessment')).toBe('forensic-assessment-ki-1');
     });
 
     const thisIndicator = {
       timeline: 'forensic-timeline-ki-1',
       iocs: 'forensic-iocs-ki-1',
-      assessment: 'forensic-assessment-ki-1',
     };
     const outcome = (
       field: 'attached' | 'settled',
-      found: { ids?: string[]; hostName?: string }
+      found: {
+        ids?: string[];
+        hostName?: string;
+        telemetry?: { checked: boolean; present: boolean };
+      }
     ): unknown =>
       evaluate(String(stepByName('resolve_run_outcome')?.with?.[field]), {
         steps: {
           finding_ids: { output: thisIndicator },
           resolve_written_findings: { output: { ids: found.ids } },
           resolve_host: { output: { host_name: found.hostName } },
+          resolve_endpoint_telemetry: { output: found.telemetry ?? {} },
         },
       });
 
-    it('settles a run whose three findings for this indicator are on the investigation', () => {
-      const ids = [thisIndicator.timeline, thisIndicator.iocs, thisIndicator.assessment];
+    it('settles a run whose timeline and indicators for this indicator are on the investigation', () => {
+      const ids = [thisIndicator.timeline, thisIndicator.iocs];
       expect(outcome('settled', { ids, hostName: 'host-a' })).toBe(true);
       expect(outcome('attached', { ids, hostName: 'host-a' })).toBe(true);
     });
@@ -377,7 +440,7 @@ describe('Endpoint analysis run', () => {
       expect(outcome('settled', { ids: [thisIndicator.iocs], hostName: 'host-a' })).toBe(false);
       expect(
         outcome('attached', {
-          ids: [thisIndicator.timeline, thisIndicator.assessment],
+          ids: [thisIndicator.timeline],
           hostName: 'host-a',
         })
       ).toBe(false);
@@ -419,6 +482,24 @@ describe('Endpoint analysis run', () => {
       expect(outcome('settled', { ids: [] })).toBe(true);
       expect(outcome('attached', { ids: [] })).toBe(false);
     });
+
+    // Same shape as no host: the agent never ran because there was nothing for it to
+    // read, and no retry ships telemetry the host never sent.
+    it('settles a run whose host has no Defend telemetry without claiming it attached anything', () => {
+      const none = { checked: true, present: false };
+      expect(outcome('settled', { ids: [], hostName: 'host-a', telemetry: none })).toBe(true);
+      expect(outcome('attached', { ids: [], hostName: 'host-a', telemetry: none })).toBe(false);
+    });
+
+    // A run that skipped the check (findings already attached, or a recorded attempt)
+    // has no telemetry answer, and must not be settled by the absence of one.
+    it('does not read a telemetry check it skipped as no telemetry', () => {
+      const skipped = { checked: false, present: false };
+      expect(outcome('settled', { ids: [], hostName: 'host-a', telemetry: skipped })).toBe(false);
+      expect(outcome('settled', { ids: [], hostName: 'host-a' })).toBe(false);
+      const some = { checked: true, present: true };
+      expect(outcome('settled', { ids: [], hostName: 'host-a', telemetry: some })).toBe(false);
+    });
   });
 
   // A 15m agent run against an investigation that is gone produces three attachment
@@ -446,7 +527,12 @@ describe('Endpoint analysis run', () => {
 
       const markUnreachable = stepByName('mark_unreachable');
       expect(markUnreachable?.type).toBe('context-engine.updateKi');
+      expect(definition.steps.map(({ name }) => name)).toContain('mark_unreachable');
+      expect(stepByName('when_ki_valid')?.else?.map(({ name }) => name)).not.toContain(
+        'mark_unreachable'
+      );
       expect(markUnreachable?.if).toContain('steps.resolve_request.output.has_request == true');
+      expect(markUnreachable?.if).toContain('steps.verify_investigation.output.metadata == null');
       expect(
         (markUnreachable?.with?.ki as { attributes?: { status?: string } })?.attributes
       ).toEqual({
@@ -456,15 +542,45 @@ describe('Endpoint analysis run', () => {
       });
     });
 
-    // Both live in the same `else`, so without this they would both fire: one reporting a
-    // malformed indicator, the other an unreachable investigation, for the same run.
+    // A malformed indicator is retired only as invalid. The unreachable write is a
+    // separate step, and its condition is the opposite of this one, so the two cannot
+    // both update the same indicator.
     it('is told apart from a malformed indicator', () => {
+      expect(stepByName('when_ki_valid')?.else?.map(({ name }) => name)).toEqual([
+        'journal_invalid_request',
+        'mark_invalid',
+      ]);
       expect(stepByName('mark_invalid')?.if).toContain(
         'steps.resolve_request.output.has_request != true'
+      );
+      expect(stepByName('mark_unreachable')?.if).toContain(
+        'steps.resolve_request.output.has_request == true'
       );
       expect(stepByName('journal_invalid_request')?.if).toContain(
         'steps.resolve_request.output.has_request != true'
       );
+
+      const found = {
+        read_ki: { output: { hits: { hits: [{ _id: 'ki-1' }] } } },
+      };
+      const malformed = {
+        steps: {
+          ...found,
+          resolve_request: { output: { has_request: false } },
+          verify_investigation: { output: { metadata: null } },
+        },
+      };
+      const unreachable = {
+        steps: {
+          ...found,
+          resolve_request: { output: { has_request: true } },
+          verify_investigation: { output: { metadata: null } },
+        },
+      };
+      expect(evaluate(String(stepByName('mark_invalid')?.if), malformed)).toBe(true);
+      expect(evaluate(String(stepByName('mark_unreachable')?.if), malformed)).toBe(false);
+      expect(evaluate(String(stepByName('mark_invalid')?.if), unreachable)).toBe(false);
+      expect(evaluate(String(stepByName('mark_unreachable')?.if), unreachable)).toBe(true);
     });
   });
 
@@ -475,17 +591,27 @@ describe('Endpoint analysis run', () => {
     const journalSteps = allSteps.filter(
       ({ with: withInputs }) =>
         (withInputs as { 'workflow-id'?: string } | undefined)?.['workflow-id'] ===
-        '{{ consts.journal_note }}'
+        'system-alertzero-journal-note'
     );
 
-    it('narrates every problem path as a journal note rather than an attachment', () => {
+    it('narrates problem paths and the assessment as journal notes rather than attachments', () => {
       expect(journalSteps.map(({ name }) => name).sort()).toEqual([
         'journal_analysis_problem',
+        'journal_analysis_started',
         'journal_fetch_alert_problem',
         'journal_invalid_request',
+        'journal_iocs',
         'journal_no_host',
+        'journal_no_telemetry',
+        'journal_outcome_unrecorded',
+        'journal_proposals_lost',
+        'journal_proposals_queued',
+        'journal_rationale',
+        'journal_timeline',
       ]);
-      expect(definition.consts?.journal_note).toBe('system-alertzero-journal-note');
+      expect(
+        journalSteps.every(({ with: withInputs }) => withInputs?.['run-as-mode'] === 'inherit')
+      ).toBe(true);
     });
 
     // A missing discovery alert is narrated and then falls through to the no-host
@@ -516,37 +642,63 @@ describe('Endpoint analysis run', () => {
       expect(String(stepByName('resolve_run_outcome')?.with?.settled)).not.toContain('journal');
     });
 
-    // Findings stay attachments: they carry a payload a domain type validates, and the
-    // run's terminal status depends on them landing, which a note returning no id cannot
-    // report. The assessment is prose and still one of them for a second reason below.
-    it('keeps the findings as attachments', () => {
+    // Timeline and IoCs stay attachments: they carry a payload a domain type validates,
+    // and the run's terminal status depends on them landing, which a note returning no
+    // id cannot report. The assessment is prose and goes to the journal instead.
+    it('keeps the timeline and indicators as attachments', () => {
       expect(
         allSteps.filter(({ type }) => type === 'ai.attachment.add').map(({ name }) => name)
-      ).toEqual(['attach_timeline', 'attach_iocs', 'attach_rationale']);
+      ).toEqual(['attach_timeline', 'attach_iocs']);
     });
 
-    // `system-alertzero-journal-note` bounds `message` at 8000 characters. The agent may
-    // return twice that, and the note would be rejected whole rather than truncated, so
-    // the longest assessments — the ones worth reading — are exactly the ones that would
-    // vanish. Lowering the cap to fit is the trade this records a decision against.
-    it('keeps the assessment at a length no journal note could carry', () => {
+    // `system-alertzero-journal-note` bounds `message` at 8000 characters and rejects a
+    // longer one whole. The note prefixes the assessment, and a blank line keeps the
+    // first markdown block on its own line. The schema cap stays under that bound
+    // for either label.
+    it('caps the assessment at the length a journal note can carry', () => {
       const schema = stepByName('forensic_analysis')?.with?.schema as {
         properties?: { rationale?: { maxLength?: number } };
       };
+      const journal = stepByName('journal_rationale');
+      const rationaleCap = schema?.properties?.rationale?.maxLength ?? 0;
+      const message = (journal?.with as { inputs?: { message?: string } })?.inputs?.message ?? '';
+      const rendered = (propose: boolean) =>
+        liquid.parseAndRenderSync(message, {
+          steps: {
+            forensic_analysis: {
+              output: { structured_output: { propose, rationale: 'x'.repeat(rationaleCap) } },
+            },
+          },
+        });
 
-      expect(schema?.properties?.rationale?.maxLength).toBeGreaterThan(JOURNAL_MESSAGE_MAX_LENGTH);
-      expect((stepByName('attach_rationale')?.with as { type?: string })?.type).toBe('text');
+      expect(rationaleCap).toBe(7900);
+      expect(journal?.type).toBe('workflow.execute');
+      expect((journal?.with as { 'workflow-id'?: string })?.['workflow-id']).toBe(
+        'system-alertzero-journal-note'
+      );
+      expect(message).toContain('{{ steps.forensic_analysis.output.structured_output.rationale }}');
+      expect(message).toContain('Rationale for proposed actions');
+      expect(message).toContain('Rationale for ending investigation');
+      expect(message).toContain('steps.forensic_analysis.output.structured_output.propose == true');
+      expect(rendered(true).startsWith('# Rationale for proposed actions\n\n')).toBe(true);
+      expect(rendered(false).startsWith('# Rationale for ending investigation\n\n')).toBe(true);
+      expect(rendered(true).length).toBeLessThanOrEqual(JOURNAL_MESSAGE_MAX_LENGTH);
+      expect(rendered(false).length).toBeLessThanOrEqual(JOURNAL_MESSAGE_MAX_LENGTH);
     });
 
-    // The two notes before the agent are the only record of why this run stopped.
+    // The three notes before the agent are the only record of why this run stopped.
     // A failed note fails the run and leaves the indicator pending for a cheap retry.
     // Notes beside a retirement still continue, so a rejected note cannot block the
     // write that stops the sweep.
     it('fails the run when a note before the agent is lost', () => {
       expect(stepByName('journal_fetch_alert_problem')?.['on-failure']).toBeUndefined();
       expect(stepByName('journal_no_host')?.['on-failure']).toBeUndefined();
+      expect(stepByName('journal_no_telemetry')?.['on-failure']).toBeUndefined();
       expect(stepByName('journal_invalid_request')?.['on-failure']).toEqual({ continue: true });
       expect(stepByName('journal_analysis_problem')?.['on-failure']).toEqual({ continue: true });
+      // Before the agent, but a rejected note must not skip the 15m run.
+      expect(stepByName('journal_analysis_started')?.['on-failure']).toEqual({ continue: true });
+      expect(stepByName('journal_analysis_started')?.if).toBe(stepByName('forensic_analysis')?.if);
     });
   });
 
@@ -570,19 +722,89 @@ describe('Endpoint analysis run', () => {
       }
     });
 
+    // The empty-state sentence on the attachment is the "found nothing" record. Each
+    // note introduces one finding, only when that finding has something in it, and it
+    // is written before that card. A rejected note must not skip the attachment.
+    it('journals each finding separately, and only when it is nonempty', () => {
+      const names = allSteps.map(({ name }) => name);
+      expect(names.indexOf('journal_timeline')).toBeLessThan(names.indexOf('attach_timeline'));
+      expect(names.indexOf('attach_timeline')).toBeLessThan(names.indexOf('journal_iocs'));
+      expect(names.indexOf('journal_iocs')).toBeLessThan(names.indexOf('attach_iocs'));
+      expect(stepByName('journal_timeline')?.['on-failure']).toEqual({ continue: true });
+      expect(stepByName('journal_iocs')?.['on-failure']).toEqual({ continue: true });
+      expect(stepByName('attach_timeline')?.if).not.toBe(stepByName('journal_timeline')?.if);
+      expect(stepByName('attach_iocs')?.if).not.toBe(stepByName('journal_iocs')?.if);
+
+      const timeline = String(stepByName('resolve_finding_presence')?.with?.timeline);
+      const iocs = String(stepByName('resolve_finding_presence')?.with?.iocs);
+      const output = (events: unknown[], indicators: Record<string, unknown[]>) => ({
+        steps: {
+          forensic_analysis: {
+            output: { structured_output: { timeline: { events }, iocs: indicators } },
+          },
+        },
+      });
+
+      expect(evaluate(timeline, output([], {}))).toBe(false);
+      expect(evaluate(timeline, output([{ timestamp: 't' }], {}))).toBe(true);
+      expect(evaluate(iocs, output([], {}))).toBe(false);
+      expect(evaluate(iocs, output([], { ips: [{ value: '1.2.3.4' }] }))).toBe(true);
+      expect(evaluate(iocs, output([], { shas: [], file_paths: [{ value: '/tmp/a' }] }))).toBe(
+        true
+      );
+
+      const when = (hasTimeline: boolean, hasIocs: boolean) => ({
+        steps: { resolve_finding_presence: { output: { timeline: hasTimeline, iocs: hasIocs } } },
+      });
+      expect(evaluate(String(stepByName('journal_timeline')?.if), when(true, false))).toBe(true);
+      expect(evaluate(String(stepByName('journal_timeline')?.if), when(false, true))).toBe(false);
+      expect(evaluate(String(stepByName('journal_iocs')?.if), when(false, true))).toBe(true);
+      expect(evaluate(String(stepByName('journal_iocs')?.if), when(true, false))).toBe(false);
+
+      const message = (name: string) =>
+        (stepByName(name)?.with as { inputs?: { message?: string } })?.inputs?.message ?? '';
+      expect(liquid.parseAndRenderSync(message('journal_timeline'), {})).toContain(
+        'Reconstructed forensic timeline'
+      );
+      expect(liquid.parseAndRenderSync(message('journal_iocs'), {})).toContain(
+        'Extracted IoCs during forensic analysis'
+      );
+    });
+
     // With both findings allowed to be empty, the assessment is the only output that
     // evidences the turn happened at all. Listing it as required does not get there: an
-    // empty string satisfies `required`, and `attach_rationale` skips on blank — which
-    // would leave a completed analysis with nothing attached and retire it as failed.
+    // empty string satisfies `required`, and `journal_rationale` skips on blank — which
+    // would leave a completed analysis with no assessment on the investigation.
     it('requires an assessment with something in it', () => {
       const schema = stepByName('forensic_analysis')?.with?.schema as {
         required?: string[];
-        properties?: { rationale?: { minLength?: number } };
+        properties?: { rationale?: { minLength?: number; description?: string } };
       };
 
       expect(schema?.required).toContain('rationale');
       expect(schema?.properties?.rationale?.minLength).toBeGreaterThan(0);
-      expect(stepByName('attach_rationale')?.if).toContain('rationale != blank');
+      expect(stepByName('journal_rationale')?.if).toContain('rationale != blank');
+    });
+
+    // The journal renders this note as markdown. The sentences stay in the same
+    // controlled language coverage, rule creation, and rule tuning ask for.
+    it('asks for the assessment as markdown in simplified technical English', () => {
+      const message = String(stepByName('forensic_analysis')?.with?.message);
+      const schema = stepByName('forensic_analysis')?.with?.schema as {
+        properties?: { rationale?: { description?: string } };
+      };
+
+      expect(message).toContain(
+        'Write `rationale` as markdown, in ASD-STE100 Simplified Technical English.'
+      );
+      expect(message).toContain('`## Affected hosts`');
+      expect(message).toContain('`## Data gaps`');
+      expect(message).toContain('Do not list the actions.');
+      expect(message).not.toContain('`## Recommended actions`');
+      expect(schema?.properties?.rationale?.description).toContain(
+        'markdown in ASD-STE100 Simplified Technical English'
+      );
+      expect(schema?.properties?.rationale?.description).not.toContain('`## Recommended actions`');
     });
 
     // `attach_timeline` and `attach_iocs` hand these payloads straight to attachment
@@ -678,22 +900,107 @@ describe('Endpoint analysis run', () => {
         'mark_attempted',
         'mark_failed',
         'mark_invalid',
+        'mark_outcome_unrecorded',
         'mark_processed',
+        'mark_proposals_failed',
         'mark_unreachable',
       ]);
       for (const step of writes) {
-        expect(step['on-failure']).toBeUndefined();
+        expect(step['on-failure']?.continue).toBeUndefined();
       }
+    });
+
+    // The verdict after the agent exists only in this run's output. A retry skips the
+    // agent and cannot reconstruct it, so losing the write to a short blip in the
+    // context engine loses the verdict. These writes try again in place before the run
+    // gives up; the pre-agent writes do not need to, since their retry is the next sweep.
+    it('retries the writes that record a verdict before failing the run', () => {
+      const retry = { 'max-attempts': 3, delay: '5s', strategy: 'exponential' };
+
+      for (const name of [
+        'mark_processed',
+        'mark_failed',
+        'mark_proposals_failed',
+        'mark_outcome_unrecorded',
+      ]) {
+        expect(stepByName(name)?.['on-failure']).toEqual({ retry });
+      }
+      expect(stepByName('mark_attempted')?.['on-failure']).toBeUndefined();
+      expect(stepByName('mark_invalid')?.['on-failure']).toBeUndefined();
+      expect(stepByName('mark_unreachable')?.['on-failure']).toBeUndefined();
+    });
+
+    // A retry finds both findings already attached and skips the agent. Without the
+    // agent's output it cannot tell whether the earlier run's assessment note landed or
+    // its proposals were queued, so claiming `processed` would turn a lost proposal
+    // into a success. It says what it knows and retires the indicator as failed.
+    it('does not claim processed for an earlier run whose verdict was never recorded', () => {
+      const thisIndicator = { timeline: 'forensic-timeline-ki-1', iocs: 'forensic-iocs-ki-1' };
+      const unrecorded = String(stepByName('resolve_run_outcome')?.with?.outcome_unrecorded);
+      const unrecordedWhen = (ids: string[], agentOutput?: Record<string, unknown>): unknown =>
+        evaluate(unrecorded, {
+          steps: {
+            finding_ids: { output: thisIndicator },
+            resolve_written_findings: { output: { ids } },
+            forensic_analysis: agentOutput === undefined ? {} : { output: agentOutput },
+          },
+        });
+      const both = [thisIndicator.timeline, thisIndicator.iocs];
+
+      // Both attached, agent skipped this run: the retry case.
+      expect(unrecordedWhen(both)).toBe(true);
+      // Both attached by this run's agent: the normal case.
+      expect(unrecordedWhen(both, { structured_output: { rationale: 'ok' } })).toBe(false);
+      // Partial or no attachments: `settled != true` already handles it.
+      expect(unrecordedWhen([thisIndicator.timeline])).toBe(false);
+      expect(unrecordedWhen([])).toBe(false);
+
+      const terminal = (outcomeUnrecorded: boolean) => ({
+        steps: {
+          resolve_request: { output: { has_request: true, investigation_id: 'inv-1' } },
+          verify_investigation: { output: { metadata: { id: 'inv-1' } } },
+          resolve_run_outcome: {
+            output: { settled: true, outcome_unrecorded: outcomeUnrecorded },
+          },
+          resolve_proposals: { output: { proposals_lost: false } },
+        },
+      });
+      const fires = (name: string, ctx: Record<string, unknown>): unknown =>
+        evaluate(String(stepByName(name)?.if), ctx);
+
+      expect(fires('mark_processed', terminal(false))).toBe(true);
+      expect(fires('mark_outcome_unrecorded', terminal(false))).toBe(false);
+      expect(fires('mark_processed', terminal(true))).toBe(false);
+      expect(fires('mark_outcome_unrecorded', terminal(true))).toBe(true);
+      // Exactly one verdict on that path: the other failure writes stay quiet.
+      expect(fires('mark_failed', terminal(true))).toBe(false);
+      expect(fires('mark_proposals_failed', terminal(true))).toBe(false);
+
+      const mark = stepByName('mark_outcome_unrecorded');
+      expect(mark?.type).toBe('context-engine.updateKi');
+      expect((mark?.with?.ki as { attributes: { status: string } }).attributes.status).toBe(
+        'failed'
+      );
+      expect(
+        (mark?.with?.ki as { attributes: { failure_reason: string } }).attributes.failure_reason
+      ).toContain('did not record its outcome');
+
+      const names = allSteps.map(({ name }) => name);
+      expect(names.indexOf('journal_outcome_unrecorded')).toBeLessThan(
+        names.indexOf('mark_outcome_unrecorded')
+      );
+      expect(stepByName('journal_outcome_unrecorded')?.if).toBe(mark?.if);
+      expect(stepByName('journal_outcome_unrecorded')?.['on-failure']).toEqual({ continue: true });
     });
 
     // The case this exists for is a re-dispatch after a failed retirement: the findings
     // are already attached and the only work left is the write. Paying 15m to rediscover
     // them is what made a stuck indicator expensive rather than merely repetitive.
-    it('skips the agent when this indicator already has all three findings', () => {
+    it('skips the agent when this indicator already has both attachments', () => {
       expect(stepByName('list_prior_findings')?.type).toBe('ai.attachment.list');
       expect(stepByName('forensic_analysis')?.if).toBe(stepByName('mark_attempted')?.if);
       expect(String(stepByName('forensic_analysis')?.if)).toContain(
-        'steps.resolve_prior_assessment.output.count != 3'
+        'steps.resolve_prior_assessment.output.count != 2'
       );
       expect(String(stepByName('forensic_analysis')?.if)).toContain(
         'steps.resolve_request.output.forensic_attempted_at == blank'
@@ -702,7 +1009,6 @@ describe('Endpoint analysis run', () => {
       const thisIndicator = {
         timeline: 'forensic-timeline-ki-1',
         iocs: 'forensic-iocs-ki-1',
-        assessment: 'forensic-assessment-ki-1',
       };
       const counted = (ids: string[]): unknown =>
         evaluate(String(stepByName('resolve_prior_assessment')?.with?.count), {
@@ -712,14 +1018,10 @@ describe('Endpoint analysis run', () => {
           },
         });
 
-      expect(counted([thisIndicator.timeline, thisIndicator.iocs, thisIndicator.assessment])).toBe(
-        3
-      );
-      expect(counted([thisIndicator.timeline, thisIndicator.assessment])).toBe(2);
+      expect(counted([thisIndicator.timeline, thisIndicator.iocs])).toBe(2);
+      expect(counted([thisIndicator.timeline])).toBe(1);
       expect(counted([thisIndicator.iocs])).toBe(1);
-      expect(
-        counted(['forensic-timeline-ki-2', 'forensic-iocs-ki-2', 'forensic-assessment-ki-2'])
-      ).toBe(0);
+      expect(counted(['forensic-timeline-ki-2', 'forensic-iocs-ki-2'])).toBe(0);
       expect(counted([])).toBe(0);
     });
 
@@ -730,7 +1032,12 @@ describe('Endpoint analysis run', () => {
       const names = allSteps.map(({ name }) => name);
       const mark = stepByName('mark_attempted');
 
-      expect(names.indexOf('mark_attempted')).toBeLessThan(names.indexOf('forensic_analysis'));
+      expect(names.indexOf('mark_attempted')).toBeLessThan(
+        names.indexOf('journal_analysis_started')
+      );
+      expect(names.indexOf('journal_analysis_started')).toBeLessThan(
+        names.indexOf('forensic_analysis')
+      );
       expect(mark?.type).toBe('context-engine.updateKi');
       expect(mark?.with).toEqual({
         ai_index_id: '{{ inputs.ai_index_id }}',
@@ -742,19 +1049,83 @@ describe('Endpoint analysis run', () => {
         },
       });
 
-      const runsAgent = (count: number, attemptedAt: string): unknown =>
+      const runsAgent = (count: number, attemptedAt: string, present = true): unknown =>
         evaluate(String(stepByName('forensic_analysis')?.if), {
           steps: {
             resolve_prior_assessment: { output: { count } },
             resolve_request: { output: { forensic_attempted_at: attemptedAt } },
+            resolve_endpoint_telemetry: { output: { checked: true, present } },
           },
         });
 
       expect(runsAgent(0, '')).toBe(true);
-      expect(runsAgent(2, '')).toBe(true);
-      expect(runsAgent(3, '')).toBe(false);
+      expect(runsAgent(1, '')).toBe(true);
+      expect(runsAgent(2, '')).toBe(false);
       expect(runsAgent(0, '2026-09-23T14:00:00.000Z')).toBe(false);
-      expect(runsAgent(2, '2026-09-23T14:00:00.000Z')).toBe(false);
+      expect(runsAgent(1, '2026-09-23T14:00:00.000Z')).toBe(false);
+      expect(runsAgent(0, '', false)).toBe(false);
+      // The attempt marker is gated the same way, so a host with nothing to analyze
+      // does not use up the indicator's one attempt on a run that never started.
+      expect(mark?.if).toBe(stepByName('forensic_analysis')?.if);
+    });
+
+    // The forensic skill resolves `logs-endpoint.events.*` only inside the agent, so
+    // without a check first a host with no Defend telemetry would spend its one attempt
+    // on a 15m run that can only report nothing. The Hunt Watch worker makes the same
+    // check (`check_index_scope`) before it selects a report.
+    it('checks for Defend telemetry before the agent, and fails the run rather than guess', () => {
+      const names = allSteps.map(({ name }) => name);
+      const check = stepByName('check_endpoint_telemetry');
+
+      expect(names.indexOf('check_endpoint_telemetry')).toBeLessThan(
+        names.indexOf('mark_attempted')
+      );
+      expect(names.indexOf('journal_no_telemetry')).toBeLessThan(names.indexOf('mark_attempted'));
+      expect(check?.type).toBe('elasticsearch.search');
+      expect(check?.with).toEqual({
+        index: 'logs-endpoint.events.*',
+        ignore_unavailable: true,
+        size: 1,
+        _source: false,
+        query: {
+          bool: {
+            filter: [
+              { term: { 'host.name': '{{ steps.resolve_host.output.host_name }}' } },
+              { range: { '@timestamp': { gte: 'now-72h' } } },
+            ],
+          },
+        },
+      });
+      // A read error is a gap, not "no telemetry": the run fails and the indicator stays
+      // pending for a cheap retry, like the alert lookups.
+      expect(check?.['on-failure']).toBeUndefined();
+      // Only looked up on the path where the agent would run, so a retry of a finished
+      // analysis does not depend on the telemetry still being there.
+      expect(check?.if).toContain('steps.resolve_prior_assessment.output.count != 2');
+      expect(check?.if).toContain('steps.resolve_request.output.forensic_attempted_at == blank');
+
+      const resolved = stepByName('resolve_endpoint_telemetry')?.with ?? {};
+      const telemetry = (
+        field: 'checked' | 'present',
+        output?: { hits: { hits: Array<{ _id: string }> } }
+      ): unknown =>
+        evaluate(String(resolved[field]), {
+          steps: { check_endpoint_telemetry: output === undefined ? {} : { output } },
+        });
+      expect(telemetry('checked', { hits: { hits: [] } })).toBe(true);
+      expect(telemetry('present', { hits: { hits: [] } })).toBe(false);
+      expect(telemetry('present', { hits: { hits: [{ _id: 'evt-1' }] } })).toBe(true);
+      // A skipped check has no output, and that must not read as an empty index.
+      expect(telemetry('checked')).toBe(false);
+      expect(telemetry('present')).toBe(false);
+
+      const notes = (checked: boolean, present: boolean): unknown =>
+        evaluate(String(stepByName('journal_no_telemetry')?.if), {
+          steps: { resolve_endpoint_telemetry: { output: { checked, present } } },
+        });
+      expect(notes(true, false)).toBe(true);
+      expect(notes(true, true)).toBe(false);
+      expect(notes(false, false)).toBe(false);
     });
 
     // `ai.attachment.read` cannot answer this question: it catches every error and
@@ -789,12 +1160,21 @@ describe('Endpoint analysis run', () => {
     it('retires an indicator whose analysis failed instead of re-running it every minute', () => {
       expect(stepByName('forensic_analysis')?.['on-failure']).toEqual({ continue: true });
 
-      // Both of these read the agent's error, which only exists downstream of a step that
-      // continued past it. They were unreachable while the agent failed the run outright.
-      expect(stepByName('journal_analysis_problem')?.with).toMatchObject({
-        inputs: { message: expect.stringContaining('steps.forensic_analysis.error') },
-      });
-      expect(stepByName('attach_rationale')?.if).toContain('steps.forensic_analysis.error == null');
+      // The journal still branches on the agent's error, which only exists downstream of a
+      // step that continued past it. The message itself stays a stable reason plus the
+      // execution link: the error body would land in the investigation, where a later
+      // agent round reads it as user input.
+      const problemMessage = String(
+        (stepByName('journal_analysis_problem')?.with?.inputs as { message?: string } | undefined)
+          ?.message
+      );
+      expect(problemMessage).toContain('steps.forensic_analysis.error');
+      expect(problemMessage).not.toContain('error.message');
+      expect(problemMessage).toContain('execution.id');
+      expect(problemMessage).toContain('execution.url');
+      expect(stepByName('journal_rationale')?.if).toContain(
+        'steps.forensic_analysis.error == null'
+      );
     });
 
     // Nothing reached the investigation, so all it has is the handoff. It has to be told,
@@ -806,6 +1186,28 @@ describe('Endpoint analysis run', () => {
       expect(journal?.if).toBe(stepByName('mark_failed')?.if);
       expect(journal?.['on-failure']).toEqual({ continue: true });
       expect(names.indexOf('journal_analysis_problem')).toBeLessThan(names.indexOf('mark_failed'));
+
+      // Each case renders one sentence about what happened, and never the error body.
+      const message = String((journal?.with?.inputs as { message?: string } | undefined)?.message);
+      const render = (agentError: string | null, attemptedAt: string): string =>
+        liquid.parseAndRenderSync(message, {
+          execution: { id: 'exec-1', url: 'https://kibana/exec-1' },
+          steps: {
+            resolve_host: { output: { host_name: 'host-a' } },
+            resolve_request: { output: { forensic_attempted_at: attemptedAt } },
+            forensic_analysis: agentError === null ? {} : { error: { message: agentError } },
+          },
+        });
+
+      expect(render('boom', '')).toContain('left no findings');
+      expect(render('boom', '')).toContain('The forensic agent failed.');
+      expect(render('boom', '')).not.toContain('boom');
+      expect(render(null, '2026-09-23T14:00:00.000Z')).toContain(
+        'A previous attempt did not finish'
+      );
+      expect(render(null, '')).toContain('none of its findings could be attached');
+      expect(render(null, '')).toContain('exec-1');
+      expect(render(null, '')).toContain('https://kibana/exec-1');
     });
   });
 
@@ -828,10 +1230,10 @@ describe('Endpoint analysis run', () => {
     };
     const recommendation = schema?.properties?.recommendedActions?.items;
 
-    // Without this, `propose: true` and no list at all is valid output. `propose_actions`
-    // defaults the missing list to `[]`, so the run fans out to nothing, attaches its
-    // findings, and retires the indicator as processed — the containment the analysis
-    // just spent 15m justifying disappears with no failure anywhere to show for it.
+    // Without this, `propose: true` and no list at all is valid output. The dispatch
+    // step runs only when that list has items, so a missing list attaches the findings
+    // and retires the indicator as processed — the containment the analysis just spent
+    // 15m justifying disappears with no failure anywhere to show for it.
     it('makes the model state that it proposes nothing rather than stay silent', () => {
       expect(schema?.required).toContain('recommendedActions');
       expect(String(stepByName('forensic_analysis')?.with?.message)).toContain(
@@ -857,8 +1259,28 @@ describe('Endpoint analysis run', () => {
         'actionInput',
         'comment',
         'confidence',
+        'title',
       ]);
-      expect(recommendation?.required).toEqual(['actionId', 'actionInput', 'confidence']);
+      expect(recommendation?.required).toEqual([
+        'actionId',
+        'actionInput',
+        'title',
+        'comment',
+        'confidence',
+      ]);
+      // 256 is the proposal step's title limit. The dispatch truncates to the same bound.
+      expect(recommendation?.properties?.title).toMatchObject({
+        type: 'string',
+        minLength: 1,
+        maxLength: 256,
+      });
+      // A blank id is schema-valid without this, and the proposal workflow treats a
+      // blank actionWorkflowId as a no-action card an analyst can approve.
+      expect(recommendation?.properties?.actionId).toMatchObject({
+        type: 'string',
+        minLength: 1,
+        maxLength: 256,
+      });
     });
 
     // Confidence is per recommendation, not per run: one reconstruction can be certain
@@ -876,20 +1298,354 @@ describe('Endpoint analysis run', () => {
     // nothing but the agent that weighed the evidence can supply it, so leaving it unset is
     // the one gap the caller has to fill.
     it('supplies confidence to the proposal and leaves impact to the action', () => {
-      const inputs = (stepByName('propose_action')?.with as { inputs?: Record<string, unknown> })
-        ?.inputs;
+      const proposeAction = stepByName('propose_action')?.with as {
+        'workflow-id'?: string;
+        inputs?: Record<string, unknown>;
+      };
+      const inputs = proposeAction?.inputs;
 
+      // The forensics gate wraps the bridge, so `origin` is still stamped there and
+      // containment proposals land in the queue AlertZero actually reads.
+      expect(proposeAction?.['workflow-id']).toBe(ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW_ID);
       expect(inputs?.confidence).toBe("{{ foreach.item.confidence | default: '' }}");
+      // A missing title stores the action's own name, so two isolates of different
+      // hosts share one queue label. The prompt tells the model to name the target.
+      expect(inputs?.title).toBe('{{ foreach.item.title | truncate: 256, "" }}');
+      expect(
+        evaluate(String(inputs?.title), {
+          foreach: { item: { title: 'Isolate host WIN-ANALYST01' } },
+        })
+      ).toBe('Isolate host WIN-ANALYST01');
+      expect(String(stepByName('forensic_analysis')?.with?.message)).toContain('`title`');
       expect(inputs?.impact).toBeUndefined();
       expect(inputs?.category).toBeUndefined();
     });
 
-    // Naming a process selector is fine — that is which action to pick, and the
-    // provenance of a value. Spelling out the object the action receives is the
-    // restatement, and `endpoint_ids` / `agentId` were how it was written.
+    // The comment is the body of the approval card. `rationale` is the whole assessment,
+    // up to 7900 characters, and is journaled once on the investigation; a card that
+    // repeats it on every action is too long to review. So each recommendation carries
+    // its own short comment, required by the schema, and the dispatch never reaches for
+    // the rationale.
+    it('puts a short per-action comment on each card instead of the full rationale', () => {
+      const comment = recommendation?.properties?.comment as {
+        type?: string;
+        minLength?: number;
+        maxLength?: number;
+      };
+      expect(comment).toMatchObject({ type: 'string', minLength: 1, maxLength: 500 });
+
+      const message = String(stepByName('forensic_analysis')?.with?.message);
+      expect(message).toContain('Set `comment` on every recommendation');
+      expect(message).toContain('Do not restate the assessment from `rationale`');
+
+      const inputs = (stepByName('propose_action')?.with as { inputs?: Record<string, string> })
+        ?.inputs;
+      expect(inputs?.comment).not.toContain('rationale');
+      expect(
+        liquid.parseAndRenderSync(String(inputs?.comment), {
+          foreach: {
+            item: { title: 'Kill powershell.exe (PID 4212)', comment: 'Encrypting C:\\Users.' },
+          },
+        })
+      ).toBe('Encrypting C:\\Users.');
+      // A blank comment would be rejected by the bridge, which requires one. The label
+      // keeps the card readable rather than failing the dispatch.
+      expect(
+        liquid.parseAndRenderSync(String(inputs?.comment), {
+          foreach: { item: { title: 'Kill powershell.exe (PID 4212)', comment: '' } },
+        })
+      ).toBe('Kill powershell.exe (PID 4212)');
+    });
+
+    // One gate — the containment proposals — so the dial is the same two levels as
+    // Attack Discovery. The level is the indicator attribute the worker wrote.
+    // A missing attribute fails closed to manual. The trigger does not accept a level.
+    it('auto-approves containment only at supervised autonomy', () => {
+      expect(definition.triggers?.[0]?.inputs?.properties?.autonomy).toBeUndefined();
+      expect(definition.consts?.default_autonomy).toBe('manual');
+
+      const level = String(stepByName('resolve_autonomy')?.with?.level);
+      const recorded = (autonomy?: string) => ({
+        steps: {
+          read_ki: {
+            output: {
+              hits: {
+                hits: [{ _source: { attributes: autonomy === undefined ? {} : { autonomy } } }],
+              },
+            },
+          },
+        },
+        consts: { default_autonomy: 'manual' },
+      });
+      expect(evaluate(level, recorded())).toBe('manual');
+      expect(evaluate(level, recorded('supervised'))).toBe('supervised');
+      expect(evaluate(level, recorded('manual'))).toBe('manual');
+
+      const autoApprove = String(
+        (
+          stepByName('propose_action')?.with as {
+            inputs?: Record<string, unknown>;
+          }
+        )?.inputs?.autoApprove
+      );
+      const when = (autonomy: string) => ({
+        steps: { resolve_autonomy: { output: { level: autonomy } } },
+      });
+      expect(evaluate(autoApprove, when('supervised'))).toBe(true);
+      expect(evaluate(autoApprove, when('manual'))).toBe(false);
+    });
+
+    // The add steps continue on failure, so "the agent proposed" is not "the
+    // findings are on the investigation". A card queued before that check is
+    // what an approver opens and finds empty. `settled` is also true when there
+    // was no host, which must not propose anything.
+    it('dispatches containment only after the findings are on the investigation', () => {
+      const names = allSteps.map(({ name }) => name);
+      expect(names.indexOf('resolve_run_outcome')).toBeLessThan(
+        names.indexOf('journal_proposals_queued')
+      );
+      expect(names.indexOf('journal_proposals_queued')).toBeLessThan(
+        names.indexOf('propose_actions')
+      );
+      expect(names.indexOf('propose_actions')).toBeLessThan(names.indexOf('resolve_proposals'));
+      expect(names.indexOf('resolve_proposals')).toBeLessThan(names.indexOf('mark_processed'));
+
+      const gate = String(stepByName('propose_actions')?.if);
+      expect(gate).toContain('steps.resolve_run_outcome.output.attached == true');
+      expect(gate).toContain('recommendedActions.size > 0');
+      expect(gate).not.toContain('settled');
+      // `| default: []` is not an array in this engine, so `foreach` hard-fails on it.
+      expect(stepByName('propose_actions')?.foreach).toBe(
+        '${{ steps.forensic_analysis.output.structured_output.recommendedActions }}'
+      );
+
+      const when = (attached: boolean, propose: boolean, recommended = 1) => ({
+        steps: {
+          resolve_run_outcome: { output: { attached } },
+          forensic_analysis: {
+            output: {
+              structured_output: {
+                propose,
+                recommendedActions: Array.from({ length: recommended }, () => ({})),
+              },
+            },
+          },
+        },
+      });
+      expect(evaluate(gate, when(true, true))).toBe(true);
+      expect(evaluate(gate, when(true, true, 0))).toBe(false);
+      expect(evaluate(gate, when(false, true))).toBe(false);
+      expect(evaluate(gate, when(true, false))).toBe(false);
+    });
+
+    // The investigation used to stay open after the last containment decision. The
+    // gate closes it once every proposal on the investigation is settled, so each
+    // dispatch goes through the gate (still async: this run must not park on the
+    // approval window) and tells it which investigation to close and how many
+    // proposals to wait for.
+    describe('closes the investigation once every proposal is decided', () => {
+      const gate = parse(ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW.yaml) as {
+        triggers?: Array<{
+          inputs?: {
+            required?: string[];
+            properties?: Record<string, unknown>;
+            additionalProperties?: boolean;
+          };
+        }>;
+      };
+      const dispatch = stepByName('propose_action');
+      const inputs = (dispatch?.with as { inputs?: Record<string, unknown> })?.inputs ?? {};
+
+      it('dispatches the gate asynchronously by its registered id', () => {
+        expect(dispatch?.type).toBe('workflow.executeAsync');
+        expect((dispatch?.with as { 'workflow-id'?: string })?.['workflow-id']).toBe(
+          ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW.id
+        );
+      });
+
+      // The gate's own declared trigger schema is what the dispatch is checked against,
+      // not a copy of it, so a change to either side fails here rather than at runtime.
+      it('satisfies the gate trigger schema', () => {
+        const gateInputs = gate.triggers?.[0]?.inputs;
+        const provided = Object.keys(inputs);
+        const declared = Object.keys(gateInputs?.properties ?? {});
+
+        expect((gateInputs?.required ?? []).filter((key) => !provided.includes(key))).toEqual([]);
+        expect(gateInputs?.additionalProperties).toBe(false);
+        expect(provided.filter((key) => !declared.includes(key))).toEqual([]);
+      });
+
+      it('closes the investigation it proposed on', () => {
+        expect(inputs.investigationConversationId).toBe(inputs.conversationId);
+        expect(inputs.closureSummary).toBeUndefined();
+      });
+
+      // The barrier counts every proposal on the investigation, and this one already
+      // holds at least the approved handoff that requested the analysis. A barrier of
+      // just this run's actions would be met before the siblings finished queueing.
+      it('baselines the creation barrier on the proposals already there', () => {
+        const count = stepByName('count_existing_proposals');
+        expect(count?.type).toBe('kibana.request');
+        expect(count?.with).toMatchObject({
+          method: 'GET',
+          path: '/s/{{ workflow.spaceId }}/internal/proposals',
+          headers: { 'elastic-api-version': '1' },
+          query: {
+            conversationId: '{{ steps.resolve_request.output.investigation_id }}',
+            size: 1,
+          },
+        });
+        expect(count?.['on-failure']).toEqual({ continue: true });
+        expect(count?.if).toBe(stepByName('propose_actions')?.if);
+
+        const names = allSteps.map(({ name }) => name);
+        expect(names.indexOf('count_existing_proposals')).toBeLessThan(
+          names.indexOf('resolve_expected_proposals')
+        );
+        expect(names.indexOf('resolve_expected_proposals')).toBeLessThan(
+          names.indexOf('propose_actions')
+        );
+
+        expect(inputs.expectedProposalCount).toBe(
+          '${{ steps.resolve_expected_proposals.output.count }}'
+        );
+        const expected = String(stepByName('resolve_expected_proposals')?.with?.count);
+        const when = (total: number | undefined, recommended: number) => ({
+          steps: {
+            count_existing_proposals: total === undefined ? { error: {} } : { output: { total } },
+            forensic_analysis: {
+              output: {
+                structured_output: {
+                  recommendedActions: Array.from({ length: recommended }, () => ({})),
+                },
+              },
+            },
+          },
+        });
+        expect(evaluate(expected, when(1, 2))).toBe(3);
+        expect(evaluate(expected, when(0, 2))).toBe(2);
+        // A failed count falls back to this run's own actions rather than blocking.
+        expect(evaluate(expected, when(undefined, 2))).toBe(2);
+      });
+
+      it('tells the analyst the investigation will close on the last decision', () => {
+        const message = String(
+          (stepByName('journal_proposals_queued')?.with as { inputs?: { message?: string } })
+            ?.inputs?.message
+        );
+        expect(message).toContain('closes once every proposal');
+      });
+    });
+
+    // A rejected dispatch used to be swallowed, and the findings alone then closed
+    // the indicator. The recommendation lives only in this run's agent output, so
+    // the next sweep would skip the agent and never queue it.
+    it('retires the indicator when a containment proposal is rejected', () => {
+      const dispatch = stepByName('propose_actions');
+      expect(dispatch?.type).toBe('parallel');
+      expect(dispatch?.mode).toBe('settled');
+      expect(dispatch?.concurrency?.max).toBe(8);
+      const recommendedActions = schema?.properties?.recommendedActions as { maxItems?: unknown };
+      // Typed expression: `{{ }}` would leave maxItems a string, which Claude rejects.
+      expect(recommendedActions?.maxItems).toBe('${{ consts.max_recommended_actions }}');
+      expect(
+        evaluate(String(recommendedActions?.maxItems), {
+          consts: { max_recommended_actions: 8 },
+        })
+      ).toBe(8);
+      expect(dispatch?.['on-failure']).toBeUndefined();
+      expect(stepByName('propose_action')?.['on-failure']).toBeUndefined();
+
+      const lost = String(stepByName('resolve_proposals')?.with?.proposals_lost);
+      expect(
+        evaluate(lost, {
+          steps: {
+            forensic_analysis: { output: { structured_output: { propose: true } } },
+            resolve_proposal_dispatch: { output: { failed: 1 } },
+          },
+        })
+      ).toBe(true);
+      expect(
+        evaluate(lost, {
+          steps: {
+            forensic_analysis: { output: { structured_output: { propose: true } } },
+            resolve_proposal_dispatch: { output: { failed: 0 } },
+          },
+        })
+      ).toBe(false);
+      expect(
+        evaluate(lost, {
+          steps: {
+            forensic_analysis: { output: { structured_output: { propose: false } } },
+            resolve_proposal_dispatch: { output: { failed: 1 } },
+          },
+        })
+      ).toBe(false);
+
+      const processed = String(stepByName('mark_processed')?.if);
+      const retired = String(stepByName('mark_proposals_failed')?.if);
+      const ready = {
+        steps: {
+          resolve_request: { output: { has_request: true } },
+          verify_investigation: { output: { metadata: { id: 'inv-1' } } },
+          resolve_run_outcome: { output: { settled: true } },
+          resolve_proposals: { output: { proposals_lost: false } },
+        },
+      };
+      expect(evaluate(processed, ready)).toBe(true);
+      expect(evaluate(retired, ready)).toBe(false);
+      expect(
+        evaluate(processed, {
+          steps: {
+            ...ready.steps,
+            resolve_proposals: { output: { proposals_lost: true } },
+          },
+        })
+      ).toBe(false);
+      expect(
+        evaluate(retired, {
+          steps: {
+            ...ready.steps,
+            resolve_proposals: { output: { proposals_lost: true } },
+          },
+        })
+      ).toBe(true);
+
+      const names = allSteps.map(({ name }) => name);
+      expect(names.indexOf('journal_proposals_lost')).toBeLessThan(
+        names.indexOf('mark_proposals_failed')
+      );
+      expect(stepByName('journal_proposals_lost')?.['on-failure']).toEqual({ continue: true });
+      expect(stepByName('journal_proposals_queued')?.['on-failure']).toEqual({ continue: true });
+      const queued = String(stepByName('journal_proposals_queued')?.if);
+      const queuedWhen = (propose: boolean, recommended: number, attached: boolean) => ({
+        steps: {
+          resolve_request: { output: { has_request: true } },
+          verify_investigation: { output: { metadata: { id: 'inv-1' } } },
+          resolve_run_outcome: { output: { attached } },
+          forensic_analysis: {
+            output: {
+              structured_output: {
+                propose,
+                recommendedActions: Array.from({ length: recommended }, () => ({})),
+              },
+            },
+          },
+        },
+      });
+      expect(evaluate(queued, queuedWhen(true, 2, true))).toBe(true);
+      expect(evaluate(queued, queuedWhen(true, 0, true))).toBe(false);
+      expect(evaluate(queued, queuedWhen(false, 2, true))).toBe(false);
+      expect(evaluate(queued, queuedWhen(true, 2, false))).toBe(false);
+      expect(stepByName('journal_proposals_lost')?.if).toBe(
+        stepByName('mark_proposals_failed')?.if
+      );
+    });
+
     it('points the agent at each entry inputSchema rather than a fixed shape', () => {
       const message = stepByName('forensic_analysis')?.with?.message as string;
-      expect(message).toContain('inputSchema');
+      expect(message).toContain('inputSchema.properties.actionInput');
+      expect(message).toContain('not against `inputSchema` itself');
       expect(message).not.toContain('endpoint_ids');
       expect(message).not.toContain('agentId');
     });
@@ -903,7 +1659,10 @@ describe('Endpoint analysis run', () => {
 
     it('is retired to a status the sweep does not select', () => {
       const markInvalid = stepByName('mark_invalid');
-      expect(whenKiValid?.else?.map(({ name }) => name)).toContain('mark_invalid');
+      expect(whenKiValid?.else?.map(({ name }) => name)).toEqual([
+        'journal_invalid_request',
+        'mark_invalid',
+      ]);
       expect(markInvalid?.type).toBe('context-engine.updateKi');
       expect(markInvalid?.with).toEqual({
         ai_index_id: '{{ inputs.ai_index_id }}',

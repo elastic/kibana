@@ -4,23 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { IdentifierType } from '../../../common/api/entity_analytics/common/common.gen';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { SECURITY_GET_ENTITY_GRAPH_TOOL_ID } from '../tools';
 import { securityAttachmentDataSchema } from './security_attachment_data_schema';
 
-const entityGraphAttachmentDataSchema = securityAttachmentDataSchema.extend({
-  identifierType: IdentifierType,
-  identifier: z.string().min(1),
-  /** Canonical Entity Store `entity.id` (EUID) the graph is centered on. */
-  entityStoreId: z.string().min(1),
-  timeRange: z.object({
-    from: z.string().min(1),
-    to: z.string().min(1),
-  }),
-});
+const entityGraphAttachmentDataSchema = lazySchema(() =>
+  securityAttachmentDataSchema.extend({
+    identifierType: IdentifierType,
+    identifier: z.string().min(1),
+    /** Canonical Entity Store `entity.id` (EUID) the graph is centered on. */
+    entityStoreId: z.string().min(1),
+    timeRange: z.object({
+      from: z.string().min(1),
+      to: z.string().min(1),
+    }),
+  })
+);
 
 type EntityGraphAttachmentData = z.infer<typeof entityGraphAttachmentDataSchema>;
 
