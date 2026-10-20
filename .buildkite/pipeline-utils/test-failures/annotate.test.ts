@@ -108,6 +108,15 @@ describe('Annotate', () => {
       );
     });
 
+    it('should link the issue without a count when the failure is tracked by a flaky suite issue', () => {
+      mockFailure.githubIssue = 'https://github.com/some/failure/link/1234';
+      const annotation = getSlackMessage([mockFailure], mockArtifacts);
+
+      expect(annotation).toEqual(
+        '*Test Failures*\n<https://buildkite.com/elastic/kibana-pull-request/builds/53#job-id|[job]> <https://buildkite.com/organizations/elastic/pipelines/kibana-pull-request/builds/53/jobs/job-id/artifacts/artifact-id|[logs]> <https://github.com/some/failure/link/1234|[issue]> OSS CI Group #1 / test should fail'
+      );
+    });
+
     it('should create an annotation with an infra tag if the failure is attributed to infra', () => {
       mockFailure.infraReason = { category: 'network', message: 'Connections dropped' };
       const annotation = getSlackMessage([mockFailure], mockArtifacts);

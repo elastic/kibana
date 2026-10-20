@@ -67,6 +67,31 @@ describe('updateScoutHtmlReport', () => {
     expect(updatedContent).toContain('https://github.com/elastic/kibana/issues/123');
   });
 
+  it('links a flaky suite issue without a failure count', () => {
+    const tempDir = fs.mkdtempSync(Path.join(os.tmpdir(), 'scout-html-'));
+    const htmlPath = Path.join(tempDir, 'failure-id.html');
+    fs.writeFileSync(
+      htmlPath,
+      '<div class="section" id="tracked-branches-status"><strong>No failures found in tracked branches</strong></div>',
+      'utf-8'
+    );
+
+    updateScoutHtmlReport({
+      log: new ToolingLog(),
+      reportDir: tempDir,
+      failure: createFailure({
+        githubIssue: 'https://github.com/elastic/kibana/issues/123',
+        trackedBySuite: true,
+      }),
+      reportUpdate: true,
+    });
+
+    const updatedContent = fs.readFileSync(htmlPath, 'utf-8');
+    expect(updatedContent).toContain('<strong>Flaky suite issue</strong>');
+    expect(updatedContent).toContain('https://github.com/elastic/kibana/issues/123');
+    expect(updatedContent).not.toContain('failure-count');
+  });
+
   it('explains why no GitHub issue was created when the failure is attributed to infra', () => {
     const tempDir = fs.mkdtempSync(Path.join(os.tmpdir(), 'scout-html-'));
     const htmlPath = Path.join(tempDir, 'failure-id.html');

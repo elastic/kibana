@@ -14,6 +14,13 @@ failure percentage and its recent failed attempts with their Buildkite jobs. Exi
 the link the next time the reporter updates them; failure comments on `main` include it too.
 Tests without an exact file path get no link.
 
+For every failure the reporter asks ci-stats which `failed-test` issue tracks the test, and links
+that issue from the failure's HTML report, the Buildkite annotation and the Slack message. A test
+covered by a flaky suite issue (see below) is only linked: the daily report keeps that issue up to
+date, so the job neither comments on it nor opens a per-test issue next to it. ci-stats finds suite
+issues by the test's file, its Scout test id (recomputed for FTR and Jest failures from the file
+and the test name) or, for Jest reports that only name the directory, that directory.
+
 ## `node scripts/report_flaky_test_issues`
 
 Files one `failed-test` issue per flaky test suite, from the report written by

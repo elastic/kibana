@@ -134,14 +134,13 @@ export const getSlackMessage = (
 
         const logsLink = artifactUrl ? ` <${artifactUrl}|[logs]>` : '';
 
-        const failuresCount =
-          failure.failureCount && failure.githubIssue
-            ? ` <${failure.githubIssue}|[${failure.failureCount} failure${
-                failure.failureCount > 1 ? 's' : ''
-              }]>`
-            : '';
+        // a flaky suite issue tracks the whole suite, so it comes without a per-test count
+        const issueLabel = failure.failureCount
+          ? `${failure.failureCount} failure${failure.failureCount > 1 ? 's' : ''}`
+          : 'issue';
+        const issueLink = failure.githubIssue ? ` <${failure.githubIssue}|[${issueLabel}]>` : '';
 
-        return `<${jobUrl}|[job]>${logsLink}${failuresCount}${getInfraTag(failure)} ${
+        return `<${jobUrl}|[job]>${logsLink}${issueLink}${getInfraTag(failure)} ${
           failure.jobName
         } / ${failure.name}`;
       })

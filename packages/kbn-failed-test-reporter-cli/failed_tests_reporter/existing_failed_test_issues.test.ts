@@ -7,10 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Path from 'path';
+
 import { createStripAnsiSerializer } from '@kbn/jest-serializers';
+import { computeTestID } from '@kbn/scout-reporting';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 
-import type { FailedTestIssue } from './existing_failed_test_issues';
+import type { FailedTestIssue, FlakySuiteIssue } from './existing_failed_test_issues';
 import { ExistingFailedTestIssues } from './existing_failed_test_issues';
 import type { TestFailure } from './get_failures';
 
@@ -93,10 +96,10 @@ it('captures a list of failed test issue, loads the bodies for each issue, and o
   expect(writer.messages).toMatchInlineSnapshot(`
     Array [
       " debg finding 1 existing issues via ci-stats",
-      " debg found 1 existing issues",
+      " debg found 1 existing issues and 0 suite issues",
       " debg loaded 1 existing test issues",
       " debg finding 1 existing issues via ci-stats",
-      " debg found 0 existing issues",
+      " debg found 0 existing issues and 0 suite issues",
       " debg loaded 1 existing test issues",
     ]
   `);
@@ -326,5 +329,192 @@ describe('Scout failures', () => {
 
     const issue = existing.getForFailure(scoutFailure);
     expect(issue).toBeUndefined();
+  });
+});
+
+describe('flaky suite issues', () => {
+  const FTR_FILE = 'x-pack/test/functional/apps/maps/group1/maps_app.ts';
+  const JEST_FILE = 'src/platform/plugins/shared/data/server/search/strategy.test.ts';
+  const SCOUT_FILE = 'x-pack/test/scout/ui/tests/attachments.spec.ts';
+
+  const ftrFailure: TestFailure = {
+    ...mockTestFailure,
+    classname: `Chrome X-Pack UI Functional Tests.${FTR_FILE.replace(/\./g, '·')}`,
+    name: 'maps app sample data ecommerce should load the layers',
+    testType: 'ftr',
+    location: FTR_FILE,
+  };
+  const jestFailure: TestFailure = {
+    ...mockTestFailure,
+    classname: 'Jest Tests.src/platform/plugins/shared/data/server/search',
+    name: 'strategy search returns hits',
+    testType: 'jest',
+    location: JEST_FILE,
+  };
+  // a jest report without the file in the suite name only leaves the directory
+  const jestFailureWithoutFile: TestFailure = {
+    ...jestFailure,
+    name: 'strategy search returns aggregations',
+    location: Path.dirname(JEST_FILE),
+  };
+  const scoutFailure: TestFailure & { id: string; target: string; location: string } = {
+    ...mockTestFailure,
+    classname: 'Attachments',
+    name: 'uploads a file',
+    id: 'scout-1',
+    target: 'stateful',
+    location: SCOUT_FILE,
+  };
+
+  const suiteIssue = (
+    number: number,
+    suite: Partial<FlakySuiteIssue['suite']> & { filePath: string },
+    state: FlakySuiteIssue['github']['state'] = 'open'
+  ): FlakySuiteIssue => ({
+    kind: 'suite',
+    suite: { dirPath: Path.dirname(suite.filePath), testIds: [], ...suite },
+    github: {
+      nodeId: `node-${number}`,
+      number,
+      htmlUrl: `https://github.com/elastic/kibana/issues/${number}`,
+      state,
+    },
+  });
+
+  const loadWith = async (suiteIssues: FlakySuiteIssue[], failures: TestFailure[]) => {
+    fetchMock.mockImplementation(async () => jsonResponse({ existingIssues: [], suiteIssues }));
+    const existing = new ExistingFailedTestIssues(log);
+    await existing.loadForFailures(failures);
+    return existing;
+  };
+
+  const numberOf = (issue: FlakySuiteIssue | undefined) => issue?.github.number;
+
+  it('sends ci-stats the file, directory and Scout test id each failure knows', async () => {
+    await loadWith([], [ftrFailure, jestFailure, jestFailureWithoutFile, scoutFailure]);
+
+    expect(JSON.parse(fetchMock.mock.calls[0][1]?.body as string)).toEqual({
+      failures: [
+        {
+          classname: ftrFailure.classname,
+          name: ftrFailure.name,
+          filePath: FTR_FILE,
+          testId: computeTestID(FTR_FILE, ftrFailure.name),
+        },
+        {
+          classname: jestFailure.classname,
+          name: jestFailure.name,
+          filePath: JEST_FILE,
+          testId: computeTestID(JEST_FILE, jestFailure.name),
+        },
+        {
+          classname: jestFailureWithoutFile.classname,
+          name: jestFailureWithoutFile.name,
+          dirPath: Path.dirname(JEST_FILE),
+        },
+        {
+          classname: scoutFailure.classname,
+          name: scoutFailure.name,
+          filePath: SCOUT_FILE,
+          testId: 'scout-1',
+        },
+      ],
+    });
+  });
+
+  it('matches a failure by the Scout test id the issue lists', async () => {
+    const existing = await loadWith(
+      [
+        suiteIssue(1, { filePath: SCOUT_FILE, title: 'Something else', testIds: ['scout-1'] }),
+        suiteIssue(2, { filePath: FTR_FILE, testIds: [computeTestID(FTR_FILE, ftrFailure.name)] }),
+      ],
+      [scoutFailure, ftrFailure]
+    );
+
+    expect(numberOf(existing.getSuiteIssueForFailure(scoutFailure))).toBe(1);
+    expect(numberOf(existing.getSuiteIssueForFailure(ftrFailure))).toBe(2);
+  });
+
+  it('matches a failure by its file and describe block when the issue does not list its id', async () => {
+    const existing = await loadWith(
+      [
+        suiteIssue(1, { filePath: FTR_FILE, title: 'maps app sample data ecommerce' }),
+        suiteIssue(2, { filePath: FTR_FILE, title: 'maps app sample data flights' }),
+        suiteIssue(3, { filePath: SCOUT_FILE, title: 'Streams Attachments' }),
+        suiteIssue(4, { filePath: JEST_FILE }),
+      ],
+      [ftrFailure, scoutFailure, jestFailure]
+    );
+
+    expect(numberOf(existing.getSuiteIssueForFailure(ftrFailure))).toBe(1);
+    // the scout failure only knows its innermost describe title
+    expect(numberOf(existing.getSuiteIssueForFailure(scoutFailure))).toBe(3);
+    // an issue without a title is about the whole file
+    expect(numberOf(existing.getSuiteIssueForFailure(jestFailure))).toBe(4);
+  });
+
+  it('matches a jest failure that only knows its directory through the describe block', async () => {
+    const existing = await loadWith(
+      [
+        suiteIssue(1, { filePath: JEST_FILE }),
+        suiteIssue(2, { filePath: JEST_FILE, title: 'strategy search' }),
+      ],
+      [jestFailureWithoutFile]
+    );
+
+    // the whole-file issue could be about any file of the directory
+    expect(numberOf(existing.getSuiteIssueForFailure(jestFailureWithoutFile))).toBe(2);
+  });
+
+  it('prefers an open issue to a closed one, then the newest', async () => {
+    const existing = await loadWith(
+      [
+        suiteIssue(3, { filePath: FTR_FILE }, 'closed'),
+        suiteIssue(1, { filePath: FTR_FILE }),
+        suiteIssue(2, { filePath: FTR_FILE }),
+      ],
+      [ftrFailure]
+    );
+
+    expect(numberOf(existing.getSuiteIssueForFailure(ftrFailure))).toBe(2);
+  });
+
+  it('still links a closed issue when it is the only one', async () => {
+    const existing = await loadWith(
+      [suiteIssue(1, { filePath: FTR_FILE }, 'closed')],
+      [ftrFailure]
+    );
+
+    expect(numberOf(existing.getSuiteIssueForFailure(ftrFailure))).toBe(1);
+  });
+
+  it('ignores issues about another framework in the same file', async () => {
+    const existing = await loadWith(
+      [suiteIssue(1, { filePath: FTR_FILE, framework: 'jest' })],
+      [ftrFailure]
+    );
+
+    expect(existing.getSuiteIssueForFailure(ftrFailure)).toBeUndefined();
+  });
+
+  it('keeps the latest copy of an issue returned again for a later batch of failures', async () => {
+    const existing = await loadWith([suiteIssue(1, { filePath: FTR_FILE })], [ftrFailure]);
+    fetchMock.mockImplementation(async () =>
+      jsonResponse({
+        existingIssues: [],
+        suiteIssues: [suiteIssue(1, { filePath: FTR_FILE }, 'closed')],
+      })
+    );
+    await existing.loadForFailures([{ ...ftrFailure, name: 'maps app another test' }]);
+
+    expect(existing.getSuiteIssueForFailure(ftrFailure)?.github.state).toBe('closed');
+  });
+
+  it('copes with a ci-stats response that has no suite issues yet', async () => {
+    fetchMock.mockImplementation(async () => jsonResponse({ existingIssues: [] }));
+    const existing = new ExistingFailedTestIssues(log);
+    await existing.loadForFailures([ftrFailure]);
+
+    expect(existing.getSuiteIssueForFailure(ftrFailure)).toBeUndefined();
   });
 });

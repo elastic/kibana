@@ -88,6 +88,26 @@ describe('generateScoutTestFailureArtifacts', () => {
     expect(artifact.failureCount).toBe(6);
   });
 
+  it('carries a flaky suite issue into the artifact without a failure count', async () => {
+    fs.writeFileSync(
+      Path.join(reportDir, SCOUT_GITHUB_ISSUES_FILENAME),
+      JSON.stringify({
+        'with-issue': {
+          githubIssue: 'https://github.com/elastic/kibana/issues/123',
+          trackedBySuite: true,
+        },
+      }),
+      'utf-8'
+    );
+
+    await generateScoutTestFailureArtifacts({ log, bkMeta: {} });
+
+    const artifact = readArtifactFor('suite - tracked failure');
+    expect(artifact.githubIssue).toBe('https://github.com/elastic/kibana/issues/123');
+    expect(artifact.trackedBySuite).toBe(true);
+    expect(artifact).not.toHaveProperty('failureCount');
+  });
+
   it('omits the GitHub fields when there is no tracked issue for the failure', async () => {
     await generateScoutTestFailureArtifacts({ log, bkMeta: {} });
 

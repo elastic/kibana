@@ -26,11 +26,13 @@ export const SCOUT_GITHUB_ISSUES_FILENAME = 'github-issues.json';
 export interface ScoutGithubIssueDetails {
   githubIssue?: string;
   failureCount?: number;
+  /** `githubIssue` is a flaky suite issue, which has no per-test failure count */
+  trackedBySuite?: boolean;
   infraReason?: ScoutInfraFailureReason;
 }
 
 const getTrackedBranchesStatus = (failure: ScoutTestFailureExtended): string | undefined => {
-  const { infraReason, githubIssue, failureCount = 0 } = failure;
+  const { infraReason, githubIssue, trackedBySuite, failureCount = 0 } = failure;
 
   if (infraReason) {
     return `<div class="section alert alert-warning" id="tracked-branches-status"><strong>Likely infrastructure issue (${
@@ -40,8 +42,11 @@ const getTrackedBranchesStatus = (failure: ScoutTestFailureExtended): string | u
 
   if (githubIssue) {
     const issueUrl = escape(githubIssue);
-    const badgeHtml = `<span class="badge rounded-pill bg-danger" id="failure-count">${failureCount}</span>`;
     const issueLinkHtml = `<a id="github-issue-link" href="${issueUrl}" target="_blank">${issueUrl}</a>`;
+    if (trackedBySuite) {
+      return `<div class="section" id="tracked-branches-status"><strong>Flaky suite issue</strong>: ${issueLinkHtml}</div>`;
+    }
+    const badgeHtml = `<span class="badge rounded-pill bg-danger" id="failure-count">${failureCount}</span>`;
     return `<div class="section" id="tracked-branches-status"><strong>Failures in tracked branches</strong>: ${badgeHtml} ${issueLinkHtml}</div>`;
   }
 
@@ -126,12 +131,12 @@ export async function processScoutReports(
     const githubIssues: Record<string, ScoutGithubIssueDetails> = {};
 
     const recordGithubIssue = (failure: ScoutTestFailureExtended) => {
-      if (failure.githubIssue) {
-        githubIssues[failure.id] = {
-          githubIssue: failure.githubIssue,
-          failureCount: failure.failureCount ?? 0,
-        };
+      if (!failure.githubIssue) {
+        return;
       }
+      githubIssues[failure.id] = failure.trackedBySuite
+        ? { githubIssue: failure.githubIssue, trackedBySuite: true }
+        : { githubIssue: failure.githubIssue, failureCount: failure.failureCount ?? 0 };
     };
 
     for (const failure of failures) {
@@ -141,6 +146,17 @@ export async function processScoutReports(
         );
         githubIssues[failure.id] = { infraReason: failure.infraReason };
         updateScoutHtmlReport({ log, reportDir, failure, reportUpdate });
+        continue;
+      }
+
+      // the daily flaky test report keeps suite issues up to date, the job only links to them
+      const suiteIssue = existingIssues.getSuiteIssueForFailure(failure);
+      if (suiteIssue) {
+        failure.githubIssue = suiteIssue.github.htmlUrl;
+        failure.trackedBySuite = true;
+        log.info(`Scout failure is tracked by a flaky suite issue: ${failure.githubIssue}`);
+        updateScoutHtmlReport({ log, reportDir, failure, reportUpdate });
+        recordGithubIssue(failure);
         continue;
       }
 

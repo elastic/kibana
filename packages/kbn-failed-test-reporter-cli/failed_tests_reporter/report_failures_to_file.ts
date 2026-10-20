@@ -165,12 +165,15 @@ const renderDetailsTable = (failure: TestFailure, bkMeta: BuildkiteMetadata) => 
           configPath === NOT_AVAILABLE ? NOT_AVAILABLE : renderCode(configPath)
         ),
         renderDetailsRow('Code owners', escape(formatOwners(failure.owners))),
-        renderDetailsRow(
-          'Failures in tracked branches',
-          `<span class="badge rounded-pill bg-danger">${failureCount}</span>${
-            failure.githubIssue ? ` ${renderIssueLink(failure.githubIssue)}` : ''
-          }`
-        ),
+        // a suite issue has no per-test count to show
+        failure.trackedBySuite && failure.githubIssue
+          ? renderDetailsRow('Flaky suite issue', renderIssueLink(failure.githubIssue))
+          : renderDetailsRow(
+              'Failures in tracked branches',
+              `<span class="badge rounded-pill bg-danger">${failureCount}</span>${
+                failure.githubIssue ? ` ${renderIssueLink(failure.githubIssue)}` : ''
+              }`
+            ),
         renderDetailsRow(
           'Buildkite job',
           bkMeta.jobUrl ? renderLink(bkMeta.jobUrl, bkMeta.jobName || bkMeta.jobUrl) : NOT_AVAILABLE

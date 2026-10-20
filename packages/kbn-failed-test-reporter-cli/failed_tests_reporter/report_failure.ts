@@ -15,6 +15,7 @@ import {
   formatOwners,
   getConfigPathFromCommandLine,
 } from './failure_details';
+import { isScoutFailure } from './failure_identity';
 import type { TestFailure } from './get_failures';
 import { getLocationFromClassname, getReportNameFromClassname } from './get_failures';
 import type { ScoutTestFailureExtended } from './get_scout_failures';
@@ -44,10 +45,6 @@ export function redactSensitiveGithubFailureText(text: string): string {
     out = redactHostnameSuffix(out, suffix);
   }
   return out.replace(/\S+@elastic\.co\b/g, '<redacted>@elastic.co');
-}
-
-function isScoutFailure(failure: TestFailure): failure is ScoutTestFailureExtended {
-  return 'id' in failure && 'target' in failure && 'location' in failure;
 }
 
 function truncateFailureBody(failure: string, maxCharacters: number = 8192): string {

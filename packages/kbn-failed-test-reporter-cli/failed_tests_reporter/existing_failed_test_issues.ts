@@ -11,7 +11,9 @@ import { setTimeout } from 'timers/promises';
 
 import type { ToolingLog } from '@kbn/tooling-log';
 
+import { getScoutTestId, getTestFilePath, isScoutFailure } from './failure_identity';
 import type { TestFailure } from './get_failures';
+import { getLocationFromClassname } from './get_failures';
 import type { GithubIssueMini } from './github_api';
 
 export interface FailedTestIssue {
@@ -25,9 +27,99 @@ export interface FailedTestIssue {
   };
 }
 
+/**
+ * A flaky suite issue filed by `report_flaky_test_issues`, as ci-stats indexes it: about a test
+ * file, or one `describe` block of it, rather than about one test.
+ */
+export interface FlakySuiteIssue {
+  kind: 'suite';
+  suite: {
+    filePath: string;
+    dirPath: string;
+    /** the `describe` block, absent when the issue is about the whole file */
+    title?: string;
+    framework?: string;
+    /** Scout test ids of the tests that were flaky when the issue was filed or last updated */
+    testIds: string[];
+  };
+  github: {
+    nodeId: string;
+    number: number;
+    htmlUrl: string;
+    state: 'open' | 'closed';
+  };
+}
+
 interface FindFailedTestIssuesResponse {
   existingIssues: FailedTestIssue[];
+  /** missing from ci-stats versions that predate suite issues */
+  suiteIssues?: FlakySuiteIssue[];
 }
+
+/** What ci-stats matches on: per-test issues by `classname` and `name`, suite issues by the rest */
+interface FailureSelector {
+  classname: string;
+  name: string;
+  filePath?: string;
+  dirPath?: string;
+  testId?: string;
+}
+
+const getSelector = (failure: TestFailure): FailureSelector => {
+  const filePath = getTestFilePath(failure);
+  return {
+    classname: failure.classname,
+    name: failure.name,
+    filePath,
+    // a jest report without the file leaves the directory from the classname
+    dirPath:
+      !filePath && failure.testType === 'jest'
+        ? getLocationFromClassname(failure.classname) || undefined
+        : undefined,
+    testId: getScoutTestId(failure),
+  };
+};
+
+const getFramework = (failure: TestFailure): string | undefined =>
+  isScoutFailure(failure) ? 'playwright' : failure.testType;
+
+/**
+ * Whether the failure is inside the `describe` block a suite issue is about. Suite titles join
+ * every `describe` title; a JUnit name starts with them, a Scout failure only knows the innermost.
+ */
+const isInDescribe = (failure: TestFailure, title: string): boolean =>
+  isScoutFailure(failure)
+    ? title === failure.classname || title.endsWith(` ${failure.classname}`)
+    : failure.name === title || failure.name.startsWith(`${title} `);
+
+const isAboutFailure = (issue: FlakySuiteIssue, failure: TestFailure): boolean => {
+  const { suite } = issue;
+  const framework = getFramework(failure);
+  if (framework && suite.framework && framework !== suite.framework) {
+    return false;
+  }
+
+  const testId = getScoutTestId(failure);
+  if (testId && suite.testIds.includes(testId)) {
+    return true;
+  }
+
+  // a test that became flaky after the issue was filed is only known by its file and describe block
+  const { filePath, dirPath } = getSelector(failure);
+  if (filePath) {
+    return (
+      suite.filePath === filePath &&
+      (suite.title === undefined || isInDescribe(failure, suite.title))
+    );
+  }
+  // with only a directory, the describe block has to tell the files of the directory apart
+  return (
+    dirPath !== undefined &&
+    suite.dirPath === dirPath &&
+    suite.title !== undefined &&
+    isInDescribe(failure, suite.title)
+  );
+};
 
 export interface ExistingFailedTestIssue extends FailedTestIssue {
   github: FailedTestIssue['github'] & {
@@ -46,6 +138,8 @@ const BASE_URL = 'https://ci-stats.kibana.dev';
  */
 export class ExistingFailedTestIssues {
   private readonly results = new Map<TestFailure, ExistingFailedTestIssue | undefined>();
+  /** by issue number, newest first */
+  private suiteIssues: FlakySuiteIssue[] = [];
 
   constructor(private readonly log: ToolingLog) {}
 
@@ -63,8 +157,17 @@ export class ExistingFailedTestIssues {
     }
 
     this.log.debug('finding', unseenFailures.length, 'existing issues via ci-stats');
-    const failedTestIssues = await this.findExistingIssues(unseenFailures);
-    this.log.debug('found', failedTestIssues.length, 'existing issues');
+    const { existingIssues: failedTestIssues, suiteIssues = [] } = await this.findExistingIssues(
+      unseenFailures
+    );
+    this.log.debug(
+      'found',
+      failedTestIssues.length,
+      'existing issues and',
+      suiteIssues.length,
+      'suite issues'
+    );
+    this.addSuiteIssues(suiteIssues);
 
     const initialResultSize = this.results.size;
     for (const failure of unseenFailures) {
@@ -83,7 +186,17 @@ export class ExistingFailedTestIssues {
   }
 
   isScoutFailure(failure: TestFailure): boolean {
-    return 'id' in failure && 'target' in failure && 'location' in failure;
+    return isScoutFailure(failure);
+  }
+
+  /**
+   * The flaky suite issue tracking the failure's test, if any: an open one before a closed one,
+   * then the newest. Suite issues are kept up to date by `report_flaky_test_issues`, so callers
+   * link to them without updating them.
+   */
+  getSuiteIssueForFailure(failure: TestFailure): FlakySuiteIssue | undefined {
+    const about = this.suiteIssues.filter((issue) => isAboutFailure(issue, failure));
+    return about.find((issue) => issue.github.state === 'open') ?? about[0];
   }
 
   getForFailure(failure: TestFailure) {
@@ -129,9 +242,21 @@ export class ExistingFailedTestIssues {
     });
   }
 
-  private async findExistingIssues(failures: TestFailure[]) {
+  private addSuiteIssues(suiteIssues: FlakySuiteIssue[]) {
+    if (suiteIssues.length === 0) {
+      return;
+    }
+    // the same issue can come back for several batches of failures
+    const byNumber = new Map(this.suiteIssues.map((issue) => [issue.github.number, issue]));
+    for (const issue of suiteIssues) {
+      byNumber.set(issue.github.number, issue);
+    }
+    this.suiteIssues = [...byNumber.values()].sort((a, b) => b.github.number - a.github.number);
+  }
+
+  private async findExistingIssues(failures: TestFailure[]): Promise<FindFailedTestIssuesResponse> {
     if (failures.length === 0) {
-      return [];
+      return { existingIssues: [] };
     }
 
     const maxAttempts = 5;
@@ -144,12 +269,7 @@ export class ExistingFailedTestIssues {
         response = await fetch(`${BASE_URL}/v1/find_failed_test_issues`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            failures: failures.map((f) => ({
-              classname: f.classname,
-              name: f.name,
-            })),
-          }),
+          body: JSON.stringify({ failures: failures.map(getSelector) }),
         });
       } catch (error: unknown) {
         // Network-level error (fetch throws TypeError for DNS/connection failures).
@@ -172,7 +292,7 @@ export class ExistingFailedTestIssues {
         throw new Error(`${response.status}:${await response.text()}`);
       }
 
-      return ((await response.json()) as FindFailedTestIssuesResponse).existingIssues;
+      return (await response.json()) as FindFailedTestIssuesResponse;
     }
   }
 

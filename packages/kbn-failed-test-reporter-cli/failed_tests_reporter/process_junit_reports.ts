@@ -98,6 +98,16 @@ export async function processJUnitReports(
       }
       seenNewIssueKeys.add(key);
 
+      // the daily flaky test report keeps suite issues up to date, the job only links to them
+      const suiteIssue = existingIssues.getSuiteIssueForFailure(failure);
+      if (suiteIssue) {
+        const url = suiteIssue.github.htmlUrl;
+        failure.githubIssue = url;
+        failure.trackedBySuite = true;
+        pushMessage(`Test is tracked by a flaky suite issue: ${url}`);
+        continue;
+      }
+
       const existingIssue = existingIssues.getForFailure(failure);
       if (existingIssue) {
         const { newBody, newCount } = await updateFailureIssue(
