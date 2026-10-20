@@ -80,6 +80,7 @@ describe('Nightshift investigation agent type', () => {
     expect(base.instructions).not.toContain('platform_core_execute_esql');
     expect(base.instructions).not.toContain('/workspace/decision-trees/monitors.md');
     expect(base.instructions).toContain('<alert_data>');
+    expect(base.instructions).toContain('Affected entity');
     expect(base.instructions).not.toContain('inputs.context.alerts');
     expect(base.instructions).toContain('`- <slug> (id <id>): FROM <view_name>`');
     expect(base.instructions).toContain('FROM <view_name> | LIMIT 0');
@@ -170,12 +171,17 @@ describe('Nightshift investigation agent type', () => {
     expect(base.tools?.[0]?.tool_ids).toEqual([]);
   });
 
-  it('instructs the agent to record its findings with the conversation and proposal tools', () => {
+  it('instructs the agent to record its findings with the investigation tools', () => {
     const { instructions } = staticBase(
       getInvestigationAgentType({ sandboxEnabled: true, cortexEnabled: true, ...ALL_PLUGINS })
     );
 
-    for (const tool of ['set_conversation_metadata', 'proposals.create']) {
+    for (const tool of [
+      'set_conversation_metadata',
+      'agentic_investigations.set_impact',
+      'agentic_investigations.set_hypotheses',
+      'proposals.create',
+    ]) {
       expect(instructions).toContain(`\`${tool}\``);
     }
     expect(instructions).toContain('"origin": "nightshift"');

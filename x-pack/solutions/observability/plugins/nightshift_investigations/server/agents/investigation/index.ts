@@ -40,8 +40,9 @@ export const SANDBOX_TOOL_IDS = [
 ] as const;
 
 /**
- * The agentic investigations tools the agent records its findings with. Memory transcripts treat
- * their calls as conclusions rather than evidence.
+ * The agentic investigations tools the agent records its findings with.
+ * `set_conversation_metadata` (summary, verdict, severity) is not listed: Agent Builder adds it to
+ * every run on a template conversation, which every investigation is.
  */
 export const INVESTIGATION_TOOL_IDS = [SET_IMPACT_TOOL_ID, SET_HYPOTHESES_TOOL_ID] as const;
 
