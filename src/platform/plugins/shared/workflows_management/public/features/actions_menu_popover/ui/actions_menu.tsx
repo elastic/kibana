@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSelectable,
+  EuiText,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
@@ -173,6 +174,18 @@ export function ActionsMenu({
     jumpToStepEntries,
     currentPath,
   });
+
+  const selectableOptions = useMemo(
+    () =>
+      displayOptions.map((option) => {
+        if (option.isGroupLabel) {
+          return { ...option, css: styles.groupLabel };
+        }
+        const className = ['actionsMenuOption', option.className].filter(Boolean).join(' ');
+        return { ...option, className };
+      }),
+    [displayOptions, styles.groupLabel]
+  );
 
   const actionableDisplayOptions = useMemo(
     () => getActionableDisplayOptions(displayOptions),
@@ -517,6 +530,11 @@ export function ActionsMenu({
   );
 
   const breadcrumbs: EuiBreadcrumb[] = useMemo(() => {
+    const breadcrumbText = (label: string) => (
+      <EuiText size="xs" component="span">
+        {label}
+      </EuiText>
+    );
     const allActionsLabel = i18n.translate('workflows.actionsMenu.breadcrumb.allActions', {
       defaultMessage: 'All actions',
     });
@@ -524,7 +542,7 @@ export function ActionsMenu({
     if (isSearching || searchTerm.startsWith(STEPS_PREFIX)) {
       return [
         {
-          text: allActionsLabel,
+          text: breadcrumbText(allActionsLabel),
           onClick: (e: React.MouseEvent) => {
             e.preventDefault();
             setSearchTerm('');
@@ -532,9 +550,11 @@ export function ActionsMenu({
           },
         },
         {
-          text: i18n.translate('workflows.actionsMenu.breadcrumb.searchResults', {
-            defaultMessage: 'Search results',
-          }),
+          text: breadcrumbText(
+            i18n.translate('workflows.actionsMenu.breadcrumb.searchResults', {
+              defaultMessage: 'Search results',
+            })
+          ),
         },
       ];
     }
@@ -543,7 +563,7 @@ export function ActionsMenu({
 
     const crumbs: EuiBreadcrumb[] = [
       {
-        text: allActionsLabel,
+        text: breadcrumbText(allActionsLabel),
         onClick: (e: React.MouseEvent) => {
           e.preventDefault();
           navigateToPath([]);
@@ -555,7 +575,7 @@ export function ActionsMenu({
       const isLast = index === pathLabels.length - 1;
       const pathToHere = currentPath.slice(0, index + 1);
       crumbs.push({
-        text: item.label,
+        text: breadcrumbText(item.label),
         ...(isLast
           ? {}
           : {
@@ -591,7 +611,7 @@ export function ActionsMenu({
         defaultMessage: 'Actions menu',
       })}
       searchable
-      options={displayOptions}
+      options={selectableOptions}
       onChange={handleChange}
       optionMatcher={optionMatcher}
       searchProps={{
@@ -653,7 +673,7 @@ export function ActionsMenu({
       {(list, search) => (
         <div ref={menuContainerRef} css={styles.fill}>
           <EuiFlexGroup direction="column" gutterSize="s" responsive={false} css={styles.header}>
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} css={styles.headerTitle}>
               <EuiTitle size="xxs">
                 <h3>
                   <FormattedMessage

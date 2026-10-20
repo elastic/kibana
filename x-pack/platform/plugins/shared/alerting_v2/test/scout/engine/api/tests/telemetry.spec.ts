@@ -18,7 +18,6 @@
 
 import { expect } from '@kbn/scout/api';
 import type { NameValuePair } from '../../../../../server/lib/usage/types';
-import { AGENT_BUILDER_TAG } from '../../../../../server/agent_builder/common/constants';
 import { apiTest, buildCreateActionPolicyData, buildCreateRuleData, testData } from '../fixtures';
 
 const sortByName = (buckets: NameValuePair[] | undefined): NameValuePair[] =>
@@ -35,7 +34,7 @@ apiTest.describe('Alerting V2 Telemetry', { tag: testData.API_ENGINE_TAG }, () =
       apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           kind: 'alert',
-          metadata: { name: 'alert-rule-1', tags: [AGENT_BUILDER_TAG] },
+          metadata: { name: 'alert-rule-1' },
           time_field: '@timestamp',
           schedule: { every: '1m', lookback: '5m' },
           query: { base: 'FROM metrics-* | LIMIT 10' },
@@ -158,7 +157,6 @@ apiTest.describe('Alerting V2 Telemetry', { tag: testData.API_ENGINE_TAG }, () =
     // Rule stats
     expect(state.count_total).toBe(7);
     expect(state.count_enabled).toBe(6);
-    expect(state.count_agent_builder_assisted).toBe(1);
     expect(state.count_by_kind).toStrictEqual({ alert: 6, signal: 1 });
     expect(sortByName(state.count_by_schedule)).toStrictEqual([
       { name: '1m', value: 1 },

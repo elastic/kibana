@@ -5,10 +5,6 @@
         "**/*.spec.ts"
       ],
       "rules": {
-        "@kbn/imports/require_import": [
-          "error",
-          "@kbn/ambient-ftr-types"
-        ],
         "@typescript-eslint/triple-slash-reference": [
           "off"
         ],
