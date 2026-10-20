@@ -52,6 +52,7 @@ describe('useFetchEpisodeActionsHistoryQuery', () => {
   const wrapper = createQueryClientWrapper(queryClient);
   const episodeId = 'ep-1';
   const seriesId = 'series-1';
+  const groupHash = 'hash-1';
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -67,6 +68,7 @@ describe('useFetchEpisodeActionsHistoryQuery', () => {
         useFetchEpisodeActionsHistoryQuery({
           episodeId: undefined,
           seriesId,
+          groupHash,
           services: { data, spaces: mockSpaces },
         }),
       { wrapper }
@@ -87,6 +89,7 @@ describe('useFetchEpisodeActionsHistoryQuery', () => {
         useFetchEpisodeActionsHistoryQuery({
           episodeId,
           seriesId: null,
+          groupHash,
           services: { data, spaces: mockSpaces },
         }),
       { wrapper }
@@ -111,6 +114,7 @@ describe('useFetchEpisodeActionsHistoryQuery', () => {
         useFetchEpisodeActionsHistoryQuery({
           episodeId,
           seriesId,
+          groupHash,
           services: { data, spaces: mockSpaces },
           pageSize: 2,
         }),
@@ -123,9 +127,14 @@ describe('useFetchEpisodeActionsHistoryQuery', () => {
       expect.objectContaining({
         data,
         params: expect.objectContaining({
-          query: buildEpisodeActionsHistoryQuery(DEFAULT_SPACE_ID, episodeId, seriesId, {
-            limit: 2,
-          }).print('basic'),
+          query: buildEpisodeActionsHistoryQuery(
+            DEFAULT_SPACE_ID,
+            episodeId,
+            { seriesId, groupHash },
+            {
+              limit: 2,
+            }
+          ).print('basic'),
           time_zone: 'UTC',
         }),
       })
@@ -160,6 +169,7 @@ describe('useFetchEpisodeActionsHistoryQuery', () => {
         useFetchEpisodeActionsHistoryQuery({
           episodeId,
           seriesId,
+          groupHash,
           services: { data, spaces: mockSpaces },
         }),
       { wrapper }
@@ -188,6 +198,7 @@ describe('useFetchEpisodeActionsHistoryQuery', () => {
         useFetchEpisodeActionsHistoryQuery({
           episodeId,
           seriesId,
+          groupHash,
           services: { data, spaces: mockSpaces },
           pageSize: 2,
         }),
@@ -240,6 +251,7 @@ describe('useFetchEpisodeActionsHistoryQuery', () => {
         useFetchEpisodeActionsHistoryQuery({
           episodeId,
           seriesId,
+          groupHash,
           services: { data, spaces: mockSpaces },
           pageSize: 2,
         }),
@@ -264,6 +276,7 @@ describe('useFetchEpisodeActionsHistoryQuery', () => {
         useFetchEpisodeActionsHistoryQuery({
           episodeId,
           seriesId,
+          groupHash,
           services: { data, spaces: mockSpaces },
           pageSize: 2,
         }),

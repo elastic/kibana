@@ -63,6 +63,7 @@ export type {
   EpisodeActionHistoryEntry,
   RawEpisodeActionHistoryEntry,
   BuildEpisodeActionsHistoryQueryOptions,
+  EpisodeSeriesFilter,
 } from './episode_actions_history_query';
 
 export { buildEpisodeFlappingQuery } from './episode_flapping_query';

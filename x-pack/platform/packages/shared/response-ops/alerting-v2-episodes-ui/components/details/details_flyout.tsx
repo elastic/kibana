@@ -521,6 +521,7 @@ export const AlertEpisodeDetailsFlyout = ({
             <AlertEpisodeTimelineSection
               episodeId={episodeId}
               seriesId={episode ? episode.series_id ?? null : undefined}
+              groupHash={episode?.group_hash}
               services={services}
             />
           </FlyoutTemplate.Body.TabPanel>

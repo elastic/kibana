@@ -164,8 +164,6 @@ export class AlertActionsClient {
   }): Promise<void> {
     const { seriesId, action } = params;
     const series = decodeSeriesIdOrThrow(seriesId);
-    // The request's space is the authority: an id minted for another space is rejected before
-    // any I/O, with the same answer as a series that doesn't exist.
     if (!this.isInRequestSpace(series)) {
       throw getSeriesNotFoundError(seriesId);
     }

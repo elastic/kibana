@@ -187,7 +187,7 @@ interface LoadLastSeriesAlertEventParams {
  * Single-series adapter over {@link loadLatestAlertEventsBySeries}: returns
  * the most recent `.rule-events` row for one series or throws `Boom.notFound`
  * with the canonical `ALERT_EVENT_NOT_FOUND` shape the series-level route
- * surface relies on. The series must already belong to `spaceId`.
+ * surface relies on. A series of another space is not found without a query.
  */
 export const loadLastSeriesAlertEventOrThrow = async ({
   queryService,

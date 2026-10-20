@@ -6,7 +6,10 @@
  */
 
 import { buildEpisodeActionsHistoryQuery as buildEpisodeActionsHistoryQueryCommon } from '@kbn/alerting-v2-common-queries';
-import type { BuildEpisodeActionsHistoryQueryOptions as BuildEpisodeActionsHistoryQueryOptionsCommon } from '@kbn/alerting-v2-common-queries';
+import type {
+  BuildEpisodeActionsHistoryQueryOptions as BuildEpisodeActionsHistoryQueryOptionsCommon,
+  EpisodeSeriesFilter,
+} from '@kbn/alerting-v2-common-queries';
 
 export const DEFAULT_ACTIONS_HISTORY_PAGE_SIZE = 25;
 
@@ -25,10 +28,10 @@ export type BuildEpisodeActionsHistoryQueryOptions = Omit<
 export const buildEpisodeActionsHistoryQuery = (
   spaceId: string,
   episodeId: string,
-  seriesId: string | null | undefined,
+  series: EpisodeSeriesFilter | null | undefined,
   { before, limit = DEFAULT_ACTIONS_HISTORY_PAGE_SIZE }: BuildEpisodeActionsHistoryQueryOptions = {}
 ) =>
-  buildEpisodeActionsHistoryQueryCommon(spaceId, episodeId, seriesId, {
+  buildEpisodeActionsHistoryQueryCommon(spaceId, episodeId, series, {
     before,
     limit,
   });

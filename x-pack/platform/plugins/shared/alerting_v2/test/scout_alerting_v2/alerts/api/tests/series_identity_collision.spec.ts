@@ -263,15 +263,21 @@ apiTest.describe(
         // rule A's history and absent from rule B's.
         const historyA = await runEsql(
           esClient,
-          buildEpisodeActionsHistoryQuery(SPACE_ID, episodeIdA, seriesIdA, { limit: 25 }).print(
-            'basic'
-          )
+          buildEpisodeActionsHistoryQuery(
+            SPACE_ID,
+            episodeIdA,
+            { seriesId: seriesIdA, groupHash: SHARED_GROUP_HASH },
+            { limit: 25 }
+          ).print('basic')
         );
         const historyB = await runEsql(
           esClient,
-          buildEpisodeActionsHistoryQuery(SPACE_ID, episodeIdB, seriesIdB, { limit: 25 }).print(
-            'basic'
-          )
+          buildEpisodeActionsHistoryQuery(
+            SPACE_ID,
+            episodeIdB,
+            { seriesId: seriesIdB, groupHash: SHARED_GROUP_HASH },
+            { limit: 25 }
+          ).print('basic')
         );
         expect(historyA.map((row) => row.action_type)).toStrictEqual(['snooze']);
         expect(historyB).toHaveLength(0);

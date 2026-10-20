@@ -469,6 +469,7 @@ export function EpisodeDetailsPage() {
                   <AlertEpisodeTimelineSection
                     episodeId={episodeId}
                     seriesId={episode ? episode.series_id ?? null : undefined}
+                    groupHash={groupHash}
                     services={{ data, spaces, userProfile: services.userProfile }}
                   />
                 </EuiPanel>

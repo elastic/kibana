@@ -30,6 +30,11 @@ export interface UseFetchEpisodeActionsHistoryQueryOptions {
    * `null` when the episode has no series identity (only its own actions are fetched).
    */
   seriesId: string | null | undefined;
+  /**
+   * `group_hash` of the episode. It narrows the series-level actions on an indexed field before
+   * the series id is compared, so it is needed whenever `seriesId` is a string.
+   */
+  groupHash: string | undefined;
   services: { data: DataPublicPluginStart; spaces: SpacesPluginStart };
   /** Page size for each keyset fetch. Defaults to {@link DEFAULT_ACTIONS_HISTORY_PAGE_SIZE}. */
   pageSize?: number;
@@ -43,6 +48,7 @@ export interface UseFetchEpisodeActionsHistoryQueryOptions {
 export const useFetchEpisodeActionsHistoryQuery = ({
   episodeId,
   seriesId,
+  groupHash,
   services,
   pageSize = DEFAULT_ACTIONS_HISTORY_PAGE_SIZE,
 }: UseFetchEpisodeActionsHistoryQueryOptions) => {
@@ -52,7 +58,8 @@ export const useFetchEpisodeActionsHistoryQuery = ({
   const query = useInfiniteQuery({
     queryKey: [...queryKeys.actionsHistory(spaceId, episodeId ?? '', seriesId ?? ''), pageSize],
     queryFn: async ({ signal, pageParam }: { signal?: AbortSignal; pageParam?: string }) => {
-      const esqlQuery = buildEpisodeActionsHistoryQuery(spaceId, episodeId!, seriesId, {
+      const series = seriesId && groupHash ? { seriesId, groupHash } : null;
+      const esqlQuery = buildEpisodeActionsHistoryQuery(spaceId, episodeId!, series, {
         before: pageParam,
         limit: pageSize,
       });

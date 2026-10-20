@@ -59,10 +59,20 @@ export interface BuildEpisodeActionsHistoryQueryOptions {
 }
 
 /**
+ * The series an episode belongs to. `groupHash` is the `group_hash` the `seriesId` was built
+ * from: it is not unique to the series, but it is indexed, so it narrows the read before the
+ * derived `seriesId` is compared.
+ */
+export interface EpisodeSeriesFilter {
+  seriesId: string;
+  groupHash: string;
+}
+
+/**
  * Returns individual action records for an episode (both episode-level and series-level),
  * sorted newest-first, one keyset page at a time. Series-level actions are matched by
- * `seriesId` so another rule's snoozes on a shared `group_hash` don't show; without one,
- * only the episode-level actions are returned. Non-aggregating counterpart to
+ * `series.seriesId` so another rule's snoozes on a shared `group_hash` don't show; without a
+ * series, only the episode-level actions are returned. Non-aggregating counterpart to
  * buildEpisodeActionsQuery. `_id` is projected via `METADATA _id` so callers can dedup records
  * that straddle a page boundary (the `before` cursor is inclusive to avoid dropping same-timestamp
  * records split across pages).
@@ -70,7 +80,7 @@ export interface BuildEpisodeActionsHistoryQueryOptions {
 export const buildEpisodeActionsHistoryQuery = (
   spaceId: string,
   episodeId: string,
-  seriesId: string | null | undefined,
+  series: EpisodeSeriesFilter | null | undefined,
   { before, limit }: BuildEpisodeActionsHistoryQueryOptions
 ): TypedEsqlQuery<RawEpisodeActionHistoryEntry> => {
   // prettier-ignore
@@ -79,16 +89,23 @@ export const buildEpisodeActionsHistoryQuery = (
     .where`space_id == ${spaceId}`
     .where`action_type IN ("ack", "unack", "snooze", "unsnooze", "deactivate", "activate", "tag", "assign")`;
 
-  if (seriesId) {
-    // The id is derived after the filters above so it is only computed for user actions.
-    query.pipe(ACTIONS_SERIES_ID_EVAL)
-      .where`alert_id == ${episodeId} OR (alert_id IS NULL AND series_id == ${seriesId})`;
+  // Everything above and below narrows on indexed fields, so the series id, which is derived
+  // from a base64 expression and cannot use an index, is only computed for the few rows left:
+  // this episode's actions and the series-level actions that share its `group_hash`.
+  if (series) {
+    query.where`alert_id == ${episodeId} OR (alert_id IS NULL AND group_hash == ${series.groupHash})`;
   } else {
     query.where`alert_id == ${episodeId}`;
   }
 
   if (before) {
     query.where`@timestamp <= ${before}`;
+  }
+
+  if (series) {
+    // Drops the other rules' series-level actions that share the hash.
+    query.pipe(ACTIONS_SERIES_ID_EVAL)
+      .where`alert_id == ${episodeId} OR series_id == ${series.seriesId}`;
   }
 
   return asTypedEsqlQuery<RawEpisodeActionHistoryEntry>(
