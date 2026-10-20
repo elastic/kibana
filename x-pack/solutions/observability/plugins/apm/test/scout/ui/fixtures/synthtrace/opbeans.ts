@@ -5,7 +5,13 @@
  * 2.0.
  */
 import type { ApmFields, SynthtraceGenerator } from '@kbn/synthtrace-client';
-import { apm, timerange, generateLongId, generateShortId } from '@kbn/synthtrace-client';
+import {
+  apm,
+  timerange,
+  generateLongId,
+  generateShortId,
+  httpExitSpan,
+} from '@kbn/synthtrace-client';
 import { shuffle, compact } from 'lodash';
 import type { SpanLink } from '@kbn/apm-types/es_schemas_raw';
 import {
@@ -172,6 +178,12 @@ export function opbeans({
       return [
         opbeansJava
           .transaction({ transactionName: PRODUCT_TRANSACTION_NAME })
+          .overrides({
+            'url.full':
+              'http://opbeans-java:3000/api/products/1/customers?include=orders,addresses&sort=-created_at',
+            'http.request.method': 'GET',
+            'http.response.status_code': 500,
+          })
           .timestamp(timestamp)
           .duration(1000)
           .failure()
@@ -185,10 +197,52 @@ export function opbeans({
                 spanType: 'db',
                 spanSubtype: 'postgresql',
               })
+              .defaults({
+                'span.db.statement': 'SELECT * FROM product WHERE id = $1',
+                'span.stacktrace': [
+                  {
+                    library_frame: false,
+                    exclude_from_grouping: false,
+                    filename: 'ProductRepository.java',
+                    classname: 'co.elastic.apm.opbeans.repositories.ProductRepository',
+                    line: { number: 42 },
+                    module: 'co.elastic.apm.opbeans.repositories',
+                    function: 'findAll',
+                  },
+                ],
+              })
               .timestamp(timestamp)
               .duration(50)
               .failure()
               .destination('postgresql'),
+            opbeansJava
+              .span(
+                httpExitSpan({
+                  spanName: 'GET opbeans-node',
+                  destinationUrl: 'http://opbeans-node:3000',
+                  statusCode: 503,
+                })
+              )
+              .overrides({
+                'url.original':
+                  'http://opbeans-node:3000/api/customers/42/orders?include=items,shipping&sort=-created_at',
+              })
+              .timestamp(timestamp + 60)
+              .duration(200)
+              .failure()
+              .destination('opbeans-node:3000'),
+            opbeansJava
+              .span(
+                httpExitSpan({
+                  spanName: 'GET opbeans-go',
+                  destinationUrl: 'http://opbeans-go:3000',
+                })
+              )
+              .overrides({ 'url.original': 'http://opbeans-go:3000/api/cart' })
+              .timestamp(timestamp + 300)
+              .duration(100)
+              .success()
+              .destination('opbeans-go:3000'),
             opbeansJava
               .span({ spanName: 'Span B', spanType: 'messaging', spanSubtype: 'kafka' })
               .defaults({
