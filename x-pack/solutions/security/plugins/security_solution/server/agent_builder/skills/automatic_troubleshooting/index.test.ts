@@ -187,6 +187,10 @@ describe('createAutomaticTroubleshootingSkill', () => {
       expect(skill.content).toContain('endpoint-yararules');
       expect(skill.content).toContain('Endpoint.policy.applied.artifacts.user.identifiers');
       expect(skill.content).toContain(
+        `from \`metrics-endpoint.policy-*\` with ${platformCoreTools.getDocumentById}`
+      );
+      expect(skill.content).toContain('That field is nested, so search queries on it can miss');
+      expect(skill.content).toContain(
         'The Elastic Defend knowledge base has no custom YARA signatures content yet'
       );
       expect(skill.content).not.toContain('- `Elastic Defend custom YARA signatures');
