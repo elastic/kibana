@@ -88,7 +88,6 @@ export const APPROVED_CATALOG_SOURCE_IDS = [
   'rss:uk-ncsc',
   'rss:cert-fr-alerts',
   'rss:cert-fr-threats',
-  'rss:cert-fr-iocs',
   'rss:cert-eu-advisories',
   'rss:cert-eu-threat-intelligence',
 ] as const;

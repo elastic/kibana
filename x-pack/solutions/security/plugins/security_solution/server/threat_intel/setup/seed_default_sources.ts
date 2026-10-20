@@ -77,13 +77,6 @@ export const DEFAULT_SOURCES: readonly DefaultSource[] = [
     enabled: true,
   },
   {
-    id: 'rss:cert-fr-iocs',
-    adapter_type: 'rss',
-    name: 'CERT-FR IOC Publications',
-    tags: ['government', 'france', 'indicators', 'ioc'],
-    enabled: true,
-  },
-  {
     id: 'rss:cert-eu-advisories',
     adapter_type: 'rss',
     name: 'CERT-EU Security Advisories',

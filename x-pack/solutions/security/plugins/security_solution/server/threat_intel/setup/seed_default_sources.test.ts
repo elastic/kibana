@@ -82,7 +82,6 @@ describe('DEFAULT_SOURCES approved catalog', () => {
     'rss:uk-ncsc': 'https://www.ncsc.gov.uk/api/1/services/v1/all-rss-feed.xml',
     'rss:cert-fr-alerts': 'https://cert.cyber.gouv.fr/alerte/feed/',
     'rss:cert-fr-threats': 'https://cert.cyber.gouv.fr/cti/feed/',
-    'rss:cert-fr-iocs': 'https://cert.cyber.gouv.fr/ioc/feed/',
     'rss:cert-eu-advisories': 'https://cert.europa.eu/publications/security-advisories-rss',
     'rss:cert-eu-threat-intelligence':
       'https://cert.europa.eu/publications/threat-intelligence-rss',
@@ -92,8 +91,8 @@ describe('DEFAULT_SOURCES approved catalog', () => {
     expect(CATALOG_SOURCE_URLS).toEqual(APPROVED_ENDPOINTS);
   });
 
-  it('ships exactly eight sources enabled', () => {
-    expect(DEFAULT_SOURCES).toHaveLength(8);
+  it('ships exactly seven sources enabled', () => {
+    expect(DEFAULT_SOURCES).toHaveLength(7);
     expect(DEFAULT_SOURCES.every(({ enabled }) => enabled)).toBe(true);
   });
 

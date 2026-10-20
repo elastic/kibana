@@ -23,9 +23,11 @@ export const CATALOG_SOURCE_URLS = {
   'rss:uk-ncsc': 'https://www.ncsc.gov.uk/api/1/services/v1/all-rss-feed.xml',
   // Licence Ouverte / Open Licence 2.0 (attribution required):
   // https://cert.cyber.gouv.fr/mentions-legales/
+  // CERT-FR's IOC feed (`/ioc/feed/`) is deliberately not here: it has published nothing
+  // since July 2024, and its entries are short summaries whose indicators live in linked
+  // STIX/MISP attachments the RSS adapter never fetches.
   'rss:cert-fr-alerts': 'https://cert.cyber.gouv.fr/alerte/feed/',
   'rss:cert-fr-threats': 'https://cert.cyber.gouv.fr/cti/feed/',
-  'rss:cert-fr-iocs': 'https://cert.cyber.gouv.fr/ioc/feed/',
   // CC BY 4.0 (attribution required): https://cert.europa.eu/legal-notice
   'rss:cert-eu-advisories': 'https://cert.europa.eu/publications/security-advisories-rss',
   'rss:cert-eu-threat-intelligence': 'https://cert.europa.eu/publications/threat-intelligence-rss',
