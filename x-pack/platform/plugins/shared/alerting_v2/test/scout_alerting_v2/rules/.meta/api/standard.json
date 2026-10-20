@@ -1,5 +1,5 @@
 {
-  "sha1": "f5dbaf248a51ff05b0b114f7fe2fa3862e9a0ce2",
+  "sha1": "b96792c23591c4837a7050f89c1cc67a1d97d5ae",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -3306,6 +3306,150 @@
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/get_rules_bulk.spec.ts",
         "line": 215,
         "column": 70
+      }
+    },
+    {
+      "id": "fc78f4e8129d773-a475bd945b74406",
+      "title": "Install rule template API should create the rule from the body and record the template on it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/install_rule_template.spec.ts",
+        "line": 33,
+        "column": 23
+      }
+    },
+    {
+      "id": "fc78f4e8129d773-a470d38cb2ef589",
+      "title": "Install rule template API should record the template when the body is the unedited template rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/install_rule_template.spec.ts",
+        "line": 65,
+        "column": 14
+      }
+    },
+    {
+      "id": "fc78f4e8129d773-3d48faec52859ac",
+      "title": "Install rule template API should not let the body choose the template",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/install_rule_template.spec.ts",
+        "line": 78,
+        "column": 72
+      }
+    },
+    {
+      "id": "fc78f4e8129d773-7a3c2eed580e5e9",
+      "title": "Install rule template API should return 400 when the body is not a valid rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/install_rule_template.spec.ts",
+        "line": 98,
+        "column": 16
+      }
+    },
+    {
+      "id": "fc78f4e8129d773-e157a50c1e2c097",
+      "title": "Install rule template API should return 404 when no template has that id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/install_rule_template.spec.ts",
+        "line": 109,
+        "column": 25
+      }
+    },
+    {
+      "id": "fc78f4e8129d773-83b05e85f82c574",
+      "title": "Install rule template API should return 404 for a template that belongs to another engine",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/install_rule_template.spec.ts",
+        "line": 116,
+        "column": 31
+      }
+    },
+    {
+      "id": "fc78f4e8129d773-520392f05a1a7b2",
+      "title": "Install rule template API should not create a rule when the template cannot be installed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/install_rule_template.spec.ts",
+        "line": 132,
+        "column": 5
+      }
+    },
+    {
+      "id": "fc78f4e8129d773-156f695ebdbe18d",
+      "title": "Install rule template API authorization: should return 403 for a user with read-only rules privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/install_rule_template.spec.ts",
+        "line": 154,
+        "column": 25
+      }
+    },
+    {
+      "id": "fc78f4e8129d773-ca797be6d57ea59",
+      "title": "Install rule template API authorization: should return 403 for a user without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/install_rule_template.spec.ts",
+        "line": 167,
+        "column": 19
       }
     },
     {
