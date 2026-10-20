@@ -114,8 +114,6 @@ export class InboxPlugin
     };
   }
 
-  private spaces?: InboxStartDependencies['spaces'];
-
   private getSpaceId(request: KibanaRequest): string {
     // When the spaces plugin is available (default in Kibana / serverless)
     // resolve the active space for this request. When it isn't, Kibana is
@@ -124,8 +122,7 @@ export class InboxPlugin
     return request.spaceId;
   }
 
-  start(_core: CoreStart, plugins: InboxStartDependencies): InboxPluginStart {
-    this.spaces = plugins.spaces;
+  start(_core: CoreStart, _plugins: InboxStartDependencies): InboxPluginStart {
     return {};
   }
 

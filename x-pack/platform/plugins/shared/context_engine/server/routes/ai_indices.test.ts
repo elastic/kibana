@@ -291,12 +291,9 @@ describe('ai indices routes', () => {
     const { spaceId, ...rest } = request as Record<string, unknown> & {
       spaceId?: ReturnType<typeof asSpaceId>;
     };
-    const rawRequest = httpServerMock.createRawRequest(
-      spaceId !== undefined ? { spaceId } : undefined
-    );
     const kibanaRequest = httpServerMock.createKibanaRequest({
       ...rest,
-      request: rawRequest,
+      ...(spaceId !== undefined ? { spaceId } : {}),
       kibanaRequestState: {
         requestId: '123',
         requestUuid: '123e4567-e89b-12d3-a456-426614174000',

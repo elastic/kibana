@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { asSpaceId } from '@kbn/core-spaces-common';
 import { resolveSpaceId } from './resolve_space_id';
 
 describe('resolveSpaceId', () => {
   it('returns request.spaceId from core', () => {
-    const request = kibanaRequestFactory(
-      httpServerMock.createRawRequest({ spaceId: asSpaceId('marketing') })
-    );
+    const request = httpServerMock.createKibanaRequest({ spaceId: asSpaceId('marketing') });
 
     expect(resolveSpaceId(request)).toBe('marketing');
   });
