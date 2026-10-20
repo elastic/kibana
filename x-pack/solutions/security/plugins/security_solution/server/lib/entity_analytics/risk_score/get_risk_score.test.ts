@@ -63,6 +63,43 @@ describe('createGetRiskScores', () => {
     expect(result).toEqual([riskScore]);
   });
 
+  it('should not filter on score_type when scoreType is omitted', async () => {
+    (esClient.search as jest.Mock).mockResolvedValue({ hits: { hits: [] } });
+
+    const getRiskScores = createGetRiskScores({ logger, esClient, spaceId });
+    await getRiskScores({ entityType, entityIdentifier, pagination });
+
+    expect((esClient.search as jest.Mock).mock.calls[0][0].query).toEqual({
+      bool: {
+        filter: [{ terms: { 'host.name': ['host-1'] } }, { exists: { field: 'host.name' } }],
+      },
+    });
+  });
+
+  it('should restrict to the given score_type, treating missing score_type as base', async () => {
+    (esClient.search as jest.Mock).mockResolvedValue({ hits: { hits: [] } });
+
+    const getRiskScores = createGetRiskScores({ logger, esClient, spaceId });
+    await getRiskScores({ entityType, entityIdentifier, pagination, scoreType: 'base' });
+
+    expect((esClient.search as jest.Mock).mock.calls[0][0].query.bool.filter[0]).toEqual({
+      bool: {
+        filter: [
+          { terms: { 'host.name': ['host-1'] } },
+          {
+            bool: {
+              should: [
+                { term: { 'host.risk.score_type': 'base' } },
+                { bool: { must_not: { exists: { field: 'host.risk.score_type' } } } },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        ],
+      },
+    });
+  });
+
   it('should handle empty hits', async () => {
     const mockResponse = {
       hits: {

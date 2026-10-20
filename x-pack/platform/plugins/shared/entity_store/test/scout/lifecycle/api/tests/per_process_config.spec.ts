@@ -29,8 +29,7 @@ type SettingsFn = (settings: Record<string, unknown>) => Promise<unknown>;
 const NON_PRIORITY_TASK_ID = 'entity_store:v2:extract_entity_non_priority_task:user:default';
 const PRIORITY_TASK_ID = 'entity_store:v2:extract_entity_task:user:default';
 
-// Failing: See https://github.com/elastic/kibana/issues/296933
-apiTest.describe.skip(
+apiTest.describe(
   'Entity Store per-process configuration and control',
   { tag: ENTITY_STORE_TAGS },
   () => {
