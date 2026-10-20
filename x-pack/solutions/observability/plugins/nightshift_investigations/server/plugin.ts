@@ -34,6 +34,7 @@ import { installDecisionTreeWorkflows } from './lib/managed_workflows/install_de
 import { installSandboxMaterializeWorkspaceWorkflow } from './lib/managed_workflows/install_sandbox_materialize_workspace';
 import { installAgentOptimizationsWorkflow } from './lib/managed_workflows/install_agent_optimizations';
 import { installInvestigationAgent } from './lib/install_investigation_agent';
+import { createResolveHookWorkflowId } from './lib/service_account/resolve_hook_workflow_id';
 import {
   createInvestigatorServiceAccountService,
   type InvestigatorServiceAccountService,
@@ -71,7 +72,7 @@ import { registerDecisionTreeAiIndex } from './decision_trees/register_decision_
 import { setupNightshiftTelemetry } from './telemetry';
 import { createTriggerEmitter, type TriggerEmitter } from './workflows/triggers/emit';
 import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/register_triggers';
-import { registerInvestigationAgentType } from './agents/investigation';
+import { registerInvestigationAgentType, type ResolveHookWorkflowId } from './agents/investigation';
 import { registerDecisionTreeReinforcementAgentType } from './agents/decision_tree_reinforcement';
 import { createDecisionTreeTools } from './tools/decision_tree';
 import { createSandboxBashTool } from './tools/sandbox_bash/tool';
@@ -115,6 +116,8 @@ export class NightshiftInvestigationsPlugin
     >
 {
   private readonly logger: Logger;
+  /** Hooks of the Nightshift agents run as the agent account in set-up spaces. */
+  private readonly resolveHookWorkflowId: ResolveHookWorkflowId;
   private workflowsManagement?: NightshiftInvestigationsSetupDeps['workflowsManagement'];
   private workflowsExtensionsStart?: NightshiftInvestigationsStartDeps['workflowsExtensions'];
   private spaces?: NightshiftInvestigationsStartDeps['spaces'];
@@ -143,6 +146,11 @@ export class NightshiftInvestigationsPlugin
 
   constructor(private readonly ctx: PluginInitializerContext<NightshiftInvestigationsConfig>) {
     this.logger = ctx.logger.get();
+    this.resolveHookWorkflowId = createResolveHookWorkflowId({
+      isServiceAccountExecutionEnabled: () => this.security?.serviceAccounts.isEnabled() ?? false,
+      getWorkflowsManagement: () => this.workflowsManagement,
+      logger: this.logger.get('service_account'),
+    });
   }
 
   setup(
@@ -250,10 +258,13 @@ export class NightshiftInvestigationsPlugin
         telemetryConnectorId,
         getCustomContextInstructions: ({ request, spaceId }) =>
           customContextClient.getInstructions(request, spaceId),
+        resolveHookWorkflowId: this.resolveHookWorkflowId,
         logger: this.logger.get('custom_context'),
       });
       if (this.decisionTreesEnabled) {
-        registerDecisionTreeReinforcementAgentType(plugins.agentBuilder);
+        registerDecisionTreeReinforcementAgentType(plugins.agentBuilder, {
+          resolveHookWorkflowId: this.resolveHookWorkflowId,
+        });
       }
 
       if (plugins.sandbox?.isAvailable) {
@@ -688,6 +699,10 @@ export class NightshiftInvestigationsPlugin
       workflowsManagement: this.workflowsManagement,
       spaces: this.spaces,
       isServerless: this.ctx.env.packageInfo.buildFlavor === 'serverless',
+      reinforcementAgent:
+        this.decisionTreesEnabled && this.agentBuilder
+          ? { agentBuilder: this.agentBuilder, availability: this.getInvestigationAvailability() }
+          : undefined,
       logger: this.logger.get('service_account'),
     });
     return this.investigatorServiceAccountService;
