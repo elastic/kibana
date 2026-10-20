@@ -10,6 +10,7 @@
 import { parse } from 'yaml';
 import FLOOR_ALERT_TRIAGE_BATCH_YAML from './floor_alert_triage_batch.yaml';
 import FLOOR_ALERT_TRIAGE_REVIEW_YAML from './floor_alert_triage_review.yaml';
+import { RULE_TUNING_WORKER_SETTINGS_DEFAULTS } from './worker_settings_defaults';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
 import { convertToWorkflowGraph } from '../../../graph/build_execution_graph/build_execution_graph';
 import type { WorkflowYaml } from '../../../spec/schema';
@@ -1017,10 +1018,24 @@ describe('floor_alert_triage_batch — ai.conversation.metadata.patch failure ha
   const patchSteps = allSteps.filter((step) => step.type === 'ai.conversation.metadata.patch');
 
   it('finds every conversation-close step this workflow defines', () => {
-    expect(patchSteps.map((step) => step.name).sort()).toEqual(['close_no_fp']);
+    expect(patchSteps.map((step) => step.name).sort()).toEqual(
+      [
+        'close_investigation_defer_tuning',
+        'close_investigation_do_not_close',
+        'close_investigation_pending_review',
+        'close_investigation_standing_close',
+        'close_no_fp',
+      ].sort()
+    );
   });
 
-  it.each(['close_no_fp'])(
+  it.each([
+    'close_no_fp',
+    'close_investigation_standing_close',
+    'close_investigation_do_not_close',
+    'close_investigation_pending_review',
+    'close_investigation_defer_tuning',
+  ])(
     '"%s" survives a patch failure via fallback + continue, so the step after it still runs',
     (name) => {
       const step = stepByName(name);
@@ -1055,10 +1070,11 @@ describe('floor_alert_triage_batch — closure review hand-off', () => {
     expect(gate).toBeGreaterThan(stepIndex('add_verdict_notes'));
   });
 
-  it('only starts a review when there is something to close', () => {
+  it('only starts a review when there is something to close and no standing disposition', () => {
     expect(stepByName('gate_fp_close')?.condition).toBe('${{ variables.fp_candidate_count > 0 }}');
-    expect(stepByName('gate_fp_close')?.steps?.map((step) => step.name)).toContain(
-      'start_fp_review'
+    expect(stepByName('handle_propose')?.condition).toBe("${{ variables.fp_gate == 'propose' }}");
+    expect(stepByName('handle_propose')?.steps?.map((step) => step.name)).toEqual(
+      expect.arrayContaining(['remember_pending_disposition', 'start_fp_review'])
     );
   });
 
@@ -1098,7 +1114,10 @@ describe('floor_alert_triage_batch — closure review hand-off', () => {
 
   it('fails the run, after saying so, when the review cannot be started at all', () => {
     const fallback = stepByName('start_fp_review')?.['on-failure']?.fallback ?? [];
-    expect(fallback.map((step) => step.name)).toEqual(['post_comment_review_not_started']);
+    expect(fallback.map((step) => step.name)).toEqual([
+      'drop_pending_disposition_on_start_failure',
+      'post_comment_review_not_started',
+    ]);
     expect(stepByName('start_fp_review')?.['on-failure']?.continue).toBeUndefined();
   });
 
@@ -1275,5 +1294,98 @@ describe('floor_alert_triage_batch — classification comment attribution', () =
   it('names neither when no call was made', () => {
     const comment = renderResults({ connector_id: '', agent_id: '' });
     expect(comment).not.toContain('Connector:');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Disposition gate — Context Engine knowledge indicator and Rule Tuning
+// ---------------------------------------------------------------------------
+describe('floor_alert_triage_batch — false-positive disposition', () => {
+  const batch = parse(FLOOR_ALERT_TRIAGE_BATCH_YAML) as {
+    consts: {
+      ai_index_id: string;
+      tuning_window_days: number;
+      tuning_min_fp_count: number;
+      tuning_min_fp_rate_pct: number;
+    };
+  };
+  const review = parse(FLOOR_ALERT_TRIAGE_REVIEW_YAML) as {
+    consts: { ai_index_id: string };
+    steps: YamlStep[];
+  };
+  const reviewSteps = (steps: YamlStep[]): YamlStep[] =>
+    steps.flatMap((step) => [
+      step,
+      ...reviewSteps(step.steps ?? []),
+      ...reviewSteps(step.else ?? []),
+    ]);
+  const reviewStep = (name: string) => reviewSteps(review.steps).find((step) => step.name === name);
+
+  const fpGateTemplate = stepByName('resolve_fp_gate')?.with?.fp_gate as string;
+  const resolveGate = (steps: Record<string, unknown>): string =>
+    renderString(fpGateTemplate, { consts: { no_rows: [] }, steps }).trim();
+
+  const hit = (disposition: string) => ({
+    hits: { hits: [{ _source: { attributes: { disposition } } }] },
+  });
+
+  it('uses the same indicator id and AI index as the closure review', () => {
+    const batchKi = stepByName('remember_pending_disposition')?.with as {
+      ai_index_id: string;
+      ki_id: string;
+    };
+    const reviewKi = reviewStep('record_standing_close')?.with as {
+      ai_index_id: string;
+      ki_id: string;
+    };
+    expect(batchKi.ki_id).toBe(reviewKi.ki_id);
+    expect(batchKi.ai_index_id).toBe(reviewKi.ai_index_id);
+    expect(batch.consts.ai_index_id).toBe(review.consts.ai_index_id);
+    expect(reviewStep('record_do_not_close')?.with).toMatchObject({ ki_id: batchKi.ki_id });
+    expect(reviewStep('drop_pending_disposition_on_expiry')?.with).toMatchObject({
+      ki_id: batchKi.ki_id,
+    });
+  });
+
+  it('defers to Rule Tuning at the same thresholds that worker uses', () => {
+    const defaults = RULE_TUNING_WORKER_SETTINGS_DEFAULTS.extras.defaultValue;
+    expect(batch.consts.tuning_window_days).toBe(defaults.analysisWindowDays);
+    expect(batch.consts.tuning_min_fp_count).toBe(defaults.fpCountThreshold);
+    expect(batch.consts.tuning_min_fp_rate_pct).toBe(defaults.fpRateThresholdPct);
+  });
+
+  it.each([
+    ['no indicator and no tuning rows', {}, 'propose'],
+    ['a failed lookup', { count_rule_false_positives: {}, search_fp_disposition: {} }, 'propose'],
+    [
+      'standing_close',
+      { search_fp_disposition: { output: hit('standing_close') } },
+      'standing_close',
+    ],
+    ['do_not_close', { search_fp_disposition: { output: hit('do_not_close') } }, 'do_not_close'],
+    [
+      'pending_review',
+      { search_fp_disposition: { output: hit('pending_review') } },
+      'pending_review',
+    ],
+    [
+      'a tuning row, ahead of a standing close',
+      {
+        count_rule_false_positives: { output: { values: [[10, 12]] } },
+        search_fp_disposition: { output: hit('standing_close') },
+      },
+      'defer_tuning',
+    ],
+  ])('resolves %s to %s', (_label, steps, expected) => {
+    expect(resolveGate(steps)).toBe(expected);
+  });
+
+  it('closes a standing disposition with the false-positive action and no new proposal', () => {
+    const close = stepByName('apply_standing_close');
+    expect(close?.type).toBe('workflow.execute');
+    expect(close?.with?.['workflow-id']).toBe('system-alertzero-action-close-alerts-fp');
+    expect(stepByName('handle_standing_close')?.condition).toBe(
+      "${{ variables.fp_gate == 'standing_close' }}"
+    );
   });
 });

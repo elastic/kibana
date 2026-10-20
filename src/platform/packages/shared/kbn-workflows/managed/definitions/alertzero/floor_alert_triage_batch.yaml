@@ -3,8 +3,10 @@ name: Alert Triage batch
 description: >
   Triages one batch of alerts of a single detection rule for the Alert Triage sweep. Opens one
   Investigation, classifies every alert with the Security Alert Analysis workflow, writes each
-  verdict as an alert tag and note, and hands the confident false positives to the closure review
-  as one proposal. Started by the sweep with `workflow.executeAsync` and never waits for a human.
+  verdict as an alert tag and note, and hands confident false positives to the closure review
+  only when this rule has no standing disposition. A Context Engine knowledge indicator remembers
+  the last decision so a noisy rule does not raise a new proposal on every sweep. Started by the
+  sweep with `workflow.executeAsync` and never waits for a human.
   The sweep claimed the alerts with `az:triage_pending` and recorded this execution as
   `az:triage_exec:<id>`; this run removes both when it has written the outcome, or marks the
   alerts `az:triage_failed` when it cannot classify them.
@@ -69,6 +71,18 @@ triggers:
           minimum: 0
           maximum: 1
           description: Minimum confidence for a false positive to be proposed for closure.
+
+consts:
+  # Same AI index Coverage and Forensics use. Every space shares the backing index, so the
+  # indicator id and `attributes.space_id` both carry the space.
+  ai_index_id: security-investigations
+  # Liquid has no array literal. `| default: []` yields nothing, so this is the empty fallback.
+  no_rows: []
+  # Kept equal to RULE_TUNING_WORKER_SETTINGS_DEFAULTS. A test pins the three numbers. A rule
+  # that already meets them is a tuning problem; another closure proposal does not change the rule.
+  tuning_window_days: 7
+  tuning_min_fp_count: 10
+  tuning_min_fp_rate_pct: 50
 
 steps:
   # ---------------------------------------------------------------------------
@@ -767,106 +781,362 @@ steps:
         Verdict notes written and classification tags submitted for {{ steps.classify_alerts.output.verdicts.size }} alert{% if steps.classify_alerts.output.verdicts.size != 1 %}s{% endif %}.
 
   # ---------------------------------------------------------------------------
-  # 9. Hand the closure proposal to the review workflow (if any FP candidates).
+  # 9. Decide whether this batch may raise a closure proposal.
   #
-  #    The proposal waits for an analyst for up to 72 h at Manual autonomy, and a noisy rule
-  #    produces one every run. Waiting here would park this run, the proposal bridge and the gate
-  #    per batch, so the proposal lives in `system-security-floor-alert-triage-review`, started
-  #    with `workflow.executeAsync`. This run finishes in minutes. The review raises the
-  #    proposal, applies the outcome (re-tag on dismissal) and closes the Investigation.
+  #    Order, matching the disposition tree:
+  #      1. Rule already over the Rule Tuning thresholds → leave the alerts tagged and
+  #         let Rule Tuning own the change. Those thresholds count alerts already closed
+  #         as false positive, so a rule reaches them only after earlier closures.
+  #      2. Knowledge indicator `security.fp_disposition` for this space and rule:
+  #         standing_close → close with the same action, no new proposal
+  #         do_not_close   → leave the alerts open, no proposal
+  #         pending_review → a proposal is already waiting, no second one
+  #      3. Otherwise raise one proposal. The indicator is written `pending_review`
+  #         before the review starts, and the review replaces it when the analyst decides.
   #
-  #    The review has no concurrency limit, so every batch with confident false positives raises
-  #    its proposal. The dispatch status is still read below, because nothing else closes the
-  #    Investigation of a batch whose review never ran.
+  #    A failed lookup fails open to `propose`, which is today's behavior. The proposal
+  #    still lives in `system-security-floor-alert-triage-review`, started with
+  #    `workflow.executeAsync`, so this run never waits for a human.
   #
-  #    Autonomy (`manual` gates, `supervised` auto-approves) is passed to the review, which owns
-  #    the mapping to `autoApprove`.
+  #    A pending proposal cannot gain alert ids. Alerts that arrive while one is open
+  #    stay tagged `az:false_positive` and are not added to it.
   # ---------------------------------------------------------------------------
   - name: gate_fp_close
     type: if
     condition: "${{ variables.fp_candidate_count > 0 }}"
     steps:
-      - name: start_fp_review
-        type: workflow.executeAsync
-        # Reached only when the review could not be started at all. A review that was started
-        # and then skipped or failed is handled from its reported status below. The fallback
-        # re-throws afterwards, so the run fails and shows up in execution history.
+      - name: search_fp_disposition
+        type: elasticsearch.search
         on-failure:
-          fallback:
-            - name: post_comment_review_not_started
-              type: ai.conversation.add_user_message
-              on-failure:
-                continue: true
-              with:
-                conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-                message: >-
-                  ⚠️ The closure review could not be started: {{ error.message }}.
-                  {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}remains{% else %}remain{% endif %} open and tagged az:false_positive.
+          continue: true
         with:
-          workflow-id: system-security-floor-alert-triage-review
-          run-as-mode: inherit
-          inputs:
-            conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-            rule_id: "{{ inputs.rule_id }}"
-            rule_name: "{{ inputs.rule_name }}"
-            fp_candidate_ids: "${{ variables.fp_candidate_ids }}"
-            entity_summary: "{{ variables.fp_entity_summary }}"
-            confidence_floor: "${{ inputs.confidence_floor }}"
-            autonomy: "{{ inputs.autonomy }}"
+          index: "ai-index-idx-{{ consts.ai_index_id }}"
+          size: 1
+          sort:
+            - "@timestamp":
+                order: desc
+                unmapped_type: date
+          query:
+            bool:
+              filter:
+                - term:
+                    type: security.fp_disposition
+                - term:
+                    attributes.rule_id: "{{ inputs.rule_id }}"
+                - term:
+                    attributes.space_id: "{{ workflow.spaceId }}"
 
-      # `workflow.executeAsync` reports the child's status as it was when the engine returned
-      # the execution id, and the engine applies the concurrency policy and validates the inputs
-      # before that, so `skipped` and `failed` are already final here. No separate read of the
-      # execution is needed.
-      #
-      # One value per outcome so every branch below is a single comparison (if-conditions take
-      # no filters, and `and`/`or` have no precedence).
-      #   failed  → the review never ran to a decision (skipped, rejected inputs, cancelled, timed out)
-      #   started → pending, running, parked or already finished
-      - name: resolve_review_dispatch
+      # One row when the rule is already noisy enough for Rule Tuning. Scoped to this rule.
+      # Building-block alerts are excluded, as they are in the tuning harvest.
+      - name: count_rule_false_positives
+        type: elasticsearch.esql.query
+        on-failure:
+          continue: true
+        with:
+          allow_partial_results: false
+          filter:
+            bool:
+              filter:
+                - term:
+                    kibana.alert.rule.uuid: "{{ inputs.rule_id }}"
+                - range:
+                    "@timestamp":
+                      gte: "now-{{ consts.tuning_window_days }}d"
+              must_not:
+                - exists:
+                    field: kibana.alert.building_block_type
+          query: |-
+            FROM .alerts-security.alerts-{{ workflow.spaceId }}
+            | EVAL is_fp = `kibana.alert.workflow_status` == "closed" AND `kibana.alert.workflow_reason` == "false_positive"
+            | STATS total_count = COUNT(*), fp_count = COUNT(*) WHERE is_fp
+            | WHERE fp_count >= {{ consts.tuning_min_fp_count }} AND fp_count * 100 >= total_count * {{ consts.tuning_min_fp_rate_pct }}
+            | KEEP fp_count, total_count
+            | LIMIT 1
+
+      # One word. `if` conditions take no filters, and `and`/`or` have no precedence.
+      - name: resolve_fp_gate
         type: data.set
         with:
-          review_dispatch: >-
-            {% if steps.start_fp_review.output.status == 'skipped' or steps.start_fp_review.output.status == 'failed' or steps.start_fp_review.output.status == 'cancelled' or steps.start_fp_review.output.status == 'timed_out' %}failed{% else %}started{% endif %}
+          fp_gate: >-
+            {%- assign tuning_count = steps.count_rule_false_positives.output.values | default: consts.no_rows | size -%}
+            {%- assign hits = steps.search_fp_disposition.output.hits.hits | default: consts.no_rows -%}
+            {%- assign ki_disposition = hits[0]._source.attributes.disposition | default: '' -%}
+            {%- if tuning_count > 0 -%}defer_tuning
+            {%- elsif ki_disposition == 'standing_close' -%}standing_close
+            {%- elsif ki_disposition == 'do_not_close' -%}do_not_close
+            {%- elsif ki_disposition == 'pending_review' -%}pending_review
+            {%- else -%}propose
+            {%- endif -%}
 
-      - name: handle_review_started
+      - name: handle_propose
         type: if
-        condition: "${{ variables.review_dispatch == 'started' }}"
+        condition: "${{ variables.fp_gate == 'propose' }}"
         steps:
-          - name: post_comment_review_started
+          # Written before the review starts so the next sweep sees `pending_review` and does
+          # not raise a second proposal. The review replaces this when the analyst decides.
+          # A failed write still starts the review: losing the memory is better than losing
+          # the first proposal.
+          - name: remember_pending_disposition
+            type: context-engine.createKi
+            on-failure:
+              continue: true
+            with:
+              ai_index_id: "{{ consts.ai_index_id }}"
+              ki_id: "fp-disposition-{{ workflow.spaceId }}-{{ inputs.rule_id }}"
+              refresh: true
+              ki:
+                type: security.fp_disposition
+                title: "False-positive disposition"
+                description: "Alert Triage is waiting on a closure proposal for rule {{ inputs.rule_id }}."
+                tags:
+                  - alert-triage
+                  - false-positive
+                attributes:
+                  disposition: pending_review
+                  rule_id: "{{ inputs.rule_id }}"
+                  space_id: "{{ workflow.spaceId }}"
+
+          - name: start_fp_review
+            type: workflow.executeAsync
+            # Reached only when the review could not be started at all. A review that was started
+            # and then skipped or failed is handled from its reported status below. The fallback
+            # re-throws afterwards, so the run fails and shows up in execution history. Drop the
+            # pending indicator first, or every later batch of this rule would skip its proposal.
+            on-failure:
+              fallback:
+                - name: drop_pending_disposition_on_start_failure
+                  type: context-engine.deleteKi
+                  on-failure:
+                    continue: true
+                  with:
+                    ai_index_id: "{{ consts.ai_index_id }}"
+                    ki_id: "fp-disposition-{{ workflow.spaceId }}-{{ inputs.rule_id }}"
+                - name: post_comment_review_not_started
+                  type: ai.conversation.add_user_message
+                  on-failure:
+                    continue: true
+                  with:
+                    conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+                    message: >-
+                      ⚠️ The closure review could not be started: {{ error.message }}.
+                      {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}remains{% else %}remain{% endif %} open and tagged az:false_positive.
+            with:
+              workflow-id: system-security-floor-alert-triage-review
+              run-as-mode: inherit
+              inputs:
+                conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+                rule_id: "{{ inputs.rule_id }}"
+                rule_name: "{{ inputs.rule_name }}"
+                fp_candidate_ids: "${{ variables.fp_candidate_ids }}"
+                entity_summary: "{{ variables.fp_entity_summary }}"
+                confidence_floor: "${{ inputs.confidence_floor }}"
+                autonomy: "{{ inputs.autonomy }}"
+
+          # `workflow.executeAsync` reports the child's status as it was when the engine returned
+          # the execution id, and the engine applies the concurrency policy and validates the inputs
+          # before that, so `skipped` and `failed` are already final here. No separate read of the
+          # execution is needed.
+          #
+          # One value per outcome so every branch below is a single comparison (if-conditions take
+          # no filters, and `and`/`or` have no precedence).
+          #   failed  → the review never ran to a decision (skipped, rejected inputs, cancelled, timed out)
+          #   started → pending, running, parked or already finished
+          - name: resolve_review_dispatch
+            type: data.set
+            with:
+              review_dispatch: >-
+                {% if steps.start_fp_review.output.status == 'skipped' or steps.start_fp_review.output.status == 'failed' or steps.start_fp_review.output.status == 'cancelled' or steps.start_fp_review.output.status == 'timed_out' %}failed{% else %}started{% endif %}
+
+          - name: drop_pending_disposition_on_failed_dispatch
+            type: context-engine.deleteKi
+            if: "${{ variables.review_dispatch == 'failed' }}"
+            on-failure:
+              continue: true
+            with:
+              ai_index_id: "{{ consts.ai_index_id }}"
+              ki_id: "fp-disposition-{{ workflow.spaceId }}-{{ inputs.rule_id }}"
+
+          - name: handle_review_started
+            type: if
+            condition: "${{ variables.review_dispatch == 'started' }}"
+            steps:
+              - name: post_comment_review_started
+                type: ai.conversation.add_user_message
+                on-failure:
+                  continue: true
+                with:
+                  conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+                  message: >-
+                    Closure of {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} classified as false positive at or above the {{ inputs.confidence_floor }} confidence floor was handed to the closure review.
+                    Autonomy level: {{ inputs.autonomy }}.
+                    {% if inputs.autonomy == 'supervised' %}The closure is approved automatically at this autonomy level; reopen any alert you disagree with.{% else %}A human decision is required.{% endif %}
+                    The outcome is posted here and this Investigation is closed when it is decided.
+
+          - name: handle_review_failed
+            type: if
+            condition: "${{ variables.review_dispatch == 'failed' }}"
+            steps:
+              - name: post_comment_review_failed
+                type: ai.conversation.add_user_message
+                on-failure:
+                  continue: true
+                with:
+                  conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+                  message: >-
+                    ⚠️ The closure review ended without a decision (status: {{ steps.start_fp_review.output.status }}).
+                    {% if inputs.autonomy == 'supervised' %}The {{ variables.fp_candidate_count }} candidate alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}is{% else %}are{% endif %} tagged az:false_positive. At supervised autonomy the review approves automatically and can start closing before this status is read, so some may already be closed: check each alert's workflow_status rather than assuming {% if variables.fp_candidate_count == 1 %}it is{% else %}they are{% endif %} still open.{% else %}{{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}remains{% else %}remain{% endif %} open and tagged az:false_positive, since nothing is closed without a human decision.{% endif %} This Investigation stays open for review.
+
+              # Fails the run so a review that never ran shows up in execution history, like a
+              # dispatch that could not be started does.
+              - name: abort_review_failed
+                type: workflow.fail
+                with:
+                  message: >-
+                    The Alert Triage closure review ended as {{ steps.start_fp_review.output.status }}
+                    before it reached a decision. The alerts were classified, tagged and noted.
+
+      # The indicator is the recorded decision, so this close does not raise another proposal.
+      # The first close of the rule still went through the proposal gate.
+      - name: handle_standing_close
+        type: if
+        condition: "${{ variables.fp_gate == 'standing_close' }}"
+        steps:
+          - name: apply_standing_close
+            type: workflow.execute
+            on-failure:
+              continue: true
+            with:
+              workflow-id: system-alertzero-action-close-alerts-fp
+              run-as-mode: inherit
+              inputs:
+                actionInput:
+                  alertIds: "${{ variables.fp_candidate_ids }}"
+                  reason: "false_positive"
+
+          - name: post_comment_standing_close
             type: ai.conversation.add_user_message
             on-failure:
               continue: true
             with:
               conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
               message: >-
-                Closure of {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} classified as false positive at or above the {{ inputs.confidence_floor }} confidence floor was handed to the closure review.
-                Autonomy level: {{ inputs.autonomy }}.
-                {% if inputs.autonomy == 'supervised' %}The closure is approved automatically at this autonomy level; reopen any alert you disagree with.{% else %}A human decision is required.{% endif %}
-                The outcome is posted here and this Investigation is closed when it is decided.
+                {% if steps.apply_standing_close.error == blank %}
+                These alerts match a standing false-positive disposition for this rule, so they were closed without a new proposal.
+                {% else %}
+                ⚠️ A standing false-positive disposition exists for this rule, but the close failed: {{ steps.apply_standing_close.error.message }}. The alerts stay open and tagged az:false_positive.
+                {% endif %}
 
-      - name: handle_review_failed
+          - name: close_investigation_standing_close
+            type: ai.conversation.metadata.patch
+            if: "${{ steps.apply_standing_close.error == blank }}"
+            on-failure:
+              continue: true
+              fallback:
+                - name: log_standing_close_investigation_failed
+                  type: console
+                  with:
+                    message: >-
+                      The standing disposition closed the alerts, but the Investigation could not
+                      be marked closed: {{ error.message }}. Investigation
+                      {{ steps.create_investigation.output.conversation_id }} stays open.
+            with:
+              conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+              updates:
+                status: closed
+                close_reason: false_positive
+
+      - name: handle_do_not_close
         type: if
-        condition: "${{ variables.review_dispatch == 'failed' }}"
+        condition: "${{ variables.fp_gate == 'do_not_close' }}"
         steps:
-          - name: post_comment_review_failed
+          - name: post_comment_do_not_close
             type: ai.conversation.add_user_message
             on-failure:
               continue: true
             with:
               conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
               message: >-
-                ⚠️ The closure review ended without a decision (status: {{ steps.start_fp_review.output.status }}).
-                {% if inputs.autonomy == 'supervised' %}The {{ variables.fp_candidate_count }} candidate alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}is{% else %}are{% endif %} tagged az:false_positive. At supervised autonomy the review approves automatically and can start closing before this status is read, so some may already be closed: check each alert's workflow_status rather than assuming {% if variables.fp_candidate_count == 1 %}it is{% else %}they are{% endif %} still open.{% else %}{{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}remains{% else %}remain{% endif %} open and tagged az:false_positive, since nothing is closed without a human decision.{% endif %} This Investigation stays open for review.
+                A knowledge indicator records that false positives from this rule should not be closed. No proposal was created. The alerts stay open and tagged az:false_positive.
 
-          # Fails the run so a review that never ran shows up in execution history, like a
-          # dispatch that could not be started does.
-          - name: abort_review_failed
-            type: workflow.fail
+          - name: close_investigation_do_not_close
+            type: ai.conversation.metadata.patch
+            on-failure:
+              continue: true
+              fallback:
+                - name: log_do_not_close_investigation_failed
+                  type: console
+                  with:
+                    message: >-
+                      The do-not-close disposition was applied, but the Investigation could not
+                      be marked closed: {{ error.message }}. Investigation
+                      {{ steps.create_investigation.output.conversation_id }} stays open.
             with:
+              conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+              updates:
+                status: closed
+                close_reason: other
+
+      - name: handle_pending_review
+        type: if
+        condition: "${{ variables.fp_gate == 'pending_review' }}"
+        steps:
+          - name: post_comment_pending_review
+            type: ai.conversation.add_user_message
+            on-failure:
+              continue: true
+            with:
+              conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
               message: >-
-                The Alert Triage closure review ended as {{ steps.start_fp_review.output.status }}
-                before it reached a decision. The alerts were classified, tagged and noted.
+                A closure proposal is already waiting for this rule, so this batch did not raise another. These alerts stay open and tagged az:false_positive. Approving the waiting proposal closes only the alerts named on it.
+
+          - name: close_investigation_pending_review
+            type: ai.conversation.metadata.patch
+            on-failure:
+              continue: true
+              fallback:
+                - name: log_pending_review_investigation_failed
+                  type: console
+                  with:
+                    message: >-
+                      A closure proposal is already waiting, but the Investigation could not be
+                      marked closed: {{ error.message }}. Investigation
+                      {{ steps.create_investigation.output.conversation_id }} stays open.
+            with:
+              conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+              updates:
+                status: closed
+                close_reason: other
+
+      - name: handle_defer_tuning
+        type: if
+        condition: "${{ variables.fp_gate == 'defer_tuning' }}"
+        steps:
+          - name: post_comment_defer_tuning
+            type: ai.conversation.add_user_message
+            on-failure:
+              continue: true
+            with:
+              conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+              message: >-
+                This rule is already a tuning candidate: at least {{ consts.tuning_min_fp_count }} closed false positives, and at least {{ consts.tuning_min_fp_rate_pct }}% of its alerts, over the last {{ consts.tuning_window_days }} days. No closure proposal was created. Rule Tuning owns the change. The alerts stay open and tagged az:false_positive.
+
+          - name: close_investigation_defer_tuning
+            type: ai.conversation.metadata.patch
+            on-failure:
+              continue: true
+              fallback:
+                - name: log_defer_tuning_investigation_failed
+                  type: console
+                  with:
+                    message: >-
+                      The batch was left for Rule Tuning, but the Investigation could not be
+                      marked closed: {{ error.message }}. Investigation
+                      {{ steps.create_investigation.output.conversation_id }} stays open.
+            with:
+              conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+              updates:
+                status: closed
+                close_reason: other
 
   # ---------------------------------------------------------------------------
   # 10. No-FP branch: close the Investigation immediately.
