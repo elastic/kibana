@@ -39,9 +39,10 @@ describe('useEventsSelection', () => {
   });
 
   it('forgets selected rows that leave the page', () => {
-    const { result, rerender } = renderHook((props) => useEventsSelection(props), {
-      initialProps: { pageIds, onRemove: jest.fn() },
-    });
+    const { result, rerender } = renderHook(
+      (props: Parameters<typeof useEventsSelection>[0]) => useEventsSelection(props),
+      { initialProps: { pageIds, onRemove: jest.fn() } }
+    );
 
     act(() => result.current.onSelectPage(checkboxEvent(true)));
     rerender({ pageIds: ['event-2'], onRemove: jest.fn() });
