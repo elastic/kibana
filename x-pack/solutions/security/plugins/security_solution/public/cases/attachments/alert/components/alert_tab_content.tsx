@@ -8,7 +8,10 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { CommonAttachmentListViewProps } from '@kbn/cases-plugin/public';
-import type { AlertsTableOnLoadedProps } from '@kbn/response-ops-alerts-table/types';
+import type {
+  AlertsTableOnLoadedProps,
+  BulkActionsConfig,
+} from '@kbn/response-ops-alerts-table/types';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { getManualAlertIds } from '@kbn/cases-plugin/common';
 import { AlertsTable } from '../../../../detections/components/alerts_table';
@@ -18,9 +21,14 @@ import { useAlertsPrivileges } from '../../../../detections/containers/detection
 import { useKibana } from '../../../../common/lib/kibana';
 import { NoPrivileges } from '../../../../common/components/no_privileges';
 import { SECURITY_FEATURE_ID } from '../../../../../common/constants';
-import { ALERTS_EMPTY_DESCRIPTION } from '../translations';
+import { ALERTS_EMPTY_DESCRIPTION, REMOVE_FROM_CASE } from '../translations';
 
-export const AlertTabContent: React.FC<CommonAttachmentListViewProps> = ({ caseData }) => {
+export const REMOVE_ALERTS_FROM_CASE_TEST_ID = 'remove-alerts-from-case';
+
+export const AlertTabContent: React.FC<CommonAttachmentListViewProps> = ({
+  caseData,
+  onRemove,
+}) => {
   const {
     application: { capabilities },
   } = useKibana().services;
@@ -42,6 +50,33 @@ export const AlertTabContent: React.FC<CommonAttachmentListViewProps> = ({ caseD
   const onLoaded = useCallback(
     ({ alerts }: AlertsTableOnLoadedProps) => onAlertsTableLoaded(alerts),
     [onAlertsTableLoaded]
+  );
+
+  // Disabled on "select all", which also matches alerts the table's time range hides.
+  const removeBulkActionItems = useMemo<BulkActionsConfig[] | undefined>(
+    () =>
+      onRemove
+        ? [
+            {
+              key: REMOVE_ALERTS_FROM_CASE_TEST_ID,
+              label: REMOVE_FROM_CASE,
+              icon: 'trash',
+              'data-test-subj': REMOVE_ALERTS_FROM_CASE_TEST_ID,
+              disableOnQuery: true,
+              onClick: (alerts, _isAllSelected, _setIsBulkActionsLoading, clearSelection) =>
+                onRemove(
+                  { attachmentIds: alerts.map(({ _id }) => _id) },
+                  { onSuccess: clearSelection }
+                ),
+            },
+          ]
+        : undefined,
+    [onRemove]
+  );
+
+  const onRemoveFromCase = useMemo(
+    () => (onRemove ? (alertId: string) => onRemove({ attachmentIds: [alertId] }) : undefined),
+    [onRemove]
   );
 
   if (!hasAlertsRead) {
@@ -80,6 +115,8 @@ export const AlertTabContent: React.FC<CommonAttachmentListViewProps> = ({ caseD
           id={`case-details-alerts-${caseData.owner}`}
           onLoaded={onLoaded}
           query={alertIdsQuery}
+          additionalBulkActionItems={removeBulkActionItems}
+          onRemoveFromCase={onRemoveFromCase}
         />
       )}
     </EuiFlexItem>

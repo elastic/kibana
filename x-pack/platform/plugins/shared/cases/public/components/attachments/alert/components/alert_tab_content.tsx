@@ -8,15 +8,20 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiEmptyPrompt } from '@elastic/eui';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
+import type { BulkActionsPanelConfig } from '@kbn/response-ops-alerts-table/types';
 import React, { useMemo } from 'react';
 import type { SetRequired } from 'type-fest';
-import { ALERTS_EMPTY_DESCRIPTION } from '../translations';
+import { ALERTS_EMPTY_DESCRIPTION, REMOVE_FROM_CASE } from '../translations';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useGetFeatureIds } from '../../../../containers/use_get_feature_ids';
 import { getManualAlertIds } from '../../../../../common/utils/attachments/manual_alert_ids';
 import type { CommonAttachmentListViewProps } from '../../../../client/attachment_framework/types';
+import type { StackAlertsTableContext } from './stack_alert_actions_cell';
+import { StackAlertActionsCell } from './stack_alert_actions_cell';
 
-export const StackAlertTabContent = ({ caseData }: CommonAttachmentListViewProps) => {
+export const REMOVE_STACK_ALERTS_FROM_CASE_TEST_ID = 'remove-stack-alerts-from-case';
+
+export const StackAlertTabContent = ({ caseData, onRemove }: CommonAttachmentListViewProps) => {
   const { services } = useKibana();
   const { data, http, notifications, fieldFormats, application, licensing, settings } =
     services as SetRequired<typeof services, 'licensing'>;
@@ -32,6 +37,42 @@ export const StackAlertTabContent = ({ caseData }: CommonAttachmentListViewProps
   const alertsTableServices = useMemo(
     () => ({ data, http, notifications, fieldFormats, application, settings, licensing }),
     [data, http, notifications, fieldFormats, application, settings, licensing]
+  );
+
+  // Disabled on "select all", which also matches alerts the table's time range hides.
+  const removeBulkActions = useMemo<BulkActionsPanelConfig[] | undefined>(
+    () =>
+      onRemove
+        ? [
+            {
+              id: 0,
+              items: [
+                {
+                  key: REMOVE_STACK_ALERTS_FROM_CASE_TEST_ID,
+                  label: REMOVE_FROM_CASE,
+                  icon: 'trash',
+                  'data-test-subj': REMOVE_STACK_ALERTS_FROM_CASE_TEST_ID,
+                  disableOnQuery: true,
+                  onClick: (alerts, _isAllSelected, _setIsBulkActionsLoading, clearSelection) =>
+                    onRemove(
+                      { attachmentIds: alerts.map(({ _id }) => _id) },
+                      { onSuccess: clearSelection }
+                    ),
+                },
+              ],
+            },
+          ]
+        : undefined,
+    [onRemove]
+  );
+
+  const additionalContext = useMemo<StackAlertsTableContext>(
+    () => ({
+      onRemoveFromCase: onRemove
+        ? (alertId: string) => onRemove({ attachmentIds: [alertId] })
+        : undefined,
+    }),
+    [onRemove]
   );
 
   const { isLoading, data: alertData } = useGetFeatureIds(alertIds, true);
@@ -64,13 +105,16 @@ export const StackAlertTabContent = ({ caseData }: CommonAttachmentListViewProps
 
   return (
     <EuiFlexItem data-test-subj="case-view-alerts">
-      <AlertsTable
+      <AlertsTable<StackAlertsTableContext>
         id={`case-details-alerts-${caseData.owner}`}
         ruleTypeIds={alertData?.ruleTypeIds ?? []}
         consumers={alertData?.featureIds}
         query={alertIdsQuery}
         showAlertStatusWithFlapping
         services={alertsTableServices}
+        additionalBulkActions={removeBulkActions}
+        additionalContext={additionalContext}
+        renderActionsCell={onRemove ? StackAlertActionsCell : undefined}
       />
     </EuiFlexItem>
   );
