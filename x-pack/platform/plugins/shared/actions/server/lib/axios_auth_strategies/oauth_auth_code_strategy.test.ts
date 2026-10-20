@@ -122,7 +122,10 @@ describe('OAuthAuthCodeStrategy', () => {
 
     it('refreshes token on 401 and retries the request', async () => {
       const { instance, mockRequest } = createMockAxiosInstance();
-      strategy.installResponseInterceptor(instance, baseDeps);
+      strategy.installResponseInterceptor(instance, {
+        ...baseDeps,
+        connectorTypeId: '.test_connector',
+      });
       const onRejected = getOnRejected(instance);
 
       mockGetOAuthAuthorizationCodeAccessToken.mockResolvedValue('Bearer refreshed');
@@ -140,11 +143,20 @@ describe('OAuthAuthCodeStrategy', () => {
       );
       expect(error.config.headers.Authorization).toBe('Bearer refreshed');
       expect(mockRequest).toHaveBeenCalledWith(error.config);
+      expect(connectorAuthCounter.add).toHaveBeenCalledWith(1, {
+        'auth.phase': 'token',
+        'connector.auth_type': 'oauth_authorization_code',
+        'connector.type': '.test_connector',
+        success: true,
+      });
     });
 
     it('rejects with message when token refresh returns null', async () => {
       const { instance } = createMockAxiosInstance();
-      strategy.installResponseInterceptor(instance, baseDeps);
+      strategy.installResponseInterceptor(instance, {
+        ...baseDeps,
+        connectorTypeId: '.test_connector',
+      });
       const onRejected = getOnRejected(instance);
 
       mockGetOAuthAuthorizationCodeAccessToken.mockResolvedValue(null);
@@ -158,50 +170,6 @@ describe('OAuthAuthCodeStrategy', () => {
       expect((error as { message: string }).message).toContain(
         'Unable to refresh access token. Please re-authorize'
       );
-    });
-
-    it('records a successful forced token refresh', async () => {
-      const { instance, mockRequest } = createMockAxiosInstance();
-      strategy.installResponseInterceptor(instance, {
-        ...baseDeps,
-        connectorTypeId: '.test_connector',
-      });
-      const onRejected = getOnRejected(instance);
-
-      mockGetOAuthAuthorizationCodeAccessToken.mockResolvedValue('Bearer newtoken');
-      mockRequest.mockResolvedValue({ status: 200 });
-
-      await onRejected({
-        config: { _retry: false, headers: {} as Record<string, string> },
-        response: { status: 401 },
-        message: 'Unauthorized',
-      });
-
-      expect(connectorAuthCounter.add).toHaveBeenCalledWith(1, {
-        'auth.phase': 'token',
-        'connector.auth_type': 'oauth_authorization_code',
-        'connector.type': '.test_connector',
-        success: true,
-      });
-    });
-
-    it('records a failed forced token refresh', async () => {
-      const { instance } = createMockAxiosInstance();
-      strategy.installResponseInterceptor(instance, {
-        ...baseDeps,
-        connectorTypeId: '.test_connector',
-      });
-      const onRejected = getOnRejected(instance);
-
-      mockGetOAuthAuthorizationCodeAccessToken.mockResolvedValue(null);
-
-      const error = {
-        config: { _retry: false, headers: {} },
-        response: { status: 401 },
-        message: '',
-      };
-      await expect(onRejected(error)).rejects.toBe(error);
-
       expect(connectorAuthCounter.add).toHaveBeenCalledWith(1, {
         'auth.phase': 'token',
         'connector.auth_type': 'oauth_authorization_code',
