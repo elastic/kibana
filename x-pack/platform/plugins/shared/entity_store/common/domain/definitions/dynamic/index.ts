@@ -30,4 +30,9 @@ export type {
   DynamicSource,
   DynamicValueLabels,
 } from './dynamic_block_schema';
-export { assertDynamicDefinitionRules } from './dynamic_definition_rules';
+export {
+  MAX_DYNAMIC_IDENTITY_FIELDS,
+  assertDynamicDefinitionRules,
+  getIdentityFields,
+  getPresenceFilter,
+} from './dynamic_definition_rules';

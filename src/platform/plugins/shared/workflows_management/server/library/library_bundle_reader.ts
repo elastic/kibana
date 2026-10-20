@@ -56,7 +56,7 @@ export interface LibraryBundleReaderDeps {
 }
 
 /**
- * Local bundle source mode for the Workflow Template Library (air-gapped
+ * Local bundle source mode for the Workflow Template library (air-gapped
  * deployments). Reads the catalog and template bodies from an extracted
  * tarball on the Kibana host's filesystem instead of the CDN.
  *
@@ -105,7 +105,7 @@ export class LibraryBundleReader extends LibrarySource {
     if (!this.cache.catalog) {
       // Defensive: ensureLoaded either populated the catalog or threw.
       throw new LibraryFetchError(
-        'Workflow Template Library bundle catalog could not be loaded.',
+        'Workflow Template library bundle catalog could not be loaded.',
         'unavailable'
       );
     }
@@ -157,7 +157,7 @@ export class LibraryBundleReader extends LibrarySource {
       return nested;
     }
     throw new LibraryFetchError(
-      `No Workflow Template Library bundle found under bundlePath "${bundlePath}". ` +
+      `No Workflow Template library bundle found under bundlePath "${bundlePath}". ` +
         `Expected "${VERSIONS_FILE}" directly under the path or inside a "v1/" directory.`,
       'unavailable',
       bundlePath
@@ -184,7 +184,7 @@ export class LibraryBundleReader extends LibrarySource {
     const root = this.root;
     if (!root) {
       // Defensive: bodies are only read after a successful catalog load.
-      throw new LibraryFetchError('Workflow Template Library bundle is not loaded.', 'unavailable');
+      throw new LibraryFetchError('Workflow Template library bundle is not loaded.', 'unavailable');
     }
     const file = this.resolveBodyPath(root, row.definitionUrl);
     const text = await this.readFileOrThrow(
@@ -277,7 +277,7 @@ export class LibraryBundleReader extends LibrarySource {
     } catch (err) {
       if (err instanceof LibraryFetchError) throw err;
       throw new LibraryFetchError(
-        `Could not read ${file} from the Workflow Template Library bundle: ${
+        `Could not read ${file} from the Workflow Template library bundle: ${
           err instanceof Error ? err.message : String(err)
         }`,
         'unavailable',
