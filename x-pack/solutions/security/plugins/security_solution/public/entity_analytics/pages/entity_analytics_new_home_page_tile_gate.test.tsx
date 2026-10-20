@@ -6,10 +6,17 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import { TestProviders } from '../../common/mock';
 import { EntityAnalyticsNewHomePage } from './entity_analytics_new_home_page';
 import * as tileHooks from '../components/home/needs_attention_tiles/hooks';
 import { useEntityStoreStatus } from '../components/entity_store/hooks/use_entity_store';
+import { useMissingRiskEnginePrivileges } from '../hooks/use_missing_risk_engine_privileges';
+import { useEntityEnginePrivileges } from '../components/entity_store/hooks/use_entity_engine_privileges';
+import { useAnomalyPrivileges } from '../api/hooks/use_anomaly_privileges';
+import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
+import { SignalCards } from '../components/home/needs_attention_tiles/signal_cards';
+import type { SignalCardData } from '../components/home/needs_attention_tiles/data';
 
 jest.mock('../components/home/needs_attention_tiles/hooks', () => ({
   useAlertBasedTiles: jest.fn(),
@@ -35,7 +42,11 @@ jest.mock('../../common/hooks/use_global_filter_query', () => ({
   useGlobalFilterQuery: () => ({ filterQuery: undefined }),
 }));
 jest.mock('../components/home/use_entity_store_data_view', () => ({
-  useEntityStoreDataView: () => ({ dataView: {}, isLoading: false, error: undefined }),
+  useEntityStoreDataView: () => ({
+    dataView: { fields: { getAll: () => [] } },
+    isLoading: false,
+    error: undefined,
+  }),
 }));
 jest.mock('../api/hooks/use_get_watchlists', () => ({
   useGetWatchlists: () => ({ data: [], error: undefined }),
@@ -44,17 +55,44 @@ jest.mock('../../common/hooks/use_error_toast', () => ({ useErrorToast: jest.fn(
 jest.mock('../../common/hooks/use_app_toasts', () => ({
   useAppToasts: () => ({ addWarning: jest.fn() }),
 }));
-jest.mock('../components/home/use_time_range_param', () => ({
-  useTimeRangeParam: () => ['7d', jest.fn()],
+jest.mock('../components/home/entities_grid/hooks/use_entity_analytics_url_state', () => ({
+  useEntityAnalyticsUrlState: () => ({
+    timeRange: '7d',
+    setTimeRange: jest.fn(),
+    entityFilters: jest.requireActual('../components/home/entities_grid/common')
+      .EMPTY_ENTITY_FILTERS,
+    setEntityFilters: jest.fn(),
+    rowsMode: 'individual',
+    setRowsMode: jest.fn(),
+    sortField: 'entity.risk.calculated_score_norm',
+    sortDirection: 'desc',
+    setSort: jest.fn(),
+    activeTile: null,
+    setActiveTile: jest.fn(),
+    expandedIds: [],
+    toggleExpandedId: jest.fn(),
+  }),
 }));
-jest.mock('../components/home/use_entity_filters_param', () => ({
-  useEntityFiltersParam: () => ({ entityFilters: {}, setEntityFilters: jest.fn() }),
-  getEntityFilterTerms: () => [],
+jest.mock('../components/home/entities_grid/components/entities_grid', () => ({
+  EntitiesGrid: () => null,
+}));
+jest.mock('../components/home/entities_grid/components/entities_groups', () => ({
+  EntitiesGroups: () => null,
+}));
+jest.mock('../../flyout_v2/use_flyout_api', () => ({
+  useFlyoutApi: () => ({ openEntityFlyout: jest.fn(), openGraphFlyout: jest.fn() }),
+}));
+jest.mock('../../common/hooks/timeline/use_investigate_in_timeline', () => ({
+  useInvestigateInTimeline: () => ({ investigateInTimeline: jest.fn() }),
+}));
+jest.mock('@kbn/entity-store/public', () => ({
+  ...jest.requireActual('@kbn/entity-store/public'),
+  useEntityStoreEuidApi: () => undefined,
 }));
 jest.mock('../components/home/entity_search_bar', () => ({ EntitySearchBar: () => null }));
 jest.mock('../components/home/entity_filters_bar', () => ({ EntityFiltersBar: () => null }));
 jest.mock('../components/home/needs_attention_tiles/signal_cards', () => ({
-  SignalCards: () => null,
+  SignalCards: jest.fn(() => null),
 }));
 jest.mock('../components/home/entities_table', () => ({
   DataViewContext: { Provider: ({ children }: { children: React.ReactNode }) => <>{children}</> },
@@ -74,8 +112,70 @@ jest.mock('../../common/components/page_wrapper', () => ({
   SecuritySolutionPageWrapper: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 jest.mock('../../common/utils/route/spy_routes', () => ({ SpyRoute: () => null }));
+jest.mock('../hooks/use_missing_risk_engine_privileges', () => ({
+  useMissingRiskEnginePrivileges: jest.fn(),
+}));
+jest.mock('../components/entity_store/hooks/use_entity_engine_privileges', () => ({
+  useEntityEnginePrivileges: jest.fn(),
+}));
+jest.mock('../api/hooks/use_anomaly_privileges', () => ({
+  useAnomalyPrivileges: jest.fn(),
+}));
+jest.mock('../../detections/containers/detection_engine/alerts/use_alerts_privileges', () => ({
+  useAlertsPrivileges: jest.fn(),
+}));
 
 const hooks = tileHooks as unknown as Record<string, jest.Mock>;
+
+const mockPrivileges = ({
+  isLoading = false,
+  isError = false,
+  hasReadPermissions = true,
+  alerts = true,
+  risk = true,
+  anomalies = true,
+}: {
+  isLoading?: boolean;
+  isError?: boolean;
+  hasReadPermissions?: boolean;
+  alerts?: boolean;
+  risk?: boolean;
+  anomalies?: boolean;
+} = {}) => {
+  (useMissingRiskEnginePrivileges as jest.Mock).mockReturnValue(
+    risk
+      ? { isLoading: false, hasAllRequiredPrivileges: true }
+      : {
+          isLoading: false,
+          hasAllRequiredPrivileges: false,
+          missingPrivileges: { indexPrivileges: [], clusterPrivileges: { enable: [], run: [] } },
+        }
+  );
+  (useAnomalyPrivileges as jest.Mock).mockReturnValue({
+    isLoading: false,
+    isError: false,
+    data: {
+      has_read_permissions: anomalies,
+      privileges: { elasticsearch: { index: {} }, kibana: {} },
+    },
+  });
+  (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexRead: alerts, loading: false });
+  (useEntityEnginePrivileges as jest.Mock).mockReturnValue({
+    isLoading,
+    isError,
+    data: isError
+      ? undefined
+      : {
+          has_read_permissions: hasReadPermissions,
+          privileges: { elasticsearch: { index: {} }, kibana: [] },
+        },
+  });
+};
+
+const getCard = (id: SignalCardData['id']): SignalCardData | undefined => {
+  const { calls } = (SignalCards as jest.Mock).mock;
+  return calls[calls.length - 1][0].cards.find((card: SignalCardData) => card.id === id);
+};
 
 const COUNT_HOOKS = {
   alerts: 'useAlertBasedTiles',
@@ -181,27 +281,101 @@ const seriesReachesBack = (tile: Tile): boolean | undefined => {
   return options.reachesBack;
 };
 
-describe('EntityAnalyticsNewHomePage: the tiles wait for every count', () => {
+describe('EntityAnalyticsNewHomePage: privileges', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useEntityStoreStatus as jest.Mock).mockReturnValue({
       data: { status: 'running' },
       isLoading: false,
     });
+    mockTiles();
   });
 
-  it('releases every delta once all the counts have settled', () => {
-    mockTiles();
-    render(<EntityAnalyticsNewHomePage />);
+  it('shows a loader and runs no query while the privileges load', () => {
+    mockPrivileges({ isLoading: true });
+    render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
 
-    TILES.forEach((tile) => expect(deltaIsReady(tile)).toBe(true));
+    expect(screen.getByRole('progressbar', { name: 'Loading' })).toBeInTheDocument();
+    expect(hooks.useNewEntityCount).not.toHaveBeenCalled();
+  });
+
+  it('shows the no-access screen and runs no query without read access to the entity store', () => {
+    mockPrivileges({ hasReadPermissions: false });
+    render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+    expect(screen.getByTestId('noPrivilegesPage')).toBeInTheDocument();
+    expect(hooks.useNewEntityCount).not.toHaveBeenCalled();
+  });
+
+  it('shows the page when the privileges check fails', () => {
+    mockPrivileges({ isError: true });
+    render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+    expect(screen.queryByTestId('noPrivilegesPage')).not.toBeInTheDocument();
+    expect(hooks.useNewEntityCount).toHaveBeenCalled();
+  });
+
+  it('shows the page when the risk engine privileges check fails', () => {
+    mockPrivileges();
+    (useMissingRiskEnginePrivileges as jest.Mock).mockReturnValue({
+      isLoading: true,
+      isError: true,
+    });
+    render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+    expect(screen.queryByRole('progressbar', { name: 'Loading' })).not.toBeInTheDocument();
+    expect(hooks.useNewEntityCount).toHaveBeenCalled();
+  });
+
+  it.each([
+    ['alerts', ['alerts'], ['entitiesWithAlerts', 'watchlisted']],
+    ['anomalies', ['anomalies'], ['entitiesWithAnomalies']],
+    ['risk', ['riskMovers', 'newlyHighCritical'], ['riskMovers', 'newlyHighCritical']],
+  ] as const)(
+    'skips the %s tiles and says why without read access to them',
+    (source, tiles, cardIds) => {
+      mockPrivileges({ [source]: false });
+      render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+      TILES.forEach((tile) => {
+        const isSkipped = (tiles as readonly Tile[]).includes(tile);
+        expect(lastOptions(COUNT_HOOKS[tile]).skip).toBe(isSkipped);
+        expect(lastOptions(DELTA_HOOKS[tile]).skip).toBe(isSkipped);
+        expect(lastOptions(SERIES_HOOKS[tile]).skip).toBe(isSkipped);
+      });
+      cardIds.forEach((id) => {
+        expect(getCard(id)?.noDataMessage).toMatch(/^Requires read access to /);
+      });
+    }
+  );
+});
+
+describe('EntityAnalyticsNewHomePage: the tiles wait for every count', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockPrivileges();
+    (useEntityStoreStatus as jest.Mock).mockReturnValue({
+      data: { status: 'running' },
+      isLoading: false,
+    });
+  });
+
+  it('releases and runs every delta and sparkline once all the counts have settled and the store runs', () => {
+    mockTiles();
+    render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+    TILES.forEach((tile) => {
+      expect(deltaIsReady(tile)).toBe(true);
+      expect(lastOptions(DELTA_HOOKS[tile]).skip).toBe(false);
+      expect(lastOptions(SERIES_HOOKS[tile]).skip).toBe(false);
+    });
   });
 
   it.each(TILES)(
     'holds all the deltas and sparklines back while the %s count is pending',
     (stuck) => {
       mockTiles({ [stuck]: { isCountPending: true } });
-      render(<EntityAnalyticsNewHomePage />);
+      render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
 
       TILES.forEach((tile) => {
         expect(deltaIsReady(tile)).toBe(false);
@@ -210,27 +384,12 @@ describe('EntityAnalyticsNewHomePage: the tiles wait for every count', () => {
     }
   );
 
-  it.each(TILES)(
-    'releases them all when the pending %s count settles, whether it was skipped, failed or loaded',
-    (stuck) => {
-      mockTiles({ [stuck]: { isCountPending: true } });
-      const { rerender } = render(<EntityAnalyticsNewHomePage />);
-      TILES.forEach((tile) => expect(deltaIsReady(tile)).toBe(false));
-
-      // A count that cannot run, or has failed, reports that it is no longer pending.
-      mockTiles({ [stuck]: { isCountPending: false } });
-      rerender(<EntityAnalyticsNewHomePage />);
-
-      TILES.forEach((tile) => expect(deltaIsReady(tile)).toBe(true));
-    }
-  );
-
   it.each(['installing', 'not_installed', 'stopped'])(
     'skips every delta and sparkline while the entity store is %s',
     (status) => {
       (useEntityStoreStatus as jest.Mock).mockReturnValue({ data: { status }, isLoading: false });
       mockTiles();
-      render(<EntityAnalyticsNewHomePage />);
+      render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
 
       TILES.forEach((tile) => {
         expect(lastOptions(DELTA_HOOKS[tile]).skip).toBe(true);
@@ -239,49 +398,29 @@ describe('EntityAnalyticsNewHomePage: the tiles wait for every count', () => {
     }
   );
 
-  it('does not skip them while the entity store is running', () => {
-    mockTiles();
-    render(<EntityAnalyticsNewHomePage />);
-
-    TILES.forEach((tile) => {
-      expect(lastOptions(DELTA_HOOKS[tile]).skip).toBe(false);
-      expect(lastOptions(SERIES_HOOKS[tile]).skip).toBe(false);
-    });
-  });
-
   describe('the sparklines follow the deltas', () => {
-    it('hold a sparkline back until its own delta has loaded, and release the others', () => {
-      mockTiles({ anomalies: { isDeltaLoading: true } });
-      render(<EntityAnalyticsNewHomePage />);
-
-      expect(seriesIsReady('anomalies')).toBe(false);
-      TILES.filter((tile) => tile !== 'anomalies').forEach((tile) =>
-        expect(seriesIsReady(tile)).toBe(true)
-      );
-    });
-
-    it.each(['riskMovers', 'newlyHighCritical'] as const)(
-      'hold the one risk sparkline query back while the %s delta is loading',
+    it.each(TILES)(
+      'hold back only the sparkline that reads the %s delta until it has loaded',
       (loading) => {
         mockTiles({ [loading]: { isDeltaLoading: true } });
-        render(<EntityAnalyticsNewHomePage />);
+        render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
 
-        expect(seriesIsReady('riskMovers')).toBe(false);
-        expect(seriesIsReady('newlyHighCritical')).toBe(false);
-        (['alerts', 'anomalies', 'newEntity'] as const).forEach((tile) =>
-          expect(seriesIsReady(tile)).toBe(true)
+        // The two risk tiles share one sparkline query, which waits for both deltas.
+        const isRisk = (tile: Tile) => tile === 'riskMovers' || tile === 'newlyHighCritical';
+        TILES.forEach((tile) =>
+          expect(seriesIsReady(tile)).toBe(!(tile === loading || (isRisk(tile) && isRisk(loading))))
         );
       }
     );
 
     it.each(TILES)('pass the history result of the %s delta on to its sparkline', (tile) => {
       mockTiles({ [tile]: { reachesBack: false } });
-      render(<EntityAnalyticsNewHomePage />);
+      render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
       expect(seriesReachesBack(tile)).toBe(false);
 
       jest.clearAllMocks();
       mockTiles({ [tile]: { reachesBack: undefined } });
-      render(<EntityAnalyticsNewHomePage />);
+      render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
       expect(seriesReachesBack(tile)).toBeUndefined();
     });
   });

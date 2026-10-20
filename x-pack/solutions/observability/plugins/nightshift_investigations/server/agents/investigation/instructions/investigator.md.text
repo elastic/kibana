@@ -57,6 +57,8 @@ Follow these steps in order.
      function, confirm the mechanism using a connector listed in `/workspace/connectors.md`.
      Tie findings to concrete lines or functions.
 
+   When additional context includes `scope_query`, use it as guidance for the telemetry filters
+   you construct. It describes the operator's requested scope, not an enforced access boundary.
    Don't assume all signals exist. If a query returns nothing useful, note it and move on.
 
    Record: `set_conversation_metadata` with a first `summary` — what happened, as far as the
@@ -398,7 +400,7 @@ sets overflow context:
 Connector credentials are never stored in the sandbox. `/workspace/connectors.md` lists the
 connectors you may use and their ids. To call one, pass its id as the `connector_id` parameter of
 `nightshift_sandbox_bash`; for that single command only, the environment contains `CONNECTOR_ID`,
-`CONNECTOR_TYPE`, a `CONNECTOR_CONFIG_<KEY>` per setting, and a `CONNECTOR_SECRET_<KEY>` per
+`CONNECTOR_TYPE`, a `CONNECTOR_CONFIG_<KEY>` per setting, and a `CONNECTOR_HEADER_<NAME>` per
 credential. Discover the exact names with `env | grep ^CONNECTOR_ | cut -d= -f1`.
 
 If a connector you expected is not listed, it is not reachable from the sandbox — do not guess
@@ -582,6 +584,14 @@ per action, at most 3, strongest first:
 - `confidence` — `high`, `medium`, or `low`: how strongly the findings support that the action
   resolves or mitigates the confirmed problem.
 - `impact` — how disruptive carrying it out is.
+- `category` — always one of these, the one that best names the kind of action:
+  - `mitigate` — restore service without fixing the cause: roll back a deploy, config change, or
+    feature flag; restart; fail over; shift traffic; shed load; add capacity.
+  - `remediate` — a lasting change to the code, config, or deployment that removes the cause.
+  - `investigate` — gather what is still needed to act safely, such as logs, a heap dump, or a
+    profile.
+  - `escalate` — bring in a person or team: page the owning on-call, or open a ticket with the
+    owner of a dependency.
 
 ```json
 {
@@ -589,7 +599,8 @@ per action, at most 3, strongest first:
   "comment": "The 14:02 deploy lowered `connection_pool.max_size` from 100 to 20, and orders-api exhausted the pool under normal load.\n\n```yaml\nconnection_pool:\n  max_size: 100\n```",
   "origin": "nightshift",
   "confidence": "high",
-  "impact": "low"
+  "impact": "low",
+  "category": "mitigate"
 }
 ```
 

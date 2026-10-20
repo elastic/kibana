@@ -91,7 +91,7 @@ describe('sandbox bash tool — sandbox secrets', () => {
       secretValues: [GITHUB_TOKEN],
     });
     const resolveConnectorCredentials: ResolveConnectorCredentials = jest.fn().mockResolvedValue({
-      env: { SHARED: 'from-connector', CONNECTOR_SECRET_TOKEN: CONNECTOR_TOKEN },
+      env: { SHARED: 'from-connector', CONNECTOR_HEADER_AUTHORIZATION: CONNECTOR_TOKEN },
       secretValues: [CONNECTOR_TOKEN],
     });
     const { run, runCommand } = setup({ resolveForCommand, resolveConnectorCredentials });
@@ -105,13 +105,13 @@ describe('sandbox bash tool — sandbox secrets', () => {
     expect(runCommand.mock.calls[0][0].env).toMatchObject({
       GITHUB_TOKEN,
       SHARED: 'from-connector',
-      CONNECTOR_SECRET_TOKEN: CONNECTOR_TOKEN,
+      CONNECTOR_HEADER_AUTHORIZATION: CONNECTOR_TOKEN,
     });
   });
 
   it('redacts both connector credentials and sandbox secrets from output', async () => {
     const resolveConnectorCredentials: ResolveConnectorCredentials = jest.fn().mockResolvedValue({
-      env: { CONNECTOR_SECRET_TOKEN: CONNECTOR_TOKEN },
+      env: { CONNECTOR_HEADER_AUTHORIZATION: CONNECTOR_TOKEN },
       secretValues: [CONNECTOR_TOKEN],
     });
     const { run } = setup({

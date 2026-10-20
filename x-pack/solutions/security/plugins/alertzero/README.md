@@ -298,6 +298,10 @@ Alert Triage no longer runs once per rule execution, and enabling it attaches no
 
 **Alert Analysis settings the Worker path uses.** The batch calls `system-security-alert-analysis` with `calledByWorker: true`, `autoCloseEnabled: false` (closing is a proposal, never inline), `autoCloseConfidenceScoreMinThreshold` from this Worker's setting, the `alertzero_balanced` model feature, and the Investigation id. Its tag prefix comes from the space's Alert Analysis runtime config, so alerts Alert Analysis tagged on its own are left alone. Alert Analysis run on its own keeps reading its own space settings and is unchanged.
 
+### Attack Discovery Worker
+
+The per-space `system-security-floor-attack-discovery` Worker runs `system-security-attack-discovery-worker`, which generates attacks through `system-security-attack-discovery-batched-generation` and starts one `system-security-attack-discovery-review` per attack. Generation runs the `security.attack-discovery.run` step with `ground_truth_gate_enabled: false`, so it does no false-positive triage of its own. The review's FP/TP analysis (`system-security-attack-discovery-fp-tp-analysis`) is the only place an attack is judged a false positive, and the review applies that verdict.
+
 ### Worker-specific settings (`extras`)
 
 `enabled` sits beside `settings`; `autonomy` and `scheduleInterval` are the shared fields inside it. Anything else lives under `settings.extras`, owned by the Worker's Watch team and closed per Worker. A PATCH is the editable subset of the read body plus the revision GET returned:

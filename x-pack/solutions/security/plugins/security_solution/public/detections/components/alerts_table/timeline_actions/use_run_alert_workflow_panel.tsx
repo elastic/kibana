@@ -85,7 +85,7 @@ export const AlertWorkflowsPanel = ({
         : { attachmentIds: alertIds.map(({ _id }) => _id) },
     [alertIds, originAlertId]
   );
-  const { runWorkflow, showSuccessToast } = useCaseAttachmentWorkflowRun({
+  const { runWorkflow, showSuccessToast, telemetry } = useCaseAttachmentWorkflowRun({
     attachmentType,
     target,
   });
@@ -105,6 +105,7 @@ export const AlertWorkflowsPanel = ({
       inputs={inputs}
       runWorkflow={runWorkflow}
       showSuccessToast={showSuccessToast}
+      telemetry={telemetry}
       visibility={ALERT_WORKFLOW_VISIBILITY}
       sortWorkflow={sortAlertWorkflow}
       filterWorkflow={isAlertWorkflow}

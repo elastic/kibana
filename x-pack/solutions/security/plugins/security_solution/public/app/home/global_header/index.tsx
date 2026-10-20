@@ -26,6 +26,7 @@ import {
   isRuleChangesHistoryPath,
   isRulesAddPath,
   isRulesManagementPath,
+  isSharedExceptionListsPath,
 } from '../../../helpers';
 import { TimelineId } from '../../../../common/types/timeline';
 import { timelineDefaults } from '../../../timelines/store/defaults';
@@ -67,6 +68,7 @@ export const GlobalHeader = React.memo(() => {
   const changesHistoryPath = isRuleChangesHistoryPath(pathname);
   const rulesManagementPath = isRulesManagementPath(pathname);
   const rulesAddPath = isRulesAddPath(pathname);
+  const sharedExceptionListsPath = isSharedExceptionListsPath(pathname);
   // Cloud Security Posture pages own "Add integrations" in their own app header.
   const cloudSecurityPosturePath = isCloudSecurityPosturePath(pathname);
 
@@ -77,10 +79,16 @@ export const GlobalHeader = React.memo(() => {
       return;
     }
 
-    // The Rules, Add Elastic rules and Cloud Security Posture page app headers render their own
-    // actions (ML job settings, Add integrations), so clear the global header action menu there to
-    // avoid duplicating them.
-    if (changesHistoryPath || rulesManagementPath || rulesAddPath || cloudSecurityPosturePath) {
+    // The Rules, Add Elastic rules, Shared Exception Lists and Cloud Security Posture page app headers
+    // render their own actions (ML job settings, Add integrations), so clear the global header action
+    // menu there to avoid duplicating them.
+    if (
+      changesHistoryPath ||
+      rulesManagementPath ||
+      rulesAddPath ||
+      sharedExceptionListsPath ||
+      cloudSecurityPosturePath
+    ) {
       setHeaderActionMenu(undefined);
       return;
     }
@@ -110,6 +118,7 @@ export const GlobalHeader = React.memo(() => {
     changesHistoryPath,
     rulesManagementPath,
     rulesAddPath,
+    sharedExceptionListsPath,
     cloudSecurityPosturePath,
   ]);
 

@@ -17,7 +17,8 @@ const buildPublicConversationFilter = () => {
 
 /**
  * Matches conversations owned by the current user, on `user_id` when the document stored one and on
- * username only when it did not. Mirrors `isConversationOwner`.
+ * username only when it did not (legacy conversations, and ones created by callers without a
+ * profile). Mirrors `isConversationOwner`.
  */
 const buildOwnedConversationFilter = ({ user }: { user: UserIdAndName }) => {
   const shouldClauses: Array<Record<string, unknown>> = [];

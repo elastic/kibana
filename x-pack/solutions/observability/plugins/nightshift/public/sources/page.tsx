@@ -13,7 +13,7 @@ import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
 import React, { useCallback } from 'react';
 import { NightshiftAppHeader } from '../app/app_header';
 import type { NightshiftAppHeaderProps } from '../app/app_header';
-import { getFormattedError } from '../common/errors';
+import { getWorkflowFailureMessage } from '../common/errors';
 import { SignificantEventsPageProvider } from '../data/discovery/significant_events_page_context';
 import { useBlocksNewActivity } from '../data/maintenance/use_significant_events_maintenance';
 import { useKibana } from '../hooks/use_kibana';
@@ -56,7 +56,9 @@ export function SourcesPage({
   });
   const onOnboardingFailed = useCallback(
     (error: string) => {
-      toasts.addError(getFormattedError(new Error(error)), { title: ONBOARDING_FAILURE_TITLE });
+      toasts.addError(new Error(getWorkflowFailureMessage(error)), {
+        title: ONBOARDING_FAILURE_TITLE,
+      });
     },
     [toasts]
   );
