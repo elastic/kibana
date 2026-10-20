@@ -8,27 +8,42 @@
 /* RESEARCH ONLY. Boot-phase fence for the worker's Elasticsearch client.
  * Records method and path only (never body, headers, or credentials). */
 
+import { appendFileSync } from 'fs';
 import type {
   OnRequestHandler,
   OnRequestHandlerFactory,
 } from '@kbn/core-elasticsearch-client-server-internal';
 
-/** A document API in front of a read-looking segment is still a write. */
-const DOC_MUTATION_SEGMENTS = new Set(['_doc', '_update', '_create']);
-const READ_SEGMENTS = new Set([
-  '_search',
-  '_msearch',
-  '_async_search',
-  '_count',
-  '_field_caps',
-  '_mget',
-  '_pit',
-  '_query',
-  '_analyze',
-]);
-
-/** Template simulation only. A document update such as `/orders/_update/_simulate` stays a write. */
-const INDEX_TEMPLATE_SIMULATE = /^\/_index_template\/_simulate(?:_index)?(?:\/|$)/;
+/**
+ * Read routes the alerting subset actually sends, matched by segment position.
+ * A segment that starts with `_` is an API. Anything else is a target: index names
+ * cannot start with `_`, so `/_scripts/_search` is not `/{target}/_search`.
+ * Boot record on t7p-wc sent the two index-template simulate paths. The other
+ * templates are the search/ES|QL/pit/scroll routes from alerting runs.
+ */
+type RoutePart = { readonly kind: 'target' } | { readonly kind: 'api'; readonly name: string };
+const target: RoutePart = { kind: 'target' };
+const api = (name: string): RoutePart => ({ kind: 'api', name });
+const READ_ROUTE_TEMPLATES: readonly { method: string; parts: readonly RoutePart[] }[] = [
+  { method: 'POST', parts: [api('_search')] },
+  { method: 'POST', parts: [target, api('_search')] },
+  { method: 'POST', parts: [api('_msearch')] },
+  { method: 'POST', parts: [target, api('_msearch')] },
+  { method: 'POST', parts: [target, api('_count')] },
+  { method: 'POST', parts: [api('_mget')] },
+  { method: 'POST', parts: [target, api('_mget')] },
+  { method: 'POST', parts: [api('_query')] },
+  { method: 'POST', parts: [target, api('_field_caps')] },
+  { method: 'POST', parts: [api('_pit')] },
+  { method: 'POST', parts: [target, api('_pit')] },
+  { method: 'POST', parts: [api('_search'), api('scroll')] },
+  { method: 'DELETE', parts: [api('_pit')] },
+  { method: 'DELETE', parts: [api('_search'), api('scroll')] },
+  { method: 'POST', parts: [api('_index_template'), api('_simulate')] },
+  { method: 'POST', parts: [api('_index_template'), api('_simulate'), target] },
+  { method: 'POST', parts: [api('_index_template'), api('_simulate_index')] },
+  { method: 'POST', parts: [api('_index_template'), api('_simulate_index'), target] },
+];
 
 export interface EsWriteAllow {
   readonly method: string;
@@ -53,31 +68,45 @@ export interface EsWriteSummary {
 const barePath = (path: string): string => path.split('?')[0];
 
 /**
- * A POST is a read only when a path segment is a search API and no earlier
- * segment is a document mutation (`_doc`, `_update`, `_create`).
- * Index-template `_simulate` is the other read.
+ * One decode. Encoded `/` or `_`, `//`, and `.` / `..` segments are not routes:
+ * they stay writes so a write cannot borrow a read template.
  */
-const isAnchoredReadPost = (path: string): boolean => {
-  if (INDEX_TEMPLATE_SIMULATE.test(path)) return true;
-  const segments = path.split('/').filter(Boolean);
-  if (segments.some((segment) => DOC_MUTATION_SEGMENTS.has(segment))) return false;
-  for (let index = 0; index < segments.length; index++) {
-    const segment = segments[index];
-    const next = segments[index + 1];
-    if (READ_SEGMENTS.has(segment)) return true;
-    if (segment === '_eql' && next === 'search') return true;
-    if (segment === '_validate' && next === 'query') return true;
-    if (segment === '_render' && next === 'template') return true;
+export const routeSegments = (path: string): readonly string[] | undefined => {
+  const raw = barePath(path);
+  if (raw.includes('//') || /%2f/i.test(raw) || /%5f/i.test(raw)) return undefined;
+  let decoded: string;
+  try {
+    decoded = decodeURIComponent(raw);
+  } catch {
+    return undefined;
   }
-  return false;
+  if (decoded.includes('//') || /%2f/i.test(decoded) || /%5f/i.test(decoded)) return undefined;
+  const segments = decoded.startsWith('/') ? decoded.slice(1).split('/') : decoded.split('/');
+  if (segments.some((segment) => segment === '' || segment === '.' || segment === '..')) {
+    return undefined;
+  }
+  return segments;
 };
 
-/** True for mutations. Anchored search POSTs and index-template `_simulate` stay reads. */
+const isReadRoute = (method: string, path: string): boolean => {
+  const segments = routeSegments(path);
+  if (!segments) return false;
+  const verb = method.toUpperCase();
+  return READ_ROUTE_TEMPLATES.some(
+    (template) =>
+      template.method === verb &&
+      template.parts.length === segments.length &&
+      template.parts.every((part, index) =>
+        part.kind === 'target' ? !segments[index].startsWith('_') : segments[index] === part.name
+      )
+  );
+};
+
+/** True for mutations. GET and HEAD are reads. Other methods are writes unless a route template matches. */
 export const isEsWrite = (method: string, path: string): boolean => {
   const verb = method.toUpperCase();
-  const pathOnly = barePath(path);
   if (verb === 'GET' || verb === 'HEAD') return false;
-  if (verb === 'POST' && isAnchoredReadPost(pathOnly)) return false;
+  if (isReadRoute(verb, path)) return false;
   return verb === 'POST' || verb === 'PUT' || verb === 'DELETE' || verb === 'PATCH';
 };
 
@@ -92,7 +121,9 @@ const kindOf = (record: EsRequestRecord): string => {
 export interface BootEsWriteFence {
   readonly endBoot: () => void;
   /** Ends the boot phase after these installer promises settle. A sleep is not a boundary. */
-  readonly awaitInstallers: (installers: ReadonlyArray<Promise<unknown> | undefined>) => Promise<void>;
+  readonly awaitInstallers: (
+    installers: ReadonlyArray<Promise<unknown> | undefined>
+  ) => Promise<void>;
   readonly records: () => readonly EsRequestRecord[];
   readonly summary: () => EsWriteSummary;
   readonly wrap: (factory: OnRequestHandlerFactory) => OnRequestHandlerFactory;
@@ -141,6 +172,10 @@ export const createBootEsWriteFence = (options: {
     const write = isEsWrite(method, path);
     const record: EsRequestRecord = { method, path, write, phase };
     seen.push(record);
+    const logPath = process.env.KBN_RESEARCH_WC_ES_LOG;
+    if (logPath) {
+      appendFileSync(logPath, `${JSON.stringify({ method, path, write, phase })}\n`);
+    }
     if (write && phase === 'boot' && options.mode === 'deny' && !permitted(record)) {
       denied += 1;
       throw new Error(`worker-core boot ES write denied: ${method.toUpperCase()} ${path}`);

@@ -9,7 +9,7 @@
  * Values that look like secrets are never placed in forwarded log text. */
 
 import { AsyncLocalStorage } from 'async_hooks';
-import { BehaviorSubject, distinctUntilChanged, filter, map } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, map } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 
 export interface ReplicaEnvelope<T> {
@@ -106,8 +106,12 @@ const encodeContextPart = (value?: string): string => encodeURIComponent(value |
 
 /** Same hierarchy string Core puts in the Elasticsearch opaque id. */
 const stringifyExecutionContext = (context: ExecutionContextValue): string => {
-  const current = `${encodeContextPart(context.type)}:${encodeContextPart(context.name)}:${encodeContextPart(context.id)}`;
-  const encoded = context.child ? `${current};${stringifyExecutionContext(context.child)}` : current;
+  const current = `${encodeContextPart(context.type)}:${encodeContextPart(
+    context.name
+  )}:${encodeContextPart(context.id)}`;
+  const encoded = context.child
+    ? `${current};${stringifyExecutionContext(context.child)}`
+    : current;
   return encoded.slice(0, MAX_OPAQUE_CONTEXT);
 };
 
@@ -245,7 +249,8 @@ export const createForwardingLogger = (
     log: (record: { level: { id: string }; message: string }) =>
       log(record.level.id as (typeof levels)[number], record.message),
     isLevelEnabled: (level: string) => levels.indexOf(level as (typeof levels)[number]) >= floor,
-    get: (...parts: string[]) => createForwardingLogger([context, ...parts].join('.'), emit, minLevel),
+    get: (...parts: string[]) =>
+      createForwardingLogger([context, ...parts].join('.'), emit, minLevel),
   };
   return logger as Logger;
 };
@@ -285,9 +290,7 @@ export const registerForwardedEventType = (
 };
 
 /** Forwards audit and analytics. Usage collectors are an explicit exclusion. */
-export const createEventForwarder = (
-  emit: (event: ForwardedEvent) => void
-): EventForwarder => {
+export const createEventForwarder = (emit: (event: ForwardedEvent) => void): EventForwarder => {
   const forwarded: ForwardedEvent[] = [];
   const excluded: Record<string, number> = {};
   return {
@@ -334,10 +337,8 @@ export const classifyFlagOverrides = (raw: unknown): FeatureFlagReplica => {
 };
 
 /** Lookup helpers. A miss is a miss: callers must ask main, not substitute a constant. */
-export const lookupBooleanFlag = (
-  replica: FeatureFlagReplica,
-  key: string
-): boolean | undefined => (Object.prototype.hasOwnProperty.call(replica.booleans, key) ? replica.booleans[key] : undefined);
+export const lookupBooleanFlag = (replica: FeatureFlagReplica, key: string): boolean | undefined =>
+  Object.prototype.hasOwnProperty.call(replica.booleans, key) ? replica.booleans[key] : undefined;
 
 export const createPlatformReplica = (initial: PlatformReplicas) => {
   let current = initial;
@@ -375,7 +376,6 @@ export const createPlatformReplica = (initial: PlatformReplicas) => {
     booleanFlag$: (key: string, _fallback: boolean) =>
       featureFlags$.pipe(
         map((envelope) => lookupBooleanFlag(envelope.value, key)),
-        filter((value): value is boolean => value !== undefined),
         distinctUntilChanged()
       ),
     stringFlag$: (key: string, _fallback: string) =>
@@ -385,7 +385,6 @@ export const createPlatformReplica = (initial: PlatformReplicas) => {
             ? envelope.value.strings[key]
             : undefined
         ),
-        filter((value): value is string => value !== undefined),
         distinctUntilChanged()
       ),
     numberFlag$: (key: string, _fallback: number) =>
@@ -395,7 +394,6 @@ export const createPlatformReplica = (initial: PlatformReplicas) => {
             ? envelope.value.numbers[key]
             : undefined
         ),
-        filter((value): value is number => value !== undefined),
         distinctUntilChanged()
       ),
     stringFlag: (key: string) =>

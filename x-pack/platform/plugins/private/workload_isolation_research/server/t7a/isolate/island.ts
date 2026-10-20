@@ -22,6 +22,7 @@
  */
 
 import { BehaviorSubject, from, of } from 'rxjs';
+import { switchMap } from 'rxjs';
 import { sanitizeTaskDefinitions } from '@kbn/task-manager-plugin/server/task_type_dictionary';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -52,7 +53,16 @@ import { License } from '@kbn/licensing-plugin/common/license';
 import { map } from 'rxjs';
 import { encodeFakeRequest } from '../request_codec';
 import type { IslandSnapshot } from '../snapshot';
-import { bridge, bridgeSync, countFence, edgeStats, fenceStats, runContext, strict, toData } from './bridge';
+import {
+  bridge,
+  bridgeSync,
+  countFence,
+  edgeStats,
+  fenceStats,
+  runContext,
+  strict,
+  toData,
+} from './bridge';
 import {
   ALERTING_BOOT_ES_WRITE_ALLOW,
   createBootEsWriteFence,
@@ -72,7 +82,11 @@ import {
   savedObjectCallOptions,
   verifyRegistryReadiness,
 } from '../../capability_kit/worker_core';
-import type { ForwardedEvent, ForwardedLog, SoTypeFingerprintInput } from '../../capability_kit/worker_core';
+import type {
+  ForwardedEvent,
+  ForwardedLog,
+  SoTypeFingerprintInput,
+} from '../../capability_kit/worker_core';
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 
@@ -90,7 +104,12 @@ const emitLog = (record: ForwardedLog): void => {
   if (!runContext.getStore()) return;
   void bridge('log', 'write', toData(record) as never, { detached: true }).catch(() => undefined);
 };
-const resolveReplica = async <T>(kind: string, key: string, fallback: T, hit: T | undefined): Promise<T> => {
+const resolveReplica = async <T>(
+  kind: string,
+  key: string,
+  fallback: T,
+  hit: T | undefined
+): Promise<T> => {
   if (hit !== undefined) return hit;
   const value = await bridge('replica', 'featureFlag', toData({ kind, key, fallback }) as never);
   return value as T;
@@ -468,23 +487,47 @@ export const createCoreLite = (
       getNumberValue: (key: string, fallback: number) =>
         resolveReplica('number', key, fallback, platform.numberFlag(key)),
       getBooleanValue$: (key: string, fallback: boolean) =>
-        platform.booleanFlag(key) === undefined
-          ? from(
-              bridge('replica', 'featureFlag', { key, fallback, kind: 'boolean' }) as Promise<boolean>
+        platform
+          .booleanFlag$(key, fallback)
+          .pipe(
+            switchMap((value) =>
+              value === undefined
+                ? from(
+                    bridge('replica', 'featureFlag', { key, fallback, kind: 'boolean' }) as Promise<
+                      boolean | undefined
+                    >
+                  )
+                : of(value)
             )
-          : platform.booleanFlag$(key, fallback),
+          ),
       getStringValue$: (key: string, fallback: string) =>
-        platform.stringFlag(key) === undefined
-          ? from(
-              bridge('replica', 'featureFlag', { key, fallback, kind: 'string' }) as Promise<string>
+        platform
+          .stringFlag$(key, fallback)
+          .pipe(
+            switchMap((value) =>
+              value === undefined
+                ? from(
+                    bridge('replica', 'featureFlag', { key, fallback, kind: 'string' }) as Promise<
+                      string | undefined
+                    >
+                  )
+                : of(value)
             )
-          : platform.stringFlag$(key, fallback),
+          ),
       getNumberValue$: (key: string, fallback: number) =>
-        platform.numberFlag(key) === undefined
-          ? from(
-              bridge('replica', 'featureFlag', { key, fallback, kind: 'number' }) as Promise<number>
+        platform
+          .numberFlag$(key, fallback)
+          .pipe(
+            switchMap((value) =>
+              value === undefined
+                ? from(
+                    bridge('replica', 'featureFlag', { key, fallback, kind: 'number' }) as Promise<
+                      number | undefined
+                    >
+                  )
+                : of(value)
             )
-          : platform.numberFlag$(key, fallback),
+          ),
     }),
     pricing: strict('core.pricing', {
       isFeatureAvailable: (featureId: string) => {
@@ -606,7 +649,9 @@ export const createCoreLite = (
     events.send('analytics', analyticsEvent);
     await safeBridge('analytics', 'registerEventType', {
       eventType: 'worker_core_live',
-      schema: { token: { type: 'keyword', _meta: { description: 'Worker Core live probe token' } } },
+      schema: {
+        token: { type: 'keyword', _meta: { description: 'Worker Core live probe token' } },
+      },
     });
     const analyticsError = await safeBridge('analytics', 'write', analyticsEvent);
     events.send('usage.collector.fetch', { collector: 'worker-core' });
@@ -674,7 +719,8 @@ export const createDepFacades = (
   platform: ReturnType<typeof createPlatformReplica>
 ) => {
   const toLicense = (value: Record<string, unknown>) => {
-    const source = Object.keys(value).length > 0 ? value : (snapshot.license as Record<string, unknown>);
+    const source =
+      Object.keys(value).length > 0 ? value : (snapshot.license as Record<string, unknown>);
     return License.fromJSON(source as never);
   };
   const license$ = new BehaviorSubject(toLicense(platform.license$.getValue()));
@@ -704,7 +750,9 @@ export const createDepFacades = (
         return bridge('tm', method, toData(args) as never);
       }
       countFence(`taskManager.${method}`);
-      return Array.isArray(first) ? first.map((item) => ({ ...item, id: 'fenced' })) : { id: 'fenced' };
+      return Array.isArray(first)
+        ? first.map((item) => ({ ...item, id: 'fenced' }))
+        : { id: 'fenced' };
     };
   const taskManagerSetup = strict('taskManager(setup)', {
     index: snapshot.taskManagerIndex,
@@ -959,6 +1007,12 @@ export interface Island {
   readonly clusterClient: ClusterClient;
   readonly esWrites: ReturnType<ReturnType<typeof createBootEsWriteFence>['summary']>;
   readonly esWriteRecords: ReadonlyArray<{ method: string; path: string }>;
+  readonly esRecords: ReadonlyArray<{
+    method: string;
+    path: string;
+    write: boolean;
+    phase: 'boot' | 'run';
+  }>;
   readonly registeredSoTypes: readonly string[];
   readonly taskDefinitionMeta: ReadonlyArray<{
     type: string;
@@ -1062,119 +1116,118 @@ export const bootIsland = async (
   };
 
   await runInTmPhase('boot', async () => {
-  // ---- setup (Core's topological order) ----
-  const esoStartDeferred = deferred<unknown>();
-  if (eso) {
-    const esoSetup = eso.setup(
-      core.setupFor(Promise.resolve({}), esoStartDeferred.promise),
-      {}
+    // ---- setup (Core's topological order) ----
+    const esoStartDeferred = deferred<unknown>();
+    if (eso) {
+      const esoSetup = eso.setup(
+        core.setupFor(Promise.resolve({}), esoStartDeferred.promise),
+        {}
+      ) as object;
+      (deps as { esoSetup: object }).esoSetup = esoSetup;
+    }
+    const eventLogSetup = eventLog.setup(
+      core.setupFor(depsStart.eventLog.promise, starts.eventLog.promise),
+      { spaces: deps.spacesSetup }
     ) as object;
-    (deps as { esoSetup: object }).esoSetup = esoSetup;
-  }
-  const eventLogSetup = eventLog.setup(
-    core.setupFor(depsStart.eventLog.promise, starts.eventLog.promise),
-    { spaces: deps.spacesSetup }
-  ) as object;
-  const actionsSetup = actions.setup(
-    core.setupFor(depsStart.actions.promise, starts.actions.promise),
-    {
-      licensing: deps.licensingSetup,
-      taskManager: deps.taskManagerSetup,
-      encryptedSavedObjects: deps.esoSetup,
-      eventLog: eventLogSetup,
+    const actionsSetup = actions.setup(
+      core.setupFor(depsStart.actions.promise, starts.actions.promise),
+      {
+        licensing: deps.licensingSetup,
+        taskManager: deps.taskManagerSetup,
+        encryptedSavedObjects: deps.esoSetup,
+        eventLog: eventLogSetup,
+        features: deps.features,
+        spaces: deps.spacesSetup,
+        security: deps.securitySetup,
+      }
+    ) as object;
+    stackConnectors.setup(
+      core.setupFor(depsStart.stackConnectors.promise, starts.stackConnectors.promise),
+      { actions: actionsSetup }
+    );
+    const alertingSetup = alerting.setup(
+      core.setupFor(depsStart.alerting.promise, starts.alerting.promise),
+      {
+        actions: actionsSetup,
+        data: deps.dataSetup,
+        dataViews: {},
+        share: {},
+        encryptedSavedObjects: deps.esoSetup,
+        eventLog: eventLogSetup,
+        features: deps.features,
+        kibanaUtils: {},
+        licensing: deps.licensingSetup,
+        taskManager: deps.taskManagerSetup,
+        management: {},
+        kql: deps.kqlSetup,
+        embeddable: {},
+        security: deps.securitySetup,
+        spaces: deps.spacesSetup,
+      }
+    ) as object;
+    stackAlerts.setup(core.setupFor(depsStart.stackAlerts.promise, starts.stackAlerts.promise), {
+      alerting: alertingSetup,
       features: deps.features,
-      spaces: deps.spacesSetup,
-      security: deps.securitySetup,
+    });
+
+    // ---- start ----
+    if (eso) {
+      const esoStart = eso.start(core.start, {}) as object;
+      esoStartDeferred.resolve(esoStart);
+      (deps as { esoStart: object }).esoStart = esoStart;
     }
-  ) as object;
-  stackConnectors.setup(
-    core.setupFor(depsStart.stackConnectors.promise, starts.stackConnectors.promise),
-    { actions: actionsSetup }
-  );
-  const alertingSetup = alerting.setup(
-    core.setupFor(depsStart.alerting.promise, starts.alerting.promise),
-    {
-      actions: actionsSetup,
-      data: deps.dataSetup,
-      dataViews: {},
-      share: {},
-      encryptedSavedObjects: deps.esoSetup,
-      eventLog: eventLogSetup,
+    depsStart.eventLog.resolve({ spaces: deps.spacesStart });
+    const eventLogStart = eventLog.start(core.start, { spaces: deps.spacesStart }) as object;
+    starts.eventLog.resolve(eventLogStart);
+
+    const actionsDeps = {
+      licensing: deps.licensingStart,
+      taskManager: deps.taskManagerStart,
+      encryptedSavedObjects: deps.esoStart,
+      eventLog: eventLogStart,
+      spaces: deps.spacesStart,
+      security: deps.securityStart,
       features: deps.features,
-      kibanaUtils: {},
-      licensing: deps.licensingSetup,
-      taskManager: deps.taskManagerSetup,
-      management: {},
-      kql: deps.kqlSetup,
-      embeddable: {},
-      security: deps.securitySetup,
-      spaces: deps.spacesSetup,
-    }
-  ) as object;
-  stackAlerts.setup(core.setupFor(depsStart.stackAlerts.promise, starts.stackAlerts.promise), {
-    alerting: alertingSetup,
-    features: deps.features,
-  });
+    };
+    depsStart.actions.resolve(actionsDeps);
+    const actionsStart = actions.start(core.start, actionsDeps) as object;
+    starts.actions.resolve(actionsStart);
 
-  // ---- start ----
-  if (eso) {
-    const esoStart = eso.start(core.start, {}) as object;
-    esoStartDeferred.resolve(esoStart);
-    (deps as { esoStart: object }).esoStart = esoStart;
-  }
-  depsStart.eventLog.resolve({ spaces: deps.spacesStart });
-  const eventLogStart = eventLog.start(core.start, { spaces: deps.spacesStart }) as object;
-  starts.eventLog.resolve(eventLogStart);
+    const connectorsDeps = {
+      encryptedSavedObjects: deps.esoStart,
+      actions: actionsStart,
+      spaces: deps.spacesStart,
+      licensing: deps.licensingStart,
+    };
+    depsStart.stackConnectors.resolve(connectorsDeps);
+    starts.stackConnectors.resolve(stackConnectors.start(core.start, connectorsDeps));
 
-  const actionsDeps = {
-    licensing: deps.licensingStart,
-    taskManager: deps.taskManagerStart,
-    encryptedSavedObjects: deps.esoStart,
-    eventLog: eventLogStart,
-    spaces: deps.spacesStart,
-    security: deps.securityStart,
-    features: deps.features,
-  };
-  depsStart.actions.resolve(actionsDeps);
-  const actionsStart = actions.start(core.start, actionsDeps) as object;
-  starts.actions.resolve(actionsStart);
+    const alertingDeps = {
+      actions: actionsStart,
+      data: deps.dataStart,
+      dataViews: deps.dataViewsStart,
+      share: deps.shareStart,
+      encryptedSavedObjects: deps.esoStart,
+      eventLog: eventLogStart,
+      features: deps.features,
+      licensing: deps.licensingStart,
+      taskManager: deps.taskManagerStart,
+      security: deps.securityStart,
+      spaces: deps.spacesStart,
+      maintenanceWindows: deps.maintenanceWindowsStart,
+    };
+    depsStart.alerting.resolve(alertingDeps);
+    starts.alerting.resolve(alerting.start(core.start, alertingDeps));
 
-  const connectorsDeps = {
-    encryptedSavedObjects: deps.esoStart,
-    actions: actionsStart,
-    spaces: deps.spacesStart,
-    licensing: deps.licensingStart,
-  };
-  depsStart.stackConnectors.resolve(connectorsDeps);
-  starts.stackConnectors.resolve(stackConnectors.start(core.start, connectorsDeps));
-
-  const alertingDeps = {
-    actions: actionsStart,
-    data: deps.dataStart,
-    dataViews: deps.dataViewsStart,
-    share: deps.shareStart,
-    encryptedSavedObjects: deps.esoStart,
-    eventLog: eventLogStart,
-    features: deps.features,
-    licensing: deps.licensingStart,
-    taskManager: deps.taskManagerStart,
-    security: deps.securityStart,
-    spaces: deps.spacesStart,
-    maintenanceWindows: deps.maintenanceWindowsStart,
-  };
-  depsStart.alerting.resolve(alertingDeps);
-  starts.alerting.resolve(alerting.start(core.start, alertingDeps));
-
-  const stackAlertsDeps = { alerting: {}, triggersActionsUi: { data: {} } };
-  depsStart.stackAlerts.resolve(stackAlertsDeps);
-  starts.stackAlerts.resolve(stackAlerts.start(core.start, stackAlertsDeps));
+    const stackAlertsDeps = { alerting: {}, triggersActionsUi: { data: {} } };
+    depsStart.stackAlerts.resolve(stackAlertsDeps);
+    starts.stackAlerts.resolve(stackAlerts.start(core.start, stackAlertsDeps));
   });
   const eventLogContext = (
     eventLog as { esContext?: { initialized?: boolean; waitTillReady?: () => Promise<unknown> } }
   ).esContext;
-  const alertsInit = (
-    alerting as { alertsService?: { commonInitPromise?: Promise<unknown> } }
-  ).alertsService?.commonInitPromise;
+  const alertsInit = (alerting as { alertsService?: { commonInitPromise?: Promise<unknown> } })
+    .alertsService?.commonInitPromise;
   await core.esFence.awaitInstallers([
     eventLogContext?.initialized ? eventLogContext.waitTillReady?.() : undefined,
     alertsInit,
@@ -1190,6 +1243,12 @@ export const bootIsland = async (
       .records()
       .filter((record) => record.write && record.phase === 'boot')
       .map((record) => ({ method: record.method, path: record.path })),
+    esRecords: core.esFence.records().map((record) => ({
+      method: record.method,
+      path: record.path,
+      write: record.write,
+      phase: record.phase,
+    })),
     registeredSoTypes: core.registeredSoTypes.map((type) => type.name),
     taskDefinitionMeta: sanitizeTaskDefinitions(
       Object.fromEntries(deps.taskCapture.definitions) as never
@@ -1205,7 +1264,8 @@ export const bootIsland = async (
     })),
     applyReplicas: (next: IslandSnapshot) => {
       if (next.replicas) core.platform.apply(next.replicas);
-      if (localSo && next.readiness) verifyRegistryReadiness(next.readiness, core.registeredSoTypes);
+      if (localSo && next.readiness)
+        verifyRegistryReadiness(next.readiness, core.registeredSoTypes);
     },
     observePlatform: (token: string) => core.observePlatform(token),
     platform: core.platform,

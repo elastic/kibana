@@ -89,6 +89,7 @@ runContext
       bootMs: island.bootMs,
       esWrites: island.esWrites,
       esWriteRecords: island.esWriteRecords,
+      esRecords: island.esRecords,
       registeredSoTypes: island.registeredSoTypes,
       taskTypeCount: island.taskCapture.definitions.size,
       taskTypes: [...island.taskCapture.definitions.keys()].sort(),

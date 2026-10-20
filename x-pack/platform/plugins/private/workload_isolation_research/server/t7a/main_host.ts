@@ -24,6 +24,10 @@ import {
   researchDefinitionMeta,
   resolveCancelGraceMs,
 } from '@kbn/task-manager-plugin/server';
+import type { RunContext } from '@kbn/task-manager-plugin/server';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import { captureResearchEsCapability } from '@kbn/core-elasticsearch-client-server-internal';
+import type { PlatformReplicas } from '../capability_kit/worker_core';
 import {
   CONFIG_CAPTURE_KEY,
   CONFIG_OBSERVE_KEY,
@@ -31,7 +35,6 @@ import {
   captureActiveProduct,
   classifyFlagOverrides,
   captureEffectivePluginConfig,
-  configKeyPaths,
   createReplicaWaitQueue,
   forwardLogLevel,
   RUN_BRIDGED_TM_METHODS,
@@ -42,10 +45,6 @@ import {
   registerForwardedEventType,
   taskManagerExecutionContext,
 } from '../capability_kit/worker_core';
-import type { PlatformReplicas } from '../capability_kit/worker_core';
-import type { RunContext } from '@kbn/task-manager-plugin/server';
-import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
-import { captureResearchEsCapability } from '@kbn/core-elasticsearch-client-server-internal';
 import { ExecutionHost, ModuleRegistry } from '../capability_kit';
 import type { Binding, CodecInput, Crossing, Outcome } from '../capability_kit';
 import { decodeFakeRequest, encodeFakeRequest } from './request_codec';
@@ -230,7 +229,9 @@ export class T7aController {
   }
 
   /** Dispatches a control phase (stats/gc/platform) to warm slots; used by memory probes. */
-  public async probe(kind: 'stats' | 'gc' | 'boot' | 'coldstart' | 'platform' | 'platform-watch'): Promise<Obj> {
+  public async probe(
+    kind: 'stats' | 'gc' | 'boot' | 'coldstart' | 'platform' | 'platform-watch'
+  ): Promise<Obj> {
     if (kind === 'platform-watch') {
       const outcome: Outcome = await this.getHost().run(
         this.runOptions(
@@ -353,7 +354,9 @@ export class T7aController {
   private featureSnapshot(): unknown[] {
     let list: unknown[] = [];
     try {
-      list = JSON.parse(JSON.stringify(this.deps.features?.getKibanaFeatures?.() ?? [])) as unknown[];
+      list = JSON.parse(
+        JSON.stringify(this.deps.features?.getKibanaFeatures?.() ?? [])
+      ) as unknown[];
     } catch (error) {
       this.configErrors = [...this.configErrors, `features: ${(error as Error).name ?? 'Error'}`];
       list = this.featureList;
@@ -372,13 +375,12 @@ export class T7aController {
     const value = {
       available: {},
       activeProduct: captureActiveProduct(
-        (
-          this.deps.core.pricing as { getActiveProduct?: () => unknown }
-        ).getActiveProduct?.()
+        (this.deps.core.pricing as { getActiveProduct?: () => unknown }).getActiveProduct?.()
       ),
     };
     const next = advanceGeneration(this.pricingState.hash, this.pricingState.generation, value);
-    if (next.hash !== this.pricingState.hash && this.pricingState.hash !== '') this.snapshot = undefined;
+    if (next.hash !== this.pricingState.hash && this.pricingState.hash !== '')
+      this.snapshot = undefined;
     this.pricingState = next;
     return { generation: next.generation, value };
   }
@@ -396,7 +398,10 @@ export class T7aController {
           overall: this.statusSource.overall,
         },
       },
-      features: { generation: this.featuresState.generation, value: { kibana: this.featureSnapshot() } },
+      features: {
+        generation: this.featuresState.generation,
+        value: { kibana: this.featureSnapshot() },
+      },
     };
   }
 
@@ -520,7 +525,8 @@ export class T7aController {
     ).getTypeRegistry?.();
     const fingerprints: Record<string, string> = {};
     if (registry) {
-      for (const type of registry.getAllTypes()) fingerprints[type.name] = fingerprintSavedObjectType(type);
+      for (const type of registry.getAllTypes())
+        fingerprints[type.name] = fingerprintSavedObjectType(type);
     }
     return { generation: 1, fingerprints };
   }
@@ -561,7 +567,9 @@ export class T7aController {
       }),
       audit: asBinding(async (op, args) => {
         if (op !== 'write') throw new Error('t7a audit: op not allowlisted');
-        const audit = core.security.audit as { withoutRequest?: { log?: (event: unknown) => void } };
+        const audit = core.security.audit as {
+          withoutRequest?: { log?: (event: unknown) => void };
+        };
         if (audit.withoutRequest?.log) audit.withoutRequest.log(args);
         else this.logger.info('[worker-core][audit] event forwarded');
         this.forwarded.audit += 1;
@@ -584,9 +592,8 @@ export class T7aController {
         }
         const eventData =
           args.eventData && typeof args.eventData === 'object' ? (args.eventData as object) : {};
-        const report = (
-          core.analytics as { reportEvent?: (type: string, data: object) => void }
-        ).reportEvent;
+        const report = (core.analytics as { reportEvent?: (type: string, data: object) => void })
+          .reportEvent;
         if (report) report(eventType, eventData);
         this.forwarded.analytics += 1;
         return { ok: true };
@@ -600,7 +607,8 @@ export class T7aController {
         },
         handler: async (operation, args, _bundle, context) => {
           const record = (args ?? {}) as Obj;
-          if (operation === 'pricing') return toData(core.pricing.isFeatureAvailable(String(record.featureId)));
+          if (operation === 'pricing')
+            return toData(core.pricing.isFeatureAvailable(String(record.featureId)));
           if (operation === 'wait') {
             return toData(
               await this.waitForReplicaChange(String(record.fingerprint ?? ''), context?.signal)
@@ -732,7 +740,16 @@ export class T7aController {
         rss: outcome.status === 'success' ? outcome.rss : undefined,
         at: Date.now(),
         ...(outcome.status === 'terminated'
-          ? { reason: outcome.reason, stop: outcome.stop, graceful: outcome.graceful }
+          ? {
+              reason: outcome.reason,
+              stop: outcome.stop,
+              graceful: outcome.graceful,
+              ...(outcome.terminal &&
+              typeof outcome.terminal === 'object' &&
+              (outcome.terminal as Obj).cancelledBeforeStart === true
+                ? { cancelledBeforeStart: true }
+                : {}),
+            }
           : {}),
       });
       if (outcome.status === 'failure') throw outcome.error;

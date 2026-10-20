@@ -10,9 +10,6 @@
 
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { ExecutionHost } from '../host';
-import { ModuleRegistry } from '../registry';
-import { beginRunThenCancel, bindRunnerCancel } from '../../t7a/isolate/runner_cancel';
 import {
   consumeCollateralReschedule,
   deriveCancelGraceMs,
@@ -25,6 +22,10 @@ import {
   setResearchTaskDefinitionSource,
   COLLATERAL_RESCHEDULE_CAP,
 } from '@kbn/task-manager-plugin/server/lib/research_runner_override';
+import { ExecutionHost, cooperativeStopFor } from '../host';
+import { ModuleRegistry } from '../registry';
+import { guardReplicaWatch } from '../../t7a/isolate/replica_watch';
+import { beginRunThenCancel, bindRunnerCancel } from '../../t7a/isolate/runner_cancel';
 import {
   ALERTING_BOOT_ES_WRITE_ALLOW,
   NAMED_EVENT_EXCLUSIONS,
@@ -114,7 +115,12 @@ test('boot fence anchors endpoint shapes and waits for installers', async () => 
   );
   assert.throws(
     () =>
-      handler({ scoped: false }, { method: 'POST', path: '/orders/_update/_simulate' }, {}, {} as never),
+      handler(
+        { scoped: false },
+        { method: 'POST', path: '/orders/_update/_simulate' },
+        {},
+        {} as never
+      ),
     /boot ES write denied/
   );
   handler(
@@ -217,10 +223,10 @@ test('replicas refresh on generation change and do not invent flag or price defa
 
 test('replica subscriptions and content hashes observe warm owner changes', async () => {
   const replica = createPlatformReplica(emptyPlatformReplicas());
-  const flags: boolean[] = [];
+  const flags: Array<boolean | undefined> = [];
   let completed = false;
   const subscription = replica.booleanFlag$('workerCore.liveProbe', false).subscribe({
-    next: (value: boolean) => flags.push(value),
+    next: (value: boolean | undefined) => flags.push(value),
     complete: () => {
       completed = true;
     },
@@ -243,10 +249,21 @@ test('replica subscriptions and content hashes observe warm owner changes', asyn
       value: { elasticsearch: 'available', savedObjects: 'degraded', overall: 'degraded' },
     },
   });
-  assert.deepEqual(flags, [true]);
-  const absent: boolean[] = [];
-  replica.booleanFlag$('not-owned', false).subscribe((value: boolean) => absent.push(value));
-  assert.deepEqual(absent, []);
+  assert.deepEqual(flags, [undefined, true]);
+  replica.apply({
+    ...emptyPlatformReplicas(),
+    featureFlags: { generation: 3, value: { booleans: {}, strings: {}, numbers: {} } },
+    status: {
+      generation: 2,
+      value: { elasticsearch: 'available', savedObjects: 'degraded', overall: 'degraded' },
+    },
+  });
+  assert.deepEqual(flags, [undefined, true, undefined]);
+  const absent: Array<boolean | undefined> = [];
+  replica
+    .booleanFlag$('not-owned', false)
+    .subscribe((value: boolean | undefined) => absent.push(value));
+  assert.deepEqual(absent, [undefined]);
   assert.equal(completed, false);
   assert.equal(statuses[statuses.length - 1], 'degraded');
   subscription.unsubscribe();
@@ -319,22 +336,29 @@ test('analytics reportEvent forwards a registered string event type and its data
   );
   assert.equal(counters[0].event_type, 'worker_core_live');
   assert.throws(
-    () => parseAnalyticsReport({ eventType: 'worker_core_live', properties: { token: 't' } }, undefined),
+    () =>
+      parseAnalyticsReport(
+        { eventType: 'worker_core_live', properties: { token: 't' } },
+        undefined
+      ),
     /eventType must be a string/
   );
-  registerForwardedEventType(
-    (definition) => client.registerEventType(definition),
-    { eventType: 'gen_ai_token_count', schema: {} }
-  );
-  registerForwardedEventType(
-    (definition) => client.registerEventType(definition),
-    { eventType: 'gen_ai_token_count', schema: {} }
-  );
+  registerForwardedEventType((definition) => client.registerEventType(definition), {
+    eventType: 'gen_ai_token_count',
+    schema: {},
+  });
+  registerForwardedEventType((definition) => client.registerEventType(definition), {
+    eventType: 'gen_ai_token_count',
+    schema: {},
+  });
   assert.throws(
     () =>
-      registerForwardedEventType(() => {
-        throw new Error('schema rejected');
-      }, { eventType: 'other' }),
+      registerForwardedEventType(
+        () => {
+          throw new Error('schema rejected');
+        },
+        { eventType: 'other' }
+      ),
     /schema rejected/
   );
 });
@@ -369,7 +393,9 @@ test('internal repository extensions fail closed', () => {
 });
 
 test('execution context matches Core opaque ids for concurrent tasks', async () => {
-  const { ExecutionContextContainer } = require('../../../../../../../../src/core/packages/execution-context/server-internal/src/execution_context_container');
+  const {
+    ExecutionContextContainer,
+  } = require('@kbn/core-execution-context-server-internal/src/execution_context_container');
   const service = createExecutionContextService();
   const taskA = {
     type: 'task manager',
@@ -690,7 +716,8 @@ test(
       registerExecutionClass({
         id: 'alerting-cancel',
         taskTypes: (type) => type === 'alerting:.es-query',
-        cancelGraceMs: (taskType) => (researchDefinitionMeta(taskType)?.timeout === '5m' ? 800 : 50),
+        cancelGraceMs: (taskType) =>
+          researchDefinitionMeta(taskType)?.timeout === '5m' ? 800 : 50,
         createRunner: () => ({ run: async () => ({ state: {} }) }),
       });
       const grace = resolveCancelGraceMs('alerting:.es-query', 50);
@@ -750,14 +777,98 @@ test('read classification is anchored and document ids cannot impersonate endpoi
   assert.equal(isEsWrite('POST', '/orders/_update/_query'), true);
   assert.equal(isEsWrite('POST', '/orders/_doc/_mget'), true);
   assert.equal(isEsWrite('POST', '/orders/_search'), false);
-  assert.equal(isEsWrite('POST', '/orders/_eql/search'), false);
-  assert.equal(isEsWrite('POST', '/_render/template'), false);
+  assert.equal(isEsWrite('POST', '/orders/_eql/search'), true);
+  assert.equal(isEsWrite('POST', '/_render/template'), true);
+  assert.equal(isEsWrite('DELETE', '/_pit'), false);
+  assert.equal(isEsWrite('POST', '/_search/scroll'), false);
+  assert.equal(isEsWrite('POST', '/%5Fsearch'), true);
+  assert.equal(isEsWrite('POST', '/orders/../_search'), true);
+  assert.equal(isEsWrite('POST', '//orders/_search'), true);
   for (const name of READ_ENDPOINT_NAMES) {
     assert.equal(isEsWrite('POST', `/orders/_doc/${name}`), true, name);
     assert.equal(isEsWrite('POST', `/orders/_update/${name}`), true, name);
     assert.equal(isEsWrite('POST', `/orders/_create/${name}`), true, name);
   }
+  assert.equal(isEsWrite('POST', '/_scripts/_search'), true);
+  assert.equal(isEsWrite('POST', '/_scripts/_mget'), true);
+  assert.equal(isEsWrite('POST', '/_scripts/_query'), true);
+  const admitted = adversarialWriteCandidates().filter((path) => !isEsWrite('POST', path));
+  assert.equal(adversarialWriteCandidates().length, 242);
+  assert.deepEqual(admitted, []);
 });
+
+/** Recreates the 242-path set: document ids, bulk shapes, underscore ids, encoding, slashes, queries. */
+const adversarialWriteCandidates = (): string[] => {
+  const names = READ_ENDPOINT_NAMES;
+  const paths: string[] = [];
+  for (const api of ['_doc', '_update', '_create']) {
+    for (const name of names) {
+      paths.push(`/orders/${api}/${name}`);
+      paths.push(`/${api}/${name}`);
+    }
+  }
+  paths.push('/_bulk', '/orders/_bulk');
+  for (const name of names) {
+    paths.push(`/_bulk/${name}`, `/orders/_bulk/${name}`, `/${name}/_bulk`);
+  }
+  for (const root of ['_scripts', '_cluster', '_nodes', '_security']) {
+    for (const name of names) paths.push(`/${root}/${name}`);
+  }
+  for (const name of names) {
+    paths.push(`/%5F${name.slice(1)}`, `/orders/${name}%2Fsecret`, `/_scripts%2F${name.slice(1)}`);
+  }
+  for (const name of names) {
+    paths.push(`//orders/${name}`, `/orders//${name}`, `/orders/${name}//`, `//_scripts/${name}`);
+  }
+  for (const name of names) {
+    paths.push(`/_bulk?${name}`, `/orders/_update/1?${name}=1`);
+  }
+  paths.push(
+    '/orders/_doc/1',
+    '/orders/_update/1',
+    '/orders/_create/1',
+    '/orders/_delete_by_query',
+    '/orders/_update_by_query',
+    '/.kibana-event-log-ds/_delete_by_query',
+    '/orders/_update/_simulate',
+    '/.kibana_locks-000001/_delete_by_query',
+    '/.kibana_locks-000001/_update',
+    '/orders/.kibana_locks-000001/_update/lock-id',
+    '/_scripts',
+    '/orders/_refresh',
+    '/orders/_flush',
+    '/_mapping',
+    '/orders/_mapping',
+    '/_aliases',
+    '/orders/_aliases',
+    '/_ilm/policy/x',
+    '/_security/user/elastic',
+    '/_template/legacy',
+    '/orders/_doc',
+    '/_update/_query',
+    '/_doc/_mget',
+    '/orders/_update/_search',
+    '/orders/_update/_query',
+    '/orders/_doc/_mget',
+    '/secret-index/_doc/1',
+    '/_component_template',
+    '/_data_stream/orders',
+    '/orders/_clone/other',
+    '/orders/_split/other',
+    '/orders/_shrink/other',
+    '/_reindex',
+    '/orders/_rollover',
+    '/_snapshot/repo/snap',
+    '/_slm/policy/p',
+    '/_ml/anomaly_detectors/j',
+    '/_ingest/pipeline/p',
+    '/_index_template/orders',
+    '/orders/_settings',
+    '/_cluster/settings',
+    '/_nodes/reload_secure_settings'
+  );
+  return paths;
+};
 
 test('an already-aborted host signal still cancels the runner', () => {
   const signal = AbortSignal.abort(new Error('boot finished after cancel'));
@@ -790,28 +901,91 @@ test('a cancel rejection during boot does not escape the binder', async () => {
   }
 });
 
-test('an already-aborted signal cancels only after run has started', async () => {
+test('an already-aborted signal does not start the run', async () => {
   const signal = AbortSignal.abort(new Error('boot finished after cancel'));
   const abortController = new AbortController();
   const order: string[] = [];
-  let ready = false;
-  const { pending, unbind } = beginRunThenCancel(signal, abortController, {
+  const { pending, unbind, cancelledBeforeStart } = beginRunThenCancel(signal, abortController, {
     run: async () => {
-      ready = true;
       order.push('run');
       return 'ran';
     },
     cancel: async () => {
-      if (!ready) throw new Error('AlertingEventLogger not initialized');
       order.push('cancel');
     },
   });
   try {
-    assert.equal(await pending, 'ran');
-    assert.deepEqual(order, ['run', 'cancel']);
-    assert.equal(abortController.signal.aborted, true);
+    assert.equal(cancelledBeforeStart, true);
+    assert.equal(await pending, undefined);
+    assert.deepEqual(order, []);
+    assert.equal(abortController.signal.aborted, false);
   } finally {
     unbind();
+  }
+});
+
+test('a cancel rejection after run has started fails the run', async () => {
+  const signal = new AbortController();
+  const abortController = new AbortController();
+  const { pending, unbind } = beginRunThenCancel(signal.signal, abortController, {
+    run: async () => {
+      signal.abort();
+      return 'ran';
+    },
+    cancel: async () => {
+      throw new Error('cancel failed');
+    },
+  });
+  try {
+    await assert.rejects(pending, /cancel failed/);
+  } finally {
+    unbind();
+  }
+});
+
+test('cooperative stop reads a thrown result and a failed packet', () => {
+  assert.equal(
+    cooperativeStopFor(false, { thrown: { message: 'cancel failed' } }),
+    'cooperative-failed'
+  );
+  assert.equal(cooperativeStopFor(true, { ok: true }), 'cooperative-failed');
+  assert.equal(cooperativeStopFor(false, { phase: 'run' }), 'cooperative');
+  assert.equal(cooperativeStopFor(false, { cancelledBeforeStart: true }), 'cooperative');
+});
+
+test('replica watch joins on every early failure path', async () => {
+  const paths = [
+    'success',
+    'runner-rejection',
+    'pre-aborted',
+    'parity',
+    'missing-definition',
+    'create-runner',
+  ] as const;
+  for (const path of paths) {
+    let open = 0;
+    const controller = new AbortController();
+    const watch = new Promise<void>((resolve) => {
+      open += 1;
+      const finish = () => {
+        open -= 1;
+        resolve();
+      };
+      controller.signal.addEventListener('abort', finish, { once: true });
+    });
+    const body = async () => {
+      if (path !== 'success') throw new Error(path);
+      return path;
+    };
+    if (path === 'success') {
+      assert.equal(await guardReplicaWatch(watch, () => controller.abort(), body), 'success');
+    } else {
+      await assert.rejects(
+        guardReplicaWatch(watch, () => controller.abort(), body),
+        new RegExp(path)
+      );
+    }
+    assert.equal(open, 0, path);
   }
 });
 
@@ -854,43 +1028,39 @@ test(
   }
 );
 
-test(
-  'a detached log call does not fail the task as outstanding',
-  { timeout: 20000 },
-  async () => {
-    const specifier = require.resolve('../example_tasks');
-    const registry = new ModuleRegistry(new Set([specifier]));
-    registry.register('fireAndForget', specifier, 'fireAndForget');
-    const host = new ExecutionHost(registry, { transport: 'thread', abortGraceMs: 200 });
-    let wrote = false;
-    try {
-      const outcome = await host.run({
-        workloadClass: 'alerting',
-        principal: 'alice',
-        space: 'default',
-        moduleId: 'fireAndForget',
-        input: {},
-        deadlineMs: 5000,
-        capabilities: {
-          fixture: {
-            lever: 'capability_bundle',
-            handler: async () => {
-              await new Promise((resolve) => setTimeout(resolve, 40));
-              wrote = true;
-              return { ok: true };
-            },
+test('a detached log call does not fail the task as outstanding', { timeout: 20000 }, async () => {
+  const specifier = require.resolve('../example_tasks');
+  const registry = new ModuleRegistry(new Set([specifier]));
+  registry.register('fireAndForget', specifier, 'fireAndForget');
+  const host = new ExecutionHost(registry, { transport: 'thread', abortGraceMs: 200 });
+  let wrote = false;
+  try {
+    const outcome = await host.run({
+      workloadClass: 'alerting',
+      principal: 'alice',
+      space: 'default',
+      moduleId: 'fireAndForget',
+      input: {},
+      deadlineMs: 5000,
+      capabilities: {
+        fixture: {
+          lever: 'capability_bundle',
+          handler: async () => {
+            await new Promise((resolve) => setTimeout(resolve, 40));
+            wrote = true;
+            return { ok: true };
           },
         },
-      });
-      assert.equal(outcome.status, 'success');
-      if (outcome.status === 'success') assert.deepEqual(outcome.value, { ok: true });
-      await new Promise((resolve) => setTimeout(resolve, 80));
-      assert.equal(wrote, true);
-    } finally {
-      await host.stop();
-    }
+      },
+    });
+    assert.equal(outcome.status, 'success');
+    if (outcome.status === 'success') assert.deepEqual(outcome.value, { ok: true });
+    await new Promise((resolve) => setTimeout(resolve, 80));
+    assert.equal(wrote, true);
+  } finally {
+    await host.stop();
   }
-);
+});
 
 test(
   'a task that aborts its own capability call does not leave it outstanding',
@@ -916,7 +1086,10 @@ test(
                 const signal = call?.signal;
                 if (!signal) return;
                 if (signal.aborted) reject(new Error('aborted'));
-                else signal.addEventListener('abort', () => reject(new Error('aborted')), { once: true });
+                else
+                  signal.addEventListener('abort', () => reject(new Error('aborted')), {
+                    once: true,
+                  });
               });
             },
           },

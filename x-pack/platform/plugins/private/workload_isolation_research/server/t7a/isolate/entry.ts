@@ -12,6 +12,7 @@
 import { setFlagsFromString } from 'v8';
 import { runInNewContext } from 'vm';
 import type { ResearchEsCapability } from '@kbn/core-elasticsearch-client-server-internal';
+import { diffDefinitionParity } from '@kbn/task-manager-plugin/server/lib/research_runner_override';
 import { decode } from '../../capability_kit/codecs';
 import type { CodecInput } from '../../capability_kit/codecs';
 import type { TaskEntry, WorkerContext } from '../../capability_kit/protocol';
@@ -21,9 +22,9 @@ import type { FakeRequestDescriptor } from '../request_codec';
 import { encodeRunResult, encodeTaskError } from '../task_codec';
 import { bootIsland } from './island';
 import type { Island } from './island';
-import { diffDefinitionParity } from '@kbn/task-manager-plugin/server/lib/research_runner_override';
 import { replicaFingerprint, runWithExecutionContext } from '../../capability_kit/worker_core';
 import { edgeStats, fenceStats, missStats, runContext } from './bridge';
+import { guardReplicaWatch } from './replica_watch';
 import { beginRunThenCancel, bindRunnerCancel } from './runner_cancel';
 
 let island: Promise<Island> | undefined;
@@ -74,7 +75,9 @@ const forceGc = () => {
 };
 
 const dataSnapshot = (context: WorkerContext): IslandSnapshot => {
-  const data = (context.bundle.data ? decode(context.bundle.data) : {}) as { snapshot?: IslandSnapshot };
+  const data = (context.bundle.data ? decode(context.bundle.data) : {}) as {
+    snapshot?: IslandSnapshot;
+  };
   return data.snapshot ?? ({} as IslandSnapshot);
 };
 
@@ -115,7 +118,9 @@ export const runTask: TaskEntry = async (rawInput: CodecInput, context: WorkerCo
         const raw = value as { type?: string; license?: { type?: string } };
         licenseSeen.push(String(raw.license?.type ?? raw.type ?? ''));
       });
-      const statusSub = current.platform.status$.subscribe((value) => statusSeen.push(value.overall));
+      const statusSub = current.platform.status$.subscribe((value) =>
+        statusSeen.push(value.overall)
+      );
       try {
         // Status can move on its own. Keep waiting until the flag value changes so a
         // mid-run override is observed on this warm island, not only on the next task.
@@ -194,80 +199,105 @@ export const runTask: TaskEntry = async (rawInput: CodecInput, context: WorkerCo
       }
     };
     const watch = watchReplicas();
-    const parity = diffDefinitionParity(
-      ((dataSnapshot(context).taskDefinitionMeta as readonly {
-        type: string;
-        timeout: string;
-        maxAttempts?: number;
-        cost?: string | number;
-        priority?: string | number;
-        stateSchemaVersions: readonly number[];
-      }[]) ?? []),
-      current.taskDefinitionMeta
-    );
-    if (parity.length > 0) {
-      throw new Error(`worker-core task definition parity failed: ${parity.join('; ')}`);
-    }
-    const bootMs = wasCold ? current.bootMs : 0;
-    const definition = current.taskCapture.definitions.get(input.taskType);
-    if (!definition) throw new Error(`t7a: task type ${input.taskType} not registered in island`);
-    const customFields: Record<string, unknown> = {};
-    const abortController = new AbortController();
-    const runner = definition.createTaskRunner({
-      taskInstance: input.taskInstance,
-      signal: abortController.signal,
-      executionUuid: input.executionUuid,
-      setCustomTaskRunEventFields: (fields: Record<string, unknown>) =>
-        Object.assign(customFields, fields),
-      ...(input.fakeRequest ? { fakeRequest: decodeFakeRequest(input.fakeRequest) } : {}),
-    } as never) as {
-      run: () => Promise<unknown>;
-      cancel?: () => Promise<unknown>;
-      cleanup?: () => Promise<void>;
-    };
-    // Cooperative cancel: TM's cancel on main aborts the dispatch signal, including one
-    // that aborted while the island was still booting. run() must start first so alerting's
-    // event logger exists before cancel writes the timeout event.
-    runs++;
     let unbindCancel = () => {};
-    try {
-      if (input.phase === 'cleanup') {
-        unbindCancel = bindRunnerCancel(context.signal, abortController, () =>
-          runner.cancel?.() ?? Promise.resolve()
+    return guardReplicaWatch(
+      watch,
+      () => {
+        unbindCancel();
+        stopWatch();
+        context.signal.removeEventListener('abort', stopWatch);
+      },
+      async () => {
+        const parity = diffDefinitionParity(
+          (dataSnapshot(context).taskDefinitionMeta as readonly {
+            type: string;
+            timeout: string;
+            maxAttempts?: number;
+            cost?: string | number;
+            priority?: string | number;
+            stateSchemaVersions: readonly number[];
+          }[]) ?? [],
+          current.taskDefinitionMeta
         );
-        await runner.cleanup?.();
-        return { phase: 'cleanup', customFields, coldBootMs: bootMs } as CodecInput;
+        if (parity.length > 0) {
+          throw new Error(`worker-core task definition parity failed: ${parity.join('; ')}`);
+        }
+        const bootMs = wasCold ? current.bootMs : 0;
+        const definition = current.taskCapture.definitions.get(input.taskType);
+        if (!definition)
+          throw new Error(`t7a: task type ${input.taskType} not registered in island`);
+        const customFields: Record<string, unknown> = {};
+        const abortController = new AbortController();
+        const runner = definition.createTaskRunner({
+          taskInstance: input.taskInstance,
+          signal: abortController.signal,
+          executionUuid: input.executionUuid,
+          setCustomTaskRunEventFields: (fields: Record<string, unknown>) =>
+            Object.assign(customFields, fields),
+          ...(input.fakeRequest ? { fakeRequest: decodeFakeRequest(input.fakeRequest) } : {}),
+        } as never) as {
+          run: () => Promise<unknown>;
+          cancel?: () => Promise<unknown>;
+          cleanup?: () => Promise<void>;
+        };
+        // A signal that aborted during boot does not start run(). A cancel that arrives
+        // after run() has started still lets run() begin so alerting's event logger exists.
+        runs++;
+        if (context.signal.aborted) {
+          return {
+            phase: 'run',
+            cancelledBeforeStart: true,
+            customFields,
+            coldBootMs: bootMs,
+            runMs: performance.now() - t0,
+            memory: memory(),
+          } as CodecInput;
+        }
+        if (input.phase === 'cleanup') {
+          unbindCancel = bindRunnerCancel(
+            context.signal,
+            abortController,
+            () => runner.cancel?.() ?? Promise.resolve()
+          );
+          await runner.cleanup?.();
+          return { phase: 'cleanup', customFields, coldBootMs: bootMs } as CodecInput;
+        }
+        const started = beginRunThenCancel(context.signal, abortController, {
+          run: () => runWithExecutionContext(input.executionContext, () => runner.run()),
+          cancel: () => runner.cancel?.() ?? Promise.resolve(),
+        });
+        unbindCancel = started.unbind;
+        if (started.cancelledBeforeStart) {
+          return {
+            phase: 'run',
+            cancelledBeforeStart: true,
+            customFields,
+            coldBootMs: bootMs,
+            runMs: performance.now() - t0,
+            memory: memory(),
+          } as CodecInput;
+        }
+        try {
+          const result = await started.pending;
+          return {
+            phase: 'run',
+            wire: encodeRunResult(result),
+            customFields,
+            coldBootMs: bootMs,
+            bootQueuedMs: wasCold && bootStartedAt ? 0 : undefined,
+            runMs: performance.now() - t0,
+            memory: memory(),
+          } as unknown as CodecInput;
+        } catch (error) {
+          return {
+            phase: 'run',
+            thrown: encodeTaskError(error instanceof Error ? error : new Error(String(error))),
+            customFields,
+            coldBootMs: bootMs,
+            runMs: performance.now() - t0,
+            memory: memory(),
+          } as unknown as CodecInput;
+        }
       }
-      const started = beginRunThenCancel(context.signal, abortController, {
-        run: () => runWithExecutionContext(input.executionContext, () => runner.run()),
-        cancel: () => runner.cancel?.() ?? Promise.resolve(),
-      });
-      unbindCancel = started.unbind;
-      try {
-        const result = await started.pending;
-        return {
-          phase: 'run',
-          wire: encodeRunResult(result),
-          customFields,
-          coldBootMs: bootMs,
-          bootQueuedMs: wasCold && bootStartedAt ? 0 : undefined,
-          runMs: performance.now() - t0,
-          memory: memory(),
-        } as unknown as CodecInput;
-      } catch (error) {
-        return {
-          phase: 'run',
-          thrown: encodeTaskError(error instanceof Error ? error : new Error(String(error))),
-          customFields,
-          coldBootMs: bootMs,
-          runMs: performance.now() - t0,
-          memory: memory(),
-        } as unknown as CodecInput;
-      }
-    } finally {
-      unbindCancel();
-      stopWatch();
-      context.signal.removeEventListener('abort', stopWatch);
-      await watch;
-    }
+    );
   });

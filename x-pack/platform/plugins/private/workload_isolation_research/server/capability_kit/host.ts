@@ -91,6 +91,22 @@ interface Slot {
   readonly active: Map<string, Execution>;
 }
 
+/**
+ * A cancel that returns `{ thrown }` is a failed cooperative stop even when the transport
+ * packet itself succeeded. Entry catches the runner and puts the error on `thrown`.
+ */
+export const cooperativeStopFor = (
+  packetFailed: boolean,
+  value: unknown
+): 'cooperative' | 'cooperative-failed' => {
+  const thrown =
+    value !== null &&
+    typeof value === 'object' &&
+    'thrown' in value &&
+    (value as { thrown?: unknown }).thrown != null;
+  return packetFailed || thrown ? 'cooperative-failed' : 'cooperative';
+};
+
 /** Supervises discardable per-class slots, preserving main's asynchronous control-plane authority. */
 export class ExecutionHost {
   private readonly pools = new Map<string, Slot[]>();
@@ -454,11 +470,7 @@ export class ExecutionHost {
               reason: execution.termination.reason,
               graceful: execution.termination.acknowledged,
               ...(execution.termination.reason === 'cancelled'
-                ? {
-                    stop: (packet.failed ? 'cooperative-failed' : 'cooperative') as
-                      | 'cooperative'
-                      | 'cooperative-failed',
-                  }
+                ? { stop: cooperativeStopFor(packet.failed, value) }
                 : {}),
               terminal: value,
             }

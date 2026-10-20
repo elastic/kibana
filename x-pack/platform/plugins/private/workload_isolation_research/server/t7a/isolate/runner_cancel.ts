@@ -11,19 +11,21 @@
 export const bindRunnerCancel = (
   signal: AbortSignal,
   abortController: AbortController,
-  cancel: (() => Promise<unknown>) | undefined
+  cancel: (() => Promise<unknown>) | undefined,
+  onError?: (error: Error) => void
 ): (() => void) => {
   let fired = false;
   const onAbort = () => {
     if (fired) return;
     fired = true;
     abortController.abort(signal.reason);
-    // Cancel can reject when the runner's logger is not initialized yet. That rejection
-    // must not become an unhandled rejection: the worker treats one as a process crash.
+    // The rejection is reported and is not an unhandled rejection (that crashes the worker).
     try {
-      void Promise.resolve(cancel?.()).catch(() => undefined);
-    } catch {
-      /* A synchronous throw is the same class of failure. */
+      void Promise.resolve(cancel?.()).catch((error: unknown) => {
+        onError?.(error instanceof Error ? error : new Error(String(error)));
+      });
+    } catch (error) {
+      onError?.(error instanceof Error ? error : new Error(String(error)));
     }
   };
   if (signal.aborted) onAbort();
@@ -32,8 +34,11 @@ export const bindRunnerCancel = (
 };
 
 /**
- * Starts the runner before installing cancel. Alerting's cancel writes a timeout event and
- * throws when that logger has not been initialized, which only happens inside `run()`.
+ * Starts the runner, then installs cancel, unless the signal is already aborted.
+ * Main does not start a task whose timeout already fired. Alerting's cancel writes a
+ * timeout event and throws when that logger has not been initialized, which only
+ * happens inside `run()`, so a cancel that arrives after `run()` has started still
+ * waits for `run()` to begin.
  */
 export const beginRunThenCancel = <T>(
   signal: AbortSignal,
@@ -42,10 +47,38 @@ export const beginRunThenCancel = <T>(
     run: () => Promise<T>;
     cancel?: () => Promise<unknown>;
   }
-): { readonly pending: Promise<T>; readonly unbind: () => void } => {
-  const pending = runner.run();
-  const unbind = bindRunnerCancel(signal, abortController, () =>
-    runner.cancel?.() ?? Promise.resolve()
+): {
+  readonly pending: Promise<T | undefined>;
+  readonly unbind: () => void;
+  readonly cancelledBeforeStart: boolean;
+} => {
+  if (signal.aborted) {
+    return { pending: Promise.resolve(undefined), unbind: () => {}, cancelledBeforeStart: true };
+  }
+  let cancelError: Error | undefined;
+  let cancelInFlight: Promise<void> | undefined;
+  const pendingRun = runner.run();
+  const unbind = bindRunnerCancel(
+    signal,
+    abortController,
+    async () => {
+      cancelInFlight = (async () => {
+        try {
+          await runner.cancel?.();
+        } catch (error) {
+          cancelError = error instanceof Error ? error : new Error(String(error));
+        }
+      })();
+      await cancelInFlight;
+    },
+    (error) => {
+      cancelError = error;
+    }
   );
-  return { pending, unbind };
+  const pending = pendingRun.then(async (value) => {
+    if (cancelInFlight) await cancelInFlight;
+    if (cancelError) throw cancelError;
+    return value;
+  });
+  return { pending, unbind, cancelledBeforeStart: false };
 };
