@@ -25,7 +25,7 @@ import { registerTierBRoutes, registerTierBTasks } from './tier_b';
 import { registerMockLlmRoute } from './tier_b/canned_llm';
 import { API_BASE } from './routes';
 import { registerT7aRoutes } from './t7a/routes';
-import type { T7aController, T7aDeps } from './t7a/main_host';
+import type { PlatformStatusSource, T7aController, T7aDeps } from './t7a/main_host';
 
 interface SetupDeps {
   taskManager: TaskManagerSetupContract;
@@ -47,6 +47,12 @@ export class WorkloadIsolationResearchPlugin implements Plugin<void, void, Setup
   private readonly recorder: Recorder;
   private ticks?: TickScheduler;
   private t7a?: Promise<T7aController | undefined>;
+  private readonly statusSource: PlatformStatusSource = {
+    elasticsearch: 'unknown',
+    savedObjects: 'unknown',
+    overall: 'unknown',
+    generation: 1,
+  };
 
   constructor(private readonly context: PluginInitializerContext<WorkloadIsolationResearchConfig>) {
     this.logger = context.logger.get();
@@ -70,6 +76,32 @@ export class WorkloadIsolationResearchPlugin implements Plugin<void, void, Setup
       if (!this.ticks) this.ticks = new TickScheduler(tm, this.logger, this.recorder);
       return { core: coreStart as CoreStart, taskManager: tm, ticks: this.ticks };
     };
+    if (process.env.KBN_RESEARCH_T7A === 'true') {
+      const publishStatus = (patch: Partial<PlatformStatusSource>) => {
+        const next = { ...this.statusSource, ...patch };
+        if (
+          next.elasticsearch === this.statusSource.elasticsearch &&
+          next.savedObjects === this.statusSource.savedObjects &&
+          next.overall === this.statusSource.overall
+        ) {
+          return;
+        }
+        this.statusSource.elasticsearch = next.elasticsearch;
+        this.statusSource.savedObjects = next.savedObjects;
+        this.statusSource.overall = next.overall;
+        this.statusSource.generation += 1;
+        void this.t7a?.then((controller) => controller?.refreshStatus());
+      };
+      core.status.core$.subscribe((value) => {
+        publishStatus({
+          elasticsearch: String(value.elasticsearch.level),
+          savedObjects: String(value.savedObjects.level),
+        });
+      });
+      core.status.overall$.subscribe((value) => {
+        publishStatus({ overall: String(value.level) });
+      });
+    }
     const router = core.http.createRouter();
     registerTierBRoutes(router, API_BASE, getRecorder, getStart);
     registerT7aRoutes(router, API_BASE, async () => {
@@ -112,7 +144,12 @@ export class WorkloadIsolationResearchPlugin implements Plugin<void, void, Setup
     if (process.env.KBN_RESEARCH_T7A === 'true') {
       this.t7a = import('./t7a/main_host').then(
         ({ T7aController: Controller }) =>
-          new Controller({ core, ...plugins }, this.context.env, this.logger.get('t7a'))
+          new Controller(
+            { core, ...plugins },
+            this.context.env,
+            this.logger.get('t7a'),
+            this.statusSource
+          )
       );
     }
     this.recorder.start();

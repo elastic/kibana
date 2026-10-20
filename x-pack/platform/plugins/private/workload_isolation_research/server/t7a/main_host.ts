@@ -65,6 +65,14 @@ export interface T7aDeps {
   readonly features?: { getKibanaFeatures?: () => unknown[] };
 }
 
+/** Latest core status observed on main. Plugins only receive this during setup. */
+export interface PlatformStatusSource {
+  elasticsearch: string;
+  savedObjects: string;
+  overall: string;
+  generation: number;
+}
+
 export interface T7aConfig {
   readonly mode: 'main' | 'offmain';
   readonly transport: 'thread' | 'process';
@@ -117,8 +125,6 @@ export class T7aController {
   private flagGeneration = 1;
   private flagSeen = false;
   private probeFlag: boolean | undefined;
-  private statusGeneration = 1;
-  private overallStatus = 'available';
   private featuresGeneration = 1;
   private featuresHash = '';
   private featureList: unknown[] = [];
@@ -130,7 +136,8 @@ export class T7aController {
   constructor(
     private readonly deps: T7aDeps,
     private readonly env: PluginInitializerContext['env'],
-    private readonly logger: Logger
+    private readonly logger: Logger,
+    private readonly statusSource: PlatformStatusSource
   ) {
     this.entry = require.resolve('./isolate/entry');
     this.registry = new ModuleRegistry(new Set([this.entry]));
@@ -154,16 +161,6 @@ export class T7aController {
         this.snapshot = undefined;
       }
     });
-    const status = deps.core.status as {
-      overall$?: {
-        subscribe: (fn: (value: { level: { toString: () => string } }) => void) => void;
-      };
-    };
-    status.overall$?.subscribe((value) => {
-      this.overallStatus = value.level.toString();
-      this.statusGeneration += 1;
-      this.snapshot = undefined;
-    });
     registerExecutionClass({
       id: WORKLOAD_CLASS,
       taskTypes: (taskType) => OFFMAIN_TASK_TYPES.has(taskType),
@@ -174,6 +171,10 @@ export class T7aController {
 
   public getConfig(): T7aConfig {
     return this.config;
+  }
+
+  public refreshStatus(): void {
+    this.snapshot = undefined;
   }
 
   public async configure(next: Partial<T7aConfig>): Promise<T7aConfig> {
@@ -357,11 +358,11 @@ export class T7aController {
         value: { available: {}, activeProduct: this.activeProductName() },
       },
       status: {
-        generation: this.statusGeneration,
+        generation: this.statusSource.generation,
         value: {
-          elasticsearch: this.overallStatus,
-          savedObjects: this.overallStatus,
-          overall: this.overallStatus,
+          elasticsearch: this.statusSource.elasticsearch,
+          savedObjects: this.statusSource.savedObjects,
+          overall: this.statusSource.overall,
         },
       },
       features: { generation: this.featuresGeneration, value: { kibana: this.featureSnapshot() } },

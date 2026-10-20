@@ -22,6 +22,7 @@
  */
 
 import { BehaviorSubject, of } from 'rxjs';
+import { sanitizeTaskDefinitions } from '@kbn/task-manager-plugin/server/task_type_dictionary';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import {
@@ -1149,14 +1150,15 @@ export const bootIsland = async (
       .filter((record) => record.write && record.phase === 'boot')
       .map((record) => ({ method: record.method, path: record.path })),
     registeredSoTypes: core.registeredSoTypes.map((type) => type.name),
-    taskDefinitionMeta: [...deps.taskCapture.definitions.entries()].map(([type, def]) => ({
-      type,
-      timeout: String((def as Obj).timeout ?? ''),
-      maxAttempts:
-        typeof (def as Obj).maxAttempts === 'number' ? ((def as Obj).maxAttempts as number) : undefined,
-      cost: (def as Obj).cost as string | number | undefined,
-      priority: (def as Obj).priority as string | number | undefined,
-      stateSchemaVersions: Object.keys(((def as Obj).stateSchemaByVersion as object) ?? {})
+    taskDefinitionMeta: sanitizeTaskDefinitions(
+      Object.fromEntries(deps.taskCapture.definitions) as never
+    ).map((def) => ({
+      type: def.type,
+      timeout: String(def.timeout ?? ''),
+      maxAttempts: typeof def.maxAttempts === 'number' ? def.maxAttempts : undefined,
+      cost: def.cost as string | number | undefined,
+      priority: def.priority as string | number | undefined,
+      stateSchemaVersions: Object.keys(def.stateSchemaByVersion ?? {})
         .map(Number)
         .sort((left, right) => left - right),
     })),
