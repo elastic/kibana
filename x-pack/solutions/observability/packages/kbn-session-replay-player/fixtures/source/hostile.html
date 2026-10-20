@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Hostile test page (synthetic)</title>
+  <style>
+    @import url(https://evil.example/import.css);
+    .tracked { background-image: url(https://evil.example/css-bg.png); width: 40px; height: 40px; }
+  </style>
+  <link rel="stylesheet" href="https://evil.example/link.css" />
+  <base href="https://evil.example/" />
+</head>
+<body>
+  <h1>Hostile content</h1>
+  <p>Everything on this page tries to run code or fetch from a remote origin.</p>
+  <script>window.parent.__pwned_script = 1;</script>
+  <img src="https://evil.example/p.gif?x=1" onerror="window.parent.__pwned_onerror = 1" width="10" height="10" />
+  <img src="/relative-image.png" width="10" height="10" />
+  <img srcset="https://evil.example/srcset.png 2x" width="10" height="10" />
+  <div class="tracked" style="background-image:url(https://evil.example/inline.png)"></div>
+  <a id="jslink" href="javascript:window.parent.__pwned_js = 1">javascript link</a>
+  <iframe src="https://evil.example/frame.html" width="80" height="40"></iframe>
+  <video poster="https://evil.example/poster.png" width="80" height="40"></video>
+</body>
+</html>

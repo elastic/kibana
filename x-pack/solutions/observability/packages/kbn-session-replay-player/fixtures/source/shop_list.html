@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Shop: products</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { margin: 0; font: 16px/1.4 system-ui, sans-serif; color: #1a1c21; background: #f7f8fc; }
+    header { display: flex; justify-content: space-between; align-items: center; padding: 16px 32px; background: #0b64dd; color: #fff; }
+    nav a { color: #fff; margin-left: 24px; text-decoration: none; }
+    main { padding: 32px; }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .card { background: #fff; border: 1px solid #d3dae6; border-radius: 6px; padding: 16px; }
+    .card .swatch { height: 90px; border-radius: 4px; margin-bottom: 12px; }
+    .card h2 { font-size: 18px; margin: 0 0 4px; }
+    .price { color: #5a6270; margin-bottom: 12px; }
+    button { background: #0b64dd; color: #fff; border: 0; border-radius: 4px; padding: 8px 14px; font: inherit; cursor: pointer; }
+    #cart-count { background: #fff; color: #0b64dd; border-radius: 12px; padding: 2px 8px; margin-left: 8px; }
+  </style>
+</head>
+<body>
+  <header>
+    <strong>Example Shop</strong>
+    <nav><a href="shop_list.html">Products</a><a href="checkout.html">Checkout<span id="cart-count">0</span></a></nav>
+  </header>
+  <main>
+    <h1>Products</h1>
+    <div class="grid">
+      <div class="card"><div class="swatch" style="background:#54b399"></div><h2>Trail shoes</h2><div class="price">$89.00</div><button data-add>Add to cart</button></div>
+      <div class="card"><div class="swatch" style="background:#6092c0"></div><h2>Rain jacket</h2><div class="price">$129.00</div><button data-add>Add to cart</button></div>
+      <div class="card"><div class="swatch" style="background:#d36086"></div><h2>Daypack</h2><div class="price">$59.00</div><button data-add>Add to cart</button></div>
+      <div class="card"><div class="swatch" style="background:#9170b8"></div><h2>Water bottle</h2><div class="price">$19.00</div><button data-add>Add to cart</button></div>
+      <div class="card"><div class="swatch" style="background:#ca8eae"></div><h2>Wool socks</h2><div class="price">$14.00</div><button data-add>Add to cart</button></div>
+      <div class="card"><div class="swatch" style="background:#d6bf57"></div><h2>Headlamp</h2><div class="price">$39.00</div><button data-add>Add to cart</button></div>
+    </div>
+  </main>
+  <script>
+    var count = 0;
+    document.querySelectorAll('[data-add]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        count += 1;
+        document.getElementById('cart-count').textContent = String(count);
+        button.textContent = 'Added';
+      });
+    });
+  </script>
+</body>
+</html>

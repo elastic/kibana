@@ -19,7 +19,9 @@
     "target/**/*"
   ],
   "kbn_references": [
+    "@kbn/dev-cli-runner",
     "@kbn/i18n",
+    "@kbn/repo-info",
     "@kbn/storybook",
     "@kbn/test-jest-helpers"
   ]
