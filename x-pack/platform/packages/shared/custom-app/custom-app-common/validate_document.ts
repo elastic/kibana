@@ -276,21 +276,6 @@ export const validateDocument = (document: DocumentToValidate, ctx: z.Refinement
         if (action.type === 'openFlyout' && !flyoutIds.has(action.flyout)) {
           issue(`Node "${node.id}" opens "${action.flyout}", which is not a flyout`, node.id);
         }
-        if (action.type === 'toggleInList') {
-          const target = state[action.key];
-          if (!target) {
-            issue(`Node "${node.id}" toggles unknown state key "${action.key}"`, node.id);
-          } else if (target.type !== 'list') {
-            issue(
-              `Node "${node.id}" toggles state key "${action.key}" (${target.type}), which is not a list`,
-              node.id
-            );
-          }
-          if (typeof action.value === 'object' && !allowed.fromColumn) {
-            issue(`Node "${node.id}": fromColumn is not valid in ${event}`, node.id);
-          }
-          return;
-        }
         if (action.type !== 'setState') return;
 
         const declaration = state[action.key];

@@ -282,7 +282,7 @@ export const pruneUnusedValues = (document: AppDocument): AppDocument => {
     if (source) getSourceStateKeys(source).forEach((key) => used.add(key));
     getNodeActions(node).forEach(({ actions }) =>
       actions.forEach((action) => {
-        if (action.type === 'setState' || action.type === 'toggleInList') used.add(action.key);
+        if (action.type === 'setState') used.add(action.key);
         if (action.type === 'runWorkflow') {
           Object.values(action.inputs).forEach((value) => {
             if (typeof value === 'object' && 'fromState' in value) used.add(value.fromState);
