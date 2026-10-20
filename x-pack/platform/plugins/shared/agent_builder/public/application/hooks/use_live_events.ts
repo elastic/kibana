@@ -15,7 +15,6 @@ import { useConversationStreamService } from '../context/streaming/streaming_con
 
 const EMPTY_EVENTS: TimelineDisplayEvent[] = [];
 
-/** The live events of the current conversation as an observable, at most one value per frame. */
 export const useLiveEvents$ = (): Observable<TimelineDisplayEvent[]> => {
   const conversationId = useConversationId();
   const conversationStreamService = useConversationStreamService();
