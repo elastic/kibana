@@ -10,7 +10,7 @@ import { type EntityStoreEuidApi, useEntityStoreEuidApi } from '@kbn/entity-stor
 import { hostToCriteria } from '../../../../common/components/ml/criteria/host_to_criteria';
 import { getCriteriaFromUsersType } from '../../../../common/components/ml/criteria/get_criteria_from_users_type';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { getScopeFlyoutTimeRange } from '../../../../entity_analytics/common/scope_time_ranges';
+import { getScopeFlyoutTimeRangeMs } from '../../../../entity_analytics/common/scope_time_ranges';
 import { useInstalledSecurityJobNameById } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
 import type { ObservedEntityData } from './observed_entity/types';
 import { ObservedEntity } from './observed_entity';
@@ -106,8 +106,18 @@ export const ObservedDataSectionContent = memo((props: ObservedDataSectionProps)
 
   const globalTime = useGlobalTime();
   const { isInitializing } = globalTime;
-  // A scope that pins a time range wins over global time for the anomalies row.
-  const { to, from } = getScopeFlyoutTimeRange(scopeId) ?? globalTime;
+  // A scope that pins a time range wins over global time for the anomalies row. The hook parses its
+  // dates with `new Date(...)`, so resolve the pinned datemath bounds (`now-24h`) to ISO strings;
+  // memoised because "now" resolves at call time.
+  const pinnedTimeRange = useMemo(() => {
+    const rangeMs = getScopeFlyoutTimeRangeMs(scopeId);
+    if (!rangeMs) return undefined;
+    return {
+      from: new Date(rangeMs.from).toISOString(),
+      to: new Date(rangeMs.to).toISOString(),
+    };
+  }, [scopeId]);
+  const { to, from } = pinnedTimeRange ?? globalTime;
 
   const { jobNameById } = useInstalledSecurityJobNameById();
   const jobIds = useMemo(() => Object.keys(jobNameById), [jobNameById]);
