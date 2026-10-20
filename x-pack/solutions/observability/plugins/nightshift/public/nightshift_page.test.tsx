@@ -344,6 +344,7 @@ describe('NightshiftPage', () => {
     const settingsLink = screen.getByTestId('nightshiftSettingsLink');
     expect(settingsLink).toBeVisible();
     expect(settingsLink).toHaveAttribute('href', '/app/nightshift/settings/detections');
+    expect(screen.queryByTestId('nightshiftAutomationsPrimaryAction')).not.toBeInTheDocument();
 
     await openAppMenuOverflow();
     expect(screen.queryByTestId('nightshiftManagementLink')).not.toBeInTheDocument();

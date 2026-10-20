@@ -91,7 +91,7 @@ const EventsFilterPopover = <Value extends string>({
       button={
         <EuiFilterButton
           data-test-subj={`${testSubject}Button`}
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           isSelected={isOpen}
           numFilters={options.length}
           hasActiveFilters={selected.length > 0}

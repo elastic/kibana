@@ -143,6 +143,8 @@ export function NightshiftAppHeader({
                 href: automationsHref,
                 run: () => void onAutomationsClick(),
                 testId: 'nightshiftAutomationsPrimaryAction',
+                // The menu shows two buttons; Detections keeps them for Sources and Settings.
+                overflow: isDetectionPage,
               },
             ]
           : []),
