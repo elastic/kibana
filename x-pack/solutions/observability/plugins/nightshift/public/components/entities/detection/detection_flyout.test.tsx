@@ -175,6 +175,21 @@ describe('DetectionFlyout', () => {
     expect(screen.getByText(label)).toBeInTheDocument();
   });
 
+  it('shows the Skipped badge, instead of a verdict, for a detection the classifier skipped', () => {
+    renderFlyout({
+      detection: { ...mockDetection, skip: { reason: 'still_breaching' } },
+      signal: undefined,
+    });
+
+    expect(screen.getByTestId('nightshiftSkippedDetectionBadge')).toHaveTextContent('Skipped');
+  });
+
+  it('shows no Skipped badge for a detection the agent handled', () => {
+    renderFlyout();
+
+    expect(screen.queryByTestId('nightshiftSkippedDetectionBadge')).not.toBeInTheDocument();
+  });
+
   it('hides the verdict badge without a signal', () => {
     renderFlyout({ signal: undefined });
 

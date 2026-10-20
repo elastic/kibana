@@ -7,6 +7,7 @@
 
 import { lazySchema, z, isoDateTime } from '@kbn/zod/v4';
 import dedent from 'dedent';
+import { i18n } from '@kbn/i18n';
 import { MAX_ID_LENGTH, MAX_RULE_NAME_LENGTH, MAX_TITLE_LENGTH } from '../constants';
 
 /**
@@ -163,3 +164,88 @@ export const detectionSchema = lazySchema(() =>
 );
 
 export type Detection = z.infer<typeof detectionSchema>;
+
+const VERDICT_STATES: Readonly<Record<string, string>> = {
+  confirms: i18n.translate('xpack.significantEvents.detectionSkip.state.breaching', {
+    defaultMessage: 'breaching',
+  }),
+  refutes: i18n.translate('xpack.significantEvents.detectionSkip.state.healthy', {
+    defaultMessage: 'healthy',
+  }),
+};
+
+const REASON_STATES: Readonly<Record<string, string>> = {
+  still_breaching: VERDICT_STATES.confirms,
+  still_healthy: VERDICT_STATES.refutes,
+};
+
+const probeSentence = ({
+  hasRows,
+  minutes,
+}: {
+  hasRows: boolean;
+  minutes: number | undefined;
+}): string => {
+  if (minutes === undefined) {
+    return hasRows
+      ? i18n.translate('xpack.significantEvents.detectionSkip.probe.rows', {
+          defaultMessage: 'The rule still matches.',
+        })
+      : i18n.translate('xpack.significantEvents.detectionSkip.probe.noRows', {
+          defaultMessage: 'The rule matches nothing.',
+        });
+  }
+  return hasRows
+    ? i18n.translate('xpack.significantEvents.detectionSkip.probe.rowsInWindow', {
+        defaultMessage: 'The rule still matches (last {minutes} min).',
+        values: { minutes },
+      })
+    : i18n.translate('xpack.significantEvents.detectionSkip.probe.noRowsInWindow', {
+        defaultMessage: 'The rule matches nothing (last {minutes} min).',
+        values: { minutes },
+      });
+};
+
+/**
+ * Why the classifier skipped a detection, in at most two short lines: what the rule's query
+ * returned, and what the live event already records for the rule. A marker written before that
+ * context was stored gets the lines it has the fields for; an unknown reason is returned as stored.
+ */
+export const describeSkip = (
+  skip: DetectionSkip,
+  formatTime: (isoTime: string) => string
+): string[] => {
+  const state =
+    (skip.stored_verdict ? VERDICT_STATES[skip.stored_verdict] : undefined) ??
+    REASON_STATES[skip.reason];
+  const lines: string[] = [];
+  if (state === undefined) {
+    lines.push(skip.reason);
+  } else {
+    if (skip.probe_has_rows !== undefined) {
+      lines.push(
+        probeSentence({ hasRows: skip.probe_has_rows, minutes: skip.probe_window_minutes })
+      );
+    }
+    lines.push(
+      skip.event_title
+        ? i18n.translate('xpack.significantEvents.detectionSkip.eventRecords', {
+            defaultMessage: '"{title}" already records it as {state}, so nothing changed.',
+            values: { title: skip.event_title, state },
+          })
+        : i18n.translate('xpack.significantEvents.detectionSkip.liveEventRecords', {
+            defaultMessage: 'A live event already records it as {state}, so nothing changed.',
+            values: { state },
+          })
+    );
+  }
+  if (skip.checked_at) {
+    lines.push(
+      i18n.translate('xpack.significantEvents.detectionSkip.checkedAt', {
+        defaultMessage: 'Checked {time}',
+        values: { time: formatTime(skip.checked_at) },
+      })
+    );
+  }
+  return lines;
+};

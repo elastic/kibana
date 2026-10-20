@@ -114,6 +114,7 @@ export {
   detectionSkipSchema,
   skipMarkerSchema,
   type SkipMarker,
+  describeSkip,
   PROBE_STATUSES,
   type ProbeStatus,
   type BaselineDecision,
