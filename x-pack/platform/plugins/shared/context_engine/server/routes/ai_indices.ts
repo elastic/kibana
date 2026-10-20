@@ -846,12 +846,19 @@ export const registerAiIndexRoutes = ({
               return { output: result };
             },
           });
-          auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.UPDATE, id: aiIndexId }));
+          auditLogger.log(
+            aiIndexAuditEvent({ action: AiIndexAuditAction.KI_UPDATE, id: aiIndexId, kiId })
+          );
           const body: UpdateKiResponse = output;
           return response.ok({ body });
         } catch (error) {
           auditLogger.log(
-            aiIndexAuditEvent({ action: AiIndexAuditAction.UPDATE, id: aiIndexId, error })
+            aiIndexAuditEvent({
+              action: AiIndexAuditAction.KI_UPDATE,
+              id: aiIndexId,
+              kiId,
+              error,
+            })
           );
           return handleAiIndexError(error, response, logger);
         }
@@ -913,12 +920,19 @@ export const registerAiIndexRoutes = ({
               return { output: result };
             },
           });
-          auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.DELETE, id: aiIndexId }));
+          auditLogger.log(
+            aiIndexAuditEvent({ action: AiIndexAuditAction.KI_DELETE, id: aiIndexId, kiId })
+          );
           const body: DeleteKiResponse = output;
           return response.ok({ body });
         } catch (error) {
           auditLogger.log(
-            aiIndexAuditEvent({ action: AiIndexAuditAction.DELETE, id: aiIndexId, error })
+            aiIndexAuditEvent({
+              action: AiIndexAuditAction.KI_DELETE,
+              id: aiIndexId,
+              kiId,
+              error,
+            })
           );
           return handleAiIndexError(error, response, logger);
         }
@@ -960,6 +974,7 @@ export const registerAiIndexRoutes = ({
         const { index: backingIndex } = request.query;
         const spaceId = resolveSpaceId(await getSpaces(), request);
         try {
+          // Restore has no dedicated KiWriteAction (would need a new EBT event type); report it under 'update'.
           const { output } = await withKiWriteTelemetry({
             action: 'update',
             aiIndexId,
@@ -980,12 +995,19 @@ export const registerAiIndexRoutes = ({
               return { output: result };
             },
           });
-          auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.RESTORE, id: aiIndexId }));
+          auditLogger.log(
+            aiIndexAuditEvent({ action: AiIndexAuditAction.RESTORE, id: aiIndexId, kiId })
+          );
           const body: RestoreKiResponse = output;
           return response.ok({ body });
         } catch (error) {
           auditLogger.log(
-            aiIndexAuditEvent({ action: AiIndexAuditAction.RESTORE, id: aiIndexId, error })
+            aiIndexAuditEvent({
+              action: AiIndexAuditAction.RESTORE,
+              id: aiIndexId,
+              kiId,
+              error,
+            })
           );
           return handleAiIndexError(error, response, logger);
         }

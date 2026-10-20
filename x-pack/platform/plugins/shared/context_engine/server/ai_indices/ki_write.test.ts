@@ -40,8 +40,11 @@ const createConflictResponseError = () =>
 
 const indexDest = { type: 'index' as const, value: 'ai-index-idx-my-ai-index' };
 const dataStreamDest = { type: 'data_stream' as const, value: 'ai-index-ds-my-ai-index' };
-const abortSignal = expect.any(AbortSignal);
 const pinnedBackingIndex = 'ai-index-idx-my-ai-index-000001';
+
+const expectEsRequest = (fn: jest.Mock, payload: unknown) => {
+  expect(fn.mock.calls[0][0]).toEqual(payload);
+};
 
 describe('buildKiApiWriter', () => {
   it('builds a writer for update with the space id', () => {
@@ -70,37 +73,31 @@ describe('updateKi', () => {
       aiIndexId: 'my-ai-index',
       dest: indexDest,
       kiId: 'ki-1',
-      ki: { description: 'Updated' },
+      ki: { content: 'Updated' },
       writer: apiWriter,
     });
 
     expect(result).toEqual({ id: 'ki-1', result: 'updated' });
-    expect(esClient.search).toHaveBeenCalledWith(
-      {
-        index: 'ai-index-idx-my-ai-index',
-        ignore_unavailable: true,
-        allow_no_indices: true,
-        query: kiIdQuery('ki-1'),
-        size: 2,
-        seq_no_primary_term: true,
-        _source: ['id', 'governance'],
+    expectEsRequest(esClient.search as jest.Mock, {
+      index: 'ai-index-idx-my-ai-index',
+      ignore_unavailable: true,
+      allow_no_indices: true,
+      query: kiIdQuery('ki-1'),
+      size: 2,
+      seq_no_primary_term: true,
+      _source: ['id', 'governance'],
+    });
+    expectEsRequest(esClient.update as jest.Mock, {
+      index: 'ai-index-idx-my-ai-index',
+      id: 'ki-1',
+      doc: {
+        content: 'Updated',
+        updated_at: expect.any(String),
+        governance: { provenance: { updated_by: apiWriter } },
       },
-      { signal: abortSignal }
-    );
-    expect(esClient.update).toHaveBeenCalledWith(
-      {
-        index: 'ai-index-idx-my-ai-index',
-        id: 'ki-1',
-        doc: {
-          description: 'Updated',
-          updated_at: expect.any(String),
-          governance: { provenance: { updated_by: apiWriter } },
-        },
-        if_seq_no: 5,
-        if_primary_term: 1,
-      },
-      { signal: abortSignal }
-    );
+      if_seq_no: 5,
+      if_primary_term: 1,
+    });
   });
 
   it('filters search by backing index when backingIndex is set', async () => {
@@ -113,27 +110,24 @@ describe('updateKi', () => {
       aiIndexId: 'my-ai-index',
       dest: indexDest,
       kiId: 'ki-1',
-      ki: { description: 'Updated' },
+      ki: { content: 'Updated' },
       writer: apiWriter,
       backingIndex: pinnedBackingIndex,
     });
 
-    expect(esClient.search).toHaveBeenCalledWith(
-      {
-        index: 'ai-index-idx-my-ai-index',
-        ignore_unavailable: true,
-        allow_no_indices: true,
-        query: {
-          bool: {
-            filter: [kiIdQuery('ki-1'), { term: { _index: pinnedBackingIndex } }],
-          },
+    expectEsRequest(esClient.search as jest.Mock, {
+      index: 'ai-index-idx-my-ai-index',
+      ignore_unavailable: true,
+      allow_no_indices: true,
+      query: {
+        bool: {
+          filter: [kiIdQuery('ki-1'), { term: { _index: pinnedBackingIndex } }],
         },
-        size: 1,
-        seq_no_primary_term: true,
-        _source: ['id', 'governance'],
       },
-      { signal: abortSignal }
-    );
+      size: 1,
+      seq_no_primary_term: true,
+      _source: ['id', 'governance'],
+    });
   });
 
   it('appends a new revision on a data stream dest', async () => {
@@ -149,7 +143,7 @@ describe('updateKi', () => {
       search: jest
         .fn()
         .mockResolvedValue(searchHit('.ds-ai-index-ds-my-ai-index-000001', existing)),
-      index: jest.fn().mockResolvedValue({ _id: 'new' }),
+      index: jest.fn().mockResolvedValue({ _id: 'ki-1' }),
       update: jest.fn(),
     } as unknown as ElasticsearchClient;
 
@@ -157,50 +151,29 @@ describe('updateKi', () => {
       aiIndexId: 'my-ai-index',
       dest: dataStreamDest,
       kiId: 'ki-1',
-      ki: { description: 'Updated' },
+      ki: { content: 'Updated' },
       writer: apiWriter,
     });
 
     expect(result).toEqual({ id: 'ki-1', result: 'updated' });
     expect(esClient.update).not.toHaveBeenCalled();
-    expect(esClient.index).toHaveBeenCalledWith(
-      {
-        index: 'ai-index-ds-my-ai-index',
-        document: {
-          ...storedKi,
-          description: 'Updated',
-          '@timestamp': expect.any(String),
-          updated_at: expect.any(String),
-          governance: {
-            provenance: {
-              created_by: { uri: 'workflow://wf-0', metadata: {} },
-              updated_by: apiWriter,
-            },
-            lifecycle: { status: 'active' },
+    expectEsRequest(esClient.index as jest.Mock, {
+      index: 'ai-index-ds-my-ai-index',
+      document: {
+        ...storedKi,
+        content: 'Updated',
+        '@timestamp': expect.any(String),
+        updated_at: expect.any(String),
+        governance: {
+          provenance: {
+            created_by: { uri: 'workflow://wf-0', metadata: {} },
+            updated_by: apiWriter,
           },
+          lifecycle: { status: 'active' },
         },
-        op_type: 'create',
       },
-      { signal: abortSignal }
-    );
-  });
-
-  it('returns noop without writing when ki is empty', async () => {
-    const esClient = {
-      search: jest.fn().mockResolvedValue(searchHit('ai-index-idx-my-ai-index')),
-      update: jest.fn(),
-    } as unknown as ElasticsearchClient;
-
-    const result = await updateKi(esClient, {
-      aiIndexId: 'my-ai-index',
-      dest: indexDest,
-      kiId: 'ki-1',
-      ki: {},
-      writer: apiWriter,
+      op_type: 'create',
     });
-
-    expect(result).toEqual({ id: 'ki-1', result: 'noop' });
-    expect(esClient.update).not.toHaveBeenCalled();
   });
 
   it('throws NotFoundError when the KI does not exist', async () => {
@@ -213,7 +186,7 @@ describe('updateKi', () => {
       aiIndexId: 'my-ai-index',
       dest: indexDest,
       kiId: 'missing-ki',
-      ki: { title: 'New title' },
+      ki: { content: 'New title' },
       writer: apiWriter,
     }).catch((e) => e);
 
@@ -232,7 +205,7 @@ describe('updateKi', () => {
       aiIndexId: 'my-ai-index',
       dest: indexDest,
       kiId: 'ki-1',
-      ki: { title: 'New title' },
+      ki: { content: 'New title' },
       writer: apiWriter,
     }).catch((e) => e);
 
@@ -250,7 +223,7 @@ describe('updateKi', () => {
       aiIndexId: 'my-ai-index',
       dest: indexDest,
       kiId: 'ki-1',
-      ki: { description: 'Updated' },
+      ki: { content: 'Updated' },
       writer: apiWriter,
     }).catch((e) => e);
 
@@ -277,22 +250,19 @@ describe('softDeleteKi', () => {
 
     expect(result).toEqual({ id: 'ki-1' });
     expect(esClient.delete).not.toHaveBeenCalled();
-    expect(esClient.update).toHaveBeenCalledWith(
-      {
-        index: 'ai-index-idx-my-ai-index',
-        id: 'ki-1',
-        doc: {
-          updated_at: expect.any(String),
-          governance: {
-            provenance: { updated_by: deleteWriter },
-            lifecycle: { status: 'deleted' },
-          },
+    expectEsRequest(esClient.update as jest.Mock, {
+      index: 'ai-index-idx-my-ai-index',
+      id: 'ki-1',
+      doc: {
+        updated_at: expect.any(String),
+        governance: {
+          provenance: { updated_by: deleteWriter },
+          lifecycle: { status: 'deleted' },
         },
-        if_seq_no: 5,
-        if_primary_term: 1,
       },
-      { signal: abortSignal }
-    );
+      if_seq_no: 5,
+      if_primary_term: 1,
+    });
   });
 
   it('filters search by backing index when backingIndex is set', async () => {
@@ -309,28 +279,25 @@ describe('softDeleteKi', () => {
       backingIndex: pinnedBackingIndex,
     });
 
-    expect(esClient.search).toHaveBeenCalledWith(
-      {
-        index: 'ai-index-idx-my-ai-index',
-        ignore_unavailable: true,
-        allow_no_indices: true,
-        query: {
-          bool: {
-            filter: [kiIdQuery('ki-1'), { term: { _index: pinnedBackingIndex } }],
-          },
+    expectEsRequest(esClient.search as jest.Mock, {
+      index: 'ai-index-idx-my-ai-index',
+      ignore_unavailable: true,
+      allow_no_indices: true,
+      query: {
+        bool: {
+          filter: [kiIdQuery('ki-1'), { term: { _index: pinnedBackingIndex } }],
         },
-        size: 1,
-        seq_no_primary_term: true,
-        _source: ['id', 'governance'],
       },
-      { signal: abortSignal }
-    );
+      size: 1,
+      seq_no_primary_term: true,
+      _source: ['id', 'governance'],
+    });
   });
 
   it('appends a tombstone revision on a data stream dest', async () => {
     const esClient = {
       search: jest.fn().mockResolvedValue(searchHit('.ds-ai-index-ds-my-ai-index-000001')),
-      index: jest.fn().mockResolvedValue({ _id: 'new' }),
+      index: jest.fn().mockResolvedValue({ _id: 'ki-1' }),
       delete: jest.fn(),
     } as unknown as ElasticsearchClient;
 
@@ -343,22 +310,19 @@ describe('softDeleteKi', () => {
 
     expect(result).toEqual({ id: 'ki-1' });
     expect(esClient.delete).not.toHaveBeenCalled();
-    expect(esClient.index).toHaveBeenCalledWith(
-      {
-        index: 'ai-index-ds-my-ai-index',
-        document: {
-          ...storedKi,
-          '@timestamp': expect.any(String),
-          updated_at: expect.any(String),
-          governance: {
-            provenance: { updated_by: deleteWriter },
-            lifecycle: { status: 'deleted' },
-          },
+    expectEsRequest(esClient.index as jest.Mock, {
+      index: 'ai-index-ds-my-ai-index',
+      document: {
+        ...storedKi,
+        '@timestamp': expect.any(String),
+        updated_at: expect.any(String),
+        governance: {
+          provenance: { updated_by: deleteWriter },
+          lifecycle: { status: 'deleted' },
         },
-        op_type: 'create',
       },
-      { signal: abortSignal }
-    );
+      op_type: 'create',
+    });
   });
 
   it('returns idempotently when the KI is already deleted', async () => {
@@ -418,22 +382,19 @@ describe('restoreKi', () => {
 
     expect(result).toEqual({ id: 'ki-1' });
     expect(esClient.delete).not.toHaveBeenCalled();
-    expect(esClient.update).toHaveBeenCalledWith(
-      {
-        index: 'ai-index-idx-my-ai-index',
-        id: 'ki-1',
-        doc: {
-          updated_at: expect.any(String),
-          governance: {
-            provenance: { updated_by: apiWriter },
-            lifecycle: { status: 'active' },
-          },
+    expectEsRequest(esClient.update as jest.Mock, {
+      index: 'ai-index-idx-my-ai-index',
+      id: 'ki-1',
+      doc: {
+        updated_at: expect.any(String),
+        governance: {
+          provenance: { updated_by: apiWriter },
+          lifecycle: { status: 'active' },
         },
-        if_seq_no: 5,
-        if_primary_term: 1,
       },
-      { signal: abortSignal }
-    );
+      if_seq_no: 5,
+      if_primary_term: 1,
+    });
   });
 
   it('filters search by backing index when backingIndex is set', async () => {
@@ -450,22 +411,19 @@ describe('restoreKi', () => {
       backingIndex: pinnedBackingIndex,
     });
 
-    expect(esClient.search).toHaveBeenCalledWith(
-      {
-        index: 'ai-index-idx-my-ai-index',
-        ignore_unavailable: true,
-        allow_no_indices: true,
-        query: {
-          bool: {
-            filter: [kiIdQuery('ki-1'), { term: { _index: pinnedBackingIndex } }],
-          },
+    expectEsRequest(esClient.search as jest.Mock, {
+      index: 'ai-index-idx-my-ai-index',
+      ignore_unavailable: true,
+      allow_no_indices: true,
+      query: {
+        bool: {
+          filter: [kiIdQuery('ki-1'), { term: { _index: pinnedBackingIndex } }],
         },
-        size: 1,
-        seq_no_primary_term: true,
-        _source: ['id', 'governance'],
       },
-      { signal: abortSignal }
-    );
+      size: 1,
+      seq_no_primary_term: true,
+      _source: ['id', 'governance'],
+    });
   });
 
   it('appends a restore revision on a data stream dest', async () => {
@@ -473,7 +431,7 @@ describe('restoreKi', () => {
       search: jest
         .fn()
         .mockResolvedValue(searchHit('.ds-ai-index-ds-my-ai-index-000001', deletedKi)),
-      index: jest.fn().mockResolvedValue({ _id: 'new' }),
+      index: jest.fn().mockResolvedValue({ _id: 'ki-1' }),
       delete: jest.fn(),
     } as unknown as ElasticsearchClient;
 
@@ -486,22 +444,19 @@ describe('restoreKi', () => {
 
     expect(result).toEqual({ id: 'ki-1' });
     expect(esClient.delete).not.toHaveBeenCalled();
-    expect(esClient.index).toHaveBeenCalledWith(
-      {
-        index: 'ai-index-ds-my-ai-index',
-        document: {
-          ...storedKi,
-          '@timestamp': expect.any(String),
-          updated_at: expect.any(String),
-          governance: {
-            provenance: { updated_by: apiWriter },
-            lifecycle: { status: 'active' },
-          },
+    expectEsRequest(esClient.index as jest.Mock, {
+      index: 'ai-index-ds-my-ai-index',
+      document: {
+        ...storedKi,
+        '@timestamp': expect.any(String),
+        updated_at: expect.any(String),
+        governance: {
+          provenance: { updated_by: apiWriter },
+          lifecycle: { status: 'active' },
         },
-        op_type: 'create',
       },
-      { signal: abortSignal }
-    );
+      op_type: 'create',
+    });
   });
 
   it('returns idempotently when the KI is already active', async () => {

@@ -45,15 +45,11 @@ import {
 const memoryTypeSchema = z.enum(MEMORY_KI_TYPES);
 const DEFAULT_MEMORY_EXPIRATION_MS = 90 * 24 * 60 * 60 * 1000;
 
-/** Narrows a stored KI to a memory document by its required fields and `type` discriminant. */
-const isMemoryDocument = (source: StoredKi): source is StoredKi & StoredMemoryDocument =>
-  (source.type === 'memory.session' || source.type === 'memory.session_fact') &&
-  typeof source['@timestamp'] === 'string' &&
-  typeof source.id === 'string' &&
-  typeof source.title === 'string' &&
-  typeof source.description === 'string' &&
-  typeof source.content === 'string' &&
-  typeof source.updated_at === 'string';
+/** Narrows a stored KI to a memory document by its `type` discriminant. */
+const isMemoryDocument = (
+  source: StoredKi
+): source is StoredKi & { type: 'memory.session' | 'memory.session_fact' } =>
+  source.type === 'memory.session' || source.type === 'memory.session_fact';
 
 const rememberSchema = z.object({
   aiIndexId: aiIndexIdFieldSchema.describe(
@@ -192,7 +188,9 @@ export const createRememberTool = ({
       let existingBackingIndex: string | undefined;
       let existingSeqNo: number | undefined;
       let existingPrimaryTerm: number | undefined;
-      let existingDocument: StoredMemoryDocument | undefined;
+      let existingDocument:
+        | (StoredKi & { type: 'memory.session' | 'memory.session_fact' })
+        | undefined;
 
       if (params.id) {
         const abortSignal = new AbortController().signal;
@@ -227,7 +225,11 @@ export const createRememberTool = ({
 
       const document: StoredMemoryDocument = {
         '@timestamp':
-          aiIndex.dest.type === 'data_stream' ? now : existingDocument?.['@timestamp'] ?? now,
+          aiIndex.dest.type === 'data_stream'
+            ? now
+            : typeof existingDocument?.['@timestamp'] === 'string'
+            ? existingDocument['@timestamp']
+            : now,
         id: logicalId,
         type: params.type,
         title: params.title,
@@ -235,8 +237,10 @@ export const createRememberTool = ({
         content: params.content,
         ...(params.tags !== undefined
           ? { tags: params.tags }
-          : existingDocument?.tags !== undefined
-          ? { tags: existingDocument.tags }
+          : Array.isArray(existingDocument?.tags)
+          ? {
+              tags: existingDocument.tags.filter((tag): tag is string => typeof tag === 'string'),
+            }
           : {}),
         ...(params.expires_at === null
           ? {}
@@ -249,7 +253,12 @@ export const createRememberTool = ({
         updated_at: now,
         references: createConversationReferences(conversationId),
         attributes: {
-          ...existingDocument?.attributes,
+          ...(existingDocument?.attributes !== undefined &&
+          typeof existingDocument.attributes === 'object' &&
+          existingDocument.attributes !== null &&
+          !Array.isArray(existingDocument.attributes)
+            ? existingDocument.attributes
+            : {}),
           'memory.session_id': sessionId,
         },
         governance: updateMemoryProvenance(

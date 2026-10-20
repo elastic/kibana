@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
+import type { UpdateKiBody } from '../../common/http_api/knowledge_indicators';
 import {
   isKiDeleted,
   kiDeletedError,
@@ -26,7 +27,7 @@ export interface UpdateKiOptions {
   aiIndexId: string;
   dest: AiIndexDest;
   kiId: string;
-  ki: Record<string, unknown>;
+  ki: UpdateKiBody['ki'];
   writer: KiWriter;
   backingIndex?: string;
 }
@@ -37,21 +38,16 @@ export const updateKi = async (
   options: UpdateKiOptions
 ): Promise<{ id: string; result: 'updated' | 'noop' }> => {
   const { aiIndexId, dest, kiId, ki, writer, backingIndex } = options;
-  const abortSignal = new AbortController().signal;
 
   const revision = await getKiRevision({
     esClient,
     aiIndexId,
     dest,
     kiId,
-    abortSignal,
     backingIndex,
   });
   if (isKiDeleted(revision.source)) {
     throw kiDeletedError(aiIndexId, kiId);
-  }
-  if (Object.keys(ki).length === 0) {
-    return { id: kiId, result: 'noop' };
   }
 
   const now = new Date().toISOString();
@@ -68,8 +64,6 @@ export const updateKi = async (
     kiId,
     revision,
     changes,
-    refresh: false,
-    abortSignal,
   });
 
   return { id: kiId, result };
@@ -89,14 +83,12 @@ export const softDeleteKi = async (
   options: SoftDeleteKiOptions
 ): Promise<{ id: string }> => {
   const { aiIndexId, dest, kiId, writer, backingIndex } = options;
-  const abortSignal = new AbortController().signal;
 
   const revision = await getKiRevision({
     esClient,
     aiIndexId,
     dest,
     kiId,
-    abortSignal,
     backingIndex,
   });
   if (isKiDeleted(revision.source)) {
@@ -119,8 +111,6 @@ export const softDeleteKi = async (
     kiId,
     revision,
     changes,
-    refresh: false,
-    abortSignal,
   });
 
   return { id: kiId };
@@ -140,14 +130,12 @@ export const restoreKi = async (
   options: RestoreKiOptions
 ): Promise<{ id: string }> => {
   const { aiIndexId, dest, kiId, writer, backingIndex } = options;
-  const abortSignal = new AbortController().signal;
 
   const revision = await getKiRevision({
     esClient,
     aiIndexId,
     dest,
     kiId,
-    abortSignal,
     backingIndex,
   });
   if (!isKiDeleted(revision.source)) {
@@ -170,8 +158,6 @@ export const restoreKi = async (
     kiId,
     revision,
     changes,
-    refresh: false,
-    abortSignal,
   });
 
   return { id: kiId };

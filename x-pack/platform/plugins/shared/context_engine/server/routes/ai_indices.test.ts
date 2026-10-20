@@ -337,7 +337,7 @@ describe('ai indices routes', () => {
     });
     await callRoute('PATCH', AI_INDEX_KI_BY_ID_PATH, {
       params: { aiIndexId: 'a', kiId: 'ki-1' },
-      body: { ki: { title: 'Updated' } },
+      body: { ki: { content: 'Updated' } },
     });
     await callRoute('DELETE', AI_INDEX_KI_BY_ID_PATH, {
       params: { aiIndexId: 'a', kiId: 'ki-1' },
@@ -1431,7 +1431,7 @@ describe('ai indices routes', () => {
 
       await callRoute('PATCH', AI_INDEX_KI_BY_ID_PATH, {
         params: { aiIndexId: 'customer_support', kiId: 'ki-1' },
-        body: { ki: { title: 'Updated title' } },
+        body: { ki: { content: 'Updated content' } },
       });
 
       expect(aiIndexService.get).toHaveBeenCalledWith('customer_support', defaultSpaceId);
@@ -1442,7 +1442,7 @@ describe('ai indices routes', () => {
           aiIndexId: 'customer_support',
           dest: aiIndexItem.dest,
           kiId: 'ki-1',
-          ki: { title: 'Updated title' },
+          ki: { content: 'Updated content' },
         })
       );
       expect(analyticsService.reportKiWrite).toHaveBeenCalledWith(
@@ -1455,14 +1455,27 @@ describe('ai indices routes', () => {
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
-            action: 'ai_index_update',
+            action: 'ai_index_ki_update',
             outcome: 'success',
           }),
+          kibana: { saved_object: { type: 'ki', id: 'ki-1' } },
         })
       );
       expect(response.ok).toHaveBeenCalledWith({
         body: { id: 'ki-1', result: 'updated' },
       });
+    });
+
+    it('rejects a body that updates fields other than content', () => {
+      const { validate } = getRoute('PATCH', AI_INDEX_KI_BY_ID_PATH);
+      if (validate === false || !validate.request?.body) {
+        throw new Error('expected a body schema');
+      }
+      const bodySchema = validate.request.body;
+      expect(() => bodySchema.validate({ ki: { title: 'Updated title' } })).toThrow();
+      expect(() =>
+        bodySchema.validate({ ki: { content: 'Updated content', title: 'Updated title' } })
+      ).toThrow();
     });
 
     it('passes the index query param as backingIndex to updateKi', async () => {
@@ -1472,7 +1485,7 @@ describe('ai indices routes', () => {
       await callRoute('PATCH', AI_INDEX_KI_BY_ID_PATH, {
         params: { aiIndexId: 'customer_support', kiId: 'ki-1' },
         query: { index: kiBackingIndex },
-        body: { ki: { title: 'Updated title' } },
+        body: { ki: { content: 'Updated content' } },
       });
 
       expect(updateKi).toHaveBeenCalledWith(
@@ -1492,7 +1505,7 @@ describe('ai indices routes', () => {
 
       await callRoute('PATCH', AI_INDEX_KI_BY_ID_PATH, {
         params: { aiIndexId: 'customer_support', kiId: 'missing' },
-        body: { ki: { title: 'Updated title' } },
+        body: { ki: { content: 'Updated content' } },
       });
 
       expect(response.notFound).toHaveBeenCalledWith({
@@ -1509,7 +1522,7 @@ describe('ai indices routes', () => {
 
       await callRoute('PATCH', AI_INDEX_KI_BY_ID_PATH, {
         params: { aiIndexId: 'customer_support', kiId: 'ki-1' },
-        body: { ki: { title: 'Updated title' } },
+        body: { ki: { content: 'Updated content' } },
       });
 
       expect(response.conflict).toHaveBeenCalledWith({
@@ -1554,9 +1567,10 @@ describe('ai indices routes', () => {
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
-            action: 'ai_index_delete',
+            action: 'ai_index_ki_delete',
             outcome: 'success',
           }),
+          kibana: { saved_object: { type: 'ki', id: 'ki-1' } },
         })
       );
       expect(response.ok).toHaveBeenCalledWith({ body: { id: 'ki-1' } });
@@ -1645,6 +1659,7 @@ describe('ai indices routes', () => {
             action: 'ai_index_ki_restore',
             outcome: 'success',
           }),
+          kibana: { saved_object: { type: 'ki', id: 'ki-1' } },
         })
       );
       expect(response.ok).toHaveBeenCalledWith({ body: { id: 'ki-1' } });

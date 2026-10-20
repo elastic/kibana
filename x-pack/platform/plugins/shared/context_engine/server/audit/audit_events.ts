@@ -16,6 +16,8 @@ export enum AiIndexAuditAction {
   LIST = 'ai_index_list',
   DELETE = 'ai_index_delete',
   RESTORE = 'ai_index_ki_restore',
+  KI_UPDATE = 'ai_index_ki_update',
+  KI_DELETE = 'ai_index_ki_delete',
   DELETE_RESOURCES = 'ai_index_delete_resources',
   QUERY = 'ai_index_query',
   DESCRIBE = 'ai_index_describe',
@@ -31,6 +33,8 @@ const eventVerbs: Record<AiIndexAuditAction, VerbsTuple> = {
   ai_index_list: ['access', 'accessing', 'accessed'],
   ai_index_delete: ['delete', 'deleting', 'deleted'],
   ai_index_ki_restore: ['restore', 'restoring', 'restored'],
+  ai_index_ki_update: ['update', 'updating', 'updated'],
+  ai_index_ki_delete: ['delete', 'deleting', 'deleted'],
   ai_index_delete_resources: [
     'delete related resources of',
     'deleting related resources of',
@@ -48,6 +52,8 @@ const eventTypes: Record<AiIndexAuditAction, string> = {
   ai_index_list: 'access',
   ai_index_delete: 'deletion',
   ai_index_ki_restore: 'change',
+  ai_index_ki_update: 'change',
+  ai_index_ki_delete: 'deletion',
   ai_index_delete_resources: 'deletion',
   ai_index_query: 'access',
   ai_index_describe: 'access',
@@ -56,6 +62,7 @@ const eventTypes: Record<AiIndexAuditAction, string> = {
 export interface AiIndexAuditEventParams {
   action: AiIndexAuditAction;
   id?: string;
+  kiId?: string;
   outcome?: EcsEvent['outcome'];
   error?: Error;
 }
@@ -98,10 +105,22 @@ export const improvementAuditEvent = ({
 export const aiIndexAuditEvent = ({
   action,
   id,
+  kiId,
   outcome,
   error,
 }: AiIndexAuditEventParams): AuditEvent => {
-  const doc = id ? `AI index [id=${id}]` : 'an AI index';
+  let doc: string;
+  if (kiId) {
+    doc = `Knowledge Indicator [id=${kiId}] of AI index [id=${id}]`;
+  } else if (id) {
+    doc = `AI index [id=${id}]`;
+  } else {
+    doc = 'an AI index';
+  }
+
+  const savedObject =
+    !kiId || !id ? { type: kiId ? 'ki' : 'ai_index', id: kiId ?? id ?? '' } : undefined;
+
   const [present, progressive, past] = eventVerbs[action];
   const message = error
     ? `Failed attempt to ${present} ${doc}`
@@ -118,7 +137,7 @@ export const aiIndexAuditEvent = ({
       outcome: outcome ?? (error ? 'failure' : 'success'),
     },
     kibana: {
-      saved_object: id ? { type: 'ai_index', id } : undefined,
+      saved_object: savedObject,
     },
     error: error && {
       code: error.name,

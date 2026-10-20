@@ -138,7 +138,7 @@ export const appendKiRevision = async ({
   source: StoredKi;
   changes: KiRevisionChanges;
   refresh: boolean;
-  abortSignal: AbortSignal;
+  abortSignal?: AbortSignal;
 }): Promise<void> => {
   await esClient.index(
     {
@@ -430,7 +430,7 @@ export const findKiRevision = async ({
   aiIndexId: string;
   dest: AiIndexDest;
   kiId: string;
-  abortSignal: AbortSignal;
+  abortSignal?: AbortSignal;
   backingIndex?: string;
   /** Fetches the full `_source` for an index-type dest instead of just `id`/`governance`. */
   includeSource?: boolean;
@@ -504,7 +504,7 @@ export const writeKiRevision = async ({
   kiId,
   revision,
   changes,
-  refresh,
+  refresh = false,
   abortSignal,
 }: {
   esClient: ElasticsearchClient;
@@ -513,8 +513,8 @@ export const writeKiRevision = async ({
   kiId: string;
   revision: KiRevision;
   changes: KiRevisionChanges;
-  refresh: boolean;
-  abortSignal: AbortSignal;
+  refresh?: boolean;
+  abortSignal?: AbortSignal;
 }): Promise<{ result: 'updated' | 'noop' }> => {
   if (dest.type === 'data_stream') {
     await appendKiRevision({
