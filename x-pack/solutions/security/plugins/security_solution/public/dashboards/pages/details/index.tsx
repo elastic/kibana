@@ -30,6 +30,8 @@ import { DashboardToolBar } from '../../components/dashboard_tool_bar';
 import { useDashboardRenderer } from '../../hooks/use_dashboard_renderer';
 import { useDashboardTitle } from '../../hooks/use_dashboard_title';
 
+/* dshDashboardViewport--panelExpanded: dashboard_viewport.tsx
+   dshLayout-isMaximizedPanel: dashboard_grid.tsx */
 const dashboardExpandedStyles = {
   '&:has(.dshDashboardViewport--panelExpanded)': {
     display: 'flex',

@@ -43,6 +43,8 @@ const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<
   /* EuiPageTemplate writes min-height inline (max(0, 100vh)). While a panel is maximized,
      that minimum is taller than the app content area and is not a definite height, so
      Dashboard's height: 100% collapses. Pin this page to the content box instead. */
+  /* dshDashboardViewport--panelExpanded: dashboard_viewport.tsx
+     dshLayout-isMaximizedPanel: dashboard_grid.tsx */
   &:has(.dshDashboardViewport--panelExpanded) {
     height: var(--kbn-application--content-height, 100vh);
     max-height: var(--kbn-application--content-height, 100vh);
