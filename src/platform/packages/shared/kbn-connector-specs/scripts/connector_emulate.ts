@@ -166,9 +166,13 @@ run(
     log.success(
       `Contract mock of ${connector.metadata.id} (${spec} specs: ${Object.keys(specs).join(
         ', '
-      )}) is listening at ${proxyUrl.href}, serving ${fixtures.length} fixtures and ${
+      )}) is listening at ${proxyUrl.href}, with ${fixtures.length} fixtures and ${
         recordings.length
-      } recordings`
+      } recordings loaded${
+        mock.rejectedResponses.length > 0
+          ? ` (${mock.rejectedResponses.length} not served, listed above)`
+          : ''
+      }`
     );
     log.info(
       `Control endpoints: GET ${controlUrl('calls')}, POST ${controlUrl('reset')}, GET ${controlUrl(
