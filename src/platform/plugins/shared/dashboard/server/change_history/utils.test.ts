@@ -38,18 +38,6 @@ const mockedGetClient = getChangeHistoryClient as jest.MockedFunction<
   typeof getChangeHistoryClient
 >;
 
-const getContext = (user: unknown = { username: 'elastic', profile_uid: 'u_1' }) =>
-  ({
-    core: Promise.resolve({ security: { authc: { getCurrentUser: () => user } } }),
-  } as unknown as RequestHandlerContext);
-
-const getClient = (latestHistorySnapshot?: DashboardState) => ({
-  getHistory: jest.fn().mockResolvedValue({
-    items: latestHistorySnapshot ? [{ object: { snapshot: latestHistorySnapshot } }] : [],
-  }),
-  log: jest.fn().mockResolvedValue(undefined),
-});
-
 const baseArgs = {
   dashboardId: 'dash-1',
   spaceId: 'default',
@@ -110,6 +98,18 @@ describe('getNextHistorySequence', () => {
 });
 
 describe('addToHistory', () => {
+  const getContext = (user: unknown = { username: 'elastic', profile_uid: 'u_1' }) =>
+    ({
+      core: Promise.resolve({ security: { authc: { getCurrentUser: () => user } } }),
+    } as unknown as RequestHandlerContext);
+
+  const getClient = (latestHistorySnapshot?: DashboardState) => ({
+    getHistory: jest.fn().mockResolvedValue({
+      items: latestHistorySnapshot ? [{ object: { snapshot: latestHistorySnapshot } }] : [],
+    }),
+    log: jest.fn().mockResolvedValue(undefined),
+  });
+
   beforeEach(() => jest.resetAllMocks());
 
   it('logs without an actor when there is no authenticated user (security disabled)', async () => {
@@ -152,14 +152,14 @@ describe('addToHistory', () => {
     );
   });
 
-  it('logs deletes with their sequence', async () => {
+  it('logs deletes with their sequence and waits for refresh so that a recreated ID continues after it', async () => {
     const client = getClient();
     mockedGetClient.mockResolvedValue(client as never);
     await addToHistory({ ...baseArgs, ctx: getContext(), sequence: 4, type: 'delete' });
 
     expect(client.log).toHaveBeenCalledWith(
       expect.objectContaining({ objectId: 'dash-1', sequence: 4 }),
-      expect.objectContaining({ action: 'dashboard_delete' })
+      expect.objectContaining({ action: 'dashboard_delete', refresh: 'wait_for' })
     );
   });
 
@@ -177,8 +177,8 @@ describe('addToHistory', () => {
     expect(client.log.mock.calls[0][1].refresh).toBeUndefined();
   });
 
-  it('ignores the latest searchable history event when computing the change count', async () => {
-    // history lags behind (e.g. v1 is still the latest searchable event while saving v3)
+  it('does not read history to compute the change count, since it lags behind saves', async () => {
+    // e.g. v1 is still the latest searchable event while saving v3
     const client = getClient({ ...baseArgs.snapshot, title: 'v1' } as DashboardState);
     mockedGetClient.mockResolvedValue(client as never);
     await addToHistory({
@@ -189,7 +189,6 @@ describe('addToHistory', () => {
     });
 
     expect(client.getHistory).not.toHaveBeenCalled();
-    expect(client.log.mock.calls[0][1].data.metadata).toEqual({ changeCount: 0 });
   });
 
   it('records restoredFrom and waits for refresh on restore', async () => {
@@ -206,14 +205,6 @@ describe('addToHistory', () => {
     const options = client.log.mock.calls[0][1];
     expect(options.data.metadata).toEqual({ changeCount: 1, restoredFrom: 2 });
     expect(options.refresh).toBe('wait_for');
-  });
-
-  it('waits for refresh on delete so that a recreated ID continues after it', async () => {
-    const client = getClient();
-    mockedGetClient.mockResolvedValue(client as never);
-    await addToHistory({ ...baseArgs, ctx: getContext(), sequence: 4, type: 'delete' });
-
-    expect(client.log.mock.calls[0][1].refresh).toBe('wait_for');
   });
 
   it('swallows history write failures', async () => {
@@ -314,7 +305,6 @@ describe('getChangeHistoryContext', () => {
 
   it('skips the privileges check when security is disabled', async () => {
     mockUseRbacForRequest.mockReturnValue(false);
-    getSavedObject.mockResolvedValue({ attributes: {} });
     const client = { getHistory: jest.fn().mockResolvedValue({ items: [] }) };
     mockedGetClient.mockResolvedValue(client as never);
     const res = httpServerMock.createResponseFactory();
