@@ -1337,6 +1337,24 @@ describe('AttachmentService getter', () => {
       expect(JSON.stringify(findArgs.filter)).toContain('host:b');
     });
 
+    it('buckets only the requested ids of an attachment that holds several', async () => {
+      // An attachment holding ['host:a', 'host:b'] matches a request for 'host:b'; without
+      // `include`, its 'host:a' would take a bucket of the requested size.
+      unsecuredSavedObjectsClient.find.mockResolvedValue(createSOFindResponse([]));
+
+      await createAttachmentGetter().getCaseIdsByAttachmentIds({
+        type: 'security.entity',
+        attachmentIds: ['host:b'],
+      });
+
+      const [[findArgs]] = unsecuredSavedObjectsClient.find.mock.calls;
+      expect(findArgs.aggs?.attachmentIds.terms).toEqual({
+        field: 'cases-attachments.attributes.attachmentId',
+        size: 1,
+        include: ['host:b'],
+      });
+    });
+
     it('returns no case ids when nothing matches', async () => {
       unsecuredSavedObjectsClient.find.mockResolvedValue(createSOFindResponse([]));
 
