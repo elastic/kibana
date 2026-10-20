@@ -76,13 +76,16 @@ function toConnectionNode(node: TopologyNode): ConnectionNode {
     : toExternalConnectionNode(node);
 }
 
-/**
- * Node id conventions match the APM service map: services are keyed by
- * `service.name`, external dependencies by `>` + destination resource
- * (see `getExitSpanNodeId`).
- */
-export function getTopologyNodeId(node: TopologyNode): string {
-  return toConnectionNode(node).id;
+/** Whether `serviceName` is a service node of the topology (as a source or a target). */
+export function topologyHasService(
+  connections: ServiceMapAttachmentData['connections'],
+  serviceName: string
+): boolean {
+  return connections.some(({ source, target }) =>
+    [source, target].some(
+      (node) => isTopologyServiceNode(node) && node[SERVICE_NAME] === serviceName
+    )
+  );
 }
 
 function toReactFlowNode(

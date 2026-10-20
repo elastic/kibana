@@ -11,7 +11,10 @@ import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
 import type { ServiceMapAttachmentData } from '../../../common/agent_builder/attachments';
 import { SERVICE_MAP_ATTACHMENT_DEFAULT_TIME_RANGE } from '../../../common/agent_builder/attachments';
-import { transformTopologyToServiceMap } from '../../../common/agent_builder/attachments/service_map_transform';
+import {
+  topologyHasService,
+  transformTopologyToServiceMap,
+} from '../../../common/agent_builder/attachments/service_map_transform';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import type { Environment } from '../../../common/environment_rt';
 import { isActivePlatinumLicense } from '../../../common/license_check';
@@ -170,6 +173,30 @@ function ContextualMapContent({
   );
 }
 
+/**
+ * Resolves the attachment's time range to the relative range and the absolute
+ * start/end the data fetches need. The range is LLM-provided, so an absent or
+ * unparseable one falls back to the default instead of reaching the fetches.
+ */
+function resolveTimeRange(timeRange: ServiceMapAttachmentData['timeRange']) {
+  const requested = {
+    rangeFrom: timeRange?.start ?? SERVICE_MAP_ATTACHMENT_DEFAULT_TIME_RANGE.start,
+    rangeTo: timeRange?.end ?? SERVICE_MAP_ATTACHMENT_DEFAULT_TIME_RANGE.end,
+  };
+  const parsed = getDateRange(requested);
+  if (parsed.start && parsed.end) {
+    return { ...requested, start: parsed.start, end: parsed.end };
+  }
+
+  const fallback = {
+    rangeFrom: SERVICE_MAP_ATTACHMENT_DEFAULT_TIME_RANGE.start,
+    rangeTo: SERVICE_MAP_ATTACHMENT_DEFAULT_TIME_RANGE.end,
+  };
+  const { start, end } = getDateRange(fallback);
+  // The default is datemath that always parses; the fallbacks only satisfy the types.
+  return { ...fallback, start: start ?? fallback.rangeFrom, end: end ?? fallback.rangeTo };
+}
+
 function ContextualMap({
   data,
   deps,
@@ -179,28 +206,10 @@ function ContextualMap({
 }: AgentContextualServiceMapProps & { serviceName: string }) {
   const environment: Environment = data.environment || ENVIRONMENT_ALL.value;
 
-  const { rangeFrom, rangeTo, start, end } = useMemo(() => {
-    const requested = {
-      rangeFrom: data.timeRange?.start ?? SERVICE_MAP_ATTACHMENT_DEFAULT_TIME_RANGE.start,
-      rangeTo: data.timeRange?.end ?? SERVICE_MAP_ATTACHMENT_DEFAULT_TIME_RANGE.end,
-    };
-    const parsed = getDateRange(requested);
-    if (parsed.start && parsed.end) {
-      return { ...requested, start: parsed.start, end: parsed.end };
-    }
-    // Unparseable attachment timeRange (LLM-provided): fall back to the
-    // default range rather than passing raw garbage to the data fetches.
-    const fallback = {
-      rangeFrom: SERVICE_MAP_ATTACHMENT_DEFAULT_TIME_RANGE.start,
-      rangeTo: SERVICE_MAP_ATTACHMENT_DEFAULT_TIME_RANGE.end,
-    };
-    const parsedFallback = getDateRange(fallback);
-    return {
-      ...fallback,
-      start: parsedFallback.start ?? fallback.rangeFrom,
-      end: parsedFallback.end ?? fallback.rangeTo,
-    };
-  }, [data.timeRange?.start, data.timeRange?.end]);
+  const { rangeFrom, rangeTo, start, end } = useMemo(
+    () => resolveTimeRange(data.timeRange),
+    [data.timeRange]
+  );
 
   const fullMapHref = getServiceMapUrl(deps.coreStart, {
     rangeFrom,
@@ -246,16 +255,10 @@ export function AgentContextualServiceMap(props: AgentContextualServiceMapProps)
   const serviceName = data.serviceName;
   const isFullView = data.view === 'full';
 
-  const hasFocalService = useMemo(() => {
-    if (!serviceName) {
-      return false;
-    }
-    return data.connections.some((connection) =>
-      [connection.source, connection.target].some(
-        (node) => 'service.name' in node && node['service.name'] === serviceName
-      )
-    );
-  }, [data.connections, serviceName]);
+  const hasFocalService = useMemo(
+    () => !!serviceName && topologyHasService(data.connections, serviceName),
+    [data.connections, serviceName]
+  );
 
   if (isFullView || !serviceName || !hasFocalService) {
     return <AgentServiceMap connections={data.connections} nodeMetadata={data.nodeMetadata} />;

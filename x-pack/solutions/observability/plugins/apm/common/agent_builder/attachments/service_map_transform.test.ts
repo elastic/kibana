@@ -6,7 +6,7 @@
  */
 
 import type { ServiceMapAttachmentData } from './service_map';
-import { getTopologyNodeId, transformTopologyToServiceMap } from './service_map_transform';
+import { topologyHasService, transformTopologyToServiceMap } from './service_map_transform';
 
 const serviceNode = (name: string, agentName?: string) => ({
   'service.name': name,
@@ -225,9 +225,19 @@ describe('transformTopologyToServiceMap', () => {
   });
 });
 
-describe('getTopologyNodeId', () => {
-  it('uses service.name for services and >resource for externals', () => {
-    expect(getTopologyNodeId(serviceNode('opbeans-java'))).toBe('opbeans-java');
-    expect(getTopologyNodeId(externalNode('postgresql'))).toBe('>postgresql');
+describe('topologyHasService', () => {
+  const connections = [
+    { source: serviceNode('frontend'), target: serviceNode('backend') },
+    { source: serviceNode('backend'), target: externalNode('postgresql') },
+  ];
+
+  it('finds a service as a source or a target', () => {
+    expect(topologyHasService(connections, 'frontend')).toBe(true);
+    expect(topologyHasService(connections, 'backend')).toBe(true);
+  });
+
+  it('does not match unknown services or external dependencies', () => {
+    expect(topologyHasService(connections, 'unknown')).toBe(false);
+    expect(topologyHasService(connections, 'postgresql')).toBe(false);
   });
 });
