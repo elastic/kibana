@@ -140,7 +140,7 @@ export abstract class Type<V> {
 
   protected constructor(schemaOrFactory: Schema | (() => Schema), options: TypeOptions<V> = {}) {
     this.meta = options.meta;
-    this.baseTypeOptions = options;
+    this.baseTypeOptions = { ...options };
     this.schemaFactory =
       typeof schemaOrFactory === 'function' ? schemaOrFactory : () => schemaOrFactory;
   }

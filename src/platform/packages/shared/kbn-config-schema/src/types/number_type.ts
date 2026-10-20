@@ -25,6 +25,7 @@ export type NumberOptions = TypeOptions<number> & {
 
 export class NumberType extends Type<number> {
   constructor(options: NumberOptions = {}) {
+    options = { ...options };
     super(() => {
       let schema = internals.number();
       if (options.min !== undefined) {

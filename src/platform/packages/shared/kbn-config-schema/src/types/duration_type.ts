@@ -27,6 +27,7 @@ export interface DurationOptions {
 
 export class DurationType extends Type<Duration> {
   constructor(options: DurationOptions = {}) {
+    options = { ...options };
     let defaultValue;
     if (typeof options.defaultValue === 'function') {
       const originalDefaultValue = options.defaultValue;

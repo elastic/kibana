@@ -83,6 +83,7 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
   private options: ObjectTypeOptions<P>;
 
   constructor(props: P, options: ObjectTypeOptions<P> = {}) {
+    options = { ...options };
     const clonedProps = { ...props };
     const { unknowns, ...typeOptions } = options;
     const seenIds = new Map<string, Type<any>>();

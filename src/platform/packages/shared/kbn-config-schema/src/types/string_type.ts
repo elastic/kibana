@@ -23,6 +23,7 @@ export type StringOptions = TypeOptions<string> & {
 
 export class StringType extends Type<string> {
   constructor(options: StringOptions = {}) {
+    options = { ...options };
     super(() => StringType.createSchema(options), options);
   }
 

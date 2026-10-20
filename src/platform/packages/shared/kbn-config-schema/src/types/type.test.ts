@@ -8,9 +8,11 @@
  */
 
 import { get } from 'lodash';
+import { schema } from '../..';
 import { internals } from '../internals';
 import type { TypeOptions } from './type';
 import { Type } from './type';
+import { UnionType } from './union_type';
 import {
   META_FIELD_X_OAS_AVAILABILITY,
   META_FIELD_X_OAS_DEPRECATED,
@@ -90,5 +92,31 @@ describe('meta', () => {
     const frozenLiteral = Object.freeze(internals.any().valid('a'));
     const frozenType = Object.freeze(new MyType({}, () => frozenLiteral));
     expect(frozenType.validate('a')).toBe('a');
+  });
+});
+
+describe('options snapshot', () => {
+  it('ignores mutations to the options object made after construction', () => {
+    const numberOptions: { defaultValue: number; min: number } = { defaultValue: 1, min: 0 };
+    const numberType = schema.number(numberOptions);
+    numberOptions.defaultValue = 2;
+    numberOptions.min = 10;
+    expect(numberType.validate(undefined)).toBe(1);
+    expect(numberType.validate(5)).toBe(5);
+
+    const stringOptions: { maxLength: number } = { maxLength: 10 };
+    const stringType = schema.string(stringOptions);
+    stringOptions.maxLength = 1;
+    expect(stringType.validate('abc')).toBe('abc');
+
+    const objectOptions: { unknowns: 'allow' | 'forbid' } = { unknowns: 'allow' };
+    const objectType = schema.object({}, objectOptions);
+    objectOptions.unknowns = 'forbid';
+    expect(objectType.validate({ extra: true })).toEqual({ extra: true });
+
+    const unionTypes: Array<Type<string>> = [schema.literal('a')];
+    const unionType = new UnionType(unionTypes);
+    unionTypes.push(schema.literal('b'));
+    expect(() => unionType.validate('b')).toThrow();
   });
 });

@@ -23,6 +23,7 @@ export class ArrayType<T> extends Type<T[]> {
   private readonly arrayOptions: ArrayOptions<T>;
 
   constructor(type: Type<T>, options: ArrayOptions<T> = {}) {
+    options = { ...options };
     super(() => {
       let schema = internals.array().items(type.getSchema().optional()).sparse(false);
 

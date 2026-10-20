@@ -24,6 +24,7 @@ export interface ByteSizeOptions {
 
 export class ByteSizeType extends Type<ByteSizeValue> {
   constructor(options: ByteSizeOptions = {}) {
+    options = { ...options };
     const defaultValue = ensureByteSizeValue(options.defaultValue);
     if (options.min !== undefined) {
       ensureByteSizeValue(options.min);

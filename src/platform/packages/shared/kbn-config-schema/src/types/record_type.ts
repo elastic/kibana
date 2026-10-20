@@ -22,6 +22,7 @@ export class RecordOfType<K extends string, V> extends Type<Record<K, V>> {
   private readonly options: RecordOfOptions<K, V>;
 
   constructor(keyType: Type<K>, valueType: Type<V>, options: RecordOfOptions<K, V> = {}) {
+    options = { ...options };
     super(() => {
       let schema = internals
         .record()
