@@ -45,6 +45,7 @@ export interface ModelVersionSummary {
   schemas: {
     create: false | string | Record<string, unknown>;
     forwardCompatibility: false | string | Record<string, unknown>;
+    update?: Record<string, unknown>;
   };
 }
 
@@ -121,12 +122,13 @@ const getSerializedSchemas = (
       create: false as const,
     };
   }
-  const { forwardCompatibility, create } = schemas;
+  const { forwardCompatibility, create, update } = schemas;
   return {
     forwardCompatibility: forwardCompatibility
       ? serializeSchema(forwardCompatibility)
       : (false as const),
     create: create ? serializeSchema(create) : (false as const),
+    ...(update && { update: serializeSchema(update) }),
   };
 };
 

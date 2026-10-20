@@ -6,6 +6,7 @@
  */
 
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
+import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { actionsAuthorizationMock } from '../../../../authorization/actions_authorization.mock';
 import type { ActionsAuthorization } from '../../../../authorization/actions_authorization';
@@ -33,6 +34,7 @@ import { authTypeRegistryMock } from '../../../../auth_types/auth_type_registry.
 import { generateConfigSchema } from '../../../../lib/single_file_connectors/generate_config_schema';
 import { securityServiceMock } from '@kbn/core/server/mocks';
 import { encodeApiKey } from '../../../../inbound/event_identity/encode_api_key';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 jest.mock('@kbn/connector-specs', () => {
   const actual = jest.requireActual('@kbn/connector-specs');
@@ -1323,7 +1325,7 @@ describe('create()', () => {
     const securityService = securityServiceMock.createStart();
     const inboundContext: ActionsClientContext = {
       ...mockContext,
-      spaceId: 'default',
+      spaceId: DEFAULT_SPACE_ID,
       securityService,
     };
 
@@ -1473,7 +1475,7 @@ describe('create()', () => {
     const securityService = securityServiceMock.createStart();
     const dualContext: ActionsClientContext = {
       ...mockContext,
-      spaceId: 'default',
+      spaceId: DEFAULT_SPACE_ID,
       securityService,
     };
 
@@ -1586,6 +1588,87 @@ describe('create()', () => {
       );
       expect(preSaveHook).not.toHaveBeenCalled();
       expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('connectors that publish keys', () => {
+    const keyContext: ActionsClientContext = {
+      ...mockContext,
+      spaceId: asSpaceId('security'),
+      publicBaseUrl: 'https://kibana.example.com',
+    };
+    const action = { name: 'SSF', actionTypeId: '.ssf', config: {}, secrets: {} };
+
+    beforeEach(() => {
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(
+        getConnectorType({
+          id: '.ssf',
+          preSaveHook,
+          validate: {
+            config: { schema: z.any() },
+            secrets: { schema: z.any() },
+            params: { schema: z.object({}) },
+          },
+        })
+      );
+      unsecuredSavedObjectsClient.create.mockImplementation(async (type, attributes, options) => ({
+        id: options?.id ?? 'mock-saved-object-id',
+        type,
+        attributes,
+        references: [],
+      }));
+    });
+
+    test.each([undefined, 'http://kibana.example.com', 'https://kibana.example.com/kibana'])(
+      'returns 400 before the pre-save hook when the public base URL is %s',
+      async (publicBaseUrl) => {
+        await expect(
+          create({ context: { ...keyContext, publicBaseUrl }, action })
+        ).rejects.toMatchObject({ output: { statusCode: 400 } });
+        expect(preSaveHook).not.toHaveBeenCalled();
+        expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      }
+    );
+
+    test('creates the key record after the connector, outside the connector attributes', async () => {
+      await create({ context: keyContext, action });
+
+      const [[connectorType, connector], [keyType, key, keyOptions]] =
+        unsecuredSavedObjectsClient.create.mock.calls;
+      expect(connectorType).toBe('action');
+      expect(connector).toMatchObject({ config: {}, secrets: {} });
+      expect(keyType).toBe('connector_signing_key');
+      expect(key).toMatchObject({
+        connectorId: 'mock-saved-object-id',
+        issuer:
+          'https://kibana.example.com/s/security/api/actions/public/.ssf/mock-saved-object-id',
+      });
+      expect(keyOptions).toMatchObject({ id: 'mock-saved-object-id', overwrite: true });
+    });
+
+    test('does not write a key record when the connector ID is already used', async () => {
+      unsecuredSavedObjectsClient.create.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createConflictError('action', 'mock-saved-object-id')
+      );
+
+      await expect(create({ context: keyContext, action })).rejects.toThrow(
+        'A connector is already using this ID'
+      );
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
+      expect(unsecuredSavedObjectsClient.delete).not.toHaveBeenCalled();
+    });
+
+    test('deletes the connector when the key record cannot be written', async () => {
+      unsecuredSavedObjectsClient.create.mockImplementation(async (type, attributes, options) => {
+        if (type === 'connector_signing_key') throw new Error('key write failed');
+        return { id: options?.id ?? 'mock-saved-object-id', type, attributes, references: [] };
+      });
+
+      await expect(create({ context: keyContext, action })).rejects.toThrow('key write failed');
+      expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith(
+        'action',
+        'mock-saved-object-id'
+      );
     });
   });
 });

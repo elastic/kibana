@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import {
+  ALERT_ACTION_NO_OP_CODE,
+  INVALID_ALERT_STATE_TRANSITION_CODE,
+} from '@kbn/alerting-v2-schemas';
+
 /**
  * This file hosts two distinct catalogs:
  *
@@ -125,6 +130,12 @@ export const ALERTING_ERROR_CODES = {
    * snoozing and deleting existing policies stay available.
    */
   ACTION_POLICY_LICENSE_NOT_SUPPORTED: 'ACTION_POLICY_LICENSE_NOT_SUPPORTED',
+  /**
+   * An action policy was written with a user-created Cloud API key (a raw `essu_`
+   * credential). Such a key has no key id and cannot be stored or used by the
+   * dispatcher, so create / update / upsert / API key rotation are rejected.
+   */
+  ACTION_POLICY_CLOUD_API_KEY_NOT_SUPPORTED: 'ACTION_POLICY_CLOUD_API_KEY_NOT_SUPPORTED',
 
   // ──────────────────────── Alert actions ────────────────────
   /** No alert event matched the supplied `group_hash` (and `alert_id`). */
@@ -146,8 +157,21 @@ export const ALERTING_ERROR_CODES = {
    * actions (`activate` / `deactivate`) only accept the latest episode.
    */
   ALERT_EPISODE_NOT_LATEST: 'ALERT_NOT_LATEST',
-  /** The requested action is incompatible with the episode's current `episode.status`. */
-  INVALID_EPISODE_STATE_TRANSITION: 'INVALID_ALERT_STATE_TRANSITION',
+  /**
+   * The requested action is a no-op against the alert's current state machine:
+   * `activate` / `deactivate` of an alert already in that lifecycle state,
+   * `ack` / `unack` of an alert already on that side of acknowledgement, or
+   * `unsnooze` of a series with no snooze in effect.
+   */
+  INVALID_EPISODE_STATE_TRANSITION: INVALID_ALERT_STATE_TRANSITION_CODE,
+  /**
+   * The requested action would write the value the alert already carries —
+   * `assign` to the current assignee, `tag` with the current set, or `snooze`
+   * with the expiry of the snooze already in effect. Distinct
+   * from `INVALID_ALERT_STATE_TRANSITION` because no state machine is
+   * involved: the write is simply identical to what is already recorded.
+   */
+  ALERT_ACTION_NO_OP: ALERT_ACTION_NO_OP_CODE,
 
   // ──────────────────── Rule doctor insights ─────────────────
   /** A rule doctor insight with the given identifier does not exist. */
@@ -365,12 +389,6 @@ export const ALERTING_LOG_CODES = {
    * remaining policies still dispatch.
    */
   DISPATCH_POLICY_LOOKUP_FAILED: 'DISPATCH_POLICY_LOOKUP_FAILED',
-  /**
-   * The dispatcher has no persisted event watermark (cold start or wiped task
-   * state). The first scan starts from `startedAt − OVERLAP_WINDOW_MINUTES`.
-   * Rule events older than that will not be dispatched.
-   */
-  DISPATCHER_COLD_START: 'DISPATCHER_COLD_START',
   /**
    * The self-imposed tick deadline (TICK_DEADLINE_MS) fired before the pipeline
    * completed. The pipeline was aborted cooperatively; the returned watermark is

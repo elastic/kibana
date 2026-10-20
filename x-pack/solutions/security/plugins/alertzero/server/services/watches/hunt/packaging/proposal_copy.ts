@@ -12,6 +12,7 @@ import type {
   CurrentRunState,
   HuntEvidenceTechnique,
   ProcessSelector,
+  Subject,
 } from './types';
 
 const sentenceCase = (value: string): string =>
@@ -37,7 +38,7 @@ const describeProcessForTitle = (selector: ProcessSelector): string =>
     : selector.processName;
 
 /** Markdown process label for the comment body, e.g. `` `powershell.exe` (PID 4212) ``. */
-const describeProcess = (selector: ProcessSelector): string => {
+export const describeProcess = (selector: ProcessSelector): string => {
   if (selector.pid !== undefined) {
     return `\`${selector.processName}\` (PID ${selector.pid})`;
   }
@@ -125,18 +126,21 @@ const processTechniqueText = (
  */
 const buildActionRationale = ({
   entry,
-  processSelector,
+  subject,
 }: {
   entry: ActionCatalogEntry;
-  processSelector?: ProcessSelector;
+  subject: Subject;
 }): string => {
   const name = entry.name.trim().toLowerCase();
-  if (processSelector) {
+  if (subject.kind === 'process') {
     if (name.startsWith('kill')) {
       return 'Killing it stops execution immediately';
     }
     if (name.startsWith('suspend')) {
       return 'Suspending it pauses execution without terminating the process, preserving state for investigation';
+    }
+    if (name.startsWith('dump memory')) {
+      return 'Dumping its memory captures volatile evidence for offline analysis without changing the process';
     }
     return 'This action responds to the process directly';
   }
@@ -159,24 +163,22 @@ const buildHuntContextLine = (state: CurrentRunState): string | undefined => {
 
 const buildActionLine = ({
   entry,
-  host,
-  processSelector,
+  subject,
 }: {
   entry: ActionCatalogEntry;
-  host: CurrentRunHost;
-  processSelector?: ProcessSelector;
+  subject: Subject;
 }): string => {
   const name = sentenceCase(entry.name.trim());
-  if (processSelector) {
+  if (subject.kind === 'process') {
     const verb = stripTrailingWord(name, 'process') ?? name;
-    return `**Action:** ${verb} ${describeProcess(processSelector)} on **${
-      host.name
+    return `**Action:** ${verb} ${describeProcess(subject.processSelector)} on **${
+      subject.host.name
     }** with Elastic Defend.`;
   }
   if (isHostAction(name)) {
-    return `**Action:** ${name} **${host.name}** with Elastic Defend.`;
+    return `**Action:** ${name} **${subject.host.name}** with Elastic Defend.`;
   }
-  return `**Action:** ${name} on **${host.name}** with Elastic Defend.`;
+  return `**Action:** ${name} on **${subject.host.name}** with Elastic Defend.`;
 };
 
 /**
@@ -186,24 +188,38 @@ const buildActionLine = ({
  */
 export const buildProposalTitle = ({
   entry,
-  host,
-  processSelector,
+  subject,
 }: {
   entry: ActionCatalogEntry;
-  host: CurrentRunHost;
-  processSelector?: ProcessSelector;
+  subject: Subject;
 }): string => {
   const name = sentenceCase(entry.name.trim());
   let title: string;
-  if (processSelector) {
+  if (subject.kind === 'process') {
     const verb = stripTrailingWord(name, 'process') ?? name;
-    title = `${verb} ${describeProcessForTitle(processSelector)} on ${host.name}`;
+    title = `${verb} ${describeProcessForTitle(subject.processSelector)} on ${subject.host.name}`;
   } else if (isHostAction(name)) {
-    title = `${name} ${host.name}`;
+    title = `${name} ${subject.host.name}`;
   } else {
-    title = `${name} on ${host.name}`;
+    title = `${name} on ${subject.host.name}`;
   }
   return title.slice(0, MAX_TITLE_LENGTH);
+};
+
+/** Evidence lines for the Why list, scoped to what the subject actually is. */
+const buildEvidenceLines = (
+  state: CurrentRunState,
+  subject: Subject
+): Array<string | undefined> => {
+  switch (subject.kind) {
+    case 'process':
+      return [
+        processTechniqueText(state, subject.processSelector),
+        processLastSeenText(subject.processSelector),
+      ];
+    case 'host':
+      return [huntConfirmedText(state, subject.host), evidenceSummaryText(state)];
+  }
 };
 
 /**
@@ -212,20 +228,22 @@ export const buildProposalTitle = ({
  */
 export const buildProposalComment = ({
   entry,
-  host,
+  subject,
   state,
-  processSelector,
+  ruleLine,
 }: {
   entry: ActionCatalogEntry;
-  host: CurrentRunHost;
+  subject: Subject;
   state: CurrentRunState;
-  processSelector?: ProcessSelector;
+  /** The selection rule that chose this action; rendered as the first Why bullet when present. */
+  ruleLine?: string;
 }): string => {
-  const actionLine = buildActionLine({ entry, host, processSelector });
-  const evidenceLines = processSelector
-    ? [processTechniqueText(state, processSelector), processLastSeenText(processSelector)]
-    : [huntConfirmedText(state, host), evidenceSummaryText(state)];
-  const whyLines = [...evidenceLines, buildActionRationale({ entry, processSelector })]
+  const actionLine = buildActionLine({ entry, subject });
+  const whyLines = [
+    ruleLine,
+    ...buildEvidenceLines(state, subject),
+    buildActionRationale({ entry, subject }),
+  ]
     .filter((line): line is string => line !== undefined)
     .map(addPeriod);
 
@@ -241,10 +259,13 @@ export const buildRecommendationComment = ({
   reasonLines,
   manualRemediation,
   state,
+  heldBackLines = [],
 }: {
   reasonLines: string[];
   manualRemediation: string[];
   state: CurrentRunState;
+  /** Actions the selection table declined to propose, each with its reason. */
+  heldBackLines?: string[];
 }): string => {
   const sections = [
     '**Action:** Analyst follow-up. No automated action is proposed.',
@@ -252,6 +273,9 @@ export const buildRecommendationComment = ({
     '**Why**',
     ...reasonLines.map((line) => `- ${line}`),
   ];
+  if (heldBackLines.length > 0) {
+    sections.push('', '**Held back**', ...heldBackLines.map((line) => `- ${addPeriod(line)}`));
+  }
   if (manualRemediation.length > 0) {
     sections.push('', '**Recommended steps**', ...manualRemediation.map((line) => `- ${line}`));
   }

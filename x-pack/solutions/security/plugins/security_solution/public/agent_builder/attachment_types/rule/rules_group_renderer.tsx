@@ -14,7 +14,7 @@ import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
 import { APP_UI_ID, SecurityPageName } from '../../../../common/constants';
 import { FLYOUT_DESCRIPTOR_KIND } from '../../../flyout_v2/shared/url_state/flyout_v2_url_param';
-import { FlyoutRow, RULE_FALLBACK_TITLE, RULE_SUBTITLE } from '../grouped_attachments';
+import { FlyoutRow, RULE_FALLBACK_TITLE, RULE_SUBTITLE, rulesTitle } from '../grouped_attachments';
 import { getRuleName, getSavedRuleId } from './helpers';
 import type { RuleAttachment } from './helpers';
 
@@ -35,6 +35,22 @@ export const createRulesGroupRenderer = ({
       if (!rules.has(key)) {
         rules.set(key, rule);
       }
+    }
+
+    if (rules.size > 1) {
+      const href = application.getUrlForApp(APP_UI_ID, {
+        deepLinkId: SecurityPageName.rules,
+        path: '/management',
+      });
+
+      return (
+        <GroupedAttachmentRow
+          iconType="document"
+          iconColor="subdued"
+          title={rulesTitle(rules.size)}
+          action={{ kind: 'page', href }}
+        />
+      );
     }
 
     return (

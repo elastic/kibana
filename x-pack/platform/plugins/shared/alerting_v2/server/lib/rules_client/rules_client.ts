@@ -14,7 +14,9 @@ import {
   createRuleDataSchema,
   FIND_DEFAULT_PER_PAGE,
   isStateTransitionAllowed,
+  putRuleDataSchema,
   updateRuleDataSchema,
+  type PutRuleData,
   type RuleKind,
 } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
@@ -400,6 +402,7 @@ export class RulesClient {
     actor,
     nowIso,
     version,
+    template,
   }: {
     data: CreateRuleData;
     id?: string;
@@ -407,6 +410,7 @@ export class RulesClient {
     actor: RuleSavedObjectAttributes['createdBy'];
     nowIso: string;
     version: number;
+    template?: RuleSavedObjectAttributes['metadata']['template'];
   }): PreparedRule {
     this.artifactTypeRegistry.validate(data.artifacts);
     this.assertScheduleIntervalAllowed(data.schedule.every);
@@ -418,6 +422,7 @@ export class RulesClient {
       updatedBy: actor,
       updatedAt: nowIso,
       version,
+      template,
     });
 
     return {
@@ -621,14 +626,15 @@ export class RulesClient {
     const prepared = this.prepareRuleForCreate({
       data: parsed,
       id: params.options?.id,
-      enabled: true,
+      enabled: params.options?.enabled ?? true,
       actor,
       nowIso,
       version: this.getNextVersion(),
+      template: params.options?.template,
     });
 
     await this.validateSchedule([
-      { updatedEvery: prepared.attrs.schedule.every, checkLimit: true },
+      { updatedEvery: prepared.attrs.schedule.every, checkLimit: prepared.enabled },
     ]);
 
     const { created, errors } = await this.persistPreparedRules([prepared]);
@@ -1793,15 +1799,16 @@ export class RulesClient {
     data,
   }: {
     id: string;
-    data: CreateRuleData;
+    data: PutRuleData;
   }): Promise<{ rule: RuleResponse; created: boolean }> {
-    const parsed = this.parseRuleData(createRuleDataSchema, data, 'upsert');
+    const parsed = this.parseRuleData(putRuleDataSchema, data, 'upsert');
     this.artifactTypeRegistry.validate(parsed.artifacts);
 
     const exists = await this.ruleExists({ id });
 
     if (!exists) {
-      const rule = await this.createRule({ data, options: { id } });
+      const { enabled, ...createData } = parsed;
+      const rule = await this.createRule({ data: createData, options: { id, enabled } });
       return { rule, created: true };
     }
 
@@ -1817,28 +1824,26 @@ export class RulesClient {
 
     assertImmutableUnchanged(parsed, existingAttrs);
 
+    const prevEnabled = existingAttrs.enabled;
+    const nextEnabled = parsed.enabled ?? prevEnabled;
+
     const nextAttrs = transformCreateRuleBodyToRuleSoAttributes(parsed, {
-      enabled: existingAttrs.enabled,
+      enabled: nextEnabled,
       createdBy: existingAttrs.createdBy,
       createdAt: existingAttrs.createdAt,
       updatedBy: actor,
       updatedAt: nowIso,
       version: this.getNextVersion(existingAttrs.version),
+      template: existingAttrs.metadata.template,
     });
 
     await this.validateSchedule([
       {
         updatedEvery: nextAttrs.schedule.every,
-        prevEvery: existingAttrs.schedule.every,
-        checkLimit: existingAttrs.enabled,
+        prevEvery: prevEnabled ? existingAttrs.schedule.every : undefined,
+        checkLimit: nextEnabled,
       },
     ]);
-
-    await this.scheduleRuleExecutorTask({
-      ruleId: id,
-      spaceId,
-      scheduleEvery: nextAttrs.schedule.every,
-    });
 
     const references = rebuildArtifactReferences({
       artifacts: nextAttrs.artifacts,
@@ -1846,12 +1851,33 @@ export class RulesClient {
       registry: this.artifactTypeRegistry,
     });
 
-    await this.writeRuleAttrs({
-      id,
-      attrs: nextAttrs,
-      version: existingVersion,
-      references,
-    });
+    // Enable schedules before writing; disable writes before removing — each
+    // order keeps a failure from leaving the rule in a worse state than
+    // before. Also self-heals like `enableRule`/`disableRule`: the task state
+    // is always reapplied for `nextEnabled`, not just on a transition, so a
+    // leftover task from a prior bug or failed write also gets cleaned up.
+    if (nextEnabled) {
+      await this.scheduleRuleExecutorTask({
+        ruleId: id,
+        spaceId,
+        scheduleEvery: nextAttrs.schedule.every,
+      });
+      await this.writeRuleAttrs({
+        id,
+        attrs: nextAttrs,
+        version: existingVersion,
+        references,
+      });
+    } else {
+      await this.writeRuleAttrs({
+        id,
+        attrs: nextAttrs,
+        version: existingVersion,
+        references,
+      });
+      const taskId = getRuleExecutorTaskId({ ruleId: id, spaceId });
+      await this.taskManager.removeIfExists(taskId);
+    }
 
     const rule = this.toRuleApiResponse({
       id,

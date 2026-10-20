@@ -97,9 +97,12 @@ describe('useWatchSettingsDraft', () => {
         await result.current.save();
       });
 
-      expect(mockEnsureWorkerServiceAccounts).toHaveBeenCalledWith(undefined, undefined, [
-        SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
-      ]);
+      expect(mockEnsureWorkerServiceAccounts).toHaveBeenCalledWith(
+        undefined,
+        undefined,
+        [SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID],
+        { isServerless: false }
+      );
       expect(mutateAsync).toHaveBeenCalledWith({
         workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
         patch: {
@@ -178,7 +181,9 @@ describe('useWatchSettingsDraft', () => {
         await result.current.save();
       });
 
-      expect(mockEnsureWorkerServiceAccounts).toHaveBeenCalledWith(undefined, undefined, []);
+      expect(mockEnsureWorkerServiceAccounts).toHaveBeenCalledWith(undefined, undefined, [], {
+        isServerless: false,
+      });
       expect(mutateAsync).toHaveBeenCalledWith({
         workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
         patch: { enabled: true },
@@ -218,6 +223,34 @@ describe('useWatchSettingsDraft', () => {
       settings: { extras: RULE_TUNING_EXTRAS },
       dirty: false,
     });
+  });
+
+  it('lists only the Workers with unsaved changes, in the order they were given', () => {
+    const { result } = renderHook(() => useWatchSettingsDraft([ruleTuning, ruleCoverage]));
+
+    expect(result.current.dirtyWorkers).toEqual([]);
+
+    act(() => {
+      result.current.updateEnabled(ruleCoverage, true);
+    });
+    expect(result.current.dirtyWorkers).toEqual([ruleCoverage]);
+
+    act(() => {
+      result.current.updateSettings(ruleTuning, {
+        extras: { ...RULE_TUNING_EXTRAS, analysisWindowDays: 7 },
+      });
+    });
+    expect(result.current.dirtyWorkers).toEqual([ruleTuning, ruleCoverage]);
+
+    act(() => {
+      result.current.updateEnabled(ruleCoverage, false);
+    });
+    expect(result.current.dirtyWorkers).toEqual([ruleTuning]);
+
+    act(() => {
+      result.current.discard();
+    });
+    expect(result.current.dirtyWorkers).toEqual([]);
   });
 
   it('diffs and revision-checks against the settings the edit started from, not a later refetch', async () => {

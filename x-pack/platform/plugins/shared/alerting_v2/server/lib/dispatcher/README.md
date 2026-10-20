@@ -72,7 +72,7 @@ The window caps **event** rows only. Action rows are not upper-bounded, so `last
 
 `nextWatermark` never regresses: the final value is `max(computed, eventWatermark)`.
 
-Cold start (no persisted watermark) is logged as `DISPATCHER_COLD_START` and the watermark is seeded to `startedAt − OVERLAP_WINDOW_MINUTES`.
+Cold start (no persisted watermark) is logged at info level (no code) and the watermark is seeded to `startedAt − OVERLAP_WINDOW_MINUTES`.
 
 The scan window, persisted action history, and content-addressed dedup let the dispatcher decide which alerts are new or still relevant without blindly replaying everything on every run.
 
@@ -153,7 +153,7 @@ An action policy is a saved object scoped to a Kibana space. Policies are not em
 Each policy defines:
 
 - `matcher`: optional KQL filter evaluated against the alert context and `data.*`
-- `groupBy` and `groupingMode`: how matched alerts are batched
+- `grouping`: how matched alerts are batched
 - `throttle`: when repeated actions are allowed
 - `destinations`: where matching groups should go
 - `snoozedUntil`: optional time-based suppression
@@ -161,7 +161,7 @@ Each policy defines:
 
 An empty matcher is a catch-all.
 
-`BuildGroupsStep` derives each action group's `groupKey` from `groupingMode`: `per_alert` keys on `{ groupHash, alertId }` (one group per alert), `per_field` keys on the `groupBy` field values, and `all` uses `{}` (one group per policy). The group id is a hash of the policy id and `groupKey`, so changing the key shape changes the ids that throttling compares against.
+`BuildGroupsStep` derives each action group's `groupKey` from `grouping.mode`: `per_alert` keys on `{ groupHash, alertId }` (one group per alert), `per_field` keys on the `grouping.fields` values, and `all` uses `{}` (one group per policy). The group id is a hash of the policy id and `groupKey`, so changing the key shape changes the ids that throttling compares against.
 
 ## Operational parameters
 

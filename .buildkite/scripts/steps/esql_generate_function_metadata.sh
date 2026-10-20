@@ -13,7 +13,8 @@ report_main_step () {
 
 maybe_update_esql_definitions () {
   local latest
-  local current
+  local current_esql
+  local current_definitions
 
   latest=$(npm view @elastic/esql-definitions version 2>/dev/null)
 
@@ -22,15 +23,20 @@ maybe_update_esql_definitions () {
     return
   fi
 
-  current=$(node -e "console.log(require('./package.json').dependencies['@elastic/esql'])")
+  # @elastic/esql and @elastic/esql-definitions are released together and must stay on the same version
+  current_esql=$(node -e "console.log(require('./package.json').dependencies['@elastic/esql'])")
+  current_definitions=$(node -e "console.log(require('./package.json').dependencies['@elastic/esql-definitions'])")
 
-  if [ "$latest" == "$current" ]; then
-    echo "@elastic/esql-definitions is already up to date ($current). Skipping version bump."
+  if [ "$latest" == "$current_esql" ] && [ "$latest" == "$current_definitions" ]; then
+    echo "@elastic/esql and @elastic/esql-definitions are already up to date ($latest). Skipping version bump."
     return
   fi
 
-  echo "@elastic/esql-definitions: $current → $latest. Bumping @elastic/esql in package.json."
+  echo "@elastic/esql: $current_esql → $latest, @elastic/esql-definitions: $current_definitions → $latest. Bumping both in package.json and the esql catalog in pnpm-workspace.yaml."
   sed -i "s/\"@elastic\/esql\": \"[^\"]*\"/\"@elastic\/esql\": \"$latest\"/" package.json
+  sed -i "s/\"@elastic\/esql-definitions\": \"[^\"]*\"/\"@elastic\/esql-definitions\": \"$latest\"/" package.json
+  # Only rewrite catalog entries (versions start with a digit), not the `'catalog:'` overrides
+  sed -i -E "s/^(  '@elastic\/(esql-definitions|esql-grammar|esql-promql-grammar|esql-types|pretty-printer)'): '[0-9][^']*'/\1: '$latest'/" pnpm-workspace.yaml
   VERSION_BUMPED=true
 }
 
@@ -47,13 +53,9 @@ main () {
 
   cd "$KIBANA_DIR/$SCRIPTS_PACKAGE_DIR"
 
-  report_main_step "Generate function definitions"
+  report_main_step "Generate function definitions and inline docs"
 
-  pnpm make:defs
-
-  report_main_step "Generate inline function docs"
-
-  pnpm make:docs
+  pnpm generate
 
   report_main_step "Run i18n check"
 
@@ -98,7 +100,7 @@ main () {
 
   git add $GIT_SCOPE
   if [ "$VERSION_BUMPED" == "true" ]; then
-    git add package.json pnpm-lock.yaml
+    git add package.json pnpm-lock.yaml pnpm-workspace.yaml
   fi
   git commit -m "Update function metadata"
 
