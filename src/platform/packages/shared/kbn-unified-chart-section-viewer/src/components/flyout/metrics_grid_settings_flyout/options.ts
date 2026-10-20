@@ -7,15 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiSuperSelectOption } from '@elastic/eui';
+import type { EuiSuperSelectOption, IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { HistogramVisualization, SimpleAggregation } from '@kbn/discover-utils';
-import {
-  HISTOGRAM_SERIES_FALLBACK,
-  HISTOGRAM_VISUALIZATION_OPTIONS,
-  SIMPLE_AGGREGATION_OPTIONS,
-  toSeriesPercentile,
-} from './constants';
+import type {
+  HistogramPercentile,
+  HistogramVisualization,
+  SimpleAggregation,
+} from '@kbn/discover-utils';
+import { SIMPLE_AGGREGATION_OPTIONS, HISTOGRAM_PERCENTILE_OPTIONS } from './constants';
 
 /**
  * Display labels for `SimpleAggregation` values. Spelled out in full (e.g.
@@ -38,14 +37,8 @@ export const SIMPLE_AGGREGATION_LABELS: Record<SimpleAggregation, string> = {
   }),
 };
 
-/** Display labels for histogram visualizations, e.g. "Distribution" or "50th percentile". */
-export const HISTOGRAM_VISUALIZATION_LABELS: Record<HistogramVisualization, string> = {
-  distribution: i18n.translate(
-    'metricsExperience.gridSettingsFlyout.distributionDropDownOptionLabel',
-    {
-      defaultMessage: 'Distribution',
-    }
-  ),
+/** Display labels for `HistogramPercentile` values, e.g. "50th percentile". */
+export const HISTOGRAM_PERCENTILE_LABELS: Record<HistogramPercentile, string> = {
   p50: i18n.translate('metricsExperience.gridSettingsFlyout.p50OptionLabel', {
     defaultMessage: '50th percentile',
   }),
@@ -73,59 +66,15 @@ export const buildSimpleAggregationOptions = (
     'data-test-subj': `${dataTestSubjPrefix}-${option}`,
   }));
 
-/**
- * `EuiSuperSelect` forwards unknown option fields onto the row. `hasAriaDisabled`
- * keeps a disabled row hoverable so `tooltipProps` can explain why it is disabled.
- */
-type HistogramVisualizationOption = EuiSuperSelectOption<HistogramVisualization> & {
-  hasAriaDisabled?: boolean;
-  tooltipProps?: { content: string };
-};
-
-const distributionUnavailableTooltip = (histogramPercentile: HistogramVisualization): string =>
-  i18n.translate('metricsExperience.gridSettingsFlyout.distributionUnavailableTooltip', {
-    defaultMessage:
-      'Distribution is unavailable while dimensions are selected. Histograms use the {percentile} instead.',
-    values: {
-      percentile: HISTOGRAM_VISUALIZATION_LABELS[toSeriesPercentile(histogramPercentile)],
-    },
-  });
-
-export const buildHistogramVisualizationOptions = ({
-  hasDimensions = false,
-  isHeatmapsEnabled = true,
-  histogramPercentile = 'distribution',
-}: {
-  hasDimensions?: boolean;
-  /** When false, Distribution is omitted. The chart draws the fallback percentile. */
-  isHeatmapsEnabled?: boolean;
-  /** Stored visualization. The disabled Distribution tooltip names the series the chart draws. */
-  histogramPercentile?: HistogramVisualization;
-} = {}): HistogramVisualizationOption[] =>
-  HISTOGRAM_VISUALIZATION_OPTIONS.filter(
-    (option) => isHeatmapsEnabled || option !== 'distribution'
-  ).map((option) => {
-    const label = HISTOGRAM_VISUALIZATION_LABELS[option];
-    const isDistributionUnavailable = option === 'distribution' && hasDimensions;
-
-    return {
-      value: option,
-      // The closed control shows the series the chart actually draws. The menu
-      // row stays "Distribution" so the stored value is unchanged.
-      inputDisplay: isDistributionUnavailable
-        ? HISTOGRAM_VISUALIZATION_LABELS[HISTOGRAM_SERIES_FALLBACK]
-        : label,
-      dropdownDisplay: label,
-      disabled: isDistributionUnavailable,
-      ...(isDistributionUnavailable
-        ? {
-            hasAriaDisabled: true,
-            tooltipProps: { content: distributionUnavailableTooltip(histogramPercentile) },
-          }
-        : {}),
-      'data-test-subj': `metricsExperienceGridSettingsHistogramOption-${option}`,
-    };
-  });
+export const buildHistogramPercentileOptions = (): Array<
+  EuiSuperSelectOption<HistogramPercentile>
+> =>
+  HISTOGRAM_PERCENTILE_OPTIONS.map((option) => ({
+    value: option,
+    inputDisplay: HISTOGRAM_PERCENTILE_LABELS[option],
+    dropdownDisplay: HISTOGRAM_PERCENTILE_LABELS[option],
+    'data-test-subj': `metricsExperienceGridSettingsHistogramOption-${option}`,
+  }));
 
 export const COUNTER_OPTIONS = buildSimpleAggregationOptions(
   'metricsExperienceGridSettingsCounterOption'
@@ -134,3 +83,32 @@ export const COUNTER_OPTIONS = buildSimpleAggregationOptions(
 export const GAUGE_OPTIONS = buildSimpleAggregationOptions(
   'metricsExperienceGridSettingsGaugeOption'
 );
+
+export const HISTOGRAM_OPTIONS = buildHistogramPercentileOptions();
+
+export interface HistogramVisualizationChoice {
+  id: HistogramVisualization;
+  label: string;
+  iconType: IconType;
+  'data-test-subj': string;
+}
+
+/** Histogram choices shown in the flyout. */
+export const HISTOGRAM_VISUALIZATION_OPTIONS: HistogramVisualizationChoice[] = [
+  {
+    id: 'percentile',
+    label: i18n.translate('metricsExperience.gridSettingsFlyout.percentileChoiceLabel', {
+      defaultMessage: 'Percentile',
+    }),
+    iconType: 'chartLine',
+    'data-test-subj': 'metricsExperienceGridSettingsPercentileChoice',
+  },
+  {
+    id: 'distribution',
+    label: i18n.translate('metricsExperience.gridSettingsFlyout.distributionChoiceLabel', {
+      defaultMessage: 'Distribution',
+    }),
+    iconType: 'chartHeatmap',
+    'data-test-subj': 'metricsExperienceGridSettingsDistributionChoice',
+  },
+];

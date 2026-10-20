@@ -18,15 +18,15 @@ import {
   useEuiTheme,
   type EuiFlexGridProps,
 } from '@elastic/eui';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { isHistogramHeatmapVisualization } from '@kbn/discover-utils';
 import type { AggregateQuery, Query } from '@kbn/es-query';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { Dimension, ParsedMetricItem, UnifiedMetricsGridProps } from '../../../types';
 import { getEsqlQuery } from './utils/get_esql_query';
 import { PAGE_SIZE } from '../../../common/constants';
 import { isLegacyHistogram } from '../../../common/utils/histogram_metric';
 import { LEGACY_HISTOGRAM_USER_MESSAGES } from '../../../common/utils/user_messages';
 import { MetricsGrid } from './metrics_grid';
-import { isDistributionVisualization } from '../../flyout/metrics_grid_settings_flyout/constants';
 import { Pagination } from '../../pagination';
 import { useFetchHistogramBounds, usePagination } from './hooks';
 import { MetricsGridLoadingProgress } from '../../empty_state/empty_state';
@@ -100,7 +100,8 @@ export const MetricsExperienceGridContent = ({
   }) ?? {};
 
   const { loading: histogramBoundsLoading, bounds: histogramBounds } = useFetchHistogramBounds({
-    enabled: isComponentVisible && isDistributionVisualization(gridSettings.histogramPercentile),
+    enabled:
+      isComponentVisible && isHistogramHeatmapVisualization(gridSettings.histogramVisualization),
     metricItems: currentPageFields,
     fetchParams: loadedFetchParams,
     services,

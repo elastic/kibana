@@ -10,11 +10,10 @@
 import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import type {
-  HistogramVisualization,
+  HistogramPercentile,
   MetricsGridSettings,
   SimpleAggregation,
 } from '@kbn/discover-utils';
-import { toSeriesPercentile } from '../../../components/flyout/metrics_grid_settings_flyout/constants';
 
 /**
  * Short display labels for `SimpleAggregation` values, used where space is
@@ -27,7 +26,7 @@ const AGGREGATION_LABELS: Record<SimpleAggregation, string> = {
   max: i18n.translate('metricsExperience.aggregationLabel.max', { defaultMessage: 'max' }),
 };
 
-const PERCENTILE_LABELS: Record<Exclude<HistogramVisualization, 'distribution'>, string> = {
+const PERCENTILE_LABELS: Record<HistogramPercentile, string> = {
   p50: i18n.translate('metricsExperience.aggregationLabel.p50', {
     defaultMessage: 'p50',
   }),
@@ -62,7 +61,7 @@ export const getAggregationLabel = ({
   if (customFunction) return customFunction;
 
   if (instrument === 'histogram') {
-    return PERCENTILE_LABELS[toSeriesPercentile(gridSettings.histogramPercentile)];
+    return PERCENTILE_LABELS[gridSettings.histogramPercentile];
   }
 
   return AGGREGATION_LABELS[

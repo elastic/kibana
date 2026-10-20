@@ -18,12 +18,14 @@ import { createFeatureFlagsMock } from '../../../test_utils/create_feature_flags
 import { GridSettingsFlyout } from './grid_settings_flyout';
 
 jest.mock('@kbn/discover-utils', () => {
-  const { METRICS_GRID_HISTOGRAM_VISUALIZATIONS, METRICS_GRID_SIMPLE_AGGREGATIONS } =
-    jest.requireActual('@kbn/discover-utils/src/data_types/metrics');
+  const metrics = jest.requireActual('@kbn/discover-utils/src/data_types/metrics');
 
   return {
-    METRICS_GRID_HISTOGRAM_VISUALIZATIONS,
-    METRICS_GRID_SIMPLE_AGGREGATIONS,
+    HISTOGRAM_VISUALIZATION_CHART: metrics.HISTOGRAM_VISUALIZATION_CHART,
+    METRICS_GRID_HISTOGRAM_PERCENTILES: metrics.METRICS_GRID_HISTOGRAM_PERCENTILES,
+    METRICS_GRID_HISTOGRAM_VISUALIZATIONS: metrics.METRICS_GRID_HISTOGRAM_VISUALIZATIONS,
+    METRICS_GRID_SIMPLE_AGGREGATIONS: metrics.METRICS_GRID_SIMPLE_AGGREGATIONS,
+    isHistogramVisualization: metrics.isHistogramVisualization,
   };
 });
 
@@ -38,7 +40,8 @@ jest.mock('../../../context/ebt_telemetry_context', () => ({
 const defaultSettings: MetricsGridSettings = {
   counterAggregation: 'sum',
   gaugeAggregation: 'avg',
-  histogramPercentile: 'distribution',
+  histogramPercentile: 'p95',
+  histogramVisualization: 'distribution',
   dimensions: [],
   searchTerm: '',
 };
@@ -48,6 +51,9 @@ const gaugeSelect = new EuiSuperSelectTestHarness('metricsExperienceGridSettings
 const histogramSelect = new EuiSuperSelectTestHarness(
   'metricsExperienceGridSettingsHistogramSelect'
 );
+
+const openHistogramsTab = () =>
+  userEvent.click(screen.getByTestId('metricsExperienceGridSettingsHistogramsTab'));
 
 const renderFlyout = (
   ui: React.ReactElement,
@@ -70,7 +76,7 @@ describe('GridSettingsFlyout', () => {
     jest.clearAllMocks();
   });
 
-  it('renders the aggregation settings inside an accordion that is open by default', () => {
+  it('renders the aggregation settings inside an accordion that is open by default', async () => {
     renderFlyout(
       <GridSettingsFlyout
         gridSettings={defaultSettings}
@@ -84,7 +90,17 @@ describe('GridSettingsFlyout', () => {
     ).toBeInTheDocument();
     expect(counterSelect.getSelected()).toContain('Sum');
     expect(gaugeSelect.getSelected()).toContain('Average');
-    expect(histogramSelect.getSelected()).toContain('Distribution');
+    expect(
+      screen.queryByTestId('metricsExperienceGridSettingsHistogramSelect')
+    ).not.toBeInTheDocument();
+
+    await openHistogramsTab();
+
+    expect(histogramSelect.getSelected()).toContain('95th percentile');
+    expect(screen.getByTestId('metricsExperienceGridSettingsDistributionChoice')).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
   });
 
   it('disables "Apply and close" until a selection actually changes', async () => {
@@ -131,16 +147,18 @@ describe('GridSettingsFlyout', () => {
   });
 
   it('reports each changed metric type when multiple settings are applied', async () => {
+    const onGridSettingsChange = jest.fn();
     renderFlyout(
       <GridSettingsFlyout
         gridSettings={defaultSettings}
-        onGridSettingsChange={jest.fn()}
+        onGridSettingsChange={onGridSettingsChange}
         onClose={jest.fn()}
       />
     );
 
     await gaugeSelect.select('metricsExperienceGridSettingsGaugeOption-min');
-    await histogramSelect.select('metricsExperienceGridSettingsHistogramOption-p99');
+    await openHistogramsTab();
+    await userEvent.click(screen.getByTestId('metricsExperienceGridSettingsPercentileChoice'));
     await userEvent.click(screen.getByTestId('metricsExperienceGridSettingsApplyButton'));
 
     expect(mockTrackAggregationConfigChanged).toHaveBeenCalledTimes(2);
@@ -152,8 +170,53 @@ describe('GridSettingsFlyout', () => {
     expect(mockTrackAggregationConfigChanged).toHaveBeenNthCalledWith(2, {
       metric_type: 'histogram',
       previous_aggregation: 'distribution',
-      new_aggregation: 'p99',
+      new_aggregation: 'p95',
     });
+    expect(onGridSettingsChange).toHaveBeenCalledWith({
+      gaugeAggregation: 'min',
+      histogramVisualization: 'percentile',
+    });
+  });
+
+  it('stores Distribution on its own choice and keeps the percentile', async () => {
+    const onGridSettingsChange = jest.fn();
+    renderFlyout(
+      <GridSettingsFlyout
+        gridSettings={{ ...defaultSettings, histogramVisualization: 'percentile' }}
+        onGridSettingsChange={onGridSettingsChange}
+        onClose={jest.fn()}
+      />
+    );
+
+    await openHistogramsTab();
+    expect(histogramSelect.getSelected()).toContain('95th percentile');
+    await userEvent.click(screen.getByTestId('metricsExperienceGridSettingsDistributionChoice'));
+    await userEvent.click(screen.getByTestId('metricsExperienceGridSettingsApplyButton'));
+
+    expect(onGridSettingsChange).toHaveBeenCalledWith({ histogramVisualization: 'distribution' });
+    expect(mockTrackAggregationConfigChanged).toHaveBeenCalledWith({
+      metric_type: 'histogram',
+      previous_aggregation: 'p95',
+      new_aggregation: 'distribution',
+    });
+  });
+
+  it('changes the percentile without turning Distribution off', async () => {
+    const onGridSettingsChange = jest.fn();
+    renderFlyout(
+      <GridSettingsFlyout
+        gridSettings={defaultSettings}
+        onGridSettingsChange={onGridSettingsChange}
+        onClose={jest.fn()}
+      />
+    );
+
+    await openHistogramsTab();
+    await histogramSelect.select('metricsExperienceGridSettingsHistogramOption-p99');
+    await userEvent.click(screen.getByTestId('metricsExperienceGridSettingsApplyButton'));
+
+    expect(onGridSettingsChange).toHaveBeenCalledWith({ histogramPercentile: 'p99' });
+    expect(mockTrackAggregationConfigChanged).not.toHaveBeenCalled();
   });
 
   it('discards the draft and does not call onGridSettingsChange when Cancel is clicked', async () => {
@@ -176,7 +239,7 @@ describe('GridSettingsFlyout', () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  it('shows Distribution when heatmaps are enabled', () => {
+  it('shows the Distribution choice when heatmaps are enabled', async () => {
     renderFlyout(
       <GridSettingsFlyout
         gridSettings={defaultSettings}
@@ -186,10 +249,15 @@ describe('GridSettingsFlyout', () => {
       { isHeatmapsEnabled: true }
     );
 
-    expect(histogramSelect.getSelected()).toContain('Distribution');
+    await openHistogramsTab();
+    expect(histogramSelect.getSelected()).toContain('95th percentile');
+    expect(screen.getByTestId('metricsExperienceGridSettingsDistributionChoice')).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
   });
 
-  it('hides Distribution and shows the 95th percentile when heatmaps are disabled', async () => {
+  it('hides the Distribution choice and shows the 95th percentile when heatmaps are disabled', async () => {
     renderFlyout(
       <GridSettingsFlyout
         gridSettings={defaultSettings}
@@ -200,12 +268,15 @@ describe('GridSettingsFlyout', () => {
     );
 
     expect(histogramSelect.getSelected()).toContain('95th percentile');
+    expect(
+      screen.queryByTestId('metricsExperienceGridSettingsHistogramsTab')
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('metricsExperienceGridSettingsDistributionChoice')
+    ).not.toBeInTheDocument();
     expect(screen.getByTestId('metricsExperienceGridSettingsApplyButton')).toBeDisabled();
 
     await userEvent.click(screen.getByTestId('metricsExperienceGridSettingsHistogramSelect'));
-    expect(
-      screen.queryByTestId('metricsExperienceGridSettingsHistogramOption-distribution')
-    ).not.toBeInTheDocument();
     expect(
       await screen.findByTestId('metricsExperienceGridSettingsHistogramOption-p95')
     ).toBeInTheDocument();
@@ -222,85 +293,37 @@ describe('GridSettingsFlyout', () => {
     );
 
     expect(histogramSelect.getSelected()).toContain('90th percentile');
+    expect(
+      screen.queryByTestId('metricsExperienceGridSettingsDistributionChoice')
+    ).not.toBeInTheDocument();
 
     await userEvent.click(screen.getByTestId('metricsExperienceGridSettingsHistogramSelect'));
-    expect(
-      screen.queryByTestId('metricsExperienceGridSettingsHistogramOption-distribution')
-    ).not.toBeInTheDocument();
     expect(
       await screen.findByTestId('metricsExperienceGridSettingsHistogramOption-p90')
     ).toBeInTheDocument();
   });
 
-  it('shows the 95th percentile and disables Distribution when dimensions are selected', async () => {
+  it('keeps Distribution selectable when dimensions are selected', async () => {
     const onGridSettingsChange = jest.fn();
     renderFlyout(
       <GridSettingsFlyout
-        gridSettings={{ ...defaultSettings, dimensions: ['host.name'] }}
+        gridSettings={{
+          ...defaultSettings,
+          histogramVisualization: 'percentile',
+          dimensions: ['host.name'],
+        }}
         onGridSettingsChange={onGridSettingsChange}
         onClose={jest.fn()}
       />
     );
 
-    expect(histogramSelect.getSelected()).toContain('95th percentile');
-    expect(screen.getByTestId('metricsExperienceGridSettingsApplyButton')).toBeDisabled();
+    await openHistogramsTab();
+    expect(screen.getByTestId('metricsExperienceGridSettingsDistributionChoice')).toBeEnabled();
 
-    await userEvent.click(screen.getByTestId('metricsExperienceGridSettingsHistogramSelect'));
-    const distributionOption = await screen.findByTestId(
-      'metricsExperienceGridSettingsHistogramOption-distribution'
-    );
-    expect(distributionOption).toHaveAttribute('aria-disabled', 'true');
-    expect(distributionOption).toHaveTextContent('Distribution');
-
-    const tooltipAnchor = distributionOption.parentElement;
-    if (!tooltipAnchor) {
-      throw new Error('Expected the distribution option to be wrapped for its tooltip');
-    }
-    await userEvent.hover(tooltipAnchor);
-    expect(
-      await screen.findByText(
-        'Distribution is unavailable while dimensions are selected. Histograms use the 95th percentile instead.'
-      )
-    ).toBeInTheDocument();
-
-    await userEvent.keyboard('{Escape}');
-    await counterSelect.select('metricsExperienceGridSettingsCounterOption-max');
+    await userEvent.click(screen.getByTestId('metricsExperienceGridSettingsDistributionChoice'));
     await userEvent.click(screen.getByTestId('metricsExperienceGridSettingsApplyButton'));
 
-    expect(onGridSettingsChange).toHaveBeenCalledWith({ counterAggregation: 'max' });
-  });
-
-  it('keeps a selected percentile when dimensions disable Distribution', async () => {
-    renderFlyout(
-      <GridSettingsFlyout
-        gridSettings={{
-          ...defaultSettings,
-          histogramPercentile: 'p90',
-          dimensions: ['host.name'],
-        }}
-        onGridSettingsChange={jest.fn()}
-        onClose={jest.fn()}
-      />
-    );
-
-    expect(histogramSelect.getSelected()).toContain('90th percentile');
-
-    await userEvent.click(screen.getByTestId('metricsExperienceGridSettingsHistogramSelect'));
-    const distributionOption = await screen.findByTestId(
-      'metricsExperienceGridSettingsHistogramOption-distribution'
-    );
-    expect(distributionOption).toHaveAttribute('aria-disabled', 'true');
-
-    const tooltipAnchor = distributionOption.parentElement;
-    if (!tooltipAnchor) {
-      throw new Error('Expected the distribution option to be wrapped for its tooltip');
-    }
-    await userEvent.hover(tooltipAnchor);
-    expect(
-      await screen.findByText(
-        'Distribution is unavailable while dimensions are selected. Histograms use the 90th percentile instead.'
-      )
-    ).toBeInTheDocument();
+    expect(onGridSettingsChange).toHaveBeenCalledWith({ histogramVisualization: 'distribution' });
   });
 
   it('discards the draft and does not call onGridSettingsChange when the flyout close button is clicked', async () => {

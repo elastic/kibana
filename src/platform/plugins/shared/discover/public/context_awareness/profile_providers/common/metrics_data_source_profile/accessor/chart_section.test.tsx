@@ -133,13 +133,17 @@ const createChartSectionProps = (overrides: Partial<ChartSectionProps> = {}): Ch
   };
 };
 
-const renderChartSection = (overrides: Partial<ChartSectionProps> = {}) => {
+const renderChartSection = (
+  overrides: Partial<ChartSectionProps> = {},
+  initialMetricsState?: Partial<MetricsState>
+) => {
   const toolkitActions: ContextAwarenessToolkitActions = {
     addFilter: jest.fn(),
   };
   const metricsStateAdapter = createFakeMetricsStateAdapter({
     ...METRICS_GRID_SETTINGS_DEFAULTS,
     ...METRICS_GRID_SORT_DEFAULTS,
+    ...initialMetricsState,
   });
   const getChartSection = createChartSection();
 

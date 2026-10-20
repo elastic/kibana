@@ -99,10 +99,14 @@ export {
   TABLE_HIDDEN_KEY,
   HISTOGRAM_HEIGHT_KEY,
   HISTOGRAM_BREAKDOWN_FIELD_KEY,
-  HistogramVisualizationValue,
+  HistogramPercentileValue,
+  HISTOGRAM_VISUALIZATION_CHART,
+  METRICS_GRID_HISTOGRAM_PERCENTILES,
   METRICS_GRID_HISTOGRAM_VISUALIZATIONS,
   METRICS_GRID_SIMPLE_AGGREGATIONS,
   METRICS_GRID_SETTINGS_DEFAULTS,
+  isHistogramHeatmapVisualization,
+  isHistogramVisualization,
   METRICS_GRID_SORT_DEFAULTS,
 } from './src';
 
@@ -114,6 +118,7 @@ export type {
   SortPair,
   ErrorCalloutProps,
   DiscoverSessionFinderAttributes,
+  HistogramPercentile,
   HistogramVisualization,
   MetricsGridSettings,
   MetricsGridSort,

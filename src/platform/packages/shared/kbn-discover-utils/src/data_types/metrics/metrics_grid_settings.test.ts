@@ -8,7 +8,7 @@
  */
 
 import {
-  METRICS_GRID_HISTOGRAM_VISUALIZATIONS,
+  METRICS_GRID_HISTOGRAM_PERCENTILES,
   METRICS_GRID_SIMPLE_AGGREGATIONS,
 } from './metrics_grid_settings';
 
@@ -17,14 +17,7 @@ describe('metrics grid settings', () => {
     expect(METRICS_GRID_SIMPLE_AGGREGATIONS).toEqual(['avg', 'sum', 'min', 'max']);
   });
 
-  it('exposes distribution and the histogram percentile options', () => {
-    expect(METRICS_GRID_HISTOGRAM_VISUALIZATIONS).toEqual([
-      'distribution',
-      'p50',
-      'p75',
-      'p90',
-      'p95',
-      'p99',
-    ]);
+  it('exposes the public histogram percentile options', () => {
+    expect(METRICS_GRID_HISTOGRAM_PERCENTILES).toEqual(['p50', 'p75', 'p90', 'p95', 'p99']);
   });
 });

@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { HistogramVisualization, SimpleAggregation } from '@kbn/discover-utils';
+import type {
+  HistogramPercentile,
+  HistogramVisualization,
+  SimpleAggregation,
+} from '@kbn/discover-utils';
 import type { ChartSectionErrorCategory } from '../../../../common/errors/classify_chart_section_error';
 
 export type MetricAggregationConfigMetricType = 'counter' | 'gauge' | 'histogram';
@@ -25,6 +29,12 @@ export interface MetricsEsqlQueryFailureEvent {
 
 export interface MetricAggregationConfigChangedEvent {
   metric_type: MetricAggregationConfigMetricType;
-  previous_aggregation: SimpleAggregation | HistogramVisualization;
-  new_aggregation: SimpleAggregation | HistogramVisualization;
+  previous_aggregation:
+    | SimpleAggregation
+    | HistogramPercentile
+    | Exclude<HistogramVisualization, 'percentile'>;
+  new_aggregation:
+    | SimpleAggregation
+    | HistogramPercentile
+    | Exclude<HistogramVisualization, 'percentile'>;
 }

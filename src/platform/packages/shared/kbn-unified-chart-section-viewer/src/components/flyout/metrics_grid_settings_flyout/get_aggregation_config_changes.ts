@@ -7,25 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MetricsGridSettings } from '@kbn/discover-utils';
+import type {
+  HistogramPercentile,
+  HistogramVisualization,
+  MetricsGridSettings,
+} from '@kbn/discover-utils';
 import type {
   MetricAggregationConfigChangedEvent,
   MetricAggregationConfigMetricType,
 } from '../../observability/metrics/telemetry';
 
-type AggregationSetting = 'counterAggregation' | 'gaugeAggregation' | 'histogramPercentile';
+type AggregationSetting = 'counterAggregation' | 'gaugeAggregation';
 
 const METRIC_TYPE_BY_SETTING: Record<AggregationSetting, MetricAggregationConfigMetricType> = {
   counterAggregation: 'counter',
   gaugeAggregation: 'gauge',
-  histogramPercentile: 'histogram',
 };
+
+const histogramAggregation = (
+  settings: Pick<MetricsGridSettings, 'histogramPercentile' | 'histogramVisualization'>
+): HistogramPercentile | Exclude<HistogramVisualization, 'percentile'> =>
+  settings.histogramVisualization === 'percentile'
+    ? settings.histogramPercentile
+    : settings.histogramVisualization;
 
 export const getAggregationConfigChanges = (
   gridSettings: MetricsGridSettings,
   update: Partial<MetricsGridSettings>
-): MetricAggregationConfigChangedEvent[] =>
-  (Object.keys(update) as AggregationSetting[]).flatMap((setting) => {
+): MetricAggregationConfigChangedEvent[] => {
+  const events: MetricAggregationConfigChangedEvent[] = (
+    Object.keys(METRIC_TYPE_BY_SETTING) as AggregationSetting[]
+  ).flatMap((setting) => {
     const newAggregation = update[setting];
 
     if (newAggregation === undefined) {
@@ -40,3 +52,23 @@ export const getAggregationConfigChanges = (
       },
     ];
   });
+
+  const nextHistogram = histogramAggregation({
+    histogramPercentile: update.histogramPercentile ?? gridSettings.histogramPercentile,
+    histogramVisualization: update.histogramVisualization ?? gridSettings.histogramVisualization,
+  });
+  const previousHistogram = histogramAggregation(gridSettings);
+
+  if (
+    (update.histogramPercentile !== undefined || update.histogramVisualization !== undefined) &&
+    nextHistogram !== previousHistogram
+  ) {
+    events.push({
+      metric_type: 'histogram',
+      previous_aggregation: previousHistogram,
+      new_aggregation: nextHistogram,
+    });
+  }
+
+  return events;
+};

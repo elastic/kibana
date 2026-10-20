@@ -8,7 +8,7 @@
  */
 
 import { useMemo } from 'react';
-import type { HistogramVisualization } from '@kbn/discover-utils';
+import { isHistogramHeatmapVisualization, type HistogramVisualization } from '@kbn/discover-utils';
 import type { LensHeatmapConfig } from '@kbn/lens-embeddable-utils';
 import { FEATURE_FLAG_DEFAULTS, FEATURE_FLAGS } from '../../../../common/constants';
 import {
@@ -20,7 +20,6 @@ import { isHistogramMetric } from '../../../../common/utils/histogram_metric';
 import { useFeatureFlag } from '../../../../hooks/use_feature_flag';
 import type { Dimension, ParsedMetricItem } from '../../../../types';
 import { buildHistogramHeatmapConfig } from '../../../chart/build_histogram_heatmap_config';
-import { isDistributionVisualization } from '../../../flyout/metrics_grid_settings_flyout/constants';
 import type { HistogramBoundsByMetricKey } from './use_fetch_histogram_bounds';
 
 export interface UseHistogramHeatmapParams {
@@ -56,10 +55,10 @@ export const useHistogramHeatmap = ({
     FEATURE_FLAGS.IS_HEATMAPS_ENABLED,
     FEATURE_FLAG_DEFAULTS[FEATURE_FLAGS.IS_HEATMAPS_ENABLED]
   );
-  // Percentile settings always draw the series chart. Only distribution can draw a heatmap.
+  // Series visualizations draw the percentile chart. Heatmap visualizations draw the distribution.
   const isHistogramDistribution =
     isHeatmapsEnabled &&
-    isDistributionVisualization(histogramVisualization) &&
+    isHistogramHeatmapVisualization(histogramVisualization) &&
     isHistogramMetric(
       firstNonNullable(metricItem.fieldTypes),
       firstNonNullable(metricItem.metricTypes)

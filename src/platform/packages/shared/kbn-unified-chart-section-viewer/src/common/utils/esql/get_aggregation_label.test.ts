@@ -45,18 +45,9 @@ describe('getAggregationLabel', () => {
     ).toBe('min');
   });
 
-  it('uses the p95 axis label for the default histogram percentile', () => {
+  it('returns the percentile label for histogram metrics', () => {
     expect(
       getAggregationLabel({ instrument: 'histogram', gridSettings: METRICS_GRID_SETTINGS_DEFAULTS })
-    ).toBe('p95');
-  });
-
-  it('uses the p95 axis label when distribution falls back to a series chart', () => {
-    expect(
-      getAggregationLabel({
-        instrument: 'histogram',
-        gridSettings: { ...METRICS_GRID_SETTINGS_DEFAULTS, histogramPercentile: 'distribution' },
-      })
     ).toBe('p95');
   });
 

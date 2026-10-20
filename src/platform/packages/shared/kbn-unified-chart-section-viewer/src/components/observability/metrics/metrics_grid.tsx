@@ -416,7 +416,7 @@ const ChartItem = React.memo(
         histogramBoundsLoading,
         whereStatements,
         originalSource: userSource,
-        histogramVisualization: gridSettings.histogramPercentile,
+        histogramVisualization: gridSettings.histogramVisualization,
         description,
       });
 

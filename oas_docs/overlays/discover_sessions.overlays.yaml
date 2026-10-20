@@ -117,14 +117,3 @@ actions:
         description: Discover documentation
         url: https://www.elastic.co/docs/explore-analyze/discover
       x-displayName: Discover sessions
-  # ──────────────────────────────────────────────
-  # Metrics tab: histogram heatmap (feature flag observability.metricsHeatmapsEnabled)
-  # Remove these actions when the feature flag is removed.
-  # ──────────────────────────────────────────────
-  - target: "$..properties.histogram_percentile.enum[?(@ == 'distribution')]"
-    description: Hide the heatmap display while it is behind a feature flag
-    remove: true
-  - target: '$..properties.histogram_percentile'
-    description: Hide the heatmap display while it is behind a feature flag
-    update:
-      description: Percentile displayed for histogram metric fields.

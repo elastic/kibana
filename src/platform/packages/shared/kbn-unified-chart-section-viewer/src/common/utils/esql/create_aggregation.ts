@@ -20,10 +20,7 @@ import {
 import { isLegacyHistogram } from '../histogram_metric';
 import { resolveConflictingFieldTypes } from './resolve_conflicting_field_types';
 import { fieldNameToColumn } from './helpers';
-import {
-  HISTOGRAM_PERCENTILE_VALUES,
-  toSeriesPercentile,
-} from '../../../components/flyout/metrics_grid_settings_flyout/constants';
+import { HISTOGRAM_PERCENTILE_VALUES } from '../../../components/flyout/metrics_grid_settings_flyout/constants';
 
 const GAUGE_OVER_TIME_FN: Record<SimpleAggregation, FunctionNames> = {
   [FunctionNames.AVG]: FunctionNames.AVG_OVER_TIME,
@@ -67,7 +64,7 @@ function applyCastIfNeeded(types: ES_FIELD_TYPES[], field: ESQLAstExpression): E
 }
 
 function resolvePercentileValue(settings: MetricsGridSettings): number {
-  return HISTOGRAM_PERCENTILE_VALUES[toSeriesPercentile(settings.histogramPercentile)];
+  return HISTOGRAM_PERCENTILE_VALUES[settings.histogramPercentile];
 }
 
 /**

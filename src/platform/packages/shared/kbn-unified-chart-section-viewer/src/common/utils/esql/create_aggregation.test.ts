@@ -120,6 +120,7 @@ describe('createMetricAggregation with gridSettings override', () => {
     counterAggregation: 'max' as const,
     gaugeAggregation: 'min' as const,
     histogramPercentile: 'p90' as const,
+    histogramVisualization: 'percentile' as const,
     dimensions: [],
     searchTerm: '',
   };
@@ -160,6 +161,7 @@ describe('createMetricAggregation with gridSettings override', () => {
           counterAggregation: 'sum',
           gaugeAggregation,
           histogramPercentile: 'p95',
+          histogramVisualization: 'percentile' as const,
           dimensions: [],
           searchTerm: '',
         },
@@ -221,19 +223,6 @@ describe('createMetricAggregation with gridSettings override', () => {
       gridSettings,
     });
     expect(result).toBe('COUNT(requests.count)');
-  });
-
-  it('uses the 95th percentile when the histogram setting is distribution', () => {
-    const result = createMetricAggregation({
-      types: [ES_FIELD_TYPES.TDIGEST],
-      instrument: 'counter',
-      metricName: 'http.request.duration',
-      gridSettings: {
-        ...gridSettings,
-        histogramPercentile: 'distribution',
-      },
-    });
-    expect(result).toBe('PERCENTILE(http.request.duration, 95)');
   });
 
   it('falls back to the 95th percentile and SUM/AVG defaults when gridSettings is omitted', () => {

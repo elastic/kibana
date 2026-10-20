@@ -23,17 +23,64 @@ import {
   EuiButtonEmpty,
   EuiAccordion,
   EuiIconTip,
+  EuiButtonGroup,
+  EuiTabs,
+  EuiTab,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { type MetricsGridSettings } from '@kbn/discover-utils';
+import {
+  HISTOGRAM_VISUALIZATION_CHART,
+  type HistogramVisualization,
+  type MetricsGridSettings,
+} from '@kbn/discover-utils';
 import { FEATURE_FLAG_DEFAULTS, FEATURE_FLAGS } from '../../../common/constants';
 import { useTelemetry } from '../../../context/ebt_telemetry_context';
 import { useFeatureFlag } from '../../../hooks/use_feature_flag';
-import { toSeriesPercentile } from './constants';
-import { COUNTER_OPTIONS, GAUGE_OPTIONS, buildHistogramVisualizationOptions } from './options';
+import {
+  COUNTER_OPTIONS,
+  GAUGE_OPTIONS,
+  HISTOGRAM_OPTIONS,
+  HISTOGRAM_VISUALIZATION_OPTIONS,
+} from './options';
 import { getAggregationConfigChanges } from './get_aggregation_config_changes';
 import { getChangedSettings } from './get_changed_settings';
+
+/** Explains the percentile series when the selected visualization cannot use it directly. */
+const getPercentileFallbackHint = (visualization: HistogramVisualization): string | undefined => {
+  switch (visualization) {
+    case 'percentile':
+      return undefined;
+    case 'distribution':
+      return i18n.translate('metricsExperience.gridSettingsFlyout.percentileFallbackHelpText', {
+        defaultMessage:
+          'Used when dimensions are selected. Distribution cannot be split by them, so histograms show the selected percentile instead.',
+      });
+    default: {
+      const unhandled: never = visualization;
+      return unhandled;
+    }
+  }
+};
+
+const getPercentileFieldLabel = (visualization: HistogramVisualization): string => {
+  switch (HISTOGRAM_VISUALIZATION_CHART[visualization]) {
+    case 'series':
+      return i18n.translate('metricsExperience.gridSettingsFlyout.percentileTypeLabel', {
+        defaultMessage: 'Percentile type',
+      });
+    case 'heatmap':
+      return i18n.translate('metricsExperience.gridSettingsFlyout.percentileFallbackLabel', {
+        defaultMessage: 'Percentile fallback',
+      });
+    default: {
+      const unhandled: never = HISTOGRAM_VISUALIZATION_CHART[visualization];
+      return unhandled;
+    }
+  }
+};
+
+type SettingsTabId = 'metrics' | 'histograms';
 
 interface GridSettingsFlyoutProps {
   gridSettings: MetricsGridSettings;
@@ -65,20 +112,20 @@ export const GridSettingsFlyout = ({
     FEATURE_FLAG_DEFAULTS[FEATURE_FLAGS.IS_HEATMAPS_ENABLED]
   );
   const [draftSettings, setDraftSettings] = useState<MetricsGridSettings>(gridSettings);
-  const histogramOptions = useMemo(
-    () =>
-      buildHistogramVisualizationOptions({
-        hasDimensions: gridSettings.dimensions.length > 0,
-        isHeatmapsEnabled,
-        histogramPercentile: draftSettings.histogramPercentile,
-      }),
-    [draftSettings.histogramPercentile, gridSettings.dimensions.length, isHeatmapsEnabled]
+  const [settingsTabId, setSettingsTabId] = useState<SettingsTabId>('metrics');
+  const percentileFallbackHint = getPercentileFallbackHint(draftSettings.histogramVisualization);
+  const histogramLabel = i18n.translate('metricsExperience.gridSettingsFlyout.histogramLabel', {
+    defaultMessage: 'Histogram',
+  });
+  const histogramDisplayLabel = i18n.translate(
+    'metricsExperience.gridSettingsFlyout.histogramDisplayLabel',
+    {
+      defaultMessage: 'Show as',
+    }
   );
-  // Distribution is omitted while heatmaps are off. The series chart already
-  // draws the fallback percentile for that stored value.
-  const histogramValueOfSelected = !isHeatmapsEnabled
-    ? toSeriesPercentile(draftSettings.histogramPercentile)
-    : draftSettings.histogramPercentile;
+  const percentileFieldLabel = isHeatmapsEnabled
+    ? getPercentileFieldLabel(draftSettings.histogramVisualization)
+    : histogramLabel;
 
   const pendingUpdate = useMemo(
     () => getChangedSettings(draftSettings, gridSettings),
@@ -92,6 +139,17 @@ export const GridSettingsFlyout = ({
     },
     []
   );
+
+  const onHistogramDisplayChange = useCallback((id: string) => {
+    const choice = HISTOGRAM_VISUALIZATION_OPTIONS.find((option) => option.id === id);
+    if (!choice) {
+      return;
+    }
+    setDraftSettings((current) => ({
+      ...current,
+      histogramVisualization: choice.id,
+    }));
+  }, []);
 
   const onApply = useCallback(() => {
     getAggregationConfigChanges(gridSettings, pendingUpdate).forEach((event) =>
@@ -147,44 +205,98 @@ export const GridSettingsFlyout = ({
           }
         >
           <EuiSpacer size="m" />
-          <EuiFormRow
-            label={i18n.translate('metricsExperience.gridSettingsFlyout.counterLabel', {
-              defaultMessage: 'Counter',
-            })}
-          >
-            <EuiSuperSelect
-              data-test-subj="metricsExperienceGridSettingsCounterSelect"
-              options={COUNTER_OPTIONS}
-              valueOfSelected={draftSettings.counterAggregation}
-              onChange={(value) => onSettingChange('counterAggregation', value)}
-            />
-          </EuiFormRow>
-          <EuiSpacer size="m" />
-          <EuiFormRow
-            label={i18n.translate('metricsExperience.gridSettingsFlyout.gaugeLabel', {
-              defaultMessage: 'Gauge',
-            })}
-          >
-            <EuiSuperSelect
-              data-test-subj="metricsExperienceGridSettingsGaugeSelect"
-              options={GAUGE_OPTIONS}
-              valueOfSelected={draftSettings.gaugeAggregation}
-              onChange={(value) => onSettingChange('gaugeAggregation', value)}
-            />
-          </EuiFormRow>
-          <EuiSpacer size="m" />
-          <EuiFormRow
-            label={i18n.translate('metricsExperience.gridSettingsFlyout.histogramLabel', {
-              defaultMessage: 'Histogram',
-            })}
-          >
-            <EuiSuperSelect
-              data-test-subj="metricsExperienceGridSettingsHistogramSelect"
-              options={histogramOptions}
-              valueOfSelected={histogramValueOfSelected}
-              onChange={(value) => onSettingChange('histogramPercentile', value)}
-            />
-          </EuiFormRow>
+          {isHeatmapsEnabled ? (
+            <>
+              <EuiTabs size="s" data-test-subj="metricsExperienceGridSettingsTabs">
+                <EuiTab
+                  isSelected={settingsTabId === 'metrics'}
+                  onClick={() => setSettingsTabId('metrics')}
+                  data-test-subj="metricsExperienceGridSettingsMetricsTab"
+                >
+                  {i18n.translate('metricsExperience.gridSettingsFlyout.metricsTabLabel', {
+                    defaultMessage: 'Counters and gauges',
+                  })}
+                </EuiTab>
+                <EuiTab
+                  isSelected={settingsTabId === 'histograms'}
+                  onClick={() => setSettingsTabId('histograms')}
+                  data-test-subj="metricsExperienceGridSettingsHistogramsTab"
+                >
+                  {i18n.translate('metricsExperience.gridSettingsFlyout.histogramsTabLabel', {
+                    defaultMessage: 'Histograms',
+                  })}
+                </EuiTab>
+              </EuiTabs>
+              <EuiSpacer size="m" />
+            </>
+          ) : null}
+          {settingsTabId === 'metrics' || !isHeatmapsEnabled ? (
+            <>
+              <EuiFormRow
+                label={i18n.translate('metricsExperience.gridSettingsFlyout.counterLabel', {
+                  defaultMessage: 'Counter',
+                })}
+              >
+                <EuiSuperSelect
+                  data-test-subj="metricsExperienceGridSettingsCounterSelect"
+                  options={COUNTER_OPTIONS}
+                  valueOfSelected={draftSettings.counterAggregation}
+                  onChange={(value) => onSettingChange('counterAggregation', value)}
+                />
+              </EuiFormRow>
+              <EuiSpacer size="m" />
+              <EuiFormRow
+                label={i18n.translate('metricsExperience.gridSettingsFlyout.gaugeLabel', {
+                  defaultMessage: 'Gauge',
+                })}
+              >
+                <EuiSuperSelect
+                  data-test-subj="metricsExperienceGridSettingsGaugeSelect"
+                  options={GAUGE_OPTIONS}
+                  valueOfSelected={draftSettings.gaugeAggregation}
+                  onChange={(value) => onSettingChange('gaugeAggregation', value)}
+                />
+              </EuiFormRow>
+            </>
+          ) : null}
+          {isHeatmapsEnabled && settingsTabId === 'histograms' ? (
+            <>
+              <EuiFormRow fullWidth label={histogramDisplayLabel}>
+                <EuiButtonGroup
+                  isFullWidth
+                  buttonSize="s"
+                  legend={histogramDisplayLabel}
+                  data-test-subj="metricsExperienceGridSettingsHistogramDisplay"
+                  variant="selection"
+                  display="highlighted"
+                  idSelected={draftSettings.histogramVisualization}
+                  onChange={onHistogramDisplayChange}
+                >
+                  {HISTOGRAM_VISUALIZATION_OPTIONS.map((choice) => (
+                    <EuiButton
+                      key={choice.id}
+                      id={choice.id}
+                      iconType={choice.iconType}
+                      data-test-subj={choice['data-test-subj']}
+                    >
+                      {choice.label}
+                    </EuiButton>
+                  ))}
+                </EuiButtonGroup>
+              </EuiFormRow>
+              <EuiSpacer size="m" />
+            </>
+          ) : null}
+          {settingsTabId === 'histograms' || !isHeatmapsEnabled ? (
+            <EuiFormRow label={percentileFieldLabel} helpText={percentileFallbackHint}>
+              <EuiSuperSelect
+                data-test-subj="metricsExperienceGridSettingsHistogramSelect"
+                options={HISTOGRAM_OPTIONS}
+                valueOfSelected={draftSettings.histogramPercentile}
+                onChange={(value) => onSettingChange('histogramPercentile', value)}
+              />
+            </EuiFormRow>
+          ) : null}
         </EuiAccordion>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

@@ -44,6 +44,29 @@ describe('getAggregationConfigChanges', () => {
     ]);
   });
 
+  it('reports distribution separately from the stored percentile', () => {
+    expect(
+      getAggregationConfigChanges(gridSettings, {
+        histogramVisualization: 'distribution',
+      })
+    ).toEqual([
+      {
+        metric_type: 'histogram',
+        previous_aggregation: 'p95',
+        new_aggregation: 'distribution',
+      },
+    ]);
+  });
+
+  it('ignores a percentile change while distribution stays selected', () => {
+    expect(
+      getAggregationConfigChanges(
+        { ...gridSettings, histogramVisualization: 'distribution' },
+        { histogramPercentile: 'p50' }
+      )
+    ).toEqual([]);
+  });
+
   it('ignores missing settings', () => {
     expect(
       getAggregationConfigChanges(gridSettings, {

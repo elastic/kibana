@@ -8,10 +8,15 @@
  */
 
 export {
-  HistogramVisualizationValue,
+  HistogramPercentileValue,
+  HISTOGRAM_VISUALIZATION_CHART,
+  METRICS_GRID_HISTOGRAM_PERCENTILES,
   METRICS_GRID_HISTOGRAM_VISUALIZATIONS,
   METRICS_GRID_SIMPLE_AGGREGATIONS,
   METRICS_GRID_SETTINGS_DEFAULTS,
+  isHistogramHeatmapVisualization,
+  isHistogramVisualization,
+  type HistogramPercentile,
   type HistogramVisualization,
   type MetricsGridSettings,
   type SimpleAggregation,

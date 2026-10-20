@@ -36,20 +36,22 @@ jest.mock('./hooks/use_fetch_exemplars', () => ({
 
 jest.mock('@kbn/discover-utils', () => {
   const {
-    METRICS_GRID_HISTOGRAM_VISUALIZATIONS,
+    METRICS_GRID_HISTOGRAM_PERCENTILES,
     METRICS_GRID_SETTINGS_DEFAULTS: metricsGridSettingsDefaults,
     METRICS_GRID_SIMPLE_AGGREGATIONS,
     METRICS_GRID_SORT_DEFAULTS,
+    isHistogramHeatmapVisualization,
   } = jest.requireActual('@kbn/discover-utils/src/data_types/metrics');
 
   return {
     DiscoverFlyouts: { metricInsights: 'metricInsights' },
     dismissAllFlyoutsExceptFor: jest.fn(),
     fieldConstants: jest.requireActual('@kbn/discover-utils/src/field_constants'),
-    METRICS_GRID_HISTOGRAM_VISUALIZATIONS,
+    METRICS_GRID_HISTOGRAM_PERCENTILES,
     METRICS_GRID_SETTINGS_DEFAULTS: metricsGridSettingsDefaults,
     METRICS_GRID_SIMPLE_AGGREGATIONS,
     METRICS_GRID_SORT_DEFAULTS,
+    isHistogramHeatmapVisualization,
   };
 });
 
@@ -1157,6 +1159,7 @@ describe('MetricsGrid', () => {
             counterAggregation: 'max',
             gaugeAggregation: 'avg',
             histogramPercentile: 'p90',
+            histogramVisualization: 'percentile',
             dimensions: [],
             searchTerm: '',
           }}
@@ -1175,6 +1178,7 @@ describe('MetricsGrid', () => {
             counterAggregation: 'max',
             gaugeAggregation: 'avg',
             histogramPercentile: 'p95',
+            histogramVisualization: 'percentile',
             dimensions: [],
             searchTerm: '',
           }}
@@ -1196,6 +1200,7 @@ describe('MetricsGrid', () => {
             counterAggregation: 'max',
             gaugeAggregation: 'avg',
             histogramPercentile: 'p90',
+            histogramVisualization: 'percentile',
             dimensions: [],
             searchTerm: '',
           }}
@@ -1210,6 +1215,7 @@ describe('MetricsGrid', () => {
             counterAggregation: 'max',
             gaugeAggregation: 'avg',
             histogramPercentile: 'p90',
+            histogramVisualization: 'percentile',
             dimensions: [],
             searchTerm: '',
           },
@@ -1285,7 +1291,7 @@ describe('MetricsGrid', () => {
     const bounds = new Map([[getMetricUniqueKey(histogramItem), { bounds: { min: 1, max: 9 } }]]);
     const distributionGridSettings = {
       ...METRICS_GRID_SETTINGS_DEFAULTS,
-      histogramPercentile: 'distribution' as const,
+      histogramVisualization: 'distribution' as const,
     };
 
     const renderMetricsGridWithHistDistributions = (props: Partial<MetricsGridProps> = {}) =>
@@ -1315,6 +1321,7 @@ describe('MetricsGrid', () => {
             counterAggregation: 'sum',
             gaugeAggregation: 'avg',
             histogramPercentile: 'p95',
+            histogramVisualization: 'percentile',
             dimensions: [],
             searchTerm: '',
           }}
