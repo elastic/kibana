@@ -31,6 +31,7 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
@@ -226,7 +227,10 @@ export const SecretConnectionPanel = () => {
       await http.delete(`${SYNTHETICS_API_URLS.SECRET_CONNECTION}/${encodeURIComponent(name)}`);
       await load();
     } catch (e) {
-      notifications?.toasts.addError(e as Error, { title: DELETE_ERROR_TOAST });
+      notifications?.toasts.addError(e as Error, {
+        title: DELETE_ERROR_TOAST,
+        toastMessage: (e as IHttpFetchError<ResponseErrorBody>).body?.message,
+      });
     }
   };
 
@@ -589,7 +593,7 @@ export const SecretConnectionPanel = () => {
           <p>
             {i18n.translate('xpack.synthetics.secretConnection.deleteConfirmBody', {
               defaultMessage:
-                'Delete the Vault connection "{name}"? Parameters that reference it will stop resolving at the agent until they are pointed at another connection.',
+                'Delete the Vault connection "{name}"? A connection can only be deleted once no parameter or monitor references it.',
               values: { name: deleteTarget },
             })}
           </p>

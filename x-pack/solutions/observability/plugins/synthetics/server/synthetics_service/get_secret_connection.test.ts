@@ -7,6 +7,7 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import type { SyntheticsServerSetup } from '../types';
+import { syntheticsSecretConnectionType } from '../../common/types/saved_objects';
 import { getSecretConnectionConfigs } from './get_secret_connection';
 
 const connection = (name: string, address: string) => ({
@@ -30,14 +31,13 @@ const setup = (secretConnections: { enabled?: boolean; allowedHosts?: string[] }
     },
     close: jest.fn().mockResolvedValue(undefined),
   });
+  const getClient = jest.fn(() => ({ createPointInTimeFinderDecryptedAsInternalUser }));
   const server = {
     logger: loggerMock.create(),
     config: { secretConnections: { allowedHosts: ['*'], ...secretConnections } },
-    encryptedSavedObjects: {
-      getClient: () => ({ createPointInTimeFinderDecryptedAsInternalUser }),
-    },
+    encryptedSavedObjects: { getClient },
   } as unknown as SyntheticsServerSetup;
-  return { server, createPointInTimeFinderDecryptedAsInternalUser };
+  return { server, getClient, createPointInTimeFinderDecryptedAsInternalUser };
 };
 
 describe('getSecretConnectionConfigs', () => {
@@ -51,11 +51,15 @@ describe('getSecretConnectionConfigs', () => {
   });
 
   it('delivers every connection when all hosts are allowed', async () => {
-    const { server } = setup({});
+    const { server, getClient } = setup({});
 
     const configs = await getSecretConnectionConfigs(server, 'default');
 
     expect(configs.map(({ name }) => name)).toEqual(['allowed', 'denied']);
+    // The type is hidden: without this the finder silently returns nothing.
+    expect(getClient).toHaveBeenCalledWith({
+      includedHiddenTypes: [syntheticsSecretConnectionType],
+    });
   });
 
   it('delivers nothing, without reading connections, while secret connections are disabled', async () => {

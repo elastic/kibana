@@ -6,8 +6,14 @@
  */
 import { schema } from '@kbn/config-schema';
 import type { SavedObjectsType } from '@kbn/core/server';
+import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import { v5 as uuidv5 } from 'uuid';
 import { syntheticsSecretConnectionType } from '../../common/types/saved_objects';
+
+// The type is hidden, so a client created without it cannot read any connection.
+export const getSecretConnectionEncryptedClient = (
+  encryptedSavedObjects: EncryptedSavedObjectsPluginStart
+) => encryptedSavedObjects.getClient({ includedHiddenTypes: [syntheticsSecretConnectionType] });
 
 // Encrypted saved objects require predefined ids to be UUIDs. We derive a stable
 // UUID per (space, connection name) so the name is the key (upsert by name) while

@@ -10,6 +10,7 @@ import type { SyntheticsSecretConnection } from '../../common/runtime_types';
 import { syntheticsSecretConnectionType } from '../../common/types/saved_objects';
 import type { SyntheticsServerSetup } from '../types';
 import { isSecretConnectionsEnabled } from '../config';
+import { getSecretConnectionEncryptedClient } from '../saved_objects/synthetics_secret_connection';
 import {
   getAllowedHosts,
   isAddressHostAllowed,
@@ -74,7 +75,7 @@ export const getSecretConnectionConfigs = async (
   // vault monitor with a now-missing connection fails closed at its own policy
   // generation rather than taking the sync down.
   try {
-    const encryptedClient = server.encryptedSavedObjects.getClient();
+    const encryptedClient = getSecretConnectionEncryptedClient(server.encryptedSavedObjects);
     const finder =
       await encryptedClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsSecretConnection>(
         {

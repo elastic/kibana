@@ -17,8 +17,13 @@ import { SECRET_PROVIDER_HASHICORP_VAULT } from '../../../../common/runtime_type
 import { syntheticsSecretConnectionType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { SECRET_CONNECTION_WRITE_API } from '../../../feature';
-import { secretConnectionId } from '../../../saved_objects/synthetics_secret_connection';
 import {
+  getSecretConnectionEncryptedClient,
+  secretConnectionId,
+} from '../../../saved_objects/synthetics_secret_connection';
+import {
+  connectionInUseMessage,
+  findConnectionReferences,
   listConnections,
   propagate,
   toStatus,
@@ -64,7 +69,7 @@ export const saveSecretConnectionRoute: SyntheticsRestApiRouteFactory<
       }
 
       const id = secretConnectionId(body.name, spaceId);
-      const encryptedClient = server.encryptedSavedObjects.getClient();
+      const encryptedClient = getSecretConnectionEncryptedClient(server.encryptedSavedObjects);
       let existing: SyntheticsSecretConnection | undefined;
       try {
         const decrypted =
@@ -149,17 +154,20 @@ export const deleteSecretConnectionRoute: SyntheticsRestApiRouteFactory<
   path: SYNTHETICS_API_URLS.SECRET_CONNECTION + '/{name}',
   validate: { params: schema.object({ name: schema.string({ minLength: 1, maxLength: 1024 }) }) },
   requiredPrivileges: [SECRET_CONNECTION_WRITE_API],
-  handler: whenSecretConnectionsEnabled(
-    async ({ request, savedObjectsClient, server, spaceId }) => {
-      const { name } = request.params as { name: string };
-      await savedObjectsClient.delete(
-        syntheticsSecretConnectionType,
-        secretConnectionId(name, spaceId)
-      );
-      await propagate(server, spaceId);
-      return { deleted: true };
+  handler: whenSecretConnectionsEnabled(async (routeContext) => {
+    const { request, response, savedObjectsClient, server, spaceId } = routeContext;
+    const { name } = request.params as { name: string };
+    const references = await findConnectionReferences(routeContext, name);
+    if (references.params.length > 0 || references.monitors.length > 0) {
+      return response.conflict({ body: { message: connectionInUseMessage(name, references) } });
     }
-  ),
+    await savedObjectsClient.delete(
+      syntheticsSecretConnectionType,
+      secretConnectionId(name, spaceId)
+    );
+    await propagate(server, spaceId);
+    return { deleted: true };
+  }),
 });
 
 /**
@@ -175,7 +183,7 @@ export const refreshSecretConnectionsRoute: SyntheticsRestApiRouteFactory<
   requiredPrivileges: [SECRET_CONNECTION_WRITE_API],
   handler: whenSecretConnectionsEnabled(async (routeContext) => {
     const { savedObjectsClient, server, spaceId } = routeContext;
-    const encryptedClient = server.encryptedSavedObjects.getClient();
+    const encryptedClient = getSecretConnectionEncryptedClient(server.encryptedSavedObjects);
     const finder =
       await encryptedClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsSecretConnection>(
         { type: syntheticsSecretConnectionType, perPage: 1000, namespaces: [spaceId] }
@@ -224,13 +232,13 @@ export const testSecretConnectionRoute: SyntheticsRestApiRouteFactory<TestResult
     const missingSecret = authMethod === 'token' ? !token : !secretId;
     if (missingSecret && body.name) {
       try {
-        const decrypted = await server.encryptedSavedObjects
-          .getClient()
-          .getDecryptedAsInternalUser<SyntheticsSecretConnection>(
-            syntheticsSecretConnectionType,
-            secretConnectionId(body.name, spaceId),
-            { namespace: spaceId }
-          );
+        const decrypted = await getSecretConnectionEncryptedClient(
+          server.encryptedSavedObjects
+        ).getDecryptedAsInternalUser<SyntheticsSecretConnection>(
+          syntheticsSecretConnectionType,
+          secretConnectionId(body.name, spaceId),
+          { namespace: spaceId }
+        );
         if (isCredentialSensitiveChange(decrypted.attributes.config, body.config)) {
           return { ok: false, message: SECRET_REENTRY_REQUIRED_MESSAGE };
         }

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import type { HttpResponsePayload, ResponseError } from '@kbn/core-http-server';
 import type { SyntheticsServerSetup } from '../../../types';
 import type { RouteContext, SyntheticsRouteHandler } from '../../types';
@@ -13,8 +14,12 @@ import type {
   SyntheticsSecretConnection,
   SecretConnectionStatus,
 } from '../../../../common/runtime_types';
+import { ConfigKey } from '../../../../common/runtime_types';
 import { syntheticsSecretConnectionType } from '../../../../common/types/saved_objects';
 import { asyncGlobalParamsPropagation } from '../../../tasks/sync_global_params_task';
+import { getParamsForSpace } from '../../../synthetics_service/formatters/param_utils';
+import { referencedConnectionNames } from '../../../synthetics_service/formatters/vault_param_formatter';
+import { normalizeSecrets } from '../../../synthetics_service/utils';
 
 // Whether the connection has its provider secret stored, so the UI can render
 // "•••• saved" without receiving the value. Prefers the stored `hasSecret` marker
@@ -83,3 +88,62 @@ export const whenSecretConnectionsEnabled =
 
 export const unknownConnectionsMessage = (names: string[]): string =>
   `Vault connection ${names.map((name) => `"${name}"`).join(', ')} is not configured in this space`;
+
+export interface ConnectionReferences {
+  params: string[];
+  monitors: string[];
+}
+
+/**
+ * Params and monitors of the space that reference the connection by name. Deleting a
+ * referenced connection would leave its credential in those monitors' Fleet policies,
+ * because policy generation then skips them instead of rewriting them.
+ */
+export const findConnectionReferences = async (
+  {
+    syntheticsMonitorClient,
+    monitorConfigRepository,
+    spaceId,
+  }: Pick<RouteContext, 'syntheticsMonitorClient' | 'monitorConfigRepository' | 'spaceId'>,
+  name: string
+): Promise<ConnectionReferences> => {
+  const [paramsBySpace, monitors] = await Promise.all([
+    syntheticsMonitorClient.getSyntheticsParams({ spaceId }),
+    monitorConfigRepository.findDecryptedMonitors({ spaceId }),
+  ]);
+  const params = Object.entries(getParamsForSpace(paramsBySpace, spaceId))
+    .filter(([, value]) => referencedConnectionNames(value).has(name))
+    .map(([key]) => key);
+  const monitorNames = monitors
+    .map((monitor) => normalizeSecrets(monitor).attributes)
+    .filter((attributes) =>
+      referencedConnectionNames(
+        omit(attributes, [ConfigKey.SOURCE_INLINE, ConfigKey.SOURCE_PROJECT_CONTENT])
+      ).has(name)
+    )
+    .map((attributes) => attributes[ConfigKey.NAME]);
+  return { params, monitors: monitorNames };
+};
+
+const MAX_LISTED_REFERENCES = 5;
+const listNames = (names: string[]): string => {
+  const listed = names
+    .slice(0, MAX_LISTED_REFERENCES)
+    .map((name) => `"${name}"`)
+    .join(', ');
+  const rest = names.length - MAX_LISTED_REFERENCES;
+  return rest > 0 ? `${listed} and ${rest} more` : listed;
+};
+
+export const connectionInUseMessage = (
+  name: string,
+  { params, monitors }: ConnectionReferences
+): string => {
+  const users = [
+    params.length ? `parameters ${listNames(params)}` : '',
+    monitors.length ? `monitors ${listNames(monitors)}` : '',
+  ]
+    .filter(Boolean)
+    .join(' and ');
+  return `Vault connection "${name}" is still referenced by ${users}. Point them at another connection before deleting it.`;
+};
