@@ -277,15 +277,18 @@ permanently blocking the plugin from creating it.
 Elasticsearch and Kibana take separate credentials because they need different users.
 
 `.kibana-notifications` is a system data stream, so the writes need a user holding
-`allow_restricted_indices` — `superuser` grants that for reads only, so `elastic` cannot seed.
+`allow_restricted_indices`. `superuser` role grants that for reads only, so `elastic` cannot seed.
 `--es-username` therefore defaults to `system_indices_superuser`, the test-only role `kbn-es`
-creates for exactly this (`kbn-es/src/stateful_resources/roles.yml`). The client also sends
-`x-elastic-product-origin: kibana`, which Elasticsearch requires before it serves the stream at
-all. Serverless has no such role, so seeding there needs a user you know can write a restricted
-index; this has not been verified.
+creates for exactly this. It exists on both architectures, defined identically in
+`kbn-es/src/stateful_resources/roles.yml` and in every
+`kbn-es/src/serverless_resources/project_roles/<project>/roles.yml`, so the default carries over
+to serverless unchanged.
+
+The client also sends `x-elastic-product-origin: kibana`, which Elasticsearch requires before
+it serves the stream at all.
 
 `--kibana-username` is the user whose bell you will open, and defaults to `elastic`. Serverless
-needs `elastic_serverless`: SAML is only the default _UI_ provider there, and basic auth still
+needs `elastic_serverless`. SAML is only the default _UI_ provider there, and basic auth still
 works.
 
 The plugin's `notificationWriteSchema` rejects an unknown `namespace` or `type`. `--include-unregistered`

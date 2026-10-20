@@ -52,7 +52,6 @@ export const notificationDataStreamDefinition = {
   hidden: true,
   system: true,
   template: {
-    // Left at the package default (100) so the Elasticsearch template, registered at 200, wins.
     lifecycle: {
       data_retention: NOTIFICATION_DATA_RETENTION,
     },

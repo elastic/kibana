@@ -51,8 +51,8 @@ export const makeDoc = (id: string, overrides: Partial<NotificationDoc> = {}): N
  * Takes the `systemEsClient` fixture: the stream is a system data stream and Scout's `esClient`
  * cannot write it.
  */
-export const seedNotifications = async (esClient: Client, docs: NotificationDoc[]) => {
-  await esClient.bulk({
+export const seedNotifications = async (systemEsClient: Client, docs: NotificationDoc[]) => {
+  await systemEsClient.bulk({
     refresh: true,
     operations: docs.flatMap((doc) => [{ create: { _index: NOTIFICATION_DATA_STREAM_NAME } }, doc]),
   });

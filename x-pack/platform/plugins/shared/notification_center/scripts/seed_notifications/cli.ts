@@ -129,7 +129,7 @@ run(
     // Dev Console sends no product origin header, so it cannot read this stream.
     log.info('Read them back with:');
     log.info(
-      `curl -u ${target.esAuth.username}:${target.esAuth.password} ` +
+      `curl -u <es_username>:<es_password> ` +
         `-H 'x-elastic-product-origin: kibana' '${target.esUrl}/${NOTIFICATION_DATA_STREAM_NAME}/_search'`
     );
 
