@@ -12,6 +12,7 @@ import { errors } from '@elastic/elasticsearch';
 
 import { ElasticsearchAssetType } from '../../../../../common/types/models';
 import type { EsAssetReference, PackageInstallContext } from '../../../../../common/types/models';
+import { FleetError } from '../../../../errors';
 
 import { createArchiveIteratorFromMap } from '../../archive/archive_iterator';
 import { updateEsAssetReferences } from '../../packages/es_assets_reference';
@@ -161,18 +162,40 @@ describe('installMlModel', () => {
     expect(esClient.ml.putTrainedModel).toHaveBeenCalledTimes(2);
   });
 
-  it('should propagate non-resource_already_exists errors', async () => {
+  it('should propagate non-resource_already_exists errors as original error type, not PackageInvalidArchiveError', async () => {
     const ctx = makeContext([MODEL_A_PATH], new Map([[MODEL_A_PATH, MODEL_A_CONTENT]]));
 
+    const originalError = new errors.ResponseError({
+      statusCode: 500,
+      body: { error: { type: 'internal_server_error' } },
+    } as any);
     esClient.ml.putTrainedModel.mockImplementationOnce(() => {
-      throw new errors.ResponseError({
-        statusCode: 500,
-        body: { error: { type: 'internal_server_error' } },
-      } as any);
+      throw originalError;
     });
 
-    await expect(
-      installMlModel(ctx, esClient, soClient, logger, existingRefs)
-    ).rejects.toBeInstanceOf(errors.ResponseError);
+    await expect(installMlModel(ctx, esClient, soClient, logger, existingRefs)).rejects.toBe(
+      originalError
+    );
+  });
+
+  it('should throw when a selected ML model archive entry has no buffer', async () => {
+    const sparseMap = new Map<string, Buffer | undefined>([[MODEL_A_PATH, undefined]]);
+    const archiveIterator = createArchiveIteratorFromMap(sparseMap);
+    const ctx = {
+      ...makeContext([MODEL_A_PATH], twoModelAssetsMap),
+      archiveIterator,
+    };
+
+    const err = await installMlModel(
+      ctx as unknown as PackageInstallContext,
+      esClient,
+      soClient,
+      logger,
+      existingRefs
+    ).catch((e) => e);
+    expect(err).toBeInstanceOf(FleetError);
+    expect(err.message).toContain(`No buffer for ML model archive entry at path: ${MODEL_A_PATH}`);
+
+    expect(esClient.ml.putTrainedModel).not.toHaveBeenCalled();
   });
 });

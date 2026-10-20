@@ -10,7 +10,8 @@ import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import { errors } from '@elastic/elasticsearch';
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { QueryService } from './query_service';
-import { JSON_STREAM_BATCH_SIZE } from './query_service';
+import { JSON_STREAM_BATCH_SIZE } from './formats';
+import { RuleExecutionCancellationError } from '../../execution_context';
 import { createQueryService } from './query_service.mock';
 import {
   createMockArrowReader,
@@ -448,7 +449,6 @@ describe('QueryService', () => {
     });
 
     it('logs debug instead of error when cancelled', async () => {
-      const { RuleExecutionCancellationError } = jest.requireActual('../../execution_context');
       mockHelpersEsqlToArrowReader(
         mockEsClient,
         jest.fn().mockRejectedValue(new RuleExecutionCancellationError('Streaming query aborted'))
@@ -651,8 +651,22 @@ describe('QueryService', () => {
       expect(mockLogger.error).toHaveBeenCalled();
     });
 
+    it('wraps decode failures with a descriptive error (parity with the arrow path)', async () => {
+      // A response missing `columns` cannot be decoded into rows.
+      mockEsClient.esql.query.mockResolvedValue({
+        values: [['host-a']],
+      } as unknown as EsqlQueryResponse);
+
+      await expect(async () => {
+        for await (const _batch of queryService.executeQueryStream({ query: mockQuery })) {
+          // consume
+        }
+      }).rejects.toThrow(/Failed to parse ES\|QL response/);
+
+      expect(mockLogger.error).toHaveBeenCalled();
+    });
+
     it('logs debug instead of error when cancelled', async () => {
-      const { RuleExecutionCancellationError } = jest.requireActual('../../execution_context');
       mockEsClient.esql.query.mockRejectedValue(
         new RuleExecutionCancellationError('Streaming query aborted')
       );
@@ -667,22 +681,31 @@ describe('QueryService', () => {
       expect(mockLogger.error).not.toHaveBeenCalled();
     });
 
-    it('logs debug instead of error when the transport aborts mid-flight', async () => {
+    it('reports a mid-flight transport abort as a cancellation, keeping the transport error as cause', async () => {
       const abortController = new AbortController();
+      const transportError = new errors.RequestAbortedError('Request aborted');
       mockEsClient.esql.query.mockImplementation(async () => {
         abortController.abort();
-        throw new errors.RequestAbortedError('Request aborted');
+        throw transportError;
       });
 
-      await expect(async () => {
-        for await (const _batch of queryService.executeQueryStream({
-          query: mockQuery,
-          abortSignal: abortController.signal,
-        })) {
-          // consume
-        }
-      }).rejects.toThrow(errors.RequestAbortedError);
+      let thrown: unknown;
 
+      await expect(async () => {
+        try {
+          for await (const _batch of queryService.executeQueryStream({
+            query: mockQuery,
+            abortSignal: abortController.signal,
+          })) {
+            // consume
+          }
+        } catch (error) {
+          thrown = error;
+          throw error;
+        }
+      }).rejects.toThrow(RuleExecutionCancellationError);
+
+      expect((thrown as RuleExecutionCancellationError).cause).toBe(transportError);
       expect(mockLogger.debug).toHaveBeenCalled();
       expect(mockLogger.error).not.toHaveBeenCalled();
     });
@@ -757,6 +780,90 @@ describe('QueryService', () => {
       expect(batches).toEqual([
         [{ bucket: Date.parse(iso), label: '2026-08-24T14:01:32.000Z', count: 7 }],
       ]);
+    });
+  });
+
+  describe('executeQueryStream (format-agnostic envelope)', () => {
+    const mockQuery = 'FROM .alerting-* | LIMIT 10';
+
+    beforeEach(() => {
+      const mocks = createQueryService('arrow');
+      mockEsClient = mocks.mockEsClient;
+      mockLogger = mocks.mockLogger;
+      queryService = mocks.queryService;
+    });
+
+    it('stops iterating and reports cancellation when the signal fires between batches', async () => {
+      const abortController = new AbortController();
+
+      mockHelpersEsqlArrowBatches(mockEsClient, [
+        { numRows: 1, rows: [{ host: 'host-a' }] },
+        { numRows: 1, rows: [{ host: 'host-b' }] },
+      ]);
+
+      const batches: Array<Record<string, unknown>[]> = [];
+
+      await expect(async () => {
+        for await (const batch of queryService.executeQueryStream({
+          query: mockQuery,
+          abortSignal: abortController.signal,
+        })) {
+          batches.push(batch);
+          abortController.abort(new RuleExecutionCancellationError());
+        }
+      }).rejects.toThrow(RuleExecutionCancellationError);
+
+      expect(batches).toEqual([[{ host: 'host-a' }]]);
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        'QueryService: Streaming query aborted (arrow)'
+      );
+      expect(mockLogger.error).not.toHaveBeenCalled();
+    });
+
+    it('reports a bare mid-stream abort (as Task Manager issues) as a cancellation', async () => {
+      const abortController = new AbortController();
+
+      mockHelpersEsqlArrowBatches(mockEsClient, [
+        { numRows: 1, rows: [{ host: 'host-a' }] },
+        { numRows: 1, rows: [{ host: 'host-b' }] },
+      ]);
+
+      const batches: Array<Record<string, unknown>[]> = [];
+
+      await expect(async () => {
+        for await (const batch of queryService.executeQueryStream({
+          query: mockQuery,
+          abortSignal: abortController.signal,
+        })) {
+          batches.push(batch);
+          abortController.abort();
+        }
+      }).rejects.toThrow(RuleExecutionCancellationError);
+
+      expect(batches).toEqual([[{ host: 'host-a' }]]);
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        'QueryService: Streaming query aborted (arrow)'
+      );
+      expect(mockLogger.error).not.toHaveBeenCalled();
+    });
+
+    it('does not let a failing format cleanup mask the primary error', async () => {
+      const reader: MockArrowReader = {
+        closed: false,
+        cancel: jest.fn().mockRejectedValue(new Error('cancel blew up')),
+        async *[Symbol.asyncIterator]() {
+          throw new Error('mid-stream failure');
+        },
+      };
+      mockHelpersEsqlToArrowReader(mockEsClient, jest.fn().mockResolvedValue(reader));
+
+      await expect(async () => {
+        for await (const _batch of queryService.executeQueryStream({ query: mockQuery })) {
+          // consume
+        }
+      }).rejects.toThrow(/Failed to parse ES\|QL response\. Error: mid-stream failure/);
+
+      expect(reader.cancel).toHaveBeenCalledTimes(1);
     });
   });
 });

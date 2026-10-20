@@ -234,6 +234,74 @@ describe('ToggleAlertFlyoutButton', () => {
     expect(editTlsRuleButton).not.toHaveAttribute('disabled');
   });
 
+  it('disables create status rule when the user cannot manage rules', async () => {
+    const user = userEvent.setup();
+    render(<ToggleAlertFlyoutButton />, {
+      state: baseMockState,
+      core: makeSyntheticsPermissionsCore({ save: false }),
+    });
+
+    const button = screen.getByTestId('syntheticsAlertsRulesButton');
+    await user.click(button);
+    await waitForEuiPopoverOpen();
+
+    const statusRuleMenuItem = screen.getByTestId('manageStatusRuleName');
+    await user.click(statusRuleMenuItem);
+    const createStatusRuleButton = await waitFor(() => screen.getByTestId('createNewStatusRule'));
+    expect(createStatusRuleButton).toHaveAttribute('disabled');
+  });
+
+  it('disables create TLS rule when the user cannot manage rules', async () => {
+    const user = userEvent.setup();
+    render(<ToggleAlertFlyoutButton />, {
+      state: baseMockState,
+      core: makeSyntheticsPermissionsCore({ save: false }),
+    });
+
+    const button = screen.getByTestId('syntheticsAlertsRulesButton');
+    await user.click(button);
+    await waitForEuiPopoverOpen();
+
+    const tlsRuleMenuItem = screen.getByTestId('manageTlsRuleName');
+    await user.click(tlsRuleMenuItem);
+    const createTlsRuleButton = await waitFor(() => screen.getByTestId('createNewTLSRule'));
+    expect(createTlsRuleButton).toHaveAttribute('disabled');
+  });
+
+  it('enables create status rule when the user has canManageRules but not save', async () => {
+    const user = userEvent.setup();
+    render(<ToggleAlertFlyoutButton />, {
+      state: baseMockState,
+      core: makeSyntheticsPermissionsCore({ save: false, canManageRules: true }),
+    });
+
+    const button = screen.getByTestId('syntheticsAlertsRulesButton');
+    await user.click(button);
+    await waitForEuiPopoverOpen();
+
+    const statusRuleMenuItem = screen.getByTestId('manageStatusRuleName');
+    await user.click(statusRuleMenuItem);
+    const createStatusRuleButton = await waitFor(() => screen.getByTestId('createNewStatusRule'));
+    expect(createStatusRuleButton).not.toHaveAttribute('disabled');
+  });
+
+  it('enables create TLS rule when the user has canManageRules but not save', async () => {
+    const user = userEvent.setup();
+    render(<ToggleAlertFlyoutButton />, {
+      state: baseMockState,
+      core: makeSyntheticsPermissionsCore({ save: false, canManageRules: true }),
+    });
+
+    const button = screen.getByTestId('syntheticsAlertsRulesButton');
+    await user.click(button);
+    await waitForEuiPopoverOpen();
+
+    const tlsRuleMenuItem = screen.getByTestId('manageTlsRuleName');
+    await user.click(tlsRuleMenuItem);
+    const createTlsRuleButton = await waitFor(() => screen.getByTestId('createNewTLSRule'));
+    expect(createTlsRuleButton).not.toHaveAttribute('disabled');
+  });
+
   it('enables edit status rule when the user has canManageRules but not save', async () => {
     const user = userEvent.setup();
     render(<ToggleAlertFlyoutButton />, {

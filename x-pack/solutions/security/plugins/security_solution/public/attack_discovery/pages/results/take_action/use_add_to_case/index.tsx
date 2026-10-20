@@ -6,7 +6,11 @@
  */
 
 import { COMMENT_ATTACHMENT_TYPE, SECURITY_ALERT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
-import type { CaseAttachmentWithoutOwner } from '@kbn/cases-plugin/public/types';
+import type {
+  CaseAttachmentWithoutOwner,
+  CaseAttachmentsWithoutOwner,
+} from '@kbn/cases-plugin/public/types';
+import type { CaseUI } from '@kbn/cases-plugin/common';
 import { useAssistantContext } from '@kbn/elastic-assistant';
 import { getOriginalAlertIds, type Replacements } from '@kbn/elastic-assistant-common';
 import React, { useCallback, useMemo } from 'react';
@@ -16,48 +20,71 @@ import * as i18n from './translations';
 
 interface Props {
   canUserCreateAndReadCases: () => boolean;
-  title: string;
   onClick?: () => void;
+  /** Called once the attachments have been posted, with the case they were posted to. */
+  onSuccess?: (theCase: CaseUI, isNewCase: boolean) => void;
+  title: string;
 }
 
-export const useAddToNewCase = ({
+/** Attaches the discoveries as markdown comments plus their constituent alerts. */
+interface AddMarkdownToCaseParams {
+  alertIds: string[];
+  markdownComments: string[];
+  replacements?: Replacements;
+}
+
+/** Attaches whatever the caller builds once the user has picked (or created) a case. */
+interface AddAttachmentsToCaseParams {
+  /**
+   * Builds the payload for the chosen case, or with no case before the create-case flyout has one.
+   * Must be pure, as the case selector also calls it on every render.
+   */
+  getAttachments: (theCase?: CaseUI) => CaseAttachmentsWithoutOwner;
+}
+
+export type AddToCaseParams = AddMarkdownToCaseParams | AddAttachmentsToCaseParams;
+
+export const useAddToCase = ({
   canUserCreateAndReadCases,
-  title,
   onClick,
+  onSuccess,
+  title,
 }: Props): {
   disabled: boolean;
-  onAddToNewCase: ({
-    alertIds,
-    markdownComments,
-    replacements,
-  }: {
-    alertIds: string[];
-    markdownComments: string[];
-    replacements?: Replacements;
-  }) => void;
+  onAddToCase: (params: AddToCaseParams) => void;
 } => {
   const { cases } = useKibana().services;
   const { alertsIndexPattern } = useAssistantContext();
+  const headerContent = useMemo(
+    () => <div>{i18n.CREATE_A_CASE_FOR_ATTACK_DISCOVERY(title)}</div>,
+    [title]
+  );
 
-  const createCaseFlyout = cases.hooks.useCasesAddToNewCaseFlyout({
-    initialValue: {
-      description: i18n.CASE_DESCRIPTION(title),
-      title,
-    },
-    toastContent: i18n.ADD_TO_CASE_SUCCESS,
-  });
-  const openCreateCaseFlyout = useCallback(
-    ({
-      alertIds,
+  const { open: openSelectCaseModal } = cases.hooks.useCasesAddToExistingCaseModal({
+    createCaseFlyout: {
       headerContent,
-      markdownComments,
-      replacements,
-    }: {
-      alertIds: string[];
-      headerContent?: React.ReactNode;
-      markdownComments: string[];
-      replacements?: Replacements;
-    }) => {
+      initialValue: {
+        description: i18n.CASE_DESCRIPTION(title),
+        title,
+      },
+    },
+    onClose: onClick,
+    onSuccess,
+    successToaster: {
+      content: i18n.ADD_TO_CASE_SUCCESS,
+    },
+  });
+
+  const onAddToCase = useCallback(
+    (params: AddToCaseParams) => {
+      if ('getAttachments' in params) {
+        const { getAttachments } = params;
+        openSelectCaseModal({ getAttachments: ({ theCase }) => getAttachments(theCase) });
+        return;
+      }
+
+      const { alertIds, markdownComments, replacements } = params;
+
       const userCommentAttachments = markdownComments.map<CaseAttachmentWithoutOwner>((x) => ({
         type: COMMENT_ATTACHMENT_TYPE,
         data: { content: x },
@@ -76,42 +103,15 @@ export const useAddToNewCase = ({
         },
       }));
 
-      const attachments = [...userCommentAttachments, ...alertAttachments];
-
-      createCaseFlyout.open({
-        attachments,
-        headerContent,
+      openSelectCaseModal({
+        getAttachments: () => [...userCommentAttachments, ...alertAttachments],
       });
     },
-    [alertsIndexPattern, createCaseFlyout]
-  );
-
-  const headerContent = useMemo(
-    () => <div>{i18n.CREATE_A_CASE_FOR_ATTACK_DISCOVERY(title)}</div>,
-    [title]
-  );
-
-  const onAddToNewCase = useCallback(
-    ({
-      alertIds,
-      markdownComments,
-      replacements,
-    }: {
-      alertIds: string[];
-      markdownComments: string[];
-      replacements?: Replacements;
-    }) => {
-      if (onClick) {
-        onClick();
-      }
-
-      openCreateCaseFlyout({ alertIds, headerContent, markdownComments, replacements });
-    },
-    [headerContent, onClick, openCreateCaseFlyout]
+    [alertsIndexPattern, openSelectCaseModal]
   );
 
   return {
     disabled: !canUserCreateAndReadCases(),
-    onAddToNewCase,
+    onAddToCase,
   };
 };

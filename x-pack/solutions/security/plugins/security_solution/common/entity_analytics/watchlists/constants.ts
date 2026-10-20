@@ -46,3 +46,14 @@ export const PREBUILT_WATCHLIST_NAMES: Record<string, string> = {
 
 export const getWatchlistName = (watchlistId: string): string =>
   PREBUILT_WATCHLIST_NAMES[watchlistId] ?? watchlistId;
+
+/**
+ * Real ES field names supported as the identifier field for index-type entity sources.
+ */
+export const WATCHLIST_IDENTIFIER_FIELDS = [
+  'host.name',
+  'user.name',
+  'service.name',
+  'host.id',
+  'user.email',
+] as const;

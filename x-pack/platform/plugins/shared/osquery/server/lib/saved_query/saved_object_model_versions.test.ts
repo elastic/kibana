@@ -5,15 +5,20 @@
  * 2.0.
  */
 
+import { getFlattenedObject } from '@kbn/std';
 import type { ObjectType } from '@kbn/config-schema';
 import type {
   SavedObjectModelDataBackfillFn,
   SavedObjectsModelDataBackfillChange,
+  SavedObjectsModelMappingsAdditionChange,
 } from '@kbn/core-saved-objects-server';
 import {
   packSavedObjectModelVersion3,
   packSavedObjectModelVersion4,
+  packSavedObjectModelVersion5,
 } from './saved_object_model_versions';
+import { packSavedObjectMappings, packType } from './saved_object_mappings';
+import { packSchemaV5 } from './schemas';
 import { convertSOQueriesToPack } from '../../routes/pack/utils';
 
 describe('Pack saved object model version 3 forward compatibility', () => {
@@ -648,5 +653,135 @@ describe('Pack saved object model version 4 — schedule_id/start_date/id backfi
     };
 
     expect(() => (forwardCompatibility as ObjectType).validate(migratedDoc)).not.toThrow();
+  });
+});
+
+// Kibana refuses to boot when a model version's `mappings_addition` declares a
+// field that the global mappings definition omits (or types differently):
+//
+//   FATAL Error: Type osquery-pack: mappings added on model versions not
+//   present on the global mappings definition: platform.type,platform.ignore_above
+//
+// This replicates core's `validateAddedMappings` so that failure surfaces as a
+// unit-test failure instead of a startup crash.
+describe('osquery-pack model version mappings', () => {
+  it('declares every mappings_addition field in the global mappings with identical values', () => {
+    const flattenedMappings = new Map(
+      Object.entries(getFlattenedObject(packType.mappings.properties as object))
+    );
+
+    const addedMappings = new Map<string, unknown>();
+    Object.values(packType.modelVersions as Record<string, { changes?: unknown[] }>)
+      .flatMap((version) => version.changes ?? [])
+      .filter(
+        (change): change is { type: string; addedMappings: object } =>
+          (change as { type?: string })?.type === 'mappings_addition'
+      )
+      .forEach((change) => {
+        const flattened = getFlattenedObject(change.addedMappings);
+        Object.keys(flattened).forEach((key) => {
+          addedMappings.set(key, (flattened as Record<string, unknown>)[key]);
+        });
+      });
+
+    const missing: string[] = [];
+    const differing: string[] = [];
+    for (const [key, value] of addedMappings.entries()) {
+      if (!flattenedMappings.has(key)) {
+        missing.push(key);
+      } else if (flattenedMappings.get(key) !== value) {
+        differing.push(key);
+      }
+    }
+
+    expect({ missing, differing }).toEqual({ missing: [], differing: [] });
+  });
+
+  // Inverse of the one-way check above. `validateAddedMappings` only iterates
+  // `mappings_addition`, so a version that adds schema fields with `changes: []`
+  // (the original V5 mistake) still passes. Pack root is NOT `dynamic: false`
+  // (it inherits index `dynamic: 'strict'`), so every stored attribute must
+  // appear in `packSavedObjectMappings.properties` or ES rejects writes.
+  it('maps every packSchemaV5 root key in packSavedObjectMappings.properties', () => {
+    expect(packSavedObjectMappings.dynamic).not.toBe(false);
+
+    const schemaKeys = Object.keys(packSchemaV5.getPropSchemas());
+    const mappingKeys = new Set(Object.keys(packSavedObjectMappings.properties));
+
+    // Stored as SO references, never as a mapped attribute.
+    const referenceOnlyKeys = new Set(['policy_ids']);
+
+    const unmapped = schemaKeys.filter(
+      (key) => !mappingKeys.has(key) && !referenceOnlyKeys.has(key)
+    );
+
+    expect(unmapped).toEqual([]);
+  });
+
+  it('V5 mappings_addition is byte-identical to the three new pack-root mapping properties', () => {
+    const mappingsAddition = packSavedObjectModelVersion5.changes.find(
+      (change): change is SavedObjectsModelMappingsAdditionChange =>
+        change.type === 'mappings_addition'
+    );
+
+    expect(mappingsAddition).toBeDefined();
+
+    const properties = packSavedObjectMappings.properties;
+    expect(mappingsAddition?.addedMappings).toEqual({
+      min_osquery_version: properties.min_osquery_version,
+      result_type: properties.result_type,
+      platform: properties.platform,
+    });
+  });
+});
+
+describe('Pack saved object model version 5 — frozen packQuerySchema', () => {
+  const v4Create = packSavedObjectModelVersion4.schemas?.create;
+  const v5Create = packSavedObjectModelVersion5.schemas?.create;
+
+  it('V4 create still accepts untyped per-query enabled/result_type as unknowns', () => {
+    expect(v4Create).toBeDefined();
+
+    expect(() =>
+      (v4Create as ObjectType).validate({
+        queries: [
+          {
+            id: 'q1',
+            query: 'SELECT 1',
+            enabled: 'not-a-boolean',
+            result_type: 'not-an-enum',
+          },
+        ],
+      })
+    ).not.toThrow();
+  });
+
+  it('V5 create type-checks per-query enabled and result_type', () => {
+    expect(v5Create).toBeDefined();
+
+    expect(() =>
+      (v5Create as ObjectType).validate({
+        queries: [{ id: 'q1', query: 'SELECT 1', enabled: 'not-a-boolean' }],
+      })
+    ).toThrow();
+
+    expect(() =>
+      (v5Create as ObjectType).validate({
+        queries: [{ id: 'q1', query: 'SELECT 1', result_type: 'not-an-enum' }],
+      })
+    ).toThrow();
+
+    expect(() =>
+      (v5Create as ObjectType).validate({
+        queries: [
+          {
+            id: 'q1',
+            query: 'SELECT 1',
+            enabled: true,
+            result_type: 'snapshot',
+          },
+        ],
+      })
+    ).not.toThrow();
   });
 });

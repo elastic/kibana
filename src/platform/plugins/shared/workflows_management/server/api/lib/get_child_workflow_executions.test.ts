@@ -127,11 +127,13 @@ describe('getChildWorkflowExecutions', () => {
     expect(mockStepDataClient.getByIds).toHaveBeenCalledTimes(1);
   });
 
-  it('should skip workflow.execute steps that are not in terminal status', async () => {
+  it('should skip workflow.execute steps that carry no child execution id', async () => {
+    const stepWithoutChild = {
+      ...createWorkflowExecuteStep('step-1', 'child-exec-1', 'running'),
+      state: {},
+    };
     mockWorkflowDataClient.getByIds.mockResolvedValue(mockWorkflowGetByIds([parentDoc]));
-    mockStepDataClient.getByIds.mockResolvedValue(
-      mockStepGetByIds([createWorkflowExecuteStep('step-1', 'child-exec-1', 'running')])
-    );
+    mockStepDataClient.getByIds.mockResolvedValue(mockStepGetByIds([stepWithoutChild]));
 
     const result = await getChildWorkflowExecutions({
       ...baseParams,
@@ -140,6 +142,41 @@ describe('getChildWorkflowExecutions', () => {
     });
 
     expect(result).toEqual([]);
+  });
+
+  it('should return a child run whose workflow.execute step is still waiting', async () => {
+    mockWorkflowDataClient.getByIds
+      .mockResolvedValueOnce(mockWorkflowGetByIds([parentDoc]))
+      .mockResolvedValueOnce(
+        mockWorkflowGetByIds([
+          {
+            id: 'child-exec-1',
+            spaceId: 'default',
+            workflowId: 'child-wf-1',
+            workflowDefinition: { name: 'Child Workflow' },
+            status: 'waiting_for_input',
+            stepExecutionIds: [],
+          },
+        ])
+      );
+    mockStepDataClient.getByIds.mockResolvedValueOnce(
+      mockStepGetByIds([createWorkflowExecuteStep('step-1', 'child-exec-1', 'waiting_for_child')])
+    );
+
+    const result = await getChildWorkflowExecutions({
+      ...baseParams,
+      workflowExecutionsDataClient: mockWorkflowDataClient,
+      stepExecutionsDataClient: mockStepDataClient,
+    });
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toEqual(
+      expect.objectContaining({
+        parentStepExecutionId: 'step-1',
+        executionId: 'child-exec-1',
+        status: 'waiting_for_input',
+      })
+    );
   });
 
   it('should fetch child executions and their steps', async () => {

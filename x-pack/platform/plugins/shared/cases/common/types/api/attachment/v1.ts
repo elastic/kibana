@@ -7,10 +7,9 @@
 
 import * as rt from 'io-ts';
 import {
-  MAX_BULK_CREATE_ATTACHMENTS,
-  MAX_BULK_GET_ATTACHMENTS,
   MAX_COMMENTS_PER_PAGE,
   MAX_COMMENT_LENGTH,
+  MAX_BULK_DELETE_ATTACHMENTS,
   MAX_DELETE_FILES,
   MAX_FILENAME_LENGTH,
 } from '../../../constants';
@@ -30,7 +29,6 @@ import {
   PersistableStateAttachmentPayloadRt,
   AttachmentType,
   AttachmentRt,
-  AttachmentsRt,
   EventAttachmentPayloadRt,
 } from '../../domain/attachment/v1';
 
@@ -60,6 +58,20 @@ export const PostFileAttachmentRequestRt = rt.intersection([
   ),
 ]);
 
+/**
+ * Attachments bulk delete
+ */
+
+export const BulkDeleteAttachmentsRequestRt = rt.strict({
+  ids: limitedArraySchema({
+    codec: NonEmptyString,
+    min: MIN_DELETE_IDS,
+    max: MAX_BULK_DELETE_ATTACHMENTS,
+    fieldName: 'ids',
+  }),
+});
+
+export type BulkDeleteAttachmentsRequest = rt.TypeOf<typeof BulkDeleteAttachmentsRequestRt>;
 export type BulkDeleteFileAttachmentsRequest = rt.TypeOf<typeof BulkDeleteFileAttachmentsRequestRt>;
 export type PostFileAttachmentRequest = rt.TypeOf<typeof PostFileAttachmentRequestRt>;
 
@@ -140,38 +152,7 @@ export const FindAttachmentsQueryParamsRt = rt.intersection([
   paginationSchema({ maxPerPage: MAX_COMMENTS_PER_PAGE }),
 ]);
 
-export const BulkCreateAttachmentsRequestRt = limitedArraySchema({
-  codec: AttachmentRequestRt,
-  min: 0,
-  max: MAX_BULK_CREATE_ATTACHMENTS,
-  fieldName: 'attachments',
-});
-
-export const BulkGetAttachmentsRequestRt = rt.strict({
-  ids: limitedArraySchema({
-    codec: rt.string,
-    min: 1,
-    max: MAX_BULK_GET_ATTACHMENTS,
-    fieldName: 'ids',
-  }),
-});
-
-export const BulkGetAttachmentsResponseRt = rt.strict({
-  attachments: AttachmentsRt,
-  errors: rt.array(
-    rt.strict({
-      error: rt.string,
-      message: rt.string,
-      status: rt.union([rt.undefined, rt.number]),
-      savedObjectId: rt.string,
-    })
-  ),
-});
-
 export type FindAttachmentsQueryParams = rt.TypeOf<typeof FindAttachmentsQueryParamsRt>;
 export type AttachmentsFindResponse = rt.TypeOf<typeof AttachmentsFindResponseRt>;
 export type AttachmentRequest = rt.TypeOf<typeof AttachmentRequestRt>;
 export type AttachmentPatchRequest = rt.TypeOf<typeof AttachmentPatchRequestRt>;
-export type BulkCreateAttachmentsRequest = rt.TypeOf<typeof BulkCreateAttachmentsRequestRt>;
-export type BulkGetAttachmentsResponse = rt.TypeOf<typeof BulkGetAttachmentsResponseRt>;
-export type BulkGetAttachmentsRequest = rt.TypeOf<typeof BulkGetAttachmentsRequestRt>;

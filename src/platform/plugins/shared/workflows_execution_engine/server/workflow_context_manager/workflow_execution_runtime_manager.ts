@@ -533,6 +533,9 @@ export class WorkflowExecutionRuntimeManager {
       const finishDate = new Date();
       workflowExecutionUpdate.finishedAt = finishDate.toISOString();
       workflowExecutionUpdate.duration = finishDate.getTime() - startedAt.getTime();
+      // Persist the stored context, not the Liquid render alias. Minting a
+      // typeless `event` here makes the execution tree label the trigger
+      // `document` instead of `manual`.
       workflowExecutionUpdate.context = buildWorkflowContext(
         this.workflowExecution,
         this.coreStart,
@@ -609,6 +612,8 @@ export class WorkflowExecutionRuntimeManager {
     const finalWorkflowExecution = {
       ...workflowExecution,
       ...workflowExecutionUpdate,
+      // The update's context is rebuilt without the raw parent* keys, so keep the stored ones.
+      context: { ...workflowExecution.context, ...workflowExecutionUpdate.context },
       status: finalStatus,
     } as EsWorkflowExecution;
 

@@ -54,11 +54,13 @@ export const find = async (
     // supertest and query-string encode a single entry in an array as just a string so make sure we have an array
     const types = asArray(params.types);
     const authors = asArray(params.authors);
+    const sources = asArray(params.sources);
 
     const queryParams = decodeWithExcessOrThrow(UserActionInternalFindRequestRt)({
       ...params,
       types,
       authors,
+      sources,
     });
 
     const [authorizationFilterRes] = await Promise.all([

@@ -526,6 +526,12 @@ The plugin stores data in Elasticsearch using the following indices:
 
 ---
 
+### Execution Telemetry (EBT)
+
+Execution outcomes and trigger dispatches are also reported as event-based telemetry, which is not stored in these indices. See [docs/telemetry.md](./docs/telemetry.md) for the execution lineage fields and how to join a sub-workflow chain with them.
+
+---
+
 ## Step Types
 
 The engine supports various step types for different workflow operations:
@@ -754,13 +760,13 @@ workflows_execution_engine/
 
 ```bash
 # Run unit tests
-yarn test:jest src/platform/plugins/shared/workflows_execution_engine
+pnpm test:jest src/platform/plugins/shared/workflows_execution_engine
 
 # Run integration tests
-yarn test:jest_integration src/platform/plugins/shared/workflows_execution_engine
+pnpm test:jest_integration src/platform/plugins/shared/workflows_execution_engine
 
 # Run with watch mode for development
-yarn test:jest --watch src/platform/plugins/shared/workflows_execution_engine
+pnpm test:jest --watch src/platform/plugins/shared/workflows_execution_engine
 ```
 
 ### Debugging

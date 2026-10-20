@@ -21,6 +21,20 @@ describe('getFormattedError', () => {
     expect(getFormattedError(err).message).toBe('Backing data stream is missing');
   });
 
+  it('prefers body.message over Error.message for Kibana HTTP errors', () => {
+    const err = Object.assign(new Error('Bad Request'), {
+      body: {
+        statusCode: 400,
+        error: 'Bad Request',
+        message: 'source "otlp-input" has unknown type "not-a-real-source"',
+      },
+    });
+
+    expect(getFormattedError(err).message).toBe(
+      'source "otlp-input" has unknown type "not-a-real-source"'
+    );
+  });
+
   it('uses a string body as message when provided', () => {
     const err = { body: 'Not Found' };
     expect(getFormattedError(err).message).toBe('Not Found');

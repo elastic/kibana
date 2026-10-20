@@ -7,12 +7,7 @@
 
 import { assign, fromPromise, sendTo, setup } from 'xstate';
 import type { CoreStart } from '@kbn/core/public';
-import type {
-  SourceRuntimeMetadata,
-  SourceStatus,
-  SourcesUnitDefinition,
-  SourceType,
-} from '../types';
+import type { SourceRuntimeMetadata, SourceStatus, SourceType } from '../types';
 import {
   createSourcesMachineImplementations,
   sourcesStateMachine,
@@ -20,11 +15,13 @@ import {
 } from './sources_state_machine';
 import type { SourceApiKeyGenerationDeps } from '../source_api_keys';
 import type { SourceEnvironmentLoader } from '../source_environment';
+import { getConfiguredSources } from '../source_models';
 import {
-  createEmptyUnitDefinition,
-  mockUnitDefinitionRepository,
-  type UnitDefinitionRepository,
-} from '../unit_definition_repository';
+  createDefaultUnit,
+  type Unit,
+  type UnitRepository,
+} from '../../../../services/unit_repository';
+import { getFormattedError } from '../../../../util/errors';
 
 export interface SourcesTableSortingColumn {
   id: string;
@@ -37,19 +34,19 @@ export interface SourcesTablePagination {
 }
 
 export interface SourcesTableStateInput {
-  unitDefinition?: SourcesUnitDefinition;
+  unitDefinition?: Unit;
   metadataBySourceId?: Record<string, SourceRuntimeMetadata>;
   apiKeyGenerationDeps: SourceApiKeyGenerationDeps;
   toasts: CoreStart['notifications']['toasts'];
   loadSourceEnvironment?: SourceEnvironmentLoader;
-  loadUnitDefinition?: UnitDefinitionRepository['load'];
-  persistUnitDefinition?: UnitDefinitionRepository['persist'];
+  loadUnitDefinition: UnitRepository['load'];
+  persistUnitDefinition: UnitRepository['persist'];
 }
 
 export interface SourcesTableStateContext {
-  unitDefinition: SourcesUnitDefinition;
-  pendingUnitDefinition?: SourcesUnitDefinition;
-  pendingSourceId?: string;
+  unitDefinition: Unit;
+  pendingUnitDefinition?: Unit;
+  pendingSourceIds?: string[];
   pendingIntent?: 'create' | 'delete';
   sourcesRef: SourcesActorRef;
   query: string;
@@ -59,24 +56,24 @@ export interface SourcesTableStateContext {
   sortingColumns: SourcesTableSortingColumn[];
   pagination: SourcesTablePagination;
   visibleColumnIds: string[];
-  loadUnitDefinition: () => Promise<SourcesUnitDefinition>;
-  persistUnitDefinition: (unitDefinition: SourcesUnitDefinition) => Promise<SourcesUnitDefinition>;
+  loadUnitDefinition: () => Promise<Unit>;
+  persistUnitDefinition: (unitDefinition: Unit) => Promise<Unit>;
   error?: Error;
 }
 
 export type SourcesTableStateEvent =
   | {
       type: 'unit.changed';
-      unitDefinition: SourcesUnitDefinition;
-      sourceId: string;
+      unitDefinition: Unit;
+      sourceIds: string[];
       intent: 'create' | 'delete';
     }
   | { type: 'unit.reload' }
-  | { type: 'xstate.done.actor.loadUnitDefinition'; output: SourcesUnitDefinition }
+  | { type: 'xstate.done.actor.loadUnitDefinition'; output: Unit }
   | { type: 'xstate.error.actor.loadUnitDefinition'; error: unknown }
   | {
       type: 'xstate.done.actor.persistUnitDefinition';
-      output: { unitDefinition: SourcesUnitDefinition; sourceId: string };
+      output: { unitDefinition: Unit; sourceIds: string[] };
     }
   | { type: 'xstate.error.actor.persistUnitDefinition'; error: unknown }
   | { type: 'search.change'; query: string }
@@ -87,9 +84,6 @@ export type SourcesTableStateEvent =
   | { type: 'pagination.change'; pagination: SourcesTablePagination }
   | { type: 'visibleColumns.change'; columnIds: string[] };
 
-const toError = (error: unknown): Error =>
-  error instanceof Error ? error : new Error('The unit definition request failed.');
-
 export const sourcesTableStateMachine = setup({
   types: {
     input: {} as SourcesTableStateInput,
@@ -97,21 +91,19 @@ export const sourcesTableStateMachine = setup({
     events: {} as SourcesTableStateEvent,
   },
   actors: {
-    loadUnitDefinition: fromPromise(
-      async ({ input }: { input: () => Promise<SourcesUnitDefinition> }) => input()
-    ),
+    loadUnitDefinition: fromPromise(async ({ input }: { input: () => Promise<Unit> }) => input()),
     persistUnitDefinition: fromPromise(
       async ({
         input,
       }: {
         input: {
-          persist: UnitDefinitionRepository['persist'];
-          unitDefinition: SourcesUnitDefinition;
-          sourceId: string;
+          persist: UnitRepository['persist'];
+          unitDefinition: Unit;
+          sourceIds: string[];
         };
       }) => ({
         unitDefinition: await input.persist(input.unitDefinition),
-        sourceId: input.sourceId,
+        sourceIds: input.sourceIds,
       })
     ),
   },
@@ -119,7 +111,8 @@ export const sourcesTableStateMachine = setup({
     storePendingUnitDefinition: assign({
       pendingUnitDefinition: ({ event }) =>
         event.type === 'unit.changed' ? event.unitDefinition : undefined,
-      pendingSourceId: ({ event }) => (event.type === 'unit.changed' ? event.sourceId : undefined),
+      pendingSourceIds: ({ event }) =>
+        event.type === 'unit.changed' ? event.sourceIds : undefined,
       pendingIntent: ({ event }) => (event.type === 'unit.changed' ? event.intent : undefined),
       error: undefined,
     }),
@@ -129,13 +122,13 @@ export const sourcesTableStateMachine = setup({
           ? event.output
           : context.unitDefinition,
       pendingUnitDefinition: undefined,
-      pendingSourceId: undefined,
+      pendingSourceIds: undefined,
       pendingIntent: undefined,
       selectedSourceIds: ({ context, event }) => {
         if (event.type !== 'xstate.done.actor.loadUnitDefinition') {
           return context.selectedSourceIds;
         }
-        const loadedSourceIds = new Set(event.output.sources.map(({ id }) => id));
+        const loadedSourceIds = new Set(getConfiguredSources(event.output).map(({ id }) => id));
         return context.selectedSourceIds.filter((sourceId) => loadedSourceIds.has(sourceId));
       },
       error: undefined,
@@ -146,7 +139,7 @@ export const sourcesTableStateMachine = setup({
           ? event.output.unitDefinition
           : context.unitDefinition,
       pendingUnitDefinition: undefined,
-      pendingSourceId: undefined,
+      pendingSourceIds: undefined,
       pendingIntent: undefined,
       error: undefined,
     }),
@@ -154,7 +147,7 @@ export const sourcesTableStateMachine = setup({
       error: ({ event }) =>
         event.type === 'xstate.error.actor.loadUnitDefinition' ||
         event.type === 'xstate.error.actor.persistUnitDefinition'
-          ? toError(event.error)
+          ? getFormattedError(event.error)
           : undefined,
     }),
     syncLoadedUnitDefinition: sendTo(
@@ -177,7 +170,7 @@ export const sourcesTableStateMachine = setup({
         }
         return {
           type: 'unit.persisted',
-          sourceId: event.output.sourceId,
+          sourceIds: event.output.sourceIds,
           unitDefinition: event.output.unitDefinition,
         };
       }
@@ -188,14 +181,14 @@ export const sourcesTableStateMachine = setup({
         if (event.type !== 'xstate.error.actor.persistUnitDefinition') {
           throw new Error('Expected a unit persistence failure');
         }
-        if (!context.pendingSourceId || !context.pendingIntent) {
+        if (!context.pendingSourceIds?.length || !context.pendingIntent) {
           throw new Error('Expected a pending source mutation');
         }
         return {
           type: 'unit.persistenceFailed',
-          sourceId: context.pendingSourceId,
+          sourceIds: context.pendingSourceIds,
           unitDefinition: context.unitDefinition,
-          message: toError(event.error).message,
+          message: getFormattedError(event.error).message,
           intent: context.pendingIntent,
         };
       }
@@ -239,15 +232,23 @@ export const sourcesTableStateMachine = setup({
       visibleColumnIds: ({ context, event }) =>
         event.type === 'visibleColumns.change' ? event.columnIds : context.visibleColumnIds,
     }),
+    notifyUnitSaveStarted: sendTo(
+      ({ context }) => context.sourcesRef,
+      () => ({ type: 'unit.save.started' as const })
+    ),
+    notifyUnitSaveFinished: sendTo(
+      ({ context }) => context.sourcesRef,
+      () => ({ type: 'unit.save.finished' as const })
+    ),
   },
 }).createMachine({
   id: 'streamsSourcesTable',
   context: ({ input, self, spawn }) => {
-    const unitDefinition = input.unitDefinition ?? createEmptyUnitDefinition();
+    const unitDefinition = input.unitDefinition ?? createDefaultUnit();
     return {
       unitDefinition,
       pendingUnitDefinition: undefined,
-      pendingSourceId: undefined,
+      pendingSourceIds: undefined,
       pendingIntent: undefined,
       query: '',
       selectedSourceIds: [],
@@ -256,8 +257,8 @@ export const sourcesTableStateMachine = setup({
       sortingColumns: [{ id: 'name', direction: 'asc' }],
       pagination: { pageIndex: 0, pageSize: 10 },
       visibleColumnIds: ['name', 'type', 'status', 'throughput', 'lastEvent', 'destinations'],
-      loadUnitDefinition: input.loadUnitDefinition ?? mockUnitDefinitionRepository.load,
-      persistUnitDefinition: input.persistUnitDefinition ?? mockUnitDefinitionRepository.persist,
+      loadUnitDefinition: input.loadUnitDefinition,
+      persistUnitDefinition: input.persistUnitDefinition,
       error: undefined,
       sourcesRef: spawn(
         sourcesStateMachine.provide(
@@ -290,6 +291,7 @@ export const sourcesTableStateMachine = setup({
   initial: 'loading',
   states: {
     loading: {
+      entry: 'notifyUnitSaveStarted',
       invoke: {
         id: 'loadUnitDefinition',
         src: 'loadUnitDefinition',
@@ -310,6 +312,7 @@ export const sourcesTableStateMachine = setup({
       },
     },
     ready: {
+      entry: 'notifyUnitSaveFinished',
       on: {
         'unit.changed': {
           target: 'persisting',
@@ -319,6 +322,7 @@ export const sourcesTableStateMachine = setup({
       },
     },
     reloading: {
+      entry: 'notifyUnitSaveStarted',
       invoke: {
         id: 'loadUnitDefinition',
         src: 'loadUnitDefinition',
@@ -334,20 +338,14 @@ export const sourcesTableStateMachine = setup({
       },
     },
     persisting: {
-      on: {
-        'unit.changed': {
-          target: 'persisting',
-          reenter: true,
-          actions: ['storePendingUnitDefinition'],
-        },
-      },
+      entry: 'notifyUnitSaveStarted',
       invoke: {
         id: 'persistUnitDefinition',
         src: 'persistUnitDefinition',
         input: ({ context }) => ({
           persist: context.persistUnitDefinition,
           unitDefinition: context.pendingUnitDefinition ?? context.unitDefinition,
-          sourceId: context.pendingSourceId ?? '',
+          sourceIds: context.pendingSourceIds ?? [],
         }),
         onDone: {
           target: 'ready',
@@ -360,6 +358,7 @@ export const sourcesTableStateMachine = setup({
       },
     },
     failed: {
+      entry: 'notifyUnitSaveFinished',
       on: {
         'unit.changed': {
           target: 'persisting',

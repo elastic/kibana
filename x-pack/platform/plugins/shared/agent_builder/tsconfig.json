@@ -24,6 +24,7 @@
     "@kbn/config-schema",
     "@kbn/inference-plugin",
     "@kbn/agent-builder-server",
+    "@kbn/isomer",
     "@kbn/agent-builder-skill-loader",
     "@kbn/agent-builder-browser",
     "@kbn/agent-builder-visualizations",
@@ -37,6 +38,7 @@
     "@kbn/zod",
     "@kbn/inference-langchain",
     "@kbn/storage-adapter",
+    "@kbn/es-query",
     "@kbn/sse-utils",
     "@kbn/sse-utils-client",
     "@kbn/sse-utils-server",
@@ -98,7 +100,6 @@
     "@kbn/elastic-assistant",
     "@kbn/inference-connectors",
     "@kbn/react-query",
-    "@kbn/react-kibana-mount",
     "@kbn/shared-ux-utility",
     "@kbn/usage-collection-plugin",
     "@kbn/core-notifications-browser",
@@ -152,5 +153,6 @@
     "@kbn/files-plugin",
     "@kbn/ui-callout",
     "@kbn/core-http-browser-mocks",
+    "@kbn/projects-solutions-groups",
   ]
 }

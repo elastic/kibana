@@ -7,9 +7,35 @@
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { toHashedId } from '@kbn/agent-builder-server';
 import pRetry from 'p-retry';
 
 const FILESTORE_READ = 'filestore.read';
+
+/**
+ * Agent Builder anonymizes `gen_ai.conversation.id` before exporting spans
+ * unless the `agentBuilder:tracing:includeRealIds` uiSetting is enabled — and it
+ * defaults to `false`. The workflow step output, by contrast, always carries the
+ * *real* dashed-UUID conversation id. Joining the raw id against exported spans
+ * therefore matches nothing on a default-configured stack, which reads as "the
+ * agent emitted no tool spans" rather than as an id-space mismatch.
+ *
+ * Reuses `toHashedId` — the same function `AgentBuilderSpanProcessor` applies —
+ * so the two sides cannot drift.
+ */
+const expandWithHashedIds = (ids: string[]): string[] => {
+  const expanded: string[] = [];
+  const seen = new Set<string>();
+  for (const id of ids) {
+    for (const variant of [id, toHashedId(id)]) {
+      if (!seen.has(variant)) {
+        seen.add(variant);
+        expanded.push(variant);
+      }
+    }
+  }
+  return expanded;
+};
 
 interface EsqlResponse {
   columns: Array<{ name: string; type: string }>;
@@ -171,25 +197,30 @@ export const readAgentToolCallsFromTraces = async ({
   excludeToolIds = [FILESTORE_READ],
   includeFailures = false,
 }: ReadAgentToolCallsFromTracesParams): Promise<ReadAgentToolCallsFromTracesResult> => {
-  const ids = normalizeConversationIds(conversationIds);
+  const ids = expandWithHashedIds(normalizeConversationIds(conversationIds));
 
   if (!traceEsClient || ids.length === 0) {
     return { toolCallIds: [], unavailable: true };
   }
 
   try {
+    // Built once, outside pRetry: query construction is deterministic, so a
+    // rejected (unsafe) id is a permanent failure and must not burn retries.
+    const orderedToolQuery = buildOrderedToolQuery({
+      conversationIds: ids,
+      indexPattern,
+      excludeToolIds,
+      includeFailures,
+    });
+    const spanProbeQuery = buildSpanProbeQuery({ conversationIds: ids, indexPattern });
+
     const response = await pRetry(
       async () => {
         const result = await traceEsClient.transport.request<EsqlResponse>({
           method: 'POST',
           path: '/_query',
           body: {
-            query: buildOrderedToolQuery({
-              conversationIds: ids,
-              indexPattern,
-              excludeToolIds,
-              includeFailures,
-            }),
+            query: orderedToolQuery,
           },
         });
 
@@ -204,7 +235,7 @@ export const readAgentToolCallsFromTraces = async ({
         const probe = await traceEsClient.transport.request<EsqlResponse>({
           method: 'POST',
           path: '/_query',
-          body: { query: buildSpanProbeQuery({ conversationIds: ids, indexPattern }) },
+          body: { query: spanProbeQuery },
         });
         const spanCount = (probe.values[0]?.[0] as number | undefined) ?? 0;
         if (spanCount === 0) {
