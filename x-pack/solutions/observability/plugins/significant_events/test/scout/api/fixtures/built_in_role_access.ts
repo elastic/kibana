@@ -42,7 +42,6 @@ export const CONFIGURE_ONLY_REQUESTS = [
   { method: 'post', path: 'internal/significant_events/maintenance/_pause' },
   { method: 'post', path: 'internal/significant_events/maintenance/_resume' },
   { method: 'post', path: 'internal/significant_events/maintenance/_reset' },
-  { method: 'post', path: 'internal/significant_events/maintenance/cleanup/_bootstrap' },
 ] as const;
 
 const FENCE_TIMEOUT_MS = 120_000;

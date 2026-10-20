@@ -24,9 +24,12 @@ const bootstrapCleanupRoute = createServerRoute({
     access: 'internal',
     summary: 'Bootstrap stale Significant Events cleanup for the current space',
   },
+  // Discovery calls this as whoever runs it, including the Nightshift detection service account,
+  // which holds `manage_nightshift` but not `configure_nightshift`. It only enables the cleanup
+  // workflow, and does nothing while the space is paused, so it changes no settings.
   security: {
     authz: {
-      requiredPrivileges: NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
   params: z.object({}),
