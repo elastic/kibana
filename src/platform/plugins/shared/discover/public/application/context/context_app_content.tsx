@@ -240,17 +240,29 @@ export function ContextAppContent({
     [defaultStepSize, predecessorCount, onChangeCount, arePredecessorsLoading, isAnchorLoading]
   );
 
+  // Rendered inside the grid toolbar so it stays visible in full-screen mode, where the "load newer documents" control is still available
+  const predecessorsErrorMessage = useMemo(
+    () =>
+      havePredecessorsFailed ? (
+        <WrapperWithPadding>
+          <ContextErrorMessage type={SurrDocType.PREDECESSORS} status={predecessorsStatus} />
+        </WrapperWithPadding>
+      ) : undefined,
+    [havePredecessorsFailed, predecessorsStatus]
+  );
+
   const renderCustomToolbar = useMemo(
     () =>
       getRenderCustomToolbarWithElements({
         leftSide: predecessorsActionBar,
+        bottomSection: predecessorsErrorMessage,
       }),
-    [predecessorsActionBar]
+    [predecessorsActionBar, predecessorsErrorMessage]
   );
 
   return (
     <Fragment>
-      {(showInterceptedWarning || showPredecessorsWarning || havePredecessorsFailed) && (
+      {(showInterceptedWarning || showPredecessorsWarning) && (
         <WrapperWithPadding>
           {showInterceptedWarning && (
             <SearchResponseWarningsCallout
@@ -261,9 +273,6 @@ export function ContextAppContent({
           )}
           {showPredecessorsWarning && (
             <ActionBarWarning docCount={predecessors.length} type={SurrDocType.PREDECESSORS} />
-          )}
-          {havePredecessorsFailed && (
-            <ContextErrorMessage type={SurrDocType.PREDECESSORS} status={predecessorsStatus} />
           )}
         </WrapperWithPadding>
       )}

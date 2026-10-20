@@ -124,7 +124,10 @@ describe('ContextAppContent test', () => {
       successorsStatus: { value: LoadingStatus.FAILED, reason: FailureReason.UNKNOWN, error },
     });
 
-    expect(screen.getByTestId('predecessorsErrorMsg')).toBeVisible();
+    // rendered inside the grid toolbar so it remains visible in full-screen mode
+    const toolbarBottom = screen.getByTestId('unifiedDataTableToolbarBottom');
+
+    expect(within(toolbarBottom).getByTestId('predecessorsErrorMsg')).toBeVisible();
     expect(screen.getByTestId('successorsErrorMsg')).toBeVisible();
     expect(screen.queryByTestId('predecessorsWarningMsg')).not.toBeInTheDocument();
     expect(screen.queryByTestId('successorsWarningMsg')).not.toBeInTheDocument();
