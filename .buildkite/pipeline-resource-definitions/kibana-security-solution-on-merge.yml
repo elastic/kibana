@@ -3,7 +3,7 @@ apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
   name: bk-kibana-security-solution-on-merge
-  description: 'Runs the Security Solution Cypress test suites after changes merge'
+  description: 'Runs the Security Solution Cypress and Scout test suites after changes merge'
   links:
     - url: 'https://buildkite.com/elastic/kibana-security-solution-on-merge'
       title: Pipeline link
@@ -16,7 +16,7 @@ spec:
     kind: Pipeline
     metadata:
       name: kibana / security solution / on merge
-      description: 'Runs the Security Solution Cypress test suites after changes merge'
+      description: 'Runs the Security Solution Cypress and Scout test suites after changes merge'
     spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#sdh-security-team'
