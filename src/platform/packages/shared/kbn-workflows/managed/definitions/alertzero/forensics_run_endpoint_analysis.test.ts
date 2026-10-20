@@ -1378,7 +1378,7 @@ describe('Endpoint analysis run', () => {
       );
     });
 
-    it('names the attack, the verdict, the cited alerts, the window and the margin in the message', () => {
+    it('names the attack, the verdict, the window and the margin in the message', () => {
       for (const reference of [
         'steps.resolve_request.output.attack_discovery_alert_id',
         'steps.resolve_incident_context.output.title',
@@ -1387,7 +1387,6 @@ describe('Endpoint analysis run', () => {
         'steps.resolve_incident_context.output.verdict',
         'steps.resolve_incident_context.output.verdict_summary',
         'steps.resolve_incident_context.output.verdict_rationale',
-        'steps.resolve_incident_context.output.alert_count',
         'steps.resolve_incident_window.output.start',
         'steps.resolve_incident_window.output.end',
         'consts.incident_margin_hours',
@@ -1405,7 +1404,6 @@ describe('Endpoint analysis run', () => {
               title: 'IMDS Credential Harvest',
               summary: 'curl reached the IMDS endpoint',
               details: 'Step by step.',
-              alert_count: 3,
               verdict: 'true_positive',
               verdict_summary: 'The chain holds.',
               verdict_rationale: '',
@@ -1425,30 +1423,19 @@ describe('Endpoint analysis run', () => {
       expect(rendered).toContain('IMDS Credential Harvest');
       expect(rendered).toContain('Attack Discovery verdict: true_positive. The chain holds.');
       expect(rendered).not.toContain('Verdict rationale');
-      expect(rendered).toContain('Cited alerts: 3');
       expect(rendered).toContain(
         'Incident window: `2026-10-16T10:00:00.000Z` to `2026-10-16T11:30:00.000Z`, the earliest to the latest cited alert'
       );
       expect(rendered).toContain('Margin: 2 hours on each side.');
     });
 
-    // The ids are opaque to the agent: it has no tool that resolves them and never queried one. The
-    // full set stays on the Attack Discovery alert, so the message carries only how many there are.
-    it('gives the agent the count of cited alerts but not their ids', () => {
-      const ids = Array.from({ length: 60 }, (_, index) => `a-${index}`);
-      const ctx = {
-        steps: {
-          fetch_attack_discovery_alert: {
-            output: {
-              hits: {
-                hits: [{ _source: { 'kibana.alert.attack_discovery.alert_ids': ids } }],
-              },
-            },
-          },
-        },
-      };
-      expect(evaluate(String(context.alert_count), ctx)).toBe(60);
+    // The cited alerts are not listed: the agent has no tool that resolves an id and never queried
+    // one. They stay on the Attack Discovery alert, and `extract_host_from_ad_constituent_alerts`
+    // reads them to resolve the host and window the message does carry.
+    it('does not list the cited alerts or their count in the message', () => {
       expect(context).not.toHaveProperty('alert_ids');
+      expect(context).not.toHaveProperty('alert_count');
+      expect(message).not.toContain('Cited alerts');
       expect(message).not.toContain('alert_ids');
       expect(definition.consts).not.toHaveProperty('max_cited_alert_ids_in_prompt');
     });
