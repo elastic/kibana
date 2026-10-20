@@ -1,0 +1,41 @@
+{
+  "sha1": "0489d2d76c55eb790c3694ca144310e65a4e91f0",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "37578f9266c4bc1-912be45ca504405",
+      "title": "Ingest ES data needed for dashboard markdown tests",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard_markdown/test/scout/ui/tests/global.setup.ts",
+        "line": 7,
+        "column": 1
+      }
+    },
+    {
+      "id": "19a41db5ea3faec-8097a7da8d99c2f",
+      "title": "Inline markdown panel create, discard, and edit flow",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard_markdown/test/scout/ui/tests/inline_markdown.spec.ts",
+        "line": 43,
+        "column": 53
+      }
+    }
+  ]
+}

@@ -61,7 +61,7 @@ import {
   toEntityDescriptorMode,
   urlParamKeyForHistoryKey,
 } from '../shared/url_state/flyout_v2_url_param';
-import type { EntityViewMode } from '../../flyout/entity_details/shared/types';
+import type { EntityViewMode } from '../../../common/entity_analytics/entity_store/resolution_group';
 
 // Lazy-loaded so consumers of this hook don't statically pull the entity flyout graph into their
 // bundle; each chunk only loads when the corresponding flyout is actually opened.
@@ -726,12 +726,13 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
   );
   const openEntityAnomalyInsights = useCallback(
     ({ title, origin, ...props }: OpenEntityAnomalyInsightsParams) => {
-      const { entityType, value, entityId } = props;
+      const { entityType, value, entityId, mode } = props;
       writeOnOpen({
         kind: FLYOUT_DESCRIPTOR_KIND.entityAnomalyInsights,
         entityType: entityType as string,
         value,
         entityId,
+        mode: toEntityDescriptorMode(mode),
       });
       const onClose = buildOnClose(null);
       open(

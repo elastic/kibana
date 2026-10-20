@@ -47,6 +47,7 @@ export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
       esClient,
       coreLogger,
       changeHistoryClient,
+      retention: config.retention,
       userProfileService,
     });
 

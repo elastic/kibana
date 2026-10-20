@@ -259,10 +259,11 @@ overrides:
   '@babel/plugin-transform-typescript': 7.24.7
   '@bufbuild/protobuf': 2.5.2
   '@elastic/elasticsearch@9>@elastic/transport': 9.4.0
-  '@elastic/esql-grammar': 4.29.0
-  '@elastic/esql-promql-grammar': 4.29.0
-  '@elastic/esql-types': 4.29.0
-  '@elastic/pretty-printer': 4.29.0
+  '@elastic/esql-definitions': 4.33.0
+  '@elastic/esql-grammar': 4.33.0
+  '@elastic/esql-promql-grammar': 4.33.0
+  '@elastic/esql-types': 4.33.0
+  '@elastic/pretty-printer': 4.33.0
   '@emnapi/core': 1.11.1
   '@emnapi/runtime': 1.11.1
   '@paulirish/trace_engine>legacy-javascript': 0.0.3
@@ -398,8 +399,11 @@ importers:
         specifier: 8.7.0
         version: 8.7.0
       '@elastic/esql':
-        specifier: 4.32.0
-        version: 4.32.0
+        specifier: 4.33.0
+        version: 4.33.0
+      '@elastic/esql-definitions':
+        specifier: 4.33.0
+        version: 4.33.0
       '@elastic/eui':
         specifier: 123.1.0
         version: 123.1.0(@elastic/datemath@5.0.3(moment@2.31.0))(@elastic/eui-theme-borealis@8.1.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@emotion/css@11.13.5(supports-color@10.2.2))(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment@2.31.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@6.0.3)
@@ -425,8 +429,8 @@ importers:
         specifier: 2.0.2
         version: 2.0.2
       '@elastic/monaco-esql':
-        specifier: 4.31.0
-        version: 4.31.0(monaco-editor@0.56.0)
+        specifier: 4.32.0
+        version: 4.32.0(monaco-editor@0.56.0)
       '@elastic/node-crypto':
         specifier: 1.2.3
         version: 1.2.3
@@ -1951,6 +1955,9 @@ importers:
       '@kbn/developer-examples-plugin':
         specifier: workspace:*
         version: link:examples/developer_examples
+      '@kbn/digital-experience-plugin':
+        specifier: workspace:*
+        version: link:x-pack/solutions/observability/plugins/digital_experience
       '@kbn/discover-contextual-components':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-discover-contextual-components
@@ -4166,11 +4173,11 @@ importers:
         specifier: 4.10.4
         version: 4.10.4
       '@launchdarkly/node-server-sdk':
-        specifier: 9.13.7
-        version: 9.13.7(supports-color@10.2.2)
+        specifier: 9.13.8
+        version: 9.13.8(supports-color@10.2.2)
       '@launchdarkly/openfeature-node-server':
-        specifier: 2.0.6
-        version: 2.0.6(@launchdarkly/node-server-sdk@9.13.7(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))
+        specifier: 2.0.7
+        version: 2.0.7(@launchdarkly/node-server-sdk@9.13.8(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))
       '@loaders.gl/core':
         specifier: 3.4.7
         version: 3.4.7
@@ -4349,8 +4356,8 @@ importers:
         specifier: 6.0.0
         version: 6.0.0
       '@xyflow/react':
-        specifier: 12.11.6
-        version: 12.11.6(@types/react-dom@18.2.25)(@types/react@18.2.79)(immer@11.1.8)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: 12.12.0
+        version: 12.12.0(@types/react-dom@18.2.25)(@types/react@18.2.79)(immer@11.1.8)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       adm-zip:
         specifier: 0.6.1
         version: 0.6.1
@@ -4688,8 +4695,8 @@ importers:
         specifier: 1.4.0
         version: 1.4.0
       nodemailer:
-        specifier: 10.0.10
-        version: 10.0.10
+        specifier: 10.0.16
+        version: 10.0.16
       normalize-path:
         specifier: 3.0.0
         version: 3.0.0
@@ -5531,6 +5538,9 @@ importers:
       '@kbn/evals-suite-entity-analytics':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics
+      '@kbn/evals-suite-hunt-watch':
+        specifier: workspace:*
+        version: link:x-pack/solutions/security/packages/kbn-evals-suite-hunt-watch
       '@kbn/evals-suite-lead-generation':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-lead-generation
@@ -9623,6 +9633,8 @@ importers:
 
   x-pack/solutions/observability/plugins/client_apps: {}
 
+  x-pack/solutions/observability/plugins/digital_experience: {}
+
   x-pack/solutions/observability/plugins/entity_inventory: {}
 
   x-pack/solutions/observability/plugins/exploratory_view: {}
@@ -9750,6 +9762,8 @@ importers:
   x-pack/solutions/security/packages/kbn-evals-suite-endpoint: {}
 
   x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics: {}
+
+  x-pack/solutions/security/packages/kbn-evals-suite-hunt-watch: {}
 
   x-pack/solutions/security/packages/kbn-evals-suite-lead-generation: {}
 
@@ -11077,29 +11091,29 @@ packages:
       eslint: ^8.57.0 || ^9.0.0
       typescript: 6.0.3
 
-  '@elastic/esql-ast@4.32.0':
-    resolution: {integrity: sha512-IHZ4pSx8Rs7yRD4e9V8jKxac9l7iU4IxDPK8e5AJljJhilnBiwmDWJeLXl9xHMTW4UiabFQlP2FNkKJyUjc1ew==}
+  '@elastic/esql-ast@4.33.0':
+    resolution: {integrity: sha512-Z2XhwyvTfIQFMLwKfXvFQPcByYMqSzRTJulS79bjRRTLU1m/5VrvauWx7g93WRnHezzr4iRPgu47yWd39a51wA==}
 
-  '@elastic/esql-definitions@4.32.0':
-    resolution: {integrity: sha512-qO4YNzpEjUrlfpySc5ASRsM2guC4XGSB1eggx8dsbTxeKEaJUK+deaB+YuGjP53FQpnLdd2mLx5ysNs1ibTCeQ==}
+  '@elastic/esql-definitions@4.33.0':
+    resolution: {integrity: sha512-/GuodYIA6/kwXrrlvs2hkxiqu03VGXR4sUvrZODfpk+DIQAZj5gLpyFLskIwXUMmsVNSEf4n450Gl1P3ELD1zg==}
 
-  '@elastic/esql-grammar@4.29.0':
-    resolution: {integrity: sha512-m9GnY/JU+Y5lLQHksallW1FjJGXD/GscYHOtJp0XuKg5mg6W07Kn6LEYx7hq7hQzi0eprJqdtxDbinVb0ZIkUg==}
+  '@elastic/esql-grammar@4.33.0':
+    resolution: {integrity: sha512-bahX3HKozk1lfgGnQLkd0Tsuj6isXWce5NRSaIUp6aHi2Yhp/T1ypg7cVLrmHsDTsWbeUWKxBYV0GLA36/MGVg==}
 
-  '@elastic/esql-parser@4.32.0':
-    resolution: {integrity: sha512-pmerC4ozwXN6tnNAj2Bda8XvMbaP7M9vgCsAu8Bq9z1KC/ukNf85FvXjCS4DXoaXuT5eQFmz3RXL6O2lKUhWSQ==}
+  '@elastic/esql-parser@4.33.0':
+    resolution: {integrity: sha512-GwBBfrlpSCSGNF4eLX+BLur7zCQwFwl8VUICis8SSqcuL6te86t8hJhbT3ndvq1/pM9ojwW/uldlaGnGYZbdZQ==}
 
-  '@elastic/esql-promql-grammar@4.29.0':
-    resolution: {integrity: sha512-clwi4RnYutldI8s3ptYqQ8GjJMboplQenSR+TOoLJEUYArtFsq367wdsSb7+njC89BDe4dRwnbCFC1bGqh01Ig==}
+  '@elastic/esql-promql-grammar@4.33.0':
+    resolution: {integrity: sha512-9mybyE+6BQTml/+ydPvfL7UQTmsq1djVSFNG1Zu3RBkitpIT8W7f4jWfh7YpVKyHelC0p2WQHh5Pce/kmubdsg==}
 
-  '@elastic/esql-traversal@4.32.0':
-    resolution: {integrity: sha512-2WHq9G/5mcSLVbbiGbxroh9fI21mm2vhWN329TOuaJo052j8ckCFSQ+TxzpqZBypSVnX11953GjI7M+sPTYblw==}
+  '@elastic/esql-traversal@4.33.0':
+    resolution: {integrity: sha512-QzVgJdikHsHC2/bxFzxos7HmKNcWRDo7tKO6g823MrtNapvfxaUszGJKZZeFl1LXJ/JTmmfu92s64MQdqaf8vA==}
 
-  '@elastic/esql-types@4.29.0':
-    resolution: {integrity: sha512-NWmOI/DjZy7+F7lejeqjQ0hwt+vQCfOCRWhQJh9Jqk81ctQZTPwE4buqxbiuWiaz2/iF0hz6qup4HWDXlt3EDA==}
+  '@elastic/esql-types@4.33.0':
+    resolution: {integrity: sha512-Nzg/emQmvGwb0yAxMMMJoWRq1oKZDCEbq7dTxpY4V2X+AVYu6gECR+u1ijk8CELI/yM46HsqP0By7QAhxJrt8A==}
 
-  '@elastic/esql@4.32.0':
-    resolution: {integrity: sha512-36eM9osfw0XL7oqI/vmO3hBz/J1A81c7yGpmv1Kl47jCXpPveGovoSixsvyJoWmmMPKIIM2Qh0Yggv2rDlUJ2g==}
+  '@elastic/esql@4.33.0':
+    resolution: {integrity: sha512-TkxS8qkQZYJqDw4yyJvMd3U3nKg+abd5ESjhAfjtC6Ikzq4qYABjyevLwHSxmqB1RFM/l/89k8oEO7m56WwJ9w==}
 
   '@elastic/eui-illustrations@1.1.0':
     resolution: {integrity: sha512-xqOf5dcFmB0WylGy7w2aTJfHMIOjGxW1xops2WkxsfWEpqSFz4r0y4QCpGW+zEhRBVemWcB/lr3S+GoFqm+AFQ==}
@@ -11171,8 +11185,8 @@ packages:
     engines: {node: '>=20'}
     hasBin: true
 
-  '@elastic/monaco-esql@4.31.0':
-    resolution: {integrity: sha512-xMwtMuvHhRPHqzmPmY/BPZy5MAR0dAWA72QYI6/rAYAFqWev5fj58f0Y1ML2YVQrt7lWP84HkvqW43V18jVxuQ==}
+  '@elastic/monaco-esql@4.32.0':
+    resolution: {integrity: sha512-mweMdeQyPngTjqP9SQU5X64/naSVjJxprNuUNFeBjujyE33ppzZX+R7zR4b38DaBzkWZ+cmD2hvVY0Rf6RgYag==}
     peerDependencies:
       monaco-editor: '>=0.30.0'
 
@@ -11191,8 +11205,8 @@ packages:
     resolution: {integrity: sha512-aHfyUFuZuvIwhflPQcuxMtC/Hmdb3h0ahyjZKsFicMesrBMRvcpI8cpFQeDq9OCJ+yFCjCtBD2UI6TUyRmClkA==}
     engines: {node: ^18.19.0 || >=20.6.0}
 
-  '@elastic/pretty-printer@4.29.0':
-    resolution: {integrity: sha512-y7GCElPas4bFK5wnnS/9o2B971+qBLb42lY98pP92BaZqfDuTrZS61qoQj/tJYdOeKacgxYA/K2+1ZIPc90vEg==}
+  '@elastic/pretty-printer@4.33.0':
+    resolution: {integrity: sha512-b+F47G2SeqO+RbL7yy6bS12Cfm6teXrKSxJbc0hFCja9cXhBrcpPLXTAAt5s6kI54MfB8mZw1C9kOhBo/zUilA==}
 
   '@elastic/prismjs-esql@4.28.0':
     resolution: {integrity: sha512-nl0x5VIZu1/duqOpcAYofBJBuqzuBJL3szSIytHtiNCDl4xgndnV5FR5D37r8OZmGY4M1nOYhKk2rZ/Iwl7XPA==}
@@ -12536,25 +12550,22 @@ packages:
   '@launchdarkly/js-client-sdk@4.10.4':
     resolution: {integrity: sha512-n1gvH/Or8/M2bR2HNqyLKrZ7x7lJOQx7WOaWnSibqf9hmtauE169HgtbtdMoUA9s22Z5MvSmNF6eBCJbetHlKA==}
 
-  '@launchdarkly/js-sdk-common@2.26.1':
-    resolution: {integrity: sha512-FY4gKzlU5bL44+EgUtP9E9uMBpa7aYgAJ+y0zKRTlf5HPd84XW4zy9vPPeLkCYIfgIn/KoxO3g+9o08qcLvcrw==}
-
   '@launchdarkly/js-sdk-common@2.27.0':
     resolution: {integrity: sha512-Av+eVK5QXQ41leDGi1JS+rzOGvz4ViRgVw8P8vg9h6Q+IwP4UkW/swA7ZU6+05k4cUs9LuGUg8oW+mR7weCVFg==}
 
-  '@launchdarkly/js-server-sdk-common@2.21.5':
-    resolution: {integrity: sha512-4hKdGulMc6ZRiyVjxCEjXdA3/Syg2cJdtRdfhLaMQuWHe6Cc2obmM8afW7AIsFwpeWjvmHagoBewl9uV1N6CSw==}
+  '@launchdarkly/js-server-sdk-common@2.21.6':
+    resolution: {integrity: sha512-WyfcBG1oun5cgvZSTUzpFZFtgBd0uk9WVolt0sQTcYfBA0nS6A1bhdgGtM8FjdCq+6ZRKQeiwvjkQdVoHLrvBw==}
 
-  '@launchdarkly/node-server-sdk@9.13.7':
-    resolution: {integrity: sha512-GBzQbkpJVORjRd8AHbrTO3eTrQkOj+nEUQydvjU50TcqlD6/z43X9zqKYc9pBR2uD4nmmRlbART4K7gWBRQtkQ==}
+  '@launchdarkly/node-server-sdk@9.13.8':
+    resolution: {integrity: sha512-E4grvdy7TKYvG3RqjrpCNoH2O1XWmTU0YDIm4UMBCXfM2Hf7w10aPGWM/tqtyViBiODmc36Pf3ILntZJYpaWlA==}
 
-  '@launchdarkly/openfeature-js-server-common@2.0.2':
-    resolution: {integrity: sha512-DPEhBA4vBkBc8yBEnwuEDF+KzZKfOvsdJaKmrtumxOVKPZxqieBxXEvXQH5e9AgglqyoSW9k4ggSwwkotSfD7g==}
+  '@launchdarkly/openfeature-js-server-common@2.0.3':
+    resolution: {integrity: sha512-EIGgztosblBCkDDPiYJ1ke8BnHQz+9D+qHHyr58TRv+4JLpU/3O9zwMQMooUXw2nHWdYphcxI62Rb3AoS2IjFQ==}
     peerDependencies:
       '@openfeature/server-sdk': ^1.16.0
 
-  '@launchdarkly/openfeature-node-server@2.0.6':
-    resolution: {integrity: sha512-npkcV+ZCboKzTWY9HXZyIohJoqjPhfRCcHkU3aUhH3sPb3rv6c6ZVnYPk7EzgwTx2ipgkLVomCk7fY7ObnfrDA==}
+  '@launchdarkly/openfeature-node-server@2.0.7':
+    resolution: {integrity: sha512-wwDm4yiGdl35aLzKZXDkcmKQfr90ZUadsu1zB1LoeQCfhbUvjaWmmi5deUmPpYI5LxP/rmvbo7dB5DM9cIBBUA==}
     engines: {node: '>=20'}
     peerDependencies:
       '@launchdarkly/node-server-sdk': ^9.0.0
@@ -16046,8 +16057,8 @@ packages:
   '@xtuc/long@4.2.2':
     resolution: {integrity: sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ==}
 
-  '@xyflow/react@12.11.6':
-    resolution: {integrity: sha512-9XsEJNHjatKYndszKTF/bsU7FOP9dJ6V/EQwzy3oMdtqgBuUq7BjKSwkEo+C7s4qHstHQfwwoHA3E8QfpPxZZQ==}
+  '@xyflow/react@12.12.0':
+    resolution: {integrity: sha512-74oXI0Rgm1Eu33cHQAd74J6oVgCH9mbFyTVQbsGgp2kmWwh0HdtBr2VP04z8mbPD+M/xO69nqG5dDEt7/EN2rQ==}
     peerDependencies:
       '@types/react': 18.2.79
       '@types/react-dom': 18.2.25
@@ -16059,8 +16070,8 @@ packages:
       '@types/react-dom':
         optional: true
 
-  '@xyflow/system@0.0.82':
-    resolution: {integrity: sha512-4DKnL3CGtCGLRSmgDqaajRVgeksMXq/Yw4wPfdMfm7JvdIiWHGzVYOfFUztiATwdBXZqUU6HhehwUdbV9G23PQ==}
+  '@xyflow/system@0.0.83':
+    resolution: {integrity: sha512-a//eDjez3WZF47aaPTfVUDD0OINOq+WVwBZCRTqG+m0a5euX8EwlJ4jMY1Wxz0Ocj4xOeekJ70V22Pq0ll8RJw==}
 
   '@zip.js/zip.js@2.22.0':
     resolution: {integrity: sha512-QgkA+BSEPNR0C2l6xbSu5HDXieUxiuDK+Jx4ZeZlp22QO/qRUIF6JRXdxh4WlLiQUmnE/9aaGerlni+OY81wqg==}
@@ -21963,8 +21974,8 @@ packages:
     resolution: {integrity: sha512-X75ZN8DCLftGM5iKwoYLA3rjnrAEs97MkzvSd4q2746Tgpg8b8XWiBGiBG4ZpgcAqBgtgPHTiAc8ZMCvZuikDw==}
     engines: {node: '>=10'}
 
-  nodemailer@10.0.10:
-    resolution: {integrity: sha512-He9XskOFms62SyAKkLu8CcGcYHAo+BSHSsORI8s4PJH8qZgZY4L4lDfvyN0twvmbpyG+eGrxpyBlskj9d9rJ8A==}
+  nodemailer@10.0.16:
+    resolution: {integrity: sha512-VL9xKErxN+el77o8eBOuYKUPMyEx7F9hfnDCuiUKJRp9v3wnWMOudYgP/SWbwSHy8rUL4cylobuXtki1LpQS7A==}
     engines: {node: '>=20.0.0'}
 
   nopt@4.0.3:
@@ -27811,56 +27822,56 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@elastic/esql-ast@4.32.0':
+  '@elastic/esql-ast@4.33.0':
     dependencies:
-      '@elastic/esql-definitions': 4.32.0
-      '@elastic/esql-grammar': 4.29.0
-      '@elastic/esql-promql-grammar': 4.29.0
-      '@elastic/esql-types': 4.29.0
+      '@elastic/esql-definitions': 4.33.0
+      '@elastic/esql-grammar': 4.33.0
+      '@elastic/esql-promql-grammar': 4.33.0
+      '@elastic/esql-types': 4.33.0
       tslib: 2.8.1
 
-  '@elastic/esql-definitions@4.32.0': {}
+  '@elastic/esql-definitions@4.33.0': {}
 
-  '@elastic/esql-grammar@4.29.0':
+  '@elastic/esql-grammar@4.33.0':
     dependencies:
       antlr4: 4.13.2
       tslib: 2.8.1
 
-  '@elastic/esql-parser@4.32.0':
+  '@elastic/esql-parser@4.33.0':
     dependencies:
-      '@elastic/esql-ast': 4.32.0
-      '@elastic/esql-definitions': 4.32.0
-      '@elastic/esql-grammar': 4.29.0
-      '@elastic/esql-promql-grammar': 4.29.0
-      '@elastic/esql-traversal': 4.32.0
-      '@elastic/esql-types': 4.29.0
+      '@elastic/esql-ast': 4.33.0
+      '@elastic/esql-definitions': 4.33.0
+      '@elastic/esql-grammar': 4.33.0
+      '@elastic/esql-promql-grammar': 4.33.0
+      '@elastic/esql-traversal': 4.33.0
+      '@elastic/esql-types': 4.33.0
       antlr4: 4.13.2
       tslib: 2.8.1
 
-  '@elastic/esql-promql-grammar@4.29.0':
+  '@elastic/esql-promql-grammar@4.33.0':
     dependencies:
       antlr4: 4.13.2
       tslib: 2.8.1
 
-  '@elastic/esql-traversal@4.32.0':
+  '@elastic/esql-traversal@4.33.0':
     dependencies:
-      '@elastic/esql-ast': 4.32.0
-      '@elastic/esql-types': 4.29.0
+      '@elastic/esql-ast': 4.33.0
+      '@elastic/esql-types': 4.33.0
       tree-dump: 1.1.0(tslib@2.8.1)
       tslib: 2.8.1
 
-  '@elastic/esql-types@4.29.0': {}
+  '@elastic/esql-types@4.33.0': {}
 
-  '@elastic/esql@4.32.0':
+  '@elastic/esql@4.33.0':
     dependencies:
-      '@elastic/esql-ast': 4.32.0
-      '@elastic/esql-definitions': 4.32.0
-      '@elastic/esql-grammar': 4.29.0
-      '@elastic/esql-parser': 4.32.0
-      '@elastic/esql-promql-grammar': 4.29.0
-      '@elastic/esql-traversal': 4.32.0
-      '@elastic/esql-types': 4.29.0
-      '@elastic/pretty-printer': 4.29.0
+      '@elastic/esql-ast': 4.33.0
+      '@elastic/esql-definitions': 4.33.0
+      '@elastic/esql-grammar': 4.33.0
+      '@elastic/esql-parser': 4.33.0
+      '@elastic/esql-promql-grammar': 4.33.0
+      '@elastic/esql-traversal': 4.33.0
+      '@elastic/esql-types': 4.33.0
+      '@elastic/pretty-printer': 4.33.0
       antlr4: 4.13.2
       tree-dump: 1.1.0(tslib@2.8.1)
       tslib: 2.8.1
@@ -27977,9 +27988,9 @@ snapshots:
 
   '@elastic/micro-jq@2.0.2': {}
 
-  '@elastic/monaco-esql@4.31.0(monaco-editor@0.56.0)':
+  '@elastic/monaco-esql@4.32.0(monaco-editor@0.56.0)':
     dependencies:
-      '@elastic/esql-definitions': 4.32.0
+      '@elastic/esql-definitions': 4.33.0
       monaco-editor: 0.56.0
 
   '@elastic/node-crypto@1.2.3': {}
@@ -28060,14 +28071,14 @@ snapshots:
       - encoding
       - supports-color
 
-  '@elastic/pretty-printer@4.29.0':
+  '@elastic/pretty-printer@4.33.0':
     dependencies:
       tree-dump: 1.1.0(tslib@2.8.1)
       tslib: 2.8.1
 
   '@elastic/prismjs-esql@4.28.0':
     dependencies:
-      '@elastic/esql-definitions': 4.32.0
+      '@elastic/esql-definitions': 4.33.0
 
   '@elastic/react-search-ui-views@1.24.2(@types/react@18.2.79)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)':
     dependencies:
@@ -29696,32 +29707,30 @@ snapshots:
     dependencies:
       '@launchdarkly/js-client-sdk-common': 1.32.2
 
-  '@launchdarkly/js-sdk-common@2.26.1': {}
-
   '@launchdarkly/js-sdk-common@2.27.0': {}
 
-  '@launchdarkly/js-server-sdk-common@2.21.5':
+  '@launchdarkly/js-server-sdk-common@2.21.6':
     dependencies:
-      '@launchdarkly/js-sdk-common': 2.26.1
+      '@launchdarkly/js-sdk-common': 2.27.0
       semver: 7.5.4
 
-  '@launchdarkly/node-server-sdk@9.13.7(supports-color@10.2.2)':
+  '@launchdarkly/node-server-sdk@9.13.8(supports-color@10.2.2)':
     dependencies:
-      '@launchdarkly/js-server-sdk-common': 2.21.5
+      '@launchdarkly/js-server-sdk-common': 2.21.6
       https-proxy-agent: 7.0.6(supports-color@10.2.2)
       launchdarkly-eventsource: 2.2.0
     transitivePeerDependencies:
       - supports-color
 
-  '@launchdarkly/openfeature-js-server-common@2.0.2(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))':
+  '@launchdarkly/openfeature-js-server-common@2.0.3(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))':
     dependencies:
-      '@launchdarkly/js-sdk-common': 2.26.1
+      '@launchdarkly/js-sdk-common': 2.27.0
       '@openfeature/server-sdk': 1.23.0(@openfeature/core@1.12.0)
 
-  '@launchdarkly/openfeature-node-server@2.0.6(@launchdarkly/node-server-sdk@9.13.7(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))':
+  '@launchdarkly/openfeature-node-server@2.0.7(@launchdarkly/node-server-sdk@9.13.8(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))':
     dependencies:
-      '@launchdarkly/node-server-sdk': 9.13.7(supports-color@10.2.2)
-      '@launchdarkly/openfeature-js-server-common': 2.0.2(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))
+      '@launchdarkly/node-server-sdk': 9.13.8(supports-color@10.2.2)
+      '@launchdarkly/openfeature-js-server-common': 2.0.3(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))
       '@openfeature/server-sdk': 1.23.0(@openfeature/core@1.12.0)
 
   '@leichtgewicht/ip-codec@2.0.5':
@@ -33532,9 +33541,9 @@ snapshots:
 
   '@xtuc/long@4.2.2': {}
 
-  '@xyflow/react@12.11.6(@types/react-dom@18.2.25)(@types/react@18.2.79)(immer@11.1.8)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
+  '@xyflow/react@12.12.0(@types/react-dom@18.2.25)(@types/react@18.2.79)(immer@11.1.8)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
-      '@xyflow/system': 0.0.82
+      '@xyflow/system': 0.0.83
       classcat: 5.0.5
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
@@ -33545,7 +33554,7 @@ snapshots:
     transitivePeerDependencies:
       - immer
 
-  '@xyflow/system@0.0.82':
+  '@xyflow/system@0.0.83':
     dependencies:
       '@types/d3-drag': 3.0.7
       '@types/d3-interpolate': 3.0.4
@@ -40747,7 +40756,7 @@ snapshots:
       util: 0.12.5
       vm-browserify: 1.1.2
 
-  nodemailer@10.0.10: {}
+  nodemailer@10.0.16: {}
 
   nopt@4.0.3:
     dependencies:
