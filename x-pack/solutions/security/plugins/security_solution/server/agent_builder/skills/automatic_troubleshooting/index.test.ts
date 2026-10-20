@@ -180,6 +180,9 @@ describe('createAutomaticTroubleshootingSkill', () => {
       );
       expect(skill.content).toContain('the artifactType is `custom_yara_signatures`');
       expect(skill.content).toContain('rule.custom_yara_signature.entry_id');
+      expect(skill.content).toContain(
+        'page through `custom_yara_signatures` for the policy without `search` and compare each `id` to `entry_id`'
+      );
       expect(skill.content).toContain('memory_protection.custom_yara_signatures');
       expect(skill.content).toContain('endpoint-yararules');
       expect(skill.content).toContain('Endpoint.policy.applied.artifacts.user.identifiers');
