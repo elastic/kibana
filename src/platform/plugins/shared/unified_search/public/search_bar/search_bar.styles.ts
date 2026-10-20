@@ -31,3 +31,13 @@ export const searchBarStyles = ({ euiTheme }: UseEuiTheme, isESQLQuery: boolean)
     `,
   };
 };
+
+export const fullHeightSearchBarStyles = css`
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-bottom: none;
+`;

@@ -20,8 +20,11 @@ import { CreateViewModal, createViewLabel } from '../save_as_view/create_view_mo
 import { ViewCreatedSource } from '../telemetry/telemetry_service';
 import { useApplySavedView } from '../save_as_view/use_apply_saved_view';
 import { useCanCreateView } from '../save_as_view/use_can_create_view';
+import { useEsqlEditorFullHeight } from '../editor_full_height_context';
 import {
   addStarredQueryLabel,
+  exitFullHeightLayoutLabel,
+  fullHeightLayoutLabel,
   helpLabel,
   hideHistoryLabel,
   removeStarredQueryLabel,
@@ -63,6 +66,7 @@ export function ESQLMenu({
   docsFlyoutSize?: EuiFlyoutProps['size'];
 } = {}) {
   const editorActions = useEsqlEditorActions();
+  const editorFullHeight = useEsqlEditorFullHeight();
   const isNlToEsqlEnabled = useNlToEsqlCheck();
   const visorTooltip = isNlToEsqlEnabled ? searchWithNlTooltipLabel : searchTooltipLabel;
   const isInline = editorActions?.editorIsInline;
@@ -187,6 +191,29 @@ export function ESQLMenu({
               onClick={onToggleVisor}
               isDisabled={!onToggleVisor}
               data-test-subj="esql-menu-button"
+              color="text"
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
+      {editorFullHeight && (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            position="top"
+            content={
+              editorFullHeight.isFullHeight ? exitFullHeightLayoutLabel : fullHeightLayoutLabel
+            }
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              iconType={editorFullHeight.isFullHeight ? 'fullScreenExit' : 'fullScreen'}
+              size="xs"
+              aria-label={
+                editorFullHeight.isFullHeight ? exitFullHeightLayoutLabel : fullHeightLayoutLabel
+              }
+              aria-pressed={editorFullHeight.isFullHeight}
+              onClick={editorFullHeight.toggleFullHeight}
+              data-test-subj="ESQLEditor-full-height-layout"
               color="text"
             />
           </EuiToolTip>

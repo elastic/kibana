@@ -20,6 +20,17 @@ export const searchWithNlTooltipLabel = i18n.translate('esqlEditor.menu.searchWi
   defaultMessage: 'Search your data using KQL or natural language',
 });
 
+export const fullHeightLayoutLabel = i18n.translate('esqlEditor.menu.fullHeightLayoutLabel', {
+  defaultMessage: 'Use full height editor',
+});
+
+export const exitFullHeightLayoutLabel = i18n.translate(
+  'esqlEditor.menu.exitFullHeightLayoutLabel',
+  {
+    defaultMessage: 'Move editor to the top',
+  }
+);
+
 export const showHistoryLabel = i18n.translate('esqlEditor.query.showQueriesLabel', {
   defaultMessage: 'Show recent queries',
 });

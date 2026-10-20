@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiPage,
   EuiPageBody,
@@ -20,6 +20,8 @@ import {
   type UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { EsqlEditorFullHeightProvider } from '@kbn/esql-editor';
+import { createHtmlPortalNode, OutPortal } from 'react-reverse-portal';
 import { i18n } from '@kbn/i18n';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { hasTransformationalCommand } from '@kbn/esql-utils';
@@ -71,6 +73,7 @@ import {
   useInternalStateDispatch,
   useInternalStateSelector,
 } from '../../state_management/redux';
+import { DiscoverEditorFullHeightLayout } from './discover_editor_full_height_layout';
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
 import { DiscoverDocumentFlyout } from '../document_flyout';
 import type { DiscoverLayoutRestorableState } from './discover_layout_restorable_state';
@@ -406,6 +409,31 @@ export function DiscoverLayout() {
     [dispatch, onDataViewCreatedAction]
   );
 
+  const [searchBarPortalNode] = useState(() => createHtmlPortalNode());
+  const [isEditorFullHeight, setIsEditorFullHeight] = useState(false);
+  const toggleEditorFullHeight = useCallback(() => {
+    setIsEditorFullHeight((isFullHeight) => !isFullHeight);
+  }, []);
+
+  useLayoutEffect(() => {
+    const portalElement = searchBarPortalNode.element;
+    if (isEditorFullHeight) {
+      portalElement.style.flex = '1 1 auto';
+      portalElement.style.minHeight = '0';
+      portalElement.style.height = '100%';
+      portalElement.style.display = 'flex';
+      portalElement.style.flexDirection = 'column';
+      portalElement.style.overflow = 'hidden';
+    } else {
+      portalElement.style.flex = '';
+      portalElement.style.minHeight = '';
+      portalElement.style.height = '';
+      portalElement.style.display = '';
+      portalElement.style.flexDirection = '';
+      portalElement.style.overflow = '';
+    }
+  }, [isEditorFullHeight, searchBarPortalNode]);
+
   const fullBodyHeightOffset = useMemo(() => {
     const isStandalone = customizationContext.displayMode === 'standalone';
     if (isProjectChromeStyle && isStandalone) {
@@ -415,123 +443,145 @@ export function DiscoverLayout() {
     return `${TABS_BAR_HEIGHT + 1}px`;
   }, [customizationContext.displayMode, euiTheme.size.xxl, isProjectChromeStyle]);
 
-  return (
-    <EuiPage
-      className="dscPage" // class is used in tests and other styles
-      data-test-subj="dscPage"
-      data-fetch-counter={fetchCounter.current}
-      direction="column"
-      css={[
-        styles.dscPage,
-        css`
-          ${useEuiBreakpoint(['m', 'l', 'xl'])} {
-            ${kbnFullBodyHeightCss(fullBodyHeightOffset)}
-          }
-        `,
-      ]}
-    >
-      <TopNavMemoized
-        savedQuery={savedQuery}
-        esqlModeErrors={esqlModeErrors}
-        esqlModeWarning={esqlModeWarning}
-        onFieldEdited={onFieldEdited}
-        isLoading={isLoading}
-        onCancelClick={onCancelClick}
-      />
-      <EuiPageBody css={styles.pageBody}>
-        <SavedSearchURLConflictCallout
-          discoverSession={discoverSession}
-          spaces={spaces}
-          history={history}
-        />
-        <div css={styles.sidebarContainer}>
-          {dataViewLoading && (
-            <EuiDelayRender delay={300}>
-              <EuiProgress size="xs" color="accent" position="absolute" />
-            </EuiDelayRender>
-          )}
-          <DiscoverResizableLayout
+  const resultsLayout = (
+    <div css={styles.sidebarContainer}>
+      {dataViewLoading && (
+        <EuiDelayRender delay={300}>
+          <EuiProgress size="xs" color="accent" position="absolute" />
+        </EuiDelayRender>
+      )}
+      <DiscoverResizableLayout
+        sidebarToggleState$={sidebarToggleState$}
+        isSidebarHidden={isSidebarHidden}
+        sidebarPanel={
+          <SidebarMemoized
+            columns={sidebarColumns}
+            documents$={dataStateContainer.data$.documents$}
+            onAddBreakdownField={canSetBreakdownField ? onAddBreakdownField : undefined}
+            onAddField={onAddColumnWithTracking}
+            onAddFilter={onAddFilter}
+            onAddOtherFilter={onAddOtherFilter}
+            onChangeDataView={onChangeDataView}
+            onDataViewCreated={onDataViewCreated}
+            onFieldEdited={onFieldEdited}
+            onMoveField={onMoveSidebarColumn}
+            onRemoveField={onRemoveColumnWithTracking}
+            onRemoveFields={onRemoveColumnsWithTracking}
+            selectedDataView={dataView}
             sidebarToggleState$={sidebarToggleState$}
-            isSidebarHidden={isSidebarHidden}
-            sidebarPanel={
-              <SidebarMemoized
-                columns={sidebarColumns}
-                documents$={dataStateContainer.data$.documents$}
-                onAddBreakdownField={canSetBreakdownField ? onAddBreakdownField : undefined}
-                onAddField={onAddColumnWithTracking}
-                onAddFilter={onAddFilter}
-                onAddOtherFilter={onAddOtherFilter}
-                onChangeDataView={onChangeDataView}
-                onDataViewCreated={onDataViewCreated}
-                onFieldEdited={onFieldEdited}
-                onMoveField={onMoveSidebarColumn}
-                onRemoveField={onRemoveColumnWithTracking}
-                onRemoveFields={onRemoveColumnsWithTracking}
-                selectedDataView={dataView}
-                sidebarToggleState$={sidebarToggleState$}
-                trackUiMetric={trackUiMetric}
-              />
-            }
-            mainPanel={
-              <div css={styles.dscPageContentWrapper}>
-                {resultState === 'none' ? (
-                  <>
-                    <div css={styles.mainPanel}>
-                      <PanelsToggle omitChartButton omitTableButton dataTestSubjSuffix="InPage" />
-                    </div>
-                    {dataState.error ? (
-                      <ErrorCallout
-                        title={i18n.translate(
-                          'discover.noResults.searchExamples.noResultsErrorTitle',
-                          {
-                            defaultMessage: 'Unable to retrieve search results',
-                          }
-                        )}
-                        error={dataState.error}
-                        isEsqlMode={isEsqlMode}
-                        showErrorDialog={({ title, error }) =>
-                          core.notifications.showErrorDialog({ title, error })
-                        }
-                        esqlReferenceHref={docLinks.links.query.queryESQL}
-                      />
-                    ) : (
-                      <DiscoverNoResults
-                        isTimeBased={isTimeBased}
-                        query={globalQueryState.query}
-                        filters={globalQueryState.filters}
-                        dataView={dataView}
-                        onDisableFilters={onDisableFilters}
-                      />
-                    )}
-                  </>
-                ) : (
-                  <EuiPanel
-                    role="main"
-                    paddingSize="none"
-                    borderRadius="none"
-                    hasShadow={false}
-                    hasBorder={false}
-                    color="transparent"
-                    css={[styles.dscPageContent, contentCentered && styles.dscPageContentCentered]}
-                  >
-                    {mainDisplay}
-                  </EuiPanel>
-                )}
-              </div>
-            }
-            initialState={layoutUiState}
-            onInitialStateChange={onInitialStateChange}
+            trackUiMetric={trackUiMetric}
           />
-        </div>
-      </EuiPageBody>
-      <DiscoverDocumentFlyout
-        dataView={dataView}
-        columns={currentColumns}
-        onAddColumn={onAddColumnWithTracking}
-        onRemoveColumn={onRemoveColumnWithTracking}
-        onAddFilter={onAddFilter}
+        }
+        mainPanel={
+          <div css={styles.dscPageContentWrapper}>
+            {resultState === 'none' ? (
+              <>
+                <div css={styles.mainPanel}>
+                  <PanelsToggle omitChartButton omitTableButton dataTestSubjSuffix="InPage" />
+                </div>
+                {dataState.error ? (
+                  <ErrorCallout
+                    title={i18n.translate('discover.noResults.searchExamples.noResultsErrorTitle', {
+                      defaultMessage: 'Unable to retrieve search results',
+                    })}
+                    error={dataState.error}
+                    isEsqlMode={isEsqlMode}
+                    showErrorDialog={({ title, error }) =>
+                      core.notifications.showErrorDialog({ title, error })
+                    }
+                    esqlReferenceHref={docLinks.links.query.queryESQL}
+                  />
+                ) : (
+                  <DiscoverNoResults
+                    isTimeBased={isTimeBased}
+                    query={globalQueryState.query}
+                    filters={globalQueryState.filters}
+                    dataView={dataView}
+                    onDisableFilters={onDisableFilters}
+                  />
+                )}
+              </>
+            ) : (
+              <EuiPanel
+                role="main"
+                paddingSize="none"
+                borderRadius="none"
+                hasShadow={false}
+                hasBorder={false}
+                color="transparent"
+                css={[styles.dscPageContent, contentCentered && styles.dscPageContentCentered]}
+              >
+                {mainDisplay}
+              </EuiPanel>
+            )}
+          </div>
+        }
+        initialState={layoutUiState}
+        onInitialStateChange={onInitialStateChange}
       />
-    </EuiPage>
+    </div>
+  );
+
+  return (
+    <EsqlEditorFullHeightProvider
+      isFullHeight={isEditorFullHeight}
+      toggleFullHeight={toggleEditorFullHeight}
+    >
+      <EuiPage
+        className="dscPage" // class is used in tests and other styles
+        data-test-subj="dscPage"
+        data-fetch-counter={fetchCounter.current}
+        direction="column"
+        css={[
+          styles.dscPage,
+          css`
+            ${useEuiBreakpoint(['m', 'l', 'xl'])} {
+              ${kbnFullBodyHeightCss(fullBodyHeightOffset)}
+            }
+          `,
+        ]}
+      >
+        <TopNavMemoized
+          savedQuery={savedQuery}
+          esqlModeErrors={esqlModeErrors}
+          esqlModeWarning={esqlModeWarning}
+          onFieldEdited={onFieldEdited}
+          isLoading={isLoading}
+          onCancelClick={onCancelClick}
+          searchBarPortalNode={searchBarPortalNode}
+          isEditorFullHeight={isEditorFullHeight}
+        />
+        {isEditorFullHeight ? null : <OutPortal node={searchBarPortalNode} />}
+        <EuiPageBody css={styles.pageBody}>
+          <SavedSearchURLConflictCallout
+            discoverSession={discoverSession}
+            spaces={spaces}
+            history={history}
+          />
+          {isEditorFullHeight ? (
+            <div css={styles.sidebarContainer}>
+              <DiscoverEditorFullHeightLayout
+                editorPanel={
+                  <div css={styles.editorColumn}>
+                    <OutPortal node={searchBarPortalNode} />
+                  </div>
+                }
+                mainPanel={resultsLayout}
+              />
+            </div>
+          ) : (
+            resultsLayout
+          )}
+        </EuiPageBody>
+        <DiscoverDocumentFlyout
+          dataView={dataView}
+          columns={currentColumns}
+          onAddColumn={onAddColumnWithTracking}
+          onRemoveColumn={onRemoveColumnWithTracking}
+          onAddFilter={onAddFilter}
+        />
+      </EuiPage>
+    </EsqlEditorFullHeightProvider>
   );
 }
 
@@ -550,6 +600,13 @@ const componentStyles = {
     height: '100%',
     display: 'flex',
     flex: '1 1 auto',
+  }),
+  editorColumn: css({
+    height: '100%',
+    minHeight: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    overflow: 'hidden',
   }),
   mainPanel: ({ euiTheme }: UseEuiTheme) =>
     css({

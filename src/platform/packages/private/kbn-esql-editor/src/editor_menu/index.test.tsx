@@ -14,6 +14,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock, notificationServiceMock } from '@kbn/core/public/mocks';
 import { ESQLMenu } from '.';
 import { EsqlEditorActionsProvider } from '../editor_actions_context';
+import { EsqlEditorFullHeightProvider } from '../editor_full_height_context';
 import { EsqlEditorActionsRegister } from '../editor_actions_register';
 
 jest.mock('./help_popover', () => {
@@ -137,5 +138,29 @@ describe('ESQLMenu', () => {
     );
     expect(screen.getByRole('button', { name: 'Create view' })).toBeEnabled();
     expect(screen.queryByTestId('ESQLEditor-toggle-query-history-icon')).not.toBeInTheDocument();
+  });
+
+  it('hides the full height layout button unless a host provides it', async () => {
+    await renderMenu();
+    expect(screen.queryByTestId('ESQLEditor-full-height-layout')).not.toBeInTheDocument();
+  });
+
+  it('toggles the full height layout from the footer actions', async () => {
+    const toggleFullHeight = jest.fn();
+    await act(async () => {
+      render(
+        <KibanaContextProvider services={services as any}>
+          <EsqlEditorFullHeightProvider isFullHeight={false} toggleFullHeight={toggleFullHeight}>
+            <EsqlEditorActionsProvider>
+              <EsqlEditorActionsRegister />
+              <ESQLMenu />
+            </EsqlEditorActionsProvider>
+          </EsqlEditorFullHeightProvider>
+        </KibanaContextProvider>
+      );
+    });
+
+    fireEvent.click(screen.getByTestId('ESQLEditor-full-height-layout'));
+    expect(toggleFullHeight).toHaveBeenCalledTimes(1);
   });
 });

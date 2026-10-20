@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { SerializedStyles } from '@emotion/react';
 import type { ReactNode } from 'react';
 import React from 'react';
 import { PanelsResizable } from './panels_resizable';
@@ -56,6 +57,10 @@ export interface ResizableLayoutProps {
    */
   resizeButtonClassName?: string;
   /**
+   * Additional styles for the resize button, applied after the default button styles.
+   */
+  resizeButtonCss?: SerializedStyles;
+  /**
    * Test subject for the layout container
    */
   ['data-test-subj']?: string;
@@ -78,6 +83,7 @@ export const ResizableLayout = ({
   flexPanel,
   fixedPanelOrder,
   resizeButtonClassName,
+  resizeButtonCss,
   ['data-test-subj']: dataTestSubj,
   onFixedPanelSizeChange,
 }: ResizableLayoutProps) => {
@@ -97,6 +103,7 @@ export const ResizableLayout = ({
       minFlexPanelSize={minFlexPanelSize}
       fixedPanelOrder={fixedPanelOrder}
       resizeButtonClassName={resizeButtonClassName}
+      resizeButtonCss={resizeButtonCss}
       data-test-subj={dataTestSubj}
       onFixedPanelSizeChange={onFixedPanelSizeChange}
       {...panelsProps}

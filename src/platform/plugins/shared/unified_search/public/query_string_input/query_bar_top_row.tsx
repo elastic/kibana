@@ -312,6 +312,8 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
    * Hidden unless a host opts in.
    */
   enableCreateView?: ESQLEditorProps['enableCreateView'];
+  /** Stretch the ES|QL editor to fill the remaining height of a full-height column. */
+  isEditorFullHeight?: boolean;
   useBackgroundSearchButton?: boolean;
   /**
    * Whether to use the new DateRangePicker. Defaults to `true`; pass `false`
@@ -1487,7 +1489,7 @@ export const QueryBarTopRow = React.memo(
         />
         {!isScreenshotMode &&
           (shouldRenderESQLUi ? (
-            <>
+            <EsqlQueryBarRows isEditorFullHeight={props.isEditorFullHeight}>
               <EuiFlexGroup {...queryBarFlexGroupProps}>
                 {props.dataViewPickerOverride || renderDataViewsPicker()}
                 <EuiFlexItem>
@@ -1522,7 +1524,7 @@ export const QueryBarTopRow = React.memo(
               )}
               {!shouldShowDatePickerAsBadge() && props.filterBar}
               {renderESQLEditor()}
-            </>
+            </EsqlQueryBarRows>
           ) : (
             <>
               <EuiFlexGroup {...queryBarFlexGroupProps}>
@@ -1558,6 +1560,44 @@ export const QueryBarTopRow = React.memo(
     return isQueryEqual && shallowEqual(prevProps, nextProps);
   }
 ) as GenericQueryBarTopRow;
+
+const EsqlQueryBarRows = ({
+  isEditorFullHeight,
+  children,
+}: {
+  isEditorFullHeight?: boolean;
+  children: ReactNode;
+}) => {
+  if (!isEditorFullHeight) {
+    return <>{children}</>;
+  }
+
+  const rows = React.Children.toArray(children);
+  const editor = rows.pop();
+
+  return (
+    <>
+      <div
+        css={css`
+          flex: 0 0 auto;
+        `}
+      >
+        {rows}
+      </div>
+      <div
+        css={css`
+          flex: 1 1 auto;
+          min-height: 0;
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+        `}
+      >
+        {editor}
+      </div>
+    </>
+  );
+};
 
 const inputStringStyles = {
   datePickerWrapper: ({ euiTheme }: UseEuiTheme) =>

@@ -10,7 +10,7 @@
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiResizableContainer, useGeneratedHtmlId, mathWithUnits } from '@elastic/eui';
 import type { ResizeTrigger } from '@elastic/eui/src/components/resizable_container/types';
-import { css } from '@emotion/react';
+import { css, type SerializedStyles } from '@emotion/react';
 import { isEqual, round } from 'lodash';
 import type { ReactNode } from 'react';
 import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
@@ -29,6 +29,7 @@ export const PanelsResizable = ({
   flexPanel,
   fixedPanelOrder = ResizableLayoutOrder.Start,
   resizeButtonClassName,
+  resizeButtonCss,
   ['data-test-subj']: dataTestSubj = 'resizableLayout',
   onFixedPanelSizeChange,
 }: {
@@ -41,6 +42,7 @@ export const PanelsResizable = ({
   flexPanel: ReactNode;
   fixedPanelOrder?: ResizableLayoutOrder;
   resizeButtonClassName?: string;
+  resizeButtonCss?: SerializedStyles;
   ['data-test-subj']?: string;
   onFixedPanelSizeChange?: (fixedPanelSize: number) => void;
 }) => {
@@ -229,6 +231,7 @@ export const PanelsResizable = ({
               css={[
                 direction === 'horizontal' ? buttonStyles.horizontal : buttonStyles.vertical,
                 isResizing ? resizingButtonCss : defaultButtonCss,
+                resizeButtonCss,
               ]}
               data-test-subj={`${dataTestSubj}ResizableButton`}
             />

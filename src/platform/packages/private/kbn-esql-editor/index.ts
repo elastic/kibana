@@ -17,6 +17,11 @@ export type { QuickSearchVisorProps, QuickSearchVisorRestorableState } from './s
 export { VisorMode } from './src/editor_visor/visor_mode';
 export { ESQLMenu } from './src/editor_menu';
 export { EsqlEditorActionsProvider } from './src/editor_actions_context';
+export {
+  EsqlEditorFullHeightProvider,
+  useEsqlEditorFullHeight,
+} from './src/editor_full_height_context';
+export type { EsqlEditorFullHeightContextValue } from './src/editor_full_height_context';
 export { EsqlEditorActionsRegister } from './src/editor_actions_register';
 export type { EsqlEditorActionsRegisterProps } from './src/editor_actions_register';
 export { helpLabel } from './src/editor_menu/menu_i18n';

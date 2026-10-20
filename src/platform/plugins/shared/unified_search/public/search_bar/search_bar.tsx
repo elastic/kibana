@@ -52,7 +52,7 @@ import type { DataViewPickerProps } from '../dataview_picker';
 import type { QueryBarTopRowProps, ShowDatePicker } from '../query_string_input/query_bar_top_row';
 import { QueryBarTopRow } from '../query_string_input/query_bar_top_row';
 import { FilterBar, FilterItems } from '../filter_bar';
-import { searchBarStyles } from './search_bar.styles';
+import { fullHeightSearchBarStyles, searchBarStyles } from './search_bar.styles';
 import { QuerySubmitTrigger } from './query_submit_metadata';
 
 export interface SearchBarInjectedDeps {
@@ -197,6 +197,10 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
    * Hidden unless a host opts in.
    */
   enableCreateView?: boolean;
+  /**
+   * Stretch the query bar so the ES|QL editor can fill a full-height column.
+   */
+  isEditorFullHeight?: boolean;
 }
 
 export type SearchBarProps<QT extends Query | AggregateQuery = Query> = SearchBarOwnProps<QT> &
@@ -689,6 +693,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
       styles.uniSearchBar,
       this.props.displayStyle && styles[this.props.displayStyle],
       isScreenshotMode && styles.hidden,
+      this.props.isEditorFullHeight && fullHeightSearchBarStyles,
     ];
 
     const classes = classNames('uniSearchBar', 'hide-for-sharing', {
@@ -875,6 +880,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           showTimeWindowButtons={this.props.showTimeWindowButtons}
           enableResourceBrowser={this.props.enableResourceBrowser}
           enableCreateView={this.props.enableCreateView}
+          isEditorFullHeight={this.props.isEditorFullHeight}
         />
       </div>
     );

@@ -46,6 +46,7 @@ import { createPortal } from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
 import { QuerySource } from '@kbn/esql-types';
 import { DEFAULT_HISTOGRAM_BAR_TARGET } from '@kbn/data-service';
+import { useEsqlEditorFullHeight } from './editor_full_height_context';
 import { useLookupIndexCommand } from './lookup_join';
 import { useCommentToEsql, useGhostLineHint, useVisorNlToEsql } from './comment_to_esql';
 import { useSuggestFix } from './suggest_fix/use_suggest_fix';
@@ -169,6 +170,7 @@ const ESQLEditorInternal = function ESQLEditor({
     }),
     []
   );
+  const isEditorFullHeight = useEsqlEditorFullHeight()?.isFullHeight ?? false;
   const editorModelUriRef = useRef<string | undefined>(undefined);
   const containerRef = useRef<HTMLElement>(null);
   const suppressSuggestionsRef = useRef(false);
@@ -831,23 +833,51 @@ const ESQLEditorInternal = function ESQLEditor({
       <EuiFlexGroup
         gutterSize="none"
         css={{
-          zIndex: theme.euiTheme.levels.flyout,
+          // In the full-height column this stacking context paints over Discover's
+          // resize handle. Keep the flyout level only for the top-of-page editor.
+          zIndex: isEditorFullHeight ? undefined : theme.euiTheme.levels.flyout,
           position: 'relative',
+          ...(isEditorFullHeight
+            ? { flex: '1 1 auto', minHeight: 0, height: '100%', alignItems: 'stretch' }
+            : {}),
         }}
         responsive={false}
         ref={containerRef}
       >
-        <div css={styles.resizableContainer}>
+        <div
+          css={[
+            styles.resizableContainer,
+            isEditorFullHeight &&
+              css({
+                flex: '1 1 auto',
+                height: '100%',
+                minHeight: 0,
+                alignItems: 'stretch',
+              }),
+          ]}
+        >
           <EuiFlexItem
             data-test-subj={dataTestSubj ?? 'ESQLEditor'}
             className="ESQLEditor"
             css={css`
               max-width: 100%;
               position: relative;
+              ${isEditorFullHeight ? 'height: 100%; min-height: 0; align-self: stretch;' : ''}
             `}
           >
-            <div css={styles.editorContainer}>
+            <div
+              css={
+                isEditorFullHeight
+                  ? css({
+                      position: 'absolute',
+                      inset: 0,
+                      height: 'auto',
+                    })
+                  : styles.editorContainer
+              }
+            >
               <CodeEditor
+                height={isEditorFullHeight ? '100%' : undefined}
                 htmlId={htmlId}
                 aria-label={i18n.translate('esqlEditor.ariaLabel', {
                   defaultMessage: 'ES|QL editor',
@@ -1070,7 +1100,7 @@ const ESQLEditorInternal = function ESQLEditor({
         isLanguageComponentOpen={isLanguageComponentOpen}
         setIsLanguageComponentOpen={setIsLanguageComponentOpen}
         measuredContainerWidth={measuredEditorWidth}
-        resizableContainerButton={resizableContainerButton}
+        resizableContainerButton={isEditorFullHeight ? undefined : resizableContainerButton}
         resizableContainerHeight={resizableContainerHeight}
         displayDocumentationAsFlyout={displayDocumentationAsFlyout}
         dataErrorsControl={dataErrorsControl}
@@ -1192,8 +1222,24 @@ const ESQLEditorInternal = function ESQLEditor({
     </>
   );
 
-  return editorPanel;
+  if (!isEditorFullHeight) {
+    return editorPanel;
+  }
+
+  return (
+    <div css={fullHeightEditorCss} data-test-subj="ESQLEditor-fullHeight">
+      {editorPanel}
+    </div>
+  );
 };
+
+const fullHeightEditorCss = css`
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+`;
 
 const ESQLEditorWithActionsProvider = forwardRef<ESQLEditorApi, ESQLEditorPropsInternal>(
   function ESQLEditorWithActionsProvider(props, ref) {
