@@ -43,6 +43,7 @@ describe('buildColumns', () => {
         ['kubernetes.node.name', 'identity'],
         ['cluster', 'attribute'],
         ['os', 'attribute'],
+        ['os.type', 'attribute'],
         ['last_seen', 'last_seen'],
       ],
     ],
@@ -99,6 +100,25 @@ describe('buildColumns', () => {
     expect(() => columnsOf(definition)).toThrow(InventoryDefinitionError);
     expect(() => columnsOf(definition)).toThrow(
       'attribute name "hostname" collides with an identity field of definition "k8s.node"'
+    );
+  });
+
+  it('throws when a dotted attribute name equals an identity field', () => {
+    const definition: EntityDefinitionWithoutId = {
+      ...k8sNodeFixture,
+      identityField: { singleField: 'host.name' },
+      dynamic: {
+        sources: [
+          {
+            indexPattern: 'metrics-*',
+            attributes: [{ name: 'host.name', field: 'host.hostname' }],
+          },
+        ],
+      },
+    };
+    expect(() => columnsOf(definition)).toThrow(InventoryDefinitionError);
+    expect(() => columnsOf(definition)).toThrow(
+      'attribute name "host.name" collides with an identity field of definition "k8s.node"'
     );
   });
 

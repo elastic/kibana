@@ -134,6 +134,27 @@ describe('buildListQuery', () => {
     expect(Parser.parse(esql).errors).toEqual([]);
   });
 
+  it('reads an attribute whose name equals its own source field', () => {
+    const definition: EntityDefinitionWithoutId = {
+      ...k8sDeploymentFixture,
+      dynamic: {
+        sources: [
+          {
+            indexPattern: 'metrics-system.cpu-*',
+            attributes: [{ name: 'host.os.type', field: 'host.os.type' }],
+          },
+        ],
+      },
+    };
+    const [{ esql }] = generateListQueries(definition, plansOf(definition, 'FROM'), window, LIMIT);
+
+    expect(esql).toContain(
+      '`host.os.type` = LAST(`host.os.type`, `@timestamp`) WHERE `host.os.type` IS NOT NULL'
+    );
+    expect(esql.split('\n').find((line) => line.startsWith('| KEEP '))).toContain('`host.os.type`');
+    expect(Parser.parse(esql).errors).toEqual([]);
+  });
+
   it.each([0, -1, 1.5, Number.NaN, Number.POSITIVE_INFINITY])('rejects a limit of %p', (limit) => {
     const plans = plansOf(k8sDeploymentFixture, 'FROM');
 

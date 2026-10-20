@@ -78,6 +78,7 @@ export const k8sNodeFixture: InventoryDefinitionFixture = {
         attributes: [
           { name: 'cluster', field: 'orchestrator.cluster.name' },
           { name: 'os', field: 'host.os.name' },
+          { name: 'os.type', field: 'host.os.type' },
         ],
       },
     ],
