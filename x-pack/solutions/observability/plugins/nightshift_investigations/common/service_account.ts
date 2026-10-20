@@ -7,7 +7,7 @@
 
 /** One of the Nightshift service accounts and the built-in role it holds. */
 export interface NightshiftServiceAccountInfo {
-  kind: 'agent' | 'automations' | 'detection';
+  kind: 'agent' | 'automations';
   id: string;
   role: string;
 }
