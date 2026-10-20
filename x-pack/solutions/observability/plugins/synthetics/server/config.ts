@@ -29,7 +29,9 @@ const uptimeConfig = schema.object({
 
 export const config: PluginConfigDescriptor = {
   schema: uptimeConfig,
-  deprecations: ({ unused }) => [
+  deprecations: ({ renameFromRoot, unused }) => [
+    // Must run first so the `unused` checks below see the renamed keys.
+    renameFromRoot('xpack.uptime', 'xpack.synthetics', { level: 'warning' }),
     unused('experimental.ccs.enabled', { level: 'warning' }),
     unused('rebalancePrivateLocationShardsTaskEnabled', { level: 'warning' }),
   ],
