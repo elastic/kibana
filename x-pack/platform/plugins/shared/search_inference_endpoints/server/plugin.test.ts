@@ -265,6 +265,54 @@ describe('SearchInferenceEndpointsPlugin', () => {
         });
       });
 
+      it('returns nothing for a child feature when only the parent row has a saved model', async () => {
+        const request = httpServerMock.createKibanaRequest();
+        const internalClient = savedObjectsClientMock.create();
+        internalClient.get.mockResolvedValue({
+          id: 'default',
+          type: INFERENCE_SETTINGS_SO_TYPE,
+          references: [],
+          attributes: {
+            features: [{ feature_id: 'parent_feature', endpoints: [{ id: 'parent-connector' }] }],
+          },
+        });
+        coreStart.savedObjects.getUnsafeInternalClient.mockReturnValue(internalClient);
+
+        const inference = inferenceMock.createStartContract();
+        inference.getConnectorById.mockImplementation(async (id: string) => ({
+          connectorId: id,
+          name: id,
+          type: '.gen-ai',
+          config: {},
+          capabilities: {},
+          isPreconfigured: false,
+          isInferenceEndpoint: false,
+        }));
+        const contract = plugin.start(coreStart, { inference });
+        contract.features.register({
+          featureId: 'parent_feature',
+          featureName: 'Parent',
+          featureDescription: 'Parent',
+          taskType: 'chat_completion',
+          recommendedEndpoints: [],
+        });
+        contract.features.register({
+          featureId: 'child_feature',
+          featureName: 'Child',
+          featureDescription: 'Child',
+          taskType: 'chat_completion',
+          parentFeatureId: 'parent_feature',
+          recommendedEndpoints: [],
+        });
+
+        const result = await contract.endpoints.getForFeature('child_feature', request, {
+          onlyReturnConfigured: true,
+          ownEntryOnly: true,
+        });
+
+        expect(result).toEqual({ endpoints: [], warnings: [], soEntryFound: false });
+      });
+
       it('returns empty list when defaultConnectorOnly is set but no default connector is configured', async () => {
         const request = httpServerMock.createKibanaRequest();
 

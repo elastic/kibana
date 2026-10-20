@@ -49,7 +49,7 @@ describe('resolveExplicitFeatureConnectorId', () => {
     expect(searchInferenceEndpoints.endpoints.getForFeature).toHaveBeenCalledWith(
       'alertzero_template_models',
       request,
-      { onlyReturnConfigured: true }
+      { onlyReturnConfigured: true, ownEntryOnly: true }
     );
   });
 

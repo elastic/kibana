@@ -104,6 +104,7 @@ describe('resolveDefaultConnectorId', () => {
       expect(result).toBe('template-connector');
       expect(mockGetForFeature).toHaveBeenCalledWith('alertzero_template_models', mockRequest, {
         onlyReturnConfigured: true,
+        ownEntryOnly: true,
       });
       expect(mockGetForFeature).not.toHaveBeenCalledWith(
         'alertzero_frontier',

@@ -531,6 +531,84 @@ describe('getForFeature', () => {
       });
     });
 
+    it('returns the saved connector on the requested feature when a parent also has one', async () => {
+      registry.register(createValidFeature({ featureId: 'parent', taskType: 'chat_completion' }));
+      registry.register(
+        createValidFeature({
+          featureId: 'child',
+          parentFeatureId: 'parent',
+          recommendedEndpoints: ['child_ep'],
+          taskType: 'chat_completion',
+        })
+      );
+
+      const result = await getForFeature(
+        registry,
+        createSoClient([
+          { feature_id: 'parent', endpoints: [{ id: 'parent_ep' }] },
+          { feature_id: 'child', endpoints: [{ id: 'child_saved' }] },
+        ]),
+        createGetConnectorById(['parent_ep', 'child_ep', 'child_saved']),
+        'child',
+        logger,
+        { ownEntryOnly: true }
+      );
+
+      expect(result).toEqual({
+        endpoints: [createConnector('child_saved')],
+        warnings: [],
+        soEntryFound: true,
+      });
+    });
+
+    it('returns nothing when the requested row is unset and only a parent has a saved model', async () => {
+      registry.register(createValidFeature({ featureId: 'parent', taskType: 'chat_completion' }));
+      registry.register(
+        createValidFeature({
+          featureId: 'child',
+          parentFeatureId: 'parent',
+          recommendedEndpoints: ['child_ep'],
+          taskType: 'chat_completion',
+        })
+      );
+
+      const result = await getForFeature(
+        registry,
+        createSoClient([{ feature_id: 'parent', endpoints: [{ id: 'parent_ep' }] }]),
+        createGetConnectorById(['parent_ep', 'child_ep']),
+        'child',
+        logger,
+        { ownEntryOnly: true }
+      );
+
+      expect(result).toEqual({ endpoints: [], warnings: [], soEntryFound: false });
+    });
+
+    it('keeps an empty saved list on the requested feature when the parent has a model', async () => {
+      registry.register(createValidFeature({ featureId: 'parent', taskType: 'chat_completion' }));
+      registry.register(
+        createValidFeature({
+          featureId: 'child',
+          parentFeatureId: 'parent',
+          taskType: 'chat_completion',
+        })
+      );
+
+      const result = await getForFeature(
+        registry,
+        createSoClient([
+          { feature_id: 'parent', endpoints: [{ id: 'parent_ep' }] },
+          { feature_id: 'child', endpoints: [] },
+        ]),
+        createGetConnectorById(['parent_ep']),
+        'child',
+        logger,
+        { ownEntryOnly: true }
+      );
+
+      expect(result).toEqual({ endpoints: [], warnings: [], soEntryFound: true });
+    });
+
     it('excludes unavailable connector from recommendedEndpoints and emits a warning', async () => {
       registry.register(
         createValidFeature({

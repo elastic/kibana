@@ -78,6 +78,12 @@ export interface GetForFeatureOptions {
    * user's current execution model).
    */
   onlyReturnConfigured?: boolean;
+  /**
+   * When true, resolution stops at this feature's own saved-object entry.
+   * `soEntryFound` is true only for that entry, including one that clears the
+   * endpoint list. A parent feature's saved model stays on the parent.
+   */
+  ownEntryOnly?: boolean;
 }
 
 export interface InferenceEndpointsContract {

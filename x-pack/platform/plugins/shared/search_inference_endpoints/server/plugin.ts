@@ -195,7 +195,14 @@ export class SearchInferenceEndpointsPlugin
           );
 
           const resolveFeatureEndpoints = (fId: string) =>
-            getForFeatureFn(featureRegistry, soClient, getConnectorById, fId, this.logger);
+            getForFeatureFn(
+              featureRegistry,
+              soClient,
+              getConnectorById,
+              fId,
+              this.logger,
+              opts?.ownEntryOnly ? { ownEntryOnly: true } : undefined
+            );
           const getConnectorList = () => plugins.inference.getConnectorList(request);
           const feature = featureRegistry.get(featureId);
 

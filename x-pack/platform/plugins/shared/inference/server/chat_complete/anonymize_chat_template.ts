@@ -1,0 +1,66 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { AnonymizationOutput, ChatCompleteOptions } from '@kbn/inference-common';
+import { createInferenceInternalError, MessageRole } from '@kbn/inference-common';
+import { applyStringReplacements, flattenJsonStrings } from '@kbn/ai-anonymization-server';
+import { prepareAnonymization } from './prepare_anonymization';
+
+type ChatTemplate = NonNullable<ChatCompleteOptions['template']>;
+
+type PrepareAnonymizationOptions = Parameters<typeof prepareAnonymization>[0];
+
+/**
+ * Masks string leaves in a prompt template's variables with the same rules as chat messages.
+ */
+export const anonymizeChatTemplate = async ({
+  template,
+  ...anonymizationOptions
+}: { template: ChatTemplate } & Omit<PrepareAnonymizationOptions, 'messages' | 'system'>): Promise<{
+  template: ChatTemplate;
+  anonymization: AnonymizationOutput;
+}> => {
+  const flattened = flattenJsonStrings(template.variables);
+  const paths = Object.keys(flattened);
+
+  if (paths.length === 0) {
+    return {
+      template,
+      anonymization: { messages: [], anonymizations: [] },
+    };
+  }
+
+  const { anonymization, replacementsId } = await prepareAnonymization({
+    ...anonymizationOptions,
+    messages: paths.map((path) => ({
+      role: MessageRole.User,
+      content: flattened[path],
+    })),
+  });
+
+  const replacements: Record<string, string> = {};
+  paths.forEach((path, index) => {
+    const content = anonymization.messages[index]?.content;
+    if (typeof content !== 'string') {
+      throw createInferenceInternalError('Anonymized template variable was not a string');
+    }
+    replacements[path] = content;
+  });
+
+  return {
+    template: {
+      id: template.id,
+      version: template.version,
+      variables: applyStringReplacements(template.variables, replacements),
+    },
+    anonymization: {
+      messages: [],
+      anonymizations: anonymization.anonymizations,
+      replacementsId,
+    },
+  };
+};

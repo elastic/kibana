@@ -9,9 +9,9 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { SearchInferenceEndpointsPluginStart } from '../types';
 
 /**
- * Returns the connector an operator saved for a feature, or null when they have not.
- * Recommended endpoints and the global default do not count: callers use this to
- * prefer an optional row without replacing the feature that still owns the default.
+ * Returns the connector an operator saved on this feature's own settings row, or
+ * null when that row has none. Callers use this to prefer an optional row without
+ * replacing the feature that still owns the default.
  */
 export const resolveExplicitFeatureConnectorId = async ({
   featureId,
@@ -30,7 +30,7 @@ export const resolveExplicitFeatureConnectorId = async ({
   const { endpoints, soEntryFound } = await searchInferenceEndpoints.endpoints.getForFeature(
     featureId,
     request,
-    { onlyReturnConfigured: true }
+    { onlyReturnConfigured: true, ownEntryOnly: true }
   );
 
   if (!soEntryFound || endpoints.length === 0) {
