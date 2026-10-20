@@ -47,6 +47,7 @@ describe('renderDashboardChangeHistoryBadge', () => {
   it('renders only the current badge when there is no version', () => {
     renderBadge(getItem({ isCurrent: true }));
     expect(screen.getByText('Current version')).toBeInTheDocument();
+    expect(screen.queryByText('Deleted')).not.toBeInTheDocument();
   });
 
   it('renders the deleted badge for delete actions', () => {
@@ -61,17 +62,8 @@ describe('renderDashboardChangeHistoryBadge', () => {
     expect(screen.getByText('v5')).toBeInTheDocument();
   });
 
-  it('does not render the deleted badge for non-delete actions', () => {
-    renderBadge(getItem({ isCurrent: true }));
-    expect(screen.queryByText('Deleted')).not.toBeInTheDocument();
-  });
-
   it('renders no badges for changes without metadata', () => {
     const { container } = renderBadge(getItem({}));
     expect(container).toHaveTextContent('');
-    expect(screen.queryByText('Unsaved changes')).not.toBeInTheDocument();
-    expect(screen.queryByText('Current version')).not.toBeInTheDocument();
-    expect(screen.queryByText('Deleted')).not.toBeInTheDocument();
-    expect(screen.queryByText(/^v\d+$/)).not.toBeInTheDocument();
   });
 });

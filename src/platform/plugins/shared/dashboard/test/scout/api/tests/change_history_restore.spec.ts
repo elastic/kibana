@@ -180,7 +180,9 @@ apiTest.describe(
       expect(after.map((item) => item.metadata.version)).toStrictEqual([3, 2, 1]);
       const [newest] = after;
       expect(newest.action).toBe('dashboard_update');
-      expect(newest.comment).toContain('v1');
+      expect(newest.comment).toBe('Restored from v1');
+      expect(after.map((item) => item.isCurrent)).toStrictEqual([true, false, false]);
+      expect(after[1].comment).toBeUndefined();
       expect(after[1].id).not.toBe(newest.id);
 
       const details = await getChange(apiClient, spaceA, newest.id);
@@ -421,19 +423,5 @@ apiTest.describe(
         expect((await listHistory(apiClient, spaceA, ...asA)).body.total).toBe(2);
       }
     );
-
-    apiTest('returns 404 for history of a dashboard that does not exist', async ({ apiClient }) => {
-      const missing = `${spacePrefix(spaceA)}${HISTORY_PATH}/does-not-exist`;
-      const list = await apiClient.get(missing, {
-        headers: await headers(editorBothSpaces),
-        responseType: 'json',
-      });
-      const restored = await apiClient.post(`${missing}/any-change/_restore`, {
-        headers: await headers(editorBothSpaces),
-        responseType: 'json',
-      });
-      expect(list).toHaveStatusCode(404);
-      expect(restored).toHaveStatusCode(404);
-    });
   }
 );

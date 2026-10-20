@@ -115,45 +115,6 @@ apiTest.describe('dashboard change history - list', { tag: tags.stateful.classic
     expect(second.body.items.some((item: HistoryItem) => item.isCurrent)).toBe(false);
   });
 
-  apiTest(
-    'flags the restored version as current and records where it came from',
-    async ({ apiClient }) => {
-      const id = 'history-list-restored';
-      const path = `s/${spaceId}/${HISTORY_PATH}/${id}`;
-      for (const title of ['Original', 'Edited']) {
-        await apiClient.put(
-          `s/${spaceId}/${DASHBOARD_API_PATH}/${id}`,
-          await requestOptions({ title })
-        );
-      }
-      await expect
-        .poll(async () => (await apiClient.get(path, await requestOptions())).body.total, {
-          timeout: 30_000,
-        })
-        .toBe(2);
-      const before = (await apiClient.get(path, await requestOptions())).body
-        .items as HistoryItem[];
-
-      const restored = await apiClient.post(
-        `${path}/${before[1].id}/_restore`,
-        await requestOptions()
-      );
-      expect(restored).toHaveStatusCode(200);
-
-      await expect
-        .poll(async () => (await apiClient.get(path, await requestOptions())).body.total, {
-          timeout: 30_000,
-        })
-        .toBe(3);
-      const { items } = (await apiClient.get(path, await requestOptions())).body as {
-        items: HistoryItem[];
-      };
-      expect(items.map((item) => item.isCurrent)).toStrictEqual([true, false, false]);
-      expect(items[0].comment).toBe('Restored from v1');
-      expect(items[1].comment).toBeUndefined();
-    }
-  );
-
   apiTest('rejects invalid query parameters', async ({ apiClient }) => {
     expect(await listHistory(apiClient, '?page=not-a-number')).toHaveStatusCode(400);
     expect(await listHistory(apiClient, '?per_page=not-a-number')).toHaveStatusCode(400);
