@@ -294,6 +294,18 @@ describe('entities grid query builders', () => {
       expect(fields.get('host:h-1')).toEqual({ anomaly_count: null });
     });
 
+    it('sorts by anomalies without security jobs by entity id, reading no anomaly index', async () => {
+      const runQuery = createRunner(pageRows);
+
+      const rows = await anomalyCountQuerySpec.fetchSortPage(
+        { ...BASE_ARGS, sort: { field: 'anomaly_count', direction: 'desc' }, anomalyJobIds: [] },
+        createRunContext(runQuery)
+      );
+
+      expect(rows).toEqual(pageRows.map((row) => expect.objectContaining(row)));
+      expect(runQuery.mock.calls.flat(2).join('\n')).not.toContain('.ml-anomalies');
+    });
+
     it('reads the alerts of many entities in several queries, which ES|QL can parse', async () => {
       const runQuery = createRunner([]);
       const manyRows = Array.from({ length: 300 }, (_, i) => ({

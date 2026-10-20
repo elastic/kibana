@@ -498,6 +498,7 @@ export const User: FC<UserProps> = memo(function User({
             entityRecord={entityStoreV2Enabled ? observedUser.entityRecord ?? undefined : undefined}
             aliasRecords={aliasRecords}
             noEntityInStore={noEntityInStore}
+            isEntityRecordLoading={entityStoreV2Enabled && entityFromStoreResult.isLoading}
             entityStoreV2Enabled={entityStoreV2Enabled}
             entityStoreEntityId={entityStoreEntityId}
             mode={mode}

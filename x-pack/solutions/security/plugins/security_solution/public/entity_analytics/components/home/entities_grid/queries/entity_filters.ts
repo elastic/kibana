@@ -80,10 +80,31 @@ export const buildEntityFiltersExpression = (
       : [`${field} IN (${toList(values)})`];
   }).join(' AND ');
 
-export const buildEntityFiltersQuery = (filters: EntityFilters): QueryDslQueryContainer[] =>
+const buildResolvedRiskLevelQuery = (values: readonly string[]): QueryDslQueryContainer => ({
+  bool: {
+    should: [
+      { terms: { [RESOLUTION_RISK_LEVEL_FIELD]: [...values] } },
+      {
+        bool: {
+          filter: [{ terms: { [RISK_LEVEL_FIELD]: [...values] } }],
+          must_not: [{ exists: { field: RESOLUTION_RISK_LEVEL_FIELD } }],
+        },
+      },
+    ],
+    minimum_should_match: 1,
+  },
+});
+
+export const buildEntityFiltersQuery = (
+  filters: EntityFilters,
+  rowsMode: RowsMode = 'individual'
+): QueryDslQueryContainer[] =>
   ENTITY_FILTER_FIELDS.flatMap(({ key, field }) => {
     const values: readonly string[] = filters[key];
     if (!values.length) return [];
+    if (key === 'riskLevels' && rowsMode === 'resolved') {
+      return [buildResolvedRiskLevelQuery(values)];
+    }
     if (key === 'assetCriticality') return [buildCriticalityQuery(values)];
     return [{ terms: { [field]: [...values] } }];
   });
