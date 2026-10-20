@@ -22,7 +22,7 @@ describe('buildDestinationRateQuery', () => {
     expect(buildDestinationRateQuery(params).print('basic')).toBe(
       `${head(
         'TS'
-      )} | STATS rate = SUM(RATE(metrics.streams.destination.items)), failed_rate = SUM(RATE(metrics.streams.destination.items)) WHERE attributes.outcome != "success", latency = AVG(metrics.streams.destination.duration) BY id = attributes.streams.destination.id`
+      )} | STATS rate = SUM(RATE(metrics.streams.destination.items)), failed_rate = SUM(RATE(metrics.streams.destination.items)) WHERE attributes.outcome != "success", latency = AVG(metrics.streams.destination.duration) BY id = attributes.streams.destination.id | EVAL failed_rate = CASE(rate IS NOT NULL AND failed_rate IS NULL, 0.0, failed_rate)`
     );
   });
 
