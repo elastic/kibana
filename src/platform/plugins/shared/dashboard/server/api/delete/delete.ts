@@ -39,7 +39,7 @@ export async function deleteDashboard(
     strictValidationSchema
   );
   await core.savedObjects.client.delete(DASHBOARD_SAVED_OBJECT_TYPE, id);
-  const deletedAt = new Date().toISOString();
+  const deletedAt = new Date().toISOString(); // SO client does not provide deletedAt timestamp, so this is the next-best thing
 
   const snapshot = getHistorySnapshot({
     attributes: savedObject.attributes,
