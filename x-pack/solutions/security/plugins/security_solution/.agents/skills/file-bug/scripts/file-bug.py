@@ -7,6 +7,7 @@ import json
 import re
 import subprocess
 import sys
+import uuid
 from pathlib import Path
 
 sys.dont_write_bytecode = True
@@ -445,6 +446,11 @@ def _cmd_write(args: argparse.Namespace) -> int:
             finding=finding if isinstance(finding, dict) else {},
             config=config if isinstance(config, dict) else {},
             security_ok=bool(args.security_ok),
+            marker_meta={
+                "agent": args.agent or "",
+                "model": args.model or "",
+                "run": uuid.uuid4().hex[:12],
+            },
         )
     except CreateFailed as error:
         return _fail(str(error))
@@ -717,6 +723,8 @@ def _build_parser() -> argparse.ArgumentParser:
     write.add_argument("--number", type=int, default=None, help="Issue number to comment on")
     write.add_argument("--finding", default=None, help="Finding JSON; Path B stamps the tester label")
     write.add_argument("--config", default=None)
+    write.add_argument("--agent", default=None, help="Agent running the skill (claude-code, codex, cursor), for the hidden marker")
+    write.add_argument("--model", default=None, help="Model name, for the hidden marker")
     write.add_argument(
         "--security-ok",
         action="store_true",

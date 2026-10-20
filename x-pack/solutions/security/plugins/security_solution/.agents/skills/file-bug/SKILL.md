@@ -86,7 +86,7 @@ python3 "$FILE_BUG" write \
   --label bug --label triage_needed --label "Team:…"
 ```
 
-Path B adds `--label sec-eng-prod:exploratory-tester --finding "$FINDING_JSON"`; Path A passes neither.
+Path B adds `--label sec-eng-prod:exploratory-tester --finding "$FINDING_JSON"`; Path A passes neither. Always pass `--agent claude-code|codex|cursor` (the tool you run in) and `--model <your model name>`; `write` records them in the hidden marker.
 
 Comment / reopen also need `--number N`. Reply with the issue URL, action, uploaded URLs, leftovers.
 

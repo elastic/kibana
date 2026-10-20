@@ -1079,17 +1079,30 @@ def _finding_with_body_answers(finding: dict, body: str) -> dict:
     return merged
 
 
-def with_filed_stamp(body: str) -> str:
+_MARKER_RE = re.compile(r"[ \t]*<!-- filed-via: file-bug v1\b[^>]*-->[ \t]*\n?")
+_META_VALUE_RE = re.compile(r"[A-Za-z0-9._:/+-]{1,60}")
+
+
+def filed_marker(meta: dict[str, str] | None = None) -> str:
+    """The hidden marker, optionally with `key=value` fields (agent, model, run)."""
+    fields = []
+    for key, value in (meta or {}).items():
+        value = str(value or "").strip()
+        if value and _META_VALUE_RE.fullmatch(value):
+            fields.append(f"{key}={value}")
+    return "<!-- filed-via: file-bug v1" + "".join(f" {f}" for f in fields) + " -->"
+
+
+def with_filed_stamp(body: str, meta: dict[str, str] | None = None) -> str:
     """Append the visible stamp and the hidden marker, each only once.
 
     The marker lets tooling find skill-filed tickets; agents never add it by hand.
+    An existing marker is replaced, so `write` can enrich the plain one `render-body` added.
     """
-    text = body.rstrip()
+    text = _MARKER_RE.sub("", body).rstrip()
     if FILED_VIA not in _visible_text(text):
         text = f"{text}\n\n{FILED_VIA}"
-    if FILED_MARKER not in text:
-        text = f"{text}\n{FILED_MARKER}"
-    return f"{text}\n"
+    return f"{text}\n{filed_marker(meta)}\n"
 
 
 def scan_wip(*texts: object) -> list[str]:
@@ -1742,6 +1755,7 @@ def write_github(
     finding: dict | None = None,
     config: dict | None = None,
     security_ok: bool = False,
+    marker_meta: dict[str, str] | None = None,
     run_gh: GhRunner = _default_run_gh,
 ) -> dict:
     """Run the `gh` write for `action`, never retrying a create that already failed."""
@@ -1781,7 +1795,7 @@ def write_github(
     workdir = Path(tempfile.mkdtemp(prefix="file_bug_body_"))
     try:
         body_file = workdir / "body.md"
-        body_file.write_text(with_filed_stamp(body), encoding="utf-8")
+        body_file.write_text(with_filed_stamp(body, marker_meta), encoding="utf-8")
         if action == "create":
             url = _gh_create(
                 repo=repo,

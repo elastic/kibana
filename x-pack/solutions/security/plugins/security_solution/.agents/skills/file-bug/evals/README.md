@@ -90,3 +90,7 @@ One `s12` run executed `validate-labels --repo` for real, which the brief forbad
 ## Results after trimming `drafting.md` and moving the gap table into `check-draft` (`help`)
 
 25 runs over every scenario above (`s13` and `s14` included; Sonnet 5.5, stubbed): all matched the pre-trim behavior. Classify asked on every Path A signal, Path B decided without asking, media review and the write-yes gate held, `s14` asked "file anyway?" 5/5 (3 pre-trim, 2 post), `s13` asked for the team and treated the stated UI text as confirmed.
+
+## Results after adding `--agent` and `--model` to the hidden marker
+
+6 runs (`s5`, `s6` x2, `s6b` x2, `s8`): every `write` carried `--agent claude-code --model <name>`; repos, labels, `embedded.md` and `reopen_comment` unchanged.

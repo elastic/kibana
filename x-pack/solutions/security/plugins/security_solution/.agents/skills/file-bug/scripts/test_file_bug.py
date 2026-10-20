@@ -1205,6 +1205,34 @@ class CheckDraftTest(unittest.TestCase):
         self.assertEqual(with_filed_stamp(updated), updated)
 
 
+class MarkerMetaTest(unittest.TestCase):
+    def test_marker_carries_agent_model_and_run(self):
+        updated = with_filed_stamp(
+            "Body\n", {"agent": "codex", "model": "gpt-5", "run": "abc123"}
+        )
+        self.assertIn("<!-- filed-via: file-bug v1 agent=codex model=gpt-5 run=abc123 -->", updated)
+        self.assertEqual(updated.count("filed-via: file-bug"), 1)
+
+    def test_enriched_marker_replaces_the_plain_one(self):
+        plain = with_filed_stamp("Body\n")
+        self.assertIn(FILED_MARKER, plain)
+        updated = with_filed_stamp(plain, {"agent": "cursor"})
+        self.assertNotIn(FILED_MARKER, updated)
+        self.assertEqual(updated.count("filed-via: file-bug"), 1)
+        self.assertEqual(updated.count(FILED_VIA), 1)
+
+    def test_unsafe_marker_values_are_dropped(self):
+        updated = with_filed_stamp("Body\n", {"agent": "a --> <b>", "model": "ok-1"})
+        self.assertNotIn("agent=", updated)
+        self.assertIn("model=ok-1", updated)
+        self.assertEqual(updated.count("-->"), 1)
+
+    def test_write_cli_accepts_agent_and_model(self):
+        result = run_cli("write", "--help")
+        self.assertIn("--agent", result.stdout)
+        self.assertIn("--model", result.stdout)
+
+
 class PathADraftTest(unittest.TestCase):
     def test_unfilled_template_is_not_fileable(self):
         template = (SKILL_ROOT / "templates" / "bug-report.md").read_text(
