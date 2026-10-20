@@ -1,5 +1,5 @@
 {
-  "getEscalationPolicy": {
+  "browseActivity": {
     "queries": [
       {
         "method": "POST",
@@ -7,7 +7,7 @@
       }
     ]
   },
-  "getIncident": {
+  "browseAlertGrouping": {
     "queries": [
       {
         "method": "POST",
@@ -15,7 +15,7 @@
       }
     ]
   },
-  "getSchedule": {
+  "browseChangeEvents": {
     "queries": [
       {
         "method": "POST",
@@ -23,7 +23,7 @@
       }
     ]
   },
-  "getTeam": {
+  "browseEscalationPolicies": {
     "queries": [
       {
         "method": "POST",
@@ -31,7 +31,7 @@
       }
     ]
   },
-  "getUserData": {
+  "browseEventOrchestrations": {
     "queries": [
       {
         "method": "POST",
@@ -39,7 +39,7 @@
       }
     ]
   },
-  "listEscalationPolicies": {
+  "browseIncidents": {
     "queries": [
       {
         "method": "POST",
@@ -47,7 +47,7 @@
       }
     ]
   },
-  "listIncidents": {
+  "browseSchedules": {
     "queries": [
       {
         "method": "POST",
@@ -55,7 +55,7 @@
       }
     ]
   },
-  "listOncalls": {
+  "browseServices": {
     "queries": [
       {
         "method": "POST",
@@ -63,7 +63,7 @@
       }
     ]
   },
-  "listSchedules": {
+  "browseStatusPages": {
     "queries": [
       {
         "method": "POST",
@@ -71,7 +71,15 @@
       }
     ]
   },
-  "listTeams": {
+  "browseTeams": {
+    "queries": [
+      {
+        "method": "POST",
+        "path": "/mcp"
+      }
+    ]
+  },
+  "browseUsers": {
     "queries": [
       {
         "method": "POST",
@@ -80,14 +88,6 @@
     ]
   },
   "listTools": {
-    "queries": [
-      {
-        "method": "POST",
-        "path": "/mcp"
-      }
-    ]
-  },
-  "listUsers": {
     "queries": [
       {
         "method": "POST",

@@ -14,16 +14,18 @@
         "source": "v2"
       }
     ],
+    "browseActivity": [],
+    "browseAlertGrouping": [],
+    "browseChangeEvents": [],
+    "browseEscalationPolicies": [],
+    "browseEventOrchestrations": [],
+    "browseIncidents": [],
+    "browseSchedules": [],
+    "browseServices": [],
+    "browseStatusPages": [],
+    "browseTeams": [],
+    "browseUsers": [],
     "callTool": [],
-    "getEscalationPolicy": [],
-    "getIncident": [],
-    "getSchedule": [],
-    "getTeam": [],
-    "getUserData": [],
-    "listEscalationPolicies": [],
-    "listIncidents": [],
-    "listOncalls": [],
-    "listSchedules": [],
     "listServices": [
       {
         "method": "get",
@@ -42,9 +44,14 @@
         "source": "v2"
       }
     ],
-    "listTeams": [],
     "listTools": [],
-    "listUsers": [],
+    "manageAlertGrouping": [],
+    "manageEventOrchestrations": [],
+    "manageIncidents": [],
+    "manageSchedules": [],
+    "manageServices": [],
+    "manageStatusPages": [],
+    "manageTeams": [],
     "resolveIncident": [
       {
         "method": "put",
@@ -77,77 +84,84 @@
     }
   },
   "unmatched": {
+    "browseActivity": [
+      {
+        "method": "post",
+        "path": "/mcp",
+        "reason": "PagerDuty's remote MCP server (JSON-RPC over Streamable HTTP at https://mcp.pagerduty.com/mcp), which the REST API spec doesn't cover; see https://docs.pagerduty.com/developer/mcp-tooling-remote-server"
+      }
+    ],
+    "browseAlertGrouping": [
+      {
+        "method": "post",
+        "path": "/mcp",
+        "reason": "PagerDuty's remote MCP server (JSON-RPC over Streamable HTTP at https://mcp.pagerduty.com/mcp), which the REST API spec doesn't cover; see https://docs.pagerduty.com/developer/mcp-tooling-remote-server"
+      }
+    ],
+    "browseChangeEvents": [
+      {
+        "method": "post",
+        "path": "/mcp",
+        "reason": "PagerDuty's remote MCP server (JSON-RPC over Streamable HTTP at https://mcp.pagerduty.com/mcp), which the REST API spec doesn't cover; see https://docs.pagerduty.com/developer/mcp-tooling-remote-server"
+      }
+    ],
+    "browseEscalationPolicies": [
+      {
+        "method": "post",
+        "path": "/mcp",
+        "reason": "PagerDuty's remote MCP server (JSON-RPC over Streamable HTTP at https://mcp.pagerduty.com/mcp), which the REST API spec doesn't cover; see https://docs.pagerduty.com/developer/mcp-tooling-remote-server"
+      }
+    ],
+    "browseEventOrchestrations": [
+      {
+        "method": "post",
+        "path": "/mcp",
+        "reason": "PagerDuty's remote MCP server (JSON-RPC over Streamable HTTP at https://mcp.pagerduty.com/mcp), which the REST API spec doesn't cover; see https://docs.pagerduty.com/developer/mcp-tooling-remote-server"
+      }
+    ],
+    "browseIncidents": [
+      {
+        "method": "post",
+        "path": "/mcp",
+        "reason": "PagerDuty's remote MCP server (JSON-RPC over Streamable HTTP at https://mcp.pagerduty.com/mcp), which the REST API spec doesn't cover; see https://docs.pagerduty.com/developer/mcp-tooling-remote-server"
+      }
+    ],
+    "browseSchedules": [
+      {
+        "method": "post",
+        "path": "/mcp",
+        "reason": "PagerDuty's remote MCP server (JSON-RPC over Streamable HTTP at https://mcp.pagerduty.com/mcp), which the REST API spec doesn't cover; see https://docs.pagerduty.com/developer/mcp-tooling-remote-server"
+      }
+    ],
+    "browseServices": [
+      {
+        "method": "post",
+        "path": "/mcp",
+        "reason": "PagerDuty's remote MCP server (JSON-RPC over Streamable HTTP at https://mcp.pagerduty.com/mcp), which the REST API spec doesn't cover; see https://docs.pagerduty.com/developer/mcp-tooling-remote-server"
+      }
+    ],
+    "browseStatusPages": [
+      {
+        "method": "post",
+        "path": "/mcp",
+        "reason": "PagerDuty's remote MCP server (JSON-RPC over Streamable HTTP at https://mcp.pagerduty.com/mcp), which the REST API spec doesn't cover; see https://docs.pagerduty.com/developer/mcp-tooling-remote-server"
+      }
+    ],
+    "browseTeams": [
+      {
+        "method": "post",
+        "path": "/mcp",
+        "reason": "PagerDuty's remote MCP server (JSON-RPC over Streamable HTTP at https://mcp.pagerduty.com/mcp), which the REST API spec doesn't cover; see https://docs.pagerduty.com/developer/mcp-tooling-remote-server"
+      }
+    ],
+    "browseUsers": [
+      {
+        "method": "post",
+        "path": "/mcp",
+        "reason": "PagerDuty's remote MCP server (JSON-RPC over Streamable HTTP at https://mcp.pagerduty.com/mcp), which the REST API spec doesn't cover; see https://docs.pagerduty.com/developer/mcp-tooling-remote-server"
+      }
+    ],
     "callTool": [
-      {
-        "method": "post",
-        "path": "/mcp",
-        "reason": "PagerDuty's remote MCP server (JSON-RPC over Streamable HTTP at https://mcp.pagerduty.com/mcp), which the REST API spec doesn't cover; see https://docs.pagerduty.com/developer/mcp-tooling-remote-server"
-      }
-    ],
-    "getEscalationPolicy": [
-      {
-        "method": "post",
-        "path": "/mcp",
-        "reason": "PagerDuty's remote MCP server (JSON-RPC over Streamable HTTP at https://mcp.pagerduty.com/mcp), which the REST API spec doesn't cover; see https://docs.pagerduty.com/developer/mcp-tooling-remote-server"
-      }
-    ],
-    "getIncident": [
-      {
-        "method": "post",
-        "path": "/mcp",
-        "reason": "PagerDuty's remote MCP server (JSON-RPC over Streamable HTTP at https://mcp.pagerduty.com/mcp), which the REST API spec doesn't cover; see https://docs.pagerduty.com/developer/mcp-tooling-remote-server"
-      }
-    ],
-    "getSchedule": [
-      {
-        "method": "post",
-        "path": "/mcp",
-        "reason": "PagerDuty's remote MCP server (JSON-RPC over Streamable HTTP at https://mcp.pagerduty.com/mcp), which the REST API spec doesn't cover; see https://docs.pagerduty.com/developer/mcp-tooling-remote-server"
-      }
-    ],
-    "getTeam": [
-      {
-        "method": "post",
-        "path": "/mcp",
-        "reason": "PagerDuty's remote MCP server (JSON-RPC over Streamable HTTP at https://mcp.pagerduty.com/mcp), which the REST API spec doesn't cover; see https://docs.pagerduty.com/developer/mcp-tooling-remote-server"
-      }
-    ],
-    "getUserData": [
-      {
-        "method": "post",
-        "path": "/mcp",
-        "reason": "PagerDuty's remote MCP server (JSON-RPC over Streamable HTTP at https://mcp.pagerduty.com/mcp), which the REST API spec doesn't cover; see https://docs.pagerduty.com/developer/mcp-tooling-remote-server"
-      }
-    ],
-    "listEscalationPolicies": [
-      {
-        "method": "post",
-        "path": "/mcp",
-        "reason": "PagerDuty's remote MCP server (JSON-RPC over Streamable HTTP at https://mcp.pagerduty.com/mcp), which the REST API spec doesn't cover; see https://docs.pagerduty.com/developer/mcp-tooling-remote-server"
-      }
-    ],
-    "listIncidents": [
-      {
-        "method": "post",
-        "path": "/mcp",
-        "reason": "PagerDuty's remote MCP server (JSON-RPC over Streamable HTTP at https://mcp.pagerduty.com/mcp), which the REST API spec doesn't cover; see https://docs.pagerduty.com/developer/mcp-tooling-remote-server"
-      }
-    ],
-    "listOncalls": [
-      {
-        "method": "post",
-        "path": "/mcp",
-        "reason": "PagerDuty's remote MCP server (JSON-RPC over Streamable HTTP at https://mcp.pagerduty.com/mcp), which the REST API spec doesn't cover; see https://docs.pagerduty.com/developer/mcp-tooling-remote-server"
-      }
-    ],
-    "listSchedules": [
-      {
-        "method": "post",
-        "path": "/mcp",
-        "reason": "PagerDuty's remote MCP server (JSON-RPC over Streamable HTTP at https://mcp.pagerduty.com/mcp), which the REST API spec doesn't cover; see https://docs.pagerduty.com/developer/mcp-tooling-remote-server"
-      }
-    ],
-    "listTeams": [
       {
         "method": "post",
         "path": "/mcp",
@@ -161,7 +175,49 @@
         "reason": "PagerDuty's remote MCP server (JSON-RPC over Streamable HTTP at https://mcp.pagerduty.com/mcp), which the REST API spec doesn't cover; see https://docs.pagerduty.com/developer/mcp-tooling-remote-server"
       }
     ],
-    "listUsers": [
+    "manageAlertGrouping": [
+      {
+        "method": "post",
+        "path": "/mcp",
+        "reason": "PagerDuty's remote MCP server (JSON-RPC over Streamable HTTP at https://mcp.pagerduty.com/mcp), which the REST API spec doesn't cover; see https://docs.pagerduty.com/developer/mcp-tooling-remote-server"
+      }
+    ],
+    "manageEventOrchestrations": [
+      {
+        "method": "post",
+        "path": "/mcp",
+        "reason": "PagerDuty's remote MCP server (JSON-RPC over Streamable HTTP at https://mcp.pagerduty.com/mcp), which the REST API spec doesn't cover; see https://docs.pagerduty.com/developer/mcp-tooling-remote-server"
+      }
+    ],
+    "manageIncidents": [
+      {
+        "method": "post",
+        "path": "/mcp",
+        "reason": "PagerDuty's remote MCP server (JSON-RPC over Streamable HTTP at https://mcp.pagerduty.com/mcp), which the REST API spec doesn't cover; see https://docs.pagerduty.com/developer/mcp-tooling-remote-server"
+      }
+    ],
+    "manageSchedules": [
+      {
+        "method": "post",
+        "path": "/mcp",
+        "reason": "PagerDuty's remote MCP server (JSON-RPC over Streamable HTTP at https://mcp.pagerduty.com/mcp), which the REST API spec doesn't cover; see https://docs.pagerduty.com/developer/mcp-tooling-remote-server"
+      }
+    ],
+    "manageServices": [
+      {
+        "method": "post",
+        "path": "/mcp",
+        "reason": "PagerDuty's remote MCP server (JSON-RPC over Streamable HTTP at https://mcp.pagerduty.com/mcp), which the REST API spec doesn't cover; see https://docs.pagerduty.com/developer/mcp-tooling-remote-server"
+      }
+    ],
+    "manageStatusPages": [
+      {
+        "method": "post",
+        "path": "/mcp",
+        "reason": "PagerDuty's remote MCP server (JSON-RPC over Streamable HTTP at https://mcp.pagerduty.com/mcp), which the REST API spec doesn't cover; see https://docs.pagerduty.com/developer/mcp-tooling-remote-server"
+      }
+    ],
+    "manageTeams": [
       {
         "method": "post",
         "path": "/mcp",
