@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useTimeZone } from '@kbn/observability-shared-plugin/public';
+import { useTimeZone } from '@kbn/observability-shared-plugin/public/hooks/use_time_zone';
 import { useMemo } from 'react';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/public';
 import type { Ping, PingState } from '../../../../../../common/runtime_types';

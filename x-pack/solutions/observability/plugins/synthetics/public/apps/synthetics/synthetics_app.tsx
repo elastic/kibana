@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { InspectorContextProvider } from '@kbn/observability-shared-plugin/public';
+import { InspectorContextProvider } from '@kbn/observability-shared-plugin/public/contexts/inspector/inspector_context';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';

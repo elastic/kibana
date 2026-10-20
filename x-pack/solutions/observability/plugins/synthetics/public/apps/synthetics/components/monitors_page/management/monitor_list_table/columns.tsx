@@ -9,7 +9,8 @@ import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/e
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { FETCH_STATUS, TagsList } from '@kbn/observability-shared-plugin/public';
+import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
+import { TagsList } from '@kbn/observability-shared-plugin/public/components/tags_list/tags_list_lazy';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { isEmpty } from 'lodash';
 import type { ClientPluginsStart } from '../../../../../../plugin';

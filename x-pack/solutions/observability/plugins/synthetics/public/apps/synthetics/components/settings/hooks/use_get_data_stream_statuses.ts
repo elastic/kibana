@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useFetcher } from '@kbn/observability-shared-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
 import type { DataStream } from '@kbn/index-management-plugin/common';
 import { useContext } from 'react';
 import { keyBy } from 'lodash';

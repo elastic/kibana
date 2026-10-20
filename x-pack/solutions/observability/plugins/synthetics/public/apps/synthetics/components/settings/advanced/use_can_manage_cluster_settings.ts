@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useFetcher } from '@kbn/observability-shared-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
 import { SYNTHETICS_API_URLS } from '../../../../../../common/constants';
 import { apiService } from '../../../../../utils/api_service';
 

@@ -8,7 +8,7 @@
 import { useCallback, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux-v7';
-import { FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public';
+import { FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
 import {
   ConfigKey,
   isExternalSyntheticsMonitor,

@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiIconTip, EuiLink, EuiSkeletonText, EuiToolTip, EuiText } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ILM_LOCATOR_ID } from '@kbn/index-lifecycle-management-common-shared';
-import { useFetcher } from '@kbn/observability-shared-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
 import { i18n } from '@kbn/i18n';
 import { useSyntheticsSettingsContext } from '../../contexts';
 import type { ClientPluginsStart } from '../../../../plugin';

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
-import { useFetcher } from '@kbn/observability-shared-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
 import type { EncryptedSyntheticsSavedMonitor } from '../../../../../../../common/runtime_types';
 import { ConfigKey, SourceType } from '../../../../../../../common/runtime_types';
 import { render } from '../../../../utils/testing/rtl_helpers';
@@ -30,8 +30,8 @@ jest.mock('../../../../state', () => ({
   fetchBulkUpdateMonitors: jest.fn(),
 }));
 
-jest.mock('@kbn/observability-shared-plugin/public', () => ({
-  ...jest.requireActual('@kbn/observability-shared-plugin/public'),
+jest.mock('@kbn/observability-shared-plugin/public/hooks/use_fetcher', () => ({
+  ...jest.requireActual('@kbn/observability-shared-plugin/public/hooks/use_fetcher'),
   useFetcher: jest.fn(),
 }));
 

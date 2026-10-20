@@ -10,14 +10,14 @@ import { render } from '../../utils/testing/rtl_helpers';
 import { MonitorEditPage } from './monitor_edit_page';
 import { ConfigKey } from '../../../../../common/runtime_types';
 
-import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public';
+import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
 import {
   PROFILE_VALUES_ENUM,
   PROFILES_MAP,
 } from '../../../../../common/constants/monitor_defaults';
 
-jest.mock('@kbn/observability-shared-plugin/public', () => ({
-  ...jest.requireActual('@kbn/observability-shared-plugin/public'),
+jest.mock('@kbn/observability-shared-plugin/public/hooks/use_fetcher', () => ({
+  ...jest.requireActual('@kbn/observability-shared-plugin/public/hooks/use_fetcher'),
 }));
 
 jest.mock('../../hooks/use_monitor_name', () => ({

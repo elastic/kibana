@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useFetcher } from '@kbn/observability-shared-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 import { fetchMonitorManagementList, getMonitorListPageStateWithDefaults } from '../../../state';

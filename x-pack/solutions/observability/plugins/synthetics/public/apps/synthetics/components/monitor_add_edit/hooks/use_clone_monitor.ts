@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useFetcher } from '@kbn/observability-shared-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
 import { fetchSyntheticsMonitor } from '../../../state/monitor_details/api';
 import { useGetUrlParams } from '../../../hooks';
 

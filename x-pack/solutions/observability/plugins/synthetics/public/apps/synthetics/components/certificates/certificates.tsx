@@ -8,7 +8,7 @@
 import { useDispatch, useSelector } from 'react-redux-v7';
 import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
-import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public/hooks/use_track_metric';
 import { i18n } from '@kbn/i18n';
 import type { CertFacetCount } from '../../../../../common/runtime_types';
 import { MonitorTypeEnum } from '../../../../../common/runtime_types';

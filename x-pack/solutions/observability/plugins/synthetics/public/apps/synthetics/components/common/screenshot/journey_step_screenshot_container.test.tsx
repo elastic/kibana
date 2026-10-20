@@ -12,8 +12,6 @@ import { render } from '../../../utils/testing';
 import * as retrieveHooks from '../monitor_test_result/use_retrieve_step_image';
 import { getScreenshotUrl } from './journey_screenshot_dialog';
 
-jest.mock('@kbn/observability-shared-plugin/public');
-
 jest.setTimeout(10 * 1000);
 
 const imgPath1 = getScreenshotUrl({ basePath: '', checkGroup: 'test-check-group', stepNumber: 1 });

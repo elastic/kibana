@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useFetcher } from '@kbn/observability-shared-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
 import { formatBytes } from '../../step_details_page/hooks/use_object_metrics';
 import { formatAge } from '../data_retention/common';
 import { policyLabels } from '../data_retention/policy_labels';

@@ -20,7 +20,7 @@ import type { MouseEvent } from 'react';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useFetcher } from '@kbn/observability-shared-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { useDateFormat } from '../../../../../hooks/use_date_format';
 import { LoadingState } from '../../monitors_page/overview/overview/monitor_detail_flyout';

@@ -6,13 +6,13 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public';
+import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public/hooks/use_es_search';
 import { useMonitorDetail } from './use_monitor_detail';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../common/constants';
 import { HEARTBEAT_UNMAPPED_LOCATION_LABEL } from '../../../../common/runtime_types';
 import { MONITOR_STATUS_LOOKBACK } from '../../../../common/constants/client_defaults';
 
-jest.mock('@kbn/observability-shared-plugin/public', () => ({
+jest.mock('@kbn/observability-shared-plugin/public/hooks/use_es_search', () => ({
   useEsSearch: jest.fn().mockReturnValue({ data: undefined, loading: false }),
 }));
 

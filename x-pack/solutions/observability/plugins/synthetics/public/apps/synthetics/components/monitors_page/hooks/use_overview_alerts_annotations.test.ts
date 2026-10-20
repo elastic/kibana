@@ -22,7 +22,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 }));
 
 const mockUseFetcher = jest.fn();
-jest.mock('@kbn/observability-shared-plugin/public', () => ({
+jest.mock('@kbn/observability-shared-plugin/public/hooks/use_fetcher', () => ({
   useFetcher: () => mockUseFetcher(),
 }));
 

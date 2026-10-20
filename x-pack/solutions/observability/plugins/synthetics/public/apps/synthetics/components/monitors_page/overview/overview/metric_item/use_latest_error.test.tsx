@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public';
+import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public/hooks/use_es_search';
 import { useLatestError } from './use_latest_error';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../../../common/constants';
 import type { OverviewStatusMetaData, Ping } from '../../../../../../../../common/runtime_types';
@@ -16,7 +16,7 @@ import {
   selectLastErrorRunMetadata,
 } from '../../../../../state';
 
-jest.mock('@kbn/observability-shared-plugin/public', () => ({
+jest.mock('@kbn/observability-shared-plugin/public/hooks/use_es_search', () => ({
   useEsSearch: jest.fn().mockReturnValue({ data: undefined, loading: false, error: undefined }),
 }));
 

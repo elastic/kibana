@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useParams } from 'react-router-dom';
-import { LoadWhenInView } from '@kbn/observability-shared-plugin/public';
+import { LoadWhenInView } from '@kbn/observability-shared-plugin/public/components/load_when_in_view/get_load_when_in_view_lazy';
 import { MonitorMWsCallout } from '../../common/mws_callout/monitor_mws_callout';
 import { MissingIntegrationCallout } from '../../monitor_add_edit/steps/missing_integration_callout';
 import { SummaryPanel } from './summary_panel';

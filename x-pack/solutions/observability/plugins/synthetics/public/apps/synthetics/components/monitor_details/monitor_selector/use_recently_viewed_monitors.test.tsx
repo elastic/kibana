@@ -9,13 +9,13 @@ import React from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
 import type { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 
-import { useFetcher } from '@kbn/observability-shared-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
 import * as localStorageModule from 'react-use/lib/useLocalStorage';
 import { fetchMonitorManagementList } from '../../../state';
 
 import * as useMonitorQueryModule from '../hooks/use_monitor_query_id';
 import { useRecentlyViewedMonitors } from './use_recently_viewed_monitors';
-import { WrappedHelper } from '../../../utils/testing';
+import { HookWrapper } from '../../../utils/testing/hook_helpers';
 import { MONITOR_ROUTE } from '../../../../../../common/constants';
 
 jest.mock('../../../state', () => ({
@@ -23,8 +23,8 @@ jest.mock('../../../state', () => ({
   fetchMonitorManagementList: jest.fn(),
 }));
 
-jest.mock('@kbn/observability-shared-plugin/public', () => ({
-  ...jest.requireActual('@kbn/observability-shared-plugin/public'),
+jest.mock('@kbn/observability-shared-plugin/public/hooks/use_fetcher', () => ({
+  ...jest.requireActual('@kbn/observability-shared-plugin/public/hooks/use_fetcher'),
   useFetcher: jest.fn(),
 }));
 
@@ -40,9 +40,9 @@ describe('useRecentlyViewedMonitors', () => {
   it('returns expected result', () => {
     const WrapperWithState = ({ children }: React.PropsWithChildren) => {
       return (
-        <WrappedHelper url="/monitor/1" path={MONITOR_ROUTE}>
+        <HookWrapper url="/monitor/1" path={MONITOR_ROUTE}>
           {React.createElement(React.Fragment, null, children)}
-        </WrappedHelper>
+        </HookWrapper>
       );
     };
 
@@ -89,9 +89,9 @@ describe('useRecentlyViewedMonitors', () => {
 
     const WrapperWithState = ({ children }: React.PropsWithChildren) => {
       return (
-        <WrappedHelper url="/monitor/1" path={MONITOR_ROUTE}>
+        <HookWrapper url="/monitor/1" path={MONITOR_ROUTE}>
           {React.createElement(React.Fragment, null, children)}
-        </WrappedHelper>
+        </HookWrapper>
       );
     };
     const { result, rerender } = renderHook(() => useRecentlyViewedMonitors(), {

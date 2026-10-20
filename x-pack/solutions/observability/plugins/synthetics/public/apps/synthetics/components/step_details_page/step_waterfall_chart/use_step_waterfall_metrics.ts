@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createEsParams } from '@kbn/observability-shared-plugin/public';
+import { createEsParams } from '@kbn/observability-shared-plugin/public/hooks/use_es_search';
 import { useSyntheticsEsSearch } from '../../../hooks/use_synthetics_es_search';
 import { getSyntheticsCcsIndex } from '../../../../../../common/get_synthetics_indices';
 import { useGetUrlParams } from '../../../hooks';

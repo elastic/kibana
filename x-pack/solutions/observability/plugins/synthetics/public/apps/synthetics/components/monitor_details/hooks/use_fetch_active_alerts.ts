@@ -10,7 +10,7 @@ import {
   AlertConsumers,
   SYNTHETICS_RULE_TYPE_IDS,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
-import { useFetcher } from '@kbn/observability-shared-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useParams } from 'react-router-dom';
 import type { ESSearchResponse } from '@kbn/es-types';

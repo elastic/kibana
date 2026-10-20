@@ -11,7 +11,7 @@ import { useDispatch, useSelector } from 'react-redux-v7';
 import { EuiMarkdownFormat, EuiSpacer } from '@elastic/eui';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import { syntheticsSettingsLocatorID } from '@kbn/observability-plugin/common';
-import { useFetcher } from '@kbn/observability-shared-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';

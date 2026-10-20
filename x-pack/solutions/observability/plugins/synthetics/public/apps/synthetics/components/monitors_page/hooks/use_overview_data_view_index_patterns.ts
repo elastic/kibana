@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { useFetcher } from '@kbn/observability-shared-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
 import type { ExploratoryEmbeddableProps } from '@kbn/exploratory-view-plugin/public';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 import { getSyntheticsCcsIndex } from '../../../../../../common/get_synthetics_indices';

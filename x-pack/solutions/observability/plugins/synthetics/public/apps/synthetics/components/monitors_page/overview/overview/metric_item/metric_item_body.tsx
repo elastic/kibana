@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { TagsList } from '@kbn/observability-shared-plugin/public';
+import { TagsList } from '@kbn/observability-shared-plugin/public/components/tags_list/tags_list_lazy';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { LocationsBadge } from './locations_badge';
 import { MonitorTypeBadge } from '../../../../common/components/monitor_type_badge';

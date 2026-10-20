@@ -21,7 +21,7 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { useFetcher } from '@kbn/observability-shared-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/public';

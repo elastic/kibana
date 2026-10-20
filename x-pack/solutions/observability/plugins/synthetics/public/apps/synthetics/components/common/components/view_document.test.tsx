@@ -47,7 +47,7 @@ let mockFetcherReturn: { data?: unknown; loading: boolean; error?: Error | undef
   loading: true,
   error: undefined,
 };
-jest.mock('@kbn/observability-shared-plugin/public', () => ({
+jest.mock('@kbn/observability-shared-plugin/public/hooks/use_fetcher', () => ({
   useFetcher: (producer: () => Promise<unknown>) => {
     mockFetcherProducers.push(producer);
     return mockFetcherReturn;

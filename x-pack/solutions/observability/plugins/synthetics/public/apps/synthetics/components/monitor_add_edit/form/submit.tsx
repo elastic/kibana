@@ -10,7 +10,7 @@ import { Redirect, useParams, useHistory, useLocation } from 'react-router-dom';
 import { EuiButton, EuiLink, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useFormContext } from 'react-hook-form';
-import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
+import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useEnablement } from '../../../hooks';
 import { RunTestButton } from './run_test_btn';

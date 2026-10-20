@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public';
+import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
 import { screen } from '@testing-library/react';
 import { ProjectAPIKeys } from './project_api_keys';
 import { makeUptimePermissionsCore, render } from '../../../utils/testing';
 
-jest.mock('@kbn/observability-shared-plugin/public');
+jest.mock('@kbn/observability-shared-plugin/public/hooks/use_fetcher');
 
 describe('<ProjectAPIKeys />', () => {
   const state = {

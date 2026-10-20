@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
+import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public/components/header_menu';
 import type { AppMountParameters } from '@kbn/core/public';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ActionMenuContent } from './action_menu_content';

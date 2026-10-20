@@ -6,14 +6,14 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public';
+import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
 import * as reactRedux from 'react-redux-v7';
 import { useMonitorLatestPing } from './use_monitor_latest_ping';
 import { ConfigKey, MonitorTypeEnum, type Ping } from '../../../../../../common/runtime_types';
 import { getMonitorLastRunAction } from '../../../state';
 import { fetchLatestTestRun } from '../../../state/monitor_details/api';
 
-jest.mock('@kbn/observability-shared-plugin/public', () => ({
+jest.mock('@kbn/observability-shared-plugin/public/hooks/use_fetcher', () => ({
   // Mirror of the real FETCH_STATUS enum values; test bodies read it back off
   // the mocked module below so there is a single source of truth.
   FETCH_STATUS: {

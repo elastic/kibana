@@ -6,7 +6,7 @@
  */
 
 import { useContext } from 'react';
-import { useFetcher } from '@kbn/observability-shared-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
 import type { SyntheticsCCSSettings } from '../../../../../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../../../../../common/constants';
 import { apiService } from '../../../../../../utils/api_service';
