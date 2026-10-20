@@ -79,7 +79,7 @@ const StyledKibanaPageTemplate = styled(KibanaPageTemplate)<
       min-height: 0;
       overflow: hidden;
 
-      > div {
+      .securityPageWrapper__content {
         display: flex;
         flex-direction: column;
         flex: 1 1 auto;
@@ -143,6 +143,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateW
             <GlobalKQLHeader />
             <KibanaPageTemplate.Section
               className="securityPageWrapper"
+              contentProps={{ className: 'securityPageWrapper__content' }}
               data-test-subj="pageContainer"
               paddingSize={rest.paddingSize ?? 'l'}
               alignment="top"
