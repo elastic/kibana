@@ -9,14 +9,14 @@
 
 import type { ExportShare, RegisterShareIntegrationArgs } from '@kbn/share-plugin/public';
 import { checkLicense } from '../../../license_check';
-import type { ExportModalShareOpts } from '../../share_context_menu';
+import type { ScreenCaptureExportShareOpts } from '../../share_context_menu';
 import { hasCapabilityByKey } from '../../shared';
 
 export const reportingPNGExportShareIntegration = ({
   apiClient,
   startServices$,
-  isServerless,
-}: ExportModalShareOpts): RegisterShareIntegrationArgs<ExportShare> => {
+  isExperimental,
+}: ScreenCaptureExportShareOpts): RegisterShareIntegrationArgs<ExportShare> => {
   const supportedObjectTypes = ['dashboard', 'visualization', 'lens'];
 
   return {
@@ -24,7 +24,7 @@ export const reportingPNGExportShareIntegration = ({
     groupId: 'export',
     getShareIntegrationConfig: async (...args) => {
       const { getShareMenuItems } = await import('./png_export_config');
-      return getShareMenuItems({ apiClient, startServices$, isServerless })(...args);
+      return getShareMenuItems({ apiClient, startServices$, isExperimental })(...args);
     },
     prerequisiteCheck({ license, capabilities, objectType }) {
       if (!license) {

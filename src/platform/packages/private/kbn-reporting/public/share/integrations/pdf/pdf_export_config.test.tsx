@@ -11,18 +11,18 @@ import { NEVER } from 'rxjs';
 import { getShareMenuItems } from './pdf_export_config';
 
 describe('PDF export config', () => {
-  const getConfig = (isServerless: boolean) =>
+  const getConfig = (isExperimental: boolean) =>
     getShareMenuItems({
       apiClient: {},
       startServices$: NEVER,
-      isServerless,
+      isExperimental,
     } as unknown as Parameters<typeof getShareMenuItems>[0])({
       objectType: 'dashboard',
       isDirty: false,
       sharingData: { title: 'test', locatorParams: { id: 'test', params: {} } },
     } as unknown as Parameters<ReturnType<typeof getShareMenuItems>>[0]);
 
-  it('marks the export as experimental on serverless', () => {
+  it('badges the export when it is experimental', () => {
     expect(getConfig(true).badge).toEqual({
       label: 'Experimental',
       tooltipContent:
@@ -30,7 +30,7 @@ describe('PDF export config', () => {
     });
   });
 
-  it('does not badge the export on stateful', () => {
+  it('does not badge the export when it is not experimental', () => {
     expect(getConfig(false).badge).toBeUndefined();
   });
 });

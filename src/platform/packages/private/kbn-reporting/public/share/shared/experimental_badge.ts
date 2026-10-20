@@ -11,12 +11,12 @@ import { i18n } from '@kbn/i18n';
 import type { ExportShareConfig } from '@kbn/share-plugin/public';
 
 /**
- * Badge marking PDF/PNG exports as experimental on serverless; delete it when they reach GA.
+ * Badge marking an export as experimental in the export flyout.
  */
-export const getServerlessExperimentalBadge = (
-  isServerless: boolean
+export const getExperimentalBadge = (
+  isExperimental: boolean
 ): ExportShareConfig['config']['badge'] =>
-  isServerless
+  isExperimental
     ? {
         label: i18n.translate('reporting.share.experimentalBadge.label', {
           defaultMessage: 'Experimental',
