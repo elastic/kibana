@@ -27,7 +27,7 @@ Run `python3 "$FILE_BUG" <cmd>`: JSON on stdout, exit `0` ok, `1` fail, `2` ask.
 
 No write-yes request until `check-draft` exits 0 (create: pass `--title`, `--repo` and every `--label`; comment/reopen: `--action comment` and omit `--title`) or every remaining gap is walked (`Unknown` is allowed).
 
-Each gap in `check-draft` output has a line under `help` saying what the human must confirm and which flag then applies (`sensitive:*` also fires on Cases UI text like “Opening case 12345”).
+Each confirm-gate in `check-draft` output (`sensitive:*`, `security_issue:*`, `wip_or_limitation`, `media_review`) has a line under `help` saying what the human must confirm and which flag then applies (`sensitive:*` also fires on Cases UI text like “Opening case 12345”).
 
 `--sensitive-ok` never unlocks `security_issue`. `write` sets GitHub Type to Bug.
 
