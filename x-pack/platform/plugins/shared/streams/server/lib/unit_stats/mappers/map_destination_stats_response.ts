@@ -6,8 +6,10 @@
  */
 
 import type { StreamsUnit } from '@kbn/streams-schema';
-import { ITEM_UNIT, SECONDS_UNIT } from '../constants';
-import { noRate, noValue, perSecond, toItemRate, toValue } from './stats_values';
+import { ITEM_UNIT, SECONDS_UNIT, STATS_COLUMN } from '../constants';
+import { numberOrNull } from './esql_rows';
+import type { DestinationRow } from './join_destination_rows';
+import { noRate, noValue, perSecond, toItemRate, toSeries, toValue } from './stats_values';
 
 interface DestinationBucket {
   key: string;
@@ -83,3 +85,37 @@ export const mapDestinationStatsResponse = ({
 
   return results;
 };
+
+/**
+ * Places the joined rows of each destination into its result. A column that ES|QL returned as
+ * null stays no data. `total` is the sum of the points, so it always agrees with the bars.
+ */
+export const mapDestinationStatsRows = ({
+  rows,
+  bucketMs,
+}: {
+  rows: Record<string, DestinationRow>;
+  bucketMs: number;
+}): Record<string, StreamsUnit.StatsDestinationResult> =>
+  Object.fromEntries(
+    Object.entries(rows).map(([id, row]) => {
+      const { series, total } = toSeries({ rows: row.series, bucketMs });
+
+      return [
+        id,
+        {
+          latency: {
+            average: toValue(numberOrNull(row[STATS_COLUMN.avgLatency]), SECONDS_UNIT),
+          },
+          events: {
+            incoming: {
+              total: toValue(total, ITEM_UNIT),
+              rate: toItemRate(numberOrNull(row[STATS_COLUMN.incomingRate])),
+              series,
+              failures: { rate: toItemRate(numberOrNull(row[STATS_COLUMN.failedRate])) },
+            },
+          },
+        },
+      ];
+    })
+  );

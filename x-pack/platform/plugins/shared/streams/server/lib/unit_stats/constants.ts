@@ -43,6 +43,19 @@ export const STEP_ID_FIELD = 'attributes.streams.step.id';
 export const STEP_ITEMS_FIELD = 'metrics.streams.step.items';
 export const STEP_DURATION_FIELD = 'metrics.streams.step.duration';
 
+/** Columns the stats queries return and the mappers read into the response. */
+export const STATS_COLUMN = {
+  id: 'id',
+  step: 'step',
+  bucket: 'bucket',
+  incomingRate: 'incoming_rate',
+  failedRate: 'failed_rate',
+  avgLatency: 'avg_latency',
+  sumItems: 'sum_items',
+  sumItemsIn: 'sum_items_in',
+  avgDurationPerItem: 'avg_duration_per_item',
+} as const;
+
 /** Destination types that emit user-facing metrics (ADR 348, decision 4). */
 export const DESTINATION_TYPES_WITH_STATS = ['elasticsearch'];
 

@@ -13,6 +13,7 @@ import {
   DESTINATION_ITEMS_FIELD,
   ESQL_MAX_ROWS,
   OUTCOME_FIELD,
+  STATS_COLUMN,
   UNIT_STATS_STREAM,
 } from '../constants';
 import { filterByIds, filterByUnitAndWindow, type StatsWindow } from './filters';
@@ -40,28 +41,41 @@ const filterDestinations = (
  */
 export const buildDestinationRateQuery = (params: DestinationStatsQueryParams): ComposerQuery => {
   const items = normalizeColumn(DESTINATION_ITEMS_FIELD);
+  const duration = normalizeColumn(DESTINATION_DURATION_FIELD);
+  const outcome = normalizeColumn(OUTCOME_FIELD);
+  const destinationId = normalizeColumn(DESTINATION_ID_FIELD);
+  const incomingRate = esql.col(STATS_COLUMN.incomingRate);
+  const failedRate = esql.col(STATS_COLUMN.failedRate);
+  const avgLatency = esql.col(STATS_COLUMN.avgLatency);
+  const id = esql.col(STATS_COLUMN.id);
 
   return filterDestinations(esql.ts(UNIT_STATS_STREAM), params)
-    .pipe`STATS rate = SUM(RATE(${items})),
-        failed_rate = SUM(RATE(${items})) WHERE ${normalizeColumn(OUTCOME_FIELD)} != "success",
-        latency = AVG(${normalizeColumn(DESTINATION_DURATION_FIELD)})
-      BY id = ${normalizeColumn(DESTINATION_ID_FIELD)}`
-    .pipe`EVAL failed_rate = CASE(rate IS NOT NULL AND failed_rate IS NULL, 0.0, failed_rate)`;
+    .pipe`STATS ${incomingRate} = SUM(RATE(${items})),
+        ${failedRate} = SUM(RATE(${items})) WHERE ${outcome} != "success",
+        ${avgLatency} = AVG(${duration})
+      BY ${id} = ${destinationId}`
+    .pipe`EVAL ${failedRate} = CASE(${incomingRate} IS NOT NULL AND ${failedRate} IS NULL, 0.0, ${failedRate})`;
 };
 
 /**
- * Items per destination and time bucket, from a plain `FROM`: a plain sum inside `TS` is the
- * last value of each series, not a sum of deltas. `items` is a counter, so it is cast first.
+ * Items per destination and time bucket, ordered by bucket, from a plain `FROM`: a plain sum
+ * inside `TS` is the last value of each series, not a sum of deltas. `items` is a counter, so
+ * it is cast first.
  * Returns at most `ESQL_MAX_ROWS` rows (ids times buckets), silently, so the caller chunks ids.
  */
 export const buildDestinationSumsQuery = ({
   bucketMs,
   ...params
 }: DestinationStatsQueryParams & { bucketMs: number }): ComposerQuery => {
-  const items = normalizeColumn(DESTINATION_ITEMS_FIELD);
+  const destinationItems = normalizeColumn(DESTINATION_ITEMS_FIELD);
+  const destinationId = normalizeColumn(DESTINATION_ID_FIELD);
+  const sumItems = esql.col(STATS_COLUMN.sumItems);
+  const id = esql.col(STATS_COLUMN.id);
+  const bucket = esql.col(STATS_COLUMN.bucket);
 
-  return filterDestinations(esql.from(UNIT_STATS_STREAM), params).pipe`WHERE ${items} IS NOT NULL`
-    .pipe`EVAL delta = TO_DOUBLE(${items})`.pipe`STATS items = SUM(delta)
-      BY id = ${normalizeColumn(DESTINATION_ID_FIELD)}, bucket = BUCKET(@timestamp, ${bucketMs} ms)`
-    .pipe`LIMIT ${ESQL_MAX_ROWS}`;
+  return filterDestinations(esql.from(UNIT_STATS_STREAM), params)
+    .pipe`WHERE ${destinationItems} IS NOT NULL`.pipe`EVAL delta = TO_DOUBLE(${destinationItems})`
+    .pipe`STATS ${sumItems} = SUM(delta)
+      BY ${id} = ${destinationId}, ${bucket} = BUCKET(@timestamp, ${bucketMs} ms)`
+    .pipe`SORT ${bucket}`.pipe`LIMIT ${ESQL_MAX_ROWS}`;
 };

@@ -19,7 +19,7 @@ describe('buildProcessorRateQuery', () => {
     expect(buildProcessorRateQuery(params).print('basic')).toBe(
       `${head(
         'TS'
-      )} | WHERE attributes.direction == "in" | STATS rate = SUM(RATE(metrics.streams.step.items)) BY step = attributes.streams.step.id`
+      )} | WHERE attributes.direction == "in" | STATS incoming_rate = SUM(RATE(metrics.streams.step.items)) BY step = attributes.streams.step.id`
     );
   });
 
@@ -45,7 +45,7 @@ describe('buildProcessorSumsQuery', () => {
     expect(buildProcessorSumsQuery(params).print('basic')).toBe(
       `${head(
         'FROM'
-      )} | EVAL delta = TO_DOUBLE(metrics.streams.step.items) | STATS items_in = SUM(delta) WHERE attributes.direction == "in", duration_sum = SUM(metrics.streams.step.duration) BY step = attributes.streams.step.id | EVAL duration_per_item = CASE(items_in > 0, duration_sum / items_in)`
+      )} | EVAL delta = TO_DOUBLE(metrics.streams.step.items) | STATS sum_items_in = SUM(delta) WHERE attributes.direction == "in", duration_sum = SUM(metrics.streams.step.duration) BY step = attributes.streams.step.id | EVAL avg_duration_per_item = CASE(sum_items_in > 0, duration_sum / sum_items_in)`
     );
   });
 

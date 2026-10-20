@@ -22,7 +22,7 @@ describe('buildDestinationRateQuery', () => {
     expect(buildDestinationRateQuery(params).print('basic')).toBe(
       `${head(
         'TS'
-      )} | STATS rate = SUM(RATE(metrics.streams.destination.items)), failed_rate = SUM(RATE(metrics.streams.destination.items)) WHERE attributes.outcome != "success", latency = AVG(metrics.streams.destination.duration) BY id = attributes.streams.destination.id | EVAL failed_rate = CASE(rate IS NOT NULL AND failed_rate IS NULL, 0.0, failed_rate)`
+      )} | STATS incoming_rate = SUM(RATE(metrics.streams.destination.items)), failed_rate = SUM(RATE(metrics.streams.destination.items)) WHERE attributes.outcome != "success", avg_latency = AVG(metrics.streams.destination.duration) BY id = attributes.streams.destination.id | EVAL failed_rate = CASE(incoming_rate IS NOT NULL AND failed_rate IS NULL, 0.0, failed_rate)`
     );
   });
 
@@ -41,7 +41,7 @@ describe('buildDestinationSumsQuery', () => {
     expect(buildDestinationSumsQuery({ ...params, bucketMs: 60_000 }).print('basic')).toBe(
       `${head(
         'FROM'
-      )} | WHERE metrics.streams.destination.items IS NOT NULL | EVAL delta = TO_DOUBLE(metrics.streams.destination.items) | STATS items = SUM(delta) BY id = attributes.streams.destination.id, bucket = BUCKET(@timestamp, 60000 ms) | LIMIT 10000`
+      )} | WHERE metrics.streams.destination.items IS NOT NULL | EVAL delta = TO_DOUBLE(metrics.streams.destination.items) | STATS sum_items = SUM(delta) BY id = attributes.streams.destination.id, bucket = BUCKET(@timestamp, 60000 ms) | SORT bucket | LIMIT 10000`
     );
   });
 

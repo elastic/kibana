@@ -6,7 +6,8 @@
  */
 
 import type { StreamsUnit } from '@kbn/streams-schema';
-import { ITEM_UNIT, RATE_TIME_UNIT } from '../constants';
+import { ITEM_UNIT, RATE_TIME_UNIT, STATS_COLUMN } from '../constants';
+import { numberOrNull, type EsqlRow } from './esql_rows';
 
 export type StatsValue = StreamsUnit.StatsDestinationResult['latency']['average'];
 export type StatsRate = StreamsUnit.StatsDestinationResult['events']['incoming']['rate'];
@@ -22,6 +23,28 @@ export const toValue = (value: number | null, unit: string): StatsValue =>
 /** A rate of items per second. */
 export const toItemRate = (value: number | null): StatsRate =>
   value === null ? noRate() : { value, unit: ITEM_UNIT, time_unit: RATE_TIME_UNIT };
+
+/**
+ * The series of a destination from its sums rows, and the total of its points, so the total
+ * always agrees with the bars. A row with no items is left out. No points means no total.
+ */
+export const toSeries = ({
+  rows,
+  bucketMs,
+}: {
+  rows: EsqlRow[];
+  bucketMs: number;
+}): { series: StreamsUnit.StatsSeries; total: number | null } => {
+  const points = rows.flatMap((row) => {
+    const value = numberOrNull(row[STATS_COLUMN.sumItems]);
+    return value === null ? [] : [{ start: String(row[STATS_COLUMN.bucket]), value }];
+  });
+
+  return {
+    series: { bucket_ms: bucketMs, points },
+    total: points.length > 0 ? points.reduce((sum, point) => sum + point.value, 0) : null,
+  };
+};
 
 /** Total over the seconds the data covers. Null when there is no covered time. */
 export const perSecond = (total: number, seconds: number | undefined): number | null =>
