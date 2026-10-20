@@ -11,10 +11,9 @@ import {
   WORKFLOW_DISPATCHED_EBT_EVENT_TYPE,
   type WorkflowDispatchedEbtData,
 } from '../../../../server/lib/telemetry/workflow_ebt_schema';
-import { COMMON_HEADERS } from '../constants';
+import { COMMON_HEADERS, POLL_TIMEOUT_MS } from '../constants';
 
 const EBT_HELPERS_PATH = '/internal/analytics_ftr_helpers';
-const DEFAULT_EVENT_TIMEOUT_MS = 10_000;
 
 /** An EBT event as buffered by the `analytics_ftr_helpers` server shipper. */
 export interface WorkflowDispatchedEbtEvent {
@@ -73,7 +72,7 @@ export const getEbtService = ({
     waitForWorkflowDispatchedEvents: ({
       workflowId,
       count = 1,
-      timeoutMs = DEFAULT_EVENT_TIMEOUT_MS,
+      timeoutMs = POLL_TIMEOUT_MS,
     }) =>
       measurePerformanceAsync(log, 'ebt.waitForWorkflowDispatchedEvents', async () => {
         const response = await kbnClient.request<WorkflowDispatchedEbtEvent[]>({
