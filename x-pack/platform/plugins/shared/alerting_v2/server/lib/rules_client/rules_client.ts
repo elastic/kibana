@@ -617,6 +617,51 @@ export class RulesClient {
     }
   }
 
+  /**
+   * Saves the rule and creates or removes its executor task to match `enabled`.
+   * The order makes sure an enabled rule is never left without a task.
+   */
+  private async commitRuleAttrs({
+    id,
+    attrs,
+    version,
+    references,
+  }: {
+    id: string;
+    attrs: RuleSavedObjectAttributes;
+    version?: string;
+    references: SavedObjectReference[];
+  }): Promise<void> {
+    const { spaceId } = this.getSpaceContext();
+
+    if (attrs.enabled) {
+      await this.scheduleRuleExecutorTask({
+        ruleId: id,
+        spaceId,
+        scheduleEvery: attrs.schedule.every,
+      });
+      await this.writeRuleAttrs({ id, attrs, version, references });
+      return;
+    }
+
+    await this.writeRuleAttrs({ id, attrs, version, references });
+
+    // The rule is already saved as disabled, so a failed removal doesn't fail
+    // the request. The leftover task halts on its next run, like in bulk disable.
+    try {
+      await this.taskManager.removeIfExists(getRuleExecutorTaskId({ ruleId: id, spaceId }));
+    } catch (e) {
+      this.logger.error({
+        error: new Error(
+          `Failed to remove executor task for rule [${id}]; the task may still exist but the executor defense halts it: ${errorMessage(
+            e
+          )}`
+        ),
+        code: ALERTING_LOG_CODES.RULE_TASK_MANAGER_DRIFT,
+      });
+    }
+  }
+
   @withApm
   public async createRule(params: CreateRuleParams): Promise<RuleResponse> {
     const parsed = this.parseRuleData(createRuleDataSchema, params.data, 'create');
@@ -720,7 +765,6 @@ export class RulesClient {
 
   @withApm
   public async updateRule({ id, data }: UpdateRuleParams): Promise<RuleResponse> {
-    const { spaceId } = this.getSpaceContext();
     const parsed = this.parseRuleData(updateRuleDataSchema, data, 'update');
     if (parsed.artifacts !== undefined) {
       this.artifactTypeRegistry.validate(parsed.artifacts ?? undefined);
@@ -763,26 +807,15 @@ export class RulesClient {
       },
     ]);
 
-    // updateRule NEVER changes whether a rule runs — it only re-syncs the
-    // schedule interval of an already-enabled rule (Task Manager's
-    // `ensureScheduled` updates the interval of the existing task on conflict).
-    // Turning the run loop on/off stays exclusively with enableRule/disableRule,
-    // so a disabled rule is never resurrected by an unrelated property edit.
-    if (existingAttrs.enabled) {
-      await this.scheduleRuleExecutorTask({
-        ruleId: id,
-        spaceId,
-        scheduleEvery: nextAttrs.schedule.every,
-      });
-    }
-
     const references = rebuildArtifactReferences({
       artifacts: nextAttrs.artifacts,
       previousReferences: existingReferences,
       registry: this.artifactTypeRegistry,
     });
 
-    await this.writeRuleAttrs({
+    // Updates never enable or disable a rule. Enabled rules get their task
+    // interval updated, disabled rules only lose a leftover task.
+    await this.commitRuleAttrs({
       id,
       attrs: nextAttrs,
       version: existingVersion,
@@ -927,8 +960,6 @@ export class RulesClient {
 
   @withApm
   public async enableRule({ id }: { id: string }): Promise<RuleResponse> {
-    const { spaceId } = this.getSpaceContext();
-
     const {
       attrs: existingAttrs,
       version: existingVersion,
@@ -953,13 +984,7 @@ export class RulesClient {
       await this.validateSchedule([{ updatedEvery: nextAttrs.schedule.every, checkLimit: true }]);
     }
 
-    await this.scheduleRuleExecutorTask({
-      ruleId: id,
-      spaceId,
-      scheduleEvery: nextAttrs.schedule.every,
-    });
-
-    await this.writeRuleAttrs({
+    await this.commitRuleAttrs({
       id,
       attrs: nextAttrs,
       version: existingVersion,
@@ -979,8 +1004,6 @@ export class RulesClient {
 
   @withApm
   public async disableRule({ id }: { id: string }): Promise<RuleResponse> {
-    const { spaceId } = this.getSpaceContext();
-
     const {
       attrs: existingAttrs,
       version: existingVersion,
@@ -1001,10 +1024,7 @@ export class RulesClient {
       version: this.getNextVersion(existingAttrs.version),
     };
 
-    const taskId = getRuleExecutorTaskId({ ruleId: id, spaceId });
-    await this.taskManager.removeIfExists(taskId);
-
-    await this.writeRuleAttrs({
+    await this.commitRuleAttrs({
       id,
       attrs: nextAttrs,
       version: existingVersion,
@@ -1041,6 +1061,12 @@ export class RulesClient {
       size: params.size,
       field: 'routing_tags',
     });
+  }
+
+  /** Returns how many rules were created from each of the given rule templates. */
+  @withApm
+  public async getRuleCountsByTemplateId(templateIds: string[]): Promise<Record<string, number>> {
+    return this.rulesSavedObjectService.countByTemplateIds(templateIds);
   }
 
   @withApm
@@ -1812,7 +1838,6 @@ export class RulesClient {
       return { rule, created: true };
     }
 
-    const { spaceId } = this.getSpaceContext();
     const actor = await this.userService.getCurrentActor();
     const nowIso = new Date().toISOString();
 
@@ -1851,33 +1876,14 @@ export class RulesClient {
       registry: this.artifactTypeRegistry,
     });
 
-    // Enable schedules before writing; disable writes before removing — each
-    // order keeps a failure from leaving the rule in a worse state than
-    // before. Also self-heals like `enableRule`/`disableRule`: the task state
-    // is always reapplied for `nextEnabled`, not just on a transition, so a
-    // leftover task from a prior bug or failed write also gets cleaned up.
-    if (nextEnabled) {
-      await this.scheduleRuleExecutorTask({
-        ruleId: id,
-        spaceId,
-        scheduleEvery: nextAttrs.schedule.every,
-      });
-      await this.writeRuleAttrs({
-        id,
-        attrs: nextAttrs,
-        version: existingVersion,
-        references,
-      });
-    } else {
-      await this.writeRuleAttrs({
-        id,
-        attrs: nextAttrs,
-        version: existingVersion,
-        references,
-      });
-      const taskId = getRuleExecutorTaskId({ ruleId: id, spaceId });
-      await this.taskManager.removeIfExists(taskId);
-    }
+    // Always reapplies the task state for `nextEnabled`, not just on a
+    // transition, so a leftover task gets cleaned up too.
+    await this.commitRuleAttrs({
+      id,
+      attrs: nextAttrs,
+      version: existingVersion,
+      references,
+    });
 
     const rule = this.toRuleApiResponse({
       id,

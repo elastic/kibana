@@ -38,7 +38,7 @@ const createFromFileLabel = i18n.translate('workflows.libraryPage.createFromFile
 });
 
 /**
- * Workflow Template Library catalog page (`/app/workflows/library`). The
+ * Workflow Template library catalog page (`/app/workflows/library`). The
  * browse UI itself lives in `@kbn/workflows-ui` (`<CatalogBrowser>`) so it can
  * be reused from other plugins later; this page only wires navigation. The
  * route is always registered (see `routes.tsx`); this page redirects to the
