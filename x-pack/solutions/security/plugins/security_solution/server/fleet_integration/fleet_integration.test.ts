@@ -176,6 +176,7 @@ describe('Fleet integrations', () => {
       linuxDnsEvents: true,
       customYaraSignaturesEnabled: true,
       linuxRansomwareProtection: true,
+      endpointAiDataCollection: true,
       perOsPolicySettings: true,
       registryCredentialHardening: true,
     } as ExperimentalFeatures;
@@ -1922,6 +1923,57 @@ describe('Fleet integrations', () => {
             message: expect.stringContaining('Invalid Elastic Defend policy configuration'),
           });
         });
+      });
+    });
+
+    describe('AI Data Collection', () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const runUpdate = async () => {
+        const callback = getPackagePolicyUpdateCallback(
+          endpointAppContextServiceMock,
+          cloudService,
+          productFeaturesService,
+          experimentalFeatures
+        );
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        policyConfig.inputs[0]!.config!.policy.value = policyFactory();
+
+        const updatedPolicyConfig = await callback(
+          policyConfig,
+          soClient,
+          esClient,
+          requestContextMock.convertContext(ctx),
+          req
+        );
+
+        return updatedPolicyConfig.inputs[0]!.config!.policy.value;
+      };
+
+      beforeEach(() => {
+        licenseEmitter.next(Enterprise);
+      });
+
+      it.each([
+        ['endpointAiDataCollection', { endpointAiDataCollection: false }],
+        ['perOsPolicySettings', { perOsPolicySettings: false }],
+      ])('should strip ai_data_collection from every OS when %s is off', async (_flag, flags) => {
+        experimentalFeatures = { ...experimentalFeatures, ...flags };
+
+        const policy = await runUpdate();
+
+        for (const os of ['windows', 'mac', 'linux'] as const) {
+          expect(policy[os]).not.toHaveProperty('ai_data_collection');
+        }
+      });
+
+      it('should keep ai_data_collection when both experimental flags are on', async () => {
+        const policy = await runUpdate();
+
+        for (const os of ['windows', 'mac', 'linux'] as const) {
+          expect(policy[os].ai_data_collection).toEqual({ enabled: true });
+        }
       });
     });
 

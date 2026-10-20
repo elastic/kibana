@@ -12,6 +12,13 @@
  */
 export const AI_SUMMARY_EVENT_ACTION = 'ai_summary_generated' as const;
 
+/**
+ * `Ai_summary.variant_id` of a summary generated over an entity's whole resolution group
+ * (flyout `mode: resolved`). Single-entity summaries carry no variant id, so the two never
+ * overwrite each other in the latest-wins read.
+ */
+export const AI_SUMMARY_RESOLVED_GROUP_VARIANT_ID = 'resolved' as const;
+
 export interface AiSummaryHighlightItem {
   title: string;
   text: string;

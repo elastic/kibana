@@ -32,6 +32,8 @@ export const AI_ASSISTANT_APP_ID = 'observabilityAIAssistant';
 
 export const OBLT_UX_APP_ID = 'ux';
 
+export const OBLT_DIGITAL_EXPERIENCE_APP_ID = 'digital_experience';
+
 export const OBLT_PROFILING_APP_ID = 'profiling';
 
 export const INVENTORY_APP_ID = 'inventory';
