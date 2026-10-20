@@ -324,7 +324,7 @@ const describeOutcome = (
   if (result.tier2_skipped_reason === 'extraction_pending') {
     return {
       heading: 'Hunt Watch did not hunt this report yet',
-      summary: `Hunt Watch did not hunt ${report}: the report has not been enriched yet, so nothing was searched. It stays eligible and a later sweep hunts it once enrichment finishes.`,
+      summary: `Hunt Watch did not hunt ${report}: the report has not been enriched yet, so nothing was searched. It is not marked as hunted, so a later sweep can pick it up once enrichment finishes.`,
     };
   }
   if (!result.completed_successfully && !result.has_confirmed_hit) {
