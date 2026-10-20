@@ -69,6 +69,10 @@ interface Execution {
   readonly chains: Map<string, Promise<void>>;
   /** Main-side per-run signal handed to bindings so in-flight main work can stop too. */
   readonly hostAbort: AbortController;
+  /** Aborts one in-flight capability call when the worker drops it. */
+  readonly callAborts: Map<number, AbortController>;
+  /** Drop arrived before the call packet. */
+  readonly droppedCalls: Set<number>;
   abort?: () => void;
   termination?: {
     readonly reason: TerminationReason;
@@ -171,6 +175,8 @@ export class ExecutionHost {
         callbacks: new Map(),
         chains: new Map(),
         hostAbort: new AbortController(),
+        callAborts: new Map(),
+        droppedCalls: new Set(),
       };
       const abort = () => {
         void this.terminate(execution, 'cancelled');
@@ -448,7 +454,11 @@ export class ExecutionHost {
               reason: execution.termination.reason,
               graceful: execution.termination.acknowledged,
               ...(execution.termination.reason === 'cancelled'
-                ? { stop: 'cooperative' as const }
+                ? {
+                    stop: (packet.failed ? 'cooperative-failed' : 'cooperative') as
+                      | 'cooperative'
+                      | 'cooperative-failed',
+                  }
                 : {}),
               terminal: value,
             }
@@ -459,7 +469,25 @@ export class ExecutionHost {
       this.dispatch(execution.options.workloadClass);
       return;
     }
+    if (packet.kind === 'drop_call') {
+      const existing = execution.callAborts.get(packet.id);
+      if (existing) existing.abort();
+      else execution.droppedCalls.add(packet.id);
+      return;
+    }
     if (packet.kind !== 'call') return;
+    const callAbort = new AbortController();
+    execution.callAborts.set(packet.id, callAbort);
+    if (execution.droppedCalls.has(packet.id) || execution.hostAbort.signal.aborted) {
+      callAbort.abort(execution.hostAbort.signal.reason);
+    }
+    const onHostAbort = () => callAbort.abort(execution.hostAbort.signal.reason);
+    execution.hostAbort.signal.addEventListener('abort', onHostAbort);
+    const releaseCall = () => {
+      execution.hostAbort.signal.removeEventListener('abort', onHostAbort);
+      execution.callAborts.delete(packet.id);
+      execution.droppedCalls.delete(packet.id);
+    };
     const started = performance.now();
     const binding = execution.options.capabilities[packet.capability];
     let value: CodecInput;
@@ -483,7 +511,7 @@ export class ExecutionHost {
         if (execution.done || slot.stopping) throw new Error('Run ended; capability call dropped');
         const syncStarted = cpuStarted ? process.threadCpuUsage() : undefined;
         const pending = binding.handler(packet.operation, callArgs, execution.bundle, {
-          signal: execution.hostAbort.signal,
+          signal: callAbort.signal,
           invokeCallback: (reference, args) =>
             new Promise((resolve, reject) => {
               if (reference.runId !== execution.bundle.runId || execution.done || slot.stopping)
@@ -544,8 +572,10 @@ export class ExecutionHost {
     }
     const windowCpu = cpuStarted ? process.threadCpuUsage(cpuStarted) : { user: 0, system: 0 };
     // A late completion from a killed generation cannot reach a reused slot or commit an outcome.
-    if (slot.active.get(execution.bundle.runId) !== execution || execution.done || slot.stopping)
+    if (slot.active.get(execution.bundle.runId) !== execution || execution.done || slot.stopping) {
+      releaseCall();
       return;
+    }
     let encoded;
     try {
       encoded = encode(value);
@@ -571,6 +601,7 @@ export class ExecutionHost {
       { handlerSyncCpuUs, handlerWindowCpuUs: windowCpu.user + windowCpu.system }
     );
     slot.endpoint.send(reply);
+    releaseCall();
   }
 
   private armDeadline(execution: Execution, deadlineAt: number): void {

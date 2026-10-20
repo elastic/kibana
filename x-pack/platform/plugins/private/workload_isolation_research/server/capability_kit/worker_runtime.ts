@@ -26,7 +26,12 @@ interface RunState {
   cancellation?: CancellationInfo;
   readonly pending: Map<
     number,
-    { resolve: (value: CodecInput) => void; reject: (error: Error) => void }
+    {
+      resolve: (value: CodecInput) => void;
+      reject: (error: Error) => void;
+      signal?: AbortSignal;
+      onAbort: () => void;
+    }
   >;
 }
 
@@ -118,6 +123,7 @@ const startRuntime = (): void => {
       const call = run?.pending.get(packet.id);
       if (!call) return;
       run?.pending.delete(packet.id);
+      call.signal?.removeEventListener('abort', call.onAbort);
       const value = decode(packet.value);
       if (packet.failed)
         call.reject(value instanceof Error ? value : new Error('Capability call failed'));
@@ -218,12 +224,27 @@ const startRuntime = (): void => {
           if (reference.runId !== bundle.runId) throw new Error('Foreign callback handle');
           run.callbacks.delete(reference.id);
         },
-        call: (capability, operation, args) =>
+        call: (capability, operation, args, signal?: AbortSignal) =>
           new Promise((resolve, reject) => {
             const grant = bundle.grants[capability];
             if (!grant) return reject(new Error('Capability not granted'));
+            if (signal?.aborted) {
+              reject(signal.reason instanceof Error ? signal.reason : new Error('Capability call aborted'));
+              return;
+            }
             const id = ++sequence;
-            run.pending.set(id, { resolve, reject });
+            const onAbort = () => {
+              if (!run.pending.has(id)) return;
+              run.pending.delete(id);
+              try {
+                send({ version: 1, kind: 'drop_call', runId: bundle.runId, id });
+              } catch {
+                /* The host may already be gone. */
+              }
+              reject(signal?.reason instanceof Error ? signal.reason : new Error('Capability call aborted'));
+            };
+            run.pending.set(id, { resolve, reject, signal, onAbort });
+            signal?.addEventListener('abort', onAbort, { once: true });
             try {
               send({
                 version: 1,
@@ -237,6 +258,7 @@ const startRuntime = (): void => {
               });
             } catch (error) {
               run.pending.delete(id);
+              signal?.removeEventListener('abort', onAbort);
               reject(error instanceof Error ? error : new Error('Capability send failed'));
             }
           }),

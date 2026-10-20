@@ -89,7 +89,12 @@ export interface WorkerContext {
   readonly signal: AbortSignal;
   /** 0.1.9: category of the cooperative abort (undefined until aborted). */
   readonly cancellation?: () => CancellationInfo | undefined;
-  call(capability: string, operation: string, args: CodecInput): Promise<CodecInput>;
+  call(
+    capability: string,
+    operation: string,
+    args: CodecInput,
+    signal?: AbortSignal
+  ): Promise<CodecInput>;
   callSync(
     capability: string,
     operation: string,
@@ -185,7 +190,8 @@ export type Packet =
       readonly state: SharedArrayBuffer;
       readonly buffer: SharedArrayBuffer;
     }
-  | { readonly version: 1; readonly kind: 'ready' };
+  | { readonly version: 1; readonly kind: 'ready' }
+  | { readonly version: 1; readonly kind: 'drop_call'; readonly runId: string; readonly id: number };
 
 export type Outcome =
   | {
@@ -201,7 +207,7 @@ export type Outcome =
       readonly reason: TerminationReason;
       readonly graceful?: boolean;
       /** Cancel only: the worker finished during grace, or the slot was hard-stopped after it. */
-      readonly stop?: 'cooperative' | 'hard';
+      readonly stop?: 'cooperative' | 'cooperative-failed' | 'hard';
       readonly terminal?: CodecInput;
       readonly collateral?: boolean;
       readonly initiatingRunId?: string;

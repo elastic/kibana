@@ -12,6 +12,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { ExecutionHost } from '../host';
 import { ModuleRegistry } from '../registry';
+import { bindRunnerCancel } from '../../t7a/isolate/runner_cancel';
 import {
   consumeCollateralReschedule,
   deriveCancelGraceMs,
@@ -34,6 +35,7 @@ import {
   createReplicaWaitQueue,
   createBootEsWriteFence,
   createEventForwarder,
+  assertNoInternalRepositoryExtensions,
   createExecutionContextService,
   createForwardingLogger,
   createPlatformReplica,
@@ -241,7 +243,10 @@ test('replica subscriptions and content hashes observe warm owner changes', asyn
       value: { elasticsearch: 'available', savedObjects: 'degraded', overall: 'degraded' },
     },
   });
-  assert.deepEqual(flags, [false, true]);
+  assert.deepEqual(flags, [true]);
+  const absent: boolean[] = [];
+  replica.booleanFlag$('not-owned', false).subscribe((value: boolean) => absent.push(value));
+  assert.deepEqual(absent, []);
   assert.equal(completed, false);
   assert.equal(statuses[statuses.length - 1], 'degraded');
   subscription.unsubscribe();
@@ -331,6 +336,35 @@ test('analytics reportEvent forwards a registered string event type and its data
         throw new Error('schema rejected');
       }, { eventType: 'other' }),
     /schema rejected/
+  );
+});
+
+test('set replaces the execution context and labels match Core', () => {
+  const service = createExecutionContextService();
+  service.set({
+    name: 'parent',
+    id: 'p',
+    page: 'alerts',
+    meta: { rule: 'es-query', skip: undefined },
+  });
+  service.withContext({ name: 'child', id: 'c' }, () => {
+    assert.equal(service.get()?.toJSON().child?.id, 'c');
+  });
+  assert.deepEqual(service.getAsLabels(), {
+    name: 'parent',
+    id: 'p',
+    page: 'alerts',
+    kibana_meta_rule: 'es-query',
+  });
+  assert.equal(service.get()?.toJSON().child, undefined);
+});
+
+test('internal repository extensions fail closed', () => {
+  assertNoInternalRepositoryExtensions(undefined);
+  assertNoInternalRepositoryExtensions({});
+  assert.throws(
+    () => assertNoInternalRepositoryExtensions({ securityExtension: {} }),
+    /internal repository extensions are not supported/
   );
 });
 
@@ -678,3 +712,161 @@ test(
     }
   }
 );
+
+test('aborting a replica wait settles it and drops the waiter', async () => {
+  const queue = createReplicaWaitQueue();
+  const controller = new AbortController();
+  let settled = false;
+  const pending = queue.wait('stable', controller.signal).then(() => {
+    settled = true;
+  });
+  controller.abort();
+  const result = await Promise.race([
+    pending.then(() => 'settled'),
+    new Promise((resolve) => setTimeout(() => resolve('hung'), 40)),
+  ]);
+  assert.equal(result, 'settled');
+  assert.equal(settled, true);
+  assert.equal(queue.size(), 0);
+  queue.publish('changed');
+  await Promise.resolve();
+  assert.equal(queue.size(), 0);
+});
+
+const READ_ENDPOINT_NAMES = [
+  '_search',
+  '_msearch',
+  '_async_search',
+  '_count',
+  '_field_caps',
+  '_mget',
+  '_pit',
+  '_query',
+  '_analyze',
+] as const;
+
+test('read classification is anchored and document ids cannot impersonate endpoints', () => {
+  assert.equal(isEsWrite('POST', '/orders/_update/_search'), true);
+  assert.equal(isEsWrite('POST', '/orders/_update/_query'), true);
+  assert.equal(isEsWrite('POST', '/orders/_doc/_mget'), true);
+  assert.equal(isEsWrite('POST', '/orders/_search'), false);
+  assert.equal(isEsWrite('POST', '/orders/_eql/search'), false);
+  assert.equal(isEsWrite('POST', '/_render/template'), false);
+  for (const name of READ_ENDPOINT_NAMES) {
+    assert.equal(isEsWrite('POST', `/orders/_doc/${name}`), true, name);
+    assert.equal(isEsWrite('POST', `/orders/_update/${name}`), true, name);
+    assert.equal(isEsWrite('POST', `/orders/_create/${name}`), true, name);
+  }
+});
+
+test('an already-aborted host signal still cancels the runner', () => {
+  const signal = AbortSignal.abort(new Error('boot finished after cancel'));
+  const abortController = new AbortController();
+  let cancels = 0;
+  bindRunnerCancel(signal, abortController, async () => {
+    cancels += 1;
+  });
+  assert.equal(cancels, 1);
+  assert.equal(abortController.signal.aborted, true);
+});
+
+test(
+  'a failed terminal during cancel is not recorded as cooperative completion',
+  { timeout: 20000 },
+  async () => {
+    const specifier = require.resolve('../example_tasks');
+    const registry = new ModuleRegistry(new Set([specifier]));
+    registry.register('failAfterCancel', specifier, 'failAfterCancel');
+    const host = new ExecutionHost(registry, { transport: 'thread', abortGraceMs: 2000 });
+    const controller = new AbortController();
+    try {
+      const outcome = await host.run({
+        workloadClass: 'alerting',
+        principal: 'alice',
+        space: 'default',
+        moduleId: 'failAfterCancel',
+        input: {},
+        deadlineMs: 10000,
+        signal: controller.signal,
+        capabilities: {
+          fixture: {
+            lever: 'capability_bundle',
+            handler: async (operation) => {
+              if (operation === 'started') controller.abort();
+            },
+          },
+        },
+      });
+      assert.equal(outcome.status, 'terminated');
+      if (outcome.status === 'terminated') {
+        assert.equal(outcome.stop, 'cooperative-failed');
+        assert.notEqual(outcome.stop, 'cooperative');
+        assert.equal(outcome.graceful, true);
+      }
+    } finally {
+      await host.stop();
+    }
+  }
+);
+
+test(
+  'a task that aborts its own capability call does not leave it outstanding',
+  { timeout: 20000 },
+  async () => {
+    const specifier = require.resolve('../example_tasks');
+    const registry = new ModuleRegistry(new Set([specifier]));
+    registry.register('abortOwnCall', specifier, 'abortOwnCall');
+    const host = new ExecutionHost(registry, { transport: 'thread', abortGraceMs: 200 });
+    try {
+      const outcome = await host.run({
+        workloadClass: 'alerting',
+        principal: 'alice',
+        space: 'default',
+        moduleId: 'abortOwnCall',
+        input: {},
+        deadlineMs: 800,
+        capabilities: {
+          fixture: {
+            lever: 'capability_bundle',
+            handler: async (_operation, _args, _bundle, call) => {
+              await new Promise((_resolve, reject) => {
+                const signal = call?.signal;
+                if (!signal) return;
+                if (signal.aborted) reject(new Error('aborted'));
+                else signal.addEventListener('abort', () => reject(new Error('aborted')), { once: true });
+              });
+            },
+          },
+        },
+      });
+      assert.equal(outcome.status, 'success');
+      if (outcome.status === 'success') assert.deepEqual(outcome.value, { released: true });
+    } finally {
+      await host.stop();
+    }
+  }
+);
+
+test('bulk item namespaces bridge even when an options bag is present', () => {
+  const options = savedObjectCallOptions('bulkCreate', [
+    [{ type: 'action_task_params', id: '1', initialNamespaces: ['foreign'] }],
+    { overwrite: false },
+  ]);
+  assert.equal(hasExplicitNamespace(options), true);
+  assert.equal(
+    routeSavedObject({
+      ...baseRoute,
+      target: 'scoped',
+      operation: 'bulkCreate',
+      types: ['action_task_params'],
+      registeredTypes: ['action', 'action_task_params', 'alert', 'rules-settings'],
+      providerOptions: {
+        excludedExtensions: ['security'],
+        includedHiddenTypes: ['action', 'action_task_params'],
+      },
+      defaultSpace: true,
+      options,
+    }),
+    'bridge'
+  );
+});

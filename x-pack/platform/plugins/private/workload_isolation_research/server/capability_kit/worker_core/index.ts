@@ -45,6 +45,7 @@ export type {
   StatusReplica,
 } from './platform';
 export {
+  assertNoInternalRepositoryExtensions,
   ALWAYS_FENCED_TM_METHODS,
   CONFIG_CAPTURE_KEY,
   LOCAL_SCOPED_CLIENT_OPTION_SIGNATURES,

@@ -21,7 +21,7 @@
  *    maintenance scheduling, analytics event types): FENCED (recorded no-ops).
  */
 
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, from, of } from 'rxjs';
 import { sanitizeTaskDefinitions } from '@kbn/task-manager-plugin/server/task_type_dictionary';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -66,6 +66,7 @@ import {
   parseAnalyticsReport,
   decideTaskManagerCall,
   emptyPlatformReplicas,
+  assertNoInternalRepositoryExtensions,
   routeSavedObject,
   runInTmPhase,
   savedObjectCallOptions,
@@ -379,7 +380,8 @@ export const createCoreLite = (
     });
 
   const savedObjectsStart = strict('core.savedObjects', {
-    createInternalRepository: (types?: string[]) => {
+    createInternalRepository: (types?: string[], extensions?: object) => {
+      assertNoInternalRepositoryExtensions(extensions);
       const list = types ?? [];
       const concrete = list.length > 0 ? list : registeredNames();
       const facade = soFacade({ target: 'internal', types: list });
@@ -463,9 +465,24 @@ export const createCoreLite = (
         resolveReplica('string', key, fallback, platform.stringFlag(key)),
       getNumberValue: (key: string, fallback: number) =>
         resolveReplica('number', key, fallback, platform.numberFlag(key)),
-      getBooleanValue$: (key: string, fallback: boolean) => platform.booleanFlag$(key, fallback),
-      getStringValue$: (key: string, fallback: string) => platform.stringFlag$(key, fallback),
-      getNumberValue$: (key: string, fallback: number) => platform.numberFlag$(key, fallback),
+      getBooleanValue$: (key: string, fallback: boolean) =>
+        platform.booleanFlag(key) === undefined
+          ? from(
+              bridge('replica', 'featureFlag', { key, fallback, kind: 'boolean' }) as Promise<boolean>
+            )
+          : platform.booleanFlag$(key, fallback),
+      getStringValue$: (key: string, fallback: string) =>
+        platform.stringFlag(key) === undefined
+          ? from(
+              bridge('replica', 'featureFlag', { key, fallback, kind: 'string' }) as Promise<string>
+            )
+          : platform.stringFlag$(key, fallback),
+      getNumberValue$: (key: string, fallback: number) =>
+        platform.numberFlag(key) === undefined
+          ? from(
+              bridge('replica', 'featureFlag', { key, fallback, kind: 'number' }) as Promise<number>
+            )
+          : platform.numberFlag$(key, fallback),
     }),
     pricing: strict('core.pricing', {
       isFeatureAvailable: (featureId: string) => {

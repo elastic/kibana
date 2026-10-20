@@ -24,6 +24,7 @@ import type { Island } from './island';
 import { diffDefinitionParity } from '@kbn/task-manager-plugin/server/lib/research_runner_override';
 import { replicaFingerprint, runWithExecutionContext } from '../../capability_kit/worker_core';
 import { edgeStats, fenceStats, missStats, runContext } from './bridge';
+import { bindRunnerCancel } from './runner_cancel';
 
 let island: Promise<Island> | undefined;
 let bootStartedAt: number | undefined;
@@ -169,12 +170,22 @@ export const runTask: TaskEntry = async (rawInput: CodecInput, context: WorkerCo
     const current = await getIsland(context);
     current.applyReplicas(dataSnapshot(context));
     let watchStopped = false;
+    const watchAbort = new AbortController();
+    const stopWatch = () => {
+      watchStopped = true;
+      if (!watchAbort.signal.aborted) watchAbort.abort();
+    };
+    if (context.signal.aborted) stopWatch();
+    else context.signal.addEventListener('abort', stopWatch, { once: true });
     const watchReplicas = async () => {
-      while (!watchStopped && !context.signal.aborted) {
+      while (!watchStopped && !watchAbort.signal.aborted) {
         try {
-          const next = (await context.call('replica', 'wait', {
-            fingerprint: replicaFingerprint(current.platform.generation()),
-          })) as IslandSnapshot['replicas'];
+          const next = (await context.call(
+            'replica',
+            'wait',
+            { fingerprint: replicaFingerprint(current.platform.generation()) },
+            watchAbort.signal
+          )) as IslandSnapshot['replicas'];
           if (watchStopped || !next) return;
           current.applyReplicas({ replicas: next } as IslandSnapshot);
         } catch {
@@ -182,7 +193,7 @@ export const runTask: TaskEntry = async (rawInput: CodecInput, context: WorkerCo
         }
       }
     };
-    void watchReplicas();
+    const watch = watchReplicas();
     const parity = diffDefinitionParity(
       ((dataSnapshot(context).taskDefinitionMeta as readonly {
         type: string;
@@ -214,12 +225,11 @@ export const runTask: TaskEntry = async (rawInput: CodecInput, context: WorkerCo
       cancel?: () => Promise<unknown>;
       cleanup?: () => Promise<void>;
     };
-    // Cooperative cancel (kit 0.1.1): TM's cancel on main aborts the dispatch signal.
-    const onAbort = () => {
-      abortController.abort();
-      void runner.cancel?.();
-    };
-    context.signal.addEventListener('abort', onAbort, { once: true });
+    // Cooperative cancel: TM's cancel on main aborts the dispatch signal, including one
+    // that aborted while the island was still booting.
+    const unbindCancel = bindRunnerCancel(context.signal, abortController, () =>
+      runner.cancel?.() ?? Promise.resolve()
+    );
     runs++;
     try {
       if (input.phase === 'cleanup') {
@@ -248,7 +258,9 @@ export const runTask: TaskEntry = async (rawInput: CodecInput, context: WorkerCo
         } as unknown as CodecInput;
       }
     } finally {
-      watchStopped = true;
-      context.signal.removeEventListener('abort', onAbort);
+      unbindCancel();
+      stopWatch();
+      context.signal.removeEventListener('abort', stopWatch);
+      await watch;
     }
   });

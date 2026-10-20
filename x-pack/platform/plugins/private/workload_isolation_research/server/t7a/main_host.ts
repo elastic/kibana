@@ -35,6 +35,7 @@ import {
   createReplicaWaitQueue,
   forwardLogLevel,
   RUN_BRIDGED_TM_METHODS,
+  assertNoInternalRepositoryExtensions,
   emptyPlatformReplicas,
   fingerprintSavedObjectType,
   replicaFingerprint,
@@ -437,18 +438,21 @@ export class T7aController {
       features: current.features.generation,
     });
     if (fingerprint !== seen || signal?.aborted) return Promise.resolve(current);
+    const waiter = new AbortController();
+    const stopWaiting = () => waiter.abort();
     return new Promise((resolve) => {
       let settled = false;
       const finish = () => {
         if (settled) return;
         settled = true;
         clearTimeout(timer);
-        signal?.removeEventListener('abort', finish);
+        signal?.removeEventListener('abort', stopWaiting);
+        waiter.abort();
         resolve(this.buildSnapshot().replicas ?? current);
       };
       const timer = setTimeout(finish, 30_000);
-      signal?.addEventListener('abort', finish, { once: true });
-      void this.replicaQueue.wait(seen).then(finish);
+      signal?.addEventListener('abort', stopWaiting, { once: true });
+      void this.replicaQueue.wait(seen, waiter.signal).then(finish);
     });
   }
 
@@ -528,6 +532,7 @@ export class T7aController {
       const target = args.target as string;
       let client: Obj;
       if (target === 'internal') {
+        assertNoInternalRepositoryExtensions(args.extensions as object | undefined);
         client = core.savedObjects.createInternalRepository(
           args.types as string[]
         ) as unknown as Obj;
@@ -588,6 +593,11 @@ export class T7aController {
       }),
       replica: {
         lever: 'capability_bundle',
+        syncHandler: (operation, args) => {
+          const record = (args ?? {}) as Obj;
+          if (operation !== 'pricing') throw new Error('t7a replica: sync op not allowlisted');
+          return toData(core.pricing.isFeatureAvailable(String(record.featureId)));
+        },
         handler: async (operation, args, _bundle, context) => {
           const record = (args ?? {}) as Obj;
           if (operation === 'pricing') return toData(core.pricing.isFeatureAvailable(String(record.featureId)));

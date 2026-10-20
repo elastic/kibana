@@ -133,6 +133,13 @@ export const routeSavedObject = (input: SoRouteInput): 'local' | 'bridge' => {
   return 'local';
 };
 
+/** Internal repositories do not accept extension hooks on the worker. An empty bag is the default. */
+export const assertNoInternalRepositoryExtensions = (extensions?: object): void => {
+  if (extensions && Object.keys(extensions).length > 0) {
+    throw new Error('worker-core internal repository extensions are not supported');
+  }
+};
+
 export const hasExplicitNamespace = (options?: object): boolean => {
   if (!options) return false;
   return ['namespace', 'namespaces', 'spaceId', 'initialNamespaces'].some(
@@ -184,9 +191,9 @@ export const savedObjectCallOptions = (
   const index = SAVED_OBJECT_OPTION_ARGUMENT[method];
   if (index === undefined) return undefined;
   const declared = asOptionBag(args[index]);
-  if (declared) return declared;
-  if (itemsCarryNamespace(args)) return { namespace: 'item' };
-  return undefined;
+  if (!itemsCarryNamespace(args)) return declared;
+  if (declared && hasExplicitNamespace(declared)) return declared;
+  return { ...(declared ?? {}), namespace: 'item' };
 };
 
 const tmPhaseStore = new AsyncLocalStorage<'boot' | 'run'>();

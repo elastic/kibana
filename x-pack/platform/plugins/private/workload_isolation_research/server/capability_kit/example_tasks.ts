@@ -206,6 +206,31 @@ export const cooperative = async (
   return { cancelled: context.signal.aborted, persisted: true };
 };
 
+/** Throws after cancel so a failed terminal is not recorded as cooperative completion. */
+export const failAfterCancel = async (
+  _input: CodecInput,
+  context: WorkerContext
+): Promise<CodecInput> => {
+  await context.call('fixture', 'started', {});
+  await new Promise<void>((resolve) => {
+    if (context.signal.aborted) resolve();
+    else context.signal.addEventListener('abort', () => resolve(), { once: true });
+  });
+  throw new Error('cleanup failed');
+};
+
+/** Aborts its own capability call before returning. The call must not stay pending. */
+export const abortOwnCall = async (
+  _input: CodecInput,
+  context: WorkerContext
+): Promise<CodecInput> => {
+  const controller = new AbortController();
+  const pending = context.call('fixture', 'wait', {}, controller.signal);
+  controller.abort();
+  await pending.catch(() => undefined);
+  return { released: true };
+};
+
 /** Finishes bounded cleanup after the host forwards cancel. Used to prove grace vs hard stop. */
 export const cleanupAfterCancel = async (
   input: CodecInput,

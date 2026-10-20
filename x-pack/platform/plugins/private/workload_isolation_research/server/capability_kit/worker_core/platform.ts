@@ -9,7 +9,7 @@
  * Values that look like secrets are never placed in forwarded log text. */
 
 import { AsyncLocalStorage } from 'async_hooks';
-import { BehaviorSubject, distinctUntilChanged, map } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, filter, map } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 
 export interface ReplicaEnvelope<T> {
@@ -173,11 +173,22 @@ export const createExecutionContextService = () => ({
   getAsHeader: (requestId?: string) => executionContextOpaqueId(requestId),
   getAsLabels: () => {
     const value = currentExecutionContext()?.toJSON();
-    return value ? { ...value } : {};
+    if (!value) return {};
+    const meta = value.meta
+      ? Object.entries(value.meta).reduce((acc, [key, entry]) => {
+          if (entry !== undefined) acc[`kibana_meta_${key}`] = entry;
+          return acc;
+        }, {} as Record<string, string | number | boolean>)
+      : {};
+    return {
+      ...(value.name === undefined ? {} : { name: value.name }),
+      ...(value.id === undefined ? {} : { id: value.id }),
+      ...(value.page === undefined ? {} : { page: value.page }),
+      ...meta,
+    };
   },
   set: (context: ExecutionContextValue) => {
-    const parent = executionContextStore.getStore();
-    executionContextStore.enterWith(new ResearchExecutionContextContainer(context, parent));
+    executionContextStore.enterWith(new ResearchExecutionContextContainer(context));
   },
   setRequestId: (requestId: string) => {
     requestIdStore.enterWith({ requestId });
@@ -361,27 +372,30 @@ export const createPlatformReplica = (initial: PlatformReplicas) => {
       features: current.features.generation,
     }),
     booleanFlag: (key: string) => lookupBooleanFlag(current.featureFlags.value, key),
-    booleanFlag$: (key: string, fallback: boolean) =>
+    booleanFlag$: (key: string, _fallback: boolean) =>
       featureFlags$.pipe(
-        map((envelope) => lookupBooleanFlag(envelope.value, key) ?? fallback),
+        map((envelope) => lookupBooleanFlag(envelope.value, key)),
+        filter((value): value is boolean => value !== undefined),
         distinctUntilChanged()
       ),
-    stringFlag$: (key: string, fallback: string) =>
+    stringFlag$: (key: string, _fallback: string) =>
       featureFlags$.pipe(
         map((envelope) =>
           Object.prototype.hasOwnProperty.call(envelope.value.strings, key)
             ? envelope.value.strings[key]
-            : fallback
+            : undefined
         ),
+        filter((value): value is string => value !== undefined),
         distinctUntilChanged()
       ),
-    numberFlag$: (key: string, fallback: number) =>
+    numberFlag$: (key: string, _fallback: number) =>
       featureFlags$.pipe(
         map((envelope) =>
           Object.prototype.hasOwnProperty.call(envelope.value.numbers, key)
             ? envelope.value.numbers[key]
-            : fallback
+            : undefined
         ),
+        filter((value): value is number => value !== undefined),
         distinctUntilChanged()
       ),
     stringFlag: (key: string) =>
@@ -408,10 +422,25 @@ export const createPlatformReplica = (initial: PlatformReplicas) => {
 /** Resolves waiters whose seen fingerprint is no longer current. An unchanged publish waits. */
 export const createReplicaWaitQueue = () => {
   const pending: Array<{ seen: string; resolve: (fingerprint: string) => void }> = [];
+  const drop = (entry: { seen: string; resolve: (fingerprint: string) => void }): void => {
+    const index = pending.indexOf(entry);
+    if (index >= 0) pending.splice(index, 1);
+  };
   return {
-    wait: (seen: string) =>
+    size: () => pending.length,
+    wait: (seen: string, signal?: AbortSignal) =>
       new Promise<string>((resolve) => {
-        pending.push({ seen, resolve });
+        const entry = { seen, resolve };
+        const finish = () => {
+          drop(entry);
+          resolve(seen);
+        };
+        if (signal?.aborted) {
+          finish();
+          return;
+        }
+        pending.push(entry);
+        signal?.addEventListener('abort', finish, { once: true });
       }),
     publish: (fingerprint: string) => {
       const ready = pending.filter((item) => item.seen !== fingerprint);
