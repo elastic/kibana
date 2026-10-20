@@ -45,7 +45,7 @@ const getChange = (id: string, snapshot: Partial<DashboardState>): ChangeHistory
   ({
     id,
     timestamp: '2026-01-01T00:00:00.000Z',
-    actor: { name: 'Hannah' },
+    actor: { name: 'Miles M.' },
     action: 'dashboard_update',
     snapshot: { title: `Title ${id}`, panels: [], ...snapshot },
   } as unknown as ChangeHistoryDetail);
