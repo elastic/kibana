@@ -12,7 +12,8 @@ import type { Logger } from '@kbn/core/server';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { prepareReinforcementTurn } from '../decision_trees/register_decision_trees';
-import { toolCallsSchema } from './tool_calls_schema';
+import { withToolResults } from '../investigation_round';
+import { toolCallsSchema, toolResultsSchema } from './tool_calls_schema';
 
 const MAX_INPUT_CHARS = 100_000;
 
@@ -45,17 +46,29 @@ export const decisionTreePrepareStepDefinition = ({
       tool_calls: toolCallsSchema.describe(
         'Investigator tool calls from this round. Used to see which decision-tree files were read.'
       ),
+      tool_results: toolResultsSchema.describe(
+        'Results of the investigator tool calls, keyed by tool_call_id.'
+      ),
     }),
     outputSchema: z.object({
       message: z.string().describe('Message to hand the reinforcement agent.'),
       tree_count: z.number().describe('Number of decision trees the agent may edit.'),
+      opened_ids: z
+        .array(z.string())
+        .optional()
+        .describe('Canonical symptom:<slug> tree ids opened by the investigator this round.'),
       turn_kind: z
         .enum(['initial_investigation', 'feedback_reinforcement'])
         .describe('Whether this round seeds the trees or follows up on them.'),
       skipped: z.boolean().describe('True when this round is not eligible for reinforcement.'),
     }),
     handler: async (context) => {
-      const { response, agent_id: agentId, tool_calls: toolCalls } = context.input;
+      const {
+        response,
+        agent_id: agentId,
+        tool_calls: toolCalls,
+        tool_results: toolResults,
+      } = context.input;
       const skippedOutput = {
         output: {
           message: '',
@@ -80,17 +93,23 @@ export const decisionTreePrepareStepDefinition = ({
 
       const telemetryConnectorId = getTelemetryConnectorId();
       const { spaceId } = context.contextManager.getContext().workflow;
-      const { message, treeCount, turnKind } = await prepareReinforcementTurn({
+      const { message, treeCount, turnKind, openedTreeIds } = await prepareReinforcementTurn({
         response,
         connectorNames: telemetryConnectorId ? [telemetryConnectorId] : [],
         esClient: context.contextManager.getScopedEsClient(),
         logger,
         spaceId,
-        toolCalls: (toolCalls ?? []) as InvestigationToolCall[],
+        toolCalls: withToolResults((toolCalls ?? []) as InvestigationToolCall[], toolResults ?? []),
       });
 
       return {
-        output: { message, tree_count: treeCount, turn_kind: turnKind, skipped: false },
+        output: {
+          message,
+          tree_count: treeCount,
+          turn_kind: turnKind,
+          skipped: false,
+          ...(openedTreeIds && openedTreeIds.length > 0 ? { opened_ids: openedTreeIds } : {}),
+        },
       };
     },
   });

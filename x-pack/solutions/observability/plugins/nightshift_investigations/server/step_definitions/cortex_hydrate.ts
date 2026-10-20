@@ -61,6 +61,10 @@ export const cortexHydrateStepDefinition = ({
     outputSchema: z.object({
       sandbox_id: z.string().describe('Sandbox that was hydrated.'),
       conversation_id: z.string().describe('Unscoped conversation id for legacy consumers.'),
+      hydrated_ids: z
+        .array(z.string())
+        .optional()
+        .describe('Canonical Cortex page ids materialized into the sandbox.'),
       skipped: z.boolean().optional(),
       failed: z.boolean().optional().describe('The write failed; its contents may be incomplete.'),
       notification: z
@@ -113,8 +117,9 @@ export const cortexHydrateStepDefinition = ({
       // this is a before-agent hook, and aborting the investigator round because one
       // writer could not reach the sandbox is worse than telling the model the
       // directory may be incomplete.
+      let hydrateResult: Awaited<ReturnType<typeof hydrateCortexWorkspace>> | undefined;
       try {
-        await withTimeout(
+        hydrateResult = await withTimeout(
           (signal) =>
             hydrateCortexWorkspace({
               session,
@@ -144,11 +149,19 @@ export const cortexHydrateStepDefinition = ({
         };
       }
 
+      const hydratedIds =
+        typeof hydrateResult === 'object' &&
+        hydrateResult !== null &&
+        Array.isArray(hydrateResult.hydratedIds)
+          ? hydrateResult.hydratedIds
+          : undefined;
+
       return {
         output: {
           sandbox_id: sandboxId,
           conversation_id: resolvedConversationId,
           notification: '',
+          ...(hydratedIds ? { hydrated_ids: hydratedIds } : {}),
         },
       };
     },

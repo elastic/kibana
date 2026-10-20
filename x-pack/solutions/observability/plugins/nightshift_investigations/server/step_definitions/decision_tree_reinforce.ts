@@ -17,9 +17,16 @@ import {
   buildInvestigationConversation,
   buildInvestigationRound,
 } from '../decision_trees/investigation_round';
-import { DECISION_TREE_LEARNING_TOOL_IDS } from '../tools/decision_tree';
-import { withToolResults } from './cortex_optimize';
-import { toolCallsSchema, toolResultsSchema } from './tool_calls_schema';
+import {
+  appliedWriteSchema,
+  investigationRoundInputsSchema,
+  loadInvestigationRound,
+} from '../investigation_round';
+import {
+  DECISION_TREE_LEARNING_TOOL_IDS,
+  reinforcementSessionRegistry,
+} from '../tools/decision_tree';
+import { scopeConversationId } from '../tools/sandbox_bash/tool_utils';
 
 const MAX_INPUT_CHARS = 100_000;
 
@@ -38,16 +45,12 @@ export const decisionTreeReinforceStepDefinition = ({
       "Runs the reinforcement agent with the investigator's round as conversation history (its " +
       'tool calls and their results as real tool messages), followed by the prepared turn message.',
     inputSchema: z.object({
+      ...investigationRoundInputsSchema,
       prompt: z.string().max(MAX_INPUT_CHARS).describe('The user message that started the round.'),
       response: z
         .string()
         .max(MAX_INPUT_CHARS)
         .describe("The investigator's final response for the round."),
-      round_id: z
-        .string()
-        .max(1024)
-        .optional()
-        .describe("Id of the investigator's round, reused for the rebuilt history round."),
       message: z
         .string()
         .max(MAX_INPUT_CHARS)
@@ -60,14 +63,14 @@ export const decisionTreeReinforceStepDefinition = ({
         .max(MAX_KEYWORD_LENGTH)
         .optional()
         .describe('Inference connector for the reinforcement run.'),
-      tool_calls: toolCallsSchema.describe('Investigator tool calls from this round.'),
-      tool_results: toolResultsSchema.describe(
-        'Results of the investigator tool calls, keyed by tool_call_id.'
-      ),
     }),
     outputSchema: z.object({
       message: z.string().describe("The reinforcement agent's final response."),
       skipped: z.boolean().optional(),
+      applied_writes: z
+        .array(appliedWriteSchema)
+        .optional()
+        .describe('Decision tree and learning writes applied during this reinforcement turn.'),
     }),
     handler: async (context) => {
       // The combined optimize workflow installs with Cortex or Memory, so this step is registered
@@ -85,6 +88,7 @@ export const decisionTreeReinforceStepDefinition = ({
       const {
         prompt,
         response,
+        conversation_id: conversationId,
         round_id: roundId,
         message,
         turn_kind: turnKind,
@@ -92,14 +96,26 @@ export const decisionTreeReinforceStepDefinition = ({
         tool_calls: toolCalls,
         tool_results: toolResults,
       } = context.input;
+      const request = context.contextManager.getFakeRequest();
+      const loadedRound = await loadInvestigationRound({
+        agentBuilder,
+        request,
+        conversationId: conversationId || undefined,
+        roundId: roundId || undefined,
+        fallbackToolCalls: (toolCalls ?? []) as InvestigationToolCall[],
+        fallbackToolResults: toolResults ?? [],
+        logger: context.logger,
+        signal: context.abortSignal,
+      });
       const now = new Date().toISOString();
       const round = buildInvestigationRound({
         // Liquid renders an absent input as '', so empty strings count as unset.
         roundId: roundId || uuidv4(),
         prompt,
         response,
-        toolCalls: withToolResults((toolCalls ?? []) as InvestigationToolCall[], toolResults ?? []),
-        startedAt: now,
+        toolCalls: loadedRound.toolCalls,
+        steps: loadedRound.source === 'persisted_round' ? loadedRound.steps : undefined,
+        startedAt: loadedRound.startedAt ?? now,
       });
       // A fresh id per run: the beforeAgent hydrate namespaces the sandbox by conversation id.
       const conversation = buildInvestigationConversation({
@@ -108,33 +124,55 @@ export const decisionTreeReinforceStepDefinition = ({
         round,
         now,
       });
+      const workflowContext = context.contextManager.getContext();
+      const spaceId = workflowContext.workflow.spaceId;
+      const executionId = workflowContext.execution.id;
+      const scopedReinforcementConvId = scopeConversationId(spaceId, conversation.id);
+      reinforcementSessionRegistry.registerSession(scopedReinforcementConvId, {
+        conversationId: conversationId || undefined,
+        roundId: roundId || undefined,
+        workflowExecutionId: executionId,
+      });
+
       // Matches Deductive: an initial investigation only edits files; learnings need a follow-up.
       const configurationOverrides =
         turnKind === 'feedback_reinforcement'
           ? { tools: [{ tool_ids: [...DECISION_TREE_LEARNING_TOOL_IDS] }] }
           : undefined;
 
-      // The workflow step's `timeout` bounds the run: its timeout zone aborts this signal.
-      const { result } = await agentBuilder.agents.runAgent({
-        request: context.contextManager.getFakeRequest(),
-        agentId: NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID,
-        interactive: { enabled: false },
-        defaultConnectorId: connectorId || undefined,
-        abortSignal: context.abortSignal,
-        telemetryMetadata: {
-          pluginId: 'nightshift_investigation_memory',
-          aggregateBy: 'nightshift',
-          productSolution: 'observability',
-          productFeature: 'nightshift',
-          interactionId: context.contextManager.getContext().execution.id,
-        },
-        agentParams: {
-          conversation,
-          nextInput: { message },
-          ...(configurationOverrides ? { configurationOverrides } : {}),
-        },
-      });
+      try {
+        // The workflow step's `timeout` bounds the run: its timeout zone aborts this signal.
+        const { result } = await agentBuilder.agents.runAgent({
+          request,
+          agentId: NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID,
+          interactive: { enabled: false },
+          defaultConnectorId: connectorId || undefined,
+          abortSignal: context.abortSignal,
+          telemetryMetadata: {
+            pluginId: 'nightshift_investigation_memory',
+            aggregateBy: 'nightshift',
+            productSolution: 'observability',
+            productFeature: 'nightshift',
+            interactionId: executionId,
+          },
+          agentParams: {
+            conversation,
+            nextInput: { message },
+            ...(configurationOverrides ? { configurationOverrides } : {}),
+          },
+        });
+        const sessionState = reinforcementSessionRegistry.drainSession(scopedReinforcementConvId);
 
-      return { output: { message: result.round.response.message } };
+        return {
+          output: {
+            message: result.round.response.message,
+            ...(sessionState.appliedWrites.length > 0
+              ? { applied_writes: sessionState.appliedWrites }
+              : {}),
+          },
+        };
+      } finally {
+        reinforcementSessionRegistry.drainSession(scopedReinforcementConvId);
+      }
     },
   });

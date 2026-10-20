@@ -34,6 +34,10 @@ interface CortexKiSource {
     corroborations?: number | string;
     slug?: string;
     space_id?: string;
+    version?: number | string;
+    conversation_id?: string;
+    round_id?: string;
+    workflow_execution_id?: string;
   };
 }
 
@@ -47,6 +51,10 @@ interface CortexPageWrite {
   corroborations?: number;
   /** When set, the write fails with a version conflict if the stored page has changed since. */
   version?: string;
+  docVersion?: number;
+  conversationId?: string;
+  roundId?: string;
+  workflowExecutionId?: string;
 }
 
 export interface CortexPageStore {
@@ -58,8 +66,15 @@ export interface CortexPageStore {
   upsert: (page: CortexPageWrite) => Promise<CortexPage>;
   /** Writes a new page atomically; resolves undefined when the page already exists. */
   create: (page: CortexPageWrite) => Promise<CortexPage | undefined>;
-  corroborate: (id: string) => Promise<CortexPage | undefined>;
-  archive: (id: string, version?: string) => Promise<CortexPage | undefined>;
+  corroborate: (
+    id: string,
+    provenance?: { conversationId?: string; roundId?: string; workflowExecutionId?: string }
+  ) => Promise<CortexPage | undefined>;
+  archive: (
+    id: string,
+    version?: string,
+    provenance?: { conversationId?: string; roundId?: string; workflowExecutionId?: string }
+  ) => Promise<CortexPage | undefined>;
   pruneDuplicates: () => Promise<number>;
 }
 
@@ -167,6 +182,10 @@ const toSummary = (id: string, source: CortexKiSource): CortexPageSummary | unde
   }
 
   const status = isStatus(source.attributes?.status) ? source.attributes.status : 'tentative';
+  const docVersion =
+    source.attributes?.version !== undefined
+      ? toCorroborations(source.attributes.version)
+      : undefined;
 
   return {
     id,
@@ -178,6 +197,14 @@ const toSummary = (id: string, source: CortexKiSource): CortexPageSummary | unde
     ...(source.description !== undefined && source.description.length > 0
       ? { description: source.description }
       : {}),
+    ...(source.attributes?.conversation_id
+      ? { conversation_id: source.attributes.conversation_id }
+      : {}),
+    ...(source.attributes?.round_id ? { round_id: source.attributes.round_id } : {}),
+    ...(source.attributes?.workflow_execution_id
+      ? { workflow_execution_id: source.attributes.workflow_execution_id }
+      : {}),
+    ...(docVersion && docVersion > 0 ? { doc_version: docVersion } : {}),
   };
 };
 
@@ -334,7 +361,18 @@ export const createCortexPageStore = ({
   };
 
   const buildDocument = (
-    { entityType, slug, title, description, content, status }: CortexPageWrite,
+    {
+      entityType,
+      slug,
+      title,
+      description,
+      content,
+      status,
+      docVersion,
+      conversationId,
+      roundId,
+      workflowExecutionId,
+    }: CortexPageWrite,
     corroborations: number
   ): { id: string; document: CortexKiSource } => {
     const canonicalSlug = canonicalizeSlug(entityType, slug);
@@ -352,6 +390,10 @@ export const createCortexPageStore = ({
           corroborations,
           slug: canonicalSlug,
           space_id: spaceId,
+          ...(docVersion !== undefined ? { version: docVersion } : {}),
+          ...(conversationId ? { conversation_id: conversationId } : {}),
+          ...(roundId ? { round_id: roundId } : {}),
+          ...(workflowExecutionId ? { workflow_execution_id: workflowExecutionId } : {}),
         },
       },
     };
@@ -452,7 +494,7 @@ export const createCortexPageStore = ({
       }
     },
 
-    async corroborate(id) {
+    async corroborate(id, provenance) {
       const found = await getSource(id);
       if (!found) {
         return undefined;
@@ -462,6 +504,9 @@ export const createCortexPageStore = ({
         return undefined;
       }
       const corroborations = page.corroborations + 1;
+      const hasProvenance = Boolean(
+        provenance?.conversationId || provenance?.roundId || provenance?.workflowExecutionId
+      );
       return this.upsert({
         entityType: page.entity_type,
         slug: page.slug,
@@ -470,10 +515,16 @@ export const createCortexPageStore = ({
         content: page.content,
         status: statusAfterCorroboration(page.status, corroborations),
         corroborations,
+        ...(hasProvenance || page.doc_version !== undefined
+          ? { docVersion: (page.doc_version ?? 0) + 1 }
+          : {}),
+        conversationId: provenance?.conversationId ?? page.conversation_id,
+        roundId: provenance?.roundId ?? page.round_id,
+        workflowExecutionId: provenance?.workflowExecutionId ?? page.workflow_execution_id,
       });
     },
 
-    async archive(id, version) {
+    async archive(id, version, provenance) {
       const found = await getSource(id);
       if (!found) {
         return undefined;
@@ -482,6 +533,9 @@ export const createCortexPageStore = ({
       if (!page) {
         return undefined;
       }
+      const hasProvenance = Boolean(
+        provenance?.conversationId || provenance?.roundId || provenance?.workflowExecutionId
+      );
       return this.upsert({
         entityType: page.entity_type,
         slug: page.slug,
@@ -491,6 +545,12 @@ export const createCortexPageStore = ({
         status: 'archived',
         corroborations: page.corroborations,
         version,
+        ...(hasProvenance || page.doc_version !== undefined
+          ? { docVersion: (page.doc_version ?? 0) + 1 }
+          : {}),
+        conversationId: provenance?.conversationId ?? page.conversation_id,
+        roundId: provenance?.roundId ?? page.round_id,
+        workflowExecutionId: provenance?.workflowExecutionId ?? page.workflow_execution_id,
       });
     },
 

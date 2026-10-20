@@ -56,6 +56,10 @@ export const decisionTreeHydrateStepDefinition = ({
         .string()
         .describe('Unscoped conversation id derived from the sandbox key.'),
       tree_count: z.number().describe('Number of decision trees written into the sandbox.'),
+      hydrated_ids: z
+        .array(z.string())
+        .optional()
+        .describe('Canonical symptom:<slug> tree ids materialized into the sandbox.'),
       skipped: z.boolean().optional(),
       failed: z.boolean().optional().describe('The write failed; its contents may be incomplete.'),
       notification: z
@@ -103,9 +107,9 @@ export const decisionTreeHydrateStepDefinition = ({
       // A failed write degrades to a system_update line rather than a failed step: this
       // step is also a before-agent hook for the reinforcement agent, so throwing would
       // abort that round over one writer.
-      let treeCount: number;
+      let hydrateResult: Awaited<ReturnType<typeof hydrateDecisionTreeWorkspace>>;
       try {
-        treeCount = await withTimeout(
+        hydrateResult = await withTimeout(
           (signal) =>
             hydrateDecisionTreeWorkspace({
               session,
@@ -135,12 +139,21 @@ export const decisionTreeHydrateStepDefinition = ({
         };
       }
 
+      const treeCount = typeof hydrateResult === 'number' ? hydrateResult : hydrateResult.treeCount;
+      const hydratedIds =
+        typeof hydrateResult === 'object' &&
+        hydrateResult !== null &&
+        Array.isArray(hydrateResult.hydratedIds)
+          ? hydrateResult.hydratedIds
+          : undefined;
+
       return {
         output: {
           sandbox_id: sandboxId,
           conversation_id: conversationId,
           tree_count: treeCount,
           notification: '',
+          ...(hydratedIds ? { hydrated_ids: hydratedIds } : {}),
         },
       };
     },

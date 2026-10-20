@@ -91,6 +91,65 @@ describe('buildInvestigationRound', () => {
     expect(JSON.stringify(other)).toContain('notes body');
   });
 
+  it('omits seeded env_docs, memory files, and bash reads of seeded directories', () => {
+    const steps = build([
+      {
+        tool_id: SANDBOX_VIEW_FILE_TOOL_ID,
+        tool_call_id: 'toolu_env',
+        params: { file_path: '/workspace/elastic.md' },
+        results: esqlResult('elastic body'),
+      },
+      {
+        tool_id: SANDBOX_BASH_TOOL_ID,
+        tool_call_id: 'toolu_bash',
+        params: { command: 'cat /workspace/connectors.md && cat /workspace/memories/m1.md' },
+        results: esqlResult('connectors body'),
+      },
+    ]).steps;
+
+    expect(JSON.stringify(steps)).not.toContain('elastic body');
+    expect(JSON.stringify(steps)).not.toContain('connectors body');
+    expect(steps[0]).toMatchObject({ results: [{ data: { omitted: expect.any(String) } }] });
+    expect(steps[1]).toMatchObject({ results: [{ data: { omitted: expect.any(String) } }] });
+  });
+
+  it('includes interleaved reasoning steps when persisted round steps are supplied', () => {
+    const results = esqlResult('{"values":[[1]]}');
+    const round = buildInvestigationRound({
+      roundId: 'round-1',
+      prompt: 'Why is checkout slow?',
+      response: 'Connection pool exhausted.',
+      toolCalls: [],
+      steps: [
+        { kind: 'reasoning', text: 'Checking Redis metrics first.' },
+        {
+          kind: 'tool',
+          toolId: SANDBOX_BASH_TOOL_ID,
+          toolCallId: 'toolu_1',
+          params: { command: 'curl "$URL/_query"' },
+          results,
+          resultText: '{"values":[[1]]}',
+          isError: false,
+        },
+      ],
+      startedAt: '2026-09-30T02:28:30.000Z',
+    });
+
+    expect(round.steps).toEqual([
+      {
+        type: ConversationRoundStepType.reasoning,
+        reasoning: 'Checking Redis metrics first.',
+      },
+      {
+        type: ConversationRoundStepType.toolCall,
+        tool_call_id: 'toolu_1',
+        tool_id: SANDBOX_BASH_TOOL_ID,
+        params: { command: 'curl "$URL/_query"' },
+        results,
+      },
+    ]);
+  });
+
   it('replaces results past the transcript budget while keeping every call', () => {
     const half = 'x'.repeat(MAX_HISTORY_RESULT_CHARS / 2);
     const steps = build(

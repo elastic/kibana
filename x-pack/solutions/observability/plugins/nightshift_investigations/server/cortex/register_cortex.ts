@@ -24,6 +24,11 @@ import {
 import { CORTEX_AI_INDEX_DEST, CORTEX_AI_INDEX_ID } from '../../common/cortex';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID, SANDBOX_TOOL_IDS } from '../agents/investigation';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
+import {
+  extractWorkspaceReads,
+  loadInvestigationRound,
+  type AppliedWriteRecord,
+} from '../investigation_round';
 import { createCortexTelemetry } from '../telemetry';
 import { materializeCortex } from './materialize';
 import { createLlmProposeCortexEdits, optimizeCortex } from './optimize';
@@ -91,13 +96,13 @@ export const hydrateCortexWorkspace = async ({
   analytics: AnalyticsServiceSetup;
   conversationId?: string;
   logger: Logger;
-}): Promise<void> => {
+}): Promise<{ hydratedIds: string[] } | void> => {
   const store = createCortexStore({ esClient, logger, spaceId, signal });
   const telemetry = createCortexTelemetry({ analytics, conversationId, logger });
   const materialize = () => materializeCortex({ session, store, telemetry, logger });
 
   try {
-    await materialize();
+    return await materialize();
   } catch (err) {
     if (!isSandboxUnavailable(err) || signal?.aborted) throw err;
 
@@ -106,9 +111,14 @@ export const hydrateCortexWorkspace = async ({
     // UNAVAILABLE and allocates a new pod for the next call, so a single retry lands on a pod
     // that is ready. Without it the run continues with no wiki, because nothing else seeds it.
     logger.warn(`Cortex hydrate reached an unavailable sandbox, retrying once: ${err.message}`);
-    await materialize();
+    return await materialize();
   }
 };
+
+export interface CortexOptimizeResult {
+  openedIds: string[];
+  appliedWrites: AppliedWriteRecord[];
+}
 
 export const runCortexOptimize = async ({
   request,
@@ -150,24 +160,35 @@ export const runCortexOptimize = async ({
   getSavedObjects: () => CoreStart['savedObjects'] | undefined;
   getUiSettings: () => CoreStart['uiSettings'] | undefined;
   logger: Logger;
-}): Promise<void> => {
+}): Promise<CortexOptimizeResult | undefined> => {
   // Only the Nightshift investigator writes to Cortex: it is the one agent whose post-execution
   // hook runs this workflow, and other agents' rounds must not edit the wiki. An unidentified
   // caller is refused rather than trusted — the optimize workflow has a manual trigger, so it can
   // be run without an agent id.
   if (agentId !== NIGHTSHIFT_INVESTIGATION_AGENT_ID) {
     logger.info('Cortex optimizer skipped — round was not produced by the Nightshift investigator');
-    return;
+    return undefined;
   }
 
-  const sandboxToolCalls = toolCalls.filter(
+  const loadedRound = await loadInvestigationRound({
+    agentBuilder: getAgentBuilder(),
+    request,
+    conversationId,
+    roundId,
+    fallbackToolCalls: toolCalls,
+    logger,
+    signal,
+  });
+  const openedIds = extractWorkspaceReads(loadedRound.steps).cortexIds;
+
+  const sandboxToolCalls = loadedRound.toolCalls.filter(
     ({ tool_id: toolId }) => toolId !== undefined && OPTIMIZER_TOOL_IDS.has(toolId)
   );
   if (sandboxToolCalls.length < MIN_OPTIMIZE_TOOL_CALLS) {
     logger.debug(
       `Cortex optimizer skipped — round made ${sandboxToolCalls.length} sandbox tool calls, below ${MIN_OPTIMIZE_TOOL_CALLS}`
     );
-    return;
+    return { openedIds, appliedWrites: [] };
   }
 
   const model = await createOptimizeModel({
@@ -182,11 +203,11 @@ export const runCortexOptimize = async ({
     logger,
   });
   if (!model) {
-    return;
+    return undefined;
   }
 
   const store = createCortexStore({ esClient, logger, spaceId, signal });
-  await optimizeCortex({
+  const appliedWrites = await optimizeCortex({
     store,
     proposeEdits: createLlmProposeCortexEdits({ inferenceClient: model.inferenceClient }),
     userMessage,
@@ -198,6 +219,12 @@ export const runCortexOptimize = async ({
       roundId,
       logger,
     }),
+    provenance: {
+      conversationId,
+      roundId,
+      workflowExecutionId: interactionId,
+    },
     logger,
   });
+  return { openedIds, appliedWrites };
 };

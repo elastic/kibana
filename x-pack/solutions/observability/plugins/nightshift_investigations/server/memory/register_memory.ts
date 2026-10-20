@@ -19,6 +19,7 @@ import {
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { previewText } from './log_format';
 import { stepsFromRound, stepsFromToolCalls, type TranscriptStep } from './transcript';
+import { loadInvestigationRound } from '../investigation_round';
 import { materializeMemory, type MaterializeMemoryResult } from './materialize';
 import {
   createLlmProposeMemoryExtractions,
@@ -91,19 +92,6 @@ export const hydrateMemoryWorkspace = async ({
   return materializeMemory({ session, store, logger, query });
 };
 
-/** Agent Builder fires the hook before saving the round, so wait briefly, then fall back. */
-const ROUND_READ_RETRY_DELAYS_MS = [1_000, 2_000];
-
-const sleep = (ms: number, signal?: AbortSignal): Promise<void> =>
-  new Promise((resolve) => {
-    if (signal?.aborted) return resolve();
-    const timer = setTimeout(resolve, ms);
-    signal?.addEventListener('abort', () => {
-      clearTimeout(timer);
-      resolve();
-    });
-  });
-
 export const loadRoundSteps = async ({
   agentBuilder,
   request,
@@ -111,7 +99,7 @@ export const loadRoundSteps = async ({
   roundId,
   logger,
   signal,
-  retryDelaysMs = ROUND_READ_RETRY_DELAYS_MS,
+  retryDelaysMs,
 }: {
   agentBuilder: AgentBuilderPluginStart | undefined;
   request: KibanaRequest;
@@ -121,31 +109,18 @@ export const loadRoundSteps = async ({
   signal?: AbortSignal;
   retryDelaysMs?: readonly number[];
 }): Promise<TranscriptStep[] | undefined> => {
-  if (!agentBuilder || !conversationId || !roundId) {
-    return undefined;
-  }
-  let lastProblem = '';
-  for (let attempt = 0; attempt <= retryDelaysMs.length; attempt++) {
-    if (attempt > 0) {
-      await sleep(retryDelaysMs[attempt - 1], signal);
-      if (signal?.aborted) break;
-    }
-    try {
-      const client = await agentBuilder.conversations.getScopedClient({ request });
-      const conversation = await client.get(conversationId);
-      const round = conversation.rounds.find(({ id }) => id === roundId);
-      if (round) {
-        logger.debug(`Memory optimize read the round on attempt ${attempt + 1}`);
-        return stepsFromRound(round.steps as Parameters<typeof stepsFromRound>[0]);
-      }
-      lastProblem = 'round not saved yet';
-    } catch (error) {
-      lastProblem = (error as Error).message;
-    }
-  }
-  logger.warn('Memory optimize could not read the round; using the hook tool calls');
-  logger.debug(`Memory optimize round read gave up: ${lastProblem}`);
-  return undefined;
+  const loaded = await loadInvestigationRound({
+    agentBuilder,
+    request,
+    conversationId,
+    roundId,
+    logger,
+    signal,
+    retryDelaysMs,
+  });
+  return loaded.source === 'persisted_round'
+    ? stepsFromRound(loaded.rawSteps as Parameters<typeof stepsFromRound>[0])
+    : undefined;
 };
 
 export const runMemoryOptimize = async ({
@@ -241,6 +216,8 @@ export const runMemoryOptimize = async ({
     investigation,
     agentId,
     conversationId,
+    roundId,
+    workflowExecutionId: interactionId,
     logger,
     signal,
   });
