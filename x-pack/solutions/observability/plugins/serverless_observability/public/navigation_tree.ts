@@ -171,6 +171,12 @@ export const createNavigationTree = ({
                 },
               },
               { link: 'apm:settings', sideNavStatus: 'hidden' },
+              {
+                link: 'digital_experience',
+                title: i18n.translate('xpack.serverlessObservability.nav.digitalExperience', {
+                  defaultMessage: 'Digital Experience',
+                }),
+              },
             ],
           },
           {
@@ -611,6 +617,10 @@ export const createNavigationTree = ({
               children: [
                 {
                   link: 'management:genAiSettings' as const,
+                  breadcrumbStatus: 'hidden' as const,
+                },
+                {
+                  link: 'management:aiAnonymizationSettings' as const,
                   breadcrumbStatus: 'hidden' as const,
                 },
                 ...(showAiAssistant

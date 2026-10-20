@@ -38,6 +38,15 @@ describe('getResolvedFromRecordCount', () => {
   it('is undefined when there are no aliases', () => {
     expect(getResolvedFromRecordCount([])).toBeUndefined();
     expect(getResolvedFromRecordCount(undefined)).toBeUndefined();
+    expect(getResolvedFromRecordCount([], 250)).toBeUndefined();
+  });
+
+  it('uses the store alias count when the loaded aliases were capped', () => {
+    expect(getResolvedFromRecordCount([{ id: 'a' }, { id: 'b' }], 250)).toBe(251);
+  });
+
+  it('never reports fewer records than were actually loaded', () => {
+    expect(getResolvedFromRecordCount([{ id: 'a' }, { id: 'b' }], 1)).toBe(3);
   });
 });
 
@@ -95,8 +104,12 @@ describe('getWatchlistIds', () => {
     expect(getWatchlistIds(withWatchlists())).toEqual([]);
   });
 
-  it('returns an empty list when watchlists is not an array', () => {
-    expect(getWatchlistIds(withWatchlists('wl-1'))).toEqual([]);
+  it('wraps a single watchlist stored as a bare string', () => {
+    expect(getWatchlistIds(withWatchlists('wl-1'))).toEqual(['wl-1']);
+  });
+
+  it('returns an empty list when watchlists is neither a string nor an array', () => {
+    expect(getWatchlistIds(withWatchlists(42))).toEqual([]);
   });
 
   it('drops non-string and empty entries', () => {

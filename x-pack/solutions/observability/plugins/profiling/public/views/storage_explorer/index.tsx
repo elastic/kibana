@@ -43,11 +43,11 @@ export function StorageExplorerView() {
     data: { universalProfiling },
   } = useEnabledProfilingStatus();
   const profilingRouter = useProfilingRouter();
-  const {
-    query: { rangeFrom, rangeTo, kuery },
-  } = useProfilingParams('/storage-explorer');
+  const { query } = useProfilingParams('/storage-explorer');
+  const { rangeFrom, rangeTo, kuery, schema } = query;
 
   const availability = getStorageExplorerAvailability(universalProfiling);
+  const hasEcsSchema = schema === ProfilingSchema.ECS;
 
   // Direct links can still reach Storage explorer without Universal Profiling set up
   useEffect(() => {
@@ -58,10 +58,19 @@ export function StorageExplorerView() {
       });
     } else if (availability === StorageExplorerAvailability.NotAvailable) {
       profilingRouter.replace('/', { path: {}, query: { rangeFrom, rangeTo, kuery } });
+    } else if (!hasEcsSchema) {
+      // Storage explorer only covers Universal Profiling, so it selects that schema for the links
+      // leaving it
+      profilingRouter.replace('/storage-explorer', {
+        path: {},
+        query: { ...query, schema: ProfilingSchema.ECS },
+      });
     }
-  }, [availability, profilingRouter, rangeFrom, rangeTo, kuery]);
+  }, [availability, hasEcsSchema, profilingRouter, query, rangeFrom, rangeTo, kuery]);
 
-  return availability === StorageExplorerAvailability.Available ? <StorageExplorerContent /> : null;
+  return availability === StorageExplorerAvailability.Available && hasEcsSchema ? (
+    <StorageExplorerContent />
+  ) : null;
 }
 
 function StorageExplorerContent() {

@@ -19,6 +19,7 @@ import {
   OBSERVABILITY_ALERTING_APP_ID,
   OBSERVABILITY_ALERTING_BASE_PATH,
 } from '@kbn/deeplinks-observability';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { from, map, switchMap } from 'rxjs';
 import { getObservabilityAlertingDeepLinks } from './get_observability_alerting_deep_links';
 import type {
@@ -81,6 +82,10 @@ export class ObservabilityAlertingPlugin
           coreStart,
           alertingVTwo: depsStart.alertingVTwo,
           triggersActionsUi: depsStart.triggersActionsUi,
+          cases: depsStart.cases && {
+            service: depsStart.cases,
+            kibanaServices: { ...coreStart, ...depsStart, storage: new Storage(localStorage) },
+          },
           observabilityShared: depsStart.observabilityShared,
           params,
         });

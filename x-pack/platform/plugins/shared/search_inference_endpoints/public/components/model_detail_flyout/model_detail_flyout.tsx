@@ -113,8 +113,8 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
           }),
       modelStatus: getModelStatus(endpointModelMetadata),
       modelMetadata: endpointModelMetadata,
-      modelReleaseDate: getModelReleaseDate(endpointModelMetadata)?.format('l') ?? '--',
-      modelEOLDate: getModelEOLDate(endpointModelMetadata)?.format('l') ?? '--',
+      modelReleaseDate: getModelReleaseDate(endpointModelMetadata)?.format('YYYY-MM-DD') ?? '--',
+      modelEOLDate: getModelEOLDate(endpointModelMetadata)?.format('YYYY-MM-DD') ?? '--',
       regionOptions: getRegionOptions(filtered),
     };
   }, [allEndpoints, modelId]);
