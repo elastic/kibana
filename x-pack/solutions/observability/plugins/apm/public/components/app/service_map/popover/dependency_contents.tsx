@@ -83,7 +83,11 @@ export function DependencyContents({ selection, environment, start, end }: Conte
   return (
     <>
       <EuiFlexItem>
-        <StatsList data={data} isLoading={isLoading} />
+        <StatsList
+          data={data}
+          isLoading={isLoading}
+          hasFailed={!showToastOnError && status === FETCH_STATUS.FAILURE}
+        />
       </EuiFlexItem>
       <EuiSpacer size="s" />
       <EuiFlexItem>

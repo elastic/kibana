@@ -20,6 +20,8 @@ import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { StatsList } from './stats_list';
 import { usePopoverFetchOptions } from './popover_fetch_options_context';
+import { EdgePayloadMetricsList, hasEdgePayloadMetrics } from './edge_payload_metrics';
+import { getEdgeMetrics } from '../../../../../common/agent_builder/attachments/service_map_transform';
 import { isMessagingExitSpan } from '../../../../../common/service_map/get_service_map_nodes';
 import { OpenInDiscover } from '../../../shared/links/discover_links/open_in_discover';
 import { isEdge } from './utils';
@@ -114,6 +116,12 @@ export function EdgeContents({
   );
 
   const isLoading = status === FETCH_STATUS.LOADING;
+  const hasFailed = !showToastOnError && status === FETCH_STATUS.FAILURE;
+
+  // Edges without a resource to fetch stats for (service-to-service edges of the
+  // Agent Builder attachment) show the metrics that came with the map instead.
+  const payloadMetrics =
+    isEdgeSelection && !dependencies?.length ? getEdgeMetrics(selection) : undefined;
 
   if (!isEdgeSelection) {
     return null;
@@ -130,7 +138,11 @@ export function EdgeContents({
   return (
     <>
       <EuiFlexItem>
-        <StatsList data={data} isLoading={isLoading} />
+        {hasEdgePayloadMetrics(payloadMetrics) ? (
+          <EdgePayloadMetricsList metrics={payloadMetrics} />
+        ) : (
+          <StatsList data={data} isLoading={isLoading} hasFailed={hasFailed} />
+        )}
       </EuiFlexItem>
       {sourceServiceName && dependencyName && (
         <>
