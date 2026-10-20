@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { perSecond, toItemRate, toSeries, toValue } from './stats_values';
+import { toItemRate, toSeries, toValue } from './stats_values';
 
 describe('toSeries', () => {
   const bucketMs = 60_000;
@@ -57,20 +57,6 @@ describe('toSeries', () => {
       series: { bucket_ms: bucketMs, points: [] },
       total: null,
     });
-  });
-});
-
-describe('perSecond', () => {
-  it('divides the total by the seconds the data covers', () => {
-    expect(perSecond(30, 180)).toBeCloseTo(0.1667, 4);
-  });
-
-  it('keeps a real zero total as zero', () => {
-    expect(perSecond(0, 180)).toBe(0);
-  });
-
-  it.each([undefined, 0, -5])('is null when the covered time is %s', (seconds) => {
-    expect(perSecond(30, seconds)).toBeNull();
   });
 });
 

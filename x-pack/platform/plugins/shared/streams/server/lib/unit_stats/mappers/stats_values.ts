@@ -45,7 +45,3 @@ export const toSeries = ({
     total: points.length > 0 ? points.reduce((sum, point) => sum + point.value, 0) : null,
   };
 };
-
-/** Total over the seconds the data covers. Null when there is no covered time. */
-export const perSecond = (total: number, seconds: number | undefined): number | null =>
-  seconds !== undefined && seconds > 0 ? total / seconds : null;

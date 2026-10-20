@@ -17,8 +17,6 @@ export const UNIT_STATS_STREAM = 'metrics-streams.otel-default';
 
 export const UNIT_STATS_DEFAULT_WINDOW_MS = 15 * 60 * 1000;
 
-export const UNIT_STATS_QUERY_TIMEOUT = '30s';
-
 /** ES|QL returns at most this many rows and truncates silently, with no warning. */
 export const ESQL_MAX_ROWS = 10_000;
 
@@ -28,13 +26,8 @@ export const UNIT_ID_FIELD = 'resource.attributes.unit.id';
 
 export const CONFIG_HASH_FIELD = 'resource.attributes.streams.config.hash';
 
-export const TIMESTAMP_FIELD = '@timestamp';
-export const START_TIMESTAMP_FIELD = 'start_timestamp';
-
 export const DIRECTION_FIELD = 'attributes.direction';
 export const OUTCOME_FIELD = 'attributes.outcome';
-export const OUTCOME_SUCCESS = 'success';
-export const OUTCOME_FAILURE = 'failure';
 
 export const DESTINATION_ID_FIELD = 'attributes.streams.destination.id';
 export const DESTINATION_ITEMS_FIELD = 'metrics.streams.destination.items';
