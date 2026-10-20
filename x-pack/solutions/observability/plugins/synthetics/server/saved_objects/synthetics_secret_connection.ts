@@ -32,7 +32,8 @@ export const SYNTHETICS_SECRET_CONNECTION_ENCRYPTED_TYPE = {
 };
 
 // Unknown attributes are kept (not stripped) so a rollback never drops encrypted secrets
-// written by a newer version.
+// written by a newer version. `secrets` is deliberately not declared: encrypted saved
+// objects validate it after encryption, when it is no longer an object.
 const secretConnectionSchemaV1 = schema.object(
   {
     name: schema.string({ maxLength: 2048 }),
@@ -55,7 +56,7 @@ export const syntheticsSecretConnectionSavedObjectType: SavedObjectsType = {
   modelVersions: {
     1: {
       changes: [],
-      schemas: { forwardCompatibility: secretConnectionSchemaV1 },
+      schemas: { create: secretConnectionSchemaV1, forwardCompatibility: secretConnectionSchemaV1 },
     },
   },
   management: {
