@@ -167,3 +167,45 @@ export const deleteSecretConnectionRoute: SyntheticsRestApiRouteFactory<
     return { deleted: true };
   }),
 });
+
+/**
+ * POST /_refresh: bump refreshedAt on every connection (which changes the blob)
+ * and re-push configs, so agents re-resolve all vault-backed secrets.
+ */
+export const refreshSecretConnectionsRoute: SyntheticsRestApiRouteFactory<
+  SecretConnectionStatus[]
+> = () => ({
+  method: 'POST',
+  path: SYNTHETICS_API_URLS.SECRET_CONNECTION + '/_refresh',
+  validate: {},
+  requiredPrivileges: [SECRET_CONNECTION_WRITE_API],
+  handler: whenSecretConnectionsEnabled(async (routeContext) => {
+    const { savedObjectsClient, server, spaceId } = routeContext;
+    const encryptedClient = getSecretConnectionEncryptedClient(server.encryptedSavedObjects);
+    const finder =
+      await encryptedClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsSecretConnection>(
+        { type: syntheticsSecretConnectionType, perPage: 1000, namespaces: [spaceId] }
+      );
+
+    const refreshedAt = new Date().toISOString();
+    for await (const result of finder.find()) {
+      for (const so of result.saved_objects) {
+        // B3: the decrypting finder returns decrypt-failed objects with `error`
+        // set and their attributes stripped — re-creating those would wipe the
+        // secret. Skip them.
+        if (so.error || !so.attributes) continue;
+        await savedObjectsClient.create<SyntheticsSecretConnection>(
+          syntheticsSecretConnectionType,
+          { ...so.attributes, refreshedAt },
+          // B5: preserve the object's actual namespaces on overwrite rather than
+          // forcing [spaceId], which would narrow (or error on) a shared object.
+          { id: so.id, overwrite: true, initialNamespaces: so.namespaces ?? [spaceId] }
+        );
+      }
+    }
+    finder.close().catch(() => {});
+
+    await propagate(server, spaceId);
+    return listConnections(routeContext);
+  }),
+});
