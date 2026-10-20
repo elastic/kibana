@@ -96,7 +96,7 @@ describe('Slack', () => {
         authorizationUrl: 'https://slack.com/oauth/v2/authorize',
         tokenUrl: 'https://slack.com/api/oauth.v2.access',
         scope:
-          'channels:manage channels:read channels:history chat:write files:read files:write groups:read groups:history groups:write im:read im:history mpim:read mpim:history reactions:write search:read.files search:read.im search:read.mpim search:read.private search:read.public users:read users:read.email',
+          'channels:write channels:read channels:history chat:write files:read files:write groups:read groups:history groups:write im:read im:history mpim:read mpim:history reactions:write search:read.files search:read.im search:read.mpim search:read.private search:read.public users:read users:read.email',
       },
     });
   });

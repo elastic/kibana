@@ -252,10 +252,10 @@ export const Slack: ConnectorSpec = {
           // History scopes (channels/groups/im/mpim:history) are needed for getConversationHistory.
           // users:read.email is needed for lookupUserByEmail.
           // reactions:write needed for addReaction; files:write needed for uploadFile.
-          // channels:manage needed for createConversation/inviteToConversation on public channels.
+          // channels:write (user scope; channels:manage is bot-only) needed for createConversation/inviteToConversation on public channels.
           // groups:write needed for createConversation/inviteToConversation on private channels.
           scope:
-            'channels:manage channels:read channels:history chat:write files:read files:write groups:read groups:history groups:write im:read im:history mpim:read mpim:history reactions:write search:read.files search:read.im search:read.mpim search:read.private search:read.public users:read users:read.email',
+            'channels:write channels:read channels:history chat:write files:read files:write groups:read groups:history groups:write im:read im:history mpim:read mpim:history reactions:write search:read.files search:read.im search:read.mpim search:read.private search:read.public users:read users:read.email',
           scopeParamName: 'user_scope',
           accessTokenPath: 'authed_user.access_token',
           tokenType: 'Bearer',
