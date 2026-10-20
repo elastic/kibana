@@ -1047,7 +1047,7 @@ describe('SourcesClient', () => {
       });
     });
 
-    it('escapes KQL metacharacters in the title prefix filter', async () => {
+    it('trims the search and escapes KQL metacharacters in the title prefix filter', async () => {
       const { client, soClient } = setup();
       soClient.find.mockResolvedValue({ saved_objects: [], total: 0, page: 1, per_page: 25 });
 

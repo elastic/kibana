@@ -14,7 +14,7 @@ import {
   retireSourceDetections,
   reconcileSourceRevision,
   retireDeletedSource,
-  isRetriedNextSweep,
+  isRetryableConflict,
   applySourceEnabled,
 } from './reconcile_source_catalog';
 
@@ -132,7 +132,7 @@ const reconcileSourceRoute = createServerRoute({
         // The source is already deleted: the next sync sweep retries this cleanup. A held lease is
         // expected while a write finishes, so it is not reported as an error.
         const message = `Failed to clean up the knowledge of deleted source ${params.path.sourceId}: ${error}`;
-        if (isRetriedNextSweep(error)) {
+        if (isRetryableConflict(error)) {
           logger.warn(message);
         } else {
           logger.error(message);

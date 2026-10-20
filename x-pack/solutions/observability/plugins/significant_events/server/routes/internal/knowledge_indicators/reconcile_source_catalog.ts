@@ -426,7 +426,7 @@ export async function reconcileSourceCatalog({
         skipRuleToggle: !ownedRuleSourceIds.has(source.id),
       });
     } catch (error) {
-      if (!isRetriedNextSweep(error)) {
+      if (!isRetryableConflict(error)) {
         failures.push(error);
       }
     }
@@ -469,7 +469,7 @@ export async function reconcileSourceCatalog({
         await retireSourceKnowledge({ sourceId, kiClient });
       }
     } catch (error) {
-      if (!isRetriedNextSweep(error)) {
+      if (!isRetryableConflict(error)) {
         failures.push(error);
       }
     }
@@ -485,7 +485,7 @@ export async function reconcileSourceCatalog({
 }
 
 /** A 409 means a held lease or a cancelled run still winding down, which the next sweep retries. */
-export const isRetriedNextSweep = (error: unknown): boolean =>
+export const isRetryableConflict = (error: unknown): boolean =>
   error instanceof StatusError && error.statusCode === 409;
 
 /** The sources with a run going, by source id. A run carries the slug its source had at the time. */
