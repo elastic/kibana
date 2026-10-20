@@ -62,6 +62,19 @@ describe('install_automation_template schema', () => {
     expect(createTool().confirmation).toBeUndefined();
   });
 
+  it('caps maxDocuments at 2,000', () => {
+    const base = {
+      template: 'document_orchestration',
+      name: 'flight-activity-docs',
+      sourceIndex: 'loyalty-docs',
+      titleField: 'title',
+      bodyField: 'body',
+    };
+
+    expect(schema.safeParse({ ...base, maxDocuments: 2000 }).success).toBe(true);
+    expect(schema.safeParse({ ...base, maxDocuments: 2001 }).success).toBe(false);
+  });
+
   it('rejects index metadata arguments on a document install', () => {
     const parsed = schema.safeParse({
       template: 'document_orchestration',
@@ -355,6 +368,11 @@ describe('install_automation_template unit profile arguments', () => {
         metricFields: ['Points Accumulated'],
       }).success
     ).toBe(true);
+  });
+
+  it('caps maxUnits at 2,000', () => {
+    expect(schema.safeParse({ ...base, maxUnits: 2000 }).success).toBe(true);
+    expect(schema.safeParse({ ...base, maxUnits: 2001 }).success).toBe(false);
   });
 
   it('bounds the metric fields', () => {

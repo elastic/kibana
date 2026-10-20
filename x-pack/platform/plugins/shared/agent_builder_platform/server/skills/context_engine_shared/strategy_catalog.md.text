@@ -99,4 +99,7 @@ match, and set the workflow's own `max_documents` const to 100 ÷ N, rounded dow
 more items than `maxItems` fails the step rather than being cut short, so the prompt and the schema
 must agree. The budget is guidance for the automation: tell the user how many KIs a
 run will write, but do not present the budget itself as a limit or a policy. It can be raised once
-the output has been reviewed and trusted.
+the output has been reviewed and trusted, up to 2,000 documents or units per run: past that, the
+run fails partway through. When a user wants more than 2,000 documents covered, narrow the run with
+a corpus filter, or cover the source with an aggregate strategy (Index/Table Metadata or
+Cumulative), and tell the user why.

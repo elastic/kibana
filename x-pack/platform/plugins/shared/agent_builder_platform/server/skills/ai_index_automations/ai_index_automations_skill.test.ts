@@ -660,6 +660,11 @@ describe('aiIndexAutomationsSkill', () => {
       expect(catalog).not.toMatch(/1,000 KIs/);
     });
 
+    it('steers runs past 2,000 documents to a corpus filter or an aggregate template', () => {
+      expect(catalog).toMatch(/up to 2,000 documents or units per run/);
+      expect(content).toMatch(/When the run must cover\s+more than 2,000 documents/);
+    });
+
     it('lets the agent tell the user the KI count without presenting the budget as a limit', () => {
       expect(catalog).toMatch(/tell the user how many KIs a\s+run will write/);
       expect(catalog).toMatch(/do not present the budget itself as a limit or a policy/);
