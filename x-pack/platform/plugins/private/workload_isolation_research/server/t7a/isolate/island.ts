@@ -63,6 +63,7 @@ import {
   createPlatformReplica,
   currentExecutionContext,
   executionContextOpaqueId,
+  parseAnalyticsReport,
   decideTaskManagerCall,
   emptyPlatformReplicas,
   routeSavedObject,
@@ -82,7 +83,7 @@ type Obj = Record<string, unknown>;
 // ---------------------------------------------------------------------------------------------
 const LEVELS = ['trace', 'debug', 'info', 'warn', 'error', 'fatal'] as const;
 const minLevel = LEVELS.indexOf(
-  (process.env.KBN_RESEARCH_T7A_LOG_LEVEL as (typeof LEVELS)[number]) ?? 'warn'
+  (process.env.KBN_RESEARCH_T7A_LOG_LEVEL as (typeof LEVELS)[number]) ?? 'trace'
 );
 const emitLog = (record: ForwardedLog): void => {
   if (!runContext.getStore()) return;
@@ -451,7 +452,8 @@ export const createCoreLite = (
     userProfile: strict('core.userProfile', {}),
     executionContext: strict('core.executionContext', executionContext),
     analytics: strict('core.analytics', {
-      reportEvent: (event: unknown) => events.send('analytics', event),
+      reportEvent: (eventType: unknown, eventData: unknown) =>
+        events.send('analytics', parseAnalyticsReport(eventType, eventData)),
     }),
     http: strict('core.http', { basePath }),
     featureFlags: strict('core.featureFlags', {
@@ -497,6 +499,8 @@ export const createCoreLite = (
             namespaceType: type.namespaceType,
             hidden: type.hidden,
             indexPattern: type.indexPattern,
+            modelVersions: (type as { modelVersions?: unknown }).modelVersions,
+            migrations: (type as { migrations?: unknown }).migrations,
           });
           if (localSo) typeRegistry.registerType(type as never);
         },
@@ -522,8 +526,10 @@ export const createCoreLite = (
         registerSwitcher: fence('core.capabilities.registerSwitcher'),
       }),
       analytics: strict('core.analytics(setup)', {
-        registerEventType: fence('core.analytics.registerEventType'),
-        reportEvent: fence('core.analytics.reportEvent'),
+        registerEventType: (definition: unknown) =>
+          bridge('analytics', 'registerEventType', toData(definition) as never),
+        reportEvent: (eventType: unknown, eventData: unknown) =>
+          events.send('analytics', parseAnalyticsReport(eventType, eventData)),
       }),
       uiSettings: strict('core.uiSettings(setup)', {
         register: fence('core.uiSettings.register'),
@@ -576,7 +582,7 @@ export const createCoreLite = (
     };
     events.send('audit', auditEvent);
     const auditError = await safeBridge('audit', 'write', auditEvent);
-    const analyticsEvent = { eventType: 'worker_core_live', properties: { token } };
+    const analyticsEvent = parseAnalyticsReport('worker_core_live', { properties: { token } });
     events.send('analytics', analyticsEvent);
     const analyticsError = await safeBridge('analytics', 'write', analyticsEvent);
     events.send('usage.collector.fetch', { collector: 'worker-core' });

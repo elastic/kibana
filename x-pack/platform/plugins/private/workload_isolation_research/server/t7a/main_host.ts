@@ -28,13 +28,15 @@ import {
   advanceGeneration,
   captureActiveProduct,
   classifyFlagOverrides,
+  captureEffectivePluginConfig,
   configKeyPaths,
   createReplicaWaitQueue,
+  forwardLogLevel,
+  RUN_BRIDGED_TM_METHODS,
   emptyPlatformReplicas,
   fingerprintSavedObjectType,
   replicaFingerprint,
   taskManagerExecutionContext,
-  toPlainConfig,
 } from '../capability_kit/worker_core';
 import type { PlatformReplicas } from '../capability_kit/worker_core';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
@@ -144,7 +146,8 @@ export class T7aController {
     private readonly deps: T7aDeps,
     private readonly env: PluginInitializerContext['env'],
     private readonly logger: Logger,
-    private readonly statusSource: PlatformStatusSource
+    private readonly statusSource: PlatformStatusSource,
+    private readonly analyticsSetup?: { registerEventType: (definition: unknown) => void }
   ) {
     this.entry = require.resolve('./isolate/entry');
     this.registry = new ModuleRegistry(new Set([this.entry]));
@@ -539,12 +542,10 @@ export class T7aController {
     return {
       log: asBinding(async (op, args) => {
         if (op !== 'write') throw new Error('t7a log: op not allowlisted');
-        const message = `[worker-core][${String(args.context ?? '')}] ${String(args.message ?? '')}`;
-        const level = String(args.level ?? 'info');
-        if (level === 'error' || level === 'fatal') this.logger.error(message);
-        else if (level === 'warn') this.logger.warn(message);
-        else if (level === 'debug' || level === 'trace') this.logger.debug(message);
-        else this.logger.info(message);
+        const message = String(args.message ?? '');
+        const level = forwardLogLevel(String(args.level ?? 'info'));
+        const child = this.logger.get('worker-core', String(args.context ?? 'core'));
+        child[level](message);
         this.forwarded.log += 1;
         return { ok: true };
       }),
@@ -557,9 +558,21 @@ export class T7aController {
         return { ok: true };
       }),
       analytics: asBinding(async (op, args) => {
+        if (op === 'registerEventType') {
+          this.analyticsSetup?.registerEventType(args);
+          return { ok: true };
+        }
         if (op !== 'write') throw new Error('t7a analytics: op not allowlisted');
-        const report = (core.analytics as { reportEvent?: (event: unknown) => void }).reportEvent;
-        if (report) report(args);
+        const eventType = args.eventType;
+        if (typeof eventType !== 'string') {
+          throw new Error('worker-core analytics eventType must be a string');
+        }
+        const eventData =
+          args.eventData && typeof args.eventData === 'object' ? (args.eventData as object) : {};
+        const report = (
+          core.analytics as { reportEvent?: (type: string, data: object) => void }
+        ).reportEvent;
+        if (report) report(eventType, eventData);
         this.forwarded.analytics += 1;
         return { ok: true };
       }),
@@ -596,7 +609,7 @@ export class T7aController {
         return (client.getDecryptedAsInternalUser as AnyFn)(args.type, args.id, args.opts);
       }),
       tm: asBinding(async (op, args) => {
-        if (!['bulkSchedule', 'schedule', 'aggregate', 'fetch', 'get'].includes(op))
+        if (!(RUN_BRIDGED_TM_METHODS as readonly string[]).includes(op))
           throw new Error('t7a tm: op not allowlisted');
         const list = args as unknown as unknown[];
         return (taskManager as unknown as Record<string, AnyFn>)[op].apply(taskManager, list);
@@ -741,7 +754,7 @@ const PLUGIN_CONFIG_PATHS: Record<string, string> = {
   encryptedSavedObjects: 'xpack.encryptedSavedObjects',
 };
 
-/** Reads one config path. Failures become an empty capture, never a logged value. */
+/** Reads one config path. A missing reader is a miss, not a logged value. */
 const readResearchConfig = (path: string): unknown => {
   const at = (globalThis as Record<symbol, (configPath: string) => unknown>)[CONFIG_CAPTURE_KEY];
   if (typeof at !== 'function') return undefined;
@@ -752,28 +765,13 @@ const readResearchConfig = (path: string): unknown => {
   }
 };
 
-/** Reads main's effective plugin config. Returns key paths only to callers that log. */
+/** Reads main's effective plugin config. Capture failure fails the boot that asked for it. */
 const captureEffectiveConfig = (): {
   effectiveConfig: Record<string, Record<string, unknown>>;
   keyPaths: string[];
   errors: string[];
 } => {
   const at = (globalThis as Record<symbol, (path: string) => unknown>)[CONFIG_CAPTURE_KEY];
-  const effectiveConfig: Record<string, Record<string, unknown>> = {};
-  const errors: string[] = [];
-  if (typeof at !== 'function') {
-    return { effectiveConfig, keyPaths: [], errors: ['config capture unavailable'] };
-  }
-  for (const [id, path] of Object.entries(PLUGIN_CONFIG_PATHS)) {
-    try {
-      const plain = toPlainConfig(at(path));
-      effectiveConfig[id] =
-        plain && typeof plain === 'object' && !Array.isArray(plain)
-          ? (plain as Record<string, unknown>)
-          : {};
-    } catch (error) {
-      errors.push(`${id}: ${(error as Error).name ?? 'Error'}`);
-    }
-  }
-  return { effectiveConfig, keyPaths: configKeyPaths(effectiveConfig), errors };
+  const captured = captureEffectivePluginConfig(at, PLUGIN_CONFIG_PATHS);
+  return { ...captured, errors: [] };
 };

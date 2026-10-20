@@ -184,6 +184,14 @@ export const createExecutionContextService = () => ({
   },
 });
 
+export const LOGGER_LEVELS = ['trace', 'debug', 'info', 'warn', 'error', 'fatal'] as const;
+
+/** Keeps fatal and trace. Main's child logger applies its own threshold. */
+export const forwardLogLevel = (level: string): (typeof LOGGER_LEVELS)[number] =>
+  (LOGGER_LEVELS as readonly string[]).includes(level)
+    ? (level as (typeof LOGGER_LEVELS)[number])
+    : 'info';
+
 const textOf = (message: unknown): string => {
   if (typeof message === 'function') return textOf((message as () => unknown)());
   if (message instanceof Error) return message.stack ?? message.message;
@@ -236,6 +244,21 @@ export interface EventForwarder {
   readonly excluded: () => Readonly<Record<string, number>>;
   readonly send: (sink: string, payload: unknown) => void;
 }
+
+/** Both arguments of `reportEvent`. An object event type is rejected before it can name a counter. */
+export const parseAnalyticsReport = (
+  eventType: unknown,
+  eventData: unknown
+): { readonly eventType: string; readonly eventData: Record<string, unknown> } => {
+  if (typeof eventType !== 'string' || eventType.length === 0) {
+    throw new Error('worker-core analytics eventType must be a string');
+  }
+  const data =
+    eventData && typeof eventData === 'object' && !Array.isArray(eventData)
+      ? (eventData as Record<string, unknown>)
+      : {};
+  return { eventType, eventData: data };
+};
 
 /** Forwards audit and analytics. Usage collectors are an explicit exclusion. */
 export const createEventForwarder = (

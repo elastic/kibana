@@ -199,7 +199,7 @@ export const runInTmPhase = <T>(phase: 'boot' | 'run', fn: () => T): T =>
 /** Maintenance scheduling stays on main in both phases. */
 export const ALWAYS_FENCED_TM_METHODS = ['ensureScheduled'] as const;
 
-const RUN_BRIDGED = new Set([
+export const RUN_BRIDGED_TM_METHODS = [
   'schedule',
   'bulkSchedule',
   'aggregate',
@@ -212,7 +212,9 @@ const RUN_BRIDGED = new Set([
   'bulkEnable',
   'bulkUpdateSchedules',
   'bulkUpdateState',
-]);
+] as const;
+
+const RUN_BRIDGED = new Set<string>(RUN_BRIDGED_TM_METHODS);
 
 /**
  * Boot phase fences every Task Manager call. Run phase bridges the run-time methods
@@ -243,7 +245,17 @@ export interface SoTypeFingerprintInput {
   readonly namespaceType?: unknown;
   readonly hidden?: boolean;
   readonly indexPattern?: string;
+  readonly modelVersions?: unknown;
+  readonly migrations?: unknown;
 }
+
+const versionShape = (value: unknown): unknown => {
+  if (!value || typeof value !== 'object') return null;
+  const record = value as Record<string, unknown>;
+  return Object.keys(record)
+    .sort()
+    .map((key) => [key, typeof record[key] === 'function' ? 'function' : record[key]]);
+};
 
 /** Stable hash of the saved-object type fields that define index compatibility. */
 export const fingerprintSavedObjectType = (type: SoTypeFingerprintInput): string =>
@@ -255,6 +267,8 @@ export const fingerprintSavedObjectType = (type: SoTypeFingerprintInput): string
         hidden: type.hidden === true,
         indexPattern: type.indexPattern ?? null,
         mappings: type.mappings ?? null,
+        modelVersions: versionShape(type.modelVersions),
+        migrations: versionShape(type.migrations),
       })
     )
     .digest('hex');
@@ -320,6 +334,29 @@ export const toPlainConfig = (value: unknown, depth = 0): unknown => {
     }
   }
   return out;
+};
+
+/** Reads effective plugin config. A missing reader or a path error fails boot. */
+export const captureEffectivePluginConfig = (
+  at: ((path: string) => unknown) | undefined,
+  paths: Readonly<Record<string, string>>
+): { readonly effectiveConfig: Record<string, Record<string, unknown>>; readonly keyPaths: string[] } => {
+  if (typeof at !== 'function') throw new Error('worker-core config capture unavailable');
+  const effectiveConfig: Record<string, Record<string, unknown>> = {};
+  const errors: string[] = [];
+  for (const [id, path] of Object.entries(paths)) {
+    try {
+      const plain = toPlainConfig(at(path));
+      effectiveConfig[id] =
+        plain && typeof plain === 'object' && !Array.isArray(plain)
+          ? (plain as Record<string, unknown>)
+          : {};
+    } catch (error) {
+      errors.push(`${id}: ${(error as Error).name ?? 'Error'}`);
+    }
+  }
+  if (errors.length > 0) throw new Error(`worker-core config capture failed: ${errors.join('; ')}`);
+  return { effectiveConfig, keyPaths: configKeyPaths(effectiveConfig) };
 };
 
 export const CONFIG_CAPTURE_KEY = Symbol.for('kbn.research.config.atPathSync');

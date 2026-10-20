@@ -31,12 +31,16 @@ import {
   createExecutionContextService,
   createForwardingLogger,
   createPlatformReplica,
+  captureEffectivePluginConfig,
   decideTaskManagerCall,
+  forwardLogLevel,
+  RUN_BRIDGED_TM_METHODS,
   emptyPlatformReplicas,
   fingerprintSavedObjectType,
   hasExplicitNamespace,
   isEsWrite,
   lookupBooleanFlag,
+  parseAnalyticsReport,
   routeSavedObject,
   savedObjectCallOptions,
   runInTmPhase,
@@ -245,6 +249,30 @@ test('logger and events forward to the sink and redact secret-looking meta', () 
   assert.throws(() => forwarder.send('unknown-sink', {}), /not forwarded or excluded/);
 });
 
+test('analytics reportEvent forwards a registered string event type and its data', () => {
+  const { createAnalytics } = require('@elastic/ebt/client');
+  const counters: Array<{ event_type: unknown; code: string }> = [];
+  const client = createAnalytics({
+    isDev: false,
+    logger: new Proxy({}, { get: () => () => undefined }),
+  });
+  client.telemetryCounter$.subscribe((counter: { event_type: unknown; code: string }) => {
+    counters.push(counter);
+  });
+  client.registerEventType({ eventType: 'worker_core_live', schema: {} });
+  const report = parseAnalyticsReport('worker_core_live', { token: 't' });
+  client.reportEvent(report.eventType, report.eventData);
+  assert.equal(
+    counters.some((item) => item.code === 'UnregisteredType'),
+    false
+  );
+  assert.equal(counters[0].event_type, 'worker_core_live');
+  assert.throws(
+    () => parseAnalyticsReport({ eventType: 'worker_core_live', properties: { token: 't' } }, undefined),
+    /eventType must be a string/
+  );
+});
+
 test('execution context matches Core opaque ids for concurrent tasks', async () => {
   const { ExecutionContextContainer } = require('../../../../../../../../src/core/packages/execution-context/server-internal/src/execution_context_container');
   const service = createExecutionContextService();
@@ -397,6 +425,43 @@ test('task manager policy is boot versus run, not a task-type prefix', () => {
   const seen = runInTmPhase('boot', () => decideTaskManagerCall('get'));
   assert.equal(seen, 'fence');
   assert.equal(decideTaskManagerCall('get', 'run'), 'bridge');
+});
+
+test('P2 contracts: task methods, config failure, log levels, and model versions', () => {
+  for (const method of RUN_BRIDGED_TM_METHODS) {
+    assert.equal(decideTaskManagerCall(method, 'run'), 'bridge');
+    assert.equal(decideTaskManagerCall(method, 'boot'), 'fence');
+  }
+  assert.throws(
+    () => captureEffectivePluginConfig(undefined, { alerting: 'xpack.alerting' }),
+    /config capture unavailable/
+  );
+  assert.throws(
+    () =>
+      captureEffectivePluginConfig(
+        () => {
+          throw new Error('denied');
+        },
+        { alerting: 'xpack.alerting' }
+      ),
+    /config capture failed/
+  );
+  const captured = captureEffectivePluginConfig(() => ({ enabled: true }), {
+    alerting: 'xpack.alerting',
+  });
+  assert.deepEqual(captured.keyPaths, ['alerting.enabled']);
+  assert.equal(forwardLogLevel('fatal'), 'fatal');
+  assert.equal(forwardLogLevel('trace'), 'trace');
+  const base = { name: 'alert', mappings: { properties: { a: { type: 'keyword' } } } };
+  const first = fingerprintSavedObjectType({ ...base, modelVersions: { 1: { changes: [] } } });
+  const second = fingerprintSavedObjectType({ ...base, modelVersions: { 2: { changes: [] } } });
+  const migrated = fingerprintSavedObjectType({
+    ...base,
+    modelVersions: { 1: { changes: [] } },
+    migrations: { '8.8.0': 'fn' },
+  });
+  assert.notEqual(first, second);
+  assert.notEqual(first, migrated);
 });
 
 test('readiness token mismatch fails closed and a matching fingerprint passes', () => {
