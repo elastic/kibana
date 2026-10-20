@@ -112,6 +112,15 @@ describe('getAiIndicesInstructions', () => {
     expect(instructions).not.toContain('sml_');
   });
 
+  it('keeps the agent on its assigned AI Indices and limits list_ai_indices to exploration', () => {
+    const instructions = render();
+
+    expect(instructions).toContain('Search the AI Indices assigned to you, listed above');
+    expect(instructions).toContain('only when that list gives no target you can use');
+    expect(instructions).toContain('Keep to entries with `assigned_to_agent: true`');
+    expect(instructions).toContain('for an AI Index the user asked about');
+  });
+
   it('limits query_ai_indices to AI Indices and routes other data to execute_esql', () => {
     const instructions = render();
 
