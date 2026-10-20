@@ -19,9 +19,9 @@ import { getIndexMappingsTool } from './get_index_mapping';
 
 const getIndexFieldsMock = getIndexFields as jest.MockedFunction<typeof getIndexFields>;
 
-const runTool = async (indices: string[], raw: boolean) => {
+const runTool = async (indices: string[], raw: boolean, includeFrozen?: boolean) => {
   const result = (await getIndexMappingsTool().handler(
-    { indices, raw },
+    { indices, raw, include_frozen: includeFrozen },
     agentBuilderMocks.tools.createHandlerContext()
   )) as ToolHandlerStandardReturn;
 
@@ -58,6 +58,48 @@ describe('getIndexMappingsTool', () => {
           'logs-aged-out': { warning: expect.stringContaining('frozen tier') },
         },
       });
+    });
+
+    it('suggests opting in to the frozen tier', async () => {
+      const result = await runTool(['logs-aged-out'], false);
+
+      expect(result?.data).toMatchObject({
+        resources: {
+          'logs-aged-out': { fields: expect.stringContaining('include_frozen') },
+        },
+      });
+    });
+
+    it('omits the frozen tier explanation when frozen tier indices were included', async () => {
+      const result = await runTool(['logs-aged-out'], true, true);
+
+      expect(result?.data).toMatchObject({
+        resources: {
+          'logs-aged-out': { warning: 'No fields found.' },
+        },
+      });
+    });
+  });
+
+  describe('include_frozen', () => {
+    beforeEach(() => {
+      getIndexFieldsMock.mockResolvedValue({});
+    });
+
+    it('excludes frozen tier indices by default', async () => {
+      await runTool(['logs-*'], false);
+
+      expect(getIndexFieldsMock).toHaveBeenCalledWith(
+        expect.objectContaining({ includeFrozen: false })
+      );
+    });
+
+    it('includes frozen tier indices when opted in', async () => {
+      await runTool(['logs-*'], false, true);
+
+      expect(getIndexFieldsMock).toHaveBeenCalledWith(
+        expect.objectContaining({ includeFrozen: true })
+      );
     });
   });
 

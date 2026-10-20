@@ -27,43 +27,37 @@ const processSubject = (processSelector: ProcessSelector): Subject => ({
   host,
   processSelector,
 });
-const actionInput = { endpoint_ids: ['agent-1'] };
-const userSubject: Subject = { kind: 'user', value: 'dev-user', reachable: true };
-const serviceSubject: Subject = { kind: 'service', value: 'escalated-role', reachable: true };
-
-const setAssetCriticality: ActionCatalogEntry = {
-  workflowId: 'system-alertzero-action-set-asset-criticality',
-  name: 'Set asset criticality',
-  category: 'respond',
-  subjects: ['user', 'service'],
-};
-
 const killProcess: ActionCatalogEntry = {
   workflowId: 'system-security-action-kill-process',
+  approvalPolicy: 'autonomy-dependent',
   name: 'Kill process',
   category: 'respond',
 };
 
 const suspendProcess: ActionCatalogEntry = {
   workflowId: 'system-security-action-suspend-process',
+  approvalPolicy: 'autonomy-dependent',
   name: 'Suspend process',
   category: 'respond',
 };
 
 const isolateHost: ActionCatalogEntry = {
   workflowId: 'system-security-action-isolate-host',
+  approvalPolicy: 'autonomy-dependent',
   name: 'Isolate host',
   category: 'respond',
 };
 
 const memoryDump: ActionCatalogEntry = {
   workflowId: 'system-alertzero-action-memory-dump',
+  approvalPolicy: 'autonomy-dependent',
   name: 'Dump memory of process',
   category: 'investigate',
 };
 
 const configureSomething: ActionCatalogEntry = {
   workflowId: 'system-security-action-configure-something',
+  approvalPolicy: 'autonomy-dependent',
   name: 'Configure something',
   category: 'configure',
 };
@@ -118,9 +112,9 @@ const baseState = (overrides: Partial<CurrentRunState> = {}): CurrentRunState =>
 
 describe('buildProposalTitle', () => {
   it('names the process and pid when the selector has a pid', () => {
-    expect(
-      buildProposalTitle({ entry: killProcess, subject: processSubject(withPid), actionInput })
-    ).toBe('Kill powershell.exe (PID 4212) on WIN-ANALYST01');
+    expect(buildProposalTitle({ entry: killProcess, subject: processSubject(withPid) })).toBe(
+      'Kill powershell.exe (PID 4212) on WIN-ANALYST01'
+    );
   });
 
   it('names the process only when the selector has no pid', () => {
@@ -128,70 +122,32 @@ describe('buildProposalTitle', () => {
       buildProposalTitle({
         entry: suspendProcess,
         subject: processSubject(withEntityOnly),
-        actionInput,
       })
     ).toBe('Suspend aws.exe on WIN-ANALYST01');
   });
 
   it('builds a host-scoped title for a host action', () => {
-    expect(buildProposalTitle({ entry: isolateHost, subject: hostSubject, actionInput })).toBe(
+    expect(buildProposalTitle({ entry: isolateHost, subject: hostSubject })).toBe(
       'Isolate host WIN-ANALYST01'
     );
   });
 
   it('falls back to a generic "on host" title for any other action', () => {
-    expect(
-      buildProposalTitle({ entry: configureSomething, subject: hostSubject, actionInput })
-    ).toBe('Configure something on WIN-ANALYST01');
+    expect(buildProposalTitle({ entry: configureSomething, subject: hostSubject })).toBe(
+      'Configure something on WIN-ANALYST01'
+    );
   });
 
   it('gives two processes on the same host distinct titles', () => {
     const titleA = buildProposalTitle({
       entry: killProcess,
       subject: processSubject(withPid),
-      actionInput,
     });
     const titleB = buildProposalTitle({
       entry: killProcess,
       subject: processSubject(withEntityOnly),
-      actionInput,
     });
     expect(titleA).not.toBe(titleB);
-  });
-
-  it('names the identity and the level for an asset-criticality proposal', () => {
-    expect(
-      buildProposalTitle({
-        entry: setAssetCriticality,
-        subject: userSubject,
-        actionInput: {
-          id_field: 'user.name',
-          id_value: 'dev-user',
-          criticality_level: 'high_impact',
-        },
-      })
-    ).toBe('Mark user dev-user high impact');
-    expect(
-      buildProposalTitle({
-        entry: setAssetCriticality,
-        subject: serviceSubject,
-        actionInput: {
-          id_field: 'service.name',
-          id_value: 'escalated-role',
-          criticality_level: 'extreme_impact',
-        },
-      })
-    ).toBe('Mark service escalated-role extreme impact');
-  });
-
-  it('falls back to a generic "for <kind> <value>" title for an identity action without a level', () => {
-    expect(
-      buildProposalTitle({
-        entry: { ...setAssetCriticality, name: 'Suspend Okta user' },
-        subject: userSubject,
-        actionInput: { id_field: 'user.name', id_value: 'dev-user' },
-      })
-    ).toBe('Suspend Okta user for user dev-user');
   });
 
   it('caps the title at 256 characters', () => {
@@ -202,7 +158,6 @@ describe('buildProposalTitle', () => {
     const title = buildProposalTitle({
       entry: killProcess,
       subject: processSubject(longSelector),
-      actionInput,
     });
     expect(title.length).toBeLessThanOrEqual(256);
   });
@@ -215,7 +170,6 @@ describe('buildProposalComment', () => {
       entry: killProcess,
       subject: processSubject(withPid),
       state,
-      actionInput,
     });
 
     expect(comment).toContain(
@@ -245,7 +199,6 @@ describe('buildProposalComment', () => {
       entry: killProcess,
       subject: processSubject(withTechnique),
       state,
-      actionInput,
     });
     expect(comment).toContain(
       'Implicated in T1059.001 (PowerShell): 3 rows of matching activity confirmed in the hunt window.'
@@ -259,13 +212,11 @@ describe('buildProposalComment', () => {
       entry: killProcess,
       subject: processSubject(withPid),
       state,
-      actionInput,
     });
     const suspendComment = buildProposalComment({
       entry: suspendProcess,
       subject: processSubject(withPid),
       state,
-      actionInput,
     });
     expect(killComment).toContain('Killing it stops execution immediately.');
     expect(suspendComment).toContain(
@@ -279,7 +230,6 @@ describe('buildProposalComment', () => {
       entry: isolateHost,
       subject: hostSubject,
       state,
-      actionInput,
     });
     expect(comment).toContain('**Action:** Isolate host **WIN-ANALYST01** with Elastic Defend.');
     expect(comment).toContain(
@@ -296,13 +246,11 @@ describe('buildProposalComment', () => {
       entry: killProcess,
       subject: processSubject(withPid),
       state,
-      actionInput,
     });
     const isolateComment = buildProposalComment({
       entry: isolateHost,
       subject: hostSubject,
       state,
-      actionInput,
     });
     expect(killComment).not.toBe(isolateComment);
     expect(killComment).toContain('Killing it stops execution immediately.');
@@ -318,7 +266,6 @@ describe('buildProposalComment', () => {
       entry: killProcess,
       subject: processSubject(withPid),
       state,
-      actionInput,
     });
     const tier1Lines = comment.split('\n').filter((line) => line.includes('Tier 1 matched'));
     expect(tier1Lines).toHaveLength(1);
@@ -330,7 +277,6 @@ describe('buildProposalComment', () => {
       entry: killProcess,
       subject: processSubject(withPid),
       state,
-      actionInput,
     });
     expect(comment).not.toContain('per_index');
     expect(comment).not.toContain('hunt_result');
@@ -350,7 +296,6 @@ describe('buildProposalComment', () => {
       entry: isolateHost,
       subject: hostSubject,
       state,
-      actionInput,
     });
     expect(comment).toContain('Tier 2 confirmed T1059.001 (3 rows) and T1078.004 (4 rows)');
   });
@@ -361,31 +306,8 @@ describe('buildProposalComment', () => {
       entry: isolateHost,
       subject: hostSubject,
       state,
-      actionInput,
     });
     expect(comment).toContain('Techniques: T1078.004');
-  });
-
-  it('builds the Action / Why body for an identity proposal without a host suffix', () => {
-    const state = baseState({ titles: ['Shadow admin AssumeRole'] });
-    const comment = buildProposalComment({
-      entry: setAssetCriticality,
-      subject: userSubject,
-      state,
-      actionInput: {
-        id_field: 'user.name',
-        id_value: 'dev-user',
-        criticality_level: 'high_impact',
-      },
-    });
-    expect(comment).toContain(
-      '**Action:** Set asset criticality for user **dev-user** to high_impact.'
-    );
-    expect(comment).toContain('Hunt Watch confirmed *Shadow admin AssumeRole*.');
-    expect(comment).not.toContain('on WIN-ANALYST01');
-    expect(comment).toContain('Tier 1 matched 4 events');
-    expect(comment).toContain('Raising its asset criticality lifts its risk score');
-    expect(comment).not.toContain('Elastic Defend');
   });
 
   it('omits the process last-seen line when there is no process selector', () => {
@@ -394,7 +316,6 @@ describe('buildProposalComment', () => {
       entry: isolateHost,
       subject: hostSubject,
       state,
-      actionInput,
     });
     expect(comment).not.toContain('last seen');
   });
@@ -404,7 +325,6 @@ describe('buildProposalComment', () => {
       entry: suspendProcess,
       subject: processSubject(withPid),
       state: baseState(),
-      actionInput,
       ruleLine: 'Rule: suspend_only (no destructive technique, no memdump_process capability)',
     });
     const lines = comment.split('\n');
@@ -419,7 +339,6 @@ describe('buildProposalComment', () => {
       entry: memoryDump,
       subject: processSubject(withPid),
       state: baseState(),
-      actionInput,
     });
     expect(comment).toContain(
       '**Action:** Dump memory of `powershell.exe` (PID 4212) on **WIN-ANALYST01** with Elastic Defend.'
