@@ -53,7 +53,7 @@ export class AiopsPlugin
         return getPatternAnalysisAvailable(core.application);
       },
       PatternAnalysisComponent,
-      aiopsUsage: new AiopsUsage(core.http),
+      aiopsUsage: new AiopsUsage(core.http, core.application),
     };
   }
 
