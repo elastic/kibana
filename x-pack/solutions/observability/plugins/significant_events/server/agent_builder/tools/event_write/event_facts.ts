@@ -107,6 +107,22 @@ const changesMemberVerdict = (
   );
 };
 
+const ruleOf = (signal: SignalEntry): string | undefined => signal.metadata?.rule_uuid;
+
+/** Does this write confirm a rule the stored event did not hold as confirmed? */
+const escalatesStoredVerdict = ({
+  submitted,
+  latest,
+}: {
+  submitted: SignificantEvent['signals'];
+  latest: SignificantEvent | undefined;
+}): boolean => {
+  const stored = new Map((latest?.signals ?? []).map((signal) => [ruleOf(signal), signal.verdict]));
+  return (submitted ?? []).some(
+    (signal) => signal.verdict === 'confirms' && stored.get(ruleOf(signal)) !== 'confirms'
+  );
+};
+
 const hasConfirmingSignal = (signals: SignificantEvent['signals']): boolean =>
   (signals ?? []).some(({ verdict }) => verdict === 'confirms');
 
@@ -203,13 +219,16 @@ export const computeEventFacts = ({
   });
 
   // For continuations: if no new rule UUIDs are introduced, freeze title and symptom_hypothesis to prevent identity hijack
-  const frozenNarrative = isContinuation
-    ? preserveStableNarrative(
-        extractRuleUuids(candidate.input.signals),
-        latest,
-        extractRuleUuidsFromEvents([...priorDocs, latest])
-      )
-    : undefined;
+  // A rule that now confirms what the event stored as unconfirmed changes what the event is about:
+  // its title and hypothesis must be free to say so.
+  const frozenNarrative =
+    isContinuation && !escalatesStoredVerdict({ submitted: candidate.input.signals, latest })
+      ? preserveStableNarrative(
+          extractRuleUuids(candidate.input.signals),
+          latest,
+          extractRuleUuidsFromEvents([...priorDocs, latest])
+        )
+      : undefined;
 
   return {
     candidate,

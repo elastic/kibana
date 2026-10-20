@@ -181,10 +181,10 @@ describe('decideLifecycle', () => {
         RECOVERING,
       ],
       [
-        'opens a new series inactive when every member is healthy: recovering is never a birth',
+        'does not open a series from healthy members: only evidence of an error is born',
         undefined,
         'recovered',
-        INACTIVE,
+        NOT_A_BREACH,
       ],
       ['opens a new series active when a member cannot be judged', undefined, 'no_data', ACTIVE],
       ['does not reopen a closed series on healthy members', 'inactive', 'recovered', NOT_A_BREACH],
@@ -287,11 +287,11 @@ describe('decideLifecycle', () => {
       });
     });
 
-    it('opens a series with no version on any assessment, and never as recovering', () => {
+    it('opens a series with no version only from a breach or unjudged evidence, always active', () => {
       everyCase.forEach(({ status, change, decision }) => {
         if (change.kind === 'assessment' && status === undefined) {
-          expect(decision.write).toBe(true);
-          expect(decision.write && decision.status).not.toBe('recovering');
+          expect(decision.write).toBe(change.outcome !== 'recovered');
+          if (decision.write) expect(decision.status).toBe('active');
         }
       });
     });
@@ -343,10 +343,10 @@ describe('discovery assessments: the status comes from the members, never from t
     });
   });
 
-  it('opens an event from healthy members as inactive: recovering is never a birth', () => {
+  it('does not open an event from healthy members', () => {
     expect(decideFromMembers({ latest: undefined, signals: allHealthy })).toEqual({
-      write: true,
-      status: 'inactive',
+      write: false,
+      reason: 'not_a_breach',
     });
   });
 

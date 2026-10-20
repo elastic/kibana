@@ -75,7 +75,7 @@ export const eventsWriteItemSchema = lazySchema(() =>
       status: z
         .never({
           error:
-            'status is not an input: it follows from the per-rule verdicts you write. A breach opens or keeps an event active, healthy verdicts for every member open it inactive (nothing is failing) or, on an active event, move it to recovering, and only an operator or a close workflow closes a live event.',
+            'status is not an input: it follows from the per-rule verdicts you write. A breach opens or keeps an event active, healthy verdicts for every member of an active event move it to recovering, and only an operator or a close workflow closes a live event. An event is never born from healthy evidence.',
         })
         .optional(),
       event_id: z
@@ -117,25 +117,39 @@ export const eventsWriteItemSchema = lazySchema(() =>
           });
         });
       }
-      // Discovery decides which detections open an event, whatever their verdict: a healthy one opens
-      // it inactive and an unjudged one active, and the lifecycle derives that status from the
-      // verdicts. An event with no signal says nothing, so it is the only thing refused.
-      // Nothing confirmed means low severity and little confidence; the writer enforces it too, but
-      // refusing it here lets the note state the confidence that is stored.
-      if (item.event_id === undefined && signals.length > 0 && !hasConfirmingSignal) {
-        if (item.severity !== undefined && item.severity !== 'low') {
+      // An event is born only from evidence that points to an error: a confirming signal, an
+      // off-topic row, or an inconclusive result that found rows. Healthy, empty, errored or
+      // unchecked evidence is not an event; it can only join a live one. When nothing on the event
+      // confirms, it is rated low with little confidence; the writer enforces that too, but refusing
+      // it here lets the note state the confidence that is stored.
+      const pointsToError = (signal: (typeof signals)[number]): boolean =>
+        signal.verdict === 'confirms' ||
+        signal.verdict === 'off_topic' ||
+        (signal.verdict === 'inconclusive' && signal.evidence?.result === 'found');
+      if (item.event_id === undefined && signals.length > 0) {
+        if (!signals.some(pointsToError)) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            path: ['severity'],
-            message: 'No signal in this new event confirms anything, so its severity must be low.',
+            path: ['signals'],
+            message:
+              'A new event needs evidence that points to an error: a confirms signal, an off_topic row with a concrete error, or an inconclusive result with found rows. Leave these detections out of the write and add their rule_uuid to written_rule_uuids.',
           });
-        }
-        if (item.confidence !== undefined && item.confidence > UNCONFIRMED_EVENT_MAX_CONFIDENCE) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ['confidence'],
-            message: `No signal in this new event confirms anything, so its confidence is at most ${UNCONFIRMED_EVENT_MAX_CONFIDENCE}.`,
-          });
+        } else if (!hasConfirmingSignal) {
+          if (item.severity !== undefined && item.severity !== 'low') {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              path: ['severity'],
+              message:
+                'No signal in this new event confirms anything, so its severity must be low.',
+            });
+          }
+          if (item.confidence !== undefined && item.confidence > UNCONFIRMED_EVENT_MAX_CONFIDENCE) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              path: ['confidence'],
+              message: `No signal in this new event confirms anything, so its confidence is at most ${UNCONFIRMED_EVENT_MAX_CONFIDENCE}.`,
+            });
+          }
         }
       }
       if (item.event_id === undefined && signals.length === 0) {
@@ -331,7 +345,8 @@ export function createEventsWriteTool({
       **With event_id**: append a version to an existing event. Its status follows the merged
       members' verdicts: a breaching member returns a recovering event to active, while healthy or
       unjudgeable verdicts keep it recovering. Submit healthy evidence for a member too. A new event
-      is never opened recovering: every member healthy opens it inactive.
+      is born only from evidence that points to an error (a confirms signal, an off_topic row, or
+      an inconclusive result with found rows); healthy or empty evidence is not written.
       Signals and topology are merged with prior versions. \`severity\` is your verdict under
       its field contract, decided from the merged confirming signals; the writer stores it as given
       (an inactive event is low) and returns the stored tier. No-op if the stored severity and

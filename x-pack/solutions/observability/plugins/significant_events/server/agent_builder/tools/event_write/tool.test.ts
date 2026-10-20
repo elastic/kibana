@@ -178,16 +178,44 @@ describe('events_write tool', () => {
     };
     const { event_id: _omitted, ...newEventInput } = input;
 
-    it.each([
-      ['inconclusive evidence', [signalWith('inconclusive')]],
-      ['refuting evidence', [signalWith('refutes')]],
-      ['a quiet not_checked rule', [quiet]],
-    ])('accepts a new event backed only by %s: discovery decides', (_label, signals) => {
+    it('accepts a new event backed only by an inconclusive result that found rows, rated low', () => {
       expect(
         eventsWriteSchema.safeParse({
-          items: [{ ...newEventInput, signals, severity: 'low', confidence: 0.2 }],
+          items: [
+            {
+              ...newEventInput,
+              signals: [signalWith('inconclusive')],
+              severity: 'low',
+              confidence: 0.2,
+            },
+          ],
         }).success
       ).toBe(true);
+    });
+
+    it.each([
+      ['refuting evidence', [signalWith('refutes')]],
+      ['a quiet not_checked rule', [quiet]],
+      [
+        'an inconclusive result with no rows',
+        [
+          {
+            ...signalWith('inconclusive'),
+            evidence: { esql_query: 'FROM logs.test', result: 'empty' },
+          },
+        ],
+      ],
+    ])('refuses a new event backed only by %s: nothing points to an error', (_label, signals) => {
+      const result = eventsWriteSchema.safeParse({
+        items: [{ ...newEventInput, signals, severity: 'low', confidence: 0.2 }],
+      });
+
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues.map(({ message }) => message).join(' ')).toContain(
+          'points to an error'
+        );
+      }
     });
 
     it.each([

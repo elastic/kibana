@@ -60,18 +60,21 @@ Keep entries separate per detection; one detection's description or verdict neve
 <eligibility>
 
 Every detection is judged; the classifier before you is the only thing that skips one. A grounding
-verdict (`<grounding_evidence>`) says what the evidence shows, not whether to write: write an event
-for every detection except a same-batch duplicate, and judge where it belongs and how severe it is
-under the severity contract. The server derives the event's status from the verdicts. Every rule that
-asks whether something is written points here.
+verdict (`<grounding_evidence>`) says what the evidence shows, not whether to write. An event is born
+only from evidence that points to an error: healthy, empty, errored or unchecked evidence is not an
+event, and can only be added to a live event that already holds its rule. A detection you do not
+write is done; add its `rule_uuid` to `written_rule_uuids`. The server derives the event's status
+from the verdicts. Every rule that asks whether something is written points here.
 
 | Grounding verdict | Outcome |
 |---|---|
 | `confirms`, event-aligned (an on-topic failure sample is enough) | A continuation of the live event that holds its rule, or of the event Topology Match accepts; otherwise a new event. |
 | `off_topic` with a concrete error the system does not demonstrably tolerate | Its own event. The rule's signal keeps `off_topic`. |
-| `off_topic` otherwise | Its own event, never grouped with a breach. |
-| `refutes` | A continuation of the live event that holds the rule, per the recovery checklist below; otherwise its own event. It never pairs or groups. |
-| `inconclusive`, `not_checked` | Its own event, never grouped with a breach. |
+| `off_topic` otherwise (benign) | Not written. |
+| `refutes` | A continuation of the live event that holds the rule, per the recovery checklist below; otherwise not written. It never pairs or groups. |
+| `inconclusive`, the query found rows that point to an error | Its own event when its rule is in no live event, never grouped with a breach; otherwise not written (the live event keeps its stored verdict). |
+| `inconclusive` otherwise (empty or errored) | Not written. |
+| `not_checked` | Not written. |
 
 **Recovery.** A `refutes` detection is written as a continuation item, with its `event_id` and the
 `refutes` signal, only when all hold:
@@ -84,8 +87,8 @@ asks whether something is written points here.
 
 A stored `off_topic` signal never qualifies: it records an observed error the authored query does not
 measure, so only a re-check of that error can clear it. A `refutes` detection that does not meet the
-checklist on any live event, or whose event's stored signal is `off_topic`, is written as its own
-event and leaves that event unchanged.
+checklist on any live event, or whose event's stored signal is `off_topic`, is not written and leaves
+that event unchanged.
 
 **Same-batch duplicates.** Do not emit one, and add its `rule_uuid` to `written_rule_uuids`.
 
@@ -187,8 +190,8 @@ Compare one current detection against one active event using that event's compac
    `off_topic` detection, which is its own event.
 2. Either side has no matched query KI, or its `<grounding_evidence>` has verdict
    `inconclusive`/`not_checked` (`<eligibility>`). A detection that fails this check is never
-   paired or grouped: it does not enter the grouping graph or confirmed signal map, and it is its own
-   event item.
+   paired or grouped: it does not enter the grouping graph or confirmed signal map, and it follows
+   `<eligibility>` on its own.
 3. The event holds no confirming signal: its `signal_counts.confirms` is 0.
    - Non-confirming signals never establish a continuation. The detection must pass the checks below
      against the event's compact fields.
@@ -309,7 +312,7 @@ continuation binds the matched `event_id` to this detection's topology from grou
 - An inactive event is never a continuation target. `status: "active"` search results include
   recovering events: they are still live, so route to one normally. A write onto a recovering event
   records the new evidence. If a search result is inactive, discard it for routing; do not reuse its
-  `event_id`. Detections not accepted here are new-event candidates for Step 3, or their own event when `<eligibility>` keeps them out of grouping.
+  `event_id`. Detections not accepted here are new-event candidates for Step 3, or follow `<eligibility>` on their own when it keeps them out of grouping.
 
 For events returned by `platform_sig_events_event_search`, derive:
 - **Domain** and **Alert symptom** plus stored hypothesis context — `summary`, `symptom_hypothesis`,
@@ -356,7 +359,7 @@ searches have returned.
      verdict for that rule from the `full` event view first, and add the rule to
      `continued_rule_uuids` only when it is `confirms`, `inconclusive` or `not_checked`. When several
      candidate events qualify, accept it onto the one with the greatest rule coverage. A `refutes`
-     detection that meets the recovery checklist on no live event is its own event
+     detection that meets the recovery checklist on no live event is not written
      (`<eligibility>`); where the stored verdict is `off_topic`, the observed error is unchecked, so
      leave the event unchanged.
    - **Breach.** A breach for that rule continues the event that holds it, whatever the stored
@@ -397,7 +400,7 @@ Step 4.
 1. Build the grouping graph before any ownership, titles, or narratives:
    - One node per detection not excluded by `<incident_matching>` pre-check rule 2 or by
      `<eligibility>` (`refutes`, benign `off_topic`); a concrete off-topic observed error remains its
-     own candidate. Excluded detections never enter the graph; each is its own event item.
+     own candidate. Excluded detections never enter the graph; each follows `<eligibility>` on its own.
    - **Index first.** List each confirmed detection with the `features[].id` values of its matched
      query KI and the services its signal names. A detection whose list reaches another
      detection's services or features is a bridge candidate; check each one below.
@@ -466,8 +469,8 @@ For each event candidate, decide from all signals that will appear in the final 
    classify each event from `signals[]` alone — each signal's stored or `<grounding_evidence>`
    verdict, evidence result. Then read the narrative fields and state the strongest case for each
    alternative outcome (event ↔ no event). If the challenge surfaces a more credible alternative,
-   adopt it. A candidate with no confirming signal is still written (`<eligibility>`): it is rated
-   under the severity contract, and the server derives its status from its verdicts.
+   adopt it. A candidate whose evidence points to no error is not written (`<eligibility>`). One that
+   does is rated under the severity contract, and the server derives its status from its verdicts.
 2. **Decide whether each candidate is written.** Classify each event from the verdicts in
    `signals[]` alone, before reading `symptom_hypothesis`, `summary`, or `title`. Then read them
    and state the strongest case for the alternative outcome (event ↔ no event); adopt it if it is
@@ -607,6 +610,6 @@ so use `"low"` and `"active"` as placeholders, which the workflow ignores for un
 Include `narrative_preserved: true` when the tool result carries it.
 
 Set `written_rule_uuids` to every detection whose item result is marked "yes" in the Step 6 results
-table, and every same-batch duplicate.
+table, every same-batch duplicate, and every detection `<eligibility>` leaves unwritten.
 
 </field_rules>

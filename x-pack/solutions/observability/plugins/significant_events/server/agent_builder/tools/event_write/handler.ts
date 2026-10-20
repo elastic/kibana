@@ -13,7 +13,6 @@ import {
   assertValidBulkWriteSize,
   createBulkWriteItemError,
   createBulkWriteOutcomeUnknownError,
-  createBulkWriteValidationError,
 } from '../bulk_write';
 import type { CompactBulkError } from '../bulk_write';
 import { assessMembers } from '../../../lib/significant_events/events/event_members';
@@ -225,17 +224,12 @@ const decideStatuses = ({
       });
       return;
     }
-    if (latest === undefined) {
-      // Invariant: a series with no version always has something to write, so this is unreachable.
-      throw createBulkWriteValidationError(
-        `events_write: item ${candidate.index} has no event to leave unchanged.`
-      );
-    }
-
+    // Nothing was written: a new event is not born from healthy evidence, and an existing one
+    // already says what this write would.
     stage.skipped.push({
       index: candidate.index,
       event_id: candidate.eventId,
-      status: latest.status,
+      ...(latest ? { status: latest.status } : {}),
       written: false,
       skipped: true,
       reason: 'unchanged_outcome',
