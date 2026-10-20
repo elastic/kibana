@@ -265,11 +265,12 @@ export class NightshiftInvestigationsPlugin
           getDeps: () => ({ actions: this.actionsStart }),
           logger: sandboxLogger.get('connector_credentials'),
         });
+        const outputRedactionLogger = sandboxLogger.get('output_redaction');
         const redaction = {
           getOutputRedactor: createSandboxOutputRedactorProvider({
             getDeps: () => ({ actions: this.actionsStart, sandboxSecretsClient }),
           }),
-          logger: sandboxLogger.get('output_redaction'),
+          logger: outputRedactionLogger,
         };
         const availability = createSandboxToolAvailability({
           getDeps: () => ({ featureFlags: this.featureFlags, security: this.securityStart }),

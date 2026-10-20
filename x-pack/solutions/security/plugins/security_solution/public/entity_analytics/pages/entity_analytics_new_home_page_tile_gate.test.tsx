@@ -6,11 +6,17 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { TestProviders } from '../../common/mock';
 import { EntityAnalyticsNewHomePage } from './entity_analytics_new_home_page';
 import * as tileHooks from '../components/home/needs_attention_tiles/hooks';
 import { useEntityStoreStatus } from '../components/entity_store/hooks/use_entity_store';
+import { useMissingRiskEnginePrivileges } from '../hooks/use_missing_risk_engine_privileges';
+import { useEntityEnginePrivileges } from '../components/entity_store/hooks/use_entity_engine_privileges';
+import { useAnomalyPrivileges } from '../api/hooks/use_anomaly_privileges';
+import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
+import { SignalCards } from '../components/home/needs_attention_tiles/signal_cards';
+import type { SignalCardData } from '../components/home/needs_attention_tiles/data';
 
 jest.mock('../components/home/needs_attention_tiles/hooks', () => ({
   useAlertBasedTiles: jest.fn(),
@@ -85,12 +91,8 @@ jest.mock('@kbn/entity-store/public', () => ({
 }));
 jest.mock('../components/home/entity_search_bar', () => ({ EntitySearchBar: () => null }));
 jest.mock('../components/home/entity_filters_bar', () => ({ EntityFiltersBar: () => null }));
-const mockSignalCards = jest.fn(
-  (_props: { cards: Array<{ id: string; noDataMessage?: string }> }) => null
-);
 jest.mock('../components/home/needs_attention_tiles/signal_cards', () => ({
-  SignalCards: (props: { cards: Array<{ id: string; noDataMessage?: string }> }) =>
-    mockSignalCards(props),
+  SignalCards: jest.fn(() => null),
 }));
 jest.mock('../components/home/entities_table', () => ({
   DataViewContext: { Provider: ({ children }: { children: React.ReactNode }) => <>{children}</> },
@@ -110,8 +112,70 @@ jest.mock('../../common/components/page_wrapper', () => ({
   SecuritySolutionPageWrapper: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 jest.mock('../../common/utils/route/spy_routes', () => ({ SpyRoute: () => null }));
+jest.mock('../hooks/use_missing_risk_engine_privileges', () => ({
+  useMissingRiskEnginePrivileges: jest.fn(),
+}));
+jest.mock('../components/entity_store/hooks/use_entity_engine_privileges', () => ({
+  useEntityEnginePrivileges: jest.fn(),
+}));
+jest.mock('../api/hooks/use_anomaly_privileges', () => ({
+  useAnomalyPrivileges: jest.fn(),
+}));
+jest.mock('../../detections/containers/detection_engine/alerts/use_alerts_privileges', () => ({
+  useAlertsPrivileges: jest.fn(),
+}));
 
 const hooks = tileHooks as unknown as Record<string, jest.Mock>;
+
+const mockPrivileges = ({
+  isLoading = false,
+  isError = false,
+  hasReadPermissions = true,
+  alerts = true,
+  risk = true,
+  anomalies = true,
+}: {
+  isLoading?: boolean;
+  isError?: boolean;
+  hasReadPermissions?: boolean;
+  alerts?: boolean;
+  risk?: boolean;
+  anomalies?: boolean;
+} = {}) => {
+  (useMissingRiskEnginePrivileges as jest.Mock).mockReturnValue(
+    risk
+      ? { isLoading: false, hasAllRequiredPrivileges: true }
+      : {
+          isLoading: false,
+          hasAllRequiredPrivileges: false,
+          missingPrivileges: { indexPrivileges: [], clusterPrivileges: { enable: [], run: [] } },
+        }
+  );
+  (useAnomalyPrivileges as jest.Mock).mockReturnValue({
+    isLoading: false,
+    isError: false,
+    data: {
+      has_read_permissions: anomalies,
+      privileges: { elasticsearch: { index: {} }, kibana: {} },
+    },
+  });
+  (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexRead: alerts, loading: false });
+  (useEntityEnginePrivileges as jest.Mock).mockReturnValue({
+    isLoading,
+    isError,
+    data: isError
+      ? undefined
+      : {
+          has_read_permissions: hasReadPermissions,
+          privileges: { elasticsearch: { index: {} }, kibana: [] },
+        },
+  });
+};
+
+const getCard = (id: SignalCardData['id']): SignalCardData | undefined => {
+  const { calls } = (SignalCards as jest.Mock).mock;
+  return calls[calls.length - 1][0].cards.find((card: SignalCardData) => card.id === id);
+};
 
 const COUNT_HOOKS = {
   alerts: 'useAlertBasedTiles',
@@ -223,9 +287,79 @@ const seriesReachesBack = (tile: Tile): boolean | undefined => {
   return options.reachesBack;
 };
 
+describe('EntityAnalyticsNewHomePage: privileges', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useEntityStoreStatus as jest.Mock).mockReturnValue({
+      data: { status: 'running' },
+      isLoading: false,
+    });
+    mockTiles();
+  });
+
+  it('shows a loader and runs no query while the privileges load', () => {
+    mockPrivileges({ isLoading: true });
+    render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+    expect(screen.getByRole('progressbar', { name: 'Loading' })).toBeInTheDocument();
+    expect(hooks.useNewEntityCount).not.toHaveBeenCalled();
+  });
+
+  it('shows the no-access screen and runs no query without read access to the entity store', () => {
+    mockPrivileges({ hasReadPermissions: false });
+    render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+    expect(screen.getByTestId('noPrivilegesPage')).toBeInTheDocument();
+    expect(hooks.useNewEntityCount).not.toHaveBeenCalled();
+  });
+
+  it('shows the page when the privileges check fails', () => {
+    mockPrivileges({ isError: true });
+    render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+    expect(screen.queryByTestId('noPrivilegesPage')).not.toBeInTheDocument();
+    expect(hooks.useNewEntityCount).toHaveBeenCalled();
+  });
+
+  it('shows the page when the risk engine privileges check fails', () => {
+    mockPrivileges();
+    (useMissingRiskEnginePrivileges as jest.Mock).mockReturnValue({
+      isLoading: true,
+      isError: true,
+    });
+    render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+    expect(screen.queryByRole('progressbar', { name: 'Loading' })).not.toBeInTheDocument();
+    expect(hooks.useNewEntityCount).toHaveBeenCalled();
+  });
+
+  it.each([
+    ['alerts', ['alerts'], ['entitiesWithAlerts', 'watchlisted']],
+    ['anomalies', ['anomalies'], ['entitiesWithAnomalies']],
+    ['risk', ['riskMovers', 'newlyHighCritical'], ['riskMovers', 'newlyHighCritical']],
+  ] as const)(
+    'skips the %s tiles and says why without read access to them',
+    (source, tiles, cardIds) => {
+      mockPrivileges({ [source]: false });
+      render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+      TILES.forEach((tile) => {
+        const isSkipped = (tiles as readonly Tile[]).includes(tile);
+        expect(lastOptions(COUNT_HOOKS[tile]).skip).toBe(isSkipped);
+        expect(lastOptions(DELTA_HOOKS[tile]).skip).toBe(isSkipped);
+        expect(lastOptions(SERIES_HOOKS[tile]).skip).toBe(isSkipped);
+      });
+      cardIds.forEach((id) => {
+        expect(getCard(id)?.noDataMessage).toMatch(/^Requires read access to /);
+      });
+    }
+  );
+});
+
 describe('EntityAnalyticsNewHomePage: each tile waits for its own count', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockPrivileges();
     (useEntityStoreStatus as jest.Mock).mockReturnValue({
       data: { status: 'running' },
       isLoading: false,
@@ -300,11 +434,7 @@ describe('EntityAnalyticsNewHomePage: each tile waits for its own count', () => 
   });
 
   it('tells the anomalies tile that it needs jobs only when no security ML job is installed', () => {
-    const anomaliesNoDataMessage = () => {
-      const { calls } = mockSignalCards.mock;
-      return calls[calls.length - 1][0].cards.find(({ id }) => id === 'entitiesWithAnomalies')
-        ?.noDataMessage;
-    };
+    const anomaliesNoDataMessage = () => getCard('entitiesWithAnomalies')?.noDataMessage;
     mockTiles({}, { anomaliesMissingJobs: true });
     render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
     expect(anomaliesNoDataMessage()).toBe('Requires anomaly detection jobs');
