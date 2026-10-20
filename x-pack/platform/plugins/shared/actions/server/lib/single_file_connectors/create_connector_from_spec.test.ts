@@ -147,6 +147,14 @@ describe('createConnectorTypeFromSpec', () => {
     expect(connectorType.sandboxSupportedAuthTypes).toEqual(['bearer', 'oauth_authorization_code']);
   });
 
+  it('registers the shipped External Elasticsearch spec as sandbox capable for both auth types', () => {
+    const connectorType = createConnectorTypeFromSpec(
+      connectorsSpecs.Elasticsearch,
+      mockActionsPlugin
+    );
+    expect(connectorType.sandboxSupportedAuthTypes).toEqual(['api_key_header', 'basic']);
+  });
+
   it('sets description from metadata.description', () => {
     const spec = createMockSpec({
       metadata: {

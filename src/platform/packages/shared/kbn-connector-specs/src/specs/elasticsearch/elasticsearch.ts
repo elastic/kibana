@@ -47,6 +47,7 @@ export const Elasticsearch: ConnectorSpec = {
       {
         type: 'api_key_header',
         isRecommended: true,
+        supportsSandbox: true,
         defaults: { headerField: 'Authorization' },
         overrides: {
           label: i18n.translate('core.kibanaConnectorSpecs.elasticsearch.auth.apiKeyHeader.label', {
@@ -71,6 +72,7 @@ export const Elasticsearch: ConnectorSpec = {
       },
       {
         type: 'basic',
+        supportsSandbox: true,
         defaults: {},
         overrides: {
           label: i18n.translate('core.kibanaConnectorSpecs.elasticsearch.auth.basic.label', {
