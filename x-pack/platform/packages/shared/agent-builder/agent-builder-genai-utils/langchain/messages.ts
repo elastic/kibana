@@ -13,6 +13,7 @@ import type { RunToolReturn } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
 import { isArray } from 'lodash';
 import { cleanPrompt } from '../prompts';
+import { sanitizeToolId } from './tools';
 
 /**
  * Extract the text content from a langchain message or chunk.
@@ -29,6 +30,19 @@ export const extractTextContent = (message: BaseMessage): string => {
     }
     return content;
   }
+};
+
+/**
+ * Extract the refusal the inference layer attached to a message, if any.
+ *
+ * `@kbn/inference-langchain` carries a chat completion's `refusal` (the provider's refusal text,
+ * or the inference plugin's placeholder for a `content_filter` finish reason) in
+ * `additional_kwargs.refusal`. A refused response otherwise looks like an empty one: no text,
+ * no tool calls.
+ */
+export const extractRefusal = (message: BaseMessage): string | undefined => {
+  const refusal = message.additional_kwargs?.refusal;
+  return typeof refusal === 'string' && refusal.length > 0 ? refusal : undefined;
 };
 
 export interface ToolCall {
@@ -168,7 +182,7 @@ export const createToolCallMessage = (
     tool_calls: toolCalls.map((toolCall) => {
       return {
         id: toolCall.toolCallId,
-        name: toolCall.toolName,
+        name: sanitizeToolId(toolCall.toolName),
         args: toolCall.reasoning
           ? { _reasoning: toolCall.reasoning, ...toolCall.args }
           : toolCall.args,

@@ -7,7 +7,7 @@
 
 /**
  * Enables grounding of significant events query generation against source code indexed via
- * Semantic Code Search (SCS). When enabled and a stream is linked to a code index, the query
+ * Semantic Code Search (SCS). When enabled and a source is linked to a code index, the query
  * generation reasoning agent can consult the source code (through the installed SCS Kibana
  * workflows) to verify hypotheses before emitting ES|QL queries.
  */

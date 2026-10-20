@@ -8,6 +8,7 @@
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import type { ConnectorEventEmitParams, ConnectorEventEmitter } from '@kbn/actions-plugin/server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 
 import {
@@ -21,7 +22,7 @@ const createEmitParams = (
 ): ConnectorEventEmitParams => ({
   eventId: 'inboundWebhook.received',
   payload: { body: {} },
-  spaceId: 'default',
+  spaceId: DEFAULT_SPACE_ID,
   connectorId: 'c1',
   connectorTypeId: '.inboundWebhook',
   request: httpServerMock.createKibanaRequest({
@@ -92,7 +93,7 @@ describe('registerWorkflowsConnectorEventEmitter', () => {
     await emitter.emit(
       createEmitParams({
         eventId: 'myConnector.received',
-        spaceId: 'space-a',
+        spaceId: asSpaceId('space-a'),
         connectorId: 'connector-99',
         connectorTypeId: '.myConnector',
       })

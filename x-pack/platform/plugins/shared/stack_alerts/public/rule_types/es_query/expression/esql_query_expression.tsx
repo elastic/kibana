@@ -20,14 +20,15 @@ import {
 import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { ESQLLangEditor } from '@kbn/esql/public';
 import {
-  getESQLAdHocDataview,
   getESQLResults,
+  getESQLTimeField,
+  getEsqlSourceColumns,
   getProjectRoutingFromEsqlQuery,
+  getSourceCommandQueryFromESQLQuery,
 } from '@kbn/esql-utils';
 import { type AggregateQuery } from '@kbn/es-query';
 import { parseDuration } from '@kbn/alerting-plugin/common';
 import {
-  convertFieldSpecToFieldOption,
   firstFieldOption,
   getTimeFieldOptions,
   getTimeOptions,
@@ -116,7 +117,7 @@ const keepRecommendedWarning = i18n.translate(
 
 export const EsqlQueryExpression: React.FC<
   RuleTypeParamsExpressionProps<EsQueryRuleParams<SearchType.esqlQuery>, EsQueryRuleMetaData>
-> = ({ ruleParams, metadata, setRuleParams, setRuleProperty, errors, data, dataViews }) => {
+> = ({ ruleParams, metadata, setRuleParams, setRuleProperty, errors, data }) => {
   const { http, isServerless, uiSettings } = useTriggerUiActionServices();
   const { esqlQuery, timeWindowSize, timeWindowUnit, timeField, groupBy } = ruleParams;
   const isEdit = !!metadata?.isEdit;
@@ -272,24 +273,15 @@ export const EsqlQueryExpression: React.FC<
     async (q: AggregateQuery) => {
       const fetchTimeFieldsData = async (queryObj: AggregateQuery) => {
         try {
-          const esqlDataView = await getESQLAdHocDataview({
-            dataViewsService: dataViews,
-            query: queryObj.esql,
-            http,
-          });
-          const indexPattern: string = esqlDataView.getIndexPattern();
-
+          // Load the source columns with ES|QL (like Discover), so federated datasets work too
           const projectRouting = getProjectRoutingFromEsqlQuery(queryObj.esql);
-          const fieldSpecs = await dataViews.getFieldsForWildcard({
-            pattern: indexPattern,
-            allowNoIndex: true,
-            ...(projectRouting ? { projectRouting } : {}),
-          });
+          const sourceQuery = getSourceCommandQueryFromESQLQuery(queryObj.esql);
+          const [columns, timestampField] = await Promise.all([
+            getEsqlSourceColumns({ esqlQuery: sourceQuery, http, projectRouting }),
+            getESQLTimeField({ query: queryObj.esql, http, projectRouting }),
+          ]);
 
-          const currentEsFields = convertFieldSpecToFieldOption(fieldSpecs, false);
-
-          const newTimeFieldOptions = getTimeFieldOptions(currentEsFields);
-          const timestampField = esqlDataView.timeFieldName;
+          const newTimeFieldOptions = getTimeFieldOptions(columns);
           return { newTimeFieldOptions, timestampField };
         } catch (e) {
           return { newTimeFieldOptions: [], timestampField: undefined };
@@ -298,14 +290,17 @@ export const EsqlQueryExpression: React.FC<
 
       const { newTimeFieldOptions, timestampField } = await fetchTimeFieldsData(q);
       setTimeFieldOptions([firstFieldOption, ...newTimeFieldOptions]);
-      if (!timeField && timestampField) {
+      const isOption = (field?: string) => newTimeFieldOptions.some(({ value }) => value === field);
+      if (isOption(timeField)) {
+        return;
+      }
+      if (timestampField && isOption(timestampField)) {
         setParam('timeField', timestampField);
+        return;
       }
-      if (!newTimeFieldOptions.find(({ value }) => value === timeField)) {
-        clearParam('timeField');
-      }
+      clearParam('timeField');
     },
-    [timeField, setParam, clearParam, dataViews, http]
+    [timeField, setParam, clearParam, http]
   );
 
   return (
