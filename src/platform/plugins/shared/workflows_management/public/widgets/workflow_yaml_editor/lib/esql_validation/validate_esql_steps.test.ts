@@ -149,7 +149,7 @@ describe('validateEsqlSteps — Liquid policy', () => {
     });
   });
 
-  describe('skip path: Liquid in structural position', () => {
+  describe('grammar-only path: Liquid in structural position', () => {
     // Numbers reference the scenario matrix in the plan
     // (`/Users/marcoliberati/.claude/plans/you-are-a-very-fancy-waffle.md`).
     const cases: Array<{ row: number | string; description: string; query: string }> = [
@@ -171,26 +171,32 @@ describe('validateEsqlSteps — Liquid policy', () => {
         query: 'FROM logs-* | LIMIT {{ n }}',
       },
       { row: 7, description: 'Liquid wraps the whole query', query: '{{ query }}' },
-      {
-        row: 9,
-        description: 'Liquid `{% raw %}` block outside a string',
-        query: '{% raw %}FROM logs-* | LIMIT 1{% endraw %}',
-      },
-      {
-        row: 'extra',
-        description: 'Liquid `{% if %}` tag outside any string',
-        query: '{%- if env -%} FROM logs {%- endif -%}',
-      },
     ];
 
     for (const { row, description, query } of cases) {
-      it(`row ${row}: skips validation for ${description}`, async () => {
+      it(`row ${row}: checks only grammar for ${description}`, async () => {
+        mockValidate.mockResolvedValue({ errors: [], warnings: [] });
         const text = buildStep(query);
         const markers = await validateEsqlFromText(text, stubCallbacks);
         expect(markers).toEqual([]);
-        expect(mockValidate).not.toHaveBeenCalled();
+        // Placeholders replace every Liquid span, and no callbacks are passed.
+        expect(mockValidate).toHaveBeenCalledTimes(1);
+        expect(mockValidate.mock.calls[0]).toHaveLength(1);
+        expect(mockValidate.mock.calls[0][0]).not.toMatch(/[{}]/);
+        expect(mockValidate.mock.calls[0][0].trim()).toHaveLength(query.length);
       });
     }
+  });
+
+  describe('skip path: Liquid tag in structural position', () => {
+    it.each([
+      ['row 9: a `{% raw %}` block outside a string', '{% raw %}FROM logs-* | LIMIT 1{% endraw %}'],
+      ['an `{% if %}` tag outside any string', '{%- if env -%} FROM logs {%- endif -%}'],
+    ])('does not validate %s', async (_name, query) => {
+      const markers = await validateEsqlFromText(buildStep(query), stubCallbacks);
+      expect(markers).toEqual([]);
+      expect(mockValidate).not.toHaveBeenCalled();
+    });
   });
 
   describe('Liquid comments and ES|QL comments stay on the mask path', () => {
@@ -220,7 +226,7 @@ describe('validateEsqlSteps — Liquid policy', () => {
   });
 
   describe('multi-step robustness', () => {
-    it('skips one step on Liquid and validates another', async () => {
+    it('drops placeholder diagnostics on one step and keeps the next step diagnostics', async () => {
       const text = `steps:
   - name: liquid_step
     type: elasticsearch.esql.query
@@ -245,8 +251,9 @@ describe('validateEsqlSteps — Liquid policy', () => {
         warnings: [],
       });
       const markers = await validateEsqlFromText(text, stubCallbacks);
-      // The first step is skipped (structural Liquid); only the second runs.
-      expect(mockValidate).toHaveBeenCalledTimes(1);
+      // Both steps run. On the first, offsets 13–18 fall on the placeholder for
+      // `{{ env }}`, so that diagnostic is dropped.
+      expect(mockValidate).toHaveBeenCalledTimes(2);
       expect(markers).toHaveLength(1);
       expect(markers[0].message).toBe('Unknown command');
     });
