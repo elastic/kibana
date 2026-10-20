@@ -104,7 +104,7 @@ const smlCrawlerTaskId = (typeId: string): string => `${SML_CRAWLER_TASK_TYPE}:$
  *
  * This suite lives under `scout_alerting_v2` so `alerting:v2:enabled` stays
  * pinned on. The generic Scout config leaves that setting unpinned, and
- * `rule_management_skill_gating.spec.ts` toggles it at runtime.
+ * `rule_authoring_skill_gating.spec.ts` toggles it at runtime.
  */
 apiTest.describe(
   'Agent Builder — alerting V2 SML type access',

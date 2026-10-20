@@ -33,6 +33,7 @@ export interface UsageStats {
   'search:timeout': number;
   'visualization:visualize:legacyHeatmapChartsLibrary': boolean;
   'discover:modifyColumnsOnSwitch': boolean;
+  'discover:enableSolutionProfilesInClassic': boolean;
   'discover:showFieldStatistics': boolean;
   'discover:showMultiFields': boolean;
   enableESQL: boolean;
@@ -241,5 +242,6 @@ export interface UsageStats {
   'elasticRamen:enabled': boolean;
   'query_activity:minRunningTime': number;
   'genAiSettings:tokenUsageTracking': boolean;
+  'genAiSettings:inferenceStreaming': boolean;
   'alerting:v1:showV1ObservabilityAlertsTable': boolean;
 }

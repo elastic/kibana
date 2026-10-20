@@ -491,11 +491,9 @@ export function MachineLearningCommonUIProvider({
         await testSubjects.setValue('optionsListFilterInput', value);
         await testSubjects.click(`optionsListControlSelection-${value}`);
       });
-      // Close the popover so its panel can't overlay subsequent controls (e.g. the wizard "Next" button).
-      await retry.tryForTime(5000, async () => {
-        await browser.pressKeys(browser.keys.ESCAPE);
-        await testSubjects.missingOrFail('optionsListControlAvailableOptions', { timeout: 1000 });
-      });
+      // The control closes its own popover on selection; wait for the panel to go so it can't
+      // overlay subsequent controls (e.g. the wizard "Next" button).
+      await testSubjects.missingOrFail('optionsListControlAvailableOptions', { timeout: 5000 });
     },
 
     async assertOptionsListWithFieldStatsValue(

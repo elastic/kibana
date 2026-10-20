@@ -25,6 +25,7 @@ export function SloErrorBudget({
   sloInstanceId,
   onRenderComplete,
   reloadSubject,
+  isInteractive = true,
 }: EmbeddableSloProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [selectedSlo, setSelectedSlo] = useState<SLOWithSummaryResponse | null>(null);
@@ -119,6 +120,7 @@ export function SloErrorBudget({
             onClick={() => {
               setSelectedSlo(slo);
             }}
+            disabled={!isInteractive}
           >
             <h4>{slo.name}</h4>
           </EuiLink>

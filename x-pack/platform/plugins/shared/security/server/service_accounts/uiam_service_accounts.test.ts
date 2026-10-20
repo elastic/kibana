@@ -11,7 +11,7 @@ import type { AuthenticatedUser, KibanaRequest } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
 import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
-import type { Logger } from '@kbn/logging';
+import type { MockedLogger } from '@kbn/logging-mocks';
 import type {
   CheckPrivileges,
   CheckPrivilegesResponse,
@@ -41,7 +41,7 @@ describe('UiamServiceAccounts', () => {
   let mockUiam: jest.Mocked<UiamServicePublic>;
   let mockCheckPrivileges: jest.Mocked<CheckPrivileges>;
   let mockCheckPrivilegesWithRequest: jest.Mocked<CheckPrivilegesWithRequest>;
-  let logger: Logger;
+  let logger: MockedLogger;
   let getCurrentUser: jest.Mock<AuthenticatedUser | null, [KibanaRequest]>;
   let audit: ReturnType<typeof auditServiceMock.create>;
   let auditLogger: ReturnType<typeof auditLoggerMock.create>;
@@ -108,7 +108,7 @@ describe('UiamServiceAccounts', () => {
   beforeEach(() => {
     mockLicense = licenseMock.create();
     mockLicense.isEnabled.mockReturnValue(true);
-    logger = loggingSystemMock.create().get('service-accounts');
+    logger = loggingSystemMock.create().get('service-accounts') as MockedLogger;
     mockUiam = uiamServiceMock.create();
     getCurrentUser = jest.fn().mockReturnValue(null);
     mockCheckPrivileges = {
@@ -819,7 +819,7 @@ describe('UiamServiceAccounts', () => {
       expect(mockUiam.listServiceAccounts).not.toHaveBeenCalled();
     });
 
-    it('checks the `read_security` cluster privilege for the caller', async () => {
+    it('checks the `manage_security` cluster privilege for the caller', async () => {
       mockUiam.listServiceAccounts.mockResolvedValue({ service_accounts: [] });
       const request = createMockRequest('Bearer essu_my_token');
 
@@ -827,11 +827,11 @@ describe('UiamServiceAccounts', () => {
 
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(request);
       expect(mockCheckPrivileges.globally).toHaveBeenCalledWith({
-        elasticsearch: { cluster: ['read_security'], index: {} },
+        elasticsearch: { cluster: ['manage_security'], index: {} },
       });
     });
 
-    it('rejects with a 403 when the caller lacks the `read_security` cluster privilege', async () => {
+    it('rejects with a 403 when the caller lacks the `manage_security` cluster privilege', async () => {
       mockCheckPrivileges.globally.mockResolvedValue(clusterPrivilegesResponse(false));
 
       await expect(
@@ -947,7 +947,7 @@ describe('UiamServiceAccounts', () => {
       expect(mockUiam.getServiceAccount).not.toHaveBeenCalled();
     });
 
-    it('checks the `read_security` cluster privilege for the caller', async () => {
+    it('checks the `manage_security` cluster privilege for the caller', async () => {
       mockUiam.getServiceAccount.mockResolvedValue(retrievedAccount);
       const request = createMockRequest('Bearer essu_my_token');
 
@@ -955,11 +955,11 @@ describe('UiamServiceAccounts', () => {
 
       expect(mockCheckPrivilegesWithRequest).toHaveBeenCalledWith(request);
       expect(mockCheckPrivileges.globally).toHaveBeenCalledWith({
-        elasticsearch: { cluster: ['read_security'], index: {} },
+        elasticsearch: { cluster: ['manage_security'], index: {} },
       });
     });
 
-    it('rejects with a 403 when the caller lacks the `read_security` cluster privilege', async () => {
+    it('rejects with a 403 when the caller lacks the `manage_security` cluster privilege', async () => {
       mockCheckPrivileges.globally.mockResolvedValue(clusterPrivilegesResponse(false));
 
       await expect(
