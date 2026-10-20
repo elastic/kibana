@@ -21,11 +21,11 @@ import type { EngineDescriptor } from '../../domain/saved_objects';
 
 /**
  * Whether the dual-process log extraction architecture is active for this deployment.
- * Reads from LaunchDarkly via core featureFlags; defaults to false so self-managed and
- * unreachable deployments always run single-process.
+ * Reads from LaunchDarkly via core featureFlags; defaults to true so self-managed and
+ * unreachable deployments, which never reach LaunchDarkly, also run dual-process.
  */
 export const isDualProcessEnabled = (featureFlags: FeatureFlagsStart): Promise<boolean> =>
-  firstValueFrom(featureFlags.getBooleanValue$(FF_DUAL_PROCESS_ENABLED, false));
+  firstValueFrom(featureFlags.getBooleanValue$(FF_DUAL_PROCESS_ENABLED, true));
 
 // ---------------------------------------------------------------------------
 // Flag-reactive stop / restart
@@ -175,7 +175,7 @@ export const subscribeToDualProcessFlag = ({
     );
 
   coreStart.featureFlags
-    .getBooleanValue$(FF_DUAL_PROCESS_ENABLED, false)
+    .getBooleanValue$(FF_DUAL_PROCESS_ENABLED, true)
     .pipe(
       pairwise(),
       takeUntil(stop$),

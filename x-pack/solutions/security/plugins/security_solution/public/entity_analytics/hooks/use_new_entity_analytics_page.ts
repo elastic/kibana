@@ -10,5 +10,5 @@ import { useKibana } from '../../common/lib/kibana';
 
 export const useNewEntityAnalyticsPage = (): boolean => {
   const { featureFlags } = useKibana().services;
-  return featureFlags.useBooleanValue(USE_NEW_ENTITY_ANALYTICS_HOME_PAGE_FLAG, false);
+  return featureFlags.useBooleanValue(USE_NEW_ENTITY_ANALYTICS_HOME_PAGE_FLAG, true);
 };
