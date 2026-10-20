@@ -21,6 +21,7 @@ export const servers: ScoutServerConfig = {
       // without tripping the minimum-interval or per-minute limits.
       '--xpack.alerting_v2.rules.minimumScheduleInterval=5s',
       '--xpack.alerting_v2.rules.maxScheduledPerMinute=32000',
+      '--xpack.alerting_v2.retention.alertActions.dispatcher.enabled=true',
       '--uiSettings.globalOverrides.alerting:v2:enabled=true',
     ],
   },

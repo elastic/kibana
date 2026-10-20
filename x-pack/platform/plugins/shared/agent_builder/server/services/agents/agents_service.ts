@@ -62,6 +62,8 @@ export class AgentsService {
   private typeRegistry: AgentTypeRegistry;
   /** In-memory availability for persisted agents, keyed by agent id. Filled by `ensure`. */
   private readonly availabilityByAgentId = new Map<string, AgentAvailabilityConfig>();
+  /** In-memory UI visibility overrides for persisted agents, keyed by agent id. Filled by `ensure`. */
+  private readonly hiddenByAgentId = new Map<string, boolean>();
   private aiIndexResolver?: AiIndexResolver;
 
   private setupDeps?: AgentsServiceSetupDeps;
@@ -149,6 +151,7 @@ export class AgentsService {
       toolsService,
       logger,
       availabilityByAgentId: this.availabilityByAgentId,
+      hiddenByAgentId: this.hiddenByAgentId,
     });
 
     const getAgentClient = async ({ request }: { request: KibanaRequest }) => {
@@ -176,7 +179,12 @@ export class AgentsService {
       });
     };
 
-    const ensure: AgentsServiceStart['ensure'] = async ({ spaceId, agent, availability }) => {
+    const ensure: AgentsServiceStart['ensure'] = async ({
+      spaceId,
+      agent,
+      availability,
+      hidden,
+    }) => {
       if (this.builtinRegistry.has(agent.id)) {
         throw new Error(
           `Cannot ensure persisted agent "${agent.id}": a built-in agent uses this id`
@@ -188,6 +196,9 @@ export class AgentsService {
 
       if (availability) {
         this.availabilityByAgentId.set(agent.id, availability);
+      }
+      if (hidden !== undefined) {
+        this.hiddenByAgentId.set(agent.id, hidden);
       }
 
       const systemClient = createSystemClient({ space: spaceId, elasticsearch, logger });

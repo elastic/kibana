@@ -27,7 +27,7 @@ describe('createSeriesActionRouteForType', () => {
     });
 
     expect(RouteClass.method).toBe('post');
-    expect(RouteClass.path).toBe(`/internal/alerting/v2/series/{group_hash}/${suffix}`);
+    expect(RouteClass.path).toBe(`/internal/alerting/v2/series/{series_id}/${suffix}`);
     expect(RouteClass.options?.summary).toBe(summary);
     expect(RouteClass.validate).toBeDefined();
     expect(RouteClass.validate).toEqual(
@@ -46,7 +46,7 @@ describe('createSeriesActionRouteForType', () => {
     });
     const { ctx } = createRouteDependencies();
     const request = {
-      params: { group_hash: 'group-1' },
+      params: { series_id: 'series-1' },
       body: { snoozed_until: '2026-08-12T00:00:00.000Z' },
     } as unknown as KibanaRequest;
     const alertActionsClient = createAlertActionsClientMock();
@@ -55,7 +55,7 @@ describe('createSeriesActionRouteForType', () => {
     await route.handle();
 
     expect(alertActionsClient.createSeriesAction).toHaveBeenCalledWith({
-      groupHash: 'group-1',
+      seriesId: 'series-1',
       action: {
         action_type: 'snooze',
         snoozed_until: '2026-08-12T00:00:00.000Z',
@@ -73,7 +73,7 @@ describe('createSeriesActionRouteForType', () => {
     });
     const { ctx } = createRouteDependencies();
     const request = {
-      params: { group_hash: 'group-1' },
+      params: { series_id: 'series-1' },
       body: { snoozed_until: '2026-08-12T00:00:00.000Z' },
     } as unknown as KibanaRequest;
     const alertActionsClient = createAlertActionsClientMock();
