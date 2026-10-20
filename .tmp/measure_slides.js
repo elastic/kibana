@@ -12,7 +12,7 @@ const now = () => process.hrtime.bigint();
 const msSince = (start) => Math.round(Number(now() - start) / 1e6);
 
 if (preload === 'preload') {
-  require('zod');
+  require('@kbn/zod');
   require('@kbn/zod');
   require('react');
   require('react-dom/server');
