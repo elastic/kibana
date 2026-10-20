@@ -1,4 +1,4 @@
-# Track 7 capability kit — 0.1.6 pre-release research slice
+# Track 7 capability kit — 0.1.7 pre-release research slice
 
 PRIVATE research code; no public Core API, plugin lifecycle hook, or automatic enablement.
 Base harness fd3138c. Only main owns TM claims/leases/results.
@@ -76,14 +76,19 @@ Await every capability call before returning. Background callbacks are not suppo
 No Core request object or closure is cloned. Schemas/contributed callbacks load locally
 via `context.load(id)` from module registrations; arbitrary functions/getters/classes
 are rejected by the data codec. Supported values: plain data, Buffer/Uint8Array,
-ArrayBuffer (decoded as Buffer), Date, BigInt, ByteSizeValue, moment Duration
+Buffer, ArrayBuffer, typed arrays (incl BigInt), DataView, Map, Set, RegExp
+(flags/lastIndex), URL/URLSearchParams, nonfinite numbers/-0, Date, BigInt,
+ByteSizeValue, moment Duration
 (calendar months/days retained via ISO), and typed errors.0.1.4 reconstructs actual
 ServerSentEventError (AgentBuilderError alias; guards/code/meta/toJSON preserved),
 Boom (status/output/headers/data), and11SO helper classifications (private symbol
 identity rebuilt by owner factory). Name/message/stack/cause chains retained.
 Plain Error retains string code/numeric statusCode. Arbitrary custom Error
 subclasses are not magically reconstructed; unknown wire codec tags fail closed.
-No raw error payloads go into crossing telemetry.
+No raw error payloads go into crossing telemetry. Typed views copy ONLY visible
+bytes (no pooled-buffer disclosure), reconstruct at byteOffset0; backing-buffer
+aliasing/repeated object identity are not retained by data codecs. WeakMap/WeakSet
+and cycles fail closed; functions/services use explicit handles or module code.
 
 ## Mutable registries / semantics
 
