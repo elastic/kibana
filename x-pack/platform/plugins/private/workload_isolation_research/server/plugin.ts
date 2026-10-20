@@ -6,6 +6,7 @@
  */
 
 import os from 'os';
+import { sampleProcessMemory } from './capability_kit/worker_core/memory_sample';
 import type {
   CoreSetup,
   CoreStart,
@@ -135,6 +136,7 @@ export class WorkloadIsolationResearchPlugin implements Plugin<void, void, Setup
         build_sha: this.context.env.packageInfo.buildSha,
         exec_argv: process.execArgv,
         node_options: process.env.NODE_OPTIONS ?? null,
+        main_memory: sampleProcessMemory(),
         tracer_enabled: process.env.KBN_RESEARCH_CONTRACT_TRACER === 'true',
         push_stats: this.recorder.pushStats,
       }),

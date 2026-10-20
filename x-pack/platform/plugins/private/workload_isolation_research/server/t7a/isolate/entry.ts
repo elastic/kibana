@@ -10,6 +10,7 @@
  * the island's captured task definitions — the same `createTaskRunner` main would have used. */
 
 import { setFlagsFromString } from 'v8';
+import { sampleProcessMemory } from '../../capability_kit/worker_core/memory_sample';
 import { runInNewContext } from 'vm';
 import type { ResearchEsCapability } from '@kbn/core-elasticsearch-client-server-internal';
 import { diffDefinitionParity } from '@kbn/task-manager-plugin/server/lib/research_runner_override';
@@ -42,10 +43,7 @@ interface RunInput {
   readonly token?: string;
 }
 
-const memory = () => {
-  const m = process.memoryUsage();
-  return { heapUsed: m.heapUsed, heapTotal: m.heapTotal, rss: m.rss, external: m.external };
-};
+const memory = () => sampleProcessMemory();
 
 const getIsland = (context: WorkerContext): Promise<Island> => {
   if (!island) {
