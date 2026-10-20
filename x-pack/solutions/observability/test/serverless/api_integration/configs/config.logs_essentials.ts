@@ -25,7 +25,7 @@ export default createTestConfig({
   ],
   kbnServerArgs: [
     // defined in MKI control plane
-    '--xpack.uptime.service.manifestUrl=mockDevUrl',
+    '--xpack.synthetics.service.manifestUrl=mockDevUrl',
     // useful for testing (also enabled in MKI QA)
     '--coreApp.allowDynamicConfigOverrides=true',
     '--xpack.dataUsage.enabled=true',

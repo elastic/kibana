@@ -18,7 +18,7 @@ xpack.apm.enabled: false
 xpack.cases.enabled: false
 xpack.legacy_uptime.enabled: false
 xpack.ux.enabled: false
-xpack.uptime.enabled: false
+xpack.synthetics.enabled: false
 xpack.exploratoryView.enabled: false
 
 ### Workflows Management plugin is not available in this tier

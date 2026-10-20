@@ -27,7 +27,7 @@ export const servers: ScoutServerConfig = {
       ...defaultConfig.kbnTestServer.serverArgs,
       '--serverless=oblt',
       '--coreApp.allowDynamicConfigOverrides=true',
-      '--xpack.uptime.service.manifestUrl=mockDevUrl',
+      '--xpack.synthetics.service.manifestUrl=mockDevUrl',
       `--pricing.tiers.products=${JSON.stringify([
         { name: 'observability', tier: 'logs_essentials' },
       ])}`,
