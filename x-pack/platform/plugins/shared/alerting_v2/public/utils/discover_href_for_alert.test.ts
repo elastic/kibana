@@ -12,6 +12,7 @@ import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import {
   DISCOVER_CONTEXT_HALF_WINDOW_MINUTES,
+  canOpenDiscover,
   getDiscoverHrefForAlertEventsHistory,
   getDiscoverHrefForRuleAndAlertTimestamp,
   getDiscoverHrefForRuleQuery,
@@ -161,6 +162,34 @@ describe('getDiscoverHrefForAlertEventsHistory', () => {
 | SORT @timestamp ASC`,
       },
     });
+  });
+
+  it('returns undefined when ES|QL is disabled', () => {
+    (uiSettings.get as jest.Mock).mockImplementation(() => false);
+
+    try {
+      expect(
+        getDiscoverHrefForAlertEventsHistory({
+          share,
+          capabilities: getCapabilities(true),
+          uiSettings,
+          episodeId: 'episode-one',
+          episodeStart: '2026-04-23T00:00:00.000Z',
+          spaceId: 'space-one',
+        })
+      ).toBeUndefined();
+      expect(share.url.locators.get).not.toHaveBeenCalled();
+    } finally {
+      (uiSettings.get as jest.Mock).mockImplementation((key: string) => key === ENABLE_ESQL);
+    }
+  });
+
+  it('canOpenDiscover is false without Discover access', () => {
+    expect(canOpenDiscover({ share, capabilities: getCapabilities(false), uiSettings })).toBe(
+      false
+    );
+    expect(share.url.locators.get).not.toHaveBeenCalled();
+    expect(canOpenDiscover({ share, capabilities: getCapabilities(true), uiSettings })).toBe(true);
   });
 });
 

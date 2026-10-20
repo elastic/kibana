@@ -32,27 +32,39 @@ export function getDiscoverTimeRangeAroundTimestamp(
   };
 }
 
+export interface DiscoverAvailabilityArgs {
+  share: SharePluginStart;
+  capabilities: Capabilities;
+  uiSettings: IUiSettingsClient;
+}
+
+/** True when the current user can open an ES|QL query in Discover. */
+export function canOpenDiscover({
+  share,
+  capabilities,
+  uiSettings,
+}: DiscoverAvailabilityArgs): boolean {
+  if (!uiSettings.get(ENABLE_ESQL)) {
+    return false;
+  }
+  if (!capabilities.discover_v2?.show) {
+    return false;
+  }
+  return Boolean(share.url.locators.get(DISCOVER_APP_LOCATOR));
+}
+
 export function getDiscoverHrefForRuleQuery({
   share,
   capabilities,
   uiSettings,
   timeRange,
   ruleEsql,
-}: {
-  share: SharePluginStart;
-  capabilities: Capabilities;
-  uiSettings: IUiSettingsClient;
+}: DiscoverAvailabilityArgs & {
   timeRange: TimeRange;
   ruleEsql: string | undefined;
 }): string | undefined {
   const trimmed = ruleEsql?.trim();
-  if (!trimmed) {
-    return undefined;
-  }
-  if (!uiSettings.get(ENABLE_ESQL)) {
-    return undefined;
-  }
-  if (!capabilities.discover_v2?.show) {
+  if (!trimmed || !canOpenDiscover({ share, capabilities, uiSettings })) {
     return undefined;
   }
   const locator = share.url.locators.get(DISCOVER_APP_LOCATOR);

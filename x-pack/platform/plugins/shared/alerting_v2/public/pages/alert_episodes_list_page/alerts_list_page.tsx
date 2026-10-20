@@ -93,6 +93,7 @@ import { CLASSIC_ALERTS_DATA_SOURCE } from '../../alert_sources';
 import { getQueryFilterState } from './utils/episodes_query_filter';
 import { ClassicAlertDetailsFlyout } from './components/classic_alert_details_flyout';
 import {
+  canOpenDiscover,
   getDiscoverHrefForAlertEventsHistory,
   getDiscoverHrefForRuleAndAlertTimestamp,
 } from '../../utils/discover_href_for_alert';
@@ -461,6 +462,12 @@ const AlertsListPageContent = () => {
               episodeId,
               episodeStart,
               spaceId,
+            }),
+          isAlertEventsHistoryAvailable: () =>
+            canOpenDiscover({
+              share: services.share,
+              capabilities: services.application.capabilities,
+              uiSettings: services.uiSettings,
             }),
         }),
         alertsCapability

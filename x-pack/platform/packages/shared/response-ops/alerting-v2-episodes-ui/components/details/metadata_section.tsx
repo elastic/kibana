@@ -7,6 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { EuiPanel, EuiSkeletonRectangle, EuiSkeletonText, EuiSpacer, EuiText } from '@elastic/eui';
+import useAsync from 'react-use/lib/useAsync';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { getRootEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { useFetchEpisodeQuery } from '../../hooks/use_fetch_episode_query';
@@ -15,6 +16,7 @@ import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { isRuleLoaded, isRuleLoading } from '../../types/rule_state';
 import { useAlertingEpisodeSourceDataView } from '../../hooks/use_alerting_episode_source_data_view';
 import { AlertEpisodeMetadataTable } from './metadata_table';
+import { createDataContainerDataView } from './prefix_data_view_fields';
 import type { AlertEpisodeMetadataTableProps } from './metadata_table';
 import type { AlertEpisodeDetailsServices } from './types';
 import * as i18n from './translations';
@@ -69,11 +71,23 @@ export const AlertEpisodeMetadataSection = ({
     services,
   });
 
-  const { value: dataView, loading: isDataViewLoading } = useAlertingEpisodeSourceDataView({
-    query: isRuleLoaded(ruleState) ? getRootEsqlQuery(ruleState.rule.query) : undefined,
-    dataViews: services.dataViews,
-    http: services.http,
-  });
+  const { value: sourceDataView, loading: isSourceDataViewLoading } =
+    useAlertingEpisodeSourceDataView({
+      query: isRuleLoaded(ruleState) ? getRootEsqlQuery(ruleState.rule.query) : undefined,
+      dataViews: services.dataViews,
+      http: services.http,
+    });
+  const {
+    value: dataView,
+    loading: isDataContainerDataViewLoading,
+    error: dataContainerDataViewError,
+  } = useAsync(async () => {
+    if (!sourceDataView) {
+      return undefined;
+    }
+    // The hit stores evaluation fields under `data`, so the data view field names must match.
+    return createDataContainerDataView(sourceDataView, services.dataViews);
+  }, [services.dataViews, sourceDataView]);
 
   const tableDocView = useMemo(
     () => services.unifiedDocViewer.registry.getAll().find((dv) => dv.id === 'doc_view_table'),
@@ -101,7 +115,7 @@ export const AlertEpisodeMetadataSection = ({
     [decreaseAvailableHeightBy, tableDocView]
   );
 
-  if (isError) {
+  if (isError || dataContainerDataViewError) {
     return (
       <EuiText size="s" color="subdued" data-test-subj="alertingV2EpisodeMetadataSectionError">
         {i18n.METADATA_SECTION_ERROR}
@@ -113,7 +127,8 @@ export const AlertEpisodeMetadataSection = ({
     isLoadingEpisode ||
     isEventDataLoading ||
     (ruleId && isRuleLoading(ruleState)) ||
-    isDataViewLoading
+    isSourceDataViewLoading ||
+    isDataContainerDataViewLoading
   ) {
     // Shaped like the doc-viewer table: a search input row, then field rows. The panel
     // provides padding because this section renders edge-to-edge in the flyout.

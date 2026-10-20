@@ -59,6 +59,7 @@ import type { AlertsKibanaServices } from '../../alerts_kibana_services';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { UserCapabilities } from '../../services/user_capabilities';
 import {
+  canOpenDiscover,
   getDiscoverHrefForAlertEventsHistory,
   getDiscoverHrefForRuleAndAlertTimestamp,
 } from '../../utils/discover_href_for_alert';
@@ -234,6 +235,12 @@ export function EpisodeDetailsPage() {
               episodeId: selectedEpisodeId,
               episodeStart,
               spaceId,
+            }),
+          isAlertEventsHistoryAvailable: () =>
+            canOpenDiscover({
+              share: services.share,
+              capabilities: services.application.capabilities,
+              uiSettings: services.uiSettings,
             }),
         }),
         alertsCapability

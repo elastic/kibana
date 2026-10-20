@@ -33,6 +33,7 @@ const makeDeps = () => {
 
   return {
     spaces,
+    isAvailable: jest.fn(() => true),
     getAlertEventsHistoryHref: jest.fn((): string | undefined => '/discover?query=history'),
   };
 };
@@ -44,6 +45,15 @@ describe('createOpenAlertEventsHistoryAction', () => {
     expect(
       createOpenAlertEventsHistoryAction(makeDeps()).isCompatible({ episodes: [makeEpisode()] })
     ).toBe(true);
+  });
+
+  it('is not compatible when Discover cannot open the history', () => {
+    const deps = makeDeps();
+    deps.isAvailable.mockReturnValue(false);
+
+    expect(
+      createOpenAlertEventsHistoryAction(deps).isCompatible({ episodes: [makeEpisode()] })
+    ).toBe(false);
   });
 
   it('is not compatible with multiple or source episodes', () => {

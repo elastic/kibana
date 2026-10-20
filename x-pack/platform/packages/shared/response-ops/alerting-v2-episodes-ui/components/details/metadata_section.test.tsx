@@ -107,12 +107,31 @@ const mockEsqlResponses = (eventData: string | null | 'error') => {
 const queryClient = createTestQueryClient();
 const wrapper = createQueryClientWrapper(queryClient);
 
+const sourceDataView = {
+  id: 'mock-data-view',
+  toSpec: () => ({
+    id: 'mock-data-view',
+    title: 'logs-*',
+    fields: {
+      'host.name': {
+        name: 'host.name',
+        type: 'string',
+        searchable: true,
+        aggregatable: true,
+      },
+    },
+  }),
+};
+
+const prefixedDataView = { id: 'prefixed-data-view' };
+
 describe('AlertEpisodeMetadataSection', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     queryClient.clear();
+    (mockServices.dataViews.create as jest.Mock).mockResolvedValue(prefixedDataView);
     useAlertingEpisodeSourceDataViewMock.mockReturnValue({
-      value: { id: 'mock-data-view' },
+      value: sourceDataView,
       loading: false,
     } as never);
   });
@@ -183,13 +202,25 @@ describe('AlertEpisodeMetadataSection', () => {
 
     await waitFor(() => expect(screen.getByTestId('mock-doc-viewer-table')).toBeInTheDocument());
 
+    expect(mockServices.dataViews.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'mock-data-view-data-container',
+        fields: expect.objectContaining({
+          'data.host.name': expect.objectContaining({
+            name: 'data.host.name',
+            type: 'string',
+          }),
+        }),
+      }),
+      true
+    );
     expect(mockTableRender).toHaveBeenCalledWith(
       expect.objectContaining({
         hit: expect.objectContaining({
           id: 'mock-id',
           raw: { _source: { data: { threshold_met: true } } },
         }),
-        dataView: expect.objectContaining({ id: 'mock-data-view' }),
+        dataView: prefixedDataView,
       })
     );
   });

@@ -15,6 +15,7 @@ import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { QueryClient } from '@kbn/react-query';
+import type { AlertEpisode } from '../queries/episodes_query';
 import type { AddToCaseCasesService } from '../components/add_to_case_modal';
 import type { EpisodeDataSource } from '../types/episode_data_source';
 import { createAddToCaseAction } from './add_to_case';
@@ -24,9 +25,11 @@ import { createEpisodeActions } from './create_episode_actions';
 const buildActions = ({
   additionalDataSource,
   includeHistory = true,
+  isAlertEventsHistoryAvailable = true,
 }: {
   additionalDataSource?: EpisodeDataSource;
   includeHistory?: boolean;
+  isAlertEventsHistoryAvailable?: boolean;
 } = {}) =>
   createEpisodeActions({
     http: httpServiceMock.createStartContract(),
@@ -42,7 +45,10 @@ const buildActions = ({
     isRuleAvailable: () => true,
     getDiscoverHref: async () => 'https://discover/foo',
     ...(includeHistory
-      ? { getAlertEventsHistoryHref: async () => 'https://discover/history' }
+      ? {
+          getAlertEventsHistoryHref: async () => 'https://discover/history',
+          isAlertEventsHistoryAvailable: () => isAlertEventsHistoryAvailable,
+        }
       : {}),
     additionalDataSource,
   });
@@ -68,6 +74,19 @@ describe('createEpisodeActions', () => {
     expect(buildActions({ includeHistory: false }).map((action) => action.id)).not.toContain(
       'ALERTING_V2_OPEN_ALERT_EVENTS_HISTORY_IN_DISCOVER'
     );
+  });
+
+  it('hides alert events history when Discover is unavailable', () => {
+    const episode = { 'episode.id': 'e1' } as AlertEpisode;
+    const available = buildActions().find(
+      ({ id }) => id === 'ALERTING_V2_OPEN_ALERT_EVENTS_HISTORY_IN_DISCOVER'
+    );
+    const unavailable = buildActions({ isAlertEventsHistoryAvailable: false }).find(
+      ({ id }) => id === 'ALERTING_V2_OPEN_ALERT_EVENTS_HISTORY_IN_DISCOVER'
+    );
+
+    expect(available?.isCompatible({ episodes: [episode] })).toBe(true);
+    expect(unavailable?.isCompatible({ episodes: [episode] })).toBe(false);
   });
 
   it('sorts the host add to case action before edit alert tags', () => {

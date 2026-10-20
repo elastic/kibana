@@ -15,6 +15,11 @@ export const OPEN_ALERT_EVENTS_HISTORY_ACTION_ID =
 
 export interface OpenAlertEventsHistoryActionDeps {
   spaces: SpacesPluginStart;
+  /**
+   * Whether Discover can open this episode's rule-events history. False when
+   * Discover access or ES|QL is unavailable, so the menu item is not offered.
+   */
+  isAvailable: () => boolean;
   getAlertEventsHistoryHref: (args: {
     episodeId: string;
     episodeStart: string;
@@ -30,7 +35,8 @@ export const createOpenAlertEventsHistoryAction = (
   displayName: i18n.OPEN_ALERT_EVENTS_HISTORY,
   iconType: 'productDiscover',
   enforcesOwnPrivileges: true,
-  isCompatible: ({ episodes }) => episodes.length === 1 && episodeSupportsTimeline(episodes[0]),
+  isCompatible: ({ episodes }) =>
+    episodes.length === 1 && episodeSupportsTimeline(episodes[0]) && deps.isAvailable(),
   execute: async ({ episodes }) => {
     const [episode] = episodes;
     const { id: spaceId } = await deps.spaces.getActiveSpace();

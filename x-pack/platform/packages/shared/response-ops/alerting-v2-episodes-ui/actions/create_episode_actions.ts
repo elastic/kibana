@@ -52,6 +52,11 @@ export interface EpisodeActionsDeps {
     episodeStart: string;
     spaceId: string;
   }) => string | undefined | Promise<string | undefined>;
+  /**
+   * Whether Discover can open an episode's rule-events history. Required with
+   * `getAlertEventsHistoryHref`; omitted or false hides the action.
+   */
+  isAlertEventsHistoryAvailable?: () => boolean;
   additionalDataSource?: EpisodeDataSource;
 }
 
@@ -92,6 +97,7 @@ export const createEpisodeActions = (deps: EpisodeActionsDeps): EpisodeAction[] 
           createOpenAlertEventsHistoryAction({
             spaces: deps.spaces,
             getAlertEventsHistoryHref: deps.getAlertEventsHistoryHref,
+            isAvailable: deps.isAlertEventsHistoryAvailable ?? (() => false),
           }),
         ]
       : []),
