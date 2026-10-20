@@ -1,14 +1,11 @@
 ---
 navigation_title: GenAI
+description: "Connect Kibana to large language model (LLM) services with Generative AI connectors. The OpenAI, Amazon Bedrock, Google Gemini, and AI Connector types are deprecated."
 applies_to:
   stack: deprecated 9.5
   serverless: deprecated
 ---
 # Generative AI connectors
-
-Use these connectors to connect to third-party large language model (LLM) services and Elastic's own LLM offerings.
-
-## Available connectors
 
 ::::{important}
 :applies_to: {"stack": "deprecated 9.5", "serverless": "deprecated"}
@@ -18,6 +15,10 @@ The OpenAI, {{bedrock}}, {{gemini}}, and AI Connector types are deprecated. Exis
 
 For new AI integrations, create an {{es}} {{infer}} endpoint with the `chat_completion` task type instead. To get started, refer to [Elastic Inference](docs-content://explore-analyze/elastic-inference.md) and [External inference](docs-content://explore-analyze/elastic-inference/external.md).
 ::::
+
+Use these connectors to connect to third-party large language model (LLM) services and Elastic's own LLM offerings.
+
+## Available connectors
 
 :::{include} _snippets/gen-ai-connectors-list.md
 :::

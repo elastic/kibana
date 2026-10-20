@@ -1,5 +1,6 @@
 ---
 navigation_title: "{{bedrock}}"
+description: "Use the Amazon Bedrock connector to send requests to Amazon Bedrock models from Kibana. This connector is deprecated. Create an Elasticsearch inference endpoint instead."
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/bedrock-action-type.html
 applies_to:
@@ -8,14 +9,19 @@ applies_to:
 ---
 # {{bedrock}} connector and action [bedrock-action-type]
 
-The {{bedrock}} connector uses [axios](https://github.com/axios/axios) to send a POST request to {{bedrock}}.
-
 :::{include} _snippets/deprecated-llm-connector-note.md
 :::
 
+The {{bedrock}} connector uses [axios](https://github.com/axios/axios) to send a POST request to {{bedrock}}.
+
 ## Create connectors in {{kib}} [define-bedrock-ui]
 
-In {{stack}} 9.5 and earlier, you can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.  For example:
+```{applies_to}
+stack: deprecated =9.5, removed 9.6+
+serverless: unavailable
+```
+
+You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.  For example:
 
 :::{image} ../images/bedrock-connector.png
 :alt: {{bedrock}} connector

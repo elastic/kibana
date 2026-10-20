@@ -1,5 +1,6 @@
 ---
 navigation_title: "OpenAI"
+description: "Use the OpenAI connector to send requests to OpenAI and Azure OpenAI from Kibana. This connector is deprecated. Create an Elasticsearch inference endpoint instead."
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/openai-action-type.html
 applies_to:
@@ -9,18 +10,23 @@ applies_to:
 
 # OpenAI connector and action [openai-action-type]
 
+:::{include} _snippets/deprecated-llm-connector-note.md
+:::
+
 The OpenAI connector uses [axios](https://github.com/axios/axios) to send a POST request to an OpenAI provider: 
 
 * OpenAI
 * Azure OpenAI
 * {applies_to}`stack: ga 9.1` Other (OpenAI-compatible service).
 
-:::{include} _snippets/deprecated-llm-connector-note.md
-:::
-
 ## Create connectors in {{kib}} [define-gen-ai-ui]
 
-In {{stack}} 9.5 and earlier, you can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.  For example:
+```{applies_to}
+stack: deprecated =9.5, removed 9.6+
+serverless: unavailable
+```
+
+You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.  For example:
 
 :::{image} ../images/gen-ai-connector.png
 :alt: OpenAI connector
@@ -110,7 +116,7 @@ To view the dashboard, you need at least `read` and `view_index_metadata` privil
 
 ## Connect a local LLM
 
-In {{stack}} 9.5 and earlier, you can connect a locally hosted LLM to Elastic using the OpenAI connector. Your local LLM must be compatible with the OpenAI API format.
+You can connect a locally hosted LLM to Elastic using the OpenAI connector. Your local LLM must be compatible with the OpenAI API format.
 
 When selecting a model:
 - Download models from trusted sources only

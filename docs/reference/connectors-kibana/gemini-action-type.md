@@ -1,5 +1,6 @@
 ---
 navigation_title: "{{gemini}}"
+description: "Use the Google Gemini connector to send requests to Gemini models from Kibana. This connector is deprecated. Create an Elasticsearch inference endpoint instead."
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/gemini-action-type.html
 applies_to:
@@ -9,14 +10,19 @@ applies_to:
 
 # {{gemini}} connector and action [gemini-action-type]
 
-The {{gemini}} connector uses [axios](https://github.com/axios/axios) to send a POST request to {{gemini}}.
-
 :::{include} _snippets/deprecated-llm-connector-note.md
 :::
 
+The {{gemini}} connector uses [axios](https://github.com/axios/axios) to send a POST request to {{gemini}}.
+
 ## Create connectors in {{kib}} [define-gemini-ui]
 
-In {{stack}} 9.5 and earlier, you can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.  For example:
+```{applies_to}
+stack: deprecated =9.5, removed 9.6+
+serverless: unavailable
+```
+
+You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.  For example:
 
 :::{image} ../images/gemini-connector.png
 :alt: {{gemini}} connector
