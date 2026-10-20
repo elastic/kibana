@@ -24,7 +24,7 @@ import type { Island } from './island';
 import { diffDefinitionParity } from '@kbn/task-manager-plugin/server/lib/research_runner_override';
 import { replicaFingerprint, runWithExecutionContext } from '../../capability_kit/worker_core';
 import { edgeStats, fenceStats, missStats, runContext } from './bridge';
-import { bindRunnerCancel } from './runner_cancel';
+import { beginRunThenCancel, bindRunnerCancel } from './runner_cancel';
 
 let island: Promise<Island> | undefined;
 let bootStartedAt: number | undefined;
@@ -226,18 +226,25 @@ export const runTask: TaskEntry = async (rawInput: CodecInput, context: WorkerCo
       cleanup?: () => Promise<void>;
     };
     // Cooperative cancel: TM's cancel on main aborts the dispatch signal, including one
-    // that aborted while the island was still booting.
-    const unbindCancel = bindRunnerCancel(context.signal, abortController, () =>
-      runner.cancel?.() ?? Promise.resolve()
-    );
+    // that aborted while the island was still booting. run() must start first so alerting's
+    // event logger exists before cancel writes the timeout event.
     runs++;
+    let unbindCancel = () => {};
     try {
       if (input.phase === 'cleanup') {
+        unbindCancel = bindRunnerCancel(context.signal, abortController, () =>
+          runner.cancel?.() ?? Promise.resolve()
+        );
         await runner.cleanup?.();
         return { phase: 'cleanup', customFields, coldBootMs: bootMs } as CodecInput;
       }
+      const started = beginRunThenCancel(context.signal, abortController, {
+        run: () => runWithExecutionContext(input.executionContext, () => runner.run()),
+        cancel: () => runner.cancel?.() ?? Promise.resolve(),
+      });
+      unbindCancel = started.unbind;
       try {
-        const result = await runWithExecutionContext(input.executionContext, () => runner.run());
+        const result = await started.pending;
         return {
           phase: 'run',
           wire: encodeRunResult(result),

@@ -18,9 +18,34 @@ export const bindRunnerCancel = (
     if (fired) return;
     fired = true;
     abortController.abort(signal.reason);
-    void cancel?.();
+    // Cancel can reject when the runner's logger is not initialized yet. That rejection
+    // must not become an unhandled rejection: the worker treats one as a process crash.
+    try {
+      void Promise.resolve(cancel?.()).catch(() => undefined);
+    } catch {
+      /* A synchronous throw is the same class of failure. */
+    }
   };
   if (signal.aborted) onAbort();
   else signal.addEventListener('abort', onAbort, { once: true });
   return () => signal.removeEventListener('abort', onAbort);
+};
+
+/**
+ * Starts the runner before installing cancel. Alerting's cancel writes a timeout event and
+ * throws when that logger has not been initialized, which only happens inside `run()`.
+ */
+export const beginRunThenCancel = <T>(
+  signal: AbortSignal,
+  abortController: AbortController,
+  runner: {
+    run: () => Promise<T>;
+    cancel?: () => Promise<unknown>;
+  }
+): { readonly pending: Promise<T>; readonly unbind: () => void } => {
+  const pending = runner.run();
+  const unbind = bindRunnerCancel(signal, abortController, () =>
+    runner.cancel?.() ?? Promise.resolve()
+  );
+  return { pending, unbind };
 };

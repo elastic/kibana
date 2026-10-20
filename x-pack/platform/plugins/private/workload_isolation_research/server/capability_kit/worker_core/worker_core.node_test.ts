@@ -12,7 +12,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { ExecutionHost } from '../host';
 import { ModuleRegistry } from '../registry';
-import { bindRunnerCancel } from '../../t7a/isolate/runner_cancel';
+import { beginRunThenCancel, bindRunnerCancel } from '../../t7a/isolate/runner_cancel';
 import {
   consumeCollateralReschedule,
   deriveCancelGraceMs,
@@ -768,6 +768,51 @@ test('an already-aborted host signal still cancels the runner', () => {
   });
   assert.equal(cancels, 1);
   assert.equal(abortController.signal.aborted, true);
+});
+
+test('a cancel rejection during boot does not escape the binder', async () => {
+  const signal = AbortSignal.abort(new Error('boot finished after cancel'));
+  const abortController = new AbortController();
+  let rejected = false;
+  const onRejection = () => {
+    rejected = true;
+  };
+  process.on('unhandledRejection', onRejection);
+  try {
+    bindRunnerCancel(signal, abortController, async () => {
+      throw new Error('AlertingEventLogger not initialized');
+    });
+    await new Promise((resolve) => setImmediate(resolve));
+    assert.equal(rejected, false);
+    assert.equal(abortController.signal.aborted, true);
+  } finally {
+    process.removeListener('unhandledRejection', onRejection);
+  }
+});
+
+test('an already-aborted signal cancels only after run has started', async () => {
+  const signal = AbortSignal.abort(new Error('boot finished after cancel'));
+  const abortController = new AbortController();
+  const order: string[] = [];
+  let ready = false;
+  const { pending, unbind } = beginRunThenCancel(signal, abortController, {
+    run: async () => {
+      ready = true;
+      order.push('run');
+      return 'ran';
+    },
+    cancel: async () => {
+      if (!ready) throw new Error('AlertingEventLogger not initialized');
+      order.push('cancel');
+    },
+  });
+  try {
+    assert.equal(await pending, 'ran');
+    assert.deepEqual(order, ['run', 'cancel']);
+    assert.equal(abortController.signal.aborted, true);
+  } finally {
+    unbind();
+  }
 });
 
 test(
