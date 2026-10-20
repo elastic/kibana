@@ -131,7 +131,7 @@ const ADD_INTEGRATION_EXCLUDED_PACKAGES = [
   'elastic_agent',
   'elastic_govcloud',
   'keeper',
-];
+] as const;
 
 type PackageClassificationFields = Partial<
   Pick<PackageInfo | PackageListItem, 'name' | 'type' | 'data_streams' | 'policy_templates'>
@@ -154,7 +154,7 @@ export function shouldAddIntegrationFromCatalog(pkg: PackageClassificationFields
   if (pkg.type === 'content') {
     return false;
   }
-  if (pkg.name && ADD_INTEGRATION_EXCLUDED_PACKAGES.includes(pkg.name)) {
+  if (pkg.name && (ADD_INTEGRATION_EXCLUDED_PACKAGES as readonly string[]).includes(pkg.name)) {
     return false;
   }
   // Uploaded packages beyond the catalog's package info limit only carry saved object attributes

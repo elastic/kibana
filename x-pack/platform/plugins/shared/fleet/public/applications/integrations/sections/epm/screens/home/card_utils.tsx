@@ -172,9 +172,8 @@ export const mapToCard = ({
     const { enableIntegrationTileClickToAdd } = ExperimentalFeaturesService.get();
     // Catalog tiles carry the classification, computed before `policy_templates` is stripped from them.
     const addIntegrationFromCatalog =
-      'addIntegrationFromCatalog' in item && typeof item.addIntegrationFromCatalog === 'boolean'
-        ? item.addIntegrationFromCatalog
-        : shouldAddIntegrationFromCatalog(item);
+      ('addIntegrationFromCatalog' in item ? item.addIntegrationFromCatalog : undefined) ??
+      shouldAddIntegrationFromCatalog(item);
     const url =
       !enableIntegrationTileClickToAdd || !addIntegrationFromCatalog
         ? getHref('integration_details_overview', {
