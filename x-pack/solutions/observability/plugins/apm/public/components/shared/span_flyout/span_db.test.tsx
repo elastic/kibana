@@ -11,7 +11,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import type { Span } from '../../../../typings/es_schemas/ui/span';
-import { useSpanDatabaseCallout } from './span_db';
+import { useSpanDatabaseSection } from './span_db';
 
 type SpanDb = NonNullable<Span['span']>['db'];
 
@@ -20,13 +20,13 @@ const TABS = [
   { id: 'stack-trace', label: 'Stack Trace' },
 ];
 
-function DatabaseCalloutHost({ spanDb }: { spanDb?: SpanDb }) {
-  const callout = useSpanDatabaseCallout(spanDb);
+function DatabaseSectionHost({ spanDb }: { spanDb?: SpanDb }) {
+  const section = useSpanDatabaseSection(spanDb);
   return (
     <FlyoutTemplate onClose={jest.fn()} session="never" tabs={TABS} data-test-subj="spanFlyout">
       <FlyoutTemplate.Header title="Span" />
       <FlyoutTemplate.Body>
-        {callout}
+        {section}
         <FlyoutTemplate.Body.TabPanel tabId="metadata">
           <div data-test-subj="metadataPanel">metadata</div>
         </FlyoutTemplate.Body.TabPanel>
@@ -38,49 +38,49 @@ function DatabaseCalloutHost({ spanDb }: { spanDb?: SpanDb }) {
   );
 }
 
-const renderCallout = (spanDb?: SpanDb) =>
+const renderSection = (spanDb?: SpanDb) =>
   render(
     <EuiThemeProvider>
       <I18nProvider>
-        <DatabaseCalloutHost spanDb={spanDb} />
+        <DatabaseSectionHost spanDb={spanDb} />
       </I18nProvider>
     </EuiThemeProvider>
   );
 
-describe('useSpanDatabaseCallout', () => {
-  it('renders the statement in an info callout', () => {
-    renderCallout({ statement: 'SELECT * FROM users', type: 'sql' });
+describe('useSpanDatabaseSection', () => {
+  it('renders the statement in a titled section above the tab panel', () => {
+    renderSection({ statement: 'SELECT * FROM users', type: 'sql' });
 
-    const callout = screen.getByTestId('spanFlyoutDatabaseCallout');
-    expect(callout).toHaveTextContent('Database statement');
-    expect(callout).toHaveTextContent('SELECT * FROM users');
-    expect(screen.getByTestId('metadataPanel')).not.toContainElement(callout);
+    const section = screen.getByRole('region', { name: 'Database statement' });
+    expect(section).toHaveAttribute('data-test-subj', 'spanFlyoutDatabaseSection');
+    expect(section).toHaveTextContent('SELECT * FROM users');
+    expect(screen.getByTestId('metadataPanel')).not.toContainElement(section);
   });
 
-  it('keeps the same callout mounted when the tab changes', async () => {
+  it('keeps the same section mounted when the tab changes', async () => {
     const user = userEvent.setup();
-    renderCallout({ statement: 'SELECT * FROM users', type: 'sql' });
+    renderSection({ statement: 'SELECT * FROM users', type: 'sql' });
 
-    const callout = screen.getByTestId('spanFlyoutDatabaseCallout');
+    const section = screen.getByTestId('spanFlyoutDatabaseSection');
     await user.click(screen.getByRole('tab', { name: 'Stack Trace' }));
 
     expect(screen.getByTestId('stackTracePanel')).toBeInTheDocument();
-    expect(screen.getByTestId('spanFlyoutDatabaseCallout')).toBe(callout);
-    expect(callout).toHaveTextContent('SELECT * FROM users');
+    expect(screen.getByTestId('spanFlyoutDatabaseSection')).toBe(section);
+    expect(section).toHaveTextContent('SELECT * FROM users');
   });
 
   it('does not render when spanDb is undefined', () => {
-    renderCallout();
-    expect(screen.queryByTestId('spanFlyoutDatabaseCallout')).not.toBeInTheDocument();
+    renderSection();
+    expect(screen.queryByTestId('spanFlyoutDatabaseSection')).not.toBeInTheDocument();
   });
 
   it('does not render when spanDb has no statement', () => {
-    renderCallout({ type: 'sql' });
-    expect(screen.queryByTestId('spanFlyoutDatabaseCallout')).not.toBeInTheDocument();
+    renderSection({ type: 'sql' });
+    expect(screen.queryByTestId('spanFlyoutDatabaseSection')).not.toBeInTheDocument();
   });
 
   it('does not render when spanDb.statement is an empty string', () => {
-    renderCallout({ statement: '', type: 'sql' });
-    expect(screen.queryByTestId('spanFlyoutDatabaseCallout')).not.toBeInTheDocument();
+    renderSection({ statement: '', type: 'sql' });
+    expect(screen.queryByTestId('spanFlyoutDatabaseSection')).not.toBeInTheDocument();
   });
 });

@@ -152,7 +152,7 @@ describe('SpanFlyout', () => {
     expect(lastMenuPropsArgs()).toEqual(expect.objectContaining({ isSpanLoaded: false }));
   });
 
-  it('shows the span header, the database statement callout, and the Discover action', () => {
+  it('shows the span header, the database statement section, and the Discover action', () => {
     setFetch(buildSpan(), FETCH_STATUS.SUCCESS);
 
     renderFlyout({ kuery: 'service.name: "a"' });
@@ -160,10 +160,10 @@ describe('SpanFlyout', () => {
     expect(screen.getByRole('heading', { name: 'Span details' })).toBeInTheDocument();
     expect(screen.getByTestId('spanFlyoutInfo-name')).toHaveTextContent('SELECT * FROM orders');
     expect(screen.getByTestId('spanFlyoutTab-metadata')).toHaveAttribute('aria-selected', 'true');
-    const callout = screen.getByTestId('spanFlyoutDatabaseCallout');
-    expect(callout).toHaveTextContent('Database statement');
-    expect(callout).toHaveTextContent('SELECT * FROM orders');
-    expect(screen.getByTestId('mockSpanMetadata')).not.toContainElement(callout);
+    const section = screen.getByRole('region', { name: 'Database statement' });
+    expect(section).toHaveAttribute('data-test-subj', 'spanFlyoutDatabaseSection');
+    expect(section).toHaveTextContent('SELECT * FROM orders');
+    expect(screen.getByTestId('mockSpanMetadata')).not.toContainElement(section);
     expect(screen.queryByTestId('spanFlyoutCompositeCallout')).not.toBeInTheDocument();
 
     expect(lastMenuPropsArgs()).toEqual({
@@ -197,22 +197,22 @@ describe('SpanFlyout', () => {
 
     expect(screen.getByTestId('spanLinksTab')).toHaveAttribute('aria-selected', 'true');
     expect(screen.getByTestId('mockSpanLinks')).toBeInTheDocument();
-    expect(screen.getByTestId('spanFlyoutDatabaseCallout')).toHaveTextContent(
+    expect(screen.getByTestId('spanFlyoutDatabaseSection')).toHaveTextContent(
       'SELECT * FROM orders'
     );
     expect(screen.queryByTestId('mockSpanMetadata')).not.toBeInTheDocument();
   });
 
-  it('keeps the same database statement callout mounted when switching tabs', async () => {
+  it('keeps the same database statement section mounted when switching tabs', async () => {
     const user = userEvent.setup();
     setFetch(buildSpan(), FETCH_STATUS.SUCCESS);
     renderFlyout();
 
-    const callout = screen.getByTestId('spanFlyoutDatabaseCallout');
+    const section = screen.getByTestId('spanFlyoutDatabaseSection');
     await user.click(screen.getByTestId('spanLinksTab'));
 
     expect(screen.getByTestId('mockSpanLinks')).toBeInTheDocument();
-    expect(screen.getByTestId('spanFlyoutDatabaseCallout')).toBe(callout);
+    expect(screen.getByTestId('spanFlyoutDatabaseSection')).toBe(section);
   });
 
   it('does not show the previous span while the next one loads', () => {
@@ -235,7 +235,7 @@ describe('SpanFlyout', () => {
 
     expect(screen.queryByTestId('spanFlyoutInfo-name')).not.toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Span details' })).toBeInTheDocument();
-    expect(screen.queryByTestId('spanFlyoutDatabaseCallout')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('spanFlyoutDatabaseSection')).not.toBeInTheDocument();
     expect(screen.queryByTestId('mockSpanMetadata')).not.toBeInTheDocument();
     expect(lastMenuPropsArgs()).toEqual(expect.objectContaining({ isSpanLoaded: false }));
   });

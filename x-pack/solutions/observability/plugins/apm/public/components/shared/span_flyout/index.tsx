@@ -12,7 +12,7 @@ import React from 'react';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useFetcher, isPending } from '../../../hooks/use_fetcher';
 import type { SpanLinksCount } from '../span_links';
-import { useSpanDatabaseCallout } from './span_db';
+import { useSpanDatabaseSection } from './span_db';
 import { SPAN_DETAILS_LABEL, useSpanFlyoutHeader } from './use_span_flyout_header';
 import { useSpanFlyoutMenuProps } from './use_span_flyout_menu_props';
 import { useSpanFlyoutTabs } from './use_span_flyout_tabs';
@@ -75,7 +75,7 @@ export function SpanFlyout({
     totalDuration,
   });
   const tabs = useSpanFlyoutTabs({ span, parentTransaction, spanLinksCount });
-  const databaseCallout = useSpanDatabaseCallout(span?.span?.db);
+  const databaseSection = useSpanDatabaseSection(span?.span?.db);
 
   const flyoutMenuProps = useSpanFlyoutMenuProps({
     isSpanLoaded: !!span,
@@ -108,7 +108,7 @@ export function SpanFlyout({
             data-test-subj="spanFlyoutCompositeCallout"
           />
         ) : null}
-        {databaseCallout}
+        {databaseSection}
         {isLoading ? <EuiSkeletonText isLoading /> : null}
         {tabs.map(({ tab, panel }) => (
           <FlyoutTemplate.Body.TabPanel key={tab.id} tabId={tab.id}>

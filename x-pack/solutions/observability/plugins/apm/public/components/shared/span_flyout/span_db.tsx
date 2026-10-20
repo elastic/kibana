@@ -18,10 +18,10 @@ const DATABASE_STATEMENT_TITLE = i18n.translate(
 );
 
 /**
- * Resolves the database statement as a `Body.Callout` in the body banner, so it stays visible and
- * mounted on every tab.
+ * Resolves the database statement as a `Body.Section` for directly under `Body`, where it renders
+ * above the tab panels and stays mounted on every tab.
  */
-export function useSpanDatabaseCallout(
+export function useSpanDatabaseSection(
   spanDb?: NonNullable<Span['span']>['db']
 ): ReactElement | null {
   const statement = spanDb?.statement || undefined;
@@ -32,16 +32,15 @@ export function useSpanDatabaseCallout(
     }
 
     return (
-      <FlyoutTemplate.Body.Callout
+      <FlyoutTemplate.Body.Section
         id="databaseStatement"
-        level="info"
         title={DATABASE_STATEMENT_TITLE}
-        data-test-subj="spanFlyoutDatabaseCallout"
+        data-test-subj="spanFlyoutDatabaseSection"
       >
         <EuiCodeBlock language="sql" fontSize="m" paddingSize="m" overflowHeight={150}>
           {statement}
         </EuiCodeBlock>
-      </FlyoutTemplate.Body.Callout>
+      </FlyoutTemplate.Body.Section>
     );
   }, [statement]);
 }
