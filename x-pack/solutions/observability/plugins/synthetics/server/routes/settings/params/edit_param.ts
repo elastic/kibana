@@ -167,7 +167,7 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
       // the full attribute set in that case so `source` is actually dropped.
       const {
         id: responseId,
-        attributes: { key, tags, description, value, source },
+        attributes: { key, tags, description },
         namespaces,
       } = (await savedObjectsClient.update<SyntheticsParams>(
         syntheticsParamType,
@@ -185,6 +185,8 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
         modifiedParamKeys,
       });
 
+      // The update result never carries `value`: encrypted attributes are stripped from it.
+      const { value, source } = newParam;
       return { id: responseId, key, tags, description, namespaces, value, source };
     } catch (getErr) {
       if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {

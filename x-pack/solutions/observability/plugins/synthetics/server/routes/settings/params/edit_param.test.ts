@@ -33,11 +33,14 @@ const setup = (body: Record<string, unknown>, secretConnections: { enabled?: boo
     },
     close: jest.fn().mockResolvedValue(undefined),
   }));
-  const update = jest.fn().mockResolvedValue({
-    id: 'param-1',
-    attributes: { key: 'pw', value: 'vault://prod@app/creds#password' },
-    namespaces: ['default'],
-  });
+  // Like the real client, the update result has no `value`: it is an encrypted attribute.
+  const update = jest.fn(
+    async (_type: string, id: string, { value, ...attributes }: Record<string, unknown>) => ({
+      id,
+      attributes,
+      namespaces: ['default'],
+    })
+  );
   const getDecryptedAsInternalUser = jest.fn().mockResolvedValue({
     attributes: { key: 'pw', value: 'old' },
     namespaces: ['default'],
@@ -68,6 +71,17 @@ describe('edit param route Vault connection checks', () => {
 
     expect(update).toHaveBeenCalledTimes(1);
     expect(asyncGlobalParamsPropagation).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([
+    ['a literal value', { value: 'new' }, 'new'],
+    ['a vault source', { source: vaultSource('prod') }, 'vault://prod@app/creds#password'],
+  ])('returns the saved value for %s', async (_label, body, value) => {
+    const { routeContext } = setup(body);
+
+    const result = await editSyntheticsParamsRoute().handler(routeContext);
+
+    expect(result).toEqual(expect.objectContaining({ key: 'pw', value }));
   });
 
   it.each([
