@@ -137,17 +137,15 @@ describe('significant events fair batch selection', () => {
     expect(discovery.outputs.map(({ name }) => name)).toEqual([
       'processedCount',
       'hasWork',
-      'suppressedRuleCount',
+      'skippedCount',
+      'needsAgentCount',
+      'classifierReasonCounts',
+      'classifierProbeStatusCounts',
+      'classifierFailed',
     ]);
     expect(discovery.steps.find(({ name }) => name === 'output_result')?.with).toMatchObject({
       hasWork: true,
     });
-    expect(discovery.steps.find(({ name }) => name === 'output_result')?.with).toHaveProperty(
-      'suppressedRuleCount'
-    );
-    expect(findStepRecursive(discovery.steps, 'output_no_detections')?.with).toHaveProperty(
-      'suppressedRuleCount'
-    );
   });
 
   it('carries the three flaky-rule throttle inputs with documented defaults', () => {
