@@ -69,11 +69,7 @@ export const getEbtService = ({
   return {
     optIn,
     optOut,
-    waitForWorkflowDispatchedEvents: ({
-      workflowId,
-      count = 1,
-      timeoutMs = POLL_TIMEOUT_MS,
-    }) =>
+    waitForWorkflowDispatchedEvents: ({ workflowId, count = 1, timeoutMs = POLL_TIMEOUT_MS }) =>
       measurePerformanceAsync(log, 'ebt.waitForWorkflowDispatchedEvents', async () => {
         const response = await kbnClient.request<WorkflowDispatchedEbtEvent[]>({
           method: 'GET',
