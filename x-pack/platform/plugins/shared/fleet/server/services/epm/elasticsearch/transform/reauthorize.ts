@@ -167,7 +167,11 @@ export async function handleTransformReauthorizeAndStart({
   // the identity binding applied at install time: a user with Integrations All could upload a
   // transform they have no privileges to run, leave it deferred, and have a transform admin
   // start it with their own, broader privileges — reaching exactly the restricted indices the
-  // uploader was denied. An uploaded transform runs with its uploader's privileges or not at all.
+  // uploader was denied. Through this Fleet route, an uploaded transform runs with its uploader's
+  // privileges or not at all.
+  // This does not cover Stack Management > Transforms: its own reauthorize action
+  // (`/internal/transform/reauthorize_transforms`) rebinds any transform with a failed privileges
+  // check to the calling transform admin without consulting Fleet's install source.
   const installation = await getInstallation({ savedObjectsClient, pkgName, logger });
   if (!isTrustedInstallSource(installation?.install_source)) {
     throw new FleetUnauthorizedError(

@@ -34,6 +34,8 @@ import * as epmPackagesInstall from './packages/install';
 import * as epmRegistry from './registry';
 import * as epmTransformsInstall from './elasticsearch/transform/install';
 import * as epmArchiveParse from './archive/parse';
+import * as epmBundledPackages from './packages/bundled_packages';
+import * as epmArchiveIterator from './archive/archive_iterator';
 import { getEsPackage } from './archive/storage';
 
 jest.mock('./archive/storage');
@@ -392,6 +394,9 @@ describe('PackageService', () => {
         .mocked(epmPackagesGet.getInstallation)
         .mockResolvedValue({ name: packageInfo.name, install_source: installSource } as any);
       jest.mocked(getEsPackage).mockResolvedValue({ assetsMap: new Map() } as any);
+      jest
+        .spyOn(epmBundledPackages, 'getBundledPackageForInstallation')
+        .mockResolvedValue(undefined);
     };
 
     // A reinstall replays the archive stored at install time, so the source recorded on the
@@ -423,6 +428,52 @@ describe('PackageService', () => {
       await expect(
         mockPackageService.asInternalUser.reinstallEsAssets(packageInfo, paths)
       ).rejects.toThrow(FleetUnauthorizedError);
+    });
+
+    describe('upload installation of a bundled package', () => {
+      const bundledBuffer = Buffer.from('bundled-zip');
+
+      it('reinstalls from the bundled archive as bundled when a matching bundled package exists', async () => {
+        mockInstallation('upload');
+        const bundledIterator = { name: 'bundled-iterator' } as any;
+        jest.spyOn(epmBundledPackages, 'getBundledPackageForInstallation').mockResolvedValue({
+          name: packageInfo.name,
+          version: packageInfo.version,
+          getBuffer: async () => bundledBuffer,
+        });
+        const iteratorSpy = jest
+          .spyOn(epmArchiveIterator, 'createArchiveIterator')
+          .mockReturnValue(bundledIterator);
+        const spy = jest
+          .spyOn(epmTransformsInstall, 'installTransforms')
+          .mockResolvedValue({ installedTransforms: [] } as any);
+
+        await mockPackageService.asInternalUser.reinstallEsAssets(packageInfo, paths);
+
+        expect(iteratorSpy).toHaveBeenCalledWith(bundledBuffer, 'application/zip');
+        expect(getEsPackage).not.toHaveBeenCalled();
+        expect(spy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            installSource: 'bundled',
+            packageInstallContext: expect.objectContaining({ archiveIterator: bundledIterator }),
+          })
+        );
+      });
+
+      it('keeps the upload source and stored archive when no matching bundled package exists', async () => {
+        mockInstallation('upload');
+        jest
+          .spyOn(epmBundledPackages, 'getBundledPackageForInstallation')
+          .mockResolvedValue(undefined);
+        const spy = jest
+          .spyOn(epmTransformsInstall, 'installTransforms')
+          .mockResolvedValue({ installedTransforms: [] } as any);
+
+        await mockPackageService.asInternalUser.reinstallEsAssets(packageInfo, paths);
+
+        expect(getEsPackage).toHaveBeenCalled();
+        expect(spy).toHaveBeenCalledWith(expect.objectContaining({ installSource: 'upload' }));
+      });
     });
 
     it('passes no request when not scoped to one', async () => {

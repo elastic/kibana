@@ -36,6 +36,9 @@ export default function (providerContext: FtrProviderContext) {
   // remove the previous transform rather than leave it in place.
   const upgradeVersion = '1.1.0';
   const upgradeTransformId = `logs-${pkgName}.${transformModuleId}-default-${upgradeVersion}`;
+  // Legacy JSON specs are named `<pkg>.<folder>-<file>-<version>`; the folder is `transform`.
+  const legacyTransformFile = 'legacy';
+  const legacyTransformId = `${pkgName}.transform-${legacyTransformFile}-${pkgVersion}`;
 
   // `start: false` keeps the assertions on the created transform rather than on whether
   // Elasticsearch could start it against a source index this test never creates.
@@ -43,10 +46,13 @@ export default function (providerContext: FtrProviderContext) {
     sourceIndex,
     version = pkgVersion,
     transformPath,
+    legacy = false,
   }: {
     sourceIndex: string;
     version?: string;
     transformPath?: string;
+    // Ships the transform as a legacy JSON spec, which has no `_meta.run_as_kibana_system` switch.
+    legacy?: boolean;
   }): Promise<Buffer> => {
     const key = `${pkgName}-${version}`;
     const path =
@@ -68,6 +74,18 @@ export default function (providerContext: FtrProviderContext) {
         `  github: elastic/fleet`,
       ].join('\n')
     );
+    if (legacy) {
+      zip.file(
+        `${key}/elasticsearch/transform/${legacyTransformFile}.json`,
+        JSON.stringify({
+          source: { index: [sourceIndex] },
+          dest: { index: `${pkgName}_dest` },
+          latest: { unique_key: ['id'], sort: '@timestamp' },
+          frequency: '1m',
+        })
+      );
+      return await zip.generateAsync({ type: 'nodebuffer' });
+    }
     zip.file(
       `${key}/elasticsearch/transform/${transformModuleId}/manifest.yml`,
       ['start: false'].join('\n')
@@ -138,7 +156,7 @@ export default function (providerContext: FtrProviderContext) {
       await supertest
         .delete(`/api/fleet/epm/packages/${pkgName}/${upgradeVersion}`)
         .set('kbn-xsrf', 'xxxx');
-      for (const id of [transformId, upgradeTransformId]) {
+      for (const id of [transformId, upgradeTransformId, legacyTransformId]) {
         await esClient.transform.deleteTransform(
           { transform_id: id, force: true },
           { ignore: [404] }
@@ -177,6 +195,28 @@ export default function (providerContext: FtrProviderContext) {
       expect(
         (transforms[0]._meta as { run_as_kibana_system?: boolean })?.run_as_kibana_system
       ).to.be(false);
+    });
+
+    // Legacy JSON specs have no `_meta.run_as_kibana_system` switch and used to be created with
+    // kibana_system unconditionally, so they are covered separately from the yml path.
+    it('creates an uploaded legacy JSON transform with the installing user credentials', async () => {
+      const buf = await buildPackageZip({
+        sourceIndex: 'logs-transform_identity_test-*',
+        legacy: true,
+      });
+      await uploadPackage(buf).expect(200);
+
+      const { transforms } = await esClient.transform.getTransform({
+        transform_id: legacyTransformId,
+      });
+      expect(transforms.length).to.be(1);
+
+      const authorization = transforms[0].authorization as
+        | { api_key?: { id: string; name: string }; roles?: string[] }
+        | undefined;
+      expect(authorization?.api_key).to.be.an('object');
+      expect(authorization?.roles).to.be(undefined);
+      expect(authorization?.api_key?.name).to.contain(uploader.username);
     });
 
     // Reauthorizing re-binds a transform to the caller. Allowing it for an uploaded package
