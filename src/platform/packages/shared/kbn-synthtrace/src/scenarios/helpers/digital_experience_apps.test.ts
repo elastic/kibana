@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { timerange, type EdotBrowserDocument } from '@kbn/synthtrace-client';
+import { timerange, type EdotBrowserDocument, type OtelLogDocument } from '@kbn/synthtrace-client';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
   DIGITAL_EXPERIENCE_APPS,
@@ -21,24 +21,36 @@ const range = timerange(
   {} as ToolingLog
 );
 
-const collect = (withSessionId: boolean) =>
-  generateEdotBrowserSessions(range, { environment: 'test', withSessionId, scale: 1 }).flatMap(
-    (generator) =>
-      Array.from(generator).flatMap((event): EdotBrowserDocument[] => event.serialize())
+const collect = (withSessionId: boolean, includeRawAttribution: boolean = false) =>
+  generateEdotBrowserSessions(range, {
+    environment: 'test',
+    withSessionId,
+    includeRawAttribution,
+    scale: 1,
+  }).flatMap((generator) =>
+    Array.from(generator).flatMap((event): EdotBrowserDocument[] => event.serialize())
   );
 
 describe('digital experience apps', () => {
   describe('parseDigitalExperienceScenarioOpts', () => {
-    it('defaults to no session.id and scale 1', () => {
+    it('defaults to no session.id, no raw attribution and scale 1', () => {
       expect(parseDigitalExperienceScenarioOpts(undefined)).toEqual({
         withSessionId: false,
+        includeRawAttribution: false,
         scale: 1,
       });
     });
 
     it('parses string options from the CLI', () => {
-      expect(parseDigitalExperienceScenarioOpts({ withSessionId: 'true', scale: '2.5' })).toEqual({
+      expect(
+        parseDigitalExperienceScenarioOpts({
+          withSessionId: 'true',
+          includeRawAttribution: 'true',
+          scale: '2.5',
+        })
+      ).toEqual({
         withSessionId: true,
+        includeRawAttribution: true,
         scale: 2.5,
       });
     });
@@ -62,6 +74,23 @@ describe('digital experience apps', () => {
       expect([...serviceNames].sort()).toEqual(
         DIGITAL_EXPERIENCE_APPS.map(({ serviceName }) => serviceName).sort()
       );
+    });
+
+    it('only writes web vital attribution bodies when enabled', () => {
+      const webVitals = (docs: EdotBrowserDocument[]) =>
+        docs.filter(
+          (doc): doc is OtelLogDocument =>
+            'event_name' in doc && doc.event_name === 'browser.web_vital'
+        );
+
+      webVitals(collect(false)).forEach((doc) => {
+        expect(doc).not.toHaveProperty('body');
+      });
+      const withAttribution = webVitals(collect(false, true));
+      expect(withAttribution.length).toBeGreaterThan(0);
+      withAttribution.forEach((doc) => {
+        expect(JSON.parse(String(doc.body?.text))).toEqual(expect.any(Object));
+      });
     });
 
     it('ends every session by the last generated timestamp', () => {

@@ -28,6 +28,8 @@
  * Scenario options:
  * - withSessionId (boolean, default: false): write `attributes.session.id`. EDOT Browser `main`
  *   does not emit it yet (elastic/opentelemetry-dev#1410).
+ * - includeRawAttribution (boolean, default: false): write the web-vitals attribution as a JSON
+ *   body on `browser.web_vital` events, like the instrumentation's experimental opt-in option
  * - scale (number, default: 1): multiplies the number of sessions per minute of every app
  *
  * Run:

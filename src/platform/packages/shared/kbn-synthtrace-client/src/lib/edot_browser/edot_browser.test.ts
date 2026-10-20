@@ -279,7 +279,7 @@ describe('edotBrowser', () => {
       });
     });
 
-    it('writes web vitals with a derived rating and a JSON attribution body', () => {
+    it('writes web vitals with a derived rating and no body by default', () => {
       const [doc] = client
         .webVital({
           name: 'lcp',
@@ -299,21 +299,26 @@ describe('edotBrowser', () => {
       });
       expect(JSON.stringify(doc.attributes)).toMatch(/"browser\.web_vital\.value":4100\.\d+/);
       expect(JSON.stringify(doc.attributes)).toMatch(/"browser\.web_vital\.delta":4100\.\d+/);
-      expect(JSON.parse(doc.body?.text ?? '')).toEqual({ target: 'img.hero' });
+      expect(doc).not.toHaveProperty('body');
     });
 
-    it('keeps CLS precision in the attribution body', () => {
-      const [doc] = client
+    it('writes the raw attribution as a JSON body when includeRawAttribution is set', () => {
+      const [doc] = edotBrowser
+        .app({ serviceName: 'storefront-web', environment: 'production' })
+        .client(BROWSER_PROFILES.chromeMacos, { includeRawAttribution: true })
         .webVital({
           name: 'cls',
           value: 0.0213,
           id: 'v5-1-2',
           navigationType: 'navigate',
-          attribution: { largestShiftValue: 0.0213 },
+          attribution: { largestShiftTarget: 'main > div.banner', largestShiftValue: 0.021347 },
         })
         .serialize();
 
-      expect(JSON.parse(doc.body?.text ?? '')).toEqual({ largestShiftValue: 0.0213 });
+      expect(JSON.parse(doc.body?.text ?? '')).toEqual({
+        largestShiftTarget: 'main > div.banner',
+        largestShiftValue: 0.021347,
+      });
     });
 
     it('keeps CLS values of 0 fractional', () => {

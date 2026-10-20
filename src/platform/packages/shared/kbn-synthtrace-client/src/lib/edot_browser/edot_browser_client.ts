@@ -25,6 +25,11 @@ const HTTP_PORT_FROM_PROTOCOL: Readonly<Record<string, number>> = { 'http:': 80,
 export interface EdotBrowserClientOptions {
   /** Written as `attributes.session.id` on every log and span when set. */
   sessionId?: string;
+  /**
+   * Writes the web-vitals attribution as a JSON string body on `browser.web_vital` events, like the
+   * experimental `includeRawAttribution` option of the web-vitals instrumentation. Off by default.
+   */
+  includeRawAttribution?: boolean;
 }
 
 /**
@@ -197,7 +202,6 @@ export class EdotBrowserClient {
   }) {
     // CLS is unitless and small, all other vitals are milliseconds
     const decimals = name === 'cls' ? 4 : 1;
-    const precision = 10 ** decimals;
     const log = this.log('browser.web_vital', 'web-vitals', {
       'browser.web_vital.name': name,
       'browser.web_vital.value': asFloat(value, decimals),
@@ -206,14 +210,8 @@ export class EdotBrowserClient {
       'browser.web_vital.id': id,
       'browser.web_vital.navigation_type': navigationType,
     });
-    return attribution
-      ? log.message(
-          JSON.stringify(attribution, (_key, attributionValue) =>
-            typeof attributionValue === 'number'
-              ? Math.round(attributionValue * precision) / precision
-              : attributionValue
-          )
-        )
+    return attribution && this.options.includeRawAttribution
+      ? log.message(JSON.stringify(attribution))
       : log;
   }
 

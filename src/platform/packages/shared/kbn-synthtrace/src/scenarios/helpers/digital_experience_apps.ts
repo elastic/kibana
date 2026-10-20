@@ -31,12 +31,15 @@ export interface DigitalExperienceApp {
 export interface DigitalExperienceScenarioOpts {
   /** Write `attributes.session.id`, which EDOT Browser `main` does not emit yet. */
   withSessionId: boolean;
+  /** Write the web vital attribution as a JSON body, which EDOT Browser only does when opted in. */
+  includeRawAttribution: boolean;
   /** Multiplies the number of sessions per minute of every app. */
   scale: number;
 }
 
 const DEFAULT_SCENARIO_OPTS: DigitalExperienceScenarioOpts = {
   withSessionId: false,
+  includeRawAttribution: false,
   scale: 1,
 };
 
@@ -370,6 +373,11 @@ export const parseDigitalExperienceScenarioOpts = (
 
   return {
     withSessionId: getBooleanOpt(opts, 'withSessionId', DEFAULT_SCENARIO_OPTS.withSessionId),
+    includeRawAttribution: getBooleanOpt(
+      opts,
+      'includeRawAttribution',
+      DEFAULT_SCENARIO_OPTS.includeRawAttribution
+    ),
     scale,
   };
 };
@@ -382,7 +390,12 @@ const MAX_PAGE_VIEW_MS = 20_000;
 /** One generator per app in the catalogue, each producing EDOT Browser sessions over `range`. */
 export const generateEdotBrowserSessions = (
   range: Timerange,
-  { environment, withSessionId, scale }: DigitalExperienceScenarioOpts & { environment: string }
+  {
+    environment,
+    withSessionId,
+    includeRawAttribution,
+    scale,
+  }: DigitalExperienceScenarioOpts & { environment: string }
 ): Array<SynthtraceGenerator<EdotBrowserDocument>> =>
   DIGITAL_EXPERIENCE_APPS.map(
     ({ serviceName, serviceVersion, health, sessionsPerMinute, site, browserWeights }) => {
@@ -401,10 +414,10 @@ export const generateEdotBrowserSessions = (
           const sessionEnd = timestamp - Math.floor(Math.random() * stepMilliseconds);
 
           return edotBrowser.session({
-            client: app.client(
-              edotBrowser.pickBrowserProfile(Math.random, browserWeights),
-              withSessionId ? { sessionId: generateLongId() } : {}
-            ),
+            client: app.client(edotBrowser.pickBrowserProfile(Math.random, browserWeights), {
+              sessionId: withSessionId ? generateLongId() : undefined,
+              includeRawAttribution,
+            }),
             site,
             health: edotBrowser.healthProfiles[health],
             start: sessionEnd - sessionDurationMs,
