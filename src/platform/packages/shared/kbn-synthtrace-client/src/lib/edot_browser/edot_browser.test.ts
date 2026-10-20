@@ -741,6 +741,24 @@ describe('edotBrowser', () => {
         .forEach((doc) => expect(doc).not.toHaveProperty('trace_id'));
     });
 
+    it('resolves request paths on the site origin', () => {
+      const site: EdotBrowserSite = {
+        origin: 'https://shop.example.com',
+        pages: [{ path: '/', requests: [{ method: 'GET', url: '/api/cart' }] }],
+      };
+      const docs = createSession({ site, pageViews: 1 });
+      const requestUrls = docs
+        .filter(
+          (doc) =>
+            isSpan(doc) || doc.attributes?.['browser.resource_timing.initiator_type'] === 'fetch'
+        )
+        .map((doc) => doc.attributes?.['url.full']);
+
+      expect(requestUrls.length).toBeGreaterThan(0);
+      requestUrls.forEach((url) => expect(url).toBe('https://shop.example.com/api/cart'));
+      expect(docs.filter(isSpan)[0]?.attributes['server.address']).toBe('shop.example.com');
+    });
+
     it('types network errors like the fetch and XHR instrumentations', () => {
       const health = { ...HEALTH_PROFILES.healthy, networkErrorRate: 0.5 };
       const spans = Array.from({ length: 20 }, (_, seed) => createSession({ seed, health }))

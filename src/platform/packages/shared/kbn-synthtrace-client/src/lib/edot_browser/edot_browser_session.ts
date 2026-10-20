@@ -33,6 +33,7 @@ export interface EdotBrowserResource {
 
 export interface EdotBrowserRequest {
   method: string;
+  /** Path on the site origin, or an absolute URL for cross-origin requests. */
   url: string;
   instrumentation?: HttpInstrumentation;
   /** Overrides the health profile's failure rate for this endpoint. */
@@ -279,15 +280,15 @@ const sendRequest = (
   time: number,
   latestEnd: number
 ): EdotBrowserEvent[] => {
-  const { client, health, random, slowdown } = ctx;
+  const { client, site, health, random, slowdown } = ctx;
   const {
     method,
-    url,
     instrumentation = 'fetch',
     failureRate = health.httpFailureRate,
     failureStatusCodes = DEFAULT_FAILURE_STATUS_CODES,
     latencyFactor = 1,
   } = request;
+  const url = toUrl(site, request.url);
   const duration = Math.min(
     sample(health.httpLatency, random) * latencyFactor * slowdown,
     Math.max(latestEnd - time, 1)
