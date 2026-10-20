@@ -19,9 +19,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import type { DocViewerApi, DocViewerRestorableState } from '@kbn/unified-doc-viewer';
-import { getDisplayedColumns, getTextBasedColumnsMeta } from '@kbn/unified-data-table';
-import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
+import type {
+  DocViewerApi,
+  DocViewerRestorableState,
+  DocViewerShareableState,
+} from '@kbn/unified-doc-viewer';
+import { getDisplayedColumns } from '@kbn/unified-data-table';
 import {
   DiscoverGridFlyout,
   useShareDirectLinkAction,
@@ -31,7 +34,9 @@ import {
   internalStateActions,
   useAppStateSelector,
   useCurrentTabAction,
+  useCurrentDataSource,
   useCurrentTabDataStateContainer,
+  useCurrentTabRuntimeState,
   useCurrentTabSelector,
   useInternalStateDispatch,
   useInternalStateSelector,
@@ -68,14 +73,17 @@ export const DiscoverDocumentFlyout = memo(
     );
     const expandedDoc = useCurrentTabSelector((state) => state.expandedDoc);
     const expandedDocOwner = useCurrentTabSelector((state) => state.expandedDocOwner);
+    const expandedDocCascadePath = useCurrentTabSelector((state) => state.expandedDocCascadePath);
     const renderDocumentViewMeta = useCurrentTabSelector((state) => state.renderDocumentViewMeta);
     const initialDocViewerTabId = useCurrentTabSelector((state) => state.initialDocViewerTabId);
-    const cascadedColumnsMeta = useCurrentTabSelector(
-      (state) => state.cascadedDocumentsState.columnsMeta
+    const docViewerState = useAppStateSelector((state) => state.docViewerState);
+    const cascadedLeafDataSource = useCurrentTabRuntimeState(
+      (runtimeState) => runtimeState.cascadedLeafDataSource$
     );
 
     const dataStateContainer = useCurrentTabDataStateContainer();
     const documentState = useDataState(dataStateContainer.data$.documents$);
+    const currentDataSource = useCurrentDataSource();
     const rows = useMemo(() => documentState.result ?? [], [documentState.result]);
 
     const { hasExpandedDoc, requestState, notice, expandedDocRef } = useExpandedDocSync({
@@ -83,22 +91,19 @@ export const DiscoverDocumentFlyout = memo(
       rows,
       fetchStatus: documentState.fetchStatus,
     });
-    const copyLink = useCopyExpandedDocLink({ dataView });
+    const { copyLink, shareQuery } = useCopyExpandedDocLink({ dataView });
     const expandedDocLinkability = useMemo(
-      () => getExpandedDocLinkability(query, expandedDoc),
-      [query, expandedDoc]
+      () => getExpandedDocLinkability(shareQuery, expandedDoc),
+      [shareQuery, expandedDoc]
     );
     const shareDirectLinkActions = useShareDirectLinkAction({
       copyLink,
       linkability: expandedDocLinkability,
-      query,
+      query: shareQuery,
     });
     const flyoutMenuTrailingActions = useMemo<EuiFlyoutMenuAction[] | undefined>(
-      () =>
-        expandedDoc && expandedDocOwner === DEFAULT_EXPANDED_DOC_OWNER
-          ? shareDirectLinkActions
-          : undefined,
-      [expandedDoc, expandedDocOwner, shareDirectLinkActions]
+      () => (expandedDoc ? shareDirectLinkActions : undefined),
+      [expandedDoc, shareDirectLinkActions]
     );
 
     const setExpandedDoc = useCurrentTabAction(internalStateActions.setExpandedDoc);
@@ -108,10 +113,11 @@ export const DiscoverDocumentFlyout = memo(
           setExpandedDoc({
             expandedDoc: doc,
             expandedDocOwner: doc ? expandedDocOwner ?? DEFAULT_EXPANDED_DOC_OWNER : undefined,
+            expandedDocCascadePath: doc ? expandedDocCascadePath : undefined,
           })
         );
       },
-      [dispatch, expandedDocOwner, setExpandedDoc]
+      [dispatch, expandedDocCascadePath, expandedDocOwner, setExpandedDoc]
     );
 
     const docViewerRef = useRef<DocViewerApi>(null);
@@ -141,20 +147,20 @@ export const DiscoverDocumentFlyout = memo(
       [dispatch, setInitialDocViewerTabIdAction]
     );
 
-    const columnsMeta: DataTableColumnsMeta | undefined = useMemo(
-      () =>
-        documentState.esqlQueryColumns
-          ? getTextBasedColumnsMeta(documentState.esqlQueryColumns)
-          : undefined,
-      [documentState.esqlQueryColumns]
+    const setDocViewerShareableStateAction = useCurrentTabAction(
+      internalStateActions.setDocViewerShareableState
+    );
+    const onShareableStateChange = useCallback(
+      (newDocViewerState: DocViewerShareableState) => {
+        dispatch(setDocViewerShareableStateAction({ docViewerState: newDocViewerState }));
+      },
+      [dispatch, setDocViewerShareableStateAction]
     );
 
-    const flyoutColumnsMeta = useMemo(() => {
-      if (!expandedDocOwner || expandedDocOwner === DEFAULT_EXPANDED_DOC_OWNER) {
-        return columnsMeta;
-      }
-      return cascadedColumnsMeta;
-    }, [expandedDocOwner, columnsMeta, cascadedColumnsMeta]);
+    const flyoutDataSource =
+      !expandedDocOwner || expandedDocOwner === DEFAULT_EXPANDED_DOC_OWNER
+        ? currentDataSource
+        : cascadedLeafDataSource;
 
     // Derive columns for when a linked flyout opens before the grid exists.
     const displayedColumns = useMemo(
@@ -177,7 +183,7 @@ export const DiscoverDocumentFlyout = memo(
         }
         hits={renderDocumentViewMeta?.displayedRows}
         columns={renderDocumentViewMeta?.displayedColumns ?? displayedColumns}
-        columnsMeta={flyoutColumnsMeta}
+        dataSource={flyoutDataSource}
         savedSearchId={persistedDiscoverSession?.id}
         query={query}
         initialTabId={initialDocViewerTabId}
@@ -191,6 +197,8 @@ export const DiscoverDocumentFlyout = memo(
         onUpdateSelectedTabId={onUpdateSelectedTabId}
         initialDocViewerState={docViewerUiState}
         onInitialDocViewerStateChange={onInitialDocViewerStateChange}
+        initialShareableState={docViewerState}
+        onShareableStateChange={onShareableStateChange}
       />
     );
   }

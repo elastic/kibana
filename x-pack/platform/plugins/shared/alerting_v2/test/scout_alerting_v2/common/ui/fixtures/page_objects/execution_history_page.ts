@@ -6,6 +6,7 @@
  */
 
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout';
+import type { AlertingMountConfig } from './alerting_mount_config';
 
 export class ExecutionHistoryPage {
   public readonly emptyPrompt: Locator;
@@ -13,27 +14,36 @@ export class ExecutionHistoryPage {
   public readonly rulesTab: Locator;
   public readonly actionPoliciesTab: Locator;
   public readonly searchBar: Locator;
+  public readonly ruleSearchBar: Locator;
+  public readonly ruleExecutionsTable: Locator;
+  public readonly filteredEmptyPrompt: Locator;
   public readonly policiesTable: Locator;
   public readonly policyDetailsFlyout: Locator;
 
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
-    this.emptyPrompt = this.page.getByRole('cell').getByTestId('ruleExecutionHistoryEmptyPrompt');
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl,
+    private readonly mountConfig: AlertingMountConfig
+  ) {
+    this.emptyPrompt = this.page.testSubj.locator('ruleExecutionHistoryEmptyPrompt');
     this.retryButton = this.page.testSubj.locator('executionHistoryRetryButton');
     this.rulesTab = this.page.testSubj.locator('executionHistoryRulesTab');
     this.actionPoliciesTab = this.page.testSubj.locator('executionHistoryPoliciesTab');
     this.searchBar = this.page.testSubj.locator('executionHistorySearchBar');
-    this.policiesTable = this.page.testSubj.locator('actionPolicyExecutionHistoryTable');
+    this.ruleSearchBar = this.page.testSubj.locator('ruleExecutionHistorySearch');
+    this.ruleExecutionsTable = this.page.testSubj.locator('ruleExecutionHistoryTable');
+    this.filteredEmptyPrompt = this.page.testSubj.locator('executionHistoryFilteredEmptyPrompt');
+    this.policiesTable = this.page.testSubj.locator('policyExecutionHistoryTable');
     this.policyDetailsFlyout = this.page.testSubj.locator('actionPolicyDetailsFlyout');
   }
 
   async goto(spaceId?: string) {
+    const appPath = `${this.mountConfig.appRoute}${this.mountConfig.paths.executionHistory}`;
     if (spaceId) {
-      await this.page.goto(
-        this.kbnUrl.app('management/alertingV2/execution_history', { space: spaceId })
-      );
+      await this.page.goto(this.kbnUrl.app(appPath, { space: spaceId }));
       return;
     }
-    await this.page.gotoApp('management/alertingV2/execution_history');
+    await this.page.gotoApp(appPath);
   }
 
   async openActionPoliciesTab() {
@@ -46,6 +56,10 @@ export class ExecutionHistoryPage {
 
   async search(value: string) {
     await this.searchBar.fill(value);
+  }
+
+  async searchRules(value: string) {
+    await this.ruleSearchBar.fill(value);
   }
 
   policyRow(policyName: string): Locator {

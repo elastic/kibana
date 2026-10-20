@@ -142,6 +142,41 @@ describe('useBulkAttackRunWorkflowItems', () => {
       expect(panelContent.props.alertIds).toEqual([]);
     });
 
+    it('should declare the attack attachment type so the Cases API resolves attack targets', () => {
+      const { result } = renderHook(() => useBulkAttackRunWorkflowItems());
+
+      const panelContent = result.current.panels[0].renderContent({
+        alertItems: defaultAlertItems,
+        closePopoverMenu: jest.fn(),
+        setIsBulkActionsLoading: jest.fn(),
+      }) as ReactElement;
+      expect(panelContent.props.attachmentType).toBe('security.attack');
+    });
+
+    it('should forward originAttackId to the panel as the singular origin', () => {
+      const { result } = renderHook(() =>
+        useBulkAttackRunWorkflowItems({ originAttackId: 'attack-1' })
+      );
+
+      const panelContent = result.current.panels[0].renderContent({
+        alertItems: defaultAlertItems,
+        closePopoverMenu: jest.fn(),
+        setIsBulkActionsLoading: jest.fn(),
+      }) as ReactElement;
+      expect(panelContent.props.originAlertId).toBe('attack-1');
+    });
+
+    it('should leave the panel origin plural when no originAttackId is given', () => {
+      const { result } = renderHook(() => useBulkAttackRunWorkflowItems());
+
+      const panelContent = result.current.panels[0].renderContent({
+        alertItems: defaultAlertItems,
+        closePopoverMenu: jest.fn(),
+        setIsBulkActionsLoading: jest.fn(),
+      }) as ReactElement;
+      expect(panelContent.props.originAlertId).toBeUndefined();
+    });
+
     it('should pass closePopoverMenu to the panel onClose', () => {
       const { result } = renderHook(() => useBulkAttackRunWorkflowItems());
 

@@ -6,8 +6,8 @@
  */
 
 import type { PropsWithChildren } from 'react';
-import React, { memo, useCallback, useState } from 'react';
-import { EuiSpacer, EuiText } from '@elastic/eui';
+import React, { lazy, memo, Suspense, useCallback, useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -30,6 +30,14 @@ import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import { useGetDeviceControlUpsellComponent } from './hooks/use_get_device_control_component';
 import { DeviceControlCard } from './components/cards/device_control_card';
 
+const PerOsPolicySettingsForm = lazy(async () => {
+  const { PerOsPolicySettingsForm: LazyPerOsPolicySettingsForm } = await import(
+    './per_os/per_os_policy_settings_form'
+  );
+
+  return { default: LazyPerOsPolicySettingsForm };
+});
+
 const PROTECTIONS_SECTION_TITLE = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.protections',
   { defaultMessage: 'Protections' }
@@ -50,6 +58,31 @@ export const PolicySettingsForm = memo<PolicySettingsFormProps>((props) => {
   const { storage } = useKibana().services;
 
   const trustedDevices = useIsExperimentalFeatureEnabled('trustedDevices');
+  const isPerOsFormEnabled = useIsExperimentalFeatureEnabled('perOsPolicySettings');
+
+  const [showEventMergingBanner, setShowEventMergingBanner] = useState(
+    storage.get('securitySolution.showEventMergingBanner') ?? true
+  );
+  const onBannerDismiss = useCallback(() => {
+    setShowEventMergingBanner(false);
+    storage.set('securitySolution.showEventMergingBanner', false);
+  }, [storage]);
+
+  if (isPerOsFormEnabled) {
+    return (
+      <Suspense
+        fallback={
+          <EuiFlexGroup justifyContent="center" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="xl" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+      >
+        <PerOsPolicySettingsForm {...props} />
+      </Suspense>
+    );
+  }
 
   const renderDeviceControlSection = () => {
     if (!trustedDevices) {
@@ -67,14 +100,6 @@ export const PolicySettingsForm = memo<PolicySettingsFormProps>((props) => {
       </>
     );
   };
-
-  const [showEventMergingBanner, setShowEventMergingBanner] = useState(
-    storage.get('securitySolution.showEventMergingBanner') ?? true
-  );
-  const onBannerDismiss = useCallback(() => {
-    setShowEventMergingBanner(false);
-    storage.set('securitySolution.showEventMergingBanner', false);
-  }, [storage]);
 
   const onChangeProxy: PolicySettingsFormProps['onChange'] = ({ isValid, updatedPolicy }) => {
     // perform tasks that synchronises changes between settings

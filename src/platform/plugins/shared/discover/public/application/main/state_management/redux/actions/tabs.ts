@@ -8,13 +8,13 @@
  */
 
 import { cloneDeep, differenceBy, omit } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import type { DataViewSpec, QueryState } from '@kbn/data-plugin/common';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
-import { isOfAggregateQueryType } from '@kbn/es-query';
-import { getInitialESQLQuery } from '@kbn/esql-utils';
+import { isEmptyEsqlQuery, isOfAggregateQueryType } from '@kbn/es-query';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
-import type { UISession } from '@kbn/data-plugin/public/search/session/sessions_mgmt/types';
+import type { UISession } from '@kbn/data-plugin/public';
 import type { OpenInNewTabParams } from '../../../../../context_awareness/types';
 import { ProfileStateType, type ProfileStateMap } from '../../../../../../common/context_awareness';
 import { createDataSource } from '../../../../../../common/data_sources/utils';
@@ -29,6 +29,7 @@ import {
 import {
   createTabRuntimeState,
   selectCurrentProfileUrlState,
+  getTabDataView,
   selectTabRuntimeState,
   selectInitialUnifiedHistogramLayoutPropsMap,
   selectTabRuntimeInternalState,
@@ -53,6 +54,8 @@ import { fetchData } from './tab_state';
 import { fromSavedObjectTabToTabState } from '../tab_mapping_utils';
 import { initializeAndSync, stopSyncing } from './tab_sync';
 import { assignSessionDataViewIds } from '../../utils/assign_session_data_view_ids';
+import { clearOutdatedTabUrlState } from '../../utils/cleanup_url_state';
+import { showSessionWarnings } from '../../../../../session';
 
 export const setTabs: InternalStateThunkActionCreator<
   [Parameters<typeof internalStateSlice.actions.setTabs>[0]]
@@ -93,6 +96,7 @@ export const setTabs: InternalStateThunkActionCreator<
       newRecentlyClosedTab.appState = cloneDeep(tab.appState);
       newRecentlyClosedTab.globalState = cloneDeep(tab.globalState);
       newRecentlyClosedTab.profileState = cloneDeep(tab.profileState);
+      newRecentlyClosedTab.skipInitialFetch = false;
       justRemovedTabs.push(newRecentlyClosedTab);
 
       dispatch(disconnectTab({ tabId: tab.id }));
@@ -206,6 +210,17 @@ export const updateTabs: InternalStateThunkActionCreator<
         tab.globalState = cloneDeep(existingTabToDuplicateFrom.globalState);
         tab.profileState = cloneDeep(existingTabToDuplicateFrom.profileState);
         tab.uiState = cloneDeep(existingTabToDuplicateFrom.uiState);
+        // Carry over auto-refresh. Prefer the live timefilter when duplicating
+        // the current tab so an in-progress interval is not replaced by defaults.
+        const refreshInterval =
+          existingTabToDuplicateFrom.id === currentTab.id
+            ? services.timefilter.getRefreshInterval()
+            : existingTabToDuplicateFrom.globalState.refreshInterval ??
+              services.timefilter.getRefreshInterval();
+        tab.globalState = {
+          ...tab.globalState,
+          refreshInterval: cloneDeep(refreshInterval),
+        };
       } else if (item.restoredFromId) {
         // the new tab was created by restoring a recently closed tab
         const recentlyClosedTabToRestore = selectRecentlyClosedTabs(currentState).find(
@@ -225,24 +240,46 @@ export const updateTabs: InternalStateThunkActionCreator<
           stateTypes: [ProfileStateType.Persistent, ProfileStateType.Url],
           defaultsHandling: 'strip',
         });
+        tab.uiState = {
+          ...tab.uiState,
+          visor: recentlyClosedTabToRestore.uiState.visor,
+        };
       } else if (!('appState' in item)) {
         // the new tab is a fresh one
         const currentQuery = currentTab.appState.query;
-        const currentDataView = currentTabRuntimeState.currentDataView$.getValue();
+        const currentDataView = getTabDataView(currentTabRuntimeState);
+
+        tab.skipInitialFetch = true;
+        const currentRefreshInterval =
+          tab.globalState.refreshInterval ?? services.timefilter.getRefreshInterval();
+        tab.globalState = {
+          ...tab.globalState,
+          refreshInterval: { ...currentRefreshInterval, pause: true },
+        };
 
         if (!currentQuery || !currentDataView) {
           return tab;
         }
 
         tab.appState = {
-          ...(isOfAggregateQueryType(currentQuery)
-            ? { query: { esql: getInitialESQLQuery(currentDataView) } }
-            : {}),
+          ...(isOfAggregateQueryType(currentQuery) ? { query: { esql: '' } } : {}),
           dataSource: createDataSource({
             dataView: currentDataView,
             query: currentQuery,
           }),
         };
+
+        // Empty ES|QL has no dataViewId in app state. Keep the previous tab's
+        // data view so init does not fall back to the default and refetch fields.
+        if (isOfAggregateQueryType(currentQuery)) {
+          tab.initialInternalState = {
+            ...tab.initialInternalState,
+            serializedSearchSource: {
+              ...tab.initialInternalState?.serializedSearchSource,
+              index: currentDataView.isPersisted() ? currentDataView.id : currentDataView.toSpec(),
+            },
+          };
+        }
       }
 
       return tab;
@@ -319,7 +356,7 @@ export const updateTabs: InternalStateThunkActionCreator<
 
         dispatch(initializeAndSync({ tabId: nextTab.id }));
 
-        if (nextTab.forceFetchOnSelect) {
+        if (nextTab.forceFetchOnSelect && !isEmptyEsqlQuery(nextTab.appState.query)) {
           nextTabDataStateContainer.reset();
           dispatch(fetchData({ tabId: nextTab.id }));
         }
@@ -353,7 +390,11 @@ export const initializeTabs = createInternalStateAsyncThunk(
       discoverSessionId,
       shouldClearAllTabs,
     }: { discoverSessionId: string | undefined; shouldClearAllTabs?: boolean },
-    { dispatch, getState, extra: { services, tabsStorageManager, customizationContext } }
+    {
+      dispatch,
+      getState,
+      extra: { services, tabsStorageManager, customizationContext, urlStateStorage },
+    }
   ) {
     const { userId: existingUserId, spaceId: existingSpaceId } = getState();
 
@@ -380,7 +421,35 @@ export const initializeTabs = createInternalStateAsyncThunk(
         return undefined;
       }
       try {
-        return await services.savedSearch.getDiscoverSession(discoverSessionId);
+        const { session, warnings } = await services.discoverSessionService.get(discoverSessionId);
+
+        if (warnings.length) {
+          showSessionWarnings({ session, warnings, core: services.core });
+        }
+
+        // Fill an omitted refresh interval once so the baseline matches the inherited value.
+        const tabsMissingRefreshInterval = session.tabs.filter(
+          (tab) => tab.timeRestore && tab.refreshInterval === undefined
+        );
+
+        if (tabsMissingRefreshInterval.length === 0) {
+          return session;
+        }
+
+        const refreshInterval =
+          urlStateStorage.get<QueryState>(GLOBAL_STATE_URL_KEY)?.refreshInterval ??
+          services.timefilter.getRefreshInterval();
+
+        return {
+          ...session,
+          tabs: session.tabs.map((tab) => {
+            if (!tab.timeRestore || tab.refreshInterval !== undefined) {
+              return tab;
+            }
+
+            return { ...tab, refreshInterval };
+          }),
+        };
       } catch (error) {
         if (error instanceof SavedObjectNotFound) {
           forgetDiscoverSession(services.core.http, services.chrome, discoverSessionId);
@@ -409,23 +478,38 @@ export const initializeTabs = createInternalStateAsyncThunk(
       : undefined;
 
     const initialTabState = services.getScopedHistory<InitialTabState>()?.location.state;
-    const initialTabsState = tabsStorageManager.loadLocally({
-      userId,
-      spaceId,
-      persistedDiscoverSession,
-      shouldClearAllTabs,
-      defaultTabState: byValueEmbeddableTabState ?? DEFAULT_TAB_STATE,
-      // Assign IDs before mapping saved tabs, using the incoming link and same-session local tabs.
-      prepareSession: (session, localTabs, selectedTabId) =>
-        assignSessionDataViewIds(session, localTabs, {
-          tabId: selectedTabId ?? session.tabs[0]?.id,
-          dataViewSpec: initialTabState?.dataViewSpec,
-        }),
-    });
+    const { draftSessionTitle, outdatedSelectedTab, hasNewSavedVersion, ...initialTabsState } =
+      tabsStorageManager.loadLocally({
+        userId,
+        spaceId,
+        persistedDiscoverSession,
+        shouldClearAllTabs,
+        defaultTabState: byValueEmbeddableTabState ?? DEFAULT_TAB_STATE,
+        // Assign IDs before mapping saved tabs, using the incoming link and same-session local tabs.
+        prepareSession: (session, localTabs, selectedTabId) =>
+          assignSessionDataViewIds(session, localTabs, {
+            tabId: selectedTabId ?? session.tabs[0]?.id,
+            dataViewSpec: initialTabState?.dataViewSpec,
+          }),
+      });
 
     // Hand the location state over to the tab initialization before updating the URL below, which
     // discards it, so initial state such as ad hoc data view specs is passed on
     services.initialTabStateService.capture(initialTabState);
+
+    // Clear a stale draft URL unless navigation explicitly supplies initial tab state.
+    if (!initialTabState && outdatedSelectedTab) {
+      const selectedTab = initialTabsState.allTabs.find(
+        ({ id }) => id === initialTabsState.selectedTabId
+      );
+
+      await clearOutdatedTabUrlState({
+        tab: outdatedSelectedTab,
+        timeRestore: selectedTab?.attributes.timeRestore ?? false,
+        urlStateStorage,
+        profileStateRegistry: services.profileStateRegistry,
+      });
+    }
 
     // Replace instead of push the tab ID to the URL on initialization in order to
     // avoid capturing a browser history entry with a potentially empty _tab state
@@ -433,7 +517,21 @@ export const initializeTabs = createInternalStateAsyncThunk(
       replace: true,
     });
 
+    dispatch(internalStateSlice.actions.setDraftSessionTitle(draftSessionTitle));
     dispatch(setTabs(initialTabsState));
+
+    if (hasNewSavedVersion) {
+      services.toastNotifications.addInfo({
+        title: i18n.translate('discover.sessionReplacedToast.title', {
+          defaultMessage: 'Discover session updated externally',
+        }),
+        text: i18n.translate('discover.sessionReplacedToast.text', {
+          defaultMessage:
+            'The latest saved version has been loaded. Any unsaved changes are available in recently closed tabs.',
+        }),
+        'data-test-subj': 'discoverSessionReplacedToast',
+      });
+    }
 
     return {
       userId,

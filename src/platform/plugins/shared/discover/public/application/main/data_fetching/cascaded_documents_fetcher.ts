@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { BehaviorSubject } from 'rxjs';
 import { constructCascadeQuery } from '@kbn/esql-utils';
 import type { TimeRange } from '@kbn/es-query';
 import type { CascadeQueryArgs } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers';
 import { apm } from '@elastic/apm-rum';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
-import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
-import { getTextBasedColumnsMeta } from '@kbn/unified-data-table';
+import type { DataSource } from '@kbn/data-source';
 import type { DiscoverServices } from '../../../build_services';
 import { fetchEsql } from './fetch_esql';
 import type { ScopedProfilesManager } from '../../../context_awareness';
@@ -29,9 +30,7 @@ export interface FetchCascadedDocumentsParams extends CascadeQueryArgs {
 export interface CascadedDocumentsStateManager {
   getIsActiveInstance(): boolean;
   getCascadedDocuments(nodeId: string): DataTableRecord[] | undefined;
-  getColumnsMeta(): DataTableColumnsMeta;
   setCascadedDocuments(nodeId: string, records: DataTableRecord[]): void;
-  setColumnsMeta(columnsMeta: DataTableColumnsMeta): void;
 }
 
 export class CascadedDocumentsFetcher {
@@ -41,7 +40,9 @@ export class CascadedDocumentsFetcher {
   constructor(
     private readonly services: DiscoverServices,
     private readonly scopedProfilesManager: ScopedProfilesManager,
-    private readonly stateManager: CascadedDocumentsStateManager
+    private readonly stateManager: CascadedDocumentsStateManager,
+    private readonly currentDataSource$: BehaviorSubject<DataSource | undefined>,
+    private readonly cascadedLeafDataSource$: BehaviorSubject<DataSource | undefined>
   ) {}
 
   getRequestAdapter(): RequestAdapter {
@@ -89,10 +90,16 @@ export class CascadedDocumentsFetcher {
         return [];
       }
 
-      const { esqlQueryColumns, records: fetchedRecords } = await fetchEsql({
+      const currentEsqlSource = this.currentDataSource$.getValue();
+
+      if (currentEsqlSource?.kind !== 'esql') {
+        return [];
+      }
+
+      const { records: fetchedRecords, dataSource: leafDataSource } = await fetchEsql({
         query: cascadeQuery,
         esqlVariables,
-        dataView,
+        esqlSource: currentEsqlSource,
         data: this.services.data,
         expressions: this.services.expressions,
         abortSignal: abortController.signal,
@@ -112,13 +119,16 @@ export class CascadedDocumentsFetcher {
       });
 
       records = fetchedRecords;
-      this.stateManager.setCascadedDocuments(nodeId, records);
 
-      const columnsMeta = esqlQueryColumns ? getTextBasedColumnsMeta(esqlQueryColumns) : {};
-      const previousColumnsMeta = this.stateManager.getColumnsMeta();
-      if (!isEqual(previousColumnsMeta, columnsMeta)) {
-        this.stateManager.setColumnsMeta(columnsMeta);
+      // The leaf query drops STATS, so its columns differ from the parent source. All leaves share
+      // them, so the leaf source is only replaced when they change.
+      if (
+        leafDataSource &&
+        !isEqual(this.cascadedLeafDataSource$.getValue()?.getColumns(), leafDataSource.getColumns())
+      ) {
+        this.cascadedLeafDataSource$.next(leafDataSource);
       }
+      this.stateManager.setCascadedDocuments(nodeId, records);
     } finally {
       this.abortControllers.delete(nodeId);
     }

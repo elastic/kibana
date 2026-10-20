@@ -31,6 +31,10 @@ export const loadMappingFileMock = jest.fn();
 export const loadManifestFileMock = jest.fn();
 export const ensureDefaultElserDeployedMock = jest.fn();
 export const ensureInferenceDeployedMock = jest.fn();
+export const checkArtifactAvailableMock = jest.fn();
+export const removeArtifactFileMock = jest.fn();
+export const logArtifactsFolderUsageMock = jest.fn();
+export const purgeArtifactsFolderMock = jest.fn();
 
 jest.doMock('./utils', () => {
   const actual = jest.requireActual('./utils');
@@ -42,5 +46,9 @@ jest.doMock('./utils', () => {
     loadManifestFile: loadManifestFileMock,
     ensureDefaultElserDeployed: ensureDefaultElserDeployedMock,
     ensureInferenceDeployed: ensureInferenceDeployedMock,
+    checkArtifactAvailable: checkArtifactAvailableMock,
+    removeArtifactFile: removeArtifactFileMock,
+    logArtifactsFolderUsage: logArtifactsFolderUsageMock,
+    purgeArtifactsFolder: purgeArtifactsFolderMock,
   };
 });

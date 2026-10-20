@@ -65,7 +65,9 @@ export const getRunStepDefinition = ({
           connector_id: connectorId,
           end,
           esql_query: esqlQuery,
+          feature_id: featureId,
           filter,
+          ground_truth_gate_enabled: groundTruthGateEnabled = true,
           // The engine does not apply the schema's zod defaults to
           // `context.input`, so the default is mirrored here (see the note above).
           include_attack_discoveries: includeAttackDiscoveries = true,
@@ -106,9 +108,11 @@ export const getRunStepDefinition = ({
         const effectiveConnectorId = connectorId
           ? connectorId
           : await resolveDefaultConnectorId({
+              featureId,
               inference: pluginsStart.inference,
               logger,
               request,
+              searchInferenceEndpoints: pluginsStart.searchInferenceEndpoints,
               uiSettingsClient,
             });
 
@@ -143,7 +147,10 @@ export const getRunStepDefinition = ({
           alert_retrieval_workflows_enabled: alertRetrievalWorkflowIds.length > 0,
           default_retrieval_enabled: !hasProvidedAlerts && alertRetrievalMode !== 'custom_only',
           ...(esqlQuery != null ? { esql_query: esqlQuery } : {}),
-          skill_enabled: true,
+          ground_truth_gate_enabled: groundTruthGateEnabled,
+          // The skill's additional retrieval runs inside the gate, so it is off
+          // with the gate. That also keeps the "no alert source" check strict.
+          skill_enabled: groundTruthGateEnabled,
           validation_workflow_id: validationWorkflowId,
         };
 
