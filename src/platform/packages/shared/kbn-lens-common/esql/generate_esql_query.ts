@@ -781,27 +781,30 @@ export function generateEsqlQuery(
             scoreFragment = OUTER_TOP_N_GROUPING_ONLY_METRIC;
           }
 
+          // Metric-ranked subqueries also sort by the field so ties match DSL terms key order.
+          const fieldSortKey: EsqlSortKey = {
+            expr: quoteEsqlColumnRef(fieldExpr),
+            direction: 'ASC',
+          };
           queryParts.push(
             buildOuterTopNOtherRemap({
               source,
               timeFilter,
               groupExpr: fieldExpr,
               scoreFragment,
-              sortClause: formatSortKeys([
+              sortClause: formatSortKeys(
                 rankAlias
-                  ? { expr: rankAlias, direction: orderDirectionUpper }
-                  : {
-                      expr: quoteEsqlColumnRef(fieldExpr),
-                      direction: orderDirectionUpper,
-                    },
-              ]),
+                  ? [{ expr: rankAlias, direction: orderDirectionUpper }, fieldSortKey]
+                  : [{ expr: quoteEsqlColumnRef(fieldExpr), direction: orderDirectionUpper }]
+              ),
               size,
             })
           );
 
-          // Metric DESC: named=1 / Other=0 so SORT flag DESC, metric DESC keeps Other last.
+          // Metric-ranked: named=1 / Other=0 so SORT named DESC keeps Other last (ASC and DESC),
+          // then the chart metric, then the field for tie-break (DSL terms key order).
           // A single CASE(metric) cannot mix 0::LONG with AVG (double) or similar.
-          if (orderBy.type === 'column' && orderDirectionUpper === 'DESC') {
+          if (orderBy.type === 'column') {
             const namedFlagAlias = getOtherBucketNamedFlagAlias(innerTermsBucket.col.sourceField);
             queryParts.push(
               `INLINE STATS ${buildOtherBucketNamedFlagFragment({
@@ -817,6 +820,7 @@ export function generateEsqlQuery(
               `SORT ${formatSortKeys([
                 { expr: namedFlagAlias, direction: 'DESC' },
                 innerSortKey,
+                fieldSortKey,
               ])}`
             );
             queryParts.push(`LIMIT ${size + 1}`);
