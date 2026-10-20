@@ -7,6 +7,7 @@
 
 export { componentsPack, componentsPrimitives } from './src/pack';
 export type { AppLinkTarget, ComponentsRenderContext } from './src/lib';
+export { TABLE_SORT_ENHANCEMENT } from './src/primitives/table';
 export {
   type ActionsNode,
   type CodeNode,
