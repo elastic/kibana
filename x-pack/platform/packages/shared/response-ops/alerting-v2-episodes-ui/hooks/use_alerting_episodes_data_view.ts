@@ -76,7 +76,7 @@ const computedFields: Record<string, RuntimeField> = {
   suppressed: {
     type: 'keyword',
     script: { source: "emit('')" },
-    customLabel: i18n.MAINTENANCE_WINDOWS_FIELD_LABEL,
+    customLabel: i18n.SUPPRESSED_FIELD_LABEL,
   },
 };
 
