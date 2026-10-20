@@ -581,6 +581,8 @@ export class SlackAppService {
             available: true,
             status: RELAY_APP_CONNECTION_STATUS.pendingConfirmation,
             workspace: toWorkspace(pending),
+            ...(pending.createdBy ? { createdBy: pending.createdBy } : {}),
+            ...(pending.createdAt ? { createdAt: pending.createdAt } : {}),
           };
         }
       } catch (error) {

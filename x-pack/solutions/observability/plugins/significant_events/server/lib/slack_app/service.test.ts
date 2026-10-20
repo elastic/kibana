@@ -878,6 +878,8 @@ describe('SlackAppService', () => {
           status: RELAY_APP_CONNECTION_STATUS.oauthInProgress,
           apiKeyId: 'key-1',
           claimId: 'claim-1',
+          createdBy: 'alice',
+          createdAt: '2026-10-19T12:00:00.000Z',
         },
       });
       fetchClaim.mockResolvedValue({
@@ -905,6 +907,8 @@ describe('SlackAppService', () => {
         available: true,
         status: RELAY_APP_CONNECTION_STATUS.pendingConfirmation,
         workspace: { tenantKey: 'T0123ABC', name: 'Acme', url: 'https://acme.slack.com/' },
+        createdBy: 'alice',
+        createdAt: '2026-10-19T12:00:00.000Z',
       });
     });
 
