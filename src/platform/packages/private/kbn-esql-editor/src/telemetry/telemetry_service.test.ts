@@ -11,6 +11,9 @@ import type { AnalyticsServiceStart } from '@kbn/core/server';
 import {
   ESQLEditorTelemetryService,
   AiReviewAction,
+  AiPromptFeature,
+  AiQueryExecutionStatus,
+  AiQueryValidationStatus,
   ResourceBrowserType,
   ResourceBrowserOpenedFrom,
   ViewSelectedSource,
@@ -29,6 +32,7 @@ import {
   ESQL_COMMENT_TO_ESQL_REVIEWED,
   ESQL_FIX_WITH_AI_SUBMITTED,
   ESQL_FIX_WITH_AI_REVIEWED,
+  ESQL_AI_PROMPT_RESOLVED,
 } from './events_registration';
 import { reportEsqlError } from '../report_error';
 
@@ -391,6 +395,28 @@ describe('ESQLEditorTelemetryService', () => {
       expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(ESQL_FIX_WITH_AI_REVIEWED, {
         action: AiReviewAction.REJECT,
         lines_changed: 1,
+      });
+    });
+  });
+
+  describe('trackAiPromptResolved', () => {
+    it('reports the prompt, the generated query and the statuses', () => {
+      telemetryService.trackAiPromptResolved({
+        feature: AiPromptFeature.VISOR_NL,
+        prompt: 'show me the logs from [EMAIL]',
+        generatedQuery: 'FROM logs | WHERE user == "[EMAIL]"',
+        validationStatus: AiQueryValidationStatus.SUCCESS,
+        outcome: AiReviewAction.ACCEPT,
+        executionStatus: AiQueryExecutionStatus.ERROR,
+      });
+
+      expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(ESQL_AI_PROMPT_RESOLVED, {
+        feature: 'visor_nl',
+        prompt: 'show me the logs from [EMAIL]',
+        generated_query: 'FROM logs | WHERE user == "[EMAIL]"',
+        validation_status: 'success',
+        outcome: 'accept',
+        execution_status: 'error',
       });
     });
   });

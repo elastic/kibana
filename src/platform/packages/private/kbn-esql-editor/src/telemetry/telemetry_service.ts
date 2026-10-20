@@ -42,6 +42,7 @@ import {
   ESQL_COMMENT_TO_ESQL_REVIEWED,
   ESQL_FIX_WITH_AI_SUBMITTED,
   ESQL_FIX_WITH_AI_REVIEWED,
+  ESQL_AI_PROMPT_RESOLVED,
 } from './events_registration';
 import type { IndexEditorCommandArgs } from '../lookup_join/use_lookup_index_editor';
 import { COMMAND_ID as LOOKUP_INDEX_EDITOR_COMMAND } from '../lookup_join/use_lookup_index_editor';
@@ -51,6 +52,42 @@ export enum AiReviewAction {
   ACCEPT = 'accept',
   REJECT = 'reject',
 }
+
+export enum AiPromptFeature {
+  VISOR_NL = 'visor_nl',
+  COMMENT_TO_ESQL = 'comment_to_esql',
+  FIX_WITH_AI = 'fix_with_ai',
+}
+
+export enum AiQueryValidationStatus {
+  SUCCESS = 'success',
+  WARNING = 'warning',
+  ERROR = 'error',
+}
+
+export enum AiQueryExecutionStatus {
+  SUCCESS = 'success',
+  ERROR = 'error',
+  NOT_RUN = 'not_run',
+  UNKNOWN = 'unknown',
+}
+
+/** An AI proposal the user kept or undid. */
+export interface AiPromptResolution {
+  feature: AiPromptFeature;
+  /** The user's prompt, or the error message that triggered a Fix with AI. */
+  prompt: string;
+  /** The query as it would run after accepting the proposal. */
+  generatedQuery: string;
+  outcome: AiReviewAction;
+}
+
+export interface AiPromptResolvedProps extends AiPromptResolution {
+  validationStatus: AiQueryValidationStatus;
+  executionStatus: AiQueryExecutionStatus;
+}
+
+export type OnAiPromptResolved = (resolution: AiPromptResolution) => void;
 
 export enum ResourceBrowserType {
   DATA_SOURCES = 'data_sources',
@@ -397,6 +434,18 @@ export class ESQLEditorTelemetryService {
     this._reportEvent(ESQL_FIX_WITH_AI_REVIEWED, {
       action: params.action,
       lines_changed: params.linesChanged,
+    });
+  }
+
+  /** Expects `prompt` and `generatedQuery` to be anonymized by the caller. */
+  public trackAiPromptResolved(params: AiPromptResolvedProps) {
+    this._reportEvent(ESQL_AI_PROMPT_RESOLVED, {
+      feature: params.feature,
+      prompt: params.prompt,
+      generated_query: params.generatedQuery,
+      validation_status: params.validationStatus,
+      outcome: params.outcome,
+      execution_status: params.executionStatus,
     });
   }
 }

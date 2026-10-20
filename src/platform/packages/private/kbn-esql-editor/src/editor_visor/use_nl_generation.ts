@@ -129,7 +129,11 @@ export const useNlGeneration = ({
         );
         if (onNlResult) {
           // The prompt stays until the generated query is kept
-          onNlResult(result.content, { onAccept: () => setNlValue(''), onReject: onNlReject });
+          onNlResult(result.content, {
+            prompt: trimmed,
+            onAccept: () => setNlValue(''),
+            onReject: onNlReject,
+          });
         } else {
           appliedContent = true;
           onUpdateAndSubmitQuery(result.content);

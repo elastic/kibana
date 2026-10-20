@@ -108,10 +108,10 @@ export interface ESQLEditorProps {
   onVisorNlResultReady?: (handler: VisorNlResultHandler) => void;
 }
 
-/** Receives the generated ES|QL for review and the callbacks for the user's decision */
+/** Receives the generated ES|QL for review, the prompt it came from and the callbacks for the user's decision */
 export type VisorNlResultHandler = (
   generatedQuery: string,
-  review: { onAccept: () => void; onReject?: () => void }
+  review: { prompt: string; onAccept: () => void; onReject?: () => void }
 ) => void;
 
 interface ESQLVariableService {

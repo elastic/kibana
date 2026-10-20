@@ -52,6 +52,7 @@ dependsOn:
   - '@kbn/es-types'
   - '@kbn/ui-ai-components'
   - '@kbn/ui-callout'
+  - '@kbn/ai-anonymization-common'
 tags:
   - shared-browser
   - package

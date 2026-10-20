@@ -65,6 +65,7 @@ import {
   esqlEditorStyles,
 } from './esql_editor.styles';
 import { ESQLEditorTelemetryService } from './telemetry/telemetry_service';
+import { useAiPromptTelemetry } from './telemetry/use_ai_prompt_telemetry';
 import { useEsqlEditorActionsRegistration } from './editor_actions_context';
 import {
   getEditorOverwrites,
@@ -641,6 +642,13 @@ const ESQLEditorInternal = function ESQLEditor({
     [onUpdateAndSubmitQuery]
   );
 
+  const { onPromptResolved } = useAiPromptTelemetry({
+    telemetryService,
+    esqlCallbacks,
+    isLoading,
+    serverErrors,
+  });
+
   const {
     generateFromComment: onGenerateFromComment,
     isReviewActiveRef,
@@ -656,6 +664,7 @@ const ESQLEditorInternal = function ESQLEditor({
     onSubmit: runAcceptedQuery,
     clearGhostHintRef,
     telemetryService,
+    onPromptResolved,
     onAfterInsert: expandToFitContent,
   });
 
@@ -719,6 +728,7 @@ const ESQLEditorInternal = function ESQLEditor({
     isEnabled: isNlToEsqlEnabled,
     onSubmit: runAcceptedQuery,
     telemetryService,
+    onPromptResolved,
     onAfterInsert: expandToFitContent,
   });
 
@@ -739,6 +749,7 @@ const ESQLEditorInternal = function ESQLEditor({
     onSubmit: visorNlOnSubmit,
     onAfterInsert: expandToFitContent,
     telemetryService,
+    onPromptResolved,
   });
 
   // The first review that reports it was pending wins; accepting submits the query itself.

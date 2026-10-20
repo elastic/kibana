@@ -12,7 +12,12 @@ import { monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { useCallback, useMemo, useRef } from 'react';
 import type { MutableRefObject } from 'react';
-import { AiReviewAction, type ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
+import {
+  AiPromptFeature,
+  AiReviewAction,
+  type ESQLEditorTelemetryService,
+  type OnAiPromptResolved,
+} from '../telemetry/telemetry_service';
 import type { VisorNlResultHandler } from '../types';
 import { useReplaceReview } from './use_replace_review';
 import type { ReviewState } from './use_replace_review';
@@ -24,6 +29,7 @@ interface UseVisorNlToEsqlParams {
   onSubmit: (query: string) => void;
   onAfterInsert?: () => void;
   telemetryService?: ESQLEditorTelemetryService;
+  onPromptResolved?: OnAiPromptResolved;
 }
 
 export const useVisorNlToEsql = ({
@@ -32,11 +38,25 @@ export const useVisorNlToEsql = ({
   onSubmit,
   onAfterInsert,
   telemetryService,
+  onPromptResolved,
 }: UseVisorNlToEsqlParams) => {
   const { euiTheme } = useEuiTheme();
   const generatedContentRef = useRef<string>('');
   const reviewRef = useRef<Parameters<VisorNlResultHandler>[1] | undefined>(undefined);
   const isSupersedingRef = useRef(false);
+
+  const resolvePrompt = useCallback(
+    (outcome: AiReviewAction) => {
+      if (!reviewRef.current) return;
+      onPromptResolved?.({
+        feature: AiPromptFeature.VISOR_NL,
+        prompt: reviewRef.current.prompt,
+        generatedQuery: generatedContentRef.current,
+        outcome,
+      });
+    },
+    [onPromptResolved]
+  );
 
   const onAfterAccept = useCallback(
     ({ generatedLineStart, generatedLineEnd }: ReviewState) => {
@@ -44,10 +64,11 @@ export const useVisorNlToEsql = ({
         action: AiReviewAction.ACCEPT,
         linesChanged: generatedLineEnd - generatedLineStart + 1,
       });
+      resolvePrompt(AiReviewAction.ACCEPT);
       onSubmit(generatedContentRef.current);
       reviewRef.current?.onAccept();
     },
-    [onSubmit, telemetryService]
+    [onSubmit, telemetryService, resolvePrompt]
   );
 
   const onAfterReject = useCallback(
@@ -57,9 +78,10 @@ export const useVisorNlToEsql = ({
         action: AiReviewAction.REJECT,
         linesChanged: generatedLineEnd - generatedLineStart + 1,
       });
+      resolvePrompt(AiReviewAction.REJECT);
       reviewRef.current?.onReject?.();
     },
-    [telemetryService]
+    [telemetryService, resolvePrompt]
   );
 
   const rejectAction = useMemo(

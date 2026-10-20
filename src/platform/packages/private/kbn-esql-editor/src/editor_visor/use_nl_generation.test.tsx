@@ -48,7 +48,7 @@ describe('useNlGeneration', () => {
     expect(coreStart.http.post).not.toHaveBeenCalled();
   });
 
-  it('onNlSubmit calls onNlResult and keeps the prompt until the result is accepted', async () => {
+  it('onNlSubmit calls onNlResult with the prompt and keeps it until the result is accepted', async () => {
     const onNlResult = jest.fn();
     (coreStart.http.post as jest.Mock).mockResolvedValue({ content: 'FROM logs | LIMIT 10' });
 
@@ -63,7 +63,7 @@ describe('useNlGeneration', () => {
 
     expect(onNlResult).toHaveBeenCalledWith(
       'FROM logs | LIMIT 10',
-      expect.objectContaining({ onAccept: expect.any(Function) })
+      expect.objectContaining({ prompt: 'show me logs', onAccept: expect.any(Function) })
     );
     expect(defaultParams.onUpdateAndSubmitQuery).not.toHaveBeenCalled();
     expect(result.current.nlValue).toBe('show me logs');

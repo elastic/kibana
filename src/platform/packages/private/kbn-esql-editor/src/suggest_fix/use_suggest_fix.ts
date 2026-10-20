@@ -14,7 +14,12 @@ import type { MutableRefObject } from 'react';
 import { i18n } from '@kbn/i18n';
 import { SUGGEST_FIX_ROUTE, FIX_WITH_AI_COMMAND_ID } from '@kbn/esql-types';
 import type { HttpStart, NotificationsStart } from '@kbn/core/public';
-import { AiReviewAction, type ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
+import {
+  AiPromptFeature,
+  AiReviewAction,
+  type ESQLEditorTelemetryService,
+  type OnAiPromptResolved,
+} from '../telemetry/telemetry_service';
 import { GENERATING_HINT_CLASS } from '../editor_ai.styles';
 import { findChangedRegion } from './utils';
 import { useReplaceReview } from '../comment_to_esql/use_replace_review';
@@ -70,6 +75,7 @@ interface UseSuggestFixParams {
   // Runs the query once a fix is kept.
   onSubmit: (query: string) => void;
   telemetryService?: ESQLEditorTelemetryService;
+  onPromptResolved?: OnAiPromptResolved;
   onAfterInsert?: () => void;
 }
 
@@ -81,6 +87,7 @@ export const useSuggestFix = ({
   isEnabled,
   onSubmit,
   telemetryService,
+  onPromptResolved,
   onAfterInsert,
 }: UseSuggestFixParams) => {
   const { euiTheme } = useEuiTheme();
@@ -89,6 +96,7 @@ export const useSuggestFix = ({
     undefined
   );
   const abortControllerRef = useRef<AbortController | undefined>(undefined);
+  const pendingFixRef = useRef<{ errorMessage: string; fixedQuery: string } | undefined>(undefined);
 
   const clearGeneratingDecoration = useCallback(() => {
     generatingDecorationsRef.current?.clear();
@@ -119,6 +127,21 @@ export const useSuggestFix = ({
     [telemetryService]
   );
 
+  const resolveFix = useCallback(
+    (outcome: AiReviewAction, acceptedQuery?: string) => {
+      const pendingFix = pendingFixRef.current;
+      pendingFixRef.current = undefined;
+      if (!pendingFix) return;
+      onPromptResolved?.({
+        feature: AiPromptFeature.FIX_WITH_AI,
+        prompt: pendingFix.errorMessage,
+        generatedQuery: acceptedQuery ?? pendingFix.fixedQuery,
+        outcome,
+      });
+    },
+    [onPromptResolved]
+  );
+
   const {
     showReview,
     reject: rejectFix,
@@ -138,10 +161,13 @@ export const useSuggestFix = ({
     editSourceId: 'esql-suggest-fix',
     onAfterAccept: (state, acceptedQuery) => {
       trackFixReview(AiReviewAction.ACCEPT, state.generatedLineEnd - state.generatedLineStart + 1);
+      resolveFix(AiReviewAction.ACCEPT, acceptedQuery);
       onSubmit(acceptedQuery);
     },
-    onAfterReject: (state) =>
-      trackFixReview(AiReviewAction.REJECT, state.generatedLineEnd - state.generatedLineStart + 1),
+    onAfterReject: (state) => {
+      trackFixReview(AiReviewAction.REJECT, state.generatedLineEnd - state.generatedLineStart + 1);
+      resolveFix(AiReviewAction.REJECT);
+    },
   });
 
   const runSuggestFix = useCallback(
@@ -238,6 +264,7 @@ export const useSuggestFix = ({
           generatedLineEnd - generatedLineStart + 1
         );
 
+        pendingFixRef.current = { errorMessage, fixedQuery };
         showReview({
           firstChangedOriginalLine,
           lastChangedOriginalLine,

@@ -468,6 +468,7 @@ describe('Quick search visor', () => {
       });
       await waitFor(() =>
         expect(onNlResult).toHaveBeenCalledWith('FROM logs | LIMIT 10', {
+          prompt: 'show me logs',
           onAccept: expect.any(Function),
           onReject: expect.any(Function),
         })

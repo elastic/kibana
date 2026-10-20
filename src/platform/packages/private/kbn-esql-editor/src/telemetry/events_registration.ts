@@ -34,6 +34,7 @@ export const ESQL_COMMENT_TO_ESQL_SUBMITTED = 'esql.comment_to_esql_submitted';
 export const ESQL_COMMENT_TO_ESQL_REVIEWED = 'esql.comment_to_esql_reviewed';
 export const ESQL_FIX_WITH_AI_SUBMITTED = 'esql.fix_with_ai_submitted';
 export const ESQL_FIX_WITH_AI_REVIEWED = 'esql.fix_with_ai_reviewed';
+export const ESQL_AI_PROMPT_RESOLVED = 'esql.ai_prompt_resolved';
 
 /**
  * Registers the esql editor analytics events.
@@ -423,6 +424,51 @@ export const registerESQLEditorAnalyticsEvents = once((analytics: AnalyticsServi
       lines_changed: {
         type: 'long',
         _meta: { description: 'Number of lines in the generated fix.' },
+      },
+    },
+  });
+
+  // One event per AI proposal; the prompt and the query are anonymized client-side first.
+  analytics.registerEventType({
+    eventType: ESQL_AI_PROMPT_RESOLVED,
+    schema: {
+      feature: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'The AI feature that produced the proposal. Possible values are: visor_nl|comment_to_esql|fix_with_ai',
+        },
+      },
+      prompt: {
+        type: 'text',
+        _meta: {
+          description:
+            'The anonymized user prompt. For fix_with_ai, the ES|QL error message that triggered the fix.',
+        },
+      },
+      generated_query: {
+        type: 'text',
+        _meta: {
+          description: 'The anonymized ES|QL query as it would run after accepting the proposal.',
+        },
+      },
+      validation_status: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'Client-side validation result of the generated query. Possible values are: success|warning|error',
+        },
+      },
+      outcome: {
+        type: 'keyword',
+        _meta: { description: 'User decision on the proposal. Possible values are: accept|reject' },
+      },
+      execution_status: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'Outcome of running the accepted query. Possible values are: success|error|not_run|unknown',
+        },
       },
     },
   });
