@@ -233,14 +233,9 @@ export class ToolManager implements IToolManager {
     return internalToolIds;
   }
 
-  private getMaxToolTokens(tool: ExecutableTool, dynamicToolId?: string) {
-    if (dynamicToolId) {
-      const dynamicTool = this.getDynamicTool(dynamicToolId);
-      if (dynamicTool && dynamicTool.maxResultTokens) {
-        return dynamicTool.maxResultTokens;
-      }
-    }
-    return tool.maxResultTokens ?? this.maxToolResultTokens;
+  private getMaxToolTokens(tool: ExecutableTool, dynamicToolId?: string): number {
+    const dynamicTool = dynamicToolId ? this.getDynamicTool(dynamicToolId) : undefined;
+    return dynamicTool?.maxResultTokens ?? tool.maxResultTokens ?? this.maxToolResultTokens;
   }
 }
 

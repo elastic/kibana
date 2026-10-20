@@ -110,12 +110,12 @@ describe('execute_dynamic_tool', () => {
     expect(isDynamicToolRunReturn(result)).toBe(true);
   });
 
-  it('tags the error returns with the requested tool id too', async () => {
+  it('does not tag the error returns: nothing was dispatched, so nothing is attributed', async () => {
     const invalid = await execute({ tool_id: inner.id, params: { limit: 'five' } });
     const unknown = await execute({ tool_id: 'nope', params: {} });
 
-    expect(invalid).toMatchObject({ dynamicToolId: 'platform.core.cases' });
-    expect(unknown).toMatchObject({ dynamicToolId: 'nope' });
+    expect(isDynamicToolRunReturn(invalid)).toBe(false);
+    expect(isDynamicToolRunReturn(unknown)).toBe(false);
   });
 
   it("tags the inner tool's events with its id so they are attributed to it", async () => {

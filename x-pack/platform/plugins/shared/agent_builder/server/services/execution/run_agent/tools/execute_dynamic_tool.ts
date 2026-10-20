@@ -59,7 +59,6 @@ Dynamic tools are not in your tool list: their definitions appear in the convers
     if (!tool) {
       return {
         results: [createErrorResult(unavailableToolMessage({ toolId, toolManager }))],
-        dynamicToolId: toolId,
       };
     }
 
@@ -68,7 +67,6 @@ Dynamic tools are not in your tool list: their definitions appear in the convers
     if (!validation.success) {
       return {
         results: [createErrorResult(invalidParamsMessage({ toolId, error: validation.error }))],
-        dynamicToolId: toolId,
       };
     }
 
