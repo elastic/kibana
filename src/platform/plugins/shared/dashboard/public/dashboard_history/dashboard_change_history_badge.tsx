@@ -30,19 +30,6 @@ const DashboardChangeHistoryBadge = ({
     );
   }
 
-  const version = item.metadata?.version as number | undefined;
-  const versionBadge = version ? (
-    <EuiBadge color="hollow">
-      {i18n.translate('dashboard.changeHistory.versionBadge', {
-        defaultMessage: 'v{version}',
-        values: { version },
-      })}
-    </EuiBadge>
-  ) : null;
-
-  const isDeleted = item.action === 'dashboard_delete';
-  if (!item.isCurrent && !isDeleted && !versionBadge) return null;
-
   return (
     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
       {item.isCurrent && (
@@ -54,7 +41,7 @@ const DashboardChangeHistoryBadge = ({
           </EuiBadge>
         </EuiFlexItem>
       )}
-      {isDeleted && (
+      {item.action === 'dashboard_delete' && (
         <EuiFlexItem grow={false}>
           <EuiBadge color="danger">
             {i18n.translate('dashboard.changeHistory.deletedBadge', {
@@ -63,7 +50,16 @@ const DashboardChangeHistoryBadge = ({
           </EuiBadge>
         </EuiFlexItem>
       )}
-      {versionBadge ? <EuiFlexItem grow={false}>{versionBadge}</EuiFlexItem> : null}
+      {typeof item.metadata?.version === 'number' && (
+        <EuiFlexItem grow={false}>
+          <EuiBadge color="hollow">
+            {i18n.translate('dashboard.changeHistory.versionBadge', {
+              defaultMessage: 'v{version}',
+              values: { version: item.metadata.version },
+            })}
+          </EuiBadge>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };

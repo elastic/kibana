@@ -49,8 +49,29 @@ describe('renderDashboardChangeHistoryBadge', () => {
     expect(screen.getByText('Current version')).toBeInTheDocument();
   });
 
-  it('renders nothing for changes without metadata', () => {
+  it('renders the deleted badge for delete actions', () => {
+    renderBadge(getItem({ action: 'dashboard_delete' }));
+    expect(screen.getByText('Deleted')).toBeInTheDocument();
+    expect(screen.queryByText('Current version')).not.toBeInTheDocument();
+  });
+
+  it('renders the deleted badge alongside the version badge', () => {
+    renderBadge(getItem({ action: 'dashboard_delete', metadata: { version: 5 } }));
+    expect(screen.getByText('Deleted')).toBeInTheDocument();
+    expect(screen.getByText('v5')).toBeInTheDocument();
+  });
+
+  it('does not render the deleted badge for non-delete actions', () => {
+    renderBadge(getItem({ isCurrent: true }));
+    expect(screen.queryByText('Deleted')).not.toBeInTheDocument();
+  });
+
+  it('renders no badges for changes without metadata', () => {
     const { container } = renderBadge(getItem({}));
-    expect(container).toBeEmptyDOMElement();
+    expect(container).toHaveTextContent('');
+    expect(screen.queryByText('Unsaved changes')).not.toBeInTheDocument();
+    expect(screen.queryByText('Current version')).not.toBeInTheDocument();
+    expect(screen.queryByText('Deleted')).not.toBeInTheDocument();
+    expect(screen.queryByText(/^v\d+$/)).not.toBeInTheDocument();
   });
 });
