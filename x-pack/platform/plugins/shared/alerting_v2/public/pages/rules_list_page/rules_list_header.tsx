@@ -20,6 +20,7 @@ import {
   useAreAgentBuilderSkillsAvailable,
   useAgentBuilderSkillsRequirements,
 } from '../../hooks/use_are_agent_builder_skills_available';
+import { useV2RulesTabNewBadge } from '../../hooks/use_v2_rules_tab_new_badge';
 import { getCreateWithAgentTooltipText } from '../../components/rule_create_options/rule_create_options_panel';
 
 const RULES_LIST_PAGE_TITLE = i18n.translate('xpack.alertingV2.rulesList.pageTitle', {
@@ -111,6 +112,15 @@ export const RulesListHeader = ({
     useAgentBuilderSkillsRequirements()
   );
 
+  // When host tabs are provided they own the badge; Management defaults treat Universal as selected.
+  // Do not persist on unmount here — this header unmounts for rule details while still in Universal.
+  // App-leave persist lives on RulesApp / Observability shell (`persistOnUnmount: true`).
+  const isUniversalSelected =
+    hostTabs?.find((tab) => tab.id === ALERTING_V2_RULES_TAB_ID)?.isSelected ?? true;
+  const v2RulesTabNewBadge = useV2RulesTabNewBadge(isUniversalSelected, {
+    persistOnUnmount: false,
+  });
+
   const defaultTabs = useMemo<AppHeaderTab[]>(() => {
     const headerTabs: AppHeaderTab[] = [
       {
@@ -120,12 +130,7 @@ export const RulesListHeader = ({
         }),
         isSelected: true,
         href: basePath.prepend(paths.ruleList),
-        badge: {
-          iconType: 'dot',
-          tooltip: i18n.translate('xpack.alertingV2.rulesList.v2RulesTabNewBadgeTooltip', {
-            defaultMessage: 'New',
-          }),
-        },
+        ...(v2RulesTabNewBadge !== undefined ? { badge: v2RulesTabNewBadge } : {}),
         'data-test-subj': 'v2RulesTab',
       },
     ];
@@ -144,7 +149,7 @@ export const RulesListHeader = ({
 
     // A one-item tablist is not a tablist — omit tabs unless both surfaces are shown.
     return headerTabs.length > 1 ? headerTabs : [];
-  }, [basePath, application.capabilities]);
+  }, [basePath, application.capabilities, v2RulesTabNewBadge]);
 
   const tabs = hostTabs ?? defaultTabs;
 
