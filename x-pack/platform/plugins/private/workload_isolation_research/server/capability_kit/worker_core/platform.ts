@@ -260,6 +260,19 @@ export const parseAnalyticsReport = (
   return { eventType, eventData: data };
 };
 
+/** Main already registered the plugin's event types. A duplicate registration is not a boot failure. */
+export const registerForwardedEventType = (
+  register: ((definition: unknown) => void) | undefined,
+  definition: unknown
+): void => {
+  try {
+    register?.(definition);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (!message.includes('already registered')) throw error;
+  }
+};
+
 /** Forwards audit and analytics. Usage collectors are an explicit exclusion. */
 export const createEventForwarder = (
   emit: (event: ForwardedEvent) => void

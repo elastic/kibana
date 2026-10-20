@@ -28,6 +28,7 @@ export {
   taskManagerExecutionContext,
   lookupBooleanFlag,
   parseAnalyticsReport,
+  registerForwardedEventType,
   replicaFingerprint,
   runWithExecutionContext,
 } from './platform';

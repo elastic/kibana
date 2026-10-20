@@ -85,6 +85,9 @@ export const ALERTING_BOOT_ES_WRITE_ALLOW: readonly EsWriteAllow[] = [
   { method: 'PUT', path: /^\/\.kibana_locks-000001$/ },
   { method: 'PUT', path: /^\/\.kibana-event-log-ds\/_mapping$/ },
   { method: 'POST', path: /^\/\.kibana-event-log-ds\/_bulk$/ },
+  // Lock-manager document upsert the alerting installer issues while acquiring
+  // `alerting:resource-install:common`. A locks-index delete-by-query stays denied.
+  { method: 'POST', path: /^\/\.kibana_locks-\d+\/_update\/[^/?]+$/ },
 ];
 
 /** Wraps Core's onRequest factory. Deny mode rejects non-allowlisted boot writes before they are sent. */

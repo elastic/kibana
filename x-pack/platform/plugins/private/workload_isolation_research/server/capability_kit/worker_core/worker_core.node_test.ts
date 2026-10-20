@@ -41,6 +41,7 @@ import {
   isEsWrite,
   lookupBooleanFlag,
   parseAnalyticsReport,
+  registerForwardedEventType,
   routeSavedObject,
   savedObjectCallOptions,
   runInTmPhase,
@@ -114,6 +115,25 @@ test('boot fence anchors endpoint shapes and waits for installers', async () => 
     {},
     {} as never
   );
+  handler(
+    { scoped: false },
+    {
+      method: 'POST',
+      path: '/.kibana_locks-000001/_update/alerting%3Aresource-install%3Acommon',
+    },
+    {},
+    {} as never
+  );
+  assert.throws(
+    () =>
+      handler(
+        { scoped: false },
+        { method: 'POST', path: '/.kibana_locks-000001/_delete_by_query' },
+        {},
+        {} as never
+      ),
+    /boot ES write denied/
+  );
   release();
   await settled;
   handler(
@@ -122,8 +142,8 @@ test('boot fence anchors endpoint shapes and waits for installers', async () => 
     {},
     {} as never
   );
-  assert.equal(fence.summary().denied, 2);
-  assert.equal(fence.summary().writes, 3);
+  assert.equal(fence.summary().denied, 3);
+  assert.equal(fence.summary().writes, 5);
 });
 
 test('flag overrides are classified and unknown flags stay absent', () => {
@@ -270,6 +290,21 @@ test('analytics reportEvent forwards a registered string event type and its data
   assert.throws(
     () => parseAnalyticsReport({ eventType: 'worker_core_live', properties: { token: 't' } }, undefined),
     /eventType must be a string/
+  );
+  registerForwardedEventType(
+    (definition) => client.registerEventType(definition),
+    { eventType: 'gen_ai_token_count', schema: {} }
+  );
+  registerForwardedEventType(
+    (definition) => client.registerEventType(definition),
+    { eventType: 'gen_ai_token_count', schema: {} }
+  );
+  assert.throws(
+    () =>
+      registerForwardedEventType(() => {
+        throw new Error('schema rejected');
+      }, { eventType: 'other' }),
+    /schema rejected/
   );
 });
 

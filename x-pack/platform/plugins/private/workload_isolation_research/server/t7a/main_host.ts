@@ -36,6 +36,7 @@ import {
   emptyPlatformReplicas,
   fingerprintSavedObjectType,
   replicaFingerprint,
+  registerForwardedEventType,
   taskManagerExecutionContext,
 } from '../capability_kit/worker_core';
 import type { PlatformReplicas } from '../capability_kit/worker_core';
@@ -559,7 +560,12 @@ export class T7aController {
       }),
       analytics: asBinding(async (op, args) => {
         if (op === 'registerEventType') {
-          this.analyticsSetup?.registerEventType(args);
+          registerForwardedEventType(
+            this.analyticsSetup
+              ? this.analyticsSetup.registerEventType.bind(this.analyticsSetup)
+              : undefined,
+            args
+          );
           return { ok: true };
         }
         if (op !== 'write') throw new Error('t7a analytics: op not allowlisted');
