@@ -64,6 +64,14 @@ describe('digital experience apps', () => {
       );
     });
 
+    it('ends every session by the last generated timestamp', () => {
+      const lastTimestamp = range.to.getTime() - 60_000;
+
+      collect(false).forEach((doc) => {
+        expect(doc['@timestamp']).toBeLessThanOrEqual(lastTimestamp);
+      });
+    });
+
     it('sets the deployment environment', () => {
       collect(false).forEach((doc) => {
         expect(doc.resource?.attributes?.['deployment.environment.name']).toBe('test');

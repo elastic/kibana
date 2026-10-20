@@ -396,6 +396,9 @@ export const generateEdotBrowserSessions = (
             MIN_PAGE_VIEWS + Math.floor(Math.random() * (MAX_PAGE_VIEWS - MIN_PAGE_VIEWS + 1));
           const pageViewMs =
             MIN_PAGE_VIEW_MS + Math.random() * (MAX_PAGE_VIEW_MS - MIN_PAGE_VIEW_MS);
+          const sessionDurationMs = Math.round(pageViews * pageViewMs);
+          // Sessions end by `timestamp`, which live mode keeps at or before now
+          const sessionEnd = timestamp - Math.floor(Math.random() * stepMilliseconds);
 
           return edotBrowser.session({
             client: app.client(
@@ -404,9 +407,9 @@ export const generateEdotBrowserSessions = (
             ),
             site,
             health: edotBrowser.healthProfiles[health],
-            start: timestamp + Math.floor(Math.random() * stepMilliseconds),
+            start: sessionEnd - sessionDurationMs,
             pageViews,
-            sessionDurationMs: Math.round(pageViews * pageViewMs),
+            sessionDurationMs,
           });
         });
     }
