@@ -87,6 +87,7 @@ import {
   BulkNamespaceCustomizationRequestSchema,
   BulkNamespaceCustomizationResponseSchema,
   InstallRuleAssetsRequestSchema,
+  InstallWorkflowAssetsRequestSchema,
   NamespacePreflightCheckRequestSchema,
   NamespacePreflightCheckResponseSchema,
 } from '../../types';
@@ -126,6 +127,7 @@ import {
   deletePackageKibanaAssetsHandler,
   installPackageKibanaAssetsHandler,
   installRuleAssetsHandler,
+  installWorkflowAssetsHandler,
 } from './install_assets_handler';
 import {
   postBulkUpgradePackagesHandler,
@@ -833,6 +835,41 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       },
       installRuleAssetsHandler
     );
+
+  router.versioned
+    .post({
+      path: EPM_API_ROUTES.INSTALL_WORKFLOW_ASSETS_PATTERN,
+      security: INSTALL_PACKAGES_SECURITY,
+      summary: `Install Kibana workflow assets for a package`,
+      description: `Install or retry Kibana workflow assets for a specific package version.`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () =>
+            path.join(__dirname, 'examples/post_install_workflow_assets.yaml'),
+        },
+        validate: {
+          request: InstallWorkflowAssetsRequestSchema,
+          response: {
+            200: {
+              body: () => InstallKibanaAssetsResponseSchema,
+              description: 'OK: A successful request.',
+            },
+            400: {
+              body: genericErrorResponse,
+              description: 'A bad request.',
+            },
+          },
+        },
+      },
+      installWorkflowAssetsHandler
+    );
+
   router.versioned
     .post({
       path: EPM_API_ROUTES.INSTALL_KIBANA_ASSETS_PATTERN,
