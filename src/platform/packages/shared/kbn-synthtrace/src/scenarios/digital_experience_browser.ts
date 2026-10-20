@@ -49,7 +49,7 @@ import {
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
-const scenario: Scenario<OtelDocument> = async ({ scenarioOpts, logger }) => {
+const scenario: Scenario<OtelDocument> = async ({ scenarioOpts, logger, from }) => {
   const opts = parseDigitalExperienceScenarioOpts(scenarioOpts);
   logger.info(`Generating EDOT Browser data with ${JSON.stringify(opts)}`);
 
@@ -57,7 +57,7 @@ const scenario: Scenario<OtelDocument> = async ({ scenarioOpts, logger }) => {
     generate: ({ range, clients: { otelEsClient } }) =>
       withClient(
         otelEsClient,
-        generateEdotBrowserSessions(range, { ...opts, environment: ENVIRONMENT })
+        generateEdotBrowserSessions(range, { ...opts, environment: ENVIRONMENT, from })
       ),
   };
 };

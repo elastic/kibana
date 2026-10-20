@@ -15,7 +15,11 @@ import { HEALTH_PROFILES } from './health_profiles';
 export type { BrowserProfileId } from './browser_profiles';
 export type { HealthProfileName } from './health_profiles';
 export type { EdotBrowserSpanDocument } from './edot_browser_span';
-export type { EdotBrowserDocument, EdotBrowserSite } from './edot_browser_session';
+export type {
+  EdotBrowserDocument,
+  EdotBrowserEvent,
+  EdotBrowserSite,
+} from './edot_browser_session';
 
 export const edotBrowser = {
   app: (options: EdotBrowserAppOptions): EdotBrowserApp => new EdotBrowserApp(options),

@@ -12,6 +12,7 @@ import {
   generateLongId,
   type BrowserProfileId,
   type EdotBrowserDocument,
+  type EdotBrowserEvent,
   type EdotBrowserSite,
   type HealthProfileName,
   type SynthtraceGenerator,
@@ -404,15 +405,22 @@ export const parseDigitalExperienceScenarioOpts = (
 const MIN_PAGE_VIEWS = 1;
 const MAX_PAGE_VIEWS = 5;
 
-/** One generator per app in the catalogue, each producing EDOT Browser sessions over `range`. */
+const getTimestamp = (event: EdotBrowserEvent) => Number(event.serialize()[0]['@timestamp']);
+
+/**
+ * One generator per app in the catalogue, each producing EDOT Browser sessions over `range`.
+ * Sessions end by their interval timestamp, so live mode never writes into the future. Sessions
+ * that started before the run's `from` are cut off there, like traffic at the edge of any window.
+ */
 export const generateEdotBrowserSessions = (
   range: Timerange,
   {
     environment,
+    from,
     withSessionId,
     includeRawAttribution,
     scale,
-  }: DigitalExperienceScenarioOpts & { environment: string }
+  }: DigitalExperienceScenarioOpts & { environment: string; from: number }
 ): Array<SynthtraceGenerator<EdotBrowserDocument>> =>
   DIGITAL_EXPERIENCE_APPS.map(
     ({ serviceName, serviceVersion, health, sessionsPerMinute, site, browserWeights }) => {
@@ -425,17 +433,19 @@ export const generateEdotBrowserSessions = (
           const pageViews =
             MIN_PAGE_VIEWS + Math.floor(Math.random() * (MAX_PAGE_VIEWS - MIN_PAGE_VIEWS + 1));
 
-          return edotBrowser.session({
-            client: app.client(edotBrowser.pickBrowserProfile(Math.random, browserWeights), {
-              sessionId: withSessionId ? generateLongId() : undefined,
-              includeRawAttribution,
-            }),
-            site,
-            health: edotBrowser.healthProfiles[health],
-            // Sessions end by `timestamp`, which live mode keeps at or before now
-            end: timestamp - Math.floor(Math.random() * stepMilliseconds),
-            pageViews,
-          });
+          return edotBrowser
+            .session({
+              client: app.client(edotBrowser.pickBrowserProfile(Math.random, browserWeights), {
+                sessionId: withSessionId ? generateLongId() : undefined,
+                includeRawAttribution,
+              }),
+              site,
+              health: edotBrowser.healthProfiles[health],
+              // Sessions end by `timestamp`, which live mode keeps at or before now
+              end: timestamp - Math.floor(Math.random() * stepMilliseconds),
+              pageViews,
+            })
+            .filter((event) => getTimestamp(event) >= from);
         });
     }
   );

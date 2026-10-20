@@ -57,6 +57,7 @@ export {
   edotBrowser,
   type BrowserProfileId,
   type EdotBrowserDocument,
+  type EdotBrowserEvent,
   type EdotBrowserSite,
   type EdotBrowserSpanDocument,
   type HealthProfileName,

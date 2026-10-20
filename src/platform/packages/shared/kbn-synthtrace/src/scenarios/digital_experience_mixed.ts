@@ -43,7 +43,7 @@ const CLASSIC_RUM_PAGE_LOADS_PER_MINUTE = 3;
 const CLASSIC_RUM_PAGES = ['/', '/products', '/products/:id', '/cart'] as const;
 const CLASSIC_RUM_REQUESTS = ['GET /api/products', 'GET /api/cart', 'GET /api/recommendations'];
 
-const scenario: Scenario<OtelDocument | ApmFields> = async ({ scenarioOpts, logger }) => {
+const scenario: Scenario<OtelDocument | ApmFields> = async ({ scenarioOpts, logger, from }) => {
   const opts = parseDigitalExperienceScenarioOpts(scenarioOpts);
   logger.info(`Generating EDOT Browser and classic RUM data with ${JSON.stringify(opts)}`);
 
@@ -79,7 +79,7 @@ const scenario: Scenario<OtelDocument | ApmFields> = async ({ scenarioOpts, logg
       return [
         withClient(
           otelEsClient,
-          generateEdotBrowserSessions(range, { ...opts, environment: ENVIRONMENT })
+          generateEdotBrowserSessions(range, { ...opts, environment: ENVIRONMENT, from })
         ),
         withClient(apmEsClient, classicPageLoads),
       ];

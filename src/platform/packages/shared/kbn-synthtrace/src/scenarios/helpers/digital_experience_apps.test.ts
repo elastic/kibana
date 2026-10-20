@@ -24,6 +24,7 @@ const range = timerange(
 const collect = (withSessionId: boolean, includeRawAttribution: boolean = false) =>
   generateEdotBrowserSessions(range, {
     environment: 'test',
+    from: range.from.getTime(),
     withSessionId,
     includeRawAttribution,
     scale: 1,
@@ -116,12 +117,12 @@ describe('digital experience apps', () => {
       });
     });
 
-    it('ends every session by the last generated timestamp', () => {
+    it('keeps sessions between the start of the run and the last generated timestamp', () => {
       const lastTimestamp = range.to.getTime() - 60_000;
+      const timestamps = collect(false).map((doc) => Number(doc['@timestamp']));
 
-      collect(false).forEach((doc) => {
-        expect(doc['@timestamp']).toBeLessThanOrEqual(lastTimestamp);
-      });
+      expect(Math.min(...timestamps)).toBeGreaterThanOrEqual(range.from.getTime());
+      expect(Math.max(...timestamps)).toBeLessThanOrEqual(lastTimestamp);
     });
 
     it('sets the deployment environment', () => {
