@@ -170,7 +170,7 @@ describe('useConversationProposals', () => {
       version: PROPOSALS_API_VERSION,
       query: {
         conversationId: 'conv-42',
-        excludeUndecidedSuperseded: true,
+        excludeSuperseded: true,
         order: 'newest',
         size: MAX_PROPOSALS_PAGE_SIZE,
         from: 0,
@@ -222,7 +222,7 @@ describe('useConversationProposals', () => {
       version: PROPOSALS_API_VERSION,
       query: {
         conversationId: 'conv-42',
-        excludeUndecidedSuperseded: true,
+        excludeSuperseded: true,
         order: 'newest',
         size: MAX_PROPOSALS_PAGE_SIZE,
         from: 1,

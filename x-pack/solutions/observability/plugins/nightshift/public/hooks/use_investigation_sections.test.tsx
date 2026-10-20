@@ -146,7 +146,7 @@ describe('useInvestigationSections', () => {
     );
     expect(httpGet).toHaveBeenCalledWith(
       '/internal/investigations/investigations/_severity_counts',
-      expect.objectContaining({ query: { in_progress: false, query: 'checkout' }, version: '1' })
+      expect.objectContaining({ query: { query: 'checkout' }, version: '1' })
     );
   });
 
