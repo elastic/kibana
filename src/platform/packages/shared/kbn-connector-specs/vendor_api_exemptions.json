@@ -41,7 +41,6 @@
   ".servicenow_search": "Artifacts not recorded yet; see https://github.com/elastic/kibana/issues/295688",
   ".sharepoint-online": "Artifacts not recorded yet; see https://github.com/elastic/kibana/issues/295688",
   ".sharepoint-server": "Artifacts not recorded yet; see https://github.com/elastic/kibana/issues/295688",
-  ".shodan": "Shodan publishes only HTML docs (developer.shodan.io/api) and no OpenAPI/Swagger. Guessed spec URLs return 404 or the HTML docs page. The only OpenAPI descriptions found are community-authored (api-evangelist/shodan), not vendor mirrors, and the referenced raw path did not resolve.",
   ".slack2": "Artifacts not recorded yet; see https://github.com/elastic/kibana/issues/295688",
   ".snowflake": "Artifacts not recorded yet; see https://github.com/elastic/kibana/issues/295688",
   ".solarwinds_platform": "Self-hosted SolarWinds Information Service (SWIS) REST endpoint (/SolarWinds/InformationService/v3/Json/Query, /Invoke/{entity}/{verb}, swis:// URIs) at a user-configured URL. It is documented only in the OrionSDK wiki (solarwinds.github.io/OrionSDK/docs/rest) and has no OpenAPI. The schema is SWQL-entity driven.",
