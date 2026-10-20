@@ -2367,7 +2367,6 @@ class WriteLocalPathGuardTest(unittest.TestCase):
             "Recording: ~/flow.mp4",
             "Screenshot: `/tmp/shot.png`",
             "Recording: `flow.mp4`",
-            "![s](`./a.png`)",
         ):
             with self.assertRaises(ValueError, msg=body):
                 self._write(body)
@@ -2375,6 +2374,9 @@ class WriteLocalPathGuardTest(unittest.TestCase):
     def test_allows_repro_snippets_that_look_like_paths(self):
         for body in (
             '<img src="/missing.png" onerror="alert(1)">',
+            'Payload: `<video src="missing.mp4" onerror="alert(1)">`',
+            'Payload: `![x](./x.png)`',
+            '```html\n<video src="missing.mp4" onerror="alert(1)">\n![x](./x.png)\n```',
             "Payload: `<img src=/a/b.png onerror=alert(1)>` renders",
             "```html\n<img src=\"/tmp/x/shot.png\">\n```",
         ):

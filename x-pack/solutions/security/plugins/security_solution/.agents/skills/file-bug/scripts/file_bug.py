@@ -111,19 +111,27 @@ _LOCAL_MEDIA_BARE_RE = re.compile(
     rf"\.{_MEDIA_EXT}\b",
     re.I | re.M,
 )
-# An explicit attachment reference (labelled, markdown image or video src) whose target is not
-# an http(s) URL; relative paths too, and still checked when the filename is in backticks.
-_LOCAL_MEDIA_REF_RE = re.compile(
-    rf"^\s*(?:screenshot|recording|video)s?\s*:\s*(?!https?://|!\[|<video)[^\s]*\.{_MEDIA_EXT}\b"
-    rf"|!\[[^\]]*\]\((?!https?://)[^)]*\.{_MEDIA_EXT}\)"
+# An explicit attachment reference whose target is not an http(s) URL (relative paths too).
+# A labelled line is checked even when the filename is in backticks; image and video tags are
+# checked outside code only, so a repro snippet containing one is not an attachment.
+_LOCAL_MEDIA_LABEL_RE = re.compile(
+    rf"^\s*(?:screenshot|recording|video)s?\s*:\s*(?!https?://|!\[|<video)[^\s]*\.{_MEDIA_EXT}\b",
+    re.I | re.M,
+)
+_LOCAL_MEDIA_EMBED_RE = re.compile(
+    rf"!\[[^\]]*\]\((?!https?://)[^)]*\.{_MEDIA_EXT}\)"
     rf"|<video[^>]*\bsrc=\"(?!https?://)[^\"]*\.{_MEDIA_EXT}\"",
     re.I | re.M,
 )
+_FENCE_RE = re.compile(r"```.*?```", re.S)
 
 
 def _local_media(body: str) -> str | None:
-    match = _LOCAL_MEDIA_REF_RE.search(body.replace("`", "")) or _LOCAL_MEDIA_BARE_RE.search(
-        _without_code(body)
+    outside_code = _without_code(body)
+    match = (
+        _LOCAL_MEDIA_LABEL_RE.search(_FENCE_RE.sub("", body).replace("`", ""))
+        or _LOCAL_MEDIA_EMBED_RE.search(outside_code)
+        or _LOCAL_MEDIA_BARE_RE.search(outside_code)
     )
     return match.group(0) if match else None
 
