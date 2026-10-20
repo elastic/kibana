@@ -80,7 +80,7 @@ describe('Remove panel action', () => {
       expect(usageCollection.reportUiCounter).toHaveBeenCalledWith(
         'dashboard',
         'click',
-        'lens.panel_remove'
+        'lens:panel_remove'
       );
     });
   });

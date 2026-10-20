@@ -69,7 +69,7 @@ export class RemovePanelAction implements Action<EmbeddableApiContext> {
       usageCollection?.reportUiCounter?.(
         parentApi.type,
         METRIC_TYPE.CLICK,
-        `${embeddable.type}.panel_remove`
+        `${embeddable.type}:panel_remove`
       );
     }
   }
