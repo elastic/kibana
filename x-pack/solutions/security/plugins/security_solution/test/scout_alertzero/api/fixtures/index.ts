@@ -27,14 +27,17 @@ export { HUNT_INDEX_SCOPE_URL } from '@kbn/alertzero-common';
 export {
   cleanupThreatReportsByIds,
   enableAlertZeroInSpace,
+  readAlertZeroEnabledInSpace,
   readSupplyStatus,
   SECURITY_READ_ONLY_ROLE,
   seedSharedReportWithEvidence,
+  setAlertZeroEnabledInSpace,
   setHuntEnabled,
-  setIngestEnabled,
+  setSupplyWorkflowEnabled,
   setupHuntPrerequisites,
   spaceUrl,
   withHuntHeaders,
   type HuntPrerequisites,
   type SupplyStatusBody,
+  type SupplyWorkflowKey,
 } from './helpers';

@@ -10,28 +10,32 @@ import {
   apiTest,
   tags,
   enableAlertZeroInSpace,
+  readAlertZeroEnabledInSpace,
   readSupplyStatus,
+  setAlertZeroEnabledInSpace,
   setHuntEnabled,
-  setIngestEnabled,
+  setSupplyWorkflowEnabled,
   setupHuntPrerequisites,
   spaceUrl,
   withHuntHeaders,
   SUPPLY_RESTORE_URL,
   type HuntPrerequisites,
   type SupplyStatusBody,
+  type SupplyWorkflowKey,
 } from '../fixtures';
 
 const RUN = Date.now();
 const SPACE_A = `hunt-supply-a-${RUN}`;
 const SPACE_B = `hunt-supply-b-${RUN}`;
+const DEPLOYMENT_SUPPLY_KEYS: readonly SupplyWorkflowKey[] = ['ingest', 'enrich'];
 
 const workflowByKey = (status: SupplyStatusBody, key: string) =>
   status.workflows.find((row) => row.key === key);
 
 /**
  * Live decision-table rows 1, 2, 7, 8, 13, and 17: enable/disable across two spaces,
- * drift via the Workflows API, and Restore. Mutates deployment-global ingest/enrich;
- * beforeAll records their enabled flags and afterAll puts them back.
+ * drift via the Workflows API, and Restore. Mutates deployment-global ingest/enrich and
+ * the default space's AlertZero setting; beforeAll records them and afterAll puts them back.
  */
 apiTest.describe.serial(
   'Hunt Watch - threat intel supply across two spaces',
@@ -40,8 +44,8 @@ apiTest.describe.serial(
     let adminHeaders: Record<string, string>;
     let prereqA: HuntPrerequisites;
     let prereqB: HuntPrerequisites;
-    let initialIngestEnabled: boolean | undefined;
-    let initialEnrichEnabled: boolean | undefined;
+    let initialDefaultAlertZeroEnabled: boolean | undefined;
+    const initialSupplyEnabled: Partial<Record<SupplyWorkflowKey, boolean>> = {};
 
     apiTest.beforeAll(async ({ apiServices, samlAuth, apiClient }) => {
       await apiServices.spaces.create({ id: SPACE_A, name: SPACE_A });
@@ -50,6 +54,11 @@ apiTest.describe.serial(
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
       adminHeaders = withHuntHeaders(cookieHeader);
 
+      initialDefaultAlertZeroEnabled = await readAlertZeroEnabledInSpace({
+        apiClient,
+        headers: adminHeaders,
+        spaceId: 'default',
+      });
       await enableAlertZeroInSpace({
         apiClient,
         headers: adminHeaders,
@@ -59,8 +68,9 @@ apiTest.describe.serial(
       // Capture deployment-global rows from the default space before any Hunt enable.
       const baseline = await readSupplyStatus(apiClient, adminHeaders, 'default');
       expect(baseline.statusCode).toBe(200);
-      initialIngestEnabled = workflowByKey(baseline.body, 'ingest')?.enabled;
-      initialEnrichEnabled = workflowByKey(baseline.body, 'enrich')?.enabled;
+      for (const key of DEPLOYMENT_SUPPLY_KEYS) {
+        initialSupplyEnabled[key] = workflowByKey(baseline.body, key)?.enabled;
+      }
 
       prereqA = await setupHuntPrerequisites({
         apiClient,
@@ -110,33 +120,19 @@ apiTest.describe.serial(
         // Same for B.
       }
 
-      if (initialIngestEnabled !== undefined) {
-        await setIngestEnabled({
-          apiClient,
-          headers: adminHeaders,
-          enabled: initialIngestEnabled,
-        });
-      }
-      // Enrich is restored by enabling/disabling Hunt teardown when no space hunts; if the
-      // suite left it drifted, flip via the managed API the same way as ingest when needed.
-      if (initialEnrichEnabled !== undefined) {
-        const after = await readSupplyStatus(apiClient, adminHeaders, 'default');
-        const enrich = workflowByKey(after.body, 'enrich');
-        if (enrich && enrich.enabled !== initialEnrichEnabled) {
-          await apiClient.put(
-            `/api/workflows/managed/workflow/${encodeURIComponent(
-              'system-security-threat-intel-enrich-report'
-            )}`,
-            {
-              headers: {
-                ...adminHeaders,
-                'kbn-xsrf': 'true',
-                'elastic-api-version': '2023-10-31',
-              },
-              responseType: 'json',
-              body: { enabled: initialEnrichEnabled },
-            }
-          );
+      // Disabling Hunt tears the deployment rows down only when no other space hunts, so
+      // put each one back to its recorded state through the Workflows API when it differs.
+      const after = await readSupplyStatus(apiClient, adminHeaders, 'default');
+      for (const key of DEPLOYMENT_SUPPLY_KEYS) {
+        const initial = initialSupplyEnabled[key];
+        const current = workflowByKey(after.body, key);
+        if (initial !== undefined && current?.installed && current.enabled !== initial) {
+          await setSupplyWorkflowEnabled({
+            apiClient,
+            headers: adminHeaders,
+            key,
+            enabled: initial,
+          });
         }
       }
 
@@ -144,6 +140,12 @@ apiTest.describe.serial(
       await prereqB?.cleanup();
       await apiServices.spaces.delete(SPACE_A);
       await apiServices.spaces.delete(SPACE_B);
+      await setAlertZeroEnabledInSpace({
+        apiClient,
+        headers: adminHeaders,
+        spaceId: 'default',
+        enabled: initialDefaultAlertZeroEnabled,
+      });
     });
 
     apiTest(
@@ -244,9 +246,10 @@ apiTest.describe.serial(
       });
       expect(enable.statusCode).toBe(200);
 
-      const driftOff = await setIngestEnabled({
+      const driftOff = await setSupplyWorkflowEnabled({
         apiClient,
         headers: adminHeaders,
+        key: 'ingest',
         enabled: false,
       });
       expect(driftOff.statusCode).toBe(200);

@@ -1,5 +1,5 @@
 {
-  "sha1": "bf08bdc3296de5457b62ee3257215ee10f7957fc",
+  "sha1": "012f9b0e6592a61abe52c3b360511ce80a3af42d",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 58,
-        "column": 9
+        "line": 81,
+        "column": 24
       }
     },
     {
@@ -28,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 71,
-        "column": 25
+        "line": 94,
+        "column": 42
       }
     },
     {
@@ -42,13 +42,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 88,
-        "column": 6
+        "line": 105,
+        "column": 26
       }
     },
     {
-      "id": "e11dd99e43856bd-598289e9695b1f6",
-      "title": "Hunt Watch - authz isolation and evidence projection returns 403 naming manage_security when read-only Restore is refused",
+      "id": "e11dd99e43856bd-e980d26230765dd",
+      "title": "Hunt Watch - authz isolation and evidence projection returns 403 when an AlertZero read-only user calls Restore",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -56,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 94,
-        "column": 25
+        "line": 117,
+        "column": 42
       }
     },
     {
@@ -70,8 +70,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 108,
-        "column": 6
+        "line": 127,
+        "column": 11
       }
     },
     {
@@ -84,8 +84,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 117,
-        "column": 11
+        "line": 137,
+        "column": 20
       }
     },
     {
@@ -98,8 +98,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 128,
-        "column": 31
+        "line": 149,
+        "column": 20
       }
     },
     {
@@ -112,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 139,
-        "column": 42
+        "line": 161,
+        "column": 26
       }
     },
     {
@@ -126,8 +126,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 145,
-        "column": 11
+        "line": 166,
+        "column": 34
       }
     },
     {
@@ -140,8 +140,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 175,
-        "column": 7
+        "line": 198,
+        "column": 25
       }
     },
     {
@@ -154,8 +154,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_supply_two_space.spec.ts",
-        "line": 127,
-        "column": 17
+        "line": 137,
+        "column": 7
       }
     },
     {
@@ -168,8 +168,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_supply_two_space.spec.ts",
-        "line": 157,
-        "column": 50
+        "line": 172,
+        "column": 6
       }
     },
     {
@@ -182,8 +182,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_supply_two_space.spec.ts",
-        "line": 197,
-        "column": 20
+        "line": 208,
+        "column": 16
       }
     },
     {
@@ -196,7 +196,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_supply_two_space.spec.ts",
-        "line": 217,
+        "line": 228,
         "column": 18
       }
     },
@@ -210,8 +210,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_supply_two_space.spec.ts",
-        "line": 231,
-        "column": 28
+        "line": 242,
+        "column": 18
       }
     },
     {
@@ -224,7 +224,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/report_ingest.spec.ts",
-        "line": 38,
+        "line": 37,
         "column": 20
       }
     },

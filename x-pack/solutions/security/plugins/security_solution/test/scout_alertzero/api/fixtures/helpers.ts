@@ -18,10 +18,24 @@ import {
   type HuntThreatIntelSupplyStatus,
 } from '@kbn/alertzero-common';
 import { THREAT_REPORTS_INDEX } from '../../../../common/threat_intel';
-import { HUNT_HEADERS, HUNT_WORKER_ID, SUPPLY_STATUS_URL, WORKERS_URL } from './constants';
+import {
+  HUNT_HEADERS,
+  HUNT_WORKER_ID,
+  NO_ALERTZERO_ROLE,
+  SUPPLY_STATUS_URL,
+  WORKERS_URL,
+} from './constants';
 
-/** Matches `THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID` in `@kbn/workflows/managed` (inlined so Scout stays light). */
-const INGEST_FEEDS_WORKFLOW_ID = 'system-security-threat-intel-ingest-feeds';
+/**
+ * Deployment-wide supply workflow ids. Match `THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID` and
+ * `THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID` in `@kbn/workflows/managed` (inlined so Scout stays light).
+ */
+const SUPPLY_WORKFLOW_IDS = {
+  ingest: 'system-security-threat-intel-ingest-feeds',
+  enrich: 'system-security-threat-intel-enrich-report',
+} as const;
+
+export type SupplyWorkflowKey = keyof typeof SUPPLY_WORKFLOW_IDS;
 
 /** Minimal ES client surface these tests rely on. */
 interface EsLike {
@@ -48,20 +62,10 @@ interface EsLike {
  *
  * The threat intel routes read and write their hidden indices as the internal
  * user, so this role needs no Elasticsearch index privileges of its own.
+ *
+ * Same role as {@link NO_ALERTZERO_ROLE}; the hunt authz table names it by what it lacks.
  */
-export const SECURITY_READ_ONLY_ROLE = {
-  elasticsearch: {
-    cluster: [],
-    indices: [],
-  },
-  kibana: [
-    {
-      base: [],
-      feature: { siem: ['read'] },
-      spaces: ['*'],
-    },
-  ],
-};
+export const SECURITY_READ_ONLY_ROLE = NO_ALERTZERO_ROLE;
 
 /**
  * Remove only the specific threat reports created by this suite run.
@@ -125,8 +129,10 @@ export interface HuntPrerequisites {
   cleanup: () => Promise<void>;
 }
 
-/** Turns on the per-space AlertZero gate so hunt/worker routes stop 404ing. */
-export const enableAlertZeroInSpace = async ({
+const KIBANA_SETTINGS_PATH = 'internal/kibana/settings';
+
+/** Reads the per-space AlertZero gate as the user set it; `undefined` when it is still the default. */
+export const readAlertZeroEnabledInSpace = async ({
   apiClient,
   headers,
   spaceId,
@@ -134,20 +140,59 @@ export const enableAlertZeroInSpace = async ({
   apiClient: ApiClientFixture;
   headers: Record<string, string>;
   spaceId: string;
-}): Promise<void> => {
-  const response = await apiClient.post(spaceUrl('internal/kibana/settings', spaceId), {
-    headers: { ...headers, 'kbn-xsrf': 'true' },
+}): Promise<boolean | undefined> => {
+  const response = await apiClient.get(spaceUrl(KIBANA_SETTINGS_PATH, spaceId), {
+    headers,
     responseType: 'json',
-    body: { changes: { [ALERTZERO_ENABLED_SETTING_ID]: true } },
   });
   if (response.statusCode !== 200) {
     throw new Error(
-      `Setup: failed to enable AlertZero in ${spaceId} (status ${
+      `Setup: failed to read settings in ${spaceId} (status ${
+        response.statusCode
+      }): ${JSON.stringify(response.body)}`
+    );
+  }
+  const settings = (response.body as { settings?: Record<string, { userValue?: unknown }> })
+    .settings;
+  const userValue = settings?.[ALERTZERO_ENABLED_SETTING_ID]?.userValue;
+  return typeof userValue === 'boolean' ? userValue : undefined;
+};
+
+/**
+ * Sets the per-space AlertZero gate. `true` makes hunt/worker routes stop 404ing;
+ * `undefined` clears the user value so the space goes back to the default.
+ */
+export const setAlertZeroEnabledInSpace = async ({
+  apiClient,
+  headers,
+  spaceId,
+  enabled,
+}: {
+  apiClient: ApiClientFixture;
+  headers: Record<string, string>;
+  spaceId: string;
+  enabled: boolean | undefined;
+}): Promise<void> => {
+  const response = await apiClient.post(spaceUrl(KIBANA_SETTINGS_PATH, spaceId), {
+    headers: { ...headers, 'kbn-xsrf': 'true' },
+    responseType: 'json',
+    body: { changes: { [ALERTZERO_ENABLED_SETTING_ID]: enabled ?? null } },
+  });
+  if (response.statusCode !== 200) {
+    throw new Error(
+      `Setup: failed to set AlertZero enabled=${String(enabled)} in ${spaceId} (status ${
         response.statusCode
       }): ${JSON.stringify(response.body)}`
     );
   }
 };
+
+/** Turns on the per-space AlertZero gate so hunt/worker routes stop 404ing. */
+export const enableAlertZeroInSpace = async (args: {
+  apiClient: ApiClientFixture;
+  headers: Record<string, string>;
+  spaceId: string;
+}): Promise<void> => setAlertZeroEnabledInSpace({ ...args, enabled: true });
 
 /**
  * Creates a space-scoped `.gen-ai` connector (so Workers are not blocked by `noModel`),
@@ -361,18 +406,23 @@ export const setHuntEnabled = async ({
   return { statusCode: response.statusCode, body: response.body };
 };
 
-/** Flip the deployment-wide ingest-feeds managed workflow on or off (default space). */
-export const setIngestEnabled = async ({
+/**
+ * Flip a deployment-wide supply managed workflow (ingest or enrich) on or off through
+ * the Workflows API, bypassing the Hunt coupling. Both live in the default space.
+ */
+export const setSupplyWorkflowEnabled = async ({
   apiClient,
   headers,
+  key,
   enabled,
 }: {
   apiClient: ApiClientFixture;
   headers: Record<string, string>;
+  key: SupplyWorkflowKey;
   enabled: boolean;
 }): Promise<{ statusCode: number; body: unknown }> => {
   const response = await apiClient.put(
-    `/api/workflows/managed/workflow/${encodeURIComponent(INGEST_FEEDS_WORKFLOW_ID)}`,
+    `/api/workflows/managed/workflow/${encodeURIComponent(SUPPLY_WORKFLOW_IDS[key])}`,
     {
       headers: {
         ...headers,

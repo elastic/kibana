@@ -43,7 +43,7 @@ export const WORKERS_URL = ALERTZERO_WORKERS_URL;
 export const SUPPLY_STATUS_URL = HUNT_THREAT_INTEL_SUPPLY_URL;
 export const SUPPLY_RESTORE_URL = HUNT_THREAT_INTEL_SUPPLY_RESTORE_URL;
 
-/** The seven hunt internal routes Phase 1 named in the authz table. */
+/** The seven hunt internal routes covered by the authz table. */
 export const HUNT_READ_ROUTES = [
   HUNT_INDEX_SCOPE_URL,
   CANDIDATES_URL,

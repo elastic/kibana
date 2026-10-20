@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { KibanaRole } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import {
   FIND_THREAT_REPORTS_API_PATH,
@@ -18,6 +19,7 @@ import {
   enableAlertZeroInSpace,
   HUNT_ALL_ROUTES,
   HUNT_INDEX_SCOPE_URL,
+  HUNT_READ_ROUTES,
   HUNT_WORKER_URL,
   HUNT_WRITE_ROUTES,
   NO_ALERTZERO_ROLE,
@@ -33,10 +35,29 @@ const RUN = Date.now();
 const SPACE_A = `hunt-authz-a-${RUN}`;
 const SPACE_B = `hunt-authz-b-${RUN}`;
 const REPORT_ID = `scout-evidence-${RUN}`;
+const HUNT_READ_ROUTE_SET: ReadonlySet<string> = new Set(HUNT_READ_ROUTES);
+
+interface ErrorBody {
+  message?: string;
+}
 
 /**
- * Route × identity × space authz table from Phase 1, plus per-space evidence
- * projection on a shared report and feed credential non-exposure on list_sources.
+ * Core route authz names the missing Kibana privilege in its 403 body. Asserting on it
+ * keeps a 403 from the AlertZero subscription gate or a handler from passing as authz.
+ */
+const expectMissingKibanaPrivilege = (
+  response: { statusCode: number; body: unknown },
+  privilege: string
+) => {
+  expect(response.statusCode).toBe(403);
+  expect((response.body as ErrorBody).message).toContain(
+    `granted by the Kibana privileges [${privilege}]`
+  );
+};
+
+/**
+ * Route, identity, and space authz table, plus per-space evidence projection on
+ * a shared report and feed credential non-exposure on list_sources.
  */
 apiTest.describe(
   'Hunt Watch - authz isolation and evidence projection',
@@ -73,7 +94,6 @@ apiTest.describe(
       async ({ samlAuth, apiClient }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser(NO_ALERTZERO_ROLE);
         const headers = withHuntHeaders(cookieHeader);
-        const statuses: number[] = [];
 
         for (const path of HUNT_ALL_ROUTES) {
           const response =
@@ -84,10 +104,11 @@ apiTest.describe(
                   responseType: 'json',
                   body: {},
                 });
-          statuses.push(response.statusCode);
+          expectMissingKibanaPrivilege(
+            response,
+            HUNT_READ_ROUTE_SET.has(path) ? 'alertzero_read' : 'alertzero_write'
+          );
         }
-
-        expect(statuses).toStrictEqual(HUNT_ALL_ROUTES.map(() => 403));
       }
     );
 
@@ -96,7 +117,6 @@ apiTest.describe(
       async ({ samlAuth, apiClient }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser(ALERTZERO_READ_ONLY_ROLE);
         const headers = withHuntHeaders(cookieHeader);
-        const statuses: number[] = [];
 
         for (const path of HUNT_WRITE_ROUTES) {
           const response = await apiClient.post(spaceUrl(path, SPACE_B), {
@@ -104,10 +124,8 @@ apiTest.describe(
             responseType: 'json',
             body: {},
           });
-          statuses.push(response.statusCode);
+          expectMissingKibanaPrivilege(response, 'alertzero_write');
         }
-
-        expect(statuses).toStrictEqual(HUNT_WRITE_ROUTES.map(() => 403));
       }
     );
 
@@ -124,7 +142,7 @@ apiTest.describe(
     );
 
     apiTest(
-      'returns 403 naming manage_security when read-only Restore is refused',
+      'returns 403 when an AlertZero read-only user calls Restore',
       async ({ samlAuth, apiClient }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser(ALERTZERO_READ_ONLY_ROLE);
         const response = await apiClient.post(spaceUrl(SUPPLY_RESTORE_URL, SPACE_B), {
@@ -133,8 +151,8 @@ apiTest.describe(
           body: {},
         });
         // Read-only lacks alertzero_write, so core authz refuses before the handler's
-        // manage_security check. Either way the call must not restore anything.
-        expect(response.statusCode).toBe(403);
+        // manage_security check runs.
+        expectMissingKibanaPrivilege(response, 'alertzero_write');
       }
     );
 
@@ -147,7 +165,7 @@ apiTest.describe(
           responseType: 'json',
           body: { enabled: false },
         });
-        expect(response.statusCode).toBe(403);
+        expectMissingKibanaPrivilege(response, 'alertzero_write');
       }
     );
 
@@ -164,6 +182,9 @@ apiTest.describe(
           responseType: 'json',
         });
         expect(response.statusCode).toBe(400);
+        expect((response.body as ErrorBody).message).toContain(
+          'is not available with the current configuration'
+        );
       }
     );
 
@@ -192,11 +213,11 @@ apiTest.describe(
     });
 
     apiTest('refuses a B-only role on space A routes', async ({ samlAuth, apiClient }) => {
-      const bOnlyRole = {
-        elasticsearch: { cluster: [] as string[], indices: [] as unknown[] },
+      const bOnlyRole: KibanaRole = {
+        elasticsearch: { cluster: [], indices: [] },
         kibana: [
           {
-            base: [] as string[],
+            base: [],
             feature: { siem: ['read'], alertzero: ['read'] },
             spaces: [SPACE_B],
           },
@@ -208,7 +229,7 @@ apiTest.describe(
         headers: withHuntHeaders(cookieHeader),
         responseType: 'json',
       });
-      expect(response.statusCode).not.toBe(200);
+      expectMissingKibanaPrivilege(response, 'securitySolution');
     });
 
     apiTest(
