@@ -21,7 +21,7 @@ import type { CPSPluginStart } from '@kbn/cps/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import { WorkflowApi } from '@kbn/workflows-ui';
-import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
+import { isAlertingV2Enabled } from '@kbn/alerting-v2-utils';
 import { ActionPoliciesApi } from './services/action_policies_api';
 import { ExecutionHistoryApi } from './services/execution_history_api';
 import { RuleChangeHistoryApi } from './services/rule_change_history_api';
@@ -214,12 +214,7 @@ const pluginModule = new ContainerModule(({ bind }) => {
         container: diContainer,
       });
 
-      const alertingEnabled = coreStart.settings.globalClient.get<boolean>(
-        ALERTING_V2_ENABLED_SETTING_ID,
-        false
-      );
-
-      if (!alertingEnabled) {
+      if (!isAlertingV2Enabled(coreStart)) {
         return;
       }
 

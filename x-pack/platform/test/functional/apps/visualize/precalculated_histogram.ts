@@ -10,8 +10,7 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const { common, visualize, discover, visChart, visEditor, unifiedFieldList } = getPageObjects([
-    'common',
+  const { visualize, discover, visChart, visEditor, unifiedFieldList } = getPageObjects([
     'visualize',
     'discover',
     'visChart',
@@ -34,7 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('appears correctly in discover', async function () {
-      await common.navigateToApp('discover');
+      await discover.navigateToApp({ queryMode: 'classic' });
       await discover.waitUntilSearchingHasFinished();
       await unifiedFieldList.clickFieldListItemAdd('histogram-content');
       const rowData = await discover.getDocTableIndex(1);

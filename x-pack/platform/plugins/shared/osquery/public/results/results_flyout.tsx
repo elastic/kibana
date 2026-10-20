@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { UnifiedDocViewerFlyout } from '@kbn/unified-doc-viewer-plugin/public';
-import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import type { DataView } from '@kbn/data-plugin/common';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
 import type { ChromeStart } from '@kbn/core-chrome-browser';
@@ -19,7 +19,6 @@ export interface OsqueryResultsFlyoutProps {
   hits: DataTableRecord[];
   columns: string[];
   dataView: DataView;
-  columnsMeta?: DataTableColumnsMeta;
   onClose: () => void;
   setExpandedDoc: (doc?: DataTableRecord) => void;
   toastNotifications: ToastsStart;
@@ -31,7 +30,6 @@ const OsqueryResultsFlyoutComponent: React.FC<OsqueryResultsFlyoutProps> = ({
   hits,
   columns,
   dataView,
-  columnsMeta,
   onClose,
   setExpandedDoc,
   toastNotifications,
@@ -49,7 +47,6 @@ const OsqueryResultsFlyoutComponent: React.FC<OsqueryResultsFlyoutProps> = ({
       hit={hit}
       hits={hits}
       columns={columns}
-      columnsMeta={columnsMeta}
       dataView={dataView}
       setExpandedDoc={setExpandedDoc}
       onClose={onClose}

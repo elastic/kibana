@@ -221,6 +221,7 @@ export const generateLeadsTool = (
         }
 
         const currentEsClient = esClient.asCurrentUser;
+        const internalEsClient = coreStart.elasticsearch.client.asInternalUser;
         const crudClient = startPlugins.entityStore.createCRUDClient(currentEsClient, spaceId);
         const relationshipsClient = startPlugins.entityStore.createRelationshipsClient(
           currentEsClient,
@@ -251,6 +252,7 @@ export const generateLeadsTool = (
           pipelineArgs: {
             listEntities: () => fetchCandidateEntities(crudClient, logger),
             esClient: currentEsClient,
+            internalEsClient,
             logger,
             spaceId,
             riskScoreDataClient,

@@ -7,13 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPageTemplate,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import { useLocation } from 'react-router-dom';
+import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
+import { AppHeader } from '@kbn/app-header';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useWorkflowsCapabilities, type WorkflowsCreateRouteState } from '@kbn/workflows-ui';
 import { workflowDefaultYaml } from './workflow_default_yml';
@@ -24,7 +33,10 @@ import { WorkflowDetailLoadingState } from './workflow_detail_loading_state';
 import { WorkflowDetailTestModal } from './workflow_detail_test_modal';
 import { WorkflowDetailTestStepModal } from './workflow_detail_test_step_modal';
 import { WorkflowNotFoundPage } from './workflow_not_found_page';
+import { PLUGIN_ID, WORKFLOWS_DOCUMENTATION_URL } from '../../../../common';
 import type { WorkflowDetailTab } from '../../../common/lib/telemetry/events/workflows/ui/types';
+import { AgenticFirstEmptyStateLive } from '../../../components';
+import { WorkflowsPageName } from '../../../deep_links';
 import {
   setActiveTab,
   setExecution,
@@ -48,6 +60,7 @@ import { WorkflowExecutionDetail } from '../../../features/workflow_execution_de
 import { WorkflowExecutionListFlyout } from '../../../features/workflow_execution_list/ui/workflow_execution_list_flyout';
 import { WorkflowExecutionList } from '../../../features/workflow_execution_list_old';
 import { useAsyncThunkState } from '../../../hooks/use_async_thunk';
+import { useAutoCollapseSideNav } from '../../../hooks/use_auto_collapse_side_nav';
 import { useGlobalExecutionsViewEnabled } from '../../../hooks/use_global_executions_view_enabled';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useTelemetry } from '../../../hooks/use_telemetry';
@@ -64,9 +77,14 @@ import {
 /**
  * `location.state` the page can arrive with: list-navigation state (back
  * link) and, on `/create`, the cross-app initial-content contract
- * (`WorkflowsCreateRouteState`, e.g. the Template Library's "Remix with AI").
+ * (`WorkflowsCreateRouteState`, e.g. "Remix with AI" or the landing prompt).
  */
 type WorkflowDetailLocationState = WorkflowDetailRouteState & WorkflowsCreateRouteState;
+
+interface PendingAgentPrompt {
+  message: string;
+  attachments: ConversationAttachment[];
+}
 
 const isLoadWorkflowNotFoundError = (error: unknown) =>
   isHttpFetchError(error) && error.response?.status === 404;
@@ -85,6 +103,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   const telemetry = useTelemetry();
   const { application } = useKibana().services;
   const location = useLocation<WorkflowDetailLocationState | undefined>();
+  const { euiTheme } = useEuiTheme();
 
   const isReady = !isLoadingWorkflow && !isLoadingConnectors;
 
@@ -95,6 +114,8 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   const workflowDefinition = useSelector(selectWorkflowDefinition);
 
   useWorkflowsBreadcrumbs(workflowName);
+
+  useAutoCollapseSideNav();
 
   const { canExecuteWorkflow, canReadWorkflowExecution } = useWorkflowsCapabilities();
   const isExecutionsViewEnabled = useGlobalExecutionsViewEnabled();
@@ -258,6 +279,38 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     clearSelectedExecution({ replace: true });
   }, [clearSelectedExecution]);
 
+  // `/create` starts on the agentic-first landing. `?startBlank=true` ("Start manually"
+  // on the empty list) skips it.
+  const startBlank = new URLSearchParams(location.search).get('startBlank') === 'true';
+  // Prompt from this page's landing or from the empty list (`location.state`).
+  const [pendingPrompt, setPendingPrompt] = useState<PendingAgentPrompt | undefined>(() => {
+    const message = !id ? location.state?.initialAgentMessage : undefined;
+    return message
+      ? { message, attachments: location.state?.initialAgentAttachments ?? [] }
+      : undefined;
+  });
+  // "Remix with AI" arrives with the template YAML, so it skips the landing too.
+  const shouldShowAgenticLandingRef = useRef(false);
+  shouldShowAgenticLandingRef.current = !id && !startBlank && !pendingPrompt && !initialYaml;
+  const [showAgenticLanding, setShowAgenticLanding] = useState(shouldShowAgenticLandingRef.current);
+  // Re-check only when the route switches between `/create` and `/:id`. URL
+  // churn on `/create` (view toggle, run selection) drops the query and the
+  // history state, and must not bring the landing back over the editor.
+  useEffect(() => {
+    setShowAgenticLanding(shouldShowAgenticLandingRef.current);
+  }, [id]);
+  // The sidebar opens only when the user picked AI: a landing prompt or a remix.
+  // "Start manually" goes straight to the editor.
+  const autoOpenAgentChat = !id && Boolean(pendingPrompt || initialYaml);
+
+  const handleLandingSubmit = useCallback(
+    (message: string, attachments: ConversationAttachment[]) => {
+      setPendingPrompt({ message, attachments });
+      setShowAgenticLanding(false);
+    },
+    []
+  );
+
   const onCloseExecutionDetail = useCallback(() => {
     // Clear the selected execution but keep the list open so the user goes back to the list.
     // Push so Back reopens the run.
@@ -319,6 +372,56 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     !isExecutionsViewEnabled && selectedExecutionId && canReadWorkflowExecution ? (
       <WorkflowExecutionDetail executionId={selectedExecutionId} onClose={onCloseExecutionDetail} />
     ) : null;
+  // A run in the URL (e.g. a draft test run) means the user is past the landing.
+  if (!id && showAgenticLanding && !selectedExecutionId) {
+    return (
+      <EuiPageTemplate
+        offset={0}
+        css={{ backgroundColor: euiTheme.colors.backgroundBasePlain }}
+        data-test-subj="newWorkflowPage"
+      >
+        <AppHeader
+          title={i18n.translate('workflows.newWorkflow.title', {
+            defaultMessage: 'New workflow',
+          })}
+          back={{
+            href: application.getUrlForApp(PLUGIN_ID),
+            label: i18n.translate('workflows.newWorkflow.backLinkLabel', {
+              defaultMessage: 'Workflows',
+            }),
+            onClick: (event) => {
+              event.preventDefault();
+              onBackToWorkflows();
+            },
+          }}
+          docLink={WORKFLOWS_DOCUMENTATION_URL}
+          showAddIntegrations
+          spacing="compact"
+        />
+        {/* Full-width content, or centering shrinks the landing to its content. */}
+        <EuiPageTemplate.Section
+          restrictWidth={false}
+          grow
+          alignment="center"
+          contentProps={{ css: { width: '100%' } }}
+        >
+          <AgenticFirstEmptyStateLive
+            onSubmitPrompt={handleLandingSubmit}
+            onStartManually={() => setShowAgenticLanding(false)}
+            onSelectTemplate={(template) =>
+              application.navigateToApp(PLUGIN_ID, {
+                deepLinkId: WorkflowsPageName.library,
+                path: template.slug,
+              })
+            }
+            onExploreLibrary={() =>
+              application.navigateToApp(PLUGIN_ID, { deepLinkId: WorkflowsPageName.library })
+            }
+          />
+        </EuiPageTemplate.Section>
+      </EuiPageTemplate>
+    );
+  }
 
   const pageContent = (
     <EuiFlexGroup direction="column" gutterSize="none" css={kbnFullBodyHeightCss()}>
@@ -340,6 +443,9 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
                 <WorkflowDetailEditor
                   highlightDiff={highlightDiff}
                   onAgentProposalHeld={onAgentProposalHeld}
+                  initialAgentMessage={pendingPrompt?.message}
+                  initialAgentAttachments={pendingPrompt?.attachments}
+                  autoOpenAgentChat={autoOpenAgentChat}
                 />
               }
               executionList={sidebarExecutionList}
