@@ -167,6 +167,7 @@ export const Content = ({
           openDetailsPanel={enableGraphAndResolutionNavigation ? openDetailsPanel : undefined}
           onShowEntity={onShowEntity}
           hideHeaderIcons={hideHeaderIcons}
+          mode={mode}
         />
         <EuiHorizontalRule />
       </>
