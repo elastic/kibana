@@ -669,7 +669,6 @@ const AlertsListPageContent = () => {
           block-size: calc(
             var(--kbn-application--content-height, 100vh) - ${euiTheme.size.base} * 2
           );
-          overflow-y: auto;
         }
       `}
     >
@@ -689,6 +688,7 @@ const AlertsListPageContent = () => {
           flex: 1;
           min-width: 0;
           ${logicalCSS('min-height')}: 0;
+          overflow-y: auto;
         `}
       >
         <EuiFlexItem grow={false}>
