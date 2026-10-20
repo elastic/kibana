@@ -140,6 +140,7 @@ function buildEuiGridColumn({
   dataGridRef,
   hideFilteringOnComputedColumns,
   documentsDisplayMode,
+  isInteractive = true,
 }: {
   numberOfColumns: number;
   columnName: string;
@@ -171,6 +172,7 @@ function buildEuiGridColumn({
   dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>;
   hideFilteringOnComputedColumns?: boolean;
   documentsDisplayMode: DocumentsDisplayMode;
+  isInteractive?: boolean;
 }) {
   const dataViewField = getDataViewFieldFromDataSource({
     dataView,
@@ -307,8 +309,8 @@ function buildEuiGridColumn({
       <DataTableSourceColumnHeaderMemoized
         columnDisplayName={columnDisplayName}
         headerRowHeight={headerRowHeight}
-        // JSON mode do not display a tooltip, Summary mode sets undefined so the default one is displayed.
-        tooltipContent={documentsDisplayMode === 'json' ? null : undefined}
+        // JSON mode and non-interactive modes (e.g. print) do not display a tooltip, Summary mode sets undefined so the default one is displayed.
+        tooltipContent={documentsDisplayMode === 'json' || !isInteractive ? null : undefined}
       />
     );
     if (documentsDisplayMode === 'json') {
@@ -400,6 +402,7 @@ export function getEuiGridColumns({
   dataGridRef,
   hideFilteringOnComputedColumns,
   documentsDisplayMode,
+  isInteractive = true,
 }: {
   columns: string[];
   columnsCellActions?: EuiDataGridColumnCellAction[][];
@@ -432,6 +435,7 @@ export function getEuiGridColumns({
   dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>;
   hideFilteringOnComputedColumns?: boolean;
   documentsDisplayMode: DocumentsDisplayMode;
+  isInteractive?: boolean;
 }) {
   const getColWidth = (column: string) => settings?.columns?.[column]?.width ?? 0;
   const headerRowHeight = deserializeHeaderRowHeight(headerRowHeightLines);
@@ -469,6 +473,7 @@ export function getEuiGridColumns({
       dataGridRef,
       hideFilteringOnComputedColumns,
       documentsDisplayMode,
+      isInteractive,
     })
   );
 }

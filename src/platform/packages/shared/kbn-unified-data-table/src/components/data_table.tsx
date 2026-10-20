@@ -1268,6 +1268,7 @@ const InternalUnifiedDataTable = React.forwardRef<
           dataGridRef,
           hideFilteringOnComputedColumns,
           documentsDisplayMode,
+          isInteractive,
         }),
       [
         cellActionsHandling,

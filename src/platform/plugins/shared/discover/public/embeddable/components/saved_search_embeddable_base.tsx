@@ -35,6 +35,7 @@ const gridAreaStyles = css`
 export interface SavedSearchEmbeddableBaseProps {
   isLoading: boolean;
   totalHitCount?: number;
+  isEsqlMode?: boolean;
   prepend?: React.ReactElement;
   append?: React.ReactElement;
   interceptedWarnings?: SearchResponseWarning[];
@@ -45,6 +46,7 @@ export interface SavedSearchEmbeddableBaseProps {
 export const SavedSearchEmbeddableBase: FC<PropsWithChildren<SavedSearchEmbeddableBaseProps>> = ({
   isLoading,
   totalHitCount,
+  isEsqlMode,
   prepend,
   append,
   interceptedWarnings,
@@ -75,7 +77,7 @@ export const SavedSearchEmbeddableBase: FC<PropsWithChildren<SavedSearchEmbeddab
 
             {!!totalHitCount && (
               <EuiFlexItem grow={false} data-test-subj="toolBarTotalDocsText">
-                <TotalDocuments totalHitCount={totalHitCount} />
+                <TotalDocuments totalHitCount={totalHitCount} isEsqlMode={isEsqlMode} />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>

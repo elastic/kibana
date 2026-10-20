@@ -209,7 +209,9 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
 
   return (
     <SavedSearchEmbeddableBase
-      totalHitCount={undefined} // it will be rendered inside the custom grid toolbar instead
+      // interactive: rendered inside the custom grid toolbar instead; print has no toolbar, so render it here
+      totalHitCount={isInteractive ? undefined : props.totalHitCount}
+      isEsqlMode={isEsqlResult}
       isLoading={props.loadingState === DiscoverGridLoadingState.loading}
       interceptedWarnings={interceptedWarnings}
       inlineEditing={inlineEditing}
