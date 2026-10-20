@@ -78,7 +78,7 @@ export const lexerRules: monaco.languages.IMonarchLanguage = {
       [/\//, 'regexp', '@regexp'],
 
       // A curly bracket after `=` opens a hex string, otherwise it delimits a rule body.
-      [/(=)(\s*)(\{)/, ['operator', 'white', { token: 'delimiter.curly', next: '@hexString' }]],
+      [/=(?!=)/, 'operator', '@assignedValue'],
       [/[{}]/, 'delimiter.curly'],
 
       [/@operators/, 'operator'],
@@ -127,6 +127,13 @@ export const lexerRules: monaco.languages.IMonarchLanguage = {
     ruleTags: [
       { include: '@whitespace' },
       [/[a-zA-Z_]\w*/, 'tag'],
+      [/./, { token: '@rematch', next: '@pop' }],
+    ],
+
+    // The value after `=` can start on a later line, and comments can precede it.
+    assignedValue: [
+      { include: '@whitespace' },
+      [/\{/, { token: 'delimiter.curly', switchTo: '@hexString' }],
       [/./, { token: '@rematch', next: '@pop' }],
     ],
 

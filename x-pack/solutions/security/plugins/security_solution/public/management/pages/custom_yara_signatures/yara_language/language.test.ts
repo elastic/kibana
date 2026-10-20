@@ -438,6 +438,67 @@ describe('YARA language', () => {
       ]);
     });
 
+    it('should tokenize a hex string opened on the line after `=`', () => {
+      expect(tokenize('a =\n  { ?? E2 }')).toEqual([
+        [
+          ['a', 'identifier'],
+          [' ', 'white'],
+          ['=', 'operator'],
+        ],
+        [
+          ['  ', 'white'],
+          ['{', 'delimiter.curly'],
+          [' ', 'white'],
+          ['??', 'number.hex'],
+          [' ', 'white'],
+          ['E2', 'number.hex'],
+          [' ', 'white'],
+          ['}', 'delimiter.curly'],
+        ],
+      ]);
+    });
+
+    it('should tokenize a hex string after comments following `=`', () => {
+      expect(tokenize('= /* a */ // b\n{ E2 }')).toEqual([
+        [
+          ['=', 'operator'],
+          [' ', 'white'],
+          ['/* a */', 'comment'],
+          [' ', 'white'],
+          ['// b', 'comment'],
+        ],
+        [
+          ['{', 'delimiter.curly'],
+          [' ', 'white'],
+          ['E2', 'number.hex'],
+          [' ', 'white'],
+          ['}', 'delimiter.curly'],
+        ],
+      ]);
+    });
+
+    it.each([
+      ['a text string', '"E2"', [['"E2"', 'string']]],
+      ['a regular expression', '/E2/', [['/E2/', 'regexp']]],
+      ['a number', '2', [['2', 'number']]],
+    ])('should tokenize %s on the line after `=` normally', (_, value, valueTokens) => {
+      expect(tokenize(`=\n${value}`)).toEqual([[['=', 'operator']], valueTokens]);
+    });
+
+    it('should not tokenize a hex string after `==`', () => {
+      expect(tokenize('== { E2 }')).toEqual([
+        [
+          ['==', 'operator'],
+          [' ', 'white'],
+          ['{', 'delimiter.curly'],
+          [' ', 'white'],
+          ['E2', 'identifier'],
+          [' ', 'white'],
+          ['}', 'delimiter.curly'],
+        ],
+      ]);
+    });
+
     it('should not tokenize a rule body as a hex string', () => {
       expect(tokenize('rule a { E2 }')).toEqual([
         [
