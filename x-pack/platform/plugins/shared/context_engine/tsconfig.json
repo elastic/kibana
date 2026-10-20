@@ -81,7 +81,6 @@
     "@kbn/datemath",
     "@kbn/esql-utils",
     "@kbn/ebt-click",
-    "@kbn/core-http-server-utils",
     "@kbn/core-http-server-mocks"
   ]
 }
