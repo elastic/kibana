@@ -10,7 +10,7 @@
 import type { ComponentProps } from 'react';
 import React, { useContext, useEffect } from 'react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
-import { screen, waitFor } from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
 import { buildDataViewMock, dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { DiscoverTopNavProps } from './discover_topnav';
 import { DataSourceType } from '../../../../../common/data_sources';
@@ -95,6 +95,10 @@ let mockUseCustomizations = false;
 jest.mock('../../../../customizations', () => ({
   ...jest.requireActual('../../../../customizations'),
   useDiscoverCustomization: jest.fn(),
+}));
+
+jest.mock('./save_discover_session', () => ({
+  DiscoverSessionSaveModalContainer: () => <div data-test-subj="savedObjectSaveModal" />,
 }));
 
 const mockDefaultCapabilities = {
@@ -222,6 +226,36 @@ describe('Discover topnav component', () => {
     expect(itemIds).toEqual(['new', 'open', 'inspect']);
     expect(capturedTopNavMenu?.primaryActionItem).toBeUndefined();
   });
+
+  test.each(['save', 'saveAs'])(
+    '%s waits for the pending data view list before opening the modal',
+    async (actionId) => {
+      const { toolkit, props } = await setup();
+      const catalog = Promise.withResolvers<void>();
+      toolkit.runtimeStateManager.initialDataViewListRequest = catalog.promise;
+      jest.mocked(mockDiscoverService.dataViews.getIdsWithTitle).mockClear();
+      renderTestComponent({ toolkit, props });
+
+      const saveAction = capturedTopNavMenu?.primaryActionItem;
+      const action =
+        actionId === 'save'
+          ? saveAction
+          : saveAction?.splitButtonProps?.items?.find((item) => item.id === actionId);
+
+      act(() => {
+        action?.run?.({ triggerElement: document.createElement('button'), returnFocus: jest.fn() });
+      });
+
+      expect(screen.queryByTestId('savedObjectSaveModal')).not.toBeInTheDocument();
+
+      await act(async () => {
+        catalog.resolve();
+      });
+
+      expect(await screen.findByTestId('savedObjectSaveModal')).toBeVisible();
+      expect(mockDiscoverService.dataViews.getIdsWithTitle).not.toHaveBeenCalled();
+    }
+  );
 
   test('disables submit when the ES|QL editor is empty after a search', async () => {
     const { toolkit, props } = await setup();
