@@ -274,7 +274,7 @@ const isolationNoOpResult = (
 
 /** Host isolation refusal shared by the confirmation and dispatch gates. */
 const hostIsolationDisabledMessage = (hostLabel: string): string =>
-  `Host isolation is disabled by the endpoint policy assigned to Linux host ${hostLabel}, so the endpoint will refuse this action. Enable linux.advanced.host_isolation.allowed in that policy before trying again.`;
+  `Host isolation is disabled by the endpoint policy assigned to ${hostLabel}, so the endpoint will refuse this action. Enable linux.advanced.host_isolation.allowed in that policy before trying again.`;
 
 const isHostIsolationDisabled = async (
   request: DispatchRequest,
@@ -296,7 +296,7 @@ const isHostIsolationDisabled = async (
   )}"`;
   const { items } = await fleet.packagePolicy.list(fleet.getSoClient(), {
     kuery,
-    perPage: 2,
+    perPage: 1,
     spaceId: request.context.spaceId,
   });
   const policyValue = items[0]?.inputs?.[0]?.config?.policy?.value as

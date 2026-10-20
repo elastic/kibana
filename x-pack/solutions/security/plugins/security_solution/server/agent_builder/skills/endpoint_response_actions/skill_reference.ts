@@ -19,10 +19,13 @@ export const ENDPOINT_RESPONSE_ACTIONS_REFERENCE = `## Error Handling Reference
 | Host not found | \`found: false\`, \`reason: endpoint_not_found\` (+ \`hostName\` or \`agentId\`, whichever was looked up) | Ask analyst to clarify that hostname or agent ID; do not guess, and do not report any status or isolation state |
 | \`status: 'unknown'\` | \`host_status\` not yet in metadata | Report the state is unknown; do not call it offline |
 | Hostname matches several endpoints | \`found: false\`, \`reason: ambiguous_hostname\` (+ \`candidates\`, possibly \`truncated: true\` + \`totalCandidates\`) | Ask analyst which agent ID they mean, then re-call the tool with \`agentId\`; if truncated, say only 10 newest candidates of \`totalCandidates\` are shown |
+| IP address matches several endpoints | \`found: false\`, \`reason: ambiguous_ip\` (+ \`candidates\`, possibly \`truncated: true\` + \`totalCandidates\`) | Ask analyst which agent ID they mean, then re-call the tool with \`agentId\`; never select a historical or shared-IP candidate automatically |
 | Action not found | \`found: false\`, \`reason: action_not_found\` | Ask analyst to verify the action ID from Response Actions history |
 | Agent unenrolled or uninstalled | \`found: false\`, \`reason: endpoint_not_active\` (+ \`agentId\`) | Tell the analyst the agent can no longer receive actions and nothing was dispatched; if the ID is stale, look the host up again by hostname |
 | Action failed | \`status: failed\` + \`errors\` (bounded; see \`totalErrors\`) | Report the reasons in \`errors\`; do not retry blindly |
 | Action still pending | \`status: pending\` + action ID | Report it is still in flight; offer to re-check with \`get_response_action_status\` |
+| Offline action queued | \`queued: true\`, \`status: pending\` + action ID | Report that the action was dispatched and is queued until the endpoint reconnects; include the action ID and offer to re-check it, but do not call the action completed or dispatch it again |
+| Isolation state already satisfied | \`noOp: true\`, \`status: completed\`, no action ID | Report that the endpoint was already in the requested isolation state and no response action was dispatched; do not invent or request an action ID |
 | Action expired | \`status: failed\` + \`isExpired: true\` | Report that the action expired before the host responded, not that the command failed; direct the analyst to re-issue it from the Response Actions UI |
 | Insufficient privileges | \`error: insufficient_privileges\` | Tell analyst which privilege is missing; suggest Security UI |
 | Page out of range | \`error: invalid_argument\` | Narrow the request with \`hostNameFilter\` instead of paging further |
@@ -46,7 +49,7 @@ When a counter shows dropped items, say that only a sample is shown and give the
 
 - When the analyst asks which hosts are available, call \`list_endpoints\` first.
 - Call \`isolate_host\` / \`unisolate_host\` directly: they resolve the hostname themselves and return \`endpoint_not_found\` or \`ambiguous_hostname\` rather than guessing, so no \`get_endpoint_status\` pre-check is needed. Use \`get_endpoint_status\` when the analyst asks for the current state.
-- Always surface the action ID from write tools — it is the audit anchor in Response Actions history. If a write tool reports \`status: pending\` with no outcome, the action was still dispatched: report its ID and check it with \`get_response_action_status\`; never re-issue it.
+- Surface the action ID whenever a write tool returns one — it is the audit anchor in Response Actions history. If \`queued: true\`, report that the action was dispatched and will execute when the endpoint reconnects; include its ID and never re-issue it. If \`noOp: true\`, report that the requested isolation state already held and no response action was dispatched; no action ID exists. For another \`status: pending\` result, report its ID and check it with \`get_response_action_status\`.
 - For follow-up on a prior action ("what happened to scan X?"), use \`get_response_action_status\` with the action ID.
 - For this skill's status and response action lookups, use \`list_endpoints\`, \`get_endpoint_status\`, and \`get_response_action_status\` instead of \`platform.core.search\` or raw Elasticsearch queries. Other skills' diagnostic queries are unaffected.
 

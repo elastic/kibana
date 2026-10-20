@@ -1070,7 +1070,8 @@ describe('createEndpointLookupService', () => {
             {
               metadata: { elastic: { agent: { id: 'agent-a' } } },
               host_status: HostStatus.OFFLINE,
-              last_checkin: '2026-10-20T10:00:00.000Z',
+              // Newer but offline: liveness must outrank recency.
+              last_checkin: '2026-10-20T12:00:00.000Z',
             },
             {
               metadata: { elastic: { agent: { id: 'agent-a' } } },

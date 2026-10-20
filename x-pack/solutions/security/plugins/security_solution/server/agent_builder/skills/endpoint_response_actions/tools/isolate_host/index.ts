@@ -40,7 +40,7 @@ export const isolateHostTool = (
   return {
     id: ISOLATE_TOOL_ID,
     type: ToolType.builtin,
-    description: `Isolates a host by its hostname, exact IP address, or agent ID (pass the agent ID, from an ambiguous_hostname result, when several endpoints share the hostname). Isolation disconnects the endpoint from the network to contain a potential threat. The action is dispatched through the Elastic Defend Response Actions service.`,
+    description: `Isolates a host by its hostname, exact IP address, or agent ID (pass the selected agent ID after an ambiguous_hostname or ambiguous_ip result). Isolation disconnects the endpoint from the network to contain a potential threat. The action is dispatched through the Elastic Defend Response Actions service.`,
     schema: isolateHostSchema,
     // HITL gate enforced by the framework, not skill prose: the runner prompts
     // the analyst for confirmation before every dispatch. `always` (not `once`)

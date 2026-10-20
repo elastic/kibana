@@ -551,8 +551,8 @@ export function createEndpointLookupService(
     return { candidates, truncated, total };
   };
 
-  const resolveMetadataCandidates = async (field: 'hostname' | 'ip', value: string) => {
-    const metadata = await listMetadataCandidates(field, value, scoped);
+  const resolveIpMetadataCandidates = async (value: string) => {
+    const metadata = await listMetadataCandidates('ip', value, scoped);
     const sorted = [...metadata.candidates].sort((a, b) => {
       const aLive = a.isLive ? 1 : 0;
       const bLive = b.isLive ? 1 : 0;
@@ -573,10 +573,8 @@ export function createEndpointLookupService(
       return { kind: 'not_found' } as const;
     }
 
-    const live = distinct.filter((candidate) => candidate.isLive);
-    const ambiguous = field === 'ip' ? distinct.length > 1 : live.length > 1;
-    if (metadata.truncated || ambiguous) {
-      const toReport = metadata.truncated || field === 'ip' ? distinct : live;
+    if (metadata.truncated || distinct.length > 1) {
+      const toReport = distinct;
       return {
         kind: 'ambiguous' as const,
         candidates: toReport
@@ -612,7 +610,7 @@ export function createEndpointLookupService(
       if (supportedAgentTypes && !supportedAgentTypes.includes('endpoint')) {
         return { kind: 'not_found' };
       }
-      return resolveMetadataCandidates('ip', ip);
+      return resolveIpMetadataCandidates(ip);
     },
 
     async resolveByAgentId(agentId: string): Promise<EndpointLookupResult> {

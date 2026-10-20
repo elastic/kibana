@@ -40,7 +40,7 @@ export const unisolateHostTool = (
   return {
     id: UNISOLATE_TOOL_ID,
     type: ToolType.builtin,
-    description: `Un-isolates a host by its hostname, exact IP address, or agent ID (pass the agent ID, from an ambiguous_hostname result, when several endpoints share the hostname). Re-establishes network connectivity on an endpoint that was previously isolated. The action is dispatched through the Elastic Defend Response Actions service.`,
+    description: `Un-isolates a host by its hostname, exact IP address, or agent ID (pass the selected agent ID after an ambiguous_hostname or ambiguous_ip result). Re-establishes network connectivity on an endpoint that was previously isolated. The action is dispatched through the Elastic Defend Response Actions service.`,
     schema: unisolateHostSchema,
     // HITL gate enforced by the framework, not skill prose: the runner prompts
     // the analyst for confirmation before every dispatch.

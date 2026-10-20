@@ -16,7 +16,7 @@ const FORENSIC_ESQL_TRAJECTORY = [
   'platform.core.generate_esql',
   'platform.core.execute_esql',
 ] as const;
-const EXTRACT_IOCS_TOOL_ID = 'core.security.endpoint_forensic.extract_iocs' as const;
+const EXTRACT_IOCS_TOOL_ID = 'security.endpoint_forensic.extract_iocs' as const;
 
 evaluate.describe('Endpoint Forensic Analysis — smoke', { tag: tags.stateful.classic }, () => {
   evaluate.beforeAll(async ({ kbnClient, esClient, internalEsClient, agentBuilderClient, log }) => {
