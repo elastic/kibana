@@ -123,6 +123,8 @@ describe('AutomationTriggerSection', () => {
     fireEvent.click(await screen.findByText('CPU usage high'));
     expect(lastTrigger()).toMatchObject({ kind: 'alert', ruleNames: ['CPU usage high'] });
     expect(screen.getByTestId('automationRulePicker')).toHaveTextContent('CPU usage high');
+    expect(screen.getByText('changes to')).toBeInTheDocument();
+    expect(screen.getByText('Active')).toBeInTheDocument();
   });
 
   it('selects rules and tags in the rule picker', async () => {

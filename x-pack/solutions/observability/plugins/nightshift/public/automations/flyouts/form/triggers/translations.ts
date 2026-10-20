@@ -63,6 +63,10 @@ export const triggerLabels = {
     defaultMessage: 'When an alert',
   }),
   from: i18n.translate('xpack.nightshift.automations.flyout.from', { defaultMessage: 'from' }),
+  changesTo: i18n.translate('xpack.nightshift.automations.flyout.changesTo', {
+    defaultMessage: 'changes to',
+  }),
+  active: i18n.translate('xpack.nightshift.automations.activeOption', { defaultMessage: 'Active' }),
   anyRule: i18n.translate('xpack.nightshift.automations.flyout.anyRule', {
     defaultMessage: 'Any rule',
   }),

@@ -49,6 +49,8 @@ export const AlertTriggerEditor = ({
           {() => <RulePicker trigger={trigger} onChange={onChange} />}
         </PillPopover>
       )}
+      <EuiText size="s">{triggerLabels.changesTo}</EuiText>
+      <EuiBadge>{triggerLabels.active}</EuiBadge>
     </Sentence>
   );
 };
