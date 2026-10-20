@@ -263,7 +263,11 @@ export const runTask: TaskEntry = async (rawInput: CodecInput, context: WorkerCo
           return { phase: 'cleanup', customFields, coldBootMs: bootMs } as CodecInput;
         }
         const started = beginRunThenCancel(context.signal, abortController, {
-          run: () => runWithExecutionContext(input.executionContext, () => runner.run()),
+          run: () =>
+            runWithExecutionContext(input.executionContext, () => {
+              context.notifyExecutionStart?.();
+              return runner.run();
+            }),
           cancel: () => runner.cancel?.() ?? Promise.resolve(),
         });
         unbindCancel = started.unbind;

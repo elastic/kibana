@@ -45,6 +45,10 @@ export interface RunOptions {
   readonly capabilities: Readonly<Record<string, Binding>>;
   readonly data?: CodecInput;
   readonly deadlineMs: number;
+  /** When set, deadlineMs starts at the execution_start packet. Boot is capped by this. */
+  readonly bootstrapDeadlineMs?: number;
+  /** Task Manager task id, so the execution-start packet can move the lease. */
+  readonly taskId?: string;
   readonly signal?: AbortSignal;
   readonly abortGraceMs?: number;
   /**
@@ -66,6 +70,8 @@ interface Execution {
   stallTimer?: NodeJS.Timeout;
   /** Set when the worker reports the task module loaded; undefined = watchdog not armed yet. */
   startedAt?: number;
+  readonly dispatchedAt: number;
+  executionStarted: boolean;
   readonly chains: Map<string, Promise<void>>;
   /** Main-side per-run signal handed to bindings so in-flight main work can stop too. */
   readonly hostAbort: AbortController;
@@ -124,6 +130,7 @@ export class ExecutionHost {
       readonly maxQueuePerClass?: number;
       readonly abortGraceMs?: number;
       readonly onCrossing?: (crossing: Crossing) => void;
+      readonly onExecutionStart?: (taskId: string, at: number) => void;
       /**
        * 0.1.11: co-resident async runs share ONE isolate (memory, globals, transport port), so a
        * buggy or hostile task can observe another co-resident run's packets/grants/credentials.
@@ -183,6 +190,7 @@ export class ExecutionHost {
       ...(options.data === undefined ? {} : { data: encode(options.data) }),
     });
     return new Promise((resolve) => {
+      const dispatchedAt = Date.now();
       const execution: Execution = {
         options,
         bundle,
@@ -193,14 +201,20 @@ export class ExecutionHost {
         hostAbort: new AbortController(),
         callAborts: new Map(),
         droppedCalls: new Set(),
+        dispatchedAt,
+        executionStarted: false,
       };
       const abort = () => {
         void this.terminate(execution, 'cancelled');
       };
       execution.abort = abort;
       options.signal?.addEventListener('abort', abort, { once: true });
-      // Deadline includes queue + cold bootstrap, not just user code.
-      this.armDeadline(execution, Date.now() + options.deadlineMs);
+      // Without a bootstrap cap, deadlineMs covers queue and boot. With one, it starts at execution_start.
+      const firstDeadline =
+        options.bootstrapDeadlineMs === undefined
+          ? options.deadlineMs
+          : options.bootstrapDeadlineMs;
+      this.armDeadline(execution, dispatchedAt + firstDeadline);
       queue.push(execution);
       this.queues.set(options.workloadClass, queue);
       this.activeIds.add(bundle.runId);
@@ -439,6 +453,28 @@ export class ExecutionHost {
       execution.startedAt = Date.now();
       return;
     }
+    if (packet.kind === 'execution_start') {
+      // Late or duplicate packets must not move the deadline or undo a cancel.
+      if (
+        execution.termination ||
+        execution.executionStarted ||
+        execution.options.bootstrapDeadlineMs === undefined
+      )
+        return;
+      execution.executionStarted = true;
+      if (execution.timer) clearTimeout(execution.timer);
+      const now = Date.now();
+      if (execution.options.taskId)
+        this.options.onExecutionStart?.(execution.options.taskId, now);
+      const grace = execution.options.abortGraceMs ?? this.options.abortGraceMs ?? 250;
+      const cap =
+        execution.dispatchedAt +
+        execution.options.bootstrapDeadlineMs +
+        execution.options.deadlineMs +
+        grace;
+      this.armDeadline(execution, Math.min(now + execution.options.deadlineMs, cap));
+      return;
+    }
     if (packet.kind === 'abort_ack') {
       if (execution.termination) execution.termination.acknowledged = true;
       this.record(
@@ -667,6 +703,8 @@ export class ExecutionHost {
         }
         await slot.endpoint.stop();
         slot.active.clear();
+        const retired = slots.indexOf(slot);
+        if (retired !== -1) slots.splice(retired, 1);
         for (const victim of victims) {
           victim.resolve({
             status: 'terminated',

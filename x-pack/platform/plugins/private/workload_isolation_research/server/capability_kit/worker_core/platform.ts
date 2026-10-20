@@ -376,7 +376,7 @@ export const createPlatformReplica = (initial: PlatformReplicas) => {
     booleanFlag$: (key: string, _fallback: boolean) =>
       featureFlags$.pipe(
         map((envelope) => lookupBooleanFlag(envelope.value, key)),
-        distinctUntilChanged()
+        distinctUntilChanged((previous, next) => previous === next && next !== undefined)
       ),
     stringFlag$: (key: string, _fallback: string) =>
       featureFlags$.pipe(
@@ -385,7 +385,7 @@ export const createPlatformReplica = (initial: PlatformReplicas) => {
             ? envelope.value.strings[key]
             : undefined
         ),
-        distinctUntilChanged()
+        distinctUntilChanged((previous, next) => previous === next && next !== undefined)
       ),
     numberFlag$: (key: string, _fallback: number) =>
       featureFlags$.pipe(
@@ -394,7 +394,7 @@ export const createPlatformReplica = (initial: PlatformReplicas) => {
             ? envelope.value.numbers[key]
             : undefined
         ),
-        distinctUntilChanged()
+        distinctUntilChanged((previous, next) => previous === next && next !== undefined)
       ),
     stringFlag: (key: string) =>
       Object.prototype.hasOwnProperty.call(current.featureFlags.value.strings, key)

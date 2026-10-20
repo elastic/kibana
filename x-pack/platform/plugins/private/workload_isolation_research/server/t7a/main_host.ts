@@ -18,10 +18,15 @@ import { performance } from 'perf_hooks';
 import type { CoreStart, KibanaRequest, Logger, PluginInitializerContext } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import {
+  RESEARCH_BOOTSTRAP_DEADLINE_MS,
+  armResearchLease,
+  clearResearchLease,
   deriveCancelGraceMs,
   markCollateralLoss,
+  markResearchExecutionStarted,
   registerExecutionClass,
   researchDefinitionMeta,
+  researchExecutionBudgetMs,
   resolveCancelGraceMs,
 } from '@kbn/task-manager-plugin/server';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
@@ -276,6 +281,7 @@ export class T7aController {
         maxQueuePerClass: 1000,
         abortGraceMs: this.config.abortGraceMs,
         onCrossing: (crossing) => this.recordCrossing(crossing),
+        onExecutionStart: (taskId, at) => markResearchExecutionStarted(taskId, at),
       });
     }
     return this.host;
@@ -684,7 +690,13 @@ export class T7aController {
     };
   }
 
-  private runOptions(taskType: string, input: Obj, space: string, signal: AbortSignal | undefined) {
+  private runOptions(
+    taskType: string,
+    input: Obj,
+    space: string,
+    signal: AbortSignal | undefined,
+    budget?: { readonly deadlineMs: number; readonly bootstrapDeadlineMs: number; readonly taskId?: string }
+  ) {
     const fake = kibanaRequestFactory({ headers: {} });
     return {
       workloadClass: WORKLOAD_CLASS,
@@ -702,7 +714,10 @@ export class T7aController {
           'internal'
         ) as unknown as Obj),
       } as unknown as CodecInput,
-      deadlineMs: this.config.deadlineMs,
+      deadlineMs: budget?.deadlineMs ?? this.config.deadlineMs,
+      ...(budget
+        ? { bootstrapDeadlineMs: budget.bootstrapDeadlineMs, taskId: budget.taskId }
+        : {}),
       abortGraceMs: resolveCancelGraceMs(taskType, this.config.abortGraceMs),
       signal,
     };
@@ -721,11 +736,30 @@ export class T7aController {
       ),
       ...(context.fakeRequest ? { fakeRequest: encodeFakeRequest(context.fakeRequest) } : {}),
     };
+    const taskId = String((taskInstance as Obj).id ?? '');
+    const executionMs = researchExecutionBudgetMs(taskType, this.config.deadlineMs);
     const dispatch = async (phase: 'run' | 'cleanup') => {
       const t0 = performance.now();
-      const outcome = await this.getHost().run(
-        this.runOptions(taskType, { ...baseInput, phase }, space, context.signal)
-      );
+      if (taskId) {
+        armResearchLease({
+          taskId,
+          claimedAt: Date.now(),
+          bootstrapMs: RESEARCH_BOOTSTRAP_DEADLINE_MS,
+          executionMs,
+        });
+      }
+      let outcome: Outcome;
+      try {
+        outcome = await this.getHost().run(
+          this.runOptions(taskType, { ...baseInput, phase }, space, context.signal, {
+            deadlineMs: executionMs,
+            bootstrapDeadlineMs: RESEARCH_BOOTSTRAP_DEADLINE_MS,
+            taskId,
+          })
+        );
+      } finally {
+        if (taskId) clearResearchLease(taskId);
+      }
       const key = `${taskType}/${phase}/${outcome.status}`;
       this.outcomes.set(key, (this.outcomes.get(key) ?? 0) + 1);
       const value = (outcome.status === 'success' ? outcome.value : undefined) as Obj | undefined;

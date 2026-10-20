@@ -24,6 +24,7 @@ interface RunState {
   readonly callbacks: Map<string, AsyncCallback>;
   syncCalls: number;
   cancellation?: CancellationInfo;
+  executionNotified?: boolean;
   readonly pending: Map<
     number,
     {
@@ -235,6 +236,11 @@ const startRuntime = (): void => {
           if (reference.runId !== bundle.runId) throw new Error('Foreign callback handle');
           run.callbacks.delete(reference.id);
         },
+        notifyExecutionStart: () => {
+          if (run.executionNotified) return;
+          run.executionNotified = true;
+          send({ version: 1, kind: 'execution_start', runId: bundle.runId });
+        },
         call: (capability, operation, args, signal?: AbortSignal, options?: { detached?: boolean }) =>
           new Promise((resolve, reject) => {
             const grant = bundle.grants[capability];
@@ -300,6 +306,10 @@ const startRuntime = (): void => {
     } catch (error) {
       failed = true;
       value = error instanceof Error ? error : new Error('Task failed with a non-Error value');
+    }
+    const flushUntil = Date.now() + 25;
+    while (run.detached.size && Date.now() < flushUntil) {
+      await new Promise((resolve) => setTimeout(resolve, 5));
     }
     let encoded;
     try {

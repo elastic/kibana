@@ -45,6 +45,34 @@ const READ_ROUTE_TEMPLATES: readonly { method: string; parts: readonly RoutePart
   { method: 'POST', parts: [api('_index_template'), api('_simulate_index'), target] },
 ];
 
+/**
+ * GET/HEAD the alerting subset sent, plus document get. Admin routes such as
+ * `_refresh` and `_flush` are absent: the ES client issues `indices.refresh` as GET.
+ * Search-shaped POST templates are also admitted as GET/HEAD.
+ */
+const GET_READ_TEMPLATES: readonly { method: string; parts: readonly RoutePart[] }[] = [
+  { method: 'GET', parts: [target, api('_settings')] },
+  { method: 'GET', parts: [target, api('_mapping')] },
+  { method: 'GET', parts: [target, api('_alias')] },
+  { method: 'GET', parts: [target, api('_alias'), target] },
+  { method: 'GET', parts: [target] },
+  { method: 'GET', parts: [target, api('_doc'), target] },
+  { method: 'HEAD', parts: [target, api('_doc'), target] },
+  { method: 'GET', parts: [target, api('_source'), target] },
+  { method: 'HEAD', parts: [target, api('_source'), target] },
+  { method: 'GET', parts: [api('_template'), target] },
+  { method: 'GET', parts: [api('_index_template'), target] },
+  { method: 'HEAD', parts: [api('_index_template'), target] },
+  { method: 'GET', parts: [api('_data_stream'), target] },
+  { method: 'GET', parts: [api('_ilm'), api('policy'), target] },
+  { method: 'GET', parts: [api('_component_template'), target] },
+  { method: 'GET', parts: [api('_security'), api('api_key')] },
+  ...READ_ROUTE_TEMPLATES.filter((template) => template.method === 'POST').flatMap((template) => [
+    { method: 'GET', parts: template.parts },
+    { method: 'HEAD', parts: template.parts },
+  ]),
+];
+
 export interface EsWriteAllow {
   readonly method: string;
   /** Anchored path. Substring matches are not allowed. */
@@ -88,11 +116,14 @@ export const routeSegments = (path: string): readonly string[] | undefined => {
   return segments;
 };
 
+const templatesFor = (method: string) =>
+  method === 'GET' || method === 'HEAD' ? GET_READ_TEMPLATES : READ_ROUTE_TEMPLATES;
+
 const isReadRoute = (method: string, path: string): boolean => {
   const segments = routeSegments(path);
   if (!segments) return false;
   const verb = method.toUpperCase();
-  return READ_ROUTE_TEMPLATES.some(
+  return templatesFor(verb).some(
     (template) =>
       template.method === verb &&
       template.parts.length === segments.length &&
@@ -102,12 +133,61 @@ const isReadRoute = (method: string, path: string): boolean => {
   );
 };
 
-/** True for mutations. GET and HEAD are reads. Other methods are writes unless a route template matches. */
-export const isEsWrite = (method: string, path: string): boolean => {
+const queryEntries = (
+  path: string,
+  querystring?: string | Readonly<Record<string, unknown>>
+): Array<[string, string]> => {
+  const entries: Array<[string, string]> = [];
+  const raw = path.split('?')[1];
+  if (raw) {
+    for (const part of raw.split('&')) {
+      if (!part) continue;
+      const splitAt = part.indexOf('=');
+      const key = splitAt === -1 ? part : part.slice(0, splitAt);
+      const value = splitAt === -1 ? '' : part.slice(splitAt + 1);
+      try {
+        entries.push([decodeURIComponent(key), decodeURIComponent(value)]);
+      } catch {
+        entries.push([key, value]);
+      }
+    }
+  }
+  if (typeof querystring === 'string') return entries.concat(queryEntries(`/?${querystring}`));
+  if (querystring && typeof querystring === 'object') {
+    for (const [key, value] of Object.entries(querystring)) {
+      entries.push([key, value == null ? '' : String(value)]);
+    }
+  }
+  return entries;
+};
+
+/**
+ * `refresh` other than `false`, plus `pipeline` and `wait_for_active_shards`,
+ * mutate. They count on the path and on a separately supplied `params.querystring`.
+ */
+export const hasMutatingQuery = (
+  path: string,
+  querystring?: string | Readonly<Record<string, unknown>>
+): boolean =>
+  queryEntries(path, querystring).some(([key, value]) => {
+    const name = key.toLowerCase();
+    if (name === 'refresh') return value.toLowerCase() !== 'false';
+    return name === 'pipeline' || name === 'wait_for_active_shards';
+  });
+
+/**
+ * True for mutations. GET and HEAD are writes unless the path is an allowlisted
+ * read route. Unknown verbs are writes. A mutating query makes any verb a write.
+ */
+export const isEsWrite = (
+  method: string,
+  path: string,
+  querystring?: string | Readonly<Record<string, unknown>>
+): boolean => {
+  if (hasMutatingQuery(path, querystring)) return true;
   const verb = method.toUpperCase();
-  if (verb === 'GET' || verb === 'HEAD') return false;
   if (isReadRoute(verb, path)) return false;
-  return verb === 'POST' || verb === 'PUT' || verb === 'DELETE' || verb === 'PATCH';
+  return true;
 };
 
 const kindOf = (record: EsRequestRecord): string => {
@@ -169,7 +249,8 @@ export const createBootEsWriteFence = (options: {
   const observe: OnRequestHandler = (_ctx, params) => {
     const method = String(params.method ?? 'GET');
     const path = String(params.path ?? '');
-    const write = isEsWrite(method, path);
+    const querystring = (params as { querystring?: string | Record<string, unknown> }).querystring;
+    const write = isEsWrite(method, path, querystring);
     const record: EsRequestRecord = { method, path, write, phase };
     seen.push(record);
     const logPath = process.env.KBN_RESEARCH_WC_ES_LOG;

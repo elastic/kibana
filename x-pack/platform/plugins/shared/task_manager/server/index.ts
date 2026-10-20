@@ -152,6 +152,11 @@ export {
   researchDefinitionMeta,
   deriveCancelGraceMs,
   resolveCancelGraceMs,
+  RESEARCH_BOOTSTRAP_DEADLINE_MS,
+  armResearchLease,
+  markResearchExecutionStarted,
+  clearResearchLease,
+  researchExecutionBudgetMs,
   setResearchTaskDefinitionSource,
 } from './lib/research_runner_override';
 export type {

@@ -11,8 +11,12 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import {
+  armResearchLease,
+  clearResearchLease,
   consumeCollateralReschedule,
   deriveCancelGraceMs,
+  markResearchExecutionStarted,
+  researchExpiration,
   diffDefinitionParity,
   markCollateralLoss,
   registerExecutionClass,
@@ -22,7 +26,9 @@ import {
   setResearchTaskDefinitionSource,
   COLLATERAL_RESCHEDULE_CAP,
 } from '@kbn/task-manager-plugin/server/lib/research_runner_override';
+import { encode } from '../codecs';
 import { ExecutionHost, cooperativeStopFor } from '../host';
+import type { Packet } from '../protocol';
 import { ModuleRegistry } from '../registry';
 import { guardReplicaWatch } from '../../t7a/isolate/replica_watch';
 import { beginRunThenCancel, bindRunnerCancel } from '../../t7a/isolate/runner_cancel';
@@ -123,6 +129,26 @@ test('boot fence anchors endpoint shapes and waits for installers', async () => 
       ),
     /boot ES write denied/
   );
+  assert.throws(
+    () =>
+      handler(
+        { scoped: false },
+        { method: 'POST', path: '/orders/_mget', querystring: { refresh: 'true' } },
+        {},
+        {} as never
+      ),
+    /boot ES write denied/
+  );
+  assert.throws(
+    () =>
+      handler(
+        { scoped: false },
+        { method: 'GET', path: '/orders/_refresh' },
+        {},
+        {} as never
+      ),
+    /boot ES write denied/
+  );
   handler(
     { scoped: false },
     { method: 'POST', path: '/.kibana-event-log-ds/_bulk' },
@@ -176,8 +202,8 @@ test('boot fence anchors endpoint shapes and waits for installers', async () => 
     {},
     {} as never
   );
-  assert.equal(fence.summary().denied, 5);
-  assert.equal(fence.summary().writes, 7);
+  assert.equal(fence.summary().denied, 7);
+  assert.equal(fence.summary().writes, 9);
 });
 
 test('flag overrides are classified and unknown flags stay absent', () => {
@@ -264,6 +290,15 @@ test('replica subscriptions and content hashes observe warm owner changes', asyn
     .booleanFlag$('not-owned', false)
     .subscribe((value: boolean | undefined) => absent.push(value));
   assert.deepEqual(absent, [undefined]);
+  replica.apply({
+    ...emptyPlatformReplicas(),
+    featureFlags: { generation: 4, value: { booleans: {}, strings: {}, numbers: {} } },
+    status: {
+      generation: 2,
+      value: { elasticsearch: 'available', savedObjects: 'degraded', overall: 'degraded' },
+    },
+  });
+  assert.deepEqual(absent, [undefined, undefined]);
   assert.equal(completed, false);
   assert.equal(statuses[statuses.length - 1], 'degraded');
   subscription.unsubscribe();
@@ -795,6 +830,24 @@ test('read classification is anchored and document ids cannot impersonate endpoi
   const admitted = adversarialWriteCandidates().filter((path) => !isEsWrite('POST', path));
   assert.equal(adversarialWriteCandidates().length, 242);
   assert.deepEqual(admitted, []);
+  assert.equal(isEsWrite('GET', '/orders/_refresh'), true);
+  assert.equal(isEsWrite('GET', '/orders/_flush'), true);
+  assert.equal(isEsWrite('GET', '/_refresh'), true);
+  assert.equal(isEsWrite('GET', '/orders/_doc/1?refresh=true'), true);
+  assert.equal(isEsWrite('HEAD', '/orders/_doc/1?refresh=wait_for'), true);
+  assert.equal(isEsWrite('POST', '/orders/_mget', { refresh: 'true' }), true);
+  assert.equal(isEsWrite('POST', '/orders/_search?pipeline=ingest'), true);
+  assert.equal(isEsWrite('OPTIONS', '/orders/_search'), true);
+  assert.equal(isEsWrite('TRACE', '/orders'), true);
+  assert.equal(isEsWrite('CONNECT', '/orders/_doc/1'), true);
+  assert.equal(isEsWrite('GET', '/orders/_doc/1'), false);
+  assert.equal(isEsWrite('GET', '/orders/_doc/1?refresh=false'), false);
+  assert.equal(isEsWrite('GET', '/.kibana-event-log-*/_settings'), false);
+  assert.equal(isEsWrite('HEAD', '/_index_template/.kibana-event-log-template'), false);
+  const queryAdmitted = adversarialQueryCandidates().filter(
+    (candidate) => !isEsWrite(candidate.method, candidate.path, candidate.query)
+  );
+  assert.deepEqual(queryAdmitted, []);
 });
 
 /** Recreates the 242-path set: document ids, bulk shapes, underscore ids, encoding, slashes, queries. */
@@ -868,6 +921,42 @@ const adversarialWriteCandidates = (): string[] => {
     '/_nodes/reload_secure_settings'
   );
   return paths;
+};
+
+/** Query-param and admin-GET writes. A refresh=false document get stays out of this set. */
+const adversarialQueryCandidates = (): Array<{
+  method: string;
+  path: string;
+  query?: Record<string, string>;
+}> => {
+  const paths = [
+    '/orders/_search',
+    '/orders/_mget',
+    '/_query',
+    '/orders/_doc/1',
+    '/orders/_source/1',
+    '/_search/scroll',
+  ];
+  const candidates: Array<{ method: string; path: string; query?: Record<string, string> }> = [];
+  for (const path of paths) {
+    candidates.push({ method: 'POST', path: `${path}?refresh=true` });
+    candidates.push({ method: 'GET', path: `${path}?refresh=wait_for` });
+    candidates.push({ method: 'POST', path, query: { refresh: 'true' } });
+    candidates.push({ method: 'POST', path, query: { refresh: 'wait_for' } });
+    candidates.push({ method: 'POST', path: `${path}?pipeline=p` });
+    candidates.push({ method: 'POST', path, query: { wait_for_active_shards: '1' } });
+  }
+  for (const method of ['OPTIONS', 'TRACE', 'CONNECT', 'FOO']) {
+    candidates.push({ method, path: '/orders/_search' });
+  }
+  candidates.push(
+    { method: 'GET', path: '/orders/_refresh' },
+    { method: 'GET', path: '/orders/_flush' },
+    { method: 'GET', path: '/_flush' },
+    { method: 'HEAD', path: '/orders/_doc/1?refresh=true' },
+    { method: 'GET', path: '/orders/_forcemerge' }
+  );
+  return candidates;
 };
 
 test('an already-aborted host signal still cancels the runner', () => {
@@ -1125,4 +1214,188 @@ test('bulk item namespaces bridge even when an options bag is present', () => {
     }),
     'bridge'
   );
+});
+
+const scriptedEndpoint = (
+  script: (runId: string, send: (packet: Packet) => void) => void
+) => {
+  let handler: (packet: Packet) => void = () => {};
+  return () => ({
+    send(packet: Packet) {
+      if (packet.kind !== 'run') return;
+      script(packet.bundle.runId, handler);
+    },
+    onMessage(next: (packet: Packet) => void) {
+      handler = next;
+      handler({ version: 1, kind: 'ready' });
+    },
+    onExit() {},
+    stop: async () => {},
+  });
+};
+
+test('rule budget starts when execution starts, after bootstrap', async () => {
+  const registry = new ModuleRegistry(new Set());
+  const host = new ExecutionHost(
+    registry,
+    { abortGraceMs: 50 },
+    scriptedEndpoint((runId, send) => {
+      setTimeout(() => send({ version: 1, kind: 'execution_start', runId }), 100);
+      setTimeout(
+        () =>
+          send({
+            version: 1,
+            kind: 'outcome',
+            runId,
+            value: encode({ ok: true }),
+            failed: false,
+            heapUsed: 1,
+            rss: 1,
+          }),
+        200
+      );
+    })
+  );
+  const outcome = await host.run({
+    workloadClass: 'budget',
+    moduleId: 'unused',
+    input: {},
+    principal: 'alice',
+    space: 'default',
+    capabilities: {},
+    deadlineMs: 150,
+    bootstrapDeadlineMs: 500,
+  });
+  assert.equal(outcome.status, 'success');
+  await host.stop();
+});
+
+test('a boot that never starts execution dies at the bootstrap deadline', async () => {
+  const registry = new ModuleRegistry(new Set());
+  const host = new ExecutionHost(
+    registry,
+    { abortGraceMs: 20 },
+    scriptedEndpoint((runId, send) => {
+      setTimeout(
+        () =>
+          send({
+            version: 1,
+            kind: 'outcome',
+            runId,
+            value: encode({ ok: true }),
+            failed: false,
+            heapUsed: 1,
+            rss: 1,
+          }),
+        250
+      );
+    })
+  );
+  const outcome = await host.run({
+    workloadClass: 'wedged',
+    moduleId: 'unused',
+    input: {},
+    principal: 'alice',
+    space: 'default',
+    capabilities: {},
+    deadlineMs: 1000,
+    bootstrapDeadlineMs: 80,
+  });
+  assert.equal(outcome.status, 'terminated');
+  if (outcome.status === 'terminated') assert.equal(outcome.reason, 'deadline');
+  await host.stop();
+});
+
+test('a duplicate execution_start does not extend the rule budget', async () => {
+  const registry = new ModuleRegistry(new Set());
+  const host = new ExecutionHost(
+    registry,
+    { abortGraceMs: 20 },
+    scriptedEndpoint((runId, send) => {
+      setTimeout(() => send({ version: 1, kind: 'execution_start', runId }), 40);
+      setTimeout(() => send({ version: 1, kind: 'execution_start', runId }), 90);
+      setTimeout(
+        () =>
+          send({
+            version: 1,
+            kind: 'outcome',
+            runId,
+            value: encode({ ok: true }),
+            failed: false,
+            heapUsed: 1,
+            rss: 1,
+          }),
+        150
+      );
+    })
+  );
+  const outcome = await host.run({
+    workloadClass: 'duplicate-start',
+    moduleId: 'unused',
+    input: {},
+    principal: 'alice',
+    space: 'default',
+    capabilities: {},
+    deadlineMs: 80,
+    bootstrapDeadlineMs: 500,
+  });
+  assert.equal(outcome.status, 'terminated');
+  if (outcome.status === 'terminated') assert.equal(outcome.reason, 'deadline');
+  await host.stop();
+});
+
+test('execution_start during cancel does not resurrect the run', async () => {
+  const registry = new ModuleRegistry(new Set());
+  const controller = new AbortController();
+  const host = new ExecutionHost(
+    registry,
+    { abortGraceMs: 200 },
+    scriptedEndpoint((runId, send) => {
+      setTimeout(() => controller.abort(), 30);
+      setTimeout(() => send({ version: 1, kind: 'execution_start', runId }), 60);
+      setTimeout(
+        () =>
+          send({
+            version: 1,
+            kind: 'outcome',
+            runId,
+            value: encode({ ok: true }),
+            failed: false,
+            heapUsed: 1,
+            rss: 1,
+          }),
+        100
+      );
+    })
+  );
+  const outcome = await host.run({
+    workloadClass: 'no-resurrect',
+    moduleId: 'unused',
+    input: {},
+    principal: 'alice',
+    space: 'default',
+    capabilities: {},
+    deadlineMs: 1000,
+    bootstrapDeadlineMs: 500,
+    signal: controller.signal,
+  });
+  assert.equal(outcome.status, 'terminated');
+  if (outcome.status === 'terminated') assert.equal(outcome.reason, 'cancelled');
+  await host.stop();
+});
+
+test('a research lease keeps the claim through boot and starts the rule budget once', () => {
+  armResearchLease({
+    taskId: 'lease-1',
+    claimedAt: 1_000,
+    bootstrapMs: 30_000,
+    executionMs: 1_000,
+  });
+  assert.equal(researchExpiration('lease-1')?.getTime(), 32_000);
+  markResearchExecutionStarted('lease-1', 5_000);
+  assert.equal(researchExpiration('lease-1')?.getTime(), 6_000);
+  markResearchExecutionStarted('lease-1', 9_000);
+  assert.equal(researchExpiration('lease-1')?.getTime(), 6_000);
+  clearResearchLease('lease-1');
+  assert.equal(researchExpiration('lease-1'), undefined);
 });

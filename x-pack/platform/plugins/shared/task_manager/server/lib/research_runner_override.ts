@@ -204,6 +204,69 @@ export const consumeCollateralReschedule = (
   return { refunded: true, count: count + 1 };
 };
 
+/** Island boot is inside the claim, not the rule timeout. Cold boot measured ~4s. */
+export const RESEARCH_BOOTSTRAP_DEADLINE_MS = 30_000;
+
+interface ResearchLease {
+  readonly claimedAt: number;
+  readonly bootstrapMs: number;
+  readonly executionMs: number;
+  executionStartedAt?: number;
+}
+
+const leases = new Map<string, ResearchLease>();
+
+/** Replaces any previous lease for this task. The rule budget is not running yet. */
+export const armResearchLease = (lease: {
+  readonly taskId: string;
+  readonly claimedAt: number;
+  readonly bootstrapMs: number;
+  readonly executionMs: number;
+}): void => {
+  if (!lease.taskId) return;
+  leases.set(lease.taskId, {
+    claimedAt: lease.claimedAt,
+    bootstrapMs: lease.bootstrapMs,
+    executionMs: lease.executionMs,
+  });
+};
+
+/** Once. A second packet must not move the execution clock. */
+export const markResearchExecutionStarted = (taskId: string, at = Date.now()): void => {
+  const lease = leases.get(taskId);
+  if (!lease || lease.executionStartedAt !== undefined) return;
+  lease.executionStartedAt = at;
+};
+
+/**
+ * While booting, the document stays claimed through bootstrap plus the rule budget.
+ * After execution_start, the rule budget is `at + executionMs`.
+ */
+export const researchExpiration = (taskId: string): Date | undefined => {
+  const lease = leases.get(taskId);
+  if (!lease) return undefined;
+  const at =
+    lease.executionStartedAt === undefined
+      ? lease.claimedAt + lease.bootstrapMs + lease.executionMs
+      : lease.executionStartedAt + lease.executionMs;
+  return new Date(at);
+};
+
+export const clearResearchLease = (taskId: string): void => {
+  leases.delete(taskId);
+};
+
+/** Rule timeout from the task definition, or the caller fallback. */
+export const researchExecutionBudgetMs = (taskType: string, fallbackMs: number): number => {
+  const timeout = researchDefinitionMeta(taskType)?.timeout;
+  if (!timeout || !isInterval(timeout)) return fallbackMs;
+  try {
+    return parseIntervalAsMillisecond(timeout);
+  } catch {
+    return fallbackMs;
+  }
+};
+
 /** Creates the task runner. An execution class wins, then the legacy override, then the real runner. */
 export const createTaskRunnerWithResearchOverride = (
   taskType: string,

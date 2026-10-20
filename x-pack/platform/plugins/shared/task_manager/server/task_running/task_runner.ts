@@ -27,6 +27,7 @@ import { getExecutionContextRunner } from '../lib/execution_context';
 import {
   consumeCollateralReschedule,
   createTaskRunnerWithResearchOverride,
+  researchExpiration,
 } from '../lib/research_runner_override';
 import type { TaskMarkRunning, TaskRun, TaskTiming, TaskManagerStat } from '../task_events';
 import {
@@ -317,6 +318,8 @@ export class TaskManagerRunner implements TaskRunner {
    * Gets the time at which this task will expire.
    */
   public get expiration() {
+    const leased = researchExpiration(this.id);
+    if (leased) return leased;
     return intervalFromDate(
       // if the task is running, use it's started at, otherwise use the timestamp at
       // which it was last updated
@@ -1215,8 +1218,9 @@ export class TaskManagerRunner implements TaskRunner {
       if (!stopped) {
         const taskInstance = this.instance.task;
         try {
-          // Set retryAt to now + 5m
-          const updatedRetryAt = new Date(Date.now() + 5 * 60 * 1000);
+          // A worker boot holds the claim through bootstrap + the rule budget, not now+5m.
+          const leased = researchExpiration(this.id);
+          const updatedRetryAt = leased ?? new Date(Date.now() + 5 * 60 * 1000);
           this.logger.debug(
             `Attempting to update retryAt to ${updatedRetryAt.toISOString()} for long running task: ${
               this.id
@@ -1274,7 +1278,8 @@ export class TaskManagerRunner implements TaskRunner {
       }
     };
 
-    let timer = setTimeout(updateRetryAt, UPDATE_RETRY_AT_INTERVAL);
+    const firstDelay = researchExpiration(this.id) ? 0 : UPDATE_RETRY_AT_INTERVAL;
+    let timer = setTimeout(updateRetryAt, firstDelay);
 
     const stop = () => {
       stopped = true;

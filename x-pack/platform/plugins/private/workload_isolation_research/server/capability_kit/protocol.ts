@@ -96,6 +96,8 @@ export interface WorkerContext {
     signal?: AbortSignal,
     options?: { readonly detached?: boolean }
   ): Promise<CodecInput>;
+  /** Once, after boot and parity, immediately before the task runner starts. */
+  notifyExecutionStart?(): void;
   callSync(
     capability: string,
     operation: string,
@@ -164,6 +166,8 @@ export type Packet =
   | { readonly version: 1; readonly kind: 'heartbeat' }
   /** 0.1.12: task module loaded, user code starting (stall watchdog arms here, not at dispatch). */
   | { readonly version: 1; readonly kind: 'started'; readonly runId: string }
+  /** Once, after island boot and parity, immediately before runner.run(). */
+  | { readonly version: 1; readonly kind: 'execution_start'; readonly runId: string }
   | {
       readonly version: 1;
       readonly kind: 'callback';
