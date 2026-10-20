@@ -157,7 +157,7 @@ describe('pollActionResponses', () => {
     expect(search).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({
-        index: 'logs-osquery_manager.action.responses*',
+        index: ['logs-osquery_manager.action.responses*', '.logs-osquery_manager.action.responses*'],
         size: 0,
         aggs: {
           distinct_agents: { cardinality: { field: 'agent_id' } },
@@ -523,6 +523,101 @@ describe('pollActionResponses', () => {
       });
 
       expect(result.rows).toEqual([{ pid: 1 }]);
+    });
+  });
+
+  describe('index coverage and space scoping', () => {
+    const bothSearches = () =>
+      jest
+        .fn()
+        .mockResolvedValueOnce(responsesSearchResult(1))
+        .mockResolvedValueOnce({ hits: { total: { value: 0 }, hits: [] } });
+
+    it('reads legacy and new action-response locations so pre-1.12 integrations still complete', async () => {
+      const search = bothSearches();
+
+      await pollActionResponses({ search } as any, 'query-action-1', {
+        budgetMs: 10,
+        intervalMs: 1,
+        spaceId: 'default',
+        expectedAgentCount: 1,
+      });
+
+      // Older integration packages report completion into the legacy
+      // transform-fed index; omitting it strands those queries on `pending`.
+      expect(search.mock.calls[0][0].index).toEqual([
+        'logs-osquery_manager.action.responses*',
+        '.logs-osquery_manager.action.responses*',
+      ]);
+    });
+
+    it('matches agent-carried provenance in a named space on both reads', async () => {
+      const search = bothSearches();
+
+      await pollActionResponses({ search } as any, 'query-action-1', {
+        budgetMs: 10,
+        intervalMs: 1,
+        spaceId: 'my-space',
+        expectedAgentCount: 1,
+      });
+
+      // Fleet never forwards the action's top-level `space_id` to osquerybeat,
+      // so a named-space poll that only matches that field returns nothing and
+      // reports a successful query as permanently pending.
+      const expectedFilter = {
+        bool: {
+          should: [
+            { term: { space_id: 'my-space' } },
+            {
+              bool: {
+                filter: { term: { 'action_data.space_id': 'my-space' } },
+                must_not: { exists: { field: 'space_id' } },
+              },
+            },
+          ],
+        },
+      };
+
+      for (const call of search.mock.calls) {
+        expect(call[0].query.bool.filter).toContainEqual(expectedFilter);
+      }
+    });
+
+    it('still excludes named-space documents from a default-space poll', async () => {
+      const search = bothSearches();
+
+      await pollActionResponses({ search } as any, 'query-action-1', {
+        budgetMs: 10,
+        intervalMs: 1,
+        spaceId: 'default',
+        expectedAgentCount: 1,
+      });
+
+      // The field-less allowance must not swallow documents stamped for
+      // another space via `action_data.space_id`.
+      for (const call of search.mock.calls) {
+        expect(call[0].query.bool.filter).toContainEqual({
+          bool: {
+            should: [
+              { term: { space_id: 'default' } },
+              {
+                bool: {
+                  must_not: [
+                    { exists: { field: 'space_id' } },
+                    { exists: { field: 'action_data.space_id' } },
+                  ],
+                },
+              },
+              {
+                bool: {
+                  filter: { term: { 'action_data.space_id': 'default' } },
+                  must_not: { exists: { field: 'space_id' } },
+                },
+              },
+            ],
+          },
+        });
+      }
     });
   });
 });

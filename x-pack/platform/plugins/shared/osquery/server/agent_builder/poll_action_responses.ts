@@ -9,6 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import {
   ACTION_RESPONSES_DATA_STREAM_INDEX,
+  ACTION_RESPONSES_INDEX,
   OSQUERY_INTEGRATION_NAME,
 } from '../../common/constants';
 import { buildSpaceIdFilter } from '../utils/build_space_id_filter';
@@ -22,7 +23,23 @@ import { buildSpaceIdFilter } from '../utils/build_space_id_filter';
  * they return".
  */
 const RESULTS_INDEX_PATTERN = `logs-${OSQUERY_INTEGRATION_NAME}.result*`;
-const ACTION_RESPONSES_INDEX_PATTERN = `${ACTION_RESPONSES_DATA_STREAM_INDEX}*`;
+/**
+ * Both response locations are read. The new data stream is written directly by
+ * osquerybeat but only exists from integration package 1.12; earlier versions
+ * report completion into the legacy transform-fed index, so polling the new
+ * stream alone leaves every query on an older integration permanently
+ * `pending`/`partial`. The search strategy makes the same old/new distinction
+ * (see `query.action_results.dsl.ts`); here both patterns are read at once with
+ * `ignore_unavailable`, so whichever exists answers.
+ *
+ * Reading both cannot double-count: every aggregation below is `cardinality`
+ * over `agent_id` or a per-agent `max`, so an agent reported in both indices
+ * still counts once.
+ */
+const ACTION_RESPONSES_INDEX_PATTERN = [
+  `${ACTION_RESPONSES_DATA_STREAM_INDEX}*`,
+  `${ACTION_RESPONSES_INDEX}*`,
+];
 
 export type LiveQueryPollStatus =
   | 'completed'
@@ -139,7 +156,16 @@ export const pollActionResponses = async (
   }: PollActionResponsesOptions
 ): Promise<PollActionResponsesResult> => {
   const deadline = Date.now() + budgetMs;
-  const spaceFilter = buildSpaceIdFilter(spaceId);
+  // Both callers reach here bound to a single query `action_id` they either
+  // just created (`run_live_query`) or proved belongs to this space via
+  // `assertActionBelongsToSpace` (`get_live_query_results`), which is the
+  // precondition `buildSpaceIdFilter` documents for `matchActionDataSpaceId`.
+  // It is required, not an optimisation: Fleet never forwards the action's
+  // top-level `space_id` to osquerybeat, so result and action-response
+  // documents carry the originating space only as `action_data.space_id`. With
+  // the default options a named-space poll matches nothing and reports a
+  // successful query as permanently pending.
+  const spaceFilter = buildSpaceIdFilter(spaceId, { matchActionDataSpaceId: true });
   let responded = 0;
   let rows: Array<Record<string, unknown>> = [];
   let searchSucceeded = false;
