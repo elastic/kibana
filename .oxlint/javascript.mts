@@ -19,15 +19,6 @@ export const javascriptRules: DummyRuleMap = {
   // '@eslint-community/eslint-comments/no-unused-disable': 'error',
   // '@eslint-community/eslint-comments/no-unused-enable': 'error',
   'guard-for-in': 'error',
-  // 'import/default': 'error',
-  // 'import/export': 'error',
-  // 'import/named': 'error',
-  // 'import/namespace': 'error',
-  // 'import/no-default-export': 'error',
-  // 'import/no-duplicates': 'error',
-  // 'import/no-dynamic-require': 'error',
-  // 'import/no-named-as-default': 'error',
-  // 'import/no-named-as-default-member': 'error',
   // 'import/order': [
   //   'error',
   //   {
@@ -82,7 +73,6 @@ export const javascriptRules: DummyRuleMap = {
   // 'no-unsanitized/property': 'error',
   // 'no-unused-expressions': 'error',
   'no-unused-labels': 'error',
-  // 'no-unused-vars': ['error'],
   // 'no-use-before-define': ['error', 'nofunc'],
   // 'no-var': 'error',
   'no-with': 'error',

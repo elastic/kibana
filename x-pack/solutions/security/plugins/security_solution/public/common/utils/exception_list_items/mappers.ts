@@ -140,7 +140,8 @@ export const conditionEntriesToEntries = (
       entriesArray.push(entry);
     } else if (
       (conditionEntry.field.includes(EntryFieldType.EXECUTABLE) ||
-        conditionEntry.field.includes(EntryFieldType.PATH)) &&
+        conditionEntry.field.includes(EntryFieldType.PATH) ||
+        conditionEntry.field.includes(EntryFieldType.FILENAME)) &&
       conditionEntry.type === 'wildcard'
     ) {
       const entry = createWildcardPathEntry(conditionEntry.field, conditionEntry.value);
@@ -192,7 +193,9 @@ export const entriesToConditionEntriesMap = <T extends ConditionEntry = Conditio
         ]),
       } as ConditionEntriesMap<T>;
     } else if (
-      (field.includes(EntryFieldType.EXECUTABLE) || field.includes(EntryFieldType.PATH)) &&
+      (field.includes(EntryFieldType.EXECUTABLE) ||
+        field.includes(EntryFieldType.PATH) ||
+        field.includes(EntryFieldType.FILENAME)) &&
       (entry.type === 'match' || entry.type === 'match_any' || entry.type === 'wildcard')
     ) {
       return {

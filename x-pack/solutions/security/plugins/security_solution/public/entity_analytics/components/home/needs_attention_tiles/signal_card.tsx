@@ -382,6 +382,7 @@ export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, onToggle
   const isLoading = card.isLoading ?? false;
   const isZero = card.value === 0;
   const interactive = !isZero && !isLoading;
+  const noDataMessage = isZero && !isLoading ? card.noDataMessage : undefined;
   // Hover only: mouse clicks must not leave focus chrome that looks like hover after deselect.
   const emphasized = interactive && hovered;
 
@@ -565,23 +566,24 @@ export const SignalCard: React.FC<SignalCardProps> = ({ card, selected, onToggle
                 gap: ${DELTA_VALUE_GAP}px;
               `}
             >
-              <EuiText
-                css={css`
-                  font-family: 'Elastic UI Numeric', ${euiTheme.font.family};
-                  font-size: ${VALUE_FONT_SIZE}px;
-                  font-weight: ${euiTheme.font.weight.bold};
-                  line-height: ${METRIC_LINE_HEIGHT};
-                  text-align: end;
-                  color: ${euiTheme.colors.textParagraph};
-                `}
-              >
-                {renderValueRow(card, isLoading, isZero)}
-              </EuiText>
-              {isZero && !isLoading && card.noDataMessage ? (
+              {noDataMessage ? (
                 <EuiText size="xs" color="subdued">
-                  {card.noDataMessage}
+                  {noDataMessage}
                 </EuiText>
-              ) : null}
+              ) : (
+                <EuiText
+                  css={css`
+                    font-family: 'Elastic UI Numeric', ${euiTheme.font.family};
+                    font-size: ${VALUE_FONT_SIZE}px;
+                    font-weight: ${euiTheme.font.weight.bold};
+                    line-height: ${METRIC_LINE_HEIGHT};
+                    text-align: end;
+                    color: ${euiTheme.colors.textParagraph};
+                  `}
+                >
+                  {renderValueRow(card, isLoading, isZero)}
+                </EuiText>
+              )}
               {interactive && card.isDeltaLoading ? (
                 <span>
                   <EuiLoadingSpinner size="s" /> <DeltaLabel />

@@ -56,7 +56,7 @@ import {
 import { EntityPanelHeaderTabs } from '../../../../flyout/entity_details/shared/components/entity_panel_tabs';
 import { EntityStoreTableTab } from '../../../../flyout/entity_details/shared/components/entity_store_table_tab';
 import { EntitySummaryGrid } from '../../../../flyout/entity_details/shared/components/entity_summary_grid';
-import type { EntityViewMode } from '../../../../flyout/entity_details/shared/types';
+import type { EntityViewMode } from '../../../../../common/entity_analytics/entity_store/resolution_group';
 
 export interface HostProps {
   /**
@@ -348,6 +348,7 @@ export const Host: FC<HostProps> = memo(function Host({
             entityType: EntityType.host,
             value: hostName,
             entityId: entityStoreEntityId,
+            mode,
             onOpenEntity: onShowHost,
             title: hostName,
             origin: FLYOUT_ORIGIN.ANOMALIES_SECTION,
@@ -358,6 +359,7 @@ export const Host: FC<HostProps> = memo(function Host({
               return openEntityVulnerabilityInsights({
                 value: hostName,
                 entityId: panelDisplayEntityId,
+                mode,
                 onShowHost,
                 title: hostName,
                 origin: FLYOUT_ORIGIN.INSIGHTS_VULNERABILITY,
@@ -367,6 +369,8 @@ export const Host: FC<HostProps> = memo(function Host({
                 entityType: EntityType.host,
                 value: hostName,
                 entityId: panelDisplayEntityId,
+                mode,
+                scopeId,
                 onShowEntity: onShowHost,
                 title: hostName,
                 origin: FLYOUT_ORIGIN.INSIGHTS_ALERTS,
@@ -376,6 +380,7 @@ export const Host: FC<HostProps> = memo(function Host({
                 entityType: EntityType.host,
                 value: hostName,
                 entityId: panelDisplayEntityId,
+                mode,
                 onShowEntity: onShowHost,
                 title: hostName,
                 origin: FLYOUT_ORIGIN.INSIGHTS_MISCONFIGURATION,
@@ -420,6 +425,7 @@ export const Host: FC<HostProps> = memo(function Host({
       scopeId,
       panelDisplayEntityId,
       entityStoreEntityId,
+      mode,
       onShowHost,
       onShowRelatedEntityFromGraph,
       onShowRelatedEntityFromResolution,
@@ -471,9 +477,12 @@ export const Host: FC<HostProps> = memo(function Host({
             onAssetCriticalityChange={onAssetCriticalityChanged}
             isPreviewMode={false}
             entityRecord={entityStoreV2Enabled ? observedHost.entityRecord ?? undefined : undefined}
+            aliasRecords={aliasRecords}
             noEntityInStore={noEntityInStore}
+            isEntityRecordLoading={entityStoreV2Enabled && entityFromStoreResult.isLoading}
             entityStoreV2Enabled={entityStoreV2Enabled}
             entityStoreEntityId={entityStoreEntityId}
+            mode={mode}
             onShowEntity={onShowRelatedEntityFromResolution}
             hideHeaderIcons
             riskScoreQueryId={HOST_PANEL_RISK_SCORE_QUERY_ID}

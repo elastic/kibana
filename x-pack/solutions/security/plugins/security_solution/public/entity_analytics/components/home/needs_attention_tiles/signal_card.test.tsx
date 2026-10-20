@@ -236,7 +236,13 @@ describe('SignalCard', () => {
     expect(tile).toHaveAttribute('aria-disabled', 'true');
   });
 
-  it('shows a dash and the no-data message at 0, with no delta, no sparkline and no click', () => {
+  it('shows a dash at 0 without a no-data message', () => {
+    renderCard({ value: 0 });
+
+    expect(screen.getByTestId('eaFaceliftSignalCard-newEntity')).toHaveTextContent('—');
+  });
+
+  it('shows the no-data message instead of the dash at 0, with no delta, no sparkline and no click', () => {
     const onToggle = jest.fn();
     renderCard(
       { value: 0, noDataMessage: 'No risk scores yet', delta: 5, trend: [1, 2, 3] },
@@ -244,7 +250,7 @@ describe('SignalCard', () => {
     );
     const tile = screen.getByTestId('eaFaceliftSignalCard-newEntity');
 
-    expect(tile).toHaveTextContent('—');
+    expect(tile).not.toHaveTextContent('—');
     expect(tile).toHaveTextContent('No risk scores yet');
     expect(screen.queryByTestId('eaFaceliftSignalCardDelta')).not.toBeInTheDocument();
     expect(mockSeriesData).toBeUndefined();

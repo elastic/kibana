@@ -14,21 +14,31 @@ import {
   ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
   SPACE_IDS,
 } from '@kbn/rule-data-utils';
+import {
+  ATTACK_DISCOVERY_TEST_ALIAS,
+  ATTACK_DISCOVERY_TEST_BACKING_INDEX,
+} from '../../../../common/lib/constants';
 
 /**
- * Stand-ins for `.alerts-security.attack.discovery.alerts-default`,
- * `.adhoc.alerts-security.attack.discovery.alerts-default` and `.alerts-security.alerts-default`.
- * Attaching and status syncing are index-agnostic — both read the attachment's `metadata.index` —
- * so dedicated test indices exercise the same code paths without depending on the detection
- * engine's or the attack discovery schedule's index templates.
+ * Stand-ins for the scheduled and ad-hoc attack discovery indices and for
+ * `.alerts-security.alerts-default`.
  *
- * The `.alerts` prefix is load bearing: alerting RBAC reads the referenced documents as the
- * internal `kibana_system` user, which is only privileged on `.alerts*`. An ordinary index name
- * makes that read return no `_source`, and the authorization check then has no rule type or
- * consumer to assert on and silently passes.
+ * The Cases platform refuses an attack whose `metadata.index` is outside the two attack discovery
+ * families, and reads the rest as the caller through the pattern `toReadableAttackIndexPattern` maps
+ * the index to. So the scheduled fixture is a backing index behind an alias, the way the alerting
+ * framework lays one out: attachments carry the backing index, as the find API returns it, and only
+ * the alias matches the pattern. The ad-hoc fixture is a plain index the ad-hoc pattern matches
+ * directly.
+ *
+ * Every name is inside a family the internal `kibana_system` user is privileged on (`.alerts*`,
+ * `.internal.alerts*`, `.adhoc.alerts*`). That is load bearing: alerting RBAC reads the referenced
+ * documents as that user, and a read it is not privileged for returns no `_source`, leaving the
+ * authorization check with no rule type or consumer to assert on, so it silently passes. The fixtures
+ * themselves are written through the test's superuser `es` client, which can write all of them.
  */
-export const ATTACK_INDEX = '.alerts-test-cases-attack-discovery';
-export const AD_HOC_ATTACK_INDEX = '.adhoc.alerts-test-cases-attack-discovery';
+export const ATTACK_INDEX = ATTACK_DISCOVERY_TEST_BACKING_INDEX;
+export const ATTACK_ALIAS = ATTACK_DISCOVERY_TEST_ALIAS;
+export const AD_HOC_ATTACK_INDEX = '.adhoc.alerts-security.attack.discovery.alerts-test-cases';
 export const ALERT_INDEX = '.alerts-test-cases-attack-constituent';
 
 /**
@@ -66,6 +76,19 @@ export const buildAlertDocument = (spaceId = 'default') => ({
   [ALERT_WORKFLOW_STATUS]: 'open',
 });
 
+/** Creates the scheduled attack backing index and its alias, as the alerting framework does. */
+const ensureAttackIndex = async (es: Client): Promise<void> => {
+  if (await es.indices.exists({ index: ATTACK_INDEX })) {
+    return;
+  }
+
+  await es.indices.create({
+    index: ATTACK_INDEX,
+    settings: { index: { hidden: true } },
+    aliases: { [ATTACK_ALIAS]: { is_write_index: true, is_hidden: true } },
+  });
+};
+
 /** Indexes the attack discovery documents (and optionally their constituent alerts) under test. */
 export const indexAttackDocuments = async ({
   es,
@@ -80,9 +103,11 @@ export const indexAttackDocuments = async ({
   alertIds?: string[];
   spaceId?: string;
 }): Promise<void> => {
+  await ensureAttackIndex(es);
+
   await Promise.all([
     ...attackIds.map((id) =>
-      es.index({ index: ATTACK_INDEX, id, document: buildAttackDocument(spaceId) })
+      es.index({ index: ATTACK_ALIAS, id, document: buildAttackDocument(spaceId) })
     ),
     ...adHocAttackIds.map((id) =>
       es.index({ index: AD_HOC_ATTACK_INDEX, id, document: buildAdHocAttackDocument(spaceId) })
@@ -101,6 +126,7 @@ export const indexAttackDocuments = async ({
   });
 };
 
+/** Deleting the backing index removes its alias with it. */
 export const deleteAttackDocuments = async (es: Client): Promise<void> => {
   await es.indices.delete({
     index: [ATTACK_INDEX, AD_HOC_ATTACK_INDEX, ALERT_INDEX],
