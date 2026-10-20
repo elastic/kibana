@@ -317,7 +317,7 @@ describe('NightshiftPage', () => {
     );
   });
 
-  it.each(['/detections', '/detections/unknown', '/detection', '/detection/events'])(
+  it.each(['/detections', '/detections/unknown'])(
     'redirects %s to the Events tab',
     async (path) => {
       const { history } = renderPage(path);

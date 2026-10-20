@@ -129,10 +129,7 @@ export function NightshiftPage(): React.ReactElement | null {
   );
   const isKnowledgePage = pathname === '/knowledge' || pathname.startsWith('/knowledge/');
   const isSourcesPage = pathname === '/sources' || pathname.startsWith('/sources/');
-  // `/detection` shipped first; keep its links working.
-  const isLegacyDetectionPath = pathname === '/detection' || pathname.startsWith('/detection/');
-  const isDetectionPage =
-    isLegacyDetectionPath || pathname === '/detections' || pathname.startsWith('/detections/');
+  const isDetectionPage = pathname === '/detections' || pathname.startsWith('/detections/');
   const isSettingsPage = pathname === '/settings' || pathname.startsWith('/settings/');
   const canUseAutomationsPage = canUseAutomations && pathname.startsWith('/automations');
   const isAutomationDetailRoute = pathname.startsWith('/automations/');
@@ -283,11 +280,6 @@ export function NightshiftPage(): React.ReactElement | null {
           }
         >
           <Routes>
-            <Route path="/detection/:tab?">
-              <Redirect
-                to={{ pathname: pathname.replace(/^\/detection(?=\/|$)/, '/detections'), search }}
-              />
-            </Route>
             <Route path="/detections/:tab?">
               <DetectionRoute
                 headerProps={{
