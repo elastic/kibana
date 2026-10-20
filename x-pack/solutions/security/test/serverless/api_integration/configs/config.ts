@@ -39,6 +39,19 @@ export default createTestConfig({
       { product_line: 'endpoint', product_tier: 'complete' },
       { product_line: 'cloud', product_tier: 'complete' },
     ])}`,
+    // MKI disables `customYaraSignaturesEnabled` through the kibana-controller override
+    // (https://github.com/elastic/serverless-gitops/blob/main/services/kibana-controller/values/qa/default.yaml),
+    // while the flag defaults to `true` in code. Mirror that here so local runs match MKI.
+    // CLI array values replace (not merge with) the list in config/serverless.security.yml,
+    // so that list is repeated with the extra `disable:` entry.
+    `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+      'riskScoreAssistantToolDisabled',
+      'disable:enableRiskScorePrivmonModifier',
+      'disable:kubernetesEnabled',
+      'trialCompanionEnabled',
+      'disable:linuxRansomwareProtection',
+      'disable:customYaraSignaturesEnabled',
+    ])}`,
   ],
   enableFleetDockerRegistry: false,
 });
