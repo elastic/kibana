@@ -22,8 +22,9 @@ const MAX_SOURCE_INDEX_LENGTH = 1024;
 const MAX_FIELD_NAME_LENGTH = 256;
 const MAX_CORPUS_FILTER_LENGTH = 2000;
 /** Per-item runs fail at around 2,800 items on serverless (elastic/kibana#298948). */
-const MAX_PER_ITEM_RUN_LIMIT = 2_000;
+const MAX_DOCUMENTS_LIMIT = 2_000;
 const MAX_BODY_CHARS_LIMIT = 50_000;
+const MAX_UNITS_LIMIT = MAX_DOCUMENTS_LIMIT;
 const MAX_KIS_LENGTH = 50_000;
 /** One KI per source, so the list is capped at the 100-KI onboarding budget (`strategy_catalog`, "The KI budget"). */
 const MAX_INDEX_METADATA_SOURCES = 100;
@@ -172,7 +173,7 @@ const installAutomationTemplateSchema = z
       .number()
       .int()
       .min(1)
-      .max(MAX_PER_ITEM_RUN_LIMIT)
+      .max(MAX_DOCUMENTS_LIMIT)
       .optional()
       .describe(
         'Optional. Upper bound on documents summarised in one run, at most 2,000. document_orchestration only. Defaults to 50. For a larger corpus, narrow it with corpusFilter or use index_metadata or unit_profile.'
@@ -190,7 +191,7 @@ const installAutomationTemplateSchema = z
       .number()
       .int()
       .min(1)
-      .max(MAX_PER_ITEM_RUN_LIMIT)
+      .max(MAX_UNITS_LIMIT)
       .optional()
       .describe(
         'Optional. Upper bound on units profiled in one run, at most 2,000. Each costs a model call. unit_profile only. Defaults to 100.'
