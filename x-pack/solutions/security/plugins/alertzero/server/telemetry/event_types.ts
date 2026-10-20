@@ -543,7 +543,7 @@ export const ALERTZERO_RULE_TUNING_REVIEW_COMPLETED_EVENT: EventTypeOpts<AlertZe
         'Whether an approved tuning change landed, confirmed by re-reading the rule (a changed revision, or the exception item the change added)'
       ),
       approved_not_applied: flagField(
-        'Whether an approved tuning change with an action did not land on the rule; the alerts then stay untagged for a later sweep'
+        'Whether an approved tuning change with an action succeeded but could not be confirmed on the rule (the re-read failed or showed no new revision). The review still tags the alerts and closes the Investigation, so no later sweep retries it'
       ),
       backtest_ran: flagField(
         'Whether both backtest previews (current and proposed rule) succeeded'

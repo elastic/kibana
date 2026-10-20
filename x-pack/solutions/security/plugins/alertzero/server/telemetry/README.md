@@ -219,7 +219,7 @@ Emitted by a Rule Tuning review for one rule, when it ends: after the manual ent
 | `confidence` | keyword | yes | The diagnosis's stated confidence: `low`, `medium`, `high` or `none` |
 | `decision` | keyword | yes | `approved`, `dismissed`, `undecided` (a proposal nobody decided) or `none` (no proposal) |
 | `applied` | boolean | yes | Whether an approved change landed on the rule, confirmed by re-reading it: a new revision, or the exception item the change added |
-| `approved_not_applied` | boolean | yes | Whether an approved change with an action did not land. The alerts then stay untagged, so a later sweep retries the rule |
+| `approved_not_applied` | boolean | yes | Whether an approved change with an action succeeded but could not be confirmed on the rule (the re-read failed or showed no new revision). The review still tags the alerts and closes the Investigation, so no later sweep retries it |
 | `backtest_ran` | boolean | yes | Whether both backtest previews (current and proposed rule) succeeded |
 | `backtest_reduced_alerts` | boolean | yes | Whether the proposed rule produced fewer preview alerts. False when the backtest did not run |
 | `rule_unavailable` | boolean | yes | Whether the rule could not be read or was disabled, so the review did nothing |
