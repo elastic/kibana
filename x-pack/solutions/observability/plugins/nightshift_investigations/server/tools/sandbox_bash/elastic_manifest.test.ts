@@ -49,7 +49,7 @@ describe('renderElasticManifest', () => {
   it('steers remote queries to a specific data stream instead of logs-*', () => {
     const content = renderElasticManifest(connector('remote-telemetry'));
 
-    expect(content).toContain('/_resolve/index/logging-us-east-1:logs-*nginx*');
+    expect(content).toContain('/_resolve/index/<remote>:logs-*nginx*');
     expect(content).toContain('FROM $1:logs-nginx.error-*');
     expect(content).not.toContain('FROM $1:logs-* ');
   });

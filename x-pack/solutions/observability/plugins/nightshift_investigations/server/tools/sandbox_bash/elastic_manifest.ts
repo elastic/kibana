@@ -105,7 +105,7 @@ export const renderElasticManifest = (
     '',
     '# Find the data streams that match a keyword on one remote',
     `curl --fail-with-body -sS --max-time 120 -H "Authorization: ${authHeader}" \\`,
-    `  "${url}/_resolve/index/logging-us-east-1:logs-*nginx*"`,
+    `  "${url}/_resolve/index/<remote>:logs-*nginx*"`,
     '',
     '# Count one data stream on every remote whose name starts with logging-, 8 at a time, each line',
     '# prefixed with its remote; failed requests print their error',
