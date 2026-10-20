@@ -7,12 +7,15 @@
 
 import { act, renderHook } from '@testing-library/react';
 import { useKibana } from '../../../../common/lib/kibana';
+import { useHuntWithAiAvailability } from '../use_hunt_with_ai_availability';
 import { PRODUCT_TOUR_BANNER_STORAGE_KEY, PRODUCT_TOUR_STEPS } from './constants';
 import { useProductTour } from './use_product_tour';
 
 jest.mock('../../../../common/lib/kibana');
+jest.mock('../use_hunt_with_ai_availability');
 
 const useKibanaMock = useKibana as jest.Mock;
+const useHuntWithAiAvailabilityMock = useHuntWithAiAvailability as jest.Mock;
 
 const createStorageMock = (initial: Record<string, unknown> = {}) => {
   const store = new Map<string, unknown>(Object.entries(initial));
@@ -27,7 +30,9 @@ let storage: ReturnType<typeof createStorageMock>;
 const renderProductTour = ({
   dismissed = false,
   toursEnabled = true,
-}: { dismissed?: boolean; toursEnabled?: boolean } = {}) => {
+  huntWithAiAvailable = true,
+}: { dismissed?: boolean; toursEnabled?: boolean; huntWithAiAvailable?: boolean } = {}) => {
+  useHuntWithAiAvailabilityMock.mockReturnValue(huntWithAiAvailable);
   storage = createStorageMock(dismissed ? { [PRODUCT_TOUR_BANNER_STORAGE_KEY]: true } : {});
   useKibanaMock.mockReturnValue({
     services: {
@@ -95,6 +100,24 @@ describe('useProductTour', () => {
     }
     act(() => result.current.nextStep());
 
+    expect(result.current.currentStep).toBe(0);
+  });
+
+  it('includes every step when hunt with AI is available', () => {
+    const { result } = renderProductTour();
+
+    expect(result.current.steps.map(({ id }) => id)).toEqual(['attention', 'huntWithAi', 'rows']);
+  });
+
+  it('drops the hunt with AI step when it is not available', () => {
+    const { result } = renderProductTour({ huntWithAiAvailable: false });
+
+    expect(result.current.steps.map(({ id }) => id)).toEqual(['attention', 'rows']);
+
+    act(() => result.current.startTour());
+    act(() => result.current.nextStep());
+    expect(result.current.currentStep).toBe(2);
+    act(() => result.current.nextStep());
     expect(result.current.currentStep).toBe(0);
   });
 

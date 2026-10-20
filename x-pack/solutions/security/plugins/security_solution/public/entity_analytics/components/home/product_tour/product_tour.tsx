@@ -13,7 +13,6 @@ import {
   PRODUCT_TOUR_CLOSE_TEST_ID,
   PRODUCT_TOUR_FINISH_TEST_ID,
   PRODUCT_TOUR_NEXT_TEST_ID,
-  PRODUCT_TOUR_STEPS,
   TOUR_POPOVER_WIDTH,
   getProductTourStepTestId,
   type ProductTourStepConfig,
@@ -21,6 +20,7 @@ import {
 import { STEP_CLOSE_TOUR, STEP_FINISH_TOUR, STEP_NEXT } from './translations';
 
 export interface ProductTourProps {
+  steps: readonly ProductTourStepConfig[];
   /** 1-based; 0 when the tour is not running. */
   currentStep: number;
   onNext: () => void;
@@ -30,11 +30,18 @@ export interface ProductTourProps {
 interface ProductTourStepProps {
   step: ProductTourStepConfig;
   stepNumber: number;
+  stepsTotal: number;
   onNext: () => void;
   onEnd: () => void;
 }
 
-const ProductTourStep: React.FC<ProductTourStepProps> = ({ step, stepNumber, onNext, onEnd }) => {
+const ProductTourStep: React.FC<ProductTourStepProps> = ({
+  step,
+  stepNumber,
+  stepsTotal,
+  onNext,
+  onEnd,
+}) => {
   const isAnchorMounted = useIsAnchorMounted(step.anchor);
 
   useEffect(() => {
@@ -51,7 +58,7 @@ const ProductTourStep: React.FC<ProductTourStepProps> = ({ step, stepNumber, onN
   // EuiTourStep resolves its anchor once on mount, so wait for the element.
   if (!isAnchorMounted) return null;
 
-  const isLastStep = stepNumber === PRODUCT_TOUR_STEPS.length;
+  const isLastStep = stepNumber === stepsTotal;
 
   return (
     <EuiTourStep
@@ -65,7 +72,7 @@ const ProductTourStep: React.FC<ProductTourStepProps> = ({ step, stepNumber, onN
         </EuiText>
       }
       step={stepNumber}
-      stepsTotal={PRODUCT_TOUR_STEPS.length}
+      stepsTotal={stepsTotal}
       isStepOpen
       minWidth={TOUR_POPOVER_WIDTH}
       maxWidth={TOUR_POPOVER_WIDTH}
@@ -108,9 +115,9 @@ const ProductTourStep: React.FC<ProductTourStepProps> = ({ step, stepNumber, onN
   );
 };
 
-/** Three-step tour of the Entity Analytics page controls. */
-export const ProductTour: React.FC<ProductTourProps> = ({ currentStep, onNext, onEnd }) => {
-  const step = PRODUCT_TOUR_STEPS[currentStep - 1];
+/** Step-by-step tour of the Entity Analytics page controls. */
+export const ProductTour: React.FC<ProductTourProps> = ({ steps, currentStep, onNext, onEnd }) => {
+  const step = steps[currentStep - 1];
   if (!step) return null;
 
   // Remount per step: EuiWrappingPopover moves the anchor into the popover and only puts it back on unmount.
@@ -119,6 +126,7 @@ export const ProductTour: React.FC<ProductTourProps> = ({ currentStep, onNext, o
       key={step.id}
       step={step}
       stepNumber={currentStep}
+      stepsTotal={steps.length}
       onNext={onNext}
       onEnd={onEnd}
     />

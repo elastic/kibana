@@ -14,6 +14,7 @@ import {
   PRODUCT_TOUR_CLOSE_TEST_ID,
   PRODUCT_TOUR_FINISH_TEST_ID,
   PRODUCT_TOUR_NEXT_TEST_ID,
+  PRODUCT_TOUR_STEPS,
   ROWS_MODE_SELECTOR_TEST_ID,
   SIGNAL_CARDS_TOUR_ANCHOR_TEST_ID,
   getProductTourStepTestId,
@@ -29,9 +30,11 @@ const ALL_ANCHORS = [
 const renderTour = ({
   currentStep,
   anchors = ALL_ANCHORS,
+  steps = PRODUCT_TOUR_STEPS,
 }: {
   currentStep: number;
   anchors?: string[];
+  steps?: typeof PRODUCT_TOUR_STEPS;
 }) => {
   const onNext = jest.fn();
   const onEnd = jest.fn();
@@ -43,7 +46,7 @@ const renderTour = ({
           <button key={testId} type="button" data-test-subj={testId} />
         ))}
       </div>
-      <ProductTour currentStep={currentStep} onNext={onNext} onEnd={onEnd} />
+      <ProductTour steps={steps} currentStep={currentStep} onNext={onNext} onEnd={onEnd} />
     </TestProviders>
   );
   return { ...utils, onNext, onEnd };
@@ -98,6 +101,16 @@ describe('ProductTour', () => {
     fireEvent.click(await screen.findByTestId(PRODUCT_TOUR_FINISH_TEST_ID));
 
     expect(onEnd).toHaveBeenCalledTimes(1);
+  });
+
+  it('numbers only the steps it gets', async () => {
+    const steps = PRODUCT_TOUR_STEPS.filter(({ id }) => id !== 'huntWithAi');
+    renderTour({ currentStep: 2, steps });
+
+    expect(await screen.findByTestId(getProductTourStepTestId('rows'))).toBeInTheDocument();
+    expect(screen.getByLabelText('Step 2 active')).toBeInTheDocument();
+    expect(screen.queryByLabelText(/^Step 3/)).not.toBeInTheDocument();
+    expect(screen.getByTestId(PRODUCT_TOUR_FINISH_TEST_ID)).toBeInTheDocument();
   });
 
   it('skips a step whose anchor never renders', () => {

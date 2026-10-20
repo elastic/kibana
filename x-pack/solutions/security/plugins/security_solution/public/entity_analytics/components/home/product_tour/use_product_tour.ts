@@ -7,10 +7,18 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import { useKibana } from '../../../../common/lib/kibana';
-import { PRODUCT_TOUR_BANNER_STORAGE_KEY, PRODUCT_TOUR_STEPS } from './constants';
+import { useHuntWithAiAvailability } from '../use_hunt_with_ai_availability';
+import {
+  HUNT_WITH_AI_STEP_ID,
+  PRODUCT_TOUR_BANNER_STORAGE_KEY,
+  PRODUCT_TOUR_STEPS,
+  type ProductTourStepConfig,
+} from './constants';
 
 export interface ProductTourState {
   isBannerVisible: boolean;
+  /** Steps whose target renders on the page. */
+  steps: readonly ProductTourStepConfig[];
   /** 1-based; 0 when the tour is not running. */
   currentStep: number;
   startTour: () => void;
@@ -30,6 +38,13 @@ export const useProductTour = (): ProductTourState => {
   );
   const [currentStep, setCurrentStep] = useState(0);
 
+  const isHuntWithAiAvailable = useHuntWithAiAvailability();
+  const steps = useMemo(
+    () =>
+      PRODUCT_TOUR_STEPS.filter(({ id }) => id !== HUNT_WITH_AI_STEP_ID || isHuntWithAiAvailable),
+    [isHuntWithAiAvailable]
+  );
+
   const dismissBanner = useCallback(() => {
     setIsBannerDismissed(true);
     storage.set(PRODUCT_TOUR_BANNER_STORAGE_KEY, true);
@@ -41,8 +56,8 @@ export const useProductTour = (): ProductTourState => {
   }, [dismissBanner]);
 
   const nextStep = useCallback(
-    () => setCurrentStep((step) => (step >= PRODUCT_TOUR_STEPS.length ? 0 : step + 1)),
-    []
+    () => setCurrentStep((step) => (step >= steps.length ? 0 : step + 1)),
+    [steps.length]
   );
 
   const endTour = useCallback(() => setCurrentStep(0), []);
@@ -50,12 +65,22 @@ export const useProductTour = (): ProductTourState => {
   return useMemo(
     () => ({
       isBannerVisible: isTourEnabled && !isBannerDismissed,
+      steps,
       currentStep,
       startTour,
       nextStep,
       endTour,
       dismissBanner,
     }),
-    [isTourEnabled, isBannerDismissed, currentStep, startTour, nextStep, endTour, dismissBanner]
+    [
+      isTourEnabled,
+      isBannerDismissed,
+      steps,
+      currentStep,
+      startTour,
+      nextStep,
+      endTour,
+      dismissBanner,
+    ]
   );
 };

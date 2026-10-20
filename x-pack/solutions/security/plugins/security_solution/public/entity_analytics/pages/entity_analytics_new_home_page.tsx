@@ -1349,6 +1349,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         </div>
       </SecuritySolutionPageWrapper>
       <ProductTour
+        steps={productTour.steps}
         currentStep={productTour.currentStep}
         onNext={productTour.nextStep}
         onEnd={productTour.endTour}

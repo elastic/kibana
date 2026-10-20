@@ -35,12 +35,14 @@ export const PRODUCT_TOUR_CLOSE_TEST_ID = 'eaProductTourClose';
 export const PRODUCT_TOUR_FINISH_TEST_ID = 'eaProductTourFinish';
 export const getProductTourStepTestId = (stepId: string): string => `eaProductTourStep-${stepId}`;
 
-/** Skip a step whose anchor never renders, e.g. Hunt with AI when Agent Builder is off. */
+/** Skip a step whose anchor never renders, e.g. the attention step when no cards load. */
 export const ANCHOR_TIMEOUT_MS = 3000;
 
 export const TOUR_POPOVER_WIDTH = 360;
 
 const bySubj = (testId: string): string => `[data-test-subj="${testId}"]`;
+
+export const HUNT_WITH_AI_STEP_ID = 'huntWithAi';
 
 export interface ProductTourStepConfig {
   id: string;
@@ -59,7 +61,7 @@ export const PRODUCT_TOUR_STEPS: readonly ProductTourStepConfig[] = [
     content: ATTENTION_STEP_CONTENT,
   },
   {
-    id: 'huntWithAi',
+    id: HUNT_WITH_AI_STEP_ID,
     anchor: bySubj(HUNT_WITH_AI_BUTTON_TEST_ID),
     anchorPosition: 'downRight',
     title: AI_STEP_TITLE,
