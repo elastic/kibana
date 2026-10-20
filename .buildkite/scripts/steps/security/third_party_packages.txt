@@ -76,3 +76,5 @@ bump-cli
 @oxlint/plugins
 @types/mssql
 monaco-marker-data-provider
+@rrweb/types
+rrweb
