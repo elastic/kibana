@@ -83,8 +83,6 @@ import {
 } from './tools/sandbox_bash/sandbox_output_redaction';
 import { createSandboxToolAvailability } from './tools/sandbox_bash/sandbox_tool_availability';
 import {
-  nightshiftSecretsEncryptionParams,
-  nightshiftSecretsSavedObjectType,
   nightshiftCustomContextSavedObjectType,
   nightshiftAutomationSavedObjectType,
   nightshiftAutomationBudgetSavedObjectType,
@@ -93,7 +91,6 @@ import {
 } from './saved_objects';
 import { createOnboardingClient } from './onboarding/onboarding_client';
 import { createListSandboxConnectors } from './lib/list_sandbox_connectors';
-import { createSandboxSecretsClient } from './sandbox_secrets';
 import { createCustomContextClient } from './custom_context';
 import type {
   InvestigationQuotaCallback,
@@ -127,7 +124,6 @@ export class NightshiftInvestigationsPlugin
   private uiSettings?: CoreStart['uiSettings'];
   private featureFlags?: CoreStart['featureFlags'];
   private actionsStart?: ActionsPluginStart;
-  private encryptedSavedObjectsStart?: NightshiftInvestigationsStartDeps['encryptedSavedObjects'];
   private securityStart?: NightshiftInvestigationsStartDeps['security'];
   private security?: CoreStart['security'];
   private notificationRoutingService?: InvestigationAttachmentDocService<StoredNotificationRouting>;
@@ -177,9 +173,7 @@ export class NightshiftInvestigationsPlugin
 
     core.savedObjects.registerType(nightshiftAutomationSavedObjectType);
     core.savedObjects.registerType(nightshiftAutomationBudgetSavedObjectType);
-    core.savedObjects.registerType(nightshiftSecretsSavedObjectType);
     core.savedObjects.registerType(nightshiftCustomContextSavedObjectType);
-    plugins.encryptedSavedObjects?.registerType(nightshiftSecretsEncryptionParams);
 
     const customContextClient = createCustomContextClient({
       getDeps: () => ({
@@ -189,18 +183,6 @@ export class NightshiftInvestigationsPlugin
         securityPlugin: this.securityStart,
         spaces: this.spaces,
       }),
-    });
-
-    const sandboxSecretsClient = createSandboxSecretsClient({
-      getDeps: () => ({
-        featureFlags: this.featureFlags,
-        savedObjects: this.savedObjects,
-        encryptedSavedObjects: this.encryptedSavedObjectsStart,
-        security: this.securityStart,
-        spaces: this.spaces,
-      }),
-      canEncrypt: plugins.encryptedSavedObjects?.canEncrypt ?? false,
-      logger: this.logger.get('sandbox_secrets'),
     });
 
     const onboardingClient = createOnboardingClient({
@@ -265,7 +247,7 @@ export class NightshiftInvestigationsPlugin
         // Tools are registered in setup() but only run after start(), so read start deps lazily.
         const getSandboxStart = () => this.sandboxStart;
         const sandboxWorkspaceManager = createSandboxWorkspaceManager({
-          getDeps: () => ({ actions: this.actionsStart, sandboxSecretsClient }),
+          getDeps: () => ({ actions: this.actionsStart }),
           telemetryConnectorId,
           telemetryReadableIndices: config.sandbox?.telemetry_readable_indices,
           logger: sandboxLogger,
@@ -277,7 +259,7 @@ export class NightshiftInvestigationsPlugin
         const outputRedactionLogger = sandboxLogger.get('output_redaction');
         const redaction = {
           getOutputRedactor: createSandboxOutputRedactorProvider({
-            getDeps: () => ({ actions: this.actionsStart, sandboxSecretsClient }),
+            getDeps: () => ({ actions: this.actionsStart }),
           }),
           logger: outputRedactionLogger,
         };
@@ -298,7 +280,6 @@ export class NightshiftInvestigationsPlugin
             getSandboxStart,
             sandboxWorkspaceManager,
             resolveConnectorCredentials,
-            sandboxSecretsClient,
             logger: sandboxLogger,
           })
         );
@@ -474,7 +455,6 @@ export class NightshiftInvestigationsPlugin
           getAutomationsSoClient: this.getAutomationsSoClient,
           getWorkflowsManagement: () => this.workflowsManagement,
           isCortexEnabled: () => this.cortexEnabled,
-          sandboxSecretsClient,
           listSandboxConnectors,
           customContextClient,
           onboardingClient,
@@ -554,7 +534,6 @@ export class NightshiftInvestigationsPlugin
     this.uiSettings = coreStart.uiSettings;
     this.featureFlags = coreStart.featureFlags;
     this.actionsStart = plugins.actions;
-    this.encryptedSavedObjectsStart = plugins.encryptedSavedObjects;
     this.securityStart = plugins.security;
     this.security = coreStart.security;
     this.notificationRoutingService = notificationRoutingAttachment.createService({
