@@ -8,7 +8,6 @@
 import React, { useMemo } from 'react';
 import {
   EuiCard,
-  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -30,8 +29,6 @@ import {
   useAreAgentBuilderSkillsAvailable,
   useAgentBuilderSkillsRequirements,
 } from '../../hooks/use_are_agent_builder_skills_available';
-import { useAlertingV2ExperimentalFeatures } from '../../hooks/use_alerting_v2_experimental_features';
-import { experimentalBadgeLabel } from '../experimental_badge';
 import rulesListEmptyIllustration from '../../assets/illustration-results-128.svg';
 
 export interface LegacyRuleTypeItem {
@@ -55,7 +52,7 @@ const ESQL_RULE_TITLE = i18n.translate(
 );
 const ESQL_RULE_DESCRIPTION = i18n.translate(
   'xpack.alertingV2.ruleCreateOptionsPanel.createWithEsqlDescription',
-  { defaultMessage: 'Create as an ES|QL query with live preview. YAML editor available.' }
+  { defaultMessage: 'Write your own ES|QL query and preview the results live.' }
 );
 const AI_AGENT_TITLE = i18n.translate(
   'xpack.alertingV2.ruleCreateOptionsPanel.createWithAiAgentTitle',
@@ -72,41 +69,16 @@ const CREATE_WITH_AGENT_MISSING_PRIVILEGE_TOOLTIP = i18n.translate(
       'To create rules with the AI Agent, you need the "Agent Builder: Read" privilege.',
   }
 );
-const CREATE_WITH_AGENT_MISSING_SETTING_TOOLTIP = i18n.translate(
-  'xpack.alertingV2.ruleCreateOptions.createWithAgentMissingSettingTooltip',
-  {
-    defaultMessage:
-      'To create rules with the AI Agent, enable the "Elastic Agent Builder: Experimental Features" advanced setting.',
-  }
-);
-const CREATE_WITH_AGENT_MISSING_ALL_TOOLTIP = i18n.translate(
-  'xpack.alertingV2.ruleCreateOptions.createWithAgentMissingAllTooltip',
-  {
-    defaultMessage:
-      'To create rules with the AI Agent, you need the "Agent Builder: Read" privilege and the "Elastic Agent Builder: Experimental Features" advanced setting enabled.',
-  }
-);
 
 /**
- * Builds the tooltip shown on the disabled "Create with agent" entry points, naming the specific
- * prerequisite(s) the user is missing. Returns `undefined` when the skill is fully available (the
- * option should then be enabled). Shared so all entry points produce the same message.
+ * Builds the tooltip shown on the disabled "Create with agent" entry points. Returns `undefined`
+ * when the skill is available (the option should then be enabled). Shared so all entry points
+ * produce the same message.
  */
 export const getCreateWithAgentTooltipText = ({
   hasAgentBuilderCapability,
-  isExperimentalFeaturesEnabled,
-}: AgentBuilderSkillsRequirements): string | undefined => {
-  if (hasAgentBuilderCapability && isExperimentalFeaturesEnabled) {
-    return undefined;
-  }
-  if (!hasAgentBuilderCapability && !isExperimentalFeaturesEnabled) {
-    return CREATE_WITH_AGENT_MISSING_ALL_TOOLTIP;
-  }
-  if (!hasAgentBuilderCapability) {
-    return CREATE_WITH_AGENT_MISSING_PRIVILEGE_TOOLTIP;
-  }
-  return CREATE_WITH_AGENT_MISSING_SETTING_TOOLTIP;
-};
+}: AgentBuilderSkillsRequirements): string | undefined =>
+  hasAgentBuilderCapability ? undefined : CREATE_WITH_AGENT_MISSING_PRIVILEGE_TOOLTIP;
 
 const THRESHOLD_RULE_TITLE = i18n.translate(
   'xpack.alertingV2.ruleCreateOptionsPanel.thresholdRuleTitle',
@@ -115,22 +87,11 @@ const THRESHOLD_RULE_TITLE = i18n.translate(
 const THRESHOLD_RULE_DESCRIPTION = i18n.translate(
   'xpack.alertingV2.ruleCreateOptionsPanel.thresholdRuleDescription',
   {
-    defaultMessage: 'Monitor metrics against one or more threshold conditions.',
+    defaultMessage: 'Use the query builder to monitor metrics against threshold conditions.',
   }
 );
 
 const noop = () => undefined;
-
-const AgentTitleWithBadge = () => (
-  <EuiFlexGroup gutterSize="s" responsive={false}>
-    <EuiFlexItem grow={false}>{AI_AGENT_TITLE}</EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiBadge color="hollow" data-test-subj="createWithAgentExperimentalBadge">
-        {experimentalBadgeLabel}
-      </EuiBadge>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
 
 /** Applied to the EuiCard in the flyout layout when the option is disabled. */
 const flyoutCardDisabledStyle = css({
@@ -145,7 +106,6 @@ const RuleCreateOptionsListEmptyState: React.FC<RuleCreateOptionsPanelProps> = (
   onCreateThresholdRule,
 }) => {
   const areAgentBuilderSkillsAvailable = useAreAgentBuilderSkillsAvailable();
-  const showCreateWithAgent = useAlertingV2ExperimentalFeatures();
   const createWithAgentTooltipText = getCreateWithAgentTooltipText(
     useAgentBuilderSkillsRequirements()
   );
@@ -159,27 +119,22 @@ const RuleCreateOptionsListEmptyState: React.FC<RuleCreateOptionsPanelProps> = (
         onClick: onCreateEsqlRule,
         'data-test-subj': 'createEsqlRuleCard',
       },
-      ...(showCreateWithAgent
-        ? [
-            {
-              id: 'create-with-agent',
-              iconType: 'productAgent',
-              title: <AgentTitleWithBadge />,
-              description: AI_AGENT_DESCRIPTION,
-              onClick: onCreateWithAgent,
-              disabled: !areAgentBuilderSkillsAvailable,
-              tooltipText: createWithAgentTooltipText,
-              'data-test-subj': 'createWithAgentCard',
-            },
-          ]
-        : []),
+      {
+        id: 'create-with-agent',
+        iconType: 'productAgent',
+        title: AI_AGENT_TITLE,
+        description: AI_AGENT_DESCRIPTION,
+        onClick: onCreateWithAgent,
+        disabled: !areAgentBuilderSkillsAvailable,
+        tooltipText: createWithAgentTooltipText,
+        'data-test-subj': 'createWithAgentCard',
+      },
     ],
     [
       onCreateEsqlRule,
       onCreateWithAgent,
       areAgentBuilderSkillsAvailable,
       createWithAgentTooltipText,
-      showCreateWithAgent,
     ]
   );
 
@@ -200,7 +155,7 @@ const RuleCreateOptionsListEmptyState: React.FC<RuleCreateOptionsPanelProps> = (
   return (
     <CreateOptionsPanel
       title={
-        <h2>
+        <h2 data-test-subj="ruleCreateOptionsEmptyStateTitle">
           <FormattedMessage
             id="xpack.alertingV2.ruleCreateOptionsPanel.emptyStateTitle"
             defaultMessage="No Universal rules yet. Let's get started!"
@@ -230,7 +185,7 @@ const RuleCreateOptionsListEmptyState: React.FC<RuleCreateOptionsPanelProps> = (
 
 const RuleBuilderSectionDivider: React.FC = () => (
   <>
-    <EuiSpacer size="s" />
+    <EuiSpacer size="l" />
     <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
       <EuiFlexItem>
         <EuiHorizontalRule margin="none" />
@@ -302,7 +257,6 @@ const RuleCreateOptionsFlyoutPanel: React.FC<RuleCreateOptionsPanelProps> = ({
   legacyRuleTypes,
 }) => {
   const areAgentBuilderSkillsAvailable = useAreAgentBuilderSkillsAvailable();
-  const showCreateWithAgent = useAlertingV2ExperimentalFeatures();
   const createWithAgentTooltipText = getCreateWithAgentTooltipText(
     useAgentBuilderSkillsRequirements()
   );
@@ -317,7 +271,7 @@ const RuleCreateOptionsFlyoutPanel: React.FC<RuleCreateOptionsPanelProps> = ({
       hasBorder={true}
       aria-disabled={isAgentDisabled || undefined}
       css={isAgentDisabled ? flyoutCardDisabledStyle : undefined}
-      title={<AgentTitleWithBadge />}
+      title={AI_AGENT_TITLE}
       description={AI_AGENT_DESCRIPTION}
       onClick={isAgentDisabled ? noop : onCreateWithAgent}
       icon={<EuiIcon type="productAgent" color="text" size="l" aria-hidden={true} />}
@@ -342,17 +296,15 @@ const RuleCreateOptionsFlyoutPanel: React.FC<RuleCreateOptionsPanelProps> = ({
             data-test-subj="createEsqlRuleCard"
           />
         </EuiFlexItem>
-        {showCreateWithAgent && (
-          <EuiFlexItem>
-            {hasAgentTooltip ? (
-              <EuiToolTip content={createWithAgentTooltipText} display="block">
-                {agentCard}
-              </EuiToolTip>
-            ) : (
-              agentCard
-            )}
-          </EuiFlexItem>
-        )}
+        <EuiFlexItem>
+          {hasAgentTooltip ? (
+            <EuiToolTip content={createWithAgentTooltipText} display="block">
+              {agentCard}
+            </EuiToolTip>
+          ) : (
+            agentCard
+          )}
+        </EuiFlexItem>
       </EuiFlexGroup>
       <RuleBuilderSectionDivider />
       <EuiCard

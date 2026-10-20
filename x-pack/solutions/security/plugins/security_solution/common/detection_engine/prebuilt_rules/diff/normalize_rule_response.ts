@@ -21,6 +21,7 @@ import {
   normalizeFilterArray,
   normalizeQueryField,
   normalizeRequiredFields,
+  normalizeTags,
 } from './normalizers';
 
 export const normalizeRuleResponse = (rule: RuleResponse): RuleResponse => {
@@ -48,7 +49,7 @@ const normalizeCommonResponseFields = (rule: RuleResponse): SharedResponseProps 
     exceptions_list: rule.exceptions_list,
     actions: rule.actions,
     author: rule.author,
-    tags: rule.tags ?? [],
+    tags: normalizeTags(rule.tags),
     severity_mapping: rule.severity_mapping ?? [],
     risk_score_mapping: rule.risk_score_mapping?.map((mapping) => requiredOptional(mapping)) ?? [],
     references: rule.references ?? [],

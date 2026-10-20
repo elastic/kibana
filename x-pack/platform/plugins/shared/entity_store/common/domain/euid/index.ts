@@ -30,10 +30,7 @@ export {
   getFieldEvaluationsEsql,
   getHostScopedUserEuidEsql,
 } from './esql';
-export {
-  applyFieldEvaluations,
-  getIdentityFieldEvaluationsFromDefinition,
-} from './field_evaluations';
+export { applyFieldEvaluations, getIdentityFieldEvaluations } from './field_evaluations';
 export {
   getEuidSourceFields,
   getEuidNamespaceSourceFields,
