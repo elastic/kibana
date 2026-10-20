@@ -53,6 +53,14 @@ const writeGenerations: Record<string, number> = {};
  */
 const openGenerationStacks: Record<string, number[]> = {};
 
+/**
+ * Child generations closed together with their root, per `urlParamKey`. When a session ends (Back,
+ * or closing the root), core closes the child flyout in its own React root without calling its
+ * `onClose`, so the root's close accounts for the child. A child `onClose` that still arrives
+ * afterwards is then ignored instead of writing its `[root]` fallback back.
+ */
+const closedWithRootGenerations: Record<string, Set<number>> = {};
+
 // ---------------------------------------------------------------------------
 // Public interface
 // ---------------------------------------------------------------------------
@@ -182,6 +190,7 @@ export const useFlyoutV2UrlWriter = (urlParamKey: string, historyKey: symbol): F
         // A 'start' open is a new top-level flyout; discard any existing chain.
         writeToUrl([descriptor]);
         openGenerationStacks[urlParamKey] = [generation];
+        closedWithRootGenerations[urlParamKey]?.clear();
       }
     },
     [canWrite, urlParamKey, readCurrentStack, writeToUrl]
@@ -192,9 +201,19 @@ export const useFlyoutV2UrlWriter = (urlParamKey: string, historyKey: symbol): F
       if (!canWrite) return () => {};
       const ownGeneration = writeGenerations[urlParamKey] ?? 0;
       return () => {
+        const closedWithRoot = closedWithRootGenerations[urlParamKey] ?? new Set<number>();
+        closedWithRootGenerations[urlParamKey] = closedWithRoot;
+        if (closedWithRoot.delete(ownGeneration)) return;
+
         const stack = openGenerationStacks[urlParamKey] ?? [];
         const ownIndex = stack.indexOf(ownGeneration);
-        if (ownIndex !== -1) stack.splice(ownIndex, 1);
+        if (ownIndex === 0) {
+          // The root closing ends its whole session, so its child is closed too.
+          stack.slice(1).forEach((childGeneration) => closedWithRoot.add(childGeneration));
+          stack.length = 0;
+        } else if (ownIndex !== -1) {
+          stack.splice(ownIndex, 1);
+        }
 
         // If something with a newer generation is STILL open, this close is a cascade-eviction
         // side effect — do NOT overwrite the newer descriptor with this, now-stale, fallback.

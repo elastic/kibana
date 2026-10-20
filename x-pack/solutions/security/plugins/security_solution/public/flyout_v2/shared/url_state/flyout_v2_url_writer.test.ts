@@ -266,6 +266,50 @@ describe('useFlyoutV2UrlWriter', () => {
       expect(getParam(history)).toBeNull();
     });
 
+    it('clears the param when the root closes and its child closed without an onClose (Back)', () => {
+      // When a session ends (Back, or closing the root), core closes the child flyout in its own
+      // React root without calling its onClose, so only the root's onClose fires.
+      const { result, history } = renderWriter();
+
+      let rootOnClose!: () => void;
+      act(() => {
+        result.current.writeOnOpen(analyzerDescriptor('tool-doc'));
+        rootOnClose = result.current.buildOnClose(null);
+      });
+      act(() => {
+        result.current.writeOnOpen(docDescriptor('child-1'), 'inherit');
+        result.current.buildOnClose(analyzerDescriptor('tool-doc'));
+      });
+
+      act(() => {
+        rootOnClose();
+      });
+
+      expect(getParam(history)).toBeNull();
+    });
+
+    it('ignores a child onClose that fires after its root closed the session', () => {
+      const { result, history } = renderWriter();
+
+      let rootOnClose!: () => void;
+      let childOnClose!: () => void;
+      act(() => {
+        result.current.writeOnOpen(analyzerDescriptor('tool-doc'));
+        rootOnClose = result.current.buildOnClose(null);
+      });
+      act(() => {
+        result.current.writeOnOpen(docDescriptor('child-1'), 'inherit');
+        childOnClose = result.current.buildOnClose(analyzerDescriptor('tool-doc'));
+      });
+
+      act(() => {
+        rootOnClose();
+        childOnClose();
+      });
+
+      expect(getParam(history)).toBeNull();
+    });
+
     it('does not let a stale eviction through just because a sibling happens to still be open', () => {
       // Guards against a naive "count reaches 0" only implementation: the evicted tool's onClose
       // must stay suppressed while the flyout that replaced it (doc-2) is still open.
@@ -425,6 +469,26 @@ describe('useFlyoutV2UrlWriter', () => {
       });
       act(() => {
         onClose();
+      });
+
+      expect(docViewerFlyoutChain.stack).toEqual([]);
+    });
+
+    it('clears the chain when Back closes a tool together with its child', () => {
+      const { result } = renderDocViewerWriter();
+
+      let toolOnClose!: () => void;
+      act(() => {
+        result.current.writeOnOpen(analyzerDescriptor('doc-1'));
+        toolOnClose = result.current.buildOnClose(null);
+        const parent = result.current.readRootDescriptor();
+        result.current.writeOnOpen(docDescriptor('doc-2'), 'inherit');
+        result.current.buildOnClose(parent);
+      });
+
+      // Only the tool's onClose fires: core closes the child without calling its onClose.
+      act(() => {
+        toolOnClose();
       });
 
       expect(docViewerFlyoutChain.stack).toEqual([]);

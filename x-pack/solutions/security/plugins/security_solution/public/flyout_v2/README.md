@@ -158,6 +158,9 @@ Two invariants worth understanding before you touch this file:
   per param key, plus an `openGenerationStacks` mirror of the URL array, so `buildOnClose` can ask precisely: "is
   anything newer than me still open?" and swallow stale eviction callbacks correctly. Don't replace this with a simpler
   check.
+- **A root close ends its session.** When a session ends (Back, or closing the root), core closes the child flyout
+  without calling its `onClose`, so only the root's `onClose` fires. The root's close therefore clears the whole chain
+  and marks its child as closed, so a late child `onClose` can't write its `[root]` fallback back.
 
 ### Restore (`use_flyout_v2_restore.ts`)
 
