@@ -66,6 +66,8 @@ interface Execution {
   stallTimer?: NodeJS.Timeout;
   dispatchedAt?: number;
   readonly chains: Map<string, Promise<void>>;
+  /** Main-side per-run signal handed to bindings so in-flight main work can stop too. */
+  readonly hostAbort: AbortController;
   abort?: () => void;
   termination?: {
     readonly reason: TerminationReason;
@@ -154,6 +156,7 @@ export class ExecutionHost {
         done: false,
         callbacks: new Map(),
         chains: new Map(),
+        hostAbort: new AbortController(),
       };
       const abort = () => {
         void this.terminate(execution, 'cancelled');
@@ -448,6 +451,7 @@ export class ExecutionHost {
       const invoke = (): Promise<CodecInput> => {
         const syncStarted = cpuStarted ? process.threadCpuUsage() : undefined;
         const pending = binding.handler(packet.operation, callArgs, execution.bundle, {
+          signal: execution.hostAbort.signal,
           invokeCallback: (reference, args) =>
             new Promise((resolve, reject) => {
               if (reference.runId !== execution.bundle.runId || execution.done || slot.stopping)
@@ -656,6 +660,7 @@ export class ExecutionHost {
   private clear(execution: Execution): void {
     if (execution.timer) clearTimeout(execution.timer);
     if (execution.stallTimer) clearInterval(execution.stallTimer);
+    abortHostWork(execution, execution.termination?.reason ?? 'ended');
     execution.chains.clear();
     if (execution.termination?.timer) clearTimeout(execution.termination.timer);
     if (execution.abort) execution.options.signal?.removeEventListener('abort', execution.abort);
@@ -713,4 +718,20 @@ const originalAbortReason = (execution: Execution): ReturnType<typeof encode> | 
   } catch {
     return undefined;
   }
+};
+
+/** Aborts main-side work started for a run: original caller reason when cancelled, else a category. */
+const abortHostWork = (execution: Execution, reason: TerminationReason | 'ended'): void => {
+  if (execution.hostAbort.signal.aborted) return;
+  const callerReason: unknown = execution.options.signal?.aborted
+    ? execution.options.signal.reason
+    : undefined;
+  execution.hostAbort.abort(
+    reason === 'cancelled' && callerReason !== undefined
+      ? callerReason
+      : new DOMException(
+          reason === 'ended' ? 'Run ended' : 'Run terminated: ' + reason,
+          reason === 'deadline' || reason === 'stall' ? 'TimeoutError' : 'AbortError'
+        )
+  );
 };

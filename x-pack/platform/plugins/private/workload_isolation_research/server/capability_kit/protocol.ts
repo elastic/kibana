@@ -70,6 +70,8 @@ export interface CallbackRef {
 export type AsyncCallback = (...args: CodecInput[]) => CodecInput | Promise<CodecInput>;
 export interface HostCallContext {
   invokeCallback(reference: CallbackRef, args: readonly CodecInput[]): Promise<CodecInput>;
+  /** 0.1.10: main-side signal for this run; aborts once the run has ended (outcome or hard stop). */
+  readonly signal?: AbortSignal;
 }
 export type TerminationReason = 'deadline' | 'cancelled' | 'shutdown' | 'stall' | 'crash';
 /** Why the worker signal aborted; `original` is the host AbortSignal.reason when it was codec-safe. */

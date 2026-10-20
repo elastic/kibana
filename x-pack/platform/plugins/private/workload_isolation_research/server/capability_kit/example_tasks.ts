@@ -285,3 +285,26 @@ export const esErrorRoundtrip = async (
     redaction: { type: 'replace', additionalKeys: [] },
   });
 };
+
+// 0.1.10 fixture: generic service binder.
+export const serviceBinder = async (
+  input: CodecInput,
+  context: WorkerContext
+): Promise<CodecInput> => {
+  const { createServiceCaller } = await import('./bind_service');
+  const call = createServiceCaller(context, 'svc', { positional: true });
+  const log = createServiceCaller(context, 'log', { positional: true });
+  const sum = await call('add', 2, 3);
+  const greeting = await call('greet', { name: 'w' });
+  let denied = '';
+  try {
+    await call('secretMethod');
+  } catch (error) {
+    denied = (error as Error).message;
+  }
+  void log('info', 'first', { meta: 1 });
+  void log('info', 'second');
+  await log('info', 'third');
+  if ((input as { hang?: boolean }).hang) await call('waitForAbort', {});
+  return { sum, greeting, denied };
+};

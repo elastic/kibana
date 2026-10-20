@@ -13,6 +13,8 @@ export { createBatchStream, bindBatchStream } from './batch_stream';
 export { createAsyncServiceClient, bindAsyncServices } from './async_handles';
 export type { ServiceHandle } from './async_handles';
 export { bindSyncOperations } from './sync_operations';
+export { bindService, createServiceCaller } from './bind_service';
+export type { ServiceBinderOptions } from './bind_service';
 export { createLocalSavedObjects } from './local_saved_objects';
 export type { LocalSoCapability, SoRegistration } from './local_saved_objects';
 export type { EventBatch, BatchLimits } from './batch_stream';

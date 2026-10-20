@@ -1,4 +1,4 @@
-# Track 7 capability kit — 0.1.9 pre-release research slice
+# Track 7 capability kit — 0.1.10 pre-release research slice
 
 PRIVATE research code; no public Core API, plugin lifecycle hook, or automatic enablement.
 Base harness fd3138c. Only main owns TM claims/leases/results.
@@ -10,6 +10,40 @@ the whole slot: EVERY co-resident outcome is terminated, with collateral flag,
 initiatingRunId and all discardedRunIds (when multiple runs are lost). Slot crash
 also reports discarded IDs. Queue/admission/lease policy still belongs to TM.
 This is the minimal runner integration surface, NOT the complete 7.P acceptance.
+
+## 0.1.10 generic service binder (replaces hand-written runner facades)
+
+7.W and 7.A each hand-write request-scoped allowlist facades: Spaces, security
+privileges, maintenance windows, Actions, TM, the workflow original-request
+profile/audit clients, and positional loggers. Those count as BESPOKE. Use the
+unmodified kit binder instead:
+
+```ts
+// MAIN, per run: resolve request-scoped clients HERE (original/fake request never crosses).
+const actions = await actionsPlugin.getActionsClientWithRequest(originalRequest);
+capabilities: {
+  actions: bindService(actions, { operations: ['get', 'getAll', 'execute'],
+    signal: { operations: ['execute'] } }),          // injects the run's main-side signal
+  logger: bindService(logger, { operations: ['info', 'warn', 'error'],
+    positional: true, ordered: true, discardResult: true }),
+}
+// WORKER
+const call = createServiceCaller(context, 'actions');
+await call('execute', { actionId, params });
+const log = createServiceCaller(context, 'logger', { positional: true });
+void log('info', 'message', { meta });              // FIFO on main
+```
+
+Semantics: an explicit method allowlist (fails closed, and rejects non-methods). Methods run
+with their real receiver on main, so #private fields work. Args/results use the kit codecs;
+results that aren't data fail the call, so use async handles for objects. `positional`
+spreads an argument array. `ordered` gives FIFO per run. `signal` injects
+`HostCallContext.signal` into the last object argument (or appends `{signal}`). That signal
+aborts when the run ENDS (outcome or hard stop), with reason Timeout/Abort or the caller's
+original reason. It does NOT abort at the start of cooperative grace, so terminal-persistence
+calls during grace still work. Default lever: generic `capability_bundle`. A binder over a
+run-scoped service needs no owner change. Runner-specific argument rewriting stays bespoke
+and must be labelled that way.
 
 ## 0.1.9 runner fixes (additive; 0.1.8 call sites unchanged)
 

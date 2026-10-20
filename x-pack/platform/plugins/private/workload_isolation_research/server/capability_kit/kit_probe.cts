@@ -18,3 +18,4 @@ require('./sync.node_test');
 require('./collections.node_test');
 require('./local_so.node_test');
 require('./deadline_abort.node_test');
+require('./service_binder.node_test');
