@@ -801,38 +801,29 @@ export function generateEsqlQuery(
             })
           );
 
-          // Metric-ranked: named=1 / Other=0 so SORT named DESC keeps Other last (ASC and DESC),
-          // then the chart metric, then the field for tie-break (DSL terms key order).
+          // named=1 / Other=0 so SORT named DESC keeps Other last like DSL, for both metric and
+          // alphabetical ranking. Metric ranking also breaks ties by the field (DSL key order).
           // A single CASE(metric) cannot mix 0::LONG with AVG (double) or similar.
-          if (orderBy.type === 'column') {
-            const namedFlagAlias = getOtherBucketNamedFlagAlias(innerTermsBucket.col.sourceField);
-            queryParts.push(
-              `INLINE STATS ${buildOtherBucketNamedFlagFragment({
-                flagAlias: namedFlagAlias,
-                groupExpr: fieldExpr,
-              })} BY ${fieldExpr}`
-            );
-            const statsClause = buildStatsClause([namedFlagAlias]);
-            if (statsClause) {
-              queryParts.push(statsClause);
-            }
-            queryParts.push(
-              `SORT ${formatSortKeys([
-                { expr: namedFlagAlias, direction: 'DESC' },
-                innerSortKey,
-                fieldSortKey,
-              ])}`
-            );
-            queryParts.push(`LIMIT ${size + 1}`);
-            queryParts.push(`DROP ${namedFlagAlias}`);
-          } else {
-            const statsClause = buildStatsClause();
-            if (statsClause) {
-              queryParts.push(statsClause);
-            }
-            queryParts.push(`SORT ${formatSortKeys([innerSortKey])}`);
-            queryParts.push(`LIMIT ${size + 1}`);
+          const namedFlagAlias = getOtherBucketNamedFlagAlias(innerTermsBucket.col.sourceField);
+          queryParts.push(
+            `INLINE STATS ${buildOtherBucketNamedFlagFragment({
+              flagAlias: namedFlagAlias,
+              groupExpr: fieldExpr,
+            })} BY ${fieldExpr}`
+          );
+          const statsClause = buildStatsClause([namedFlagAlias]);
+          if (statsClause) {
+            queryParts.push(statsClause);
           }
+          queryParts.push(
+            `SORT ${formatSortKeys([
+              { expr: namedFlagAlias, direction: 'DESC' },
+              innerSortKey,
+              ...(rankAlias ? [fieldSortKey] : []),
+            ])}`
+          );
+          queryParts.push(`LIMIT ${size + 1}`);
+          queryParts.push(`DROP ${namedFlagAlias}`);
         } else {
           // Filters run before STATS so the aggregation only sees the kept outer values.
           queryParts.push(...outerTopNFilters, ...outerRankStats);
