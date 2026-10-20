@@ -9,11 +9,11 @@ import React from 'react';
 import { EuiPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import type { ActiveFilter, SignalCardData, SignalCardId } from './data';
+import type { SignalCardData, SignalCardId } from './data';
 import { SignalCard } from './signal_card';
 
 export interface SignalCardsProps {
-  activeFilter: ActiveFilter | null;
+  activeTile: SignalCardId | null;
   /** Card values for the current page filters — see `getSignalCards`. */
   cards: SignalCardData[];
   onFilterForCard: (cardId: SignalCardId) => void;
@@ -68,11 +68,7 @@ const layoutCappedGridCss = ({
  * Needs-attention metrics in a capped wrapping grid (6 across, stepping down to 3 / 2 / 1).
  * Each card toggles an in-page table filter; selection stays on the card itself.
  */
-export const SignalCards: React.FC<SignalCardsProps> = ({
-  activeFilter,
-  cards,
-  onFilterForCard,
-}) => {
+export const SignalCards: React.FC<SignalCardsProps> = ({ activeTile, cards, onFilterForCard }) => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -94,7 +90,7 @@ export const SignalCards: React.FC<SignalCardsProps> = ({
         })}
       >
         {cards.map((card) => {
-          const selected = activeFilter?.type === 'card' && activeFilter.cardId === card.id;
+          const selected = activeTile === card.id;
 
           return (
             <div

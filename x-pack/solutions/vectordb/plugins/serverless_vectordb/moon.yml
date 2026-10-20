@@ -28,6 +28,7 @@ dependsOn:
   - '@kbn/console-plugin'
   - '@kbn/core-chrome-browser'
   - '@kbn/cloud-plugin'
+  - '@kbn/agent-builder-plugin'
   - '@kbn/shared-ux-router'
   - '@kbn/vectordb-onboarding'
   - '@kbn/elasticsearch-home'
