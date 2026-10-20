@@ -165,6 +165,36 @@ describe('toolToLangchain', () => {
       data: { message: 'hi', tool_call_id: 'unknown' },
     });
   });
+
+  it('passes the inner tool id of a dynamic tool return to buildContent', async () => {
+    const results = [{ type: ToolResultType.other, data: 'foo' }];
+    const tool = createTool('execute_dynamic_tool', {
+      execute: jest.fn().mockResolvedValue({ results, dynamicToolId: 'inner.tool' }),
+    });
+    const buildContent = jest.fn().mockReturnValue('content');
+
+    const langchainTool = await toolToLangchain({ tool, toolId: tool.id, logger, buildContent });
+    await langchainTool.invoke({});
+
+    expect(buildContent).toHaveBeenCalledWith({
+      results,
+      toolId: 'execute_dynamic_tool',
+      toolCallId: 'unknown',
+      dynamicToolId: 'inner.tool',
+    });
+  });
+
+  it('passes no dynamic tool id for a plain return', async () => {
+    const tool = createTool('toolA', {
+      execute: jest.fn().mockResolvedValue({ results: [] }),
+    });
+    const buildContent = jest.fn().mockReturnValue('content');
+
+    const langchainTool = await toolToLangchain({ tool, toolId: tool.id, logger, buildContent });
+    await langchainTool.invoke({});
+
+    expect(buildContent.mock.calls[0][0].dynamicToolId).toBeUndefined();
+  });
 });
 
 describe('createToolIdMappings', () => {

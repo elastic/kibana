@@ -23,7 +23,9 @@ export type {
   RunToolParams,
   RequestBoundRunToolParams,
   RunToolReturn,
+  DynamicToolRunReturn,
 } from './runner';
+export { isDynamicToolRunReturn } from './runner';
 export { getAgentFromRunContext } from './run_context_utils';
 export {
   type AgentBuilderToolEvent,

@@ -1073,4 +1073,81 @@ describe('ToolManager', () => {
       expect(toolManager.getSummarizer('unknown')).toBeUndefined();
     });
   });
+
+  describe('dynamic tool result content', () => {
+    const lastBuildContent = () => {
+      const { toolToLangchain } = jest.requireMock('@kbn/agent-builder-genai-utils/langchain') as {
+        toolToLangchain: jest.Mock;
+      };
+      const lastCall = toolToLangchain.mock.calls[toolToLangchain.mock.calls.length - 1][0];
+      return lastCall.buildContent as (params: {
+        results: unknown[];
+        toolId: string;
+        toolCallId: string;
+        dynamicToolId?: string;
+      }) => string;
+    };
+    const hugeResults = [{ type: 'other', data: 'word '.repeat(500) }];
+
+    beforeEach(async () => {
+      toolManager.setMaxToolResultTokens(10);
+      await toolManager.addTools({
+        type: ToolManagerToolType.executable,
+        tools: createMockExecutableTool('execute_dynamic_tool'),
+        logger: mockLogger,
+      });
+    });
+
+    it('applies the registered inner tool budget to a tagged return', () => {
+      toolManager.registerDynamicTools([
+        { ...createMockExecutableTool('inner.tool'), maxResultTokens: Infinity },
+      ]);
+
+      const content = lastBuildContent()({
+        results: hugeResults,
+        toolId: 'execute_dynamic_tool',
+        toolCallId: 'call-1',
+        dynamicToolId: 'inner.tool',
+      });
+
+      expect(content).toEqual(JSON.stringify({ results: hugeResults }));
+    });
+
+    it('names the inner tool in the recovery path of a truncated tagged return', () => {
+      toolManager.registerDynamicTools([createMockExecutableTool('inner.tool')]);
+
+      const content = lastBuildContent()({
+        results: hugeResults,
+        toolId: 'execute_dynamic_tool',
+        toolCallId: 'call-1',
+        dynamicToolId: 'inner.tool',
+      });
+
+      // the inner tool's own pipeline stored the result under the inner id, which is what the
+      // model must read back; the meta-tool itself is excluded from the filestore
+      expect(content).toContain('Preview (first 10 tokens):');
+      expect(content).toContain('/tool_calls/inner_tool_call-1/');
+      expect(content).not.toContain('not recoverable');
+    });
+
+    it('falls back to the outer tool budget for an unregistered or untagged return', () => {
+      const buildContent = lastBuildContent();
+
+      const unregistered = buildContent({
+        results: hugeResults,
+        toolId: 'execute_dynamic_tool',
+        toolCallId: 'call-1',
+        dynamicToolId: 'nope',
+      });
+      const untagged = buildContent({
+        results: hugeResults,
+        toolId: 'execute_dynamic_tool',
+        toolCallId: 'call-1',
+      });
+
+      expect(unregistered).toContain('Preview (first 10 tokens):');
+      expect(untagged).toContain('Preview (first 10 tokens):');
+      expect(untagged).toContain('not recoverable');
+    });
+  });
 });

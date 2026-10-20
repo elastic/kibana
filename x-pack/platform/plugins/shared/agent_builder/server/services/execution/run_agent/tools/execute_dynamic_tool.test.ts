@@ -15,7 +15,11 @@ import {
 } from '@kbn/agent-builder-common';
 import { isExcludedFromFilestore, isInternalTool } from '@kbn/agent-builder-common/tools';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents/prompts';
-import { toDynamicToolEvent, type AgentBuilderToolEvent } from '@kbn/agent-builder-server/runner';
+import {
+  isDynamicToolRunReturn,
+  toDynamicToolEvent,
+  type AgentBuilderToolEvent,
+} from '@kbn/agent-builder-server/runner';
 import type { ExecutableToolWithOrigin } from '@kbn/agent-builder-server/runner/tool_manager';
 import { createToolManagerMock, type ToolManagerMock } from '../../../../test_utils/runner';
 import { createExecuteDynamicTool } from './execute_dynamic_tool';
@@ -98,7 +102,20 @@ describe('execute_dynamic_tool', () => {
       onEvent: expect.any(Function),
       abortSignal,
     });
-    expect(result).toEqual({ results: [{ type: 'other', data: { ok: 1 } }] });
+    // the return is tagged with the inner tool id so the result content is attributed to it
+    expect(result).toEqual({
+      results: [{ type: 'other', data: { ok: 1 } }],
+      dynamicToolId: 'platform.core.cases',
+    });
+    expect(isDynamicToolRunReturn(result)).toBe(true);
+  });
+
+  it('tags the error returns with the requested tool id too', async () => {
+    const invalid = await execute({ tool_id: inner.id, params: { limit: 'five' } });
+    const unknown = await execute({ tool_id: 'nope', params: {} });
+
+    expect(invalid).toMatchObject({ dynamicToolId: 'platform.core.cases' });
+    expect(unknown).toMatchObject({ dynamicToolId: 'nope' });
   });
 
   it("tags the inner tool's events with its id so they are attributed to it", async () => {
@@ -138,7 +155,7 @@ describe('execute_dynamic_tool', () => {
     expect(inner.execute).toHaveBeenCalledWith(expect.objectContaining({ onEvent: undefined }));
   });
 
-  it('passes an interrupt return through untouched', async () => {
+  it('passes an interrupt return through, tagged', async () => {
     const prompt = {
       id: 'prompt-1',
       type: AgentPromptType.confirmation,
@@ -151,7 +168,7 @@ describe('execute_dynamic_tool', () => {
 
     const result = await execute({ tool_id: inner.id, params: { query: 'x' } });
 
-    expect(result).toEqual({ prompt });
+    expect(result).toEqual({ prompt, dynamicToolId: 'platform.core.cases' });
   });
 
   it('returns a validation error with the provider wording when params do not match', async () => {

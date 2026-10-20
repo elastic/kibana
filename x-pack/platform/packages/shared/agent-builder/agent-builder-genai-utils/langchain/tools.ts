@@ -22,7 +22,7 @@ import type {
   ToolProvider,
 } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
-import { isDynamicToolEvent } from '@kbn/agent-builder-server/runner';
+import { isDynamicToolEvent, isDynamicToolRunReturn } from '@kbn/agent-builder-server/runner';
 import type { ToolCall } from './messages';
 
 export type ToolIdMapping = Map<string, string>;
@@ -104,6 +104,7 @@ export interface BuildToolContentParams {
   results: ToolResult[];
   toolId: string;
   toolCallId: string;
+  dynamicToolId?: string;
 }
 
 export type BuildToolContentFn = (params: BuildToolContentParams) => string;
@@ -155,6 +156,7 @@ export const toolToLangchain = async ({
           results: toolReturn.results ?? [],
           toolId: tool.id,
           toolCallId,
+          dynamicToolId: isDynamicToolRunReturn(toolReturn) ? toolReturn.dynamicToolId : undefined,
         });
         return [content, toolReturn];
       } catch (e) {

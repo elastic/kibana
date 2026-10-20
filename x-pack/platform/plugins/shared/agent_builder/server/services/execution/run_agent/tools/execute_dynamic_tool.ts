@@ -57,7 +57,10 @@ Dynamic tools are not in your tool list: their definitions appear in the convers
 
     const tool = toolManager.getDynamicTool(toolId);
     if (!tool) {
-      return { results: [createErrorResult(unavailableToolMessage({ toolId, toolManager }))] };
+      return {
+        results: [createErrorResult(unavailableToolMessage({ toolId, toolManager }))],
+        dynamicToolId: toolId,
+      };
     }
 
     const innerSchema = await tool.getSchema();
@@ -65,6 +68,7 @@ Dynamic tools are not in your tool list: their definitions appear in the convers
     if (!validation.success) {
       return {
         results: [createErrorResult(invalidParamsMessage({ toolId, error: validation.error }))],
+        dynamicToolId: toolId,
       };
     }
 
@@ -72,13 +76,14 @@ Dynamic tools are not in your tool list: their definitions appear in the convers
       ? (event: AgentBuilderToolEvent) => onEvent(toDynamicToolEvent(tool.id, event))
       : undefined;
 
-    return tool.execute({
+    const response = await tool.execute({
       toolParams: validation.data,
       toolCallId,
       onEvent: onDynamicEvent,
       source: source ?? 'agent',
       abortSignal,
     });
+    return { ...response, dynamicToolId: toolId };
   },
 });
 

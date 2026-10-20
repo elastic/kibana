@@ -105,12 +105,12 @@ export class ToolManager implements IToolManager {
             sendEvent: this.eventEmitter,
             toolId: toolIdMapping.get(tool.id),
             addReasoningParam: false,
-            buildContent: ({ results, toolId, toolCallId }) =>
+            buildContent: ({ results, toolId, toolCallId, dynamicToolId }) =>
               buildGuardedToolContent({
                 results,
-                toolId,
+                toolId: dynamicToolId ?? toolId,
                 toolCallId,
-                maxTokens: tool.maxResultTokens ?? this.maxToolResultTokens,
+                maxTokens: this.getMaxToolTokens(tool, dynamicToolId),
               }),
           })
         )
@@ -231,6 +231,16 @@ export class ToolManager implements IToolManager {
     }
 
     return internalToolIds;
+  }
+
+  private getMaxToolTokens(tool: ExecutableTool, dynamicToolId?: string) {
+    if (dynamicToolId) {
+      const dynamicTool = this.getDynamicTool(dynamicToolId);
+      if (dynamicTool && dynamicTool.maxResultTokens) {
+        return dynamicTool.maxResultTokens;
+      }
+    }
+    return tool.maxResultTokens ?? this.maxToolResultTokens;
   }
 }
 
