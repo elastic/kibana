@@ -77,7 +77,7 @@ describe('build_hitl_email_notification', () => {
           formUrl: 'https://kibana.example/form',
         })
       ).toBe(
-        'See \\[click\\]\\(https:\u2060//evil.example\\)\n\n[Open form](https://kibana.example/form)'
+        'See \\[click\\](https:\u2060//evil.example)\n\n[Open form](https://kibana.example/form)'
       );
       expect(
         buildDefaultHitlApprovalEmailMessage({
@@ -88,7 +88,7 @@ describe('build_hitl_email_notification', () => {
           rejectUrl: 'https://kibana.example/reject',
         })
       ).toBe(
-        'Approve?\n\n[Approve\\]\\(https:\u2060//evil.example\\)](https://kibana.example/approve)  [Decline](https://kibana.example/reject)'
+        'Approve?\n\n[Approve\\](https:\u2060//evil.example)](https://kibana.example/approve)  [Decline](https://kibana.example/reject)'
       );
     });
 

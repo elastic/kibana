@@ -107,8 +107,9 @@ describe('fitHitlTextPreservingSuffix', () => {
 describe('generated notification text', () => {
   it('escapes email markdown link syntax and keeps a scheme URL from autolinking', () => {
     expect(escapeHitlEmailMarkdown('See [click](https://evil.example)')).toBe(
-      'See \\[click\\]\\(https:\u2060//evil.example\\)'
+      'See \\[click\\](https:\u2060//evil.example)'
     );
+    expect(escapeHitlEmailMarkdown('ship (prod)')).toBe('ship (prod)');
     expect(escapeHitlEmailMarkdown('is https://elastic.co a valid indicator')).toBe(
       'is https:\u2060//elastic.co a valid indicator'
     );
@@ -119,6 +120,9 @@ describe('generated notification text', () => {
   it('escapes Slack mrkdwn link syntax and keeps a scheme URL from autolinking', () => {
     expect(escapeSlackMrkdwnText('See <https://evil.example|click> & more')).toBe(
       'See &lt;https:\u2060//evil.example|click&gt; &amp; more'
+    );
+    expect(escapeSlackMrkdwnText('Hey <@U123> <#C123> <!here> <mailto:a@b.co|Approve>')).toBe(
+      'Hey <@U123> <#C123> <!here> &lt;mailto:a@b.co|Approve&gt;'
     );
   });
 
@@ -144,6 +148,7 @@ describe('generated notification text', () => {
     expect(escapeSlackMrkdwnLabel('Approve\nhttps://evil.example')).toBe(
       'Approve https:\u2060//evil.example'
     );
+    expect(escapeSlackMrkdwnLabel('<@U123>')).toBe('&lt;@U123&gt;');
   });
 });
 

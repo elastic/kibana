@@ -20,6 +20,7 @@ export function assertConnectorSucceeded(result: {
 }
 
 const HITL_WORD_JOINER = '\u2060';
+const HITL_FULLWIDTH_VERTICAL_LINE = '\uff5c';
 
 /** Keeps `http://` and `https://` from becoming an autolink. The text still reads as the URL. */
 function breakHitlSchemeUrls(value: string): string {
@@ -29,14 +30,27 @@ function breakHitlSchemeUrls(value: string): string {
 /** Escapes generated email text so it cannot add a markdown link or code fence. */
 export function escapeHitlEmailMarkdown(value: string): string {
   return breakHitlSchemeUrls(
-    value.replace(/\\/g, '\\\\').replace(/[\[\]()<>`~]/g, (char) => `\\${char}`)
+    value.replace(/\\/g, '\\\\').replace(/[\[\]<>`~]/g, (char) => `\\${char}`)
   );
 }
 
-/** Escapes generated Slack mrkdwn so it cannot open an explicit link. */
+/** Escapes `&`, `<`, and `>` so Slack cannot treat them as mrkdwn control characters. */
+function escapeSlackMrkdwnControlCharacters(value: string): string {
+  return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+/** Escapes generated Slack mrkdwn so it cannot open an explicit link. Mentions stay intact. */
 export function escapeSlackMrkdwnText(value: string): string {
   return breakHitlSchemeUrls(
-    value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    value.replace(/&/g, '&amp;').replace(/<([@!#][^>\n]*)>|<|>/g, (token) => {
+      if (token === '<') {
+        return '&lt;';
+      }
+      if (token === '>') {
+        return '&gt;';
+      }
+      return token;
+    })
   );
 }
 
@@ -47,7 +61,9 @@ export function flattenHitlLinkLabel(value: string): string {
 
 /** Escapes a label used inside a Slack `<url|label>` link. */
 export function escapeSlackMrkdwnLabel(value: string): string {
-  return escapeSlackMrkdwnText(flattenHitlLinkLabel(value)).replace(/\|/g, '\uff5c');
+  return breakHitlSchemeUrls(
+    escapeSlackMrkdwnControlCharacters(flattenHitlLinkLabel(value))
+  ).replace(/\|/g, HITL_FULLWIDTH_VERTICAL_LINE);
 }
 
 /** Escapes `&` in a resume URL placed inside Slack mrkdwn. */
