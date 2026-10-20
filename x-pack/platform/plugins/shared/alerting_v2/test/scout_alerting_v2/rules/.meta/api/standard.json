@@ -1,5 +1,5 @@
 {
-  "sha1": "b96792c23591c4837a7050f89c1cc67a1d97d5ae",
+  "sha1": "20c840575006f8952f56449c2bf4141070a87fbf",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -3791,8 +3791,8 @@
       }
     },
     {
-      "id": "fc474d7c402bdfc-07c6ad3743dc2b3",
-      "title": "Matcher value suggestions API authorization: returns 403 for a user with alerts privileges but no rules privileges",
+      "id": "fc474d7c402bdfc-3446c4b50319c1f",
+      "title": "Matcher value suggestions API authorization: returns 200 for a user with alerts privileges but no rules privileges",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -4865,7 +4865,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 30,
+        "line": 31,
         "column": 31
       }
     },
@@ -4878,7 +4878,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 50,
+        "line": 51,
         "column": 14
       }
     },
@@ -4891,21 +4891,60 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 83,
+        "line": 84,
         "column": 14
       }
     },
     {
-      "id": "63d456e0152970c-a28c866a308ced0",
-      "title": "Upsert rule API upsert: replace does not merge nested query or metadata leaves",
+      "id": "63d456e0152970c-5f63bbd5491ebcd",
+      "title": "Upsert rule API upsert: should create an enabled rule when the body omits enabled",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 108,
+        "line": 109,
         "column": 47
+      }
+    },
+    {
+      "id": "63d456e0152970c-c0f9af18db7bb95",
+      "title": "Upsert rule API upsert: should create a disabled rule when the body sets enabled=false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
+        "line": 123,
+        "column": 24
+      }
+    },
+    {
+      "id": "63d456e0152970c-b23f642c082437a",
+      "title": "Upsert rule API upsert: should enable a disabled rule when the replace body sets enabled=true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
+        "line": 139,
+        "column": 24
+      }
+    },
+    {
+      "id": "63d456e0152970c-f1b9eb4589111ba",
+      "title": "Upsert rule API upsert: should disable an enabled rule when the replace body sets enabled=false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
+        "line": 163,
+        "column": 15
       }
     },
     {
@@ -4917,8 +4956,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 135,
-        "column": 51
+        "line": 184,
+        "column": 74
       }
     },
     {
@@ -4930,8 +4969,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 161,
-        "column": 18
+        "line": 209,
+        "column": 8
       }
     },
     {
@@ -4943,8 +4982,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 166,
-        "column": 14
+        "line": 220,
+        "column": 18
       }
     },
     {
@@ -4956,8 +4995,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 184,
-        "column": 4
+        "line": 234,
+        "column": 14
       }
     },
     {
@@ -4969,8 +5008,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 188,
-        "column": 76
+        "line": 243,
+        "column": 4
       }
     },
     {
@@ -4982,8 +5021,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 198,
-        "column": 11
+        "line": 249,
+        "column": 16
       }
     },
     {
@@ -4995,8 +5034,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 207,
-        "column": 79
+        "line": 257,
+        "column": 46
       }
     },
     {
@@ -5008,8 +5047,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 219,
-        "column": 24
+        "line": 269,
+        "column": 56
       }
     },
     {
@@ -5021,8 +5060,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 229,
-        "column": 5
+        "line": 280,
+        "column": 15
       }
     },
     {
@@ -5034,8 +5073,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 238,
-        "column": 15
+        "line": 291,
+        "column": 27
       }
     },
     {
@@ -5047,8 +5086,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 250,
-        "column": 57
+        "line": 300,
+        "column": 14
       }
     },
     {
@@ -5060,8 +5099,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 263,
-        "column": 21
+        "line": 311,
+        "column": 14
       }
     },
     {
@@ -5073,8 +5112,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 286,
-        "column": 11
+        "line": 338,
+        "column": 15
       }
     },
     {
@@ -5086,8 +5125,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 294,
-        "column": 12
+        "line": 346,
+        "column": 22
       }
     },
     {
@@ -5099,8 +5138,21 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
-        "line": 305,
-        "column": 79
+        "line": 363,
+        "column": 33
+      }
+    },
+    {
+      "id": "63d456e0152970c-a28c866a308ced0",
+      "title": "Upsert rule API upsert: replace does not merge nested query or metadata leaves",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/upsert_rule.spec.ts",
+        "line": 377,
+        "column": 15
       }
     }
   ]
