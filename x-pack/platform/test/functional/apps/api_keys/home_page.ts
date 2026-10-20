@@ -91,7 +91,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await pageObjects.apiKeys.deleteAllApiKeyOneByOne();
+        await clearAllApiKeys(es, log);
+        await browser.refresh();
       });
 
       after(async () => {
@@ -146,7 +147,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await pageObjects.apiKeys.deleteAllApiKeyOneByOne();
+        await clearAllApiKeys(es, log);
+        await browser.refresh();
       });
 
       after(async () => {
@@ -256,7 +258,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await pageObjects.apiKeys.deleteAllApiKeyOneByOne();
+        await clearAllApiKeys(es, log);
+        await browser.refresh();
       });
 
       after(async () => {
