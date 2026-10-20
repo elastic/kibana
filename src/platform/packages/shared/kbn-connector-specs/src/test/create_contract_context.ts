@@ -10,8 +10,8 @@
 import { generateKeyPairSync, webcrypto } from 'crypto';
 import { Readable } from 'stream';
 import axios from 'axios';
-import type { ContractMock, ContractMockOptions } from '@kbn/connector-contract-mock';
-import { createContractMockFetch } from '@kbn/connector-contract-mock';
+import type { Emulator, EmulatorOptions } from '@kbn/connector-emulate';
+import { createEmulatorFetch } from '@kbn/connector-emulate';
 import type { Logger } from '@kbn/logging';
 import { z } from '@kbn/zod/v4';
 import { authTypeSpecs } from '../../server';
@@ -27,7 +27,7 @@ import { getSchemaForAuthType } from '../lib';
 // plugin's getToken, it includes the token type, as auth types use it as the header value.
 const ACCESS_TOKEN = 'Bearer contract-mock-access-token';
 
-export interface ContractContextOptions extends ContractMockOptions {
+export interface ContractContextOptions extends EmulatorOptions {
   readonly connector: ConnectorSpec;
   /** The auth type to authenticate with; defaults to the connector's first one. */
   readonly authType?: string;
@@ -39,7 +39,7 @@ export interface ContractContextOptions extends ContractMockOptions {
 export interface ContractContext {
   /** The context the actions plugin would pass to handlers, with a client answered by the mock. */
   readonly ctx: ActionContext;
-  readonly mock: ContractMock;
+  readonly mock: Emulator;
   /** Validates the input with the action's schema, as the actions plugin does, and runs it. */
   readonly runAction: (name: string, input: unknown) => Promise<unknown>;
 }
@@ -204,7 +204,7 @@ export const createContractContext = async ({
   config = {},
   ...mockOptions
 }: ContractContextOptions): Promise<ContractContext> => {
-  const mock = createContractMockFetch(mockOptions);
+  const mock = createEmulatorFetch(mockOptions);
   const definitions = connector.auth?.types.length ? connector.auth.types : ['none'];
   const definition =
     authType === undefined

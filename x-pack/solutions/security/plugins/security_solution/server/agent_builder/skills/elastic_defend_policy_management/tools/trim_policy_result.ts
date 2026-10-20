@@ -334,7 +334,7 @@ const IDENTITY_STRING_KEYS = [
   'packageVersion',
 ] as const satisfies readonly PolicyIdentityStringKey[];
 
-const capPresentedIdentityString = (value: string): { text: string; truncated: boolean } => {
+export const capPresentedIdentityString = (value: string): { text: string; truncated: boolean } => {
   if (value.length <= MAX_STRING_LENGTH) {
     return { text: value, truncated: false };
   }

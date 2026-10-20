@@ -13,8 +13,8 @@ import { CoreStart, useService } from '@kbn/core-di-browser';
 import { useContentListPhase } from '@kbn/content-list-provider';
 import { i18n } from '@kbn/i18n';
 import { canAccessTriggersActionsRules, triggersActionsRoute } from '@kbn/rule-data-utils';
+import { ALERTING_V2_RULES_TAB_ID } from '@kbn/alerting-v2-constants';
 import { useHostTabs } from '../../application/tabs_context';
-import { experimentalBadge } from '../../components/experimental_badge';
 import { paths } from '../../constants';
 import {
   useAreAgentBuilderSkillsAvailable,
@@ -33,7 +33,6 @@ const getRulesListMenu = ({
   onCreateWithAgent,
   onBuildSequence,
   showBuildSequence,
-  showCreateWithAgent,
   createWithAgentDisabled,
   createWithAgentTooltipText,
 }: {
@@ -42,7 +41,6 @@ const getRulesListMenu = ({
   onCreateWithAgent: () => void;
   onBuildSequence: () => void;
   showBuildSequence: boolean;
-  showCreateWithAgent: boolean;
   createWithAgentDisabled?: boolean;
   createWithAgentTooltipText?: string;
 }): AppHeaderMenu => ({
@@ -87,22 +85,18 @@ const getRulesListMenu = ({
           run: onCreateEsqlRule,
           testId: 'createEsqlRuleButton',
         },
-        ...(showCreateWithAgent
-          ? [
-              {
-                id: 'createWithAgent',
-                label: i18n.translate('xpack.alertingV2.rulesList.createWithAgentButton', {
-                  defaultMessage: 'Create with agent (Experimental)',
-                }),
-                iconType: 'sparkles' as const,
-                order: 1,
-                run: onCreateWithAgent,
-                testId: 'createWithAgentButton',
-                disableButton: createWithAgentDisabled,
-                tooltipContent: createWithAgentTooltipText,
-              },
-            ]
-          : []),
+        {
+          id: 'createWithAgent',
+          label: i18n.translate('xpack.alertingV2.rulesList.createWithAgentButton', {
+            defaultMessage: 'Create with agent',
+          }),
+          iconType: 'sparkles' as const,
+          order: 1,
+          run: onCreateWithAgent,
+          testId: 'createWithAgentButton',
+          disableButton: createWithAgentDisabled,
+          tooltipContent: createWithAgentTooltipText,
+        },
       ],
     },
   },
@@ -133,9 +127,9 @@ export const RulesListHeader = ({
 
   const application = useService(CoreStart('application'));
   const basePath = useService(CoreStart('http')).basePath;
+  const { links } = useService(CoreStart('docLinks'));
   const hostTabs = useHostTabs();
   const showBuildSequence = useAlertingV2ExperimentalFeatures();
-  const showCreateWithAgent = useAlertingV2ExperimentalFeatures();
   const createWithAgentDisabled = !useAreAgentBuilderSkillsAvailable();
   const createWithAgentTooltipText = getCreateWithAgentTooltipText(
     useAgentBuilderSkillsRequirements()
@@ -144,9 +138,9 @@ export const RulesListHeader = ({
   const defaultTabs = useMemo<AppHeaderTab[]>(() => {
     const headerTabs: AppHeaderTab[] = [
       {
-        id: 'v2Rules',
+        id: ALERTING_V2_RULES_TAB_ID,
         label: i18n.translate('xpack.alertingV2.rulesList.v2RulesTabTitle', {
-          defaultMessage: 'V2 rules',
+          defaultMessage: 'Universal',
         }),
         isSelected: true,
         href: basePath.prepend(paths.ruleList),
@@ -164,7 +158,7 @@ export const RulesListHeader = ({
       headerTabs.push({
         id: 'v1Rules',
         label: i18n.translate('xpack.alertingV2.rulesList.v1RulesTabTitle', {
-          defaultMessage: 'V1 rules',
+          defaultMessage: 'Classic',
         }),
         isSelected: false,
         href: basePath.prepend(triggersActionsRoute),
@@ -187,7 +181,6 @@ export const RulesListHeader = ({
             onCreateWithAgent,
             onBuildSequence,
             showBuildSequence,
-            showCreateWithAgent,
             createWithAgentDisabled,
             createWithAgentTooltipText,
           })
@@ -199,7 +192,6 @@ export const RulesListHeader = ({
       onCreateWithAgent,
       onBuildSequence,
       showBuildSequence,
-      showCreateWithAgent,
       createWithAgentDisabled,
       createWithAgentTooltipText,
     ]
@@ -211,9 +203,9 @@ export const RulesListHeader = ({
         sticky={false}
         title={RULES_LIST_PAGE_TITLE}
         tabs={tabs}
-        badges={[experimentalBadge]}
         spacing="bleed"
         menu={headerMenu}
+        docLink={links.alerting.viewManageRules}
       />
       <EuiSpacer size="m" />
     </>

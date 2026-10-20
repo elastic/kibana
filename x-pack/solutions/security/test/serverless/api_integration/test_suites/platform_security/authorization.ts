@@ -8,6 +8,13 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
+const ALERTING_V2_FEATURE_IDS = [
+  'alerting_v2_rules',
+  'alerting_v2_alerts',
+  'alerting_v2_action_policies',
+  'alerting_v2_execution_history',
+];
+
 export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
 
@@ -138,6 +145,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "saved_object:scheduled_report/share_to_space",
                 "ui:dashboard_v2/downloadCsv",
                 "api:generateReport",
+                "ui:dashboard_v2/generateScreenshot",
                 "ui:discover_v2/generateCsv",
               ],
               "minimal_all": Array [
@@ -219,6 +227,7 @@ if (sourceFilePath === 'authorization.ts') {
                 "saved_object:scheduled_report/share_to_space",
                 "ui:dashboard_v2/downloadCsv",
                 "api:generateReport",
+                "ui:dashboard_v2/generateScreenshot",
                 "ui:discover_v2/generateCsv",
               ],
               "minimal_read": Array [
@@ -13766,6 +13775,30 @@ if (sourceFilePath === 'authorization.ts') {
                 "saved_object:entity-store-global-state/delete",
                 "saved_object:entity-store-global-state/bulk_delete",
                 "saved_object:entity-store-global-state/share_to_space",
+                "saved_object:entity-resolution-rule/bulk_get",
+                "saved_object:entity-resolution-rule/get",
+                "saved_object:entity-resolution-rule/find",
+                "saved_object:entity-resolution-rule/open_point_in_time",
+                "saved_object:entity-resolution-rule/close_point_in_time",
+                "saved_object:entity-resolution-rule/create",
+                "saved_object:entity-resolution-rule/bulk_create",
+                "saved_object:entity-resolution-rule/update",
+                "saved_object:entity-resolution-rule/bulk_update",
+                "saved_object:entity-resolution-rule/delete",
+                "saved_object:entity-resolution-rule/bulk_delete",
+                "saved_object:entity-resolution-rule/share_to_space",
+                "saved_object:entity-resolution-custom-rule/bulk_get",
+                "saved_object:entity-resolution-custom-rule/get",
+                "saved_object:entity-resolution-custom-rule/find",
+                "saved_object:entity-resolution-custom-rule/open_point_in_time",
+                "saved_object:entity-resolution-custom-rule/close_point_in_time",
+                "saved_object:entity-resolution-custom-rule/create",
+                "saved_object:entity-resolution-custom-rule/bulk_create",
+                "saved_object:entity-resolution-custom-rule/update",
+                "saved_object:entity-resolution-custom-rule/bulk_update",
+                "saved_object:entity-resolution-custom-rule/delete",
+                "saved_object:entity-resolution-custom-rule/bulk_delete",
+                "saved_object:entity-resolution-custom-rule/share_to_space",
                 "saved_object:siem-detection-engine-rule-actions/bulk_get",
                 "saved_object:siem-detection-engine-rule-actions/get",
                 "saved_object:siem-detection-engine-rule-actions/find",
@@ -14226,6 +14259,38 @@ if (sourceFilePath === 'authorization.ts') {
                 "api:securitySolution-readBlocklist",
                 "ui:siemV5/readBlocklist",
               ],
+              "custom_yara_signatures_all": Array [
+                "login:",
+                "api:lists-all",
+                "api:exceptions-read",
+                "api:exceptions-all",
+                "api:lists-read",
+                "api:lists-summary",
+                "api:securitySolution-writeCustomYaraSignatures",
+                "api:securitySolution-readCustomYaraSignatures",
+                "saved_object:exception-list-agnostic/bulk_get",
+                "saved_object:exception-list-agnostic/get",
+                "saved_object:exception-list-agnostic/find",
+                "saved_object:exception-list-agnostic/open_point_in_time",
+                "saved_object:exception-list-agnostic/close_point_in_time",
+                "saved_object:exception-list-agnostic/create",
+                "saved_object:exception-list-agnostic/bulk_create",
+                "saved_object:exception-list-agnostic/update",
+                "saved_object:exception-list-agnostic/bulk_update",
+                "saved_object:exception-list-agnostic/delete",
+                "saved_object:exception-list-agnostic/bulk_delete",
+                "saved_object:exception-list-agnostic/share_to_space",
+                "ui:siemV5/writeCustomYaraSignatures",
+                "ui:siemV5/readCustomYaraSignatures",
+              ],
+              "custom_yara_signatures_read": Array [
+                "login:",
+                "api:lists-read",
+                "api:exceptions-read",
+                "api:lists-summary",
+                "api:securitySolution-readCustomYaraSignatures",
+                "ui:siemV5/readCustomYaraSignatures",
+              ],
               "endpoint_exceptions_all": Array [
                 "login:",
                 "api:lists-all",
@@ -14482,6 +14547,30 @@ if (sourceFilePath === 'authorization.ts') {
                 "saved_object:entity-store-global-state/delete",
                 "saved_object:entity-store-global-state/bulk_delete",
                 "saved_object:entity-store-global-state/share_to_space",
+                "saved_object:entity-resolution-rule/bulk_get",
+                "saved_object:entity-resolution-rule/get",
+                "saved_object:entity-resolution-rule/find",
+                "saved_object:entity-resolution-rule/open_point_in_time",
+                "saved_object:entity-resolution-rule/close_point_in_time",
+                "saved_object:entity-resolution-rule/create",
+                "saved_object:entity-resolution-rule/bulk_create",
+                "saved_object:entity-resolution-rule/update",
+                "saved_object:entity-resolution-rule/bulk_update",
+                "saved_object:entity-resolution-rule/delete",
+                "saved_object:entity-resolution-rule/bulk_delete",
+                "saved_object:entity-resolution-rule/share_to_space",
+                "saved_object:entity-resolution-custom-rule/bulk_get",
+                "saved_object:entity-resolution-custom-rule/get",
+                "saved_object:entity-resolution-custom-rule/find",
+                "saved_object:entity-resolution-custom-rule/open_point_in_time",
+                "saved_object:entity-resolution-custom-rule/close_point_in_time",
+                "saved_object:entity-resolution-custom-rule/create",
+                "saved_object:entity-resolution-custom-rule/bulk_create",
+                "saved_object:entity-resolution-custom-rule/update",
+                "saved_object:entity-resolution-custom-rule/bulk_update",
+                "saved_object:entity-resolution-custom-rule/delete",
+                "saved_object:entity-resolution-custom-rule/bulk_delete",
+                "saved_object:entity-resolution-custom-rule/share_to_space",
                 "saved_object:siem-detection-engine-rule-actions/bulk_get",
                 "saved_object:siem-detection-engine-rule-actions/get",
                 "saved_object:siem-detection-engine-rule-actions/find",
@@ -14989,6 +15078,16 @@ if (sourceFilePath === 'authorization.ts') {
                 "saved_object:entity-store-global-state/find",
                 "saved_object:entity-store-global-state/open_point_in_time",
                 "saved_object:entity-store-global-state/close_point_in_time",
+                "saved_object:entity-resolution-rule/bulk_get",
+                "saved_object:entity-resolution-rule/get",
+                "saved_object:entity-resolution-rule/find",
+                "saved_object:entity-resolution-rule/open_point_in_time",
+                "saved_object:entity-resolution-rule/close_point_in_time",
+                "saved_object:entity-resolution-custom-rule/bulk_get",
+                "saved_object:entity-resolution-custom-rule/get",
+                "saved_object:entity-resolution-custom-rule/find",
+                "saved_object:entity-resolution-custom-rule/open_point_in_time",
+                "saved_object:entity-resolution-custom-rule/close_point_in_time",
                 "saved_object:siem-detection-engine-rule-actions/bulk_get",
                 "saved_object:siem-detection-engine-rule-actions/get",
                 "saved_object:siem-detection-engine-rule-actions/find",
@@ -15295,6 +15394,16 @@ if (sourceFilePath === 'authorization.ts') {
                 "saved_object:entity-store-global-state/find",
                 "saved_object:entity-store-global-state/open_point_in_time",
                 "saved_object:entity-store-global-state/close_point_in_time",
+                "saved_object:entity-resolution-rule/bulk_get",
+                "saved_object:entity-resolution-rule/get",
+                "saved_object:entity-resolution-rule/find",
+                "saved_object:entity-resolution-rule/open_point_in_time",
+                "saved_object:entity-resolution-rule/close_point_in_time",
+                "saved_object:entity-resolution-custom-rule/bulk_get",
+                "saved_object:entity-resolution-custom-rule/get",
+                "saved_object:entity-resolution-custom-rule/find",
+                "saved_object:entity-resolution-custom-rule/open_point_in_time",
+                "saved_object:entity-resolution-custom-rule/close_point_in_time",
                 "saved_object:siem-detection-engine-rule-actions/bulk_get",
                 "saved_object:siem-detection-engine-rule-actions/get",
                 "saved_object:siem-detection-engine-rule-actions/find",
@@ -15661,6 +15770,19 @@ if (sourceFilePath === 'authorization.ts') {
         expect(discoverV2?.category?.id).to.be('securitySolution');
         expect(discoverV2?.order).to.be(1101);
         expect(dashboardV2?.order).to.be(1102);
+      });
+
+      it('does not expose alerting v2 feature privileges', async () => {
+        const { body } = await supertestWithoutAuth
+          .get('/api/security/privileges')
+          .set(svlCommonApi.getInternalRequestHeader())
+          .set(adminCredentials)
+          .expect(200);
+
+        const featureIds = Object.keys(body.features);
+        for (const featureId of ALERTING_V2_FEATURE_IDS) {
+          expect(featureIds).to.not.contain(featureId);
+        }
       });
     });
   });

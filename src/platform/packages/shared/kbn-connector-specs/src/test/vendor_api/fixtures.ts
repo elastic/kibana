@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ResponseFixture } from '@kbn/connector-contract-mock';
+import type { ResponseFixture } from '@kbn/connector-emulate';
 import { z } from '@kbn/zod/v4';
 
 const responseOverrideSchema = z
