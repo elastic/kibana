@@ -55,7 +55,9 @@ const buildSeriesCondition = (series: DecodedSeriesId) =>
  * Resolves the latest `.rule-events` row per series in a single ES|QL
  * round-trip, keyed by the series' id(`encodeSeriesId`). A series
  * is identified by its owner and `group_hash`. The space is always the
- * request's. Series that have no matching event don't appear in the result;
+ * request's `spaceId`, which every series passed in must already belong to:
+ * callers validate the space of a client-supplied series id before getting
+ * here. Series that have no matching event don't appear in the result;
  * callers that need throw-on-empty semantics layer that on top
  * ({@link loadLastSeriesAlertEventOrThrow}).
  */

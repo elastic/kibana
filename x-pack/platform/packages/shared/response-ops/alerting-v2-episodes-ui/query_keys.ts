@@ -52,7 +52,7 @@ export const queryKeys = {
     [...queryKeys.episodeTrendAll(), spaceId, episodeId, ...metricLabels] as const,
   relatedSameGroupEpisodes: (
     spaceId: string,
-    ruleId: string,
+    scopeKey: string,
     groupHash: string,
     pageSize: number
   ) =>
@@ -60,13 +60,13 @@ export const queryKeys = {
       ...queryKeys.all,
       'related-episodes-same-group',
       spaceId,
-      ruleId,
+      scopeKey,
       groupHash,
       pageSize,
     ] as const,
   relatedOtherEpisodes: (
     spaceId: string,
-    ruleId: string,
+    scopeKey: string,
     pageSize: number,
     currentGroupKey: string,
     excludeEpisodeId: string
@@ -75,7 +75,7 @@ export const queryKeys = {
       ...queryKeys.all,
       'related-episodes-other',
       spaceId,
-      ruleId,
+      scopeKey,
       pageSize,
       currentGroupKey,
       excludeEpisodeId,

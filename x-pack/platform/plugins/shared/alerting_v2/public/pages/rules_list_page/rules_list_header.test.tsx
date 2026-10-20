@@ -19,7 +19,6 @@ let mockExperimentalFeaturesEnabled = true;
 let mockAreAgentBuilderSkillsAvailable = true;
 let mockAgentBuilderSkillsRequirements = {
   hasAgentBuilderCapability: true,
-  isExperimentalFeaturesEnabled: true,
 };
 
 /** Non-empty so the assertions below prove each href is run through `basePath.prepend`. */
@@ -50,6 +49,16 @@ jest.mock('@kbn/core-di-browser', () => {
 
       if (token === actual.CoreStart('http')) {
         return { basePath: { prepend: (path: string) => `${MOCK_BASE_PATH}${path}` } };
+      }
+
+      if (token === actual.CoreStart('docLinks')) {
+        return {
+          links: {
+            alerting: {
+              viewManageRules: 'https://docs.test/view-manage-rules',
+            },
+          },
+        };
       }
 
       return {};
@@ -94,7 +103,6 @@ describe('RulesListHeader', () => {
     mockAreAgentBuilderSkillsAvailable = true;
     mockAgentBuilderSkillsRequirements = {
       hasAgentBuilderCapability: true,
-      isExperimentalFeaturesEnabled: true,
     };
   });
 

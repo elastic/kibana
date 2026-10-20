@@ -178,6 +178,8 @@ export {
   type ConfigProperties,
   type FieldsConfiguration,
   type InferenceProvider,
+  type InferenceServiceFeatures,
+  supportsNonStreamingChat,
 } from './src/inference_services_api';
 
 export { type Model, ModelFamily, ModelPlatform, ModelProvider } from './src/model_provider';

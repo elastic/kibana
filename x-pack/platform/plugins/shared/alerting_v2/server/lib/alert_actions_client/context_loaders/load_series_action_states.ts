@@ -75,8 +75,9 @@ const buildSeriesCondition = (series: DecodedSeriesId) =>
  * current state in a single ES|QL round-trip, keyed by the series' canonical
  * id (`encodeSeriesId`). A series is identified by its owner and `group_hash`,
  * so a snooze recorded for another rule that shares the hash is not read.
- * Series with no such history are absent from the map; callers fall back to
- * {@link EMPTY_SERIES_ACTION_STATE}.
+ * The space is the request's `spaceId`, which every series passed in must
+ * already belong to. Series with no such history are absent from the map;
+ * callers fall back to {@link EMPTY_SERIES_ACTION_STATE}.
  *
  * Series actions are persisted with a null `alert_id`, which is what the
  * `alert_id IS NULL` filter selects.

@@ -419,6 +419,7 @@ export function EpisodeDetailsPage() {
         menu={headerMenu}
         tabs={headerTabs}
         spacing="bleed"
+        docLink={services.docLinks.links.alerting.investigateAlertEpisodes}
       />
       {isLoading ? (
         <KibanaPageTemplate.Section grow>
