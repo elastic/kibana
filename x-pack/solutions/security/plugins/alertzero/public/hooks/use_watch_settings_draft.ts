@@ -242,7 +242,8 @@ export const useWatchSettingsDraft = (workers: Worker[]) => {
         try {
           const { worker: savedWorker } = await mutateAsync({ workerId: worker.id, patch });
           savedWorkers.push(savedWorker);
-          // A Worker can sit on several Watches, so a detached save must not wipe a fresh edit.
+          // `watchIds` allows a Worker on several Watches; a detached save must not wipe an edit
+          // made on the next one.
           if (ownsDraft()) {
             setOverlays((current) => {
               const { [worker.id]: _removed, ...rest } = current;
