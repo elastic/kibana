@@ -14,6 +14,12 @@ failure percentage and its recent failed attempts with their Buildkite jobs. Exi
 the link the next time the reporter updates them; failure comments on `main` include it too.
 Tests without an exact file path get no link.
 
+### Buildkite reporting
+
+Test jobs run with `--no-github-update`. When `REPORT_FAILED_TESTS_TO_GITHUB` is enabled, Post-Build
+downloads their reports and files GitHub issues. Retries of a step are reported together, and
+Post-Build fails without reporting when more than 50 tests failed.
+
 ## `node scripts/report_flaky_test_issues`
 
 Files one `failed-test` issue per flaky test suite, from the report written by
