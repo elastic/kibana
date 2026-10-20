@@ -7,8 +7,8 @@
 
 import type { StreamsUnit } from '@kbn/streams-schema';
 import { DESTINATION_TYPES_WITH_STATS } from './constants';
-import { noDestinationStats } from './mappers/map_destination_stats_response';
-import { noProcessorStats } from './mappers/map_processor_stats_response';
+import { noDestinationStats } from './mappers/map_destination_stats_result';
+import { noProcessorStats } from './mappers/map_processor_stats_result';
 import { UnitStatsError } from './errors/unit_stats_error';
 
 /**

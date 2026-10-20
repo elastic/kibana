@@ -7,8 +7,7 @@
 
 import type { StreamsUnit } from '@kbn/streams-schema';
 import { ITEM_UNIT, SECONDS_UNIT, STATS_COLUMN } from '../constants';
-import { numberOrNull } from './esql_rows';
-import type { DestinationRow } from './join_destination_rows';
+import { groupById, indexById, numberOrNull, type EsqlRow, type EsqlValue } from './esql_rows';
 import { noRate, noValue, toItemRate, toSeries, toValue } from './stats_values';
 
 export const noDestinationStats = (bucketMs: number): StreamsUnit.StatsDestinationResult => ({
@@ -22,6 +21,34 @@ export const noDestinationStats = (bucketMs: number): StreamsUnit.StatsDestinati
     },
   },
 });
+
+/** What the two destination queries return for one destination. */
+export interface DestinationRow {
+  [STATS_COLUMN.incomingRate]?: EsqlValue;
+  [STATS_COLUMN.failedRate]?: EsqlValue;
+  [STATS_COLUMN.avgLatency]?: EsqlValue;
+  series: EsqlRow[];
+}
+
+/**
+ * Joins the rows of the rate query and of the sums query on the destination id, into one object
+ * per destination. A destination is there when the sums query has rows for it (it has items in
+ * the window). The series keeps the order of the rows, which the query sorts by bucket.
+ */
+export const joinDestinationRows = ({
+  rateRows,
+  sumsRows,
+}: {
+  rateRows: EsqlRow[];
+  sumsRows: EsqlRow[];
+}): Record<string, DestinationRow> => {
+  const ratesById = indexById(rateRows, STATS_COLUMN.id);
+  const seriesById = groupById(sumsRows, STATS_COLUMN.id);
+
+  return Object.fromEntries(
+    Object.entries(seriesById).map(([id, series]) => [id, { ...ratesById[id], series }])
+  );
+};
 
 /**
  * Places the joined rows of each destination into its result. A column that ES|QL returned as

@@ -13,14 +13,17 @@ import { chunk } from 'lodash';
 import { toEsqlRequest } from '../streams/helpers/esql';
 import { UNIT_STATS_DEFAULT_WINDOW_MS, UNIT_STATS_REQUEST_TIMEOUT_MS } from './constants';
 import { toSearchError } from './errors/search_errors';
-import { joinDestinationRows } from './mappers/join_destination_rows';
-import { joinProcessorRows } from './mappers/join_processor_rows';
 import { toRows, type EsqlRow } from './mappers/esql_rows';
 import {
+  joinDestinationRows,
   mapDestinationStatsRows,
   noDestinationStats,
-} from './mappers/map_destination_stats_response';
-import { mapProcessorStatsRows, noProcessorStats } from './mappers/map_processor_stats_response';
+} from './mappers/map_destination_stats_result';
+import {
+  joinProcessorRows,
+  mapProcessorStatsRows,
+  noProcessorStats,
+} from './mappers/map_processor_stats_result';
 import {
   buildDestinationRateQuery,
   buildDestinationSumsQuery,
