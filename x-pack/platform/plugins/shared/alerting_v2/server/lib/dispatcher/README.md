@@ -87,7 +87,7 @@ The pipeline then moves through these phases:
 7. Load enabled action policies
 8. Evaluate policy matchers
 9. Build action groups
-10. Set aside alerts an earlier, aborted tick already delivered
+10. Set aside alerts an earlier, aborted tick already handled
 11. Apply throttling
 12. Dispatch eligible groups and record the outcomes: first the records that need no dispatch, then each chunk's records as soon as the chunk returns, and the execution history once at the end
 
@@ -98,12 +98,14 @@ By the end of a dispatcher run, every alert that reached the later pipeline stag
 | Outcome      | What happened                                                                                              | Action documents written                             |
 | ------------ | ---------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
 | `dispatch`   | The alert matched a policy, survived suppression and throttling, and was selected for delivery.            | `fire` per alert, plus `notified` per (action group, alert), written after each dispatch chunk |
-| `already notified` | An earlier tick delivered this alert's content to the group but aborted before recording the alert. | `fire` with an `already notified by policy` reason   |
+| `already notified` | An earlier tick handled this alert's content for the group (scheduled it, or failed to) but aborted before recording the alert. | `fire` with an `already notified by policy` reason   |
 | `throttled`  | The alert matched a policy, but the action group was held back by throttling.                              | `suppress` with a throttle-related reason            |
 | `suppressed` | The alert was explicitly filtered out by suppression logic such as ack, snooze, or deactivate semantics.   | `suppress` with the suppression reason               |
 | `unmatched`  | The alert remained dispatchable but matched no enabled action policy.                                      | `unmatched`                                          |
 
 `fire`, `suppress` and `unmatched` carry no `alert_id`, and the scan dedups them per series (`subject`, `group_hash`): one record hides every policy and every episode of its series. `DispatchStep` therefore writes them per series, through `SeriesLedger` (`steps/utils/series_ledger.ts`), only once every (dispatched group, alert) pair of that series has concluded. A group concludes when its chunk returns or when it fails before scheduling. Series with no group to dispatch are written in a first commit, before any scheduling. `notified` is keyed by (`action_group_id`, `alert_id`), so it is written right after each chunk; `ApplyAlreadyNotifiedStep` reads it back on later ticks.
+
+`notified` means the group concluded, not that a workflow ran: a group whose scheduling failed (license, API key, workflow lookup, schedule error) gets `notified` too, and its failure is reported as a `dispatch_failed` event. A failed attempt is therefore not retried, on an aborted tick as on a completed one, and it starts the group's throttle interval like a successful dispatch.
 
 The full action taxonomy, including user-written actions such as `ack` and `snooze`, is documented in [`../../resources/README.md`](../../resources/README.md).
 
@@ -195,7 +197,7 @@ The dispatcher carries state forward through `DispatcherPipelineState` in `types
 | `policies`         | `PolicyCatalog`    | `FetchPoliciesStep`                                                                 | Enabled action policies keyed by id and grouped by space.                                                                                                       |
 | `matched`          | plain array        | `EvaluateMatchersStep`                                                              | Concrete `(alert, policy)` matches.                                                                                                                            |
 | `groups`           | plain array        | `BuildGroupsStep`; narrowed by `ApplyAlreadyNotifiedStep`                           | Action groups to consider for delivery (transient — consumed by `ApplyThrottlingStep`).                                                                        |
-| `alreadyNotified`  | plain array        | `ApplyAlreadyNotifiedStep`                                                          | Groups narrowed to the alerts an earlier, aborted tick already delivered; recorded as `fire`, never dispatched again.                                         |
+| `alreadyNotified`  | plain array        | `ApplyAlreadyNotifiedStep`                                                          | Groups narrowed to the alerts an earlier, aborted tick already handled; recorded as `fire`, never dispatched again.                                           |
 | `plan`             | `DispatchPlan`     | `ApplyThrottlingStep`                                                               | Delivery decision: `toDispatch` vs `throttled`, the `alreadyNotified` groups, plus the `unmatched` alerts that landed in no group.                            |
 | `outcome`          | `DispatchOutcome`  | `DispatchStep`                                                                      | What happened: workflow execution ids per group and failed (group, destination) attempts; `deliveredDestinationsFor()` filters totally-failed groups.           |
 

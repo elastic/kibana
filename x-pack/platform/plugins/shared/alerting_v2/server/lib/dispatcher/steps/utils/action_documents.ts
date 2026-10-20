@@ -35,9 +35,10 @@ export function toAction({
 }
 
 /**
- * Builds one `notified` record per alert of a dispatched group. The record is keyed by
- * (`action_group_id`, `alert_id`) and stamped with the alert's event time so the
- * already-notified guard can tell, on a later tick, which content the group already delivered.
+ * Builds one `notified` record per alert of a concluded group: its workflows were scheduled, or
+ * their scheduling failed (license, API key, workflow lookup, schedule error). The record is keyed
+ * by (`action_group_id`, `alert_id`) and stamped with the alert's event time so the
+ * already-notified guard can tell, on a later tick, which content the group already handled.
  */
 export const toNotifiedActions = (
   group: ActionGroup,

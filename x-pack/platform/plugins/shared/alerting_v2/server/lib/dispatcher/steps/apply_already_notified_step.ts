@@ -27,8 +27,9 @@ import type {
 
 /**
  * Removes from each action group the alerts whose current content an earlier tick already
- * delivered (its `notified` records were committed but the tick aborted before recording `fire`),
- * so they are recorded instead of dispatched again.
+ * handled (its `notified` records were committed but the tick aborted before recording `fire`),
+ * so they are recorded instead of dispatched again. A group whose scheduling failed was handled
+ * too: the failed attempt is not retried.
  */
 @injectable()
 export class ApplyAlreadyNotifiedStep implements DispatcherStep {

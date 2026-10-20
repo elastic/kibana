@@ -19,7 +19,7 @@ export class DispatchPlan {
   private constructor(
     public readonly toDispatch: readonly ActionGroup[],
     public readonly throttled: readonly ActionGroup[],
-    /** Groups narrowed to the alerts an earlier tick already delivered. */
+    /** Groups narrowed to the alerts an earlier tick already handled. */
     public readonly alreadyNotified: readonly ActionGroup[],
     /** Alerts that survived triage but matched no enabled action policy. */
     public readonly unmatched: readonly Alert[]

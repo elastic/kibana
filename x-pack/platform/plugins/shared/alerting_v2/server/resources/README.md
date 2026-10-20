@@ -128,18 +128,18 @@ These actions are written by `DispatchStep` to record what the dispatcher decide
 | Action type | Written by | Meaning |
 | --- | --- | --- |
 | `fire` | Dispatcher | This episode was eligible for dispatch in the current run. |
-| `notified` | Dispatcher | A notification group was actually scheduled/sent. Written once per (`action_group_id`, `alert_id`) right after the dispatch chunk, with `last_series_event_timestamp` set to the alert's event time. Used for throttling and to skip content an aborted tick already delivered. Records written before this carry no `alert_id`. |
+| `notified` | Dispatcher | The action group concluded for this alert: its workflows were scheduled, or their scheduling failed (reported as a `dispatch_failed` event, not retried). Written once per (`action_group_id`, `alert_id`) right after the dispatch chunk, with `last_series_event_timestamp` set to the alert's event time. Used for throttling and to skip content an aborted tick already handled. Records written before this carry no `alert_id`. |
 | `suppress` | Dispatcher | The episode was intentionally not fired in this run, for example because suppression logic or throttling held it back. |
 | `unmatched` | Dispatcher | The episode stayed dispatchable but matched no enabled notification policy. |
 
 ### Why both `fire` and `notified` exist
 
-The dispatcher records both per-episode and per-group outcomes:
+The dispatcher records both per-series and per-group outcomes:
 
-- `fire` means an individual episode reached the dispatch stage
-- `notified` means a notification group was actually sent and is the durable record later throttling queries look at
+- `fire` means the series reached the dispatch stage. It carries no `alert_id`, and the scan uses it to skip the series on later ticks
+- `notified` means an action group concluded for one alert (scheduled, or failed to schedule), keyed by (`action_group_id`, `alert_id`). It is the durable record that throttling and the already-notified guard read; whether a workflow actually ran is in the `dispatched` / `dispatch_failed` events
 
-That distinction is why `.alert-actions` stores both episode-scoped and notification-group-scoped fields.
+That distinction is why `.alert-actions` stores both series-scoped and action-group-scoped fields.
 
 ## ES|QL views
 

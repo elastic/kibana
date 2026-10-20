@@ -212,7 +212,7 @@ export interface DispatcherPipelineState {
   readonly policies?: PolicyCatalog;
   readonly matched?: MatchedPair[];
   readonly groups?: ActionGroup[];
-  /** Alerts of each group already delivered by an earlier tick; recorded as `fire`, never dispatched again. */
+  /** Alerts of each group an earlier tick already handled (scheduled, or failed to); recorded as `fire`, never dispatched again. */
   readonly alreadyNotified?: ActionGroup[];
   /** Delivery decision: groups eligible to dispatch now vs groups held back. */
   readonly plan?: DispatchPlan;
