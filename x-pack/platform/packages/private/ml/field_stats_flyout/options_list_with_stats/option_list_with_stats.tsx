@@ -74,6 +74,7 @@ export const OptionListWithFieldStats: FC<OptionListWithFieldStatsProps> = ({
   const [isPopoverOpen, setPopoverOpen] = useState(false);
 
   const popoverId = useMemo(() => htmlIdGenerator()(), []);
+  const popoverPanelId = useMemo(() => htmlIdGenerator()(), []);
   const comboBoxOptions: DropDownLabel[] = useMemo(
     () =>
       Array.isArray(options)
@@ -116,6 +117,7 @@ export const OptionListWithFieldStats: FC<OptionListWithFieldStatsProps> = ({
             role="combobox"
             controlOnly
             aria-expanded={isPopoverOpen ? 'true' : 'false'}
+            aria-controls={popoverPanelId}
             onChange={() => {}}
             value={value}
             aria-labelledby={titleId}
@@ -138,6 +140,7 @@ export const OptionListWithFieldStats: FC<OptionListWithFieldStatsProps> = ({
       initialFocus={'[data-test-subj=optionsList-control-search-input]'}
       closePopover={setPopoverOpen.bind(null, false)}
       panelProps={{
+        id: popoverPanelId,
         'aria-label': i18n.translate('xpack.ml.controls.optionsList.popover.ariaLabel', {
           defaultMessage: 'Popover for {ariaLabel}',
           values: { ariaLabel },

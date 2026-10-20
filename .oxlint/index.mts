@@ -24,7 +24,7 @@ import { defineConfig, type OxlintConfig } from 'oxlint';
 import { javascriptRules } from './javascript.mts';
 import { typescriptRules } from './typescript.mts';
 import { jestRules } from './jest.mts';
-import { reactRules } from './react.mts';
+import { reactOverrides, reactRules } from './react.mts';
 import { kibanaOverrides, kibanaRules } from './kibana.mts';
 import { licenseHeaderOverrides } from './license_headers.mts';
 import { scoutOverrides } from './scout.mts';
@@ -33,6 +33,7 @@ import { i18nOverrides } from './i18n.mts';
 import { telemetryOverrides } from './telemetry.mts';
 import { alertingV2Overrides } from './alerting_v2.mts';
 import { securityImportsOverrides } from './security_imports.mts';
+import { unusedVarsOverrides } from './unused_vars.mts';
 import { importPluginOverrides } from './import_plugin.mts';
 
 export default defineConfig<OxlintConfig>({
@@ -77,12 +78,14 @@ export default defineConfig<OxlintConfig>({
     ...importPluginOverrides,
     ...licenseHeaderOverrides,
     ...kibanaOverrides,
+    ...reactOverrides,
     ...scoutOverrides,
     ...importsOverrides,
     ...i18nOverrides,
     ...telemetryOverrides,
     ...securityImportsOverrides,
     ...alertingV2Overrides,
+    ...unusedVarsOverrides,
   ],
   // oxlint's parser rejects TypeScript grammar errors (TS1016: required parameter after an
   // optional one) that ESLint's parser and tsc's `skipLibCheck` let through in this declaration.
