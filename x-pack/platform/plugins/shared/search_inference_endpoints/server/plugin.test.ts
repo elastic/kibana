@@ -9,6 +9,7 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { coreMock, httpServerMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
+import { InferenceConnectorType } from '@kbn/inference-common';
 import { inferenceMock } from '@kbn/inference-plugin/server/mocks';
 import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
@@ -282,7 +283,7 @@ describe('SearchInferenceEndpointsPlugin', () => {
         inference.getConnectorById.mockImplementation(async (id: string) => ({
           connectorId: id,
           name: id,
-          type: '.gen-ai',
+          type: InferenceConnectorType.OpenAI,
           config: {},
           capabilities: {},
           isPreconfigured: false,

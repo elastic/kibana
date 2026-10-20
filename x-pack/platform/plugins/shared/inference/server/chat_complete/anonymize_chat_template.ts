@@ -44,11 +44,11 @@ export const anonymizeChatTemplate = async ({
 
   const replacements: Record<string, string> = {};
   paths.forEach((path, index) => {
-    const content = anonymization.messages[index]?.content;
-    if (typeof content !== 'string') {
+    const message = anonymization.messages[index];
+    if (!message || message.role !== MessageRole.User || typeof message.content !== 'string') {
       throw createInferenceInternalError('Anonymized template variable was not a string');
     }
-    replacements[path] = content;
+    replacements[path] = message.content;
   });
 
   return {
