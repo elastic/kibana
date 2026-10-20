@@ -535,6 +535,9 @@ describe('getEndpointArtifactsTool', () => {
 
       it('mentions custom YARA signatures in the tool description', () => {
         expect(tool.description).toContain('custom YARA signatures');
+        expect(tool.description).toContain('`rule.custom_yara_signature.entry_id`');
+        expect(tool.description).toContain('truncated preview');
+        expect(tool.description).toContain('only treat items whose `name` matches it');
       });
 
       it('includes custom YARA signatures in summary mode', async () => {

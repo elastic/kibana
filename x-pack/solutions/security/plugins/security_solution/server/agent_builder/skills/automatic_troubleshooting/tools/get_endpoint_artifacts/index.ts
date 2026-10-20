@@ -65,6 +65,9 @@ const getEnabledArtifactTypes = ({
     ? [...BASE_ARTIFACT_TYPES, CUSTOM_YARA_SIGNATURES_ARTIFACT_TYPE]
     : BASE_ARTIFACT_TYPES;
 
+const CUSTOM_YARA_SIGNATURES_DESCRIPTION =
+  ' Custom YARA signature items include the artifact `id`, which custom YARA signature alerts reference as `rule.custom_yara_signature.entry_id`; it is not the `item_id`. Their rule text is a truncated preview, not the full rule. The `search` filter also matches rule text, so results can include signatures whose rule merely mentions the search term. When the user names a signature, only treat items whose `name` matches it as that signature. If none match, say so instead of substituting a text match.';
+
 type ArtifactErrorType = 'not_authorized' | 'feature_disabled' | 'unknown_error';
 
 const DEFAULT_PER_PAGE = 20;
@@ -332,11 +335,14 @@ export const getEndpointArtifactsTool = (
   const artifactTypesText = artifactTypes
     .map((artifactType) => ARTIFACT_TYPE_LABELS[artifactType])
     .join(', ');
+  const customYaraSignaturesDescription = experimentalFeatures.customYaraSignaturesEnabled
+    ? CUSTOM_YARA_SIGNATURES_DESCRIPTION
+    : '';
 
   return {
     id: GET_ENDPOINT_ARTIFACTS_TOOL_ID,
     type: ToolType.builtin,
-    description: `Query endpoint artifacts (${artifactTypesText}). Call without artifactType to get a summary of all types, or with artifactType to get details for a specific type.`,
+    description: `Query endpoint artifacts (${artifactTypesText}). Call without artifactType to get a summary of all types, or with artifactType to get details for a specific type.${customYaraSignaturesDescription}`,
     schema: createGetEndpointArtifactsSchema(artifactTypes),
     handler: async (params, { request, savedObjectsClient, esClient, logger }) => {
       try {

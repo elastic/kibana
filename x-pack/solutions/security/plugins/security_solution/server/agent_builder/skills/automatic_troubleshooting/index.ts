@@ -36,36 +36,32 @@ export const GET_ENDPOINT_ARTIFACTS_TOOL_ID = toolName('get_endpoint_artifacts')
 interface CustomYaraSignaturesText {
   whenToUse: string;
   artifactType: string;
-  instructions: string;
+  artifactsTrigger: string;
+  artifactsNotes: string;
   description: string;
 }
 
 const NO_CUSTOM_YARA_SIGNATURES_TEXT: CustomYaraSignaturesText = {
   whenToUse: '',
   artifactType: '',
-  instructions: '',
+  artifactsTrigger: '',
+  artifactsNotes: '',
   description: '',
 };
 
 const CUSTOM_YARA_SIGNATURES_TEXT: CustomYaraSignaturesText = {
   whenToUse: '- Custom YARA signatures not matching, not alerting, or not reaching endpoints\n',
   artifactType: ', custom YARA signatures',
-  instructions: `## Custom YARA signatures
-
-Use this guidance when the user asks about a custom YARA signature that is not matching, not alerting, or not reaching an endpoint, after the scoped investigation framework has classified the problem.
-
-- Call ${GET_ENDPOINT_ARTIFACTS_TOOL_ID} with artifactType \`custom_yara_signatures\` and the affected endpoint's policyId. Signature items include the artifact \`id\`. Rule text in entries is a truncated preview, not the full rule.
-- The \`search\` filter also matches rule text, so results can include signatures whose rule merely mentions the search term. When the user names a signature, only treat items whose \`name\` matches it as that signature. If none match, say so instead of substituting a text match.
-- A signature tagged \`disabled\` is not packed into the endpoint artifact and never runs.
-- Custom YARA signature alerts in \`logs-endpoint.alerts-*\` carry \`rule.custom_yara_signature.entry_id\`, \`rule.custom_yara_signature.entry_name\`, and \`rule.custom_yara_signature.rule_identifier\`. \`entry_id\` is the artifact \`id\`, not its \`item_id\`. Find the signature by searching for \`entry_name\`, then confirm that its \`id\` equals \`entry_id\`. \`entry_name\` is copied when the signature is packed, so it can be stale after a rename.
-- Packed signatures reach endpoints in the \`endpoint-yararules-<os>-v1\` user artifact. User artifact download failures, which may affect this artifact, appear in the policy response as \`download_user_artifacts\`.
-- To check whether the signatures artifact reached the target endpoint, look for \`endpoint-yararules-<os>-v1\` in \`Endpoint.policy.applied.artifacts.user.identifiers\` of the newest policy response for that endpoint in \`metrics-endpoint.policy-*\`. If it is present, the endpoint applied the artifact, but that does not show that a specific signature is inside it. If it is missing, the endpoint has not applied it, or its Elastic Defend version may not support custom YARA signatures yet.
-- The Elastic Defend knowledge base has no custom YARA signatures content yet. Knowledge results for these questions describe user artifacts in general, not custom YARA signatures specifically.
-- A \`not_authorized\` result for \`custom_yara_signatures\` can mean the cluster lacks an Enterprise license or the Endpoint Complete add-on, not only that the user lacks the Custom YARA Signatures privilege.
-- An enabled, correctly assigned signature can still be left out of the packed artifact when it fails validation while the artifact is built. That is only visible in Kibana server logs, which this skill cannot read. Do not claim a signature reached the endpoint based on the artifact list alone.
-- This skill cannot read the \`memory_protection.custom_yara_signatures\` policy setting. A \`memory_protection\` policy response status is not that setting. If the answer depends on whether custom YARA signatures are enabled in the policy, say that this cannot be checked here and ask the user to confirm it in the policy.
-
-`,
+  artifactsTrigger:
+    ', or custom YARA signatures not matching, not alerting, or not reaching an endpoint',
+  artifactsNotes: `
+   - For custom YARA signatures, the artifactType is \`custom_yara_signatures\`. A signature tagged \`disabled\` is not packed into the endpoint artifact and never runs.
+   - Custom YARA signature alerts in \`logs-endpoint.alerts-*\` carry \`rule.custom_yara_signature.entry_id\`, \`rule.custom_yara_signature.entry_name\`, and \`rule.custom_yara_signature.rule_identifier\`. Find the signature by searching for \`entry_name\`, then confirm that its \`id\` equals \`entry_id\`. \`entry_name\` is copied when the signature is packed, so it can be stale after a rename.
+   - Packed custom YARA signatures reach endpoints in the \`endpoint-yararules-<os>-v1\` user artifact. User artifact download failures, which may affect this artifact, appear in the policy response as \`download_user_artifacts\`. To check whether this artifact reached the target endpoint, look for \`endpoint-yararules-<os>-v1\` in \`Endpoint.policy.applied.artifacts.user.identifiers\` of the newest policy response for that endpoint in \`metrics-endpoint.policy-*\`. If it is present, the endpoint applied the artifact, but that does not show that a specific signature is inside it. If it is missing, the endpoint has not applied it, or its Elastic Defend version may not support custom YARA signatures yet.
+   - An enabled, correctly assigned custom YARA signature can still be left out of the packed artifact when it fails validation while the artifact is built. That is only visible in Kibana server logs, which this skill cannot read. Do not claim a signature reached the endpoint based on the artifact list alone.
+   - A \`not_authorized\` result for \`custom_yara_signatures\` can mean the cluster lacks an Enterprise license or the Endpoint Complete add-on, not only that the user lacks the Custom YARA Signatures privilege.
+   - This skill cannot read the \`memory_protection.custom_yara_signatures\` policy setting. A \`memory_protection\` policy response status is not that setting. If the answer depends on whether custom YARA signatures are enabled in the policy, say that this cannot be checked here and ask the user to confirm it in the policy.
+   - The Elastic Defend knowledge base has no custom YARA signatures content yet. Knowledge results for these questions describe user artifacts in general, not custom YARA signatures specifically.`,
   description: 'custom YARA signatures, ',
 };
 
@@ -120,7 +116,7 @@ Reference './available_indices' for the list of indices available for troublesho
 1. **Check package freshness** - Call ${CHECK_ENDPOINT_PACKAGE_FRESHNESS_TOOL_ID} first. If \`stale: true\`, output this exact line before anything else, substituting the version values: "⚠️ ${STALE_ENDPOINT_PACKAGE_MESSAGE}" Do not add to or rephrase this line. Then continue the investigation. If the check fails or the package is fresh, proceed without comment.
 2. **Run the scoped investigation framework** - Complete the framework below before calling ${platformCoreTools.integrationKnowledge}. The goal is to classify the current problem, not to explain every historical warning.
 3. **Gather scenario knowledge when the current scope requires it** - Call ${platformCoreTools.integrationKnowledge} with the user's symptom plus the concrete evidence from the framework only when the classification is a current policy failure, a current non-policy health failure, or another current unexplained issue. Include exact action names, messages, OS, status, HTTP/download errors, artifact names, and other terms that match the example queries below. Do not call ${platformCoreTools.integrationKnowledge} when the endpoint is currently healthy or for a recovered historical warning unless the user explicitly asks about prior failures.
-4. **Investigate with knowledge context** - Use the retrieved Elastic Defend knowledge base context to decide which indices, documents, package configurations, or endpoint artifacts to inspect next. Use ${platformCoreTools.search} to query relevant indices for evidence of errors, warnings, misconfigurations, or incompatibilities. Use ${platformCoreTools.getDocumentById} to retrieve full documents when needed. Use ${GET_PACKAGE_CONFIGURATIONS_TOOL_ID} to inspect Elastic Defend package configuration if relevant. When the issue involves unexpected allow/block/filtering behavior, isolation failures, or missing alerts, use ${GET_ENDPOINT_ARTIFACTS_TOOL_ID} to check if endpoint artifacts could be the cause. Call without artifactType first to see what artifact types exist, then query specific types for details. Use the policyId filter to narrow results to the affected endpoint's policy. Note: endpoint_exceptions can affect both the endpoint agent AND detection engine alerts depending on per-policy opt-in configuration — consider this when investigating missing alerts.
+4. **Investigate with knowledge context** - Use the retrieved Elastic Defend knowledge base context to decide which indices, documents, package configurations, or endpoint artifacts to inspect next. Use ${platformCoreTools.search} to query relevant indices for evidence of errors, warnings, misconfigurations, or incompatibilities. Use ${platformCoreTools.getDocumentById} to retrieve full documents when needed. Use ${GET_PACKAGE_CONFIGURATIONS_TOOL_ID} to inspect Elastic Defend package configuration if relevant. When the issue involves unexpected allow/block/filtering behavior, isolation failures, or missing alerts${customYaraSignaturesText.artifactsTrigger}, use ${GET_ENDPOINT_ARTIFACTS_TOOL_ID} to check if endpoint artifacts could be the cause. Call without artifactType first to see what artifact types exist, then query specific types for details. Use the policyId filter to narrow results to the affected endpoint's policy. Note: endpoint_exceptions can affect both the endpoint agent AND detection engine alerts depending on per-policy opt-in configuration — consider this when investigating missing alerts.${customYaraSignaturesText.artifactsNotes}
 5. **Iterate** - Continue querying and gathering context until the root cause or relevant findings are understood.
 6. **Persist findings** - Call ${GENERATE_INSIGHT_TOOL_ID} with a clear problem description, actionable remediation steps, affected endpoint IDs, and relevant raw documents.
 
@@ -171,7 +167,7 @@ Before retrieval or remediation, collect only enough current evidence to choose 
    - If the answer to all checks is no, do not continue searching for a root cause or additional findings. Tell the user the endpoint does not appear currently unhealthy, summarize only the current healthy evidence, and ask for the specific symptom, affected time range, alert/event, or behavior they want investigated.
    - If any check is yes, reclassify into \`CURRENT_POLICY_FAILURE\`, \`NON_POLICY_HEALTH_FAILURE\`, \`OTHER_CURRENT_ISSUE\`, or \`RECOVERED_POLICY_FAILURE\` and continue on that path.
 
-${customYaraSignaturesText.instructions}## Example integration knowledge queries
+## Example integration knowledge queries
 
 Use exact terms from the user's request and queried endpoint evidence when calling ${platformCoreTools.integrationKnowledge}. These examples match common Elastic Defend knowledge base topics:
 

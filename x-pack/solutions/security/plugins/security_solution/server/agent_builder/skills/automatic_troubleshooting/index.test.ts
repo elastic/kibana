@@ -175,11 +175,12 @@ describe('createAutomaticTroubleshootingSkill', () => {
       const inlineTools = await skill.getInlineTools?.();
       const artifactsTool = inlineTools?.find((tool) => tool.id.includes('get_endpoint_artifacts'));
 
-      expect(skill.content).toContain('## Custom YARA signatures');
-      expect(skill.content).toContain('custom_yara_signatures');
+      expect(skill.content).toContain(
+        'or missing alerts, or custom YARA signatures not matching, not alerting, or not reaching an endpoint, use'
+      );
+      expect(skill.content).toContain('the artifactType is `custom_yara_signatures`');
       expect(skill.content).toContain('rule.custom_yara_signature.entry_id');
       expect(skill.content).toContain('memory_protection.custom_yara_signatures');
-      expect(skill.content).toContain('only treat items whose `name` matches it');
       expect(skill.content).toContain('endpoint-yararules');
       expect(skill.content).toContain('Endpoint.policy.applied.artifacts.user.identifiers');
       expect(skill.content).toContain(
