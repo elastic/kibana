@@ -708,10 +708,6 @@ export class NightshiftInvestigationsPlugin
       spaces: this.spaces,
       getAutomationsSoClient: this.getAutomationsSoClient,
       isServerless: this.ctx.env.packageInfo.buildFlavor === 'serverless',
-      reinforcementAgent:
-        this.decisionTreesEnabled && this.agentBuilder
-          ? { agentBuilder: this.agentBuilder, availability: this.getInvestigationAvailability() }
-          : undefined,
       logger: this.logger.get('service_account'),
     });
     return this.investigatorServiceAccountService;

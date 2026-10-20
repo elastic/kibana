@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AgentAccessControlMode } from '@kbn/agent-builder-common';
+import { AgentAccessControlMode, AgentAccessControlRole } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
 import {
@@ -14,6 +14,7 @@ import {
   NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID,
   NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_TYPE_ID,
 } from '../agents/decision_tree_reinforcement';
+import { INVESTIGATOR_SERVICE_ACCOUNT_ID } from './service_account/constants';
 
 export const installDecisionTreeReinforcementAgent = async ({
   agentBuilder,
@@ -27,6 +28,16 @@ export const installDecisionTreeReinforcementAgent = async ({
   await agentBuilder.agents.ensure({
     spaceId,
     availability,
+    // Agent optimize runs this agent as the Nightshift agent service account in spaces set up
+    // with it, so the account may use it despite the private access mode.
+    accessControlEntries: [
+      {
+        type: 'user',
+        id: `service_account:${INVESTIGATOR_SERVICE_ACCOUNT_ID}`,
+        name: INVESTIGATOR_SERVICE_ACCOUNT_ID,
+        role: AgentAccessControlRole.User,
+      },
+    ],
     agent: {
       id: NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID,
       type: NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_TYPE_ID,

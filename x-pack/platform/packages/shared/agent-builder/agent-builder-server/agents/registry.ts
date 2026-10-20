@@ -6,7 +6,7 @@
  */
 
 import type { MaybePromise } from '@kbn/utility-types';
-import type { AgentAccessControl, AgentDefinition } from '@kbn/agent-builder-common/agents';
+import type { AgentDefinition } from '@kbn/agent-builder-common/agents';
 import type {
   AgentCreateRequest,
   AgentUpdateRequest,
@@ -30,12 +30,4 @@ export interface AgentRegistry {
   create(createRequest: AgentCreateRequest): Promise<InternalAgentDefinition>;
   update(agentId: string, update: AgentUpdateRequest): Promise<InternalAgentDefinition>;
   delete(args: AgentDeleteRequest): Promise<boolean>;
-  /**
-   * Replaces the agent's access-control entries. The caller must be the agent's owner, an admin,
-   * or hold Manager access to it.
-   */
-  updateAccessControl(
-    agentId: string,
-    update: Pick<AgentAccessControl, 'entries'>
-  ): Promise<AgentAccessControl>;
 }
