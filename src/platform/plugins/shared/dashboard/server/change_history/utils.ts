@@ -45,9 +45,7 @@ export const hasContentChanged = (
 
 /**
  * Builds the snapshot to record in history from the stored attributes, always in the dashboard-app
- * panel format. Restoring always treats the snapshot as a dashboard-app request, so snapshots must
- * not depend on which API (public as-code or dashboard-app) performed the save. Returns undefined
- * if the snapshot cannot be built, since history is best-effort.
+ * panel format. Returns undefined if the snapshot cannot be built, since history is best-effort.
  */
 export const getHistorySnapshot = ({
   attributes,
@@ -72,11 +70,9 @@ export const getHistorySnapshot = ({
 };
 
 /**
- * Sequences of the dashboard's change history, which is the only source of version numbers: nothing
- * is stored on the saved object, and history outlives it (deleting a dashboard does not delete its
- * history). `latest` is undefined when there is no history or it cannot be read. `next` continues
- * after the latest version, which keeps new versions ordered above existing ones, including those
- * of a deleted dashboard with the same ID.
+ * Sequences of the dashboard's change history. Used when the saved object has no stored
+ * `historySequence` (a new dashboard, or one saved before it was stored), and history outlives
+ * the saved object (deleting a dashboard does not delete its history)
  */
 export const getHistorySequences = async ({
   spaceId = 'default',
@@ -102,8 +98,7 @@ export const getHistorySequences = async ({
 
 /**
  * The sequence of the next version of a dashboard. A dashboard that stores its history sequence
- * continues from it, which is atomic with the save. Otherwise (a new dashboard, or one saved before the
- * sequence was stored) it continues from the history, which outlives the saved object.
+ * continues from it; otherwise it continues from the history, which outlives the saved object.
  */
 export const getNextHistorySequence = async ({
   spaceId,
@@ -159,10 +154,8 @@ export const addToHistory = async ({
   };
 
   try {
-    // Diffed against the saved object read before the update rather than the latest history event:
-    // history is searchable only after a refresh, so consecutive saves could otherwise be compared
-    // with an older version or with none. Stored with the event so that listing history does not
-    // need to diff every snapshot.
+    // Diffed against the pre-update saved object, not the latest history event, which may not be
+    // searchable yet. Stored with the event so listing history doesn't need to diff every snapshot.
     const changeCount = previousSnapshot
       ? jsonpatchFormatter.format(jsondiffpatch.diff(previousSnapshot, snapshot)).length
       : undefined;
@@ -178,7 +171,7 @@ export const addToHistory = async ({
           ...(typeof restoredFrom === 'number' && { restoredFrom }),
         },
       },
-      // wait for ES to update so that we fetch the updated list; a delete must also be visible before its ID is recreated
+      // restores and deletes must be searchable immediately (listing, ID recreation)
       refresh: restoredFrom || type === 'delete' ? 'wait_for' : undefined,
     });
   } catch {
@@ -195,7 +188,8 @@ export const CHANGE_HISTORY_ROUTE_SECURITY = {
 
 /**
  * Checks the dashboard "all" privilege and access to the target dashboard saved object, then resolves the change history client and space for a
- * request, along with the saved dashboard's current history sequence (its stored `historySequence`). Returns the error response to send when the request cannot be served.
+ * request, along with the saved dashboard's current history sequence (its stored `historySequence`).
+ * Returns the error response to send when the request cannot be served.
  */
 export const getChangeHistoryContext = async <P, Q, B, M extends RouteMethod>(
   ctx: RequestHandlerContext,
@@ -243,8 +237,7 @@ export const getChangeHistoryContext = async <P, Q, B, M extends RouteMethod>(
       error: res.customError({ statusCode: 503, body: 'Change history service is not ready' }),
     };
   }
-  // The saved object is the source of truth for the current version: history is eventually consistent and failed history writes are
-  // swallowed, so the latest searchable event can lag behind it. Only dashboards saved before the sequence was stored fall back to history.
+  // the saved object is the source of truth; dashboards saved before the sequence was stored fall back to history
   const currentSequence =
     typeof storedSequence === 'number'
       ? storedSequence
