@@ -9,8 +9,10 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { NavigationLink } from '../types';
-import { BetaBadge } from './beta_badge';
+import { LinkCard } from '../links';
+import { BETA, BetaBadge } from './beta_badge';
 import { LandingLink } from './landing_links';
+import { getKibanaLinkProps } from './utils';
 
 export interface LandingLinksIconsProps {
   items: Readonly<NavigationLink[]>;
@@ -36,6 +38,35 @@ const useLinkIconStyles = () => {
     `,
   };
 };
+
+/**
+ * Renders a navigation item as a card where the whole card is the navigation target.
+ *
+ * The card title inherits the body text color, so the link is not identified by color alone
+ * (WCAG SC 1.4.1), which a stand-alone `EuiLink` title would be.
+ */
+export const LandingLinkCard: FC<LandingLinkIconProps> = React.memo(function LandingLinkCard({
+  item,
+  urlState,
+  onLinkClick,
+}) {
+  const { title, description, landingIcon, isBeta, betaOptions } = item;
+
+  return (
+    <LinkCard
+      {...getKibanaLinkProps({ item, urlState, onLinkClick })}
+      data-test-subj="LandingItem"
+      layout="vertical"
+      textAlign="left"
+      titleSize="xs"
+      hasBorder
+      icon={<EuiIcon aria-hidden="true" size="xl" type={landingIcon ?? ''} role="presentation" />}
+      title={title}
+      description={description}
+      {...(isBeta && { betaBadgeProps: { label: betaOptions?.text ?? BETA } })}
+    />
+  );
+});
 
 export const LandingLinkIcon: FC<PropsWithChildren<LandingLinkIconProps>> = React.memo(
   function LandingLinkIcon({ item, urlState, onLinkClick, children }) {
@@ -80,6 +111,7 @@ export const LandingLinkIcon: FC<PropsWithChildren<LandingLinkIconProps>> = Reac
 
 const linkIconContainerStyles = css`
   min-width: 22em;
+  max-width: 22em;
 `;
 export const LandingLinksIcons: React.FC<LandingLinksIconsProps> = ({
   items,
@@ -87,10 +119,10 @@ export const LandingLinksIcons: React.FC<LandingLinksIconsProps> = ({
   onLinkClick,
 }) => {
   return (
-    <EuiFlexGroup gutterSize="xl" wrap>
+    <EuiFlexGroup gutterSize="l" wrap>
       {items.map((item) => (
         <EuiFlexItem key={item.id} grow={false} css={linkIconContainerStyles}>
-          <LandingLinkIcon item={item} urlState={urlState} onLinkClick={onLinkClick} />
+          <LandingLinkCard item={item} urlState={urlState} onLinkClick={onLinkClick} />
         </EuiFlexItem>
       ))}
     </EuiFlexGroup>

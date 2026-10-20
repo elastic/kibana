@@ -17,6 +17,22 @@ import {
 
 import { renderIacTemplateHandler } from './handlers';
 
+const IAC_PROVISIONER_ROUTE_SECURITY = {
+  authz: {
+    // Read + proxy only: the handler reads package info and forwards to
+    // the IaC Provisioner. It never writes Fleet objects, so READ is the
+    // correct level — matching the sibling GET cloud-connector routes.
+    requiredPrivileges: [
+      {
+        anyRequired: [
+          FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
+          FLEET_API_PRIVILEGES.INTEGRATIONS.READ,
+        ],
+      },
+    ],
+  },
+};
+
 export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .post({
@@ -25,21 +41,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       description:
         'Render a deployable IaC template for the enabled integrations via the IaC Provisioner.',
       access: 'internal',
-      security: {
-        authz: {
-          // Read + proxy only: the handler reads package info and forwards to
-          // the IaC Provisioner. It never writes Fleet objects, so READ is the
-          // correct level — matching the sibling GET cloud-connector routes.
-          requiredPrivileges: [
-            {
-              anyRequired: [
-                FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
-                FLEET_API_PRIVILEGES.INTEGRATIONS.READ,
-              ],
-            },
-          ],
-        },
-      },
+      security: IAC_PROVISIONER_ROUTE_SECURITY,
     })
     .addVersion(
       {

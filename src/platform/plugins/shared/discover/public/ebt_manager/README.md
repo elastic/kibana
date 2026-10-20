@@ -14,15 +14,17 @@ Tracks field interactions in Discover, including table column selection/removal 
 
 | Event name           | Description                                    |
 | -------------------- | ---------------------------------------------- |
-| `dataTableSelection` | A field was added to the Discover table.       |
-| `dataTableRemoval`   | A field was removed from the Discover table.   |
-| `filterAddition`     | A filter was created from a field interaction. |
+| `dataTableSelection`            | A field was added to the Discover table.                           |
+| `dataTableRemoval`              | A field was removed from the Discover table.                       |
+| `dataTableClearSelectedFields`  | Selected fields were cleared together from the field list.         |
+| `filterAddition`                | A filter was created from a field interaction.                     |
 
 | Field             | Type                 | Description                                                                     |
 | ----------------- | -------------------- | ------------------------------------------------------------------------------- |
-| `eventName`       | `keyword`            | Field usage action.                                                             |
-| `fieldName`       | `keyword` (optional) | ECS field name when known, or `<non-ecs>` for non-ECS fields.                   |
-| `filterOperation` | `keyword` (optional) | Filter operation when `eventName` is `filterAddition`: `+`, `-`, or `_exists_`. |
+| `eventName`       | `keyword`            | Field usage action.                                                                                                                              |
+| `fieldName`       | `keyword` (optional) | ECS field name when known, or `<non-ecs>` for non-ECS fields. Sent for single-field actions.                                                     |
+| `fieldNames`      | `keyword[]` (optional) | Fields cleared together when `eventName` is `dataTableClearSelectedFields`. ECS field name when known, or `<non-ecs>` for non-ECS fields.                |
+| `filterOperation` | `keyword` (optional) | Filter operation when `eventName` is `filterAddition`: `+`, `-`, or `_exists_`.                                                                  |
 
 ### `discover_query_fields_usage`
 
@@ -174,4 +176,4 @@ These counters are reported with `usageCollection.reportUiCounter('discover', ..
 | `click`     | `filter_added`                 | A filter was added while in data view mode.                |
 | `loaded`    | `field_statistics_loaded`      | The field statistics table loaded.                         |
 | `loaded`    | `pattern_analysis_loaded`      | The pattern analysis table loaded.                         |
-| `count`     | `ad_hoc_data_view`             | Discover rendered with an ad hoc data view.                |
+| `count`     | `ad_hoc_data_view`             | Discover rendered with an ad hoc data view (classic mode). |

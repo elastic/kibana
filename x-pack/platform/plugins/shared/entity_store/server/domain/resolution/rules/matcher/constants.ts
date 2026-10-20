@@ -31,6 +31,7 @@ export const MATCH_GROUP_COLUMNS = {
   unresolvedNs: 'unresolved_ns',
   existingTargets: 'existing_targets',
   unresolvedN: 'unresolved_n',
+  unresolvedLocalN: 'unresolved_local_n',
   totalN: 'total_n',
 } as const;
 

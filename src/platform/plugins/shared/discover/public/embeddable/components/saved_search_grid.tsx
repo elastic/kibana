@@ -7,14 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { useEuiTheme } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme, type EuiFlyoutMenuAction } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { MAX_DOC_FIELDS_DISPLAYED, SHOW_MULTIFIELDS } from '@kbn/discover-utils';
 import {
-  type DataTableColumnsMeta,
   type UnifiedDataTableProps,
   DataLoadingState as DiscoverGridLoadingState,
   getRenderCustomToolbarWithElements,
@@ -26,7 +25,8 @@ import { DiscoverGrid } from '../../components/discover_grid';
 import { DiscoverGridFlyout } from '../../components/discover_grid_flyout';
 import { SavedSearchEmbeddableBase } from './saved_search_embeddable_base';
 import { TotalDocuments } from '../../application/main/components/total_documents/total_documents';
-import { useProfileAccessor } from '../../context_awareness';
+import { useProfileAccessor, type CellRenderersSearchContext } from '../../context_awareness';
+import { useSearchEmbeddableToolbar } from './search_embeddable_toolbar_context';
 
 export interface InlineEditing {
   isActive: boolean;
@@ -50,29 +50,53 @@ interface DiscoverGridEmbeddableProps extends Omit<UnifiedDataTableProps, 'sampl
   initialDocViewerTabId: string | undefined;
   docViewerRef: React.RefObject<DocViewerApi>;
   setExpandedDoc?: (doc: DataTableRecord | undefined, options?: { initialTabId?: string }) => void;
+  documentViewerFlyoutType?: 'push' | 'overlay';
+  wrapToolbar?: boolean;
+  searchContext?: CellRenderersSearchContext;
+  flyoutMenuTrailingActions?: EuiFlyoutMenuAction[];
+  isInteractive: boolean;
 }
 
 const noopSetExpandedDoc: NonNullable<UnifiedDataTableProps['setExpandedDoc']> = () => undefined;
 
 export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
-  const { enableDocumentViewer, inlineEditing, interceptedWarnings, ...gridProps } = props;
+  const {
+    enableDocumentViewer,
+    inlineEditing,
+    interceptedWarnings,
+    documentViewerFlyoutType,
+    wrapToolbar = true,
+    searchContext,
+    flyoutMenuTrailingActions,
+    isInteractive,
+    ...gridProps
+  } = props;
   const { euiTheme } = useEuiTheme();
+  const {
+    leftSide: toolbarSlotLeftSide,
+    saveToDashboardButton,
+    onVisibleColumnsChange,
+  } = useSearchEmbeddableToolbar();
   const setExpandedDoc = props.setExpandedDoc ?? noopSetExpandedDoc;
+  const hasRows = (props.rows?.length ?? 0) > 0;
+  const isEsqlResult = props.dataSource?.kind === 'esql';
+  // UnifiedDataTable does not render the grid toolbar when there are no rows.
+  const showToolbarSlotOutsideGrid =
+    !hasRows && Boolean(toolbarSlotLeftSide || saveToDashboardButton);
+
+  useEffect(() => {
+    onVisibleColumnsChange?.(props.columns);
+  }, [onVisibleColumnsChange, props.columns]);
 
   const renderDocumentView = useCallback(
-    (
-      hit: DataTableRecord,
-      displayedRows: DataTableRecord[],
-      displayedColumns: string[],
-      columnsMeta?: DataTableColumnsMeta
-    ) => (
+    (hit: DataTableRecord, displayedRows: DataTableRecord[], displayedColumns: string[]) => (
       <DiscoverGridFlyout
         dataView={props.dataView}
         hit={hit}
         hits={displayedRows}
         // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
         columns={displayedColumns}
-        columnsMeta={columnsMeta}
+        dataSource={props.dataSource}
         savedSearchId={props.savedSearchId}
         onFilter={props.onFilter}
         onRemoveColumn={props.onRemoveColumn}
@@ -83,12 +107,15 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         query={props.query}
         filters={props.filters}
         docViewerRef={props.docViewerRef}
+        flyoutMenuTrailingActions={flyoutMenuTrailingActions}
         hideFilteringOnComputedColumns={true}
+        flyoutType={documentViewerFlyoutType}
       />
     ),
     [
       setExpandedDoc,
       props.dataView,
+      props.dataSource,
       props.docViewerRef,
       props.filters,
       props.initialDocViewerTabId,
@@ -97,19 +124,39 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
       props.onRemoveColumn,
       props.query,
       props.savedSearchId,
+      documentViewerFlyoutType,
+      flyoutMenuTrailingActions,
     ]
   );
 
-  const renderCustomToolbarWithElements = useMemo(
-    () =>
-      getRenderCustomToolbarWithElements({
-        leftSide:
-          typeof props.totalHitCount === 'number' ? (
-            <TotalDocuments totalHitCount={props.totalHitCount} isEsqlMode={props.isPlainRecord} />
-          ) : undefined,
-      }),
-    [props.totalHitCount, props.isPlainRecord]
-  );
+  const renderCustomToolbarWithElements = useMemo(() => {
+    const totalDocuments =
+      typeof props.totalHitCount === 'number' ? (
+        <TotalDocuments totalHitCount={props.totalHitCount} isEsqlMode={isEsqlResult} />
+      ) : undefined;
+    const leftSide =
+      toolbarSlotLeftSide && hasRows ? (
+        <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center" wrap={false}>
+          <EuiFlexItem grow={false}>{toolbarSlotLeftSide}</EuiFlexItem>
+          {totalDocuments ? <EuiFlexItem grow={false}>{totalDocuments}</EuiFlexItem> : null}
+        </EuiFlexGroup>
+      ) : (
+        totalDocuments
+      );
+
+    return getRenderCustomToolbarWithElements({
+      wrap: wrapToolbar,
+      leftSide,
+      saveToDashboardButton: hasRows ? saveToDashboardButton : undefined,
+    });
+  }, [
+    hasRows,
+    isEsqlResult,
+    props.totalHitCount,
+    saveToDashboardButton,
+    toolbarSlotLeftSide,
+    wrapToolbar,
+  ]);
 
   const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');
   const cellRenderers = useMemo(() => {
@@ -124,15 +171,41 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         rowHeightState: gridProps.rowHeightState,
         configRowHeight: props.configRowHeight,
       }),
+      searchContext,
+      isDataLoading: props.loadingState === DiscoverGridLoadingState.loading,
     });
   }, [
     getCellRenderersAccessor,
     props.dataView,
     props.services.storage,
     props.configRowHeight,
+    props.loadingState,
+    searchContext,
     gridProps.dataGridDensityState,
     gridProps.rowHeightState,
   ]);
+
+  const discoverGrid = (
+    <DiscoverGrid
+      {...gridProps}
+      isPaginationEnabled={!isEsqlResult}
+      totalHits={props.totalHitCount}
+      setExpandedDoc={props.setExpandedDoc}
+      expandedDoc={props.expandedDoc}
+      showMultiFields={props.services.uiSettings.get(SHOW_MULTIFIELDS)}
+      hideFilteringOnComputedColumns={true}
+      maxDocFieldsDisplayed={props.services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
+      renderDocumentView={enableDocumentViewer ? renderDocumentView : undefined}
+      renderMode={isInteractive ? 'interactive' : 'print'}
+      renderCustomToolbar={isInteractive ? renderCustomToolbarWithElements : undefined}
+      externalCustomRenderers={cellRenderers}
+      enableComparisonMode
+      showColumnTokens
+      showFullScreenButton={false}
+      className="unifiedDataTable"
+      css={{ '.unifiedDataTableToolbar': { paddingBlockStart: euiTheme.size.xs } }}
+    />
+  );
 
   return (
     <SavedSearchEmbeddableBase
@@ -140,25 +213,39 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
       isLoading={props.loadingState === DiscoverGridLoadingState.loading}
       interceptedWarnings={interceptedWarnings}
       inlineEditing={inlineEditing}
+      constrainWidth={!wrapToolbar}
     >
-      <DiscoverGrid
-        {...gridProps}
-        isPaginationEnabled={!gridProps.isPlainRecord}
-        totalHits={props.totalHitCount}
-        setExpandedDoc={props.setExpandedDoc}
-        expandedDoc={props.expandedDoc}
-        showMultiFields={props.services.uiSettings.get(SHOW_MULTIFIELDS)}
-        hideFilteringOnComputedColumns={true}
-        maxDocFieldsDisplayed={props.services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
-        renderDocumentView={enableDocumentViewer ? renderDocumentView : undefined}
-        renderCustomToolbar={renderCustomToolbarWithElements}
-        externalCustomRenderers={cellRenderers}
-        enableComparisonMode
-        showColumnTokens
-        showFullScreenButton={false}
-        className="unifiedDataTable"
-        css={{ '.unifiedDataTableToolbar': { paddingBlockStart: euiTheme.size.xs } }}
-      />
+      {showToolbarSlotOutsideGrid ? (
+        <EuiFlexGroup
+          responsive={false}
+          direction="column"
+          gutterSize="none"
+          css={{ minHeight: 0, height: '100%' }}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup
+              responsive={false}
+              gutterSize="s"
+              alignItems="center"
+              justifyContent="spaceBetween"
+              wrap={false}
+              css={{
+                padding: `${euiTheme.size.s} ${euiTheme.size.s} ${euiTheme.size.xs}`,
+              }}
+            >
+              {toolbarSlotLeftSide ? (
+                <EuiFlexItem grow={false}>{toolbarSlotLeftSide}</EuiFlexItem>
+              ) : null}
+              {saveToDashboardButton ? (
+                <EuiFlexItem grow={false}>{saveToDashboardButton}</EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem css={{ minHeight: 0 }}>{discoverGrid}</EuiFlexItem>
+        </EuiFlexGroup>
+      ) : (
+        discoverGrid
+      )}
     </SavedSearchEmbeddableBase>
   );
 }

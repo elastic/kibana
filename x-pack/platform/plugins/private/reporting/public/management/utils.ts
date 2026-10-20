@@ -6,7 +6,6 @@
  */
 
 import { capitalize } from 'lodash';
-import type { IconType } from '@elastic/eui';
 import { JOB_STATUS } from '@kbn/reporting-common';
 import type { Job } from '@kbn/reporting-public';
 import type { Rrule } from '@kbn/task-manager-plugin/server/task';
@@ -16,6 +15,7 @@ import type {
   RecurringSchedule,
 } from '@kbn/response-ops-recurring-schedule-form/types';
 import {
+  LAST_DAY_OF_MONTH,
   RRULE_TO_ISO_WEEKDAYS,
   RecurrenceEnd,
 } from '@kbn/response-ops-recurring-schedule-form/constants';
@@ -23,27 +23,22 @@ import type { ScheduledReportApiJSON } from '@kbn/reporting-common/types';
 import type { ScheduledReport } from '../types';
 
 /**
- * This is not the most forward-compatible way of mapping to an {@link IconType} for an application.
+ * This is not the most forward-compatible way of mapping to an EUI icon for an application.
  *
  * Ideally apps using reporting should send some metadata for the icon type they want - this is how
  * the saved objects management UI handles icons at the moment.
  */
-export const guessAppIconTypeFromObjectType = (type: string): IconType => {
-  switch (type) {
-    case 'search':
-      return 'discoverApp';
-    case 'dashboard':
-      return 'dashboardApp';
-    case 'visualization':
-      return 'visualizeApp';
-    case 'canvas workpad':
-      return 'canvasApp';
-    case 'lens':
-      return 'lensApp';
-    default:
-      return 'apps';
-  }
-};
+const REPORT_OBJECT_TYPE_ICONS = {
+  search: 'productDiscover',
+  dashboard: 'productDashboard',
+  visualization: 'chartMix',
+  'canvas workpad': 'productCanvas',
+  lens: 'productLens',
+  ai_value_report: 'documentsCheck',
+} as const;
+
+export const guessAppIconTypeFromObjectType = (type: string) =>
+  REPORT_OBJECT_TYPE_ICONS[type as keyof typeof REPORT_OBJECT_TYPE_ICONS] ?? 'apps';
 
 export const getDisplayNameFromObjectType = (type: string): string => {
   switch (type) {
@@ -110,6 +105,9 @@ export const transformScheduledReport = (report: ScheduledReportApiJSON): Schedu
     if (rRule.byweekday?.length) {
       recurringSchedule.bymonth = 'weekday';
       recurringSchedule.bymonthweekday = rRule.byweekday[0];
+    } else if (rRule.bymonthday?.includes(LAST_DAY_OF_MONTH)) {
+      recurringSchedule.bymonth = 'lastday';
+      recurringSchedule.bymonthday = LAST_DAY_OF_MONTH;
     } else if (rRule.bymonthday?.length) {
       recurringSchedule.bymonth = 'day';
       recurringSchedule.bymonthday = rRule.bymonthday[0];

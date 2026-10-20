@@ -34,8 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/266279
-  describe.skip('extension getRowIndicatorProvider', () => {
+  describe('extension getRowIndicatorProvider', () => {
     before(async () => {
       await PageObjects.svlCommonPage.loginAsViewer();
       await esArchiver.loadIfNeeded(
@@ -100,7 +99,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should render log.level row indicators on Surrounding documents page', async () => {
-      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.navigateToApp({ queryMode: 'classic' });
       await dataViews.switchTo('my-example-logs,logstash*');
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await dataGrid.clickRowToggle({ rowIndex: 0 });

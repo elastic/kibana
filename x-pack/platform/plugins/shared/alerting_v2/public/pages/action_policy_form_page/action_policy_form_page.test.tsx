@@ -18,6 +18,9 @@ const mockLocators = createMockLocators();
 
 const mockNavigateToUrl = jest.fn();
 const mockBasePath = { prepend: jest.fn((path: string) => `/mock${path}`) };
+const mockGetUrlForApp = jest.fn(
+  (appId: string, options?: { path?: string }) => `/app/${appId}${options?.path ?? ''}`
+);
 
 jest.mock('../../components/action_policy/form/components/matcher_input', () => ({
   MatcherInput: (props: {
@@ -44,10 +47,8 @@ jest.mock('@kbn/core-di-browser', () => {
       if (tokenStr.includes('application')) {
         return {
           navigateToUrl: mockNavigateToUrl,
-          getUrlForApp: jest.fn(
-            (appId: string, options?: { path?: string }) =>
-              `/app/${appId}${options?.path ? `/${options.path}` : ''}`
-          ),
+          capabilities: {},
+          getUrlForApp: mockGetUrlForApp,
         };
       }
       if (tokenStr.includes('chrome')) {
@@ -101,11 +102,20 @@ jest.mock('@kbn/alerting-v2-rule-form', () => ({
   InlineWorkflowEditor: ({
     value,
     onChange,
+    connectorCreationConfig,
+    forceShowErrors,
   }: {
     value: { id: string; connectorId: string | null; params: string };
     onChange: (next: { id: string; connectorId: string | null; params: string }) => void;
+    connectorCreationConfig?: { mode: string; href?: string };
+    forceShowErrors?: boolean;
   }) => (
-    <div data-test-subj={`inlineWorkflowEditor-${value.id}`}>
+    <div
+      data-test-subj={`inlineWorkflowEditor-${value.id}`}
+      data-connector-creation-mode={connectorCreationConfig?.mode}
+      data-connector-creation-href={connectorCreationConfig?.href}
+      data-force-show-errors={String(Boolean(forceShowErrors))}
+    >
       <button
         type="button"
         data-test-subj={`inlineFill-${value.id}`}
@@ -148,6 +158,11 @@ jest.mock('../../hooks/use_create_inline_workflows', () => ({
   }),
 }));
 
+let mockIsLicenseValid = true;
+jest.mock('../../hooks/use_is_action_policies_license_valid', () => ({
+  useIsActionPoliciesLicenseValid: () => mockIsLicenseValid,
+}));
+
 const mockUseFetchActionPolicy = jest.fn();
 jest.mock('../../hooks/use_fetch_action_policy', () => ({
   useFetchActionPolicy: (...args: unknown[]) => mockUseFetchActionPolicy(...args),
@@ -161,12 +176,8 @@ jest.mock('../../hooks/use_fetch_rules', () => ({
   useFetchRules: () => ({ data: { items: [], total: 0 }, isLoading: false }),
 }));
 
-jest.mock('../../hooks/use_fetch_rule_tags', () => ({
-  useFetchRuleTags: () => ({ data: [], isLoading: false }),
-}));
-
-jest.mock('../../hooks/use_fetch_tags', () => ({
-  useFetchTags: () => ({ data: [], isLoading: false }),
+jest.mock('../../hooks/use_fetch_rule_routing_tags', () => ({
+  useFetchRuleRoutingTags: () => ({ data: [], isLoading: false }),
 }));
 
 jest.mock('../../hooks/use_fetch_workflows', () => ({
@@ -178,6 +189,7 @@ jest.mock('../../hooks/use_fetch_workflows', () => ({
       ],
     },
     isLoading: false,
+    refetch: jest.fn(),
   }),
 }));
 
@@ -199,25 +211,17 @@ const TEST_SUBJ = {
 
 const EXISTING_POLICY: ActionPolicyResponse = {
   id: 'policy-1',
-  version: 'WzEsMV0=',
   name: 'Critical production alerts',
   description: 'Routes critical alerts',
   enabled: true,
   matcher: { expression: 'data.severity : "critical"' },
-  group_by: ['host.name', 'service.name'],
-  tags: ['production'],
-  grouping_mode: 'per_field',
+  grouping: { mode: 'per_field', fields: ['host.name', 'service.name'] },
   throttle: { strategy: 'time_interval', interval: '5m' },
-  snoozed_until: null,
   destinations: [{ type: 'workflow', id: 'workflow-2' }],
-  created_by: 'elastic',
+  created_by: { profile_uid: 'elastic' },
   created_at: '2026-03-01T10:00:00.000Z',
-  updated_by: 'elastic',
+  updated_by: { profile_uid: 'elastic' },
   updated_at: '2026-03-01T10:00:00.000Z',
-  auth: {
-    owner: 'elastic',
-    created_by_user: false,
-  },
 };
 
 const renderPage = () => {
@@ -235,6 +239,7 @@ const mockUseActionPolicyAutoAttach = jest.mocked(useActionPolicyAutoAttach);
 describe('ActionPolicyFormPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockIsLicenseValid = true;
     mockCreateMutateAsync.mockResolvedValue({});
     mockUpdateMutateAsync.mockResolvedValue({});
     mockCreateInlineWorkflows.mockResolvedValue([]);
@@ -257,6 +262,35 @@ describe('ActionPolicyFormPage', () => {
 
       expect(screen.getByTestId(TEST_SUBJ.pageTitle)).toHaveTextContent('Create action policy');
       expect(screen.getByTestId(TEST_SUBJ.submitButton)).toHaveTextContent('Create policy');
+      expect(screen.queryByTestId('actionPoliciesLicenseCallout')).toBeNull();
+    });
+
+    it('shows the license callout and keeps submit disabled when the license is not valid', async () => {
+      mockIsLicenseValid = false;
+      const user = userEvent.setup({ delay: null });
+      renderPage();
+
+      expect(screen.getByTestId('actionPoliciesLicenseCallout')).toBeInTheDocument();
+
+      await user.type(screen.getByTestId(TEST_SUBJ.nameInput), 'Policy from test');
+      await user.tab();
+      const destinationsCombo = screen.getByTestId('destinationsInput');
+      await user.click(within(destinationsCombo).getByRole('combobox'));
+      await user.click(await screen.findByRole('option', { name: 'Workflow 1' }));
+
+      expect(screen.getByTestId(TEST_SUBJ.submitButton)).toBeDisabled();
+      expect(mockCreateMutateAsync).not.toHaveBeenCalled();
+    });
+
+    it('does not override the default, in-page, connector creation behavior', async () => {
+      const user = userEvent.setup();
+      renderPage();
+
+      await user.click(screen.getByTestId('simpleWorkflowAdd-slack'));
+
+      expect(await screen.findByTestId(/inlineWorkflowEditor-/)).not.toHaveAttribute(
+        'data-connector-creation-mode'
+      );
     });
 
     it('submits create payload on save', async () => {
@@ -282,8 +316,8 @@ describe('ActionPolicyFormPage', () => {
         expect(mockCreateMutateAsync).toHaveBeenCalledWith({
           name: 'Policy from test',
           description: 'Description from test',
-          grouping_mode: 'per_episode',
-          throttle: { strategy: 'on_status_change', interval: null },
+          grouping: { mode: 'per_alert' },
+          throttle: { strategy: 'on_status_change' },
           destinations: [{ type: 'workflow', id: 'workflow-1' }],
         })
       );
@@ -349,6 +383,39 @@ describe('ActionPolicyFormPage', () => {
 
       await waitFor(() => expect(mockRollbackWorkflows).toHaveBeenCalledWith(['wf-new']));
       expect(mockLocators.actionPolicyLocators.navigateSync).not.toHaveBeenCalled();
+    });
+
+    it('reveals the errors and focuses the first invalid field instead of saving an empty form', async () => {
+      const user = userEvent.setup({ delay: null });
+      renderPage();
+
+      const saveButton = screen.getByTestId(TEST_SUBJ.submitButton);
+      expect(saveButton).toBeEnabled();
+      await user.click(saveButton);
+
+      expect(await screen.findByText('Name is required.')).toBeInTheDocument();
+      expect(screen.getByText('At least one destination is required')).toBeInTheDocument();
+      expect(screen.getByTestId(TEST_SUBJ.nameInput)).toHaveFocus();
+      expect(mockCreateInlineWorkflows).not.toHaveBeenCalled();
+      expect(mockCreateMutateAsync).not.toHaveBeenCalled();
+    });
+
+    it('does not create anything while a simple workflow draft is incomplete', async () => {
+      const user = userEvent.setup({ delay: null });
+      renderPage();
+
+      await user.type(screen.getByTestId(TEST_SUBJ.nameInput), 'Inline policy');
+      await user.click(screen.getByTestId('simpleWorkflowAdd-slack'));
+      await user.click(screen.getByTestId(TEST_SUBJ.submitButton));
+
+      await waitFor(() =>
+        expect(screen.getByTestId(/inlineWorkflowEditor-/)).toHaveAttribute(
+          'data-force-show-errors',
+          'true'
+        )
+      );
+      expect(mockCreateInlineWorkflows).not.toHaveBeenCalled();
+      expect(mockCreateMutateAsync).not.toHaveBeenCalled();
     });
 
     it('navigates to listing page on cancel', async () => {
@@ -424,11 +491,6 @@ describe('ActionPolicyFormPage', () => {
 
       renderPage();
 
-      await user.click(screen.getByTestId(TEST_SUBJ.nameInput));
-      await user.tab();
-      await user.click(screen.getByTestId(TEST_SUBJ.descriptionInput));
-      await user.tab();
-
       const updateButton = screen.getByTestId(TEST_SUBJ.submitButton);
       await waitFor(() => expect(updateButton).toBeEnabled());
       await user.click(updateButton);
@@ -437,13 +499,10 @@ describe('ActionPolicyFormPage', () => {
       expect(mockUpdateMutateAsync).toHaveBeenCalledWith({
         id: 'policy-1',
         data: {
-          version: 'WzEsMV0=',
           name: 'Critical production alerts',
           description: 'Routes critical alerts',
-          grouping_mode: 'per_field',
-          tags: ['production'],
-          matcher: { expression: 'data.severity : "critical"' },
-          group_by: ['host.name', 'service.name'],
+          grouping: { mode: 'per_field', fields: ['host.name', 'service.name'] },
+          matcher: { tags: null, expression: 'data.severity : "critical"' },
           throttle: { strategy: 'time_interval', interval: '5m' },
           destinations: [{ type: 'workflow', id: 'workflow-2' }],
         },

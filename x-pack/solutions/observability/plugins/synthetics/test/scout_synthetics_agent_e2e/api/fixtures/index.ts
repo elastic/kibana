@@ -13,8 +13,9 @@ export interface AgentE2eWorkerFixtures {
 }
 
 /**
- * Sequential API fixture for the real-agent suite. `agentStack` starts Fleet
+ * Sequential API fixture for the monitor-types suite. `agentStack` starts Fleet
  * Server + elastic-agent-complete once per worker and tears them down after.
+ * Sharding/failover uses `parallel.playwright.config.ts` with its own fixture.
  */
 export const apiTest = baseApiTest.extend<{}, AgentE2eWorkerFixtures>({
   agentStack: [
@@ -40,6 +41,7 @@ export {
   buildMonitorPayload,
 } from './monitor_payloads';
 export {
+  deleteSyntheticsDocsForAgent,
   isCheckDown,
   isCheckUp,
   waitForBrowserStep,

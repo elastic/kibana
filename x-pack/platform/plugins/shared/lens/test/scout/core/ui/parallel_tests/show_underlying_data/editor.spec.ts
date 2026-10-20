@@ -49,8 +49,9 @@ spaceTest.describe('Lens show underlying data', { tag: '@local-stateful-classic'
   spaceTest(
     'opens Discover with columns from a compatible saved visualization',
     async ({ pageObjects, context, kbnUrl }) => {
-      const { lens } = pageObjects;
+      const { appMenu, lens } = pageObjects;
 
+      await appMenu.openOverflow();
       await expect(lens.workspace.openInDiscoverButton).toBeEnabled();
       const discoverPage = await openDiscoverFromPopup({
         context,
@@ -72,13 +73,14 @@ spaceTest.describe('Lens show underlying data', { tag: '@local-stateful-classic'
   spaceTest(
     'opens Discover when the visualization has an annotation layer',
     async ({ pageObjects, context, kbnUrl }) => {
-      const { lens } = pageObjects;
+      const { appMenu, lens } = pageObjects;
 
       await spaceTest.step('add an annotation layer', async () => {
         await lens.layers.createLayer('annotations');
       });
 
       await spaceTest.step('open Discover and assert columns are unchanged', async () => {
+        await appMenu.openOverflow();
         await expect(lens.workspace.openInDiscoverButton).toBeEnabled();
         const discoverPage = await openDiscoverFromPopup({
           context,
@@ -103,13 +105,14 @@ spaceTest.describe('Lens show underlying data', { tag: '@local-stateful-classic'
   spaceTest(
     'opens Discover when the visualization has a reference line layer',
     async ({ pageObjects, context, kbnUrl }) => {
-      const { lens } = pageObjects;
+      const { appMenu, lens } = pageObjects;
 
       await spaceTest.step('add a reference line layer', async () => {
         await lens.layers.createLayer('referenceLine');
       });
 
       await spaceTest.step('open Discover and assert columns are unchanged', async () => {
+        await appMenu.openOverflow();
         await expect(lens.workspace.openInDiscoverButton).toBeEnabled();
         const discoverPage = await openDiscoverFromPopup({
           context,
@@ -134,7 +137,7 @@ spaceTest.describe('Lens show underlying data', { tag: '@local-stateful-classic'
   spaceTest(
     'disables Open in Discover when the visualization has multiple data layers',
     async ({ page, pageObjects }) => {
-      const { lens } = pageObjects;
+      const { appMenu, lens } = pageObjects;
 
       await addDataLayer(page, 'bar');
       await lens.configureDimension({
@@ -149,14 +152,17 @@ spaceTest.describe('Lens show underlying data', { tag: '@local-stateful-classic'
       });
       await lens.waitForVisualization(testData.XY_CHART);
 
+      await appMenu.openOverflow();
       await expect(lens.workspace.openInDiscoverButton).toBeDisabled();
+      await page.keyboard.press('Escape');
+      await expect(appMenu.popover).toBeHidden();
     }
   );
 
   spaceTest(
     'omits terms from the Discover query when Other is enabled',
     async ({ pageObjects, context, kbnUrl }) => {
-      const { lens } = pageObjects;
+      const { appMenu, lens } = pageObjects;
 
       await spaceTest.step('enable terms Other bucket', async () => {
         await lens.dimensions.openDimensionEditor(SPLIT_TRIGGER);
@@ -166,6 +172,7 @@ spaceTest.describe('Lens show underlying data', { tag: '@local-stateful-classic'
       });
 
       await spaceTest.step('open Discover with an empty query', async () => {
+        await appMenu.openOverflow();
         await expect(lens.workspace.openInDiscoverButton).toBeEnabled();
         const discoverPage = await openDiscoverFromPopup({
           context,
@@ -185,7 +192,7 @@ spaceTest.describe('Lens show underlying data', { tag: '@local-stateful-classic'
   spaceTest(
     'opens Discover with a Lucene dimension filter as a filter pill',
     async ({ pageObjects, context, kbnUrl }) => {
-      const { lens } = pageObjects;
+      const { appMenu, lens } = pageObjects;
 
       await spaceTest.step('add a Lucene filter on the Y dimension', async () => {
         await lens.dimensions.openDimensionEditor(Y_TRIGGER);
@@ -198,6 +205,7 @@ spaceTest.describe('Lens show underlying data', { tag: '@local-stateful-classic'
       });
 
       await spaceTest.step('open Discover and assert query plus Lucene pill', async () => {
+        await appMenu.openOverflow();
         await expect(lens.workspace.openInDiscoverButton).toBeEnabled();
         const discoverPage = await openDiscoverFromPopup({
           context,
@@ -222,7 +230,7 @@ spaceTest.describe('Lens show underlying data', { tag: '@local-stateful-classic'
   spaceTest(
     'extracts formula KQL filters and columns into Discover',
     async ({ page, pageObjects, context, kbnUrl }) => {
-      const { lens } = pageObjects;
+      const { appMenu, lens } = pageObjects;
 
       await spaceTest.step('replace Y with a memory average formula plus KQL', async () => {
         await lens.workspace.removeAllDimensions('lnsXY_yDimensionPanel');
@@ -248,6 +256,7 @@ spaceTest.describe('Lens show underlying data', { tag: '@local-stateful-classic'
       });
 
       await spaceTest.step('open Discover and assert memory column plus combined KQL', async () => {
+        await appMenu.openOverflow();
         await expect(lens.workspace.openInDiscoverButton).toBeEnabled();
         const discoverPage = await openDiscoverFromPopup({
           context,
@@ -275,7 +284,7 @@ spaceTest.describe('Lens show underlying data', { tag: '@local-stateful-classic'
   spaceTest(
     'extracts a formula global filter into Discover',
     async ({ pageObjects, context, kbnUrl }) => {
-      const { lens } = pageObjects;
+      const { appMenu, lens } = pageObjects;
 
       await spaceTest.step('replace Y with a count formula plus a global filter', async () => {
         await lens.workspace.removeAllDimensions('lnsXY_yDimensionPanel');
@@ -296,6 +305,7 @@ spaceTest.describe('Lens show underlying data', { tag: '@local-stateful-classic'
       });
 
       await spaceTest.step('open Discover and assert combined KQL', async () => {
+        await appMenu.openOverflow();
         await expect(lens.workspace.openInDiscoverButton).toBeEnabled();
         const discoverPage = await openDiscoverFromPopup({
           context,

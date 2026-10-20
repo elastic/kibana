@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { CodeEditor, monaco } from '@kbn/code-editor';
+import { CodeEditor, jsonDefaults, type monaco } from '@kbn/code-editor';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { StepContext } from '@kbn/workflows';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
@@ -141,7 +141,7 @@ export const ResumeExecutionModal: React.FC<ResumeExecutionModalProps> = ({
 
       try {
         const currentModel = editor.getModel();
-        monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+        jsonDefaults.setDiagnosticsOptions({
           validate: true,
           allowComments: false,
           enableSchemaRequest: false,
@@ -225,7 +225,7 @@ export const ResumeExecutionModal: React.FC<ResumeExecutionModalProps> = ({
             wordWrap: 'on',
             wrappingIndent: 'indent',
             hover: {
-              enabled: true,
+              enabled: 'on',
             },
           }}
         />

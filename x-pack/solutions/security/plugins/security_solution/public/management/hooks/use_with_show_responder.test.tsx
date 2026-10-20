@@ -17,6 +17,10 @@ import { useLicense } from '../../common/hooks/use_license';
 jest.mock('../../common/components/user_privileges');
 jest.mock('../../common/hooks/use_license');
 
+// Costly: whichever case runs first pays a one-time ~0.5s synchronous mount of the responder
+// console, which the 5s default budget does not survive under CI worker contention.
+jest.setTimeout(30_000);
+
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
 const useLicenseMock = useLicense as jest.Mock;
 

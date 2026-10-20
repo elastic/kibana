@@ -348,4 +348,60 @@ describe('validateStepNameUniqueness', () => {
     expect(result.isValid).toBe(true);
     expect(result.errors).toHaveLength(0);
   });
+
+  it('should detect duplicate names across switch cases', () => {
+    // Same name inside two different switch cases was previously invisible to
+    // collectNestedStepNames (which missed `cases`), so it passed validation.
+    const workflow = {
+      version: '1',
+      name: 'Test Workflow',
+      enabled: true,
+      triggers: [{ type: 'manual' }],
+      steps: [
+        {
+          name: 'router',
+          type: 'switch',
+          cases: [
+            {
+              match: 'a',
+              steps: [{ name: 'shared-name', type: 'http' }],
+            },
+            {
+              match: 'b',
+              steps: [{ name: 'shared-name', type: 'http' }],
+            },
+          ],
+        },
+      ],
+    } as any as WorkflowYaml;
+
+    const result = validateStepNameUniqueness(workflow);
+
+    expect(result.isValid).toBe(false);
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0].stepName).toBe('shared-name');
+    expect(result.errors[0].occurrences).toBe(2);
+  });
+
+  it('should detect duplicate names across switch default and a case', () => {
+    const workflow = {
+      version: '1',
+      name: 'Test Workflow',
+      enabled: true,
+      triggers: [{ type: 'manual' }],
+      steps: [
+        {
+          name: 'router',
+          type: 'switch',
+          cases: [{ match: 'a', steps: [{ name: 'dupe', type: 'http' }] }],
+          default: [{ name: 'dupe', type: 'http' }],
+        },
+      ],
+    } as any as WorkflowYaml;
+
+    const result = validateStepNameUniqueness(workflow);
+
+    expect(result.isValid).toBe(false);
+    expect(result.errors[0].stepName).toBe('dupe');
+  });
 });

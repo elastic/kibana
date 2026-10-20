@@ -8,7 +8,7 @@
  */
 
 const { RuleTester } = require('eslint');
-const rule = require('./scout_no_promise_all_with_playwright_apis');
+const rule = require('../oxlint_plugin').rules.scout_no_promise_all_with_playwright_apis;
 
 const ruleTester = new RuleTester({
   parser: require.resolve('@typescript-eslint/parser'),

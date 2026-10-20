@@ -22,6 +22,8 @@ dependsOn:
   - '@kbn/flyout-sections'
   - '@kbn/i18n'
   - '@kbn/shared-ux-error-boundary'
+  - '@kbn/test-jest-helpers'
+  - '@kbn/ui-callout'
   - '@kbn/ui-react-assembly'
 tags:
   - shared-browser

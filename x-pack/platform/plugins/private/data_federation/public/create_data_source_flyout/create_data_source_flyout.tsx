@@ -48,7 +48,7 @@ import {
 import { CreateDataSourceFlyoutAuthenticationFields } from './create_data_source_flyout_authentication_fields';
 import { CreateDataSourceFlyoutAuthenticationSelect } from './create_data_source_flyout_authentication_select';
 import { CreateDataSourceFlyoutTypeSettingsBlock } from './create_data_source_flyout_type_settings';
-import { CreateDataSourceFlyoutTypeSettingsS3Region } from './create_data_source_flyout_type_settings_s3';
+import { FlyoutErrorBanner } from './flyout_error_banner';
 import {
   authenticationModeFromDataSource,
   dataSourceToFlyoutFormValues,
@@ -57,6 +57,7 @@ import {
 import { getDataSourceTypeVerbose } from '../get_data_source_type_label';
 import type { CreateDataSourceFlyoutFormValues } from './types';
 import type { DataFederationKibanaServices } from '../types';
+import { UI_COUNTER_EVENTS } from '../ui_counters';
 
 export interface CreateDataSourceFlyoutProps {
   /** When set, the flyout opens in edit mode for this data source. */
@@ -77,16 +78,22 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
   onSave,
 }) => {
   const {
-    services: { cloudInfo, featureFlags, docLinks },
+    services: { cloudInfo, featureFlags, docLinks, reportUiCounter },
   } = useKibana<DataFederationKibanaServices>();
 
   const dataFederationLinks = docLinks.links.dataFederation;
 
-  const enableFederatedIdentityAuth = featureFlags?.enableFederatedIdentityAuth;
+  const enableFederatedIdentity = Boolean(cloudInfo?.jwtIssuer);
   const enableGoogleCloudStorageDataSourceType =
     featureFlags?.enableGoogleCloudStorageDataSourceType;
   const enableAzureDataSourceType = featureFlags?.enableAzureDataSourceType;
   const isEditMode = initialDataSource !== undefined;
+
+  useEffect(() => {
+    if (!isEditMode) {
+      reportUiCounter?.(UI_COUNTER_EVENTS.datasourceCreateFormOpened);
+    }
+  }, [isEditMode, reportUiCounter]);
 
   const formDefaultValues = useMemo(
     (): CreateDataSourceFlyoutFormValues =>
@@ -100,7 +107,6 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
     handleSubmit,
     control,
     reset,
-    unregister,
     formState: { errors },
   } = useForm<CreateDataSourceFlyoutFormValues>({
     defaultValues: formDefaultValues,
@@ -187,7 +193,9 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
     () =>
       initialDataSource
         ? authenticationModeFromDataSource(initialDataSource)
-        : getDefaultAuthenticationMode(dataSourceType)
+        : getDefaultAuthenticationMode(dataSourceType, {
+            enableFederatedIdentity,
+          })
   );
 
   // runs when data source type changes
@@ -203,9 +211,13 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
   // could likely be merged with above
   useEffect(() => {
     if (!isEditMode) {
-      setAuthenticationMode(getDefaultAuthenticationMode(dataSourceType));
+      setAuthenticationMode(
+        getDefaultAuthenticationMode(dataSourceType, {
+          enableFederatedIdentity,
+        })
+      );
     }
-  }, [dataSourceType, isEditMode]);
+  }, [dataSourceType, isEditMode, enableFederatedIdentity]);
 
   const handleSave = (data: CreateDataSourceFlyoutFormValues) =>
     onSave(
@@ -228,6 +240,21 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const onFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    // The EuiCodeBlock info buttons submit the form and make the flyout jump,
+    // ignore any submit that is not from the real submit button.
+    const { nativeEvent } = event;
+    const submitter =
+      typeof SubmitEvent !== 'undefined' && nativeEvent instanceof SubmitEvent
+        ? nativeEvent.submitter
+        : null;
+    if (submitter && submitter.getAttribute('type') !== 'submit') {
+      event.preventDefault();
+      return;
+    }
+    return handleSubmit(onSubmit)(event);
   };
 
   const flyoutTitle = isEditMode
@@ -261,15 +288,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
         )}
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiForm component="form" id="createDataSourceForm" onSubmit={handleSubmit(onSubmit)}>
-          {saveError ? (
-            <>
-              <EuiText color="danger" size="s" data-test-subj="createDataSourceFlyoutSaveError">
-                {saveError}
-              </EuiText>
-              <EuiSpacer size="m" />
-            </>
-          ) : null}
+        <EuiForm component="form" id="createDataSourceForm" onSubmit={onFormSubmit}>
           <EuiFormRow label={createDataSourceFlyoutStrings.typeLabel()} fullWidth>
             <EuiSuperSelect
               options={dataSourceTypeOptions}
@@ -283,6 +302,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
           </EuiFormRow>
           <EuiFormRow
             label={createDataSourceFlyoutStrings.nameLabel()}
+            helpText={createDataSourceFlyoutStrings.nameDescription()}
             isInvalid={Boolean(errors.name)}
             error={errors.name?.message}
             fullWidth
@@ -299,7 +319,11 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
               readOnly={isEditMode}
             />
           </EuiFormRow>
-          <EuiFormRow label={createDataSourceFlyoutStrings.descriptionLabel()} fullWidth>
+          <EuiFormRow
+            label={createDataSourceFlyoutStrings.descriptionLabel()}
+            helpText={createDataSourceFlyoutStrings.descriptionDescription()}
+            fullWidth
+          >
             <EuiTextArea
               data-test-subj="createDataSourceFlyoutDescription"
               fullWidth
@@ -310,25 +334,18 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
               inputRef={descriptionField.ref}
             />
           </EuiFormRow>
-          {dataSourceType === 's3' && (
-            <CreateDataSourceFlyoutTypeSettingsS3Region
+          {dataSourceType !== 's3' && (
+            <CreateDataSourceFlyoutTypeSettingsBlock
               control={control}
-              unregister={unregister}
-              isRequired={!isEditMode}
+              dataSourceType={dataSourceType}
             />
           )}
-          <CreateDataSourceFlyoutTypeSettingsBlock
-            control={control}
-            dataSourceType={dataSourceType}
-            unregister={unregister}
-          />
           <EuiHorizontalRule margin="m" />
           <CreateDataSourceFlyoutAuthenticationSelect
             authenticationMode={authenticationMode}
             dataSourceType={dataSourceType}
-            enableFederatedIdentity={enableFederatedIdentityAuth}
+            enableFederatedIdentity={enableFederatedIdentity}
             onAuthenticationModeChange={setAuthenticationMode}
-            authenticationDocsUrl={dataFederationLinks.authentication}
           />
           <CreateDataSourceFlyoutAuthenticationFields
             authenticationMode={authenticationMode}
@@ -340,14 +357,28 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
             requireGcsCredentials={!isEditMode}
             requireGcsFederatedIdentity={!isEditMode}
             requireAzureCredentials={!isEditMode}
-            unregister={unregister}
           />
         </EuiForm>
       </EuiFlyoutBody>
-      <EuiFlyoutFooter>
+      <EuiFlyoutFooter data-test-subj="createDataSourceFlyoutFooter">
+        {saveError ? (
+          <FlyoutErrorBanner
+            title={
+              isEditMode
+                ? createDataSourceFlyoutStrings.saveErrorTitle()
+                : createDataSourceFlyoutStrings.connectErrorTitle()
+            }
+            message={saveError}
+            data-test-subj="createDataSourceFlyoutSaveError"
+          />
+        ) : null}
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty data-test-subj="createDataSourceFlyoutCancel" onClick={() => onClose()}>
+            <EuiButtonEmpty
+              data-test-subj="createDataSourceFlyoutCancel"
+              data-telemetry-id="dataFederation-dataSourceForm-cancelButton"
+              onClick={() => onClose()}
+            >
               {createDataSourceFlyoutStrings.cancelButton()}
             </EuiButtonEmpty>
           </EuiFlexItem>
@@ -357,8 +388,9 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
                 <EuiButton
                   fill
                   type="submit"
+                  form="createDataSourceForm"
                   data-test-subj="createDataSourceFlyoutSubmit"
-                  onClick={handleSubmit(onSubmit)}
+                  data-telemetry-id="dataFederation-dataSourceForm-saveButton"
                   isLoading={isSaving}
                   disabled={isSaving}
                 >

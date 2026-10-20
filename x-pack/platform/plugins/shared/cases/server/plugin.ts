@@ -60,6 +60,7 @@ import type { ConfigType } from './config';
 import { registerConnectorTypes } from './connectors';
 import { registerSavedObjects } from './saved_object_types';
 import type { ServerlessProjectType } from '../common/constants/types';
+import { SERVERLESS_PROJECT_TYPES } from '../common/constants/owners';
 
 import { IncrementalIdTaskManager } from './tasks/incremental_id/incremental_id_task_manager';
 import { TemplatesMigrationTaskManager } from './tasks/templates_migration/templates_migration_task_manager';
@@ -169,7 +170,7 @@ export class CasePlugin
       plugins.features.registerKibanaFeature(casesFeatures.v3);
     }
 
-    this.casesEventBus = new CasesEventBus();
+    this.casesEventBus = new CasesEventBus(this.logger);
 
     registerSavedObjects({
       core,
@@ -237,15 +238,24 @@ export class CasePlugin
             management: plugins.workflowsManagement.management,
             logger: this.logger,
             audit: plugins.security.audit,
-            getWorkflowRunAuthorizer: async (request) => {
-              const [{ savedObjects }] = await core.getStartServices();
-              return this.clientFactory.createWorkflowRunAuthorizer({
-                request,
-                savedObjectsService: savedObjects,
-              });
-            },
+            attachmentTypeRegistry: this.unifiedAttachmentTypeRegistry,
           })
         : undefined;
+
+    // Resolves a request-scoped workflow run context. Defined here and threaded directly into
+    // the route so that `getCasesWorkflowRunContext` does not need to live on `CaseRequestContext`
+    // (which would expose it to all ~20 plugins that depend on the `cases` context).
+    const getWorkflowRunContext = workflowRunService
+      ? async (request: KibanaRequest) => {
+          const [coreStart] = await core.getStartServices();
+          return this.clientFactory.createWorkflowRunContext({
+            request,
+            scopedClusterClient: coreStart.elasticsearch.client.asScoped(request).asCurrentUser,
+            savedObjectsService: coreStart.savedObjects,
+            clientSource: 'rest_api',
+          });
+        }
+      : undefined;
 
     registerRoutes({
       router,
@@ -258,7 +268,9 @@ export class CasePlugin
         ...getInternalRoutes(
           this.userProfileService,
           this.caseConfig,
-          workflowRunService ? { service: workflowRunService, getSpaceId } : undefined
+          workflowRunService && getWorkflowRunContext
+            ? { service: workflowRunService, getSpaceId, getWorkflowRunContext }
+            : undefined
         ),
       ],
       logger: this.logger,
@@ -310,7 +322,11 @@ export class CasePlugin
     );
     registerCaseWorkflowTriggers(plugins.workflowsExtensions);
 
-    if (plugins.agentBuilder) {
+    const isCasesAgentBuilderAllowed =
+      !this.isServerless ||
+      (!!serverlessProjectType && SERVERLESS_PROJECT_TYPES.includes(serverlessProjectType));
+
+    if (plugins.agentBuilder && isCasesAgentBuilderAllowed) {
       registerCasesAgentBuilderTools(
         plugins.agentBuilder,
         getCasesClient('agent_builder'),
@@ -421,6 +437,10 @@ export class CasePlugin
         //    so deleting a data view in space `analytics-1` from a `/reset`
         //    request that arrived in `default` 404s on the existence check
         //    (even with `force: true`).
+        //  - The reconciliation task lists the hidden `space` SOs to delete
+        //    analytics documents of deleted spaces. Only opted in when Spaces
+        //    is enabled: it registers the type, and opting in an unregistered
+        //    type throws.
         // The cases SO types are hidden, so they must be opted in
         // explicitly. `index-pattern` is a globally-registered SO type
         // (data-views plugin); opting it in here grants the internal client
@@ -430,6 +450,7 @@ export class CasePlugin
         // unified `cases-attachments` type is registered unconditionally
         // since #275225), so both are opted in here and the attachments
         // reconciliation runner always walks both source types.
+        const spacesEnabled = plugins.spaces != null;
         const v2InternalRepository = core.savedObjects.createInternalRepository([
           CASE_SAVED_OBJECT,
           CASE_USER_ACTION_SAVED_OBJECT,
@@ -438,6 +459,7 @@ export class CasePlugin
           CASE_TEMPLATE_SAVED_OBJECT,
           CASE_FIELD_DEFINITION_SAVED_OBJECT,
           'index-pattern',
+          ...(spacesEnabled ? ['space'] : []),
         ]);
         const v2InternalSavedObjectsClient = new SavedObjectsClient(v2InternalRepository);
         void this.casesAnalyticsV2Service.start({
@@ -445,6 +467,7 @@ export class CasePlugin
           taskManager: plugins.taskManager,
           internalSavedObjectsClient: v2InternalSavedObjectsClient,
           dataViewsService: plugins.dataViews,
+          spacesEnabled,
         });
       }
     }

@@ -180,8 +180,7 @@ describe('fetchBrowserJourney remoteName plumbing', () => {
 
     expect(mockGet).toHaveBeenCalledWith(
       SYNTHETICS_API_URLS.JOURNEY.replace('{checkGroup}', 'cg-1'),
-      undefined,
-      expect.anything()
+      undefined
     );
   });
 
@@ -190,8 +189,7 @@ describe('fetchBrowserJourney remoteName plumbing', () => {
 
     expect(mockGet).toHaveBeenCalledWith(
       SYNTHETICS_API_URLS.JOURNEY.replace('{checkGroup}', 'cg-1'),
-      { remoteName: 'remote-a' },
-      expect.anything()
+      { remoteName: 'remote-a' }
     );
   });
 
@@ -200,8 +198,7 @@ describe('fetchBrowserJourney remoteName plumbing', () => {
 
     expect(mockGet).toHaveBeenCalledWith(
       SYNTHETICS_API_URLS.JOURNEY.replace('{checkGroup}', 'cg-1'),
-      { timestamp: '2023-01-01T00:00:00.000Z' },
-      expect.anything()
+      { timestamp: '2023-01-01T00:00:00.000Z' }
     );
   });
 
@@ -214,8 +211,7 @@ describe('fetchBrowserJourney remoteName plumbing', () => {
 
     expect(mockGet).toHaveBeenCalledWith(
       SYNTHETICS_API_URLS.JOURNEY.replace('{checkGroup}', 'cg-1'),
-      { remoteName: 'remote-a', timestamp: '2023-01-01T00:00:00.000Z' },
-      expect.anything()
+      { remoteName: 'remote-a', timestamp: '2023-01-01T00:00:00.000Z' }
     );
   });
 
@@ -224,8 +220,7 @@ describe('fetchBrowserJourney remoteName plumbing', () => {
 
     expect(mockGet).toHaveBeenCalledWith(
       SYNTHETICS_API_URLS.JOURNEY.replace('{checkGroup}', 'cg-1'),
-      { stepsOnly: true },
-      expect.anything()
+      { stepsOnly: true }
     );
   });
 
@@ -234,8 +229,7 @@ describe('fetchBrowserJourney remoteName plumbing', () => {
 
     expect(mockGet).toHaveBeenCalledWith(
       SYNTHETICS_API_URLS.JOURNEY.replace('{checkGroup}', 'cg-1'),
-      { timestamp: '2023-01-01T00:00:00.000Z' },
-      expect.anything()
+      { timestamp: '2023-01-01T00:00:00.000Z' }
     );
   });
 });
@@ -285,18 +279,16 @@ describe('fetchLastSuccessfulCheck remoteName plumbing', () => {
 
     expect(mockGet).toHaveBeenCalledWith(
       SYNTHETICS_API_URLS.SYNTHETICS_SUCCESSFUL_CHECK,
-      baseParams,
-      expect.anything()
+      baseParams
     );
   });
 
   it('forwards remoteName to apiService.get when present', async () => {
     await fetchLastSuccessfulCheck({ ...baseParams, remoteName: 'remote-a' });
 
-    expect(mockGet).toHaveBeenCalledWith(
-      SYNTHETICS_API_URLS.SYNTHETICS_SUCCESSFUL_CHECK,
-      { ...baseParams, remoteName: 'remote-a' },
-      expect.anything()
-    );
+    expect(mockGet).toHaveBeenCalledWith(SYNTHETICS_API_URLS.SYNTHETICS_SUCCESSFUL_CHECK, {
+      ...baseParams,
+      remoteName: 'remote-a',
+    });
   });
 });

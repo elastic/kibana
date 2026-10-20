@@ -8,12 +8,12 @@
  */
 
 import YAML from 'yaml';
-import type { StepInfo } from '@kbn/workflows-yaml';
-import { buildStepSeverityMap, getStepSeverity } from './step_severity';
 import type {
+  StepInfo,
   YamlValidationErrorSeverity,
   YamlValidationResult,
-} from '../../../../features/validate_workflow_yaml/model/types';
+} from '@kbn/workflows-yaml';
+import { buildStepSeverityMap, getStepSeverity } from './step_severity';
 
 // ── Factories ────────────────────────────────────────────────────────────────
 
@@ -21,6 +21,7 @@ const makeStep = (lineStart: number, lineEnd: number, stepId = 'step'): StepInfo
   stepId,
   stepType: 'wait',
   stepYamlNode: new YAML.YAMLMap(),
+  path: ['steps', 0],
   propInfos: {},
   lineStart,
   lineEnd,
