@@ -1676,6 +1676,13 @@ const InternalUnifiedDataTable = React.forwardRef<
       );
     }
 
+    const showFooter =
+      !isPrintMode &&
+      loadingState !== DataLoadingState.loading &&
+      isPaginationEnabled && // we hide the footer for Surrounding Documents page
+      !isFilterActive && // hide footer when showing selected documents
+      !isCompareActive;
+
     return (
       <UnifiedDataTableContext.Provider value={unifiedDataTableContextValue}>
         <span className="unifiedDataTable__inner" css={styles.dataTableInner}>
@@ -1743,25 +1750,21 @@ const InternalUnifiedDataTable = React.forwardRef<
               />
             )}
           </div>
-          {!isPrintMode &&
-            loadingState !== DataLoadingState.loading &&
-            isPaginationEnabled && // we hide the footer for Surrounding Documents page
-            !isFilterActive && // hide footer when showing selected documents
-            !isCompareActive && (
-              <UnifiedDataTableFooter
-                isLoadingMore={loadingState === DataLoadingState.loadingMore}
-                rowCount={rowCount}
-                sampleSize={sampleSizeState}
-                pageCount={pageCount}
-                pageIndex={paginationObj?.pageIndex}
-                totalHits={totalHits}
-                onFetchMoreRecords={onFetchMoreRecords}
-                data={data}
-                fieldFormats={fieldFormats}
-                paginationMode={paginationMode}
-                hasScrolledToBottom={paginationMode !== 'multiPage' ? hasScrolledToBottom : true}
-              />
-            )}
+          {showFooter && (
+            <UnifiedDataTableFooter
+              isLoadingMore={loadingState === DataLoadingState.loadingMore}
+              rowCount={rowCount}
+              sampleSize={sampleSizeState}
+              pageCount={pageCount}
+              pageIndex={paginationObj?.pageIndex}
+              totalHits={totalHits}
+              onFetchMoreRecords={onFetchMoreRecords}
+              data={data}
+              fieldFormats={fieldFormats}
+              paginationMode={paginationMode}
+              hasScrolledToBottom={paginationMode !== 'multiPage' ? hasScrolledToBottom : true}
+            />
+          )}
           {searchTitle && (
             <EuiScreenReaderOnly>
               <p id={String(randomId)}>
