@@ -39,10 +39,3 @@ export interface SignalCardData {
   filterLabel: string;
   trend?: number[];
 }
-
-export interface ActiveFilter {
-  type: 'card';
-  cardId: SignalCardId;
-  label: string;
-  exclude?: boolean;
-}

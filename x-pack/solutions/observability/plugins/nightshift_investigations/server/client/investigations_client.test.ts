@@ -40,7 +40,8 @@ jest.mock('../lib/install_investigation_agent', () => ({
   installInvestigationAgent: jest.fn().mockResolvedValue(undefined),
 }));
 
-jest.mock('uuid', () => ({ ...jest.requireActual('uuid'), v4: () => 'inv-new' }));
+const mockNewInvestigationId = jest.fn(() => 'inv-new');
+jest.mock('uuid', () => ({ ...jest.requireActual('uuid'), v4: () => mockNewInvestigationId() }));
 
 const installInvestigationAgentMock = installInvestigationAgent as jest.MockedFunction<
   typeof installInvestigationAgent
@@ -335,6 +336,47 @@ describe('NightshiftInvestigationsClient.start()', () => {
       'nightshift-investigations'
     );
     expect(result).toEqual({ investigation_id: 'inv-new' });
+  });
+
+  it('applies a per-run timeout without mutating the installed investigation workflow', async () => {
+    const workflow = {
+      id: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+      enabled: true,
+      valid: true,
+      definition: { steps: [], settings: { timeout: '60m', concurrency: { max: 1 } } },
+    };
+    mockManagement.getWorkflow.mockResolvedValue(workflow);
+    await makeClient().start({
+      subject: { type: 'manual', id: 'manual' },
+      trigger_type: 'automatic',
+      message: 'Review errors.',
+      timeout_seconds: 20,
+    });
+    expect(mockManagement.runWorkflow).toHaveBeenCalledWith(
+      expect.objectContaining({
+        definition: { steps: [], settings: { timeout: '20s', concurrency: { max: 1 } } },
+      }),
+      SPACE_ID,
+      expect.anything(),
+      mockRequest,
+      'nightshift-investigations'
+    );
+    expect(workflow.definition.settings.timeout).toBe('60m');
+  });
+
+  it('starts fresh investigations for repeated automatic questions without matching an open conversation', async () => {
+    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+    mockNewInvestigationId.mockReturnValueOnce('inv-one').mockReturnValueOnce('inv-two');
+    const client = makeClient();
+    const request = {
+      subject: { type: 'manual' as const, id: 'manual' },
+      trigger_type: 'automatic' as const,
+      message: 'Review checkout health.',
+    };
+    expect(await client.start(request)).toEqual({ investigation_id: 'inv-one' });
+    expect(await client.start(request)).toEqual({ investigation_id: 'inv-two' });
+    expect(agenticInvestigationsClient.findOpenBySubjects).not.toHaveBeenCalled();
+    expect(investigationQuotaCallback).toHaveBeenCalledTimes(2);
   });
 
   it('labels a manual run with its prompt so it does not read as "manual" while running', async () => {
