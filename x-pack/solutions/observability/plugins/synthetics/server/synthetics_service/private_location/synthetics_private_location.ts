@@ -25,9 +25,7 @@ import {
 } from '../synthetics_monitor/synthetics_monitor_client';
 import { scheduleTestNowCleanUp } from '../../tasks/clean_up_package_policies_task';
 import type { SyntheticsServerSetup } from '../../types';
-import {
-  formatSyntheticsPolicy,
-} from '../formatters/private_formatters/format_synthetics_policy';
+import { formatSyntheticsPolicy } from '../formatters/private_formatters/format_synthetics_policy';
 import {
   getSecretConnectionDelivery,
   SecretConnectionError,
