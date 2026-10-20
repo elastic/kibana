@@ -128,12 +128,6 @@ export interface GetCategoryArgs {
   filter?: KueryNode;
 }
 
-/** The ids of the cases one attachment id is attached to. */
-export interface CaseIdsOfAttachment {
-  attachmentId: string;
-  caseIds: string[];
-}
-
 /** The cases one attachment id is attached to, with their owners for authorization. */
 export interface CasesWithOwnerOfAttachment {
   attachmentId: string;

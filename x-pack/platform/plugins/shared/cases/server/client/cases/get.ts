@@ -67,7 +67,7 @@ import {
 import { limitedArraySchema, limitedStringSchema } from '../../../common/schema';
 import { combineAuthorizedAndOwnerFilter } from '../utils';
 import { CasesService } from '../../services';
-import type { CaseIdsOfAttachment } from '../../services/cases/types';
+import type { CasesWithOwnerOfAttachment } from '../../services/cases/types';
 import type {
   CaseSavedObjectTransformed,
   CaseTransformedAttributes,
@@ -287,19 +287,20 @@ export const getCasesByAttachmentIDs = async (
       ),
     });
 
+    const casesInStatus = await filterByCaseStatus(caseService, casesOfAttachments, status);
+
+    // After the status filter, so only the cases returned are audited.
     ensureSavedObjectsAreAuthorized(
       uniqBy(
-        casesOfAttachments.flatMap(({ cases }) => cases),
+        casesInStatus.flatMap(({ cases }) => cases),
         'id'
       )
     );
 
-    const caseIdsOfAttachments = casesOfAttachments.map(({ attachmentId, cases }) => ({
+    const res = casesInStatus.map(({ attachmentId, cases }) => ({
       attachmentId,
       caseIds: cases.map(({ id }) => id),
     }));
-
-    const res = await filterByCaseStatus(caseService, caseIdsOfAttachments, status);
 
     return decodeOrThrow(GetCaseIDsByAttachmentIDsResponseRt)(res);
   } catch (error) {
@@ -317,28 +318,28 @@ export const getCasesByAttachmentIDs = async (
  */
 const filterByCaseStatus = async (
   caseService: CasesService,
-  casesOfAttachments: CaseIdsOfAttachment[],
+  casesOfAttachments: CasesWithOwnerOfAttachment[],
   status: CaseStatuses | CaseStatuses[] | undefined
-): Promise<CaseIdsOfAttachment[]> => {
+): Promise<CasesWithOwnerOfAttachment[]> => {
   if (status === undefined) return casesOfAttachments;
   const statuses = asArray(status);
-  const caseIds = [...new Set(casesOfAttachments.flatMap((attachment) => attachment.caseIds))];
-  const responses = await pMap(
+  const caseIds = [
+    ...new Set(casesOfAttachments.flatMap(({ cases }) => cases.map(({ id }) => id))),
+  ];
+  const statusesById = await pMap(
     chunk(caseIds, MAX_BULK_GET_CASES),
-    (ids) => caseService.getCases({ caseIds: ids }),
+    (ids) => caseService.getCaseStatuses({ caseIds: ids }),
     { concurrency: MAX_CONCURRENT_SEARCHES }
   );
   const caseIdsWithStatus = new Set(
-    responses
-      .flatMap(({ saved_objects: cases }) => cases)
-      .filter((theCase): theCase is SavedObject<CaseTransformedAttributes> => !isSOError(theCase))
-      .filter(({ attributes }) => statuses.includes(attributes.status))
-      .map(({ id }) => id)
+    statusesById.flatMap((statusById) =>
+      [...statusById].flatMap(([id, caseStatus]) => (statuses.includes(caseStatus) ? [id] : []))
+    )
   );
 
-  return casesOfAttachments.flatMap(({ attachmentId, caseIds: ids }) => {
-    const caseIdsInStatus = ids.filter((id) => caseIdsWithStatus.has(id));
-    return caseIdsInStatus.length > 0 ? [{ attachmentId, caseIds: caseIdsInStatus }] : [];
+  return casesOfAttachments.flatMap(({ attachmentId, cases }) => {
+    const casesInStatus = cases.filter(({ id }) => caseIdsWithStatus.has(id));
+    return casesInStatus.length > 0 ? [{ attachmentId, cases: casesInStatus }] : [];
   });
 };
 

@@ -12,7 +12,6 @@ import { mockCases, mockCaseComments } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
 import { CaseStatuses } from '../../../common/types/domain';
 import { MAX_ATTACHMENT_IDS_PER_CASES_LOOKUP } from '../../../common/constants';
-import type { CasesService } from '../../services';
 import { Operations } from '../../authorization';
 import {
   get,
@@ -49,12 +48,6 @@ describe('get', () => {
       owner: 'securitySolution',
       attachmentIds: ['host:a', 'host:b', 'host:c'],
     };
-    const caseSO = (id: string, owner: string, status: CaseStatuses) => ({
-      id,
-      type: 'cases',
-      references: [],
-      attributes: { owner, status },
-    });
 
     beforeEach(() => {
       clientArgs.services.caseService.getCaseIdsByAttachmentIds.mockResolvedValue([
@@ -115,16 +108,16 @@ describe('get', () => {
         { attachmentId: 'host:a', caseIds: ['case-1', 'case-2'] },
         { attachmentId: 'host:b', caseIds: ['case-2'] },
       ]);
-      expect(clientArgs.services.caseService.getCases).not.toHaveBeenCalled();
+      expect(clientArgs.services.caseService.getCaseStatuses).not.toHaveBeenCalled();
     });
 
     it('keeps only the cases with one of the statuses', async () => {
-      clientArgs.services.caseService.getCases.mockResolvedValue({
-        saved_objects: [
-          caseSO('case-1', 'securitySolution', CaseStatuses.closed),
-          caseSO('case-2', 'securitySolution', CaseStatuses['in-progress']),
-        ],
-      } as unknown as Awaited<ReturnType<CasesService['getCases']>>);
+      clientArgs.services.caseService.getCaseStatuses.mockResolvedValue(
+        new Map([
+          ['case-1', CaseStatuses.closed],
+          ['case-2', CaseStatuses['in-progress']],
+        ])
+      );
 
       await expect(
         getCasesByAttachmentIDs(
@@ -135,9 +128,28 @@ describe('get', () => {
         { attachmentId: 'host:a', caseIds: ['case-2'] },
         { attachmentId: 'host:b', caseIds: ['case-2'] },
       ]);
-      expect(clientArgs.services.caseService.getCases).toHaveBeenCalledWith({
+      expect(clientArgs.services.caseService.getCaseStatuses).toHaveBeenCalledWith({
         caseIds: ['case-1', 'case-2'],
       });
+    });
+
+    it('authorizes and audits only the cases left after the status filter', async () => {
+      const ensureSavedObjectsAreAuthorized = jest.fn();
+      clientArgs.authorization.getAuthorizationFilter.mockResolvedValueOnce({
+        ensureSavedObjectsAreAuthorized,
+      });
+      clientArgs.services.caseService.getCaseStatuses.mockResolvedValue(
+        new Map([
+          ['case-1', CaseStatuses.closed],
+          ['case-2', CaseStatuses.open],
+        ])
+      );
+
+      await getCasesByAttachmentIDs({ ...request, status: CaseStatuses.open }, clientArgs);
+
+      expect(ensureSavedObjectsAreAuthorized).toHaveBeenCalledWith([
+        { id: 'case-2', owner: 'securitySolution' },
+      ]);
     });
 
     it('authorizes and audits each case it returns once, without reading the cases', async () => {
@@ -152,15 +164,13 @@ describe('get', () => {
         { id: 'case-1', owner: 'securitySolution' },
         { id: 'case-2', owner: 'securitySolution' },
       ]);
-      expect(clientArgs.services.caseService.getCases).not.toHaveBeenCalled();
+      expect(clientArgs.services.caseService.getCaseStatuses).not.toHaveBeenCalled();
     });
+
     it('leaves out cases that are not found', async () => {
-      clientArgs.services.caseService.getCases.mockResolvedValue({
-        saved_objects: [
-          { id: 'case-1', type: 'cases', error: { statusCode: 404, message: 'Not found' } },
-          caseSO('case-2', 'securitySolution', CaseStatuses.open),
-        ],
-      } as unknown as Awaited<ReturnType<CasesService['getCases']>>);
+      clientArgs.services.caseService.getCaseStatuses.mockResolvedValue(
+        new Map([['case-2', CaseStatuses.open]])
+      );
 
       await expect(
         getCasesByAttachmentIDs({ ...request, status: CaseStatuses.open }, clientArgs)
