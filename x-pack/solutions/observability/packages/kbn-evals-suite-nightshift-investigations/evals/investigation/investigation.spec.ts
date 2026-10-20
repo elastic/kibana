@@ -32,7 +32,6 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: suiteTags }, (
     'grades investigations with the RCA judges and persists complete agent traces',
     async ({
       executorClient,
-      connector,
       fetch,
       evalsClient,
       traceEsClient,
@@ -61,9 +60,7 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: suiteTags }, (
           async () =>
             (
               await fetch<{ available: boolean }>(
-                `/internal/nightshift/investigations/availability?connector_id=${encodeURIComponent(
-                  connector.id
-                )}`
+                '/internal/nightshift/investigations/availability'
               )
             ).available,
           { timeout: 60_000 }
@@ -91,7 +88,7 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: suiteTags }, (
           trustUpstreamDataset: Boolean(process.env.NIGHTSHIFT_DATASET_NAME),
           concurrency,
           metadata: { concurrency },
-          task: (example) => runInvestigation(fetch, example, connector),
+          task: (example) => runInvestigation(fetch, example),
         },
         judges
       );

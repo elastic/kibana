@@ -9,7 +9,6 @@ import { setTimeout } from 'timers/promises';
 import type { HttpHandler } from '@kbn/core/public';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import type { ConversationRound } from '@kbn/agent-builder-common';
-import type { EvalConnector } from '@kbn/evals';
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import type { StartInvestigationResponse } from '@kbn/nightshift-investigations-plugin/common';
 import type { Investigation } from '@kbn/agentic-investigations-plugin/common';
@@ -156,11 +155,13 @@ export const toInvestigationReport = ({
   proposals: proposals.map(({ title, comment, status }) => ({ title, comment, status })),
 });
 
-/** Runs a manual investigation and retains a bounded report with references to its full evidence. */
+/**
+ * Runs a manual investigation and retains a bounded report with references to its full evidence.
+ * It names no model, so the investigation runs on the same default as production.
+ */
 export const runInvestigation = async (
   fetch: HttpHandler,
-  example: InvestigationExample,
-  connector: Pick<EvalConnector, 'id'>
+  example: InvestigationExample
 ): Promise<InvestigationTaskOutput> => {
   const started = Date.now();
   const output: InvestigationTaskOutput = {
@@ -176,7 +177,6 @@ export const runInvestigation = async (
         body: JSON.stringify({
           subject: { type: 'manual' },
           message: example.input.question,
-          connector_id: connector.id,
         }),
       }
     );
