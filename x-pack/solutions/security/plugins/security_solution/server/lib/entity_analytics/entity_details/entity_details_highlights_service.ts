@@ -699,7 +699,7 @@ export const entityDetailsHighlightsServiceFactory = ({
             ...sharedOpts,
             filter: buildAliasesFilter(entityIdentifier),
             // The target takes one of the member slots.
-            size: RESOLVED_MODE_MAX_RECORDS,
+            size: RESOLVED_MODE_MAX_RECORDS - 1,
             // Highest-risk aliases first, so truncation drops the least risky ones.
             sort: [{ [RESOLUTION_GROUP_RISK_SORT_FIELD]: 'desc' }],
           })

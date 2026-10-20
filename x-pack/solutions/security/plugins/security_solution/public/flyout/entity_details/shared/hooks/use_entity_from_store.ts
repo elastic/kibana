@@ -302,7 +302,7 @@ export function useEntityFromStore(
       const aliasesResponse = await fetchRecords({
         filterQuery: JSON.stringify(buildAliasesFilter(entityId)),
         // The target takes one of the member slots.
-        perPage: RESOLVED_MODE_MAX_RECORDS,
+        perPage: RESOLVED_MODE_MAX_RECORDS - 1,
         sortField: RESOLUTION_GROUP_RISK_SORT_FIELD,
         sortOrder: 'desc',
       });

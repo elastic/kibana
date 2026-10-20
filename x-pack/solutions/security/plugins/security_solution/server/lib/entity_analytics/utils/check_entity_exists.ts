@@ -124,7 +124,7 @@ export const getEntityRecords = async ({
     crudClient,
     esClient,
     filter: [buildAliasesFilter(entityId), { term: { 'entity.EngineMetadata.Type': entityType } }],
-    size: RESOLVED_MODE_MAX_RECORDS,
+    size: RESOLVED_MODE_MAX_RECORDS - 1,
     sort: [{ [RESOLUTION_GROUP_RISK_SORT_FIELD]: 'desc' }],
   });
   return [target, ...aliases.filter((entity) => entity.entity?.id !== entityId)];

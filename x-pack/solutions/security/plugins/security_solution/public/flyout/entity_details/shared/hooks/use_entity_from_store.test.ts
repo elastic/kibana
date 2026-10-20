@@ -210,7 +210,7 @@ describe('useEntityFromStore', () => {
         term: { [RESOLVED_TO_FIELD]: 'target' },
       });
       // The target takes one of the member slots; the riskiest aliases fill the rest.
-      expect(aliasParams.perPage).toBe(RESOLVED_MODE_MAX_RECORDS);
+      expect(aliasParams.perPage).toBe(RESOLVED_MODE_MAX_RECORDS - 1);
       expect(aliasParams.sortField).toBe(RESOLUTION_GROUP_RISK_SORT_FIELD);
       expect(aliasParams.sortOrder).toBe('desc');
 

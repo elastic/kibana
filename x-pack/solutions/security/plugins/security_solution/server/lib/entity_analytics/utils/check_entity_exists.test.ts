@@ -212,7 +212,7 @@ describe('getEntityRecords', () => {
           { term: { [RESOLVED_TO_FIELD]: 'host:target' } },
           { term: { 'entity.EngineMetadata.Type': 'host' } },
         ],
-        size: RESOLVED_MODE_MAX_RECORDS,
+        size: RESOLVED_MODE_MAX_RECORDS - 1,
         sort: [{ [RESOLUTION_GROUP_RISK_SORT_FIELD]: 'desc' }],
       });
     });
