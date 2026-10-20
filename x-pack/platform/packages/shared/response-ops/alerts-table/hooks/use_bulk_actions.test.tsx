@@ -727,9 +727,7 @@ describe('bulk action hooks', () => {
           wrapper,
         }
       );
-      const initialBulkActions = result.current.bulkActions[0].items
-        ? [...result.current.bulkActions[0].items]
-        : [];
+      const initialKeys = result.current.bulkActions[0].items?.map(({ key }) => key);
       result.current.updateBulkActionsState({ action: BulkActionsVerbs.selectCurrentPage });
       rerender();
       result.current.updateBulkActionsState({ action: BulkActionsVerbs.clear });
@@ -738,8 +736,59 @@ describe('bulk action hooks', () => {
       rerender();
       result.current.updateBulkActionsState({ action: BulkActionsVerbs.selectAll });
       rerender();
-      const newBulkActions = result.current.bulkActions[0].items;
-      expect(initialBulkActions).toEqual(newBulkActions);
+      expect(result.current.bulkActions[0].items?.map(({ key }) => key)).toEqual(initialKeys);
+    });
+
+    it('passes the latest default action handlers after select all', () => {
+      const additionalBulkActions = [
+        { id: 0, items: [{ label: 'test', key: 'test', disableOnQuery: true, onClick: () => {} }] },
+      ];
+      const { result, rerender } = renderHook(
+        () =>
+          useBulkActions({
+            alertsCount: 0,
+            query: {},
+            casesConfig,
+            refresh,
+            additionalBulkActions,
+            http,
+            notifications,
+            application,
+          }),
+        { wrapper }
+      );
+      const findUntrack = () =>
+        result.current.bulkActions[0].items?.find(({ key }) => key === 'mark-as-untracked');
+      const initialUntrack = findUntrack();
+
+      result.current.updateBulkActionsState({ action: BulkActionsVerbs.selectAll });
+      rerender();
+
+      expect(findUntrack()?.onClick).not.toBe(initialUntrack?.onClick);
+    });
+
+    it('does not change the additional bulk actions passed in', () => {
+      const items = [{ label: 'test', key: 'test', disableOnQuery: true, onClick: () => {} }];
+      const additionalBulkActions = [{ id: 0, items }];
+
+      const { result } = renderHook(
+        () =>
+          useBulkActions({
+            alertsCount: 0,
+            query: {},
+            casesConfig,
+            refresh,
+            additionalBulkActions,
+            http,
+            notifications,
+            application,
+          }),
+        { wrapper }
+      );
+
+      expect(result.current.bulkActions[0].items?.length).toBeGreaterThan(1);
+      expect(additionalBulkActions[0].items).toBe(items);
+      expect(items).toHaveLength(1);
     });
 
     it('hides bulk actions if hideBulkActions == true', () => {
