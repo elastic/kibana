@@ -134,16 +134,23 @@ test.describe(
       page,
       pageObjects: { serviceDetailsPage },
     }) => {
+      // Calculate a new rangeFrom that is 5 minutes after the original START_DATE
+      const rangeFrom = new Date(
+        new Date(testData.START_DATE).getTime() + 5 * 60 * 1000
+      ).toISOString();
+
       await test.step('Navigate to service overview with new time range', async () => {
         await serviceDetailsPage.overviewTab.goToTab({
           serviceName: testData.SERVICE_OPBEANS_NODE,
-          rangeFrom: '2021-10-09T23:55:00.000Z',
+          rangeFrom,
           rangeTo: testData.END_DATE,
         });
       });
 
       await test.step('Verify URL contains updated time range', async () => {
-        await expect(page).toHaveURL(/2021-10-09/, { timeout: EXTENDED_TIMEOUT });
+        await expect(page).toHaveURL(new RegExp(testData.END_DATE.slice(0, 10)), {
+          timeout: EXTENDED_TIMEOUT,
+        });
       });
 
       await test.step('Verify page still renders correctly', async () => {
