@@ -561,6 +561,21 @@ describe('createLiveQueryRoute', () => {
       expect(mockedCreateActionHandler).not.toHaveBeenCalled();
     });
 
+    it('returns 403 when runSavedQueries lacks readSavedQueries', async () => {
+      const coreStart = createMockCoreStart(
+        { [SAVED_QUERY_ID]: { query: STORED_QUERY } },
+        { runSavedQueries: true, readSavedQueries: false }
+      );
+
+      const response = await invokeRoute(
+        { saved_query_id: SAVED_QUERY_ID, query: STORED_QUERY, agent_ids: ['agent-1'] },
+        { coreStart }
+      );
+
+      expect(response.forbidden).toHaveBeenCalled();
+      expect(mockedCreateActionHandler).not.toHaveBeenCalled();
+    });
+
     it('does not recover a denied pack_id through a matching investigation guide query', async () => {
       const coreStart = createMockCoreStart(
         { [PACK_ID]: { queries: [{ query: 'select * from shadow;' }] } },

@@ -90,6 +90,19 @@ apiTest.describe(
     });
 
     apiTest(
+      'returns 403 when running a saved query without Saved queries read',
+      async ({ apiClient }) => {
+        const response = await runLiveQuery(
+          apiClient,
+          'runSavedMinimal',
+          testData.getSavedQueryLiveQuery(savedQueryId)
+        );
+
+        expect(response).toHaveStatusCode(403);
+      }
+    );
+
+    apiTest(
       'is not rejected when running a saved query with Saved queries read',
       async ({ apiClient }) => {
         const response = await runLiveQuery(

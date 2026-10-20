@@ -448,6 +448,27 @@ apiTest.describe(
     );
 
     apiTest(
+      'rejects a saved-query response action for an author without Saved queries read',
+      async ({ apiClient }) => {
+        const response = await apiClient.post(testData.API_PATHS.DETECTION_RULES, {
+          headers: { ...testData.COMMON_HEADERS, ...runSavedMinimalCredentials.apiKeyHeader },
+          body: testData.getMinimalRule({
+            response_actions: [
+              { action_type_id: '.osquery', params: { saved_query_id: savedQueryId } },
+            ],
+          }),
+          responseType: 'json',
+        });
+
+        if (response.statusCode === 200 && response.body?.id) {
+          createdRuleIds.push(response.body.id);
+        }
+
+        expect(response).toHaveStatusCode(403);
+      }
+    );
+
+    apiTest(
       'accepts a pack response action with copied queries for a runSavedQueries-only author',
       async ({ apiClient }) => {
         const response = await apiClient.post(testData.API_PATHS.DETECTION_RULES, {

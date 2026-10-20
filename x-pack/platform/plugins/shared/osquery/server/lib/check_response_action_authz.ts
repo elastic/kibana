@@ -19,6 +19,7 @@ interface OsqueryCapabilities {
   writeLiveQueries: boolean;
   runSavedQueries: boolean;
   readPacks: boolean;
+  readSavedQueries: boolean;
 }
 
 // Cache capability resolution per request so bulk operations (e.g., duplicating
@@ -85,6 +86,7 @@ export const getOsqueryCapabilities = (
         writeLiveQueries: !!resolved.osquery.writeLiveQueries,
         runSavedQueries: !!resolved.osquery.runSavedQueries,
         readPacks: !!resolved.osquery.readPacks,
+        readSavedQueries: !!resolved.osquery.readSavedQueries,
       };
     })().catch((error) => {
       capabilitiesCache.delete(request);
@@ -103,8 +105,9 @@ export interface AuthorizeOsqueryResponseActionResult {
 
 /**
  * `writeLiveQueries` may supply SQL. `runSavedQueries` may only run a resolved saved query or pack.
- * Running a pack also requires `readPacks` for every caller, mirroring the UI. It is denied
- * before the pack is loaded.
+ * Running a referenced object also requires read access to its type, mirroring the UI: a pack
+ * needs `readPacks` for every caller, and a saved query run under `runSavedQueries` needs
+ * `readSavedQueries`. Both are denied before the object is loaded.
  */
 export const authorizeOsqueryResponseAction = async (
   coreStart: CoreStart,
@@ -113,11 +116,10 @@ export const authorizeOsqueryResponseAction = async (
   spaceId?: string,
   alertData?: ParsedTechnicalFields & { _index: string }
 ): Promise<AuthorizeOsqueryResponseActionResult> => {
-  const { writeLiveQueries, runSavedQueries, readPacks } = await getOsqueryCapabilities(
-    coreStart,
-    request
-  );
+  const { writeLiveQueries, runSavedQueries, readPacks, readSavedQueries } =
+    await getOsqueryCapabilities(coreStart, request);
   const packId = actionParams.pack_id?.trim();
+  const savedQueryId = actionParams.saved_query_id?.trim();
 
   // Dispatching a pack returns its name and every query's SQL, so even a caller who may write
   // arbitrary SQL must be able to read packs to run one.
@@ -130,6 +132,11 @@ export const authorizeOsqueryResponseAction = async (
   }
 
   if (!runSavedQueries) {
+    return { authorized: false };
+  }
+
+  // A pack reference takes precedence over a saved query one, as in `resolveQueryReference`.
+  if (!packId && savedQueryId && !readSavedQueries) {
     return { authorized: false };
   }
 

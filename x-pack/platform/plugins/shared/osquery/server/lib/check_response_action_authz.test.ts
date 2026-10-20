@@ -571,6 +571,16 @@ describe('isOsqueryResponseActionAuthorized', () => {
         capabilities: { ...RUN_SAVED_NO_READS, readSavedQueries: true },
         params: { pack_id: PACK_ID, saved_query_id: SAVED_QUERY_ID },
       },
+      {
+        scenario: 'runSavedQueries without readSavedQueries runs a saved query',
+        capabilities: RUN_SAVED_NO_READS,
+        params: { saved_query_id: SAVED_QUERY_ID, query: STORED_QUERY },
+      },
+      {
+        scenario: 'runSavedQueries with only readPacks runs a saved query',
+        capabilities: { ...RUN_SAVED_NO_READS, readPacks: true },
+        params: { saved_query_id: SAVED_QUERY_ID },
+      },
     ])(
       'should deny without reading saved objects when $scenario',
       async ({ capabilities, params }) => {
