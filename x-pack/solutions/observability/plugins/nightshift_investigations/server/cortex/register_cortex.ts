@@ -24,6 +24,7 @@ import {
 import { CORTEX_AI_INDEX_DEST, CORTEX_AI_INDEX_ID } from '../../common/cortex';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID, SANDBOX_TOOL_IDS } from '../agents/investigation';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
+import { loadInvestigationRound } from '../investigation_round';
 import { createCortexTelemetry } from '../telemetry';
 import { materializeCortex } from './materialize';
 import { createLlmProposeCortexEdits, optimizeCortex } from './optimize';
@@ -160,7 +161,17 @@ export const runCortexOptimize = async ({
     return;
   }
 
-  const sandboxToolCalls = toolCalls.filter(
+  const loadedRound = await loadInvestigationRound({
+    agentBuilder: getAgentBuilder(),
+    request,
+    conversationId,
+    roundId,
+    fallbackToolCalls: toolCalls,
+    logger,
+    signal,
+  });
+
+  const sandboxToolCalls = loadedRound.toolCalls.filter(
     ({ tool_id: toolId }) => toolId !== undefined && OPTIMIZER_TOOL_IDS.has(toolId)
   );
   if (sandboxToolCalls.length < MIN_OPTIMIZE_TOOL_CALLS) {
