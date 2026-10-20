@@ -289,6 +289,13 @@ export class Config {
     return Boolean(this.buildOptions.tarZstd);
   }
 
+  /**
+   * Bundle only the pointer compression Node.js variant on Linux and make launchers use it
+   */
+  getForceNodePointerCompression() {
+    return Boolean(this.buildOptions.forceNodePointerCompression);
+  }
+
   getDistPluginsFromRepo() {
     return getPackages(this.repoRoot).filter((p) => !p.isDevOnly() && this.pluginFilter(p));
   }
