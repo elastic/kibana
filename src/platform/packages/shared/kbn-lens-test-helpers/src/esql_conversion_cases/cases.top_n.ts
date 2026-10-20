@@ -25,7 +25,7 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
   // Restricts the query to the top values of a dimension that `LIMIT n BY` cannot cap globally
   // (outer Top values, or Top values above a date histogram). Pass `where: null` to omit the
   // time filter (data views without a time field).
-  const outerTopNFilter = ({
+  const outerTopNSubquery = ({
     field,
     score,
     sort,
@@ -41,7 +41,7 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
     where?: string | null;
   }) => {
     const where = whereOption === null ? undefined : whereOption ?? logsWhere;
-    const subquery = [
+    return [
       from,
       ...(where ? [where] : []),
       `STATS ${score} BY ${field}`,
@@ -49,8 +49,17 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
       `LIMIT ${size}`,
       `KEEP ${field}`,
     ].join(' | ');
-    return `WHERE ${field} IN (${subquery})`;
   };
+
+  const outerTopNFilter = (args: Parameters<typeof outerTopNSubquery>[0]) =>
+    `WHERE ${args.field} IN (${outerTopNSubquery(args)})`;
+
+  // Remaps non-top-N keys to "Other" (single Top values + Other; nested outer Other is a follow-up).
+  // Type casts use uppercase to match `esql(...).print('basic')`.
+  const outerTopNOtherRemap = (args: Parameters<typeof outerTopNSubquery>[0]) =>
+    `EVAL ${args.field} = CASE(${args.field} IN (${outerTopNSubquery(args)}), ${
+      args.field
+    }, "Other"::KEYWORD)`;
 
   return [
     {
@@ -169,12 +178,115 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
     {
       group: 'top_n',
       dataset: logs,
-      description: 'terms with other bucket is not convertible',
+      description: 'single terms with other bucket ordered alphabetically',
       columns: {
         col1: terms('host.keyword', { otherBucket: true }),
         col2: metric('average', 'bytes'),
       },
       columnOrder: ['col1', 'col2'],
+      expected: {
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | ${outerTopNOtherRemap({
+          field: 'host.keyword',
+          score: 'COUNT(*)',
+          sort: 'host.keyword ASC',
+          size: 5,
+        })} | STATS AVG(bytes) BY host.keyword | SORT host.keyword ASC | LIMIT 6`,
+        columnNames: ['AVG(bytes)', 'host.keyword'],
+        expectedSourceIds: { 'AVG(bytes)': ['col2'], 'host.keyword': ['col1'] },
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'single terms with other bucket ranked by metric DESC',
+      columns: {
+        col1: terms('host.keyword', {
+          size: 3,
+          orderBy: { type: 'column', columnId: 'col2' },
+          orderDirection: 'desc',
+          otherBucket: true,
+        }),
+        col2: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2'],
+      expected: {
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | ${outerTopNOtherRemap({
+          field: 'host.keyword',
+          score: 'rank_host_keyword = AVG(bytes)',
+          sort: 'rank_host_keyword DESC',
+          size: 3,
+        })} | INLINE STATS named_host_keyword = CASE(host.keyword == "Other"::KEYWORD, 0::LONG, 1::LONG) BY host.keyword | STATS AVG(bytes) BY named_host_keyword, host.keyword | SORT named_host_keyword DESC, \`AVG(bytes)\` DESC | LIMIT 4 | DROP named_host_keyword`,
+        columnNames: ['AVG(bytes)', 'host.keyword'],
+        expectedSourceIds: { 'AVG(bytes)': ['col2'], 'host.keyword': ['col1'] },
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'single terms with other bucket ranked by metric ASC',
+      columns: {
+        col1: terms('host.keyword', {
+          size: 3,
+          orderBy: { type: 'column', columnId: 'col2' },
+          orderDirection: 'asc',
+          otherBucket: true,
+        }),
+        col2: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2'],
+      expected: {
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | ${outerTopNOtherRemap({
+          field: 'host.keyword',
+          score: 'rank_host_keyword = AVG(bytes)',
+          sort: 'rank_host_keyword ASC',
+          size: 3,
+        })} | STATS AVG(bytes) BY host.keyword | SORT \`AVG(bytes)\` ASC | LIMIT 4`,
+        columnNames: ['AVG(bytes)', 'host.keyword'],
+        expectedSourceIds: { 'AVG(bytes)': ['col2'], 'host.keyword': ['col1'] },
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'nested terms with other bucket on the outer dimension is not convertible yet',
+      columns: {
+        col1: terms('geo.src', {
+          size: 2,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+          otherBucket: true,
+        }),
+        col2: terms('host.keyword', {
+          size: 3,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+        }),
+        col3: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2', 'col3'],
+      expected: {
+        success: false,
+        reason: 'terms_other_bucket_not_supported',
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'terms above a date histogram with other bucket is not convertible yet',
+      columns: {
+        col1: terms('host.keyword', {
+          size: 5,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+          otherBucket: true,
+        }),
+        col2: dateHistogram('timestamp', { interval: '1d' }),
+        col3: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2', 'col3'],
       expected: {
         success: false,
         reason: 'terms_other_bucket_not_supported',
@@ -556,7 +668,8 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
     {
       group: 'top_n',
       dataset: logs,
-      description: 'terms with accuracy mode and other bucket reports the highest-priority blocker',
+      description:
+        'single terms with accuracy mode and other bucket reports accuracy (Other is supported)',
       columns: {
         col1: terms('host.keyword', { accuracyMode: true, otherBucket: true }),
         col2: metric('average', 'bytes'),
@@ -564,7 +677,7 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
       columnOrder: ['col1', 'col2'],
       expected: {
         success: false,
-        reason: 'terms_other_bucket_not_supported',
+        reason: 'terms_accuracy_mode_not_supported',
       },
     },
     {

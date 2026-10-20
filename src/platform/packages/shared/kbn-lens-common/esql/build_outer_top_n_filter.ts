@@ -26,11 +26,10 @@ export interface OuterTopNFilterInput {
 }
 
 /**
- * Builds the `WHERE <group> IN (…)` clause that restricts a query to the top values of an
- * outer dimension. `LIMIT n BY` only limits rows per group, so without this the chart would
- * show every outer value instead of the configured number, unlike the equivalent DSL chart.
+ * Top-N subquery shared by the outer `WHERE … IN` filter and the Other-bucket `EVAL` remap.
+ * Returns exactly one column (`KEEP`) so it can be compared against `groupExpr`.
  */
-export const buildOuterTopNFilter = ({
+export const buildOuterTopNSubquery = ({
   source,
   timeFilter,
   groupExpr,
@@ -48,9 +47,18 @@ export const buildOuterTopNFilter = ({
     `STATS ${scoreFragment} BY ${groupExpr}`,
     `SORT ${sortClause}`,
     `LIMIT ${size}`,
-    // The subquery must return exactly one column to be compared against.
     `KEEP ${groupExpr}`
   );
 
-  return `WHERE ${groupExpr} IN (${subqueryParts.join(' | ')})`;
+  return subqueryParts.join(' | ');
+};
+
+/**
+ * Builds the `WHERE <group> IN (…)` clause that restricts a query to the top values of an
+ * outer dimension. `LIMIT n BY` only limits rows per group, so without this the chart would
+ * show every outer value instead of the configured number, unlike the equivalent DSL chart.
+ */
+export const buildOuterTopNFilter = (input: OuterTopNFilterInput): string => {
+  const { groupExpr } = input;
+  return `WHERE ${groupExpr} IN (${buildOuterTopNSubquery(input)})`;
 };
