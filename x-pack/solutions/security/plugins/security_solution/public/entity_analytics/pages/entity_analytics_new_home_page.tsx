@@ -546,6 +546,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
     count: anomaliesCount,
     entityIds: anomaliesEntityIds,
     isLoading: anomaliesLoading,
+    isMissingJobs: anomaliesMissingJobs,
     isCountPending: anomaliesPending,
   } = useEntitiesWithAnomaliesCount({
     spaceId: resolvedSpaceId,
@@ -589,20 +590,13 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
     skip: skipRiskTiles,
   });
 
-  // Count first, for the whole page: the deltas start only once every count has loaded, so a delta
-  // never slows a count (a count whose query cannot run is not waited for).
-  const areCountsLoaded =
-    !alertBasedPending &&
-    !anomaliesPending &&
-    !newEntityPending &&
-    !riskMoversPending &&
-    !newlyHCPending;
+  // Count first, then each tile on its own: a tile's delta starts once its own count has loaded (a
+  // count whose query cannot run is not waited for), so a slow count delays only its own tile.
   const deltaOptions = {
     spaceId: resolvedSpaceId,
     timeRange,
     entityFilters,
     skip: skipTileQueries,
-    isReady: areCountsLoaded,
   };
   const {
     severeAlertsDelta: alertsDelta,
@@ -612,6 +606,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
     reachesBack: alertBasedReachesBack,
   } = useAlertBasedTilesDelta({
     ...deltaOptions,
+    isReady: !alertBasedPending,
     skip: skipAlertTiles,
     severeAlertsCount,
     watchlistedCount,
@@ -623,6 +618,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
     reachesBack: anomaliesReachesBack,
   } = useEntitiesWithAnomaliesDelta({
     ...deltaOptions,
+    isReady: !anomaliesPending,
     skip: skipAnomaliesTile,
     count: anomaliesCount,
   });
@@ -631,7 +627,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
     isDeltaLoading: newEntityDeltaLoading,
     isHistoryMissing: newEntityHistoryMissing,
     reachesBack: newEntityReachesBack,
-  } = useNewEntityDelta({ ...deltaOptions, count: newEntityCount });
+  } = useNewEntityDelta({ ...deltaOptions, isReady: !newEntityPending, count: newEntityCount });
   const {
     delta: riskMoversDelta,
     isDeltaLoading: riskMoversDeltaLoading,
@@ -640,6 +636,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
   } = useRiskMoversDelta({
     ...deltaOptions,
     skip: skipRiskTiles,
+    isReady: !riskMoversPending,
     count: riskMoversCount,
   });
   const {
@@ -650,15 +647,16 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
   } = useNewlyHighCriticalDelta({
     ...deltaOptions,
     skip: skipRiskTiles,
+    isReady: !newlyHCPending,
     count: newlyHCCount,
   });
 
-  // The sparklines follow the deltas: they start once the counts and the deltas have settled, and
+  // The sparklines follow the deltas: each starts once its own counts and deltas have settled, and
   // only for a tile whose history reaches back twice the range, so they never delay them.
   const { alertsTrend, watchlistedTrend } = useAlertBasedTilesSeries({
     ...deltaOptions,
     skip: skipAlertTiles,
-    isReady: areCountsLoaded && !isDeltaLoading,
+    isReady: !alertBasedPending && !isDeltaLoading,
     reachesBack: alertBasedReachesBack,
     severeAlertsCount,
     watchlistedCount,
@@ -666,21 +664,23 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
   const { trend: anomaliesTrend } = useEntitiesWithAnomaliesSeries({
     ...deltaOptions,
     skip: skipAnomaliesTile,
-    isReady: areCountsLoaded && !anomaliesDeltaLoading,
+    isReady: !anomaliesPending && !anomaliesDeltaLoading,
     reachesBack: anomaliesReachesBack,
     count: anomaliesCount,
   });
   const { trend: newEntityTrend } = useNewEntitySeries({
     ...deltaOptions,
-    isReady: areCountsLoaded && !newEntityDeltaLoading,
+    isReady: !newEntityPending && !newEntityDeltaLoading,
     reachesBack: newEntityReachesBack,
     count: newEntityCount,
   });
-  // The two risk tiles read the same risk score history, so one query serves both sparklines.
+  // The two risk tiles read the same risk score history, so one query serves both sparklines: it
+  // waits for both risk tiles.
   const { riskMoversTrend, newlyHighCriticalTrend: newlyHCTrend } = useRiskTilesSeries({
     ...deltaOptions,
     skip: skipRiskTiles,
-    isReady: areCountsLoaded && !riskMoversDeltaLoading && !newlyHCDeltaLoading,
+    isReady:
+      !riskMoversPending && !newlyHCPending && !riskMoversDeltaLoading && !newlyHCDeltaLoading,
     riskMoversReachesBack,
     newlyHighCriticalReachesBack: newlyHCReachesBack,
     riskMoversCount,
@@ -847,7 +847,14 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         isDeltaUnavailable: anomaliesHistoryMissing,
         trend: anomaliesTrend,
         isLoading: anomaliesLoading,
-        noDataMessage: canReadAnomalies ? undefined : NO_ANOMALIES_ACCESS_MESSAGE,
+        noDataMessage: !canReadAnomalies
+          ? NO_ANOMALIES_ACCESS_MESSAGE
+          : anomaliesMissingJobs
+          ? i18n.translate(
+              'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAnomalies.noJobs',
+              { defaultMessage: 'Requires anomaly detection jobs' }
+            )
+          : undefined,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAnomalies.description',
           {
@@ -1030,6 +1037,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
       anomaliesDeltaLoading,
       anomaliesHistoryMissing,
       anomaliesLoading,
+      anomaliesMissingJobs,
       riskMoversCount,
       riskMoversDelta,
       riskMoversTrend,

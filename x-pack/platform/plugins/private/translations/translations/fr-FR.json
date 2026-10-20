@@ -1664,7 +1664,6 @@
     "core.ui.observabilityNavList.label": "Observabilité",
     "core.ui.overlays.banner.attentionTitle": "Attention",
     "core.ui.overlays.banner.closeButtonLabel": "Fermer",
-    "core.ui.pageChangeAnnouncements": "Annonces de changements de page",
     "core.ui.primaryNav.addData": "Ajouter des intégrations",
     "core.ui.primaryNav.cloud.breadCrumbDropdown.manageDeploymentLabel": "Gérer ce déploiement",
     "core.ui.primaryNav.cloud.deploymentLabel": "Déploiement",
