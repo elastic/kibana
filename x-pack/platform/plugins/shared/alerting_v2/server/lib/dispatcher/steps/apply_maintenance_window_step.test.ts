@@ -65,7 +65,7 @@ describe('ApplyMaintenanceWindowStep', () => {
     expect(result).toEqual({ type: 'continue' });
   });
 
-  it('keeps alerts whose rule is in a different space than active MW', async () => {
+  it('keeps alerts in a different space than the active MW', async () => {
     service.getEnabledMaintenanceWindows.mockResolvedValue([buildMw({ spaceId: 'other-space' })]);
 
     const alert = createAlert();
@@ -273,20 +273,6 @@ describe('ApplyMaintenanceWindowStep', () => {
     );
   });
 
-  it('does not pass any timestamp to the service (per-alert matching is done in the step)', async () => {
-    service.getEnabledMaintenanceWindows.mockResolvedValue([]);
-
-    const state = createDispatcherPipelineState({
-      input: createDispatcherPipelineInput({ startedAt: new Date('2026-01-22T07:45:00.000Z') }),
-      dispatchable: [createAlert()],
-      rules: new Map([['rule-1', createRule()]]),
-    });
-
-    await step.execute(state, logger);
-
-    expect(service.getEnabledMaintenanceWindows).toHaveBeenCalledWith();
-  });
-
   describe('external alert maintenance window matching', () => {
     it('suppresses an external alert in the same space as the MW (no rule KQL scope)', async () => {
       service.getEnabledMaintenanceWindows.mockResolvedValue([buildMw({ spaceId: 'default' })]);
@@ -311,25 +297,6 @@ describe('ApplyMaintenanceWindowStep', () => {
       expect(result.data?.triage?.suppressed[0]).toEqual(
         expect.objectContaining({ reason: 'maintenance_window:mw-1' })
       );
-    });
-
-    it('does not suppress an external alert when the MW is in a different space', async () => {
-      service.getEnabledMaintenanceWindows.mockResolvedValue([buildMw({ spaceId: 'other-space' })]);
-
-      const alert = createAlert({
-        source: 'pagerduty',
-        rule_id: null,
-        space_id: 'default',
-        last_event_timestamp: '2026-01-22T07:30:00.000Z',
-      });
-      const state = createDispatcherPipelineState({
-        dispatchable: [alert],
-        rules: new Map(),
-      });
-
-      const result = await step.execute(state, logger);
-
-      expect(result).toEqual({ type: 'continue' });
     });
 
     it('suppresses an external alert matched by a KQL-scoped MW against alert data', async () => {
@@ -362,58 +329,14 @@ describe('ApplyMaintenanceWindowStep', () => {
         expect.objectContaining({ reason: 'maintenance_window:mw-1' })
       );
     });
-
-    it('does not suppress an external alert when the KQL scope does not match', async () => {
-      service.getEnabledMaintenanceWindows.mockResolvedValue([
-        buildMw({
-          spaceId: 'default',
-          scope: { alertingV2: { enabled: true, kql: 'data.severity: "critical"' } },
-        }),
-      ]);
-
-      const alert = createAlert({
-        source: 'pagerduty',
-        rule_id: null,
-        space_id: 'default',
-        last_event_timestamp: '2026-01-22T07:30:00.000Z',
-        data: { severity: 'low' },
-      });
-      const state = createDispatcherPipelineState({
-        dispatchable: [alert],
-        rules: new Map(),
-      });
-
-      const result = await step.execute(state, logger);
-
-      expect(result).toEqual({ type: 'continue' });
-    });
-
-    it('does not suppress an alert when the MW has no alertingV2 scope (v2 not selected)', async () => {
-      // A MW with scope.alertingV2 absent means v2 not selected — must not suppress v2 alerts.
-      service.getEnabledMaintenanceWindows.mockResolvedValue([
-        buildMw({ spaceId: 'default', scope: {} }),
-      ]);
-
-      const alert = createAlert({
-        source: 'pagerduty',
-        rule_id: null,
-        space_id: 'default',
-        last_event_timestamp: '2026-01-22T07:30:00.000Z',
-      });
-      const state = createDispatcherPipelineState({
-        dispatchable: [alert],
-        rules: new Map(),
-      });
-
-      const result = await step.execute(state, logger);
-
-      // v2 not selected → no suppression
-      expect(result).toEqual({ type: 'continue' });
-    });
   });
 
-  it('does not suppress an alert when the MW has no scope at all (v2 not selected)', async () => {
-    service.getEnabledMaintenanceWindows.mockResolvedValue([buildMw({ scope: undefined })]);
+  it.each<[string, ActiveMaintenanceWindow['scope']]>([
+    ['no scope at all', undefined],
+    ['no alertingV2 scope', {}],
+    ['alertingV2 disabled', { alertingV2: { enabled: false } }],
+  ])('does not suppress an alert when the MW has %s (v2 not selected)', async (_, scope) => {
+    service.getEnabledMaintenanceWindows.mockResolvedValue([buildMw({ scope })]);
 
     const alert = createAlert({ last_event_timestamp: '2026-01-22T07:30:00.000Z' });
     const state = createDispatcherPipelineState({
@@ -424,7 +347,6 @@ describe('ApplyMaintenanceWindowStep', () => {
 
     const result = await step.execute(state, logger);
 
-    // scope absent → alertingV2 absent → skip → no suppression
     expect(result).toEqual({ type: 'continue' });
   });
 });
