@@ -64,6 +64,7 @@ export interface CreateRuleParams {
     id?: string;
     /** The rule template this rule is created from. */
     template?: { id: string };
+    enabled?: boolean;
   };
 }
 

@@ -14,7 +14,7 @@ import {
   getAddControlsFailures,
   getAttemptedControls,
   getLastWrittenDashboardId,
-  getOperationFailures,
+  getDashboardFailures,
 } from './extract_dashboard';
 
 const generateCall = (
@@ -82,7 +82,7 @@ describe('extract dashboard helpers', () => {
         ],
       }),
     ];
-    expect(getOperationFailures(steps)).toHaveLength(2);
+    expect(getDashboardFailures(steps)).toHaveLength(2);
     expect(getAddControlsFailures(steps)).toEqual([
       { type: 'add_controls', identifier: 'a, b', error: 'Not mapped on index "logs".', call: 1 },
     ]);

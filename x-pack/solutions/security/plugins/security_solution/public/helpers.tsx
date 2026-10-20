@@ -211,6 +211,16 @@ export const isRulesManagementPath = (pathname: string): boolean =>
     strict: false,
   });
 
+/**
+ * Matches the Shared Exception Lists page, whose app header owns the page actions.
+ */
+export const isSharedExceptionListsPath = (pathname: string): boolean =>
+  !!matchPath(pathname, {
+    path: EXCEPTIONS_PATH,
+    exact: true,
+    strict: false,
+  });
+
 const isAlertsPath = (pathname: string): boolean => {
   return !!matchPath(pathname, {
     path: `${ALERTS_PATH}`,

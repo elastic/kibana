@@ -7,7 +7,7 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Entity } from '../../../../common/api/entity_analytics';
-import { CriticalityLevels } from '../../../../common/entity_analytics/asset_criticality/constants';
+import { getCriticalityRank } from '../../../../common/entity_analytics/asset_criticality/constants';
 import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
 import { toEntitySourceArray } from './components/entity_source_value';
 
@@ -29,33 +29,17 @@ export const getResolvedFromRecordCount = (
   aliasRecords: readonly unknown[] | undefined
 ): number | undefined => (isEntityGroupView(aliasRecords) ? aliasRecords.length + 1 : undefined);
 
-/** Most severe first. `unassigned` (and any unknown value) is treated as "no criticality". */
-const CRITICALITY_RANK: readonly string[] = [
-  CriticalityLevels.EXTREME_IMPACT,
-  CriticalityLevels.HIGH_IMPACT,
-  CriticalityLevels.MEDIUM_IMPACT,
-  CriticalityLevels.LOW_IMPACT,
-];
-
 /**
  * Most severe assigned asset criticality across the records, or `undefined` when none is assigned
  * (callers render `undefined` as the "unassigned" badge).
  */
 export const getMaxCriticality = (
   records: ReadonlyArray<Pick<Entity, 'asset'>>
-): CriticalityLevelWithUnassigned | undefined => {
-  let bestRank = CRITICALITY_RANK.length;
-  for (const record of records) {
-    const level = record.asset?.criticality;
-    const rank = level ? CRITICALITY_RANK.indexOf(level) : -1;
-    if (rank !== -1 && rank < bestRank) {
-      bestRank = rank;
-    }
-  }
-  return bestRank === CRITICALITY_RANK.length
-    ? undefined
-    : (CRITICALITY_RANK[bestRank] as CriticalityLevelWithUnassigned);
-};
+): CriticalityLevelWithUnassigned | undefined =>
+  records.reduce<CriticalityLevelWithUnassigned | undefined>((max, { asset }) => {
+    const level = asset?.criticality as CriticalityLevelWithUnassigned | undefined;
+    return getCriticalityRank(level) > getCriticalityRank(max) ? level : max;
+  }, undefined);
 
 /** Watchlist ids stored on a single record under `entity.attributes.watchlists`. */
 export const getWatchlistIds = (record: Pick<Entity, 'entity'>): string[] => {
