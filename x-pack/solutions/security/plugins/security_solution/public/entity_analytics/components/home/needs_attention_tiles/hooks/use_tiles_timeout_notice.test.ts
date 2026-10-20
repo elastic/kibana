@@ -41,4 +41,14 @@ describe('useTilesTimeoutNotice', () => {
     rerender({ timedOut: true, runKey: '7d:{}' });
     expect(addWarning).toHaveBeenCalledTimes(2);
   });
+
+  it('warns again when a range that timed out comes back after a run that did not', () => {
+    const { rerender } = renderHook(
+      ({ timedOut, runKey }) => useTilesTimeoutNotice(timedOut, runKey),
+      { initialProps: { timedOut: true, runKey: '24h:{}' } }
+    );
+    rerender({ timedOut: false, runKey: '7d:{}' });
+    rerender({ timedOut: true, runKey: '24h:{}' });
+    expect(addWarning).toHaveBeenCalledTimes(2);
+  });
 });

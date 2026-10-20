@@ -133,29 +133,34 @@ export const useAlertBasedTiles = ({
     ? undefined
     : (error as SecurityAppError | undefined);
 
+  // The inputs can time out too (the group filter overrides). Either way the tile says so, and a
+  // timed-out refetch does not leave the last count on show as if it were current.
+  const isTimedOut = isTileQueryTimeout(error) || isTileQueryTimeout(indexError);
+  const shownResult = isTimedOut ? undefined : queryResult;
+
   // A timeout gets one notice for the whole page, and a message on the tile, not a toast per tile.
   useErrorToast(
     i18n.translate('xpack.securitySolution.entityAnalytics.home.alertBasedTiles.queryError', {
       defaultMessage: 'There was an error loading entity alert data',
     }),
-    (isTileQueryTimeout(error) ? undefined : filteredError) ?? indexError
+    isTimedOut ? undefined : filteredError ?? indexError
   );
 
   return {
-    severeAlertsCount: queryResult?.severeAlertsCount ?? 0,
+    severeAlertsCount: shownResult?.severeAlertsCount ?? 0,
     severeAlertsEntityIds: isFetching
       ? EMPTY_ENTITY_IDS
-      : queryResult?.severeAlertsEntityIds ?? EMPTY_ENTITY_IDS,
-    watchlistedCount: queryResult?.watchlistedCount ?? 0,
+      : shownResult?.severeAlertsEntityIds ?? EMPTY_ENTITY_IDS,
+    watchlistedCount: shownResult?.watchlistedCount ?? 0,
     watchlistedEntityIds: isFetching
       ? EMPTY_ENTITY_IDS
-      : queryResult?.watchlistedEntityIds ?? EMPTY_ENTITY_IDS,
+      : shownResult?.watchlistedEntityIds ?? EMPTY_ENTITY_IDS,
     // A query that can never run (no index, failed inputs) is not loading: react-query reports a
     // disabled query with no data as loading for ever.
     isLoading: isIndexLoading || (isEnabled && Boolean(query) && (isLoading || isFetching)),
     // True while the count is on its way, not when its query can never run (skipped, no index, no job).
     isCountPending: isIndexLoading || (isEnabled && Boolean(query) && (isLoading || isFetching)),
     error: filteredError ?? indexError,
-    isTimedOut: isTileQueryTimeout(error),
+    isTimedOut,
   };
 };

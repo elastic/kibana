@@ -101,24 +101,29 @@ export const useRiskMoversCount = ({
     (error as SecurityAppError | undefined)?.message?.includes('Unknown index') ?? false;
   const filteredError = isMissingIndex ? undefined : (error as SecurityAppError | undefined);
 
+  // The inputs can time out too (the group filter overrides). Either way the tile says so, and a
+  // timed-out refetch does not leave the last count on show as if it were current.
+  const isTimedOut = isTileQueryTimeout(error) || isTileQueryTimeout(indexError);
+  const shownResult = isTimedOut ? undefined : queryResult;
+
   useErrorToast(
     i18n.translate('xpack.securitySolution.entityAnalytics.home.riskMovers.queryError', {
       defaultMessage: 'There was an error loading risk movers data',
     }),
     // A timeout gets one notice for the whole page, and a message on the tile, not a toast per tile.
-    (isTileQueryTimeout(error) ? undefined : filteredError) ?? indexError
+    isTimedOut ? undefined : filteredError ?? indexError
   );
 
   return {
-    count: queryResult?.count ?? 0,
-    entityIds: isFetching ? EMPTY_ENTITY_IDS : queryResult?.entityIds ?? EMPTY_ENTITY_IDS,
+    count: shownResult?.count ?? 0,
+    entityIds: isFetching ? EMPTY_ENTITY_IDS : shownResult?.entityIds ?? EMPTY_ENTITY_IDS,
     // A query that can never run (no index, failed inputs) is not loading: react-query reports a
     // disabled query with no data as loading for ever.
     isLoading: isIndexLoading || (isEnabled && Boolean(query) && (isLoading || isFetching)),
     // True while the count is on its way, not when its query can never run (skipped, no index, no job).
     isCountPending: isIndexLoading || (isEnabled && Boolean(query) && (isLoading || isFetching)),
     isMissingIndex,
-    isTimedOut: isTileQueryTimeout(error),
+    isTimedOut,
     error: filteredError ?? indexError,
   };
 };

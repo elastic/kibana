@@ -21,11 +21,17 @@ export const TILE_TIMEOUT_MESSAGE = i18n.translate(
  */
 export const useTilesTimeoutNotice = (isAnyCountTimedOut: boolean, runKey: string): void => {
   const { addWarning } = useAppToasts();
-  const notifiedKey = useRef<string>();
+  const currentKey = useRef<string>();
+  const isNotified = useRef(false);
 
   useEffect(() => {
-    if (!isAnyCountTimedOut || notifiedKey.current === runKey) return;
-    notifiedKey.current = runKey;
+    // A run that did not time out must not hide the warning when its range or filter comes back.
+    if (currentKey.current !== runKey) {
+      currentKey.current = runKey;
+      isNotified.current = false;
+    }
+    if (!isAnyCountTimedOut || isNotified.current) return;
+    isNotified.current = true;
     addWarning({
       title: i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.timedOutTitle', {
         defaultMessage: 'Some tiles timed out',

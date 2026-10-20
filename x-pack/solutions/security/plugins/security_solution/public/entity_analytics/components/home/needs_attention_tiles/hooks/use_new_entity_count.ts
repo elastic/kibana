@@ -96,23 +96,28 @@ export const useNewEntityCount = ({
     }
   );
 
+  // The inputs can time out too (the group filter overrides). Either way the tile says so, and a
+  // timed-out refetch does not leave the last count on show as if it were current.
+  const isTimedOut = isTileQueryTimeout(error) || isTileQueryTimeout(indexError);
+  const shownResult = isTimedOut ? undefined : result;
+
   useErrorToast(
     i18n.translate('xpack.securitySolution.entityAnalytics.home.newEntity.queryError', {
       defaultMessage: 'There was an error loading new entity data',
     }),
     // A timeout gets one notice for the whole page, and a message on the tile, not a toast per tile.
-    (isTileQueryTimeout(error) ? undefined : (error as SecurityAppError | undefined)) ?? indexError
+    isTimedOut ? undefined : (error as SecurityAppError | undefined) ?? indexError
   );
 
   return {
-    count: result?.count ?? 0,
-    entityIds: isFetching ? EMPTY_ENTITY_IDS : result?.entityIds ?? EMPTY_ENTITY_IDS,
+    count: shownResult?.count ?? 0,
+    entityIds: isFetching ? EMPTY_ENTITY_IDS : shownResult?.entityIds ?? EMPTY_ENTITY_IDS,
     // A query that can never run (no index, failed inputs) is not loading: react-query reports a
     // disabled query with no data as loading for ever.
     isLoading: isIndexLoading || (isEnabled && (isLoading || isFetching)),
     // True while the count is on its way, not when its query can never run (skipped, no index, no job).
     isCountPending: isIndexLoading || (isEnabled && (isLoading || isFetching)),
     error: (error as SecurityAppError | undefined) ?? indexError,
-    isTimedOut: isTileQueryTimeout(error),
+    isTimedOut,
   };
 };
