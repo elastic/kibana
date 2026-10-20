@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { schema } from '@kbn/config-schema';
 import type { SavedObjectsType } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { monitorConfigMappings } from './monitor_mappings';
@@ -26,7 +27,16 @@ export const getSyntheticsMonitorConfigSavedObjectType = (): SavedObjectsType =>
           values: { name: savedObject.attributes.name },
         }),
     },
-    modelVersions: {},
+    modelVersions: {
+      // Schema-only baseline. Mapping changes belong in a later version.
+      '1': {
+        changes: [],
+        schemas: {
+          forwardCompatibility: (attrs) => attrs,
+          create: schema.object({}, { unknowns: 'allow' }),
+        },
+      },
+    },
   };
 };
 
