@@ -18,6 +18,22 @@ describe('TemplateUserActionPayloadRt', () => {
     });
   });
 
+  it('accepts a payload with an optional template name', () => {
+    expect(
+      TemplateUserActionPayloadRt.decode({
+        template: { id: 'tmpl-1', version: 3, name: 'My Template' },
+      })
+    ).toStrictEqual({
+      _tag: 'Right',
+      right: { template: { id: 'tmpl-1', version: 3, name: 'My Template' } },
+    });
+  });
+
+  it('accepts a payload without a template name (name is optional / back-compat)', () => {
+    const result = TemplateUserActionPayloadRt.decode({ template: { id: 'tmpl-1', version: 3 } });
+    expect(result._tag).toBe('Right');
+  });
+
   it('accepts a payload with null template (remove)', () => {
     expect(TemplateUserActionPayloadRt.decode({ template: null })).toStrictEqual({
       _tag: 'Right',

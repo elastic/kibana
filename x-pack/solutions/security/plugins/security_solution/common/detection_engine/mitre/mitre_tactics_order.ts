@@ -14,6 +14,7 @@ export const tacticOrder = [
   'TA0003',
   'TA0004',
   'TA0005',
+  'TA0112',
   'TA0006',
   'TA0007',
   'TA0008',

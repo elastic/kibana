@@ -1106,6 +1106,35 @@ describe('actions telemetry', () => {
     });
   });
 
+  test('getExecutionsPerDayCount should return empty results without errors when response has no aggregations', async () => {
+    const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
+    // ES omits `aggregations` when the target index matches no indices (e.g. a fresh
+    // project that has never executed a connector action).
+    mockEsClient.search.mockResponseOnce(
+      // @ts-expect-error not full search response
+      {}
+    );
+
+    const telemetry = await getExecutionsPerDayCount(mockEsClient, 'test', logger);
+
+    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+
+    const loggerCalls = loggingSystemMock.collect(logger);
+    expect(loggerCalls.debug).toHaveLength(0);
+    expect(loggerCalls.warn).toHaveLength(0);
+
+    expect(telemetry).toStrictEqual({
+      hasErrors: false,
+      countTotal: 0,
+      countByType: {},
+      countFailed: 0,
+      countFailedByType: {},
+      avgExecutionTime: 0,
+      avgExecutionTimeByType: {},
+      countRunOutcomeByConnectorType: {},
+    });
+  });
+
   test('getExecutionsPerDayCount should return empty results and log warning if query throws error', async () => {
     const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
     mockEsClient.search.mockRejectedValue(new Error('oh no'));

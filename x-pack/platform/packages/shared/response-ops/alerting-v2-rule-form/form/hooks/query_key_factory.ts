@@ -27,4 +27,7 @@ export const ruleFormKeys = {
   dataFields: (query: string) => [...ruleFormKeys.all, 'dataFields', query] as const,
   composeDiscoverApiTimeField: (fromSourceQuery: string) =>
     [...ruleFormKeys.all, 'composeDiscoverApiTimeField', fromSourceQuery] as const,
+  tags: (search?: string) => ['rule', 'tags', { search }] as const,
+  actionPolicyRoutingTags: (search?: string) =>
+    [...ruleFormKeys.all, 'actionPolicyRoutingTags', { search }] as const,
 };

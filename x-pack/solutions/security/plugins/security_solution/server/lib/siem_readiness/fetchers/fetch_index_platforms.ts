@@ -37,19 +37,40 @@ interface IndexPlatformRow {
   observerVendor: string | null;
 }
 
+// "sentinel_one" -> "Sentinel One", "crowdstrike" -> "Crowdstrike", "windows" -> "Windows"
+const titleCase = (value: string): string =>
+  value
+    .replace(/[_.-]+/g, ' ')
+    .replace(/\b\w/g, (c) => c.toUpperCase())
+    .trim();
+
+// "logs-crowdstrike.fdr-default" -> "crowdstrike"; "logs-endpoint.events.process-default" -> "endpoint"
+const vendorFromIndexName = (index: string): string | null => {
+  const dataStreamName = toDataStreamName(index);
+  if (!/^(logs|metrics|traces)-/.test(dataStreamName)) {
+    return null;
+  }
+  const ds = dataStreamName.replace(/^(logs|metrics|traces)-/, '');
+  const pkg = ds.split('.')[0];
+  return pkg || null;
+};
+
+const deriveEndpointVendor = (row: IndexPlatformRow): string | null => {
+  const raw = row.eventModule ?? row.observerVendor ?? vendorFromIndexName(row.index);
+  return raw ? titleCase(raw) : null;
+};
+
 /**
  * Classifies an index into a human-readable platform label using ECS field values.
  * Priority order (highest specificity first):
  *   1. cloud.provider + cloud.account.id → "AWS account 123456"
  *   2. cloud.provider only → "AWS" / "GCP" / "Azure" (uppercased)
- *   3. host.os.family == "windows" → "Windows Endpoints"
- *   4. host.os.family == "macos"   → "macOS Endpoints"
- *   5. host.os.family (other)      → "{family} Endpoints"
- *   6. event.module == "okta"      → "Okta (Identity)"
- *   7. event.module (other)        → module name as-is
- *   8. observer.vendor == "Palo Alto Networks" → "Palo Alto (Network)"
- *   9. observer.vendor (other)     → vendor name as-is
- *  10. dataset extracted from index name → generic fallback label
+ *   3. host.os.family + vendor (event.module / observer.vendor / index package) → "Crowdstrike (Windows)"
+ *   4. host.os.family, no vendor → "Windows Endpoints"
+ *   5. vendor only, no OS → title-cased vendor (e.g. "Okta")
+ *   6. dataset extracted from index name → generic fallback label
+ *
+ * Vendor and OS display names are generic title-cased values — no lookup maps.
  */
 const classifyPlatform = (row: IndexPlatformRow): string | undefined => {
   const { cloudProvider, cloudAccountId, hostOsFamily, eventModule, observerVendor } = row;
@@ -60,9 +81,15 @@ const classifyPlatform = (row: IndexPlatformRow): string | undefined => {
   if (cloudProvider) {
     return cloudProvider.toUpperCase();
   }
-  if (hostOsFamily) return `${hostOsFamily} Endpoints`;
-  if (eventModule) return eventModule;
-  if (observerVendor) return observerVendor;
+  // endpoint: compose vendor + OS so same-OS vendors are distinguishable
+  if (hostOsFamily) {
+    const vendor = deriveEndpointVendor(row);
+    const osName = titleCase(hostOsFamily);
+    return vendor ? `${vendor} (${osName})` : `${osName} Endpoints`;
+  }
+  // vendor present but no OS (rare for endpoint) -> vendor alone
+  if (eventModule) return titleCase(eventModule);
+  if (observerVendor) return titleCase(observerVendor);
 
   // Last-resort: extract dataset portion from the index name
   // "logs-aws.cloudtrail-default" → "aws.cloudtrail"

@@ -89,9 +89,150 @@ describe('getNodeStack', () => {
     expect(nodeStack).toEqual(['enterCondition_if_ifStepLevel', 'enterThen_if_ifStepLevel']);
   });
 
-  it('should return empty stack for ifStepLevel', () => {
+  it('reuses precomputed predecessors without traversing again or mutating them', () => {
+    const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowDefinition as WorkflowYaml);
+    const nodeId = 'secondThenTestConnectorStep';
+    const predecessors = Object.freeze(workflowGraph.getAllPredecessors(nodeId));
+    const getAllPredecessorsSpy = jest.spyOn(workflowGraph, 'getAllPredecessors');
+
+    expect(workflowGraph.getNodeStack(nodeId, predecessors)).toEqual([
+      'enterForeach_testForeachStep',
+      'enterCondition_testIfStep',
+      'enterThen_testIfStep',
+    ]);
+    expect(getAllPredecessorsSpy).not.toHaveBeenCalled();
+  });
+
+  it('keeps predecessor order and node stacks independent of mutations to earlier results', () => {
+    const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowDefinition as WorkflowYaml);
+    const nodeId = 'secondThenTestConnectorStep';
+    const predecessors = workflowGraph.getAllPredecessors(nodeId);
+    const expectedPredecessors = [...predecessors];
+
+    predecessors.reverse();
+
+    expect(workflowGraph.getAllPredecessors(nodeId)).toEqual(expectedPredecessors);
+    expect(workflowGraph.getNodeStack(nodeId)).toEqual([
+      'enterForeach_testForeachStep',
+      'enterCondition_testIfStep',
+      'enterThen_testIfStep',
+    ]);
+  });
+
+  it('should return empty stack for top-level step without control-flow wrappers', () => {
     const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowDefinition as WorkflowYaml);
     const nodeStack = workflowGraph.getNodeStack('notInStackStep');
     expect(nodeStack).toEqual([]);
+  });
+
+  it('throws when the node id does not exist in the graph', () => {
+    const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowDefinition as WorkflowYaml);
+
+    expect(() => workflowGraph.getNodeStack('unknown-node-id')).toThrow(
+      'Node not found for node id: unknown-node-id'
+    );
+  });
+
+  it('should return enterThen stack for firstThenTestConnectorStep', () => {
+    const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowDefinition as WorkflowYaml);
+    expect(workflowGraph.getNodeStack('firstThenTestConnectorStep')).toEqual([
+      'enterForeach_testForeachStep',
+      'enterCondition_testIfStep',
+      'enterThen_testIfStep',
+    ]);
+  });
+
+  it('should return enterElse stack for elseTestConnectorStep', () => {
+    const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowDefinition as WorkflowYaml);
+    expect(workflowGraph.getNodeStack('elseTestConnectorStep')).toEqual([
+      'enterForeach_testForeachStep',
+      'enterCondition_testIfStep',
+      'enterElse_testIfStep',
+    ]);
+  });
+});
+
+describe('getNodeStack timeout zones', () => {
+  it('should include step-level enter-timeout-zone for a timed connector step', () => {
+    const workflowDefinition = {
+      steps: [
+        {
+          name: 'timedStep',
+          type: 'slack',
+          connectorId: 'slack',
+          timeout: '30s',
+          with: { message: 'hello' },
+        } as ConnectorStep,
+      ],
+    } as Partial<WorkflowYaml>;
+
+    const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowDefinition as WorkflowYaml);
+
+    expect(workflowGraph.getNodeStack('timedStep')).toEqual(['enterTimeoutZone_timedStep']);
+    expect(workflowGraph.getNodeStack('enterTimeoutZone_timedStep')).toEqual([]);
+    expect(workflowGraph.getNodeStack('exitTimeoutZone_timedStep')).toEqual([]);
+  });
+
+  it('should include workflow-level enter-timeout-zone for steps under settings.timeout', () => {
+    const workflowDefinition = {
+      settings: { timeout: '5m' },
+      steps: [
+        {
+          name: 'atomicStep',
+          type: 'slack',
+          connectorId: 'slack',
+          with: { message: 'hello' },
+        } as ConnectorStep,
+      ],
+    } as Partial<WorkflowYaml>;
+
+    const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowDefinition as WorkflowYaml);
+
+    expect(workflowGraph.getNodeStack('atomicStep')).toEqual([
+      'enterTimeoutZone_workflow_level_timeout',
+    ]);
+    expect(workflowGraph.getNodeStack('enterTimeoutZone_workflow_level_timeout')).toEqual([]);
+    expect(workflowGraph.getNodeStack('exitTimeoutZone_workflow_level_timeout')).toEqual([]);
+  });
+
+  it('should nest workflow-level and step-level enter-timeout-zone nodes', () => {
+    const workflowDefinition = {
+      settings: { timeout: '5m' },
+      steps: [
+        {
+          name: 'nestedTimedStep',
+          type: 'slack',
+          connectorId: 'slack',
+          timeout: '30s',
+          with: { message: 'hello' },
+        } as ConnectorStep,
+      ],
+    } as Partial<WorkflowYaml>;
+
+    const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowDefinition as WorkflowYaml);
+
+    expect(workflowGraph.getNodeStack('nestedTimedStep')).toEqual([
+      'enterTimeoutZone_workflow_level_timeout',
+      'enterTimeoutZone_nestedTimedStep',
+    ]);
+  });
+
+  it('should unwind enter scopes when traversing exit-timeout-zone predecessors', () => {
+    const workflowDefinition = {
+      steps: [
+        {
+          name: 'timedStep',
+          type: 'slack',
+          connectorId: 'slack',
+          timeout: '30s',
+          with: { message: 'hello' },
+        } as ConnectorStep,
+      ],
+    } as Partial<WorkflowYaml>;
+
+    const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowDefinition as WorkflowYaml);
+
+    // exit-* nodes pop matching enter frames while walking predecessors, then pop once more for the exit node itself
+    expect(workflowGraph.getNodeStack('exitTimeoutZone_timedStep')).toEqual([]);
   });
 });

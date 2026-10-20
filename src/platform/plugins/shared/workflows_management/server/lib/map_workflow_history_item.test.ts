@@ -87,6 +87,43 @@ describe('mapWorkflowHistoryItem', () => {
     expect(result).not.toHaveProperty('restoredFromSequence');
   });
 
+  it('uses `full_name` as the display name when resolved', () => {
+    const result = mapWorkflowHistoryItem(
+      createDocument({
+        user: {
+          name: 'alice',
+          id: 'profile-1',
+          full_name: 'Alice Smith',
+          email: 'alice@elastic.co',
+        },
+      })
+    );
+
+    expect(result.user).toEqual({ profileId: 'profile-1', name: 'Alice Smith' });
+  });
+
+  it('falls back to `email` when `full_name` is not resolved', () => {
+    const result = mapWorkflowHistoryItem(
+      createDocument({ user: { name: 'alice', id: 'profile-1', email: 'alice@elastic.co' } })
+    );
+
+    expect(result.user).toEqual({ profileId: 'profile-1', name: 'alice@elastic.co' });
+  });
+
+  it('falls back to the raw `name` when neither `full_name` nor `email` is resolved', () => {
+    const result = mapWorkflowHistoryItem(createDocument());
+
+    expect(result.user).toEqual({ profileId: 'profile-1', name: 'alice' });
+  });
+
+  it('omits `profileId` when the document has no user id', () => {
+    const result = mapWorkflowHistoryItem(
+      createDocument({ user: { name: 'alice', full_name: 'Alice Smith' } })
+    );
+
+    expect(result.user).toEqual({ name: 'Alice Smith' });
+  });
+
   it('omits optional fields when absent', () => {
     const result = mapWorkflowHistoryItem(
       createDocument({

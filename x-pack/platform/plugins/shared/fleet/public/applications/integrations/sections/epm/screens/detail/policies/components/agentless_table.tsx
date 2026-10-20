@@ -43,7 +43,11 @@ import {
   useBulkGetAgentlessPolicyThroughput,
   useDiscoverLocator,
 } from '../../../../../../hooks';
-import { getAgentlessThroughputIndexPatterns } from '../../../../../../../../../common/services';
+import {
+  getAgentlessThroughputIndexPatterns,
+  buildPolicyBaseIdsWithFallbackKuery,
+} from '../../../../../../../../../common/services';
+import { removeVersionSuffixFromPolicyId } from '../../../../../../../../../common/services/version_specific_policies_utils';
 import { isAgentlessPoliciesUIEnabled } from '../../../../../../services';
 import {
   Loading,
@@ -143,16 +147,21 @@ export const AgentlessPackagePoliciesTable = ({
     [discoverLocator]
   );
 
-  // Kuery for all agents enrolled into the agent policies associated with the package policies
-  // We use the first agent policy as agentless package policies have a 1:1 relationship with agent policies
-  // Maximum # of agent policies is 50, based on the max page size in UI
+  // Kuery for all agents enrolled into the agent policies associated with the package policies.
+  // We use the first agent policy as agentless package policies have a 1:1 relationship with agent policies.
+  // Maximum # of agent policies is 50, based on the max page size in UI.
+  // Uses policy_base_id (with policy_id fallback) so that agents on version-specific variants
+  // of these policies are included.
   const agentsKuery = useMemo(() => {
-    return packagePolicies
-      .reduce((policyIds, { agentPolicies }) => {
-        return [...policyIds, ...(agentPolicies[0] ? [agentPolicies[0]?.id] : [])];
-      }, [] as string[])
-      .map((policyId) => `${AGENTS_PREFIX}.policy_id: "${policyId}"`)
-      .join(' or ');
+    const policyIds = packagePolicies.reduce<string[]>(
+      (ids, { agentPolicies: aps }) => (aps[0] ? [...ids, aps[0].id] : ids),
+      []
+    );
+    return buildPolicyBaseIdsWithFallbackKuery(
+      policyIds,
+      `${AGENTS_PREFIX}.policy_base_id`,
+      `${AGENTS_PREFIX}.policy_id`
+    );
   }, [packagePolicies]);
 
   // Fetch agents using above kuery, if the user has access to read agents
@@ -167,7 +176,9 @@ export const AgentlessPackagePoliciesTable = ({
       setAgentsByPolicyId(
         (agentsData?.items || []).reduce((acc, agent) => {
           if (agent.policy_id) {
-            acc[agent.policy_id] = agent;
+            // Key by the base policy id so the lookup at `agentsByPolicyId[agentPolicy.id]`
+            // resolves correctly for agents on version-specific variants.
+            acc[removeVersionSuffixFromPolicyId(agent.policy_id)] = agent;
           }
           return acc;
         }, {} as Record<string, Agent>)
@@ -178,7 +189,7 @@ export const AgentlessPackagePoliciesTable = ({
           title: i18n.translate(
             'xpack.fleet.epm.packageDetails.integrationList.agentlessStatusError',
             {
-              defaultMessage: 'Error fetching agentless status information',
+              defaultMessage: 'Error fetching managed integration status information',
             }
           ),
         });
@@ -202,11 +213,16 @@ export const AgentlessPackagePoliciesTable = ({
   const [flyoutOpenForPolicyId, setFlyoutOpenForPolicyId] = useState<string>();
   const [flyoutPackagePolicy, setFlyoutPackagePolicy] = useState<PackagePolicy>();
   const [flyoutAgentPolicy, setFlyoutAgentPolicy] = useState<AgentPolicy>();
+  const closeFlyout = () => {
+    setFlyoutOpenForPolicyId(undefined);
+    setFlyoutPackagePolicy(undefined);
+    setFlyoutAgentPolicy(undefined);
+  };
   useEffect(() => {
     // The agentless save flow sets openEnrollmentFlyout=<packagePolicyId> via
     // appendOnSaveQueryParamsToPath (AgentlessPolicy has no policy_ids, so
     // policy.id is used). Match on packagePolicy.id accordingly. Rows are sourced from the
-    // agentless policies API (see `useAgentlessPolicies`) and mapped to this table's shape;
+    // managed integrations API (see `useAgentlessPolicies`) and mapped to this table's shape;
     // `packagePolicy.id` / `policy_ids[0]` both equal the agentless policy id.
     const flyoutPolicyIdFromQuery = queryParams.get('openEnrollmentFlyout');
     if (flyoutPolicyIdFromQuery) {
@@ -416,6 +432,7 @@ export const AgentlessPackagePoliciesTable = ({
                 <PackagePolicyActionsMenu
                   agentPolicies={agentPolicies}
                   packagePolicy={packagePolicy}
+                  agent={(agentPolicy?.id && agentsByPolicyId[agentPolicy.id]) || undefined}
                   showAddAgent={true}
                   upgradePackagePolicyHref={
                     agentPolicy
@@ -435,7 +452,7 @@ export const AgentlessPackagePoliciesTable = ({
         tableCaption={i18n.translate(
           'xpack.fleet.epm.packageDetails.integrationList.agentlessPoliciesTableCaption',
           {
-            defaultMessage: 'Agentless integration policies',
+            defaultMessage: 'Managed integrations',
           }
         )}
         loading={isLoading}
@@ -467,7 +484,7 @@ export const AgentlessPackagePoliciesTable = ({
                 <h3>
                   <FormattedMessage
                     id="xpack.fleet.epm.packageDetails.integrationList.agentlessLoadErrorTitle"
-                    defaultMessage="Unable to load agentless integration policies"
+                    defaultMessage="Unable to load managed integrations"
                   />
                 </h3>
               }
@@ -489,18 +506,14 @@ export const AgentlessPackagePoliciesTable = ({
           ) : (
             <FormattedMessage
               id="xpack.fleet.epm.packageDetails.integrationList.noAgentlessPoliciesMessage"
-              defaultMessage="No agentless integration policies"
+              defaultMessage="No managed integrations"
             />
           )
         }
       />
       {flyoutOpenForPolicyId && flyoutPackagePolicy && (
         <AgentlessEnrollmentFlyout
-          onClose={() => {
-            setFlyoutOpenForPolicyId(undefined);
-            setFlyoutPackagePolicy(undefined);
-            setFlyoutAgentPolicy(undefined);
-          }}
+          onClose={closeFlyout}
           policyId={flyoutPackagePolicy.policy_ids[0]}
           policyName={flyoutPackagePolicy.name}
           // package is always set for agentless policies (createAgentlessPolicy);
@@ -511,6 +524,7 @@ export const AgentlessPackagePoliciesTable = ({
           }}
           selectedInput={getSelectedInput(flyoutPackagePolicy)}
           agentPolicy={flyoutAgentPolicy}
+          packagePolicy={flyoutPackagePolicy}
           connectors={getConnectorsFromPackagePolicy(flyoutPackagePolicy)}
         />
       )}

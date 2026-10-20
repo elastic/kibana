@@ -11,12 +11,12 @@ import { useToasts } from '../common/lib/kibana/hooks';
 import { useGetSimilarCases } from './use_get_similar_cases';
 import { mockCase } from './mock';
 import { TestProviders } from '../common/mock';
+import { SortFieldCase } from '../../common/ui/types';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana/hooks');
 
 describe('useGetSimilarCases', () => {
-  const abortCtrl = new AbortController();
   const addSuccess = jest.fn();
   (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError: jest.fn() });
 
@@ -34,15 +34,46 @@ describe('useGetSimilarCases', () => {
     );
 
     await waitFor(() => {
-      expect(spyOnGetCases).toBeCalled();
+      expect(spyOnGetCases).toHaveBeenCalled();
     });
 
-    expect(spyOnGetCases).toBeCalledWith({
+    expect(spyOnGetCases).toHaveBeenCalledWith({
       caseId: mockCase.id,
-      signal: abortCtrl.signal,
+      signal: expect.any(AbortSignal),
       page: 0,
       perPage: 10,
+      sortField: undefined,
+      sortOrder: undefined,
     });
+  });
+
+  it('passes sort params to getSimilarCases', async () => {
+    const spyOnGetCases = jest.spyOn(api, 'getSimilarCases');
+    renderHook(
+      () =>
+        useGetSimilarCases({
+          caseId: mockCase.id,
+          perPage: 10,
+          page: 0,
+          enabled: true,
+          sortField: SortFieldCase.createdAt,
+          sortOrder: 'asc',
+        }),
+      {
+        wrapper: TestProviders,
+      }
+    );
+
+    await waitFor(() => {
+      expect(spyOnGetCases).toHaveBeenCalled();
+    });
+
+    expect(spyOnGetCases).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sortField: SortFieldCase.createdAt,
+        sortOrder: 'asc',
+      })
+    );
   });
 
   it('calls does not call getSimilarCases when enabled=false', async () => {
@@ -54,7 +85,7 @@ describe('useGetSimilarCases', () => {
       }
     );
 
-    expect(spyOnGetCases).not.toBeCalled();
+    expect(spyOnGetCases).not.toHaveBeenCalled();
   });
 
   it('shows a toast error message when an error occurs in the response', async () => {

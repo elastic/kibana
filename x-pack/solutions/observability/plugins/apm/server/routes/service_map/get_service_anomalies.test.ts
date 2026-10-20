@@ -202,4 +202,34 @@ describe('getServiceAnomalies', () => {
     expect(serviceAnomalies).toHaveLength(1);
     expect(serviceAnomalies[0].anomalyScore).toEqual(0);
   });
+
+  it('queries anomalies for the exact selected time range', async () => {
+    const start = Date.parse('2026-07-17T11:08:00.000Z');
+    const end = Date.parse('2026-07-17T11:22:00.000Z');
+    mockJobs([{ jobId: 'job-prod', environment: 'production' }]);
+    mockAnomalyResponse([]);
+
+    await getServiceAnomalies({ ...defaultArgs, start, end });
+
+    expect(anomalySearchMock).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        query: expect.objectContaining({
+          bool: expect.objectContaining({
+            filter: expect.arrayContaining([
+              expect.objectContaining({
+                range: {
+                  timestamp: {
+                    gte: start,
+                    lte: end,
+                    format: 'epoch_millis',
+                  },
+                },
+              }),
+            ]),
+          }),
+        }),
+      })
+    );
+  });
 });

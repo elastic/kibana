@@ -21,7 +21,7 @@ import {
   HIDDEN_API_REFERENCE_PACKAGES,
 } from '../../../../../../../../common/constants';
 import type { PackageInfo, NewAgentPolicy, NewPackagePolicy } from '../../../../../types';
-import { ExperimentalFeaturesService, isAgentlessPoliciesUIEnabled } from '../../../../../services';
+import { isAgentlessPoliciesUIEnabled } from '../../../../../services';
 import { SelectedPolicyTab } from '../../components';
 import {
   generateCreateAgentlessPolicyDevToolsRequest,
@@ -47,9 +47,7 @@ export function useDevToolsRequest({
 }) {
   const showDevtoolsRequest = !HIDDEN_API_REFERENCE_PACKAGES.includes(packageInfo?.name ?? '');
 
-  const { enableVarGroups } = ExperimentalFeaturesService.get();
-  const varGroups =
-    enableVarGroups && packageInfo?.var_groups ? packageInfo?.var_groups : undefined;
+  const varGroups = packageInfo?.var_groups;
   const agentlessUIEnabled = isAgentlessPoliciesUIEnabled();
 
   const [devtoolRequest, devtoolRequestDescription] = useMemo(() => {
@@ -69,7 +67,7 @@ export function useDevToolsRequest({
           i18n.translate(
             'xpack.fleet.editPackagePolicy.devtoolsRequestAgentlessPolicyDescription',
             {
-              defaultMessage: 'These Kibana requests create a new agentless policy.',
+              defaultMessage: 'These Kibana requests create a new managed integration.',
             }
           ),
         ];
@@ -127,7 +125,7 @@ export function useDevToolsRequest({
         i18n.translate(
           'xpack.fleet.editPackagePolicy.devtoolsRequestUpdateAgentlessPolicyDescription',
           {
-            defaultMessage: 'This Kibana request updates an agentless policy.',
+            defaultMessage: 'This Kibana request updates a managed integration.',
           }
         ),
       ];

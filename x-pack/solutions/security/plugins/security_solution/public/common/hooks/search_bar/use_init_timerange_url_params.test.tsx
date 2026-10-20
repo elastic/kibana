@@ -7,12 +7,12 @@
 
 import { renderHook } from '@testing-library/react';
 import { useInitTimerangeFromUrlParam } from './use_init_timerange_url_params';
-import * as redux from 'react-redux';
+import * as redux from 'react-redux-v7';
 import * as globalQueryString from '../../utils/global_query_string';
 import { TestProviders } from '../../mock';
 
-jest.mock('react-redux', () => ({
-  ...jest.requireActual('react-redux'),
+jest.mock('react-redux-v7', () => ({
+  ...jest.requireActual('react-redux-v7'),
   useDispatch: jest.fn(),
 }));
 jest.mock('../../lib/kibana');

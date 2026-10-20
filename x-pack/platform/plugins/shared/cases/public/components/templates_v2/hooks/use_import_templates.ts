@@ -23,21 +23,29 @@ interface ImportResult {
 }
 
 const buildDefinitionYaml = (template: ParsedTemplateEntry): string => {
-  const definition: Record<string, unknown> = {
-    name: template.name,
-  };
+  // Template identity (name/description/tags) is persisted on the saved object attributes via the
+  // POST/PATCH payload below — it is the single source of truth and must not be duplicated inside
+  // the definition. The editor re-injects the mirrored template_* keys from those attributes for
+  // authoring; they are stripped again on save.
+  const definition: Record<string, unknown> = {};
 
-  if (template.description) {
-    definition.description = template.description;
-  }
-  if (template.tags && template.tags.length > 0) {
-    definition.tags = template.tags;
-  }
-  if (template.severity) {
-    definition.severity = template.severity;
-  }
-  if (template.category != null) {
-    definition.category = template.category;
+  if (template.caseDefaults) {
+    if (template.caseDefaults.title) {
+      definition.name = template.caseDefaults.title;
+    }
+    if (template.caseDefaults.description) {
+      definition.description = template.caseDefaults.description;
+    }
+    if (template.caseDefaults.severity) {
+      definition.severity = template.caseDefaults.severity;
+    }
+    if (template.caseDefaults.category !== undefined) {
+      definition.category = template.caseDefaults.category;
+    }
+    // Case defaults are forced-present: always write `tags` and `assignees` (empty arrays when
+    // unset) so import/export round-trip them identically instead of dropping empty values.
+    definition.tags = template.caseDefaults.tags ?? [];
+    definition.assignees = template.caseDefaults.assignees ?? [];
   }
   if (template.connector) {
     definition.connector = template.connector;
@@ -72,6 +80,7 @@ export const useImportTemplates = () => {
             return patchTemplate({
               templateId: template.templateId,
               template: {
+                name: template.name,
                 definition: definitionYaml,
                 owner: template.owner,
                 description: template.description,
@@ -83,6 +92,7 @@ export const useImportTemplates = () => {
 
           return postTemplate({
             template: {
+              name: template.name,
               definition: definitionYaml,
               owner: template.owner ?? 'securitySolution',
               description: template.description,

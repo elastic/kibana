@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { screen, within, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { screen, within, fireEvent } from '@testing-library/react';
 
 import { ObservableTypesList, type ObservableTypesListProps } from '.';
 import { renderWithTestingProviders } from '../../../common/mock';
@@ -35,18 +34,14 @@ describe('ObservableTypesList', () => {
     expect(screen.getByTestId('observable-types-list')).toBeInTheDocument();
   });
 
-  it('shows ObservableTypesList correctly', async () => {
+  it('shows ObservableTypesList correctly', () => {
     renderWithTestingProviders(<ObservableTypesList {...props} />);
 
-    expect(await screen.findByTestId('observable-types-list')).toBeInTheDocument();
+    expect(screen.getByTestId('observable-types-list')).toBeInTheDocument();
 
-    expect(
-      await screen.findByTestId(`observable-type-${observableTypes[0].key}`)
-    ).toBeInTheDocument();
-    expect(await screen.findByText('Test Observable Type')).toBeInTheDocument();
-    expect(
-      await screen.findByTestId(`observable-type-${observableTypes[1].key}`)
-    ).toBeInTheDocument();
+    expect(screen.getByTestId(`observable-type-${observableTypes[0].key}`)).toBeInTheDocument();
+    expect(screen.getByText('Test Observable Type')).toBeInTheDocument();
+    expect(screen.getByTestId(`observable-type-${observableTypes[1].key}`)).toBeInTheDocument();
   });
 
   describe('Delete', () => {
@@ -54,56 +49,44 @@ describe('ObservableTypesList', () => {
       jest.clearAllMocks();
     });
 
-    it('shows confirmation modal when deleting a field ', async () => {
+    it('shows confirmation modal when deleting a field ', () => {
       renderWithTestingProviders(<ObservableTypesList {...props} />);
 
-      const list = await screen.findByTestId('observable-types-list');
+      const list = screen.getByTestId('observable-types-list');
 
-      await userEvent.click(
-        await within(list).findByTestId(`${observableTypes[0].key}-observable-type-delete`)
-      );
+      fireEvent.click(within(list).getByTestId(`${observableTypes[0].key}-observable-type-delete`));
 
-      expect(await screen.findByTestId('confirm-delete-modal')).toBeInTheDocument();
+      expect(screen.getByTestId('confirm-delete-modal')).toBeInTheDocument();
     });
 
-    it('calls onDeleteObservableType when confirm', async () => {
+    it('calls onDeleteObservableType when confirm', () => {
       renderWithTestingProviders(<ObservableTypesList {...props} />);
 
-      const list = await screen.findByTestId('observable-types-list');
+      const list = screen.getByTestId('observable-types-list');
 
-      await userEvent.click(
-        await within(list).findByTestId(`${observableTypes[0].key}-observable-type-delete`)
-      );
+      fireEvent.click(within(list).getByTestId(`${observableTypes[0].key}-observable-type-delete`));
 
-      expect(await screen.findByTestId('confirm-delete-modal')).toBeInTheDocument();
+      expect(screen.getByTestId('confirm-delete-modal')).toBeInTheDocument();
 
-      await userEvent.click(await screen.findByText('Delete'));
+      fireEvent.click(screen.getByText('Delete'));
 
-      await waitFor(() => {
-        expect(screen.queryByTestId('confirm-delete-modal')).not.toBeInTheDocument();
-      });
-
+      expect(screen.queryByTestId('confirm-delete-modal')).not.toBeInTheDocument();
       expect(props.onDeleteObservableType).toHaveBeenCalledWith(observableTypes[0].key);
     });
 
-    it('does not call onDeleteObservableType when cancel', async () => {
+    it('does not call onDeleteObservableType when cancel', () => {
       renderWithTestingProviders(<ObservableTypesList {...props} />);
 
-      const list = await screen.findByTestId('observable-types-list');
+      const list = screen.getByTestId('observable-types-list');
 
-      await userEvent.click(
-        await within(list).findByTestId(`${observableTypes[0].key}-observable-type-delete`)
-      );
+      fireEvent.click(within(list).getByTestId(`${observableTypes[0].key}-observable-type-delete`));
 
-      expect(await screen.findByTestId('confirm-delete-modal')).toBeInTheDocument();
+      expect(screen.getByTestId('confirm-delete-modal')).toBeInTheDocument();
 
-      await userEvent.click(await screen.findByText('Cancel'));
+      fireEvent.click(screen.getByText('Cancel'));
 
-      await waitFor(() => {
-        expect(screen.queryByTestId('confirm-delete-modal')).not.toBeInTheDocument();
-      });
-
-      expect(props.onDeleteObservableType).not.toHaveBeenCalledWith();
+      expect(screen.queryByTestId('confirm-delete-modal')).not.toBeInTheDocument();
+      expect(props.onDeleteObservableType).not.toHaveBeenCalled();
     });
   });
 
@@ -112,18 +95,47 @@ describe('ObservableTypesList', () => {
       jest.clearAllMocks();
     });
 
-    it('calls onEditObservableType correctly', async () => {
+    it('calls onEditObservableType correctly', () => {
       renderWithTestingProviders(<ObservableTypesList {...props} />);
 
-      const list = await screen.findByTestId('observable-types-list');
+      const list = screen.getByTestId('observable-types-list');
 
-      await userEvent.click(
-        await within(list).findByTestId(`${observableTypes[0].key}-observable-type-edit`)
-      );
+      fireEvent.click(within(list).getByTestId(`${observableTypes[0].key}-observable-type-edit`));
 
-      await waitFor(() => {
-        expect(props.onEditObservableType).toHaveBeenCalledWith(observableTypes[0].key);
-      });
+      expect(props.onEditObservableType).toHaveBeenCalledWith(observableTypes[0].key);
+    });
+  });
+
+  describe('useLineSeparators', () => {
+    it('renders each item inside a panel by default', () => {
+      renderWithTestingProviders(<ObservableTypesList {...props} />);
+
+      const item = screen.getByTestId(`observable-type-${observableTypes[0].key}`);
+
+      expect(item.className).toContain('euiPanel');
+    });
+
+    it('renders line-separated rows without panels when useLineSeparators is true', () => {
+      renderWithTestingProviders(<ObservableTypesList {...props} useLineSeparators />);
+
+      const item = screen.getByTestId(`observable-type-${observableTypes[0].key}`);
+
+      expect(item.className).not.toContain('euiPanel');
+      expect(screen.getByText('Test Observable Type')).toBeInTheDocument();
+    });
+
+    it('still supports edit and delete actions when useLineSeparators is true', () => {
+      renderWithTestingProviders(<ObservableTypesList {...props} useLineSeparators />);
+
+      const list = screen.getByTestId('observable-types-list');
+
+      fireEvent.click(within(list).getByTestId(`${observableTypes[0].key}-observable-type-delete`));
+
+      expect(screen.getByTestId('confirm-delete-modal')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByText('Delete'));
+
+      expect(props.onDeleteObservableType).toHaveBeenCalledWith(observableTypes[0].key);
     });
   });
 });

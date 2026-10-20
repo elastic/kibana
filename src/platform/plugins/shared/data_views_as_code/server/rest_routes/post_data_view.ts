@@ -7,23 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IRouter, StartServicesAccessor } from '@kbn/core/server';
 import { asCodeResponseSchema, savedDataViewSpecSchemaWithoutId } from './schema';
-import { getDataViewsAsCodeService, handleErrors } from './utils';
+import { getDataViewsAsCodeService, requestHandler } from './utils';
 import { BASE_PATH, INITIAL_REST_VERSION } from './constants';
-import type { DataViewsAsCodeServerPluginStartDependencies } from '../types';
+import type { RegisterRouteArgs } from './types';
 
 const CREATE_DATA_VIEW_AS_CODE_PATH = BASE_PATH;
 
-export const registerPostDataViewAsCodeRoute = (
-  router: IRouter,
-  getStartServices: StartServicesAccessor<DataViewsAsCodeServerPluginStartDependencies, void>
-) =>
+export const registerPostDataViewAsCodeRoute = ({
+  router,
+  getStartServices,
+  ...args
+}: RegisterRouteArgs) =>
   router.versioned
     .post({
       path: CREATE_DATA_VIEW_AS_CODE_PATH,
       access: 'public',
-      description: 'Create a data view',
+      enableQueryVersion: true,
+      summary: 'Create a data view',
+      description:
+        'Creates a data view and returns it. Kibana generates the data view ID. If a data view with the same name already exists, the request fails with a conflict.',
+      options: {
+        tags: ['oas-tag:data-views-v2'],
+        availability: {
+          stability: 'stable',
+          since: '9.6.0',
+        },
+      },
       security: {
         authz: {
           requiredPrivileges: ['indexPatterns:manage'],
@@ -33,6 +43,10 @@ export const registerPostDataViewAsCodeRoute = (
     .addVersion(
       {
         version: INITIAL_REST_VERSION,
+        options: {
+          oasOperationObject: async () =>
+            (await import('./oas_examples')).postDataViewOASOperationObject,
+        },
         validate: {
           request: {
             body: savedDataViewSpecSchemaWithoutId,
@@ -40,20 +54,22 @@ export const registerPostDataViewAsCodeRoute = (
           response: {
             201: {
               body: () => asCodeResponseSchema,
+              description: 'The data view was created.',
             },
             400: {
-              description: 'invalid request',
+              description:
+                'The request is invalid, for example when a field format type does not exist.',
             },
             403: {
               description: 'forbidden',
             },
             409: {
-              description: 'conflict',
+              description: 'A data view with the same name already exists.',
             },
           },
         },
       },
-      handleErrors(async (ctx, req, res) => {
+      requestHandler(args, async (ctx, req, res) => {
         const dataViewsAsCodeService = await getDataViewsAsCodeService(ctx, getStartServices, req);
         const storedDataView = await dataViewsAsCodeService.create(req.body);
 

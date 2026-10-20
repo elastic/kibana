@@ -79,7 +79,7 @@ export const LocationsBadge = ({
     >
       <EuiBadge
         data-test-subj="syntheticsLocationsBadgeClickMeToLoadAContextMenuButton"
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         iconSide="right"
         onClick={(e) => {
           e.stopPropagation();

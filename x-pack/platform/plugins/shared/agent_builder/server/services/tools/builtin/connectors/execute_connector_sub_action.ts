@@ -10,9 +10,17 @@ import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import { AuthorizationStatus, isAuthorizationMethod } from '@kbn/agent-builder-common/agents';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
-import { getConnectorSpec, isToolAction } from '@kbn/connector-specs';
+import {
+  getToolResultId,
+  createErrorResult,
+  resolveAllowedConnectorIds,
+} from '@kbn/agent-builder-server';
+import {
+  getConnectorSpec,
+  isSelectedActionEnabled,
+  isToolAction,
+  type SelectedActions,
+} from '@kbn/connector-specs';
 import type { ConnectorToolsOptions } from './types';
 
 const connectorIdValidationMessage =
@@ -65,30 +73,44 @@ export const createExecuteConnectorSubActionTool = ({
     'Arguments must look like: {"connectorId":"<id>","subAction":"<name>","params":{...}}. ' +
     'Keep connectorId and subAction at the root; put every argument for the sub-action inside params, not at the root. ' +
     'Use the connector attachment for the Connector ID, allowed sub-action names, and parameter definitions. ' +
-    'Do not invent names or parameters.',
+    'Do not invent names or parameters. ' +
+    'Connectors API: https://www.elastic.co/docs/api/doc/kibana/group/endpoint-connectors — ' +
+    'Connectors reference: https://www.elastic.co/docs/reference/kibana/connectors-kibana',
   schema: executeConnectorSubActionArgsSchema,
   tags: ['connector', 'sub-action'],
-  availability: {
-    cacheMode: 'global',
-    handler: async ({ uiSettings }) => {
-      const enabled = await uiSettings.get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
-      return enabled
-        ? { status: 'available' }
-        : {
-            status: 'unavailable',
-            reason: 'Connector tools require Agent Builder experimental features to be enabled',
-          };
-    },
+  excludeFromMcp: true,
+  annotations: {
+    title: 'Execute Connector Sub-Action',
+    readOnlyHint: false,
+    destructiveHint: true,
+    idempotentHint: false,
+    openWorldHint: true,
   },
   handler: async ({ connectorId, subAction, params }, context) => {
+    // Runtime-imposed scoping: the connector allow-list comes from the resolved agent
+    // configuration (undefined only when there is no agent context at all).
+    const allowedIds = resolveAllowedConnectorIds(context.agentConfiguration);
+    if (allowedIds && !allowedIds.includes(connectorId)) {
+      return {
+        results: [
+          createErrorResult({
+            message: `Connector '${connectorId}' is not available to this agent because it is not assigned to it. Do not retry; tell the user the connector must be added to this agent's connectors.`,
+            metadata: { connectorId, subAction },
+          }),
+        ],
+      };
+    }
+
     const actions = await getActions();
     const actionsClient = await actions.getActionsClientWithRequest(context.request);
 
     // Resolve the connector type from the connector ID
     let connectorType: string;
+    let selectedActions: SelectedActions;
     try {
       const connector = await actionsClient.get({ id: connectorId });
       connectorType = connector.actionTypeId;
+      selectedActions = connector.config?.selectedActions as SelectedActions;
     } catch (error) {
       return {
         results: [
@@ -115,14 +137,28 @@ export const createExecuteConnectorSubActionTool = ({
       };
     }
 
-    // Validate that the sub-action is marked as a tool in the connector spec
+    // Reject workflow-only actions — isTool: false actions are not callable by agents.
     if (!isToolAction(spec, subAction)) {
       return {
         results: [
           createErrorResult({
             message:
-              `Sub-action '${subAction}' is not available as a tool on connector type '${connectorType}'. ` +
-              'Read the connector attachment to find the correct sub-action names.',
+              `Sub-action '${subAction}' is not available as an agent tool for connector '${connectorId}'. ` +
+              'It can only be called from a workflow.',
+            metadata: { connectorId, connectorType, subAction },
+          }),
+        ],
+      };
+    }
+
+    // Enforce instance allowlist / recommended-mode rules.
+    if (!isSelectedActionEnabled(subAction, selectedActions)) {
+      return {
+        results: [
+          createErrorResult({
+            message:
+              `Sub-action '${subAction}' is not enabled for connector '${connectorId}'. ` +
+              'Read the connector attachment to find the allowed sub-action names.',
             metadata: { connectorId, connectorType, subAction },
           }),
         ],

@@ -17,8 +17,8 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
   <TestProviders>{children}</TestProviders>
 );
 
-jest.mock('react-redux', () => {
-  const actual = jest.requireActual('react-redux');
+jest.mock('react-redux-v7', () => {
+  const actual = jest.requireActual('react-redux-v7');
   const mockDispatch = jest.fn();
   return {
     ...actual,

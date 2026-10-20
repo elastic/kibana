@@ -89,6 +89,7 @@ describe('actionTypeRegistry', () => {
               createTaskRunner: expect.any(Function),
               maxAttempts: 3,
               cost: TaskCost.Tiny,
+              taskTypeGroup: 'actions',
               title: 'My connector type',
             },
           },
@@ -249,6 +250,7 @@ describe('actionTypeRegistry', () => {
           isSystemActionType: false,
           isDeprecated: false,
           source: 'stack',
+          isTestable: false,
         },
       ]);
       expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalled();
@@ -307,6 +309,7 @@ describe('actionTypeRegistry', () => {
           validate: { params: expect.any(Object) },
           isDeprecated: false,
           source: 'stack',
+          isTestable: false,
         },
         {
           id: 'my-connector-type-with-subaction',
@@ -320,6 +323,7 @@ describe('actionTypeRegistry', () => {
           validate: { params: expect.any(Object) },
           isDeprecated: false,
           source: 'stack',
+          isTestable: false,
         },
       ]);
 
@@ -458,6 +462,7 @@ describe('actionTypeRegistry', () => {
           isSystemActionType: false,
           isDeprecated: false,
           source: 'stack',
+          isTestable: false,
         },
       ]);
       expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalled();
@@ -491,6 +496,7 @@ describe('actionTypeRegistry', () => {
           isSystemActionType: true,
           isDeprecated: false,
           source: 'stack',
+          isTestable: false,
         },
       ]);
     });
@@ -525,6 +531,7 @@ describe('actionTypeRegistry', () => {
           supportedFeatureIds: ['siem'],
           isDeprecated: false,
           source: 'stack',
+          isTestable: false,
         },
       ]);
     });
@@ -943,6 +950,34 @@ describe('actionTypeRegistry', () => {
 
       const result = registry.isDeprecated('test.action');
       expect(result).toBe(true);
+    });
+  });
+
+  describe('getSpec()', () => {
+    it('returns the source spec for a spec-backed type', () => {
+      const spec = { metadata: { id: 'spec-backed' } };
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      actionTypeRegistry.register(
+        getConnectorType({
+          id: 'spec-backed',
+          spec,
+        })
+      );
+
+      expect(actionTypeRegistry.getSpec('spec-backed')).toBe(spec);
+    });
+
+    it('returns undefined for a classic type without a spec', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      actionTypeRegistry.register(getConnectorType());
+
+      expect(actionTypeRegistry.getSpec('my-connector-type')).toBeUndefined();
+    });
+
+    it('returns undefined for an unknown id without throwing', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+
+      expect(actionTypeRegistry.getSpec('unknown')).toBeUndefined();
     });
   });
 

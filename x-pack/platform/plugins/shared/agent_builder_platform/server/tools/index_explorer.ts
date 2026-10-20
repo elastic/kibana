@@ -10,6 +10,7 @@ import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import { indexExplorer } from '@kbn/agent-builder-genai-utils';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import { includeFrozenSchema } from './include_frozen_schema';
 
 const indexExplorerSchema = z.object({
   query: z
@@ -23,13 +24,14 @@ const indexExplorerSchema = z.object({
     .string()
     .optional()
     .describe('(optional) Index pattern to filter indices by. Defaults to *.'),
+  include_frozen: includeFrozenSchema,
 });
 
 export const indexExplorerTool = (): BuiltinToolDefinition<typeof indexExplorerSchema> => {
   return {
     id: platformCoreTools.indexExplorer,
     type: ToolType.builtin,
-    description: `List relevant indices, aliases and datastreams based on a natural language query.
+    description: `List relevant indices, aliases, datastreams, and ES|QL views based on a natural language query.
 
 The 'indexPattern' parameter can be used to filter indices by a specific pattern, e.g. 'foo*'.
 This should *only* be used if you know what you're doing (e.g. if the user explicitly specified a pattern).
@@ -40,10 +42,17 @@ User: "Show me my latest alerts"
 You: call tool 'index_explorer' with { query: 'indices containing user alerts' }
 Tool result: [{ type: "index", name: '.alerts' }]
 `,
+    annotations: {
+      title: 'Explore Indices',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     schema: indexExplorerSchema,
     handler: async (
-      { query: nlQuery, indexPattern = '*', limit = 1 },
-      { esClient, experimentalFeatures, modelProvider, logger }
+      { query: nlQuery, indexPattern = '*', limit = 1, include_frozen: includeFrozen = false },
+      { esClient, modelProvider, logger }
     ) => {
       logger.debug(
         `Index explorer tool called with query: ${nlQuery}, indexPattern: ${indexPattern}, limit: ${limit}`
@@ -53,7 +62,9 @@ Tool result: [{ type: "index", name: '.alerts' }]
         nlQuery,
         indexPattern,
         limit,
-        includeDatasets: experimentalFeatures.datasets,
+        includeDatasets: true,
+        includeViews: true,
+        includeFrozen,
         esClient: esClient.asCurrentUser,
         model,
       });

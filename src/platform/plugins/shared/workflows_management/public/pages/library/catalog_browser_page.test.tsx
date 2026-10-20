@@ -12,7 +12,7 @@ import React from 'react';
 import { of } from 'rxjs';
 import type { Template } from '@kbn/workflows-library';
 import { LibraryCatalogBrowserPage } from './catalog_browser_page';
-import { WorkflowsDeepLinks } from '../../deep_links';
+import { WorkflowsPageName } from '../../deep_links';
 import { createStartServicesMock, type StartServicesMock } from '../../mocks';
 import { getTestProvider } from '../../shared/mocks/test_providers';
 
@@ -50,6 +50,22 @@ describe('LibraryCatalogBrowserPage', () => {
     expect(screen.getByTestId('mockCatalogBrowserSelectButton')).toBeInTheDocument();
   });
 
+  it('links to the request and contribution issue forms', () => {
+    const services = buildEnabledServices();
+
+    render(<LibraryCatalogBrowserPage />, { wrapper: getTestProvider({ services }) });
+
+    fireEvent.click(screen.getByRole('button', { name: 'More' }));
+    expect(screen.getByTestId('workflowLibraryContributeLink')).toHaveAttribute(
+      'href',
+      'https://github.com/elastic/workflows/issues/new?template=template_contribution.yml'
+    );
+    expect(screen.getByTestId('workflowLibraryRequestLink')).toHaveAttribute(
+      'href',
+      'https://github.com/elastic/workflows/issues/new?template=template_request.yml'
+    );
+  });
+
   it('navigates to the template detail route via the library deep link when a template is selected', () => {
     const services = buildEnabledServices();
 
@@ -57,7 +73,7 @@ describe('LibraryCatalogBrowserPage', () => {
     fireEvent.click(screen.getByTestId('mockCatalogBrowserSelectButton'));
 
     expect(services.application.navigateToApp).toHaveBeenCalledWith('workflows', {
-      deepLinkId: WorkflowsDeepLinks.library,
+      deepLinkId: WorkflowsPageName.library,
       path: 'ip-reputation-check',
     });
   });

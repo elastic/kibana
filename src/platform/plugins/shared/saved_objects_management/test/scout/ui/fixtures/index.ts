@@ -9,7 +9,8 @@
 
 import type { PageObjects, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
 import { test as baseTest, createLazyPageObject } from '@kbn/scout';
-import { SavedObjectsManagementPage, CopySavedObjectsToSpaceFlyout } from './page_objects';
+import { CopySavedObjectsToSpaceFlyout } from '@kbn/spaces-plugin/test/scout/ui/fixtures/page_objects';
+import { SavedObjectsManagementPage } from './page_objects';
 
 export interface SavedObjectsManagementTestFixtures extends ScoutTestFixtures {
   pageObjects: PageObjects & {

@@ -46,15 +46,6 @@ const resolveUserDisplayForEntities = (
 ): string | undefined =>
   resolveUserNameForEntityInsightsWithFallback(identityFields, getFieldsData);
 
-const resolveHostDisplayForEntities = (
-  identityFields: IdentityFields | undefined,
-  getFieldsData: GetFieldsData,
-  hostNameFromStore: string | undefined
-): string | undefined => {
-  const fromDocument = resolveHostNameForEntityInsightsWithFallback(identityFields, getFieldsData);
-  return fromDocument ?? hostNameFromStore;
-};
-
 /**
  * Entities displayed in the document details expandable flyout left section under the Insights tab
  */
@@ -67,11 +58,11 @@ export const EntitiesDetails: React.FC<EntitySectionOverrideBuilders> = ({
 
   const euidApi = useEntityStoreEuidApi();
   const userEntityIdentifiers = euidApi?.euid.getEntityIdentifiersFromDocument(
-    'user',
+    euidApi.getBuiltInEntityDefinition('user'),
     dataAsNestedObject
   ) as IdentityFields;
   const hostEntityIdentifiers = euidApi?.euid.getEntityIdentifiersFromDocument(
-    'host',
+    euidApi.getBuiltInEntityDefinition('host'),
     dataAsNestedObject
   ) as IdentityFields;
 
@@ -86,7 +77,10 @@ export const EntitiesDetails: React.FC<EntitySectionOverrideBuilders> = ({
       ? ({ 'user.name': resolvedUserName } as IdentityFields)
       : undefined;
 
-  const userEntityId = euidApi?.euid.getEuidFromObject('user', dataAsNestedObject);
+  const userEntityId = euidApi?.euid.getEuidFromObject(
+    euidApi.getBuiltInEntityDefinition('user'),
+    dataAsNestedObject
+  );
   const userEntityFromStore = useEntityFromStore({
     entityId: userEntityId,
     identityFields: userEntityIdentifiers ?? legacyUserIdentityForStore,
@@ -94,23 +88,37 @@ export const EntitiesDetails: React.FC<EntitySectionOverrideBuilders> = ({
     skip: userEntityIdentifiers == null && legacyUserIdentityForStore == null,
   });
 
-  const hostEntityId = euidApi?.euid.getEuidFromObject('host', dataAsNestedObject);
+  /**
+   * Host EUID extraction can return nothing when the entity store EUID API is still loading
+   * (it is imported lazily) or when the document is not fully populated. Mirror the user
+   * handling: resolve the display name from the document and use it for store lookup when
+   * EUID returns nothing.
+   */
+  const resolvedHostNameFromDocument = resolveHostNameForEntityInsightsWithFallback(
+    hostEntityIdentifiers,
+    getFieldsData
+  );
+  const legacyHostIdentityForStore =
+    resolvedHostNameFromDocument != null && resolvedHostNameFromDocument !== ''
+      ? ({ 'host.name': resolvedHostNameFromDocument } as IdentityFields)
+      : undefined;
+
+  const hostEntityId = euidApi?.euid.getEuidFromObject(
+    euidApi.getBuiltInEntityDefinition('host'),
+    dataAsNestedObject
+  );
   const hostEntityFromStore = useEntityFromStore({
     entityId: hostEntityId,
-    identityFields: hostEntityIdentifiers ?? undefined,
+    identityFields: hostEntityIdentifiers ?? legacyHostIdentityForStore,
     entityType: 'host',
-    skip: !hostEntityIdentifiers,
+    skip: hostEntityIdentifiers == null && legacyHostIdentityForStore == null,
   });
 
   const hostRecord = hostEntityFromStore.entityRecord;
   const hostNameFromStore =
     hostRecord != null && 'host' in hostRecord ? hostRecord.host?.name : undefined;
 
-  const resolvedHostName = resolveHostDisplayForEntities(
-    hostEntityIdentifiers,
-    getFieldsData,
-    hostNameFromStore
-  );
+  const resolvedHostName = resolvedHostNameFromDocument ?? hostNameFromStore;
 
   const userDisplayName = userEntityFromStore.entityRecord?.entity?.name ?? resolvedUserName;
   const hostDisplayName = hostEntityFromStore.entityRecord?.entity?.name ?? resolvedHostName;
@@ -135,8 +143,7 @@ export const EntitiesDetails: React.FC<EntitySectionOverrideBuilders> = ({
   );
 
   const showUserDetails = timestamp != null && userDisplayName != null;
-  const showHostDetails =
-    hostEntityIdentifiers != null && timestamp != null && hostDisplayName != null;
+  const showHostDetails = timestamp != null && hostDisplayName != null;
   const showDetails = showUserDetails || showHostDetails;
 
   return (

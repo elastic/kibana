@@ -27,14 +27,15 @@ import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
  *     implicit-privileges DLS, matching the cases surface (see
  *     `mappings/case.ts`). `space_id` is singular — a user action belongs
  *     to exactly one case in one space.
- *   - `cases.id` — denormalized from the SO `references[case]` so
- *     ES|QL `LOOKUP JOIN .cases ON cases.id` works without an
+ *   - `case.id` — denormalized from the SO `references[case]` so
+ *     ES|QL `LOOKUP JOIN .cases ON case.id` works without an
  *     intermediate aggregation.
  *   - `actor.*` — flattened `created_by` so `actor.username` etc. are
  *     first-class analytics dimensions.
  *   - `action.*` — the user-action shape: `type`, `verb`, the
  *     polymorphic `payload` stringified as `action.payload_json`, plus
  *     a curated set of typed extracts for the common analytical pivots.
+ *   - `source.*` — mirrors the SO `source` (origin of the action).
  *
  * Intentional divergences from the SO mapping:
  *   - `payload`: SO uses `dynamic: false` with a sparse set of indexed
@@ -68,7 +69,7 @@ export const ACTIVITY_INDEX_MAPPING: MappingTypeMapping = {
     space_id: { type: 'keyword' },
     owner: { type: 'keyword' },
 
-    cases: {
+    case: {
       properties: {
         // Denormalized from the user-action SO's `references[case]`.
         // Single value per doc — a user action belongs to exactly one
@@ -127,6 +128,25 @@ export const ACTIVITY_INDEX_MAPPING: MappingTypeMapping = {
         // For `connector` actions: the new connector instance id.
         // High-signal for connector-adoption dashboards.
         connector_id_new: { type: 'keyword' },
+        // For `comment` actions: the id of the attachment *record* the
+        // action targets — the `cases-comments` (legacy) or
+        // `cases-attachments` (unified) SO id, resolved source-agnostically.
+        // Equals `.cases-attachments._id`. Distinct from that surface's
+        // `attachment.attachment_id` (referenced alert/event/external-ref
+        // ids). Unset for non-comment actions.
+        attachment_reference_id: { type: 'keyword' },
+      },
+    },
+
+    // Mirrors the user-action SO `source`: the origin of the action
+    // (agent, workflow, rule, attack, api, user). Absent when the SO has no
+    // `source` or the row predates this mapping. Not ECS `source.*` (network origin).
+    source: {
+      properties: {
+        type: { type: 'keyword' },
+        id: { type: 'keyword' },
+        name: { type: 'keyword' },
+        run_id: { type: 'keyword' },
       },
     },
   },

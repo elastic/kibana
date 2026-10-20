@@ -16,11 +16,12 @@ import type {
 } from './types';
 import { registerTools } from './tools';
 import { registerAttachmentTypes } from './attachment_types';
+import { registerConversationEventTypes } from './conversation_events';
+import { registerConversationTemplates } from './conversation_templates';
 import { registerSkills } from './skills';
 import { createConnectorSmlType } from './sml_types/connector';
 import { createConnectorLifecycleHandler } from './connector_lifecycle/connector_lifecycle_handler';
-import { getTracingFeaturesEnabled } from './tracing/get_tracing_features_enabled';
-import { syncTracingPlatformFeatures } from './tracing/sync_tracing_platform_features';
+import { setAgentBuilderDashboard } from './dashboard/install_dashboard';
 
 export class AgentBuilderPlatformPlugin
   implements
@@ -48,12 +49,15 @@ export class AgentBuilderPlatformPlugin
     registerAttachmentTypes({
       coreSetup,
       setupDeps,
+      logger: this.logger,
     });
+    registerConversationTemplates({ setupDeps });
+    registerConversationEventTypes({ setupDeps });
     const getActionsStart = async () => {
       const [, startDeps] = await coreSetup.getStartServices();
       return startDeps.actions;
     };
-    registerSkills(setupDeps.agentBuilder, getActionsStart);
+    registerSkills(setupDeps.agentBuilder, getActionsStart, this.logger);
 
     const connectorSmlType = createConnectorSmlType({
       getActionSavedObjectsClient: async (request) => {
@@ -62,7 +66,7 @@ export class AgentBuilderPlatformPlugin
       },
       logger: this.logger.get('sml-connector'),
     });
-    setupDeps.agentContextLayer.registerType(connectorSmlType);
+    setupDeps.agentBuilderSml.registerType(connectorSmlType);
 
     const connectorLifecycleHandler = createConnectorLifecycleHandler({
       logger: this.logger.get('connector-lifecycle'),
@@ -79,31 +83,10 @@ export class AgentBuilderPlatformPlugin
   }
 
   start(coreStart: CoreStart): AgentBuilderPlatformPluginStart {
-    void (async () => {
-      try {
-        const tracingFeaturesEnabled = await getTracingFeaturesEnabled(coreStart);
-
-        await syncTracingPlatformFeatures({
-          coreStart,
-          logger: this.logger,
-          enabled: tracingFeaturesEnabled,
-        });
-      } catch (error) {
-        this.logger.error(
-          `Failed to sync Agent Builder tracing platform features: ${(error as Error).message}`
-        );
-      }
-    })();
-
     return {
       tracingFeatures: {
-        sync: ({ enabled, spaceId }) =>
-          syncTracingPlatformFeatures({
-            coreStart,
-            logger: this.logger,
-            enabled,
-            spaceId,
-          }),
+        setDashboard: ({ enabled, spaceId }) =>
+          setAgentBuilderDashboard(coreStart, enabled, spaceId, this.logger),
       },
     };
   }

@@ -8,9 +8,9 @@
  */
 
 import React from 'react';
-import { Provider as ReduxProvider } from 'react-redux';
+import { Provider as ReduxProvider } from 'react-redux-v7';
 import { MemoryRouter } from 'react-router-dom';
-import type { Store } from 'redux';
+import type { Store } from 'redux-v4';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { type QueryClient, QueryClientProvider } from '@kbn/react-query';

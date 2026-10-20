@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeOf } from '@kbn/config-schema';
+import type { z } from '@kbn/zod';
 import type { getCreateResponseBodySchema } from './schemas';
 
 /** The response body type for creating a dashboard. */
-export type DashboardCreateResponseBody = TypeOf<ReturnType<typeof getCreateResponseBodySchema>>;
+export type DashboardCreateResponseBody = z.output<ReturnType<typeof getCreateResponseBodySchema>>;

@@ -8,12 +8,15 @@
 import type { KibanaResponseFactory, RequestHandlerContext } from '@kbn/core/server';
 import { ATTACK_DISCOVERY_WORKFLOWS_ENABLED_FEATURE_FLAG } from '@kbn/discoveries/impl/lib/helpers/is_workflows_enabled';
 
+import { isWorkflowsEnabledForSpace } from '../is_workflows_enabled_for_space';
+
 export { ATTACK_DISCOVERY_WORKFLOWS_ENABLED_FEATURE_FLAG };
 
 /**
- * Checks the `attackDiscoveryWorkflowsEnabled` feature flag via the request
- * context. Returns a 404 response when the flag is OFF, or `null` when the
- * flag is ON (indicating the caller may proceed).
+ * Checks both the global `attackDiscoveryWorkflowsEnabled` feature flag AND the
+ * per-space `securitySolution:enableAttackDiscoveryWorkflows` Advanced Setting via the
+ * request context. Returns a 404 response when either is OFF, or `null` when
+ * both are ON (indicating the caller may proceed).
  */
 export const assertWorkflowsEnabled = async ({
   context,
@@ -23,11 +26,10 @@ export const assertWorkflowsEnabled = async ({
   response: KibanaResponseFactory;
 }): Promise<ReturnType<KibanaResponseFactory['notFound']> | null> => {
   const coreContext = await context.core;
-  const enabled =
-    (await coreContext?.featureFlags?.getBooleanValue(
-      ATTACK_DISCOVERY_WORKFLOWS_ENABLED_FEATURE_FLAG,
-      false
-    )) ?? false;
+  const enabled = await isWorkflowsEnabledForSpace({
+    featureFlags: coreContext.featureFlags,
+    uiSettingsClient: coreContext.uiSettings.client,
+  });
 
   if (!enabled) {
     return response.notFound({

@@ -7,6 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export {
+  assertValidDuration,
+  DURATION_REGEX,
+  isValidDuration,
+  MAX_DURATION_LENGTH,
+  parseDuration,
+} from './duration/duration';
 export { extractTemplateVariables } from './extract_template_variables/extract_template_variables';
 export {
   findInputsInGraph,
@@ -30,6 +37,7 @@ export {
   LIQUID_ALLOWED_TAGS,
   createWorkflowLiquidEngine,
 } from './create_workflow_liquid_engine/create_workflow_liquid_engine';
+export { pickObjectFields } from './pick_object_fields/pick_object_fields';
 export {
   pickManagedWorkflowFields,
   toManagedWorkflowTelemetryFields,

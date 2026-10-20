@@ -277,6 +277,7 @@ export class Flyout extends Component {
       noClusterUuidPrompt = (
         <Fragment>
           <EuiCallOut
+            announceOnMount
             color="warning"
             iconType="question"
             title={i18n.translate(

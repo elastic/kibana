@@ -7,7 +7,7 @@
 
 // eslint-disable-next-line @kbn/eslint/module_migration
 import type { ExtractRouteParams } from 'react-router';
-import { generatePath } from 'react-router-dom';
+import { generatePath, matchPath } from 'react-router-dom';
 import {
   CASES_CREATE_PATH,
   CASES_CONFIGURE_PATH,
@@ -84,4 +84,16 @@ export const generateCaseViewPath = (params: CaseViewPathParams): string => {
   return normalizePath(
     generatePath(CASE_VIEW_PATH, params as ExtractRouteParams<typeof CASE_VIEW_PATH>)
   );
+};
+export const isCaseViewPath = (pathname: string, caseId?: string): boolean => {
+  const match = matchPath(pathname, {
+    // needs the wildcard because of spaces etc in front
+    path: `*${CASE_VIEW_PATH}/:detailName`,
+    strict: false,
+  });
+  if (caseId && match) {
+    return (match.params as unknown as Record<string, string>).detailName === caseId;
+  } else {
+    return !!match;
+  }
 };

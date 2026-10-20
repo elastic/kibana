@@ -32,10 +32,18 @@
       "unifiedDocViewer",
       "maintenanceWindows",
       "eventLog",
-      "triggersActionsUi"
+      "triggersActionsUi",
+      "licensing"
     ],
-    "optionalPlugins": ["usageCollection", "agentBuilder", "agentContextLayer", "dashboard", "cps"],
-    "requiredBundles": ["alerting", "kibanaReact"],
+    "optionalPlugins": [
+      "usageCollection",
+      "agentBuilder",
+      "agentBuilderSml",
+      "dashboard",
+      "cps",
+      "cloud"
+    ],
+    "requiredBundles": ["alerting", "kibanaReact", "agentBuilder", "esql"],
     "extraPublicDirs": []
   }
 }

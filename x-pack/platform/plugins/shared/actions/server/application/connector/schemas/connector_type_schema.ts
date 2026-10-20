@@ -29,4 +29,5 @@ export const connectorTypeSchema = schema.object({
   allowMultipleSystemActions: schema.maybe(schema.boolean()),
   description: schema.maybe(schema.string()),
   isExperimental: schema.maybe(schema.boolean()),
+  isTestable: schema.boolean({ defaultValue: false }),
 });

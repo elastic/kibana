@@ -28,29 +28,39 @@ export const DISPATCH_PAYLOAD_VARIABLES: readonly PayloadVariable[] = [
     documentation: 'Map of grouping field values for the dispatched group.',
   },
   {
-    path: 'episodes',
-    detail: 'AlertEpisode[]',
-    documentation: 'Alert episodes included in this dispatch.',
+    path: 'alerts',
+    detail: 'ActionPolicyWorkflowPayloadAlert[]',
+    documentation: 'Alerts included in this dispatch.',
   },
   {
     path: 'rules',
     detail: 'Record<string, { name: string }>',
     documentation:
-      'Rule metadata keyed by rule id. Covers all rules present in `episodes`. Access via `rules[episode.rule_id].name`.',
+      'Rule metadata keyed by rule id. Covers all rules present in `alerts`. Access via `rules[alert.rule_id].name`.',
   },
 ];
 
-// Mirrors `AlertEpisode` from server/lib/dispatcher/types.ts — keep in sync.
-export const ALERT_EPISODE_FIELDS: readonly PayloadVariable[] = [
+// Mirrors `ActionPolicyWorkflowPayloadAlert` from server/lib/dispatcher/types.ts — keep in sync.
+export const PAYLOAD_ALERT_FIELDS: readonly PayloadVariable[] = [
   {
     path: 'last_event_timestamp',
     detail: 'string',
-    documentation: 'Timestamp of the most recent event in this episode.',
+    documentation: 'Timestamp of the most recent event in this alert.',
   },
   {
     path: 'rule_id',
     detail: 'string',
-    documentation: 'ID of the rule that produced this episode.',
+    documentation: 'ID of the rule that produced this alert.',
+  },
+  {
+    path: 'source',
+    detail: 'string',
+    documentation: 'Origin of the alert events for this alert (e.g. `internal`).',
+  },
+  {
+    path: 'space_id',
+    detail: 'string',
+    documentation: 'ID of the space the alert belongs to.',
   },
   {
     path: 'group_hash',
@@ -58,19 +68,24 @@ export const ALERT_EPISODE_FIELDS: readonly PayloadVariable[] = [
     documentation: 'Hash identifying the alert group.',
   },
   {
-    path: 'episode_id',
+    path: 'alert_id',
     detail: 'string',
-    documentation: 'Unique identifier for this episode.',
+    documentation: 'Unique identifier for this alert.',
   },
   {
-    path: 'episode_status',
+    path: 'alert_status',
     detail: "'inactive' | 'pending' | 'active' | 'recovering'",
-    documentation: 'Current lifecycle status of the episode.',
+    documentation: 'Current lifecycle status of the alert.',
+  },
+  {
+    path: 'severity',
+    detail: "'info' | 'low' | 'medium' | 'high' | 'critical'",
+    documentation: 'Severity of the alert. Optional — may be absent if not set by the rule.',
   },
   {
     path: 'data',
     detail: 'Record<string, unknown>',
     documentation:
-      'Additional alert/event data attached to the episode. Arbitrary Record<string, unknown> — field autocomplete is not available inside `data`.',
+      'Additional alert/event data attached to the alert. Arbitrary Record<string, unknown> — field autocomplete is not available inside `data`.',
   },
 ];

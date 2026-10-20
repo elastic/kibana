@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { css } from '@emotion/react';
 import {
   EuiCallOut,
   EuiFieldNumber,
@@ -22,6 +21,7 @@ import {
   sumCompoundSeconds,
   type SplayUnit,
 } from '../../../common/utils/splay_utils';
+import { selectAppendCss } from './select_append_css';
 import { ToggleableRow } from './toggleable_row';
 import {
   SPLAY_DESCRIPTION,
@@ -56,28 +56,6 @@ const UNIT_OPTIONS: EuiSelectOption[] = [
   { value: 'hours', text: SPLAY_UNIT_HOURS },
 ];
 
-// Intentional override on the EUI select
-const unitSelectAppendCss = (borderRadius: string | number) => css`
-  && .euiFormControlLayout__append {
-    padding: 0;
-    align-items: stretch;
-  }
-
-  && .euiFormControlLayout__append,
-  && .euiFormControlLayout__append .euiFormControlLayout,
-  && .euiFormControlLayout__append .euiFormControlLayout__childrenWrapper,
-  && .euiFormControlLayout__append .euiSelect {
-    block-size: 100%;
-  }
-
-  && .euiFormControlLayout__append .euiSelect {
-    border-start-start-radius: 0;
-    border-end-start-radius: 0;
-    border-start-end-radius: ${borderRadius};
-    border-end-end-radius: ${borderRadius};
-  }
-`;
-
 const isSplayUnit = (raw: string): raw is SplayUnit =>
   raw === 'seconds' || raw === 'minutes' || raw === 'hours';
 
@@ -90,7 +68,7 @@ export const SplayTimeField = ({
 }: SplayTimeFieldProps) => {
   const { euiTheme } = useEuiTheme();
   const appendCss = useMemo(
-    () => unitSelectAppendCss(euiTheme.border.radius.medium ?? 0),
+    () => selectAppendCss(euiTheme.border.radius.medium ?? 0),
     [euiTheme.border.radius.medium]
   );
 

@@ -8,4 +8,4 @@
  */
 
 require('@kbn/setup-node-env');
-require('../src/dev/run_licenses_csv_report');
+require('@kbn/dev/run_licenses_csv_report');

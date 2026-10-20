@@ -7,23 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiPageTemplate, useIsWithinBreakpoints } from '@elastic/eui';
+import { EuiPageTemplate } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { selectUnit } from '@formatjs/intl-utils';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { useLocation, useParams } from 'react-router-dom';
-import type { AppHeaderBadge } from '@kbn/app-header';
+import useObservable from 'react-use/lib/useObservable';
+import type { AppHeaderBack, AppHeaderBadge } from '@kbn/app-header';
 import { AppHeader } from '@kbn/app-header';
 import { ChangeHistoryModalContext } from '@kbn/change-history-ui';
 import type { AppMenuConfig, AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
-import { WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/workflows';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
-import { useRunWorkflowWithConfirmation } from './use_run_workflow_with_confirmation';
-import { WORKFLOW_DETAIL_INLINE_TOOLBAR_BREAKPOINTS } from './workflow_detail_header_layout';
-import { WorkflowDetailHeaderToolbar } from './workflow_detail_header_toolbar';
+import { WorkflowAccessControlModal } from './workflow_access_control_modal';
 import { PLUGIN_ID, WORKFLOWS_DOCUMENTATION_URL } from '../../../../common';
 import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
 import { useUpdateWorkflow } from '../../../entities/workflows/model/use_update_workflow';
@@ -35,12 +33,12 @@ import {
   selectIsYamlSyntaxValid,
   selectWorkflow,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
-import { setIsTestModalOpen } from '../../../entities/workflows/store/workflow_detail/slice';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
-import { useWorkflowsExperimentalUiSetting } from '../../../hooks/use_workflows_experimental_ui_setting';
-import { getSaveWorkflowTooltipContent, getTestRunTooltipContent } from '../../../shared/ui';
+import { getSaveWorkflowTooltipContent } from '../../../shared/ui';
+import { getAddConnectorsMenuItem } from '../../../shared/ui/get_add_connectors_menu_item';
 import {
+  getReturnDestinationFromSearch,
   navigateToWorkflowsList,
   type WorkflowDetailRouteState,
 } from '../../../shared/utils/workflow_navigation';
@@ -61,10 +59,43 @@ const executionsTabReadManagedExecutionDisabledTooltip = i18n.translate(
   }
 );
 
-const Translations = {
-  runWorkflow: i18n.translate('workflows.workflowDetailHeader.runWorkflow', {
-    defaultMessage: 'Run',
-  }),
+const useWorkflowDetailHeaderBack = (): AppHeaderBack => {
+  const { application } = useKibana().services;
+  const location = useLocation<WorkflowDetailRouteState | undefined>();
+  const appList = useObservable(application.applications$);
+
+  // Honor `returnApp`/`returnPath` query params when the app is known.
+  return useMemo<AppHeaderBack>(() => {
+    const returnDestination = getReturnDestinationFromSearch(location.search);
+    const returnApp = returnDestination && appList?.get(returnDestination.returnAppId);
+
+    if (returnDestination && returnApp) {
+      return {
+        href: application.getUrlForApp(returnDestination.returnAppId, {
+          path: returnDestination.returnPath,
+        }),
+        label: returnApp.title,
+        onClick: (event) => {
+          event.preventDefault();
+          application.navigateToApp(
+            returnDestination.returnAppId,
+            returnDestination.returnPath ? { path: returnDestination.returnPath } : undefined
+          );
+        },
+      };
+    }
+
+    return {
+      href: `/app/${PLUGIN_ID}`,
+      label: i18n.translate('workflows.workflowDetailHeader.backLinkLabel', {
+        defaultMessage: 'Workflows',
+      }),
+      onClick: (event) => {
+        event.preventDefault();
+        void navigateToWorkflowsList(application, location.state);
+      },
+    };
+  }, [application, appList, location.search, location.state]);
 };
 
 export interface WorkflowDetailHeaderProps {
@@ -72,19 +103,25 @@ export interface WorkflowDetailHeaderProps {
   // TODO: manage it in a workflow state context
   highlightDiff: boolean;
   setHighlightDiff: React.Dispatch<React.SetStateAction<boolean>>;
+  /** When provided, Executions opens the flyout list instead of switching editor tabs. */
+  onOpenExecutionList?: () => void;
 }
 
 export const WorkflowDetailHeader = React.memo(
-  ({ isLoading, highlightDiff, setHighlightDiff }: WorkflowDetailHeaderProps) => {
+  ({
+    isLoading,
+    highlightDiff,
+    setHighlightDiff,
+    onOpenExecutionList,
+  }: WorkflowDetailHeaderProps) => {
     const { id: workflowId } = useParams<{ id?: string }>();
     const { application } = useKibana().services;
-    const location = useLocation<WorkflowDetailRouteState | undefined>();
+    const back = useWorkflowDetailHeaderBack();
     const styles = useMemoCss(componentStyles);
-    const dispatch = useDispatch();
+    const [isAccessOpen, setIsAccessOpen] = useState(false);
     const {
       canCreateWorkflow,
-      canUpdateWorkflow,
-      canExecuteWorkflow,
+      canUpdateWorkflow: hasUpdatePrivilege,
       canReadWorkflow,
       canReadWorkflowExecution,
       canReadManagedWorkflowExecution,
@@ -94,6 +131,8 @@ export const WorkflowDetailHeader = React.memo(
     const isExecutionsTab = activeTab === 'executions';
 
     const workflow = useSelector(selectWorkflow);
+    const canUpdateWorkflow = hasUpdatePrivilege && workflow?.permissions?.edit !== false;
+    const canManageAccess = hasUpdatePrivilege && workflow?.permissions?.manage === true;
     const isManagedWorkflow = workflow?.managed === true;
     const canReadVisibleWorkflowExecution =
       canReadWorkflowExecution && (!isManagedWorkflow || canReadManagedWorkflowExecution);
@@ -121,10 +160,6 @@ export const WorkflowDetailHeader = React.memo(
     }, [saveYaml]);
 
     const updateWorkflow = useUpdateWorkflow();
-
-    const openTestModal = useCallback(() => {
-      dispatch(setIsTestModalOpen(true));
-    }, [dispatch]);
 
     const [savedLabel, setSavedLabel] = useState<string>('');
 
@@ -167,15 +202,6 @@ export const WorkflowDetailHeader = React.memo(
     const isSchemaValid =
       isSyntaxValid && !hasYamlSchemaValidationErrors && workflow?.valid !== false;
 
-    const runWorkflowTooltipContent = useMemo(() => {
-      return getTestRunTooltipContent({
-        isExecutionsTab,
-        isValid: isSyntaxValid,
-        canRunWorkflow: canExecuteWorkflow,
-        isSaving,
-      });
-    }, [isSyntaxValid, canExecuteWorkflow, isExecutionsTab, isSaving]);
-
     const saveWorkflowTooltipContent = useMemo(() => {
       const isCreate = !workflowId;
       return getSaveWorkflowTooltipContent({
@@ -213,13 +239,17 @@ export const WorkflowDetailHeader = React.memo(
     }, [hasUnsavedChanges, isSchemaValid]);
 
     const toggleExecutionsPanel = useCallback(() => {
+      if (onOpenExecutionList) {
+        onOpenExecutionList();
+        return;
+      }
       setActiveTab(isExecutionsTab ? 'workflow' : 'executions');
-    }, [isExecutionsTab, setActiveTab]);
+    }, [isExecutionsTab, onOpenExecutionList, setActiveTab]);
 
     const executionsToggleItem = useMemo<AppMenuItemType>(
       () => ({
         id: 'toggleExecutions',
-        order: 1,
+        order: 0,
         label: i18n.translate('workflows.workflowDetailHeader.executionsButton', {
           defaultMessage: 'Executions',
         }),
@@ -238,28 +268,20 @@ export const WorkflowDetailHeader = React.memo(
       ]
     );
 
-    const isVisualEditorEnabled = useWorkflowsExperimentalUiSetting(
-      WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID
-    );
-
     const changeHistoryModal = useContext(ChangeHistoryModalContext);
     const openHistoryModal = useCallback(() => {
       changeHistoryModal?.openModal();
     }, [changeHistoryModal]);
     const showHistoryButton = Boolean(canReadWorkflow && !isExecutionsTab && changeHistoryModal);
-    const isAppMenuSwitchInline = useIsWithinBreakpoints([
-      ...WORKFLOW_DETAIL_INLINE_TOOLBAR_BREAKPOINTS,
-    ]);
 
     const historyItem = useMemo<AppMenuItemType | undefined>(() => {
-      if (!showHistoryButton || isAppMenuSwitchInline) {
+      if (!showHistoryButton) {
         return undefined;
       }
 
       return {
         id: 'workflowHistory',
-        order: 0,
-        overflow: true,
+        order: 2,
         label: i18n.translate('workflows.workflowDetailHeader.historyButton', {
           defaultMessage: 'History',
         }),
@@ -267,7 +289,7 @@ export const WorkflowDetailHeader = React.memo(
         run: openHistoryModal,
         testId: 'workflowDetailHistoryButton',
       };
-    }, [showHistoryButton, isAppMenuSwitchInline, openHistoryModal]);
+    }, [showHistoryButton, openHistoryModal]);
 
     const enabledSwitchConfig = useMemo<NonNullable<AppMenuConfig['switch']> | undefined>(() => {
       if (!workflowId) {
@@ -299,21 +321,10 @@ export const WorkflowDetailHeader = React.memo(
       enabledSwitchTooltipContent,
     ]);
 
-    const titleAppend = useMemo(() => {
-      if (!enabledSwitchConfig || !isAppMenuSwitchInline) {
-        return undefined;
-      }
-
-      return (
-        <WorkflowDetailHeaderToolbar
-          switchConfig={enabledSwitchConfig}
-          showHistoryButton={showHistoryButton}
-          onOpenHistory={openHistoryModal}
-        />
-      );
-    }, [enabledSwitchConfig, isAppMenuSwitchInline, showHistoryButton, openHistoryModal]);
-
-    const { handleRunClick, runConfirmationModal } = useRunWorkflowWithConfirmation(openTestModal);
+    const addConnectorsMenuItem = useMemo(
+      () => getAddConnectorsMenuItem(application),
+      [application]
+    );
 
     const badges = useMemo<AppHeaderBadge[]>(() => {
       const result: AppHeaderBadge[] = [];
@@ -370,21 +381,11 @@ export const WorkflowDetailHeader = React.memo(
       if (workflowId) {
         items.push(executionsToggleItem);
       }
-      if (!isVisualEditorEnabled) {
-        items.push({
-          id: 'runWorkflow',
-          order: 2,
-          label: Translations.runWorkflow,
-          iconType: 'play',
-          run: handleRunClick,
-          disableButton:
-            isExecutionsTab || !canExecuteWorkflow || isLoading || isSaving || !isSyntaxValid,
-          tooltipContent: runWorkflowTooltipContent ?? undefined,
-          testId: 'runWorkflowHeaderButton',
-        });
-      }
       if (historyItem) {
         items.push(historyItem);
+      }
+      if (addConnectorsMenuItem) {
+        items.push(addConnectorsMenuItem);
       }
 
       return {
@@ -407,7 +408,7 @@ export const WorkflowDetailHeader = React.memo(
           tooltipContent: saveWorkflowTooltipContent ?? undefined,
           testId: 'saveWorkflowHeaderButton',
         },
-        switch: enabledSwitchConfig && !isAppMenuSwitchInline ? enabledSwitchConfig : undefined,
+        switch: enabledSwitchConfig,
         items,
       };
     }, [
@@ -415,9 +416,8 @@ export const WorkflowDetailHeader = React.memo(
       workflowId,
       executionsToggleItem,
       historyItem,
-      isAppMenuSwitchInline,
+      addConnectorsMenuItem,
       enabledSwitchConfig,
-      isVisualEditorEnabled,
       handleSaveWorkflow,
       canSaveWorkflow,
       isLoading,
@@ -426,35 +426,46 @@ export const WorkflowDetailHeader = React.memo(
       isYamlSynced,
       hasUnsavedChanges,
       saveWorkflowTooltipContent,
-      handleRunClick,
-      canExecuteWorkflow,
-      isSyntaxValid,
-      runWorkflowTooltipContent,
     ]);
+
+    const share = useMemo(() => {
+      if (!workflowId || isManagedWorkflow) return undefined;
+      return {
+        label: i18n.translate('workflows.access.buttonLabel', { defaultMessage: 'Access control' }),
+        onClick: () => setIsAccessOpen(true),
+        isDisabled: !canManageAccess,
+        tooltip: !canManageAccess
+          ? {
+              content:
+                workflow?.permissions?.manage === false
+                  ? i18n.translate('workflows.access.ownerOnlyTooltip', {
+                      defaultMessage:
+                        'Only the workflow owner and administrators can manage access.',
+                    })
+                  : i18n.translate('workflows.access.updatePrivilegeTooltip', {
+                      defaultMessage: 'You need the Workflows Update privilege to manage access.',
+                    }),
+            }
+          : undefined,
+      };
+    }, [canManageAccess, isManagedWorkflow, workflow?.permissions?.manage, workflowId]);
 
     return (
       <>
         <EuiPageTemplate offset={0} minHeight={0} grow={false} css={styles.pageTemplate}>
           <AppHeader
             title={name}
-            back={{
-              href: `/app/${PLUGIN_ID}`,
-              label: i18n.translate('workflows.workflowDetailHeader.backLinkLabel', {
-                defaultMessage: 'Workflows',
-              }),
-              onClick: (event) => {
-                event.preventDefault();
-                void navigateToWorkflowsList(application, location.state);
-              },
-            }}
+            back={back}
             badges={badges}
-            titleAppend={titleAppend}
+            share={share}
             menu={appMenu}
             docLink={WORKFLOWS_DOCUMENTATION_URL}
-            showAddIntegrations
+            spacing="compact"
           />
         </EuiPageTemplate>
-        {runConfirmationModal}
+        {isAccessOpen && workflow && (
+          <WorkflowAccessControlModal workflow={workflow} onClose={() => setIsAccessOpen(false)} />
+        )}
       </>
     );
   }

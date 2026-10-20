@@ -12,6 +12,7 @@ import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { MlLocatorDefinition } from '@kbn/ml-plugin/public';
 import { enableInspectEsQueries } from '@kbn/observability-plugin/common';
+import { UI_SETTINGS as DATA_UI_SETTINGS } from '@kbn/data-plugin/public';
 import { UI_SETTINGS } from '@kbn/observability-shared-plugin/public/hooks/use_kibana_ui_settings';
 import { UrlService } from '@kbn/share-plugin/common/url_service';
 import type { Router } from '@kbn/typed-react-router-config';
@@ -30,8 +31,32 @@ import { APMServiceContext } from '../apm_service/apm_service_context';
 import { ChartPointerEventContextProvider } from '../chart_pointer_event/chart_pointer_event_context';
 import { MockTimeRangeContextProvider } from '../time_range_metadata/mock_time_range_metadata_context_provider';
 import { ApmTimeRangeMetadataContextProvider } from '../time_range_metadata/time_range_metadata_context';
+import type { ConfigSchema } from '../..';
 import type { ApmPluginContextValue } from './apm_plugin_context';
 import { ApmPluginContext } from './apm_plugin_context';
+
+const mockConfig: ConfigSchema = {
+  serviceMapEnabled: true,
+  ui: {
+    enabled: false,
+  },
+  latestAgentVersionsUrl: '',
+  serverlessOnboarding: false,
+  managedServiceUrl: '',
+  featureFlags: {
+    agentConfigurationAvailable: true,
+    configurableIndicesAvailable: true,
+    infrastructureTabAvailable: true,
+    infraUiAvailable: true,
+    migrationToFleetAvailable: true,
+    sourcemapApiAvailable: true,
+    storageExplorerAvailable: true,
+    // to be removed in https://github.com/elastic/kibana/issues/221904
+    profilingIntegrationAvailable: false,
+    ruleFormV2Enabled: false,
+  },
+  serverless: { enabled: false },
+};
 
 const mockPerformanceApi = {
   onPageReady: () => {},
@@ -60,7 +85,14 @@ const uiSettings: Record<string, unknown> = {
     value: 100000,
   },
   [enableInspectEsQueries]: false,
+  [DATA_UI_SETTINGS.QUERY_ALLOW_LEADING_WILDCARDS]: true,
+  [DATA_UI_SETTINGS.QUERY_STRING_OPTIONS]: {},
+  [DATA_UI_SETTINGS.DATEFORMAT_TZ]: 'Browser',
+  [DATA_UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX]: false,
 };
+
+const getUiSetting = (key: string, defaultValue?: unknown) =>
+  key in uiSettings ? uiSettings[key] : defaultValue;
 
 const urlService = new UrlService({
   navigate: async () => {},
@@ -132,8 +164,15 @@ export const mockCore = {
     },
   },
   uiSettings: {
-    get: (key: string) => uiSettings[key],
-    get$: (key: string) => of(mockCore.uiSettings.get(key)),
+    get: getUiSetting,
+    get$: (key: string, defaultValue?: unknown) => of(getUiSetting(key, defaultValue)),
+  },
+  settings: {
+    client: {
+      get: getUiSetting,
+      get$: (key: string, defaultValue?: unknown) => of(getUiSetting(key, defaultValue)),
+      set: async () => true,
+    },
   },
   unifiedSearch: {
     autocomplete: {
@@ -186,6 +225,7 @@ const mockUnifiedSearchBar = {
 export const mockApmPluginContext = {
   core: mockCore,
   plugins: mockPlugin,
+  config: mockConfig,
   unifiedSearch: mockUnifiedSearchBar,
   observabilityAIAssistant: {
     service: { setScreenContext: () => noop },

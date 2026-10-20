@@ -13,6 +13,14 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import type { NotificationCenterConfig } from './config';
+import {
+  registerNotificationCleanupTask,
+  scheduleNotificationCleanupTask,
+} from './cleanup_task/cleanup_task';
+import { registerNotificationDataStream } from './storage/notification_data_stream';
+import { buildForType } from './lib/submit';
+import { registerNotificationUserStorage } from './storage/user_storage';
+import { registerNotificationRoutes } from './routes';
 import type {
   NotificationCenterPluginSetup,
   NotificationCenterPluginStart,
@@ -36,14 +44,30 @@ export class NotificationCenterPlugin
   }
 
   public setup(
-    _core: CoreSetup<NotificationCenterStartDependencies, NotificationCenterPluginStart>
+    core: CoreSetup<NotificationCenterStartDependencies, NotificationCenterPluginStart>,
+    plugins: NotificationCenterSetupDependencies
   ): NotificationCenterPluginSetup {
-    // Gated by `xpack.notificationCenter.enabled` in kibana config
+    // core gates the plugin on xpack.notificationCenter.enabled;
     this.logger.debug('Setting up Notification Center plugin');
-    return {};
+
+    registerNotificationDataStream(core.dataStreams);
+    registerNotificationUserStorage(core.userStorage);
+    registerNotificationCleanupTask(core, plugins.taskManager, this.logger);
+    registerNotificationRoutes({ router: core.http.createRouter(), core, logger: this.logger });
+
+    return {
+      forType: buildForType(core),
+    };
   }
 
-  public start(core: CoreStart): NotificationCenterPluginStart {
+  public start(
+    _core: CoreStart,
+    plugins: NotificationCenterStartDependencies
+  ): NotificationCenterPluginStart {
+    scheduleNotificationCleanupTask(plugins.taskManager).catch((err) => {
+      this.logger.error(`Failed to schedule Notification Center cleanup task: ${err.message}`);
+    });
+
     return {};
   }
 

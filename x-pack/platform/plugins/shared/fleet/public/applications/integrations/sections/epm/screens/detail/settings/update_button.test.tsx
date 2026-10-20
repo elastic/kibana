@@ -77,7 +77,7 @@ describe('UpdateButton agentless dry-run guard failures', () => {
     // The skip is announced: the success toast alone must not read as a full upgrade.
     expect(toasts.addWarning).toHaveBeenCalledWith(
       expect.objectContaining({
-        title: expect.stringContaining('1 agentless policy'),
+        title: expect.stringContaining('1 managed integration'),
         text: expect.stringContaining('gone-policy'),
       })
     );
@@ -146,7 +146,7 @@ describe('UpdateButton agentless dry-run guard failures', () => {
     await waitFor(() =>
       expect(toasts.addWarning).toHaveBeenCalledWith(
         expect.objectContaining({
-          title: expect.stringContaining('Error upgrading agentless policies'),
+          title: expect.stringContaining('Error upgrading managed integrations'),
           text: expect.stringContaining('broken-policy'),
         })
       )

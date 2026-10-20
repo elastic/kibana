@@ -22,12 +22,14 @@ export enum AttacksEventTypes {
   ScheduleFlyoutOpened = 'Attacks Schedule Flyout Opened',
   ScheduleDetailsFlyoutOpened = 'Attacks Schedule Details Flyout Opened',
   SettingsFlyoutOpened = 'Attacks Settings Flyout Opened',
+  GenerationsControlCenterOpened = 'Attacks Generations Control Center Opened',
   GenerateClicked = 'Attacks Generate Clicked',
   FeaturePromotionCalloutAction = 'Attacks Feature Promotion Callout Action',
   WorkflowRunTriggered = 'Attacks Workflow Run Triggered',
   TypeFilterChanged = 'Attacks Type Filter Changed',
   TourCalloutAction = 'Attacks Tour Callout Action',
   TourStepAction = 'Attacks Tour Step Action',
+  WorkflowsPromotionCalloutAction = 'Attacks Workflows Promotion Callout Action',
 }
 
 interface AttacksTableSortChangedParams {
@@ -48,7 +50,8 @@ export type AttacksActionTelemetrySource =
   | 'attacks_page_group_summary'
   | 'attacks_page_group_take_action'
   | 'attacks_page_flyout_header'
-  | 'attacks_page_flyout_take_action';
+  | 'attacks_page_flyout_take_action'
+  | 'case_attachment_table';
 
 export type AttacksUpdateScope = 'attack_only' | 'attack_and_related_alerts';
 
@@ -61,6 +64,10 @@ interface AttacksScheduleFlyoutOpenedParams {
 }
 
 interface AttacksSettingsFlyoutOpenedParams {
+  source: 'attacks_page_header';
+}
+
+interface AttacksGenerationsControlCenterOpenedParams {
   source: 'attacks_page_header';
 }
 
@@ -115,6 +122,10 @@ interface AttacksTourStepActionParams {
   step: number;
 }
 
+interface AttacksWorkflowsPromotionCalloutActionParams {
+  action: 'view' | 'enable' | 'dismiss' | 'learn_more';
+}
+
 export interface AttacksTelemetryEventsMap {
   [AttacksEventTypes.TableSortChanged]: AttacksTableSortChangedParams;
   [AttacksEventTypes.ViewOptionChanged]: AttacksViewOptionChangedParams;
@@ -129,6 +140,7 @@ export interface AttacksTelemetryEventsMap {
   [AttacksEventTypes.ExpandedViewTabClicked]: AttacksExpandedViewTabClickedParams;
   [AttacksEventTypes.ScheduleFlyoutOpened]: AttacksScheduleFlyoutOpenedParams;
   [AttacksEventTypes.SettingsFlyoutOpened]: AttacksSettingsFlyoutOpenedParams;
+  [AttacksEventTypes.GenerationsControlCenterOpened]: AttacksGenerationsControlCenterOpenedParams;
   [AttacksEventTypes.GenerateClicked]: AttacksGenerateClickedParams;
   [AttacksEventTypes.ScheduleDetailsFlyoutOpened]: AttacksScheduleDetailsFlyoutOpenedParams;
   [AttacksEventTypes.FeaturePromotionCalloutAction]: AttacksFeaturePromotionCalloutActionParams;
@@ -136,6 +148,7 @@ export interface AttacksTelemetryEventsMap {
   [AttacksEventTypes.TypeFilterChanged]: AttacksTypeFilterChangedParams;
   [AttacksEventTypes.TourCalloutAction]: AttacksTourCalloutActionParams;
   [AttacksEventTypes.TourStepAction]: AttacksTourStepActionParams;
+  [AttacksEventTypes.WorkflowsPromotionCalloutAction]: AttacksWorkflowsPromotionCalloutActionParams;
 }
 
 export interface AttacksTelemetryEvent {

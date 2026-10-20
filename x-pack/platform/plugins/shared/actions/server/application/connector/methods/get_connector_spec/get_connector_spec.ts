@@ -6,14 +6,9 @@
  */
 
 import Boom from '@hapi/boom';
-import { connectorsSpecs } from '@kbn/connector-specs';
 import { serializeConnectorSpec } from '@kbn/connector-specs/src/lib/serialize_connector_spec';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
 import type { GetConnectorSpecParams } from './types';
-
-const specsByIdMap = new Map(
-  Object.values(connectorsSpecs).map((spec) => [spec.metadata.id, spec])
-);
 
 export async function getConnectorSpecAsJsonSchema({
   context,
@@ -32,7 +27,7 @@ export async function getConnectorSpecAsJsonSchema({
     throw error;
   }
 
-  const spec = specsByIdMap.get(id);
+  const spec = context.actionTypeRegistry.getSpec(id);
 
   if (!spec) {
     throw Boom.notFound(`Spec for connector type "${id}" not found.`);
@@ -51,6 +46,13 @@ export async function getConnectorSpecAsJsonSchema({
     return {
       metadata: serialized.metadata,
       schema: serialized.schema,
+      isTestable: Boolean(spec.test.enabled),
+      actions: Object.entries(spec.actions).map(([name, def]) => ({
+        name,
+        isTool: Boolean(def.isTool),
+        ...(def.description !== undefined ? { description: def.description } : {}),
+        ...(def.scope !== undefined ? { scope: def.scope } : {}),
+      })),
     };
   } catch (error) {
     throw new Error(

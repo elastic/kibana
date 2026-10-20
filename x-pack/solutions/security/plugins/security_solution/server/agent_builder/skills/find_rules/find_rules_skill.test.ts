@@ -97,7 +97,7 @@ describe('findRulesSkill', () => {
     expect(skill.content).toMatch(/alert-analysis/);
     expect(skill.content).toMatch(/detection-rule-edit/);
     expect(skill.content).toMatch(/threat-hunting/);
-    expect(skill.content).toMatch(/rule-management/);
+    expect(skill.content).toMatch(/rule-authoring/);
   });
 
   it('content advertises the read-only action limitations', () => {
@@ -168,6 +168,7 @@ describe('findRulesSkill', () => {
       'TA0040',
       'TA0042',
       'TA0043',
+      'TA0112',
     ]) {
       expect(skill.content).toContain(tactic);
     }
@@ -176,7 +177,7 @@ describe('findRulesSkill', () => {
       'Execution',
       'Persistence',
       'Privilege Escalation',
-      'Defense Evasion',
+      'Stealth',
       'Credential Access',
       'Discovery',
       'Lateral Movement',
@@ -186,6 +187,7 @@ describe('findRulesSkill', () => {
       'Impact',
       'Resource Development',
       'Reconnaissance',
+      'Defense Impairment',
     ]) {
       expect(skill.content).toContain(name);
     }

@@ -39,8 +39,8 @@ import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
  *   - `space_id` / `owner` — top-level (document-root) scoping fields for
  *     implicit-privileges DLS, matching the cases + activity surfaces.
  *     `space_id` is singular — an attachment lives in exactly one space.
- *   - `cases.id` — denormalized from the SO `references[case]` so
- *     ES|QL `LOOKUP JOIN .cases ON cases.id` works without an
+ *   - `case.id` — denormalized from the SO `references[case]` so
+ *     ES|QL `LOOKUP JOIN .cases ON case.id` works without an
  *     intermediate aggregation.
  *   - `created_by.* / updated_by.* / pushed_by.*` — flattened user
  *     refs. Match the cases surface's `created_by` shape.
@@ -91,7 +91,7 @@ export const ATTACHMENTS_INDEX_MAPPING: MappingTypeMapping = {
     space_id: { type: 'keyword' },
     owner: { type: 'keyword' },
 
-    cases: {
+    case: {
       properties: {
         // Denormalized from the SO's `references[case]`. Single value
         // per doc — an attachment belongs to exactly one case.

@@ -67,7 +67,7 @@ export class TsProject {
   }): TsProject[] {
     const mapPath = Path.resolve(__dirname, 'config-paths.json');
     if (!Fs.existsSync(mapPath)) {
-      throw new Error('missing config-paths.json file, make sure you run `yarn kbn bootstrap`');
+      throw new Error('missing config-paths.json file, make sure you run `pnpm kbn bootstrap`');
     }
 
     const refreshTsConfigPaths = () => {
@@ -78,7 +78,7 @@ export class TsProject {
     const tsConfigRepoRels: string[] = JSON.parse(Fs.readFileSync(mapPath, 'utf8'));
 
     if (!tsConfigRepoRels || !tsConfigRepoRels.length) {
-      throw new Error('TS Project map missing, make sure you run `yarn kbn bootstrap`');
+      throw new Error('TS Project map missing, make sure you run `pnpm kbn bootstrap`');
     }
 
     let ignores: Set<string>;
@@ -120,7 +120,7 @@ export class TsProject {
 
       if (options.noTsconfigPathsRefresh) {
         throw createFailError(
-          `Run "yarn kbn bootstrap" to update the tsconfig.json path cache. ${repoRel} no longer exists.`
+          `Run "pnpm kbn bootstrap" to update the tsconfig.json path cache. ${repoRel} no longer exists.`
         );
       }
 

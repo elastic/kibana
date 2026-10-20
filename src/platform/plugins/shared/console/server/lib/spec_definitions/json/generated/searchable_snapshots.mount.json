@@ -16,6 +16,12 @@
         "shared_cache"
       ]
     },
+    "data_autocomplete_rules": {
+      "index": "",
+      "renamed_index": "",
+      "index_settings": {},
+      "ignore_index_settings": []
+    },
     "methods": [
       "POST"
     ],

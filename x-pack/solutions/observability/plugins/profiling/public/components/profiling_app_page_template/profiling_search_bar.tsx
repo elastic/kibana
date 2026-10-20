@@ -7,9 +7,9 @@
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Query, TimeRange } from '@kbn/es-query';
 import { SearchBar } from '@kbn/unified-search-plugin/public';
+import { PROFILING_EVENTS_INDEX_BY_SCHEMA, ProfilingSchema } from '@kbn/profiling-utils';
 import { compact } from 'lodash';
 import React, { useEffect, useState } from 'react';
-import { INDEX_EVENTS } from '../../../common';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 
 interface Props {
@@ -29,6 +29,8 @@ interface Props {
   dataTestSubj?: string;
   showDatePicker?: boolean;
   showQueryMenu?: boolean;
+  /** Schema whose events the query suggests fields from, Universal Profiling when omitted. */
+  schema?: ProfilingSchema;
 }
 
 export function ProfilingSearchBar({
@@ -42,20 +44,35 @@ export function ProfilingSearchBar({
   dataTestSubj = 'profilingUnifiedSearchBar',
   showDatePicker = true,
   showQueryMenu = true,
+  schema = ProfilingSchema.ECS,
 }: Props) {
   const {
     start: { dataViews },
   } = useProfilingDependencies();
 
   const [dataView, setDataView] = useState<DataView>();
+  const eventsIndex = PROFILING_EVENTS_INDEX_BY_SCHEMA[schema];
 
   useEffect(() => {
+    // Ignore data views created for a previous schema that resolve after the current one
+    let isCurrent = true;
+
+    // A stable id lets the data views service reuse the data view, and its fields, once created
     dataViews
       .create({
-        title: INDEX_EVENTS,
+        id: eventsIndex,
+        title: eventsIndex,
       })
-      .then((nextDataView) => setDataView(nextDataView));
-  }, [dataViews]);
+      .then((nextDataView) => {
+        if (isCurrent) {
+          setDataView(nextDataView);
+        }
+      });
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [dataViews, eventsIndex]);
 
   const searchBarQuery: Required<React.ComponentProps<typeof SearchBar>>['query'] = {
     language: 'kuery',

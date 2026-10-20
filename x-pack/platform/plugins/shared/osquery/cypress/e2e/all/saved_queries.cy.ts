@@ -127,7 +127,7 @@ describe.skip('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
 
       // save new query from the detail page
       cy.contains('Exit full screen').should('not.exist');
-      navigateTo('/app/osquery/live_queries');
+      navigateTo('/app/osquery/history');
       cy.get('tbody tr', { timeout: 60000 })
         .first()
         .within(() => {
@@ -201,8 +201,7 @@ describe.skip('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
   // Migrated to Jest component test: public/form/results_type_field.test.tsx
   // Phase 2 migration — form field default values are UI-only assertions
 
-  // Failing: See https://github.com/elastic/kibana/issues/276571
-  describe.skip('prebuilt', () => {
+  describe('prebuilt', () => {
     let packName: string;
     let packId: string;
     let savedQueryId: string;
@@ -257,7 +256,7 @@ describe.skip('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
       // Navigate to page 2 where users_elastic is located
       cy.getBySel('pagination-button-1').click();
       cy.get(rowActionsMenuSelector('users_elastic')).click();
-      cy.contains('Edit query').click();
+      cy.contains('View query').click();
       cy.contains('Delete query').should('not.exist');
       navigateTo(`/app/osquery/saved_queries/${savedQueryId}`);
 
@@ -280,7 +279,7 @@ describe.skip('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
       cy.contains('User ID').should('exist');
       inputQuery('where name=1');
       cy.getBySel('resultsTypeField').click();
-      cy.contains('Differential (Ignore removals)').click();
+      cy.contains('Differential (ignore removals)').click();
 
       cy.get(`[aria-labelledby="flyoutTitle"]`).within(() => {
         cy.getBySel('ECSMappingEditorForm')
@@ -301,7 +300,7 @@ describe.skip('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
       cy.contains('SELECT * FROM users;where name=1');
       cy.contains('Unique identifier of the us.').should('not.exist');
       cy.contains('User ID').should('not.exist');
-      cy.contains('Differential (Ignore removals)').should('exist');
+      cy.contains('Differential (ignore removals)').should('exist');
       cy.get(`[aria-labelledby="flyoutTitle"]`).contains('Cancel').click();
     });
   });

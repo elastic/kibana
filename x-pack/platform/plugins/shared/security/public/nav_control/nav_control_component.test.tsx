@@ -10,44 +10,37 @@ import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
 
+import { useCurrentUser } from '@kbn/core-user-profile-browser-hooks';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { SecurityNavControl } from './nav_control_component';
-import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
-import { userProfileMock } from '../../common/model/user_profile.mock';
-import * as UseCurrentUserImports from '../components/use_current_user';
 
-jest.mock('../components/use_current_user');
+jest.mock('@kbn/core-user-profile-browser-hooks', () => {
+  const actual = jest.requireActual('@kbn/core-user-profile-browser-hooks');
+  return { ...actual, useCurrentUser: jest.fn() };
+});
 jest.mock('react-use/lib/useObservable');
 
 const useObservableMock = useObservable as jest.Mock;
-const useUserProfileMock = jest.spyOn(UseCurrentUserImports, 'useUserProfile');
-const useCurrentUserMock = jest.spyOn(UseCurrentUserImports, 'useCurrentUser');
+const useCurrentUserMock = useCurrentUser as jest.Mock;
 
-const userProfileWithSecurity = userProfileMock.createWithSecurity();
-const userProfile = {
-  ...userProfileWithSecurity,
-  user: {
-    ...userProfileWithSecurity.user,
-    authentication_provider: { type: 'basic', name: 'basic1' },
-  },
-};
 const userMenuLinks$ = new BehaviorSubject([]);
 
 const renderWithIntl = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
 describe('SecurityNavControl', () => {
   beforeEach(() => {
-    useUserProfileMock.mockReset();
-    useUserProfileMock.mockReturnValue({
-      loading: false,
-      value: userProfile,
-    });
-
     useCurrentUserMock.mockReset();
     useCurrentUserMock.mockReturnValue({
-      loading: false,
-      value: mockAuthenticatedUser(),
+      isLoading: false,
+      user: {
+        username: 'user',
+        email: 'email',
+        fullName: 'full name',
+        displayName: 'full name',
+        isAnonymous: false,
+        avatar: undefined,
+      },
     });
 
     useObservableMock.mockReset();
@@ -61,7 +54,6 @@ describe('SecurityNavControl', () => {
       <SecurityNavControl editProfileUrl="" logoutUrl="" userMenuLinks$={userMenuLinks$} />
     );
 
-    expect(useUserProfileMock).toHaveBeenCalledTimes(1);
     expect(useCurrentUserMock).toHaveBeenCalledTimes(1);
     expect(screen.getByTestId('userMenuButton')).toMatchInlineSnapshot(`
       <button
@@ -87,16 +79,16 @@ describe('SecurityNavControl', () => {
                 id="generated-id_euiToolTipAnchor"
               >
                 <div
-                  aria-label="some@email"
+                  aria-label="full name (email)"
                   class="euiAvatar euiAvatar--s euiAvatar--user emotion-euiAvatar-user-s-uppercase"
                   data-test-subj="userMenuAvatar"
                   role="img"
-                  style="background-color: rgb(255, 199, 219); color: rgb(0, 0, 0);"
+                  style="background-color: rgb(97, 162, 255); color: rgb(0, 0, 0);"
                 >
                   <span
                     aria-hidden="true"
                   >
-                    s
+                    fn
                   </span>
                 </div>
               </span>
@@ -108,18 +100,15 @@ describe('SecurityNavControl', () => {
   });
 
   it('should render a spinner while loading', () => {
-    useUserProfileMock.mockReturnValue({
-      loading: true,
-    });
     useCurrentUserMock.mockReturnValue({
-      loading: true,
+      isLoading: true,
+      user: null,
     });
 
     renderWithIntl(
       <SecurityNavControl editProfileUrl="" logoutUrl="" userMenuLinks$={userMenuLinks$} />
     );
 
-    expect(useUserProfileMock).toHaveBeenCalledTimes(1);
     expect(useCurrentUserMock).toHaveBeenCalledTimes(1);
     expect(screen.getByTestId('userMenuButton')).toMatchInlineSnapshot(`
       <button
@@ -164,11 +153,9 @@ describe('SecurityNavControl', () => {
   });
 
   it('should not open popover while loading', () => {
-    useUserProfileMock.mockReturnValue({
-      loading: true,
-    });
     useCurrentUserMock.mockReturnValue({
-      loading: true,
+      isLoading: true,
+      user: null,
     });
 
     renderWithIntl(
@@ -515,17 +502,15 @@ describe('SecurityNavControl', () => {
   });
 
   it('should render anonymous user', async () => {
-    useUserProfileMock.mockReturnValue({
-      loading: false,
-      value: undefined,
-      error: new Error('404'),
-    });
-
     useCurrentUserMock.mockReturnValue({
-      loading: false,
-      value: mockAuthenticatedUser({
-        authentication_provider: { type: 'anonymous', name: 'does no matter' },
-      }),
+      isLoading: false,
+      user: {
+        username: 'user',
+        fullName: 'full name',
+        displayName: 'full name',
+        isAnonymous: true,
+        avatar: undefined,
+      },
     });
 
     renderWithIntl(

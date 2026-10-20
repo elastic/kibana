@@ -38,12 +38,12 @@ interface BulkRollbackTaskState {
 }
 
 export async function _runBulkRollbackTask({
-  abortController,
+  signal,
   taskParams,
   logger,
 }: {
   taskParams: BulkRollbackTaskParams;
-  abortController: AbortController;
+  signal: AbortSignal;
   logger: Logger;
 }) {
   const { packages, spaceId = DEFAULT_SPACE_ID, packagePolicyIdsForCurrentUser } = taskParams;
@@ -52,7 +52,7 @@ export async function _runBulkRollbackTask({
 
   for (const pkg of packages) {
     // Throw between package rollback if task is aborted
-    if (abortController.signal.aborted) {
+    if (signal.aborted) {
       throw new Error('Task was aborted');
     }
     try {

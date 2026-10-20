@@ -7,15 +7,14 @@
 
 import React, { memo } from 'react';
 import { EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
 import { ToolsFlyoutHeader } from '../../../../shared/components/tools_flyout_header';
 import { AnomaliesTab } from '../../../../../entity_analytics/components/anomalies/anomalies_tab';
+import type { EntityViewMode } from '../../../../../../common/entity_analytics/entity_store/resolution_group';
+import { ANOMALY_INSIGHTS_TITLE } from '../../../../shared/constants/flyout_titles';
 import { ANOMALY_INSIGHTS_TOOL_TEST_ID } from './test_ids';
 
-const TITLE = i18n.translate('xpack.securitySolution.flyout.entityDetails.anomalyInsights.title', {
-  defaultMessage: 'Behavioral anomalies',
-});
+const TITLE = ANOMALY_INSIGHTS_TITLE;
 
 const ICON_TYPE = { [EntityType.host]: 'storage', [EntityType.user]: 'user' } as const;
 
@@ -26,6 +25,8 @@ export interface AnomalyInsightsProps {
   value: string;
   /** Canonical Entity Store v2 id (`entity.id`) used to query anomalies. */
   entityId?: string;
+  /** `resolved` shows the anomalies of the whole resolution group; defaults to `single`. */
+  mode?: EntityViewMode;
   /** Opens the originating entity flyout as a child. */
   onOpenEntity?: () => void;
 }
@@ -34,7 +35,7 @@ export interface AnomalyInsightsProps {
  * Tool flyout displaying the full behavioral anomalies view for an entity.
  */
 export const AnomalyInsights = memo(
-  ({ entityType, value, entityId, onOpenEntity }: AnomalyInsightsProps) => {
+  ({ entityType, value, entityId, mode, onOpenEntity }: AnomalyInsightsProps) => {
     return (
       <>
         <EuiFlyoutHeader hasBorder>
@@ -46,7 +47,12 @@ export const AnomalyInsights = memo(
           />
         </EuiFlyoutHeader>
         <EuiFlyoutBody data-test-subj={ANOMALY_INSIGHTS_TOOL_TEST_ID}>
-          <AnomaliesTab entityId={entityId ?? ''} entityType={entityType} />
+          <AnomaliesTab
+            entityId={entityId ?? ''}
+            entityName={value}
+            entityType={entityType}
+            mode={mode}
+          />
         </EuiFlyoutBody>
       </>
     );

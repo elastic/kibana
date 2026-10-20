@@ -21,7 +21,7 @@ import { getOr } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import type { ComponentType } from 'react';
 import React, { useCallback, useContext, useEffect, useMemo, useRef } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 
 import styled, { ThemeContext } from 'styled-components';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';

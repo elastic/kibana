@@ -9,10 +9,10 @@ import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { Request } from '@kbn/core-di-server';
 import type { z } from '@kbn/zod/v4';
 import {
-  createRuleDataSchema,
+  putRuleDataSchema,
   errorResponseSchema,
   ruleResponseSchema,
-  type CreateRuleData,
+  type PutRuleData,
 } from '@kbn/alerting-v2-schemas';
 
 import { BaseAlertingRoute } from '../base_alerting_route';
@@ -21,6 +21,9 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ruleIdParamsSchema } from './route_schemas';
 import { RulesClient } from '../../lib/rules_client/rules_client';
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
+import { RULE_UPSERT_CONFLICT_DESCRIPTION } from './rule_response_descriptions';
+import { upsertRuleOasExamples } from './upsert_rule_oas_example';
 
 @injectable()
 export class UpsertRuleRoute extends BaseAlertingRoute {
@@ -32,13 +35,16 @@ export class UpsertRuleRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
+    access: 'public' as const,
+    availability: { stability: 'stable', since: '9.6.0' },
     summary: 'Create or replace a rule',
     description:
       'Creates a rule with the given identifier, or fully replaces it if one already exists.',
+    oasOperationObject: upsertRuleOasExamples,
   } as const;
   static schemas = {
     request: {
-      body: createRuleDataSchema,
+      body: putRuleDataSchema,
       params: ruleIdParamsSchema,
     },
     response: {
@@ -52,16 +58,11 @@ export class UpsertRuleRoute extends BaseAlertingRoute {
       },
       400: {
         body: () => errorResponseSchema,
-        description: 'Indicates an invalid schema or parameters.',
-      },
-      404: {
-        body: () => errorResponseSchema,
-        description: 'Indicates the rule with the given ID does not exist.',
+        description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
       },
       409: {
         body: () => errorResponseSchema,
-        description:
-          'Indicates the rule was created or updated concurrently, or the request changes immutable fields.',
+        description: RULE_UPSERT_CONFLICT_DESCRIPTION,
       },
     },
   };
@@ -74,7 +75,7 @@ export class UpsertRuleRoute extends BaseAlertingRoute {
     private readonly request: KibanaRequest<
       z.infer<typeof ruleIdParamsSchema>,
       unknown,
-      CreateRuleData
+      PutRuleData
     >,
     @inject(RulesClient) private readonly rulesClient: RulesClient
   ) {

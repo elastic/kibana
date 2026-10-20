@@ -5,20 +5,33 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiComboBox } from '@elastic/eui';
+import { EuiButtonIcon, EuiComboBox, EuiCopy, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import {
+  createTagsPasteHandler,
+  getNewTags,
+  splitTags,
+} from '@kbn/observability-shared-plugin/public';
 
 export interface FormattedComboBoxProps {
   onChange: (value: string[]) => void;
   onBlur?: () => void;
   selectedOptions: string[];
+  // Opt-in copy button; the combo box steals focus on click, so pills can't be
+  // drag-selected/copied. Only meaningful for tag-like fields.
+  enableCopy?: boolean;
+  options?: Array<EuiComboBoxOptionOption<string>>;
+  isLoading?: boolean;
 }
 
 export const FormattedComboBox = ({
   onChange,
   onBlur,
   selectedOptions,
+  enableCopy = false,
+  options,
   ...props
 }: FormattedComboBoxProps) => {
   const [formattedSelectedOptions, setSelectedOptions] = useState<
@@ -27,29 +40,32 @@ export const FormattedComboBox = ({
   const [isInvalid, setInvalid] = useState(false);
 
   const onOptionsChange = useCallback(
-    (options: Array<EuiComboBoxOptionOption<string>>) => {
-      setSelectedOptions(options);
-      const formattedTags = options.map((option) => option.label);
+    (newOptions: Array<EuiComboBoxOptionOption<string>>) => {
+      setSelectedOptions(newOptions);
+      const formattedTags = newOptions.map((option) => option.label);
       onChange(formattedTags);
       setInvalid(false);
     },
     [onChange, setSelectedOptions, setInvalid]
   );
 
-  const onCreateOption = useCallback(
-    (tag: string) => {
-      const formattedTag = tag.trim();
-      const newOption = {
-        label: formattedTag,
-      };
+  const addTags = useCallback(
+    (rawValues: string[]) => {
+      const newTags = getNewTags(selectedOptions, rawValues);
 
-      onChange([...selectedOptions, formattedTag]);
+      if (newTags.length === 0) {
+        return;
+      }
 
-      // Select the option.
-      setSelectedOptions([...formattedSelectedOptions, newOption]);
+      onChange([...selectedOptions, ...newTags]);
+      setSelectedOptions([...formattedSelectedOptions, ...newTags.map((label) => ({ label }))]);
     },
     [onChange, formattedSelectedOptions, selectedOptions, setSelectedOptions]
   );
+
+  const onCreateOption = useCallback((tag: string) => addTags(splitTags(tag)), [addTags]);
+
+  const onPaste = useMemo(() => createTagsPasteHandler(addTags), [addTags]);
 
   const onSearchChange = useCallback(
     (searchValue: string) => {
@@ -64,18 +80,55 @@ export const FormattedComboBox = ({
     [setInvalid]
   );
 
-  return (
+  const comboBox = (
     <EuiComboBox<string>
       data-test-subj="syntheticsFleetComboBox"
-      noSuggestions
+      noSuggestions={!options?.length}
+      options={options}
       selectedOptions={formattedSelectedOptions}
       onCreateOption={onCreateOption}
       onChange={onOptionsChange}
       onBlur={() => onBlur?.()}
       onSearchChange={onSearchChange}
+      onPaste={onPaste}
       isInvalid={isInvalid}
       {...props}
     />
+  );
+
+  if (!enableCopy) {
+    return comboBox;
+  }
+
+  const tagsToCopy = formattedSelectedOptions.map((option) => option.label).join('\n');
+  const copyTags = i18n.translate('xpack.synthetics.comboBox.copyTagsAriaLabel', {
+    defaultMessage: 'Copy tags',
+  });
+
+  return (
+    <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="flexStart">
+      <EuiFlexItem>{comboBox}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiCopy
+          textToCopy={tagsToCopy}
+          beforeMessage={copyTags}
+          tooltipProps={{ disableScreenReaderOutput: true }}
+        >
+          {(copy) => (
+            <EuiButtonIcon
+              iconType="copy"
+              display="base"
+              size="m"
+              color="text"
+              onClick={copy}
+              isDisabled={formattedSelectedOptions.length === 0}
+              data-test-subj="syntheticsFleetComboBoxCopyButton"
+              aria-label={copyTags}
+            />
+          )}
+        </EuiCopy>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 

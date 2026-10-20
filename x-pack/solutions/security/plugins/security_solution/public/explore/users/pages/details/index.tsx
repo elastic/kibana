@@ -17,7 +17,7 @@ import {
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { useLocation } from 'react-router-dom';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
@@ -194,7 +194,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
   );
 
   const { dataView, status } = useDataView(PageScope.explore);
-  const selectedPatterns = useSelectedPatterns(PageScope.explore);
+  const selectedPatterns = useSelectedPatterns(dataView);
   const indicesExist = dataView.hasMatchedIndices();
 
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
@@ -226,8 +226,8 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
       return legacyFilters;
     }
 
-    const entityDslFilter = euidApi?.euid?.dsl.getEuidFilterBasedOnDocument(
-      EntityType.user,
+    const entityDslFilter = euidApi?.euid?.dsl.getEuidFilterBasedOnEntityRecord(
+      euidApi.getBuiltInEntityDefinition(EntityType.user),
       entityFromStoreResult.entityRecord
     );
     return entityDslFilter ? euidDslFilterToPageFilters(entityDslFilter) : legacyFilters;
@@ -236,7 +236,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     entityFromStoreResult.entityRecord,
     entityStoreV2Enabled,
     noEntityInStore,
-    euidApi?.euid,
+    euidApi,
   ]);
 
   const { indexPatterns: securityDefaultPatterns } = useSecurityDefaultPatterns();
@@ -254,6 +254,8 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     startDate: from,
     userName: detailName,
     entityId: entityStoreV2Enabled ? entityFromStoreResult?.entityRecord?.entity?.id : undefined,
+    entityRecord: entityStoreV2Enabled ? entityFromStoreResult?.entityRecord : undefined,
+    entityStoreInitialLoading: entityStoreV2Enabled && entityFromStoreResult.isInitialLoading,
     indexNames: selectedPatterns,
     skip: selectedPatterns.length === 0,
   });
@@ -405,6 +407,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
                     contextID={PageScope.explore}
                     scopeId={PageScope.explore}
                     queryId={USER_PANEL_OBSERVED_USER_QUERY_ID}
+                    hideAnomalies={false}
                   />
                   <EuiHorizontalRule />
                   <EuiSpacer />
@@ -427,13 +430,13 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
                       type: UsersType.details,
                       userName: detailName,
                       identityFields: resolvedIdentityFields,
-                      euid: euidApi?.euid,
+                      euidApi: euidApi ?? undefined,
                       entityRecord: entityStoreV2Enabled
                         ? entityFromStoreResult.entityRecord
                         : undefined,
                     })}
                     filterQuery={buildAnomaliesTableInfluencersFilterQuery({
-                      euid: euidApi?.euid,
+                      euidApi: euidApi ?? undefined,
                       entityType: 'user',
                       entityRecord: entityStoreV2Enabled
                         ? entityFromStoreResult.entityRecord

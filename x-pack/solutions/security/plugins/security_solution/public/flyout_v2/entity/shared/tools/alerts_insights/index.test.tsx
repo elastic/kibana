@@ -44,13 +44,17 @@ jest.mock(
       value,
       entityId,
       entityType,
+      mode,
+      scopeId,
       onShowAlert,
     }: {
       field: string;
       value: string;
       entityId?: string;
       entityType?: string;
-      onShowAlert?: (eventId: string, indexName: string) => void;
+      mode?: string;
+      scopeId?: string;
+      onShowAlert?: (eventId: string, indexName: string, ruleName?: string) => void;
     }) => (
       <button
         type="button"
@@ -59,7 +63,9 @@ jest.mock(
         data-value={value}
         data-entity-id={entityId ?? ''}
         data-entity-type={entityType ?? ''}
-        onClick={() => onShowAlert?.('event-1', '.alerts-security')}
+        data-mode={mode ?? ''}
+        data-scope-id={scopeId ?? ''}
+        onClick={() => onShowAlert?.('event-1', '.alerts-security', 'My Alert Rule')}
       >
         {'alerts-table'}
       </button>
@@ -81,14 +87,15 @@ jest.mock('../../../../shared/components/cell_actions', () => ({
 
 jest.mock('../../../../shared/hooks/use_default_flyout_properties', () => ({
   useDefaultDocumentFlyoutProperties: () => ({ size: 'm' }),
+  useDefaultToolsFlyoutProperties: () => ({ minWidth: 384, size: 'm' }),
 }));
 
 jest.mock('../../../../../common/hooks/is_in_security_app', () => ({
   useIsInSecurityApp: () => true,
 }));
 
-jest.mock('react-redux', () => ({
-  ...jest.requireActual('react-redux'),
+jest.mock('react-redux-v7', () => ({
+  ...jest.requireActual('react-redux-v7'),
   useStore: () => ({}),
 }));
 
@@ -101,6 +108,8 @@ jest.mock('../../../../../common/lib/kibana', () => ({
   useKibana: () => ({
     services: {
       overlays: { openSystemFlyout: mockOpenSystemFlyout },
+      storage: { get: jest.fn(), set: jest.fn(), remove: jest.fn() },
+      telemetry: { reportEvent: jest.fn() },
     },
   }),
 }));
@@ -108,6 +117,7 @@ jest.mock('../../../../../common/lib/kibana', () => ({
 describe('<AlertsInsights /> host', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockOpenSystemFlyout.mockReturnValue({ onClose: Promise.resolve(), close: jest.fn() });
   });
 
   it('renders the header with the title, host label and storage icon', () => {
@@ -134,6 +144,33 @@ describe('<AlertsInsights /> host', () => {
     expect(table).toHaveAttribute('data-value', 'my-host');
     expect(table).toHaveAttribute('data-entity-id', 'euid-123');
     expect(table).toHaveAttribute('data-entity-type', 'host');
+    expect(table).toHaveAttribute('data-mode', '');
+  });
+
+  it('forwards the originating scope id to the alerts table', () => {
+    const { getByTestId } = render(
+      <AlertsInsights
+        entityType={EntityType.host}
+        value="my-host"
+        scopeId="entity-analytics-home-table"
+      />
+    );
+    expect(getByTestId('mockAlertsDetailsTable')).toHaveAttribute(
+      'data-scope-id',
+      'entity-analytics-home-table'
+    );
+  });
+
+  it('forwards the resolved mode to the alerts table', () => {
+    const { getByTestId } = render(
+      <AlertsInsights
+        entityType={EntityType.host}
+        value="my-host"
+        entityId="euid-123"
+        mode="resolved"
+      />
+    );
+    expect(getByTestId('mockAlertsDetailsTable')).toHaveAttribute('data-mode', 'resolved');
   });
 
   it('forwards onShowEntity to the header click handler', () => {
@@ -151,7 +188,7 @@ describe('<AlertsInsights /> host', () => {
     expect(mockOpenSystemFlyout).toHaveBeenCalledTimes(1);
     expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
       expect.anything(),
-      expect.objectContaining({ session: 'inherit' })
+      expect.objectContaining({ session: 'inherit', title: 'Alert: My Alert Rule' })
     );
   });
 });

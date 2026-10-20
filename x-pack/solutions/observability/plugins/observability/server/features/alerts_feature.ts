@@ -15,17 +15,23 @@ export const getObservabilityAlertsFeature = (): KibanaFeatureConfig => {
   return {
     id: observabilityAlertsFeatureId,
     name: i18n.translate('xpack.observability.featureRegistry.observabilityAlertsTitle', {
-      defaultMessage: 'Observability Alerts',
+      defaultMessage: 'Classic Observability Alerts',
     }),
     order: 1300,
     category: DEFAULT_APP_CATEGORIES.observability,
     app: [],
     catalogue: [],
+    management: {
+      insightsAndAlerting: ['triggersActionsAlerts'],
+    },
     alerting: OBS_ALERTING_FEATURES,
     privileges: {
       all: {
         app: [],
         catalogue: [],
+        management: {
+          insightsAndAlerting: ['triggersActionsAlerts'],
+        },
         savedObject: { all: [], read: [] },
         alerting: {
           alert: { all: OBS_ALERTING_FEATURES },
@@ -37,6 +43,9 @@ export const getObservabilityAlertsFeature = (): KibanaFeatureConfig => {
       read: {
         app: [],
         catalogue: [],
+        management: {
+          insightsAndAlerting: ['triggersActionsAlerts'],
+        },
         savedObject: { all: [], read: [] },
         alerting: {
           alert: { read: OBS_ALERTING_FEATURES },

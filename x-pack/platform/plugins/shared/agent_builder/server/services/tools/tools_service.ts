@@ -14,6 +14,7 @@ import type {
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { Runner } from '@kbn/agent-builder-server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { isAllowedBuiltinTool } from '@kbn/agent-builder-server/allow_lists';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
@@ -44,6 +45,7 @@ export interface ToolsServiceStartDeps {
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
   actions: ActionsPluginStart;
+  securityPlugin: SecurityPluginStart | undefined;
 }
 
 export class ToolsService {
@@ -77,11 +79,13 @@ export class ToolsService {
     uiSettings,
     savedObjects,
     actions,
+    securityPlugin,
   }: ToolsServiceStartDeps): ToolsServiceStart {
     const { logger, workflowsManagement, config } = this.setupDeps!;
 
     const toolTypes = getToolTypeDefinitions({
       workflowsManagement,
+      security: securityPlugin,
       actions,
       indexSearchDeps: {
         uiSettings,

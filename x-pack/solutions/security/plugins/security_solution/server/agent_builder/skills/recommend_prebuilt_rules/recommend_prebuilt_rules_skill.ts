@@ -68,8 +68,8 @@ The goal is to surface rules that are **worth installing here.** Four factors ma
 
 1. **Data availability gates the set.** Lead with rules whose related integrations the user already has; surface high-value rules that need missing integrations separately, not interleaved (see Integration Coverage). This decides what is recommendable, not the order within it. (Factor: *user has the data*.)
 2. **Threat impact sets the rank.** Within recommendable rules, prefer the ones that matter most, weighing three things together:
-   - **Tactic criticality** — read from each rule's triage \`threat\` (its \`tactic\` entries; a multi-tactic rule takes its highest-ranked tactic). v18 order, highest first:
-     - **Critical:** Credential Access, Lateral Movement, Privilege Escalation, Defense Evasion
+   - **Tactic criticality** — read from each rule's triage \`threat\` (its \`tactic\` entries; a multi-tactic rule takes its highest-ranked tactic). v19 order, highest first:
+     - **Critical:** Credential Access, Lateral Movement, Privilege Escalation, Stealth, Defense Impairment
      - **High:** Command and Control, Execution, Exfiltration, Impact
      - **Medium:** Persistence, Initial Access, Collection
      - **Lower:** Discovery, Resource Development, Reconnaissance
@@ -128,7 +128,7 @@ Every tag value, rule name, \`rule_id\`, count, total, and MITRE tactic/techniqu
 
 **Coverage intent** ("which MITRE tactics am I missing?"):
 1. Call \`security.get_installed_rules_mitre_coverage\`. Frame the answer with \`total_with_mitre_mapping\` out of \`total_installed_rules\` (e.g. "of your 320 installed rules, 290 carry MITRE mappings") so the user knows how much of their estate the coverage reflects.
-2. Diff its \`tactics\` against the canonical 14 below — any tactic not present has zero installed coverage.
+2. Diff its \`tactics\` against the canonical 15 below — any tactic not present has zero installed coverage.
 3. Use the per-\`technique\` counts to judge depth **within** a covered tactic: a high tactic count can still be lopsided (many rules on a few techniques, none on others). The result lists only techniques with coverage, so a technique you'd expect from your own ATT&CK knowledge but don't see has zero installed coverage — call those out as thin spots even when the parent tactic looks covered.
 4. To recommend rules that fill the gaps, call \`security.find_prebuilt_rules\` with \`mitreTactic: ["<TA-ID-1>", "<TA-ID-2>", ...]\` for the missing tactics in one call (or one call per tactic when you want balanced coverage of each). For a thin technique inside an otherwise-covered tactic, target it directly with \`mitreTechnique: ["<T-ID>"]\`.
 
@@ -181,7 +181,7 @@ Priority:
 | TA0002 | Execution |
 | TA0003 | Persistence |
 | TA0004 | Privilege Escalation |
-| TA0005 | Defense Evasion |
+| TA0005 | Stealth |
 | TA0006 | Credential Access |
 | TA0007 | Discovery |
 | TA0008 | Lateral Movement |
@@ -191,6 +191,7 @@ Priority:
 | TA0040 | Impact |
 | TA0042 | Resource Development |
 | TA0043 | Reconnaissance |
+| TA0112 | Defense Impairment |
 
 ## Integration Coverage
 
@@ -219,7 +220,7 @@ Do **not** re-call \`security.get_user_data_inventory\`, \`security.get_installa
 - For **install recommendations**, justify each recommended rule in a few words (why it fits the user's data or coverage gap), and group "related integration installed" vs "needs another integration" — at most 5 rules per group.
 - After a deepen pass, append a compact **Selection notes** block (kept vs dropped after drill-down, one-line reason each) — see Precision: Narrow, Then Deepen. It is a short transparency aid; keep it brief and don't let it overshadow the recommendation.
 - For pure **count** questions, answer from \`total\` with \`perPage: 1\`; no table needed.
-- For **coverage** questions, list covered tactics and explicitly call out the missing ones from the canonical 14.
+- For **coverage** questions, list covered tactics and explicitly call out the missing ones from the canonical 15.
 - Offer a follow-up refinement ("want me to narrow to critical only, or to your endpoint data?").
 
 ## Worked Examples
@@ -234,7 +235,7 @@ Each maps a user request to the tool call(s). These are patterns for you, not sc
 - "Do you have a rule that mentions mimikatz?" -> \`security.find_prebuilt_rules { filter: { keywords: "mimikatz" } }\` (searches description too).
 - "Show me critical ES|QL rules to install" -> \`security.find_prebuilt_rules { filter: { severity: ["critical"], ruleType: ["esql"] } }\`.
 - "How many LLM rules can I install?" -> \`security.get_installable_catalog_overview\` (read the \`Domain: LLM\` tag count); confirm with \`security.find_prebuilt_rules { filter: { tags: ["Domain: LLM"] }, perPage: 1 }\` and answer from \`total\`.
-- "Which MITRE tactics am I missing?" -> \`security.get_installed_rules_mitre_coverage\`, then diff against the canonical 14.
+- "Which MITRE tactics am I missing?" -> \`security.get_installed_rules_mitre_coverage\`, then diff against the canonical 15.
 - "Recommend rules to fill those gaps" -> \`security.find_prebuilt_rules { filter: { mitreTactic: ["<TA-ID-1>", "<TA-ID-2>", ...] } }\` for the missing tactics in one call (or one call per tactic if you want balanced coverage of each), prioritizing rules whose related integrations are already installed.
 
 ## No Actions

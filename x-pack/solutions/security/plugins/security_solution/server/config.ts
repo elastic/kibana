@@ -8,6 +8,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { PluginInitializerContext } from '@kbn/core/server';
+import { DEFAULT_ALERT_SAMPLE_SIZE } from './lib/entity_analytics/risk_score/constants';
 import { SIGNALS_INDEX_KEY, DEFAULT_SIGNALS_INDEX } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
@@ -151,7 +152,7 @@ export const configSchema = schema.object({
    * The Max number of Bytes allowed for the `upload` endpoint response action
    */
   maxUploadResponseActionFileBytes: schema.number({
-    defaultValue: 5e8, // 500MB
+    defaultValue: 200 * 2 ** 20, // 200MiB
     max: Number.MAX_SAFE_INTEGER,
   }),
 
@@ -184,7 +185,7 @@ export const configSchema = schema.object({
   }),
   entityAnalytics: schema.object({
     riskEngine: schema.object({
-      alertSampleSizePerShard: schema.number({ defaultValue: 10_000 }),
+      alertSampleSizePerShard: schema.number({ defaultValue: DEFAULT_ALERT_SAMPLE_SIZE }),
     }),
     assetCriticality: schema.object({
       csvUpload: schema.object({

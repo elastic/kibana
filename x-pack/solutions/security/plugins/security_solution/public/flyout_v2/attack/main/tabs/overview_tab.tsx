@@ -7,26 +7,14 @@
 
 import React, { memo, useCallback } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
-import { useStore } from 'react-redux';
-import { useHistory } from 'react-router-dom';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
-import { useKibana } from '../../../../common/lib/kibana';
-import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
-import {
-  defaultToolsFlyoutProperties,
-  useDefaultDocumentFlyoutProperties,
-} from '../../../shared/hooks/use_default_flyout_properties';
-import { flyoutProviders } from '../../../shared/components/flyout_provider';
-import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_history';
-import { noopCellActionRenderer } from '../../../shared/components/cell_actions';
-import { DocumentFlyoutWrapper } from '../../../document/main/document_flyout_wrapper';
-import { CorrelationsDetails } from '../../tools/correlations';
-import { EntitiesDetails } from '../../tools/entities';
+import type { CellActionRenderer } from '../../../shared/components/cell_actions';
+import { useFlyoutApi } from '../../../use_flyout_api';
 import { AISummarySection } from '../components/ai_summary_section';
 import { VisualizationsSection } from '../components/visualizations_section';
 import { InsightsSection } from '../components/insights_section';
 import { useAttackAlertIds } from '../hooks/use_attack_alert_ids';
+import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 
 export interface OverviewTabProps {
   /**
@@ -37,6 +25,10 @@ export interface OverviewTabProps {
    * Callback invoked after alert mutations to refresh the flyout content.
    */
   onAttackUpdated: () => void;
+  /**
+   * Renderer for cell actions in nested alert flyouts.
+   */
+  renderCellActions: CellActionRenderer;
 }
 
 /**
@@ -45,72 +37,39 @@ export interface OverviewTabProps {
  * the legacy attack details flyout. Owns the callbacks that open the Entities/Correlations tools
  * (and, from Correlations, an alert) as child flyouts via the new flyout system.
  */
-export const OverviewTab = memo(({ hit, onAttackUpdated }: OverviewTabProps) => {
-  const { services } = useKibana();
-  const { overlays } = services;
-  const store = useStore();
-  const history = useHistory();
-  const isInSecurityApp = useIsInSecurityApp();
-  const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
-  const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
+export const OverviewTab = memo(({ hit, onAttackUpdated, renderCellActions }: OverviewTabProps) => {
+  const { openAttackCorrelations, openAttackEntities, openDocumentFlyoutFromIndexAsChild } =
+    useFlyoutApi();
 
   const alertIds = useAttackAlertIds(hit);
 
   const onShowAlert = useCallback(
-    (id: string, indexName: string) =>
-      overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: (
-            <DocumentFlyoutWrapper
-              documentId={id}
-              indexName={indexName}
-              renderCellActions={noopCellActionRenderer}
-              onAlertUpdated={onAttackUpdated}
-            />
-          ),
-        }),
-        { ...defaultDocumentFlyoutProperties, historyKey, session: 'inherit' }
-      ),
-    [
-      defaultDocumentFlyoutProperties,
-      history,
-      historyKey,
-      onAttackUpdated,
-      overlays,
-      services,
-      store,
-    ]
+    (id: string, indexName: string, title?: string) =>
+      openDocumentFlyoutFromIndexAsChild({
+        documentId: id,
+        indexName,
+        renderCellActions,
+        onAlertUpdated: onAttackUpdated,
+        origin: FLYOUT_ORIGIN.CORRELATIONS_ALERT,
+        title,
+      }),
+    [openDocumentFlyoutFromIndexAsChild, onAttackUpdated, renderCellActions]
   );
 
   const onShowCorrelations = useCallback(
     () =>
-      overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: <CorrelationsDetails hit={hit} alertIds={alertIds} onShowAlert={onShowAlert} />,
-        }),
-        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' }
-      ),
-    [alertIds, history, historyKey, hit, onShowAlert, overlays, services, store]
+      openAttackCorrelations({
+        hit,
+        alertIds,
+        onShowAlert,
+        origin: FLYOUT_ORIGIN.INSIGHTS_CORRELATIONS,
+      }),
+    [openAttackCorrelations, hit, alertIds, onShowAlert]
   );
 
   const onShowEntities = useCallback(
-    () =>
-      overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: <EntitiesDetails hit={hit} alertIds={alertIds} />,
-        }),
-        { ...defaultToolsFlyoutProperties, historyKey, session: 'start' }
-      ),
-    [alertIds, history, historyKey, hit, overlays, services, store]
+    () => openAttackEntities({ hit, alertIds, origin: FLYOUT_ORIGIN.INSIGHTS_ENTITIES }),
+    [openAttackEntities, hit, alertIds]
   );
 
   return (

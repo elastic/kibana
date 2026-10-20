@@ -73,6 +73,9 @@ export const emitWorkflowDiff = async (
     proposalId: input.proposalId,
     beforeYaml: input.beforeYaml,
     afterYaml: input.afterYaml,
+    // Stable per-editor id the client scopes edits by (works when workflowId
+    // is undefined on /workflows/create). See AttachmentBridge.
+    attachmentId,
     workflowId: input.workflowId,
     name: input.name,
     attachmentVersion,

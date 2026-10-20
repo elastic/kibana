@@ -100,7 +100,7 @@ export const useApplicationConnectionsTableColumns = ({
                   ? labels.groupedColumns.collapseRowAriaLabel
                   : labels.groupedColumns.expandRowAriaLabel
               }
-              iconType={isOpen ? 'arrowDown' : 'arrowRight'}
+              iconType={isOpen ? 'chevronSingleDown' : 'chevronSingleRight'}
               onClick={() => onToggleExpand(client.id)}
             />
           </EuiToolTip>

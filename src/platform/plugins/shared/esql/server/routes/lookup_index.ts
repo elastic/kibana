@@ -27,7 +27,8 @@ export const registerLookupIndexRoutes = (
       path: `${LOOKUP_INDEX_UPDATE_ROUTE}/{indexName}`,
       validate: {
         params: schema.object({
-          indexName: schema.string(),
+          // Elasticsearch index names are limited to 255 bytes.
+          indexName: schema.string({ maxLength: 255 }),
         }),
         body: schema.object({
           // maxSize is added here to prevent DoS vulnerabilities https://github.com/elastic/kibana/pull/245533,
@@ -85,7 +86,8 @@ export const registerLookupIndexRoutes = (
       path: `${LOOKUP_INDEX_CREATE_ROUTE}/{indexName}`,
       validate: {
         params: schema.object({
-          indexName: schema.string(),
+          // Elasticsearch index names are limited to 255 bytes.
+          indexName: schema.string({ maxLength: 255 }),
         }),
       },
       security: {
@@ -141,7 +143,8 @@ export const registerLookupIndexRoutes = (
       path: `${LOOKUP_INDEX_RECREATE_ROUTE}/{indexName}`,
       validate: {
         params: schema.object({
-          indexName: schema.string(),
+          // Elasticsearch index names are limited to 255 bytes.
+          indexName: schema.string({ maxLength: 255 }),
         }),
       },
       security: {
@@ -201,7 +204,8 @@ export const registerLookupIndexRoutes = (
     {
       path: LOOKUP_INDEX_PRIVILEGES_ROUTE,
       validate: {
-        query: schema.object({ indexName: schema.maybe(schema.string()) }),
+        // indexName may hold a comma-separated list of index names.
+        query: schema.object({ indexName: schema.maybe(schema.string({ maxLength: 1000 })) }),
       },
       security: {
         authz: {
@@ -268,7 +272,8 @@ export const registerLookupIndexRoutes = (
           properties: schema.object({}, { unknowns: 'allow' }),
         }),
         params: schema.object({
-          indexName: schema.string(),
+          // Elasticsearch index names are limited to 255 bytes.
+          indexName: schema.string({ maxLength: 255 }),
         }),
       },
     },

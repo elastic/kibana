@@ -18,11 +18,11 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { DocumentToolsFlyoutHeader } from '../../../shared/components/document_tools_flyout_header';
 import { OpenFlyoutLink } from '../../../shared/components/open_flyout_link';
+import { useEntityFlyoutOverrides } from '../../../shared/hooks/use_entity_flyout_overrides';
 import {
   AttackHostInsightsRow,
   AttackUserInsightsRow,
@@ -33,10 +33,7 @@ import {
   ATTACK_ENTITIES_TOOL_LOADING_TEST_ID,
   ATTACK_ENTITIES_TOOL_TEST_ID,
 } from './test_ids';
-
-const TITLE = i18n.translate('xpack.securitySolution.flyoutV2.attack.tools.entities.title', {
-  defaultMessage: 'Entities',
-});
+import { ATTACK_ENTITIES_TITLE } from '../../../shared/constants/flyout_titles';
 
 export interface EntitiesDetailsProps {
   /**
@@ -63,13 +60,14 @@ export const EntitiesDetails = memo(({ hit, alertIds }: EntitiesDetailsProps) =>
 
   const hasEntities = userEntityEntries.length > 0 || hostEntityEntries.length > 0;
 
-  // The reused legacy entity overview renders host.ip via the expandable-flyout `FlyoutLink`,
-  // which has no rendered flyout to open into here. Supply a renderer that opens the network
-  // flyout as a child through the new flyout system instead.
   const renderIpLink = useCallback(
     (ip: string) => <OpenFlyoutLink field="host.ip" value={ip} />,
     []
   );
+
+  // The attack tool has no single representative document (it aggregates across many alerts),
+  // so hit is omitted — openUserFlyoutAsChild / openHostFlyoutAsChild receive hit=undefined.
+  const { buildUserOverrides, buildHostOverrides } = useEntityFlyoutOverrides({ scopeId: '' });
 
   return (
     <>
@@ -79,7 +77,7 @@ export const EntitiesDetails = memo(({ hit, alertIds }: EntitiesDetailsProps) =>
           padding-block: ${euiTheme.size.s} !important;
         `}
       >
-        <DocumentToolsFlyoutHeader title={TITLE} hit={hit} />
+        <DocumentToolsFlyoutHeader title={ATTACK_ENTITIES_TITLE} hit={hit} />
       </EuiFlyoutHeader>
       <EuiFlyoutBody data-test-subj={ATTACK_ENTITIES_TOOL_TEST_ID}>
         {loading && (
@@ -87,6 +85,7 @@ export const EntitiesDetails = memo(({ hit, alertIds }: EntitiesDetailsProps) =>
         )}
         {!loading && error && (
           <EuiCallOut
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.securitySolution.flyoutV2.attack.tools.entities.errorTitle"
@@ -126,13 +125,13 @@ export const EntitiesDetails = memo(({ hit, alertIds }: EntitiesDetailsProps) =>
                       index
                     }`}
                   >
-                    {/* TODO: open host/user flyout when available (host/user flyout v2 is not merged yet) */}
                     <AttackUserInsightsRow
                       identityFields={entry.identityFields}
                       sampleSource={entry.sampleSource}
                       timestamp={timestamp}
                       scopeId=""
                       renderIpLink={renderIpLink}
+                      buildEntityOverrides={buildUserOverrides}
                     />
                     <EuiSpacer size="s" />
                   </React.Fragment>
@@ -159,13 +158,13 @@ export const EntitiesDetails = memo(({ hit, alertIds }: EntitiesDetailsProps) =>
                       index
                     }`}
                   >
-                    {/* TODO: open host/user flyout when available (host/user flyout v2 is not merged yet) */}
                     <AttackHostInsightsRow
                       identityFields={entry.identityFields}
                       sampleSource={entry.sampleSource}
                       timestamp={timestamp}
                       scopeId=""
                       renderIpLink={renderIpLink}
+                      buildEntityOverrides={buildHostOverrides}
                     />
                     <EuiSpacer size="s" />
                   </React.Fragment>

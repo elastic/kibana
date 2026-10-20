@@ -46,10 +46,17 @@ Also read thoroughly:
 - The FTR config(s): capture every `kbnTestServer.serverArgs`, `esTestCluster.serverArgs`, `security.roles`, `security.defaultRoles`, `apps`, `testFiles`, and any `services`/`pageObjects` registrations. Note config inheritance chains (which base config does it extend?).
 - Every `index.ts` file that uses `loadTestFile`: capture shared `before`/`after` hooks and their setup logic. Note what state they create and whether downstream tests depend on it.
 - Every FTR service and page object referenced: note which files use them, what they do, and whether they contain hidden assertions (`existOrFail`, `missingOrFail`, `expect` inside helpers).
+- **Mirror-suite discovery (mandatory):** search outside the provided source directory for duplicate stateful/serverless variants before planning coverage removal or retagging. Search by:
+  - exact basename (`_url_state.ts`, `url_state.ts`, etc.)
+  - distinctive test titles / `describe` names
+  - matching `loadTestFile(require.resolve(...))` entries in sibling stateful/serverless `index.ts` files and configs.
+  Include likely mirrors under `x-pack/platform/test/serverless/functional/test_suites/**`, `x-pack/solutions/*/test/**/serverless/**`, and any corresponding stateful FTR roots. If no mirrors are found, state that explicitly in the plan.
 
 ### 2. Triage (what should exist, what should change)
 
 For every test file, decide UI test / API test / unit test (RTL/Jest) / drop / defer using the criteria in [`pick-correct-test-type.md`](pick-correct-test-type.md). For each decision, write a one-line justification.
+
+Build a scenario parity map with one row for every FTR `it(...)` block. Record its behavior and assertions, its exact Scout destination, and whether it becomes a Scout `test`, `test.step`, API test, RTL/Jest test, drop, or defer. Never group away or omit individual blocks; justify every move, drop, or defer.
 
 **File splitting**: when a single FTR file tests multiple roles or unrelated flows, recommend splitting it into separate specs (one role + one flow per file). List the proposed splits.
 
@@ -99,13 +106,13 @@ The execution step picks the specific Scout auth method (`loginAsViewer`, `login
 1. **Catalog every FTR service and page object** used by the tests: name, what it does, which files use it, and whether it contains hidden assertions (`existOrFail`, `missingOrFail`, or `expect` calls that should move to specs)
 2. **Check for existing Scout equivalents**: does a matching page object or API service already exist in the Scout packages or in other plugins' `test/scout` trees? Note: exists / exists-but-in-wrong-scope / missing
 3. **For missing equivalents**, recommend scope (shared Scout package vs solution-scoped vs plugin-local) based on how many plugins would benefit
-4. **Catalog EUI component interactions**: list every EUI component the tests interact with directly (combo boxes, data grids, selectable lists, etc.) so the executor knows where to use Scout's EUI wrappers
+4. **Catalog EUI component interactions**: list every EUI component the tests interact with directly (combo boxes, data grids, selectable lists, etc.) so the executor can use a published EUI test helpers through `page.components.*`.
 5. **Flag brittle locator strategies**: `find.byCssSelector(...)`, `find.byClassName(...)`, or text-based lookups. Note where `data-test-subj` attributes are missing in source code and need to be added
 6. **Flag FTR page objects with hidden assertions**: these need restructuring since page objects should return state, with assertions belonging in the spec
 
 ### 8. Server configuration and feature flags
 
-**Prefer Scout's default servers config.** It mirrors the Elastic Cloud (MKI/ECH) setup and is batched with other default-config suites in CI, so tests that pass locally on it are likely to pass on Cloud. A custom server config set runs only in local pipelines (no Cloud) and adds CI cost — treat it as a last resort, used only when a setting must be present at Kibana boot (e.g. registering HTTP routes at plugin `setup`). See [Can your tests reuse Scout's default servers config?](../../../../docs/extend/scout/migrate-tests.md#dont-migrate-blindly).
+**Prefer Scout's default servers config.** It mirrors the Elastic Cloud (MKI/ECH) setup and is batched with other default-config suites in CI, so tests that pass locally on it are likely to pass on Cloud. A custom server config set runs only in local pipelines (no Cloud) and adds CI cost — treat it as a last resort, used only when a setting must be present at Kibana boot (e.g. registering HTTP routes at plugin `setup`). See [Can your tests reuse Scout's default servers config?](../../../../docs/extend/testing/migrate-tests.md#dont-migrate-blindly).
 
 1. **List every server arg** from `kbnTestServer.serverArgs` and `esTestCluster.serverArgs` across all relevant configs (including inherited base configs)
 2. **Classify each arg**:
@@ -116,7 +123,7 @@ The execution step picks the specific Scout auth method (`loginAsViewer`, `login
 
 ### 9. Deployment targets and Cloud portability
 
-Scout is deployment-agnostic — the goal is "write once, run locally and on Elastic Cloud." Reference [Design tests with a cloud-first mindset](../../../../docs/extend/scout/best-practices.md#design-tests-with-a-cloud-first-mindset) for the underlying principles.
+Scout is deployment-agnostic — the goal is "write once, run locally and on Elastic Cloud." Reference [Design tests with a cloud-first mindset](../../../../docs/extend/testing/scout-best-practices.md#design-tests-with-a-cloud-first-mindset) for the underlying principles.
 
 For each test group, answer all four:
 
@@ -125,12 +132,16 @@ For each test group, answer all four:
    - **Platform tests** (`src/platform/**`, `x-pack/platform/**`): use `tags.deploymentAgnostic` when the original intent was "run everywhere."
    - **Solution tests** (`x-pack/solutions/observability|security|search/...`): use explicit `tags.stateful.*` + `tags.serverless.<solution>.*` rather than `tags.deploymentAgnostic`.
    - Flag tests that currently run in only one environment but could run in both.
-3. **Can they run on Cloud out-of-the-box?** Flag any blockers:
+3. **Are there stateful/serverless mirror FTR files?** List each duplicate or near-duplicate found by the mirror-suite discovery step. Decide whether to:
+   - merge them into one Scout spec with tags covering both deployment targets,
+   - keep separate Scout specs because the flows genuinely diverge, or
+   - delete only one side because coverage already exists elsewhere.
+4. **Can they run on Cloud out-of-the-box?** Flag any blockers:
    - Hardcoded `localhost` URLs or local file paths
    - Node topology assumptions (single-node, specific port)
    - Cluster settings unavailable on Elastic Cloud
    - Custom server args / feature flags set in FTR configs (these need to become runtime settings or move to a Scout server config set)
-4. **Custom servers config or default?** Default to Scout's default test servers config (see step 8 for why); only call for a [custom servers config](../../../../docs/extend/scout/feature-flags.md#scout-feature-flags-custom-servers) when a server arg must apply at Kibana boot. If custom, list which args force the choice and whether a matching config set already exists.
+5. **Custom servers config or default?** Default to Scout's default test servers config (see step 8 for why); only call for a [custom servers config](../../../../docs/extend/testing/feature-flags.md#scout-feature-flags-custom-servers) when a server arg must apply at Kibana boot. If custom, list which args force the choice and whether a matching config set already exists.
 
 ### 10. FTR test smells
 
@@ -143,7 +154,7 @@ Scan every test file for patterns that need attention during migration:
 | **Global loading indicator waits** | `waitForSelector('globalLoadingIndicator')` or similar global spinners |
 | **Hardcoded timeouts** | `await new Promise(r => setTimeout(r, ...))`, `browser.sleep(...)` |
 | **Shared mutable state** | Variables mutated across `it()` blocks relying on execution order |
-| **Sequential journey as separate `it` blocks** | Multiple `it()` blocks that form a single user journey (shared browser state) |
+| **Sequential journey as separate `it` blocks** | Multiple `it()` blocks that form a single user journey (shared browser state). Record the `beforeEach`/`afterEach` behavior and expected application state at the start and end of every block so the executor can preserve resets when converting blocks to `test.step()` |
 | **Duplicate test cases** | Multiple `it()` blocks testing the same behavior with minor variations |
 | **Missing cleanup** | Setup in `before`/`beforeEach` without corresponding teardown |
 | **Retry wrappers** | `retry.try(...)`, `retry.waitFor(...)` around assertions |
@@ -184,4 +195,4 @@ Output the plan to `migration-plan-<source-dir-slug>-<YYYY-MM-DD>.md` (see **Out
 
 - Plan output structure (every section, table, and bullet format): [`plan-template.md`](plan-template.md)
 - Test-type downgrade catalog (UI vs API vs RTL/Jest): [`pick-correct-test-type.md`](pick-correct-test-type.md)
-- Cloud-first mindset (rationale for step 9): [`docs/extend/scout/best-practices.md#design-tests-with-a-cloud-first-mindset`](../../../../docs/extend/scout/best-practices.md#design-tests-with-a-cloud-first-mindset)
+- Cloud-first mindset (rationale for step 9): [`docs/extend/testing/scout-best-practices.md#design-tests-with-a-cloud-first-mindset`](../../../../docs/extend/testing/scout-best-practices.md#design-tests-with-a-cloud-first-mindset)

@@ -53,15 +53,44 @@ describe('mapRuleHistoryItem', () => {
     expect(typeof item.old_values).toBe('object');
   });
 
-  it('returns a null `user` when the change history doc has no user', () => {
-    const item = mapRuleHistoryItem(buildHistoryDoc({}, { user: undefined }));
-    expect(item.user).toBeNull();
-  });
-
   it('passes the user profile `id` through when present', () => {
     const item = mapRuleHistoryItem(
       buildHistoryDoc({}, { user: { id: 'profile-1', name: 'alice' } })
     );
+    expect(item.user).toEqual({ id: 'profile-1', name: 'alice' });
+  });
+
+  it('uses the resolved `full_name` as `name` when present', () => {
+    const item = mapRuleHistoryItem(
+      buildHistoryDoc(
+        {},
+        {
+          user: {
+            id: 'profile-1',
+            name: 'alice',
+            full_name: 'Alice Smith',
+            email: 'alice@elastic.co',
+          },
+        }
+      )
+    );
+
+    expect(item.user).toEqual({ id: 'profile-1', name: 'Alice Smith' });
+  });
+
+  it('falls back to the resolved `email` when there is no `full_name`', () => {
+    const item = mapRuleHistoryItem(
+      buildHistoryDoc({}, { user: { id: 'profile-1', name: 'alice', email: 'alice@elastic.co' } })
+    );
+
+    expect(item.user).toEqual({ id: 'profile-1', name: 'alice@elastic.co' });
+  });
+
+  it('falls back to the raw `name` when neither `full_name` nor `email` is present', () => {
+    const item = mapRuleHistoryItem(
+      buildHistoryDoc({}, { user: { id: 'profile-1', name: 'alice', full_name: '', email: '' } })
+    );
+
     expect(item.user).toEqual({ id: 'profile-1', name: 'alice' });
   });
 

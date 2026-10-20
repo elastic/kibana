@@ -7,13 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { graphlib } from '@dagrejs/dagre';
 import { omit } from 'lodash';
 import { GraphBuildError } from './graph_build_error';
-import {
-  DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT,
-  isHitlWaitStepType,
-} from '../../common/wait_for_approval';
+import { isHitlWaitStepType } from '../../common/hitl';
+import { DEFAULT_WAIT_FOR_APPROVAL_TIMEOUT } from '../../common/wait_for_approval';
 import { DEFAULT_LOOP_MAX_ITERATIONS } from '../../spec/schema';
 import type {
   BaseStep,
@@ -80,7 +77,7 @@ import type {
   WorkflowGraphType,
   WorkflowOutputGraphNode,
 } from '../types';
-import { isLoopEnterNode } from '../types';
+import { isElasticsearch, isKibana, isLoopEnterNode } from '../types';
 import type { EnterParallelNode, ExitParallelNode } from '../types/nodes/parallel_nodes';
 import type { GraphNodeUnion } from '../types/nodes/union';
 import { createTypedGraph } from '../workflow_graph/create_typed_graph';
@@ -195,13 +192,17 @@ function visitTypedAbstractStep(
 
   if ((currentStep as TimeoutProp).timeout) {
     const step = currentStep as BaseStep & TimeoutProp;
-    return handleTimeout(
-      getStepId(step, context),
-      'step_level_timeout',
-      step.timeout as string,
-      visitAbstractStep(omit(step, ['timeout']) as BaseStep, context),
-      context
-    );
+    const stepId = getStepId(step, context);
+    const innerGraph = visitAbstractStep(omit(step, ['timeout']) as BaseStep, context);
+    // Elasticsearch and Kibana steps size their request timeout from the step timeout.
+    const leafNode = innerGraph.node(stepId);
+    if (leafNode && (isElasticsearch(leafNode) || isKibana(leafNode))) {
+      innerGraph.setNode(stepId, {
+        ...leafNode,
+        configuration: { ...leafNode.configuration, timeout: step.timeout },
+      });
+    }
+    return handleTimeout(stepId, 'step_level_timeout', step.timeout as string, innerGraph, context);
   }
 
   if (currentStep.type === 'foreach') {
@@ -281,13 +282,15 @@ function createLeafStepGraph(
 ): WorkflowGraphType {
   const stepId = getStepId(currentStep, context);
   const graph = createTypedGraph({ directed: true });
+  // `nodeType`/`configuration` are runtime-polymorphic across leaf step types, so this
+  // object can't be narrowed to a single `GraphNodeUnion` member statically.
   graph.setNode(stepId, {
     id: stepId,
     type: nodeType,
     stepId,
     stepType: currentStep.type,
     configuration: { ...currentStep },
-  });
+  } as GraphNodeUnion);
   return graph;
 }
 
@@ -692,9 +695,9 @@ function handleTimeout(
   stepId: string,
   stepType: 'workflow_level_timeout' | 'step_level_timeout',
   timeout: string,
-  innerGraph: graphlib.Graph<GraphNodeUnion>,
+  innerGraph: WorkflowGraphType,
   context: GraphBuildContext
-): graphlib.Graph<GraphNodeUnion> {
+): WorkflowGraphType {
   const enterTimeoutZone: EnterTimeoutZoneNode = {
     id: `enterTimeoutZone_${stepId}`,
     type: 'enter-timeout-zone',
@@ -708,7 +711,7 @@ function handleTimeout(
     stepId,
     stepType,
   };
-  const graph = new graphlib.Graph<GraphNodeUnion>({ directed: true });
+  const graph = createTypedGraph({ directed: true });
   graph.setNode(enterTimeoutZone.id, enterTimeoutZone);
   graph.setNode(exitTimeoutZone.id, exitTimeoutZone);
   context.stack.push(enterTimeoutZone);
@@ -720,7 +723,7 @@ function handleTimeout(
 function handleStepLevelOnFailure(
   step: BaseStep,
   context: GraphBuildContext
-): graphlib.Graph<GraphNodeUnion> | null {
+): WorkflowGraphType | null {
   const stackEntry: GraphNodeUnion = {
     id: `stepLevelOnFailure_${getStepId(step, context)}`,
     type: 'step-level-on-failure',
@@ -740,7 +743,7 @@ function handleStepLevelOnFailure(
 function handleWorkflowLevelOnFailure(
   step: BaseStep,
   context: GraphBuildContext
-): graphlib.Graph<GraphNodeUnion> | null {
+): WorkflowGraphType | null {
   const onFailureConfiguration = context.settings?.['on-failure'];
   if (
     flowControlStepTypes.has(step.type) ||
@@ -940,13 +943,10 @@ function createFallback(
   return graph;
 }
 
-function createStepsSequence(
-  steps: BaseStep[],
-  context: GraphBuildContext
-): graphlib.Graph<GraphNodeUnion> {
+function createStepsSequence(steps: BaseStep[], context: GraphBuildContext): WorkflowGraphType {
   const graph = createTypedGraph({ directed: true });
 
-  let previousGraph: graphlib.Graph<GraphNodeUnion> | null = null;
+  let previousGraph: WorkflowGraphType | null = null;
 
   for (let i = 0; i < steps.length; i++) {
     const currentGraph = visitAbstractStep(steps[i], context);
@@ -1118,7 +1118,7 @@ function buildParallelBranchBody(
       `Parallel step "${stepId}" has a branch body containing unsupported flow-control ` +
         `("${flowControlNode.type}"). A parallel branch body must be a straight-line sequence of ` +
         `atomic steps with no nested flow-control (if/switch/foreach/while), no step-level ` +
-        `"on-failure" handler, and no step-level "timeout".`,
+        `"if", no step-level "on-failure" handler, and no step-level "timeout".`,
       stepId
     );
   }
@@ -1307,7 +1307,7 @@ function visitLoopContinueStep(
 export function convertToWorkflowGraph(
   workflowSchema: WorkflowYaml,
   defaultSettings?: WorkflowSettings
-): graphlib.Graph<GraphNodeUnion> {
+): WorkflowGraphType {
   const resolvedSettings = resolveWorklfowSettings(workflowSchema.settings, defaultSettings);
   const context: GraphBuildContext = {
     settings: resolvedSettings,
@@ -1348,9 +1348,4 @@ function resolveWorklfowSettings(
     'on-failure': workflowSettings['on-failure'] ?? defaultSettings['on-failure'],
     timezone: workflowSettings.timezone ?? defaultSettings.timezone,
   };
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function convertToSerializableGraph(graph: graphlib.Graph): any {
-  return graphlib.json.write(graph); // GraphLib does not provide type information, so we use `any`
 }

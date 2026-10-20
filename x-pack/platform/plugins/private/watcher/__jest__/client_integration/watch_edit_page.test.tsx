@@ -8,6 +8,7 @@
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { I18nProvider } from '@kbn/i18n-react';
 import '@kbn/code-editor-mock/jest_helper';
 
@@ -60,7 +61,9 @@ describe('<WatchEditPage />', () => {
 
     describe('on component mount', () => {
       test('should set the correct page title', () => {
-        expect(screen.getByTestId('pageTitle')).toHaveTextContent(`Edit ${WATCH.watch.name}`);
+        expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+          `Edit ${WATCH.watch.name}`
+        );
       });
 
       test('should populate the correct values', () => {
@@ -122,6 +125,42 @@ describe('<WatchEditPage />', () => {
     });
   });
 
+  describe('Advanced watch with an escaped JSON string value', () => {
+    // Regression test for https://github.com/elastic/kibana/issues/225232:
+    // the JSON editor used to run the watch through XJson mode, which rewrote
+    // any escaped string (e.g. a Slack webhook body) into """ triple-quote
+    // literals when the watch was loaded for editing.
+    const escapedBodyWatch = {
+      actions: {
+        'send-to-slack': {
+          webhook: {
+            body: '{ "blocks": [ { "type": "section" } ] }',
+          },
+        },
+      },
+    };
+
+    beforeEach(async () => {
+      ({ httpSetup, httpRequestsMockHelpers } = setupEnvironment());
+      routerHistoryPush = jest.fn();
+      registerRouter({ history: { push: routerHistoryPush } });
+
+      httpRequestsMockHelpers.setLoadWatchResponse(WATCH_ID, {
+        watch: { ...getWatch({ id: WATCH_ID }), watch: escapedBodyWatch },
+      });
+
+      renderWatchEditPage({ httpSetup, id: WATCH_ID });
+      await screen.findByTestId('jsonWatchForm');
+    });
+
+    test('does not rewrite escaped strings into triple-quote literals', () => {
+      const jsonEditorValue = screen.getByTestId('jsonEditor').getAttribute('data-currentvalue');
+
+      expect(jsonEditorValue).not.toContain('"""');
+      expect(JSON.parse(jsonEditorValue!)).toEqual(escapedBodyWatch);
+    });
+  });
+
   describe('Threshold watch', () => {
     const watch = {
       ...getWatch({
@@ -159,7 +198,9 @@ describe('<WatchEditPage />', () => {
 
     describe('on component mount', () => {
       test('should set the correct page title', () => {
-        expect(screen.getByTestId('pageTitle')).toHaveTextContent(`Edit ${watch.name}`);
+        expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+          `Edit ${watch.name}`
+        );
       });
 
       test('should populate the correct values', async () => {

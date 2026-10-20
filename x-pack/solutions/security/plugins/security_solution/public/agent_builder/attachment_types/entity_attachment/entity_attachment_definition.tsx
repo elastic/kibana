@@ -15,6 +15,7 @@ import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ISessionService } from '@kbn/data-plugin/public';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSkeletonText } from '@elastic/eui';
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 import type { EntityAttachment } from './types';
@@ -28,7 +29,7 @@ import {
   type SecurityAgentBuilderChrome,
 } from '../entity_explore_navigation';
 import { EntityAnalyticsAgentNavigationProvider } from '../entity_analytics_agent_navigation_context';
-import { APP_UI_ID } from '../../../../common/constants';
+import { APP_UI_ID, ENABLE_NEW_FLYOUT_SETTING } from '../../../../common/constants';
 
 const DEFAULT_LABEL = i18n.translate(
   'xpack.securitySolution.agentBuilder.attachments.entity.label',
@@ -99,6 +100,7 @@ export const createEntityAttachmentDefinition = ({
   chrome,
   resolveSecurityCanvasContext,
   searchSession,
+  uiSettings,
 }: {
   experimentalFeatures: ExperimentalFeatures;
   application?: ApplicationStart;
@@ -106,7 +108,12 @@ export const createEntityAttachmentDefinition = ({
   chrome?: SecurityAgentBuilderChrome;
   resolveSecurityCanvasContext?: () => Promise<SecurityCanvasEmbeddedBundle>;
   searchSession?: ISessionService;
+  uiSettings?: IUiSettingsClient;
 }): AttachmentUIDefinition<EntityAttachment> => {
+  const getIsNewFlyoutEnabled = (): boolean =>
+    !experimentalFeatures.newFlyoutSystemDisabled &&
+    (uiSettings?.get<boolean>(ENABLE_NEW_FLYOUT_SETTING, true) ?? false);
+
   const baseDefinition: AttachmentUIDefinition<EntityAttachment> = {
     getLabel: (attachment) => {
       const customLabel = attachment?.data?.attachmentLabel;
@@ -124,6 +131,7 @@ export const createEntityAttachmentDefinition = ({
         chrome={chrome}
         openSidebarConversation={props.openSidebarConversation}
         searchSession={searchSession}
+        isNewFlyoutEnabled={getIsNewFlyoutEnabled()}
       >
         <React.Suspense fallback={<EuiSkeletonText lines={4} />}>
           <LazyEntityAttachmentInlineContent
@@ -145,13 +153,15 @@ export const createEntityAttachmentDefinition = ({
   return {
     ...baseDefinition,
     canvasWidth: ENTITY_CANVAS_WIDTH,
-    renderCanvasContent: (props: AttachmentRenderProps<EntityAttachment>) => (
+    renderCanvasContent: (props: AttachmentRenderProps<EntityAttachment>, { closeCanvas }) => (
       <EntityAnalyticsAgentNavigationProvider
         application={resolvedApplication}
         agentBuilder={agentBuilder}
         chrome={chrome}
         openSidebarConversation={props.openSidebarConversation}
         searchSession={searchSession}
+        isNewFlyoutEnabled={getIsNewFlyoutEnabled()}
+        closeCanvas={closeCanvas}
       >
         <React.Suspense
           fallback={
@@ -165,16 +175,18 @@ export const createEntityAttachmentDefinition = ({
           <LazyEntityAttachmentCanvasContent
             {...props}
             experimentalFeatures={experimentalFeatures}
-            application={resolvedApplication}
-            agentBuilder={agentBuilder}
-            chrome={chrome}
             resolveSecurityCanvasContext={resolvedResolveCanvasContext}
-            searchSession={searchSession}
           />
         </React.Suspense>
       </EntityAnalyticsAgentNavigationProvider>
     ),
-    getActionButtons: ({ attachment, isCanvas, openCanvas, openSidebarConversation }) => {
+    getActionButtons: ({
+      attachment,
+      isCanvas,
+      openCanvas,
+      openSidebarConversation,
+      closeCanvas,
+    }) => {
       const parsed = normaliseEntityAttachment(attachment);
       if (!parsed || !parsed.isSingle) {
         return [];
@@ -187,9 +199,10 @@ export const createEntityAttachmentDefinition = ({
         return [
           {
             label: OPEN_IN_ENTITY_ANALYTICS_LABEL,
-            icon: 'popout',
+            icon: 'external',
             type: ActionButtonType.SECONDARY,
             handler: () => {
+              closeCanvas?.();
               const rightPanel = buildEntityRightPanel(identifier);
               if (rightPanel) {
                 navigateToEntityAnalyticsWithFlyoutInApp({
@@ -200,6 +213,7 @@ export const createEntityAttachmentDefinition = ({
                   chrome,
                   openSidebarConversation,
                   searchSession,
+                  isNewFlyoutEnabled: getIsNewFlyoutEnabled(),
                 });
                 return;
               }

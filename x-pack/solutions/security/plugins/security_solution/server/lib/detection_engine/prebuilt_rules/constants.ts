@@ -34,14 +34,8 @@ export const PREBUILT_RULES_UPGRADE_BATCH_SIZE = 100;
 
 /**
  * Max prebuilt rules fetched from ES and processed by bulk-create per install handler iteration.
- */
-export const PREBUILT_RULES_BULK_CREATE_BATCH_SIZE = 500;
-
-/**
- * Batch size passed to the alerting plugin's `rulesClient.bulkCreateRules`,
+ * Also the batch size passed to the alerting plugin's `rulesClient.bulkCreateRules`,
  * controlling how many rules it writes to ES per underlying bulk-create call.
- *
- * This is independent of PREBUILT_RULES_BULK_CREATE_BATCH_SIZE, which chunks
- * the install queue before assets are fetched and handed off here.
+ * A single constant for both layers means no nested re-chunking happens between them.
  */
-export const PREBUILT_RULES_ALERTING_BULK_CREATE_BATCH_SIZE = 100;
+export const PREBUILT_RULES_BULK_CREATE_BATCH_SIZE = 400;

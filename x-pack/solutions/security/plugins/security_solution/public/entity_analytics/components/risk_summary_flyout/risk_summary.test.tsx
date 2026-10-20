@@ -26,6 +26,9 @@ import {
   EntityDetailsLeftPanelTab,
   RiskScoreLeftPanelSubTab,
 } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import { USE_NEW_ENTITY_ANALYTICS_HOME_PAGE_FLAG } from '../../../../common/constants';
+import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
+import type { StartServices } from '../../../types';
 
 const mockVisualizationEmbeddable = jest
   .fn()
@@ -35,6 +38,20 @@ jest.mock('../../../common/components/visualization_actions/visualization_embedd
   VisualizationEmbeddable: (props: VisualizationEmbeddableProps) =>
     mockVisualizationEmbeddable(props),
 }));
+
+const renderSummary = (
+  ui: React.ReactElement,
+  { newEntityAnalyticsPage = false }: { newEntityAnalyticsPage?: boolean } = {}
+) => {
+  const startServices = createStartServicesMock();
+  jest
+    .mocked(startServices.featureFlags.useBooleanValue)
+    .mockImplementation((flag, fallback) =>
+      flag === USE_NEW_ENTITY_ANALYTICS_HOME_PAGE_FLAG ? newEntityAnalyticsPage : fallback
+    );
+
+  return render(<TestProviders startServices={startServices as StartServices}>{ui}</TestProviders>);
+};
 
 describe('FlyoutRiskSummary', () => {
   beforeEach(() => {
@@ -116,8 +133,8 @@ describe('FlyoutRiskSummary', () => {
     expect(getByTestId('risk-summary-table')).toBeInTheDocument();
   });
 
-  it('risk summary header does not render link when riskScoreData is loading', () => {
-    const { queryByTestId } = render(
+  it('risk summary header renders link even when riskScoreData is loading', () => {
+    const { getByTestId } = render(
       <TestProviders>
         <FlyoutRiskSummary
           riskScoreData={{ ...mockHostRiskScoreState, data: undefined, loading: true }}
@@ -131,7 +148,7 @@ describe('FlyoutRiskSummary', () => {
       </TestProviders>
     );
 
-    expect(queryByTestId('entityRiskInputsTitleLink')).not.toBeInTheDocument();
+    expect(getByTestId('entityRiskInputsTitleLink')).toBeInTheDocument();
   });
 
   it('renders visualization embeddable', () => {
@@ -333,8 +350,35 @@ describe('FlyoutRiskSummary', () => {
     });
   });
 
-  it('does not render resolution risk inputs link when resolution score is loading', () => {
-    const { queryByTestId } = render(
+  it('group view "Entity risk contributions" link opens the resolution-group risk inputs', () => {
+    const openDetailsPanel = jest.fn();
+    const { getByTestId } = renderSummary(
+      <FlyoutRiskSummary
+        riskScoreData={mockHostRiskScoreState}
+        entityRiskScores={mockHostEntityRiskScoresWithResolution}
+        queryId={'testQuery'}
+        openDetailsPanel={openDetailsPanel}
+        recalculatingScore={false}
+        isPreviewMode={false}
+        entityType={EntityType.host}
+        entityId="host:alias-entity"
+        isGroupView
+      />,
+      { newEntityAnalyticsPage: true }
+    );
+
+    const link = getByTestId('resolutionRiskInputsTitleLink');
+    expect(link).toHaveTextContent('Entity risk contributions');
+    fireEvent.click(link);
+
+    expect(openDetailsPanel).toHaveBeenCalledWith({
+      tab: EntityDetailsLeftPanelTab.RISK_INPUTS,
+      subTab: RiskScoreLeftPanelSubTab.RESOLUTION,
+    });
+  });
+
+  it('renders resolution risk inputs link even when resolution score is loading', () => {
+    const { getByTestId } = render(
       <TestProviders>
         <FlyoutRiskSummary
           riskScoreData={mockHostRiskScoreState}
@@ -357,7 +401,7 @@ describe('FlyoutRiskSummary', () => {
       </TestProviders>
     );
 
-    expect(queryByTestId('resolutionRiskInputsTitleLink')).not.toBeInTheDocument();
+    expect(getByTestId('resolutionRiskInputsTitleLink')).toBeInTheDocument();
   });
 
   it('renders resolution risk score block when resolution score exists', () => {
@@ -462,5 +506,202 @@ describe('FlyoutRiskSummary', () => {
     );
 
     expect(queryByTestId('resolution-risk-summary-table')).not.toBeInTheDocument();
+  });
+
+  it('shows only the resolution score in the group view', () => {
+    const { getByTestId, queryByTestId, getAllByTestId } = renderSummary(
+      <FlyoutRiskSummary
+        riskScoreData={mockHostRiskScoreState}
+        entityRiskScores={mockHostEntityRiskScoresWithResolution}
+        queryId={'testQuery'}
+        openDetailsPanel={() => {}}
+        recalculatingScore={false}
+        isPreviewMode={false}
+        entityType={EntityType.host}
+        entityId="host:alias-entity"
+        isGroupView
+      />
+    );
+
+    expect(queryByTestId('risk-summary-table')).not.toBeInTheDocument();
+    expect(getByTestId('resolution-risk-summary-table')).toBeInTheDocument();
+    expect(getAllByTestId('visualization-embeddable')).toHaveLength(1);
+    expect(
+      getByTestId('resolutionRiskInputsContent').querySelector(
+        '[data-test-subj="inspect-icon-button"]'
+      )
+    ).toBeTruthy();
+  });
+
+  it('labels the resolution score as the entity risk score in the group view', () => {
+    const { getByTestId } = renderSummary(
+      <FlyoutRiskSummary
+        riskScoreData={mockHostRiskScoreState}
+        entityRiskScores={mockHostEntityRiskScoresWithResolution}
+        queryId={'testQuery'}
+        openDetailsPanel={() => {}}
+        recalculatingScore={false}
+        isPreviewMode={false}
+        entityType={EntityType.host}
+        entityId="host:alias-entity"
+        isGroupView
+      />
+    );
+
+    expect(getByTestId('resolutionRiskInputsTitleLink')).toHaveTextContent(
+      'Entity risk contributions'
+    );
+    expect(mockVisualizationEmbeddable).toHaveBeenCalledWith(
+      expect.objectContaining({
+        lensAttributes: expect.objectContaining({
+          state: expect.objectContaining({
+            datasourceStates: expect.anything(),
+          }),
+        }),
+        casesAttachmentMetadata: {
+          description: expect.stringMatching(/^Risk score for host/),
+        },
+      })
+    );
+    expect(JSON.stringify(mockVisualizationEmbeddable.mock.calls[0][0].lensAttributes)).toContain(
+      'Entity risk score'
+    );
+  });
+
+  it('shows the resolution score alongside the entity score, labelled as the resolution group, when the flag is off', () => {
+    const { getByTestId } = renderSummary(
+      <FlyoutRiskSummary
+        riskScoreData={mockHostRiskScoreState}
+        entityRiskScores={mockHostEntityRiskScoresWithResolution}
+        queryId={'testQuery'}
+        openDetailsPanel={() => {}}
+        recalculatingScore={false}
+        isPreviewMode={false}
+        entityType={EntityType.host}
+        entityId="host:alias-entity"
+      />
+    );
+
+    expect(getByTestId('risk-summary-table')).toBeInTheDocument();
+    expect(getByTestId('resolution-risk-summary-table')).toBeInTheDocument();
+    expect(getByTestId('resolutionRiskInputsTitleLink')).toHaveTextContent(
+      'Resolution group risk contributions'
+    );
+    expect(getByTestId('entityRiskInputsTitleLink')).toHaveTextContent('Entity risk contributions');
+  });
+
+  it('shows only the entity score outside the group view when the flag is on, even with a resolution score', () => {
+    const { getByTestId, queryByTestId } = renderSummary(
+      <FlyoutRiskSummary
+        riskScoreData={mockHostRiskScoreState}
+        entityRiskScores={mockHostEntityRiskScoresWithResolution}
+        queryId={'testQuery'}
+        openDetailsPanel={() => {}}
+        recalculatingScore={false}
+        isPreviewMode={false}
+        entityType={EntityType.host}
+        entityId="host:alias-entity"
+      />,
+      { newEntityAnalyticsPage: true }
+    );
+
+    expect(getByTestId('risk-summary-table')).toBeInTheDocument();
+    expect(queryByTestId('resolution-risk-summary-table')).not.toBeInTheDocument();
+    expect(getByTestId('entityRiskInputsTitleLink')).toHaveTextContent('Entity risk contributions');
+  });
+
+  it('holds the entity score back while the resolution score for a group is loading', () => {
+    const { getByTestId, queryByTestId } = renderSummary(
+      <FlyoutRiskSummary
+        riskScoreData={mockHostRiskScoreState}
+        entityRiskScores={{
+          base: { ...mockHostRiskScoreState },
+          resolution: {
+            state: { ...mockHostRiskScoreState, data: undefined, loading: true },
+            hasResolutionGroup: true,
+            resolutionTargetEntityId: 'host:target-entity',
+          },
+          refetch: jest.fn(),
+        }}
+        queryId={'testQuery'}
+        openDetailsPanel={() => {}}
+        recalculatingScore={false}
+        isPreviewMode={false}
+        entityType={EntityType.host}
+        entityId="host:alias-entity"
+        isGroupView
+      />
+    );
+
+    expect(queryByTestId('risk-summary-table')).not.toBeInTheDocument();
+    expect(getByTestId('resolution-risk-summary-table')).toBeInTheDocument();
+  });
+
+  it('keeps the individual score when the group view has no resolution score', () => {
+    const { getByTestId, queryByTestId } = renderSummary(
+      <FlyoutRiskSummary
+        riskScoreData={mockHostRiskScoreState}
+        entityRiskScores={{
+          base: { ...mockHostRiskScoreState },
+          resolution: {
+            state: { ...mockHostRiskScoreState, data: undefined, loading: false },
+            hasResolutionGroup: true,
+            resolutionTargetEntityId: 'host:target-entity',
+          },
+          refetch: jest.fn(),
+        }}
+        queryId={'testQuery'}
+        openDetailsPanel={() => {}}
+        recalculatingScore={false}
+        isPreviewMode={false}
+        entityType={EntityType.host}
+        entityId="host:alias-entity"
+        isGroupView
+      />
+    );
+
+    expect(getByTestId('risk-summary-table')).toBeInTheDocument();
+    expect(queryByTestId('resolution-risk-summary-table')).not.toBeInTheDocument();
+  });
+
+  it('keeps the individual score in the group view when no resolution score was fetched', () => {
+    const { getByTestId, queryByTestId } = renderSummary(
+      <FlyoutRiskSummary
+        riskScoreData={mockHostRiskScoreState}
+        entityRiskScores={mockHostEntityRiskScores}
+        queryId={'testQuery'}
+        openDetailsPanel={() => {}}
+        recalculatingScore={false}
+        isPreviewMode={false}
+        entityType={EntityType.host}
+        isGroupView
+      />
+    );
+
+    expect(getByTestId('risk-summary-table')).toBeInTheDocument();
+    expect(queryByTestId('resolution-risk-summary-table')).not.toBeInTheDocument();
+  });
+
+  it('shows only the resolution score in the group view when the flag is on', () => {
+    const { getByTestId, queryByTestId } = renderSummary(
+      <FlyoutRiskSummary
+        riskScoreData={mockHostRiskScoreState}
+        entityRiskScores={mockHostEntityRiskScoresWithResolution}
+        queryId={'testQuery'}
+        openDetailsPanel={() => {}}
+        recalculatingScore={false}
+        isPreviewMode={false}
+        entityType={EntityType.host}
+        entityId="host:alias-entity"
+        isGroupView
+      />,
+      { newEntityAnalyticsPage: true }
+    );
+
+    expect(queryByTestId('risk-summary-table')).not.toBeInTheDocument();
+    expect(getByTestId('resolution-risk-summary-table')).toBeInTheDocument();
+    expect(getByTestId('resolutionRiskInputsTitleLink')).toHaveTextContent(
+      'Entity risk contributions'
+    );
   });
 });

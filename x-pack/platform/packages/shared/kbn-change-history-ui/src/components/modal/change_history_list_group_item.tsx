@@ -6,11 +6,23 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiListGroupItem } from '@elastic/eui';
+import { EuiListGroupItem, type EuiListGroupItemProps } from '@elastic/eui';
 import { useChangeHistoryModal } from '../../provider/use_change_history_modal';
 import * as i18n from '../timeline/translations';
 
-export function ChangeHistoryListGroupItem(): JSX.Element {
+export interface ChangeHistoryListGroupItemProps {
+  label?: string;
+  iconType?: string;
+  'data-test-subj'?: string;
+  listGroupItemProps?: Omit<EuiListGroupItemProps, 'iconType' | 'label' | 'onClick'>;
+}
+
+export function ChangeHistoryListGroupItem({
+  label = i18n.HISTORY_LIST_ITEM_LABEL,
+  iconType = 'clockCounter',
+  'data-test-subj': dataTestSubj = 'changeHistoryListGroupItem',
+  listGroupItemProps,
+}: ChangeHistoryListGroupItemProps = {}): JSX.Element {
   const { openModal } = useChangeHistoryModal();
 
   const handleClick = useCallback(() => {
@@ -19,10 +31,11 @@ export function ChangeHistoryListGroupItem(): JSX.Element {
 
   return (
     <EuiListGroupItem
-      iconType="clockCounter"
-      label={i18n.HISTORY_LIST_ITEM_LABEL}
+      iconType={iconType}
+      label={label}
       onClick={handleClick}
-      data-test-subj="changeHistoryListGroupItem"
+      data-test-subj={dataTestSubj}
+      {...listGroupItemProps}
     />
   );
 }

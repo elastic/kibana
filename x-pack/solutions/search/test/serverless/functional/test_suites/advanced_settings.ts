@@ -7,7 +7,10 @@
 
 import expect from '@kbn/expect';
 import { SEARCH_PROJECT_SETTINGS } from '@kbn/serverless-search-settings';
-import { isEditorFieldSetting } from '@kbn/test-suites-xpack-platform/serverless/functional/test_suites/management/advanced_settings';
+import {
+  isEditorFieldSetting,
+  isGlobalSetting,
+} from '@kbn/test-suites-xpack-platform/serverless/functional/test_suites/management/advanced_settings';
 import {
   AGENT_BUILDER_NAV_ENABLED_SETTING_ID,
   AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS,
@@ -15,6 +18,7 @@ import {
   AGENT_BUILDER_TRACING_LLM_RESPONSES_SETTING_ID,
   AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID,
   AGENT_BUILDER_TRACING_REAL_NAMES_SETTING_ID,
+  AGENT_BUILDER_TRACING_USER_DATA_SETTING_ID,
   AGENT_BUILDER_TRACING_SYSTEM_PROMPT_SETTING_ID,
   AGENT_BUILDER_TRACING_TOOL_DETAILS_SETTING_ID,
   AGENT_BUILDER_TRACING_USER_PROMPTS_SETTING_ID,
@@ -22,6 +26,7 @@ import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
   GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING,
+  GEN_AI_SETTINGS_INFERENCE_STREAMING,
 } from '@kbn/management-settings-ids';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
@@ -30,6 +35,7 @@ const READ_ONLY_SETTINGS: string[] = [
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
   GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING,
+  GEN_AI_SETTINGS_INFERENCE_STREAMING,
   AGENT_BUILDER_NAV_ENABLED_SETTING_ID,
   AI_CHAT_EXPERIENCE_TYPE,
   AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS,
@@ -40,6 +46,7 @@ const READ_ONLY_SETTINGS: string[] = [
   AGENT_BUILDER_TRACING_SYSTEM_PROMPT_SETTING_ID,
   AGENT_BUILDER_TRACING_REAL_NAMES_SETTING_ID,
   AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID,
+  AGENT_BUILDER_TRACING_USER_DATA_SETTING_ID,
 ];
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -65,6 +72,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('renders search settings', () => {
       for (const settingId of SEARCH_PROJECT_SETTINGS) {
+        // Global settings render on the Global Settings tab
+        if (isGlobalSetting(settingId)) {
+          continue;
+        }
         // Code editors don't have their test subjects rendered
         if (isEditorFieldSetting(settingId)) {
           continue;
@@ -75,7 +86,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         }
         it('renders ' + settingId + ' edit field', async () => {
           const fieldTestSubj = 'management-settings-editField-' + settingId;
-          expect(await testSubjects.exists(fieldTestSubj)).to.be(true);
+          await testSubjects.existOrFail(fieldTestSubj, { timeout: 5000 });
         });
       }
     });

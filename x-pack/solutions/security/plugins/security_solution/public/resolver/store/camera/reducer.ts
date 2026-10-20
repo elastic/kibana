@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Draft } from 'immer';
+import type { Draft } from 'immer-v9';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 import { unitsPerNudge, nudgeAnimationDuration } from './scaling_constants';
 import { animatePanning } from './methods';

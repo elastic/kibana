@@ -10,6 +10,11 @@ export { createTracedLogger } from './impl/lib/create_traced_logger';
 export { AttackDiscoveryError, InvalidDefendInsightTypeError } from './impl/lib/errors';
 export { getLlmType } from './impl/lib/helpers/get_llm_type';
 export {
+  extractJson,
+  getFormatInstructionsFromZodV4Schema,
+  getStructuredGenerationPrompt,
+} from './impl/lib/langchain';
+export {
   getGenerateNode,
   getGenerateOrEndEdge,
   getGenerateOrRefineOrEndEdge,
@@ -26,10 +31,11 @@ export type {
   AttackDiscoveryGraphMetadata,
   AttackDiscoveryGraphState,
   BaseGraphState,
+  DefendInsightsGraphMetadata,
+  DefendInsightsGraphState,
   GetAttackDiscoveryGraph,
+  GetDefendInsightsGraph,
   GraphInsightTypes,
-  GraphInvocationResult,
-  InvokeGraphParams,
 } from './impl/lib/types';
 
 // Attack Discovery
@@ -74,17 +80,16 @@ export {
   ATTACK_DISCOVERY_GRAPH_RUN_NAME,
   ATTACK_DISCOVERY_TAG,
   getAnonymizedAlerts,
+  getAttackDiscoveriesGenerationSchema,
+  getCombinedAttackDiscoveryPrompt,
   getDefaultAttackDiscoveryGraph,
 } from './impl/attack_discovery/graphs';
 export type {
-  AttackDiscoveryGraphResult,
   AttackDiscoveryPrompts,
   CombinedPrompts,
   DefaultAttackDiscoveryGraph,
   GenerationPrompts,
   GetDefaultAttackDiscoveryGraphParams,
-  InvokeAttackDiscoveryGraphWithDocs,
-  InvokeAttackDiscoveryGraphWithDocsParams,
 } from './impl/attack_discovery/graphs';
 export {
   filterHallucinatedAlerts,
@@ -94,7 +99,6 @@ export {
   logFilteredDiscoveries,
   logUnverifiableDiscoveries,
 } from './impl/attack_discovery/hallucination_detection';
-export type { DiscoveryWithAlertIds } from './impl/attack_discovery/hallucination_detection';
 
 // Event logging — introduced in this PR (Orchestration + Event Logging).
 export {
@@ -114,19 +118,24 @@ export {
   ATTACK_DISCOVERY_EVENT_LOG_ACTION_VALIDATION_STARTED,
   ATTACK_DISCOVERY_EVENT_LOG_ACTION_VALIDATION_SUCCEEDED,
   ATTACK_DISCOVERY_EVENT_PROVIDER,
+  ATTACK_DISCOVERY_EVENT_SERVICE_ACCOUNT_TAG,
+  getAttackDiscoveryEventOwnerFilter,
   writeAttackDiscoveryEvent,
 } from './impl/attack_discovery/persistence/event_logging';
-export type {
-  AttackDiscoverySource,
-  DiagnosticsConfig,
-  DiagnosticsContext,
-  DiagnosticsPreExecutionCheck,
-  DiagnosticsWorkflowIntegrity,
-  EventLogRefresher,
-  SourceMetadata,
-  WorkflowExecutionTracking,
-  WorkflowExecutionsTracking,
-} from './impl/attack_discovery/persistence/event_logging';
+export type { EventLogRefresher } from './impl/attack_discovery/persistence/event_logging';
 
-// Note: schedules/transforms, telemetry/event_based_telemetry, and
-// defend_insights/graphs are added in later PRs alongside their source files.
+// Defend Insights
+export {
+  DEFEND_INSIGHTS_GRAPH_RUN_NAME,
+  getDefaultDefendInsightsGraph,
+} from './impl/defend_insights/graphs';
+export type {
+  DefaultDefendInsightsGraph,
+  DefendInsightsCombinedPrompts,
+  DefendInsightsGenerationPrompts,
+  DefendInsightsPrompts,
+  GetDefaultDefendInsightsGraphParams,
+} from './impl/defend_insights/graphs';
+
+// Note: schedules/transforms and telemetry/event_based_telemetry barrel exports
+// are added in the Schedule Integration PR (PR10) alongside their consumers.

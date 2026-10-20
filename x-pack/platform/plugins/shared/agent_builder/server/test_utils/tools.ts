@@ -73,6 +73,13 @@ export const createMockedBuiltinTool = (
     description: 'test description',
     schema: z.object({}),
     tags: ['tag-1', 'tag-2'],
+    annotations: {
+      title: 'Test Tool',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     experimental: false,
     handler: jest.fn(parts.handler),
     ...parts,

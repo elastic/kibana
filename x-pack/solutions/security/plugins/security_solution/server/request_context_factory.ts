@@ -332,6 +332,7 @@ export class RequestContextFactory implements IRequestContextFactory {
       getRulesAuthz: memoize(() => {
         return rulesAuthz;
       }),
+      getMitreDataClient: () => startPlugins.mitreAttack?.getMitreDataClient?.(),
     };
   }
 }

@@ -7,23 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiPageTemplate } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import { EuiPageTemplate } from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Redirect } from 'react-router-dom';
+import { AppHeader } from '@kbn/app-header';
+import type { AppHeaderBadge, AppHeaderMenu } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import type { Template } from '@kbn/workflows-library';
-import { CatalogBrowser, useLibraryEnabled } from '@kbn/workflows-ui';
+import type { WorkflowsImportRouteState } from '@kbn/workflows-ui';
+import { CatalogBrowser, UploadTemplateFlyout, useLibraryEnabled } from '@kbn/workflows-ui';
 import { PLUGIN_ID } from '../../../common';
-import { WorkflowsDeepLinks } from '../../deep_links';
+import { WorkflowsPageName } from '../../deep_links';
 import { useKibana } from '../../hooks/use_kibana';
 import { useWorkflowsBreadcrumbs } from '../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 
 const libraryPageTitle = i18n.translate('workflowsManagement.libraryPage.pageTitle', {
-  defaultMessage: 'Library',
+  defaultMessage: 'Template library',
 });
 
 const experimentalBadgeLabel = i18n.translate('workflowsManagement.libraryPage.experimentalBadge', {
   defaultMessage: 'Experimental',
+});
+
+const contributeLinkLabel = i18n.translate('workflowsManagement.libraryPage.contributeLink', {
+  defaultMessage: 'Contribute a template',
+});
+
+const createFromFileLabel = i18n.translate('workflowsManagement.libraryPage.createFromFile', {
+  defaultMessage: 'Import template',
 });
 
 /**
@@ -38,11 +49,75 @@ export const LibraryCatalogBrowserPage = React.memo(() => {
 
   useWorkflowsBreadcrumbs(libraryPageTitle);
 
+  const [isUploadFlyoutOpen, setIsUploadFlyoutOpen] = useState(false);
+  const openUploadFlyout = useCallback(() => setIsUploadFlyoutOpen(true), []);
+  const closeUploadFlyout = useCallback(() => setIsUploadFlyoutOpen(false), []);
+
+  const headerBadges = useMemo<AppHeaderBadge[]>(
+    () => [
+      {
+        label: experimentalBadgeLabel,
+        color: 'hollow',
+        'data-test-subj': 'workflowLibraryExperimentalBadge',
+      },
+    ],
+    []
+  );
+
+  const headerMenu = useMemo<AppHeaderMenu>(
+    () => ({
+      items: [
+        {
+          id: 'requestTemplate',
+          label: i18n.translate('workflowsManagement.libraryPage.requestTemplateButtonLabel', {
+            defaultMessage: 'Request a template',
+          }),
+          iconType: 'logoGithub',
+          href: 'https://github.com/elastic/workflows/issues/new?template=template_request.yml',
+          target: '_blank',
+          testId: 'workflowLibraryRequestLink',
+        },
+        {
+          id: 'contributeTemplate',
+          label: contributeLinkLabel,
+          iconType: 'logoGithub',
+          href: 'https://github.com/elastic/workflows/issues/new?template=template_contribution.yml',
+          target: '_blank',
+          testId: 'workflowLibraryContributeLink',
+        },
+        {
+          id: 'createFromFile',
+          label: createFromFileLabel,
+          iconType: 'download',
+          overflow: true,
+          run: openUploadFlyout,
+          testId: 'workflowLibraryCreateFromFileButton',
+        },
+      ],
+    }),
+    [openUploadFlyout]
+  );
+
   const handleSelect = useCallback(
     (template: Template) => {
       application.navigateToApp(PLUGIN_ID, {
-        deepLinkId: WorkflowsDeepLinks.library,
+        deepLinkId: WorkflowsPageName.library,
         path: template.slug,
+      });
+    },
+    [application]
+  );
+
+  // Navigate to the import page with the uploaded YAML carried on history state
+  // (never in the URL). A reload there loses the state and falls back to the
+  // catalog. The file is processed entirely client-side (see `UploadTemplateFlyout`).
+  const handleFileUploaded = useCallback(
+    (customTemplateYaml: string) => {
+      setIsUploadFlyoutOpen(false);
+      application.navigateToApp(PLUGIN_ID, {
+        deepLinkId: WorkflowsPageName.library,
+        path: 'import',
+        state: { customTemplateYaml } satisfies WorkflowsImportRouteState,
       });
     },
     [application]
@@ -61,26 +136,18 @@ export const LibraryCatalogBrowserPage = React.memo(() => {
       data-test-subj="workflowLibraryCatalogBrowserPage"
       restrictWidth={false}
     >
-      <EuiPageTemplate.Header
-        bottomBorder
-        pageTitle={
-          <EuiFlexGroup gutterSize="m" alignItems="center" justifyContent="flexStart">
-            <EuiFlexItem grow={false}>{libraryPageTitle}</EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBadge
-                color="hollow"
-                iconType="flask"
-                data-test-subj="workflowLibraryExperimentalBadge"
-              >
-                {experimentalBadgeLabel}
-              </EuiBadge>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
+      <AppHeader
+        title={libraryPageTitle}
+        badges={headerBadges}
+        menu={headerMenu}
+        spacing="compact"
       />
       <EuiPageTemplate.Section paddingSize="m" grow>
         <CatalogBrowser onSelect={handleSelect} />
       </EuiPageTemplate.Section>
+      {isUploadFlyoutOpen ? (
+        <UploadTemplateFlyout onClose={closeUploadFlyout} onUploaded={handleFileUploaded} />
+      ) : null}
     </EuiPageTemplate>
   );
 });

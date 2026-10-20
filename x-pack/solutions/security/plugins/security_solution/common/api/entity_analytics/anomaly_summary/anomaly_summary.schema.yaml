@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Anomaly Summary API
-  version: '2023-10-31'
+  version: '1'
 
 paths:
   /internal/entity_analytics/entities/{entity_type}/{entity_id}/anomaly_overview:
@@ -10,7 +10,7 @@ paths:
       x-codegen-enabled: true
       operationId: GetAnomalyOverview
       summary: Get anomaly overview for an entity
-      description: Returns time-bucketed anomaly counts and tactic distribution for a given entity.
+      description: Returns time-bucketed anomaly counts and tactic distribution for a given entity. In `resolved` mode the entity's resolution group is combined.
       parameters:
         - name: entity_type
           in: path
@@ -26,6 +26,7 @@ paths:
             type: string
             minLength: 1
             maxLength: 1000
+          description: Entity Store id (`entity.id`) of the target entity
       requestBody:
         required: true
         content:
@@ -67,6 +68,7 @@ paths:
                 totalAnomaliesCount: 11
                 from: 1705276800000
                 to: 1705622400000
+                hasJobsMissingThreatTactics: false
 
   /internal/entity_analytics/entities/{entity_type}/{entity_id}/anomaly_summary:
     post:
@@ -74,7 +76,7 @@ paths:
       x-codegen-enabled: true
       operationId: GetAnomalySummary
       summary: Get anomaly summary for an entity
-      description: Queries ML anomaly records on demand, enriches them with baseline data, and returns results for a given entity.
+      description: Queries ML anomaly records on demand, enriches them with baseline data, and returns results for a given entity. In `resolved` mode the entity's resolution group is combined.
       parameters:
         - name: entity_type
           in: path
@@ -90,6 +92,7 @@ paths:
             type: string
             minLength: 1
             maxLength: 1000
+          description: Entity Store id (`entity.id`) of the target entity
       requestBody:
         required: true
         content:
@@ -162,9 +165,27 @@ paths:
 
 components:
   schemas:
+    AnomalyScoreRange:
+      type: object
+      required: [min_score]
+      properties:
+        min_score:
+          type: number
+          minimum: 0
+          maximum: 100
+          description: Minimum record_score (inclusive)
+        max_score:
+          type: number
+          minimum: 0
+          maximum: 100
+          description: Maximum record_score (exclusive); omit for an unbounded upper end
+
     AnomalySummaryRequestBody:
       type: object
       properties:
+        mode:
+          $ref: '../common/common.schema.yaml#/components/schemas/EntityViewMode'
+          default: single
         page:
           type: integer
           minimum: 1
@@ -186,16 +207,12 @@ components:
           format: int64
           minimum: 0
           description: End time as epoch milliseconds; only anomalies at or before this timestamp are returned
-        min_score:
-          type: number
-          minimum: 0
-          maximum: 100
-          description: Minimum record_score (inclusive); omit to use the default threshold of 1
-        max_score:
-          type: number
-          minimum: 0
-          maximum: 100
-          description: Maximum record_score (exclusive); omit to return all scores up to 100
+        score_ranges:
+          type: array
+          maxItems: 10
+          items:
+            $ref: '#/components/schemas/AnomalyScoreRange'
+          description: Filter to anomalies whose record_score falls within any one of the given ranges; omit to use the default threshold of 1 and include all scores up to 100
         job_ids:
           type: array
           maxItems: 200
@@ -228,6 +245,7 @@ components:
       type: object
       required:
         - recordId
+        - entityId
         - jobId
         - detectorIndex
         - detectorFunction
@@ -248,6 +266,10 @@ components:
           type: string
           maxLength: 200
           description: Elasticsearch document ID of the ML anomaly record
+        entityId:
+          type: string
+          maxLength: 200
+          description: Id of the Entity Store record this anomaly was matched to; in resolved mode this identifies which member of the resolution group it belongs to
         jobId:
           type: string
           maxLength: 150
@@ -363,6 +385,9 @@ components:
     AnomalyOverviewRequestBody:
       type: object
       properties:
+        mode:
+          $ref: '../common/common.schema.yaml#/components/schemas/EntityViewMode'
+          default: single
         from:
           type: integer
           format: int64
@@ -373,16 +398,12 @@ components:
           format: int64
           minimum: 0
           description: End time as epoch milliseconds; defaults to now when omitted
-        min_score:
-          type: number
-          minimum: 0
-          maximum: 100
-          description: Minimum record_score (inclusive); omit to use the default threshold of 1
-        max_score:
-          type: number
-          minimum: 0
-          maximum: 100
-          description: Maximum record_score (exclusive); omit to return all scores up to 100
+        score_ranges:
+          type: array
+          maxItems: 10
+          items:
+            $ref: '#/components/schemas/AnomalyScoreRange'
+          description: Filter to anomalies whose record_score falls within any one of the given ranges; omit to use the default threshold of 1 and include all scores up to 100
         threat_tactics:
           type: array
           maxItems: 100
@@ -412,6 +433,11 @@ components:
             type: string
             maxLength: 150
           description: MITRE ATT&CK tactic names for all jobs that fired in this bucket
+        tacticCounts:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Number of anomaly records per MITRE ATT&CK tactic within this time bucket; a job's doc_count is attributed to each tactic it is configured for
 
     AnomalyOverviewHit:
       type: object
@@ -454,6 +480,7 @@ components:
         - totalAnomaliesCount
         - from
         - to
+        - hasJobsMissingThreatTactics
       properties:
         entityId:
           type: string
@@ -487,3 +514,6 @@ components:
           type: integer
           format: int64
           description: Effective end of the query time range as epoch milliseconds
+        hasJobsMissingThreatTactics:
+          type: boolean
+          description: True when at least one ML job contributing to this overview has no `custom_settings.threat_tactics` configured, meaning tactic counts may be incomplete

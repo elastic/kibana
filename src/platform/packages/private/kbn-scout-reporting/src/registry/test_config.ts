@@ -11,7 +11,11 @@ import { globSync } from 'fast-glob';
 import { REPO_ROOT } from '@kbn/repo-info';
 import path from 'node:path';
 import { ToolingLog } from '@kbn/tooling-log';
-import { SCOUT_CONFIG_PATH_GLOB, SCOUT_UNIFIED_CONFIG_PATH_REGEX } from '@kbn/scout-info';
+import {
+  SCOUT_CONFIG_PATH_GLOB,
+  SCOUT_UNIFIED_CONFIG_PATH_REGEX,
+  testChannels,
+} from '@kbn/scout-info';
 import { existsSync, readFileSync } from 'node:fs';
 import { readKibanaModuleManifest } from '../helpers/read_manifest';
 import type { ScoutTestableModule } from './testable_module';
@@ -31,13 +35,17 @@ export interface ScoutTestConfig {
 
 const loadScoutManifestFile = (
   manifestPath: string
-): { exists: boolean } & Pick<ScoutConfigManifest, 'sha1' | 'tests'> => {
+):
+  | ({ exists: true } & Omit<ScoutConfigManifest, 'exists'>)
+  | ({ exists: false } & Pick<ScoutConfigManifest, 'sha1' | 'testChannels' | 'tests'>) => {
   const absoluteManifestPath = path.join(REPO_ROOT, manifestPath);
   const manifestExists = existsSync(absoluteManifestPath);
+
   if (manifestExists) {
     try {
       return {
         exists: true,
+        testChannels: [],
         ...JSON.parse(readFileSync(absoluteManifestPath, 'utf8')),
       };
     } catch (e) {
@@ -48,6 +56,7 @@ const loadScoutManifestFile = (
   return {
     exists: false,
     sha1: '000000000000000-000000000000000',
+    testChannels: [],
     tests: [],
   };
 };
@@ -71,32 +80,35 @@ const resolveModuleMetadata = (
   }
 
   const g = match.groups;
-  const module: ScoutTestableModule = g.coreRoot
-    ? {
-        name: 'core',
-        group: 'platform',
-        type: 'package' as ScoutTestableModule['type'],
-        visibility: 'shared' as ScoutTestableModule['visibility'],
-        root: moduleRoot,
-      }
-    : g.examplesRoot
-    ? (() => {
-        const manifest = readKibanaModuleManifest(path.join(REPO_ROOT, moduleRoot, 'kibana.jsonc'));
-        return {
-          name: manifest.id,
-          group: manifest.group,
-          type: manifest.type as ScoutTestableModule['type'],
-          visibility: manifest.visibility as ScoutTestableModule['visibility'],
+  const module: ScoutTestableModule =
+    g.coreRoot || g.devBuildRoot
+      ? {
+          name: g.coreRoot ? 'core' : 'dev',
+          group: 'platform',
+          type: 'package' as ScoutTestableModule['type'],
+          visibility: g.coreRoot ? 'shared' : 'private',
+          root: moduleRoot,
+        }
+      : g.examplesRoot
+      ? (() => {
+          const manifest = readKibanaModuleManifest(
+            path.join(REPO_ROOT, moduleRoot, 'kibana.jsonc')
+          );
+          return {
+            name: manifest.id,
+            group: manifest.group,
+            type: manifest.type as ScoutTestableModule['type'],
+            visibility: manifest.visibility as ScoutTestableModule['visibility'],
+            root: moduleRoot,
+          };
+        })()
+      : {
+          name: g.moduleName,
+          group: g.platformOrCore ?? g.solution,
+          type: g.moduleKind.slice(0, -1) as ScoutTestableModule['type'],
+          visibility: (g.moduleVisibility || 'private') as ScoutTestableModule['visibility'],
           root: moduleRoot,
         };
-      })()
-    : {
-        name: g.moduleName,
-        group: g.platformOrCore ?? g.solution,
-        type: g.moduleKind.slice(0, -1) as ScoutTestableModule['type'],
-        visibility: (g.moduleVisibility || 'private') as ScoutTestableModule['visibility'],
-        root: moduleRoot,
-      };
 
   return {
     module,
@@ -125,25 +137,18 @@ export const testConfig = {
     const { module, serverConfigSet, namespace, testCategory, testConfigType } =
       resolveModuleMetadata(configPath, moduleRoot);
 
-    const scoutDirName = `scout${serverConfigSet ? `_${serverConfigSet}` : ''}`;
-    const manifestPath = namespace
-      ? path.join(
-          moduleRoot,
-          'test',
-          scoutDirName,
-          namespace,
-          '.meta',
-          testCategory,
-          `${testConfigType || 'standard'}.json`
-        )
-      : path.join(
-          moduleRoot,
-          'test',
-          scoutDirName,
-          '.meta',
-          testCategory,
-          `${testConfigType || 'standard'}.json`
-        );
+    const manifestPath = path.join(
+      ...[
+        moduleRoot,
+        'test',
+        `scout${serverConfigSet ? `_${serverConfigSet}` : ''}`,
+        namespace,
+        '.meta',
+        testCategory,
+        `${testConfigType || 'standard'}.json`,
+      ].filter((segment) => segment !== undefined)
+    );
+
     const manifestFileData = loadScoutManifestFile(manifestPath);
 
     return {
@@ -156,6 +161,10 @@ export const testConfig = {
         path: manifestPath,
         exists: manifestFileData.exists,
         sha1: manifestFileData.sha1,
+        testChannels:
+          manifestFileData.testChannels.length > 0
+            ? manifestFileData.testChannels
+            : testChannels.default,
         tests: manifestFileData.tests,
       },
       server: {

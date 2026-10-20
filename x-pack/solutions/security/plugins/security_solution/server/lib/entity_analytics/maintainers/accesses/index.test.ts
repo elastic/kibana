@@ -28,7 +28,7 @@ describe('accessesFrequentlyMaintainer', () => {
         state: {},
         taskStatus: 'started',
       },
-      abortController: new AbortController(),
+      signal: new AbortController().signal,
       logger: loggerMock.create(),
       fakeRequest: {} as KibanaRequest,
       esClient: {} as ElasticsearchClient,
@@ -50,8 +50,14 @@ describe('accessesFrequentlyMaintainer', () => {
       .mockImplementation(async ({ telemetryCollector }) => {
         if (telemetryCollector) {
           telemetryCollector.sources.push(
-            { id: 'elastic_defend', scanned: 10, qualified: 8, outcome: 'producing' },
-            { id: 'aws_cloudtrail', scanned: 0, qualified: 0, outcome: 'index_missing' }
+            { id: 'elastic_defend', scanned: 10, qualified: 8, outcome: 'producing', applied: 8 },
+            {
+              id: 'aws_cloudtrail',
+              scanned: 0,
+              qualified: 0,
+              outcome: 'index_missing',
+              applied: 0,
+            }
           );
           telemetryCollector.relationshipTypeApplied.accesses_frequently = 5;
           telemetryCollector.relationshipTypeApplied.accesses_infrequently = 3;
@@ -63,7 +69,8 @@ describe('accessesFrequentlyMaintainer', () => {
           totalNotFound: 0,
           totalWriteErrors: 0,
           totalMetadataDocsApplied: 8,
-          totalDroppedTargets: 0,
+          totalMetadataDocsFailed: 0,
+          totalTargetIdsNotInStore: 0,
           totalIterations: 15,
           truncated: false,
           lastRunTimestamp: '2026-05-21T00:00:00.000Z',
@@ -84,13 +91,15 @@ describe('accessesFrequentlyMaintainer', () => {
       proposed: 8, // echoes qualified — engine has no distinct proposal stage
       applied: 8,
       droppedNotInStore: 0,
+      targetIdsNotInStore: 0,
       failed: 0,
       metadataDocsApplied: 8,
+      metadataDocsFailed: 0,
     });
 
     expect(payload.sources).toEqual([
-      { id: 'elastic_defend', scanned: 10, qualified: 8, outcome: 'producing' },
-      { id: 'aws_cloudtrail', scanned: 0, qualified: 0, outcome: 'index_missing' },
+      { id: 'elastic_defend', scanned: 10, qualified: 8, outcome: 'producing', applied: 8 },
+      { id: 'aws_cloudtrail', scanned: 0, qualified: 0, outcome: 'index_missing', applied: 0 },
     ]);
 
     expect(payload.breakdown).toEqual([
@@ -112,6 +121,7 @@ describe('accessesFrequentlyMaintainer', () => {
             scanned: 0,
             qualified: 0,
             outcome: 'index_missing',
+            applied: 0,
           });
           // relationshipTypeApplied intentionally empty
         }
@@ -122,7 +132,8 @@ describe('accessesFrequentlyMaintainer', () => {
           totalNotFound: 0,
           totalWriteErrors: 0,
           totalMetadataDocsApplied: 0,
-          totalDroppedTargets: 0,
+          totalMetadataDocsFailed: 0,
+          totalTargetIdsNotInStore: 0,
           totalIterations: 2,
           truncated: false,
           lastRunTimestamp: '2026-05-21T00:00:00.000Z',
@@ -135,12 +146,12 @@ describe('accessesFrequentlyMaintainer', () => {
     expect(payload).not.toHaveProperty('breakdown');
   });
 
-  it('passes abortController to runRelationshipMaintainer', async () => {
+  it('passes signal to runRelationshipMaintainer', async () => {
     const telemetry = makeTelemetry();
     const ac = new AbortController();
     const ctx = makeContext({
       telemetry: telemetry as unknown as Ctx['telemetry'],
-      abortController: ac,
+      signal: ac.signal,
     });
 
     const spy = jest.spyOn(engineModule, 'runRelationshipMaintainer').mockResolvedValue({
@@ -150,7 +161,8 @@ describe('accessesFrequentlyMaintainer', () => {
       totalNotFound: 0,
       totalWriteErrors: 0,
       totalMetadataDocsApplied: 0,
-      totalDroppedTargets: 0,
+      totalMetadataDocsFailed: 0,
+      totalTargetIdsNotInStore: 0,
       totalIterations: 1,
       truncated: false,
       lastRunTimestamp: '2026-05-21T00:00:00.000Z',
@@ -158,6 +170,45 @@ describe('accessesFrequentlyMaintainer', () => {
 
     await accessesFrequentlyMaintainer.run(ctx);
 
-    expect(spy).toHaveBeenCalledWith(expect.objectContaining({ abortController: ac }));
+    expect(spy).toHaveBeenCalledWith(expect.objectContaining({ signal: ac.signal }));
+  });
+
+  it('reports non-zero metadataDocsFailed in the telemetry funnel', async () => {
+    const telemetry = makeTelemetry();
+    const ctx = makeContext({ telemetry: telemetry as unknown as Ctx['telemetry'] });
+
+    jest
+      .spyOn(engineModule, 'runRelationshipMaintainer')
+      .mockImplementation(async ({ telemetryCollector }) => {
+        if (telemetryCollector) {
+          telemetryCollector.sources.push({
+            id: 'elastic_defend',
+            scanned: 5,
+            qualified: 5,
+            outcome: 'producing',
+            applied: 5,
+          });
+          telemetryCollector.relationshipTypeApplied.accesses_frequently = 5;
+        }
+        return {
+          totalBuckets: 5,
+          totalRecords: 5,
+          totalWritten: 5,
+          totalNotFound: 0,
+          totalWriteErrors: 0,
+          totalMetadataDocsApplied: 3,
+          totalMetadataDocsFailed: 2,
+          totalTargetIdsNotInStore: 0,
+          totalIterations: 1,
+          truncated: false,
+          lastRunTimestamp: '2026-05-21T00:00:00.000Z',
+        };
+      });
+
+    await accessesFrequentlyMaintainer.run(ctx);
+
+    const [payload] = telemetry.report.mock.calls[0];
+    expect(payload.funnel.metadataDocsApplied).toBe(3);
+    expect(payload.funnel.metadataDocsFailed).toBe(2);
   });
 });

@@ -23,6 +23,9 @@ import * as i18n from './translations';
 
 export const isImage = (file: { mimeType?: string }) => file.mimeType?.startsWith('image/');
 
+export const getFileDisplayName = (file: { name: string; extension?: string }) =>
+  file.extension !== undefined ? `${file.name}.${file.extension}` : file.name;
+
 export const parseMimeType = (mimeType: string | undefined) => {
   if (typeof mimeType === 'undefined') {
     return i18n.UNKNOWN_MIME_TYPE;
@@ -74,6 +77,32 @@ export const getFileFromReferenceMetadata = ({
 
 const isFileAttachment = (comment: AttachmentUIV2, owner: string): boolean =>
   resolveUnifiedAttachmentType(comment, owner) === FILE_ATTACHMENT_TYPE;
+
+/** Minimal identity of a file already attached to a case (name + extension). */
+export interface AttachedFile {
+  name: string;
+  extension: string;
+}
+
+/** Name + extension of every file already attached to a case. */
+export const getFilesFromComments = (
+  comments: CaseUI['comments'],
+  owner: string
+): AttachedFile[] => {
+  const files: AttachedFile[] = [];
+  for (const comment of comments) {
+    if (
+      isFileAttachment(comment, owner) &&
+      'metadata' in comment &&
+      isValidFileMetadata(comment.metadata)
+    ) {
+      for (const { name, extension } of comment.metadata.files) {
+        files.push({ name, extension });
+      }
+    }
+  }
+  return files;
+};
 
 /**
  * Collects the set of file ids referenced by a case's comments. Used by

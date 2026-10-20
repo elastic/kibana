@@ -6,7 +6,7 @@
  */
 
 import type { ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
-import { test as baseTest } from '@kbn/scout';
+import { apiClientFixture, test as baseTest, mergeTests } from '@kbn/scout';
 
 import type { SpacesPageObjects } from './page_objects';
 import { extendPageObjects } from './page_objects';
@@ -15,9 +15,12 @@ export interface SpacesTestFixtures extends ScoutTestFixtures {
   pageObjects: SpacesPageObjects;
 }
 
-export const test = baseTest.extend<SpacesTestFixtures, ScoutWorkerFixtures>({
-  pageObjects: async ({ pageObjects, page }, use) => {
-    const extendedPageObjects = extendPageObjects(pageObjects, page);
+export const test = mergeTests(baseTest, apiClientFixture).extend<
+  SpacesTestFixtures,
+  ScoutWorkerFixtures
+>({
+  pageObjects: async ({ pageObjects, page, kbnUrl }, use) => {
+    const extendedPageObjects = extendPageObjects(pageObjects, page, kbnUrl);
     await use(extendedPageObjects);
   },
 });

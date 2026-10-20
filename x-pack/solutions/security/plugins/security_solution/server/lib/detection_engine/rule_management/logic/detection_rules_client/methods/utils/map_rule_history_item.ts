@@ -25,12 +25,16 @@ export function mapRuleHistoryItem(
   return {
     timestamp: current['@timestamp'],
     id: current.event.id,
-    user: current.user ? { id: current.user.id, name: current.user.name } : null,
+    user: { id: current.user.id, name: resolveUserName(current.user) },
     action: current.event.action,
     rule,
     old_values: computeOldValues(rule, previousRule),
     metadata: normalizeMetadata(current.metadata),
   };
+}
+
+function resolveUserName(user: RuleChangeHistoryDocument['user']): string {
+  return user.full_name || user.email || user.name;
 }
 
 function normalizeMetadata(

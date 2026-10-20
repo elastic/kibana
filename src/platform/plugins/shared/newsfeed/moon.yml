@@ -23,6 +23,12 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/utility-types'
   - '@kbn/config-schema'
+  - '@kbn/core-chrome-sidebar'
+  - '@kbn/core-chrome-sidebar-components'
+  - '@kbn/core-chrome-sidebar-context'
+  - '@kbn/core-chrome-sidebar-mocks'
+  - '@kbn/react-env'
+  - '@kbn/test-jest-helpers'
 tags:
   - plugin
   - prod

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { act, render, waitFor } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 import React from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
 import { of } from 'rxjs';
@@ -17,7 +17,6 @@ import { createStartServicesMock, type StartServicesMock } from '../../mocks';
 import { getTestProvider } from '../../shared/mocks/test_providers';
 
 const mockSetWorkflowsBreadcrumbs = jest.fn();
-const mockUseWorkflowsExperimentalUiSetting = jest.fn(() => false);
 let mockOnLoaded: ((template: TemplateBody) => void) | undefined;
 let mockShowGraphPreview: boolean | undefined;
 
@@ -38,10 +37,6 @@ jest.mock('@kbn/workflows-ui', () => ({
   },
 }));
 
-jest.mock('../../hooks/use_workflows_experimental_ui_setting', () => ({
-  useWorkflowsExperimentalUiSetting: () => mockUseWorkflowsExperimentalUiSetting(),
-}));
-
 jest.mock('../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs', () => ({
   useSetWorkflowsBreadcrumbs: () => mockSetWorkflowsBreadcrumbs,
 }));
@@ -50,6 +45,7 @@ function buildEnabledServices(): StartServicesMock {
   const services = createStartServicesMock();
   services.settings.globalClient.get.mockReturnValue(true);
   services.settings.globalClient.get$.mockReturnValue(of(true));
+  services.application.getUrlForApp.mockReturnValue('/app/workflows/library');
   return services;
 }
 
@@ -61,12 +57,11 @@ const routeProps = (slug: string) =>
 describe('LibraryTemplateDetailPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseWorkflowsExperimentalUiSetting.mockReturnValue(false);
     mockOnLoaded = undefined;
     mockShowGraphPreview = undefined;
   });
 
-  it('resets breadcrumbs to Library when the route slug changes', async () => {
+  it('resets breadcrumbs to Library when the route slug changes', () => {
     const services = buildEnabledServices();
     const { rerender } = render(<LibraryTemplateDetailPage {...routeProps('first-template')} />, {
       wrapper: getTestProvider({ services }),
@@ -78,23 +73,18 @@ describe('LibraryTemplateDetailPage', () => {
       } as TemplateBody);
     });
 
-    await waitFor(() => {
-      expect(mockSetWorkflowsBreadcrumbs).toHaveBeenLastCalledWith(
-        expect.arrayContaining([expect.objectContaining({ text: 'First template' })])
-      );
-    });
+    expect(mockSetWorkflowsBreadcrumbs).toHaveBeenLastCalledWith(
+      expect.arrayContaining([expect.objectContaining({ text: 'First template' })])
+    );
 
     rerender(<LibraryTemplateDetailPage {...routeProps('second-template')} />);
 
-    await waitFor(() => {
-      expect(mockSetWorkflowsBreadcrumbs).toHaveBeenLastCalledWith([
-        expect.objectContaining({ text: 'Library' }),
-      ]);
-    });
+    expect(mockSetWorkflowsBreadcrumbs).toHaveBeenLastCalledWith([
+      { text: 'Template Library', href: '/app/workflows/library' },
+    ]);
   });
 
-  it('passes the visual editor flag through to the template detail preview', () => {
-    mockUseWorkflowsExperimentalUiSetting.mockReturnValue(true);
+  it('always enables the graph preview in the template detail', () => {
     const services = buildEnabledServices();
 
     render(<LibraryTemplateDetailPage {...routeProps('first-template')} />, {

@@ -89,8 +89,14 @@ export const openEntityFlyoutFromHomeByName = (entityName: string) => {
  * Click the "Resolution group" link inside the right-panel ResolutionSection
  * to open the left panel pre-selected on the resolution tab. Waits for the
  * tab content to render before returning so chained interactions are safe.
+ *
+ * Scrolls to the section first: with `entityAnalyticsAnomalyDetails` enabled,
+ * the right panel renders an Anomalies section above ResolutionSection (even
+ * when the entity has no anomalies), which can push it below the flyout's
+ * initially-visible scroll area.
  */
 export const openResolutionTabFromRightPanel = () => {
+  cy.get(RESOLUTION_SECTION).scrollIntoView();
   cy.get(RESOLUTION_SECTION).should('be.visible');
   cy.get(RESOLUTION_GROUP_LINK).click();
   cy.get(RESOLUTION_GROUP_TAB).should('be.visible');

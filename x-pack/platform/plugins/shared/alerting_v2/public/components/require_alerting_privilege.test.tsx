@@ -13,23 +13,47 @@ import type { AlertingV2Feature } from '../../common/feature_privileges';
 import type { UserCapabilities } from '../services/user_capabilities';
 import { RequireAlertingPrivilege } from './require_alerting_privilege';
 import type { RequireAlertingPrivilegeProps } from './require_alerting_privilege';
+import {
+  PrivilegeCheckProvider,
+  type PrivilegeCheck,
+} from '../application/privilege_check_context';
 
 jest.mock('@kbn/core-di-browser');
 
 const mockUseService = useService as jest.MockedFunction<typeof useService>;
 const mockCanRead = jest.fn<boolean, [AlertingV2Feature]>();
+const mockCanWrite = jest.fn<boolean, [AlertingV2Feature]>();
 
 const mockReadableFeatures = (readable: (feature: AlertingV2Feature) => boolean) => {
   mockCanRead.mockImplementation(readable);
-  mockUseService.mockReturnValue({ canRead: mockCanRead } as unknown as UserCapabilities);
+  mockUseService.mockReturnValue({
+    canRead: mockCanRead,
+    canWrite: mockCanWrite,
+  } as unknown as UserCapabilities);
 };
 
-const renderGate = (features: RequireAlertingPrivilegeProps['features'] = ['rules']) =>
+const mockWritableFeatures = (writable: (feature: AlertingV2Feature) => boolean) => {
+  mockCanWrite.mockImplementation(writable);
+  mockUseService.mockReturnValue({
+    canRead: mockCanRead,
+    canWrite: mockCanWrite,
+  } as unknown as UserCapabilities);
+};
+
+const renderGate = (
+  features: RequireAlertingPrivilegeProps['features'] = ['rules'],
+  {
+    capability,
+    privilegeCheck,
+  }: { capability?: 'read' | 'all'; privilegeCheck?: PrivilegeCheck } = {}
+) =>
   render(
     <I18nProvider>
-      <RequireAlertingPrivilege features={features} pageName="Rules">
-        <div data-test-subj="gatedContent">Gated content</div>
-      </RequireAlertingPrivilege>
+      <PrivilegeCheckProvider value={privilegeCheck}>
+        <RequireAlertingPrivilege features={features} pageName="Rules" capability={capability}>
+          <div data-test-subj="gatedContent">Gated content</div>
+        </RequireAlertingPrivilege>
+      </PrivilegeCheckProvider>
     </I18nProvider>
   );
 
@@ -69,5 +93,64 @@ describe('RequireAlertingPrivilege', () => {
 
     expect(screen.queryByTestId('gatedContent')).not.toBeInTheDocument();
     expect(screen.getByTestId('alertingRequiredPrivilegesPrompt')).toBeInTheDocument();
+  });
+
+  describe('when requireWrite is set', () => {
+    it('renders children when the user can write the required feature', () => {
+      mockWritableFeatures(() => true);
+      renderGate(['actionPolicies'], { capability: 'all' });
+
+      expect(screen.getByTestId('gatedContent')).toBeInTheDocument();
+      expect(mockCanWrite).toHaveBeenCalledWith('actionPolicies');
+    });
+
+    it('renders the interstitial when the user cannot write the required feature', () => {
+      mockWritableFeatures(() => false);
+      renderGate(['actionPolicies'], { capability: 'all' });
+
+      expect(screen.queryByTestId('gatedContent')).not.toBeInTheDocument();
+      expect(screen.getByTestId('alertingRequiredPrivilegesPrompt')).toBeInTheDocument();
+      expect(
+        screen.getByTestId('alertingRequiredPrivilege-alerting_v2_action_policies')
+      ).toBeInTheDocument();
+    });
+  });
+
+  describe('when a custom privilegeCheck is provided via context', () => {
+    it('renders children when the custom check returns true, regardless of v2 capabilities', () => {
+      mockReadableFeatures(() => false);
+      const privilegeCheck: PrivilegeCheck = jest.fn(() => true);
+      renderGate(['alerts'], { privilegeCheck });
+
+      expect(screen.getByTestId('gatedContent')).toBeInTheDocument();
+      expect(privilegeCheck).toHaveBeenCalledWith(['alerts'], 'read');
+      expect(mockCanRead).not.toHaveBeenCalled();
+    });
+
+    it('renders the interstitial when the custom check returns false, regardless of v2 capabilities', () => {
+      mockReadableFeatures(() => true);
+      const privilegeCheck: PrivilegeCheck = jest.fn(() => false);
+      renderGate(['alerts'], { privilegeCheck });
+
+      expect(screen.queryByTestId('gatedContent')).not.toBeInTheDocument();
+      expect(screen.getByTestId('alertingRequiredPrivilegesPrompt')).toBeInTheDocument();
+      expect(mockCanRead).not.toHaveBeenCalled();
+    });
+
+    it('forwards the capability level to the custom check', () => {
+      mockWritableFeatures(() => false);
+      const privilegeCheck: PrivilegeCheck = jest.fn(() => true);
+      renderGate(['actionPolicies'], { capability: 'all', privilegeCheck });
+
+      expect(privilegeCheck).toHaveBeenCalledWith(['actionPolicies'], 'all');
+    });
+
+    it('falls back to the default v2 check when no custom check is provided', () => {
+      mockReadableFeatures(() => true);
+      renderGate(['rules']);
+
+      expect(mockCanRead).toHaveBeenCalledWith('rules');
+      expect(screen.getByTestId('gatedContent')).toBeInTheDocument();
+    });
   });
 });

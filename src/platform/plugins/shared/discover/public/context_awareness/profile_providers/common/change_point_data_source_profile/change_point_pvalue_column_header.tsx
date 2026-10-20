@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { UnifiedDataTableSummaryColumnHeader } from '@kbn/unified-data-table';
+import { UnifiedDataTableSourceColumnHeader } from '@kbn/unified-data-table';
 
 const TOOLTIP_TITLE = i18n.translate(
   'discover.contextAwareness.changePointPvalueColumnHeader.tooltipTitle',
@@ -33,7 +33,7 @@ export const ChangePointPvalueColumnHeader: React.FC<ChangePointPvalueColumnHead
   columnDisplayName,
   headerRowHeight,
 }) => (
-  <UnifiedDataTableSummaryColumnHeader
+  <UnifiedDataTableSourceColumnHeader
     columnDisplayName={columnDisplayName ?? 'pvalue'}
     headerRowHeight={headerRowHeight}
     tooltipTitle={TOOLTIP_TITLE}

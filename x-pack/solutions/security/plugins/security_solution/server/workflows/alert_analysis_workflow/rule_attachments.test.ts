@@ -36,13 +36,52 @@ const createWorkflowAction = (workflowId = WORKFLOW_ID) => createWorkflowActionF
 const createWorkflowSystemAction = (workflowId = WORKFLOW_ID) =>
   createWorkflowSystemActionFixture(workflowId);
 
+// Emulates the parts of rulesClient.find the service relies on: server-side name sorting,
+// count-only requests (perPage 0), page slicing, and the attachment-filter KQL the service pushes
+// into `filter`. Attachment narrowing is derived from that filter rather than done in memory: each
+// `actionRef` group is a "has the workflow action" requirement, negated when wrapped in `not (...)`.
+// A filter that requires both (e.g. the attached count under the `not_attached` filter) matches
+// nothing, mirroring the contradictory KQL. The id-based path (getRulesByIds) passes an enriched id
+// filter with no `actionRef`, so it falls through to the full set like the real client does.
 const createRulesClient = (rules: RuleAlertType[]): jest.Mocked<RulesClient> =>
   ({
-    find: jest.fn().mockResolvedValue({
-      data: rules,
-      total: rules.length,
-      page: 1,
-      perPage: 2000,
+    find: jest.fn().mockImplementation(async ({ options } = {}) => {
+      const { filter = '', page = 1, perPage = 0, sortField, sortOrder } = options ?? {};
+
+      let matched = rules;
+      // The service narrows ML rules out (or counts only them) through the rule-type KQL clause.
+      const mlClause = 'alert.attributes.params.type: "machine_learning"';
+      if (typeof filter === 'string' && filter.includes(`not ${mlClause}`)) {
+        matched = matched.filter((rule) => rule.params.type !== 'machine_learning');
+      } else if (typeof filter === 'string' && filter.includes(mlClause)) {
+        matched = matched.filter((rule) => rule.params.type === 'machine_learning');
+      }
+      if (typeof filter === 'string' && filter.includes('actionRef')) {
+        const negatedGroups = (filter.match(/not \(/g) ?? []).length;
+        const totalGroups = (filter.match(/actionRef/g) ?? []).length;
+        const requireAttached = totalGroups - negatedGroups > 0;
+        const requireNotAttached = negatedGroups > 0;
+        matched = matched.filter((rule) => {
+          const attached = hasAlertAnalysisWorkflowAction(rule, WORKFLOW_ID);
+          if (requireAttached && !attached) {
+            return false;
+          }
+          if (requireNotAttached && attached) {
+            return false;
+          }
+          return true;
+        });
+      }
+      if (sortField === 'name') {
+        const direction = sortOrder === 'desc' ? -1 : 1;
+        matched = [...matched].sort((a, b) => a.name.localeCompare(b.name) * direction);
+      }
+
+      const total = matched.length;
+      const start = (page - 1) * perPage;
+      const data = perPage === 0 ? [] : matched.slice(start, start + perPage);
+
+      return { data, total, page, perPage };
     }),
   } as Partial<jest.Mocked<RulesClient>> as jest.Mocked<RulesClient>);
 
@@ -104,7 +143,7 @@ describe('alert analysis workflow rule attachments', () => {
     );
   });
 
-  it('returns paginated rule attachment summaries', async () => {
+  it('returns a server-paginated page of rule attachment summaries', async () => {
     const rulesClient = createRulesClient([
       createRule({ id: 'rule-3' }),
       createRule({ id: 'rule-2', enabled: false }),
@@ -124,16 +163,16 @@ describe('alert analysis workflow rule attachments', () => {
       perPage: 1,
       rules: [
         {
-          id: 'rule-3',
-          name: 'Rule rule-3',
-          enabled: true,
+          id: 'rule-2',
+          name: 'Rule rule-2',
+          enabled: false,
           attached: false,
         },
       ],
     });
   });
 
-  it('sorts rules deterministically by enabled state, name, and id before paginating', async () => {
+  it('delegates sorting and pagination to the rules client (by name, ascending)', async () => {
     const rulesClient = createRulesClient([
       createRule({ id: 'rule-3', enabled: false }),
       createRule({ id: 'rule-2' }),
@@ -144,17 +183,55 @@ describe('alert analysis workflow rule attachments', () => {
       workflowId: WORKFLOW_ID,
     });
 
-    await expect(
-      service.getRuleAttachments({ search: '', attachmentFilter: 'all', page: 1, perPage: 3 })
-    ).resolves.toEqual(
+    await service.getRuleAttachments({ search: '', attachmentFilter: 'all', page: 1, perPage: 3 });
+
+    expect(rulesClient.find).toHaveBeenCalledWith(
       expect.objectContaining({
-        rules: [
-          expect.objectContaining({ id: 'rule-1' }),
-          expect.objectContaining({ id: 'rule-2' }),
-          expect.objectContaining({ id: 'rule-3' }),
-        ],
+        options: expect.objectContaining({
+          page: 1,
+          perPage: 3,
+          sortField: 'name',
+          sortOrder: 'asc',
+        }),
       })
     );
+  });
+
+  it('returns the true total without throwing when more than the attach cap match', async () => {
+    const rules = Array.from({ length: 2500 }, (_, index) => createRule({ id: `rule-${index}` }));
+    const service = createAlertAnalysisWorkflowRuleAttachmentService({
+      rulesClient: createRulesClient(rules),
+      workflowId: WORKFLOW_ID,
+    });
+
+    await expect(
+      service.getRuleAttachmentStats({ search: '', attachmentFilter: 'all' })
+    ).resolves.toEqual({
+      total: 2500,
+      attached: 0,
+    });
+  });
+
+  it('paginates past the attach cap without throwing', async () => {
+    const rules = Array.from({ length: 2500 }, (_, index) =>
+      // zero-pad so name sort order is deterministic for the assertion below
+      createRule({ id: `rule-${String(index).padStart(4, '0')}` })
+    );
+    const service = createAlertAnalysisWorkflowRuleAttachmentService({
+      rulesClient: createRulesClient(rules),
+      workflowId: WORKFLOW_ID,
+    });
+
+    const result = await service.getRuleAttachments({
+      search: '',
+      attachmentFilter: 'all',
+      page: 3,
+      perPage: 20,
+    });
+
+    expect(result.total).toBe(2500);
+    expect(result.rules).toHaveLength(20);
+    expect(result.rules[0].id).toBe('rule-0040');
   });
 
   it('returns selectable rule ids for all matching rules missing the workflow action', async () => {
@@ -174,6 +251,7 @@ describe('alert analysis workflow rule attachments', () => {
       total: 3,
       attached: 1,
       selectable: 2,
+      skippedRuleCount: 0,
       attachedRuleIds: ['rule-1'],
       ruleIds: ['rule-2', 'rule-3'],
     });
@@ -218,6 +296,7 @@ describe('alert analysis workflow rule attachments', () => {
       total: 2,
       attached: 2,
       selectable: 0,
+      skippedRuleCount: 0,
       attachedRuleIds: ['rule-1', 'rule-3'],
       ruleIds: [],
     });
@@ -244,8 +323,60 @@ describe('alert analysis workflow rule attachments', () => {
       total: 2,
       attached: 0,
       selectable: 2,
+      skippedRuleCount: 0,
       attachedRuleIds: [],
       ruleIds: ['rule-2', 'rule-3'],
+    });
+  });
+
+  describe('selection when the caller lacks machine learning authorization', () => {
+    const buildService = ({ mlValid }: { mlValid: boolean }) =>
+      createAlertAnalysisWorkflowRuleAttachmentService({
+        rulesClient: createRulesClient([
+          createRule({ id: 'rule-1' }),
+          createRule({ id: 'rule-2', type: 'machine_learning' }),
+          createRule({ id: 'rule-3', type: 'machine_learning' }),
+          createRule({ id: 'rule-4', actions: [createWorkflowAction()] }),
+        ]),
+        workflowId: WORKFLOW_ID,
+        bulkEditDependencies: {
+          ...createBulkEditDependencies(),
+          mlAuthz: {
+            validateRuleType: jest.fn().mockResolvedValue({ valid: mlValid, message: undefined }),
+          },
+        },
+      });
+
+    it('leaves ML rules out of the selection and reports how many were skipped', async () => {
+      await expect(
+        buildService({ mlValid: false }).getRuleAttachmentSelection({
+          search: '',
+          attachmentFilter: 'not_attached',
+        })
+      ).resolves.toEqual({
+        total: 1,
+        attached: 0,
+        selectable: 1,
+        skippedRuleCount: 2,
+        attachedRuleIds: [],
+        ruleIds: ['rule-1'],
+      });
+    });
+
+    it('selects ML rules when the caller is authorized to edit them', async () => {
+      await expect(
+        buildService({ mlValid: true }).getRuleAttachmentSelection({
+          search: '',
+          attachmentFilter: 'not_attached',
+        })
+      ).resolves.toEqual({
+        total: 3,
+        attached: 0,
+        selectable: 3,
+        skippedRuleCount: 0,
+        attachedRuleIds: [],
+        ruleIds: ['rule-1', 'rule-2', 'rule-3'],
+      });
     });
   });
 
@@ -550,20 +681,6 @@ describe('alert analysis workflow rule attachments', () => {
     // empty. What matters is that a blank search adds no `name` condition.
     const { options } = rulesClient.find.mock.calls[0][0] as { options: { filter?: string } };
     expect(options.filter ?? '').not.toContain('alert.attributes.name');
-  });
-
-  it('throws when more than the max number of rules match the search', async () => {
-    const rulesClient = {
-      find: jest.fn().mockResolvedValue({ data: [], total: 2001, page: 1, perPage: 2000 }),
-    } as Partial<jest.Mocked<RulesClient>> as jest.Mocked<RulesClient>;
-    const service = createAlertAnalysisWorkflowRuleAttachmentService({
-      rulesClient,
-      workflowId: WORKFLOW_ID,
-    });
-
-    await expect(
-      service.getRuleAttachmentStats({ search: '', attachmentFilter: 'all' })
-    ).rejects.toThrow('More than 2000 rules matched the filter query');
   });
 
   it('throws when more than the max number of rules are selected for update', async () => {

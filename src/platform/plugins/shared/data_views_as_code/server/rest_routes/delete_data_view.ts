@@ -7,24 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IRouter, StartServicesAccessor } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 
-import { getDataViewsAsCodeService, handleErrors } from './utils';
+import { getDataViewsAsCodeService, requestHandler } from './utils';
 import { BASE_PATH, INITIAL_REST_VERSION } from './constants';
-import type { DataViewsAsCodeServerPluginStartDependencies } from '../types';
+import type { RegisterRouteArgs } from './types';
 
 const DELETE_DATA_VIEW_AS_CODE_PATH = BASE_PATH + '/{id}';
 
-export const registerDeleteDataViewAsCodeRoute = (
-  router: IRouter,
-  getStartServices: StartServicesAccessor<DataViewsAsCodeServerPluginStartDependencies, void>
-) =>
+export const registerDeleteDataViewAsCodeRoute = ({
+  router,
+  getStartServices,
+  ...args
+}: RegisterRouteArgs) =>
   router.versioned
     .delete({
       path: DELETE_DATA_VIEW_AS_CODE_PATH,
       access: 'public',
-      description: 'Delete a data view by id',
+      enableQueryVersion: true,
+      summary: 'Delete a data view',
+      description: "Permanently deletes a data view by ID. You can't recover a deleted data view.",
+      options: {
+        tags: ['oas-tag:data-views-v2'],
+        availability: {
+          stability: 'stable',
+          since: '9.6.0',
+        },
+      },
       security: {
         authz: {
           requiredPrivileges: ['indexPatterns:manage'],
@@ -40,11 +49,14 @@ export const registerDeleteDataViewAsCodeRoute = (
               id: schema.string({
                 minLength: 1,
                 maxLength: 1_000,
+                meta: {
+                  description: 'The ID of the data view to delete.',
+                },
               }),
             }),
           },
           response: {
-            200: {
+            204: {
               description: 'deleted',
             },
             403: {
@@ -56,12 +68,12 @@ export const registerDeleteDataViewAsCodeRoute = (
           },
         },
       },
-      handleErrors(async (ctx, req, res) => {
+      requestHandler(args, async (ctx, req, res) => {
         const id = req.params.id;
 
         const dataViewsAsCodeService = await getDataViewsAsCodeService(ctx, getStartServices, req);
         await dataViewsAsCodeService.delete(id);
 
-        return res.ok();
+        return res.noContent();
       })
     );

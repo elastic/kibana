@@ -7,14 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AnyAction, Dispatch, Middleware, MiddlewareAPI } from '@reduxjs/toolkit';
 import { debounce } from 'lodash';
+import type { AnyAction, Dispatch, Middleware, MiddlewareAPI } from 'redux-toolkit-v1';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { _clearComputedData, _setComputedDataInternal, setYamlString } from './slice';
 import { performComputation } from './utils/computation';
 import type { RootState } from '../types';
 
-const COMPUTATION_DEBOUNCE_MS = 500;
+// Keep this low enough that structure-derived UI (step minimap, graph) feels
+// live while typing; combined with the editor's own 200ms onChange debounce
+// the end-to-end update lands in well under half a second.
+const COMPUTATION_DEBOUNCE_MS = 250;
 
 const compute = (
   yamlString: string,

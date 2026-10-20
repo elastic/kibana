@@ -9,7 +9,6 @@ import type { Locator, ScoutPage, ScoutTestConfig } from '@kbn/scout';
 
 const PAGE_URL = 'securitySolutionUI';
 const ATTACKS_PAGE_URL = 'security/attacks';
-const ATTACK_DISCOVERY_PAGE_URL = 'security/attack_discovery';
 const STATEFUL_ALERTS_NAV_ITEM_SELECTOR = 'solutionSideNavItemLink-alerts';
 const STATEFUL_DETECTIONS_NAV_ITEM_SELECTOR = 'solutionSideNavItemLink-alert_detections';
 const STATEFUL_DETECTIONS_NAV_ITEM_BUTTON_SELECTOR = 'solutionSideNavItemButton-alert_detections';
@@ -21,7 +20,7 @@ const SERVERLESS_DETECTIONS_NAV_ITEM_ID = 'securityGroup:alertDetections';
 const SERVERLESS_ATTACKS_NAV_PANEL_ITEM_DEEP_LINK_ID = 'securitySolutionUI:attacks';
 const SERVERLESS_ALERTS_NAV_PANEL_ITEM_DEEP_LINK_ID = 'securitySolutionUI:alerts';
 const ATTACKS_PAGE_CONTENT_TEST_ID = 'attacks-page-content';
-const ATTACKS_PAGE_ACTIONS_TEST_ID = 'attacks-page-actions';
+const APP_HEADER_TEST_ID = 'appHeader';
 const ATTACKS_PAGE_SEARCH_BAR_TEST_ID = 'attacks-page-search-bar';
 const ATTACKS_PAGE_STANDARD_FILTERS_TEST_ID = 'attacks-page-standard-filters';
 const ATTACKS_KPIS_SECTION_TEST_ID = 'attacks-kpis-section';
@@ -57,7 +56,7 @@ export class DetectionsAttackDiscoveryPage {
   public readonly detectionsPanelAttacksNavItem: Locator;
   public readonly detectionsNavItemButton: Locator;
   public readonly attacksPageContent: Locator;
-  public readonly attacksPageActions: Locator;
+  public readonly attacksPageHeader: Locator;
   public readonly attacksPageSearchBar: Locator;
   public readonly attacksPageStandardFilters: Locator;
   public readonly attacksKpisSection: Locator;
@@ -93,7 +92,7 @@ export class DetectionsAttackDiscoveryPage {
 
   constructor(private readonly page: ScoutPage, _config: ScoutTestConfig) {
     this.attacksPageContent = this.page.testSubj.locator(ATTACKS_PAGE_CONTENT_TEST_ID);
-    this.attacksPageActions = this.page.testSubj.locator(ATTACKS_PAGE_ACTIONS_TEST_ID);
+    this.attacksPageHeader = this.page.testSubj.locator(APP_HEADER_TEST_ID);
     this.attacksPageSearchBar = this.page.testSubj.locator(ATTACKS_PAGE_SEARCH_BAR_TEST_ID);
     this.attacksPageStandardFilters = this.page.testSubj.locator(
       ATTACKS_PAGE_STANDARD_FILTERS_TEST_ID
@@ -182,15 +181,9 @@ export class DetectionsAttackDiscoveryPage {
     // AttacksPageContent mount and expose attacks-page-content. This wait confirms real UI, not the loader.
     await this.attacksPageContent.waitFor({ state: 'visible', timeout: 30_000 });
 
-    // The search bar is rendered via FiltersGlobal into the global KQL header portal, so it can
-    // appear after the main content tree. SiemSearchBar also skips rendering until index patterns
-    // are ready. Waiting here avoids races that show up on slower CI but not locally.
+    // SiemSearchBar skips rendering until index patterns are ready, so the search bar can appear
+    // after the main content tree. Waiting here avoids races that show up on slower CI but not locally.
     await this.attacksPageSearchBar.waitFor({ state: 'visible', timeout: 30_000 });
-  }
-
-  async navigateToAttackDiscoveryPage() {
-    await this.page.gotoApp(ATTACK_DISCOVERY_PAGE_URL);
-    await this.runButton.waitFor({ state: 'visible', timeout: 30_000 });
   }
 
   async expandDetectionsSection() {

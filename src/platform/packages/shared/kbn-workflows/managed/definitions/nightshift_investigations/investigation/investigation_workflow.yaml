@@ -1,0 +1,246 @@
+version: '1'
+name: Nightshift Investigation
+description: >
+  General-purpose root cause investigation. One agent investigates available signals,
+  including logs, traces, metrics, and topology, then produces a structured conclusion.
+enabled: true
+settings:
+  timeout: '60m'
+  # Fallbacks run after ordinary step errors, not after workflow timeout or cancellation.
+  on-failure:
+    fallback:
+      - name: handle_investigation_failure
+        type: nightshift.handleInvestigationFailure
+        with:
+          investigation_id: '{{ inputs.investigation_id | default: execution.id }}'
+          # The failed steps remain available even when the engine omits the fallback's error binding.
+          reason: >-
+            ${{ error.message
+            | default: steps.resolve_model.error.message
+            | default: steps.ensure_investigation_agent.error.message
+            | default: steps.persist_investigation_started.error.message
+            | default: steps.resolve_investigation_sources.error.message
+            | default: steps.investigate.error.message
+            | default: 'Investigation failed' | truncate: 10000 }}
+        on-failure:
+          continue: true
+  # One run per investigation at a time, in arrival order, so a follow-up builds on the run
+  # before it.
+  concurrency:
+    key: 'investigation:{{ inputs.investigation_id | default: execution.id }}'
+    strategy: queue
+    max: 1
+tags:
+  - observability
+  - investigation
+  - nightshift
+
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        message:
+          type: string
+          description: Description of the issue or event to investigate.
+        title:
+          type: string
+          maxLength: 512
+          description: >
+            Accepted for compatibility and not stored. Agent Builder generates the investigation's
+            title from its first round.
+        source_ids:
+          type: array
+          maxItems: 100
+          items:
+            type: string
+            maxLength: 255
+          description: >
+            Optional Nightshift source ids to scope observability queries. The workflow resolves
+            them to slug and ES|QL view for the investigator.
+        context:
+          type: object
+          additionalProperties: true
+          description: Optional structured context from the start API.
+        connector_id:
+          type: string
+          maxLength: 500
+          description: Optional chat model connector or inference endpoint id for this run.
+        subjects:
+          type: array
+          maxItems: 50
+          items:
+            type: object
+            additionalProperties: true
+          description: >
+            Subjects to record on the investigation (alerts, significant events, questions), as
+            the start API passes them. Without it the subject is derived from the context.
+        notificationDestinations:
+          type: array
+          maxItems: 5
+          description: Destinations that receive investigation lifecycle messages.
+          items:
+            type: object
+            additionalProperties: false
+            required:
+              - type
+              - connector_id
+              - params
+            properties:
+              type:
+                type: string
+                minLength: 1
+                maxLength: 100
+              connector_id:
+                type: string
+                minLength: 1
+                maxLength: 500
+              params:
+                type: object
+                additionalProperties: true
+                description: Connector-specific destination properties, validated by the notification handler at runtime. Limited to 4096 JSON characters, three container levels, and 20 entries per object or array.
+              automation_id:
+                type: string
+                maxLength: 500
+              automation_name:
+                type: string
+                maxLength: 500
+        investigation_id:
+          type: string
+          description: >
+            The investigation (Agent Builder conversation) to run in. The start API always sets
+            it; a run without it starts a new investigation whose id is the workflow execution ID.
+      required:
+        - message
+      additionalProperties: false
+
+steps:
+  # Resolve before any persisted state or lifecycle event, so a bad or blocked model cannot leave
+  # a stale started investigation.
+  - name: resolve_model
+    type: nightshift.resolveModel
+    with:
+      step: investigation
+      connector_id: '{{ inputs.connector_id }}'
+
+  # Investigation agents are per-space documents. Ensuring the agent here covers direct and manual
+  # workflow executions as well as client starts; it is idempotent and preserves existing edits.
+  # It runs before persistence and lifecycle emission so an unavailable agent leaves no stale run.
+  - name: ensure_investigation_agent
+    type: nightshift.ensureInvestigationAgent
+    with:
+      agent_id: nightshift.investigation
+
+  # Gets or creates the investigation conversation and records the run's subjects before lifecycle
+  # emission, so a running investigation is always visible, and records this run's execution id so
+  # the investigation reads as in progress while it runs. The server derives everything from the
+  # execution document; retries cover startup races. A run continuing a closed investigation
+  # reopens it.
+  - name: persist_investigation_started
+    type: kibana.request
+    with:
+      method: POST
+      path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ inputs.investigation_id | default: execution.id }}/_ensure'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+      body:
+        execution_id: '{{ execution.id }}'
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
+        strategy: exponential
+      # Step-level retries override the workflow-level fallback.
+      fallback:
+        - name: handle_persistence_failure
+          type: nightshift.handleInvestigationFailure
+          with:
+            investigation_id: '{{ inputs.investigation_id | default: execution.id }}'
+            reason: "${{ steps.persist_investigation_started.error.message | default: 'Investigation failed' | truncate: 10000 }}"
+          on-failure:
+            continue: true
+
+  - name: emit_investigation_started
+    type: kibana.request
+    with:
+      method: POST
+      path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ inputs.investigation_id | default: execution.id }}/lifecycle_events'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+      body:
+        status: 'running'
+    on-failure:
+      continue: true
+
+  - name: notify_started
+    type: nightshift.sendNotifications
+    with:
+      investigation_id: '{{ inputs.investigation_id | default: execution.id }}'
+      phase: started
+    on-failure:
+      continue: true
+
+  # Resolves the requested source ids to their slug and ES|QL view in one request. A failed request
+  # leaves the list empty: a missing source list must not block the investigation.
+  - name: list_investigation_sources
+    type: kibana.request
+    if: '${{ (inputs.source_ids | size | default: 0) > 0 }}'
+    with:
+      method: GET
+      path: '/s/{{ workflow.spaceId }}/internal/nightshift/sources?per_page=100&{% for id in inputs.source_ids %}ids={{ id | url_encode }}{% unless forloop.last %}&{% endunless %}{% endfor %}'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+    on-failure:
+      continue: true
+
+  - name: resolve_investigation_sources
+    type: data.set
+    with:
+      investigation_sources: '${{ steps.list_investigation_sources.output.sources | default: [] }}'
+
+  - name: investigate
+    type: ai.agent
+    agent-id: nightshift.investigation
+    connector-id: '{{ steps.resolve_model.output.connector_id }}'
+    plugin-id: 'nightshift_investigation'
+    aggregate-by: 'nightshift'
+    product-solution: 'observability'
+    product-feature: 'nightshift'
+    timeout: 1800s
+    with:
+      # The agent records its findings on the investigation with its tools, so the step has no
+      # output schema.
+      conversation_id: '${{ steps.persist_investigation_started.output.conversation_id }}'
+      message: |
+        {{ inputs.message }}
+
+        {% if variables.investigation_sources and variables.investigation_sources.size > 0 %}
+        Related sources:
+        {% for source in variables.investigation_sources %}- {{ source.slug }} (id {{ source.id }}): FROM {{ source.view_name }}
+        {% endfor %}
+        {% elsif inputs.source_ids and inputs.source_ids.size > 0 %}
+        Related sources: none of the requested sources could be resolved to an ES|QL view. The source list was unavailable or the sources no longer exist, so no source scope applies.
+        {% endif %}
+
+        {% if inputs.context and inputs.context.size > 0 and inputs.context.source != 'alert' %}
+        Additional context: {{ inputs.context | json }}
+        {% endif %}
+
+  - name: emit_investigation_completed
+    type: kibana.request
+    with:
+      method: POST
+      path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ inputs.investigation_id | default: execution.id }}/lifecycle_events'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+      body:
+        status: 'completed'
+    on-failure:
+      continue: true
+
+  - name: notify_completed
+    type: nightshift.sendNotifications
+    with:
+      investigation_id: '{{ inputs.investigation_id | default: execution.id }}'
+      phase: completed
+    on-failure:
+      continue: true

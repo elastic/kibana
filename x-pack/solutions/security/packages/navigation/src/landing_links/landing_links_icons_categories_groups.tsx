@@ -145,7 +145,7 @@ const LandingColumnHeading: React.FC<{
     <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
       {iconType && (
         <EuiFlexItem grow={false}>
-          <EuiIcon type={iconType} />
+          <EuiIcon type={iconType} aria-hidden={true} />
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>

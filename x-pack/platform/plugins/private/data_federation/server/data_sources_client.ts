@@ -24,7 +24,7 @@ export class DataSourcesClient {
    * Calls Elasticsearch `GET /_query/datasource`.
    */
   public async getAll(): Promise<DataSource[]> {
-    return await this.esClient.transport.request({
+    return this.esClient.transport.request({
       method: 'GET',
       path,
     });
@@ -35,7 +35,7 @@ export class DataSourcesClient {
    */
   public async get(id: string): Promise<DataSource> {
     const encoded = encodeURIComponent(id);
-    return await this.esClient.transport.request({
+    return this.esClient.transport.request({
       method: 'GET',
       path: `${path}/${encoded}`,
     });
@@ -46,7 +46,7 @@ export class DataSourcesClient {
    */
   public async put(id: string, body: TypeOf<typeof putDataSourceBodySchema>): Promise<void> {
     const encoded = encodeURIComponent(id);
-    return await this.esClient.transport.request({
+    return this.esClient.transport.request({
       method: 'PUT',
       path: `${path}/${encoded}`,
       body,
@@ -58,7 +58,7 @@ export class DataSourcesClient {
    */
   public async delete(id: string): Promise<void> {
     const encoded = encodeURIComponent(id);
-    return await this.esClient.transport.request({
+    return this.esClient.transport.request({
       method: 'DELETE',
       path: `${path}/${encoded}`,
     });

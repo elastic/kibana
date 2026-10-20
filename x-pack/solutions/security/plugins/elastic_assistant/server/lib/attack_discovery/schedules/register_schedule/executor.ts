@@ -17,6 +17,10 @@ import { ALERT_URL } from '@kbn/rule-data-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 
+import type {
+  AttackDiscoveryExecutorOptions,
+  AttackDiscoveryScheduleContext,
+} from '@kbn/attack-discovery-schedules-common';
 import { isInvalidAnonymizationError } from '../../../../routes/attack_discovery/public/post/helpers/throw_if_invalid_anonymization';
 import {
   reportAttackDiscoveryGenerationFailure,
@@ -29,7 +33,6 @@ import type { EsAnonymizationFieldsSchema } from '../../../../ai_assistant_data_
 import { findDocuments } from '../../../../ai_assistant_data_clients/find';
 import { generateAttackDiscoveries } from '../../../../routes/attack_discovery/helpers/generate_discoveries';
 import { filterHallucinatedAlerts } from '../../../../routes/attack_discovery/helpers/filter_hallucinated_alerts';
-import type { AttackDiscoveryExecutorOptions, AttackDiscoveryScheduleContext } from '../types';
 import type { AttackDiscoveryWorkflowExecutorFactory } from '../../../../types';
 import { getIndexTemplateAndPattern } from '../../../data_stream/helpers';
 import {
@@ -38,11 +41,11 @@ import {
 } from '../../persistence/transforms/transform_to_alert_documents';
 import { deduplicateAttackDiscoveries } from '../../persistence/deduplication';
 import { getScheduledIndexPattern } from '../../persistence/get_scheduled_index_pattern';
-import { updateAlertsWithAttackIds } from './updateAlertsWithAttackIds';
+import { updateAlertsWithAttackIds } from './update_alerts_with_attack_ids';
 
 export interface AttackDiscoveryScheduleExecutorParams {
-  getWorkflowExecutorFactory?: () => AttackDiscoveryWorkflowExecutorFactory | undefined;
-  inference: InferenceServerStart;
+  getInference: () => InferenceServerStart | undefined;
+  getWorkflowExecutorFactory: () => AttackDiscoveryWorkflowExecutorFactory | undefined;
   options: AttackDiscoveryExecutorOptions;
   logger: Logger;
   publicBaseUrl: string | undefined;
@@ -50,14 +53,14 @@ export interface AttackDiscoveryScheduleExecutorParams {
 }
 
 export const attackDiscoveryScheduleExecutor = async ({
+  getInference,
   getWorkflowExecutorFactory,
-  inference,
   options,
   logger,
   publicBaseUrl,
   telemetry,
 }: AttackDiscoveryScheduleExecutorParams) => {
-  const { params, rule, services, spaceId } = options;
+  const { params, rule, services, spaceId, startedAt } = options;
   const { alertsClient, actionsClient, savedObjectsClient, scopedClusterClient } = services;
   if (!alertsClient) {
     throw new AlertsClientError();
@@ -66,23 +69,12 @@ export const attackDiscoveryScheduleExecutor = async ({
     throw new Error('Expected actionsClient not to be null!');
   }
 
-  if (params.apiConfig?.connectorId) {
-    // Resolve potentially outdated Elastic managed connector ID to the new one.
-    // This provides backward compatibility for existing schedules that reference
-    // "Elastic-Managed-LLM" or "General-Purpose-LLM-v1".
-    params.apiConfig.connectorId = resolveConnectorId(params.apiConfig.connectorId);
-  }
-
-  // AD 2.0: a schedule that carries a `workflowConfig` dispatches to the workflow
-  // executor registered by the discoveries plugin. Schedules only carry a
-  // `workflowConfig` when the feature is enabled, so with the feature flag off no
-  // schedule reaches this branch and the legacy generation path below is unaffected.
   const workflowConfig = (params as Record<string, unknown>).workflowConfig as
     | Record<string, unknown>
     | undefined;
 
   if (workflowConfig != null) {
-    const workflowExecutorFactory = getWorkflowExecutorFactory?.();
+    const workflowExecutorFactory = getWorkflowExecutorFactory();
 
     if (workflowExecutorFactory == null) {
       const error = new Error(
@@ -95,7 +87,26 @@ export const attackDiscoveryScheduleExecutor = async ({
     return workflowExecutorFactory(options);
   }
 
+  if (params.apiConfig?.connectorId) {
+    // Resolve potentially outdated Elastic managed connector ID to the new one.
+    // This provides backward compatibility for existing schedules that reference
+    // "Elastic-Managed-LLM" or "General-Purpose-LLM-v1".
+    params.apiConfig.connectorId = resolveConnectorId(params.apiConfig.connectorId);
+  }
+
   const esClient = scopedClusterClient.asCurrentUser;
+
+  const inference = getInference();
+  const resolvedConnector = inference
+    ? await inference.getConnectorByIdWithoutClientRequest(
+        params.apiConfig.connectorId,
+        actionsClient,
+        esClient
+      )
+    : undefined;
+  const inferenceClient = inference
+    ? inference.getClientWithoutRequest(actionsClient, esClient)
+    : undefined;
 
   const resourceName = getResourceName(ANONYMIZATION_FIELDS_RESOURCE);
   const index = getIndexTemplateAndPattern(resourceName, spaceId).alias;
@@ -118,27 +129,18 @@ export const attackDiscoveryScheduleExecutor = async ({
   };
 
   try {
-    // Resolve the connector server-side to get the authoritative actionTypeId.
-    // Uses pre-scoped services since the executor runs without a KibanaRequest.
-    const resolvedConnector = await inference.getConnectorByIdWithoutClientRequest(
-      params.apiConfig.connectorId,
-      actionsClient,
-      esClient
-    );
-    const inferenceClient = inference.getClientWithoutRequest(actionsClient, esClient);
-
     const { anonymizedAlerts, attackDiscoveries, replacements } = await generateAttackDiscoveries({
       actionsClient,
       config: {
         ...restParams,
         alertsIndexPattern,
-        filter: combinedFilter,
         anonymizationFields,
-        subAction: 'invokeAI',
         apiConfig: {
           ...restParams.apiConfig,
-          actionTypeId: resolvedConnector.type,
+          ...(resolvedConnector != null ? { actionTypeId: resolvedConnector.type } : {}),
         },
+        filter: combinedFilter,
+        subAction: 'invokeAI',
       },
       esClient,
       inferenceClient,
@@ -151,22 +153,6 @@ export const attackDiscoveryScheduleExecutor = async ({
     if (services.shouldStopExecution()) {
       throw new Error('Rule execution cancelled due to timeout');
     }
-
-    const endTime = moment();
-    const durationMs = endTime.diff(startTime);
-
-    reportAttackDiscoveryGenerationSuccess({
-      alertsContextCount: anonymizedAlerts.length,
-      apiConfig: params.apiConfig,
-      attackDiscoveries,
-      durationMs,
-      end: restParams.end,
-      hasFilter: !!(combinedFilter && Object.keys(combinedFilter).length),
-      scheduleInfo,
-      size: restParams.size,
-      start: restParams.start,
-      telemetry,
-    });
 
     const alertsParams = {
       alertsContextCount: anonymizedAlerts.length,
@@ -208,6 +194,26 @@ export const attackDiscoveryScheduleExecutor = async ({
       spaceId,
     });
 
+    const endTime = moment();
+    const durationMs = endTime.diff(startTime);
+    const duplicatesDroppedCount = validDiscoveries.length - dedupedDiscoveries.length;
+
+    reportAttackDiscoveryGenerationSuccess({
+      alertsContextCount: anonymizedAlerts.length,
+      apiConfig: params.apiConfig,
+      attackDiscoveries,
+      duplicatesDroppedCount,
+      durationMs,
+      end: restParams.end,
+      execution_mode: 'legacy',
+      hasFilter: !!(combinedFilter && Object.keys(combinedFilter).length),
+      scheduleInfo,
+      size: restParams.size,
+      start: restParams.start,
+      telemetry,
+      trigger: 'schedule',
+    });
+
     /**
      * Map that uses alert id as key and an array
      * of attack ids as value.
@@ -241,6 +247,7 @@ export const attackDiscoveryScheduleExecutor = async ({
           alertsParams,
           publicBaseUrl,
           spaceId,
+          timestamp: startedAt.toISOString(),
         });
 
         const { alertIds, timestamp, mitreAttackTactics } = attackDiscovery;
@@ -281,8 +288,10 @@ export const attackDiscoveryScheduleExecutor = async ({
     reportAttackDiscoveryGenerationFailure({
       apiConfig: params.apiConfig,
       errorMessage: transformedError.message,
+      execution_mode: 'legacy',
       scheduleInfo,
       telemetry,
+      trigger: 'schedule',
     });
 
     if (isInvalidAnonymizationError(error)) {

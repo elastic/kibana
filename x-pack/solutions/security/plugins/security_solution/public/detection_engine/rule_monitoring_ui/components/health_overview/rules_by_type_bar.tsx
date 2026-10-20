@@ -29,7 +29,7 @@ export const RulesByTypeBar = memo(function RulesByTypeBar({ health }: { health:
   if (data.length === 0) {
     return (
       <EuiEmptyPrompt
-        iconType="visBarVertical"
+        iconType="chartBarVertical"
         title={<h4>{i18n.NO_RULE_TYPES_TITLE}</h4>}
         body={<p>{i18n.NO_RULE_TYPES_BODY}</p>}
       />

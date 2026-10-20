@@ -8,7 +8,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { _setDarkMode } from '@kbn/ui-theme';
+import { _setDarkMode, getEuiThemeVars } from '@kbn/ui-theme';
 import type { InjectedMetadataTheme } from '@kbn/core-injected-metadata-common-internal';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 import type { CoreTheme } from '@kbn/core-theme-browser';
@@ -94,9 +94,27 @@ export class ThemeService {
     });
 
     _setDarkMode(darkMode);
+    updateRootBackground(theme);
     updateKbnThemeTag(theme);
   }
 }
+
+// Keeps the root `<html>` background (painted by the server-rendered boot
+// splash) in sync with the active color mode on reload-less theme switches.
+// The splash paints the root background only for the color mode resolved at
+// render time, so on a live switch we recolor the real root element from the
+// reactive EUI page-background token instead of leaving it frozen at the SSR
+// color.
+const updateRootBackground = (theme: CoreTheme) => {
+  if (typeof document === 'undefined') {
+    return;
+  }
+  const { euiPageBackgroundColor } = getEuiThemeVars({
+    name: theme.name,
+    darkMode: theme.darkMode,
+  });
+  document.documentElement.style.backgroundColor = euiPageBackgroundColor;
+};
 
 const updateKbnThemeTag = (theme: CoreTheme) => {
   const globals: any = typeof window === 'undefined' ? {} : window;

@@ -17,7 +17,7 @@ export const mapWorkflowHistoryItem = (document: ChangeHistoryDocument): Workflo
   id: document.event.id,
   user: document.user.name
     ? {
-        name: document.user.name,
+        name: document.user.full_name || document.user.email || document.user.name,
         ...(document.user.id ? { profileId: document.user.id } : {}),
       }
     : { name: WORKFLOW_CHANGE_HISTORY_SYSTEM_USER },

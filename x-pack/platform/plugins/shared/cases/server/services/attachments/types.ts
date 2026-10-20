@@ -14,10 +14,10 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsUpdateOptions,
 } from '@kbn/core/server';
+import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { KueryNode } from '@kbn/es-query';
 import type { AttachmentType } from '../../../common';
 import type {
-  AttachmentMode,
   AttachmentAttributesV2,
   AttachmentPatchAttributesV2,
 } from '../../../common/types/domain';
@@ -26,6 +26,7 @@ import type { AttachmentPersistedAttributes } from '../../common/types/attachmen
 import type { UnifiedAttachmentAttributes } from '../../common/types/attachments_v2';
 import type { PartialField } from '../../types';
 import type { IndexRefresh } from '../types';
+import type { AttachmentSavedObjectType } from '../user_actions/types';
 import type { ConfigType } from '../../config';
 
 export type MixSavedObjectResponse =
@@ -60,10 +61,25 @@ export interface AttachedToCaseArgs {
 
 export interface GetAttachmentArgs {
   savedObjectId: string;
-  mode: AttachmentMode;
 }
 
-export type OptionalAttributes<T> = PartialField<SavedObject<T>, 'attributes'>;
+/**
+ * A stored attachment read for deletion; `attributes` is absent when the row fails to decode and
+ * `owner` when the stored owner is not a non-empty string.
+ */
+export interface AttachmentForDeletion {
+  id: string;
+  type: AttachmentSavedObjectType;
+  owner?: string;
+  references: SavedObjectReference[];
+  /** The file of a file attachment, read from the stored fields whether or not they decode. */
+  fileId?: string;
+  attributes?: AttachmentAttributesV2;
+}
+
+export type OptionalAttributes<T> = PartialField<SavedObject<T>, 'attributes'> & {
+  error?: SavedObjectError;
+};
 
 export interface BulkOptionalAttributes<T>
   extends Omit<SavedObjectsBulkResponse<T>, 'saved_objects'> {
@@ -72,10 +88,37 @@ export interface BulkOptionalAttributes<T>
 
 export type GetAllAlertsAttachToCaseArgs = AttachedToCaseArgs & {
   owner: string;
+  /**
+   * Extra unified attachment `type` values (e.g. `security.entity`) to include in the
+   * query alongside the alert/event types. Used by the "already attached" dedup check so
+   * non-alert unified attachments can participate.
+   */
+  unifiedAttachmentTypes?: string[];
 };
+
+/**
+ * Fetches unified-only attachments (e.g. `security.entity`) by exact `type`, returning full
+ * unified attributes (unlike {@link GetAllAlertsAttachToCaseArgs}).
+ *
+ * `filter` must only reference `cases-attachments` fields — don't pass
+ * {@link getAttachmentAuthorizationFilter}'s combined filter (it also matches `cases-comments`).
+ */
+export interface GetUnifiedAttachmentsByTypesArgs {
+  caseId: string;
+  types: string[];
+  filter?: KueryNode;
+}
 
 export interface AlertIdsAggsResult {
   alertIds: {
+    buckets: Array<{
+      key: string;
+    }>;
+  };
+}
+
+export interface AttackIdsAggsResult {
+  attackIds: {
     buckets: Array<{
       key: string;
     }>;
@@ -95,7 +138,14 @@ export interface EventIdsAggsResult {
   };
 }
 
-export type AlertsAttachedToCaseArgs = AttachedToCaseArgs;
+export type AlertsAttachedToCaseArgs = AttachedToCaseArgs & {
+  owner: string;
+  /**
+   * Excludes alerts whose index belongs to a linked project
+   * default to true
+   */
+  originOnly?: boolean;
+};
 
 export interface AttachmentsAttachedToCaseArgs extends AttachedToCaseArgs {
   attachmentType: AttachmentType;

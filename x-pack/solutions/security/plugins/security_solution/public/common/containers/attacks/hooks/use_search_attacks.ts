@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@kbn/react-query';
 
 import type { SearchAttacksRequestBody } from '../../../../../common/api/detection_engine/attacks';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
+import { useDeepEqualSelector } from '../../../hooks/use_selector';
+import type { inputsModel } from '../../../store';
+import { inputsSelectors } from '../../../store';
 import { searchAttacks } from '../api';
 
 import * as i18n from './translations';
@@ -45,22 +48,21 @@ export const useSearchAttacks = (query: SearchAttacksRequestBody) => {
 };
 
 /**
- * We should use this hook to invalidate the attacks search cache. For
- * example, attacks mutations, like setting workflow status, tags, or assignees,
- * should lead to cache invalidation.
+ * We should use this hook to refresh attacks page search after mutations.
+ * Invalidates React Query caches and refetches global queries registered via
+ * `useInspectButton` (attacks table grouping and KPI hooks).
  *
- * @returns An attacks search cache invalidation callback
+ * @returns A callback to refresh attacks search data
  */
 export const useInvalidateSearchAttacks = () => {
   const queryClient = useQueryClient();
+  const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuery(), []);
+  const globalQueries = useDeepEqualSelector(getGlobalQuerySelector);
 
   return useCallback(() => {
-    /**
-     * Invalidate all queries that start with SEARCH_ATTACKS_QUERY_KEY. This
-     * includes the in-memory query cache and paged query cache.
-     */
     queryClient.invalidateQueries(SEARCH_ATTACKS_QUERY_KEY, {
       refetchType: 'active',
     });
-  }, [queryClient]);
+    globalQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
+  }, [queryClient, globalQueries]);
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { produce } from 'immer';
+import { produce } from 'immer-v9';
 import { satisfies } from 'semver';
 import { set } from '@kbn/safer-lodash-set';
 import { filter, reduce, mapKeys, each, unset, uniq, map, has, flatMap } from 'lodash';

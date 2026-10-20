@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import yaml from 'js-yaml';
+import { parse } from 'yaml';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { RegistryVarsEntry } from '@kbn/fleet-plugin/common';
 import {
@@ -99,11 +99,15 @@ function ensureValidMultiText(textMultiValue: string[] | undefined) {
 
 function escapeInvalidYamlString(yamlString: string) {
   try {
-    yaml.load(yamlString);
-  } catch (error) {
-    if (error instanceof yaml.YAMLException) {
-      return `"${yamlString}"`;
-    }
+    // `logLevel: 'silent'` suppresses the process-level warnings the `yaml`
+    // package emits for constructs it tolerates but cannot resolve (e.g. unknown
+    // tags), which are irrelevant here — only whether parsing fails matters.
+    parse(yamlString, { logLevel: 'silent' });
+  } catch {
+    // Any parse failure means the value needs quoting. `yaml` signals invalid
+    // input with both `YAMLParseError` and, for unresolved aliases such as
+    // `*.example.com`, a plain `ReferenceError`, so all errors are treated alike.
+    return `"${yamlString}"`;
   }
   return yamlString;
 }

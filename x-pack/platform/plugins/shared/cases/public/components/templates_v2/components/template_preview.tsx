@@ -6,19 +6,34 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiEmptyPrompt, EuiHorizontalRule, EuiText, EuiSpacer } from '@elastic/eui';
+import { EuiAccordion, EuiEmptyPrompt, EuiHorizontalRule, EuiText, EuiSpacer } from '@elastic/eui';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { parse as parseYaml } from 'yaml';
+import type {
+  TemplateSettings,
+  ParsedTemplateDefinition,
+} from '../../../../common/types/domain/template/v1';
 import { ParsedTemplateDefinitionSchema } from '../../../../common/types/domain/template/v1';
+import type { CaseConnectorWithoutName } from '../../../../common/types/domain_zod/connector/v1';
 import { TemplateFieldRenderer } from '../field_types/field_renderer';
-import { TemplateMetadataPreview } from './template_metadata_preview';
+import { TemplateCaseDefaultsForm } from './template_case_defaults_form';
 import * as i18n from '../translations';
+import { normalizeTemplateCaseDefaultsForValidation } from '../utils/normalize_template_case_defaults';
+import type { OnCaseDefaultChange } from '../case_default_fields';
 
 interface TemplatePreviewProps {
+  settings?: TemplateSettings;
+  connector?: CaseConnectorWithoutName;
   onFieldDefaultChange?: (fieldName: string, value: string, control: string) => void;
+  onCaseDefaultChange?: OnCaseDefaultChange;
 }
 
-export const TemplatePreview: React.FC<TemplatePreviewProps> = ({ onFieldDefaultChange }) => {
+const TemplatePreviewComponent: React.FC<TemplatePreviewProps> = ({
+  settings,
+  connector,
+  onFieldDefaultChange,
+  onCaseDefaultChange,
+}) => {
   const { control } = useFormContext();
   const values = useWatch({ control, defaultValue: { definition: '' } });
 
@@ -48,7 +63,9 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({ onFieldDefault
         } as const;
       }
 
-      return ParsedTemplateDefinitionSchema.safeParse(parsedDefinition);
+      return ParsedTemplateDefinitionSchema.safeParse(
+        normalizeTemplateCaseDefaultsForValidation(parsedDefinition)
+      );
     } catch (error: unknown) {
       if (error instanceof Error) {
         return {
@@ -102,26 +119,60 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({ onFieldDefault
   }
 
   const parsedTemplateData = parsedTemplate.data;
+  const previewDefinition: ParsedTemplateDefinition = {
+    ...parsedTemplateData,
+    settings: settings ?? parsedTemplateData.settings,
+    connector: connector ?? parsedTemplateData.connector,
+  };
 
   return (
     <div>
-      <TemplateMetadataPreview parsedTemplate={parsedTemplateData} />
+      <EuiAccordion
+        id="templatePreviewCaseDefaults"
+        initialIsOpen
+        buttonContent={
+          <EuiText size="xs" color="subdued">
+            <strong>{i18n.CASE_DEFAULTS_SECTION_TITLE}</strong>
+          </EuiText>
+        }
+        data-test-subj="templatePreviewCaseDefaultsAccordion"
+      >
+        <EuiSpacer size="s" />
+        <TemplateCaseDefaultsForm
+          parsedTemplate={previewDefinition}
+          onChange={onCaseDefaultChange}
+        />
+      </EuiAccordion>
 
-      {parsedTemplateData.fields.length > 0 && (
+      {previewDefinition.fields.length > 0 && (
         <>
           <EuiHorizontalRule margin="m" />
-          <EuiText size="xs" color="subdued">
-            <strong>{i18n.TEMPLATE_FIELDS_LABEL}</strong>
-          </EuiText>
-          <EuiSpacer size="s" />
-          <TemplateFieldRenderer
-            parsedTemplate={parsedTemplateData}
-            onFieldDefaultChange={onFieldDefaultChange}
-          />
+          <EuiAccordion
+            id="templatePreviewFields"
+            initialIsOpen
+            buttonContent={
+              <EuiText size="xs" color="subdued">
+                <strong>{i18n.TEMPLATE_FIELDS_LABEL}</strong>
+              </EuiText>
+            }
+            data-test-subj="templatePreviewFieldsAccordion"
+          >
+            <EuiSpacer size="s" />
+            <TemplateFieldRenderer
+              parsedTemplate={previewDefinition}
+              onFieldDefaultChange={onFieldDefaultChange}
+            />
+          </EuiAccordion>
         </>
       )}
     </div>
   );
 };
 
-TemplatePreview.displayName = 'TemplatePreview';
+TemplatePreviewComponent.displayName = 'TemplatePreview';
+
+/**
+ * Memoized so template-details (metadata) edits — which don't change `settings`, `connector`, or the
+ * watched `definition` — never re-render this heavier YAML-backed preview (async user/tag lookups).
+ */
+export const TemplatePreview = React.memo(TemplatePreviewComponent);

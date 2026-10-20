@@ -46,7 +46,6 @@ export const getTableList = (
         visualizations={services.visualizations}
         contentManagement={services.contentManagement}
         embeddable={services.embeddable}
-        savedObjectsTagging={services.savedObjectsTagging?.()}
         parentProps={parentProps}
       />
     </TableListViewKibanaProvider>
@@ -56,30 +55,33 @@ export const getTableList = (
 export const showNewVisModalFromDashboard = async (
   coreStart: CoreStart,
   pluginsStart: { visualizations: VisualizationsStart; embeddable: EmbeddableStart },
-  tabTitle: string
+  tabTitle: string,
+  path: string
 ) => {
   try {
     const currentApp = await firstValueFrom(coreStart.application.currentAppId$);
-    const breadcrumbs = currentApp
-      ? [
-          {
-            text:
-              pluginsStart.embeddable.getStateTransfer().getAppNameFromId(currentApp) ?? currentApp,
-            href: coreStart.application.getUrlForApp(currentApp),
-          },
-          {
-            text: tabTitle,
-            href: coreStart.application.getUrlForApp(currentApp, {
-              path: window.location.hash,
-            }),
-          },
-        ]
+    const embeddableState = currentApp
+      ? {
+          originatingApp: currentApp,
+          breadcrumbs: [
+            {
+              text:
+                pluginsStart.embeddable.getStateTransfer().getAppNameFromId(currentApp) ??
+                currentApp,
+              href: coreStart.application.getUrlForApp(currentApp),
+            },
+            {
+              text: tabTitle,
+              href: coreStart.application.getUrlForApp(currentApp, {
+                path,
+              }),
+            },
+          ],
+        }
       : undefined;
     pluginsStart.visualizations.showNewVisModal({
-      originatingApp: currentApp,
-      originatingPath: window.location.hash,
       outsideVisualizeApp: currentApp !== VISUALIZE_APP_NAME,
-      breadcrumbs,
+      embeddableState,
     });
   } catch (error) {
     coreStart.notifications.toasts.addError(error, {

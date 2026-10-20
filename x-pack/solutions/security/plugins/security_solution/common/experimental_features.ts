@@ -45,6 +45,12 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsEndpointMemoryDump: true,
 
   /**
+   * `physical` memory dump type for the Memory Dump response action for Elastic Defend Endpoint
+   * Release: 9.6, backported to 9.5.x
+   */
+  responseActionsEndpointMemoryDumpRaw: true,
+
+  /**
    * `runscript` response action for Elastic Defend Endpoint
    * Release: 9.4
    */
@@ -66,14 +72,39 @@ export const allowedExperimentalValues = Object.freeze({
    * `cancel` response action for Elastic Defend Endpoint
    * Release: 9.5
    */
-  responseActionsEndpointCancel: false,
+  responseActionsEndpointCancel: true,
+
+  /**
+   * `kill_descendants` parameter option for the `kill-process` response action for Elastic Defend Endpoint
+   * Release: 9.6
+   */
+  responseActionsEndpointKillProcessDescendants: true,
 
   /**
    * Enables CCS prefixing of endpoint indices so a Defend agent shipping to a remote ES output
-   * (Fleet remote output) is visible from the managing cluster's Kibana. Off by default while
-   * we test impact on other features.
+   * (Fleet remote output) is visible from the managing cluster's Kibana.
+   * Release: 9.5
    */
-  defendRemoteOutputCcs: false,
+  defendRemoteOutputCcs: true,
+
+  /**
+   * Enables Cross-Project Search fan-out for Elastic Defend read paths on serverless, moving the reads
+   * it covers from the internal user to a project-routed current-user client. Fan-out additionally
+   * requires the request to resolve at least one linked project via `cps.isCpsActive()`, so a
+   * serverless project with no linked projects reads exactly as it did before CPS. Off until the
+   * request user holds index privileges on the Defend indices: a missing grant drops rows silently.
+   */
+  defendCrossProjectSearch: true,
+
+  /**
+   * AI Agent chat-first endpoint response actions skill (isolate, unisolate, etc.)
+   * Release: TBD
+   *
+   * Ships disabled: this skill dispatches destructive endpoint response actions,
+   * so it must not be enabled by default on any branch. Enable it explicitly via
+   * config (or a Scout evals config) for local/CI testing.
+   */
+  endpointResponseActionsSkill: false,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
@@ -94,8 +125,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Entity Analytics: Disables the Risk Score AI Assistant tool.
    */
   riskScoreAssistantToolDisabled: false,
+
   /**
-   * Enables the new Entity Analytics home page experience.
+   * Retired no-op. The Entity Analytics homepage is always on. Kept so existing
+   * `xpack.securitySolution.enableExperimental` entries, including
+   * `disable:entityAnalyticsNewHomePageEnabled`, remain valid during upgrade.
    */
   entityAnalyticsNewHomePageEnabled: true,
 
@@ -126,7 +160,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Entity Analytics surfaces such as the entity flyout, and registers the
    * `security.entity` unified cases attachment type.
    */
-  entityAttachmentsEnabled: false,
+  entityAttachmentsEnabled: true,
 
   /**
    * Enables AI rule creation feature
@@ -137,6 +171,13 @@ export const allowedExperimentalValues = Object.freeze({
    * Disables the siem migrations feature
    */
   siemMigrationsDisabled: false,
+
+  /**
+   * Enables the v2 rule migration agent graph, which runs pre-built rule matching
+   * (security-team#18589) through a dedicated subgraph that generates its own semantic
+   * queries and calls pre-built rules search as a tool, instead of the v1 one-shot node.
+   */
+  ruleMigrationGraphv2: false,
 
   /**
    * Enables the Defend Insights Policy Response Failure feature
@@ -175,7 +216,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables custom YARA signature management in Elastic Defend.
    */
-  customYaraSignaturesEnabled: false,
+  customYaraSignaturesEnabled: true,
 
   /**
    * Enables the ability to import and migration dashboards through automatic migration service
@@ -192,13 +233,19 @@ export const allowedExperimentalValues = Object.freeze({
    */
   enableAlertsAndAttacksAlignment: true,
   /**
+   * Enables attaching an attack, together with its constituent alerts, to a case from
+   * the Attacks page and the attack flyout, and registers the `security.attack` unified
+   * cases attachment type on the server.
+   */
+  attackAttachmentsEnabled: false,
+  /**
    *  Enables the QRadar rules import feature
    */
   qradarRulesMigration: true,
   /**
    *  Enables the Microsoft Sentinel rules import feature
    */
-  sentinelRulesMigration: false,
+  sentinelRulesMigration: true,
   /**
    * Enables the Kubernetes Dashboard in Security Solution
    */
@@ -247,21 +294,39 @@ export const allowedExperimentalValues = Object.freeze({
   pciComplianceAgentBuilder: true,
 
   /**
+   * Enables the Endpoint Forensic Analysis Agent Builder skill (DFIR / patient zero / timeline).
+   */
+  endpointForensicAnalysisSkill: true,
+
+  /**
+   * Enables the Elastic Defend Policy Management Agent Builder skill
+   */
+  elasticDefendPolicyManagementSkill: true,
+
+  /**
+   * Enables the investigate-rule Agent Builder skill.
+   */
+  investigateRuleSkill: true,
+
+  /**
    * Enables the find-security-rules Agent Builder skill.
    * Part of the DEX AI skills family (`dexAiSkill*`).
    */
-  dexAiSkillFindRules: false,
+  dexAiSkillFindRules: true,
 
   /**
    * Enables the recommend-prebuilt-rules Agent Builder skill.
    * Part of the DEX AI skills family (`dexAiSkill*`).
    */
-  dexAiSkillRecommendPrebuiltRules: false,
+  dexAiSkillRecommendPrebuiltRules: true,
 
   /**
-   * Enables the new flyout using the EUI flyout system
+   * Disables the new flyout using the EUI flyout system. When this flag is off (the default), the
+   * "Enable new flyout" advanced setting is registered and defaults to off, so users can opt in.
+   * Turning this flag on unregisters that advanced setting, forcing the
+   * legacy flyout and effectively removing the new flyout option.
    */
-  newFlyoutSystemEnabled: false,
+  newFlyoutSystemDisabled: false,
 
   /**
    * Uses entity store v2 for entity analytics skill
@@ -271,13 +336,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables entity ML anomaly details API
    */
-  entityAnalyticsAnomalyDetails: false,
-
-  /**
-   * Enables the deprecated prebuilt rules UI
-   * Release: 9.4
-   */
-  prebuiltRulesDeprecationUIEnabled: true,
+  entityAnalyticsAnomalyDetails: true,
 
   /**
    * Enables the Detection Rule Changes History API endpoint
@@ -287,17 +346,7 @@ export const allowedExperimentalValues = Object.freeze({
    * config flag, which gates the underlying primitive that produces the history
    * records. Both must be enabled for the API to return non-empty results.
    */
-  ruleChangesHistoryEnabled: false,
-
-  /**
-   * Enables the Agents, Discover and Workflows external links in the classic Security Solution side navigation
-   */
-  securityClassicNavExternalLinks: true,
-  /**
-   * Enables public Detection Engine attacks REST APIs
-   * (`/api/detection_engine/attacks/*`).
-   */
-  publicAttacksApiEnabled: false,
+  ruleChangesHistoryEnabled: true,
 
   /**
    * Enables the agent builder `run_rule_preview` tool and the `security.rule.preview`
@@ -309,19 +358,56 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the risk score history API endpoint for Entity Analytics.
    */
-  riskScoreHistoryEnabled: false,
-
-  /**
-   * Enables the Attacks page tour (welcome callout + guided tour).
-   * Release: 9.5
-   */
-  attacksPageTourEnabled: false,
+  riskScoreHistoryEnabled: true,
 
   /**
    * Enables UI treatments surfacing rules whose MITRE ATT&CK mappings drift
    * from the locally stored kibana mappings after a MITRE version bump.
    */
-  mitreAttackUpdatesUIEnabled: false,
+  mitreAttackUpdatesUIEnabled: true,
+
+  /**
+   * Enables the reworked Elastic Defend policy settings form with
+   * per-operating-system protection configuration.
+   * Release: 9.6
+   */
+  perOsPolicySettings: true,
+
+  /**
+   * Enables ransomware protection for Linux in Elastic Defend policies.
+   * When disabled, `linux.ransomware` is not added to new policies, is stripped from updated
+   * ones, and is not shown in the UI.
+   * Requires `perOsPolicySettings`: the Linux toggle exists only in the per-OS policy form, so the
+   * feature is treated as disabled unless both flags are on (`isLinuxRansomwareProtectionEnabled`).
+   * Release: 9.6
+   */
+  linuxRansomwareProtection: false,
+
+  /**
+   * Enables the AI Data Collection card in the per-OS Elastic Defend policy settings form and
+   * turns AI event enrichment on by default for new policies (requires `perOsPolicySettings`).
+   * Release: 9.6
+   */
+  endpointAiDataCollection: false,
+
+  /**
+   * Enables the Registry credential hardening toggle in the Elastic Defend policy
+   * Attack Surface Reduction section (`windows.attack_surface_reduction.registry_credential_hardening`).
+   * Release: 9.6
+   */
+  registryCredentialHardening: false,
+
+  /**
+   * Risk score maintainer create-if-missing path: when an alert's EUID passes the entity type's
+   * creation policy but has no entity store record, create the entity (with its risk score)
+   * instead of silently dropping the score.
+   */
+  riskScoreCreateMissingEntitiesEnabled: true,
+
+  /**
+   * Enables the SIEM Rule Migrations Agent Builder tools.
+   */
+  siemRuleMigrationsAgentBuilderEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
