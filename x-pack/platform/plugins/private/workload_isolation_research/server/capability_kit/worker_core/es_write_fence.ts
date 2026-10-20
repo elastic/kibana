@@ -16,9 +16,13 @@ import type {
 const READ_POST =
   /\/(_search|_msearch|_async_search|_eql\/search|_count|_field_caps|_validate\/query|_mget|_pit|_query|_render\/template|_analyze)(\/|$|\?)/;
 
+/** Template simulation only. A document update such as `/orders/_update/_simulate` stays a write. */
+const INDEX_TEMPLATE_SIMULATE = /^\/_index_template\/_simulate(?:_index)?(?:\/|$)/;
+
 export interface EsWriteAllow {
   readonly method: string;
-  readonly pathIncludes: string;
+  /** Anchored path. Substring matches are not allowed. */
+  readonly path: RegExp;
 }
 
 export interface EsRequestRecord {
@@ -35,11 +39,15 @@ export interface EsWriteSummary {
   readonly kinds: Readonly<Record<string, number>>;
 }
 
-/** True for mutations. Search-shaped POSTs stay reads. */
+const barePath = (path: string): string => path.split('?')[0];
+
+/** True for mutations. Search-shaped POSTs and index-template `_simulate` stay reads. */
 export const isEsWrite = (method: string, path: string): boolean => {
   const verb = method.toUpperCase();
+  const pathOnly = barePath(path);
   if (verb === 'GET' || verb === 'HEAD') return false;
-  if (verb === 'POST' && (READ_POST.test(path) || path.includes('/_simulate'))) return false;
+  if (verb === 'POST' && (READ_POST.test(pathOnly) || INDEX_TEMPLATE_SIMULATE.test(pathOnly)))
+    return false;
   return verb === 'POST' || verb === 'PUT' || verb === 'DELETE' || verb === 'PATCH';
 };
 
@@ -53,6 +61,8 @@ const kindOf = (record: EsRequestRecord): string => {
 
 export interface BootEsWriteFence {
   readonly endBoot: () => void;
+  /** Ends the boot phase after these installer promises settle. A sleep is not a boundary. */
+  readonly awaitInstallers: (installers: ReadonlyArray<Promise<unknown> | undefined>) => Promise<void>;
   readonly records: () => readonly EsRequestRecord[];
   readonly summary: () => EsWriteSummary;
   readonly wrap: (factory: OnRequestHandlerFactory) => OnRequestHandlerFactory;
@@ -63,14 +73,18 @@ export interface BootEsWriteFence {
  * Prefixes cover a fresh cluster (create templates, data stream, locks, first bulk)
  * and a warm cluster (mapping update on the existing event-log data stream).
  */
+/**
+ * Exact boot writes measured on t7p-wc (record then deny).
+ * `POST /.kibana-event-log-ds/_delete_by_query` is not in this set.
+ */
 export const ALERTING_BOOT_ES_WRITE_ALLOW: readonly EsWriteAllow[] = [
-  { method: 'PUT', pathIncludes: '/_component_template/.kibana_locks' },
-  { method: 'PUT', pathIncludes: '/_index_template/.kibana-event-log' },
-  { method: 'PUT', pathIncludes: '/_index_template/.kibana_locks' },
-  { method: 'PUT', pathIncludes: '/_data_stream/.kibana-event-log' },
-  { method: 'PUT', pathIncludes: '/.kibana_locks' },
-  { method: 'PUT', pathIncludes: '/.kibana-event-log' },
-  { method: 'POST', pathIncludes: '/.kibana-event-log' },
+  { method: 'PUT', path: /^\/_component_template\/\.kibana_locks-component$/ },
+  { method: 'PUT', path: /^\/_index_template\/\.kibana-event-log-template$/ },
+  { method: 'PUT', path: /^\/_index_template\/\.kibana_locks-index-template$/ },
+  { method: 'PUT', path: /^\/_data_stream\/\.kibana-event-log-ds$/ },
+  { method: 'PUT', path: /^\/\.kibana_locks-000001$/ },
+  { method: 'PUT', path: /^\/\.kibana-event-log-ds\/_mapping$/ },
+  { method: 'POST', path: /^\/\.kibana-event-log-ds\/_bulk$/ },
 ];
 
 /** Wraps Core's onRequest factory. Deny mode rejects non-allowlisted boot writes before they are sent. */
@@ -86,7 +100,7 @@ export const createBootEsWriteFence = (options: {
     allow.some(
       (entry) =>
         entry.method.toUpperCase() === record.method.toUpperCase() &&
-        record.path.includes(entry.pathIncludes)
+        entry.path.test(barePath(record.path))
     );
   const observe: OnRequestHandler = (_ctx, params) => {
     const method = String(params.method ?? 'GET');
@@ -101,6 +115,10 @@ export const createBootEsWriteFence = (options: {
   };
   return {
     endBoot: () => {
+      phase = 'run';
+    },
+    awaitInstallers: async (installers) => {
+      await Promise.allSettled(installers.filter((job): job is Promise<unknown> => Boolean(job)));
       phase = 'run';
     },
     records: () => seen,

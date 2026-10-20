@@ -1145,9 +1145,16 @@ export const bootIsland = async (
   depsStart.stackAlerts.resolve(stackAlertsDeps);
   starts.stackAlerts.resolve(stackAlerts.start(core.start, stackAlertsDeps));
   });
-  const settleMs = Number(process.env.KBN_RESEARCH_WC_BOOT_SETTLE_MS ?? 0);
-  if (settleMs > 0) await new Promise((resolve) => setTimeout(resolve, settleMs));
-  core.esFence.endBoot();
+  const eventLogContext = (
+    eventLog as { esContext?: { initialized?: boolean; waitTillReady?: () => Promise<unknown> } }
+  ).esContext;
+  const alertsInit = (
+    alerting as { alertsService?: { commonInitPromise?: Promise<unknown> } }
+  ).alertsService?.commonInitPromise;
+  await core.esFence.awaitInstallers([
+    eventLogContext?.initialized ? eventLogContext.waitTillReady?.() : undefined,
+    alertsInit,
+  ]);
   if (localSo) verifyRegistryReadiness(snapshot.readiness, core.registeredSoTypes);
 
   return {

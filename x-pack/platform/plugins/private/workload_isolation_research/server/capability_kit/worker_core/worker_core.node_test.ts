@@ -19,6 +19,7 @@ import {
   COLLATERAL_RESCHEDULE_CAP,
 } from '@kbn/task-manager-plugin/server/lib/research_runner_override';
 import {
+  ALERTING_BOOT_ES_WRITE_ALLOW,
   NAMED_EVENT_EXCLUSIONS,
   configKeyPaths,
   classifyFlagOverrides,
@@ -68,6 +69,52 @@ test('elasticsearch write classification treats search as read and bulk as write
   fence.endBoot();
   handler({ scoped: false }, { method: 'POST', path: '/_bulk' }, {}, {} as never);
   assert.equal(fence.summary().writes, 1);
+});
+
+test('boot fence anchors endpoint shapes and waits for installers', async () => {
+  assert.equal(isEsWrite('POST', '/orders/_update/_simulate'), true);
+  assert.equal(isEsWrite('POST', '/_index_template/_simulate_index/orders'), false);
+  const fence = createBootEsWriteFence({
+    mode: 'deny',
+    allow: ALERTING_BOOT_ES_WRITE_ALLOW,
+  });
+  const handler = fence.wrap(() => () => undefined)({ logger: {} as never });
+  let release: () => void = () => undefined;
+  const installer = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const settled = fence.awaitInstallers([installer]);
+  assert.throws(
+    () =>
+      handler(
+        { scoped: false },
+        { method: 'POST', path: '/.kibana-event-log-ds/_delete_by_query' },
+        {},
+        {} as never
+      ),
+    /boot ES write denied/
+  );
+  assert.throws(
+    () =>
+      handler({ scoped: false }, { method: 'POST', path: '/orders/_update/_simulate' }, {}, {} as never),
+    /boot ES write denied/
+  );
+  handler(
+    { scoped: false },
+    { method: 'POST', path: '/.kibana-event-log-ds/_bulk' },
+    {},
+    {} as never
+  );
+  release();
+  await settled;
+  handler(
+    { scoped: false },
+    { method: 'POST', path: '/.kibana-event-log-ds/_delete_by_query' },
+    {},
+    {} as never
+  );
+  assert.equal(fence.summary().denied, 2);
+  assert.equal(fence.summary().writes, 3);
 });
 
 test('flag overrides are classified and unknown flags stay absent', () => {
