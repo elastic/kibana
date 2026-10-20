@@ -13,6 +13,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { KueryNode } from '@kbn/es-query';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
 import {
+  type LegacyTypeMatch,
   toLegacyTypeMatches,
   toUnifiedAttachmentType,
   UNIFIED_ALERT_TYPES_ARRAY,
@@ -49,6 +50,7 @@ import type {
 import {
   AttachmentType,
   DocumentAttachmentAttributesRtV2,
+  ExternalReferenceStorageType,
   UnifiedAttachmentAttributesRt,
 } from '../../../../common/types/domain';
 import type {
@@ -78,7 +80,9 @@ import {
 } from '../../so_references';
 import type { AttachmentSavedObjectType } from '../../user_actions/types';
 import { partitionByCaseAssociation } from '../../../common/partitioning';
-import { getCaseReferenceId } from '../../../common/references';
+import { findReferenceId, getCaseReferenceId } from '../../../common/references';
+import { getExternalReferenceStorage } from '../../../common/attachments/storage_type';
+import { EXTERNAL_REFERENCE_REF_NAME } from '../../../common/constants';
 import {
   decodeAttachmentSavedObject,
   toUnifiedAttributes,
@@ -90,6 +94,14 @@ const LEGACY_ATTACHMENT_ID_FIELDS: Readonly<Record<string, string>> = {
   [LEGACY_ALERT_TYPE]: 'alertId',
   [LEGACY_EVENT_TYPE]: 'eventId',
   [LEGACY_EXTERNAL_REFERENCE_TYPE]: 'externalReferenceId',
+};
+
+/** The saved object type a legacy external reference attaches, when it attaches one. */
+const getReferencedSoType = ({ type, values }: LegacyTypeMatch): string | undefined => {
+  const [externalReferenceTypeId] = values ?? [];
+  if (type !== LEGACY_EXTERNAL_REFERENCE_TYPE || externalReferenceTypeId == null) return;
+  const storage = getExternalReferenceStorage(externalReferenceTypeId);
+  return storage.type === ExternalReferenceStorageType.savedObject ? storage.soType : undefined;
 };
 
 /** Joins the cases of the same attachment id read from several saved object types. */
@@ -586,14 +598,22 @@ export class AttachmentGetter {
             filter,
           ]),
         }),
-        ...legacyMatches.map((match) =>
-          this.findCasesOfAttachmentIds({
-            soType: CASE_COMMENT_SAVED_OBJECT,
-            idField: LEGACY_ATTACHMENT_ID_FIELDS[match.type],
-            attachmentIds,
-            filter: combineFilters([commentsMatchFilter(match), legacyFilter]),
-          })
-        ),
+        ...legacyMatches.map((match) => {
+          const legacyMatchFilter = combineFilters([commentsMatchFilter(match), legacyFilter]);
+          const referencedSoType = getReferencedSoType(match);
+          return referencedSoType
+            ? this.findCasesOfReferencedIds({
+                referencedSoType,
+                attachmentIds,
+                filter: legacyMatchFilter,
+              })
+            : this.findCasesOfAttachmentIds({
+                soType: CASE_COMMENT_SAVED_OBJECT,
+                idField: LEGACY_ATTACHMENT_ID_FIELDS[match.type],
+                attachmentIds,
+                filter: legacyMatchFilter,
+              });
+        }),
       ]);
 
       return mergeCasesOfAttachments(responses.flat());
@@ -603,6 +623,49 @@ export class AttachmentGetter {
       );
       throw error;
     }
+  }
+
+  /**
+   * Legacy rows that store what they attach as a saved object keep its id only in their
+   * references, which a find can't filter or aggregate on, so their rows are read.
+   */
+  private async findCasesOfReferencedIds({
+    referencedSoType,
+    attachmentIds,
+    filter,
+  }: {
+    referencedSoType: string;
+    attachmentIds: string[];
+    filter?: KueryNode;
+  }): Promise<CasesWithOwnerOfAttachment[]> {
+    const finder = this.context.unsecuredSavedObjectsClient.createPointInTimeFinder<{
+      owner: string;
+    }>({
+      type: CASE_COMMENT_SAVED_OBJECT,
+      hasReference: attachmentIds.map((id) => ({ type: referencedSoType, id })),
+      fields: ['owner'],
+      filter,
+      perPage: MAX_DOCS_PER_PAGE,
+    });
+
+    const casesOfAttachments: CasesWithOwnerOfAttachment[] = [];
+    for await (const { saved_objects: attachments } of finder.find()) {
+      for (const { references, attributes } of attachments) {
+        const attachmentId = findReferenceId(
+          EXTERNAL_REFERENCE_REF_NAME,
+          referencedSoType,
+          references
+        );
+        const caseId = getCaseReferenceId(references);
+        if (attachmentId != null && caseId != null) {
+          casesOfAttachments.push({
+            attachmentId,
+            cases: [{ id: caseId, owner: attributes.owner }],
+          });
+        }
+      }
+    }
+    return casesOfAttachments;
   }
 
   private async findCasesOfAttachmentIds({

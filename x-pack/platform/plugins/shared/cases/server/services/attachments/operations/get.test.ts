@@ -1675,6 +1675,40 @@ describe('AttachmentService getter', () => {
         expect(JSON.stringify(legacyArgs.filter)).toContain('endpoint');
       });
 
+      it('reads the references of legacy file comments, which keep the file id only there', async () => {
+        unsecuredSavedObjectsClient.find.mockResolvedValue(createSOFindResponse([]));
+        mockFinder(
+          createSOFindResponse([
+            {
+              id: 'comment-1',
+              type: 'cases-comments',
+              score: 0,
+              attributes: { owner: 'securitySolution' },
+              references: [
+                { id: 'file-1', name: 'externalReferenceId', type: 'file' },
+                { id: 'case-1', name: 'associated-cases', type: 'cases' },
+              ],
+            },
+          ])
+        );
+
+        const res = await createAttachmentGetter().getCaseIdsByAttachmentIds({
+          type: 'file',
+          attachmentIds: ['file-1'],
+        });
+
+        expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
+        expect(unsecuredSavedObjectsClient.createPointInTimeFinder).toHaveBeenCalledWith(
+          expect.objectContaining({
+            type: 'cases-comments',
+            hasReference: [{ type: 'file', id: 'file-1' }],
+          })
+        );
+        expect(res).toEqual([
+          { attachmentId: 'file-1', cases: [{ id: 'case-1', owner: 'securitySolution' }] },
+        ]);
+      });
+
       it('skips legacy forms that keep no id, such as comments', async () => {
         unsecuredSavedObjectsClient.find.mockResolvedValue(createSOFindResponse([]));
 
