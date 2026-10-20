@@ -207,7 +207,7 @@ export const EpisodeSuppressedCell = ({ row }: CellRendererProps) => {
   }
 
   return (
-    <EuiBadge color="hollow" data-test-subj="episodeMaintenanceWindowsCell">
+    <EuiBadge color="hollow" data-test-subj="episodeSuppressedCell">
       {i18n.SUPPRESSED_BY_MAINTENANCE_WINDOW}
     </EuiBadge>
   );
