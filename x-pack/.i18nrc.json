@@ -233,7 +233,7 @@
     "xpack.serverlessWorkplaceAI": "solutions/workplaceai/plugins/serverless_workplace_ai",
     "xpack.sloShared": "platform/plugins/shared/slo_shared",
     "xpack.workplaceai": "solutions/workplaceai/plugins/workplace_ai_app",
-    "xpack.entityInventoryApp": ["solutions/observability/plugins/entity_inventory_app"],
+    "xpack.entityInventoryApp": ["solutions/observability/plugins/entity_inventory_app"]
 
   },
   "exclude": [
