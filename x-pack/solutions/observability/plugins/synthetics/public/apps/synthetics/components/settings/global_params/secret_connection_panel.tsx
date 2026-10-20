@@ -604,7 +604,7 @@ const TITLE = i18n.translate('xpack.synthetics.secretConnection.title', {
 });
 const DESCRIPTION = i18n.translate('xpack.synthetics.secretConnection.description', {
   defaultMessage:
-    "Connect one or more HashiCorp Vault accounts. Connections are stored encrypted and propagated to your private-location agents (Heartbeat), which resolve vault-backed parameters at runtime. Secret values never leave Vault's trust boundary. Reference a connection from a parameter by its name.",
+    "Connect one or more HashiCorp Vault accounts. Connections are stored encrypted and propagated to your private-location agents (Heartbeat), which resolve vault-backed parameters at runtime. Secret values never leave Vault's trust boundary. Reference a connection from a parameter by its name. Requires Elastic Agent 9.6 or later on your private locations.",
 });
 const PROVIDER_LABEL = i18n.translate('xpack.synthetics.secretConnection.provider', {
   defaultMessage: 'Provider',

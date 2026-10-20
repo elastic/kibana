@@ -12,8 +12,10 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
 import {
   findUnknownConnections,
+  SECRET_CONNECTIONS_DISABLED_MESSAGE,
   unknownConnectionsMessage,
 } from '../secret_connection/connection_utils';
+import { isSecretConnectionsEnabled } from '../../../config';
 import { MAX_PARAM_VALUE_LENGTH, MAX_ROUTE_ID_LENGTH, routeId } from '../../zod_query';
 import { validateRouteSpaceName } from '../../common';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
@@ -97,6 +99,9 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
       return response.badRequest({
         body: { message: 'A parameter cannot set both a value and a vault source' },
       });
+    }
+    if (data.source && !isSecretConnectionsEnabled(server.config)) {
+      return response.badRequest({ body: { message: SECRET_CONNECTIONS_DISABLED_MESSAGE } });
     }
     const malformed = findMalformedVaultReferences(data.value);
     if (malformed.length > 0) {

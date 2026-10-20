@@ -9,6 +9,7 @@ import { getFleetSecretStorageEnabled } from './fleet_secret_storage';
 import type { SyntheticsSecretConnection } from '../../common/runtime_types';
 import { syntheticsSecretConnectionType } from '../../common/types/saved_objects';
 import type { SyntheticsServerSetup } from '../types';
+import { isSecretConnectionsEnabled } from '../config';
 import {
   getAllowedHosts,
   isAddressHostAllowed,
@@ -66,6 +67,7 @@ export const getSecretConnectionConfigs = async (
   server: SyntheticsServerSetup,
   spaceId: string
 ): Promise<HeartbeatVaultConfig[]> => {
+  if (!isSecretConnectionsEnabled(server.config)) return [];
   // Resilient by design: this is fetched once per policy-sync (E1) up front, so a
   // failure here must NOT break the whole batch (including monitors that use no
   // vault). Degrade to "no connections" — non-vault monitors are unaffected, and a

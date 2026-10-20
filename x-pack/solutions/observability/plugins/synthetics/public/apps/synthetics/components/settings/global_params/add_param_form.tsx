@@ -23,6 +23,7 @@ import type {
   SyntheticsParamVaultSource,
 } from '../../../../../../common/runtime_types';
 import type { ListParamItem } from './params_list';
+import { kibanaService } from '../../../../../utils/kibana_service';
 
 export type ParamValueSourceType = 'value' | 'vault';
 
@@ -76,34 +77,37 @@ export const AddParamForm = ({
           })}
         />
       </EuiFormRow>
-      <EuiFormRow fullWidth label={VALUE_SOURCE_LABEL}>
-        <Controller
-          control={control}
-          name="sourceType"
-          render={({ field }) => (
-            <EuiButtonGroup
-              legend={VALUE_SOURCE_LABEL}
-              buttonSize="compressed"
-              isFullWidth
-              options={[
-                {
-                  id: 'value',
-                  label: LITERAL_VALUE_LABEL,
-                  'data-test-subj': 'syntheticsParamSourceLiteral',
-                },
-                {
-                  id: 'vault',
-                  label: VAULT_SOURCE_OPTION_LABEL,
-                  iconType: 'lock',
-                  'data-test-subj': 'syntheticsParamSourceVault',
-                },
-              ]}
-              idSelected={sourceType}
-              onChange={(id) => field.onChange(id)}
-            />
-          )}
-        />
-      </EuiFormRow>
+      {/* Still shown for an existing Vault param, so it can be switched to a literal value. */}
+      {(kibanaService.secretConnectionsEnabled || sourceType === 'vault') && (
+        <EuiFormRow fullWidth label={VALUE_SOURCE_LABEL}>
+          <Controller
+            control={control}
+            name="sourceType"
+            render={({ field }) => (
+              <EuiButtonGroup
+                legend={VALUE_SOURCE_LABEL}
+                buttonSize="compressed"
+                isFullWidth
+                options={[
+                  {
+                    id: 'value',
+                    label: LITERAL_VALUE_LABEL,
+                    'data-test-subj': 'syntheticsParamSourceLiteral',
+                  },
+                  {
+                    id: 'vault',
+                    label: VAULT_SOURCE_OPTION_LABEL,
+                    iconType: 'lock',
+                    'data-test-subj': 'syntheticsParamSourceVault',
+                  },
+                ]}
+                idSelected={sourceType}
+                onChange={(id) => field.onChange(id)}
+              />
+            )}
+          />
+        </EuiFormRow>
+      )}
       <ParamValueField isEditingItem={isEditingItem} sourceType={sourceType} />
       <EuiFormRow fullWidth label={TAGS_LABEL} labelAppend={<OptionalText />}>
         <Controller

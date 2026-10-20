@@ -22,6 +22,8 @@ const serviceConfig = schema.object({
 });
 
 const secretConnectionsConfig = schema.object({
+  // Off where private-location agents cannot resolve references yet.
+  enabled: schema.boolean({ defaultValue: true }),
   // Hostnames Kibana may contact for secret provider (Vault) connections. `*` allows any.
   allowedHosts: schema.arrayOf(schema.string({ minLength: 1, maxLength: 253 }), {
     defaultValue: ['*'],
@@ -38,6 +40,9 @@ const uptimeConfig = schema.object({
 
 export const config: PluginConfigDescriptor = {
   schema: uptimeConfig,
+  exposeToBrowser: {
+    secretConnections: { enabled: true },
+  },
   deprecations: ({ unused }) => [
     unused('experimental.ccs.enabled', { level: 'warning' }),
     unused('rebalancePrivateLocationShardsTaskEnabled', { level: 'warning' }),
@@ -46,3 +51,6 @@ export const config: PluginConfigDescriptor = {
 
 export type UptimeConfig = TypeOf<typeof uptimeConfig>;
 export type ServiceConfig = TypeOf<typeof serviceConfig>;
+
+export const isSecretConnectionsEnabled = (syntheticsConfig?: UptimeConfig): boolean =>
+  syntheticsConfig?.secretConnections?.enabled ?? true;

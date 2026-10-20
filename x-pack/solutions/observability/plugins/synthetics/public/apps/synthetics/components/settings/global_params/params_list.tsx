@@ -27,6 +27,7 @@ import { useParamsList } from '../hooks/use_params_list';
 import { AddParamFlyout } from './add_param_flyout';
 import { DeleteParam } from './delete_param';
 import { SecretConnectionPanel } from './secret_connection_panel';
+import { kibanaService } from '../../../../../utils/kibana_service';
 
 export interface ListParamItem extends SyntheticsParams {
   id: string;
@@ -221,8 +222,12 @@ export const ParamsList = () => {
 
   return (
     <div>
-      <SecretConnectionPanel />
-      <EuiSpacer size="l" />
+      {kibanaService.secretConnectionsEnabled && (
+        <>
+          <SecretConnectionPanel />
+          <EuiSpacer size="l" />
+        </>
+      )}
       <EuiInMemoryTable<ListParamItem>
         data-test-subj={
           isLoading ? 'syntheticsParamsTable-loading' : 'syntheticsParamsTable-loaded'

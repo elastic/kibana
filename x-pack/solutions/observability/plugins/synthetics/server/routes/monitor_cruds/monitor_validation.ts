@@ -105,7 +105,8 @@ const getApiServerlessValidationError = (
 export function validateMonitor(
   monitorFields: MonitorFields,
   spaceId: string,
-  isServerless = false
+  isServerless = false,
+  secretConnectionsEnabled = true
 ): ValidationResult {
   const { [ConfigKey.MONITOR_TYPE]: monitorType, [ConfigKey.KIBANA_SPACES]: kSpaces } =
     monitorFields;
@@ -191,14 +192,21 @@ export function validateMonitor(
     };
   }
 
+  // Heartbeat never resolves references in scripts.
+  const hasVaultReference = valueContainsVaultReference(
+    omit(monitorFields, [ConfigKey.SOURCE_INLINE, ConfigKey.SOURCE_PROJECT_CONTENT])
+  );
+  if (hasVaultReference && !secretConnectionsEnabled) {
+    return {
+      valid: false,
+      reason: VAULT_DISABLED_ERROR,
+      details: VAULT_DISABLED_DETAILS,
+      payload: monitorFields,
+    };
+  }
   // Only Heartbeat on a private location resolves Vault references; a managed location
-  // would run the monitor with the literal reference. Heartbeat never resolves scripts.
-  if (
-    hasPublicServiceLocation(monitorFields.locations) &&
-    valueContainsVaultReference(
-      omit(monitorFields, [ConfigKey.SOURCE_INLINE, ConfigKey.SOURCE_PROJECT_CONTENT])
-    )
-  ) {
+  // would run the monitor with the literal reference.
+  if (hasVaultReference && hasPublicServiceLocation(monitorFields.locations)) {
     return {
       valid: false,
       reason: VAULT_PUBLIC_LOCATION_ERROR,
@@ -822,6 +830,20 @@ export const LOCATION_REQUIRED_ERROR = i18n.translate(
   {
     defaultMessage:
       'At least one location is required, either elastic managed or private e.g locations: ["us-east"] or private_locations:["test private location"]',
+  }
+);
+
+const VAULT_DISABLED_ERROR = i18n.translate(
+  'xpack.synthetics.server.monitors.vaultDisabledErrorMessage',
+  {
+    defaultMessage: 'Vault references are not available in this deployment',
+  }
+);
+
+const VAULT_DISABLED_DETAILS = i18n.translate(
+  'xpack.synthetics.server.monitors.vaultDisabledDetailsErrorMessage',
+  {
+    defaultMessage: 'Remove the vault:// references from this monitor.',
   }
 );
 

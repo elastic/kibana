@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import type { HttpResponsePayload, ResponseError } from '@kbn/core-http-server';
 import type { SyntheticsServerSetup } from '../../../types';
-import type { RouteContext } from '../../types';
+import type { RouteContext, SyntheticsRouteHandler } from '../../types';
+import { isSecretConnectionsEnabled } from '../../../config';
 import type {
   SyntheticsSecretConnection,
   SecretConnectionStatus,
@@ -65,6 +67,19 @@ export const findUnknownConnections = async (
   const known = new Set((await listConnections(routeContext)).map(({ name }) => name));
   return [...new Set(names)].filter((name) => !known.has(name));
 };
+
+export const SECRET_CONNECTIONS_DISABLED_MESSAGE =
+  'Vault secret references are not available in this deployment';
+
+/** Wraps a route handler so it responds 404 while secret connections are disabled. */
+export const whenSecretConnectionsEnabled =
+  <ClientContract extends HttpResponsePayload | ResponseError>(
+    handler: SyntheticsRouteHandler<ClientContract>
+  ): SyntheticsRouteHandler<ClientContract> =>
+  async (routeContext) =>
+    isSecretConnectionsEnabled(routeContext.server.config)
+      ? handler(routeContext)
+      : routeContext.response.notFound({ body: { message: SECRET_CONNECTIONS_DISABLED_MESSAGE } });
 
 export const unknownConnectionsMessage = (names: string[]): string =>
   `Vault connection ${names.map((name) => `"${name}"`).join(', ')} is not configured in this space`;

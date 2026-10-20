@@ -17,8 +17,10 @@ import type {
 import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-server';
 import {
   findUnknownConnections,
+  SECRET_CONNECTIONS_DISABLED_MESSAGE,
   unknownConnectionsMessage,
 } from '../secret_connection/connection_utils';
+import { isSecretConnectionsEnabled } from '../../../config';
 import { MAX_PARAM_BULK_SIZE, MAX_PARAM_VALUE_LENGTH, MAX_ROUTE_ID_LENGTH } from '../../zod_query';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import type {
@@ -116,6 +118,13 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
             message: `Param "${ambiguous.key}" must not set both a value and a vault source`,
           },
         });
+      }
+
+      if (
+        !isSecretConnectionsEnabled(server.config) &&
+        (paramsToValidate as SyntheticsParamRequest[]).some((param) => param.source)
+      ) {
+        return response.badRequest({ body: { message: SECRET_CONNECTIONS_DISABLED_MESSAGE } });
       }
 
       for (const param of paramsToValidate as SyntheticsParamRequest[]) {

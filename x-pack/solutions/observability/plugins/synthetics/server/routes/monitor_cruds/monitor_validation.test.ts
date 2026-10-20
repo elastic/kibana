@@ -504,6 +504,33 @@ describe('validateMonitor', () => {
       expect(result.valid).toBe(true);
     });
 
+    it('rejects a reference when secret connections are disabled', () => {
+      const result = validateMonitor(
+        {
+          ...testHTTPFields,
+          [ConfigKey.PASSWORD]: 'vault://prod@app/creds#password',
+          [ConfigKey.LOCATIONS]: [privateLocation],
+        } as MonitorFields,
+        'default',
+        false,
+        false
+      );
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Vault references are not available in this deployment',
+      });
+    });
+
+    it('allows a monitor without references when secret connections are disabled', () => {
+      const result = validateMonitor(
+        { ...testHTTPFields, [ConfigKey.LOCATIONS]: [privateLocation] } as MonitorFields,
+        'default',
+        false,
+        false
+      );
+      expect(result.valid).toBe(true);
+    });
+
     it('ignores vault:// text in a browser script on a managed location', () => {
       const result = validateMonitor(
         {
