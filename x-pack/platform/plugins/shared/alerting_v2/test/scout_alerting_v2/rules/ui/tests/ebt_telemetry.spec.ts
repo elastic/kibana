@@ -80,8 +80,7 @@ test.describe(
       apiServices,
     }) => {
       await test.step('create a rule from the Discover flyout', async () => {
-        await pageObjects.ruleForm.gotoDiscover();
-        await pageObjects.ruleForm.switchToEsqlMode();
+        await pageObjects.discover.goto({ queryMode: 'esql' });
         await pageObjects.discover.writeAndSubmitEsqlQuery(
           `FROM ${SOURCE_INDEX} | WHERE message != "" | LIMIT 10`
         );
