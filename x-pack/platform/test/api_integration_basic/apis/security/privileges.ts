@@ -423,6 +423,8 @@ export default function ({ getService }: FtrProviderContext) {
               'scan_operations_all',
               'scripts_management_all',
               'scripts_management_read',
+              'custom_yara_signatures_all',
+              'custom_yara_signatures_read',
               'soc_management_all',
               'trusted_devices_all',
               'trusted_devices_read',

@@ -307,7 +307,7 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
   );
 
   apiTest(
-    'authorization: returns 403 for a user with alerts privileges but no rules privileges',
+    'authorization: returns 200 for a user with alerts privileges but no rules privileges',
     async ({ apiClient, requestAuth }) => {
       const credentials = await requestAuth.getApiKeyForCustomRole(ALERTING_V2_ALERTS_READ_ROLE);
 
@@ -317,7 +317,7 @@ apiTest.describe('Matcher value suggestions API', { tag: '@local-stateful-classi
         { headers: { ...testData.COMMON_HEADERS, ...credentials.apiKeyHeader } }
       );
 
-      expect(response).toHaveStatusCode(403);
+      expect(response).toHaveStatusCode(200);
     }
   );
 

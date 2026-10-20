@@ -27,6 +27,7 @@ dependsOn:
   - '@kbn/core-http-server-mocks'
   - '@kbn/core-security-server-mocks'
   - '@kbn/logging-mocks'
+  - '@kbn/reporting-common'
 tags:
   - plugin
   - prod

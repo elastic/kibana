@@ -1,0 +1,124 @@
+# Gate-correctness checklist for the Hunt Watch Worker (NotDaybreak families A/B/C/D).
+# Every gate is either tested, with the suite assertion named as evidence, or n/a with the reason.
+# A gate regression is binary and blocking; output-quality scores cannot average it away.
+# Validate with the `evaluation.gate-checklist` action, mode `validate`, against a temp dir holding
+# a copy named `gate-checklist.yaml` (the validator hardcodes that name; Kibana requires snake_case).
+worker_name: Hunt Watch Worker
+capabilities:
+  - hitl-resumed-writes
+gates:
+  A1:
+    family: A
+    name: dedup
+    status: n/a
+    reason: "Concurrent triggers are not exercised. The suite runs one trigger per space at a time because the Worker's per-space concurrency strategy is drop (a racing trigger is dropped, not queued), and resetHuntReport dismisses open Proposals before each row so the open_proposal skip never fires inside a scored run. Lost-race handling in the gate (resolve_lost_race) is untested here."
+  A2:
+    family: A
+    name: output-validation
+    status: tested
+    evidence: "SSE Attachment evaluator (src/evaluators/code_scores.ts, scoreSseAttachment) parses every significant_security_event hunt_result against huntResultSchema from @kbn/alertzero-common and fails the row on hunt_result_error. Outcome Label accepts only the labelled outcomes and the pinned incomplete_stage. Hit Consistency fails when hunt hit, SSE has_confirmed_hit and hit_sources disagree."
+  A3:
+    family: A
+    name: approval-boundary
+    status: n/a
+    reason: "Gate configuration is fixed by the product (every hunt Proposal is created with alwaysGate true) and the suite cannot remove or corrupt it. The default boundary is covered: Proposal Presence asserts a hit run stops at pending Proposals, and evals/hunt_watch_approval.spec.ts shows an actioned Proposal reaches succeeded only after approve."
+  B-completeness:
+    family: B
+    name: completeness
+    status: n/a
+    reason: "The approval policy matrix belongs to the Proposals plugin and the Worker does not vary it: hunt Proposals always gate (alwaysGate true), so there is no unmapped action type to fall through. Not an assertion this suite can make."
+  B-fail-closed-default:
+    family: B
+    name: fail-closed-default
+    status: n/a
+    reason: "Same as B-completeness: approval is unconditional for hunt Proposals, so the fail-closed default is never consulted. Covered by the Proposals plugin's own tests."
+  B-monotonicity:
+    family: B
+    name: monotonicity
+    status: n/a
+    reason: "The suite runs at one autonomy level and does not vary severity; approval strictness has no axis to be monotonic over here."
+  B-reversibility:
+    family: B
+    name: reversibility
+    status: n/a
+    reason: "Hunt Proposals always require approval regardless of the action's reversibility flag, so the irreversible-requires-approval rule is not separately observable."
+  B-audit-fidelity:
+    family: B
+    name: audit-fidelity
+    status: n/a
+    reason: "Only approve and dismiss are exercised (evals/hunt_watch_approval.spec.ts checks decision and dismissReason on every settled record). Modify, defer and expire are out of scope for this suite, so the full claim is not tested."
+  C-process:
+    family: C
+    name: process
+    status: n/a
+    reason: "No Entry, Pilot, Launch or Expansion claim is made. CAPABILITY_PROFILE.md thresholds are unratified; the gate checklist and the eval scorecard are the inputs to that review."
+  D1:
+    family: D
+    name: subject-separation
+    status: n/a
+    reason: "The Worker runs as the per-space service account and the approval spec decides as the eval user, but the suite does not assert the executing identity of a run or of an action. Orchestrator identity is not an observable the suite has."
+  D2:
+    family: D
+    name: authz-scoping
+    status: n/a
+    reason: "The suite runs the Worker under its built-in Elasticsearch role and does not attempt reads or writes beyond it. Space containment is covered under D3, role scoping is not."
+  D3:
+    family: D
+    name: investigation-containment
+    status: tested
+    evidence: "One Investigation per report: its id is derived from the report id (buildHuntInvestigationConversationId, pinned to the plugin's namespace by seed_contract.test.ts) and every evaluator reads that single conversation. Contained to the triggering space: the \"keeps Investigations inside the triggering space\" case in evals/hunt_watch.spec.ts asserts space B has no Investigation and cannot read space A's. Append on repeat detection is not exercised because resetHuntReport deletes the Investigation between rows."
+  D4:
+    family: D
+    name: hitl-pause-fail-closed
+    status: tested
+    evidence: "Dismiss path in evals/hunt_watch_approval.spec.ts: every decided Proposal, actioned or not, ends no_action with the dismiss reason recorded, and the Investigation closes as resolved. The approve path on the same report shows an actioned Proposal ends succeeded, so no_action after dismiss is evidence the action did not run. Expiry is out of scope."
+  D5:
+    family: D
+    name: allowlist-boundary
+    status: n/a
+    reason: "The Worker's callable surface is fixed by its managed child workflows; the suite has no way to ask it to call something outside that surface and observe a refusal."
+  D6:
+    family: D
+    name: open-vs-append-determinism
+    status: n/a
+    reason: "Same-unit append is not exercised: resetHuntReport deletes the Investigation before each row so every run opens fresh. New-unit opens-new is implied by one Investigation per report id (D3) but the append half is untested."
+  D7:
+    family: D
+    name: incident-fork-integrity
+    status: n/a
+    reason: "Hunt Watch does not escalate to an Incident root; there is no fork to assert."
+  D8:
+    family: D
+    name: approval-identity-rekey
+    status: tested
+    evidence: "evals/hunt_watch_approval.spec.ts: after approve, the actioned Proposal's action executes (status succeeded) and the gate's resumed close writes closed / resolved on the Investigation the service account owns; waitForInvestigationClosed fails loud when the resumed write does not apply. Passes on main since Public conversation access (#297385) let the service account's resumed patch reach the Investigation it owns."
+  D9:
+    family: D
+    name: thread-depth-fork-root-containment
+    status: n/a
+    reason: "The Worker creates one root Investigation per report and no threads or forks, so there is no nesting to bound."
+  D10:
+    family: D
+    name: proposal-gate-exclusivity
+    status: tested
+    evidence: "Proposal Presence asserts pending Proposals exist only on the report's Investigation (listed by conversationId) and only when a hit is expected; Proposal Convergence asserts a multi-candidate run that shares principals mints each actioned subject once and records Also raised by / no second Proposal; Canary Inverted asserts a prose-only report produces no Proposal; blocked and clean rows pin zero. The approval spec shows the Proposals are created by the human-input gate (system-create-proposal child with await_decision) and settle only on a decision. The Proposal conversation's template_id is not checked."
+  D10a:
+    family: D
+    name: watch-tag-grouping
+    status: n/a
+    reason: "The suite triggers the Worker directly with named report ids; Watch tagging and grouping are not on its path."
+  D10b:
+    family: D
+    name: per-worker-settings-scope
+    status: n/a
+    reason: "Settings are not varied. The v1 subject-model bridge goes through the space-level genAiSettings default connector, which is the opposite of per-Worker scope and is tracked as a follow-up, so this gate cannot be claimed."
+  D10c:
+    family: D
+    name: execute-time-revalidation
+    status: n/a
+    reason: "The actions the hit rows propose are asset criticality updates, not Elastic Defend endpoint actions, and the suite does not assert re-validation at execution time."
+  D10d:
+    family: D
+    name: coverage-handoff-integrity
+    status: n/a
+    reason: "Coverage handoff to the Detection Watch is out of scope for this suite (not a scored claim); the needs-coverage tag is not asserted."

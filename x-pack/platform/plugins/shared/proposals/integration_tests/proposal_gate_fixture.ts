@@ -200,7 +200,15 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
     // Supplies the action metadata `create` and `get` resolve. No `triggers`,
     // so the best-effort action-input validation is skipped.
     getWorkflow: jest.fn().mockResolvedValue({
-      definition: { consts: { actionMetadata: { name: 'Create rule', category: 'tune' } } },
+      definition: {
+        consts: {
+          actionMetadata: {
+            name: 'Create rule',
+            category: 'tune',
+            approvalPolicy: 'autonomy-dependent',
+          },
+        },
+      },
     }),
     // Both report the fixture engine's own executions, so a read or a decision
     // settles a proposal only when its gate really ended.
@@ -334,7 +342,7 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
     /**
      * Goes through the real service, the same path the tool and HTTP route take,
      * so a test can park a gate, revise under it, resume, and assert the revision
-     * rather than the trigger's original input reaches `execute_action`.
+     * rather than the trigger's original input reaches `execute_as_approver`.
      */
     revise: async (overrides: { comment?: string; actionInput?: Record<string, unknown> }) => {
       const [live] = proposals().filter((proposal) => proposal.supersededBy === undefined);
