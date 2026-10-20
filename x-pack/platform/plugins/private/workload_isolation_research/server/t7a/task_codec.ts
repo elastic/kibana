@@ -42,7 +42,8 @@ export const decodeTaskError = (wire: WireTaskError): Error => {
   error.name = wire.name;
   if (wire.stack) error.stack = wire.stack;
   if (wire.source) error = createTaskRunError(error, wire.source as TaskErrorSource);
-  if (wire.retry !== null && wire.retry !== undefined) error = createRetryableError(error, wire.retry);
+  if (wire.retry !== null && wire.retry !== undefined)
+    error = createRetryableError(error, wire.retry);
   if (wire.unrecoverable) {
     // throwUnrecoverableError only decorates then throws; reproduce the decoration.
     try {

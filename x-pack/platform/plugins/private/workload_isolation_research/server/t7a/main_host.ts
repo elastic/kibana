@@ -42,8 +42,14 @@ export interface T7aDeps {
   readonly encryptedSavedObjects?: { getClient: (o?: Obj) => Obj };
   readonly spaces?: { spacesService: Obj };
   readonly security?: { authz: Obj };
-  readonly maintenanceWindows?: { getMaintenanceWindowClientWithoutAuth: (r: KibanaRequest) => Obj };
-  readonly licensing?: { license$: { subscribe: (fn: (l: { toJSON: () => Obj }) => void) => { unsubscribe: () => void } } };
+  readonly maintenanceWindows?: {
+    getMaintenanceWindowClientWithoutAuth: (r: KibanaRequest) => Obj;
+  };
+  readonly licensing?: {
+    license$: {
+      subscribe: (fn: (l: { toJSON: () => Obj }) => void) => { unsubscribe: () => void };
+    };
+  };
 }
 
 export interface T7aConfig {
@@ -212,7 +218,9 @@ export class T7aController {
     if (this.snapshot) return this.snapshot;
     const { core, security } = this.deps;
     const fake = kibanaRequestFactory({ headers: {} });
-    const authz = security?.authz as { mode?: { useRbacForRequest: (r: KibanaRequest) => boolean } } | undefined;
+    const authz = security?.authz as
+      | { mode?: { useRbacForRequest: (r: KibanaRequest) => boolean } }
+      | undefined;
     this.snapshot = {
       kibanaVersion: this.env.packageInfo.version,
       buildFlavor: this.env.packageInfo.buildFlavor,
@@ -245,7 +253,9 @@ export class T7aController {
       const target = args.target as string;
       let client: Obj;
       if (target === 'internal') {
-        client = core.savedObjects.createInternalRepository(args.types as string[]) as unknown as Obj;
+        client = core.savedObjects.createInternalRepository(
+          args.types as string[]
+        ) as unknown as Obj;
       } else if (target === 'unsafeInternal') {
         client = core.savedObjects.getUnsafeInternalClient(args.options as never) as unknown as Obj;
       } else if (target === 'scoped') {
@@ -275,7 +285,7 @@ export class T7aController {
         if (!['bulkSchedule', 'schedule', 'aggregate', 'fetch', 'get'].includes(op))
           throw new Error('t7a tm: op not allowlisted');
         const list = args as unknown as unknown[];
-        return (taskManager[op] as AnyFn).apply(taskManager, list);
+        return (taskManager as unknown as Record<string, AnyFn>)[op].apply(taskManager, list);
       }),
       uiSettings: asBinding(async (op, args) => {
         const client = core.uiSettings.asScopedToClient(soClient(args) as never) as unknown as Obj;
@@ -299,7 +309,10 @@ export class T7aController {
             args.privileges,
             args.opts
           );
-        const scoped = (authz.checkPrivilegesWithRequest as AnyFn)(request) as Record<string, AnyFn>;
+        const scoped = (authz.checkPrivilegesWithRequest as AnyFn)(request) as Record<
+          string,
+          AnyFn
+        >;
         if (op === 'checkPrivilegesAtSpace')
           return scoped.atSpace(args.spaceId, args.privileges, args.opts);
         if (op === 'checkPrivilegesAtSpaces')
@@ -370,6 +383,7 @@ export class T7aController {
       });
       if (outcome.status === 'failure') throw outcome.error;
       if (outcome.status === 'terminated') {
+        this.logger.warn(`t7a: ${taskType} ${phase} terminated in isolate (${outcome.reason})`);
         throw new Error(`t7a: ${taskType} ${phase} terminated in isolate (${outcome.reason})`);
       }
       const customFields = value?.customFields as Obj | undefined;

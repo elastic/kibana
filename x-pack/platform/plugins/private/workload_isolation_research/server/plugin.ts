@@ -111,11 +111,7 @@ export class WorkloadIsolationResearchPlugin implements Plugin<void, void, Setup
     if (process.env.KBN_RESEARCH_T7A === 'true') {
       this.t7a = import('./t7a/main_host').then(
         ({ T7aController: Controller }) =>
-          new Controller(
-            { core, ...plugins },
-            this.context.env,
-            this.logger.get('t7a')
-          )
+          new Controller({ core, ...plugins }, this.context.env, this.logger.get('t7a'))
       );
     }
     this.recorder.start();

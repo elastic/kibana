@@ -23,7 +23,10 @@ import {
   throwUnrecoverableError,
 } from '@kbn/task-manager-plugin/server/task_running';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
-import { createTaskRunnerWithResearchOverride, setResearchRunnerOverride } from '@kbn/task-manager-plugin/server/lib/research_runner_override';
+import {
+  createTaskRunnerWithResearchOverride,
+  setResearchRunnerOverride,
+} from '@kbn/task-manager-plugin/server/lib/research_runner_override';
 import { encode, decode } from '../capability_kit/codecs';
 import type { CodecInput } from '../capability_kit/codecs';
 import { decodeFakeRequest, encodeFakeRequest } from './request_codec';
@@ -56,7 +59,11 @@ test('fake request codec rejects non-fake requests and bad descriptors', () => {
 test('TM decorated errors survive the boundary (module-private symbols rebuilt)', () => {
   const retryAt = new Date('2026-10-20T12:00:00.000Z');
   const retryable = decodeTaskError(
-    wire(encodeTaskError(createRetryableError(createTaskRunError(new Error('r'), TaskErrorSource.USER), retryAt)))
+    wire(
+      encodeTaskError(
+        createRetryableError(createTaskRunError(new Error('r'), TaskErrorSource.USER), retryAt)
+      )
+    )
   );
   assert.equal((isRetryableError(retryable) as Date).toISOString(), retryAt.toISOString());
   assert.equal(getErrorSource(retryable), TaskErrorSource.USER);
@@ -89,7 +96,7 @@ test('run result codec revives Dates and decorated taskRunError', () => {
   )!;
   assert.ok(result.runAt instanceof Date);
   assert.equal((result.runAt as Date).toISOString(), runAt.toISOString());
-  assert.ok(((result.state as { nested: { at: Date } }).nested.at) instanceof Date);
+  assert.ok((result.state as { nested: { at: Date } }).nested.at instanceof Date);
   assert.equal(getErrorSource(result.taskRunError as Error), TaskErrorSource.USER);
 });
 
@@ -108,7 +115,10 @@ test('strict facade names missing members and toData keeps dates, drops function
 test('TM research runner override takes precedence only while installed', () => {
   const original = () => ({ run: async () => ({ state: { from: 'original' } }) });
   const context = { taskInstance: {} } as never;
-  assert.equal(createTaskRunnerWithResearchOverride('x', original as never, context).run.name, 'run');
+  assert.equal(
+    createTaskRunnerWithResearchOverride('x', original as never, context).run.name,
+    'run'
+  );
   setResearchRunnerOverride((type) =>
     type === 'x' ? ({ run: async () => ({ state: { from: 'override' } }) } as never) : undefined
   );

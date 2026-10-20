@@ -58,7 +58,11 @@ const reviveError = ({ __t7aError: e }: WireError): Error => {
 };
 
 /** Calls a main-side capability for the current run. */
-export const bridge = async <T>(capability: string, operation: string, args: CodecInput): Promise<T> => {
+export const bridge = async <T>(
+  capability: string,
+  operation: string,
+  args: CodecInput
+): Promise<T> => {
   const context = runContext.getStore();
   if (!context) throw new Error(`t7a bridge ${capability}.${operation} called outside a run`);
   countEdge(`${capability}.${operation}`, 'bridge');

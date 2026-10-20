@@ -11,10 +11,10 @@
 
 import { setFlagsFromString } from 'v8';
 import { runInNewContext } from 'vm';
+import type { ResearchEsCapability } from '@kbn/core-elasticsearch-client-server-internal';
 import { decode } from '../../capability_kit/codecs';
 import type { CodecInput } from '../../capability_kit/codecs';
 import type { TaskEntry, WorkerContext } from '../../capability_kit/protocol';
-import type { ResearchEsCapability } from '@kbn/core-elasticsearch-client-server-internal';
 import type { IslandSnapshot } from '../snapshot';
 import { decodeFakeRequest } from '../request_codec';
 import type { FakeRequestDescriptor } from '../request_codec';
@@ -50,7 +50,9 @@ const getIsland = (context: WorkerContext): Promise<Island> => {
     };
     bootStartedAt = performance.now();
     island = bootIsland(data.snapshot, data.elasticsearch, Boolean(data.localSo));
-    island.then((i) => (islandTaskTypes = [...i.taskCapture.definitions.keys()])).catch(() => undefined);
+    island
+      .then((i) => (islandTaskTypes = [...i.taskCapture.definitions.keys()]))
+      .catch(() => undefined);
     island.catch(() => {
       island = undefined;
     });
@@ -88,7 +90,12 @@ export const runTask: TaskEntry = async (rawInput: CodecInput, context: WorkerCo
     if (input.phase === 'boot') {
       const t = performance.now();
       const current = await getIsland(context);
-      return { bootMs: current.bootMs, waitedMs: performance.now() - t, slotAgeMs: performance.now() - slotStartedAt, memory: memory() } as CodecInput;
+      return {
+        bootMs: current.bootMs,
+        waitedMs: performance.now() - t,
+        slotAgeMs: performance.now() - slotStartedAt,
+        memory: memory(),
+      } as CodecInput;
     }
     const t0 = performance.now();
     const wasCold = !island;

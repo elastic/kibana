@@ -21,7 +21,9 @@ export type ResearchRunnerOverride = (
 ) => ReturnType<TaskRunCreatorFunction> | undefined;
 
 const KEY = Symbol.for('kbn.research.taskManager.runnerOverride');
-type Holder = { [KEY]?: ResearchRunnerOverride };
+interface Holder {
+  [KEY]?: ResearchRunnerOverride;
+}
 
 /** Installs (or clears with undefined) the research runner override. */
 export const setResearchRunnerOverride = (override: ResearchRunnerOverride | undefined): void => {

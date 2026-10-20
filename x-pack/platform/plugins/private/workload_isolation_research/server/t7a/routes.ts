@@ -9,6 +9,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
+import { ReservedPrivilegesSet } from '@kbn/core/server';
 import type { T7aController } from './main_host';
 
 export const registerT7aRoutes = (
@@ -16,7 +17,7 @@ export const registerT7aRoutes = (
   base: string,
   getController: () => Promise<T7aController | undefined>
 ): void => {
-  const security = { authz: { requiredPrivileges: ['superuser'] } } as const;
+  const security = { authz: { requiredPrivileges: [ReservedPrivilegesSet.superuser] } };
   const options = { access: 'internal' } as const;
   const withController =
     <T>(fn: (c: T7aController, body: T) => Promise<unknown> | unknown) =>

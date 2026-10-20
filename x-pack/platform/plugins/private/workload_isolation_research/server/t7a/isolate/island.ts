@@ -34,8 +34,15 @@ import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { ServiceStatusLevels } from '@kbn/core-status-common';
 import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
-import { DocumentMigrator, buildActiveMappings, buildTypesMappings } from '@kbn/core-saved-objects-migration-server-internal';
-import { SavedObjectsRepository, SavedObjectsClient } from '@kbn/core-saved-objects-api-server-internal';
+import {
+  DocumentMigrator,
+  buildActiveMappings,
+  buildTypesMappings,
+} from '@kbn/core-saved-objects-migration-server-internal';
+import {
+  SavedObjectsRepository,
+  SavedObjectsClient,
+} from '@kbn/core-saved-objects-api-server-internal';
 import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { IKibanaMigrator } from '@kbn/core-saved-objects-base-server-internal';
 import { Actions as SecurityActions } from '@kbn/security-authorization-core';
@@ -95,25 +102,22 @@ const fence =
     countFence(what);
     return result;
   };
-const asyncFence =
-  (what: string, result: unknown = undefined) =>
-  async (..._args: unknown[]) => {
-    countFence(what);
-    return result;
-  };
 /** A router that records route registrations and never serves them (HTTP stays on main). */
 const fencedRouter = (): object => {
   const register = fence('core.http.router.route');
   const versionedRoute = { addVersion: () => versionedRoute };
   const versioned = new Proxy(
     {},
-    { get: () => (..._a: unknown[]) => (countFence('core.http.router.versioned'), versionedRoute) }
+    {
+      get:
+        () =>
+        (..._a: unknown[]) => (countFence('core.http.router.versioned'), versionedRoute),
+    }
   );
   return new Proxy(
     { versioned, routerPath: '/', handleLegacyErrors: (h: unknown) => h },
     {
-      get: (target, prop) =>
-        prop in target ? (target as Obj)[prop as string] : register,
+      get: (target, prop) => (prop in target ? (target as Obj)[prop as string] : register),
     }
   );
 };
@@ -168,8 +172,10 @@ const soFacade = (where: SoTarget): Obj => {
 
 const uiSettingsFacade = (soClient: Obj): Obj => {
   const where = (soClient as { __t7aTarget?: SoTarget }).__t7aTarget;
-  const call = (method: string) => (...args: unknown[]) =>
-    bridge('uiSettings', method, toData({ ...where, args }) as Obj);
+  const call =
+    (method: string) =>
+    (...args: unknown[]) =>
+      bridge('uiSettings', method, toData({ ...where, args }) as Obj);
   return { get: call('get'), getAll: call('getAll'), getUserProvided: call('getUserProvided') };
 };
 
@@ -210,7 +216,11 @@ export const createCoreLite = (
     set: fence('core.http.basePath.set'),
   };
 
-  const auditLogger = { log: fence('security.audit.log'), enabled: false, includeSavedObjectNames: false };
+  const auditLogger = {
+    log: fence('security.audit.log'),
+    enabled: false,
+    includeSavedObjectNames: false,
+  };
   const coreSecurityStart = strict('core.security', {
     authc: strict('core.security.authc', {
       // Fake (task) requests never carry an authenticated-user state on main either.
@@ -231,7 +241,9 @@ export const createCoreLite = (
   // index migrations/readiness fence stays on main. Security/spaces extensions are NOT here, so
   // only internal repositories and security-excluded default-space scoped clients run locally.
   const typeRegistry = new SavedObjectTypeRegistry();
-  let encryptionExtensionFactory: ((o: { typeRegistry: unknown; request: KibanaRequest }) => unknown) | undefined;
+  let encryptionExtensionFactory:
+    | ((o: { typeRegistry: unknown; request: KibanaRequest }) => unknown)
+    | undefined;
   let migrator: IKibanaMigrator | undefined;
   const getMigrator = (): IKibanaMigrator => {
     if (migrator) return migrator;
@@ -247,7 +259,8 @@ export const createCoreLite = (
       prepareMigrations: () => documentMigrator.prepareMigrations(),
       getActiveMappings: () => mappings,
       getDocumentMigrator: () => documentMigrator,
-      migrateDocument: (document: never, options: never) => documentMigrator.migrate(document, options),
+      migrateDocument: (document: never, options: never) =>
+        documentMigrator.migrate(document, options),
       getStatus$: () => of({ status: 'completed' as const }),
       runMigrations: async () => {
         throw new Error('t7a: index migrations belong to main');
@@ -274,7 +287,8 @@ export const createCoreLite = (
         : undefined
     );
   const isDefaultSpace = (request: KibanaRequest) =>
-    ((request as KibanaRequest & { spaceId?: string }).spaceId ?? DEFAULT_SPACE_ID) === DEFAULT_SPACE_ID;
+    ((request as KibanaRequest & { spaceId?: string }).spaceId ?? DEFAULT_SPACE_ID) ===
+    DEFAULT_SPACE_ID;
   const typesKnown = (types: string[]) => types.every((t) => typeRegistry.getType(t));
 
   const savedObjectsStart = strict('core.savedObjects', {
@@ -286,7 +300,12 @@ export const createCoreLite = (
     getScopedClient: (request: KibanaRequest, options?: Obj) => {
       const excluded = (options?.excludedExtensions as string[] | undefined) ?? [];
       const hidden = (options?.includedHiddenTypes as string[] | undefined) ?? [];
-      if (localSo && excluded.includes('security') && isDefaultSpace(request) && typesKnown(hidden)) {
+      if (
+        localSo &&
+        excluded.includes('security') &&
+        isDefaultSpace(request) &&
+        typesKnown(hidden)
+      ) {
         countFence('so.local.unsecuredScopedClient');
         // Mirrors security's SO client factory provider: with RBAC the repository runs as the
         // internal user (authorization is the security extension's job — excluded here).
@@ -295,7 +314,11 @@ export const createCoreLite = (
           : clusterClient.asScoped(request).asCurrentUser;
         return new SavedObjectsClient(localRepository(esClient, hidden, request));
       }
-      return soFacade({ target: 'scoped', request: encodeFakeRequest(request), options: options ?? {} });
+      return soFacade({
+        target: 'scoped',
+        request: encodeFakeRequest(request),
+        options: options ?? {},
+      });
     },
     getTypeRegistry: () => typeRegistry,
     getUnsafeInternalClient: (options?: Obj) =>
@@ -492,9 +515,9 @@ export const createDepFacades = (snapshot: IslandSnapshot) => {
     spaceIdToNamespace,
     namespaceToSpaceId,
     // Fake requests carry their space; identical to main's implementation.
-    getSpaceId: (request: KibanaRequest) =>
-      (request as KibanaRequest & { spaceId?: string }).spaceId ?? DEFAULT_SPACE_ID,
-    isInDefaultSpace: (request: KibanaRequest) =>
+    getSpaceId: (request: KibanaRequest): string =>
+      (request as KibanaRequest & { spaceId?: string }).spaceId ?? (DEFAULT_SPACE_ID as string),
+    isInDefaultSpace: (request: KibanaRequest): boolean =>
       ((request as KibanaRequest & { spaceId?: string }).spaceId ?? DEFAULT_SPACE_ID) ===
       DEFAULT_SPACE_ID,
     getActiveSpace: (request: KibanaRequest) =>
@@ -505,8 +528,12 @@ export const createDepFacades = (snapshot: IslandSnapshot) => {
           bridge('spaces', 'get', { request: encodeFakeRequest(request), id } as never),
       }),
   };
-  const spacesSetup = strict('spaces(setup)', { spacesService: strict('spaces.spacesService(setup)', spacesService) });
-  const spacesStart = strict('spaces(start)', { spacesService: strict('spaces.spacesService', spacesService) });
+  const spacesSetup = strict('spaces(setup)', {
+    spacesService: strict('spaces.spacesService(setup)', spacesService),
+  });
+  const spacesStart = strict('spaces(start)', {
+    spacesService: strict('spaces.spacesService', spacesService),
+  });
 
   const securityActions = new SecurityActions();
   const auditLogger = { log: fence('security.audit.log'), enabled: false };
@@ -515,15 +542,32 @@ export const createDepFacades = (snapshot: IslandSnapshot) => {
     withoutRequest: auditLogger,
     getLogger: () => strict('security.audit.legacy', { log: fence('security.audit.legacy.log') }),
   });
-  const checkPrivilegesDynamicallyWithRequest = (request: KibanaRequest) => async (privileges: unknown, opts?: unknown) =>
-    bridge('security', 'checkPrivilegesDynamically', toData({ request: encodeFakeRequest(request), privileges, opts }) as never);
+  const checkPrivilegesDynamicallyWithRequest =
+    (request: KibanaRequest) => async (privileges: unknown, opts?: unknown) =>
+      bridge(
+        'security',
+        'checkPrivilegesDynamically',
+        toData({ request: encodeFakeRequest(request), privileges, opts }) as never
+      );
   const checkPrivilegesWithRequest = (request: KibanaRequest) => ({
     atSpace: async (spaceId: string, privileges: unknown, opts?: unknown) =>
-      bridge('security', 'checkPrivilegesAtSpace', toData({ request: encodeFakeRequest(request), spaceId, privileges, opts }) as never),
+      bridge(
+        'security',
+        'checkPrivilegesAtSpace',
+        toData({ request: encodeFakeRequest(request), spaceId, privileges, opts }) as never
+      ),
     atSpaces: async (spaceIds: string[], privileges: unknown, opts?: unknown) =>
-      bridge('security', 'checkPrivilegesAtSpaces', toData({ request: encodeFakeRequest(request), spaceIds, privileges, opts }) as never),
+      bridge(
+        'security',
+        'checkPrivilegesAtSpaces',
+        toData({ request: encodeFakeRequest(request), spaceIds, privileges, opts }) as never
+      ),
     globally: async (privileges: unknown, opts?: unknown) =>
-      bridge('security', 'checkPrivilegesGlobally', toData({ request: encodeFakeRequest(request), privileges, opts }) as never),
+      bridge(
+        'security',
+        'checkPrivilegesGlobally',
+        toData({ request: encodeFakeRequest(request), privileges, opts }) as never
+      ),
   });
   const authz = strict('security.authz', {
     actions: securityActions,
@@ -552,7 +596,9 @@ export const createDepFacades = (snapshot: IslandSnapshot) => {
     registerKibanaFeature: fence('features.registerKibanaFeature'),
     registerElasticsearchFeature: fence('features.registerElasticsearchFeature'),
     getKibanaFeatures: () => {
-      throw new Error('T7A_UNSUPPORTED features.getKibanaFeatures (replicate snapshot when needed)');
+      throw new Error(
+        'T7A_UNSUPPORTED features.getKibanaFeatures (replicate snapshot when needed)'
+      );
     },
   });
 
@@ -591,7 +637,10 @@ export const createDepFacades = (snapshot: IslandSnapshot) => {
       locators: strict('share.url.locators', {
         get: (id: string) =>
           snapshot.locatorIds.includes(id)
-            ? new Locator({ id, getLocation: lazyUnsupported('locator.getLocation') } as never, locatorDeps as never)
+            ? new Locator(
+                { id, getLocation: lazyUnsupported('locator.getLocation') } as never,
+                locatorDeps as never
+              )
             : undefined,
       }),
     }),
@@ -605,7 +654,11 @@ export const createDepFacades = (snapshot: IslandSnapshot) => {
           get: (_t, method) =>
             typeof method === 'string'
               ? (...args: unknown[]) =>
-                  bridge('mw', method, toData({ request: encodeFakeRequest(request), args }) as never)
+                  bridge(
+                    'mw',
+                    method,
+                    toData({ request: encodeFakeRequest(request), args }) as never
+                  )
               : undefined,
         }
       ),
@@ -692,7 +745,11 @@ export const bootIsland = async (
     const initializerContext = {
       opaqueId: Symbol(configKey),
       env: {
-        mode: { dev: snapshot.dev, prod: !snapshot.dev, name: snapshot.dev ? 'development' : 'production' },
+        mode: {
+          dev: snapshot.dev,
+          prod: !snapshot.dev,
+          name: snapshot.dev ? 'development' : 'production',
+        },
         packageInfo: {
           version: snapshot.kibanaVersion,
           branch: 'main',
@@ -719,7 +776,9 @@ export const bootIsland = async (
   };
 
   // D: co-locate the REAL ESO plugin (same config schema → same key in dev; prod needs a key handover).
-  const eso = localSo ? await load('@kbn/encrypted-saved-objects-plugin/server', 'encryptedSavedObjects') : undefined;
+  const eso = localSo
+    ? await load('@kbn/encrypted-saved-objects-plugin/server', 'encryptedSavedObjects')
+    : undefined;
   const eventLog = await load('@kbn/event-log-plugin/server', 'eventLog');
   const actions = await load('@kbn/actions-plugin/server', 'actions');
   const stackConnectors = await load('@kbn/stack-connectors-plugin/server', 'stackConnectors');
@@ -744,7 +803,10 @@ export const bootIsland = async (
   // ---- setup (Core's topological order) ----
   const esoStartDeferred = deferred<unknown>();
   if (eso) {
-    const esoSetup = eso.setup(core.setupFor(Promise.resolve({}), esoStartDeferred.promise), {}) as object;
+    const esoSetup = eso.setup(
+      core.setupFor(Promise.resolve({}), esoStartDeferred.promise),
+      {}
+    ) as object;
     (deps as { esoSetup: object }).esoSetup = esoSetup;
   }
   const eventLogSetup = eventLog.setup(
