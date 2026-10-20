@@ -131,6 +131,53 @@ describe('createDataViewSelectedListener', () => {
     expect(mockListenerApi.cancelActiveListeners).toHaveBeenCalled();
   });
 
+  it('should still select a data view when two effects for the same scope run concurrently', async () => {
+    const fetchedDataView = { id: 'fetched-id' } as unknown as Awaited<
+      ReturnType<DataViewsServicePublic['getDataViewLazy']>
+    >;
+    // `mockResolvedValueOnce` per concurrent effect, so no implementation leaks into later tests.
+    jest
+      .mocked(mockDataViewsService.getDataViewLazy)
+      .mockResolvedValueOnce(fetchedDataView)
+      .mockResolvedValueOnce(fetchedDataView);
+
+    // Mimics the listener middleware: every running effect owns a signal, and
+    // `cancelActiveListeners` aborts the other in-flight effects for the scope.
+    const signals: Array<{ aborted: boolean }> = [];
+    const createListenerApi = () => {
+      const signal = { aborted: false };
+      signals.push(signal);
+
+      return {
+        dispatch: mockDispatch,
+        getState: mockGetState,
+        cancelActiveListeners: () => {
+          signals
+            .filter((otherSignal) => otherSignal !== signal)
+            .forEach((otherSignal) => {
+              otherSignal.aborted = true;
+            });
+        },
+        signal,
+      } as unknown as ListenerEffectAPI<RootState, Dispatch<AnyAction>>;
+    };
+
+    const action = selectDataViewAsync({ id: 'fetched-id', scope: PageScope.default });
+
+    await Promise.all([
+      listener.effect(action, createListenerApi()),
+      listener.effect(action, createListenerApi()),
+    ]);
+
+    const selections = mockDispatch.mock.calls.filter(
+      ([dispatched]) =>
+        dispatched.type === 'x-pack/security_solution/dataViewManager/default/setSelectedDataView'
+    );
+
+    expect(selections).toHaveLength(1);
+    expect(selections[0][0]).toEqual(expect.objectContaining({ payload: 'fetched-id' }));
+  });
+
   it('should return cached adhoc data view first', async () => {
     await listener.effect(
       selectDataViewAsync({ id: 'adhoc_test-*', scope: PageScope.default }),
