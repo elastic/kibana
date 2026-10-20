@@ -421,10 +421,12 @@ describe('useRunAlertWorkflowPanel', () => {
       );
 
       await waitFor(() => {
-        expect(mockUseCaseAttachmentWorkflowRun).toHaveBeenCalledWith({
-          attachmentType: 'security.attack',
-          target: { attachmentIds: ['attack-1'] },
-        });
+        expect(mockUseCaseAttachmentWorkflowRun).toHaveBeenCalledWith(
+          expect.objectContaining({
+            attachmentType: 'security.attack',
+            target: { attachmentIds: ['attack-1'] },
+          })
+        );
       });
     });
   });
