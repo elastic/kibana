@@ -206,7 +206,7 @@ Compare one current detection against one active event using that event's compac
      - resolved dependency, entity, or infrastructure candidates from grounding; ignore raw,
        unresolved query-feature IDs.
    - Create a topology connection when any of the following holds:
-     - `causal_features` intersect, or
+     - any of the `causal_features` nodes intersect, or
      - one side's `blast_radius` dependency edge touches the other side's `causal_features` node
        (`source` or `target` equals that node), or
      - both sides have dependency edges with the same `source` and different `target` nodes
@@ -233,8 +233,8 @@ Compare one current detection against one active event using that event's compac
    - Also compare each side's **Alert symptom**, mechanism, and failure keywords; different wording
      alone is not a rejection.
    - **Multi-service bridge:** `<grounding_evidence>` verdict is `confirms`, the matched query KI's
-     `features[]` names topology nodes present on both sides, accept the pair even when their found
-     rows name different services or mechanisms.
+     `features[]` names fetched topology nodes present on both sides, accept the pair even when their
+     found rows name different services or mechanisms.
    - **Domain** or source name alone is not sufficient convergence.
 
 Example:
@@ -399,8 +399,11 @@ Step 4.
      own candidate, as does an `inconclusive` detection whose rows point to an error (never
      grouped). Other excluded detections never enter the graph or any later assignment.
    - **Index first.** List each confirmed detection with the `features[].id` values of its matched
-     query KI and the services its signal names. A detection whose list reaches another
-     detection's services or features is a bridge candidate; check each one below.
+     query KI and the services its signal names. A `features[].id` counts only when it matches a
+     fetched dependency, entity, or infrastructure KI; generic ids such as `log_patterns` and
+     `dataset_analysis` never do, so a rule that lists only those, or whose rows span many services,
+     bridges nothing. A detection whose list reaches another detection's services or features is a
+     bridge candidate; check each one below.
    - **Bridge edges first.** When a detection's matched query KI `features[]` names topology nodes
      present in two or more confirmed detections, add a direct edge between every pair of those
      detections before pairwise matching, and record every induced edge. Example: detection A's KI
