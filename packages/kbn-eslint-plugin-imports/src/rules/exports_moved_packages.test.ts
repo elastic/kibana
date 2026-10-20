@@ -9,7 +9,7 @@
 
 import { RuleTester } from 'eslint';
 import type { MovedExportsRule } from './exports_moved_packages';
-import { ExportsMovedPackagesRule } from './exports_moved_packages';
+import { rules } from '../..';
 import dedent from 'dedent';
 
 const fmt = (str: TemplateStringsArray) => dedent(str) + '\n';
@@ -55,7 +55,7 @@ const babelTester = [
 
 for (const [name, tester] of [tsTester, babelTester]) {
   describe(name, () => {
-    tester.run('@kbn/imports/exports_moved_packages', ExportsMovedPackagesRule, {
+    tester.run('@kbn/imports/exports_moved_packages', rules.exports_moved_packages, {
       valid: [
         {
           filename: 'foo.ts',

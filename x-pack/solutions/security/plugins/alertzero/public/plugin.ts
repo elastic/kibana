@@ -37,6 +37,7 @@ import React from 'react';
 import { getSubscriptionAvailability, type SubscriptionAvailability } from '../common/availability';
 import { getAlertZeroDeepLinks } from './deep_links';
 import { registerAlertZeroAttachmentTypesUI } from './agent_builder/attachment_types';
+import { registerAlertZeroPublicStepDefinitions } from './step_types';
 import type {
   AlertZeroClientConfig,
   AlertZeroPublicSetup,
@@ -85,11 +86,13 @@ export class AlertZeroPublicPlugin
 
   public setup(
     coreSetup: CoreSetup<AlertZeroStartDependencies, AlertZeroPublicStart>,
-    _setupDeps: AlertZeroSetupDependencies
+    { workflowsExtensions }: AlertZeroSetupDependencies
   ): AlertZeroPublicSetup {
     if (!this.config.enabled) {
       return { enabled: false };
     }
+
+    registerAlertZeroPublicStepDefinitions(workflowsExtensions);
 
     coreSetup.application.register({
       id: ALERTZERO_APP_ID,
@@ -115,6 +118,7 @@ export class AlertZeroPublicPlugin
           startDeps,
           params,
           availability$: this.availability$,
+          isServerless: this.isServerless,
         });
       },
     });
