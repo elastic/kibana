@@ -143,6 +143,7 @@ dependsOn:
   - '@kbn/ui-callout'
   - '@kbn/app-header'
   - '@kbn/app-menu'
+  - '@kbn/config'
 tags:
   - plugin
   - prod

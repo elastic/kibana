@@ -11,6 +11,8 @@
 // `@kbn/eslint-config` so each rule runs in exactly one linter. When enabling a rule here,
 // delete it from packages/kbn-eslint-config/*.js; when removing one, add it back there.
 // A rule whose ESLint options are stricter than oxlint's implementation must stay in ESLint.
+// Exception: the generated `test-api-clients` bundles keep `@kbn/imports/no_unused_imports` and
+// `import/no-duplicates` in ESLint, because the OpenAPI generator relies on both fixing its output in one pass.
 //
 // oxlint loads this through the repo-root `oxlint.config.mjs` and resolves `files`,
 // `ignorePatterns`, and `jsPlugins` paths relative to that root entry. Rule sets are spread
@@ -26,11 +28,13 @@ import { reactRules } from './react.mts';
 import { kibanaOverrides, kibanaRules } from './kibana.mts';
 import { licenseHeaderOverrides } from './license_headers.mts';
 import { scoutOverrides } from './scout.mts';
+import { importsOverrides } from './imports.mts';
 import { i18nOverrides } from './i18n.mts';
 import { telemetryOverrides } from './telemetry.mts';
 import { kbnUiOverrides, kbnUiRules } from './kbn_ui.mts';
 import { alertingV2Overrides } from './alerting_v2.mts';
 import { securityImportsOverrides } from './security_imports.mts';
+import { importPluginOverrides } from './import_plugin.mts';
 
 export default defineConfig<OxlintConfig>({
   plugins: ['react', 'typescript', 'import', 'jsx-a11y', 'react-perf', 'node', 'jest'],
@@ -38,6 +42,10 @@ export default defineConfig<OxlintConfig>({
     {
       name: '@kbn/eslint',
       specifier: './packages/kbn-eslint-plugin-eslint/oxlint_plugin.js',
+    },
+    {
+      name: '@kbn/imports',
+      specifier: './packages/kbn-eslint-plugin-imports/oxlint_plugin.js',
     },
     {
       name: '@kbn/i18n',
@@ -72,9 +80,11 @@ export default defineConfig<OxlintConfig>({
     ...kbnUiRules,
   },
   overrides: [
+    ...importPluginOverrides,
     ...licenseHeaderOverrides,
     ...kibanaOverrides,
     ...scoutOverrides,
+    ...importsOverrides,
     ...i18nOverrides,
     ...telemetryOverrides,
     ...securityImportsOverrides,
