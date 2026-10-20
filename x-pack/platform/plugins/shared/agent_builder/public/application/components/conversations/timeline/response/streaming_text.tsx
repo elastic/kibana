@@ -67,8 +67,6 @@ export const StreamingText = ({
     }
   }, [content, tokenDelay]);
 
-  // Stop the timer only on unmount. If we restart it on every new chunk and chunks come faster
-  // than `tokenDelay`, it never ticks and no text is shown.
   useEffect(
     () => () => {
       if (intervalRef.current) {

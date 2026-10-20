@@ -23,10 +23,7 @@ export const useLiveEvents$ = (): Observable<TimelineDisplayEvent[]> => {
   return useMemo(
     () =>
       conversationId
-        ? // The React root renders every `setState` at once. A burst of SSE events would render
-          // once per event, so tell React at most once per frame: the first value right away, the
-          // latest one at the end of the frame.
-          conversationStreamService
+        ? conversationStreamService
             .getActiveStream$(conversationId)
             .pipe(throttleTime(0, animationFrameScheduler, { leading: true, trailing: true }))
         : of(EMPTY_EVENTS),
@@ -34,6 +31,5 @@ export const useLiveEvents$ = (): Observable<TimelineDisplayEvent[]> => {
   );
 };
 
-/** The live (streamed) events of the current conversation; empty when nothing streams. */
 export const useLiveEvents = (): TimelineDisplayEvent[] =>
   useObservable(useLiveEvents$(), EMPTY_EVENTS);
