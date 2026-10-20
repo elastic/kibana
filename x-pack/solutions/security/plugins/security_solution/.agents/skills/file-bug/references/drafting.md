@@ -26,17 +26,11 @@ Related things you noticed (other controls, similar gaps, “same category”) d
 
 Use the template headings. Each heading stays on its own line with the value on the next line (`**Version:**` then `9.3.0`); `check-draft` reads sections that way, so an inline `**Version:** 9.3.0` counts as a gap. **Version** (stack). **Original install method** when known (`from source (dev)` for local/scout). **Steps to reproduce**, **Current behaviour (with screenshots and recordings)**, **Expected behavior**.
 
-**Title** (new issues): `[<team name>] [Bug] <short symptom>`. Run `format-title` after you have a `Team:*` label (human or `infer-team`). If inference is `ask`, ask the human before create. Do not invent a team. If `format-title` exits 2, the symptom is too long — ask the human to shorten it. Do not file a clipped title.
+**Title** (new issues): `[<team name>] [Bug] <short symptom>` from `format-title`, after a `Team:*` label from `infer-team` or the human (ask when inference is `ask`; never invent a team). If `format-title` exits 2 the symptom is too long: ask for a shorter one; do not file a clipped title.
 
-**Release label:** run `infer-release`. A concrete stack version (`9.6.0`, `v9.6.0`, `9.6.0 (notes…)`) becomes `v9.6.0` — pass it on `check-draft` and `write`; `write` does not infer one. `Unknown` is not a gap: omit the `v*` label. A PR build, `main`, or other unparseable version still asks. Never invent a `v*` label. Create always gets `bug` and `triage_needed`; GitHub Type is Bug (`write` sets `--type Bug`).
+**Release label:** `infer-release`; pass the `vX.Y.Z` it returns on `check-draft` and `write` (`write` does not infer one). `Unknown` is not a gap: omit the label; an unparseable version asks; never invent one. Create always gets `bug` and `triage_needed`, and `write` sets `--type Bug`.
 
-**Feature flags:** exact flag id, on/off, and **how to enable it**. If confirmed default/GA, write `No feature flag (default/GA)`.
-
-**Role required to reproduce:** specific Kibana/Security role, or none / any.
-
-**Spaces:** default space, custom space, or both. Prefill from `space_id` (session space, not “both”). Prefill **Role** from `setup.resolved_role` when present.
-
-**Preconditions:** only when the repro needs setup before step 1 (data, integrations, flags already covered above, users, index state). Omit the heading when there are none.
+**Preconditions:** only when the repro needs setup before step 1 (data, integrations, users, index state). Omit the heading when there are none.
 
 Omit **Server OS version**, **Browser and Browser OS versions**, **Elastic Endpoint version**, **Errors in browser console**, and **Logs and/or server output** when empty. Same for any other heading with no value.
 
@@ -57,17 +51,11 @@ Do not treat the draft as complete (and do not ask for a write-yes) until these 
 3. Is a **specific role** required to reproduce?
 4. Can it be reproduced in the **default space**, a **custom space**, or **both**?
 
-If they do not know, **keep the heading** and write `Unknown`. If they stay vague after one follow-up, `Unknown`.
+If they do not know, **keep the heading** and write `Unknown`; the same after one vague follow-up. Confirmed default/GA is `No feature flag (default/GA)`. Prefill **Spaces** from `space_id` (the session space, not “both”) and **Role** from `setup.resolved_role` when present.
 
 ## Deployment
 
-Run `infer-deployment`; do not re-derive the mapping. A pack `deployment` wins; `serverless` → Serverless; `stateful`, `stateful-ess`, `stateful-classic` → ECH. A URL that contains `cloud` is only a **hint** (exit 2: ask). `kind: scout`, `local` or `user-provided` with no type, arch or URL → ask. Write **both** only if the human or pack says both.
-
-Do not assume every session is local Scout. Read `config.json` / the session URL / Scout architecture. Note Scout or local under install method or Preconditions as *how* it was exercised.
-
-## Thin pack
-
-A pack is **thin** when `check-pack` exits 2. `Unknown` counts as answered, including `version: Unknown` (no `release` gap). A concrete version that is not `X.Y` / `X.Y.Z` still asks for release. Run environment-setup questions on a thin pack.
+Run `infer-deployment`; do not re-derive the mapping (`serverless` → Serverless, `stateful*` → ECH, a URL that contains `cloud` is only a hint and asks, write **both** only if the human or pack says so). Do not assume every session is local Scout: read `config.json` / the session URL / Scout architecture, and note Scout or local under install method or Preconditions as *how* it was exercised.
 
 ## Sanitize
 
@@ -75,7 +63,7 @@ Before draft-and-stop, run `scan-sensitive` on the finding and draft. Flag email
 
 ## Environment setup questions
 
-On from-scratch filings **and** a **thin** exploratory-tester pack, ask what a reproducer needs, one question at a time and only what is unknown: install method or deployment, sample data / Fleet / integrations / endpoint, users, privileges or spaces beyond the always-ask items, and anything else for **Preconditions:**. Do not assume a local or Scout session is what a triager will use.
+On from-scratch filings **and** a **thin** exploratory-tester pack (`check-pack` exits 2; `Unknown` counts as answered), ask what a reproducer needs, one question at a time and only what is unknown: install method or deployment, sample data / Fleet / integrations / endpoint, users, privileges or spaces beyond the always-ask items, and anything else for **Preconditions:**. Do not assume a local or Scout session is what a triager will use.
 
 ## Media
 

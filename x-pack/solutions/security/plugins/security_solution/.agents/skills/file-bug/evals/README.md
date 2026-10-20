@@ -21,6 +21,8 @@ The brief forbids running `gh`, `curl`, `write`, `upload` and `validate-labels -
 | `s6-approve-kibana` / `s6b-approve-security` | After "yes, file it": `upload`, then `embed-uploads`, then `write --body-file embedded.md`, all with the target `--repo`; no `--finding` or tester label on Path A. |
 | `s12-pathb-signal` | Path B finding with a signal (a viewer reads another space's case): no Classify question; target `elastic/security-team`; search and labels only there; the draft states the repo and the signal in one line. |
 | `s12b-pathb-override` | After the above, the human says "not sensitive, file in elastic/kibana": switches to `elastic/kibana`, redoes the search there (`--repo elastic/kibana`), re-shows the changed draft and does not write. |
+| `s13-sensitive-ui-text` | `check-draft` gaps `sensitive:case_id` on "Opening case 12345" product text: asks the human to confirm it is UI text, not a customer ID, before using `--sensitive-ok`. |
+| `s14-wip-pr` | The report mentions a draft PR: asks "file anyway?" and waits for the human before `--wip-ok`. |
 | `s6c-approve-with-edit` | The reply approves and edits at once: re-shows the changed draft and asks for a fresh yes; does not write. |
 | `s7-duplicate` | `decide` exits 2; shows the open and closed candidates and asks create / comment / reopen; drafts and writes nothing. |
 | `s8-reopen-approve` | After "yes, post it": `write --action reopen_comment --number 98`, no `--title` or labels, no create. |
@@ -84,3 +86,7 @@ One `s12` run executed `validate-labels --repo` for real, which the brief forbad
 
 `validate-labels` now runs through the stub, so no run reached real `gh`. Agents also declined to use the session's `area` (Entity Analytics) for a Cases finding and asked for the team; `infer-team` still returns `ask` for the Cases route.
 
+
+## Results after trimming `drafting.md` and moving the gap table into `check-draft` (`help`)
+
+25 runs over every scenario above (`s13` and `s14` included; Sonnet 5.5, stubbed): all matched the pre-trim behavior. Classify asked on every Path A signal, Path B decided without asking, media review and the write-yes gate held, `s14` asked "file anyway?" 5/5 (3 pre-trim, 2 post), `s13` asked for the team and treated the stated UI text as confirmed.

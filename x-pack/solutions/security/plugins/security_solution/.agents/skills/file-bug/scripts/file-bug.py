@@ -331,6 +331,23 @@ def _cmd_check_pack(args: argparse.Namespace) -> int:
     )
 
 
+GAP_HELP = (
+    ("sensitive:", "Human confirms the flagged text is UI wording, not a customer ID; then pass --sensitive-ok."),
+    ("security_issue:", "File in elastic/security-team, or the human confirms it is not a vulnerability or secret (--security-ok). --sensitive-ok never unlocks this."),
+    ("wip_or_limitation", "Ask the human whether to file anyway; only on 'file anyway' pass --wip-ok."),
+    ("media_review", "Human confirms every screenshot/recording is clean; then pass --media-ok."),
+)
+
+
+def _gap_help(gaps: list[str]) -> dict[str, str]:
+    return {
+        gap: text
+        for gap in gaps
+        for prefix, text in GAP_HELP
+        if gap.startswith(prefix)
+    }
+
+
 def _cmd_check_draft(args: argparse.Namespace) -> int:
     finding = _read_json(args.finding) if args.finding else {}
     config = _read_json(args.config) if args.config else {}
@@ -360,6 +377,7 @@ def _cmd_check_draft(args: argparse.Namespace) -> int:
         {
             "fileable": not gaps,
             "gaps": gaps,
+            "help": _gap_help(gaps),
             "hints": scan_security_hints(body, title or "", json.dumps(finding)),
         },
         EXIT_ASK if gaps else EXIT_OK,

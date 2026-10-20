@@ -1889,6 +1889,17 @@ class FileBugCliTest(unittest.TestCase):
         self.assertEqual(result.returncode, 2)
         self.assertIn("wip_or_limitation", json.loads(result.stdout)["hits"])
 
+    def test_check_draft_cli_help_explains_gaps(self):
+        with TemporaryDirectory() as tmp:
+            body_path = Path(tmp) / "body.md"
+            body_path.write_text("PR #12 is still a draft\n", encoding="utf-8")
+            result = run_cli(
+                "check-draft", "--action", "comment", "--body", str(body_path)
+            )
+        out = json.loads(result.stdout)
+        self.assertIn("wip_or_limitation", out["help"])
+        self.assertIn("--wip-ok", out["help"]["wip_or_limitation"])
+
     def test_check_draft_cli_exits_2_without_stamp(self):
         finding = {
             "current_behavior": "Table shows 0",
