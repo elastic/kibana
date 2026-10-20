@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 import {
-  EuiBadge,
   EuiPageHeader,
   EuiModal,
   EuiPanel,
@@ -91,11 +90,6 @@ const ruleTypeModalTitle = i18n.translate('responseOpsRuleForm.components.ruleTy
   defaultMessage: 'Create new rule',
 });
 
-const ruleTypeModalBadgeLabel = i18n.translate(
-  'responseOpsRuleForm.components.ruleTypeModal.classicBadge',
-  { defaultMessage: 'Classic' }
-);
-
 export const RuleTypeModal: React.FC<RuleTypeModalProps & RuleTypeModalState> = ({
   onClose,
   onSelectRuleType,
@@ -168,18 +162,9 @@ export const RuleTypeModal: React.FC<RuleTypeModalProps & RuleTypeModalState> = 
           <EuiFlexItem grow={0}>
             <EuiPageHeader bottomBorder="extended" paddingSize="m">
               <EuiPageHeaderSection style={{ width: '100%' }}>
-                <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <EuiTitle size="s">
-                      <h1>{ruleTypeModalTitle}</h1>
-                    </EuiTitle>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge color="hollow" data-test-subj="ruleTypeModalClassicBadge">
-                      {ruleTypeModalBadgeLabel}
-                    </EuiBadge>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <EuiTitle size="s">
+                  <h1>{ruleTypeModalTitle}</h1>
+                </EuiTitle>
                 <EuiSpacer size="m" />
                 <EuiFlexGroup alignItems="center">
                   <EuiFlexItem

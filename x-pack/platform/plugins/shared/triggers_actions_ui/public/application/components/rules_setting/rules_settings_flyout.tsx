@@ -14,7 +14,6 @@ import type {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
@@ -292,26 +291,14 @@ export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
       })}
     >
       <EuiFlyoutHeader>
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiTitle>
-              <h3>
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.rulesSettings.flyout.title"
-                  defaultMessage="Settings"
-                />
-              </h3>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow" data-test-subj="rulesSettingsFlyoutClassicBadge">
-              <FormattedMessage
-                id="xpack.triggersActionsUI.rulesSettings.flyout.classicBadge"
-                defaultMessage="Classic"
-              />
-            </EuiBadge>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiTitle>
+          <h3>
+            <FormattedMessage
+              id="xpack.triggersActionsUI.rulesSettings.flyout.title"
+              defaultMessage="Settings"
+            />
+          </h3>
+        </EuiTitle>
         <EuiSpacer size="m" />
       </EuiFlyoutHeader>
       <EuiHorizontalRule margin="none" />

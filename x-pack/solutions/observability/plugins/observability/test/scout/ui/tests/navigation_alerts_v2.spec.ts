@@ -379,7 +379,6 @@ test.describe(
 
     test('clicking Alerts V1 loads the classic alerts page when the V1 alerts table setting is on', async ({
       browserAuth,
-      page,
       pageObjects,
       kbnClient,
       scoutSpace,
@@ -410,7 +409,6 @@ test.describe(
 
       await nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, ALERTS_DEEP_LINK).click();
       await expectPageTitle(pageObjects.chrome.pageTitle, CLASSIC_ALERTS_TITLE);
-      await expect(page.getByTestId('classicAlertsBadge')).toBeVisible();
     });
 
     test('reverts to a plain Alerts link that loads the classic alerts page after disabling v2', async ({
