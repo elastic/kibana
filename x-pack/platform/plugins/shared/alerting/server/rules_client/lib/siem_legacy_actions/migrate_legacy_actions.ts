@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import type { SavedObject } from '@kbn/core/server';
 import type { RulesClientContext } from '../..';
-import type { RawRule } from '../../../types';
+import type { RawRule, RawRuleAction } from '../../../types';
 import { findAndTransformLegacyActions } from './find_and_transform_legacy_actions';
 
 interface BulkMigrateLegacyActionsParams {
@@ -56,8 +56,19 @@ export const bulkMigrateLegacyActions = async ({
         return;
       }
       const { transformedActions, transformedReferences } = transformed[ruleId];
-      // Only rules without actions get here (see findAndTransformLegacyActions), so there is nothing to merge
-      rule.attributes.actions = transformedActions;
+      // A rule with its own actions only gets here with a "no_actions" or "rule" sidecar, which has no actions to merge.
+      // The notify setting of the rule is put into the frequency of its own actions instead.
+      const existingActionsWithFrequencies: RawRuleAction[] = rule.attributes.actions.map(
+        (action) => ({
+          ...action,
+          frequency: {
+            summary: true,
+            notifyWhen: rule.attributes.notifyWhen ?? 'onActiveAlert',
+            throttle: rule.attributes.throttle ?? null,
+          },
+        })
+      );
+      rule.attributes.actions = [...existingActionsWithFrequencies, ...transformedActions];
       rule.references = [...rule.references, ...transformedReferences];
       // Only clear rule-level throttle when there are actual migrated actions from
       // the sidecar (throttled sidecars). For no_actions/rule sidecars (empty

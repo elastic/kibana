@@ -34,6 +34,12 @@ type FindAndTransformLegacyActionsReturn = Promise<
   >
 >;
 
+// ruleThrottle can have special values 'no_actions' or 'rule', or a duration like e.g. '1h'
+// 'rule' means actions fire each time the rule runs, whereas a duration means the actions are
+// throttled to only fire once per the specified time duration
+const hasNoThrottledActions = ({ ruleThrottle }: LegacyIRuleActionsAttributes): boolean =>
+  ruleThrottle === 'no_actions' || ruleThrottle === 'rule';
+
 interface LegacyActionsLookup {
   siemNotificationRuleIds: string[];
   legacyRuleActionsSOs: Array<SavedObject<LegacyIRuleActionsAttributes>>;
@@ -136,10 +142,15 @@ export const findAndTransformLegacyActions: FindAndTransformLegacyActions = asyn
     const getRuleId = (savedObject: SavedObject): string | undefined =>
       savedObject.references.find(({ type }) => type === RULE_SAVED_OBJECT_TYPE)?.id;
 
-    // The rule's own actions are persisted, so its sidecar carries nothing to keep and is not migrated.
+    // A rule that already has actions wins over a sidecar that carries actions of its own, so that sidecar is not migrated.
+    // A "no_actions" or "rule" sidecar carries no actions, only the notify setting that has to be folded into the rule's own actions.
     const migratingSOs = legacyRuleActionsSOs.filter((savedObject) => {
       const ruleId = getRuleId(savedObject);
-      return ruleId === undefined || !ruleIdsWithActions.has(ruleId);
+      return (
+        ruleId === undefined ||
+        !ruleIdsWithActions.has(ruleId) ||
+        hasNoThrottledActions(savedObject.attributes)
+      );
     });
 
     const transformedActionsByRuleId: Record<
@@ -153,14 +164,7 @@ export const findAndTransformLegacyActions: FindAndTransformLegacyActions = asyn
         throw new Error('Failed to find rule reference on legacy action Saved Object');
       }
 
-      // ruleThrottle can have special values 'no_actions' or 'rule', or a duration like e.g. '1h'
-      // 'rule' means actions fire each time the rule runs, whereas a duration means the actions are
-      // throttled to only fire once per the specified time duration
-      const hasNoThrottledActions =
-        savedObject.attributes.ruleThrottle === 'no_actions' ||
-        savedObject.attributes.ruleThrottle === 'rule';
-
-      if (hasNoThrottledActions) {
+      if (hasNoThrottledActions(savedObject.attributes)) {
         // Still register the rule so that bulkMigrateLegacyActions resets
         // notifyWhen/throttle and adds per-action frequency to existing actions,
         // even though there are no new throttled actions to migrate from the sidecar.

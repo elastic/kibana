@@ -164,6 +164,34 @@ describe('bulkMigrateLegacyActions', () => {
     ]);
   });
 
+  it.each(['rule', 'no_actions'])(
+    'folds the notify setting into the actions of a rule that has its own actions with a "%s" sidecar',
+    async (ruleThrottle) => {
+      mockLegacyObjects({ sidecars: [buildSidecar(ruleThrottle)] });
+      const rule = buildRule([existingAction]);
+      rule.attributes.notifyWhen = 'onActiveAlert';
+      rule.attributes.throttle = null;
+
+      const migratedIds = await bulkMigrateLegacyActions({
+        context,
+        rules: [rule],
+        skipActionsValidation: true,
+      });
+
+      expect(migratedIds).toEqual([RULE_ID]);
+      expect(rule.attributes.actions).toEqual([
+        {
+          ...existingAction,
+          frequency: { summary: true, notifyWhen: 'onActiveAlert', throttle: null },
+        },
+      ]);
+      expect(rule.attributes.notifyWhen).toBeNull();
+      expect(rule.references).toEqual([{ name: 'action_0', type: 'action', id: 'email-1' }]);
+      // deleted after the rule is saved
+      expect(savedObjectsClient.bulkDelete).not.toHaveBeenCalled();
+    }
+  );
+
   it('does not validate or transform the sidecar of a rule that already has actions', async () => {
     // a sidecar with no connector references would make the transformation throw
     const brokenSidecar = {
