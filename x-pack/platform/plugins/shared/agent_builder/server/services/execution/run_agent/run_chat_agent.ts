@@ -233,7 +233,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     templateId: conversation?.template_id,
   });
   processedConversation.resumedRoundId = pendingTurn?.id;
-  processedConversation.omitAttachmentGuidance = agentConfiguration.enable_internal_tools === false;
+  processedConversation.omitAttachmentContext = agentConfiguration.enable_internal_tools === false;
   // Everything in the log at this point came from the incoming message's attachments; anything
   // recorded from here on is made by tools during the round.
   const chatInputChanges = context.attachmentStateManager.drainChanges();

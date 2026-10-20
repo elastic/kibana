@@ -66,10 +66,11 @@ export interface ProcessedConversation {
    */
   resumedRoundId?: string;
   /**
-   * Leaves out the attachment guidance Agent Builder adds to user messages (the attachment list
-   * and per-type instructions), for agents without the platform attachment tools.
+   * Leaves out the attachment list (and its `attachment_read` note) Agent Builder adds to user
+   * messages, for agents without the platform attachment tools. The per-type instructions that
+   * attachment types contribute for their own tools stay.
    */
-  omitAttachmentGuidance?: boolean;
+  omitAttachmentContext?: boolean;
 }
 
 export const prepareConversation = async ({

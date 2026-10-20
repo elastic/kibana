@@ -135,7 +135,7 @@ export interface AgentConfiguration {
    * sub-agents, user questions) are not added to the agent's runs, leaving only `tools` and
    * `set_conversation_metadata` on a conversation template. The system prompt is then the agent's
    * own instructions (plus the conversation metadata fields), and user messages carry no attachment
-   * guidance. Defaults to true.
+   * list. Defaults to true.
    */
   enable_internal_tools?: boolean;
 

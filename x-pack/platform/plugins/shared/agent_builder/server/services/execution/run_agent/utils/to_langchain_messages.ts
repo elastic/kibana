@@ -109,7 +109,7 @@ export const prepareMessages = async ({
           ignoreSteps,
           attachmentTypes: conversation.attachmentTypes,
           attachmentTypeInstructionsProvided,
-          omitAttachmentGuidance: conversation.omitAttachmentGuidance,
+          omitAttachmentContext: conversation.omitAttachmentContext,
           fromStepIndex: index === 0 ? visibility.entryFromStep : 0,
         }))
       );
@@ -126,7 +126,7 @@ export const prepareMessages = async ({
         timestamp: entry.userMessage.created_at,
         attachmentTypes: conversation.attachmentTypes,
         attachmentTypeInstructionsProvided,
-        omitAttachmentGuidance: conversation.omitAttachmentGuidance,
+        omitAttachmentContext: conversation.omitAttachmentContext,
       })
     );
   }
@@ -137,7 +137,7 @@ export const prepareMessages = async ({
       timestamp: inputTimestamp,
       attachmentTypes: conversation.attachmentTypes,
       attachmentTypeInstructionsProvided,
-      omitAttachmentGuidance: conversation.omitAttachmentGuidance,
+      omitAttachmentContext: conversation.omitAttachmentContext,
     })
   );
 
@@ -168,7 +168,7 @@ export interface RoundToLangchainOptions {
   ignoreSteps?: boolean;
   attachmentTypes?: ProcessedAttachmentType[];
   attachmentTypeInstructionsProvided?: Set<string>;
-  omitAttachmentGuidance?: boolean;
+  omitAttachmentContext?: boolean;
   /**
    * First step to render, for a round partially covered by the compaction summary. The user
    * message is kept so the visible steps stay anchored to the request they answer.
@@ -183,7 +183,7 @@ export const roundToLangchain = async (
     ignoreSteps = false,
     attachmentTypes,
     attachmentTypeInstructionsProvided,
-    omitAttachmentGuidance,
+    omitAttachmentContext,
     fromStepIndex = 0,
   }: RoundToLangchainOptions = {}
 ): Promise<BaseMessage[]> => {
@@ -196,7 +196,7 @@ export const roundToLangchain = async (
       timestamp: round.userMessage.created_at,
       attachmentTypes,
       attachmentTypeInstructionsProvided,
-      omitAttachmentGuidance,
+      omitAttachmentContext,
     })
   );
 
@@ -248,13 +248,13 @@ export const formatUserInput = ({
   timestamp,
   attachmentTypes,
   attachmentTypeInstructionsProvided,
-  omitAttachmentGuidance = false,
+  omitAttachmentContext = false,
 }: {
   input: ProcessedRoundInput;
   timestamp?: string;
   attachmentTypes?: ProcessedAttachmentType[];
   attachmentTypeInstructionsProvided?: Set<string>;
-  omitAttachmentGuidance?: boolean;
+  omitAttachmentContext?: boolean;
 }): HumanMessage => {
   const { message, attachments, attachment_context, attachment_refs, author } = input;
 
@@ -271,11 +271,10 @@ export const formatUserInput = ({
 
     content += `\n\n${attachmentsXml}\n`;
   }
-  if (attachment_context && !omitAttachmentGuidance) {
+  if (attachment_context && !omitAttachmentContext) {
     content += `\n\n${attachment_context}\n`;
   }
   if (
-    !omitAttachmentGuidance &&
     attachment_refs &&
     attachment_refs.length > 0 &&
     attachmentTypes &&
