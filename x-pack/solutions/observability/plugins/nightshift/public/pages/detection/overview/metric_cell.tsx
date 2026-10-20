@@ -36,7 +36,7 @@ export const MetricCell = ({
   isLoading,
   testSubject,
 }: MetricCellProps): React.ReactElement => (
-  <EuiToolTip content={tooltip}>
+  <EuiToolTip content={tooltip} position="bottom">
     <div data-test-subj={testSubject} tabIndex={0}>
       <EuiTitle size="s">
         <div>
