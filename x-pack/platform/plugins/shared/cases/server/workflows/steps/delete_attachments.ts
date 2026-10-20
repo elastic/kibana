@@ -31,7 +31,7 @@ export const deleteAttachmentsStepDefinition = (
         return {
           output: {
             case_id,
-            ids,
+            ids: [...new Set(ids)],
           },
         };
       } catch (error) {

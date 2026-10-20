@@ -141,6 +141,15 @@ describe('manageAttachmentsTool', () => {
     ).rejects.toThrow('Attachments could not be deleted on case "case-1": a-1. Reason: Forbidden');
   });
 
+  it('rejects delete_attachments without ids before calling the cases client', async () => {
+    const tool = buildTool(buildRegistry([]), true);
+
+    await expect(
+      tool.handler({ mode: 'delete_attachments', case_id: 'case-1' } as never, buildToolContext())
+    ).rejects.toThrow(/ids/);
+    expect(casesClient.attachments.bulkDelete).not.toHaveBeenCalled();
+  });
+
   it('bulk-creates attachments and emits a case attachment when enabled', async () => {
     const theCase = {
       id: 'case-1',

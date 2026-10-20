@@ -144,7 +144,8 @@ export const manageAttachmentsTool = (
 
       if (mode === 'delete_attachments') {
         // Deletion returns ids only, so there is no case to emit as an attachment.
-        return invokeStepHandler(deleteAttachmentsStepDef, { case_id, ids }, toolContext);
+        const input = deleteAttachmentsStepCommonDefinition.inputSchema.parse({ case_id, ids });
+        return invokeStepHandler(deleteAttachmentsStepDef, input, toolContext);
       }
 
       const runStep = async () => {

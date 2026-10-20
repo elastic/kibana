@@ -48,6 +48,18 @@ describe('deleteAttachmentsStepDefinition', () => {
     });
   });
 
+  it('returns each deleted id once when the input repeats ids', async () => {
+    const { definition } = setup();
+
+    const result = await definition.handler(
+      createContext({ case_id: 'case-1', ids: ['a-1', 'a-1', 'a-2'] })
+    );
+
+    expect(result).toEqual({
+      output: { case_id: 'case-1', ids: ['a-1', 'a-2'] },
+    });
+  });
+
   it('does not delete anything once the run is aborted', async () => {
     const { definition, bulkDelete } = setup();
     const controller = new AbortController();
