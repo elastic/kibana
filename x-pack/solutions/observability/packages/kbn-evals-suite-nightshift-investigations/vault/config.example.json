@@ -1,0 +1,13 @@
+{
+  "sandbox": {
+    "apiKey": "REPLACE_ME",
+    "url": "https://REPLACE_ME:443"
+  },
+  "nightshift": {
+    "telemetry": {
+      "url": "https://REPLACE_ME",
+      "apiKey": "REPLACE_ME",
+      "readableIndices": "REPLACE_ME"
+    }
+  }
+}

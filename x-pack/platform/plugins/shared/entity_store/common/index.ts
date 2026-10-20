@@ -121,8 +121,13 @@ export const EntityType = lazySchema(() => z.enum(['user', 'host', 'service', 'g
 
 export const ALL_ENTITY_TYPES = Object.values(EntityType.enum);
 
-export { ExtractionMode, extractionBlockSchema } from './domain/definitions/entity_schema';
+export {
+  ExtractionMode,
+  extractionBlockSchema,
+  dynamicBlockSchema,
+} from './domain/definitions/entity_schema';
 export type {
+  DynamicBlock,
   EntityDefinitionOfAnyType,
   EntityDefinitionWithoutId,
   ExtractionBlock,
@@ -210,7 +215,10 @@ export type {
   RelationshipMetadataDoc,
   RelationshipMetadataMaintainer,
 } from './domain/entity_metadata/relationship_metadata';
-export { AI_SUMMARY_EVENT_ACTION } from './domain/entity_metadata/ai_summary_metadata';
+export {
+  AI_SUMMARY_EVENT_ACTION,
+  AI_SUMMARY_RESOLVED_GROUP_VARIANT_ID,
+} from './domain/entity_metadata/ai_summary_metadata';
 export type {
   AiSummaryMetadataDoc,
   AiSummaryHighlightItem,

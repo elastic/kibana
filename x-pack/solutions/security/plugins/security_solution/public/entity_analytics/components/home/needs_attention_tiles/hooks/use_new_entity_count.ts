@@ -16,8 +16,8 @@ import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { useTileQueryInputs } from './use_tile_query_inputs';
 import { EMPTY_ENTITY_IDS } from '../data';
 import { buildNewEntityCountQuery } from '../queries/new_entity_query';
-import type { TimeRange } from '../../use_time_range_param';
-import { EMPTY_ENTITY_FILTERS, type EntityFilters } from '../../use_entity_filters_param';
+import { EMPTY_ENTITY_FILTERS } from '../../entities_grid/common';
+import type { EntityFilters, TimeRange } from '../../entities_grid/common';
 import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
 
 export const useNewEntityCount = ({

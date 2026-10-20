@@ -1076,6 +1076,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'mac.advanced.memory_protection.enable_shared_dirty_scan',
+    first_supported_version: '9.6',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.memory_protection.enable_shared_dirty_scan',
+      {
+        defaultMessage:
+          'Also scan anonymous executable memory regions that are not reported as dirty but have resident or compressed pages, instead of scanning only dirty regions. Scans more memory regions because of the loosened restrictions, mostly JIT-generated code. Applies to macOS 27 and later. Default: true.',
+      }
+    ),
+  },
+  {
     key: 'windows.advanced.memory_protection.shellcode_collect_sample',
     first_supported_version: '7.15',
     documentation: i18n.translate(
@@ -1824,6 +1835,18 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'Mitigates vulnerable driver abuse by providing additional safeguards and enrichment for driver loads. Default: true.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.kernel.registry_credential_hardening.descendants',
+    first_supported_version: '9.6',
+    license: 'enterprise',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.registry_credential_hardening.descendants',
+      {
+        defaultMessage:
+          'Also block saving subkeys of protected credential registry hives (for example, HKLM\\SYSTEM\\Select). Only applies when registry credential hardening is enabled. Default: true.',
       }
     ),
   },
