@@ -171,15 +171,17 @@ export const createAlertServiceMock = (): AlertServiceMock => {
 const createAttachmentGetterServiceMock = (): AttachmentGetterServiceMock => {
   const service: PublicMethodsOf<AttachmentGetter> = lazyObject({
     get: jest.fn(),
+    bulkGetForDeletion: jest.fn(),
+    bulkGetForDeletionByType: jest.fn(),
     bulkGet: jest.fn(),
     getAllDocumentsAttachedToCase: jest.fn(),
     getUnifiedAttachmentsByTypes: jest.fn().mockResolvedValue([]),
     getCaseAttatchmentStats: jest.fn(),
     getAttachmentIdsForCases: jest.fn(),
-    getFileAttachments: jest.fn(),
+    getFileAttachmentsForDeletion: jest.fn(),
     getAllAlertIds: jest.fn(),
     getCaseIdsByAttachmentIds: jest.fn(),
-    getAllAttackIds: jest.fn().mockResolvedValue(new Set()),
+    getAttachedAttackIds: jest.fn().mockResolvedValue(new Set()),
     getAllEventIds: jest.fn(),
   });
 

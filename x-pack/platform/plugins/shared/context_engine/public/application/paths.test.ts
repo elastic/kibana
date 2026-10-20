@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { decodeRouteParam, getAiIndexDetailPath, getViewKiPath } from './paths';
+import {
+  decodeRouteParam,
+  getAiIndexDetailPath,
+  getAiIndexKnowledgeIndicatorsPath,
+  getViewKiPath,
+} from './paths';
 
 describe('getAiIndexDetailPath', () => {
   it('builds the path without encoding the id', () => {
@@ -13,8 +18,16 @@ describe('getAiIndexDetailPath', () => {
   });
 });
 
+describe('getAiIndexKnowledgeIndicatorsPath', () => {
+  it('builds the knowledge indicators tab path', () => {
+    expect(getAiIndexKnowledgeIndicatorsPath('my-ai-index')).toBe(
+      '/ai_index/my-ai-index/knowledge_indicators'
+    );
+  });
+});
+
 describe('getViewKiPath', () => {
-  it('does not encode the AI index id', () => {
+  it('builds the path with an unencoded AI index id and encoded KI id', () => {
     expect(getViewKiPath('my-ai-index', 'ki-1')).toBe('/ai_index/my-ai-index/ki/ki-1');
   });
 

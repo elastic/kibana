@@ -514,7 +514,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
             ? [
                 {
                   label: reservedBadgeLabel,
-                  color: 'primary',
+                  color: 'hollow',
                   'data-test-subj': 'reservedRoleBadge',
                 },
               ]

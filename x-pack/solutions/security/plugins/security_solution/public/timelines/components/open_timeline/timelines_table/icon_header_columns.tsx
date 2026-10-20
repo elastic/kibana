@@ -34,6 +34,7 @@ export const getIconHeaderColumns = ({
       field: 'eventIdToNoteIds',
       name: (
         <EuiIconTip
+          aria-label={i18n.NOTES}
           content={i18n.NOTES}
           iconProps={{
             'data-test-subj': 'notes-count-header-icon',
@@ -54,6 +55,7 @@ export const getIconHeaderColumns = ({
       field: 'pinnedEventIds',
       name: (
         <EuiIconTip
+          aria-label={i18n.PINNED_EVENTS}
           content={i18n.PINNED_EVENTS}
           iconProps={{
             'data-test-subj': 'pinned-event-header-icon',
@@ -76,6 +78,7 @@ export const getIconHeaderColumns = ({
       field: 'favorite',
       name: (
         <EuiIconTip
+          aria-label={i18n.FAVORITES}
           content={i18n.FAVORITES}
           iconProps={{
             'data-test-subj': 'favorites-header-icon',
@@ -112,6 +115,7 @@ export const getSuperTimelineQueryTypeColumn = (): EuiTableFieldDataColumnType<o
   field: 'savedSearchId',
   name: (
     <EuiIconTip
+      aria-label={SUPER_TIMELINE_QUERY_MERGING_COLUMN_HEADER}
       content={SUPER_TIMELINE_QUERY_MERGING_COLUMN_HEADER}
       iconProps={{ 'data-test-subj': 'super-timeline-query-type-header-icon' }}
       size="m"
