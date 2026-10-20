@@ -49,7 +49,17 @@ test('writer rejects unbounded fire-and-forget queue and wrong ACK', async () =>
     bundle,
     signal: new AbortController().signal,
     load: async () => ({}),
+    exportCallback: () => {
+      throw new Error('unused');
+    },
+    releaseCallback: () => {},
+    resolveCallback: () => {
+      throw new Error('unused');
+    },
     call: async () => wait,
+    callSync: () => {
+      throw new Error('unused');
+    },
   };
   const stream = createBatchStream(context, 'events', { maxPendingBatches: 1 });
   const first = stream.write([1]);

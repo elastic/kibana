@@ -1,4 +1,4 @@
-# Track 7 capability kit — 0.1.4 pre-release research slice
+# Track 7 capability kit — 0.1.6 pre-release research slice
 
 PRIVATE research code; no public Core API, plugin lifecycle hook, or automatic enablement.
 Base harness fd3138c. Only main owns TM claims/leases/results.
@@ -95,7 +95,7 @@ export/specifier works. Replacing executable file contents under the SAME specif
 requires pool restart (Node caches modules); do not call revision a code hot-reloader.
 
 Thread and child-process adapters use the same protocol. Main never Atomics-waits;
-rare worker-to-main sync API is not yet implemented. Deadlines include queue
+bounded worker-to-main sync API is documented below. Deadlines include queue
 and bootstrap. In0.1.1, cancellation/deadline/shutdown FIRST send a cancel packet:
 WorkerContext.signal aborts with AbortError (TimeoutError for deadline), then sends
 an acknowledgement. Task code can perform bounded terminal persistence and return.
@@ -113,6 +113,41 @@ spaceId overrides are denied; pass a genuine Core space-scoped security-wrapped
 client, not an unwrapped internal repository. Principal/space must match its binding.
 This bridge preserves actual migration/security/ESO behavior ON MAIN; no claim of
 worker-local SO/ESO, large-state isolation or RBAC proof from fixture clients.
+
+## Rare thread→main sync (0.1.6)
+
+Grant bindSyncOperations({ lookup: (args,bundle)=>value }); worker calls
+context.callSync(capability,'lookup',args,{timeoutMs:50,maxReplyBytes:65536}).
+ONLY worker Atomics.waits. Main executes a STATIC allowlist without awaiting;
+operations MUST be pure, bounded CPU, no I/O/mutation/worker calls. Prefer a local
+replica/static snapshot. Max8calls/run,64KiB encoded request/reply, timeout1–1000ms,
+reply capacity256–65536bytes. Timeout fails closed; each call owns fresh SABs so
+late replies cannot corrupt a later call. This blocks the WHOLE worker isolate,
+including co-resident async runs, not just the calling task. Main CPU/time measured.
+Child processes explicitly reject callSync (no SAB across IPC); use context.call
+against the SAME binding asynchronously or a static snapshot. No FIFO sync claim.
+
+## Residual async service handles (0.1.5)
+
+Main grants handles: bindAsyncServices({ serviceObject, registryFunction },
+{ staticMetadata: ... }). Worker uses createAsyncServiceClient(context,'handles'):
+await roots() -> services handle references + COPIED static snapshots;
+await get(ref,key), await invoke(methodRef,args), await snapshot(ref,keys),
+await release(ref). There is NO implicit JavaScript Proxy and no main sync wait.
+Class private-field receivers are owner-side; handing a host ref back unwraps to
+its actual object. Object results are handles (not eager graph snapshots); use
+snapshot(ref,keys) for bounded data, or prefer module-specifier local code.
+For callbacks: context.exportCallback(async (...args)=>...), pass that reference
+as a service argument; main receives an async callback. Returning it to its owning
+worker unwraps to the ORIGINAL function. context.releaseCallback(ref) revokes it.
+Limits256host handles/run and256worker callbacks/pending callback calls; explicit
+release or run-end cleanup, no FinalizationRegistry. Foreign/expired refs fail.
+Residual host handlers record main THREAD CPU: handlerSyncCpuUs (synchronous prefix)
+and handlerWindowCpuUs (whole await interval, INCLUDES other concurrent main work),
+plus wall durationMs. Window CPU is NOT attributable/exclusive per-call billing.
+Telemetry absent means no CPU sampling/byte measurement. No payloads in telemetry.
+Worker-owned arbitrary service objects are not transparent graphs; export their
+functions explicitly as callbacks. Network/crash persistent handles not provided.
 
 ## Acknowledged event streams (0.1.3)
 
@@ -153,7 +188,7 @@ No stack/QAF, real runner, cgroup/pod fit, exact slices or scored latency claim.
 
 Outstanding 7.P: worker-local composed real SO/ESO + readiness/auth/audit parity;
 scoped live SO security matrix; session refresh bridge (capture is a per-run snapshot,
-not token renewal); rare sync lane; telemetry overhead and per-MB/call measurement;
+not token renewal); process sync transport; telemetry overhead and per-MB/call measurement;
 distribution-shaped initialized-service floor; bounded envelope sizes/backpressure;
 broader SO operations, additional custom error codecs, logger metadata and production bootstrap.
 
