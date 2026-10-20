@@ -9,6 +9,7 @@
 
 import type { OtelLogDocument } from '../otel_logs';
 import type { Serializable } from '../serializable';
+import { generateLongId, generateShortId } from '../utils/generate_id';
 import type {
   EdotBrowserClient,
   HttpInstrumentation,
@@ -223,7 +224,10 @@ const hideDocument = (
   return events;
 };
 
-/** A fetch/XHR span, its resource timing entry and, for some failures, an uncaught exception. */
+/**
+ * A fetch/XHR span, its resource timing entry, which the instrumentation links to the span, and,
+ * for some failures, an uncaught exception.
+ */
 const sendRequest = (
   ctx: SessionContext,
   { timeOrigin }: DocumentState,
@@ -252,6 +256,7 @@ const sendRequest = (
     : method === 'POST'
     ? 201
     : 200;
+  const traceContext = { traceId: generateLongId(), spanId: generateShortId() };
 
   const events: EdotBrowserEvent[] = [
     client
@@ -259,8 +264,10 @@ const sendRequest = (
         method,
         url,
         statusCode,
-        errorType: isNetworkError ? 'TypeError' : undefined,
+        // A failed fetch rejects with a TypeError, a failed XHR fires an `error` event
+        errorType: isNetworkError ? (instrumentation === 'xhr' ? 'Error' : 'TypeError') : undefined,
         instrumentation,
+        ...traceContext,
       })
       .timestamp(time)
       .duration(duration),
@@ -277,11 +284,13 @@ const sendRequest = (
           timings: resourceTimings(random, time - timeOrigin, duration, 2_000),
           nextHopProtocol: 'h2',
         })
+        .traceContext(traceContext)
         .timestamp(endTime)
     );
   }
 
-  const isFailure = statusCode === undefined || statusCode >= 400;
+  // Unlike fetch, XHR doesn't throw on network errors
+  const isFailure = statusCode === undefined ? instrumentation === 'fetch' : statusCode >= 400;
   if (isFailure && random() < 0.5) {
     const exception = isNetworkError
       ? { type: 'TypeError', message: 'Failed to fetch' }

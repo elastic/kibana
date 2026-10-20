@@ -585,6 +585,51 @@ describe('edotBrowser', () => {
       }
     });
 
+    it('links fetch and XHR resource timing entries to their span', () => {
+      const docs = Array.from({ length: 10 }, (_, seed) => createSession({ seed })).flat();
+      let pairs = 0;
+
+      docs.forEach((doc, index) => {
+        if (!isSpan(doc) || doc.attributes['http.response.status_code'] === undefined) {
+          return;
+        }
+        pairs++;
+        expect(docs[index + 1]).toMatchObject({
+          event_name: 'browser.resource_timing',
+          trace_id: doc.trace_id,
+          span_id: doc.span_id,
+        });
+      });
+      expect(pairs).toBeGreaterThan(10);
+      docs
+        .filter(
+          (doc) =>
+            'event_name' in doc &&
+            doc.event_name === 'browser.resource_timing' &&
+            !['fetch', 'xmlhttprequest'].includes(
+              String(doc.attributes?.['browser.resource_timing.initiator_type'])
+            )
+        )
+        .forEach((doc) => expect(doc).not.toHaveProperty('trace_id'));
+    });
+
+    it('types network errors like the fetch and XHR instrumentations', () => {
+      const health = { ...HEALTH_PROFILES.healthy, networkErrorRate: 0.5 };
+      const spans = Array.from({ length: 20 }, (_, seed) => createSession({ seed, health }))
+        .flat()
+        .filter(isSpan)
+        .filter(({ attributes }) => attributes['http.response.status_code'] === undefined);
+      const errorTypes = (instrumentation: string) =>
+        new Set(
+          spans
+            .filter(({ scope }) => scope.name.endsWith(`/${instrumentation}`))
+            .map(({ attributes }) => attributes['error.type'])
+        );
+
+      expect([...errorTypes('fetch')]).toEqual(['TypeError']);
+      expect([...errorTypes('xhr')]).toEqual(['Error']);
+    });
+
     it('timestamps web vitals like the instrumentation', () => {
       for (let seed = 1; seed <= 30; seed++) {
         const docs = createSession({ seed, pageViews: 1, health: HEALTH_PROFILES.critical });

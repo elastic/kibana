@@ -16,4 +16,11 @@ export class EdotBrowserLog extends OtelLog {
     this.fields.observed_timestamp = time;
     return this;
   }
+
+  /** Links the record to a span, like resource timing entries of instrumented fetch/XHR calls. */
+  traceContext({ traceId, spanId }: { traceId: string; spanId: string }) {
+    this.fields.trace_id = traceId;
+    this.fields.span_id = spanId;
+    return this;
+  }
 }
