@@ -198,12 +198,20 @@ const MinimapStepRow = React.memo(
             />
             <EuiScreenReaderOnly>
               <span>
-                {severityInfo.isOwn
-                  ? i18n.translate('workflows.stepMinimap.stepHasErrors', {
-                      defaultMessage: 'has errors',
+                {severityInfo.severity === 'error'
+                  ? severityInfo.isOwn
+                    ? i18n.translate('workflows.stepMinimap.stepHasErrors', {
+                        defaultMessage: 'has errors',
+                      })
+                    : i18n.translate('workflows.stepMinimap.stepContainsErrors', {
+                        defaultMessage: 'contains steps with errors',
+                      })
+                  : severityInfo.isOwn
+                  ? i18n.translate('workflows.stepMinimap.stepHasWarnings', {
+                      defaultMessage: 'has warnings',
                     })
-                  : i18n.translate('workflows.stepMinimap.stepContainsErrors', {
-                      defaultMessage: 'contains steps with errors',
+                  : i18n.translate('workflows.stepMinimap.stepContainsWarnings', {
+                      defaultMessage: 'contains steps with warnings',
                     })}
               </span>
             </EuiScreenReaderOnly>
