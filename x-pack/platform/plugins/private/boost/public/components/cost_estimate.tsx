@@ -18,16 +18,10 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { BoostProfileType } from '../../common/types';
 import type { CostImpact, VcuRange } from '../../common/vcu_estimate';
-import {
-  COST_DISCLAIMER,
-  formatCostRange,
-  formatSize,
-  getCostRangeLabel,
-  getVcuRangeText,
-  roundVcus,
-} from './cost_format';
+import { COST_DISCLAIMER, formatCost, formatSize, getVcusText, roundVcus } from './cost_format';
 import { DataStreamTimeline } from './data_stream_timeline';
 import { formatDataSourceCount } from './format';
 
@@ -56,42 +50,41 @@ interface ShownEstimate {
   type: BoostProfileType;
 }
 
-interface RangeChangeIndicatorProps {
-  range: VcuRange;
-  savedRange: VcuRange;
+interface ChangeIndicatorProps {
+  end: keyof VcuRange;
+  vcus: number;
+  savedVcus: number;
 }
 
-/** Whether a range moved up (costs more) or down (costs less) from today's, led by its peak. */
-const RangeChangeIndicator = ({ range, savedRange }: RangeChangeIndicatorProps) => {
-  const isHigher =
-    range.atPeak !== savedRange.atPeak
-      ? range.atPeak > savedRange.atPeak
-      : range.atRest > savedRange.atRest;
-  const savedCost = formatCostRange(savedRange);
+/** Whether one end of the range moved up (costs more) or down (costs less) from today's. */
+const ChangeIndicator = ({ end, vcus, savedVcus }: ChangeIndicatorProps) => {
+  const isHigher = vcus > savedVcus;
+  const savedCost = formatCost(savedVcus);
 
   return (
     <EuiIconTip
       type={isHigher ? 'sortUp' : 'sortDown'}
       color={isHigher ? 'danger' : 'success'}
+      // A flex anchor sizes to the icon, so the row's flex alignment centers it.
       display="flex"
-      title={i18n.translate('xpack.boost.costEstimate.previousRangeTitle', {
+      title={i18n.translate('xpack.boost.costEstimate.previousTitle', {
         defaultMessage: 'Previously',
       })}
       content={
         <>
           <div>{savedCost}</div>
-          <div>{getVcuRangeText(savedRange)}</div>
+          <div>{getVcusText(savedVcus)}</div>
         </>
       }
       aria-label={
         isHigher
-          ? i18n.translate('xpack.boost.costEstimate.rangeHigherThanSaved', {
-              defaultMessage: 'Up from {cost}',
-              values: { cost: savedCost },
+          ? i18n.translate('xpack.boost.costEstimate.higherThanSaved', {
+              defaultMessage: '{end, select, atRest {At rest} other {At peak}}, up from {cost}',
+              values: { end, cost: savedCost },
             })
-          : i18n.translate('xpack.boost.costEstimate.rangeLowerThanSaved', {
-              defaultMessage: 'Down from {cost}',
-              values: { cost: savedCost },
+          : i18n.translate('xpack.boost.costEstimate.lowerThanSaved', {
+              defaultMessage: '{end, select, atRest {At rest} other {At peak}}, down from {cost}',
+              values: { end, cost: savedCost },
             })
       }
     />
@@ -99,42 +92,83 @@ const RangeChangeIndicator = ({ range, savedRange }: RangeChangeIndicatorProps) 
 };
 
 interface EstimateValueProps {
+  end: keyof VcuRange;
+  /** The end's search VCUs, rounded as shown. */
+  vcus: number;
+  /** Today's, when there's a change to show. */
+  savedVcus?: number;
+}
+
+/** One end of the range: its cost and what it is, any change indicator, and its VCUs below. */
+const EstimateValue = ({ end, vcus, savedVcus }: EstimateValueProps) => (
+  <div data-test-subj={`boostCostEstimate-${end}`}>
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiText size="s">
+          {end === 'atRest' ? (
+            <FormattedMessage
+              id="xpack.boost.costEstimate.atRestValue"
+              defaultMessage="{cost} at rest"
+              values={{ cost: <strong>{formatCost(vcus)}</strong> }}
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.boost.costEstimate.atPeakValue"
+              defaultMessage="{cost} at peak"
+              values={{ cost: <strong>{formatCost(vcus)}</strong> }}
+            />
+          )}
+        </EuiText>
+      </EuiFlexItem>
+      {savedVcus !== undefined && savedVcus !== vcus && (
+        <EuiFlexItem grow={false}>
+          <ChangeIndicator end={end} vcus={vcus} savedVcus={savedVcus} />
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
+    <EuiText size="xs" color="subdued">
+      {getVcusText(vcus)}
+    </EuiText>
+  </div>
+);
+
+interface EstimateValuesProps {
   estimate: VcuRange;
   comparison?: VcuRange;
 }
 
-/** The cost range, from at rest to at peak, with any change indicator, and its VCUs below. */
-const EstimateValue = ({ estimate, comparison }: EstimateValueProps) => {
-  const range = { atRest: roundVcus(estimate.atRest), atPeak: roundVcus(estimate.atPeak) };
-  const savedRange = comparison && {
-    atRest: roundVcus(comparison.atRest),
-    atPeak: roundVcus(comparison.atPeak),
-  };
-  const hasChanged =
-    savedRange !== undefined &&
-    (savedRange.atRest !== range.atRest || savedRange.atPeak !== range.atPeak);
+/**
+ * Both ends of the range, at rest and at peak, side by side with a divider between, each with its
+ * own change indicator, since they can move in opposite directions.
+ */
+const EstimateValues = ({ estimate, comparison }: EstimateValuesProps) => {
+  const { euiTheme } = useEuiTheme();
+  const renderValue = (end: keyof VcuRange) => (
+    <EstimateValue
+      end={end}
+      vcus={roundVcus(estimate[end])}
+      savedVcus={comparison && roundVcus(comparison[end])}
+    />
+  );
 
   return (
-    <div data-test-subj="boostCostEstimate-range">
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiText size="s">
-            <strong aria-hidden={true}>{formatCostRange(range)}</strong>
-            <EuiScreenReaderOnly>
-              <span>{getCostRangeLabel(range)}</span>
-            </EuiScreenReaderOnly>
-          </EuiText>
-        </EuiFlexItem>
-        {hasChanged && savedRange && (
-          <EuiFlexItem grow={false}>
-            <RangeChangeIndicator range={range} savedRange={savedRange} />
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-      <EuiText size="xs" color="subdued">
-        {getVcuRangeText(range)}
-      </EuiText>
-    </div>
+    <EuiFlexGroup
+      // 16px around the divider, between EUI's 12px and 24px gutters.
+      gutterSize="none"
+      alignItems="flexStart"
+      responsive={false}
+      wrap
+      css={{ gap: euiTheme.size.base }}
+    >
+      <EuiFlexItem grow={false}>{renderValue('atRest')}</EuiFlexItem>
+      {/* Decorative divider, as tall as the values beside it; EUI has no vertical rule. */}
+      <EuiFlexItem
+        grow={false}
+        aria-hidden={true}
+        css={{ alignSelf: 'stretch', borderInlineStart: euiTheme.border.thin }}
+      />
+      <EuiFlexItem grow={false}>{renderValue('atPeak')}</EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 
@@ -213,6 +247,7 @@ const EstimateContent = ({
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="xs" />
       <div aria-live="polite">
         {isStale && (
           <EuiScreenReaderOnly>
@@ -223,7 +258,7 @@ const EstimateContent = ({
             </span>
           </EuiScreenReaderOnly>
         )}
-        <EstimateValue estimate={estimate} comparison={comparison} />
+        <EstimateValues estimate={estimate} comparison={comparison} />
       </div>
       {periods && (
         <>

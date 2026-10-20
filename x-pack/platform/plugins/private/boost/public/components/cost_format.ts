@@ -69,7 +69,7 @@ export const getCostText = (end: keyof VcuRange, vcus: number): string =>
       });
 
 /** A number of search VCUs, such as "1.2 VCUs". */
-const getVcusText = (vcus: number): string =>
+export const getVcusText = (vcus: number): string =>
   i18n.translate('xpack.boost.costEstimate.vcus', {
     defaultMessage: '{value} {count, plural, one {VCU} other {VCUs}}',
     values: { value: formatVcus(vcus), count: vcus },
@@ -86,13 +86,6 @@ export const formatCostRange = ({ atRest, atPeak }: VcuRange): string => {
         values: { atRest: restCost, atPeak: peakCost },
       });
 };
-
-/** A cost range per hour in words, for screen readers and tooltips. */
-export const getCostRangeLabel = ({ atRest, atPeak }: VcuRange): string =>
-  i18n.translate('xpack.boost.costFormat.costRangeLabel', {
-    defaultMessage: '{atRest} at rest to {atPeak} at peak',
-    values: { atRest: formatCost(roundVcus(atRest)), atPeak: formatCost(roundVcus(atPeak)) },
-  });
 
 /** A range of search VCUs, such as "1.2–34 VCUs". */
 export const getVcuRangeText = ({ atRest, atPeak }: VcuRange): string => {

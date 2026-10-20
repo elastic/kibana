@@ -264,7 +264,7 @@ describe('RuleFlyout estimate', () => {
     expect(getEstimate()).toHaveTextContent('1 index · 4 GB');
     expect(getEstimate()).toHaveAttribute('data-shown', 'true');
     expect(getEstimate()).toHaveAttribute('data-stale', 'false');
-    expect(screen.getByTestId('boostCostEstimate-range')).toBeInTheDocument();
+    expect(screen.getByTestId('boostCostEstimate-atRest')).toBeInTheDocument();
     expect(screen.queryByTestId('boostCostEstimateTimeline')).not.toBeInTheDocument();
   });
 
@@ -284,7 +284,7 @@ describe('RuleFlyout estimate', () => {
       renderFlyout(defaultDataStreamsRule);
 
       expect(getEstimate()).toHaveTextContent('1 data stream · 3 GB');
-      expect(screen.getByTestId('boostCostEstimate-range')).toBeInTheDocument();
+      expect(screen.getByTestId('boostCostEstimate-atRest')).toBeInTheDocument();
       expect(screen.getByTestId('boostCostEstimateTimeline-recent')).toHaveTextContent(
         'Recent1 GB'
       );
@@ -363,7 +363,7 @@ describe('RuleFlyout estimate', () => {
     expect(getEstimate()).toHaveAttribute('data-shown', 'true');
     expect(getEstimate()).toHaveAttribute('data-stale', 'false');
     // A new rule has nothing of its own to compare with, so there's no change to show.
-    expect(screen.queryByText(/^(Up|Down) /)).not.toBeInTheDocument();
+    expect(screen.queryByText(/(up|down) from/)).not.toBeInTheDocument();
 
     await userEvent.clear(getPattern());
     await userEvent.type(getPattern(), 'nothing-*');
@@ -383,8 +383,40 @@ describe('RuleFlyout estimate', () => {
     expect(getEstimate()).toHaveAttribute('data-shown', 'true');
     expect(getEstimate()).toHaveTextContent('0 indices · 0 GB');
     expect(getEstimate()).toHaveTextContent('$0.00 at rest');
-    // EUI's test build renders an icon's label as its text.
-    expect(screen.getAllByText(/^Down /).length).toBeGreaterThan(0);
+    // Each end has its own indicator. EUI's test build renders an icon's label as its text.
+    expect(screen.getByText(/^At rest, down from/)).toBeInTheDocument();
+    expect(screen.getByText(/^At peak, down from/)).toBeInTheDocument();
+  });
+
+  describe('with a profile whose min boost is higher but max boost lower', () => {
+    const profiles = state.profiles;
+    const steadySearch: BoostProfile = {
+      name: 'steady-search',
+      type: 'indices',
+      is_builtin: false,
+      min_boost: 2,
+      max_boost: 3,
+      high_availability: 'none',
+      prewarm: false,
+      pinned: false,
+    };
+    beforeEach(() => {
+      state.profiles = [...profiles, steadySearch];
+    });
+    afterEach(() => {
+      state.profiles = profiles;
+    });
+
+    it('shows each end moving its own way', async () => {
+      const { getInput, blur } = renderFlyout();
+
+      await userEvent.click(getInput());
+      await userEvent.keyboard('{Control>}a{/Control}steady-search');
+      await blur();
+
+      expect(screen.getByText(/^At rest, up from/)).toBeInTheDocument();
+      expect(screen.getByText(/^At peak, down from/)).toBeInTheDocument();
+    });
   });
 
   it("estimates the rule's targets with a profile being created for it", async () => {
