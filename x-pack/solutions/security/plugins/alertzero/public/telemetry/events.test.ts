@@ -138,7 +138,7 @@ describe('AlertZero UI events', () => {
     [ALERTZERO_UI_EVENTS.ErrorShown, 'error_class', UI_ERROR_CLASSES],
     [ALERTZERO_UI_EVENTS.ErrorShown, 'surface', UI_ERROR_SURFACES],
   ] as const)(
-    'keeps the full %s %s vocabulary in the schema and the README',
+    'lists the whole %s %s vocabulary in the schema and the README',
     (eventType, field, values) => {
       const [, { _meta }] = fieldsOf(eventType).find(([name]) => name === field) ?? [
         field,
@@ -151,4 +151,24 @@ describe('AlertZero UI events', () => {
       }).toEqual({ readme: [], schema: [] });
     }
   );
+
+  it.each([
+    [
+      ALERTZERO_UI_EVENTS.QueueFiltered,
+      'filter_type',
+      ['status', 'assignee', 'type', 'time_range', 'other'],
+    ],
+    [ALERTZERO_UI_EVENTS.BriefCardClicked, 'conversation_type', ['escalation']],
+    [ALERTZERO_UI_EVENTS.ErrorShown, 'surface', ['escalations']],
+  ] as const)('lists no %s %s value that no UI sends yet', (eventType, field, unsentValues) => {
+    const [, { _meta }] = fieldsOf(eventType).find(([name]) => name === field) ?? [
+      field,
+      { _meta: { description: '' } },
+    ];
+
+    expect({
+      readme: unsentValues.filter((value) => readmeSection(eventType).includes(`\`${value}\``)),
+      schema: unsentValues.filter((value) => _meta.description.includes(`\`${value}\``)),
+    }).toEqual({ readme: [], schema: [] });
+  });
 });

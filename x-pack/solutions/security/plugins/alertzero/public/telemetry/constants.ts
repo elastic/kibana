@@ -23,20 +23,13 @@ export const QUEUE_SIZE_BUCKETS = ['0', '1_10', '11_50', '51_200', 'gt_200', 'un
 
 export type QueueSizeBucket = (typeof QUEUE_SIZE_BUCKETS)[number];
 
-/** The epic's queue filter and sort types. Only `impact` has a UI today. */
-export const QUEUE_FILTER_TYPES = [
-  'status',
-  'assignee',
-  'type',
-  'time_range',
-  'impact',
-  'other',
-] as const;
+/** The queue filters and sorts the UI has today; the epic's others are added with their UI. */
+export const QUEUE_FILTER_TYPES = ['impact'] as const;
 
 export type QueueFilterType = (typeof QUEUE_FILTER_TYPES)[number];
 
-/** The conversations a brief card can open. Only the queue's `investigation` cards report today. */
-export const BRIEF_CARD_CONVERSATION_TYPES = ['investigation', 'escalation'] as const;
+/** The conversations a brief card can open; `escalation` is added when its page reports clicks. */
+export const BRIEF_CARD_CONVERSATION_TYPES = ['investigation'] as const;
 
 export type BriefCardConversationType = (typeof BRIEF_CARD_CONVERSATION_TYPES)[number];
 
@@ -74,7 +67,6 @@ export const UI_ERROR_SURFACES = [
   'onboarding',
   'watch_detail',
   'watch_settings',
-  'escalations',
 ] as const;
 
 export type UiErrorSurface = (typeof UI_ERROR_SURFACES)[number];

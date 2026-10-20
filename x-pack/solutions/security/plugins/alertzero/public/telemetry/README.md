@@ -7,7 +7,7 @@ The four events are registered when the app first mounts (`registerAlertZeroUiEv
 ## Rules
 
 - **No content.** No entity ids or names, no conversation, proposal or alert text, no error messages, no free text. Every field is a closed enum, a boolean or a small integer.
-- **Full vocabularies, honest values.** Each schema keeps the epic's full list of values, so a dashboard built from the epic works unchanged. The code sends only the values whose UI exists today; the values waiting on UI are listed below.
+- **Only values the UI sends.** Each vocabulary lists only the values a UI reports today. The epic names more (other queue filters, Escalation cards and errors), and each is added with its UI, as a new value of the same `keyword` field.
 - **Once per occurrence.** A page visit, a click or a toast reports once. A callout or error prompt reports when it appears, not on every re-render while it stays visible, and again only after it has gone away and come back. A request that keeps failing is one occurrence: a query without data drops its error while a poll or focus refetch retries it, so the prompt hides for a moment, but it reports again only once a refetch settles without the error. Ref latches keep React StrictMode's repeated effects from reporting twice.
 - **Tests.** `events.test.ts` checks every payload against a dev-mode analytics client (`createAnalytics({ isDev: true })`), which throws on a schema mismatch or an undeclared field. The hooks and the queue page have their own tests for the latches.
 
@@ -28,9 +28,9 @@ The user set a queue filter or sort, including switching from one value to anoth
 
 | Field | Type | Description |
 |---|---|---|
-| `filter_type` | keyword | `status`, `assignee`, `type`, `time_range`, `impact` or `other` |
+| `filter_type` | keyword | `impact` (the Impact entity pills), the queue's only filter today |
 
-Sent today: `impact` (the Impact entity pills). Waiting on UI: `status`, `assignee`, `type`, `time_range` and `other`, because the queue has no other filter or sort control.
+The epic's status, assignee, type, time range and other filter types are added when the queue has those controls.
 
 ### `alertzero_ui_brief_card_clicked`
 
@@ -38,12 +38,12 @@ A queue card was clicked open into the Investigation flyout. A flyout opened fro
 
 | Field | Type | Description |
 |---|---|---|
-| `conversation_type` | keyword | `investigation` or `escalation` |
+| `conversation_type` | keyword | `investigation` |
 | `has_pending_proposal` | boolean | Whether the card's proposal was still `pending` |
 | `position_in_list` | long | Zero-based position of the card in its queue section (`section`), after the Impact filter |
 | `section` | keyword | The queue section the card was rendered in: `respond`, `investigate`, `configure` or `closed` |
 
-Sent today: `investigation`. Waiting on UI: `escalation`, for cards on the Escalations page, which doesn't report clicks yet.
+Cards on the Escalations page don't report clicks yet; an escalation value is added when they do.
 
 ### `alertzero_ui_error_shown`
 
@@ -52,7 +52,7 @@ An error toast, callout or error prompt was shown. The class is a fixed mapping,
 | Field | Type | Description |
 |---|---|---|
 | `error_class` | keyword | `network` (no response), `bad_request` (400), `unauthorized` (401), `forbidden` (403), `not_found` (404), `timeout` (408), `conflict` (409), `rate_limited` (429), `server` (5xx), `partial_failure`, `worker_scan_failed`, `clipboard` or `unknown` |
-| `surface` | keyword | `queue`, `flyout`, `onboarding`, `watch_detail`, `watch_settings` or `escalations` |
+| `surface` | keyword | `queue`, `flyout`, `onboarding`, `watch_detail` or `watch_settings` |
 
 Where it is sent:
 
@@ -69,4 +69,4 @@ Where it is sent:
 | The Watch failed to load or was not found (`watch_detail.tsx`); switching to another Watch starts a new occurrence | `watch_detail` | From the error, or `not_found` |
 | The Workers failed to load on a Watch (`watch_detail.tsx`) | `watch_detail` | From the error |
 
-Not sent: form validation messages (an invalid trigger amount), and the read-only and permission notices, which describe access rather than an error. Nor is a failure to set up a Worker's service account (the onboarding toast, and the inline error on the Watch settings page): AlertZero gets it as a message, with no HTTP status to classify. Any other per-Worker save error shown inline on the Watch settings page is the same failure as the save toast, so only the toast reports. Waiting on UI: `escalations`, whose page shows no AlertZero error of its own yet.
+Not sent: form validation messages (an invalid trigger amount), and the read-only and permission notices, which describe access rather than an error. Nor is a failure to set up a Worker's service account (the onboarding toast, and the inline error on the Watch settings page): AlertZero gets it as a message, with no HTTP status to classify. Any other per-Worker save error shown inline on the Watch settings page is the same failure as the save toast, so only the toast reports. The Escalations page shows no AlertZero error of its own yet, so it has no surface value.
