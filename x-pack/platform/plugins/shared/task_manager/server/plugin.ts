@@ -38,6 +38,7 @@ import type { TaskManagerConfig } from './config';
 import type { Middleware } from './lib/middleware';
 import { createInitialMiddleware, addMiddlewareToChain } from './lib/middleware';
 import { removeIfExists } from './lib/remove_if_exists';
+import { setResearchTaskDefinitionSource } from './lib/research_runner_override';
 import {
   setupSavedObjects,
   BACKGROUND_TASK_NODE_SO_NAME,
@@ -542,6 +543,7 @@ export class TaskManagerPlugin
     ).catch(() => {});
     scheduleMarkRemovedTasksAsUnrecognizedDefinition(this.logger, taskScheduling).catch(() => {});
 
+    setResearchTaskDefinitionSource(this.definitions);
     this.startContract = {
       fetch: (opts: SearchOpts): Promise<FetchResult> => taskStore.fetch(opts),
       aggregate: (opts: AggregationOpts): Promise<estypes.SearchResponse<ConcreteTaskInstance>> =>

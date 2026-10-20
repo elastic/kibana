@@ -24,7 +24,10 @@ import type { Middleware } from '../lib/middleware';
 import type { Result } from '../lib/result_type';
 import { asErr, asOk, eitherAsync, isErr, isOk, mapErr, mapOk, unwrap } from '../lib/result_type';
 import { getExecutionContextRunner } from '../lib/execution_context';
-import { createTaskRunnerWithResearchOverride } from '../lib/research_runner_override';
+import {
+  consumeCollateralReschedule,
+  createTaskRunnerWithResearchOverride,
+} from '../lib/research_runner_override';
 import type { TaskMarkRunning, TaskRun, TaskTiming, TaskManagerStat } from '../task_events';
 import {
   asTaskRunEvent,
@@ -853,8 +856,10 @@ export class TaskManagerRunner implements TaskRunner {
   ): Result<SuccessfulRunResult, FailedTaskResult> => {
     const { state, error } = failureResult;
     const { schedule, attempts } = this.instance.task;
+    const collateral = consumeCollateralReschedule(this.instance.task.id, error);
+    const attemptsForRetry = collateral.refunded ? Math.max(attempts - 1, 0) : attempts;
 
-    if (this.shouldTryToScheduleRetry() && !isUnrecoverableError(error)) {
+    if ((this.shouldTryToScheduleRetry() || collateral.refunded) && !isUnrecoverableError(error)) {
       // if we're retrying, keep the number of attempts
 
       let reschedule:
@@ -869,13 +874,13 @@ export class TaskManagerRunner implements TaskRunner {
         reschedule = { schedule };
       } else {
         // when result.error is truthy, then we're retrying because it failed
-        reschedule = { runAt: getRetryDate({ attempts, error }) };
+        reschedule = { runAt: getRetryDate({ attempts: attemptsForRetry, error }) };
       }
 
       if (reschedule.runAt || reschedule.schedule) {
         return asOk({
           state,
-          attempts,
+          attempts: attemptsForRetry,
           ...reschedule,
         });
       }
