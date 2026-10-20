@@ -1640,10 +1640,13 @@ module.exports = {
         'no-unused-vars': 'off',
         'react/prop-types': 'off',
         // The `recommended` presets above re-enable these rules; they run in oxlint instead.
+        'constructor-super': 'off',
         'no-cond-assign': 'off',
+        'no-const-assign': 'off',
         'no-debugger': 'off',
         'no-empty': 'off',
         'no-unused-labels': 'off',
+        'no-with': 'off',
         'use-isnan': 'off',
         'react/jsx-no-undef': 'off',
         'react/no-is-mounted': 'off',

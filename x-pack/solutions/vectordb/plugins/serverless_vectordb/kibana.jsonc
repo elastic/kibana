@@ -17,6 +17,7 @@
       "vectordb"
     ],
     "requiredPlugins": [
+      "agentBuilder",
       "dataViews",
       "elasticsearchHome",
       "navigation",
