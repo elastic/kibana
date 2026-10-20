@@ -36,13 +36,21 @@ export const registerAttachments = async (
   agentBuilder: AgentBuilderPluginSetup,
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger,
-  experimentalFeatures: ExperimentalFeatures
+  experimentalFeatures: ExperimentalFeatures,
+  kibanaVersion: string
 ) => {
   agentBuilder.attachments.registerType(createAlertAttachmentType());
   agentBuilder.attachments.registerType(createBulkAlertsAttachmentType(core, logger));
   agentBuilder.attachments.registerType(createEntityAttachmentType());
   agentBuilder.attachments.registerType(createEntityAnalyticsDashboardAttachmentType());
-  agentBuilder.attachments.registerType(createEntityAnalyticsAiBriefAttachmentType());
+  agentBuilder.attachments.registerType(
+    createEntityAnalyticsAiBriefAttachmentType({
+      core,
+      logger,
+      experimentalFeatures,
+      kibanaVersion,
+    })
+  );
   agentBuilder.attachments.registerType(createEntityGraphAttachmentType());
   if (experimentalFeatures.riskScoreHistoryEnabled) {
     agentBuilder.attachments.registerType(createEntityRiskScoreHistoryAttachmentType());

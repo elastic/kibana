@@ -7,88 +7,65 @@
 
 import { errors } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
-import type {
-  BuiltinToolDefinition,
-  ToolAvailabilityContext,
-  ToolHandlerStandardReturn,
-} from '@kbn/agent-builder-server';
-import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
+import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server';
+import type { BuiltinAttachmentBoundedTool } from '@kbn/agent-builder-server/attachments';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { isInferenceError } from '@kbn/inference-common';
-import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 import type { ExperimentalFeatures } from '../../../../common';
-import { EntityAnalyticsScope } from '../../../../common/entity_analytics/ai_brief/scope';
+import type { EntityAnalyticsScope } from '../../../../common/entity_analytics/ai_brief/scope';
 import { RiskScoreDataClient } from '../../../lib/entity_analytics/risk_score/risk_score_data_client';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
-import { securityTool } from '../constants';
-import { BRIEF_RESULT_INSTRUCTIONS, BRIEF_TOOL_DESCRIPTION, generateBrief } from './brief';
-import { getEntityAnalyticsToolAvailability } from './entity_analytics_availability';
+import { BRIEF_RESULT_INSTRUCTIONS, generateBrief, getBriefToolDescription } from './brief';
 import { checkResolutionAccess } from './resolution/check_resolution_access';
 import { createToolTelemetryTracker } from './tool_telemetry_tracker';
 
-export const SECURITY_GENERATE_ENTITY_ANALYTICS_BRIEF_TOOL_ID = securityTool(
-  'generate_entity_analytics_brief'
-);
+/** The tool's name in logs and telemetry; each captured view gets its own tool id. */
+const BRIEF_TOOL_NAME = 'security.generate_entity_analytics_brief';
 
-const NO_SCOPE_MESSAGE =
-  'No valid Entity Analytics view is attached, so no brief was generated. Open the brief from the Entity Analytics page.';
 const ENTITY_READ_FAILED_MESSAGE = "Entity details couldn't be read, so no brief was generated.";
 const MODEL_FAILED_MESSAGE = 'The AI model call failed, so no brief was generated.';
 const FAILED_MESSAGE = "The brief couldn't be generated. Try again.";
 
-const schema = lazySchema(() =>
-  z.object({
-    scopeAttachmentId: z
-      .string()
-      .min(1)
-      .max(512)
-      .optional()
-      .describe(
-        `Id of the ${SecurityAgentBuilderAttachments.entityAnalyticsAiBrief} attachment to brief on. Omit it to use the most recently attached view.`
-      ),
-  })
-);
+export interface BriefToolDeps {
+  core: SecuritySolutionPluginCoreSetupDependencies;
+  logger: Logger;
+  experimentalFeatures: ExperimentalFeatures;
+  kibanaVersion: string;
+}
 
-/** Builds the tool that turns a captured Entity Analytics view into the AI brief. */
-export const generateEntityAnalyticsBriefTool = (
-  core: SecuritySolutionPluginCoreSetupDependencies,
-  logger: Logger,
-  experimentalFeatures: ExperimentalFeatures,
-  kibanaVersion: string
-): BuiltinToolDefinition<typeof schema> => ({
-  id: SECURITY_GENERATE_ENTITY_ANALYTICS_BRIEF_TOOL_ID,
+/** The id of the brief tool bound to a captured view. */
+export const getBriefToolId = (attachmentId: string): string =>
+  `generate_entity_analytics_brief_${attachmentId.replace(/[^a-zA-Z0-9_]/g, '_')}`;
+
+/**
+ * The tool that turns one captured Entity Analytics view into the AI brief. It is bound to the view's
+ * attachment, so it only exists in conversations that hold a view.
+ */
+export const createGenerateBriefTool = ({
+  core,
+  logger,
+  experimentalFeatures,
+  kibanaVersion,
+  attachmentId,
+  scope,
+}: BriefToolDeps & {
+  attachmentId: string;
+  scope: EntityAnalyticsScope;
+}): BuiltinAttachmentBoundedTool => ({
+  id: getBriefToolId(attachmentId),
   type: ToolType.builtin,
-  description: BRIEF_TOOL_DESCRIPTION,
-  schema,
-  tags: ['security', 'entity-analytics'],
-  annotations: {
-    title: 'Generate Entity Analytics brief',
-    readOnlyHint: true,
-    destructiveHint: false,
-    idempotentHint: true,
-    openWorldHint: false,
-  },
+  description: getBriefToolDescription(attachmentId),
+  schema: z.object({}),
   excludeFromMcp: true,
-  availability: {
-    cacheMode: 'space',
-    handler: async ({ request, spaceId }: ToolAvailabilityContext) =>
-      getEntityAnalyticsToolAvailability({
-        core,
-        request,
-        spaceId,
-        experimentalFeatures,
-        logger,
-      }),
-  },
   handler: async (
-    { scopeAttachmentId },
+    _params,
     { request, spaceId, esClient, savedObjectsClient, modelProvider, attachments }
   ) => {
     const telemetryTracker = createToolTelemetryTracker({
       core,
-      toolId: SECURITY_GENERATE_ENTITY_ANALYTICS_BRIEF_TOOL_ID,
+      toolId: BRIEF_TOOL_NAME,
       spaceId,
       actionType: 'read',
     });
@@ -103,16 +80,9 @@ export const generateEntityAnalyticsBriefTool = (
         telemetryTracker.recordFailure(access.result.data.message);
         return { results: [access.result] };
       }
-      const parsedScope = EntityAnalyticsScope.safeParse(
-        getScopeData(attachments, scopeAttachmentId)
-      );
-      if (!parsedScope.success) {
-        telemetryTracker.recordFailure(NO_SCOPE_MESSAGE);
-        return errorResult(NO_SCOPE_MESSAGE);
-      }
       const { inferenceClient } = await modelProvider.getDefaultModel();
       const { brief, priorityCount } = await generateBrief({
-        scope: parsedScope.data,
+        scope,
         spaceId,
         esClient: esClient.asCurrentUser,
         inferenceClient,
@@ -140,7 +110,7 @@ export const generateEntityAnalyticsBriefTool = (
       };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      logger.error(`${SECURITY_GENERATE_ENTITY_ANALYTICS_BRIEF_TOOL_ID} failed: ${errorMessage}`);
+      logger.error(`${BRIEF_TOOL_NAME} failed: ${errorMessage}`);
       telemetryTracker.recordFailure(errorMessage);
       return errorResult(getFailureMessage(error));
     } finally {
@@ -148,24 +118,6 @@ export const generateEntityAnalyticsBriefTool = (
     }
   },
 });
-
-/** The named scope attachment's current data, or the most recently added active scope's. */
-const getScopeData = (attachments: AttachmentStateManager, scopeAttachmentId?: string): unknown => {
-  const attachmentId =
-    scopeAttachmentId ??
-    attachments
-      .getActive()
-      .filter(({ type }) => type === SecurityAgentBuilderAttachments.entityAnalyticsAiBrief)
-      .at(-1)?.id;
-  if (attachmentId === undefined) {
-    return undefined;
-  }
-  const attachment = attachments.get(attachmentId);
-  if (attachment?.type !== SecurityAgentBuilderAttachments.entityAnalyticsAiBrief) {
-    return undefined;
-  }
-  return attachment.data.data;
-};
 
 /** A plain message for the user: Entity Store, model, or anything else. Details go to the log. */
 const getFailureMessage = (error: unknown): string => {

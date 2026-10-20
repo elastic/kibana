@@ -21,7 +21,7 @@
 export { generateBrief } from './generate_brief';
 export { describeScopeForAgent } from './describe_scope';
 export {
+  ATTACHMENT_AGENT_DESCRIPTION,
   BRIEF_RESULT_INSTRUCTIONS,
-  BRIEF_TOOL_DESCRIPTION,
-  getAttachmentAgentDescription,
+  getBriefToolDescription,
 } from './prompts';

@@ -38,7 +38,7 @@ const SPACE_ID = 'brief-scout-space';
 const SPACE_USER_ID = 'user:brief-scout-space-user';
 
 apiTest.describe(
-  'Entity Analytics AI brief - security.generate_entity_analytics_brief',
+  'Entity Analytics AI brief - the brief tool bound to a captured view',
   { tag: [...tags.stateful.classic] },
   () => {
     let headers: Record<string, string>;

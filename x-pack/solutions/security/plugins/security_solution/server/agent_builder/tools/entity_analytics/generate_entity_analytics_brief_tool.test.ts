@@ -14,11 +14,11 @@ import {
 } from '../../__mocks__/test_helpers';
 import type { ExperimentalFeatures } from '../../../../common';
 import { generateBrief } from './brief';
-import { generateEntityAnalyticsBriefTool } from './generate_entity_analytics_brief_tool';
+import { createGenerateBriefTool } from './generate_entity_analytics_brief_tool';
 
 jest.mock('./brief', () => ({ ...jest.requireActual('./brief'), generateBrief: jest.fn() }));
 
-describe('generateEntityAnalyticsBriefTool', () => {
+describe('createGenerateBriefTool', () => {
   const {
     mockCore,
     mockLogger,
@@ -27,12 +27,14 @@ describe('generateEntityAnalyticsBriefTool', () => {
     mockSecurityStart,
     mockCheckPrivileges,
   } = createToolTestMocks();
-  const tool = generateEntityAnalyticsBriefTool(
-    mockCore,
-    mockLogger,
-    {} as ExperimentalFeatures,
-    '9.6.0'
-  );
+  const tool = createGenerateBriefTool({
+    core: mockCore,
+    logger: mockLogger,
+    experimentalFeatures: {} as ExperimentalFeatures,
+    kibanaVersion: '9.6.0',
+    attachmentId: 'view',
+    scope: { period: '7d', capturedAt: '2026-10-14T12:00:00.000Z', tiles: {} },
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();

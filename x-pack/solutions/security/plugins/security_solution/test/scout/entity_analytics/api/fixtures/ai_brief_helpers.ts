@@ -18,9 +18,8 @@ import { SecurityAgentBuilderAttachments } from '../../../../../common/constants
 import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
 import type { BriefDraft } from '../../../../../server/agent_builder/tools/entity_analytics/brief/prompts';
 
-const BRIEF_TOOL_ID = 'security.generate_entity_analytics_brief';
-/** The brief tool's name on the wire: Agent Builder replaces dots with underscores. */
-const BRIEF_TOOL_LLM_NAME = 'security_generate_entity_analytics_brief';
+/** The brief tool bound to the `brief-scope` attachment. */
+const BRIEF_TOOL_ID = 'generate_entity_analytics_brief_brief_scope';
 /** The inference plugin's structured-output tool, which the brief's model call forces. */
 const SUBMIT_BRIEF_TOOL_NAME = 'structuredOutput';
 const SCOPE_ATTACHMENT_ID = 'brief-scope';
@@ -116,11 +115,8 @@ export const mockBriefRound = (llmProxy: LlmProxy, draft?: BriefDraft): void => 
   void llmProxy
     .intercept({
       name: 'agent: call the brief tool',
-      when: ({ tools }) =>
-        Boolean(tools?.some(({ function: fn }) => fn.name === BRIEF_TOOL_LLM_NAME)),
-      responseMock: createToolCallMessage(BRIEF_TOOL_LLM_NAME, {
-        scopeAttachmentId: SCOPE_ATTACHMENT_ID,
-      }),
+      when: ({ tools }) => Boolean(tools?.some(({ function: fn }) => fn.name === BRIEF_TOOL_ID)),
+      responseMock: createToolCallMessage(BRIEF_TOOL_ID, {}),
     })
     .completeAfterIntercept();
   void llmProxy

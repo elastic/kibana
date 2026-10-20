@@ -11,7 +11,6 @@ import type { ExperimentalFeatures } from '../../../common';
 import { securityLabsSearchTool } from './security_labs_search_tool';
 import { attackDiscoverySearchTool } from './attack_discovery_search_tool';
 import { buildRedirectUrlTool } from './build_redirect_url_tool';
-import { generateEntityAnalyticsBriefTool } from './entity_analytics/generate_entity_analytics_brief_tool';
 import {
   addEntitiesToWatchlistTool,
   createWatchlistTool,
@@ -97,9 +96,6 @@ export const registerTools = (
   agentBuilder.tools.register(getWatchlistIdTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(removeEntitiesFromWatchlistTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(searchEntitiesTool(core, logger, experimentalFeatures));
-  agentBuilder.tools.register(
-    generateEntityAnalyticsBriefTool(core, logger, experimentalFeatures, kibanaVersion)
-  );
   agentBuilder.tools.register(
     setAssetCriticalityTool(core, logger, experimentalFeatures, kibanaVersion)
   );

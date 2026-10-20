@@ -9,14 +9,20 @@ import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { EntityAnalyticsScope } from '../../../common/entity_analytics/ai_brief/scope';
-import { SECURITY_GENERATE_ENTITY_ANALYTICS_BRIEF_TOOL_ID } from '../tools/entity_analytics/generate_entity_analytics_brief_tool';
+import type { BriefToolDeps } from '../tools/entity_analytics/generate_entity_analytics_brief_tool';
+import { createGenerateBriefTool } from '../tools/entity_analytics/generate_entity_analytics_brief_tool';
 import {
+  ATTACHMENT_AGENT_DESCRIPTION,
   describeScopeForAgent,
-  getAttachmentAgentDescription,
 } from '../tools/entity_analytics/brief';
 
-/** Attachment type for the Entity Analytics view captured by the "Generate AI brief" button. */
-export const createEntityAnalyticsAiBriefAttachmentType = (): AttachmentTypeDefinition => ({
+/**
+ * Attachment type for the Entity Analytics view captured by the "Generate AI brief" button. Each view
+ * brings its own brief tool, so the tool only exists where there is a view to brief on.
+ */
+export const createEntityAnalyticsAiBriefAttachmentType = (
+  deps: BriefToolDeps
+): AttachmentTypeDefinition => ({
   id: SecurityAgentBuilderAttachments.entityAnalyticsAiBrief,
   validate: (input) => {
     const result = EntityAnalyticsScope.safeParse(input);
@@ -32,9 +38,10 @@ export const createEntityAnalyticsAiBriefAttachmentType = (): AttachmentTypeDefi
         type: 'text',
         value: describeScopeForAgent(attachment.id, scope),
       }),
+      getBoundedTools: () => [
+        createGenerateBriefTool({ ...deps, attachmentId: attachment.id, scope }),
+      ],
     };
   },
-  getTools: () => [SECURITY_GENERATE_ENTITY_ANALYTICS_BRIEF_TOOL_ID],
-  getAgentDescription: () =>
-    getAttachmentAgentDescription(SECURITY_GENERATE_ENTITY_ANALYTICS_BRIEF_TOOL_ID),
+  getAgentDescription: () => ATTACHMENT_AGENT_DESCRIPTION,
 });
