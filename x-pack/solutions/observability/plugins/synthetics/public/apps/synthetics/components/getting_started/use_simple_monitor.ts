@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
+import {
+  FETCH_STATUS,
+  useFetcher,
+} from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
 import { useEffect } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useDispatch, useSelector } from 'react-redux-v7';

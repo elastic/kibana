@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import React from 'react';
+import { renderHook } from '@testing-library/react';
 import { useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux-v7';
-import { getHistoryFromUrl, mergeTestState, renderHookWithStore } from './hook_helpers';
+import { HookWrapper, getHistoryFromUrl, mergeTestState } from './hook_helpers';
+import type { HookWrapperProps } from './hook_helpers';
 import { mockState } from './__mocks__/synthetics_store.mock';
 
 describe('hook_helpers', () => {
@@ -33,35 +36,45 @@ describe('hook_helpers', () => {
 
     it('replaces arrays instead of merging them', () => {
       const state = mergeTestState({
-        serviceLocations: { locations: [{ id: 'a', label: 'A', url: 'u', isServiceManaged: true }] },
+        serviceLocations: {
+          locations: [{ id: 'a', label: 'A', url: 'u', isServiceManaged: true }],
+        },
       });
 
       expect(state.serviceLocations.locations).toHaveLength(1);
     });
   });
 
-  describe('renderHookWithStore', () => {
-    it('provides the router and the mock store, and returns the history in use', () => {
-      const { result, history } = renderHookWithStore(
+  describe('HookWrapper', () => {
+    const renderWithWrapper = (props: HookWrapperProps) =>
+      renderHook(
         () => ({
           location: useLocation(),
-          locations: useSelector(
-            (state: typeof mockState) => state.serviceLocations.locations
-          ),
+          locations: useSelector((state: typeof mockState) => state.serviceLocations.locations),
         }),
-        {
-          url: '/monitors?a=1',
-          state: {
-            serviceLocations: {
-              locations: [{ id: 'a', label: 'A', url: 'u', isServiceManaged: true }],
-            },
-          },
-        }
+        { wrapper: ({ children }) => <HookWrapper {...props}>{children}</HookWrapper> }
       );
 
-      expect(result.current.location.pathname).toBe('/monitors');
+    it('provides the router and the mock store', () => {
+      const { result } = renderWithWrapper({
+        url: '/monitors?a=1',
+        state: {
+          serviceLocations: {
+            locations: [{ id: 'a', label: 'A', url: 'u', isServiceManaged: true }],
+          },
+        },
+      });
+
+      expect(result.current.location).toMatchObject({ pathname: '/monitors', search: '?a=1' });
       expect(result.current.locations).toHaveLength(1);
-      expect(history.location.search).toBe('?a=1');
+    });
+
+    it('uses the given history', () => {
+      const history = getHistoryFromUrl('/given');
+
+      const { result } = renderWithWrapper({ history });
+
+      expect(result.current.location.pathname).toBe('/given');
     });
   });
 });

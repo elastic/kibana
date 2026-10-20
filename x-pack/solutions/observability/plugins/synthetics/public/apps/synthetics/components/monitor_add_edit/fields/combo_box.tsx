@@ -9,7 +9,11 @@ import React, { useState, useCallback, useMemo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiButtonIcon, EuiComboBox, EuiCopy, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { createTagsPasteHandler, getNewTags, splitTags } from '@kbn/observability-shared-plugin/public/components/tags_combo_box/tags_input';
+import {
+  createTagsPasteHandler,
+  getNewTags,
+  splitTags,
+} from '@kbn/observability-shared-plugin/public/components/tags_combo_box/tags_input';
 
 export interface FormattedComboBoxProps {
   onChange: (value: string[]) => void;

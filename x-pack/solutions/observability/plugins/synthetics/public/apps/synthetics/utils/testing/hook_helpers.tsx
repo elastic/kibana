@@ -8,8 +8,6 @@
 import type { PropsWithChildren } from 'react';
 import React, { useMemo } from 'react';
 import { Route, Router } from '@kbn/shared-ux-router';
-import type { RenderHookOptions, RenderHookResult } from '@testing-library/react';
-import { renderHook } from '@testing-library/react';
 import type { History } from 'history';
 import { createMemoryHistory } from 'history';
 import { mergeWith } from 'lodash';
@@ -85,26 +83,4 @@ export const HookWrapper = ({
       </Router>
     </MountWithReduxProvider>
   );
-};
-
-/** `renderHook` inside `HookWrapper`; the returned `history` is the one the router uses. */
-export const renderHookWithStore = <Result, Props>(
-  callback: (props: Props) => Result,
-  {
-    history,
-    path,
-    state,
-    url,
-    ...options
-  }: HookWrapperProps & Omit<RenderHookOptions<Props>, 'wrapper'> = {}
-): RenderHookResult<Result, Props> & { history: History } => {
-  const routerHistory = url ? getHistoryFromUrl(url) : history ?? createMemoryHistory();
-
-  const wrapper = ({ children }: PropsWithChildren) => (
-    <HookWrapper history={routerHistory} path={path} state={state}>
-      {children}
-    </HookWrapper>
-  );
-
-  return { ...renderHook(callback, { ...options, wrapper }), history: routerHistory };
 };
