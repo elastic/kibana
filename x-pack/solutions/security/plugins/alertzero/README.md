@@ -108,6 +108,8 @@ This is optional. AlertZero's own Watch pages work without it; it only affects w
 | Browser app `/app/alertzero` | Not registered (nav links to `alertzero` / `alertzero:*` are removed by chrome) |
 | Managed workflow **owner** | Not registered (`registerManagedWorkflowOwner` skipped) |
 | Managed workflow initialization | Not called |
+| Telemetry event types (`alertzero_*`, see [`server/telemetry/README.md`](server/telemetry/README.md)) | Not registered (`core.analytics.registerEventType` skipped) |
+| Workflow step `alertzero.reportWorkerOutcome`, the only emitter of the `alertzero_ad_worker_*` run events and the Worker Investigation-close event (see [`server/step_types/report_worker_outcome/README.md`](server/step_types/report_worker_outcome/README.md)) | Not registered, server or browser (`registerStepDefinition` skipped) |
 | Leftover installed Worker documents | Global Workflows orphan cleanup removes docs whose owner is unregistered |
 
 With the kill switch on but the advanced setting off, the Kibana feature privileges *are* registered — `features.registerKibanaFeature` cannot be scoped per space — so the `alertzero` read/write privileges appear in the Roles and Spaces pickers regardless of the per-space toggle.
