@@ -76,11 +76,11 @@ const renderHeader = (span: Span | undefined, parentTransaction?: Transaction) =
     wrapper,
   }).result.current;
 
-/** Renders the info block and badge contents, which the template would place. */
-const renderParts = ({ infoBlocks, badges }: SpanFlyoutHeaderParts) =>
+/** Renders the meta block, info block, and badge contents, which the template would place. */
+const renderParts = ({ metaBlocks, infoBlocks, badges }: SpanFlyoutHeaderParts) =>
   render(
     <>
-      {[...infoBlocks, ...badges].map((part) => (
+      {[...metaBlocks, ...infoBlocks, ...badges].map((part) => (
         <div key={part.key} data-test-subj={part.props['data-test-subj']}>
           {part.props.children}
         </div>
@@ -96,10 +96,28 @@ describe('useSpanFlyoutHeader', () => {
   it('renders span name from complete data', () => {
     const parts = renderHeader(baseSpan, baseTransaction);
 
-    expect(getTestSubjects(parts.infoBlocks)[0]).toBe('spanFlyoutInfo-name');
+    expect(getTestSubjects(parts.metaBlocks)).toEqual(['spanFlyoutInfo-name']);
 
     renderParts(parts);
     expect(screen.getByTestId('spanFlyoutInfo-name')).toHaveTextContent('SELECT *');
+  });
+
+  it('renders the request as a meta block after the name for an HTTP span', () => {
+    const httpSpan = {
+      ...baseSpan,
+      url: { original: 'https://example.com/api/products/1' },
+      http: { request: { method: 'GET' }, response: { status_code: 200 } },
+    } as unknown as Span;
+
+    const parts = renderHeader(httpSpan, baseTransaction);
+
+    expect(getTestSubjects(parts.metaBlocks)).toEqual([
+      'spanFlyoutInfo-name',
+      'spanFlyoutInfo-request',
+    ]);
+    expect(parts.metaBlocks[1].props.title).toBe('Request');
+    expect(parts.metaBlocks[1].props.children.props.fitToContainer).toBe(true);
+    expect(getTestSubjects(parts.infoBlocks)).not.toContain('spanFlyoutInfo-request');
   });
 
   it('renders N/A when span.span is missing', () => {
@@ -110,10 +128,9 @@ describe('useSpanFlyoutHeader', () => {
 
     const parts = renderHeader(spanWithoutInner);
 
-    expect(getTestSubjects(parts.infoBlocks)).toEqual([
-      'spanFlyoutInfo-name',
-      'spanFlyoutInfo-timestamp',
-    ]);
+    expect(getTestSubjects(parts.metaBlocks)).toEqual(['spanFlyoutInfo-name']);
+    expect(parts.metaBlocks[0].props.children).toBe('N/A');
+    expect(getTestSubjects(parts.infoBlocks)).toEqual(['spanFlyoutInfo-timestamp']);
     expect(parts.badges).toEqual([]);
   });
 
@@ -158,7 +175,6 @@ describe('useSpanFlyoutHeader', () => {
     const parts = renderHeader(baseSpan);
 
     expect(getTestSubjects(parts.infoBlocks)).toEqual([
-      'spanFlyoutInfo-name',
       'spanFlyoutInfo-timestamp',
       'spanFlyoutInfo-duration',
     ]);
@@ -173,6 +189,7 @@ describe('useSpanFlyoutHeader', () => {
   it('renders the generic title while the span is loading', () => {
     const parts = renderHeader(undefined);
 
+    expect(parts.metaBlocks).toEqual([]);
     expect(parts.infoBlocks).toEqual([]);
     expect(parts.badges).toEqual([]);
   });
@@ -192,10 +209,7 @@ describe('useSpanFlyoutHeader', () => {
 
     const parts = renderHeader(span, baseTransaction);
 
-    expect(getTestSubjects(parts.infoBlocks).slice(0, 2)).toEqual([
-      'spanFlyoutInfo-name',
-      'spanFlyoutInfo-dependency',
-    ]);
+    expect(getTestSubjects(parts.infoBlocks)[0]).toBe('spanFlyoutInfo-dependency');
     expect(getTestSubjects(parts.badges)).toEqual([
       'spanFlyoutBadge-type',
       'spanFlyoutBadge-subtype',

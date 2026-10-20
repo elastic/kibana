@@ -59,11 +59,11 @@ const renderHeader = (
     { wrapper }
   ).result.current;
 
-/** Renders the info block and badge contents, which the template would place. */
-const renderParts = ({ infoBlocks, badges }: TransactionFlyoutHeaderParts) =>
+/** Renders the meta block, info block, and badge contents, which the template would place. */
+const renderParts = ({ metaBlocks, infoBlocks, badges }: TransactionFlyoutHeaderParts) =>
   render(
     <>
-      {[...infoBlocks, ...badges].map((part) => (
+      {[...metaBlocks, ...infoBlocks, ...badges].map((part) => (
         <div key={part.key} data-test-subj={part.props['data-test-subj']}>
           {part.props.children}
         </div>
@@ -79,6 +79,7 @@ describe('useTransactionFlyoutHeader', () => {
   it('renders null when transaction is undefined', () => {
     const parts = renderHeader(undefined);
 
+    expect(parts.metaBlocks).toEqual([]);
     expect(parts.infoBlocks).toEqual([]);
     expect(parts.badges).toEqual([]);
   });
@@ -86,15 +87,15 @@ describe('useTransactionFlyoutHeader', () => {
   it('renders service and transaction links with complete data', () => {
     const parts = renderHeader(baseTransaction);
 
+    expect(getTestSubjects(parts.metaBlocks)).toEqual(['transactionFlyoutInfo-name']);
+    expect(parts.metaBlocks[0].props.title).toBe('Transaction');
     expect(getTestSubjects(parts.infoBlocks)).toEqual([
       'transactionFlyoutInfo-service',
-      'transactionFlyoutInfo-name',
       'transactionFlyoutInfo-timestamp',
       'transactionFlyoutInfo-duration',
     ]);
     expect(parts.infoBlocks.map((block) => block.props.title)).toEqual([
       'Service',
-      'Transaction',
       'Date',
       'Duration',
     ]);
@@ -162,7 +163,12 @@ describe('useTransactionFlyoutHeader', () => {
     } as unknown as Transaction;
 
     const urlParts = renderHeader(withUrlAndErrors, { errorCount: 2 });
-    expect(getTestSubjects(urlParts.infoBlocks)).toContain('transactionFlyoutInfo-request');
+    expect(getTestSubjects(urlParts.metaBlocks)).toEqual([
+      'transactionFlyoutInfo-name',
+      'transactionFlyoutInfo-request',
+    ]);
+    expect(urlParts.metaBlocks[1].props.title).toBe('Request');
+    expect(urlParts.metaBlocks[1].props.children.props.fitToContainer).toBe(true);
     expect(getTestSubjects(urlParts.badges)).toEqual([
       'transactionFlyoutBadge-errorCount',
       'transactionFlyoutBadge-coldStart',

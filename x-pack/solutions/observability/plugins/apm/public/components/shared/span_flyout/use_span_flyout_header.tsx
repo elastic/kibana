@@ -39,7 +39,7 @@ import {
   TRANSACTION_LABEL,
 } from '../waterfall_item_flyout/constants';
 
-const { Badge, InfoBlock } = FlyoutTemplate.Header;
+const { Badge, InfoBlock, MetaBlock } = FlyoutTemplate.Header;
 
 export const SPAN_DETAILS_LABEL = i18n.translate(
   'xpack.apm.transactionDetails.spanFlyout.spanDetailsTitle',
@@ -74,13 +74,16 @@ function formatSubtype(subtype: string | undefined) {
 }
 
 export interface SpanFlyoutHeaderParts {
+  metaBlocks: ReactElement[];
   infoBlocks: ReactElement[];
   badges: ReactElement[];
 }
 
 /**
  * Resolves the waterfall span flyout header parts for `FlyoutTemplate.Header`: the span name and
- * other summary fields as info blocks, and the status badges.
+ * request as meta blocks, the other summary fields as info blocks, and the status badges. The name
+ * and request are meta blocks because they can be long, and a meta block spans the header width
+ * where an info block gets a single grid cell.
  */
 export function useSpanFlyoutHeader({
   span,
@@ -101,7 +104,7 @@ export function useSpanFlyoutHeader({
   const { euiTheme } = useEuiTheme();
 
   if (!span) {
-    return { infoBlocks: [], badges: [] };
+    return { metaBlocks: [], infoBlocks: [], badges: [] };
   }
 
   const latencyAggregationType =
@@ -122,11 +125,31 @@ export function useSpanFlyoutHeader({
   const duration = span.span?.duration?.us;
   const composite = span.span?.composite;
 
-  const infoBlocks: ReactElement[] = [
-    <InfoBlock key="name" id="name" title={NAME_LABEL} data-test-subj="spanFlyoutInfo-name">
+  const metaBlocks: ReactElement[] = [
+    <MetaBlock key="name" id="name" title={NAME_LABEL} data-test-subj="spanFlyoutInfo-name">
       {spanName}
-    </InfoBlock>,
+    </MetaBlock>,
   ];
+
+  if (spanHttpUrl) {
+    metaBlocks.push(
+      <MetaBlock
+        key="request"
+        id="request"
+        title={REQUEST_LABEL}
+        data-test-subj="spanFlyoutInfo-request"
+      >
+        <HttpInfoSummaryItem
+          method={span.http?.request?.method || span.span?.http?.method}
+          url={spanHttpUrl}
+          status={span.http?.response?.status_code || span.span?.http?.response?.status_code}
+          fitToContainer
+        />
+      </MetaBlock>
+    );
+  }
+
+  const infoBlocks: ReactElement[] = [];
 
   if (dependencyName) {
     infoBlocks.push(
@@ -240,23 +263,6 @@ export function useSpanFlyoutHeader({
     );
   }
 
-  if (spanHttpUrl) {
-    infoBlocks.push(
-      <InfoBlock
-        key="request"
-        id="request"
-        title={REQUEST_LABEL}
-        data-test-subj="spanFlyoutInfo-request"
-      >
-        <HttpInfoSummaryItem
-          method={span.http?.request?.method || span.span?.http?.method}
-          url={spanHttpUrl}
-          status={span.http?.response?.status_code || span.span?.http?.response?.status_code}
-        />
-      </InfoBlock>
-    );
-  }
-
   const type = span.span?.type;
   const action = span.span?.action;
   const spanSubtype = formatSubtype(span.span?.subtype);
@@ -340,5 +346,5 @@ export function useSpanFlyoutHeader({
     );
   }
 
-  return { infoBlocks, badges };
+  return { metaBlocks, infoBlocks, badges };
 }

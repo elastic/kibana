@@ -62,7 +62,7 @@ export function TransactionFlyout({
   const isTransactionLoading = isPending(status);
   const transaction = isTransactionLoading ? undefined : data;
 
-  const { infoBlocks, badges } = useTransactionFlyoutHeader({
+  const { metaBlocks, infoBlocks, badges } = useTransactionFlyoutHeader({
     transaction,
     errorCount,
     rootTransactionDuration,
@@ -89,6 +89,7 @@ export function TransactionFlyout({
           title={TRANSACTION_DETAILS_LABEL}
           data-test-subj="transactionFlyoutHeader"
         >
+          {metaBlocks}
           {infoBlocks}
           {badges}
         </FlyoutTemplate.Header>

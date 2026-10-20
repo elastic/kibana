@@ -36,7 +36,7 @@ import {
   TRANSACTION_LABEL,
 } from '../waterfall_item_flyout/constants';
 
-const { Badge, InfoBlock } = FlyoutTemplate.Header;
+const { Badge, InfoBlock, MetaBlock } = FlyoutTemplate.Header;
 
 export const TRANSACTION_DETAILS_LABEL = i18n.translate(
   'xpack.apm.transactionDetails.transFlyout.transactionDetailsTitle',
@@ -54,13 +54,16 @@ const COLD_START_LABEL = i18n.translate('xpack.apm.transactionFlyout.coldStartBa
 });
 
 export interface TransactionFlyoutHeaderParts {
+  metaBlocks: ReactElement[];
   infoBlocks: ReactElement[];
   badges: ReactElement[];
 }
 
 /**
  * Resolves the waterfall transaction flyout header parts for `FlyoutTemplate.Header`: the
- * transaction name and other summary fields as info blocks, and the status badges.
+ * transaction name and request as meta blocks, the other summary fields as info blocks, and the
+ * status badges. The name and request are meta blocks because they can be long, and a meta block
+ * spans the header width where an info block gets a single grid cell.
  */
 export function useTransactionFlyoutHeader({
   transaction,
@@ -80,7 +83,7 @@ export function useTransactionFlyoutHeader({
   const { euiTheme } = useEuiTheme();
 
   if (!transaction) {
-    return { infoBlocks: [], badges: [] };
+    return { metaBlocks: [], infoBlocks: [], badges: [] };
   }
 
   const latencyAggregationType =
@@ -122,6 +125,35 @@ export function useTransactionFlyoutHeader({
   const userAgent = transaction.user_agent;
   const duration = transaction.transaction?.duration?.us;
 
+  const metaBlocks = [
+    <MetaBlock
+      key="name"
+      id="name"
+      title={TRANSACTION_LABEL}
+      data-test-subj="transactionFlyoutInfo-name"
+    >
+      {name}
+    </MetaBlock>,
+  ];
+
+  if (url) {
+    metaBlocks.push(
+      <MetaBlock
+        key="request"
+        id="request"
+        title={REQUEST_LABEL}
+        data-test-subj="transactionFlyoutInfo-request"
+      >
+        <HttpInfoSummaryItem
+          method={transaction.http?.request?.method}
+          status={transaction.http?.response?.status_code}
+          url={url}
+          fitToContainer
+        />
+      </MetaBlock>
+    );
+  }
+
   const infoBlocks = [
     <InfoBlock
       key="service"
@@ -150,14 +182,6 @@ export function useTransactionFlyoutHeader({
       )}
     </InfoBlock>,
     <InfoBlock
-      key="name"
-      id="name"
-      title={TRANSACTION_LABEL}
-      data-test-subj="transactionFlyoutInfo-name"
-    >
-      {name}
-    </InfoBlock>,
-    <InfoBlock
       key="timestamp"
       id="timestamp"
       title={DATE_LABEL}
@@ -178,23 +202,6 @@ export function useTransactionFlyoutHeader({
         <Duration
           duration={duration}
           parent={{ duration: rootTransactionDuration, type: 'trace' }}
-        />
-      </InfoBlock>
-    );
-  }
-
-  if (url) {
-    infoBlocks.push(
-      <InfoBlock
-        key="request"
-        id="request"
-        title={REQUEST_LABEL}
-        data-test-subj="transactionFlyoutInfo-request"
-      >
-        <HttpInfoSummaryItem
-          method={transaction.http?.request?.method}
-          status={transaction.http?.response?.status_code}
-          url={url}
         />
       </InfoBlock>
     );
@@ -258,5 +265,5 @@ export function useTransactionFlyoutHeader({
     );
   }
 
-  return { infoBlocks, badges };
+  return { metaBlocks, infoBlocks, badges };
 }
