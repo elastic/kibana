@@ -97,7 +97,9 @@ afterAll(() => {
 
 async function runExtractNodeBuildsTask(forceNodePointerCompression = false) {
   const { config } = await setup();
-  jest.spyOn(config, 'getForceNodePointerCompression').mockReturnValue(forceNodePointerCompression);
+  jest
+    .spyOn(config, 'shouldForceNodePointerCompression')
+    .mockReturnValue(forceNodePointerCompression);
 
   await ExtractNodeBuilds.run(config, log);
 

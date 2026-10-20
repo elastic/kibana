@@ -23,7 +23,6 @@ is_pr_with_label "ci:build-os-packages" || BUILD_ARGS+=("--skip-os-packages")
 is_pr_with_label "ci:build-docker-contexts" || BUILD_ARGS+=("--skip-docker-contexts")
 is_pr_with_label "ci:build-cdn-assets" || BUILD_ARGS+=("--skip-cdn-assets")
 if [[ "${BUILDKITE_PIPELINE_SLUG:-}" == "kibana-pointer-compression" ]]; then
-  echo " -- Bundling only the pointer compression Node.js variant"
   BUILD_ARGS+=("--force-node-pointer-compression")
 fi
 

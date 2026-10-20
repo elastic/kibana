@@ -27,7 +27,7 @@ export const CopyBinScripts: Task = {
         linux: platform.isLinux(),
         serverless: platform.isServerless(),
         pointerCompression: platform.isServerless() || platform.isCloud(),
-        forcePointerCompression: platform.isLinux() && config.getForceNodePointerCompression(),
+        forcePointerCompression: platform.isLinux() && config.shouldForceNodePointerCompression(),
       };
 
       if (platform.isWindows()) {

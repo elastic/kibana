@@ -63,7 +63,9 @@ describe('bin/kibana Node selection', () => {
     forcePointerCompression = false
   ) => {
     jest.spyOn(config, 'getTargetPlatforms').mockReturnValue([platform]);
-    jest.spyOn(config, 'getForceNodePointerCompression').mockReturnValue(forcePointerCompression);
+    jest
+      .spyOn(config, 'shouldForceNodePointerCompression')
+      .mockReturnValue(forcePointerCompression);
     await CopyBinScripts.run(config, new ToolingLog(), build);
     const launcher = join(directory, 'bin', 'kibana');
     execFileSync('/bin/sh', ['-n', launcher]);
