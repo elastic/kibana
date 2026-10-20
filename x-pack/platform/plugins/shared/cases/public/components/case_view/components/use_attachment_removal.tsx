@@ -17,7 +17,7 @@ import { DeleteAttachmentConfirmationModal } from '../../user_actions/delete_att
 import { REMOVE } from '../../attachments/common/translations';
 import { ATTACHMENTS_COUNT, REMOVE_ATTACHMENTS_TITLE } from './translations';
 
-type RemovableAttachmentType = Pick<RegisteredUnifiedAttachmentType, 'getCountLabel'>;
+type RemovableAttachmentType = Pick<RegisteredUnifiedAttachmentType, 'id' | 'getCountLabel'>;
 
 interface PendingRemoval {
   attachmentType: RemovableAttachmentType;
@@ -29,8 +29,11 @@ export type OnRemoveAttachments = (
   attachmentType: RemovableAttachmentType
 ) => (request: AttachmentRemovalRequest, options?: AttachmentRemovalOptions) => void;
 
+const getCount = (request: AttachmentRemovalRequest): number =>
+  'savedObjectIds' in request ? request.savedObjectIds.length : request.attachmentIds.length;
+
 const getCountLabel = ({ attachmentType, request }: PendingRemoval): string => {
-  const count = request.savedObjectIds.length;
+  const count = getCount(request);
   return attachmentType.getCountLabel?.({ count }) ?? ATTACHMENTS_COUNT(count);
 };
 
@@ -49,7 +52,7 @@ export const useAttachmentRemoval = (
 
   const onRemove = useCallback<OnRemoveAttachments>(
     (attachmentType) => (request, options) => {
-      if (!isRemoving && request.savedObjectIds.length > 0) {
+      if (!isRemoving && getCount(request) > 0) {
         setPendingRemoval({ attachmentType, request, options });
       }
     },
@@ -63,11 +66,14 @@ export const useAttachmentRemoval = (
       return;
     }
 
-    const { request, options } = pendingRemoval;
+    const { attachmentType, request, options } = pendingRemoval;
     setPendingRemoval(null);
     bulkDeleteAttachments(
       {
-        request: { ids: request.savedObjectIds },
+        request:
+          'savedObjectIds' in request
+            ? { ids: request.savedObjectIds }
+            : { type: attachmentType.id, attachmentIds: request.attachmentIds },
         countLabel: getCountLabel(pendingRemoval),
       },
       { onSuccess: options?.onSuccess }

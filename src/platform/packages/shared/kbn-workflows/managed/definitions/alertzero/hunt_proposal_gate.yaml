@@ -352,6 +352,16 @@ steps:
     on-failure:
       continue: true
 
+  - name: report_investigation_closed_settled
+    type: alertzero.reportWorkerOutcome
+    if: "${{ steps.close_if_settled.error == blank and steps.close_if_settled.output.changed_fields contains 'status' }}"
+    on-failure:
+      continue: true
+    with:
+      event: worker_investigation_closed
+      investigation_id: "{{ inputs.investigationConversationId }}"
+      close_reason: resolved
+
   - name: emit_result
     type: workflow.output
     status: completed
