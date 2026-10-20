@@ -86,8 +86,8 @@ const semConvHostExtendedMetadata = (metadataInfo: InfraMetadata['info']): Metad
   {
     field: 'cloudProvider',
     value: firstValue(
-      metadataInfo?.resource?.attributes?.cloud?.provider,
-      metadataInfo?.cloud?.provider
+      metadataInfo?.cloud?.provider,
+      metadataInfo?.resource?.attributes?.cloud?.provider
     ),
     tooltipFieldLabel: 'cloud.provider',
     tooltipLink:

@@ -86,13 +86,18 @@ describe('getHostMetadataBySchema', () => {
     expect(valueOf(extended, 'operatingSystem')).toBe('Debian GNU/Linux');
   });
 
-  it('prefers the ECS-aliased value when both shapes are present', () => {
-    const { metadata } = getHostMetadataBySchema(
+  it('prefers the ECS-aliased value on every field when both shapes are present', () => {
+    const { metadata, extended } = getHostMetadataBySchema(
       { ...semconvAliasedInfo, ...semconvResourceInfo },
       'semconv'
     );
 
     expect(valueOf(metadata, 'hostIp')).toBe('10.0.0.1');
+    expect(valueOf(metadata, 'hostOsVersion')).toBe('6.12.76-linuxkit');
+    expect(valueOf(extended, 'cloudProvider')).toBe('aws');
+    // `operatingSystem` is the one interleaved chain: an exact `os.name` from either shape outranks
+    // degrading to `os.type` / `host.os.platform`, so the resource attribute wins here.
+    expect(valueOf(extended, 'operatingSystem')).toBe('Debian GNU/Linux');
   });
 
   it('still resolves ECS values while the schema has not resolved yet', () => {
