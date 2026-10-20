@@ -157,12 +157,7 @@ export class AgentsService {
       });
     };
 
-    const ensure: AgentsServiceStart['ensure'] = async ({
-      spaceId,
-      agent,
-      availability,
-      accessControlEntries,
-    }) => {
+    const ensure: AgentsServiceStart['ensure'] = async ({ spaceId, agent, availability }) => {
       if (this.builtinRegistry.has(agent.id)) {
         throw new Error(
           `Cannot ensure persisted agent "${agent.id}": a built-in agent uses this id`
@@ -177,7 +172,7 @@ export class AgentsService {
       }
 
       const systemClient = createSystemClient({ space: spaceId, elasticsearch, logger });
-      await systemClient.ensureAgent(agent, { accessControlEntries });
+      await systemClient.ensureAgent(agent);
     };
 
     const resolveAgentConfiguration: AgentsServiceStart['resolveAgentConfiguration'] = ({

@@ -15,11 +15,7 @@ import {
 import type { KibanaRequest } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { isAllowedBuiltinAgent, isAllowedAgentType } from '@kbn/agent-builder-server/allow_lists';
-import {
-  AgentAccessControlRole,
-  agentBuilderDefaultAiIndexId,
-  chatAgentTypeId,
-} from '@kbn/agent-builder-common';
+import { agentBuilderDefaultAiIndexId, chatAgentTypeId } from '@kbn/agent-builder-common';
 import type { AgentConfiguration, AgentDefinition } from '@kbn/agent-builder-common';
 import { AgentsService } from './agents_service';
 import { defaultAiIndices } from './default_ai_indices';
@@ -241,20 +237,7 @@ describe('AgentsService', () => {
         expect(createSystemClientMock).toHaveBeenCalledWith(
           expect.objectContaining({ space: 'space-1', logger })
         );
-        expect(ensureAgent).toHaveBeenCalledWith(agent, { accessControlEntries: undefined });
-      });
-
-      it('passes access-control entries to the system client', async () => {
-        const accessControlEntries = [
-          {
-            type: 'user' as const,
-            id: 'service_account:kibana/example',
-            role: AgentAccessControlRole.User,
-          },
-        ];
-        await started.ensure({ spaceId: 'space-1', agent, accessControlEntries });
-
-        expect(ensureAgent).toHaveBeenCalledWith(agent, { accessControlEntries });
+        expect(ensureAgent).toHaveBeenCalledWith(agent);
       });
 
       it('rejects an unknown agent type', async () => {
@@ -274,7 +257,7 @@ describe('AgentsService', () => {
         });
 
         expect(ensureAgent).toHaveBeenCalledTimes(1);
-        expect(ensureAgent).toHaveBeenCalledWith(agent, { accessControlEntries: undefined });
+        expect(ensureAgent).toHaveBeenCalledWith(agent);
       });
 
       it('applies ensure-registered availability when reading the agent', async () => {

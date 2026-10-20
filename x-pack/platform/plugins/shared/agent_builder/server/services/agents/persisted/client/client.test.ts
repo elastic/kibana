@@ -836,43 +836,6 @@ describe('SystemAgentClient', () => {
     });
   });
 
-  it('writes access-control entries when it creates the agent', async () => {
-    mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
-    const entry = {
-      type: 'user' as const,
-      id: 'service_account:kibana/example',
-      role: AgentAccessControlRole.User,
-    };
-
-    await createSystemAgentClient().ensureAgent(
-      { ...profile, access_control: { access_mode: AgentAccessControlMode.Private } },
-      { accessControlEntries: [entry] }
-    );
-
-    expect(mockEsClient.index).toHaveBeenCalledWith(
-      expect.objectContaining({
-        document: expect.objectContaining({
-          access_control: {
-            access_mode: AgentAccessControlMode.Private,
-            entries: [{ ...entry, added_at: expect.any(String) }],
-          },
-        }),
-      })
-    );
-  });
-
-  it('does not apply access-control entries to an existing agent', async () => {
-    mockEsClient.search.mockResolvedValue({ hits: { hits: [buildDoc()] } });
-
-    await createSystemAgentClient().ensureAgent(profile, {
-      accessControlEntries: [
-        { type: 'user', id: 'service_account:kibana/example', role: AgentAccessControlRole.User },
-      ],
-    });
-
-    expect(mockEsClient.index).not.toHaveBeenCalled();
-  });
-
   it('preserves an existing agent', async () => {
     mockEsClient.search.mockResolvedValue({ hits: { hits: [buildDoc()] } });
 
