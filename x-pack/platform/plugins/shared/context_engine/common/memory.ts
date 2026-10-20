@@ -21,11 +21,15 @@ export const MEMORY_READ_ACTION = `ai_index:${MEMORY_AI_INDEX_READ_KI_TYPE}/read
 /** Multi-valued keyword of principal URIs that may read a memory; absent means shared. */
 export const MEMORY_SCOPE_ID_FIELD = 'scope_id';
 export const USER_SCOPE_PREFIX = 'user://';
+export const MAX_MEMORY_SCOPE_IDS = 20;
+export const MAX_MEMORY_SCOPE_ID_LENGTH = 256;
 
 export const buildUserScopeId = (profileUid: string): string => `${USER_SCOPE_PREFIX}${profileUid}`;
 
 export const buildUserScopeIds = (profileUid: string | undefined): string[] =>
   profileUid ? [buildUserScopeId(profileUid)] : [];
+
+export const isUserScopeId = (scopeId: string): boolean => scopeId.startsWith(USER_SCOPE_PREFIX);
 
 export const isMemoryAiIndexDest = (destValue: string): boolean =>
   destValue.startsWith(AI_MEMORY_INDEX_PREFIX);

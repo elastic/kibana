@@ -309,6 +309,30 @@ describe('remember tool', () => {
     expect(index).not.toHaveBeenCalled();
   });
 
+  it('stores caller scope_ids next to the user scope', async () => {
+    await run({ ...params, scope_ids: ['entity://acme-42'] }, 'conversation-1');
+
+    expect(index).toHaveBeenCalledWith(
+      expect.objectContaining({
+        document: expect.objectContaining({ scope_id: ['user://u_alice', 'entity://acme-42'] }),
+      })
+    );
+  });
+
+  it('rejects user:// values in scope_ids', async () => {
+    const result = await run({ ...params, scope_ids: ['user://u_bob'] }, 'conversation-1');
+
+    expect(result).toEqual({
+      results: [
+        {
+          type: ToolResultType.error,
+          data: { message: 'Failed to store memory: scope_ids may not contain user:// values.' },
+        },
+      ],
+    });
+    expect(index).not.toHaveBeenCalled();
+  });
+
   it('creates a memory with server-derived session metadata', async () => {
     const result = await run({ ...params, sessionId: 'ignored-session-id' }, 'conversation-1');
 

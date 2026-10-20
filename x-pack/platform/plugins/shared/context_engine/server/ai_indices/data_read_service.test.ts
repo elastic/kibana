@@ -90,6 +90,20 @@ describe('AiIndexDataReadService', () => {
       );
     });
 
+    it('uses request scope_ids in place of the caller scope', async () => {
+      esqlQuery.mockResolvedValue({ columns: [], values: [] });
+      aiIndexService.list.mockResolvedValue([]);
+
+      await service.query({ query: 'FROM .ai-memory-elastic', scope_ids: ['entity://e_1'] });
+
+      expect(esqlQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: buildAiIndexReadFilter({ spaceId: 'marketing', scopeIds: ['entity://e_1'] }),
+        }),
+        expect.anything()
+      );
+    });
+
     it('applies the lifecycle pipeline to a registered dest', async () => {
       esqlQuery.mockResolvedValue({ columns: [], values: [] });
       aiIndexService.list.mockResolvedValue([aiIndex]);

@@ -12,7 +12,12 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getAgentFromRunContext } from '@kbn/agent-builder-server';
 import { randomUUID } from 'crypto';
 import { aiIndexIdFieldSchema } from '@kbn/context-engine-plugin/common/ai_index_schemas';
-import { MEMORY_KI_TYPES } from '@kbn/context-engine-plugin/common/memory';
+import {
+  MAX_MEMORY_SCOPE_IDS,
+  MAX_MEMORY_SCOPE_ID_LENGTH,
+  MEMORY_KI_TYPES,
+  isUserScopeId,
+} from '@kbn/context-engine-plugin/common/memory';
 import {
   MAX_KI_CONTENT_LENGTH,
   MAX_KI_DESCRIPTION_LENGTH,
@@ -80,6 +85,13 @@ const rememberSchema = z.object({
     .optional()
     .describe(
       'Optional lowercase index names, feature areas, or tools associated with the memory. When revising, omit to preserve existing tags or pass an empty array to clear them.'
+    ),
+  scope_ids: z
+    .array(z.string().min(1).max(MAX_MEMORY_SCOPE_ID_LENGTH))
+    .max(MAX_MEMORY_SCOPE_IDS)
+    .optional()
+    .describe(
+      'For direct API callers that manage their own end users: extra scope values stored next to the caller scope, such as entity://<id>. Values may not start with user://. Omit in Agent Builder conversations.'
     ),
   expires_at: isoDateTime({ offset: true })
     .nullable()
@@ -166,6 +178,9 @@ export const createRememberTool = ({
       });
 
       const userScopeId = await resolveMemoryUserScopeId({ request, esClient, getCoreStart });
+      if (params.scope_ids?.some(isUserScopeId)) {
+        throw new Error('scope_ids may not contain user:// values.');
+      }
 
       const currentUserClient = esClient.asCurrentUser;
       const currentDate = getCurrentDate();
@@ -271,7 +286,9 @@ export const createRememberTool = ({
           writer,
           existingDocument === undefined
         ),
-        scope_id: existingDocument?.scope_id?.length ? existingDocument.scope_id : [userScopeId],
+        scope_id: existingDocument?.scope_id?.length
+          ? existingDocument.scope_id
+          : [userScopeId, ...(params.scope_ids ?? [])],
         permissions: existingDocument?.permissions ?? createMemoryPermissions(spaceId),
       };
 
