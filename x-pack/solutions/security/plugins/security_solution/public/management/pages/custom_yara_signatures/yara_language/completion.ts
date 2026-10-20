@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { last, uniq, uniqBy } from 'lodash';
+import { findLast, last, uniq, uniqBy } from 'lodash';
 import { monaco } from '@kbn/code-editor';
 import {
   MetaArchValue,
@@ -160,6 +160,19 @@ const STATIC_SUGGESTIONS: Suggestion[] = uniqBy(
 const getCapturedNames = (text: string, regex: RegExp): string[] =>
   uniq(Array.from(text.matchAll(regex), ([, name]) => name));
 
+/** Returns the offsets of the rule containing the cursor, from its header until the next rule header. */
+const getCurrentRuleRange = (
+  text: string,
+  cursorOffset: number
+): { start: number; end: number } => {
+  const ruleStarts = Array.from(text.matchAll(RULE_DEFINITION_REGEX), ({ index }) => index);
+
+  return {
+    start: findLast(ruleStarts, (ruleStart) => ruleStart < cursorOffset) ?? 0,
+    end: ruleStarts.find((ruleStart) => ruleStart >= cursorOffset) ?? text.length,
+  };
+};
+
 const getLastTokenType = (text: string): string =>
   last(last(monaco.editor.tokenize(text, YARA_LANG_ID)))?.type ?? '';
 
@@ -195,14 +208,15 @@ const getMetaValueSuggestions = (
     }));
 };
 
+// Strings are scoped to the rule declaring them.
 const getStringReferenceSuggestions = (
-  text: string,
+  currentRuleText: string,
   typedReference: string,
   range: monaco.IRange
 ): monaco.languages.CompletionItem[] => {
   const [prefix] = typedReference;
 
-  return getCapturedNames(text, STRING_DEFINITION_REGEX)
+  return getCapturedNames(currentRuleText, STRING_DEFINITION_REGEX)
     .map((name) => `${prefix}${name}`)
     .filter((reference) => reference !== typedReference)
     .map((reference) => ({
@@ -276,11 +290,14 @@ export const yaraCompletionProvider: monaco.languages.CompletionItemProvider = {
     }
 
     const text = model.getValue();
+    const currentRuleRange = getCurrentRuleRange(text, textUntilPosition.length);
     const typedReference = linePrefix.match(STRING_REFERENCE_PREFIX_REGEX)?.[0];
 
     if (typedReference !== undefined) {
+      const currentRuleText = text.slice(currentRuleRange.start, currentRuleRange.end);
+
       return {
-        suggestions: getStringReferenceSuggestions(text, typedReference, {
+        suggestions: getStringReferenceSuggestions(currentRuleText, typedReference, {
           startLineNumber: lineNumber,
           endLineNumber: lineNumber,
           startColumn: column - typedReference.length,

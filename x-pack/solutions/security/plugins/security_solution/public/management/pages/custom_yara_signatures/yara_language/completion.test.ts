@@ -35,9 +35,9 @@ const RULE_WITH_STRINGS = [
   '}',
   'rule b {',
   '  strings:',
-  '    $a = "duplicate"',
+  '    $c = "other"',
   '  condition:',
-  '    $a',
+  '    $c',
   '}',
 ].join('\n');
 
@@ -267,6 +267,33 @@ describe('YARA completion', () => {
       const suggestions = await getSuggestions(withCondition(`!a != !${CURSOR}`));
 
       expect(suggestions.map(({ label }) => label)).toEqual(['!a', '!b_1']);
+    });
+
+    it('should only suggest the strings defined in the current rule', async () => {
+      const suggestions = await getSuggestions(
+        [
+          'rule a {',
+          '  strings:',
+          '    $a = "x"',
+          '  condition:',
+          '    $a',
+          '}',
+          'rule b {',
+          '  strings:',
+          '    $b = "y"',
+          '  condition:',
+          `    $a or $${CURSOR}`,
+          '}',
+          'rule c {',
+          '  strings:',
+          '    $c = "z"',
+          '  condition:',
+          '    $c',
+          '}',
+        ].join('\n')
+      );
+
+      expect(suggestions.map(({ label }) => label)).toEqual(['$b']);
     });
 
     it('should not suggest string references without a prefix', async () => {
