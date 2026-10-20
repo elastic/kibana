@@ -38,29 +38,20 @@ export const CopyWorkflowStepOption: React.FC<CopyWorkflowStepOption> = ({ onCli
 
       if (notifications) {
         notifications.toasts.addSuccess({
-          title: i18n.translate(
-            'workflows.workflowsManagement.copyWorkflowStepToClipboard.successTitle',
-            {
-              defaultMessage: 'Copied to clipboard',
-            }
-          ),
-          text: i18n.translate(
-            'workflows.workflowsManagement.copyWorkflowStepToClipboard.successText',
-            {
-              defaultMessage: 'Workflow step copied successfully',
-            }
-          ),
+          title: i18n.translate('workflows.copyWorkflowStepToClipboard.successTitle', {
+            defaultMessage: 'Copied to clipboard',
+          }),
+          text: i18n.translate('workflows.copyWorkflowStepToClipboard.successText', {
+            defaultMessage: 'Workflow step copied successfully',
+          }),
         });
       }
     } catch (error) {
       if (notifications) {
         notifications.toasts.addError(error as Error, {
-          title: i18n.translate(
-            'workflows.workflowsManagement.copyWorkflowStepToClipboard.errorTitle',
-            {
-              defaultMessage: 'Failed to copy',
-            }
-          ),
+          title: i18n.translate('workflows.copyWorkflowStepToClipboard.errorTitle', {
+            defaultMessage: 'Failed to copy',
+          }),
         });
       }
     }
@@ -75,7 +66,7 @@ export const CopyWorkflowStepOption: React.FC<CopyWorkflowStepOption> = ({ onCli
       icon="copy"
     >
       <FormattedMessage
-        id="workflows.workflowsManagement.copyWorkflowStepToClipboard.buttonLabel"
+        id="workflows.copyWorkflowStepToClipboard.buttonLabel"
         defaultMessage="Copy as YAML"
       />
     </EuiContextMenuItem>

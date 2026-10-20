@@ -13,23 +13,14 @@ export const SEARCH_WORKFLOWS = i18n.translate('workflows.workflowsList.searchAr
   defaultMessage: 'Search workflows',
 });
 
-export const SEARCH_PLACEHOLDER = i18n.translate(
-  'workflows.workflowsManagement.workflowsList.searchPlaceholder',
-  {
-    defaultMessage: 'Workflow name/description',
-  }
-);
+export const SEARCH_PLACEHOLDER = i18n.translate('workflows.workflowsList.searchPlaceholder', {
+  defaultMessage: 'Workflow name/description',
+});
 
-export const TRIGGERS_LIST_TITLE = i18n.translate(
-  'workflows.workflowsManagement.workflowsList.triggersListTitle',
-  {
-    defaultMessage: 'Triggers',
-  }
-);
+export const TRIGGERS_LIST_TITLE = i18n.translate('workflows.workflowsList.triggersListTitle', {
+  defaultMessage: 'Triggers',
+});
 
-export const TAGS_LIST_TITLE = i18n.translate(
-  'workflows.workflowsManagement.workflowsList.tagsListTitle',
-  {
-    defaultMessage: 'Tags',
-  }
-);
+export const TAGS_LIST_TITLE = i18n.translate('workflows.workflowsList.tagsListTitle', {
+  defaultMessage: 'Tags',
+});
