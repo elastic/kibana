@@ -468,6 +468,30 @@ describe('generateWorkflowYaml', () => {
         expect(matches(automation, { sender: 'U1' })).toBe(false);
       });
 
+      it.each([
+        ['app id', { appId: 'A1' }, true],
+        ['bot id', { botId: 'B1' }, true],
+        ['bot name', { botName: 'PagerDuty' }, true],
+        ['another bot', { botName: 'Datadog', appId: 'A9' }, false],
+        ['a person', {}, false],
+      ])('matches a post from %s only when it is selected', (_name, event, expected) => {
+        const automation = slackAutomation(slackRow({ bots: ['A1', 'B1', 'PagerDuty'] }));
+        expect(matches(automation, event)).toBe(expected);
+      });
+
+      it('rejects Slack filters longer than a trigger condition allows', () => {
+        const bots = Array.from({ length: 30 }, (_, i) => `A${String(i).padStart(10, '0')}`);
+        expect(() => generateWorkflowYaml('auto-123', slackAutomation(slackRow({ bots })))).toThrow(
+          'too long'
+        );
+      });
+
+      it('quotes bot values so KQL syntax in a name stays literal', () => {
+        const automation = slackAutomation(slackRow({ bots: ['Ops "bot" or *'] }));
+        expect(matches(automation, { botName: 'Ops "bot" or *' })).toBe(true);
+        expect(matches(automation, { botName: 'Ops bot' })).toBe(false);
+      });
+
       it('ANDs channels and users within a row', () => {
         const automation = slackAutomation(slackRow({ channels: ['C1'], users: ['U1'] }));
         expect(matches(automation, {})).toBe(true);
@@ -641,7 +665,7 @@ describe('generateWorkflowYaml', () => {
         automation.execution.promptTemplate = 'Look for deploy problems.';
         const yaml = parse(generateWorkflowYaml({ automationId: 'auto-123', automation }));
         expect(yaml.steps[0].with.message).toBe(
-          'Look for deploy problems.\n\nSlack message from {{ event.sender }} in channel {{ event.channel }}:\n\n{{ event.text | truncate: 4000 }}'
+          'Look for deploy problems.\n\nSlack message from {{ event.botName | default: event.sender | default: event.botId }} in channel {{ event.channel }}:\n\n{{ event.text | truncate: 4000 }}'
         );
       });
 
