@@ -129,6 +129,7 @@ const deleteByAttachmentIds = async (
 ): Promise<void> => {
   const {
     user,
+    logger,
     authorization,
     services: { attachmentService, caseService, alertsService },
   } = clientArgs;
@@ -262,10 +263,7 @@ const deleteByAttachmentIds = async (
           caseId,
           attachments: toDelete,
           operation: Operations.deleteComment,
-          deferCaseUpdates: true,
-          recordUserActions: async ({ attachments }) => {
-            attachments.forEach(({ id }) => deletedIds.add(id));
-          },
+          onDeleted: (ids) => ids.forEach((id) => deletedIds.add(id)),
         },
         clientArgs
       );
@@ -273,7 +271,9 @@ const deleteByAttachmentIds = async (
 
     ({ updated, failed } = await removeReferencedIds({ partialDeletions: toUpdate }, clientArgs));
   } catch (error) {
-    await recordChanges();
+    await recordChanges().catch((recordError) =>
+      logger.error(`Failed to record the partial removal on case ${caseId}: ${recordError}`)
+    );
     throw error;
   }
 

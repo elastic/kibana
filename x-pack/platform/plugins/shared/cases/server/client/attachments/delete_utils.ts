@@ -45,8 +45,11 @@ interface DeleteCaseAttachmentsArgs {
   /** Message of the not found error thrown for attachments of another case. */
   notInCaseMessage?: (ids: string[]) => string;
   recordUserActions?: RecordUserActions;
-  /** The caller updates the case totals and emits the event, so several steps count as 1 change. */
-  deferCaseUpdates?: boolean;
+  /**
+   * Receives the ids the bulk delete confirmed. When set, the caller updates the case totals,
+   * records the user actions and emits the event, so several steps count as 1 change.
+   */
+  onDeleted?: (deletedIds: ReadonlySet<string>) => void;
 }
 
 /** Deletes attachments read for deletion and their files; shared by the comment delete routes. */
@@ -57,7 +60,7 @@ export const deleteCaseAttachments = async (
     operation,
     notInCaseMessage = (ids) => doNotExistOnCaseMessage(ids, caseId),
     recordUserActions,
-    deferCaseUpdates = false,
+    onDeleted,
   }: DeleteCaseAttachmentsArgs,
   clientArgs: CasesClientArgs
 ): Promise<void> => {
@@ -126,6 +129,7 @@ export const deleteCaseAttachments = async (
 
   const savedObjectIds = ownedAttachments.map(({ id }) => id);
   const deletedIds = new Set(await attachmentService.bulkDelete({ savedObjectIds, refresh: true }));
+  onDeleted?.(deletedIds);
 
   // Core's bulk delete reports per-object failures instead of throwing. The confirmed deletes are
   // still recorded before throwing, since a retry fails the not found check on those ids.
@@ -145,7 +149,7 @@ export const deleteCaseAttachments = async (
         attachments: decodedAttachments.filter(({ id }) => deletedIds.has(id)),
         fileIds: fileEntities.filter(({ id }) => !keptFileIds.has(id)).map(({ id }) => id),
         recordUserActions,
-        deferCaseUpdates,
+        deferCaseUpdates: onDeleted != null,
       },
       clientArgs
     );
@@ -197,21 +201,21 @@ const recordDeletion = async (
       caseId,
       user,
     });
-  }
 
-  if (recordUserActions != null) {
-    await recordUserActions({ attachments });
-  } else if (attachments.length > 0) {
-    await userActionService.creator.bulkCreateAttachmentDeletion({
-      caseId,
-      attachments: attachments.map(({ id, owner, type, requestAttributes }) => ({
-        id,
-        owner,
-        attachment: requestAttributes,
-        savedObjectType: type,
-      })),
-      user,
-    });
+    if (recordUserActions != null) {
+      await recordUserActions({ attachments });
+    } else if (attachments.length > 0) {
+      await userActionService.creator.bulkCreateAttachmentDeletion({
+        caseId,
+        attachments: attachments.map(({ id, owner, type, requestAttributes }) => ({
+          id,
+          owner,
+          attachment: requestAttributes,
+          savedObjectType: type,
+        })),
+        user,
+      });
+    }
   }
 
   await handleAlerts({

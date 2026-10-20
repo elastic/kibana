@@ -44,9 +44,10 @@ import { getDefaultControlColumn } from '../../../../timelines/components/timeli
 import { defaultRowRenderers } from '../../../../timelines/components/timeline/body/renderers';
 import { DefaultCellRenderer } from '../../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import type { State } from '../../../../common/store/types';
-import type { TimelineNonEcsData } from '../../../../../common/search_strategy';
 import { useGetEvents } from '../hooks/use_get_events';
 import { useCaseEventsDataView } from '../hooks/use_events_data_view';
+import { useEventsSelection } from '../hooks/use_events_selection';
+import { getPageIndexInRange } from '../utils';
 import {
   TABLE_UNIT,
   NO_EVENTS_TITLE,
@@ -59,6 +60,7 @@ export interface CaseViewEventsTableProps {
   events: Event[];
   /** Enables row selection and removing the selected events from the case. */
   onRemove?: CommonAttachmentListViewProps['onRemove'];
+  isRemoving?: CommonAttachmentListViewProps['isRemoving'];
 }
 export interface Event {
   eventId: string | string[];
@@ -81,6 +83,7 @@ const EventsTableForCasesBody: FC<{ dataView: DataView } & CaseViewEventsTablePr
   dataView,
   events,
   onRemove,
+  isRemoving = false,
 }) => {
   const selectTableById = useMemo(() => getTableByIdSelector(), []);
 
@@ -116,9 +119,25 @@ const EventsTableForCasesBody: FC<{ dataView: DataView } & CaseViewEventsTablePr
 
   const { euiTheme } = useEuiTheme();
 
+  const eventIds = useMemo(() => {
+    return events.flatMap((event) =>
+      Array.isArray(event.eventId) ? event.eventId : [event.eventId]
+    );
+  }, [events]);
+
+  const pageIndex = getPageIndexInRange({
+    pageIndex: currentPageIndex,
+    totalItems: eventIds.length,
+    pageSize: itemsPerPage,
+  });
+
+  useEffect(() => {
+    setCurrentPageIndex(pageIndex);
+  }, [pageIndex]);
+
   const pagination: EuiDataGridPaginationProps & { pageSize: number } = useMemo(
     () => ({
-      pageIndex: currentPageIndex,
+      pageIndex,
       pageSize: itemsPerPage,
       pageSizeOptions: itemsPerPageOptions,
       onChangeItemsPerPage: (perPage) =>
@@ -130,19 +149,13 @@ const EventsTableForCasesBody: FC<{ dataView: DataView } & CaseViewEventsTablePr
         ),
       onChangePage: setCurrentPageIndex,
     }),
-    [currentPageIndex, dispatch, itemsPerPage, itemsPerPageOptions]
+    [pageIndex, dispatch, itemsPerPage, itemsPerPageOptions]
   );
-
-  const eventIds = useMemo(() => {
-    return events.flatMap((event) =>
-      Array.isArray(event.eventId) ? event.eventId : [event.eventId]
-    );
-  }, [events]);
 
   const { data = [], isFetching: isFetchingEvents } = useGetEvents(dataView, {
     eventIds,
     sort,
-    pageIndex: currentPageIndex,
+    pageIndex,
     itemsPerPage,
   });
 
@@ -151,49 +164,17 @@ const EventsTableForCasesBody: FC<{ dataView: DataView } & CaseViewEventsTablePr
     setCurrentPageIndex(0);
   }, [sort]);
 
-  const [selectedIds, setSelectedIds] = useState<ReadonlySet<string>>(() => new Set());
   const pageIds = useMemo(() => data.map(({ _id }) => _id), [data]);
 
-  // Keeps only rows on the current page, so a page change or a removal unchecks hidden rows.
-  useEffect(() => {
-    setSelectedIds((previous) => {
-      const next = new Set([...previous].filter((id) => pageIds.includes(id)));
-      return next.size === previous.size ? previous : next;
-    });
-  }, [pageIds]);
-
-  const selectedEventIds = useMemo(
-    () =>
-      Object.fromEntries([...selectedIds].map((id): [string, TimelineNonEcsData[]] => [id, []])),
-    [selectedIds]
-  );
-
-  const onRowSelected = useCallback(
-    ({ eventIds: rowIds, isSelected }: { eventIds: string[]; isSelected: boolean }) =>
-      setSelectedIds((previous) => {
-        const next = new Set(previous);
-        rowIds.forEach((id) => (isSelected ? next.add(id) : next.delete(id)));
-        return next;
-      }),
-    []
-  );
-
-  const isPageSelected = pageIds.length > 0 && pageIds.every((id) => selectedIds.has(id));
-
-  const onSelectPage = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) =>
-      setSelectedIds(event.target.checked ? new Set(pageIds) : new Set()),
-    [pageIds]
-  );
-
-  const onRemoveSelected = useCallback(
-    () =>
-      onRemove?.(
-        { attachmentIds: [...selectedIds] },
-        { onSuccess: () => setSelectedIds(new Set()) }
-      ),
-    [onRemove, selectedIds]
-  );
+  const {
+    selectedIds,
+    selectedEventIds,
+    isPageSelected,
+    onRowSelected,
+    onSelectPage,
+    onRemoveSelected,
+    onRemoveEvent,
+  } = useEventsSelection({ pageIds, onRemove });
 
   const leadingControlColumns = useMemo(
     () =>
@@ -243,9 +224,7 @@ const EventsTableForCasesBody: FC<{ dataView: DataView } & CaseViewEventsTablePr
               isEventViewer={false}
               isExpandable={isExpandable}
               loadingEventIds={loadingEventIds}
-              onRemoveFromCase={
-                onRemove && rowData ? () => onRemove({ attachmentIds: [rowData._id] }) : undefined
-              }
+              onRemoveFromCase={onRemoveEvent}
               onRowSelected={onRowSelected}
               onRuleChange={noop}
               pageRowIndex={pageRowIndex}
@@ -268,7 +247,7 @@ const EventsTableForCasesBody: FC<{ dataView: DataView } & CaseViewEventsTablePr
       isSelectable,
       itemsPerPage,
       loadingEventIds,
-      onRemove,
+      onRemoveEvent,
       onRowSelected,
       onSelectPage,
       selectedEventIds,
@@ -290,6 +269,8 @@ const EventsTableForCasesBody: FC<{ dataView: DataView } & CaseViewEventsTablePr
             iconType="trash"
             flush="left"
             onClick={onRemoveSelected}
+            isLoading={isRemoving}
+            isDisabled={isRemoving}
             data-test-subj={REMOVE_EVENTS_FOR_CASES_ID}
           >
             {REMOVE_EVENTS}
@@ -337,7 +318,7 @@ const EventsTableForCasesBody: FC<{ dataView: DataView } & CaseViewEventsTablePr
   );
 };
 
-export const EventsTableForCases = ({ events, onRemove }: CaseViewEventsTableProps) => {
+export const EventsTableForCases = ({ events, onRemove, isRemoving }: CaseViewEventsTableProps) => {
   const patterns = useMemo(
     () =>
       [
@@ -354,5 +335,12 @@ export const EventsTableForCases = ({ events, onRemove }: CaseViewEventsTablePro
     return null;
   }
 
-  return <EventsTableForCasesBody dataView={dataView} events={events} onRemove={onRemove} />;
+  return (
+    <EventsTableForCasesBody
+      dataView={dataView}
+      events={events}
+      onRemove={onRemove}
+      isRemoving={isRemoving}
+    />
+  );
 };

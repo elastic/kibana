@@ -20,6 +20,7 @@ import { EventsTableForCases } from './table';
 export const EventTabContent: React.FC<CommonAttachmentListViewProps> = ({
   caseData,
   onRemove,
+  isRemoving,
 }) => {
   const events = useMemo(
     () =>
@@ -47,7 +48,7 @@ export const EventTabContent: React.FC<CommonAttachmentListViewProps> = ({
       `}
       data-test-subj="case-view-events"
     >
-      <EventsTableForCases events={events} onRemove={onRemove} />
+      <EventsTableForCases events={events} onRemove={onRemove} isRemoving={isRemoving} />
     </EuiFlexItem>
   );
 };

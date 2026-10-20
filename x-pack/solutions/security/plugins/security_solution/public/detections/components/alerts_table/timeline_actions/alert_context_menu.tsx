@@ -60,7 +60,7 @@ interface AlertContextMenuProps {
   ariaLabel?: string;
   isRemoteDocument: boolean;
   ecsRowData: Ecs;
-  onRemoveFromCase?: () => void;
+  onRemoveFromCase?: (eventId: string) => void;
   onRuleChange?: () => void;
   scopeId: string;
   refetch: (() => void) | undefined;
@@ -271,12 +271,12 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
               name: i18n.REMOVE_FROM_CASE,
               onClick: () => {
                 closePopover();
-                onRemoveFromCase();
+                onRemoveFromCase(ecsRowData._id);
               },
             },
           ]
         : [],
-    [closePopover, onRemoveFromCase]
+    [closePopover, onRemoveFromCase, ecsRowData._id]
   );
 
   const isAlertActionMenu = !isEvent && Boolean(ruleId);

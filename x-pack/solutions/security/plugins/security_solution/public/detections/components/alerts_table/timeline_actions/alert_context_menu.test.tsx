@@ -231,6 +231,7 @@ describe('Alert table context menu', () => {
       fireEvent.click(wrapper.getByTestId(removeFromCaseButton));
 
       expect(onRemoveFromCase).toHaveBeenCalledTimes(1);
+      expect(onRemoveFromCase).toHaveBeenCalledWith(props.ecsRowData._id);
     });
 
     test('it does not render RemoveFromCase without onRemoveFromCase', () => {

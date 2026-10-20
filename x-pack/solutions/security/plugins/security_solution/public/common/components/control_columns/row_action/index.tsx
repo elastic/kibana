@@ -52,7 +52,7 @@ export type RowActionProps = EuiDataGridCellValueElementProps & {
   index: number;
   isEventViewer: boolean;
   loadingEventIds: Readonly<string[]>;
-  onRemoveFromCase?: () => void;
+  onRemoveFromCase?: (eventId: string) => void;
   onRowSelected: OnRowSelected;
   onRuleChange?: () => void;
   pageRowIndex: number;

@@ -459,6 +459,21 @@ describe('bulk_delete', () => {
         expect(userActionService.creator.bulkCreateAttachmentBulkDeletion).not.toHaveBeenCalled();
       });
 
+      it('throws the original error when recording the partial removal also fails', async () => {
+        attachmentService.getter.getCaseAttachmentsForDeletion.mockResolvedValue([
+          alertAttachment('attachment-1', 'alert-1', 'index-1'),
+          alertAttachment('attachment-2', ['alert-2', 'alert-3'], ['index-2', 'index-3']),
+        ]);
+        attachmentService.bulkUpdate.mockRejectedValue(new Error('update failed'));
+        caseService.patchCase.mockRejectedValue(new Error('stats failed'));
+
+        await expect(deleteAlerts(['alert-1', 'alert-2'])).rejects.toThrow('update failed');
+
+        expect(clientArgs.logger.error).toHaveBeenCalledWith(
+          expect.stringContaining('stats failed')
+        );
+      });
+
       describe('files', () => {
         const fileId = 'file-1';
 
