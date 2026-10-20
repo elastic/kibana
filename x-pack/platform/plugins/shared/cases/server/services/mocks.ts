@@ -110,6 +110,7 @@ const createUserActionPersisterServiceMock = (): CaseUserActionPersisterServiceM
     buildUserActions: jest.fn(),
     addSyncedAlertsCountToUserActions: jest.fn(),
     bulkCreateAttachmentDeletion: jest.fn(),
+    bulkCreateAttachmentBulkDeletion: jest.fn(),
     bulkCreateAttachmentCreation: jest.fn(),
     createUserAction: jest.fn(),
     bulkCreateUserAction: jest.fn(),
