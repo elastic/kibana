@@ -24,6 +24,9 @@ import type {
   RenderAssignees,
   RenderStatus,
   RenderLinkedInvestigations,
+  RenderOverview,
+  RenderLiveState,
+  RenderTitle,
   RenderSyncIndicator,
 } from './types';
 
@@ -46,6 +49,8 @@ export interface OverviewSlotProps extends InvestigationSlotProps {
    * host can fetch its proposals; omitted entirely (see `OverviewTab`) when the caller has none.
    */
   renderProposedActions?: (props: { conversationId: string }) => React.ReactNode;
+  /** Replaces the tab body; see `RenderOverview`. */
+  renderOverview?: RenderOverview;
   /** Renders a count shown beside the "Proposed actions" heading. */
   renderProposedActionsCount?: (props: { conversationId: string }) => React.ReactNode;
 }
@@ -54,26 +59,47 @@ export const OverviewSlot = ({
   conversation,
   groupedAttachments,
   renderProposedActions,
+  renderOverview,
   renderProposedActionsCount,
-}: OverviewSlotProps) => (
-  <OverviewTab
-    investigation={conversationToInvestigation(conversation)}
-    attachments={conversation.attachments}
-    groupedAttachments={groupedAttachments}
-    proposedActionsContent={renderProposedActions?.({ conversationId: conversation.id })}
-    proposedActionsCount={renderProposedActionsCount?.({ conversationId: conversation.id })}
-  />
-);
+}: OverviewSlotProps) => {
+  const proposedActionsContent = renderProposedActions?.({ conversationId: conversation.id });
+  const proposedActionsCount = renderProposedActionsCount?.({ conversationId: conversation.id });
+  if (renderOverview) {
+    return (
+      <>
+        {renderOverview({
+          conversation,
+          groupedAttachments,
+          proposedActionsContent,
+          proposedActionsCount,
+        })}
+      </>
+    );
+  }
+  return (
+    <OverviewTab
+      investigation={conversationToInvestigation(conversation)}
+      attachments={conversation.attachments}
+      groupedAttachments={groupedAttachments}
+      proposedActionsContent={proposedActionsContent}
+      proposedActionsCount={proposedActionsCount}
+    />
+  );
+};
 
 export interface HeaderSlotProps extends InvestigationSlotProps {
   renderAssignees?: RenderAssignees;
   renderStatus?: RenderStatus;
+  renderLiveState?: RenderLiveState;
+  renderTitle?: RenderTitle;
 }
 
 export const HeaderSlot = ({
   conversation,
   renderAssignees,
   renderStatus,
+  renderLiveState,
+  renderTitle,
   refetchConversation,
 }: HeaderSlotProps) => {
   const investigation = conversationToInvestigation(conversation);
@@ -99,6 +125,11 @@ export const HeaderSlot = ({
       investigation={investigation}
       assigneesNode={assigneesNode}
       statusNode={statusNode}
+      liveStateNode={renderLiveState?.({
+        conversationId: conversation.id,
+        severity: investigation.severity,
+      })}
+      titleNode={renderTitle?.({ conversationId: conversation.id, title: conversation.title })}
     />
   );
 };

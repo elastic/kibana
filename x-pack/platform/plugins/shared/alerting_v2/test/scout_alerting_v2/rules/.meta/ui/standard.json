@@ -1,5 +1,5 @@
 {
-  "sha1": "9e42212d34c812474e3ec3b4138b5fa3fe71b8e8",
+  "sha1": "96ad7b7f126179ca83bc1e3ee44823ed85df74df",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -117,6 +117,34 @@
       }
     },
     {
+      "id": "b470088e3702fe3-96ce193baa9f2e9",
+      "title": "Rule library - install a rule template lists every installed v2 template",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/install_rule_template.spec.ts",
+        "line": 64,
+        "column": 56
+      }
+    },
+    {
+      "id": "b470088e3702fe3-226855ce3d4b15e",
+      "title": "Rule library - install a rule template creating from a template opens the flyout and creates a rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/install_rule_template.spec.ts",
+        "line": 70,
+        "column": 56
+      }
+    },
+    {
       "id": "9c1881f2135d817-21909d01f6a3e51",
       "title": "Rule Builder — threshold create and edit flows create flow: configure threshold builder and submit",
       "expectedStatus": "passed",
@@ -126,7 +154,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_builder_threshold.spec.ts",
-        "line": 59,
+        "line": 60,
         "column": 46
       }
     },
@@ -140,8 +168,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_builder_threshold.spec.ts",
-        "line": 132,
-        "column": 12
+        "line": 140,
+        "column": 77
       }
     },
     {
@@ -154,13 +182,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_builder_threshold.spec.ts",
-        "line": 181,
+        "line": 185,
         "column": 9
       }
     },
     {
-      "id": "9c1881f2135d817-686926d85ee73c5",
-      "title": "Rule Builder — threshold create and edit flows builder-to-esql: rule without builder_type opens in ES|QL mode",
+      "id": "9c1881f2135d817-4c4c58a6af68be9",
+      "title": "Rule Builder — threshold create and edit flows builder-to-esql: rule without builder metadata opens in ES|QL mode",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -168,8 +196,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_builder_threshold.spec.ts",
-        "line": 200,
-        "column": 18
+        "line": 203,
+        "column": 12
       }
     },
     {
@@ -182,8 +210,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_builder_threshold.spec.ts",
-        "line": 243,
-        "column": 20
+        "line": 248,
+        "column": 26
       }
     },
     {
@@ -196,8 +224,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_builder_threshold.spec.ts",
-        "line": 277,
-        "column": 61
+        "line": 285,
+        "column": 88
       }
     },
     {
@@ -210,7 +238,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_name_validation_flyout.spec.ts",
-        "line": 43,
+        "line": 42,
         "column": 76
       }
     },
@@ -224,7 +252,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_name_validation_flyout.spec.ts",
-        "line": 50,
+        "line": 49,
         "column": 7
       }
     },
@@ -238,8 +266,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_name_validation_flyout.spec.ts",
-        "line": 62,
+        "line": 61,
         "column": 25
+      }
+    },
+    {
+      "id": "516c7c0e6a63cda-5cfaaa8b9382bbe",
+      "title": "Rule routing tags — edit via ES|QL form replacing routing tags on the Actions step persists them and leaves tags alone",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_routing_tags_edit.spec.ts",
+        "line": 53,
+        "column": 22
       }
     },
     {

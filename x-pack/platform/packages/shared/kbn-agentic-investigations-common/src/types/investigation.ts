@@ -25,8 +25,10 @@ export interface Investigation {
   title: string;
   /** ISO 8601 timestamp */
   createdAt: string;
-  /** ISO 8601 timestamp */
-  updatedAt: string;
+  /** ISO 8601 timestamp. Set when the investigation is a proposal. */
+  proposalCreatedAt?: string;
+  /** ISO 8601 timestamp. Set once a proposal is decided; dates the closed rows. */
+  proposalDecidedAt?: string;
   worker_execution_ids: string[];
   watch_tier?: string;
   severity?: string;
@@ -47,6 +49,8 @@ export interface Investigation {
    * fallback for sample data that has not been hydrated.
    */
   entityIds?: string[];
+  /** Entity type (`host`, `user`, …) by entity id, for the ids that have one. */
+  entityTypes?: Record<string, string>;
   summary?: string;
   /** Brief priority score (0-100) for queue ranking */
   priorityScore?: number;
