@@ -6,6 +6,7 @@
  */
 
 import { expect } from '@kbn/scout-oblt/api';
+import type { KibanaRole } from '@kbn/scout-oblt';
 import {
   apiTest,
   mergeSyntheticsApiHeaders,
@@ -21,6 +22,17 @@ const LOCAL_PUBLIC_LOCATION = {
   label: 'Dev Service',
   isServiceManaged: true,
 };
+
+const SYNTHETICS_EDITOR_WITH_PARAMETER_VALUES_ROLE = {
+  elasticsearch: { cluster: [], indices: [{ names: ['*'], privileges: ['all'] }] },
+  kibana: [
+    {
+      base: [],
+      spaces: ['*'],
+      feature: { uptime: ['all', 'can_read_param_values'] },
+    },
+  ],
+} satisfies KibanaRole;
 
 const testParamWithNewLine = {
   key: 'testWithNewLine',
@@ -61,11 +73,16 @@ apiTest.describe(
   { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
   () => {
     let editorHeaders: Record<string, string>;
+    let parameterReaderHeaders: Record<string, string>;
     let adminHeaders: Record<string, string>;
 
     apiTest.beforeAll(async ({ requestAuth, apiClient, kbnClient }) => {
       const { apiKeyHeader: editorKey } = await requestAuth.getApiKey('editor');
       editorHeaders = mergeSyntheticsApiHeaders(editorKey);
+      const { apiKeyHeader: parameterReaderKey } = await requestAuth.getApiKeyForCustomRole(
+        SYNTHETICS_EDITOR_WITH_PARAMETER_VALUES_ROLE
+      );
+      parameterReaderHeaders = mergeSyntheticsApiHeaders(parameterReaderKey);
       const { apiKeyHeader: adminKey } = await requestAuth.getApiKey('admin');
       adminHeaders = mergeSyntheticsApiHeaders(adminKey);
 
@@ -158,15 +175,20 @@ apiTest.describe(
     });
 
     apiTest('inspect project browser monitor', async ({ apiClient }) => {
-      const apiResponse = await inspectMonitor(apiClient, editorHeaders, {
-        ...inspectBrowserMonitorFixture,
-        timeout: '30',
-        params: JSON.stringify({
-          username: 'elastic',
-          password: 'changeme',
-        }),
-        locations: [LOCAL_PUBLIC_LOCATION],
-      });
+      const apiResponse = await inspectMonitor(
+        apiClient,
+        editorHeaders,
+        {
+          ...inspectBrowserMonitorFixture,
+          timeout: '30',
+          params: JSON.stringify({
+            username: 'elastic',
+            password: 'changeme',
+          }),
+          locations: [LOCAL_PUBLIC_LOCATION],
+        },
+        { hideParams: false }
+      );
 
       expect(apiResponse.hasMissingReferences).toBe(false);
       expect(apiResponse.packagePolicyLinks).toStrictEqual([]);
@@ -227,11 +249,59 @@ apiTest.describe(
       expect(publicConfig.monitors[0].streams[0].timeout).toBeUndefined();
     });
 
+    apiTest(
+      'reveals browser monitor parameters to an authorized inspector',
+      async ({ apiClient }) => {
+        const apiResponse = await inspectMonitor(
+          apiClient,
+          parameterReaderHeaders,
+          {
+            ...inspectBrowserMonitorFixture,
+            timeout: '30',
+            params: JSON.stringify({
+              username: 'elastic',
+              password: 'changeme',
+            }),
+            locations: [LOCAL_PUBLIC_LOCATION],
+          },
+          { hideParams: false }
+        );
+
+        const params = apiResponse.result.publicConfigs![0].monitors[0].streams[0].params;
+        expect(params.username).toBe('elastic');
+        expect(params.password).toBe('changeme');
+      }
+    );
+
+    apiTest(
+      'masks browser monitor parameters when an authorized inspector requests it',
+      async ({ apiClient }) => {
+        const apiResponse = await inspectMonitor(
+          apiClient,
+          parameterReaderHeaders,
+          {
+            ...inspectBrowserMonitorFixture,
+            timeout: '30',
+            params: JSON.stringify({
+              username: 'elastic',
+              password: 'changeme',
+            }),
+            locations: [LOCAL_PUBLIC_LOCATION],
+          },
+          { hideParams: true }
+        );
+
+        const params = apiResponse.result.publicConfigs![0].monitors[0].streams[0].params;
+        expect(params.username).toBe('"********"');
+        expect(params.password).toBe('"********"');
+      }
+    );
+
     apiTest('inspect http monitor in private location', async ({ apiClient, apiServices }) => {
       const location = await apiServices.syntheticsPrivateLocations.addTestPrivateLocation();
       const apiResponse = await inspectMonitor(
         apiClient,
-        editorHeaders,
+        parameterReaderHeaders,
         {
           ...httpMonitorFixture,
           password: '${testWithNewLine}',
