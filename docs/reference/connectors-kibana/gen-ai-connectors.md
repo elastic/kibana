@@ -1,9 +1,6 @@
 ---
 navigation_title: GenAI
 description: "Documentation for the Generative AI connectors, used to connect Kibana to large language model (LLM) services. The OpenAI, Amazon Bedrock, Google Gemini, and AI Connector types are deprecated."
-applies_to:
-  stack: deprecated 9.5
-  serverless: deprecated
 ---
 # Generative AI connectors
 
