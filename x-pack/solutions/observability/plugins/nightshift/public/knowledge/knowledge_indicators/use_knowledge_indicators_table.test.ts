@@ -104,7 +104,7 @@ let mockIsMutatingValue = 0;
 const mockMutate = jest.fn();
 let mockMutationCallbacks: {
   onSuccess?: (result: PromoteResult) => Promise<void>;
-  onError?: (e: Error) => void;
+  onError?: (e: Error) => Promise<void>;
 } = {};
 
 jest.mock('@kbn/react-query', () => ({
@@ -112,7 +112,7 @@ jest.mock('@kbn/react-query', () => ({
   useMutation: (config: {
     mutationFn: (ids: string[]) => Promise<unknown>;
     onSuccess?: (result: PromoteResult) => Promise<void>;
-    onError?: (e: Error) => void;
+    onError?: (e: Error) => Promise<void>;
   }) => {
     mockMutationCallbacks = { onSuccess: config.onSuccess, onError: config.onError };
     return {
@@ -511,14 +511,15 @@ describe('useKnowledgeIndicatorsTable', () => {
       });
     });
 
-    it('promote onError shows error toast', () => {
+    it('promote onError shows error toast and refreshes queries other sources may have promoted', async () => {
       renderHook(() => useKnowledgeIndicatorsTable());
 
-      act(() => {
-        mockMutationCallbacks.onError?.(new Error('promote failed'));
+      await act(async () => {
+        await mockMutationCallbacks.onError?.(new Error('promote failed'));
       });
 
       expect(mockToasts.addError).toHaveBeenCalled();
+      expect(mockInvalidatePromoteRelatedQueries).toHaveBeenCalled();
     });
   });
 

@@ -229,8 +229,10 @@ export function useKnowledgeIndicatorsTable() {
       closeFlyout();
       await invalidatePromoteRelatedQueries();
     },
-    onError: (error) => {
+    onError: async (error) => {
       toasts.addError(getFormattedError(error), { title: BULK_PROMOTE_ERROR_TITLE });
+      // Other sources may have been promoted before this one failed.
+      await invalidatePromoteRelatedQueries();
     },
   });
 
