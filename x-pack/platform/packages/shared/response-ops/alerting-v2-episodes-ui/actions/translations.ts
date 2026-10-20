@@ -53,6 +53,13 @@ export const OPEN_IN_DISCOVER = i18n.translate(
   }
 );
 
+export const OPEN_ALERT_EVENTS_HISTORY = i18n.translate(
+  'xpack.alertingV2.episodesUi.actions.openAlertEventsHistoryLabel',
+  {
+    defaultMessage: 'Open alert events history',
+  }
+);
+
 export const TAGS_FLYOUT_TITLE = i18n.translate(
   'xpack.alertingV2.episodesUi.tagsAction.flyoutTitle',
   {

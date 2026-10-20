@@ -12,6 +12,7 @@ import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import {
   DISCOVER_CONTEXT_HALF_WINDOW_MINUTES,
+  getDiscoverHrefForAlertEventsHistory,
   getDiscoverHrefForRuleAndAlertTimestamp,
   getDiscoverHrefForRuleQuery,
   getDiscoverTimeRangeAroundTimestamp,
@@ -121,6 +122,45 @@ describe('getDiscoverHrefForRuleQuery', () => {
       })
     ).toBeUndefined();
     expect(share.url.locators.get).not.toHaveBeenCalled();
+  });
+});
+
+describe('getDiscoverHrefForAlertEventsHistory', () => {
+  const getRedirectUrl = jest.fn(() => '/app/discover#/?_a=...');
+  const share = sharePluginMock.createStartContract();
+  const uiSettings = uiSettingsServiceMock.createStartContract();
+  (uiSettings.get as jest.Mock).mockImplementation((key: string) =>
+    key === ENABLE_ESQL ? true : false
+  );
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    share.url.locators.get = jest.fn().mockReturnValue({
+      getRedirectUrl,
+    });
+  });
+
+  it('builds a Discover URL for the episode event history', () => {
+    const href = getDiscoverHrefForAlertEventsHistory({
+      share,
+      capabilities: getCapabilities(true),
+      uiSettings,
+      episodeId: 'episode-"one"',
+      episodeStart: '2026-04-23T00:00:00.000Z',
+      spaceId: 'space-one',
+    });
+
+    expect(href).toBe('/app/discover#/?_a=...');
+    expect(getRedirectUrl).toHaveBeenCalledWith({
+      timeRange: { from: '2026-04-23T00:00:00.000Z', to: 'now' },
+      query: {
+        esql: `FROM .rule-events
+| WHERE space_id == "space-one"
+  AND type == "alert"
+  AND episode.id == "episode-\\"one\\""
+| SORT @timestamp ASC`,
+      },
+    });
   });
 });
 

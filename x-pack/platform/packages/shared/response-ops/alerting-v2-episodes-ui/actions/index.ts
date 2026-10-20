@@ -27,6 +27,10 @@ export { createEditTagsAction } from './edit_tags';
 export { createEditAssigneeAction, EDIT_EPISODE_ASSIGNEE_ACTION_ID } from './edit_assignee';
 export { createOpenInDiscoverAction, OPEN_IN_DISCOVER_EPISODE_ACTION_ID } from './open_in_discover';
 export {
+  createOpenAlertEventsHistoryAction,
+  OPEN_ALERT_EVENTS_HISTORY_ACTION_ID,
+} from './open_alert_events_history';
+export {
   createCompositeEpisodeAction,
   type CompositeActionDef,
   type CompositeActionDeps,

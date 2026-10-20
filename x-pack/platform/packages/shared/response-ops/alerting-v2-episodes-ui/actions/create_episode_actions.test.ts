@@ -17,7 +17,7 @@ import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { QueryClient } from '@kbn/react-query';
 import { createEpisodeActions, READ_SAFE_EPISODE_ACTION_IDS } from './create_episode_actions';
 
-const buildActions = () =>
+const buildActions = ({ includeHistory = true }: { includeHistory?: boolean } = {}) =>
   createEpisodeActions({
     http: httpServiceMock.createStartContract(),
     overlays: overlayServiceMock.createStartContract(),
@@ -31,10 +31,13 @@ const buildActions = () =>
     queryClient: new QueryClient(),
     isRuleAvailable: () => true,
     getDiscoverHref: async () => 'https://discover/foo',
+    ...(includeHistory
+      ? { getAlertEventsHistoryHref: async () => 'https://discover/history' }
+      : {}),
   });
 
 describe('createEpisodeActions', () => {
-  it('returns all 9 actions sorted by order asc', () => {
+  it('returns all 10 actions sorted by order asc', () => {
     const actions = buildActions();
     expect(actions.map((a) => a.id)).toEqual([
       'ALERTING_V2_ACK_EPISODE',
@@ -46,13 +49,23 @@ describe('createEpisodeActions', () => {
       'ALERTING_V2_EDIT_EPISODE_TAGS',
       'ALERTING_V2_EDIT_EPISODE_ASSIGNEE',
       'ALERTING_V2_OPEN_EPISODE_IN_DISCOVER',
+      'ALERTING_V2_OPEN_ALERT_EVENTS_HISTORY_IN_DISCOVER',
     ]);
+  });
+
+  it('omits alert events history when the surface does not provide its resolver', () => {
+    expect(buildActions({ includeHistory: false }).map((action) => action.id)).not.toContain(
+      'ALERTING_V2_OPEN_ALERT_EVENTS_HISTORY_IN_DISCOVER'
+    );
   });
 });
 
 describe('READ_SAFE_EPISODE_ACTION_IDS', () => {
   it('contains exactly the non-mutating (navigation-only) episode actions', () => {
-    expect([...READ_SAFE_EPISODE_ACTION_IDS]).toEqual(['ALERTING_V2_OPEN_EPISODE_IN_DISCOVER']);
+    expect([...READ_SAFE_EPISODE_ACTION_IDS]).toEqual([
+      'ALERTING_V2_OPEN_EPISODE_IN_DISCOVER',
+      'ALERTING_V2_OPEN_ALERT_EVENTS_HISTORY_IN_DISCOVER',
+    ]);
   });
 
   it('is a subset of the ids produced by createEpisodeActions', () => {

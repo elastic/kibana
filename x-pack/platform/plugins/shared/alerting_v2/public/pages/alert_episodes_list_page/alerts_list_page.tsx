@@ -52,7 +52,11 @@ import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_al
 import { useAlertingRuleSourceDataViews } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rule_source_data_views';
 import { useBulkGetMaintenanceWindowsQuery } from '@kbn/response-ops-alerts-table/hooks/use_bulk_get_maintenance_windows';
 import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
-import { createEpisodeActions, type EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
+import {
+  createEpisodeActions,
+  OPEN_ALERT_EVENTS_HISTORY_ACTION_ID,
+  type EpisodeAction,
+} from '@kbn/alerting-v2-episodes-ui/actions';
 import {
   EpisodeDurationCell,
   EpisodeMaintenanceWindowsCell,
@@ -87,7 +91,10 @@ import { useEpisodesBulkActions } from './hooks/use_episodes_bulk_actions';
 import { DEFAULT_EPISODES_LIST_FILTER } from './utils/episodes_list_url_state';
 import { CLASSIC_ALERTS_DATA_SOURCE } from '../../alert_sources';
 import { ClassicAlertDetailsFlyout } from './components/classic_alert_details_flyout';
-import { getDiscoverHrefForRuleAndAlertTimestamp } from '../../utils/discover_href_for_alert';
+import {
+  getDiscoverHrefForAlertEventsHistory,
+  getDiscoverHrefForRuleAndAlertTimestamp,
+} from '../../utils/discover_href_for_alert';
 import {
   filterAlertActionsByPrivilege,
   ALERT_ACTIONS_PRIVILEGE,
@@ -444,10 +451,23 @@ const AlertsListPageContent = () => {
                 : undefined,
               alertIsoTimestamp: episodeIsoTimestamp,
             }),
+          getAlertEventsHistoryHref: ({ episodeId, episodeStart, spaceId }) =>
+            getDiscoverHrefForAlertEventsHistory({
+              share: services.share,
+              capabilities: services.application.capabilities,
+              uiSettings: services.uiSettings,
+              episodeId,
+              episodeStart,
+              spaceId,
+            }),
         }),
         alertsCapability
       ),
     [services, queryClient, additionalDataSource, rulesCache, alertsCapability]
+  );
+  const tableEpisodeActions = useMemo(
+    () => episodeActions.filter(({ id }) => id !== OPEN_ALERT_EVENTS_HISTORY_ACTION_ID),
+    [episodeActions]
   );
 
   const getRuleDetailsHref = useCallback(
@@ -512,7 +532,7 @@ const AlertsListPageContent = () => {
 
   const rowAdditionalLeadingControls: RowControlColumn[] = useMemo(
     () =>
-      episodeActions.map((action) => ({
+      tableEpisodeActions.map((action) => ({
         id: action.id,
         isAvailable: ({ record }: RowControlRowProps) => {
           const episodes = [dataTableRecordToEpisode(record)];
@@ -554,11 +574,11 @@ const AlertsListPageContent = () => {
           return control;
         },
       })),
-    [episodeActions, invalidateEpisodeQueries]
+    [tableEpisodeActions, invalidateEpisodeQueries]
   );
 
   const customBulkActions = useEpisodesBulkActions({
-    actions: episodeActions,
+    actions: tableEpisodeActions,
     episodesData,
     onSuccess: invalidateEpisodeQueries,
   });

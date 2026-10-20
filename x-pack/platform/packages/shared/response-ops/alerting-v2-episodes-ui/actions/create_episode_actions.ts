@@ -26,6 +26,10 @@ import { createUnresolveAction } from './unresolve';
 import { createEditTagsAction } from './edit_tags';
 import { createEditAssigneeAction } from './edit_assignee';
 import { createOpenInDiscoverAction, OPEN_IN_DISCOVER_EPISODE_ACTION_ID } from './open_in_discover';
+import {
+  createOpenAlertEventsHistoryAction,
+  OPEN_ALERT_EVENTS_HISTORY_ACTION_ID,
+} from './open_alert_events_history';
 
 /**
  * Ids of episode actions that are safe to expose to users without write
@@ -35,6 +39,7 @@ import { createOpenInDiscoverAction, OPEN_IN_DISCOVER_EPISODE_ACTION_ID } from '
  */
 export const READ_SAFE_EPISODE_ACTION_IDS: ReadonlySet<string> = new Set([
   OPEN_IN_DISCOVER_EPISODE_ACTION_ID,
+  OPEN_ALERT_EVENTS_HISTORY_ACTION_ID,
 ]);
 
 export interface EpisodeActionsDeps {
@@ -54,6 +59,12 @@ export interface EpisodeActionsDeps {
   getDiscoverHref: (args: {
     episodeIsoTimestamp: string;
     ruleId: string;
+  }) => string | undefined | Promise<string | undefined>;
+  /** Resolver for the Discover URL containing all rule events for one episode. */
+  getAlertEventsHistoryHref?: (args: {
+    episodeId: string;
+    episodeStart: string;
+    spaceId: string;
   }) => string | undefined | Promise<string | undefined>;
   additionalDataSource?: EpisodeDataSource;
 }
@@ -90,6 +101,14 @@ export const createEpisodeActions = (deps: EpisodeActionsDeps): EpisodeAction[] 
     ),
     createEditAssigneeAction(deps),
     createOpenInDiscoverAction(deps),
+    ...(deps.getAlertEventsHistoryHref
+      ? [
+          createOpenAlertEventsHistoryAction({
+            spaces: deps.spaces,
+            getAlertEventsHistoryHref: deps.getAlertEventsHistoryHref,
+          }),
+        ]
+      : []),
     ...(additionalDataSource?.createActions?.(deps) ?? []),
   ].sort((a, b) => a.order - b.order);
 };
