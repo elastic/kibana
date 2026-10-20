@@ -17,9 +17,11 @@ project:
   owner: '@elastic/nightshift'
   sourceRoot: x-pack/solutions/observability/plugins/nightshift
 dependsOn:
+  - '@kbn/actions-types'
   - '@kbn/agent-builder-browser'
   - '@kbn/agent-builder-elastic-ai-index-ki-types'
   - '@kbn/agent-builder-plugin'
+  - '@kbn/alerts-ui-shared'
   - '@kbn/app-header'
   - '@kbn/calculate-auto'
   - '@kbn/charts-plugin'
