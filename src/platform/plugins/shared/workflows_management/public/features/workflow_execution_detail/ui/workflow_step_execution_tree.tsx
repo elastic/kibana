@@ -786,7 +786,7 @@ function convertTreeToOpenNodes(
         isRetryAttempt: item.isRetryAttempt,
         retryAttemptCount: item.isRetryAttempt ? undefined : item.retryAttemptCount,
         retryMaxAttempts,
-        error: errorMessage,
+        error: carriesErrorRegion ? errorMessage : null,
         onViewFailedStepInput:
           status && isDangerousStatus(status) && stepExecution?.id
             ? () => onSelectStepExecution(stepExecution.id)
@@ -827,6 +827,21 @@ function convertTreeToOpenNodes(
     return [node];
   });
 }
+
+const getErrorMessage = (error: StepExecutionTreeRowProps['error']): string | undefined =>
+  typeof error === 'string' ? error : error?.message;
+
+const hasVisibleDescendantWithError = (
+  nodes: OpenTreeNode[],
+  message: string,
+  expandedIds: Set<string>
+): boolean =>
+  nodes.some(
+    (node) =>
+      getErrorMessage(node.row?.error) === message ||
+      (expandedIds.has(node.id) &&
+        hasVisibleDescendantWithError(node.children, message, expandedIds))
+  );
 
 const OpenTreeNodes = ({
   nodes,
@@ -902,6 +917,14 @@ const OpenTreeNodes = ({
           : node.row.onToggleExpand
           ? Boolean(node.row.isExpanded)
           : hasTreeChildren && expandedIds.has(node.id);
+        // The engine copies a failed step's error onto every enclosing scope
+        // (iteration, foreach, ...); show it once, on the deepest visible row.
+        const showChildren = isExpanded && hasTreeChildren;
+        const message = getErrorMessage(node.row.error);
+        const isErrorShownBelow =
+          showChildren &&
+          message != null &&
+          hasVisibleDescendantWithError(node.children, message, expandedIds);
 
         return (
           <div
@@ -912,6 +935,7 @@ const OpenTreeNodes = ({
           >
             <StepExecutionTreeRow
               {...node.row}
+              error={isErrorShownBelow ? null : node.row.error}
               isExpanded={isExpanded}
               onToggleExpand={handleToggle}
               isExpandable={isExpandable}
@@ -923,7 +947,7 @@ const OpenTreeNodes = ({
                   : 'step-execution-tree-item-label'
               }
             />
-            {isExpanded && hasTreeChildren && (
+            {showChildren && (
               <div
                 data-test-subj="workflowStepTreeIndentGuide"
                 css={css`

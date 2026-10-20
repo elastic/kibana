@@ -2368,6 +2368,110 @@ describe('WorkflowStepExecutionTree', () => {
     });
   });
 
+  describe('nested step failure', () => {
+    const renderFailedForeach = (foreachErrorMessage: string) => {
+      isTerminalStatus.mockReturnValue(true);
+      isDangerousStatus.mockImplementation((s) => s === ExecutionStatus.FAILED);
+      buildStepExecutionsTree.mockReturnValue([
+        {
+          stepExecutionId: 'foreach-exec',
+          stepId: 'loop',
+          stepType: 'foreach',
+          executionIndex: 0,
+          status: ExecutionStatus.FAILED,
+          children: [
+            {
+              stepExecutionId: 'iteration-exec',
+              stepId: 'iteration-0',
+              stepType: 'foreach-iteration',
+              executionIndex: 0,
+              status: ExecutionStatus.FAILED,
+              children: [
+                {
+                  stepExecutionId: 'leaf-exec',
+                  stepId: 'leaf',
+                  stepType: 'console',
+                  executionIndex: 0,
+                  status: ExecutionStatus.FAILED,
+                  children: [],
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      render(
+        <TestWrapper>
+          <WorkflowStepExecutionTree
+            execution={createMockExecution({
+              status: ExecutionStatus.FAILED,
+              stepExecutions: [
+                createMockStepExecution({
+                  id: 'foreach-exec',
+                  stepId: 'loop',
+                  stepType: 'foreach',
+                  status: ExecutionStatus.FAILED,
+                  error: { type: 'Error', message: foreachErrorMessage },
+                }),
+                createMockStepExecution({
+                  id: 'iteration-exec',
+                  stepId: 'iteration-0',
+                  stepType: 'foreach-iteration',
+                  status: ExecutionStatus.FAILED,
+                  error: { type: 'Error', message: 'boom' },
+                }),
+                createMockStepExecution({
+                  id: 'leaf-exec',
+                  stepId: 'leaf',
+                  stepType: 'console',
+                  status: ExecutionStatus.FAILED,
+                  error: { type: 'Error', message: 'boom' },
+                }),
+              ],
+            })}
+            definition={createMockDefinition()}
+            error={null}
+            onStepExecutionClick={mockOnStepExecutionClick}
+            selectedId={null}
+          />
+        </TestWrapper>
+      );
+    };
+
+    const getRow = (label: string) =>
+      screen.getByText(label).closest('[data-test-subj="step-execution-tree-item-label"]');
+
+    it('shows a propagated error once, on the deepest visible row', async () => {
+      renderFailedForeach('boom');
+
+      expect(screen.getAllByTestId('workflowFailedStepErrorPanel')).toHaveLength(1);
+      expect(getRow('leaf')).toHaveAttribute('data-has-error-panel', 'true');
+      expect(getRow('Iteration #0')).toHaveAttribute('data-has-error-panel', 'false');
+      expect(getRow('loop')).toHaveAttribute('data-has-error-panel', 'false');
+
+      const user = userEvent.setup();
+      const [foreachChevron, iterationChevron] = screen.getAllByTestId('workflowStepTreeChevron');
+      await user.click(iterationChevron);
+
+      expect(screen.getAllByTestId('workflowFailedStepErrorPanel')).toHaveLength(1);
+      expect(getRow('Iteration #0')).toHaveAttribute('data-has-error-panel', 'true');
+
+      await user.click(foreachChevron);
+
+      expect(screen.getAllByTestId('workflowFailedStepErrorPanel')).toHaveLength(1);
+      expect(getRow('loop')).toHaveAttribute('data-has-error-panel', 'true');
+    });
+
+    it('keeps a parent error that differs from the nested error', () => {
+      renderFailedForeach('foreach timed out');
+
+      expect(screen.getAllByTestId('workflowFailedStepErrorPanel')).toHaveLength(2);
+      expect(getRow('loop')).toHaveAttribute('data-has-error-panel', 'true');
+      expect(getRow('leaf')).toHaveAttribute('data-has-error-panel', 'true');
+    });
+  });
+
   describe('retry attempts', () => {
     const makeFailedRetryTree = () => [
       {
