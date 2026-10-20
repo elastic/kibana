@@ -372,13 +372,13 @@ export const microsoftTeamsEvents: ConnectorSpecEvents = {
     [MICROSOFT_TEAMS_CHANNEL_MESSAGE_EVENT_KEY]: {
       eventId: MICROSOFT_TEAMS_CHANNEL_MESSAGE_EVENT_ID,
       title: i18n.translate(
-        'core.kibanaConnectorSpecs.microsoftTeams.events.channelMessage.title',
+        'connectorSpecs.kibanaConnectorSpecs.microsoftTeams.events.channelMessage.title',
         {
           defaultMessage: 'Channel message posted',
         }
       ),
       description: i18n.translate(
-        'core.kibanaConnectorSpecs.microsoftTeams.events.channelMessage.description',
+        'connectorSpecs.kibanaConnectorSpecs.microsoftTeams.events.channelMessage.description',
         {
           defaultMessage:
             'A message was posted in a Teams channel. The event includes the team, channel, and message ids. For a reply, message_id is the reply. Message content is not included.',
@@ -388,11 +388,14 @@ export const microsoftTeamsEvents: ConnectorSpecEvents = {
     },
     [MICROSOFT_TEAMS_CHAT_MESSAGE_EVENT_KEY]: {
       eventId: MICROSOFT_TEAMS_CHAT_MESSAGE_EVENT_ID,
-      title: i18n.translate('core.kibanaConnectorSpecs.microsoftTeams.events.chatMessage.title', {
-        defaultMessage: 'Chat message received',
-      }),
+      title: i18n.translate(
+        'connectorSpecs.kibanaConnectorSpecs.microsoftTeams.events.chatMessage.title',
+        {
+          defaultMessage: 'Chat message received',
+        }
+      ),
       description: i18n.translate(
-        'core.kibanaConnectorSpecs.microsoftTeams.events.chatMessage.description',
+        'connectorSpecs.kibanaConnectorSpecs.microsoftTeams.events.chatMessage.description',
         {
           defaultMessage:
             'A message was posted in a Teams chat. The event includes the chat and message ids. Message content is not included.',
@@ -403,22 +406,25 @@ export const microsoftTeamsEvents: ConnectorSpecEvents = {
     [MICROSOFT_TEAMS_CHANNEL_CREATED_EVENT_KEY]: {
       eventId: MICROSOFT_TEAMS_CHANNEL_CREATED_EVENT_ID,
       title: i18n.translate(
-        'core.kibanaConnectorSpecs.microsoftTeams.events.channelCreated.title',
+        'connectorSpecs.kibanaConnectorSpecs.microsoftTeams.events.channelCreated.title',
         { defaultMessage: 'Channel created' }
       ),
       description: i18n.translate(
-        'core.kibanaConnectorSpecs.microsoftTeams.events.channelCreated.description',
+        'connectorSpecs.kibanaConnectorSpecs.microsoftTeams.events.channelCreated.description',
         { defaultMessage: 'A channel was created in a team.' }
       ),
       eventSchema: ChannelCreatedEventSchema,
     },
     [MICROSOFT_TEAMS_CHAT_CREATED_EVENT_KEY]: {
       eventId: MICROSOFT_TEAMS_CHAT_CREATED_EVENT_ID,
-      title: i18n.translate('core.kibanaConnectorSpecs.microsoftTeams.events.chatCreated.title', {
-        defaultMessage: 'Chat created',
-      }),
+      title: i18n.translate(
+        'connectorSpecs.kibanaConnectorSpecs.microsoftTeams.events.chatCreated.title',
+        {
+          defaultMessage: 'Chat created',
+        }
+      ),
       description: i18n.translate(
-        'core.kibanaConnectorSpecs.microsoftTeams.events.chatCreated.description',
+        'connectorSpecs.kibanaConnectorSpecs.microsoftTeams.events.chatCreated.description',
         { defaultMessage: 'A Teams chat was created.' }
       ),
       eventSchema: ChatCreatedEventSchema,
@@ -426,11 +432,11 @@ export const microsoftTeamsEvents: ConnectorSpecEvents = {
     [MICROSOFT_TEAMS_TEAM_MEMBER_ADDED_EVENT_KEY]: {
       eventId: MICROSOFT_TEAMS_TEAM_MEMBER_ADDED_EVENT_ID,
       title: i18n.translate(
-        'core.kibanaConnectorSpecs.microsoftTeams.events.teamMemberAdded.title',
+        'connectorSpecs.kibanaConnectorSpecs.microsoftTeams.events.teamMemberAdded.title',
         { defaultMessage: 'Team member added' }
       ),
       description: i18n.translate(
-        'core.kibanaConnectorSpecs.microsoftTeams.events.teamMemberAdded.description',
+        'connectorSpecs.kibanaConnectorSpecs.microsoftTeams.events.teamMemberAdded.description',
         { defaultMessage: 'A user was added to a team.' }
       ),
       eventSchema: TeamMemberAddedEventSchema,

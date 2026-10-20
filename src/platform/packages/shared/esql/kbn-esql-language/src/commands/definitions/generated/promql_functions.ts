@@ -1161,7 +1161,7 @@ const lastOverTimeDefinition: PromQLFunctionDefinition = {
 const limitRatioDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.ACROSS_SERIES_REDUCTION,
   name: 'limit_ratio',
-  description: i18n.translate('kbn-esql-language.promql.definitions.limit_ratio', {
+  description: i18n.translate('esqlLanguage.promql.definitions.limit_ratio', {
     defaultMessage:
       'Returns a ratio `r` of the series from the input vector, keeping their full label set.',
   }),

@@ -142,19 +142,22 @@ export const UNRESOLVE_NOT_AVAILABLE = i18n.translate(
   }
 );
 
-export const ADD_TO_CASE = i18n.translate('xpack.alertingV2.episodesUi.addToCaseAction.addToCase', {
-  defaultMessage: 'Add to case',
-});
+export const ADD_TO_CASE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesUi.addToCaseAction.addToCase',
+  {
+    defaultMessage: 'Add to case',
+  }
+);
 
 export const NO_ALERTS_ADDED_TO_CASE = i18n.translate(
-  'xpack.alertingV2.episodesUi.addToCaseAction.noAlertsAddedTitle',
+  'xpack.alertingV2EpisodesUi.episodesUi.addToCaseAction.noAlertsAddedTitle',
   {
     defaultMessage: 'No alerts added to the case',
   }
 );
 
 export const ALERTS_ALREADY_ATTACHED_TO_CASE = i18n.translate(
-  'xpack.alertingV2.episodesUi.addToCaseAction.alertsAlreadyAttached',
+  'xpack.alertingV2EpisodesUi.episodesUi.addToCaseAction.alertsAlreadyAttached',
   {
     defaultMessage: 'All selected alerts are already attached to the case',
   }
