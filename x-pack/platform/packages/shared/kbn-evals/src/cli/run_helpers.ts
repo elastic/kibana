@@ -239,7 +239,7 @@ export interface ResolveProfileEnvOverridesOptions {
 /**
  * The config a `scoutHook` reads: the datasets profile only. Suite secrets are credentials, like
  * `evaluationsKbn`, so an auto-selected export profile (e.g. `config.local.json`) must not replace them.
- * With `dev-vault`, a suite that declares a `vaultSecret` reads that secret instead of the general
+ * With `dev-vault`, a suite that declares a `vaultSecret` merges that secret over the general
  * config; file profiles keep passing the profile JSON, which holds any suite blocks itself.
  */
 export const loadScoutHookConfig = (
@@ -248,7 +248,9 @@ export const loadScoutHookConfig = (
   suite: Pick<EvalSuiteDefinition, 'vaultSecret'> | undefined
 ): object => {
   if (suite?.vaultSecret && isDevVaultProfile(datasetsProfile)) {
-    return readSuiteSecretFromDevVault(suite.vaultSecret) ?? {};
+    const suiteConfig = readSuiteSecretFromDevVault(suite.vaultSecret);
+    if (!suiteConfig) return {};
+    return { ...loadVaultConfig(repoRoot, datasetsProfile), ...suiteConfig };
   }
   return loadVaultConfig(repoRoot, datasetsProfile) ?? {};
 };

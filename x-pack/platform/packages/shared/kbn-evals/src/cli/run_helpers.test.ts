@@ -31,6 +31,7 @@ describe('loadScoutHookConfig', () => {
   const generalConfig = {
     evaluationsKbn: { url: 'https://kbn.example' },
     sandbox: { apiKey: 'from-general' },
+    nightshiftOrcaEs: { url: 'https://orca.example', apiKey: 'orca-key' },
   };
   const suiteSecret = { sandbox: { apiKey: 'from-suite-secret' } };
 
@@ -39,12 +40,13 @@ describe('loadScoutHookConfig', () => {
     mockedReadSuiteSecret.mockReset().mockReturnValue(suiteSecret);
   });
 
-  it("gives the hook the suite's own secret with the dev-vault profile", () => {
-    expect(loadScoutHookConfig('/repo', 'dev-vault', { vaultSecret: 'nightshift' })).toBe(
-      suiteSecret
-    );
+  it('merges general fields with the suite secret taking precedence', () => {
+    expect(loadScoutHookConfig('/repo', 'dev-vault', { vaultSecret: 'nightshift' })).toEqual({
+      ...generalConfig,
+      ...suiteSecret,
+    });
     expect(mockedReadSuiteSecret).toHaveBeenCalledWith('nightshift');
-    expect(mockedLoadVaultConfig).not.toHaveBeenCalled();
+    expect(mockedLoadVaultConfig).toHaveBeenCalledWith('/repo', 'dev-vault');
   });
 
   it('gives the hook an empty config when the suite secret cannot be read', () => {
