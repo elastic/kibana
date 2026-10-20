@@ -31,8 +31,8 @@ export interface HeartbeatVaultConfig {
   auth: { token: string } | { approle: { role_id: string; secret_id: string } };
   ssl?: { verification_mode: 'none' };
   // Opaque version (the connection's refreshedAt). Heartbeat shares one store (and
-  // its 5 minute secret cache) per distinct entry, so bumping this forces fresh
-  // reads — the manual "refresh" mechanism.
+  // its 5 minute secret cache) per distinct entry, so bumping this on save forces
+  // fresh reads.
   version?: string;
 }
 

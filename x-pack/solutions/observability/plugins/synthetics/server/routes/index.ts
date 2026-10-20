@@ -11,7 +11,6 @@ import {
   getSecretConnectionsRoute,
   saveSecretConnectionRoute,
   deleteSecretConnectionRoute,
-  refreshSecretConnectionsRoute,
 } from './settings/secret_connection/secret_connection';
 import { getFleetSecretStorageStatusRoute } from './settings/secret_connection/fleet_secret_storage';
 import { cleanupPrivateLocationRoute } from './settings/private_locations/cleanup_private_locations';
@@ -163,7 +162,6 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   getSecretConnectionsRoute,
   saveSecretConnectionRoute,
   deleteSecretConnectionRoute,
-  refreshSecretConnectionsRoute,
   getFleetSecretStorageStatusRoute,
   syncParamsSettingsParamsRoute,
   getMonitorsHealthRoute,

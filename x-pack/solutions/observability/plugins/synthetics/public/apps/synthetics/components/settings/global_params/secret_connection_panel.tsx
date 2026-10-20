@@ -106,7 +106,6 @@ export const SecretConnectionPanel = () => {
   const [connections, setConnections] = useState<SecretConnectionStatus[]>([]);
   const [editing, setEditing] = useState<FormState | null>(null);
   const [saving, setSaving] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 
   const accordionId = useGeneratedHtmlId({ prefix: 'secretConnections' });
@@ -179,19 +178,6 @@ export const SecretConnectionPanel = () => {
         title: DELETE_ERROR_TOAST,
         toastMessage: (e as IHttpFetchError<ResponseErrorBody>).body?.message,
       });
-    }
-  };
-
-  const onRefreshAll = async () => {
-    setRefreshing(true);
-    try {
-      await http.post(`${SYNTHETICS_API_URLS.SECRET_CONNECTION}/_refresh`);
-      notifications?.toasts.addSuccess(REFRESHED_TOAST);
-      await load();
-    } catch (e) {
-      notifications?.toasts.addError(e as Error, { title: REFRESH_ERROR_TOAST });
-    } finally {
-      setRefreshing(false);
     }
   };
 
@@ -294,20 +280,6 @@ export const SecretConnectionPanel = () => {
               {ADD_LABEL}
             </EuiButton>
           </EuiFlexItem>
-          {connections.length > 0 && (
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="s"
-                iconType="refresh"
-                data-test-subj="syntheticsVaultRefreshSecrets"
-                isLoading={refreshing}
-                isDisabled={!canManage}
-                onClick={onRefreshAll}
-              >
-                {REFRESH_BUTTON}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          )}
         </EuiFlexGroup>
 
         {editing && (
@@ -584,9 +556,6 @@ const SAVE_LABEL = i18n.translate('xpack.synthetics.secretConnection.save', {
 const CANCEL_LABEL = i18n.translate('xpack.synthetics.secretConnection.cancel', {
   defaultMessage: 'Cancel',
 });
-const REFRESH_BUTTON = i18n.translate('xpack.synthetics.secretConnection.refreshButton', {
-  defaultMessage: 'Refresh secrets',
-});
 const ACCESS_NOTE_TITLE = i18n.translate('xpack.synthetics.secretConnection.accessNoteTitle', {
   defaultMessage: 'Use a dedicated, least-privilege credential',
 });
@@ -611,10 +580,4 @@ const DELETE_CONFIRM_TITLE = i18n.translate(
 );
 const LOAD_ERROR_TOAST = i18n.translate('xpack.synthetics.secretConnection.loadErrorToast', {
   defaultMessage: 'Failed to load Vault connections',
-});
-const REFRESHED_TOAST = i18n.translate('xpack.synthetics.secretConnection.refreshedToast', {
-  defaultMessage: 'Refreshing secrets — configs are being re-pushed to agents',
-});
-const REFRESH_ERROR_TOAST = i18n.translate('xpack.synthetics.secretConnection.refreshErrorToast', {
-  defaultMessage: 'Failed to refresh Vault secrets',
 });

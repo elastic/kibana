@@ -46,7 +46,7 @@ export interface SecretProviderConnection {
   name: string;
   type: 'hashicorp_vault';
   config: HashiCorpVaultConfig;
-  // Bumped on save / manual refresh so agents re-resolve.
+  // Bumped on save so agents re-resolve.
   refreshedAt?: string;
   secrets?: HashiCorpVaultSecrets;
   // Non-secret marker so the (non-decrypting) list read can report "secret saved".
