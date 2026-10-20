@@ -1445,6 +1445,7 @@ x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp @elast
 x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-creation @elastic/security-detection-engineering
 x-pack/solutions/security/packages/kbn-evals-suite-endpoint @elastic/security-defend-workflows
 x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics @elastic/security-entity-analytics
+x-pack/solutions/security/packages/kbn-evals-suite-hunt-watch @elastic/security-investigations
 x-pack/solutions/security/packages/kbn-evals-suite-lead-generation @elastic/security-entity-analytics
 x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance @elastic/security-solution
 x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules @elastic/security-detection-engineering
@@ -3020,6 +3021,8 @@ x-pack/solutions/security/plugins/security_solution/public/cloud_defend @elastic
 x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store @elastic/security-entity-analytics
 x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/entity_store/ @elastic/security-entity-analytics
 x-pack/platform/plugins/shared/entity_store @elastic/security-entity-analytics
+# Entity store - dynamic block schema and rules (owned by Observability)
+x-pack/platform/plugins/shared/entity_store/common/domain/definitions/dynamic @elastic/obs-signals-metrics-team
 
 ## Security Solution sub teams - Threat Hunting
 
@@ -3213,6 +3216,7 @@ src/platform/packages/shared/kbn-workflows/managed/definitions/threat_intel @ela
 /x-pack/solutions/security/plugins/security_solution/test/scout_alertzero @elastic/security-investigations
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/alertzero @elastic/security-investigations
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_threat_intel @elastic/security-investigations
+/src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_hunt_watch @elastic/security-investigations
 x-pack/solutions/security/plugins/security_solution/common/workflows/alert_analysis_workflow.ts @elastic/security-investigations
 
 # AlertZero Hunt Watch services
