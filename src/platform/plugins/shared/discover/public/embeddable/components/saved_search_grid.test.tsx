@@ -96,23 +96,24 @@ describe('DiscoverGridEmbeddable renderCustomToolbar', () => {
   });
 });
 
+// The toolbar slot is provided by embedders (e.g. the Agent Builder chat view) and holds interactive controls.
 describe('DiscoverGridEmbeddable toolbar slot without rows', () => {
   const renderWithToolbarSlot = (renderMode: DataGridRenderMode) =>
     render(
       <SearchEmbeddableToolbarProvider
-        value={{ saveToDashboardButton: <button data-test-subj="saveToDashboardButton" /> }}
+        value={{ leftSide: <button data-test-subj="toolbarSlotControl" /> }}
       >
         <DiscoverGridEmbeddable {...baseProps} renderMode={renderMode} />
       </SearchEmbeddableToolbarProvider>
     );
 
-  it('renders the toolbar slot outside the grid when interactive', () => {
+  it('renders toolbar slot controls outside the grid when interactive', () => {
     renderWithToolbarSlot('interactive');
-    expect(screen.getByTestId('saveToDashboardButton')).toBeInTheDocument();
+    expect(screen.getByTestId('toolbarSlotControl')).toBeInTheDocument();
   });
 
-  it('does not render the toolbar slot in print mode', () => {
+  it('does not render toolbar slot controls in print mode', () => {
     renderWithToolbarSlot('print');
-    expect(screen.queryByTestId('saveToDashboardButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('toolbarSlotControl')).not.toBeInTheDocument();
   });
 });
