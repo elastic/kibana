@@ -57,7 +57,7 @@ asks whether something is written points here.
 
 | Grounding verdict | Outcome |
 |---|---|
-| `confirms`, event-aligned (an on-topic failure sample is enough) | A continuation of the live event that holds its rule, or of the event Topology Match accepts; otherwise a new event. |
+| `confirms`, event-aligned (an on-topic failure sample is enough) | Write. A continuation if routed to a live event (a breach must still pass `<incident_matching>`), otherwise a new event. |
 | `off_topic` with a concrete error the system does not demonstrably tolerate | Its own event. The rule's signal keeps `off_topic`. |
 | `off_topic` otherwise (benign) | Not written. |
 | `refutes` | A continuation of the live event that holds the rule, per the recovery checklist below; otherwise not written. It never pairs or groups. |
@@ -185,8 +185,9 @@ Compare one current detection against one active event using that event's compac
      against the event's compact fields.
    - Exception — same rule: a detection whose `rule_uuid` is already in an event's
      `signal_rule_uuids` is exempt from this pre-check, because its stored verdict is the rule's own
-     latest state. A breach continues that event (Rule Match); a recovery follows the checklist in
-     `<eligibility>`.
+     latest state. Whether it is accepted is governed only by the recovery checklist in
+     `<eligibility>`; any other detection, including a breach, must still pass the remaining checks
+     and the Rule Match rejection conditions.
 
 **Impact check**
 - Use the affected operation when evaluating a match; different or uncertain effects do not reject a
@@ -319,9 +320,10 @@ For events returned by `platform_sig_events_event_search`, derive:
   block Topology Match. Topology Match does not require the new rule in `signal_rule_uuids` or a
   stored signal that passes `<incident_matching>` for that rule — compact search has no per-signal
   prose.
-- **Rule Match accept:** a rule in `signal_rule_uuids` (any verdict) is the event that continues it,
-  for a breach and for a recovery (`<eligibility>`): one rule is never in two live events, and the
-  write refuses a second.
+- **Rule Match accept:** the event's compact fields pass `<incident_matching>` for this detection. A
+  rule in `signal_rule_uuids` (any verdict) identifies a candidate event but is not acceptance
+  evidence by itself for a breach: a new breach for it must still pass `<incident_matching>`. The
+  only exception is the recovery checklist in `<eligibility>`.
 - **Topology Match accept:** grounded topology overlaps the active event's stored topology, and the
   current detection's grounded evidence passes `<incident_matching>` against the event's returned
   topology and compact summary context (`title`, `summary`, `symptom_hypothesis`). That pair is
@@ -347,12 +349,24 @@ until both searches have returned.
      candidate events qualify, accept it onto the one with the greatest rule coverage. A `refutes`
      detection that meets the recovery checklist on no live event is not written; where the stored
      verdict is `off_topic`, the observed error is unchecked, so leave the event unchanged.
-   - **Breach.** A breach for that rule continues the event that holds it, whatever the stored
-     verdict. Collect all rule-uuid-matching candidates and select the one with the greatest rule
-     coverage (tie-break: compact `summary` and topology overlap). A different title or
-     `symptom_hypothesis` wording is no reason to open another event. On accept, bind this
-     detection's grounded `causal_features` and `blast_radius` for emit — both are required on the
-     write payload even when stored topology from `event_search` is empty.
+   - **Breach.** A breach for that rule is never accepted by membership alone: the current
+     detection's grounded evidence must still pass `<incident_matching>` against the event's
+     returned topology and summary context. Collect all rule-uuid-matching candidates before
+     selecting the best one (tie-break: greatest rule coverage, then compact `summary` and topology overlap).
+     Reject a breach match when one of these holds:
+      - The `<grounding_evidence>`'s query rows show the failure now targets a different resource, host,
+        or downstream dependency than the event's `summary`, `causal_features`, or `blast_radius`.
+      - The authored KI explicitly scopes the new detection away from the active event's incident.
+      - The `<grounding_evidence>`'s query rows show a substantively different active failure
+        mechanism or error signature from the active event's `summary`, `symptom_hypothesis` or
+        topology — title wording alone never qualifies. A caller-side timeout or refusal on a
+        dependency edge whose target is the event's failing node is a downstream effect of that
+        failure, not a different mechanism: accept it.
+
+   A different title or `symptom_hypothesis` wording for the same `rule_uuid` is never, by itself,
+   sufficient to reject — evaluate the underlying target and mechanism, not how the symptom is
+   phrased. On accept, bind this detection's grounded `causal_features` and `blast_radius` for emit
+   — both are required on the write payload even when stored topology from `event_search` is empty.
 
 **Topology Match**
 
@@ -531,7 +545,6 @@ rules were written.
    | `bulk_error` | once, unchanged | only if the retry succeeds |
    | `unknown_event_id` | no; do not rerun routing, pick another event, reuse the ID, or drop it into a new event | no |
    | `superseded` — another writer changed the event first | no | no |
-   | `rule_already_in_live_event` (returns `existing_event_ids`) — a rule of the item is already in a live event | once: resend the item with the `event_id` of one listed event (greatest rule coverage); never open another | only if the resend succeeds |
    | `duplicate_in_batch` or any other failure | no | no |
 
    Rules left out of `written_rule_uuids` are routed again by the next discovery cycle.

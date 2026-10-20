@@ -363,10 +363,8 @@ export function createEventsWriteTool({
       currently-active events for one that confirms every submitted confirmed rule and shares at
       least one source; non-confirming co-signals do not affect the identity. When the item
       has no confirmed rules, every submitted rule is used instead. If found, returns it without
-      writing (written: false, reason: existing_active_event). If a submitted rule, whatever its
-      verdict, is already in a live event that does not cover them all, the item is rejected
-      (written: false, reason: rule_already_in_live_event, existing_event_ids): continue one of
-      those events by sending its event_id. Otherwise creates a new event with a generated event_id.
+      writing (written: false, reason: existing_active_event). Otherwise creates a new event with
+      a generated event_id.
     `,
     annotations: {
       title: 'Write significant events',
