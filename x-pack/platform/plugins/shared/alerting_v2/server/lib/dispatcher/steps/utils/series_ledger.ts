@@ -11,24 +11,43 @@ import type { ActionGroup, ActionGroupId, Alert } from '../../types';
 import { toAction } from './action_documents';
 import { suppressionSeriesKey } from './suppression_key';
 
+/** The records of one series, held until the series has nothing left to dispatch. */
 interface SeriesRecords {
+  /** `fire`, `suppress` and `unmatched` records of every policy and alert of the series. */
   docs: AlertActionDocument[];
+  /** (toDispatch group, alert) pairs of the series not concluded yet; the docs wait for 0. */
   pending: number;
+  /**
+   * Whether the docs were handed out for writing, so they are handed out once. Handed out is not
+   * written: execution history reports the series even when the commit then fails.
+   */
   released: boolean;
 }
 
+interface DispatchEntry {
+  group: ActionGroup;
+  /** Series of each alert of the group, one entry per alert, so concluding needs no key lookup. */
+  series: SeriesRecords[];
+}
+
 /**
- * Holds the alert-scoped `.alert-actions` records of a tick until they are safe to write.
+ * Holds the series-level `.alert-actions` records of a tick until they are safe to write.
  * `fire`, `suppress` and `unmatched` carry no `alert_id` and the scan dedups them per
- * (subject, group_hash), so one record hides every policy and every episode of the series:
- * a series' records are released only once every (toDispatch group, alert) pair of it concluded.
+ * (subject, group_hash): one written record hides the whole series from the next tick. Writing it
+ * while an alert of the series is still waiting for dispatch would lose that alert if the tick
+ * aborts, so a series is released only once every (toDispatch group, alert) pair of it concluded.
  */
 export class SeriesLedger {
+  /** toDispatch groups that had their last schedule attempt, whether it succeeded or failed. */
   private readonly concluded = new Map<ActionGroupId, ActionGroup>();
 
+  /**
+   * @param recordsBySeries records of every series of the tick, keyed by `suppressionSeriesKey`.
+   * @param toDispatch planned dispatch groups, with the series each of their alerts waits on.
+   */
   private constructor(
     private readonly recordsBySeries: ReadonlyMap<string, SeriesRecords>,
-    private readonly toDispatch: ReadonlyMap<ActionGroupId, ActionGroup>
+    private readonly toDispatch: ReadonlyMap<ActionGroupId, DispatchEntry>
   ) {}
 
   public static of({ triage, plan }: { triage: AlertTriage; plan: DispatchPlan }): SeriesLedger {
@@ -56,10 +75,16 @@ export class SeriesLedger {
         record(alert, 'suppress', `suppressed by throttled policy ${policyId}`);
       }
     }
-    for (const { policyId, alerts } of plan.toDispatch) {
-      for (const alert of alerts) {
-        record(alert, 'fire', `dispatched by policy ${policyId}`).pending += 1;
-      }
+    // Only toDispatch alerts hold their series back: every other record describes a decision
+    // already final this tick, including already-notified alerts, which still need `last_fired`.
+    const toDispatch = new Map<ActionGroupId, DispatchEntry>();
+    for (const group of plan.toDispatch) {
+      const series = group.alerts.map((alert) => {
+        const records = record(alert, 'fire', `dispatched by policy ${group.policyId}`);
+        records.pending += 1;
+        return records;
+      });
+      toDispatch.set(group.id, { group, series });
     }
     for (const { policyId, alerts } of plan.alreadyNotified) {
       for (const alert of alerts) {
@@ -70,16 +95,14 @@ export class SeriesLedger {
       record(alert, 'unmatched', 'no matching action policy');
     }
 
-    return new SeriesLedger(
-      recordsBySeries,
-      new Map(plan.toDispatch.map((group) => [group.id, group]))
-    );
+    return new SeriesLedger(recordsBySeries, toDispatch);
   }
 
   public isEmpty(): boolean {
     return this.recordsBySeries.size === 0 && this.toDispatch.size === 0;
   }
 
+  /** Hands out the records of every series no toDispatch group waits on. */
   public takeReady(): AlertActionDocument[] {
     const docs: AlertActionDocument[] = [];
     for (const records of this.recordsBySeries.values()) {
@@ -91,19 +114,19 @@ export class SeriesLedger {
     return docs;
   }
 
+  /**
+   * Marks `groups` as concluded and hands out the records of the series that no longer wait on
+   * any group. Unknown and already concluded groups are skipped so a pair is never counted twice.
+   */
   public conclude(groups: readonly ActionGroup[]): AlertActionDocument[] {
     const docs: AlertActionDocument[] = [];
     for (const { id } of groups) {
-      const group = this.toDispatch.get(id);
-      if (!group || this.concluded.has(id)) {
+      const entry = this.toDispatch.get(id);
+      if (!entry || this.concluded.has(id)) {
         continue;
       }
-      this.concluded.set(id, group);
-      for (const alert of group.alerts) {
-        const records = this.recordsBySeries.get(suppressionSeriesKey(alert));
-        if (!records) {
-          continue;
-        }
+      this.concluded.set(id, entry.group);
+      for (const records of entry.series) {
         records.pending -= 1;
         if (records.pending === 0) {
           records.released = true;
@@ -114,6 +137,7 @@ export class SeriesLedger {
     return docs;
   }
 
+  /** Whether a toDispatch group was never attempted, so the tick must not advance past it. */
   public hasPending(): boolean {
     return this.concluded.size < this.toDispatch.size;
   }
@@ -122,6 +146,7 @@ export class SeriesLedger {
     return [...this.concluded.values()];
   }
 
+  /** Narrows `groups` to the alerts whose series records were handed out, dropping empty groups. */
   public releasedGroups(groups: readonly ActionGroup[]): ActionGroup[] {
     return groups.flatMap((group) => {
       const alerts = this.releasedAlerts(group.alerts);
@@ -129,6 +154,7 @@ export class SeriesLedger {
     });
   }
 
+  /** Keeps the alerts whose series records were handed out, so history matches what was recorded. */
   public releasedAlerts(alerts: readonly Alert[]): Alert[] {
     return alerts.filter(
       (alert) => this.recordsBySeries.get(suppressionSeriesKey(alert))?.released ?? false
