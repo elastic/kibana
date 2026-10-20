@@ -17,6 +17,17 @@ import {
   testData,
 } from '../fixtures';
 
+// A newly created rule's executor task is due immediately, so Task Manager can
+// claim its first run before this call; `_run` then returns 409 (already running
+// or a task-doc update conflict). Poll until that first run clears and it accepts.
+const expectRunAccepted = (post: () => Promise<{ statusCode: number }>) =>
+  expect
+    .poll(async () => (await post()).statusCode, {
+      timeout: testData.POLL_TIMEOUT_MS,
+      intervals: [testData.POLL_INTERVAL_MS],
+    })
+    .toBe(202);
+
 apiTest.describe('Run rule API', { tag: testData.API_ENGINE_TAG }, () => {
   let writerCredentials: RoleApiCredentials;
   let writerHeaders: Record<string, string>;
@@ -38,10 +49,9 @@ apiTest.describe('Run rule API', { tag: testData.API_ENGINE_TAG }, () => {
     const created = await apiServices.alertingV2.rules.create(
       buildCreateRuleData({ metadata: { name: 'rule-to-run' } })
     );
-    const response = await apiClient.post(getRunRuleUrl(created.id), {
-      headers: writerHeaders,
-    });
-    expect(response).toHaveStatusCode(202);
+    await expectRunAccepted(() =>
+      apiClient.post(getRunRuleUrl(created.id), { headers: writerHeaders })
+    );
   });
 
   apiTest('status: returns 404 when the rule does not exist', async ({ apiClient }) => {
@@ -74,10 +84,9 @@ apiTest.describe('Run rule API', { tag: testData.API_ENGINE_TAG }, () => {
       const created = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({ metadata: { name: 'writer-can-run' } })
       );
-      const response = await apiClient.post(getRunRuleUrl(created.id), {
-        headers: writerHeaders,
-      });
-      expect(response).toHaveStatusCode(202);
+      await expectRunAccepted(() =>
+        apiClient.post(getRunRuleUrl(created.id), { headers: writerHeaders })
+      );
     }
   );
 

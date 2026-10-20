@@ -84,17 +84,30 @@ export const getRuleRunnerApiService = ({
     requestRun: () => Promise<number>,
     intervalMs: number,
     timeoutMs: number = POLL_TIMEOUT_MS
-  ) =>
-    expect
+  ) => {
+    // Count observed when we last drove a run. A run stays "in flight" until the
+    // count moves past that value; while one is in flight we skip `_run` so a run
+    // that completes mid-poll cannot stack an extra execution (and extra event batch).
+    let drivenAtCount: number | undefined;
+    return expect
       .poll(
         async () => {
           const current = await count();
-          if (current < min) await requestRun();
+          if (current >= min) return current;
+
+          const runInFlight = drivenAtCount !== undefined && current <= drivenAtCount;
+
+          if (!runInFlight) {
+            drivenAtCount = current;
+            await requestRun();
+          }
+
           return current;
         },
         { timeout: timeoutMs, intervals: [intervalMs] }
       )
       .toBeGreaterThanOrEqual(min);
+  };
 
   return {
     waitForEvents: (ruleId, min, filter, { intervalMs = POLL_INTERVAL_MS } = {}) =>

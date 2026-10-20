@@ -152,17 +152,29 @@ apiTest.describe('Agent Builder — alerting V2 skill gating', () => {
         expect(setResponse).toHaveStatusCode(200);
 
         for (const { id } of RESTRICTED_SOLUTION_SPACES) {
-          const response = await apiClient.get(`/s/${id}${SKILLS_API}`, {
-            headers,
-            responseType: 'json',
-          });
-          expect(response).toHaveStatusCode(200);
-          expect(response.body.results.length).toBeGreaterThan(0);
-
-          const skillIds = getSkillIds(response.body.results);
-          for (const skillId of ALERTING_V2_SKILL_IDS) {
-            expect(skillIds).not.toContain(skillId);
-          }
+          // Poll so the solution-view and enabled writes can refresh on every node
+          // before the negative assertion; a stale node would still list the skills.
+          await expect
+            .poll(
+              async () => {
+                const response = await apiClient.get(`/s/${id}${SKILLS_API}`, {
+                  headers,
+                  responseType: 'json',
+                });
+                // Returned, not thrown: throwing inside expect.poll aborts polling instead of retrying.
+                if (response.statusCode !== 200) {
+                  return `status ${response.statusCode}: ${JSON.stringify(response.body)}`;
+                }
+                // Guard against a false pass before the space's skills are populated.
+                if (response.body.results.length === 0) {
+                  return 'no skills returned yet';
+                }
+                const skillIds = getSkillIds(response.body.results);
+                return ALERTING_V2_SKILL_IDS.every((skillId) => !skillIds.includes(skillId));
+              },
+              { timeout: SETTINGS_PROPAGATION_TIMEOUT, intervals: [1_000] }
+            )
+            .toBe(true);
         }
       } finally {
         for (const { id } of RESTRICTED_SOLUTION_SPACES) {
