@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { alertActionSubtype } from '../../../resources/datastreams/alert_actions';
 import { suppressionAlertKey, suppressionSeriesKey } from '../steps/utils/suppression_key';
 import type { Alert, SuppressionRow } from '../types';
+import type { Suppression } from './alert_triage';
 
 /**
  * Suppression facts loaded from `.alert-actions` (FetchSuppressionsStep),
@@ -42,21 +44,32 @@ export class SuppressionIndex {
    * An alert-scoped suppression wins over a series-scoped one.
    */
   public suppressionReasonFor(alert: Alert): string | undefined {
+    return this.suppressionFor(alert)?.reason;
+  }
+
+  /** Like {@link suppressionReasonFor}, with the machine-readable subtype alongside the reason. */
+  public suppressionFor(alert: Alert): Suppression | undefined {
     const alertSuppression = this.byKey.get(suppressionAlertKey(alert));
     if (alertSuppression?.should_suppress) {
-      return suppressionReason(alertSuppression);
+      return toSuppression(alertSuppression);
     }
     const seriesSuppression = this.byKey.get(suppressionSeriesKey(alert));
     if (seriesSuppression?.should_suppress) {
-      return suppressionReason(seriesSuppression);
+      return toSuppression(seriesSuppression);
     }
     return undefined;
   }
 }
 
-function suppressionReason(suppression: SuppressionRow): string {
-  if (suppression.last_snooze_action === 'snooze') return 'snooze';
-  if (suppression.last_ack_action === 'ack') return 'ack';
-  if (suppression.last_deactivate_action === 'deactivate') return 'deactivate';
-  return 'unknown suppression reason';
+function toSuppression(suppression: SuppressionRow): Suppression {
+  if (suppression.last_snooze_action === 'snooze') {
+    return { reason: 'snooze', action_subtype: alertActionSubtype.snooze };
+  }
+  if (suppression.last_ack_action === 'ack') {
+    return { reason: 'ack', action_subtype: alertActionSubtype.ack };
+  }
+  if (suppression.last_deactivate_action === 'deactivate') {
+    return { reason: 'deactivate', action_subtype: alertActionSubtype.deactivate };
+  }
+  return { reason: 'unknown suppression reason', action_subtype: alertActionSubtype.unknown };
 }
