@@ -50,10 +50,10 @@ if (sourceFilePath === 'authorization.ts') {
         adminCredentials = await svlUserManager.getM2MApiCookieCredentialsWithRoleScope('admin');
       });
 
-      // Skipped: the siemV5 snapshot expects the `custom_yara_signatures_*` privileges, but the
+      // Failing: See https://github.com/elastic/kibana/issues/299070
+      // The siemV5 snapshot expects the `custom_yara_signatures_*` privileges, but the
       // `customYaraSignaturesEnabled` flag that registers them is disabled on MKI (and, to match,
       // in configs/config.ts). Owners to decide the serverless expectation before re-enabling.
-      // See https://github.com/elastic/kibana/pull/299023
       it.skip('composite features', async () => {
         const { body } = await supertestWithoutAuth
           .get('/api/security/privileges?includeActions=true')
