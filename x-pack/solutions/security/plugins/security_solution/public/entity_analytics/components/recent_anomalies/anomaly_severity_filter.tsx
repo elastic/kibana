@@ -9,25 +9,19 @@ import React from 'react';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
-  EuiFlexItem,
+  EuiHealth,
   EuiIcon,
   EuiPanel,
   EuiText,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { AnomalyBand } from './anomaly_bands';
 
 interface SeverityFilterProps {
   anomalyBands: AnomalyBand[];
   toggleHiddenBand: (band: AnomalyBand) => void;
 }
-
-const ANOMALY_SCORE_LABEL = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.recentAnomalies.severityFilter.anomalyScoreLabel',
-  { defaultMessage: 'Anomaly score' }
-);
 
 export const AnomalySeverityFilter: React.FC<SeverityFilterProps> = ({
   anomalyBands,
@@ -46,41 +40,37 @@ export const AnomalySeverityFilter: React.FC<SeverityFilterProps> = ({
         aria-labelledby={labelId}
       >
         <p id={labelId} css={{ fontWeight: euiTheme.font.weight.bold }}>
-          {ANOMALY_SCORE_LABEL}
+          {'Anomaly score'}
         </p>
         {anomalyBands.map((band) => {
-          const range = `${band.start}-${band.end}`;
-          return (
-            <EuiFlexItem key={range} grow={false}>
+          if (band.hidden) {
+            return (
               <EuiButtonEmpty
+                key={`${band.start}-${band.end}`}
                 size="xs"
                 color="text"
-                flush="both"
-                aria-pressed={!band.hidden}
+                aria-pressed={false}
                 onClick={() => toggleHiddenBand(band)}
-                data-test-subj={`anomaly-severity-filter-${range}`}
               >
-                <EuiFlexGroup
-                  component="span"
-                  alignItems={'center'}
-                  gutterSize={'xs'}
-                  responsive={false}
-                >
-                  <EuiIcon
-                    type={band.hidden ? 'eyeSlash' : 'dot'}
-                    color={band.hidden ? euiTheme.colors.textSubdued : band.color}
-                    aria-hidden={true}
-                  />
-                  <EuiText
-                    component="span"
-                    size={'s'}
-                    color={band.hidden ? euiTheme.colors.textSubdued : undefined}
-                  >
-                    {range}
+                <EuiFlexGroup alignItems={'center'} gutterSize={'xs'} responsive={false}>
+                  <EuiIcon type={'eyeSlash'} aria-hidden={true} />
+                  <EuiText size={'s'} color={euiTheme.colors.textSubdued}>
+                    <p>{`${band.start}-${band.end}`}</p>
                   </EuiText>
                 </EuiFlexGroup>
               </EuiButtonEmpty>
-            </EuiFlexItem>
+            );
+          }
+          return (
+            <EuiButtonEmpty
+              key={`${band.start}-${band.end}`}
+              size="xs"
+              color="text"
+              aria-pressed={true}
+              onClick={() => toggleHiddenBand(band)}
+            >
+              <EuiHealth color={band.color}>{`${band.start}-${band.end}`}</EuiHealth>
+            </EuiButtonEmpty>
           );
         })}
       </EuiFlexGroup>
