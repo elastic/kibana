@@ -8,47 +8,13 @@
 import { mapValues } from 'lodash';
 import stats from 'stats-lite';
 import type { JsonObject } from '@kbn/utility-types';
-import type { Logger } from '@kbn/core/server';
 import type { RawMonitoringStats, RawMonitoredStat } from './monitoring_stats_stream';
 import { HealthStatus } from './monitoring_stats_stream';
 import type { AveragedStat } from './task_run_calculators';
 import type { TaskPersistenceTypes } from './task_run_statistics';
+import type { HealthStatusLogger } from '../lib/health_status_logger';
 import type { Result } from '../lib/result_type';
 import { asErr, asOk, map } from '../lib/result_type';
-
-export const UNHEALTHY_LOG_THROTTLE_MS = 5 * 60 * 1000; // 5 min
-
-export interface HealthStatusLogger extends Logger {
-  healthy: (reason: string) => void;
-  unhealthy: (reason: string) => void;
-}
-export function createHealthStatusLogger(logger: Logger): HealthStatusLogger {
-  let lastUnhealthyWarnAt = 0;
-  return {
-    trace: (message, meta) => logger.trace(message, meta),
-    debug: (message, meta) => logger.debug(message, meta),
-    info: (message, meta) => logger.info(message, meta),
-    warn: (errorOrMessage, meta) => logger.warn(errorOrMessage, meta),
-    error: (errorOrMessage, meta) => logger.error(errorOrMessage, meta),
-    fatal: (errorOrMessage, meta) => logger.fatal(errorOrMessage, meta),
-    log: (record) => logger.log(record),
-    isLevelEnabled: (level) => logger.isLevelEnabled(level),
-    get: (...childContextPaths) => logger.get(...childContextPaths),
-    healthy: (reason) => {
-      lastUnhealthyWarnAt = 0;
-      logger.debug(reason);
-    },
-    unhealthy: (reason) => {
-      const now = Date.now();
-      if (now - lastUnhealthyWarnAt < UNHEALTHY_LOG_THROTTLE_MS) {
-        logger.debug(reason);
-        return;
-      }
-      lastUnhealthyWarnAt = now;
-      logger.warn(reason);
-    },
-  };
-}
 
 export interface CapacityEstimationStat extends JsonObject {
   observed: {

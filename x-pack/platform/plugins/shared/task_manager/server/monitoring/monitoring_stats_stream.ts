@@ -20,7 +20,8 @@ import { createBackgroundTaskUtilizationAggregator } from './background_task_uti
 import type { ConfigStat } from './configuration_statistics';
 import { createConfigurationAggregator } from './configuration_statistics';
 import type { TaskManagerConfig } from '../config';
-import type { CapacityEstimationStat, HealthStatusLogger } from './capacity_estimation';
+import type { CapacityEstimationStat } from './capacity_estimation';
+import type { HealthStatusLogger } from '../lib/health_status_logger';
 import { withCapacityEstimate } from './capacity_estimation';
 import type { AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
 import type { CreateMonitoringStatsOpts } from '.';

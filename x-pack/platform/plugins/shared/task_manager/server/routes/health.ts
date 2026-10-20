@@ -21,10 +21,11 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { Logger, ServiceStatus } from '@kbn/core/server';
 import { ServiceStatusLevels } from '@kbn/core/server';
 import type { MonitoringStats, RawMonitoringStats } from '../monitoring';
-import { summarizeMonitoringStats, HealthStatus, createHealthStatusLogger } from '../monitoring';
+import { summarizeMonitoringStats, HealthStatus } from '../monitoring';
 import type { TaskManagerConfig } from '../config';
 import { logHealthMetrics } from '../lib/log_health_metrics';
 import { calculateHealthStatus } from '../lib/calculate_health_status';
+import { createHealthStatusLogger } from '../lib/health_status_logger';
 
 export type MonitoredHealth = RawMonitoringStats & {
   id: string;

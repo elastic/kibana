@@ -6,12 +6,9 @@
  */
 
 import type { CapacityEstimationParams } from './capacity_estimation';
-import type { HealthStatusLogger } from './capacity_estimation';
-import {
-  createHealthStatusLogger,
-  estimateCapacity,
-  UNHEALTHY_LOG_THROTTLE_MS,
-} from './capacity_estimation';
+import { estimateCapacity } from './capacity_estimation';
+import type { HealthStatusLogger } from '../lib/health_status_logger';
+import { createHealthStatusLogger, UNHEALTHY_LOG_THROTTLE_MS } from '../lib/health_status_logger';
 import type { RawMonitoringStats } from './monitoring_stats_stream';
 import { HealthStatus } from './monitoring_stats_stream';
 import { mockLogger } from '../test_utils';
@@ -942,17 +939,6 @@ describe('estimateCapacity', () => {
       expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('Task Manager is healthy'));
       expect(logger.warn).toHaveBeenCalledTimes(2);
     });
-  });
-
-  test('createHealthStatusLogger passes standard Logger methods through', () => {
-    const error = new Error('boom');
-    healthStatusLogger.info('info message');
-    healthStatusLogger.warn('warn message');
-    healthStatusLogger.error(error);
-
-    expect(logger.info).toHaveBeenCalledWith('info message', undefined);
-    expect(logger.warn).toHaveBeenCalledWith('warn message', undefined);
-    expect(logger.error).toHaveBeenCalledWith(error, undefined);
   });
 });
 
