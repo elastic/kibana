@@ -18,7 +18,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 }));
 
 jest.mock('../hooks/use_fetch_event_lifecycle');
-jest.mock('../detection/change_point_visualization', () => ({
+jest.mock('../components/entities/detection/change_point_visualization', () => ({
   ChangePointSparkline: ({ data }: { data: Array<{ x: number; y: number }> }) => (
     <div data-test-subj="mockDetectionSparkline" data-point-count={data.length} />
   ),

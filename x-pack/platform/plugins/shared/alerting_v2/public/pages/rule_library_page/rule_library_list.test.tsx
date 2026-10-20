@@ -16,11 +16,9 @@ import { createMockLocators, ListPageTestProviders } from '../../test_utils/test
 import { RuleLibraryList } from './rule_library_list';
 
 const mockFindItems = jest.fn();
-const mockInstallMutate = jest.fn();
+const mockOnCreateFromTemplate = jest.fn();
 const mockUseFetchRuleTemplateTags = jest.fn();
 let mockCanWriteRules = true;
-let mockInstallIsLoading = false;
-let mockInstallVariables: { id: string } | undefined;
 
 jest.mock('@kbn/core-di-browser', () => {
   const { UserCapabilities: ActualUserCapabilities } = jest.requireActual(
@@ -58,14 +56,6 @@ jest.mock('../../hooks/use_fetch_rule_template_tags', () => ({
   useFetchRuleTemplateTags: (params: { search?: string }) => mockUseFetchRuleTemplateTags(params),
 }));
 
-jest.mock('../../hooks/use_install_rule_template', () => ({
-  useInstallRuleTemplate: () => ({
-    mutate: mockInstallMutate,
-    isLoading: mockInstallIsLoading,
-    variables: mockInstallVariables,
-  }),
-}));
-
 const createRulePayload = (overrides: Partial<CreateRuleData> = {}): CreateRuleData =>
   ({
     kind: 'signal',
@@ -86,7 +76,7 @@ const createTemplate = (overrides: Partial<RuleTemplateResponse> = {}): RuleTemp
 const renderList = (initialEntries?: string[], locators = createMockLocators()) =>
   render(
     <ListPageTestProviders initialEntries={initialEntries} locators={locators}>
-      <RuleLibraryList />
+      <RuleLibraryList onCreateFromTemplate={mockOnCreateFromTemplate} />
     </ListPageTestProviders>
   );
 
@@ -111,8 +101,6 @@ describe('RuleLibraryList', () => {
     jest.clearAllMocks();
     contentListQueryClient.clear();
     mockCanWriteRules = true;
-    mockInstallIsLoading = false;
-    mockInstallVariables = undefined;
     mockFindItems.mockResolvedValue({ items: [], total: 0 });
     mockUseFetchRuleTemplateTags.mockReturnValue({
       data: ['nginx'],
@@ -148,7 +136,7 @@ describe('RuleLibraryList', () => {
     expect(await screen.findByText('CPU usage')).toBeInTheDocument();
     expect(screen.getByText('High CPU')).toBeInTheDocument();
     expect(screen.getByText('prod')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Install' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Create' })).toBeInTheDocument();
     expect(screen.getByTestId(CONTENT_LIST_TEST_SUBJECTS.table)).toBeInTheDocument();
   });
 
@@ -274,7 +262,7 @@ describe('RuleLibraryList', () => {
     expect(await within(options).findByText(additionalTag)).toBeInTheDocument();
   });
 
-  it('installs a template from the row action', async () => {
+  it('opens the create-from-template flyout from the row action', async () => {
     const user = userEvent.setup();
     const template = createTemplate();
     mockFindItems.mockResolvedValue({
@@ -292,15 +280,15 @@ describe('RuleLibraryList', () => {
 
     renderList();
 
-    const installAction = await screen.findByTestId('ruleLibraryInstallAction');
-    await user.click(installAction);
+    const createAction = await screen.findByTestId('ruleLibraryCreateAction');
+    await user.click(createAction);
 
     await waitFor(() => {
-      expect(mockInstallMutate).toHaveBeenCalledWith(template);
+      expect(mockOnCreateFromTemplate).toHaveBeenCalledWith(template);
     });
   });
 
-  it('disables install when the user cannot write rules', async () => {
+  it('disables create when the user cannot write rules', async () => {
     mockCanWriteRules = false;
     const template = createTemplate();
     mockFindItems.mockResolvedValue({
@@ -318,32 +306,8 @@ describe('RuleLibraryList', () => {
 
     renderList();
 
-    const installAction = await screen.findByTestId('ruleLibraryInstallAction');
-    expect(installAction).toHaveAttribute('aria-disabled', 'true');
-  });
-
-  it('shows a loading install action while a template is installing', async () => {
-    mockInstallIsLoading = true;
-    mockInstallVariables = { id: 'template-1' };
-    const template = createTemplate();
-    mockFindItems.mockResolvedValue({
-      items: [
-        {
-          id: template.id,
-          title: template.rule.metadata.name,
-          description: template.rule.metadata.description,
-          tags: template.rule.metadata.tags,
-          template,
-        },
-      ],
-      total: 1,
-    });
-
-    renderList();
-
-    const installAction = await screen.findByTestId('ruleLibraryInstallAction');
-    expect(installAction).toHaveAttribute('aria-disabled', 'true');
-    expect(screen.getByTestId('ruleLibraryInstallLoading')).toBeInTheDocument();
+    const createAction = await screen.findByTestId('ruleLibraryCreateAction');
+    expect(createAction).toHaveAttribute('aria-disabled', 'true');
   });
 
   describe('rule count', () => {

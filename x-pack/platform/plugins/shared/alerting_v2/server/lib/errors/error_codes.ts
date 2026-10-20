@@ -390,12 +390,6 @@ export const ALERTING_LOG_CODES = {
    */
   DISPATCH_POLICY_LOOKUP_FAILED: 'DISPATCH_POLICY_LOOKUP_FAILED',
   /**
-   * The dispatcher has no persisted event watermark (cold start or wiped task
-   * state). The first scan starts from `startedAt − OVERLAP_WINDOW_MINUTES`.
-   * Rule events older than that will not be dispatched.
-   */
-  DISPATCHER_COLD_START: 'DISPATCHER_COLD_START',
-  /**
    * The self-imposed tick deadline (TICK_DEADLINE_MS) fired before the pipeline
    * completed. The pipeline was aborted cooperatively; the returned watermark is
    * safe. This is expected under sustained high load — it is not an error.
