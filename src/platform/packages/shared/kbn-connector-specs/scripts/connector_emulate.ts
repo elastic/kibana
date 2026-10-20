@@ -175,12 +175,12 @@ run(
         'operations'
       )}`
     );
+    log.info('Start Kibana with these settings in config/kibana.dev.yml:');
+    // Written without the log prefix, which indents every line after the first, so the YAML
+    // can be pasted as printed.
+    log.write(`\n${kibanaSettings(proxyUrl, certFile, fixedHttpsOrigins(specs))}\n`);
     log.info(
-      `Start Kibana with these settings in config/kibana.dev.yml:\n\n${kibanaSettings(
-        proxyUrl,
-        certFile,
-        fixedHttpsOrigins(specs)
-      )}\n\nFor vendor hosts that come from connector config, start Kibana with NODE_EXTRA_CA_CERTS=${certFile} instead of the customHostSettings.`
+      `For vendor hosts that come from connector config, start Kibana with NODE_EXTRA_CA_CERTS=${certFile} instead of the customHostSettings. If config/kibana.dev.yml already sets xpack.actions.customHostSettings, add these entries to that list.`
     );
     // Serves until interrupted; the runner's exit hook ends the process.
     await new Promise<never>(() => {});
