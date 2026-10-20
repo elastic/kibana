@@ -28,7 +28,7 @@ dependsOn:
   - '@kbn/std'
   - '@kbn/logging-mocks'
   - '@kbn/repo-info'
-  - '@kbn/connector-contract-mock'
+  - '@kbn/connector-emulate'
   - '@kbn/dev-cli-runner'
   - '@kbn/dev-cli-errors'
 tags:
