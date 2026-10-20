@@ -20,11 +20,18 @@ import { CHANGE_POINT_GRID_EMBEDDABLE_TYPE } from '../../../../../common';
 /** Full dashboard width. The grid is 48 columns. */
 const CHANGE_POINT_GRID_PANEL_WIDTH = 48;
 
-/** Enough grid rows for two rows of mini charts. */
-const CHANGE_POINT_GRID_PANEL_HEIGHT = 32;
+/**
+ * Dashboard rows for two chart rows. A row is 20px plus an 8px gutter, and the panel
+ * includes a 32px title bar.
+ */
+const CHANGE_POINT_GRID_PANEL_HEIGHT = 19;
+
+/** Dashboard rows for one chart row, using the same title bar and padding. */
+const CHANGE_POINT_SERIES_PANEL_HEIGHT = 11;
 
 export interface ChangePointDashboardPage {
   esql: string;
+  singleSeries?: boolean;
 }
 
 export const toChangePointDashboardPackages = ({
@@ -62,7 +69,7 @@ export const toChangePointDashboardPackages = ({
     },
     size: {
       width: CHANGE_POINT_GRID_PANEL_WIDTH,
-      height: CHANGE_POINT_GRID_PANEL_HEIGHT,
+      height: page.singleSeries ? CHANGE_POINT_SERIES_PANEL_HEIGHT : CHANGE_POINT_GRID_PANEL_HEIGHT,
     },
   };
 

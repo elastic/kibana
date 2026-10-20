@@ -8,6 +8,7 @@
  */
 
 export { ViewSavedSearchAction } from '../embeddable/actions/view_saved_search_action';
+export { ExploreChangePointGridInDiscoverAction } from '../embeddable/actions/explore_change_point_grid_in_discover_action';
 export { AddDiscoverSessionPanelAction } from '../embeddable/actions/add_discover_session_panel_action';
 export { addPanelFromLibrary } from '../embeddable/utils/add_panel_from_library';
 export { getSearchEmbeddableFactory } from '../embeddable/get_search_embeddable_factory';

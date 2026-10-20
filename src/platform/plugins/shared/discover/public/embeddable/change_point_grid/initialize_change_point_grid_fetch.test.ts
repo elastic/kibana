@@ -76,6 +76,7 @@ describe('initializeChangePointGridFetch', () => {
   const start = () => {
     const setDataLoading = jest.fn();
     const setSearchError = jest.fn();
+    const setApproximationApplied = jest.fn();
     const onCardsUpdated = jest.fn();
     const discoverServices = {
       profilesManager: {
@@ -96,10 +97,18 @@ describe('initializeChangePointGridFetch', () => {
       onCardsUpdated,
       setDataLoading,
       setSearchError,
+      setApproximationApplied,
     });
 
     cleanupFetch = cleanup;
-    return { cleanup, setDataLoading, setSearchError, onCardsUpdated, discoverServices };
+    return {
+      cleanup,
+      setDataLoading,
+      setSearchError,
+      setApproximationApplied,
+      onCardsUpdated,
+      discoverServices,
+    };
   };
 
   afterEach(() => {
@@ -108,7 +117,7 @@ describe('initializeChangePointGridFetch', () => {
   });
 
   it('searches with the dashboard context and publishes the latest cards', async () => {
-    const { setDataLoading, onCardsUpdated } = start();
+    const { setDataLoading, setApproximationApplied, onCardsUpdated } = start();
     fetchContext$.next(dashboardContext);
     await Promise.resolve();
 
@@ -125,6 +134,7 @@ describe('initializeChangePointGridFetch', () => {
     resolveSearch({
       records: [],
       dataSource: { kind: 'esql', id: 'source-1', resultColumns: [] },
+      approximationApplied: true,
     });
     await Promise.resolve();
     await Promise.resolve();
@@ -139,6 +149,8 @@ describe('initializeChangePointGridFetch', () => {
         esqlApproximation: true,
       })
     );
+    expect(setApproximationApplied).toHaveBeenNthCalledWith(1, undefined);
+    expect(setApproximationApplied).toHaveBeenLastCalledWith(true);
     expect(cards$.getValue()?.map((card) => card.title)).toEqual(['live']);
     expect(onCardsUpdated).toHaveBeenCalled();
     expect(setDataLoading).toHaveBeenLastCalledWith(false);

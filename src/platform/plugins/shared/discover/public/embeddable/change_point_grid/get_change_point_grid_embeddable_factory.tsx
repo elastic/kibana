@@ -10,6 +10,7 @@
 import { EuiLoadingChart } from '@elastic/eui';
 import type { ChangePointCardModel } from '@kbn/change-point-chart-viewer';
 import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
+import type { AggregateQuery } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import {
@@ -20,6 +21,8 @@ import {
   type HasTypeDisplayName,
   type PublishesBlockingError,
   type PublishesDataLoading,
+  type PublishesEsql,
+  type PublishingSubject,
 } from '@kbn/presentation-publishing';
 import type {
   DefaultEmbeddableApi,
@@ -55,7 +58,11 @@ const getDefaultPanelTitle = (esql: string): string => {
 type ChangePointGridApi = DefaultEmbeddableApi<ChangePointGridEmbeddableState> &
   HasTypeDisplayName &
   PublishesDataLoading &
-  PublishesBlockingError;
+  PublishesBlockingError &
+  PublishesEsql & {
+    searchContext$: PublishingSubject<ChangePointGridSearchRequest | undefined>;
+    applyDashboardContext: boolean;
+  };
 
 export const getChangePointGridEmbeddableFactory = ({
   discoverServices,
@@ -70,6 +77,9 @@ export const getChangePointGridEmbeddableFactory = ({
     );
     const cards$ = new BehaviorSubject<ChangePointCardModel[] | undefined>(undefined);
     const searchContext$ = new BehaviorSubject<ChangePointGridSearchRequest | undefined>(undefined);
+    const esql$ = new BehaviorSubject<AggregateQuery[]>([{ esql: initialState.esql }]);
+    const approximationApplied$ = new BehaviorSubject<boolean | undefined>(undefined);
+    const applyDashboardContext = initialState.apply_dashboard_context !== false;
     const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
     const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
     const refresh$ = new ReplaySubject<UnifiedHistogramFetch$Arguments>(1);
@@ -80,10 +90,8 @@ export const getChangePointGridEmbeddableFactory = ({
       serializeState: () => ({
         ...titleManager.getLatestState(),
         esql: initialState.esql,
-        apply_dashboard_context: initialState.apply_dashboard_context !== false,
-        ...(initialState.apply_dashboard_context === false
-          ? { static_context: initialState.static_context }
-          : {}),
+        apply_dashboard_context: applyDashboardContext,
+        ...(applyDashboardContext ? {} : { static_context: initialState.static_context }),
       }),
       anyStateChange$: titleManager.anyStateChange$,
       getComparators: () => ({
@@ -101,6 +109,10 @@ export const getChangePointGridEmbeddableFactory = ({
       defaultTitle$,
       dataLoading$,
       blockingError$,
+      esql$,
+      approximationApplied$,
+      searchContext$,
+      applyDashboardContext,
       getTypeDisplayName: () => defaultTitle,
     });
 
@@ -114,6 +126,7 @@ export const getChangePointGridEmbeddableFactory = ({
       onCardsUpdated: () => refresh$.next(undefined as unknown as UnifiedHistogramFetch$Arguments),
       setDataLoading: (loading) => dataLoading$.next(loading),
       setSearchError: (error) => blockingError$.next(error),
+      setApproximationApplied: (applied) => approximationApplied$.next(applied),
     });
 
     return {

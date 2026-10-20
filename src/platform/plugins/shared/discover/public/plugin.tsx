@@ -50,6 +50,7 @@ import { initializeKbnUrlTracking } from './utils/initialize_kbn_url_tracking';
 import { defaultCustomizationContext } from './customizations/defaults';
 import {
   ACTION_ADD_DISCOVER_SESSION_PANEL,
+  ACTION_EXPLORE_CHANGE_POINT_GRID_IN_DISCOVER,
   ACTION_VIEW_SAVED_SEARCH,
   LEGACY_LOG_STREAM_EMBEDDABLE,
 } from './embeddable/constants';
@@ -308,6 +309,15 @@ export class DiscoverPlugin
       async () => {
         const { ViewSavedSearchAction } = await getEmbeddableServices();
         return new ViewSavedSearchAction(core.application, this.locator!);
+      }
+    );
+
+    plugins.uiActions.addTriggerActionAsync(
+      ON_OPEN_PANEL_MENU,
+      ACTION_EXPLORE_CHANGE_POINT_GRID_IN_DISCOVER,
+      async () => {
+        const { ExploreChangePointGridInDiscoverAction } = await getEmbeddableServices();
+        return new ExploreChangePointGridInDiscoverAction(core.application, this.locator!);
       }
     );
 

@@ -31,6 +31,7 @@ export const initializeChangePointGridFetch = ({
   onCardsUpdated,
   setDataLoading,
   setSearchError,
+  setApproximationApplied,
 }: {
   api: unknown;
   state: ChangePointGridEmbeddableState;
@@ -40,6 +41,7 @@ export const initializeChangePointGridFetch = ({
   onCardsUpdated: () => void;
   setDataLoading: (loading: boolean) => void;
   setSearchError: (error: Error | undefined) => void;
+  setApproximationApplied: (applied: boolean | undefined) => void;
 }) => {
   const scopedProfilesManager = discoverServices.profilesManager.createScopedProfilesManager({
     scopedEbtManager: discoverServices.ebtManager.createScopedEBTManager(),
@@ -68,6 +70,7 @@ export const initializeChangePointGridFetch = ({
     const currentRequestId = ++requestId;
     setDataLoading(true);
     setSearchError(undefined);
+    setApproximationApplied(undefined);
 
     const run = async () => {
       const { esqlSource } = await resolveEsqlSource({
@@ -104,9 +107,10 @@ export const initializeChangePointGridFetch = ({
         projectRouting: searchRequest.projectRouting,
         esqlApproximation: searchRequest.isApproximate,
       });
-      if (currentRequestId !== requestId) {
+      if (currentRequestId !== requestId || currentAbortController.signal.aborted) {
         return;
       }
+      setApproximationApplied(result.approximationApplied);
       const { table } = getEsqlDatatableFromDocuments({
         documentsValue: {
           fetchStatus: FetchStatus.COMPLETE,
@@ -127,6 +131,7 @@ export const initializeChangePointGridFetch = ({
           return;
         }
         setSearchError(error instanceof Error ? error : new Error(String(error)));
+        setApproximationApplied(undefined);
       })
       .finally(() => {
         if (currentRequestId === requestId) {

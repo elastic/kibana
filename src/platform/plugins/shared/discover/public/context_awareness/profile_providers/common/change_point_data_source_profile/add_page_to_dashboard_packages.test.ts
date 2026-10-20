@@ -65,7 +65,7 @@ describe('toChangePointDashboardPackages', () => {
         },
         size: {
           width: 48,
-          height: 32,
+          height: 19,
         },
       },
       {
@@ -73,6 +73,16 @@ describe('toChangePointDashboardPackages', () => {
         serializedState: { fieldName: 'service' },
       },
     ]);
+  });
+
+  it('uses one chart row when the page is a single series', () => {
+    const packages = toChangePointDashboardPackages({
+      page: { ...page, singleSeries: true },
+      applyDashboardContext: true,
+      ...context,
+    });
+
+    expect(packages[0].size).toEqual({ width: 48, height: 11 });
   });
 
   it('stores the Discover context and omits controls when the panel is static', () => {

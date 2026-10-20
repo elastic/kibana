@@ -190,4 +190,61 @@ describe('ChangePointLensChart', () => {
 
     expect(capturedExtraActions).toHaveLength(0);
   });
+
+  it('adds one series to a dashboard without annotations', async () => {
+    let capturedExtraActions: Array<{ id: string; execute: () => Promise<void> }> = [];
+    const EmbeddableSpy = ({
+      extraActions,
+    }: {
+      extraActions?: Array<{ id: string; execute: () => Promise<void> }>;
+    }) => {
+      capturedExtraActions = extraActions ?? [];
+      return <div data-test-subj="lensEmbeddable" />;
+    };
+    const addPageToDashboard = jest.fn();
+    useChangePointLensProps.mockReturnValue({ lensProps: stubLensProps, buildError: undefined });
+
+    render(
+      <ChangePointLensChart
+        {...baseProps}
+        services={{ lens: { EmbeddableComponent: EmbeddableSpy } } as never}
+        card={stubCard({
+          annotationEvents: [],
+          dashboardEsql: 'FROM idx | WHERE host == "a" | CHANGE_POINT m ON bucket BY host',
+          title: 'host: a',
+        })}
+        actions={{ addPageToDashboard }}
+      />
+    );
+
+    expect(capturedExtraActions.map((action) => action.id)).toEqual([
+      'ACTION_CHANGE_POINT_CHART_ADD_TO_DASHBOARD',
+    ]);
+    await capturedExtraActions[0].execute();
+    expect(addPageToDashboard).toHaveBeenCalledWith({
+      esql: 'FROM idx | WHERE host == "a" | CHANGE_POINT m ON bucket BY host',
+      singleSeries: true,
+    });
+  });
+
+  it('omits chart actions when panel actions are disabled', () => {
+    let capturedExtraActions: unknown[] | undefined = [];
+    const EmbeddableSpy = ({ extraActions }: { extraActions?: unknown[] }) => {
+      capturedExtraActions = extraActions;
+      return <div data-test-subj="lensEmbeddable" />;
+    };
+    useChangePointLensProps.mockReturnValue({ lensProps: stubLensProps, buildError: undefined });
+
+    render(
+      <ChangePointLensChart
+        {...baseProps}
+        showPanelActions={false}
+        services={{ lens: { EmbeddableComponent: EmbeddableSpy } } as never}
+        card={stubCard({ dashboardEsql: 'FROM idx | CHANGE_POINT m ON bucket' })}
+        actions={{ addPageToDashboard: jest.fn() }}
+      />
+    );
+
+    expect(capturedExtraActions).toBeUndefined();
+  });
 });

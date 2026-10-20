@@ -72,6 +72,7 @@ export const ChangePointGridRenderer = ({
            drawn outside each card, stay inside the panel on every edge. */
         padding: ${euiTheme.size.s};
         overflow: auto;
+        align-content: start;
         grid-template-columns: repeat(${columns}, minmax(0, 1fr));
       `}
     >

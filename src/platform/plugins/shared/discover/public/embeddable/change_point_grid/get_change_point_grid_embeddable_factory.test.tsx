@@ -49,6 +49,11 @@ describe('getChangePointGridEmbeddableFactory', () => {
       }),
     });
 
+    expect(api.esql$.getValue()).toEqual([
+      { esql: 'FROM logs-* | CHANGE_POINT count ON @timestamp' },
+    ]);
+    expect(api.approximationApplied$.getValue()).toBeUndefined();
+    expect(api.applyDashboardContext).toBe(true);
     expect(api.defaultTitle$?.getValue()).toBe('Change points in logs-*');
     expect(api.serializeState()).toEqual({
       esql: 'FROM logs-* | CHANGE_POINT count ON @timestamp',

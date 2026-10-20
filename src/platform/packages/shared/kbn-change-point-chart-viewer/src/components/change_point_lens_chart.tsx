@@ -20,6 +20,7 @@ import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import React, { useMemo, useRef } from 'react';
 import {
+  ACTION_ADD_TO_DASHBOARD,
   ACTION_EXPLORE_IN_DISCOVER_TAB,
   ACTION_FOCUSED_VIEW,
   ACTION_INSPECT_PANEL,
@@ -42,11 +43,12 @@ const focusedViewLabel = i18n.translate('changePointChartViewer.lens.focusedView
 
 const EMBEDDABLE_QUICK_ACTIONS = {
   quickActions: {
-    view: [ACTION_FOCUSED_VIEW, ACTION_INSPECT_PANEL, ADD_TO_EXISTING_CASE_ACTION_ID] as [
-      string,
-      string,
-      string
-    ],
+    view: [
+      ACTION_ADD_TO_DASHBOARD,
+      ACTION_FOCUSED_VIEW,
+      ACTION_INSPECT_PANEL,
+      ADD_TO_EXISTING_CASE_ACTION_ID,
+    ] as [string, string, string, string],
   },
 };
 
@@ -179,44 +181,73 @@ export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
   const { EmbeddableComponent } = services.lens;
 
   const extraActions = useMemo((): Action[] => {
-    if (!actions?.openInNewTab || !lensProps || !card.annotationEvents.length) return [];
+    const chartActions: Action[] = [];
+    const dashboardEsql = card.dashboardEsql;
+
+    if (actions?.addPageToDashboard && dashboardEsql) {
+      chartActions.push({
+        id: ACTION_ADD_TO_DASHBOARD,
+        order: 1,
+        type: 'actionButton',
+        getDisplayName() {
+          return i18n.translate('changePointChartViewer.lens.addToDashboardLabel', {
+            defaultMessage: 'Add to dashboard',
+          });
+        },
+        getIconType() {
+          return 'addToDashboard';
+        },
+        async isCompatible() {
+          return true;
+        },
+        async execute() {
+          actions.addPageToDashboard?.({ esql: dashboardEsql, singleSeries: true });
+        },
+      });
+    }
+
+    if (!actions?.openInNewTab || !lensProps || !card.annotationEvents.length) {
+      return chartActions;
+    }
 
     const timeRange = buildFocusedViewTimeRange(
       card.annotationEvents,
       lensProps.timeRange ?? fetchParams.timeRange
     );
+    if (!timeRange) {
+      return chartActions;
+    }
 
-    return timeRange
-      ? [
-          {
-            id: ACTION_FOCUSED_VIEW,
-            order: 22,
-            type: 'actionButton',
-            getDisplayName() {
-              return i18n.translate('changePointChartViewer.lens.focusedView', {
-                defaultMessage: 'Open in a new Discover tab',
-              });
-            },
-            getIconType() {
-              return 'productDiscover';
-            },
-            async isCompatible() {
-              return true;
-            },
-            async execute() {
-              const rawEsql = buildFocusedViewRawQuery(card.lineEsql, card.entityValues);
-              actions.openInNewTab?.({
-                query: rawEsql ? { esql: rawEsql } : lensProps.attributes.state.query,
-                tabLabel: `${lensProps.attributes.title} - ${focusedViewLabel}`,
-                timeRange,
-              });
-            },
-          },
-        ]
-      : [];
+    chartActions.push({
+      id: ACTION_FOCUSED_VIEW,
+      order: 22,
+      type: 'actionButton',
+      getDisplayName() {
+        return i18n.translate('changePointChartViewer.lens.focusedView', {
+          defaultMessage: 'Open in a new Discover tab',
+        });
+      },
+      getIconType() {
+        return 'productDiscover';
+      },
+      async isCompatible() {
+        return true;
+      },
+      async execute() {
+        const rawEsql = buildFocusedViewRawQuery(card.lineEsql, card.entityValues);
+        actions.openInNewTab?.({
+          query: rawEsql ? { esql: rawEsql } : lensProps.attributes.state.query,
+          tabLabel: `${lensProps.attributes.title} - ${focusedViewLabel}`,
+          timeRange,
+        });
+      },
+    });
+
+    return chartActions;
   }, [
     actions,
     card.annotationEvents,
+    card.dashboardEsql,
     card.entityValues,
     card.lineEsql,
     fetchParams.timeRange,
