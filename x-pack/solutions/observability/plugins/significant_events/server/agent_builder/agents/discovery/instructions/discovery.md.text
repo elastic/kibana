@@ -400,7 +400,7 @@ Step 4.
      grouped). Other excluded detections never enter the graph or any later assignment.
    - **Index first.** List each confirmed detection with the `features[].id` values of its matched
      query KI and the services its signal names. A `features[].id` counts only when it matches a
-     fetched dependency, entity, or infrastructure KI; generic ids such as `log_patterns` and
+     fetched dependency, entity, or infrastructure KI; computed KIs such as `log_patterns` and
      `dataset_analysis` never do, so a rule that lists only those, or whose rows span many services,
      bridges nothing. A detection whose list reaches another detection's services or features is a
      bridge candidate; check each one below.

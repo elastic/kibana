@@ -134,8 +134,8 @@ Always set `slugs`: feature IDs are unique only within a source.
 
 - Every matched query references a dependency, entity, or infrastructure feature → pass them as
   `feature_ids`, and set `slugs` to the matched queries' `source_id` values from Phase 1 (for example
-  `logs`), not the batch `source_id`. Generic features such as `log_patterns` and `dataset_analysis`
-  are not references.
+  `logs`), not the batch `source_id`. Computed KIs such as `log_patterns` and `dataset_analysis` are
+  not references.
 - Any matched query references none, including when no query matched → omit `feature_ids`, and set
   `slugs` to all distinct batch `source_id` values. The query KI's other authored fields can only
   resolve an entity against features that were fetched.
