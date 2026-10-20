@@ -43,7 +43,7 @@ describe('common utils', () => {
       schedules: ['10s', '5'],
     });
     expect(filters.filtersStr).toMatchInlineSnapshot(
-      `"synthetics-monitor-multi-space.attributes.tags:(\\"tag1\\" OR \\"tag2\\") AND synthetics-monitor-multi-space.attributes.project_id:(\\"project1\\" OR \\"project2\\") AND synthetics-monitor-multi-space.attributes.type:(\\"type1\\" OR \\"type2\\") AND synthetics-monitor-multi-space.attributes.locations.id:(\\"loc1\\" OR \\"loc2\\") AND ((synthetics-monitor-multi-space.attributes.schedule.number:\\"10\\" AND synthetics-monitor-multi-space.attributes.schedule.unit:\\"s\\") OR (synthetics-monitor-multi-space.attributes.schedule.number:\\"5\\" AND synthetics-monitor-multi-space.attributes.schedule.unit:\\"m\\")) AND synthetics-monitor-multi-space.attributes.id:(\\"query1\\" OR \\"query2\\") AND synthetics-monitor-multi-space.attributes.config_id:(\\"1\\" OR \\"2\\")"`
+      `"synthetics-monitor-multi-space.attributes.tags:(\\"tag1\\" OR \\"tag2\\") AND synthetics-monitor-multi-space.attributes.project_id:(\\"project1\\" OR \\"project2\\") AND synthetics-monitor-multi-space.attributes.type:(\\"type1\\" OR \\"type2\\") AND synthetics-monitor-multi-space.attributes.locations.id:(\\"loc1\\" OR \\"loc2\\") AND (synthetics-monitor-multi-space.attributes.schedule_interval_seconds:10 OR synthetics-monitor-multi-space.attributes.schedule_interval_seconds:300) AND synthetics-monitor-multi-space.attributes.id:(\\"query1\\" OR \\"query2\\") AND synthetics-monitor-multi-space.attributes.config_id:(\\"1\\" OR \\"2\\")"`
     );
   });
 });
@@ -120,13 +120,13 @@ describe('getSavedObjectKqlFilter', () => {
 describe('getScheduleKqlFilter', () => {
   it('treats a bare number as minutes', () => {
     expect(getScheduleKqlFilter('10')).toBe(
-      '(synthetics-monitor-multi-space.attributes.schedule.number:"10" AND synthetics-monitor-multi-space.attributes.schedule.unit:"m")'
+      'synthetics-monitor-multi-space.attributes.schedule_interval_seconds:600'
     );
   });
 
   it('keeps seconds and minutes as separate clauses', () => {
     expect(getScheduleKqlFilter(['10s', '10m'])).toBe(
-      '((synthetics-monitor-multi-space.attributes.schedule.number:"10" AND synthetics-monitor-multi-space.attributes.schedule.unit:"s") OR (synthetics-monitor-multi-space.attributes.schedule.number:"10" AND synthetics-monitor-multi-space.attributes.schedule.unit:"m"))'
+      '(synthetics-monitor-multi-space.attributes.schedule_interval_seconds:10 OR synthetics-monitor-multi-space.attributes.schedule_interval_seconds:600)'
     );
   });
 
@@ -136,13 +136,14 @@ describe('getScheduleKqlFilter', () => {
 });
 
 describe('scheduleBucketLabel', () => {
-  it('builds a filter key from a number and unit', () => {
-    expect(scheduleBucketLabel([10, 's'])).toBe('10s');
-    expect(scheduleBucketLabel([10, 'm'])).toBe('10m');
+  it('labels a duration that is not a whole number of minutes in seconds', () => {
+    expect(scheduleBucketLabel(10)).toBe('10s');
+    expect(scheduleBucketLabel(30)).toBe('30s');
   });
 
-  it('treats a missing unit as minutes', () => {
-    expect(scheduleBucketLabel([5])).toBe('5m');
+  it('labels a whole number of minutes in minutes', () => {
+    expect(scheduleBucketLabel(180)).toBe('3m');
+    expect(scheduleBucketLabel(600)).toBe('10m');
   });
 });
 

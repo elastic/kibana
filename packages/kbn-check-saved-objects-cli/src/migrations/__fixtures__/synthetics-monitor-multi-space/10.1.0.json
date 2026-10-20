@@ -1,5 +1,5 @@
 {
-  "10.1.0": [
+  "0.0.0": [
     {
       "name": "Homepage",
       "type": "http",
@@ -52,7 +52,7 @@
       "revision": 1
     }
   ],
-  "10.2.0": [
+  "10.1.0": [
     {
       "name": "Homepage",
       "type": "http",

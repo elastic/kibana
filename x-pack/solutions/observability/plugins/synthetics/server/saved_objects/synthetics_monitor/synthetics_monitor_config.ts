@@ -7,7 +7,7 @@
 import type { SavedObjectsType } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { monitorConfigMappings } from './monitor_mappings';
-import { scheduleIntervalModelVersion, scheduleUnitModelVersion } from './schedule_model_version';
+import { scheduleIntervalModelVersion } from './schedule_model_version';
 import { syntheticsMonitorSavedObjectType } from '../../../common/types/saved_objects';
 import { ConfigKey, secretKeys } from '../../../common/constants/monitor_management';
 
@@ -28,8 +28,7 @@ export const getSyntheticsMonitorConfigSavedObjectType = (): SavedObjectsType =>
         }),
     },
     modelVersions: {
-      '1': scheduleUnitModelVersion,
-      '2': scheduleIntervalModelVersion,
+      '1': scheduleIntervalModelVersion,
     },
   };
 };

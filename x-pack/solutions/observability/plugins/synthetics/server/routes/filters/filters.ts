@@ -17,14 +17,10 @@ import type { MonitorFiltersResult } from '../../../common/runtime_types';
 import { ConfigKey } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { scheduleBucketLabel } from '../common';
+import { SCHEDULE_INTERVAL_FIELD } from '../../../common/lib/schedule_to_time';
 
 type Buckets = Array<{
-  key: string;
-  doc_count: number;
-}>;
-
-type ScheduleBuckets = Array<{
-  key: Array<string | number>;
+  key: string | number;
   doc_count: number;
 }>;
 
@@ -37,8 +33,8 @@ interface AggsResponse {
   tagsLegacy?: { buckets: Buckets };
   projects?: { buckets: Buckets };
   projectsLegacy?: { buckets: Buckets };
-  schedules?: { buckets: ScheduleBuckets };
-  schedulesLegacy?: { buckets: ScheduleBuckets };
+  schedules?: { buckets: Buckets };
+  schedulesLegacy?: { buckets: Buckets };
 }
 
 const mergeBuckets = (...bucketSets: Array<Buckets | undefined>) => {
@@ -52,7 +48,7 @@ const mergeBuckets = (...bucketSets: Array<Buckets | undefined>) => {
   return Array.from(map.entries()).map(([label, count]) => ({ label, count }));
 };
 
-const toScheduleBuckets = (buckets?: ScheduleBuckets): Buckets | undefined =>
+const toScheduleBuckets = (buckets?: Buckets): Buckets | undefined =>
   buckets?.map(({ key, doc_count: docCount }) => ({
     key: scheduleBucketLabel(key),
     doc_count: docCount,
@@ -153,21 +149,15 @@ const aggs = {
     },
   },
   schedules: {
-    multi_terms: {
+    terms: {
+      field: `${syntheticsMonitorAttributes}.${SCHEDULE_INTERVAL_FIELD}`,
       size: 10000,
-      terms: [
-        { field: `${syntheticsMonitorAttributes}.${ConfigKey.SCHEDULE}.number` },
-        { field: `${syntheticsMonitorAttributes}.${ConfigKey.SCHEDULE}.unit` },
-      ],
     },
   },
   schedulesLegacy: {
-    multi_terms: {
+    terms: {
+      field: `${legacyMonitorAttributes}.${SCHEDULE_INTERVAL_FIELD}`,
       size: 10000,
-      terms: [
-        { field: `${legacyMonitorAttributes}.${ConfigKey.SCHEDULE}.number` },
-        { field: `${legacyMonitorAttributes}.${ConfigKey.SCHEDULE}.unit` },
-      ],
     },
   },
 };

@@ -12,21 +12,6 @@ import type {
 import { ScheduleUnit } from '../../../common/runtime_types';
 import { SCHEDULE_INTERVAL_FIELD, scheduleToSeconds } from '../../../common/lib/schedule_to_time';
 
-export const scheduleUnitModelVersion: SavedObjectsModelVersion = {
-  changes: [
-    {
-      type: 'mappings_addition',
-      addedMappings: {
-        schedule: {
-          properties: {
-            unit: { type: 'keyword' },
-          },
-        },
-      },
-    },
-  ],
-};
-
 interface ScheduleAttributes {
   schedule?: {
     number?: string;
@@ -42,7 +27,7 @@ export const backfillScheduleInterval: SavedObjectModelDataBackfillFn<
   if (!schedule?.number) {
     return { attributes: {} };
   }
-  // A missing unit is minutes, matching schedules saved before unit was indexed.
+  // A missing unit is minutes. Older monitors stored the number without a unit.
   let unit: ScheduleUnit | undefined;
   if (schedule.unit === ScheduleUnit.SECONDS) {
     unit = ScheduleUnit.SECONDS;

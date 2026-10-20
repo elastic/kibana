@@ -26,6 +26,7 @@ import {
   type ServiceLocation,
 } from '../../common/runtime_types';
 import { syntheticsMonitorAttributes } from '../../common/types/saved_objects';
+import { SCHEDULE_INTERVAL_FIELD, scheduleToSeconds } from '../../common/lib/schedule_to_time';
 import {
   jsonArrayFromString,
   MAX_DATE_RANGE_LENGTH,
@@ -320,10 +321,15 @@ export const parseScheduleFilterValue = (
   };
 };
 
-export const scheduleBucketLabel = (key: Array<string | number>): string => {
-  const [number, unit] = key;
-  const parsed = parseScheduleFilterValue(`${number ?? ''}${unit ?? ''}`);
-  return parsed ? `${parsed.number}${parsed.unit}` : String(number ?? '');
+export const scheduleBucketLabel = (key: string | number): string => {
+  const seconds = Number(key);
+  if (!Number.isFinite(seconds)) {
+    return String(key);
+  }
+  if (seconds > 0 && seconds % 60 === 0) {
+    return `${seconds / 60}m`;
+  }
+  return `${seconds}s`;
 };
 
 export const getScheduleKqlFilter = (
@@ -342,12 +348,10 @@ export const getScheduleKqlFilter = (
     return '';
   }
 
-  const clauses = list.map(
-    ({ number, unit }) =>
-      `(${attributes}.schedule.number:"${escapeQuotes(
-        number
-      )}" AND ${attributes}.schedule.unit:"${escapeQuotes(unit)}")`
-  );
+  const clauses = list.map(({ number, unit }) => {
+    const seconds = scheduleToSeconds({ number, unit });
+    return `${attributes}.${SCHEDULE_INTERVAL_FIELD}:${seconds}`;
+  });
   const joined = clauses.join(' OR ');
   return clauses.length > 1 ? `(${joined})` : joined;
 };
