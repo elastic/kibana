@@ -25,7 +25,7 @@ export interface UiamClientAuthentication {
  * supplied none and Kibana's own shared secret should be used instead.
  */
 export const getUiamClientAuthentication = (
-  request: KibanaRequest
+  request: Pick<KibanaRequest, 'headers'>
 ): UiamClientAuthentication | undefined => {
   const authorization = HTTPAuthorizationHeader.parseFromRequest(request);
   if (!authorization || !isUiamBearerCredential(authorization)) {

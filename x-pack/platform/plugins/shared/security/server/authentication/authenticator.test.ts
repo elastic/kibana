@@ -92,6 +92,7 @@ function getMockOptions({
   return {
     audit: auditService,
     getCurrentUser: jest.fn(),
+    authHeadersStorage: httpServiceMock.createAuthHeaderStorage(),
     clusterClient: elasticsearchServiceMock.createClusterClient(),
     basePath: httpServiceMock.createSetupContract().basePath,
     license: licenseMock.create(),
@@ -3109,15 +3110,15 @@ describe('Authenticator', () => {
       mockOptions = getMockOptions({ providers: { basic: { basic1: { order: 0 } } } });
       mockSessVal = sessionMock.createValue({ state: { authorization: 'Basic xxx' } });
 
+      mockOptions.getCurrentUser.mockReturnValue(mockAuthenticatedUser());
+
       authenticator = new Authenticator(mockOptions);
     });
 
     it('does not try to reauthenticate request if session is not available.', async () => {
       const request = httpServerMock.createKibanaRequest();
 
-      await expect(authenticator.reauthenticate(request)).resolves.toEqual(
-        AuthenticationResult.notHandled()
-      );
+      await expect(authenticator.reauthenticate(request)).resolves.toEqual(null);
 
       expect(mockOptions.session.create).not.toHaveBeenCalled();
       expect(mockOptions.session.update).not.toHaveBeenCalled();
@@ -3137,9 +3138,7 @@ describe('Authenticator', () => {
         })
       );
 
-      await expect(authenticator.reauthenticate(request)).resolves.toEqual(
-        AuthenticationResult.notHandled()
-      );
+      await expect(authenticator.reauthenticate(request)).resolves.toEqual(null);
 
       expect(mockOptions.session.create).not.toHaveBeenCalled();
       expect(mockOptions.session.update).not.toHaveBeenCalled();
@@ -3158,9 +3157,7 @@ describe('Authenticator', () => {
         AuthenticationResult.notHandled()
       );
 
-      await expect(authenticator.reauthenticate(request)).resolves.toEqual(
-        AuthenticationResult.notHandled()
-      );
+      await expect(authenticator.reauthenticate(request)).resolves.toEqual(null);
 
       expect(mockOptions.session.create).not.toHaveBeenCalled();
       expect(mockOptions.session.update).not.toHaveBeenCalled();
@@ -3169,7 +3166,8 @@ describe('Authenticator', () => {
       expect(mockBasicAuthenticationProvider.authenticate).toHaveBeenCalledTimes(1);
       expect(mockBasicAuthenticationProvider.authenticate).toHaveBeenCalledWith(
         request,
-        mockSessVal
+        mockSessVal,
+        { reauthenticate: true }
       );
       expect(auditLogger.log).not.toHaveBeenCalled();
     });
@@ -3184,9 +3182,7 @@ describe('Authenticator', () => {
       mockOptions.session.getSID.mockResolvedValue(mockSessVal.sid);
       mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
-      await expect(authenticator.reauthenticate(request)).resolves.toEqual(
-        AuthenticationResult.failed(failureReason)
-      );
+      await expect(authenticator.reauthenticate(request)).resolves.toEqual(null);
 
       expect(mockOptions.session.create).not.toHaveBeenCalled();
       expect(mockOptions.session.update).not.toHaveBeenCalled();
@@ -3200,14 +3196,15 @@ describe('Authenticator', () => {
       const request = httpServerMock.createKibanaRequest();
 
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
-        AuthenticationResult.succeeded(user)
+        AuthenticationResult.succeeded(user, { authHeaders: { authorization: 'Basic xxx' } })
       );
       mockOptions.session.getSID.mockResolvedValue(mockSessVal.sid);
       mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
-      await expect(authenticator.reauthenticate(request)).resolves.toEqual(
-        AuthenticationResult.succeeded(user)
-      );
+      await expect(authenticator.reauthenticate(request)).resolves.toEqual({
+        authHeaders: { authorization: 'Basic xxx' },
+        authorizationHeader: { scheme: 'Basic', credentials: 'xxx' },
+      });
 
       expect(mockOptions.session.create).not.toHaveBeenCalled();
       expect(mockOptions.session.update).not.toHaveBeenCalled();
@@ -3231,14 +3228,15 @@ describe('Authenticator', () => {
       });
 
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
-        AuthenticationResult.succeeded(user)
+        AuthenticationResult.succeeded(user, { authHeaders: { authorization: 'Basic xxx' } })
       );
       mockOptions.session.getSID.mockResolvedValue(mockSessVal.sid);
       mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
-      await expect(authenticator.reauthenticate(request)).resolves.toEqual(
-        AuthenticationResult.succeeded(user)
-      );
+      await expect(authenticator.reauthenticate(request)).resolves.toEqual({
+        authHeaders: { authorization: 'Basic xxx' },
+        authorizationHeader: { scheme: 'Basic', credentials: 'xxx' },
+      });
 
       expect(mockOptions.session.create).not.toHaveBeenCalled();
       expect(mockOptions.session.update).not.toHaveBeenCalled();
@@ -3253,14 +3251,15 @@ describe('Authenticator', () => {
       const request = httpServerMock.createKibanaRequest();
 
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
-        AuthenticationResult.succeeded(user, { state: newState })
+        AuthenticationResult.succeeded(user, { state: newState, authHeaders: newState })
       );
       mockOptions.session.getSID.mockResolvedValue(mockSessVal.sid);
       mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
-      await expect(authenticator.reauthenticate(request)).resolves.toEqual(
-        AuthenticationResult.succeeded(user, { state: newState })
-      );
+      await expect(authenticator.reauthenticate(request)).resolves.toEqual({
+        authHeaders: newState,
+        authorizationHeader: { scheme: 'Basic', credentials: 'yyy' },
+      });
 
       expect(mockOptions.session.create).not.toHaveBeenCalled();
       expect(mockOptions.session.update).toHaveBeenCalledTimes(1);
@@ -3289,14 +3288,15 @@ describe('Authenticator', () => {
       });
 
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
-        AuthenticationResult.succeeded(user, { state: newState })
+        AuthenticationResult.succeeded(user, { state: newState, authHeaders: newState })
       );
       mockOptions.session.getSID.mockResolvedValue(mockSessVal.sid);
       mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
-      await expect(authenticator.reauthenticate(request)).resolves.toEqual(
-        AuthenticationResult.succeeded(user, { state: newState })
-      );
+      await expect(authenticator.reauthenticate(request)).resolves.toEqual({
+        authHeaders: newState,
+        authorizationHeader: { scheme: 'Basic', credentials: 'yyy' },
+      });
 
       expect(mockOptions.session.create).not.toHaveBeenCalled();
       expect(mockOptions.session.update).toHaveBeenCalledTimes(1);
@@ -3322,9 +3322,7 @@ describe('Authenticator', () => {
       mockOptions.session.getSID.mockResolvedValue(mockSessVal.sid);
       mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
-      await expect(authenticator.reauthenticate(request)).resolves.toEqual(
-        AuthenticationResult.failed(failureReason)
-      );
+      await expect(authenticator.reauthenticate(request)).resolves.toEqual(null);
 
       expect(mockOptions.session.create).not.toHaveBeenCalled();
       expect(mockOptions.session.update).not.toHaveBeenCalled();

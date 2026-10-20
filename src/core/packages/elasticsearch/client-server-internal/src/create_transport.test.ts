@@ -450,7 +450,7 @@ describe('createTransport', () => {
 
       expect(transportRequestMock).toHaveBeenCalledTimes(1);
       expect(handler).toHaveBeenCalledTimes(1);
-      expect(handler).toHaveBeenCalledWith(error);
+      expect(handler).toHaveBeenCalledWith(error, {});
     });
 
     it('does not retry the call if the handler returns `notHandled`', async () => {
@@ -472,6 +472,36 @@ describe('createTransport', () => {
       await expect(transport.request(requestParams, {})).rejects.toThrow(error);
 
       expect(transportRequestMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('passes the actual failed credential, including a per-call override, to the handler', async () => {
+      const handler: jest.MockedFunction<InternalUnauthorizedErrorHandler> = jest.fn();
+      handler.mockReturnValue({ type: 'notHandled' });
+      getUnauthorizedErrorHandler.mockReturnValue(handler);
+      const error = createUnauthorizedError();
+      transportRequestMock.mockRejectedValue(error);
+      const transportClass = createTransportClass();
+      const transport = new transportClass({
+        ...baseConstructorParams,
+        headers: {
+          authorization: 'Bearer original-session-token',
+          'x-client-authentication': 'original-secret',
+        },
+      });
+
+      await expect(
+        transport.request(
+          { method: 'GET', path: '/' },
+          {
+            headers: { authorization: 'Bearer explicit-override' },
+          }
+        )
+      ).rejects.toBe(error);
+
+      expect(handler).toHaveBeenCalledWith(error, {
+        authorization: 'Bearer explicit-override',
+        'x-client-authentication': 'original-secret',
+      });
     });
 
     it('retries the call if the handler returns `retry` and return result from the retry', async () => {

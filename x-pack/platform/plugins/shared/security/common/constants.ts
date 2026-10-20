@@ -64,6 +64,9 @@ export const KIBANA_AUTH_FULL_HEADER = 'kbn-auth-full';
  */
 export const ES_CLIENT_AUTHENTICATION_HEADER = 'x-client-authentication';
 
+/** Carries native Elasticsearch JWT client authentication, including its scheme (e.g. SharedSecret). */
+export const ELASTICSEARCH_CLIENT_AUTHENTICATION_HEADER = 'es-client-authentication';
+
 /**
  * Matches valid usernames and role names.
  *
