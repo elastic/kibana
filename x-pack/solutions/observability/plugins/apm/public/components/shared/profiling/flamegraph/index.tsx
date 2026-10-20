@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { EuiSpacer } from '@elastic/eui';
+import type { ProfilingSchema } from '@kbn/profiling-utils';
 import React from 'react';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
@@ -19,6 +20,8 @@ interface Props {
   transactionName?: string;
   transactionType?: string;
   environment: string;
+  /** Undefined until a schema is selected, which the request waits for */
+  schema?: ProfilingSchema;
 }
 
 export function ProfilingFlamegraph({
@@ -29,12 +32,13 @@ export function ProfilingFlamegraph({
   transactionName,
   transactionType,
   environment,
+  schema,
 }: Props) {
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const { data, status } = useFetcher(
     (callApmApi) => {
-      if (!transactionType) {
+      if (!transactionType || !schema) {
         return;
       }
       return callApmApi('GET /internal/apm/services/{serviceName}/profiling/flamegraph', {
@@ -47,11 +51,12 @@ export function ProfilingFlamegraph({
             transactionName,
             transactionType,
             environment,
+            schema,
           },
         },
       });
     },
-    [serviceName, start, end, kuery, transactionName, transactionType, environment]
+    [serviceName, start, end, kuery, transactionName, transactionType, environment, schema]
   );
 
   return (
@@ -60,6 +65,7 @@ export function ProfilingFlamegraph({
         kuery={kuery}
         rangeFrom={rangeFrom}
         rangeTo={rangeTo}
+        schema={schema}
         justifyContent="flexEnd"
       />
       <EuiSpacer />

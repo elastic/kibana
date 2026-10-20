@@ -18,9 +18,15 @@ export interface Props {
   viewMode?: 'compact' | 'default';
   activeAlerts?: number;
   slo: SLOWithSummaryResponse;
+  isInteractive?: boolean;
 }
 
-export function SloActiveAlertsBadge({ slo, activeAlerts, viewMode = 'default' }: Props) {
+export function SloActiveAlertsBadge({
+  slo,
+  activeAlerts,
+  viewMode = 'default',
+  isInteractive = true,
+}: Props) {
   const {
     application: { navigateToApp },
   } = useKibana().services;
@@ -47,6 +53,18 @@ export function SloActiveAlertsBadge({ slo, activeAlerts, viewMode = 'default' }
     return null;
   }
 
+  const label =
+    viewMode !== 'default'
+      ? activeAlerts
+      : i18n.translate('xpack.slo.slo.activeAlertsBadge.label', {
+          defaultMessage: '{count, plural, one {# alert} other {# alerts}}',
+          values: { count: activeAlerts },
+        });
+
+  const handleMouseDown = (e: MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation(); // stops propagation of metric onElementClick
+  };
+
   return (
     <EuiFlexItem grow={false}>
       <EuiToolTip
@@ -58,26 +76,30 @@ export function SloActiveAlertsBadge({ slo, activeAlerts, viewMode = 'default' }
         })}
         display="block"
       >
-        <EuiBadge
-          iconType="warning"
-          color="danger"
-          onClick={handleActiveAlertsClick}
-          onClickAriaLabel={i18n.translate('xpack.slo.slo.activeAlertsBadge.ariaLabel', {
-            defaultMessage: 'View active alerts in a new browser tab',
-          })}
-          data-test-subj="o11ySloActiveAlertsBadge"
-          onMouseDown={(e: MouseEvent<HTMLButtonElement>) => {
-            e.stopPropagation(); // stops propagation of metric onElementClick
-          }}
-          css={{ cursor: 'pointer' }}
-        >
-          {viewMode !== 'default'
-            ? activeAlerts
-            : i18n.translate('xpack.slo.slo.activeAlertsBadge.label', {
-                defaultMessage: '{count, plural, one {# alert} other {# alerts}}',
-                values: { count: activeAlerts },
-              })}
-        </EuiBadge>
+        {isInteractive ? (
+          <EuiBadge
+            iconType="warning"
+            color="danger"
+            data-test-subj="o11ySloActiveAlertsBadge"
+            onMouseDown={handleMouseDown}
+            css={{ cursor: 'pointer' }}
+            onClick={handleActiveAlertsClick}
+            onClickAriaLabel={i18n.translate('xpack.slo.slo.activeAlertsBadge.ariaLabel', {
+              defaultMessage: 'View active alerts in a new browser tab',
+            })}
+          >
+            {label}
+          </EuiBadge>
+        ) : (
+          <EuiBadge
+            iconType="warning"
+            color="danger"
+            data-test-subj="o11ySloActiveAlertsBadge"
+            onMouseDown={handleMouseDown}
+          >
+            {label}
+          </EuiBadge>
+        )}
       </EuiToolTip>
     </EuiFlexItem>
   );

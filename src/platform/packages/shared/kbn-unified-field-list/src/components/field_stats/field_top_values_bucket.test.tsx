@@ -104,11 +104,11 @@ describe('UnifiedFieldList <FieldTopValuesBucket />', () => {
     expect(screen.getAllByRole('button')).toHaveLength(2);
   });
 
-  it('renders 48px placeholder instead of buttons when type is "other"', () => {
+  it('renders hidden filter buttons when type is "other" and onAddOtherFilter is undefined', () => {
     renderBucket({ type: 'other', onAddFilter: jest.fn() });
 
     expect(screen.queryAllByRole('button')).toHaveLength(0);
-    expect(screen.getByTestId('test-filterActions-placeholder')).toBeInTheDocument();
+    expect(screen.getByTestId('plus-extension-__other__')).not.toBeVisible();
   });
 
   it('calls onAddFilter with "+" when plus button is clicked', async () => {
