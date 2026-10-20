@@ -24,8 +24,6 @@ import {
   EuiAccordion,
   EuiIconTip,
   EuiButtonGroup,
-  EuiTabs,
-  EuiTab,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -80,8 +78,6 @@ const getPercentileFieldLabel = (visualization: HistogramVisualization): string 
   }
 };
 
-type SettingsTabId = 'metrics' | 'histograms';
-
 interface GridSettingsFlyoutProps {
   gridSettings: MetricsGridSettings;
   onGridSettingsChange: (update: Partial<MetricsGridSettings>) => void;
@@ -98,6 +94,12 @@ export const GridSettingsFlyout = ({
   const aggregationAccordionId = useGeneratedHtmlId({
     prefix: 'metricsGridSettingsAggregationAccordion',
   });
+  const metricsAccordionId = useGeneratedHtmlId({
+    prefix: 'metricsGridSettingsMetricsAccordion',
+  });
+  const histogramsAccordionId = useGeneratedHtmlId({
+    prefix: 'metricsGridSettingsHistogramsAccordion',
+  });
 
   const dataDisplayGroupDescription = i18n.translate(
     'metricsExperience.gridSettingsFlyout.dataDisplayGroupTooltip',
@@ -112,7 +114,6 @@ export const GridSettingsFlyout = ({
     FEATURE_FLAG_DEFAULTS[FEATURE_FLAGS.IS_HEATMAPS_ENABLED]
   );
   const [draftSettings, setDraftSettings] = useState<MetricsGridSettings>(gridSettings);
-  const [settingsTabId, setSettingsTabId] = useState<SettingsTabId>('metrics');
   const percentileFallbackHint = getPercentileFallbackHint(draftSettings.histogramVisualization);
   const histogramLabel = i18n.translate('metricsExperience.gridSettingsFlyout.histogramLabel', {
     defaultMessage: 'Histogram',
@@ -159,6 +160,99 @@ export const GridSettingsFlyout = ({
     onClose();
   }, [gridSettings, onGridSettingsChange, onClose, pendingUpdate, trackAggregationConfigChanged]);
 
+  const counterAndGaugeFields = (
+    <>
+      <EuiFormRow
+        label={i18n.translate('metricsExperience.gridSettingsFlyout.counterLabel', {
+          defaultMessage: 'Counter',
+        })}
+      >
+        <EuiSuperSelect
+          data-test-subj="metricsExperienceGridSettingsCounterSelect"
+          options={COUNTER_OPTIONS}
+          valueOfSelected={draftSettings.counterAggregation}
+          onChange={(value) => onSettingChange('counterAggregation', value)}
+        />
+      </EuiFormRow>
+      <EuiSpacer size="m" />
+      <EuiFormRow
+        label={i18n.translate('metricsExperience.gridSettingsFlyout.gaugeLabel', {
+          defaultMessage: 'Gauge',
+        })}
+      >
+        <EuiSuperSelect
+          data-test-subj="metricsExperienceGridSettingsGaugeSelect"
+          options={GAUGE_OPTIONS}
+          valueOfSelected={draftSettings.gaugeAggregation}
+          onChange={(value) => onSettingChange('gaugeAggregation', value)}
+        />
+      </EuiFormRow>
+    </>
+  );
+
+  const histogramFields = (
+    <>
+      {isHeatmapsEnabled ? (
+        <>
+          <EuiFormRow fullWidth label={histogramDisplayLabel}>
+            <EuiButtonGroup
+              isFullWidth
+              buttonSize="s"
+              legend={histogramDisplayLabel}
+              data-test-subj="metricsExperienceGridSettingsHistogramDisplay"
+              variant="selection"
+              display="highlighted"
+              idSelected={draftSettings.histogramVisualization}
+              onChange={onHistogramDisplayChange}
+            >
+              {HISTOGRAM_VISUALIZATION_OPTIONS.map((choice) => (
+                <EuiButton
+                  key={choice.id}
+                  id={choice.id}
+                  iconType={choice.iconType}
+                  data-test-subj={choice['data-test-subj']}
+                >
+                  {choice.label}
+                </EuiButton>
+              ))}
+            </EuiButtonGroup>
+          </EuiFormRow>
+          <EuiSpacer size="m" />
+        </>
+      ) : null}
+      <EuiFormRow label={percentileFieldLabel} helpText={percentileFallbackHint}>
+        <EuiSuperSelect
+          data-test-subj="metricsExperienceGridSettingsHistogramSelect"
+          options={HISTOGRAM_OPTIONS}
+          valueOfSelected={draftSettings.histogramPercentile}
+          onChange={(value) => onSettingChange('histogramPercentile', value)}
+        />
+      </EuiFormRow>
+    </>
+  );
+
+  const dataDisplayHeading = (
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiTitle size="xs">
+          <h3>
+            {i18n.translate('metricsExperience.gridSettingsFlyout.dataDisplayGroupTitle', {
+              defaultMessage: 'Data display',
+            })}
+          </h3>
+        </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiIconTip
+          type="info"
+          color="subdued"
+          aria-label={dataDisplayGroupDescription}
+          content={dataDisplayGroupDescription}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
   return (
     <EuiFlyout
       onClose={onClose}
@@ -178,126 +272,53 @@ export const GridSettingsFlyout = ({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiAccordion
-          id={aggregationAccordionId}
-          initialIsOpen
-          data-test-subj="metricsExperienceGridSettingsAggregationAccordion"
-          buttonContent={
-            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="xs">
-                  <h5>
-                    {i18n.translate('metricsExperience.gridSettingsFlyout.dataDisplayGroupTitle', {
-                      defaultMessage: 'Data display',
-                    })}
-                  </h5>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiIconTip
-                  type="info"
-                  color="subdued"
-                  aria-label={dataDisplayGroupDescription}
-                  content={dataDisplayGroupDescription}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          }
-        >
-          <EuiSpacer size="m" />
-          {isHeatmapsEnabled ? (
-            <>
-              <EuiTabs size="s" data-test-subj="metricsExperienceGridSettingsTabs">
-                <EuiTab
-                  isSelected={settingsTabId === 'metrics'}
-                  onClick={() => setSettingsTabId('metrics')}
-                  data-test-subj="metricsExperienceGridSettingsMetricsTab"
-                >
-                  {i18n.translate('metricsExperience.gridSettingsFlyout.metricsTabLabel', {
-                    defaultMessage: 'Counters and gauges',
-                  })}
-                </EuiTab>
-                <EuiTab
-                  isSelected={settingsTabId === 'histograms'}
-                  onClick={() => setSettingsTabId('histograms')}
-                  data-test-subj="metricsExperienceGridSettingsHistogramsTab"
-                >
-                  {i18n.translate('metricsExperience.gridSettingsFlyout.histogramsTabLabel', {
-                    defaultMessage: 'Histograms',
-                  })}
-                </EuiTab>
-              </EuiTabs>
-              <EuiSpacer size="m" />
-            </>
-          ) : null}
-          {settingsTabId === 'metrics' || !isHeatmapsEnabled ? (
-            <>
-              <EuiFormRow
-                label={i18n.translate('metricsExperience.gridSettingsFlyout.counterLabel', {
-                  defaultMessage: 'Counter',
-                })}
-              >
-                <EuiSuperSelect
-                  data-test-subj="metricsExperienceGridSettingsCounterSelect"
-                  options={COUNTER_OPTIONS}
-                  valueOfSelected={draftSettings.counterAggregation}
-                  onChange={(value) => onSettingChange('counterAggregation', value)}
-                />
-              </EuiFormRow>
-              <EuiSpacer size="m" />
-              <EuiFormRow
-                label={i18n.translate('metricsExperience.gridSettingsFlyout.gaugeLabel', {
-                  defaultMessage: 'Gauge',
-                })}
-              >
-                <EuiSuperSelect
-                  data-test-subj="metricsExperienceGridSettingsGaugeSelect"
-                  options={GAUGE_OPTIONS}
-                  valueOfSelected={draftSettings.gaugeAggregation}
-                  onChange={(value) => onSettingChange('gaugeAggregation', value)}
-                />
-              </EuiFormRow>
-            </>
-          ) : null}
-          {isHeatmapsEnabled && settingsTabId === 'histograms' ? (
-            <>
-              <EuiFormRow fullWidth label={histogramDisplayLabel}>
-                <EuiButtonGroup
-                  isFullWidth
-                  buttonSize="s"
-                  legend={histogramDisplayLabel}
-                  data-test-subj="metricsExperienceGridSettingsHistogramDisplay"
-                  variant="selection"
-                  display="highlighted"
-                  idSelected={draftSettings.histogramVisualization}
-                  onChange={onHistogramDisplayChange}
-                >
-                  {HISTOGRAM_VISUALIZATION_OPTIONS.map((choice) => (
-                    <EuiButton
-                      key={choice.id}
-                      id={choice.id}
-                      iconType={choice.iconType}
-                      data-test-subj={choice['data-test-subj']}
-                    >
-                      {choice.label}
-                    </EuiButton>
-                  ))}
-                </EuiButtonGroup>
-              </EuiFormRow>
-              <EuiSpacer size="m" />
-            </>
-          ) : null}
-          {settingsTabId === 'histograms' || !isHeatmapsEnabled ? (
-            <EuiFormRow label={percentileFieldLabel} helpText={percentileFallbackHint}>
-              <EuiSuperSelect
-                data-test-subj="metricsExperienceGridSettingsHistogramSelect"
-                options={HISTOGRAM_OPTIONS}
-                valueOfSelected={draftSettings.histogramPercentile}
-                onChange={(value) => onSettingChange('histogramPercentile', value)}
-              />
-            </EuiFormRow>
-          ) : null}
-        </EuiAccordion>
+        {isHeatmapsEnabled ? (
+          <>
+            {dataDisplayHeading}
+            <EuiSpacer size="m" />
+            <EuiAccordion
+              id={metricsAccordionId}
+              initialIsOpen
+              paddingSize="s"
+              data-test-subj="metricsExperienceGridSettingsMetricsAccordion"
+              buttonContent={i18n.translate(
+                'metricsExperience.gridSettingsFlyout.metricsTabLabel',
+                {
+                  defaultMessage: 'Counters and gauges',
+                }
+              )}
+            >
+              {counterAndGaugeFields}
+            </EuiAccordion>
+            <EuiSpacer size="m" />
+            <EuiAccordion
+              id={histogramsAccordionId}
+              initialIsOpen
+              paddingSize="s"
+              data-test-subj="metricsExperienceGridSettingsHistogramsAccordion"
+              buttonContent={i18n.translate(
+                'metricsExperience.gridSettingsFlyout.histogramsTabLabel',
+                {
+                  defaultMessage: 'Histograms',
+                }
+              )}
+            >
+              {histogramFields}
+            </EuiAccordion>
+          </>
+        ) : (
+          <EuiAccordion
+            id={aggregationAccordionId}
+            initialIsOpen
+            data-test-subj="metricsExperienceGridSettingsAggregationAccordion"
+            buttonContent={dataDisplayHeading}
+          >
+            <EuiSpacer size="m" />
+            {counterAndGaugeFields}
+            <EuiSpacer size="m" />
+            {histogramFields}
+          </EuiAccordion>
+        )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">

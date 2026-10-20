@@ -52,9 +52,6 @@ const histogramSelect = new EuiSuperSelectTestHarness(
   'metricsExperienceGridSettingsHistogramSelect'
 );
 
-const openHistogramsTab = () =>
-  userEvent.click(screen.getByTestId('metricsExperienceGridSettingsHistogramsTab'));
-
 const renderFlyout = (
   ui: React.ReactElement,
   { isHeatmapsEnabled = true }: { isHeatmapsEnabled?: boolean } = {}
@@ -76,7 +73,7 @@ describe('GridSettingsFlyout', () => {
     jest.clearAllMocks();
   });
 
-  it('renders the aggregation settings inside an accordion that is open by default', async () => {
+  it('renders counters and histograms in accordions that are open by default', () => {
     renderFlyout(
       <GridSettingsFlyout
         gridSettings={defaultSettings}
@@ -86,16 +83,14 @@ describe('GridSettingsFlyout', () => {
     );
 
     expect(
-      screen.getByTestId('metricsExperienceGridSettingsAggregationAccordion')
+      screen.queryByTestId('metricsExperienceGridSettingsAggregationAccordion')
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId('metricsExperienceGridSettingsMetricsAccordion')).toBeInTheDocument();
+    expect(
+      screen.getByTestId('metricsExperienceGridSettingsHistogramsAccordion')
     ).toBeInTheDocument();
     expect(counterSelect.getSelected()).toContain('Sum');
     expect(gaugeSelect.getSelected()).toContain('Average');
-    expect(
-      screen.queryByTestId('metricsExperienceGridSettingsHistogramSelect')
-    ).not.toBeInTheDocument();
-
-    await openHistogramsTab();
-
     expect(histogramSelect.getSelected()).toContain('95th percentile');
     expect(screen.getByTestId('metricsExperienceGridSettingsDistributionChoice')).toHaveAttribute(
       'aria-pressed',
@@ -157,7 +152,6 @@ describe('GridSettingsFlyout', () => {
     );
 
     await gaugeSelect.select('metricsExperienceGridSettingsGaugeOption-min');
-    await openHistogramsTab();
     await userEvent.click(screen.getByTestId('metricsExperienceGridSettingsPercentileChoice'));
     await userEvent.click(screen.getByTestId('metricsExperienceGridSettingsApplyButton'));
 
@@ -188,7 +182,6 @@ describe('GridSettingsFlyout', () => {
       />
     );
 
-    await openHistogramsTab();
     expect(histogramSelect.getSelected()).toContain('95th percentile');
     await userEvent.click(screen.getByTestId('metricsExperienceGridSettingsDistributionChoice'));
     await userEvent.click(screen.getByTestId('metricsExperienceGridSettingsApplyButton'));
@@ -211,7 +204,6 @@ describe('GridSettingsFlyout', () => {
       />
     );
 
-    await openHistogramsTab();
     await histogramSelect.select('metricsExperienceGridSettingsHistogramOption-p99');
     await userEvent.click(screen.getByTestId('metricsExperienceGridSettingsApplyButton'));
 
@@ -239,7 +231,7 @@ describe('GridSettingsFlyout', () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  it('shows the Distribution choice when heatmaps are enabled', async () => {
+  it('shows the Distribution choice when heatmaps are enabled', () => {
     renderFlyout(
       <GridSettingsFlyout
         gridSettings={defaultSettings}
@@ -249,7 +241,6 @@ describe('GridSettingsFlyout', () => {
       { isHeatmapsEnabled: true }
     );
 
-    await openHistogramsTab();
     expect(histogramSelect.getSelected()).toContain('95th percentile');
     expect(screen.getByTestId('metricsExperienceGridSettingsDistributionChoice')).toHaveAttribute(
       'aria-pressed',
@@ -269,7 +260,13 @@ describe('GridSettingsFlyout', () => {
 
     expect(histogramSelect.getSelected()).toContain('95th percentile');
     expect(
-      screen.queryByTestId('metricsExperienceGridSettingsHistogramsTab')
+      screen.getByTestId('metricsExperienceGridSettingsAggregationAccordion')
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('metricsExperienceGridSettingsHistogramsAccordion')
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('metricsExperienceGridSettingsMetricsAccordion')
     ).not.toBeInTheDocument();
     expect(
       screen.queryByTestId('metricsExperienceGridSettingsDistributionChoice')
@@ -317,7 +314,6 @@ describe('GridSettingsFlyout', () => {
       />
     );
 
-    await openHistogramsTab();
     expect(screen.getByTestId('metricsExperienceGridSettingsDistributionChoice')).toBeEnabled();
 
     await userEvent.click(screen.getByTestId('metricsExperienceGridSettingsDistributionChoice'));
