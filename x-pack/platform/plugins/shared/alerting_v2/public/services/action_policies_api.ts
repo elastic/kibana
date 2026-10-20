@@ -49,8 +49,8 @@ export class ActionPoliciesApi {
       query: {
         page: params.page,
         per_page: params.per_page,
+        filter: params.filter || undefined,
         search: params.search || undefined,
-        enabled: params.enabled,
         sort_field: params.sort_field,
         sort_order: params.sort_order,
       },

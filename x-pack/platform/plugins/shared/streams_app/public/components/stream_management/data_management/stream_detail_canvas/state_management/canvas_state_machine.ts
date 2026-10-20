@@ -42,22 +42,19 @@ import {
   canvasUrlSchema,
   type CanvasUrlSchema,
 } from '../../../../../../common/url_schema';
-import type {
-  CanvasCreateHistoryRef,
-  CanvasStateServiceDeps,
-  CanvasUrlInput,
-  CanvasUrlEvent,
-  CanvasState,
+import {
+  defaultCanvasUrlState,
+  type CanvasCreateHistoryRef,
+  type CanvasStateServiceDeps,
+  type CanvasUrlInput,
+  type CanvasUrlEvent,
+  type CanvasState,
+  type RouteEdit,
 } from './types';
 
 export interface StoreUrlStateParams {
   urlState: CanvasUrlInput;
 }
-
-const defaultUrlState = {
-  flyoutName: null,
-  flyoutTab: null,
-};
 
 export const canvasStateMachine = setup({
   types: {
@@ -303,6 +300,20 @@ export const canvasStateMachine = setup({
             };
       }
     ),
+    syncRoutingEditMode: assign({
+      editingRoute: ({ context, event }) => {
+        switch (event.type) {
+          case 'routing.edit.open':
+            return [event.edgeId, event.mode] satisfies RouteEdit;
+
+          case 'routing.edit.close':
+            return [undefined, undefined] satisfies Partial<RouteEdit>;
+
+          default:
+            return context.editingRoute;
+        }
+      },
+    }),
   },
   guards: {
     hasUnsavedUnitChanges: ({ context }) => context.unit !== context.nextUnit,
@@ -387,6 +398,28 @@ export const canvasStateMachine = setup({
               }),
             },
             raise({ type: 'url.sync' }),
+          ],
+        },
+        'search.change': {
+          actions: [
+            {
+              type: 'storeUrlState',
+              params: ({ event, context }) => ({
+                urlState: {
+                  ...context.urlState,
+                  query: event.query || null,
+                },
+              }),
+            },
+            // Typing should not leave one history entry per keystroke.
+            raise({ type: 'url.sync', replace: true }),
+          ],
+        },
+        'routing.*': {
+          actions: [
+            {
+              type: 'syncRoutingEditMode',
+            },
           ],
         },
       },
@@ -562,7 +595,7 @@ export const canvasStateMachine = setup({
   context: ({ spawn, self }) => {
     const unitDefinition = createDefaultUnit();
     return {
-      urlState: defaultUrlState,
+      urlState: defaultCanvasUrlState,
       unit: unitDefinition,
       nextUnit: unitDefinition,
       savingUnit: undefined,
@@ -573,6 +606,7 @@ export const canvasStateMachine = setup({
       // persisted alongside the unit without changing the graph components.
       nodePositions: {},
       error: undefined,
+      editingRoute: [],
       sourcesRef: spawn('sourcesMachine', {
         input: {
           unitDefinition,
@@ -761,9 +795,9 @@ function createNotifyUnitFailureAction({ core }: Pick<CanvasStateServiceDeps, 'c
 function createUrlSyncAction({
   urlStateStorageContainer,
 }: Pick<CanvasStateServiceDeps, 'urlStateStorageContainer'>) {
-  return ({ context }: ActionArgs<CanvasState, CanvasUrlEvent, CanvasUrlEvent>) => {
+  return ({ context, event }: ActionArgs<CanvasState, CanvasUrlEvent, CanvasUrlEvent>) => {
     urlStateStorageContainer.set(CANVAS_URL_STATE_KEY, context.urlState, {
-      replace: false,
+      replace: event.type === 'url.sync' && event.replace === true,
     });
   };
 }
@@ -778,18 +812,21 @@ function createUrlInitializerActor({
     if (!urlStateValues) {
       return sendBack({
         type: 'url.init',
-        urlState: defaultUrlState,
+        urlState: defaultCanvasUrlState,
       });
     }
 
     const urlState = canvasUrlSchema.safeParse(urlStateValues);
 
     if (urlState.success) {
-      urlState.data.flyoutTab =
-        urlState.data.flyoutName && !urlState.data.flyoutTab ? 'overview' : urlState.data.flyoutTab;
+      const { flyoutName, flyoutTab, query } = urlState.data;
       sendBack({
         type: 'url.init',
-        urlState: urlState.data,
+        urlState: {
+          flyoutName,
+          flyoutTab: flyoutName && !flyoutTab ? 'overview' : flyoutTab,
+          query: query || null,
+        },
       });
     } else {
       withNotifyOnErrors(core.notifications.toasts).onGetError(
@@ -797,7 +834,7 @@ function createUrlInitializerActor({
       );
       sendBack({
         type: 'url.init',
-        urlState: defaultUrlState,
+        urlState: defaultCanvasUrlState,
       });
     }
   });

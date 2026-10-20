@@ -44,13 +44,12 @@ apiTest.describe(
       expect(response.body.code).toBe('BAD_REQUEST');
     });
 
-    apiTest('validation: accepts perPage=0 (count-only read)', async ({ apiClient }) => {
+    apiTest('validation: rejects perPage=0', async ({ apiClient }) => {
       const response = await apiClient.get(getListExecutionHistoryUrl({ per_page: 0 }), {
         headers: readerHeaders,
       });
-      expect(response).toHaveStatusCode(200);
-      expect(response.body.per_page).toBe(0);
-      expect(response.body.items).toStrictEqual([]);
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     });
 
     apiTest('validation: accepts perPage at the maximum', async ({ apiClient }) => {

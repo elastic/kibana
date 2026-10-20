@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { chunk } from 'lodash';
+import Boom from '@hapi/boom';
 import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
@@ -12,9 +14,10 @@ import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
 import {
   toUnifiedAttachmentType,
   UNIFIED_ALERT_TYPES_ARRAY,
+  getAttachmentTypeFromAttributes,
 } from '../../../../common/utils/attachments';
 import { getAttachmentSavedObjectType } from '../../../common/attachments';
-import { isSOError } from '../../../common/error';
+import { generateCaseErrorResponse, isSOError } from '../../../common/error';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import type { AttachmentPersistedAttributes } from '../../../common/types/attachments_v1';
 import { AttachmentTransformedAttributesRt } from '../../../common/types/attachments_v1';
@@ -27,6 +30,10 @@ import {
 } from '../../../../common/constants';
 import {
   COMMENT_ATTACHMENT_TYPE,
+  FILE_ATTACHMENT_TYPE,
+  LEGACY_EXTERNAL_REFERENCE_TYPE,
+  LEGACY_FILE_ATTACHMENT_TYPE,
+  SECURITY_ATTACK_ATTACHMENT_TYPE,
   SECURITY_EVENT_ATTACHMENT_TYPE,
 } from '../../../../common/constants/attachments';
 import { NodeBuilderOperators, buildFilter, combineFilters } from '../../../client/utils';
@@ -41,12 +48,15 @@ import {
 } from '../../../../common/types/domain';
 import type {
   AlertIdsAggsResult,
+  AttachmentForDeletion,
+  AttackIdsAggsResult,
   BulkOptionalAttributes,
   EventIdsAggsResult,
   GetAllAlertsAttachToCaseArgs as GetAllDocumentsAttachedToCaseArgs,
   GetAttachmentArgs,
   GetUnifiedAttachmentsByTypesArgs,
   MixSavedObjectResponse,
+  OptionalAttributes,
   ServiceContext,
 } from '../types';
 import type {
@@ -58,9 +68,14 @@ import {
   injectAttachmentAttributesAndHandleErrors,
   injectAttachmentSOAttributesFromRefs,
 } from '../../so_references';
+import type { AttachmentSavedObjectType } from '../../user_actions/types';
 import { partitionByCaseAssociation } from '../../../common/partitioning';
 import { getCaseReferenceId } from '../../../common/references';
-import { toUnifiedAttributes } from './utils';
+import {
+  decodeAttachmentSavedObject,
+  toUnifiedAttributes,
+  type ModeTransformedAttributes,
+} from './utils';
 
 export class AttachmentGetter {
   constructor(private readonly context: ServiceContext) {}
@@ -89,6 +104,117 @@ export class AttachmentGetter {
         `Error retrieving attachments with ids ${savedObjectIds.join()}: ${error}`
       );
       throw error;
+    }
+  }
+
+  /**
+   * Retrieves attachments for deletion. Unlike {@link bulkGet}, a row that fails to decode is
+   * returned without `attributes` so it can still be removed. Ids found in neither type are left out.
+   */
+  public async bulkGetForDeletion(savedObjectIds: string[]): Promise<AttachmentForDeletion[]> {
+    return this.getForDeletion(
+      savedObjectIds.flatMap((id) => [
+        { id, type: CASE_ATTACHMENT_SAVED_OBJECT },
+        { id, type: CASE_COMMENT_SAVED_OBJECT },
+      ]),
+      (savedObjects) => this.mergeBulkGetResults(savedObjects)
+    );
+  }
+
+  /**
+   * Same as {@link bulkGetForDeletion} for attachments whose saved object type is already known,
+   * so each id is looked up once.
+   */
+  public async bulkGetForDeletionByType(
+    attachments: Array<{ id: string; type: AttachmentSavedObjectType }>
+  ): Promise<AttachmentForDeletion[]> {
+    return this.getForDeletion(attachments, (savedObjects) => savedObjects);
+  }
+
+  private async getForDeletion(
+    objects: Array<{ id: string; type: AttachmentSavedObjectType }>,
+    merge: (
+      savedObjects: Array<SavedObject<AttachmentAttributesV2> | { id: string; error: unknown }>
+    ) => Array<MixSavedObjectResponse>
+  ): Promise<AttachmentForDeletion[]> {
+    try {
+      this.context.log.debug(`Attempting to retrieve ${objects.length} attachments for deletion`);
+
+      const attachments: AttachmentForDeletion[] = [];
+      // The chunk size is even, so an id looked up in both types never has its pair split.
+      for (const objectsChunk of chunk(objects, MAX_DOCS_PER_PAGE)) {
+        const response =
+          await this.context.unsecuredSavedObjectsClient.bulkGet<AttachmentAttributesV2>(
+            objectsChunk
+          );
+
+        for (const so of merge(response.saved_objects)) {
+          if (isSOError(so)) {
+            const { status, message } = generateCaseErrorResponse(so.error);
+            if (status !== 404) {
+              throw Boom.boomify(new Error(`Failed to retrieve attachment ${so.id}: ${message}`), {
+                statusCode: status,
+              });
+            }
+          } else {
+            attachments.push(
+              this.toAttachmentForDeletion(so as SavedObject<AttachmentPersistedAttributes>)
+            );
+          }
+        }
+      }
+
+      return attachments;
+    } catch (error) {
+      this.context.log.error(
+        `Error retrieving ${objects.length} attachments for deletion: ${error}`
+      );
+      throw error;
+    }
+  }
+
+  private toAttachmentForDeletion(
+    so: SavedObject<AttachmentPersistedAttributes> | SavedObject<UnifiedAttachmentAttributes>
+  ): AttachmentForDeletion {
+    const { id, type, references } = so;
+    const attributes = this.injectForDeletion(so);
+    const { owner: rawOwner }: Record<string, unknown> = attributes;
+    const attachment = {
+      id,
+      type: type as AttachmentSavedObjectType,
+      owner: typeof rawOwner === 'string' && rawOwner.length > 0 ? rawOwner : undefined,
+      references,
+      fileId: getStoredFileId(attributes),
+    };
+
+    try {
+      const transformed = toUnifiedAttributes({ attributes });
+
+      return {
+        ...attachment,
+        attributes: transformed.isUnified
+          ? transformed.attributes
+          : decodeOrThrow(AttachmentTransformedAttributesRt)(transformed.attributes),
+      };
+    } catch (error) {
+      this.context.log.warn(`Attachment ${id} failed to decode: ${error}`);
+      return attachment;
+    }
+  }
+
+  /** Restores the fields kept in references (e.g. a legacy file id), or keeps the stored ones. */
+  private injectForDeletion(
+    so: SavedObject<AttachmentPersistedAttributes> | SavedObject<UnifiedAttachmentAttributes>
+  ): AttachmentAttributesV2 {
+    try {
+      return (
+        injectAttachmentSOAttributesFromRefs(
+          so as SavedObject<AttachmentPersistedAttributes>
+        ) as SavedObject<AttachmentAttributesV2>
+      ).attributes;
+    } catch (error) {
+      this.context.log.warn(`Attachment ${so.id} failed to restore its reference fields: ${error}`);
+      return so.attributes as AttachmentAttributesV2;
     }
   }
 
@@ -128,12 +254,12 @@ export class AttachmentGetter {
     return result;
   }
 
-  // Leftover cases-comments documents fold via toUnifiedAttributes. Unknown
-  // persistable-state subtype ids stay legacy-shaped.
+  // cases-comments documents with a unified mapping fold to unified via toUnifiedAttributes;
+  // the rest are surfaced as per-item errors (see toUnrecognizedTypeError).
   private transformAndDecodeBulkGetResponse(
     merged: Array<MixSavedObjectResponse>
   ): BulkOptionalAttributes<AttachmentAttributesV2> {
-    const validatedAttachments: Array<AttachmentSavedObjectTransformedV2> = [];
+    const validatedAttachments: Array<OptionalAttributes<AttachmentAttributesV2>> = [];
 
     for (const so of merged) {
       if (isSOError(so)) {
@@ -142,31 +268,61 @@ export class AttachmentGetter {
         const injectedSo = injectAttachmentAttributesAndHandleErrors(
           so as SavedObject<AttachmentPersistedAttributes>
         ) as SavedObject<AttachmentAttributesV2>;
-        const transformed = toUnifiedAttributes({
-          attributes: injectedSo.attributes,
-        });
-        if (transformed.isUnified) {
+        let transformed: ModeTransformedAttributes | undefined;
+        let decodeError: unknown;
+        try {
+          transformed = toUnifiedAttributes({
+            attributes: injectedSo.attributes,
+          });
+        } catch (error) {
+          decodeError = error;
+        }
+        if (transformed?.isUnified) {
           validatedAttachments.push(
             Object.assign(injectedSo, {
               attributes: transformed.attributes,
             }) as AttachmentSavedObjectTransformedV2
           );
         } else {
-          const legacySo = {
-            ...injectedSo,
-            attributes: transformed.attributes,
-          } as SavedObject<AttachmentPersistedAttributes>;
-          const validatedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(
-            legacySo.attributes
-          );
-
-          validatedAttachments.push(Object.assign(legacySo, { attributes: validatedAttributes }));
+          validatedAttachments.push(this.toUnrecognizedTypeError(injectedSo, decodeError));
         }
       }
     }
 
     return {
       saved_objects: validatedAttachments,
+    };
+  }
+
+  // Only `bulkGet` has an errors channel; get/flatten fall back to legacy instead, and the deletion
+  // reads return the row without attributes.
+  // A unified cross-path policy for unmapped types is a tracked follow-up.
+  private toUnrecognizedTypeError(
+    injectedSo: SavedObject<AttachmentAttributesV2>,
+    decodeError?: unknown
+  ): OptionalAttributes<AttachmentAttributesV2> {
+    const attachmentType = getAttachmentTypeFromAttributes(injectedSo.attributes);
+    const decodeReason = decodeError instanceof Error ? decodeError.message : String(decodeError);
+    const reason =
+      decodeError === undefined
+        ? 'has no unified mapping'
+        : `failed unified decode: ${decodeReason}`;
+    this.context.log.warn(
+      `Attachment ${injectedSo.id} has attachment type "${attachmentType}" (owner: "${injectedSo.attributes.owner}"), which ${reason}. Returning it as an error instead of a legacy fallback.`
+    );
+
+    return {
+      id: injectedSo.id,
+      type: injectedSo.type,
+      references: injectedSo.references,
+      error: {
+        error: 'Bad Request',
+        message:
+          decodeError === undefined
+            ? `Attachment type "${attachmentType}" is not recognized.`
+            : `Attachment type "${attachmentType}" failed validation: ${decodeReason}`,
+        statusCode: 400,
+      },
     };
   }
 
@@ -192,12 +348,12 @@ export class AttachmentGetter {
         perPage: MAX_DOCS_PER_PAGE,
       });
 
-      const idTypePairs: Array<{ id: string; type: string }> = [];
+      const idTypePairs: Array<{ id: string; type: AttachmentSavedObjectType }> = [];
       for await (const attachmentSavedObject of finder.find()) {
         idTypePairs.push(
           ...attachmentSavedObject.saved_objects.map((attachment) => ({
             id: attachment.id,
-            type: attachment.type,
+            type: attachment.type as AttachmentSavedObjectType,
           }))
         );
       }
@@ -259,7 +415,7 @@ export class AttachmentGetter {
 
       let result: Array<SavedObject<DocumentAttachmentAttributesV2>> = [];
       for await (const userActionSavedObject of finder.find()) {
-        result = result.concat(AttachmentGetter.decodeDocuments(userActionSavedObject));
+        result = result.concat(this.decodeDocuments(userActionSavedObject));
       }
 
       return result;
@@ -269,14 +425,23 @@ export class AttachmentGetter {
     }
   }
 
-  private static decodeDocuments(
+  private decodeDocuments(
     response: SavedObjectsFindResponse<AttachmentAttributesV2>
   ): Array<SavedObject<DocumentAttachmentAttributesV2>> {
-    return response.saved_objects.map((so) => {
-      const validatedAttributes = decodeOrThrow(DocumentAttachmentAttributesRtV2)(so.attributes);
+    const decoded: Array<SavedObject<DocumentAttachmentAttributesV2>> = [];
 
-      return Object.assign(so, { attributes: validatedAttributes });
-    });
+    for (const so of response.saved_objects) {
+      try {
+        const validatedAttributes = decodeOrThrow(DocumentAttachmentAttributesRtV2)(so.attributes);
+        decoded.push(Object.assign(so, { attributes: validatedAttributes }));
+      } catch (error) {
+        this.context.log.warn(
+          `Failed to decode document attachment id ${so.id} of type ${so.type}, skipping it: ${error}`
+        );
+      }
+    }
+
+    return decoded;
   }
 
   /**
@@ -425,6 +590,66 @@ export class AttachmentGetter {
   }
 
   /**
+   * Returns the subset of `attackIds` that is already attached to a case.
+   */
+  public async getAttachedAttackIds({
+    caseId,
+    attackIds,
+  }: {
+    caseId: string;
+    attackIds: string[];
+  }): Promise<Set<string>> {
+    const requestedIds = [...new Set(attackIds)];
+    if (requestedIds.length === 0) {
+      return new Set();
+    }
+
+    try {
+      this.context.log.debug(`Attempting to GET attached attack ids for case id ${caseId}`);
+
+      // Attacks have no legacy `cases-comments` shape to union in, and filtering on the requested
+      // ids bounds the aggregation by the request rather than by the attacks on the case.
+      const res = await this.context.unsecuredSavedObjectsClient.find<unknown, AttackIdsAggsResult>(
+        {
+          type: CASE_ATTACHMENT_SAVED_OBJECT,
+          hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
+          filter: combineFilters(
+            [
+              buildFilter({
+                filters: [SECURITY_ATTACK_ATTACHMENT_TYPE],
+                field: 'type',
+                operator: 'or',
+                type: CASE_ATTACHMENT_SAVED_OBJECT,
+              }),
+              buildFilter({
+                filters: requestedIds,
+                field: 'attachmentId',
+                operator: 'or',
+                type: CASE_ATTACHMENT_SAVED_OBJECT,
+              }),
+            ],
+            NodeBuilderOperators.and
+          ),
+          perPage: 0,
+          aggs: {
+            attackIds: {
+              terms: {
+                field: `${CASE_ATTACHMENT_SAVED_OBJECT}.attributes.attachmentId`,
+                size: requestedIds.length,
+              },
+            },
+          },
+        }
+      );
+
+      return new Set(res.aggregations?.attackIds.buckets.map((bucket) => bucket.key) ?? []);
+    } catch (error) {
+      this.context.log.error(`Error on GET attached attack ids for case id ${caseId}: ${error}`);
+      throw error;
+    }
+  }
+
+  /**
    * Retrieves all the events attached to a case.
    */
   public async getAllEventIds({
@@ -491,16 +716,27 @@ export class AttachmentGetter {
   public async get({
     savedObjectId,
   }: GetAttachmentArgs): Promise<AttachmentSavedObjectTransformedV2> {
+    const res = await this.getStoredAttachment(savedObjectId);
+
+    try {
+      return decodeAttachmentSavedObject(res as SavedObject<AttachmentPersistedAttributes>);
+    } catch (error) {
+      this.context.log.warn(`Failed to decode attachment ${savedObjectId}: ${error}`);
+      throw Boom.notFound(`Attachment ${savedObjectId} could not be read.`);
+    }
+  }
+
+  private async getStoredAttachment(
+    savedObjectId: string
+  ): Promise<
+    SavedObject<UnifiedAttachmentAttributes> | SavedObject<AttachmentPersistedAttributes>
+  > {
     try {
       this.context.log.debug(`Attempting to GET attachment ${savedObjectId}`);
 
-      let res:
-        | SavedObject<UnifiedAttachmentAttributes>
-        | SavedObject<AttachmentPersistedAttributes>;
-
       // Try unified first; fall back to cases-comments on 404 for leftover rows.
       try {
-        res = await this.context.unsecuredSavedObjectsClient.get<UnifiedAttachmentAttributes>(
+        return await this.context.unsecuredSavedObjectsClient.get<UnifiedAttachmentAttributes>(
           CASE_ATTACHMENT_SAVED_OBJECT,
           savedObjectId
         );
@@ -511,27 +747,11 @@ export class AttachmentGetter {
         this.context.log.debug(
           `Attachment ${savedObjectId} not found in ${CASE_ATTACHMENT_SAVED_OBJECT}, falling back to ${CASE_COMMENT_SAVED_OBJECT}`
         );
-        res = await this.context.unsecuredSavedObjectsClient.get<AttachmentPersistedAttributes>(
+        return await this.context.unsecuredSavedObjectsClient.get<AttachmentPersistedAttributes>(
           CASE_COMMENT_SAVED_OBJECT,
           savedObjectId
         );
       }
-
-      const injectedRes = injectAttachmentSOAttributesFromRefs(
-        res as SavedObject<AttachmentPersistedAttributes>
-      ) as SavedObject<AttachmentAttributesV2>;
-      const transformed = toUnifiedAttributes({
-        attributes: injectedRes.attributes,
-      });
-      if (transformed.isUnified) {
-        return Object.assign(injectedRes, { attributes: transformed.attributes });
-      }
-
-      const validatedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(
-        transformed.attributes
-      );
-
-      return Object.assign(injectedRes, { attributes: validatedAttributes });
     } catch (error) {
       this.context.log.error(`Error on GET attachment ${savedObjectId}: ${error}`);
       throw error;
@@ -765,13 +985,14 @@ export class AttachmentGetter {
     };
   }
 
-  public async getFileAttachments({
+  /** Finds the attachments of the case that reference the files, read for deletion. */
+  public async getFileAttachmentsForDeletion({
     caseId,
     fileIds,
   }: {
     caseId: string;
     fileIds: string[];
-  }): Promise<AttachmentSavedObjectTransformedV2[]> {
+  }): Promise<AttachmentForDeletion[]> {
     try {
       this.context.log.debug('Attempting to find file attachments');
 
@@ -799,51 +1020,27 @@ export class AttachmentGetter {
         perPage: MAX_DOCS_PER_PAGE,
       });
 
-      const foundAttachments: AttachmentSavedObjectTransformedV2[] = [];
+      const fileAttachments: AttachmentForDeletion[] = [];
 
-      for await (const attachmentSavedObjects of finder.find()) {
-        foundAttachments.push(...this.transformAndDecodeFileAttachments(attachmentSavedObjects));
+      for await (const { saved_objects: savedObjects } of finder.find()) {
+        const [validFileAttachments, invalidFileAttachments] = partitionByCaseAssociation(
+          caseId,
+          savedObjects
+        );
+
+        this.logInvalidFileAssociations(invalidFileAttachments, fileIds, caseId);
+        fileAttachments.push(
+          ...validFileAttachments.map((so) =>
+            this.toAttachmentForDeletion(so as SavedObject<AttachmentPersistedAttributes>)
+          )
+        );
       }
 
-      const [validFileAttachments, invalidFileAttachments] = partitionByCaseAssociation(
-        caseId,
-        foundAttachments
-      );
-
-      this.logInvalidFileAssociations(invalidFileAttachments, fileIds, caseId);
-
-      return validFileAttachments;
+      return fileAttachments;
     } catch (error) {
       this.context.log.error(`Error retrieving file attachments file ids: ${fileIds}: ${error}`);
       throw error;
     }
-  }
-
-  private transformAndDecodeFileAttachments(
-    response: SavedObjectsFindResponse<AttachmentPersistedAttributes | UnifiedAttachmentAttributes>
-  ): AttachmentSavedObjectTransformedV2[] {
-    return response.saved_objects.map((so) => {
-      const injectedSo = injectAttachmentSOAttributesFromRefs(
-        so as SavedObject<AttachmentPersistedAttributes>
-      ) as SavedObject<AttachmentAttributesV2>;
-
-      const transformed = toUnifiedAttributes({
-        attributes: injectedSo.attributes,
-      });
-      if (transformed.isUnified) {
-        return Object.assign(injectedSo, {
-          attributes: transformed.attributes,
-        }) as AttachmentSavedObjectTransformedV2;
-      }
-
-      const validatedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(
-        transformed.attributes
-      );
-
-      return Object.assign(injectedSo, {
-        attributes: validatedAttributes,
-      }) as AttachmentSavedObjectTransformedV2;
-    });
   }
 
   private logInvalidFileAssociations(
@@ -866,3 +1063,25 @@ export class AttachmentGetter {
     }
   }
 }
+
+/** Reads the file id off the stored fields, so it is found even when the row fails to decode. */
+const getStoredFileId = (attributes: AttachmentAttributesV2 | undefined): string | undefined => {
+  const {
+    type,
+    attachmentId,
+    externalReferenceAttachmentTypeId,
+    externalReferenceId,
+  }: Record<string, unknown> = attributes ?? {};
+
+  if (type === FILE_ATTACHMENT_TYPE && typeof attachmentId === 'string') {
+    return attachmentId;
+  }
+
+  if (
+    type === LEGACY_EXTERNAL_REFERENCE_TYPE &&
+    externalReferenceAttachmentTypeId === LEGACY_FILE_ATTACHMENT_TYPE &&
+    typeof externalReferenceId === 'string'
+  ) {
+    return externalReferenceId;
+  }
+};

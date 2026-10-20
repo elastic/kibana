@@ -91,11 +91,13 @@ import type {
   WorkflowChangesHistoryResponse,
 } from '../../common/lib/workflow_change_history/types';
 import { updateWorkflowYamlFields } from '../../common/lib/yaml/update_workflow_yaml_fields';
+import { getWorkflowDeleteOperation } from '../services/workflow_access_control';
 import type { BulkCreateWorkflowsResult } from '../services/workflow_crud_service';
 import type {
   ProcessedWaitForInputFacets,
   ProcessedWaitForInputFilters,
   WaitForInputListResult,
+  WorkflowExecutionStatusItem,
 } from '../services/workflow_execution_query_service';
 
 export type SmlIndexAttachmentFn = (params: SmlIndexAttachmentParams) => Promise<void>;
@@ -380,12 +382,13 @@ export class WorkflowsManagementApi {
     id: string,
     spaceId: string,
     operation: WorkflowAccessOperation,
-    request: KibanaRequest
+    request: KibanaRequest,
+    options?: { allowAdminOverride?: boolean; auditOverride?: boolean }
   ): Promise<void> {
     const workflow = await this.workflowsService.getWorkflow(id, spaceId);
     if (!workflow) throw new WorkflowNotFoundError(id);
     const access = await this.workflowsService.getAccessControl();
-    await access.assertAccess(workflow, operation, request);
+    await access.assertAccess(workflow, operation, request, options);
   }
 
   public async updateAccessControl(
@@ -397,7 +400,6 @@ export class WorkflowsManagementApi {
     const workflow = await this.workflowsService.getWorkflow(id, spaceId);
     if (!workflow) throw new WorkflowNotFoundError(id);
     const access = await this.workflowsService.getAccessControl();
-    await access.assertAccess(workflow, 'manage', request);
     const result = await access.update(id, spaceId, input, request);
     if (input.access_mode === 'private') {
       // Finish earlier public writes before removing their search entries.
@@ -456,8 +458,8 @@ export class WorkflowsManagementApi {
     const workflow = await this.workflowsService.getWorkflow(id, spaceId);
     if (!workflow) return null;
     const access = await this.workflowsService.getAccessControl();
-    const result = await access.toDto(workflow, request);
-    return result.permissions.read ? result : null;
+    if (!(await access.checkAccess(workflow, 'read', request))) return null;
+    return access.toDto(workflow, request);
   }
 
   public async getHistoryForWorkflow(
@@ -550,7 +552,9 @@ export class WorkflowsManagementApi {
         workflows.flatMap(({ id }) => (id ? [id] : [])),
         spaceId
       );
-      for (const { id } of existing) await this.assertWorkflowAccess(id, spaceId, 'edit', request);
+      for (const { id } of existing) {
+        await this.assertWorkflowAccess(id, spaceId, 'edit', request);
+      }
     }
     const result = await this.workflowsService.bulkCreateWorkflows(
       workflows,
@@ -661,8 +665,9 @@ export class WorkflowsManagementApi {
         const access = await this.workflowsService.getAccessControl();
         await access.assertAccess(
           workflow,
-          options?.force && workflow.access_control.access_mode === 'private' ? 'manage' : 'edit',
-          request
+          getWorkflowDeleteOperation(workflow, options?.force),
+          request,
+          { allowAdminOverride: options?.force === true }
         );
       }
     }
@@ -702,7 +707,8 @@ export class WorkflowsManagementApi {
     inputs: Record<string, any>,
     request: KibanaRequest,
     triggeredBy?: string,
-    metadata?: Record<string, unknown>
+    metadata?: Record<string, unknown>,
+    isUserInteractive?: boolean
   ): Promise<string> {
     if (!workflow.isEphemeral) {
       await this.assertWorkflowAccess(workflow.id, spaceId, 'execute', request);
@@ -716,6 +722,9 @@ export class WorkflowsManagementApi {
     };
     if (metadata) {
       context.metadata = metadata;
+    }
+    if (isUserInteractive === true) {
+      context.isUserInteractive = true;
     }
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
     const executeResponse = await workflowsExecutionEngine.executeWorkflow(
@@ -770,7 +779,8 @@ export class WorkflowsManagementApi {
       finalInputs,
       request,
       undefined,
-      metadata
+      metadata,
+      true
     );
 
     return { workflowExecutionId };
@@ -822,7 +832,7 @@ export class WorkflowsManagementApi {
       params.spaceId,
       params.request,
       // This throws on an invalid result, so it must not apply the variable rules.
-      { includeVariableRules: false }
+      { includeVariableRules: false, includeEsqlRules: false }
     );
     if (!validation.valid || !validation.parsedWorkflow) {
       throw buildWorkflowValidationError(validation, params.yaml);
@@ -967,7 +977,8 @@ export class WorkflowsManagementApi {
         workflowId,
         spaceId,
         workflowYaml ? 'edit' : 'execute',
-        request
+        request,
+        { allowAdminOverride: false }
       );
     }
     let resolvedYaml = workflowYaml;
@@ -998,6 +1009,7 @@ export class WorkflowsManagementApi {
       request,
       {
         includeVariableRules: false,
+        includeEsqlRules: false,
       }
     );
     if (!validation.valid || !validation.parsedWorkflow) {
@@ -1010,6 +1022,7 @@ export class WorkflowsManagementApi {
       event,
       spaceId,
       inputs: manualInputs,
+      isUserInteractive: true,
     };
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
     const executeResponse = await workflowsExecutionEngine.executeWorkflow(
@@ -1043,13 +1056,18 @@ export class WorkflowsManagementApi {
     spaceId: string,
     request: KibanaRequest
   ): Promise<string> {
-    if (workflowId) await this.assertWorkflowAccess(workflowId, spaceId, 'edit', request);
+    if (workflowId) {
+      await this.assertWorkflowAccess(workflowId, spaceId, 'edit', request, {
+        allowAdminOverride: false,
+      });
+    }
     const validation = await this.workflowsService.validateWorkflow(
       workflowYaml,
       spaceId,
       request,
       {
         includeVariableRules: false,
+        includeEsqlRules: false,
       }
     );
     if (!validation.valid || !validation.parsedWorkflow) {
@@ -1087,7 +1105,7 @@ export class WorkflowsManagementApi {
       const workflow = await this.workflowsService.getWorkflow(params.workflowId, spaceId, {
         includeDeleted: true,
       });
-      if (workflow && !(await access.permissions(workflow, params.request)).read) {
+      if (workflow && !(await access.checkAccess(workflow, 'read', params.request))) {
         accessControlFilter = { match_none: {} };
       }
     } else {
@@ -1129,9 +1147,37 @@ export class WorkflowsManagementApi {
     });
     if (workflow) {
       const access = await this.workflowsService.getAccessControl();
-      if (!(await access.permissions(workflow, options?.request)).read) return null;
+      if (!(await access.checkAccess(workflow, 'read', options?.request))) return null;
     }
     return execution;
+  }
+
+  /**
+   * The status of each execution the caller can read, in one read. An id that is missing, in
+   * another space, or whose workflow the caller cannot read or that no longer exists is left out
+   * of the result.
+   */
+  public async getWorkflowExecutionStatuses(
+    workflowExecutionIds: string[],
+    spaceId: string,
+    options: { request: KibanaRequest }
+  ): Promise<WorkflowExecutionStatusItem[]> {
+    const executions = await this.workflowsService.getWorkflowExecutionStatuses(
+      workflowExecutionIds,
+      spaceId
+    );
+    if (executions.length === 0) {
+      return [];
+    }
+    const access = await this.workflowsService.getAccessControl();
+    const readable = await this.workflowsService.getWorkflowsSourceByIds(
+      [...new Set(executions.map(({ workflowId }) => workflowId).filter(Boolean))],
+      spaceId,
+      ['id'],
+      { includeDeleted: true, accessControlFilter: await access.readFilter(options.request) }
+    );
+    const readableIds = new Set(readable.map(({ id }) => id));
+    return executions.filter(({ workflowId }) => readableIds.has(workflowId));
   }
 
   public async getChildWorkflowExecutions(
@@ -1542,6 +1588,7 @@ export class WorkflowsManagementApi {
   ): Promise<ValidateWorkflowResponseDto> {
     return this.workflowsService.validateWorkflow(yaml, spaceId, request, {
       includeVariableRules: true,
+      includeEsqlRules: true,
     });
   }
 

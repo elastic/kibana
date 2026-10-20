@@ -7,6 +7,7 @@
 
 import { ADD_TO_CASE } from '@kbn/response-ops-alerts-table';
 import type { BulkActionsConfig } from '@kbn/response-ops-alerts-table/types';
+import type { CaseUI } from '@kbn/cases-plugin/common';
 import { useCallback, useMemo } from 'react';
 
 import { useAddToCase } from '../../../../../attack_discovery/pages/results/take_action/use_add_to_case';
@@ -15,6 +16,8 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
 import type { AttacksActionTelemetrySource } from '../../../../../common/lib/telemetry';
 import { ATTACK_ADD_TO_CASE_ACTION_ID } from '../../../../../common/constants/action_ids';
+import type { AttackToAttach } from '../../../../../cases/attachments/attack';
+import { useAttackCaseAttachments } from '../../../../../cases/attachments/attack/hooks/use_attack_case_attachments';
 import { ALERT_ATTACK_DISCOVERY_MARKDOWN_COMMENT } from '../constants';
 import type { BulkAttackActionItems } from '../types';
 import { extractRelatedDetectionAlertIds } from '../utils/extract_related_detection_alert_ids';
@@ -28,6 +31,8 @@ export interface UseBulkAttackCaseItemsProps {
   closePopover?: () => void;
   /** Source of the action for telemetry */
   telemetrySource?: AttacksActionTelemetrySource;
+  /** Posted as `security.attack` attachments instead of markdown when `attackAttachmentsEnabled`. */
+  attacksToAttach?: ReadonlyArray<Omit<AttackToAttach, 'alertsIndex'>>;
 }
 
 /**
@@ -38,10 +43,12 @@ export const useBulkAttackCaseItems = ({
   onCasesAdd,
   closePopover,
   telemetrySource,
+  attacksToAttach,
 }: UseBulkAttackCaseItemsProps): BulkAttackActionItems => {
   const {
     services: { cases, telemetry },
   } = useKibana();
+  const attackCaseAttachments = useAttackCaseAttachments(attacksToAttach);
   const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
   const canCreateAndReadCases = userCasesPermissions.createComment && userCasesPermissions.read;
   const canUserCreateAndReadCases = useCallback(
@@ -50,7 +57,10 @@ export const useBulkAttackCaseItems = ({
   );
 
   const onAddToCaseSuccess = useCallback(
-    (isNewCase: boolean) => {
+    (theCase: CaseUI, isNewCase: boolean) => {
+      // Not raised while building the payload, which the case selector does on every render.
+      attackCaseAttachments?.onAttached(theCase);
+
       if (telemetrySource) {
         telemetry.reportEvent(AttacksEventTypes.ActionAddedToCase, {
           source: telemetrySource,
@@ -58,7 +68,7 @@ export const useBulkAttackCaseItems = ({
         });
       }
     },
-    [telemetry, telemetrySource]
+    [attackCaseAttachments, telemetry, telemetrySource]
   );
 
   const { onAddToCase, disabled } = useAddToCase({
@@ -83,10 +93,16 @@ export const useBulkAttackCaseItems = ({
         })
         .filter((comment): comment is string => comment != null);
 
-      onAddToCase({ alertIds, markdownComments });
+      if (attackCaseAttachments == null) {
+        onAddToCase({ alertIds, markdownComments });
+      } else {
+        // Built per case, since how many alerts fit depends on what the chosen case already holds.
+        onAddToCase({ getAttachments: attackCaseAttachments.getAttachments });
+      }
+
       closePopover?.();
     },
-    [closePopover, onAddToCase]
+    [attackCaseAttachments, closePopover, onAddToCase]
   );
 
   const items = useMemo<BulkActionsConfig[]>(

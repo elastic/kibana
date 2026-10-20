@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   ALERTING_V2_RULES_READ_ROLE,
@@ -15,7 +14,7 @@ import {
 
 test.describe(
   'Rules list - heading tabs privileges',
-  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
+  { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
   () => {
     test('shows the V1 and V2 rules tabs when the user can read both surfaces', async ({
       browserAuth,

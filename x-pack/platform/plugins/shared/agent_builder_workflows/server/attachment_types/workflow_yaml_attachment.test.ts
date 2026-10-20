@@ -48,6 +48,7 @@ interface RegisteredAttachmentType {
       data: {
         yaml: string;
         clientDiagnostics?: Array<{ severity: string; message: string; source: string }>;
+        readOnlyReason?: string;
       };
     },
     context: { spaceId: string; request: unknown }
@@ -173,6 +174,13 @@ describe('workflow_yaml_attachment', () => {
         data: { yaml: 'version: "1"' },
       });
       expect(type.validate({ notYaml: true })).toMatchObject({ valid: false });
+      expect(type.validate({ yaml: 'version: "1"', readOnlyReason: 'executions_tab' })).toEqual({
+        valid: true,
+        data: { yaml: 'version: "1"', readOnlyReason: 'executions_tab' },
+      });
+      expect(type.validate({ yaml: 'version: "1"', readOnlyReason: 'unknown' })).toMatchObject({
+        valid: false,
+      });
     });
   });
 
@@ -331,6 +339,50 @@ steps:
       expect(result.value).toContain('Validation warnings (1)');
       expect(result.value).toContain('Client-side validation errors (1)');
       expect(result.value).toContain('[yaml-parser] parse error');
+    });
+
+    it('tells the agent when the editor is read-only', async () => {
+      const type = registerAndCapture({
+        validateWorkflow: jest.fn().mockResolvedValue({ valid: true, diagnostics: [] }),
+      });
+
+      const { getRepresentation } = type.format(
+        { data: { yaml: 'version: "1"', readOnlyReason: 'executions_tab' } },
+        { spaceId: 'default', request: {} }
+      );
+      const result = await getRepresentation();
+
+      expect(result.value).toContain('Editor is read-only');
+      expect(result.value).toContain('Workflow tab');
+    });
+
+    it('tells the agent the Executions tab shows the current workflow YAML', async () => {
+      const type = registerAndCapture({
+        validateWorkflow: jest.fn().mockResolvedValue({ valid: true, diagnostics: [] }),
+      });
+
+      const { getRepresentation } = type.format(
+        { data: { yaml: 'version: "1"', readOnlyReason: 'executions_tab' } },
+        { spaceId: 'default', request: {} }
+      );
+      const result = await getRepresentation();
+
+      expect(result.value).toContain('current workflow definition');
+      expect(result.value).toContain(platformCoreTools.getWorkflowExecutionStatus);
+    });
+
+    it('omits the read-only note when the editor is editable', async () => {
+      const type = registerAndCapture({
+        validateWorkflow: jest.fn().mockResolvedValue({ valid: true, diagnostics: [] }),
+      });
+
+      const { getRepresentation } = type.format(
+        { data: { yaml: 'version: "1"' } },
+        { spaceId: 'default', request: {} }
+      );
+      const result = await getRepresentation();
+
+      expect(result.value).not.toContain('Editor is read-only');
     });
 
     it('still returns YAML and edit guidance when validation throws', async () => {

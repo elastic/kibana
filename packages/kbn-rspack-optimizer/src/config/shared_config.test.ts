@@ -252,6 +252,13 @@ describe('shared_config', () => {
       expect(cssRule).toBeDefined();
     });
 
+    it('should skip ?raw CSS imports so they are loaded as source text', () => {
+      const cssRule = rules.find((r) => r.test?.toString() === '/\\.css$/');
+      expect(cssRule?.resourceQuery).toEqual({ not: /raw/ });
+      const rawRule = rules.find((r) => r.resourceQuery?.toString() === '/raw/' && !r.test);
+      expect(rawRule?.type).toBe('asset/source');
+    });
+
     it('should include SCSS loader rules', () => {
       const scssRules = rules.filter((r) => r.test?.toString().includes('scss'));
       expect(scssRules.length).toBeGreaterThan(0);

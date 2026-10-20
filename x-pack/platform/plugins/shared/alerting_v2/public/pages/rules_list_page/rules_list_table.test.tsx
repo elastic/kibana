@@ -59,6 +59,21 @@ const mockRulesWithLongTags = [
   },
 ];
 
+const mockRulesWithRoutingTags = [
+  {
+    id: 'rule-routing-tags',
+    kind: 'alert',
+    enabled: true,
+    metadata: {
+      name: 'Rule With Routing Tags',
+      tags: [],
+      routing_tags: ['team-a', 'team-b', 'team-c'],
+    },
+    schedule: { every: '1m' },
+    query: { base: 'FROM logs-* | LIMIT 1' },
+  },
+];
+
 const defaultProps: RulesListTableProps = {
   items: mockRules as any,
   totalItemCount: 2,
@@ -82,8 +97,7 @@ const defaultProps: RulesListTableProps = {
   onBulkDisable: jest.fn(),
   onBulkDelete: jest.fn(),
   onBulkUpdateApiKey: jest.fn(),
-  onNavigateToDetails: jest.fn(),
-  onExpand: jest.fn(),
+  onOpenSummary: jest.fn(),
   onQuickEdit: jest.fn(),
   onEdit: jest.fn(),
   onClone: jest.fn(),
@@ -133,19 +147,23 @@ describe('RulesListTable', () => {
     it('renders a generic empty state when there are no rules', () => {
       renderTable({ items: [], totalItemCount: 0, search: '', hasActiveFilters: false });
 
-      expect(screen.getByText('No rules found.')).toBeInTheDocument();
+      expect(screen.getByText('No Universal rules found.')).toBeInTheDocument();
     });
 
     it('renders a search-specific empty state when no rules match', () => {
       renderTable({ items: [], totalItemCount: 0, search: 'prod' });
 
-      expect(screen.getByText('No rules match your search or filters.')).toBeInTheDocument();
+      expect(
+        screen.getByText('No Universal rules match your search or filters.')
+      ).toBeInTheDocument();
     });
 
     it('renders a filter-specific empty state when no rules match', () => {
       renderTable({ items: [], totalItemCount: 0, search: '', hasActiveFilters: true });
 
-      expect(screen.getByText('No rules match your search or filters.')).toBeInTheDocument();
+      expect(
+        screen.getByText('No Universal rules match your search or filters.')
+      ).toBeInTheDocument();
     });
 
     it('renders the Source column with extracted index pattern', () => {
@@ -200,20 +218,20 @@ describe('RulesListTable', () => {
       expect(screen.getByText('prod')).toBeInTheDocument();
     });
 
-    it('truncates tags to show only the first 1 and a +N badge for overflow', () => {
+    it('shows the first 2 tags and a +N badge for overflow', () => {
       renderTable({
         items: mockRulesWithManyTags as any,
         totalItemCount: 1,
       });
 
-      // First tag should be visible
       expect(screen.getByText('new')).toBeInTheDocument();
+      expect(screen.getByText('rna')).toBeInTheDocument();
 
-      // Remaining 8 tags should be hidden behind +8 badge
-      expect(screen.getByTestId('overflowTagsBadge')).toHaveTextContent('+8');
+      // Remaining 7 tags should be hidden behind +7 badge
+      expect(screen.getByTestId('overflowTagsBadge')).toHaveTextContent('+7');
 
       // Overflow tags should not be directly visible
-      expect(screen.queryByText('rna')).not.toBeInTheDocument();
+      expect(screen.queryByText('production')).not.toBeInTheDocument();
     });
 
     it('renders long tag text with native EuiBadge truncation', () => {
@@ -226,6 +244,51 @@ describe('RulesListTable', () => {
       expect(
         screen.getByText('this-is-a-very-long-tag-name-that-should-be-truncated')
       ).toBeInTheDocument();
+    });
+  });
+
+  describe('routing tags column', () => {
+    it('renders the routing tags header with an info icon explaining them', async () => {
+      renderTable();
+
+      expect(screen.getByText('Routing tags')).toBeInTheDocument();
+
+      fireEvent.mouseOver(screen.getByTestId('routingTagsColumnInfoIcon'));
+
+      expect(
+        await screen.findByText(
+          'Action policies apply to a rule when they share at least one of its routing tags.'
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('shows the first 2 routing tags and a +N badge, like regular tags', () => {
+      renderTable({
+        items: mockRulesWithRoutingTags as any,
+        totalItemCount: 1,
+      });
+
+      expect(screen.getByTestId('routingTagsContainer')).toHaveTextContent('team-a');
+      expect(screen.getByTestId('routingTagsContainer')).toHaveTextContent('team-b');
+      expect(screen.getByTestId('overflowRoutingTagsBadge')).toHaveTextContent('+1');
+      expect(screen.queryByText('team-c')).not.toBeInTheDocument();
+    });
+
+    it('shows the overflowing routing tags in a tooltip', async () => {
+      renderTable({
+        items: mockRulesWithRoutingTags as any,
+        totalItemCount: 1,
+      });
+
+      fireEvent.mouseOver(screen.getByTestId('overflowRoutingTagsBadge'));
+
+      expect(await screen.findByText('team-c')).toBeInTheDocument();
+    });
+
+    it('renders an empty value for rules without routing tags', () => {
+      renderTable();
+
+      expect(screen.queryByTestId('routingTagsContainer')).not.toBeInTheDocument();
     });
   });
 
@@ -569,13 +632,20 @@ describe('RulesListTable', () => {
       expect(screen.getByTestId('ruleNameLink-rule-1')).toBeInTheDocument();
     });
 
-    it('calls onNavigateToDetails when rule name link is clicked', () => {
-      const onNavigateToDetails = jest.fn();
-      renderTable({ onNavigateToDetails });
+    it('calls onOpenSummary when rule name link is clicked', () => {
+      const onOpenSummary = jest.fn();
+      renderTable({ onOpenSummary });
 
       fireEvent.click(screen.getByTestId('ruleNameLink-rule-1'));
 
-      expect(onNavigateToDetails).toHaveBeenCalledWith(expect.objectContaining({ id: 'rule-1' }));
+      expect(onOpenSummary).toHaveBeenCalledWith(expect.objectContaining({ id: 'rule-1' }));
+    });
+
+    it('does not render an expand button', () => {
+      renderTable();
+
+      expect(screen.queryByTestId('expandRule-rule-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('expandRule-rule-2')).not.toBeInTheDocument();
     });
   });
 
@@ -624,29 +694,11 @@ describe('RulesListTable', () => {
       expect(screen.getByTestId('ruleEnabledBadge-rule-2')).toHaveTextContent('Disabled');
     });
 
-    it('keeps read-only affordances (name link, expand) available', () => {
+    it('keeps the rule name link available', () => {
       renderTable({ canWrite: false });
 
       expect(screen.getByTestId('ruleNameLink-rule-1')).toBeInTheDocument();
-      expect(screen.getByTestId('expandRule-rule-1')).toBeInTheDocument();
-    });
-  });
-
-  describe('expand button', () => {
-    it('renders an expand button for each row', () => {
-      renderTable();
-
-      expect(screen.getByTestId('expandRule-rule-1')).toBeInTheDocument();
-      expect(screen.getByTestId('expandRule-rule-2')).toBeInTheDocument();
-    });
-
-    it('calls onExpand with the row rule when the expand button is clicked', () => {
-      const onExpand = jest.fn();
-      renderTable({ onExpand });
-
-      fireEvent.click(screen.getByTestId('expandRule-rule-1'));
-
-      expect(onExpand).toHaveBeenCalledWith(expect.objectContaining({ id: 'rule-1' }));
+      expect(screen.queryByTestId('expandRule-rule-1')).not.toBeInTheDocument();
     });
   });
 });

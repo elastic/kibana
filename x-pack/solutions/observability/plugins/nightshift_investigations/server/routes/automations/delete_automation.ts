@@ -6,7 +6,9 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { NIGHTSHIFT_AUTOMATION_BUDGET_SO_TYPE } from '../../saved_objects/automation_budget_saved_object';
 import { createNightshiftInvestigationsServerRoute } from '../create_server_route';
 import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../../saved_objects/automation_saved_object';
 import type { NightshiftAutomationAttributes } from '../../lib/automations/types';
@@ -51,6 +53,11 @@ export const deleteAutomationRoute = createNightshiftInvestigationsServerRoute({
       }
     }
 
+    try {
+      await soClient.delete(NIGHTSHIFT_AUTOMATION_BUDGET_SO_TYPE, params.path.id);
+    } catch (error) {
+      if (!SavedObjectsErrorHelpers.isNotFoundError(error as Error)) throw error;
+    }
     await soClient.delete(NIGHTSHIFT_AUTOMATION_SO_TYPE, params.path.id);
 
     return {};

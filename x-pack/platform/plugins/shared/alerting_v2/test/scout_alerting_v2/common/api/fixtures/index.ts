@@ -41,6 +41,7 @@ export {
   ALERTING_V2_ACTION_POLICIES_ALL_ROLE,
   ALERTING_V2_ACTION_POLICIES_READ_ROLE,
   ALERTING_V2_ACTION_POLICIES_ALL_AND_RULES_READ_ROLE,
+  ALERTING_V2_ACTION_POLICY_DISPATCH_ROLE,
   ALERTING_V2_EXECUTION_HISTORY_ALL_ROLE,
   ALERTING_V2_EXECUTION_HISTORY_READ_ROLE,
 } from '../../roles';
@@ -95,6 +96,7 @@ export {
   getFindRuleTemplatesUrl,
   getRuleTemplateTagsUrl,
   getRuleTemplateUrl,
+  getInstallRuleTemplateUrl,
 } from '../../urls';
 export {
   ACTION_POLICY_PER_PAGE_MAX,
@@ -104,3 +106,4 @@ export {
   RULE_TEMPLATE_TAGS_MAX_COUNT,
 } from '../../constants';
 export * as testData from '../../constants';
+export { findNullPaths } from '../../saved_object_assertions';
