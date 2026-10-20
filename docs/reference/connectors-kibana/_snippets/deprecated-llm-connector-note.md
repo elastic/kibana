@@ -3,6 +3,6 @@ This connector is being replaced by {{es}} {{infer}} endpoints. To configure acc
 
 Availability of this connector depends on your deployment and version:
 
-- {applies_to}`serverless: deprecated` {applies_to}`stack: deprecated 9.6+` You can no longer create new connectors of this type by selecting **Create connector** in {{kib}}. Existing connectors and their rule actions continue to work.
+- {applies_to}`serverless: deprecated` {applies_to}`stack: deprecated 9.6+` You can no longer create new connectors of this type by selecting **Create connector** in {{kib}}. Existing connectors and their rule actions continue to work, but the **Connectors** page hides them by default. To show them, open **Display options** and set **Deprecated** to **Show**.
 - {applies_to}`stack: deprecated =9.5` This connector is still available, but deprecated.
 ::::

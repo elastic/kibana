@@ -9,7 +9,7 @@ The OpenAI, {{bedrock}}, {{gemini}}, and AI Connector types are being replaced b
 
 Availability of these connector types depends on your deployment and version:
 
-- {applies_to}`serverless: deprecated` {applies_to}`stack: deprecated 9.6+` You can no longer create new connectors of these types by selecting **Create connector** in {{kib}}. Existing connectors and their rule actions continue to work.
+- {applies_to}`serverless: deprecated` {applies_to}`stack: deprecated 9.6+` You can no longer create new connectors of these types by selecting **Create connector** in {{kib}}. Existing connectors and their rule actions continue to work, but the **Connectors** page hides them by default. To show them, open **Display options** and set **Deprecated** to **Show**.
 - {applies_to}`stack: deprecated =9.5` These connector types are still available, but deprecated.
 ::::
 
