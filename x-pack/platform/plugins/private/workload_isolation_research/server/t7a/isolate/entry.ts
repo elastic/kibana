@@ -49,6 +49,7 @@ const getIsland = (context: WorkerContext): Promise<Island> => {
     };
     bootStartedAt = performance.now();
     island = bootIsland(data.snapshot, data.elasticsearch);
+    island.then((i) => (islandTaskTypes = [...i.taskCapture.definitions.keys()])).catch(() => undefined);
     island.catch(() => {
       island = undefined;
     });
@@ -64,7 +65,9 @@ const forceGc = () => {
   gc();
 };
 
+let islandTaskTypes: string[] = [];
 const stats = () => ({
+  taskTypes: islandTaskTypes,
   edges: Object.fromEntries(edgeStats),
   fences: Object.fromEntries(fenceStats),
   misses: Object.fromEntries(missStats),
