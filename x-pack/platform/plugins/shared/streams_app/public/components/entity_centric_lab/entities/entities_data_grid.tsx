@@ -261,6 +261,7 @@ const DEFAULT_METRICS_BY_BUCKET: Readonly<Record<string, readonly string[]>> = {
   // Hosts
   hosts: ['metric:cpu-util', 'metric:memory-util', 'metric:disk-util'],
   'hosts:bare-metal': ['metric:cpu-util', 'metric:memory-util', 'metric:disk-util'],
+  'hosts:vm': ['metric:cpu-util', 'metric:memory-util', 'metric:disk-util'],
   'hosts:aws ec2 instance': ['metric:cpu-util', 'metric:memory-util', 'metric:disk-util'],
   'hosts:gcp compute engine': ['metric:cpu-util', 'metric:memory-util', 'metric:disk-util'],
   'hosts:azure vm': ['metric:cpu-util', 'metric:memory-util', 'metric:disk-util'],
@@ -581,6 +582,83 @@ const CellSparkline = ({ values, color }: { values: readonly number[]; color: st
   );
 };
 
+/**
+ * Sparkline that fakes asynchronous, viewport-gated loading: the chart only
+ * renders once the cell is scrolled into view *and* a short staggered delay
+ * has elapsed (simulating a backend time-series fetch). Cells outside the
+ * visible area stay empty until the user scrolls to them.
+ *
+ * Reliability notes:
+ * - `IntersectionObserver` is created in a `requestAnimationFrame` callback
+ *   so the element has been laid out by the time the observer first checks —
+ *   this avoids the common edge-case where an observer attached in the same
+ *   frame as mount never fires for an element already in view.
+ * - The delay is seeded from the series data so different cells stagger.
+ */
+const LazySparkline = ({ values, color }: { values: readonly number[]; color: string }) => {
+  const ref = useRef<HTMLSpanElement>(null);
+  const [loaded, setLoaded] = useState(false);
+
+  // Deterministic delay 100–500ms seeded from the first two data points.
+  const delay = useMemo(
+    () => 100 + Math.round(((values[0] ?? 0) * 137 + (values[1] ?? 0) * 53) % 400),
+    [values]
+  );
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+
+    // Defer observer creation so the element is laid out first.
+    const rafId = requestAnimationFrame(() => {
+      if (cancelled) return;
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            observer.disconnect();
+            timer = setTimeout(() => {
+              if (!cancelled) setLoaded(true);
+            }, delay);
+          }
+        },
+        { threshold: 0 }
+      );
+      observer.observe(el);
+      // Store for cleanup.
+      cleanup.observer = observer;
+    });
+
+    const cleanup: { observer?: IntersectionObserver } = {};
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(rafId);
+      if (timer) clearTimeout(timer);
+      cleanup.observer?.disconnect();
+    };
+  }, [delay]);
+
+  return (
+    <span ref={ref} style={{ display: 'inline-flex', width: 56, height: 16, flexShrink: 0 }}>
+      {loaded ? (
+        <span
+          style={{
+            display: 'inline-flex',
+            opacity: 0,
+            transition: 'opacity 200ms ease-out',
+          }}
+          ref={(el) => {
+            if (el) requestAnimationFrame(() => { el.style.opacity = '1'; });
+          }}
+        >
+          <CellSparkline values={values} color={color} />
+        </span>
+      ) : null}
+    </span>
+  );
+};
+
 const NumericMetricCell = ({
   displayValue,
   series,
@@ -592,7 +670,7 @@ const NumericMetricCell = ({
 }) => (
   <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
     <span>{displayValue}</span>
-    {series && series.length > 1 ? <CellSparkline values={series} color={color} /> : null}
+    {series && series.length > 1 ? <LazySparkline values={series} color={color} /> : null}
   </span>
 );
 
