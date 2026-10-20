@@ -136,11 +136,10 @@ function buildEuiGridColumn({
   onResize,
   sortedColumns,
   disableCellActions = false,
-  disableColumnActions = false,
   dataGridRef,
   hideFilteringOnComputedColumns,
   documentsDisplayMode,
-  isInteractive = true,
+  isInteractive,
 }: {
   numberOfColumns: number;
   columnName: string;
@@ -168,11 +167,10 @@ function buildEuiGridColumn({
   onResize: UnifiedDataTableProps['onResize'];
   sortedColumns?: EuiDataGridColumnSortingConfig[];
   disableCellActions?: boolean;
-  disableColumnActions?: boolean;
   dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>;
   hideFilteringOnComputedColumns?: boolean;
   documentsDisplayMode: DocumentsDisplayMode;
-  isInteractive?: boolean;
+  isInteractive: boolean;
 }) {
   const dataViewField = getDataViewFieldFromDataSource({
     dataView,
@@ -264,7 +262,7 @@ function buildEuiGridColumn({
         />
       ) : undefined,
     displayAsText: columnDisplayName,
-    actions: disableColumnActions
+    actions: !isInteractive
       ? false
       : {
           showHide:
@@ -385,7 +383,6 @@ export function getEuiGridColumns({
   isSortEnabled,
   isResizable = true,
   disableCellActions = false,
-  disableColumnActions = false,
   isPlainRecord,
   services,
   hasEditDataViewPermission,
@@ -415,7 +412,6 @@ export function getEuiGridColumns({
   isResizable?: boolean;
   isPlainRecord?: boolean;
   disableCellActions?: boolean;
-  disableColumnActions?: boolean;
   services: {
     uiSettings: IUiSettingsClient;
     toastNotifications: ToastsStart;
@@ -450,8 +446,8 @@ export function getEuiGridColumns({
       columnWidth: getColWidth(column),
       dataView,
       isSummaryOnlyColumn,
-      isSortEnabled,
-      isResizable,
+      isSortEnabled: isSortEnabled && isInteractive,
+      isResizable: isResizable && isInteractive,
       isPlainRecord,
       toastNotifications: services.toastNotifications,
       uiActions: services.uiActions,
@@ -468,8 +464,7 @@ export function getEuiGridColumns({
       columnDisplay: settings?.columns?.[column]?.display,
       onResize,
       sortedColumns,
-      disableCellActions,
-      disableColumnActions,
+      disableCellActions: disableCellActions || !isInteractive,
       dataGridRef,
       hideFilteringOnComputedColumns,
       documentsDisplayMode,

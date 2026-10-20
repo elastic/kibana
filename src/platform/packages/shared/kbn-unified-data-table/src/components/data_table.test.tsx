@@ -787,31 +787,6 @@ describe('UnifiedDataTable', () => {
       });
     });
 
-    it('should render the sort direction indicator in the column header in print view', async () => {
-      await renderComponent({
-        ...getProps(),
-        columns: ['message'],
-        sort: [['message', 'desc']],
-        renderMode: 'print',
-      });
-
-      expect(screen.getByTestId('dataGridHeaderCellSortingIcon-message')).toBeInTheDocument();
-    });
-
-    it('should keep showing the current sort as read-only in print view', async () => {
-      await renderComponent({
-        ...getProps(),
-        columns: ['message'],
-        sort: [['message', 'desc']],
-        renderMode: 'print',
-      });
-
-      expect(getLastEuiDataGridProps().sorting).toEqual({
-        onSort: expect.any(Function),
-        columns: [{ direction: 'desc', id: 'message' }],
-      });
-    });
-
     it(
       'sorting should preserve the selected documents when copying them to clipboard',
       async () => {
@@ -1019,37 +994,6 @@ describe('UnifiedDataTable', () => {
       },
       EXTENDED_JEST_TIMEOUT
     );
-
-    it('should hide toolbar controls in print mode', async () => {
-      await renderComponent({
-        ...getProps(),
-        renderMode: 'print',
-        onUpdateRowHeight: jest.fn(),
-        onUpdateSampleSize: jest.fn(),
-      });
-
-      expect(getLastEuiDataGridProps().toolbarVisibility).toMatchObject({
-        showColumnSelector: false,
-        showDisplaySelector: undefined,
-        showFullScreenSelector: false,
-        showKeyboardShortcuts: false,
-        showSortSelector: false,
-      });
-    });
-
-    it('should hide additional controls in print mode', async () => {
-      await renderComponent({
-        ...getProps(),
-        renderMode: 'print',
-        externalAdditionalControls: <div data-test-subj="externalControl" />,
-      });
-
-      const { toolbarVisibility } = getLastEuiDataGridProps();
-      expect(
-        typeof toolbarVisibility === 'object' && toolbarVisibility.additionalControls
-      ).toBeNull();
-      expect(screen.queryByTestId('externalControl')).not.toBeInTheDocument();
-    });
 
     it(
       'should hide the Sort toolbar control when showSortSelector is false without disabling column sorting',
@@ -1967,33 +1911,6 @@ describe('UnifiedDataTable', () => {
       },
       EXTENDED_JEST_TIMEOUT
     );
-
-    it('should hide the Summary column tooltip in print mode', async () => {
-      await renderComponent({
-        ...getProps(),
-        columns: [],
-        renderMode: 'print',
-      });
-
-      expect(screen.getByText('Summary')).toBeInTheDocument();
-      expect(screen.queryByTestId('unifiedDataTable_headerSummaryIcon')).not.toBeInTheDocument();
-    });
-
-    it('should hide column actions and resize when in print mode', async () => {
-      await renderComponent({
-        ...getProps(),
-        columns: ['message'],
-        renderMode: 'print',
-      });
-
-      expect(getLastEuiDataGridProps().onColumnResize).toBeUndefined();
-      expect(getLastEuiDataGridProps().leadingControlColumns).toEqual([]);
-      expect(getLastEuiDataGridProps().columns[1].actions).toBe(false);
-      expect(getLastEuiDataGridProps().columns[1].cellActions).toEqual([]);
-      expect(
-        screen.queryByTestId('dataGridHeaderCellActionButton-message')
-      ).not.toBeInTheDocument();
-    });
   });
 
   describe('pagination', () => {
@@ -2094,9 +2011,6 @@ describe('UnifiedDataTable', () => {
       rows,
       rowsPerPageOptions: [1, 5],
       rowsPerPageState: 1,
-      initialState: {
-        pageIndex: 0,
-      },
       onUpdatePageIndex: onChangePageMock,
       setExpandedDoc: jest.fn(),
       renderDocumentView: jest.fn(),
@@ -2321,11 +2235,27 @@ describe('UnifiedDataTable', () => {
         showColumnSelector: false,
         showKeyboardShortcuts: false,
         showDisplaySelector: undefined,
+        showFullScreenSelector: false,
       });
       // the current sort order is still shown, read-only, rather than hidden outright
       expect(getLastEuiDataGridProps().sorting?.columns).toEqual([
         { id: 'bytes', direction: 'desc' },
       ]);
+      expect(screen.getByTestId('dataGridHeaderCellSortingIcon-bytes')).toBeInTheDocument();
+    });
+
+    it('hides additional controls in the toolbar', async () => {
+      await renderComponent({
+        ...getProps(),
+        renderMode: 'print',
+        externalAdditionalControls: <div data-test-subj="externalControl" />,
+      });
+
+      const { toolbarVisibility } = getLastEuiDataGridProps();
+      expect(
+        typeof toolbarVisibility === 'object' && toolbarVisibility.additionalControls
+      ).toBeNull();
+      expect(screen.queryByTestId('externalControl')).not.toBeInTheDocument();
     });
 
     it('disables column resize and column/cell actions', async () => {
@@ -2339,6 +2269,18 @@ describe('UnifiedDataTable', () => {
       expect(column?.isResizable).toBe(false);
       expect(column?.actions).toBe(false);
       expect(column?.cellActions).toEqual([]);
+      expect(screen.queryByTestId('dataGridHeaderCellActionButton-bytes')).not.toBeInTheDocument();
+    });
+
+    it('hides the Summary column tooltip', async () => {
+      await renderComponent({
+        ...getProps(),
+        columns: [],
+        renderMode: 'print',
+      });
+
+      expect(screen.getByText('Summary')).toBeInTheDocument();
+      expect(screen.queryByTestId('unifiedDataTable_headerSummaryIcon')).not.toBeInTheDocument();
     });
 
     it('removes the row selection control column and disables drag-and-drop', async () => {
@@ -2370,15 +2312,43 @@ describe('UnifiedDataTable', () => {
       ).not.toBeInTheDocument();
     });
 
-    it('hides the rows-per-page options while leaving pagination active', async () => {
+    it('hides the rows-per-page options while leaving pagination active in non-interactive mode', async () => {
       await renderComponent({
         ...getProps(),
         columns: ['bytes'],
-        renderMode: 'print',
+        renderMode: 'non-interactive',
         rowsPerPageOptions: [5, 10],
       });
 
       expect(getLastEuiDataGridProps().pagination?.pageSizeOptions).toEqual([]);
+    });
+
+    it('removes pagination in print mode', async () => {
+      await renderComponent({
+        ...getProps(),
+        columns: ['bytes'],
+        renderMode: 'print',
+        rowsPerPageOptions: [1, 5],
+        rowsPerPageState: 1,
+      });
+
+      expect(getLastEuiDataGridProps().pagination).toBeUndefined();
+      expect(screen.queryByTestId('pagination-button-1')).not.toBeInTheDocument();
+    });
+
+    it('renders the footer in non-interactive mode but not in print mode', async () => {
+      const props = {
+        ...getProps(),
+        columns: ['bytes'],
+        totalHits: 1000,
+      };
+
+      const { unmount } = await renderComponent({ ...props, renderMode: 'non-interactive' });
+      expect(screen.getByTestId('unifiedDataTableFooter')).toBeInTheDocument();
+      unmount();
+
+      await renderComponent({ ...props, renderMode: 'print' });
+      expect(screen.queryByTestId('unifiedDataTableFooter')).not.toBeInTheDocument();
     });
 
     it(

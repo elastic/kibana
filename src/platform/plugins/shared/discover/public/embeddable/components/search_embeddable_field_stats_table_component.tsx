@@ -16,6 +16,7 @@ import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { FieldStatisticsTable } from '../../application/main/components/field_stats_table';
 import { isEsqlMode } from '../initialize_fetch';
+import { getDataGridRenderMode } from '../utils/get_data_grid_render_mode';
 import type { SearchEmbeddableApi, SearchEmbeddableStateManager } from '../types';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 
@@ -58,7 +59,7 @@ export function SearchEmbeddablFieldStatsTableComponent({
       searchSessionId={fetchContext?.searchSessionId}
       isEsqlMode={isEsql}
       timeRange={fetchContext?.timeRange}
-      isInteractive={viewMode !== 'non-interactive'}
+      isInteractive={getDataGridRenderMode(viewMode) === 'interactive'}
     />
   );
 }

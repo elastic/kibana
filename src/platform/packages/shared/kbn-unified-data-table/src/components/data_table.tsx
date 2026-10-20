@@ -706,6 +706,7 @@ const InternalUnifiedDataTable = React.forwardRef<
     useImperativeHandle(ref, () => dataGridRef.current!);
 
     const isInteractive = renderMode === 'interactive';
+    const isPrintMode = renderMode === 'print';
 
     const [isFilterActive, setIsFilterActive] = useRestorableState('isFilterActive', false);
     const [isCompareActive, setIsCompareActive] = useRestorableState('isCompareActive', false);
@@ -1243,8 +1244,8 @@ const InternalUnifiedDataTable = React.forwardRef<
           settings,
           dataView,
           isSummaryOnlyColumn,
-          isSortEnabled: isSortEnabled && isInteractive,
-          isResizable: isResizable && isInteractive,
+          isSortEnabled,
+          isResizable,
           isPlainRecord,
           services: {
             uiSettings,
@@ -1263,8 +1264,7 @@ const InternalUnifiedDataTable = React.forwardRef<
           customGridColumnsConfiguration,
           onResize,
           sortedColumns,
-          disableCellActions: disableCellActions || !isInteractive,
-          disableColumnActions: !isInteractive,
+          disableCellActions,
           dataGridRef,
           hideFilteringOnComputedColumns,
           documentsDisplayMode,
@@ -1384,7 +1384,7 @@ const InternalUnifiedDataTable = React.forwardRef<
                 rows={displayedRows}
                 setIsFilterActive={setIsFilterActive}
                 selectedDocsState={selectedDocsState}
-                enableComparisonMode={enableComparisonMode && isInteractive}
+                enableComparisonMode={enableComparisonMode}
                 setIsCompareActive={setIsCompareActive}
                 fieldFormats={fieldFormats}
                 pageIndex={unifiedDataTableContextValue.pageIndex}
@@ -1720,8 +1720,10 @@ const InternalUnifiedDataTable = React.forwardRef<
                 columnVisibility={columnsVisibility}
                 data-test-subj="docTable"
                 leadingControlColumns={leadingControlColumns}
-                onColumnResize={isInteractive ? onResize : undefined}
-                pagination={paginationMode === 'multiPage' ? paginationObj : undefined}
+                onColumnResize={onResize}
+                pagination={
+                  !isPrintMode && paginationMode === 'multiPage' ? paginationObj : undefined
+                }
                 renderCellValue={renderCellValueWithInTableSearchSupport}
                 ref={dataGridRef}
                 rowCount={rowCount}
@@ -1740,7 +1742,8 @@ const InternalUnifiedDataTable = React.forwardRef<
               />
             )}
           </div>
-          {loadingState !== DataLoadingState.loading &&
+          {!isPrintMode &&
+            loadingState !== DataLoadingState.loading &&
             isPaginationEnabled && // we hide the footer for Surrounding Documents page
             !isFilterActive && // hide footer when showing selected documents
             !isCompareActive && (

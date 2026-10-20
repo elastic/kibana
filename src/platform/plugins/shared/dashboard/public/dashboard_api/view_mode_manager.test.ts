@@ -7,9 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { initializeViewModeManager } from './view_mode_manager';
 import { mockDashboardBackupService } from '../services/mocks';
 import { coreServices } from '../services/kibana_services';
+
+const incomingEmbeddable: EmbeddablePackageState = {
+  type: 'testEmbeddable',
+  serializedState: {},
+  embeddableId: 'panel1',
+};
 
 describe('initializeViewModeManager', () => {
   beforeEach(() => {
@@ -44,7 +51,7 @@ describe('initializeViewModeManager', () => {
       const { api } = initializeViewModeManager({
         isManaged: false,
         savedObjectId: 'dashboard1',
-        incomingEmbeddables: [{ embeddableId: 'panel1' } as any],
+        incomingEmbeddables: [incomingEmbeddable],
         viewMode: 'non-interactive',
       });
 
@@ -87,7 +94,7 @@ describe('initializeViewModeManager', () => {
       const { api } = initializeViewModeManager({
         isManaged: false,
         savedObjectId: 'dashboard1',
-        incomingEmbeddables: [{ embeddableId: 'panel1' } as any],
+        incomingEmbeddables: [incomingEmbeddable],
         viewMode: 'print',
       });
 
@@ -119,7 +126,7 @@ describe('initializeViewModeManager', () => {
       const { api } = initializeViewModeManager({
         isManaged: true,
         savedObjectId: 'dashboard1',
-        incomingEmbeddables: [{ embeddableId: 'panel1' } as any],
+        incomingEmbeddables: [incomingEmbeddable],
       });
 
       expect(api.viewMode$.getValue()).toBe('view');
@@ -170,7 +177,7 @@ describe('initializeViewModeManager', () => {
       const { api } = initializeViewModeManager({
         isManaged: false,
         savedObjectId: 'dashboard1',
-        incomingEmbeddables: [{ embeddableId: 'panel1' } as any],
+        incomingEmbeddables: [incomingEmbeddable],
       });
 
       expect(api.viewMode$.getValue()).toBe('edit');
