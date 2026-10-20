@@ -31,13 +31,11 @@ import {
   toBatchEntry,
   DEFAULT_DETECTION_COLUMNS,
   type BatchEntry,
-  type BatchPriorSeries,
 } from './detection_batch';
 import { runProbe, runStoredQuery, type ProbeResult, type ProbeWindow } from './run_probe';
 import {
   RuleEventsClient,
   type LiveRuleMembership,
-  type PriorSeries,
 } from '../lib/significant_events/events/rule_events_client';
 
 /** Rows beyond this are not classified: they go to the agent untouched. */
@@ -65,13 +63,6 @@ const inputSchema = lazySchema(() =>
       .number()
       .min(1)
       .max(24 * 30),
-    /** A series an operator closed with a reason counts as known-ongoing this long after it closed. */
-    known_ongoing_days: z.number().min(0).max(90),
-    /** How far back a rule's latest series is looked for. */
-    prior_series_lookback_hours: z
-      .number()
-      .min(1)
-      .max(24 * 90),
   })
 );
 
@@ -259,18 +250,13 @@ export interface ClassifyBatchParams {
   shadowMode: boolean;
   /** A skip is withdrawn when the verdict it rests on is older than this. */
   maxSkipAgeMs: number;
-  /** A series an operator closed with a reason is known-ongoing for this long after it closed. */
-  knownOngoingMs: number;
   /** The clock the series ages are read against. */
   now: number;
   /** How far back the probe looked, so a skip can say what it saw. */
   probeWindowMinutes: number;
   probeConcurrency: number;
-  /** The live series each rule is in, and its latest series in any status. Called once. */
-  findRuleSeries: (ruleUuids: string[]) => Promise<{
-    live: Map<string, LiveRuleMembership[]>;
-    prior: Map<string, PriorSeries>;
-  }>;
+  /** The live series each rule is in. Called once. */
+  findLiveMemberships: (ruleUuids: string[]) => Promise<Map<string, LiveRuleMembership[]>>;
   /** Re-runs a stored query once; must not throw. */
   probe: (query: string | undefined) => Promise<ProbeResult>;
   /** Is the detection above its own normal? A skip is withdrawn when it is. */
@@ -287,11 +273,10 @@ export const classifyBatch = async ({
   columns,
   shadowMode,
   maxSkipAgeMs,
-  knownOngoingMs,
   now,
   probeWindowMinutes,
   probeConcurrency,
-  findRuleSeries,
+  findLiveMemberships,
   probe,
   observe,
 }: ClassifyBatchParams): Promise<ClassifyDetectionsOutput> => {
@@ -303,39 +288,10 @@ export const classifyBatch = async ({
   const classifiable = parsed.flatMap(({ row, withinCap }) => (row && withinCap ? [row] : []));
   const ruleUuids = [...new Set(classifiable.map(({ ruleUuid }) => ruleUuid))];
 
-  const { live: memberships, prior: priorSeries } =
+  const memberships =
     ruleUuids.length > 0
-      ? await findRuleSeries(ruleUuids)
-      : {
-          live: new Map<string, LiveRuleMembership[]>(),
-          prior: new Map<string, PriorSeries>(),
-        };
-  const priorSeriesOf = (ruleUuid: string): BatchPriorSeries | undefined => {
-    const series = priorSeries.get(ruleUuid);
-    return series
-      ? {
-          ...(series.eventId ? { event_id: series.eventId } : {}),
-          status: series.status,
-          severity: series.severity,
-          ...(series.assessmentNote ? { assessment_note: series.assessmentNote } : {}),
-          updated_at: series.updatedAt,
-          ...(series.status === 'inactive'
-            ? {
-                ended_by:
-                  series.statusSetBy === 'operator' ? ('operator' as const) : ('engine' as const),
-              }
-            : {}),
-          // An operator dismissed it with a reason not long ago: the prompt caps its severity. Only
-          // when enforcing: in shadow mode the agent judges unprompted.
-          ...(!shadowMode &&
-          series.status === 'inactive' &&
-          series.closedWithReason &&
-          now - Date.parse(series.updatedAt) <= knownOngoingMs
-            ? { known_ongoing: true }
-            : {}),
-        }
-      : undefined;
-  };
+      ? await findLiveMemberships(ruleUuids)
+      : new Map<string, LiveRuleMembership[]>();
 
   const limiter = pLimit(probeConcurrency);
   const probes = new Map<string, ProbeResult>();
@@ -363,11 +319,9 @@ export const classifyBatch = async ({
 
   const decisions: Decision[] = [];
   const entries: BatchEntry[] = rows.map((row, index) => {
-    const ruleUuid = parsed[index].row?.ruleUuid;
     return toBatchEntry({
       columns,
       row,
-      priorSeries: ruleUuid ? priorSeriesOf(ruleUuid) : undefined,
       includeFlakyProbe: shadowMode,
     });
   });
@@ -415,7 +369,6 @@ export const classifyBatch = async ({
       entries[index] = toBatchEntry({
         columns,
         row: rows[index],
-        priorSeries: priorSeriesOf(ruleUuid),
         // The classifier replaced the count-based gate the flag belonged to.
         includeFlakyProbe: false,
         classifier: {
@@ -507,8 +460,6 @@ export const classifyDetectionsStepDefinition = ({ logger }: { logger: Logger })
         probe_concurrency: probeConcurrency,
         budget_ms: budgetMs,
         max_skip_age_hours: maxSkipAgeHours,
-        prior_series_lookback_hours: lookbackHours,
-        known_ongoing_days: knownOngoingDays,
       } = context.input;
       const esClient = context.contextManager.getScopedEsClient();
       const ruleEventsClient = new RuleEventsClient({ esClient, space: spaceId });
@@ -528,9 +479,6 @@ export const classifyDetectionsStepDefinition = ({ logger }: { logger: Logger })
           abortSignal: context.abortSignal,
         });
 
-      // A known-ongoing series must be in the prior window to be seen.
-      const priorHours = Math.max(lookbackHours, knownOngoingDays * 24);
-
       const output = await classifyBatch({
         rows,
         columns,
@@ -539,13 +487,11 @@ export const classifyDetectionsStepDefinition = ({ logger }: { logger: Logger })
         now,
         probeWindowMinutes: windowMinutes,
         probeConcurrency,
-        knownOngoingMs: knownOngoingDays * 24 * 3_600_000,
-        // A live series with no write for longer than both limits cannot rest a skip anyway.
-        findRuleSeries: (ruleUuids) =>
-          ruleEventsClient.findRuleSeries({
+        // A live series with no write for longer than the skip age cannot rest a skip anyway.
+        findLiveMemberships: (ruleUuids) =>
+          ruleEventsClient.findLiveMemberships({
             ruleUuids,
-            from: new Date(now - Math.max(priorHours, maxSkipAgeHours) * 3_600_000).toISOString(),
-            priorFrom: new Date(now - priorHours * 3_600_000).toISOString(),
+            from: new Date(now - maxSkipAgeHours * 3_600_000).toISOString(),
           }),
         probe: (query) =>
           runProbe({

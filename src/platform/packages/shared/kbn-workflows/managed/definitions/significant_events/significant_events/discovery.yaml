@@ -65,18 +65,6 @@ triggers:
           minimum: 1
           maximum: 720
           description: "A detection is never skipped on the strength of a verdict older than this many hours (the rule's last verification in its live series): it goes to the agent, so a long-running event is re-judged at least this often."
-        classifierKnownOngoingDays:
-          type: number
-          default: 7
-          minimum: 0
-          maximum: 90
-          description: 'A rule whose latest series an operator closed with a reason is known-ongoing for this many days after it closed: the agent caps the severity of its next event at medium. 0 turns it off.'
-        classifierPriorSeriesLookbackHours:
-          type: number
-          default: 336
-          minimum: 1
-          maximum: 2160
-          description: "How far back a rule's latest series is looked for. It is handed to the agent as prior_series context."
         classifierBudgetMs:
           type: number
           default: 20000
@@ -235,8 +223,6 @@ steps:
       probe_concurrency: '${{ inputs.classifierProbeConcurrency }}'
       budget_ms: '${{ inputs.classifierBudgetMs }}'
       max_skip_age_hours: '${{ inputs.classifierMaxSkipAgeHours }}'
-      prior_series_lookback_hours: '${{ inputs.classifierPriorSeriesLookbackHours }}'
-      known_ongoing_days: '${{ inputs.classifierKnownOngoingDays }}'
     on-failure:
       continue: true
 
@@ -410,16 +396,7 @@ steps:
             items:
               type: string
             description: >-
-              rule_uuid of every detection that is done this cycle: a detection whose
-              events_write result was written: true or skipped with reason
-              existing_active_event or unchanged_outcome, or a same-batch duplicate of one
-              that was written.
-              Failed (bulk_error or unknown_event_id) or unattempted writes must not be
-              included.
-              Used both as a hallucination guardrail (schema validation forces the agent
-              to report real activity) and as the per-rule filter for which detections
-              get stamped as processed. Full discovery data is written via the
-              events_write tool — this is a compact summary only.
+              rule_uuid of every detection that was processed and included in this cycle's significant events.
           significant_events:
             type: array
             description: 'Final events_write outcomes from the discovery agent. Successful writes have written: true. The workflow uses only successful active items to gate trigger_investigation.'
@@ -442,14 +419,6 @@ steps:
                   description: 'true when events_write appended the event version.'
                 reason:
                   type: string
-                  enum:
-                    [
-                      bulk_error,
-                      duplicate_in_batch,
-                      existing_active_event,
-                      unchanged_outcome,
-                      unknown_event_id,
-                    ]
                   description: 'Failure or skip reason when written is false.'
               required: [event_id, severity, status, written]
         required: [written_rule_uuids, significant_events]

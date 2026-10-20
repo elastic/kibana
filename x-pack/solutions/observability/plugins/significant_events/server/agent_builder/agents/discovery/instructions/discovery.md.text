@@ -22,10 +22,6 @@ tool result, or a KI; with no source, make no claim.
   (`unjudged_member`, `over_cap`, `probe_unavailable`). `live_events` lists the events its rule is in
   (`event_id`, `status`, `stored_verdict`). It points at what to verify and where to route; it is
   never evidence.
-- **`prior_series`** (per detection; optional) — the rule's latest series in any status: `status`,
-  `severity`, `assessment_note`, `updated_at`, `ended_by` (`operator` or `engine`, inactive only) and
-  `known_ongoing`. Read it as "last time this rule was X because Y": context only, never evidence and
-  never a reason to write or skip. Its one effect is `known_ongoing` in Step 5.
 
 </inputs>
 
@@ -191,8 +187,8 @@ Compare one current detection against one active event using that event's compac
 
 **Impact check**
 - Use the affected operation when evaluating a match; different or uncertain effects do not reject a
-  topology-supported match unless independent or contradictory. The affected operation alone cannot
-  create a match.
+  topology-supported match unless the grounded evidence shows them independent or contradictory. The
+  affected operation alone cannot create a match.
 
 **Match eligible pairs**
 - Accept when any criterion below holds. Read each side's `<grounding_evidence>` as a whole.
@@ -211,11 +207,15 @@ Compare one current detection against one active event using that event's compac
        (`source` or `target` equals that node), or
      - both sides have dependency edges with the same `source` and different `target` nodes
        (shared caller / fan-out), or
-     - both sides share at least one node in `blast_radius` by `feature_id` or normalized name —
-       including the `target` of a dependency edge that both paths converge on.
+     - both sides share at least one node by `feature_id` or normalized name, counting their
+       `blast_radius` entity nodes and the `source` and `target` of every dependency edge —
+       including a `target` both paths converge on, and a chain where one edge's `target` is the
+       other's `source`.
    - Topology forms the edge: accept a pair of confirmed connected failures when propagation is
      plausible. Different signatures or effects do not reject unless they show an independent path
-     or failure class. Use **Impact** to qualify, not require identical operations.
+     or failure class. A rule's authored text (name, KI description, **Alert symptom**) never makes a
+     connected pair independent; only the grounded evidence can, by showing an independent failure.
+     Use **Impact check** to qualify, not require identical operations.
    - A pair with no connection above is rejected when `<grounding_evidence>` identifies a distinct
      resource or dependency path. A pair that has a connection above is never rejected for its
      different downstream targets.
@@ -382,8 +382,7 @@ Match never skips it, and a Topology hit is not waiting for a rule-uuid match.
      returned topology and compact summary context (`title`, `summary`, `symptom_hypothesis`).
      Compact search has no per-signal prose. Reuse that `event_id`. Compact `signal_rule_uuids` need
      not contain the new rule.
-   - Reject when `<incident_matching>` rejects, or when `<grounding_evidence>` identifies a distinct
-     resource or dependency path. On accept, bind topology as in Rule Match.
+   - Reject when `<incident_matching>` rejects. On accept, bind topology as in Rule Match.
 
 Every continuation item must carry its recorded exact `event_id`.
 
@@ -488,9 +487,6 @@ For each event candidate, decide from all signals that will appear in the final 
      satisfy, before weighing anything that was not measured.
    - A continuation that carries only `refutes` signals has nothing new to rate: set `severity` to
      the stored value read from the `full` view, and keep the stored `confidence`.
-   - **Known ongoing.** When a new event's detection has `prior_series.known_ongoing: true`, rate it
-     as the contract says, then cap it at `medium` unless the confirming signals show a worse failure
-     than the one the operator's `assessment_note` dismissed. Say so in `assessment_note`.
 5. Set `confidence` after severity:
    - `p_value`, `change_point_type`, and `recent_detection_count` adjust `confidence`.
    - For a continuation, start from the matched active event's existing `confidence` and apply

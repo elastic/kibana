@@ -37,19 +37,19 @@ const blastRadiusDependencySchema = lazySchema(() =>
       .max(MAX_ID_LENGTH)
       .optional()
       .describe(
-        "The subtype of the Knowledge Indicator named by feature_id above, copied verbatim from that indicator's own subtype field. A point-in-time snapshot taken when this entry was written; it is never re-synced if the Knowledge Indicator is later reclassified."
+        "The subtype of the Knowledge Indicator named by feature_id, copied verbatim from that indicator's own subtype field. A point-in-time snapshot taken when this entry was written; it is never re-synced if the Knowledge Indicator is later reclassified."
       ),
     source: z
       .string()
       .max(MAX_TITLE_LENGTH)
       .describe(
-        "feature_id of the entity or infrastructure Knowledge Indicator initiating the call in this dependency relationship, copied from the dependency indicator's own source. The writer stores the resolved indicator id."
+        "feature_id of the entity or infrastructure Knowledge Indicator initiating the call in this dependency relationship, copied from the dependency Knowledge Indicator's own source. The writer stores the resolved indicator id."
       ),
     target: z
       .string()
       .max(MAX_TITLE_LENGTH)
       .describe(
-        "feature_id of the entity or infrastructure Knowledge Indicator being called or depended upon, copied from the dependency indicator's own target. The writer stores the resolved indicator id."
+        "feature_id of the entity or infrastructure Knowledge Indicator being called or depended upon, copied from the dependency Knowledge Indicator's own target. The writer stores the resolved indicator id."
       ),
     protocol: z
       .string()
@@ -79,7 +79,7 @@ const blastRadiusInfrastructureSchema = lazySchema(() =>
       .max(MAX_ID_LENGTH)
       .optional()
       .describe(
-        "The subtype of the Knowledge Indicator named by feature_id above, copied verbatim from that indicator's own subtype field. A point-in-time snapshot taken when this entry was written; it is never re-synced if the Knowledge Indicator is later reclassified."
+        "The subtype of the Knowledge Indicator named by feature_id above, copied verbatim from that Knowledge Indicator's own subtype field. A point-in-time snapshot taken when this entry was written; it is never re-synced if the Knowledge Indicator is later reclassified."
       ),
     title: z
       .string()
@@ -114,7 +114,7 @@ const blastRadiusEntitySchema = lazySchema(() =>
       .max(MAX_ID_LENGTH)
       .optional()
       .describe(
-        "The subtype of the Knowledge Indicator named by feature_id above, copied verbatim from that indicator's own subtype field. A point-in-time snapshot taken when this entry was written; it is never re-synced if the Knowledge Indicator is later reclassified."
+        "The subtype of the Knowledge Indicator named by feature_id above, copied verbatim from that Knowledge Indicator's own subtype field. A point-in-time snapshot taken when this entry was written; it is never re-synced if the Knowledge Indicator is later reclassified."
       ),
     name: z.string().max(MAX_TITLE_LENGTH).describe('Human-readable name of the affected entity.'),
     source_id: z
@@ -157,14 +157,14 @@ export const causalFeatureSchema = lazySchema(() =>
       .max(MAX_ID_LENGTH)
       .optional()
       .describe(
-        'The type of the Knowledge Indicator named by feature_id above, copied verbatim from that indicator\'s own type field — one of "entity", "infrastructure", "technology", "dependency", or "schema". This is the Knowledge Indicator\'s own type, not the blast_radius row discriminator, which shares the name but only distinguishes the three blast radius shapes. A point-in-time snapshot taken when this entry was written; it is never re-synced if the Knowledge Indicator is later reclassified.'
+        'The type of the Knowledge Indicator named by feature_id above, copied verbatim from that Knowledge Indicator\'s own type field — one of "entity", "infrastructure", "technology", "dependency", or "schema". This is the Knowledge Indicator\'s own type, not the blast_radius row discriminator, which shares the name but only distinguishes the three blast radius shapes. A point-in-time snapshot taken when this entry was written; it is never re-synced if the Knowledge Indicator is later reclassified.'
       ),
     subtype: z
       .string()
       .max(MAX_ID_LENGTH)
       .optional()
       .describe(
-        "The subtype of the Knowledge Indicator named by feature_id above, copied verbatim from that indicator's own subtype field. A point-in-time snapshot taken when this entry was written; it is never re-synced if the Knowledge Indicator is later reclassified."
+        "The subtype of the Knowledge Indicator named by feature_id above, copied verbatim from that Knowledge Indicator's own subtype field. A point-in-time snapshot taken when this entry was written; it is never re-synced if the Knowledge Indicator is later reclassified."
       ),
     name: z
       .string()

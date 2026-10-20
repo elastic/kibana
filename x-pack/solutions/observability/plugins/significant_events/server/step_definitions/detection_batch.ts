@@ -7,7 +7,6 @@
 
 import {
   MAX_ID_LENGTH,
-  MAX_TEXT_LENGTH,
   NEEDS_AGENT_REASONS,
   PROBE_STATUSES,
   baselineObservationSchema,
@@ -46,21 +45,6 @@ export const batchClassifierSchema = lazySchema(() =>
   })
 );
 
-/** The rule's latest series in any status: what it last was, and why. Context, never evidence. */
-export const batchPriorSeriesSchema = lazySchema(() =>
-  z.object({
-    event_id: z.string().max(MAX_ID_LENGTH).optional(),
-    status: z.string().max(32),
-    severity: z.string().max(32),
-    assessment_note: z.string().max(MAX_TEXT_LENGTH).optional(),
-    updated_at: z.string().max(64),
-    /** For an `inactive` series: an operator closed it, or the engine did. */
-    ended_by: z.enum(['operator', 'engine']).optional(),
-    /** An operator closed it with a reason not long ago: its severity is capped at `medium`. */
-    known_ongoing: z.boolean().optional(),
-  })
-);
-
 /** One detection as the agent reads it: named fields only, no column positions. */
 export const batchEntrySchema = lazySchema(() =>
   z.object({
@@ -75,12 +59,9 @@ export const batchEntrySchema = lazySchema(() =>
     flaky_probe: z.boolean().optional(),
     /** Only when the classifier is enforcing: while it only records, the agent judges unprompted. */
     classifier: batchClassifierSchema.optional(),
-    /** Absent when the rule has no series in the lookback window. */
-    prior_series: batchPriorSeriesSchema.optional(),
   })
 );
 
-export type BatchPriorSeries = z.infer<typeof batchPriorSeriesSchema>;
 export type BatchClassifier = z.infer<typeof batchClassifierSchema>;
 export type BatchEntry = z.infer<typeof batchEntrySchema>;
 
@@ -97,13 +78,11 @@ export const toBatchEntry = ({
   columns = DEFAULT_DETECTION_COLUMNS,
   row,
   classifier,
-  priorSeries,
   includeFlakyProbe = true,
 }: {
   columns?: readonly string[];
   row: readonly unknown[];
   classifier?: BatchClassifier;
-  priorSeries?: BatchPriorSeries;
   /** The count-based flaky flag; left out once the classifier decides instead. */
   includeFlakyProbe?: boolean;
 }): BatchEntry => {
@@ -123,6 +102,5 @@ export const toBatchEntry = ({
     recent_detection_count: number(cells.get('recent_detection_count')),
     ...(includeFlakyProbe && typeof flaky === 'boolean' ? { flaky_probe: flaky } : {}),
     ...(classifier ? { classifier } : {}),
-    ...(priorSeries ? { prior_series: priorSeries } : {}),
   };
 };

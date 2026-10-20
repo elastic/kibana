@@ -256,8 +256,8 @@ search.
 1. **Activate paths.** Only `confirms` signals activate paths. If no signal is `confirms`, emit empty
    `causal_features` and `blast_radius` and skip the remaining sub-steps. For each confirming signal:
    - Identify the failed entity or infrastructure from the query KI first: `query.features[]`, then
-     any value its predicate pins to a field that names a resource (a service, host, pod, database,
-     or queue, whatever the field), matched exactly and uniquely to a fetched feature's `feature.id`
+     any value its predicate pins to a field that identifies an entitiy (e.g: a service, host, pod, database,
+     or queue), matched exactly and uniquely to a fetched feature's `feature.id`
      or `properties.name`. Use its title and description only to disambiguate. Use the component
      named in the found row only when the KI identifies none, or to corroborate. Match the result to
      a fetched dependency's `source`. A matching `target`, shared technology, or another signal's

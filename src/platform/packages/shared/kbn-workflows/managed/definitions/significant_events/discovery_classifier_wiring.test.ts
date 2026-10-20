@@ -107,8 +107,6 @@ describe('discovery workflow detection classifier wiring', () => {
         probe_concurrency: '${{ inputs.classifierProbeConcurrency }}',
         budget_ms: '${{ inputs.classifierBudgetMs }}',
         max_skip_age_hours: '${{ inputs.classifierMaxSkipAgeHours }}',
-        prior_series_lookback_hours: '${{ inputs.classifierPriorSeriesLookbackHours }}',
-        known_ongoing_days: '${{ inputs.classifierKnownOngoingDays }}',
       });
     });
   });
@@ -149,7 +147,6 @@ describe('discovery workflow detection classifier wiring', () => {
 
     it.each([
       ['classifierShadowMode', 'boolean', true, undefined, undefined],
-      ['classifierKnownOngoingDays', 'number', 7, 0, 90],
       ['classifierProbeWindowMinutes', 'number', 20, 15, 360],
       ['classifierProbeTimeoutMs', 'number', 8000, 1000, 30000],
       ['classifierProbeConcurrency', 'number', 5, 1, 10],

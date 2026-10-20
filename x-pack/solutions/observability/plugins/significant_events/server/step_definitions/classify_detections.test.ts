@@ -14,10 +14,7 @@ import {
   type ClassifyBatchParams,
 } from './classify_detections';
 import type { BaselineObservation } from './baseline';
-import type {
-  LiveRuleMembership,
-  PriorSeries,
-} from '../lib/significant_events/events/rule_events_client';
+import type { LiveRuleMembership } from '../lib/significant_events/events/rule_events_client';
 import type { ProbeResult } from './run_probe';
 
 const STORED_QUERY = 'FROM $.a | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend';
@@ -63,25 +60,19 @@ const membersOf = (entries: Record<string, LiveRuleMembership[]>) =>
 
 type BatchOverrides = Partial<ClassifyBatchParams> & {
   findLiveMembers?: (ruleUuids: string[]) => Promise<Map<string, LiveRuleMembership[]>>;
-  findPriorSeries?: (ruleUuids: string[]) => Promise<Map<string, PriorSeries>>;
 };
 
 const batchParams = ({
   findLiveMembers = async () => new Map(),
-  findPriorSeries = async () => new Map(),
   ...overrides
 }: BatchOverrides = {}): ClassifyBatchParams => ({
   rows: [],
   shadowMode: false,
   maxSkipAgeMs: 24 * HOUR_MS,
   probeWindowMinutes: 20,
-  knownOngoingMs: 7 * 24 * HOUR_MS,
   now: NOW,
   probeConcurrency: 5,
-  findRuleSeries: async (ruleUuids) => ({
-    live: await findLiveMembers(ruleUuids),
-    prior: await findPriorSeries(ruleUuids),
-  }),
+  findLiveMemberships: findLiveMembers,
   probe: jest.fn(async () => probeResult('ok', true)),
   ...overrides,
 });
@@ -351,60 +342,6 @@ describe('classifyBatch', () => {
       expect(output.batch[0]).not.toHaveProperty('classifier');
     });
 
-    it('hands over the latest series of the rule, whatever its status, with its note', async () => {
-      const rows = [rowOf('rule-A'), rowOf('rule-B')];
-      const prior: PriorSeries = {
-        eventId: 'event-9',
-        status: 'inactive',
-        severity: 'low',
-        assessmentNote: 'Benign deploy.',
-        updatedAt: '2026-10-12T10:00:00.000Z',
-        statusSetBy: undefined,
-        closedWithReason: false,
-      };
-      const findPriorSeries = jest.fn(async () => new Map([['rule-A', prior]]));
-
-      const output = await classifyBatch(batchParams({ rows, findPriorSeries, shadowMode: true }));
-
-      expect(findPriorSeries).toHaveBeenCalledWith(['rule-A', 'rule-B']);
-      expect(output.batch[0].prior_series).toEqual({
-        event_id: 'event-9',
-        status: 'inactive',
-        severity: 'low',
-        assessment_note: 'Benign deploy.',
-        updated_at: '2026-10-12T10:00:00.000Z',
-        ended_by: 'engine',
-      });
-      expect(output.batch[1]).not.toHaveProperty('prior_series');
-    });
-
-    it('keeps the prior series next to the classifier hint when enforcing', async () => {
-      const rows = [rowOf('rule-A')];
-      const findPriorSeries = jest.fn(
-        async () =>
-          new Map([
-            [
-              'rule-A',
-              {
-                eventId: undefined,
-                status: 'active',
-                severity: 'high',
-                assessmentNote: undefined,
-                updatedAt: 't',
-                statusSetBy: undefined,
-                closedWithReason: false,
-              } satisfies PriorSeries,
-            ],
-          ])
-      );
-
-      const output = await classifyBatch(batchParams({ rows, findPriorSeries, shadowMode: false }));
-
-      expect(output.batch[0].classifier).toBeDefined();
-      expect(output.batch[0].prior_series).toMatchObject({ status: 'active', severity: 'high' });
-      expect(output.batch[0].prior_series).not.toHaveProperty('ended_by');
-    });
-
     it('reads cells by the given column names', async () => {
       const rows = [[{ detection_id: 'd-1', rule_uuid: 'rule-A' }, 'rule-A', 5]];
 
@@ -582,50 +519,9 @@ describe('classifyBatch', () => {
 
   describe('the batch the agent reads in enforce mode', () => {
     const flakyRow = [...detectionRow('rule-A').slice(0, 4), true];
-    const closedBy = (overrides: Partial<PriorSeries>): PriorSeries => ({
-      eventId: 'event-0',
-      status: 'inactive',
-      severity: 'high',
-      assessmentNote: 'Known, tracked elsewhere',
-      updatedAt: new Date(NOW - 24 * HOUR_MS).toISOString(),
-      statusSetBy: 'operator',
-      closedWithReason: true,
-      ...overrides,
-    });
-    const batchOf = async (prior: PriorSeries, overrides: Partial<ClassifyBatchParams> = {}) =>
-      (
-        await classifyBatch(
-          batchParams({
-            rows: [flakyRow],
-            findPriorSeries: jest.fn(async () => new Map([['rule-A', prior]])),
-            ...overrides,
-          })
-        )
-      ).batch[0];
-
-    it('flags a series an operator closed with a reason recently as known ongoing', async () => {
-      expect((await batchOf(closedBy({}))).prior_series).toMatchObject({ known_ongoing: true });
-    });
-
-    it.each([
-      [
-        'closed longer ago than the window',
-        closedBy({ updatedAt: new Date(NOW - 8 * 24 * HOUR_MS).toISOString() }),
-      ],
-      ['closed with no reason', closedBy({ closedWithReason: false })],
-      ['still active', closedBy({ status: 'active' })],
-    ])('does not flag a series that is %s', async (_, prior) => {
-      expect((await batchOf(prior)).prior_series).not.toHaveProperty('known_ongoing');
-    });
-
-    it('does not flag a known-ongoing series in shadow mode, where the agent judges unprompted', async () => {
-      expect((await batchOf(closedBy({}), { shadowMode: true })).prior_series).not.toHaveProperty(
-        'known_ongoing'
-      );
-    });
-
     it('drops the flaky_probe flag when enforcing, and keeps it in shadow mode', async () => {
-      expect(await batchOf(closedBy({}))).not.toHaveProperty('flaky_probe');
+      const enforcing = await classifyBatch(batchParams({ rows: [flakyRow] }));
+      expect(enforcing.batch[0]).not.toHaveProperty('flaky_probe');
       const shadow = await classifyBatch(batchParams({ rows: [flakyRow], shadowMode: true }));
       expect(shadow.batch[0]).toMatchObject({ flaky_probe: true });
     });
@@ -761,8 +657,6 @@ describe('classifyDetectionsStepDefinition', () => {
     probe_concurrency: 5,
     budget_ms: 20_000,
     max_skip_age_hours: 24,
-    prior_series_lookback_hours: 336,
-    known_ongoing_days: 7,
   };
 
   const createDefinition = () => {
