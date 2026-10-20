@@ -24,8 +24,7 @@ const getField = (
 const isFieldActive = (
   field: ConnectorConfigProperties,
   values: Record<string, string | boolean>
-): boolean =>
-  field.depends_on.every((dependency) => values[dependency.field] === dependency.value);
+): boolean => field.depends_on.every((dependency) => values[dependency.field] === dependency.value);
 
 describe('Exchange Server and Outlook auth_method configuration', () => {
   const exchangeConfig = NATIVE_CONNECTOR_DEFINITIONS.exchange_server!.configuration;
