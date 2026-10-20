@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React, { useEffect } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import { Provider as ReduxProvider } from 'react-redux-v7';
 import { Router } from '@kbn/shared-ux-router';
 import { i18n } from '@kbn/i18n';
@@ -37,7 +38,6 @@ export interface UptimeAppProps {
   basePath: string;
   canSave: boolean;
   core: CoreStart;
-  darkMode: boolean;
   i18n: I18nStart;
   isApmAvailable: boolean;
   isInfraAvailable: boolean;
@@ -57,13 +57,13 @@ const Application = (props: UptimeAppProps) => {
     basePath,
     canSave,
     core,
-    darkMode,
     plugins,
     renderGlobalHelpControls,
     setBadge,
     startPlugins,
     appMountParameters,
   } = props;
+  const { darkMode } = useObservable(core.theme.theme$, core.theme.getTheme());
 
   useEffect(() => {
     renderGlobalHelpControls();

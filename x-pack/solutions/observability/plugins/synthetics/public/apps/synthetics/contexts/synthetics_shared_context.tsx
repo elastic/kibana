@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { Provider as ReduxProvider } from 'react-redux-v7';
@@ -29,17 +30,9 @@ export const SyntheticsSharedContext: React.FC<
       onAutoRefresh?: () => void;
     }
   >
-> = ({
-  reduxStore,
-  coreStart,
-  setupPlugins,
-  startPlugins,
-  children,
-  darkMode,
-  reload$,
-  onAutoRefresh,
-}) => {
+> = ({ reduxStore, coreStart, setupPlugins, startPlugins, children, reload$, onAutoRefresh }) => {
   const queryClient = new QueryClient();
+  const { darkMode } = useObservable(coreStart.theme.theme$, coreStart.theme.getTheme());
 
   const spacesApi = startPlugins.spaces;
 
