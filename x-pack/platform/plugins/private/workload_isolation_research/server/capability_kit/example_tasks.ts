@@ -206,6 +206,22 @@ export const cooperative = async (
   return { cancelled: context.signal.aborted, persisted: true };
 };
 
+/** Finishes bounded cleanup after the host forwards cancel. Used to prove grace vs hard stop. */
+export const cleanupAfterCancel = async (
+  input: CodecInput,
+  context: WorkerContext
+): Promise<CodecInput> => {
+  const cleanupMs = Number((input as { cleanupMs?: number }).cleanupMs ?? 0);
+  await context.call('fixture', 'started', {});
+  await new Promise<void>((resolve) => {
+    if (context.signal.aborted) resolve();
+    else context.signal.addEventListener('abort', () => resolve(), { once: true });
+  });
+  if (cleanupMs > 0) await new Promise((resolve) => setTimeout(resolve, cleanupMs));
+  await context.call('fixture', 'cleaned', {});
+  return { cleaned: true, cleanupMs };
+};
+
 export const wrongGrant = async (_input: CodecInput, context: WorkerContext): Promise<CodecInput> =>
   context.call('notGranted', 'get', {});
 

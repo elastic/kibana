@@ -18,9 +18,11 @@ import { performance } from 'perf_hooks';
 import type { CoreStart, KibanaRequest, Logger, PluginInitializerContext } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import {
+  deriveCancelGraceMs,
   markCollateralLoss,
   registerExecutionClass,
   researchDefinitionMeta,
+  resolveCancelGraceMs,
 } from '@kbn/task-manager-plugin/server';
 import {
   CONFIG_CAPTURE_KEY,
@@ -176,6 +178,8 @@ export class T7aController {
       id: WORKLOAD_CLASS,
       taskTypes: (taskType) => OFFMAIN_TASK_TYPES.has(taskType),
       enabled: () => this.config.mode === 'offmain',
+      cancelGraceMs: (taskType) =>
+        deriveCancelGraceMs(researchDefinitionMeta(taskType)?.timeout, this.config.abortGraceMs),
       createRunner: (taskType, context) => this.createStub(taskType, context),
     });
   }
@@ -681,6 +685,7 @@ export class T7aController {
         ) as unknown as Obj),
       } as unknown as CodecInput,
       deadlineMs: this.config.deadlineMs,
+      abortGraceMs: resolveCancelGraceMs(taskType, this.config.abortGraceMs),
       signal,
     };
   }
@@ -716,7 +721,9 @@ export class T7aController {
         heapUsed: outcome.status === 'success' ? outcome.heapUsed : undefined,
         rss: outcome.status === 'success' ? outcome.rss : undefined,
         at: Date.now(),
-        ...(outcome.status === 'terminated' ? { reason: outcome.reason } : {}),
+        ...(outcome.status === 'terminated'
+          ? { reason: outcome.reason, stop: outcome.stop, graceful: outcome.graceful }
+          : {}),
       });
       if (outcome.status === 'failure') throw outcome.error;
       if (outcome.status === 'terminated') {
@@ -738,7 +745,8 @@ export class T7aController {
         const value = await dispatch('run');
         return decodeRunResult((value?.wire ?? {}) as WireRunResult) as never;
       },
-      // TM's cancel wrapper aborts context.signal → kit cooperative cancel → isolate runner.cancel().
+      // TM owns cancel: its wrapper aborts context.signal, the host forwards that into the
+      // worker, waits the class grace, and hard-stops only after it.
       cancel: async () => undefined,
       ...(taskType.startsWith('actions:')
         ? {

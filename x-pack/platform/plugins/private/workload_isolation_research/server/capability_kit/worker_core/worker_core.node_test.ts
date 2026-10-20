@@ -10,12 +10,18 @@
 
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import { ExecutionHost } from '../host';
+import { ModuleRegistry } from '../registry';
 import {
   consumeCollateralReschedule,
+  deriveCancelGraceMs,
   diffDefinitionParity,
   markCollateralLoss,
   registerExecutionClass,
+  researchDefinitionMeta,
   resetResearchExecutionClasses,
+  resolveCancelGraceMs,
+  setResearchTaskDefinitionSource,
   COLLATERAL_RESCHEDULE_CAP,
 } from '@kbn/task-manager-plugin/server/lib/research_runner_override';
 import {
@@ -134,6 +140,26 @@ test('boot fence anchors endpoint shapes and waits for installers', async () => 
       ),
     /boot ES write denied/
   );
+  assert.throws(
+    () =>
+      handler(
+        { scoped: false },
+        { method: 'POST', path: '/.kibana_locks-000001/_update' },
+        {},
+        {} as never
+      ),
+    /boot ES write denied/
+  );
+  assert.throws(
+    () =>
+      handler(
+        { scoped: false },
+        { method: 'POST', path: '/orders/.kibana_locks-000001/_update/lock-id' },
+        {},
+        {} as never
+      ),
+    /boot ES write denied/
+  );
   release();
   await settled;
   handler(
@@ -142,8 +168,8 @@ test('boot fence anchors endpoint shapes and waits for installers', async () => 
     {},
     {} as never
   );
-  assert.equal(fence.summary().denied, 3);
-  assert.equal(fence.summary().writes, 5);
+  assert.equal(fence.summary().denied, 5);
+  assert.equal(fence.summary().writes, 7);
 });
 
 test('flag overrides are classified and unknown flags stay absent', () => {
@@ -577,3 +603,78 @@ test('execution class parity fails closed and collateral losses refund at most t
     resetResearchExecutionClasses();
   });
 });
+
+const runCleanup = async (graceMs: number, cleanupMs: number) => {
+  const specifier = require.resolve('../example_tasks');
+  const registry = new ModuleRegistry(new Set([specifier]));
+  registry.register('cleanupAfterCancel', specifier, 'cleanupAfterCancel');
+  const host = new ExecutionHost(registry, { transport: 'thread', abortGraceMs: 50 });
+  const controller = new AbortController();
+  let cleaned = false;
+  try {
+    const outcome = await host.run({
+      workloadClass: 'alerting',
+      principal: 'alice',
+      space: 'default',
+      moduleId: 'cleanupAfterCancel',
+      input: { cleanupMs },
+      deadlineMs: 10000,
+      signal: controller.signal,
+      abortGraceMs: graceMs,
+      capabilities: {
+        fixture: {
+          lever: 'capability_bundle',
+          handler: async (operation) => {
+            if (operation === 'started') controller.abort();
+            if (operation === 'cleaned') cleaned = true;
+          },
+        },
+      },
+    });
+    return { outcome, cleaned };
+  } finally {
+    await host.stop();
+  }
+};
+
+test(
+  'cleanup that finishes within the class cancel grace is not hard-stopped',
+  { timeout: 20000 },
+  async () => {
+    resetResearchExecutionClasses();
+    setResearchTaskDefinitionSource({
+      get: (type) =>
+        type === 'alerting:.es-query'
+          ? { type, timeout: '5m', stateSchemaByVersion: { 1: {} } }
+          : undefined,
+    });
+    try {
+      assert.equal(deriveCancelGraceMs('5m', 2000), 30_000);
+      assert.equal(deriveCancelGraceMs('1s', 2000), 10_000);
+      assert.equal(deriveCancelGraceMs(undefined, 2000), 2000);
+      assert.equal(resolveCancelGraceMs('alerting:.es-query', 50), 30_000);
+      registerExecutionClass({
+        id: 'alerting-cancel',
+        taskTypes: (type) => type === 'alerting:.es-query',
+        cancelGraceMs: (taskType) => (researchDefinitionMeta(taskType)?.timeout === '5m' ? 800 : 50),
+        createRunner: () => ({ run: async () => ({ state: {} }) }),
+      });
+      const grace = resolveCancelGraceMs('alerting:.es-query', 50);
+      assert.equal(grace, 800);
+      const within = await runCleanup(grace, 200);
+      assert.equal(within.cleaned, true);
+      assert.equal(within.outcome.status, 'terminated');
+      if (within.outcome.status === 'terminated') {
+        assert.equal(within.outcome.stop, 'cooperative');
+        assert.equal(within.outcome.graceful, true);
+      }
+      const overrun = await runCleanup(80, 400);
+      assert.equal(overrun.cleaned, false);
+      assert.equal(overrun.outcome.status, 'terminated');
+      if (overrun.outcome.status === 'terminated') assert.equal(overrun.outcome.stop, 'hard');
+    } finally {
+      resetResearchExecutionClasses();
+      setResearchTaskDefinitionSource(undefined);
+    }
+  }
+);

@@ -200,6 +200,8 @@ export type Outcome =
       /** 'stall' only occurs when the run opted into RunOptions.stallMs. */
       readonly reason: TerminationReason;
       readonly graceful?: boolean;
+      /** Cancel only: the worker finished during grace, or the slot was hard-stopped after it. */
+      readonly stop?: 'cooperative' | 'hard';
       readonly terminal?: CodecInput;
       readonly collateral?: boolean;
       readonly initiatingRunId?: string;

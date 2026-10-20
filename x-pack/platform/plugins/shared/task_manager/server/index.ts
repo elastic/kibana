@@ -150,6 +150,8 @@ export {
   markCollateralLoss,
   diffDefinitionParity,
   researchDefinitionMeta,
+  deriveCancelGraceMs,
+  resolveCancelGraceMs,
   setResearchTaskDefinitionSource,
 } from './lib/research_runner_override';
 export type {

@@ -245,7 +245,12 @@ for (const transport of ['thread', 'process'] as const) {
           input: 'neighbour',
         });
         controller.abort();
-        assert.deepEqual(await old, { status: 'terminated', reason: 'cancelled', graceful: false });
+        assert.deepEqual(await old, {
+          status: 'terminated',
+          reason: 'cancelled',
+          graceful: false,
+          stop: 'hard',
+        });
         const fresh = host.run({
           ...base,
           moduleId: 'echo',

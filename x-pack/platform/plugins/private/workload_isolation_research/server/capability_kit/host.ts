@@ -143,7 +143,12 @@ export class ExecutionHost {
     if (!Number.isFinite(grace) || grace < 0 || grace > 30000)
       return Promise.reject(new Error('Abort grace must be between0 and30000ms'));
     if (options.signal?.aborted)
-      return Promise.resolve({ status: 'terminated', reason: 'cancelled', graceful: false });
+      return Promise.resolve({
+        status: 'terminated',
+        reason: 'cancelled',
+        graceful: false,
+        stop: 'hard',
+      });
     const queue = this.queues.get(options.workloadClass) ?? [];
     if (queue.length >= (this.options.maxQueuePerClass ?? 10))
       return Promise.reject(new Error('Class queue full'));
@@ -442,6 +447,9 @@ export class ExecutionHost {
               status: 'terminated',
               reason: execution.termination.reason,
               graceful: execution.termination.acknowledged,
+              ...(execution.termination.reason === 'cancelled'
+                ? { stop: 'cooperative' as const }
+                : {}),
               terminal: value,
             }
           : packet.failed
@@ -621,6 +629,7 @@ export class ExecutionHost {
             status: 'terminated',
             reason,
             graceful: false,
+            ...(reason === 'cancelled' ? { stop: 'hard' as const } : {}),
             ...(victims.length > 1
               ? {
                   collateral: victim !== execution,
@@ -679,7 +688,12 @@ export class ExecutionHost {
               await entry.endpoint.stop();
             })
         );
-      this.finish(execution, { status: 'terminated', reason, graceful: false });
+      this.finish(execution, {
+        status: 'terminated',
+        reason,
+        graceful: false,
+        ...(reason === 'cancelled' ? { stop: 'hard' as const } : {}),
+      });
     }
     this.dispatch(execution.options.workloadClass);
   }

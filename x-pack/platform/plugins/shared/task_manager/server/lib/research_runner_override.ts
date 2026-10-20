@@ -13,6 +13,7 @@
  */
 
 import type { RunContext, TaskRunCreatorFunction } from '../task';
+import { isInterval, parseIntervalAsMillisecond } from './intervals';
 
 export type ResearchRunnerOverride = (
   taskType: string,
@@ -29,6 +30,44 @@ interface Holder {
 /** A collateral loss may be rescheduled this many times without consuming an attempt. */
 export const COLLATERAL_RESCHEDULE_CAP = 3;
 
+/** Host maximum for abort grace. Longer values are clamped, not rejected, at this seam. */
+export const CANCEL_GRACE_CAP_MS = 30_000;
+
+/**
+ * Floor when a task timeout is known. The fixed 2s host grace hard-stopped alerting's
+ * cooperative cancel before rule execute events and the next action chunk were written.
+ */
+export const CANCEL_GRACE_FLOOR_MS = 10_000;
+
+const clampCancelGrace = (ms: number): number => {
+  if (!Number.isFinite(ms) || ms < 0) return 0;
+  return Math.min(CANCEL_GRACE_CAP_MS, Math.floor(ms));
+};
+
+/**
+ * Cancel grace from a task-definition timeout. Known timeouts are at least
+ * {@link CANCEL_GRACE_FLOOR_MS} and at most {@link CANCEL_GRACE_CAP_MS}.
+ * An absent timeout keeps the caller fallback (the host default).
+ */
+export const deriveCancelGraceMs = (timeout: string | undefined, fallbackMs: number): number => {
+  if (!timeout || !isInterval(timeout)) return clampCancelGrace(fallbackMs);
+  try {
+    const parsed = parseIntervalAsMillisecond(timeout);
+    return clampCancelGrace(Math.max(parsed, CANCEL_GRACE_FLOOR_MS, fallbackMs));
+  } catch {
+    return clampCancelGrace(fallbackMs);
+  }
+};
+
+/** Grace for a task type: the matching class, otherwise the definition timeout. */
+export const resolveCancelGraceMs = (taskType: string, fallbackMs: number): number => {
+  const match = classes.find((item) => (item.enabled?.() ?? true) && item.taskTypes(taskType));
+  const configured = match?.cancelGraceMs;
+  if (typeof configured === 'function') return clampCancelGrace(configured(taskType));
+  if (typeof configured === 'number') return clampCancelGrace(configured);
+  return deriveCancelGraceMs(researchDefinitionMeta(taskType)?.timeout, fallbackMs);
+};
+
 export interface ResearchExecutionClass {
   readonly id: string;
   readonly taskTypes: (taskType: string) => boolean;
@@ -37,6 +76,12 @@ export interface ResearchExecutionClass {
     context: RunContext,
     dispatch: () => Promise<unknown>
   ) => Promise<unknown>;
+  /**
+   * How long Task Manager's cancel may run in the worker before a hard stop.
+   * A number is used as given (0–30000). A function should derive it from the task timeout.
+   * Omitted classes use {@link deriveCancelGraceMs}.
+   */
+  readonly cancelGraceMs?: number | ((taskType: string) => number);
   readonly createRunner: (
     taskType: string,
     context: RunContext,
