@@ -11,6 +11,7 @@ import type {
   ListSourcesResponse,
   NightshiftSource,
   UpdateSourceRequest,
+  ValidateSourceQueryRequest,
 } from '@kbn/nightshift-shared';
 import type { ApiClientFixture, ApiClientResponse, EsClient } from '@kbn/scout-oblt';
 import { COMMON_HEADERS, SOURCES_PATH, TEST_INDEX_PREFIX } from './constants';
@@ -41,6 +42,13 @@ export const createSource = (
   { spaceId }: SourceRequestOptions = {}
 ): Promise<ApiClientResponse> =>
   apiClient.post(spacePath(SOURCES_PATH, spaceId), { ...withHeaders(cookieHeader), body });
+
+export const validateSourceQuery = (
+  apiClient: ApiClientFixture,
+  cookieHeader: CookieHeader,
+  body: ValidateSourceQueryRequest
+): Promise<ApiClientResponse> =>
+  apiClient.post(`${SOURCES_PATH}/_validate`, { ...withHeaders(cookieHeader), body });
 
 export const getSource = (
   apiClient: ApiClientFixture,

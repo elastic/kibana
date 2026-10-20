@@ -152,12 +152,11 @@ public setup(core: CoreSetup, { entityStore }: MyPluginSetupDeps) {
     identityField: { singleField: 'kubernetes.pod.uid' },
     managedBy: { kind: 'plugin', id: 'myPlugin' },
     // Optional; see "Definition shape".
-    extraction: {
-      fields: [
+    dynamic: {
+      sources: [
         {
-          source: 'kubernetes.pod.name',
-          destination: 'kubernetes.pod.name',
-          retention: { operation: 'prefer_newest_value' },
+          indexPattern: 'metrics-kubernetes.state_pod-*',
+          attributes: [{ name: 'namespace', field: 'kubernetes.namespace' }],
         },
       ],
     },
@@ -175,14 +174,45 @@ public setup(core: CoreSetup, { entityStore }: MyPluginSetupDeps) {
 
 ### Definition shape
 
-A definition is an identity core plus an optional `extraction` block:
+A definition is an identity core plus two optional blocks, `extraction` and `dynamic`. A definition may carry either, both or neither:
 
 - Core: `type`, `name`, `description`, `managedBy` and `identityField`. This is sufficient for the id compiler, so a definition with only the core is valid; when `extraction` is present, document/search paths also replay its field evaluations, overrides and post-aggregation gate. `name` is the type's display name, shown wherever the type is listed. `description` is optional free text on what the entity is and how it is identified.
 - `extraction`: the config the store's extraction engine, templates and CRUD API read (`fields`, `fieldEvaluations`, `postAggFilter`, `whenConditionTrueSetFieldsPreAgg`, `whenConditionTrueSetFieldsAfterStats`, `entityTypeFallback`, `creatableFromSingleDocument`, `priorityExtractionGate`, `nonPrioritySampling`). Its presence does not make the store extract the type: the store only materialises its four built-ins.
+- `dynamic`: what the inventory reads to generate ES|QL over raw telemetry for its list, count and detail views. See "The `dynamic` block" below.
 - There is no `indexPatterns` key. Source indices for extraction are API configuration (global state and per-engine overrides), not part of a definition.
-- Unknown keys are rejected, at the top level and inside `extraction`.
+- Unknown keys are rejected, at the top level, inside each block and inside `identityField`. An identity is exactly one of its two variants (`singleField`, or `euidRanking` with `documentsFilter`); keys of both in one identity are rejected rather than stripped, because the registry stores the object as passed and the EUID helpers pick the variant by key presence.
 
-`@kbn/entity-store/common` exports the types `EntityDefinitionWithoutId` (a definition as registered), `ExtractionBlock` and `ExtractedEntityDefinition` (a definition with the block required), and the block's zod schema `extractionBlockSchema`. `EntityDefinitionOfAnyType` remains as a deprecated alias of `EntityDefinitionWithoutId`.
+`@kbn/entity-store/common` exports the types `EntityDefinitionWithoutId` (a definition as registered), `ExtractionBlock` and `ExtractedEntityDefinition` (a definition with the block required), `DynamicBlock`, and the block zod schemas `extractionBlockSchema` and `dynamicBlockSchema`. `EntityDefinitionOfAnyType` remains as a deprecated alias of `EntityDefinitionWithoutId`.
+
+#### The `dynamic` block
+
+The schema and rules live in `common/domain/definitions/dynamic/`, owned by `@elastic/obs-signals-metrics-team`. Authors declare what to read, never how: engine choice, grouping, null handling and query shape belong to the inventory's generator.
+
+```ts
+dynamic: {
+  sources: [
+    {
+      indexPattern: 'metrics-kubernetes.state_pod-*',
+      filter: 'metricset.name == "state_pod"',
+      attributes: [
+        { name: 'namespace', field: 'kubernetes.namespace' },
+        { name: 'phase', field: 'kubernetes.pod.status.phase', valueLabels: { Running: 'running' } },
+      ],
+    },
+  ],
+},
+```
+
+- Sources: 1 to 16. A source is one index pattern (no commas or whitespace, at most 256 characters); several patterns are several sources. The same pattern may appear on several sources with different filters.
+- `filter`: optional opaque ES|QL boolean expression narrowing the source to this type's documents, at most 2000 characters. It is validated for length only; where it goes in the query is the generator's job.
+- Attributes: at most 32 per source. `name` (`^[a-z][a-z0-9_]*$`, at most 64 characters) is the output column and the merge key across sources, and is unique within a source. `field` is a literal field path (dot-separated segments of letters, digits, `_`, `@` and `-`; no wildcards, expressions, quoting or whitespace; at most 512 characters).
+- `valueLabels`: optional map from raw values (stringified) to canonical labels, at most 64 entries, keys and labels 1 to 256 characters. Unmapped values pass through.
+- Unknown keys are rejected on the block, each source and each attribute. Bounds are denial-of-service limits for HTTP input, not design limits.
+
+Two whole-definition rules apply only when `dynamic` is present, at both `entitySchema` and registration:
+
+- Servable identity: `identityField` is a single literal field, or one unconditional ranking branch of literal fields and separators whose `documentsFilter` is exactly the derived presence filter, with no field evaluations, no `skipTypePrepend` and at most eight distinct fields. The built-in `host` identity fits; `user` does not.
+- No attribute `field` may be an identity field.
 
 ### Type names
 
