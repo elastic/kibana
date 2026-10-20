@@ -8,14 +8,14 @@
  */
 
 import { EuiIcon, euiPaletteColorBlind } from '@elastic/eui';
+import type { SparklinePoint } from '@kbn/apm-ui-shared';
 import type { StoryFn } from '@storybook/react';
 import React from 'react';
-import { ServiceSummary, type ServiceSummaryProps } from '.';
-import type { SparklinePoint } from '../sparkline/utils';
+import { EntitySummary, type EntitySummaryProps } from '.';
 
 export default {
-  title: 'shared/ServiceSummary',
-  component: ServiceSummary,
+  title: 'shared/EntitySummary',
+  component: EntitySummary,
 };
 
 const palette = euiPaletteColorBlind({ rotations: 2 });
@@ -31,11 +31,13 @@ const latencyComparison = makeSeries((i) => 940 + Math.sin(i / 3) * 100 + Math.r
 const throughputSeries = makeSeries((i) => 46 + Math.sin(i / 4) * 6 + Math.random() * 3);
 const throughputComparison = makeSeries((i) => 48 + Math.sin(i / 4) * 6 + Math.random() * 3);
 
-const baseProps: ServiceSummaryProps = {
-  serviceName: 'checkoutService',
-  environment: 'Synthtrace: service_map',
-  agentName: 'go',
-  serviceHref: 'https://localhost:5601/app/apm/services/checkoutService/overview',
+// A service entity drives this story, but the component is entity-agnostic: `title`/`subtitle`/
+// `metrics`/`links` carry no service-specific semantics, so hosts, containers, etc. map in the
+// same way.
+const baseProps: EntitySummaryProps = {
+  title: 'checkoutService',
+  subtitle: 'Synthtrace: service_map · go',
+  titleHref: 'https://localhost:5601/app/apm/services/checkoutService/overview',
   icon: <EuiIcon type="compute" size="xl" aria-hidden={true} />,
   health: {
     activeAlertCount: 1,
@@ -69,6 +71,7 @@ const baseProps: ServiceSummaryProps = {
   ],
   links: [
     {
+      id: 'alerts',
       label: 'Active alerts',
       iconType: 'bell',
       external: true,
@@ -77,6 +80,7 @@ const baseProps: ServiceSummaryProps = {
       'data-test-subj': 'linkActiveAlerts',
     },
     {
+      id: 'slos',
       label: 'SLOs',
       iconType: 'chartGauge',
       external: true,
@@ -91,14 +95,14 @@ const baseProps: ServiceSummaryProps = {
   onCopyValue: () => {},
 };
 
-export const DesignAWithSparklines: StoryFn = () => <ServiceSummary {...baseProps} />;
+export const DesignAWithSparklines: StoryFn = () => <EntitySummary {...baseProps} />;
 
 export const DesignBWithoutSparklines: StoryFn = () => (
-  <ServiceSummary {...baseProps} showSparklines={false} />
+  <EntitySummary {...baseProps} showSparklines={false} />
 );
 
 export const Healthy: StoryFn = () => (
-  <ServiceSummary
+  <EntitySummary
     {...baseProps}
     health={{ activeAlertCount: 0, slo: { status: 'healthy' } }}
     metrics={baseProps.metrics.map((metric) => ({ ...metric, change: undefined }))}
@@ -106,7 +110,7 @@ export const Healthy: StoryFn = () => (
 );
 
 export const Loading: StoryFn = () => (
-  <ServiceSummary
+  <EntitySummary
     {...baseProps}
     isLoading
     metrics={baseProps.metrics.map((metric) => ({ ...metric, series: null }))}

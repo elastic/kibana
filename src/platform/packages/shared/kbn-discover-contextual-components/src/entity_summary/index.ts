@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ServiceSummary } from './service_summary';
+export { EntitySummary } from './entity_summary';
 export type {
-  ServiceSummaryProps,
-  ServiceSummaryMetric,
-  ServiceSummaryHealth,
-  ServiceSummaryLink,
-  ServiceMetricChange,
-  ServiceMetricEvaluation,
-  ServiceSloStatus,
-} from './service_summary';
+  EntitySummaryProps,
+  EntitySummaryMetric,
+  EntitySummaryHealth,
+  EntitySummaryLink,
+  EntityMetricChange,
+  EntityMetricEvaluation,
+  EntitySloStatus,
+} from './entity_summary';

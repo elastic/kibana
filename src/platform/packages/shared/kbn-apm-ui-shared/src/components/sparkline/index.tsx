@@ -24,6 +24,8 @@ import { useChartThemes } from '../../hooks/use_chart_theme';
 import { COMPARISON_CHART_THEME, DOTTED_LINE_STYLE, splitSeriesAtNullGaps } from './utils';
 import type { SparklinePoint } from './utils';
 
+export type { SparklinePoint } from './utils';
+
 const CHART_HEIGHT = 24;
 const COMPACT_WIDTH = 64;
 const DEFAULT_WIDTH = 80;

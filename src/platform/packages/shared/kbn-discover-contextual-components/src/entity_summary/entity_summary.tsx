@@ -26,8 +26,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { type ReactNode } from 'react';
-import { Sparkline } from '../sparkline';
-import type { SparklinePoint } from '../sparkline/utils';
+import { Sparkline, type SparklinePoint } from '@kbn/apm-ui-shared';
 
 const PANEL_WIDTH = 380;
 const SPARKLINE_HEIGHT = 24;
@@ -36,16 +35,16 @@ const SPARKLINE_HEIGHT = 24;
 const METRIC_LABEL_COLUMN_WIDTH = 112;
 
 /** Whether a metric change is an improvement, a regression, or neutral — the caller decides. */
-export type ServiceMetricEvaluation = 'good' | 'bad' | 'neutral';
+export type EntityMetricEvaluation = 'good' | 'bad' | 'neutral';
 
-export interface ServiceMetricChange {
+export interface EntityMetricChange {
   /** Pre-formatted magnitude, e.g. `6.25%`. */
   label: string;
   direction: 'increase' | 'decrease' | 'neutral';
-  evaluation: ServiceMetricEvaluation;
+  evaluation: EntityMetricEvaluation;
 }
 
-export interface ServiceSummaryMetric {
+export interface EntitySummaryMetric {
   label: string;
   /** Pre-formatted value, e.g. `1,000 ms` or `N/A`. Formatting is the caller's responsibility. */
   valueLabel: ReactNode;
@@ -54,20 +53,22 @@ export interface ServiceSummaryMetric {
   series?: SparklinePoint[] | null;
   comparisonSeries?: SparklinePoint[];
   comparisonColor?: string;
-  change?: ServiceMetricChange;
+  change?: EntityMetricChange;
 }
 
-export type ServiceSloStatus = 'violated' | 'degrading' | 'healthy' | 'no_data';
+export type EntitySloStatus = 'violated' | 'degrading' | 'healthy' | 'no_data';
 
-export interface ServiceSummaryHealth {
+export interface EntitySummaryHealth {
   activeAlertCount?: number;
   slo?: {
-    status: ServiceSloStatus;
+    status: EntitySloStatus;
     violatedCount?: number;
   };
 }
 
-export interface ServiceSummaryLink {
+export interface EntitySummaryLink {
+  /** Stable identity so callers can override, reorder, or hide a link by id. */
+  id: string;
   label: string;
   iconType?: string;
   href?: string;
@@ -81,48 +82,53 @@ export interface ServiceSummaryLink {
   'data-test-subj'?: string;
 }
 
-export interface ServiceSummaryProps {
-  serviceName: string;
-  environment?: string;
-  agentName?: string;
-  /** When set, the service name in the header links to this URL (opens in a new tab). */
-  serviceHref?: string;
-  /** Service/agent icon rendered in the header. */
+export interface EntitySummaryProps {
+  /** Entity display name shown in the header (e.g. a service or host name). */
+  title: string;
+  /** Secondary header line (e.g. `environment · agent`). The caller composes it. */
+  subtitle?: ReactNode;
+  /** When set, the title links to this URL (opens in a new tab). */
+  titleHref?: string;
+  /** Entity icon rendered in the header. */
   icon?: ReactNode;
-  health?: ServiceSummaryHealth;
-  /** Ordered metrics (typically latency, throughput, failed transaction rate). */
-  metrics: ServiceSummaryMetric[];
+  health?: EntitySummaryHealth;
+  /** Ordered metrics (e.g. latency, throughput, failed transaction rate). */
+  metrics: EntitySummaryMetric[];
   /** Lay the metrics out side by side (`row`, default) or stacked (`column`). */
   metricsDirection?: 'row' | 'column';
   /** When false, renders values without charts (Design B). Defaults to true. */
   showSparklines?: boolean;
   isLoading?: boolean;
   /** Secondary links ("Open overview", "Active alerts", …). */
-  links?: ServiceSummaryLink[];
+  links?: EntitySummaryLink[];
   onClose?: () => void;
   onFilterFor?: () => void;
   onFilterOut?: () => void;
   onCopyValue?: () => void;
 }
 
-const SLO_HEALTH_COLOR: Record<ServiceSloStatus, string> = {
+const SLO_HEALTH_COLOR: Record<EntitySloStatus, string> = {
   violated: 'danger',
   degrading: 'warning',
   healthy: 'success',
   no_data: 'subdued',
 };
 
-const CHANGE_ICON: Record<ServiceMetricChange['direction'], string> = {
+const CHANGE_ICON: Record<EntityMetricChange['direction'], string> = {
   increase: 'sortUp',
   decrease: 'sortDown',
   neutral: 'minus',
 };
 
-export function ServiceSummary({
-  serviceName,
-  environment,
-  agentName,
-  serviceHref,
+/**
+ * Entity-agnostic summary popover body: a header, optional filter actions, optional health, a
+ * metrics section (with sparklines), and a list of links. Purely presentational — callers map
+ * their own data into the generic metric/link/health shapes.
+ */
+export function EntitySummary({
+  title,
+  subtitle,
+  titleHref,
   icon,
   health,
   metrics,
@@ -134,7 +140,7 @@ export function ServiceSummary({
   onFilterFor,
   onFilterOut,
   onCopyValue,
-}: ServiceSummaryProps) {
+}: EntitySummaryProps) {
   return (
     <EuiPanel
       hasShadow
@@ -142,14 +148,13 @@ export function ServiceSummary({
       css={css`
         width: ${PANEL_WIDTH}px;
       `}
-      data-test-subj="serviceSummaryPanel"
+      data-test-subj="entitySummaryPanel"
     >
       <Section>
         <Header
-          serviceName={serviceName}
-          environment={environment}
-          agentName={agentName}
-          serviceHref={serviceHref}
+          title={title}
+          subtitle={subtitle}
+          titleHref={titleHref}
           icon={icon}
           onClose={onClose}
         />
@@ -210,19 +215,14 @@ function Section({ children }: { children: ReactNode }) {
 }
 
 function Header({
-  serviceName,
-  environment,
-  agentName,
-  serviceHref,
+  title,
+  subtitle,
+  titleHref,
   icon,
   onClose,
-}: Pick<
-  ServiceSummaryProps,
-  'serviceName' | 'environment' | 'agentName' | 'serviceHref' | 'icon' | 'onClose'
->) {
-  const subtitle = [environment, agentName].filter(Boolean).join(' · ');
-  const closeLabel = i18n.translate('apmUiShared.serviceSummary.closeAriaLabel', {
-    defaultMessage: 'Close service summary',
+}: Pick<EntitySummaryProps, 'title' | 'subtitle' | 'titleHref' | 'icon' | 'onClose'>) {
+  const closeLabel = i18n.translate('discover.entitySummary.closeAriaLabel', {
+    defaultMessage: 'Close summary',
   });
 
   return (
@@ -235,13 +235,13 @@ function Header({
           </EuiText>
         ) : null}
         <EuiTitle size="xs">
-          <h3 data-test-subj="serviceSummaryServiceName">
-            {serviceHref ? (
-              <EuiLink href={serviceHref} target="_blank" external={false}>
-                {serviceName}
+          <h3 data-test-subj="entitySummaryTitle">
+            {titleHref ? (
+              <EuiLink href={titleHref} target="_blank" external={false}>
+                {title}
               </EuiLink>
             ) : (
-              serviceName
+              title
             )}
           </h3>
         </EuiTitle>
@@ -254,7 +254,7 @@ function Header({
               color="text"
               onClick={onClose}
               aria-label={closeLabel}
-              data-test-subj="serviceSummaryCloseButton"
+              data-test-subj="entitySummaryCloseButton"
             />
           </EuiToolTip>
         </EuiFlexItem>
@@ -263,7 +263,7 @@ function Header({
   );
 }
 
-function HealthSection({ health }: { health: ServiceSummaryHealth }) {
+function HealthSection({ health }: { health: EntitySummaryHealth }) {
   const { activeAlertCount, slo } = health;
   const hasAlerts = typeof activeAlertCount === 'number' && activeAlertCount > 0;
 
@@ -271,15 +271,15 @@ function HealthSection({ health }: { health: ServiceSummaryHealth }) {
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
       <EuiFlexItem grow={false}>
         {hasAlerts ? (
-          <EuiBadge color="danger" iconType="bell" data-test-subj="serviceSummaryAlertsBadge">
-            {i18n.translate('apmUiShared.serviceSummary.activeAlerts', {
+          <EuiBadge color="danger" iconType="bell" data-test-subj="entitySummaryAlertsBadge">
+            {i18n.translate('discover.entitySummary.activeAlerts', {
               defaultMessage: '{count, plural, one {# alert active} other {# alerts active}}',
               values: { count: activeAlertCount },
             })}
           </EuiBadge>
         ) : (
-          <EuiHealth color="success" data-test-subj="serviceSummaryNoAlerts">
-            {i18n.translate('apmUiShared.serviceSummary.noAlerts', {
+          <EuiHealth color="success" data-test-subj="entitySummaryNoAlerts">
+            {i18n.translate('discover.entitySummary.noAlerts', {
               defaultMessage: 'No alerts',
             })}
           </EuiHealth>
@@ -287,7 +287,7 @@ function HealthSection({ health }: { health: ServiceSummaryHealth }) {
       </EuiFlexItem>
       {slo ? (
         <EuiFlexItem grow={false}>
-          <EuiHealth color={SLO_HEALTH_COLOR[slo.status]} data-test-subj="serviceSummarySloHealth">
+          <EuiHealth color={SLO_HEALTH_COLOR[slo.status]} data-test-subj="entitySummarySloHealth">
             {getSloLabel(slo)}
           </EuiHealth>
         </EuiFlexItem>
@@ -296,23 +296,23 @@ function HealthSection({ health }: { health: ServiceSummaryHealth }) {
   );
 }
 
-function getSloLabel(slo: NonNullable<ServiceSummaryHealth['slo']>): string {
+function getSloLabel(slo: NonNullable<EntitySummaryHealth['slo']>): string {
   switch (slo.status) {
     case 'violated':
-      return i18n.translate('apmUiShared.serviceSummary.sloViolated', {
+      return i18n.translate('discover.entitySummary.sloViolated', {
         defaultMessage: '{count, plural, one {# SLO violated} other {# SLOs violated}}',
         values: { count: slo.violatedCount ?? 1 },
       });
     case 'degrading':
-      return i18n.translate('apmUiShared.serviceSummary.sloDegrading', {
+      return i18n.translate('discover.entitySummary.sloDegrading', {
         defaultMessage: 'SLO degrading',
       });
     case 'healthy':
-      return i18n.translate('apmUiShared.serviceSummary.sloHealthy', {
+      return i18n.translate('discover.entitySummary.sloHealthy', {
         defaultMessage: 'SLOs healthy',
       });
     case 'no_data':
-      return i18n.translate('apmUiShared.serviceSummary.sloNoData', {
+      return i18n.translate('discover.entitySummary.sloNoData', {
         defaultMessage: 'No SLOs',
       });
   }
@@ -324,7 +324,7 @@ function MetricsSection({
   showSparklines,
   isLoading,
 }: {
-  metrics: ServiceSummaryMetric[];
+  metrics: EntitySummaryMetric[];
   direction: 'row' | 'column';
   showSparklines: boolean;
   isLoading: boolean;
@@ -358,7 +358,7 @@ function MetricRow({
   showSparkline,
   isLoading,
 }: {
-  metric: ServiceSummaryMetric;
+  metric: EntitySummaryMetric;
   showSparkline: boolean;
   isLoading: boolean;
 }) {
@@ -394,7 +394,7 @@ function MetricColumn({
   showSparkline,
   isLoading,
 }: {
-  metric: ServiceSummaryMetric;
+  metric: EntitySummaryMetric;
   showSparkline: boolean;
   isLoading: boolean;
 }) {
@@ -432,7 +432,7 @@ function MetricSparkline({
   isLoading,
   fullWidth = false,
 }: {
-  metric: ServiceSummaryMetric;
+  metric: EntitySummaryMetric;
   isLoading: boolean;
   fullWidth?: boolean;
 }) {
@@ -465,7 +465,7 @@ function NoDataPlaceholder({ color }: { color: string }) {
         display: flex;
         align-items: center;
       `}
-      data-test-subj="serviceSummaryMetricNoData"
+      data-test-subj="entitySummaryMetricNoData"
     >
       <div
         css={css`
@@ -477,7 +477,7 @@ function NoDataPlaceholder({ color }: { color: string }) {
   );
 }
 
-function MetricChangeLabel({ change }: { change: ServiceMetricChange }) {
+function MetricChangeLabel({ change }: { change: EntityMetricChange }) {
   const { euiTheme } = useEuiTheme();
 
   const color =
@@ -494,7 +494,7 @@ function MetricChangeLabel({ change }: { change: ServiceMetricChange }) {
         color: ${color};
         white-space: nowrap;
       `}
-      data-test-subj="serviceSummaryMetricChange"
+      data-test-subj="entitySummaryMetricChange"
     >
       <EuiIcon type={CHANGE_ICON[change.direction]} size="s" aria-hidden={true} /> {change.label}
     </EuiText>
@@ -505,7 +505,7 @@ function FilterActions({
   onFilterFor,
   onFilterOut,
   onCopyValue,
-}: Pick<ServiceSummaryProps, 'onFilterFor' | 'onFilterOut' | 'onCopyValue'>) {
+}: Pick<EntitySummaryProps, 'onFilterFor' | 'onFilterOut' | 'onCopyValue'>) {
   const { euiTheme } = useEuiTheme();
 
   const actions = [
@@ -513,33 +513,33 @@ function FilterActions({
       ? {
           key: 'filterFor',
           iconType: 'plusCircle',
-          label: i18n.translate('apmUiShared.serviceSummary.filterFor', {
+          label: i18n.translate('discover.entitySummary.filterFor', {
             defaultMessage: 'Filter for',
           }),
           onClick: onFilterFor,
-          'data-test-subj': 'serviceSummaryFilterFor',
+          'data-test-subj': 'entitySummaryFilterFor',
         }
       : null,
     onFilterOut
       ? {
           key: 'filterOut',
           iconType: 'minusCircle',
-          label: i18n.translate('apmUiShared.serviceSummary.filterOut', {
+          label: i18n.translate('discover.entitySummary.filterOut', {
             defaultMessage: 'Filter out',
           }),
           onClick: onFilterOut,
-          'data-test-subj': 'serviceSummaryFilterOut',
+          'data-test-subj': 'entitySummaryFilterOut',
         }
       : null,
     onCopyValue
       ? {
           key: 'copyValue',
           iconType: 'copy',
-          label: i18n.translate('apmUiShared.serviceSummary.copyValue', {
+          label: i18n.translate('discover.entitySummary.copyValue', {
             defaultMessage: 'Copy value',
           }),
           onClick: onCopyValue,
-          'data-test-subj': 'serviceSummaryCopyValue',
+          'data-test-subj': 'entitySummaryCopyValue',
         }
       : null,
   ].filter((action): action is NonNullable<typeof action> => action !== null);
@@ -580,11 +580,11 @@ function FilterActions({
   );
 }
 
-function LinksSection({ links }: { links: ServiceSummaryLink[] }) {
+function LinksSection({ links }: { links: EntitySummaryLink[] }) {
   return (
     <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
       {links.map((link) => (
-        <EuiFlexItem key={link.label} grow={false}>
+        <EuiFlexItem key={link.id} grow={false}>
           <LinkRow link={link} />
         </EuiFlexItem>
       ))}
@@ -592,7 +592,7 @@ function LinksSection({ links }: { links: ServiceSummaryLink[] }) {
   );
 }
 
-function LinkRow({ link }: { link: ServiceSummaryLink }) {
+function LinkRow({ link }: { link: EntitySummaryLink }) {
   const { label, iconType, href, onClick, external, badgeLabel, badgeColor } = link;
 
   return (

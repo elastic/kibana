@@ -10,13 +10,33 @@
 import React from 'react';
 import { getShouldShowFieldHandler, SERVICE_NAME_FIELD } from '@kbn/discover-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { RenderResourceBadge, SummaryColumnProps } from '@kbn/discover-contextual-components';
+import type {
+  AllSummaryColumnProps,
+  SummaryColumnProps,
+} from '@kbn/discover-contextual-components';
 import type { CellRenderersExtensionParams } from '../../../../context_awareness';
 import type { ContextAwarenessToolkit } from '../../../../context_awareness';
-import { ServiceSummaryBadge } from '../../../../context_awareness/profile_providers/observability/traces_data_source_profile/accessors/service_summary_cell';
+import {
+  createEntitySummaryBinding,
+  createServiceSummaryDefinition,
+  useEntitySummaryResourceBadge,
+  type EntitySummaryFieldBinding,
+} from '../../entity_summary';
 import { SummaryColumn } from './summary_column';
 
 export type SummaryColumnGetterDeps = CellRenderersExtensionParams;
+
+type LogsSummaryColumnProps = Omit<
+  AllSummaryColumnProps,
+  'core' | 'share' | 'renderResourceBadge'
+> & {
+  bindings: EntitySummaryFieldBinding[];
+};
+
+const LogsSummaryColumn = ({ bindings, ...props }: LogsSummaryColumnProps) => {
+  const renderResourceBadge = useEntitySummaryResourceBadge({ bindings });
+  return <SummaryColumn {...props} renderResourceBadge={renderResourceBadge} />;
+};
 
 export const getSummaryColumn = (
   params: SummaryColumnGetterDeps,
@@ -27,19 +47,22 @@ export const getSummaryColumn = (
 
   // Render the service chip as the service-summary popover (same as the traces profile), instead
   // of the generic filter/copy cell-actions badge.
-  const renderResourceBadge: RenderResourceBadge = ({ field, row }) =>
-    field.name === SERVICE_NAME_FIELD ? (
-      <ServiceSummaryBadge row={row} serviceNameField={field.name} toolkit={toolkit} />
-    ) : undefined;
+  const bindings: EntitySummaryFieldBinding[] = [
+    createEntitySummaryBinding({
+      fields: [SERVICE_NAME_FIELD],
+      definition: createServiceSummaryDefinition(),
+      toolkit,
+    }),
+  ];
 
   return (props: Omit<SummaryColumnProps, 'core' | 'share'>) => (
-    <SummaryColumn
+    <LogsSummaryColumn
       {...props}
       density={density}
       onFilter={toolkit.actions.addFilter}
       rowHeight={rowHeight}
       shouldShowFieldHandler={shouldShowFieldHandler}
-      renderResourceBadge={renderResourceBadge}
+      bindings={bindings}
     />
   );
 };

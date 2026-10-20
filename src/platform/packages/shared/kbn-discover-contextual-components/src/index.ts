@@ -10,6 +10,7 @@
 import { dynamic } from '@kbn/shared-ux-utility';
 
 export * from './data_types/logs/components';
+export * from './entity_summary';
 
 export const LazySummaryColumn = dynamic(
   () => import('./data_types/logs/components/summary_column/summary_column')
