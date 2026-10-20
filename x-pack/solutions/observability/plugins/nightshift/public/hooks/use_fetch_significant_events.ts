@@ -12,7 +12,7 @@ import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { useKibana } from './use_kibana';
 import { NIGHTSHIFT_LANDING_SEVERITIES } from '../common/constants';
-import { hasRunningInvestigations } from '../event/significant_event_status';
+import { hasRunningInvestigations } from '../components/entities/significant_event/significant_event_status';
 
 /**
  * The paginated envelope the events endpoint returns, flattened across the pages we

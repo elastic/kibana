@@ -7,7 +7,7 @@
 
 import { useQuery, type UseQueryResult } from '@kbn/react-query';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
-import { useKibana } from './use_kibana';
+import { useKibana } from '../../hooks/use_kibana';
 
 /** Fetches one significant event by its stable `event_id`, unfiltered by the landing list's severity and time range. */
 export const useFetchEventById = (

@@ -25,7 +25,7 @@ const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent 
     ...overrides,
   } as SignificantEvent);
 
-jest.mock('./use_kibana', () => ({
+jest.mock('../../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
       significantEvents: {

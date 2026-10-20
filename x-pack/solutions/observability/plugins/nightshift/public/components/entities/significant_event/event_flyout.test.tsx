@@ -49,13 +49,13 @@ const investigationDetails = {
 
 const mockOpenConversationDetails = jest.fn();
 
-jest.mock('../hooks/use_fetch_investigation_statuses', () => ({
+jest.mock('../../../hooks/use_fetch_investigation_statuses', () => ({
   useFetchInvestigationStatuses: () => ({ data: mockInvestigationRunStatuses }),
 }));
 
 let mockInvestigationRunStatuses: Record<string, InvestigationRunStatus> | undefined;
 
-jest.mock('../hooks/use_fetch_source_features', () => ({
+jest.mock('../../../hooks/use_fetch_source_features', () => ({
   useFetchSourceFeatures: () => ({
     features: [],
     failedSourceIds: [],
@@ -66,11 +66,11 @@ jest.mock('../hooks/use_fetch_source_features', () => ({
   }),
 }));
 
-jest.mock('../components/entities/detection/change_point_lens_chart', () => ({
+jest.mock('../detection/change_point_lens_chart', () => ({
   ChangePointLensChart: () => <div data-test-subj="nightshiftDetectionLensChart" />,
 }));
 
-jest.mock('../hooks/use_fetch_detection_occurrences', () => ({
+jest.mock('../../../hooks/use_fetch_detection_occurrences', () => ({
   useFetchDetectionOccurrences: () => ({
     data: new Map([
       [
@@ -87,7 +87,7 @@ jest.mock('../hooks/use_fetch_detection_occurrences', () => ({
   }),
 }));
 
-jest.mock('../hooks/use_fetch_event_lifecycle', () => ({
+jest.mock('../../../hooks/use_fetch_event_lifecycle', () => ({
   useFetchEventLifecycle: () => ({
     data: {
       detections: [
@@ -110,7 +110,7 @@ jest.mock('../hooks/use_fetch_event_lifecycle', () => ({
 
 const mockOpenChat = jest.fn();
 
-jest.mock('../hooks/use_kibana', () => ({
+jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
       http: { basePath: { prepend: (path: string) => path } },

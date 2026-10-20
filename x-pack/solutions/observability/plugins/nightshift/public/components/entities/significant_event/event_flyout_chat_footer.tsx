@@ -27,16 +27,16 @@ import type {
   SignificantEventInvestigation,
 } from '@kbn/significant-events-schema';
 import { AiButton } from '@kbn/shared-ux-ai-components';
-import { useKibana } from '../hooks/use_kibana';
+import { useKibana } from '../../../hooks/use_kibana';
 import {
   buildInvestigationConversationChatOptions,
   buildNewSignificantEventChatOptions,
-} from '../chat/open_significant_event_in_chat';
+} from '../../../chat/open_significant_event_in_chat';
 import {
   NIGHTSHIFT_EBT_ACTIONS,
   NIGHTSHIFT_EBT_DETAILS,
   NIGHTSHIFT_EBT_ELEMENTS,
-} from '../common/ebt_constants';
+} from '../../../common/ebt_constants';
 
 const INVESTIGATION_MENU_TITLE_MAX_LENGTH = 48;
 

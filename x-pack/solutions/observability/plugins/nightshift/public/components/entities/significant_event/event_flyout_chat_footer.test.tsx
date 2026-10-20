@@ -15,7 +15,7 @@ import { EventFlyoutChatFooter } from './event_flyout_chat_footer';
 
 const mockOpenChat = jest.fn();
 
-jest.mock('../hooks/use_kibana', () => ({
+jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
       http: { basePath: { prepend: (path: string) => path } },

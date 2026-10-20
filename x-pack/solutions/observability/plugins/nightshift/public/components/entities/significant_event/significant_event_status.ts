@@ -10,7 +10,7 @@ import {
   type SignificantEvent,
   type SignificantEventStatus,
 } from '@kbn/significant-events-schema';
-import { getInvestigationProgressStatusLabel } from '../common/investigation_progress_status';
+import { getInvestigationProgressStatusLabel } from '../../../common/investigation_progress_status';
 
 export { getInvestigationProgressStatusLabel };
 

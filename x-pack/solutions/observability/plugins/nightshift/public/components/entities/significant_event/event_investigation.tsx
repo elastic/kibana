@@ -19,8 +19,8 @@ import { i18n } from '@kbn/i18n';
 import type { Investigation } from '@kbn/agentic-investigations-plugin/common';
 import { InvestigationOutput, type InvestigationStatus } from '@kbn/investigation-output';
 import type { SignificantEventInvestigation } from '@kbn/significant-events-schema';
-import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
-import { useKibana } from '../hooks/use_kibana';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
+import { useKibana } from '../../../hooks/use_kibana';
 
 export interface EventInvestigationProps {
   /** The latest investigation the significant event records. */
