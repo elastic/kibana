@@ -219,6 +219,46 @@ export default function (providerContext: FtrProviderContext) {
           .expect(400);
       });
 
+      it('should store and return the integration name and description', async () => {
+        const { body } = await supertest
+          .post(BASE_URL)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            provider: 'aws',
+            authMethod: 'static_keys',
+            mechanisms: ['managed_integration'],
+            services: ['cloudtrail'],
+            integrationName: 'my-aws',
+            description: 'Production AWS',
+          })
+          .expect(200);
+
+        expect(body.item.integrationName).to.equal('my-aws');
+        expect(body.item.description).to.equal('Production AWS');
+        createdIds.push(body.item.id);
+
+        const { body: fetched } = await supertest
+          .get(`${BASE_URL}/${body.item.id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+        expect(fetched.item.integrationName).to.equal('my-aws');
+        expect(fetched.item.description).to.equal('Production AWS');
+      });
+
+      it('should reject an integration name over the Fleet limit', async () => {
+        await supertest
+          .post(BASE_URL)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            provider: 'aws',
+            authMethod: 'static_keys',
+            mechanisms: ['managed_integration'],
+            services: ['cloudtrail'],
+            integrationName: 'a'.repeat(256),
+          })
+          .expect(400);
+      });
+
       it('should create an agent-based deployment with authMethod and no connectorId', async () => {
         const { body } = await supertest
           .post(BASE_URL)

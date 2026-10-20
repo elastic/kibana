@@ -199,6 +199,8 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
       const { agentHostsMode, agentPolicyId, selectedAgentPolicyIds, agentCredentialMethod } =
         agentBasedDeployment;
       const globalRegion = serviceSettings?.globalRegion ?? '';
+      const integrationName = serviceSettings?.integrationName?.trim() || undefined;
+      const description = serviceSettings?.description?.trim() || undefined;
       const storedServiceVars = serviceSettings?.serviceVars ?? {};
       const { dataFormat } = servicesStep;
       const targetPolicyIds =
@@ -278,6 +280,8 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           },
           pkgVersion: '', // overridden per-package inside deploy functions
           agentCredentials: credentials,
+          integrationName,
+          description,
         };
 
         // Cleaned instance IDs — excluded from packagePolicyIds in the SO update.
@@ -527,6 +531,8 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
                 Record<string, unknown>
               >,
               globalRegion,
+              ...(integrationName ? { integrationName } : {}),
+              ...(description ? { description } : {}),
               dataFormat,
               authMethod: toSOAuthMethod(agentCredentialMethod),
               // Persist agentPolicyIds on create so a mid-deploy tab-close leaves a record that

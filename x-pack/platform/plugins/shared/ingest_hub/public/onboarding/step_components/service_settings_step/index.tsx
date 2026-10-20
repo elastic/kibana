@@ -41,6 +41,7 @@ import {
 import type { ServiceInstance } from './use_service_settings';
 import { useServiceSettings } from './use_service_settings';
 import { ServiceSettingsFlyout } from './service_settings_flyout';
+import { SharedSettingsSection } from './shared_settings_section';
 import { DuplicateServiceModal } from './duplicate_service_modal';
 import { SignalTypeBadge } from '../services_step/signal_type_badge';
 import { ServiceSearchFilter } from '../service_search_filter';
@@ -56,6 +57,13 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
   const {
     globalRegion,
     setGlobalRegion,
+    integrationName,
+    setIntegrationName,
+    integrationNameError,
+    description,
+    setDescription,
+    descriptionError,
+    hasPolicyServices,
     instances,
     filteredInstances,
     incompleteInstances,
@@ -168,6 +176,13 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
         })
       );
     }
+    if (integrationNameError || descriptionError) {
+      reasons.push(
+        i18n.translate('xpack.ingestHub.serviceSettingsStep.continueTooltip.sharedSettings', {
+          defaultMessage: 'Fix the shared settings',
+        })
+      );
+    }
     if (incompleteInstances.length > 0) {
       reasons.push(
         i18n.translate('xpack.ingestHub.serviceSettingsStep.continueTooltip.incompleteServices', {
@@ -183,6 +198,8 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     hasUnloadedSelectedManifests,
     hasErroredSelectedManifests,
     globalRegion,
+    integrationNameError,
+    descriptionError,
     incompleteInstances,
   ]);
 
@@ -502,6 +519,21 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
       </EuiFlexGroup>
 
       <EuiSpacer size="m" />
+
+      {hasPolicyServices && (
+        <>
+          <SharedSettingsSection
+            integrationName={integrationName}
+            onIntegrationNameChange={setIntegrationName}
+            integrationNameError={integrationNameError}
+            description={description}
+            onDescriptionChange={setDescription}
+            descriptionError={descriptionError}
+            isLocked={isRegionDisabled}
+          />
+          <EuiSpacer size="m" />
+        </>
+      )}
 
       {hasErroredSelectedManifests && (
         <>

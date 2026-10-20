@@ -93,6 +93,7 @@ export {
   packagePolicyRouteService,
   fleetSetupRouteService,
   // Package policy helpers
+  getMaxPackageName,
   isValidNamespace,
   isValidDataset,
   isValidDataStreamType,

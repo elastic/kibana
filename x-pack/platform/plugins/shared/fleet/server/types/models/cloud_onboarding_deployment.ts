@@ -93,6 +93,14 @@ export const CloudOnboardingDeploymentSchemaV2 = schema.object({
   ...SharedFields,
 });
 
+// ── V3: integrationName + description ────────────────────────────────────────
+// Common integration settings entered in the Service Settings step. Neither field is in
+// mappings.properties (dynamic: false), so no mapping change is needed.
+export const CloudOnboardingDeploymentSchemaV3 = CloudOnboardingDeploymentSchemaV2.extends({
+  integrationName: schema.maybe(schema.string({ maxLength: 255 })),
+  description: schema.maybe(schema.string({ maxLength: 2048 })),
+});
+
 // ── V1 ───────────────────────────────────────────────────────────────────────
 export const CloudOnboardingDeploymentSchemaV1 = schema.object({
   provider: ProviderSchema,

@@ -133,6 +133,19 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
       },
     })
   ),
+  integrationName: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          'Integration name as entered in the Service Settings step, before any per-package suffix is applied.',
+      },
+    })
+  ),
+  description: schema.maybe(
+    schema.string({
+      meta: { description: 'Integration description from the Service Settings step.' },
+    })
+  ),
   dataFormat: schema.maybe(DataFormatSchema),
   authMethod: schema.maybe(
     schema.oneOf(
@@ -230,6 +243,21 @@ export const CreateCloudOnboardingDeploymentRequestSchema = {
       schema.string({
         maxLength: 64,
         meta: { description: 'Global AWS region from the Service Settings step.' },
+      })
+    ),
+    integrationName: schema.maybe(
+      schema.string({
+        maxLength: 255,
+        meta: {
+          description:
+            'Integration name as entered in the Service Settings step, before any per-package suffix is applied.',
+        },
+      })
+    ),
+    description: schema.maybe(
+      schema.string({
+        maxLength: 2048,
+        meta: { description: 'Integration description from the Service Settings step.' },
       })
     ),
     dataFormat: schema.maybe(DataFormatSchema),

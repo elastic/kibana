@@ -5,9 +5,15 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
-import { isValidNamespace } from '@kbn/fleet-plugin/common';
+import {
+  getMaxPackageName,
+  isValidNamespace,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  SO_SEARCH_LIMIT,
+} from '@kbn/fleet-plugin/common';
+import { sendGetPackagePolicies } from '@kbn/fleet-plugin/public';
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { makeDsView } from '../../aws_service_matrix';
@@ -20,6 +26,12 @@ import {
   toTyped,
 } from './field_config';
 import type { SignalFilter } from '../services_step/use_services_step';
+import { AWS_MAIN_PACKAGE_NAME } from '../authenticate_and_deploy_step/deploy_group_helpers';
+import {
+  getDescriptionError,
+  getIntegrationNameError,
+  supportsIntegrationSettings,
+} from './integration_settings';
 
 export interface ServiceDataStreamVars {
   /** Input types enabled for this data stream. */
@@ -58,6 +70,12 @@ export interface ServiceInstance {
 
 export interface ServiceSettingsPersistedState {
   globalRegion: string;
+  /**
+   * Integration name as entered. Policy names are derived from it at deploy time. Absent until
+   * the default is prefilled or the user types one.
+   */
+  integrationName?: string;
+  description?: string;
   /** Keyed by instanceId. */
   serviceVars: Record<string, ServiceVars>;
   /** Absent in old sessions — reconciled on read from selectedServiceIds. */
@@ -228,11 +246,84 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     [persisted, setPersisted]
   );
 
+  const integrationName = persisted?.integrationName ?? '';
+  const description = persisted?.description ?? '';
+
+  const setIntegrationName = useCallback(
+    (name: string) => {
+      setPersisted({
+        ...(persisted ?? { globalRegion: '', serviceVars: {} }),
+        integrationName: name,
+      });
+    },
+    [persisted, setPersisted]
+  );
+
+  const setDescription = useCallback(
+    (value: string) => {
+      setPersisted({
+        ...(persisted ?? { globalRegion: '', serviceVars: {} }),
+        description: value,
+      });
+    },
+    [persisted, setPersisted]
+  );
+
   // Reconcile instances each render — cheap since selectedServiceIds rarely changes.
   const instances: ServiceInstance[] = useMemo(
     () => reconcileInstances(selectedServiceIds, persisted?.instances, awsServicesMap),
     [selectedServiceIds, persisted?.instances, awsServicesMap]
   );
+
+  // ECF creates no package policies, so name and description only matter for the other services.
+  const hasPolicyServices = useMemo(
+    () =>
+      instances.some((inst) => {
+        const service = awsServicesMap?.get(inst.serviceId);
+        return service ? supportsIntegrationSettings(service) : false;
+      }),
+    [instances, awsServicesMap]
+  );
+
+  // Prefill the Fleet-style default (`aws-<n>`) once, when no name exists yet. The fetch can
+  // outlive other edits, so the write is based on the latest persisted state.
+  const persistedRef = useRef(persisted);
+  persistedRef.current = persisted;
+  const isPrefilling = useRef(false);
+  useEffect(() => {
+    if (!hasPolicyServices || persisted?.integrationName !== undefined || isPrefilling.current) {
+      return;
+    }
+    isPrefilling.current = true;
+    let cancelled = false;
+    (async () => {
+      let defaultName = `${AWS_MAIN_PACKAGE_NAME}-1`;
+      try {
+        const { data } = await sendGetPackagePolicies({
+          perPage: SO_SEARCH_LIMIT,
+          page: 1,
+          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${AWS_MAIN_PACKAGE_NAME}`,
+        });
+        defaultName = getMaxPackageName(AWS_MAIN_PACKAGE_NAME, data?.items);
+      } catch {
+        // Best-effort: fall back to the first number, the user can still edit the name.
+      }
+      const latest = persistedRef.current;
+      if (cancelled || latest?.integrationName !== undefined) {
+        isPrefilling.current = false;
+        return;
+      }
+      setPersisted({
+        ...(latest ?? { globalRegion: '', serviceVars: {} }),
+        integrationName: defaultName,
+      });
+      isPrefilling.current = false;
+    })();
+    return () => {
+      cancelled = true;
+      isPrefilling.current = false;
+    };
+  }, [hasPolicyServices, persisted?.integrationName, setPersisted]);
 
   // Lazy prune: drop serviceVars entries for instances no longer present (deselected in Step 1).
   // Runs on mount and whenever the instance list changes. Writing only when stale keys exist
@@ -382,9 +473,18 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     [incompleteInstances]
   );
 
+  const integrationNameError = hasPolicyServices
+    ? getIntegrationNameError(integrationName)
+    : undefined;
+  const descriptionError = hasPolicyServices ? getDescriptionError(description) : undefined;
+
   const isReady = useMemo(
-    () => !!globalRegion.trim() && incompleteInstances.length === 0,
-    [globalRegion, incompleteInstances]
+    () =>
+      !!globalRegion.trim() &&
+      incompleteInstances.length === 0 &&
+      !integrationNameError &&
+      !descriptionError,
+    [globalRegion, incompleteInstances, integrationNameError, descriptionError]
   );
 
   const [globalRegionTouched, setGlobalRegionTouched] = useState(false);
@@ -405,6 +505,13 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
   return {
     globalRegion,
     setGlobalRegion,
+    integrationName,
+    setIntegrationName,
+    integrationNameError,
+    description,
+    setDescription,
+    descriptionError,
+    hasPolicyServices,
     instances,
     filteredInstances,
     incompleteInstances,

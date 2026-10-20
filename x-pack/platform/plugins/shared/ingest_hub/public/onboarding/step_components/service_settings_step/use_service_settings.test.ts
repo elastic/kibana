@@ -5,15 +5,20 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { useState } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 
 jest.mock('react-use/lib/useSessionStorage');
+jest.mock('@kbn/fleet-plugin/public', () => ({
+  ...jest.requireActual('@kbn/fleet-plugin/public'),
+  sendGetPackagePolicies: jest.fn(),
+}));
 jest.mock('../../onboarding_flow_context', () => ({
   useOnboardingFlow: jest.fn(),
 }));
 
+import { sendGetPackagePolicies } from '@kbn/fleet-plugin/public';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { getIncompleteInstances, useServiceSettings } from './use_service_settings';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
@@ -22,8 +27,11 @@ import type { RegistryVarsEntry } from '@kbn/fleet-plugin/common';
 
 const mockUseOnboardingFlow = useOnboardingFlow as jest.MockedFunction<typeof useOnboardingFlow>;
 const mockUseSessionStorage = useSessionStorage as jest.MockedFunction<typeof useSessionStorage>;
+const mockSendGetPackagePolicies = sendGetPackagePolicies as jest.Mock;
 
 beforeEach(() => {
+  mockSendGetPackagePolicies.mockReset();
+  mockSendGetPackagePolicies.mockResolvedValue({ data: { items: [] } });
   mockUseSessionStorage.mockImplementation((_key, initial) => useState(initial));
   mockUseOnboardingFlow.mockReturnValue({
     servicesStep: { selectedServiceIds: ['guardduty'] },
@@ -571,5 +579,104 @@ describe('useServiceSettings — handleNext', () => {
 
     expect(setServiceSettingsMethod).toHaveBeenCalledWith('agent_based');
     expect(onContinue).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('useServiceSettings — integration name and description', () => {
+  const policyService = makeEntry('svc_p', {
+    deploymentMethods: [{ method: 'managed_integration', preferred: true }] as any,
+  });
+  const ecfOnlyService = makeEntry('svc_e', {
+    deploymentMethods: [{ method: 'ecf', preferred: true }] as any,
+  });
+
+  const mockServices = (services: AwsServiceMatrixEntry[]) => {
+    mockUseOnboardingFlow.mockReturnValue({
+      servicesStep: { selectedServiceIds: services.map((s) => s.id) },
+      removeDeployInstance: jest.fn(),
+      awsServicesMap: new Map(services.map((s) => [s.id, s])),
+    } as unknown as ReturnType<typeof useOnboardingFlow>);
+  };
+
+  it('prefills the next free Fleet-style name for the aws package', async () => {
+    mockServices([policyService]);
+    mockSendGetPackagePolicies.mockResolvedValue({
+      data: { items: [{ name: 'aws-1' }, { name: 'aws-4' }] },
+    });
+
+    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+
+    await waitFor(() => expect(result.current.integrationName).toBe('aws-5'));
+    expect(mockSendGetPackagePolicies).toHaveBeenCalledWith(
+      expect.objectContaining({ kuery: expect.stringContaining('package.name:aws') })
+    );
+  });
+
+  it('falls back to the first name when the policies cannot be listed', async () => {
+    mockServices([policyService]);
+    mockSendGetPackagePolicies.mockRejectedValue(new Error('network error'));
+
+    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+
+    await waitFor(() => expect(result.current.integrationName).toBe('aws-1'));
+  });
+
+  it('does not prefill ECF-only selections, which create no package policy', async () => {
+    mockServices([ecfOnlyService]);
+
+    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+
+    expect(result.current.hasPolicyServices).toBe(false);
+    expect(mockSendGetPackagePolicies).not.toHaveBeenCalled();
+    expect(result.current.integrationName).toBe('');
+  });
+
+  it('keeps a name the user typed instead of prefilling over it', async () => {
+    mockServices([policyService]);
+    let resolveList: (value: unknown) => void = () => {};
+    mockSendGetPackagePolicies.mockReturnValue(
+      new Promise((resolve) => {
+        resolveList = resolve;
+      })
+    );
+
+    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+    act(() => result.current.setIntegrationName('my-aws'));
+    await act(async () => resolveList({ data: { items: [] } }));
+
+    expect(result.current.integrationName).toBe('my-aws');
+  });
+
+  it('is not ready without an integration name, and ready once one is set', async () => {
+    mockServices([policyService]);
+    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+    await waitFor(() => expect(result.current.integrationName).toBe('aws-1'));
+    act(() => result.current.setGlobalRegion('us-east-1'));
+    expect(result.current.isReady).toBe(true);
+
+    act(() => result.current.setIntegrationName('  '));
+    expect(result.current.integrationNameError).toBeDefined();
+    expect(result.current.isReady).toBe(false);
+  });
+
+  it('is not ready with a description over the limit', async () => {
+    mockServices([policyService]);
+    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+    await waitFor(() => expect(result.current.integrationName).toBe('aws-1'));
+    act(() => result.current.setGlobalRegion('us-east-1'));
+
+    act(() => result.current.setDescription('a'.repeat(2049)));
+
+    expect(result.current.descriptionError).toBeDefined();
+    expect(result.current.isReady).toBe(false);
+  });
+
+  it('does not require a name for ECF-only selections', () => {
+    mockServices([ecfOnlyService]);
+    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+    act(() => result.current.setGlobalRegion('us-east-1'));
+
+    expect(result.current.integrationNameError).toBeUndefined();
+    expect(result.current.isReady).toBe(true);
   });
 });

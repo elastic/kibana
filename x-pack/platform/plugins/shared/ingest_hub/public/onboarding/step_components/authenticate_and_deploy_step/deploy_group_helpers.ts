@@ -47,6 +47,45 @@ export const buildGroupPolicyNameStem = (group: DeployGroup): string =>
 
 export const DEFAULT_NAMESPACE = 'default';
 
+/** The package whose services share the integration name exactly; other packages get a suffix. */
+export const AWS_MAIN_PACKAGE_NAME = 'aws';
+
+/** Fleet's package policy name limit. */
+const MAX_POLICY_NAME_LENGTH = 255;
+
+/**
+ * Package policy name for a deploy group, derived from the integration name the user entered.
+ *
+ * - Bundled originals of the main `aws` package keep the name as entered; a non-default
+ *   namespace adds `-<namespace>`.
+ * - Bundled originals of any other package get `-<package>` (and `-<namespace>`), so the policies
+ *   of one deploy never collide.
+ * - A duplicate instance is named after the service name the user typed in the duplicate modal.
+ *
+ * Returns undefined without an integration name, so callers keep their previous naming.
+ */
+export function deriveGroupPolicyName(
+  group: DeployGroup,
+  integrationName: string | undefined
+): string | undefined {
+  const base = integrationName?.trim();
+  if (!base) return undefined;
+
+  if (group.isDuplicateGroup) {
+    const { instance } = group.members[0];
+    return instance.name.replace(/[^a-zA-Z0-9_\-. ]/g, '_').slice(0, MAX_POLICY_NAME_LENGTH);
+  }
+
+  // The stem is `<package>` or `<package>__<namespace>`, made unique within one deploy.
+  const stem = buildGroupPolicyNameStem(group);
+  const isMainPackage = group.members[0].service.packageName === AWS_MAIN_PACKAGE_NAME;
+  const suffix = isMainPackage
+    ? stem.slice(AWS_MAIN_PACKAGE_NAME.length).replace(/^__/, '')
+    : stem.replace('__', '-');
+  const name = suffix ? `${base}-${suffix}` : base;
+  return name.slice(0, MAX_POLICY_NAME_LENGTH);
+}
+
 function instanceNamespace(
   instance: ServiceInstance,
   storedServiceVars: Record<string, ServiceVars>

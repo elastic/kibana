@@ -704,6 +704,8 @@ export function useMiDeploy({
       }
 
       const globalRegion = serviceSettings?.globalRegion ?? '';
+      const integrationName = serviceSettings?.integrationName?.trim() || undefined;
+      const description = serviceSettings?.description?.trim() || undefined;
       const storedServiceVars = serviceSettings?.serviceVars ?? {};
 
       const { connectorId } = authenticateAndDeployStep;
@@ -721,6 +723,8 @@ export function useMiDeploy({
               Record<string, unknown>
             >,
             globalRegion,
+            ...(integrationName ? { integrationName } : {}),
+            ...(description ? { description } : {}),
             dataFormat,
             authMethod: connectorId ? 'identity_federation' : 'static_keys',
           })) ?? undefined;
@@ -778,6 +782,8 @@ export function useMiDeploy({
             namespace,
             globalRegion,
             storedServiceVars,
+            integrationName,
+            description,
             authenticateAndDeployStep: sharedRefs
               ? withSharedRefs(sharedRefs)
               : { ...authenticateAndDeployStep, existingSecretRefs: keptSecretRefs },
