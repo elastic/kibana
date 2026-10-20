@@ -1355,6 +1355,102 @@ describe('AttachmentService getter', () => {
       });
     });
 
+    describe('legacy cases-comments rows', () => {
+      const findResponse = (attachmentId: string, caseIds: string[]) => ({
+        ...createSOFindResponse([]),
+        aggregations: {
+          attachmentIds: {
+            buckets: [
+              {
+                key: attachmentId,
+                references: {
+                  cases: {
+                    caseIds: {
+                      buckets: caseIds.map((key) => ({
+                        key,
+                        attachment: { owner: { buckets: [{ key: 'securitySolution' }] } },
+                      })),
+                    },
+                  },
+                },
+              },
+            ],
+          },
+        },
+      });
+
+      it('reads only cases-attachments for a type with no legacy form', async () => {
+        unsecuredSavedObjectsClient.find.mockResolvedValue(createSOFindResponse([]));
+
+        await createAttachmentGetter().getCaseIdsByAttachmentIds({
+          type: 'security.entity',
+          attachmentIds: ['host:a'],
+        });
+
+        expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
+      });
+
+      it('also reads the alert ids of legacy alert comments of the alert type owner, listing each case once', async () => {
+        unsecuredSavedObjectsClient.find
+          .mockResolvedValueOnce(findResponse('alert-1', ['case-1']))
+          .mockResolvedValueOnce(findResponse('alert-1', ['case-1', 'case-2']));
+
+        const res = await createAttachmentGetter().getCaseIdsByAttachmentIds({
+          type: 'security.alert',
+          attachmentIds: ['alert-1'],
+        });
+
+        const [, [legacyArgs]] = unsecuredSavedObjectsClient.find.mock.calls;
+        expect(legacyArgs).toMatchObject({
+          type: 'cases-comments',
+          aggs: {
+            attachmentIds: {
+              terms: { field: 'cases-comments.attributes.alertId', include: ['alert-1'] },
+            },
+          },
+        });
+        expect(JSON.stringify(legacyArgs.filter)).toContain('cases-comments.attributes.type');
+        expect(JSON.stringify(legacyArgs.filter)).toContain('securitySolution');
+        expect(res).toEqual([
+          {
+            attachmentId: 'alert-1',
+            cases: [
+              { id: 'case-1', owner: 'securitySolution' },
+              { id: 'case-2', owner: 'securitySolution' },
+            ],
+          },
+        ]);
+      });
+
+      it('reads the external reference id of legacy external reference comments', async () => {
+        unsecuredSavedObjectsClient.find.mockResolvedValue(createSOFindResponse([]));
+
+        await createAttachmentGetter().getCaseIdsByAttachmentIds({
+          type: 'security.endpoint',
+          attachmentIds: ['endpoint-1'],
+        });
+
+        const [, [legacyArgs]] = unsecuredSavedObjectsClient.find.mock.calls;
+        expect(legacyArgs).toMatchObject({
+          aggs: {
+            attachmentIds: { terms: { field: 'cases-comments.attributes.externalReferenceId' } },
+          },
+        });
+        expect(JSON.stringify(legacyArgs.filter)).toContain('endpoint');
+      });
+
+      it('skips legacy forms that keep no id, such as comments', async () => {
+        unsecuredSavedObjectsClient.find.mockResolvedValue(createSOFindResponse([]));
+
+        await createAttachmentGetter().getCaseIdsByAttachmentIds({
+          type: 'comment',
+          attachmentIds: ['x'],
+        });
+
+        expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
+      });
+    });
+
     it('returns no case ids when nothing matches', async () => {
       unsecuredSavedObjectsClient.find.mockResolvedValue(createSOFindResponse([]));
 

@@ -57,6 +57,7 @@ import { Operations } from '../../authorization';
 import { getOwnersFilter } from '../../authorization/utils';
 import {
   CASE_ATTACHMENT_SAVED_OBJECT,
+  CASE_COMMENT_SAVED_OBJECT,
   MAX_ATTACHMENT_ID_LENGTH,
   MAX_ATTACHMENT_IDS_PER_CASES_LOOKUP,
   MAX_ATTACHMENT_TYPE_LENGTH,
@@ -272,19 +273,22 @@ export const getCasesByAttachmentIDs = async (
       await authorization.getAuthorizationFilter(Operations.getCaseIDsByAttachmentIDs);
 
     // The operation is scoped to cases, so the attachments read get their own owner filter.
-    const attachmentsAuthorizationFilter =
-      authorizedOwners && authorizedOwners.length > 0
-        ? getOwnersFilter(CASE_ATTACHMENT_SAVED_OBJECT, authorizedOwners)
-        : undefined;
+    const getAttachmentsFilter = (
+      soType: typeof CASE_ATTACHMENT_SAVED_OBJECT | typeof CASE_COMMENT_SAVED_OBJECT
+    ) =>
+      combineAuthorizedAndOwnerFilter(
+        owner,
+        authorizedOwners && authorizedOwners.length > 0
+          ? getOwnersFilter(soType, authorizedOwners)
+          : undefined,
+        soType
+      );
 
     const casesOfAttachments = await attachmentService.getter.getCaseIdsByAttachmentIds({
       type,
       attachmentIds,
-      filter: combineAuthorizedAndOwnerFilter(
-        owner,
-        attachmentsAuthorizationFilter,
-        CASE_ATTACHMENT_SAVED_OBJECT
-      ),
+      filter: getAttachmentsFilter(CASE_ATTACHMENT_SAVED_OBJECT),
+      legacyFilter: getAttachmentsFilter(CASE_COMMENT_SAVED_OBJECT),
     });
 
     const casesInStatus = await filterByCaseStatus(caseService, casesOfAttachments, status);

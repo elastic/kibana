@@ -175,6 +175,10 @@ export interface GetCaseIdsByAttachmentIdsArgs {
    * Authorization + owner filter scoped to the unified `cases-attachments` saved object type.
    */
   filter?: KueryNode;
+  /**
+   * The same filter, scoped to the legacy `cases-comments` saved object type.
+   */
+  legacyFilter?: KueryNode;
 }
 
 /** The cases one attachment id is attached to, with their owners for authorization. */

@@ -97,6 +97,21 @@ describe('get', () => {
       expect(JSON.stringify(getAttachmentsFilter())).toContain('observability');
     });
 
+    it('scopes the legacy attachments it reads the same way', async () => {
+      clientArgs.authorization.getAuthorizationFilter.mockResolvedValueOnce({
+        authorizedOwners: ['observability'],
+        ensureSavedObjectsAreAuthorized: () => {},
+      });
+
+      await getCasesByAttachmentIDs(request, clientArgs);
+
+      const { legacyFilter } =
+        clientArgs.services.attachmentService.getter.getCaseIdsByAttachmentIds.mock.calls[0][0];
+      expect(JSON.stringify(legacyFilter)).toContain('cases-comments.attributes.owner');
+      expect(JSON.stringify(legacyFilter)).toContain('observability');
+      expect(JSON.stringify(legacyFilter)).toContain('securitySolution');
+    });
+
     it('does not read the attachments when the user may not read cases', async () => {
       clientArgs.authorization.getAuthorizationFilter.mockRejectedValueOnce(
         new Error('Unauthorized')
