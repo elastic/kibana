@@ -29,11 +29,13 @@ import {
 } from '../../../../common/lib/authentication/users';
 import {
   bulkCreateAttachments,
+  bulkDeleteAttachmentReferences,
   bulkDeleteAttachments,
   createCase,
   createComment,
   deleteAllCaseItems,
   deleteComment,
+  findCaseUserActions,
   getAllComments,
   updateAttachmentV2,
 } from '../../../../common/lib/api';
@@ -394,6 +396,60 @@ export default ({ getService }: FtrProviderContext): void => {
         const remaining = await readAttachments(caseId);
         expect(attackIdsOf(remaining)).to.eql([ATTACK_A_ID]);
         expect(alertIdsOf(remaining)).to.eql([SHARED_ALERT_ID, ATTACK_A_ONLY_ALERT_ID].sort());
+      });
+
+      it('takes the alerts when the attack is removed by its attack id', async () => {
+        const { caseId } = await seedCaseWithTwoAttacks();
+
+        await bulkDeleteAttachmentReferences({
+          supertest,
+          caseId,
+          type: SECURITY_ATTACK_ATTACHMENT_TYPE,
+          attachmentIds: [ATTACK_A_ID],
+        });
+
+        const remaining = await readAttachments(caseId);
+        expect(attackIdsOf(remaining)).to.eql([ATTACK_B_ID]);
+        expect(alertIdsOf(remaining)).to.eql([SHARED_ALERT_ID, ATTACK_B_ONLY_ALERT_ID].sort());
+      });
+
+      it('keeps every alert when the attack is removed by its attack id without related attachments', async () => {
+        const { caseId } = await seedCaseWithTwoAttacks();
+
+        await bulkDeleteAttachmentReferences({
+          supertest,
+          caseId,
+          type: SECURITY_ATTACK_ATTACHMENT_TYPE,
+          attachmentIds: [ATTACK_A_ID],
+          includeRelated: false,
+        });
+
+        const remaining = await readAttachments(caseId);
+        expect(attackIdsOf(remaining)).to.eql([ATTACK_B_ID]);
+        expect(alertIdsOf(remaining)).to.eql(
+          [SHARED_ALERT_ID, ATTACK_A_ONLY_ALERT_ID, ATTACK_B_ONLY_ALERT_ID].sort()
+        );
+      });
+
+      it('records 1 activity entry for the attack and 1 for its alerts', async () => {
+        const { caseId, attackAttachmentId } = await seedCaseWithTwoAttacks();
+
+        await bulkDeleteAttachments({
+          supertest,
+          caseId,
+          savedObjectIds: [attackAttachmentId(ATTACK_B_ID)],
+        });
+
+        const { userActions } = await findCaseUserActions({ supertest, caseID: caseId });
+        const deletions = userActions
+          .filter(({ type, action }) => type === 'bulkAttachments' && action === 'delete')
+          .flatMap(({ payload }) => ('bulkAttachments' in payload ? [payload.bulkAttachments] : []))
+          .sort((a, b) => a.attachmentType.localeCompare(b.attachmentType));
+
+        expect(deletions).to.eql([
+          { attachmentType: SECURITY_ALERT_ATTACHMENT_TYPE, count: 1 },
+          { attachmentType: SECURITY_ATTACK_ATTACHMENT_TYPE, count: 1 },
+        ]);
       });
 
       for (const [first, second] of [

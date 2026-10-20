@@ -76,13 +76,6 @@ const ShowAttackButton = React.lazy(async () => {
   const { ShowAttackButton: Component } = await import('./components/show_attack_button');
   return { default: Component };
 });
-const RemoveAttackCardAction = React.lazy(async () => {
-  const { RemoveAttackCardAction: Component } = await import(
-    './components/remove_attack_card_action'
-  );
-  return { default: Component };
-});
-
 const AttackTabContentWrapper: ComponentType<CommonAttachmentListViewProps> = (props) => (
   <Suspense fallback={null}>
     <AttackTabContentLazy {...props} />
@@ -98,11 +91,18 @@ const DISPLAY_NAME = i18n.translate('xpack.securitySolution.attackDiscovery.case
   defaultMessage: 'Attacks',
 });
 
+const getAttackCountLabel = (count: number): string =>
+  i18n.translate('xpack.securitySolution.attackDiscovery.cases.attacksCount', {
+    defaultMessage: '{count, plural, one {# attack} other {# attacks}}',
+    values: { count },
+  });
+
 export const getAttackAttachment = () =>
   defineAttachment({
     id: SECURITY_ATTACK_ATTACHMENT_TYPE,
     getIcon: () => 'securitySignalDetected',
     getLabel: () => DISPLAY_NAME,
+    getCountLabel: ({ count }) => getAttackCountLabel(count),
     schema: AttackAttachmentPayloadSchema,
     getCreationActivity: () => ({
       eventColor: 'subdued' as const,
@@ -113,13 +113,8 @@ export const getAttackAttachment = () =>
         />
       ),
       children: AttackAttachmentChildrenLazy,
-      // The framework's own trash action removes the attack attachment on its own. Attacks bring
-      // their constituent alerts onto the case with them, so removal is registered here instead,
-      // to offer to take those alerts back off — see `resolveRemovableAlertAttachments` for which
-      // of them are actually the attack's to remove.
-      hideDefaultActions: true,
       getActions: (actionProps: AttackAttachmentViewProps) => {
-        const { attachmentId, caseData, metadata, permissions, savedObjectId } = actionProps;
+        const { attachmentId, metadata, savedObjectId } = actionProps;
         if (!metadata) {
           return [];
         }
@@ -139,24 +134,6 @@ export const getAttackAttachment = () =>
               </Suspense>
             ),
           },
-          ...(permissions.delete
-            ? [
-                {
-                  type: AttachmentActionType.CUSTOM as const,
-                  isPrimary: true,
-                  render: () => (
-                    <Suspense fallback={<EuiLoadingSpinner size="m" />}>
-                      <RemoveAttackCardAction
-                        attackId={attachmentId}
-                        attackTitle={metadata.title}
-                        caseId={caseData.id}
-                        savedObjectId={savedObjectId}
-                      />
-                    </Suspense>
-                  ),
-                },
-              ]
-            : []),
         ];
       },
     }),

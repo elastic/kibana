@@ -8,15 +8,11 @@
 import type { CoreSetup, ElasticsearchClient, Logger } from '@kbn/core/server';
 import type {
   AttachmentDeleteTarget,
-  AttachmentOnDelete,
-  AttachmentUpdate,
+  GetRelatedAttachments,
   UnifiedAttachmentTypeSetup,
 } from '@kbn/cases-plugin/server';
-import {
-  SECURITY_ATTACK_ATTACHMENT_TYPE,
-  isUnifiedAlertAttachment,
-  toStringArray,
-} from '@kbn/cases-plugin/common';
+import { SECURITY_ATTACK_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
+import { SECURITY_ALERT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common/constants';
 import {
   ALERT_ATTACK_DISCOVERY_ALERT_IDS,
   ALERT_ATTACK_DISCOVERY_REPLACEMENTS,
@@ -27,10 +23,9 @@ import {
 import { z } from '@kbn/zod/v4';
 import { AttackAttachmentPayloadSchema } from '../../../common/cases/attachments/attack';
 import { validateAttackWorkflowTargets } from './workflow_validation';
-import type { RemovableAlertAttachmentUpdate } from '../../../common/cases/attachments/attack/resolve_removable_alerts';
 import {
   getCaseAlertAttachments,
-  resolveRemovableAlertAttachmentsForAttacks,
+  resolveRemovableAlertIds,
 } from '../../../common/cases/attachments/attack/resolve_removable_alerts';
 
 interface AttackAttachmentTypeDeps {
@@ -150,73 +145,22 @@ const getAlertIdsByAttackId = async ({
 };
 
 /**
- * Rewrites a partially removed alert attachment: the alerts it keeps, the `metadata.index`
- * entries that belong to them, and the provenance relabelled onto the attacks still claiming
- * them.
- *
- * `metadata.index` runs parallel to `attachmentId`, so the kept indices are taken by position
- * rather than by value: an alert id says nothing about which index it came from, and alerts on
- * one case can live in different indices.
+ * Takes the alerts an attack brought to the case with it when the attack is deleted, keeping any
+ * alert another attached attack still claims.
  */
-const toAttachmentUpdate = ({
-  update,
-  attributes,
-}: {
-  update: RemovableAlertAttachmentUpdate;
-  attributes: AttachmentDeleteTarget['attributes'];
-}): AttachmentUpdate[] => {
-  if (!isUnifiedAlertAttachment(attributes)) {
-    return [];
-  }
-
-  const storedAlertIds = toStringArray(attributes.attachmentId);
-  const keptAlertIdSet = new Set(update.keptAlertIds);
-  const keptPositions = storedAlertIds.flatMap((alertId, position) =>
-    keptAlertIdSet.has(alertId) ? [position] : []
-  );
-
-  const storedIndex = attributes.metadata?.index;
-  // A scalar index applies to every alert, and an array that does not line up is not safe to
-  // realign, so both are left exactly as they are.
-  const index =
-    Array.isArray(storedIndex) && storedIndex.length === storedAlertIds.length
-      ? keptPositions.map((position) => storedIndex[position])
-      : storedIndex;
-
-  return [
-    {
-      id: update.id,
-      payload: {
-        type: attributes.type,
-        owner: attributes.owner,
-        attachmentId: keptPositions.map((position) => storedAlertIds[position]),
-        metadata: {
-          ...attributes.metadata,
-          ...(index === undefined ? {} : { index }),
-          sourceAttachmentIds: update.sourceAttackIds,
-        },
-      },
-    },
-  ];
-};
-
-/**
- * Takes the alert attachments an attack brought to the case with it when the attack is deleted,
- * keeping any alert another attached attack still claims.
- */
-export const getAttackOnDelete =
+export const getAttackRelatedAttachments =
   ({
     getStartServices,
     logger,
-  }: Omit<AttackAttachmentTypeDeps, 'isAttachEnabled'>): AttachmentOnDelete =>
-  async ({ request, attachments, remainingAttachments, includeRelated }) => {
+  }: Omit<AttackAttachmentTypeDeps, 'isAttachEnabled'>): GetRelatedAttachments =>
+  async ({ request, attachments, remainingAttachments }) => {
     const removedAttacks = toAttackReferences(attachments);
     const alertAttachments = getCaseAlertAttachments(
       remainingAttachments.map(({ id, attributes }) => ({ ...attributes, id }))
     );
 
-    if (removedAttacks.length === 0 || alertAttachments.length === 0) {
-      return { relatedAttachmentIds: [] };
+    if (removedAttacks.length === 0 || !alertAttachments.some(({ isFromAttack }) => isFromAttack)) {
+      return [];
     }
 
     const otherAttacks = toAttackReferences(remainingAttachments);
@@ -227,47 +171,33 @@ export const getAttackOnDelete =
       logger,
     });
 
-    const { attachmentIds, updates } = resolveRemovableAlertAttachmentsForAttacks({
+    const alertIds = resolveRemovableAlertIds({
       removedAttackIds: removedAttacks.map(({ attackId }) => attackId),
       otherAttackIds: otherAttacks.map(({ attackId }) => attackId),
       alertIdsByAttackId,
       alertAttachments,
-      // The analyst may keep the alerts and still be removing the attack that vouched for them,
-      // so the attachments are relabelled onto whoever still claims them. Without this the
-      // provenance would name an attack no longer on the case, and no later removal would ever
-      // look at those alerts again.
-      allowRemoval: includeRelated,
     });
 
-    const attributesById = new Map(
-      remainingAttachments.map(({ id, attributes }) => [id, attributes])
-    );
-
-    return {
-      relatedAttachmentIds: attachmentIds,
-      relatedAttachmentUpdates: updates.flatMap((update) => {
-        const attributes = attributesById.get(update.id);
-
-        return attributes == null ? [] : toAttachmentUpdate({ update, attributes });
-      }),
-    };
+    return alertIds.length > 0
+      ? [{ type: SECURITY_ALERT_ATTACHMENT_TYPE, attachmentIds: alertIds }]
+      : [];
   };
 
 /**
  * Server-side attack attachment type registration.
  * Uses a zod schema (shared with the client) to validate the full payload.
  *
- * Registered whether or not `attackAttachmentsEnabled` is on. The renderer and its remove action
- * are registered unconditionally on the client so that attacks attached while the flag was on
- * still display, and `onDelete` has to stay reachable for the same reason: otherwise the remove
- * prompt would offer to take the alerts along and the server would quietly keep them. With the
- * flag off the schema refuses new payloads, so the gate sits on the attach path alone.
+ * Registered whether or not `attackAttachmentsEnabled` is on. The renderer is registered
+ * unconditionally on the client so that attacks attached while the flag was on still display,
+ * and `getRelatedAttachments` has to stay reachable for the same reason: otherwise removing one
+ * of those attacks would quietly keep its alerts. With the flag off the schema refuses new
+ * payloads, so the gate sits on the attach path alone.
  */
 export const getAttackAttachmentType = (
   deps: AttackAttachmentTypeDeps
 ): UnifiedAttachmentTypeSetup => ({
   id: SECURITY_ATTACK_ATTACHMENT_TYPE,
   schema: deps.isAttachEnabled ? AttackAttachmentPayloadSchema : AttachDisabledSchema,
-  onDelete: getAttackOnDelete(deps),
+  getRelatedAttachments: getAttackRelatedAttachments(deps),
   workflow: { validateTargets: validateAttackWorkflowTargets },
 });

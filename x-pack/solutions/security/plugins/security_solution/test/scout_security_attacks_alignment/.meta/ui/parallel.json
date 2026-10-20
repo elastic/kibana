@@ -1,5 +1,5 @@
 {
-  "sha1": "baf5dcdb57955b3162df41380867c4338ef0134b",
+  "sha1": "bdcc87d41578e9de03f2a84125fa1c432f625a10",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -25,13 +25,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attack_cases.spec.ts",
-        "line": 190,
+        "line": 189,
         "column": 15
       }
     },
     {
-      "id": "1f3b1f0fa751de1-9f1cd6d6afe1cea",
-      "title": "Attack case attachments removes an attack from its activity card, keeping the alerts another attack claims",
+      "id": "1f3b1f0fa751de1-dec293a9375b796",
+      "title": "Attack case attachments removes an attack from the Attacks grid, keeping the alerts another attack claims",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -39,7 +39,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attack_cases.spec.ts",
-        "line": 315,
+        "line": 313,
         "column": 11
       }
     },
@@ -53,8 +53,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attack_cases.spec.ts",
-        "line": 466,
-        "column": 34
+        "line": 477,
+        "column": 18
       }
     },
     {

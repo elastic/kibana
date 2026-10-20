@@ -14,6 +14,8 @@ import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { getAttackDiscoveryMarkdown, getOriginalAlertIds } from '@kbn/elastic-assistant-common';
 import { DEFAULT_NUMBER_FORMAT } from '../../../../../common/constants';
+import { REMOVE_FROM_CASE_ACTION_ID } from '../../../../common/constants/action_ids';
+import { REMOVE_FROM_CASE } from '../../../../detections/components/alerts_table/translations';
 import {
   withActionIcons,
   withGroupSeparators,
@@ -97,6 +99,8 @@ export interface AttackTabBulkActionsProps {
   onToggleSelectAll: () => void;
   /** Called once a bulk action lands, so the grid can drop a selection it has already acted on. */
   onActionSuccess: () => void;
+  /** Removes the attacks from the case. Unset when the user can't remove. */
+  onRemove?: (attackIds: string[]) => void;
 }
 
 /** The attacks grid's bulk action bar: the selection count and the attack take-action verbs. */
@@ -106,6 +110,7 @@ export const AttackTabBulkActions = ({
   areAllAttacksSelected,
   onToggleSelectAll,
   onActionSuccess,
+  onRemove,
 }: AttackTabBulkActionsProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
@@ -256,13 +261,36 @@ export const AttackTabBulkActions = ({
     title: caseTitle,
   });
 
+  const removeFromCaseItems = useMemo(
+    () =>
+      onRemove != null
+        ? [
+            {
+              key: REMOVE_FROM_CASE_ACTION_ID,
+              'data-test-subj': REMOVE_FROM_CASE_ACTION_ID,
+              name: REMOVE_FROM_CASE,
+              onClick: () => {
+                closePopover();
+                onRemove(resolvedAttacks.map(({ id }) => id));
+              },
+            },
+          ]
+        : [],
+    [closePopover, onRemove, resolvedAttacks]
+  );
+
   /** Grouped like the alerts table's bulk menu: status, attack management, workflows, navigation. */
   const menuItems = useMemo(
     () =>
       withActionIcons(
         withGroupSeparators([
           withStatusDotIcons(workflowItems, ATTACK_STATUS_ICON_COLORS),
-          [...assignItems, ...(attacksWithCase.length > 0 ? caseItems : []), ...tagsItems],
+          [
+            ...assignItems,
+            ...(attacksWithCase.length > 0 ? caseItems : []),
+            ...removeFromCaseItems,
+            ...tagsItems,
+          ],
           runWorkflowItems,
           investigateInTimelineItems,
         ]),
@@ -273,6 +301,7 @@ export const AttackTabBulkActions = ({
       attacksWithCase.length,
       caseItems,
       investigateInTimelineItems,
+      removeFromCaseItems,
       runWorkflowItems,
       tagsItems,
       workflowItems,

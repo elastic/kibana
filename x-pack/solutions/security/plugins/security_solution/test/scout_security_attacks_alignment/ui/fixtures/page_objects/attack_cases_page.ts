@@ -12,7 +12,6 @@ import {
   SECURITY_ATTACK_ATTACHMENT_TYPE,
 } from '@kbn/cases-plugin/common';
 import {
-  ATTACK_CARD_DELETE_ACTION_TEST_ID,
   ATTACK_CARD_TEST_ID,
   ATTACK_TITLE_TEST_ID,
   ATTACK_ALERT_COUNT_TEST_ID,
@@ -31,8 +30,6 @@ import {
   ATTACK_TAB_ROW_TITLE_TEST_ID,
   ATTACK_TAB_SELECT_ALL_TEST_ID,
   INVESTIGATE_ATTACK_IN_TIMELINE_BUTTON_TEST_ID,
-  REMOVE_ATTACK_ALERTS_CHECKBOX_TEST_ID,
-  REMOVE_ATTACK_MODAL_TEST_ID,
   SHOW_ATTACK_BUTTON_TEST_ID,
 } from '../../../../../common/cases/attachments/attack/test_ids';
 
@@ -78,6 +75,8 @@ export const ATTACK_TAKE_ACTION_ITEM_TEST_ID = {
   manageAssignees: 'attack-assignees-context-menu-item',
   investigateInTimeline: 'attack-investigate-in-timeline-action-item',
   viewInAiAssistant: 'viewInAiAssistant',
+  // `REMOVE_FROM_CASE_ACTION_ID` in public/common/constants/action_ids
+  removeFromCase: 'remove-from-case-action',
 } as const;
 
 /**
@@ -128,15 +127,14 @@ const ATTACH_SUCCESS_TOAST_TEST_ID = 'cases-toast-success-attach';
  * Page object for the attack case-attachment flow:
  * - the Attacks page table "Take action" popover (Add to case)
  * - the Cases new-case creation flyout and its "select a case" modal
- * - the case view: the attack preview card in the Activity log — including the card's own
- *   removal action — and the Attacks section inside the consolidated Attachments tab
+ * - the case view: the attack preview card in the Activity log and the Attacks section inside
+ *   the consolidated Attachments tab
  *
  * The unified attachment framework renders no per-type tab: attacks render as an
  * accordion (`case-view-attachment-accordion-security.attack`) inside the single
  * Attachments tab, and that accordion only exists when the case has at least one
  * `security.attack` attachment. Inside it, the section renders an `EuiDataGrid` styled to match
- * the Alerts section directly above it. Nothing in that grid removes an attachment — an attack is
- * removed from its own entry in the Activity log, as an alert is.
+ * the Alerts section directly above it, whose row menu and bulk bar remove attacks from the case.
  */
 export class AttackCasesPage {
   // Attacks page – table group "Take action" popover
@@ -169,7 +167,6 @@ export class AttackCasesPage {
   public readonly activityAttackAiAssistantCta: Locator;
   public readonly activityAttackInvestigateInTimelineCta: Locator;
   public readonly showAttackButton: Locator;
-  public readonly activityAttackDeleteButtons: Locator;
 
   // Case view – Attachments tab + Attacks accordion
   public readonly attachmentsTab: Locator;
@@ -204,10 +201,9 @@ export class AttackCasesPage {
   public readonly attackGridBulkTakeActionButton: Locator;
   public readonly attackGridBulkActionsPopover: Locator;
 
-  // Case view – attack removal prompt
-  public readonly removeAttackModal: Locator;
-  public readonly removeAttackAlertsCheckbox: Locator;
-  public readonly removeAttackConfirmButton: Locator;
+  // Case view – the Cases removal confirmation
+  public readonly removeConfirmModal: Locator;
+  public readonly removeConfirmButton: Locator;
 
   // Attack details flyout (legacy expandable flyout, i.e. `enableNewFlyout: false`)
   public readonly attackDetailsFlyoutBody: Locator;
@@ -252,11 +248,6 @@ export class AttackCasesPage {
     // generated server-side, so match on the stable prefix. The Activity log's copy of the action
     // is the only one on that tab; the grid's copies are scoped to the grid below.
     this.showAttackButton = page.locator(`[data-test-subj^="${SHOW_ATTACK_BUTTON_TEST_ID}-"]`);
-    // The card's own removal action, registered in place of the Cases framework's default trash.
-    // Suffixed with the attachment saved object id, so a spec can target one card of several.
-    this.activityAttackDeleteButtons = page.locator(
-      `[data-test-subj^="${ATTACK_CARD_DELETE_ACTION_TEST_ID}-"]`
-    );
 
     this.attachmentsTab = page.testSubj.locator('case-view-tab-title-attachments');
     this.activityTab = page.testSubj.locator('case-view-tab-title-activity');
@@ -323,10 +314,8 @@ export class AttackCasesPage {
       ATTACK_TAB_BULK_ACTIONS_POPOVER_TEST_ID
     );
 
-    // Suffixed with the attachment saved object id, generated server-side — match the prefix.
-    this.removeAttackModal = page.testSubj.locator(REMOVE_ATTACK_MODAL_TEST_ID);
-    this.removeAttackAlertsCheckbox = page.testSubj.locator(REMOVE_ATTACK_ALERTS_CHECKBOX_TEST_ID);
-    this.removeAttackConfirmButton = page.testSubj.locator('confirmModalConfirmButton');
+    this.removeConfirmModal = page.testSubj.locator('property-actions-confirm-modal');
+    this.removeConfirmButton = this.removeConfirmModal.getByTestId('confirmModalConfirmButton');
 
     this.attackDetailsFlyoutBody = page.testSubj.locator('attack-details-flyout-body');
   }
@@ -604,43 +593,26 @@ export class AttackCasesPage {
   }
 
   /**
-   * Removes one attack from its own entry in the Activity log, which is the only place an attack
-   * attachment is removed from. The delete action is suffixed with the attachment saved object
-   * id, so the card is named rather than picked by position.
+   * Removes one attack through its grid row's "Remove from case" item, then confirms. The row
+   * menu is suffixed with the attachment saved object id, so the row is named rather than picked
+   * by position.
    */
-  async removeAttackFromActivityCard({
-    savedObjectId,
-    withRelatedAlerts,
-  }: {
-    savedObjectId: string;
-    withRelatedAlerts: boolean;
-  }) {
-    const deleteButton = this.page.testSubj.locator(
-      `${ATTACK_CARD_DELETE_ACTION_TEST_ID}-${savedObjectId}`
+  async removeAttackFromGrid(savedObjectId: string) {
+    const moreActionsButton = this.attackGrid.getByTestId(
+      `${ATTACK_TAB_ROW_MORE_ACTIONS_TEST_ID}-${savedObjectId}`
     );
 
-    await deleteButton.waitFor({ state: 'visible', timeout: 30_000 });
-    await deleteButton.click();
-    await this.removeAttackModal.waitFor({ state: 'visible', timeout: 30_000 });
-    await this.confirmRemoveAttack({ withRelatedAlerts });
+    await moreActionsButton.waitFor({ state: 'visible', timeout: 30_000 });
+    await moreActionsButton.click();
+    await this.attackGridMoreActionsPopover.waitFor({ state: 'visible', timeout: 30_000 });
+    await this.rowMoreActionsMenuItem(ATTACK_TAKE_ACTION_ITEM_TEST_ID.removeFromCase).click();
+    await this.confirmRemove();
   }
 
-  /**
-   * Confirms the removal prompt. The related-alerts checkbox is ticked by default and only
-   * enables once the attack's alert set has been resolved, so this waits for that rather than
-   * racing the request, then asserts the default or clears it.
-   */
-  async confirmRemoveAttack({ withRelatedAlerts }: { withRelatedAlerts: boolean }) {
-    await this.removeAttackAlertsCheckbox.waitFor({ state: 'visible', timeout: 30_000 });
-    await expect(this.removeAttackAlertsCheckbox).toBeEnabled({ timeout: 30_000 });
-
-    if (withRelatedAlerts) {
-      await expect(this.removeAttackAlertsCheckbox).toBeChecked({ timeout: 30_000 });
-    } else {
-      await this.removeAttackAlertsCheckbox.uncheck();
-    }
-
-    await this.removeAttackConfirmButton.click();
-    await this.removeAttackModal.waitFor({ state: 'hidden', timeout: 30_000 });
+  /** Confirms the Cases removal prompt and waits for it to close. */
+  async confirmRemove() {
+    await this.removeConfirmModal.waitFor({ state: 'visible', timeout: 30_000 });
+    await this.removeConfirmButton.click();
+    await this.removeConfirmModal.waitFor({ state: 'hidden', timeout: 30_000 });
   }
 }

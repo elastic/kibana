@@ -43,6 +43,7 @@ import {
 } from './delete_utils';
 import { buildAttachmentTypeFilter } from './type_filter';
 import { emitAttachmentsDeletedEvent } from './trigger_utils';
+import { getRelatedAttachments } from './related_deletions';
 
 /**
  * Deletes attachments from a case, by saved object id or by the ids an attachment type references,
@@ -53,7 +54,7 @@ export const bulkDeleteAttachments = async (
   args: BulkDeleteArgs,
   clientArgs: CasesClientArgs
 ): Promise<void> => {
-  const { caseId } = args;
+  const { caseId, includeRelated = true } = args;
   const { logger } = clientArgs;
 
   try {
@@ -61,13 +62,16 @@ export const bulkDeleteAttachments = async (
       const request = decodeWithExcessOrThrow(BulkDeleteAttachmentsBySavedObjectIdRequestRt)({
         ids: args.savedObjectIds,
       });
-      await deleteBySavedObjectIds({ caseId, savedObjectIds: request.ids }, clientArgs);
+      await deleteBySavedObjectIds(
+        { caseId, savedObjectIds: request.ids, includeRelated },
+        clientArgs
+      );
     } else {
       const request = decodeWithExcessOrThrow(BulkDeleteAttachmentsByAttachmentIdRequestRt)({
         type: args.type,
         attachmentIds: args.attachmentIds,
       });
-      await deleteByAttachmentIds({ caseId, ...request }, clientArgs);
+      await deleteByAttachmentIds({ caseId, ...request, includeRelated }, clientArgs);
     }
   } catch (error) {
     throw createCaseError({
@@ -78,8 +82,27 @@ export const bulkDeleteAttachments = async (
   }
 };
 
+/**
+ * Removes the ids that the `getRelatedAttachments` hooks of the attachments' types take along
+ * with them, recording 1 user action per related type.
+ */
+export const deleteRelatedAttachments = async (
+  { caseId, attachments }: { caseId: string; attachments: DecodedAttachment[] },
+  clientArgs: CasesClientArgs
+): Promise<void> => {
+  const related = await getRelatedAttachments({ caseId, attachments, clientArgs });
+
+  for (const { type, attachmentIds } of related) {
+    await deleteByAttachmentIds({ caseId, type, attachmentIds, includeRelated: false }, clientArgs);
+  }
+};
+
 const deleteBySavedObjectIds = async (
-  { caseId, savedObjectIds }: { caseId: string; savedObjectIds: string[] },
+  {
+    caseId,
+    savedObjectIds,
+    includeRelated,
+  }: { caseId: string; savedObjectIds: string[]; includeRelated: boolean },
   clientArgs: CasesClientArgs
 ): Promise<void> => {
   const {
@@ -101,6 +124,9 @@ const deleteBySavedObjectIds = async (
       attachments,
       operation: Operations.deleteComment,
       recordUserActions: recordByType(caseId, clientArgs),
+      beforeDelete: includeRelated
+        ? (decoded) => deleteRelatedAttachments({ caseId, attachments: decoded }, clientArgs)
+        : undefined,
     },
     clientArgs
   );
@@ -123,8 +149,17 @@ interface PartialDeletion {
 const notAttachedMessage = (type: string, ids: string[], caseId: string): string =>
   `${type} ${ids.join(', ')} ${ids.length === 1 ? 'is' : 'are'} not attached to case ${caseId}.`;
 
-const deleteByAttachmentIds = async (
-  { caseId, type, attachmentIds }: { caseId: string; type: string; attachmentIds: string[] },
+/**
+ * Removes the ids an attachment type references from the case, deleting the attachments left
+ * without any and shrinking the others.
+ */
+export const deleteByAttachmentIds = async (
+  {
+    caseId,
+    type,
+    attachmentIds,
+    includeRelated,
+  }: { caseId: string; type: string; attachmentIds: string[]; includeRelated: boolean },
   clientArgs: CasesClientArgs
 ): Promise<void> => {
   const {
@@ -264,6 +299,9 @@ const deleteByAttachmentIds = async (
           attachments: toDelete,
           operation: Operations.deleteComment,
           onDeleted: (ids) => ids.forEach((id) => deletedIds.add(id)),
+          beforeDelete: includeRelated
+            ? (decoded) => deleteRelatedAttachments({ caseId, attachments: decoded }, clientArgs)
+            : undefined,
         },
         clientArgs
       );

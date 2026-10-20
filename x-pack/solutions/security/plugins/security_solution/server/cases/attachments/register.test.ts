@@ -138,7 +138,7 @@ describe('registerCaseAttachments', () => {
     expect(framework.registerAttachment).toHaveBeenCalledWith({
       id: SECURITY_ATTACK_ATTACHMENT_TYPE,
       schema: AttackAttachmentPayloadSchema,
-      onDelete: expect.any(Function),
+      getRelatedAttachments: expect.any(Function),
       workflow: { validateTargets: expect.any(Function) },
     });
   });
@@ -148,15 +148,15 @@ describe('registerCaseAttachments', () => {
 
     registerCaseAttachments(framework, experimentalFeatures, deps);
 
-    // The renderer and its remove action are registered unconditionally on the client, so the
-    // type has to stay registered here or `onDelete` would vanish and the remove prompt would
-    // offer to take the alerts along while the server quietly kept them.
+    // The renderer is registered unconditionally on the client, so the type has to stay
+    // registered here or removing an attack attached while the flag was on would quietly keep
+    // its alerts.
     const registered = framework.registerAttachment.mock.calls
       .map(([attachmentType]) => attachmentType)
       .find(({ id }) => id === SECURITY_ATTACK_ATTACHMENT_TYPE);
 
     expect(registered).toBeDefined();
-    expect(registered!.onDelete).toEqual(expect.any(Function));
+    expect(registered!.getRelatedAttachments).toEqual(expect.any(Function));
     expect(registered!.schema).not.toBe(AttackAttachmentPayloadSchema);
 
     // Only the attach path is gated: every payload is refused while the flag is off.

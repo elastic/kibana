@@ -58,65 +58,31 @@ export interface AttachmentDeleteTarget {
   attributes: AttachmentAttributesV2;
 }
 
-export interface AttachmentDeleteContext {
+export interface RelatedAttachmentsContext {
   caseId: string;
   request: KibanaRequest;
   /** The attachments of this type being deleted. */
   attachments: readonly AttachmentDeleteTarget[];
   /** The case's attachments that are not being deleted. */
   remainingAttachments: readonly AttachmentDeleteTarget[];
-  /**
-   * Whether the caller accepts losing further attachments along with the requested ones.
-   *
-   * False means the analyst declined the deletions, not that the hook is unwanted: the hook
-   * still runs, and `relatedAttachmentIds` is ignored rather than acted on. A type that keeps
-   * bookkeeping about where an attachment came from still has to correct it here, because the
-   * attachment that recorded it is leaving either way. Returning updates that drop content in
-   * this mode would delete exactly what the caller refused.
-   */
-  includeRelated: boolean;
 }
 
-export interface AttachmentUpdate {
-  /** The attachment saved object id, from `remainingAttachments`. */
-  id: string;
-  /**
-   * The payload replacing the stored one. Validated against the type's schema like any other
-   * write, and neither the type nor the owner may change.
-   */
-  payload: UnifiedAttachmentPayload;
-}
-
-export interface AttachmentDeleteResult {
-  /** Ids from `remainingAttachments` to delete in the same operation. Ignored when the delete
-   * context has `includeRelated: false`. */
-  relatedAttachmentIds: readonly string[];
-  /**
-   * Attachments from `remainingAttachments` to shrink rather than delete, for when the deleted
-   * attachment contributed only part of what one of them holds.
-   *
-   * An attachment is stored whole, so a type that adds several items in one attachment cannot
-   * undo its own contribution by deleting it: whatever another attachment still depends on would
-   * go with it. Rewriting the payload instead drops only the part that is no longer wanted.
-   *
-   * An id named here and in `relatedAttachmentIds` is deleted; the delete wins.
-   *
-   * An update that drops nothing records no activity on the case. A hook uses one of those to
-   * rewrite its own bookkeeping, which the analyst never sees, and an entry saying an attachment
-   * was edited when nothing visible changed is worse than no entry at all.
-   */
-  relatedAttachmentUpdates?: readonly AttachmentUpdate[];
+/** Ids of one attachment type, as the bulk delete by attachment ids takes them. */
+export interface RelatedAttachmentIds {
+  type: string;
+  attachmentIds: string[];
 }
 
 /**
- * Called before attachments of the type are deleted, whatever the caller (UI, API, agent or
- * workflow), so a type can take attachments it depends on with it. Related attachments go through
- * the same authorization, user actions and alert sync as the requested ones; their own `onDelete`
- * is not called.
+ * Called after the attachments of the type are authorized for deletion and before they are
+ * deleted, whatever the caller (UI, API, agent or workflow), so a type can take attachments it
+ * depends on with it. The returned ids must be attached to the case outside the deleted
+ * attachments; they are removed like a bulk delete by attachment ids, with the same
+ * authorization, user actions and alert sync, and without calling their own type's hook.
  */
-export type AttachmentOnDelete = (
-  context: AttachmentDeleteContext
-) => Promise<AttachmentDeleteResult>;
+export type GetRelatedAttachments = (
+  context: RelatedAttachmentsContext
+) => Promise<RelatedAttachmentIds[]>;
 
 export interface UnifiedAttachmentType
   extends Omit<PersistableState<UnifiedAttachmentState>, 'migrations' | 'inject' | 'extract'> {
@@ -129,7 +95,7 @@ export interface UnifiedAttachmentType
    */
   workflowSchema?: z.ZodObject | false;
   workflow?: AttachmentWorkflowDefinition;
-  onDelete?: AttachmentOnDelete;
+  getRelatedAttachments?: GetRelatedAttachments;
 }
 
 export interface UnifiedAttachmentTypeSetup
@@ -142,7 +108,7 @@ export interface UnifiedAttachmentTypeSetup
   schema: z.ZodType;
   workflowSchema?: z.ZodObject | false;
   workflow?: AttachmentWorkflowDefinition;
-  onDelete?: AttachmentOnDelete;
+  getRelatedAttachments?: GetRelatedAttachments;
 }
 
 export interface AttachmentFramework {

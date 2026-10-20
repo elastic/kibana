@@ -23,10 +23,9 @@
  *  - The "Show attack details" affordance opens the attack flyout, both from the Activity log
  *    card and from the grid's row actions.
  *  - Selecting rows raises a bulk action bar carrying those same take-action verbs across the
- *    selection. Nothing in the grid removes an attachment.
- *  - Removing the attack from its own entry in the Activity log, with the prompt's "also remove
- *    related alerts" checkbox left ticked, takes the attack and the alerts no other attached
- *    attack still claims off the case.
+ *    selection, plus "Remove from case".
+ *  - Removing an attack from its grid row's "Remove from case" item takes the attack and the
+ *    alerts no other attached attack still claims off the case.
  *
  * The `security.attack` type is registered only when `attackAttachmentsEnabled` is on; the
  * attacks-alignment Scout config boots with it (see
@@ -390,7 +389,7 @@ spaceTest.describe(
     );
 
     spaceTest(
-      'removes an attack from its activity card, keeping the alerts another attack claims',
+      'removes an attack from the Attacks grid, keeping the alerts another attack claims',
       async ({ esClient, kbnClient, page, pageObjects, scoutSpace }) => {
         const { detectionsAttackDiscoveryPage, attackCases } = pageObjects;
         const caseName = 'Scout attack attachment case – removal';
@@ -521,27 +520,22 @@ spaceTest.describe(
             await expect(
               attackCases.bulkActionsMenuItem(ATTACK_TAKE_ACTION_ITEM_TEST_ID.investigateInTimeline)
             ).toBeVisible();
+            await expect(
+              attackCases.bulkActionsMenuItem(ATTACK_TAKE_ACTION_ITEM_TEST_ID.removeFromCase)
+            ).toBeVisible();
 
             await attackCases.closeBulkTakeActionMenu();
           }
         );
 
         await spaceTest.step(
-          'the activity card removes the attack and only the alerts it alone brought in',
+          'the grid removes the attack and only the alerts it alone brought in',
           async () => {
-            await attackCases.openActivityTab();
-            // Each attack's own entry carries the removal action registered in place of the Cases
-            // framework's default trash.
-            await expect(attackCases.activityAttackDeleteButtons).toHaveCount(2);
+            await attackCases.removeAttackFromGrid(scheduledAttachmentId);
 
-            await attackCases.removeAttackFromActivityCard({
-              savedObjectId: scheduledAttachmentId,
-              withRelatedAlerts: true,
-            });
-
-            // The case view refreshes itself once the removal lands, so the remaining card is the
+            // The case view refreshes itself once the removal lands, so the remaining row is the
             // signal that the delete has been written — no manual refresh, and no polling.
-            await expect(attackCases.activityAttackDeleteButtons).toHaveCount(1);
+            await expect(attackCases.attackGridRowTitles).toHaveCount(1);
 
             const attachments = await findCaseAttachments(kbnClient, scoutSpace.id, caseId);
 
@@ -558,7 +552,6 @@ spaceTest.describe(
         await spaceTest.step(
           'the Attachments tab drops the removed attack and its alert',
           async () => {
-            await attackCases.openAttachmentsTab();
             await expect(attackCases.attackAccordionBadge).toHaveText('1');
             await expect(attackCases.alertAccordionBadge).toHaveText('2');
             await expect(attackCases.attackGridRowTitles).toHaveCount(1);

@@ -29,7 +29,11 @@ import type { AttacksActionTelemetrySource } from '../../../../common/lib/teleme
 import { useAttackRunWorkflowContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_run_workflow_context_menu_items';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import { AttacksActionMenu } from './attacks_action_menu';
-import { ATTACK_DISCOVERY_ACTION_IDS } from '../../../../common/constants/action_ids';
+import {
+  ATTACK_DISCOVERY_ACTION_IDS,
+  REMOVE_FROM_CASE_ACTION_ID,
+} from '../../../../common/constants/action_ids';
+import { REMOVE_FROM_CASE } from '../../alerts_table/translations';
 import { toAttacksToAttach } from '../../../../cases/attachments/attack/utils';
 
 interface AttacksGroupTakeActionItemsProps {
@@ -38,6 +42,8 @@ interface AttacksGroupTakeActionItemsProps {
   closePopover?: () => void;
   /** Optional callback to run after an action is successfully taken */
   onActionSuccess?: () => void;
+  /** Adds "Remove from case", for surfaces showing the attacks of a case. */
+  onRemoveFromCase?: () => void;
   /** Whether to include the AI assistant action in the menu (default true) */
   showAiAssistantAction?: boolean;
   /** Whether to include the navigation action (default true); off where the surface has its own. */
@@ -60,6 +66,7 @@ export function AttacksGroupTakeActionItems({
   attack,
   closePopover,
   onActionSuccess,
+  onRemoveFromCase,
   showAiAssistantAction = true,
   showNavigationAction = true,
   telemetrySource,
@@ -223,6 +230,24 @@ export function AttacksGroupTakeActionItems({
     [addToDatasetAction]
   );
 
+  const removeFromCaseItems = useMemo(
+    () =>
+      onRemoveFromCase != null
+        ? [
+            {
+              key: REMOVE_FROM_CASE_ACTION_ID,
+              'data-test-subj': REMOVE_FROM_CASE_ACTION_ID,
+              name: REMOVE_FROM_CASE,
+              onClick: () => {
+                closePopover?.();
+                onRemoveFromCase();
+              },
+            },
+          ]
+        : [],
+    [closePopover, onRemoveFromCase]
+  );
+
   return (
     <AttacksActionMenu
       assigneeItems={assignItems}
@@ -232,6 +257,7 @@ export function AttacksGroupTakeActionItems({
       datasetItems={datasetItems}
       isRemoteDocument={isRemoteDocument}
       navigationItems={showNavigationAction || isRemoteDocument ? navigationItems : []}
+      removeFromCaseItems={removeFromCaseItems}
       runWorkflowItems={runWorkflowItems}
       runWorkflowPanels={runWorkflowPanels}
       showAiAssistantAction={showAiAssistantAction}
