@@ -879,6 +879,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
         'Non-default value of the minimum hours between continuous knowledge indicator onboarding runs per source.',
     },
   },
+  'observability:nightshiftSandboxAllowlist': {
+    type: 'keyword',
+    _meta: { description: 'Default value of the setting was changed.' },
+  },
   'observability:streamsSigEventsScheduledDiscoveryEnabled': {
     type: 'boolean',
     _meta: {

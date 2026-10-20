@@ -10,7 +10,11 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { SandboxPluginStart, SandboxSession } from '@kbn/sandbox-plugin/server';
 import type { SandboxWorkspaceManager } from './sandbox_workspace_manager';
 import type { ResolveConnectorCredentials } from './connector_credentials';
-import { createSandboxBashTool, MAX_SANDBOX_COMMAND_TIMEOUT_SECONDS } from './tool';
+import {
+  createSandboxBashTool,
+  MAX_SANDBOX_COMMAND_TIMEOUT_SECONDS,
+  SANDBOX_ALLOWLIST_EMPTY_MESSAGE,
+} from './tool';
 
 const GITHUB_TOKEN = 'ghp_sandbox_secret_value';
 const CONNECTOR_TOKEN = 'connector-secret-token';
@@ -22,11 +26,14 @@ const setup = ({
   }),
   resolveConnectorCredentials,
   stdout = '',
+  allowedHosts = ['api.github.com'],
 }: {
   resolveForCommand?: jest.Mock;
   resolveConnectorCredentials?: ResolveConnectorCredentials;
   stdout?: string;
+  allowedHosts?: string[];
 } = {}) => {
+  const getHostsForCommand = jest.fn().mockResolvedValue(allowedHosts);
   const runCommand = jest.fn().mockResolvedValue({
     exit_code: 0,
     timed_out: false,
@@ -47,6 +54,7 @@ const setup = ({
     sandboxWorkspaceManager,
     resolveConnectorCredentials,
     sandboxSecretsClient: { resolveForCommand },
+    sandboxAllowlistClient: { getHostsForCommand },
     logger,
   });
 
@@ -63,7 +71,16 @@ const setup = ({
       context
     );
 
-  return { tool, run, runCommand, resolveForCommand, request, logger, session };
+  return {
+    tool,
+    run,
+    runCommand,
+    resolveForCommand,
+    getHostsForCommand,
+    request,
+    logger,
+    session,
+  };
 };
 
 describe('sandbox bash tool — sandbox secrets', () => {
@@ -159,6 +176,70 @@ describe('sandbox bash tool — sandbox secrets', () => {
     expect(loggedMessage).not.toContain('boom while handling');
     expect(loggedMessage).toContain('Error');
   });
+});
+
+describe('sandbox bash tool — credential host allowlist', () => {
+  const resolveConnectorCredentials: ResolveConnectorCredentials = jest.fn().mockResolvedValue({
+    env: {
+      CONNECTOR_ID: 'connector-1',
+      CONNECTOR_CONFIG_APIURL: 'https://api.github.com',
+      CONNECTOR_SECRET_TOKEN: CONNECTOR_TOKEN,
+    },
+    secretValues: [CONNECTOR_TOKEN],
+  });
+
+  it('neither reads the allowlist nor marks keys for a command without credentials', async () => {
+    const { run, runCommand, getHostsForCommand } = setup({ allowedHosts: [] });
+
+    await run({});
+
+    expect(getHostsForCommand).not.toHaveBeenCalled();
+    expect(runCommand.mock.calls[0][0]).not.toHaveProperty('secret_env_keys');
+  });
+
+  it('binds every connector secret and sandbox secret to the same flat allowlist', async () => {
+    const allowedHosts = ['api.github.com', 'uploads.github.com'];
+    const { run, runCommand } = setup({ resolveConnectorCredentials, allowedHosts });
+
+    await run({ connector_id: 'connector-1', secret_keys: ['GITHUB_TOKEN'] });
+
+    expect(runCommand.mock.calls[0][0].secret_env_keys).toEqual([
+      { key: 'GITHUB_TOKEN', allowed_hosts: allowedHosts },
+      { key: 'CONNECTOR_SECRET_TOKEN', allowed_hosts: allowedHosts },
+    ]);
+  });
+
+  it('does not mark connector config or id keys', async () => {
+    const { run, runCommand } = setup({ resolveConnectorCredentials });
+
+    await run({ connector_id: 'connector-1' });
+
+    const keys = runCommand.mock.calls[0][0].secret_env_keys.map(({ key }: { key: string }) => key);
+    expect(keys).toEqual(['CONNECTOR_SECRET_TOKEN']);
+  });
+
+  it.each([
+    { name: 'a sandbox secret', params: { secret_keys: ['GITHUB_TOKEN'] } },
+    { name: 'connector credentials', params: { connector_id: 'connector-1' } },
+  ])(
+    'fails closed without resolving or sending $name when the allowlist is empty',
+    async ({ params }) => {
+      const connectorResolver = jest.fn();
+      const { run, runCommand, resolveForCommand } = setup({
+        allowedHosts: [],
+        resolveConnectorCredentials: connectorResolver,
+      });
+
+      const { results } = await run(params);
+
+      expect(results).toEqual([
+        { type: ToolResultType.error, data: { message: SANDBOX_ALLOWLIST_EMPTY_MESSAGE } },
+      ]);
+      expect(resolveForCommand).not.toHaveBeenCalled();
+      expect(connectorResolver).not.toHaveBeenCalled();
+      expect(runCommand).not.toHaveBeenCalled();
+    }
+  );
 });
 
 describe('sandbox bash tool — command timeout', () => {

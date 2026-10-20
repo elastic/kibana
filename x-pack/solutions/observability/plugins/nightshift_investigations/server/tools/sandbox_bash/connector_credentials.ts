@@ -129,6 +129,10 @@ export const buildConnectorEnv = ({
   return { env, secretValues };
 };
 
+/** The env keys of a connector environment that hold secrets (`CONNECTOR_SECRET_*`). */
+export const getConnectorSecretEnvKeys = (env: Record<string, string>): string[] =>
+  Object.keys(env).filter((key) => key.startsWith(`${CONNECTOR_ENV_PREFIX}SECRET_`));
+
 /** Redacts injected secret values (and their common encodings) from command output. */
 export const redactSecrets = (text: string, secretValues: readonly string[]): string =>
   createOutputRedactor(secretValues).redact(text);
