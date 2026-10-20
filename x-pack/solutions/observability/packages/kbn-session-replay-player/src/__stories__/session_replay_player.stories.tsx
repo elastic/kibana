@@ -26,5 +26,5 @@ export default meta;
 type Story = StoryObj<typeof SessionReplayPlayer>;
 
 export const Default: Story = {
-  args: { sessionId: 'session-1' },
+  args: { sessionId: 'session-1', recording: { status: 'unavailable', reason: 'noRecording' } },
 };

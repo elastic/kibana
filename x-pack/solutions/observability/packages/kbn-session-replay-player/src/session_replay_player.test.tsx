@@ -15,7 +15,10 @@ describe('SessionReplayPlayer', () => {
   it('renders an accessible region for the session', async () => {
     renderWithI18n(
       <Suspense fallback={null}>
-        <SessionReplayPlayer sessionId="session-1" />
+        <SessionReplayPlayer
+          sessionId="session-1"
+          recording={{ status: 'unavailable', reason: 'noRecording' }}
+        />
       </Suspense>
     );
 
