@@ -33,11 +33,10 @@ const { InsertAsSnippet } = CompletionItemInsertTextRule;
 
 const STRING_REFERENCE_PREFIX_REGEX = /[$#@!]\w*$/;
 const STRING_DEFINITION_REGEX = /^\s*\$(\w+)\s*=/gm;
-const RULE_DEFINITION_REGEX = /\brule\s+([a-zA-Z_]\w*)/g;
 const INTEGER_FUNCTION_REGEX = /^u?int\d+(?:be)?$/;
 const NON_CODE_TOKEN_REGEX = /^(?:comment|string|regexp)/;
-// The last match before the cursor tells the section, the capture group is empty in a rule header.
-const SECTION_REGEX = /\b(?:rule\s+[a-zA-Z_]\w*|(meta|strings|condition)\s*:)/g;
+const RULE_NAME_TOKEN_TYPE = `type.${YARA_LANG_ID}`;
+const KEYWORD_TOKEN_TYPE = `keyword.${YARA_LANG_ID}`;
 const META_KEY_POSITION_REGEX = /^\s*\w*$/;
 const META_VALUE_POSITION_REGEX = new RegExp(
   `^\\s*(${Object.values(YaraMetaKeyOfInterest).join('|')})\\s*=\\s*"([^"]*)$`
@@ -160,24 +159,70 @@ const STATIC_SUGGESTIONS: Suggestion[] = uniqBy(
 const getCapturedNames = (text: string, regex: RegExp): string[] =>
   uniq(Array.from(text.matchAll(regex), ([, name]) => name));
 
-/** Returns the offsets of the rule containing the cursor, from its header until the next rule header. */
-const getCurrentRuleRange = (
-  text: string,
-  cursorOffset: number
-): { start: number; end: number } => {
-  const ruleStarts = Array.from(text.matchAll(RULE_DEFINITION_REGEX), ({ index }) => index);
+interface Declaration {
+  name: string;
+  offset: number;
+}
 
-  return {
-    start: findLast(ruleStarts, (ruleStart) => ruleStart < cursorOffset) ?? 0,
-    end: ruleStarts.find((ruleStart) => ruleStart >= cursorOffset) ?? text.length,
-  };
+interface Outline {
+  ruleNames: Declaration[];
+  sectionLabels: Declaration[];
+}
+
+/** Collects the rule names and section labels with the tokenizer, so the ones in strings and comments are ignored. */
+const getOutline = (model: monaco.editor.ITextModel): Outline => {
+  const outline: Outline = { ruleNames: [], sectionLabels: [] };
+
+  monaco.editor.tokenize(model.getValue(), YARA_LANG_ID).forEach((lineTokens, lineIndex) => {
+    const lineNumber = lineIndex + 1;
+    const lineContent = model.getLineContent(lineNumber);
+
+    lineTokens.forEach(({ offset, type }, tokenIndex) => {
+      const name = lineContent.slice(offset, lineTokens[tokenIndex + 1]?.offset);
+      const declaration = { name, offset: model.getOffsetAt({ lineNumber, column: offset + 1 }) };
+
+      if (type === RULE_NAME_TOKEN_TYPE) {
+        outline.ruleNames.push(declaration);
+      } else if (
+        type === KEYWORD_TOKEN_TYPE &&
+        SECTION_KEYWORDS.some((section) => section === name)
+      ) {
+        outline.sectionLabels.push(declaration);
+      }
+    });
+  });
+
+  return outline;
 };
+
+const findLastBefore = (declarations: Declaration[], offset: number): Declaration | undefined =>
+  findLast(declarations, (declaration) => declaration.offset < offset);
+
+/** Returns the offsets of the rule containing the cursor, from its name until the next rule name. */
+const getCurrentRuleRange = (
+  { ruleNames }: Outline,
+  cursorOffset: number,
+  textLength: number
+): { start: number; end: number } => ({
+  start: findLastBefore(ruleNames, cursorOffset)?.offset ?? 0,
+  end: ruleNames.find(({ offset }) => offset >= cursorOffset)?.offset ?? textLength,
+});
 
 const getLastTokenType = (text: string): string =>
   last(last(monaco.editor.tokenize(text, YARA_LANG_ID)))?.type ?? '';
 
-const isInsideMetaSection = (textUntilPosition: string): boolean =>
-  last(Array.from(textUntilPosition.matchAll(SECTION_REGEX)))?.[1] === 'meta';
+const isInsideMetaSection = (
+  { ruleNames, sectionLabels }: Outline,
+  cursorOffset: number
+): boolean => {
+  const lastSectionLabel = findLastBefore(sectionLabels, cursorOffset);
+  const lastRuleName = findLastBefore(ruleNames, cursorOffset);
+
+  return (
+    lastSectionLabel?.name === 'meta' &&
+    (lastRuleName === undefined || lastRuleName.offset < lastSectionLabel.offset)
+  );
+};
 
 const getMetaValueSuggestions = (
   key: string,
@@ -230,11 +275,11 @@ const getStringReferenceSuggestions = (
 
 // Rules can only reference the rules declared before them.
 const getWordSuggestions = (
-  precedingRulesText: string,
+  precedingRuleNames: string[],
   range: monaco.IRange,
   isMetaKeyPosition: boolean
 ): monaco.languages.CompletionItem[] => {
-  const ruleSuggestions = getCapturedNames(precedingRulesText, RULE_DEFINITION_REGEX).map(
+  const ruleSuggestions = uniq(precedingRuleNames).map(
     (ruleName): Suggestion => ({
       label: ruleName,
       kind: CompletionItemKind.Reference,
@@ -288,7 +333,9 @@ export const yaraCompletionProvider: monaco.languages.CompletionItemProvider = {
     }
 
     const text = model.getValue();
-    const currentRuleRange = getCurrentRuleRange(text, textUntilPosition.length);
+    const cursorOffset = textUntilPosition.length;
+    const outline = getOutline(model);
+    const currentRuleRange = getCurrentRuleRange(outline, cursorOffset, text.length);
     const typedReference = linePrefix.match(STRING_REFERENCE_PREFIX_REGEX)?.[0];
 
     if (typedReference !== undefined) {
@@ -307,11 +354,14 @@ export const yaraCompletionProvider: monaco.languages.CompletionItemProvider = {
     const { startColumn, endColumn } = model.getWordUntilPosition(position);
 
     const isMetaKeyPosition =
-      META_KEY_POSITION_REGEX.test(linePrefix) && isInsideMetaSection(textUntilPosition);
+      META_KEY_POSITION_REGEX.test(linePrefix) && isInsideMetaSection(outline, cursorOffset);
+    const precedingRuleNames = outline.ruleNames
+      .filter(({ offset }) => offset < currentRuleRange.start)
+      .map(({ name }) => name);
 
     return {
       suggestions: getWordSuggestions(
-        text.slice(0, currentRuleRange.start),
+        precedingRuleNames,
         { startLineNumber: lineNumber, endLineNumber: lineNumber, startColumn, endColumn },
         isMetaKeyPosition
       ),

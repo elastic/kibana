@@ -226,6 +226,23 @@ describe('YARA completion', () => {
       expect(getLabels(suggestions, CompletionItemKind.Reference)).toEqual(['Foo', 'Bar']);
     });
 
+    it('should not suggest rule names in strings and comments', async () => {
+      const suggestions = await getSuggestions(
+        [
+          '// this rule detects',
+          'rule Foo {',
+          '  strings:',
+          '    $a = "rule decoy"',
+          '  condition:',
+          '    $a /* rule other */',
+          '}',
+          `rule Bar { condition: ${CURSOR} }`,
+        ].join('\n')
+      );
+
+      expect(getLabels(suggestions, CompletionItemKind.Reference)).toEqual(['Foo']);
+    });
+
     it('should not suggest the rule name being typed', async () => {
       const suggestions = await getSuggestions(`rule Foo { condition: true }\nrule Fo${CURSOR}`);
 
@@ -301,6 +318,24 @@ describe('YARA completion', () => {
       expect(suggestions.map(({ label }) => label)).toEqual(['$b']);
     });
 
+    it('should ignore rule declarations in strings and comments', async () => {
+      const suggestions = await getSuggestions(
+        [
+          'rule a {',
+          '  strings:',
+          '    $a = "rule decoy"',
+          '    // this rule detects',
+          '    /* rule other */',
+          '    $b = /rule regex/',
+          '  condition:',
+          `    $${CURSOR}`,
+          '}',
+        ].join('\n')
+      );
+
+      expect(suggestions.map(({ label }) => label)).toEqual(['$a', '$b']);
+    });
+
     it('should not suggest string references without a prefix', async () => {
       const suggestions = await getSuggestions(withCondition(CURSOR));
 
@@ -331,6 +366,18 @@ describe('YARA completion', () => {
         '0-os',
         '0-arch',
         '0-scan_type',
+      ]);
+    });
+
+    it('should suggest the meta keys after rule declarations and section labels in strings and comments', async () => {
+      const suggestions = await getSuggestions(
+        withMeta(`description = "rule decoy strings:" // rule other condition:\n    ${CURSOR}`)
+      );
+
+      expect(getLabels(suggestions, CompletionItemKind.Property)).toEqual([
+        'os',
+        'arch',
+        'scan_type',
       ]);
     });
 
