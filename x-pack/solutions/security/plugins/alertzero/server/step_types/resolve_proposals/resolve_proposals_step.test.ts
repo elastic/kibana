@@ -43,7 +43,7 @@ const isolate = (agent: string) => ({
 
 describe('keyCandidateProposals', () => {
   it('keys each proposal by its action and target', () => {
-    const keyed = keyCandidateProposals([isolate('agent-a')], 'conv-1');
+    const { candidates: keyed } = keyCandidateProposals([isolate('agent-a')], 'conv-1');
 
     expect(keyed).toEqual([
       {
@@ -54,16 +54,54 @@ describe('keyCandidateProposals', () => {
   });
 
   it('drops a proposal that repeats an earlier one in the same list', () => {
-    const keyed = keyCandidateProposals(
+    const { candidates: keyed, repeatedCount } = keyCandidateProposals(
       [isolate('agent-a'), { ...isolate('agent-a'), title: 'Again' }, isolate('agent-b')],
       'conv-1'
     );
 
     expect(keyed.map(({ title }) => title)).toEqual(['Isolate agent-a', 'Isolate agent-b']);
+    expect(repeatedCount).toBe(1);
+  });
+
+  it('splits a multi-endpoint proposal so no endpoint is dropped behind another', () => {
+    const { candidates: keyed, repeatedCount } = keyCandidateProposals(
+      [
+        isolate('a'),
+        {
+          actionWorkflowId: ISOLATE,
+          actionInput: { endpoint_ids: ['a', 'b', 'b'] },
+          title: 'Isolate a and b',
+        },
+      ],
+      'conv-1'
+    );
+
+    expect(keyed.map(({ actionInput }) => actionInput?.endpoint_ids)).toEqual([['a'], ['b']]);
+    expect(repeatedCount).toBe(0);
+    expect(keyed[0].subjectKey).toBe(
+      buildProposalSubjectKey({ subjectId: 'a', actionWorkflowId: ISOLATE })
+    );
+    expect(keyed[1].subjectKey).toBe(
+      buildProposalSubjectKey({ subjectId: 'b', actionWorkflowId: ISOLATE })
+    );
+  });
+
+  it('counts a multi-endpoint proposal as repeated only when every endpoint is already covered', () => {
+    const { candidates, repeatedCount } = keyCandidateProposals(
+      [
+        isolate('a'),
+        isolate('b'),
+        { actionWorkflowId: ISOLATE, actionInput: { endpoint_ids: ['a', 'b'] } },
+      ],
+      'conv-1'
+    );
+
+    expect(candidates).toHaveLength(2);
+    expect(repeatedCount).toBe(1);
   });
 
   it('keeps a kill by pid apart from a kill by entity id on the same host', () => {
-    const keyed = keyCandidateProposals(
+    const { candidates: keyed } = keyCandidateProposals(
       [
         { actionWorkflowId: KILL, actionInput: { endpoint_ids: ['a'], parameters: { pid: 1 } } },
         {
@@ -79,9 +117,9 @@ describe('keyCandidateProposals', () => {
   });
 
   it('keys a proposal with no target to this Investigation, so only its own rerun lands on it', () => {
-    const here = keyCandidateProposals([{ actionWorkflowId: ISOLATE }], 'conv-1');
-    const again = keyCandidateProposals([{ actionWorkflowId: ISOLATE }], 'conv-1');
-    const elsewhere = keyCandidateProposals([{ actionWorkflowId: ISOLATE }], 'conv-2');
+    const here = keyCandidateProposals([{ actionWorkflowId: ISOLATE }], 'conv-1').candidates;
+    const again = keyCandidateProposals([{ actionWorkflowId: ISOLATE }], 'conv-1').candidates;
+    const elsewhere = keyCandidateProposals([{ actionWorkflowId: ISOLATE }], 'conv-2').candidates;
 
     expect(here[0].subjectKey).toBe(again[0].subjectKey);
     expect(here[0].subjectKey).not.toBe(elsewhere[0].subjectKey);
@@ -158,7 +196,7 @@ describe(`${RESOLVE_PROPOSALS_STEP_ID} step wiring`, () => {
       logger,
     });
     expect(resolveProposalsMock).toHaveBeenCalledWith({
-      candidates: keyCandidateProposals([isolate('agent-a')], 'conv-1'),
+      candidates: keyCandidateProposals([isolate('agent-a')], 'conv-1').candidates,
       investigationConversationId: 'conv-1',
       spaceId: 'soc',
       deps: {
@@ -167,6 +205,26 @@ describe(`${RESOLVE_PROPOSALS_STEP_ID} step wiring`, () => {
         appendAlsoRaisedBy: 'appender',
       },
     });
+  });
+
+  it('counts proposals repeated within the list as already open, unless the check failed', async () => {
+    const base = {
+      proposals: [],
+      converged: [],
+      alreadyOpenCount: 1,
+      existingProposalCount: 0,
+      expectedProposalCount: 0,
+    };
+    const input = {
+      investigationConversationId: 'conv-1',
+      proposals: [isolate('agent-a'), isolate('agent-a')],
+    };
+
+    resolveProposalsMock.mockResolvedValueOnce({ ...base, mintSuppression: 'none' });
+    await expect(run(input)).resolves.toMatchObject({ output: { alreadyOpenCount: 2 } });
+
+    resolveProposalsMock.mockResolvedValueOnce({ ...base, mintSuppression: 'check_failed' });
+    await expect(run(input)).resolves.toMatchObject({ output: { alreadyOpenCount: 1 } });
   });
 
   it('refuses a caller who cannot read Proposals before counting or resolving anything, even with no candidates', async () => {

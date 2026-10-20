@@ -35,30 +35,59 @@ export interface ResolveProposalsStepDependencies {
 }
 
 /**
+ * The subject key only reads one endpoint, so an action over several endpoints becomes one
+ * candidate per endpoint, each with its own `endpoint_ids: [id]`. Otherwise `[a]` and `[a, b]`
+ * would share a key and `b` would lose its proposal.
+ */
+const splitByEndpoint = <T extends CandidateProposal>(proposal: T): T[] => {
+  const endpointIds = proposal.actionInput?.endpoint_ids;
+  if (!Array.isArray(endpointIds) || endpointIds.length < 2) {
+    return [proposal];
+  }
+  const unique = [...new Set(endpointIds)];
+  return unique.map((endpointId) => ({
+    ...proposal,
+    actionInput: { ...proposal.actionInput, endpoint_ids: [endpointId] },
+  }));
+};
+
+/**
  * Keys each candidate proposal by what it acts on, and drops a repeat of an earlier one in the same
- * list. A proposal whose input names no target is keyed to this Investigation and the action, so
- * only a rerun of the same Investigation lands on it.
+ * list. A multi-endpoint proposal is split into one per endpoint first. A proposal whose input
+ * names no target is keyed to this Investigation and the action, so only a rerun of the same
+ * Investigation lands on it.
+ *
+ * `repeatedCount` is the proposals every part of which an earlier one in the list already covers.
+ * They create nothing, so the caller has to count them or the run's summary under-reports.
  */
 export const keyCandidateProposals = <T extends CandidateProposal>(
-  candidates: T[],
+  proposals: T[],
   investigationConversationId: string
-): Array<T & { subjectKey: string }> => {
+): { candidates: Array<T & { subjectKey: string }>; repeatedCount: number } => {
   const seen = new Set<string>();
-  const keyed: Array<T & { subjectKey: string }> = [];
-  for (const proposal of candidates) {
-    const subjectKey =
-      buildProposalSubjectKeyFromActionInput(proposal) ??
-      uuidv5(
-        `${investigationConversationId}|${proposal.actionWorkflowId}`,
-        PROPOSAL_SUBJECT_UUID_NAMESPACE
-      );
-    if (seen.has(subjectKey)) {
-      continue;
+  const candidates: Array<T & { subjectKey: string }> = [];
+  let repeatedCount = 0;
+  for (const proposal of proposals) {
+    let kept = 0;
+    for (const part of splitByEndpoint(proposal)) {
+      const subjectKey =
+        buildProposalSubjectKeyFromActionInput(part) ??
+        uuidv5(
+          `${investigationConversationId}|${part.actionWorkflowId}`,
+          PROPOSAL_SUBJECT_UUID_NAMESPACE
+        );
+      if (seen.has(subjectKey)) {
+        continue;
+      }
+      seen.add(subjectKey);
+      candidates.push({ ...part, subjectKey });
+      kept += 1;
     }
-    seen.add(subjectKey);
-    keyed.push({ ...proposal, subjectKey });
+    if (kept === 0) {
+      repeatedCount += 1;
+    }
   }
-  return keyed;
+  return { candidates, repeatedCount };
 };
 
 /**
@@ -93,8 +122,12 @@ export const getResolveProposalsStepDefinition = ({
         await retryTransient(() => privileges.assertCanRead(request));
         const conversationClient = await getConversations().getScopedClient({ request });
 
-        const output: ResolveProposalsOutput = await resolveProposals({
-          candidates: keyCandidateProposals(input.proposals, investigationConversationId),
+        const { candidates, repeatedCount } = keyCandidateProposals(
+          input.proposals,
+          investigationConversationId
+        );
+        const resolved: ResolveProposalsOutput = await resolveProposals({
+          candidates,
           investigationConversationId,
           spaceId,
           deps: {
@@ -122,6 +155,13 @@ export const getResolveProposalsStepDefinition = ({
             }),
           },
         });
+
+        // A repeat is covered by a proposal this run raises, so it counts as already open, unless
+        // the run minted nothing because it could not check what exists.
+        const output: ResolveProposalsOutput =
+          resolved.mintSuppression === 'none'
+            ? { ...resolved, alreadyOpenCount: resolved.alreadyOpenCount + repeatedCount }
+            : resolved;
 
         return { output };
       } catch (error) {

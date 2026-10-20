@@ -1648,7 +1648,8 @@ describe('Endpoint analysis run', () => {
         expect(outputs?.proposals_submitted).toMatchObject({ type: 'number' });
         expect(outputs?.proposals_converged).toMatchObject({ type: 'number' });
         expect(stepByName('emit_result')?.with).toMatchObject({
-          proposals_submitted: '${{ steps.resolve_proposal_counts.output.new_count | default: 0 }}',
+          proposals_submitted:
+            '${{ steps.resolve_proposal_counts.output.new_count | default: 0 | minus: steps.resolve_proposal_dispatch.output.failed | at_least: 0 }}',
           proposals_converged:
             '${{ steps.resolve_proposal_counts.output.converged_count | default: 0 }}',
         });

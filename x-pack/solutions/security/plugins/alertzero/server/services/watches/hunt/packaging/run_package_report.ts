@@ -21,7 +21,6 @@ import {
   type ResolveProposalSlot,
 } from '../../../proposals/dedup';
 
-export { computeExpectedProposalCount } from '../../../proposals/dedup';
 import { buildHuntInvestigationConversationId } from '../common/hunt_investigation_id';
 import { buildProposalSummaryBullets, decidePackageReport } from './decide_package_report';
 import {

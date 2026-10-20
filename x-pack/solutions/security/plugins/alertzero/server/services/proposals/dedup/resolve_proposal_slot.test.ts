@@ -274,6 +274,11 @@ describe('createProposalSlotResolver', () => {
         { endpoint_ids: ['agent-a'], parameters: { entity_id: 'ent-1' } },
         { endpoint_ids: ['agent-a'], parameters: { entity_id: 'ent-2' } },
       ],
+      [
+        'a process by pid',
+        { endpoint_ids: ['agent-a'], parameters: { pid: 4242 } },
+        { endpoint_ids: ['agent-a'], parameters: { pid: 4343 } },
+      ],
     ])('compares what %s is identified by', async (_label, wanted, revisedTo) => {
       const service = createService({ [idAt(0)]: { status: 'pending', actionInput: revisedTo } });
       const { resolve } = resolver(service);

@@ -1272,6 +1272,7 @@ steps:
       # is visible from its own output, which is what makes the handoff desk-testable.
       attachments_written: "${{ steps.resolve_run_outcome.output.attached == true }}"
       # How the recommendations split: created on this investigation, or already
-      # held by another Investigation's Proposal.
-      proposals_submitted: "${{ steps.resolve_proposal_counts.output.new_count | default: 0 }}"
+      # held by another Investigation's Proposal. Submitted excludes the ones the
+      # dispatch rejected, so it is what reached the queue, not what was dispatched.
+      proposals_submitted: "${{ steps.resolve_proposal_counts.output.new_count | default: 0 | minus: steps.resolve_proposal_dispatch.output.failed | at_least: 0 }}"
       proposals_converged: "${{ steps.resolve_proposal_counts.output.converged_count | default: 0 }}"

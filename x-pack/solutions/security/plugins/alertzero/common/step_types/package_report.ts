@@ -143,8 +143,6 @@ const coverageSkippedSchema = z.object({
   reason: z.enum(['disabled', 'denied', 'storage_failure', 'already_processed']),
 });
 
-export { convergedProposalSchema, type ConvergedProposal } from './resolve_proposals';
-
 export const packageReportMintPayloadSchema = z.object({
   /**
    * What is being proposed: uuidv5(subjectId, actionWorkflowId[, processKey]). No Investigation in

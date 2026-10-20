@@ -11,15 +11,12 @@ import { buildHuntInvestigationConversationId } from '../common/hunt_investigati
 import {
   buildProposalId,
   buildProposalSubjectKey,
+  computeExpectedProposalCount,
   type LiveProposal,
   type ProposalSlot,
   type WantedProposal,
 } from '../../../proposals/dedup';
-import {
-  PackageReportIdentityError,
-  computeExpectedProposalCount,
-  runPackageReport,
-} from './run_package_report';
+import { PackageReportIdentityError, runPackageReport } from './run_package_report';
 import type { RunPackageReportDeps } from './run_package_report';
 import type { CoverageSubject } from './types';
 

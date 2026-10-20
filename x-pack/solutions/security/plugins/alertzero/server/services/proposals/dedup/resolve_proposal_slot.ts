@@ -26,11 +26,11 @@ type ProposalReader = Pick<
 const MAX_GENERATIONS = 50;
 
 /**
- * Where an action's input says what it acts on: the agent or the process. Everything else in
+ * Where an action's input says what it acts on: the agent or the process (by entity id or pid). Everything else in
  * the input (a reason, a comment) can be revised freely without the Proposal being about
  * something else.
  */
-const TARGET_PATHS = ['endpoint_ids', 'parameters.entity_id'] as const;
+const TARGET_PATHS = ['endpoint_ids', 'parameters.entity_id', 'parameters.pid'] as const;
 
 /**
  * Whether a live Proposal still holds the subject a finding is about: it acts on the same target.
