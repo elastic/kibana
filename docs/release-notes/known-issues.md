@@ -8,6 +8,28 @@ For Elastic {{observability}} known issues, refer to [Elastic Observability know
 
 For Elastic Security known issues, refer to [Elastic Security known issues](docs-content://release-notes/elastic-security/known-issues.md).
 
+::::{dropdown} Edits to some {{fleet}} integration policies are not applied to {{agent}}s
+
+Applies to: {{stack}} 9.4.6–9.4.8, 9.5.3–9.5.5
+
+**Details**
+
+For integration packages that declare their {{agent}} version requirement only in the package manifest (`conditions.agent.version`), and not in an input template, edits to a package policy are not applied to {{agent}}s running version 9.4 or later. {{fleet}} keeps a copy of the package policy inputs for each {{agent}} version, and does not refresh that copy when the package policy is edited. The {{fleet}} UI and API show the edited values, but the policy that {{agent}}s receive keeps the old ones. Restarting {{agent}} or {{fleet-server}} does not help.
+
+For example, the AWS integration version 7.1.5 requires {{agent}} `^9.4.0` in its manifest only. After you change a setting such as `queue_url` in an AWS CloudTrail integration policy, {{agent}}s continue to use the previous value.
+
+**Workaround**
+
+Upgrade to {{stack}} 9.4.9+ or 9.5.6+, then edit the affected integration policy again, making any change to a setting, and save it. Saving refreshes the stored copies.
+
+Until you can upgrade, delete the integration policy and recreate it with the settings you want. Do not edit the recreated integration policy before you upgrade, because the same issue applies to it.
+
+**Resolved**
+
+This issue is resolved in {{stack}} 9.4.9, 9.5.6, and 9.6.0.
+
+::::
+
 ::::{dropdown} Upgrading to versions 9.4.0-9.4.2 on deployments with many rules might cause {{kib}} instability
 
 Applies to: {{stack}} 9.4.0-9.4.2
