@@ -68,8 +68,7 @@ export const useGenerateAiBriefAction = ({
     autoSendInitialMessage: true,
   });
 
-  // Waits for the deltas too, so the brief never reads a delta that is still loading as missing.
-  const isLoading = cards.some((card) => card.isLoading || card.isDeltaLoading);
+  const isLoading = isWaitingForCounts(cards);
   const hasPageQuery = Boolean(scope.query || scope.filters);
   return useMemo(
     () =>
@@ -87,6 +86,17 @@ export const useGenerateAiBriefAction = ({
     [hasPageQuery, isAgentBuilderEnabled, isLoading, openAgentBuilderFlyout]
   );
 };
+
+/**
+ * True while a count or its change is loading, so the brief never reads a loading delta as missing.
+ * A count that can't be read is not waited for: a disabled query, such as anomalies without ML jobs,
+ * reports loading for good.
+ */
+export const isWaitingForCounts = (cards: SignalCardData[]): boolean =>
+  cards.some(
+    ({ isUnavailable, isLoading, isDeltaLoading }) =>
+      !isUnavailable && Boolean(isLoading || isDeltaLoading)
+  );
 
 /** The view as the brief's scope: the tiles as shown, and only the filters that apply. */
 const captureScope = ({
