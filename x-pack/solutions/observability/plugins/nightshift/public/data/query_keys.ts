@@ -12,3 +12,22 @@ export const FEATURES_QUERY_KEY = ['features'] as const;
 
 export const detectionOverviewQueryKey = ({ from, to }: { from: string; to: string }) =>
   ['nightshift.detectionOverview', from, to] as const;
+
+export const significantEventsListQueryKey = ({
+  from,
+  to,
+  page,
+  perPage,
+  search,
+  status,
+  severity,
+}: {
+  from: string;
+  to: string;
+  page: number;
+  perPage: number;
+  search: string;
+  status: readonly string[];
+  severity: readonly string[];
+}) =>
+  ['nightshift.significantEventsList', from, to, page, perPage, search, status, severity] as const;

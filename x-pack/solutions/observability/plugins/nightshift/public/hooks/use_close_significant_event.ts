@@ -37,7 +37,18 @@ interface UseCloseSignificantEventResult {
   closingEventId?: string;
 }
 
-export const useCloseSignificantEvent = (): UseCloseSignificantEventResult => {
+const EVENT_QUERY_KEYS = [
+  NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY,
+  ['nightshift.significantEventsList'],
+  ['nightshift.eventById'],
+  ['nightshift.eventLifecycle'],
+] as const;
+
+export const useCloseSignificantEvent = ({
+  onClosed,
+}: {
+  onClosed?: () => void;
+} = {}): UseCloseSignificantEventResult => {
   const {
     notifications,
     significantEvents: { significantEventsRepositoryClient },
@@ -69,6 +80,7 @@ export const useCloseSignificantEvent = (): UseCloseSignificantEventResult => {
       // invalidation in `onSettled` refetches the list.
       if (updated === 0) {
         notifications.toasts.addInfo({ title: CLOSE_NO_CHANGE_TOAST_TITLE });
+        onClosed?.();
         return;
       }
       queryClient.setQueryData<NightshiftSignificantEventsQueryData>(
@@ -89,15 +101,18 @@ export const useCloseSignificantEvent = (): UseCloseSignificantEventResult => {
             : current
       );
       notifications.toasts.addSuccess({ title: CLOSE_SUCCESS_TOAST_TITLE });
+      onClosed?.();
     },
     onError: (error: unknown) => {
       notifications.toasts.addError(toError(error), { title: CLOSE_ERROR_TOAST_TITLE });
     },
     onSettled: async () => {
       setClosingEventId(undefined);
-      await queryClient.invalidateQueries({
-        queryKey: NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY,
-      });
+      await Promise.all(
+        EVENT_QUERY_KEYS.map((queryKey) =>
+          queryClient.invalidateQueries({ queryKey, exact: false })
+        )
+      );
     },
   });
 

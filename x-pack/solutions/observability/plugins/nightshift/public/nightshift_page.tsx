@@ -9,7 +9,7 @@ import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiLoadingSpinner, EuiPageTemplate, useEuiTheme } from '@elastic/eui';
 import { Route, Routes } from '@kbn/shared-ux-router';
-import { useHistory, useLocation } from 'react-router-dom';
+import { Redirect, useHistory, useLocation, useParams } from 'react-router-dom';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
@@ -35,6 +35,7 @@ import { CustomContextFlyout } from './custom_context/custom_context_flyout';
 import { NightshiftOnboarding } from './onboarding/onboarding';
 import { useOnboardingVisibility } from './onboarding/use_onboarding_visibility';
 import { SettingsPage } from './settings/page';
+import { isDetectionTabId } from './pages/detection/detection_tabs';
 
 /** Onboarding has a second column for the "Get started" card. */
 const ONBOARDING_MAX_WIDTH = '1040px';
@@ -49,6 +50,21 @@ const SourcesPage = React.lazy(() =>
 const DetectionPage = React.lazy(() =>
   import('./pages/detection/page').then(({ DetectionPage: Page }) => ({ default: Page }))
 );
+
+const DetectionRoute = ({
+  headerProps,
+}: {
+  headerProps: React.ComponentProps<typeof DetectionPage>['headerProps'];
+}) => {
+  const { tab } = useParams<{ tab?: string }>();
+  const { search } = useLocation();
+
+  if (!tab || !isDetectionTabId(tab)) {
+    return <Redirect to={{ pathname: '/detection/events', search }} />;
+  }
+
+  return <DetectionPage headerProps={headerProps} tab={tab} />;
+};
 
 export function NightshiftPage(): React.ReactElement | null {
   const { euiTheme } = useEuiTheme();
@@ -257,8 +273,8 @@ export function NightshiftPage(): React.ReactElement | null {
           }
         >
           <Routes>
-            <Route path="/detection">
-              <DetectionPage
+            <Route path="/detection/:tab?">
+              <DetectionRoute
                 headerProps={{
                   onSourcesClick: navigateToSources,
                   sourcesHref,

@@ -58,6 +58,7 @@ export interface DetectionsListProps {
   isLoadingOccurrences?: boolean;
   selectedDetectionId?: string;
   onDetectionClick?: (detection: LifecycleDetection) => void;
+  showTitle?: boolean;
   lifecycleQuery?: Pick<
     UseQueryResult<EventLifecycleResponse, Error>,
     'data' | 'isLoading' | 'isError' | 'refetch'
@@ -400,6 +401,7 @@ export function DetectionsList({
   isLoadingOccurrences = false,
   selectedDetectionId,
   onDetectionClick,
+  showTitle = true,
   lifecycleQuery: lifecycleQueryFromParent,
 }: DetectionsListProps): React.ReactElement {
   const internalLifecycleQuery = useFetchEventLifecycle(eventId, {
@@ -450,14 +452,18 @@ export function DetectionsList({
 
   return (
     <>
-      <EuiTitle size="xs">
-        <h3>
-          {i18n.translate('xpack.nightshift.flyout.detectionsTitle', {
-            defaultMessage: 'Detections',
-          })}
-        </h3>
-      </EuiTitle>
-      <EuiSpacer size="s" />
+      {showTitle ? (
+        <>
+          <EuiTitle size="xs">
+            <h3>
+              {i18n.translate('xpack.nightshift.flyout.detectionsTitle', {
+                defaultMessage: 'Detections',
+              })}
+            </h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+        </>
+      ) : null}
 
       {isError && (
         <EuiCallOut

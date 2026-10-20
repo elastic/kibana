@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const DETECTION_OVERVIEW_TIME_RANGE = { from: 'now-24h', to: 'now' } as const;
+export const DEFAULT_DETECTION_TIME_RANGE = { from: 'now-24h', to: 'now' } as const;

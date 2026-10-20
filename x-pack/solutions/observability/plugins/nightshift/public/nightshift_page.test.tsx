@@ -110,7 +110,7 @@ const featureFlags = { useBooleanValue: jest.fn() };
 
 function renderPage(initialPath = '/') {
   const history = createMemoryHistory({ initialEntries: [initialPath] });
-  return render(
+  const renderResult = render(
     <I18nProvider>
       <MockAppHeaderProvider>
         <Router history={history}>
@@ -119,6 +119,7 @@ function renderPage(initialPath = '/') {
       </MockAppHeaderProvider>
     </I18nProvider>
   );
+  return { ...renderResult, history };
 }
 
 describe('NightshiftPage', () => {
@@ -316,10 +317,11 @@ describe('NightshiftPage', () => {
     );
   });
 
-  it('renders the lazy Detection page with its header actions', async () => {
-    renderPage('/detection');
+  it.each(['/detection', '/detection/unknown'])('redirects %s to the Events tab', async (path) => {
+    const { history } = renderPage(path);
 
     expect(await screen.findByTestId('detectionPageStub')).toBeInTheDocument();
+    expect(history.location.pathname).toBe('/detection/events');
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Detection');
     expect(screen.queryByTestId('nightshiftAppStub')).not.toBeInTheDocument();
 

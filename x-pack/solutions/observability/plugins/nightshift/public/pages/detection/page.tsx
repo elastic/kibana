@@ -5,17 +5,26 @@
  * 2.0.
  */
 
-import { EuiPageTemplate } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiPageTemplate, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { useHistory } from 'react-router-dom';
 import { NightshiftAppHeader } from '../../app/app_header';
 import type { NightshiftAppHeaderProps } from '../../app/app_header';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../common/ebt_constants';
 import { useDetectionOverview } from '../../data/detection_overview/use_detection_overview';
 import { useMaintenanceStatus } from '../../data/maintenance/use_significant_events_maintenance';
 import { useKibana } from '../../hooks/use_kibana';
-import { DETECTION_OVERVIEW_TIME_RANGE } from './constants';
+import type { DetectionTabId } from './detection_tabs';
+import { DETECTION_TAB_IDS, DETECTION_TAB_LABELS } from './detection_tabs';
 import { DetectionOverview } from './overview/detection_overview';
+import { useDetectionTimeRange } from './use_detection_time_range';
+
+const EventsTab = React.lazy(() =>
+  import('./events/events_tab').then(({ EventsTab: Tab }) => ({ default: Tab }))
+);
 
 export type DetectionPageHeaderProps = Pick<
   NightshiftAppHeaderProps,
@@ -32,12 +41,29 @@ export type DetectionPageHeaderProps = Pick<
 
 export const DetectionPage = ({
   headerProps,
+  tab,
 }: {
   headerProps: DetectionPageHeaderProps;
+  tab: DetectionTabId;
 }): React.ReactElement => {
   const { application } = useKibana().services;
+  const history = useHistory();
   const maintenanceStatus = useMaintenanceStatus();
-  const overview = useDetectionOverview(DETECTION_OVERVIEW_TIME_RANGE);
+  const { timeRange, setTimeRange } = useDetectionTimeRange();
+  const overview = useDetectionOverview(timeRange);
+  const tabs = DETECTION_TAB_IDS.map((id) => ({
+    id,
+    label: DETECTION_TAB_LABELS[id],
+    isSelected: tab === id,
+    href: application.getUrlForApp(NIGHTSHIFT_APP_ID, {
+      path: `/detection/${id}${history.location.search}`,
+    }),
+    onClick: (event?: React.MouseEvent) => {
+      event?.preventDefault();
+      history.push(`/detection/${id}${history.location.search}`);
+    },
+    'data-test-subj': `nightshiftDetectionTab-${id}`,
+  }));
 
   return (
     <>
@@ -61,6 +87,39 @@ export const DetectionPage = ({
           isCountsError={overview.isError}
           onRetry={() => void overview.refetch()}
         />
+        <EuiSpacer size="m" />
+        <EuiTabs size="s">
+          {tabs.map(({ id, label, isSelected, href, onClick, 'data-test-subj': testSubject }) => (
+            <EuiTab
+              key={id}
+              isSelected={isSelected}
+              href={href}
+              onClick={onClick}
+              data-test-subj={testSubject}
+              {...getEbtProps({
+                action: NIGHTSHIFT_EBT_ACTIONS.VIEW_DETECTION_TAB,
+                element: NIGHTSHIFT_EBT_ELEMENTS.DETECTION_WORKSPACE_TABS,
+                detail: id,
+              })}
+            >
+              {label}
+            </EuiTab>
+          ))}
+        </EuiTabs>
+        <EuiSpacer size="m" />
+        <React.Suspense
+          fallback={
+            <EuiLoadingSpinner size="xl" data-test-subj="nightshiftDetectionEventsTabLoading" />
+          }
+        >
+          {tab === 'events' && (
+            <EventsTab
+              timeRange={timeRange}
+              onTimeRangeChange={setTimeRange}
+              onRefresh={() => void overview.refetch()}
+            />
+          )}
+        </React.Suspense>
       </EuiPageTemplate.Section>
     </>
   );

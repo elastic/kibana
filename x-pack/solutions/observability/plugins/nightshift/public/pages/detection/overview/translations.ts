@@ -71,7 +71,7 @@ export const DETECTIONS_LABEL = i18n.translate('xpack.nightshift.detectionPage.d
 
 export const DETECTIONS_TOOLTIP = i18n.translate(
   'xpack.nightshift.detectionPage.detectionsTooltip',
-  { defaultMessage: 'Change-point detections in the last 24 hours' }
+  { defaultMessage: 'Change-point detections in the selected time range' }
 );
 
 export const SIGNIFICANT_EVENTS_LABEL = i18n.translate(
@@ -81,7 +81,7 @@ export const SIGNIFICANT_EVENTS_LABEL = i18n.translate(
 
 export const SIGNIFICANT_EVENTS_TOOLTIP = i18n.translate(
   'xpack.nightshift.detectionPage.significantEventsTooltip',
-  { defaultMessage: 'Significant events in the last 24 hours, any status' }
+  { defaultMessage: 'Significant events in the selected time range, any status' }
 );
 
 export const OVERVIEW_ERROR_TITLE = i18n.translate(
