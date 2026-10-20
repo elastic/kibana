@@ -102,7 +102,9 @@ export class DashboardAddPanelService extends FtrService {
     this.log.debug('DashboardAddPanel.openAddPanelFlyout');
     await this.retry.try(async () => {
       // Skip the menu click if a previous attempt left the popover open, to avoid toggling it closed
-      if (!(await this.testSubjects.exists('dashboardOpenAddPanelFlyoutButton', { timeout: 500 }))) {
+      if (
+        !(await this.testSubjects.exists('dashboardOpenAddPanelFlyoutButton', { timeout: 500 }))
+      ) {
         await this.clickTopNavAddMenu();
       }
       await this.testSubjects.existOrFail('dashboardOpenAddPanelFlyoutButton', { timeout: 5000 });
