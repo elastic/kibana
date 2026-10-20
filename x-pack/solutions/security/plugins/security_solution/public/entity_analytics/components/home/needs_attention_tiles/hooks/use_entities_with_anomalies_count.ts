@@ -81,7 +81,7 @@ export const useEntitiesWithAnomaliesCount = ({
 
   const {
     data: queryResult,
-    isLoading,
+    isInitialLoading: isLoading,
     isFetching,
     error,
   } = useQuery<{ count: number; entityIds: string[] }, SecurityAppError>(

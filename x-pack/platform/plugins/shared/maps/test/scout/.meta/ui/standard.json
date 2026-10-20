@@ -1,5 +1,5 @@
 {
-  "sha1": "2d009255fd94da8f30ac358295f7f9fa98f49fac",
+  "sha1": "b96539e1b917439cc9ea31dcad4fdbbeceb468e9",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -91,8 +91,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/discover.spec.ts",
-        "line": 32,
-        "column": 43
+        "line": 33,
+        "column": 13
       }
     },
     {

@@ -53,7 +53,7 @@ export const useNewEntityCount = ({
 
   const {
     data: result,
-    isLoading,
+    isInitialLoading: isLoading,
     isFetching,
     error,
   } = useQuery(

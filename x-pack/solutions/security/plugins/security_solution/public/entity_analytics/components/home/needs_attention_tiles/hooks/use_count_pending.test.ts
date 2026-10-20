@@ -54,12 +54,14 @@ describe.each([
     mockUseQuery.mockReturnValue({
       data: undefined,
       isLoading: false,
+      isInitialLoading: false,
       isFetching: false,
       error: undefined,
       ...overrides,
     });
-  const pending = (props: object = {}) =>
-    renderHook(() => useCount({ spaceId: 'default', ...props })).result.current.isCountPending;
+  const render = (props: object = {}) =>
+    renderHook(() => useCount({ spaceId: 'default', ...props })).result.current;
+  const pending = (props: object = {}) => render(props).isCountPending;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -87,9 +89,9 @@ describe.each([
   });
 
   it('is true while the count loads for the first time and while it refetches', () => {
-    query({ isLoading: true, isFetching: true });
+    query({ isLoading: true, isInitialLoading: true, isFetching: true });
     expect(pending()).toBe(true);
-    query({ data: { count: 3 }, isLoading: false, isFetching: true });
+    query({ data: { count: 3 }, isFetching: true });
     expect(pending()).toBe(true);
   });
 
@@ -176,6 +178,7 @@ describe.each([
     const loading = () =>
       renderHook(() => useCount({ spaceId: 'default' })).result.current.isLoading;
     query({ isLoading: true });
+    expect(render({ skip: true }).isLoading).toBe(false);
     // No latest entities index, or its lookup failed: the query is disabled and has no data.
     (useResolvedLatestEntitiesIndexName as jest.Mock).mockReturnValue({
       data: { indexName: null },
@@ -207,7 +210,12 @@ describe('useEntitiesWithAnomaliesCount', () => {
       data: { indexName: '.entities-v1' },
       isLoading: false,
     });
-    mockUseQuery.mockReturnValue({ data: undefined, isLoading: true, isFetching: false });
+    mockUseQuery.mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      isInitialLoading: false,
+      isFetching: false,
+    });
   });
   const pending = () =>
     renderHook(() => useEntitiesWithAnomaliesCount({ spaceId: 'default' })).result.current
@@ -263,5 +271,13 @@ describe('useEntitiesWithAnomaliesCount', () => {
     expect(pending()).toBe(false);
     jobs({ isError: true });
     expect(pending()).toBe(false);
+  });
+
+  it('does not spin forever when no security job is installed', () => {
+    (useInstalledSecurityJobsIds as jest.Mock).mockReturnValue({ jobIds: [], loading: false });
+    expect(
+      renderHook(() => useEntitiesWithAnomaliesCount({ spaceId: 'default' })).result.current
+        .isLoading
+    ).toBe(false);
   });
 });

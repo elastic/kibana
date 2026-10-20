@@ -103,7 +103,7 @@ export const useAlertBasedTiles = ({
 
   const {
     data: queryResult,
-    isLoading,
+    isInitialLoading: isLoading,
     isFetching,
     error,
   } = useQuery<AlertBasedTilesResult, SecurityAppError>(
