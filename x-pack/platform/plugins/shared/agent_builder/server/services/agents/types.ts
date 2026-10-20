@@ -14,7 +14,6 @@ import type {
   AiIndexResolver,
 } from '@kbn/agent-builder-server/agents';
 import type {
-  AgentAccessControlEntry,
   AgentConfiguration,
   AgentCreateRequest,
   AgentDefinition,
@@ -50,7 +49,6 @@ export interface AgentsServiceStart {
     spaceId: string;
     agent: AgentCreateRequest;
     availability?: AgentAvailabilityConfig;
-    accessControlEntries?: AgentAccessControlEntry[];
   }) => Promise<void>;
   resolveAgentConfiguration: (opts: {
     agent: AgentDefinition;
