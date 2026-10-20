@@ -25,6 +25,7 @@ import { ButtonNode } from './button_node';
 import { FlyoutNode } from './flyout_node';
 import { FormNode } from './form_node';
 import { KeyValueNode } from './key_value_node';
+import { ListInputNode } from './list_input_node';
 import { SearchNode } from './search_node';
 import { SelectNode } from './select_node';
 import { StatNode } from './stat_node';
@@ -33,6 +34,7 @@ import { TimeRangeNode } from './time_range_node';
 
 const isInput = (node: AppNode): boolean =>
   node.type === 'search' ||
+  node.type === 'list_input' ||
   node.type === 'select' ||
   node.type === 'button_group' ||
   node.type === 'time_range';
@@ -98,6 +100,8 @@ export const NodeRenderer = ({ node }: NodeRendererProps) => {
       return <ButtonGroupNode node={node} />;
     case 'search':
       return <SearchNode node={node} />;
+    case 'list_input':
+      return <ListInputNode node={node} />;
     case 'button':
       return <ButtonNode node={node} />;
     case 'form':

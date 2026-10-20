@@ -24,6 +24,8 @@ export const MAX_PROMPT_LENGTH = 10_000;
 export const MAX_STATE_KEYS = 20;
 export const MAX_STATE_KEY_LENGTH = 64;
 export const MAX_STATE_STRING_LENGTH = 1_000;
+/** A list holds a few values to look for, as many as a person can paste into a box. */
+export const MAX_LIST_ITEMS = 1_000;
 export const MAX_ACTIONS_PER_EVENT = 5;
 /** A workflow is named by its id, which is a text of this length at most. */
 export const MAX_WORKFLOW_ID_LENGTH = 256;

@@ -37,6 +37,7 @@ describe('the authoring guide', () => {
     'select',
     'button_group',
     'search',
+    'list_input',
     'button',
     'form',
     'time_range',
@@ -132,6 +133,15 @@ describe('the authoring guide', () => {
     expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('"optionsQuery"');
     expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('whose first column is the value of each option');
     expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('put an "All" option there');
+  });
+
+  it('teaches lists: the value type, the box, the multiple select, and how a query uses one', () => {
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('"list"');
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('list_input');
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('"multiple": true');
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('WHERE user.name IN (?users)');
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('Nothing written or chosen is an empty list');
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('A list is not kept in the address of the page');
   });
 
   it('says that a component has a query or a source, not both, and that a chart cannot show cases', () => {

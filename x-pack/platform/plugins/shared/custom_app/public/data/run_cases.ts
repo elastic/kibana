@@ -87,7 +87,8 @@ export const createRunCases =
     const valueOf = (filter: CasesSource['status']): string => {
       if (filter === undefined) return '';
       const value = typeof filter === 'string' ? filter : state[filter.fromState];
-      return value === undefined ? '' : String(value).trim();
+      // A list is not a filter of the cases, which are filtered by one text.
+      return value === undefined || Array.isArray(value) ? '' : String(value).trim();
     };
 
     const status = valueOf(source.status);

@@ -25,9 +25,13 @@ const getSampleParams = (
   query: string | undefined,
   state: Readonly<Record<string, StateDeclaration>>
 ): Params =>
-  Array.from(new Set(query ? getESQLQueryVariables(query) : [])).flatMap((name) =>
-    name in state ? [{ [name]: state[name].default }] : []
-  );
+  Array.from(new Set(query ? getESQLQueryVariables(query) : [])).flatMap((name) => {
+    if (!(name in state)) return [];
+    const { default: value } = state[name];
+    // A list is tried with its first value, or an empty one: it is a sample of the data that is
+    // wanted, and a value stands for a list of one.
+    return [{ [name]: Array.isArray(value) ? value[0] ?? '' : value }];
+  });
 
 const replaceNodes = (node: AppNode, replacements: ReadonlyMap<string, AppNode>): AppNode => {
   const replacement = replacements.get(node.id);

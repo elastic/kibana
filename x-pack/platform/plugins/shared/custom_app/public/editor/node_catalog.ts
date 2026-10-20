@@ -165,6 +165,17 @@ const ENTRIES: Record<AppNodeType, Omit<NodeCatalogEntry, 'type'>> = {
     group: 'input',
     isContainer: false,
   },
+  list_input: {
+    label: i18n.translate('xpack.customApp.catalog.listInput.label', {
+      defaultMessage: 'List of values',
+    }),
+    description: i18n.translate('xpack.customApp.catalog.listInput.description', {
+      defaultMessage: 'A box for values to look for, one to a line.',
+    }),
+    iconType: 'list',
+    group: 'input',
+    isContainer: false,
+  },
   search: {
     label: i18n.translate('xpack.customApp.catalog.search.label', { defaultMessage: 'Search' }),
     description: i18n.translate('xpack.customApp.catalog.search.description', {

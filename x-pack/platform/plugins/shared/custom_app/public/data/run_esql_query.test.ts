@@ -24,7 +24,10 @@ const dashboardVariable = (key: string, value: string): ESQLControlVariable => (
   type: ESQLVariableType.VALUES,
 });
 
-const run = (context: Partial<FetchContext>, state: Record<string, string | number | boolean>) =>
+const run = (
+  context: Partial<FetchContext>,
+  state: Record<string, string | number | boolean | string[]>
+) =>
   createRunEsqlQuery({ search, http } as never)(
     QUERY,
     { context: context as FetchContext, state },
@@ -76,6 +79,36 @@ describe('createRunEsqlQuery', () => {
       expect.objectContaining({ key: 'limit', value: 5 }),
       expect.objectContaining({ key: 'compact', value: true }),
     ]);
+  });
+
+  it('offers a list as one parameter that holds many values, as a dashboard multi-select does', async () => {
+    await run({}, { users: ['alice', 'bob'] });
+
+    const { options } = lastCall();
+    expect(options.esqlVariables).toEqual([
+      expect.objectContaining({ key: 'users', value: ['alice', 'bob'] }),
+    ]);
+    expect(
+      getNamedParams('FROM logs | WHERE user.name IN (?users)', undefined, options.esqlVariables)
+    ).toEqual([{ users: ['alice', 'bob'] }]);
+  });
+
+  it('offers an empty list as it is, which is what nothing chosen is', async () => {
+    await run({}, { users: [] });
+
+    expect(lastCall().options.esqlVariables).toEqual([
+      expect.objectContaining({ key: 'users', value: [] }),
+    ]);
+  });
+
+  it('never lets a value of a list change the query text either', async () => {
+    await run({}, { users: ["x' OR 1=1 --", '?? | DROP logs'] });
+
+    const { query, options } = lastCall();
+    expect(query).toBe(QUERY);
+    expect(
+      getNamedParams('FROM logs | WHERE u IN (?users)', undefined, options.esqlVariables)
+    ).toEqual([{ users: ["x' OR 1=1 --", '?? | DROP logs'] }]);
   });
 
   it('keeps dashboard variables the state does not shadow, and lets state win otherwise', async () => {

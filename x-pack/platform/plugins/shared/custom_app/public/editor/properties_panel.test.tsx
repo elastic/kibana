@@ -38,6 +38,7 @@ const initial = (): AppDocument =>
       service: { type: 'string', default: 'checkout' },
       filter: { type: 'string', default: 'x' },
       reason: { type: 'string', default: '' },
+      users: { type: 'list', default: [] },
     },
     root: {
       type: 'stack',
@@ -82,6 +83,13 @@ const initial = (): AppDocument =>
           options: [{ value: 'x' }],
         },
         { type: 'search', id: 'find', label: 'Find', bind: 'filter', placeholder: 'Look' },
+        {
+          type: 'list_input',
+          id: 'names',
+          label: 'Usernames',
+          bind: 'users',
+          placeholder: 'One per line',
+        },
         { type: 'button', id: 'isolate', label: 'Isolate host', onClick: [] },
         {
           type: 'form',
@@ -269,7 +277,7 @@ describe('PropertiesPanel', () => {
       const { onChange } = setup('pick');
       expect(screen.queryByLabelText('ES|QL query editor')).not.toBeInTheDocument();
 
-      await userEvent.click(screen.getByRole('switch', { name: 'Also take options from a query' }));
+      await userEvent.click(screen.getByText('Also take options from a query'));
 
       expect(onChange).toHaveBeenLastCalledWith({ optionsQuery: 'ROW value = 1' });
     });
@@ -285,7 +293,7 @@ describe('PropertiesPanel', () => {
     it('can stop taking options from a query', async () => {
       const { onChange } = setup('with-query');
 
-      await userEvent.click(screen.getByRole('switch', { name: 'Also take options from a query' }));
+      await userEvent.click(screen.getByText('Also take options from a query'));
 
       expect(onChange).toHaveBeenLastCalledWith({ optionsQuery: undefined });
     });
@@ -295,6 +303,66 @@ describe('PropertiesPanel', () => {
 
       expect(screen.getByRole('textbox', { name: 'Starts as' })).toBeInTheDocument();
       expect(screen.queryByRole('combobox', { name: 'Starts as' })).not.toBeInTheDocument();
+    });
+  });
+
+  describe('a list of values', () => {
+    it('edits what is written above the box and its placeholder', async () => {
+      const { onChange } = setup('names');
+
+      await userEvent.type(screen.getByRole('textbox', { name: 'Label' }), '!');
+      expect(onChange).toHaveBeenLastCalledWith({ label: 'Usernames!' });
+
+      await userEvent.type(screen.getByRole('textbox', { name: 'Placeholder' }), '?');
+      expect(onChange).toHaveBeenLastCalledWith({ placeholder: 'One per line?' });
+    });
+
+    it('says it sets a list, and how a query uses it', () => {
+      setup('names');
+
+      expect(screen.getByText(/It sets a list, one value to a line/)).toBeInTheDocument();
+      expect(screen.getByText(/WHERE field IN \(\?users\)/)).toBeInTheDocument();
+    });
+
+    it('is a component of its own, named as one, with nothing to start as', () => {
+      setup('names');
+
+      expect(screen.getByRole('heading', { name: 'List of values' })).toBeInTheDocument();
+      expect(screen.queryByRole('textbox', { name: 'Starts as' })).not.toBeInTheDocument();
+    });
+  });
+
+  describe('a select that takes several options', () => {
+    it('can allow choosing several, which makes what it sets a list', async () => {
+      const { latest } = setup('pick');
+      expect(latest.document.state.service).toEqual({ type: 'string', default: 'checkout' });
+
+      await userEvent.click(screen.getByText('Allow choosing several'));
+
+      expect(findNode(latest.document.root, 'pick')!.node).toMatchObject({ multiple: true });
+      expect(latest.document.state.service).toEqual({ type: 'list', default: [] });
+      expect(getDocumentIssues(latest.document)).toEqual([]);
+    });
+
+    it('can go back to one, which makes what it sets a text again, starting as its first option', async () => {
+      const { latest } = setup('pick');
+      await userEvent.click(screen.getByText('Allow choosing several'));
+
+      await userEvent.click(screen.getByText('Allow choosing several'));
+
+      expect(findNode(latest.document.root, 'pick')!.node).not.toHaveProperty('multiple', true);
+      expect(latest.document.state.service).toEqual({ type: 'string', default: 'checkout' });
+      expect(getDocumentIssues(latest.document)).toEqual([]);
+    });
+
+    it('has nothing to start as when it takes several, which starts with none', async () => {
+      setup('pick');
+      expect(screen.getByRole('combobox', { name: 'Starts as' })).toBeInTheDocument();
+
+      await userEvent.click(screen.getByText('Allow choosing several'));
+
+      expect(screen.queryByRole('combobox', { name: 'Starts as' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('textbox', { name: 'Starts as' })).not.toBeInTheDocument();
     });
   });
 

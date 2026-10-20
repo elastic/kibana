@@ -17,6 +17,7 @@ import {
 } from './node_tree';
 import {
   MAX_FORM_FIELDS,
+  MAX_LIST_ITEMS,
   MAX_NODE_COUNT,
   MAX_NODE_DEPTH,
   MAX_QUERY_LENGTH,
@@ -605,6 +606,121 @@ describe('forms', () => {
         })
       )
     ).toContain('fromInput is only valid on input nodes');
+  });
+});
+
+describe('lists', () => {
+  const listDoc = (root: Record<string, unknown>, state: Record<string, unknown> = {}) => ({
+    state: {
+      users: { type: 'list', default: [] },
+      name: { type: 'string', default: '' },
+      ...state,
+    },
+    root,
+  });
+  const box = { type: 'list_input', id: 'users-box', label: 'Usernames', bind: 'users' };
+  const issues = (document: unknown) =>
+    JSON.stringify(appDocumentSchema.safeParse(document).error?.issues ?? []);
+
+  it('is a kind of value, a list of texts, which starts as given', () => {
+    const result = appDocumentSchema.parse(
+      listDoc(box, { users: { type: 'list', default: ['alice', 'bob'] } })
+    );
+
+    expect(result.state.users).toEqual({ type: 'list', default: ['alice', 'bob'] });
+  });
+
+  it('is not a list of anything but texts, nor too long, nor of texts that are too long', () => {
+    const parse = (value: unknown) =>
+      appDocumentSchema.safeParse(listDoc(box, { users: { type: 'list', default: value } }))
+        .success;
+
+    expect(parse([1, 2])).toBe(false);
+    expect(parse('alice')).toBe(false);
+    expect(parse(Array.from({ length: MAX_LIST_ITEMS + 1 }, (_, i) => `u${i}`))).toBe(false);
+    expect(parse(Array.from({ length: MAX_LIST_ITEMS }, (_, i) => `u${i}`))).toBe(true);
+    expect(parse(['x'.repeat(1001)])).toBe(false);
+  });
+
+  it('is what a list input sets, so the value it is bound to must be a list', () => {
+    expect(appDocumentSchema.safeParse(listDoc(box)).success).toBe(true);
+    expect(issues(listDoc({ ...box, bind: 'name' }))).toContain('needs a list key');
+    expect(issues(listDoc({ ...box, bind: 'ghost' }))).toContain('unknown state key');
+  });
+
+  it('is what a select that takes several options sets, and a select that takes one cannot set it', () => {
+    const select = {
+      type: 'select',
+      id: 'pick',
+      label: 'Users',
+      bind: 'users',
+      options: [{ value: 'a' }],
+      multiple: true,
+    };
+
+    expect(appDocumentSchema.safeParse(listDoc(select)).success).toBe(true);
+    expect(issues(listDoc({ ...select, multiple: undefined }))).toContain(
+      'an input needs a string key'
+    );
+    expect(issues(listDoc({ ...select, bind: 'name' }))).toContain('needs a list key');
+  });
+
+  it('is not what a search box or a button group may be bound to', () => {
+    expect(issues(listDoc({ type: 'search', id: 's', label: 'S', bind: 'users' }))).toContain(
+      'an input needs a string key'
+    );
+  });
+
+  it('can be set to a list by an action, and not by an action that sets a text to a list', () => {
+    const button = (key: string) =>
+      listDoc({
+        type: 'button',
+        id: 'go',
+        label: 'Go',
+        onClick: [{ type: 'setState', key, value: ['alice'] }],
+      });
+
+    expect(appDocumentSchema.safeParse(button('users')).success).toBe(true);
+    expect(issues(button('name'))).toContain('to a list');
+  });
+
+  it('is not set to a text by an action, which is not what a list is', () => {
+    expect(
+      issues(
+        listDoc({
+          type: 'button',
+          id: 'go',
+          label: 'Go',
+          onClick: [{ type: 'setState', key: 'users', value: 'alice' }],
+        })
+      )
+    ).toContain('to a string');
+  });
+
+  it('may be given to a workflow by a form, a button or a row, as a value of the app', () => {
+    expect(
+      appDocumentSchema.safeParse(
+        listDoc({
+          type: 'button',
+          id: 'go',
+          label: 'Go',
+          onClick: [
+            { type: 'runWorkflow', workflow: 'w', inputs: { users: { fromState: 'users' } } },
+          ],
+        })
+      ).success
+    ).toBe(true);
+  });
+
+  it('may be the value of an input that runs actions when it changes, with the list as its input', () => {
+    expect(
+      appDocumentSchema.safeParse(
+        listDoc({
+          ...box,
+          onChange: [{ type: 'setState', key: 'users', value: { fromInput: true } }],
+        })
+      ).success
+    ).toBe(true);
   });
 });
 

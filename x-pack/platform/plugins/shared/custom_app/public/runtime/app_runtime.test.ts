@@ -325,6 +325,100 @@ describe('createAppRuntime', () => {
     });
   });
 
+  describe('a list', () => {
+    const listDocument = parse({
+      state: {
+        users: { type: 'list', default: [] },
+        service: { type: 'string', default: 'all' },
+      },
+      root: { type: 'text', id: 't', text: 'x' },
+    });
+
+    it('starts as declared', () => {
+      expect(createAppRuntime(listDocument).state$.getValue().users).toEqual([]);
+    });
+
+    it('is set by an action to a list, by the list an input hands over, or to a column of a row', () => {
+      const runtime = createAppRuntime(listDocument);
+
+      runtime.run([setState('users', ['alice'])]);
+      expect(runtime.state$.getValue().users).toEqual(['alice']);
+
+      runtime.run([setState('users', { fromInput: true })], { input: ['bob', 'carol'] });
+      expect(runtime.state$.getValue().users).toEqual(['bob', 'carol']);
+
+      runtime.run([setState('users', { fromColumn: 'names' })], { row: { names: ['dave'] } });
+      expect(runtime.state$.getValue().users).toEqual(['dave']);
+    });
+
+    it('says nothing, and does not change, when it is set to the same values', () => {
+      const runtime = createAppRuntime(listDocument);
+      runtime.run([setState('users', ['alice'])]);
+      const states: unknown[] = [];
+      runtime.state$.subscribe((state) => states.push(state));
+
+      runtime.run([setState('users', ['alice'])]);
+
+      expect(states).toHaveLength(1);
+    });
+
+    it('refuses what is not a list of texts, and a text for a list', () => {
+      const runtime = createAppRuntime(listDocument);
+
+      expect(runtime.run([setState('users', 'alice')]).dropped).toEqual([
+        '"users" expects a list but got string',
+      ]);
+      expect(runtime.run([setState('users', [1, 2])]).dropped[0]).toContain('a list of texts');
+      expect(runtime.run([setState('service', ['a'])]).dropped).toEqual([
+        '"service" expects a string but got a list',
+      ]);
+      expect(runtime.state$.getValue()).toEqual({ users: [], service: 'all' });
+    });
+
+    it('refuses a list that is too long, and a value that is too long', () => {
+      const runtime = createAppRuntime(listDocument);
+
+      expect(
+        runtime.run([
+          setState(
+            'users',
+            Array.from({ length: 1001 }, (_, i) => `u${i}`)
+          ),
+        ]).dropped[0]
+      ).toContain('at most 1000 values');
+      expect(runtime.run([setState('users', ['x'.repeat(1001)])]).dropped[0]).toContain(
+        'a list of texts'
+      );
+    });
+
+    it('is handed to a workflow as a list of texts', () => {
+      const runtime = createAppRuntime(listDocument);
+      runtime.run([setState('users', ['alice', 'bob'])]);
+
+      const { workflows } = runtime.run([
+        { type: 'runWorkflow', workflow: 'w', inputs: { users: { fromState: 'users' } } },
+      ]);
+
+      expect(workflows).toEqual([{ workflow: 'w', inputs: { users: ['alice', 'bob'] } }]);
+    });
+
+    it('is kept by a new document that still declares it, and reset when it is not a list any more', () => {
+      const runtime = createAppRuntime(listDocument);
+      runtime.run([setState('users', ['alice'])]);
+
+      runtime.setDocument(listDocument);
+      expect(runtime.state$.getValue().users).toEqual(['alice']);
+
+      runtime.setDocument(
+        parse({
+          state: { users: { type: 'string', default: 'none' } },
+          root: { type: 'text', id: 't', text: 'x' },
+        })
+      );
+      expect(runtime.state$.getValue().users).toBe('none');
+    });
+  });
+
   describe('restoreView', () => {
     const keys = ['service', 'limit', 'compact'];
 

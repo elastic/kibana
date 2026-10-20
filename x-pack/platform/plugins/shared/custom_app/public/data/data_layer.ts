@@ -231,7 +231,7 @@ export const createDataLayer = ({
         const source = sources[id];
         if (source === undefined || entry.readers === 0) return;
         const changed = namesUsedBy(id, source).some(
-          (name) => state[name] !== entry.appliedValues[name]
+          (name) => !isEqual(state[name], entry.appliedValues[name])
         );
         if (changed) start(id);
       });

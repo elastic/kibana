@@ -6,12 +6,13 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFormRow, EuiSelect } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MAX_QUERY_OPTIONS, getOptionsSourceId, type AppNodeOfType } from '@kbn/custom-app-common';
 import type { SourceState } from '../data/data_layer';
 import { useSource } from '../data/use_source';
 import { useBoundInput } from './use_bound_input';
+import { useBoundList } from './use_bound_list';
 
 interface Option {
   value: string;
@@ -42,17 +43,53 @@ export const toQueryOptions = (state: SourceState, written: readonly Option[]): 
   return options;
 };
 
-const OptionsSelect = ({
-  node,
-  queried,
-  isLoading = false,
-  error,
-}: {
+interface SelectProps {
   node: AppNodeOfType<'select'>;
   queried: readonly Option[];
   isLoading?: boolean;
   error?: string;
-}) => {
+}
+
+/** A select that takes several options: what is chosen is a list, and nothing chosen is an empty one. */
+const MultiSelect = ({ node, queried, isLoading = false, error }: SelectProps) => {
+  const { list, change } = useBoundList(node);
+  const options = [...node.options, ...queried].map(({ value, label }) => ({
+    key: value,
+    value,
+    label: label ?? value,
+  }));
+  // What is chosen and is none of the options, such as before the options have come, is shown as
+  // what it is.
+  const selected = list.map(
+    (value) =>
+      options.find((option) => option.value === value) ?? { key: value, value, label: value }
+  );
+
+  return (
+    <EuiFormRow
+      label={node.label}
+      data-node-id={node.id}
+      isInvalid={error !== undefined}
+      error={error}
+    >
+      <EuiComboBox
+        compressed
+        isClearable
+        isLoading={isLoading}
+        isInvalid={error !== undefined}
+        aria-label={node.label}
+        placeholder={i18n.translate('xpack.customApp.selectNode.multiplePlaceholder', {
+          defaultMessage: 'Select one or more',
+        })}
+        options={options}
+        selectedOptions={selected}
+        onChange={(chosen) => change(chosen.map(({ value }) => String(value)))}
+      />
+    </EuiFormRow>
+  );
+};
+
+const SingleSelect = ({ node, queried, isLoading = false, error }: SelectProps) => {
   const { value, change } = useBoundInput(node);
   const known = [...node.options, ...queried];
   // A value that is none of the options, such as one from a link before the options have come, is
@@ -82,6 +119,9 @@ const OptionsSelect = ({
     </EuiFormRow>
   );
 };
+
+const OptionsSelect = (props: SelectProps) =>
+  props.node.multiple ? <MultiSelect {...props} /> : <SingleSelect {...props} />;
 
 /** A select whose options, or some of them, come from a query that runs with the app. */
 const QueryOptionsSelect = ({ node }: { node: AppNodeOfType<'select'> }) => {

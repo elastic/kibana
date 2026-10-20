@@ -106,6 +106,31 @@ describe('resolveCustomContent', () => {
     );
   });
 
+  it('tries a query that uses a list with the first value of it, or an empty one', async () => {
+    const withList = (users: string[]) =>
+      documentOf(
+        [
+          {
+            type: 'custom_content',
+            id: 'board',
+            query: 'FROM logs | WHERE user.name IN (?users)',
+            prompt: 'Board',
+          },
+        ],
+        { users: { type: 'list', default: users } }
+      );
+
+    await resolveCustomContent(withList(['alice', 'bob']), resolver);
+    expect(resolver).toHaveBeenLastCalledWith(
+      expect.objectContaining({ esqlParams: [{ users: 'alice' }] })
+    );
+
+    await resolveCustomContent(withList([]), resolver);
+    expect(resolver).toHaveBeenLastCalledWith(
+      expect.objectContaining({ esqlParams: [{ users: '' }] })
+    );
+  });
+
   it('names the component whose template could not be written', async () => {
     resolver.mockRejectedValue(new Error('ES|QL query is invalid: Unknown column [x]'));
     const document = documentOf([

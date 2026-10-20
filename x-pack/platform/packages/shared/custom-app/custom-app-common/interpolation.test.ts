@@ -66,3 +66,15 @@ describe('interpolate', () => {
     expect(interpolate('plain $& text', { a: 'x' })).toBe('plain $& text');
   });
 });
+
+describe('interpolating a list', () => {
+  it('shows its values one after the other, separated by commas', () => {
+    expect(interpolate('Users: {{state.users}}', { users: ['alice', 'bob'] })).toBe(
+      'Users: alice, bob'
+    );
+  });
+
+  it('shows an empty list as nothing', () => {
+    expect(interpolate('Users: [{{state.users}}]', { users: [] })).toBe('Users: []');
+  });
+});

@@ -23,6 +23,7 @@ import {
   MAX_TEXT_LENGTH,
   getNodeChildren,
   setStateDeclaration,
+  updateNode,
   type AppDocument,
   type AppNode,
   type AppNodeOfType,
@@ -497,6 +498,32 @@ export const PropertiesPanel = ({
                   <EuiSpacer size="m" />
                   <EuiSwitch
                     compressed
+                    id={`multiple-${node.id}`}
+                    label={i18n.translate('xpack.customApp.editor.selectMultiple', {
+                      defaultMessage: 'Allow choosing several',
+                    })}
+                    checked={node.multiple === true}
+                    onChange={(event) => {
+                      const multiple = event.target.checked;
+                      // What it sets changes with it: a list when several can be chosen, else a text.
+                      onEdit((current) => {
+                        const withValue = setStateDeclaration(
+                          current,
+                          node.bind,
+                          multiple
+                            ? { type: 'list', default: [] }
+                            : { type: 'string', default: node.options[0]?.value ?? '' }
+                        );
+                        const result = updateNode<'select'>(withValue, node.id, {
+                          multiple: multiple || undefined,
+                        });
+                        return result.ok ? result.document : current;
+                      });
+                    }}
+                  />
+                  <EuiSpacer size="s" />
+                  <EuiSwitch
+                    compressed
                     id={`options-query-${node.id}`}
                     label={i18n.translate('xpack.customApp.editor.optionsFromQuery', {
                       defaultMessage: 'Also take options from a query',
@@ -531,11 +558,49 @@ export const PropertiesPanel = ({
               )}
             </Section>
             <Section title={sections.value}>
-              {startsAs(
-                node.bind,
-                node.type === 'select' && node.optionsQuery !== undefined ? undefined : node.options
-              )}
+              {node.type === 'select' && node.multiple
+                ? null
+                : startsAs(
+                    node.bind,
+                    node.type === 'select' && node.optionsQuery !== undefined
+                      ? undefined
+                      : node.options
+                  )}
               {valueName(node.bind)}
+            </Section>
+          </Sections>
+        );
+      case 'list_input':
+        return (
+          <Sections>
+            <Section title={sections.content}>
+              <TextField
+                label={labels.label}
+                value={node.label}
+                maxLength={MAX_HEADING_LENGTH}
+                onChange={(label) => onChange<'list_input'>({ label })}
+              />
+              <TextField
+                label={i18n.translate('xpack.customApp.editor.fieldPlaceholder', {
+                  defaultMessage: 'Placeholder',
+                })}
+                value={node.placeholder ?? ''}
+                maxLength={MAX_HEADING_LENGTH}
+                onChange={(placeholder) =>
+                  onChange<'list_input'>({ placeholder: placeholder || undefined })
+                }
+              />
+            </Section>
+            <Section title={sections.value}>
+              <EuiText size="xs" color="subdued">
+                <p>
+                  {i18n.translate('xpack.customApp.editor.listValueHelp', {
+                    defaultMessage:
+                      'It sets a list, one value to a line. A query uses it as ?{name}, for example WHERE field IN (?{name}).',
+                    values: { name: node.bind },
+                  })}
+                </p>
+              </EuiText>
             </Section>
           </Sections>
         );

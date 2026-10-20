@@ -40,11 +40,14 @@ const collectFormKeys = (node: AppNode): string[] => [
 
 /**
  * The values a view is made of: all of them but what is typed in a form, which is free text that
- * can be long or private, and does not belong in a link.
+ * can be long or private, and the lists, which can be long, such as a thousand usernames pasted
+ * in a box. Neither belongs in a link.
  */
 export const getViewKeys = (document: Pick<AppDocument, 'state' | 'root'>): string[] => {
   const formKeys = new Set(collectFormKeys(document.root));
-  return Object.keys(document.state).filter((key) => !formKeys.has(key));
+  return Object.keys(document.state).filter(
+    (key) => !formKeys.has(key) && document.state[key].type !== 'list'
+  );
 };
 
 /** Only what differs from how the app starts, so an app as it starts has an empty view. */

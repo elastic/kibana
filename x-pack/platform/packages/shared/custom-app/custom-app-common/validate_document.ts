@@ -20,6 +20,7 @@ import { findStateReferences, hasMalformedReference } from './interpolation';
 import {
   getInterpolatedText,
   getNodeActions,
+  getBindingType,
   getNodeBindings,
   getNodeChildren,
   getNodeSource,
@@ -115,15 +116,20 @@ export const validateDocument = (document: DocumentToValidate, ctx: z.Refinement
 
   nodes.forEach((node) => {
     const bindings = getNodeBindings(node);
+    const wanted = getBindingType(node);
     bindings.forEach((binding) => {
       const declaration = state[binding];
       if (binding === '') {
         // Reported as too short.
       } else if (!declaration) {
         issue(`Node "${node.id}" binds unknown state key "${binding}"`, node.id);
-      } else if (declaration.type !== 'string') {
+      } else if (declaration.type !== wanted) {
         issue(
-          `Node "${node.id}" binds state key "${binding}" (${declaration.type}); an input needs a string key`,
+          `Node "${node.id}" binds state key "${binding}" (${declaration.type}); ${
+            wanted === 'list'
+              ? 'this input sets a list and needs a list key'
+              : 'an input needs a string key'
+          }`,
           node.id
         );
       }
@@ -278,7 +284,14 @@ export const validateDocument = (document: DocumentToValidate, ctx: z.Refinement
         }
 
         const { value } = action;
-        if (typeof value === 'object') {
+        if (Array.isArray(value)) {
+          if (declaration.type !== 'list') {
+            issue(
+              `Node "${node.id}" sets state key "${action.key}" (${declaration.type}) to a list`,
+              node.id
+            );
+          }
+        } else if (typeof value === 'object') {
           if ('fromColumn' in value && !allowed.fromColumn) {
             issue(`Node "${node.id}": fromColumn is not valid in ${event}`, node.id);
           }

@@ -124,6 +124,19 @@ describe('useDocumentEditor', () => {
         expect(state.view).toEqual({ type: 'string', default: 'option-1' });
       });
 
+      it('is a box of lines that sets a list, which starts empty', () => {
+        const { hook } = setup();
+
+        act(() => {
+          hook.result.current.add('list_input');
+        });
+
+        const { document } = hook.result.current;
+        expect(findNode(document.root, 'list_input-1')!.node).toMatchObject({ bind: 'values' });
+        expect(document.state.values).toEqual({ type: 'list', default: [] });
+        expect(hook.result.current.issues).toEqual([]);
+      });
+
       it('is a form that asks one question, whose answer is a value made with it', () => {
         const { hook } = setup();
 

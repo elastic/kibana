@@ -106,6 +106,7 @@ export const useDocumentEditor = (initial: AppDocument): DocumentEditor => {
         probe.type !== 'select' &&
         probe.type !== 'button_group' &&
         probe.type !== 'search' &&
+        probe.type !== 'list_input' &&
         probe.type !== 'form'
       ) {
         return commit(addNode(document, parentId, probe), id);
@@ -118,10 +119,14 @@ export const useDocumentEditor = (initial: AppDocument): DocumentEditor => {
       );
       const node = createDefaultNode(type, id, { valueKey });
       const startsAs = 'options' in node ? node.options[0]?.value ?? '' : '';
-      const withValue = setStateDeclaration(document, valueKey, {
-        type: 'string',
-        default: startsAs,
-      });
+      const withValue = setStateDeclaration(
+        document,
+        valueKey,
+        // A box of lines sets a list, which starts empty; every other input sets a text.
+        node.type === 'list_input'
+          ? { type: 'list', default: [] }
+          : { type: 'string', default: startsAs }
+      );
       return commit(addNode(withValue, parentId, node), id);
     },
 

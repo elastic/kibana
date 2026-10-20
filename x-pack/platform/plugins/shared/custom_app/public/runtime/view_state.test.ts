@@ -24,6 +24,7 @@ const document = appDocumentSchema.parse({
     limit: { type: 'number', default: 10 },
     compact: { type: 'boolean', default: false },
     reason: { type: 'string', default: '' },
+    users: { type: 'list', default: [] },
   },
   root: {
     type: 'stack',
@@ -42,7 +43,7 @@ const document = appDocumentSchema.parse({
 
 describe('the view of an app', () => {
   describe('which values are in it', () => {
-    it('is every value of the app but what is typed in a form, which does not belong in a link', () => {
+    it('is every value of the app but what is typed in a form, and the lists, which do not belong in a link', () => {
       expect(getViewKeys(document)).toEqual(['severity', 'limit', 'compact']);
     });
   });
@@ -71,6 +72,18 @@ describe('the view of an app', () => {
       expect(create({ severity: 'all', limit: 10, compact: false, reason: 'secret' })).toEqual(
         EMPTY_VIEW
       );
+    });
+
+    it('does not hold a list, however long: a thousand usernames do not belong in a link', () => {
+      const view = createView(
+        document,
+        { severity: 'all', limit: 10, compact: false, reason: '', users: ['alice', 'bob'] },
+        undefined,
+        DEFAULT_TIME,
+        DEFAULT_TIME
+      );
+
+      expect(view).toEqual(EMPTY_VIEW);
     });
 
     it('holds the open flyout, and the period when it is not the one the app starts with', () => {
@@ -136,6 +149,10 @@ describe('the view of an app', () => {
 
     it('leaves out a value that is too long', () => {
       expect(read({ v: { severity: 'x'.repeat(MAX_STATE_STRING_LENGTH + 1) } }).values).toEqual({});
+    });
+
+    it('leaves out a list, even when the link carries one', () => {
+      expect(read({ v: { users: ['alice'] } }).values).toEqual({});
     });
 
     it('leaves out what a form holds, even when the link carries it', () => {

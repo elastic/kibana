@@ -6,7 +6,9 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import isEqual from 'lodash/isEqual';
 import {
+  MAX_LIST_ITEMS,
   MAX_STATE_STRING_LENGTH,
   getNodeChildren,
   getStateDefaults,
@@ -67,7 +69,12 @@ export interface AppRuntime {
   ) => void;
 }
 
-const describe = (value: unknown): string => (value === null ? 'null' : typeof value);
+const describe = (value: unknown): string =>
+  value === null ? 'null' : Array.isArray(value) ? 'a list' : typeof value;
+
+/** Whether a value is of the kind a key was declared as. */
+const hasType = (value: unknown, declaration: StateDeclaration): boolean =>
+  declaration.type === 'list' ? Array.isArray(value) : typeof value === declaration.type;
 
 /** Returns why a value cannot be stored under a key, or undefined when it can. */
 const rejectValue = (
@@ -75,8 +82,18 @@ const rejectValue = (
   declaration: StateDeclaration,
   value: unknown
 ): string | undefined => {
-  if (typeof value !== declaration.type) {
-    return `"${key}" expects a ${declaration.type} but got ${describe(value)}`;
+  if (!hasType(value, declaration)) {
+    return `"${key}" expects ${
+      declaration.type === 'list' ? 'a list' : `a ${declaration.type}`
+    } but got ${describe(value)}`;
+  }
+  if (Array.isArray(value)) {
+    if (value.length > MAX_LIST_ITEMS) return `"${key}" expects at most ${MAX_LIST_ITEMS} values`;
+    if (
+      !value.every((item) => typeof item === 'string' && item.length <= MAX_STATE_STRING_LENGTH)
+    ) {
+      return `"${key}" expects a list of texts of at most ${MAX_STATE_STRING_LENGTH} characters`;
+    }
   }
   if (typeof value === 'number' && !Number.isFinite(value)) {
     return `"${key}" expects a finite number`;
@@ -128,7 +145,7 @@ export const createAppRuntime = (document: Pick<AppDocument, 'state' | 'root'>):
     }
 
     let resolved: unknown;
-    if (typeof value !== 'object') {
+    if (typeof value !== 'object' || Array.isArray(value)) {
       resolved = value;
     } else if ('fromColumn' in value) {
       if (!input.row || !(value.fromColumn in input.row)) {
@@ -153,7 +170,7 @@ export const createAppRuntime = (document: Pick<AppDocument, 'state' | 'root'>):
       dropped.push(rejection);
       return;
     }
-    if (state$.getValue()[key] === resolved) return;
+    if (isEqual(state$.getValue()[key], resolved)) return;
     state$.next({ ...state$.getValue(), [key]: resolved as StateValue });
   };
 
@@ -225,7 +242,7 @@ export const createAppRuntime = (document: Pick<AppDocument, 'state' | 'root'>):
             ? value
             : declaration.default;
       });
-      if (Object.keys(next).some((key) => next[key] !== current[key])) state$.next(next);
+      if (Object.keys(next).some((key) => !isEqual(next[key], current[key]))) state$.next(next);
 
       const open = flyout !== undefined && flyoutIds.has(flyout) ? flyout : undefined;
       if (openFlyoutId$.getValue() !== open) openFlyoutId$.next(open);
@@ -238,14 +255,12 @@ export const createAppRuntime = (document: Pick<AppDocument, 'state' | 'root'>):
       const merged = Object.fromEntries(
         Object.entries(declarations).map(([key, declaration]) => [
           key,
-          key in current && typeof current[key] === declaration.type
-            ? current[key]
-            : declaration.default,
+          key in current && hasType(current[key], declaration) ? current[key] : declaration.default,
         ])
       );
       const changed =
         Object.keys(merged).length !== Object.keys(current).length ||
-        Object.entries(merged).some(([key, value]) => current[key] !== value);
+        Object.entries(merged).some(([key, value]) => !isEqual(current[key], value));
       if (changed) state$.next(merged);
 
       const open = openFlyoutId$.getValue();

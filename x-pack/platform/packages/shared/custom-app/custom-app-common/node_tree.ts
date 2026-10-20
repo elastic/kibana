@@ -90,6 +90,7 @@ export const getNodeBindings = (node: AppNode): string[] => {
     case 'select':
     case 'button_group':
     case 'search':
+    case 'list_input':
       return [node.bind];
     case 'form':
       return node.fields.map(({ bind }) => bind);
@@ -97,6 +98,15 @@ export const getNodeBindings = (node: AppNode): string[] => {
       return [];
   }
 };
+
+/**
+ * What kind of value an input sets: a list for a box of lines, and for a select that takes several
+ * options, and text for every other.
+ */
+export const getBindingType = (node: AppNode): 'string' | 'list' =>
+  node.type === 'list_input' || (node.type === 'select' && node.multiple === true)
+    ? 'list'
+    : 'string';
 
 /** The actions a node can run, with the event that runs them. */
 export const getNodeActions = (
@@ -112,6 +122,7 @@ export const getNodeActions = (
     case 'select':
     case 'button_group':
     case 'search':
+    case 'list_input':
       return [{ event: 'onChange', actions: node.onChange }];
     default:
       return [];

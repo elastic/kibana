@@ -57,6 +57,7 @@ const summarize = (node: AppNode): string => {
     case 'select':
     case 'button_group':
     case 'search':
+    case 'list_input':
     case 'button':
       return node.label;
     case 'form':

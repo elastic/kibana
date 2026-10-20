@@ -144,6 +144,16 @@ export const createDefaultNode = (
         onChange: [],
         label: i18n.translate('xpack.customApp.defaults.search', { defaultMessage: 'Search' }),
       };
+    case 'list_input':
+      return {
+        type,
+        id,
+        bind,
+        onChange: [],
+        label: i18n.translate('xpack.customApp.defaults.listInput', {
+          defaultMessage: 'Values',
+        }),
+      };
     case 'stack':
       return { type, id, direction: 'vertical', children: [] };
     case 'flyout':

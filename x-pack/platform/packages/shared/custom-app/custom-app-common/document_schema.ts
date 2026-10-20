@@ -15,6 +15,7 @@ import {
   MAX_CASES_FILTER_LENGTH,
   MAX_CASES_LIMIT,
   MAX_INPUT_OPTIONS,
+  MAX_LIST_ITEMS,
   MAX_CHILDREN_PER_NODE,
   MAX_FORM_FIELDS,
   MAX_HEADING_LENGTH,
@@ -55,11 +56,15 @@ const stateValueSchema = z.union([
   z.boolean(),
 ]);
 
+/** A list of texts, such as the usernames to look for. */
+const listValueSchema = z.array(z.string().max(MAX_STATE_STRING_LENGTH)).max(MAX_LIST_ITEMS);
+
 /** Every state key needs a default so a query that uses it always has a value. */
 export const stateDeclarationSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('string'), default: z.string().max(MAX_STATE_STRING_LENGTH) }),
   z.object({ type: z.literal('number'), default: z.number().finite() }),
   z.object({ type: z.literal('boolean'), default: z.boolean() }),
+  z.object({ type: z.literal('list'), default: listValueSchema }),
 ]);
 
 /** An ES|QL query. A component that shows data carries its own. */
@@ -71,6 +76,7 @@ const setStateActionSchema = z.object({
   key: stateKeySchema,
   value: z.union([
     stateValueSchema,
+    listValueSchema,
     z.object({ fromColumn: z.string().min(1).max(MAX_HEADING_LENGTH) }),
     z.object({ fromInput: z.literal(true) }),
   ]),
@@ -304,12 +310,24 @@ const selectNodeSchema = z.object({
   ...inputFields,
   options: z.array(inputOptionSchema).max(MAX_INPUT_OPTIONS).default([]),
   optionsQuery: querySchema.optional(),
+  /** Several options can be chosen, and the value it sets is a list. Nothing chosen is an empty list. */
+  multiple: z.boolean().optional(),
 });
 
 const buttonGroupNodeSchema = z.object({
   type: z.literal('button_group'),
   ...inputFields,
   options: z.array(inputOptionSchema).min(1).max(MAX_BUTTON_GROUP_OPTIONS),
+});
+
+/**
+ * A box in which people write one value per line, such as the usernames to look for. The value it
+ * sets is a list: the lines, without the empty ones and the repeated ones.
+ */
+const listInputNodeSchema = z.object({
+  type: z.literal('list_input'),
+  ...inputFields,
+  placeholder: z.string().max(MAX_HEADING_LENGTH).optional(),
 });
 
 const searchNodeSchema = z.object({
@@ -350,6 +368,7 @@ type LeafNode =
   | z.output<typeof selectNodeSchema>
   | z.output<typeof buttonGroupNodeSchema>
   | z.output<typeof searchNodeSchema>
+  | z.output<typeof listInputNodeSchema>
   | z.output<typeof buttonNodeSchema>
   | z.output<typeof formNodeSchema>
   | z.output<typeof timeRangeNodeSchema>;
@@ -396,6 +415,7 @@ export const nodeSchema = z.discriminatedUnion('type', [
   selectNodeSchema,
   buttonGroupNodeSchema,
   searchNodeSchema,
+  listInputNodeSchema,
   buttonNodeSchema,
   formNodeSchema,
   timeRangeNodeSchema,

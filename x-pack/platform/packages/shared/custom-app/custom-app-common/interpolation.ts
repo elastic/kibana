@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type StateValue = string | number | boolean;
+export type StateValue = string | number | boolean | readonly string[];
 
 /** The only reference form text may contain: `{{state.<key>}}`. */
 const REFERENCE_PATTERN = /\{\{\s*state\.([A-Za-z_][A-Za-z0-9_]*)\s*\}\}/g;
@@ -19,8 +19,12 @@ export const hasMalformedReference = (text: string): boolean =>
   text.replace(REFERENCE_PATTERN, '').includes('{{');
 
 /**
- * Replaces each `{{state.key}}` with the key's current value as plain text. A key with no value
- * is replaced with nothing.
+ * Replaces each `{{state.key}}` with the key's current value as plain text, a list as its values
+ * separated by commas. A key with no value is replaced with nothing.
  */
 export const interpolate = (text: string, state: Readonly<Record<string, StateValue>>): string =>
-  text.replace(REFERENCE_PATTERN, (_match, key: string) => String(state[key] ?? ''));
+  text.replace(REFERENCE_PATTERN, (_match, key: string) => {
+    const value = state[key];
+    // A list is shown as its values, one after the other.
+    return Array.isArray(value) ? value.join(', ') : String(value ?? '');
+  });

@@ -243,6 +243,104 @@ describe('SelectNode with options from a query', () => {
   });
 });
 
+describe('SelectNode that takes several options', () => {
+  const multipleDocument = (
+    extra: Record<string, unknown> = {},
+    users: string[] = [],
+    state: Record<string, unknown> = {}
+  ) =>
+    appDocumentSchema.parse({
+      state: { users: { type: 'list', default: users }, ...state },
+      root: {
+        type: 'select',
+        id: 'pick',
+        label: 'Users',
+        bind: 'users',
+        multiple: true,
+        options: [{ value: 'alice', label: 'Alice' }, { value: 'bob' }],
+        ...extra,
+      },
+    });
+
+  const chosen = () =>
+    screen.queryAllByTestId('euiComboBoxPill').map(({ textContent }) => textContent);
+
+  it('shows what is chosen, by its label, and a placeholder when nothing is', async () => {
+    await renderApp(multipleDocument({}, ['alice']), noData);
+
+    expect(chosen()).toEqual(['Alice']);
+  });
+
+  it('has nothing chosen when the list is empty', async () => {
+    await renderApp(multipleDocument(), noData);
+
+    expect(chosen()).toEqual([]);
+    expect(screen.getByPlaceholderText('Select one or more')).toBeInTheDocument();
+  });
+
+  it('adds an option to the list when it is chosen, and keeps the ones that were', async () => {
+    const { runtime } = await renderApp(multipleDocument({}, ['alice']), noData);
+
+    await userEvent.click(screen.getByRole('combobox', { name: 'Users' }));
+    await userEvent.click(await screen.findByRole('option', { name: 'bob' }));
+
+    expect(runtime.state$.getValue().users).toEqual(['alice', 'bob']);
+  });
+
+  it('sets the values of the options, not their labels', async () => {
+    const { runtime } = await renderApp(multipleDocument(), noData);
+
+    await userEvent.click(screen.getByRole('combobox', { name: 'Users' }));
+    await userEvent.click(await screen.findByRole('option', { name: 'Alice' }));
+
+    expect(runtime.state$.getValue().users).toEqual(['alice']);
+  });
+
+  it('empties the list when what was chosen is cleared', async () => {
+    const { runtime } = await renderApp(multipleDocument({}, ['alice', 'bob']), noData);
+
+    await userEvent.click(screen.getByTestId('comboBoxClearButton'));
+
+    expect(runtime.state$.getValue().users).toEqual([]);
+  });
+
+  it('follows the list when something else changes it', async () => {
+    const { runtime } = await renderApp(multipleDocument(), noData);
+
+    act(() => {
+      runtime.run([{ type: 'setState', key: 'users', value: ['bob'] }]);
+    });
+
+    expect(chosen()).toEqual(['bob']);
+  });
+
+  it('shows what is chosen even when it is none of the options, as what it is', async () => {
+    await renderApp(multipleDocument({}, ['carol']), noData);
+
+    expect(chosen()).toEqual(['carol']);
+  });
+
+  it('takes its options from a query too, after the ones that are written', async () => {
+    await renderApp(
+      multipleDocument({ optionsQuery: 'FROM logs | STATS BY user.name' }),
+      jest.fn(async () => ({
+        columns: [{ name: 'user.name', type: 'keyword' }],
+        rows: [['carol'], ['alice']],
+      }))
+    );
+
+    await userEvent.click(screen.getByRole('combobox', { name: 'Users' }));
+
+    await waitFor(() =>
+      expect(screen.getAllByRole('option').map(({ textContent }) => textContent)).toEqual([
+        'Alice',
+        'bob',
+        'carol',
+      ])
+    );
+  });
+});
+
 describe('ButtonGroupNode', () => {
   const render = (extra: Record<string, unknown> = {}) =>
     renderApp(documentWith({ type: 'button_group', options: OPTIONS, ...extra }), noData);
