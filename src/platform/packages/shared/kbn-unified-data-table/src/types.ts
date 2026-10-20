@@ -94,6 +94,11 @@ export type CustomBulkActions = Array<
      * If omitted, the action is always shown.
      */
     isAvailable?: (payload: { selectedDocIds: string[] }) => boolean;
+    /**
+     * Optional reason the action cannot run on the current selection. Renders the action
+     * disabled, with the reason as its tooltip.
+     */
+    getDisabledReason?: (payload: { selectedDocIds: string[] }) => string | undefined;
     label: React.ReactElement | string;
     key: string;
   }
