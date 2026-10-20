@@ -2474,6 +2474,82 @@ describe('WorkflowStepExecutionTree', () => {
       expect(parent).toHaveAttribute('data-step-type', 'kibana.request');
     });
 
+    it('derives the fallback scope status and time, and keeps waits between attempts', () => {
+      isTerminalStatus.mockReturnValue(true);
+      isDangerousStatus.mockImplementation((s) => s === ExecutionStatus.FAILED);
+      const [retryParent] = makeFailedRetryTree();
+      buildStepExecutionsTree.mockReturnValue([
+        {
+          ...retryParent,
+          children: [
+            ...retryParent.children,
+            {
+              stepExecutionId: undefined,
+              stepId: 'fallback',
+              stepType: 'unknown',
+              executionIndex: 0,
+              status: ExecutionStatus.SKIPPED,
+              children: [
+                {
+                  stepExecutionId: 'fallback-step',
+                  stepId: 'log_fallback',
+                  stepType: 'console',
+                  executionIndex: 0,
+                  status: ExecutionStatus.COMPLETED,
+                  children: [],
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      const t0 = Date.parse('2024-01-01T10:00:00.000Z');
+      render(
+        <TestWrapper>
+          <WorkflowStepExecutionTree
+            execution={createMockExecution({
+              status: ExecutionStatus.COMPLETED,
+              stepExecutions: [
+                ...[1, 2, 3, 4].map((n) =>
+                  createMockStepExecution({
+                    id: `attempt-${n}`,
+                    stepId: 'http_call',
+                    stepType: 'kibana.request',
+                    status: ExecutionStatus.FAILED,
+                    startedAt: new Date(t0 + (n - 1) * 200).toISOString(),
+                    finishedAt: new Date(t0 + (n - 1) * 200 + 100).toISOString(),
+                    executionTimeMs: 100,
+                  })
+                ),
+                createMockStepExecution({
+                  id: 'fallback-step',
+                  stepId: 'log_fallback',
+                  stepType: 'console',
+                  status: ExecutionStatus.COMPLETED,
+                  executionTimeMs: 7,
+                }),
+              ],
+            })}
+            definition={createMockDefinition()}
+            error={null}
+            onStepExecutionClick={mockOnStepExecutionClick}
+            selectedId={null}
+          />
+        </TestWrapper>
+      );
+
+      const fallbackRow = screen.getByText('fallback').closest('[data-step-id="fallback"]');
+      expect(fallbackRow).toHaveAttribute('data-status', ExecutionStatus.COMPLETED);
+      expect(fallbackRow).toHaveAttribute('data-execution-time-ms', '7');
+      expect(fallbackRow).not.toHaveTextContent('Not run');
+      expect(screen.getAllByTestId('workflowStepTreeRetryWait')).toHaveLength(3);
+      expect(screen.getByText('http_call').closest('[data-step-id="http_call"]')).toHaveAttribute(
+        'data-execution-time-ms',
+        '700'
+      );
+    });
+
     it('borders the final-attempt error region when any attempt of the step is selected', () => {
       isTerminalStatus.mockReturnValue(true);
       isDangerousStatus.mockImplementation((s) => s === ExecutionStatus.FAILED);
