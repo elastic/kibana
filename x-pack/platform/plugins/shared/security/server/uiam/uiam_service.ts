@@ -217,12 +217,11 @@ export interface UiamServicePublic {
   getInternalCallerAttestationHeaders(credential: HTTPAuthorizationHeader): Record<string, string>;
 
   /**
-   * Returns the Elasticsearch client authentication information with the shared secret value. This is to be used with
-   * `client_authentication` option in Elasticsearch client. When a request is provided and client authentication rode
-   * in with its UIAM bearer token, that inbound value is preserved instead of Kibana's own shared secret.
-   * @param request Optional request whose inbound client authentication takes precedence.
+   * Returns client authentication for Elasticsearch's `client_authentication` option.
+   * Preserves client authentication supplied with a UIAM bearer token, or uses Kibana's own value.
+   * @param request Optional request or stored headers for the current credential.
    */
-  getClientAuthentication(request?: KibanaRequest): ClientAuthentication;
+  getClientAuthentication(request?: Pick<KibanaRequest, 'headers'>): ClientAuthentication;
 
   /**
    * Refreshes the UIAM user session and returns new access and refresh session tokens.
@@ -575,7 +574,7 @@ export class UiamService implements UiamServicePublic {
   /**
    * See {@link UiamServicePublic.getClientAuthentication}.
    */
-  getClientAuthentication(request?: KibanaRequest): ClientAuthentication {
+  getClientAuthentication(request?: Pick<KibanaRequest, 'headers'>): ClientAuthentication {
     const suppliedSharedSecret = request
       ? getUiamClientAuthentication(request)?.sharedSecret
       : undefined;

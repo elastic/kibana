@@ -65,6 +65,22 @@ describe('createInternalErrorHandler', () => {
     expect(setAuthHeaders).toHaveBeenCalledWith(request, handlerResponse.authHeaders);
   });
 
+  it('passes the failed attempt headers to the authentication owner', async () => {
+    const handler = jest.fn().mockReturnValue(toolkit.notHandled());
+    const request = httpServerMock.createKibanaRequest();
+    const internalHandler = createInternalErrorHandler({
+      getHandler: () => handler,
+      request,
+      setAuthHeaders,
+    });
+    const error = createUnauthorizedError();
+    const authHeaders = { authorization: 'Bearer expired' };
+
+    await internalHandler(error, authHeaders);
+
+    expect(handler).toHaveBeenCalledWith({ request, error, authHeaders }, toolkit);
+  });
+
   it('does not call `setAuthHeaders` when the handler returns `notHandled`', async () => {
     const handlerResponse = toolkit.notHandled();
     const handler = jest.fn().mockReturnValue(handlerResponse);

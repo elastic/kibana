@@ -9,7 +9,7 @@
 
 import type { MaybePromise } from '@kbn/utility-types';
 import type { UnauthorizedError } from '@kbn/es-errors';
-import type { SetAuthHeaders } from '@kbn/core-http-server';
+import type { Headers, SetAuthHeaders } from '@kbn/core-http-server';
 import { isKibanaRequest, isRealRequest } from '@kbn/core-http-router-server-internal';
 import type {
   ScopeableRequest,
@@ -22,7 +22,8 @@ import type {
 
 /** @internal */
 export type InternalUnauthorizedErrorHandler = (
-  error: UnauthorizedError
+  error: UnauthorizedError,
+  authHeaders?: Headers
 ) => MaybePromise<UnauthorizedErrorHandlerResult>;
 
 /** @internal */
@@ -57,13 +58,16 @@ export const createInternalErrorHandler = ({
   if (!isKibanaRequest(request)) {
     return notHandledInternalErrorHandler;
   }
-  return async (error) => {
+  return async (error, authHeaders) => {
     try {
       const handler = getHandler();
       if (!handler) {
         return toolkit.notHandled();
       }
-      const result = await handler({ request, error }, toolkit);
+      const result = await handler(
+        { request, error, ...(authHeaders && { authHeaders }) },
+        toolkit
+      );
       if (isRetryResult(result) && isRealRequest(request)) {
         // Fake requests are deliberately excluded: the auth headers storage is only ever read for
         // real requests, and a fake request's effective credential is its own mutable `headers`.

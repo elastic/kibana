@@ -140,7 +140,7 @@ export function initRoutes(
           | {
               PKIAuthenticationProvider?: {
                 prototype: {
-                  authenticate: (request: KibanaRequest, session?: unknown) => Promise<unknown>;
+                  authenticate: (request: KibanaRequest, ...args: unknown[]) => Promise<unknown>;
                 };
               };
             }
@@ -168,14 +168,15 @@ export function initRoutes(
 
     const pkiProviderClass = findPkiAuthenticationProvider();
     const originalPkiAuthenticate = pkiProviderClass.prototype.authenticate;
+    // Preserve every argument, including the session reauthentication options, in both hold paths.
     pkiProviderClass.prototype.authenticate = async function wrappedPkiAuthenticate(
       this: unknown,
-      request: KibanaRequest,
-      session?: unknown
+      ...args: Parameters<typeof originalPkiAuthenticate>
     ) {
+      const [request] = args;
       const holdId = readHoldId(request.headers[PREAUTH_HOLD_HEADER]);
       if (!holdId) {
-        return originalPkiAuthenticate.call(this, request, session);
+        return originalPkiAuthenticate.apply(this, args);
       }
 
       preauthHolds.get(holdId)?.release();
@@ -219,7 +220,7 @@ export function initRoutes(
 
       hold.continuedAfterHold = true;
       try {
-        return await originalPkiAuthenticate.call(this, request, session);
+        return await originalPkiAuthenticate.apply(this, args);
       } finally {
         hold.authCompleted = true;
         hold.parked = false;
