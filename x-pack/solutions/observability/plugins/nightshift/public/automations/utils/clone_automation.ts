@@ -25,7 +25,7 @@ const getCopyName = (name: string, existingNames: string[]): string => {
 };
 
 export const toCloneRequestBody = (
-  { name, description, tags, automationType, trigger, execution, completion, runtime }: Automation,
+  { name, description, tags, automationType, trigger, execution, completions, runtime }: Automation,
   existingNames: string[]
 ): CreateAutomationBody => ({
   name: getCopyName(name, existingNames),
@@ -35,6 +35,6 @@ export const toCloneRequestBody = (
   automationType,
   trigger,
   execution,
-  completion,
+  completions,
   runtime,
 });

@@ -16,7 +16,9 @@ export const toCopiedAttachmentId = (investigationId: string, attachmentId: stri
 
 /** Whether an investigation attachment is eligible to be copied into an escalation. */
 export const isCopyableAttachment = (att: { active?: boolean; type: string }): boolean =>
-  att.active !== false && att.type !== 'screen_context';
+  att.active !== false &&
+  att.type !== 'screen_context' &&
+  att.type !== 'nightshift.notification_routing';
 
 /**
  * Copies active, non-screen_context attachments from `investigation` to `escalation`.

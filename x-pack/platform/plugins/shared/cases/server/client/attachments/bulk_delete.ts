@@ -7,32 +7,68 @@
 
 import Boom from '@hapi/boom';
 
-import pMap from 'p-map';
-import { partition } from 'lodash';
-import type { Logger } from '@kbn/core/server';
-import type { File, FileJSON } from '@kbn/files-plugin/common';
-import type { FileServiceStart } from '@kbn/files-plugin/server';
-import { FileNotFoundError } from '@kbn/files-plugin/server/file_service/errors';
-import { BulkDeleteFileAttachmentsRequestRt } from '../../../common/types/api';
+import {
+  BulkDeleteAttachmentsRequestRt,
+  BulkDeleteFileAttachmentsRequestRt,
+} from '../../../common/types/api';
 import { decodeWithExcessOrThrow } from '../../common/runtime_types';
-import { MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import type { CasesClientArgs } from '../types';
 import { createCaseError } from '../../common/error';
 import { Operations } from '../../authorization';
-import type { BulkDeleteFileArgs } from './types';
-import { CaseFileMetadataForDeletionRt } from '../../../common/files';
+import type { BulkDeleteArgs, BulkDeleteFileArgs } from './types';
 import type { CasesClient } from '../client';
-import { createFileEntities, deleteFiles } from '../files';
-import { emitAttachmentsDeletedEvents } from './trigger_utils';
+import { deleteFiles, getFileEntitiesForCase } from '../files';
+import { deleteCaseAttachments, doNotExistOnCaseMessage } from './delete_utils';
 
+/** Deletes attachments of any type from a case, rejecting the request if any id is not found. */
+export const bulkDeleteAttachments = async (
+  { caseId, savedObjectIds }: BulkDeleteArgs,
+  clientArgs: CasesClientArgs
+): Promise<void> => {
+  const {
+    services: { attachmentService },
+    logger,
+  } = clientArgs;
+
+  try {
+    const request = decodeWithExcessOrThrow(BulkDeleteAttachmentsRequestRt)({
+      ids: savedObjectIds,
+    });
+    const uniqueIds = [...new Set(request.ids)];
+
+    const attachments = await attachmentService.getter.bulkGetForDeletion(uniqueIds);
+    const foundIds = new Set(attachments.map(({ id }) => id));
+    const missingIds = uniqueIds.filter((id) => !foundIds.has(id));
+
+    if (missingIds.length > 0) {
+      throw Boom.notFound(doNotExistOnCaseMessage(missingIds, caseId));
+    }
+
+    await deleteCaseAttachments(
+      {
+        caseId,
+        attachments,
+        operation: Operations.deleteComment,
+      },
+      clientArgs
+    );
+  } catch (error) {
+    throw createCaseError({
+      message: `Failed to bulk delete attachments for case: ${caseId}: ${error}`,
+      error,
+      logger,
+    });
+  }
+};
+
+/** Deletes files of a case and the attachments that reference them. */
 export const bulkDeleteFileAttachments = async (
   { caseId, fileIds }: BulkDeleteFileArgs,
   clientArgs: CasesClientArgs,
   casesClient: CasesClient
-) => {
+): Promise<void> => {
   const {
-    user,
-    services: { attachmentService, userActionService },
+    services: { attachmentService },
     logger,
     authorization,
     fileService,
@@ -43,56 +79,40 @@ export const bulkDeleteFileAttachments = async (
 
     await casesClient.cases.resolve({ id: caseId, includeComments: false });
 
-    const fileEntities = await getFileEntities({
+    // Rejects a file linked to another case before anything is deleted.
+    const fileEntities = await getFileEntitiesForCase({
       caseId,
       fileIds: request.ids,
       fileService,
       logger,
     });
 
-    // It's possible for this to return an empty array if there was an error creating file attachments in which case the
-    // file would be present but the case attachment would not
-    const fileAttachments = await attachmentService.getter.getFileAttachments({
+    const attachments = await attachmentService.getter.getFileAttachmentsForDeletion({
       caseId,
       fileIds: request.ids,
     });
 
-    await authorization.ensureAuthorized({
-      entities: [
-        ...fileAttachments.map((attachment) => ({
-          id: attachment.id,
-          owner: attachment.attributes.owner,
-        })),
-        ...fileEntities,
-      ],
-      operation: Operations.deleteComment,
-    });
+    // A file has no attachment when creating the attachment failed after the upload.
+    const attachedFileIds = new Set(attachments.map(({ fileId }) => fileId));
+    const unattachedFileEntities = fileEntities.filter(({ id }) => !attachedFileIds.has(id));
 
-    const [, deletedAttachmentIds] = await Promise.all([
-      deleteFiles(
-        fileEntities.map((entity) => entity.id),
-        fileService
-      ),
-      attachmentService.bulkDelete({
-        savedObjectIds: fileAttachments.map((so) => so.id),
-        refresh: false,
-      }),
-    ]);
+    if (unattachedFileEntities.length > 0) {
+      await authorization.ensureAuthorized({
+        entities: unattachedFileEntities,
+        operation: Operations.deleteComment,
+      });
+    }
 
-    await userActionService.creator.bulkCreateAttachmentDeletion({
-      caseId,
-      attachments: fileAttachments.map((attachment) => ({
-        id: attachment.id,
-        owner: attachment.attributes.owner,
-        attachment: attachment.attributes,
-      })),
-      user,
-    });
+    if (attachments.length > 0) {
+      await deleteCaseAttachments(
+        { caseId, attachments, operation: Operations.deleteComment },
+        clientArgs
+      );
+    }
 
-    emitAttachmentsDeletedEvents(
-      clientArgs,
-      caseId,
-      fileAttachments.filter(({ id }) => deletedAttachmentIds.includes(id))
+    await deleteFiles(
+      unattachedFileEntities.map(({ id }) => id),
+      fileService
     );
   } catch (error) {
     throw createCaseError({
@@ -101,114 +121,4 @@ export const bulkDeleteFileAttachments = async (
       logger,
     });
   }
-};
-
-const getFileEntities = async ({
-  caseId,
-  fileIds,
-  fileService,
-  logger,
-}: {
-  caseId: BulkDeleteFileArgs['caseId'];
-  fileIds: BulkDeleteFileArgs['fileIds'];
-  fileService: FileServiceStart;
-  logger: Logger;
-}) => {
-  const files = await getFiles({ caseId, fileIds, fileService, logger });
-
-  const fileEntities = createFileEntities(files);
-
-  return fileEntities;
-};
-
-const getFiles = async ({
-  caseId,
-  fileIds,
-  fileService,
-  logger,
-}: {
-  caseId: BulkDeleteFileArgs['caseId'];
-  fileIds: BulkDeleteFileArgs['fileIds'];
-  fileService: FileServiceStart;
-  logger: Logger;
-}): Promise<FileJSON[]> => {
-  // it's possible that we're trying to delete a file when an attachment wasn't created (for example if the create
-  // attachment request failed)
-  const fileSettleResults = await pMap(
-    fileIds,
-    async (fileId) => {
-      try {
-        return await fileService.getById({ id: fileId });
-      } catch (error) {
-        return error;
-      }
-    },
-    {
-      concurrency: MAX_CONCURRENT_SEARCHES,
-    }
-  );
-
-  const files = retrieveFilesIgnoringNotFound(fileSettleResults, fileIds, logger);
-
-  const [validFiles, invalidFiles] = partition(files, (file) => {
-    return (
-      CaseFileMetadataForDeletionRt.is(file.data.meta) &&
-      file.data.meta.caseIds.length === 1 &&
-      file.data.meta.caseIds.includes(caseId)
-    );
-  }) as [File[], File[]];
-
-  if (invalidFiles.length > 0) {
-    const invalidIds = invalidFiles.map((fileInfo) => fileInfo.id);
-
-    // I'm intentionally being vague here because it's possible an unauthorized user could attempt to delete files
-    throw Boom.badRequest(`Failed to delete files because filed ids were invalid: ${invalidIds}`);
-  }
-
-  return validFiles.map((fileInfo) => fileInfo.data);
-};
-
-export const retrieveFilesIgnoringNotFound = (
-  results: Array<File<unknown> | Error>,
-  fileIds: BulkDeleteFileArgs['fileIds'],
-  logger: Logger
-) => {
-  const files: File[] = [];
-
-  results.forEach((result, index) => {
-    if (result instanceof FileNotFoundError) {
-      const warningMessage = getFileNotFoundErrorMessage({
-        resultsLength: results.length,
-        fileIds,
-        index,
-        result,
-      });
-
-      logger.warn(warningMessage);
-    } else if (result instanceof Error) {
-      throw result;
-    } else if (result) {
-      files.push(result);
-    }
-  });
-
-  return files;
-};
-
-const getFileNotFoundErrorMessage = ({
-  resultsLength,
-  fileIds,
-  index,
-  result,
-}: {
-  resultsLength: number;
-  fileIds: BulkDeleteFileArgs['fileIds'];
-  index: number;
-  result: Error;
-}) => {
-  if (resultsLength === fileIds.length) {
-    return `Failed to find file id: ${fileIds[index]}: ${result}`;
-  }
-
-  return `Failed to find file: ${result}`;
 };

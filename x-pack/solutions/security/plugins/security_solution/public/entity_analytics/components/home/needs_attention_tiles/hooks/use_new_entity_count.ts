@@ -13,20 +13,12 @@ import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
-import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
+import { useTileQueryInputs } from './use_tile_query_inputs';
 import { EMPTY_ENTITY_IDS } from '../data';
-import type { TimeRange } from '../../use_time_range_param';
-import {
-  getEntityFilterESQL,
-  EMPTY_ENTITY_FILTERS,
-  type EntityFilters,
-} from '../../use_entity_filters_param';
-
-const TIME_RANGE_TO_ESQL: Record<TimeRange, string> = {
-  '24h': '24 hours',
-  '7d': '7 days',
-  '30d': '30 days',
-};
+import { buildNewEntityCountQuery } from '../queries/new_entity_query';
+import { EMPTY_ENTITY_FILTERS } from '../../entities_grid/common';
+import type { EntityFilters, TimeRange } from '../../entities_grid/common';
+import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
 
 export const useNewEntityCount = ({
   spaceId,
@@ -43,23 +35,15 @@ export const useNewEntityCount = ({
   const {
     data: resolvedIndex,
     isLoading: isIndexLoading,
+    entityFilterClauses,
     error: indexError,
-  } = useResolvedLatestEntitiesIndexName(spaceId);
+  } = useTileQueryInputs(spaceId, entityFilters);
 
   const index = resolvedIndex?.indexName;
 
   const query = useMemo(
-    () =>
-      index
-        ? [
-            `FROM ${index}`,
-            `| WHERE entity.lifecycle.first_seen >= NOW() - ${TIME_RANGE_TO_ESQL[timeRange]} AND entity.risk.calculated_score > 0`,
-            ...getEntityFilterESQL(entityFilters),
-            `| EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)`,
-            `| STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(entity.id)`,
-          ].join('\n')
-        : null,
-    [index, timeRange, entityFilters]
+    () => (index ? buildNewEntityCountQuery(index, timeRange, entityFilterClauses) : null),
+    [index, timeRange, entityFilterClauses]
   );
 
   const isEnabled = !skip && !isIndexLoading && Boolean(index);
@@ -102,7 +86,7 @@ export const useNewEntityCount = ({
     },
     {
       keepPreviousData: true,
-      staleTime: 5 * 60_000,
+      ...TILE_QUERY_CACHE_OPTIONS,
       refetchOnWindowFocus: false,
       enabled: isEnabled,
       retry: 1,
@@ -120,6 +104,8 @@ export const useNewEntityCount = ({
     count: result?.count ?? 0,
     entityIds: isFetching ? EMPTY_ENTITY_IDS : result?.entityIds ?? EMPTY_ENTITY_IDS,
     isLoading: isIndexLoading || isLoading || isFetching,
+    // True while the count is on its way, not when its query can never run (skipped, no index, no job).
+    isCountPending: isIndexLoading || (isEnabled && (isLoading || isFetching)),
     error: (error as SecurityAppError | undefined) ?? indexError,
   };
 };

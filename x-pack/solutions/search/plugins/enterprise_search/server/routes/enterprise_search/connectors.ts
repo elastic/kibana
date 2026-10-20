@@ -192,7 +192,7 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
       validate: {
         body: schema.recordOf(
           schema.string({ maxLength: 1000 }),
-          schema.oneOf([schema.string({ maxLength: 4096 }), schema.number(), schema.boolean()])
+          schema.oneOf([schema.string({ maxLength: 100_000 }), schema.number(), schema.boolean()])
         ),
         params: schema.object({
           connectorId: schema.string(),
@@ -504,7 +504,7 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
       },
       validate: {
         body: schema.object({
-          description: schema.nullable(schema.string({ maxLength: 4096 })),
+          description: schema.nullable(schema.string({ maxLength: 10_000 })),
           name: schema.string({ maxLength: 1000 }),
         }),
         params: schema.object({
@@ -538,7 +538,7 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
       },
       validate: {
         body: schema.object({
-          advanced_snippet: schema.string({ maxLength: 10000 }),
+          advanced_snippet: schema.string({ maxLength: 100_000 }),
           filtering_rules: schema.arrayOf(
             schema.object({
               created_at: schema.string({ maxLength: 512 }),
@@ -548,7 +548,7 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
               policy: schema.string({ maxLength: 512 }),
               rule: schema.string({ maxLength: 1000 }),
               updated_at: schema.string({ maxLength: 512 }),
-              value: schema.string({ maxLength: 10000 }),
+              value: schema.string({ maxLength: 10_000 }),
             }),
             { maxSize: 1000 }
           ),
@@ -584,7 +584,7 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
       validate: {
         body: schema.maybe(
           schema.object({
-            advanced_snippet: schema.string({ maxLength: 10000 }),
+            advanced_snippet: schema.string({ maxLength: 100_000 }),
             filtering_rules: schema.arrayOf(
               schema.object({
                 created_at: schema.string({ maxLength: 512 }),
@@ -594,7 +594,7 @@ export function registerConnectorRoutes({ router, log, getStartServices }: Route
                 policy: schema.string({ maxLength: 512 }),
                 rule: schema.string({ maxLength: 1000 }),
                 updated_at: schema.string({ maxLength: 512 }),
-                value: schema.string({ maxLength: 10000 }),
+                value: schema.string({ maxLength: 10_000 }),
               }),
               { maxSize: 1000 }
             ),

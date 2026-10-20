@@ -7,6 +7,7 @@
 
 import type { Capabilities, ScopedHistory } from '@kbn/core/public';
 import type { AlertingV2PageProps } from '@kbn/alerting-v2-plugin/public';
+import type { EpisodeActionsDeps } from '@kbn/alerting-v2-episodes-ui/actions';
 import { coreMock } from '@kbn/core/public/mocks';
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
@@ -17,6 +18,12 @@ import {
   OBSERVABILITY_ALERTING_APP_ID,
   OBSERVABILITY_ALERTING_BASE_PATH,
 } from '@kbn/deeplinks-observability';
+import type { ObservabilityAlertingCases } from '../types';
+import {
+  ADD_TO_CASE_EPISODE_ACTION_ID,
+  closeAddToCaseModal,
+} from '@kbn/alerting-v2-episodes-ui/actions';
+import { INVESTIGATE_EPISODE_ACTION_ID } from '../actions/investigate_episode_action';
 import { ObservabilityAlertingApp } from './observability_alerting_app';
 import {
   OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
@@ -26,6 +33,15 @@ import {
   OBSERVABILITY_ALERTING_RULES_V1_PATH,
   OBSERVABILITY_ALERTING_RULES_V2_PATH,
 } from '../constants';
+
+jest.mock('@kbn/observability-plugin/public', () => ({
+  AlertingNavPromo: () => <div data-test-subj="alertingNavPromo" />,
+}));
+
+jest.mock('@kbn/alerting-v2-episodes-ui/components/add_to_case_modal', () => ({
+  ...jest.requireActual('@kbn/alerting-v2-episodes-ui/components/add_to_case_modal'),
+  closeAddToCaseModal: jest.fn(),
+}));
 
 const Placeholder = ({
   name,
@@ -70,10 +86,18 @@ const mockAlertingVTwo = {
       privilegeCheck={privilegeCheck}
     />
   ),
-  EpisodesPage: ({ hostApp, privilegeCheck, manageRulesHref }: AlertingV2PageProps) => (
+  EpisodesPage: ({
+    hostApp,
+    privilegeCheck,
+    manageRulesHref,
+    createActions,
+  }: AlertingV2PageProps) => (
     <Placeholder
       name={`episodesPage:${hostApp?.alerts?.app ?? 'none'}`}
       privilegeCheck={privilegeCheck}
+      data-action-ids={createActions?.({} as EpisodeActionsDeps)
+        .map(({ id }) => id)
+        .join(',')}
       {...(manageRulesHref ? { 'data-manage-rules-href': manageRulesHref } : {})}
     />
   ),
@@ -128,7 +152,23 @@ const mixedRulesCapabilities = {
   alerting_v2_rules: { read: true },
 } as unknown as Capabilities;
 
-const renderAt = (pathname: string, capabilities?: Capabilities) => {
+const MockPageTemplate = ({
+  children,
+  pageSectionProps,
+}: {
+  children?: React.ReactNode;
+  pageSectionProps?: { paddingSize?: string };
+}) => (
+  <div data-test-subj="mockPageTemplate" data-padding={pageSectionProps?.paddingSize}>
+    {children}
+  </div>
+);
+
+const renderAt = (
+  pathname: string,
+  capabilities?: Capabilities,
+  cases?: ObservabilityAlertingCases
+) => {
   const coreStart = coreMock.createStart();
   if (capabilities) {
     Object.assign(coreStart.application.capabilities, capabilities);
@@ -141,6 +181,8 @@ const renderAt = (pathname: string, capabilities?: Capabilities) => {
         coreStart={coreStart}
         alertingVTwo={mockAlertingVTwo}
         triggersActionsUi={mockTriggersActionsUi}
+        cases={cases}
+        ObservabilityPageTemplate={MockPageTemplate}
         history={history}
         setBreadcrumbs={jest.fn()}
       />
@@ -161,6 +203,16 @@ describe('ObservabilityAlertingApp', () => {
     expect(history.location.pathname).toBe(OBSERVABILITY_ALERTING_ALERTS_PATH);
   });
 
+  it('renders every route inside the Observability page template without extra padding', async () => {
+    const { getByTestId } = renderAt(OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH);
+
+    await waitFor(() => {
+      const template = getByTestId('mockPageTemplate');
+      expect(template).toHaveAttribute('data-padding', 'none');
+      expect(template).toContainElement(getByTestId('actionPoliciesPage:observabilityAlerting'));
+    });
+  });
+
   it('renders EpisodesPage at /alerts with observability host', async () => {
     const { getByTestId } = renderAt(OBSERVABILITY_ALERTING_ALERTS_PATH);
 
@@ -169,7 +221,59 @@ describe('ObservabilityAlertingApp', () => {
     });
   });
 
-  it('renders the classic rules page at /rules/v1', async () => {
+  it('provides only the investigate action when the cases plugin is unavailable', async () => {
+    const { getByTestId } = renderAt(OBSERVABILITY_ALERTING_ALERTS_PATH);
+
+    await waitFor(() => {
+      expect(getByTestId(`episodesPage:${OBSERVABILITY_ALERTING_APP_ID}`)).toHaveAttribute(
+        'data-action-ids',
+        INVESTIGATE_EPISODE_ACTION_ID
+      );
+    });
+  });
+
+  it('closes an open add to case modal when the app unmounts', () => {
+    const { unmount } = renderAt(OBSERVABILITY_ALERTING_ALERTS_PATH);
+    jest.mocked(closeAddToCaseModal).mockClear();
+
+    unmount();
+
+    expect(closeAddToCaseModal).toHaveBeenCalledTimes(1);
+  });
+
+  it('adds the add to case action when the cases plugin is available', async () => {
+    const cases = { service: {}, kibanaServices: {} } as unknown as ObservabilityAlertingCases;
+    const { getByTestId } = renderAt(OBSERVABILITY_ALERTING_ALERTS_PATH, undefined, cases);
+
+    await waitFor(() => {
+      expect(getByTestId(`episodesPage:${OBSERVABILITY_ALERTING_APP_ID}`)).toHaveAttribute(
+        'data-action-ids',
+        `${INVESTIGATE_EPISODE_ACTION_ID},${ADD_TO_CASE_EPISODE_ACTION_ID}`
+      );
+    });
+  });
+
+  it('renders the alerting nav promo on the alerts landing route', async () => {
+    const { getByTestId } = renderAt(OBSERVABILITY_ALERTING_ALERTS_PATH);
+
+    await waitFor(() => {
+      expect(getByTestId(`episodesPage:${OBSERVABILITY_ALERTING_APP_ID}`)).toBeInTheDocument();
+    });
+    expect(getByTestId('alertingNavPromo')).toBeInTheDocument();
+  });
+
+  it('does not render the alerting nav promo on episode details', async () => {
+    const { getByTestId, queryByTestId } = renderAt(
+      `${OBSERVABILITY_ALERTING_ALERTS_PATH}/episode-1`
+    );
+
+    await waitFor(() => {
+      expect(getByTestId(`episodesPage:${OBSERVABILITY_ALERTING_APP_ID}`)).toBeInTheDocument();
+    });
+    expect(queryByTestId('alertingNavPromo')).not.toBeInTheDocument();
+  });
+
+  it('renders the classic rules page at /rules/classic', async () => {
     const { getByTestId, history } = renderAt(OBSERVABILITY_ALERTING_RULES_V1_PATH);
 
     await waitFor(() => {
@@ -222,7 +326,7 @@ describe('ObservabilityAlertingApp', () => {
     expect(queryAllByRole('tab')).toHaveLength(0);
   });
 
-  it('renders RulesPage at /rules/v2 with observability host', async () => {
+  it('renders RulesPage at /rules/universal with observability host', async () => {
     const { getByTestId } = renderAt(OBSERVABILITY_ALERTING_RULES_V2_PATH);
 
     await waitFor(() => {
@@ -336,7 +440,7 @@ describe('ObservabilityAlertingApp', () => {
     }
   );
 
-  it('passes manageRulesHref pointing to /rules/v2 for a v2-only user', async () => {
+  it('passes manageRulesHref pointing to /rules/universal for a v2-only user', async () => {
     const { getByTestId, coreStart } = renderAt(
       OBSERVABILITY_ALERTING_ALERTS_PATH,
       v2RulesCapabilities
@@ -352,7 +456,7 @@ describe('ObservabilityAlertingApp', () => {
     );
   });
 
-  it('passes manageRulesHref pointing to /rules/v2 for a mixed v1+v2 user', async () => {
+  it('passes manageRulesHref pointing to /rules/universal for a mixed v1+v2 user', async () => {
     const { getByTestId, coreStart } = renderAt(
       OBSERVABILITY_ALERTING_ALERTS_PATH,
       mixedRulesCapabilities
@@ -368,7 +472,7 @@ describe('ObservabilityAlertingApp', () => {
     );
   });
 
-  it('passes manageRulesHref pointing to /rules/v1 for a v1-only user', async () => {
+  it('passes manageRulesHref pointing to /rules/classic for a v1-only user', async () => {
     const { getByTestId, coreStart } = renderAt(
       OBSERVABILITY_ALERTING_ALERTS_PATH,
       v1RulesCapabilities
