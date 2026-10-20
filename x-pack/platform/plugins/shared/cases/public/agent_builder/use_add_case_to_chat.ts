@@ -7,12 +7,8 @@
 
 import { useCallback, useEffect, useMemo } from 'react';
 import { EMPTY, filter, switchMap } from 'rxjs';
-import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
-import {
-  getLatestVersion,
-  type AttachmentInput,
-  type VersionedAttachment,
-} from '@kbn/agent-builder-common/attachments';
+import { isToolUiEvent, type ChatEvent, type ToolUiEvent } from '@kbn/agent-builder-common';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import { useQueryClient } from '@kbn/react-query';
 import type { CaseUI } from '../../common';
@@ -20,6 +16,10 @@ import {
   CASE_ATTACHMENT_TYPE,
   type CaseAttachmentData,
 } from '../../common/types/agent_builder/attachment_schemas';
+import {
+  CASES_UPDATED_UI_EVENT,
+  type CasesUpdatedUiEventData,
+} from '../../common/types/agent_builder/ui_events';
 import { useCasesConfig, useKibana } from '../common/lib/kibana';
 import { casesQueriesKeys } from '../containers/constants';
 import { getCaseUrls } from './attachments/route_helpers';
@@ -65,21 +65,10 @@ export const getCaseAttachment = (
   data: getCaseAttachmentData(theCase, application),
 });
 
-const isCaseAttachment = (
-  attachment: VersionedAttachment
-): attachment is VersionedAttachment<typeof CASE_ATTACHMENT_TYPE, CaseAttachmentData> => {
-  return attachment.type === CASE_ATTACHMENT_TYPE;
-};
-
-const isCurrentCaseAttachment = (caseId: string, attachment: VersionedAttachment): boolean => {
-  if (!isCaseAttachment(attachment)) {
-    return false;
-  }
-
-  const latestVersion = getLatestVersion(attachment);
-
-  return latestVersion?.data.id === caseId;
-};
+const isCasesUpdatedUiEvent = (
+  event: ChatEvent
+): event is ToolUiEvent<typeof CASES_UPDATED_UI_EVENT, CasesUpdatedUiEventData> =>
+  isToolUiEvent(event, CASES_UPDATED_UI_EVENT);
 
 export const useAddCaseToChat = (theCase: CaseUI) => {
   const {
@@ -102,14 +91,10 @@ export const useAddCaseToChat = (theCase: CaseUI) => {
         switchMap((conversation) =>
           conversation?.id ? agentBuilder.events.getChatEvents$(conversation.id) : EMPTY
         ),
-        filter(isRoundCompleteEvent)
+        filter(isCasesUpdatedUiEvent)
       )
       .subscribe((event) => {
-        if (
-          event.data.attachments?.some((attachment) =>
-            isCurrentCaseAttachment(theCase.id, attachment)
-          )
-        ) {
+        if (event.data.data.caseIds.includes(theCase.id)) {
           queryClient.invalidateQueries(casesQueriesKeys.case(theCase.id));
           queryClient.invalidateQueries(casesQueriesKeys.tags());
           queryClient.invalidateQueries(casesQueriesKeys.categories());

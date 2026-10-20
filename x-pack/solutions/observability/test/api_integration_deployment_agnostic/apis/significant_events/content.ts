@@ -20,6 +20,7 @@ import {
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 import { bulkQueries, getQueries } from './helpers/requests';
+import { createTestSource, deleteTestSource } from './helpers/test_source';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
@@ -32,6 +33,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       const apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
+
+      let sourceId: string | undefined;
 
       try {
         await putStream(apiClient, 'logs.otel.branch_a', {
@@ -49,14 +52,23 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         });
 
-        await bulkQueries(apiClient, 'logs.otel.branch_a', [
+        // Seed a real Nightshift source pointing at the stream, then attach a
+        // query to it. The export must omit this query even though it exists.
+        const source = await createTestSource(
+          roleScopedSupertest,
+          'branch_a_source',
+          'FROM logs.otel.branch_a'
+        );
+        sourceId = source.id;
+
+        await bulkQueries(apiClient, source.id, [
           {
             index: {
               id: 'export-omits-me',
               title: 'detector',
               description: '',
               esql: {
-                query: `FROM logs.otel.branch_a,logs.otel.branch_a.* | WHERE KQL("message:'ERROR'")`,
+                query: `FROM ${source.viewName} | WHERE KQL("message:'ERROR'")`,
               },
             },
           },
@@ -74,15 +86,22 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           (entry): entry is ContentPackStream => entry.type === 'stream'
         );
         expect(streamEntries.length).to.be.greaterThan(0);
+        // Significant-event queries are intentionally excluded from content packs.
+        // They are stored on Nightshift sources (not stream structure) and must
+        // never appear in a content pack export.
         streamEntries.forEach((entry) => {
           expect(entry.request).to.not.have.property('queries');
         });
 
-        const { queries } = await getQueries(apiClient, 'logs.otel.branch_a');
+        // Verify the query survived the export (was not deleted as a side effect).
+        const { queries } = await getQueries(apiClient, source.id);
         expect(queries.map((query) => query.id)).to.contain('export-omits-me');
 
-        await bulkQueries(apiClient, 'logs.otel.branch_a', [{ delete: { id: 'export-omits-me' } }]);
+        await bulkQueries(apiClient, source.id, [{ delete: { id: 'export-omits-me' } }]);
       } finally {
+        if (sourceId) {
+          await deleteTestSource(roleScopedSupertest, sourceId).catch(() => {});
+        }
         await disableStreams(apiClient);
       }
     });

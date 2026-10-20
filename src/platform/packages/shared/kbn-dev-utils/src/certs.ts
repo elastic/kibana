@@ -29,3 +29,7 @@ export const FLEET_SERVER_KEY_PATH = resolve(__dirname, '../certs/fleet_server.k
 export const FLEET_SERVER_CERT_PATH = resolve(__dirname, '../certs/fleet_server.crt');
 export const FLEET_SERVER_P12_PATH = resolve(__dirname, '../certs/fleet_server.p12');
 export const FLEET_SERVER_P12_PASSWORD = 'storepass';
+export const RELAY_KEY_PATH = resolve(__dirname, '../certs/relay.key');
+export const RELAY_CERT_PATH = resolve(__dirname, '../certs/relay.crt');
+export const RELAY_P12_PATH = resolve(__dirname, '../certs/relay.p12');
+export const RELAY_P12_PASSWORD = 'storepass';

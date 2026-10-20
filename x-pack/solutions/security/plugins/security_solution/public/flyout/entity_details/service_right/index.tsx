@@ -93,11 +93,11 @@ export const ServicePanel = memo(function ServicePanel({
   const documentEntityIdentifiers = useMemo<IdentityFields>(() => {
     return (
       euidApi?.euid?.getEntityIdentifiersFromDocument(
-        'service',
+        euidApi.getBuiltInEntityDefinition('service'),
         entityFromStoreResult.entityRecord ?? {}
       ) ?? {}
     );
-  }, [entityFromStoreResult.entityRecord, euidApi?.euid]);
+  }, [entityFromStoreResult.entityRecord, euidApi]);
 
   const serviceNameFilterQuery = useMemo(
     () => (serviceName ? buildEntityNameFilter(EntityType.service, [serviceName]) : undefined),
