@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { ActionCreator, AnyAction } from 'typescript-fsa';
+import type { UnknownAction } from 'redux';
+import type { Action, ActionCreator, AnyAction } from 'typescript-fsa';
 
 /**
  * Infers the type of an action out of a given action type.
@@ -20,8 +21,8 @@ export type InferActionType<X> = X extends ActionCreator<infer T> ? T : never;
 /**
  * Helper to create a matcher that matches all passed in action creators.
  *
- * This is helpful to create a saga that takes multiple actions:
- * `yield takeEvery(matchesOne(actionCreator1, actionCreator2), handler);`
+ * This is helpful to create a listener that matches multiple actions:
+ * `predicate: matchesOne(actionCreator1, actionCreator2)`
  *
  * @param actionCreators The action creators to create a unified matcher for
  */
@@ -29,3 +30,11 @@ export const matchesOne =
   (...actionCreators: Array<ActionCreator<any>>) =>
   (action: AnyAction) =>
     actionCreators.some((actionCreator) => actionCreator.match(action));
+
+export type MatchedAction<Payload> = Action<Payload> & UnknownAction;
+
+/** Adapts a TypeScript-FSA action creator to an RTK listener type predicate. */
+export const matchesAction =
+  <Payload>(actionCreator: ActionCreator<Payload>) =>
+  (action: UnknownAction): action is MatchedAction<Payload> =>
+    actionCreator.match(action);

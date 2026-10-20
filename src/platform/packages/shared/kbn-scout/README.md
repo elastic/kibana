@@ -7,9 +7,10 @@
 1. Overview
 2. Folder Structure
 3. Key Components
-4. How to Use
-5. Contributing
-6. Running tests on CI
+4. Test Tags
+5. How to Use
+6. Contributing
+7. Running tests on CI
 
 ### Overview
 
@@ -340,6 +341,103 @@ export const spaceTest = spaceBaseTest.extend<DiscoverTestFixtures, ScoutParalle
 
 Here we have logic to start Kibana and Elasticsearch servers using `kbn-test` functionality in Scout flavor. The instance of the `Config` class is passed to start servers for the specific deployment type. The `flags.ts` file contains server-related command-line flags and options. The `loadServersConfig` function not only returns a `kbn-test` compatible config instance, but also converts it to `ScoutServiceConfig` format and saves it on disk to `./scout/servers/local.json` in the Kibana root directory. Scout `config` fixture reads it and exposes it to UI tests.
 
+### Test Tags
+
+Tags come from the `tags` export of `@kbn/scout` and drive both **test discovery** (which configs CI schedules) and **test execution** (which tests actually run). There are two kinds.
+
+#### Test target tags
+
+These select the deployments a test runs on. Every test needs at least one of them, otherwise it is never discovered:
+
+```ts
+import { test, tags } from '@kbn/scout';
+
+test.describe('My test suite', { tag: tags.deploymentAgnostic }, () => {
+  // ...
+});
+```
+
+Available sets include `tags.stateful.classic`, `tags.serverless.search`, `tags.serverless.observability.complete`, `tags.deploymentAgnostic` and `tags.performance`. Each expands to `@<location>-<arch>-<domain>` tags such as `@local-stateful-classic`.
+
+#### Limit tags
+
+Limit tags **narrow** an existing test target selection based on **test target attributes** — properties of the environment the tests will run in. They never replace a test target tag; a test carrying only limit tags is rejected at runtime.
+
+The format is `@limit/<selection-method>-<target-attr>`:
+
+| Selection method | Description                                    |
+| ---------------- | ---------------------------------------------- |
+| `only`           | Run the test only if the attribute is present  |
+| `except`         | Run the test only if the attribute is _absent_ |
+
+| Target attribute | Description                             |
+| ---------------- | --------------------------------------- |
+| `fips`           | Kibana is running with FIPS-mode enabled |
+
+A test without any limit tag is attribute-agnostic and runs in both cases.
+
+```ts
+import { test, tags } from '@kbn/scout';
+
+// Only runs against a FIPS-enabled Kibana
+test.describe(
+  'FIPS-specific behavior',
+  { tag: [...tags.deploymentAgnostic, tags.limit.only.fips] },
+  () => {
+    // ...
+  }
+);
+
+// Never runs against a FIPS-enabled Kibana
+test.describe(
+  'relies on a non-FIPS-approved algorithm',
+  { tag: [...tags.deploymentAgnostic, tags.limit.except.fips] },
+  () => {
+    // ...
+  }
+);
+```
+
+Tagging a single test works the same way: `test('...', { tag: [tags.limit.only.fips] }, ...)` — the test target tag can come from the enclosing `describe`.
+
+Two limit tags for the same attribute (`tags.limit.only.fips` **and** `tags.limit.except.fips`) is rejected: such a test could never run. Limit tags on their own are rejected too, for the same reason — they narrow a target selection rather than being one.
+
+All tag rules live in one place, `testTags.findIssues()` in `@kbn/scout-info`, and are applied twice:
+
+- the `validateTags` fixture applies all of them to every UI test that runs;
+- `scout discover-playwright-configs --validate` (which CI runs on every pull request) applies them to the committed manifests. A test without a selection tag, or with conflicting limits, is filtered out before it ever executes, so the fixture alone would never see it. Tags outside Scout's vocabulary are not rejected here: API tests have never been tag-validated, and Playwright turns `@words` in test titles into tags.
+
+#### Declaring target attributes
+
+Target attributes are never auto-detected — whoever starts a test distribution or test run declares them, via a CLI flag or the equivalent environment variable:
+
+```bash
+# Distribution
+node scripts/scout create-test-tracks --testTarget local-stateful-classic --targetAttribute fips
+node scripts/scout discover-playwright-configs --target local --targetAttribute fips --save
+
+# Execution
+node scripts/scout run-tests --arch stateful --domain classic --targetAttribute fips \
+  --config <plugin-path>/test/scout/ui/playwright.config.ts
+
+# Or, for any of the above
+export SCOUT_TARGET_ATTRIBUTES=fips
+```
+
+`--targetAttribute` is repeatable and accepts comma-separated values; it falls back to `SCOUT_TARGET_ATTRIBUTES` when omitted. With no attributes declared, `@limit/only-*` tests are excluded and `@limit/except-*` tests run.
+
+On CI, `.buildkite/scripts/common/env.sh` exports `SCOUT_TARGET_ATTRIBUTES=fips` whenever FIPS mode is enabled for the build (`TEST_ENABLE_FIPS_VERSION` or a `ci:enable-fips-140-*-agent` PR label), and the Scout test-run builder passes `--targetAttribute fips` to the distribution commands.
+
+Limits are applied the same way test targets are: as a Playwright `--grep-invert` next to the `--grep` that selects the target. `scout run-tests` builds it from the declared attributes; CI lanes, which call the Playwright binary directly, receive the one `create-test-tracks` built for their track. A plain `playwright test` applies neither, so it runs every test regardless of target or limit — which is also what lets committed test config manifests (`**/test/scout/.meta/*.json`) record every test with its raw tags.
+
+#### Target attributes in test events and runtime statistics
+
+Every Scout test event records the attributes its run was executed under as `test_run.target.attributes`. `scout update-test-config-stats` groups runtime statistics by that attribute set, and `scout create-test-tracks` prefers statistics gathered under the attributes the lane is about to run with — a FIPS run is not a useful runtime prediction for a non-FIPS one, and vice versa.
+
+When an attribute has no history, lane packing falls back to statistics measured without attributes (logging a warning) rather than to a full-lane estimate per config. Attribute history is slow to appear — the attribute-carrying pipelines run daily rather than per commit, and `update-test-config-stats` looks at one pipeline at a time — so this fallback is the normal state for a while after a new attribute is introduced, not a rare edge case.
+
+The `test_run.target.attributes` mapping ships with the code. `scout initialize-report-datastream` applies it explicitly; failing that, the first event carrying the field creates it dynamically. Until either happens the column does not exist, and `update-test-config-stats` logs a warning and falls back to attribute-blind statistics rather than failing.
+
 ### Test Types and Directory Structure
 
 Scout supports two distinct types of tests: UI and API, each with their own directory structure and import patterns:
@@ -536,7 +634,7 @@ For `security` and `oblt` MKI projects, `productTier` is **required** (one of `c
 
 `cloud_ech.json` and `cloud_mki.json` are validated when Scout loads them; errors are reported in a single message with the file path and `'<field>'` paths. Use the examples above as the source of truth for required fields. A few rules worth calling out:
 
-- `projectType` (serverless only) must be one of `es | oblt | security | workplaceai`.
+- `projectType` (serverless only) must be one of `es | oblt | security | vectordb`.
 - Stateful configs (`serverless: false`) must not set `projectType`, `productTier`, `organizationId`, or `linkedProject`.
 - `license` is optional and defaults to `"trial"`.
 - You don't need to set `uiam` or `http2` — Scout manages them; the schema rejects inconsistent values.
@@ -608,8 +706,7 @@ Enable it via the `http2` server config set; tests don't need any changes.
 
 ```bash
 node scripts/scout start-server --arch stateful --domain classic --serverConfigSet http2
-node scripts/scout run-tests --arch stateful --domain classic --serverConfigSet http2 \
-  --config <plugin-path>/test/scout/ui/playwright.config.ts
+node scripts/playwright test --config <plugin-path>/test/scout/ui/playwright.config.ts --project local
 ```
 
 Supported `--arch`/`--domain` combinations are the ones defined under `src/servers/configs/config_sets/http2/`.

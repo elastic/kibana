@@ -147,6 +147,7 @@ export interface SwimlaneProps {
   swimlaneLimit?: number;
   onPaginationChange?: (arg: { perPage?: number; fromPage?: number }) => void;
   isLoading: boolean;
+  isInteractive?: boolean;
   noDataWarning: string | JSX.Element | null;
   /**
    * Unique id of the chart
@@ -174,6 +175,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
   swimlaneLimit,
   onPaginationChange,
   isLoading,
+  isInteractive = true,
   noDataWarning,
   filterActive,
   swimlaneData,
@@ -590,6 +592,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                 fromPage={fromPage!}
                 perPage={perPage!}
                 onPaginationChange={onPaginationChange!}
+                isInteractive={isInteractive}
               />
             </EuiFlexItem>
           )}

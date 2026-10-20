@@ -74,12 +74,8 @@ const getRoutes = (
       component: GettingStartedPage,
       dataTestSubj: 'syntheticsGettingStartedPage',
       pageSectionProps: {
-        alignment: 'center',
         paddingSize: 'none',
       },
-      // Keep a pageHeader so the template sizes with --kbn-application--content-height
-      // instead of 100vh, which overflows and breaks vertical centering.
-      pageHeader: { bottomBorder: false },
     },
     {
       title: i18n.translate('xpack.synthetics.createMonitorRoute.title', {
