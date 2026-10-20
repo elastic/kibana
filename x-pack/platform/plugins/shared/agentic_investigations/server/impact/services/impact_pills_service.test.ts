@@ -20,15 +20,17 @@ const query = {
 const makeService = ({
   open = new Map<string, number>(),
   closed = new Map<string, number>(),
-  entityIds = new Map<string, Array<{ id: string; type?: string }>>(),
+  entityIds = new Map<string, Array<{ id: string; type?: string; name?: string }>>(),
   assertCanRead = jest.fn().mockResolvedValue(undefined),
   proposalsAvailable = true,
+  getEntityStoreNames,
 }: {
   open?: Map<string, number>;
   closed?: Map<string, number>;
-  entityIds?: Map<string, Array<{ id: string; type?: string }>>;
+  entityIds?: Map<string, Array<{ id: string; type?: string; name?: string }>>;
   assertCanRead?: jest.Mock;
   proposalsAvailable?: boolean;
+  getEntityStoreNames?: jest.Mock;
 } = {}) => {
   const countByConversation = jest.fn().mockResolvedValueOnce(open).mockResolvedValueOnce(closed);
   const getEntitiesByConversationId = jest.fn().mockResolvedValue(entityIds);
@@ -44,6 +46,7 @@ const makeService = ({
           } as unknown as ProposalsPluginStart)
         : undefined,
     getEscalationsService: () => ({ scanWithEntityIds } as unknown as EscalationsService),
+    ...(getEntityStoreNames ? { getEntityStoreNames } : {}),
   });
   return { service, countByConversation, getEntitiesByConversationId, scanWithEntityIds };
 };
@@ -58,7 +61,7 @@ describe('ImpactPillsService', () => {
         ]),
         closed: new Map([['c1', 1]]),
         entityIds: new Map([
-          ['c1', [{ id: 'host-1', type: 'host' }]],
+          ['c1', [{ id: 'host-1', type: 'host', name: 'web-01' }]],
           ['c2', [{ id: 'host-1' }, { id: 'user-1' }]],
         ]),
       });
@@ -66,7 +69,7 @@ describe('ImpactPillsService', () => {
       const pills = await service.forProposals(request, query);
 
       expect(pills).toEqual([
-        { entityId: 'host-1', count: 4, entityType: 'host' },
+        { entityId: 'host-1', count: 4, entityType: 'host', name: 'web-01' },
         { entityId: 'user-1', count: 1 },
       ]);
       expect(countByConversation).toHaveBeenNthCalledWith(
@@ -112,6 +115,29 @@ describe('ImpactPillsService', () => {
       expect(countByConversation).not.toHaveBeenCalled();
     });
 
+    it('prefers the Entity Store name and does not look up ids that are not in the store', async () => {
+      const getEntityStoreNames = jest.fn().mockResolvedValue(new Map([['host:abc', 'web-01']]));
+      const { service } = makeService({
+        open: new Map([['c1', 1]]),
+        entityIds: new Map([
+          [
+            'c1',
+            [
+              { id: 'host:abc', type: 'host', name: 'snapshot' },
+              { id: 'checkout', name: 'Checkout' },
+            ],
+          ],
+        ]),
+        getEntityStoreNames,
+      });
+
+      expect(await service.forProposals(request, query)).toEqual([
+        { entityId: 'checkout', count: 1, name: 'Checkout' },
+        { entityId: 'host:abc', count: 1, entityType: 'host', name: 'web-01' },
+      ]);
+      expect(getEntityStoreNames).toHaveBeenCalledWith(request, ['host:abc']);
+    });
+
     it('lets a failed read surface, so the client keeps the pills it has', async () => {
       const { service, countByConversation } = makeService();
       countByConversation.mockReset().mockRejectedValue(new Error('es down'));
@@ -136,6 +162,23 @@ describe('ImpactPillsService', () => {
       ]);
       expect(scanWithEntityIds).toHaveBeenCalledWith(request, { status: 'open' });
       expect(scanWithEntityIds).toHaveBeenCalledWith(request, { status: 'closed' });
+    });
+
+    it('labels a pill with the entity name carried on the escalation', async () => {
+      const { service, scanWithEntityIds } = makeService();
+      scanWithEntityIds.mockResolvedValueOnce([
+        {
+          id: 'e1',
+          entity_ids: ['host:abc'],
+          entity_types: { 'host:abc': 'host' },
+          entity_names: { 'host:abc': 'web-01' },
+        },
+      ]);
+      scanWithEntityIds.mockResolvedValueOnce([]);
+
+      expect(await service.forEscalations(request)).toEqual([
+        { entityId: 'host:abc', count: 1, entityType: 'host', name: 'web-01' },
+      ]);
     });
 
     it('lets a failed scan surface', async () => {

@@ -29,6 +29,7 @@ export const createOpenAlertEventsHistoryAction = (
   order: 51,
   displayName: i18n.OPEN_ALERT_EVENTS_HISTORY,
   iconType: 'productDiscover',
+  enforcesOwnPrivileges: true,
   isCompatible: ({ episodes }) => episodes.length === 1 && episodeSupportsTimeline(episodes[0]),
   execute: async ({ episodes }) => {
     const [episode] = episodes;

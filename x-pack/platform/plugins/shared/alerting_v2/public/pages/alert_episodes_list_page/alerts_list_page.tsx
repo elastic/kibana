@@ -90,6 +90,7 @@ import { useEpisodesListUrlState } from './hooks/use_episodes_list_url_state';
 import { useEpisodesBulkActions } from './hooks/use_episodes_bulk_actions';
 import { DEFAULT_EPISODES_LIST_FILTER } from './utils/episodes_list_url_state';
 import { CLASSIC_ALERTS_DATA_SOURCE } from '../../alert_sources';
+import { getQueryFilterState } from './utils/episodes_query_filter';
 import { ClassicAlertDetailsFlyout } from './components/classic_alert_details_flyout';
 import {
   getDiscoverHrefForAlertEventsHistory,
@@ -248,6 +249,7 @@ const AlertsListPageContent = () => {
     () => !deepEqual(filterState, DEFAULT_EPISODES_LIST_FILTER),
     [filterState]
   );
+  const queryFilterState = useMemo(() => getQueryFilterState(filterState), [filterState]);
 
   const handleClearFilters = useCallback(() => {
     setFilterState({ ...DEFAULT_EPISODES_LIST_FILTER });
@@ -299,7 +301,7 @@ const AlertsListPageContent = () => {
   } = useFetchAlertingEpisodesQuery({
     pageSize: ALERT_EPISODES_LIST_PAGE_SIZE,
     services,
-    filterState,
+    filterState: queryFilterState,
     sortState,
     timeRange,
   });
@@ -694,6 +696,7 @@ const AlertsListPageContent = () => {
         title={i18n.EPISODES_LIST_PAGE_TITLE}
         spacing="bleed"
         menu={alertsMenu}
+        docLink={services.docLinks.links.alerting.viewAndManageAlerts}
       />
       <EuiSpacer size="m" />
       <NewAlertingExperienceBanner />
@@ -720,13 +723,13 @@ const AlertsListPageContent = () => {
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EpisodesKpis services={services} filterState={filterState} timeRange={timeRange} />
+          <EpisodesKpis services={services} filterState={queryFilterState} timeRange={timeRange} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EpisodesHistogram
             services={services}
             dataView={dataView}
-            filterState={filterState}
+            filterState={queryFilterState}
             timeRange={timeRange}
             onTimeRangeChange={handleTimeChange}
             breakdownField={histogramBreakdownField}
