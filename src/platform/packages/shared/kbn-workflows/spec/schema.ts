@@ -700,6 +700,7 @@ export const ElasticsearchStepSchema = BaseStepSchema.extend({
     message: 'Elasticsearch step type must start with "elasticsearch."',
   }),
   with: ElasticsearchStepInputSchema,
+  timeout: DynamicTimeoutSchema.optional(),
 });
 export type ElasticsearchStep = z.infer<typeof ElasticsearchStepSchema>;
 
@@ -761,6 +762,7 @@ export const KibanaStepSchema = BaseStepSchema.extend({
     message: 'Kibana step type must start with "kibana."',
   }),
   with: KibanaStepInputSchema,
+  timeout: DynamicTimeoutSchema.optional(),
 });
 export type KibanaStep = z.infer<typeof KibanaStepSchema>;
 
