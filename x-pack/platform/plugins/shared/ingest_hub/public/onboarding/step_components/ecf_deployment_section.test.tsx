@@ -38,7 +38,7 @@ jest.mock('../ecf_cloudformation', () => ({
   ECF_CROWDSTRIKE_TEMPLATE_FILE: 'crowdstrike.yaml',
 }));
 
-jest.mock('../onboarding_session_storage', () => ({
+jest.mock('../core/onboarding_session_storage', () => ({
   getOnboardingSessionKey: jest.fn(() => 'onboarding.aws.ecfLaunchStep'),
 }));
 

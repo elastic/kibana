@@ -9,6 +9,7 @@ import type { TimeRange } from '../../entities_grid/common';
 import { buildNewlyHighCriticalCountQuery } from './tile_newly_high_critical_query';
 import { buildRiskMoversCountQuery } from './tile_risk_movers_query';
 import { buildRiskHistoryReachesBackQuery } from './risk_previous_period';
+import { RISK_MOVER_MIN_SCORE_CHANGE } from './risk_history';
 
 const INDEX = '.entities-v1';
 const RISK_INDEX = 'risk-score.risk-score-default';
@@ -68,7 +69,7 @@ describe.each([
 describe('the previous-period conditions', () => {
   it('keeps the rule of the risk movers tile: a score up by 10 or more', () => {
     expect(buildRiskMoversCountQuery('default', INDEX, '7d', [], 'previous')).toContain(
-      '| WHERE current_score - boundary_score >= 10'
+      `| WHERE current_score - boundary_score >= ${RISK_MOVER_MIN_SCORE_CHANGE}`
     );
   });
 

@@ -116,6 +116,8 @@ function buildEuiGridColumn({
   dataView,
   isSummaryOnlyColumn,
   isSortEnabled,
+  isResizable,
+  isPlainRecord,
   toastNotifications,
   uiActions,
   hasEditDataViewPermission,
@@ -134,6 +136,7 @@ function buildEuiGridColumn({
   onResize,
   sortedColumns,
   disableCellActions = false,
+  disableColumnActions = false,
   dataGridRef,
   hideFilteringOnComputedColumns,
   documentsDisplayMode,
@@ -144,6 +147,8 @@ function buildEuiGridColumn({
   dataView: DataView;
   isSummaryOnlyColumn: boolean;
   isSortEnabled: boolean;
+  isResizable: boolean;
+  isPlainRecord?: boolean;
   toastNotifications: ToastsStart;
   uiActions?: UiActionsStart;
   hasEditDataViewPermission: () => boolean;
@@ -162,6 +167,7 @@ function buildEuiGridColumn({
   onResize: UnifiedDataTableProps['onResize'];
   sortedColumns?: EuiDataGridColumnSortingConfig[];
   disableCellActions?: boolean;
+  disableColumnActions?: boolean;
   dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>;
   hideFilteringOnComputedColumns?: boolean;
   documentsDisplayMode: DocumentsDisplayMode;
@@ -254,6 +260,7 @@ function buildEuiGridColumn({
   const column: EuiDataGridColumn = {
     id: columnName,
     schema: columnSchema,
+    isResizable,
     isSortable:
       isSortEnabled && isSortable({ dataSource, columnName, columnSchema, dataViewField }),
     display:
@@ -268,39 +275,41 @@ function buildEuiGridColumn({
         />
       ) : undefined,
     displayAsText: columnDisplayName,
-    actions: {
-      showHide:
-        isSummaryOnlyColumn || isTimeFieldColumn
-          ? false
-          : {
-              label: i18n.translate('unifiedDataTable.removeColumnLabel', {
-                defaultMessage: 'Remove column',
-              }),
-              iconType: 'cross',
-              'data-test-subj': 'unifiedDataTableRemoveColumn',
-            },
-      showMoveLeft: !isSummaryOnlyColumn,
-      showMoveRight: !isSummaryOnlyColumn,
-      additional: [
-        ...(resetWidthButton ? [resetWidthButton] : []),
-        ...(columnName === SOURCE_COLUMN
-          ? []
-          : [
-              buildCopyColumnNameButton({
-                columnDisplayName,
-                toastNotifications,
-              }),
-            ]),
-        buildCopyColumnValuesButton({
-          columnId: columnName,
-          columnDisplayName,
-          toastNotifications,
-          rowsCount,
-          valueToStringConverter,
-        }),
-        ...(editFieldButton ? [editFieldButton] : []),
-      ],
-    },
+    actions: disableColumnActions
+      ? false
+      : {
+          showHide:
+            isSummaryOnlyColumn || isTimeFieldColumn
+              ? false
+              : {
+                  label: i18n.translate('unifiedDataTable.removeColumnLabel', {
+                    defaultMessage: 'Remove column',
+                  }),
+                  iconType: 'cross',
+                  'data-test-subj': 'unifiedDataTableRemoveColumn',
+                },
+          showMoveLeft: !isSummaryOnlyColumn,
+          showMoveRight: !isSummaryOnlyColumn,
+          additional: [
+            ...(resetWidthButton ? [resetWidthButton] : []),
+            ...(columnName === SOURCE_COLUMN
+              ? []
+              : [
+                  buildCopyColumnNameButton({
+                    columnDisplayName,
+                    toastNotifications,
+                  }),
+                ]),
+            buildCopyColumnValuesButton({
+              columnId: columnName,
+              columnDisplayName,
+              toastNotifications,
+              rowsCount,
+              valueToStringConverter,
+            }),
+            ...(editFieldButton ? [editFieldButton] : []),
+          ],
+        },
     cellActions,
     visibleCellActions,
     displayHeaderCellProps: { className: 'unifiedDataTable__headerCell' },
@@ -385,7 +394,10 @@ export function getEuiGridColumns({
   dataView,
   isSummaryOnlyColumn,
   isSortEnabled,
+  isResizable = true,
   disableCellActions = false,
+  disableColumnActions = false,
+  isPlainRecord,
   services,
   hasEditDataViewPermission,
   valueToStringConverter,
@@ -410,7 +422,10 @@ export function getEuiGridColumns({
   dataView: DataView;
   isSummaryOnlyColumn: boolean;
   isSortEnabled: boolean;
+  isResizable?: boolean;
+  isPlainRecord?: boolean;
   disableCellActions?: boolean;
+  disableColumnActions?: boolean;
   services: {
     uiSettings: IUiSettingsClient;
     toastNotifications: ToastsStart;
@@ -445,6 +460,8 @@ export function getEuiGridColumns({
       dataView,
       isSummaryOnlyColumn,
       isSortEnabled,
+      isResizable,
+      isPlainRecord,
       toastNotifications: services.toastNotifications,
       uiActions: services.uiActions,
       hasEditDataViewPermission,
@@ -461,6 +478,7 @@ export function getEuiGridColumns({
       onResize,
       sortedColumns,
       disableCellActions,
+      disableColumnActions,
       dataGridRef,
       hideFilteringOnComputedColumns,
       documentsDisplayMode,

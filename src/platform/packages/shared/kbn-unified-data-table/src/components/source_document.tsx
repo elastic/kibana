@@ -45,6 +45,7 @@ export function SourceDocument({
   className,
   isCompressed = true,
   dataSource,
+  isInteractive = true,
 }: {
   useTopLevelObjectColumns: boolean;
   row: DataTableRecord;
@@ -57,6 +58,7 @@ export function SourceDocument({
   className?: string;
   isCompressed?: boolean;
   dataSource: DataSource | undefined;
+  isInteractive?: boolean;
 }) {
   const styles = useMemoCss(componentStyles);
   const isEsql = dataSource?.kind === 'esql';
@@ -68,17 +70,13 @@ export function SourceDocument({
         shouldShowFieldHandler,
         fieldFormats,
         dataSource,
-        isEsql
+        isEsql,
+        isInteractive
       ).slice(0, maxEntries)
-    : formatHitReact(
-        row,
-        dataView,
-        shouldShowFieldHandler,
-        maxEntries,
-        fieldFormats,
-        dataSource,
-        isEsql ? SKIP_NULLISH_VALUES_FORMAT_OPTIONS : undefined
-      );
+    : formatHitReact(row, dataView, shouldShowFieldHandler, maxEntries, fieldFormats, dataSource, {
+        ...(isEsql ? SKIP_NULLISH_VALUES_FORMAT_OPTIONS : undefined),
+        isInteractive,
+      });
 
   const renderedPairs: ReactNode[] = [];
 
@@ -123,7 +121,8 @@ function getTopLevelObjectPairsReact(
   shouldShowFieldHandler: ShouldShowFieldInTableHandler,
   fieldFormats: FieldFormatsStart,
   dataSource: DataSource | undefined,
-  skipNullishValues: boolean
+  skipNullishValues: boolean,
+  isInteractive: boolean
 ): FormattedHit {
   const innerColumns = getInnerColumns(row.raw.fields as Record<string, unknown[]>, columnId);
   // Put the most important fields first
@@ -143,7 +142,14 @@ function getTopLevelObjectPairsReact(
     const formatted: ReactNode = values.map((value: unknown, idx) => (
       <Fragment key={`${key}-${idx}`}>
         {idx > 0 ? ', ' : null}
-        {formatFieldValueReact({ value, hit: row.raw, fieldFormats, dataView, field: subField })}
+        {formatFieldValueReact({
+          value,
+          hit: row.raw,
+          fieldFormats,
+          dataView,
+          field: subField,
+          options: { isInteractive },
+        })}
       </Fragment>
     ));
     const pairs = highlights[key] ? highlightPairs : sourcePairs;
