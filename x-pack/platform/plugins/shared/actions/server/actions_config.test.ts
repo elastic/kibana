@@ -234,6 +234,17 @@ describe('isUriAllowed', () => {
       true
     );
   });
+
+  test('returns true for non-compressed IPv6 hostnames in the allowedHosts', () => {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      allowedHosts: ['2001:DB8:0:0:0:0:0:1'],
+    };
+    const { isUriAllowed } = getActionsConfigurationUtilities(config);
+    expect(isUriAllowed('http://[2001:db8:0:0:0:0:0:1]/')).toEqual(true);
+    expect(isUriAllowed('http://[2001:db8::1]/')).toEqual(true);
+    expect(isUriAllowed('http://[2001:db8::2]/')).toEqual(false);
+  });
 });
 
 describe('isHostnameAllowed', () => {
@@ -258,6 +269,17 @@ describe('isHostnameAllowed', () => {
       enabledActionTypes: [],
     };
     expect(getActionsConfigurationUtilities(config).isHostnameAllowed('github.com')).toEqual(true);
+  });
+
+  test('matches equivalent IPv6 representations', () => {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      allowedHosts: ['2001:db8::1'],
+    };
+    const { isHostnameAllowed } = getActionsConfigurationUtilities(config);
+    expect(isHostnameAllowed('2001:db8:0:0:0:0:0:1')).toEqual(true);
+    expect(isHostnameAllowed('[2001:DB8::1]')).toEqual(true);
+    expect(isHostnameAllowed('2001:db8::2')).toEqual(false);
   });
 });
 
