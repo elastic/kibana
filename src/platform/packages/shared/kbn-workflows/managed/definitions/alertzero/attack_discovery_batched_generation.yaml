@@ -268,6 +268,41 @@ steps:
           kibana.alert.rule.execution.uuid:
             "${{ steps.generate_batches.output.results | map: 'output' | map: 'execution_uuid' | compact }}"
 
+  # Numbers for the terminal-status decision below. Its own step because a
+  # comparison operator cannot follow a filter chain in an `if`, and `aggregate`
+  # emits `delivered` as a string.
+  - name: classify_batches
+    type: data.set
+    with:
+      total: "${{ steps.generate_batches.output.total | plus: 0 }}"
+      delivered: "${{ steps.aggregate.output.delivered | plus: 0 }}"
+      # `errors_json` lists every batch that did not deliver, in batch order.
+      first_error: |-
+        {%- assign errors = steps.aggregate.output.errors_json | json_parse -%}
+        {{ errors[0].message | default: 'no error message reported' }}
+
+  # A run in which no batch delivered must not report success. `mode: settled`
+  # turns a failed batch into a gap so the batches that did deliver keep their
+  # discoveries; when there are none, the gap is the whole run. A caller that
+  # runs this synchronously (the AD runner) fails with it, so the Worker's failed
+  # scan callout lists the run. A partial failure (some batches delivered) stays
+  # `completed`: the runner decides what to do with it after it has reviewed the
+  # delivered batches. Zero alerts means zero batches and stays `completed`.
+  - name: emit_all_batches_failed
+    type: workflow.output
+    status: failed
+    if: "${{ steps.classify_batches.output.total > 0 and steps.classify_batches.output.delivered == 0 }}"
+    with:
+      message: "All {{ steps.classify_batches.output.total }} batches failed: {{ steps.classify_batches.output.first_error }}"
+      attack_discoveries: "${{ steps.aggregate.output.no_discoveries }}"
+      batch_errors: "${{ steps.aggregate.output.errors_json | json_parse }}"
+      batches_failed: "${{ steps.classify_batches.output.total }}"
+      batches_succeeded: 0
+      batches_total: "${{ steps.classify_batches.output.total }}"
+      discoveries_generated: "${{ steps.aggregate.output.discoveries_generated | plus: 0 }}"
+      execution_uuids: "${{ steps.generate_batches.output.results | map: 'output' | map: 'execution_uuid' | compact }}"
+      alerts_analyzed: "${{ steps.aggregate.output.alerts_analyzed | plus: 0 }}"
+
   # `| plus: 0` coerces the counted strings above back to numbers.
   - name: emit_result
     type: workflow.output

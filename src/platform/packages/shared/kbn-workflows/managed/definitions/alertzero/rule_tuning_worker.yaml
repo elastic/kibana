@@ -322,9 +322,28 @@ steps:
 
   # Decisions are not known here: each review reports its own outcome and tags its
   # alerts once its gate resolves.
+  #
+  # Two terminal steps with identical outputs. A failed harvest is not a quiet
+  # sweep: zero reviews after it does not mean no noisy rule, so the run ends
+  # `failed` and the failed-scan callout can list it. It ends here, after the
+  # expire/cleanup steps above, so a harvest failure never skips them. The
+  # `list_active_reviews` lookup is deliberately NOT a failure: its error is a
+  # fail-open (an empty `terms` filters nothing), so the sweep still did its work.
+  - name: emit_harvest_failed
+    type: workflow.output
+    status: failed
+    if: "${{ steps.harvest_fp_alerts_by_rule.error != null or steps.list_enabled_candidates.error != null }}"
+    with:
+      message: "Rule Tuning harvest failed, so no rule was considered for tuning: {{ steps.harvest_fp_alerts_by_rule.error.message | default: steps.list_enabled_candidates.error.message }}"
+      reviews_requested: "${{ steps.resolve_fanout_rows.output.rows | default: consts.no_rows | size }}"
+      reviews_in_flight: "${{ steps.collect_active_rules.output.expected }}"
+      harvest_failed: true
+      lookup_failed: "${{ steps.list_active_reviews.error != null }}"
+
   - name: emit_result
     type: workflow.output
     status: completed
+    if: "${{ steps.harvest_fp_alerts_by_rule.error == null and steps.list_enabled_candidates.error == null }}"
     with:
       # Reviews this sweep tried to start.
       reviews_requested: "${{ steps.resolve_fanout_rows.output.rows | default: consts.no_rows | size }}"

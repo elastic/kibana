@@ -643,6 +643,129 @@ describe('Attack Discovery worker chain', () => {
       expect(stepIn(workerSteps, 'emit_result')?.with?.reviews_failed).toBeUndefined();
     });
 
+    // A failed batch is a gap in the scan, and a scan with a gap must not report
+    // success (security-team#19956). The child only fails when NO batch delivered;
+    // a partial failure reaches the runner, which fails AFTER the fan-out so the
+    // delivered batches' attacks are still reviewed.
+    describe('terminal status', () => {
+      const engine = createWorkflowLiquidEngine({ strictFilters: true });
+      const consts = { no_discoveries: [] };
+
+      const stripExpression = (expression: unknown) =>
+        String(expression)
+          .replace(/^\$\{\{/, '')
+          .replace(/\}\}$/, '')
+          .trim();
+
+      // Renders `scan_outcome` the way the engine does, then the two terminal steps.
+      const evaluate = async (child: Record<string, unknown>, attackCount = 0) => {
+        const steps: Record<string, unknown> = {
+          run_generation: { output: child },
+          resolve_fanout: { output: { attack_count: attackCount } },
+        };
+        const outcome = asWith(stepIn(workerSteps, 'scan_outcome'));
+        steps.scan_outcome = {
+          output: {
+            batches_failed: engine.evalValueSync(stripExpression(outcome.batches_failed), {
+              consts,
+              steps,
+            }),
+            first_error: (
+              await engine.parseAndRender(String(outcome.first_error), { consts, steps })
+            ).trim(),
+          },
+        };
+        const failedStep = stepIn(workerSteps, 'emit_partial_scan_failed');
+        const completedStep = stepIn(workerSteps, 'emit_result');
+        const context = { consts, steps };
+        return {
+          fails: engine.evalValueSync(stripExpression(failedStep?.if), context) as boolean,
+          completes: engine.evalValueSync(stripExpression(completedStep?.if), context) as boolean,
+          message: (
+            await engine.parseAndRender(String(failedStep?.with?.message), context)
+          ).replace(/\s+/g, ' '),
+        };
+      };
+
+      const child = (overrides: Record<string, unknown>) => ({
+        alerts_analyzed: 300,
+        batch_errors: [],
+        batches_failed: 0,
+        batches_succeeded: 3,
+        batches_total: 3,
+        discoveries_generated: 2,
+        ...overrides,
+      });
+
+      it('fails the run after a partial failure and names the counts, the first error and the reviews sent', async () => {
+        const { fails, completes, message } = await evaluate(
+          child({
+            batch_errors: [{ batch_index: 1, message: 'rate limited', status: 'failed' }],
+            batches_failed: 1,
+            batches_succeeded: 2,
+          }),
+          4
+        );
+
+        expect(fails).toBe(true);
+        expect(completes).toBe(false);
+        expect(message).toBe(
+          'Partial scan: 1 of 3 Attack Discovery batches failed (rate limited); 4 attacks from the successful batches were sent for review'
+        );
+      });
+
+      it('completes when every batch delivered', async () => {
+        const { fails, completes } = await evaluate(child({}), 4);
+
+        expect(fails).toBe(false);
+        expect(completes).toBe(true);
+      });
+
+      // Zero alerts is zero batches, so there is nothing that failed.
+      it('completes when there were no alerts and no batches', async () => {
+        const { fails, completes } = await evaluate(
+          child({ batches_succeeded: 0, batches_total: 0, alerts_analyzed: 0 })
+        );
+
+        expect(fails).toBe(false);
+        expect(completes).toBe(true);
+      });
+
+      it('completes against a child that reports no batch counts', async () => {
+        const { fails, completes } = await evaluate({});
+
+        expect(fails).toBe(false);
+        expect(completes).toBe(true);
+      });
+
+      // Failing before the fan-out would drop the attacks the delivered batches
+      // persisted, which is the data the partial policy exists to keep.
+      it('fails only after the per-attack fan-out has been dispatched', () => {
+        const names = workerStepNames;
+
+        expect(names.indexOf('emit_partial_scan_failed')).toBeGreaterThan(
+          names.indexOf('run_review_batches')
+        );
+        expect(names.indexOf('emit_result')).toBeGreaterThan(names.indexOf('run_review_batches'));
+        expect(stepIn(workerSteps, 'emit_partial_scan_failed')?.type).toBe('workflow.output');
+        expect(
+          (stepIn(workerSteps, 'emit_partial_scan_failed') as unknown as { status: string }).status
+        ).toBe('failed');
+      });
+
+      it('keeps the declared outputs on the failure path', () => {
+        expect(Object.keys(asWith(stepIn(workerSteps, 'emit_partial_scan_failed'))).sort()).toEqual(
+          [...Object.keys(asWith(stepIn(workerSteps, 'emit_result'))), 'message'].sort()
+        );
+      });
+
+      // The all-batches-failed case fails inside the child; the runner must let it
+      // propagate rather than catch it and fan out over nothing.
+      it('lets an all-batches-failed child fail the run', () => {
+        expect(stepIn(workerSteps, 'run_generation')?.['on-failure']).toBeUndefined();
+      });
+    });
+
     it('accumulates no per-batch review counts', () => {
       expect(workerStepNames).not.toContain('accumulate_failed');
     });
@@ -2346,11 +2469,21 @@ describe('Attack Discovery worker chain', () => {
   describe('handoff contracts', () => {
     // `workflow.execute` resolves to the child's `context.output`, so a child without an
     // explicit `workflow.output` step hands its parent nothing.
-    it.each([
-      ['worker', workerSteps],
-      ['review', reviewSteps],
-    ])('%s emits an explicit workflow.output', (_name, steps) => {
-      expect(steps.filter((step) => step.type === 'workflow.output')).toHaveLength(1);
+    it('review emits an explicit workflow.output', () => {
+      expect(reviewSteps.filter((step) => step.type === 'workflow.output')).toHaveLength(1);
+    });
+
+    // The worker has one terminal output per outcome, and the two are mutually
+    // exclusive through their `if`, so exactly one runs.
+    it('worker emits an explicit workflow.output for each of completed and failed', () => {
+      const outputs = workerSteps.filter((step) => step.type === 'workflow.output') as Array<
+        YamlStep & { status: string }
+      >;
+
+      expect(outputs.map((step) => [step.name, step.status])).toEqual([
+        ['emit_partial_scan_failed', 'failed'],
+        ['emit_result', 'completed'],
+      ]);
     });
 
     it.each(['alerts_analyzed', 'attacks_generated', 'reviews_requested'])(
