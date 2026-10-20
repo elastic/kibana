@@ -46,6 +46,14 @@ describe('renderElasticManifest', () => {
     expect(content).toContain('never use wildcard remote names');
   });
 
+  it('steers remote queries to a specific data stream instead of logs-*', () => {
+    const content = renderElasticManifest(connector('remote-telemetry'));
+
+    expect(content).toContain('/_resolve/index/logging-us-east-1:logs-*nginx*');
+    expect(content).toContain('FROM $1:logs-nginx.error-*');
+    expect(content).not.toContain('FROM $1:logs-* ');
+  });
+
   it('tells the agent which secret keys unlock the credentials', () => {
     const content = renderElasticManifest({
       kind: 'secrets',
