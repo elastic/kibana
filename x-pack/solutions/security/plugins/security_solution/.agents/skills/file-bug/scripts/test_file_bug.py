@@ -695,12 +695,27 @@ class SecurityRoutingTest(unittest.TestCase):
     def test_flags_security_signals(self):
         for text in (
             "See CVE-2024-12345",
-            "see CVE-2024-12345",
+            "Authorization: Basic ZWxhc3RpYzpzM2NyZXRQYXNz",
+            "curl -u elastic:MyRealPassword https://x",
+            "curl --user elastic:MyRealPassword https://x",
+            "https://admin:hunter2pass@cluster.example.com",
+            "password: correcthorsebattery",
             "Authorization: Bearer abcdefghijklmnopqrstuvwxyz0123",
             "api_key=sk_live_abcdef123456",
             "-----BEGIN RSA PRIVATE KEY-----",
         ):
             self.assertIn("security_issue", scan_sensitive(text), text)
+
+    def test_credential_lookalikes_do_not_gate(self):
+        for text in (
+            "Basic configuration is required",
+            "Token: undefined",
+            "Password: required",
+            "curl -u elastic:**** https://x",
+            "https://user:***@cluster.example.com",
+            "https://example.com/app/security",
+        ):
+            self.assertNotIn("security_issue", scan_sensitive(text), text)
 
     def test_plain_ui_bug_is_not_security(self):
         self.assertNotIn("security_issue", scan_sensitive("Table shows 0 entities"))
