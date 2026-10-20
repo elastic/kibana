@@ -17,11 +17,13 @@ export type TableAlign = 'left' | 'center' | 'right';
 export interface TableView {
   columns: ReadonlyArray<{ label: string; align: TableAlign }>;
   rows: ReadonlyArray<readonly string[]>;
+  /** Each shown row's unformatted cells, in the same order as `rows`, for sorting in the browser. */
+  cells: ReadonlyArray<readonly Cell[]>;
   /** "Showing N of M rows", when fewer rows are shown than the source had. */
   note?: string;
 }
 
-type Cell = TableNode['rows'][number][number];
+export type Cell = TableNode['rows'][number][number];
 
 const NUMERIC_FORMATS: ReadonlySet<StructuredValueFormat> = new Set([
   'number',
@@ -48,24 +50,33 @@ const compareCells = (a: Cell, b: Cell): number => {
   return collator.compare(a ?? '', b ?? '');
 };
 
-const sortedRows = ({ rows, sort }: TableNode): ReadonlyArray<readonly Cell[]> => {
-  if (!sort) {
-    return rows;
-  }
-  const { column, direction = 'asc' } = sort;
+export type SortDirection = 'asc' | 'desc';
+
+/**
+ * The order of `rows` sorted by `column`, as indexes: stable, with empty cells last in either
+ * direction. The server and the `tableSort` enhancement both sort through it, so they agree.
+ */
+export const sortOrder = (
+  rows: ReadonlyArray<readonly Cell[]>,
+  column: number,
+  direction: SortDirection = 'asc'
+): number[] => {
   const sign = direction === 'desc' ? -1 : 1;
   return rows
-    .map((row, index) => ({ row, index }))
+    .map((row, index) => ({ value: row[column] ?? null, index }))
     .sort((left, right) => {
-      const a = left.row[column] ?? null;
-      const b = right.row[column] ?? null;
+      const { value: a } = left;
+      const { value: b } = right;
       if (a === null || b === null) {
         return a === b ? left.index - right.index : a === null ? 1 : -1;
       }
       return sign * compareCells(a, b) || left.index - right.index;
     })
-    .map(({ row }) => row);
+    .map(({ index }) => index);
 };
+
+const sortedRows = ({ rows, sort }: TableNode): ReadonlyArray<readonly Cell[]> =>
+  sort ? sortOrder(rows, sort.column, sort.direction).map((index) => rows[index]) : rows;
 
 const defaultAlign = (
   { format }: TableNode['columns'][number],
@@ -110,6 +121,7 @@ export const tableView = (node: TableNode, limit = Infinity): TableView => {
     rows: shown.map((row) =>
       columns.map((column, index) => formatCell(row[index] ?? null, column))
     ),
+    cells: shown.map((row) => columns.map((_column, index) => row[index] ?? null)),
     ...(shown.length < total ? { note: rowsNote(shown.length, total) } : {}),
   };
 };
