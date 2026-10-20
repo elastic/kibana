@@ -19,7 +19,7 @@ import { registerReadRoute } from './read';
 import { registerSanitizeRoute } from './sanitize';
 import { registerSearchRoute } from './search';
 import { registerUpdateRoute } from './update';
-import { registerChangeHistoryRoute } from '../change_history/register_routes';
+import { registerChangeHistoryRoutes } from '../change_history/register_routes';
 
 export function registerRoutes(
   core: CoreSetup<StartDeps, DashboardPluginStart>,
@@ -54,5 +54,5 @@ export function registerRoutes(
 
   const unversionedRouter = core.http.createRouter<RequestHandlerContext>();
   registerTrackUserActivityRoute(unversionedRouter);
-  registerChangeHistoryRoute(core, unversionedRouter);
+  registerChangeHistoryRoutes(core, unversionedRouter);
 }

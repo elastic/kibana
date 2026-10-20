@@ -15,7 +15,7 @@ import { registerChangeDetailsRoute } from './register_details_route';
 import { registerHistoryListRoute } from './register_list_route';
 import { registerRestoreChangeRoute } from './register_restore_route';
 
-export function registerChangeHistoryRoute(
+export function registerChangeHistoryRoutes(
   core: CoreSetup<StartDeps, DashboardPluginStart>,
   router: IRouter<RequestHandlerContext>
 ) {
