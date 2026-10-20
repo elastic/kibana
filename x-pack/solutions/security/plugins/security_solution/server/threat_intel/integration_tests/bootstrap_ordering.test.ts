@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { createTestServers } from '@kbn/core-test-helpers-kbn-server';
 import {
@@ -97,6 +98,8 @@ describe('threat intel bootstrap ordering against Elasticsearch', () => {
   });
 
   describe('when a write creates the reports index before the template exists', () => {
+    let installError: unknown;
+
     beforeAll(async () => {
       await deleteThreatIntelIndicesAndTemplates();
       await esClient.index({
@@ -104,18 +107,25 @@ describe('threat intel bootstrap ordering against Elasticsearch', () => {
         document: { content: { title: 'written before bootstrap', body_text: 'auto-created' } },
         refresh: true,
       });
+      // The install attempt runs once here so the mapping assertion below sees its effect.
+      installError = await installIndexTemplates({ esClient, logger }).then(
+        () => undefined,
+        (error: unknown) => error
+      );
     });
 
-    it('fails template installation closed instead of repairing the index', async () => {
-      await expect(installIndexTemplates({ esClient, logger })).rejects.toThrow(
-        BOOTSTRAP_NOT_READY
-      );
+    it('fails template installation closed instead of repairing the index', () => {
+      expect(installError).toBeInstanceOf(Error);
+      expect((installError as Error).message).toContain(BOOTSTRAP_NOT_READY);
     });
 
     it('leaves the reports index without strict dynamic mapping', async () => {
       expect((await getMapping(THREAT_REPORTS_INDEX)).dynamic).not.toBe('strict');
     });
 
+    // Bootstrap retries template installation through `withElasticsearchRetry` (8 attempts,
+    // 2s apart), so this sleeps about 14s before it rejects; the retry settings are not
+    // injectable.
     it('rejects bootstrap', async () => {
       await expect(ensureThreatIntelBootstrap({ esClient, logger })).rejects.toThrow(
         BOOTSTRAP_NOT_READY
@@ -128,9 +138,10 @@ describe('threat intel bootstrap ordering against Elasticsearch', () => {
         spaceId: 'default',
         logger,
         getBootstrapReady: () => Promise.reject(new Error(BOOTSTRAP_NOT_READY)),
+        request: httpServerMock.createKibanaRequest(),
         getInference: () => undefined,
         getSearchInferenceEndpoints: () => undefined,
-      } as unknown as Parameters<typeof getThreatIntelReadiness>[0]);
+      });
       expect(readiness.reasonCodes).toEqual(['bootstrap_incomplete', 'reports_index_unmanaged']);
     });
   });

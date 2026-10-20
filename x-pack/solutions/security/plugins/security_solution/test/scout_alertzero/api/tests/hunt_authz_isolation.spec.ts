@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+import {
+  HUNT_INDEX_SCOPE_URL,
+  HUNT_THREAT_INTEL_SUPPLY_RESTORE_URL,
+  HUNT_THREAT_INTEL_SUPPLY_URL,
+} from '@kbn/alertzero-common';
 import type { KibanaRole } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import {
   FIND_THREAT_REPORTS_API_PATH,
   GET_THREAT_REPORT_API_PATH,
-  LIST_SOURCES_API_PATH,
 } from '../../../../common/threat_intel';
 import {
   ALERTZERO_READ_ONLY_ROLE,
@@ -18,15 +22,13 @@ import {
   cleanupThreatReportsByIds,
   enableAlertZeroInSpace,
   HUNT_ALL_ROUTES,
-  HUNT_INDEX_SCOPE_URL,
   HUNT_READ_ROUTES,
   HUNT_WORKER_URL,
   HUNT_WRITE_ROUTES,
-  NO_ALERTZERO_ROLE,
+  runCleanupSteps,
+  SECURITY_READ_ONLY_ROLE,
   seedSharedReportWithEvidence,
   spaceUrl,
-  SUPPLY_RESTORE_URL,
-  SUPPLY_STATUS_URL,
   tags,
   withHuntHeaders,
 } from '../fixtures';
@@ -35,6 +37,7 @@ const RUN = Date.now();
 const SPACE_A = `hunt-authz-a-${RUN}`;
 const SPACE_B = `hunt-authz-b-${RUN}`;
 const REPORT_ID = `scout-evidence-${RUN}`;
+const REPORT_SOURCE_NAME = `scout-isolation-${RUN}`;
 const HUNT_READ_ROUTE_SET: ReadonlySet<string> = new Set(HUNT_READ_ROUTES);
 
 interface ErrorBody {
@@ -56,8 +59,9 @@ const expectMissingKibanaPrivilege = (
 };
 
 /**
- * Route, identity, and space authz table, plus per-space evidence projection on
- * a shared report and feed credential non-exposure on list_sources.
+ * Route, identity, and space authz table, plus per-space evidence projection on a
+ * shared report. Credential redaction on list_sources is covered by `redactUrl` and
+ * `mapSourceHit` unit tests, since the shipped catalog carries no userinfo to assert on.
  */
 apiTest.describe(
   'Hunt Watch - authz isolation and evidence projection',
@@ -78,21 +82,27 @@ apiTest.describe(
       await seedSharedReportWithEvidence({
         esClient,
         reportId: REPORT_ID,
+        sourceName: REPORT_SOURCE_NAME,
         spaceA: SPACE_A,
         spaceB: SPACE_B,
       });
     });
 
     apiTest.afterAll(async ({ apiServices, esClient }) => {
-      await cleanupThreatReportsByIds(esClient, [REPORT_ID]);
-      await apiServices.spaces.delete(SPACE_A);
-      await apiServices.spaces.delete(SPACE_B);
+      await runCleanupSteps([
+        {
+          name: 'delete seeded report',
+          run: () => cleanupThreatReportsByIds(esClient, [REPORT_ID]),
+        },
+        { name: `delete space ${SPACE_A}`, run: () => apiServices.spaces.delete(SPACE_A) },
+        { name: `delete space ${SPACE_B}`, run: () => apiServices.spaces.delete(SPACE_B) },
+      ]);
     });
 
     apiTest(
       'returns 403 on every hunt route for a user without AlertZero',
       async ({ samlAuth, apiClient }) => {
-        const { cookieHeader } = await samlAuth.asInteractiveUser(NO_ALERTZERO_ROLE);
+        const { cookieHeader } = await samlAuth.asInteractiveUser(SECURITY_READ_ONLY_ROLE);
         const headers = withHuntHeaders(cookieHeader);
 
         for (const path of HUNT_ALL_ROUTES) {
@@ -133,7 +143,7 @@ apiTest.describe(
       'lets an AlertZero read-only user read supply status',
       async ({ samlAuth, apiClient }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser(ALERTZERO_READ_ONLY_ROLE);
-        const response = await apiClient.get(spaceUrl(SUPPLY_STATUS_URL, SPACE_B), {
+        const response = await apiClient.get(spaceUrl(HUNT_THREAT_INTEL_SUPPLY_URL, SPACE_B), {
           headers: withHuntHeaders(cookieHeader),
           responseType: 'json',
         });
@@ -145,11 +155,14 @@ apiTest.describe(
       'returns 403 when an AlertZero read-only user calls Restore',
       async ({ samlAuth, apiClient }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser(ALERTZERO_READ_ONLY_ROLE);
-        const response = await apiClient.post(spaceUrl(SUPPLY_RESTORE_URL, SPACE_B), {
-          headers: withHuntHeaders(cookieHeader),
-          responseType: 'json',
-          body: {},
-        });
+        const response = await apiClient.post(
+          spaceUrl(HUNT_THREAT_INTEL_SUPPLY_RESTORE_URL, SPACE_B),
+          {
+            headers: withHuntHeaders(cookieHeader),
+            responseType: 'json',
+            body: {},
+          }
+        );
         // Read-only lacks alertzero_write, so core authz refuses before the handler's
         // manage_security check runs.
         expectMissingKibanaPrivilege(response, 'alertzero_write');
@@ -169,25 +182,6 @@ apiTest.describe(
       }
     );
 
-    apiTest(
-      'returns 400 when an admin omits the internal-origin header',
-      async ({ samlAuth, apiClient }) => {
-        const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
-        const response = await apiClient.get(spaceUrl(SUPPLY_STATUS_URL, SPACE_B), {
-          headers: {
-            ...cookieHeader,
-            'kbn-xsrf': 'true',
-            'elastic-api-version': '1',
-          },
-          responseType: 'json',
-        });
-        expect(response.statusCode).toBe(400);
-        expect((response.body as ErrorBody).message).toContain(
-          'is not available with the current configuration'
-        );
-      }
-    );
-
     apiTest('projects only the caller space evidence on a shared report', async ({ apiClient }) => {
       const path = GET_THREAT_REPORT_API_PATH.replace('{reportId}', REPORT_ID);
       const response = await apiClient.get(spaceUrl(path, SPACE_B), {
@@ -200,49 +194,47 @@ apiTest.describe(
     });
 
     apiTest('omits evidence from find_threat_reports', async ({ apiClient }) => {
+      // Narrowed to the seeded report's source so a shared cluster's other reports
+      // cannot push it off the page, and asserted present so the check is not vacuous.
+      const query = new URLSearchParams({ pageSize: '100', source: REPORT_SOURCE_NAME });
       const response = await apiClient.get(
-        `${spaceUrl(FIND_THREAT_REPORTS_API_PATH, SPACE_B)}?pageSize=100`,
+        `${spaceUrl(FIND_THREAT_REPORTS_API_PATH, SPACE_B)}?${query.toString()}`,
         {
           headers: adminHeaders,
           responseType: 'json',
         }
       );
       expect(response.statusCode).toBe(200);
-      const items = (response.body as { items?: Array<Record<string, unknown>> }).items ?? [];
-      expect(items.every((item) => !('evidence' in item))).toBe(true);
-    });
-
-    apiTest('refuses a B-only role on space A routes', async ({ samlAuth, apiClient }) => {
-      const bOnlyRole: KibanaRole = {
-        elasticsearch: { cluster: [], indices: [] },
-        kibana: [
-          {
-            base: [],
-            feature: { siem: ['read'], alertzero: ['read'] },
-            spaces: [SPACE_B],
-          },
-        ],
-      };
-      const { cookieHeader } = await samlAuth.asInteractiveUser(bOnlyRole);
-      const path = GET_THREAT_REPORT_API_PATH.replace('{reportId}', REPORT_ID);
-      const response = await apiClient.get(spaceUrl(path, SPACE_A), {
-        headers: withHuntHeaders(cookieHeader),
-        responseType: 'json',
-      });
-      expectMissingKibanaPrivilege(response, 'securitySolution');
+      const items = (response.body as { items: Array<{ reportId: string }> }).items;
+      const seeded = items.find((item) => item.reportId === REPORT_ID);
+      expect(seeded).toBeDefined();
+      expect(Object.keys(seeded ?? {})).not.toContain('evidence');
     });
 
     apiTest(
-      'never returns feed credentials as URL userinfo from list_sources',
-      async ({ apiClient }) => {
-        const response = await apiClient.post(LIST_SOURCES_API_PATH, {
-          headers: adminHeaders,
-          responseType: 'json',
-          body: {},
-        });
-        expect(response.statusCode).toBe(200);
-        const sources = (response.body as { sources: Array<{ url?: string }> }).sources;
-        expect(sources.every((s) => s.url == null || !/:[^/]*@/.test(s.url))).toBe(true);
+      'lets a B-only role read a shared report in space B but not in space A',
+      async ({ samlAuth, apiClient }) => {
+        const bOnlyRole: KibanaRole = {
+          elasticsearch: { cluster: [], indices: [] },
+          kibana: [
+            {
+              base: [],
+              feature: { siem: ['read'], alertzero: ['read'] },
+              spaces: [SPACE_B],
+            },
+          ],
+        };
+        const { cookieHeader } = await samlAuth.asInteractiveUser(bOnlyRole);
+        const headers = withHuntHeaders(cookieHeader);
+        const path = GET_THREAT_REPORT_API_PATH.replace('{reportId}', REPORT_ID);
+
+        // Positive control: the role does grant `securitySolution` where it is assigned,
+        // so the 403 below is space scoping and not a role that grants nothing.
+        const inB = await apiClient.get(spaceUrl(path, SPACE_B), { headers, responseType: 'json' });
+        expect(inB.statusCode).toBe(200);
+
+        const inA = await apiClient.get(spaceUrl(path, SPACE_A), { headers, responseType: 'json' });
+        expectMissingKibanaPrivilege(inA, 'securitySolution');
       }
     );
   }

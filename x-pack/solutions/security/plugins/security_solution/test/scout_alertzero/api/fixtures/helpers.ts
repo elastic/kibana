@@ -9,33 +9,18 @@ import type { ApiClientFixture } from '@kbn/scout-security';
 import {
   ALERTZERO_ENABLED_SETTING_ID,
   ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
+  ALERTZERO_WORKERS_URL,
   buildServiceAccountUrl,
-  buildWorkerUrl,
   getWorkerRoleName,
+  HUNT_THREAT_INTEL_SUPPLY_URL,
   SECURITY_SERVICE_ACCOUNT_URL,
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   WORKER_SERVICE_ACCOUNT_NAMES,
   type HuntThreatIntelSupplyStatus,
 } from '@kbn/alertzero-common';
 import { THREAT_REPORTS_INDEX } from '../../../../common/threat_intel';
-import {
-  HUNT_HEADERS,
-  HUNT_WORKER_ID,
-  NO_ALERTZERO_ROLE,
-  SUPPLY_STATUS_URL,
-  WORKERS_URL,
-} from './constants';
-
-/**
- * Deployment-wide supply workflow ids. Match `THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID` and
- * `THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID` in `@kbn/workflows/managed` (inlined so Scout stays light).
- */
-const SUPPLY_WORKFLOW_IDS = {
-  ingest: 'system-security-threat-intel-ingest-feeds',
-  enrich: 'system-security-threat-intel-enrich-report',
-} as const;
-
-export type SupplyWorkflowKey = keyof typeof SUPPLY_WORKFLOW_IDS;
+import { HUNT_WORKER_URL, TI_HEADERS } from './constants';
+import { SUPPLY_WORKFLOW_IDS, type SupplyWorkflowKey } from './supply_workflow_ids';
 
 /** Minimal ES client surface these tests rely on. */
 interface EsLike {
@@ -55,17 +40,24 @@ interface EsLike {
 }
 
 /**
- * Security read-only role: holds the base `securitySolution` API privilege via
- * `siem: ['read']` but NOT `RULES_API_ALL`. This is the exact boundary
- * `THREAT_INTEL_WRITE_AUTHZ` documents, so it proves a read-only Security user
- * cannot mutate the source catalog.
- *
- * The threat intel routes read and write their hidden indices as the internal
- * user, so this role needs no Elasticsearch index privileges of its own.
- *
- * Same role as {@link NO_ALERTZERO_ROLE}; the hunt authz table names it by what it lacks.
+ * Runs every cleanup step even when an earlier one throws, then rethrows the failures
+ * together, so one broken teardown cannot leak spaces or shared settings into later specs.
  */
-export const SECURITY_READ_ONLY_ROLE = NO_ALERTZERO_ROLE;
+export const runCleanupSteps = async (
+  steps: ReadonlyArray<{ name: string; run: () => Promise<unknown> }>
+): Promise<void> => {
+  const failures: string[] = [];
+  for (const { name, run } of steps) {
+    try {
+      await run();
+    } catch (error) {
+      failures.push(`${name}: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+  if (failures.length > 0) {
+    throw new Error(`Cleanup failed:\n${failures.join('\n')}`);
+  }
+};
 
 /**
  * Remove only the specific threat reports created by this suite run.
@@ -105,7 +97,7 @@ export const readSupplyStatus = async (
   headers: Record<string, string>,
   spaceId: string
 ): Promise<{ statusCode: number; body: SupplyStatusBody }> => {
-  const response = await apiClient.get(spaceUrl(SUPPLY_STATUS_URL, spaceId), {
+  const response = await apiClient.get(spaceUrl(HUNT_THREAT_INTEL_SUPPLY_URL, spaceId), {
     headers,
     responseType: 'json',
   });
@@ -197,7 +189,8 @@ export const enableAlertZeroInSpace = async (args: {
 /**
  * Creates a space-scoped `.gen-ai` connector (so Workers are not blocked by `noModel`),
  * assigns it to the AlertZero parent inference feature when getForFeature would otherwise
- * see nothing, and creates the Hunt Worker's built-in service account.
+ * see nothing, and creates a uniquely named service account that holds the Hunt Worker's
+ * built-in role (not the built-in account itself, which two spaces would race on).
  */
 export const setupHuntPrerequisites = async ({
   apiClient,
@@ -373,7 +366,7 @@ export const setHuntEnabled = async ({
   enabled: boolean;
   serviceAccountId?: string;
 }): Promise<{ statusCode: number; body: unknown }> => {
-  const listed = await apiClient.get(spaceUrl(WORKERS_URL, spaceId), {
+  const listed = await apiClient.get(spaceUrl(ALERTZERO_WORKERS_URL, spaceId), {
     headers,
     responseType: 'json',
   });
@@ -387,7 +380,9 @@ export const setHuntEnabled = async ({
   const workers = (
     listed.body as { workers: Array<{ id: string; settingsRevision: number | null }> }
   ).workers;
-  const current = workers.find((w) => w.id === HUNT_WORKER_ID);
+  const current = workers.find(
+    (w) => w.id === SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID
+  );
   const body: Record<string, unknown> = {
     enabled,
     settingsRevision: current?.settingsRevision ?? null,
@@ -398,7 +393,7 @@ export const setHuntEnabled = async ({
     }
     body.settings = { serviceAccountId };
   }
-  const response = await apiClient.patch(spaceUrl(buildWorkerUrl(HUNT_WORKER_ID), spaceId), {
+  const response = await apiClient.patch(spaceUrl(HUNT_WORKER_URL, spaceId), {
     headers,
     responseType: 'json',
     body,
@@ -436,15 +431,20 @@ export const setSupplyWorkflowEnabled = async ({
   return { statusCode: response.statusCode, body: response.body };
 };
 
-/** Seed a shared (`space_id: '*'`) report with two per-space evidence elements. */
+/**
+ * Seed a shared (`space_id: '*'`) report with two per-space evidence elements.
+ * `sourceName` lets a spec narrow `find_threat_reports` to this report on a shared cluster.
+ */
 export const seedSharedReportWithEvidence = async ({
   esClient,
   reportId,
+  sourceName,
   spaceA,
   spaceB,
 }: {
   esClient: EsLike;
   reportId: string;
+  sourceName: string;
   spaceA: string;
   spaceB: string;
 }): Promise<void> => {
@@ -454,6 +454,7 @@ export const seedSharedReportWithEvidence = async ({
     refresh: true,
     document: {
       space_id: '*',
+      source: { name: sourceName },
       content: {
         title: `Scout isolation ${reportId}`,
         body_text: `Shared report for evidence projection ${reportId}`,
@@ -476,6 +477,6 @@ export const seedSharedReportWithEvidence = async ({
 
 /** Headers for hunt/TI internal calls as a given cookie session. */
 export const withHuntHeaders = (cookieHeader: Record<string, string>): Record<string, string> => ({
-  ...HUNT_HEADERS,
+  ...TI_HEADERS,
   ...cookieHeader,
 });

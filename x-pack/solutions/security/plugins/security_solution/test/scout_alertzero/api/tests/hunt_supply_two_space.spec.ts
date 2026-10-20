@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { HUNT_THREAT_INTEL_SUPPLY_RESTORE_URL } from '@kbn/alertzero-common';
 import { expect } from '@kbn/scout-security/api';
 import {
   apiTest,
@@ -12,13 +13,13 @@ import {
   enableAlertZeroInSpace,
   readAlertZeroEnabledInSpace,
   readSupplyStatus,
+  runCleanupSteps,
   setAlertZeroEnabledInSpace,
   setHuntEnabled,
   setSupplyWorkflowEnabled,
   setupHuntPrerequisites,
   spaceUrl,
   withHuntHeaders,
-  SUPPLY_RESTORE_URL,
   type HuntPrerequisites,
   type SupplyStatusBody,
   type SupplyWorkflowKey,
@@ -33,9 +34,10 @@ const workflowByKey = (status: SupplyStatusBody, key: string) =>
   status.workflows.find((row) => row.key === key);
 
 /**
- * Live decision-table rows 1, 2, 7, 8, 13, and 17: enable/disable across two spaces,
- * drift via the Workflows API, and Restore. Mutates deployment-global ingest/enrich and
- * the default space's AlertZero setting; beforeAll records them and afterAll puts them back.
+ * Live enable/disable across two spaces, drift via the Workflows API, and Restore. The
+ * same transitions run in isolation in `threat_intel_supply_service.test.ts`. Mutates
+ * deployment-global ingest/enrich and the default space's AlertZero setting; beforeAll
+ * records them and afterAll puts them back.
  */
 apiTest.describe.serial(
   'Hunt Watch - threat intel supply across two spaces',
@@ -48,6 +50,10 @@ apiTest.describe.serial(
     // make afterAll clear a setting this suite never touched.
     let defaultAlertZeroBaseline: { enabled: boolean | undefined } | undefined;
     const initialSupplyEnabled: Partial<Record<SupplyWorkflowKey, boolean>> = {};
+    // A shared stack may already hunt in the default space or another one. Those consumers
+    // keep ingest and enrich on after this suite's last Hunt goes off, so the last-consumer
+    // row below asserts against this instead of assuming A and B are the only Hunts.
+    let otherSpacesHunt = false;
 
     apiTest.beforeAll(async ({ apiServices, samlAuth, apiClient }) => {
       await apiServices.spaces.create({ id: SPACE_A, name: SPACE_A });
@@ -75,6 +81,8 @@ apiTest.describe.serial(
       for (const key of DEPLOYMENT_SUPPLY_KEYS) {
         initialSupplyEnabled[key] = workflowByKey(baseline.body, key)?.enabled;
       }
+      otherSpacesHunt =
+        baseline.body.huntEnabled || baseline.body.workflows.some((row) => row.inUseElsewhere);
 
       prereqA = await setupHuntPrerequisites({
         apiClient,
@@ -103,59 +111,53 @@ apiTest.describe.serial(
     });
 
     apiTest.afterAll(async ({ apiServices, apiClient }) => {
-      try {
-        await setHuntEnabled({
-          apiClient,
-          headers: adminHeaders,
-          spaceId: SPACE_A,
-          enabled: false,
-        });
-      } catch {
-        // Space may already be gone or Hunt never enabled.
-      }
-      try {
-        await setHuntEnabled({
-          apiClient,
-          headers: adminHeaders,
-          spaceId: SPACE_B,
-          enabled: false,
-        });
-      } catch {
-        // Same for B.
-      }
-
       // Disabling Hunt tears the deployment rows down only when no other space hunts, so
       // put each one back to its recorded state through the Workflows API when it differs.
-      const after = await readSupplyStatus(apiClient, adminHeaders, 'default');
-      for (const key of DEPLOYMENT_SUPPLY_KEYS) {
-        const initial = initialSupplyEnabled[key];
-        const current = after.statusCode === 200 ? workflowByKey(after.body, key) : undefined;
-        if (initial !== undefined && current?.installed && current.enabled !== initial) {
-          await setSupplyWorkflowEnabled({
-            apiClient,
-            headers: adminHeaders,
-            key,
-            enabled: initial,
-          });
+      const restoreDeploymentSupply = async () => {
+        const after = await readSupplyStatus(apiClient, adminHeaders, 'default');
+        for (const key of DEPLOYMENT_SUPPLY_KEYS) {
+          const initial = initialSupplyEnabled[key];
+          const current = after.statusCode === 200 ? workflowByKey(after.body, key) : undefined;
+          if (initial !== undefined && current?.installed && current.enabled !== initial) {
+            await setSupplyWorkflowEnabled({
+              apiClient,
+              headers: adminHeaders,
+              key,
+              enabled: initial,
+            });
+          }
         }
-      }
+      };
+      const disableHunt = (spaceId: string) =>
+        setHuntEnabled({ apiClient, headers: adminHeaders, spaceId, enabled: false });
 
-      await prereqA?.cleanup();
-      await prereqB?.cleanup();
-      await apiServices.spaces.delete(SPACE_A);
-      await apiServices.spaces.delete(SPACE_B);
-      if (defaultAlertZeroBaseline) {
-        await setAlertZeroEnabledInSpace({
-          apiClient,
-          headers: adminHeaders,
-          spaceId: 'default',
-          enabled: defaultAlertZeroBaseline.enabled,
-        });
-      }
+      // Every step runs even when an earlier one throws, so a failed connector or account
+      // delete cannot leave spaces or the default-space setting behind for later specs.
+      await runCleanupSteps([
+        { name: `disable Hunt in ${SPACE_A}`, run: () => disableHunt(SPACE_A) },
+        { name: `disable Hunt in ${SPACE_B}`, run: () => disableHunt(SPACE_B) },
+        { name: 'restore deployment supply rows', run: restoreDeploymentSupply },
+        { name: `clean up prerequisites in ${SPACE_A}`, run: () => prereqA?.cleanup() },
+        { name: `clean up prerequisites in ${SPACE_B}`, run: () => prereqB?.cleanup() },
+        { name: `delete space ${SPACE_A}`, run: () => apiServices.spaces.delete(SPACE_A) },
+        { name: `delete space ${SPACE_B}`, run: () => apiServices.spaces.delete(SPACE_B) },
+        {
+          name: 'restore default space AlertZero setting',
+          run: async () => {
+            if (!defaultAlertZeroBaseline) return;
+            await setAlertZeroEnabledInSpace({
+              apiClient,
+              headers: adminHeaders,
+              spaceId: 'default',
+              enabled: defaultAlertZeroBaseline.enabled,
+            });
+          },
+        },
+      ]);
     });
 
     apiTest(
-      '1. enabling Hunt in A turns ingest, enrich, and attribute-A on',
+      'enabling Hunt in A turns ingest, enrich, and attribute-A on',
       async ({ apiClient }) => {
         const enable = await setHuntEnabled({
           apiClient,
@@ -178,7 +180,7 @@ apiTest.describe.serial(
     );
 
     apiTest(
-      '2. enabling Hunt in B leaves deployment rows on and turns attribute-B on',
+      'enabling Hunt in B leaves deployment rows on and turns attribute-B on',
       async ({ apiClient }) => {
         const enable = await setHuntEnabled({
           apiClient,
@@ -203,7 +205,7 @@ apiTest.describe.serial(
     );
 
     apiTest(
-      '7/8. disabling Hunt in A turns attribute-A off and marks deployment rows in use elsewhere',
+      'disabling Hunt in A turns attribute-A off and marks deployment rows in use elsewhere',
       async ({ apiClient }) => {
         const disable = await setHuntEnabled({
           apiClient,
@@ -226,23 +228,29 @@ apiTest.describe.serial(
       }
     );
 
-    apiTest('7. disabling Hunt in B turns deployment rows off', async ({ apiClient }) => {
-      const disable = await setHuntEnabled({
-        apiClient,
-        headers: adminHeaders,
-        spaceId: SPACE_B,
-        enabled: false,
-      });
-      expect(disable.statusCode).toBe(200);
+    apiTest(
+      'disabling Hunt in B turns deployment rows off unless another space still hunts',
+      async ({ apiClient }) => {
+        const disable = await setHuntEnabled({
+          apiClient,
+          headers: adminHeaders,
+          spaceId: SPACE_B,
+          enabled: false,
+        });
+        expect(disable.statusCode).toBe(200);
 
-      const statusB = await readSupplyStatus(apiClient, adminHeaders, SPACE_B);
-      expect(statusB.body.huntEnabled).toBe(false);
-      expect(workflowByKey(statusB.body, 'ingest')?.enabled).toBe(false);
-      expect(workflowByKey(statusB.body, 'enrich')?.enabled).toBe(false);
-      expect(workflowByKey(statusB.body, 'attribute')?.enabled).toBe(false);
-    });
+        const statusB = await readSupplyStatus(apiClient, adminHeaders, SPACE_B);
+        expect(statusB.body.huntEnabled).toBe(false);
+        expect(workflowByKey(statusB.body, 'attribute')?.enabled).toBe(false);
+        for (const key of DEPLOYMENT_SUPPLY_KEYS) {
+          const row = workflowByKey(statusB.body, key);
+          expect(row?.enabled).toBe(otherSpacesHunt);
+          expect(row?.inUseElsewhere ?? false).toBe(otherSpacesHunt);
+        }
+      }
+    );
 
-    apiTest('13/17. re-enable A, drift ingest off, Restore clears drift', async ({ apiClient }) => {
+    apiTest('re-enable A, drift ingest off, Restore clears drift', async ({ apiClient }) => {
       const enable = await setHuntEnabled({
         apiClient,
         headers: adminHeaders,
@@ -264,11 +272,14 @@ apiTest.describe.serial(
       expect(drifted.body.drift).toBe(true);
       expect(workflowByKey(drifted.body, 'ingest')?.enabled).toBe(false);
 
-      const restore = await apiClient.post(spaceUrl(SUPPLY_RESTORE_URL, SPACE_A), {
-        headers: adminHeaders,
-        responseType: 'json',
-        body: {},
-      });
+      const restore = await apiClient.post(
+        spaceUrl(HUNT_THREAT_INTEL_SUPPLY_RESTORE_URL, SPACE_A),
+        {
+          headers: adminHeaders,
+          responseType: 'json',
+          body: {},
+        }
+      );
       expect(restore.statusCode).toBe(200);
 
       const healed = await readSupplyStatus(apiClient, adminHeaders, SPACE_A);

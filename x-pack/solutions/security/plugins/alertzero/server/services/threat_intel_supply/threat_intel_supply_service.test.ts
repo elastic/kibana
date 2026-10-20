@@ -640,21 +640,21 @@ describe('ThreatIntelSupplyService end state by space', () => {
 
   const rows: Row[] = [
     {
-      name: '1. enable A, nothing else on: ingest, enrich and attribute-A turn on',
+      name: 'enable A, nothing else on: ingest, enrich and attribute-A turn on',
       operation: 'ensure',
       seed: allOff,
       expectedDocs: { ...allOff, ingest: true, enrich: true, attrA: true },
       expectedOutcome: 'ok',
     },
     {
-      name: '2. enable A while B hunts: globals stay on, attribute-A turns on',
+      name: 'enable A while B hunts: globals stay on, attribute-A turns on',
       operation: 'ensure',
       seed: { ...allOff, ingest: true, enrich: true, attrB: true, cthB: true },
       expectedDocs: { ...allOff, ingest: true, enrich: true, attrA: true, attrB: true, cthB: true },
       expectedOutcome: 'ok',
     },
     {
-      name: '4. enable A with attribute-A missing: the installer adds it and it turns on',
+      name: 'enable A with attribute-A missing: the installer adds it and it turns on',
       operation: 'ensure',
       seed: { ingest: false, enrich: false, attrB: false, cthA: false, cthB: false },
       installer: true,
@@ -662,35 +662,35 @@ describe('ThreatIntelSupplyService end state by space', () => {
       expectedOutcome: 'ok',
     },
     {
-      name: '5. enable A with enrich missing and no installer: nothing is left changed',
+      name: 'enable A with enrich missing and no installer: nothing is left changed',
       operation: 'ensure',
       seed: { ingest: false, attrA: false, attrB: false, cthA: false, cthB: false },
       expectedDocs: { ingest: false, attrA: false, attrB: false, cthA: false, cthB: false },
       expectedOutcome: 'ThreatIntelSupplyNotInstalledError',
     },
     {
-      name: '7. disable A, B off: attribute-A and both globals turn off',
+      name: 'disable A, B off: attribute-A and both globals turn off',
       operation: 'teardown',
       seed: { ...allOff, ingest: true, enrich: true, attrA: true },
       expectedDocs: allOff,
       expectedOutcome: 'ok',
     },
     {
-      name: '8. disable A, B on: only attribute-A turns off',
+      name: 'disable A, B on: only attribute-A turns off',
       operation: 'teardown',
       seed: { ...allOff, ingest: true, enrich: true, attrA: true, attrB: true, cthB: true },
       expectedDocs: { ...allOff, ingest: true, enrich: true, attrB: true, cthB: true },
       expectedOutcome: 'ok',
     },
     {
-      name: '9. disable A with attribute-A missing: globals still turn off by refcount',
+      name: 'disable A with attribute-A missing: globals still turn off by refcount',
       operation: 'teardown',
       seed: { ingest: true, enrich: true, attrB: false, cthA: false, cthB: false },
       expectedDocs: { ingest: false, enrich: false, attrB: false, cthA: false, cthB: false },
       expectedOutcome: 'ok',
     },
     {
-      name: '10. disable A when the global update is forbidden: attribute-A is off, ingest stays on',
+      name: 'disable A when the global update is forbidden: attribute-A is off, ingest stays on',
       operation: 'teardown',
       seed: { ...allOff, ingest: true, enrich: true, attrA: true },
       failUpdates: ['ingest'],
@@ -698,14 +698,14 @@ describe('ThreatIntelSupplyService end state by space', () => {
       expectedOutcome: 'Error',
     },
     {
-      name: '11. disable A while the default space hunts: globals stay on',
+      name: 'disable A while the default space hunts: globals stay on',
       operation: 'teardown',
       seed: { ...allOff, ingest: true, enrich: true, attrA: true, cthDefault: true },
       expectedDocs: { ...allOff, ingest: true, enrich: true, cthDefault: true },
       expectedOutcome: 'ok',
     },
     {
-      name: '12. disable A while B enables concurrently: globals stay on',
+      name: 'disable A while B enables concurrently: globals stay on',
       operation: 'teardown',
       seed: { ...allOff, ingest: true, enrich: true, attrA: true },
       raceEnablesBAfterAttrAOff: true,
@@ -713,14 +713,14 @@ describe('ThreatIntelSupplyService end state by space', () => {
       expectedOutcome: 'ok',
     },
     {
-      name: '13. restore A from ingest drifted off: ingest turns back on',
+      name: 'restore A from ingest drifted off: ingest turns back on',
       operation: 'restore',
       seed: { ...allOff, enrich: true, attrA: true, cthA: true },
       expectedDocs: { ...allOff, ingest: true, enrich: true, attrA: true, cthA: true },
       expectedOutcome: 'ok',
     },
     {
-      name: '13b. restore A from everything off reaches the same end state as a first enable',
+      name: 'restore A from everything off reaches the same end state as a first enable',
       operation: 'restore',
       seed: { ...allOff, cthA: true },
       expectedDocs: { ...allOff, ingest: true, enrich: true, attrA: true, cthA: true },
@@ -735,14 +735,14 @@ describe('ThreatIntelSupplyService end state by space', () => {
       expectedOutcome: 'ok',
     },
     {
-      name: '14. restore A with Hunt off: nothing is written',
+      name: 'restore A with Hunt off: nothing is written',
       operation: 'restore',
       seed: allOff,
       expectedDocs: allOff,
       expectedOutcome: 'ThreatIntelSupplyHuntDisabledError',
     },
     {
-      name: '15. restore A with the hard gate blocked: nothing is written',
+      name: 'restore A with the hard gate blocked: nothing is written',
       operation: 'restore',
       seed: { ...allOff, cthA: true },
       gateOk: false,
@@ -750,7 +750,7 @@ describe('ThreatIntelSupplyService end state by space', () => {
       expectedOutcome: 'ThreatIntelSupplyHardGateError',
     },
     {
-      name: '16a. restore A with attribute-A missing and an installer: it is installed and turns on',
+      name: 'restore A with attribute-A missing and an installer: it is installed and turns on',
       operation: 'restore',
       seed: { ingest: true, enrich: true, attrB: false, cthA: true, cthB: false },
       installer: true,
@@ -758,7 +758,7 @@ describe('ThreatIntelSupplyService end state by space', () => {
       expectedOutcome: 'ok',
     },
     {
-      name: '16b. restore A with attribute-A missing and no installer: the globals it could fix stay on',
+      name: 'restore A with attribute-A missing and no installer: the globals it could fix stay on',
       operation: 'restore',
       seed: { ingest: false, enrich: false, attrB: false, cthA: true, cthB: false },
       // Hunt is already on in A, so the failed ensure is not undone (see ensureSupplyForSpace).
@@ -834,12 +834,12 @@ describe('ThreatIntelSupplyService end state by space', () => {
       }).getSupplyStatus(SPACE_A, request);
     };
 
-    it('17. reports drift when Hunt is on in A and a required document is missing', async () => {
+    it('reports drift when Hunt is on in A and a required document is missing', async () => {
       const { drift } = await statusFor({ ingest: true, attrA: true, cthA: true, cthB: false });
       expect(drift).toBe(true);
     });
 
-    it('18. marks only the deployment rows in use elsewhere when A is off and B hunts', async () => {
+    it('marks only the deployment rows in use elsewhere when A is off and B hunts', async () => {
       const { workflows } = await statusFor({
         ...allOff,
         ingest: true,
@@ -854,12 +854,12 @@ describe('ThreatIntelSupplyService end state by space', () => {
       ]);
     });
 
-    it('19. reports no drift when nobody hunts, even with the globals left on', async () => {
+    it('reports no drift when nobody hunts, even with the globals left on', async () => {
       const { drift } = await statusFor({ ...allOff, ingest: true, enrich: true });
       expect(drift).toBe(false);
     });
 
-    it('19. marks nothing in use elsewhere when nobody hunts', async () => {
+    it('marks nothing in use elsewhere when nobody hunts', async () => {
       const { workflows } = await statusFor({ ...allOff, ingest: true, enrich: true });
       expect(workflows.some(({ inUseElsewhere }) => inUseElsewhere)).toBe(false);
     });

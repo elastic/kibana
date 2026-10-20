@@ -1,5 +1,5 @@
 {
-  "sha1": "012f9b0e6592a61abe52c3b360511ce80a3af42d",
+  "sha1": "7c8755fee8a83b22b08b02c0f257c34d0451219d",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 81,
-        "column": 24
+        "line": 97,
+        "column": 9
       }
     },
     {
@@ -28,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 94,
-        "column": 42
+        "line": 106,
+        "column": 25
       }
     },
     {
@@ -42,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 105,
-        "column": 26
+        "line": 123,
+        "column": 6
       }
     },
     {
@@ -56,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 117,
-        "column": 42
+        "line": 129,
+        "column": 25
       }
     },
     {
@@ -70,22 +70,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 127,
-        "column": 11
-      }
-    },
-    {
-      "id": "e11dd99e43856bd-c5ea5399fe9eebb",
-      "title": "Hunt Watch - authz isolation and evidence projection returns 400 when an admin omits the internal-origin header",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 137,
-        "column": 20
+        "line": 144,
+        "column": 24
       }
     },
     {
@@ -98,8 +84,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 149,
-        "column": 20
+        "line": 152,
+        "column": 6
       }
     },
     {
@@ -112,13 +98,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 161,
-        "column": 26
+        "line": 162,
+        "column": 33
       }
     },
     {
-      "id": "e11dd99e43856bd-62c844c628652f4",
-      "title": "Hunt Watch - authz isolation and evidence projection refuses a B-only role on space A routes",
+      "id": "e11dd99e43856bd-05671b12826c6a9",
+      "title": "Hunt Watch - authz isolation and evidence projection lets a B-only role read a shared report in space B but not in space A",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -126,41 +112,26 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 166,
-        "column": 34
+        "line": 179,
+        "column": 17
       }
     },
     {
-      "id": "e11dd99e43856bd-49113f416922780",
-      "title": "Hunt Watch - authz isolation and evidence projection never returns feed credentials as URL userinfo from list_sources",
+      "id": "973daa931f715ba-491b49ea72ca709",
+      "title": "Hunt Watch - internal API restriction returns 400 when an admin omits the internal-origin header",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
-        "line": 198,
-        "column": 25
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_internal_api_restriction.spec.ts",
+        "line": 19,
+        "column": 11
       }
     },
     {
-      "id": "13ed715b7c1260d-0da6f07b1dbe0a2",
-      "title": "Hunt Watch - threat intel supply across two spaces 1. enabling Hunt in A turns ingest, enrich, and attribute-A on",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_supply_two_space.spec.ts",
-        "line": 137,
-        "column": 7
-      }
-    },
-    {
-      "id": "13ed715b7c1260d-0e51a2292ebbd8a",
-      "title": "Hunt Watch - threat intel supply across two spaces 2. enabling Hunt in B leaves deployment rows on and turns attribute-B on",
+      "id": "13ed715b7c1260d-bf23879094f8703",
+      "title": "Hunt Watch - threat intel supply across two spaces enabling Hunt in A turns ingest, enrich, and attribute-A on",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -168,13 +139,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_supply_two_space.spec.ts",
-        "line": 172,
-        "column": 6
+        "line": 154,
+        "column": 11
       }
     },
     {
-      "id": "13ed715b7c1260d-08563b05307600c",
-      "title": "Hunt Watch - threat intel supply across two spaces 7/8. disabling Hunt in A turns attribute-A off and marks deployment rows in use elsewhere",
+      "id": "13ed715b7c1260d-5f713ed11b67204",
+      "title": "Hunt Watch - threat intel supply across two spaces enabling Hunt in B leaves deployment rows on and turns attribute-B on",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -182,13 +153,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_supply_two_space.spec.ts",
-        "line": 208,
-        "column": 16
+        "line": 189,
+        "column": 24
       }
     },
     {
-      "id": "13ed715b7c1260d-a0d12f7e837942a",
-      "title": "Hunt Watch - threat intel supply across two spaces 7. disabling Hunt in B turns deployment rows off",
+      "id": "13ed715b7c1260d-f5c08ca70dc8b90",
+      "title": "Hunt Watch - threat intel supply across two spaces disabling Hunt in A turns attribute-A off and marks deployment rows in use elsewhere",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -196,13 +167,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_supply_two_space.spec.ts",
-        "line": 228,
-        "column": 18
+        "line": 227,
+        "column": 15
       }
     },
     {
-      "id": "13ed715b7c1260d-09becd1b12e2d4a",
-      "title": "Hunt Watch - threat intel supply across two spaces 13/17. re-enable A, drift ingest off, Restore clears drift",
+      "id": "13ed715b7c1260d-74b92691a7ce09c",
+      "title": "Hunt Watch - threat intel supply across two spaces disabling Hunt in B turns deployment rows off unless another space still hunts",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -210,8 +181,22 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_supply_two_space.spec.ts",
-        "line": 242,
-        "column": 18
+        "line": 247,
+        "column": 21
+      }
+    },
+    {
+      "id": "13ed715b7c1260d-ef22601761a5484",
+      "title": "Hunt Watch - threat intel supply across two spaces re-enable A, drift ingest off, Restore clears drift",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_supply_two_space.spec.ts",
+        "line": 266,
+        "column": 22
       }
     },
     {

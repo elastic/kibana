@@ -117,8 +117,10 @@ export const createKeyedSupplyStore = ({
       if (id !== CTH) {
         return { installed: false, enabled: false };
       }
-      const spaceId = options.workflowIdSuffix ?? options.spaceId;
-      const doc = docs.get(keyOf(spaceId, `${CTH}-${spaceId}`));
+      // The namespace and the id suffix stay separate so a lookup in the wrong space
+      // finds nothing even when the suffix names the right space.
+      const { spaceId, workflowIdSuffix = spaceId } = options;
+      const doc = docs.get(keyOf(spaceId, `${CTH}-${workflowIdSuffix}`));
       return {
         installed: getHuntEnabled ? true : doc != null,
         enabled: getHuntEnabled ? getHuntEnabled(spaceId) : doc?.enabled ?? false,

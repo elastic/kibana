@@ -1639,7 +1639,7 @@ describe('WorkersService', () => {
 
     const rows: Row[] = [
       {
-        name: '1. enable A with B off: all supply turns on and Hunt is on',
+        name: 'enable A with B off: all supply turns on and Hunt is on',
         seed: tiOff,
         operation: 'enable',
         expectedResult: 'updated',
@@ -1653,7 +1653,7 @@ describe('WorkersService', () => {
         },
       },
       {
-        name: '2. enable A while B hunts: globals stay on and Hunt is on in both',
+        name: 'enable A while B hunts: globals stay on and Hunt is on in both',
         seed: { ...tiOff, ingest: true, enrich: true, attrB: true },
         bHunts: true,
         operation: 'enable',
@@ -1668,7 +1668,7 @@ describe('WorkersService', () => {
         },
       },
       {
-        name: '3. enable A with the hard gate blocked: nothing is written and Hunt stays off',
+        name: 'enable A with the hard gate blocked: nothing is written and Hunt stays off',
         seed: tiOff,
         hardGateOk: false,
         operation: 'enable',
@@ -1683,14 +1683,14 @@ describe('WorkersService', () => {
         },
       },
       {
-        name: '5. enable A with enrich missing: nothing is left changed and Hunt stays off',
+        name: 'enable A with enrich missing: nothing is left changed and Hunt stays off',
         seed: { ingest: false, attrA: false, attrB: false },
         operation: 'enable',
         expectedResult: 'blocked: huntSupplyNotInstalled',
         expectedDocs: { ingest: false, attrA: false, attrB: false, cthA: false, cthB: false },
       },
       {
-        name: '6. enable A when the Hunt write fails: supply is torn down again',
+        name: 'enable A when the Hunt write fails: supply is torn down again',
         seed: tiOff,
         operation: 'enable',
         enableWritesFail: true,
@@ -1705,7 +1705,7 @@ describe('WorkersService', () => {
         },
       },
       {
-        name: '7. disable A with B off: all supply and Hunt turn off',
+        name: 'disable A with B off: all supply and Hunt turn off',
         seed: tiOff,
         operation: 'disable',
         expectedResult: 'updated',
@@ -1719,7 +1719,7 @@ describe('WorkersService', () => {
         },
       },
       {
-        name: '8. disable A while B hunts: only attribute-A and Hunt-A turn off',
+        name: 'disable A while B hunts: only attribute-A and Hunt-A turn off',
         seed: { ...tiOff, ingest: true, enrich: true, attrB: true },
         bHunts: true,
         operation: 'disable',
@@ -1734,7 +1734,7 @@ describe('WorkersService', () => {
         },
       },
       {
-        name: '10. disable A when the global update is forbidden: Hunt-A is off and the disable still succeeds',
+        name: 'disable A when the global update is forbidden: Hunt-A is off and the disable still succeeds',
         seed: tiOff,
         operation: 'disableWithForbiddenGlobal',
         expectedResult: 'updated',

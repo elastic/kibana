@@ -11,7 +11,7 @@ import {
   CREATE_THREAT_REPORT_API_PATH,
   EXTRACT_IOCS_API_PATH,
 } from '../../../../common/threat_intel';
-import { apiTest, tags, testData, cleanupThreatReportsByIds } from '../fixtures';
+import { apiTest, tags, TI_HEADERS, cleanupThreatReportsByIds } from '../fixtures';
 
 interface CreateReportResponse {
   status: 'ingested' | 'duplicate';
@@ -35,7 +35,7 @@ apiTest.describe('Threat Intel - report ingest API', { tag: [...tags.stateful.cl
   apiTest.beforeAll(async ({ samlAuth }) => {
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
     writeHeaders = {
-      ...testData.TI_HEADERS,
+      ...TI_HEADERS,
       ...cookieHeader,
     };
   });
