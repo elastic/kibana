@@ -77,6 +77,7 @@ jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_alerting_episodes_data_view');
 
 jest.mock('@kbn/alerting-v2-episodes-ui/actions', () => ({
   createEpisodeActions: jest.fn(() => []),
+  OPEN_ALERT_EVENTS_HISTORY_ACTION_ID: 'ALERTING_V2_OPEN_ALERT_EVENTS_HISTORY_IN_DISCOVER',
 }));
 
 jest.mock('@kbn/alerting-v2-episodes-ui/components/details/details_flyout', () => ({
@@ -641,6 +642,15 @@ describe('privilege gating', () => {
     isCompatible: () => true,
     execute: jest.fn(async () => {}),
   };
+  const historyAction = {
+    id: 'ALERTING_V2_OPEN_ALERT_EVENTS_HISTORY_IN_DISCOVER',
+    order: 51,
+    displayName: 'Open alert events history',
+    iconType: 'productDiscover',
+    enforcesOwnPrivileges: true,
+    isCompatible: () => true,
+    execute: jest.fn(async () => {}),
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -648,12 +658,20 @@ describe('privilege gating', () => {
     jest.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
     jest.mocked(fetchClassicAlertsAsEpisodes).mockResolvedValue([]);
     mockHttp.post.mockResolvedValue({ rules: [] });
-    mockCreateEpisodeActions.mockReturnValue([ackAction, discoverAction]);
+    mockCreateEpisodeActions.mockReturnValue([ackAction, discoverAction, historyAction]);
   });
 
   const getRowControlIds = (): string[] => {
     const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
     return (lastCall?.rowAdditionalLeadingControls ?? []).map((control) => control.id);
+  };
+  const getFlyoutActionIds = (): string[] => {
+    const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+    const renderDocumentView = lastCall?.renderDocumentView as (hit: {
+      flattened: Record<string, unknown>;
+    }) => React.ReactElement;
+    const node = renderDocumentView({ flattened: { 'episode.id': 'ep-1' } });
+    return node.props.actions.map(({ id }: { id: string }) => id);
   };
 
   const waitForRows = () =>
@@ -676,6 +694,7 @@ describe('privilege gating', () => {
       'ALERTING_V2_ACK_EPISODE',
       OPEN_IN_DISCOVER_EPISODE_ACTION_ID,
     ]);
+    expect(getFlyoutActionIds()).toContain('ALERTING_V2_OPEN_ALERT_EVENTS_HISTORY_IN_DISCOVER');
   });
 
   it('hides mutating episode actions when the user only has read privilege', async () => {
@@ -688,6 +707,7 @@ describe('privilege gating', () => {
     expect(getCapturedBulkActions().map((action) => action.key)).toEqual([
       OPEN_IN_DISCOVER_EPISODE_ACTION_ID,
     ]);
+    expect(getFlyoutActionIds()).toContain('ALERTING_V2_OPEN_ALERT_EVENTS_HISTORY_IN_DISCOVER');
   });
 });
 
