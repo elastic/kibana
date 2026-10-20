@@ -56,7 +56,7 @@ jest.mock('@kbn/tooling-log', () => ({
 
 const mockRunJestViaMoon = jest.fn();
 
-jest.mock('@kbn/test', () => ({
+jest.mock('@kbn/jest', () => ({
   runJestViaMoon: (...args: unknown[]) => mockRunJestViaMoon(...args),
   JEST_CONFIG_NAMES: [
     'jest.config.dev.js',
