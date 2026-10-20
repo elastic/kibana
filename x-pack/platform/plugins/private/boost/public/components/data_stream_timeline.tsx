@@ -151,8 +151,9 @@ export const DataStreamTimeline = ({
             display: 'grid',
             gridTemplateColumns: 'var(--boostPeriodColumns)',
             padding: `${euiTheme.size.xs} ${euiTheme.size.xxs}`,
-            // A shade darker than subdued backgrounds, such as a flyout footer's.
-            backgroundColor: euiTheme.colors.lightestShade,
+            // Two shades darker than subdued backgrounds, such as a flyout footer's. EUI has no
+            // background color at this step of the neutral scale, only this border color.
+            backgroundColor: euiTheme.colors.borderBaseSubdued,
             borderRadius: euiTheme.border.radius.panel,
           }}
         >
@@ -219,7 +220,7 @@ export const DataStreamTimeline = ({
               <div
                 css={{
                   blockSize: euiTheme.size.s,
-                  borderInlineStart: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
+                  borderInlineStart: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
                 }}
               />
               <EuiText
