@@ -9,8 +9,8 @@ import { esql, type ComposerQuery } from '@elastic/esql';
 import { UNIT_METRICS_STREAM } from '../constants';
 
 /**
- * Returns no rows, and no columns when the stream does not exist. The wildcard makes a missing
- * stream an empty result: `TS` and `FROM` on the exact name fail with an unknown index error,
+ * Returns no rows, and no fields (only a `<no-fields>` column) when the stream does not exist. The
+ * wildcard makes a missing stream an empty result: `TS` and `FROM` on the exact name fail with an unknown index error,
  * which cannot be told from a 403.
  */
 export const buildStreamProbeQuery = (): ComposerQuery =>

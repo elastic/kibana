@@ -265,7 +265,9 @@ describe('UnitStatsClient.getStats', () => {
     });
 
     it('probes the stream once and runs no stats query when the stream does not exist', async () => {
-      const esql = makeEsql({ probe: () => ({ columns: [], values: [] }) });
+      const esql = makeEsql({
+        probe: () => ({ columns: [{ name: '<no-fields>', type: 'null' }], values: [] }),
+      });
 
       const response = await run(esql);
 

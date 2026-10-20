@@ -151,7 +151,7 @@ export class UnitStatsClient {
   }
 
   /**
-   * False only when the probe finds no stream (a query that returns no rows has no columns).
+   * False only when the probe finds no stream: a missing stream has no fields, not even `@timestamp`.
    * If the probe itself fails, the queries run and report the real error.
    */
   private async doesUnitMetricsStreamExist(): Promise<boolean> {
@@ -161,7 +161,7 @@ export class UnitStatsClient {
         requestTimeout: UNIT_STATS_REQUEST_TIMEOUT_MS,
       })) as ESQLSearchResponse;
 
-      return response.columns.length > 0;
+      return response.columns.some(({ name }) => name === '@timestamp');
     } catch (error) {
       logger.debug(`Unit stats stream probe failed: ${(error as Error).message}`);
       return true;
