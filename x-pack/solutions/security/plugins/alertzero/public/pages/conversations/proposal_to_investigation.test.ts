@@ -77,6 +77,8 @@ describe('proposalToInvestigation', () => {
       const result = proposalToInvestigation({
         ...baseProposal,
         decidedAt: '2026-09-10T11:00:00.000Z',
+        decision: 'approved',
+        status: 'succeeded',
         conversationTitle: 'My conversation',
       });
       expect(result.primaryActionLabel).toBe('My conversation');
@@ -122,10 +124,36 @@ describe('proposalToInvestigation', () => {
       expect(result.proposalCreatedAt).toBe(baseProposal.createdAt);
     });
 
-    it('does not set "closed" when decidedAt is absent', () => {
+    it('does not set "closed" when the proposal is still pending', () => {
       const result = proposalToInvestigation({ ...baseProposal, category: 'respond' });
       expect(result.recommendedAction).toBe('respond');
     });
+
+    it('keeps an approved proposal in its category while its action runs', () => {
+      const result = proposalToInvestigation({
+        ...baseProposal,
+        category: 'respond',
+        decision: 'approved',
+        status: 'executing',
+        decidedAt: '2026-09-10T11:00:00.000Z',
+      });
+      expect(result.recommendedAction).toBe('respond');
+      expect(result.proposalStatus).toBe('executing');
+      expect(result.pendingProposalCount).toBe(0);
+    });
+
+    it.each(['succeeded', 'failed', 'expired', 'no_action'] as const)(
+      'moves a %s proposal to closed',
+      (status) => {
+        const result = proposalToInvestigation({
+          ...baseProposal,
+          category: 'configure',
+          status,
+          decidedAt: '2026-09-10T11:00:00.000Z',
+        });
+        expect(result.recommendedAction).toBe('closed');
+      }
+    );
   });
 
   describe('status', () => {
