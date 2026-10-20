@@ -89,6 +89,7 @@ export const kibanaOverrides: OxlintOverride[] = [
       'src/platform/plugins/shared/telemetry/**',
       'x-pack/solutions/security/packages/test-api-clients/**',
       'x-pack/solutions/security/packages/kbn-security-evals-matrix/**',
+      'x-pack/solutions/security/packages/kbn-evals-suite-endpoint/**',
       'x-pack/platform/plugins/shared/automatic_import/**',
     ],
     rules: {
