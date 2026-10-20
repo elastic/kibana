@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
 import type { PrimitiveNode } from '@elastic/isomer-sdk';
-import { nodeAnchor, z } from '@elastic/isomer-sdk';
+import { z } from '@elastic/isomer-sdk';
 import { fromTextChildren } from '@elastic/isomer-sdk/author';
 import { md } from '@elastic/isomer-sdk/markdown';
 import type { SlackRichTextBlock } from '@elastic/isomer-sdk/slack';
-import { classNames, isomerDistillery } from '@kbn/isomer-theme';
 
 import { componentIcon, definePrimitive, plainText } from '../../lib';
+import { codeReactRenderer } from './code_react';
 
 const codeSchema = z.object({
   type: z.literal('code'),
@@ -45,24 +44,6 @@ const icon = componentIcon(
     `<path d="M5.5 4.5 2.5 8l3 3.5M10.5 4.5l3 3.5-3 3.5" stroke="${accent}"/><path d="m9 3.5-2 9" stroke="${muted}"/>`
 );
 
-const { handles } = isomerDistillery.createStyleModule(
-  'componentsCode',
-  ({ css, tokens: { border, color, font, size } }) => ({
-    root: css`
-      margin: ${size.m} 0;
-      padding: ${size.m};
-      overflow-x: auto;
-      border-radius: ${border.radius.control};
-      background: ${color.background.subdued};
-      color: ${color.text.paragraph};
-      font-family: ${font.family.code};
-      font-size: ${font.size.s};
-      line-height: ${font.lineHeight.s};
-      white-space: pre;
-    `,
-  })
-);
-
 const slackCode = ({ text }: CodeNode): SlackRichTextBlock => ({
   type: 'rich_text',
   elements: [{ type: 'rich_text_preformatted', elements: [{ type: 'text', text }] }],
@@ -81,11 +62,7 @@ export const code = definePrimitive<CodeNode, typeof codeSchema>({
   icon,
   examples: [example, { type: 'code', text: '{\n  "status": "green"\n}', language: 'json' }],
   renderers: {
-    react: (node, { context }) => (
-      <pre {...nodeAnchor(context, node)} className={classNames(context, handles.root)}>
-        <code data-language={node.language}>{node.text}</code>
-      </pre>
-    ),
+    react: codeReactRenderer,
     text: ({ text }) => text,
     markdown: ({ text, language }) => md.codeBlock(text, language),
     slack: slackCode,
