@@ -151,12 +151,10 @@ const CUSTOM_GRID_COLUMNS_CONFIGURATION: CustomGridColumnsConfiguration = Object
 );
 
 /*
- * On medium and wider viewports the table is one application viewport tall, independent of the
- * KPIs and the histogram above it,
- * so the grid always measures a definite height and virtualizes rows; the page scrolls to reach it.
- * On short viewports this floor keeps a usable number of rows visible.
+ * The table has a fixed height, independent of the KPIs and the histogram above it, so the grid
+ * always measures a definite height and virtualizes rows.
  */
-const MIN_TABLE_HEIGHT = 400;
+const TABLE_HEIGHT = 400;
 
 /**
  * Two reasons this is a whole pixel value rather than the `1.6em` default:
@@ -667,6 +665,12 @@ const AlertsListPageContent = () => {
         flex-grow: 1;
         ${logicalCSS('min-height')}: 0;
         min-width: 0;
+        ${largeMediaQuery} {
+          block-size: calc(
+            var(--kbn-application--content-height, 100vh) - ${euiTheme.size.base} * 2
+          );
+          overflow-y: auto;
+        }
       `}
     >
       <AppHeader
@@ -718,12 +722,8 @@ const AlertsListPageContent = () => {
           grow={false}
           css={css`
             min-width: 0;
-            ${largeMediaQuery} {
-              block-size: max(
-                ${MIN_TABLE_HEIGHT}px,
-                calc(var(--kbn-application--content-height, 100vh) - ${euiTheme.size.base} * 2)
-              );
-            }
+            flex-shrink: 0;
+            ${logicalCSS('height', `${TABLE_HEIGHT}px`)}
           `}
         >
           <EuiFlexGroup
