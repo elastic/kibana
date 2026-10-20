@@ -520,7 +520,10 @@ export class UserActionPersister {
     });
   }
 
-  /** Records one `bulkAttachments` user action per attachment type. */
+  /**
+   * Records one `bulkAttachments` user action per attachment type. Each deleted attachment still
+   * gets its own audit event, keyed on its saved object id.
+   */
   public async bulkCreateAttachmentBulkDeletion({
     caseId,
     owner,
@@ -529,9 +532,12 @@ export class UserActionPersister {
     refresh,
   }: BulkCreateAttachmentBulkDeletionUserAction): Promise<void> {
     const userActionBuilder = this.builderFactory.getBuilder(UserActionTypes.bulkAttachments);
+    if (userActionBuilder == null) {
+      return;
+    }
 
-    const userActions = deletions.flatMap(({ attachmentType, count, ids }) => {
-      if (userActionBuilder == null || count === 0) {
+    const recorded = deletions.flatMap(({ attachmentType, count, attachments }) => {
+      if (count === 0) {
         return [];
       }
 
@@ -540,13 +546,38 @@ export class UserActionPersister {
         user,
         owner,
         payload: { bulkAttachments: { attachmentType, count } },
-        ids,
       });
 
-      return userAction == null ? [] : [userAction];
+      return userAction == null ? [] : [{ userAction, attachments }];
     });
 
-    await this.bulkCreateAndLog({ userActions, refresh });
+    const createdUserActions = await this.bulkCreate({
+      actions: recorded.map(({ userAction }) => userAction),
+      refresh,
+    });
+
+    createdUserActions?.saved_objects.forEach((savedObject, i) => {
+      if (savedObject == null || isSavedObjectErrorResult(savedObject)) {
+        return;
+      }
+
+      const { userAction, attachments } = recorded[i];
+      this.auditLogger.log(userAction.eventDetails, savedObject.id);
+
+      for (const { id, savedObjectType } of attachments) {
+        this.auditLogger.log(
+          {
+            getMessage: (userActionId) =>
+              `User deleted comment id: ${id} for case id: ${caseId} - user action id: ${userActionId}`,
+            action: UserActionActions.delete,
+            descriptiveAction: 'case_user_action_delete_comment',
+            savedObjectId: id,
+            savedObjectType,
+          },
+          savedObject.id
+        );
+      }
+    });
   }
 
   private async bulkCreateAttachment({

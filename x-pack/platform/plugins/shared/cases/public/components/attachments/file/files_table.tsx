@@ -46,6 +46,7 @@ interface FilesTableProps {
   onChange: EuiBasicTableProps<FileJSON>['onChange'];
   pagination: Pagination;
   onRemove?: (fileIds: string[], options?: AttachmentRemovalOptions) => void;
+  isRemoving?: boolean;
 }
 
 const getFileId = ({ id }: FileJSON): string => id;
@@ -57,6 +58,7 @@ export const FilesTable = ({
   onChange,
   isLoading,
   onRemove,
+  isRemoving,
 }: FilesTableProps) => {
   const { isPreviewVisible, showPreview, closePreview } = useFilePreview();
 
@@ -102,7 +104,11 @@ export const FilesTable = ({
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <RemoveSelectedAttachments count={selectedIds.length} onRemove={onRemoveSelected} />
+            <RemoveSelectedAttachments
+              count={selectedIds.length}
+              onRemove={onRemoveSelected}
+              isRemoving={isRemoving}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       )}

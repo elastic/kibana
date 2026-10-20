@@ -12,12 +12,14 @@ import * as i18n from './translations';
 interface RemoveSelectedAttachmentsProps {
   count: number;
   onRemove: () => void;
+  isRemoving?: boolean;
 }
 
 /** Selected count and remove button for an attachment table. Renders nothing with no selection. */
 export const RemoveSelectedAttachments: React.FC<RemoveSelectedAttachmentsProps> = ({
   count,
   onRemove,
+  isRemoving = false,
 }) => {
   if (count === 0) {
     return null;
@@ -37,6 +39,8 @@ export const RemoveSelectedAttachments: React.FC<RemoveSelectedAttachmentsProps>
           iconType="trash"
           flush="left"
           onClick={onRemove}
+          isLoading={isRemoving}
+          isDisabled={isRemoving}
           data-test-subj="cases-attachments-remove-selected"
         >
           {i18n.REMOVE}

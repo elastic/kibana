@@ -114,15 +114,23 @@ describe('bulk_delete', () => {
       expect(creator.bulkCreateAttachmentBulkDeletion).toHaveBeenCalledWith(
         expect.objectContaining({
           caseId: 'mock-id-1',
+          owner: userComment.owner,
           deletions: [
-            { attachmentType: 'comment', count: 2, ids: ['mock-comment-1', 'mock-comment-2'] },
+            {
+              attachmentType: 'comment',
+              count: 2,
+              attachments: [
+                { id: 'mock-comment-1', savedObjectType: userComment.type },
+                { id: 'mock-comment-2', savedObjectType: otherUserComment.type },
+              ],
+            },
           ],
         })
       );
       expect(creator.bulkCreateAttachmentDeletion).not.toHaveBeenCalled();
     });
 
-    it('counts every referenced id and logs the deleted saved object ids', async () => {
+    it('counts every referenced id and passes each deleted attachment for the audit log', async () => {
       clientArgs.services.attachmentService.getter.bulkGetForDeletion.mockResolvedValue([
         alertAttachment('attachment-1', ['alert-1', 'alert-2', 'alert-3'], 'index-1'),
         userComment,
@@ -138,9 +146,37 @@ describe('bulk_delete', () => {
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           deletions: [
-            { attachmentType: SECURITY_ALERT_ATTACHMENT_TYPE, count: 3, ids: ['attachment-1'] },
-            { attachmentType: 'comment', count: 1, ids: ['mock-comment-1'] },
+            {
+              attachmentType: SECURITY_ALERT_ATTACHMENT_TYPE,
+              count: 3,
+              attachments: [{ id: 'attachment-1', savedObjectType: CASE_ATTACHMENT_SAVED_OBJECT }],
+            },
+            {
+              attachmentType: 'comment',
+              count: 1,
+              attachments: [{ id: 'mock-comment-1', savedObjectType: userComment.type }],
+            },
           ],
+        })
+      );
+    });
+
+    it('counts an item referenced by several attachments once', async () => {
+      clientArgs.services.attachmentService.getter.bulkGetForDeletion.mockResolvedValue([
+        alertAttachment('attachment-1', ['alert-1', 'alert-2'], 'index-1'),
+        alertAttachment('attachment-2', 'alert-1', 'index-1'),
+      ]);
+
+      await bulkDeleteAttachments(
+        { caseId: 'mock-id-1', savedObjectIds: ['attachment-1', 'attachment-2'] },
+        clientArgs
+      );
+
+      expect(
+        clientArgs.services.userActionService.creator.bulkCreateAttachmentBulkDeletion
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          deletions: [expect.objectContaining({ count: 2 })],
         })
       );
     });

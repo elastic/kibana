@@ -105,4 +105,17 @@ describe('useAttachmentRemoval', () => {
 
     expect(result.current.modal).toBeNull();
   });
+
+  it('ignores new removals while one is in progress', () => {
+    useBulkDeleteAttachmentsMock.mockReturnValue({ mutate, isLoading: true });
+    const { result } = renderRemoval();
+
+    expect(result.current.isRemoving).toBe(true);
+
+    act(() => {
+      result.current.onRemove({})({ savedObjectIds: ['attachment-1'] });
+    });
+
+    expect(result.current.modal).toBeNull();
+  });
 });

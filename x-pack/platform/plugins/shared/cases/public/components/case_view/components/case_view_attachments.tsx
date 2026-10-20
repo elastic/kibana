@@ -118,7 +118,12 @@ export const CaseViewAttachments = ({
     [unifiedAttachmentTypeRegistry]
   );
 
-  const { canRemove, onRemove, modal: removalModal } = useAttachmentRemoval(caseData.id);
+  const {
+    canRemove,
+    onRemove,
+    isRemoving,
+    modal: removalModal,
+  } = useAttachmentRemoval(caseData.id);
 
   // Render one accordion per registered type that has a tab view AND a non-zero count.
   const attachmentSections = useMemo(
@@ -361,6 +366,7 @@ export const CaseViewAttachments = ({
                     caseData={authorFilteredCaseData}
                     searchTerm={searchTerm}
                     onRemove={onRemoveSection}
+                    isRemoving={isRemoving}
                   />
                 </AttachmentAccordion>
               ))}

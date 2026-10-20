@@ -1709,8 +1709,16 @@ describe('CaseUserActionService', () => {
         await service.creator.bulkCreateAttachmentBulkDeletion({
           ...commonArgs,
           deletions: [
-            { attachmentType: 'security.alert', count: 3, ids: ['attachment-1'] },
-            { attachmentType: 'file', count: 1, ids: ['attachment-2'] },
+            {
+              attachmentType: 'security.alert',
+              count: 3,
+              attachments: [{ id: 'attachment-1', savedObjectType: 'cases-comments' }],
+            },
+            {
+              attachmentType: 'file',
+              count: 1,
+              attachments: [{ id: 'attachment-2', savedObjectType: 'cases-attachments' }],
+            },
           ],
         });
 
@@ -1727,14 +1735,44 @@ describe('CaseUserActionService', () => {
             payload: { bulkAttachments: { attachmentType: 'file', count: 1 } },
           }),
         ]);
-        expect(mockAuditLogger.log).toHaveBeenCalledTimes(2);
-        expect(mockAuditLogger.log.mock.calls[0][0]?.message).toContain('(attachment-1)');
+      });
+
+      it('audits each deleted attachment by its saved object id', async () => {
+        await service.creator.bulkCreateAttachmentBulkDeletion({
+          ...commonArgs,
+          deletions: [
+            {
+              attachmentType: 'file',
+              count: 2,
+              attachments: [
+                { id: 'attachment-1', savedObjectType: 'cases-attachments' },
+                { id: 'attachment-2', savedObjectType: 'cases-attachments' },
+              ],
+            },
+          ],
+        });
+
+        expect(mockAuditLogger.log.mock.calls.map(([event]) => event)).toEqual([
+          expect.objectContaining({
+            event: expect.objectContaining({ action: 'case_user_action_delete_attachments' }),
+            kibana: { saved_object: { id: '123', type: 'cases' } },
+          }),
+          expect.objectContaining({
+            event: expect.objectContaining({ action: 'case_user_action_delete_comment' }),
+            kibana: { saved_object: { id: 'attachment-1', type: 'cases-attachments' } },
+            message: 'User deleted comment id: attachment-1 for case id: 123 - user action id: 0',
+          }),
+          expect.objectContaining({
+            event: expect.objectContaining({ action: 'case_user_action_delete_comment' }),
+            kibana: { saved_object: { id: 'attachment-2', type: 'cases-attachments' } },
+          }),
+        ]);
       });
 
       it('skips attachment types with no deletions', async () => {
         await service.creator.bulkCreateAttachmentBulkDeletion({
           ...commonArgs,
-          deletions: [{ attachmentType: 'file', count: 0, ids: [] }],
+          deletions: [{ attachmentType: 'file', count: 0, attachments: [] }],
         });
 
         expect(unsecuredSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();

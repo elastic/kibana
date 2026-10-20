@@ -39,7 +39,7 @@ interface SavedObjectAttachmentRow {
 }
 
 export interface SavedObjectAttachmentsTableProps
-  extends Pick<CommonAttachmentListViewProps, 'onRemove'> {
+  extends Pick<CommonAttachmentListViewProps, 'onRemove' | 'isRemoving'> {
   caseData: CaseUI;
   searchTerm?: string;
   /** Attachment registration id (e.g. `dashboard`, `map`, `discoverSession`). */
@@ -99,6 +99,7 @@ export const SavedObjectAttachmentsTable: React.FC<SavedObjectAttachmentsTablePr
   attachmentTypeId,
   soType,
   onRemove,
+  isRemoving,
 }) => {
   const { permissions } = useCasesContext();
 
@@ -219,7 +220,11 @@ export const SavedObjectAttachmentsTable: React.FC<SavedObjectAttachmentsTablePr
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <RemoveSelectedAttachments count={selectedIds.length} onRemove={onRemoveSelected} />
+          <RemoveSelectedAttachments
+            count={selectedIds.length}
+            onRemove={onRemoveSelected}
+            isRemoving={isRemoving}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />

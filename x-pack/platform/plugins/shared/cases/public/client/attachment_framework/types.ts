@@ -81,6 +81,8 @@ export interface CommonAttachmentListViewProps {
   searchTerm?: string;
   /** Asks the user to confirm, removes the attachments, and refreshes the case. */
   onRemove?: (request: AttachmentRemovalRequest, options?: AttachmentRemovalOptions) => void;
+  /** True while a removal is in progress. `onRemove` is ignored until it finishes. */
+  isRemoving?: boolean;
 }
 
 export interface RowContext {

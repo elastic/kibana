@@ -42,6 +42,8 @@ export const useAttachmentSelection = <T>({
     [items, selectedIds, getId]
   );
 
+  const selectedRowIds = useMemo(() => selected.map(getId), [selected, getId]);
+
   const onSelectionChange = useCallback(
     (selectedItems: T[]) => setSelectedIds(new Set(selectedItems.map(getId))),
     [getId]
@@ -54,5 +56,5 @@ export const useAttachmentSelection = <T>({
     [enabled, selected, onSelectionChange]
   );
 
-  return { selection, selectedIds: selected.map(getId), clearSelection };
+  return { selection, selectedIds: selectedRowIds, clearSelection };
 };

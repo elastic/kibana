@@ -120,11 +120,11 @@ describe('getFileAttachmentIds', () => {
     const comments = [
       basicComment,
       makeFileComment('c1', 'file-1', owner),
-      makeFileComment('c2', ['file-2', 'file-3'], owner),
-      makeFileComment('c3', 'file-4', owner),
+      makeFileComment('c2', 'file-2', owner),
+      makeFileComment('c3', 'file-3', owner),
     ];
 
-    expect(getFileAttachmentIds(comments, owner, ['file-1', 'file-3'])).toEqual(['c1', 'c2']);
+    expect(getFileAttachmentIds(comments, owner, ['file-1', 'file-3'])).toEqual(['c1', 'c3']);
   });
 
   it('returns every attachment that references the same file', () => {

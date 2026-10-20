@@ -31,6 +31,7 @@ export const CaseViewFiles = ({
   caseData,
   searchTerm,
   onRemove,
+  isRemoving,
 }: CommonAttachmentListViewProps) => {
   const searchTermRef = useRef<string | undefined>(searchTerm);
   const [filteringOptions, setFilteringOptions] = useState<CaseFilesFilteringOptions>({
@@ -127,6 +128,7 @@ export const CaseViewFiles = ({
           onChange={onTableChange}
           pagination={pagination}
           onRemove={onRemoveFiles}
+          isRemoving={isRemoving}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

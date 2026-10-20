@@ -133,8 +133,6 @@ export interface BuilderParameters {
   bulkAttachments: {
     parameters: {
       payload: { bulkAttachments: BulkAttachmentsPayload };
-      /** The deleted attachments' saved object ids, for the audit log only. */
-      ids?: string[];
     };
   };
 }
@@ -439,7 +437,12 @@ export interface BulkCreateAttachmentUserAction
 export interface BulkCreateAttachmentBulkDeletionUserAction
   extends CommonUserActionArgs,
     IndexRefresh {
-  deletions: Array<{ attachmentType: string; count: number; ids: string[] }>;
+  deletions: Array<{
+    attachmentType: string;
+    count: number;
+    /** The deleted attachments, audited one by one like a single attachment deletion. */
+    attachments: Array<{ id: string; savedObjectType: string }>;
+  }>;
 }
 
 export type CreateUserActionArgs<T extends keyof BuilderParameters> = {

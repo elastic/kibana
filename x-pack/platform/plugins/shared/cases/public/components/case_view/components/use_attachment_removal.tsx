@@ -37,24 +37,29 @@ const getCountLabel = ({ attachmentType, request }: PendingRemoval): string => {
 /** Confirms and removes attachments for the Attachments tab sections. */
 export const useAttachmentRemoval = (
   caseId: string
-): { canRemove: boolean; onRemove: OnRemoveAttachments; modal: React.ReactNode } => {
+): {
+  canRemove: boolean;
+  onRemove: OnRemoveAttachments;
+  isRemoving: boolean;
+  modal: React.ReactNode;
+} => {
   const { permissions } = useCasesContext();
-  const { mutate: bulkDeleteAttachments } = useBulkDeleteAttachments(caseId);
+  const { mutate: bulkDeleteAttachments, isLoading: isRemoving } = useBulkDeleteAttachments(caseId);
   const [pendingRemoval, setPendingRemoval] = useState<PendingRemoval | null>(null);
 
   const onRemove = useCallback<OnRemoveAttachments>(
     (attachmentType) => (request, options) => {
-      if (request.savedObjectIds.length > 0) {
+      if (!isRemoving && request.savedObjectIds.length > 0) {
         setPendingRemoval({ attachmentType, request, options });
       }
     },
-    []
+    [isRemoving]
   );
 
   const onCancel = useCallback(() => setPendingRemoval(null), []);
 
   const onConfirm = useCallback(() => {
-    if (pendingRemoval == null) {
+    if (pendingRemoval == null || isRemoving) {
       return;
     }
 
@@ -67,7 +72,7 @@ export const useAttachmentRemoval = (
       },
       { onSuccess: options?.onSuccess }
     );
-  }, [pendingRemoval, bulkDeleteAttachments]);
+  }, [pendingRemoval, isRemoving, bulkDeleteAttachments]);
 
   const modal =
     pendingRemoval != null ? (
@@ -79,5 +84,5 @@ export const useAttachmentRemoval = (
       />
     ) : null;
 
-  return { canRemove: permissions.delete, onRemove, modal };
+  return { canRemove: permissions.delete, onRemove, isRemoving, modal };
 };

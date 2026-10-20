@@ -31,10 +31,7 @@ export interface DecodedAttachment extends OwnedAttachment {
 }
 
 /** Records the deletion in place of the default user action per attachment. */
-export type RecordUserActions = (args: {
-  attachments: DecodedAttachment[];
-  originalCase: CaseSavedObjectTransformed;
-}) => Promise<void>;
+export type RecordUserActions = (args: { attachments: DecodedAttachment[] }) => Promise<void>;
 
 export const doNotExistOnCaseMessage = (ids: string[], caseId: string): string =>
   ids.length === 1
@@ -144,7 +141,6 @@ export const deleteCaseAttachments = async (
         caseId,
         attachments: decodedAttachments.filter(({ id }) => deletedIds.has(id)),
         fileIds: fileEntities.filter(({ id }) => !keptFileIds.has(id)).map(({ id }) => id),
-        getCase,
         recordUserActions,
       },
       clientArgs
@@ -164,12 +160,11 @@ interface RecordDeletionArgs {
   caseId: string;
   attachments: DecodedAttachment[];
   fileIds: string[];
-  getCase: () => Promise<CaseSavedObjectTransformed>;
   recordUserActions?: RecordUserActions;
 }
 
 const recordDeletion = async (
-  { caseId, attachments, fileIds, getCase, recordUserActions }: RecordDeletionArgs,
+  { caseId, attachments, fileIds, recordUserActions }: RecordDeletionArgs,
   clientArgs: CasesClientArgs
 ): Promise<void> => {
   const {
@@ -198,7 +193,7 @@ const recordDeletion = async (
   });
 
   if (recordUserActions != null) {
-    await recordUserActions({ attachments, originalCase: await getCase() });
+    await recordUserActions({ attachments });
   } else if (attachments.length > 0) {
     await userActionService.creator.bulkCreateAttachmentDeletion({
       caseId,

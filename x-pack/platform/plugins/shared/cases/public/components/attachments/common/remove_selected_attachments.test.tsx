@@ -28,4 +28,12 @@ describe('RemoveSelectedAttachments', () => {
     await userEvent.click(screen.getByTestId('cases-attachments-remove-selected'));
     expect(onRemove).toHaveBeenCalledTimes(1);
   });
+
+  it('disables the button while removing', () => {
+    renderWithTestingProviders(
+      <RemoveSelectedAttachments count={3} onRemove={jest.fn()} isRemoving />
+    );
+
+    expect(screen.getByTestId('cases-attachments-remove-selected')).toBeDisabled();
+  });
 });

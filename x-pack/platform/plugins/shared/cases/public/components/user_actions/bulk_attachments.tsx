@@ -23,7 +23,7 @@ const getLabel = (
     return (
       <FormattedMessage
         id="xpack.cases.caseView.userActions.bulkAttachmentsRemovedUnknownTypeLabel"
-        defaultMessage="removed {count, plural, one {# attachment} other {# attachments}}"
+        defaultMessage="removed {count, plural, one {# item} other {# items}}"
         values={{ count }}
       />
     );
@@ -44,7 +44,7 @@ const getLabel = (
   return (
     <FormattedMessage
       id="xpack.cases.caseView.userActions.bulkAttachmentsRemovedLabel"
-      defaultMessage="removed {count, plural, one {# attachment} other {# attachments}} from {section}"
+      defaultMessage="removed {count, plural, one {# item} other {# items}} from {section}"
       values={{ count, section: registeredType.getLabel() }}
     />
   );

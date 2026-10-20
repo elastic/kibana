@@ -54,7 +54,7 @@ describe('createBulkAttachmentsUserActionBuilder', () => {
     renderUserAction('test.widget', 3, widgetAttachmentType);
 
     expect(screen.getByTestId('bulk-attachments-action')).toHaveTextContent(
-      'removed 3 attachments from Widgets'
+      'removed 3 items from Widgets'
     );
   });
 
@@ -70,9 +70,7 @@ describe('createBulkAttachmentsUserActionBuilder', () => {
   it('leaves out the section when the type is not registered', () => {
     renderUserAction('unknown.type', 1);
 
-    expect(screen.getByTestId('bulk-attachments-action')).toHaveTextContent(
-      /^removed 1 attachment$/
-    );
+    expect(screen.getByTestId('bulk-attachments-action')).toHaveTextContent(/^removed 1 item$/);
   });
 
   it('renders nothing when no attachments were removed', () => {
