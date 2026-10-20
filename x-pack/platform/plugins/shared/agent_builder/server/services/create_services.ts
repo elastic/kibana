@@ -37,7 +37,7 @@ import {
   type ConsumptionService,
 } from './metering';
 import { type PluginsService, createPluginsService } from './plugins';
-import { CallbackDeliveryService, createDefaultConversationResolver } from './execution/callback';
+import { CallbackDeliveryService } from './execution/callback';
 import { createSpaceSettingsService } from './space_settings';
 import { SurfacesServiceImpl } from './surfaces';
 import { ConversationTemplatesService } from './conversation/templates';
@@ -227,9 +227,7 @@ export class ServiceManager {
       analyticsService,
     });
 
-    this.services.callbackDelivery.start({
-      defaultConversationResolver: createDefaultConversationResolver({ conversations }),
-    });
+    this.services.callbackDelivery.start({ conversations });
 
     const runnerFactory = new RunnerFactoryImpl({
       logger: logger.get('runnerFactory'),
@@ -309,6 +307,7 @@ export class ServiceManager {
       analyticsService,
       meteringService: this.services.metering,
       searchInferenceEndpoints,
+      callbackDeliveryService: this.services.callbackDelivery,
     });
 
     const consumption = this.services.consumption.start({ elasticsearch, spaces });

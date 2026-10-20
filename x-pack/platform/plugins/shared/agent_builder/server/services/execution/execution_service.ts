@@ -64,6 +64,7 @@ import { AbortMonitor } from './task/abort_monitor';
 import { HeartbeatReporter } from './task/heartbeat_reporter';
 import { followExecution$ } from './execution_follower';
 import type { ConversationClient } from '../conversation';
+import type { CallbackDeliveryService } from './callback';
 import {
   getConversation,
   isPendingResumeConversation,
@@ -87,6 +88,8 @@ export interface AgentExecutionServiceDeps extends AgentExecutionDeps {
   taskManager: TaskManagerStartContract;
   spaces?: SpacesPluginStart;
   attachmentsService: AttachmentServiceStart;
+  /** Finds the conversation a request's origin continues: the registered resolver, else by origin. */
+  callbackDeliveryService: Pick<CallbackDeliveryService, 'resolveConversation'>;
 }
 
 export const createAgentExecutionService = (
@@ -158,6 +161,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
             params: args.params,
             request,
             conversationClient,
+            spaceId,
           })
         : undefined;
     const conversationParams = resolvedConversation?.validatedParams;
@@ -351,6 +355,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       params,
       request,
       conversationClient,
+      spaceId: getCurrentSpaceId({ request, spaces: this.deps.spaces }),
     });
 
     const created = conversation.operation === 'CREATE';
@@ -790,14 +795,21 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     );
   }
 
+  /**
+   * Resolves the conversation a request writes to. A request with an origin and no conversation id
+   * continues the conversation its origin resolves to, if any; otherwise the conversation is the
+   * one it names, or a new one.
+   */
   private async resolveConversationRequest({
     params,
     request,
     conversationClient,
+    spaceId,
   }: {
     params: ConversationExecutionParams;
     request: KibanaRequest;
     conversationClient: ConversationClient;
+    spaceId: string;
   }): Promise<{
     validatedParams: ConversationExecutionParams;
     conversation: ConversationWithOperation;
@@ -805,17 +817,28 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
   }> {
     const validatedParams = await this.validateAttachments(params, request);
     const receivedAt = new Date();
+    const { origin, conversationId } = validatedParams;
+
+    const resolved =
+      origin && !conversationId
+        ? await this.deps.callbackDeliveryService.resolveConversation({
+            origin: {
+              type: origin.type,
+              external_conversation_id: origin.external_conversation_id,
+            },
+            spaceId,
+            request,
+          })
+        : undefined;
 
     const conversation = await getConversation({
       agentId: validatedParams.agentId ?? agentBuilderDefaultAgentId,
-      conversationId: validatedParams.conversationId,
+      conversationId: resolved?.conversationId ?? conversationId,
       autoCreateConversationWithId: validatedParams.autoCreateConversationWithId,
       conversationClient,
       accessControl: validatedParams.accessControl,
       readOnly: validatedParams.readOnly,
-      origin: validatedParams.origin
-        ? { external_conversation_id: validatedParams.origin.external_conversation_id }
-        : undefined,
+      origin: origin ? { external_conversation_id: origin.external_conversation_id } : undefined,
       subagentCreation: validatedParams.subagentCreation,
     });
 

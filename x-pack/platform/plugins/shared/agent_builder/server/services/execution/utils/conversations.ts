@@ -671,17 +671,9 @@ export const getConversation = async ({
   };
   readOnly?: boolean;
 }): Promise<ConversationWithOperation> => {
-  // Case 1: No conversation ID - create new with placeholder
+  // Case 1: No conversation ID - create new with placeholder. The execution service resolves a
+  // request origin to its conversation before this.
   if (!conversationId) {
-    const conversation = origin ? await conversationClient.getByOrigin(origin) : undefined;
-
-    if (conversation) {
-      return {
-        ...conversation,
-        operation: 'UPDATE',
-      };
-    }
-
     return {
       ...placeholderConversation({ agentId, accessControl, origin, readOnly }),
       operation: 'CREATE',

@@ -7,4 +7,3 @@
 
 export { CallbackDeliveryService } from './callback_delivery_service';
 export { deliverCallbackEvents } from './deliver_callback_events';
-export { createDefaultConversationResolver } from './default_conversation_resolver';

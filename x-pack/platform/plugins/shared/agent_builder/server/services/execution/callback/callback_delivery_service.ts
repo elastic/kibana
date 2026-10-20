@@ -13,7 +13,9 @@ import type {
   CallbacksSetup,
 } from '@kbn/agent-builder-server';
 import type { ChatCallbackResponse } from '../../../../common/http_api/chat_callback';
+import type { ConversationService } from '../../conversation';
 import { CallbackTransportRegistry } from './callback_transport_registry';
+import { createDefaultConversationResolver } from './default_conversation_resolver';
 import { createRelayTransport } from './relay_transport';
 
 const callbackRetryOptions = {
@@ -48,13 +50,9 @@ export class CallbackDeliveryService {
     };
   }
 
-  /** Sets the lookup that runs when the registered resolver finds nothing; it needs start services. */
-  start({
-    defaultConversationResolver,
-  }: {
-    defaultConversationResolver: CallbackConversationResolver;
-  }): void {
-    this.defaultConversationResolver = defaultConversationResolver;
+  /** Sets the default lookup by origin, which needs the conversation service from start. */
+  start({ conversations }: { conversations: ConversationService }): void {
+    this.defaultConversationResolver = createDefaultConversationResolver({ conversations });
   }
 
   /**
