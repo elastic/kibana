@@ -128,7 +128,7 @@ Agent Builder starts hook workflows with the request of the agent run, and the w
 
 Each calls its global hook with `run-as-mode: inherit`. A hook entry point only runs when Agent Builder starts it as a hook (`triggeredBy: agent-builder-hook`, which only server code sets), so nobody can run it directly with made-up round content and plant knowledge as the agent account. Spaces that are not set up, and spaces whose setup cannot be read, keep running the global hooks.
 
-The decision-tree reinforcement agent is private and system-owned. Nightshift creates it with an access entry that gives the agent account the `user` role on it, because agent optimize runs it as that account.
+The decision-tree reinforcement agent is public, so agent optimize can run it as the agent account. Agent Builder still hides it from UI listings, and its submit tool writes decision trees as the caller.
 
 ## How investigations are stored and run
 
