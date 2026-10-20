@@ -38,6 +38,15 @@ describe('getResolvedFromRecordCount', () => {
   it('is undefined when there are no aliases', () => {
     expect(getResolvedFromRecordCount([])).toBeUndefined();
     expect(getResolvedFromRecordCount(undefined)).toBeUndefined();
+    expect(getResolvedFromRecordCount([], 250)).toBeUndefined();
+  });
+
+  it('uses the store alias count when the loaded aliases were capped', () => {
+    expect(getResolvedFromRecordCount([{ id: 'a' }, { id: 'b' }], 250)).toBe(251);
+  });
+
+  it('never reports fewer records than were actually loaded', () => {
+    expect(getResolvedFromRecordCount([{ id: 'a' }, { id: 'b' }], 1)).toBe(3);
   });
 });
 

@@ -290,6 +290,25 @@ describe('<Host />', () => {
       );
     });
 
+    it('counts every group member in the badge even when the loaded aliases are capped', () => {
+      mockedUseNewEntityAnalyticsPage.mockReturnValue(true);
+      withStoreRecords(targetRecord, [aliasRecord]);
+      mockedUseEntityFromStore.mockReturnValue({
+        ...mockedUseEntityFromStore(),
+        aliasCount: 250,
+      });
+
+      const { getByTestId } = render(
+        <TestProviders>
+          <Host {...mockProps} entityId={targetEntityId} mode="resolved" />
+        </TestProviders>
+      );
+
+      expect(getByTestId('host-panel-header-observed-badge')).toHaveTextContent(
+        'Resolved from 251 records'
+      );
+    });
+
     describe('header risk level', () => {
       const recordWithResolutionRisk: HostEntity = {
         ...targetRecord,

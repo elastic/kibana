@@ -127,6 +127,7 @@ describe('useEntityFromStore', () => {
       expect(params.perPage).toBe(1);
       expect(result.current.entityRecord?.entity?.id).toBe('host-1');
       expect(result.current.aliasRecords).toEqual([]);
+      expect(result.current.aliasCount).toBe(0);
     });
 
     it('returns a null entityRecord when the returned record does not match entityId', async () => {
@@ -168,13 +169,17 @@ describe('useEntityFromStore', () => {
     const mockTargetAndAliases = (
       target: EntityStoreRecord[],
       aliases: EntityStoreRecord[],
-      inspect?: { target: InspectQuery; aliases: InspectQuery }
+      extra?: { inspect?: { target: InspectQuery; aliases: InspectQuery }; aliasesTotal?: number }
     ) => {
       mockFetchEntitiesListV2.mockImplementation(
         async ({ params }: { params: { perPage: number } }) =>
           params.perPage === 1
-            ? { records: target, inspect: inspect?.target }
-            : { records: aliases, inspect: inspect?.aliases }
+            ? { records: target, total: target.length, inspect: extra?.inspect?.target }
+            : {
+                records: aliases,
+                total: extra?.aliasesTotal ?? aliases.length,
+                inspect: extra?.inspect?.aliases,
+              }
       );
     };
 
@@ -294,10 +299,33 @@ describe('useEntityFromStore', () => {
       expect(result.current.aliasRecords).toEqual([]);
     });
 
+    it('reports the full alias count from the store even when the loaded aliases are capped', async () => {
+      mockTargetAndAliases([hostRecord('target')], [hostRecord('alias-1'), hostRecord('alias-2')], {
+        aliasesTotal: 250,
+      });
+
+      const { result } = renderHook(
+        () =>
+          useEntityFromStore({
+            entityId: 'target',
+            mode: 'resolved',
+            entityType: 'host',
+            skip: false,
+          }),
+        { wrapper: createWrapper() }
+      );
+
+      await waitFor(() => expect(result.current.entityRecord).not.toBeNull());
+      expect(result.current.aliasRecords).toHaveLength(2);
+      expect(result.current.aliasCount).toBe(250);
+    });
+
     it('merges the inspect payloads of both lookups so the inspector shows each query', async () => {
       mockTargetAndAliases([hostRecord('target')], [hostRecord('alias-1')], {
-        target: { dsl: ['target-dsl'], response: ['target-response'] },
-        aliases: { dsl: ['aliases-dsl'], response: ['aliases-response'] },
+        inspect: {
+          target: { dsl: ['target-dsl'], response: ['target-response'] },
+          aliases: { dsl: ['aliases-dsl'], response: ['aliases-response'] },
+        },
       });
 
       const { result } = renderHook(

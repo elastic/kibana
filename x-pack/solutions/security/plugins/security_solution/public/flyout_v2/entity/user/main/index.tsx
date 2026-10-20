@@ -158,7 +158,7 @@ export const User: FC<UserProps> = memo(function User({
     entityType: 'user',
     skip: !entityStoreV2Enabled || isInitializing,
   });
-  const { aliasRecords } = entityFromStoreResult;
+  const { aliasRecords, aliasCount } = entityFromStoreResult;
   const isGroupView = isEntityGroupView(aliasRecords);
 
   const documentEntityIdentifiers = useMemo<IdentityFields>(() => {
@@ -463,6 +463,7 @@ export const User: FC<UserProps> = memo(function User({
           lastSeen={observedUser.lastSeen}
           entityId={panelDisplayEntityId}
           aliasRecords={aliasRecords}
+          aliasCount={aliasCount}
           mode={mode}
           identityFields={documentEntityIdentifiers}
           isEntityInStore={!!observedUser.entityRecord}

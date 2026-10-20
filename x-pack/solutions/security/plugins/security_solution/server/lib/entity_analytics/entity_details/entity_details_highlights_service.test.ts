@@ -156,7 +156,7 @@ describe('entityDetailsHighlightsServiceFactory.getV2Data', () => {
         expect.objectContaining({
           filter: { term: { 'entity.relationships.resolution.resolved_to': 'user:carol' } },
           // The target takes one of the member slots.
-          size: RESOLVED_MODE_MAX_RECORDS - 1,
+          size: RESOLVED_MODE_MAX_RECORDS,
           sort: [{ 'entity.risk.calculated_score_norm': 'desc' }],
         })
       );

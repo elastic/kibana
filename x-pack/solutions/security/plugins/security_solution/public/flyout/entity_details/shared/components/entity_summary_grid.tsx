@@ -85,7 +85,8 @@ export const EntitySummaryGrid = memo(
             )}
           >
             <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
-              <EuiFlexItem className="eui-textTruncate">
+              {/* Shrinks (and truncates) instead of growing so the +N badge sits right after the id, like the other cells. */}
+              <EuiFlexItem grow={false} className="eui-textTruncate" css={{ minWidth: 0 }}>
                 <EuiToolTip content={entityId}>
                   <EuiText size="xs" className="eui-textTruncate" tabIndex={0}>
                     {entityId ?? getEmptyTagValue()}
@@ -106,10 +107,12 @@ export const EntitySummaryGrid = memo(
                   grow={false}
                   // setting height to 0 and overflow to visible to avoid the button from pushing the text down
                   // translateY(-50%) is used on EuiCopy to center the button vertically
+                  // margin-left: auto keeps the copy button at the cell's right edge
                   css={css`
                     height: 0;
                     overflow: visible;
                     align-self: center;
+                    margin-left: auto;
                   `}
                 >
                   <EuiToolTip

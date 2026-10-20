@@ -133,8 +133,8 @@ export interface UseEntityFromStoreParams {
   entityId?: string;
   /**
    * `single` (default) loads the `entityId` record only; `resolved` also loads the records that
-   * resolve to `entityId`, riskiest first and capped at `RESOLVED_MODE_MAX_RECORDS` members
-   * including the target. Only applies when `entityId` is set.
+   * resolve to `entityId`, riskiest first and capped at `RESOLVED_MODE_MAX_RECORDS` members.
+   * Only applies when `entityId` is set.
    */
   mode?: EntityViewMode;
   /**
@@ -163,6 +163,11 @@ export interface EntityFromStoreResult<T> {
    * `entityRecord` itself, riskiest first. Always empty in `single` mode.
    */
   aliasRecords: EntityStoreRecord[];
+  /**
+   * In `resolved` mode, how many records resolve to `entityId` in total — the store's hit count,
+   * so it stays correct when `aliasRecords` is truncated to the member cap. `0` in `single` mode.
+   */
+  aliasCount: number;
   firstSeen: string | null;
   lastSeen: string | null;
   isLoading: boolean;
@@ -326,6 +331,8 @@ export function useEntityFromStore(
     () => (isResolvedMode ? records.filter((r) => r !== record) : []),
     [isResolvedMode, records, record]
   );
+  // In resolved mode `total` is the aliases lookup's hit count (the target is fetched separately).
+  const aliasCount = isResolvedMode ? Math.max(data?.total ?? 0, aliasRecords.length) : 0;
   const entityField = record?.entity;
 
   const firstSeen = entityField?.lifecycle?.first_seen ?? null;
@@ -350,6 +357,7 @@ export function useEntityFromStore(
       entity: mappedDetails,
       entityRecord: record ?? null,
       aliasRecords,
+      aliasCount,
       firstSeen,
       lastSeen,
       isLoading,
@@ -362,6 +370,7 @@ export function useEntityFromStore(
       mappedDetails,
       record,
       aliasRecords,
+      aliasCount,
       firstSeen,
       lastSeen,
       isLoading,

@@ -219,7 +219,7 @@ describe('EntitySummaryGrid', () => {
       const duplicateAlias = { ...alias } as unknown as Entity;
       const targetLookalike = {
         ...alias,
-        entity: { ...alias.entity, id: target.entity.id },
+        entity: { ...alias.entity, id: target.entity?.id },
       } as unknown as Entity;
       const { getByTestId } = render(
         <TestProviders>
