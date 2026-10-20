@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiEmptyPrompt,
@@ -15,89 +15,125 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import {
-  AssignToUsers,
   EscalationQueue,
+  Impact,
+  useEntityFilter,
   type EscalationQueueItem,
+  type ImpactPill,
 } from '@kbn/agentic-investigations-common';
-import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import {
   useAssignEscalation,
+  useEscalationImpactPills,
   useListEscalations,
-  useUserProfiles,
-  useSuggestUserProfiles,
+  escalationQueryKeys,
+  impactPillsQueryKeys,
+  useOpenInChat,
 } from '@kbn/agentic-investigations-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { CoreStart } from '@kbn/core/public';
 
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
 import { EscalationsPageHeader } from '../../components/escalations_page_header';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
+import { useQueuePolling } from '../../hooks/use_queue_polling';
+import { useAlertZeroInvestigationsCapabilities } from '../../hooks/use_alertzero_investigations_capabilities';
 import { escalationToQueueItem } from './escalation_to_queue_item';
 import { ESCALATIONS_PAGE_INFO } from './translations';
+import { EscalationsOpenNote } from './escalations_open_note';
+import { EscalationsEmptyBanner } from './escalations_empty_banner';
+import { useQueueAssignees } from '../../components/connected_assignees/use_queue_assignees';
+
+const NO_PILLS: readonly ImpactPill[] = [];
+
+const POLLED_QUERY_KEYS = [escalationQueryKeys.lists(), impactPillsQueryKeys.escalations()];
 
 export const EscalationsPage: React.FC = () => {
   const { euiTheme } = useEuiTheme();
-  const {
-    services: { notifications, application },
-  } = useKibana<CoreStart>();
-
   useAlertZeroDocTitle(ESCALATIONS_PAGE_INFO.pageTitle);
+  useQueuePolling(POLLED_QUERY_KEYS);
 
   // Capability check: only render the assignee picker when the user can manage escalations.
-  const canManage = application.capabilities.agenticInvestigations?.manageEscalations === true;
+  const { manageEscalations: canManage } = useAlertZeroInvestigationsCapabilities();
 
-  // Per-bucket current page (1-based). Incremented by "Show more"; never reset here.
+  // Clicking a row navigates to Agent Builder with the conversation details flyout open.
+  // getChatHref is also forwarded so cards render as real links (Cmd-click, URL on hover).
+  const { getChatHref, openChat } = useOpenInChat();
+
+  const { data: impactPills = NO_PILLS } = useEscalationImpactPills();
+  const { entityFilter, setEntityFilter } = useEntityFilter(impactPills);
+
   const [openPage, setOpenPage] = useState(1);
   const [closedPage, setClosedPage] = useState(1);
 
-  const openQuery = useListEscalations({ status: 'open', page: openPage });
-  const closedQuery = useListEscalations({ status: 'closed', page: closedPage });
+  // Items stored by page number so that a refetch of the same page replaces its rows
+  // in place rather than appending them (which would duplicate rows after "Show more").
+  // Only the active (last) page query is mounted, so earlier pages keep their cached
+  // items in this map until the component unmounts.
+  const [openPages, setOpenPages] = useState<Record<number, EscalationQueueItem[]>>({});
+  const [closedPages, setClosedPages] = useState<Record<number, EscalationQueueItem[]>>({});
 
-  // Accumulated items: each "Show more" appends the next page to the list.
-  // The response's `pagination.page` is used to detect a reset (page 1) vs. an append.
-  const [openItems, setOpenItems] = useState<EscalationQueueItem[]>([]);
-  const [closedItems, setClosedItems] = useState<EscalationQueueItem[]>([]);
+  // Reset during render, so no request goes out for the old page number under the new filter
+  // and rows of the previous filter never show up next to its pages.
+  const [pagedEntity, setPagedEntity] = useState(entityFilter);
+  if (pagedEntity !== entityFilter) {
+    setPagedEntity(entityFilter);
+    setOpenPage(1);
+    setClosedPage(1);
+    setOpenPages({});
+    setClosedPages({});
+  }
+
+  const openQuery = useListEscalations({ status: 'open', page: openPage, entity: entityFilter });
+  const closedQuery = useListEscalations({
+    status: 'closed',
+    page: closedPage,
+    entity: entityFilter,
+  });
+
+  // A filtered list reports only its own total, so the header keeps the last unfiltered one.
+  const unfilteredOpenTotal = useRef<number>();
+  useEffect(() => {
+    if (!entityFilter && openQuery.data && !openQuery.isPreviousData) {
+      unfilteredOpenTotal.current = openQuery.data.pagination.total;
+    }
+  }, [entityFilter, openQuery.data, openQuery.isPreviousData]);
 
   useEffect(() => {
-    if (!openQuery.data) return;
+    if (!openQuery.data || openQuery.isPreviousData) return;
+    const page = openQuery.data.pagination.page;
     const newItems = openQuery.data.results.map(escalationToQueueItem);
-    setOpenItems((prev) =>
-      openQuery.data!.pagination.page === 1 ? newItems : [...prev, ...newItems]
-    );
-    // When fresh data arrives, clear any pending optimistic entries for escalations
-    // included in this page. This removes the pending state only after the server has
-    // confirmed the change, eliminating the flash that would occur if we cleared
-    // optimistically in onSettled (before the refetch completed).
-    setPendingAssignees((prev) => {
-      if (prev.size === 0) return prev;
-      const next = new Map(prev);
-      let changed = false;
-      for (const item of newItems) {
-        if (next.delete(item.id)) changed = true;
-      }
-      return changed ? next : prev;
-    });
-    // openQuery.data is the only dep: fires when React Query delivers a new page.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [openQuery.data]);
+    // Page 1 starts the list over, so rows of a previous filter are replaced, not kept.
+    setOpenPages((prev) => (page === 1 ? { 1: newItems } : { ...prev, [page]: newItems }));
+  }, [openQuery.data, openQuery.isPreviousData]);
 
   useEffect(() => {
-    if (!closedQuery.data) return;
+    if (!closedQuery.data || closedQuery.isPreviousData) return;
+    const page = closedQuery.data.pagination.page;
     const newItems = closedQuery.data.results.map(escalationToQueueItem);
-    setClosedItems((prev) =>
-      closedQuery.data!.pagination.page === 1 ? newItems : [...prev, ...newItems]
-    );
-    setPendingAssignees((prev) => {
-      if (prev.size === 0) return prev;
-      const next = new Map(prev);
-      let changed = false;
-      for (const item of newItems) {
-        if (next.delete(item.id)) changed = true;
-      }
-      return changed ? next : prev;
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [closedQuery.data]);
+    setClosedPages((prev) => (page === 1 ? { 1: newItems } : { ...prev, [page]: newItems }));
+  }, [closedQuery.data, closedQuery.isPreviousData]);
+
+  // Flatten pages in order, deduping by id (offset shifts can move a row between pages).
+  const openItems = useMemo(() => {
+    const seen = new Set<string>();
+    return Object.keys(openPages)
+      .sort((a, b) => Number(a) - Number(b))
+      .flatMap((p) => openPages[Number(p)])
+      .filter((item) => (seen.has(item.id) ? false : seen.add(item.id)));
+  }, [openPages]);
+
+  const closedItems = useMemo(() => {
+    const seen = new Set<string>();
+    return Object.keys(closedPages)
+      .sort((a, b) => Number(a) - Number(b))
+      .flatMap((p) => closedPages[Number(p)])
+      .filter((item) => (seen.has(item.id) ? false : seen.add(item.id)));
+  }, [closedPages]);
+
+  const openIsEmpty = !entityFilter && openQuery.data?.pagination.total === 0;
+  // Stable element so the memoized queue is not re-rendered by unrelated page updates.
+  const openNote = useMemo(
+    () => (openIsEmpty ? <EscalationsOpenNote /> : undefined),
+    [openIsEmpty]
+  );
 
   const isLoading = openQuery.isLoading || closedQuery.isLoading;
   const hasAnyData = openQuery.data ?? closedQuery.data;
@@ -106,122 +142,52 @@ export const EscalationsPage: React.FC = () => {
   const bothFailed = openQuery.error && closedQuery.error;
   const pageError = bothFailed && !hasAnyData ? (openQuery.error as Error) : null;
 
-  // Collect all assignee uids across both groups for a single bulk profile fetch.
-  const allAssigneeUids = useMemo(() => {
-    const uids = new Set<string>();
-    for (const item of [...openItems, ...closedItems]) {
-      for (const uid of item.assigneeUids) {
-        uids.add(uid);
-      }
-    }
-    return Array.from(uids);
-  }, [openItems, closedItems]);
-
-  const profilesQuery = useUserProfiles({ uids: allAssigneeUids });
-  const profilesByUid = useMemo(() => {
-    const map = new Map<string, UserProfileWithAvatar>();
-    for (const profile of profilesQuery.data ?? []) {
-      map.set(profile.uid, profile);
-    }
-    return map;
-  }, [profilesQuery.data]);
-
-  // Per-popover search term. One popover is open at a time, so a single term suffices.
-  const [searchTerm, setSearchTerm] = useState('');
-  const suggestQuery = useSuggestUserProfiles(searchTerm, { size: 20, enabled: canManage });
-
   const assignEscalation = useAssignEscalation();
 
-  // Optimistic assignee state: maps escalationId → the selected profiles that were submitted
-  // but not yet confirmed by the server. The avatar stack renders from this while in-flight.
-  // Cleared by the list-query useEffect once refetched data arrives (success path), or
-  // immediately in onError (no refetch happens on failure).
-  const [pendingAssignees, setPendingAssignees] = useState<Map<string, UserProfileWithAvatar[]>>(
-    new Map()
-  );
+  const allItems = useMemo(() => [...openItems, ...closedItems], [openItems, closedItems]);
 
-  const handleAssigneesChange = useCallback(
-    (escalationId: string, selected: UserProfileWithAvatar[]) => {
-      // Show the new selection immediately before the server responds.
-      setPendingAssignees((prev) => new Map(prev).set(escalationId, selected));
+  // Both queues loaded and neither has any rows (a filtered total says nothing about the queue).
+  const hasNoEscalations =
+    !entityFilter &&
+    openQuery.data?.pagination.total === 0 &&
+    closedQuery.data?.pagination.total === 0;
 
-      assignEscalation.mutate(
-        {
-          escalationId,
-          assignees: selected.map((p) => p.uid),
-        },
-        {
-          onSuccess: () => {
-            notifications?.toasts.addSuccess(ESCALATIONS_PAGE_INFO.assignSuccess);
-            // Pending state is cleared by the useEffect when the refetched data arrives,
-            // so the optimistic UI stays visible right up until the server confirms.
-          },
-          onError: () => {
-            notifications?.toasts.addDanger(ESCALATIONS_PAGE_INFO.assignError);
-            // On error the query won't refetch, so roll back the optimistic state now.
-            setPendingAssignees((prev) => {
-              const next = new Map(prev);
-              next.delete(escalationId);
-              return next;
-            });
-          },
-        }
-      );
+  const renderAssignees = useQueueAssignees({
+    items: allItems,
+    getRowKey: (e) => e.id,
+    getTargetId: (e) => e.id,
+    getAssigneeUids: (e) => e.assigneeUids,
+    assign: (escalationId, assignees) => assignEscalation.mutateAsync({ escalationId, assignees }),
+    queryKey: escalationQueryKeys.all,
+    canManage,
+    isReadOnly: (e) => e.status === 'closed',
+    labels: {
+      assignSuccess: ESCALATIONS_PAGE_INFO.assignSuccess,
+      assignError: ESCALATIONS_PAGE_INFO.assignError,
     },
-    [assignEscalation, notifications]
-  );
+  });
 
-  const renderAssignees = useCallback(
-    (escalation: EscalationQueueItem) => {
-      const isUpdating = pendingAssignees.has(escalation.id);
-
-      // While an update is in flight use the optimistically submitted profiles directly
-      // (they carry full avatar data from the picker). Otherwise build the list from
-      // resolved profiles, preserving unresolved UIDs as synthetic placeholders so they
-      // round-trip through the replace-in-full payload and can only be removed explicitly.
-      const selected: UserProfileWithAvatar[] = isUpdating
-        ? pendingAssignees.get(escalation.id) ?? []
-        : escalation.assigneeUids.map((uid) => {
-            const resolved = profilesByUid.get(uid);
-            if (resolved) return resolved;
-            // Synthesise a minimal profile for an unresolvable UID (e.g. deleted user).
-            return {
-              uid,
-              enabled: true,
-              user: { username: uid },
-              data: {},
-            } as UserProfileWithAvatar;
-          });
-
-      return (
-        <AssignToUsers
-          conversationId={escalation.id}
-          selected={selected}
-          suggestions={suggestQuery.data ?? []}
-          isSuggestionsLoading={suggestQuery.isLoading}
-          // Disable the picker while the bulk profile fetch is still in flight to prevent
-          // a change that would silently drop unresolved UIDs from the replace-in-full list.
-          // `isFetching` (not `isLoading`) is used here: React Query v4 sets `isLoading: true`
-          // even for disabled queries that have no data (e.g. when there are no assignee UIDs),
-          // which would permanently grey out the button for unassigned escalations.
-          isProfilesLoading={profilesQuery.isFetching}
-          isUpdating={isUpdating}
-          canManage={canManage && escalation.status !== 'closed'}
-          onSearchChange={setSearchTerm}
-          onChange={(newSelected) => handleAssigneesChange(escalation.id, newSelected)}
-        />
-      );
-    },
-    [
-      pendingAssignees,
-      profilesByUid,
-      profilesQuery.isFetching,
-      suggestQuery.data,
-      suggestQuery.isLoading,
-      canManage,
-      handleAssigneesChange,
-    ]
-  );
+  // Nothing to show yet: the page is just the explainer banner, centered, with no header or queues.
+  if (hasNoEscalations) {
+    return (
+      <AlertZeroPageSection
+        contentProps={{
+          css: css`
+            padding-block: ${euiTheme.size.xxl};
+            align-self: center;
+            max-width: 1000px;
+            inline-size: 100%;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          `,
+        }}
+      >
+        <EscalationsEmptyBanner />
+      </AlertZeroPageSection>
+    );
+  }
 
   return (
     <AlertZeroPageSection
@@ -233,12 +199,16 @@ export const EscalationsPage: React.FC = () => {
         `,
       }}
     >
-      <EuiFlexGroup gutterSize="l" direction="column" wrap>
+      {/* No `wrap`: a wrapping column sizes each line to its widest content and lets a
+          wide row push the page past the viewport. Same fix as the conversations page. */}
+      <EuiFlexGroup gutterSize="l" direction="column">
         <EuiFlexItem grow={false}>
           <EscalationsPageHeader
             isLoading={isLoading}
             hasError={Boolean(pageError)}
-            openCount={openQuery.data?.pagination.total ?? 0}
+            openCount={
+              (entityFilter ? unfilteredOpenTotal.current : openQuery.data?.pagination.total) ?? 0
+            }
           />
         </EuiFlexItem>
 
@@ -261,23 +231,39 @@ export const EscalationsPage: React.FC = () => {
         {!isLoading && !pageError ? (
           <>
             <EuiFlexItem grow={false}>
+              <Impact
+                pills={impactPills}
+                entityFilter={entityFilter}
+                onEntityFilterChange={setEntityFilter}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EscalationQueue
                 status="open"
+                note={openNote}
                 escalations={openItems}
+                isFiltered={Boolean(entityFilter)}
                 totalItemCount={openQuery.data?.pagination.total}
-                onLoadMore={() => setOpenPage((p) => p + 1)}
+                onLoadMore={openQuery.isPreviousData ? undefined : () => setOpenPage((p) => p + 1)}
                 error={openQuery.error as Error | null}
                 renderAssignees={renderAssignees}
+                onClickCard={(item) => openChat(item.id, item.agentId)}
+                getHref={(item) => getChatHref(item.id, item.agentId)}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EscalationQueue
                 status="closed"
                 escalations={closedItems}
+                isFiltered={Boolean(entityFilter)}
                 totalItemCount={closedQuery.data?.pagination.total}
-                onLoadMore={() => setClosedPage((p) => p + 1)}
+                onLoadMore={
+                  closedQuery.isPreviousData ? undefined : () => setClosedPage((p) => p + 1)
+                }
                 error={closedQuery.error as Error | null}
                 renderAssignees={renderAssignees}
+                onClickCard={(item) => openChat(item.id, item.agentId)}
+                getHref={(item) => getChatHref(item.id, item.agentId)}
               />
             </EuiFlexItem>
           </>

@@ -46,7 +46,7 @@ export const ExecuteActionHostResponse = memo<ExecuteActionHostResponseProps>(
     );
 
     return (
-      <>
+      <div data-test-subj={dataTestSubj}>
         <EuiFlexItem>
           <ResponseActionFileDownloadLink
             action={action}
@@ -69,7 +69,7 @@ export const ExecuteActionHostResponse = memo<ExecuteActionHostResponseProps>(
             />
           </>
         )}
-      </>
+      </div>
     );
   }
 );

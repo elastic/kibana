@@ -25,17 +25,7 @@ import { createResolveAction } from './resolve';
 import { createUnresolveAction } from './unresolve';
 import { createEditTagsAction } from './edit_tags';
 import { createEditAssigneeAction } from './edit_assignee';
-import { createOpenInDiscoverAction, OPEN_IN_DISCOVER_EPISODE_ACTION_ID } from './open_in_discover';
-
-/**
- * Ids of episode actions that are safe to expose to users without write
- * privilege because they do not mutate any episode (e.g. navigation only).
- * Anything not listed here is treated as a write action and hidden from
- * read-only users, so new mutating actions are gated by default.
- */
-export const READ_SAFE_EPISODE_ACTION_IDS: ReadonlySet<string> = new Set([
-  OPEN_IN_DISCOVER_EPISODE_ACTION_ID,
-]);
+import { createOpenInDiscoverAction } from './open_in_discover';
 
 export interface EpisodeActionsDeps {
   http: HttpStart;
@@ -48,6 +38,8 @@ export interface EpisodeActionsDeps {
   expressions: ExpressionsStart;
   spaces: SpacesPluginStart;
   queryClient: QueryClient;
+  /** Returns whether the referenced rule was successfully resolved. */
+  isRuleAvailable: (ruleId: string) => boolean;
   /** Resolver for "Open in Discover" URL; may be sync or async. Return undefined when not applicable. */
   getDiscoverHref: (args: {
     episodeIsoTimestamp: string;
@@ -68,7 +60,7 @@ export const createEpisodeActions = (deps: EpisodeActionsDeps): EpisodeAction[] 
     createSnoozeAction(
       deps,
       ext('ALERTING_V2_SNOOZE_EPISODE') as
-        | EpisodeActionExtension<{ expiry: string | null }>
+        | EpisodeActionExtension<{ snoozedUntil: string | null }>
         | undefined
     ),
     createUnsnoozeAction(actionDeps, ext('ALERTING_V2_UNSNOOZE_EPISODE')),

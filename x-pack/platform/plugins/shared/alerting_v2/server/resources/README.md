@@ -2,7 +2,7 @@
 
 This folder defines the managed Elasticsearch resources for alerting v2:
 
-- data streams with explicit mappings and ILM policies
+- data streams with explicit mappings and data stream lifecycle
 - ES|QL views layered over those streams
 - the startup registration path that initializes them at plugin start
 
@@ -13,6 +13,7 @@ If you change stored document shape, retention behavior, or ES|QL views, this fo
 | Area | Files |
 | --- | --- |
 | Datastream definitions | `datastreams/alert_events.ts`, `datastreams/alert_actions.ts` |
+| Ingest timestamp pipeline | `datastreams/ingest_timestamp_pipeline.ts` |
 | Datastream registration | `datastreams/register.ts` |
 | ES\|QL view definitions | `esql_views/` |
 | Startup initialization | `register_resources.ts` |
@@ -27,6 +28,7 @@ If you change stored document shape, retention behavior, or ES|QL views, this fo
 | Strict mappings | Both data streams use `dynamic: false`. Only declared fields are indexed. |
 | Runtime schema alignment | Zod schemas mirror the intended application-level document shape. |
 | Versioned evolution | Datastream resources carry a version; bump it when template changes require rollover. |
+| ES-owned `@timestamp` | Each stream has a versioned ingest pipeline wired as `index.final_pipeline` that sets `@timestamp` from `_ingest.timestamp` when the document does not carry one. Writers omit `@timestamp`; only the public alert events API passes a caller-supplied value through. |
 | Backward compatibility | Existing fields may not be removed, renamed, or have incompatible type changes. |
 
 ## The two core streams
@@ -39,7 +41,7 @@ This stream is the durable history of rule evaluation.
 
 | Field | ES type | Notes |
 | --- | --- | --- |
-| `@timestamp` | `date` | When the document was written. |
+| `@timestamp` | `date` | When the document was indexed; set by ES via the final pipeline. |
 | `scheduled_timestamp` | `date` | When the rule run was scheduled. |
 | `rule.id` | `keyword` | Rule identifier. |
 | `rule.version` | `long` | Rule version at execution time. |
@@ -48,9 +50,10 @@ This stream is the durable history of rule evaluation.
 | `status` | `keyword` | `breached`, `recovered`, or `no_data`. |
 | `source` | `keyword` | Origin marker. |
 | `type` | `keyword` | `signal` or `alert`. |
-| `episode.id` | `keyword` | Episode id for alert-type events. |
-| `episode.status` | `keyword` | `inactive`, `pending`, `active`, or `recovering`. |
-| `episode.status_count` | `long` | Consecutive count within the current episode status. |
+| `alert.id` | `keyword` | Alert id for alert-type events. |
+| `alert.status` | `keyword` | `inactive`, `pending`, `active`, or `recovering`. |
+| `alert.status_count` | `long` | Consecutive count within the current alert status. |
+| `episode.id`, `episode.status`, `episode.status_count` | `alias` | Aliases of the `alert.*` fields, so queries on the pre-v8 names keep working. Aliases are not stored in `_source` and cannot be written. |
 | `severity` | `keyword` | Optional. Best-effort severity extracted from the ES\|QL `severity` column on breached events. One of `info`, `low`, `medium`, `high`, `critical`. |
 
 Writers:
@@ -73,14 +76,15 @@ This stream is the dispatcher's durable memory and also stores user/system actio
 
 | Field | ES type | Notes |
 | --- | --- | --- |
-| `@timestamp` | `date` | Action time. |
+| `@timestamp` | `date` | Action time; stamped by ES via the final pipeline. |
 | `last_series_event_timestamp` | `date` | Timestamp of the related series event. |
 | `expiry` | `date` | Optional expiry for temporary actions such as snooze. |
-| `actor` | `keyword` | Who performed the action. |
+| `actor.type` | `keyword` | `user`, or `internal` for writes made by Kibana itself (e.g. the dispatcher). |
+| `actor.profile_uid` | `keyword` | User profile uid of a `user` actor. Absent for `internal` actors and for users without a resolvable profile. |
 | `action_type` | `keyword` | `fire`, `suppress`, `notified`, `ack`, `deactivate`, and related values. |
 | `group_hash` | `keyword` | Series identity. |
-| `episode_id` | `keyword` | Optional episode scope. |
-| `episode_status` | `keyword` | Optional episode status captured with the action. |
+| `alert_id` | `keyword` | Optional episode scope. Null for series-level actions such as `snooze`. Named `episode_id` before v8. |
+| `alert_status` | `keyword` | Optional episode status captured with the action. Named `episode_status` before v8. |
 | `rule_id` | `keyword` | Rule identifier. |
 | `tags` | `keyword` | Optional tags. |
 | `notification_group_id` | `keyword` | Group identity for throttling / notify tracking. |
@@ -177,6 +181,12 @@ Disallowed changes:
 4. Update writers and readers that need to understand the new field.
 5. Update the relevant README if the field changes the architecture or contributor mental model.
 
+### Mapping changes that cannot be applied in place
+
+Elasticsearch cannot apply some mapping changes to existing backing indices, for example turning a concrete field into an `alias`. For those, set `forceReset: { version }` on the resource definition, where `version` is the last datastream version with the old mapping. On startup, `DatastreamInitializer` installs the current template, then deletes a data stream created from that version or below and recreates it. Installing the template first means that a write from a node still running the previous version recreates the data stream with the current mapping. All of its documents are lost. A field renamed without an alias uses the same reset, so that no document keeps the old name.
+
+`.rule-events` uses `forceReset: { version: 7 }` for the `episode.*` to `alert.*` rename in v8. `.alert-actions` uses `forceReset: { version: 7 }` for the `episode_id` / `episode_status` to `alert_id` / `alert_status` rename in v8, which also covers the `actor` keyword to object change in v7. Keep `forceReset.version` unchanged when bumping the datastream versions later.
+
 ## Example: adding a new optional alert event field
 
 If you add a new optional field to `.rule-events`, the minimum change set is usually:
@@ -188,14 +198,24 @@ If you add a new optional field to `.rule-events`, the minimum change set is usu
 
 That keeps stored schema, runtime validation, and application code aligned.
 
-## ILM and retention
+## Lifecycle and retention
 
-Current ILM policies keep both streams in the hot phase with rollover on:
+Both streams use data stream lifecycle (DSL), not ILM. Rollover follows the Elasticsearch DSL defaults. `.alert-actions` has no retention.
 
-- `30d` max age
-- `50gb` primary shard size
+`.rule-events` retention is set in `kibana.yml`:
 
-See the `*_ILM_POLICY` definitions in the datastream files if you need to change retention behavior.
+| Setting | Default | Notes |
+| --- | --- | --- |
+| `xpack.alerting_v2.retention.ruleEvents.enabled` | `false` | `config/serverless.oblt.yml` turns it on for Observability Serverless. |
+| `xpack.alerting_v2.retention.ruleEvents.dataRetention` | `90d` | Units `d`, `h`, `m`, `s` or `ms` (no `w`). Minimum `30d`. |
+
+`DatastreamInitializer` applies the `.rule-events` lifecycle with `PUT _data_stream/.rule-events/_lifecycle` on every startup (`manageLifecycle: true`), because `@kbn/data-streams` only updates it on a template version bump. Changes take effect on restart, disabling retention removes `data_retention`, and any retention set by hand on `.rule-events` is overwritten. `.alert-actions` is left untouched. A failed update fails the stream's initialization, so a previous, retention is never silently kept.
+
+Caveats:
+
+- An active episode that stops getting new events expires once its last event is older than the window, with no recovery event or notification. This happens for rules using `no_data: ignore` with manual, condition or query recovery, and for rules that are disabled or keep failing.
+- Retention applies to the whole stream, not per rule, source or space. Significant Events shares this stream.
+- DSL deletes whole backing indices measured from rollover, so documents can live a little longer than the window.
 
 ## Related server code
 

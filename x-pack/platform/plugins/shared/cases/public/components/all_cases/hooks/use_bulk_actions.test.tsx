@@ -13,6 +13,7 @@ import { waitFor, renderHook, screen } from '@testing-library/react';
 import {
   allCasesPermissions,
   noDeleteCasesPermissions,
+  noUpdateCasesPermissions,
   onlyDeleteCasesPermission,
   noReopenCasesPermissions,
   onlyReopenCasesPermission,
@@ -22,10 +23,31 @@ import {
 import { useBulkActions } from './use_bulk_actions';
 import * as api from '../../../containers/api';
 import { basicCase, basicCaseClosed } from '../../../containers/mock';
+import type { CasesUI } from '../../../containers/types';
+import { KibanaServices } from '../../../common/lib/kibana';
+import { MAX_CASES_PER_WORKFLOW_RUN } from '../../../../common/constants';
+import type { CasesPermissions } from '../../../../common';
 import * as i18n from '../translations';
 
 jest.mock('../../../containers/api');
 jest.mock('../../../containers/user_profiles/api');
+
+const mockCanExecuteWorkflow = jest.fn(() => false);
+
+jest.mock('@kbn/workflows-ui', () => {
+  const actual = jest.requireActual('@kbn/workflows-ui');
+  return {
+    ...actual,
+    useWorkflowsCapabilities: () => ({
+      ...actual.useWorkflowsCapabilities(),
+      canExecuteWorkflow: mockCanExecuteWorkflow(),
+    }),
+  };
+});
+
+jest.mock('../../workflows/run_case_workflow_modal', () => ({
+  RunCaseWorkflowModal: () => <div data-test-subj="cases-run-workflow-modal" />,
+}));
 
 describe('useBulkActions', () => {
   const onAction = jest.fn();
@@ -692,6 +714,99 @@ describe('useBulkActions', () => {
       expect(await screen.findByTestId('cases-bulk-action-status-open')).not.toBeDisabled();
       expect(screen.queryByTestId('cases-bulk-action-status-in-progress')).not.toBeDisabled();
       expect(screen.queryByTestId('cases-bulk-action-status-closed')).not.toBeDisabled();
+    });
+  });
+
+  describe('Run workflow', () => {
+    let getConfigSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      getConfigSpy = jest
+        .spyOn(KibanaServices, 'getConfig')
+        .mockReturnValue({ runWorkflows: { enabled: true } } as ReturnType<
+          typeof KibanaServices.getConfig
+        >);
+      mockCanExecuteWorkflow.mockReturnValue(true);
+    });
+
+    afterEach(() => {
+      getConfigSpy.mockRestore();
+      mockCanExecuteWorkflow.mockReturnValue(false);
+    });
+
+    const renderBulkActions = ({
+      selectedCases = [basicCase],
+      permissions = allCasesPermissions(),
+    }: { selectedCases?: CasesUI; permissions?: CasesPermissions } = {}) =>
+      renderHook(() => useBulkActions({ onAction, onActionSuccess, selectedCases }), {
+        wrapper: (props) => <TestProviders {...props} permissions={permissions} />,
+      });
+
+    const findRunWorkflowItem = (panels: ReturnType<typeof useBulkActions>['panels']) =>
+      panels[0].items?.find(({ key }) => key === 'cases-bulk-action-run-workflow');
+
+    it('shows the run workflow action and opens the modal', async () => {
+      const { result } = renderBulkActions();
+
+      let modals = result.current.modals;
+      const panels = result.current.panels;
+
+      const { rerender } = renderWithTestingProviders(
+        <>
+          <EuiContextMenu initialPanelId={0} panels={panels} />
+          {modals}
+        </>
+      );
+
+      expect(screen.queryByTestId('cases-run-workflow-modal')).not.toBeInTheDocument();
+
+      await userEvent.click(screen.getByTestId('cases-bulk-action-run-workflow'));
+
+      modals = result.current.modals;
+      rerender(
+        <>
+          <EuiContextMenu initialPanelId={0} panels={panels} />
+          {modals}
+        </>
+      );
+
+      expect(await screen.findByTestId('cases-run-workflow-modal')).toBeInTheDocument();
+      expect(onAction).toHaveBeenCalled();
+    });
+
+    it(`disables the run workflow action when more than ${MAX_CASES_PER_WORKFLOW_RUN} cases are selected`, () => {
+      const selectedCases = Array.from({ length: MAX_CASES_PER_WORKFLOW_RUN + 1 }, (_, index) => ({
+        ...basicCase,
+        id: `case-${index}`,
+      }));
+
+      const { result } = renderBulkActions({ selectedCases });
+
+      expect(findRunWorkflowItem(result.current.panels)).toEqual(
+        expect.objectContaining({ disabled: true })
+      );
+    });
+
+    it('does not show the run workflow action when running workflows is disabled', () => {
+      getConfigSpy.mockReturnValue(undefined);
+
+      const { result } = renderBulkActions();
+
+      expect(findRunWorkflowItem(result.current.panels)).toBeUndefined();
+    });
+
+    it('does not show the run workflow action without update permissions', () => {
+      const { result } = renderBulkActions({ permissions: noUpdateCasesPermissions() });
+
+      expect(findRunWorkflowItem(result.current.panels)).toBeUndefined();
+    });
+
+    it('does not show the run workflow action when the user cannot execute workflows', () => {
+      mockCanExecuteWorkflow.mockReturnValue(false);
+
+      const { result } = renderBulkActions();
+
+      expect(findRunWorkflowItem(result.current.panels)).toBeUndefined();
     });
   });
 });

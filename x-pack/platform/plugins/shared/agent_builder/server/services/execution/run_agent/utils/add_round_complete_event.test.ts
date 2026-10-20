@@ -378,7 +378,39 @@ describe('addRoundCompleteEvent', () => {
       llm_calls: 2,
       input_tokens: 110,
       output_tokens: 55,
+      connectors: [
+        {
+          connector_id: 'default-connector',
+          model: 'anthropic-claude-4.5-sonnet',
+          llm_calls: 1,
+          input_tokens: 100,
+          output_tokens: 50,
+        },
+        {
+          connector_id: 'fast-connector',
+          model: 'anthropic-claude-4.5-haiku',
+          llm_calls: 1,
+          input_tokens: 10,
+          output_tokens: 5,
+        },
+      ],
     });
+  });
+
+  it('records the input tokens of the last LLM call from the final graph state', async () => {
+    const events = await firstValueFrom(
+      completedRun(defaultRun, { lastCallUsage: { inputTokens: 4242 } }).pipe(
+        addRoundCompleteEvent({
+          ...createDeps(),
+          userInput: { message: 'hello' },
+          startTime: new Date('2026-01-01T00:00:00.000Z'),
+        }),
+        toArray()
+      )
+    );
+
+    const roundCompleteEvent = events.find(isRoundCompleteEvent);
+    expect(roundCompleteEvent?.data.round.model_usage.last_call_input_tokens).toBe(4242);
   });
 
   it('preserves the original round origin and author when resuming a pending round', async () => {

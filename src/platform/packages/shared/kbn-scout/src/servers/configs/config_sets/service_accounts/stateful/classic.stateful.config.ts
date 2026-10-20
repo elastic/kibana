@@ -7,8 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { resolve } from 'path';
+import { REPO_ROOT } from '@kbn/repo-info';
 import type { ScoutServerConfig } from '../../../../../types';
 import { servers as defaultConfig } from '../../default/stateful/classic.stateful.config';
+import { securityAuditServerArgs } from '../../security_audit/shared';
 import { serviceAccountsServerArgs } from '../shared';
 
 /**
@@ -17,8 +20,27 @@ import { serviceAccountsServerArgs } from '../shared';
  */
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
+  esTestCluster: {
+    ...defaultConfig.esTestCluster,
+    serverArgs: [
+      ...defaultConfig.esTestCluster.serverArgs,
+      'xpack.security.authc.token.timeout=15s',
+    ],
+  },
   kbnTestServer: {
     ...defaultConfig.kbnTestServer,
-    serverArgs: [...defaultConfig.kbnTestServer.serverArgs, ...serviceAccountsServerArgs],
+    serverArgs: [
+      ...defaultConfig.kbnTestServer.serverArgs,
+      ...serviceAccountsServerArgs,
+      // The audit log is shared by every spec in this config set, so audit specs match events by
+      // the unique account or workload they create.
+      ...securityAuditServerArgs,
+      `--plugin-path=${resolve(REPO_ROOT, 'examples/developer_examples')}`,
+      `--plugin-path=${resolve(REPO_ROOT, 'examples/workflows_extensions_example')}`,
+      `--plugin-path=${resolve(
+        REPO_ROOT,
+        'x-pack/platform/test/task_manager/plugins/service_accounts'
+      )}`,
+    ],
   },
 };

@@ -65,6 +65,10 @@ test.describe('EIS Models Page', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
     });
   });
 
+  test('region filter is on the models toolbar', async ({ pageObjects }) => {
+    await expect(pageObjects.eisModels.regionFilter).toBeVisible();
+  });
+
   test('model family filter filters cards by provider', async ({ page, pageObjects }) => {
     const { eisModels } = pageObjects;
 
@@ -86,20 +90,26 @@ test.describe('EIS Models Page', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
   test('renders status badges on deprecated and EOL model cards', async ({ pageObjects }) => {
     const { eisModels } = pageObjects;
 
-    await test.step('deprecated model card renders the deprecated badge without any toggle', async () => {
+    await test.step('deprecated model card renders the end-of-life date without a status badge', async () => {
       await expect(eisModels.modelCard('OpenAI GPT-3.5')).toBeVisible();
-      await expect(eisModels.modelStatusBadge('OpenAI GPT-3.5', 'deprecated')).toBeVisible();
+      await expect(eisModels.modelCardMeta('OpenAI GPT-3.5')).toHaveText(
+        'Nearing end-of-life: 2099-01-01'
+      );
+      await expect(eisModels.modelStatusBadge('OpenAI GPT-3.5', 'deprecated')).toBeHidden();
       await expect(eisModels.modelStatusBadge('OpenAI GPT-3.5', 'eol')).toBeHidden();
     });
 
-    await test.step('EOL model card renders the EOL badge once end-of-life models are shown', async () => {
+    await test.step('EOL model card renders the end-of-life date once those models are shown', async () => {
       await eisModels.showEndOfLifeModels();
       await expect(eisModels.modelCard('OpenAI Davinci')).toBeVisible();
-      await expect(eisModels.modelStatusBadge('OpenAI Davinci', 'eol')).toBeVisible();
+      await expect(eisModels.modelCardMeta('OpenAI Davinci')).toHaveText('End-of-life: 2020-01-01');
+      await expect(eisModels.modelStatusBadge('OpenAI Davinci', 'eol')).toBeHidden();
       await expect(eisModels.modelStatusBadge('OpenAI Davinci', 'deprecated')).toBeHidden();
     });
 
-    await test.step('GA model cards render no status badge', async () => {
+    await test.step('GA model cards render no date and no status badge', async () => {
+      await expect(eisModels.modelCardMeta('Anthropic Claude Sonnet 3.7')).toBeHidden();
+      await expect(eisModels.modelCardMeta('OpenAI GPT-4.1')).toBeHidden();
       await expect(
         eisModels.modelStatusBadge('Anthropic Claude Sonnet 3.7', 'deprecated')
       ).toBeHidden();

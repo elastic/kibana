@@ -34,6 +34,7 @@ export class BulkGetRulesRoute extends BaseAlertingRoute {
   };
   static routeOptions = {
     access: 'public' as const,
+    availability: { stability: 'stable', since: '9.6.0' },
     summary: 'Get rules in bulk',
     oasOperationObject: bulkGetRulesOasExamples,
   } as const;
@@ -69,7 +70,7 @@ export class BulkGetRulesRoute extends BaseAlertingRoute {
   }
 
   protected async execute() {
-    const rules = await this.rulesClient.getRules(this.request.body.ids);
-    return this.ctx.response.ok({ body: { rules } });
+    const items = await this.rulesClient.getRules(this.request.body.ids);
+    return this.ctx.response.ok({ body: { items } });
   }
 }

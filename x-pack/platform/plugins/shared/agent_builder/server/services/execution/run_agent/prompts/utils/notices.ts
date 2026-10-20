@@ -14,17 +14,16 @@ import {
   generateFakeToolCallId,
 } from '@kbn/agent-builder-genai-utils/langchain/messages';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
-import type { SerializedExecutionError } from '@kbn/agent-builder-common';
+import type {
+  ExecutionAbortReason,
+  ExecutionInterruption,
+  SerializedExecutionError,
+} from '@kbn/agent-builder-common';
 import { generateXmlTree } from '@kbn/agent-builder-genai-utils/tools/utils/formatting';
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
 import type { AgentBuilderAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 import type { BackgroundExecutionState, SubagentRosterEntry } from '@kbn/agent-builder-common/chat';
 import type { HandoverParams } from '../types';
-
-/** Number of most recent research cycles whose tool results are never compacted in-flight. */
-export const PRESERVED_RECENT_CYCLES = 2;
-
-export const IN_FLIGHT_TOKEN_THRESHOLD = 50_000;
 
 export const createCycleLimitSystemMessage = (cycle: number): BaseMessage => {
   return createUserMessage(`<system-notice>
@@ -125,8 +124,9 @@ export const EXECUTION_FAILED_NOTICE_MAX_LENGTH = 500;
 
 /**
  * System notice telling the model that a previous attempt to answer failed and produced no
- * response. The error text is untrusted (it may echo tool or model output): it is XML-escaped by
- * `generateXmlTree` and bounded to {@link EXECUTION_FAILED_NOTICE_MAX_LENGTH}.
+ * response; the steps rendered before it were completed and are kept. The error text is untrusted
+ * (it may echo tool or model output): it is XML-escaped by `generateXmlTree` and bounded to
+ * {@link EXECUTION_FAILED_NOTICE_MAX_LENGTH}.
  */
 export const formatExecutionFailedNotice = (error: SerializedExecutionError): string => {
   const bounded = (text: string) =>
@@ -146,7 +146,7 @@ export const formatExecutionFailedNotice = (error: SerializedExecutionError): st
       {
         tagName: 'message',
         children: [
-          "The agent's attempt to answer the previous message failed. No response was produced.",
+          "The agent's attempt to answer the previous message failed. The steps above were completed; no response was produced.",
         ],
       },
       {
@@ -157,6 +157,58 @@ export const formatExecutionFailedNotice = (error: SerializedExecutionError): st
     ],
   });
 };
+
+/**
+ * System notice for a run that was cancelled. Neutral wording: `aborted_by.source` may be a user
+ * (`api`), a timeout / shutdown (`task_manager`) or a parent execution (`caller`).
+ */
+export const formatExecutionAbortedNotice = (abortedBy?: ExecutionAbortReason): string =>
+  generateXmlTree({
+    tagName: 'system_notice',
+    children: [
+      {
+        tagName: 'message',
+        children: [
+          'The previous execution was interrupted before the agent finished. The steps above were completed; no response was produced.',
+        ],
+      },
+      ...(abortedBy ? [{ tagName: 'interruption', attributes: { source: abortedBy.source } }] : []),
+    ],
+  });
+
+/** The notice that stands in for the assistant answer of an interrupted round. */
+export const formatInterruptionNotice = (interruption: ExecutionInterruption): string =>
+  interruption.type === 'failed'
+    ? formatExecutionFailedNotice(interruption.error)
+    : formatExecutionAbortedNotice(interruption.aborted_by);
+
+/**
+ * The notice that stands in for the assistant answer of a round still waiting on the user. The
+ * question text comes from the model: it is XML-escaped by `generateXmlTree`.
+ */
+export const formatAwaitingPromptNotice = (questions: string[]): string =>
+  generateXmlTree({
+    tagName: 'system_notice',
+    children: [
+      {
+        tagName: 'message',
+        children: [
+          'The agent paused this round to wait for user input, and the user has not answered. The steps above were completed; tool calls waiting for a confirmation did not run, and no response was produced.',
+        ],
+      },
+      ...(questions.length > 0
+        ? [
+            {
+              tagName: 'unanswered_questions',
+              children: questions.map((question) => ({
+                tagName: 'question',
+                children: [question],
+              })),
+            },
+          ]
+        : []),
+    ],
+  });
 
 export const formatSystemNotice = (execution: BackgroundExecutionState): string => {
   const { status, execution_id: executionId } = execution;

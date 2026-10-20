@@ -10,13 +10,16 @@ import { buildOasOperation } from '../oas_utils';
 import {
   INVALID_QUERY_PARAMETERS_RESPONSE,
   RULE_NOT_FOUND_RESPONSE,
+  RULE_RESPONSE,
   ruleResponseExample,
 } from './rule_oas_shared_examples';
 
 export const getRuleOasExamples = (): AlertingOasOperationObject =>
   buildOasOperation({
     responses: {
-      200: ruleResponseExample('getRuleResponse', 'Retrieved host CPU threshold rule'),
+      200: ruleResponseExample('getRuleResponse', 'Retrieved host CPU threshold rule', {
+        metadata: { ...RULE_RESPONSE.metadata, template: { id: 'host-cpu-high' } },
+      }),
       400: INVALID_QUERY_PARAMETERS_RESPONSE,
       404: RULE_NOT_FOUND_RESPONSE,
     },

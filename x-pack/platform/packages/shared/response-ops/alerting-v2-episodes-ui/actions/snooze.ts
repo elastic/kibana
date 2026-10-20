@@ -28,7 +28,7 @@ export interface SnoozeActionDeps {
 
 export const createSnoozeAction = (
   deps: SnoozeActionDeps,
-  extension?: EpisodeActionExtension<{ expiry: string | null }>
+  extension?: EpisodeActionExtension<{ snoozedUntil: string | null }>
 ): EpisodeAction => ({
   id: 'ALERTING_V2_SNOOZE_EPISODE',
   order: 20,
@@ -37,33 +37,30 @@ export const createSnoozeAction = (
   isCompatible: ({ episodes }: EpisodeActionContext) =>
     episodes.some((ep) =>
       ep.source_id == null
-        ? !isEpisodeSnoozed(ep.last_snooze_action, ep.snooze_expiry)
+        ? !isEpisodeSnoozed(ep.last_snooze_action, ep.snoozed_until)
         : extension?.isCompatible(ep) ?? false
     ),
   execute: async ({ episodes, onSuccess }: EpisodeActionContext) => {
-    const expiry = await openSnoozeExpiryModal(deps.overlays, deps.rendering);
-    if (expiry === undefined) return;
+    const snoozedUntil = await openSnoozeExpiryModal(deps.overlays, deps.rendering);
+    if (snoozedUntil === undefined) return;
 
-    try {
-      await executeCompositeAction<{ expiry: string | null }>({
-        episodes,
-        nativeExecute: (eps, http) =>
-          bulkSnoozeSeriesActions(
-            http,
-            uniqueByGroup(eps).map(
-              (ep): BulkSnoozeSeriesActionItem => ({
-                group_hash: ep.group_hash,
-                ...(expiry === null ? {} : { expiry }),
-              })
-            )
-          ),
-        extension,
-        extensionContext: { expiry },
-        deps,
-      });
-      onSuccess?.();
-    } catch {
-      deps.notifications.toasts.addDanger(i18n.BULK_ERROR_TOAST);
-    }
+    await executeCompositeAction<{ snoozedUntil: string | null }>({
+      episodes,
+      nativeExecute: (eps, http) =>
+        bulkSnoozeSeriesActions(
+          http,
+          uniqueByGroup(eps).map(
+            (ep): BulkSnoozeSeriesActionItem => ({
+              group_hash: ep.group_hash,
+              ...(snoozedUntil === null ? {} : { snoozed_until: snoozedUntil }),
+            })
+          )
+        ),
+      extension,
+      extensionContext: { snoozedUntil },
+      actionName: i18n.SNOOZE,
+      onSuccess,
+      deps,
+    });
   },
 });

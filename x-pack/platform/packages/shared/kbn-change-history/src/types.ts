@@ -79,6 +79,10 @@ export interface ChangeHistoryDocument {
     id?: string;
     /** Current login name for user that generated the change. */
     name: string;
+    /** Resolved at read time from the user profile; not persisted. */
+    full_name?: string;
+    /** Resolved at read time from the user profile; not persisted. */
+    email?: string;
   };
 
   event: {
@@ -248,6 +252,14 @@ export interface GetChangeHistoryOptions {
   size?: number;
   /**
    * Caller-supplied labels attached to every span this method emits. The caller owns the
+   * keys and values, keeping `kbn-change-history` solution-agnostic.
+   */
+  spanLabels?: Record<string, string>;
+}
+
+export interface GetChangeHistoryEventOptions {
+  /**
+   * Caller-supplied labels attached to the span this method emits. The caller owns the
    * keys and values, keeping `kbn-change-history` solution-agnostic.
    */
   spanLabels?: Record<string, string>;

@@ -11,6 +11,10 @@ import { AlertsDetailsTable } from './alerts_findings_details_table';
 import { TestProviders } from '../../../common/mock/test_providers';
 import { EntityIdentifierFields } from '../../../../common/entity_analytics/types';
 import { useNonClosedAlerts } from '../../hooks/use_non_closed_alerts';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import { useUiSetting } from '../../../common/lib/kibana';
+import { useEntityFromStore } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
 import {
   ENTITY_ANALYTICS_TABLE_ID,
   ENTITY_ANALYTICS_ALERTS_FROM,
@@ -80,6 +84,28 @@ jest.mock('../../hooks/use_non_closed_alerts', () => ({
 jest.mock('../../../common/hooks/use_navigate_to_alerts_page_with_filters', () => ({
   useNavigateToAlertsPageWithFilters: jest.fn().mockReturnValue(jest.fn()),
 }));
+
+const TARGET_RECORD = { entity: { id: 'host:target' }, host: { name: 'my-host' } };
+const ALIAS_RECORD = { entity: { id: 'host:alias' }, host: { name: 'alias-host' } };
+const hostNameFilter = (record: { host: { name: string } }) => ({
+  term: { 'host.name': record.host.name },
+});
+const GROUP_FILTER = {
+  bool: {
+    should: [hostNameFilter(TARGET_RECORD), hostNameFilter(ALIAS_RECORD)],
+    minimum_should_match: 1,
+  },
+};
+
+const mockEntityStoreEnabled = () => {
+  (useUiSetting as jest.Mock).mockReturnValue(true);
+  (useEntityStoreEuidApi as jest.Mock).mockReturnValue({
+    euid: {
+      dsl: { getEuidFilterBasedOnDocument: jest.fn((_def, record) => hostNameFilter(record)) },
+    },
+    getBuiltInEntityDefinition: jest.fn().mockReturnValue({ id: 'host' }),
+  });
+};
 
 const renderTable = (
   onShowAlert: (eventId: string, indexName: string, ruleName?: string) => void
@@ -152,6 +178,74 @@ describe('AlertsDetailsTable', () => {
       expect(useNonClosedAlerts).toHaveBeenCalledWith(
         expect.objectContaining({ from: '2022-01-01', to: '2023-01-01' })
       );
+    });
+  });
+
+  describe('entity store filter', () => {
+    const renderWithMode = (mode?: 'single' | 'resolved') =>
+      render(
+        <TestProviders>
+          <AlertsDetailsTable
+            field={EntityIdentifierFields.hostName}
+            value="my-host"
+            entityId="host:target"
+            entityType="host"
+            mode={mode}
+            onShowAlert={jest.fn()}
+          />
+        </TestProviders>
+      );
+
+    beforeEach(() => {
+      mockEntityStoreEnabled();
+    });
+
+    afterEach(() => {
+      (useUiSetting as jest.Mock).mockReturnValue(false);
+      (useEntityStoreEuidApi as jest.Mock).mockReturnValue({ euid: null });
+      (useEntityFromStore as jest.Mock).mockReturnValue({ entityRecord: null, isLoading: false });
+    });
+
+    it('queries only the target entity in single mode', () => {
+      (useEntityFromStore as jest.Mock).mockReturnValue({
+        entityRecord: TARGET_RECORD,
+        aliasRecords: [],
+        isLoading: false,
+      });
+
+      renderWithMode();
+
+      expect(useEntityFromStore).toHaveBeenCalledWith(
+        expect.objectContaining({ entityId: 'host:target', mode: undefined })
+      );
+      expect(useNonClosedAlerts).toHaveBeenCalledWith(
+        expect.objectContaining({
+          identityFields: {},
+          additionalFilters: [hostNameFilter(TARGET_RECORD)],
+        })
+      );
+      const { query } = (useQueryAlerts as jest.Mock).mock.calls[0][0];
+      expect(JSON.stringify(query)).toContain(JSON.stringify(hostNameFilter(TARGET_RECORD)));
+      expect(JSON.stringify(query)).not.toContain('alias-host');
+    });
+
+    it('queries the whole resolution group in resolved mode', () => {
+      (useEntityFromStore as jest.Mock).mockReturnValue({
+        entityRecord: TARGET_RECORD,
+        aliasRecords: [ALIAS_RECORD],
+        isLoading: false,
+      });
+
+      renderWithMode('resolved');
+
+      expect(useEntityFromStore).toHaveBeenCalledWith(
+        expect.objectContaining({ entityId: 'host:target', mode: 'resolved' })
+      );
+      expect(useNonClosedAlerts).toHaveBeenCalledWith(
+        expect.objectContaining({ identityFields: {}, additionalFilters: [GROUP_FILTER] })
+      );
+      const { query } = (useQueryAlerts as jest.Mock).mock.calls[0][0];
+      expect(JSON.stringify(query)).toContain(JSON.stringify(GROUP_FILTER));
     });
   });
 });

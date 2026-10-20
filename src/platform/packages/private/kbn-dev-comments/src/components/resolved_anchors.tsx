@@ -25,24 +25,18 @@ export type ResolvedAnchors = ReadonlyMap<string, PlacedAnchor | null>;
 const ResolvedAnchorsContext = createContext<ResolvedAnchors>(new Map());
 
 /**
- * Resolves the current page's anchors once per layout change for pins, panel
- * and guide alike, placing each element found (its pin, and whether it shows
- * or is under other UI), and has the layout tracker watch the elements, so a
- * resize of one of them (an image loading, a panel growing) moves its pin.
- * Elements found are kept while they are there; only anchors without one
- * need a document search, and those are spaced out (see `AnchorResolver`).
+ * Resolves the current page's anchors once per layout change, for pins, panel
+ * and guide alike, and has the layout tracker watch the elements found, so that
+ * a resize of one (an image loading) moves its pin.
  */
 export const ResolvedAnchorsProvider = ({ children }: PropsWithChildren) => {
   const comments = usePageComments();
-  // Every layout tick re-renders the provider: the DOM may have changed under the anchors.
   const tick = useLayoutTick();
   const [resolver] = useState(createAnchorResolver);
   const [, retry] = useReducer((retries: number) => retries + 1, 0);
 
   const { resolved, retryAt } = resolver.resolve(comments, { tick, now: Date.now() });
-  // A screenshot shown full screen from a thread covers the page, the layer and the
-  // thread's pin alike; were what it covers looked at, the pin would go, and the
-  // thread and the screenshot with it. The layer sits under the mask meanwhile.
+  // A screenshot shown full screen covers the page and the pins; hit-tested, the thread's pin would go, and the screenshot with it.
   const overlayOpen = useCommentsState((state) => state.overlayOpen);
   const placed = new Map<string, PlacedAnchor | null>(
     comments.map(({ id, anchor }) => {
@@ -51,14 +45,15 @@ export const ResolvedAnchorsProvider = ({ children }: PropsWithChildren) => {
     })
   );
 
-  // Searches put off for being too frequent are made once their time has come, even on a page that went quiet.
+  // Searches put off are made once their time has come, even on a page gone quiet.
+  // No dependencies: a render finding the wait a moment short of over must set the timer again.
   useEffect(() => {
     if (retryAt === undefined) {
       return;
     }
     const timer = setTimeout(retry, Math.max(0, retryAt - Date.now()));
     return () => clearTimeout(timer);
-  }, [retryAt]);
+  });
 
   // After every render, so the watched set follows what resolved; the tracker only diffs.
   useEffect(() => {

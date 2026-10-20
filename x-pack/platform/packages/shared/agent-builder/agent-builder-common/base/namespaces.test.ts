@@ -16,6 +16,10 @@ describe('isInProtectedNamespace', () => {
     expect(isInProtectedNamespace('platform.core.nested.some_tool')).toBe(true);
   });
 
+  it('returns true when the tool id is in the Nightshift namespace', () => {
+    expect(isInProtectedNamespace('platform.nightshift.some_tool')).toBe(true);
+  });
+
   it('returns false when the tool id is inside a part of a protected namespace', () => {
     expect(isInProtectedNamespace('platform.some_tool')).toBe(false);
   });

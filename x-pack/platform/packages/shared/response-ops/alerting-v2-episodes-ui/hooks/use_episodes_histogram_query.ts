@@ -26,7 +26,10 @@ import {
   type EpisodeSourceError,
 } from '../utils/fetch_from_sources';
 import { buildAlertEventsTimeRangeFilter } from '../utils/build_alert_events_time_range_filter';
-import { useAdditionalEpisodesDataSource } from '../context/episode_data_source_context';
+import {
+  useAdditionalEpisodesDataSource,
+  useQueryV2Source,
+} from '../context/episode_data_source_context';
 import { useToastSourceErrors } from './use_toast_source_errors';
 import {
   generateTimeBuckets,
@@ -71,6 +74,7 @@ export const useEpisodesHistogramQuery = ({
   breakdownField,
 }: UseEpisodesHistogramQueryOptions): UseEpisodesHistogramQueryResult => {
   const additionalEpisodesDataSource = useAdditionalEpisodesDataSource();
+  const queryV2Source = useQueryV2Source();
   const spaceId = useSpaceId(services.spaces);
 
   const {
@@ -85,7 +89,8 @@ export const useEpisodesHistogramQuery = ({
       filterState,
       timeRange,
       breakdownField,
-      additionalEpisodesDataSource?.id
+      additionalEpisodesDataSource?.id,
+      queryV2Source
     ),
     queryFn: async ({ signal }) => {
       const timeRangeFilter = buildAlertEventsTimeRangeFilter(timeRange);
@@ -110,6 +115,7 @@ export const useEpisodesHistogramQuery = ({
             breakdownField,
             abortSignal: signal,
           }),
+        queryV2Source,
       });
 
       const v2Rows = v2 ?? [];

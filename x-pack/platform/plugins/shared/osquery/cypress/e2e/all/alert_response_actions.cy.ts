@@ -89,7 +89,8 @@ describe(
         closeToastIfVisible();
       });
 
-      it(
+      // skipped: https://github.com/elastic/kibana/issues/264533
+      it.skip(
         'runs a live query from the alert flyout and adds the action to Timeline',
         { tags: ['@skipInServerless'] },
         () => {
@@ -396,7 +397,8 @@ describe(
         }
       );
 
-      it(
+      // skipped: https://github.com/elastic/kibana/issues/264525
+      it.skip(
         'substitutes params in osquery launched from timeline alerts',
         { tags: ['@skipInServerless'] },
         () => {

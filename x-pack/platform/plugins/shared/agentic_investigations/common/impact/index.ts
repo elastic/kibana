@@ -5,16 +5,20 @@
  * 2.0.
  */
 
+export { IMPACT_ATTACHMENT_TYPE } from './attachment';
+
 export {
+  IMPACT_ESCALATION_SUMMARY_URL,
   IMPACT_INDEX_NAME,
   IMPACT_INTERNAL_URL,
-  IMPACT_UI_CAPABILITY_MANAGE,
-  IMPACT_UI_CAPABILITY_SHOW,
+  IMPACT_PROPOSAL_SUMMARY_URL,
   MAX_ENTITY_ID_LENGTH,
   MAX_ENTITY_IDS,
   MAX_ENTITY_NAME_LENGTH,
   MAX_IMPACT_CONVERSATION_IDS,
   MAX_IMPACT_ID_LENGTH,
+  MAX_IMPACT_TOOL_ENTITIES,
+  SET_IMPACT_TOOL_ID,
 } from './constants';
 
 export {
@@ -23,6 +27,9 @@ export {
   impactEntitiesSchema,
   impactEntitySchema,
   impactSchema,
+  storedImpactEntitiesSchema,
 } from './impact';
 
 export type { AttachImpactRequest, GetImpactQuery, Impact, ImpactEntity } from './impact';
+
+export type { ImpactPillsResponse, ProposalImpactPillsQuery } from './impact_pills';

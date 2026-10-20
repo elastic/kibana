@@ -16,7 +16,6 @@ const createMocks = () => {
   const actionPolicyClient: jest.Mocked<Pick<ActionPolicyClient, 'matchActionPolicies'>> = {
     matchActionPolicies: jest.fn().mockResolvedValue({
       items: [],
-      total: 0,
       evaluated_count: 0,
       is_truncated: false,
     }),
@@ -32,17 +31,17 @@ const buildRoute = (request: KibanaRequest, mocks: ReturnType<typeof createMocks
   );
 
 describe('MatchActionPoliciesRoute', () => {
-  it('forwards rule.tags from body to the client', async () => {
+  it('forwards rule.routing_tags from body to the client', async () => {
     const mocks = createMocks();
     const request = httpServerMock.createKibanaRequest({
-      body: { rule: { tags: ['prod', 'infra'] } },
+      body: { rule: { routing_tags: ['prod', 'infra'] } },
     });
     const route = buildRoute(request as unknown as KibanaRequest, mocks);
 
     await route.handle();
 
     expect(mocks.actionPolicyClient.matchActionPolicies).toHaveBeenCalledWith({
-      ruleTags: ['prod', 'infra'],
+      routingTags: ['prod', 'infra'],
     });
   });
 
@@ -54,7 +53,7 @@ describe('MatchActionPoliciesRoute', () => {
     await route.handle();
 
     expect(mocks.actionPolicyClient.matchActionPolicies).toHaveBeenCalledWith({
-      ruleTags: undefined,
+      routingTags: undefined,
     });
   });
 
@@ -62,14 +61,13 @@ describe('MatchActionPoliciesRoute', () => {
     const mocks = createMocks();
     const clientResult = {
       items: [{ action_policy: { id: 'ap-1', name: 'AP 1' }, category: 'catch_all' }],
-      total: 250,
       evaluated_count: 100,
       is_truncated: true,
     };
     mocks.actionPolicyClient.matchActionPolicies.mockResolvedValue(clientResult as any);
 
     const request = httpServerMock.createKibanaRequest({
-      body: { rule: { tags: ['prod'] } },
+      body: { rule: { routing_tags: ['prod'] } },
     });
     const route = buildRoute(request as unknown as KibanaRequest, mocks);
 
@@ -84,7 +82,7 @@ describe('MatchActionPoliciesRoute', () => {
     mocks.actionPolicyClient.matchActionPolicies.mockRejectedValueOnce(new Error('boom'));
 
     const request = httpServerMock.createKibanaRequest({
-      body: { rule: { tags: ['prod'] } },
+      body: { rule: { routing_tags: ['prod'] } },
     });
     const route = buildRoute(request as unknown as KibanaRequest, mocks);
 
