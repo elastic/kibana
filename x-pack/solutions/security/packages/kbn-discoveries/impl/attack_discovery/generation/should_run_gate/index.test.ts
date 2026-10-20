@@ -27,4 +27,15 @@ describe('shouldRunGate', () => {
   it('runs the gate when the trigger is undefined', () => {
     expect(shouldRunGate(undefined)).toBe(true);
   });
+
+  it('runs the gate when it is explicitly enabled', () => {
+    expect(shouldRunGate('workflow', true)).toBe(true);
+  });
+
+  it.each(['manual', 'schedule', 'workflow', undefined])(
+    'skips the gate for the %s trigger when it is disabled',
+    (trigger) => {
+      expect(shouldRunGate(trigger, false)).toBe(false);
+    }
+  );
 });

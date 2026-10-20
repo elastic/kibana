@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { sha256, sanitizeFields, REDACTED } from './utils';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import type { UserProfile } from '@kbn/core/server';
+import { userProfileServiceMock } from '@kbn/core/server/mocks';
+import { sha256, sanitizeFields, REDACTED, enrichWithProfiles } from './utils';
+import type { ChangeHistoryDocument } from './types';
 
 describe('#sanitizeFields', () => {
   describe('when fieldsToHash is not provided', () => {
@@ -379,5 +383,92 @@ describe('#sanitizeFields', () => {
 
       expect(snapshot.api).toBe(api);
     });
+  });
+});
+
+describe('#enrichWithProfiles', () => {
+  const logger = loggingSystemMock.createLogger();
+
+  const doc = (id: string | undefined, name: string): ChangeHistoryDocument => ({
+    '@timestamp': '2026-01-01T00:00:00.000Z',
+    ecs: { version: '9.3.0' },
+    user: { id, name },
+    event: {
+      id: 'e1',
+      module: 'workflows',
+      dataset: 'definitions',
+      action: 'update',
+      type: 'change',
+    },
+    object: {
+      id: 'obj-1',
+      type: 'workflow',
+      hash: 'hash',
+      fields: { hashed: [], redacted: [] },
+      snapshot: {},
+    },
+    service: { type: 'kibana', version: '9.4.0' },
+  });
+
+  const profile = (uid: string, full_name?: string, email?: string): UserProfile => ({
+    uid,
+    enabled: true,
+    data: {},
+    user: { username: uid, full_name, email },
+  });
+
+  beforeEach(() => jest.clearAllMocks());
+
+  it('populates full_name and email from resolved profiles', async () => {
+    const service = userProfileServiceMock.createStart();
+    service.bulkGet.mockResolvedValue([
+      profile('u1', 'Alice A.', 'alice@example.com'),
+      profile('u2', undefined, 'bob@example.com'),
+    ]);
+    const items = [doc('u1', 'alice'), doc('u2', 'bob')];
+
+    await enrichWithProfiles(items, service, logger);
+
+    expect(service.bulkGet).toHaveBeenCalledWith({ uids: new Set(['u1', 'u2']) });
+    expect(items[0].user.full_name).toBe('Alice A.');
+    expect(items[0].user.email).toBe('alice@example.com');
+    expect(items[1].user.full_name).toBeUndefined();
+    expect(items[1].user.email).toBe('bob@example.com');
+  });
+
+  it('only looks up and enriches items that have a user.id', async () => {
+    const service = userProfileServiceMock.createStart();
+    service.bulkGet.mockResolvedValue([profile('u1', 'Alice A.', 'alice@example.com')]);
+    const items = [doc('u1', 'alice'), doc(undefined, 'bob')];
+
+    await enrichWithProfiles(items, service, logger);
+
+    expect(service.bulkGet).toHaveBeenCalledWith({ uids: new Set(['u1']) });
+    expect(items[0].user.full_name).toBe('Alice A.');
+    expect(items[0].user.email).toBe('alice@example.com');
+    expect(items[1].user).toEqual({ id: undefined, name: 'bob' });
+  });
+
+  it('leaves the user untouched when no matching profile is returned', async () => {
+    const service = userProfileServiceMock.createStart();
+    service.bulkGet.mockResolvedValue([profile('u2', 'Bob B.', 'bob@example.com')]);
+    const items = [doc('u1', 'alice')];
+
+    await enrichWithProfiles(items, service, logger);
+
+    expect(items[0].user).toEqual({ id: 'u1', name: 'alice' });
+  });
+
+  it('swallows bulkGet failures and warns', async () => {
+    const service = userProfileServiceMock.createStart();
+    service.bulkGet.mockRejectedValue(new Error('es down'));
+    const items = [doc('u1', 'alice')];
+
+    await expect(enrichWithProfiles(items, service, logger)).resolves.toBeUndefined();
+
+    expect(items[0].user.full_name).toBeUndefined();
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringMatching(/Failed to resolve user profiles for change history: Error: es down/)
+    );
   });
 });
