@@ -32,7 +32,7 @@ export const panelStyles = {
   sectionHeader: ({ euiTheme }: UseEuiTheme) =>
     css({
       flexShrink: 0,
-      padding: `${euiTheme.size.m} ${euiTheme.size.base} 0`,
+      padding: `${euiTheme.size.base} ${euiTheme.size.base} 0`,
       marginBottom: euiTheme.size.m,
     }),
   stepListScroll: ({ euiTheme }: UseEuiTheme) =>
@@ -45,6 +45,17 @@ export const panelStyles = {
   stepListPanel: css({
     width: '100%',
     overflow: 'hidden',
+  }),
+  fieldList: css({
+    width: '100%',
+    overflow: 'hidden',
+  }),
+  // EuiText's prose `pre` margin also hits EuiCodeBlock's inner pre; the code block wrapper
+  // already spaces consecutive blocks, so drop it to avoid a trailing gap under the last snippet.
+  exampleMarkdown: css({
+    pre: {
+      marginBlockEnd: 0,
+    },
   }),
   resourceInset: ({ euiTheme }: UseEuiTheme) =>
     css({
@@ -76,10 +87,8 @@ export const previewStepRowStyles = {
       alignItems: 'center',
       width: '100%',
       paddingRight: euiTheme.size.base,
-      borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
-      '&:last-child': {
-        borderBottom: 'none',
-      },
+      // Dividers come from EuiHorizontalRule between rows (same as Inputs fields list)
+      borderRadius: 0,
       '&:hover': {
         backgroundColor: euiTheme.colors.backgroundBaseSubdued,
       },

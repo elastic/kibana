@@ -171,6 +171,12 @@ export const createNavigationTree = ({
                 },
               },
               { link: 'apm:settings', sideNavStatus: 'hidden' },
+              {
+                link: 'digital_experience',
+                title: i18n.translate('xpack.serverlessObservability.nav.digitalExperience', {
+                  defaultMessage: 'Digital Experience',
+                }),
+              },
             ],
           },
           {
