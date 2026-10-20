@@ -53,7 +53,7 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
         preserve_namespace: queryBoolean
           .optional()
           .describe(
-            'If `true`, store the `namespace` as sent. Otherwise, a `default` namespace is replaced with one derived from the space ID.'
+            'If `true`, store the `namespace` exactly as sent, skipping the space-derived fallback. If `false` or omitted, an explicit `namespace` is still stored as sent; only an omitted `namespace` is derived from the space ID.'
           ),
         gettingStarted: queryBoolean.optional().describe('For internal use only.'),
         internal: queryBoolean.optional().default(false).describe('For internal use only.'),
