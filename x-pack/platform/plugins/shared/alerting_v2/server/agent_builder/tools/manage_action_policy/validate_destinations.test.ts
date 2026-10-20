@@ -55,8 +55,6 @@ const createMockConnectorLookup = (
   findConnectorById: jest.fn(async (id: string) => connectors.get(id) ?? null),
 });
 
-const mockRequest = {} as import('@kbn/core/server').KibanaRequest;
-
 describe('validateDestinations', () => {
   it('rejects bare attachment IDs and instructs to use workflowId', async () => {
     const attachments = createMockAttachments([
