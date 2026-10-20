@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ContractCall, OpenApiDocument, Violation } from '@kbn/connector-contract-mock';
+import type { ContractCall, OpenApiDocument, Violation } from '@kbn/connector-emulate';
 import type { ConnectorSpec } from '../../connector_spec';
 import type { ContractContextOptions } from '../create_contract_context';
 import { createContractContext } from '../create_contract_context';

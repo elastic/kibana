@@ -9,13 +9,13 @@
 
 import fs from 'fs/promises';
 import path from 'path';
-import type { OpenApiDocument, OverlayDocument } from '@kbn/connector-contract-mock';
+import type { OpenApiDocument, OverlayDocument } from '@kbn/connector-emulate';
 import {
   applyOverlay,
   convertDiscovery,
   convertSwagger2,
   isDiscoveryDocument,
-} from '@kbn/connector-contract-mock';
+} from '@kbn/connector-emulate';
 import type { ConnectorSpec } from '../../connector_spec';
 import { bundleSpec } from './bundle_spec';
 import { isJsonObject } from './json_pointer';
