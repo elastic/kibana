@@ -6,3 +6,4 @@
  */
 
 export { type TableNode, table } from './table';
+export { TABLE_SORT_ENHANCEMENT, tableSortEnhancement } from './table_sort';
