@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { threadId } from 'worker_threads';
 import type { CodecInput } from './codecs';
 import type { WorkerContext } from './protocol';
 import { createRunServices } from './services';
@@ -35,6 +36,11 @@ export const services = async (input: CodecInput, context: WorkerContext): Promi
     await clients.close();
   }
 };
+export const hold = async (input: CodecInput, context: WorkerContext): Promise<CodecInput> => {
+  const result = await context.call('fixture', 'hold', input);
+  return { result, threadId, principal: context.bundle.principal, space: context.bundle.space };
+};
+
 export const cooperative = async (
   _input: CodecInput,
   context: WorkerContext

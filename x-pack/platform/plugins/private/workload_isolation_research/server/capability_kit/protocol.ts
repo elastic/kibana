@@ -129,4 +129,7 @@ export type Outcome =
       readonly reason: 'deadline' | 'cancelled' | 'shutdown' | 'crash';
       readonly graceful?: boolean;
       readonly terminal?: CodecInput;
+      readonly collateral?: boolean;
+      readonly initiatingRunId?: string;
+      readonly discardedRunIds?: readonly string[];
     };

@@ -9,31 +9,34 @@ import { parentPort } from 'worker_threads';
 import { createRequire } from 'module';
 import { encode, decode } from './codecs';
 import type { CodecInput } from './codecs';
-import type { Bundle, Packet, TaskEntry, WorkerContext, RegistrySnapshot } from './protocol';
+import type { Packet, TaskEntry, WorkerContext } from './protocol';
 
 const requireModule = createRequire(__filename);
-
 const send = (packet: Packet): void => {
   if (parentPort) parentPort.postMessage(packet);
   else if (process.send) process.send(packet);
   else throw new Error('No capability transport');
 };
 
-/** Runs exactly one discardable execution at a time; never exposes the host's service graph. */
-const startRuntime = (): void => {
-  let active: Bundle | undefined;
-  let controller: AbortController | undefined;
-  let sequence = 0;
-  let registry: RegistrySnapshot = { revision: -1, modules: [] };
-  const pending = new Map<
+interface RunState {
+  readonly controller: AbortController;
+  readonly pending: Map<
     number,
     { resolve: (value: CodecInput) => void; reject: (error: Error) => void }
-  >();
+  >;
+}
+
+/** Keeps signals, pending RPC and registry snapshots local to each co-resident async run. */
+const startRuntime = (): void => {
+  const runs = new Map<string, RunState>();
+  let sequence = 0;
+  let newestRegistry = -1;
   const onMessage = async (packet: Packet): Promise<void> => {
     if (packet.version !== 1) throw new Error('Capability protocol mismatch');
     if (packet.kind === 'cancel') {
-      if (packet.runId === active?.runId && controller) {
-        controller.abort(
+      const run = runs.get(packet.runId);
+      if (run) {
+        run.controller.abort(
           new DOMException(
             'Execution cancelled',
             packet.reason === 'deadline' ? 'TimeoutError' : 'AbortError'
@@ -44,10 +47,10 @@ const startRuntime = (): void => {
       return;
     }
     if (packet.kind === 'reply') {
-      if (packet.runId !== active?.runId) return;
-      const call = pending.get(packet.id);
+      const run = runs.get(packet.runId);
+      const call = run?.pending.get(packet.id);
       if (!call) return;
-      pending.delete(packet.id);
+      run?.pending.delete(packet.id);
       const value = decode(packet.value);
       if (packet.failed)
         call.reject(value instanceof Error ? value : new Error('Capability call failed'));
@@ -55,17 +58,16 @@ const startRuntime = (): void => {
       return;
     }
     if (packet.kind !== 'run') return;
-    if (active) throw new Error('Concurrent run in a single capability slot');
-    active = packet.bundle;
-    const { bundle } = packet;
-    const runController = new AbortController();
-    controller = runController;
+    const { bundle, registry } = packet;
+    if (runs.has(bundle.runId)) throw new Error('Duplicate capability run ID');
+    const run: RunState = { controller: new AbortController(), pending: new Map() };
+    runs.set(bundle.runId, run);
     let value: CodecInput;
     let failed = false;
     try {
-      if (packet.registry.revision < registry.revision)
-        throw new Error('Registry revision went backwards');
-      registry = packet.registry;
+      if (registry.revision < newestRegistry) throw new Error('Registry revision went backwards');
+      newestRegistry = registry.revision;
+      // Capture this immutable snapshot, not the newest concurrent run's registry.
       const load = async (id: string): Promise<object> => {
         const definition = registry.modules.find((entry) => entry.id === id);
         if (!definition) throw new Error('Module registration missing or invalidated');
@@ -75,14 +77,14 @@ const startRuntime = (): void => {
       };
       const context: WorkerContext = {
         bundle,
-        signal: runController.signal,
+        signal: run.controller.signal,
         load,
         call: (capability, operation, args) =>
           new Promise((resolve, reject) => {
             const grant = bundle.grants[capability];
             if (!grant) return reject(new Error('Capability not granted'));
             const id = ++sequence;
-            pending.set(id, { resolve, reject });
+            run.pending.set(id, { resolve, reject });
             try {
               send({
                 version: 1,
@@ -95,14 +97,14 @@ const startRuntime = (): void => {
                 args: encode(args),
               });
             } catch (error) {
-              pending.delete(id);
+              run.pending.delete(id);
               reject(error instanceof Error ? error : new Error('Capability send failed'));
             }
           }),
       };
       const task = (await load(packet.moduleId)) as TaskEntry;
       value = await task(decode(packet.input), context);
-      if (pending.size) throw new Error('Task returned with outstanding capability calls');
+      if (run.pending.size) throw new Error('Task returned with outstanding capability calls');
     } catch (error) {
       failed = true;
       value = error instanceof Error ? error : new Error('Task failed with a non-Error value');
@@ -123,10 +125,9 @@ const startRuntime = (): void => {
       heapUsed: process.memoryUsage().heapUsed,
       rss: process.memoryUsage().rss,
     });
-    controller = undefined;
-    for (const entry of pending.values()) entry.reject(new Error('Run ended'));
-    pending.clear();
-    active = undefined;
+    for (const entry of run.pending.values()) entry.reject(new Error('Run ended'));
+    run.pending.clear();
+    runs.delete(bundle.runId);
   };
   const receive = (packet: Packet): void => {
     void onMessage(packet).catch(() => process.exit(1));

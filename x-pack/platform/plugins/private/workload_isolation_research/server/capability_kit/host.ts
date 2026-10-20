@@ -51,7 +51,7 @@ interface Slot {
   readonly endpoint: Endpoint;
   ready: boolean;
   stopping: boolean;
-  active?: Execution;
+  readonly active: Map<string, Execution>;
 }
 
 /** Supervises discardable per-class slots, preserving main's asynchronous control-plane authority. */
@@ -66,6 +66,7 @@ export class ExecutionHost {
     private readonly options: {
       readonly transport?: 'thread' | 'process';
       readonly slotsPerClass?: number;
+      readonly concurrencyPerClass?: Readonly<Record<string, number>>;
       readonly maxQueuePerClass?: number;
       readonly abortGraceMs?: number;
       readonly onCrossing?: (crossing: Crossing) => void;
@@ -73,6 +74,10 @@ export class ExecutionHost {
   ) {
     if (!Number.isInteger(options.slotsPerClass ?? 1) || (options.slotsPerClass ?? 1) < 1) {
       throw new Error('slotsPerClass must be positive');
+    }
+    for (const value of Object.values(options.concurrencyPerClass ?? {})) {
+      if (!Number.isInteger(value) || value < 1 || value > 1000)
+        throw new Error('Class concurrency must be1–1000');
     }
   }
 
@@ -123,8 +128,10 @@ export class ExecutionHost {
       for (const execution of [...queue]) jobs.push(this.terminate(execution, 'shutdown'));
     for (const slots of this.pools.values())
       for (const slot of [...slots]) {
-        if (slot.active) jobs.push(this.terminate(slot.active, 'shutdown'));
-        else {
+        if (slot.active.size) {
+          for (const execution of [...slot.active.values()])
+            jobs.push(this.terminate(execution, 'shutdown'));
+        } else {
           slot.stopping = true;
           jobs.push(slot.endpoint.stop());
         }
@@ -147,7 +154,10 @@ export class ExecutionHost {
     if (!queue?.length) return;
     const slots = this.pools.get(workloadClass) ?? [];
     this.pools.set(workloadClass, slots);
-    const idle = slots.find((slot) => slot.ready && !slot.active && !slot.stopping);
+    const concurrency = this.options.concurrencyPerClass?.[workloadClass] ?? 1;
+    const idle = slots.find(
+      (slot) => slot.ready && slot.active.size < concurrency && !slot.stopping
+    );
     if (!idle && slots.length < (this.options.slotsPerClass ?? 1)) {
       let endpoint: Endpoint;
       try {
@@ -161,16 +171,25 @@ export class ExecutionHost {
           });
         return;
       }
-      const slot: Slot = { endpoint, ready: false, stopping: false };
+      const slot: Slot = { endpoint, ready: false, stopping: false, active: new Map() };
       slots.push(slot);
       endpoint.onMessage((packet) => {
         void this.receive(slot, packet).catch(() => {
-          if (slot.active) void this.terminate(slot.active, 'crash');
+          const execution = slot.active.values().next().value;
+          if (execution) void this.terminate(execution, 'crash');
         });
       });
       endpoint.onExit(() => {
-        if (slot.active && !slot.stopping)
-          this.finish(slot.active, { status: 'terminated', reason: 'crash' });
+        if (!slot.stopping) {
+          const discardedRunIds = [...slot.active.keys()];
+          for (const execution of slot.active.values())
+            this.finish(execution, {
+              status: 'terminated',
+              reason: 'crash',
+              discardedRunIds,
+            });
+          slot.active.clear();
+        }
         const index = slots.indexOf(slot);
         if (index !== -1) slots.splice(index, 1);
         this.dispatch(workloadClass);
@@ -180,7 +199,7 @@ export class ExecutionHost {
     if (!idle) return;
     const execution = queue.shift();
     if (!execution) return;
-    idle.active = execution;
+    idle.active.set(execution.bundle.runId, execution);
     try {
       const packet: Packet = {
         version: 1,
@@ -193,7 +212,7 @@ export class ExecutionHost {
       this.record(execution, 'execution.run', 'capability_bundle', 'host_to_isolate', packet, 0);
       idle.endpoint.send(packet);
     } catch (error) {
-      idle.active = undefined;
+      idle.active.delete(execution.bundle.runId);
       this.finish(execution, {
         status: 'failure',
         error: error instanceof Error ? error : new Error('Dispatch failed'),
@@ -210,7 +229,7 @@ export class ExecutionHost {
         if (slots.includes(slot)) this.dispatch(workloadClass);
       return;
     }
-    const execution = slot.active;
+    const execution = 'runId' in packet ? slot.active.get(packet.runId) : undefined;
     if (
       !execution ||
       execution.done ||
@@ -240,7 +259,7 @@ export class ExecutionHost {
         0
       );
       const value = decode(packet.value);
-      slot.active = undefined;
+      slot.active.delete(execution.bundle.runId);
       this.finish(
         execution,
         execution.termination
@@ -279,7 +298,8 @@ export class ExecutionHost {
       value = error instanceof Error ? error : new Error('Capability operation failed');
     }
     // A late completion from a killed generation cannot reach a reused slot or commit an outcome.
-    if (slot.active !== execution || execution.done || slot.stopping) return;
+    if (slot.active.get(execution.bundle.runId) !== execution || execution.done || slot.stopping)
+      return;
     let encoded;
     try {
       encoded = encode(value);
@@ -313,7 +333,7 @@ export class ExecutionHost {
     if (execution.termination) return execution.termination.promise;
     if (execution.done) return;
     const slots = this.pools.get(execution.options.workloadClass) ?? [];
-    const slot = slots.find((entry) => entry.active === execution);
+    const slot = slots.find((entry) => entry.active.get(execution.bundle.runId) === execution);
     if (slot) {
       let resolveTermination: () => void = () => {};
       const promise = new Promise<void>((resolve) => {
@@ -323,12 +343,29 @@ export class ExecutionHost {
       const hardStop = async (): Promise<void> => {
         if (execution.done) return;
         slot.stopping = true;
-        // Fence before awaiting the actual stop acknowledgement.
-        execution.done = true;
-        this.clear(execution);
+        // All co-resident runs are discardable collateral of a hard slot kill.
+        const victims = [...slot.active.values()];
+        const discardedRunIds = victims.map((entry) => entry.bundle.runId);
+        for (const victim of victims) {
+          victim.done = true;
+          this.clear(victim);
+        }
         await slot.endpoint.stop();
-        slot.active = undefined;
-        execution.resolve({ status: 'terminated', reason });
+        slot.active.clear();
+        for (const victim of victims) {
+          victim.resolve({
+            status: 'terminated',
+            reason,
+            ...(victims.length > 1
+              ? {
+                  collateral: victim !== execution,
+                  initiatingRunId: execution.bundle.runId,
+                  discardedRunIds,
+                }
+              : {}),
+          });
+          victim.termination?.resolve();
+        }
         resolveTermination();
         this.dispatch(execution.options.workloadClass);
       };
