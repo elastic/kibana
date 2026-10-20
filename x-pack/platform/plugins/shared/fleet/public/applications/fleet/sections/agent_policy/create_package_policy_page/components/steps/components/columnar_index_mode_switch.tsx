@@ -36,14 +36,13 @@ const NotReadyMessage: React.FunctionComponent<{ checked: boolean; dataStreams: 
   checked,
   dataStreams,
 }) => {
-  const values = { dataStreams: dataStreams.join(', '), count: dataStreams.length };
   // Still on columnar from an earlier version: it can be turned off, not back on.
   if (checked) {
     return dataStreams.length > 0 ? (
       <FormattedMessage
         id="xpack.fleet.createPackagePolicy.stepConfigure.columnarIndexModeNoLongerAllReady"
         defaultMessage="This integration isn't columnar-ready anymore: {dataStreams} {count, plural, one {doesn't} other {don't}} support columnar storage. You can turn the columnar index mode off, but not back on until every log data stream is ready."
-        values={values}
+        values={{ dataStreams: dataStreams.join(', '), count: dataStreams.length }}
       />
     ) : (
       <FormattedMessage
@@ -56,7 +55,7 @@ const NotReadyMessage: React.FunctionComponent<{ checked: boolean; dataStreams: 
     <FormattedMessage
       id="xpack.fleet.createPackagePolicy.stepConfigure.columnarIndexModeNotAllReady"
       defaultMessage="This integration isn't columnar-ready: {dataStreams} {count, plural, one {doesn't} other {don't}} support columnar storage yet, and every log data stream has to. Its log data streams use LogsDB."
-      values={values}
+      values={{ dataStreams: dataStreams.join(', '), count: dataStreams.length }}
     />
   ) : (
     <FormattedMessage
