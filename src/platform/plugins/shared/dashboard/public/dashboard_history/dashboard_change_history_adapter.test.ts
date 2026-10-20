@@ -7,11 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { filter, firstValueFrom } from 'rxjs';
 import type { HttpSetup } from '@kbn/core-http-browser';
 
-import type { DashboardApi } from '../dashboard_api/types';
+import { DEFAULT_DASHBOARD_STATE } from '../../common/default_dashboard_state';
+import { getDashboardApi } from '../dashboard_api/get_dashboard_api';
+import { saveDashboard } from '../dashboard_api/save_modal/save_dashboard';
 import { dashboardClient } from '../dashboard_client';
 import { createDashboardChangeHistoryAdapter } from './dashboard_change_history_adapter';
+
+jest.mock('../dashboard_api/save_modal/save_dashboard', () => ({
+  saveDashboard: jest.fn(),
+}));
 
 jest.mock('../dashboard_client', () => ({
   dashboardClient: { invalidateCache: jest.fn() },
@@ -21,15 +28,13 @@ const getHttp = () =>
   ({ get: jest.fn(), post: jest.fn() } as unknown as jest.Mocked<Pick<HttpSetup, 'get' | 'post'>> &
     HttpSetup);
 
-const getDashboardApi = (hasUnsavedChanges: boolean) =>
-  ({
-    uuid: 'api-uuid',
-    user: { name: 'Hannah' },
-    hasUnsavedChanges$: { getValue: () => hasUnsavedChanges },
-    getSerializedState: () => ({ attributes: { title: 'Unsaved' } }),
-    setState: jest.fn(),
-    runQuickSave: jest.fn(),
-  } as unknown as jest.Mocked<DashboardApi>);
+const getTestDashboardApi = () =>
+  getDashboardApi({
+    incomingEmbeddables: [],
+    initialState: DEFAULT_DASHBOARD_STATE,
+    savedObjectId: 'dash-1',
+    user: { uid: 'spidey', name: 'Peter P.', hasGlobalAccessControlPrivilege: false },
+  }).api;
 
 describe('createDashboardChangeHistoryAdapter', () => {
   it('lists changes with 1-indexed pagination', async () => {
@@ -61,27 +66,35 @@ describe('createDashboardChangeHistoryAdapter', () => {
 
   it('maps HTTP errors', async () => {
     const http = getHttp();
-    http.get.mockRejectedValue({ body: { statusCode: 404, message: 'nope' } });
+    http.get.mockRejectedValue({ response: { status: 404 }, body: { message: 'nope' } });
 
     const adapter = createDashboardChangeHistoryAdapter(http, undefined);
     await expect(
       adapter.listChanges({ objectId: 'dash-1', page: { index: 0, size: 20 } })
-    ).rejects.toBeDefined();
+    ).rejects.toMatchObject({
+      message: 'nope',
+      body: { code: 'NOT_FOUND', message: 'nope' },
+    });
   });
 
   describe('getPendingChange', () => {
     it('returns nothing without unsaved changes', () => {
-      const adapter = createDashboardChangeHistoryAdapter(getHttp(), getDashboardApi(false));
+      const adapter = createDashboardChangeHistoryAdapter(getHttp(), getTestDashboardApi());
       expect(adapter.getPendingChange?.()).toBeUndefined();
     });
 
-    it('returns the unsaved state of the dashboard', () => {
-      const adapter = createDashboardChangeHistoryAdapter(getHttp(), getDashboardApi(true));
+    it('returns the unsaved state of the dashboard', async () => {
+      const dashboardApi = getTestDashboardApi();
+      const adapter = createDashboardChangeHistoryAdapter(getHttp(), dashboardApi);
+
+      dashboardApi.setSettings({ ...dashboardApi.getSettings(), title: 'Unsaved' });
+      await firstValueFrom(dashboardApi.hasUnsavedChanges$.pipe(filter(Boolean)));
+
       expect(adapter.getPendingChange?.()).toEqual(
         expect.objectContaining({
-          id: 'api-uuid',
-          actor: { name: 'Hannah' },
-          snapshot: { title: 'Unsaved' },
+          id: dashboardApi.uuid,
+          actor: { name: 'Peter P.' },
+          snapshot: expect.objectContaining({ title: 'Unsaved' }),
           metadata: { unsavedChanges: true },
         })
       );
@@ -97,9 +110,9 @@ describe('createDashboardChangeHistoryAdapter', () => {
 
     it('posts to the restore route and applies the restored state', async () => {
       const http = getHttp();
-      const restored = { title: 'Restored' };
+      const restored = { ...DEFAULT_DASHBOARD_STATE, title: 'Restored' };
       http.post.mockResolvedValue(restored);
-      const dashboardApi = getDashboardApi(false);
+      const dashboardApi = getTestDashboardApi();
 
       const adapter = createDashboardChangeHistoryAdapter(http, dashboardApi);
       await adapter.restoreChange?.({ objectId: 'dash-1', changeId: 'c1' });
@@ -109,8 +122,12 @@ describe('createDashboardChangeHistoryAdapter', () => {
         { signal: undefined }
       );
       expect(dashboardClient.invalidateCache).toHaveBeenCalledWith('dash-1');
-      expect(dashboardApi.setState).toHaveBeenCalledWith(restored);
-      expect(dashboardApi.runQuickSave).toHaveBeenCalledWith({ restored: true });
+      expect(dashboardApi.getSettings().title).toBe('Restored');
+      // restoring must not save again, which would create a duplicate change history entry
+      expect(saveDashboard).not.toHaveBeenCalled();
+      // ensure that normal saving works as expected
+      await dashboardApi.runQuickSave();
+      expect(saveDashboard).toHaveBeenCalled();
     });
   });
 });
