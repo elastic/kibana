@@ -110,7 +110,9 @@ describe('mergeDashboards', () => {
     const { spec, renamed } = mergeDashboards(kibanaSpec(), dashboardsSpec());
 
     expect(renamed).toBe(1);
-    expect(spec.components.schemas.shared_filter).toEqual(kibanaSpec().components.schemas.shared_filter);
+    expect(spec.components.schemas.shared_filter).toEqual(
+      kibanaSpec().components.schemas.shared_filter
+    );
     expect(spec.components.schemas.Dashboards_API_shared_filter).toEqual({
       type: 'object',
       description: 'Dashboards filter',
