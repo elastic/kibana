@@ -34,6 +34,13 @@ import { useEntityStoreDataView } from '../components/home/use_entity_store_data
 import { DataViewErrorComponent } from '../../common/components/data_view_error';
 import { useEntityStoreStatus } from '../components/entity_store/hooks/use_entity_store';
 import { EntityStoreDisabledEmptyPrompt } from './entity_store_disabled_empty_prompt';
+import { useMissingRiskEnginePrivileges } from '../hooks/use_missing_risk_engine_privileges';
+import { useEntityEnginePrivileges } from '../components/entity_store/hooks/use_entity_engine_privileges';
+import { useAnomalyPrivileges } from '../api/hooks/use_anomaly_privileges';
+import { EntityAnalyticsReadPrivilegesCallout } from '../components/entity_analytics_read_privileges_callout';
+import { NoPrivileges } from '../../common/components/no_privileges';
+import { useUserPrivileges } from '../../common/components/user_privileges';
+import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useGetWatchlists } from '../api/hooks/use_get_watchlists';
 import { useErrorToast } from '../../common/hooks/use_error_toast';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
@@ -53,7 +60,13 @@ import { toDsl, toEsql } from '../components/home/entities_grid/active_filters';
 import type { ActiveFilters } from '../components/home/entities_grid/active_filters';
 import { useEntityFilterOverrides } from '../components/home/entities_grid/hooks/use_entity_grid_data';
 import { isFilteringByGroupValue } from '../components/home/entities_grid/queries/resolved_entities';
-import type { RowActions, CellHandlers, Row, RowsMode } from '../components/home/entities_grid';
+import type {
+  RowActions,
+  CellHandlers,
+  ReadAccess,
+  Row,
+  RowsMode,
+} from '../components/home/entities_grid';
 import { ENTITY_GROUPING_OPTIONS } from '../components/home/entities_table/constants';
 import type { EntityURLStateResult } from '../components/home/entities_table/hooks/use_entity_url_state';
 import { EntityFiltersBar } from '../components/home/entity_filters_bar';
@@ -68,7 +81,7 @@ import type { EntityViewMode } from '../../../common/entity_analytics/entity_sto
 import { FLYOUT_ORIGIN } from '../../common/lib/telemetry';
 import { EntityAnalyticsHomeHeader } from './entity_analytics_home_header';
 import { useKibana } from '../../common/lib/kibana';
-import { SecurityAgentBuilderAttachments } from '../../../common/constants';
+import { APP_ID, SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { ENTITY_PROMPT } from '../../agent_builder/components/prompts';
 import { useAgentBuilderAvailability } from '../../agent_builder/hooks/use_agent_builder_availability';
 import { useReportAddToChat } from '../../agent_builder/hooks/use_report_add_to_chat';
@@ -187,7 +200,115 @@ const ROWS_SELECTOR_TITLE = i18n.translate(
   { defaultMessage: 'Rows' }
 );
 
+const PAGE_TITLE = i18n.translate('xpack.securitySolution.entityAnalytics.homePage.pageTitle', {
+  defaultMessage: 'Entity analytics',
+});
+
+const ML_GET_JOBS_PRIVILEGE = 'ui:ml/canGetJobs';
+
+const NO_ALERTS_ACCESS_MESSAGE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.home.tiles.noAlertsAccess',
+  { defaultMessage: 'Requires read access to alerts' }
+);
+const NO_ANOMALIES_ACCESS_MESSAGE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.home.tiles.noAnomaliesAccess',
+  { defaultMessage: 'Requires read access to ML anomalies' }
+);
+const NO_RISK_ACCESS_MESSAGE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.home.tiles.noRiskAccess',
+  { defaultMessage: 'Requires read access to risk scores' }
+);
+
+const getReadAccess = ({
+  isLoading,
+  isError,
+  canRead,
+}: {
+  isLoading: boolean;
+  isError: boolean;
+  canRead: boolean | undefined;
+}): boolean | undefined => {
+  if (isError) return true;
+  return isLoading ? undefined : canRead;
+};
+
 export const EntityAnalyticsNewHomePage: React.FC = () => {
+  const riskEngineReadPrivileges = useMissingRiskEnginePrivileges({ readonly: true });
+  const entityEnginePrivilegesQuery = useEntityEnginePrivileges();
+  const anomalyPrivilegesQuery = useAnomalyPrivileges();
+  const {
+    detectionEnginePrivileges: { error: alertsPrivilegesError, result: alertsPrivilegesResult },
+  } = useUserPrivileges();
+  const { hasIndexRead: hasAlertsIndexRead, loading: isAlertsPrivilegesLoading } =
+    useAlertsPrivileges();
+  const { cases } = useKibana().services;
+
+  const alerts = getReadAccess({
+    isLoading: isAlertsPrivilegesLoading,
+    isError: alertsPrivilegesError != null,
+    canRead: hasAlertsIndexRead ?? undefined,
+  });
+  const risk = getReadAccess({
+    isLoading: riskEngineReadPrivileges.isLoading,
+    isError: riskEngineReadPrivileges.isError ?? false,
+    canRead:
+      !riskEngineReadPrivileges.isLoading && riskEngineReadPrivileges.hasAllRequiredPrivileges,
+  });
+  const anomalies = getReadAccess({
+    isLoading: anomalyPrivilegesQuery.isLoading,
+    isError: anomalyPrivilegesQuery.isError,
+    canRead:
+      anomalyPrivilegesQuery.data?.has_read_permissions === true &&
+      anomalyPrivilegesQuery.data.privileges.kibana?.[ML_GET_JOBS_PRIVILEGE] !== false,
+  });
+  // Users who can't read Security cases get no case counts: no Cases column, not zeros.
+  const canReadCases = cases.helpers.canUseCases([APP_ID]).read;
+  const readAccess = useMemo(
+    (): ReadAccess => ({ alerts, risk, anomalies, cases: canReadCases }),
+    [alerts, risk, anomalies, canReadCases]
+  );
+
+  const isRiskEngineReadPrivilegesLoading =
+    riskEngineReadPrivileges.isLoading && !riskEngineReadPrivileges.isError;
+
+  if (entityEnginePrivilegesQuery.isLoading || isRiskEngineReadPrivilegesLoading) {
+    return <PageLoader />;
+  }
+
+  const noPrivileges =
+    !entityEnginePrivilegesQuery.isError && !entityEnginePrivilegesQuery.data?.has_read_permissions;
+
+  return (
+    <>
+      <EntityAnalyticsReadPrivilegesCallout
+        riskEngineReadPrivileges={riskEngineReadPrivileges}
+        entityEnginePrivileges={entityEnginePrivilegesQuery.data}
+        anomalyPrivileges={anomalyPrivilegesQuery.data}
+        alertsIndexPrivileges={alertsPrivilegesResult?.index}
+        id="entity-analytics-home"
+      />
+      {noPrivileges ? (
+        <>
+          <SecuritySolutionPageWrapper data-test-subj="entityAnalyticsNewHomePage">
+            <NoPrivileges
+              pageName={PAGE_TITLE.toLowerCase()}
+              docLinkSelector={(docLinks) =>
+                docLinks.securitySolution.entityAnalytics.riskScorePrerequisites
+              }
+            />
+          </SecuritySolutionPageWrapper>
+          <SpyRoute pageName={SecurityPageName.entityAnalyticsHomePage} />
+        </>
+      ) : (
+        <EntityAnalyticsNewHomePageContent readAccess={readAccess} />
+      )}
+    </>
+  );
+};
+
+const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = ({
+  readAccess,
+}) => {
   const spaceId = useSpaceId();
   const {
     dataView,
@@ -399,6 +520,12 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     !spaceId || entityStoreStatusLoading || entityStoreDisabled || entityStoreInstalling;
 
   const resolvedSpaceId = spaceId ?? 'default';
+  const skipAlertTiles = skipTileQueries || !readAccess.alerts;
+  const skipAnomaliesTile = skipTileQueries || !readAccess.anomalies;
+  const skipRiskTiles = skipTileQueries || !readAccess.risk;
+  const canReadAlerts = readAccess.alerts !== false;
+  const canReadAnomalies = readAccess.anomalies !== false;
+  const canReadRisk = readAccess.risk !== false;
 
   const {
     severeAlertsCount,
@@ -411,7 +538,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     spaceId: resolvedSpaceId,
     timeRange,
     entityFilters,
-    skip: skipTileQueries,
+    skip: skipAlertTiles,
   });
   const {
     count: anomaliesCount,
@@ -422,7 +549,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     spaceId: resolvedSpaceId,
     timeRange,
     entityFilters,
-    skip: skipTileQueries,
+    skip: skipAnomaliesTile,
   });
   const {
     count: newEntityCount,
@@ -445,7 +572,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     spaceId: resolvedSpaceId,
     timeRange,
     entityFilters,
-    skip: skipTileQueries,
+    skip: skipRiskTiles,
   });
   const {
     count: newlyHCCount,
@@ -457,7 +584,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     spaceId: resolvedSpaceId,
     timeRange,
     entityFilters,
-    skip: skipTileQueries,
+    skip: skipRiskTiles,
   });
 
   // Count first, for the whole page: the deltas start only once every count has loaded, so a delta
@@ -483,6 +610,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     reachesBack: alertBasedReachesBack,
   } = useAlertBasedTilesDelta({
     ...deltaOptions,
+    skip: skipAlertTiles,
     severeAlertsCount,
     watchlistedCount,
   });
@@ -491,7 +619,11 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     isDeltaLoading: anomaliesDeltaLoading,
     isHistoryMissing: anomaliesHistoryMissing,
     reachesBack: anomaliesReachesBack,
-  } = useEntitiesWithAnomaliesDelta({ ...deltaOptions, count: anomaliesCount });
+  } = useEntitiesWithAnomaliesDelta({
+    ...deltaOptions,
+    skip: skipAnomaliesTile,
+    count: anomaliesCount,
+  });
   const {
     delta: newEntityDelta,
     isDeltaLoading: newEntityDeltaLoading,
@@ -503,18 +635,27 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     isDeltaLoading: riskMoversDeltaLoading,
     isHistoryMissing: riskMoversHistoryMissing,
     reachesBack: riskMoversReachesBack,
-  } = useRiskMoversDelta({ ...deltaOptions, count: riskMoversCount });
+  } = useRiskMoversDelta({
+    ...deltaOptions,
+    skip: skipRiskTiles,
+    count: riskMoversCount,
+  });
   const {
     delta: newlyHCDelta,
     isDeltaLoading: newlyHCDeltaLoading,
     isHistoryMissing: newlyHCHistoryMissing,
     reachesBack: newlyHCReachesBack,
-  } = useNewlyHighCriticalDelta({ ...deltaOptions, count: newlyHCCount });
+  } = useNewlyHighCriticalDelta({
+    ...deltaOptions,
+    skip: skipRiskTiles,
+    count: newlyHCCount,
+  });
 
   // The sparklines follow the deltas: they start once the counts and the deltas have settled, and
   // only for a tile whose history reaches back twice the range, so they never delay them.
   const { alertsTrend, watchlistedTrend } = useAlertBasedTilesSeries({
     ...deltaOptions,
+    skip: skipAlertTiles,
     isReady: areCountsLoaded && !isDeltaLoading,
     reachesBack: alertBasedReachesBack,
     severeAlertsCount,
@@ -522,6 +663,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   });
   const { trend: anomaliesTrend } = useEntitiesWithAnomaliesSeries({
     ...deltaOptions,
+    skip: skipAnomaliesTile,
     isReady: areCountsLoaded && !anomaliesDeltaLoading,
     reachesBack: anomaliesReachesBack,
     count: anomaliesCount,
@@ -535,6 +677,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   // The two risk tiles read the same risk score history, so one query serves both sparklines.
   const { riskMoversTrend, newlyHighCriticalTrend: newlyHCTrend } = useRiskTilesSeries({
     ...deltaOptions,
+    skip: skipRiskTiles,
     isReady: areCountsLoaded && !riskMoversDeltaLoading && !newlyHCDeltaLoading,
     riskMoversReachesBack,
     newlyHighCriticalReachesBack: newlyHCReachesBack,
@@ -671,6 +814,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         isDeltaUnavailable: alertBasedHistoryMissing,
         trend: alertsTrend,
         isLoading: alertBasedLoading,
+        noDataMessage: canReadAlerts ? undefined : NO_ALERTS_ACCESS_MESSAGE,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAlerts.description',
           {
@@ -701,6 +845,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         isDeltaUnavailable: anomaliesHistoryMissing,
         trend: anomaliesTrend,
         isLoading: anomaliesLoading,
+        noDataMessage: canReadAnomalies ? undefined : NO_ANOMALIES_ACCESS_MESSAGE,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAnomalies.description',
           {
@@ -730,7 +875,9 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         isDeltaUnavailable: riskMoversHistoryMissing,
         trend: riskMoversTrend,
         isLoading: riskMoversLoading,
-        noDataMessage: riskMoversMissingIndex
+        noDataMessage: !canReadRisk
+          ? NO_RISK_ACCESS_MESSAGE
+          : riskMoversMissingIndex
           ? i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.riskMovers.noData', {
               defaultMessage: 'Requires risk score history data',
             })
@@ -773,7 +920,9 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         isDeltaUnavailable: newlyHCHistoryMissing,
         trend: newlyHCTrend,
         isLoading: newlyHCLoading,
-        noDataMessage: newlyHCMissingIndex
+        noDataMessage: !canReadRisk
+          ? NO_RISK_ACCESS_MESSAGE
+          : newlyHCMissingIndex
           ? i18n.translate(
               'xpack.securitySolution.entityAnalytics.home.tiles.newlyHighCritical.noData',
               {
@@ -819,6 +968,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         isDeltaUnavailable: alertBasedHistoryMissing,
         trend: watchlistedTrend,
         isLoading: alertBasedLoading,
+        noDataMessage: canReadAlerts ? undefined : NO_ALERTS_ACCESS_MESSAGE,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.watchlisted.description',
           {
@@ -863,6 +1013,9 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
       },
     ],
     [
+      canReadAlerts,
+      canReadAnomalies,
+      canReadRisk,
       severeAlertsCount,
       alertsDelta,
       alertsTrend,
@@ -1060,6 +1213,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
                 groupSelectorComponent={tableControls}
                 cellHandlers={cellHandlers}
                 rowActions={rowActions}
+                readAccess={readAccess}
               />
             ) : (
               <EntitiesGrid
@@ -1071,6 +1225,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
                 entityExpression={gridEntityExpression}
                 cellHandlers={cellHandlers}
                 rowActions={rowActions}
+                readAccess={readAccess}
                 toolbarControls={tableControls}
                 sortField={sortField}
                 sortDirection={sortDirection}

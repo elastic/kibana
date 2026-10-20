@@ -138,7 +138,7 @@ export const translations = {
     defaultMessage: 'ES|QL query',
   }),
   viewQueryDescription: i18n.translate('xpack.esqlViews.managementPage.viewQueryDescription', {
-    defaultMessage: 'Write a new query, or select a recently or starred query.',
+    defaultMessage: 'Write a new query, or select a recent or starred query.',
   }),
   previewResultsTitle: i18n.translate('xpack.esqlViews.managementPage.previewResultsTitle', {
     defaultMessage: 'ES|QL query results',
