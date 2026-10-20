@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { act, render, screen, fireEvent } from '@testing-library/react';
 import { MigrationRulesTable } from '.';
-import { TestProviders } from '../../../../common/mock';
+import { createMockStore, mockGlobalState, TestProviders } from '../../../../common/mock';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
@@ -29,6 +29,17 @@ import { migrationRules } from '../../__mocks__/migration_rules';
 import type { RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
 import { MigrationSource } from '../../../common/types';
+import { of } from 'rxjs';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
+import { AGENTBUILDER_FEATURE_ID } from '@kbn/agent-builder-plugin/public';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
+import { DEFAULT_INDEX_KEY, NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../../../../common/constants';
+import { allowedExperimentalValues } from '../../../../../common/experimental_features';
+import { createSecuritySolutionStorageMock } from '../../../../common/mock/mock_local_storage';
+import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
+import { licenseService } from '../../../../common/hooks/use_license';
+import type { StartServices } from '../../../../types';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/hooks/use_app_toasts');
@@ -249,6 +260,7 @@ describe('MigrationRulesTable', () => {
     jest.clearAllMocks();
     (useKibana as jest.Mock).mockReturnValue({
       services: {
+        storage: createSecuritySolutionStorageMock().storage,
         siemMigrations: {
           rules: { getMissingCapabilities: jest.fn().mockReturnValue([]) },
         },
@@ -537,6 +549,260 @@ describe('MigrationRulesTable', () => {
         expect(screen.getByTestId('flyoutPrevNextNavNextButton')).toBeDisabled();
         expect(getHighlightedRuleId()).toBe('rule-2');
       });
+    });
+  });
+
+  describe('Add to chat tour', () => {
+    const TOUR_STORAGE_KEY = NEW_FEATURES_TOUR_STORAGE_KEYS.SIEM_MIGRATIONS_RULES_ADD_TO_CHAT_TOUR;
+    const step = (stepNumber: number) => `siemMigrationsAddToChatTour-step${stepNumber}`;
+    // EuiTourStep resolves its anchor on the next tick; flush it before asserting absence.
+    const flushTour = () => act(() => new Promise<void>((resolve) => setTimeout(resolve, 0)));
+
+    const agentBuilderEnabledStore = createMockStore({
+      ...mockGlobalState,
+      app: {
+        ...mockGlobalState.app,
+        enableExperimental: {
+          ...allowedExperimentalValues,
+          siemRuleMigrationsAgentBuilderEnabled: true,
+        },
+      },
+    });
+
+    const mockOpenChat = jest.fn();
+    const mockUiSettingsGet = jest.fn();
+    const mockIsToursEnabled = jest.fn();
+    let storage: Storage;
+    let services: StartServices;
+
+    // Mocks stop at Kibana services; security_solution hooks and components run for real.
+    const createTourServices = (): StartServices => {
+      const baseServices = createStartServicesMock();
+      return {
+        ...baseServices,
+        siemMigrations: { rules: { getMissingCapabilities: jest.fn().mockReturnValue([]) } },
+        application: {
+          ...baseServices.application,
+          capabilities: {
+            ...baseServices.application.capabilities,
+            [AGENTBUILDER_FEATURE_ID]: { show: true },
+          },
+        },
+        settings: {
+          ...baseServices.settings,
+          client: {
+            ...baseServices.settings.client,
+            get: jest.fn().mockReturnValue(AIChatExperience.Agent),
+            get$: jest.fn().mockReturnValue(of(AIChatExperience.Agent)),
+          },
+        },
+        uiSettings: {
+          ...baseServices.uiSettings,
+          isDeclared: jest.fn().mockReturnValue(true),
+          get: mockUiSettingsGet,
+          getAll: jest.fn().mockReturnValue({}),
+        },
+        storage,
+        notifications: { ...baseServices.notifications, tours: { isEnabled: mockIsToursEnabled } },
+        agentBuilder: { openChat: mockOpenChat },
+        telemetry: { ...baseServices.telemetry, reportEvent: jest.fn() },
+      } as unknown as StartServices;
+    };
+
+    const mockRules = (rulesOnPage: RuleMigrationRule[], isLoading = false) =>
+      (useGetMigrationRules as jest.Mock).mockReturnValue({
+        data: { migrationRules: rulesOnPage, total: rulesOnPage.length },
+        isLoading,
+      });
+
+    const tourTable = <MigrationRulesTable migrationStats={mockMigrationStats} />;
+    const renderTourTable = () =>
+      render(tourTable, {
+        wrapper: ({ children }) => (
+          <TestProviders store={agentBuilderEnabledStore} startServices={services}>
+            {children}
+          </TestProviders>
+        ),
+      });
+
+    beforeEach(() => {
+      ({ storage } = createSecuritySolutionStorageMock());
+      mockUiSettingsGet.mockImplementation((key: string) =>
+        key === DEFAULT_INDEX_KEY ? ['logs-*'] : true
+      );
+      mockIsToursEnabled.mockReturnValue(true);
+      services = createTourServices();
+      (useKibana as jest.Mock).mockReturnValue({ services });
+      licenseService.start(of(licenseMock.createLicense({ license: { type: 'enterprise' } })));
+      mockRules(threeRules);
+    });
+
+    afterEach(() => {
+      licenseService.stop();
+    });
+
+    it('should explain the Add to chat button as the first step', async () => {
+      renderTourTable();
+      expect(await screen.findByTestId(step(1))).toHaveTextContent(
+        'Chat with the AI Agent about your rules'
+      );
+    });
+
+    it('should move to the rule step after Next', async () => {
+      renderTourTable();
+      fireEvent.click(await screen.findByTestId(`${step(1)}-next`));
+      expect(await screen.findByTestId(step(2))).toHaveTextContent('Review a single rule');
+    });
+
+    it('should open the first eligible rule when Open rule is clicked', async () => {
+      renderTourTable();
+      fireEvent.click(await screen.findByTestId(`${step(1)}-next`));
+      fireEvent.click(await screen.findByTestId(`${step(2)}-next`));
+      expect(screen.getByTestId('detailsFlyoutTitle')).toHaveTextContent('First Rule');
+    });
+
+    it('should explain the rule details Add to chat button as the last step', async () => {
+      renderTourTable();
+      fireEvent.click(await screen.findByTestId(`${step(1)}-next`));
+      fireEvent.click(await screen.findByTestId(`${step(2)}-next`));
+      expect(await screen.findByTestId(step(3))).toHaveTextContent('Chat about this rule');
+    });
+
+    it('should jump to the last step when the user opens an eligible rule', async () => {
+      renderTourTable();
+      await screen.findByTestId(step(1));
+      openFlyoutForRule('Third Rule');
+      expect(await screen.findByTestId(step(3))).toBeInTheDocument();
+    });
+
+    it('should resume a saved last step at the rule step when no rule details are open', async () => {
+      storage.set(TOUR_STORAGE_KEY, { isTourActive: true, currentTourStep: 3 });
+      renderTourTable();
+      expect(await screen.findByTestId(step(2))).toBeInTheDocument();
+    });
+
+    it.each([
+      [
+        'Finish',
+        async () => {
+          fireEvent.click(await screen.findByTestId(`${step(1)}-next`));
+          fireEvent.click(await screen.findByTestId(`${step(2)}-next`));
+          fireEvent.click(await screen.findByTestId(`${step(3)}-finish`));
+        },
+      ],
+      [
+        'Skip tour',
+        async () => {
+          fireEvent.click(await screen.findByTestId(`${step(1)}-skip`));
+        },
+      ],
+      [
+        'Add to chat',
+        async () => {
+          await screen.findByTestId(step(1));
+          fireEvent.click(screen.getByTestId('newAgentBuilderAttachment'));
+        },
+      ],
+    ])('should not show the tour again after %s', async (_, endTour) => {
+      const { unmount } = renderTourTable();
+      await endTour();
+      unmount();
+
+      renderTourTable();
+      await flushTour();
+      expect(screen.queryByTestId(step(1))).not.toBeInTheDocument();
+    });
+
+    it('should open the chat when Add to chat is clicked during the tour', async () => {
+      renderTourTable();
+      await screen.findByTestId(step(1));
+      fireEvent.click(screen.getByTestId('newAgentBuilderAttachment'));
+      expect(mockOpenChat).toHaveBeenCalledTimes(1);
+    });
+
+    const makeInstalledRule = (id: string, title: string): RuleMigrationRule => ({
+      ...makeTranslatedRule(id, title),
+      elastic_rule: { title, id: `installed-${id}` },
+    });
+
+    it.each([
+      ['not translated', makeUntranslatableRule('rule-2', 'Second Rule')],
+      ['failed', makeFailedRule('rule-4', 'Failed Rule')],
+      ['installed', makeInstalledRule('rule-5', 'Installed Rule')],
+    ])('should not start when the only rule on the page is %s', async (_, rule) => {
+      mockRules([rule]);
+      renderTourTable();
+      await flushTour();
+      expect(screen.queryByTestId(step(1))).not.toBeInTheDocument();
+    });
+
+    it('should start once an eligible rule appears on the page', async () => {
+      mockRules([makeUntranslatableRule('rule-2', 'Second Rule')]);
+      const { rerender } = renderTourTable();
+      await flushTour();
+
+      mockRules(threeRules);
+      rerender(<MigrationRulesTable migrationStats={{ ...mockMigrationStats }} />);
+      expect(await screen.findByTestId(step(1))).toBeInTheDocument();
+    });
+
+    it('should not start when Add to chat is disabled', async () => {
+      mockUiSettingsGet.mockImplementation((key: string) =>
+        key === DEFAULT_INDEX_KEY ? ['logs-*'] : false
+      );
+      renderTourTable();
+      await flushTour();
+      expect(screen.queryByTestId(step(1))).not.toBeInTheDocument();
+    });
+
+    it('should not start while announcements are disabled', async () => {
+      mockIsToursEnabled.mockReturnValue(false);
+      renderTourTable();
+      await flushTour();
+      expect(screen.queryByTestId(step(1))).not.toBeInTheDocument();
+    });
+
+    it('should not start while the table is loading', async () => {
+      mockRules(threeRules, true);
+      renderTourTable();
+      await flushTour();
+      expect(screen.queryByTestId(step(1))).not.toBeInTheDocument();
+    });
+
+    it('should show the last step for a not translated rule that has Add to chat', async () => {
+      renderTourTable();
+      await screen.findByTestId(step(1));
+      openFlyoutForRule('Second Rule');
+      expect(await screen.findByTestId(step(3))).toBeInTheDocument();
+    });
+
+    it('should return to the rule step when rule details are closed during the last step', async () => {
+      renderTourTable();
+      await screen.findByTestId(step(1));
+      openFlyoutForRule('First Rule');
+      await screen.findByTestId(step(3));
+
+      fireEvent.click(screen.getByTestId('detailsFlyoutCloseButton'));
+      expect(await screen.findByTestId(step(2))).toBeInTheDocument();
+    });
+
+    it('should hide the tour while the missing index pattern flyout is open', async () => {
+      renderTourTable();
+      await screen.findByTestId(step(1));
+      fireEvent.click(screen.getByTestId('updateMissingIndexPatternButton'));
+      await flushTour();
+      expect(screen.queryByTestId(step(1))).not.toBeInTheDocument();
+    });
+
+    it('should keep the tour for a later visit when Add to chat is clicked while no step is showing', async () => {
+      mockIsToursEnabled.mockReturnValue(false);
+      const { unmount } = renderTourTable();
+      fireEvent.click(await screen.findByTestId('newAgentBuilderAttachment'));
+      unmount();
+
+      mockIsToursEnabled.mockReturnValue(true);
+      renderTourTable();
+      expect(await screen.findByTestId(step(1))).toBeInTheDocument();
     });
   });
 });

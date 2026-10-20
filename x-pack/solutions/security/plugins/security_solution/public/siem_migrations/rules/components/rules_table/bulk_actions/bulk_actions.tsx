@@ -36,6 +36,8 @@ export interface BulkActionsProps {
   installSelectedRule?: () => void;
   reprocessFailedRules?: () => void;
   setMissingIndexPatternFlyoutOpen: () => void;
+  /** Called after the chat is opened from the "Add to chat" button. */
+  onAddToChat?: () => void;
 }
 
 /**
@@ -51,6 +53,7 @@ export const BulkActions: React.FC<BulkActionsProps> = memo(
     installSelectedRule,
     reprocessFailedRules,
     setMissingIndexPatternFlyoutOpen,
+    onAddToChat,
   }) => {
     const numberOfFailedRules = translationStats.rules.failed;
     const numberOfTranslatedRules = translationStats.rules.success.installable;
@@ -84,7 +87,11 @@ export const BulkActions: React.FC<BulkActionsProps> = memo(
       >
         {isSiemMigrationAgentBuilderEnabled && (
           <EuiFlexItem grow={false}>
-            <AddRulesToChatButton migrationStats={migrationStats} selectedRules={selectedRules} />
+            <AddRulesToChatButton
+              migrationStats={migrationStats}
+              selectedRules={selectedRules}
+              onAddToChat={onAddToChat}
+            />
           </EuiFlexItem>
         )}
         {showUpdateMissingIndexPatternButton && (

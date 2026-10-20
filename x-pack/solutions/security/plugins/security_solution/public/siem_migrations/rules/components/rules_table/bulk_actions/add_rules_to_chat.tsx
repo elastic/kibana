@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiToolTip } from '@elastic/eui';
 import type { RuleMigrationRule } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { RuleMigrationStats } from '../../../types';
@@ -35,12 +35,15 @@ interface AddRulesToChatButtonProps {
   isAuthorized: boolean;
   migrationStats: RuleMigrationStats;
   selectedRules: RuleMigrationRule[];
+  /** Called after the chat is opened. */
+  onAddToChat?: () => void;
 }
 
 const AddRulesToChatButtonComponent: React.FC<AddRulesToChatButtonProps> = ({
   isAuthorized,
   migrationStats,
   selectedRules,
+  onAddToChat,
 }) => {
   const selectedCount = selectedRules.length;
   const migrationId = migrationStats.id;
@@ -74,6 +77,11 @@ const AddRulesToChatButtonComponent: React.FC<AddRulesToChatButtonProps> = ({
 
   const { openAgentBuilderFlyout } = useAgentBuilderAttachment(attachmentConfig);
 
+  const onClick = useCallback(() => {
+    openAgentBuilderFlyout();
+    onAddToChat?.();
+  }, [openAgentBuilderFlyout, onAddToChat]);
+
   const telemetry = useMemo<AgentBuilderAddToChatTelemetry>(
     () => ({
       pathway: 'translated_rules_bulk',
@@ -98,7 +106,7 @@ const AddRulesToChatButtonComponent: React.FC<AddRulesToChatButtonProps> = ({
   const button = (
     <NewAgentBuilderAttachment
       label={buttonLabel}
-      onClick={openAgentBuilderFlyout}
+      onClick={onClick}
       disabled={!isAuthorized || disabledSettings.length > 0}
       telemetry={telemetry}
     />
