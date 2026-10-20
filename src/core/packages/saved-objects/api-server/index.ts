@@ -56,6 +56,7 @@ export type {
   SavedObjectsClosePointInTimeOptions,
   SavedObjectsCreatePointInTimeFinderOptions,
   SavedObjectsFindOptions,
+  SavedObjectsFindSort,
   SavedObjectsGetOptions,
   SavedObjectsPointInTimeFinderClient,
   SavedObjectsBulkDeleteObject,
