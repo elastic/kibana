@@ -160,6 +160,7 @@ describe('listTypesWithSystemRoute', () => {
         Object {
           "featureId": "alerting",
           "includeSystemActionTypes": true,
+          "sandboxCapableOnly": undefined,
         },
       ]
     `);

@@ -21,9 +21,9 @@ export async function listTypes(
     throw Boom.badRequest(`Error validating params - ${error.message}`);
   }
 
-  const { featureId, includeSystemActionTypes } = options;
+  const { featureId, includeSystemActionTypes, sandboxCapableOnly } = options;
 
-  const connectorTypes = context.actionTypeRegistry.list({ featureId });
+  const connectorTypes = context.actionTypeRegistry.list({ featureId, sandboxCapableOnly });
 
   const filteredConnectorTypes = includeSystemActionTypes
     ? connectorTypes

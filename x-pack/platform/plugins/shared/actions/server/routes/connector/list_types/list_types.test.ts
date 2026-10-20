@@ -93,6 +93,29 @@ describe('listTypesRoute', () => {
     });
   });
 
+  it('passes sandbox_capable_only if provided as query parameter', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    listTypesRoute(router, licenseState);
+
+    const [, handler] = router.get.mock.calls[0];
+    const actionsClient = actionsClientMock.create();
+    actionsClient.listTypes.mockResolvedValueOnce([]);
+    const [context, req, res] = mockHandlerArguments(
+      { actionsClient },
+      { query: { sandbox_capable_only: true } },
+      ['ok']
+    );
+
+    await handler(context, req, res);
+
+    expect(actionsClient.listTypes).toHaveBeenCalledWith({
+      featureId: undefined,
+      sandboxCapableOnly: true,
+    });
+  });
+
   it('passes feature_id if provided as query parameter', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
@@ -155,6 +178,7 @@ describe('listTypesRoute', () => {
       Array [
         Object {
           "featureId": "alerting",
+          "sandboxCapableOnly": undefined,
         },
       ]
     `);

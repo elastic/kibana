@@ -18,4 +18,12 @@ export const connectorTypesQuerySchema = schema.object({
       maxLength: MAX_FEATURE_ID_LENGTH,
     })
   ),
+  sandbox_capable_only: schema.maybe(
+    schema.boolean({
+      meta: {
+        description:
+          'A filter to limit the retrieved connector types to those whose connectors can hand their credentials to an AI agent sandbox.',
+      },
+    })
+  ),
 });
