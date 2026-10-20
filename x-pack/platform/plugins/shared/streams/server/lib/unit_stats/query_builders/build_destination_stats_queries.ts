@@ -16,7 +16,12 @@ import {
   STATS_COLUMN,
   UNIT_STATS_STREAM,
 } from '../constants';
-import { filterByIds, filterByUnitAndWindow, type StatsWindow } from './filters';
+import {
+  filterByIds,
+  filterByUnitAndWindow,
+  nullifyUnmappedColumns,
+  type StatsWindow,
+} from './filters';
 
 interface DestinationStatsQueryParams {
   unitId: string;
@@ -30,7 +35,10 @@ interface DestinationStatsQueryParams {
 const filterDestinations = (
   query: ComposerQuery,
   { ids, ...unitAndWindow }: DestinationStatsQueryParams
-) => filterByIds(filterByUnitAndWindow(query, unitAndWindow), DESTINATION_ID_FIELD, ids);
+) =>
+  nullifyUnmappedColumns(
+    filterByIds(filterByUnitAndWindow(query, unitAndWindow), DESTINATION_ID_FIELD, ids)
+  );
 
 /**
  * Rate, failures rate and latency per destination, from the time series. `RATE` is not an

@@ -31,6 +31,13 @@ export const filterByUnitAndWindow = (
 };
 
 /**
+ * Makes a column that is not mapped null in the results, not an error. The stream gets its
+ * columns from its data, so a metric that has not been seen yet has no column.
+ */
+export const nullifyUnmappedColumns = (query: ComposerQuery): ComposerQuery =>
+  query.addSetCommand('unmapped_fields', 'nullify');
+
+/**
  * Keeps the documents whose `field` is one of `ids`. Only for a non-empty list.
  */
 export const filterByIds = (query: ComposerQuery, field: string, ids: string[]): ComposerQuery => {

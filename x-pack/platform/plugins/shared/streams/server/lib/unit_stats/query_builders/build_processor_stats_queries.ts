@@ -15,7 +15,12 @@ import {
   STEP_ITEMS_FIELD,
   UNIT_STATS_STREAM,
 } from '../constants';
-import { filterByIds, filterByUnitAndWindow, type StatsWindow } from './filters';
+import {
+  filterByIds,
+  filterByUnitAndWindow,
+  nullifyUnmappedColumns,
+  type StatsWindow,
+} from './filters';
 
 interface ProcessorStatsQueryParams {
   unitId: string;
@@ -29,7 +34,10 @@ interface ProcessorStatsQueryParams {
 const filterProcessors = (
   query: ComposerQuery,
   { ids, ...unitAndWindow }: ProcessorStatsQueryParams
-) => filterByIds(filterByUnitAndWindow(query, unitAndWindow), STEP_ID_FIELD, ids);
+) =>
+  nullifyUnmappedColumns(
+    filterByIds(filterByUnitAndWindow(query, unitAndWindow), STEP_ID_FIELD, ids)
+  );
 
 /**
  * The rate of items coming in (direction `in`) per processor, from the time series.

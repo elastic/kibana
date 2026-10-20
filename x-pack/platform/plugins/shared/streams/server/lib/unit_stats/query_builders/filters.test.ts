@@ -7,7 +7,7 @@
 
 import { esql } from '@elastic/esql';
 import { UNIT_STATS_STREAM } from '../constants';
-import { filterByIds, filterByUnitAndWindow } from './filters';
+import { filterByIds, filterByUnitAndWindow, nullifyUnmappedColumns } from './filters';
 
 const window = { start: '2026-10-20T10:00:00.000Z', end: '2026-10-20T10:15:00.000Z' };
 
@@ -64,5 +64,13 @@ describe('filterByIds', () => {
 
     expect(print(query)).toContain('IN ("we\\"ird")');
     expect(print(query)).not.toContain('`');
+  });
+});
+
+describe('nullifyUnmappedColumns', () => {
+  it('sets unmapped fields to null in the results, not an error', () => {
+    const query = nullifyUnmappedColumns(esql.from(UNIT_STATS_STREAM));
+
+    expect(print(query)).toBe(`SET unmapped_fields = "nullify"; FROM ${UNIT_STATS_STREAM}`);
   });
 });
