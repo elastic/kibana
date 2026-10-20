@@ -23,7 +23,7 @@ export interface AttachmentEntry<TData> {
   type: string;
   version: number;
   description?: string;
-  /** Id of the persisted object the attachment was created from, if any. */
+  /** Id of the persisted object the attachment was created from, if any. This is the field name used by agent builder */
   origin?: string;
   data: TData;
 }
