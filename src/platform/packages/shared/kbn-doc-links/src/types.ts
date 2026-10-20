@@ -132,6 +132,7 @@ export interface DocLinks {
     readonly connectorsConfluence: string;
     readonly connectorsContentExtraction: string;
     readonly connectorsDropbox: string;
+    readonly connectorsExchangeServer: string;
     readonly connectorsGithub: string;
     readonly connectorsGitlab: string;
     readonly connectorsGoogleCloudStorage: string;
@@ -332,6 +333,7 @@ export interface DocLinks {
     readonly notesPage: string;
     readonly timelinesPage: string;
     readonly runAttackDiscoveryInWorkflow: string;
+    readonly attackDiscovery: string;
     readonly mitreCoverage: string;
     readonly remapMitreAttack: string;
   };
@@ -502,7 +504,13 @@ export interface DocLinks {
     guide: string;
     actionTypes: string;
     actionPolicies: string;
+    manageActionPolicies: string;
     compareAlertingSystems: string;
+    viewManageRules: string;
+    viewAndManageAlerts: string;
+    investigateAlertEpisodes: string;
+    reviewRuleExecutionHistory: string;
+    reviewActionPolicyExecutionHistory: string;
     apmRulesErrorCount: string;
     apmRulesTransactionDuration: string;
     apmRulesTransactionError: string;
@@ -758,6 +766,7 @@ export interface DocLinks {
     readonly inferenceAPIDocumentation: string;
     readonly featureSettings: string;
     readonly externalInference: string;
+    readonly selfHostedInference: string;
   };
   readonly synonyms: {
     readonly synonymsAPIDocumentation: string;
@@ -774,6 +783,7 @@ export interface DocLinks {
     readonly dataSources: string;
     readonly datasets: string;
     readonly datasetSettings: string;
+    readonly datasetMappings: string;
     readonly authentication: string;
     readonly grantReadAccess: string;
     readonly staticCredentials: string;

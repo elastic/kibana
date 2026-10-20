@@ -115,6 +115,10 @@ describe('getFilteredLinks', () => {
       expect(resultIds).toContain('dashboards');
       expect(resultIds).toContain('alerts');
       expect(resultIds).toContain('attack_discovery');
+      const attackDiscoveryLink = result.find((link) => link.id === 'attack_discovery');
+      expect(attackDiscoveryLink?.sideNavDisabled).toBeUndefined();
+      expect(attackDiscoveryLink?.globalSearchDisabled).toBeUndefined();
+      expect(attackDiscoveryLink?.globalNavPosition).toBeDefined();
       expect(resultIds).toContain('cases');
       expect(resultIds).toContain('configurations');
       expect(resultIds).toContain('launchpad');
@@ -133,10 +137,13 @@ describe('getFilteredLinks', () => {
       const resultIds = result.map((link) => link.id);
       expect(resultIds).toContain('dashboards');
       expect(resultIds).toContain('alert_detections');
-      // Attack Discovery stays a normal top-level link even when alignment is enabled.
+      // The legacy Attack Discovery link stays in the app links (so its route remains authorized
+      // for the redirect to the Attacks page) but is hidden from all navigation surfaces.
       expect(resultIds).toContain('attack_discovery');
       const attackDiscoveryLink = result.find((link) => link.id === 'attack_discovery');
-      expect(attackDiscoveryLink?.sideNavDisabled).toBeUndefined();
+      expect(attackDiscoveryLink?.sideNavDisabled).toBe(true);
+      expect(attackDiscoveryLink?.globalSearchDisabled).toBe(true);
+      expect(attackDiscoveryLink?.globalNavPosition).toBeUndefined();
       expect(resultIds).toContain('cases');
       expect(resultIds).toContain('configurations');
       expect(resultIds).toContain('launchpad');

@@ -462,10 +462,11 @@ export const EntitiesDataTable = ({
                     <EuiFlexItem grow={false}>{formattedValue}</EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiIconTip
+                        aria-label={TARGET_ENTITY_TOOLTIP}
                         content={TARGET_ENTITY_TOOLTIP}
                         type="aggregate"
                         size="s"
-                        data-test-subj="target-entity-icon"
+                        iconProps={{ 'data-test-subj': 'target-entity-icon' }}
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>

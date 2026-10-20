@@ -6,10 +6,9 @@
  */
 
 import { useMemo } from 'react';
-import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
+import { useTileQueryInputs } from './use_tile_query_inputs';
 import { EMPTY_ENTITY_FILTERS } from '../../entities_grid/common';
 import type { EntityFilters, TimeRange } from '../../entities_grid/common';
-import { buildEntityFilterClauses } from '../../entities_grid/queries/entity_filters';
 import { buildRiskHistoryReachesBackQuery } from '../queries/risk_previous_period';
 import { buildNewlyHighCriticalCountQuery } from '../queries/tile_newly_high_critical_query';
 import { buildRiskMoversCountQuery } from '../queries/tile_risk_movers_query';
@@ -37,6 +36,8 @@ interface RiskTileDefinition {
   ) => string;
 }
 
+const RISK_HISTORY_GUARD_KEY = 'riskHistory';
+
 const useRiskTileDelta = (
   { tileKey, buildPrevious }: RiskTileDefinition,
   {
@@ -47,22 +48,29 @@ const useRiskTileDelta = (
     isReady,
     count,
   }: RiskTileDeltaOptions
-): { delta: number | undefined; isDeltaLoading: boolean; isHistoryMissing: boolean } => {
-  const { data: resolvedIndex, isLoading: isIndexLoading } =
-    useResolvedLatestEntitiesIndexName(spaceId);
+): {
+  delta: number | undefined;
+  isDeltaLoading: boolean;
+  isHistoryMissing: boolean;
+  reachesBack: boolean | undefined;
+} => {
+  const {
+    data: resolvedIndex,
+    isLoading: isIndexLoading,
+    entityFilterClauses,
+  } = useTileQueryInputs(spaceId, entityFilters);
   const index = resolvedIndex?.indexName;
 
   const guardQuery = buildRiskHistoryReachesBackQuery(spaceId, timeRange);
   const previousQuery = useMemo(
-    () =>
-      index
-        ? buildPrevious(spaceId, index, timeRange, buildEntityFilterClauses(entityFilters))
-        : null,
-    [buildPrevious, spaceId, index, timeRange, entityFilters]
+    () => (index ? buildPrevious(spaceId, index, timeRange, entityFilterClauses) : null),
+    [buildPrevious, spaceId, index, timeRange, entityFilterClauses]
   );
 
-  const { previous, isHistoryMissing, isError } = usePreviousPeriod({
+  const { previous, reachesBack, isHistoryMissing, isError } = usePreviousPeriod({
     tileKey,
+    // Both risk tiles read the same history with the same query: one request.
+    guardKey: RISK_HISTORY_GUARD_KEY,
     guardQuery,
     previousQuery,
     enabled: !skip && isReady && count > 0 && !isIndexLoading && Boolean(index),
@@ -72,6 +80,7 @@ const useRiskTileDelta = (
   return {
     delta: previous !== undefined ? count - previous : undefined,
     isHistoryMissing,
+    reachesBack,
     isDeltaLoading: isDeltaStillComing({
       skip,
       count,

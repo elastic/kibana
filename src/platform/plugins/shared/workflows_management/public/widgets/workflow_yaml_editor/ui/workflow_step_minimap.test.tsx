@@ -9,6 +9,7 @@
 
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React, { createRef } from 'react';
+import type { YamlValidationErrorSeverity, YamlValidationResult } from '@kbn/workflows-yaml';
 import { WorkflowStepMinimap } from './workflow_step_minimap';
 import { setYamlString } from '../../../entities/workflows/store';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
@@ -25,14 +26,44 @@ steps:
     type: slack.sendMessage
 `;
 
+// `parent` owns lines 2–5 (its own content ends where `child` starts); `child` is line 6–7.
+const NESTED_STEP_YAML = `\
+steps:
+  - name: parent
+    type: if
+    condition: "true"
+    steps:
+      - name: child
+        type: slack.sendMessage
+`;
+const PARENT_OWN_LINE = 3;
+const CHILD_LINE = 7;
+
 const BROKEN_YAML = ': : invalid yaml : : :';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
+const makeMarker = (
+  startLineNumber: number,
+  severity: YamlValidationErrorSeverity
+): Extract<YamlValidationResult, { owner: 'yaml' }> => ({
+  id: `marker-${startLineNumber}`,
+  owner: 'yaml',
+  ruleId: 'yamlSyntaxError',
+  severity,
+  startLineNumber,
+  startColumn: 1,
+  endLineNumber: startLineNumber,
+  endColumn: 80,
+  message: 'test marker',
+  hoverMessage: null,
+});
+
 /** Renders the minimap with a store pre-seeded with the given YAML. */
 const renderMinimap = (
   yaml: string,
-  editorOverrides?: Partial<ReturnType<typeof createMockMonacoEditor>['editor']>
+  editorOverrides?: Partial<ReturnType<typeof createMockMonacoEditor>['editor']>,
+  validationErrors: YamlValidationResult[] = []
 ) => {
   const store = createMockStore();
 
@@ -51,7 +82,7 @@ const renderMinimap = (
     >
       <WorkflowStepMinimap
         editor={editorInstance}
-        validationErrors={[]}
+        validationErrors={validationErrors}
         scrollContainerRef={scrollContainerRef as React.RefObject<HTMLDivElement | null>}
       />
     </div>,
@@ -168,6 +199,51 @@ describe('WorkflowStepMinimap', () => {
     fireEvent.click(pill, { detail: 1 });
 
     expect(blurSpy).toHaveBeenCalledTimes(1);
+  });
+
+  describe('screen-reader severity text', () => {
+    it.each<{
+      case: string;
+      line: number;
+      severity: YamlValidationErrorSeverity;
+      expected: string;
+      notExpected: string;
+    }>([
+      {
+        case: 'own warning',
+        line: PARENT_OWN_LINE,
+        severity: 'warning',
+        expected: 'has warnings',
+        notExpected: 'error',
+      },
+      {
+        case: 'own error',
+        line: PARENT_OWN_LINE,
+        severity: 'error',
+        expected: 'has errors',
+        notExpected: 'warning',
+      },
+      {
+        case: 'inherited warning',
+        line: CHILD_LINE,
+        severity: 'warning',
+        expected: 'contains steps with warnings',
+        notExpected: 'error',
+      },
+      {
+        case: 'inherited error',
+        line: CHILD_LINE,
+        severity: 'error',
+        expected: 'contains steps with errors',
+        notExpected: 'warning',
+      },
+    ])('announces "$expected" for an $case on the parent step', async (testCase) => {
+      renderMinimap(NESTED_STEP_YAML, undefined, [makeMarker(testCase.line, testCase.severity)]);
+
+      const parentButton = await screen.findByTitle('parent');
+      expect(parentButton).toHaveTextContent(testCase.expected);
+      expect(parentButton).not.toHaveTextContent(testCase.notExpected);
+    });
   });
 
   it('does not change scrollTop when the viewport band is already within the minimap view', async () => {
