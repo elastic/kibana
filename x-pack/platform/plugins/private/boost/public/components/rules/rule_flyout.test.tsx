@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
+import { render, renderHook, screen, within } from '@testing-library/react';
+import { useEuiTheme } from '@elastic/eui';
 import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import {
@@ -536,14 +537,17 @@ describe('RuleFlyout pattern matches', () => {
 
     await userEvent.type(screen.getByTestId('boostRulePattern'), 'catalog-*');
     expect(getIcons()).toEqual(['checkCircle']);
-    // The saved catalogs rule ranks higher, so the match is subdued like its struck-through name.
-    expect(getIcon()).toHaveAttribute('color', 'subdued');
+    // The saved catalogs rule ranks higher, so the match is disabled like its struck-through name.
+    const {
+      result: { current: theme },
+    } = renderHook(() => useEuiTheme());
+    expect(getIcon()).toHaveAttribute('color', theme.euiTheme.colors.textDisabled);
 
     await userEvent.clear(screen.getByTestId('boostRulePattern'));
     await userEvent.type(screen.getByTestId('boostRulePattern'), 'prod');
     expect(getIcons()).toEqual(['partial']);
-    // Nothing ranks higher for products, so its icon and name use the text color.
-    expect(getIcon()).toHaveAttribute('color', 'text');
+    // Nothing ranks higher for products, so its icon matches its name's color.
+    expect(getIcon()).toHaveAttribute('color', theme.euiTheme.colors.textParagraph);
     expect(screen.queryByTestId('boostSupersededTarget')).not.toBeInTheDocument();
   });
 
@@ -559,6 +563,13 @@ describe('RuleFlyout pattern matches', () => {
       'data-euiicon-type',
       'empty'
     );
+    // As in the matching list, a match that a higher-ranked rule keeps is struck through, beside
+    // that rule.
+    expect(within(catalogFall).getByTestId('boostSupersededTarget')).toHaveTextContent(
+      'catalog-fall'
+    );
+    expect(within(catalogFall).getByTestId('boostSupersedingRule')).toHaveTextContent('catalogs');
+    expect(within(products).queryByTestId('boostSupersededTarget')).not.toBeInTheDocument();
   });
 
   it('finds partial matches by any part of their name', async () => {
@@ -726,6 +737,25 @@ describe('RuleFlyout superseded targets', () => {
     expect(picker.getByRole('option', { name: /products/ })).not.toHaveTextContent(
       'Higher-ranked rule'
     );
+  });
+
+  it('strikes through data sources in the list that a higher-ranked rule keeps, until this rule outranks it', async () => {
+    renderNewRule();
+    await userEvent.click(screen.getByText('Select indices'));
+    const getOption = (name: RegExp) =>
+      within(screen.getByTestId('boostRulePicker')).getByRole('option', { name });
+
+    // Whether or not it's selected.
+    expect(
+      within(getOption(/catalog-fall/)).getByTestId('boostSupersededTarget')
+    ).toHaveTextContent('catalog-fall');
+    expect(within(getOption(/products/)).queryByTestId('boostSupersededTarget')).toBeNull();
+
+    // Above the saved catalogs rule's priority of 1.
+    await userEvent.clear(screen.getByTestId('boostRulePriority'));
+    await userEvent.type(screen.getByTestId('boostRulePriority'), '2');
+
+    expect(within(getOption(/catalog-fall/)).queryByTestId('boostSupersededTarget')).toBeNull();
   });
 
   it('explains a higher-ranked rule when its data source in the list is hovered', async () => {

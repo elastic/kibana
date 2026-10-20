@@ -73,19 +73,15 @@ const NO_DATA_SOURCES: Readonly<Record<BoostProfileType, string>> = {
 type MatchKind = 'exact' | 'partial';
 
 // Each row shows whether the pattern matches it exactly or partly.
-const MATCH_ICONS: Readonly<
-  Record<MatchKind, { iconType: string; color: 'success' | 'text'; label: string }>
-> = {
+const MATCH_ICONS: Readonly<Record<MatchKind, { iconType: string; label: string }>> = {
   exact: {
     iconType: 'checkCircle',
-    color: 'success',
     label: i18n.translate('xpack.boost.patternMatches.exactMatchIcon', {
       defaultMessage: 'Exact match',
     }),
   },
   partial: {
     iconType: 'partial',
-    color: 'text',
     label: i18n.translate('xpack.boost.patternMatches.partialMatchIcon', {
       defaultMessage: 'Partial match',
     }),
@@ -95,7 +91,7 @@ const MATCH_ICONS: Readonly<
 interface MatchIconProps {
   /** How the name matches the pattern, or nothing when it doesn't. */
   match?: MatchKind;
-  /** Whether a higher-ranked rule keeps the match, so its icon is subdued like its name. */
+  /** Whether a higher-ranked rule keeps the match, so its icon is disabled like its name. */
   isSuperseded?: boolean;
   /** Whether screen readers hear what the icon means, which a list's label may already say. */
   isLabeled: boolean;
@@ -103,11 +99,17 @@ interface MatchIconProps {
 
 /** An exact or partial match's icon, or a blank space as wide, so names line up. */
 const MatchIcon = ({ match, isSuperseded = false, isLabeled }: MatchIconProps) => {
+  const { euiTheme } = useEuiTheme();
   if (!match) {
     return <EuiIcon type="empty" size="m" aria-hidden={true} />;
   }
   const { iconType, label } = MATCH_ICONS[match];
-  const color = isSuperseded ? 'subdued' : MATCH_ICONS[match].color;
+  // Green for an exact match, and a partial match in the same color as its name.
+  const color = isSuperseded
+    ? euiTheme.colors.textDisabled
+    : match === 'exact'
+    ? 'success'
+    : euiTheme.colors.textParagraph;
   return isLabeled ? (
     <EuiIcon type={iconType} color={color} size="m" title={label} />
   ) : (
@@ -184,8 +186,8 @@ export const PatternMatches = ({
   // The full list highlights the same names as the matching one.
   const hasExactMatches = exactMatches.length > 0;
   const highlightPattern = hasExactMatches ? pattern : partialPattern;
-  const highlightedNames = new Set(
-    (hasExactMatches ? exactMatches : partialMatches).map(({ name }) => name)
+  const matchesByName = new Map(
+    (hasExactMatches ? exactMatches : partialMatches).map((target) => [target.name, target])
   );
   const matchKind: MatchKind = hasExactMatches ? 'exact' : 'partial';
 
@@ -223,53 +225,62 @@ export const PatternMatches = ({
     </EuiText>
   );
 
-  // A name after its match icon.
-  const renderName = (
-    name: ReactNode,
-    match: MatchKind | undefined,
-    isLabeled: boolean,
-    isSuperseded = false
-  ) => (
-    <span css={{ display: 'inline-flex', alignItems: 'center', gap: euiTheme.size.s }}>
-      <MatchIcon match={match} isSuperseded={isSuperseded} isLabeled={isLabeled} />
-      {name}
-    </span>
+  // A target after its match icon, struck through with the rule that keeps it when a higher-ranked
+  // rule does.
+  const renderRow = ({
+    name,
+    pattern: rowPattern,
+    match,
+    overriddenBy,
+    isLabeled,
+    testSubj,
+  }: {
+    name: string;
+    pattern?: string;
+    match?: MatchKind;
+    overriddenBy?: string;
+    /** Whether the icon tells screen readers how the target matches. */
+    isLabeled: boolean;
+    testSubj?: string;
+  }) => (
+    <EuiFlexGroup
+      key={name}
+      gutterSize="s"
+      justifyContent="spaceBetween"
+      alignItems="center"
+      responsive={false}
+      data-test-subj={testSubj}
+    >
+      <EuiFlexItem grow={false}>
+        <span css={{ display: 'inline-flex', alignItems: 'center', gap: euiTheme.size.s }}>
+          <MatchIcon
+            match={match}
+            isSuperseded={overriddenBy !== undefined}
+            isLabeled={isLabeled}
+          />
+          <TargetName name={name} pattern={rowPattern} supersededBy={overriddenBy} />
+        </span>
+      </EuiFlexItem>
+      {overriddenBy && (
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            <SupersedingRule rule={overriddenBy} />
+          </EuiText>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
   );
 
-  // Each target, struck through with the rule that keeps it when a higher-ranked rule does. The
-  // list's label says how they match, so their icons don't repeat it to screen readers.
+  // The list's label says how these match, so their icons don't repeat it to screen readers.
   const renderTargets = (
     targets: readonly TargetPreview[],
     targetPattern: string,
     match: MatchKind,
     testSubj?: string
   ) =>
-    targets.map(({ name, overriddenBy }) => (
-      <EuiFlexGroup
-        key={name}
-        gutterSize="s"
-        justifyContent="spaceBetween"
-        alignItems="center"
-        responsive={false}
-        data-test-subj={testSubj}
-      >
-        <EuiFlexItem grow={false}>
-          {renderName(
-            <TargetName name={name} pattern={targetPattern} supersededBy={overriddenBy} />,
-            match,
-            false,
-            overriddenBy !== undefined
-          )}
-        </EuiFlexItem>
-        {overriddenBy && (
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs" color="subdued">
-              <SupersedingRule rule={overriddenBy} />
-            </EuiText>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    ));
+    targets.map(({ name, overriddenBy }) =>
+      renderRow({ name, pattern: targetPattern, match, overriddenBy, isLabeled: false, testSubj })
+    );
 
   const renderMatching = () => {
     if (!type || !pattern) {
@@ -308,18 +319,18 @@ export const PatternMatches = ({
     names.length > 0
       ? renderList(
           TAB_LABELS.all[targetType],
+          // Matches are mixed with everything else here, so their icons say which they are, and
+          // each notes a higher-ranked rule that keeps it, as in the matching list.
           names.map((name) => {
-            const isHighlighted = highlightedNames.has(name);
-            return (
-              <div key={name} data-test-subj="boostRuleAvailableTarget">
-                {renderName(
-                  <TargetName name={name} pattern={isHighlighted ? highlightPattern : undefined} />,
-                  isHighlighted ? matchKind : undefined,
-                  // Matches are mixed with everything else here, so their icons say which they are.
-                  true
-                )}
-              </div>
-            );
+            const target = matchesByName.get(name);
+            return renderRow({
+              name,
+              pattern: target && highlightPattern,
+              match: target && matchKind,
+              overriddenBy: target?.overriddenBy,
+              isLabeled: true,
+              testSubj: 'boostRuleAvailableTarget',
+            });
           })
         )
       : renderEmpty(NO_DATA_SOURCES[targetType]);

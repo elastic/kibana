@@ -809,16 +809,17 @@ export const RuleFlyout = ({ rule, duplicateOf, initialProfileName, onClose }: R
                     onChange: setPickSearch,
                   }}
                   options={pickOptions}
-                  // A selected name that a higher-ranked rule keeps is struck through and subdued,
-                  // as in the rules table.
-                  renderOption={({ label, checked, supersededBy }, searchValue) => (
+                  // A name that a higher-ranked rule would keep is struck through and disabled,
+                  // whether or not it's selected, until this rule's priority outranks that rule.
+                  renderOption={({ label, supersededBy }, searchValue) => (
                     <EuiHighlight
                       search={searchValue}
                       css={
-                        checked === 'on' && supersededBy
-                          ? { textDecoration: 'line-through', color: euiTheme.colors.textSubdued }
+                        supersededBy
+                          ? { textDecoration: 'line-through', color: euiTheme.colors.textDisabled }
                           : undefined
                       }
+                      data-test-subj={supersededBy ? 'boostSupersededTarget' : undefined}
                     >
                       {label}
                     </EuiHighlight>

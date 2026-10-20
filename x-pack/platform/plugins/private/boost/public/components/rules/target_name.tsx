@@ -34,7 +34,7 @@ interface TargetNameProps {
 }
 
 /**
- * A target's name, struck through and subdued when a higher-ranked rule applies to it instead, since
+ * A target's name, struck through and disabled when a higher-ranked rule applies to it instead, since
  * the rule targets it but doesn't apply.
  */
 export const TargetName = ({ name, pattern, supersededBy }: TargetNameProps) => {
@@ -43,7 +43,7 @@ export const TargetName = ({ name, pattern, supersededBy }: TargetNameProps) => 
     <span
       css={
         supersededBy
-          ? { textDecoration: 'line-through', color: euiTheme.colors.textSubdued }
+          ? { textDecoration: 'line-through', color: euiTheme.colors.textDisabled }
           : undefined
       }
       data-test-subj={supersededBy ? 'boostSupersededTarget' : undefined}
@@ -53,7 +53,17 @@ export const TargetName = ({ name, pattern, supersededBy }: TargetNameProps) => 
         : splitByIndexPattern(pattern, name).map(({ text, isLiteral }, index) => (
             <Fragment key={index}>
               {/* The name already says what matched, so screen readers skip the highlights. */}
-              {isLiteral ? <EuiMark hasScreenReaderHelpText={false}>{text}</EuiMark> : text}
+              {isLiteral ? (
+                <EuiMark
+                  hasScreenReaderHelpText={false}
+                  // A disabled name's highlight is disabled too.
+                  css={supersededBy ? { color: 'inherit' } : undefined}
+                >
+                  {text}
+                </EuiMark>
+              ) : (
+                text
+              )}
             </Fragment>
           ))}
     </span>
