@@ -37,6 +37,8 @@ export interface GithubIssue {
   labels: unknown[];
   body: string;
   state: GithubIssueState;
+  created_at: string;
+  closed_at: string | null;
 }
 
 export interface ListIssuesOptions {
@@ -73,6 +75,56 @@ export interface GithubIssueMini {
 export interface GithubIssueComment {
   body: string;
 }
+
+export interface GithubIssueEvent {
+  id: number;
+  event: string;
+  created_at: string;
+  label?: { name: string };
+  body?: string;
+  user?: { login: string } | null;
+}
+
+export interface GithubFixPullRequest {
+  number: number;
+  state: 'OPEN' | 'CLOSED' | 'MERGED';
+  mergedAt: string | null;
+}
+
+/** Closed and merged PRs are only listed on request. */
+const CLOSING_PULL_REQUESTS_QUERY = `
+  query($owner: String!, $name: String!, $number: Int!, $after: String) {
+    repository(owner: $owner, name: $name) {
+      issue(number: $number) {
+        closedByPullRequestsReferences(first: 100, after: $after, includeClosedPrs: true) {
+          nodes { number state mergedAt repository { nameWithOwner } }
+          pageInfo { hasNextPage endCursor }
+        }
+      }
+    }
+  }
+`;
+
+interface ClosingPullRequestsResponse {
+  data?: {
+    repository: {
+      issue: {
+        closedByPullRequestsReferences: {
+          nodes: Array<GithubFixPullRequest & { repository: { nameWithOwner: string } }>;
+          pageInfo: { hasNextPage: boolean; endCursor: string | null };
+        };
+      } | null;
+    } | null;
+  };
+  errors?: Array<{ message: string }>;
+}
+
+export const hasIssueLabel = (issue: GithubIssue, name: string): boolean =>
+  issue.labels.some(
+    (label) =>
+      label === name ||
+      (typeof label === 'object' && label !== null && 'name' in label && label.name === name)
+  );
 
 interface RequestOptions {
   method: string;
@@ -164,6 +216,115 @@ export class GithubApi {
 
   getRequestCount() {
     return this.requestCount;
+  }
+
+  async getAuthenticatedLogin(): Promise<string> {
+    const { data } = await this.request<{ login: string } | undefined>(
+      { method: 'GET', url: 'https://api.github.com/user', safeForDryRun: true },
+      undefined
+    );
+    if (!data?.login) throw new Error('GitHub returned no authenticated user');
+    return data.login;
+  }
+
+  async getIssue(issueNumber: number): Promise<GithubIssue> {
+    const { data } = await this.request<GithubIssue | undefined>(
+      { method: 'GET', url: `${this.baseUrl}issues/${issueNumber}`, safeForDryRun: true },
+      undefined
+    );
+    if (!data) throw new Error(`GitHub returned no issue for #${issueNumber}`);
+    return { ...data, body: data.body ?? '' };
+  }
+
+  async getIssueTimeline(issueNumber: number): Promise<GithubIssueEvent[]> {
+    const events: GithubIssueEvent[] = [];
+    let url: string | undefined = `${this.baseUrl}issues/${issueNumber}/timeline?per_page=100`;
+    while (url) {
+      const response = await this.request<GithubIssueEvent[]>(
+        { method: 'GET', url, safeForDryRun: true },
+        []
+      );
+      events.push(...response.data);
+      url = nextPageUrl(response.headers.get('link'));
+      if (url) await sleep(DEFAULT_PAGE_INTERVAL_MS);
+    }
+    return events;
+  }
+
+  /**
+   * Pull requests of this repository that GitHub links as closing the issue, by closing keyword
+   * or a manual Development link, whatever their state. An ordinary mention is not such a link.
+   */
+  async getIssueFixPullRequests(issueNumber: number): Promise<GithubFixPullRequest[]> {
+    const [owner, name] = this.repo.split('/');
+    const pullRequests = new Map<number, GithubFixPullRequest>();
+    let after: string | null = null;
+    while (true) {
+      const response: ClosingPullRequestsResponse = (
+        await this.request<ClosingPullRequestsResponse>(
+          {
+            method: 'POST',
+            url: 'https://api.github.com/graphql',
+            safeForDryRun: true,
+            data: {
+              query: CLOSING_PULL_REQUESTS_QUERY,
+              variables: { owner, name, number: issueNumber, after },
+            },
+          },
+          {}
+        )
+      ).data;
+      const issue = response.data?.repository?.issue;
+      if (response.errors?.length || !issue) {
+        throw new Error(
+          `Unable to read fix PRs of #${issueNumber}: ${
+            response.errors?.map(({ message }) => message).join('; ') || 'not found'
+          }`
+        );
+      }
+      const { nodes, pageInfo } = issue.closedByPullRequestsReferences;
+      for (const { number, state, mergedAt, repository } of nodes) {
+        if (repository.nameWithOwner !== this.repo) continue;
+        if (!['OPEN', 'CLOSED', 'MERGED'].includes(state) || (state === 'MERGED' && !mergedAt)) {
+          throw new Error(`GitHub returned an invalid state for fix PR #${number}`);
+        }
+        pullRequests.set(number, { number, state, mergedAt });
+      }
+      if (!pageInfo.hasNextPage) {
+        return [...pullRequests.values()];
+      }
+      if (!pageInfo.endCursor || pageInfo.endCursor === after) {
+        throw new Error(`Incomplete fix PR history for #${issueNumber}`);
+      }
+      after = pageInfo.endCursor;
+    }
+  }
+
+  async checkLabel(name: string): Promise<void> {
+    await this.request(
+      {
+        method: 'GET',
+        url: `${this.baseUrl}labels/${encodeURIComponent(name)}`,
+        safeForDryRun: true,
+      },
+      undefined
+    );
+  }
+
+  /** Never retry a consumable trigger: the first request may have succeeded despite a lost response. */
+  async addLabelsOnce(issueNumber: number, labels: string[]): Promise<void> {
+    const { data } = await this.request<Array<{ name: string }>>(
+      {
+        method: 'POST',
+        url: `${this.baseUrl}issues/${issueNumber}/labels`,
+        data: { labels },
+        maxAttempts: 1,
+      },
+      labels.map((name) => ({ name }))
+    );
+    if (labels.some((name) => !data.some((label) => label.name === name))) {
+      throw new Error(`GitHub did not apply the requested labels to #${issueNumber}`);
+    }
   }
 
   async editIssueBodyAndEnsureOpen(issueNumber: number, newBody: string) {
