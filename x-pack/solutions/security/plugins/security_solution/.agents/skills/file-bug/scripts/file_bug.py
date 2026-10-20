@@ -105,15 +105,29 @@ _MEDIA_REF_RE = re.compile(
     rf"|(?:\$SESSION_DIR/|~/|\.{{1,2}}/|/)[^\s()<>\"'`]*\.{_MEDIA_EXT}\b",
     re.I | re.M,
 )
-_LOCAL_MEDIA_RE = re.compile(
+# A bare path in prose; repro snippets (inline or fenced code) are input, not attachments.
+_LOCAL_MEDIA_BARE_RE = re.compile(
     r"(?<![\w/:.-])(?:\$SESSION_DIR/|~/|\.{1,2}/|/[^\s()<>\"'`/]+/|[A-Za-z]:\\)[^\s()<>\"'`]*"
-    rf"\.{_MEDIA_EXT}\b"
-    # a labelled or embedded reference whose target is not an http(s) URL (relative paths too)
-    rf"|^\s*(?:screenshot|recording|video)s?\s*:\s*(?!https?://|!\[|<video)[^\s]*\.{_MEDIA_EXT}\b"
+    rf"\.{_MEDIA_EXT}\b",
+    re.I | re.M,
+)
+# An explicit attachment reference (labelled, markdown image or video src) whose target is not
+# an http(s) URL; relative paths too, and still checked when the filename is in backticks.
+_LOCAL_MEDIA_REF_RE = re.compile(
+    rf"^\s*(?:screenshot|recording|video)s?\s*:\s*(?!https?://|!\[|<video)[^\s]*\.{_MEDIA_EXT}\b"
     rf"|!\[[^\]]*\]\((?!https?://)[^)]*\.{_MEDIA_EXT}\)"
     rf"|<video[^>]*\bsrc=\"(?!https?://)[^\"]*\.{_MEDIA_EXT}\"",
     re.I | re.M,
 )
+
+
+def _local_media(body: str) -> str | None:
+    match = _LOCAL_MEDIA_REF_RE.search(body.replace("`", "")) or _LOCAL_MEDIA_BARE_RE.search(
+        _without_code(body)
+    )
+    return match.group(0) if match else None
+
+
 _CODE_RE = re.compile(r"```.*?```|`[^`\n]*`", re.S)
 
 
@@ -1791,10 +1805,10 @@ def write_github(
             "or pass --security-ok if the human confirmed it is a false positive"
         )
 
-    local_media = _LOCAL_MEDIA_RE.search(_without_code(body))
+    local_media = _local_media(body)
     if local_media:
         raise ValueError(
-            f"body still references a local file ({local_media.group(0)}): run `upload`, "
+            f"body still references a local file ({local_media}): run `upload`, "
             "then `embed-uploads`, and write the embedded body"
         )
 

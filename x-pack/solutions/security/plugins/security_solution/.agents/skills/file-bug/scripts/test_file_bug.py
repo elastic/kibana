@@ -2365,6 +2365,9 @@ class WriteLocalPathGuardTest(unittest.TestCase):
             "![s](./shot.jpg)",
             "Screenshot: $SESSION_DIR/screenshots/a.png",
             "Recording: ~/flow.mp4",
+            "Screenshot: `/tmp/shot.png`",
+            "Recording: `flow.mp4`",
+            "![s](`./a.png`)",
         ):
             with self.assertRaises(ValueError, msg=body):
                 self._write(body)
