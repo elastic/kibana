@@ -264,6 +264,7 @@ steps:
     depends_on:
       - build
     build:
+      message: '${BUILDKITE_MESSAGE}'
       branch: '${BUILDKITE_BRANCH}'
       commit: '${BUILDKITE_COMMIT}'
       env:
