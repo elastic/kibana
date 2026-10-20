@@ -10,8 +10,6 @@
 import {
   edotBrowser,
   generateLongId,
-  HEALTH_PROFILES,
-  pickBrowserProfile,
   type BrowserProfileId,
   type EdotBrowserDocument,
   type EdotBrowserSite,
@@ -401,11 +399,11 @@ export const generateEdotBrowserSessions = (
 
           return edotBrowser.session({
             client: app.client(
-              pickBrowserProfile(Math.random, browserWeights),
+              edotBrowser.pickBrowserProfile(Math.random, browserWeights),
               withSessionId ? { sessionId: generateLongId() } : {}
             ),
             site,
-            health: HEALTH_PROFILES[health],
+            health: edotBrowser.healthProfiles[health],
             start: timestamp + Math.floor(Math.random() * stepMilliseconds),
             pageViews,
             sessionDurationMs: Math.round(pageViews * pageViewMs),

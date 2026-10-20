@@ -7,50 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { BROWSER_PROFILES, pickBrowserProfile } from './browser_profiles';
 import { EdotBrowserApp, type EdotBrowserAppOptions } from './edot_browser_app';
 import { session } from './edot_browser_session';
+import { HEALTH_PROFILES } from './health_profiles';
 
-export { asFloat } from './as_float';
-export {
-  BROWSER_PROFILES,
-  pickBrowserProfile,
-  type BrowserProfile,
-  type BrowserProfileId,
-  type EdotBrowserResourceAttributes,
-} from './browser_profiles';
-export {
-  HEALTH_PROFILES,
-  getWebVitalRating,
-  type HealthProfile,
-  type HealthProfileName,
-  type WebVitalName,
-  type WebVitalRating,
-} from './health_profiles';
-export { EdotBrowserApp, type EdotBrowserAppOptions } from './edot_browser_app';
-export {
-  EdotBrowserClient,
-  type EdotBrowserClientOptions,
-  type HttpInstrumentation,
-  type NavigationTimingType,
-  type NavigationTimingValues,
-  type ResourceTimingValues,
-  type SoftNavigationType,
-} from './edot_browser_client';
-export { EdotBrowserLog } from './edot_browser_log';
-export { EdotBrowserSpan, type EdotBrowserSpanDocument } from './edot_browser_span';
-export type {
-  EdotBrowserClickTarget,
-  EdotBrowserDocument,
-  EdotBrowserEvent,
-  EdotBrowserExceptionTemplate,
-  EdotBrowserPage,
-  EdotBrowserRequest,
-  EdotBrowserResource,
-  EdotBrowserSessionOptions,
-  EdotBrowserSite,
-} from './edot_browser_session';
+export type { BrowserProfileId } from './browser_profiles';
+export type { HealthProfileName } from './health_profiles';
+export type { EdotBrowserSpanDocument } from './edot_browser_span';
+export type { EdotBrowserDocument, EdotBrowserSite } from './edot_browser_session';
 
 export const edotBrowser = {
   app: (options: EdotBrowserAppOptions): EdotBrowserApp => new EdotBrowserApp(options),
   session,
+  browserProfiles: BROWSER_PROFILES,
+  pickBrowserProfile,
+  healthProfiles: HEALTH_PROFILES,
 };

@@ -8,13 +8,7 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import {
-  BROWSER_PROFILES,
-  HEALTH_PROFILES,
-  edotBrowser,
-  timerange,
-  type EdotBrowserDocument,
-} from '@kbn/synthtrace-client';
+import { edotBrowser, timerange, type EdotBrowserDocument } from '@kbn/synthtrace-client';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Readable } from 'stream';
 import type { Logger } from '../utils/create_logger';
@@ -67,7 +61,7 @@ describe('OtelSynthtraceEsClient', () => {
     });
     const browser = edotBrowser
       .app({ serviceName: 'storefront-web', environment: 'production' })
-      .client(BROWSER_PROFILES.chromeMacos);
+      .client(edotBrowser.browserProfiles.chromeMacos);
     const site = { origin: 'https://shop.example.com', pages: [{ path: '/' }] };
     const generator = timerange(
       new Date('2026-10-16T12:00:00.000Z'),
@@ -79,7 +73,7 @@ describe('OtelSynthtraceEsClient', () => {
         edotBrowser.session({
           client: browser,
           site,
-          health: HEALTH_PROFILES.healthy,
+          health: edotBrowser.healthProfiles.healthy,
           start: timestamp,
           pageViews: 1,
         })
