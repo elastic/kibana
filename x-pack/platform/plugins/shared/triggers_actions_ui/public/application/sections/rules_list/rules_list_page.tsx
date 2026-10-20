@@ -12,6 +12,8 @@ import { i18n } from '@kbn/i18n';
 import { OBSERVABILITY_OVERVIEW_APP_ID } from '@kbn/deeplinks-observability';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { useHistory } from 'react-router-dom';
+import useObservable from 'react-use/lib/useObservable';
+import { AppStatus } from '@kbn/core/public';
 import { useKibana } from '../../../common/lib/kibana';
 import { getAlertingSectionBreadcrumb } from '../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../lib/doc_title';
@@ -28,7 +30,8 @@ export const RulesListContainer = () => {
   const {
     application: {
       getUrlForApp,
-      capabilities: { rulesSettings = {}, navLinks },
+      capabilities: { rulesSettings = {} },
+      applications$,
     },
     chrome: { docTitle },
     http,
@@ -56,7 +59,10 @@ export const RulesListContainer = () => {
 
   const docLink = docLinks.links.alerting.guide;
   const alertsBackHref = getUrlForApp(OBSERVABILITY_OVERVIEW_APP_ID, { path: '/alerts' });
-  const showBackButton = !hideListBackButton && Boolean(navLinks?.[OBSERVABILITY_OVERVIEW_APP_ID]);
+  const applications = useObservable(applications$, new Map());
+  const isAlertsAppAccessible =
+    applications.get(OBSERVABILITY_OVERVIEW_APP_ID)?.status === AppStatus.accessible;
+  const showBackButton = !hideListBackButton && isAlertsAppAccessible;
   const mode = useRulesPageMode();
 
   useEffect(() => {
