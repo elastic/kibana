@@ -232,16 +232,17 @@ describe('createConnectorCredentialResolver', () => {
     expect(JSON.stringify(result)).not.toContain('oauth-client-secret');
   });
 
-  it('denies connectors outside the agent allow-list before any lookup', async () => {
-    const { resolve, actionsClient } = setup();
+  it('points to the manifest without advertising assigned connectors before any lookup', async () => {
+    const { resolve, actions, actionsClient } = setup();
 
-    const result = await resolve('other-connector', createCallContext());
+    const result = await resolve('other-connector', createCallContext([CONNECTOR_ID, 'jira-1']));
 
     expect(result).toEqual({
-      errorMessage: expect.stringContaining(
-        "Connector 'other-connector' is not assigned to this agent"
-      ),
+      errorMessage:
+        "Connector 'other-connector' is not assigned to this agent. " +
+        'Check /workspace/connectors.md for available connectors.',
     });
+    expect(actions.getActionsClientWithRequest).not.toHaveBeenCalled();
     expect(actionsClient.getSandboxCredentials).not.toHaveBeenCalled();
   });
 
@@ -294,7 +295,11 @@ describe('createConnectorCredentialResolver', () => {
 
     const result = await resolve(CONNECTOR_ID, createCallContext([]));
 
-    expect(result).toEqual({ errorMessage: expect.stringContaining('Assigned connectors: none') });
+    expect(result).toEqual({
+      errorMessage:
+        `Connector '${CONNECTOR_ID}' is not assigned to this agent. ` +
+        'Check /workspace/connectors.md for available connectors.',
+    });
   });
 
   it('fails when Actions denies execute access', async () => {
