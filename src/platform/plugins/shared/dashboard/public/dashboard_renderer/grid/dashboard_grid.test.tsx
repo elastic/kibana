@@ -319,6 +319,21 @@ describe('DashboardGrid', () => {
       expect(await screen.findByTestId('dashboardPanelClickHint')).toBeInTheDocument();
     });
 
+    test('does not show in select mode', async () => {
+      const { dashboardApi } = await createAndMountDashboardGrid({ panels: getMockPanels() });
+      await act(async () => {
+        dashboardApi.setViewMode('edit');
+        dashboardApi.enterSelectMode();
+        await new Promise((resolve) => setTimeout(resolve, 1));
+      });
+
+      const header = screen.getByTestId('mockPanelHeader_1');
+      fireEvent.mouseDown(header, { clientX: 10, clientY: 10 });
+      fireEvent.click(header, { clientX: 10, clientY: 10, detail: 1 });
+
+      expect(screen.queryByTestId('dashboardPanelClickHint')).not.toBeInTheDocument();
+    });
+
     test('does not show when panel content is clicked', async () => {
       const { dashboardApi } = await createAndMountDashboardGrid({ panels: getMockPanels() });
       await act(async () => {

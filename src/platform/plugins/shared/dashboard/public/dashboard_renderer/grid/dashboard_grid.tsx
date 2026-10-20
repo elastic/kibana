@@ -165,7 +165,8 @@ export const DashboardGrid = () => {
           pointerDown !== null &&
           (Math.abs(e.clientX - pointerDown.x) >= SELECTION_DRAG_THRESHOLD_PX ||
             Math.abs(e.clientY - pointerDown.y) >= SELECTION_DRAG_THRESHOLD_PX);
-        if (!hasMoved && isDragAreaClick(e, panel)) {
+        // in select mode the user already knows how to select, so the hint would only be noise
+        if (!hasMoved && !isSelectMode && isDragAreaClick(e, panel)) {
           const { left, width, bottom } = panel.getBoundingClientRect();
           setClickHint({
             id: Date.now(),
@@ -182,6 +183,9 @@ export const DashboardGrid = () => {
   );
 
   const dismissClickHint = useCallback(() => setClickHint(null), []);
+  useEffect(() => {
+    if (isSelectMode) setClickHint(null);
+  }, [isSelectMode]);
 
   // The click that ends a selection drag must not reach the panel, or its Cmd+click handler
   // would immediately toggle off the panel the drag just selected
