@@ -1404,6 +1404,9 @@ describe('transformWorkflowToGraph — structure', () => {
     expect(lane({ continue: true })).toEqual(
       step('risky', { lanes: [{ head: 'f1', items: [step('f1'), step('f2')], rejoins: true }] })
     );
+    expect(lane({ rethrow: false })).toEqual(
+      step('risky', { lanes: [{ head: 'f1', items: [step('f1'), step('f2')], rejoins: true }] })
+    );
   });
 
   it('keeps a merge step body attached to the step instead of in the sequence', () => {

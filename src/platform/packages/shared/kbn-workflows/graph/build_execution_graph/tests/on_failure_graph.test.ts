@@ -271,6 +271,7 @@ describe('on_failure graph', () => {
           stepId: 'testRetryConnectorStep',
           stepType: 'fallback',
           enterNodeId: 'enterTryBlock_testRetryConnectorStep',
+          rethrow: true,
         });
       });
 
@@ -601,5 +602,32 @@ describe('on_failure graph', () => {
         'exitContinue_testRetryConnectorStep',
       ]);
     });
+  });
+
+  it('should pass rethrow: false to ExitTryBlockNode', () => {
+    const executionGraph = convertToWorkflowGraph({
+      steps: [
+        {
+          name: 'testStep',
+          type: 'slack',
+          connectorId: 'slack',
+          'on-failure': {
+            fallback: [
+              {
+                name: 'fallbackAction',
+                type: 'console',
+                with: { message: 'fallback' },
+              } as ConnectorStep,
+            ],
+            rethrow: false,
+          },
+          with: { message: 'Hello' },
+        } as ConnectorStep,
+      ],
+    } as any);
+
+    expect(executionGraph.node('exitTryBlock_testStep')).toEqual(
+      expect.objectContaining({ type: 'exit-try-block', rethrow: false })
+    );
   });
 });

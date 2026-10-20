@@ -107,6 +107,7 @@ Complex combinations create nested execution structures:
 - **Important**: Even if fallback steps succeed, the original error from normal path is preserved
 - Continue mechanism suppresses the preserved error and allows workflow to proceed
 - **Without continue**: Workflow fails even if fallback path succeeds, due to preserved original error
+- **With `rethrow: false`**: A fallback path that succeeds finishes the step and the workflow goes to the next step. A fallback path that fails still fails the step. Unlike `continue`, this does not hide a failing fallback.
 
 ## Key Design Principles
 
@@ -117,7 +118,7 @@ Each execution path maintains isolated scope to prevent state interference betwe
 Original error information is preserved throughout fallback execution to maintain debugging capabilities and proper error reporting.
 
 ### Non-Destructive Recovery
-Fallback execution provides alternative results without losing information about the original failure, enabling comprehensive error analysis. The original error is always preserved and will cause workflow failure unless explicitly suppressed by the continue mechanism.
+Fallback execution provides alternative results without losing information about the original failure, enabling comprehensive error analysis. The original error is always preserved and will cause workflow failure unless explicitly suppressed by the continue mechanism or by `rethrow: false`.
 
 ### Composability
 The fallback mechanism integrates seamlessly with other on-failure options (retry, continue) through ordered wrapper composition.

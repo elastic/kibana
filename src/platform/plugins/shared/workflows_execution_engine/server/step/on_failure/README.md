@@ -114,7 +114,7 @@ on-failure:
 
 **Flow:** Retry → Fallback → Continue
 
-**Note:** Without `continue: true`, the workflow will fail after executing fallback steps. The fallback executes, but the original error is re-thrown, causing the workflow to fail.
+**Note:** Without `continue: true` (or `rethrow: false`), the workflow will fail after executing fallback steps. The fallback executes, but the original error is re-thrown, causing the workflow to fail.
 
 ## Recovery patterns
 
@@ -139,6 +139,8 @@ on-failure:
 ```
 
 Flow: retry → fallback → continue. Without `continue: true`, the workflow still **fails** after fallback (the original error is re-thrown).
+
+To keep the workflow **completed** only when the fallback succeeds: use **fallback + `rethrow: false`**. A fallback that fails still fails the step.
 
 ## Restrictions
 

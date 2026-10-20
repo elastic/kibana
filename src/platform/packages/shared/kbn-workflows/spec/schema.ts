@@ -87,6 +87,12 @@ export type BaseStep = z.infer<typeof BaseStepSchema>;
 export const WorkflowOnFailureSchema = z.object({
   retry: WorkflowRetrySchema.optional(),
   fallback: z.array(BaseStepSchema).min(1).optional(),
+  rethrow: z
+    .boolean()
+    .optional()
+    .describe(
+      'Set to false to finish the step when its fallback completes. By default the original error is re-thrown after the fallback. A failing fallback always fails the step.'
+    ),
   continue: z.union([z.boolean(), z.string()]).optional(),
 });
 

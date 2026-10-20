@@ -619,7 +619,13 @@ function applyOnFailure(
   }
 
   if (onFailureConfiguration.fallback?.length) {
-    graph = createFallback(stepId, graph, onFailureConfiguration.fallback, context);
+    graph = createFallback(
+      stepId,
+      graph,
+      onFailureConfiguration.fallback,
+      onFailureConfiguration.rethrow ?? true,
+      context
+    );
   }
 
   // Here we can statically determine that 'continue' is needed if "continue" is boolean.
@@ -907,6 +913,7 @@ function createFallback(
   stepId: string,
   normalPathGraph: WorkflowGraphType,
   fallbackPathSteps: BaseStep[],
+  rethrow: boolean,
   context: GraphBuildContext
 ): WorkflowGraphType {
   const graph = createTypedGraph({ directed: true });
@@ -931,6 +938,7 @@ function createFallback(
     stepId,
     stepType: 'fallback',
     enterNodeId: enterTryBlockNodeId,
+    rethrow,
   };
   graph.setNode(exitTryBlockNodeId, exitTryBlockNode);
 

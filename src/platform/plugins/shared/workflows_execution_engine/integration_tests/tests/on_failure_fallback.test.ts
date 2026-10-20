@@ -142,4 +142,71 @@ steps:
       });
     });
   });
+
+  describe('when rethrow is false', () => {
+    const buildYaml = (fallbackConnector: { actionTypeId: string; name: string }) => `
+steps:
+  - name: constantlyFailingStep
+    type: ${FakeConnectors.constantlyFailing.actionTypeId}
+    connector-id: ${FakeConnectors.constantlyFailing.name}
+    on-failure:
+      rethrow: false
+      fallback:
+        - name: fallbackStep
+          type: ${fallbackConnector.actionTypeId}
+          connector-id: ${fallbackConnector.name}
+          with:
+            message: 'Fallback message executed'
+    with:
+      message: 'Hi there! Are you alive?'
+
+  - name: finalStep
+    type: ${FakeConnectors.slack2.actionTypeId}
+    connector-id: ${FakeConnectors.slack2.name}
+    with:
+      message: 'Final message!'
+`;
+
+    const getStepExecutions = () =>
+      Array.from(workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values());
+
+    it('should finish the step and continue when the fallback succeeds', async () => {
+      await workflowRunFixture.runWorkflow({ workflowYaml: buildYaml(FakeConnectors.slack1) });
+
+      const workflowExecutionDoc =
+        workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+          'fake_workflow_execution_id'
+        );
+      expect(workflowExecutionDoc?.status).toBe(ExecutionStatus.COMPLETED);
+      expect(workflowExecutionDoc?.error).toBeUndefined();
+
+      const stepExecutions = getStepExecutions();
+      expect(
+        stepExecutions.find(
+          (se) =>
+            se.stepId === 'constantlyFailingStep' &&
+            se.stepType === FakeConnectors.constantlyFailing.actionTypeId
+        )?.status
+      ).toBe(ExecutionStatus.FAILED);
+      expect(stepExecutions.find((se) => se.stepType === 'fallback')?.status).toBe(
+        ExecutionStatus.COMPLETED
+      );
+      expect(stepExecutions.find((se) => se.stepId === 'finalStep')?.status).toBe(
+        ExecutionStatus.COMPLETED
+      );
+    });
+
+    it('should still fail the workflow when the fallback fails', async () => {
+      await workflowRunFixture.runWorkflow({
+        workflowYaml: buildYaml(FakeConnectors.constantlyFailing),
+      });
+
+      const workflowExecutionDoc =
+        workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+          'fake_workflow_execution_id'
+        );
+      expect(workflowExecutionDoc?.status).toBe(ExecutionStatus.FAILED);
+      expect(getStepExecutions().filter((se) => se.stepId === 'finalStep')).toHaveLength(0);
+    });
+  });
 });

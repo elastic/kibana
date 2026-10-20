@@ -645,14 +645,16 @@ function transformInternal(
           graphId: ctx.graphId,
         });
 
-        // Shape 2: continue → rejoin. Add fallback leaves to exitIds so the
+        // Shape 2: continue or rethrow: false → rejoin. Add fallback leaves to exitIds so the
         // existing fan-in loop emits rejoin edges automatically on the NEXT
         // sibling step. Uses engine's own rule verbatim (Decision 6).
         const onFailure = (step as Record<string, unknown>)['on-failure'] as
-          | { continue?: boolean | string }
+          | { continue?: boolean | string; rethrow?: boolean }
           | undefined;
         const hasContinuePath =
-          typeof onFailure?.continue === 'string' || onFailure?.continue === true;
+          typeof onFailure?.continue === 'string' ||
+          onFailure?.continue === true ||
+          onFailure?.rethrow === false;
         lanes.push({ head: headId, items: inner.items, rejoins: hasContinuePath });
         if (hasContinuePath) {
           exitIds = dedupeIds([...exitIds, ...laneLeaves]);

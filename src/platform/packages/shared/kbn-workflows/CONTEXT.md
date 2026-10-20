@@ -103,10 +103,13 @@ Both appear in the schema: `on-failure` is the container map (which also holds `
 **`continue` (boolean or string)**
 A key inside `on-failure` that, when `true` (or a template expression that evaluates to a truthy value), suppresses re-throwing after the fallback path has run. Writing `fallback` without `continue` leaves the workflow still failing after fallback — the execution graph's `ExitTryBlock` re-throws. Writing `continue: true` converts "notify on failure" into "swallow the failure". These are separate operations with different semantics; the graph authoring surface writes them separately.
 
+**`rethrow` (boolean)**
+A key inside `on-failure`, default `true`. With `rethrow: false`, a fallback path that succeeds finishes the step and the workflow goes to the next step. Unlike `continue`, a fallback path that fails still fails the step.
+
 **fallback lane shape (two variants)**
-The rendered layout has two shapes depending on `continue`:
+The rendered layout has two shapes depending on `continue` and `rethrow`:
 - `fallback` alone → terminating lane. `ExitTryBlock` re-throws; no return corridor is drawn. The fallback steps are a side column with no edge back to the spine.
-- `fallback` + `continue: true` (or any truthy template) → rejoining lane, re-entering the owner's next sibling. Reuses `isMerge` / `buildMergeBusPath` on the join edge.
+- `fallback` + `continue: true` (or any truthy template), or `fallback` + `rethrow: false` → rejoining lane, re-entering the owner's next sibling. Reuses `isMerge` / `buildMergeBusPath` on the join edge.
 
 ---
 

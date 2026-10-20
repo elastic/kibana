@@ -55,6 +55,7 @@ export const ExitTryBlockNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
   type: z.literal('exit-try-block'),
   enterNodeId: z.string(),
+  rethrow: z.boolean(),
 });
 export type ExitTryBlockNode = z.infer<typeof ExitTryBlockNodeSchema>;
 

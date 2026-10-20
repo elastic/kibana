@@ -8,6 +8,7 @@
  */
 
 import type { SerializedError } from '@kbn/workflows';
+import type { ExitTryBlockNode } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
@@ -15,6 +16,7 @@ import type { NodeImplementation } from '../../node_implementation';
 
 export class ExitTryBlockNodeImpl implements NodeImplementation {
   constructor(
+    private node: ExitTryBlockNode,
     private stepExecutionRuntime: StepExecutionRuntime,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager
   ) {}
@@ -22,7 +24,7 @@ export class ExitTryBlockNodeImpl implements NodeImplementation {
   public async run(): Promise<void> {
     const stepState = this.stepExecutionRuntime.getCurrentStepState() || {};
 
-    if (stepState.error) {
+    if (stepState.error && this.node.rethrow) {
       // if error is in state, that means failure path was executed
       // and we have to re-throw error (preserve type e.g. TimeoutError)
       const executionError = new ExecutionError(stepState.error as SerializedError);

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ExitTryBlockNode } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
 import type { StepExecutionRuntime } from '../../../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
@@ -16,6 +17,14 @@ describe('ExitTryBlockNodeImpl', () => {
   let underTest: ExitTryBlockNodeImpl;
   let mockStepExecutionRuntime: jest.Mocked<StepExecutionRuntime>;
   let mockWorkflowRuntime: jest.Mocked<WorkflowExecutionRuntimeManager>;
+  const buildNode = (rethrow: boolean): ExitTryBlockNode => ({
+    id: 'exitTryBlock_step',
+    type: 'exit-try-block',
+    stepId: 'step',
+    stepType: 'fallback',
+    enterNodeId: 'enterTryBlock_step',
+    rethrow,
+  });
 
   beforeEach(() => {
     mockStepExecutionRuntime = {
@@ -29,7 +38,11 @@ describe('ExitTryBlockNodeImpl', () => {
       navigateToNextNode: jest.fn(),
     } as any;
 
-    underTest = new ExitTryBlockNodeImpl(mockStepExecutionRuntime, mockWorkflowRuntime);
+    underTest = new ExitTryBlockNodeImpl(
+      buildNode(true),
+      mockStepExecutionRuntime,
+      mockWorkflowRuntime
+    );
   });
 
   describe('run', () => {
@@ -112,6 +125,31 @@ describe('ExitTryBlockNodeImpl', () => {
 
       it('should not set workflow error when there is no error', async () => {
         await underTest.run();
+        expect(mockWorkflowRuntime.setWorkflowError).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('when there is an error in step state and rethrow is false', () => {
+      beforeEach(() => {
+        mockStepExecutionRuntime.getCurrentStepState = jest
+          .fn()
+          .mockReturnValue({ error: new Error('Test error') });
+        underTest = new ExitTryBlockNodeImpl(
+          buildNode(false),
+          mockStepExecutionRuntime,
+          mockWorkflowRuntime
+        );
+      });
+
+      it('should finish the step and go to next step', async () => {
+        await underTest.run();
+        expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith();
+        expect(mockWorkflowRuntime.navigateToNextNode).toHaveBeenCalled();
+      });
+
+      it('should not fail the step or set workflow error', async () => {
+        await underTest.run();
+        expect(mockStepExecutionRuntime.failStep).not.toHaveBeenCalled();
         expect(mockWorkflowRuntime.setWorkflowError).not.toHaveBeenCalled();
       });
     });
