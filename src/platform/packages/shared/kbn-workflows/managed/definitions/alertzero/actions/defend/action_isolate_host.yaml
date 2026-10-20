@@ -21,6 +21,7 @@ consts:
     impact: high
     reversible: true
     approvalPolicy: autonomy-dependent
+    subject: host
   actionLabel: Host isolation
   # Sentinel id used only to probe Actions-log privilege before isolating.
   # A 404 means the privilege is present; anything else must fail closed.

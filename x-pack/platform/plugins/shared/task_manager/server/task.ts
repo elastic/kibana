@@ -11,6 +11,11 @@ import type { ObjectType, TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { isNumber } from 'lodash';
 import type { KibanaRequest } from '@kbn/core/server';
+import type { ServiceAccountWorkloadRequestParams } from '@kbn/core-security-server';
+import {
+  SERVICE_ACCOUNT_WORKLOAD_TYPE_MAX_LENGTH,
+  SERVICE_ACCOUNT_WORKLOAD_TYPE_REGEX,
+} from '@kbn/core-security-server';
 import type { SpaceId } from '@kbn/core-spaces-common';
 import type { IntervalSchedule, RruleSchedule } from '@kbn/response-ops-scheduling-types';
 import { isErr, tryAsResult } from './lib/result_type';
@@ -142,6 +147,12 @@ export interface RunContext {
    * is generated using the API key and passed as part of the run context.
    */
   fakeRequest?: KibanaRequest;
+
+  /**
+   * Set instead of `fakeRequest` when the task was scheduled with `runAs`. Do all the work that
+   * needs the service account inside `runAs.withScopedRequest`.
+   */
+  runAs?: TaskRunAsContext;
   signal: AbortSignal;
 
   /**
@@ -247,6 +258,11 @@ export type TaskRunCreatorFunction = (
   context: RunContext
 ) => CancellableTask<RunContext['taskInstance']>;
 
+/**
+ * Reserved for tasks that run as the service account that scheduled them.
+ */
+const TASK_IDENTITY_WORKLOAD_TYPE = 'task_identity';
+
 export const taskDefinitionSchema = schema.object(
   {
     /**
@@ -321,6 +337,33 @@ export const taskDefinitionSchema = schema.object(
     taskTypeGroup: schema.maybe(
       schema.oneOf([schema.literal('alerting'), schema.literal('actions')])
     ),
+
+    runAs: schema.maybe(
+      schema.object({
+        // codeql[js/kibana/unbounded-array-in-schema] Task type registration at plugin setup, not HTTP input
+        workloadTypes: schema.arrayOf(
+          schema.string({
+            maxLength: SERVICE_ACCOUNT_WORKLOAD_TYPE_MAX_LENGTH,
+            validate(workloadType) {
+              if (!SERVICE_ACCOUNT_WORKLOAD_TYPE_REGEX.test(workloadType)) {
+                return `Invalid workload type "${workloadType}". Workload types must match ${SERVICE_ACCOUNT_WORKLOAD_TYPE_REGEX}.`;
+              }
+              if (workloadType === TASK_IDENTITY_WORKLOAD_TYPE) {
+                return `The workload type "${TASK_IDENTITY_WORKLOAD_TYPE}" is reserved for Task Manager.`;
+              }
+            },
+          }),
+          { minSize: 1 }
+        ),
+        withScopedRequest: schema.any({
+          validate(withScopedRequest) {
+            if (typeof withScopedRequest !== 'function') {
+              return 'withScopedRequest must be a function.';
+            }
+          },
+        }),
+      })
+    ),
   },
   {
     validate({ timeout, priority, cost }) {
@@ -349,7 +392,7 @@ export const taskDefinitionSchema = schema.object(
  */
 export type TaskDefinition = Omit<
   TypeOf<typeof taskDefinitionSchema>,
-  'paramsSchema' | 'taskTypeGroup'
+  'paramsSchema' | 'taskTypeGroup' | 'runAs'
 > & {
   /**
    * Creates an object that has a run function which performs the task's work,
@@ -365,7 +408,41 @@ export type TaskDefinition = Omit<
   >;
   paramsSchema?: ObjectType;
   taskTypeGroup?: TaskTypeGroup;
+  runAs?: TaskRunAsDefinition;
 };
+
+/**
+ * Lets tasks of a type run as the registering plugin's bound service accounts.
+ */
+export interface TaskRunAsDefinition {
+  /**
+   * The workload types an instance of this task type may name in `runAs`.
+   */
+  workloadTypes: readonly string[];
+  /**
+   * Wraps the plugin's own `core.security.serviceAccounts.withScopedRequestForWorkload`.
+   */
+  withScopedRequest<T>(
+    params: ServiceAccountWorkloadRequestParams,
+    fn: (request: KibanaRequest) => Promise<T>
+  ): Promise<T>;
+}
+
+/**
+ * Runs work as the service account bound to the workload a task was scheduled to run as.
+ */
+export interface TaskRunAsContext {
+  /**
+   * Runs `fn` with a request authenticated as the workload's service account. The request stops
+   * working once `fn` settles. Pass `expectedServiceAccountId` to reject before minting when the
+   * workload is bound to another account; `null` is the same as omitting it. A task scheduled with
+   * a non-null `expectedServiceAccountId` always uses that one, and rejects a different one.
+   */
+  withScopedRequest<T>(
+    fn: (request: KibanaRequest) => Promise<T>,
+    options?: { expectedServiceAccountId?: string | null }
+  ): Promise<T>;
+}
 
 export enum TaskStatus {
   Idle = 'idle',
@@ -419,6 +496,17 @@ export interface TaskCredential {
   workloadId?: string;
   spaceId?: string;
   expectedServiceAccountId?: string | null;
+}
+
+/**
+ * The service account workload a task runs as.
+ */
+export interface TaskRunAs {
+  workloadType: string;
+  workloadId: string;
+  spaceId: string;
+  /** Reject before minting if the binding points elsewhere. `null` runs as whatever is bound. */
+  expectedServiceAccountId: string | null;
 }
 
 /*
@@ -554,6 +642,13 @@ export interface TaskInstance {
    * Use getTaskCostFromInstance() to translate to the integer TaskCost.
    */
   cost?: InstanceTaskCost;
+
+  /**
+   * Runs the task as the service account bound to this workload, instead of with an API key. The
+   * task type's `runAs` definition must list `workloadType`. Only read when the task is created,
+   * where it is stored as the task's `credential`; the batch `request` doesn't apply to it.
+   */
+  runAs?: TaskRunAs;
 }
 
 /**
@@ -580,7 +675,7 @@ export type TaskInstanceWithId = Require<TaskInstance, 'id'>;
 /**
  * A task instance that has an id and is ready for storage.
  */
-export interface ConcreteTaskInstance extends TaskInstance {
+export interface ConcreteTaskInstance extends Omit<TaskInstance, 'runAs'> {
   /**
    * The id of the Elastic document that stores this instance's data. This can
    * be passed by the caller when scheduling the task.
@@ -726,6 +821,12 @@ export interface ApiKeyOptions {
    * such as workflows.
    */
   cloneApiKey?: boolean;
+  /**
+   * Defaults to true, so Elasticsearch refreshes after granting or cloning the task's API key and a
+   * search-based lookup of the new key (e.g. `GET _security/api_key`) finds it when the task runs.
+   * Set to false to skip the refresh: scheduling is faster, but that lookup may briefly miss the key.
+   */
+  refreshApiKey?: boolean;
   /**
    * When true with a request, grant only the Elasticsearch API key (skip UIAM). Intended for
    * tests and narrow internal flows that need tasks with ES credentials only.

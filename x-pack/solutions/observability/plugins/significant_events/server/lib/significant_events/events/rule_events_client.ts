@@ -8,19 +8,22 @@
 import { esql, type ComposerQuery } from '@elastic/esql';
 import type { ESQLAstExpression } from '@elastic/esql/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
 import {
   ALERT_EPISODE_STATUS,
   type AlertEpisodeStatus,
   type AlertEventSeverity,
 } from '@kbn/alerting-v2-schemas';
 import {
-  SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS,
+  SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS,
+  SIGNIFICANT_EVENT_STATUS_OPTIONS,
   SIGNIFICANT_EVENTS_ALERT_SOURCE,
   type SignificantEvent,
   type SignificantEventResponse,
   type Severity,
   type SignificantEventStatus,
 } from '@kbn/significant-events-schema';
+import { i18n } from '@kbn/i18n';
 import {
   MAX_DEDUP_SCAN_LIMIT,
   type CommonSearchOptions,
@@ -35,12 +38,28 @@ import {
 } from '../latest_source_query';
 import { RULE_EVENTS_INDEX } from '../alerting/rule_events_metric_series';
 import type { EventsFilterOptions, EventsPaginatedSearchOptions } from './types';
+import type { TriggerEmitter } from '../../../workflows/triggers/emit';
+import {
+  decideStatusChange,
+  requestedStatus,
+  type StatusChange,
+  type LifecycleSkipReason,
+} from './lifecycle/lifecycle_controller';
+import { emitSignificantEventWriteTriggers } from '../../../workflows/triggers/emit_significant_event_triggers';
+import { toRuleEvent } from './to_rule_event';
 
 /** `.rule-events` groups a series of writes by `group_hash`, not `event_id` (unavailable as a column). */
 const GROUP_HASH_FIELD = 'group_hash';
 
+/** Note recorded when an operator changes status without giving a reason. */
+export const operatorFallbackAssessmentNote = (status: 'active' | 'inactive'): string =>
+  i18n.translate('xpack.significantEvents.events.operatorFallbackAssessmentNote', {
+    defaultMessage: 'Manually set to {status} by an operator. No reason was given.',
+    values: { status },
+  });
+
 const isSignificantEventStatus = (status: AlertEpisodeStatus): status is SignificantEventStatus =>
-  status === ALERT_EPISODE_STATUS.ACTIVE || status === ALERT_EPISODE_STATUS.INACTIVE;
+  (SIGNIFICANT_EVENT_STATUS_OPTIONS as readonly string[]).includes(status);
 
 const isSignificantEventSeverity = (severity: AlertEventSeverity): severity is Severity =>
   severity === 'critical' || severity === 'high' || severity === 'medium' || severity === 'low';
@@ -67,10 +86,10 @@ interface RuleEventSourceRow {
 type RuleEventSourceRowWithCreatedAt = RuleEventSourceRow & { created_at: string };
 
 /**
- * `.rule-events` doesn't guarantee `stream_names` is an array — bridge docs write a scalar
+ * `.rule-events` doesn't guarantee `source_ids` is an array — bridge docs write a scalar
  * string, and the field can be absent. Normalize so callers always get `string[]`.
  */
-const normalizeStreamNames = (value: unknown): string[] => {
+const normalizeSourceIds = (value: unknown): string[] => {
   if (typeof value === 'string') return [value];
   if (Array.isArray(value)) return value.filter((item): item is string => typeof item === 'string');
   return [];
@@ -88,7 +107,7 @@ const decodeSignificantEvent = (row: RuleEventSourceRow): SignificantEvent => {
   const severity = row.severity ?? 'medium';
   return {
     ...data,
-    stream_names: normalizeStreamNames(data.stream_names),
+    source_ids: normalizeSourceIds(data.source_ids),
     '@timestamp': row['@timestamp'],
     status: isSignificantEventStatus(alertStatus) ? alertStatus : 'active',
     severity: isSignificantEventSeverity(severity) ? severity : 'medium',
@@ -153,13 +172,13 @@ const eventIdIn = (eventIds: string[]): ESQLAstExpression =>
 
 /**
  * Multi-value "contains any" filter targeting `FIELD_EXTRACT(data,
- * "stream_names")` instead of a top-level column. `MV_INTERSECTS` works correctly against
+ * "source_ids")` instead of a top-level column. `MV_INTERSECTS` works correctly against
  * `FIELD_EXTRACT`'s output for array, scalar-string, and absent-field shapes (verified live
  * against `.rule-events` on nightshift-program#1492) — no extra normalization is needed here.
  */
-const streamNamesIntersects = (values: string[]): ESQLAstExpression =>
+const sourceIdsIntersects = (values: string[]): ESQLAstExpression =>
   esql.exp`MV_INTERSECTS(FIELD_EXTRACT(${esql.col('data')}, ${esql.str(
-    'stream_names'
+    'source_ids'
   )}), [${values.map((value) => esql.str(value))}])`;
 
 /**
@@ -191,18 +210,39 @@ const topologyFeatureIdsIntersects = (values: string[]): ESQLAstExpression => {
   )}), [${literals}]))`;
 };
 
+export type UpdateEventResult =
+  | { updated: true }
+  /** Not written: another writer got there first (`head`), or the series could not be read back. */
+  | { updated: false; head?: SignificantEvent };
+
+export type UpdateEventStatusResult =
+  | { updated: 1; ignored: 0; status: SignificantEventStatus }
+  | {
+      updated: 0;
+      ignored: 1;
+      status: SignificantEventStatus;
+      reason: LifecycleSkipReason | 'not_found' | 'superseded';
+    };
+
 /**
- * Read-only `.rule-events` client used by agent-side read call sites (`event_search`,
- * `event_write`'s dedup scan, `attach_investigation`, SML). Query strategy (which ES|QL
- * extraction form to use per field) is validated per-shape on nightshift-program#1492 and #1517
- * before this client's output is trusted in production.
+ * `.rule-events` client used by agent-side call sites (`event_search`, `event_write`'s dedup scan,
+ * `attach_investigation`, SML): reads, plus `createEvent` / `updateEvent` / `updateEventStatus` to
+ * write versions. Query strategy (which ES|QL extraction form to use per field) is validated
+ * per-shape on nightshift-program#1492 and #1517 before this client's output is trusted in
+ * production.
  *
  * Not implemented here:
  * - `findLatestActive`, topology/continuation search, `attach` — agent/discovery reads (#1517).
- * - Writes — this class is read-only; writes go through `AlertEventsClient.createAlertEvent`.
  */
 export class RuleEventsClient {
-  constructor(private readonly clients: { esClient: ElasticsearchClient; space: string }) {}
+  constructor(
+    private readonly clients: {
+      esClient: ElasticsearchClient;
+      space: string;
+      getAlertEventsClient?: () => Promise<AlertEventsClientApi>;
+      emitTrigger?: TriggerEmitter;
+    }
+  ) {}
 
   private buildLatestByCurrentStateQuery(
     options: RuleEventsCurrentStateSearchOptions
@@ -227,7 +267,7 @@ export class RuleEventsClient {
       to: options.to,
       activeWhere: esql.exp`${esql.col(
         'alert.status'
-      )} IN (${SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS.map((status) => esql.str(status))})`,
+      )} IN (${SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS.map((status) => esql.str(status))})`,
     });
 
     if (options.status?.length) {
@@ -240,8 +280,8 @@ export class RuleEventsClient {
         esql.str(severity)
       )})`;
     }
-    if (options.stream?.length) {
-      query = query.where`${streamNamesIntersects(options.stream)}`;
+    if (options.sourceIds?.length) {
+      query = query.where`${sourceIdsIntersects(options.sourceIds)}`;
     }
     if (options.eventIds?.length) {
       query = query.where`${eventIdIn(options.eventIds)}`;
@@ -337,16 +377,16 @@ export class RuleEventsClient {
 
   /**
    * Returns the latest version per `group_hash` for all active ("open") events within the given
-   * time range, optionally narrowed to candidate stream/rule identities so the scan stays
+   * time range, optionally narrowed to candidate source/rule identities so the scan stays
    * proportional to the write batch instead of the whole space. Filters on the persisted
-   * `alert.status` column instead of a top-level `status` column, and reads `stream_names` /
+   * `alert.status` column instead of a top-level `status` column, and reads `source_ids` /
    * `signals.metadata.rule_uuid` through `FIELD_EXTRACT` since both live in the flattened `data`
    * column.
    *
    * Capped at MAX_DEDUP_SCAN_LIMIT distinct active events.
    */
   async findLatestActive(
-    options: CommonSearchOptions & { streamNames?: string[]; ruleUuids?: string[] }
+    options: CommonSearchOptions & { sourceIds?: string[]; ruleUuids?: string[] }
   ): Promise<{ hits: SignificantEvent[] }> {
     let query = applyTimeRange({
       query: buildBaseQuery(this.clients.space),
@@ -356,12 +396,12 @@ export class RuleEventsClient {
 
     query = pickLatestPerGroup(query, GROUP_HASH_FIELD);
 
-    query = query.where`${esql.col(
-      'alert.status'
-    )} IN (${SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS.map((status) => esql.str(status))})`;
+    query = query.where`${esql.col('alert.status')} IN (${SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS.map(
+      (status) => esql.str(status)
+    )})`;
 
-    if (options.streamNames?.length) {
-      query = query.where`${streamNamesIntersects(options.streamNames)}`;
+    if (options.sourceIds?.length) {
+      query = query.where`${sourceIdsIntersects(options.sourceIds)}`;
     }
     if (options.ruleUuids?.length) {
       query = query.where`${ruleUuidsIntersects(options.ruleUuids)}`;
@@ -419,5 +459,98 @@ export class RuleEventsClient {
       if (event.event_id) map.set(event.event_id, event);
     }
     return map;
+  }
+
+  /** Writes the first version of an event; unguarded, as there is no prior version to compare. */
+  async createEvent({ event }: { event: SignificantEvent }): Promise<void> {
+    await this.writeVersion({ event });
+  }
+
+  /** Writes the next version only while `prior` is still the head (best effort, not atomic). */
+  async updateEvent({
+    event,
+    prior,
+  }: {
+    event: SignificantEvent;
+    prior: SignificantEvent;
+  }): Promise<UpdateEventResult> {
+    // A head that cannot be read back is not a version to build on.
+    const head = await this.findLatestByEventId(event.event_id);
+    if (head === undefined || head['@timestamp'] !== prior['@timestamp']) {
+      return { updated: false, head };
+    }
+
+    await this.writeVersion({ event, prior });
+    return { updated: true };
+  }
+
+  /** Applies a status change to one event: the lifecycle controller decides, `updateEvent` writes. */
+  async updateEventStatus({
+    eventId,
+    change,
+    assessmentNote,
+    expectedTimestamp,
+  }: {
+    eventId: string;
+    change: StatusChange;
+    assessmentNote?: string;
+    /** Skips the write when the latest version's `@timestamp` differs (the event changed since). */
+    expectedTimestamp?: string;
+  }): Promise<UpdateEventStatusResult> {
+    const latest = await this.findLatestByEventId(eventId);
+    if (!latest) {
+      return { updated: 0, ignored: 1, status: requestedStatus(change), reason: 'not_found' };
+    }
+    if (expectedTimestamp !== undefined && latest['@timestamp'] !== expectedTimestamp) {
+      return { updated: 0, ignored: 1, status: latest.status, reason: 'superseded' };
+    }
+
+    const decision = decideStatusChange({
+      latest,
+      change,
+      assessmentNote: assessmentNote?.trim()
+        ? assessmentNote
+        : change.kind === 'operator'
+        ? operatorFallbackAssessmentNote(change.status)
+        : undefined,
+      timestamp: new Date().toISOString(),
+    });
+    if (!decision.write) {
+      return { updated: 0, ignored: 1, status: decision.status, reason: decision.reason };
+    }
+
+    const written = await this.updateEvent({ event: decision.event, prior: latest });
+    if (!written.updated) {
+      return {
+        updated: 0,
+        ignored: 1,
+        status: written.head?.status ?? latest.status,
+        reason: 'superseded',
+      };
+    }
+
+    return { updated: 1, ignored: 0, status: decision.event.status };
+  }
+
+  private async writeVersion({
+    event,
+    prior,
+  }: {
+    event: SignificantEvent;
+    prior?: SignificantEvent;
+  }): Promise<void> {
+    const { getAlertEventsClient, emitTrigger } = this.clients;
+    if (!getAlertEventsClient) {
+      throw new Error('RuleEventsClient was created without a writer, so it cannot write events');
+    }
+
+    const alertEventsClient = await getAlertEventsClient();
+    // `createAlertEvent` waits for a refresh, so the new version is readable immediately.
+    await alertEventsClient.createAlertEvent(toRuleEvent(event));
+    emitSignificantEventWriteTriggers({
+      emitTrigger,
+      significantEvent: event,
+      priorSignificantEvent: prior,
+    });
   }
 }

@@ -10,9 +10,13 @@ import Boom from '@hapi/boom';
 import type { AuthenticatedUser, KibanaRequest, Logger } from '@kbn/core/server';
 import type { AuthenticatedPrincipal } from '@kbn/core-security-common';
 import { getAuthenticatedPrincipal } from '@kbn/core-security-common';
-import type { CreateServiceAccountParams, ServiceAccount } from '@kbn/core-security-server';
+import type { CreateServiceAccountServerParams, ServiceAccount } from '@kbn/core-security-server';
 import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
-import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-server';
+import type {
+  AuditLogger,
+  AuditServiceSetup,
+  CheckPrivilegesWithRequest,
+} from '@kbn/security-plugin-types-server';
 import { z } from '@kbn/zod';
 
 import { buildAssumableBy } from './assumable_by';
@@ -21,6 +25,7 @@ import { parseCreateServiceAccountParams } from './create_params';
 import { toDescriptionField } from './description_field';
 import type { CreateServiceAccountFakeRequestParams } from './fake_requests';
 import { SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS, ServiceAccountFakeRequests } from './fake_requests';
+import { getPlatformAssumerServiceAccountIds } from './platform_assumers';
 import { buildRoleAssignments, readApplicationRoles } from './role_assignments';
 import { ServiceAccountTokenExchangeError } from './token_exchange_error';
 import type {
@@ -40,9 +45,8 @@ import {
   SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE,
   SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH,
   SERVICE_ACCOUNT_TOKEN_MAX_LENGTH,
-  serviceAccountIdSchema,
-  serviceAccountNameSchema,
 } from '../../common/service_accounts';
+import { ServiceAccountAuditAction, serviceAccountAuditEvent } from '../audit';
 import { getDetailedErrorMessage } from '../errors';
 import { securityTelemetry } from '../otel/instrumentation';
 import {
@@ -54,16 +58,6 @@ import {
   type UiamServiceAccountDetails,
   type UiamServicePublic,
 } from '../uiam';
-
-/**
- * The fields of UIAM's response that cross the contract boundary. The rest of the payload is
- * deliberately unvalidated: Kibana neither consumes nor reports it, so a shape change there is
- * not Kibana's to detect.
- */
-const serviceAccountSchema = z.object({
-  id: serviceAccountIdSchema,
-  name: serviceAccountNameSchema,
-});
 
 /**
  * UIAM identifies a user by the numeric id that is also their Kibana username on serverless, so
@@ -152,6 +146,7 @@ export interface UiamServiceAccountsOptions {
   license: SecurityLicense;
   uiam: UiamServicePublic;
   checkPrivilegesWithRequest: CheckPrivilegesWithRequest;
+  audit: AuditServiceSetup;
   cloudProjectContext: CloudProjectContext;
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
 }
@@ -161,6 +156,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
   private readonly license: SecurityLicense;
   private readonly uiam: UiamServicePublic;
   private readonly checkPrivilegesWithRequest: CheckPrivilegesWithRequest;
+  private readonly audit: AuditServiceSetup;
   private readonly cloudProjectContext: CloudProjectContext;
   private readonly getCurrentUser: UiamServiceAccountsOptions['getCurrentUser'];
   private readonly fakeRequests: ServiceAccountFakeRequests;
@@ -171,6 +167,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     license,
     uiam,
     checkPrivilegesWithRequest,
+    audit,
     cloudProjectContext,
     getCurrentUser,
   }: UiamServiceAccountsOptions) {
@@ -178,6 +175,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     this.license = license;
     this.uiam = uiam;
     this.checkPrivilegesWithRequest = checkPrivilegesWithRequest;
+    this.audit = audit;
     this.cloudProjectContext = cloudProjectContext;
     this.getCurrentUser = getCurrentUser;
     this.fakeRequests = new ServiceAccountFakeRequests(
@@ -194,16 +192,19 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
 
   async create(
     request: KibanaRequest,
-    params: CreateServiceAccountParams
+    params: CreateServiceAccountServerParams
   ): Promise<ServiceAccount> {
+    const auditLogger = this.audit.asScoped(request);
     try {
-      const account = await this.createAccount(request, params);
+      const account = await this.createAccount(request, params, auditLogger);
       securityTelemetry.recordServiceAccountCreationAttempt({
         outcome: 'success',
         serviceAccountBackend: 'uiam',
       });
       return account;
     } catch (e) {
+      // An authorization refusal is the one failure audited. `createAccount` logs it, and the
+      // success event, where the validated parameters are in scope.
       securityTelemetry.recordServiceAccountCreationAttempt({
         outcome: 'failure',
         serviceAccountBackend: 'uiam',
@@ -212,9 +213,11 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     }
   }
 
+  /** `auditLogger` records the created account, or an authorization refusal. */
   private async createAccount(
     request: KibanaRequest,
-    params: CreateServiceAccountParams
+    params: CreateServiceAccountServerParams,
+    auditLogger: AuditLogger
   ): Promise<ServiceAccount> {
     if (!this.license.isEnabled()) {
       throw Boom.forbidden(
@@ -222,7 +225,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
       );
     }
 
-    const { name, roles, description } = parseCreateServiceAccountParams(
+    const { name, roles, description, platformAssumers } = parseCreateServiceAccountParams(
       params,
       UIAM_SERVICE_ACCOUNT_ROLE_LIMITS
     );
@@ -235,6 +238,15 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
       logger: this.logger,
       privilege: 'manage_security',
       action: 'create a service account',
+      onRefused: (error) =>
+        auditLogger.log(
+          serviceAccountAuditEvent({
+            action: ServiceAccountAuditAction.CREATE,
+            serviceAccount: { name },
+            platformAssumers,
+            error,
+          })
+        ),
     });
 
     this.logger.debug('Attempting to create a service account');
@@ -250,7 +262,10 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
           project_type: this.cloudProjectContext.projectType,
           project_id: this.cloudProjectContext.projectId,
           role_assignments: buildRoleAssignments(this.cloudProjectContext, roles),
-          assumable_by: buildAssumableBy(this.cloudProjectContext),
+          assumable_by: buildAssumableBy({
+            ...this.cloudProjectContext,
+            platformServiceAccountIds: getPlatformAssumerServiceAccountIds(platformAssumers ?? []),
+          }),
         },
         // External API keys must not carry client authentication (`null`); everything else is
         // vouched for with Kibana's own shared secret.
@@ -263,22 +278,25 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
       throw getCreateRefusal(e) ?? e;
     }
 
-    // Validated outside the block above, so a refusal to report the account is not logged a
-    // second time as a failure to create it. By this point the account does exist.
-    const parsed = serviceAccountSchema.safeParse(result);
-    if (!parsed.success) {
-      // Returning an id or a name Kibana just rejected would be worse than failing, so name the
-      // account in the log: nothing else can find it now.
-      this.logger.error(
-        `UIAM reported the created service account [${name}] in an unrecognized shape. It may ` +
-          `need to be removed manually: ${parsed.error.message}`
-      );
-      throw Boom.badGateway('The service account was created but could not be reported back.');
-    }
+    // By this point the account exists, so the response is taken as typed rather than re-checked:
+    // refusing to report an account Kibana just created would leave the audit event, and the
+    // caller, describing a failure that did not happen. The roles are echoed from the request
+    // rather than read back. UIAM stores them as sent, and the directory reads the same roles out
+    // of its role assignments on list and get.
+    auditLogger.log(
+      serviceAccountAuditEvent({
+        action: ServiceAccountAuditAction.CREATE,
+        serviceAccount: { id: result.id, name: result.name },
+        platformAssumers,
+      })
+    );
 
-    // The roles are echoed from the request rather than read back. UIAM stores them as sent, and
-    // the directory reads the same roles out of its role assignments on list and get.
-    return { ...parsed.data, roles, ...toDescriptionField(result.description) };
+    return {
+      id: result.id,
+      name: result.name,
+      roles,
+      ...toDescriptionField(result.description),
+    };
   }
 
   async list(
@@ -295,7 +313,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
       request,
       checkPrivilegesWithRequest: this.checkPrivilegesWithRequest,
       logger: this.logger,
-      privilege: 'read_security',
+      privilege: 'manage_security',
       action: 'list service accounts',
     });
 
@@ -336,7 +354,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
       request,
       checkPrivilegesWithRequest: this.checkPrivilegesWithRequest,
       logger: this.logger,
-      privilege: 'read_security',
+      privilege: 'manage_security',
       action: 'get a service account',
     });
 
@@ -438,7 +456,11 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
           retryDelay === null ? 'terminal' : 'retryable'
         } failure)`
       );
-      throw new ServiceAccountTokenExchangeError(cause, retryDelay !== null, retryDelay ?? 0);
+      throw new ServiceAccountTokenExchangeError(cause, {
+        retryable: retryDelay !== null,
+        retryAfterMs: retryDelay ?? 0,
+        statusCode: Boom.isBoom(cause) ? cause.output.statusCode : undefined,
+      });
     }
 
     const parsed = exchangeTokenResponseSchema.safeParse(result);
@@ -446,7 +468,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
       this.logger.error(
         `Token exchange payload from UIAM failed validation for service account ${serviceAccountId}`
       );
-      throw new ServiceAccountTokenExchangeError(parsed.error, false);
+      throw new ServiceAccountTokenExchangeError(parsed.error, { retryable: false });
     }
 
     return parsed.data;

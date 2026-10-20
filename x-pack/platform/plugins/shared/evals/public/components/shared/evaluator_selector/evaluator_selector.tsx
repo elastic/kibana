@@ -22,12 +22,14 @@ export interface SelectedEvaluator {
 
 interface EvaluatorOptionMeta {
   disabled?: boolean;
-  toolTipContent?: string;
+  /** Shown inside a disabled option, since a disabled option never receives hover or focus. */
+  disabledReason?: string;
   append?: React.ReactNode;
 }
 
 interface Props {
   label: string;
+  helpText?: React.ReactNode;
   evaluators: EvaluatorDefinition[];
   selectedEvaluators: SelectedEvaluator[];
   connectorOptions: ConnectorSelectorOption[];
@@ -44,6 +46,7 @@ interface Props {
 
 export const EvaluatorSelector = ({
   label,
+  helpText,
   evaluators,
   selectedEvaluators,
   connectorOptions,
@@ -66,11 +69,19 @@ export const EvaluatorSelector = ({
   const evaluatorOptions = useMemo<Array<EuiComboBoxOptionOption<string>>>(
     () =>
       availableEvaluators.map((evaluator) => {
-        const meta = evaluatorOptionMeta?.(evaluator);
+        const { disabledReason, append, disabled } = evaluatorOptionMeta?.(evaluator) ?? {};
         return {
           label: evaluatorOptionLabel(evaluator),
           value: evaluator.name,
-          ...meta,
+          disabled,
+          append:
+            disabled && disabledReason ? (
+              <EuiText size="xs" color="subdued" component="span">
+                {disabledReason}
+              </EuiText>
+            ) : (
+              append
+            ),
         };
       }),
     [availableEvaluators, evaluatorOptionLabel, evaluatorOptionMeta]
@@ -114,7 +125,7 @@ export const EvaluatorSelector = ({
 
   return (
     <>
-      <EuiFormRow label={label} fullWidth>
+      <EuiFormRow label={label} helpText={helpText} fullWidth>
         <EuiComboBox<string>
           fullWidth
           isLoading={isEvaluatorsLoading}

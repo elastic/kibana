@@ -10,7 +10,10 @@ import 'jest-canvas-mock';
 import React from 'react';
 import { render } from '../../lib/helper/rtl_helpers';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
-import { SyntheticsPolicyEditExtensionWrapper } from './synthetics_policy_edit_extension_wrapper';
+import {
+  getMonitorRefFromVars,
+  SyntheticsPolicyEditExtensionWrapper,
+} from './synthetics_policy_edit_extension_wrapper';
 
 // ensures that fields appropriately match to their label
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
@@ -357,5 +360,29 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     expect(
       getByText('Synthetic Monitoring is now available out of the box in Synthetics')
     ).toBeInTheDocument();
+  });
+});
+
+describe('getMonitorRefFromVars', () => {
+  const varsFor = (fields: Record<string, unknown>) => ({
+    processors: { type: 'yaml', value: JSON.stringify([{ add_fields: { fields } }]) },
+  });
+
+  it('reads the config id and a single monitor space', () => {
+    expect(
+      getMonitorRefFromVars(varsFor({ config_id: 'abc', meta: { space_id: 'team-a' } }))
+    ).toEqual({ configId: 'abc', monitorSpaces: ['team-a'] });
+  });
+
+  it('reads multiple monitor spaces', () => {
+    expect(
+      getMonitorRefFromVars(
+        varsFor({ config_id: 'abc', meta: { space_id: ['default', 'team-a'] } })
+      )
+    ).toEqual({ configId: 'abc', monitorSpaces: ['default', 'team-a'] });
+  });
+
+  it('falls back to empty values when processors are missing', () => {
+    expect(getMonitorRefFromVars(undefined)).toEqual({ configId: '', monitorSpaces: [] });
   });
 });

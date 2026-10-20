@@ -61,6 +61,32 @@ const createContext = (input: Record<string, unknown>): StepHandlerContext<never
   } as unknown as StepHandlerContext<never, never>);
 
 describe('proposals.createProposal input schema', () => {
+  it.each(['', null])('should treat %p as an absent proposalId', (blank) => {
+    const parsed = createProposalStepInputSchema.parse({
+      conversationId: 'conv-1',
+      comment: 'Tune the noisy rule',
+      origin: 'alertzero',
+      proposalId: blank,
+    });
+
+    expect(parsed.proposalId).toBeUndefined();
+  });
+
+  it('should keep a supplied proposalId, and refuse one that is not a UUID', () => {
+    const base = { conversationId: 'conv-1', comment: 'c', origin: 'alertzero' };
+
+    expect(
+      createProposalStepInputSchema.parse({
+        ...base,
+        proposalId: '6f1a8c2e-2f47-5c4b-9a33-7d2a1b4e6c50',
+      }).proposalId
+    ).toBe('6f1a8c2e-2f47-5c4b-9a33-7d2a1b4e6c50');
+    // Every proposal id is a UUID, and routes and cards assume it.
+    expect(createProposalStepInputSchema.safeParse({ ...base, proposalId: 'host-1' }).success).toBe(
+      false
+    );
+  });
+
   // Liquid renders a template for an absent workflow input as `''`, so the
   // schema — not just the service — has to treat a blank as an omission.
   it.each(['', null])('should treat %p as absent for the non-string optional inputs', (blank) => {
@@ -271,6 +297,31 @@ describe('proposals.createProposal step', () => {
     });
   });
 
+  it('should hand the proposalId to the service as its id', async () => {
+    const create = jest.fn().mockResolvedValue({
+      id: '6f1a8c2e-2f47-5c4b-9a33-7d2a1b4e6c50',
+      status: 'pending',
+      category: 'respond',
+      action: { name: 'Isolate host' },
+    });
+    const { definition } = createDefinition(create);
+
+    await definition.handler(
+      createContext({
+        conversationId: 'conv-2',
+        origin: 'alertzero',
+        comment: 'Isolate the host',
+        actionWorkflowId: 'system-alertzero-action-isolate',
+        proposalId: '6f1a8c2e-2f47-5c4b-9a33-7d2a1b4e6c50',
+      })
+    );
+
+    expect(create).toHaveBeenCalledWith(
+      expect.objectContaining({ id: '6f1a8c2e-2f47-5c4b-9a33-7d2a1b4e6c50' }),
+      expect.anything()
+    );
+  });
+
   it('should report alwaysGate when the action refuses to be auto-approved', async () => {
     const create = jest.fn().mockResolvedValue({
       id: 'p',
@@ -291,13 +342,14 @@ describe('proposals.createProposal step', () => {
     expect(result.output?.alwaysGate).toBe(true);
   });
 
-  it.each([
-    ['autonomy-dependent', { name: 'Create rule', approvalPolicy: 'autonomy-dependent' }],
-    ['no declared policy', { name: 'Create rule' }],
-  ])('should leave alwaysGate false for an action with %s', async (_label, action) => {
-    // Only `always-gate` overrides the caller; a resolved action that declares
-    // anything else leaves the decision to the autonomy already resolved.
-    const create = jest.fn().mockResolvedValue({ id: 'p', status: 'pending', action });
+  it('should leave alwaysGate false for an autonomy-dependent action', async () => {
+    // Only `always-gate` overrides the caller; an autonomy-dependent action
+    // leaves the decision to the autonomy already resolved.
+    const create = jest.fn().mockResolvedValue({
+      id: 'p',
+      status: 'pending',
+      action: { name: 'Create rule', approvalPolicy: 'autonomy-dependent' },
+    });
     const { definition } = createDefinition(create);
 
     const result = await definition.handler(
