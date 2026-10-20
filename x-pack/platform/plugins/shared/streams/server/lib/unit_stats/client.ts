@@ -12,7 +12,7 @@ import type { StreamsUnit } from '@kbn/streams-schema';
 import { chunk } from 'lodash';
 import { toEsqlRequest } from '../streams/helpers/esql';
 import { UNIT_STATS_DEFAULT_WINDOW_MS, UNIT_STATS_REQUEST_TIMEOUT_MS } from './constants';
-import { isMissingStreamError, toSearchError } from './errors/search_errors';
+import { toSearchError } from './errors/search_errors';
 import { joinDestinationRows } from './mappers/join_destination_rows';
 import { joinProcessorRows } from './mappers/join_processor_rows';
 import { toRows, type EsqlRow } from './mappers/esql_rows';
@@ -29,6 +29,7 @@ import {
   buildProcessorRateQuery,
   buildProcessorSumsQuery,
 } from './query_builders/build_processor_stats_queries';
+import { buildStreamProbeQuery } from './query_builders/build_stream_probe_query';
 import type { StatsWindow } from './query_builders/filters';
 import { getIdsPerSeriesQuery, getSeriesBucketMs } from './utils/series_bucket';
 import { validateDestination, validateProcessor } from './validate_components';
@@ -118,12 +119,19 @@ export class UnitStatsClient {
     }
 
     // One pair of queries per kind, all in parallel. A kind with no queryable ids runs none.
-    const [destinationOutcome, processorOutcome] = await Promise.all([
-      destinationIds.length > 0
-        ? this.getDestinationStats({ query, ids: destinationIds, bucketMs })
-        : undefined,
-      processorIds.length > 0 ? this.getProcessorStats({ query, ids: processorIds }) : undefined,
-    ]);
+    // Without the stream there is nothing to query: the ids keep their no data results.
+    const hasQueryableIds = destinationIds.length + processorIds.length > 0;
+    const shouldQuery = hasQueryableIds && (await this.doesUnitMetricsStreamExist());
+    const [destinationOutcome, processorOutcome] = shouldQuery
+      ? await Promise.all([
+          destinationIds.length > 0
+            ? this.getDestinationStats({ query, ids: destinationIds, bucketMs })
+            : undefined,
+          processorIds.length > 0
+            ? this.getProcessorStats({ query, ids: processorIds })
+            : undefined,
+        ])
+      : [];
     Object.assign(destinations, destinationOutcome?.results);
     Object.assign(processors, processorOutcome?.results);
 
@@ -140,6 +148,24 @@ export class UnitStatsClient {
       components: { destinations, processors },
       meta: { window, ...(configHash ? { config_hash: configHash } : {}) },
     };
+  }
+
+  /**
+   * False only when the probe finds no stream (a query that returns no rows has no columns).
+   * If the probe itself fails, the queries run and report the real error.
+   */
+  private async doesUnitMetricsStreamExist(): Promise<boolean> {
+    const { esClient, logger } = this.dependencies;
+    try {
+      const response = (await esClient.esql.query(toEsqlRequest(buildStreamProbeQuery()), {
+        requestTimeout: UNIT_STATS_REQUEST_TIMEOUT_MS,
+      })) as ESQLSearchResponse;
+
+      return response.columns.length > 0;
+    } catch (error) {
+      logger.debug(`Unit stats stream probe failed: ${(error as Error).message}`);
+      return true;
+    }
   }
 
   /** The rows of a query. */
@@ -165,14 +191,9 @@ export class UnitStatsClient {
     return chunks.flat();
   }
 
-  /**
-   * The error a failed query puts on every id of its kind, so the other kind is unaffected. A
-   * missing stream is no data, not an error.
-   */
-  private toKindError(error: unknown, unitId: string, what: string) {
+  /** The error a failed query puts on every id of its kind, so the other kind is unaffected. */
+  private toKindError(error: unknown, unitId: string, what: string): StreamsUnit.StatsError {
     const { logger } = this.dependencies;
-    if (isMissingStreamError(error)) return undefined;
-
     logger.debug(`Unit stats ${what} failed for unit [${unitId}]: ${(error as Error).message}`);
     return toSearchError(error, what).toStatsError();
   }
@@ -214,10 +235,7 @@ export class UnitStatsClient {
 
       return {
         results: Object.fromEntries(
-          ids.map((id) => [
-            id,
-            { ...noDestinationStats(bucketMs), ...(failure && { error: failure }) },
-          ])
+          ids.map((id) => [id, { ...noDestinationStats(bucketMs), error: failure }])
         ),
         error: failure,
       };
@@ -248,7 +266,7 @@ export class UnitStatsClient {
 
       return {
         results: Object.fromEntries(
-          ids.map((id) => [id, { ...noProcessorStats(), ...(failure && { error: failure }) }])
+          ids.map((id) => [id, { ...noProcessorStats(), error: failure }])
         ),
         error: failure,
       };

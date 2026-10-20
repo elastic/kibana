@@ -9,13 +9,6 @@ import { errors } from '@elastic/elasticsearch';
 import { UnitStatsError } from './unit_stats_error';
 
 /**
- * A missing stats stream means no data. A new unit has no stream until its first
- * document, and this API does not report on whether the telemetry pipeline is set up.
- */
-export const isMissingStreamError = (error: unknown): boolean =>
-  error instanceof errors.ResponseError && error.statusCode === 404;
-
-/**
  * Maps a failed search to a stats error. A 403 is a ResponseError with security_exception
  * and a timeout is a TimeoutError. The original error is kept as the cause, for logging.
  */

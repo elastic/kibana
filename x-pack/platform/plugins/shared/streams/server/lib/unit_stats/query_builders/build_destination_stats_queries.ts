@@ -14,7 +14,7 @@ import {
   ESQL_MAX_ROWS,
   OUTCOME_FIELD,
   STATS_COLUMN,
-  UNIT_STATS_STREAM,
+  UNIT_METRICS_STREAM,
 } from '../constants';
 import {
   filterByIds,
@@ -57,7 +57,7 @@ export const buildDestinationRateQuery = (params: DestinationStatsQueryParams): 
   const avgLatency = esql.col(STATS_COLUMN.avgLatency);
   const id = esql.col(STATS_COLUMN.id);
 
-  return filterDestinations(esql.ts(UNIT_STATS_STREAM), params)
+  return filterDestinations(esql.ts(UNIT_METRICS_STREAM), params)
     .pipe`STATS ${incomingRate} = SUM(RATE(${items})),
         ${failedRate} = SUM(RATE(${items})) WHERE ${outcome} != "success",
         ${avgLatency} = AVG(${duration})
@@ -81,7 +81,7 @@ export const buildDestinationSumsQuery = ({
   const id = esql.col(STATS_COLUMN.id);
   const bucket = esql.col(STATS_COLUMN.bucket);
 
-  return filterDestinations(esql.from(UNIT_STATS_STREAM), params)
+  return filterDestinations(esql.from(UNIT_METRICS_STREAM), params)
     .pipe`WHERE ${destinationItems} IS NOT NULL`.pipe`EVAL delta = TO_DOUBLE(${destinationItems})`
     .pipe`STATS ${sumItems} = SUM(delta)
       BY ${id} = ${destinationId}, ${bucket} = BUCKET(@timestamp, ${bucketMs} ms)`

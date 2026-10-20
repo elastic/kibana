@@ -30,6 +30,7 @@ interface EsqlResponse {
 }
 
 const responses = {
+  probe: { columns: [{ name: '@timestamp', type: 'date' }], values: [] },
   destinationRate: {
     columns: [
       { name: 'incoming_rate', type: 'double' },
@@ -73,17 +74,27 @@ const responses = {
 
 type QueryName = keyof typeof responses;
 
+const isProbe = (query: string) => query.endsWith('| LIMIT 0');
+/** The stats queries start with a `SET` command, so the source is not at the start. */
+const isRateQuery = (query: string) => query.includes('; TS ');
+
 /**
  * Answers each `esql.query` by what the query asks for: a `TS` or a `FROM` query, for
  * destinations or for processors. An override replaces the answer, and can throw.
  */
 const makeEsql = (overrides: Partial<Record<QueryName, () => EsqlResponse>> = {}) =>
   jest.fn(async ({ query }: { query: string }) => {
+    if (isProbe(query)) return (overrides.probe ?? (() => responses.probe))();
+
     const kind = query.includes('attributes.streams.destination.id') ? 'destination' : 'processor';
-    const name = `${kind}${query.startsWith('TS') ? 'Rate' : 'Sums'}` as QueryName;
+    const name = `${kind}${isRateQuery(query) ? 'Rate' : 'Sums'}` as QueryName;
 
     return (overrides[name] ?? (() => responses[name]))();
   });
+
+/** The stats queries an esql mock was called with, not the probe. */
+const statsQueries = (esql: jest.Mock): string[] =>
+  esql.mock.calls.map(([{ query }]) => query).filter((query) => !isProbe(query));
 
 const run = (
   esql: jest.Mock,
@@ -150,7 +161,7 @@ describe('UnitStatsClient.getStats', () => {
       const response = await run(esql, { components: [ref, ref] });
 
       expect(Object.keys(response.components.destinations)).toEqual(['es-prod']);
-      const queries = esql.mock.calls.map(([{ query }]) => query);
+      const queries = statsQueries(esql);
       expect(queries).toHaveLength(2);
       queries.forEach((query) => expect(query).toContain('IN ("es-prod")'));
     });
@@ -200,8 +211,8 @@ describe('UnitStatsClient.getStats', () => {
       await run(unpinned, { filter: { time_range: timeRange } });
       await run(pinned, { filter: { time_range: timeRange, config_hash: 'h1' } });
 
-      const unpinnedQueries = unpinned.mock.calls.map(([{ query }]) => query);
-      const pinnedQueries = pinned.mock.calls.map(([{ query }]) => query);
+      const unpinnedQueries = statsQueries(unpinned);
+      const pinnedQueries = statsQueries(pinned);
       expect(unpinnedQueries).toHaveLength(4);
       unpinnedQueries.forEach((query) => {
         expect(query).toContain('resource.attributes.unit.id == "default"');
@@ -224,9 +235,7 @@ describe('UnitStatsClient.getStats', () => {
         })),
       };
       const sumsQueries = (esql: jest.Mock) =>
-        esql.mock.calls
-          .map(([{ query }]) => query)
-          .filter((query) => query.startsWith('FROM') && query.includes('destination'));
+        statsQueries(esql).filter((query) => !isRateQuery(query) && query.includes('destination'));
 
       it('splits the sums query by what the window allows, and asks for the rates once', async () => {
         const esql = makeEsql();
@@ -235,9 +244,9 @@ describe('UnitStatsClient.getStats', () => {
 
         // The default window allows 625 ids per series query.
         expect(sumsQueries(esql)).toHaveLength(2);
-        const rateQueries = esql.mock.calls
-          .map(([{ query }]) => query)
-          .filter((query) => query.startsWith('TS') && query.includes('destination'));
+        const rateQueries = statsQueries(esql).filter(
+          (query) => isRateQuery(query) && query.includes('destination')
+        );
         expect(rateQueries).toHaveLength(1);
       });
 
@@ -253,6 +262,35 @@ describe('UnitStatsClient.getStats', () => {
         // A 24 hour window has 15 minute buckets and allows 103 ids per series query.
         expect(sumsQueries(esql)).toHaveLength(13);
       });
+    });
+
+    it('probes the stream once and runs no stats query when the stream does not exist', async () => {
+      const esql = makeEsql({ probe: () => ({ columns: [], values: [] }) });
+
+      const response = await run(esql);
+
+      expect(esql).toHaveBeenCalledTimes(1);
+      expect(response.components.destinations['es-prod'].events.incoming.rate.value).toBeNull();
+      expect(
+        response.components.processors['uppercase-message'].events.incoming.rate.value
+      ).toBeNull();
+      expect(response.components.destinations['es-prod'].error).toBeUndefined();
+      expect(response.components.destinations.dbg.error?.code).toBe('unsupported');
+      expect(response.error).toBeUndefined();
+      expect(streamsUnitStatsResponseSchema.parse(response)).toEqual(response);
+    });
+
+    it('runs the stats queries when the probe itself fails, and reports their error', async () => {
+      const esql = makeEsql({
+        probe: () => {
+          throw new Error('probe failed');
+        },
+      });
+
+      const response = await run(esql);
+
+      expect(statsQueries(esql)).toHaveLength(4);
+      expect(response.components.destinations['es-prod'].events.incoming.rate.value).toBe(4.6);
     });
 
     it('returns no data and no error when the queries return no rows', async () => {

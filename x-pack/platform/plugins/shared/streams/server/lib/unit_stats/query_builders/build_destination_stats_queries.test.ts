@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UNIT_STATS_STREAM } from '../constants';
+import { UNIT_METRICS_STREAM } from '../constants';
 import {
   buildDestinationRateQuery,
   buildDestinationSumsQuery,
@@ -15,7 +15,7 @@ const window = { start: '2026-10-20T10:00:00.000Z', end: '2026-10-20T10:15:00.00
 const params = { unitId: 'default', window, ids: ['es-prod', 'es-dev'] };
 
 const head = (source: 'FROM' | 'TS') =>
-  `SET unmapped_fields = "nullify"; ${source} ${UNIT_STATS_STREAM} | WHERE resource.attributes.unit.id == "default" AND @timestamp >= "${window.start}" AND @timestamp < "${window.end}" | WHERE attributes.streams.destination.id IN ("es-prod", "es-dev")`;
+  `SET unmapped_fields = "nullify"; ${source} ${UNIT_METRICS_STREAM} | WHERE resource.attributes.unit.id == "default" AND @timestamp >= "${window.start}" AND @timestamp < "${window.end}" | WHERE attributes.streams.destination.id IN ("es-prod", "es-dev")`;
 
 describe('buildDestinationRateQuery', () => {
   it('reads the rate, failures rate and latency per destination from the time series', () => {

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { UNIT_STATS_STREAM } from '../constants';
+import { UNIT_METRICS_STREAM } from '../constants';
 import { buildProcessorRateQuery, buildProcessorSumsQuery } from './build_processor_stats_queries';
 
 const window = { start: '2026-10-20T10:00:00.000Z', end: '2026-10-20T10:15:00.000Z' };
 const params = { unitId: 'default', window, ids: ['uppercase-message'] };
 
 const head = (source: 'FROM' | 'TS') =>
-  `SET unmapped_fields = "nullify"; ${source} ${UNIT_STATS_STREAM} | WHERE resource.attributes.unit.id == "default" AND @timestamp >= "${window.start}" AND @timestamp < "${window.end}" | WHERE attributes.streams.step.id IN ("uppercase-message")`;
+  `SET unmapped_fields = "nullify"; ${source} ${UNIT_METRICS_STREAM} | WHERE resource.attributes.unit.id == "default" AND @timestamp >= "${window.start}" AND @timestamp < "${window.end}" | WHERE attributes.streams.step.id IN ("uppercase-message")`;
 
 describe('buildProcessorRateQuery', () => {
   it('reads the rate of items coming in per processor from the time series', () => {

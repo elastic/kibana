@@ -6,7 +6,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import { isMissingStreamError, toSearchError } from './search_errors';
+import { toSearchError } from './search_errors';
 
 const responseError = (statusCode: number) =>
   new errors.ResponseError({ statusCode, body: {}, headers: {}, warnings: [], meta: {} as never });
@@ -34,13 +34,5 @@ describe('toSearchError', () => {
 
     expect(mapped.cause).toBe(original);
     expect(mapped.toStatsError().reason).toBe('The stats query failed.');
-  });
-});
-
-describe('isMissingStreamError', () => {
-  it('is true for a 404 only', () => {
-    expect(isMissingStreamError(responseError(404))).toBe(true);
-    expect(isMissingStreamError(responseError(403))).toBe(false);
-    expect(isMissingStreamError(new Error('404'))).toBe(false);
   });
 });

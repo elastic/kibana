@@ -12,8 +12,8 @@
  * writes one metric per document.
  */
 
-/** Query the exact name. A wildcard hides both a 403 and a missing stream. */
-export const UNIT_STATS_STREAM = 'metrics-streams.otel-default';
+/** The stats queries use the exact name. Only the existence probe uses a wildcard. */
+export const UNIT_METRICS_STREAM = 'metrics-streams.otel-default';
 
 export const UNIT_STATS_DEFAULT_WINDOW_MS = 15 * 60 * 1000;
 

@@ -13,7 +13,7 @@ import {
   STEP_DURATION_FIELD,
   STEP_ID_FIELD,
   STEP_ITEMS_FIELD,
-  UNIT_STATS_STREAM,
+  UNIT_METRICS_STREAM,
 } from '../constants';
 import {
   filterByIds,
@@ -54,7 +54,7 @@ export const buildProcessorRateQuery = (params: ProcessorStatsQueryParams): Comp
   const incomingRate = esql.col(STATS_COLUMN.incomingRate);
   const step = esql.col(STATS_COLUMN.step);
 
-  return filterProcessors(esql.ts(UNIT_STATS_STREAM), params).pipe`WHERE ${direction} == "in"`
+  return filterProcessors(esql.ts(UNIT_METRICS_STREAM), params).pipe`WHERE ${direction} == "in"`
     .pipe`STATS ${incomingRate} = SUM(RATE(${stepItems})) BY ${step} = ${stepId}`;
 };
 
@@ -73,7 +73,7 @@ export const buildProcessorSumsQuery = (params: ProcessorStatsQueryParams): Comp
   const avgDurationPerItem = esql.col(STATS_COLUMN.avgDurationPerItem);
   const step = esql.col(STATS_COLUMN.step);
 
-  return filterProcessors(esql.from(UNIT_STATS_STREAM), params)
+  return filterProcessors(esql.from(UNIT_METRICS_STREAM), params)
     .pipe`EVAL delta = TO_DOUBLE(${stepItems})`
     .pipe`STATS ${sumItemsIn} = SUM(delta) WHERE ${direction} == "in",
         duration_sum = SUM(${stepDuration})
