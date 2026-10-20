@@ -22,6 +22,8 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { AvailabilityConfig } from '@kbn/agent-builder-server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
+import { NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID } from '@kbn/workflows/managed';
+import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { InvestigationAttachmentDocService } from '@kbn/agentic-investigations-plugin/server';
 import type { NightshiftInvestigationsConfig } from './config';
 import { InvestigationLocatorDefinition } from '../common/locators';
@@ -43,6 +45,8 @@ import { notificationRoutingAttachment } from './lib/notifications/notification_
 import type { StoredNotificationRouting } from './lib/notifications/notification_routing';
 import { NotificationRoutingClient } from './lib/notifications/notification_routing_client';
 import { sendNotificationsStepDefinition } from './step_definitions/send_notifications';
+import { handleInvestigationFailureStepDefinition } from './step_definitions/handle_investigation_failure';
+import { renderSlackMessageStepDefinition } from './step_definitions/render_slack_message';
 import { triggerInvestigationStepDefinition } from './step_definitions/trigger_investigation';
 import { obtainSandboxStepDefinition } from './step_definitions/obtain_sandbox';
 import { composeHydrateNotificationsStepDefinition } from './step_definitions/compose_hydrate_notifications';
@@ -66,7 +70,6 @@ import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/reg
 import { registerInvestigationAgentType } from './agents/investigation';
 import { registerDecisionTreeReinforcementAgentType } from './agents/decision_tree_reinforcement';
 import { createDecisionTreeTools } from './tools/decision_tree';
-import { createInvestigationProgressReportTool } from './tools/investigation_progress_report/tool';
 import { createSandboxBashTool } from './tools/sandbox_bash/tool';
 import { createSandboxViewFileTool } from './tools/sandbox_bash/view_file_tool';
 import { createSandboxStrReplaceTool } from './tools/sandbox_bash/str_replace_tool';
@@ -79,21 +82,17 @@ import {
 } from './tools/sandbox_bash/sandbox_output_redaction';
 import { createSandboxToolAvailability } from './tools/sandbox_bash/sandbox_tool_availability';
 import {
-  nightshiftInvestigationSavedObjectType,
   nightshiftSecretsEncryptionParams,
   nightshiftSecretsSavedObjectType,
   nightshiftCustomContextSavedObjectType,
-  NIGHTSHIFT_INVESTIGATION_SO_TYPE,
   nightshiftAutomationSavedObjectType,
+  nightshiftAutomationBudgetSavedObjectType,
+  NIGHTSHIFT_AUTOMATION_BUDGET_SO_TYPE,
   NIGHTSHIFT_AUTOMATION_SO_TYPE,
 } from './saved_objects';
+import { createOnboardingClient } from './onboarding/onboarding_client';
 import { createSandboxSecretsClient } from './sandbox_secrets';
 import { createCustomContextClient } from './custom_context';
-import { createInvestigationSweepRepository, SavedObjectInvestigationRepository } from './storage';
-import {
-  registerInvestigationReconciliationTask,
-  scheduleInvestigationReconciliationTask,
-} from './tasks/investigation_reconciliation_task';
 import type {
   InvestigationQuotaCallback,
   NightshiftInvestigationsServerSetup,
@@ -116,6 +115,8 @@ export class NightshiftInvestigationsPlugin
   private workflowsExtensionsStart?: NightshiftInvestigationsStartDeps['workflowsExtensions'];
   private spaces?: NightshiftInvestigationsStartDeps['spaces'];
   private agentBuilder?: NightshiftInvestigationsStartDeps['agentBuilder'];
+  private agenticInvestigations?: NightshiftInvestigationsStartDeps['agenticInvestigations'];
+  private proposals?: NightshiftInvestigationsStartDeps['proposals'];
   private inference?: NightshiftInvestigationsStartDeps['inference'];
   private sandboxStart?: NightshiftInvestigationsStartDeps['sandbox'];
   private ruleRegistry?: NightshiftInvestigationsStartDeps['ruleRegistry'];
@@ -170,8 +171,8 @@ export class NightshiftInvestigationsPlugin
       registerDecisionTreeAiIndex(plugins.contextEngine, this.logger.get('decision_trees'));
     }
 
-    core.savedObjects.registerType(nightshiftInvestigationSavedObjectType);
     core.savedObjects.registerType(nightshiftAutomationSavedObjectType);
+    core.savedObjects.registerType(nightshiftAutomationBudgetSavedObjectType);
     core.savedObjects.registerType(nightshiftSecretsSavedObjectType);
     core.savedObjects.registerType(nightshiftCustomContextSavedObjectType);
     plugins.encryptedSavedObjects?.registerType(nightshiftSecretsEncryptionParams);
@@ -198,11 +199,13 @@ export class NightshiftInvestigationsPlugin
       logger: this.logger.get('sandbox_secrets'),
     });
 
-    registerInvestigationReconciliationTask({
-      core,
-      taskManager: plugins.taskManager,
-      logger: this.logger.get('investigation_reconciliation'),
-      getWorkflowsManagement: () => this.workflowsManagement,
+    const onboardingClient = createOnboardingClient({
+      getDeps: () => ({
+        workflowsManagement: this.workflowsManagement,
+        spaces: this.spaces,
+      }),
+      listSandboxSecretKeys: (request) => sandboxSecretsClient.listKeysForSandbox(request),
+      logger: this.logger.get('onboarding'),
     });
 
     const getTriggerEmitter = (request: KibanaRequest): TriggerEmitter | undefined =>
@@ -236,6 +239,8 @@ export class NightshiftInvestigationsPlugin
         cortexEnabled: this.cortexEnabled,
         memoryEnabled: this.memoryEnabled,
         decisionTreesEnabled: this.decisionTreesEnabled,
+        investigationToolsEnabled: Boolean(plugins.agenticInvestigations),
+        proposalsEnabled: Boolean(plugins.proposals),
         telemetryConnectorId,
         getCustomContextInstructions: ({ request, spaceId }) =>
           customContextClient.getInstructions(request, spaceId),
@@ -244,12 +249,6 @@ export class NightshiftInvestigationsPlugin
       if (this.decisionTreesEnabled) {
         registerDecisionTreeReinforcementAgentType(plugins.agentBuilder);
       }
-      plugins.agentBuilder.tools.register(
-        createInvestigationProgressReportTool({
-          logger: this.logger.get('investigation_progress_report_tool'),
-          availability: this.getInvestigationAvailability(),
-        })
-      );
 
       if (plugins.sandbox?.isAvailable) {
         const sandboxLogger = this.logger.get('sandbox');
@@ -335,7 +334,10 @@ export class NightshiftInvestigationsPlugin
     if (plugins.workflowsManagement) {
       if (plugins.workflowsExtensions) {
         plugins.workflowsExtensions.registerStepDefinition(
-          triggerInvestigationStepDefinition(this.getInvestigationsClient)
+          triggerInvestigationStepDefinition(
+            this.getInvestigationsClient,
+            this.getAutomationsSoClient
+          )
         );
         // `agentBuilder` is only available from `start()`, so the step resolves it lazily.
         plugins.workflowsExtensions.registerStepDefinition(
@@ -358,6 +360,21 @@ export class NightshiftInvestigationsPlugin
             getInvestigationsClient: this.getInvestigationsClient,
             getActions: () => this.actionsStart,
             getRoutingClient: this.getNotificationRoutingClient,
+          })
+        );
+        plugins.workflowsExtensions.registerStepDefinition(
+          handleInvestigationFailureStepDefinition({
+            investigationLocator,
+            getInvestigationsClient: this.getInvestigationsClient,
+            getActions: () => this.actionsStart,
+            getRoutingClient: this.getNotificationRoutingClient,
+            getTriggerEmitter,
+          })
+        );
+        plugins.workflowsExtensions.registerStepDefinition(
+          renderSlackMessageStepDefinition({
+            investigationLocator,
+            getInvestigationsClient: this.getInvestigationsClient,
           })
         );
         // Registered even when disabled: the combined workflow no-ops a writer branch instead
@@ -449,6 +466,7 @@ export class NightshiftInvestigationsPlugin
           isCortexEnabled: () => this.cortexEnabled,
           sandboxSecretsClient,
           customContextClient,
+          onboardingClient,
           getCortexPageStore: (request: KibanaRequest) => {
             if (!this.elasticsearch) {
               throw new Error(
@@ -515,6 +533,8 @@ export class NightshiftInvestigationsPlugin
     this.spaces = plugins.spaces;
     this.workflowsExtensionsStart = plugins.workflowsExtensions;
     this.agentBuilder = plugins.agentBuilder;
+    this.agenticInvestigations = plugins.agenticInvestigations;
+    this.proposals = plugins.proposals;
     this.inference = plugins.inference;
     this.sandboxStart = plugins.sandbox;
     this.ruleRegistry = plugins.ruleRegistry;
@@ -551,26 +571,16 @@ export class NightshiftInvestigationsPlugin
       });
     }
 
-    if (this.workflowsManagement) {
-      scheduleInvestigationReconciliationTask({ taskManager: plugins.taskManager }).catch((err) => {
-        this.logger.error(`Failed to schedule investigation reconciliation task: ${err.message}`);
-      });
-    }
-
-    const investigationSweepRepository = createInvestigationSweepRepository(
-      coreStart.savedObjects,
-      this.logger
-    );
-
     return {
       getInvestigationsClient: this.getInvestigationsClient,
-      deleteAllInvestigations: () => investigationSweepRepository.deleteAllAcrossSpaces(),
       isInvestigationAvailable: (request) =>
         isInvestigationRunAvailable({
           request,
           featureFlags: coreStart.featureFlags,
           agentBuilder: this.agentBuilder,
           inference: this.inference,
+          agenticInvestigations: this.agenticInvestigations,
+          proposals: this.proposals,
           logger: this.logger,
           spaces: this.spaces,
           workflowsExtensions: this.workflowsExtensionsStart,
@@ -590,6 +600,8 @@ export class NightshiftInvestigationsPlugin
           featureFlags: this.featureFlags,
           agentBuilder: this.agentBuilder,
           inference: this.inference,
+          agenticInvestigations: this.agenticInvestigations,
+          proposals: this.proposals,
           logger: this.logger,
           spaces: this.spaces,
           workflowsExtensions: this.workflowsExtensionsStart,
@@ -614,9 +626,9 @@ export class NightshiftInvestigationsPlugin
       logger: this.logger,
       spaceIdOverride: spaceId,
       agentBuilder: this.agentBuilder,
+      agenticInvestigations: this.agenticInvestigations,
       agentAvailability: this.getInvestigationAvailability(),
       investigationQuotaCallback: this.investigationQuotaCallback,
-      investigationRepository: this.createInvestigationRepository(request, resolvedSpaceId),
       inference: this.inference,
       savedObjects: this.savedObjects,
       uiSettings: this.uiSettings,
@@ -626,6 +638,8 @@ export class NightshiftInvestigationsPlugin
           featureFlags: this.featureFlags!,
           agentBuilder: this.agentBuilder,
           inference: this.inference,
+          agenticInvestigations: this.agenticInvestigations,
+          proposals: this.proposals,
           logger: this.logger,
           connectorId,
           spaceId: resolvedSpaceId,
@@ -639,6 +653,8 @@ export class NightshiftInvestigationsPlugin
           featureFlags: this.featureFlags!,
           agentBuilder: this.agentBuilder,
           inference: this.inference,
+          agenticInvestigations: this.agenticInvestigations,
+          proposals: this.proposals,
           logger: this.logger,
           spaceId: resolvedSpaceId,
           spaces: this.spaces,
@@ -689,30 +705,15 @@ export class NightshiftInvestigationsPlugin
     return this.savedObjects
       .getScopedClient(request, {
         excludedExtensions: [SECURITY_EXTENSION_ID],
-        includedHiddenTypes: [NIGHTSHIFT_AUTOMATION_SO_TYPE],
+        includedHiddenTypes: [NIGHTSHIFT_AUTOMATION_SO_TYPE, NIGHTSHIFT_AUTOMATION_BUDGET_SO_TYPE],
       })
       .asScopedToNamespace(spaceId);
   };
 
-  private createInvestigationRepository = (
-    request: KibanaRequest,
-    spaceId: string
-  ): SavedObjectInvestigationRepository => {
-    if (!this.savedObjects) {
-      throw new Error('savedObjects is not available — plugin start() has not been called');
-    }
-    const savedObjectsClient = this.savedObjects
-      .getScopedClient(request, {
-        excludedExtensions: [SECURITY_EXTENSION_ID],
-        includedHiddenTypes: [NIGHTSHIFT_INVESTIGATION_SO_TYPE],
-      })
-      .asScopedToNamespace(spaceId);
-    return new SavedObjectInvestigationRepository({
-      savedObjectsClient,
-      logger: this.logger.get('investigation_repository'),
-    });
-  };
-
+  /**
+   * Installs the static managed workflows this plugin owns and signals readiness so the
+   * platform can reconcile (prune orphans / apply upgrades) for this plugin's workflows.
+   */
   private async installManagedWorkflows(
     workflowsExtensions: WorkflowsExtensionsServerPluginStart
   ): Promise<void> {
@@ -720,6 +721,9 @@ export class NightshiftInvestigationsPlugin
       NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER
     );
     await installInvestigationWorkflow({ client });
+    await client.install(NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID, {
+      spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+    });
     if (this.cortexEnabled || this.memoryEnabled) {
       await installSandboxMaterializeWorkspaceWorkflow({ client });
       await installAgentOptimizationsWorkflow({ client });

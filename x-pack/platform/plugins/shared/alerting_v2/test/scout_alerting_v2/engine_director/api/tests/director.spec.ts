@@ -1405,6 +1405,115 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
   );
 
   apiTest(
+    "no_data.strategy 'keep_last' writes one no_data marker while a group stays absent and resumes when data returns",
+    async ({ apiServices }) => {
+      const ABSENT_HOST = 'host-director-no-data-idle-absent';
+      const STEADY_HOST = 'host-director-no-data-idle-steady';
+      const hostsClause = `host.name IN ("${ABSENT_HOST}", "${STEADY_HOST}")`;
+
+      const indexHostDoc = (host: string) =>
+        apiServices.alertingV2.sourceIndex.indexDocs({
+          index: SOURCE_INDEX,
+          docs: [
+            {
+              '@timestamp': new Date().toISOString(),
+              'host.name': host,
+              severity: 'high',
+              value: 1,
+            },
+          ],
+        });
+
+      await indexHostDoc(ABSENT_HOST);
+      await indexHostDoc(STEADY_HOST);
+
+      const rule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'director-no-data-idle' },
+          query: {
+            base: `FROM ${SOURCE_INDEX} | WHERE ${hostsClause} | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+          },
+          // Manual recovery so the recovery step never classifies the absent group.
+          recovery: { strategy: 'manual' },
+          no_data: {
+            strategy: 'keep_last',
+            query: `FROM ${SOURCE_INDEX} | WHERE ${hostsClause} | STATS count = COUNT(*) BY host.name`,
+          },
+          // A high pending count keeps both groups in `pending` for the whole test.
+          state_transition: { pending: { count: 100 } },
+        })
+      );
+
+      // Breach events carry the row's `host.name` in `data`, so each host's
+      // breaches can be counted directly without deriving a group hash.
+      const breachesForHost = async (host: string) =>
+        (await apiServices.alertingV2.ruleEvents.find(rule.id, { status: 'breached' })).filter(
+          (event) => event.data?.['host.name'] === host
+        );
+
+      // Both groups breach and open pending episodes.
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 2, {
+        episodeStatus: 'pending',
+      });
+
+      // The steady host is the execution clock and must keep breaching for the
+      // whole test: only the absent group may go no-data, which is what lets
+      // the no_data assertion below skip a group filter. The executor only sees
+      // docs inside its sliding lookback window (`LOOKBACK_WINDOW`, 1m), so a
+      // single initial doc would age out and the steady group would itself go
+      // no-data once the test runs longer than that window. Re-indexing a fresh
+      // steady doc before each wait keeps it inside the window regardless of how
+      // long any phase takes on a loaded CI agent.
+      const keepSteadyHostFresh = () => indexHostDoc(STEADY_HOST);
+
+      // Phase 1 — transition-in: the absent host stops reporting; one marker lands.
+      await apiServices.alertingV2.sourceIndex.deleteDocs({
+        index: SOURCE_INDEX,
+        query: { term: { 'host.name': ABSENT_HOST } },
+      });
+      await keepSteadyHostFresh();
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'no_data' });
+
+      // Phase 2 — prolonged absence: use the steady host's breaches as the
+      // execution clock and wait for three more runs. Only the absent group
+      // ever goes no-data (the steady host keeps breaching), so every no_data
+      // event for the rule belongs to the absent group.
+      const clockAtMarker = (await breachesForHost(STEADY_HOST)).length;
+      await expect
+        .poll(
+          async () => {
+            await keepSteadyHostFresh();
+            return (await breachesForHost(STEADY_HOST)).length;
+          },
+          {
+            timeout: POLL_TIMEOUT_MS,
+            intervals: [POLL_INTERVAL_MS],
+          }
+        )
+        .toBeGreaterThanOrEqual(clockAtMarker + 3);
+
+      const noDataEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+        status: 'no_data',
+      });
+      expect(noDataEvents).toHaveLength(1);
+      expect(noDataEvents[0].alert?.status).toBe('pending');
+      const markerScheduledAt = noDataEvents[0].scheduled_timestamp ?? '';
+
+      // Phase 3 — transition-out: data returns and a newer breached event is written.
+      await indexHostDoc(ABSENT_HOST);
+      await expect
+        .poll(
+          async () =>
+            (
+              await breachesForHost(ABSENT_HOST)
+            ).filter((event) => (event.scheduled_timestamp ?? '') > markerScheduledAt).length,
+          { timeout: POLL_TIMEOUT_MS, intervals: [POLL_INTERVAL_MS] }
+        )
+        .toBeGreaterThanOrEqual(1);
+    }
+  );
+
+  apiTest(
     "no_data.strategy 'resolve' resolves the episode to inactive via a no_data event",
     async ({ apiServices }) => {
       const HOST = 'host-director-no-data-recover';

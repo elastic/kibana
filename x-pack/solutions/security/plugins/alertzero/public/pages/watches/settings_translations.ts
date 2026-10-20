@@ -13,6 +13,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { BUDGET_PER_HOUR_MAX, LOOKBACK_HOURS_MAX, LOOKBACK_HOURS_MIN } from '@kbn/alertzero-common';
 
 /* -------------------------------------------------------------------------- */
 /* Header                                                                     */
@@ -156,6 +157,54 @@ export const READ_ONLY_TOOLTIP = i18n.translate(
   {
     defaultMessage: 'Read-only access',
   }
+);
+
+export const UNSAVED_CHANGES_BADGE_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.unsavedChangesBadgeLabel',
+  { defaultMessage: 'Unsaved changes' }
+);
+
+export const NO_CHANGES_TO_SAVE_TOOLTIP = i18n.translate(
+  'xpack.alertzero.watches.settings.noChangesToSaveTooltip',
+  { defaultMessage: 'No changes to save' }
+);
+
+export const KEEP_EDITING_BUTTON_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.keepEditingButtonLabel',
+  { defaultMessage: 'Keep editing' }
+);
+
+export const LEAVE_PROMPT_TITLE = i18n.translate(
+  'xpack.alertzero.watches.settings.leavePromptTitle',
+  { defaultMessage: 'Leave without saving?' }
+);
+
+export const LEAVE_PROMPT_DESCRIPTION = i18n.translate(
+  'xpack.alertzero.watches.settings.leavePromptDescription',
+  {
+    defaultMessage:
+      'You have unsaved changes on this Watch. If you leave, those changes will be lost unless you save first.',
+  }
+);
+
+export const LEAVE_PROMPT_CONFIRM_BUTTON_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.leavePromptConfirmButtonLabel',
+  { defaultMessage: 'Leave without saving' }
+);
+
+export const DISCARD_CONFIRM_TITLE = i18n.translate(
+  'xpack.alertzero.watches.settings.discardConfirmTitle',
+  { defaultMessage: 'Discard unsaved changes?' }
+);
+
+export const DISCARD_CONFIRM_DESCRIPTION = i18n.translate(
+  'xpack.alertzero.watches.settings.discardConfirmDescription',
+  { defaultMessage: 'The following Workers have unsaved changes that will be lost:' }
+);
+
+export const DISCARD_CONFIRM_BUTTON_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.discardConfirmButtonLabel',
+  { defaultMessage: 'Discard' }
 );
 
 /** Shown instead of navigating when managed workflows are hidden in this space. */
@@ -364,6 +413,59 @@ export const MINIMUM_CONFIDENCE_SCORE_HELP_TEXT = i18n.translate(
   'xpack.alertzero.watches.settings.alertTriage.minimumConfidenceScoreHelpText',
   {
     defaultMessage:
-      'False positive alerts must meet or exceed this confidence score to be surfaced for review or auto-closed. Alerts below the threshold are still tagged with the verdict but require no action. Lower values surface more alerts; higher values are more conservative.',
+      'Lowest confidence at which a false positive is surfaced for review or auto-closed.',
   }
+);
+
+export const MINIMUM_CONFIDENCE_SCORE_DETAIL_TEXT = i18n.translate(
+  'xpack.alertzero.watches.settings.alertTriage.minimumConfidenceScoreDetailText',
+  {
+    defaultMessage:
+      'Alerts below the threshold are still tagged with the verdict but require no action. Lower values surface more alerts; higher values are more conservative.',
+  }
+);
+
+export const BUDGET_PER_HOUR_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.alertTriage.budgetPerHourLabel',
+  { defaultMessage: 'Triage budget per hour' }
+);
+
+export const BUDGET_PER_HOUR_HELP_TEXT = i18n.translate(
+  'xpack.alertzero.watches.settings.alertTriage.budgetPerHourHelpText',
+  { defaultMessage: 'How much triage work the worker plans each hour, in cost units.' }
+);
+
+export const getBudgetPerHourDetailText = (min: number): string =>
+  i18n.translate('xpack.alertzero.watches.settings.alertTriage.budgetPerHourDetailText', {
+    defaultMessage:
+      'A batch of alerts costs a fixed overhead plus a cost per alert, so a larger budget triages more alerts and uses more model capacity. The budget is split across runs: a shorter schedule means smaller, more frequent runs, and only raising the budget triages more alerts per hour. Between {min} and {max}; the minimum rises with a shorter schedule so each run can fund at least one batch.',
+    values: { min, max: BUDGET_PER_HOUR_MAX },
+  });
+
+export const BUDGET_PER_HOUR_ARIA_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.alertTriage.budgetPerHourAriaLabel',
+  { defaultMessage: 'Triage budget per hour' }
+);
+
+export const LOOKBACK_HOURS_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.alertTriage.lookbackHoursLabel',
+  { defaultMessage: 'Lookback (hours)' }
+);
+
+export const LOOKBACK_HOURS_HELP_TEXT = i18n.translate(
+  'xpack.alertzero.watches.settings.alertTriage.lookbackHoursHelpText',
+  { defaultMessage: 'How many hours back each run looks for alerts to triage.' }
+);
+
+export const LOOKBACK_HOURS_DETAIL_TEXT = i18n.translate(
+  'xpack.alertzero.watches.settings.alertTriage.lookbackHoursDetailText',
+  {
+    defaultMessage: 'Alerts older than this are not triaged. Between {min} and {max}.',
+    values: { min: LOOKBACK_HOURS_MIN, max: LOOKBACK_HOURS_MAX },
+  }
+);
+
+export const LOOKBACK_HOURS_ARIA_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.alertTriage.lookbackHoursAriaLabel',
+  { defaultMessage: 'Lookback in hours' }
 );

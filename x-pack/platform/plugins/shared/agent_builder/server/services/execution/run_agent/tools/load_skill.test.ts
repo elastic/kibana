@@ -178,7 +178,10 @@ describe('load_skill tool', () => {
       stack: [{ type: 'agent', agentId: 'a1', conversationId: 'c1', executionId: 'e1' }],
     } as any;
 
-    const analyticsService = { reportSkillInvoked: jest.fn() };
+    const analyticsService = {
+      reportSkillInvoked: jest.fn(),
+      reportCompactionTriggered: jest.fn(),
+    };
     const trackingService = { trackSkillInvocation: jest.fn() };
 
     const tool = createLoadSkillTool({ analyticsService, trackingService });

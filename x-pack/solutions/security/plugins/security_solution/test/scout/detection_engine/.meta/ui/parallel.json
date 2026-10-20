@@ -1,17 +1,17 @@
 {
-  "sha1": "a742dd04c1fca0dabdb96e5c2574faebf7ac7530",
+  "sha1": "4c1a5b8b46254e3bb8f4ec7401cbc90af6f28dea",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "2b399116595eb54-dcb22b3a7aa5473",
-      "title": "Seed synthetic MITRE entities (version 99.0)",
+      "id": "2b399116595eb54-2e53726a69c4e83",
+      "title": "Seed synthetic MITRE entities (versions 99.0, 9999.0)",
       "expectedStatus": "passed",
       "tags": [],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/global.setup.ts",
-        "line": 19,
+        "line": 81,
         "column": 1
       }
     },
@@ -58,6 +58,38 @@
       }
     },
     {
+      "id": "f4580a1ee3ff8d8-87907c20fb755f5",
+      "title": "EQL rule editing with non-blocking query validation errors saves the rule after confirming the warning when the data source does not exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/eql_rule_edit_non_blocking_errors.spec.ts",
+        "line": 43,
+        "column": 25
+      }
+    },
+    {
+      "id": "f4580a1ee3ff8d8-6bcf831f66ebd49",
+      "title": "EQL rule editing with non-blocking query validation errors saves the rule after confirming the warning when a queried field does not exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/eql_rule_edit_non_blocking_errors.spec.ts",
+        "line": 58,
+        "column": 25
+      }
+    },
+    {
       "id": "176ca0ecf589cb0-c6a4e67e2d9dda8",
       "title": "Rule creation MITRE picker — managed MITRE source loads tactics from the managed MITRE API and persists a tactic/technique/subtechnique selection after rule save",
       "expectedStatus": "passed",
@@ -86,13 +118,13 @@
       }
     },
     {
-      "id": "a764ffbb01ba080-9151f5692b280e6",
-      "title": "Remove synthetic MITRE entities (version 99.0)",
+      "id": "a764ffbb01ba080-19bcbc13293e686",
+      "title": "Remove synthetic MITRE entities (versions 99.0, 9999.0)",
       "expectedStatus": "passed",
       "tags": [],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/global.teardown.ts",
-        "line": 16,
+        "line": 22,
         "column": 1
       }
     }

@@ -21,6 +21,8 @@ describe('useUpdateSignificantEvent', () => {
   const fetch = jest.fn();
   const addSuccess = jest.fn();
   const addError = jest.fn();
+  const addWarning = jest.fn();
+  const addInfo = jest.fn();
 
   const wrapper = ({ children }: { children: React.ReactNode }) => {
     const queryClient = new QueryClient({
@@ -33,9 +35,11 @@ describe('useUpdateSignificantEvent', () => {
     fetch.mockReset();
     addSuccess.mockReset();
     addError.mockReset();
+    addWarning.mockReset();
+    addInfo.mockReset();
     fetch.mockResolvedValue({ updated: 1, ignored: 0, status: 'inactive' });
     mockUseKibana.mockReturnValue({
-      core: { notifications: { toasts: { addSuccess, addError } } },
+      core: { notifications: { toasts: { addSuccess, addError, addWarning, addInfo } } },
       dependencies: {
         start: {
           significantEvents: { significantEventsRepositoryClient: { fetch } },
@@ -79,5 +83,42 @@ describe('useUpdateSignificantEvent', () => {
         signal: null,
       });
     });
+  });
+
+  it('keeps the caller open and warns when the update was superseded', async () => {
+    fetch.mockResolvedValue({ updated: 0, ignored: 1, status: 'active', reason: 'superseded' });
+    const onUpdateSuccess = jest.fn();
+    const { result } = renderHook(() => useUpdateSignificantEvent({ onUpdateSuccess }), {
+      wrapper,
+    });
+
+    act(() => {
+      result.current.updateEventStatus({ eventId: 'event-1', status: 'inactive' });
+    });
+
+    await waitFor(() => expect(addWarning).toHaveBeenCalledTimes(1));
+    expect(onUpdateSuccess).not.toHaveBeenCalled();
+    expect(addInfo).not.toHaveBeenCalled();
+  });
+
+  it('closes the caller with an info toast on an ordinary no-op', async () => {
+    fetch.mockResolvedValue({
+      updated: 0,
+      ignored: 1,
+      status: 'inactive',
+      reason: 'already_in_state',
+    });
+    const onUpdateSuccess = jest.fn();
+    const { result } = renderHook(() => useUpdateSignificantEvent({ onUpdateSuccess }), {
+      wrapper,
+    });
+
+    act(() => {
+      result.current.updateEventStatus({ eventId: 'event-1', status: 'inactive' });
+    });
+
+    await waitFor(() => expect(onUpdateSuccess).toHaveBeenCalledTimes(1));
+    expect(addInfo).toHaveBeenCalledTimes(1);
+    expect(addWarning).not.toHaveBeenCalled();
   });
 });
