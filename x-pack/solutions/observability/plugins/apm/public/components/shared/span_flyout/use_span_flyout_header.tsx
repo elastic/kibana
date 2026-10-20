@@ -133,8 +133,7 @@ export function useSpanFlyoutHeader({
   ];
 
   if (spanHttpUrl) {
-    const responseCode =
-      span.http?.response?.status_code || span.span?.http?.response?.status_code;
+    const responseCode = span.http?.response?.status_code || span.span?.http?.response?.status_code;
 
     metaBlocks.push(
       <MetaBlock

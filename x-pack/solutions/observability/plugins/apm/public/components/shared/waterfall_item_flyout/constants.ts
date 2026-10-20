@@ -23,7 +23,7 @@ export const RESPONSE_LABEL = i18n.translate('xpack.apm.waterfallItemFlyout.resp
   defaultMessage: 'Response',
 });
 
-export const NAME_LABEL =i18n.translate('xpack.apm.transactionDetails.spanFlyout.nameLabel', {
+export const NAME_LABEL = i18n.translate('xpack.apm.transactionDetails.spanFlyout.nameLabel', {
   defaultMessage: 'Name',
 });
 
