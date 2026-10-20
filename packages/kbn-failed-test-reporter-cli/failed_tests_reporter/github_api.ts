@@ -37,6 +37,10 @@ export interface GithubIssue {
   labels: unknown[];
   body: string;
   state: GithubIssueState;
+  /** When the issue was last closed; null while it is open. */
+  closed_at?: string | null;
+  /** `completed`, `not_planned`, `duplicate` or `reopened`; null when never closed. */
+  state_reason?: string | null;
 }
 
 export interface ListIssuesOptions {
@@ -175,6 +179,21 @@ export class GithubApi {
           state: 'open', // Reopen issue if it was closed.
           body: newBody,
         },
+      },
+      undefined
+    );
+  }
+
+  /** Replace the body of an issue and, when given, set its state; nothing else changes. */
+  async editIssue(
+    issueNumber: number,
+    { body, state }: { body: string; state?: GithubIssueState }
+  ) {
+    await this.request(
+      {
+        method: 'PATCH',
+        url: Url.resolve(this.baseUrl, `issues/${encodeURIComponent(issueNumber)}`),
+        data: { body, ...(state ? { state } : {}) },
       },
       undefined
     );
