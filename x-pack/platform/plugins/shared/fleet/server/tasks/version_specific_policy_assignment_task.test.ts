@@ -13,7 +13,7 @@ import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 
 import { createAppContextStartContractMock } from '../mocks';
-import { AgentReassignmentError } from '../errors';
+import { AgentAlreadyAssignedError, AgentReassignmentError } from '../errors';
 import { agentPolicyService, appContextService, packagePolicyService } from '../services';
 import { fetchAllAgentsByKuery, getAgentsByKuery } from '../services/agents';
 import { reassignAgents } from '../services/agents/reassign';
@@ -459,8 +459,13 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
     describe.each([
       [
         'logs at debug level when the agents are already assigned',
-        new AgentReassignmentError('x'),
+        new AgentAlreadyAssignedError('x'),
         false,
+      ],
+      [
+        'logs an error when the agents are hosted',
+        new AgentReassignmentError('No agents to reassign, already assigned or hosted agents'),
+        true,
       ],
       ['logs an error when the reassignment fails', new Error('boom'), true],
     ])('Reassignment failure: %s', (_name, reassignError, expectError) => {

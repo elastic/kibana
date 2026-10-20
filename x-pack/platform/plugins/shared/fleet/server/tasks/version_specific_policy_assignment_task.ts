@@ -40,12 +40,13 @@ import {
 } from '../services/utils/version_specific_policies';
 import { fetchAllAgentsByKuery, getAgentsByKuery } from '../services/agents';
 import { reassignAgents } from '../services/agents/reassign';
-import { AgentReassignmentError } from '../errors';
+import { AgentAlreadyAssignedError } from '../errors';
 import {
   splitVersionSuffixFromPolicyId,
   classifyPolicyId,
   buildAgentVersionVariantsKueryFragment,
   getSentinelVersionPolicyId,
+  hasSentinelVersionPolicy,
   hasSentinelVersionSuffix,
 } from '../../common/services/version_specific_policies_utils';
 import {
@@ -429,6 +430,7 @@ export class VersionSpecificPolicyAssignmentTask {
     const agentPolicyFetcher = await agentPolicyService.fetchAllAgentPolicies(soClient, {
       kuery: [
         `not ${AGENT_POLICY_SAVED_OBJECT_TYPE}.has_agent_version_conditions:true`,
+        // Keep in sync with `hasSentinelVersionPolicy`.
         `not ${AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed:true`,
         `not ${AGENT_POLICY_SAVED_OBJECT_TYPE}.supports_agentless:true`,
       ].join(' and '),
@@ -988,12 +990,13 @@ export class VersionSpecificPolicyAssignmentTask {
   }
 
   /**
-   * `AgentReassignmentError` means that there was nothing to reassign, e.g. the agents were already moved
-   * to the target policy since they were selected. That is expected, so it is not logged as an error.
+   * `AgentAlreadyAssignedError` means that the agents were already moved to the target policy since they
+   * were selected. That is expected, so it is not logged as an error. Other reassignment errors, e.g. hosted
+   * agents, are still logged as errors.
    */
   private logReassignError(targetPolicyId: string, error: unknown) {
     const message = `[VersionSpecificPolicyAssignmentTask] Error reassigning agents to ${targetPolicyId}: ${error}`;
-    if (error instanceof AgentReassignmentError) {
+    if (error instanceof AgentAlreadyAssignedError) {
       this.logger.debug(message);
     } else {
       this.logger.error(message);
@@ -1313,12 +1316,7 @@ export class VersionSpecificPolicyAssignmentTask {
         // be left on a missing policy. Falling back to the base policy is always safe: the
         // sentinel assignment moves the agents later.
         let targetPolicyId = parentPolicyId;
-        // Managed and agentless policies are left on the plain id, like in `assignAgentsToSentinelPolicies`.
-        if (
-          sentinelVersionEnabled &&
-          !parentPolicy?.is_managed &&
-          !parentPolicy?.supports_agentless
-        ) {
+        if (sentinelVersionEnabled && (!parentPolicy || hasSentinelVersionPolicy(parentPolicy))) {
           const upToDatePolicyIds = await this.ensureSentinelPoliciesUpToDate(
             esClient,
             soClient,
