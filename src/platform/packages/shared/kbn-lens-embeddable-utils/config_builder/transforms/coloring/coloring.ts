@@ -394,12 +394,11 @@ const toStateRangeBounds = ({
 
 function mapSerializedValueToAPI(value: unknown): SerializableValueType {
   if (value !== null && typeof value === 'object' && 'type' in value) {
-    const typed = value as { type: string };
-    if (typed.type === 'multiFieldKey') {
-      return { ...typed, type: 'multi_field_key' } as SerializableValueType;
+    if (value.type === 'multiFieldKey') {
+      return { ...value, type: 'multi_field_key' } as SerializableValueType;
     }
-    if (typed.type === 'rangeKey') {
-      const { from, to, ranges } = typed as SerializedRangeKey;
+    if (value.type === 'rangeKey') {
+      const { from, to, ranges } = value as SerializedRangeKey;
       return {
         type: 'range_key',
         ...toAPIRangeBounds({ from, to }),
@@ -415,12 +414,11 @@ function mapSerializedValueToAPI(value: unknown): SerializableValueType {
 
 function mapSerializedValueFromAPI(value: SerializableValueType): unknown {
   if (value !== null && typeof value === 'object' && 'type' in value) {
-    const typed = value as { type: string };
-    if (typed.type === 'multi_field_key') {
-      return { ...typed, type: 'multiFieldKey' };
+    if (value.type === 'multi_field_key') {
+      return { ...value, type: 'multiFieldKey' };
     }
-    if (typed.type === 'range_key') {
-      const { from, to, ranges } = typed as RangeKeyType;
+    if (value.type === 'range_key') {
+      const { from, to, ranges } = value as RangeKeyType;
       const stateValue: SerializedRangeKey = {
         type: 'rangeKey',
         ...toStateRangeBounds({ from, to }),
