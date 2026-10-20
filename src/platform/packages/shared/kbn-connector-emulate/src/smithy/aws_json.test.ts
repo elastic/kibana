@@ -113,6 +113,7 @@ describe('AWS JSON services from Smithy models', () => {
         request: `POST ${ORIGIN}/`,
         operation: 'GetMetricData',
         matched: { method: 'post', path: '/GetMetricData', source: 'metrics' },
+        responseSource: 'generated',
         status: 200,
         requestViolations: [],
         responseViolations: [],

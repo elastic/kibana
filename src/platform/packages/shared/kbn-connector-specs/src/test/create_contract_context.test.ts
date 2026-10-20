@@ -115,6 +115,7 @@ describe('createContractContext', () => {
         request: 'POST https://api.firecrawl.dev/v2/scrape',
         operation: 'POST /scrape',
         matched: { method: 'post', path: '/scrape' },
+        responseSource: 'generated',
         status: 200,
         requestViolations: [],
         responseViolations: [],
