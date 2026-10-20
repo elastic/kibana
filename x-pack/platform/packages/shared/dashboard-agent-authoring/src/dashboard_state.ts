@@ -174,7 +174,6 @@ export const appendPanelsToDashboard = ({
 
 /**
  * Immutably updates a panel by id whether it lives at the top level or inside a section.
- * Returns the updated dashboard data together with a flag indicating whether a panel matched.
  */
 export const updatePanelInDashboard = ({
   dashboardData,
@@ -184,38 +183,22 @@ export const updatePanelInDashboard = ({
   dashboardData: DashboardAttachmentData;
   panelId: string;
   transformPanel: (panel: AttachmentPanel) => AttachmentPanel;
-}): { dashboardData: DashboardAttachmentData; updated: boolean } => {
-  let updated = false;
-
-  const panels = dashboardData.panels.map((widget) => {
+}): DashboardAttachmentData => ({
+  ...dashboardData,
+  panels: dashboardData.panels.map((widget) => {
     if (isSection(widget)) {
-      let sectionUpdated = false;
-      const nextSectionPanels = widget.panels.map((panel) => {
-        if (panel.id !== panelId) {
-          return panel;
-        }
-
-        updated = true;
-        sectionUpdated = true;
-        return transformPanel(panel);
-      });
-
-      return sectionUpdated ? { ...widget, panels: nextSectionPanels } : widget;
+      return widget.panels.some((panel) => panel.id === panelId)
+        ? {
+            ...widget,
+            panels: widget.panels.map((panel) =>
+              panel.id === panelId ? transformPanel(panel) : panel
+            ),
+          }
+        : widget;
     }
-
-    if (widget.id !== panelId) {
-      return widget;
-    }
-
-    updated = true;
-    return transformPanel(widget);
-  });
-
-  return {
-    dashboardData: updated ? { ...dashboardData, panels } : dashboardData,
-    updated,
-  };
-};
+    return widget.id === panelId ? transformPanel(widget) : widget;
+  }),
+});
 
 export const removePanelsFromDashboard = ({
   dashboardData,
