@@ -913,7 +913,8 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         mockAllPrivateLocations,
         'space1',
         [],
-        undefined
+        undefined,
+        { revokeUndeliverableSecretConnections: true }
       );
     });
 

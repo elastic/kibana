@@ -341,7 +341,8 @@ export class DeployPrivateLocationMonitors {
           allPrivateLocations,
           spaceId,
           maintenanceWindows,
-          deferredBumps
+          deferredBumps,
+          { revokeUndeliverableSecretConnections: true }
         );
 
         if (result?.failedCreates && result.failedCreates.length > 0) {
