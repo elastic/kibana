@@ -1,0 +1,104 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import {
+  EuiBadge,
+  EuiCode,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiText,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  isNightshiftSetUp,
+  useInvestigatorServiceAccount,
+} from '../../service_account/use_investigator_service_account';
+import { SettingsSectionRow } from './settings_section';
+
+/** Shows whether this space is set up with the Nightshift service account, read-only. */
+export const InvestigationIdentitySection = () => {
+  const status = useInvestigatorServiceAccount();
+  const isSetUp = isNightshiftSetUp(status.data);
+
+  const renderStatus = () => {
+    if (status.isLoading) return <EuiLoadingSpinner size="m" />;
+    if (!status.data) return null;
+    return (
+      <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
+        <EuiFlexItem grow={false}>
+          {isSetUp ? (
+            <EuiBadge color="success" iconType="check" data-test-subj="nightshiftServiceAccountOn">
+              {i18n.translate('xpack.nightshift.settings.serviceAccount.onBadge', {
+                defaultMessage: 'Set up',
+              })}
+            </EuiBadge>
+          ) : (
+            <EuiBadge color="warning" data-test-subj="nightshiftServiceAccountOff">
+              {i18n.translate('xpack.nightshift.settings.serviceAccount.offBadge', {
+                defaultMessage: 'Not set up',
+              })}
+            </EuiBadge>
+          )}
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            <FormattedMessage
+              id="xpack.nightshift.settings.serviceAccount.account"
+              defaultMessage="Account: {account} · Role: {role}"
+              values={{
+                account: <EuiCode>{status.data.serviceAccountId}</EuiCode>,
+                role: <EuiCode>{status.data.role}</EuiCode>,
+              }}
+            />
+          </EuiText>
+        </EuiFlexItem>
+        {isSetUp && (
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color="subdued" data-test-subj="nightshiftServiceAccountOthers">
+              <FormattedMessage
+                id="xpack.nightshift.settings.serviceAccount.otherAccounts"
+                defaultMessage="Other Nightshift accounts: {accounts}"
+                values={{
+                  accounts: status.data.serviceAccounts
+                    .filter(({ kind }) => kind !== 'agent')
+                    .map(({ id, role }, index) => (
+                      <React.Fragment key={id}>
+                        {index > 0 && ', '}
+                        <EuiCode>{id}</EuiCode> ({role})
+                      </React.Fragment>
+                    )),
+                }}
+              />
+            </EuiText>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    );
+  };
+
+  return (
+    <SettingsSectionRow
+      title={i18n.translate('xpack.nightshift.settings.serviceAccount.title', {
+        defaultMessage: 'Service account',
+      })}
+      description={
+        <p>
+          {i18n.translate('xpack.nightshift.settings.serviceAccount.description', {
+            defaultMessage:
+              'Nightshift runs every investigation in this space as this service account, not as the user who starts it. What it can read and change is set by the account’s role.',
+          })}
+        </p>
+      }
+      data-test-subj="nightshiftInvestigationIdentitySection"
+    >
+      {renderStatus()}
+    </SettingsSectionRow>
+  );
+};
