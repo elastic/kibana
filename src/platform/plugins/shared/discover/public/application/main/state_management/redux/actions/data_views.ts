@@ -11,22 +11,26 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { differenceBy } from 'lodash';
 import { internalStateSlice, type InternalStateThunkActionCreator } from '../internal_state';
 import { createInternalStateAsyncThunk } from '../utils';
+import type { RuntimeStateManager } from '../runtime_state';
 
 export const loadDataViewList = createInternalStateAsyncThunk(
   'internalState/loadDataViewList',
   async (_, { extra: { services } }) => services.dataViews.getIdsWithTitle(true)
 );
 
+const initialDataViewListRequests = new WeakMap<RuntimeStateManager, Promise<void>>();
+
 /** Loads the data view list, once per Discover instance. */
 export const loadInitialDataViewList: InternalStateThunkActionCreator<[], Promise<void>> = () =>
   function loadInitialDataViewListThunkFn(dispatch, _, { runtimeStateManager }) {
-    if (!runtimeStateManager.initialDataViewListRequest) {
-      runtimeStateManager.initialDataViewListRequest = dispatch(loadDataViewList()).then(
-        () => undefined
-      );
+    let request = initialDataViewListRequests.get(runtimeStateManager);
+
+    if (!request) {
+      request = dispatch(loadDataViewList()).then(() => undefined);
+      initialDataViewListRequests.set(runtimeStateManager, request);
     }
 
-    return runtimeStateManager.initialDataViewListRequest;
+    return request;
   };
 
 export const setAdHocDataViews: InternalStateThunkActionCreator<[DataView[]]> = (adHocDataViews) =>
