@@ -58,6 +58,13 @@ export interface AlertWorkflowsPanelProps {
    * Inside a case where Cases runs are unavailable, the menu hooks do not render this panel.
    */
   originAlertId?: string;
+  /**
+   * The case attachment type the ids in `alertIds` are stored as. Defaults to the alert type;
+   * surfaces that reuse this panel for another document kind — the attacks table, for instance —
+   * must declare their own type, otherwise the Cases API looks the ids up against the wrong
+   * attachments and reports that they do not belong to the case.
+   */
+  attachmentType?: string;
 }
 
 /** A panel that lets users select and execute a workflow against one or more alerts. **/
@@ -66,6 +73,7 @@ export const AlertWorkflowsPanel = ({
   onClose,
   onExecute,
   originAlertId,
+  attachmentType = SECURITY_ALERT_ATTACHMENT_TYPE,
 }: AlertWorkflowsPanelProps) => {
   // When rendered inside a case's attachment surface, route through the Cases API so the run
   // is authorized, audited, and recorded in the case activity feed. Outside a case the panel
@@ -78,7 +86,7 @@ export const AlertWorkflowsPanel = ({
     [alertIds, originAlertId]
   );
   const { runWorkflow, showSuccessToast } = useCaseAttachmentWorkflowRun({
-    attachmentType: SECURITY_ALERT_ATTACHMENT_TYPE,
+    attachmentType,
     target,
   });
 

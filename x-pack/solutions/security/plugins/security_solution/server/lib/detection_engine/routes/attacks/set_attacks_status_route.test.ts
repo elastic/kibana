@@ -146,6 +146,28 @@ describe('set attacks workflow status', () => {
       );
     });
 
+    test('audits a failed attack lookup once and does not run the update', async () => {
+      context.core.elasticsearch.client.asCurrentUser.search.mockRejectedValue(
+        new Error('search failed')
+      );
+
+      const response = await server.inject(
+        getRequest({ ...defaultBody, update_related_alerts: true }),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(500);
+      expect(context.core.elasticsearch.client.asCurrentUser.updateByQuery).not.toHaveBeenCalled();
+      const auditLogger = context.securitySolution.getAuditLogger();
+      expect(auditLogger?.log).toHaveBeenCalledTimes(1);
+      expect(auditLogger?.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({ action: 'alert_update', outcome: 'failure' }),
+          error: expect.objectContaining({ message: 'search failed' }),
+        })
+      );
+    });
+
     test('pre-fetches attack docs scoped to the attack indices', async () => {
       await server.inject(
         getRequest({ ...defaultBody, update_related_alerts: true }),

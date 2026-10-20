@@ -18,14 +18,15 @@ import {
 } from '@kbn/entity-store/common';
 import { compact } from 'lodash';
 import type { EntityDetailsHighlightsResponse } from '../../../common/api/entity_analytics/entity_details/highlights.gen';
+import type { EntityViewMode } from '../../../common/entity_analytics/entity_store/resolution_group';
 import {
   ENTITY_DETAILS_HIGHLIGHT_INTERNAL_URL,
   ENTITY_DETAILS_AI_SUMMARY_INTERNAL_URL,
 } from '../../../common/entity_analytics/entity_analytics/constants';
 import type {
-  AnomalyOverviewRequestBody,
+  GetAnomalyOverviewRequestBodyInput,
   AnomalyOverviewResponse,
-  AnomalySummaryRequestBody,
+  GetAnomalySummaryRequestBodyInput,
   AnomalySummaryResponse,
   AssetCriticalityRecord,
   ConfigureRiskEngineSavedObjectRequestBodyInput,
@@ -767,6 +768,7 @@ export const useEntityAnalyticsRoutes = () => {
         from: number;
         to: number;
         connectorId: string;
+        mode?: EntityViewMode;
       };
       signal?: AbortSignal;
       context?: KibanaExecutionContext;
@@ -803,14 +805,18 @@ export const useEntityAnalyticsRoutes = () => {
       signal,
       context,
     }: {
-      params: { entityType: string; entityIdentifier: string };
+      params: { entityType: string; entityIdentifier: string; mode?: EntityViewMode };
       signal?: AbortSignal;
       context?: KibanaExecutionContext;
     }): Promise<GetPersistedAiSummaryResponse> =>
       http.fetch(ENTITY_DETAILS_AI_SUMMARY_INTERNAL_URL, {
         version: API_VERSIONS.internal.v1,
         method: 'GET',
-        query: { entityId: params.entityIdentifier, entityType: params.entityType },
+        query: {
+          entityId: params.entityIdentifier,
+          entityType: params.entityType,
+          ...(params.mode ? { mode: params.mode } : {}),
+        },
         signal,
         context,
       });
@@ -1062,7 +1068,7 @@ export const useEntityAnalyticsRoutes = () => {
     }: {
       entityType: string;
       entityId: string;
-      body?: AnomalySummaryRequestBody;
+      body?: GetAnomalySummaryRequestBodyInput;
       signal?: AbortSignal;
       context?: KibanaExecutionContext;
     }) =>
@@ -1089,7 +1095,7 @@ export const useEntityAnalyticsRoutes = () => {
     }: {
       entityType: string;
       entityId: string;
-      body?: AnomalyOverviewRequestBody;
+      body?: GetAnomalyOverviewRequestBodyInput;
       signal?: AbortSignal;
       context?: KibanaExecutionContext;
     }) =>

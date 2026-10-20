@@ -23,7 +23,7 @@ describe('evalGuardedTypedEuids', () => {
 
 describe('buildAlertEuidPipeline', () => {
   it('matches each stamped id, which also keeps alerts stamped with several ids', () => {
-    const pipeline = buildAlertEuidPipeline({ stampedEntityIds: ['host:h1', 'user:a'] }).join('\n');
+    const pipeline = buildAlertEuidPipeline({ entityIds: ['host:h1', 'user:a'] }).join('\n');
     expect(pipeline).toContain(
       '| WHERE MV_CONTAINS(`kibana.alert.entity.id`, "host:h1") OR MV_CONTAINS(`kibana.alert.entity.id`, "user:a")'
     );
