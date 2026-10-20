@@ -20,7 +20,7 @@ Related things you noticed (other controls, similar gaps, “same category”) d
 
 ## Ready to file
 
-Show the full draft and **end the turn** before any `write` (SKILL.md step 3). `scan-wip` hits — draft/WIP PR, work in progress, known or intentional limitation, by design, not yet implemented, or a matching open or draft PR from search — are not cleared by a note under Additional information. Ask **file anyway?** Hard stop. Only then `check-draft --wip-ok`.
+`scan-wip` hits — draft/WIP PR, work in progress, known or intentional limitation, by design, not yet implemented, or a matching open or draft PR from search — are not cleared by a note under Additional information. Ask **file anyway?** Hard stop. Only then `check-draft --wip-ok`.
 
 ## Headings
 
@@ -82,11 +82,10 @@ On from-scratch filings **and** a **thin** exploratory-tester pack, ask what a r
 Given a recording and stills:
 
 1. Watch them. Draft steps, current behaviour, and expected if the UI makes it obvious. Quote what was on screen; do not invent clicks you did not see.
-2. Put screenshot and recording/video paths (`Screenshot:`, `Recording:`, `Video:`) under **Current behaviour**. Resolve `` `$SESSION_DIR/...` `` to the real session directory. Upload those files; `embed-uploads` writes images as `![name](url)` and videos as `<video src="url" controls></video>` on their own paragraph (GitHub inlines both).
+2. Put screenshot and recording/video paths (`Screenshot:`, `Recording:`, `Video:`) under **Current behaviour**. Resolve `` `$SESSION_DIR/...` `` to the real session directory. Upload those files (GitHub's undocumented `user-attachments` endpoint, which can change); `embed-uploads` writes images as `![name](url)` and videos as `<video src="url" controls></video>` on their own paragraph (GitHub inlines both).
 3. Use a visible route or UI area for `Team:*` inference.
 4. Ask for what media cannot provide: version, the always-ask items, console/network, server OS, endpoint version, expected if unclear.
-5. Review each file for real customer or host data before upload (SKILL.md media review), then `check-draft --media-ok`.
-6. If the video is unreadable or too long to trust, say so and ask for a still of the failure.
+5. If the video is unreadable or too long to trust, say so and ask for a still of the failure.
 
 ## Path B pack (collect steps live in SKILL.md)
 

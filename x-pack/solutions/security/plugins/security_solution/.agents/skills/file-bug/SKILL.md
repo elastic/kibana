@@ -44,11 +44,11 @@ A **signal** is any of: a user reading or changing data or actions they lack acc
 
 | Path | Signal in the report (text or media) | Do |
 |---|---|---|
-| A | yes | Ask once, then **Hard stop**: “Does this expose a vulnerability, credentials or secrets, customer data or PII, or an exploit path?” Yes or unsure → `elastic/security-team`; no → `elastic/kibana`. |
+| A | yes | Ask once, then **Hard stop**: “Does this expose a vulnerability, credentials or secrets, customer data or PII, or an exploit path?” Never answer it yourself, even when the report already calls it a vulnerability or asks you not to ask. Yes or unsure → `elastic/security-team`; no → `elastic/kibana`. |
 | B | yes | Do not ask. Decide right after Step 1's `prepare`, before searching: set `elastic/security-team`, search and label only there, and state the repo and the signal in one line in the draft. If the human replies it is not sensitive, switch to `elastic/kibana` and redo Search. |
 | A or B | no | Do not ask: `elastic/kibana`; show the target repo in the draft. |
 
-Later, if `scan-sensitive`, `check-draft` or `prepare` reports `security_issue` (a CVE id, key or token), switch to `elastic/security-team`; pass `--security-ok` only if the human confirms a false positive. `hints` (`security_hint`) are common wording that is also normal UI text: never a gate, only a prompt to re-read the report for a signal. Nothing is searched, labelled, uploaded or written in `elastic/kibana` once the target is `elastic/security-team`.
+Later, if `scan-sensitive`, `check-draft` or `prepare` reports `security_issue` (a CVE id, key or token), switch to `elastic/security-team`; `--security-ok` only for a human-confirmed false positive. `hints` (`security_hint`) are normal UI wording too: never a gate, only a prompt to re-read the report for a signal.
 
 `Team:*` and `v*` labels may not exist in `security-team`: `validate-labels --repo "$TARGET_REPO"`, drop what is missing, show the dropped labels in the draft.
 
@@ -76,8 +76,6 @@ python3 "$FILE_BUG" check-draft --body body.md \
 
 Run `validate-labels --repo "$TARGET_REPO"` (it uses `--search`; never `gh label list --limit 1000`) and `scan-wip` first. `--finding "$FINDING_JSON"` is Path B only; on Path A omit it everywhere. A Path A draft ends with the visible `Filed via file-bug` line (`check-draft` requires it); `write` adds the hidden marker itself. New issues always get `bug` and `triage_needed`; add the `vX.Y.Z` label when `infer-release` is confident (omit it on `Unknown`), and `sec-eng-prod:exploratory-tester` on Path B.
 
-If `check-draft` reports `security_issue:file_in_security_team`, switch `TARGET_REPO` to `elastic/security-team` and re-run Search there; `write` refuses `elastic/kibana` for that hit unless `--security-ok`.
-
 **Media review.** Text scans do not read images. Open every screenshot and recording before upload (video: start, middle and failure frames). Real customer or host data — hostnames, IPs, emails, org names, cluster URLs, keys or tokens, including the URL bar and console/network panels — means the file is **not uploaded**: ask for a redacted or synthetic-data replacement. List each file under **Media reviewed** (file → clean / needs redaction), say what you could not check, and pass `--media-ok` only after the human confirms.
 
 ### 4. Write (only after write-yes)
@@ -95,7 +93,7 @@ python3 "$FILE_BUG" write \
 
 Path B adds `--label sec-eng-prod:exploratory-tester --finding "$FINDING_JSON"`; Path A passes neither.
 
-Comment / reopen also need `--number N`. `upload` posts to `uploads.github.com/user-attachments/assets` (undocumented; can change). Reply with the issue URL, action, uploaded URLs, leftovers.
+Comment / reopen also need `--number N`. Reply with the issue URL, action, uploaded URLs, leftovers.
 
 Never retry a failed **create** or **comment**. Never fall back to `elastic/kibana` because a search, upload or create against `elastic/security-team` failed (404, no access): stop and report it. If `reopen_comment` reopens and the comment fails, report the partial write and do not reopen again. If `upload` fails or leaves leftovers, do not `write`: ask whether to retry once, hold, or file without the file — dropping it changes the approved draft, so re-show it and wait for a fresh write-yes.
 
@@ -104,9 +102,5 @@ Never retry a failed **create** or **comment**. Never fall back to `elastic/kiba
 Stop. You are about to write without a write-yes, or to file the wrong thing:
 
 - “They said file finding 2, I can create now.” / “Draft looks good, I’ll write this same turn.” → draft only; write-yes is a later message.
-- “I’ll batch the always-ask questions.” → **Hard stop** after each.
-- “Same class of bug, I’ll add it to Expected.” → confirmed finding only. Never suggest the fix. Adjacent notes go in Additional information or a second ticket.
 - “It's probably fine to file the vulnerability in `elastic/kibana` and fix it later.” → `TARGET_REPO=elastic/security-team`. Public issues are cached and indexed even if deleted.
 - “The text scan passed, so the screenshot is fine.” → do the media review.
-- “Title is long, I’ll clip it.” → `format-title` exit 2.
-- Writing `_unknown_`. Assuming Scout is always local (read `config.json` / URL / arch).
