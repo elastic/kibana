@@ -5,23 +5,24 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
 import {
+  EuiBadge,
   EuiBasicTable,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiLink,
   EuiLoadingSpinner,
+  EuiSpacer,
   EuiText,
   EuiTextBlockTruncate,
   EuiToolTip,
+  useEuiTheme,
   type CriteriaWithPagination,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
-import { FormattedRelative } from '@kbn/i18n-react';
-import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import type { SignificantEventsSortField } from '@kbn/significant-events-plugin/common';
 import type { SignificantEventResponse } from '@kbn/significant-events-schema';
 import React, { useMemo } from 'react';
@@ -30,7 +31,7 @@ import {
   NIGHTSHIFT_EBT_DETAILS,
   NIGHTSHIFT_EBT_ELEMENTS,
 } from '../../../common/ebt_constants';
-import { useFormatTimestamp } from '../../../common/format_timestamp';
+import { formatRelativeAge, useFormatTimestamp } from '../../../common/format_timestamp';
 import {
   getInvestigationState,
   isNeedsActionStatus,
@@ -39,19 +40,17 @@ import {
   SIGNIFICANT_EVENT_STATUS_LABELS,
 } from '../../../components/entities/significant_event/significant_event_status';
 import { SeverityBadge } from '../../../components/ui/severity_badge';
-import { useBlocksNewActivity } from '../../../data/maintenance/use_significant_events_maintenance';
-import { useTriggerEventInvestigation } from '../../../data/significant_events/use_trigger_event_investigation';
-import { useKibana } from '../../../hooks/use_kibana';
 import {
   ACTIONS_COLUMN_LABEL,
   EVENT_COLUMN_LABEL,
   EVENTS_TABLE_CAPTION,
+  INVESTIGATE_LABEL,
   INVESTIGATION_COLUMN_LABEL,
-  RUN_INVESTIGATION_LABEL,
   SEVERITY_COLUMN_LABEL,
+  SIGNIFICANT_EVENT_KIND_LABEL,
   STATUS_COLUMN_LABEL,
   TIME_COLUMN_LABEL,
-  VIEW_EVENT_LABEL,
+  VIEW_INVESTIGATION_LABEL,
 } from './translations';
 import type { EventsSort } from './use_events_url_state';
 
@@ -75,10 +74,7 @@ export interface EventsTableProps {
   onEventClick: (event: SignificantEventResponse) => void;
   onPageChange: (page: number, perPage: number) => void;
   onSortChange: (sort: EventsSort) => void;
-  onTitleLinkMount: (
-    eventId: string,
-    element: HTMLAnchorElement | HTMLButtonElement | null
-  ) => void;
+  onOpenButtonMount: (eventId: string, element: HTMLButtonElement | null) => void;
 }
 
 export const EventsTable = ({
@@ -92,13 +88,10 @@ export const EventsTable = ({
   onEventClick,
   onPageChange,
   onSortChange,
-  onTitleLinkMount,
+  onOpenButtonMount,
 }: EventsTableProps): React.ReactElement => {
   const formatTimestamp = useFormatTimestamp();
-  const { application } = useKibana().services;
-  const { canManage } = getNightshiftCapabilities(application.capabilities.nightshift);
-  const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
-  const { triggerInvestigation, triggeringEventId } = useTriggerEventInvestigation();
+  const { euiTheme } = useEuiTheme();
   const columns = useMemo<Array<EuiBasicTableColumn<SignificantEventResponse>>>(
     () => [
       {
@@ -106,30 +99,21 @@ export const EventsTable = ({
         name: EVENT_COLUMN_LABEL,
         width: '45%',
         render: (title: string, event: SignificantEventResponse) => (
-          <div>
+          <div
+            css={css`
+              padding-block: ${euiTheme.size.s};
+            `}
+          >
             <EuiText size="s">
-              <EuiLink
-                color="text"
-                ref={(element) => onTitleLinkMount(event.event_id, element)}
-                data-test-subj={`nightshiftDetectionEventLink-${event.event_id}`}
-                onClick={(clickEvent: React.MouseEvent) => {
-                  clickEvent.stopPropagation();
-                  onEventClick(event);
-                }}
-                {...getEbtProps({
-                  action: NIGHTSHIFT_EBT_ACTIONS.VIEW_SIGNIFICANT_EVENT,
-                  element: NIGHTSHIFT_EBT_ELEMENTS.SIGNIFICANT_EVENTS_LIST,
-                  detail: isNeedsActionStatus(event.status)
-                    ? NIGHTSHIFT_EBT_DETAILS.NEEDS_ACTION
-                    : NIGHTSHIFT_EBT_DETAILS.RESOLVED,
-                })}
-              >
-                <strong>{title}</strong>
-              </EuiLink>
+              <strong>{title}</strong>
             </EuiText>
             <EuiText size="xs" color="subdued">
               <EuiTextBlockTruncate lines={2}>{event.summary}</EuiTextBlockTruncate>
             </EuiText>
+            <EuiSpacer size="xs" />
+            <EuiBadge color="danger" iconType="warning">
+              {SIGNIFICANT_EVENT_KIND_LABEL}
+            </EuiBadge>
           </div>
         ),
       },
@@ -139,9 +123,9 @@ export const EventsTable = ({
         sortable: true,
         render: (createdAt: string) => (
           <EuiToolTip content={formatTimestamp(createdAt)}>
-            <span tabIndex={0}>
-              <FormattedRelative value={createdAt} />
-            </span>
+            <EuiText size="s" tabIndex={0}>
+              {formatRelativeAge(createdAt)}
+            </EuiText>
           </EuiToolTip>
         ),
       },
@@ -176,7 +160,7 @@ export const EventsTable = ({
         name: SEVERITY_COLUMN_LABEL,
         sortable: true,
         render: (severity: SignificantEventResponse['severity']) => (
-          <SeverityBadge severity={severity} />
+          <SeverityBadge severity={severity} textSize="s" />
         ),
       },
       {
@@ -210,45 +194,23 @@ export const EventsTable = ({
         width: '80px',
         align: 'right',
         render: (event: SignificantEventResponse) => {
-          // Not investigated yet: start one here. Otherwise open the event and its investigation.
-          if (canManage && getInvestigationState(event) === 'not_started') {
-            return (
-              <EuiToolTip
-                content={activityBlockTooltip ?? RUN_INVESTIGATION_LABEL}
-                disableScreenReaderOutput
-              >
-                <EuiButtonIcon
-                  iconType="inspect"
-                  aria-label={RUN_INVESTIGATION_LABEL}
-                  isDisabled={blocksActivity || triggeringEventId != null}
-                  isLoading={triggeringEventId === event.event_id}
-                  onClick={(clickEvent: React.MouseEvent<HTMLButtonElement>) => {
-                    clickEvent.stopPropagation();
-                    triggerInvestigation(event.event_id);
-                  }}
-                  data-test-subj={`nightshiftRunEventInvestigation-${event.event_id}`}
-                  {...getEbtProps({
-                    action: NIGHTSHIFT_EBT_ACTIONS.START_INVESTIGATION,
-                    element: NIGHTSHIFT_EBT_ELEMENTS.SIGNIFICANT_EVENTS_LIST,
-                    detail: isNeedsActionStatus(event.status)
-                      ? NIGHTSHIFT_EBT_DETAILS.NEEDS_ACTION
-                      : NIGHTSHIFT_EBT_DETAILS.RESOLVED,
-                  })}
-                />
-              </EuiToolTip>
-            );
-          }
+          // Both open the event; the flyout runs, restarts and reviews investigations.
+          const hasInvestigation = getInvestigationState(event) !== 'not_started';
+          const label = hasInvestigation ? VIEW_INVESTIGATION_LABEL : INVESTIGATE_LABEL;
           return (
-            <EuiToolTip content={VIEW_EVENT_LABEL} disableScreenReaderOutput>
+            <EuiToolTip content={label} disableScreenReaderOutput>
               <EuiButtonIcon
-                iconType="eye"
-                color="text"
-                aria-label={VIEW_EVENT_LABEL}
+                iconType={hasInvestigation ? 'eye' : 'inspect'}
+                color={hasInvestigation ? 'text' : 'primary'}
+                aria-label={label}
+                buttonRef={(element: HTMLButtonElement | null) =>
+                  onOpenButtonMount(event.event_id, element)
+                }
                 onClick={(clickEvent: React.MouseEvent<HTMLButtonElement>) => {
                   clickEvent.stopPropagation();
                   onEventClick(event);
                 }}
-                data-test-subj={`nightshiftViewEvent-${event.event_id}`}
+                data-test-subj={`nightshiftOpenEvent-${event.event_id}`}
                 {...getEbtProps({
                   action: NIGHTSHIFT_EBT_ACTIONS.VIEW_SIGNIFICANT_EVENT,
                   element: NIGHTSHIFT_EBT_ELEMENTS.SIGNIFICANT_EVENTS_LIST,
@@ -262,16 +224,7 @@ export const EventsTable = ({
         },
       },
     ],
-    [
-      activityBlockTooltip,
-      blocksActivity,
-      canManage,
-      formatTimestamp,
-      onEventClick,
-      onTitleLinkMount,
-      triggerInvestigation,
-      triggeringEventId,
-    ]
+    [euiTheme, formatTimestamp, onEventClick, onOpenButtonMount]
   );
 
   return (

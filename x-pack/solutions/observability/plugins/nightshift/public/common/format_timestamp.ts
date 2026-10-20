@@ -35,3 +35,29 @@ export const useFormatTimestamp = (): ((timestamp: string) => string) => {
 
   return useMemo(() => (timestamp: string) => formatTimestamp(timestamp, dateFormat), [dateFormat]);
 };
+
+const RELATIVE_AGE_UNITS: Array<[Intl.RelativeTimeFormatUnit, number]> = [
+  ['second', 60],
+  ['minute', 60],
+  ['hour', 24],
+  ['day', 30],
+  ['month', 12],
+  ['year', Number.POSITIVE_INFINITY],
+];
+
+/** Short numeric age such as "6 min. ago" or "2 hr. ago", never "yesterday". */
+export const formatRelativeAge = (timestamp: string, now: number = Date.now()): string => {
+  let amount = Math.max(0, Math.round((now - new Date(timestamp).getTime()) / 1000));
+  let unit: Intl.RelativeTimeFormatUnit = 'second';
+  for (const [nextUnit, size] of RELATIVE_AGE_UNITS) {
+    unit = nextUnit;
+    if (amount < size) {
+      break;
+    }
+    amount = Math.floor(amount / size);
+  }
+  return new Intl.RelativeTimeFormat(i18n.getLocale(), {
+    numeric: 'always',
+    style: 'short',
+  }).format(-amount, unit);
+};

@@ -33,15 +33,13 @@ const DEFAULT_PAGE_SIZE = 25;
 export const EventsTab = ({
   timeRange,
   onTimeRangeChange,
-  onRefresh,
 }: {
   timeRange: DetectionTimeRange;
   onTimeRangeChange: (timeRange: DetectionTimeRange) => void;
-  onRefresh: () => void;
 }): React.ReactElement => {
   const { notifications } = useKibana().services;
   const [perPage, setPerPage] = useState(DEFAULT_PAGE_SIZE);
-  const titleLinks = useRef(new Map<string, HTMLAnchorElement | HTMLButtonElement | null>());
+  const openButtons = useRef(new Map<string, HTMLButtonElement | null>());
   const {
     searchValue,
     debouncedSearch,
@@ -118,14 +116,14 @@ export const EventsTab = ({
   );
 
   const handleCloseFlyout = useCallback(() => {
-    const titleLink = eventId ? titleLinks.current.get(eventId) : undefined;
+    const openButton = eventId ? openButtons.current.get(eventId) : undefined;
     closeEvent();
-    window.requestAnimationFrame(() => titleLink?.focus());
+    window.requestAnimationFrame(() => openButton?.focus());
   }, [closeEvent, eventId]);
 
-  const handleTitleLinkMount = useCallback(
-    (mountedEventId: string, element: HTMLAnchorElement | HTMLButtonElement | null) => {
-      titleLinks.current.set(mountedEventId, element);
+  const handleOpenButtonMount = useCallback(
+    (mountedEventId: string, element: HTMLButtonElement | null) => {
+      openButtons.current.set(mountedEventId, element);
     },
     []
   );
@@ -140,11 +138,6 @@ export const EventsTab = ({
         onTimeRangeChange={onTimeRangeChange}
         investigation={investigation}
         facets={facetsQuery.data}
-        onRefresh={() => {
-          void eventsQuery.refetch();
-          void facetsQuery.refetch();
-          onRefresh();
-        }}
         onInvestigationChange={setInvestigation}
         onSearchChange={onSearchChange}
         onStatusChange={setStatus}
@@ -193,7 +186,7 @@ export const EventsTab = ({
           selectedEventId={eventId}
           onEventClick={(event: SignificantEventResponse) => openEvent(event.event_id)}
           onPageChange={handlePageChange}
-          onTitleLinkMount={handleTitleLinkMount}
+          onOpenButtonMount={handleOpenButtonMount}
         />
       )}
       {openEventData ? <EventFlyout event={openEventData} onClose={handleCloseFlyout} /> : null}

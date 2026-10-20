@@ -8,7 +8,6 @@
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { SignificantEvent, SignificantEventResponse } from '@kbn/significant-events-schema';
-import type { StatefulSearchBarProps } from '@kbn/unified-search-plugin/public';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
@@ -17,15 +16,11 @@ import { useFetchEventById } from '../../../data/significant_events/use_fetch_ev
 import { useSignificantEventsList } from '../../../data/significant_events/use_significant_events_list';
 import { EventsTab } from './events_tab';
 
-const mockTriggerInvestigation = jest.fn();
 const mockRefreshEvents = jest.fn();
-const mockRefreshOverview = jest.fn();
 const mockTimeRangeChange = jest.fn();
-const mockSearchBar = jest.fn((_props: StatefulSearchBarProps) => (
-  <div data-test-subj="searchBarStub" />
-));
 
 jest.mock('../../../common/format_timestamp', () => ({
+  ...jest.requireActual('../../../common/format_timestamp'),
   useFormatTimestamp: () => (timestamp: string) => timestamp,
 }));
 jest.mock('../../../components/entities/significant_event/event_flyout', () => ({
@@ -35,12 +30,6 @@ jest.mock('../../../components/entities/significant_event/event_flyout', () => (
 }));
 jest.mock('../../../data/significant_events/use_fetch_event_by_id');
 jest.mock('../../../data/significant_events/use_significant_events_list');
-jest.mock('../../../data/significant_events/use_trigger_event_investigation', () => ({
-  useTriggerEventInvestigation: () => ({
-    triggerInvestigation: mockTriggerInvestigation,
-    triggeringEventId: undefined,
-  }),
-}));
 jest.mock('../../../data/maintenance/use_significant_events_maintenance', () => ({
   useBlocksNewActivity: () => ({
     blocksActivity: false,
@@ -71,11 +60,6 @@ jest.mock('../../../hooks/use_kibana', () => ({
       notifications: {
         toasts: {
           addWarning: jest.fn(),
-        },
-      },
-      unifiedSearch: {
-        ui: {
-          SearchBar: mockSearchBar,
         },
       },
     },
@@ -110,7 +94,6 @@ const renderTab = (initialPath = '/detections/events') => {
           <EventsTab
             timeRange={{ from: 'now-24h', to: 'now' }}
             onTimeRangeChange={mockTimeRangeChange}
-            onRefresh={mockRefreshOverview}
           />
         </Router>
       </EuiProvider>
@@ -143,34 +126,7 @@ describe('EventsTab', () => {
     expect(screen.getByText('Not started')).toBeInTheDocument();
   });
 
-  it('uses compact time navigation and refreshes the overview and events', () => {
-    renderTab();
-
-    const searchBarProps = mockSearchBar.mock.calls[0][0];
-    expect(searchBarProps).toEqual(
-      expect.objectContaining({
-        dateRangeFrom: 'now-24h',
-        dateRangeTo: 'now',
-        disableSubscribingToGlobalDataServices: true,
-        enableDateRangePicker: true,
-        showTimeWindowButtons: true,
-        submitButtonStyle: 'iconOnly',
-      })
-    );
-    const { onQuerySubmit } = searchBarProps;
-    if (!onQuerySubmit) {
-      throw new Error('Expected the time range query submit handler');
-    }
-
-    act(() => onQuerySubmit({ dateRange: { from: 'now-1h', to: 'now' }, query: undefined }, true));
-    expect(mockTimeRangeChange).toHaveBeenCalledWith({ from: 'now-1h', to: 'now' });
-
-    act(() => onQuerySubmit({ dateRange: { from: 'now-1h', to: 'now' }, query: undefined }, false));
-    expect(mockRefreshEvents).toHaveBeenCalled();
-    expect(mockRefreshOverview).toHaveBeenCalled();
-  });
-
-  it('starts an investigation when none exists, and otherwise opens the event', () => {
+  it('opens the event from the action, labelled by investigation state', () => {
     const investigatedEvent = {
       ...event,
       event_id: 'event-2',
@@ -185,11 +141,17 @@ describe('EventsTab', () => {
     });
     const history = renderTab();
 
-    fireEvent.click(screen.getByTestId('nightshiftRunEventInvestigation-event-1'));
-    expect(mockTriggerInvestigation).toHaveBeenCalledWith('event-1');
-
+    expect(screen.getByTestId('nightshiftOpenEvent-event-1')).toHaveAttribute(
+      'aria-label',
+      'Investigate'
+    );
+    expect(screen.getByTestId('nightshiftOpenEvent-event-2')).toHaveAttribute(
+      'aria-label',
+      'View investigation'
+    );
     expect(screen.getByText('In progress')).toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('nightshiftViewEvent-event-2'));
+
+    fireEvent.click(screen.getByTestId('nightshiftOpenEvent-event-2'));
     expect(new URLSearchParams(history.location.search).get('eventId')).toBe('event-2');
   });
 
@@ -273,7 +235,7 @@ describe('EventsTab', () => {
   it('opens the selected row in the addressed flyout', () => {
     const history = renderTab();
 
-    act(() => fireEvent.click(screen.getByTestId('nightshiftDetectionEventLink-event-1')));
+    act(() => fireEvent.click(screen.getByTestId('nightshiftDetectionEventRow-event-1')));
 
     expect(new URLSearchParams(history.location.search).get('eventId')).toBe('event-1');
     expect(screen.getByTestId('eventFlyoutStub')).toHaveTextContent('Checkout latency increased');

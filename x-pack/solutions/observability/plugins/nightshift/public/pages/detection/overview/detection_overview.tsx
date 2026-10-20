@@ -67,7 +67,7 @@ export const DetectionOverview = ({
   const metrics: Array<Omit<MetricCellProps, 'isLoading'>> = [
     {
       icon: 'chartTagCloud',
-      tone: 'subdued',
+      tone: 'neutral',
       value: counts?.knowledge_indicators,
       getLabel: getKnowledgeIndicatorsLabel,
       tooltip: KNOWLEDGE_INDICATORS_TOOLTIP,
@@ -75,7 +75,7 @@ export const DetectionOverview = ({
     },
     {
       icon: 'database',
-      tone: 'subdued',
+      tone: 'neutral',
       value: counts?.sources,
       getLabel: getSourcesLabel,
       tooltip: SOURCES_TOOLTIP,
@@ -83,7 +83,7 @@ export const DetectionOverview = ({
     },
     {
       icon: 'radar',
-      tone: 'subdued',
+      tone: 'neutral',
       value: counts?.active_rules,
       getLabel: getRulesLabel,
       tooltip: RULES_TOOLTIP,

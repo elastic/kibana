@@ -121,13 +121,7 @@ export const DetectionPage = ({
             <EuiLoadingSpinner size="xl" data-test-subj="nightshiftDetectionEventsTabLoading" />
           }
         >
-          {tab === 'events' && (
-            <EventsTab
-              timeRange={timeRange}
-              onTimeRangeChange={setTimeRange}
-              onRefresh={() => void overview.refetch()}
-            />
-          )}
+          {tab === 'events' && <EventsTab timeRange={timeRange} onTimeRangeChange={setTimeRange} />}
         </React.Suspense>
       </EuiPageTemplate.Section>
     </>

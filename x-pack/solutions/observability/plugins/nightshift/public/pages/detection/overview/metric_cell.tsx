@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-import type { EuiPanelProps, IconType } from '@elastic/eui';
+import { css } from '@emotion/react';
+import type { IconType } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiPanel,
   EuiSkeletonRectangle,
   EuiText,
   EuiTitle,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
-export type MetricTone = Extract<EuiPanelProps['color'], 'subdued' | 'warning' | 'danger'>;
+export type MetricTone = 'neutral' | 'warning' | 'danger';
 
 export interface MetricCellProps {
   icon: IconType;
@@ -39,34 +40,50 @@ export const MetricCell = ({
   tooltip,
   isLoading,
   testSubject,
-}: MetricCellProps): React.ReactElement => (
-  <EuiToolTip content={tooltip} position="bottom">
-    <EuiFlexGroup
-      alignItems="center"
-      gutterSize="m"
-      responsive={false}
-      data-test-subj={testSubject}
-      tabIndex={0}
-    >
-      <EuiFlexItem grow={false}>
-        <EuiPanel color={tone} paddingSize="s" hasBorder={false} hasShadow={false} grow={false}>
-          <EuiIcon type={icon} size="l" aria-hidden={true} />
-        </EuiPanel>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiTitle size="xs">
-          <div>
-            {isLoading ? (
-              <EuiSkeletonRectangle width={40} height={20} borderRadius="s" />
-            ) : (
-              value?.toLocaleString(i18n.getLocale())
-            )}
+}: MetricCellProps): React.ReactElement => {
+  const { euiTheme } = useEuiTheme();
+  const toneStyles = {
+    neutral: { background: euiTheme.colors.backgroundLightNeutral, icon: 'text' },
+    warning: { background: euiTheme.colors.backgroundLightWarning, icon: 'warning' },
+    danger: { background: euiTheme.colors.backgroundLightDanger, icon: 'danger' },
+  }[tone];
+
+  return (
+    <EuiToolTip content={tooltip} position="bottom">
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="m"
+        responsive={false}
+        data-test-subj={testSubject}
+        tabIndex={0}
+      >
+        <EuiFlexItem grow={false}>
+          <div
+            css={css`
+              display: flex;
+              padding: ${euiTheme.size.s};
+              border-radius: ${euiTheme.border.radius.medium};
+              background: ${toneStyles.background};
+            `}
+          >
+            <EuiIcon type={icon} size="m" color={toneStyles.icon} aria-hidden={true} />
           </div>
-        </EuiTitle>
-        <EuiText size="s">
-          <span>{getLabel(value ?? 0)}</span>
-        </EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </EuiToolTip>
-);
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xxs">
+            <div>
+              {isLoading ? (
+                <EuiSkeletonRectangle width={40} height={16} borderRadius="s" />
+              ) : (
+                value?.toLocaleString(i18n.getLocale())
+              )}
+            </div>
+          </EuiTitle>
+          <EuiText size="xs">
+            <span>{getLabel(value ?? 0)}</span>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiToolTip>
+  );
+};

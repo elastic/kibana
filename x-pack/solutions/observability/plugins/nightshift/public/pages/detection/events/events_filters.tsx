@@ -17,6 +17,7 @@ import {
   EuiNotificationBadge,
   EuiPopover,
   EuiSelectable,
+  EuiSuperDatePicker,
   useEuiTheme,
 } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
@@ -39,7 +40,6 @@ import {
   SIGNIFICANT_EVENT_STATUS_LABELS,
 } from '../../../components/entities/significant_event/significant_event_status';
 import { SIGNIFICANT_EVENT_SEVERITY } from '../../../components/ui/severity_badge';
-import { useKibana } from '../../../hooks/use_kibana';
 import type { DetectionTimeRange } from '../use_detection_time_range';
 import {
   INVESTIGATION_FILTER_LABEL,
@@ -140,7 +140,6 @@ export interface EventsFiltersProps {
   investigation: SignificantEventInvestigationState[];
   facets: SignificantEventsFacets | undefined;
   onTimeRangeChange: (timeRange: DetectionTimeRange) => void;
-  onRefresh: () => void;
   onSearchChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onStatusChange: (status: SignificantEventStatus[]) => void;
   onSeverityChange: (severity: Severity[]) => void;
@@ -155,24 +154,18 @@ export const EventsFilters = ({
   investigation,
   facets,
   onTimeRangeChange,
-  onRefresh,
   onSearchChange,
   onStatusChange,
   onSeverityChange,
   onInvestigationChange,
 }: EventsFiltersProps): React.ReactElement => {
   const { euiTheme } = useEuiTheme();
-  const {
-    unifiedSearch: {
-      ui: { SearchBar },
-    },
-  } = useKibana().services;
-
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       <EuiFlexItem>
         <EuiFieldSearch
           data-test-subj="nightshiftDetectionEventsSearch"
+          compressed
           fullWidth
           isClearable
           maxLength={500}
@@ -183,34 +176,18 @@ export const EventsFilters = ({
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <SearchBar
-          appName="nightshift"
-          dateRangeFrom={timeRange.from}
-          dateRangeTo={timeRange.to}
-          disableQueryLanguageSwitcher
-          disableSubscribingToGlobalDataServices
-          displayStyle="inPage"
-          enableDateRangePicker
-          isAutoRefreshDisabled
-          onQuerySubmit={({ dateRange }, isUpdate) => {
-            if (dateRange) {
-              onTimeRangeChange(dateRange);
-            }
-            if (!isUpdate) {
-              onRefresh();
-            }
-          }}
-          query={undefined}
-          showDatePicker
-          showFilterBar={false}
-          showQueryInput={false}
-          showQueryMenu={false}
-          showTimeWindowButtons
-          submitButtonStyle="iconOnly"
+        <EuiSuperDatePicker
+          compressed
+          width="auto"
+          showUpdateButton={false}
+          start={timeRange.from}
+          end={timeRange.to}
+          onTimeChange={({ start, end }) => onTimeRangeChange({ from: start, to: end })}
+          data-test-subj="nightshiftDetectionEventsTimePicker"
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiFilterGroup>
+        <EuiFilterGroup compressed>
           <EventsFilterPopover
             label={SEVERITY_FILTER_LABEL}
             options={SEVERITY_OPTIONS}

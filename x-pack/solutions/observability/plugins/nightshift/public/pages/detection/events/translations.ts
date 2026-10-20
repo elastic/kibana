@@ -35,12 +35,17 @@ export const ACTIONS_COLUMN_LABEL = i18n.translate(
   'xpack.nightshift.detectionPage.events.columns.actions',
   { defaultMessage: 'Actions' }
 );
-export const VIEW_EVENT_LABEL = i18n.translate('xpack.nightshift.detectionPage.events.viewEvent', {
-  defaultMessage: 'View event and investigation',
-});
-export const RUN_INVESTIGATION_LABEL = i18n.translate(
-  'xpack.nightshift.detectionPage.events.runInvestigation',
-  { defaultMessage: 'Run investigation' }
+export const INVESTIGATE_LABEL = i18n.translate(
+  'xpack.nightshift.detectionPage.events.investigate',
+  { defaultMessage: 'Investigate' }
+);
+export const VIEW_INVESTIGATION_LABEL = i18n.translate(
+  'xpack.nightshift.detectionPage.events.viewInvestigation',
+  { defaultMessage: 'View investigation' }
+);
+export const SIGNIFICANT_EVENT_KIND_LABEL = i18n.translate(
+  'xpack.nightshift.detectionPage.events.significantEventKind',
+  { defaultMessage: 'Significant event' }
 );
 export const SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.nightshift.detectionPage.events.searchPlaceholder',
