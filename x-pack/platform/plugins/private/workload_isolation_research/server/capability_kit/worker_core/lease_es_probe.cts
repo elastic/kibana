@@ -98,6 +98,10 @@ const main = async () => {
   const docId = `task:${id}`;
   let hold = Promise.resolve();
   let releaseHold = () => {};
+  let resolveEntered = () => {};
+  const entered = new Promise((resolve) => {
+    resolveEntered = resolve;
+  });
   const armHold = () => {
     hold = new Promise((resolve) => {
       releaseHold = resolve;
@@ -128,6 +132,7 @@ const main = async () => {
       createRunner: () => ({
         run: async () => {
           console.log(JSON.stringify({ phase: 'task-enter', t: Date.now() }));
+          resolveEntered();
           await hold;
           throw markCollateralLoss(new Error('slot stopped'));
         },
@@ -343,9 +348,12 @@ const main = async () => {
       })
     );
     assert.equal(claimed.status, 'running');
-    assert.ok(
-      retryAt > startedAt + RESEARCH_BOOTSTRAP_DEADLINE_MS,
-      `retryAt hold ${retryAt - startedAt}ms is not past the ${RESEARCH_BOOTSTRAP_DEADLINE_MS}ms bootstrap`
+    const grace = deriveCancelGraceMs('1s', 0);
+    const bootHold = RESEARCH_BOOTSTRAP_DEADLINE_MS + grace;
+    assert.equal(
+      retryAt - startedAt,
+      bootHold,
+      `retryAt hold ${retryAt - startedAt}ms is not bootstrap+grace (${bootHold}ms)`
     );
 
     if (red) return;
@@ -358,12 +366,12 @@ const main = async () => {
     );
 
     armHold();
-    const executionStartedAt = Date.now();
-    markResearchExecutionStarted(id, executionStartedAt);
     const firstRunner = runnerFor(first.docs[0]);
     await firstRunner.markTaskAsRunning();
     const outcome = firstRunner.run();
-    const grace = deriveCancelGraceMs('1s', 0);
+    await entered;
+    const executionStartedAt = Date.now();
+    markResearchExecutionStarted(id, executionStartedAt);
     const expectedRetry = executionStartedAt + 1000 + grace;
     let seen;
     const deadline = Date.now() + 2500;
@@ -381,46 +389,25 @@ const main = async () => {
       })
     );
     assert.equal(new Date(seen.retryAt).getTime(), expectedRetry);
+    const duringRun = await claim();
+    assert.equal(
+      duringRun.docs.some((doc) => doc.id === id),
+      false,
+      'a second claimer took the task before the renewed lease expired'
+    );
+    const untilExpiry = Math.max(0, expectedRetry - Date.now() + 50);
+    await sleep(untilExpiry);
+    const atExpiry = await claim();
+    console.log(
+      JSON.stringify({
+        phase: 'at-expiry',
+        claimed: atExpiry.docs.some((doc) => doc.id === id),
+        waitedMs: untilExpiry,
+      })
+    );
+    assert.equal(atExpiry.docs.some((doc) => doc.id === id), true, 'claimer missed the expired lease');
     releaseHold();
-    await outcome;
-    const refunded = await reload();
-    console.log(JSON.stringify({ phase: 'after-collateral', attempts: refunded.attempts }));
-    assert.equal(refunded.attempts, 0);
-    // The execution clock is once per lease. Drop it after the attempt is persisted
-    // so the next claim arms a new run instead of looking already expired.
-    clearResearchLease(id);
-
-    const attempts = [];
-    attempts.push(refunded.attempts);
-    for (let cycle = 0; cycle < 3; cycle++) {
-      console.log(JSON.stringify({ phase: 'cycle-start', cycle, t: Date.now() }));
-      await sleep(1100);
-      const again = await claim();
-      if (again.docs.length !== 1) {
-        const missed = await reload();
-        console.log(JSON.stringify({ phase: 'claim-miss', cycle, task: missed, stats: again.stats }));
-      }
-      assert.equal(again.docs.length, 1, `recurrence ${cycle} was not claimed`);
-      markResearchExecutionStarted(id, Date.now());
-      hold = Promise.resolve();
-      const nextRunner = runnerFor(again.docs[0]);
-      await nextRunner.markTaskAsRunning();
-      await nextRunner.run();
-      const after = await reload();
-      console.log(
-        JSON.stringify({
-          phase: 'cycle-after',
-          cycle,
-          t: Date.now(),
-          attempts: after.attempts,
-          status: after.status,
-        })
-      );
-      attempts.push(after.attempts);
-      clearResearchLease(id);
-    }
-    console.log(JSON.stringify({ phase: 'refund-cap', attempts }));
-    assert.deepEqual(attempts, [0, 0, 0, 1]);
+    await Promise.race([outcome.catch((error) => error), sleep(5000)]);
   } finally {
     releaseHold();
     await es

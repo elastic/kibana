@@ -222,6 +222,18 @@ interface ResearchLease {
 }
 
 const leases = new Map<string, ResearchLease>();
+const renewals = new Map<string, Set<() => void>>();
+
+/** Runs when execution_start moves the persisted retryAt. The runner writes that date immediately. */
+export const subscribeResearchLeaseRenewal = (taskId: string, renew: () => void): (() => void) => {
+  const set = renewals.get(taskId) ?? new Set<() => void>();
+  set.add(renew);
+  renewals.set(taskId, set);
+  return () => {
+    set.delete(renew);
+    if (set.size === 0) renewals.delete(taskId);
+  };
+};
 
 /**
  * Arms a lease once. A later call from the worker stub must not reset the claim clock.
@@ -242,11 +254,12 @@ export const armResearchLease = (lease: {
   });
 };
 
-/** Once. A second packet must not move the execution clock. */
+/** Once. A second packet must not move the execution clock or fire another renewal. */
 export const markResearchExecutionStarted = (taskId: string, at = Date.now()): void => {
   const lease = leases.get(taskId);
   if (!lease || lease.executionStartedAt !== undefined) return;
   lease.executionStartedAt = at;
+  for (const renew of [...(renewals.get(taskId) ?? [])]) renew();
 };
 
 /**
@@ -265,6 +278,7 @@ export const researchExpiration = (taskId: string): Date | undefined => {
 
 export const clearResearchLease = (taskId: string): void => {
   leases.delete(taskId);
+  renewals.delete(taskId);
 };
 
 /**
@@ -293,8 +307,8 @@ const enabledClass = (taskType: string): ResearchExecutionClass | undefined =>
 
 /**
  * Claim-time retryAt for a routed task. Arms the lease before the document is
- * visible as running. The hold is bootstrap plus the rule budget, and never
- * longer than {@link RESEARCH_RECOVERY_CAP_MS}.
+ * visible as running. The hold is bootstrap plus cancel grace, and never
+ * longer than {@link RESEARCH_RECOVERY_CAP_MS}. The rule budget starts at execution_start.
  */
 export const researchClaimRetryAt = (
   task: {
@@ -319,22 +333,22 @@ export const researchClaimRetryAt = (
     bootstrapMs: RESEARCH_BOOTSTRAP_DEADLINE_MS,
     executionMs,
   });
-  const hold = Math.min(RESEARCH_BOOTSTRAP_DEADLINE_MS + executionMs, RESEARCH_RECOVERY_CAP_MS);
+  const grace = resolveCancelGraceMs(task.taskType, 0);
+  const hold = Math.min(RESEARCH_BOOTSTRAP_DEADLINE_MS + grace, RESEARCH_RECOVERY_CAP_MS);
   return new Date(now + hold);
 };
 
 /**
- * Document retryAt while the lease is held. After execution_start this includes
- * one cancel grace, still capped at the recovery window.
+ * Document retryAt while the lease is held. Boot and the stop window both include
+ * one cancel grace, still capped at the recovery window. The local expiry clock does not.
  */
 export const researchPersistedRetryAt = (taskId: string, now = Date.now()): Date | undefined => {
   const lease = leases.get(taskId);
   if (!lease) return undefined;
-  const grace =
-    lease.executionStartedAt === undefined ? 0 : resolveCancelGraceMs(lease.taskType, 0);
+  const grace = resolveCancelGraceMs(lease.taskType, 0);
   const target =
     lease.executionStartedAt === undefined
-      ? lease.claimedAt + lease.bootstrapMs + lease.executionMs
+      ? lease.claimedAt + lease.bootstrapMs + grace
       : lease.executionStartedAt + lease.executionMs + grace;
   return new Date(Math.min(target, now + RESEARCH_RECOVERY_CAP_MS));
 };

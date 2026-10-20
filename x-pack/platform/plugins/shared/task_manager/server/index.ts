@@ -155,6 +155,7 @@ export {
   RESEARCH_BOOTSTRAP_DEADLINE_MS,
   armResearchLease,
   markResearchExecutionStarted,
+  subscribeResearchLeaseRenewal,
   clearResearchLease,
   researchClaimRetryAt,
   researchPersistedRetryAt,

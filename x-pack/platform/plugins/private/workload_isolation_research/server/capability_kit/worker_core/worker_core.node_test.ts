@@ -103,6 +103,33 @@ test('elasticsearch write classification treats search as read and bulk as write
   assert.equal(fence.summary().writes, 1);
 });
 
+test('requestOptions.querystring overrides params the way transport merges them', () => {
+  const fence = createBootEsWriteFence({ mode: 'deny', allow: [] });
+  const handler = fence.wrap(() => () => undefined)({ logger: {} as never });
+  assert.throws(
+    () =>
+      handler(
+        { scoped: false },
+        { method: 'GET', path: '/orders/_doc/1' },
+        { querystring: { refresh: true } },
+        {} as never
+      ),
+    /boot ES write denied/
+  );
+  assert.throws(
+    () =>
+      handler(
+        { scoped: false },
+        { method: 'GET', path: '/orders/_doc/1', querystring: { refresh: false } },
+        { querystring: { refresh: true } },
+        {} as never
+      ),
+    /boot ES write denied/
+  );
+  assert.equal(fence.summary().denied, 2);
+  assert.equal(fence.summary().reads, 0);
+});
+
 test('boot fence anchors endpoint shapes and waits for installers', async () => {
   assert.equal(isEsWrite('POST', '/orders/_update/_simulate'), true);
   assert.equal(isEsWrite('POST', '/_index_template/_simulate_index/orders'), false);
@@ -1510,7 +1537,10 @@ test('claim arms a protected lease before a later stub and refunds persisted att
     { id: 'rule-1', taskType: 'alerting:.es-query', schedule: { interval: '1m' } },
     now
   );
-  assert.equal(claimed?.getTime(), now + RESEARCH_BOOTSTRAP_DEADLINE_MS + 1000);
+  assert.equal(
+    claimed?.getTime(),
+    now + RESEARCH_BOOTSTRAP_DEADLINE_MS + deriveCancelGraceMs('1s', 0)
+  );
   assert.equal(researchFirstRetryDelayMs('rule-1'), 0);
   armResearchLease({
     taskId: 'rule-1',

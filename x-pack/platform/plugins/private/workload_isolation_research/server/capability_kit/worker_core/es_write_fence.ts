@@ -204,6 +204,23 @@ const collectQuery = (
   return fromPath;
 };
 
+/**
+ * Effective query `@elastic/transport` serializes.
+ * `requestOptions.querystring` is assigned over `params.querystring`.
+ * Absent options keep the params query.
+ */
+export const mergeTransportQuery = (
+  paramsQuery?: string | Readonly<Record<string, unknown>> | null,
+  optionsQuery?: string | Readonly<Record<string, unknown>> | null
+): string | Readonly<Record<string, unknown>> | undefined => {
+  if (optionsQuery == null) return paramsQuery ?? undefined;
+  if (paramsQuery == null) return optionsQuery;
+  if (typeof paramsQuery === 'object' && typeof optionsQuery === 'object') {
+    return { ...paramsQuery, ...optionsQuery };
+  }
+  return optionsQuery;
+};
+
 const queryAllowed = (entries: readonly (readonly [string, string])[]): boolean =>
   entries.every(([name, value]) => {
     if (!ALLOWED_QUERY.has(name)) return false;
@@ -284,10 +301,14 @@ export const createBootEsWriteFence = (options: {
         entry.method.toUpperCase() === record.method.toUpperCase() &&
         entry.path.test(barePath(record.path))
     );
-  const observe: OnRequestHandler = (_ctx, params) => {
+  const observe: OnRequestHandler = (_ctx, params, requestOptions) => {
     const method = String(params.method ?? 'GET');
     const path = String(params.path ?? '');
-    const querystring = (params as { querystring?: string | Record<string, unknown> }).querystring;
+    const paramsQuery = (params as { querystring?: string | Record<string, unknown> }).querystring;
+    const optionsQuery = (
+      requestOptions as { querystring?: string | Record<string, unknown> } | undefined
+    )?.querystring;
+    const querystring = mergeTransportQuery(paramsQuery, optionsQuery);
     const write = isEsWrite(method, path, querystring);
     const record: EsRequestRecord = { method, path, write, phase };
     seen.push(record);

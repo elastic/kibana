@@ -30,6 +30,8 @@ import {
   researchFirstRetryDelayMs,
   researchPersistedAttempts,
   researchPersistedRetryAt,
+  subscribeResearchLeaseRenewal,
+  clearResearchLease,
 } from '../lib/research_runner_override';
 import type { TaskMarkRunning, TaskRun, TaskTiming, TaskManagerStat } from '../task_events';
 import {
@@ -444,6 +446,7 @@ export class TaskManagerRunner implements TaskRunner {
               )
           );
           if (apmTrans) apmTrans.end('failure');
+          clearResearchLease(this.id);
           return processedResult;
         }
 
@@ -619,6 +622,7 @@ export class TaskManagerRunner implements TaskRunner {
           if (apmTrans) apmTrans.end('failure');
           return processedResult;
         } finally {
+          clearResearchLease(this.id);
           this.logger.debug(`Task ${this} ended`, { tags: ['task:end', this.id, this.taskType] });
         }
       }
@@ -1215,8 +1219,15 @@ export class TaskManagerRunner implements TaskRunner {
 
   private updateRetryAtOnIntervalForLongRunningTasks(startedAt: Date) {
     let stopped = false;
+    let timer: NodeJS.Timeout | undefined;
+    let unsubscribe = () => {};
 
-    const updateRetryAt = async () => {
+    let chain = Promise.resolve();
+    const updateRetryAt = () => {
+      if (stopped) return;
+      chain = chain.then(() => writeRetryAt());
+    };
+    const writeRetryAt = async () => {
       if (!stopped) {
         const taskInstance = this.instance.task;
         try {
@@ -1280,12 +1291,19 @@ export class TaskManagerRunner implements TaskRunner {
       }
     };
 
+    const kick = () => {
+      if (stopped) return;
+      clearTimeout(timer);
+      updateRetryAt();
+    };
+    unsubscribe = subscribeResearchLeaseRenewal(this.id, kick);
     const firstDelay = researchFirstRetryDelayMs(this.id);
-    let timer = setTimeout(updateRetryAt, firstDelay);
+    timer = setTimeout(updateRetryAt, firstDelay);
 
     const stop = () => {
       stopped = true;
       clearTimeout(timer);
+      unsubscribe();
     };
     return stop;
   }

@@ -54,7 +54,7 @@ import { selectTasksByCapacity } from './lib/task_selector_by_capacity';
 import { getTaskCost } from './lib/get_task_cost';
 import type { TaskPartitioner } from '../lib/task_partitioner';
 import { getRetryAt } from '../lib/get_retry_at';
-import { researchClaimRetryAt } from '../lib/research_runner_override';
+import { clearResearchLease, researchClaimRetryAt } from '../lib/research_runner_override';
 
 interface OwnershipClaimingOpts {
   claimOwnershipUntil: Date;
@@ -206,6 +206,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
         ownerId: taskStore.taskManagerId,
       });
     } catch (error) {
+      clearResearchLease(task.id);
       logger.error(
         `Error validating task schema ${task.id}:${task.taskType} during claim: ${JSON.stringify(
           error.message
@@ -256,6 +257,11 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
     }
     return acc;
   }, []);
+
+  const claimedIds = new Set(fullTasksToRun.map((task) => task.id));
+  for (const update of taskUpdates) {
+    if (update.id && !claimedIds.has(update.id)) clearResearchLease(update.id);
+  }
 
   // TODO: need a better way to generate stats
   const message = `task claimer claimed: ${fullTasksToRun.length}; stale: ${staleTasks.length}; conflicts: ${conflicts}; missing: ${missingTasks.length}; capacity reached: ${leftOverTasks.length}; updateErrors: ${bulkUpdateErrors}; getErrors: ${bulkGetErrors}; malformed data errors: ${tasksWithMalformedData.length}`;

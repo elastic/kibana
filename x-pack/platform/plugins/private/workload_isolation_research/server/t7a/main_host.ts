@@ -20,7 +20,6 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import {
   RESEARCH_BOOTSTRAP_DEADLINE_MS,
   armResearchLease,
-  clearResearchLease,
   deriveCancelGraceMs,
   markCollateralLoss,
   markResearchExecutionStarted,
@@ -761,18 +760,13 @@ export class T7aController {
           executionMs,
         });
       }
-      let outcome: Outcome;
-      try {
-        outcome = await this.getHost().run(
-          this.runOptions(taskType, { ...baseInput, phase }, space, context.signal, {
-            deadlineMs: executionMs,
-            bootstrapDeadlineMs: RESEARCH_BOOTSTRAP_DEADLINE_MS,
-            taskId,
-          })
-        );
-      } finally {
-        if (taskId) clearResearchLease(taskId);
-      }
+      const outcome = await this.getHost().run(
+        this.runOptions(taskType, { ...baseInput, phase }, space, context.signal, {
+          deadlineMs: executionMs,
+          bootstrapDeadlineMs: RESEARCH_BOOTSTRAP_DEADLINE_MS,
+          taskId,
+        })
+      );
       const key = `${taskType}/${phase}/${outcome.status}`;
       this.outcomes.set(key, (this.outcomes.get(key) ?? 0) + 1);
       const value = (outcome.status === 'success' ? outcome.value : undefined) as Obj | undefined;
