@@ -66,12 +66,10 @@ export class AutomaticImportClient {
 
   public async analyze(params: AnalyzeParams): Promise<AutomaticImportRunOutput> {
     const { integrationId } = params;
-    try {
-      const output = await this.run(params);
-      return { ...output, runId: integrationId, traceId: await this.findTraceId(integrationId) };
-    } finally {
-      await this.deleteIntegration(integrationId);
-    }
+    const output = await this.run(params);
+    // Task Manager retries a failed analysis after 30 seconds; deleting first removes the task before then.
+    await this.deleteIntegration(integrationId);
+    return { ...output, runId: integrationId, traceId: await this.findTraceId(integrationId) };
   }
 
   private async run(params: AnalyzeParams): Promise<Omit<AutomaticImportRunOutput, 'runId'>> {

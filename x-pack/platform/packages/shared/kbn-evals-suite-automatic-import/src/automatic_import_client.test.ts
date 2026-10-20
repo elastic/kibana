@@ -93,8 +93,15 @@ const createClient = ({
     fetch.mock.calls.filter(([calledPath, options]) => {
       return calledPath === path && options?.method === method;
     }).length;
+  const deletedBeforeTraceLookup = () => {
+    const deleteCall = fetch.mock.calls.findIndex(([calledPath, options]) => {
+      return calledPath === INTEGRATION_PATH && options?.method === 'DELETE';
+    });
+    const [firstTraceLookup] = query.mock.invocationCallOrder;
+    return deleteCall !== -1 && fetch.mock.invocationCallOrder[deleteCall] < firstTraceLookup;
+  };
 
-  return { analyze, callsTo, simulate, query };
+  return { analyze, callsTo, deletedBeforeTraceLookup, simulate, query };
 };
 
 describe('AutomaticImportClient', () => {
@@ -130,7 +137,9 @@ describe('AutomaticImportClient', () => {
   it.each(['failed', 'cancelled'])(
     'fails the run at the first %s status, without waiting for a retry',
     async (status) => {
-      const { analyze, callsTo, simulate } = createClient({ statuses: ['processing', status] });
+      const { analyze, callsTo, deletedBeforeTraceLookup, simulate } = createClient({
+        statuses: ['processing', status],
+      });
 
       const output = await analyze();
 
@@ -143,6 +152,7 @@ describe('AutomaticImportClient', () => {
       expect(callsTo('GET', INTEGRATION_PATH)).toBe(2);
       expect(simulate).not.toHaveBeenCalled();
       expect(callsTo('DELETE', INTEGRATION_PATH)).toBe(1);
+      expect(deletedBeforeTraceLookup()).toBe(true);
     }
   );
 
@@ -159,12 +169,13 @@ describe('AutomaticImportClient', () => {
   });
 
   it('fails the run and still deletes the integration when a request fails', async () => {
-    const { analyze, callsTo } = createClient({ failUpload: true });
+    const { analyze, callsTo, deletedBeforeTraceLookup } = createClient({ failUpload: true });
 
     const output = await analyze();
 
     expect(output).toMatchObject({ status: 'failed', error: 'Request failed with status 500' });
     expect(callsTo('DELETE', INTEGRATION_PATH)).toBe(1);
+    expect(deletedBeforeTraceLookup()).toBe(true);
   });
 
   it('reports each line the pipeline dropped or failed to parse as an error', async () => {
