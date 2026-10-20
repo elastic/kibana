@@ -8,9 +8,9 @@
  */
 
 import { isFilterable, getFieldSubtypeNested } from '@kbn/data-views-plugin/common';
-import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { flatten } from 'lodash';
 import { escapeKuery } from '@kbn/es-query';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { sortPrefixFirst } from './sort_prefix_first';
 import type { QuerySuggestionField } from '../query_suggestion_provider';
 import { QuerySuggestionTypes } from '../query_suggestion_provider';
