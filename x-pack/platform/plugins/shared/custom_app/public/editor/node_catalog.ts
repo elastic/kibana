@@ -156,6 +156,15 @@ const ENTRIES: Record<AppNodeType, Omit<NodeCatalogEntry, 'type'>> = {
     group: 'input',
     isContainer: false,
   },
+  link: {
+    label: i18n.translate('xpack.customApp.catalog.link.label', { defaultMessage: 'Link' }),
+    description: i18n.translate('xpack.customApp.catalog.link.description', {
+      defaultMessage: 'A link to Discover, a page of Kibana or another custom app.',
+    }),
+    iconType: 'link',
+    group: 'content',
+    isContainer: false,
+  },
   form: {
     label: i18n.translate('xpack.customApp.catalog.form.label', { defaultMessage: 'Form' }),
     description: i18n.translate('xpack.customApp.catalog.form.description', {

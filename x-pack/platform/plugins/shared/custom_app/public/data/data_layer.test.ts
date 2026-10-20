@@ -398,6 +398,15 @@ describe('createDataLayer with a source of cases', () => {
 
   const open: CasesSource = { type: 'cases', status: { fromState: 'status' } };
 
+  it('says where a component gets its data from, which is how a link can open its query', () => {
+    const { layer } = setupCases();
+    layer.setSources({ list: open, users: { type: 'esql', query: queries.users } });
+
+    expect(layer.getSourceDefinition('users')).toEqual({ type: 'esql', query: queries.users });
+    expect(layer.getSourceDefinition('list')).toEqual(open);
+    expect(layer.getSourceDefinition('nope')).toBeUndefined();
+  });
+
   it('runs the source of cases, and not a query, for a component that shows cases', () => {
     const { layer, casesCalls, queryCalls } = setupCases();
     layer.setSources({ list: open, users: { type: 'esql', query: queries.users } });

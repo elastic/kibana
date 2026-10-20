@@ -124,6 +124,21 @@ describe('useDocumentEditor', () => {
         expect(state.view).toEqual({ type: 'string', default: 'option-1' });
       });
 
+      it('is a link, which sets no value and needs none', () => {
+        const { hook } = setup();
+
+        act(() => {
+          hook.result.current.add('link');
+        });
+
+        const { document } = hook.result.current;
+        expect(findNode(document.root, 'link-1')!.node).toMatchObject({
+          type: 'link',
+          to: { type: 'app', app: 'dashboards' },
+        });
+        expect(hook.result.current.issues).toEqual([]);
+      });
+
       it('is a box of lines that sets a list, which starts empty', () => {
         const { hook } = setup();
 

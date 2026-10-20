@@ -195,6 +195,20 @@ export const validateDocument = (document: DocumentToValidate, ctx: z.Refinement
       });
     }
 
+    if (node.type === 'link' && node.to.type === 'discover') {
+      const { from } = node.to;
+      const target = nodes.find(({ id }) => id === from);
+      const targetSource = target ? getNodeSource(target) : undefined;
+      if (!target) {
+        issue(`Node "${node.id}" opens "${from}" in Discover, which is not a component`, node.id);
+      } else if (targetSource?.type !== 'esql') {
+        issue(
+          `Node "${node.id}" opens "${from}" in Discover, which has no ES|QL query to open`,
+          node.id
+        );
+      }
+    }
+
     if (node.type === 'time_range' && node.id !== firstTimeRangeId) {
       issue(
         `Node "${node.id}" is a second time range; an app has one, which sets the period of all of it`,

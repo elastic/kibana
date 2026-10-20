@@ -98,6 +98,19 @@ const initial = (): AppDocument =>
           fields: [{ bind: 'reason', kind: 'text', label: 'Reason', placeholder: 'Why?' }],
           onSubmit: [],
         },
+        {
+          type: 'link',
+          id: 'to-discover',
+          label: 'See it',
+          to: { type: 'discover', from: 'table' },
+        },
+        {
+          type: 'link',
+          id: 'to-app',
+          label: 'Open dashboard',
+          to: { type: 'app', app: 'dashboards', path: '#/view/{{state.service}}' },
+        },
+        { type: 'link', id: 'to-custom', label: 'Open app', to: { type: 'custom_app', id: 'abc' } },
         { type: 'time_range', id: 'period' },
         { type: 'table', id: 'case-list', source: { type: 'cases', status: 'open' } },
         {
@@ -314,6 +327,77 @@ describe('PropertiesPanel', () => {
         screen.getByRole('heading', { name: 'When a bar, point or slice is clicked' })
       ).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Remember a column' })).toBeInTheDocument();
+    });
+  });
+
+  describe('a link', () => {
+    it('is a component of its own, with its words and where it goes', () => {
+      setup('to-app');
+
+      expect(screen.getByRole('heading', { name: 'Link' })).toBeInTheDocument();
+      expect(screen.getByRole('textbox', { name: 'Label' })).toHaveValue('Open dashboard');
+      expect(screen.getByRole('combobox', { name: 'Goes to' })).toHaveValue('app');
+      expect(screen.getByRole('textbox', { name: 'Application' })).toHaveValue('dashboards');
+      expect(screen.getByRole('textbox', { name: 'Path' })).toHaveValue('#/view/{{state.service}}');
+    });
+
+    it('edits what is written on it', async () => {
+      const { onChange } = setup('to-app');
+
+      await userEvent.type(screen.getByRole('textbox', { name: 'Label' }), '!');
+
+      expect(onChange).toHaveBeenLastCalledWith({ label: 'Open dashboard!' });
+    });
+
+    it('edits the application and the path of a page', async () => {
+      const { onChange } = setup('to-app');
+
+      await userEvent.type(screen.getByRole('textbox', { name: 'Application' }), 'x');
+      expect(onChange).toHaveBeenLastCalledWith({
+        to: { type: 'app', app: 'dashboardsx', path: '#/view/{{state.service}}' },
+      });
+
+      await userEvent.clear(screen.getByRole('textbox', { name: 'Path' }));
+      expect(onChange).toHaveBeenLastCalledWith({ to: { type: 'app', app: 'dashboards' } });
+    });
+
+    it('chooses the component whose query Discover opens, from the ones that have one', async () => {
+      const { onChange } = setup('to-discover');
+      const choose = screen.getByRole('combobox', { name: 'Opens the query of' });
+
+      expect(choose).toHaveValue('table');
+      const offered = Array.from((choose as HTMLSelectElement).options).map(({ value }) => value);
+      expect(offered).toContain('table');
+      expect(offered).toContain('stat');
+      // Cases are not ES|QL, and the options of a select are not a component.
+      expect(offered).not.toContain('case-list');
+      expect(offered.some((id) => id.endsWith(':options'))).toBe(false);
+
+      await userEvent.selectOptions(choose, 'stat');
+      expect(onChange).toHaveBeenLastCalledWith({ to: { type: 'discover', from: 'stat' } });
+    });
+
+    it('goes from one kind of place to another, with what that kind needs', async () => {
+      const { onChange } = setup('to-app');
+
+      await userEvent.selectOptions(
+        screen.getByRole('combobox', { name: 'Goes to' }),
+        'custom_app'
+      );
+      expect(onChange).toHaveBeenLastCalledWith({ to: { type: 'custom_app', id: '' } });
+
+      await userEvent.selectOptions(screen.getByRole('combobox', { name: 'Goes to' }), 'discover');
+      expect(onChange).toHaveBeenLastCalledWith({
+        to: { type: 'discover', from: expect.any(String) },
+      });
+    });
+
+    it('edits the id of another app', async () => {
+      const { onChange } = setup('to-custom');
+
+      await userEvent.type(screen.getByRole('textbox', { name: 'Id of the app' }), 'd');
+
+      expect(onChange).toHaveBeenLastCalledWith({ to: { type: 'custom_app', id: 'abcd' } });
     });
   });
 

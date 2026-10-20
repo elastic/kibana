@@ -20,6 +20,8 @@ import {
   MAX_FORM_FIELDS,
   MAX_HEADING_LENGTH,
   MAX_KEY_VALUE_FIELDS,
+  MAX_LINK_APP_ID_LENGTH,
+  MAX_LINK_PATH_LENGTH,
   MAX_NODE_ID_LENGTH,
   MAX_PROMPT_LENGTH,
   MAX_QUERY_LENGTH,
@@ -243,6 +245,49 @@ const timeRangeNodeSchema = z.object({
   id: nodeIdSchema,
 });
 
+/**
+ * Where a link goes, always inside Kibana: the query of a component opened in Discover, a page of
+ * any Kibana application, or another custom app. A path starts at the application, so it can never
+ * name another site.
+ */
+const linkTargetSchema = z.discriminatedUnion('type', [
+  z.object({
+    type: z.literal('discover'),
+    /** The id of the component whose ES|QL query is opened. */
+    from: nodeIdSchema,
+  }),
+  z.object({
+    type: z.literal('app'),
+    /** The id of the application, as Kibana knows it, such as `dashboards` or `discover`. */
+    app: z
+      .string()
+      .min(1)
+      .max(MAX_LINK_APP_ID_LENGTH)
+      .regex(/^[A-Za-z0-9_:.-]+$/),
+    /** Where in the application. `{{state.key}}` in it is replaced with the value, made safe for a path. */
+    path: z
+      .string()
+      .max(MAX_LINK_PATH_LENGTH)
+      // Not a scheme (`https:`), and not `//host`: it is a place in the application, not a site.
+      .refine((path) => !/^[A-Za-z][A-Za-z0-9+.-]*:/.test(path) && !/^[\\/]{2}/.test(path), {
+        message: 'A path is a place in the application, not an address',
+      })
+      .optional(),
+  }),
+  z.object({
+    type: z.literal('custom_app'),
+    /** The id of a saved custom app. */
+    id: z.string().min(1).max(MAX_NODE_ID_LENGTH),
+  }),
+]);
+
+const linkNodeSchema = z.object({
+  type: z.literal('link'),
+  id: nodeIdSchema,
+  label: z.string().min(1).max(MAX_HEADING_LENGTH),
+  to: linkTargetSchema,
+});
+
 const buttonNodeSchema = z.object({
   type: z.literal('button'),
   id: nodeIdSchema,
@@ -375,6 +420,7 @@ type LeafNode =
   | z.output<typeof searchNodeSchema>
   | z.output<typeof listInputNodeSchema>
   | z.output<typeof buttonNodeSchema>
+  | z.output<typeof linkNodeSchema>
   | z.output<typeof formNodeSchema>
   | z.output<typeof timeRangeNodeSchema>;
 
@@ -422,6 +468,7 @@ export const nodeSchema = z.discriminatedUnion('type', [
   searchNodeSchema,
   listInputNodeSchema,
   buttonNodeSchema,
+  linkNodeSchema,
   formNodeSchema,
   timeRangeNodeSchema,
   stackNodeSchema,

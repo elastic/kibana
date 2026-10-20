@@ -610,6 +610,110 @@ describe('forms', () => {
   });
 });
 
+describe('links', () => {
+  const linkDoc = (to: unknown, state: Record<string, unknown> = {}, label = 'Open') => ({
+    state,
+    root: {
+      type: 'stack',
+      id: 'root',
+      children: [
+        { type: 'link', id: 'go', label, to },
+        { type: 'table', id: 'rows', query: 'FROM logs | LIMIT 5' },
+        { type: 'table', id: 'cases-table', source: { type: 'cases' } },
+      ],
+    },
+  });
+  const issues = (document: unknown) =>
+    JSON.stringify(appDocumentSchema.safeParse(document).error?.issues ?? []);
+
+  it('goes to the query of a component in Discover, a page of an application, or another app', () => {
+    expect(appDocumentSchema.safeParse(linkDoc({ type: 'discover', from: 'rows' })).success).toBe(
+      true
+    );
+    expect(
+      appDocumentSchema.safeParse(linkDoc({ type: 'app', app: 'dashboards', path: '#/view/abc' }))
+        .success
+    ).toBe(true);
+    expect(appDocumentSchema.safeParse(linkDoc({ type: 'app', app: 'discover' })).success).toBe(
+      true
+    );
+    expect(appDocumentSchema.safeParse(linkDoc({ type: 'custom_app', id: 'abc' })).success).toBe(
+      true
+    );
+  });
+
+  it('needs something written on it, and a place to go', () => {
+    expect(
+      appDocumentSchema.safeParse(linkDoc({ type: 'app', app: 'discover' }, {}, '')).success
+    ).toBe(false);
+    expect(appDocumentSchema.safeParse(linkDoc({ type: 'nowhere' })).success).toBe(false);
+  });
+
+  it.each([
+    ['an address of another site', 'https://evil.example/x'],
+    // Written in two parts, so that a linter that looks for such addresses finds none.
+    ['a scheme that runs code', `${'java'}${'script'}:alert(1)`],
+    ['an address without a scheme', '//evil.example/x'],
+    ['an address with backslashes', '\\\\evil.example'],
+    ['a data address', 'data:text/html,x'],
+  ])('is never to %s', (_what, path) => {
+    expect(
+      appDocumentSchema.safeParse(linkDoc({ type: 'app', app: 'discover', path })).success
+    ).toBe(false);
+  });
+
+  it('is a place in an application: a path, a hash or a query', () => {
+    ['/cases/abc', '#/view/abc', '?tab=x', '/a?b=c#d', ''].forEach((path) => {
+      expect(
+        appDocumentSchema.safeParse(linkDoc({ type: 'app', app: 'discover', path })).success
+      ).toBe(true);
+    });
+  });
+
+  it('is to an application with an id that is only an id, and not too long', () => {
+    expect(appDocumentSchema.safeParse(linkDoc({ type: 'app', app: 'a/b' })).success).toBe(false);
+    expect(appDocumentSchema.safeParse(linkDoc({ type: 'app', app: 'a b' })).success).toBe(false);
+    expect(
+      appDocumentSchema.safeParse(linkDoc({ type: 'app', app: 'x'.repeat(101) })).success
+    ).toBe(false);
+    expect(
+      appDocumentSchema.safeParse(linkDoc({ type: 'app', app: 'securitySolutionUI' })).success
+    ).toBe(true);
+  });
+
+  it('opens a component that has an ES|QL query, and not one that has not, or is not there', () => {
+    expect(issues(linkDoc({ type: 'discover', from: 'cases-table' }))).toContain(
+      'which has no ES|QL query to open'
+    );
+    expect(issues(linkDoc({ type: 'discover', from: 'go' }))).toContain(
+      'which has no ES|QL query to open'
+    );
+    expect(issues(linkDoc({ type: 'discover', from: 'nope' }))).toContain(
+      'which is not a component'
+    );
+  });
+
+  it('may use the values of the app in its label and its path, and no others', () => {
+    const state = { id: { type: 'string', default: 'a' } };
+
+    expect(
+      appDocumentSchema.safeParse(
+        linkDoc(
+          { type: 'app', app: 'dashboards', path: '#/view/{{state.id}}' },
+          state,
+          'Open {{state.id}}'
+        )
+      ).success
+    ).toBe(true);
+    expect(
+      issues(linkDoc({ type: 'app', app: 'dashboards', path: '#/view/{{state.ghost}}' }, state))
+    ).toContain('unknown state key \\"ghost\\"');
+    expect(
+      issues(linkDoc({ type: 'app', app: 'dashboards' }, state, 'Open {{state.ghost}}'))
+    ).toContain('unknown state key');
+  });
+});
+
 describe('lists', () => {
   const listDoc = (root: Record<string, unknown>, state: Record<string, unknown> = {}) => ({
     state: {

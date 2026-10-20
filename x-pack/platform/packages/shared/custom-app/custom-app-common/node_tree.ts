@@ -37,6 +37,13 @@ export const getInterpolatedText = (
       return [{ prop: 'title', text: node.title }];
     case 'chart':
       return node.title === undefined ? [] : [{ prop: 'title', text: node.title }];
+    case 'link':
+      return [
+        { prop: 'label', text: node.label },
+        ...(node.to.type === 'app' && node.to.path !== undefined
+          ? [{ prop: 'path', text: node.to.path }]
+          : []),
+      ];
     default:
       return [];
   }

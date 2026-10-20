@@ -25,6 +25,7 @@ import { ButtonNode } from './button_node';
 import { FlyoutNode } from './flyout_node';
 import { FormNode } from './form_node';
 import { KeyValueNode } from './key_value_node';
+import { LinkNode } from './link_node';
 import { ListInputNode } from './list_input_node';
 import { SearchNode } from './search_node';
 import { SelectNode } from './select_node';
@@ -104,6 +105,8 @@ export const NodeRenderer = ({ node }: NodeRendererProps) => {
       return <ListInputNode node={node} />;
     case 'button':
       return <ButtonNode node={node} />;
+    case 'link':
+      return <LinkNode node={node} />;
     case 'form':
       return <FormNode node={node} />;
     case 'time_range':

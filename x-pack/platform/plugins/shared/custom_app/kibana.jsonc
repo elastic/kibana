@@ -10,6 +10,6 @@
     "browser": true,
     "server": true,
     "requiredPlugins": ["embeddable", "data", "dataViews", "esql", "features", "lens", "uiActions"],
-    "optionalPlugins": ["agentBuilder"]
+    "optionalPlugins": ["agentBuilder", "share"]
   }
 }

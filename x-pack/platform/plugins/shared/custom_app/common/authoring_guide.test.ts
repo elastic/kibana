@@ -39,6 +39,7 @@ describe('the authoring guide', () => {
     'search',
     'list_input',
     'button',
+    'link',
     'form',
     'time_range',
     'flyout',
@@ -154,6 +155,15 @@ describe('the authoring guide', () => {
     );
     expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('keep a way to clear the value');
     expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('a chart\'s "onClick"');
+  });
+
+  it('teaches links: where they can go, that they stay in Kibana, and not to guess a path', () => {
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('"type": "discover"');
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('"type": "custom_app"');
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain(
+      'A link stays inside Kibana and cannot go to another site'
+    );
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('do not guess it');
   });
 
   it('says that a component has a query or a source, not both, and that a chart cannot show cases', () => {

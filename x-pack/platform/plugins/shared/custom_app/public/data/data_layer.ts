@@ -63,6 +63,8 @@ export interface DataLayer {
   loading$: BehaviorSubject<boolean | undefined>;
   /** Where each component that shows data gets it from, by the id of the component. */
   setSources: (sources: Record<string, DataSource>) => void;
+  /** Where a component gets what it shows from, if it does. */
+  getSourceDefinition: (id: string) => DataSource | undefined;
   /** The same, for components that only run queries. */
   setQueries: (queries: Record<string, string>) => void;
   /** Replaces the state. Only the queries that use a changed value run again. */
@@ -209,6 +211,7 @@ export const createDataLayer = ({
         publishLoading();
       };
     },
+    getSourceDefinition: (id) => sources[id],
     setSources: (next) => {
       const previous = sources;
       sources = next;

@@ -144,6 +144,15 @@ export const createDefaultNode = (
         onChange: [],
         label: i18n.translate('xpack.customApp.defaults.search', { defaultMessage: 'Search' }),
       };
+    case 'link':
+      return {
+        type,
+        id,
+        label: i18n.translate('xpack.customApp.defaults.link', {
+          defaultMessage: 'Open dashboards',
+        }),
+        to: { type: 'app', app: 'dashboards' },
+      };
     case 'list_input':
       return {
         type,

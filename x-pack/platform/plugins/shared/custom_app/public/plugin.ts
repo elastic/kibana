@@ -11,6 +11,7 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
@@ -40,6 +41,7 @@ interface StartDeps {
   lens: LensPublicStart;
   uiActions: UiActionsStart;
   agentBuilder?: AgentBuilderPluginStart;
+  share?: SharePluginStart;
 }
 
 export class CustomAppPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
@@ -84,9 +86,9 @@ export class CustomAppPlugin implements Plugin<void, void, SetupDeps, StartDeps>
 
   start(
     core: CoreStart,
-    { data, dataViews, embeddable, lens, uiActions, agentBuilder }: StartDeps
+    { data, dataViews, embeddable, lens, uiActions, agentBuilder, share }: StartDeps
   ) {
-    setServices(core, data.search.search, embeddable, dataViews, lens, agentBuilder);
+    setServices(core, data.search.search, embeddable, dataViews, lens, agentBuilder, share);
 
     uiActions.registerActionAsync<EmbeddableApiContext>(ADD_CUSTOM_APP_ACTION_ID, async () => {
       const { getAddCustomAppAction } = await import('./actions/add_custom_app_action');

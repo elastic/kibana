@@ -21,6 +21,8 @@ import { KbnDangerCallout } from '@kbn/ui-callout';
 import {
   MAX_HEADING_LENGTH,
   MAX_TEXT_LENGTH,
+  OPTIONS_SOURCE_SUFFIX,
+  collectSources,
   getNodeChildren,
   setStateDeclaration,
   updateNode,
@@ -110,6 +112,9 @@ const sections = {
   }),
   whenSubmitted: i18n.translate('xpack.customApp.editor.sectionWhenSubmitted', {
     defaultMessage: 'When it is submitted',
+  }),
+  linkTarget: i18n.translate('xpack.customApp.editor.sectionLinkTarget', {
+    defaultMessage: 'Where it goes',
   }),
   chartClick: i18n.translate('xpack.customApp.editor.sectionChartClick', {
     defaultMessage: 'When a bar, point or slice is clicked',
@@ -583,6 +588,115 @@ export const PropertiesPanel = ({
             </Section>
           </Sections>
         );
+      case 'link': {
+        const dataComponents = Object.entries(collectSources(document.root)).flatMap(
+          ([componentId, source]) =>
+            source.type === 'esql' && !componentId.endsWith(OPTIONS_SOURCE_SUFFIX)
+              ? [{ value: componentId, text: componentId }]
+              : []
+        );
+        const { to } = node;
+        return (
+          <Sections>
+            <Section title={sections.content}>
+              <InterpolatedTextField
+                label={labels.label}
+                value={node.label}
+                maxLength={MAX_HEADING_LENGTH}
+                stateKeys={stateKeys}
+                onChange={(label) => onChange<'link'>({ label })}
+              />
+            </Section>
+            <Section title={sections.linkTarget}>
+              <SelectField<'discover' | 'app' | 'custom_app'>
+                label={i18n.translate('xpack.customApp.editor.linkGoesTo', {
+                  defaultMessage: 'Goes to',
+                })}
+                value={to.type}
+                options={[
+                  {
+                    value: 'discover',
+                    text: i18n.translate('xpack.customApp.editor.linkDiscover', {
+                      defaultMessage: 'The query of a component, in Discover',
+                    }),
+                  },
+                  {
+                    value: 'app',
+                    text: i18n.translate('xpack.customApp.editor.linkApp', {
+                      defaultMessage: 'A page of Kibana',
+                    }),
+                  },
+                  {
+                    value: 'custom_app',
+                    text: i18n.translate('xpack.customApp.editor.linkCustomApp', {
+                      defaultMessage: 'Another custom app',
+                    }),
+                  },
+                ]}
+                onChange={(type) =>
+                  onChange<'link'>({
+                    to:
+                      type === 'discover'
+                        ? { type, from: dataComponents[0]?.value ?? '' }
+                        : type === 'app'
+                        ? { type, app: 'dashboards' }
+                        : { type, id: '' },
+                  })
+                }
+              />
+              {to.type === 'discover' && (
+                <SelectField
+                  label={i18n.translate('xpack.customApp.editor.linkQueryOf', {
+                    defaultMessage: 'Opens the query of',
+                  })}
+                  value={to.from}
+                  options={dataComponents}
+                  placeholder={i18n.translate('xpack.customApp.editor.linkNoQuery', {
+                    defaultMessage: 'No component with a query',
+                  })}
+                  onChange={(from) => onChange<'link'>({ to: { type: 'discover', from } })}
+                />
+              )}
+              {to.type === 'app' && (
+                <>
+                  <TextField
+                    label={i18n.translate('xpack.customApp.editor.linkAppId', {
+                      defaultMessage: 'Application',
+                    })}
+                    value={to.app}
+                    maxLength={100}
+                    helpText={i18n.translate('xpack.customApp.editor.linkAppIdHelp', {
+                      defaultMessage: 'Its id, such as dashboards or discover.',
+                    })}
+                    onChange={(app) => onChange<'link'>({ to: { ...to, app } })}
+                  />
+                  <InterpolatedTextField
+                    label={i18n.translate('xpack.customApp.editor.linkPath', {
+                      defaultMessage: 'Path',
+                    })}
+                    value={to.path ?? ''}
+                    maxLength={500}
+                    stateKeys={stateKeys}
+                    onChange={(path) =>
+                      onChange<'link'>({ to: { ...to, path: path === '' ? undefined : path } })
+                    }
+                  />
+                </>
+              )}
+              {to.type === 'custom_app' && (
+                <TextField
+                  label={i18n.translate('xpack.customApp.editor.linkCustomAppId', {
+                    defaultMessage: 'Id of the app',
+                  })}
+                  value={to.id}
+                  maxLength={64}
+                  onChange={(id) => onChange<'link'>({ to: { type: 'custom_app', id } })}
+                />
+              )}
+            </Section>
+          </Sections>
+        );
+      }
       case 'list_input':
         return (
           <Sections>
