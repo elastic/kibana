@@ -55942,7 +55942,6 @@
     "xpack.synthetics.monitorEditPage.error.label": "无法加载监测配置",
     "xpack.synthetics.monitorErrors.title": "Synthetics 监测告警 | {baseTitle}",
     "xpack.synthetics.monitorErrorsTab.title": "错误",
-    "xpack.synthetics.monitorFilters.frequencyLabel": "每 {count} 分钟",
     "xpack.synthetics.monitorHealth.status.missingAgentPolicy": "此私有位置引用的代理策略已不存在。",
     "xpack.synthetics.monitorHealth.status.missingAgents": "该私有位置的智能体策略中未注册任何 Fleet 智能体。请您在 Fleet 中注册智能体，以解决此问题。",
     "xpack.synthetics.monitorHealth.status.missingLocation": "监测引用了一个已不存在的私有位置。",

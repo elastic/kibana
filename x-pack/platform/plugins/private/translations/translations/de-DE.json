@@ -55760,7 +55760,6 @@
     "xpack.synthetics.monitorEditPage.error.label": "Die Monitorkonfiguration kann nicht geladen werden",
     "xpack.synthetics.monitorErrors.title": "Synthetics Monitor Alerts | {baseTitle}",
     "xpack.synthetics.monitorErrorsTab.title": "Fehler",
-    "xpack.synthetics.monitorFilters.frequencyLabel": "Alle {count} Minuten",
     "xpack.synthetics.monitorHealth.status.missingAgentPolicy": "Die Agentenrichtlinie, auf die dieser private Speicherort verweist, existiert nicht mehr.",
     "xpack.synthetics.monitorHealth.status.missingAgents": "Es sind keine Fleet-Agenten in der Agentenrichtlinie für diesen privaten Standort eingeschrieben. Registrieren Sie einen Agenten in Fleet, um dieses Problem zu lösen.",
     "xpack.synthetics.monitorHealth.status.missingLocation": "Die Überwachung verweist auf einen privaten Ort, der nicht mehr existiert.",
