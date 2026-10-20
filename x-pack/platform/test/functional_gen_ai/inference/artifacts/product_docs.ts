@@ -46,7 +46,7 @@ const artifactModels: ProductDocArtifactModel[] = process.env.INFERENCE_ID
       },
     ];
 
-const stackDocsVersion = process.env.STACK_DOCS_VERSION || 'latest';
+const requestedStackDocsVersion = process.env.STACK_DOCS_VERSION || 'latest';
 const sourceClusterUrl = process.env.KIBANA_SOURCE_CLUSTER_URL;
 const sourceClusterApiKey = process.env.KIBANA_SOURCE_CLUSTER_API_KEY;
 const sourceClusterIndex = process.env.KIBANA_SOURCE_INDEX;
@@ -74,13 +74,40 @@ const OPENAPI_SPEC_INDEX_NAMES = [
   'kibana_ai_openapi_spec_kibana',
 ] as const;
 
+/** `/api/status` version.number is `9.6.0`; artifact names use `9.6`. */
+const majorMinorStackVersion = (version: string): string => {
+  const [major, minor] = version.split('.');
+  if (!major || minor === undefined || minor === '') {
+    throw new Error(`unable to read a stack version from [${version}]`);
+  }
+  return `${major}.${minor}`;
+};
+
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const log = getService('log');
   const es = getService('es');
   const retry = getService('retry');
+  const supertest = getService('supertest');
 
   describe('Gen AI product docs artifacts', function () {
+    let stackDocsVersion = requestedStackDocsVersion;
+
+    before(async () => {
+      if (stackDocsVersion !== 'current') {
+        return;
+      }
+
+      const { body } = await supertest.get('/api/status').set('kbn-xsrf', 'kibana').expect(200);
+      const versionNumber = body?.version?.number;
+      if (typeof versionNumber !== 'string' || versionNumber.length === 0) {
+        throw new Error(`unable to get stack version from '/api/status': ${JSON.stringify(body)}`);
+      }
+
+      stackDocsVersion = majorMinorStackVersion(versionNumber);
+      log.info(`Stack docs version from /api/status: ${versionNumber} -> ${stackDocsVersion}`);
+    });
+
     for (const model of artifactModels) {
       describe(`${model.label} (${model.inferenceId})`, function () {
         before(async () => {
@@ -127,7 +154,9 @@ export default function ({ getService }: FtrProviderContext) {
             );
           };
 
-          const baseArgs = [
+          // Built when the test runs so STACK_DOCS_VERSION=current can be replaced
+          // with the version from /api/status in the parent before() hook.
+          const getBaseArgs = () => [
             resolve(scriptsDir, 'build_product_doc_artifacts.js'),
             `--stack-version=${stackDocsVersion}`,
             `--inference-id=${inferenceId}`,
@@ -141,12 +170,11 @@ export default function ({ getService }: FtrProviderContext) {
             `--targetFolder=${kbArtifactsDir}`,
           ];
 
-          const commands = [
-            [...baseArgs, '--product-name=kibana'],
-            [...baseArgs, '--product-name=elasticsearch'],
-            [...baseArgs, '--product-name=observability'],
-            [...baseArgs, '--product-name=security'],
-          ];
+          const getCommands = () =>
+            ['kibana', 'elasticsearch', 'observability', 'security'].map((productName) => [
+              ...getBaseArgs(),
+              `--product-name=${productName}`,
+            ]);
 
           const waitForProductDocIndex = async (productName: string) => {
             const indexName = `.kibana_ai_product_doc_${productName}-${inferenceId}`;
@@ -191,7 +219,7 @@ export default function ({ getService }: FtrProviderContext) {
           };
 
           it(`builds product doc artifacts for inference_id=${inferenceId}`, async () => {
-            for (const args of commands) {
+            for (const args of getCommands()) {
               const cmd = `${nodeBin} ${args.join(' ')}`;
               log.info(`Running product doc artifact build: ${cmd}`);
 

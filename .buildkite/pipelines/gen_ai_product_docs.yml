@@ -1,6 +1,8 @@
 env:
   FTR_GEN_AI: '1'
   FTR_EIS_CCM: '1'
+  # Serverless product docs. The Kibana version from GET /api/status is built by
+  # gen_ai_stack_version_docs.yml every two weeks.
   STACK_DOCS_VERSION: 'latest'
 steps:
   - label: '👨‍🔧 Pre-Build'
@@ -16,7 +18,7 @@ steps:
   # Always run this step: resolve_reusable_kibana_build.sh picks a recent
   # kibana-on-merge distributable (≤36h) when KIBANA_BUILD_ID is unset, then
   # build_kibana.sh short-circuits. Falls back to a full build if none found.
-  # Shared with gen_ai_security_labs.yml and gen_ai_esql_docs_sync.yml. Force a rebuild with KIBANA_REUSE_BUILD=false
+  # Shared with gen_ai_security_labs.yml and gen_ai_stack_version_docs.yml. Force a rebuild with KIBANA_REUSE_BUILD=false
   # or pin a build by setting KIBANA_BUILD_ID on the Buildkite build.
   - label: '🧑‍🏭 Build Kibana Distribution'
     command: |
@@ -34,7 +36,7 @@ steps:
 
   # Same FTR group, two agents: Jina and ELSER on EIS. Distinct config paths so
   # ftr_configs.sh does not treat the second model as already executed.
-  - label: AppEx AI-Infra product docs artifacts (Jina)
+  - label: AppEx AI-Infra serverless product docs artifacts (Jina)
     key: ai-infra-gen-ai-inference-api-jina
     command: bash .buildkite/scripts/steps/gen_ai/run_ai_infra_inference_api_ftr.sh
     env:
@@ -63,7 +65,7 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - label: AppEx AI-Infra product docs artifacts (ELSER on EIS)
+  - label: AppEx AI-Infra serverless product docs artifacts (ELSER on EIS)
     key: ai-infra-gen-ai-inference-api-elser-eis
     command: bash .buildkite/scripts/steps/gen_ai/run_ai_infra_inference_api_ftr.sh
     env:

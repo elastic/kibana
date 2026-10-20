@@ -25,6 +25,10 @@ for var_name in KIBANA_SOURCE_CLUSTER_URL KIBANA_SOURCE_INDEX KIBANA_SOURCE_CLUS
   fi
 done
 
+# latest = serverless artifacts. current = the running Kibana version from
+# GET /api/status, resolved inside the FTR suite (9.6.0 -> 9.6).
+export STACK_DOCS_VERSION="${STACK_DOCS_VERSION:-latest}"
+
 export FTR_CONFIG="${FTR_CONFIG:-x-pack/platform/test/functional_gen_ai/inference/generate_artifacts.config.ts}"
 export FTR_CONFIG_GROUP_KEY="${FTR_CONFIG_GROUP_KEY:-ftr-ai-infra-gen-ai-inference-api}"
 export FTR_GEN_AI="${FTR_GEN_AI:-1}"
