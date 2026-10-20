@@ -52,9 +52,7 @@ export const KNOWLEDGE_INDICATORS_LABEL = i18n.translate(
 
 export const KNOWLEDGE_INDICATORS_TOOLTIP = i18n.translate(
   'xpack.nightshift.detectionPage.knowledgeIndicatorsTooltip',
-  {
-    defaultMessage: 'Current feature and draft query indicators; active rules are shown separately',
-  }
+  { defaultMessage: 'Features and queries' }
 );
 
 export const ACTIVE_RULES_LABEL = i18n.translate(
@@ -64,7 +62,7 @@ export const ACTIVE_RULES_LABEL = i18n.translate(
 
 export const ACTIVE_RULES_TOOLTIP = i18n.translate(
   'xpack.nightshift.detectionPage.activeRulesTooltip',
-  { defaultMessage: 'Query indicators with an attached alerting rule' }
+  { defaultMessage: 'Alerting rules' }
 );
 
 export const DETECTIONS_LABEL = i18n.translate('xpack.nightshift.detectionPage.detectionsLabel', {
