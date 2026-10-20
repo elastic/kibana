@@ -24,6 +24,8 @@ for (const transport of ['thread', 'process'] as const) {
         transport,
         concurrencyPerClass: { io: 2 },
         abortGraceMs: 2000,
+        // Deliberately co-locates two identities (opt-in; not a security boundary).
+        coResidency: 'any',
       });
       const controller = new AbortController();
       let startedCount = 0;

@@ -24,6 +24,7 @@ import type {
 import type { EncryptedSavedObjectTypeRegistration } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { WorkerContext } from './protocol';
 import { decode } from './codecs';
+import { allowlistedSoOptions } from './so_options';
 
 export interface SoRegistration {
   readonly revision: string;
@@ -64,11 +65,15 @@ type EsoFactory = (options: {
     Exclude<ReturnType<ISavedObjectsSecurityExtension['getCurrentUser']>, null> | undefined
   >;
 }) => LocalEsoKernel;
-const optionsFor = (value: object | undefined, namespace: string | undefined): object => {
+const optionsFor = (
+  operation: string,
+  value: object | undefined,
+  namespace: string | undefined
+): object => {
   const options = value ?? {};
   if (['namespace', 'namespaces', 'spaceId'].some((key) => key in options))
     throw new Error('Local SO namespace is pinned by capability');
-  return { ...options, namespace };
+  return { ...allowlistedSoOptions(operation, options), namespace };
 };
 
 /** Composes real document migrations/repository/ESO locally, with explicit control-plane readiness and scope fences. */
@@ -143,32 +148,42 @@ export const createLocalSavedObjects = async (
   );
   const namespace = capability.space === 'default' ? undefined : capability.space;
   let encryptedRepository: typeof repository | undefined;
-  const options = (value?: object) => optionsFor(value, namespace);
+  const options = (operation: string, value?: object) => optionsFor(operation, value, namespace);
   return {
-    get: (type: string, id: string, opts?: object) => repository.get(type, id, options(opts)),
+    get: (type: string, id: string, opts?: object) =>
+      repository.get(type, id, options('get', opts)),
     resolve: (type: string, id: string, opts?: object) =>
-      repository.resolve(type, id, options(opts)),
+      repository.resolve(type, id, options('resolve', opts)),
     bulkGet: (objects: Array<{ type: string; id: string }>, opts?: object) => {
       if (objects.some((object) => 'namespace' in object || 'namespaces' in object))
         throw new Error('Bulk SO namespace override denied');
-      return repository.bulkGet(objects, options(opts));
+      return repository.bulkGet(objects, options('bulkGet', opts));
     },
-    find: (type: string, opts?: object) => repository.find({ ...options(opts), type }),
+    find: (type: string, opts?: object) => repository.find({ ...options('find', opts), type }),
     create: (type: string, attributes: object, opts?: object) =>
-      repository.create(type, attributes, options(opts)),
+      repository.create(type, attributes, options('create', opts)),
     update: (type: string, id: string, attributes: object, opts?: object) => {
+      const pinned = options('update', opts) as { mergeAttributes?: boolean; upsert?: unknown };
       const encrypted = registrations.encryptedTypes.find((entry) => entry.type === type);
       if (encrypted) {
         const blocked = new Set([
           ...(eso?.service.getEncryptedAttributes(type) ?? []),
           ...(encrypted.attributesToIncludeInAAD ?? []),
         ]);
-        if (Object.keys(attributes).some((key) => blocked.has(key)))
+        // A replacing (non-merge) update would drop/replace encrypted and AAD state wholesale.
+        if (pinned.mergeAttributes === false)
+          throw new Error('ESO types do not allow mergeAttributes:false partial updates');
+        const touches = (value: unknown) =>
+          typeof value === 'object' &&
+          value !== null &&
+          Object.keys(value).some((key) => blocked.has(key));
+        if (touches(attributes) || touches(pinned.upsert))
           throw new Error('Partial ESO update cannot modify encrypted/AAD attributes');
       }
-      return repository.update(type, id, attributes, options(opts));
+      return repository.update(type, id, attributes, pinned);
     },
-    delete: (type: string, id: string, opts?: object) => repository.delete(type, id, options(opts)),
+    delete: (type: string, id: string, opts?: object) =>
+      repository.delete(type, id, options('delete', opts)),
     getDecryptedAsInternalUser: async (type: string, id: string) => {
       if (capability.mode !== 'internal' || !eso?.service)
         throw new Error('Decryption requires explicit internal ESO authority');

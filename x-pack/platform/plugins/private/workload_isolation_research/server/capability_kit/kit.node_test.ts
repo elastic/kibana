@@ -78,7 +78,11 @@ test(
       deadlineMs: 20,
     };
     try {
-      assert.deepEqual(await host.run(base), { status: 'terminated', reason: 'deadline' });
+      assert.deepEqual(await host.run(base), {
+        status: 'terminated',
+        reason: 'deadline',
+        graceful: false,
+      });
       assert.ok(retired);
       assert.equal((await host.run({ ...base, deadlineMs: 10000 })).status, 'success');
     } finally {
@@ -139,7 +143,7 @@ for (const transport of ['thread', 'process'] as const) {
         const denied = await host.run({ ...base, moduleId: 'wrongGrant', input: {} });
         assert.equal(denied.status, 'failure');
         const stopped = await host.run({ ...base, moduleId: 'spin', input: {}, deadlineMs: 300 });
-        assert.deepEqual(stopped, { status: 'terminated', reason: 'deadline' });
+        assert.deepEqual(stopped, { status: 'terminated', reason: 'deadline', graceful: false });
         const recovered = await host.run({ ...base, moduleId: 'bridge', input: 'recovered' });
         assert.equal(recovered.status, 'success');
         assert.ok(crossings.every((entry) => entry.generic && entry.bytes > 0));
@@ -241,7 +245,7 @@ for (const transport of ['thread', 'process'] as const) {
           input: 'neighbour',
         });
         controller.abort();
-        assert.deepEqual(await old, { status: 'terminated', reason: 'cancelled' });
+        assert.deepEqual(await old, { status: 'terminated', reason: 'cancelled', graceful: false });
         const fresh = host.run({
           ...base,
           moduleId: 'echo',

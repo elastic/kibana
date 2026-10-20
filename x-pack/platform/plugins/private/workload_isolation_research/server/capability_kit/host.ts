@@ -107,7 +107,9 @@ export class ExecutionHost {
       /**
        * 0.1.11: co-resident async runs share ONE isolate (memory, globals, transport port), so a
        * buggy or hostile task can observe another co-resident run's packets/grants/credentials.
-       * 'same-principal' only co-locates runs with identical principal AND space.
+       * DEFAULT (RC2) 'same-principal': only co-locate runs with identical principal AND space.
+       * 'any' must be chosen explicitly; per-run capability scoping is NOT a security boundary
+       * between co-resident runs.
        */
       readonly coResidency?: 'any' | 'same-principal';
     } = {},
@@ -141,7 +143,7 @@ export class ExecutionHost {
     if (!Number.isFinite(grace) || grace < 0 || grace > 30000)
       return Promise.reject(new Error('Abort grace must be between0 and30000ms'));
     if (options.signal?.aborted)
-      return Promise.resolve({ status: 'terminated', reason: 'cancelled' });
+      return Promise.resolve({ status: 'terminated', reason: 'cancelled', graceful: false });
     const queue = this.queues.get(options.workloadClass) ?? [];
     if (queue.length >= (this.options.maxQueuePerClass ?? 10))
       return Promise.reject(new Error('Class queue full'));
@@ -215,7 +217,7 @@ export class ExecutionHost {
     const concurrency = this.options.concurrencyPerClass?.[workloadClass] ?? 1;
     const head = queue[0];
     const compatible = (slot: Slot): boolean =>
-      this.options.coResidency !== 'same-principal' ||
+      (this.options.coResidency ?? 'same-principal') === 'any' ||
       [...slot.active.values()].every(
         (entry) =>
           entry.bundle.principal === head.bundle.principal &&
@@ -258,6 +260,7 @@ export class ExecutionHost {
             this.finish(execution, {
               status: 'terminated',
               reason: 'crash',
+              graceful: false,
               discardedRunIds,
             });
           slot.active.clear();
@@ -468,6 +471,8 @@ export class ExecutionHost {
       );
       const callArgs = decode(packet.args);
       const invoke = (): Promise<CodecInput> => {
+        // Ordered calls are chained; never start host work for a run that already ended.
+        if (execution.done || slot.stopping) throw new Error('Run ended; capability call dropped');
         const syncStarted = cpuStarted ? process.threadCpuUsage() : undefined;
         const pending = binding.handler(packet.operation, callArgs, execution.bundle, {
           signal: execution.hostAbort.signal,
@@ -615,6 +620,7 @@ export class ExecutionHost {
           victim.resolve({
             status: 'terminated',
             reason,
+            graceful: false,
             ...(victims.length > 1
               ? {
                   collateral: victim !== execution,
@@ -673,7 +679,7 @@ export class ExecutionHost {
               await entry.endpoint.stop();
             })
         );
-      this.finish(execution, { status: 'terminated', reason });
+      this.finish(execution, { status: 'terminated', reason, graceful: false });
     }
     this.dispatch(execution.options.workloadClass);
   }

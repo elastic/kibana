@@ -58,7 +58,12 @@ export interface Crossing {
   readonly direction: 'host_to_isolate' | 'isolate_to_host';
   readonly bytes: number;
   readonly durationMs: number;
+  /** Main-thread CPU of the handler's synchronous prefix (attributable to this call). */
   readonly handlerSyncCpuUs?: number;
+  /**
+   * Main-thread CPU over the WHOLE await window of the call, INCLUDING unrelated concurrent main
+   * work. A window measure, NOT per-call cost; never bill it as the call's cost.
+   */
   readonly handlerWindowCpuUs?: number;
 }
 export interface CallbackRef {

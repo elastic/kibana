@@ -23,8 +23,11 @@ export interface ServiceBinderOptions {
    * (default 'signal') for these operations, so main work stops when the run is terminated.
    */
   readonly signal?: { readonly operations: readonly string[]; readonly key?: string };
-  /** Defaults to the generic per-run capability bundle lever. */
-  readonly lever?: Lever;
+  /**
+   * REQUIRED: the catalogue lever this binding represents. A binder over an unmodified run-scoped
+   * service is 'capability_bundle'; runner-specific argument rewriting is 'owner_refactor'.
+   */
+  readonly lever: Lever;
 }
 
 const isPlainObject = (value: unknown): value is Record<string, unknown> =>
@@ -41,11 +44,12 @@ export const bindService = <S extends object>(
   service: S,
   options: ServiceBinderOptions
 ): Binding => {
+  if (!options.lever) throw new Error('bindService requires an explicit lever classification');
   const allowed = new Set(options.operations);
   const signalOps = new Set(options.signal?.operations ?? []);
   const signalKey = options.signal?.key ?? 'signal';
   return {
-    lever: options.lever ?? 'capability_bundle',
+    lever: options.lever,
     ordered: options.ordered,
     handler: async (operation, args, _bundle, context) => {
       if (!allowed.has(operation)) throw new Error('Service operation not allowlisted');

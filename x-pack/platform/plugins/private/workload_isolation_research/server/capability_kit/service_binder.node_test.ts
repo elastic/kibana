@@ -62,11 +62,13 @@ for (const transport of ['thread', 'process'] as const) {
       const capabilities = {
         svc: bindService(service, {
           operations: ['add', 'greet', 'waitForAbort'],
+          lever: 'capability_bundle',
           positional: true,
           signal: { operations: ['waitForAbort'] },
         }),
         log: bindService(logger, {
           operations: ['info'],
+          lever: 'capability_bundle',
           positional: true,
           ordered: true,
           discardResult: true,

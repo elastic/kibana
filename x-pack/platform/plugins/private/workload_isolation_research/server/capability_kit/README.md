@@ -1,4 +1,11 @@
-# Track 7 capability kit — 0.1.12 pre-release research slice
+# Track 7 capability kit — 0.2.0-rc.2 research slice
+
+> **Security boundary statement.** Per-run capability scoping (grants, principal/space pins)
+> is **NOT a security boundary between runs that share an isolate**. It stops confused-deputy
+> bugs, not hostile co-resident code. Since RC2, runs with different principal or space never
+> share an isolate by default (`coResidency: 'same-principal'`). `coResidency: 'any'` is an
+> explicit opt-in that puts every co-resident run in one trust domain. That is no weaker than
+> today's single-process Kibana, but it must not be described as per-run isolation.
 
 PRIVATE research code; no public Core API, plugin lifecycle hook, or automatic enablement.
 Base harness fd3138c. Only main owns TM claims/leases/results.
@@ -10,6 +17,32 @@ the whole slot: EVERY co-resident outcome is terminated, with collateral flag,
 initiatingRunId and all discardedRunIds (when multiple runs are lost). Slot crash
 also reports discarded IDs. Queue/admission/lease policy still belongs to TM.
 This is the minimal runner integration surface, NOT the complete 7.P acceptance.
+
+## RC2 review fixes (Grok 0.2.0-rc.1 "GO with fixes")
+
+- **SO option ALLOWLIST** (main bridge `bindSavedObjects` and local SO). Each operation
+  accepts only its documented option keys. `initialNamespaces` (including '*'),
+  `typeToNamespacesMap`, `namespaces`, `namespace`, `spaceId`, `accessControl` and unknown
+  keys fail closed (`so_options.ts`).
+- **Local ESO updates.** For encrypted types, `mergeAttributes: false` is denied, and
+  `upsert` gets the same encrypted/AAD key check as `attributes`.
+- **Ordered bindings** never start host work after the run ended or the slot is stopping.
+- **Co-residency default is now 'same-principal'** (see the statement at the top). BEHAVIOUR
+  CHANGE for multi-principal classes: a run whose principal/space differs from every busy
+  slot waits (head-of-line FIFO per class) until a slot drains, or until a new slot can be
+  spawned within `slotsPerClass`. Effective concurrency is per identity, not per class.
+  Opt back in with `coResidency: 'any'` only for classes that knowingly share one trust
+  domain, for example an internal-identity class.
+- `graceful: false` is now explicit on every terminated outcome without an abort
+  acknowledgement (hard stop, queued, pre-aborted, crash).
+- `bindService` REQUIRES `lever`; there is no default-generic classification any more.
+- `handlerWindowCpuUs` is a WINDOW measure (it includes unrelated main work). Never bill it
+  as per-call cost; use `handlerSyncCpuUs` for the attributable synchronous prefix.
+- ES error diagnostics keep response headers by prefix `x-elastic-*` / `x-found-*` plus
+  content-type, retry-after, warning, x-opaque-id, trace-id.
+- A `callSync` wait is bounded by main's synchronous handler. If main is busy past
+  stallMs/2, the late-check re-baseline (0.1.12) applies, so a sync wait is not reported
+  as a stall (regression test: a 400 ms main handler with stallMs 150 succeeds).
 
 ## 0.1.11 trust domain and co-residency (credential negatives)
 
@@ -26,8 +59,8 @@ in-process today; the kit isolates failure and blocking, not hostile code.
 Mitigation: `new ExecutionHost(registry, { coResidency: 'same-principal' })` co-locates
 only runs with identical principal AND space. Different identities get different slots
 (head-of-line FIFO per class), so they never share an isolate. The test proves 0
-exposure. Cost: up to one slot per concurrent identity per class. Default stays 'any'
-for 0.1.x compatibility. Recommended for multi-user classes (workflows, Agent Builder).
+exposure. Cost: up to one slot per concurrent identity per class. (RC2: this is now the
+DEFAULT; 'any' must be explicit.)
 Session tokens are NOT refreshed (capture is per-run); long runs need API-key/UIAM
 task credentials, or they fail closed with 401 when the token expires.
 
@@ -42,9 +75,9 @@ unmodified kit binder instead:
 // MAIN, per run: resolve request-scoped clients HERE (original/fake request never crosses).
 const actions = await actionsPlugin.getActionsClientWithRequest(originalRequest);
 capabilities: {
-  actions: bindService(actions, { operations: ['get', 'getAll', 'execute'],
+  actions: bindService(actions, { operations: ['get', 'getAll', 'execute'], lever: 'capability_bundle',
     signal: { operations: ['execute'] } }),          // injects the run's main-side signal
-  logger: bindService(logger, { operations: ['info', 'warn', 'error'],
+  logger: bindService(logger, { operations: ['info', 'warn', 'error'], lever: 'capability_bundle',
     positional: true, ordered: true, discardResult: true }),
 }
 // WORKER
@@ -61,9 +94,9 @@ spreads an argument array. `ordered` gives FIFO per run. `signal` injects
 `HostCallContext.signal` into the last object argument (or appends `{signal}`). That signal
 aborts when the run ENDS (outcome or hard stop), with reason Timeout/Abort or the caller's
 original reason. It does NOT abort at the start of cooperative grace, so terminal-persistence
-calls during grace still work. Default lever: generic `capability_bundle`. A binder over a
-run-scoped service needs no owner change. Runner-specific argument rewriting stays bespoke
-and must be labelled that way.
+calls during grace still work. `lever` is REQUIRED (RC2). Use `capability_bundle` for a binder
+over an unmodified run-scoped service; label runner-specific argument rewriting
+`owner_refactor`.
 
 ## 0.1.9 runner fixes (additive; 0.1.8 call sites unchanged)
 
@@ -213,8 +246,9 @@ finishing task: graceful=false then honestly records no abort acknowledgement.
 Queued/pre-aborted work terminates without invoking task code. Other class slots survive.
 Late host replies are fenced by run ID + slot identity. Other class slots survive.
 
-SO supports get/resolve/create/update/delete/find (single type). Namespace/namespaces/
-spaceId overrides are denied; pass a genuine Core space-scoped security-wrapped
+SO supports get/resolve/create/update/delete/find (single type). Option keys are
+ALLOWLISTED per operation (RC2): namespace/namespaces/initialNamespaces/typeToNamespacesMap/
+spaceId/accessControl/unknown keys are denied; pass a genuine Core space-scoped security-wrapped
 client, not an unwrapped internal repository. Principal/space must match its binding.
 This bridge preserves actual migration/security/ESO behavior ON MAIN. Optional
 local SO/ESO is explicit below; main bridge still needed for scoped RBAC until a

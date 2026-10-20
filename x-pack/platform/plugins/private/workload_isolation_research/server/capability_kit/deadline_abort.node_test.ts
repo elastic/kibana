@@ -20,6 +20,7 @@ const registry = (): ModuleRegistry => {
   const value = new ModuleRegistry(new Set([specifier]));
   for (const name of [
     'abortProbe',
+    'abortProbeStarted',
     'delayed',
     'busyThenReturn',
     'spin',
@@ -122,15 +123,33 @@ for (const transport of ['thread', 'process'] as const) {
     { timeout: 30000 },
     async () => {
       const host = new ExecutionHost(registry(), { transport, abortGraceMs: 3000 });
+      // Abort only after the worker has entered user code (a queued run is terminated without
+      // an abort acknowledgement, which is a different, already-tested path).
+      const startedProbe = () => {
+        let entered: () => void = () => {};
+        const started = new Promise<void>((resolve) => {
+          entered = resolve;
+        });
+        const probe: Binding = {
+          lever: 'capability_bundle',
+          handler: async () => {
+            entered();
+            return null;
+          },
+        };
+        return { started, probe };
+      };
       const run = async (abort: (controller: AbortController) => void, deadlineMs = YEAR_MS) => {
         const controller = new AbortController();
+        const { started, probe } = startedProbe();
         const pending = host.run({
           ...base,
-          moduleId: 'abortProbe',
+          moduleId: 'abortProbeStarted',
           deadlineMs,
           signal: controller.signal,
+          capabilities: { probe },
         });
-        await new Promise((resolve) => setTimeout(resolve, 400));
+        await started;
         abort(controller);
         return pending;
       };
@@ -172,8 +191,14 @@ for (const transport of ['thread', 'process'] as const) {
             value: null,
           });
         }
-        const shutdownRun = host.run({ ...base, moduleId: 'abortProbe', deadlineMs: YEAR_MS });
-        await new Promise((resolve) => setTimeout(resolve, 400));
+        const shutdownProbe = startedProbe();
+        const shutdownRun = host.run({
+          ...base,
+          moduleId: 'abortProbeStarted',
+          deadlineMs: YEAR_MS,
+          capabilities: { probe: shutdownProbe.probe },
+        });
+        await shutdownProbe.started;
         await host.stop();
         const shutdown = await shutdownRun;
         assert.equal(shutdown.status, 'terminated');
@@ -207,7 +232,7 @@ for (const transport of ['thread', 'process'] as const) {
         assert.equal(stalled.status, 'terminated');
         if (stalled.status === 'terminated') {
           assert.equal(stalled.reason, 'stall');
-          assert.equal(stalled.graceful, undefined);
+          assert.equal(stalled.graceful, false);
         }
         assert.ok(elapsed < 5000, 'stall detected in ' + elapsed + 'ms');
         // A short legitimate synchronous block below stallMs is not a stall.

@@ -21,6 +21,7 @@ import { decode } from './codecs';
 import type { CodecInput } from './codecs';
 import type { Binding } from './host';
 import type { WorkerContext } from './protocol';
+import { allowlistedSoOptions } from './so_options';
 
 const record = (value: CodecInput): Record<string, CodecInput> => {
   if (!value || typeof value !== 'object' || Array.isArray(value))
@@ -32,12 +33,12 @@ const text = (value: CodecInput): string => {
     throw new Error('Expected bounded capability identifier');
   return value;
 };
-const scopedOptions = (value: CodecInput): Record<string, CodecInput> => {
+const scopedOptions = (operation: string, value: CodecInput): Record<string, CodecInput> => {
   const options = value === undefined ? {} : record(value);
   if (['namespace', 'namespaces', 'spaceId'].some((key) => key in options)) {
     throw new Error('A scoped capability cannot select a different space');
   }
-  return options;
+  return allowlistedSoOptions(operation, options);
 };
 
 /** Binds the already-authenticated, already-space-scoped Core SO client, retaining its wrappers. */
@@ -50,7 +51,7 @@ export const bindSavedObjects = (
     if (bundle.principal !== scope.principal || bundle.space !== scope.space)
       throw new Error('Foreign SO capability');
     const params = record(args);
-    const options = scopedOptions(params.options);
+    const options = scopedOptions(operation, params.options);
     switch (operation) {
       case 'get':
         return client.get(text(params.type), text(params.id), options);

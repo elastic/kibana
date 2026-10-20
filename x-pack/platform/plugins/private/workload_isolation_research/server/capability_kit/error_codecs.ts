@@ -59,13 +59,13 @@ const SAFE_RESPONSE_HEADERS = new Set([
   'content-type',
   'retry-after',
   'warning',
-  'x-elastic-product',
   'x-opaque-id',
-  'x-elastic-product-origin',
   'trace-id',
-  'x-found-handling-cluster',
-  'x-found-handling-instance',
 ]);
+const SAFE_RESPONSE_HEADER_PREFIXES = ['x-elastic-', 'x-found-'] as const;
+const safeResponseHeader = (key: string): boolean =>
+  SAFE_RESPONSE_HEADERS.has(key) ||
+  SAFE_RESPONSE_HEADER_PREFIXES.some((prefix) => key.startsWith(prefix));
 /**
  * Keeps the DiagnosticResult fields retry/classification guards read (body, statusCode,
  * allowlisted response headers, warnings, attempts, aborted, request method/path/id).
@@ -99,7 +99,7 @@ const esDiagnostic = (
   const headers: Record<string, string | string[]> = {};
   for (const [key, value] of Object.entries(source.headers ?? {}))
     if (
-      SAFE_RESPONSE_HEADERS.has(key.toLowerCase()) &&
+      safeResponseHeader(key.toLowerCase()) &&
       (typeof value === 'string' ||
         (Array.isArray(value) && value.every((item) => typeof item === 'string')))
     )

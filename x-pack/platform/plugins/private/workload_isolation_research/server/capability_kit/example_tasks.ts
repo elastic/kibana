@@ -382,3 +382,22 @@ export const sniffCoResident = async (
   }
   return { sawOtherRun: seen.length > 0, sawCredentialsData: victim?.hasData ?? false };
 };
+
+// RC2 fixtures (Grok RC review).
+export const orderedThenReturn = async (
+  _input: CodecInput,
+  context: WorkerContext
+): Promise<CodecInput> => {
+  for (let index = 0; index < 3; index++)
+    void context.call('ordered', 'step', { index }).catch(() => undefined);
+  return 'returned-with-pending';
+};
+export const abortProbeStarted = async (
+  input: CodecInput,
+  context: WorkerContext
+): Promise<CodecInput> => {
+  await context.call('probe', 'started', {});
+  return abortProbe(input, context);
+};
+export const slowSync = async (input: CodecInput, context: WorkerContext): Promise<CodecInput> =>
+  context.callSync('fixture', 'slow', input, { timeoutMs: 1000, maxReplyBytes: 256 });
