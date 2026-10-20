@@ -42,11 +42,11 @@ export const DashboardPreview: ChangeHistoryPreviewRenderFn<{
     const snapshot = change.snapshot as DashboardState;
     /** `setState` leaves the previous time range in place when the snapshot has none, so re-apply the inherited one */
     const state = snapshot.time_range ? snapshot : { ...snapshot, time_range: inheritedTimeRange };
-    /** `setState` awaits async child state application, so wait for the previous call to avoid overlapping */
+    /** `setState` awaits async child state application, so wait for the previous call to avoid overlapping; skip snapshots that were superseded while queued */
     let isStale = false;
     setFailedChange(undefined);
     applyQueue.current = applyQueue.current
-      .then(() => dashboardApi.setState(state))
+      .then(() => (isStale ? undefined : dashboardApi.setState(state)))
       .catch(() => {
         // recover the queue so later snapshots still apply, but surface the failure for this selection
         if (!isStale) setFailedChange(change);
