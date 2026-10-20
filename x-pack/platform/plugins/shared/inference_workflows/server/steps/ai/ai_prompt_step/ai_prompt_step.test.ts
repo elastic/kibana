@@ -776,6 +776,54 @@ describe('aiPromptStepDefinition', () => {
         expect(result.output.content).toEqual({ verdicts: [] });
       });
 
+      it('forwards connector telemetry on the template path', async () => {
+        const chatComplete = jest.fn().mockResolvedValue({
+          content: '{"verdicts":[]}',
+          tokens: { prompt: 3, completion: 4, total: 7 },
+        });
+        (mockInference as any).getClient = jest.fn().mockReturnValue({
+          getConnectorById: jest.fn().mockResolvedValue({
+            metadata: { capabilities: { templates: { policy: 'required' } } },
+          }),
+          chatComplete,
+        });
+        mockContextManager.getContext.mockReturnValue({
+          execution: { id: 'exec-1', isTestRun: false, startedAt: new Date(), url: '' },
+          workflow: { id: 'wf-1', name: 'wf', enabled: true, spaceId: 'my-space' },
+          kibanaUrl: '',
+          consts: {},
+          variables: {},
+          steps: {},
+        });
+        mockContext.config = {
+          'connector-id': 'test-connector-id',
+          'plugin-id': 'security_alert_analysis',
+          'aggregate-by': 'alertzero_parent',
+        };
+        mockContext.input = {
+          prompt: 'classify these alerts',
+          template_id: '.alert-triage',
+          template_version: 1,
+          template_variables: { alerts_text: 'alert blocks' },
+        };
+
+        await handler(mockContext);
+
+        expect(chatComplete).toHaveBeenCalledWith(
+          expect.objectContaining({
+            metadata: {
+              connectorTelemetry: expect.objectContaining({
+                pluginId: 'security_alert_analysis',
+                aggregateBy: 'alertzero_parent',
+                interactionId: 'exec-1',
+                spaceId: 'my-space',
+              }),
+            },
+          })
+        );
+        expect(mockInference.getChatModel).not.toHaveBeenCalled();
+      });
+
       it('keeps the messages path when the connector does not require a template', async () => {
         (mockInference as any).getClient = jest.fn().mockReturnValue({
           getConnectorById: jest.fn().mockResolvedValue({ metadata: {} }),
@@ -863,6 +911,7 @@ describe('aiPromptStepDefinition', () => {
             'connector-id-by-feature': 'context_engine_prompt',
           },
         };
+        mockSearchInferenceEndpoints.features.get.mockReturnValue({ taskType: 'chat_completion' });
 
         await expect(handler(contextWithBoth)).rejects.toThrow(
           'Cannot specify both connector-id and connector-id-by-feature'
@@ -941,23 +990,29 @@ describe('aiPromptStepDefinition', () => {
         expect(mockSearchInferenceEndpoints.endpoints.getForFeature).not.toHaveBeenCalled();
       });
 
-      it('falls through to feature endpoint lookup when the feature ID is unregistered (get returns undefined)', async () => {
+      it('skips an unregistered feature id and keeps the explicit connector', async () => {
         const contextWithFeature = {
           ...mockContext,
-          config: { 'connector-id-by-feature': 'unknown_feature' },
+          config: {
+            'connector-id': 'standalone-connector',
+            'connector-id-by-feature': ['alertzero_template_models'],
+          },
         };
 
         mockSearchInferenceEndpoints.features.get.mockReturnValue(undefined);
-        mockSearchInferenceEndpoints.endpoints.getForFeature.mockResolvedValue({
-          endpoints: [{ connectorId: 'some-connector' }],
-        });
         mockChatModel.invoke.mockResolvedValue({ content: 'ok', response_metadata: {} });
 
         await handler(contextWithFeature);
 
-        expect(mockSearchInferenceEndpoints.endpoints.getForFeature).toHaveBeenCalledWith(
-          'unknown_feature',
-          expect.any(Object)
+        expect(mockSearchInferenceEndpoints.endpoints.getForFeature).not.toHaveBeenCalled();
+        expect(mockResolveConnectorId).toHaveBeenCalledWith(
+          'standalone-connector',
+          expect.anything(),
+          expect.anything(),
+          expect.anything()
+        );
+        expect(mockInference.getChatModel).toHaveBeenCalledWith(
+          expect.objectContaining({ connectorId: 'resolved-connector-id' })
         );
       });
     });

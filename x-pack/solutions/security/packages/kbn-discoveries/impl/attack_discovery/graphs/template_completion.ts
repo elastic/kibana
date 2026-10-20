@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import { isTemplateRequiredConnector, MessageRole } from '@kbn/inference-common';
 import type { InferenceClient } from '@kbn/inference-common';
 
@@ -23,7 +24,56 @@ const ATTACK_DISCOVERY_FIELD_SYNTAX =
   'Use {{ field.name fieldValue }} for every source field. Correct: {{ host.name host-a }}. Incorrect: {{ host-a }}.';
 
 /** Gateway schema: `alerts` maxItems. A larger batch is a 400 that fails the generation. */
-const MAX_TEMPLATE_ALERTS = 100;
+export const ATTACK_DISCOVERY_TEMPLATE_MAX_ALERTS = 100;
+
+/** Explains a template batch that was shortened to the gateway maximum. */
+export const attackDiscoveryTemplateOmissionMessage = (
+  omitted: number,
+  requested: number
+): string =>
+  `Attack Discovery prompt template analyzes at most ${ATTACK_DISCOVERY_TEMPLATE_MAX_ALERTS} alerts; omitting ${omitted} of ${requested}.`;
+
+/** Caps a retrieval size at the template maximum. Undefined stays undefined. */
+export const capAttackDiscoveryTemplateCount = (count: number | undefined): number | undefined =>
+  count == null ? undefined : Math.min(count, ATTACK_DISCOVERY_TEMPLATE_MAX_ALERTS);
+
+/**
+ * Keeps the prefix of `alerts` the gateway schema accepts.
+ * `omitted` is 0 when the list already fits.
+ */
+export const takeAttackDiscoveryTemplateAlerts = <T>(
+  alerts: T[]
+): { alerts: T[]; omitted: number } => {
+  if (alerts.length <= ATTACK_DISCOVERY_TEMPLATE_MAX_ALERTS) {
+    return { alerts, omitted: 0 };
+  }
+  return {
+    alerts: alerts.slice(0, ATTACK_DISCOVERY_TEMPLATE_MAX_ALERTS),
+    omitted: alerts.length - ATTACK_DISCOVERY_TEMPLATE_MAX_ALERTS,
+  };
+};
+
+/**
+ * Returns the template alert maximum when this connector rejects raw messages.
+ * A lookup failure keeps the messages path, which has no template cap.
+ */
+export const getAttackDiscoveryTemplateAlertLimit = async (
+  getConnector: () => Promise<unknown>
+): Promise<number | undefined> => {
+  try {
+    const connector = await getConnector();
+    if (
+      connector != null &&
+      typeof connector === 'object' &&
+      isTemplateRequiredConnector(connector as Parameters<typeof isTemplateRequiredConnector>[0])
+    ) {
+      return ATTACK_DISCOVERY_TEMPLATE_MAX_ALERTS;
+    }
+  } catch {
+    return undefined;
+  }
+  return undefined;
+};
 
 /** Gateway schema: each alert string maxLength. */
 const MAX_TEMPLATE_ALERT_CHARS = 8000;
@@ -32,7 +82,9 @@ const MAX_TEMPLATE_ALERT_CHARS = 8000;
 const MAX_TEMPLATE_PARTIAL_CHARS = 100_000;
 
 const clampTemplateAlerts = (alerts: string[]): string[] =>
-  alerts.slice(0, MAX_TEMPLATE_ALERTS).map((alert) => alert.slice(0, MAX_TEMPLATE_ALERT_CHARS));
+  alerts
+    .slice(0, ATTACK_DISCOVERY_TEMPLATE_MAX_ALERTS)
+    .map((alert) => alert.slice(0, MAX_TEMPLATE_ALERT_CHARS));
 
 const clampTemplatePartial = (partial: string): string =>
   partial.slice(0, MAX_TEMPLATE_PARTIAL_CHARS);
@@ -78,11 +130,22 @@ export const attackDiscoveryRefineTemplateRequest = ({
 export const createAttackDiscoveryTemplateCompletion = ({
   inferenceClient,
   connectorId,
+  logger,
+  timeout,
 }: {
   inferenceClient: InferenceClient;
   connectorId: string;
+  logger?: Logger;
+  /** Connector timeout, in milliseconds. The messages path already forwards this. */
+  timeout?: number;
 }): AttackDiscoveryTemplateCompletion => {
   return async ({ alerts, phase, partial }) => {
+    const limitedAlerts = clampTemplateAlerts(alerts);
+    if (logger && limitedAlerts.length < alerts.length) {
+      logger.warn(
+        attackDiscoveryTemplateOmissionMessage(alerts.length - limitedAlerts.length, alerts.length)
+      );
+    }
     const response = await inferenceClient.chatComplete({
       connectorId,
       stream: false,
@@ -91,12 +154,13 @@ export const createAttackDiscoveryTemplateCompletion = ({
         id: ATTACK_DISCOVERY_TEMPLATE_ID,
         version: ATTACK_DISCOVERY_TEMPLATE_VERSION,
         variables: {
-          alerts: clampTemplateAlerts(alerts),
+          alerts: limitedAlerts,
           phase,
           partial: clampTemplatePartial(partial ?? ''),
           field_syntax: ATTACK_DISCOVERY_FIELD_SYNTAX,
         },
       },
+      ...(timeout !== undefined ? { timeout } : {}),
     });
     return response.content ?? '';
   };
@@ -109,9 +173,13 @@ export const createAttackDiscoveryTemplateCompletion = ({
 export const resolveAttackDiscoveryTemplateCompletion = async ({
   inferenceClient,
   connectorId,
+  logger,
+  timeout,
 }: {
   inferenceClient?: Pick<InferenceClient, 'chatComplete' | 'getConnectorById'>;
   connectorId: string;
+  logger?: Logger;
+  timeout?: number;
 }): Promise<AttackDiscoveryTemplateCompletion | undefined> => {
   if (inferenceClient?.getConnectorById == null) {
     return undefined;
@@ -129,5 +197,7 @@ export const resolveAttackDiscoveryTemplateCompletion = async ({
   return createAttackDiscoveryTemplateCompletion({
     inferenceClient: inferenceClient as InferenceClient,
     connectorId,
+    logger,
+    timeout,
   });
 };

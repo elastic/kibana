@@ -505,6 +505,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
           sourceFeatureName={feature.featureName}
           currentFeatureId={featureId}
           taskType={feature.taskType}
+          allowTemplateRequiredModels={feature.allowTemplateRequiredModels}
           onApply={handleCopyApply}
           onClose={() => setIsCopyModalOpen(false)}
         />

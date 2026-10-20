@@ -34,10 +34,12 @@ export const normalizeConnectorFeatureIds = (value: unknown): string[] => {
  *
  * A feature with `ownEntryOnly` contributes a connector only when an operator
  * saved one on that row. A miss continues to the next id and does not conflict
- * with an explicit connector id. Any other feature is resolved in full (saved
- * model, parent chain, recommended endpoints, then the platform default) and
- * conflicts with an explicit connector id. An unregistered id takes that full
- * path. Returns undefined when every id misses, so the caller can use
+ * with an explicit connector id. An id that is not registered is skipped the
+ * same way: AlertZero ships disabled, and a workflow installed by another
+ * plugin must not treat that missing row as a full-resolve feature. Any other
+ * feature is resolved in full (saved model, parent chain, recommended
+ * endpoints, then the platform default) and conflicts with an explicit
+ * connector id. Returns undefined when every id misses, so the caller can use
  * `connector-id` or its default.
  */
 export const resolveConnectorIdFromFeatures = async ({
@@ -55,7 +57,13 @@ export const resolveConnectorIdFromFeatures = async ({
 }): Promise<string | undefined> => {
   for (const featureId of featureIds) {
     const feature = searchInferenceEndpoints.features.get(featureId);
-    if (feature?.ownEntryOnly) {
+    // Unregistered ids are optional. `features.get` is undefined when the
+    // owning plugin is disabled, and treating that as a full resolve conflicts
+    // with a standalone `connector-id`.
+    if (feature == null) {
+      continue;
+    }
+    if (feature.ownEntryOnly) {
       const connectorId = await resolveExplicitFeatureConnectorId({
         featureId,
         request,

@@ -41,6 +41,18 @@ describe('createAttackDiscoveryTemplateCompletion', () => {
       { role: MessageRole.User, content: '' },
     ]);
   });
+
+  it('forwards the connector timeout', async () => {
+    const complete = createAttackDiscoveryTemplateCompletion({
+      inferenceClient,
+      connectorId: 'daybreak',
+      timeout: 600_000,
+    });
+
+    await complete({ alerts: ['alert'], phase: 'generate' });
+
+    expect(chatComplete.mock.calls[0][0].timeout).toBe(600_000);
+  });
 });
 
 describe('attackDiscoveryRefineTemplateRequest', () => {

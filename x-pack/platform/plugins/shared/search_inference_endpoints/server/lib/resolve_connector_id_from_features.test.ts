@@ -166,7 +166,7 @@ describe('resolveConnectorIdFromFeatures', () => {
     expect(getForFeature).not.toHaveBeenCalled();
   });
 
-  it('resolves an unregistered feature through the full path', async () => {
+  it('skips an unregistered id instead of resolving it', async () => {
     const getForFeature = jest.fn().mockResolvedValue({
       endpoints: [{ connectorId: 'default-connector' } as InferenceConnector],
       warnings: [],
@@ -181,7 +181,43 @@ describe('resolveConnectorIdFromFeatures', () => {
       conflictMessage: CONFLICT,
     });
 
-    expect(connectorId).toBe('default-connector');
-    expect(getForFeature).toHaveBeenCalledWith('unknown_feature', request);
+    expect(connectorId).toBeUndefined();
+    expect(getForFeature).not.toHaveBeenCalled();
+  });
+
+  it('skips an unregistered leading id when the feature registry is empty, so a standalone connector-id is not a conflict', async () => {
+    const getForFeature = jest.fn();
+    const emptyRegistry = () => undefined;
+
+    await expect(
+      resolveConnectorIdFromFeatures({
+        featureIds: ['alertzero_template_models'],
+        request,
+        searchInferenceEndpoints: createServices(emptyRegistry, getForFeature),
+        hasExplicitConnector: true,
+        conflictMessage: CONFLICT,
+      })
+    ).resolves.toBeUndefined();
+    expect(getForFeature).not.toHaveBeenCalled();
+  });
+
+  it('continues past an unregistered id to the next registered feature', async () => {
+    const getForFeature = jest.fn().mockResolvedValue({
+      endpoints: [{ connectorId: 'tier-connector' } as InferenceConnector],
+      warnings: [],
+      soEntryFound: false,
+    });
+
+    const connectorId = await resolveConnectorIdFromFeatures({
+      featureIds: ['unknown_feature', 'alertzero_frontier'],
+      request,
+      searchInferenceEndpoints: createServices(featureFor, getForFeature),
+      hasExplicitConnector: false,
+      conflictMessage: CONFLICT,
+    });
+
+    expect(connectorId).toBe('tier-connector');
+    expect(getForFeature).toHaveBeenCalledTimes(1);
+    expect(getForFeature).toHaveBeenCalledWith('alertzero_frontier', request);
   });
 });

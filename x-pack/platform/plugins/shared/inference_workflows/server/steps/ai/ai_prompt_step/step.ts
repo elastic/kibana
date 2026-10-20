@@ -90,6 +90,7 @@ const completePromptWithTemplate = async ({
   templateVariables,
   schema,
   abortSignal,
+  telemetryMetadata,
 }: {
   inference: InferenceServerStart | undefined;
   request: KibanaRequest;
@@ -99,6 +100,7 @@ const completePromptWithTemplate = async ({
   templateVariables: Record<string, unknown>;
   schema: unknown;
   abortSignal?: AbortSignal;
+  telemetryMetadata?: ConnectorTelemetryMetadata;
 }): Promise<{ content: unknown; metadata: Record<string, unknown> } | undefined> => {
   if (!inference?.getClient) {
     if (templateId) {
@@ -141,6 +143,7 @@ const completePromptWithTemplate = async ({
     messages: [{ role: MessageRole.User, content: '' }],
     template: { id: templateId, version: templateVersion, variables: templateVariables },
     abortSignal,
+    ...(telemetryMetadata ? { metadata: { connectorTelemetry: telemetryMetadata } } : {}),
   });
 
   const promptTokens = response.tokens?.prompt ?? 0;
@@ -222,6 +225,7 @@ export const aiPromptStepDefinition = (coreSetup: CoreSetup<InferenceWorkflowsSt
         templateVariables: context.input.template_variables ?? {},
         schema: context.input.schema,
         abortSignal: context.abortSignal,
+        telemetryMetadata,
       });
       if (templateResult) {
         return { output: templateResult };

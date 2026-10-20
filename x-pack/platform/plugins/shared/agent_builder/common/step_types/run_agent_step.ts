@@ -283,14 +283,14 @@ export const ConfigSchema = z
     /**
      * Model Management feature id, or a priority list of them.
      * A single id is mutually exclusive with `connector-id` and `inference-id`.
-     * In a list, an own-entry-only feature is optional and the first other id
-     * keeps that exclusion.
+     * In a list, an unregistered id and an own-entry-only feature are optional
+     * and the first other id keeps that exclusion.
      */
     'connector-id-by-feature': z
       .union([z.string().max(255), z.array(z.string().max(255)).max(8)])
       .optional()
       .describe(
-        'A Model Management feature id, or an ordered list of them. An own-entry-only feature is used only when an operator has saved a model on that row; otherwise the next id is tried. The first other feature is resolved in full and is mutually exclusive with `connector-id` and `inference-id`. A single id keeps that full resolution.'
+        'A Model Management feature id, or an ordered list of them. An id that is not registered is skipped. An own-entry-only feature is used only when an operator has saved a model on that row; otherwise the next id is tried. The first other feature is resolved in full and is mutually exclusive with `connector-id` and `inference-id`. A single id keeps that full resolution.'
       ),
     /**
      * When true, create/persist a conversation and associate it with the executing user.

@@ -1571,14 +1571,16 @@ steps:
                 Return one verdict for every alert id above, exactly once.
 
           # The messages path keeps the full preamble above. The template already
-          # has its own instructions and a 200k character budget for alerts_text,
-          # so it receives only the alert blocks. The worker batch_summary rule
-          # lives in the preamble, so it is appended here when this run is a worker.
+          # has its own instructions, so the static preamble is dropped. Shared
+          # context (rule, prevalence, noise, close history) stays: the template
+          # system prompt does not include it, and the confidence tiers need it.
+          # The worker batch_summary rule lives in the preamble, so it is
+          # appended here when this run is a worker.
           - name: template_alerts_text
             type: data.set
             with:
               alerts_text: |
-                {% assign alert_parts = steps.build_agent_message.output.message | split: '## Alerts to classify' %}
+                {% assign alert_parts = steps.build_agent_message.output.message | split: '## Shared Context' %}
                 {{ steps.build_agent_message.output.message | remove_first: alert_parts.first | strip }}
                 {% if inputs.calledByWorker == true %}
                 Also return a `batch_summary` string: 1–2 sentences (≤45 words total), grouped by
@@ -1596,7 +1598,9 @@ steps:
             agent-id: "{{ variables.agent_id }}"
             connector-id: "{{ variables.connector_id }}"
             # First id: a saved model on alertzero_template_models replaces the connector.
-            # An empty row does not. Second id: the tier. Liquid renders "" for the unused
+            # An empty row does not. The id is skipped when AlertZero is disabled and
+            # the feature is not registered, so a standalone connector-id still runs.
+            # Second id: the tier. Liquid renders "" for the unused
             # variable and a blank entry is ignored.
             # Standalone path: connector_id=<real id>, connector_id_by_feature="".
             # Worker path: connector_id="", connector_id_by_feature=<feature id>.

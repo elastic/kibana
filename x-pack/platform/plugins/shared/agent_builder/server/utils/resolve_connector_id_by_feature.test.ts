@@ -29,10 +29,13 @@ describe('resolveConnectorIdByFeature', () => {
   const request = httpServerMock.createKibanaRequest();
 
   it('returns the first connector resolved for the feature', async () => {
-    const searchInferenceEndpoints = createSearchInferenceEndpointsMock([
-      { connectorId: 'feature-connector-1' } as InferenceConnector,
-      { connectorId: 'feature-connector-2' } as InferenceConnector,
-    ]);
+    const searchInferenceEndpoints = createSearchInferenceEndpointsMock(
+      [
+        { connectorId: 'feature-connector-1' } as InferenceConnector,
+        { connectorId: 'feature-connector-2' } as InferenceConnector,
+      ],
+      { taskType: 'chat_completion' } as InferenceFeatureConfig
+    );
 
     const result = await resolveConnectorIdByFeature({
       featureId: 'significant_events_investigation',

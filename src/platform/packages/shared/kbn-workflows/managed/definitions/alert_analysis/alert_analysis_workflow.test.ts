@@ -2674,6 +2674,55 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
       expect(runtime.with.use_prompt).toBe('${{ steps.fetch_runtime_config.output.usePrompt }}');
     });
 
+    it('keeps shared context in the template input and drops the static preamble', () => {
+      const templateStep = findStepByName(workflow.steps, 'template_alerts_text') as {
+        with: { alerts_text: string };
+      };
+      const message = [
+        '<role>static instructions</role>',
+        '<batch_protocol>one verdict per id</batch_protocol>',
+        '## Shared Context',
+        '### Rule: Suspicious process',
+        '- Severity: high',
+        '## Alerts to classify (1)',
+        '<alert id="alert-1">',
+        '- event.code: behavior',
+        '</alert>',
+      ].join('\n');
+
+      const rendered = engine.parseAndRenderSync(templateStep.with.alerts_text, {
+        inputs: { calledByWorker: false },
+        steps: { build_agent_message: { output: { message } } },
+      });
+
+      expect(rendered).toContain('## Shared Context');
+      expect(rendered).toContain('### Rule: Suspicious process');
+      expect(rendered).toContain('- Severity: high');
+      expect(rendered).toContain('## Alerts to classify (1)');
+      expect(rendered).toContain('<alert id="alert-1">');
+      expect(rendered).not.toContain('<role>');
+      expect(rendered).not.toContain('<batch_protocol>');
+      expect(rendered).not.toContain('batch_summary');
+    });
+
+    it('appends the worker batch summary after the shared context', () => {
+      const templateStep = findStepByName(workflow.steps, 'template_alerts_text') as {
+        with: { alerts_text: string };
+      };
+      const rendered = engine.parseAndRenderSync(templateStep.with.alerts_text, {
+        inputs: { calledByWorker: true },
+        steps: {
+          build_agent_message: {
+            output: { message: '<role>preamble</role>\n## Shared Context\n### Rule: R' },
+          },
+        },
+      });
+
+      expect(rendered.trim().startsWith('## Shared Context')).toBe(true);
+      expect(rendered).toContain('batch_summary');
+      expect(rendered).not.toContain('<role>');
+    });
+
     it('lists both connector fields on the prompt, like the agent, so either path can set one', () => {
       const promptStep = findStepByName(workflow.steps, 'runPrompt_step') as Record<
         string,

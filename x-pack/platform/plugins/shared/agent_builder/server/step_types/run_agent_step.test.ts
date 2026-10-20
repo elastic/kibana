@@ -848,13 +848,52 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       );
     });
 
+    it('skips an unregistered template row and keeps the standalone connector', async () => {
+      const events$ = of({
+        type: ChatEventType.roundComplete,
+        data: { round: { id: 'r-1', response: { message: 'ok' } } },
+      });
+      const execution = createExecutionMock(events$);
+      const getForFeature = jest.fn();
+      const serviceManager = {
+        internalStart: {
+          execution,
+          searchInferenceEndpoints: {
+            features: { get: jest.fn().mockReturnValue(undefined) },
+            endpoints: { getForFeature },
+          },
+        },
+      } as any;
+
+      const step = getRunAgentStepDefinition(serviceManager);
+      const res = await step.handler(
+        createContext({
+          input: { message: 'hello' },
+          config: {
+            'connector-id': 'standalone-connector',
+            'connector-id-by-feature': ['alertzero_template_models'],
+          },
+        })
+      );
+
+      expect(res.error).toBeUndefined();
+      expect(getForFeature).not.toHaveBeenCalled();
+      expect(execution.executeAgent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({ connectorId: 'standalone-connector' }),
+        })
+      );
+    });
+
     it('resolves the connector from the feature and passes it to executeAgent', async () => {
       const events$ = of({
         type: ChatEventType.roundComplete,
         data: { round: { id: 'r-1', response: { message: 'ok' } } },
       });
       const execution = createExecutionMock(events$);
-      const featureServices = createFeatureServicesMock([{ connectorId: 'feature-connector' }]);
+      const featureServices = createFeatureServicesMock([{ connectorId: 'feature-connector' }], {
+        taskType: 'chat_completion',
+      });
       const serviceManager = { internalStart: { execution, ...featureServices } } as any;
 
       const step = getRunAgentStepDefinition(serviceManager);
@@ -882,7 +921,7 @@ describe('ai.agent workflow step (Agent Builder)', () => {
         data: { round: { id: 'r-1', response: { message: 'ok' } } },
       });
       const execution = createExecutionMock(events$);
-      const featureServices = createFeatureServicesMock();
+      const featureServices = createFeatureServicesMock([], { taskType: 'chat_completion' });
       const serviceManager = { internalStart: { execution, ...featureServices } } as any;
 
       const step = getRunAgentStepDefinition(serviceManager);
@@ -902,7 +941,7 @@ describe('ai.agent workflow step (Agent Builder)', () => {
 
     it('surfaces an error when no connector can be resolved for the feature', async () => {
       const execution = createExecutionMock(of());
-      const featureServices = createFeatureServicesMock([]);
+      const featureServices = createFeatureServicesMock([], { taskType: 'chat_completion' });
       const serviceManager = { internalStart: { execution, ...featureServices } } as any;
 
       const step = getRunAgentStepDefinition(serviceManager);

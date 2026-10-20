@@ -39,7 +39,9 @@ triggers:
             Maximum alerts per Attack Discovery run. Also sets the retrieval
             ceiling at `batch_size * 100`, because the engine caps a parallel
             fan-out at 100 branches — a smaller batch buys less total coverage,
-            not more.
+            not more. A prompt-template connector analyzes at most 100 alerts
+            per batch; a larger batch reports that count and logs how many
+            alerts were omitted.
           maximum: 1000
           minimum: 50
           type: integer

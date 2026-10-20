@@ -13,6 +13,16 @@ import { prepareAnonymization } from './prepare_anonymization';
 type PrepareAnonymizationOptions = Parameters<typeof prepareAnonymization>[0];
 
 /**
+ * Template controls the gateway schema checks exactly. A hostname rule must not
+ * rewrite `field_syntax`, and `phase` is an enum, not alert text.
+ */
+const PRESERVED_TEMPLATE_VARIABLE_PATHS = new Set(['/field_syntax', '/phase']);
+
+/** JSON Pointer paths whose string values should be masked. */
+export const templateVariablePathsToAnonymize = (flattened: Record<string, string>): string[] =>
+  Object.keys(flattened).filter((path) => !PRESERVED_TEMPLATE_VARIABLE_PATHS.has(path));
+
+/**
  * Masks string leaves in a prompt template's variables with the same rules as chat messages.
  */
 export const anonymizeChatTemplate = async ({
@@ -26,7 +36,7 @@ export const anonymizeChatTemplate = async ({
   anonymization: AnonymizationOutput;
 }> => {
   const flattened = flattenJsonStrings(template.variables);
-  const paths = Object.keys(flattened);
+  const paths = templateVariablePathsToAnonymize(flattened);
 
   if (paths.length === 0) {
     return {
