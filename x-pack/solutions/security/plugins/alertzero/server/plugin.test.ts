@@ -318,14 +318,8 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         ALERTZERO_API_PRIVILEGE_WRITE,
         'read_investigations',
         'manage_investigations',
-        'read_escalations',
-        'manage_escalations',
       ]);
-      expect(privileges.read.api).toEqual([
-        ALERTZERO_API_PRIVILEGE_READ,
-        'read_investigations',
-        'read_escalations',
-      ]);
+      expect(privileges.read.api).toEqual([ALERTZERO_API_PRIVILEGE_READ, 'read_investigations']);
     });
 
     it('registers the per-space enablement advanced setting', () => {

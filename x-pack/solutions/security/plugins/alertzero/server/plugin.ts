@@ -37,8 +37,6 @@ import type { AlertZeroConfig } from './config';
 // are forbidden, so they are spelled out here and pinned by the plugin tests.
 const INVESTIGATIONS_API_PRIVILEGE_READ = 'read_investigations';
 const INVESTIGATIONS_API_PRIVILEGE_MANAGE = 'manage_investigations';
-const ESCALATIONS_API_PRIVILEGE_READ = 'read_escalations';
-const ESCALATIONS_API_PRIVILEGE_MANAGE = 'manage_escalations';
 import type {
   AlertZeroRequestHandlerContext,
   AlertZeroPluginSetup,
@@ -234,19 +232,13 @@ export class AlertZeroPlugin
             ALERTZERO_API_PRIVILEGE_WRITE,
             INVESTIGATIONS_API_PRIVILEGE_READ,
             INVESTIGATIONS_API_PRIVILEGE_MANAGE,
-            ESCALATIONS_API_PRIVILEGE_READ,
-            ESCALATIONS_API_PRIVILEGE_MANAGE,
           ],
           savedObject: { all: [], read: [] },
           ui: ['show', 'write'],
         },
         read: {
           app: ['kibana'],
-          api: [
-            ALERTZERO_API_PRIVILEGE_READ,
-            INVESTIGATIONS_API_PRIVILEGE_READ,
-            ESCALATIONS_API_PRIVILEGE_READ,
-          ],
+          api: [ALERTZERO_API_PRIVILEGE_READ, INVESTIGATIONS_API_PRIVILEGE_READ],
           savedObject: { all: [], read: [] },
           ui: ['show'],
         },

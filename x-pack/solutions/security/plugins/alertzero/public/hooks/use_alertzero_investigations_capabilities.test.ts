@@ -83,7 +83,7 @@ describe('getAlertZeroInvestigationsCapabilities', () => {
       manageInvestigations: true,
     });
   });
-  it('requires AlertZero write as well as the dependent feature privileges', () => {
+  it('requires AlertZero write for investigations but not for escalations', () => {
     const capabilities = caps({
       showEscalations: true,
       manageEscalations: true,
@@ -96,7 +96,7 @@ describe('getAlertZeroInvestigationsCapabilities', () => {
       })
     ).toEqual({
       showEscalations: true,
-      manageEscalations: false,
+      manageEscalations: true,
       manageInvestigations: false,
     });
   });

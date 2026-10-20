@@ -14,8 +14,9 @@ import {
 } from '@kbn/agentic-investigations-plugin/public';
 
 /**
- * The agentic-investigations UI capability flags as they apply inside AlertZero: the manage
- * flags additionally require the AlertZero All privilege.
+ * The agentic-investigations UI capability flags as they apply inside AlertZero: managing
+ * investigations additionally requires the AlertZero All privilege. Escalations follow the
+ * Agentic Investigations sub-feature alone, as AlertZero grants no escalation privileges.
  */
 export const getAlertZeroInvestigationsCapabilities = (
   capabilities: Capabilities
@@ -25,7 +26,7 @@ export const getAlertZeroInvestigationsCapabilities = (
     getAgenticInvestigationsCapabilities(capabilities);
   return {
     showEscalations,
-    manageEscalations: canWrite && manageEscalations,
+    manageEscalations,
     manageInvestigations: canWrite && manageInvestigations,
   };
 };
