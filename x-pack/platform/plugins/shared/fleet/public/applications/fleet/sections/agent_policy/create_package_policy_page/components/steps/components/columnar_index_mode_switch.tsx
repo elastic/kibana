@@ -24,13 +24,47 @@ interface Props {
   checked: boolean;
   onChange: () => void;
   /**
-   * Not every logs data stream of the integration declares columnar readiness: the switch is
-   * shown off and disabled, with an explanation.
+   * Not every logs data stream of the integration declares columnar readiness: the switch can't
+   * be turned on, with an explanation. It can still be turned off.
    */
   notReady?: boolean;
   /** Titles of the logs data streams that aren't ready, when some are. */
   notReadyDataStreams?: string[];
 }
+
+const NotReadyMessage: React.FunctionComponent<{ checked: boolean; dataStreams: string[] }> = ({
+  checked,
+  dataStreams,
+}) => {
+  const values = { dataStreams: dataStreams.join(', '), count: dataStreams.length };
+  // Still on columnar from an earlier version: it can be turned off, not back on.
+  if (checked) {
+    return dataStreams.length > 0 ? (
+      <FormattedMessage
+        id="xpack.fleet.createPackagePolicy.stepConfigure.columnarIndexModeNoLongerAllReady"
+        defaultMessage="This integration isn't columnar-ready anymore: {dataStreams} {count, plural, one {doesn't} other {don't}} support columnar storage. You can turn the columnar index mode off, but not back on until every log data stream is ready."
+        values={values}
+      />
+    ) : (
+      <FormattedMessage
+        id="xpack.fleet.createPackagePolicy.stepConfigure.columnarIndexModeNoLongerReady"
+        defaultMessage="This integration isn't columnar-ready anymore. You can turn the columnar index mode off, but not back on until every log data stream is ready."
+      />
+    );
+  }
+  return dataStreams.length > 0 ? (
+    <FormattedMessage
+      id="xpack.fleet.createPackagePolicy.stepConfigure.columnarIndexModeNotAllReady"
+      defaultMessage="This integration isn't columnar-ready: {dataStreams} {count, plural, one {doesn't} other {don't}} support columnar storage yet, and every log data stream has to. Its log data streams use LogsDB."
+      values={values}
+    />
+  ) : (
+    <FormattedMessage
+      id="xpack.fleet.createPackagePolicy.stepConfigure.columnarIndexModeNotReady"
+      defaultMessage="This integration isn't columnar-ready yet. Its log data streams use LogsDB."
+    />
+  );
+};
 
 export const ColumnarIndexModeSwitch: React.FunctionComponent<Props> = ({
   checked,
@@ -49,9 +83,9 @@ export const ColumnarIndexModeSwitch: React.FunctionComponent<Props> = ({
               defaultMessage: 'Columnar index mode',
             }
           )}
-          checked={checked && !notReady}
+          checked={checked}
           onChange={onChange}
-          disabled={notReady}
+          disabled={notReady && !checked}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -79,21 +113,7 @@ export const ColumnarIndexModeSwitch: React.FunctionComponent<Props> = ({
             />
           ) : (
             <span data-test-subj="columnarIndexModeNotReady">
-              {notReadyDataStreams.length > 0 ? (
-                <FormattedMessage
-                  id="xpack.fleet.createPackagePolicy.stepConfigure.columnarIndexModeNotAllReady"
-                  defaultMessage="This integration isn't columnar-ready: {dataStreams} {count, plural, one {doesn't} other {don't}} support columnar storage yet, and every log data stream has to. Its log data streams use LogsDB."
-                  values={{
-                    dataStreams: notReadyDataStreams.join(', '),
-                    count: notReadyDataStreams.length,
-                  }}
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.fleet.createPackagePolicy.stepConfigure.columnarIndexModeNotReady"
-                  defaultMessage="This integration isn't columnar-ready yet. Its log data streams use LogsDB."
-                />
-              )}
+              <NotReadyMessage checked={checked} dataStreams={notReadyDataStreams} />
             </span>
           )}
         </EuiFlexItem>

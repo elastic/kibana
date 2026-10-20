@@ -523,6 +523,22 @@ describe('StepConfigurePackage', () => {
       );
     });
 
+    it('stays on, and can be turned off, when the installation is on columnar but a data stream is no longer ready', () => {
+      declareReadiness('opt_in', { withUnsupported: true });
+      (packageInfo as any).installationInfo = { logsdb_columnar_enabled: true };
+      renderWithSwitch();
+
+      const switchEl = renderResult.getByTestId(SWITCH);
+      expect(switchEl).toBeChecked();
+      expect(switchEl).not.toBeDisabled();
+      expect(renderResult.getByTestId('columnarIndexModeNotReady')).toHaveTextContent(
+        "isn't columnar-ready anymore: Nginx error logs"
+      );
+
+      fireEvent.click(switchEl);
+      expect(onLogsdbColumnarChange).toHaveBeenCalledWith(false);
+    });
+
     it('starts on for a new installation of a package that defaults to it', () => {
       declareReadiness('default');
       renderWithSwitch();

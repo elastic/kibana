@@ -42,7 +42,7 @@ describe('ColumnarIndexModeSwitch', () => {
   });
 
   it('is greyed out, with the reason instead of the description, when the integration is not ready', () => {
-    const result = render({ checked: true, notReady: true });
+    const result = render({ notReady: true });
 
     const switchEl = result.getByTestId(COLUMNAR_INDEX_MODE_SWITCH_TEST_SUBJ);
     expect(switchEl).toBeDisabled();
@@ -62,5 +62,25 @@ describe('ColumnarIndexModeSwitch', () => {
     expect(result.getByTestId('columnarIndexModeNotReady')).toHaveTextContent(
       "This integration isn't columnar-ready: Nginx error logs, Nginx debug logs don't support columnar storage yet, and every log data stream has to."
     );
+  });
+
+  it('stays on and can be turned off when an integration on columnar is no longer ready', () => {
+    const onChange = jest.fn();
+    const result = render({
+      checked: true,
+      notReady: true,
+      notReadyDataStreams: ['Nginx error logs'],
+      onChange,
+    });
+
+    const switchEl = result.getByTestId(COLUMNAR_INDEX_MODE_SWITCH_TEST_SUBJ);
+    expect(switchEl).toBeChecked();
+    expect(switchEl).not.toBeDisabled();
+    expect(result.getByTestId('columnarIndexModeNotReady')).toHaveTextContent(
+      "This integration isn't columnar-ready anymore: Nginx error logs doesn't support columnar storage. You can turn the columnar index mode off, but not back on until every log data stream is ready."
+    );
+
+    fireEvent.click(switchEl);
+    expect(onChange).toHaveBeenCalled();
   });
 });
