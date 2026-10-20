@@ -127,7 +127,9 @@ export const createSandboxWorkspaceManager = ({
           await writeElasticManifest({
             session,
             credentials,
-            readableIndices: telemetryReadableIndices,
+            // Connector-specific guidance must stay gated on connector authorization.
+            readableIndices:
+              credentials.kind === 'connector' ? telemetryReadableIndices : undefined,
             logger,
           });
         }
