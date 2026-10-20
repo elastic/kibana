@@ -61,7 +61,7 @@ const ALLOW_ANY_HOST = '*';
 export const getAllowedHosts = (config: UptimeConfig): readonly string[] =>
   config.secretConnections?.allowedHosts ?? [ALLOW_ANY_HOST];
 
-/** Whether the address's host is in `xpack.uptime.secretConnections.allowedHosts` (exact match). */
+/** Whether the address's host is in `xpack.synthetics.secretConnections.allowedHosts` (exact match). */
 export const isAddressHostAllowed = (address: string, allowedHosts: readonly string[]): boolean => {
   if (allowedHosts.includes(ALLOW_ANY_HOST)) return true;
   try {
@@ -79,7 +79,7 @@ export const hostNotAllowedMessage = (address: string): string => {
   } catch (e) {
     // keep the raw value
   }
-  return `Vault host "${host}" is not added to the Kibana config xpack.uptime.secretConnections.allowedHosts`;
+  return `Vault host "${host}" is not added to the Kibana config xpack.synthetics.secretConnections.allowedHosts`;
 };
 
 /** DNS lookup that refuses names resolving to a blocked address (guards against rebinding). */

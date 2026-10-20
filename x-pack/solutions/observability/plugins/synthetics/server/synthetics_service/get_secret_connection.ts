@@ -94,7 +94,7 @@ export const getSecretConnectionConfigs = async (
         // The list may have been tightened after the connection was saved.
         if (!isAddressHostAllowed(so.attributes.config.address, allowedHosts)) {
           server.logger?.warn(
-            `Vault connection "${so.attributes.name}" is not delivered: its host is not in xpack.uptime.secretConnections.allowedHosts`
+            `Vault connection "${so.attributes.name}" is not delivered: its host is not in xpack.synthetics.secretConnections.allowedHosts`
           );
           continue;
         }
