@@ -986,6 +986,12 @@ describe('Field editor Preview panel', () => {
       await flushPreviewAndSearchTimers();
       expect(screen.getByRole('switch', { name: 'Set value' })).toBeChecked();
       expect(screen.getByTestId('scriptField')).toHaveValue(script);
+
+      // a cleared script must not be restored from a previous type switch
+      await fields.updateScript('');
+      await fields.updateType('Composite');
+      await flushPreviewAndSearchTimers();
+      expect(screen.getByTestId('scriptField')).toHaveValue('');
     });
 
     it('should show composite field types and update appropriately', async () => {
