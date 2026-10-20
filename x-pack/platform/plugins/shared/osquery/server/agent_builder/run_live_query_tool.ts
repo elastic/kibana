@@ -158,6 +158,7 @@ export const runLiveQueryTool = (
           userProfileUid: currentUser?.profile_uid ?? undefined,
         },
         space,
+        dispatch: { entryPoint: 'live_query', source: { kind: 'caller' } },
       });
 
       // The parent action id is a container: Fleet responses and result

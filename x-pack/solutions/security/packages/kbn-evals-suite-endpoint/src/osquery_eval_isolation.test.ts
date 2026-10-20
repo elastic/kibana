@@ -107,7 +107,10 @@ describe('Endpoint Osquery eval isolation', () => {
       jest.doMock('@kbn/evals', () => ({
         createPlaywrightEvalsConfig: () => ({ projects: [{ name: 'model', use: {} }] }),
       }));
-      const env = { ...process.env, OSQUERY_TRAP_RUN_ID: 'wiring-test' };
+      const env: NodeJS.ProcessEnv = {
+        ...process.env,
+        OSQUERY_TRAP_RUN_ID: 'wiring-test',
+      };
       delete env.OSQUERY_TRAP_STATE_PATH;
       const replacedEnv = jest.replaceProperty(process, 'env', env);
       try {

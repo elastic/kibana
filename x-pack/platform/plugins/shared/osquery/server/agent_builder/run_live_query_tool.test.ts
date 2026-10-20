@@ -41,6 +41,7 @@ jest.mock('./poll_action_responses', () => ({
   }),
 }));
 
+import { createActionHandler } from '../handlers';
 import { pollActionResponses } from './poll_action_responses';
 
 const schemaService = () =>
@@ -168,6 +169,13 @@ describe('runLiveQueryTool', () => {
     const data = getResultData(result);
     expect(data.status).toBe('completed');
     expect(data.rows).toEqual([{ pid: 1 }]);
+    expect(createActionHandler).toHaveBeenCalledWith(
+      context,
+      { query: 'SELECT pid FROM processes', agent_ids: ['agent-1'] },
+      expect.objectContaining({
+        dispatch: { entryPoint: 'live_query', source: { kind: 'caller' } },
+      })
+    );
     expect(pollActionResponses).toHaveBeenCalled();
   });
 
