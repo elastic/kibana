@@ -20,6 +20,7 @@ import {
   section,
   table,
 } from './primitives';
+import { codeCopyEnhancement } from './primitives/code';
 import { tableSortEnhancement } from './primitives/table';
 
 export const componentsPrimitives = [
@@ -42,7 +43,7 @@ export const componentsPack = definePrimitivePack({
   primitives: componentsPrimitives,
   styleAdapter: isomerStyleAdapter,
   styleCollector: ISOMER_STYLE_COLLECTOR,
-  enhancements: [tableSortEnhancement],
+  enhancements: [codeCopyEnhancement, tableSortEnhancement],
   authoring: {
     groups: [
       { title: 'Narrative and content', types: ['markdown'] },
