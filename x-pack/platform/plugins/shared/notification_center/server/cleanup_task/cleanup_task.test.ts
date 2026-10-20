@@ -12,7 +12,7 @@ import {
   registerNotificationCleanupTask,
   scheduleNotificationCleanupTask,
 } from './cleanup_task';
-import { NOTIFICATION_DATA_RETENTION } from '../storage/notification_data_stream';
+import { NOTIFICATION_DATA_RETENTION_DAYS } from '../storage/notification_data_stream';
 import { MAX_SEVERITY_TTL_DAYS, SEVERITY_TTL_DAYS } from '../../common/notification_schema';
 
 describe('cleanup_task', () => {
@@ -25,11 +25,9 @@ describe('cleanup_task', () => {
       expect(MAX_SEVERITY_TTL_DAYS).toBe(180);
     });
 
-    it('all TTLs stay within the data stream ILM ceiling', () => {
-      const ceilingDays = Number(NOTIFICATION_DATA_RETENTION.replace('d', ''));
-
+    it('all TTLs stay within the data stream retention ceiling set by Elasticsearch', () => {
       for (const days of Object.values(SEVERITY_TTL_DAYS)) {
-        expect(days).toBeLessThanOrEqual(ceilingDays);
+        expect(days).toBeLessThanOrEqual(NOTIFICATION_DATA_RETENTION_DAYS);
       }
     });
   });

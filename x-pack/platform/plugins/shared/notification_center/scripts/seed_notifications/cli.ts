@@ -15,7 +15,6 @@ import { buildChunk, buildTick, validateFixture } from './fixtures';
 import {
   clearNotifications,
   clearReadHorizon,
-  createDataStream,
   createEsClient,
   setReadHorizon,
   writeNotifications,
@@ -23,6 +22,10 @@ import {
 } from './seed';
 
 const MIN_INTERVAL_MS = 1000;
+/** Provisioned by `@kbn/es` on every dev cluster; the only local user allowed to write system data streams. */
+const DEFAULT_ES_USERNAME = 'system_indices_superuser';
+const DEFAULT_KIBANA_USERNAME = 'elastic';
+const DEFAULT_PASSWORD = 'changeme';
 /** Longer delays overflow `setTimeout`, which then fires immediately. */
 const MAX_INTERVAL_MS = 2_147_483_647;
 
@@ -94,8 +97,14 @@ run(
     const target: SeedTarget = {
       kibanaUrl: requiredUrl(flags, 'kibana-url'),
       esUrl: requiredUrl(flags, 'es-url'),
-      username: String(flags['es-username'] || 'elastic'),
-      password: String(flags['es-password'] || 'changeme'),
+      es: {
+        username: String(flags['es-username'] || DEFAULT_ES_USERNAME),
+        password: String(flags['es-password'] || DEFAULT_PASSWORD),
+      },
+      kibana: {
+        username: String(flags['kibana-username'] || DEFAULT_KIBANA_USERNAME),
+        password: String(flags['kibana-password'] || DEFAULT_PASSWORD),
+      },
     };
     const intervalMs = flags.interval ? parseInterval(String(flags.interval)) : undefined;
     const readHorizon = parseReadHorizon(String(flags['read-horizon'] || DEFAULT_READ_HORIZON));
@@ -104,7 +113,6 @@ run(
     addCleanupTask(() => {
       void esClient.close();
     });
-    await createDataStream(target);
 
     if (flags.clean === true) {
       log.info(`Deleted ${await clearNotifications(esClient)} notification(s).`);
@@ -131,16 +139,30 @@ run(
       Seed the Notification Center data stream on a local dev stack.
 
       Assumes Kibana is already running with "xpack.notificationCenter.enabled: true", and that
-      --kibana-url and --es-url name the same cluster.
+      --kibana-url and --es-url name the same cluster. Elasticsearch owns the data stream as a
+      system data stream, so the ES user must be allowed to write restricted indices.
     `,
     flags: {
-      string: ['interval', 'es-url', 'es-username', 'es-password', 'kibana-url', 'read-horizon'],
+      string: [
+        'interval',
+        'es-url',
+        'es-username',
+        'es-password',
+        'kibana-url',
+        'kibana-username',
+        'kibana-password',
+        'read-horizon',
+      ],
       boolean: ['clean', 'include-unregistered'],
       help: `
         --kibana-url <url>       Required. Kibana base URL, including any base path
         --es-url <url>           Required. Elasticsearch URL of that Kibana's cluster
-        --es-username <user>     Username for both (default: elastic)
-        --es-password <pass>     Password for both (default: changeme)
+        --es-username <user>     Elasticsearch user that writes the notifications; must be
+                                 allowed restricted indices (default: ${DEFAULT_ES_USERNAME})
+        --es-password <pass>     Password for that user (default: ${DEFAULT_PASSWORD})
+        --kibana-username <user> Kibana user whose read state is backdated: whoever you browse
+                                 Kibana as (default: ${DEFAULT_KIBANA_USERNAME})
+        --kibana-password <pass> Password for that user (default: ${DEFAULT_PASSWORD})
         --clean                  Empty the data stream, reset read state, and exit
         --include-unregistered   Also seed namespaces no plugin has registered yet, plus one
                                  timeseries id. These bypass the producer contract and exist to

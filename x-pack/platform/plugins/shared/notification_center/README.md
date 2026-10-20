@@ -100,8 +100,25 @@ The structure of the notification document is defined in [`common/`](./common):
 
 - [`notification_schema.ts`](./common/notification_schema.ts) — the Zod
   `notificationSchema` for the document stored in the append-only
-  `.kibana-notification-center` data stream. We use Zod because the shape is shared across
+  `.kibana-notifications` data stream. We use Zod because the shape is shared across
   server and browser code.
+
+### Storage
+
+`.kibana-notifications` is an Elasticsearch **system data stream**, owned by Elasticsearch's
+`kibana` module ([elastic/elasticsearch#161292](https://github.com/elastic/elasticsearch/pull/161292)).
+The `SystemDataStreamDescriptor` there carries the index template — field mappings, `180d`
+data retention, hidden — and Elasticsearch creates the stream on the first write. This plugin
+does **not** register a data stream with core or install a template; it reads and writes
+documents through `elasticsearch.client.asInternalUser` (see
+[`server/storage/notification_data_stream.ts`](./server/storage/notification_data_stream.ts)).
+A mapping change is therefore an Elasticsearch PR, not a Kibana one, and must land in
+Elasticsearch before any Kibana code depends on the new field.
+
+Being a system data stream, the stream is reserved for Kibana: direct access needs the
+`x-elastic-product-origin: kibana` header and a user allowed restricted indices
+(`system_indices_superuser` on a dev or test cluster). The `elastic` superuser cannot write to it.
+See the [`@kbn/data-streams` README](../../../../../src/platform/packages/private/kbn-data-streams/README.md#system-data-streams).
 
 ### Severity
 
@@ -229,10 +246,12 @@ export const reportDeprecatedEndpoint = async (
 
 ### Checking it landed
 
-Read it back from ES (Dev Tools → Console, or `curl` against Elasticsearch):
+Read it back from ES (Dev Tools → Console, or `curl` against Elasticsearch). Dev Tools sends the
+Kibana product origin for you; a `curl` needs `-H 'x-elastic-product-origin: kibana'` and a user
+allowed restricted indices, because the stream is a system data stream:
 
 ```
-GET /.kibana-notification-center/_search
+GET /.kibana-notifications/_search
 ```
 
 ## Seeding a local dev stack
@@ -253,19 +272,21 @@ node $SEED --help
 node $SEED --kibana-url http://localhost:5611/kbn --es-url http://localhost:9201 \
   --include-unregistered
 
-# serverless: its own credentials, and Elasticsearch on HTTPS
+# serverless: its own Kibana user, and Elasticsearch on HTTPS
 node $SEED --kibana-url http://localhost:5601 --es-url https://localhost:9200 \
-  --es-username elastic_serverless
+  --kibana-username elastic_serverless
 
 node $SEED --kibana-url http://localhost:5611/kbn --es-url http://localhost:9201 --clean
 ```
 
-`--kibana-url` must include the base path, which a dev Kibana mounts itself under. The script
-reads the list route once before writing anything: that is what makes the plugin create the data
-stream, and writing first would let Elasticsearch auto-create a plain index under the same name,
-permanently blocking the plugin from creating it.
+`--kibana-url` must include the base path, which a dev Kibana mounts itself under. The first
+write auto-creates the data stream from the Elasticsearch-owned template, so nothing needs to
+happen on the Kibana side before seeding.
 
-The credentials are used for both Elasticsearch and Kibana, which is why serverless needs
+Elasticsearch and Kibana take separate credentials. The data stream is a system data stream that
+only a user allowed restricted indices can write, so `--es-username` defaults to
+`system_indices_superuser`, which `@kbn/es` provisions on every dev cluster. `--kibana-username`
+is whoever you browse Kibana as (default `elastic`), and is why serverless needs
 `elastic_serverless`: SAML is only the default _UI_ provider there, and basic auth still works.
 
 The plugin's `notificationWriteSchema` rejects an unknown `namespace` or `type`. `--include-unregistered`
@@ -273,13 +294,16 @@ writes those directly to the cluster to exercise the read path and the UI agains
 
 Every fixture is backdated, and a user's catch-up marker is stamped at `now` the first time they
 open the bell — which is always after seeding — so the whole chunk would otherwise arrive already
-read. The script therefore logs in as the Elasticsearch user and backdates that marker to 30 days
+read. The script therefore logs in as the Kibana user and backdates that marker to 30 days
 ago, leaving the newer fixtures unread. `--read-horizon` takes an age (`12h`) or a date
 (`2026-09-01`) instead, and `--clean` drops the marker and per-id overrides. Read state is per user profile:
-if you browse Kibana as somebody other than `--es-username`, their bell is unaffected.
+if you browse Kibana as somebody other than `--kibana-username`, their bell is unaffected.
 
 ## Running tests
 
 ```bash
 node scripts/jest --config x-pack/platform/plugins/shared/notification_center/jest.config.js
+
+# against a real Elasticsearch; needs a build that registers the `.kibana-notifications` descriptor
+node scripts/jest_integration --config x-pack/platform/plugins/shared/notification_center/jest.integration.config.js
 ```

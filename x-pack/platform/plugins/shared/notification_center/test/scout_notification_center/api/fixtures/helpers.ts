@@ -46,13 +46,19 @@ export const makeDoc = (id: string, overrides: Partial<NotificationDoc> = {}): N
 /**
  * Append notifications directly to the backing data stream and wait for them to become
  * searchable. Mirrors how the plugin writes (append-only `create`), so the GET route sees
- * them exactly as produced notifications.
+ * them exactly as produced notifications. Like the plugin's first write, this auto-creates the
+ * ES-owned system data stream when it does not exist yet. Pass the `notificationsEsClient`
+ * fixture: the default `esClient` cannot write to a system data stream.
  */
 export const seedNotifications = async (esClient: Client, docs: NotificationDoc[]) => {
-  await esClient.bulk({
+  const response = await esClient.bulk({
     refresh: true,
     operations: docs.flatMap((doc) => [{ create: { _index: NOTIFICATION_DATA_STREAM_NAME } }, doc]),
   });
+  if (response.errors) {
+    const reason = response.items.find((item) => item.create?.error)?.create?.error?.reason;
+    throw new Error(`Failed to seed notifications: ${reason ?? 'unknown error'}`);
+  }
 };
 
 /** Remove every seeded doc for a namespace so suites don't leak state into each other. */

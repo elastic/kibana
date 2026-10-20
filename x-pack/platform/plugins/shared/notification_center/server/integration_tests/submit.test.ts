@@ -6,20 +6,16 @@
  */
 
 import { of } from 'rxjs';
+import type { Client } from '@elastic/elasticsearch';
 import type { CoreSetup } from '@kbn/core/server';
-import type { DataStreamsStart } from '@kbn/core-data-streams-server';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { DataStreamClient } from '@kbn/data-streams';
 import type { EsTestCluster } from '@kbn/test';
 import { createTestEsCluster } from '@kbn/test';
 import { ToolingLog } from '@kbn/tooling-log';
 import { NOTIFICATION_TYPES } from '../../common';
-import {
-  NOTIFICATION_DATA_STREAM_NAME,
-  notificationDataStreamDefinition,
-} from '../storage/notification_data_stream';
+import { NOTIFICATION_DATA_STREAM_NAME } from '../storage/notification_data_stream';
 import { buildForType, NotificationValidationError } from '../lib/submit';
 import type { NotificationCenterPluginStart, NotificationCenterStartDependencies } from '../types';
+import { asKibanaClient } from './test_utils';
 
 const modelStatus = NOTIFICATION_TYPES.inference.modelStatus;
 
@@ -34,7 +30,7 @@ const content = (overrides: Record<string, unknown> = {}) => ({
 describe('notificationCenter forType().submit() [integration]', () => {
   let esServer: EsTestCluster;
   let forType: ReturnType<typeof buildForType>;
-  let esClient: ReturnType<EsTestCluster['getClient']>;
+  let esClient: Client;
 
   const countById = async (notificationId: string) => {
     await esClient.indices.refresh({ index: NOTIFICATION_DATA_STREAM_NAME });
@@ -52,29 +48,40 @@ describe('notificationCenter forType().submit() [integration]', () => {
       log: new ToolingLog({ writeTo: process.stdout, level: 'error' }),
     });
     await esServer.start();
-    esClient = esServer.getClient();
+    esClient = asKibanaClient(esServer.getClient());
 
-    const client = await DataStreamClient.initialize({
-      logger: loggingSystemMock.createLogger(),
-      elasticsearchClient: esClient,
-      dataStream: notificationDataStreamDefinition,
-    });
-    if (!client) {
-      throw new Error('Failed to initialize the notification data stream client');
-    }
-
-    // submit resolves its client via core.getStartServices().dataStreams,
-    // so mock the start service to return the test client bound to the test ES cluster.
-    const dataStreams = { initializeClient: async () => client } as unknown as DataStreamsStart;
+    // submit writes through core.getStartServices().elasticsearch.client.asInternalUser,
+    // so stand that in with the test client bound to the test ES cluster.
+    const elasticsearch = { client: { asInternalUser: esClient } };
     const featureFlags = { getBooleanValue$: () => of(true) };
     const core = {
-      getStartServices: async () => [{ dataStreams, featureFlags }],
+      getStartServices: async () => [{ elasticsearch, featureFlags }],
     } as unknown as CoreSetup<NotificationCenterStartDependencies, NotificationCenterPluginStart>;
     forType = buildForType(core);
   });
 
   afterAll(async () => {
     await esServer?.stop();
+  });
+
+  it('auto-creates the ES-owned system data stream on the first write', async () => {
+    await expect(
+      esClient.indices.getDataStream({ name: NOTIFICATION_DATA_STREAM_NAME })
+    ).rejects.toMatchObject({ meta: { statusCode: 404 } });
+
+    await forType(modelStatus).submit(content({ entity: 'endpoint-first' }));
+
+    // Nothing in this plugin installs a template or creates the stream: Elasticsearch's own
+    // SystemDataStreamDescriptor must have done it, and marks the result as a system stream.
+    const { data_streams: dataStreams } = await esClient.indices.getDataStream({
+      name: NOTIFICATION_DATA_STREAM_NAME,
+    });
+    expect(dataStreams).toHaveLength(1);
+    expect(dataStreams[0]).toMatchObject({
+      name: NOTIFICATION_DATA_STREAM_NAME,
+      hidden: true,
+      system: true,
+    });
   });
 
   it('lands one document, building the id from the type + id parts and defaulting severity', async () => {

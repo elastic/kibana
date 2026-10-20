@@ -5,21 +5,18 @@
  * 2.0.
  */
 
-import type { DataStreamsStart } from '@kbn/core-data-streams-server';
+import type { Client } from '@elastic/elasticsearch';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { DataStreamClient } from '@kbn/data-streams';
 import type { EsTestCluster } from '@kbn/test';
 import { createTestEsCluster } from '@kbn/test';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { NotificationDocument } from '../../common/types';
-import {
-  NOTIFICATION_DATA_STREAM_NAME,
-  notificationDataStreamDefinition,
-} from '../storage/notification_data_stream';
+import { NOTIFICATION_DATA_STREAM_NAME } from '../storage/notification_data_stream';
 import { queryNotifications } from '../lib/query_notifications';
 import { queryUnreadStatus } from '../lib/query_unread_status';
 import type { NotificationReadState } from '../lib/read_state';
 import { cleanupExpiredNotifications } from '../cleanup_task/cleanup_expired_notifications';
+import { asKibanaClient } from './test_utils';
 
 const daysAgo = (days: number) => new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
 
@@ -40,15 +37,28 @@ const doc = (
 
 describe('queryNotifications [integration]', () => {
   let esServer: EsTestCluster;
-  let esClient: ReturnType<EsTestCluster['getClient']>;
-  let dataStreams: DataStreamsStart;
-  let seedNotifications: (documents: NotificationDocument[]) => Promise<void>;
+  let esClient: Client;
   const logger = loggingSystemMock.createLogger();
 
   const query = (
     params: Parameters<typeof queryNotifications>[1] = {},
     readState?: NotificationReadState
-  ) => queryNotifications({ dataStreams, logger }, params, readState);
+  ) => queryNotifications({ esClient, logger }, params, readState);
+
+  /** Append the way the plugin does; the first write auto-creates the ES-owned stream. */
+  const seedNotifications = async (documents: NotificationDocument[]) => {
+    const response = await esClient.bulk({
+      refresh: true,
+      operations: documents.flatMap((document) => [
+        { create: { _index: NOTIFICATION_DATA_STREAM_NAME } },
+        document,
+      ]),
+    });
+    if (response.errors) {
+      const reason = response.items.find((item) => item.create?.error)?.create?.error?.reason;
+      throw new Error(`Failed to seed notifications: ${reason ?? 'unknown error'}`);
+    }
+  };
 
   beforeAll(async () => {
     jest.setTimeout(120_000);
@@ -56,38 +66,29 @@ describe('queryNotifications [integration]', () => {
       log: new ToolingLog({ writeTo: process.stdout, level: 'error' }),
     });
     await esServer.start();
-    esClient = esServer.getClient();
+    esClient = asKibanaClient(esServer.getClient());
 
-    const client = await DataStreamClient.initialize({
-      logger: loggingSystemMock.createLogger(),
-      elasticsearchClient: esClient,
-      dataStream: notificationDataStreamDefinition,
-    });
-    if (!client) {
-      throw new Error('Failed to initialize the notification data stream client');
-    }
-    seedNotifications = async (documents) => {
-      await client.create({ documents });
-    };
-    dataStreams = { initializeClient: async () => client } as unknown as DataStreamsStart;
+    await seedNotifications([
+      // re-pushed id: collapse must surface only the latest doc
+      doc('dup', daysAgo(5), { title: 'dup v1' }),
+      doc('dup', daysAgo(2), { title: 'dup v2' }),
+      // past the 30d info TTL: horizon-excluded
+      doc('old-info', daysAgo(40)),
+      // same age but error tier (180d TTL): visible
+      doc('old-error', daysAgo(40), { severity: 'error' }),
+      doc('recent-warning', daysAgo(1), { severity: 'warning' }),
+      doc('other-type', daysAgo(3), { type: 'other' }),
+      // one copy past the info TTL, one inside: the in-horizon copy represents the group
+      doc('revived', daysAgo(40), { title: 'revived v1' }),
+      doc('revived', daysAgo(1.5), { title: 'revived v2' }),
+    ]);
 
-    await client.create({
-      documents: [
-        // re-pushed id: collapse must surface only the latest doc
-        doc('dup', daysAgo(5), { title: 'dup v1' }),
-        doc('dup', daysAgo(2), { title: 'dup v2' }),
-        // past the 30d info TTL: horizon-excluded
-        doc('old-info', daysAgo(40)),
-        // same age but error tier (180d TTL): visible
-        doc('old-error', daysAgo(40), { severity: 'error' }),
-        doc('recent-warning', daysAgo(1), { severity: 'warning' }),
-        doc('other-type', daysAgo(3), { type: 'other' }),
-        // one copy past the info TTL, one inside: the in-horizon copy represents the group
-        doc('revived', daysAgo(40), { title: 'revived v1' }),
-        doc('revived', daysAgo(1.5), { title: 'revived v2' }),
-      ],
+    // Guard against an ES build without the descriptor: a bare write would then auto-create a
+    // plain, dynamically-mapped index, and every assertion below would fail for the wrong reason.
+    const { data_streams: dataStreams } = await esClient.indices.getDataStream({
+      name: NOTIFICATION_DATA_STREAM_NAME,
     });
-    await esClient.indices.refresh({ index: NOTIFICATION_DATA_STREAM_NAME });
+    expect(dataStreams[0]).toMatchObject({ name: NOTIFICATION_DATA_STREAM_NAME, system: true });
   });
 
   afterAll(async () => {
@@ -159,7 +160,7 @@ describe('queryNotifications [integration]', () => {
 
   it('reports unread status from the same read state as the list', async () => {
     const result = await queryUnreadStatus(
-      { dataStreams, logger },
+      { esClient, logger },
       {
         overrides: {
           'recent-warning': { read: true, markedAt: new Date().toISOString() },
@@ -190,7 +191,6 @@ describe('queryNotifications [integration]', () => {
       doc('cleanup-live', daysAgo(1), { severity: 'warning', title: 'fresh warning' }),
       doc('cleanup-long-lived', daysAgo(45), { severity: 'error' }),
     ]);
-    await esClient.indices.refresh({ index: NOTIFICATION_DATA_STREAM_NAME });
 
     await cleanupExpiredNotifications(esClient, new AbortController().signal);
     await esClient.indices.refresh({ index: NOTIFICATION_DATA_STREAM_NAME });

@@ -7,8 +7,9 @@
 
 import { of } from 'rxjs';
 import type { CoreSetup } from '@kbn/core/server';
-import { dataStreamServiceMock } from '@kbn/core-data-streams-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { NOTIFICATION_TYPES, SEVERITY } from '../../common';
+import { NOTIFICATION_DATA_STREAM_NAME } from '../storage/notification_data_stream';
 import { buildForType, buildIdAndTimestamp, NotificationValidationError } from './submit';
 import type { NotificationCenterPluginStart, NotificationCenterStartDependencies } from '../types';
 
@@ -22,50 +23,53 @@ const content = {
 };
 
 const createCoreMock = ({ enabled = true }: { enabled?: boolean } = {}) => {
-  const create = jest.fn().mockResolvedValue({ errors: false, items: [{ create: {} }] });
-  const dataStreams = dataStreamServiceMock.createStartContract();
-  dataStreams.initializeClient.mockResolvedValue({ create } as never);
+  const esClient = elasticsearchServiceMock.createElasticsearchClient();
   const getBooleanValue$ = jest.fn().mockReturnValue(of(enabled));
   const core = {
-    getStartServices: jest
-      .fn()
-      .mockResolvedValue([{ dataStreams, featureFlags: { getBooleanValue$ } }]),
+    getStartServices: jest.fn().mockResolvedValue([
+      {
+        elasticsearch: { client: { asInternalUser: esClient } },
+        featureFlags: { getBooleanValue$ },
+      },
+    ]),
   } as unknown as CoreSetup<NotificationCenterStartDependencies, NotificationCenterPluginStart>;
-  return { core, create, getBooleanValue$ };
+  return { core, index: esClient.index, getBooleanValue$ };
 };
 
 const setup = (opts: { enabled?: boolean } = {}) => {
-  const { core, create, getBooleanValue$ } = createCoreMock(opts);
-  return { forType: buildForType(core), create, getBooleanValue$ };
+  const { core, index, getBooleanValue$ } = createCoreMock(opts);
+  return { forType: buildForType(core), index, getBooleanValue$ };
 };
 
 describe('buildForType', () => {
   it('appends one document with the id built from the type + id parts, a stamped @timestamp, and defaulted severity', async () => {
-    const { forType, create } = setup();
+    const { forType, index } = setup();
 
     const result = await forType(modelStatus).submit(content);
 
     expect(result).toEqual({ status: 'submitted' });
-    expect(create).toHaveBeenCalledTimes(1);
-    const [{ documents }] = create.mock.calls[0];
-    expect(documents).toHaveLength(1);
-    const [document] = documents;
+    expect(index).toHaveBeenCalledTimes(1);
+    const [request] = index.mock.calls[0];
+    // Data streams only accept `create`; the first write auto-creates the ES-owned stream.
+    expect(request).toMatchObject({ index: NOTIFICATION_DATA_STREAM_NAME, op_type: 'create' });
+    // data streams reject a custom _id — the id lives in a field, never as _id
+    expect(request).not.toHaveProperty('id');
+    const document = request.document as Record<string, unknown>;
     expect(document.notification_id).toBe('inference:modelStatus:my-endpoint:deprecated');
     expect(document.namespace).toBe('inference');
     expect(document.type).toBe('modelStatus');
     expect(document.severity).toBe('info');
     expect(typeof document['@timestamp']).toBe('string');
-    // data streams reject a custom _id — the id lives in a field, never as _id
     expect(document).not.toHaveProperty('_id');
   });
 
   it('stores a producer-provided severity', async () => {
-    const { forType, create } = setup();
+    const { forType, index } = setup();
 
     await forType(modelStatus).submit({ ...content, severity: SEVERITY.warning });
 
-    const [{ documents }] = create.mock.calls[0];
-    expect(documents[0].severity).toBe('warning');
+    const [{ document }] = index.mock.calls[0];
+    expect((document as Record<string, unknown>).severity).toBe('warning');
   });
 
   it('evaluates the feature flag keyed to the notification namespace/type', async () => {
@@ -80,12 +84,12 @@ describe('buildForType', () => {
   });
 
   it('skips the write and reports skipped_disabled when the type flag is off', async () => {
-    const { forType, create } = setup({ enabled: false });
+    const { forType, index } = setup({ enabled: false });
 
     const result = await forType(modelStatus).submit(content);
 
     expect(result).toEqual({ status: 'skipped_disabled' });
-    expect(create).not.toHaveBeenCalled();
+    expect(index).not.toHaveBeenCalled();
   });
 
   it('submits immediately without evaluating a flag when the type declares none', async () => {
@@ -97,31 +101,28 @@ describe('buildForType', () => {
         NOTIFICATION_TYPE_ENABLED_DEFAULT: false,
       }));
       const { buildForType: buildIsolated } = await import('./submit');
-      const { core, create, getBooleanValue$ } = createCoreMock();
+      const { core, index, getBooleanValue$ } = createCoreMock();
 
       const result = await buildIsolated(core)(modelStatus).submit(content);
 
       expect(getBooleanValue$).not.toHaveBeenCalled();
-      expect(create).toHaveBeenCalledTimes(1);
+      expect(index).toHaveBeenCalledTimes(1);
       expect(result).toEqual({ status: 'submitted' });
     });
   });
 
   it('rejects invalid content with a typed error and writes nothing', async () => {
-    const { forType, create } = setup();
+    const { forType, index } = setup();
 
     await expect(forType(modelStatus).submit({ ...content, title: '' })).rejects.toBeInstanceOf(
       NotificationValidationError
     );
-    expect(create).not.toHaveBeenCalled();
+    expect(index).not.toHaveBeenCalled();
   });
 
-  it('throws when the bulk create reports a failure', async () => {
-    const { forType, create } = setup();
-    create.mockResolvedValueOnce({
-      errors: true,
-      items: [{ create: { error: { reason: 'mapping conflict' } } }],
-    });
+  it('surfaces a rejected write', async () => {
+    const { forType, index } = setup();
+    index.mockRejectedValueOnce(new Error('mapping conflict'));
 
     await expect(forType(modelStatus).submit(content)).rejects.toThrow('mapping conflict');
   });

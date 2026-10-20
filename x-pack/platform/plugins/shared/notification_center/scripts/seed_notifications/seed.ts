@@ -6,24 +6,37 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import { GET_NOTIFICATIONS_PATH, NOTIFICATION_CENTER_API_VERSION } from '../../common/routes';
 import type { Notification } from '../../common/types';
 import { NOTIFICATION_DATA_STREAM_NAME } from '../../server/storage/notification_data_stream';
 import { OVERRIDES_KEY, READ_ALL_BEFORE_KEY } from '../../server/storage/user_storage';
 
-export interface SeedTarget {
-  esUrl: string;
-  kibanaUrl: string;
+export interface Credentials {
   username: string;
   password: string;
 }
 
+export interface SeedTarget {
+  esUrl: string;
+  kibanaUrl: string;
+  /**
+   * Writes to the data stream. Elasticsearch owns `.kibana-notifications` as a system data
+   * stream, so this user needs `allow_restricted_indices` (`system_indices_superuser` on a dev
+   * cluster); the `elastic` superuser cannot write to it.
+   */
+  es: Credentials;
+  /** Owns the read state this script backdates: whoever browses Kibana locally. */
+  kibana: Credentials;
+}
+
 const LOCAL_HOSTNAMES = new Set(['localhost', '127.0.0.1', '[::1]']);
 
-export const createEsClient = ({ esUrl, username, password }: SeedTarget): Client =>
+export const createEsClient = ({ esUrl, es }: SeedTarget): Client =>
   new Client({
     node: esUrl,
-    auth: { username, password },
+    auth: es,
+    // Elasticsearch reserves the system data stream for Kibana; this header is what Kibana's own
+    // clients send, and without it every request against the stream is rejected.
+    headers: { 'x-elastic-product-origin': 'kibana' },
     // Serverless dev clusters serve a self-signed cert. Local only: a remote https cluster
     // reached over an unverified connection is nobody's intent.
     ...(esUrl.startsWith('https:') &&
@@ -37,34 +50,9 @@ const HEADERS = {
 };
 
 /**
- * Never send this alongside a session cookie: HTTP authentication wins over the session, and the
- * request loses the `profile_uid` that read state is keyed by.
+ * Append notifications the way the plugin does, and wait for them to become searchable. Like
+ * the plugin's first write, this auto-creates the ES-owned data stream when it does not exist.
  */
-const basicAuth = ({ username, password }: SeedTarget) => ({
-  authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`,
-});
-
-/**
- * Read the list route once, which is what makes the plugin create its data stream.
- *
- * Writing first lets Elasticsearch auto-create a plain index under the same name, which then
- * permanently blocks the plugin from creating it — hence the one status check here.
- */
-export const createDataStream = async (target: SeedTarget): Promise<void> => {
-  const url = `${target.kibanaUrl}${GET_NOTIFICATIONS_PATH}`;
-  const response = await fetch(url, {
-    headers: {
-      ...HEADERS,
-      ...basicAuth(target),
-      'elastic-api-version': NOTIFICATION_CENTER_API_VERSION,
-    },
-  });
-  if (!response.ok) {
-    throw new Error(`${url} returned ${response.status}: ${await response.text()}`);
-  }
-};
-
-/** Append notifications the way the plugin does, and wait for them to become searchable. */
 export const writeNotifications = async (
   esClient: Client,
   notifications: Notification[]
@@ -87,6 +75,8 @@ export const writeNotifications = async (
 export const clearNotifications = async (esClient: Client): Promise<number> => {
   const { deleted } = await esClient.deleteByQuery({
     index: NOTIFICATION_DATA_STREAM_NAME,
+    // nothing to clear until the first write creates the stream
+    ignore_unavailable: true,
     refresh: true,
     conflicts: 'proceed',
     query: { match_all: {} },
@@ -99,7 +89,10 @@ export const clearNotifications = async (esClient: Client): Promise<number> => {
  * session carries one — a plain `Authorization: Basic` request has no read state at all.
  */
 const login = async (target: SeedTarget): Promise<string> => {
-  const { kibanaUrl, username, password } = target;
+  const {
+    kibanaUrl,
+    kibana: { username, password },
+  } = target;
   const response = await fetch(`${kibanaUrl}/internal/security/login`, {
     method: 'POST',
     headers: HEADERS,

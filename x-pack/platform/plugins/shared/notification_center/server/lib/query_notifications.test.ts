@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { dataStreamServiceMock } from '@kbn/core-data-streams-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { NOTIFICATION_DATA_STREAM_NAME } from '../storage/notification_data_stream';
 import { READ_ALL_BEFORE_DEFAULT } from '../storage/user_storage';
 import { queryNotifications, NOTIFICATION_QUERY_RESULT_LIMIT } from './query_notifications';
 
@@ -22,14 +23,16 @@ const doc = (id: string, ts: string, overrides: Record<string, unknown> = {}) =>
 });
 
 const setup = (docs: Array<Record<string, unknown>> = []) => {
-  const search = jest.fn().mockResolvedValue({
-    hits: { hits: docs.map((source, i) => ({ _id: `doc-${i}`, _source: source })) },
+  const esClient = elasticsearchServiceMock.createElasticsearchClient();
+  esClient.search.mockResponse({
+    took: 1,
+    timed_out: false,
+    _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+    hits: { hits: docs.map((source, i) => ({ _index: 'idx', _id: `doc-${i}`, _source: source })) },
   });
-  const dataStreams = dataStreamServiceMock.createStartContract();
-  dataStreams.initializeClient.mockResolvedValue({ search } as never);
 
-  const deps = { dataStreams, logger: loggingSystemMock.createLogger() };
-  return { deps, search };
+  const deps = { esClient, logger: loggingSystemMock.createLogger() };
+  return { deps, search: esClient.search };
 };
 
 describe('queryNotifications', () => {
@@ -40,6 +43,9 @@ describe('queryNotifications', () => {
 
     expect(search).toHaveBeenCalledWith(
       expect.objectContaining({
+        // Reads may precede the stream, which ES creates on first write
+        index: NOTIFICATION_DATA_STREAM_NAME,
+        ignore_unavailable: true,
         collapse: { field: 'notification_id' },
         sort: [{ '@timestamp': 'desc' }, { notification_id: 'asc' }],
         // One over the limit so a full page is distinguishable from a truncated one.
@@ -58,8 +64,8 @@ describe('queryNotifications', () => {
       to: '2026-07-20T00:00:00.000Z',
     });
 
-    const [{ query }] = search.mock.calls[0];
-    expect(query.bool.filter).toEqual(
+    const [request] = search.mock.calls[0];
+    expect(request?.query?.bool?.filter).toEqual(
       expect.arrayContaining([
         { term: { namespace: 'inference' } },
         { term: { type: 'modelStatus' } },
@@ -77,8 +83,8 @@ describe('queryNotifications', () => {
 
     await queryNotifications(deps);
 
-    const [{ query }] = search.mock.calls[0];
-    expect(query.bool.filter).toEqual([]);
+    const [request] = search.mock.calls[0];
+    expect(request?.query?.bool?.filter).toEqual([]);
   });
 
   it('returns the full collapsed set for the client to paginate', async () => {

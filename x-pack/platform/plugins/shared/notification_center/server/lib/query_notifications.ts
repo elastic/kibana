@@ -6,19 +6,19 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { Logger } from '@kbn/core/server';
-import type { DataStreamsStart } from '@kbn/core-data-streams-server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   notificationQueryParamsSchema,
   notificationReadSchema,
 } from '../../common/notification_schema';
 import type {
+  NotificationDocument,
   NotificationListItem,
   NotificationQueryParams,
   NotificationQueryParamsParsed,
   NotificationQueryResult,
 } from '../../common/types';
-import { getNotificationDataStreamClient } from '../storage/notification_data_stream';
+import { NOTIFICATION_DATA_STREAM_NAME } from '../storage/notification_data_stream';
 import { isReadAt, type NotificationReadState } from './read_state';
 
 /**
@@ -29,7 +29,8 @@ import { isReadAt, type NotificationReadState } from './read_state';
 export const NOTIFICATION_QUERY_RESULT_LIMIT = 1000;
 
 export interface NotificationQueryDeps {
-  dataStreams: DataStreamsStart;
+  /** `asInternalUser`: the stream is an ES system data stream reserved for Kibana. */
+  esClient: ElasticsearchClient;
   logger: Logger;
 }
 
@@ -69,13 +70,15 @@ export const queryNotifications = async (
   params: NotificationQueryParams = {},
   readState?: NotificationReadState | Promise<NotificationReadState | undefined>
 ): Promise<NotificationQueryResult> => {
-  const { dataStreams, logger } = deps;
+  const { esClient, logger } = deps;
   const validated = notificationQueryParamsSchema.parse(params);
 
-  const client = await getNotificationDataStreamClient(dataStreams);
   // Over-fetch by one collapse group so a full page is distinguishable from a truncated one
   const [response, resolvedReadState] = await Promise.all([
-    client.search({
+    esClient.search<NotificationDocument>({
+      index: NOTIFICATION_DATA_STREAM_NAME,
+      // ES creates the stream on the first write, so a read can precede its existence
+      ignore_unavailable: true,
       query: { bool: { filter: buildFilters(validated) } },
       collapse: { field: 'notification_id' },
       sort: [{ '@timestamp': 'desc' }, { notification_id: 'asc' }],
