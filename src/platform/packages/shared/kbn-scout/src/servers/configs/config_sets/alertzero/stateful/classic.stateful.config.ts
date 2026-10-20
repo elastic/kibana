@@ -9,6 +9,7 @@
 
 import type { ScoutServerConfig } from '../../../../../types';
 import { defaultConfig } from '../../default/stateful/base.config';
+import { serviceAccountsServerArgs } from '../../service_accounts/shared';
 
 /**
  * Scout server config for tests that need `alertzero` and the plugins it depends on.
@@ -17,6 +18,8 @@ import { defaultConfig } from '../../default/stateful/base.config';
  * by alertzero and default off; without them Kibana cascade-disables alertzero and the TI
  * routes never register. The API tests of all three live under `test/scout_alertzero`
  * (security_solution, agentic_investigations, proposals).
+ *
+ * Since #295215 alertzero installs no managed workflows unless service accounts are enabled.
  *
  * Usage:
  *   node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet alertzero
@@ -30,6 +33,7 @@ export const servers: ScoutServerConfig = {
       '--xpack.alertzero.enabled=true',
       '--xpack.agenticInvestigations.enabled=true',
       '--xpack.proposals.enabled=true',
+      ...serviceAccountsServerArgs,
     ],
   },
 };
