@@ -11,14 +11,12 @@ import { getNightshiftBoundInvestigationWorkflowId } from '@kbn/workflows/manage
  * The Nightshift service accounts. There is one of each per deployment, shared by every space:
  * - `agent` runs investigations, their sandbox tools and their Agent Builder hooks.
  * - `automations` runs automation workflows, which start investigations.
- * - `detection` runs the detection engines (KI discovery, onboarding, detection).
  */
-export type NightshiftServiceAccountKind = 'agent' | 'automations' | 'detection';
+export type NightshiftServiceAccountKind = 'agent' | 'automations';
 
 export const NIGHTSHIFT_SERVICE_ACCOUNT_KINDS: readonly NightshiftServiceAccountKind[] = [
   'agent',
   'automations',
-  'detection',
 ];
 
 /** `kibana/<name>`; user-managed service accounts live in the `kibana` namespace. */

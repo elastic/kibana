@@ -126,7 +126,6 @@ describe('createInvestigatorServiceAccountService', () => {
         name: 'nightshift_automations',
         roles: ['nightshift_automations'],
       }),
-      expect.objectContaining({ name: 'nightshift_detection', roles: ['nightshift_detection'] }),
     ]);
     expect(managedWorkflows.install.mock.calls.map(([, id]) => id)).toEqual([
       ...BOUND_WORKFLOW_IDS,
@@ -164,7 +163,6 @@ describe('createInvestigatorServiceAccountService', () => {
     expect(serviceAccounts.create.mock.calls.map(([, { roles }]) => roles)).toEqual([
       ['_nightshift_agent'],
       ['_nightshift_automations'],
-      ['_nightshift_detection'],
     ]);
     expect(status.role).toBe('_nightshift_agent');
   });
