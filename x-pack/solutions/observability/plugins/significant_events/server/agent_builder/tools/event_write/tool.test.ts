@@ -653,6 +653,51 @@ describe('events_write tool', () => {
     );
   });
 
+  it('resolves a feature_id whose explicit source_id is another source, through the event sources', async () => {
+    getFeatures.mockResolvedValue({
+      hits: [
+        {
+          id: 'checkout-api',
+          uuid: 'uuid-checkout',
+          source_id: 'logs.batch',
+          type: 'entity',
+          subtype: 'service',
+        },
+      ],
+    });
+    (eventsWriteBulkHandler as jest.Mock).mockResolvedValue([
+      { index: 0, event_uuid: 'u', event_id: 'e', status: 'open', written: true },
+    ]);
+
+    await invokeHandler(
+      createTool({ trackAgentToolEventsWrite: jest.fn() }) as never,
+      {
+        items: [
+          {
+            ...input,
+            slugs: ['logs.batch'],
+            causal_features: [
+              { feature_id: 'checkout-api', name: 'Checkout API', source_id: 'logs.copy' },
+            ],
+          },
+        ],
+      },
+      createMockToolContext()
+    );
+
+    expect(eventsWriteBulkHandler).toHaveBeenCalledWith(
+      expect.objectContaining({
+        inputs: [
+          expect.objectContaining({
+            causal_features: [
+              expect.objectContaining({ feature_id: 'checkout-api', type: 'entity' }),
+            ],
+          }),
+        ],
+      })
+    );
+  });
+
   it('refuses a feature_id that names no Knowledge Indicator of a source that has some', async () => {
     getFeatures.mockImplementation((_sourceIds, options) => {
       const known = {

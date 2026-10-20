@@ -274,10 +274,12 @@ const enrichCausalFeatures = async (
       itemSourceIds: string[]
     ) => {
       if (explicitSourceId !== undefined) {
-        return featuresByReference.get(`${explicitSourceId}:${featureId}`);
+        const explicit = featuresByReference.get(`${explicitSourceId}:${featureId}`);
+        if (explicit) return explicit;
       }
-      // Without an explicit source: an unambiguous match wins; otherwise restrict to the
-      // event's own sources so a shared slug on another source cannot stamp the wrong
+      // Without an explicit source, or when it names a source that does not hold the id (a
+      // duplicate source the agent copied from): an unambiguous match wins; otherwise restrict to
+      // the event's own sources so a shared slug on another source cannot stamp the wrong
       // classification.
       const matches = uniqueHits.filter(({ id, uuid }) => id === featureId || uuid === featureId);
       const scoped = matches.filter(({ source_id: sourceId }) => itemSourceIds.includes(sourceId));
