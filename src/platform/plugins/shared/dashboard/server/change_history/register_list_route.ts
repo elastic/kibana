@@ -14,6 +14,8 @@ import type { StartDeps } from '../plugin';
 import type { DashboardPluginStart } from '../types';
 import { CHANGE_HISTORY_ROUTE_SECURITY, getChangeHistoryContext } from './utils';
 
+const MAX_PER_PAGE = 100;
+
 const listResponseSchema = z.object({
   items: z.array(
     z.object({
@@ -46,7 +48,7 @@ export const registerHistoryListRoute = (
           query: z
             .object({
               page: z.coerce.number().optional(),
-              per_page: z.coerce.number().optional(),
+              per_page: z.coerce.number().int().min(1).max(MAX_PER_PAGE).optional(),
             })
             .strict(),
         },
