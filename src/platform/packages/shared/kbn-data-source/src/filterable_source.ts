@@ -16,6 +16,7 @@ import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 export type FilterableField = DataViewFieldBase & {
   readonly searchable?: boolean;
   readonly aggregatable?: boolean;
+  readonly filterable?: boolean;
   readonly customLabel?: string;
   readonly displayName?: string;
   toSpec?(): unknown;

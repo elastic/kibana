@@ -10,6 +10,7 @@
 import { LRUCache } from 'lru-cache';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataViewFieldBase } from '@kbn/es-query';
+import { isFilterable } from '@kbn/data-views-plugin/common';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
 import type { HttpStart } from '@kbn/core/public';
 import {
@@ -382,7 +383,9 @@ export class EsqlSource implements DataSourceBase {
       title: dataset.title,
       name: dataset.name,
       timeFieldName: dataset.timeFieldName,
-      fields: Object.values(buildFilterableFieldSpecs(dataset.getColumns(), dataset.timeFieldName)),
+      fields: Object.values(
+        buildFilterableFieldSpecs(dataset.getColumns(), dataset.timeFieldName)
+      ).map((field) => ({ ...field, filterable: isFilterable(field) })),
       isTimeBased: () => dataset.isTimeBased(),
     };
     return dataset.filterableSource;

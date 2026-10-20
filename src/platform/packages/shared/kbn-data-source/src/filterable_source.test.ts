@@ -181,6 +181,21 @@ describe('toFilterableSource', () => {
         expect(summarize(filterable.fields)).toEqual(summarize(dataView.fields.getAll()));
       });
 
+      it('sets filterable on each field, as the DataView field reports it', async () => {
+        const source = await statsOnDataset('filterable-flag-*', '@timestamp');
+        const dataView = await registerEsqlSourceInDataViewsCache(
+          createMockDataViewsService(),
+          source
+        );
+
+        const { fields } = await source.toFilterableSource();
+
+        expect(fields.length).toBeGreaterThan(0);
+        fields.forEach(({ name, filterable }) => {
+          expect(filterable).toBe(dataView.fields.getByName(name)?.filterable);
+        });
+      });
+
       it('has the same fields that unified search offers to filter on', async () => {
         const source = await statsOnDataset('filterable-*', '@timestamp');
         const dataView = await registerEsqlSourceInDataViewsCache(
