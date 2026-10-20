@@ -1,0 +1,7 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/session-replay-player",
+  "owner": "@elastic/obs-signals-rum-team",
+  "group": "observability",
+  "visibility": "private"
+}

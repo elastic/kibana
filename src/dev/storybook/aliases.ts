@@ -73,6 +73,8 @@ export const storybookAliases = {
   security: 'x-pack/platform/packages/shared/security/form_components/.storybook',
   security_solution: 'x-pack/solutions/security/plugins/security_solution/.storybook',
   security_solution_packages: 'x-pack/solutions/security/packages/storybook/config',
+  session_replay_player:
+    'x-pack/solutions/observability/packages/kbn-session-replay-player/.storybook',
   shared_ux: 'src/platform/packages/private/shared-ux/storybook/config',
   streams_app: 'x-pack/platform/plugins/shared/streams_app/.storybook',
   subscription_status: 'x-pack/platform/plugins/private/subscription_status/.storybook',

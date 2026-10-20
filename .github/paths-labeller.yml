@@ -26,6 +26,7 @@
     - 'src/plugins/bfetch/**/*.*'
 - 'Team:obs-signals-rum':
     - 'x-pack/solutions/observability/plugins/ux/**/*.*'
+    - 'x-pack/solutions/observability/packages/kbn-session-replay-player/**/*.*'
 - 'Team:obs-signals-traces':
     - 'x-pack/solutions/observability/plugins/apm/**/*.*'
     - 'x-pack/solutions/observability/test/apm_api_integration/**/*.*'
