@@ -97,7 +97,7 @@ describe('findRulesSkill', () => {
     expect(skill.content).toMatch(/alert-analysis/);
     expect(skill.content).toMatch(/detection-rule-edit/);
     expect(skill.content).toMatch(/threat-hunting/);
-    expect(skill.content).toMatch(/rule-management/);
+    expect(skill.content).toMatch(/rule-authoring/);
   });
 
   it('content advertises the read-only action limitations', () => {

@@ -55,8 +55,7 @@ describe('FetchAlertsStep', () => {
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    expect(result.data?.scan?.alerts).toHaveLength(2);
-    expect(result.data?.scan?.alerts[0].rule_id).toBe('r1');
+    expect(result.data?.scan?.alerts).toEqual(alerts);
   });
 
   it('halts with no_alerts when none are found', async () => {
@@ -187,12 +186,12 @@ describe('FetchAlertsStep', () => {
     mockEsClient.esql.query.mockRejectedValueOnce(otherError);
 
     const state = createDispatcherPipelineState();
-    await expect(step.execute(state, logger)).rejects.toThrow();
+    await expect(step.execute(state, logger)).rejects.toBe(otherError);
   });
 });
 
 describe('parseAlerts', () => {
-  it('passes through all core fields', () => {
+  it('passes through all core fields and omits severity when severity is null', () => {
     const raw = [
       {
         last_event_timestamp: '2026-01-22T07:10:00.000Z',
@@ -208,12 +207,17 @@ describe('parseAlerts', () => {
 
     const result = parseAlerts(raw);
 
-    expect(result).toHaveLength(1);
-    expect(result[0].rule_id).toBe('r1');
-    expect(result[0].group_hash).toBe('h1');
-    expect(result[0].alert_id).toBe('e1');
-    expect(result[0].alert_status).toBe('active');
-    expect(result[0]).not.toHaveProperty('data_json');
+    expect(result).toStrictEqual([
+      {
+        last_event_timestamp: '2026-01-22T07:10:00.000Z',
+        rule_id: 'r1',
+        source: 'internal',
+        space_id: 'default',
+        group_hash: 'h1',
+        alert_id: 'e1',
+        alert_status: 'active',
+      },
+    ]);
   });
 
   it('includes severity when severity is not null', () => {
@@ -234,26 +238,6 @@ describe('parseAlerts', () => {
 
     expect(result).toHaveLength(1);
     expect(result[0].severity).toBe('medium');
-  });
-
-  it('omits severity when severity is null', () => {
-    const raw = [
-      {
-        last_event_timestamp: '2026-01-22T07:10:00.000Z',
-        rule_id: 'r1',
-        source: 'internal',
-        space_id: 'default',
-        group_hash: 'h1',
-        alert_id: 'e1',
-        alert_status: 'active' as const,
-        severity: null,
-      },
-    ];
-
-    const result = parseAlerts(raw);
-
-    expect(result).toHaveLength(1);
-    expect(result[0].severity).toBeUndefined();
   });
 
   it('passes source, space_id, and null rule_id through for external alerts', () => {
