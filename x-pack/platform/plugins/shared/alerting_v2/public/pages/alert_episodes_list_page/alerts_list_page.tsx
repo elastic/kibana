@@ -50,10 +50,12 @@ import { episodeSupportsTimeline } from '@kbn/alerting-v2-episodes-ui/queries/ep
 import { useInvalidateEpisodeQueries } from '@kbn/alerting-v2-episodes-ui/hooks/use_invalidate_episode_queries';
 import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache';
 import { useAlertingRuleSourceDataViews } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rule_source_data_views';
+import { useBulkGetMaintenanceWindowsQuery } from '@kbn/response-ops-alerts-table/hooks/use_bulk_get_maintenance_windows';
 import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { createEpisodeActions, type EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
 import {
   EpisodeDurationCell,
+  EpisodeMaintenanceWindowsCell,
   EpisodeSourceCell,
   EpisodeStatusCell,
   EpisodeTagsCell,
@@ -84,6 +86,7 @@ import { useEpisodesListUrlState } from './hooks/use_episodes_list_url_state';
 import { useEpisodesBulkActions } from './hooks/use_episodes_bulk_actions';
 import { DEFAULT_EPISODES_LIST_FILTER } from './utils/episodes_list_url_state';
 import { CLASSIC_ALERTS_DATA_SOURCE } from '../../alert_sources';
+import { getQueryFilterState } from './utils/episodes_query_filter';
 import { ClassicAlertDetailsFlyout } from './components/classic_alert_details_flyout';
 import { getDiscoverHrefForRuleAndAlertTimestamp } from '../../utils/discover_href_for_alert';
 import {
@@ -102,6 +105,8 @@ const getAlertsListMenu = ({ manageRulesHref }: { manageRulesHref: string }): Ap
     testId: 'alertingV2EpisodesListManageRules',
   },
 });
+
+const MAINTENANCE_WINDOWS_COLUMN_ID = 'maintenance_windows';
 
 // Neither tag column is in the episodes query's `ALLOWLISTED_SORT_FIELDS`, so a sort on them
 // falls back to `@timestamp` and only looks like it works.
@@ -123,6 +128,11 @@ const COLUMN_CUSTOMIZATIONS: CustomGridColumnsConfiguration = {
   alerting_source: ({ column }) => ({
     ...column,
     displayAsText: i18n.EPISODES_LIST_COLUMN_SOURCE,
+    isSortable: false,
+  }),
+  [MAINTENANCE_WINDOWS_COLUMN_ID]: ({ column }) => ({
+    ...column,
+    displayAsText: i18n.EPISODES_LIST_COLUMN_MAINTENANCE_WINDOWS,
     isSortable: false,
   }),
 };
@@ -232,6 +242,7 @@ const AlertsListPageContent = () => {
     () => !deepEqual(filterState, DEFAULT_EPISODES_LIST_FILTER),
     [filterState]
   );
+  const queryFilterState = useMemo(() => getQueryFilterState(filterState), [filterState]);
 
   const handleClearFilters = useCallback(() => {
     setFilterState({ ...DEFAULT_EPISODES_LIST_FILTER });
@@ -283,7 +294,7 @@ const AlertsListPageContent = () => {
   } = useFetchAlertingEpisodesQuery({
     pageSize: ALERT_EPISODES_LIST_PAGE_SIZE,
     services,
-    filterState,
+    filterState: queryFilterState,
     sortState,
     timeRange,
   });
@@ -576,10 +587,35 @@ const AlertsListPageContent = () => {
   const manageRulesHrefOverride = useManageRulesHref();
   const manageRulesHref = manageRulesHrefOverride ?? locatorHref;
 
+  const maintenanceWindowIds = useMemo(
+    () =>
+      [...new Set((episodesData ?? []).flatMap((row) => row.maintenance_window_ids ?? []))].sort(),
+    [episodesData]
+  );
+
+  const { data: maintenanceWindows, isFetching: isLoadingMaintenanceWindows } =
+    useBulkGetMaintenanceWindowsQuery(
+      {
+        ids: maintenanceWindowIds,
+        http: services.http,
+        notifications: services.notifications,
+        application: services.application,
+        licensing: services.licensing,
+      },
+      { enabled: visibleColumns.includes(MAINTENANCE_WINDOWS_COLUMN_ID) }
+    );
+
   const externalCustomRenderers = useMemo<CustomCellRenderer>(
     () => ({
       'episode.status': (props) => <EpisodeStatusCell {...props} />,
       alerting_source: (props) => <EpisodeSourceCell {...props} />,
+      [MAINTENANCE_WINDOWS_COLUMN_ID]: (props) => (
+        <EpisodeMaintenanceWindowsCell
+          {...props}
+          maintenanceWindows={maintenanceWindows}
+          isLoadingMaintenanceWindows={isLoadingMaintenanceWindows}
+        />
+      ),
       duration: (props) => <EpisodeDurationCell {...props} />,
       severity: (props) => <EpisodeSeverityCell {...props} />,
       tags: (props) => <EpisodeTagsCell {...props} />,
@@ -612,6 +648,8 @@ const AlertsListPageContent = () => {
       openRuleFlyout,
       services.userProfile,
       sourceDataViewsByRule,
+      maintenanceWindows,
+      isLoadingMaintenanceWindows,
     ]
   );
 
@@ -638,6 +676,7 @@ const AlertsListPageContent = () => {
         title={i18n.EPISODES_LIST_PAGE_TITLE}
         spacing="bleed"
         menu={alertsMenu}
+        docLink={services.docLinks.links.alerting.viewAndManageAlerts}
       />
       <EuiSpacer size="m" />
       <NewAlertingExperienceBanner />
@@ -664,13 +703,13 @@ const AlertsListPageContent = () => {
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EpisodesKpis services={services} filterState={filterState} timeRange={timeRange} />
+          <EpisodesKpis services={services} filterState={queryFilterState} timeRange={timeRange} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EpisodesHistogram
             services={services}
             dataView={dataView}
-            filterState={filterState}
+            filterState={queryFilterState}
             timeRange={timeRange}
             onTimeRangeChange={handleTimeChange}
             breakdownField={histogramBreakdownField}

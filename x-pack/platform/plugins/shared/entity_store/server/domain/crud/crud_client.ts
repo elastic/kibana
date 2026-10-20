@@ -13,6 +13,7 @@ import type {
   QueryDslQueryContainer,
   Result,
   SearchHit,
+  SortCombinations,
   SortOrder,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
@@ -69,6 +70,8 @@ export interface ListEntitiesParams {
   size?: number;
   source?: string[] | undefined;
   searchAfter?: Array<string | number>;
+  /** Cursor-mode sort; defaults to `@timestamp` desc. A `_shard_doc` tiebreaker is always appended. */
+  sort?: SortCombinations[];
   fields?: (QueryDslFieldAndFormat | string)[];
   /** Page/search mode (unified latest index); mutually exclusive with KQL `filter` / cursor params on the route. */
   entityTypes?: EntityType[];
@@ -673,7 +676,7 @@ export class CRUDClient {
 
     this.logger.debug('Listing entities (cursor mode)');
 
-    const { filter, size, searchAfter, source, fields } = p;
+    const { filter, size, searchAfter, source, fields, sort } = p;
 
     let query: QueryDslQueryContainer = { match_all: {} };
     if (filter) {
@@ -690,7 +693,7 @@ export class CRUDClient {
       index: await this.latestIndexName(),
       query,
       size,
-      sort: [{ '@timestamp': 'desc' }, { _shard_doc: 'desc' }],
+      sort: [...(sort ?? [{ '@timestamp': 'desc' }]), { _shard_doc: 'desc' }],
       search_after: searchAfter,
       ...(fields && fields.length > 0 ? { fields } : {}),
       ...buildEntityListSourceFilter({

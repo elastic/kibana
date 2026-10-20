@@ -7,6 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { EmbeddableFunctions } from '@kbn/observability-shared-plugin/public';
+import type { ProfilingSchema } from '@kbn/profiling-utils';
 import React from 'react';
 import type { ApmDataSourceWithSummary } from '../../../../common/data_source';
 import type { ApmDocumentType } from '../../../../common/document_type';
@@ -29,6 +30,8 @@ interface Props {
   kuery: string;
   rangeFrom: string;
   rangeTo: string;
+  /** Undefined until a schema is selected, which the request waits for */
+  schema?: ProfilingSchema;
 }
 
 export function ProfilingHostsTopNFunctions({
@@ -42,10 +45,11 @@ export function ProfilingHostsTopNFunctions({
   kuery,
   rangeFrom,
   rangeTo,
+  schema,
 }: Props) {
   const { data, status } = useFetcher(
     (callApmApi) => {
-      if (dataSource) {
+      if (dataSource && schema) {
         return callApmApi('GET /internal/apm/services/{serviceName}/profiling/hosts/functions', {
           params: {
             path: { serviceName },
@@ -58,12 +62,13 @@ export function ProfilingHostsTopNFunctions({
               documentType: dataSource.documentType,
               rollupInterval: dataSource.rollupInterval,
               kuery,
+              schema,
             },
           },
         });
       }
     },
-    [dataSource, serviceName, start, end, environment, startIndex, endIndex, kuery]
+    [dataSource, schema, serviceName, start, end, environment, startIndex, endIndex, kuery]
   );
 
   const profilingKueryFilter =
@@ -82,6 +87,7 @@ export function ProfilingHostsTopNFunctions({
             kuery={mergeKueries([`(${profilingKueryFilter})`, kuery])}
             rangeFrom={rangeFrom}
             rangeTo={rangeTo}
+            schema={schema}
             justifyContent="flexEnd"
           />
         </EuiFlexItem>

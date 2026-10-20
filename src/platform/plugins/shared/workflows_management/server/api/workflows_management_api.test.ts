@@ -927,7 +927,7 @@ steps:
           mockWorkflowYaml,
           spaceId,
           mockRequest,
-          { includeVariableRules: false }
+          { includeVariableRules: false, includeEsqlRules: false }
         );
         const engine = await mockWorkflowsService.getWorkflowsExecutionEngine();
         expect(engine.executeWorkflow).toHaveBeenCalledWith(
@@ -1253,7 +1253,7 @@ steps:
           mockWorkflowYaml,
           spaceId,
           mockRequest,
-          { includeVariableRules: false }
+          { includeVariableRules: false, includeEsqlRules: false }
         );
       });
     });
@@ -1522,7 +1522,7 @@ steps:
         'name: Test Workflow',
         'default',
         mockRequest,
-        { includeVariableRules: false }
+        { includeVariableRules: false, includeEsqlRules: false }
       );
       expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -1633,7 +1633,7 @@ steps:
         'name: Test',
         'default',
         mockRequest,
-        { includeVariableRules: true }
+        { includeVariableRules: true, includeEsqlRules: true }
       );
       expect(result).toBe(expectedResult);
     });
@@ -1659,7 +1659,7 @@ steps:
         'invalid: yaml',
         'my-space',
         mockRequest,
-        { includeVariableRules: true }
+        { includeVariableRules: true, includeEsqlRules: true }
       );
       expect(result).toEqual(expectedResult);
     });

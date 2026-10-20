@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useLayoutEffect, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
@@ -16,13 +16,13 @@ import {
   EuiText,
   EuiTextTruncate,
   EuiTitle,
+  EuiToolTip,
   useEuiTheme,
   useResizeObserver,
 } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
-import type { ImpactFilterable } from './entity_ids';
+import { entityPillAriaLabel, entityPillLabel } from './entity_pill_label';
 import { entityTypeIcon } from './entity_type_icon';
-import { impactPills } from './impact_pills';
 import type { ImpactPill } from './impact_pills';
 import { IMPACT_LABELS } from './translations';
 import { findVisiblePills, isVisibleIndex, rowsAfterExpansions } from './visible_pills';
@@ -34,7 +34,7 @@ export const IMPACT_OVERFLOW_TEST_SUBJ = 'alertzeroImpactOverflow';
 export const IMPACT_COLLAPSE_TEST_SUBJ = 'alertzeroImpactCollapse';
 
 interface ImpactProps {
-  items: readonly ImpactFilterable[];
+  pills: readonly ImpactPill[];
   entityFilter: string | null;
   onEntityFilterChange: (entityId: string | null) => void;
 }
@@ -45,6 +45,8 @@ interface PillBadgeProps {
   selected?: boolean;
   iconType?: IconType;
   ariaLabel: string;
+  /** Full name, and the id when they differ, shown on hover. */
+  tooltip?: string;
   /** Omitted for the hidden measuring copy, which must not be interactive. */
   onClick?: () => void;
 }
@@ -55,6 +57,7 @@ const PillBadge: React.FC<PillBadgeProps> = ({
   selected = false,
   iconType,
   ariaLabel,
+  tooltip,
   onClick,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -64,7 +67,7 @@ const PillBadge: React.FC<PillBadgeProps> = ({
   // Icon-only pills get the same horizontal footprint as a short text pill.
   const padding = isIconOnly ? `${euiTheme.size.xs} ${euiTheme.size.m}` : euiTheme.size.xs;
 
-  return (
+  const badge = (
     <EuiBadge
       {...interactiveProps}
       // A labelled pill draws its own 16px icon below; EuiBadge would render it at 12px.
@@ -103,9 +106,11 @@ const PillBadge: React.FC<PillBadgeProps> = ({
       )}
     </EuiBadge>
   );
+
+  return tooltip ? <EuiToolTip content={tooltip}>{badge}</EuiToolTip> : badge;
 };
 
-export const Impact: React.FC<ImpactProps> = ({ items, entityFilter, onEntityFilterChange }) => {
+export const Impact: React.FC<ImpactProps> = ({ pills, entityFilter, onEntityFilterChange }) => {
   const { euiTheme } = useEuiTheme();
   const [rowElement, setRowElement] = useState<HTMLDivElement | null>(null);
   const { width: observedWidth } = useResizeObserver(rowElement, 'width');
@@ -116,7 +121,6 @@ export const Impact: React.FC<ImpactProps> = ({ items, entityFilter, onEntityFil
   // How many times `+n` was clicked; each click reveals `ROWS_PER_EXPAND` more rows.
   const [expansions, setExpansions] = useState(0);
 
-  const pills = useMemo(() => impactPills(items), [items]);
   // `gutterSize="s"` on EuiFlexGroup renders `gap: euiTheme.size.s`.
   const gap = parseFloat(euiTheme.size.s);
 
@@ -178,11 +182,12 @@ export const Impact: React.FC<ImpactProps> = ({ items, entityFilter, onEntityFil
       data-test-subj={IMPACT_PILL_TEST_SUBJ}
     >
       <PillBadge
-        label={pill.entityId}
+        label={entityPillLabel(pill)}
         iconType={entityTypeIcon(pill.entityType)}
         count={pill.count}
         selected={entityFilter === pill.entityId}
-        ariaLabel={pill.entityId}
+        ariaLabel={entityPillAriaLabel(pill)}
+        tooltip={entityPillAriaLabel(pill)}
         onClick={
           interactive
             ? () => onEntityFilterChange(entityFilter === pill.entityId ? null : pill.entityId)
