@@ -52,7 +52,7 @@ const CUSTOM_YARA_SIGNATURES_TEXT: CustomYaraSignaturesText = {
   artifactType: ', custom YARA signatures',
   instructions: `## Custom YARA signatures
 
-Use this guidance when the user asks about a custom YARA signature that is not matching, not alerting, or not reaching an endpoint. Unless the newest policy response shows a current non-success action, classify it as \`OTHER_CURRENT_ISSUE\`.
+Use this guidance when the user asks about a custom YARA signature that is not matching, not alerting, or not reaching an endpoint, after the scoped investigation framework has classified the problem.
 
 - Call ${GET_ENDPOINT_ARTIFACTS_TOOL_ID} with artifactType \`custom_yara_signatures\` and the affected endpoint's policyId. Signature items include the artifact \`id\`. Rule text in entries is a truncated preview, not the full rule.
 - The \`search\` filter also matches rule text, so results can include signatures whose rule merely mentions the search term. When the user names a signature, only treat items whose \`name\` matches it as that signature. If none match, say so instead of substituting a text match.
@@ -60,11 +60,10 @@ Use this guidance when the user asks about a custom YARA signature that is not m
 - Custom YARA signature alerts in \`logs-endpoint.alerts-*\` carry \`rule.custom_yara_signature.entry_id\`, \`rule.custom_yara_signature.entry_name\`, and \`rule.custom_yara_signature.rule_identifier\`. \`entry_id\` is the artifact \`id\`, not its \`item_id\`. Find the signature by searching for \`entry_name\`, then confirm that its \`id\` equals \`entry_id\`. \`entry_name\` is copied when the signature is packed, so it can be stale after a rename.
 - Packed signatures reach endpoints in the \`endpoint-yararules-<os>-v1\` user artifact. User artifact download failures, which may affect this artifact, appear in the policy response as \`download_user_artifacts\`.
 - To check whether the signatures artifact reached the target endpoint, look for \`endpoint-yararules-<os>-v1\` in \`Endpoint.policy.applied.artifacts.user.identifiers\` of the newest policy response for that endpoint in \`metrics-endpoint.policy-*\`. If it is present, the endpoint applied the artifact, but that does not show that a specific signature is inside it. If it is missing, the endpoint has not applied it, or its Elastic Defend version may not support custom YARA signatures yet.
-- The Elastic Defend knowledge base has no custom YARA signatures content yet. As an exception to the \`OTHER_CURRENT_ISSUE\` rule, do not call ${platformCoreTools.integrationKnowledge} for custom YARA signature questions, unless the newest policy response shows a current \`download_user_artifacts\` failure.
+- The Elastic Defend knowledge base has no custom YARA signatures content yet. Knowledge results for these questions describe user artifacts in general, not custom YARA signatures specifically.
 - A \`not_authorized\` result for \`custom_yara_signatures\` can mean the cluster lacks an Enterprise license or the Endpoint Complete add-on, not only that the user lacks the Custom YARA Signatures privilege.
 - An enabled, correctly assigned signature can still be left out of the packed artifact when it fails validation while the artifact is built. That is only visible in Kibana server logs, which this skill cannot read. Do not claim a signature reached the endpoint based on the artifact list alone.
 - This skill cannot read the \`memory_protection.custom_yara_signatures\` policy setting. A \`memory_protection\` policy response status is not that setting. If the answer depends on whether custom YARA signatures are enabled in the policy, say that this cannot be checked here and ask the user to confirm it in the policy.
-- There is no established troubleshooting playbook for custom YARA signatures yet. Base findings only on the artifact list, alerts, and policy response. Do not invent version-specific bugs or remediation.
 
 `,
   description: 'custom YARA signatures, ',

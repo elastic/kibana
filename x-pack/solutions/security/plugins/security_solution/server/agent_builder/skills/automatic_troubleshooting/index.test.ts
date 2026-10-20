@@ -179,7 +179,6 @@ describe('createAutomaticTroubleshootingSkill', () => {
       expect(skill.content).toContain('custom_yara_signatures');
       expect(skill.content).toContain('rule.custom_yara_signature.entry_id');
       expect(skill.content).toContain('memory_protection.custom_yara_signatures');
-      expect(skill.content).toContain('Do not invent version-specific bugs or remediation');
       expect(skill.content).toContain('only treat items whose `name` matches it');
       expect(skill.content).toContain('endpoint-yararules');
       expect(skill.content).toContain('Endpoint.policy.applied.artifacts.user.identifiers');
@@ -190,6 +189,22 @@ describe('createAutomaticTroubleshootingSkill', () => {
       expect(skill.description).toContain('custom YARA signatures');
       expect(skill.description?.length).toBeLessThanOrEqual(1024);
       expect(artifactsTool?.description).toContain('custom YARA signatures');
+    });
+
+    it('leaves classification and knowledge retrieval to the scoped investigation framework', () => {
+      const countOccurrences = (content: string, term: string) => content.split(term).length - 1;
+      const disabledContent = createSkill(false).content;
+      const enabledContent = createSkill(true).content;
+
+      for (const term of [
+        'OTHER_CURRENT_ISSUE',
+        'NON_POLICY_HEALTH_FAILURE',
+        platformCoreTools.integrationKnowledge,
+      ]) {
+        expect(countOccurrences(enabledContent, term)).toBe(
+          countOccurrences(disabledContent, term)
+        );
+      }
     });
   });
 });
