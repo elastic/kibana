@@ -58,7 +58,8 @@ const getRecordsOptions = (
   entityExpression: string,
   pageSize: number,
   timeRange: TimeRange,
-  keepFields: readonly string[]
+  keepFields: readonly string[],
+  columns: readonly EuiDataGridColumn[]
 ): UseEntityGridDataOptions => ({
   keyScope: 'children',
   rowsMode: 'individual',
@@ -68,6 +69,7 @@ const getRecordsOptions = (
   pageSize,
   timeRange,
   keepFields,
+  columnIds: columns.map(({ id }) => id),
 });
 
 /**
@@ -77,19 +79,22 @@ const getRecordsOptions = (
 export const getGroupRecordsOptions = (
   entityId: string,
   timeRange: TimeRange,
-  keepFields: readonly string[]
+  keepFields: readonly string[],
+  columns: readonly EuiDataGridColumn[]
 ): Record<'mainEntity' | 'aliases', UseEntityGridDataOptions> => ({
   mainEntity: getRecordsOptions(
     `${ENTITY_ID_FIELD} == ${escapeStringValue(entityId)}`,
     1,
     timeRange,
-    keepFields
+    keepFields,
+    columns
   ),
   aliases: getRecordsOptions(
     `${RESOLVED_TO_FIELD} == ${escapeStringValue(entityId)}`,
     MAX_GROUP_RECORDS - 1,
     timeRange,
-    keepFields
+    keepFields,
+    columns
   ),
 });
 
@@ -296,8 +301,8 @@ export const ExpandedEntityGroup: React.FC<ExpandedEntityGroupProps> = ({
   ...rowProps
 }) => {
   const recordsOptions = useMemo(
-    () => getGroupRecordsOptions(entityId, timeRange, keepFields),
-    [entityId, timeRange, keepFields]
+    () => getGroupRecordsOptions(entityId, timeRange, keepFields, columns),
+    [entityId, timeRange, keepFields, columns]
   );
   const mainEntity = useEntityGridData(recordsOptions.mainEntity);
   const aliases = useEntityGridData(recordsOptions.aliases);
