@@ -130,15 +130,20 @@ describe('STATS Autocomplete', () => {
     (mockCallbacks.getColumnsForQuery as jest.Mock).mockResolvedValue([...lookupIndexFields]);
   });
 
+  // `/` marks the cursor. Queries without it are completed at the end.
+  const caret = '^';
   const suggest = async (query: string, context = mockContext) => {
-    const cursorPosition = query.length;
-    const { innerText, root, command, tokens } = findAutocompleteAstPosition(query, cursorPosition);
+    const caretPosition = query.indexOf(caret);
+    const hasCaret = caretPosition >= 0;
+    const cursorPosition = hasCaret ? caretPosition : query.length;
+    const text = hasCaret ? query.slice(0, caretPosition) + query.slice(caretPosition + 1) : query;
+    const { innerText, root, command, tokens } = findAutocompleteAstPosition(text, cursorPosition);
     if (!command) {
       throw new Error('Command not found in the parsed query');
     }
     const contextWithRoot = { ...context, rootAst: root };
     const suggestions = await autocomplete(
-      query,
+      text,
       command,
       mockCallbacks,
       contextWithRoot,
@@ -1107,6 +1112,55 @@ describe('STATS Autocomplete', () => {
             ...allGroupingFunctions,
           ]
         );
+      });
+    });
+
+    describe('columns defined in the BY clause', () => {
+      it('suggests a BY-defined column inside an aggregation function argument', async () => {
+        const suggestions = await suggest('FROM a | STATS AVG(^) BY abc = doubleField');
+
+        expect(suggestions.map(({ label }) => label)).toContain('abc');
+      });
+
+      it('suggests a BY-defined column inside an unclosed aggregation function argument', async () => {
+        const suggestions = await suggest('FROM a | STATS AVG(^ BY abc = doubleField');
+
+        expect(suggestions.map(({ label }) => label)).toContain('abc');
+      });
+
+      it('suggests a BY-defined column in the per-aggregation WHERE clause', async () => {
+        const suggestions = await suggest('FROM a | STATS COUNT() WHERE ^BY abc = keywordField');
+
+        expect(suggestions.map(({ label }) => label)).toContain('abc');
+      });
+
+      it('suggests an implicit BY expression from an empty WHERE clause', async () => {
+        const suggestions = await suggest(
+          'FROM a | STATS COUNT() WHERE ^ BY BUCKET(doubleField, 10)'
+        );
+        const labels = suggestions.map(({ label }) => label);
+
+        expect(labels).toContain('BUCKET(doubleField, 10)');
+      });
+
+      it('does not suggest a BY-defined column within the BY clause itself', async () => {
+        const suggestions = await suggest('FROM a | STATS COUNT() BY abc = keywordField, def = ^');
+
+        expect(suggestions.map(({ label }) => label)).not.toContain('abc');
+      });
+
+      it('does not suggest an input field shadowed by a BY column of a different type', async () => {
+        const suggestions = await suggest('FROM a | STATS AVG(^) BY doubleField = keywordField');
+
+        expect(suggestions.map(({ label }) => label)).not.toContain('doubleField');
+      });
+
+      it('does not leak a BY column from a sibling STATS command', async () => {
+        const suggestions = await suggest(
+          'FROM a | STATS count = COUNT() WHERE ^ | STATS SUM(count) BY bucket = keywordField'
+        );
+
+        expect(suggestions.map(({ label }) => label)).not.toContain('bucket');
       });
     });
   });

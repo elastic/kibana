@@ -105,6 +105,7 @@ class TaskHandlerImpl implements TaskHandler {
     const callbackDeliveryPromise = deliverCallbackEvents({
       execution,
       events$,
+      request: fakeRequest,
       callbackDeliveryService: this.deps.callbackDeliveryService,
       surfacesService: this.deps.surfacesService,
       logger: this.logger,
