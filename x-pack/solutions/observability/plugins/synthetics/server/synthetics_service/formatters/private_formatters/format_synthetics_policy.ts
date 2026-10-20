@@ -296,8 +296,8 @@ export const formatSyntheticsPolicy = (
     if (secretConnections && !secretStorageEnabled) {
       throw new SecretConnectionError(VAULT_SECRET_STORAGE_DISABLED_MESSAGE);
     }
-    // `undefined` means no connections were loaded for this call (inspect path); an empty
-    // list is real, so an unknown connection fails instead of being dropped.
+    // `undefined` delivers none (the inspect path, or revoking connections that can no longer
+    // be delivered); an empty list is real, so an unknown connection fails instead of being dropped.
     const connections = secretConnections
       ? selectSecretConnections(
           secretConnections,

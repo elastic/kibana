@@ -617,13 +617,19 @@ export class SyntheticsPrivateLocation {
    * When `deferredBumps` is passed, scalable-location agent policy revision
    * bumps are collected there instead of awaited per call — so a caller editing
    * many batches in sequence can bump each agent policy once, not once per batch.
+   *
+   * With `revokeUndeliverableSecretConnections`, a monitor whose Vault connections can no
+   * longer be delivered gets a policy without them, instead of keeping its current one.
    */
   async editMonitors(
     configs: Array<{ config: HeartbeatConfig; globalParams: Record<string, string> }>,
     allPrivateLocations: SyntheticsPrivateLocations,
     spaceId: string,
     maintenanceWindows: MaintenanceWindow[],
-    deferredBumps?: Set<string>
+    deferredBumps?: Set<string>,
+    {
+      revokeUndeliverableSecretConnections = false,
+    }: { revokeUndeliverableSecretConnections?: boolean } = {}
   ) {
     if (configs.length === 0) {
       return {
@@ -694,21 +700,33 @@ export class SyntheticsPrivateLocation {
               : legacyPolicyIds
                   .map((id) => existingPolicyById.get(id)?.condition)
                   .find((condition) => condition != null);
-            const newPolicy = await this.generateNewPolicy(
-              config,
-              privateLocation,
-              newPolicyTemplate,
-              spaceId,
-              globalParams,
-              maintenanceWindows,
-              undefined,
-              undefined,
-              enrolledAgentsByLocation.get(privateLocation.id),
-              existingCondition,
-              shardingMode,
-              secretConnections,
-              secretStorageEnabled
-            );
+            const generatePolicy = (connections?: HeartbeatVaultConfig[]) =>
+              this.generateNewPolicy(
+                config,
+                privateLocation,
+                newPolicyTemplate,
+                spaceId,
+                globalParams,
+                maintenanceWindows,
+                undefined,
+                undefined,
+                enrolledAgentsByLocation.get(privateLocation.id),
+                existingCondition,
+                shardingMode,
+                connections,
+                secretStorageEnabled
+              );
+            const newPolicy = await generatePolicy(secretConnections).catch((e) => {
+              if (!revokeUndeliverableSecretConnections || !(e instanceof SecretConnectionError)) {
+                throw e;
+              }
+              // The current policy would keep shipping the credential to agents. Without
+              // connections the monitor fails at runtime instead, which is visible.
+              this.server.logger.warn(
+                `${e.message}. Updating its policy without Vault connections so agents drop them.`
+              );
+              return generatePolicy(undefined);
+            });
 
             if (!newPolicy) {
               throwAddEditError(hasPolicy, privateLocation.label);

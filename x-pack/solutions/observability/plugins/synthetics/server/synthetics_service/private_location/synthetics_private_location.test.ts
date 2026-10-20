@@ -1592,6 +1592,54 @@ describe('SyntheticsPrivateLocation', () => {
 
       expect(failedUpdates).toHaveLength(1);
     });
+
+    describe('when revoking connections that can no longer be delivered', () => {
+      it.each([
+        ['a connection that is not configured', {}],
+        [
+          'Fleet secret storage being disabled',
+          { delivery: { secretConnections: [vaultConnection], secretStorageEnabled: false } },
+        ],
+      ])('writes the policy without connections for %s', async (_label, options) => {
+        const { syntheticsPrivateLocation, bulkCreate } = setup(options);
+
+        const { failedUpdates } = await syntheticsPrivateLocation.editMonitors(
+          [{ config: badConfig, globalParams: {} }],
+          [locationA],
+          'default',
+          [],
+          undefined,
+          { revokeUndeliverableSecretConnections: true }
+        );
+
+        expect(failedUpdates).toEqual([]);
+        const [policy] = bulkCreate.mock.calls[0][0].newPolicies;
+        const stream = policy.inputs
+          .flatMap(({ streams }) => streams)
+          .find(({ vars }) => vars?.secret_stores);
+        expect(policy.id).toBe('bad-loc-a');
+        expect(stream?.vars?.secret_stores.value).toBeNull();
+      });
+
+      it('still reports a monitor whose package has no secret_stores', async () => {
+        const { syntheticsPrivateLocation, bulkCreate } = setup({
+          template: testMonitorPolicy as unknown as typeof templateWithSecretStores,
+          delivery: { secretConnections: [vaultConnection], secretStorageEnabled: true },
+        });
+
+        const { failedUpdates } = await syntheticsPrivateLocation.editMonitors(
+          [{ config: badConfig, globalParams: {} }],
+          [locationA],
+          'default',
+          [],
+          undefined,
+          { revokeUndeliverableSecretConnections: true }
+        );
+
+        expect(failedUpdates.map(({ config }) => config?.id)).toEqual(['bad']);
+        expect(bulkCreate.mock.calls[0][0].newPolicies).toEqual([]);
+      });
+    });
   });
 
   describe('generateNewPolicy test-now policy name', () => {
